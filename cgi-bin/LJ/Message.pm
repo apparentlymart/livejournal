@@ -23,6 +23,13 @@ sub new {
     # unknown fields
     croak("Invalid fields: " . join(",", keys %$opts)) if (%$opts);
 
+    # Handle renamed users
+    my $other_u = LJ::want_user($self->{otherid});
+    if ($other_u && $other_u->is_renamed) {
+        $other_u = $other_u->get_renamed_user;
+        $self->{otherid} = $other_u->{userid};
+    }
+
     my $journalid = $self->{journalid} || undef;
     my $msgid = $self->{msgid} || undef;
 

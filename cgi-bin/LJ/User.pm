@@ -4887,6 +4887,28 @@ sub rename_identity {
     return 1;
 }
 
+#<LJFUNC>
+# name: LJ::User::get_renamed_user
+# des: Get the actual user of a renamed user
+# args: user
+# returns: user
+# </LJFUNC>
+sub get_renamed_user {
+    my $u = shift;
+    my %opts = @_;
+    my $hops = $opts{hops} || 5;
+
+    # Traverse the renames to the final journal
+    if ($u) {
+        while ($u->{'journaltype'} eq 'R' && $hops-- > 0) {
+            my $rt = $u->prop("renamedto");
+            last unless length $rt;
+            $u = LJ::load_user($rt);
+        }
+    }
+
+    return $u;
+}
 
 package LJ;
 
@@ -6145,14 +6167,8 @@ sub ljuser
     my $u = isu($user) ? $user : LJ::load_user($user);
 
     # Traverse the renames to the final journal
-    if ($u) {
-        my $hops = 0;
-        while ($u->{'journaltype'} eq 'R'
-               and ! $opts->{'no_follow'} && $hops++ < 5) {
-            my $rt = $u->prop("renamedto");
-            last unless length $rt;
-            $u = LJ::load_user($rt);
-        }
+    if ($u && !$opts->{'no_follow'}) {
+        $u = $u->get_renamed_user;
     }
 
     # if invalid user, link to dummy userinfo page
