@@ -4278,6 +4278,11 @@ sub upgrade_to_dversion_8 {
 sub can_add_friends {
     my ($u, $err, $opts) = @_;
 
+    if ($u->is_suspended) {
+        $$err = "Suspended journals cannot add friends.";
+        return 0;
+    }
+
     # have they reached their friend limit?
     my $fr_count = $opts->{'numfriends'} || $u->friend_uids;
     my $maxfriends = $u->get_cap('maxfriends');

@@ -2224,6 +2224,10 @@ sub editfriends
                 $u->{'journaltype'} eq 'I' ||
                 ($u->{'journaltype'} eq "Y" && $u->password));
 
+    # Don't let suspended users add friend
+    return $fail->(305, "Suspended journals cannot add friends.")
+        if ($u->is_suspended);
+
      my $sclient = LJ::theschwartz();
 
     # perform the adds
