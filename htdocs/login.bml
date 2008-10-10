@@ -217,7 +217,7 @@
             $body .= "</div><!-- end .login-create-account -->\n";
             $body .= "</div><!-- end .columns-2-left -->\n";
             $body .= "<div class='columns-2-right'>\n";
-            $body .= LJ::get_ads({ location => 'bml.login' });
+            $body .= LJ::get_ads({ location => 'bml.login' }) unless $LJ::IS_SSL;
             $body .= "</div><!-- end .columns-2-right -->\n";
         }
 
