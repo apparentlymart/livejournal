@@ -76,6 +76,14 @@ The remote user&apos;s profile information in the vCard format. Available at the
 </listitem>
 </varlistentry>
 
+<varlistentry><term>Journal comments</term>
+<listitem>
+<para>A user&apos;s recently received comments, in order of oldest
+first, using the <acronym>RSS</acronym> format. Available at the &url;:</para>
+<para><uri>http://exampleusername.&domain;/data/comments</uri></para>
+</listitem>
+</varlistentry>
+
 <varlistentry><term>Userpic data</term>
 <listitem>
 <para>A user&apos;s userpic data in a machine-readable 

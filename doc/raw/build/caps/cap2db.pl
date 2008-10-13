@@ -103,6 +103,10 @@ $caps_general{'full_rss'} = {
     type => 'boolean',
     desc => 'Show the full text in the RSS view.',
 };
+$caps_general{'latest_comments_rss'} = {
+    type => 'boolean',
+    desc => 'Can have an RSS feed of journal comments received.',
+};
 $caps_general{'edit_comments'} = {
     type => 'boolean',
     desc => 'Can edit comments they posted, which have not been replied to or frozen.',
