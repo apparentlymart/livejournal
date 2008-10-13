@@ -367,19 +367,21 @@
     } elsif ($synd) {
         $body .= "<img src='$LJ::IMGPREFIX/profile_icons/feed.gif' class='user_pic' />";
     } else {
+        my $default_userpic_img;
         if ($u->is_person) {
-            $body .= "<img src='$LJ::IMGPREFIX/profile_icons/user.gif' class='user_pic' />";
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/user.gif' class='user_pic' />";
         } elsif ($com) {
-            $body .= "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif' class='user_pic' />";
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif' class='user_pic' />";
         } elsif ($u->is_identity) {
-            $body .= "<img src='$LJ::IMGPREFIX/profile_icons/openid.gif' class='user_pic' />";
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/openid.gif' class='user_pic' />";
         }
-        $body .= "<br />";
 
         if ($remote && $remote->can_manage($u)) {
-            $body .= "<a href='$LJ::SITEROOT/editpics.bml?authas=$user' class='user_pic_caption'>$ML{'.userpic.choose'}</a>";
+            $body .= "$default_userpic_img<br /><a href='$LJ::SITEROOT/editpics.bml?authas=$user' class='user_pic_caption'>$ML{'.userpic.choose'}</a>";
+        } elsif (LJ::userpic_count($u)) {
+            $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a><br /><a href='$LJ::SITEROOT/allpics.bml?user=$user' class='user_pic_caption'>$ML{'.allpics'}</a>";
         } else {
-            $body .= LJ::userpic_count($u) ? "<a href='$LJ::SITEROOT/allpics.bml?user=$user' class='user_pic_caption'>$ML{'.allpics'}</a>" : "<span class='user_pic_caption'>$ML{'.userpic.none'}</span>";
+            $body .= "$default_userpic_img<br /><span class='user_pic_caption'>$ML{'.userpic.none'}</span>";
         }
     }
     $body .= "</div>";
@@ -413,7 +415,7 @@
 
             $url = "$LJ::SITEROOT/community/join.bml?comm=$user";
             $text = $ML{'.optionlinks.joincomm'};
-            if ($comm_settings[0] eq "closed" || !$remote || $remote->is_identity) {
+            if ($comm_settings[0] eq "closed" || !$remote || $remote->is_identity || !$u->is_visible) {
                 $li_title = $comm_settings[0] eq "closed" ? $ML{'.optionlinks.joincomm.title.closed'} : $ML{'.optionlinks.joincomm.title.loggedout'};
                 $li_title = $ML{'.optionlinks.joincomm.title.cantjoin'} if $remote && $remote->is_identity;
                 $body .= "<li class='profile_join_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/join-comm-disabled.gif' />$text</li>";
@@ -429,7 +431,7 @@
     if ($u->is_community) {
         my $remote_hasfriend = $remote && $remote->has_friend($u) ? 1 : 0;
         $text = $remote_hasfriend ? $ML{'.optionlinks.modifywatch'} : $ML{'.optionlinks.watch'};
-        if ($remote) {
+        if ($remote && ($remote_hasfriend || $u->is_visible)) {
             $li_title = $remote_hasfriend ? $ML{'.optionlinks.modifywatch.title'} : $ML{'.optionlinks.watch.title'};
             $body .= "<li class='profile_watch' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/watch-comm.gif' />$text</a></li>";
         } else {
@@ -439,7 +441,7 @@
     } elsif ($u->is_syndicated) {
         my $remote_hasfriend = $remote && $remote->has_friend($u) ? 1 : 0;
         $text = $remote_hasfriend ? $ML{'.optionlinks.modifysub'} : $ML{'.optionlinks.sub'};
-        if ($remote) {
+        if ($remote && ($remote_hasfriend || $u->is_visible)) {
             $li_title = $remote_hasfriend ? $ML{'.optionlinks.modifysub.title'} : $ML{'.optionlinks.sub.title'};
             $body .= "<li class='profile_addfeed' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/add-feed.gif' />$text</a></li>";
         } else {
@@ -448,9 +450,9 @@
         }
     } else {
         # has_friend doesn't work right if you are viewing your own profile
-        my $remote_hasfriend = $remote && LJ::get_groupmask($u->userid, $remote->userid) ? 1 : 0;
+        my $remote_hasfriend = $remote && LJ::get_groupmask($remote->userid, $u->userid) ? 1 : 0;
         $text = $remote_hasfriend ? $ML{'.optionlinks.modifyfriend'} : $ML{'.optionlinks.addfriend'};
-        if ($remote) {
+        if ($remote && ($remote_hasfriend || $u->is_visible)) {
             if ($remote->equals($u)) {
                 $li_title = $remote_hasfriend ? $ML{'.optionlinks.modifyfriend.title.self'} : $ML{'.optionlinks.addfriend.title.self'};
             } else {
@@ -549,7 +551,7 @@
         my $subtitle = LJ::ehtml($u->{journalsubtitle}) if $u->{journalsubtitle};
 
         $body .= "<div class='details_left'>";
-        $body .= "<p><a href='" . $u->journal_base . "' class='journal_title'>$title</a></p>";
+        $body .= "<p class='journal_title'>$title</p>";
         $body .= "<p class='journal_subtitle'>$subtitle</p>" if $subtitle;
 
         my $journal_warnings;
@@ -594,9 +596,11 @@
             if $remote && $u->can_be_nudged_by($remote);
 
         my @comment_stats;
-        push @comment_stats, BML::ml('.details.comments.received', { num => LJ::commafy($u->num_comments_received( dbh => $dbcr )) })
+        my $num_comments_received = $u->num_comments_received( dbh => $dbcr );
+        my $num_comments_posted = $u->num_comments_posted( dbh => $dbcr );
+        push @comment_stats, BML::ml('.details.comments.received2', { num_raw => $num_comments_received, num_comma => LJ::commafy($num_comments_received) })
             unless $u->is_identity;
-        push @comment_stats, BML::ml('.details.comments.posted', { num => LJ::commafy($u->num_comments_posted( dbh => $dbcr )) })
+        push @comment_stats, BML::ml('.details.comments.posted2', { num_raw => $num_comments_posted, num_comma => LJ::commafy($num_comments_posted) })
             if LJ::is_enabled("show-talkleft") && ($u->is_personal || $u->is_identity);
         my $comment_stats_string = join(", ", @comment_stats);
 
@@ -636,7 +640,11 @@
         $body .= "<div class='details_middle'>";
         unless ($u->is_identity) {
             $body .= "<p>" . BML::ml('.details.entries', { num => $entry_count }) . " $search_link</p>";
-            $body .= "<p>" . BML::ml('.details.lastupdated', { timestamp => "<span class='tooltip' title='$ago_text'>$lastupdated</span>" }) . " $nudge_link</p>";
+            if ($u->timeupdate) {
+                $body .= "<p>" . BML::ml('.details.lastupdated', { timestamp => "<span class='tooltip' title='$ago_text'>$lastupdated</span>" }) . " $nudge_link</p>";
+            } else {
+                $body .= "<p>$ML{'.details.lastupdated.never'} $nudge_link</p>";
+            }
         }
         $body .= "<p>$comment_stats_string</p>" if $comment_stats_string;
         $body .= "<p>" . join($ML{'.details.viewlinkssep'}, @view_links) . "</p>";
@@ -819,17 +827,17 @@
             $instant_message .= "<tr class='im_yahoo'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/yahoo.gif' alt=\"$yim_alt\" title=\"$yim_alt\" /></td><td><a href='http://profiles.yahoo.com/$yim'>$yim</a></td><td class='im_status'><img alt=\"$yimstatus_alt\" title=\"$yimstatus_alt\" src='http://opi.yahoo.com/online?u=$yim&amp;m=g&amp;t=0' width='12' height='12' /></td></tr>\n";
         }
         if ($u->{'msn'}) {
-            my $msnname = LJ::ehtml($u->{'msn'});
+            my $msnname = $mangleaddress->(LJ::ehtml($u->{'msn'}));
             my $msn_alt = $ML{'.im.msn'};
             $instant_message .= "<tr class='im_msn'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/msn.gif' alt=\"$msn_alt\" title=\"$msn_alt\" /></td><td colspan='2'>$msnname</td></tr>\n";
         }
         if ($u->{'jabber'}) {
-            my $jabber = LJ::ehtml($u->{'jabber'});
+            my $jabber = $mangleaddress->(LJ::ehtml($u->{'jabber'}));
             my $jabber_alt = $ML{'.im.jabber'};
             $instant_message .= "<tr class='im_jabber'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/jabber.gif' alt=\"$jabber_alt\" title=\"$jabber_alt\" /></td><td colspan='2'>$jabber</td></tr>\n";
         }
         if ($u->{'google_talk'}) {
-            my $google = LJ::ehtml($u->{'google_talk'});
+            my $google = $mangleaddress->(LJ::ehtml($u->{'google_talk'}));
             my $gtalk_alt = $ML{'.im.gtalk'};
             $instant_message .= "<tr class='im_google'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/gtalk.gif' alt=\"$gtalk_alt\" title=\"$gtalk_alt\" /></td><td colspan='2'>$google</td></tr>\n";
         }
@@ -841,12 +849,12 @@
                 $skimg = "<td class='im_status'><img alt=\"$skypestatus_alt\" title=\"$skypestatus_alt\" width='16' height='16' src='http://mystatus.skype.com/smallicon/$u->{skype}' /></td>";
                 $colspan = "";
             }
-            my $skype = LJ::ehtml($u->{'skype'});
+            my $skype = $mangleaddress->(LJ::ehtml($u->{'skype'}));
             my $skype_alt = $ML{'.im.skype'};
             $instant_message .= "<tr class='im_skype'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/skype.gif' alt=\"$skype_alt\" title=\"$skype_alt\" /></td><td$colspan>$skype</td>$skimg</tr>\n";
         }
         if (my $gizmo = $u->gizmo_account) {
-            $gizmo = LJ::ehtml($gizmo);
+            $gizmo = $mangleaddress->(LJ::ehtml($gizmo));
             my $gizmo_alt = $ML{'.im.gizmo'};
             $instant_message .= "<tr class='im_gizmo'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/gizmo.gif' alt=\"$gizmo_alt\" title=\"$gizmo_alt\" /></td><td colspan='2'>$gizmo</td></tr>\n";
         }

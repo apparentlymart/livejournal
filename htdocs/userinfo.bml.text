@@ -58,7 +58,11 @@
 
 .details.comments.posted=[[num]] [[?num|comment|comments]] posted
 
+.details.comments.posted2=[[num_comma]] [[?num_raw|comment|comments]] posted
+
 .details.comments.received=[[num]] [[?num|comment|comments]] received
+
+.details.comments.received2=[[num_comma]] [[?num_raw|comment|comments]] received
 
 .details.createdon=Created On: [[createdate]]
 
@@ -73,6 +77,8 @@
 .details.id=LJ User No.: [[id]]
 
 .details.lastupdated=Last updated [[timestamp]]
+
+.details.lastupdated.never=Never updated
 
 .details.membersince=Member Since: [[createdate]]
 
