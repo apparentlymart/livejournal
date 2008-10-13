@@ -567,15 +567,8 @@
         unless ($u->is_identity) {
             if ($u->adult_content_calculated eq 'explicit') {
                 $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' /> $ML{'.details.warning.explicit'}</p>";
-            } else {
-                if ($u->adult_content_calculated eq 'concepts') {
-                    $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' /> $ML{'.details.warning.concepts'}</p>";
-                }
-                if ($remote && $remote->can_manage($u)) {
-                    $journal_warnings .= "<p class='journal_adult_flag'>[<a href='$LJ::SITEROOT/manage/settings/?authas=$user'>$ML{'.details.flag.self'}</a>]</p>";
-                } elsif ($remote && $remote->can_see_content_flag_button( content => $u )) {
-                    $journal_warnings .= "<p class='journal_adult_flag'>[<a href='" . LJ::ContentFlag->adult_flag_url($u) . "'>$ML{'.details.flag.other'}</a>]</p>";
-                }
+            } elsif ($u->adult_content_calculated eq 'concepts') {
+                $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' /> $ML{'.details.warning.concepts'}</p>";
             }
         }
 
@@ -858,6 +851,15 @@
             my $gizmo_alt = $ML{'.im.gizmo'};
             $instant_message .= "<tr class='im_gizmo'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/gizmo.gif' alt=\"$gizmo_alt\" title=\"$gizmo_alt\" /></td><td colspan='2'>$gizmo</td></tr>\n";
         }
+        if ($u->{'last_fm_user'}) {
+            my $lastfm_url = $LJ::LAST_FM_USER_URL;
+            my $url_escaped_last_fm_user = LJ::eurl($u->{'last_fm_user'});
+            $lastfm_url =~ s/%username%/$url_escaped_last_fm_user/g;
+
+            my $lastfm = "<a href='$lastfm_url'>" . LJ::ehtml($u->{'last_fm_user'}) . "</a>";
+            my $lastfm_alt = $ML{'.im.lastfm'};
+            $instant_message .= "<tr class='im_lastfm'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/lastfm.gif' alt=\"$lastfm_alt\" title=\"$lastfm_alt\" /></td><td colspan='2'>$lastfm</td></tr>\n";
+        }
     }
 
     # Contact
@@ -1010,7 +1012,7 @@
 
     if ($instant_message) {
         $basics_left .= "<div class='user_info_im'>";
-        $basics_left .= "<p class='user_info_title'>$ML{'.im.header'}</p>";
+        $basics_left .= "<p class='user_info_title'>$ML{'.im.header2'}</p>";
         $basics_left .= "<table cellpadding='0' cellspacing='3'>$instant_message</table>";
         $basics_left .= "</div>";
     }
@@ -1074,11 +1076,15 @@
             LJ::text_out(\$int->[1]); # 1==interest
             my $eint = LJ::eurl($int->[1]);
             if ($int->[2] > 1) {  # 2==intcount
-                if ($remote_interest{$int->[0]}) {  # 0==intid
-                    $intlist .= "<b><a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a></b>, ";
+                my $intline;
+                if ($remote && $remote->get_cap("directory")) {
+                    $intline = "<a href='$LJ::SITEROOT/directory.bml?int_like=$eint&opt_pagesize=100&start_search=1'>$int->[1]</a>";
                 } else {
-                    $intlist .= "<a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a>, ";
+                    $intline = "<a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a>";
                 }
+                $intline = "<b>$intline</b>" if $remote_interest{$int->[0]};  # 0==intid
+
+                $intlist .= "$intline, ";
             } else {
                 $intlist .= "$int->[1], ";
             }
@@ -1089,18 +1095,16 @@
             $intlist .= BML::ml('.label.intsnotshown',{'intnotshown'=>$notshown});
         }
 
-        $body .= "<div class='section'>$ML{'.label.interests'}</div>";
-        $body .= "<div class='section_body'><span class='interest_count'>$intcount:</span> " . $intlist;
+        $body .= "<div class='section'>$ML{'.label.interests'}";
         if ($remote) {
-            my $link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
-            $link .= "&fromuser=$user" unless ($remote->{'userid'} == $userid);
-            $body .= ". <small>";
-            my $mlcode = ($remote->{'userid'} == $userid) ? '.label.interests.removesome'
-                                                          : '.label.interests.modifyyours';
-            $body .= BML::ml('Actionlink', { 'link' => "<a href='$link'>$ML{$mlcode}</a>" });
-            $body .= "</a></small>";
+            my $enmasse_link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
+            $enmasse_link .= "&fromuser=$user" unless $remote->id == $userid;
+            my $enmasse_text = $remote->id == $userid ? $ML{'.label.interests.removesome2'} : $ML{'.label.interests.modifyyours2'};
+
+            $body .= " <span>[<a href='$enmasse_link'>$enmasse_text</a>]</span>";
         }
         $body .= "</div>";
+        $body .= "<div class='section_body'><span class='interest_count'>$intcount:</span> $intlist</div>";
     }
     # End Interests
 

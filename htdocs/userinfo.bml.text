@@ -148,11 +148,15 @@
 
 .im.header=Instant Message:
 
+.im.header2=External Services:
+
 .im.icq=ICQ
 
 .im.icq.status=ICQ status
 
 .im.jabber=Jabber
+
+.im.lastfm=Last.fm
 
 .im.msn=MSN
 
@@ -210,7 +214,11 @@
 
 .label.interests.modifyyours=Modify&nbsp;yours
 
+.label.interests.modifyyours2=Modify Yours
+
 .label.interests.removesome=Remove&nbsp;some
+
+.label.interests.removesome2=Remove Some
 
 .label.intsnotshown=<b>... [[intnotshown]] interests not shown</b>
 
