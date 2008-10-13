@@ -1227,37 +1227,50 @@ sub postevent
                 my $modlist = LJ::load_userids(@$mods);
 
                 my @emails;
+                my $ct;
                 foreach my $mod (values %$modlist) {
+                    last if $ct > 20;  # don't send more than 20 emails.
+
                     next unless $mod->is_visible;
 
                     LJ::load_user_props($mod, 'opt_nomodemail');
                     next if $mod->{opt_nomodemail};
                     next if $mod->{status} ne "A";
 
-                    push @emails, $mod->email_raw;
+                    push @emails,
+                        {
+                            to          => $mod->email_raw,
+                            browselang  => $mod->prop('browselang'),
+                            charset     => $mod->mailencoding || 'utf-8',
+                        };
+
+                    ++$ct;
                 }
 
-                my $body = "There has been a new submission into the community '$uowner->{'user'}'\n".
-                            "which you moderate.\n\n" .
-                            "      User: $u->{'user'}\n" .
-                            "   Subject: $req->{'subject'}\n\n" .
-                            "Options:\n\n" .
-                            "  - Accept or reject this submission\n" .
-                            "    $LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}&modid=$modid\n" .
-                            "  - View the entire moderation queue\n".
-                            "    $LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}\n\n" .
-                            "--\n$LJ::SITENAME Team\n$LJ::SITEROOT/\n";
-
-                my $ct;
                 foreach my $to (@emails) {
-                    last if ++$ct > 20;  # don't send more than 20 emails.
+                    # TODO: html/plain text.
+                    my $body = LJ::Lang::get_text(
+                        $to->{'browselang'},
+                        'esn.moderated_submission.body', undef,
+                        {
+                            user        => $u->{'user'},
+                            subject     => $req->{'subject'},
+                            community   => $uowner->{'user'},
+                            modid       => $modid,
+                            siteroot    => $LJ::SITEROOT,
+                            sitename    => $LJ::SITENAME,
+                            moderateurl => "$LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}&modid=$modid",
+                            viewurl     => "$LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}",
+                        });
+
+                    my $subject = LJ::Lang::get_text($to->{'browselang'},'esn.moderated_submission.subject');
 
                     LJ::send_mail({
-                        'to' => $to,
-                        'from' => $LJ::ADMIN_EMAIL,
-                        'charset' => 'utf-8',
-                        'subject' => "Moderated submission notification",
-                        'body' => $body,
+                        'to'        => $to->{to},
+                        'from'      => $LJ::ADMIN_EMAIL,
+                        'charset'   => $to->{charset},
+                        'subject'   => $subject,
+                        'body'      => $body,
                     });
                 }
             }

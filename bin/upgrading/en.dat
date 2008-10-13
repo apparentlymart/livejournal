@@ -1243,6 +1243,28 @@ esn.officialpost.sms=There is a new [[sitename]] announcement in [[username]] Re
 
 esn.officialpost.subscribtion.html=[[sitename]] makes a new announcement
 
+esn.moderated_submission.body<<
+There has been a new submission into the community '[[community]]'
+which you moderate.
+
+      User: [[user]]
+   Subject: [[subject]]
+
+
+Options:
+
+  - Accept or reject this submission
+    [[moderateurl]]
+  - View the entire moderation queue
+    [[viewurl]]
+
+--
+[[sitename]] Team
+[[siteroot]]
+.
+
+esn.moderated_submission.subject=Moderated submission notification
+
 esn.supofficialpost.subject=[[sitenameshort]] Announcement: [[subject]]
 
 esn.supofficialpost.nosubject=[[sitenameshort]] Announcement: New [[username]] announcement
