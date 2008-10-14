@@ -64,6 +64,8 @@
 
 .details.comments.received2=[[num_comma]] [[?num_raw|comment|comments]] received
 
+.details.created=Created: [[createdate]]
+
 .details.createdon=Created On: [[createdate]]
 
 .details.entries=[[num]] [[?num|entry|entries]]
@@ -75,6 +77,8 @@
 .details.fotobilder=[[num]] files in <a [[aopts]]>FotoBilder</a>
 
 .details.id=LJ User No.: [[id]]
+
+.details.joined=Joined: [[createdate]]
 
 .details.lastupdated=Last updated [[timestamp]]
 

@@ -634,7 +634,7 @@
         unless ($u->is_identity) {
             $body .= "<p>" . BML::ml('.details.entries', { num => $entry_count }) . " $search_link</p>";
             if ($u->timeupdate) {
-                $body .= "<p>" . BML::ml('.details.lastupdated', { timestamp => "<span class='tooltip' title='$ago_text'>$lastupdated</span>" }) . " $nudge_link</p>";
+                $body .= "<p>" . BML::ml('.details.lastupdated', { timestamp => "<span class='tooltip' title=\"$ago_text\">$lastupdated</span>" }) . " $nudge_link</p>";
             } else {
                 $body .= "<p>$ML{'.details.lastupdated.never'} $nudge_link</p>";
             }
@@ -650,8 +650,8 @@
     # Right Section
     {
         my $timecreate = LJ::mysql_time($u->timecreate);
-        my $createdate = "<span class='tooltip' title='$timecreate'>" . substr($timecreate, 0, 10) . "</span>";
-        my $createdate_label = $u->is_personal || $u->is_identity ? BML::ml('.details.membersince', { createdate => $createdate }) : BML::ml('.details.createdon', { createdate => $createdate });
+        my $createdate = "<span class='tooltip' title=\"$timecreate\">" . substr($timecreate, 0, 10) . "</span>";
+        my $createdate_label = $u->is_personal || $u->is_identity ? BML::ml('.details.joined', { createdate => $createdate }) : BML::ml('.details.created', { createdate => $createdate });
         my $supportpoints = $u->support_points_count;
 
         $body .= "<div class='details_right'>";
@@ -665,10 +665,6 @@
 
     $body .= "<div class='ljclear'></div>";
     $body .= "</div>";
-
-    my $html_under_user;
-    LJ::run_hook("userinfo_html_under_user", { ret => \$html_under_user, u => $u });
-    $body .= $html_under_user;
 
     $body .= "</div>";
 

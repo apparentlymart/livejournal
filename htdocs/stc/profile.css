@@ -143,6 +143,9 @@
     .details_right p {
         font-size: 10px;
     }
+        .details_right p strong {
+            font-weight: bold;
+        }
 .user_details p, .user_details_bottom {
     margin: 0;
     padding: 0;
