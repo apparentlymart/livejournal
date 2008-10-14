@@ -683,7 +683,7 @@
 
     my $html_by_journal;
     LJ::run_hook("userinfo_html_by_journal", { ret => \$html_by_journal, u => $u, extra_section_class => $extra_section_class, with_header => 1 });
-    $body .= $html_by_journal;
+    $body .= "$html_by_journal<br />" if $html_by_journal;
 
     ### Basic Info
     my $basics;
