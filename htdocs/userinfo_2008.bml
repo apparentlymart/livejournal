@@ -1040,11 +1040,13 @@
     }
 
     if ($basics_left || $basics_right) {
+        my $new_width = " style='width: 45%;'" unless $boxad;
+
         $body .= "<div class='section$extra_section_class'>$ML{'.basicinfo.header'}</div>";
         $body .= "<div class='section_body'>\n";
-        $body .= $basics_right ? "<div class='basics_left'>" : "<div class='basics'>";
+        $body .= $basics_right ? "<div class='basics_left'$new_width>" : "<div class='basics'>";
         $body .= "$basics_left</div>";
-        $body .= "<div class='basics_right'>$basics_right</div>" if $basics_right;
+        $body .= "<div class='basics_right'$new_width>$basics_right</div>" if $basics_right;
         $body .= "</div>";
     }
 
