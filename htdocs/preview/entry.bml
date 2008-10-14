@@ -41,6 +41,10 @@
     LJ::EmbedModule->expand_entry($u, \$event, preview => 1,);
 
     if ($u && $up) {
+        my $r = Apache->request;
+        $r->notes("_journal", $u->{user});
+        $r->notes("journalid", $u->{userid});
+
         ### Load necessary props
         my @needed_props = ("stylesys", "s2_style", "url", "urlname",
                             "opt_usesharedpic", "journaltitle", "journalsubtitle",);
