@@ -11,6 +11,9 @@
     color: #470196;
 }
 
+td {
+    vertical-align: top;
+}
 .left {
     float: left;
 }
@@ -175,15 +178,21 @@
         color: #000;
     }
 .section_body {
-    padding-bottom: 20px;
+    padding: 0 20px;
 }
-    .section_body th {
+    .section_body .inner_section_header {
         color: #444;
         font-weight: bold;
-        text-align: right;
-        padding-right: 5px;
-        vertical-align: top;
-        white-space: nowrap;
+        margin: 10px 0 0 0;
+    }
+    .section_body .first {
+        margin: 0;
+    }
+    .section_body .inner_section_body {
+        margin: 0;
+    }
+    .section_body .alt_friends {
+        margin: 1px 0 0 0;
     }
 .firsttwo {
     clear: none;
@@ -234,16 +243,3 @@
         font-size: 0.75em;
         font-weight: normal;
     }
-.interest_count {
-    color: #444;
-    font-weight: bold;
-}
-td {
-    vertical-align: top;
-}
-th.friendlist-header {
-    width: 180px;
-}
-th.alt-cfriend-header {
-    width: 50px;
-}

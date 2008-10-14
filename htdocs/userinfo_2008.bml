@@ -1102,7 +1102,7 @@
             $body .= " <span>[<a href='$enmasse_link'>$enmasse_text</a>]</span>";
         }
         $body .= "</div>";
-        $body .= "<div class='section_body'><span class='interest_count'>$intcount:</span> $intlist</div>";
+        $body .= "<div class='section_body'><p class='inner_section_header first'>$ML{'.label.interests'} ($intcount):</p><p class='inner_section_body'>$intlist</p></div>";
     }
     # End Interests
 
@@ -1123,14 +1123,14 @@
             my @maintlist = sort { $a->{'user'} cmp $b->{'user'} }
                             map { $userhash{$_} } @$maintainers;
 
+            $body .= "<div class='ljclear'></div><br />";
             $body .= "<div class='section'>$ML{'.admins.header'}</div>";
             $body .= "<div class='section_body'>";
 
-            $body .= "<table>";
-            $body .= "<tr><th class='friendlist-header'>" .
+            $body .= "<p class='inner_section_header first'>" .
                      "$ML{'.label.maintainers'} (" . scalar @maintlist .
-                     "):</td>";
-            $body .= "<td>" . $listusers->(\@maintlist, 'maint') . "</td></tr>";
+                     "):</p>";
+            $body .= "<p class='inner_section_body'>" . $listusers->(\@maintlist, 'maint') . "</p>";
 
             # moderators
             if ($u->{'moderated'} && scalar @$moderators) {
@@ -1138,13 +1138,12 @@
                               map { $userhash{$_} } @$moderators;
 
                 if (scalar @modlist) {
-                    $body .= "<tr><th class='friendlist-header'>" .
+                    $body .= "<p class='inner_section_header'>" .
                              "$ML{'.label.moderators'} (" . scalar @modlist .
-                             "):</td>";
-                    $body .= "<td>" . $listusers->(\@modlist, 'mod') . "</td></tr>";
+                             "):</p>";
+                    $body .= "<p class='inner_section_body'>" . $listusers->(\@modlist, 'mod') . "</p>";
                 }
             }
-            $body .= "</table>";
 
             $body .= "</div>";
         }
@@ -1180,14 +1179,14 @@
                     $count++;
                 }
                 chop $list; chop $list;
-                $mutual .= "<tr><th class='friendlist-header'>";
-                $mutual .= "$label ($n_friends):</td>";
-                $mutual .= "<td valign='top'>$list";
+                $mutual .= "<p class='inner_section_header'>";
+                $mutual .= "$label ($n_friends):</p>";
+                $mutual .= "<p class='inner_section_body'>$list";
                 if ($clipped) {
                     my $profile_url = $u->is_identity ? "$LJ::SITEROOT/userinfo_2008.bml?userid=" . $u->id . "&t=I" : $u->profile_url( full => 1 ) . "&ver=2008";
                     $mutual .= ", <a href='$profile_url'>...</a>";
                 }
-                $mutual .= "</td></tr>\n";
+                $mutual .= "</p>\n";
             }
             if ($friendsof{'display'} && (my $n_friends = $fro_m->friend_ofs)) {
                 $label = $com ? $ML{'.members.watchedby'} :
@@ -1212,17 +1211,17 @@
                     $count++;
                 }
                 chop $list; chop $list;
-                $fofs .= "<tr><th class='friendlist-header'>$label ($n_friends):";
+                $fofs .= "<p class='inner_section_header'>$label ($n_friends):";
                 if ($u->{'opt_hidefriendofs'}) {
-                    $fofs  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
+                    $fofs  .= " <i>$ML{'.friendof.hidden'}</i>";
                 }
-                $fofs .= "</td>";
-                $fofs .= "<td colspan='2' valign='top'>$list";
+                $fofs .= "</p>";
+                $fofs .= "<p class='inner_section_body'>$list";
                 if ($clipped) {
                     my $profile_url = $u->is_identity ? "$LJ::SITEROOT/userinfo_2008.bml?userid=" . $u->id . "&t=I" : $u->profile_url( full => 1 ) . "&ver=2008";
                     $fofs .= ", <a href='$profile_url'>...</a>";
                 }
-                $fofs .= "</td></tr>\n";
+                $fofs .= "</p>\n";
             }
             if ($friendsof{'display'} && (my $n_friends = $fro_m->member_of)) {
                 $label = $ML{'.comms.memberof'};
@@ -1238,18 +1237,11 @@
                 }
                 chop $list; chop $list;
 
-                my $rowspan = "";
-                if (scalar @alt_memberof && scalar @alt2_memberof) {
-                    $rowspan = " rowspan='3'";
-                } elsif (scalar @alt_memberof || scalar @alt2_memberof) {
-                    $rowspan = " rowspan='2'";
-                }
-
-                $mofs .= "<tr><th class='friendlist-header'$rowspan>$label (" . (scalar @memberof + scalar @alt_memberof + scalar @alt2_memberof) . "):";
+                $mofs .= "<p class='inner_section_header'>$label (" . (scalar @memberof + scalar @alt_memberof + scalar @alt2_memberof) . "):";
                 if ($u->{'opt_hidefriendofs'}) {
-                    $mofs  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
+                    $mofs  .= " <i>$ML{'.friendof.hidden'}</i>";
                 }
-                $mofs .= "</td><td colspan='2'>$list</td></tr>\n";
+                $mofs .= "</p><p class='inner_section_body'>$list\n";
 
                 $list = undef;
                 foreach my $cu (@alt_memberof) {
@@ -1258,7 +1250,7 @@
                     $list .= "$frlink, ";
                 }
                 chop $list; chop $list;
-                $mofs .= "<tr><th class='alt-cfriend-header'>$alt_clabel (" . scalar @alt_memberof ."):</th><td>$list</td></tr>\n"
+                $mofs .= "<p class='alt_friends'><span class='inner_section_header'>$alt_clabel (" . scalar @alt_memberof ."):</span> <span class='inner_section_body'>$list</span></p>\n"
                     if scalar @alt_memberof;
 
                 $list = undef;
@@ -1268,8 +1260,10 @@
                     $list .= "$frlink, ";
                 }
                 chop $list; chop $list;
-                $mofs .= "<tr><th class='alt-cfriend-header'>$alt2_clabel (" . scalar @alt2_memberof ."):</th><td>$list</td></tr>\n"
+                $mofs .= "<p class='alt_friends'><span class='inner_section_header'>$alt2_clabel (" . scalar @alt2_memberof ."):</span> <span class='inner_section_body'>$list</span></p>\n"
                     if scalar @alt2_memberof;
+
+                $mofs .= "</p>";
             }
         }
 
@@ -1312,13 +1306,6 @@
 
             LJ::run_hook("userinfo_alt_cfriends", \@accesslist, \@alt_access, \$alt_label, \@alt2_access, \$alt2_label, labels => 1);
 
-            my $rowspan = "";
-            if (scalar @alt_access && scalar @alt2_access) {
-                $rowspan = " rowspan='3'";
-            } elsif (scalar @alt_access || scalar @alt2_access) {
-                $rowspan = " rowspan='2'";
-            }
-
             if (my $vcount = @accesslist) {
                 $count = $vcount if $count < $CHOP_POINT;
 
@@ -1329,11 +1316,10 @@
                     push @accesslist_strings, $frlink;
                 }
 
-                $posting .= "<tr><th class='friendlist-header'$rowspan>$label (" . ($count + scalar @alt_access + scalar @alt2_access) . "):</td>";
-                $posting .= "<td colspan='2'>";
+                $posting .= "<p class='inner_section_header'>$label (" . ($count + scalar @alt_access + scalar @alt2_access) . "):</p>";
+                $posting .= "<p class='inner_section_body'>";
                 $posting .= join(", ", @accesslist_strings);
                 $posting .= ", ..." if $chopped;
-                $posting .= "</td></tr>";
             }
 
             $list = undef;
@@ -1343,7 +1329,7 @@
                 $list .= "$frlink, ";
             }
             chop $list; chop $list;
-            $posting .= "<tr><th class='alt-cfriend-header'>$alt_label (" . scalar @alt_access ."):</th><td>$list</td></tr>\n"
+            $posting .= "<p class='alt_friends'><span class='inner_section_header'>$alt_label (" . scalar @alt_access ."):</span> <span class='inner_section_body'>$list</span></p>\n"
                 if scalar @alt_access;
 
             $list = undef;
@@ -1353,8 +1339,10 @@
                 $list .= "$frlink, ";
             }
             chop $list; chop $list;
-            $posting .= "<tr><th class='alt-cfriend-header'>$alt2_label (" . scalar @alt2_access ."):</th><td>$list</td></tr>\n"
+            $posting .= "<p class='alt_friends'><span class='inner_section_header'>$alt2_label (" . scalar @alt2_access ."):</span> <span class='inner_section_body'>$list</span></p>\n"
                 if scalar @alt2_access;
+
+            $posting .= "</p>";
         }
 
     }
@@ -1433,66 +1421,57 @@
             # now spit out the HTML
 
             my $text = $ML{'.friends.friends'};
-            $body .= "<table>";
-            $body .= "<tr><th class='friendlist-header'>$text";
+            $body .= "<p class='inner_section_header first'>$text";
             $body .= " (" . scalar @pfriends . ")" if $should_show_friends;
             if (!$should_show_friends) {
-                $body .= ":</td><td>$viewall_string</td></tr>";
+                $body .= ":</p><p class='inner_section_body'>$viewall_string</p>";
             } elsif ($pfriends) {
-                $body .= ":</td><td>$pfriends</td></tr>";
+                $body .= ":</p><p class='inner_section_body'>$pfriends</p>";
             } else {
-                $body .= "</td></tr>";
+                $body .= "</p>";
             }
             $body .= $mutual if ($mutual);
             $body .= $fofs if ($fofs);
-            $body .= "</table>";
-
-            my $rowspan = "";
-            if (scalar @alt_cfriends && scalar @alt2_cfriends) {
-                $rowspan = " rowspan='3'";
-            } elsif (scalar @alt_cfriends || scalar @alt2_cfriends) {
-                $rowspan = " rowspan='2'";
-            }
 
             my $text = $ML{'.comms.watching'};
-            $comms .= "<tr><th class='friendlist-header'$rowspan>$text";
+            $comms .= "<p class='inner_section_header first'>$text";
             $comms .= " (" . (scalar @cfriends + scalar @alt_cfriends + scalar @alt2_cfriends) . ")" if $should_show_friends;
             if (!$should_show_friends) {
-                $comms .= ":</td><td colspan='2'>$viewall_string</td></tr>";
+                $comms .= ":</p><p class='inner_section_body'>$viewall_string</p>";
             } elsif ($cfriends || $alt_cfriends || $alt2_cfriends) {
-                $comms .= ":</td><td colspan='2'>$cfriends</td></tr>";
-                $comms .= "<tr><th class='alt-cfriend-header'>$alt_clabel (" . scalar @alt_cfriends . "):</th><td>$alt_cfriends</td></tr>"
+                $comms .= ":</p><p class='inner_section_body'>$cfriends";
+                $comms .= "<p class='alt_friends'><span class='inner_section_header'>$alt_clabel (" . scalar @alt_cfriends . "):</span> <span class='inner_section_body'>$alt_cfriends</span></p>"
                     if $alt_cfriends;
-                $comms .= "<tr><th class='alt-cfriend-header'>$alt2_clabel (" . scalar @alt2_cfriends . "):</th><td>$alt2_cfriends</td></tr>"
+                $comms .= "<p class='alt_friends'><span class='inner_section_header'>$alt2_clabel (" . scalar @alt2_cfriends . "):</span> <span class='inner_section_body'>$alt2_cfriends</span></p>"
                     if $alt2_cfriends;
+                $comms .= "</p>";
             } else {
-                $comms .= "</td></tr>";
+                $comms .= "</p>";
             }
 
             my $text = $ML{'.syn.watching'};
-            $feeds .= "<table><tr><th class='friendlist-header'>$text";
+            $feeds .= "<p class='inner_section_header first'>$text";
             $feeds .= " (" . scalar @yfriends . ")" if $should_show_friends;
             if (!$should_show_friends) {
-                $feeds .= ":</td><td>$viewall_string</td></tr></table>";
+                $feeds .= ":</p><p class='inner_section_body'>$viewall_string</p>";
             } elsif ($yfriends) {
-                $feeds .= ":</td><td>$yfriends</td></tr></table>";
+                $feeds .= ":</p><p class='inner_section_body'>$yfriends</p>";
             } else {
-                $feeds .= "</td></tr></table>";
+                $feeds .= "</p>";
             }
 
         } else {
-            $body .= "<table><tr><th class='friendlist-header'>$ML{'.members.members'}";
+            $body .= "<p class='inner_section_header first'>$ML{'.members.members'}";
             $body .= " (" . $friends{'count'} . ")";
             if (!$should_show_friends) {
-                $body .= ":</td><td>" . BML::ml('.friends.viewall.comm2', { aopts => "href='$viewall_url'" }) . "</td></tr>";
+                $body .= ":</p><p class='inner_section_body'>" . BML::ml('.friends.viewall.comm2', { aopts => "href='$viewall_url'" }) . "</p>";
             } elsif ($friends{count}) {
-                $body .= ":</td><td>" . $listusers->(\@friends, 'member') . "</td></tr>";
+                $body .= ":</p><p class='inner_section_body'>" . $listusers->(\@friends, 'member') . "</p>";
             } else {
-                $body .= "</td></tr>";
+                $body .= "</p>";
             }
             $body .= $fofs if ($fofs);
             $body .= $posting if ($posting);
-            $body .= "</table>";
         }
         $body .= "</div>";
 
@@ -1500,7 +1479,6 @@
         $comms .= "$mofs" if ($mofs);
         $comms .= "$posting" if ($posting);
         next unless $comms;
-        $comms = "<table>$comms</table>\n";
         $body .= "<div class='ljclear'></div><br>";
         $body .= "<div class='section'><img src='$LJ::IMGPREFIX/community.gif' /> $ML{'.comms.header'}</div>";
         $body .= "<div class='section_body'>$comms</div>";
