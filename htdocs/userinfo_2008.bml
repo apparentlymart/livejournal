@@ -335,13 +335,14 @@
         }
         return $ret;
     };
+
+    my $arrowimg = sub {
+        my $section = shift;
+        return "<img id='${section}_arrow' src='$LJ::IMGPREFIX/profile_icons/arrow-down.gif' align='absmiddle' />";
+    };
     # End Subs
 
     $body .= "<div id='profile_page'>";
-
-    if ($remote && $remote->can_manage($u)) {
-        $body .= $p->(BML::ml('.userinfo.body3', { aopts => "href='$LJ::SITEROOT/manage/profile/?authas=$user'" }));
-    }
 
     if ($com) {
         my $pt;
@@ -1038,8 +1039,8 @@
     if ($basics_left || $basics_right) {
         my $new_width = " style='width: 45%;'" unless $boxad;
 
-        $body .= "<div class='section$extra_section_class'>$ML{'.basicinfo.header'}</div>";
-        $body .= "<div class='section_body'>\n";
+        $body .= "<div class='section$extra_section_class'><span class='expandcollapse on' id='basics_header'>" . $arrowimg->("basics") . " $ML{'.basicinfo.header'}</span></div>";
+        $body .= "<div class='section_body' id='basics_body'>\n";
         $body .= $basics_right ? "<div class='basics_left'$new_width>" : "<div class='basics'>";
         $body .= "$basics_left</div>";
         $body .= "<div class='basics_right'$new_width>$basics_right</div>" if $basics_right;
@@ -1059,8 +1060,8 @@
         }
 
         LJ::EmbedModule->expand_entry($u, \$u->{'bio'});
-        $body .= "<div class='section'>$label</div>\n";
-        $body .= "<div class='section_body'>$u->{'bio'}</div>\n";
+        $body .= "<div class='section'><span class='expandcollapse on' id='bio_header'>" . $arrowimg->("bio") . " $label</span></div>\n";
+        $body .= "<div class='section_body' id='bio_body'>$u->{'bio'}</div>\n";
     }
     ### End Bio
 
@@ -1093,16 +1094,16 @@
             $intlist .= BML::ml('.label.intsnotshown',{'intnotshown'=>$notshown});
         }
 
-        $body .= "<div class='section'>$ML{'.label.interests'}";
+        $body .= "<div class='section'><span class='expandcollapse on' id='interests_header'>" . $arrowimg->("interests") . " $ML{'.label.interests'}</span>";
         if ($remote) {
             my $enmasse_link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
             $enmasse_link .= "&fromuser=$user" unless $remote->id == $userid;
             my $enmasse_text = $remote->id == $userid ? $ML{'.label.interests.removesome2'} : $ML{'.label.interests.modifyyours2'};
 
-            $body .= " <span>[<a href='$enmasse_link'>$enmasse_text</a>]</span>";
+            $body .= " <span class='section_link'>[<a href='$enmasse_link'>$enmasse_text</a>]</span>";
         }
         $body .= "</div>";
-        $body .= "<div class='section_body'><p class='inner_section_header first'>$ML{'.label.interests'} ($intcount):</p><p class='inner_section_body'>$intlist</p></div>";
+        $body .= "<div class='section_body' id='interests_body'><p class='inner_section_header first'>$ML{'.label.interests'} ($intcount):</p><div class='inner_section_body'>$intlist</div></div>";
     }
     # End Interests
 
@@ -1127,10 +1128,10 @@
             $body .= "<div class='section'>$ML{'.admins.header'}</div>";
             $body .= "<div class='section_body'>";
 
-            $body .= "<p class='inner_section_header first'>" .
-                     "$ML{'.label.maintainers'} (" . scalar @maintlist .
-                     "):</p>";
-            $body .= "<p class='inner_section_body'>" . $listusers->(\@maintlist, 'maint') . "</p>";
+            $body .= "<p class='inner_section_header first'><span class='expandcollapse on' id='maints_header'>" . $arrowimg->("maints") .
+                     " $ML{'.label.maintainers'} (" . scalar @maintlist .
+                     "):</span></p>";
+            $body .= "<div class='inner_section_body' id='maints_body'>" . $listusers->(\@maintlist, 'maint') . "</div>";
 
             # moderators
             if ($u->{'moderated'} && scalar @$moderators) {
@@ -1138,10 +1139,10 @@
                               map { $userhash{$_} } @$moderators;
 
                 if (scalar @modlist) {
-                    $body .= "<p class='inner_section_header'>" .
-                             "$ML{'.label.moderators'} (" . scalar @modlist .
-                             "):</p>";
-                    $body .= "<p class='inner_section_body'>" . $listusers->(\@modlist, 'mod') . "</p>";
+                    $body .= "<p class='inner_section_header'><span class='expandcollapse on' id='mods_header'>" . $arrowimg->("mods") .
+                             " $ML{'.label.moderators'} (" . scalar @modlist .
+                             "):</span></p>";
+                    $body .= "<div class='inner_section_body' id='mods_body'>" . $listusers->(\@modlist, 'mod') . "</div>";
                 }
             }
 
@@ -1179,14 +1180,14 @@
                     $count++;
                 }
                 chop $list; chop $list;
-                $mutual .= "<p class='inner_section_header'>";
-                $mutual .= "$label ($n_friends):</p>";
-                $mutual .= "<p class='inner_section_body'>$list";
+                $mutual .= "<p class='inner_section_header'><span class='expandcollapse on' id='mutual_header'>" . $arrowimg->("mutual");
+                $mutual .= " $label ($n_friends):</span></p>";
+                $mutual .= "<div class='inner_section_body' id='mutual_body'>$list";
                 if ($clipped) {
                     my $profile_url = $u->is_identity ? "$LJ::SITEROOT/userinfo_2008.bml?userid=" . $u->id . "&t=I" : $u->profile_url( full => 1 ) . "&ver=2008";
                     $mutual .= ", <a href='$profile_url'>...</a>";
                 }
-                $mutual .= "</p>\n";
+                $mutual .= "</div>\n";
             }
             if ($friendsof{'display'} && (my $n_friends = $fro_m->friend_ofs)) {
                 $label = $com ? $ML{'.members.watchedby'} :
@@ -1211,17 +1212,17 @@
                     $count++;
                 }
                 chop $list; chop $list;
-                $fofs .= "<p class='inner_section_header'>$label ($n_friends):";
+                $fofs .= "<p class='inner_section_header'><span class='expandcollapse on' id='fofs_header'>" . $arrowimg->("fofs") . " $label ($n_friends):</span>";
                 if ($u->{'opt_hidefriendofs'}) {
                     $fofs  .= " <i>$ML{'.friendof.hidden'}</i>";
                 }
                 $fofs .= "</p>";
-                $fofs .= "<p class='inner_section_body'>$list";
+                $fofs .= "<div class='inner_section_body' id='fofs_body'>$list";
                 if ($clipped) {
                     my $profile_url = $u->is_identity ? "$LJ::SITEROOT/userinfo_2008.bml?userid=" . $u->id . "&t=I" : $u->profile_url( full => 1 ) . "&ver=2008";
                     $fofs .= ", <a href='$profile_url'>...</a>";
                 }
-                $fofs .= "</p>\n";
+                $fofs .= "</div>\n";
             }
             if ($friendsof{'display'} && (my $n_friends = $fro_m->member_of)) {
                 $label = $ML{'.comms.memberof'};
@@ -1237,11 +1238,11 @@
                 }
                 chop $list; chop $list;
 
-                $mofs .= "<p class='inner_section_header'>$label (" . (scalar @memberof + scalar @alt_memberof + scalar @alt2_memberof) . "):";
+                $mofs .= "<p class='inner_section_header'><span class='expandcollapse on' id='mofs_header'>" . $arrowimg->("mofs") . " $label (" . (scalar @memberof + scalar @alt_memberof + scalar @alt2_memberof) . "):</span>";
                 if ($u->{'opt_hidefriendofs'}) {
                     $mofs  .= " <i>$ML{'.friendof.hidden'}</i>";
                 }
-                $mofs .= "</p><p class='inner_section_body'>$list\n";
+                $mofs .= "</p><div class='inner_section_body' id='mofs_body'>$list\n";
 
                 $list = undef;
                 foreach my $cu (@alt_memberof) {
@@ -1263,7 +1264,7 @@
                 $mofs .= "<p class='alt_friends'><span class='inner_section_header'>$alt2_clabel (" . scalar @alt2_memberof ."):</span> <span class='inner_section_body'>$list</span></p>\n"
                     if scalar @alt2_memberof;
 
-                $mofs .= "</p>";
+                $mofs .= "</div>";
             }
         }
 
@@ -1316,8 +1317,8 @@
                     push @accesslist_strings, $frlink;
                 }
 
-                $posting .= "<p class='inner_section_header'>$label (" . ($count + scalar @alt_access + scalar @alt2_access) . "):</p>";
-                $posting .= "<p class='inner_section_body'>";
+                $posting .= "<p class='inner_section_header'><span class='expandcollapse on' id='posting_header'>" . $arrowimg->("posting") . " $label (" . ($count + scalar @alt_access + scalar @alt2_access) . "):</span></p>";
+                $posting .= "<div class='inner_section_body' id='posting_body'>";
                 $posting .= join(", ", @accesslist_strings);
                 $posting .= ", ..." if $chopped;
             }
@@ -1342,7 +1343,7 @@
             $posting .= "<p class='alt_friends'><span class='inner_section_header'>$alt2_label (" . scalar @alt2_access ."):</span> <span class='inner_section_body'>$list</span></p>\n"
                 if scalar @alt2_access;
 
-            $posting .= "</p>";
+            $posting .= "</div>";
         }
 
     }
@@ -1421,54 +1422,54 @@
             # now spit out the HTML
 
             my $text = $ML{'.friends.friends'};
-            $body .= "<p class='inner_section_header first'>$text";
+            $body .= "<p class='inner_section_header first'><span class='expandcollapse on' id='friends_header'>" . $arrowimg->("friends") . " $text";
             $body .= " (" . scalar @pfriends . ")" if $should_show_friends;
             if (!$should_show_friends) {
-                $body .= ":</p><p class='inner_section_body'>$viewall_string</p>";
+                $body .= ":</span></p><div class='inner_section_body' id='friends_body'>$viewall_string</div>";
             } elsif ($pfriends) {
-                $body .= ":</p><p class='inner_section_body'>$pfriends</p>";
+                $body .= ":</span></p><div class='inner_section_body' id='friends_body'>$pfriends</div>";
             } else {
-                $body .= "</p>";
+                $body .= "</span></p>";
             }
             $body .= $mutual if ($mutual);
             $body .= $fofs if ($fofs);
 
             my $text = $ML{'.comms.watching'};
-            $comms .= "<p class='inner_section_header first'>$text";
+            $comms .= "<p class='inner_section_header first'><span class='expandcollapse on' id='watching_header'>" . $arrowimg->("watching") . " $text";
             $comms .= " (" . (scalar @cfriends + scalar @alt_cfriends + scalar @alt2_cfriends) . ")" if $should_show_friends;
             if (!$should_show_friends) {
-                $comms .= ":</p><p class='inner_section_body'>$viewall_string</p>";
+                $comms .= ":</span></p><div class='inner_section_body' id='watching_body'>$viewall_string</div>";
             } elsif ($cfriends || $alt_cfriends || $alt2_cfriends) {
-                $comms .= ":</p><p class='inner_section_body'>$cfriends";
+                $comms .= ":</span></p><div class='inner_section_body' id='watching_body'>$cfriends";
                 $comms .= "<p class='alt_friends'><span class='inner_section_header'>$alt_clabel (" . scalar @alt_cfriends . "):</span> <span class='inner_section_body'>$alt_cfriends</span></p>"
                     if $alt_cfriends;
                 $comms .= "<p class='alt_friends'><span class='inner_section_header'>$alt2_clabel (" . scalar @alt2_cfriends . "):</span> <span class='inner_section_body'>$alt2_cfriends</span></p>"
                     if $alt2_cfriends;
-                $comms .= "</p>";
+                $comms .= "</div>";
             } else {
-                $comms .= "</p>";
+                $comms .= "</span></p>";
             }
 
             my $text = $ML{'.syn.watching'};
-            $feeds .= "<p class='inner_section_header first'>$text";
+            $feeds .= "<p class='inner_section_header first'><span class='expandcollapse on' id='watchingfeeds_header'>" . $arrowimg->("watchingfeeds") . " $text";
             $feeds .= " (" . scalar @yfriends . ")" if $should_show_friends;
             if (!$should_show_friends) {
-                $feeds .= ":</p><p class='inner_section_body'>$viewall_string</p>";
+                $feeds .= ":</span></p><div class='inner_section_body' id='watchingfeeds_body'>$viewall_string</div>";
             } elsif ($yfriends) {
-                $feeds .= ":</p><p class='inner_section_body'>$yfriends</p>";
+                $feeds .= ":</span></p><div class='inner_section_body' id='watchingfeeds_body'>$yfriends</div>";
             } else {
-                $feeds .= "</p>";
+                $feeds .= "</span></p>";
             }
 
         } else {
-            $body .= "<p class='inner_section_header first'>$ML{'.members.members'}";
+            $body .= "<p class='inner_section_header first'><span class='expandcollapse on' id='members_header'>" . $arrowimg->("members") . " $ML{'.members.members'}";
             $body .= " (" . $friends{'count'} . ")";
             if (!$should_show_friends) {
-                $body .= ":</p><p class='inner_section_body'>" . BML::ml('.friends.viewall.comm2', { aopts => "href='$viewall_url'" }) . "</p>";
+                $body .= ":</span></p><div class='inner_section_body' id='members_body'>" . BML::ml('.friends.viewall.comm2', { aopts => "href='$viewall_url'" }) . "</div>";
             } elsif ($friends{count}) {
-                $body .= ":</p><p class='inner_section_body'>" . $listusers->(\@friends, 'member') . "</p>";
+                $body .= ":</span></p><div class='inner_section_body' id='members_body'>" . $listusers->(\@friends, 'member') . "</div>";
             } else {
-                $body .= "</p>";
+                $body .= "</span></p>";
             }
             $body .= $fofs if ($fofs);
             $body .= $posting if ($posting);
@@ -1497,7 +1498,7 @@ body=><?_code return $bml_okay ? $body : BML::noparse($body); _code?>
 head<=
 <?_code
 {
-    LJ::need_res('stc/profile.css');
+    LJ::need_res('stc/profile.css', 'js/profile.js');
     return $head;
 }
 _code?>

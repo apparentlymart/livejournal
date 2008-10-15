@@ -172,7 +172,7 @@ td {
     color: #444;
     clear: both;
 }
-    .section span {
+    .section span.section_link {
         font-size: 0.65em;
         font-weight: normal;
         color: #000;
@@ -193,6 +193,12 @@ td {
     }
     .section_body .alt_friends {
         margin: 1px 0 0 0;
+    }
+span.expandcollapse {
+    cursor: default;
+}
+    .section_body .inner_section_header span.expandcollapse img {
+        margin-left: -17px;
     }
 .firsttwo {
     clear: none;
