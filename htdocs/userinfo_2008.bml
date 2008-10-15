@@ -378,7 +378,7 @@
         }
 
         if ($remote && $remote->can_manage($u)) {
-            $body .= "$default_userpic_img<br /><a href='$LJ::SITEROOT/editpics.bml?authas=$user' class='user_pic_caption'>$ML{'.userpic.choose'}</a>";
+            $body .= "<a href='$LJ::SITEROOT/editpics.bml?authas=$user'>$default_userpic_img</a><br /><a href='$LJ::SITEROOT/editpics.bml?authas=$user' class='user_pic_caption'>$ML{'.userpic.choose'}</a>";
         } elsif (LJ::userpic_count($u)) {
             $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a><br /><a href='$LJ::SITEROOT/allpics.bml?user=$user' class='user_pic_caption'>$ML{'.allpics'}</a>";
         } else {
