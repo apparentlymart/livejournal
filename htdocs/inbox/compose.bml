@@ -35,6 +35,8 @@ body<=
 
     my @errors;
 
+    push @errors, $ML{'.suspended.cannot.send'} if $remote->statusvis eq 'S';
+
     # Submitted message
     if (LJ::did_post()) {
         my $mode = $POST{'mode'};

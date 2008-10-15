@@ -410,6 +410,8 @@ sub sendmessage
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
 
+    return fail($err, 305) if $u->statusvis eq 'S'; # suspended cannot send private messages
+
     my $msg_limit = LJ::get_cap($u, "usermessage_length");
 
     my @errors;
