@@ -133,6 +133,9 @@
 
             $body .= "<?p " . BML::ml(".loggedin.text2",
                                       { 'username' => LJ::ljuser($remote)} ) . " p?>\n";
+            if ($remote->is_identity && !$remote->is_validated) {
+                $body .= "<?warningbar " . BML::ml('.loggedin.openidemail', { aopts1 => "href='$LJ::SITEROOT/changeemail.bml'", aopts2 => "href='$LJ::SITEROOT/register.bml'" }) . " warningbar?>";
+            }
             $body .= "<br />\n";
             $body .= "<div style='float: left; padding: 5px 10px 0px 10px;'>";
             $body .= "<img src='/img/pencil.gif'></div>\n";

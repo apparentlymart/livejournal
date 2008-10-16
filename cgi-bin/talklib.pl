@@ -1409,11 +1409,13 @@ sub talkform {
                 }
                 $ret .= "</td></tr>\n";
             } else {
-                # logged out
+                # logged out or no validated email
                 $ret .= "<tr valign='middle'>";
                 $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td>";
                 $ret .= "<td align='center'>(  )</td>";
                 $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>OpenID</b></font>";
+                $ret .= BML::ml('.opt.noopenidpost', { aopts1 => "href='$LJ::SITEROOT/changeemail.bml'", aopts2 => "href='$LJ::SITEROOT/register.bml'" })
+                    if defined $oid_identity;
 
                 $ret .= LJ::help_icon_html("openid", " ");
 

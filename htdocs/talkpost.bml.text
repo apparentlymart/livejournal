@@ -63,6 +63,8 @@
 
 .opt.noimage=No Image
 
+.opt.noopenidpost=- you must <a [[aopts1]]>set</a> and <a [[aopts2]]>validate</a> your email address in order to comment.
+
 .opt.preview=Preview
 
 .opt.spellcheck=Spell check entry before posting
