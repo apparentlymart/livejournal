@@ -59,6 +59,8 @@
 
 .opt.noanonpost=- this user has disabled anonymous posting.
 
+.opt.noanonpost.nonpublic=- you cannot comment anonymously on a protected entry.
+
 .opt.noautoformat=Don't auto-format: 
 
 .opt.noimage=No Image

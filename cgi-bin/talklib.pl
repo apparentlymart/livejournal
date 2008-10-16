@@ -1336,14 +1336,24 @@ sub talkform {
     } else { # if not edit
 
     if ($journalu->{'opt_whocanreply'} eq "all") {
-        $ret .= "<tr valign='center'>";
-        $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/anonymous.gif' onclick='handleRadios(0);'/></td>";
-        $ret .= "<td align='center'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon'" .
-                $whocheck->('anonymous') .
-                " /></td>";
-        $ret .= "<td align='left'><b><label for='talkpostfromanon'>$BML::ML{'.opt.anonymous'}</label></b>";
-        $ret .= " " . $BML::ML{'.opt.willscreen'} if $screening;
-        $ret .= "</td></tr>\n";
+        my $entry = LJ::Entry->new($journalu, ditemid => $opts->{ditemid});
+
+        if ($entry && $entry->security ne "public") {
+            $ret .= "<tr valign='middle'>";
+            $ret .= "<td align='center' width='20'><img src='$LJ::IMGPREFIX/anonymous.gif' /></td>";
+            $ret .= "<td align='center'>(  )</td>";
+            $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>$BML::ML{'.opt.noanonpost.nonpublic'}</td>";
+            $ret .= "</tr>\n";
+        } else {
+            $ret .= "<tr valign='center'>";
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/anonymous.gif' onclick='handleRadios(0);'/></td>";
+            $ret .= "<td align='center'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon'" .
+                    $whocheck->('anonymous') .
+                    " /></td>";
+            $ret .= "<td align='left'><b><label for='talkpostfromanon'>$BML::ML{'.opt.anonymous'}</label></b>";
+            $ret .= " " . $BML::ML{'.opt.willscreen'} if $screening;
+            $ret .= "</td></tr>\n";
+        }
 
         if (LJ::OpenID->consumer_enabled) {
             # OpenID!!
