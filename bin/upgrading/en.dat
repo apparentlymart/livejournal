@@ -2165,6 +2165,20 @@ s2theme.themename.default=(Unnamed - [[themeid]])
 
 s2theme.themename.notheme=(Layout Default)
 
+setting.adultcontent.error.invalid=Invalid adult content setting.
+
+setting.adultcontent.label=Adult Content
+
+setting.adultcontent.option.comm=My community contains
+
+setting.adultcontent.option.select.concepts=adult concepts
+
+setting.adultcontent.option.select.explicit=explicit adult content
+
+setting.adultcontent.option.select.none=no adult content
+
+setting.adultcontent.option.self=My journal contains
+
 setting.bio.desc|notes=There shouldn't be a description unless the page specifies one
 setting.bio.desc=_none
 
@@ -2181,9 +2195,221 @@ setting.birthdaydisplay.error.invalid=Invalid option
 
 setting.birthdaydisplay.question=Birthday display options:
 
+setting.commentcaptcha.label=Anti-Spam
+
+setting.commentcaptcha.option=Show CAPTCHA to
+
+setting.commentcaptcha.option.select.all=all commenters
+
+setting.commentcaptcha.option.select.anon=anonymous commenters
+
+setting.commentcaptcha.option.select.none=nobody
+
+setting.commentcaptcha.option.select.nonfriends=non-friends
+
+setting.commentcaptcha.option.select.nonmembers=non-members
+
+setting.commentemailnotify.label=Comment Email Notification
+
+setting.commentemailnotify.option=Someone replies to any comment I make
+
+setting.commentip.label=IP Address Logging
+
+setting.commentip.option=Log IP addresses of
+
+setting.commentip.option.select.all=all commenters
+
+setting.commentip.option.select.anon=anonymous commenters
+
+setting.commentip.option.select.none=nobody
+
+setting.commentscreening.label=Comment Screening
+
+setting.commentscreening.option=Screen [[options]] before displaying them to others
+
+setting.commentscreening.option.select.all=all comments
+
+setting.commentscreening.option.select.anon=anonymous comments
+
+setting.commentscreening.option.select.none=no comments (don't screen)
+
+setting.commentscreening.option.select.nonfriends=comments from non-friends
+
+setting.commentscreening.option.select.nonmembers=comments from non-members
+
+setting.contentpromotion.label=Content Promotion
+
+setting.contentpromotion.option=Promote my public entries on the [[sitenameabbrev]] site
+
+setting.ctxpopup.label=Hover Menu
+
+setting.ctxpopup.option=Show menu when I hover over userhead images or userpics
+
+setting.display.accountstatus.actionlink.contactabuse=Contact Abuse
+
+setting.display.accountstatus.actionlink.delete=Delete
+
+setting.display.accountstatus.actionlink.undelete=Undelete
+
+setting.display.accountstatus.label=Status
+
+setting.display.accountstatus.option.active=Active
+
+setting.display.accountstatus.option.deleted=Deleted (less than [[num]] [[?num|day|days]] left to undelete)
+
+setting.display.accountstatus.option.deleted.timeup=Deleted (your account will be purged at any time)
+
+setting.display.accountstatus.option.memorial=Memorial
+
+setting.display.accountstatus.option.readonly=Read-Only
+
+setting.display.accountstatus.option.suspended=Suspended
+
+setting.display.banusers.label=Ban and Unban Users
+
+setting.display.banusers.option.comm=Ban and unban users from commenting in my community
+
+setting.display.banusers.option.self=Ban and unban users from commenting in my journal
+
+setting.display.domainmapping.actionlink=Set up
+
+setting.display.domainmapping.actionlink.remove=Remove
+
+setting.display.domainmapping.label=Domain Mapping
+
+setting.display.email.actionlink.change=Change
+
+setting.display.email.actionlink.set=Set
+
+setting.display.email.label=Email
+
+setting.display.email.option.notvalidated=(<a [[aopts]]>not validated</a>)
+
+setting.display.email.option.validated=(validated)
+
+setting.display.emailposts.label=Email Posts
+
+setting.display.emailposts.option=View email post history
+
+setting.display.emails.label=Email Addresses
+
+setting.display.emails.option=View past email addresses
+
+setting.display.logins.label=Logins
+
+setting.display.logins.option=Manage login sessions
+
+setting.display.password.actionlink=Change
+
+setting.display.password.label=Password
+
+setting.display.secretquestion.actionlink.change=Change
+
+setting.display.secretquestion.actionlink.set=Set
+
+setting.display.secretquestion.label=Secret Question
+
+setting.display.smshistory.label=Text Messages
+
+setting.display.smshistory.option=View [[sms_title]] history
+
+setting.display.username.actionlink=Rename
+
+setting.display.username.label=Username
+
+setting.display.username.option.list=See what else is available.
+
+setting.display.username.option.openidusername=(internal username: [[user]])
+
+setting.emailformat.error.invalid=Invalid email format.
+
+setting.emailformat.label=Email Format
+
+setting.emailformat.option.html=HTML
+
+setting.emailformat.option.plaintext=Plain Text
+
+setting.emailposting.error.email.invalid=Invalid email address.
+
+setting.emailposting.error.pin.invalid=Your PIN must contain only alphabet characters and numbers, and it needs to be at least [[num]] [[?num|character|characters]] long.
+
+setting.emailposting.error.pin.invalidaccount=This PIN is invalid. You should change it to something that does not have anything to do with your [[sitename]] account.
+
+setting.emailposting.label=Email Posting
+
+setting.emailposting.option=Post to your journal by sending an email from one of your defined email addresses to username+pin@[[domain]]. View more <a [[aopts]]>posting instructions</a>.
+
+setting.emailposting.option.addr=Email Address:
+
+setting.emailposting.option.advanced=advanced setup options
+
+setting.emailposting.option.pin=PIN:
+
+setting.emailposting.option.pin.note=(numbers and/or letters)
+
+setting.emailposting.option.senderrors=Send errors?
+
+setting.embedplaceholders.label=Video Placeholders
+
+setting.embedplaceholders.option=Replace videos embedded in journals with a placeholder icon
+
+setting.enablecomments.label=Enable Comments
+
+setting.enablecomments.option=Allow comments from
+
+setting.enablecomments.option.note.comm=Note: If you disable comments, all past comments in your community will be hidden
+
+setting.enablecomments.option.note.self=Note: If you disable comments, all past comments in your journal will be hidden
+
+setting.enablecomments.option.select.all=everybody
+
+setting.enablecomments.option.select.friends=friends
+
+setting.enablecomments.option.select.members=members
+
+setting.enablecomments.option.select.none=nobody
+
+setting.enablecomments.option.select.regusers=registered users
+
+setting.entryeditor.error.invalid=Invalid entry editor default.
+
+setting.entryeditor.label=Entry Editor Default
+
+setting.entryeditor.option.lastused=Last Used
+
+setting.entryeditor.option.plaintext=HTML
+
+setting.entryeditor.option.richtext=Rich Text
+
 setting.gender.error.invalid=Invalid option
 
 setting.gender.question=What's your gender?
+
+setting.gettingstarted.label=Getting Started Module
+
+setting.gettingstarted.option=Show Getting Started module on homepage and confirmation pages
+
+setting.graphicpreviews.label=Graphic Previews
+
+setting.graphicpreviews.option.comm=Allow viewers to preview external links within my community
+
+setting.graphicpreviews.option.self=Display a preview of external links when hovering over them
+
+setting.imageplaceholders.error.invalid=Invalid image size.
+
+setting.imageplaceholders.label=Image Placeholders
+
+setting.imageplaceholders.option=Replace inline images on your Friends page with a placeholder for
+
+setting.imageplaceholders.option.select.all=all images
+
+setting.imageplaceholders.option.select.custom=custom (over [[width]]x[[height]])
+
+setting.imageplaceholders.option.select.large=large images (over [[width]]x[[height]])
+
+setting.imageplaceholders.option.select.medium=medium images (over [[width]]x[[height]])
+
+setting.imageplaceholders.option.select.none=nothing (display all images)
 
 setting.interests.desc|notes=There shouldn't be a description unless the page specifies one
 setting.interests.desc=_none
@@ -2193,7 +2419,101 @@ setting.interests.note=_none
 
 setting.interests.question=Interests:
 
+setting.language.error.invalid=Invalid language.
+
+setting.language.label=Language
+
+setting.minsecurity.label=Default Entry Security
+
+setting.minsecurity.option=Set all new entries to a minimum security of
+
+setting.minsecurity.option.select.friends=friends
+
+setting.minsecurity.option.select.members=members
+
+setting.minsecurity.option.select.private=just me (private)
+
+setting.minsecurity.option.select.public=everyone (public)
+
 setting.name.question=What's your name?
+
+setting.notifyweblogs.label=Notify Weblogs.com
+
+setting.notifyweblogs.option.comm=Notify Weblogs.com subscribers when new public entries are posted to my community
+
+setting.notifyweblogs.option.self=Notify Weblogs.com subscribers when I post new public entries to my journal
+
+setting.safesearch.error.invalid=Invalid safe search setting.
+
+setting.safesearch.label=Safe Search Filter
+
+setting.safesearch.option.select.concepts=Use strict filtering (filters all adult and offensive content)
+
+setting.safesearch.option.select.explicit=Use moderate filtering (filters explicit adult and offensive content)
+
+setting.safesearch.option.select.none=Do not filter my results
+
+setting.selfcommentemail.label=Self Comment Email Notification
+
+setting.selfcommentemail.option=I comment in someone's journal, on any entry
+
+setting.searchinclusion.label=Search Inclusion
+
+setting.searchinclusion.option.comm=Minimize my community's inclusion in search engine results
+
+setting.searchinclusion.option.self=Minimize my journal's inclusion in search engine results
+
+setting.sitescheme.error.invalid=Invalid site scheme.
+
+setting.sitescheme.label=Site Scheme
+
+setting.sms.error.carrier.invalid=Invalid carrier selection.
+
+setting.sms.error.carrier.none=You must select a carrier in order to register.
+
+setting.sms.error.phone.failed=The number [[number]] could not be registered.
+
+setting.sms.error.phone.inuse=That number is currently in use by another user.
+
+setting.sms.error.phone.invalid=You must enter a valid U.S. 10-digit phone number.
+
+setting.sms.error.phone.ratelimit=You have tried to register a number too many times in one day. Please wait and try again.
+
+setting.sms.option=Receive updates and interact with LiveJournal by text message.
+
+setting.sms.option.advanced=advanced setup options
+
+setting.sms.option.carrier=Mobile Carrier:
+
+setting.sms.option.carrier.selectone=(Select Carrier)
+
+setting.sms.option.phone=Mobile Number:
+
+setting.stylealwaysmine.label=Other Journals
+
+setting.stylealwaysmine.option=View all journals and communities in my own style
+
+setting.stylemine.label=Comment Pages
+
+setting.stylemine.option=View comment pages from my Friends page in my own style
+
+setting.timezone.error.invalid=Invalid time zone.
+
+setting.timezone.label=Time Zone
+
+setting.timezone.option.select=(Select Your Time Zone)
+
+setting.viewingadultcontent.error.invalid=Invalid viewing adult content setting.
+
+setting.viewingadultcontent.label=Viewing Adult Content
+
+setting.viewingadultcontent.option=Collapse
+
+setting.viewingadultcontent.option.select.concepts=adult concepts and explicit adult content
+
+setting.viewingadultcontent.option.select.explicit=explicit adult content only
+
+setting.viewingadultcontent.option.select.none=nothing
 
 settings.city=City
 
@@ -2264,6 +2584,8 @@ statusvis_message.readonly=This journal is read-only. New entries and comments c
 
 subscribe_interface.by=By
 
+subscribe_interface.by2=Also notify me by
+
 subscribe_interface.cancel=Cancel
 
 subscribe_interface.category.my-account=My Account
@@ -2272,15 +2594,25 @@ subscribe_interface.category.friends-and-communities=Friends and Communities
 
 subscribe_interface.category.notices=Notices
 
+subscribe_interface.category.subscription-tracking=Subscription Tracking
+
 subscribe_interface.inbox=Inbox
 
 subscribe_interface.manage=Manage settings
 
 subscribe_interface.manage_settings=Manage settings
 
+subscribe_interface.nosubs.text=Track posts, comments, and user updates by clicking the [[img]] icon or the "Track This" link that appears on entries, comments, and the Profile page.
+
+subscribe_interface.nosubs.title=You have no subscriptions
+
 subscribe_interface.notify_me=Notify me when...
 
+subscribe_interface.notify_me2=Notify me in my [[sitenameabbrev]] Inbox when...
+
 subscribe_interface.save=Save
+
+subscribe_interface.special_subs.note=These notification options are only available by email and will not show in your LJ Inbox.
 
 taglib.error.toomany=This would make you exceed your maximum of [[max]] tags.  Please remove some and try again.
 

@@ -4235,6 +4235,34 @@ sub ban_user {
     return LJ::set_rel($u->id, $ban_u->id, 'B');
 }
 
+sub ban_user_multi {
+    my ($u, @banlist) = @_;
+
+    LJ::set_rel_multi(map { [$u->id, $_, 'B'] } @banlist);
+
+    my $us = LJ::load_userids(@banlist);
+    foreach my $banuid (@banlist) {
+        $u->log_event('ban_set', { actiontarget => $banuid, remote => LJ::get_remote() });
+        LJ::run_hooks('ban_set', $u, $us->{$banuid}) if $us->{$banuid};
+    }
+
+    return 1;
+}
+
+sub unban_user_multi {
+    my ($u, @unbanlist) = @_;
+
+    LJ::clear_rel_multi(map { [$u->id, $_, 'B'] } @unbanlist);
+
+    my $us = LJ::load_userids(@unbanlist);
+    foreach my $banuid (@unbanlist) {
+        $u->log_event('ban_unset', { actiontarget => $banuid, remote => LJ::get_remote() });
+        LJ::run_hooks('ban_unset', $u, $us->{$banuid}) if $us->{$banuid};
+    }
+
+    return 1;
+}
+
 # return if $target is in $fgroupid
 sub user_in_friend_group {
     my ($u, $target, $fgroupid) = @_;

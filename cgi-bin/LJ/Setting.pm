@@ -9,7 +9,16 @@ LJ::ModuleLoader->autouse_subclasses("LJ::Setting");
 
 # ----------------------------------------------------------------------------
 
+sub should_render { 1 }
+sub disabled { 0 }
+sub selected { 0 }
 sub tags { () }
+sub label { "" }
+sub actionlink { "" }
+sub helpurl { "" }
+sub option { "" }
+sub htmlcontrol { "" }
+sub htmlcontrol_label { "" }
 
 sub error_check {
     my ($class, $u, $args) = @_;

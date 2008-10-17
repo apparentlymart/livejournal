@@ -62,7 +62,7 @@ body<=
           opt_showmutualfriends opt_showschools
           opt_showbday opt_showlocation
           opt_sharebday
-          comm_theme opt_showljtalk/
+          comm_theme opt_showljtalk opt_showonlinestatus/
     );
 
     # to store values before they undergo normalisation
@@ -290,7 +290,11 @@ body<=
                                 "N" => BML::ml(".security.visibility.nobody"));
         $ret .= "</span></div>";
 
-        $ret .= LJ::Widget::Location->render;
+        if ($remote->is_in_beta('settings2008')) {
+            $ret .= LJ::Widget::Location->render( skip_timezone => 1 );
+        } else {
+            $ret .= LJ::Widget::Location->render;
+        }
 
 
         ## CONTACT INFO
@@ -380,6 +384,20 @@ body<=
                                          'id' => 'opt_showljtalk',
                                          'selected' => $u->hide_ljtalk });
                 $ret .= "<label for='opt_showljtalk' style='font-size: 10px;'>$ML{'.showljtalk'}</label>";
+
+                if ($remote->is_in_beta('settings2008')) {
+                    # Jabber Online Status
+                    my $jabber_title = LJ::run_hook("jabber_title") || $ML{'/manage/settings/index.bml.jabber.title'};
+                    $ret .= "<br />";
+                    $ret .= BML::ml('/manage/settings/index.bml.jabber', {'jabbertitle' => $jabber_title}) . " ";
+                    $ret .= LJ::html_select({ 'name' => 'opt_showonlinestatus',
+                                              'id' => 'opt_showonlinestatus',
+                                              'selected' => $u->opt_showonlinestatus },
+                                              "Y" => BML::ml("/manage/settings/index.bml.security.visibility.everybody"),
+                                              "F" => BML::ml("/manage/settings/index.bml.security.visibility.friends"),
+                                              "N"  => BML::ml("/manage/settings/index.bml.security.visibility.nobody") );
+                    $ret .= "<br />\n<span class='helper'>" . BML::ml('/manage/settings/index.bml.jabber.text', {'jabbertitle' => $jabber_title}) . "</span>";
+                }
             }
             $ret .= "</td></tr>\n";
         }
@@ -460,6 +478,8 @@ body<=
         $ret .= " <label for='opt_hidefriendofs'>$ML{'.friendof'}</label></td></tr>\n";
 
         $ret .= "</table>\n";
+
+        $ret .= LJ::run_hook("profile_settings_extra", $u);
 
         # ending submit block
         $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.save_button'}) . " standout?>\n";
@@ -633,6 +653,9 @@ body<=
             # In this case, the question is actually if they want to hide
             # it, hence looking for a value of 'N' before 'Y'.
             $POST{'opt_showljtalk'} = $POST{'opt_showljtalk'} ? 'N' : 'Y';
+            if ($remote->is_in_beta('settings2008')) {
+                $POST{'opt_showonlinestatus'} = '' unless $POST{'opt_showonlinestatus'} =~ m/^(Y|F|N)$/;
+            }
 
             # for the directory.
             $POST{'sidx_bdate'} = undef;
@@ -664,6 +687,8 @@ body<=
               opt_showbday opt_showlocation opt_showljtalk
               opt_sharebday
             );
+            push @uprops, "opt_showonlinestatus"
+                if $remote->is_in_beta('settings2008');
 
             # reset the gizmo account for this user account
             $u->gizmo_account( $POST{'gizmo'} )
@@ -746,6 +771,7 @@ body<=
         }
 
         LJ::run_hooks('profile_save', $u);
+        LJ::run_hook('set_profile_settings_extra', $u, \%POST);
 
         # tell the user all is well
         my $base = $u->journal_base;
