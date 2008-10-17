@@ -144,11 +144,11 @@ sub format_current_music_string {
             $string .= " $LJ::LAST_FM_SIGN_TEXT";
 
             $string =~ s/%artist%/$artist/g;
-            $artist =  LJ::ehtml($artist);
+            $artist =  LJ::eurl($artist);
             $string =~ s/%artist_esc%/$artist/g;
 
             $string =~ s/%track%/$track/g;
-            $track  =  LJ::ehtml($track);
+            $track  =  LJ::eurl($track);
             $string =~ s/%track_esc%/$track/g;
         }
 
