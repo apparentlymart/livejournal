@@ -1530,6 +1530,18 @@ sub can_show_onlinestatus {
     return 0;
 }
 
+# return the setting indicating how a user can be found by their email address
+# Y - Findable, N - Not findable, H - Findable but identity hidden
+sub opt_findbyemail {
+    my $u = shift;
+
+    if ($u->raw_prop('opt_findbyemail') =~ /^(N|Y|H)$/) {
+        return $u->raw_prop('opt_findbyemail');
+    } else {
+        return undef;
+    }
+}
+
 # return user selected mail encoding or undef
 sub mailencoding {
     my $u = shift;

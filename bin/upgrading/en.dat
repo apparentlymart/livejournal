@@ -2542,6 +2542,20 @@ settings.error.year.notenoughdigits=Invalid birthday year. Enter a 4-digit year.
 
 settings.error.year.outofrange=Invalid birthday year.
 
+settings.findbyemail.error.invalid=Invalid Option
+
+settings.findbyemail.question=Allow [[sitename]] users to find you by searching for your email address?
+
+settings.findbyemail.helper=This setting will allow you to have your email address searchable without having to display it anywhere on [[sitename]]. You can also choose whether or not you want your [[siteabbrev]] identity to be shared in the search results.
+
+settings.findbyemail.label=Find by email
+
+settings.findbyemail.opt.Y=Yes
+
+settings.findbyemail.opt.H=Yes, but don't show my username
+
+settings.findbyemail.opt.N=No
+
 settings.gender=Gender
 
 settings.gender.female=Female
@@ -2551,6 +2565,10 @@ settings.gender.male=Male
 settings.gender.uns=(Unspecified)
 
 settings.province=or non-US State/province/territory
+
+settings.settingprod.intro=Hi from [[sitename]]. We have a new setting that we need you to activate before continuing.
+
+settings.settingprod.outro=Visit the <a [[aopts]]>Edit Profile page</a> to change this setting in the future.
 
 settings.state=State
 

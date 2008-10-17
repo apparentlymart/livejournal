@@ -550,6 +550,14 @@ userproplist.opt_exclude_stats:
   multihomed: 0
   prettyname: Exclude From Offsite Stats Tracking
 
+userproplist.opt_findbyemail:
+  cldversion: 4
+  datatype: char
+  des: Y - Findable, N - Not findable, H - Findable but identity hidden
+  indexed: 0
+  multihomed: 0
+  prettyname: Allow other users to find you by your email address
+
 userproplist.opt_getselfemail:
   cldversion: 4
   datatype: char

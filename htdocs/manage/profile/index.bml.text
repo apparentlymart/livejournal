@@ -55,6 +55,8 @@
 
 .error.email.no_space=No spaces are allowed in an email address. If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
+.error.findbyemail=Invalid option for find by email.
+
 .error.invalidbio=Your stored bio contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
 
 .error.invalidname2=Your name contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.

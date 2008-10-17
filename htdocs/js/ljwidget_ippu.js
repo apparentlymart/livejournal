@@ -18,6 +18,15 @@ LJWidgetIPPU = new Class(LJWidget, {
         if (opts.width && opts.height)
           ippu.setDimensions(opts.width, opts.height);
 
+        if (opts.overlay) {
+            if (IPPU.isIE()) {
+                this.ippu.setClickToClose(false);
+            } else {
+                this.ippu.setModal(true);
+                this.ippu.setOverlayVisible(true);
+            }
+        }
+
         if (opts.center) ippu.center();
         ippu.show();
 

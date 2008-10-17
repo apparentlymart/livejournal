@@ -46,6 +46,7 @@ body<=
     # The settings used on this page
     my @settings = ();
     push @settings, "LJ::Setting::UserMessaging" unless $LJ::DISABLED{'user_messaging'};
+    push @settings, "LJ::Setting::FindByEmail" unless $LJ::DISABLED{'opt_findbyemail'};
 
     my $dbr = LJ::get_db_reader();
     my $sth;
@@ -346,6 +347,14 @@ body<=
 
         if ($u->is_person) {
 
+        # opt_findbyemail
+        unless ($LJ::DISABLED{'opt_findbyemail'}) {
+            $ret .= "<tr><td class='field_name'>" .
+                    LJ::Setting::FindByEmail->label . "</td><td>";
+            $ret .= LJ::Setting::FindByEmail->as_html($u);
+            $ret .= "</td></tr>\n";
+        }
+
         # opt_usermsg
         unless ($LJ::DISABLED{'user_messaging'}) {
             $ret .= "<tr><td class='field_name'>LJ User Messaging</td><td>";
@@ -559,6 +568,10 @@ body<=
 
         if ($POST{'LJ__Setting__UserMessaging_opt_usermsg'} && !$POST{'LJ__Setting__UserMessaging_opt_usermsg'} =~ /^[MFNY]$/) {
             push @errors, BML::ml(".error.usermessaging");
+        }
+
+        if ($POST{'LJ__Setting__FindByEmail_opt_findbyemail'} && !$POST{'LJ__Setting__FindByEmail_opt_findbyemail'} =~ /^[HNY]$/) {
+            push @errors, BML::ml(".error.findbyemail");
         }
 
         # bio
