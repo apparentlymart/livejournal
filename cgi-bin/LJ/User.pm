@@ -1391,7 +1391,7 @@ sub opt_showbday {
     if ($u->raw_prop('opt_showbday') =~ /^(D|F|N|Y)$/) {
         return $u->raw_prop('opt_showbday');
     } else {
-        return 'F';
+        return 'D';
     }
 }
 
