@@ -19,13 +19,13 @@ Profile.expandCollapse = function (headerid) {
     if (expand) {
         // expand
         DOM.addClassName($(headerid), 'on');
-        $(arrowid).src = Site.imgprefix + "/profile_icons/arrow-down.gif";
-        $(bodyid).style.display = "block";
+        if ($(arrowid)) { $(arrowid).src = Site.imgprefix + "/profile_icons/arrow-down.gif"; }
+        if ($(bodyid)) { $(bodyid).style.display = "block"; }
     } else {
         // collapse
         DOM.removeClassName($(headerid), 'on');
-        $(arrowid).src = Site.imgprefix + "/profile_icons/arrow-right.gif";
-        $(bodyid).style.display = "none";
+        if ($(arrowid)) { $(arrowid).src = Site.imgprefix + "/profile_icons/arrow-right.gif"; }
+        if ($(bodyid)) { $(bodyid).style.display = "none"; }
     }
 }
 
