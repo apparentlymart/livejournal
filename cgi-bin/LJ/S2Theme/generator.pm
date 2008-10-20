@@ -71,7 +71,7 @@ sub cats { qw( clean cool ) }
 
 package LJ::S2Theme::generator::nautical;
 use base qw(LJ::S2Theme::generator);
-sub cats { qw( clean cool featured ) }
+sub cats { qw( clean cool ) }
 
 package LJ::S2Theme::generator::redbliss;
 use base qw(LJ::S2Theme::generator);

@@ -154,17 +154,17 @@ sub designer { "Dobryakov Alexander" }
 
 package LJ::S2Theme::stylecontest::summer_love;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cool illustrated featured ) }
+sub cats { qw( cool illustrated ) }
 sub designer { "Victoria Wang" }
 
 package LJ::S2Theme::stylecontest::swimmingly;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cool hobbies illustrated featured ) }
+sub cats { qw( cool hobbies illustrated ) }
 sub designer { "Lorraine Barte" }
 
 package LJ::S2Theme::stylecontest::the_great_outdoors;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cool illustrated nature featured ) }
+sub cats { qw( cool illustrated nature ) }
 sub designer { "Chris Vannoy" }
 
 package LJ::S2Theme::stylecontest::the_late_show;
