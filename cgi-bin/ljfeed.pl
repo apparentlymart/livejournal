@@ -281,7 +281,7 @@ sub create_view_rss
 
     # For Yandex ( http://blogs.yandex.ru/faq.xml?id=542563 )
     # if 'copyright' tag contains 'noindex', this rss will not be indexed.
-    my $copyright = $u->should_block_robots ? '<NOINDEX />' : '';
+    my $copyright = $u->should_block_robots ? 'NOINDEX' : '';
 
     # header
     $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
