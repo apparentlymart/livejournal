@@ -291,8 +291,7 @@ body<=
         $ret .= "<?h1 $ML{'.finished.header'} h1?><?p $ML{'.finished.about'} p?><?standout ";
         $ret .= LJ::html_submit(undef, $ML{'.finished.save_button'}) . " standout?></form>";
 
-        my $leaderboard_ad = LJ::get_ads({ location => 'bml.interests/main', ljadwrapper => 1 });
-        return $leaderboard_ad . $ret;
+        return $ret;
     }
 
     if ($did_post && $POST{'mode'} eq "enmasse_do") {
