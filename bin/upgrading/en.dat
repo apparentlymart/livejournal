@@ -2564,6 +2564,8 @@ settings.gender.male=Male
 
 settings.gender.uns=(Unspecified)
 
+settings.option.select=(Please make a selection)
+
 settings.province=or non-US State/province/territory
 
 settings.settingprod.intro=Hi from [[sitename]]. We have a new setting that we need you to activate before continuing.
