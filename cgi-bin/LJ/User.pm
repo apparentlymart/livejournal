@@ -6348,7 +6348,7 @@ sub update_user
     }
 
     # log this updates
-    LJ::run_hook("update_user", userid => $_, fields => $ref)
+    LJ::run_hooks("update_user", userid => $_, fields => $ref)
         for @uid;
 
     return 1;
@@ -6558,6 +6558,7 @@ sub set_interests
     }
 
     ### do we have new interests to add?
+    my @new_intids = ();  ## existing IDs we'll add for this user
     if (%int_new)
     {
         $did_mod = 1;
@@ -6566,7 +6567,6 @@ sub set_interests
         ## that nobody has ever entered before
         my $int_in = join(", ", map { $dbh->quote($_); } keys %int_new);
         my %int_exist;
-        my @new_intids = ();  ## existing IDs we'll add for this user
 
         ## find existing IDs
         my $sth = $dbh->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
@@ -6613,9 +6613,11 @@ sub set_interests
                 ## now we can actually insert it into the userinterests table:
                 $dbh->do("INSERT INTO $uitable (userid, intid) ".
                          "VALUES ($userid, $intid)");
+                push @new_intids, $intid;
             }
         }
     }
+    LJ::run_hooks("set_interests", $u, \%int_del, \@new_intids); # interest => intid
 
     # do migrations to clean up userinterests vs comminterests conflicts
     $u->lazy_interests_cleanup;

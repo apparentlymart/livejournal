@@ -1838,6 +1838,7 @@ sub editevent
 
     my $entry = LJ::Entry->new($ownerid, jitemid => $itemid);
     LJ::EventLogRecord::EditEntry->new($entry)->fire;
+    LJ::run_hooks("editpost", $entry);
 
     return $res;
 }

@@ -2572,6 +2572,7 @@ sub delete_comments {
     foreach my $talkid (@talkids) {
         my $cmt = LJ::Comment->new($u, jtalkid => $talkid);
         push @jobs, LJ::EventLogRecord::DeleteComment->new($cmt)->fire_job;
+        LJ::run_hooks('delete_comment', $jid, $nodeid, $talkid); # jitemid, jtalkid
     }
 
     my $sclient = LJ::theschwartz();
