@@ -72,7 +72,7 @@ sub ReplyPage
             my $querysep = $args ? "?" : "";
             my $redir = LJ::eurl("http://$host$uri$querysep$args");
 
-            $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir";
+            $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir&errmsg=notloggedin";
             return;
         }
         unless ($comment->remote_can_edit(\$errref)) {

@@ -405,8 +405,7 @@ sub EntryPage_entry
             my $args = scalar $r->args;
             my $querysep = $args ? "?" : "";
             my $redir = LJ::eurl("http://$host$uri$querysep$args");
-
-            $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir";
+            $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir&errmsg=notloggedin";
             return;
         }
     }

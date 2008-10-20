@@ -309,7 +309,7 @@ sub check_viewable
             my $querysep = $args ? "?" : "";
             my $redir = LJ::eurl("http://" . $host . $r->uri . $querysep . $args);
 
-            return $err->(BML::redirect("$LJ::SITEROOT/?returnto=$redir"));
+            return $err->(BML::redirect("$LJ::SITEROOT/?returnto=$redir&errmsg=notloggedin"));
         }
     }
 
