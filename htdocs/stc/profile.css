@@ -10,6 +10,9 @@
 #profile_page a:visited {
     color: #470196;
 }
+#profile_page img {
+    border: 0;
+}
 
 td {
     vertical-align: top;
