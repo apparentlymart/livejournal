@@ -708,6 +708,9 @@ sub get_cats {
         travel => {
             text => LJ::Lang::ml('customize.cats.travel'),
         },
+        writing => {
+            text => LJ::Lang::ml('customize.cats.writing'),
+        },
     );
     
     LJ::run_hooks("modify_cat_list", \@categories, user => $u,);

@@ -710,6 +710,8 @@ customize.cats.travel=Travel
 
 customize.cats.warm=Warm Colors
 
+customize.cats.writing=Writing
+
 customize.layoutname.default=(Unnamed - [[layoutid]])
 
 customize.layouts.1=1 Column (no sidebar)
