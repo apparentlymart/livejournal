@@ -156,8 +156,7 @@ and <quote>noindex</quote> <sgmltag class="element">meta</sgmltag> tags
 on their &html; pages, this will add two similar directives to &xml; feeds,
 avoiding the need to fetch &html; just to find <quote>noindex</quote>.</para>
 <para>The journal&apos;s <acronym>RSS</acronym> feed of entries
-will contain an empty <sgmltag class="emptytag">NOINDEX</sgmltag> element
-within the <sgmltag>copyright</sgmltag> tag.
+will contain the word NOINDEX within the <sgmltag>copyright</sgmltag> tag.
 Similarly, a user&apos;s Atom recent entries and userpic data feeds contain:</para>
 <para><synopsis><markup>&lt;feed xmlns="http://www.w3.org/2005/Atom" xmlns:idx="urn:atom-extension:indexing" idx:index="no"&gt;</markup></synopsis>
 </para>
