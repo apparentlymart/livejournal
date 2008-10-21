@@ -226,6 +226,7 @@ span.expandcollapse {
 .user_info_stats_left th, .user_info_stats_right th {
     color: #444;
     font-weight: bold;
+    text-align: right;
 }
 .user_info_im {
 }
