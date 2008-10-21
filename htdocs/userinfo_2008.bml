@@ -919,7 +919,7 @@
                     $link .= ")";
                 }
 
-                push @links, $link;
+                push @links, "<span class='user_info_schools_item'>$link</span>";
             }
             $schools_list .= join("<br />\n", @links);
         }

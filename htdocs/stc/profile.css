@@ -223,6 +223,10 @@ span.expandcollapse {
 .user_info_stats_left, .user_info_stats_right, .user_info_im, .user_info_contact, .user_info_schools {
     padding-bottom: 10px;
 }
+.user_info_stats_left th, .user_info_stats_right th {
+    color: #444;
+    font-weight: bold;
+}
 .user_info_im {
 }
     .user_info_im img {
@@ -233,12 +237,9 @@ span.expandcollapse {
     .user_info_im table td.im_status {
         text-align: center;
     }
-.user_info_schools {
+.user_info_schools_item {
     font-size: 0.77em;
 }
-    .user_info_schools a {
-        font-size: 1.1em;
-    }
 .user_info_title {
     color: #444;
     font-weight: bold;
