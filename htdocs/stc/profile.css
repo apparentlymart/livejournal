@@ -244,6 +244,9 @@ span.expandcollapse {
 .user_info_schools_item {
     font-size: 0.77em;
 }
+    .user_info_schools_item a {
+        font-size: 1.07em;
+    }
 .user_info_title {
     color: #444;
     font-weight: bold;
