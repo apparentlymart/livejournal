@@ -3605,7 +3605,7 @@ sub set_expunged {
 
 sub set_suspended {
     my ($u, $who, $reason, $errref) = @_;
-    die "No enough parameters for LJ::User::set_suspended call" unless $who and $reason;
+    die "Not enough parameters for LJ::User::set_suspended call" unless $who and $reason;
 
     my $res = $u->set_statusvis('S');
     unless ($res) {
@@ -3624,6 +3624,31 @@ sub set_suspended {
         $$errref = $err if ref $errref and $err;
         return 0;
     }
+
+    return $res; # success
+}
+
+# sets a user to visible, but also does all of the stuff necessary when a suspended account is unsuspended
+# this can only be run on a suspended account
+sub set_unsuspended {
+    my ($u, $who, $reason, $errref) = @_;
+    die "Not enough parameters for LJ::User::set_unsuspended call" unless $who and $reason;
+
+    unless ($u->is_suspended) {
+        $$errref = "User isn't suspended" if ref $errref;
+        return 0;
+    }
+
+    my $res = $u->set_statusvis('V');
+    unless ($res) {
+        $$errref = "DB error while setting statusvis to 'V'" if ref $errref;
+        return $res;
+    }
+
+    LJ::statushistory_add($u, $who, "unsuspend", $reason);
+
+    eval { $u->fb_push };
+    warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
 
     return $res; # success
 }
