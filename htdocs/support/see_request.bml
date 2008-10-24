@@ -628,7 +628,7 @@ body<=
 
     # form
     $ret .= "<table border='0'>\n";
-    $ret .= "<tr valign='middle'><td align='right'>$ML{'.from'}:</td><td>";
+    $ret .= "<tr valign='middle'><td align='right'>$ML{'.from'}</td><td>";
     
     if ($remote && $remote->{'userid'}) {
         $ret .= "<?ljuser $remote->{'user'} ljuser?>";
@@ -747,7 +747,7 @@ body<=
             $ret .= "</td></tr>\n";
         }
         if (LJ::Support::can_change_summary($sp, $remote)) {
-            $ret .= "<tr><td>$ML{'.change.summary'}:</td><td>";
+            $ret .= "<tr><td align='right'>$ML{'.change.summary'}:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'changesum', id => 'changesum', 'onClick' => 'doSummaryClick();' });
             $ret .= LJ::html_text({ 'type' => 'text', 'name' => 'summary', 'size' => '50', 'maxlength' => '80', 'value' => $sp->{'subject'}, 'onChange' => 'doSummaryChanged();' });
             $ret .= "</td></tr>\n";
