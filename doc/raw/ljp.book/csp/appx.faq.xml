@@ -111,6 +111,12 @@
       For details see the chapter on machine-readable <link linkend="ljp.int.xml_userdata.data_formats">userdata</link>.
       </simpara></answer>
     </qandaentry>
+    <qandaentry id="ljp.csp.faq.fb_client_docs">
+      <question><simpara>Where can I find information on the &fb; client protocol?</simpara></question>
+      <answer><simpara>For information on developing clients for &fb; installations (like &scrapbook;
+      on &ljcom;), please see the <ulink url="http://www.picpix.com/doc/protocol/">&fb; Protocol Documentation</ulink>.
+      </simpara></answer>
+    </qandaentry>
   </qandaset>
 </appendix>
 
