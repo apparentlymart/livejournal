@@ -1329,6 +1329,16 @@ esn.community_join_requst.subject=[[comm]] membership request by [[who]]!
 
 esn.approve_join_request=[[openlink]]Approve [[username]]'s request to join[[closelink]]
 
+esn.email.pm_without_body<<
+Hi [[user]],
+
+[[sender]] sent you a message on [[sitenameshort]]: [[subject]].
+
+Go to [[inbox]] to view your new messages.
+
+Or you can:
+.
+
 esn.manage_membership_reqs=[[openlink]]Manage [[communityname]]'s membership requests[[closelink]]
 
 esn.manage_community=[[openlink]]Manage your communities[[closelink]]
@@ -1369,6 +1379,8 @@ esn.delete_comment=[[openlink]]Delete the comment[[closelink]]
 
 esn.edit_comment=[[openlink]]Edit the comment[[closelink]]
 
+esn.email.pm.subject=[[sender]] sent you a message
+
 esn.if_suport_form=If your mail client supports it, you can also reply here:
 
 esn.invited_friend_joins.subject=[[who]] created a journal!
@@ -1396,6 +1408,8 @@ esn.edit_groups=[[openlink]]Edit Friends groups[[closelink]]
 esn.read_journal=[[openlink]]Read [[postername]]'s journal[[closelink]]
 
 esn.view_profile=[[openlink]]View [[postername]]'s profile[[closelink]]
+
+esn.your_inbox=your Inbox
 
 entryform.adultcontent=Adult Content:
 
