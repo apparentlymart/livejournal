@@ -34,32 +34,13 @@ body<=
         $ret .= "<?h1 $ML{'.lostpassword.title'} h1?>\n";
         $ret .= "<?p $ML{'.lostpassword.text'} p?>\n";
 
-        $ret .= qq( <script>
-                    function enable_pass () {
-                        if (\$("userlost").value != "") {
-                            \$("lostpass").disabled = false;
-                        } else {
-                            \$("lostpass").disabled = true;
-                        }
-                    };
-                    function enable_user () {
-                        if (\$("email_u").value != "") {
-                            \$("lostuser").disabled = false;
-                        } else {
-                            \$("lostuser").disabled = true;
-                        }
-                    };
-
-                    </script>
-                  );
-
         $ret .= "<div class='form-basic form-fix'><div class='tl'><div class='tr'><div class='br'><div class='bl'>\n";
         $ret .= "<fieldset><label>$ML{'.enter_username'}</label>\n";
         $ret .= LJ::html_text({ 'name' => 'user', 'id' => 'userlost', 'size' => 30, 'maxlength' => 15, onkeyup => 'enable_pass();'}) . "</fieldset>\n";
         $ret .= "<fieldset><label>$ML{'.enter_email_optional'}</label>\n";
         $ret .= LJ::html_text({ 'name' => 'email_p', 'size' => 30, 'maxlength' => 50 }) . "</fieldset>\n";
         $ret .= "<div class='btn-set'>\n";
-        $ret .= LJ::html_submit('lostpass', $ML{'.btn.proceed'}, { id => 'lostpass', disabled => 'on' }) . "</div>\n";
+        $ret .= LJ::html_submit('lostpass', $ML{'.btn.proceed'}, { id => 'lostpass' }) . "</div>\n";
         $ret .= "</div></div></div></div></div>\n";
 
         $ret .= "<?h1 $ML{'.lostusername.title'} h1?>\n";
@@ -68,8 +49,21 @@ body<=
         $ret .= "<fieldset><label>$ML{'.enter_email'}</label>\n";
         $ret .= LJ::html_text({ 'name' => 'email_u', 'id' => 'email_u', 'size' => 30, 'maxlength' => 50, onkeyup => 'enable_user();' }) . "</fieldset>\n";
         $ret .= "<div class='btn-set'>\n";
-        $ret .= LJ::html_submit('lostuser', $ML{'.btn.proceed'}, { id => 'lostuser', disabled => 'on' }) . "</div>\n";
+        $ret .= LJ::html_submit('lostuser', $ML{'.btn.proceed'}, { id => 'lostuser' }) . "</div>\n";
         $ret .= "</div></div></div></div></div>\n";
+
+        $ret .= qq( <script type="text/javascript">
+                    function enable_pass () {
+                        \$("lostpass").disabled = !\$("userlost").value;
+                    }
+                    function enable_user () {
+                        \$("lostuser").disabled = !\$("email_u").value;
+                    }
+
+                    enable_pass();
+                    enable_user();
+                    </script>
+                  );
 
         $ret .= "</form>\n";
 
