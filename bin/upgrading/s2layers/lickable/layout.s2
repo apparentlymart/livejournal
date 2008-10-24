@@ -1481,9 +1481,9 @@ function DayPage::print_body() {
     } else {
         """<div class="entry"><div class="entryheader">&nbsp;</div>\n""";
         """<div class="entrycontent"><p>$*text_noentries_day</p></div>\n""";
-        """<div class="entryfooter">&nbsp;</div></div>\n""";
+        """<div class="entryfooter">&nbsp;</div></div></div>\n""";
     }
-
+    
 }
 
 function print_theme_preview() {
