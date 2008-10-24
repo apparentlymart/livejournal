@@ -20,58 +20,59 @@ sub as_email_subject {
     my ($self, $u) = @_;
 
     my $other_u = $self->load_message->other_u;
+    my $lang    = $u->prop('browselang');
 
-    return sprintf "%s sent you a message", $other_u->display_username;
+    return LJ::Lang::get_text($lang, 'esn.email.pm.subject', undef,
+        {
+            sender => $self->load_message->other_u->display_username,
+        });
+}
+
+sub _as_email {
+    my ($self, $u, $is_html) = @_;
+
+    my $lang        = $u->prop('browselang');
+    my $msg         = $self->load_message;
+    my $other_u     = $msg->other_u;
+    my $sender      = $other_u->user;
+    my $inbox       = "$LJ::SITEROOT/inbox/";
+    $inbox = "<a href=\"$inbox\">" . LJ::Lang::get_text($lang, 'esn.your_inbox') . "</a>" if $is_html;
+
+    my $vars = {
+        user            => $is_html ? ($u->ljuser_display) : ($u->user),
+        subject         => $msg->subject,
+        body            => $msg->body,
+        sender          => $is_html ? ($other_u->ljuser_display) : ($other_u->user),
+        postername      => $other_u->user,
+        sitenameshort   => $LJ::SITENAMESHORT,
+        inbox           => $inbox,
+    };
+
+    my $body = LJ::Lang::get_text($lang, 'esn.email.pm_without_body', undef, $vars) .
+        $self->format_options($is_html, $lang, $vars,
+        {
+            'esn.view_profile'    => [ 1, $other_u->profile_url ],
+            'esn.read_journal'    => [ 2, $other_u->journal_base ],
+            'esn.add_friend'      => [ $u->is_friend($other_u) ? 0 : 3,
+                                            "$LJ::SITEROOT/friends/add.bml?user=$sender" ],
+        }
+    );
+
+    if ($is_html) {
+        $body =~ s/\n/\n<br\/>/g unless $body =~ m!<br!i;
+    }
+
+    return $body;
 }
 
 sub as_email_string {
     my ($self, $u) = @_;
-
-    my $msg = $self->load_message;
-    my $other_u = $msg->other_u;
-    my $user = $u->user;
-    my $sender = $other_u->user;
-    my $subject = $msg->subject;
-
-    my $email = qq {Hi $user,
-
-$sender sent you a message on $LJ::SITENAMESHORT: $subject.
-
-Go to $LJ::SITEROOT/inbox/ to view your new messages.
-
-};
-    $email .= "Or you can:\n";
-    $email .= "  - View ${sender}'s profile\n    ". $other_u->profile_url ."\n";
-    $email .= "  - View ${sender}'s journal\n    ". $other_u->journal_base ."\n";
-    $email .= "  - Add ${sender} as a friend\n    $LJ::SITEROOT/friends/add.bml?user=$sender\n"
-        unless $u->is_friend($other_u);
-
-    return $email;
+    return _as_email($self, $u, 0);
 }
 
 sub as_email_html {
     my ($self, $u) = @_;
-
-    my $user = $u->ljuser_display;
-    my $other_u = $self->load_message->other_u;
-    my $sender = $other_u->ljuser_display;
-    my $username = $other_u->user;
-    my $subject = $self->load_message->subject;
-
-    my $email = qq {Hi $user,
-
-$sender sent you a message on $LJ::SITENAMESHORT: $subject.
-
-Go to <a href="$LJ::SITEROOT/inbox/">your Inbox</a> to view your new messages.
-
-};
-    $email .= "Or you can:\n";
-    $email .= "  - <a href='". $other_u->profile_url ."'>View ${username}'s profile</a>\n";
-    $email .= "  - <a href='". $other_u->journal_base ."'>View ${username}'s journal</a>\n";
-    $email .= "  - <a href='$LJ::SITEROOT/friends/add.bml?user=$username'>Add $username as friend</a>\n"
-        unless $u->is_friend($other_u);
-
-    return $email;
+    return _as_email($self, $u, 1);
 }
 
 sub load_message {
