@@ -142,6 +142,8 @@
 
 .friends.viewall.self=You are watching [[num]] friends, communities, and feeds. <a [[aopts]]>View them all.</a>
 
+.friends.viewentries=View Entries
+
 .im.aol=AIM
 
 .im.aol.status=AIM status
@@ -432,6 +434,8 @@
 
 .schools.presentyear=present
 
+.section.edit=Edit
+
 .sendmessage.body2=<a [[aopts]]>Send [[user]] a text message</a><br />on his/her cellphone/pager.
 
 .syn.header=Feeds
@@ -445,6 +449,8 @@
 .syn.parseerror=Error Message:
 
 .syn.watching=Watching
+
+.syn.xml=XML
 
 .syndinfo.body2=If you would like articles from the syndicated site to appear on your friends page, you can <a [[aopts]]>add this journal to your friends list</a>.
 

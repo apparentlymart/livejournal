@@ -338,7 +338,7 @@
 
     my $arrowimg = sub {
         my $section = shift;
-        return "<img id='${section}_arrow' src='$LJ::IMGPREFIX/profile_icons/arrow-down.gif' align='absmiddle' />";
+        return "<img id='${section}_arrow' src='$LJ::IMGPREFIX/profile_icons/arrow-down.gif' align='absmiddle' alt='' />";
     };
     # End Subs
 
@@ -368,15 +368,15 @@
         $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' border='0' alt='$user $ML{'.allpics'}' class='user_pic' /></a>";
         $body .= "<br /><a href='$LJ::SITEROOT/allpics.bml?user=$user' class='user_pic_caption'>$ML{'.allpics'}</a>";
     } elsif ($synd) {
-        $body .= "<img src='$LJ::IMGPREFIX/profile_icons/feed.gif' class='user_pic' />";
+        $body .= "<img src='$LJ::IMGPREFIX/profile_icons/feed.gif' class='user_pic' alt='' />";
     } else {
         my $default_userpic_img;
         if ($u->is_person) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/user.gif' class='user_pic' />";
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/user.gif' class='user_pic' alt='' />";
         } elsif ($com) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif' class='user_pic' />";
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif' class='user_pic' alt='' />";
         } elsif ($u->is_identity) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/openid.gif' class='user_pic' />";
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/openid.gif' class='user_pic' alt='' />";
         }
 
         if ($remote && $remote->can_manage($u)) {
@@ -412,7 +412,7 @@
             $url = "$LJ::SITEROOT/community/leave.bml?comm=$user";
             $text = $ML{'.optionlinks.leavecomm'};
             $li_title = $ML{'.optionlinks.leavecomm.title'};
-            $body .= "<li class='profile_leave' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/leave-comm.gif' />$text</a></li>";
+            $body .= "<li class='profile_leave' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/leave-comm.gif' alt='' />$text</a></li>";
         } else {
             my @comm_settings = LJ::get_comm_settings($u);
 
@@ -421,10 +421,10 @@
             if ($comm_settings[0] eq "closed" || !$remote || $remote->is_identity || !$u->is_visible) {
                 $li_title = $comm_settings[0] eq "closed" ? $ML{'.optionlinks.joincomm.title.closed'} : $ML{'.optionlinks.joincomm.title.loggedout'};
                 $li_title = $ML{'.optionlinks.joincomm.title.cantjoin'} if $remote && $remote->is_identity;
-                $body .= "<li class='profile_join_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/join-comm-disabled.gif' />$text</li>";
+                $body .= "<li class='profile_join_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/join-comm-disabled.gif' alt='' />$text</li>";
             } else {
                 $li_title = $ML{'.optionlinks.joincomm.title.open'};
-                $body .= "<li class='profile_join' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/join-comm.gif' />$text</a></li>";
+                $body .= "<li class='profile_join' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/join-comm.gif' alt='' />$text</a></li>";
             }
         }
     }
@@ -436,20 +436,20 @@
         $text = $remote_hasfriend ? $ML{'.optionlinks.modifywatch'} : $ML{'.optionlinks.watch'};
         if ($remote && ($remote_hasfriend || $u->is_visible)) {
             $li_title = $remote_hasfriend ? $ML{'.optionlinks.modifywatch.title'} : $ML{'.optionlinks.watch.title'};
-            $body .= "<li class='profile_watch' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/watch-comm.gif' />$text</a></li>";
+            $body .= "<li class='profile_watch' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/watch-comm.gif' alt='' />$text</a></li>";
         } else {
             $li_title = $ML{'.optionlinks.watch.title.loggedout'};
-            $body .= "<li class='profile_watch_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/watch-comm-disabled.gif' />$text</li>";
+            $body .= "<li class='profile_watch_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/watch-comm-disabled.gif' alt='' />$text</li>";
         }
     } elsif ($u->is_syndicated) {
         my $remote_hasfriend = $remote && $remote->has_friend($u) ? 1 : 0;
         $text = $remote_hasfriend ? $ML{'.optionlinks.modifysub'} : $ML{'.optionlinks.sub'};
         if ($remote && ($remote_hasfriend || $u->is_visible)) {
             $li_title = $remote_hasfriend ? $ML{'.optionlinks.modifysub.title'} : $ML{'.optionlinks.sub.title'};
-            $body .= "<li class='profile_addfeed' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/add-feed.gif' />$text</a></li>";
+            $body .= "<li class='profile_addfeed' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/add-feed.gif' alt='' />$text</a></li>";
         } else {
             $li_title = $ML{'.optionlinks.sub.title.loggedout'};
-            $body .= "<li class='profile_addfeed_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/add-feed-disabled.gif' />$text</li>";
+            $body .= "<li class='profile_addfeed_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/add-feed-disabled.gif' alt='' />$text</li>";
         }
     } else {
         # has_friend doesn't work right if you are viewing your own profile
@@ -461,10 +461,10 @@
             } else {
                 $li_title = $remote_hasfriend ? $ML{'.optionlinks.modifyfriend.title.other'} : $ML{'.optionlinks.addfriend.title.other'};
             }
-            $body .= "<li class='profile_addfriend' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/add-friend.gif' />$text</a></li>";
+            $body .= "<li class='profile_addfriend' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/add-friend.gif' alt='' />$text</a></li>";
         } else {
             $li_title = $ML{'.optionlinks.addfriend.title.loggedout'};
-            $body .= "<li class='profile_addfriend_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/add-friend-disabled.gif' />$text</li>";
+            $body .= "<li class='profile_addfriend_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/add-friend-disabled.gif' alt='' />$text</li>";
         }
     }
 
@@ -480,7 +480,7 @@
         } elsif ($u->is_syndicated) {
             $li_title = $ML{'.optionlinks.viewjournal.title.syn'};
         }
-        $body .= "<li class='profile_viewjournal' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/view-journal.gif' />$text</a></li>";
+        $body .= "<li class='profile_viewjournal' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/view-journal.gif' alt='' />$text</a></li>";
     }
 
     ## post entry
@@ -493,11 +493,11 @@
             $text = $ML{'.optionlinks.postentry'};
             $li_title = $ML{'.optionlinks.postentry.title'};
         }
-        $body .= "<li class='profile_postentry' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/post-entry.gif' />$text</a></li>";
+        $body .= "<li class='profile_postentry' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/post-entry.gif' alt='' />$text</a></li>";
     } elsif ($u->is_community) {
         $text = $ML{'.optionlinks.post'};
         $li_title = $remote ? $ML{'.optionlinks.post.title.cantpost'} : $ML{'.optionlinks.post.title.loggedout'};
-        $body .= "<li class='profile_postentry_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/post-entry-disabled.gif' />$text</li>";
+        $body .= "<li class='profile_postentry_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/post-entry-disabled.gif' alt='' />$text</li>";
     }
 
     ## track user
@@ -516,10 +516,10 @@
             $li_title = $ML{'.optionlinks.tracksyn.title'};
         }
         if ($remote && $remote->can_use_esn) {
-            $body .= "<li class='profile_trackuser' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/track.gif' />$text</a></li>";
+            $body .= "<li class='profile_trackuser' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/track.gif' alt='' />$text</a></li>";
         } else {
             $li_title = $remote ? $ML{'.optionlinks.trackuser.title.cantuseesn'} : $ML{'.optionlinks.trackuser.title.loggedout'};
-            $body .= "<li class='profile_trackuser_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/track-disabled.gif' />$text</li>";
+            $body .= "<li class='profile_trackuser_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/track-disabled.gif' alt='' />$text</li>";
         }
     }
 
@@ -529,10 +529,10 @@
         $text = $ML{'.optionlinks.sendmessage'};
         $li_title = $ML{'.optionlinks.sendmessage.title'};
         if ($remote && $u->can_receive_message($remote)) {
-            $body .= "<li class='profile_sendmessage' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/send-message.gif' />$text</a></li>";
+            $body .= "<li class='profile_sendmessage' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/send-message.gif' alt='' />$text</a></li>";
         } else {
             $li_title = $remote ? $ML{'.optionlinks.sendmessage.title.cantsendmessage'} : $ML{'.optionlinks.sendmessage.title.loggedout'};
-            $body .= "<li class='profile_sendmessage_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/send-message-disabled.gif' />$text</li>";
+            $body .= "<li class='profile_sendmessage_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/send-message-disabled.gif' alt='' />$text</li>";
         }
     }
 
@@ -560,18 +560,18 @@
         my $journal_warnings;
 
         if ($u->is_locked) {
-            $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' /> $ML{'statusvis_message.locked'}</p>";
+            $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'statusvis_message.locked'}</p>";
         } elsif ($u->is_memorial) {
-            $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' /> $ML{'statusvis_message.memorial'}</p>";
+            $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'statusvis_message.memorial'}</p>";
         } elsif ($u->is_readonly) {
-            $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' /> $ML{'statusvis_message.readonly'}</p>";
+            $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'statusvis_message.readonly'}</p>";
         }
 
         unless ($u->is_identity) {
             if ($u->adult_content_calculated eq 'explicit') {
-                $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' /> $ML{'.details.warning.explicit'}</p>";
+                $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'.details.warning.explicit'}</p>";
             } elsif ($u->adult_content_calculated eq 'concepts') {
-                $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' /> $ML{'.details.warning.concepts'}</p>";
+                $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'.details.warning.concepts'}</p>";
             }
         }
 
@@ -702,7 +702,7 @@
             $link = $u->{'name'};
         }
 
-        my $icon = "<a href='" . LJ::ehtml($synd->{'synurl'}) . "'><img src='$LJ::IMGPREFIX/xml.gif' width='36' height='14' align='absmiddle' border='0' /></a>";
+        my $icon = "<a href='" . LJ::ehtml($synd->{'synurl'}) . "'><img src='$LJ::IMGPREFIX/xml.gif' width='36' height='14' align='absmiddle' border='0' alt=\"$ML{'.syn.xml'}\" /></a>";
 
         $display_name .= "<tr><th>$ML{'.label.syndicatedfrom'}</th><td>$link $icon</td></tr>\n";
     } else {
@@ -1041,7 +1041,9 @@
     if ($basics_left || $basics_right) {
         my $new_width = " style='width: 45%;'" unless $boxad;
 
-        $body .= "<div class='section$extra_section_class'><span class='expandcollapse on' id='basics_header'>" . $arrowimg->("basics") . " $ML{'.basicinfo.header'}</span></div>";
+        $body .= "<div class='section$extra_section_class'><span class='expandcollapse on' id='basics_header'>" . $arrowimg->("basics") . " $ML{'.basicinfo.header'}</span>";
+        $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
+        $body .= "</div>";
         $body .= "<div class='section_body' id='basics_body'>\n";
         $body .= $basics_right ? "<div class='basics_left'$new_width>" : "<div class='basics'>";
         $body .= "$basics_left</div>";
@@ -1062,7 +1064,9 @@
         }
 
         LJ::EmbedModule->expand_entry($u, \$u->{'bio'});
-        $body .= "<div class='section'><span class='expandcollapse on' id='bio_header'>" . $arrowimg->("bio") . " $label</span></div>\n";
+        $body .= "<div class='section'><span class='expandcollapse on' id='bio_header'>" . $arrowimg->("bio") . " $label</span>";
+        $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#bio'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
+        $body .= "</div>\n";
         $body .= "<div class='section_body' id='bio_body'>$u->{'bio'}</div>\n";
     }
     ### End Bio
@@ -1097,6 +1101,7 @@
         }
 
         $body .= "<div class='section'><span class='expandcollapse on' id='interests_header'>" . $arrowimg->("interests") . " $ML{'.label.interests'}</span>";
+        $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#interests'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
         if ($remote) {
             my $enmasse_link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
             $enmasse_link .= "&fromuser=$user" unless $remote->id == $userid;
@@ -1127,7 +1132,9 @@
                             map { $userhash{$_} } @$maintainers;
 
             $body .= "<div class='ljclear'></div><br />";
-            $body .= "<div class='section'>$ML{'.admins.header'}</div>";
+            $body .= "<div class='section'>$ML{'.admins.header'}";
+            $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/community/members.bml?authas=" . $u->user . "'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
+            $body .= "</div>";
             $body .= "<div class='section_body'>";
 
             $body .= "<p class='inner_section_header first'><span class='expandcollapse on' id='maints_header'>" . $arrowimg->("maints") .
@@ -1319,7 +1326,8 @@
                     push @accesslist_strings, $frlink;
                 }
 
-                $posting .= "<p class='inner_section_header'><span class='expandcollapse on' id='posting_header'>" . $arrowimg->("posting") . " $label (" . ($count + scalar @alt_access + scalar @alt2_access) . "):</span></p>";
+                $posting .= "<p class='inner_section_header'><span class='expandcollapse on' id='posting_header'>" . $arrowimg->("posting") . " $label (" . ($count + scalar @alt_access + scalar @alt2_access) . "):</span>";
+                $posting .= " <i>$ML{'.friendof.hidden'}</i></p>";
                 $posting .= "<div class='inner_section_body' id='posting_body'>";
                 $posting .= join(", ", @accesslist_strings);
                 $posting .= ", ..." if $chopped;
@@ -1355,16 +1363,25 @@
     ##
     my $comms;
     my $feeds;
+    my $friend_edit_link;
+    if ($remote && $remote->can_manage($u)) {
+        if ($u->is_community) {
+            $friend_edit_link = " <span class='section_link'>[<a href='$LJ::SITEROOT/community/members.bml?authas=" . $u->user . "'>$ML{'.section.edit'}</a>]</span>";
+        } else {
+            $friend_edit_link = " <span class='section_link'>[<a href='$LJ::SITEROOT/friends/edit.bml'>$ML{'.section.edit'}</a>]</span>";
+        }
+    }
+
     unless ($synd || $LJ::FORCE_EMPTY_FRIENDS{$userid}) {
         $body .= "<div class='ljclear'></div><br />";
         my $label;
         if ($com) {
             $label = $ML{'.members.header'};
-            $body .= "<div class='section'>$label</div>";
+            $body .= "<div class='section'>$label$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends'>$ML{'.friends.viewentries'}</a>]</span></div>";
             $body .= "<div class='section_body'>";
         } else {
             $label = $ML{'.friends.header'};
-            $body .= "<div class='section'><img src='$LJ::IMGPREFIX/userinfo.gif' /> $label</div>";
+            $body .= "<div class='section'><img src='$LJ::IMGPREFIX/userinfo.gif' alt='' /> $label$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends?show=P'>$ML{'.friends.viewentries'}</a>]</span></div>";
             $body .= "<div class='section_body'>";
         }
 
@@ -1483,9 +1500,12 @@
         $comms .= "$posting" if ($posting);
         next unless $comms;
         $body .= "<div class='ljclear'></div><br>";
-        $body .= "<div class='section'><img src='$LJ::IMGPREFIX/community.gif' /> $ML{'.comms.header'}</div>";
+        $body .= "<div class='section'><img src='$LJ::IMGPREFIX/community.gif' alt='' /> $ML{'.comms.header'}$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends?show=C'>$ML{'.friends.viewentries'}</a>]</span></div>";
         $body .= "<div class='section_body'>$comms</div>";
-        $body .= "<div class='ljclear'></div><br><div class='section'><img src='$LJ::IMGPREFIX/syndicated.gif' /> $ML{'.syn.header'}</div><div class='section_body'>$feeds</div>" if ($feeds);
+        if ($feeds) {
+            $body .= "<div class='ljclear'></div><br><div class='section'><img src='$LJ::IMGPREFIX/syndicated.gif' alt='' /> $ML{'.syn.header'}$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends?show=Y'>$ML{'.friends.viewentries'}</a>]</span></div>";
+            $body .= "<div class='section_body'>$feeds</div>";
+        }
     }
 
     $body .= "</div>";

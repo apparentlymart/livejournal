@@ -14,9 +14,6 @@
     border: 0;
 }
 
-td {
-    vertical-align: top;
-}
 .left {
     float: left;
 }
@@ -172,6 +169,7 @@ td {
     font-weight: bold;
     border-bottom: 1px solid #b1b1b1;
     margin: 10px 0 10px 0;
+    padding-bottom: 2px;
     color: #444;
     clear: both;
 }
@@ -198,7 +196,7 @@ td {
         margin: 1px 0 0 0;
     }
 span.expandcollapse {
-    cursor: default;
+    cursor: pointer;
 }
     .section_body .inner_section_header span.expandcollapse img {
         margin-left: -17px;
@@ -241,6 +239,12 @@ span.expandcollapse {
     .user_info_im table td.im_status {
         text-align: center;
     }
+.user_info_stats_left th,
+.user_info_stats_left td,
+.user_info_stats_right th,
+.user_info_stats_right td {
+    vertical-align: top;
+}
 .user_info_schools_item {
     font-size: 0.77em;
 }

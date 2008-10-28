@@ -228,7 +228,7 @@ body<=
 
         {
             ### Interests
-            $ret .= "<div class='section_head'>$ML{'.section.interests'}</div>\n";
+            $ret .= "<a name='interests'></a><div class='section_head'>$ML{'.section.interests'}</div>\n";
             my @eintsl;
             foreach (sort keys %interests) {
                 push @eintsl, $_ if LJ::text_in($_);
@@ -254,7 +254,7 @@ body<=
         ## BIO
 
         ### User bio
-        $ret .= "<div class='section_head'>$ML{'.section.bio'}</div>";
+        $ret .= "<a name='bio'></a><div class='section_head'>$ML{'.section.bio'}</div>";
         if (LJ::text_in($saved{'bio'})) {
             $ret .= "<table class='field_block'>";
             $ret .= "<tr><td colspan='2'>$ML{'.fn.bio'}<br />\n";
