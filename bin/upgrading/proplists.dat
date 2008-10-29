@@ -830,7 +830,6 @@ userproplist.opt_show_captcha_to:
   multihomed: 0
   prettyname: Show CAPTHCHA on commenting
 
-
 userproplist.portalinit:
   cldversion: 4
   datatype: num
@@ -838,6 +837,14 @@ userproplist.portalinit:
   indexed: 0
   multihomed: 0
   prettyname: Portal Init
+
+userproplist.profile_collapsed_headers:
+  cldversion: 4
+  datatype: char
+  des: Comma-separated list of header ids that should start out collapsed when the user is viewing any profile.
+  indexed: 0
+  multihomed: 0
+  prettyname: Profile Page Collapsed Headers
 
 userproplist.public_key:
   cldversion: 4
