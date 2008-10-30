@@ -253,7 +253,7 @@ oParser.CreateEMailUri = function( address, subject, body )
 			for ( var i = 0 ; i < address.length ; i++ )
 				aAddressCode.push( address.charCodeAt( i ) ) ;
 
-			return 'javascript:location.href=\'mailto:\'+String.fromCharCode(' + aAddressCode.join( ',' ) + ')+\'?' + aParams.join( '&' ) + '\'' ;
+			return 'mailto:'+String.fromCharCode(aAddressCode.join( ',' )) + ( aParams.length ? ( '?' + aParams.join( '&' ) ) : '' );
 	}
 
 	// EMailProtection 'none'
