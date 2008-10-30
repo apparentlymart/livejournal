@@ -546,7 +546,7 @@ $LJ::SITEROOT
 
     # jump to user
     if ($items{'pages'} > 1) {
-        $ret .= "<div style='margin-left: 30px;'>Jump to user: ";
+        $ret .= "<div style='margin-left: 30px;'>$ML{'.jump'}: ";
         $ret .= LJ::html_text({ 'name' => 'jumpto', 'value' => $POST{'jumpto'},
                                 'class' => 'text', 'size' => '10', 'maxlength' => '15' }) . " ";
         $ret .= LJ::html_submit(undef, 'Go') . "</div>";

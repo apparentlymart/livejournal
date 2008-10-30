@@ -1327,8 +1327,6 @@ You can:
 
 esn.community_join_requst.subject=[[comm]] membership request by [[who]]!
 
-esn.approve_join_request=[[openlink]]Approve [[username]]'s request to join[[closelink]]
-
 esn.email.pm_without_body<<
 Hi [[user]],
 
