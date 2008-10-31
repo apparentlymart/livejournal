@@ -95,13 +95,20 @@ body<=
 
         $ret .= $u->is_community ? "<p>$ML{'.intro.unban.comm'}</p>" : "<p>$ML{'.intro.unban.self'}</p>";
         $ret .= "<table class='userslist-table' cellspacing=0 cellpadding=0><tr><th>";
-        $ret .= LJ::html_check({ id => 'all', name => 'all', onChange =>
-                "var inputs = document.getElementById('content-wrapper').getElementsByTagName('input');
+        $ret .= LJ::html_check({ id => 'all', name => 'all', onchange =>
+                "var inputs=document.getElementById('content-wrapper').getElementsByTagName('input');
                 for (var i = 0; i < inputs.length; i++) {
                     if (inputs[i].type == 'checkbox' && inputs[i].getAttribute('id') !== 'all') {
                         inputs[i].checked = this.checked;                  
                     } 
-                }",	selected => 0 });
+                }",
+	            onclick=>
+                "var inputs=document.getElementById('content-wrapper').getElementsByTagName('input');
+                for (var i = 0; i < inputs.length; i++) {
+                    if (inputs[i].type == 'checkbox' && inputs[i].getAttribute('id') !== 'all') {
+                        inputs[i].checked = this.checked;                  
+                    } 
+               }", selected => 0 });
         $ret .= "</th><th>$ML{'/community/members.bml.key.user'}</th></tr>\n";
 		
 		my $rc = 0;
