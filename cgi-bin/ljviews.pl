@@ -1331,6 +1331,8 @@ sub create_view_lastn
         my $permalink = "$journalbase/$ditemid.html";
         $lastn_event{'permalink'} = $permalink;
 
+        $lastn_event{'subject'} = "<a href='$permalink'>" . $lastn_event{'subject'} . "</a>";
+
         if ($u->{'opt_showtalklinks'} eq "Y" &&
             ! $logprops{$itemid}->{'opt_nocomments'}
             )
@@ -1869,6 +1871,8 @@ sub create_view_friends
         my $journalbase = LJ::journal_base($friends{$friendid});
         my $permalink = "$journalbase/$ditemid.html";
         $friends_event{'permalink'} = $permalink;
+
+        $friends_event{'subject'} = "<a href='$permalink'>" . $friends_event{'subject'} . "</a>";
 
         if ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
             ! $logprops{$datakey}->{'opt_nocomments'}
@@ -2533,6 +2537,8 @@ sub create_view_day
 
         my $permalink = "$journalbase/$ditemid.html";
         $day_event{'permalink'} = $permalink;
+
+        $day_event{'subject'} = "<a href='$permalink'>" . $day_event{'subject'} . "</a>";
 
         if ($u->{'opt_showtalklinks'} eq "Y" &&
             ! $logprops{$itemid}->{'opt_nocomments'}
