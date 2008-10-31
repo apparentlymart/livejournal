@@ -150,6 +150,16 @@ sub create_personal {
     # now flag as underage (and set O to mean was old or Y to mean was young)
     $u->underage(1, $opts{ofage} ? 'O' : 'Y', 'account creation') if $opts{underage};
 
+    # For settings that are to be set explicitly
+    # on create, with more private settings for non-adults
+    if ($u->underage || $u->is_child) {
+        $u->set_prop("opt_findbyemail", 'N');
+    } elsif ($u->is_minor) {
+        $u->set_prop("opt_findbyemail", 'H');
+    } else {
+        $u->set_prop("opt_findbyemail", 'Y');
+    }
+
     return $u;
 }
 

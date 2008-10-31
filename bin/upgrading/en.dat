@@ -2558,7 +2558,7 @@ settings.error.year.outofrange=Invalid birthday year.
 
 settings.findbyemail.error.invalid=Invalid Option
 
-settings.findbyemail.question=Allow [[sitename]] users to find you by searching for your email address?
+settings.findbyemail.question=Do you want users to be able to find you by searching for your primary email address?
 
 settings.findbyemail.helper=This setting will allow you to have your email address searchable without having to display it anywhere on [[sitename]]. You can also choose whether or not you want your [[siteabbrev]] identity to be shared in the search results.
 
@@ -2582,9 +2582,11 @@ settings.option.select=(Please make a selection)
 
 settings.province=or non-US State/province/territory
 
-settings.settingprod.intro=Hi from [[sitename]]. We have a new setting that we need you to activate before continuing.
+settings.settingprod.intro=Hi from [[sitename]]. We have a new option that we'd like you to set:
 
-settings.settingprod.outro=Visit the <a [[aopts]]>Edit Profile page</a> to change this setting in the future.
+settings.settingprod.outro=You can change this setting on the <a [[aopts]]>Edit Profile Page</a>.
+
+settings.settingprod.learn=Learn more
 
 settings.state=State
 

@@ -5,14 +5,29 @@ use warnings;
 
 sub tags { qw(email search) }
 
+sub helpurl {
+    my ($class, $u) = @_;
+
+    return "find_by_email";
+}
+
 sub as_html {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
     my $ret;
+    my $helper = ($args->{helper} == 0) ? 0 : 1;
+    my $faq = ($args->{faq} == 1) ? 1 : 0;
 
     $ret .= "<label for='${key}opt_findbyemail'>" .
             $class->ml('settings.findbyemail.question',
-                { sitename => $LJ::SITENAMESHORT }) . "</label><br />";
+                { sitename => $LJ::SITENAMESHORT }) . "</label>";
+
+    # Display learn more link?
+    $ret .= " (<a href='" . $LJ::HELPURL{$class->helpurl($u)} .
+            "'>" . $class->ml('settings.settingprod.learn') . "</a>)<br />"
+                if ($faq && $LJ::HELPURL{$class->helpurl($u)});
+
+    $ret .= "<br />";
     my @options;
     push @options, { text => $class->ml('settings.option.select'), value => '' }
         unless $u->opt_findbyemail;
@@ -24,11 +39,14 @@ sub as_html {
                               'class' => "select",
                               'selected' => $u->opt_findbyemail || '' },
                               @options );
+
+    # Display helper text about setting?
     $ret .= "<div class='helper'>" .
             $class->ml('settings.findbyemail.helper', {
                 sitename => $LJ::SITENAMESHORT,
                 siteabbrev => $LJ::SITENAMEABBREV }) .
-            "</div>";
+            "</div>" if ($helper);
+
     $ret .= $class->errdiv($errs, "opt_findbyemail");
 
     return $ret;
@@ -52,6 +70,17 @@ sub save {
 sub label {
     my $class = shift;
     $class->ml('settings.findbyemail.label');
+}
+
+# return key value pairs for field names and values chosen
+sub settings {
+    my ($class, $args) = @_;
+
+    my @list;
+    push @list, "opt_findbyemail";
+    push @list, $class->get_arg($args, "opt_findbyemail") || '';
+
+    return @list;
 }
 
 1;

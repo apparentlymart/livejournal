@@ -17,16 +17,18 @@ LJWidgetIPPU_SettingProd = new Class(LJWidgetIPPU, {
     post['setting'] = this.setting;
     post[field] = form[field].value + "";
 
-    this.doPost(post);
+    if (post[field] && post[field] != "") this.doPost(post);
 
     Event.stop(evt);
   },
 
   onData: function (data) {
     var success;
+    var extra = '';
     if (data.res && data.res.success) success = data.res.success;
+    if (data.res && data.res.extra) extra = data.res.extra;
     if (success) {
-      LJ_IPPU.showNote("Settings updated.");
+      LJ_IPPU.showNote("Settings updated."+extra);
       this.ippu.hide();
     }
   },

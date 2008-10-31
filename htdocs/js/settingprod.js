@@ -4,7 +4,7 @@ function displaySettingProd(sett, fname) {
     var settingProd = new LJWidgetIPPU_SettingProd({
         title: 'New Setting!',
         width: 320,
-        height: 320
+        height: 300
         }, {
             setting: sett,
             field: fname

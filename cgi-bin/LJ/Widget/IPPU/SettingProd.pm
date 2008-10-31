@@ -8,10 +8,6 @@ use Class::Autouse qw(
                       LJ::Setting
                       );
 
-sub need_res {
-#    return qw( js/widgets/settingprod.js stc/widgets/settingprod.css );
-}
-
 sub authas { 0 }
 
 sub render_body {
@@ -20,6 +16,7 @@ sub render_body {
     my $key = $opts{setting};
     my $body;
     my $remote = LJ::get_remote;
+    my $setting_class = "LJ::Setting::$key";
 
     $body .= "<div class='settingprod'>";
     $body .= "<p>" . $class->ml('settings.settingprod.intro',
@@ -29,13 +26,14 @@ sub render_body {
                 id => 'settingprod_form',
              );
 
-    my $setting_class = "LJ::Setting::$key";
-    $body .= $setting_class->as_html($remote);
+    $body .= "<div class='warningbar'>";
+    $body .= $setting_class->as_html($remote, undef, { helper => 0, faq => 1} );
 
-    $body .= "<p style='text-align: center'>" .
+    $body .= "<p>" .
              $class->html_submit('Update your Settings') .
              "</p>";
     $body .= $class->html_hidden({ name => 'setting_key', value => $key });
+    $body .= "</div>";
 
     $body .= $class->end_form;
 
@@ -43,6 +41,11 @@ sub render_body {
              $class->ml('settings.settingprod.outro',
                  { aopts => "href='$LJ::SITEROOT/manage/profile/'" } ) .
              "</span></p>";
+
+    my $ret;
+    LJ::run_hooks('campaign_tracking', \$ret,
+                  { cname => 'Popup Setting Display' } );
+    $body .= $ret;
 
     $body .= "</div>\n";
 
@@ -63,7 +66,13 @@ sub handle_post {
         die join(" <br />", map { $save_errors->{$_} } sort keys %$save_errors);
     }
 
-    return (success => 1);
+    my $xtra;
+    my $postvars = join(",", $setting_class->settings($post));
+    LJ::run_hooks('campaign_tracking', \$xtra,
+                    { cname     => 'Popup Setting Submitted',
+                      trackvars => "$postvars", } );
+
+    return (success => 1, extra => "$xtra");
 }
 
 1;
