@@ -588,11 +588,9 @@ sub clean
                             }
                             
                             if ($opts->{'strongcleancss'}) {
-                                foreach my $css (qw(-moz- absolute relative outline z-index top left right bottom filter -webkit-)) {
-                                    if ($hash->{style} =~ /\Q$css\E/i) {
-                                        delete $hash->{style};
-                                        next ATTR;
-                                    }
+                                if ($hash->{style} =~ /-moz-|absolute|relative|outline|z-index|(?<!-)(?:top|left|right|bottom)\s*:|filter|-webkit-/io) {
+                                    delete $hash->{style};
+                                    next ATTR;
                                 }
                             }
 
