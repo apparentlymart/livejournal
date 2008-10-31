@@ -2756,7 +2756,7 @@ sub interests_for_adcall {
 
     my $int_len = 0;
 
-    my @interest_list = $u->notable_interests(100);
+    my @interest_list = $u->notable_interests(100) if $u;
 
     # pass in tag list if this ad relates to a special QotD
     if (ref $opts{extra} && $opts{extra}->{qotd}) {
