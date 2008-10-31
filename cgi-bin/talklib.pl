@@ -1064,12 +1064,21 @@ sub load_comments
     # and deeper until we've hit the page size.  if too many loaded,
     # just mark that we'll load the subjects;
     my @check_for_children = @posts_to_load;
+    
+    ## expand first reply to top-level comments
+    ## %expand_children - list of comments, children of which are to expand
+    my %expand_children = map { $_ => 1 } @top_replies;
     my (@subjects_to_load, @subjects_ignored);
     while (@check_for_children) {
         my $cfc = shift @check_for_children;
         next unless defined $children{$cfc};
         foreach my $child (@{$children{$cfc}}) {
-            if (@posts_to_load < $page_size) {
+            if ($expand_children{$cfc}) {
+                push @posts_to_load, $child;
+                ## expand only the first child, then clear the flag
+                delete $expand_children{$cfc}; 
+            }
+            elsif (@posts_to_load < $page_size) {
                 push @posts_to_load, $child;
             } else {
                 if (@subjects_to_load < $max_subjects) {
