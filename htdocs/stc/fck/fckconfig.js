@@ -94,7 +94,7 @@ FCKConfig.FormatSource		= false;
 FCKConfig.FormatOutput		= false;
 FCKConfig.FormatIndentator	= '    ' ;
 
-FCKConfig.EMailProtection = 'encode' ; // none | encode | function
+FCKConfig.EMailProtection = 'none' ; // none | encode | function
 FCKConfig.EMailProtectionFunction = 'mt(NAME,DOMAIN,SUBJECT,BODY)' ;
 
 FCKConfig.StartupFocus	= false ;
