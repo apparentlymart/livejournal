@@ -359,30 +359,41 @@
 
     ### picture
     $body .= "<div class='userpicdiv'>";
-    my %pic;
-    if ($u->{'defaultpicid'}) {
-        my $picid = $u->{'defaultpicid'};
-        LJ::load_userpics(\%pic, [ $u, $picid ]);
-        $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' border='0' alt='$user $ML{'.allpics'}' class='user_pic' /></a>";
-        $body .= "<br /><a href='$LJ::SITEROOT/allpics.bml?user=$user' class='user_pic_caption'>$ML{'.allpics'}</a>";
-    } elsif ($synd) {
-        $body .= "<img src='$LJ::IMGPREFIX/profile_icons/feed.gif' class='user_pic' alt='' />";
+    if ($synd) {
+        $body .= "<img src='$LJ::IMGPREFIX/profile_icons/feed.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
     } else {
         my $default_userpic_img;
-        if ($u->is_person) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/user.gif' class='user_pic' alt='' />";
+        if ($u->{defaultpicid}) {
+            my %pic;
+            my $picid = $u->{defaultpicid};
+            LJ::load_userpics(\%pic, [ $u, $picid ]);
+            $default_userpic_img = "<img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' border='0' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
+        } elsif ($u->is_person) {
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/user.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
         } elsif ($com) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif' class='user_pic' alt='' />";
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
         } elsif ($u->is_identity) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/openid.gif' class='user_pic' alt='' />";
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/openid.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
         }
 
         if ($remote && $remote->can_manage($u)) {
-            $body .= "<a href='$LJ::SITEROOT/editpics.bml?authas=$user'>$default_userpic_img</a><br /><a href='$LJ::SITEROOT/editpics.bml?authas=$user' class='user_pic_caption'>$ML{'.userpic.choose'}</a>";
-        } elsif (LJ::userpic_count($u)) {
-            $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a><br /><a href='$LJ::SITEROOT/allpics.bml?user=$user' class='user_pic_caption'>$ML{'.allpics'}</a>";
+            if (LJ::userpic_count($u)) {
+                $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a><br />";
+                $body .= "<span class='user_pic_caption'>";
+                $body .= BML::ml('.userpic.viewall.edit', { aopts1 => "href='$LJ::SITEROOT/allpics.bml?user=$user'", aopts2 => "href='$LJ::SITEROOT/editpics.bml?authas=$user'" });
+                $body .= "</span>";
+            } else {
+                $body .= "<a href='$LJ::SITEROOT/editpics.bml?authas=$user'>$default_userpic_img</a><br />";
+                $body .= "<a href='$LJ::SITEROOT/editpics.bml?authas=$user' class='user_pic_caption'>$ML{'.userpic.upload'}</a>";
+            }
         } else {
-            $body .= "$default_userpic_img<br /><span class='user_pic_caption'>$ML{'.userpic.none'}</span>";
+            if (LJ::userpic_count($u)) {
+                $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a><br />";
+                $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user' class='user_pic_caption'>$ML{'.userpic.viewall'}</a>";
+            } else {
+                $body .= "$default_userpic_img<br />";
+                $body .= "<span class='user_pic_caption'>$ML{'.userpic.none3'}</span>";
+            }
         }
     }
     $body .= "</div>";

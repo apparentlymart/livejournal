@@ -498,8 +498,18 @@
 
 .userinfo.name=User Information
 
+.userpic.alt=Userpic
+
 .userpic.choose=Choose userpic
 
 .userpic.none=no default userpic
 
 .userpic.none2=(no userpics)
+
+.userpic.none3=No Userpics
+
+.userpic.upload=Upload Userpic
+
+.userpic.viewall=View All Userpics
+
+.userpic.viewall.edit=<a [[aopts1]]>View All</a> / <a [[aopts2]]>Edit</a>
