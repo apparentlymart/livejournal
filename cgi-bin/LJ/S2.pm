@@ -2462,8 +2462,8 @@ sub viewer_sees_control_strip
     });
 }
 
-sub _get_hbox_top_args {
-    my ($ctx, $this) = @_;
+sub _get_ad_box_args {
+    my $ctx = shift;
     
     my $r = Apache->request;
     my $journalu = LJ::load_userid($r->notes("journalid"));
@@ -2478,7 +2478,6 @@ sub _get_hbox_top_args {
     }
  
     return {
-        location => 's2.top',
         journalu => $journalu,
         pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
         tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
@@ -2491,34 +2490,31 @@ sub _get_hbox_top_args {
 
 }
 
-sub _get_vbox_args{
-    my $args = _get_hbox_top_args(@_);
-    $args->{location} = 's2.vertical';
-    return $args;
-}
-
-sub _get_hbox_bottom_args {
-    my $args = _get_hbox_top_args(@_);
-    return unless $args;
-    $args->{location} = 's2.bottom';
-    return $args;
-}
-
 sub viewer_sees_vbox
 {
-    my $args = _get_vbox_args(@_);
+    my $args = _get_ad_box_args(@_);
+    $args->{location} = 's2.vertical' if $args;
     return $args ? LJ::should_show_ad($args):0;
 }
 
 sub viewer_sees_hbox_top
 {
-    my $args = _get_hbox_top_args(@_);
+    my $args = _get_ad_box_args(@_);
+    $args->{location} = 's2.top' if $args;
     return $args ? LJ::should_show_ad($args):0;
 }
 
 sub viewer_sees_hbox_bottom
 {
-    my $args = _get_hbox_bottom_args(@_);
+    my $args = _get_ad_box_args(@_);
+    $args->{location} = 's2.bottom' if $args;
+    return $args ? LJ::should_show_ad($args):0;
+}
+
+sub viewer_sees_ad_box {
+    my ($ctx, $location) = @_;
+    my $args = _get_ad_box_args($ctx);
+    $args->{location} = $location if $args;
     return $args ? LJ::should_show_ad($args):0;
 }
 
@@ -3717,23 +3713,35 @@ sub Page__print_control_strip
 
 sub Page__print_hbox_top
 {
-    my $args = _get_hbox_top_args(@_);
+    my $args = _get_ad_box_args(@_);
     return unless $args;
+    $args->{location} = 's2.top';
     my $ad_html = LJ::get_ads($args);
     $S2::pout->($ad_html) if $ad_html;
 }
 
 sub Page__print_hbox_bottom
 {
-    my $args = _get_hbox_bottom_args(@_);
+    my $args = _get_ad_box_args(@_);
     return unless $args;
+    $args->{location} = 's2.bottom';
     my $ad_html = LJ::get_ads($args);
     $S2::pout->($ad_html) if $ad_html;
 }
 
 sub Page__print_vbox {
-    my $args = _get_vbox_args(@_);
+    my $args = _get_ad_box_args(@_);
     return unless $args;
+    $args->{location} = 's2.vertical';
+    my $ad_html = LJ::get_ads($args);
+    $S2::pout->($ad_html) if $ad_html;
+}
+
+sub Page__print_ad_box {
+    my ($ctx, $this, $location) = @_;
+    my $args = _get_ad_box_args($ctx, $this);
+    return unless $args;
+    $args->{location} = $location;
     my $ad_html = LJ::get_ads($args);
     $S2::pout->($ad_html) if $ad_html;
 }

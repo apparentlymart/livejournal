@@ -508,6 +508,9 @@ class Page
     function builtin print_vbox [fixed]
     "Prints an vertical bar of site-specific content on a journal.";
 
+    function builtin print_ad_box(string type) [fixed]
+    "Prints an side bar of site-specific content on a journal.";
+
     function builtin print_ad(string type) [fixed]
     "Deprecated function.  Use print_hbox_(top|bottom) or print_vbox from now on.";
 
@@ -820,6 +823,9 @@ function builtin viewer_sees_hbox_top() [fixed] : bool
 
 function builtin viewer_sees_hbox_bottom() [fixed] : bool
 "True if opaque horizontal site-specific content box should be displayed to the user at the bottom of the page.";
+
+function builtin viewer_sees_ad_box(string type) [fixed] : bool
+"True if opaque sidebar site-specific content box should be displayed to the user.";
 
 function builtin viewer_sees_ebox() [fixed] : bool
 "True if the user has selected to see opaque content boxes between entries.";
