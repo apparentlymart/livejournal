@@ -3314,17 +3314,14 @@ sub Page__print_trusted
     my $username = $this->{journal}->{username};
     my $fullkey = "$username-$key";
 
-    if ($key =~ /^regexp-/) {
-        foreach my $regexp (%LJ::TRUSTED_S2_WHITELIST_REGEXP) {
-            if ($username =~ /$regexp/) {
-                return $S2::pout->("Error, no print_trusted key '$key' defined for regexp /$regexp/.") unless exists ($LJ::TRUSTED_S2_WHITELIST_REGEXP{$regexp}->{$key});
-                $S2::pout->(LJ::conf_test($LJ::TRUSTED_S2_WHITELIST_REGEXP{$regexp}->{$key}));
-            }
+    foreach my $regexp (%LJ::TRUSTED_S2_WHITELIST_REGEXP) {
+        if ($username =~ /$regexp/ && exists $LJ::TRUSTED_S2_WHITELIST_REGEXP{$regexp}->{$key}) {
+            $S2::pout->(LJ::conf_test($LJ::TRUSTED_S2_WHITELIST_REGEXP{$regexp}->{$key}));
         }
-    } else {
-        return $S2::pout->("Error, no print_trusted key '$fullkey' defined.") unless exists ($LJ::TRUSTED_S2_WHITELIST{$fullkey});
-        $S2::pout->(LJ::conf_test($LJ::TRUSTED_S2_WHITELIST{$fullkey}));
     }
+
+    $S2::pout->(LJ::conf_test($LJ::TRUSTED_S2_WHITELIST{$fullkey}))
+        if exists $LJ::TRUSTED_S2_WHITELIST{$fullkey};
 }
 
 # class 'date'
