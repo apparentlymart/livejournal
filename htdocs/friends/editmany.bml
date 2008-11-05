@@ -27,7 +27,7 @@ body<=
         # process edits:
         if ($POST{friend}) {
             # process friend groups
-            if ($remote->is_friend($u) || $remote->can_add_friends(\$err)) {
+            if ($remote->is_friend($u) || $remote->can_add_friends(\$err, {friend => $u})) {
                 my $groupmask = 1;
                 foreach my $fgroupid (@groupids) {
                     $groupmask |= 1 << $fgroupid if $POST{"fgroup$fgroupid"};

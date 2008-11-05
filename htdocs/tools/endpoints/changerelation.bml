@@ -35,7 +35,7 @@
     if ($action eq 'addFriend') {
         my $errmsg = "";
         return $err->($errmsg)
-            unless $remote->can_add_friends(\$errmsg);
+            unless $remote->can_add_friends(\$errmsg, {friend => $targetu});
 
         $success = $remote->friend_and_watch($targetu);
     } elsif ($action eq 'removeFriend') {

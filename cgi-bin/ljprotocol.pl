@@ -2264,7 +2264,7 @@ sub editfriends
 
         my $err;
         return $fail->(104, "$err")
-            unless $u->can_add_friends(\$err, { 'numfriends' => $friend_count });
+            unless $u->can_add_friends(\$err, { 'numfriends' => $friend_count, friend => $fa });
 
         my $fg = $fa->{'fgcolor'} || "#000000";
         my $bg = $fa->{'bgcolor'} || "#FFFFFF";

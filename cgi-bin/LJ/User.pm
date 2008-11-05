@@ -4367,6 +4367,20 @@ sub can_add_friends {
     }
 
     # are they trying to add friends too quickly?
+
+    # don't count mutual friends
+    if (exists($opts->{friend})) {
+        my $fr_user = $opts->{friend};
+        # we needed LJ::User object, not just a hash.
+        if (ref($fr_user) eq 'HASH') {
+            $fr_user = LJ::load_user($fr_user->{username});
+        } else {
+            $fr_user = LJ::want_user($fr_user);
+        }
+
+        return 1 if $fr_user && $fr_user->is_friend($u);
+    }
+
     unless ($u->rate_log('addfriend', 1)) {
         $$err = "You are trying to add too many friends in too short a period of time.";
         return 0;

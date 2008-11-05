@@ -316,7 +316,7 @@ sub join_community {
 
     my $err = "";
     return LJ::error("You have joined the community, but it has not been added to ".
-                     "your Friends list. " . $err) unless $u->can_add_friends(\$err);
+                     "your Friends list. " . $err) unless $u->can_add_friends(\$err, { friend => $cu });
 
     $u->friend_and_watch($cu);
 
