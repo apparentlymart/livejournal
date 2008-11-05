@@ -15,8 +15,8 @@ sub as_html {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
     my $ret;
-    my $helper = ($args->{helper} == 0) ? 0 : 1;
-    my $faq = ($args->{faq} == 1) ? 1 : 0;
+    my $helper = ($args && $args->{helper} == 0) ? 0 : 1;
+    my $faq = ($args && $args->{faq} == 1) ? 1 : 0;
 
     $ret .= "<label for='${key}opt_findbyemail'>" .
             $class->ml('settings.findbyemail.question',
