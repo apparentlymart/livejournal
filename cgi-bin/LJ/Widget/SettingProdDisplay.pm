@@ -11,10 +11,11 @@ sub render_body {
     return unless $remote;
 
     my $body;
+    my $title = LJ::ejs( $class->ml('setting.prod.display.title') );
     foreach my $prod (@LJ::SETTING_PROD) {
         if ($prod->{should_show}->($remote)) {
             $body .= "\n<script language='javascript'>setTimeout(\"displaySettingProd('" .
-                    $prod->{setting} . "', '" . $prod->{field} . "')\", 400)</script>\n";
+                    $prod->{setting} . "', '" . $prod->{field} . "', '" . $title . "')\", 400)</script>\n";
             last;
         }
     }

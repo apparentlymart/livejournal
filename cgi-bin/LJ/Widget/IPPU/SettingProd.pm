@@ -30,7 +30,7 @@ sub render_body {
     $body .= $setting_class->as_html($remote, undef, { helper => 0, faq => 1} );
 
     $body .= "<p>" .
-             $class->html_submit('Update your Settings') .
+             $class->html_submit( $class->ml('settings.settingprod.update') ) .
              "</p>";
     $body .= $class->html_hidden({ name => 'setting_key', value => $key });
     $body .= "</div>";

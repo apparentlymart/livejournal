@@ -1,9 +1,11 @@
-function displaySettingProd(sett, fname) {
+function displaySettingProd(sett, fname, title) {
     if (! sett) return true;
-
+    if (!title) {
+        title = 'New Setting!';
+    }
     var settingProd = new LJWidgetIPPU_SettingProd({
-        title: 'New Setting!',
-        width: 320,
+        title: title,
+        width: 400,
         height: 300
         }, {
             setting: sett,

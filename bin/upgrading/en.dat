@@ -2457,6 +2457,8 @@ setting.notifyweblogs.option.comm=Notify Weblogs.com subscribers when new public
 
 setting.notifyweblogs.option.self=Notify Weblogs.com subscribers when I post new public entries to my journal
 
+setting.prod.display.title=New Setting!
+
 setting.safesearch.error.invalid=Invalid safe search setting.
 
 setting.safesearch.label=Safe Search Filter
@@ -2587,6 +2589,8 @@ settings.settingprod.intro=Hi from [[sitename]]. We have a new option that we'd 
 settings.settingprod.outro=You can change this setting on the <a [[aopts]]>Edit Profile Page</a>.
 
 settings.settingprod.learn=Learn more
+
+settings.settingprod.update=Update your Settings
 
 settings.state=State
 
