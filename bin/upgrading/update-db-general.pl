@@ -3836,6 +3836,12 @@ register_alter(sub {
                  "ALTER TABLE qotd " .
                  "ADD is_special ENUM('Y','N') NOT NULL DEFAULT 'N'");
     }
+
+    unless (column_type("jobstatus", "userid")) {
+        do_alter("jobstatus",
+                 "ALTER TABLE jobstatus " .
+                 "ADD userid INT UNSIGNED DEFAULT NULL"); # yes, we allow userid to be NULL - it means no userid checking
+    }
 });
 
 
