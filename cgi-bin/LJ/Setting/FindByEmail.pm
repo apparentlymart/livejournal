@@ -11,6 +11,7 @@ sub helpurl {
     return "find_by_email";
 }
 
+*option = \&as_html;
 sub as_html {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;

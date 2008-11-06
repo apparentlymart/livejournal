@@ -114,6 +114,7 @@ body<=
                 LJ::Setting::CommentCaptcha
                 LJ::Setting::CommentIP
                 LJ::Setting::Display::BanUsers
+                LJ::Setting::FindByEmail
             )],
         },
         history => {
