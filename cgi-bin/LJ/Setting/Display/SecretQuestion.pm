@@ -31,7 +31,7 @@ sub label {
 sub option {
     my ($class, $u, $errs, $args) = @_;
 
-    return LJ::ehtml($u->prop("secret_question_text")) || "";
+    return $u->prop("secret_question_text") ? "******" : "";
 }
 
 1;

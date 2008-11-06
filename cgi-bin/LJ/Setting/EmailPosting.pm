@@ -64,6 +64,7 @@ sub option {
     $ret .= "<td>" . LJ::html_text({
         name => "${key}emailposting_pin",
         id => "${key}emailposting_pin",
+        type => "password",
         value => $pin || "",
         disabled => $can_emailpost ? 0 : 1,
         size => 10,

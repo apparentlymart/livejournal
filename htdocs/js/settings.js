@@ -5,8 +5,8 @@ Settings.init = function () {
 
     Settings.form_changed = false;
 
-    // capture onclicks on the nav links to confirm form saving
-    var links = $('settings_nav').getElementsByTagName('a');
+    // capture onclicks on all links to confirm form saving
+    var links = document.getElementsByTagName('a');
     for (var i = 0; i < links.length; i++) {
         if (links[i].href != "") {
             DOM.addEventListener(links[i], "click", function (evt) { Settings.navclick_save(evt) })
