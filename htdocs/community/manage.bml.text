@@ -26,6 +26,8 @@
 
 .commlist.none=<i>You are not managing any communities.</i>
 
+.commlist.post=Post
+
 .commlist.text=Here are the communities that you manage or co-manage:
 
 .commlist.title=<b>Title</b>

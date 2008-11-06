@@ -103,6 +103,8 @@ body<=
         my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
         $ret .= "<tr class='$rstyle'><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td nowrap='nowrap'>";
         if ($admin{$id}) {
+            $ret .= BML::ml('Actionlink', {
+                'link'=>"<a href='/update.bml?usejournal=$user'>$ML{'.commlist.post'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= LJ::run_hook('community_manage_actionlink', $user);
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/manage/profile/?authas=$user'>$ML{'.commlist.actinfo2'}</a>"}) . "&nbsp;&nbsp;";
