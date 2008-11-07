@@ -109,6 +109,14 @@
         $$head .= "<script>LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";
     }
 
+    # try to call a hook to fill in the fields
+    my $override_fields = LJ::run_hook('update_fields', \%GET);
+    if ($override_fields) {
+            $event      = $override_fields->{'event'}   if exists($override_fields->{'event'});
+            $subject    = $override_fields->{'subject'} if exists($override_fields->{'subject'});
+            $tags       = $override_fields->{'tags'}    if exists($override_fields->{'tags'});
+    }
+
     ### define some bools with common logic ###
     my $did_post = LJ::did_post() && !$POST{transform};                           # transforms aren't posts
     my $user_is_remote = $remote && $remote->{'user'} eq $POST{'user'};           # user is remote
