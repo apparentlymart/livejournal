@@ -474,6 +474,11 @@ $fontspec
 $sec_fontspec
 }
 
+A.subjlink, A.subjlink:hover, A.subjlink:visited {
+   color:       $*date_fgcolor;
+   text-decoration: none;
+}
+
 .dateheader {
   font-weight: bold;
 }
@@ -1159,8 +1164,10 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
   var string security   = "";
   var string screenedbg = "";
   var string screenedfg = "";
-  $subject = """$icon$subject""";
-
+  
+  if ($p.view != "entry") {
+    $subject = """$icon<a href="$e.permalink_url" class="subjlink">$subject</a>""";
+  } else { $subject = """$icon$subject"""; }
   var int rowspan = 0;
 
   if ($e isa Entry) {

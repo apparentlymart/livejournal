@@ -338,6 +338,13 @@ table.standard td {
     border: $*entryborder_size $*entryborder_style $*border_color_entries;
     width: 100%;
 }
+
+A.subjlink, A.subjlink:hover, A.subjlink:visited {
+   color:$*subject_color;
+   text-decoration: none;
+   font-weight: bold;
+}
+
 table.standard td.poster {
     text-align: center;
 }
@@ -537,7 +544,11 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         "</td>";
     }
     "<td valign='top'><strong>$time";
-    if ($e.subject) { " - <span style='color: $*subject_color'>$e.subject</span>"; }
+    if ($e.subject) { " - ";
+       if ($p.view != "entry") {
+         "<a href='$e.permalink_url' class='subjlink'>$e.subject</a>";
+       } else { "<span style='color: $*subject_color'>$e.subject</span>"; } 
+    }
 
     if ($e.security) {
         " "; $e.security_icon->print();

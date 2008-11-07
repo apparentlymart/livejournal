@@ -248,6 +248,10 @@ table.box, table.box td, table.box th {
 border: 1px solid #000000;
 }
 
+A.subjlink, A.subjlink:hover, A.subjlink:visited {
+        text-decoration: none;
+}
+
 .metadata {
 margin-top: 1em;
 }
@@ -565,7 +569,9 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor) {
             $p->print_entry_poster($e);
             print ": ";
         }
-        print $e.subject;
+        if ($p.view != "entry") { 
+           "<a href='$e.permalink_url' class='subjlink' style='color: $fgcolor;'>$e.subject</a>";
+        } else { print $e.subject; }
     }
     "</h2>\n<div class=\"entry\">\n";
     if (defined $e.userpic and (

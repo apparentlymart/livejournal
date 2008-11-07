@@ -417,6 +417,12 @@ h3.page-header {
     padding: 6px;
     border:            1px solid $*border_color;
 }
+
+A.subjlink, A.subjlink:hover, A.subjlink:visited {
+        color:$*accent_fgcolor;
+        text-decoration: none;
+}
+
 div.entry td.alef { text-align: left; }
 div.entry td div.poster { text-align: center; }
 
@@ -621,7 +627,9 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     }
     # Subject
     if ($e.subject) {
-        $meta{"Subject:"} = $e.subject;
+      if ($p.view != "entry") {
+         $meta{"Subject:"} = "<a href='$e.permalink_url' class='subjlink'>$e.subject</a>";
+      } else { $meta{"Subject:"} = $e.subject; }
     }
     # Time posted
     var string time = $e.time->time_format($*time_format);

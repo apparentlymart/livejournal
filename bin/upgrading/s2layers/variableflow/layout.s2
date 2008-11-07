@@ -649,7 +649,10 @@ function Page::print_entry(Entry e) {
         " - " + $e.security_icon->as_string();
     }
     if ($e.subject != "") {
-        " - $e.subject";
+        " - ";
+        if ($.view != "entry") {
+          "<a href='$e.permalink_url'>$e.subject</a>";
+        } else { "$e.subject"; }
     }
     "</h2>\n";
 
@@ -1117,6 +1120,11 @@ a:active, a:hover { color: $*clr_alink; background: transparent; }
   font-weight: bold; font-size: 1.0em;
   float: left;
   margin-top: 0;
+}
+
+.entryheading A, .entryheading A:hover, .entryheading A:visited {
+   color: $*clr_text;
+   text-decoration: none;
 }
 .entrylinkbar {
 float: right;

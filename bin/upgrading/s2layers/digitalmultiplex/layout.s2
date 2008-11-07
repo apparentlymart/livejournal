@@ -582,7 +582,11 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
         $subject = "$e.security_icon $subject";
     }
     if ($subject) {
-        $subject = """<span class="subject">$subject</span>""";
+       if ($p.view != "entry") {
+          $subject = """<span class="subject"><a href="$e.permalink_url">$subject</a></span>""";
+       } else {
+           $subject = """<span class="subject">$subject</span>""";       
+       }
     }
     var Link prev; var Link next;
     if ($p.view == "entry") {
@@ -834,6 +838,11 @@ a:visited {
     color: $*heading_visited_link_color;
 }
 .quickreply { margin-top: 5px; }
+
+.heading_bar .subject A, .heading_bar .subject A:hover, .heading_bar .subject A:visited {
+    color: $*heading_fgcolor;
+    text-decoration: none;
+}
 
 /* Side bars */
 #sidebar {

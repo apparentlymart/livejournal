@@ -262,6 +262,12 @@ a:hover {
     font-family: verdana,arial,helvetica;
     font-size:12px;
 }
+A.subjlink, A.subjlink:hover, A.subjlink:visited {
+   text-decoration: none;
+   color: $*subject_color;
+   font-size: 1em;
+}
+
 .entry {
     border: $*entryborder_size $*entryborder_style $*border_color;
 }
@@ -481,7 +487,11 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         "</td>";
     }
     """<td valign="top" width='100%'><font size="+1">"""; print $e.time->date_format($*datetime_format);
-    if ($e.subject) { " <span style='color: $*subject_color'>$e.subject</span>"; }
+    if ($e.subject) { 
+        if ($p.view != "entry") {
+           " <a class='subjlink' href='$e.permalink_url'>$e.subject</a>";
+        } else { " <span style='color: $*subject_color'>$e.subject</span>";} 
+    }
     " $e.security_icon</font>";
 
     if (not $hide_text)

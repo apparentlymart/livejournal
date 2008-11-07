@@ -761,6 +761,11 @@ html>body .entry .text, html>body .calendar_month .calendar, html>body .month_da
 {
     margin-top: 0;
 }
+
+.subject A, .subject A:hover, .subject A:visited {
+        text-decoration: none;
+}
+
 /* Comments */
 .comment_page .leave_comment, .selector
 {
@@ -1111,7 +1116,11 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
     println """<div class="entry">""";
     var string subject = $e.subject != "" ? $e.subject : $*text_nosubject;
     var string time    = $e.time->time_format();
-    println """<h4 class="subject">$e.security_icon $subject @ $time</h4>""";
+    println """<h4 class="subject">$e.security_icon """;
+    if ($p.view != "entry") {
+        print "<a href='$e.permalink_url'>$subject</a>";
+    } else { print "$subject"; }
+    println """ @ $time</h4>""";
     println """<div class="text">""";
 
     if (($p.view == "friends" or

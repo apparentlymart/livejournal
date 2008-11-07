@@ -323,6 +323,10 @@ H3 EM {
     color: $*meta_color;
     font-style: normal;
 }
+H3 A, H3 A:hover {
+    text-decoration: none;
+}
+
 """;
 if (viewer_sees_control_strip()) {
 """#content {
@@ -562,7 +566,11 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     }
     # Time / Subject / Security
     var string subject = ($e.subject != "" ? " - <em>$e.subject</em>" : "");
-    "<h3><span>$time$subject</span> $e.security_icon</h3>";
+    "<h3><span>$time";
+     if ($p.view != "entry") {
+       """<a href="$e.permalink_url">$subject</a>""";}
+     else { "$subject"; }
+    "</span> $e.security_icon</h3>";
 
     if ($p.view == "entry" and $*show_entrynav_icons)
     {

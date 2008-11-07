@@ -475,6 +475,12 @@ a:hover, .entrybox a:hover, a:active {
 a img {
   border: 0px;
 }
+
+A.subj, A.subj:hover, A.subj:visited {
+  color:       $*over_fgcolor;
+  text-decoration: none;
+}
+
 .secorn {
   background-color: $*under_bgcolor;
   border-bottom:    $*entryborder_size $*entryborder_style $*bordercolor;
@@ -1473,7 +1479,14 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
   var bool tags_exist      = size $e.tags > 0;
   var bool userpic_exists  = $userpic != "";
   $date    = """<div style="float: right;">""" + $e->time_display($*datetime_format, "none") + """</div>""";
-  $subject = """<a name="$id" id="$id"></a>$icon$subject""";
+
+
+    if ($p.view != "entry") {
+        $subject = """<a name="$id" id="$id"></a>$icon<a href="$e.permalink_url" class="subj">$subject</a>""";
+    } else {
+       $subject = """<a name="$id" id="$id"></a>$icon$subject""";
+}
+
 
   if ($e isa Comment) {
     var Comment c = $e as Comment;

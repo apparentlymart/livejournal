@@ -794,6 +794,11 @@ width: 10px;
 display: inline;
 }
 
+.entrysubject A, .entrysubject A:hover, .entrysubject A:visited {
+     color: $*clr_page_fg;
+     text-decoration: none;
+}
+
 .entrylinkbarpre, .entrylinkbarpost {
 display: none;
 }
@@ -1119,7 +1124,12 @@ if($e isa Comment){
     """<div class="entry">""";
 }
 """<div class="entryheader">
-<h3 class="entrysubject">$e.subject</h3>""";
+<h3 class="entrysubject">""";
+    if ($.view != "entry") { 
+        """<a href="$e.permalink_url">$e.subject</a>""";
+    } else { "$e.subject"; }
+
+"</h3>";
     $e->lay_print_poster();
 """<div class="entrytimestamp">""";
 if ($e.depth > 0) { # If $e is a comment

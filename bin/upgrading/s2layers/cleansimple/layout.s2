@@ -499,6 +499,12 @@ font-weight: bold;
 color: $*meta_color;
 background: $*entry_bgcolor;
 }
+
+.subject A, .subject A:hover, .subject A:visited {
+    color: $*meta_color;
+    text-decoration: none;
+}
+
 .altposter a {
 color: $*meta_color;
 background: $*entry_bgcolor;
@@ -783,7 +789,11 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $e.security_icon->print();
     }
     if ($e.subject) {
-        " <span class=\"subject\">$e.subject</span>";
+        " <span class=\"subject\"> ";
+          if ($p.view != "entry") {
+                "<a href=\"$e.permalink_url\">$e.subject</a>";
+         } else { "$e.subject"; }
+        "</span>";
     }
     println "</span>"+($e.subject != "" ? "<br />" : "");
 

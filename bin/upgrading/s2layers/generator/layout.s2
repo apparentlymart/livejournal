@@ -429,6 +429,11 @@ font-size: 8pt;
 .caption, .index {
 color: $*stronger_text;
 }
+
+.caption A, .caption A:hover, .caption A:visited {
+        color: $*stronger_text;
+        text-decoration: none;
+}
 .comments {
 font-size: 8pt;
 }
@@ -790,7 +795,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $e.security_icon->print();
     }
 
-    print safe """ $e.subject</td>
+    if ($p.view != "entry") {
+                print safe """ <a href="$e.permalink_url">$e.subject</a>""";
+    } else { print safe "$e.subject"; }
+"""</td>
 <td align="right" class="index">[$datetime]</td>
 </tr>
 <tr align='left'>
