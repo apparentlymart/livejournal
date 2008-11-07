@@ -3310,14 +3310,15 @@ sub Page__print_trusted
     my $username = $this->{journal}->{username};
     my $fullkey = "$username-$key";
 
-    foreach my $regexp (%LJ::TRUSTED_S2_WHITELIST_REGEXP) {
-        if ($username =~ /$regexp/ && exists $LJ::TRUSTED_S2_WHITELIST_REGEXP{$regexp}->{$key}) {
-            $S2::pout->(LJ::conf_test($LJ::TRUSTED_S2_WHITELIST_REGEXP{$regexp}->{$key}));
-        }
+    if ($LJ::TRUSTED_S2_WHITELIST_USERNAMES{$username}) {
+        # more restrictive way: username-key
+        $S2::pout->(LJ::conf_test($LJ::TRUSTED_S2_WHITELIST{$fullkey}))
+            if exists $LJ::TRUSTED_S2_WHITELIST{$fullkey};
+    } else {
+        # less restrictive way: key
+        $S2::pout->(LJ::conf_test($LJ::TRUSTED_S2_WHITELIST{$key}))
+            if exists $LJ::TRUSTED_S2_WHITELIST{$key};
     }
-
-    $S2::pout->(LJ::conf_test($LJ::TRUSTED_S2_WHITELIST{$fullkey}))
-        if exists $LJ::TRUSTED_S2_WHITELIST{$fullkey};
 }
 
 # class 'date'
