@@ -1734,6 +1734,42 @@ sub xmlrpc_method {
             ->faultstring(LJ::Protocol::error_message($error))
             ->faultcode(substr($error, 0, 3));
     }
+
+    # Perl is untyped language and XML-RPC is typed.
+    # When library XMLRPC::Lite tries to guess type, it errors sometimes
+    # (e.g. string username goes as int, if username contains digits only).
+    # As workaround, we can select some elements by it's names
+    # and label them by correct types.
+ 
+    # Key - field name, value - type.
+    my %lj_types_map = (
+        journalname => 'string',
+    );
+
+    my $recursive_mark_elements;
+    $recursive_mark_elements = sub {
+        my $structure = shift;
+        my $ref = ref($structure);
+
+        if ($ref eq 'HASH') {
+            foreach my $hash_key (keys %$structure) {
+                if (exists($lj_types_map{$hash_key})) {
+                    $structure->{$hash_key} = SOAP::Data
+                            -> type($lj_types_map{$hash_key})
+                            -> value($structure->{$hash_key});
+                } else {
+                    $recursive_mark_elements->($structure->{$hash_key});
+                }
+            }
+        } elsif ($ref eq 'ARRAY') {
+            foreach my $idx (@$structure) {
+                $recursive_mark_elements->($idx);
+            }
+        }
+    };
+
+    $recursive_mark_elements->($res);
+
     return $res;
 }
 
