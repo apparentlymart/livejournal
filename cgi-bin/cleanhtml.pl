@@ -136,8 +136,6 @@ sub clean
         ($LJ::BLOCKED_LINK_SUBSTITUTE) ? $LJ::BLOCKED_LINK_SUBSTITUTE : '#';
     my $suspend_msg = $opts->{'suspend_msg'} || 0;
     my $unsuspend_supportid = $opts->{'unsuspend_supportid'} || 0;
-    my %autoclose = map { $_ => 1 } grep { !/^(?:tr|td|th|tbody|thead|tfoot|p|li|dt|dd)$/ }
-        (ref $opts->{'autoclose'} eq 'ARRAY' ? @{ $opts->{'autoclose'} } : ());
 
     my @canonical_urls; # extracted links
     my %action = ();
@@ -186,7 +184,6 @@ sub clean
     }
 
     my %opencount = ();
-    my @opened = ();
     my @tablescope = ();
 
     my $cutcount = 0;
@@ -440,7 +437,6 @@ sub clean
                     $newdata .= "<a name=\"cutid$cutcount\"></a>" unless $opts->{'textonly'};
                     if ($tag eq "div" && !$opts->{'textonly'}) {
                         $opencount{"div"}++;
-                        push @opened, 'div';
                         my $etext = $link_text->();
                         $newdata .= "<div class=\"ljcut\" text=\"$etext\">";
                     }
@@ -700,7 +696,6 @@ sub clean
                             LJ::img('placeholder') . '</a>';
                         $alt_output = 1;
                         $opencount{"img"}++;
-                        push @opened, 'img';
                     }
                 }
 
@@ -793,18 +788,14 @@ sub clean
                         # ignore the effects of slashclose unless we're dealing with a tag that can
                         # actually close itself. Otherwise, a tag like <em /> can pass through as valid
                         # even though some browsers just render it as an opening tag
-                        my $slashclosed = 0;
                         if ($slashclose && $tag =~ $slashclose_tags) {
                             $newdata .= " /";
                             $opencount{$tag}--;
                             $tablescope[-1]->{$tag}-- if $opts->{'tablecheck'} && @tablescope;
-                            $slashclosed = 1;
                         }
                         if ($allow) {
                             $newdata .= ">";
                             $opencount{$tag}++;
-                            push @opened, $tag
-                                unless $slashclosed;
 
                             # maintain current table scope
                             if ($opts->{'tablecheck'}) {
@@ -907,16 +898,8 @@ sub clean
                             }
                         }
 
-                        if ($opencount{$tag}) {
-                            while (my $open = pop @opened) {
-                                if ($open eq $tag || $autoclose{$open}) {
-                                    $newdata .= "</$open>";
-                                    $opencount{$open}--;
-                                }
-                                last if $open eq $tag;
-                            }
-                        }
-
+                        $newdata .= "</$tag>";
+                        $opencount{$tag}--;
                     } else {
                         $newdata .= "&lt;/$tag&gt;";
                     }
@@ -1032,10 +1015,12 @@ sub clean
     # don't close tags that don't need a closing tag -- otherwise,
     # we output the closing tags in the wrong place (eg, a </td>
     # after the <table> was closed) causing unnecessary problems
-    if (%autoclose) {
-        foreach my $tag (keys %autoclose) {
-            $newdata .= "</$tag>" x $opencount{$tag}
-                if $opencount{$tag};
+    if (ref $opts->{'autoclose'} eq "ARRAY") {
+        foreach my $tag (@{$opts->{'autoclose'}}) {
+            next if $tag =~ /^(?:tr|td|th|tbody|thead|tfoot|li)$/;
+            if ($opencount{$tag}) {
+                $newdata .= "</$tag>" x $opencount{$tag};
+            }
         }
     }
 
