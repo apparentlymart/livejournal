@@ -98,6 +98,9 @@ sub _as_email {
     my $user            = $self->requestor->user;
     my $communityname   = $self->comm->user;
     my $community       = $is_html ? ($self->comm->ljuser_display) : ($self->comm->display_username);
+    my $auth_url        = $self->authurl;
+    my $rej_url         = $auth_url;
+       $rej_url         =~ s/approve/reject/;
     my $lang            = $u->prop('browselang');
 
     # Precache text
@@ -112,8 +115,10 @@ sub _as_email {
     return LJ::Lang::get_text($lang, 'esn.community_join_requst.email_text', undef, $vars) .
         $self->format_options($is_html, $lang, $vars,
         {
-            'esn.manage_membership_reqs'  => [ 2, "$LJ::SITEROOT/community/pending.bml?authas=$communityname&jumpto=$user" ],
-            'esn.manage_community'        => [ 3, "$LJ::SITEROOT/community/manage.bml" ],
+            'esn.manage_request_approve'  => [ 1, $auth_url ],
+            'esn.manage_request_reject'   => [ 2, $rej_url ],
+            'esn.manage_membership_reqs'  => [ 3, "$LJ::SITEROOT/community/pending.bml?authas=$communityname&jumpto=$user" ],
+            'esn.manage_community'        => [ 4, "$LJ::SITEROOT/community/manage.bml" ],
         }
     );
 }

@@ -935,6 +935,11 @@ sub trans
         return redir($r, "$LJ::SITEROOT/approve.bml?$1");
     }
 
+    # reject
+    if ($uri =~ m!^/reject/(\w+\.\w+)!) {
+        return redir($r, "$LJ::SITEROOT/reject.bml?$1");
+    }
+
     return FORBIDDEN if $uri =~ m!^/userpics!;
 
     # avoid the fakeapache library having to deal with the <Files ~ *.bml> stuff

@@ -1102,6 +1102,10 @@ You can:
 
 esn.manage_invitations=[[openlink]]Manage your invitations[[closelink]]
 
+esn.manage_request_approve=[[openlink]]Approve[[closelink]] [[username]]'s request to join
+
+esn.manage_request_reject=[[openlink]]Reject[[closelink]] [[username]]'s request to join
+
 esn.read_last_comm_entries=[[openlink]]Read the latest entries in [[journal]][[closelink]]
 
 esn.poll_vote.subject=[[user]] voted in a poll!
