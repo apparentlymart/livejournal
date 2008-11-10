@@ -644,7 +644,7 @@
 
         $body .= "<div class='details_middle'>";
         unless ($u->is_identity) {
-            $body .= "<p>" . BML::ml('.details.entries', { num => $entry_count }) . " $search_link</p>";
+            $body .= "<p>" . BML::ml('.details.entries', { num => $entry_count }) . "</p>";
             if ($u->timeupdate) {
                 $body .= "<p>" . BML::ml('.details.lastupdated', { timestamp => "<span class='tooltip' title=\"$ago_text\">$lastupdated</span>" }) . " $nudge_link</p>";
             } else {
