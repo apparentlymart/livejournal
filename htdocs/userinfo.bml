@@ -753,7 +753,7 @@
                 my $states_type = $LJ::COUNTRIES_WITH_REGIONS{$u->{'country'}}->{'type'};
                 LJ::load_codes({ $states_type => \%states }) if defined $states_type;
 
-                $state = $u->{'state'};
+                $state = LJ::ehtml($u->{'state'});
                 $state = $states{$state} if $states_type && $states{$state};
                 $estate = LJ::eurl($state);
                 $state = (!$country || $LJ::DISABLED{'directory'}) ? "<span class='region'>$state</span>" :
