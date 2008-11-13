@@ -344,6 +344,8 @@
 
     $body .= "<div id='profile_page'>";
 
+    $body .= LJ::run_hook("userinfo_notice");
+
     if ($com) {
         my $pt;
         my $userinfo_join_community;
