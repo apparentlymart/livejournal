@@ -1278,13 +1278,13 @@ body {
     color: #000000;
 }
 
-A 			{ color: #CC6633; text-decoration: none; } 
-A:link		{ color: #CC6633; text-decoration: none; } 
-A:visited	{ color: #CC6633; text-decoration: none; } 
-A:active	{ color: #FF9966;  } 
-A:hover		{ color: #FF9966; } 
-	
-	
+A             { color: #CC6633; text-decoration: none; } 
+A:link        { color: #CC6633; text-decoration: none; } 
+A:visited    { color: #CC6633; text-decoration: none; } 
+A:active    { color: #FF9966;  } 
+A:hover        { color: #FF9966; } 
+    
+    
 td.body { padding:20px;}
 td.title { padding:20px; font-family: verdana, sans-serif; font-size: 16px; color: #666666; font-weight:bold; letter-spacing:.1em; }
 td.links { padding:8px; font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px;}
@@ -1345,66 +1345,66 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 <!--journal-->
 
 <td valign="top" width="175">
-	
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
-	
+    
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+    
 <tr>
-	<td bgcolor="#CCCCCC"><img src="%%cons:img%%/dot.gif" width="175" height="1"></td>
-	</tr>
-	
-	</table>
-	
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+    <td bgcolor="#CCCCCC"><img src="%%cons:img%%/dot.gif" width="175" height="1"></td>
+    </tr>
+    
+    </table>
+    
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
 
 
-	<!-- ARCHIVES -->
-	
-	<tr>
-	<td bgcolor="#CCCCCC"><font class="subhead">select year</font></td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
-	
-	<tr>
-	<td class="links">
-	%%yearlinks%%
-	</td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
+    <!-- ARCHIVES -->
+    
+    <tr>
+    <td bgcolor="#CCCCCC"><font class="subhead">select year</font></td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
+    
+    <tr>
+    <td class="links">
+    %%yearlinks%%
+    </td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
 
-	<!-- END ARCHIVES -->
+    <!-- END ARCHIVES -->
 
-	<!-- JOURNAL BLOCK-->
-	<tr>
-	<td bgcolor="#CCCCCC"><font class="subhead">my journal</font></td>
-	</tr>
+    <!-- JOURNAL BLOCK-->
+    <tr>
+    <td bgcolor="#CCCCCC"><font class="subhead">my journal</font></td>
+    </tr>
 
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
-	
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
+    
 
-	<tr>
-	<td class="links">
-	<a href="%%urllastn%%">recent posts</a><br>
-	<a href="http://www.livejournal.com/users/%%username%%/info">my userinfo</a><br>
-	<a href="%%urlfriends%%">my friends</a><br>
-	%%website%%</td>
-	</tr>
+    <tr>
+    <td class="links">
+    <a href="%%urllastn%%">recent posts</a><br>
+    <a href="http://www.livejournal.com/users/%%username%%/info">my userinfo</a><br>
+    <a href="%%urlfriends%%">my friends</a><br>
+    %%website%%</td>
+    </tr>
 
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
-       	<!-- JOURNAL BLOCK-->
-		
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
+           <!-- JOURNAL BLOCK-->
+        
         %%skyscraper_ad%%
 
-	</table>
+    </table>
 
 </td>
 <td width="1" bgcolor="#000000" rowspan="2"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
@@ -1432,13 +1432,13 @@ CALENDAR_CLOSE_SKYSCRAPER_AD=>
 CALENDAR_DAY_EVENT=><CENTER><A HREF="%%dayurl%%"><B>%%eventcount%%</B></A></CENTER>
 
 CALENDAR_SKYSCRAPER_AD<=
-	<!-- AD -->
-	
-	<tr>
-	<td class="links">%%ad%%</td>
-	</tr>
+    <!-- AD -->
+    
+    <tr>
+    <td class="links">%%ad%%</td>
+    </tr>
 
-	<!-- AD -->
+    <!-- AD -->
 <=CALENDAR_SKYSCRAPER_AD
 
 CALENDAR_YEAR_LINKS=>%%years%%
@@ -3159,17 +3159,17 @@ DAY_5LINKUNIT_AD=>
 
 DAY_WEBSITE<=
 <br>
-	<a href="%%url%%">%%name%%</a>
+    <a href="%%url%%">%%name%%</a>
 <=DAY_WEBSITE
 
 DAY_SKYSCRAPER_AD<=
-	<!-- AD -->
-	
-	<tr>
-	<td class="links">%%ad%%</td>
-	</tr>
+    <!-- AD -->
+    
+    <tr>
+    <td class="links">%%ad%%</td>
+    </tr>
 
-	<!-- AD -->
+    <!-- AD -->
 <=DAY_SKYSCRAPER_AD
 
 DAY_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">post a comment</a>
@@ -3224,13 +3224,13 @@ body {
   color: #000000;
 }
 
-A 			{ color: #CC6633; text-decoration: none; } 
-A:link		{ color: #CC6633; text-decoration: none; } 
-A:visited	{ color: #CC6633; text-decoration: none; } 
-A:active	{ color: #FF9966;  } 
-A:hover		{ color: #FF9966;  } 
-	
-	
+A             { color: #CC6633; text-decoration: none; } 
+A:link        { color: #CC6633; text-decoration: none; } 
+A:visited    { color: #CC6633; text-decoration: none; } 
+A:active    { color: #FF9966;  } 
+A:hover        { color: #FF9966;  } 
+    
+    
 td.body { padding:20px;}
 td.title { padding:20px; font-family: verdana, sans-serif; font-size: 16px; color: #666666; font-weight:bold; letter-spacing:.1em; }
 td.links { padding:8px; font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px;}
@@ -3287,74 +3287,74 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 <td width="1" bgcolor="#000000" rowspan="2"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 
 <td valign="top" width="175">
-	
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
-	
-	<tr>
-	<td bgcolor="#CCCCCC"><img src="%%cons:img%%/dot.gif" width="175" height="1"></td>
-	</tr>
-	
-	</table>
-	
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+    
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+    
+    <tr>
+    <td bgcolor="#CCCCCC"><img src="%%cons:img%%/dot.gif" width="175" height="1"></td>
+    </tr>
+    
+    </table>
+    
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
 
-	<!-- ARCHIVES -->
-	
-	<tr>
-	<td bgcolor="#CCCCCC"><font class="subhead">browse days</font></td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
+    <!-- ARCHIVES -->
+    
+    <tr>
+    <td bgcolor="#CCCCCC"><font class="subhead">browse days</font></td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
 
-	<tr>
-	<td class="links">
-	%%prevday_6link%%<br>
-	%%nextday_6link%%
-	</td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
-	</tr>
+    <tr>
+    <td class="links">
+    %%prevday_6link%%<br>
+    %%nextday_6link%%
+    </td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
+    </tr>
 
-	<!-- END ARCHIVES -->
-		
-	<!-- JOURNAL BLOCK-->
-	
-	<tr>
-	<td bgcolor="#CCCCCC"><font class="subhead">my journal</font></td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
-	
-	<tr>
-	<td class="links">
-	<a href="%%urllastn%%">recent posts</a><br>
-	<a href="%%urlfriends%%">my friends</a><br>
-	<a href="http://www.livejournal.com/users/%%username%%/info">my userinfo</a><br>
-	<a href="%%urlcalendar%%">my calendar</a>
+    <!-- END ARCHIVES -->
+        
+    <!-- JOURNAL BLOCK-->
+    
+    <tr>
+    <td bgcolor="#CCCCCC"><font class="subhead">my journal</font></td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
+    
+    <tr>
+    <td class="links">
+    <a href="%%urllastn%%">recent posts</a><br>
+    <a href="%%urlfriends%%">my friends</a><br>
+    <a href="http://www.livejournal.com/users/%%username%%/info">my userinfo</a><br>
+    <a href="%%urlcalendar%%">my calendar</a>
         %%website%%</td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
         
         <tr>
-	<td class="links">%%userpic%%</td>
-	</tr>
+    <td class="links">%%userpic%%</td>
+    </tr>
 
 
-	<!-- JOURNAL BLOCK-->
-		
+    <!-- JOURNAL BLOCK-->
+        
         %%skyscraper_ad%%
 
-	</table>
+    </table>
 
 </td>
 
@@ -5514,7 +5514,7 @@ ADS_EVENT<=
 
 FRIENDS_WEBSITE<=
 <br>
-	<a href="%%url%%">my website</a>
+    <a href="%%url%%">my website</a>
 
 <=FRIENDS_WEBSITE
 
@@ -5537,13 +5537,13 @@ FRIENDS_SKIP_BACKWARD=><a href="%%url%%">back %%lc:numitems%% entries</a>
 FRIENDS_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</a> | 
 
 FRIENDS_SKYSCRAPER_AD<=
-	<!-- AD -->
-	
-	<tr>
-	<td class="links">%%ad%%</td>
-	</tr>
+    <!-- AD -->
+    
+    <tr>
+    <td class="links">%%ad%%</td>
+    </tr>
 
-	<!-- AD -->
+    <!-- AD -->
 <=FRIENDS_SKYSCRAPER_AD
 
 FRIENDS_PAGE<=
@@ -5560,13 +5560,13 @@ body {
   color: #000000;
 }
 
-A 			{ color: #CC6633; text-decoration: none; } 
-A:link		{ color: #CC6633; text-decoration: none; } 
-A:visited	{ color: #CC6633; text-decoration: none; } 
-A:active	{ color: #FF9966;  } 
-A:hover		{ color: #FF9966;  } 
-	
-	
+A             { color: #CC6633; text-decoration: none; } 
+A:link        { color: #CC6633; text-decoration: none; } 
+A:visited    { color: #CC6633; text-decoration: none; } 
+A:active    { color: #FF9966;  } 
+A:hover        { color: #FF9966;  } 
+    
+    
 td.body { padding:20px;}
 td.title { padding:20px; font-family: verdana, sans-serif; font-size: 16px; color: #666666; font-weight:bold; letter-spacing:.1em; }
 td.links { padding:8px; font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px;}
@@ -5617,72 +5617,72 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 <img src="%%cons:img%%/dot.gif" width="100%" height="1">
 
 %%events%%
-	
+    
 </td>
 
 <td width="1" bgcolor="#000000" rowspan="2"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 
 <td valign="top" width="175">
-	
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
-	
-	<tr>
-	<td bgcolor="#CCCCCC"><img src="%%cons:img%%/dot.gif" width="175" height="1"></td>
-	</tr>
-	
-	</table>
-	
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+    
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+    
+    <tr>
+    <td bgcolor="#CCCCCC"><img src="%%cons:img%%/dot.gif" width="175" height="1"></td>
+    </tr>
+    
+    </table>
+    
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
 
-	<!-- ARCHIVES -->
-	
-	<tr>
-	<td bgcolor="#CCCCCC"><font class="subhead">browse</font></td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
-	
-	<tr>
-	<td class="links">
-	%%skiplinks%%
-	</td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
+    <!-- ARCHIVES -->
+    
+    <tr>
+    <td bgcolor="#CCCCCC"><font class="subhead">browse</font></td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
+    
+    <tr>
+    <td class="links">
+    %%skiplinks%%
+    </td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
 
-	<!-- END ARCHIVES -->
-		
-	<!-- JOURNAL BLOCK-->
-	
-	<tr>
-	<td bgcolor="#CCCCCC"><font class="subhead">my journal</font></td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
-	
-	<tr>
-	<td class="links">
-	<a href="http://www.livejournal.com/users/%%username%%/info">my userinfo</a><br>
-	<a href="%%urllastn%%">my journal</a><br>
-	<a href="%%urlcalendar%%">my calendar</a>
+    <!-- END ARCHIVES -->
+        
+    <!-- JOURNAL BLOCK-->
+    
+    <tr>
+    <td bgcolor="#CCCCCC"><font class="subhead">my journal</font></td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
+    
+    <tr>
+    <td class="links">
+    <a href="http://www.livejournal.com/users/%%username%%/info">my userinfo</a><br>
+    <a href="%%urllastn%%">my journal</a><br>
+    <a href="%%urlcalendar%%">my calendar</a>
         %%website%%</td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
 
-	<!-- JOURNAL BLOCK-->
-		
+    <!-- JOURNAL BLOCK-->
+        
         %%skyscraper_ad%%
 
-	</table>
+    </table>
 
 </td>
 
@@ -7800,13 +7800,13 @@ lastupdate: 2003-07-08 12:27:54
 LASTN_DATE_FORMAT=>%%yyyy%%-%%mm%%-%%dd%% %%24hh%%:%%min%%
 
 LASTN_SKYSCRAPER_AD<=
-	<!-- AD -->
-	
-	<tr>
-	<td class="links">%%ad%%</td>
-	</tr>
+    <!-- AD -->
+    
+    <tr>
+    <td class="links">%%ad%%</td>
+    </tr>
 
-	<!-- AD -->
+    <!-- AD -->
 <=LASTN_SKYSCRAPER_AD
 
 LASTN_EVENT<=
@@ -7867,7 +7867,7 @@ LASTN_5LINKUNIT_AD<=
 
 LASTN_WEBSITE<=
 <br>
-	<a href="%%url%%">my website</a>
+    <a href="%%url%%">my website</a>
 
 <=LASTN_WEBSITE
 
@@ -7918,13 +7918,13 @@ body {
   color: #000000;
 }
 
-A 			{ color: #CC6633; text-decoration: none; } 
-A:link		{ color: #CC6633; text-decoration: none; } 
-A:visited	{ color: #CC6633; text-decoration: none; } 
-A:active	{ color: #FF9966;  } 
-A:hover		{ color: #FF9966;  } 
-	
-	
+A             { color: #CC6633; text-decoration: none; } 
+A:link        { color: #CC6633; text-decoration: none; } 
+A:visited    { color: #CC6633; text-decoration: none; } 
+A:active    { color: #FF9966;  } 
+A:hover        { color: #FF9966;  } 
+    
+    
 td.body { padding:20px;}
 td.title { padding:20px; font-family: verdana, sans-serif; font-size: 16px; color: #666666; font-weight:bold; letter-spacing:.1em; }
 td.links { padding:8px; font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px;}
@@ -7975,77 +7975,77 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 <img src="%%cons:img%%/dot.gif" width="100%" height="1">
 
 %%events%%
-	
+    
 </td>
 
 <td width="1" bgcolor="#000000" rowspan="2"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 
 <td valign="top" width="175">
-	
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
-	
-	<tr>
-	<td bgcolor="#CCCCCC"><img src="%%cons:img%%/dot.gif" width="175" height="1"></td>
-	</tr>
-	
-	</table>
-	
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+    
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+    
+    <tr>
+    <td bgcolor="#CCCCCC"><img src="%%cons:img%%/dot.gif" width="175" height="1"></td>
+    </tr>
+    
+    </table>
+    
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
 
-	<!-- ARCHIVES -->
-	
-	<tr>
-	<td bgcolor="#CCCCCC"><font class="subhead">browse</font></td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
-	
-	<tr>
-	<td class="links">
-	%%skiplinks%%
-	</td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
+    <!-- ARCHIVES -->
+    
+    <tr>
+    <td bgcolor="#CCCCCC"><font class="subhead">browse</font></td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
+    
+    <tr>
+    <td class="links">
+    %%skiplinks%%
+    </td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
 
-	<!-- END ARCHIVES -->
-		
-	<!-- JOURNAL BLOCK-->
-	
-	<tr>
-	<td bgcolor="#CCCCCC"><font class="subhead">my journal</font></td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
-	
-	<tr>
-	<td class="links">
-	<a href="http://www.livejournal.com/users/%%username%%/info">my userinfo</a><br>
-	<a href="%%urlfriends%%">my friends</a><br>
-	<a href="%%urlcalendar%%">my calendar</a>
+    <!-- END ARCHIVES -->
+        
+    <!-- JOURNAL BLOCK-->
+    
+    <tr>
+    <td bgcolor="#CCCCCC"><font class="subhead">my journal</font></td>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
+    
+    <tr>
+    <td class="links">
+    <a href="http://www.livejournal.com/users/%%username%%/info">my userinfo</a><br>
+    <a href="%%urlfriends%%">my friends</a><br>
+    <a href="%%urlcalendar%%">my calendar</a>
         %%website%%</td>
-	</tr>
-	
-	<tr>
-	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
-	</tr>
+    </tr>
+    
+    <tr>
+    <td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
+    </tr>
         
         <tr>
-	<td class="links">%%userpic%%</td>
-	</tr>
+    <td class="links">%%userpic%%</td>
+    </tr>
 
 
-	<!-- JOURNAL BLOCK-->
-		
+    <!-- JOURNAL BLOCK-->
+        
         %%skyscraper_ad%%
 
-	</table>
+    </table>
 
 </td>
 
