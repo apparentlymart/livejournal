@@ -131,18 +131,11 @@ sub parse_module_embed {
     my $next_preview_id = 1;
     
     while (my $token = $p->get_token) {
-        my ($type, $ctag, $attr, $attord) = @$token;
-        my $tag = lc $ctag;
+        my ($type, $tag, $attr) = @$token;
+        $tag = lc $tag;
         my $newstate = undef;
-        #filter attrs
-        if ($type eq 'S') {
-            $attr->{'type'} = 'application/x-shockwave-flash'
-                if ($tag eq 'object' || $tag eq 'embed') 
-                    && !($attr->{'type'} && $attr->{'type'} =~ m!^application/!);
-        }
+        my $reconstructed = $class->reconstruct($token);
         
-        my $reconstructed = $class->reconstruct([$type, $ctag, $attr, $attord]);
-
         if ($state == REGULAR) {
             if ($tag eq 'lj-embed' && $type eq 'S' && ! $attr->{'/'}) {
                 # <lj-embed ...>, not self-closed 
@@ -425,17 +418,12 @@ sub reconstruct {
     
         # preserve order of attributes. the original order is
         # in element 4 of $token
-        if (@$attord < keys(%$attr)){
-            for my $name (keys(%$attr)){
-                push @$attord, $name unless grep {$_ eq $name} @$attord;
-            }
-        }
         foreach my $name (@$attord) {
             if ($name eq '/') {
                 $selfclose = 1;
                 next;
             }
-            next unless defined $attr->{$name};
+    
             # FIXME: ultra ghetto.
             $attr->{$name} = LJ::no_utf8_flag($attr->{$name});
     
