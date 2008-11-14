@@ -3390,7 +3390,7 @@ DAY_EVENT<=
 <TR>
 <TD BGCOLOR="%%color:weak_back%%">
 <TABLE BORDER="0">
-%%subject%%
+<TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD class="subjlink">%%subject%%</TD></TR>
 %%altposter%%
 <TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
 %%currents%%
@@ -3424,7 +3424,7 @@ ADS_EVENT<=
 
 DAY_NOEVENTS=>No journal entries for this day.
 
-DAY_SUBJECT=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%subject%%</FONT></TD></TR>
+DAY_SUBJECT=>%%subject%%
 
 DAY_TALK_READLINK=><A HREF="%%urlread%%">Read %%messagecount%%</A> or
 
@@ -3527,6 +3527,7 @@ DAY_PAGE<=
     a:visited { color:%%color:page_vlink%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt; text-decoration:none }
     a:active { color:%%color:page_alink%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt; text-decoration:none }
     a:hover { color:%%color:page_alink%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt; text-decoration:underline }
+    .subjlink A, .subjlink A:hover, .subjlink A:visited {color:%%color:weak_text%%; text-decoration: none; }
    -->
   </STYLE>
   %%head%%
@@ -5797,7 +5798,7 @@ FRIENDS_EVENT_PRIVATE<=
 <TD VALIGN="top">
 <TABLE BORDER="0">
 <TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_private.gif"></TD></TR>
-%%subject%%
+<TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD class="subjlink">%%subject%%</TD></TR>
 %%altposter%%
 <TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
 %%currents%%
@@ -5916,6 +5917,7 @@ FRIENDS_PAGE<=
     a:visited { color:%%color:page_vlink%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt; text-decoration:none }
     a:active { color:%%color:page_alink%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt; text-decoration:none }
     a:hover { color:%%color:page_alink%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt; text-decoration:underline }
+    .subjlink A, .subjlink A:hover, .subjlink A:visited { color:%%color:weak_text%%; text-decoration: none; }
    -->
   </STYLE>
   %%head%%
@@ -5994,7 +5996,7 @@ FRIENDS_EVENT_PROTECTED<=
 <TD VALIGN="top">
 <TABLE BORDER="0">
 <TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_protected.gif"></TD></TR>
-%%subject%%
+<TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD class="subjlink">%%subject%%</TD></TR>
 %%altposter%%
 <TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
 %%currents%%
@@ -6015,7 +6017,7 @@ FRIENDS_EVENT_PROTECTED<=
 <BR>
 <=FRIENDS_EVENT_PROTECTED
 
-FRIENDS_SUBJECT=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%subject%%</FONT></TD></TR>
+FRIENDS_SUBJECT=>%%subject%%
 
 FRIENDS_SKIP_LINKS=>Missed some entries?  Then simply jump %%skipbackward%%%%skipspacer%%%%skipforward%%.
 
@@ -8099,7 +8101,7 @@ LASTN_EVENT<=
 <TR>
 <TD BGCOLOR="%%color:weak_back%%">
 <TABLE BORDER="0">
-%%subject%%
+<TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD class="subjlink">%%subject%%</TD></TR>
 %%altposter%%
 <TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
 %%currents%%
@@ -8148,7 +8150,7 @@ LASTN_EVENT_PRIVATE<=
 <TD BGCOLOR="%%color:weak_back%%">
 <TABLE BORDER="0">
 <TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_private.gif"></TD></TR>
-%%subject%%
+<TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD class="subjlink">%%subject%%</TD></TR>
 %%altposter%%
 <TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
 %%currents%%
@@ -8198,7 +8200,7 @@ LASTN_EVENT_PROTECTED<=
 <TD BGCOLOR="%%color:weak_back%%">
 <TABLE BORDER="0">
 <TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_protected.gif"></TD></TR>
-%%subject%%
+<TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD class="subjlink">%%subject%%</TD></TR>
 %%altposter%%
 <TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
 %%currents%%
@@ -8243,6 +8245,7 @@ LASTN_PAGE<=
     a:visited { color:%%color:page_vlink%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt; text-decoration:none }
     a:active { color:%%color:page_alink%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt; text-decoration:none }
     a:hover { color:%%color:page_alink%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt; text-decoration:underline }
+    .subjlink A, .subjlink A:hover, .subjlink A:visited { color:%%color:weak_text%%; text-decoration: none; }
    -->
   </STYLE>
   %%head%%
@@ -8302,7 +8305,7 @@ LASTN_TALK_READLINK=><A HREF="%%urlread%%">Read %%messagecount%%</A> or
 
 LASTN_SKIP_BACKWARD=><A HREF="%%url%%">back %%numitems%% entries</A>
 
-LASTN_SUBJECT=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%subject%%</FONT></TD></TR>
+LASTN_SUBJECT=>%%subject%%
 
 LASTN_TALK_LINKS<=
 <TR>
