@@ -39,6 +39,9 @@ sub option {
 
         next if !$show_hidden && $is_hidden && $sitescheme ne $value;
 
+        my $desc = $scheme->{desc} && LJ::Lang::string_exists($scheme->{desc}) ? LJ::Lang::ml($scheme->{desc}) : "";
+        $label .= " ($desc)" if $desc;
+
         $ret .= LJ::html_check({
             type => "radio",
             name => "${key}sitescheme",
