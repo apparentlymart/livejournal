@@ -3396,16 +3396,18 @@ sub subscribe_interface {
 
         # inbox method
         my $special_subs = 0;
+        my $sub_count = 0;
         foreach my $pending_sub (@pending_subscriptions) {
             if (!ref $pending_sub) {
                 next if $u->is_identity && $pending_sub->disabled($u);
 
-                my $disabled_class = $pending_sub->disabled($u) ? " class='Disabled'" : "";
+                my $disabled_class = $pending_sub->disabled($u) ? "Disabled" : "";
+                my $altrow_class = $sub_count % 2 == 1 ? "altrow" : "";
                 my $hidden = $pending_sub->selected($u) ? "" : " style='visibility: hidden;'";
                 my $sub_title = " " . $pending_sub->htmlcontrol_label($u);
                 $sub_title = LJ::run_hook("disabled_esn_sub", $u) . $sub_title if $pending_sub->disabled($u);
 
-                $cat_html .= "<tr$disabled_class>";
+                $cat_html .= "<tr class='$disabled_class $altrow_class'";
                 $cat_html .= "<td>" . $pending_sub->htmlcontrol($u) . "$sub_title*</td>";
                 $cat_html .= "<td>&nbsp;</td>";
                 $cat_html .= "<td class='NotificationOptions'$hidden>" . $pending_sub->htmlcontrol($u, undef, undef, notif => 1, notif_catid => $catid, notif_ntypeid => 2) . "</td>";
@@ -3414,6 +3416,7 @@ sub subscribe_interface {
                 $cat_html .= "</tr>";
 
                 $special_subs++;
+                $sub_count++;
                 next;
             }
 
@@ -3468,8 +3471,9 @@ sub subscribe_interface {
 
             my $inactiveclass = $pending_sub->active ? '' : 'Inactive';
             my $disabledclass = $pending_sub->enabled ? '' : 'Disabled';
+            my $altrowclass = $sub_count % 2 == 1 ? "altrow" : "";
 
-            $cat_html  .= "<tr class='$inactiveclass $disabledclass'><td>";
+            $cat_html  .= "<tr class='$inactiveclass $disabledclass $altrowclass'><td>";
 
             if ($is_tracking_category && ! $pending_sub->pending) {
                 my $subid = $pending_sub->id;
@@ -3561,6 +3565,7 @@ sub subscribe_interface {
             }
 
             $cat_html .= "</tr>";
+            $sub_count++;
         }
 
         my $cols = 2 + (scalar @notify_classes);
