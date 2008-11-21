@@ -185,8 +185,12 @@ body<=
 
     my $u;
     my $clusterdown = 0;
-    if ($sp->{'reqtype'} eq "user") {
+    if ($sp->{'reqtype'} eq "user" && $sp->{'requserid'}) {
         $u = LJ::load_userid($sp->{'requserid'});
+        unless ($u) {
+            warn "Error: user '$sp->{requserid}' not found in request #$spid";
+            return "<?h1 $ML{'.error'} h1?><?p Unknown user p?>";
+        }
 
         # now do a check for a down cluster?
         my $dbr = LJ::get_cluster_reader($u);
