@@ -270,7 +270,7 @@ sub render_body {
                     value => '1',
                     selected => LJ::did_post() ? $post->{tos} : 0,
                 );
-                $ret .= " <span class='text'>" . $class->ml('widget.createaccount.alt_layout.field.tos') . "</span><br /><br />";
+                $ret .= " <label for='create_tos' class='text'>" . $class->ml('widget.createaccount.alt_layout.field.tos') . "</label><br /><br />";
             } else {
                 $ret .= LJ::html_hidden( tos => 1 );
             }
@@ -283,7 +283,7 @@ sub render_body {
             value => '1',
             selected => LJ::did_post() ? $post->{news} : 0,
         );
-        $ret .= " <span class='text'>" . $class->ml('widget.createaccount.field.news', { sitename => $LJ::SITENAMESHORT }) . "</span>";
+        $ret .= " <label for='create_news' class='text'>" . $class->ml('widget.createaccount.field.news', { sitename => $LJ::SITENAMESHORT }) . "</label>";
 
         $ret .= "</p>";
         $ret .= $error_msg->('tos', '<span class="formitemFlag">', '</span><br />');
