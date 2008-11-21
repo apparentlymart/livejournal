@@ -650,20 +650,18 @@ sub get_cats {
             main => 1,
             order => 1,
         },
-        sup => {
-            text => LJ::Lang::ml('customize.cats.sup'),
-            main => 1,
-            order => 3,
-        },
         special => {
             text => LJ::Lang::ml('customize.cats.special'),
             main => 1,
-            order => 4,
+            order => 3,
         },
         custom => {
             text => LJ::Lang::ml('customize.cats.custom'),
             main => 1,
-            order => 5,
+            order => 4,
+        },
+        sup => {
+            text => LJ::Lang::ml('customize.cats.sup'),
         },
         animals => {
             text => LJ::Lang::ml('customize.cats.animals'),
