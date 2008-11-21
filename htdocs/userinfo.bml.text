@@ -70,6 +70,8 @@
 
 .details.entries=[[num]] [[?num|entry|entries]]
 
+.details.entries2=[[num_comma]] [[?num_raw|entry|entries]]
+
 .details.flag.other=Flag this journal as mature/adult.
 
 .details.flag.self=Set this journal as mature/adult.
@@ -88,6 +90,8 @@
 
 .details.memories=[[num]] <a [[aopts]]>[[?num|Memory|Memories]]</a>
 
+.details.memories2=[[num_comma]] <a [[aopts]]>[[?num_raw|Memory|Memories]]</a>
+
 .details.nudge=Nudge
 
 .details.search=Search
@@ -95,6 +99,8 @@
 .details.supportpoints=<a [[aopts]]>Support Points</a>: [[num]]
 
 .details.tags=[[num]] <a [[aopts]]>[[?num|Tag|Tags]]</a>
+
+.details.tags2=[[num_comma]] <a [[aopts]]>[[?num_raw|Tag|Tags]]</a>
 
 .details.title=[[user]]'s Journal
 

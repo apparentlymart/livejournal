@@ -614,9 +614,9 @@
         my @view_links;
         my $memcount = LJ::Memories::count($userid) || 0;
         my $tagcount = scalar keys %{$u->tags};
-        push @view_links, BML::ml('.details.memories', { num => $memcount, aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" })
+        push @view_links, BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" })
             unless $u->is_syndicated;
-        push @view_links, BML::ml('.details.tags', { num => $tagcount, aopts => "href='" . $u->journal_base . "/tag/'" })
+        push @view_links, BML::ml('.details.tags2', { num_raw => $tagcount, num_comma => LJ::commafy($tagcount), aopts => "href='" . $u->journal_base . "/tag/'" })
             unless $u->is_identity || $u->is_syndicated;
 
         ## fotobilder gallery count
@@ -635,7 +635,7 @@
             } else {
                 my $order = $ct < 100 ? 10 : 100;
                 my $base = POSIX::floor($ct / $order);
-                $ct_str = $base * $order . "+";
+                $ct_str = LJ::commafy($base * $order) . "+";
             }
         } else {
             $ct_str = "0";
@@ -646,7 +646,7 @@
 
         $body .= "<div class='details_middle'>";
         unless ($u->is_identity) {
-            $body .= "<p>" . BML::ml('.details.entries', { num => $entry_count }) . "</p>";
+            $body .= "<p>" . BML::ml('.details.entries2', { num_raw => $entry_count, num_comma => LJ::commafy($entry_count) }) . "</p>";
             if ($u->timeupdate) {
                 $body .= "<p>" . BML::ml('.details.lastupdated', { timestamp => "<span class='tooltip' title=\"$ago_text\">$lastupdated</span>" }) . " $nudge_link</p>";
             } else {
