@@ -165,6 +165,8 @@ sub make_journal
     $opts->{contenttype} = $ctx->[S2::SCRATCH]->{contenttype}
         if defined $ctx->[S2::SCRATCH]->{contenttype};
 
+    $ret = $page->{'LJ_cmtinfo'} . $ret if $opts->{'need_cmtinfo'} and defined $page->{'LJ_cmtinfo'};
+
     return $ret;
 }
 

@@ -951,7 +951,7 @@ sub fixup_logitem_replycount {
 sub load_comments
 {
     my ($u, $remote, $nodetype, $nodeid, $opts) = @_;
-
+    
     my $n = $u->{'clusterid'};
     my $viewall = $opts->{viewall};
 
@@ -1073,7 +1073,7 @@ sub load_comments
         my $cfc = shift @check_for_children;
         next unless defined $children{$cfc};
         foreach my $child (@{$children{$cfc}}) {
-            if ($expand_children{$cfc}) {
+            if (@posts_to_load < $page_size || $opts->{expand_all}) {
                 push @posts_to_load, $child;
                 ## expand only the first child, then clear the flag
                 delete $expand_children{$cfc}; 
@@ -1568,9 +1568,17 @@ sub talkform {
 
     # Link to create an account
     if (!$remote || defined $oid_identity) {
-        $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td><span style='font-size: 8pt; font-style: italic;'>";
-        $ret .= BML::ml('.noaccount', {'aopts' => "href='$LJ::SITEROOT/create.bml'"});
-        $ret .= "</span></td></tr>\n";
+        my $create_link = LJ::run_hook("override_create_link_on_talkpost_form", $journalu);
+
+        $ret .= "<tr valign='middle' align='left'>";
+        if ($create_link) {
+            $ret .= $create_link;
+        } else {
+            $ret .= "<td colspan='2'></td><td><span style='font-size: 8pt; font-style: italic;'>";
+            $ret .= BML::ml('.noaccount', {'aopts' => "href='$LJ::SITEROOT/create.bml'"});
+            $ret .= "</span></td>";
+        }
+        $ret .= "</tr>\n";
     }
 
     } # end edit check

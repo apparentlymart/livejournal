@@ -3006,6 +3006,12 @@ widget.contentflagreport.explore=Explore [[sitenameabbrev]]
 
 widget.contentflagreport.note=<span class='note-header'>Note:</span> <span class='note-text'>You have not yet flagged this content. Please review the following options and select the one that best fits your concerns.</span>
 
+widget.createaccount.alt_layout.error.tos=You must agree to the Terms of Service.
+
+widget.createaccount.alt_layout.field.captcha=Enter the text below to help verify the authenticity of this account:
+
+widget.createaccount.alt_layout.field.tos=Check here to agree.
+
 widget.createaccount.btn=Create Account
 
 widget.createaccount.error.birthdate.invalid=You must enter a valid birthdate.
@@ -3057,6 +3063,8 @@ widget.createaccount.field.username=Username:
 widget.createaccount.field.username.available=Username available
 
 widget.createaccount.tip.birthdate=Required by law. No worries, you can set privacy on this after you're done creating an account.
+
+widget.createaccount.tip.birthdate2=Required by law. By default, we only display the month and day.
 
 widget.createaccount.tip.captcha=If you can't read the text, type "audio" to take a sound test instead.
 

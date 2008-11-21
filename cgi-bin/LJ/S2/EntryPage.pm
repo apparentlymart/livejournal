@@ -94,6 +94,7 @@ sub EntryPage
         # user object is cached from call just made in EntryPage_entry
         'up' => LJ::load_user($s2entry->{'poster'}->{'username'}),
         'viewall' => $viewall,
+        'expand_all' => $opts->{expand_all},
     };
 
     my $userlite_journal = UserLite($u);
@@ -315,6 +316,7 @@ sub EntryPage
         my $js = "<script>\n// don't crawl this.  read http://www.livejournal.com/developer/exporting.bml\n";
         $js .= "var LJ_cmtinfo = " . LJ::js_dumper($cmtinfo) . "\n";
         $js .= '</script>';
+        $p->{'LJ_cmtinfo'} = $js if $opts->{'need_cmtinfo'};
         $p->{'head_content'} .= $js;
     }
 
