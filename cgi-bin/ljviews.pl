@@ -263,7 +263,7 @@ sub get_public_styles {
 
     # Try process cache/memcache if no extra options are requested
     my $memkey = "s1pubstyc";
-    my $pubstyc = {};
+    my $pubstyc;
 
     unless ($opts) {
         # check process cache
@@ -275,6 +275,7 @@ sub get_public_styles {
         $LJ::CACHED_S1_PUBLIC_LAYERS = $pubstyc;
         return $pubstyc if $pubstyc;
     }
+    $pubstyc = {};
 
     # not cached, build from db
     my $sysid = LJ::get_userid("system");
