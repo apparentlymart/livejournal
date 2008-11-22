@@ -492,6 +492,8 @@ sub handle_post {
             inviter => $get->{from},
             underage => $is_underage,
             ofage => $ofage,
+            extra_props => $opts{extra_props},
+            status_history => $opts{status_history},
         );
         return $class->ml('widget.createaccount.error.cannotcreate') unless $nu;
 
@@ -541,19 +543,7 @@ sub handle_post {
         # Default new accounts to Plus level
         $nu->add_to_class('plus');
         $nu->set_prop("create_accttype", "plus");
-        
-        if($opts{extra_props}){
-            while (my ($key, $value) = each( %{$opts{extra_props}} )){
-                $nu->set_prop($key => $value);
-            };
-        }
 
-        if($opts{status_history}){
-            while (my ($key, $value) = each( %{$opts{status_history}} )){
-                LJ::statushistory_add($nu, 0, $key => $value);
-            };
-        }
-        
         my $stop_output;
         my $body;
         my $redirect = $opts{ret};

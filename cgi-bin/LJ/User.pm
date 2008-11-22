@@ -84,6 +84,21 @@ sub create {
         $u->set_prop($name, $val);
     }
 
+    if ($opts{extra_props}) {
+        while (my ($key, $value) = each( %{$opts{extra_props}} )) {
+            $u->set_prop( $key => $value );
+        }
+    }
+
+    if ($opts{status_history}) {
+        my $system = LJ::load_user("system");
+        if ($system) {
+            while (my ($key, $value) = each( %{$opts{status_history}} )) {
+                LJ::statushistory_add($u, $system, $key, $value);
+            }
+        }
+    }
+
     LJ::run_hooks("post_create", {
         'userid' => $userid,
         'user'   => $username,
