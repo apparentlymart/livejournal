@@ -1314,6 +1314,13 @@ sub talkform {
         return;
     };
 
+    # special link to create an account
+    my $create_link;
+    if (!$remote || defined $oid_identity) {
+        $create_link = LJ::run_hook("override_create_link_on_talkpost_form", $journalu);
+        $ret .= $create_link;
+    }
+
     # from registered user or anonymous?
     $ret .= "<table>\n";
     $ret .= "<tr><td align='right' valign='top'>$BML::ML{'.opt.from'}</td>";
@@ -1567,17 +1574,11 @@ sub talkform {
     $ret .= "</td></tr>\n";
 
     # Link to create an account
-    if (!$remote || defined $oid_identity) {
-        my $create_link = LJ::run_hook("override_create_link_on_talkpost_form", $journalu);
-
+    if (!$create_link && (!$remote || defined $oid_identity)) {
         $ret .= "<tr valign='middle' align='left'>";
-        if ($create_link) {
-            $ret .= $create_link;
-        } else {
-            $ret .= "<td colspan='2'></td><td><span style='font-size: 8pt; font-style: italic;'>";
-            $ret .= BML::ml('.noaccount', {'aopts' => "href='$LJ::SITEROOT/create.bml'"});
-            $ret .= "</span></td>";
-        }
+        $ret .= "<td colspan='2'></td><td><span style='font-size: 8pt; font-style: italic;'>";
+        $ret .= BML::ml('.noaccount', {'aopts' => "href='$LJ::SITEROOT/create.bml'"});
+        $ret .= "</span></td>";
         $ret .= "</tr>\n";
     }
 
