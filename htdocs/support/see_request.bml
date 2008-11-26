@@ -76,6 +76,10 @@ head<=
         return doSetReplyType('internal');
     }
 
+    function doChangeLanguage () {
+        return doSetReplyType('internal');
+    }
+
     function doDegreen () {
         return doSetReplyType('internal');
     }
@@ -737,6 +741,34 @@ body<=
         $ret .= "</tr></table>\n";
 
         $ret .= "</td></tr>\n";
+    }
+
+    if (LJ::Support::can_read_internal($sp, $remote) && ! $is_poster) {
+        # language
+        my %langs;
+        my @lang_codes;
+        my $lang_list = LJ::Lang::get_lang_names();
+        for (my $i = 0; $i < @$lang_list; $i = $i+2) {
+            push @lang_codes, $lang_list->[$i];
+            $langs{$lang_list->[$i]} = $lang_list->[$i+1];
+        }
+        @lang_codes = sort { $a cmp $b } @lang_codes;
+
+        my $current_lang = $props->{language} ? "[$props->{language}] $langs{$props->{language}}" : $ML{'.change.language.nolang'};
+
+        $ret .= "<tr><td align='right'></td><td>\n";
+        $ret .= "<table cellpadding='5'>";
+        $ret .= "<tr><td>$ML{'.change.language'}<br />";
+        $ret .= LJ::html_select({ 'name' => 'changelanguage',
+                                  'onchange' => 'doChangeLanguage();' },
+                                ('', $current_lang),
+                                map { $_, "---> [$_] $langs{$_}" }
+                                @lang_codes);
+        $ret .= "</td></tr></table>";
+        $ret .= "</td></tr>\n";
+    }
+
+    if (LJ::Support::can_perform_actions($sp, $remote) && ! $is_poster) {
         if ($sp->{'timelasthelp'} > ($sp->{'timetouched'}+5)) {
             $ret .= "<tr><td align='right'>$ML{'.put.in.queue'}:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'touch',

@@ -17,6 +17,8 @@
 
 .internal.changecat=To change a request's category, you must select "Internal Comment / Action" and optionally explain why you're changing it.
 
+.internal.changelanguage=To change a request's language, you must select "Internal Comment / Action" and optionally explain why you're changing it.
+
 .internal.changesum=To change the summary of a request, you must select "Internal Comment / Action" and enter in the new summary.
 
 .internal.touch=To change a request's status, you must select "Internal Comment / Action" and explain why you're changing it.
@@ -26,6 +28,8 @@
 .invalid.noanswer=Invalid screened response to approve.
 
 .invalid.notcat=That category doesn't seem to exist.
+
+.invalid.notlang=That language doesn't seem to exist.
 
 .invalid.noid=This action requires a support request ID.
 

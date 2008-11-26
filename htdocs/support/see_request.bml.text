@@ -15,6 +15,10 @@
 
 .change.cat=Change Category
 
+.change.language=Change Language:
+
+.change.language.nolang=(no language set)
+
 .change.summary=Change summary
 
 .clear=Clear

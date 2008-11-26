@@ -83,6 +83,9 @@ body<=
     return LJ::bad_input($ML{'.internal.changecat'})
         if $FORM{'changecat'} && ($type ne "internal" || ! LJ::Support::can_perform_actions($sp, $remote));
 
+    return LJ::bad_input($ML{'.internal.changelanguage'})
+        if $FORM{'changelanguage'} && ($type ne "internal" || ! LJ::Support::can_read_internal($sp, $remote));
+
     return LJ::bad_input($ML{'.internal.touch'})
         if ($FORM{'touch'} || $FORM{'untouch'}) &&
             ($type ne "internal" || ! LJ::Support::can_perform_actions($sp, $remote));
@@ -91,7 +94,7 @@ body<=
         if $FORM{'changesum'} && ($type ne "internal" || ! LJ::Support::can_change_summary($sp, $remote));
 
     return LJ::bad_input($ML{'.invalid.blank'})
-        if $FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} &&
+        if $FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} && !$FORM{'changelanguage'} &&
             !$FORM{'touch'} && !$FORM{'untouch'} && !$FORM{'changesum'} && !$FORM{'bounce_email'};
 
     # Load up vars for approvals
@@ -117,6 +120,15 @@ body<=
 
         return LJ::bad_input($ML{'.invalid.notcat'})
             unless ($cats->{$newcat});
+    }
+
+    # check language
+    my $newlang;
+    if ($FORM{'changelanguage'}) {
+        $newlang = $FORM{'changelanguage'};
+
+        return LJ::bad_input($ML{'.invalid.notlang'})
+            unless grep { $newlang eq $_ } @LJ::LANGS;
     }
 
     # get dbh now, it's always needed
@@ -205,6 +217,8 @@ body<=
         $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
         $status .= "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n";
         $sp->{'spcatid'} = $newcat; # update category so IC e-mail goes to right place
+
+        LJ::run_hook("support_changecat_extra_actions", spid => $spid, catkey => $cats->{$newcat}->{catkey});
     }
 
     ## approving a screened response
@@ -223,6 +237,50 @@ body<=
         my $qnewsub = $dbh->quote($FORM{'summary'});
         $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
         $status .= "Changing subject from \"$sp->{'subject'}\" to \"$FORM{'summary'}\".\n\n";
+    }
+
+    # change language and set it in the summary
+    if ($FORM{'changelanguage'}) {
+        my %langs;
+        my $lang_list = LJ::Lang::get_lang_names();
+        for (my $i = 0; $i < @$lang_list; $i = $i+2) {
+            $langs{$lang_list->[$i]} = $lang_list->[$i+1];
+        }
+        my $oldlang = LJ::Support::prop($spid, "language");
+
+        LJ::Support::set_prop($spid, "language", $newlang);
+
+        my $summary = $FORM{summary} ? $FORM{summary} : $sp->{subject};
+        $summary =~ s/[\n\r]//g;
+        my $summary_has_lang = 0;
+        my $summary_edited = 0;
+        while ($summary =~ /\[(.+?)\]/g) {
+            my $summary_lang = $1;
+            if ($summary_lang eq $newlang) {
+                $summary_has_lang = 1;
+                last;
+            }
+            if ($langs{$summary_lang}) {
+                if ($newlang =~ /^en_/) {
+                    $summary =~ s/\[$summary_lang\]//;
+                } else {
+                    $summary =~ s/\[$summary_lang\]/\[$newlang\]/;
+                }
+                $summary_has_lang = 1;
+                $summary_edited = 1;
+                last;
+            }
+        }
+        unless ($summary_has_lang || $newlang =~ /^en_/) {
+            $summary = "[$newlang] $summary";
+            $summary_edited = 1;
+        }
+        if ($summary && $summary_edited) {
+            my $qnewsub = $dbh->quote($summary);
+            $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
+        }
+
+        $status .= "Changing language from \"[$oldlang] $langs{$oldlang}\" to \"[$newlang] $langs{$newlang}\".\n\n";
     }
 
     my $splid = LJ::Support::append_request($sp, {

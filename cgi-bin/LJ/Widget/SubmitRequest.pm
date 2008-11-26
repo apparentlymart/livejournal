@@ -72,6 +72,12 @@ sub render_body {
         $ret .= "</div></p>";
     }
 
+    $ret .= "<p><b>" . $class->ml('widget.support.submit.language') . "</b><br />";
+    $ret .= "<div style='margin-left: 30px'>";
+    $ret .= "<p><?de " . $class->ml('widget.support.submit.language.note') . " de?></p>";
+    $ret .= $class->html_select(name => 'language', list => LJ::Lang::get_lang_names(), selected => $post->{language} || "en_LJ");
+    $ret .= "</div></p>";
+
     $ret .= "<p><b>" . $class->header_summary(%opts) . "</b><br />";
     $ret .= "<div style='margin-left: 30px'>";
     $ret .= $class->html_text(name => 'subject', size => '40', maxlength => '80', value => $post->{subject});
@@ -160,6 +166,9 @@ sub handle_post {
 
         push @errors, $class->ml('widget.support.submit.error.captcha') unless $result->{is_valid} eq '1';
     }
+
+    $post->{'language'} = "en_LJ" unless grep { $post->{'language'} eq $_ } @LJ::LANGS;
+    $req{'language'} = $post->{'language'};
 
     $req{'body'} = $post->{'message'};
     $req{'subject'} = $post->{'subject'};
