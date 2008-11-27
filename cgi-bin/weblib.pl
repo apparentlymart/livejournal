@@ -3792,6 +3792,7 @@ sub pageview_unique_string {
 sub site_schemes {
     my @schemes = @LJ::SCHEMES;
     LJ::run_hooks('modify_scheme_list', \@schemes);
+    @schemes = grep { !$_->{disabled} } @schemes;
     return @schemes;
 }
 
