@@ -743,7 +743,7 @@ body<=
         $ret .= "</td></tr>\n";
     }
 
-    if (LJ::Support::can_read_internal($sp, $remote) && ! $is_poster) {
+    if (LJ::is_enabled("support_request_language") && LJ::Support::can_read_internal($sp, $remote) && ! $is_poster) {
         # language
         my %langs;
         my @lang_codes;

@@ -521,8 +521,10 @@ sub file_request
 
     if (@$errors) { return 0; }
 
-    $o->{'language'} = undef unless grep { $o->{'language'} eq $_ } @LJ::LANGS;
-    $reqsubject = "[$o->{'language'}] $reqsubject" if $o->{'language'} && $o->{'language'} !~ /^en_/;
+    if (LJ::is_enabled("support_request_language")) {
+        $o->{'language'} = undef unless grep { $o->{'language'} eq $_ } @LJ::LANGS;
+        $reqsubject = "[$o->{'language'}] $reqsubject" if $o->{'language'} && $o->{'language'} !~ /^en_/;
+    }
 
     my $dbh = LJ::get_db_writer();
 
@@ -586,7 +588,11 @@ sub file_request
         return unless $q && $q ne 'NULL';
         push @data, "($spid, '$_[0]', $q)";
     };
-    $add_data->($_, $o->{$_}) foreach qw(uniq useragent language);
+    if (LJ::is_enabled("support_request_language")) {
+        $add_data->($_, $o->{$_}) foreach qw(uniq useragent language);
+    } else {
+        $add_data->($_, $o->{$_}) foreach qw(uniq useragent);
+    }
     $dbh->do("INSERT INTO supportprop (spid, prop, value) VALUES " . join(',', @data));
 
     $dbh->do("INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) ".
