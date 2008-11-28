@@ -280,7 +280,7 @@ sub print_paging {
         $ret .= $class->start_form;
         $ret .= "<span class='item'>" . $class->ml('widget.themechooser.page') . " ";
         $ret .= $class->ml('widget.themechooser.page.maxpage', { currentpage => $currentpage, maxpage => $max_page }) . " ";
-        $ret .= LJ::Widget::ThemeNav->html_submit( page_dropdown_submit => $class->ml('widget.themechooser.btn.page'), { id => "page_dropdown_btn_$location" }) . "</span>";
+        $ret .= "<noscript>" . LJ::Widget::ThemeNav->html_submit( page_dropdown_submit => $class->ml('widget.themechooser.btn.page') ) . "</noscript></span>";
         $ret .= $class->end_form;
 
         if ($page + 1 <= $max_page) {
@@ -304,7 +304,7 @@ sub print_paging {
         selected => $show, },
         @shows,
     ) . " ";
-    $ret .= LJ::Widget::ThemeNav->html_submit( show_dropdown_submit => $class->ml('widget.themechooser.btn.show'), { id => "show_dropdown_btn_$location" }) . "</span>";
+    $ret .= "<noscript>" . LJ::Widget::ThemeNav->html_submit( show_dropdown_submit => $class->ml('widget.themechooser.btn.show') ) . "</noscript></span>";
     $ret .= $class->end_form;
 
     $ret .= " <span id='paging_msg_area_$location'></span>";
@@ -346,18 +346,6 @@ sub js {
     q [
         initWidget: function () {
             var self = this;
-
-            if ($('page_dropdown_btn_top'))
-                $('page_dropdown_btn_top').style.display = "none";
-
-            if ($('page_dropdown_btn_bottom'))
-                $('page_dropdown_btn_bottom').style.display = "none";
-
-            if ($('show_dropdown_btn_top'))
-                $('show_dropdown_btn_top').style.display = "none";
-
-            if ($('show_dropdown_btn_bottom'))
-                $('show_dropdown_btn_bottom').style.display = "none";
 
             var filter_links = DOM.getElementsByClassName(document, "theme-cat");
             filter_links = filter_links.concat(DOM.getElementsByClassName(document, "theme-layout"));
