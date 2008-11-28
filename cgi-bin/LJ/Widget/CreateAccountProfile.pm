@@ -67,8 +67,15 @@ sub render_body {
     $ret .= "</td></tr>\n";
 
     ### location
+    my %countries;
+    LJ::load_codes({ "country" => \%countries});
+    my $defalt_country;
+    if ($LJ::USE_IPMAP) {    
+        $defalt_country = LJ::LJcom::get_ipmap()->Resolve(LJ::get_remote_ip());
+        undef $defalt_country unless $countries{$defalt_country};
+    }
     $ret .= "<tr valign='middle'><td class='field-name'>" . $class->ml('widget.createaccountprofile.field.location') . "</td>\n<td>";
-    $ret .= LJ::Widget::Location->render( minimal_display => 1, skip_timezone => 1 , $loc_post);
+    $ret .= LJ::Widget::Location->render( country => $defalt_country, minimal_display => 1, skip_timezone => 1 , $loc_post);
     $ret .= "</td></tr>\n";
 
     $ret .= "</table><br />\n";
