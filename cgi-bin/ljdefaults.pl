@@ -403,6 +403,7 @@
                        poll           => "tools/endpoints/poll.bml",
                        jobstatus      => "tools/endpoints/jobstatus.bml",
                        widget         => "tools/endpoints/widget.bml",
+                       multisearch    => "tools/endpoints/multisearch.bml",
                        );
 
     foreach my $src (keys %ajaxmapping) {
