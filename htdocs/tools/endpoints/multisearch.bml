@@ -60,14 +60,14 @@
         my $uids_ref;
 
         my $uids_ref = $dbr->selectall_arrayref("SELECT userid FROM user WHERE journaltype='P' AND statusvis='V' ".
-                                        "AND allow_contactshow='Y' AND email=? LIMIT $max_users", undef);
+                                        "AND email=? LIMIT $max_users", undef);
         # try the email table
         unless (@$uids_ref) {
             $uids_ref = $dbr->selectall_arrayref(qq{
                 SELECT e.userid
                 FROM user u, email e
                 WHERE e.email=? AND e.userid=u.userid AND u.journaltype='P' AND u.statusvis='V'
-                AND u.allow_contactshow='Y' LIMIT $max_users
+                LIMIT $max_users
             }, undef, $email);
         }
 
@@ -78,6 +78,7 @@
         foreach $uid (@$uids_ref) {
             $uid = $uid->[0]; # dereference
             if (my $u = LJ::load_userid($uid)) {
+                next if 'Y' ne $u->opt_findbyemail; # Search by email disabled by user
                 LJ::load_user_props($u, "opt_whatemailshow");
                 if ($u->{'opt_whatemailshow'} eq "A" || $u->{'opt_whatemailshow'} eq "B") {
                     if ($output eq "foaf") {
