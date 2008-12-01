@@ -10,9 +10,6 @@
 #profile_page a:visited {
     color: #470196;
 }
-#profile_page img {
-    border: 0;
-}
 
 .left {
     float: left;
@@ -238,6 +235,10 @@ span.expandcollapse {
     .user_info_im table td.im_status {
         text-align: center;
     }
+        .user_info_im table td.im_icon img,
+        .user_info_im table td.im_status img {
+            border: 0;
+        }
 .user_info_stats_left th,
 .user_info_stats_left td,
 .user_info_stats_right th,
