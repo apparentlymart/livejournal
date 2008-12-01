@@ -1364,7 +1364,7 @@
             $posting .= "<p class='alt_friends'><span class='inner_section_header'>$alt2_label (" . scalar @alt2_access ."):</span> <span class='inner_section_body'>$list</span></p>\n"
                 if scalar @alt2_access;
 
-            $posting .= "</div>";
+            $posting .= "</div>" if @accesslist;
         }
 
     }
