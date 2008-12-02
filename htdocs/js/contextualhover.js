@@ -419,6 +419,62 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             content.appendChild(vgift);
         }
 
+        // ban / unban
+        var ban;
+        if (data.is_logged_in && ! data.is_requester) {
+            ban = document.createElement("span");
+
+            if(!data.is_banned) {
+                // if user no banned - show ban link
+                var setBan = document.createElement("span");
+                var setBanLink = document.createElement("a");
+                
+                setBanLink.href = window.Site.siteroot + '/manage/banusers.bml';
+                setBanLink.innerHTML = 'Ban user';
+                
+                setBan.appendChild(setBanLink);
+
+                DOM.addClassName(setBan, "SetBan");
+
+                if (!ContextualPopup.disableAJAX) {
+                    DOM.addEventListener(setBanLink, "click", function (e) {
+                        Event.prep(e);
+                        Event.stop(e);
+                        return ContextualPopup.changeRelation(data, ctxPopupId, "setBan", e); });
+                }
+
+                ban.appendChild(setBan);
+
+
+                
+            } else {
+                // if use banned - show unban link
+                var setUnban = document.createElement("span");
+                var setUnbanLink = document.createElement("a");
+                setUnbanLink.href = window.Site.siteroot + '/manage/banusers.bml';
+                setUnbanLink.innerHTML = 'Unban user';
+                setUnban.appendChild(setUnbanLink);
+
+                DOM.addClassName(setUnban, "SetUnban");
+
+                if (!ContextualPopup.disableAJAX) {
+                    DOM.addEventListener(setUnbanLink, "click", function (e) {
+                        Event.prep(e);
+                        Event.stop(e);
+                        return ContextualPopup.changeRelation(data, ctxPopupId, "setUnban", e); });
+                }
+
+                ban.appendChild(setUnban);
+ 
+            }
+        }
+        
+        if(ban) {
+            content.appendChild(document.createElement("br"));    
+            content.appendChild(ban);
+        }
+
+
         // break
         if ((data.is_logged_in && !data.is_requester) || vgift) content.appendChild(document.createElement("br"));
 
@@ -449,6 +505,8 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         profileLink.innerHTML = "Profile";
         content.appendChild(profileLink);
 
+        
+        
         // clearing div
         var clearingDiv = document.createElement("div");
         DOM.addClassName(clearingDiv, "ljclear");
@@ -491,7 +549,7 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action, evt) {
         if (!data.success) return;
 
         if (ContextualPopup.cachedResults[ctxPopupId + ""]) {
-            var updatedProps = ["is_friend", "is_member"];
+            var updatedProps = ["is_friend", "is_member", 'is_banned'];
             updatedProps.forEach(function (prop) {
                 ContextualPopup.cachedResults[ctxPopupId + ""][prop] = data[prop];
             });
@@ -579,7 +637,7 @@ ContextualPopup.getInfo = function (target) {
     // needed on journal subdomains
     var url = LiveJournal.getAjaxUrl("ctxpopup");
     var url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_ctxpopup" : "/__rpc_ctxpopup";
-
+    
     // got data callback
     var gotInfo = function (data) {
         if (ContextualPopup && ContextualPopup.hourglass) ContextualPopup.hideHourglass();
