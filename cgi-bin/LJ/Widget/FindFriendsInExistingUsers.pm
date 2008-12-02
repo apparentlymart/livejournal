@@ -25,14 +25,18 @@ sub render_body {
         'yahoo' => $class->ml('.widget.search.yahoo'),
     );
 
-    $ret .= "<h2>" . $class->ml('.widget.search.title') . "</h2>\n";
+    $ret .= "<div class='mailfinder exists'>";
+    $ret .= "<h4>" . $class->ml('.widget.search.existingtitle') . "</h4>\n";
     $ret .= $class->start_form( id => $class->input_prefix . "_user_search" );
-    $ret .= $class->html_select({name => 'type', selected => 'int', class => 'select'}, @search_opts) . " ";
-    $ret .= $class->html_text(name => 'q', 'class' => 'text', 'size' => 30) . " ";
-    $ret .= $class->html_submit( button => $class->ml('.widget.search.submit'));
-    $ret .= "<div id='" . $class->input_prefix . "_ajax_status'></div><br/>";
+    $ret .= "<fieldset><label>" . $class->ml('.widget.search.title') . "</label>";
+    $ret .= $class->html_text(name => 'q', 'class' => 'mailbox', 'size' => 30) . " ";
+    $ret .= $class->html_select({name => 'type', selected => 'int'}, @search_opts) . " </fieldset>";    
+    $ret .= "<div class='ffind'>" . $class->html_submit( button => $class->ml('.widget.search.submit'), { class => "btn" });
+    $ret .= "<span id='" . $class->input_prefix . "_errors' class='find_err'></span>";
+    $ret .= "</div>";
     $ret .= $class->end_form;
-    $ret .= "<div id='" . $class->input_prefix . "_errors' style='color: #ff0000'></div>";
+    $ret .= "<div id='" . $class->input_prefix . "_ajax_status'></div><br/>";
+    $ret .= "</div>";
 
     return $ret;
 }

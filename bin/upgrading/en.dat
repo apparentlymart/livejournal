@@ -3444,9 +3444,11 @@ widget.search.msn=MSN
 
 widget.search.region=Region
 
-widget.search.submit=Go
+widget.search.submit=Search existing users
 
-widget.search.title=Search by
+widget.search.title=Search for
+
+widget.search.existingtitle=Search existing users
 
 widget.search.username=Username
 

@@ -1,6 +1,16 @@
 .indent_sm {
     margin-left: 8px;
 }
+.mailfinder {
+    border-top: 1px solid #c9c9c9;
+    margin-top: 1.5em;
+    padding-top: 1.5em;
+}
+
+.exists {
+    margin-bottom: 3em;
+}
+
 .mailfinder FORM {
     margin-top: 10px;
 }
@@ -17,16 +27,43 @@
 .mailfinder INPUT {
    margin-bottom: 5px;
 }
+.mailfinder INPUT.btn {
+   margin-bottom: 0;
+}
+
+.mailfinder SELECT {
+   margin-bottom: 5px;
+   padding: 1px;
+}
+
+SPAN.find_err {
+   color:#ff0000;
+   padding: 0 0 5px 1em;
+   font-size: .85em;
+}
+
+*:first-child+html SPAN.find_err {
+   position: relative;
+   top: -3px;
+}
+
 .mailbox {
    width: 13.5em;
 }
 .ffind {
    margin: 5px 0 0 7em;
 }
+.ffind INPUT {
+   width: 14em;
+}
+
 .comment {
    color:#808080;
-   font-size: .85em;
    margin-top: 10px;
+   margin-left: 7em;
+}
+.comment SPAN {
+   font-size: .85em;
 }
 .mailfinder H4 {
    font-size: 1.1em;
