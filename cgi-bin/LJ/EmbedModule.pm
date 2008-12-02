@@ -82,7 +82,9 @@ sub _expand_tag {
 
     return '[invalid lj-embed, id is missing]' unless $attrs{id};
     
-    if ($edit) {
+    if ($opts{expand_full}){
+        return $class->module_content(moduleid  => $attrs{id}, journalid => $journal->id);
+    } elsif ($edit) {
         return '<lj-embed ' . join(' ', map {"$_=\"$attrs{$_}\""} keys %attrs) . ">\n" . 
                  $class->module_content(moduleid  => $attrs{id}, journalid => $journal->id) . 
                  "\n<\/lj-embed>";

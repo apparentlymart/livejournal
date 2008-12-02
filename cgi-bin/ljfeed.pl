@@ -233,6 +233,10 @@ sub make_feed
 
                 $event =~ s!<lj-poll-$pollid>!<div><a href="$LJ::SITEROOT/poll/?id=$pollid">View Poll: $name</a></div>!g;
             }
+            
+            my %args = $r->args;
+            LJ::EmbedModule->expand_entry($u, \$event, expand_full => 1)
+                if %args && $args{'unfold_embed'};
 
             $ppid = $1
                 if $event =~ m!<lj-phonepost journalid=[\'\"]\d+[\'\"] dpid=[\'\"](\d+)[\'\"]( /)?>!;
