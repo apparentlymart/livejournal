@@ -79,14 +79,12 @@
             $uid = $uid->[0]; # dereference
             if (my $u = LJ::load_userid($uid)) {
                 next if 'Y' ne $u->opt_findbyemail; # Search by email disabled by user
-                LJ::load_user_props($u, "opt_whatemailshow");
-                if ($u->{'opt_whatemailshow'} eq "A" || $u->{'opt_whatemailshow'} eq "B") {
-                    if ($output eq "foaf") {
-                        $ret{result} .= '<a href="' . LJ::journal_base($u) . '/data/foaf">' . $u->{user}. '</a>';
-                    } else {
-                        $ret{result} .= '<a href="' . $u->profile_url . '">' . $u->{user}. '</a>';
-                    }
+                if ($output eq "foaf") {
+                    $ret{result} .= '<a href="' . LJ::journal_base($u) . '/data/foaf">' . $u->{user}. '</a>';
+                } else {
+                    $ret{result} .= '<a href="' . $u->profile_url . '">' . $u->{user}. '</a>';
                 }
+                $ret{result} .= '&nbsp';
             }
         }
         return LJ::js_dumper(\%ret) if $ret{result};
