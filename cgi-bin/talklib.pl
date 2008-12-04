@@ -1073,7 +1073,7 @@ sub load_comments
         my $cfc = shift @check_for_children;
         next unless defined $children{$cfc};
         foreach my $child (@{$children{$cfc}}) {
-            if (@posts_to_load < $page_size || $opts->{expand_all}) {
+            if (@posts_to_load < $page_size || $expand_children{$cfc} || $opts->{expand_all}) {
                 push @posts_to_load, $child;
                 ## expand only the first child, then clear the flag
                 delete $expand_children{$cfc}; 
