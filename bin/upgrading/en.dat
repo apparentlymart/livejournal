@@ -3474,6 +3474,8 @@ widget.support.submit.language=Language
 
 widget.support.submit.language.note=Select the language in which you'd prefer to receive a response.
 
+widget.support.submit.language.other=(Other)
+
 widget.support.submit.question=Question or Problem
 
 widget.support.submit.question.note=Do not include any sensitive information, such as your password or phone number. No HTML allowed.

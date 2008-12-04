@@ -522,7 +522,7 @@ sub file_request
     if (@$errors) { return 0; }
 
     if (LJ::is_enabled("support_request_language")) {
-        $o->{'language'} = undef unless grep { $o->{'language'} eq $_ } @LJ::LANGS;
+        $o->{'language'} = undef unless grep { $o->{'language'} eq $_ } (@LJ::LANGS, "xx");
         $reqsubject = "[$o->{'language'}] $reqsubject" if $o->{'language'} && $o->{'language'} !~ /^en_/;
     }
 
@@ -588,7 +588,7 @@ sub file_request
         return unless $q && $q ne 'NULL';
         push @data, "($spid, '$_[0]', $q)";
     };
-    if (LJ::is_enabled("support_request_language")) {
+    if (LJ::is_enabled("support_request_language") && $o->{language} ne "xx") {
         $add_data->($_, $o->{$_}) foreach qw(uniq useragent language);
     } else {
         $add_data->($_, $o->{$_}) foreach qw(uniq useragent);

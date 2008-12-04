@@ -73,11 +73,22 @@ sub render_body {
     }
 
     if (LJ::is_enabled("support_request_language")) {
-        $ret .= "<p><b>" . $class->ml('widget.support.submit.language') . "</b><br />";
-        $ret .= "<div style='margin-left: 30px'>";
-        $ret .= "<p><?de " . $class->ml('widget.support.submit.language.note') . " de?></p>";
-        $ret .= $class->html_select(name => 'language', list => LJ::Lang::get_lang_names(), selected => $post->{language} || "en_LJ");
-        $ret .= "</div></p>";
+        my $lang_list = LJ::Lang::get_lang_names();
+        for (my $i = 0; $i < @$lang_list; $i = $i+2) {
+            unless ($LJ::LANGS_FOR_SUPPORT_REQUESTS{$lang_list->[$i]}) {
+                splice(@$lang_list, $i, 2);
+                $i = $i - 2;
+            }
+        }
+
+        if ($lang_list) {
+            push @$lang_list, ( xx => $class->ml('widget.support.submit.language.other') );
+            $ret .= "<p><b>" . $class->ml('widget.support.submit.language') . "</b><br />";
+            $ret .= "<div style='margin-left: 30px'>";
+            $ret .= "<p><?de " . $class->ml('widget.support.submit.language.note') . " de?></p>";
+            $ret .= $class->html_select(name => 'language', list => $lang_list, selected => $post->{language} || "en_LJ");
+            $ret .= "</div></p>";
+        }
     }
 
     $ret .= "<p><b>" . $class->header_summary(%opts) . "</b><br />";
@@ -170,7 +181,7 @@ sub handle_post {
     }
 
     if (LJ::is_enabled("support_request_language")) {
-        $post->{'language'} = "en_LJ" unless grep { $post->{'language'} eq $_ } @LJ::LANGS;
+        $post->{'language'} = "en_LJ" unless grep { $post->{'language'} eq $_ } (@LJ::LANGS, "xx");
         $req{'language'} = $post->{'language'};
     }
 
