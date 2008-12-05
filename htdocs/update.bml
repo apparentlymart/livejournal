@@ -111,10 +111,12 @@
 
     # try to call a hook to fill in the fields
     my $override_fields = LJ::run_hook('update_fields', \%GET);
+    my $opt_preformatted = 0;
     if ($override_fields) {
             $event      = $override_fields->{'event'}   if exists($override_fields->{'event'});
             $subject    = $override_fields->{'subject'} if exists($override_fields->{'subject'});
             $tags       = $override_fields->{'tags'}    if exists($override_fields->{'tags'});
+            $opt_preformatted = $override_fields->{'prop_opt_preformatted'} if exists($override_fields->{'prop_opt_preformatted'});
     }
 
     ### define some bools with common logic ###
@@ -211,6 +213,7 @@
             'include_insert_object' => $GET{'insobj'},
             'prop_qotdid' => $qid,
             'altlogin' => $GET{altlogin} ? 1 : 0,
+            'prop_opt_preformatted' => $opt_preformatted ? 1 : 0,
         };
 
         if ($remote) {
