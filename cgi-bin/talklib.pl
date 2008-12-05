@@ -3000,7 +3000,7 @@ sub init {
     }
 
     if ($up) {
-        if ($up->{'status'} eq "N" && $up->{'journaltype'} ne "I") {
+        if ($up->{'status'} eq "N" && $up->{'journaltype'} ne "I" && !LJ::run_hook("journal_allows_unvalidated_commenting", $journalu)) {
             $err->(BML::ml("$SC.error.noverify2", {'aopts' => "href='$LJ::SITEROOT/register.bml'"}));
         }
         if ($up->{'statusvis'} eq "D") {
