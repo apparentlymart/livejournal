@@ -1211,6 +1211,22 @@ sub should_show_suspend_msg_to {
     return $self->is_suspended && !$self->is_suspended_for($u) ? 1 : 0;
 }
 
+# some entry props must keep all their history
+sub put_logprop_in_history {
+    my ($self, $prop, $old_value, $new_value, $note) = @_;
+
+    my $p = LJ::get_prop("log", $prop);
+    return undef unless $p;
+    
+    my $propid = $p->{id};
+
+    my $u = $self->journal;
+    $u->do("INSERT INTO logprop_history (journalid, jitemid, propid, change_time, old_value, new_value, note) VALUES (?, ?, ?, unix_timestamp(), ?, ?, ?)",
+           undef, $self->journalid, $self->jitemid, $propid, $old_value, $new_value, $note);
+    return undef if $u->err;
+    return 1;
+}
+
 package LJ;
 
 use Class::Autouse qw (

@@ -82,6 +82,8 @@
 
 .fn.searchincl=Search inclusion
 
+.fn.public=Public
+
 .fn.stylealwaysmine=Other Journals
 
 .fn.verticalincl=Explore Area Inclusion
@@ -161,6 +163,14 @@
 .navstrip.options.see=Always see the navigation strip when you view any journal or community
 
 .navstrip.options.show=Always show the navigation strip to anyone who views your journal or community
+
+.public<<
+I hereby give my authorization to reproduce and/or distribute any part or all of my Content by third parties, without the indication of the author`s name,
+but without any modification. This authorization is remuneration free. Except as stated herein, none of the Content may be transferred, copied,
+republished and distributed in any form or by any means for commercial use.
+Please, keep in mind that the setting only reflects the default publicity level for your entries.
+You can change this setting for any particular entry and edit publicity level of your older posts as well.
+.
 
 .safesearch2=You can choose to filter mature or offensive content out of search results.
 

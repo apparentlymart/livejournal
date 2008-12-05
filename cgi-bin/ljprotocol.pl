@@ -1806,6 +1806,11 @@ sub editevent
             $propset->{$pname} = $req->{'props'}->{$pname};
         }
         LJ::set_logprop($uowner, $itemid, $propset);
+
+        if ($req->{'props'}->{'copyright'} ne $curprops{$itemid}->{'copyright'}) {
+            LJ::Entry->new($ownerid, jitemid => $itemid)->put_logprop_in_history('copyright', $curprops{$itemid}->{'copyright'}, 
+                                                                                  $req->{'props'}->{'copyright'});
+        }
     }
 
     # deal with backdated changes.  if the entry's rlogtime is

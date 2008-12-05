@@ -15,9 +15,14 @@ LJWidgetIPPU_SettingProd = new Class(LJWidgetIPPU, {
     var post = new Object();
     post['lj_form_auth'] = form["lj_form_auth"].value + "";
     post['setting'] = this.setting;
-    post[field] = form[field].value + "";
-
-    if (post[field] && post[field] != "") this.doPost(post);
+    if (form[field].type == 'checkbox') {
+      if (form[field].checked)
+        post[field] = form[field].value;
+      this.doPost(post);
+    } else {
+      post[field] = form[field].value + "";
+      if (post[field] && post[field] != "") this.doPost(post);
+    }
 
     Event.stop(evt);
   },

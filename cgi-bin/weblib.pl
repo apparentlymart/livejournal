@@ -1269,6 +1269,7 @@ sub entry_form {
         $$onload .= " showEntryTabs();";
         }
 
+
         ### Display Spell Check Results:
         $out .= "<div id='spellcheck-results'><strong>" . BML::ml('entryform.spellchecked') . "</strong><br />$opts->{'spellcheck_html'}</div>\n"
             if $opts->{'spellcheck_html'};
@@ -1573,6 +1574,13 @@ PREVIEW
 
     $out .= "</div><!-- end #options -->\n\n";
 
+    ### Public conditions
+ 
+    $out .= "<div id='public' class='pkg'>\n";
+    $out .= "<input type='checkbox' id='prop_copyright' name='prop_copyright' " . ($opts->{'prop_copyright'} eq 'P' ? "checked" : "") . " />";
+    $out .= "<label for='prop_copyright'>" . BML::ml('entryform.public') . "</label>";
+    $out .= "</div>";
+    
     ### Submit Bar
     {
         $out .= "<div id='submitbar' class='pkg'>\n\n";
@@ -1866,6 +1874,7 @@ sub entry_form_decode
     $req->{"prop_opt_nocomments"}   ||= $POST->{'comment_settings'} eq "nocomments" ? 1 : 0;
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
+    $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : '';
 
     if (LJ::is_enabled("content_flag")) {
         $req->{prop_adult_content} = $POST->{prop_adult_content};
@@ -2040,6 +2049,8 @@ sub res_includes {
     # esn ajax enabled?
     my $esn_async = LJ::conf_test($LJ::DISABLED{esn_ajax}) ? 0 : 1;
 
+    my $default_copyright = $remote ? $remote->prop("default_copyright") : '';
+
     my %site = (
                 imgprefix => "$imgprefix",
                 siteroot => "$siteroot",
@@ -2051,6 +2062,7 @@ sub res_includes {
                 inbox_update_poll => $inbox_update_poll,
                 media_embed_enabled => $embeds_enabled,
                 esn_async => $esn_async,
+                default_copyright => $default_copyright,
                 );
 
     my $site_params = LJ::js_dumper(\%site);

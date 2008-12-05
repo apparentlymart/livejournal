@@ -1521,6 +1521,8 @@
 
     $body .= "</div>";
 
+	$body .= LJ::Widget::SettingProdDisplay->render;
+
     $bml_okay = 0;
     return;
 }

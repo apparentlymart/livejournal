@@ -3053,6 +3053,20 @@ EOC
 
 # NOTE: new table declarations go here
 
+register_tablecreate("logprop_history", <<'EOC');
+CREATE TABLE logprop_history (
+  journalid  INT UNSIGNED NOT NULL,
+  jitemid    MEDIUMINT UNSIGNED NOT NULL,
+  propid     TINYINT unsigned NOT NULL,
+  change_time  INT UNSIGNED NOT NULL DEFAULT '0',
+  old_value  VARCHAR(255) default NULL,
+  new_value  VARCHAR(255) default NULL,
+  note       VARCHAR(255) default NULL,
+  INDEX (journalid,jitemid,propid)
+)
+EOC
+
+
 ### changes
 
 register_alter(sub {
