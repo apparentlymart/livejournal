@@ -2804,6 +2804,8 @@ vertical.nav.explore.technology=Technology
 
 web.ads.advertisement=<a [[aopts]]>Advertisement</a>
 
+web.ads.advertisement_nolink=Advertisement
+
 web.ads.customize=Customize
 
 web.ads.feedback=Feedback
