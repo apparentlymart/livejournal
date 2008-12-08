@@ -5,8 +5,6 @@ function displaySettingProd(sett, fname, title) {
     }
     var settingProd = new LJWidgetIPPU_SettingProd({
         title: title,
-        width: 400,
-        height: 300
         }, {
             setting: sett,
             field: fname
