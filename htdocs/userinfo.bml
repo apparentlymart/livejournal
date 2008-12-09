@@ -344,7 +344,9 @@
 
     $body .= "<div id='profile_page'>";
 
-    $body .= LJ::run_hook("userinfo_notice");
+    if (LJ::Widget::PageNotice->should_render_for_remote( notice_key => "profile_design" )) {
+        $body .= LJ::Widget::PageNotice->render( notice_key => "profile_design" );
+    }
 
     if ($com) {
         my $pt;

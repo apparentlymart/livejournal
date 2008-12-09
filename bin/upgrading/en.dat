@@ -3414,6 +3414,8 @@ widget.navstripchooser.title=Navigation Strip
 
 widget.navstripchooser.upgradetos2=<a [[aopts]]><strong>Switch to S2</strong></a> and you'll be able to use custom colors for the navigation strip.
 
+widget.pagenotice.dismiss=Dismiss
+
 widget.popularinterests.viewall=view all popular interests
 
 widget.qotd.answer=Answer
