@@ -82,7 +82,7 @@
 
 .fn.searchincl=Search inclusion
 
-.fn.public=Public
+.fn.public=Publicity
 
 .fn.stylealwaysmine=Other Journals
 
@@ -165,11 +165,24 @@
 .navstrip.options.show=Always show the navigation strip to anyone who views your journal or community
 
 .public<<
-I hereby give my authorization to reproduce and/or distribute any part or all of my Content by third parties, without the indication of the author`s name,
-but without any modification. This authorization is remuneration free. Except as stated herein, none of the Content may be transferred, copied,
-republished and distributed in any form or by any means for commercial use.
-Please, keep in mind that the setting only reflects the default publicity level for your entries.
-You can change this setting for any particular entry and edit publicity level of your older posts as well.
+I hereby give my authorization to reproduce and/or 
+distribute any part or all of my Content by third parties, with the
+identification of the name and source, but without any modification.
+This authorization is remuneration free. Except as stated herein, none 
+of the Content may be transferred, copied, republished and distributed 
+in any form or by any means for commercial use.
+.
+
+.public.text<<
+By ticking off this checkbox you will set  
+this level of publicity as default for your new entries in 
+LiveJournal, thus allowing various internet and offline media to quote 
+your Content. LiveJournal is not responsible for unauthorized actions 
+of mass media publications that have no partnership agreements with 
+the site. Please, keep in mind that the setting only reflects the 
+default publicity level for your entries. You can change this setting 
+for any particular entry and edit publicity level of your older posts 
+as well.
 .
 
 .safesearch2=You can choose to filter mature or offensive content out of search results.

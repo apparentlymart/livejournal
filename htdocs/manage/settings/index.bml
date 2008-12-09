@@ -321,7 +321,8 @@ _code?>
         $ret .= "<tr><td class='field_name'>$ML{'.fn.public'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'default_copyright', 'id' => 'default_copyright',
                                  'selected' => $u->{'default_copyright'} eq 'P' ? 1 : 0 });
-        $ret .= " <label for='default_copyright'>" . BML::ml('.public', { sitename => $LJ::SITENAMESHORT }) . "</label>";
+        $ret .= " <label for='default_copyright'>" . BML::ml('.public') . "</label>";
+	$ret .= "<br /><span class='helper'>$ML{'.public.text'}</span>";
         $ret .= "</td></tr>\n";
         
 
