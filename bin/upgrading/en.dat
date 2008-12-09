@@ -2549,6 +2549,14 @@ settings.country=Country
 
 settings.country.choose=Pick a country
 
+settings.defaultcopyright.title=Publicity
+
+settings.defaultcopyright.question=Do you want to allow third parties to republish your Content? (<a [[aopts]]>Learn more</a>)
+
+settings.defaultcopyright.opt.P=Yes
+
+settings.defaultcopyright.opt.C=No
+
 settings.error.locale.country_ne_state=You specified United States as your country, but you typed in a non-US state in the "other state" field.
 
 settings.error.locale.invalid_country=Somehow you selected an invalid country.
