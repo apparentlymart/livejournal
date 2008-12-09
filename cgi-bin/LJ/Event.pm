@@ -95,6 +95,10 @@ sub is_common {
 # not show up in normal UI
 sub is_visible { 1 }
 
+# Override this with a true if notification to this event should be sent
+# even if user account is not in active state.
+sub is_significant { 0 }
+
 # Whether Inbox is always subscribed to
 sub always_checked { 0 }
 

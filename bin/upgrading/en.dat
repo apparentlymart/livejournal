@@ -1108,6 +1108,10 @@ esn.manage_request_approve=[[openlink]]Approve[[closelink]] [[username]]'s reque
 
 esn.manage_request_reject=[[openlink]]Reject[[closelink]] [[username]]'s request to join
 
+esn.manage_request_approve=[[openlink]]Approve[[closelink]] [[username]]'s request to join
+
+esn.manage_request_reject=[[openlink]]Reject[[closelink]] [[username]]'s request to join
+
 esn.read_last_comm_entries=[[openlink]]Read the latest entries in [[journal]][[closelink]]
 
 esn.poll_vote.subject=[[user]] voted in a poll!
@@ -1272,6 +1276,46 @@ Options:
 .
 
 esn.moderated_submission.subject=Moderated submission notification
+
+esn.security_attribute_changed.account_activated.email_subject=Your account has been activated
+
+esn.security_attribute_changed.account_activated.email_text<<
+Dear [[username]],
+ 
+ On [[date]] at [[time]] your journal was undeleted. The journal activation took place from the following IP-address: [[ip]].
+  
+  If you made this change yourself, this email serves as a confirmation of your change.
+   
+   If you did not delete your journal, it means that your journal's security was compromised. Please immediately see FAQ 117 [[http://www.livejournal.com/support/faqbrowse.bml?faqid=117]] for steps to resecure your journal.
+   This letter was sent out automatically to help you keep your account secure. You cannot opt-out of receiving these letters. 
+.
+
+esn.security_attribute_changed.account_deleted.email_subject=Your account has been deleted
+
+esn.security_attribute_changed.account_deleted.email_text<<
+Dear [[username]],
+ 
+ On [[date]] at [[time]] your journal was deleted. The journal deletion took place from the following IP-address: [[ip]].
+  
+  If you made this change yourself, this email serves as a confirmation of your change.
+   
+   If you did not delete your journal, it means that your journal's security was compromised. Please immediately see FAQ 117 [[http://www.livejournal.com/support/faqbrowse.bml?faqid=117]] for steps to resecure your journal.
+   This letter was sent out automatically to help you keep your account secure. You cannot opt-out of receiving these letters. 
+.
+
+esn.security_attribute_changed.account_renamed.email_subject=Your account has been renamed
+
+esn.security_attribute_changed.account_renamed.email_text<<
+Dear [[username]],
+
+On [[date]] at [[time]] your username was changed. The change was made from the following IP-address: [[ip]].
+
+If you made this change yourself, this email serves as a confirmation of your change.
+
+If you did not change your username, it means that your journal's security was compromised. Please immediately see FAQ 117 [[http://www.livejournal.com/support/faqbrowse.bml?faqid=117]] for steps to resecure your journal.
+
+This letter was sent out automatically to help you keep your account secure. You cannot opt-out of receiving these letters.
+.
 
 esn.supofficialpost.subject=[[sitenameshort]] Announcement: [[subject]]
 
@@ -2763,6 +2807,8 @@ talk.parentlink=Parent
 talk.readsimilar=Read similar journal entries:
 
 talk.replytothis=Reply to this
+
+talk.unscreentoreply=Unscreen to reply
 
 talk.somebodywrote=[[realname]] ([[userlink]]) wrote,
 

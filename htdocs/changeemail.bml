@@ -141,7 +141,25 @@ body<=
         $tochange->{status} = 'T' if $u->{status} eq 'A';
 
         LJ::update_user($u, $tochange);
-
+warn "send email to old address: $old_email";
+        # send letter to old email address
+        LJ::send_mail({
+            'to'      => $old_email,
+            'from'    => $LJ::ADMIN_EMAIL,
+            'charset' => 'utf-8',
+            'subject' => $ML{'/editinfo.bml.newemail_old.subject'},
+            'body'    => BML::ml('/editinfo.bml.newemail_old.body2',
+                              { username          => $u->{user},
+                                ip                => BML::get_remote_ip(),
+                                old_email         => $old_email,
+                                new_email         => $POST{'email'},
+                                email_change_link => $LJ::SITEROOT.'/changeemail.bml',
+                                email_manage_link => $LJ::SITEROOT.'/tools/emailmanage.bml', 
+                                sitename          => $LJ::SITENAME,
+                                sitelink          => $LJ::SITEROOT
+                              }),
+        });
+warn "send email to old address: $POST{'email'}";
         # send validation mail
         my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $POST{'email'});
         LJ::send_mail({
