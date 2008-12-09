@@ -141,7 +141,7 @@ body<=
         $tochange->{status} = 'T' if $u->{status} eq 'A';
 
         LJ::update_user($u, $tochange);
-warn "send email to old address: $old_email";
+
         # send letter to old email address
         LJ::send_mail({
             'to'      => $old_email,
@@ -159,7 +159,7 @@ warn "send email to old address: $old_email";
                                 sitelink          => $LJ::SITEROOT
                               }),
         });
-warn "send email to old address: $POST{'email'}";
+
         # send validation mail
         my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $POST{'email'});
         LJ::send_mail({
