@@ -36,6 +36,8 @@ our $CannotBeShown = '(cannot be shown)';
 # error classes
 use constant E_TEMP => 0;
 use constant E_PERM => 1;
+# maximum items for get_friends_page function
+use constant FRIEND_ITEMS_LIMIT => 50;
 
 my %e = (
      # User Errors
@@ -230,8 +232,21 @@ sub getfriendspage
     my @uids;
 
     my @res = ();
+    my $lastsync = int $req->{lastsync};
     foreach my $ei (@entries) {
+
         next unless $ei;
+
+        # exit cycle if maximum friend items limit reached
+        last 
+            if scalar @res >= FRIEND_ITEMS_LIMIT; 
+
+        # if passed lastsync argument - skip items with logtime less than lastsync
+        if($lastsync) {
+            next 
+                if $LJ::EndOfTime - $ei->{rlogtime} <= $lastsync;
+        }
+        
         my $entry = LJ::Entry->new_from_item_hash($ei);
         next unless $entry;
 
@@ -242,6 +257,9 @@ sub getfriendspage
         foreach my $method (@attrs) {
             $h{$method} = $entry->$method;
         }
+
+        # log time value 
+        $h{logtime} = $LJ::EndOfTime - $ei->{rlogtime};
 
         push @res, \%h;
 
