@@ -1373,6 +1373,11 @@ property string text_multiform_opt_unscreen {
 }
 set text_multiform_opt_unscreen = "Unscreen";
 
+property string text_multiform_opt_unscreen_to_reply {
+    des = "Text for the comment unscreening action it's showed instead of reply-link for screened comments";
+}
+set text_multiform_opt_unscreen_to_reply = "Unscreen to reply";
+    
 property string text_multiform_opt_screen {
     des = "Text for the comment screening action";
 }

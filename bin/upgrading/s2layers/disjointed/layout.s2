@@ -1107,7 +1107,19 @@ function EntryLite::print_linkbar() {
       }
     }
     $linkbar = $linkbar + $parent + $thread;
-    $c->print_reply_link({"linktext" => "$*text_comment_reply"}); print " - ";
+    ###$c->print_reply_link({"linktext" => "$*text_comment_reply"}); 
+
+        if($c.screened == true) {
+            ### if comment screened - show link for unscreen
+            var Link link; 
+            $link = $c->get_link("unscreen_to_reply");
+            """<a href="$link.url" title="$link.caption">$link.caption</a>"""; 
+        } else {
+            ### showing reply link if comment not screened
+            $c->print_reply_link({ "linktext" => $*text_comment_reply });
+        }
+    
+    print " - ";
   }
   if($this isa Entry) {
     var Entry en = $this as Entry;

@@ -47,16 +47,17 @@ my $old_url = 0;
  # pre-load common strings for little speed and less typing later
  # (we're doing this *after* set_language_scope is called, because
  # two below are relative strings)
- my %T = qw(postcomments   talk.commentpost
-            readcomments   talk.commentsread
-            parent         talk.parentlink
-            thread         talk.threadlink
-            expand         talk.expandlink
-            replythis      talk.replytothis
-            frozen         talk.frozen
-            link           talk.commentpermlink
-            deleted        .subjectdeleted
-            nosubject      .nosubject
+ my %T = qw(postcomments    talk.commentpost
+            readcomments    talk.commentsread
+            parent          talk.parentlink
+            thread          talk.threadlink
+            expand          talk.expandlink
+            replythis       talk.replytothis
+            unscreentoreply talk.unscreentoreply
+            frozen          talk.frozen
+            link            talk.commentpermlink
+            deleted         .subjectdeleted
+            nosubject       .nosubject
             );
  foreach (keys %T) { $T{$_} = $ML{$T{$_}}; }
 
@@ -688,12 +689,17 @@ my $old_url = 0;
                  # See if we want to force them to change their password
                  my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
                  if ($bp) {
-                     $ret .= "(<a href='$bp'>$T{'replythis'}</a>)";
+                     $ret .= "(<a href='$bp'>$T{'replythis'}</a>) ";
                  } else {
-                     $ret .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, $T{'replythis'}, $replyurl) .  ")";
+                    if ($post->{state} eq 'S') {
+                        # show unscreen to reply link id comment screened
+                        $ret .= "(<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>$T{'unscreentoreply'}</a>) ";
+                    } else {
+                        $ret .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, $T{'replythis'}, $replyurl) .  ") ";
+                    }
                  }
              } else {
-                 $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>)";
+                 $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
              }
 
              my $parentid = $post->{'parenttalkid'} || $post->{'parenttalkid_actual'};

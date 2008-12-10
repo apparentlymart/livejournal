@@ -1112,8 +1112,21 @@ function EntryPage::print_comment (Comment c) {
     if ($c.frozen) {
         print "(Replies frozen) ";
     } else {
-        print "("; $c->print_reply_link({"linktext" => $*text_comment_reply}); ") ";
-    ###print "(<a href='$c.reply_url'>Reply to this</a>) ";
+        print "("; 
+        
+        if($c.screened == true) {
+            ### if comment screened - show link for unscreen
+            var Link link;
+            $link = $c->get_link("unscreen_to_reply");
+            """<a href="$link.url" title="$link.caption">$link.caption</a>""";
+        } else {
+            ### showing reply link if comment not screened
+            $c->print_reply_link({ "linktext" => $*text_comment_reply });
+        }
+
+        ###$c->print_reply_link({"linktext" => $*text_comment_reply});
+        ") ";
+        ###print "(<a href='$c.reply_url'>Reply to this</a>) ";
     }
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") {

@@ -387,7 +387,21 @@ function EntryPage::print_comment(Comment comment) {
         """
           </div>
             <div style="font-size: smaller; margin-top: 6px;">
-               ("""; $comment->print_reply_link({"linktext" => $*text_comment_reply}); print ") ";
+               ("""; 
+               
+               ###$comment->print_reply_link({"linktext" => $*text_comment_reply}); 
+
+        if($comment.screened == true) {
+            ### if comment screened - show link for unscreen
+            var Link link;
+            $link = $comment->get_link("unscreen_to_reply");
+            """<a href="$link.url" title="$link.caption">$link.caption</a>""";
+        } else {
+            ### showing reply link if comment not screened
+            $comment->print_reply_link({ "linktext" => $*text_comment_reply });
+        }
+ 
+               print ") ";
                if ($comment.thread_url) {
                  print "(<a href=\"$comment.thread_url\">$*text_comment_thread</a>) "; }
                if ($comment.parent_url) {

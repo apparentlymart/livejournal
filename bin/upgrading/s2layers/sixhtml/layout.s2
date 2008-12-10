@@ -1064,7 +1064,21 @@ function EntryPage::print_comment(Comment e) {
             println " $sep " + $e->expand_link();
         }
     }
-    if ($e.reply_url)  { print " $sep "; $e->print_reply_link({"linktext" => $*text_comment_reply}); }
+    if ($e.reply_url)  { 
+        print " $sep "; 
+        ###$e->print_reply_link({"linktext" => $*text_comment_reply}); 
+
+        if($e.screened == true) {
+            ### if comment screened - show link for unscreen
+            var Link link;
+            $link = $e->get_link("unscreen_to_reply");
+            """<a href="$link.url" title="$link.caption">$link.caption</a>""";
+        } else {
+            ### showing reply link if comment not screened
+            $e->print_reply_link({ "linktext" => $*text_comment_reply });
+        }
+
+    }
 
     $e->print_linkbar();
     "</div>";
