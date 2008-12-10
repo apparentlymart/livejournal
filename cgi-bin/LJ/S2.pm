@@ -2200,7 +2200,7 @@ sub nth_entry_seen {
     my $e = shift;
     my $key = "$e->{'journal'}->{'username'}-$e->{'itemid'}";
     my $ref = $LJ::REQ_GLOBAL{'nth_entry_keys'};
-
+    
     if (exists $ref->{$key}) {
         return $ref->{$key};
     }
@@ -3006,6 +3006,17 @@ sub _Comment__get_link
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
     }
+
+    # added new button
+    if ($key eq "unscreen_to_reply") {
+        #return $null_link unless $this->{'screened'};
+        #return $null_link unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
+        return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                            $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen_to_reply"},
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
+    }
+
+    
     if ($key eq "watch_thread" || $key eq "unwatch_thread" || $key eq "watching_parent") {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
@@ -3148,7 +3159,7 @@ sub _print_quickreply_link
     my ($ctx, $this, $opts) = @_;
 
     $opts ||= {};
-
+    
     # one of these had better work
     my $replyurl =  $opts->{'reply_url'} || $this->{'reply_url'} || $this->{'entry'}->{'comments'}->{'post_url'};
 
@@ -3477,7 +3488,7 @@ sub EntryLite__get_link
 {
     my ($ctx, $this, $key) = @_;
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
-
+    
     if ($this->{_type} eq 'Entry') {
         return _Entry__get_link($ctx, $this, $key);
     }
