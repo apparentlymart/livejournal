@@ -1308,7 +1308,7 @@ esn.security_attribute_changed.account_renamed.email_subject=Your account has be
 esn.security_attribute_changed.account_renamed.email_text<<
 Dear [[username]],
 
-On [[date]] at [[time]] your username was changed. The change was made from the following IP-address: [[ip]].
+On [[date]] at [[time]] your username was changed from [[oldname]] to [[username]]. The change was made from the following IP-address: [[ip]].
 
 If you made this change yourself, this email serves as a confirmation of your change.
 
