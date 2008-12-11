@@ -1575,11 +1575,12 @@ PREVIEW
     $out .= "</div><!-- end #options -->\n\n";
 
     ### Public conditions
- 
-    $out .= "<div id='public' class='pkg'>\n";
-    $out .= "<input type='checkbox' id='prop_copyright' name='prop_copyright' " . ($opts->{'prop_copyright'} eq 'P' ? "checked" : "") . " />";
-    $out .= "<label for='prop_copyright'>" . BML::ml('entryform.public') . "</label>";
-    $out .= "</div>";
+    if ($remote && LJ::SUP->is_sup_enabled($remote)) {
+        $out .= "<div id='public' class='pkg'>\n";
+        $out .= "<input type='checkbox' id='prop_copyright' name='prop_copyright' " . ($opts->{'prop_copyright'} eq 'P' ? "checked" : "") . " />";
+        $out .= "<label for='prop_copyright'>" . BML::ml('entryform.public') . "</label>";
+        $out .= "</div>";
+    }
     
     ### Submit Bar
     {
@@ -2062,8 +2063,9 @@ sub res_includes {
                 inbox_update_poll => $inbox_update_poll,
                 media_embed_enabled => $embeds_enabled,
                 esn_async => $esn_async,
-                default_copyright => $default_copyright,
                 );
+    $site{default_copyright} = $remote->prop('default_copyright')
+        if $remote && LJ::SUP->is_sup_enabled($remote);
 
     my $site_params = LJ::js_dumper(\%site);
     my $site_param_keys = LJ::js_dumper([keys %site]);

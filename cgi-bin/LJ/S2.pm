@@ -1898,6 +1898,15 @@ sub Entry
         $e->{'metadata'}->{'location'} = $loc->as_html_current if $loc;
     }
 
+    my $r = Apache->request;
+    if (LJ::SUP->is_sup_enabled($u) && ($r->notes('codepath') eq 's2.entry' || $r->notes('codepath') eq 's2.reply')) {
+        if ($p->{'copyright'} eq 'P') {
+            $e->{'metadata'}->{'&copy; ' . $poster->ljuser_display} = '<i>' . $LJ::S2::CURR_CTX->[S2::PROPS]->{"text_copyr_agree"} . '</i>';
+        } else {
+            $e->{'metadata'}->{'&copy; ' . $poster->ljuser_display} = $LJ::S2::CURR_CTX->[S2::PROPS]->{"text_copyr_disagree"};
+        }
+    }
+
     # custom friend groups
     my $entry = LJ::Entry->new($e->{journal}->{_u}, ditemid => $e->{itemid});
     my $group_names = $entry->group_names;

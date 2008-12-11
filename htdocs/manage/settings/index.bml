@@ -318,13 +318,14 @@ _code?>
         $ret .= "</td></tr>";
 
         # Public security
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.public'}</td>\n<td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'default_copyright', 'id' => 'default_copyright',
-                                 'selected' => $u->{'default_copyright'} eq 'P' ? 1 : 0 });
-        $ret .= " <label for='default_copyright'>" . BML::ml('.public') . "</label>";
-        $ret .= "<br /><span class='helper'>$ML{'.public.helper'}</span>";
-        $ret .= "</td></tr>\n";
-        
+        if (LJ::SUP->is_sup_enabled($u)) {
+	        $ret .= "<tr><td class='field_name'>$ML{'.fn.public'}</td>\n<td>";
+	        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'default_copyright', 'id' => 'default_copyright',
+	                                 'selected' => $u->{'default_copyright'} eq 'P' ? 1 : 0 });
+	        $ret .= " <label for='default_copyright'>" . BML::ml('.public') . "</label>";
+	        $ret .= "<br /><span class='helper'>$ML{'.public.helper'}</span>";
+	        $ret .= "</td></tr>\n";
+        }
 
         # Search Inclusion
         $ret .= "<tr><td class='field_name'>$ML{'.fn.searchincl'}</td>\n<td>";
@@ -552,8 +553,9 @@ _code?>
               opt_imagelinks opt_stylemine
               opt_blockrobots opt_ctxpopup opt_showonlinestatus
               opt_getting_started newpost_minsecurity
-              default_copyright
             );
+            push @uprops, 'default_copyright'
+    	        if LJ::SUP->is_sup_enabled($u);
             
             # weblogs.com requires a special cap, but let people turn it off even without the cap
             push @uprops, 'opt_weblogscom'
