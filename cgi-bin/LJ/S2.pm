@@ -3511,6 +3511,21 @@ sub EntryLite__get_link
 *Entry__get_link = \&EntryLite__get_link;
 *Comment__get_link = \&EntryLite__get_link;
 
+# method for smart converting raw subject to html-link
+sub Entry__formated_subject {
+    my ($ctx, $this, $attrs) = @_;
+
+    # if subject has html-tags - print raw subject
+    return $this->{subject}
+        if($this->{subject} =~ /[<>]/);
+    
+    my $class = $attrs->{class} ? " class=\"".LJ::ehtml($attrs->{class})."\" " : '';
+    my $style = $attrs->{style} ? " style=\"".LJ::ehtml($attrs->{style})."\" " : '';
+    
+    return "<a href=\"".$this->{permalink_url}."\"$class$style>".$this->{subject}."</a>";
+    
+}
+
 sub EntryLite__get_tags_text
 {
     my ($ctx, $this) = @_;
