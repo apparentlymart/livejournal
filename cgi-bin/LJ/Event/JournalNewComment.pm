@@ -506,8 +506,9 @@ sub available_for_user  {
 
 # return detailed data for XMLRPC::getinbox
 sub raw_info {
-    my ($self, $target) = @_;
-
+    my ($self, $target, $flags) = @_;
+    my $extended = ($flags and $flags->{extended}) ? 1 : 0; # add comments body
+    
     my $res = $self->SUPER::raw_info;
 
     my $comment = $self->comment;
@@ -524,10 +525,16 @@ sub raw_info {
 
     return { %$res, visibility => 'no' } unless $comment->visible_to($target);
 
-    $res->{entry} = $entry->url;
+    $res->{entry}   = $entry->url;
     $res->{comment} = $comment->url;
-    $res->{poster} = $comment->poster->user if $comment->poster;
+    $res->{poster}  = $comment->poster->user if $comment->poster;
     $res->{subject} = $comment->subject_text;
+
+    if ($extended){
+        $res->{extended}->{subject_raw} = $comment->subject_raw;
+        $res->{extended}->{body}        = $comment->body_raw;
+        $res->{extended}->{dtalkid}     = $comment->dtalkid;
+    }
 
     if ($comment->is_edited) {
         return { %$res, action => 'edited' };

@@ -15,6 +15,7 @@ use Class::Autouse qw(
                       LJ::EventLogRecord::NewEntry
                       LJ::EventLogRecord::EditEntry
                       LJ::Config
+                      LJ::Comment
                       );
 
 LJ::Config->load;
@@ -74,6 +75,8 @@ my %e = (
      "211" => [ E_PERM, "Invalid or malformed tag list" ],
      "212" => [ E_PERM, "Message body is too long" ],
      "213" => [ E_PERM, "Message body is empty" ],
+     "214" => [ E_PERM, "Message looks like spam" ],
+
 
      # Access Errors
      "300" => [ E_TEMP, "Don't have access to requested journal" ],
@@ -200,10 +203,46 @@ sub do_request
     if ($method eq "getinbox")         { return getinbox(@args);         }
     if ($method eq "sendmessage")      { return sendmessage(@args);      }
     if ($method eq "setmessageread")   { return setmessageread(@args);   }
+    if ($method eq "addcomment")       { return addcomment(@args);   }
+
 
     $r->notes("codepath" => "") if $r;
     return fail($err,201);
 }
+
+
+sub addcomment
+{
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    my $u = $flags->{'u'};
+
+    # some additional checks
+    return fail($err,314) unless $u->get_cap('paid');
+    return fail($err,214) if LJ::Comment->is_text_spam( \ $req->{body} );
+
+    # create
+    my $comment = LJ::Comment->create(
+                        journal      => $u,
+                        ditemid      => $req->{ditemid},
+                        parenttalkid => ($req->{parenttalkid} || ($req->{parent} >> 8)),
+                               
+                        poster       => $u,
+                                
+                        body         => $req->{body},
+                        subject      => $req->{subject},
+
+                        props        => { picture_keyword => $req->{prop_picture_keyword} }
+                        );
+
+    # OK
+    return {
+             status      => "OK",
+             commentlink => $comment->url,
+             dtalkid     => $comment->dtalkid,
+             };
+}
+
 
 sub getfriendspage
 {
@@ -346,10 +385,9 @@ sub getinbox
 
     my @res;
     foreach my $item (@notifications[$skip .. $itemshow + $skip - 1]) {
-        my $raw = $item->event->raw_info($u);
+        next if $sync_date && $item->when_unixtime < $sync_date;
 
-        next 
-            if $sync_date && $item->when_unixtime < $sync_date;
+        my $raw = $item->event->raw_info($u, {extended => $req->{extended}});
         
         my $type_index = $type_number{$raw->{type}};
         if (defined $type_index) {
@@ -3009,6 +3047,7 @@ sub authenticate
     my $ip_banned = 0;
     my $chal_expired = 0;
     my $auth_check = sub {
+
         my $auth_meth = $req->{'auth_method'} || "clear";
         if ($auth_meth eq "clear") {
             return LJ::auth_okay($u,
