@@ -1587,17 +1587,23 @@ sub get_log2_row
 
 sub get_log2_recent_log
 {
-    my ($u, $cid, $update, $notafter) = @_;
+    my ($u, $cid, $update, $notafter, $events_date) = @_;
     my $jid = LJ::want_userid($u);
     $cid ||= $u->{'clusterid'} if ref $u;
 
     my $DATAVER = "3"; # 1 char
 
-    my $memkey = [$jid, "log2lt:$jid"];
+    my $use_cache = 1;
+    
+    # timestamp
+    $events_date = int $events_date;
+    $use_cache = 0 if $events_date; # do not use memcache for dayly friends log
+    
+    my $memkey  = [$jid, "log2lt:$jid"];
     my $lockkey = $memkey->[1];
     my ($rows, $ret);
 
-    $rows = LJ::MemCache::get($memkey);
+    $rows = LJ::MemCache::get($memkey) if $use_cache;
     $ret = [];
 
     my $construct_singleton = sub {
@@ -1658,14 +1664,20 @@ sub get_log2_recent_log
         return undef unless $db;
     }
 
+    #
     my $lock = $db->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
     return undef unless $lock;
 
-    $rows = LJ::MemCache::get($memkey);
-    if ($rows_decode->()) {
-        $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
-        return $construct_singleton->();
+    if ($use_cache){
+    # try to get cached data in exclusive context
+        $rows = LJ::MemCache::get($memkey);
+        if ($rows_decode->()) {
+            $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+            return $construct_singleton->();
+        }
     }
+    
+    # ok. fetch data directly from DB.
     $rows = "";
 
     # get reliable update time from the db
@@ -1688,17 +1700,28 @@ sub get_log2_recent_log
     $dont_store = 1 unless defined $tu;
 
     # get reliable log2lt data from the db
-
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14; # 2 weeks default
-
-    my $sql = "SELECT jitemid, posterid, eventtime, rlogtime, " .
-        "security, allowmask, anum, replycount FROM log2 " .
-        "USE INDEX (rlogtime) WHERE journalid=? AND " .
-        "rlogtime <= ($LJ::EndOfTime - UNIX_TIMESTAMP()) + $max_age";
+    my $sql = "
+        SELECT 
+            jitemid, posterid, eventtime, rlogtime,
+            security, allowmask, anum, replycount
+         FROM log2 
+         USE INDEX (rlogtime) 
+         WHERE 
+                journalid=?
+         " . 
+         ($events_date
+            ? 
+              "AND rlogtime <= ($LJ::EndOfTime - $events_date)
+               AND rlogtime >= ($LJ::EndOfTime - " . ($events_date + 24*3600) . ")"
+            : 
+            "AND rlogtime <= ($LJ::EndOfTime - UNIX_TIMESTAMP()) + $max_age"
+         )
+         ;
 
     my $sth = $db->prepare($sql);
     $sth->execute($jid);
-    my @row;
+    my @row = ();
     push @row, $_ while $_ = $sth->fetchrow_hashref;
     @row = sort { $a->{'rlogtime'} <=> $b->{'rlogtime'} } @row;
     my $itemnum = 0;
@@ -1722,13 +1745,16 @@ sub get_log2_recent_log
                       $sec,
                       $ditemid);
 
-        if ($itemnum++ < 50) {
+        if ($use_cache && $itemnum++ < 50) {
             LJ::MemCache::add([$jid, "rp:$jid:$item->{'jitemid'}"], $item->{'replycount'});
         }
     }
 
     $rows = $DATAVER . pack("N", $tu) . $rows;
-    LJ::MemCache::set($memkey, $rows) unless $dont_store;
+    
+    # store journal log in cache
+    LJ::MemCache::set($memkey, $rows) 
+        if $use_cache and not $dont_store;
 
     $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
     return $construct_singleton->();
@@ -1740,11 +1766,11 @@ sub get_log2_recent_user
     my $ret = [];
 
     my $log = LJ::get_log2_recent_log($opts->{'userid'}, $opts->{'clusterid'},
-              $opts->{'update'}, $opts->{'notafter'});
+              $opts->{'update'}, $opts->{'notafter'}, $opts->{events_date});
 
-    my $left = $opts->{'itemshow'};
+    my $left     = $opts->{'itemshow'};
     my $notafter = $opts->{'notafter'};
-    my $remote = $opts->{'remote'};
+    my $remote   = $opts->{'remote'};
 
     my %mask_for_remote = (); # jid => mask for $remote
     foreach my $item (@$log) {

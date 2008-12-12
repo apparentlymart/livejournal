@@ -83,8 +83,13 @@ sub FriendsPage
     my $itemload = $itemshow+$skip;
 
     my $filter;
-    my $group;
+    my $group_name    = '';
     my $common_filter = 1;
+    
+    #
+    my $events_date   = ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!)
+                        ? LJ::mysqldate_to_time("$1-$2-$3")
+                        : 0;
 
     if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {
         $filter = $get->{'filter'};
@@ -92,22 +97,28 @@ sub FriendsPage
         $p->{'filter_active'} = 1;
         $p->{'filter_name'} = "";
     } else {
+
+        # Show group or day log
         if ($opts->{'pathextra'}) {
-            $group = $opts->{'pathextra'};
-            $group =~ s!^/!!;
-            $group =~ s!/$!!;
-            if ($group) { $group = LJ::durl($group); $common_filter = 0; }
+            $group_name = $opts->{'pathextra'};
+            $group_name =~ s!^/!!;
+            $group_name =~ s!/$!!;
+
+            if ($group_name) { 
+                $group_name    = LJ::durl($group_name); 
+                $common_filter = 0; 
+
+                $p->{'filter_active'} = 1;
+                $p->{'filter_name'}   = LJ::ehtml($group_name);
+            }
         }
-        if ($group) {
-            $p->{'filter_active'} = 1;
-            $p->{'filter_name'} = LJ::ehtml($group);
-        }
-        my $grp = LJ::get_friend_group($u, { 'name' => $group || "Default View" });
+
+        my $grp = LJ::get_friend_group($u, { 'name' => $group_name || "Default View" });
         my $bit = $grp->{'groupnum'};
         my $public = $grp->{'is_public'};
         if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) {
             $filter = (1 << $bit);
-        } elsif ($group) {
+        } elsif ($group_name){
             $opts->{'badfriendgroup'} = 1;
             return 1;
         }
@@ -122,19 +133,20 @@ sub FriendsPage
     my %friends_row;
     my %idsbycluster;
     my @items = LJ::get_friend_items({
-        'u' => $u,
-        'userid' => $u->{'userid'},
-        'remote' => $remote,
-        'itemshow' => $itemshow,
-        'skip' => $skip,
-        'filter' => $filter,
-        'common_filter' => $common_filter,
-        'friends_u' => \%friends,
-        'friends' => \%friends_row,
-        'idsbycluster' => \%idsbycluster,
-        'showtypes' => $get->{'show'},
-        'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
-        'dateformat' => 'S2',
+        'u'                 => $u,
+        'userid'            => $u->{'userid'},
+        'remote'            => $remote,
+        'itemshow'          => $itemshow,
+        'skip'              => $skip,
+        'filter'            => $filter,
+        'common_filter'     => $common_filter,
+        'friends_u'         => \%friends,
+        'friends'           => \%friends_row,
+        'idsbycluster'      => \%idsbycluster,
+        'showtypes'         => $get->{'show'},
+        'friendsoffriends'  => $opts->{'view'} eq "friendsfriends",
+        'dateformat'        => 'S2',
+        'events_date'       => $events_date,
     });
 
     while ($_ = each %friends) {
@@ -371,8 +383,8 @@ sub FriendsPage
     };
 
     my $base = "$u->{'_journalbase'}/$opts->{'view'}";
-    if ($group) {
-        $base .= "/" . LJ::eurl($group);
+    if ($group_name) {
+        $base .= "/" . LJ::eurl($group_name);
     }
 
     # $linkfilter is distinct from $filter: if user has a default view,
@@ -390,6 +402,7 @@ sub FriendsPage
         my $newskip = $skip - $itemshow;
         if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
         else { $newskip = 0; }
+        $linkvars{'date'} = $get->{date} if $get->{date};
         $nav->{'forward_url'} = LJ::make_link($base, \%linkvars);
         $nav->{'forward_skip'} = $newskip;
         $nav->{'forward_count'} = $itemshow;
@@ -415,7 +428,6 @@ sub FriendsPage
     if ($get->{'mode'} eq "framed") {
         $p->{'head_content'} .= "<base target='_top' />";
     }
-
     return $p;
 }
 
