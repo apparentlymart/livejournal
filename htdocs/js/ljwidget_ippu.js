@@ -20,6 +20,8 @@ LJWidgetIPPU = new Class(LJWidget, {
 
         if (opts.overlay) {
             if (IPPU.isIE()) {
+                this.ippu.setModal(true);
+                this.ippu.setOverlayVisible(true);
                 this.ippu.setClickToClose(false);
             } else {
                 this.ippu.setModal(true);
@@ -27,8 +29,8 @@ LJWidgetIPPU = new Class(LJWidget, {
             }
         }
 
-        //if (opts.center) ippu.center();
-        //ippu.show();
+        if (opts.center) ippu.center();
+        ippu.show();
 
         var loadingText = document.createElement("div");
         loadingText.style.fontSize = '1.5em';
@@ -80,8 +82,7 @@ LJWidgetIPPU = new Class(LJWidget, {
       hexColor += hexColor + hexColor;
 
       ele.style.color = "#" + hexColor;
-      this.ippu.center(); 
-      this.ippu.show();
+      this.ippu.center();
     },
 
     // override doAjaxRequest to add _widget_ippu = 1
@@ -89,7 +90,6 @@ LJWidgetIPPU = new Class(LJWidget, {
       if (! params) params = {};
       params['_widget_ippu'] = 1;
       LJWidgetIPPU.superClass.doAjaxRequest.apply(this, [params]);
-
     },
 
     close: function () {

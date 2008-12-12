@@ -5,12 +5,12 @@ function displaySettingProd(sett, fname, title) {
     }
     var settingProd = new LJWidgetIPPU_SettingProd({
         title: title,
-        }, {
+        center: true
+        },{
             setting: sett,
             field: fname
         });
     settingProd.updateContent;
-
     return false;
 }
 
