@@ -1464,6 +1464,13 @@ sub postevent
         my $rv = LJ::Tags::update_logtags($uowner, $jitemid, $logtag_opts);
     }
 
+    unless (defined $req->{'props'}->{'copyright'}) { # unmade choice: fill default value
+        $req->{'props'}->{'copyright'} = $u->prop('default_copyright');
+    } else { # defined
+        $req->{'props'}->{'copyright'} = '' if $req->{'props'}->{'copyright'} eq 'C';
+            # we do not store 'C', but need distinguish it from unmade user choice
+    }
+
     # meta-data
     if (%{$req->{'props'}}) {
         my $propset = {};
@@ -1851,6 +1858,13 @@ sub editevent
                 remote => $u,
                 err_ref => \$tagerr,
             });
+    }
+
+    unless (defined $req->{'props'}->{'copyright'}) {
+        $req->{'props'}->{'copyright'} = $curprops{$itemid}->{'copyright'}; # save previous choice
+    } else { # defined
+        $req->{'props'}->{'copyright'} = '' if $req->{'props'}->{'copyright'} eq 'C';
+            # we do not store 'C', but need distinguish it from unmade user choice
     }
 
     # handle the props
