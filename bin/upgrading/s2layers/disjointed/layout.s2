@@ -1493,8 +1493,8 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
   $date    = """<div style="float: right;">""" + $e->time_display($*datetime_format, "none") + """</div>""";
 
 
-    if ($p.view != "entry") {
-        $subject = """<a name="$id" id="$id"></a>$icon<a href="$e.permalink_url" class="subj">$subject</a>""";
+    if ($p.view != "entry" and not $subject->contains("<a ")) {
+        $subject = """<a name="$id" id="$id"></a>$icon<a href="$e.permalink_url" class="subj subj-link">$subject</a>""";
     } else {
        $subject = """<a name="$id" id="$id"></a>$icon$subject""";
 }

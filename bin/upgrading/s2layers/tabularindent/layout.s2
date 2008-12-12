@@ -644,7 +644,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     # Subject
     if ($e.subject) {
       if ($p.view != "entry") {
-         $meta{"Subject:"} = "<a href='$e.permalink_url' class='subjlink'>$e.subject</a>";
+         $meta{"Subject:"} = $e->formatted_subject({"class"=>"subjlink subj-link"});
       } else { $meta{"Subject:"} = $e.subject; }
     }
     # Time posted

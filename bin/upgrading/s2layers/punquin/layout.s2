@@ -546,7 +546,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     "<td valign='top'><strong>$time";
     if ($e.subject) { " - ";
        if ($p.view != "entry") {
-         "<a href='$e.permalink_url' class='subjlink'>$e.subject</a>";
+         print $e->formatted_subject({"class"=>"subj-link subjlink"});
        } else { "<span style='color: $*subject_color'>$e.subject</span>"; } 
     }
 

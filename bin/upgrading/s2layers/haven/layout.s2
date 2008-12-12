@@ -1117,8 +1117,8 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
     var string subject = $e.subject != "" ? $e.subject : $*text_nosubject;
     var string time    = $e.time->time_format();
     println """<h4 class="subject">$e.security_icon """;
-    if ($p.view != "entry") {
-        print "<a href='$e.permalink_url'>$subject</a>";
+    if ($p.view != "entry" and not $subject->contains("<a ")) {
+        print "<a href='$e.permalink_url' class='subj-link'>$subject</a>";
     } else { print "$subject"; }
     println """ @ $time</h4>""";
     println """<div class="text">""";

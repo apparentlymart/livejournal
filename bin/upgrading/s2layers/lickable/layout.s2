@@ -794,7 +794,7 @@ width: 10px;
 display: inline;
 }
 
-.entrysubject A, .entrysubject A:hover, .entrysubject A:visited {
+.entrysubject A:link, .entrysubject A:visited, .entrysubject A:hover, .entrysubject A:visited {
      color: $*clr_page_fg;
      text-decoration: none;
 }
@@ -1140,7 +1140,8 @@ if($e isa Comment){
 """<div class="entryheader">
 <h3 class="entrysubject">""";
     if ($.view != "entry") { 
-        """<a href="$e.permalink_url">$e.subject</a>""";
+        var Entry en = $e as Entry;
+        print $en->formatted_subject({"class"=>"subj-link"});
     } else { "$e.subject"; }
 
 "</h3>";

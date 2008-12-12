@@ -1178,8 +1178,8 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
   var string screenedbg = "";
   var string screenedfg = "";
   
-  if ($p.view != "entry") {
-    $subject = """$icon<a href="$e.permalink_url" class="subjlink">$subject</a>""";
+  if ($p.view != "entry" and not $subject->contains("<a ")) {
+    $subject = """$icon<a href="$e.permalink_url" class="subjlink subj-link">$subject</a>""";
   } else { $subject = """$icon$subject"""; }
   var int rowspan = 0;
 

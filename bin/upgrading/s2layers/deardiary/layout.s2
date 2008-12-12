@@ -871,7 +871,8 @@ function Page::lay_print_entrylite(EntryLite e) {
 """<div class="entryheader">
 <h3 class="entrysubject">""";
     if ($.view != "entry") {
-        "<a href=\"$e.permalink_url\">$e.subject</a>";
+		var Entry en = $e as Entry;
+        print $en->formatted_subject({"class"=>"subj-link"});
     }
     else { print "$e.subject"; }
 "</h3>";

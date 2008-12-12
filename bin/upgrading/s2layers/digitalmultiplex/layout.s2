@@ -561,7 +561,7 @@ function print_heading_bar(string left, string right)
     println """</th></tr></table>""";
 }
 function print_entry_short (Page p, Entry e, Color bgcolor, Color fgcolor) {
-    var string subject = $e.subject ? $e.subject : "(No Subject)";
+    var string subject = $e.subject ? striphtml($e.subject) : "(No Subject)";
     println """<a name="entry_$e.itemid"></a><table class="short_entry" width="100%">""";
     println """<tr><th align="left"><a href="$e.permalink_url">&raquo; $subject</a></th></tr>""";
     println """<tr><td width="100%" align="left">""";
@@ -582,8 +582,8 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
         $subject = "$e.security_icon $subject";
     }
     if ($subject) {
-       if ($p.view != "entry") {
-          $subject = """<span class="subject"><a href="$e.permalink_url">$subject</a></span>""";
+       if ($p.view != "entry" and not $subject->contains("<a ")) {
+          $subject = """<span class="subject"><a href="$e.permalink_url" class="subj-link">$subject</a></span>""";
        } else {
            $subject = """<span class="subject">$subject</span>""";       
        }

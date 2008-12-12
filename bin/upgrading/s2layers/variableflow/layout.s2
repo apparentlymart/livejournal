@@ -651,7 +651,7 @@ function Page::print_entry(Entry e) {
     if ($e.subject != "") {
         " - ";
         if ($.view != "entry") {
-          "<a href='$e.permalink_url'>$e.subject</a>";
+          print $e->formatted_subject({"class"=>"subj-link"});
         } else { "$e.subject"; }
     }
     "</h2>\n";

@@ -494,7 +494,7 @@ margin-bottom: 0.5em;
 .entryheading {
 font-weight: bold;
 }
-.timestamp, .subject, .altposter {
+.timestamp, .subject, .altposter, .subj-link {
 font-weight: bold;
 color: $*meta_color;
 background: $*entry_bgcolor;
@@ -791,7 +791,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     if ($e.subject) {
         " <span class=\"subject\"> ";
           if ($p.view != "entry") {
-                "<a href=\"$e.permalink_url\">$e.subject</a>";
+              print $e->formatted_subject({"class"=>"subj-link"});
          } else { "$e.subject"; }
         "</span>";
     }

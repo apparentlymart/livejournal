@@ -199,6 +199,10 @@ color: $*clr_boxhead_text;
 background: $*clr_boxhead_back;
 }
 
+.box h2 a.subjlink {
+   background: none;
+}
+
 #navbar .box div.userpic {
 margin: 1em;
 text-align: center;
@@ -570,7 +574,7 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor) {
             print ": ";
         }
         if ($p.view != "entry") { 
-           "<a href='$e.permalink_url' class='subjlink' style='color: $fgcolor;'>$e.subject</a>";
+           print $e->formatted_subject({"class"=>"subjlink subj-link","style"=>"color: $fgcolor;"});
         } else { print $e.subject; }
     }
     "</h2>\n<div class=\"entry\">\n";

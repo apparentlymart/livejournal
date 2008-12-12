@@ -358,7 +358,7 @@ td.metabar {
 .entry {
     border: $*entryborder_size $*entryborder_style $*border_color;
 }
-.subject {
+.subject, .subject A.subj-link {
     color:               $*page_subtitle_color;
     font-weight:         bold;
 }
@@ -600,7 +600,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 
       if ($e.subject) { "\n\n<span class='subject'>";
           if ($p.view !="entry") {
-           "<a href='$e.permalink_url'>$e.subject</a>";
+              print $e->formatted_subject({"class"=>"subj-link"});
           } else { "$e.subject"; } 
        "</span><br />"; 
       }

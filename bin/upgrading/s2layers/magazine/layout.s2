@@ -319,12 +319,16 @@ H3 SPAN {
     border-bottom: thin solid $*border_color;
     padding-right: 0.5ex;
 }
+H3 SPAN SPAN {
+    border-right: none;
+}
 H3 EM {
     color: $*meta_color;
     font-style: normal;
 }
-H3 A, H3 A:hover {
+H3 A, H3 A:link, H3 A:hover, H3 A:visited {
     text-decoration: none;
+    color: $*meta_color;
 }
 
 """;
@@ -567,8 +571,8 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     # Time / Subject / Security
     var string subject = ($e.subject != "" ? " - <em>$e.subject</em>" : "");
     "<h3><span>$time";
-     if ($p.view != "entry") {
-       """<a href="$e.permalink_url">$subject</a>""";}
+     if ($p.view != "entry" and not $subject->contains("<a ")) {
+       """<a href="$e.permalink_url" class="subj-link">$subject</a>""";}
      else { "$subject"; }
     "</span> $e.security_icon</h3>";
 
