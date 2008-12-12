@@ -3512,7 +3512,7 @@ sub EntryLite__get_link
 *Comment__get_link = \&EntryLite__get_link;
 
 # method for smart converting raw subject to html-link
-sub Entry__formated_subject {
+sub Entry__formatted_subject {
     my ($ctx, $this, $attrs) = @_;
 
     # if subject has html-tags - print raw subject

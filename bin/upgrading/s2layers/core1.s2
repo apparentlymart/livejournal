@@ -328,6 +328,7 @@ class EntryLite
     function print_linkbar() "Print the link bar for this entry or comment.";
     function time_display () : string "Show the time of this post, with most useful information for user, and with tooltip for more.";
     function time_display (string datefmt, string timefmt) : string "time_display, with customized date/time formats.";
+    function builtin formatted_subject (string{} opts) : string "formats subject - outputs subject as html-link, gets hash of attributes - class and(or) style ";
 }
 
 class Entry extends EntryLite
@@ -400,7 +401,6 @@ class Comment extends EntryLite
     function edittime_display (string datefmt, string timefmt) : string "edittime_display, with customized date/time formats.";
 
     function print_edit_text () "Print the text that says when this comment was edited.";
-    function builtin formated_subject (string{} opts) : string "formats subject - outputs subject as html-link, gets hash of attributes - class and(or) style ";
 }
 
 ### Userinfo
