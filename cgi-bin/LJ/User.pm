@@ -7988,6 +7988,7 @@ sub make_journal
             }
         }
     } else {
+
         $view ||= "lastn";    # default view when none specified explicitly in URLs
         if ($LJ::viewinfo{$view} || $view eq "month" ||
             $view eq "entry" || $view eq "reply")  {
@@ -8335,7 +8336,14 @@ sub make_journal
 
     unless ($geta->{'viewall'} && LJ::check_priv($remote, "canview", "suspended") ||
             $opts->{'pathextra'} =~ m#/(\d+)/stylesheet$#) { # don't check style sheets
-        return $error->("Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal.", "404 Not Found") if ($u->is_deleted);
+        if ($u->is_deleted){
+            my $warning = LJ::Lang::get_text(LJ::Lang::get_effective_lang(), 
+                                    'journal.deleted', undef, {username => $u->username})
+                       || LJ::Lang::get_text($LJ::DEFAULT_LANG, 
+                                    'journal.deleted', undef, {username => $u->username});
+            return $error->($warning, "404 Not Found");
+
+        }
         return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);
 
         my $entry = $opts->{ljentry};
