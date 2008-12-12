@@ -44,7 +44,6 @@ LJWidgetIPPU_SettingProd = new Class(LJWidgetIPPU, {
 
   onRefresh: function () {
     var self = this;
-
     var form = $("settingprod_form");
     DOM.addEventListener(form, "submit", function(evt) { self.updatesettings(evt, form) });
   },
