@@ -34,7 +34,7 @@ if ($opt_getxsl) {
     chdir "$home/doc/raw/build" or die "Where is build dir?";
     unlink "xsl-docbook.tar.gz";
     my $fetched =  0;
-    my $url = "http://code.sixapart.com/svn/ljdocbook/trunk/dist/xsl/xsl-docbook.tar.gz";
+    my $url = "http://code.livejournal.org/svn/ljdocbook/trunk/dist/xsl/xsl-docbook.tar.gz";
     my @fetcher = ([ 'wget', "wget $url", ],
                    [ 'lynx', "lynx -source $url > xsl-docbook.tar.gz", ],
                    [ 'GET', "GET $url > xsl-docbook.tar.gz", ]);
