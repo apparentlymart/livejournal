@@ -448,21 +448,6 @@
         }
     }
 
-    # view journal
-    unless ($u->is_identity) {
-        $url = $u->journal_base;
-        $text = $ML{'.optionlinks.viewjournal'};
-        $li_title = $ML{'.optionlinks.viewjournal.title.user'};
-        if ($remote && $remote->equals($u)) {
-            $li_title = $ML{'.optionlinks.viewjournal.title.self'};
-        } elsif ($u->is_community) {
-            $li_title = $ML{'.optionlinks.viewjournal.title.comm'};
-        } elsif ($u->is_syndicated) {
-            $li_title = $ML{'.optionlinks.viewjournal.title.syn'};
-        }
-        $body .= "<li class='profile_viewjournal' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/view-journal.gif' alt='' />$text</a></li>";
-    }
-
     # post entry
     $url = "$LJ::SITEROOT/update.bml?usejournal=$user";
     if ($pm->remote_can_post) {
