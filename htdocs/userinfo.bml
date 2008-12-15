@@ -542,10 +542,9 @@
             }
         } else {
             if (LJ::userpic_count($u)) {
-                $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a><br />";
+                $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a>";
             } else {
-                $body .= "$default_userpic_img<br />";
-                $body .= "<span class='user_pic_caption'>$ML{'.userpic.none3'}</span>";
+                $body .= $default_userpic_img;
             }
         }
     }
