@@ -624,10 +624,12 @@
     $body .= "<div class='details_stats'>";
     $body .= $journal_warnings;
     $body .= "<p>" . BML::ml('.details.createdon2', { createdate => $timecreate }) . " (#" . $u->id . ")";
-    if ($u->timeupdate) {
-        $body .= ", " . BML::ml('.details.lastupdated2', { timestamp => "<span class='tooltip' title=\"$ago_text\">$lastupdated</span>" }) . " $nudge_link";
-    } else {
-        $body .= ", $ML{'.details.lastupdated.never2'} $nudge_link";
+    unless ($u->is_identity) {
+        if ($u->timeupdate) {
+            $body .= ", " . BML::ml('.details.lastupdated2', { timestamp => "<span class='tooltip' title=\"$ago_text\">$lastupdated</span>" }) . " $nudge_link";
+        } else {
+            $body .= ", $ML{'.details.lastupdated.never2'} $nudge_link";
+        }
     }
     $body .= "</p>";
     $body .= "<p>$comment_stats_string</p>" if $comment_stats_string;
