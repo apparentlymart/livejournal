@@ -324,6 +324,12 @@ sub theschwartz {
 
     return $LJ::SchwartzClient{$role} if $LJ::SchwartzClient{$role};
 
+    unless (scalar grep { defined $_->{role} } @LJ::THESCHWARTZ_DBS) { # old config
+        warn "ATTENTION! old config used - no roles for TheSchwartz DB servers";
+        $LJ::SchwartzClient{$role} = TheSchwartz->new(databases => \@LJ::THESCHWARTZ_DBS);
+        return $LJ::SchwartzClient{$role};
+    }
+
     my @dbs = grep { $_->{role}->{$role} } @LJ::THESCHWARTZ_DBS;
     die "Unknown role in LJ::theschwartz: '$role'" unless @dbs;
 
