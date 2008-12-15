@@ -68,9 +68,13 @@
 
 .details.createdon=Created On: [[createdate]]
 
+.details.createdon2=Created on [[createdate]]
+
 .details.entries=[[num]] [[?num|entry|entries]]
 
 .details.entries2=[[num_comma]] [[?num_raw|entry|entries]]
+
+.details.entries3=[[num_comma]] <a [[aopts]]>[[?num_raw|Journal Entry|Journal Entries]]</a>
 
 .details.flag.other=Flag this journal as mature/adult.
 
@@ -78,13 +82,19 @@
 
 .details.fotobilder=[[num]] files in <a [[aopts]]>FotoBilder</a>
 
+.details.fotobilder2=[[num]] <a [[aopts]]>FotoBilder Files</a>
+
 .details.id=LJ User No.: [[id]]
 
 .details.joined=Joined: [[createdate]]
 
 .details.lastupdated=Last updated [[timestamp]]
 
+.details.lastupdated2=last updated [[timestamp]]
+
 .details.lastupdated.never=Never updated
+
+.details.lastupdated.never2=never updated
 
 .details.membersince=Member Since: [[createdate]]
 
@@ -98,11 +108,15 @@
 
 .details.supportpoints=<a [[aopts]]>Support Points</a>: [[num]]
 
+.details.supportpoints2=[[num]] <a [[aopts]]>Support Points</a>
+
 .details.tags=[[num]] <a [[aopts]]>[[?num|Tag|Tags]]</a>
 
 .details.tags2=[[num_comma]] <a [[aopts]]>[[?num_raw|Tag|Tags]]</a>
 
 .details.title=[[user]]'s Journal
+
+.details.userpics=[[num_comma]] <a [[aopts]]>[[?num_raw|Userpic|Userpics]]</a>
 
 .details.viewlinkssep=, 
 
@@ -197,6 +211,8 @@
 .label.composted=<b>Posted:</b> [[num]] - 
 
 .label.comreceived=<b>Received:</b> [[num]]
+
+.label.connect=Connect
 
 .label.datecreated=Date created:
 

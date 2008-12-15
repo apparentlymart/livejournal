@@ -361,65 +361,32 @@
 
     $body .= "<div id='profile_top'>";
 
-    ### picture
-    $body .= "<div class='userpicdiv'>";
-    if ($synd) {
-        $body .= "<img src='$LJ::IMGPREFIX/profile_icons/feed.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
-    } else {
-        my $default_userpic_img;
-        if ($u->{defaultpicid}) {
-            my %pic;
-            my $picid = $u->{defaultpicid};
-            LJ::load_userpics(\%pic, [ $u, $picid ]);
-            $default_userpic_img = "<img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' border='0' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
-        } elsif ($u->is_person) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/user.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
-        } elsif ($com) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
-        } elsif ($u->is_identity) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/openid.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
-        }
-
-        if ($remote && $remote->can_manage($u)) {
-            if (LJ::userpic_count($u)) {
-                $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a><br />";
-                $body .= "<span class='user_pic_caption'>";
-                $body .= BML::ml('.userpic.viewall.edit', { aopts1 => "href='$LJ::SITEROOT/allpics.bml?user=$user'", aopts2 => "href='$LJ::SITEROOT/editpics.bml?authas=$user'" });
-                $body .= "</span>";
-            } else {
-                $body .= "<a href='$LJ::SITEROOT/editpics.bml?authas=$user'>$default_userpic_img</a><br />";
-                $body .= "<a href='$LJ::SITEROOT/editpics.bml?authas=$user' class='user_pic_caption'>$ML{'.userpic.upload'}</a>";
-            }
-        } else {
-            if (LJ::userpic_count($u)) {
-                $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a><br />";
-                $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user' class='user_pic_caption'>$ML{'.userpic.viewall'}</a>";
-            } else {
-                $body .= "$default_userpic_img<br />";
-                $body .= "<span class='user_pic_caption'>$ML{'.userpic.none3'}</span>";
-            }
-        }
+    ### Box Ad
+    my $boxad = LJ::get_ads({ location => 'bml.userinfo', jounrnalu => $u }) .
+                LJ::get_ads({ location => 'bml.userinfo.sponsored', jounrnalu => $u });
+    
+    if ($boxad) {
+        $body .= "<div class='profile_right_ad'>";
+        $body .= $boxad;
+        $body .= "</div>";
     }
-    $body .= "</div>";
-    ### /picture
 
-    $body .= "<div class='user_options'>";
-
-    $body .= "<div class='user_options_left'>";
-    $body .= "<div class='username'>" . $u->ljuser_display;
+    ### Username
+    my $new_margin = " style='margin-right: 320px;'" if $boxad;
+    $body .= "<div class='username'$new_margin>" . $u->ljuser_display;
     if ($u->{public_key}) {
         $body .= " <a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
         $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt=\"$ML{'.pubkey.alt'}\" title=\"$ML{'.pubkey.alt'}\" style='vertical-align: middle; border: 0;' /></a>";
     }
     $body .= "</div>";
-    $body .= "</div>";
 
-    $body .= "<div class='user_options_right'>";
+    ### Action Links
+    $body .= "<div class='actions'>";
     $body .= "<ul>";
 
     my ($url, $text, $li_title);
 
-    ## join/leave community
+    # join/leave community
     if ($u->is_community) {
         if ($remote && $u->has_friend($remote)) {
             $url = "$LJ::SITEROOT/community/leave.bml?comm=$user";
@@ -442,7 +409,7 @@
         }
     }
 
-    ## add friend
+    # add friend
     $url = "$LJ::SITEROOT/friends/add.bml?user=$user";
     if ($u->is_community) {
         my $remote_hasfriend = $remote && $remote->has_friend($u) ? 1 : 0;
@@ -481,7 +448,7 @@
         }
     }
 
-    ## view journal
+    # view journal
     unless ($u->is_identity) {
         $url = $u->journal_base;
         $text = $ML{'.optionlinks.viewjournal'};
@@ -496,7 +463,7 @@
         $body .= "<li class='profile_viewjournal' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/view-journal.gif' alt='' />$text</a></li>";
     }
 
-    ## post entry
+    # post entry
     $url = "$LJ::SITEROOT/update.bml?usejournal=$user";
     if ($pm->remote_can_post) {
         if ($u->is_community) {
@@ -513,7 +480,7 @@
         $body .= "<li class='profile_postentry_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/post-entry-disabled.gif' alt='' />$text</li>";
     }
 
-    ## track user
+    # track user
     if (LJ::is_enabled("esn")) {
         $url = "$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$user";
         $text = $ML{'.optionlinks.trackuser'};
@@ -536,7 +503,7 @@
         }
     }
 
-    ## send message
+    # send message
     if (($u->is_personal || $u->is_identity) && !$u->equals($remote)) {
         $url = "$LJ::SITEROOT/inbox/compose.bml?user=$user";
         $text = $ML{'.optionlinks.sendmessage'};
@@ -549,161 +516,178 @@
         }
     }
 
-    ## extra
+    # extra
     $body .= LJ::run_hook("userinfo_extra_user_options", user => $u, remote => $remote);
 
     $body .= "</ul>";
-    $body .= "<div class='clear_right'></div>";
     $body .= "</div>";
 
-    $body .= "</div>";
+    ### User Details
+    my $new_width = " style='width: 45%;'" if $boxad;
+    $body .= "<div class='user_details'$new_width>";
 
-    $body .= "<div class='user_details'>";
-    $body .= "<div class='user_details_main'>";
-
-    # Left Section
-    {
-        my $title = $u->{journaltitle} ? LJ::ehtml($u->{journaltitle}) : BML::ml('.details.title', { user => $u->display_username });
-        my $subtitle = LJ::ehtml($u->{journalsubtitle}) if $u->{journalsubtitle};
-
-        $body .= "<div class='details_left'>";
-        $body .= "<p class='journal_title'>$title</p>";
-        $body .= "<p class='journal_subtitle'>$subtitle</p>" if $subtitle;
-
-        my $journal_warnings;
-
-        if ($u->is_locked) {
-            $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'statusvis_message.locked'}</p>";
-        } elsif ($u->is_memorial) {
-            $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'statusvis_message.memorial'}</p>";
-        } elsif ($u->is_readonly) {
-            $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'statusvis_message.readonly'}</p>";
+    # picture
+    $body .= "<div class='userpicdiv'>";
+    if ($synd) {
+        $body .= "<img src='$LJ::IMGPREFIX/profile_icons/feed.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
+    } else {
+        my $default_userpic_img;
+        if ($u->{defaultpicid}) {
+            my %pic;
+            my $picid = $u->{defaultpicid};
+            LJ::load_userpics(\%pic, [ $u, $picid ]);
+            $default_userpic_img = "<img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' border='0' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
+        } elsif ($u->is_person) {
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/user.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
+        } elsif ($com) {
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
+        } elsif ($u->is_identity) {
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/openid.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
         }
 
-        unless ($u->is_identity) {
-            if ($u->adult_content_calculated eq 'explicit') {
-                $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'.details.warning.explicit'}</p>";
-            } elsif ($u->adult_content_calculated eq 'concepts') {
-                $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'.details.warning.concepts'}</p>";
-            }
-        }
-
-        $body .= "<div class='journal_warnings'>$journal_warnings</div>" if $journal_warnings;
-
-        $body .= "</div>";
-    }
-
-    # Middle Section
-    {
-        my $entry_count = $u->number_of_posts;
-        my $lastupdated = LJ::mysql_time($u->timeupdate);
-        my $ago_text = LJ::ago_text($u->{secondsold});
-
-        my $search_link = "[<a href='$LJ::SITEROOT/tools/search.bml?journal=$user'>$ML{'.details.search'}</a>]"
-            if LJ::is_enabled("offsite_journal_search") && $pm->has_journal;
-        my $nudge_link = "[<a href='$LJ::SITEROOT/friends/nudge.bml?user=$user'>$ML{'.details.nudge'}</a>]"
-            if $remote && $u->can_be_nudged_by($remote);
-
-        my @comment_stats;
-        my $num_comments_received = $u->num_comments_received( dbh => $dbcr );
-        my $num_comments_posted = $u->num_comments_posted( dbh => $dbcr );
-        push @comment_stats, BML::ml('.details.comments.received2', { num_raw => $num_comments_received, num_comma => LJ::commafy($num_comments_received) })
-            unless $u->is_identity;
-        push @comment_stats, BML::ml('.details.comments.posted2', { num_raw => $num_comments_posted, num_comma => LJ::commafy($num_comments_posted) })
-            if LJ::is_enabled("show-talkleft") && ($u->is_personal || $u->is_identity);
-        my $comment_stats_string = join(", ", @comment_stats);
-
-        my @view_links;
-        my $memcount = LJ::Memories::count($userid) || 0;
-        my $tagcount = scalar keys %{$u->tags};
-        push @view_links, BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" })
-            unless $u->is_syndicated;
-        push @view_links, BML::ml('.details.tags2', { num_raw => $tagcount, num_comma => LJ::commafy($tagcount), aopts => "href='" . $u->journal_base . "/tag/'" })
-            unless $u->is_identity || $u->is_syndicated;
-
-        ## fotobilder gallery count
-        my $ct_str;
-        if ($u->get_cap('fb_account') && $u->get_cap('fb_can_upload') && $u->{fb_num_pubpics}+0 > 0) {
-            # what we display is an estimate.  to eliminate confusion on the user end, we'll display the
-            # estimate in a way that makes it clear it's not an exact number. rules are:
-            #
-            #    * < 10    == "under 10"
-            #    * 10..999 == "at least 150" (rounded down to nearest 10)
-            #    * 1000+   == "at least 1500" (rounded down to nearest 100)
-            #
-            my $ct = $u->{fb_num_pubpics};
-            if ($ct < 10) {
-                $ct_str = "<10";
+        if ($remote && $remote->can_manage($u)) {
+            if (LJ::userpic_count($u)) {
+                $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a><br />";
+                $body .= "<span class='user_pic_caption'>";
+                $body .= "[<a href='$LJ::SITEROOT/editpics.bml?authas=$user'>$ML{'.section.edit'}</a>]";
+                $body .= "</span>";
             } else {
-                my $order = $ct < 100 ? 10 : 100;
-                my $base = POSIX::floor($ct / $order);
-                $ct_str = LJ::commafy($base * $order) . "+";
+                $body .= "<a href='$LJ::SITEROOT/editpics.bml?authas=$user'>$default_userpic_img</a><br />";
+                $body .= "<a href='$LJ::SITEROOT/editpics.bml?authas=$user' class='user_pic_caption'>$ML{'.userpic.upload'}</a>";
             }
         } else {
-            $ct_str = "0";
-        }
-
-        push @view_links, BML::ml('.details.fotobilder', { num => $ct_str, aopts => "href='$LJ::FB_SITEROOT/$user/'" })
-            if $ct_str;
-
-        $body .= "<div class='details_middle'>";
-        unless ($u->is_identity) {
-            $body .= "<p>" . BML::ml('.details.entries2', { num_raw => $entry_count, num_comma => LJ::commafy($entry_count) }) . "</p>";
-            if ($u->timeupdate) {
-                $body .= "<p>" . BML::ml('.details.lastupdated', { timestamp => "<span class='tooltip' title=\"$ago_text\">$lastupdated</span>" }) . " $nudge_link</p>";
+            if (LJ::userpic_count($u)) {
+                $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>$default_userpic_img</a><br />";
             } else {
-                $body .= "<p>$ML{'.details.lastupdated.never'} $nudge_link</p>";
+                $body .= "$default_userpic_img<br />";
+                $body .= "<span class='user_pic_caption'>$ML{'.userpic.none3'}</span>";
             }
         }
-        $body .= "<p>$comment_stats_string</p>" if $comment_stats_string;
-        $body .= "<p>" . join($ML{'.details.viewlinkssep'}, @view_links) . "</p>";
-        $body .= "</div>";
     }
-
-    $body .= "<div class='ljclear'></div>";
     $body .= "</div>";
 
-    # Right Section
-    {
-        my $timecreate = LJ::mysql_time($u->timecreate);
-        my $createdate = "<span class='tooltip' title=\"$timecreate\">" . substr($timecreate, 0, 10) . "</span>";
-        my $createdate_label = $u->is_personal || $u->is_identity ? BML::ml('.details.joined', { createdate => $createdate }) : BML::ml('.details.created', { createdate => $createdate });
-        my $supportpoints = $u->support_points_count;
+    $body .= "<div class='user_details_inner'>";
 
-        $body .= "<div class='details_right'>";
-        $body .= "<p>" . BML::ml('.details.id', { id => $u->id }) . "</p>";
-        $body .= "<p>$createdate_label</p>";
-        $body .= "<p>" . BML::ml('.details.supportpoints', { aopts => "href='$LJ::SITEROOT/support/'", num => LJ::commafy($supportpoints) }) . "</p>"
-            if $supportpoints;
-        $body .= LJ::run_hook("userinfo_extra_user_details", user => $u);
-        $body .= "</div>";
+    # journal titles
+    my $title = $u->{journaltitle} ? LJ::ehtml($u->{journaltitle}) : BML::ml('.details.title', { user => $u->display_username });
+    my $subtitle = LJ::ehtml($u->{journalsubtitle}) if $u->{journalsubtitle};
+    $body .= "<div class='details_journal'>";
+    $body .= "<p class='journal_title'>$title</p>";
+    $body .= "<p class='journal_subtitle'>$subtitle</p>" if $subtitle;
+    $body .= "</div>";
+
+    ## journal warnings
+    my $journal_warnings;
+
+    if ($u->is_locked) {
+        $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'statusvis_message.locked'}</p>";
+    } elsif ($u->is_memorial) {
+        $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'statusvis_message.memorial'}</p>";
+    } elsif ($u->is_readonly) {
+        $journal_warnings .= "<p class='statusvis_msg'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'statusvis_message.readonly'}</p>";
     }
 
-    $body .= "<div class='ljclear'></div>";
+    unless ($u->is_identity) {
+        if ($u->adult_content_calculated eq 'explicit') {
+            $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'.details.warning.explicit'}</p>";
+        } elsif ($u->adult_content_calculated eq 'concepts') {
+            $journal_warnings .= "<p class='journal_adult_warning'><img src='$LJ::IMGPREFIX/profile_icons/warning.gif' align='absmiddle' alt='' /> $ML{'.details.warning.concepts'}</p>";
+        }
+    }
+
+    ## stats
+    my $lastupdated = LJ::mysql_time($u->timeupdate);
+    my $ago_text = LJ::ago_text($u->{secondsold});
+
+    my $search_link = "[<a href='$LJ::SITEROOT/tools/search.bml?journal=$user'>$ML{'.details.search'}</a>]"
+        if LJ::is_enabled("offsite_journal_search") && $pm->has_journal;
+    my $nudge_link = "[<a href='$LJ::SITEROOT/friends/nudge.bml?user=$user'>$ML{'.details.nudge'}</a>]"
+        if $remote && $u->can_be_nudged_by($remote);
+
+    my @comment_stats;
+    my $num_comments_received = $u->num_comments_received( dbh => $dbcr );
+    my $num_comments_posted = $u->num_comments_posted( dbh => $dbcr );
+    push @comment_stats, BML::ml('.details.comments.received2', { num_raw => $num_comments_received, num_comma => LJ::commafy($num_comments_received) })
+        unless $u->is_identity;
+    push @comment_stats, BML::ml('.details.comments.posted2', { num_raw => $num_comments_posted, num_comma => LJ::commafy($num_comments_posted) })
+        if LJ::is_enabled("show-talkleft") && ($u->is_personal || $u->is_identity);
+
+    my $supportpoints = $u->support_points_count;
+    push @comment_stats, BML::ml('.details.supportpoints2', { aopts => "href='$LJ::SITEROOT/support/'", num => LJ::commafy($supportpoints) })
+        if $supportpoints;
+
+    my $comment_stats_string = join(", ", @comment_stats);
+
+    my $timecreate = LJ::mysql_time($u->timecreate);
+    my $createdate = "<span class='tooltip' title=\"$timecreate\">" . substr($timecreate, 0, 10) . "</span>";
+
+    $body .= "<div class='details_stats'>";
+    $body .= $journal_warnings;
+    $body .= "<p>" . BML::ml('.details.createdon2', { createdate => $timecreate }) . " (#" . $u->id . ")";
+    if ($u->timeupdate) {
+        $body .= ", " . BML::ml('.details.lastupdated2', { timestamp => "<span class='tooltip' title=\"$ago_text\">$lastupdated</span>" }) . " $nudge_link";
+    } else {
+        $body .= ", $ML{'.details.lastupdated.never2'} $nudge_link";
+    }
+    $body .= "</p>";
+    $body .= "<p>$comment_stats_string</p>" if $comment_stats_string;
+    $body .= LJ::run_hook("userinfo_extra_user_details", user => $u);
+    $body .= "</div>";
+
+    my @view_links;
+    my $entry_count = $u->number_of_posts;
+    my $tagcount = scalar keys %{$u->tags};
+    my $memcount = LJ::Memories::count($userid) || 0;
+    my $userpiccount = LJ::userpic_count($u);
+
+    ## fotobilder gallery count
+    my $ct_str;
+    if ($u->get_cap('fb_account') && $u->get_cap('fb_can_upload') && $u->{fb_num_pubpics}+0 > 0) {
+        # what we display is an estimate.  to eliminate confusion on the user end, we'll display the
+        # estimate in a way that makes it clear it's not an exact number. rules are:
+        #
+        #    * < 10    == "under 10"
+        #    * 10..999 == "at least 150" (rounded down to nearest 10)
+        #    * 1000+   == "at least 1500" (rounded down to nearest 100)
+        #
+        my $ct = $u->{fb_num_pubpics};
+        if ($ct < 10) {
+            $ct_str = "<10";
+        } else {
+            my $order = $ct < 100 ? 10 : 100;
+            my $base = POSIX::floor($ct / $order);
+            $ct_str = LJ::commafy($base * $order) . "+";
+        }
+    } else {
+        $ct_str = "0";
+    }
+
+    push @view_links, BML::ml('.details.entries3', { num_raw => $entry_count, num_comma => LJ::commafy($entry_count), aopts => "href='" . $u->journal_base . "'" })
+        unless $u->is_identity;
+    push @view_links, BML::ml('.details.tags2', { num_raw => $tagcount, num_comma => LJ::commafy($tagcount), aopts => "href='" . $u->journal_base . "/tag/'" })
+        unless $u->is_identity || $u->is_syndicated;
+    push @view_links, BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" })
+        unless $u->is_syndicated;
+    push @view_links, BML::ml('.details.fotobilder2', { num => $ct_str, aopts => "href='$LJ::FB_SITEROOT/$user/'" })
+        if $ct_str;
+    push @view_links, BML::ml('.details.userpics', { num_raw => $userpiccount, num_comma => LJ::commafy($userpiccount), aopts => "href='$LJ::SITEROOT/allpics.bml?user=$user'" })
+        unless $u->is_syndicated;
+
+    LJ::run_hook("userinfo_modify_view_links", user => $u, viewlinksref => \@view_links);
+
+    $body .= "<div class='details_links'>";
+    $body .= "<p>" . join($ML{'.details.viewlinkssep'}, @view_links) . "</p>";
     $body .= "</div>";
 
     $body .= "</div>";
 
-    # Box Ad
-    my $boxad = LJ::get_ads({ location => 'bml.userinfo', jounrnalu => $u }) .
-                LJ::get_ads({ location => 'bml.userinfo.sponsored', jounrnalu => $u });
-    
-    if ($boxad) {
-        $body .= "<div class='profile_right_ad'>";
-        $body .= $boxad;
-        $body .= "</div>";
-    }
-    # End Box Ad
+    $body .= "</div>";
 
-    my $extra_section_class = " firsttwo" if $boxad;
+    $body .= "</div>";
 
     my $html_by_journal;
-    LJ::run_hook("userinfo_html_by_journal", { ret => \$html_by_journal, u => $u, extra_section_class => $extra_section_class, with_header => 1 });
-    $body .= "$html_by_journal<br />" if $html_by_journal;
-
-    ### Basic Info
-    my $basics;
-    my $skool;
+    LJ::run_hook("userinfo_html_by_journal", { ret => \$html_by_journal, u => $u, with_header => 1 });
+    $body .= $html_by_journal;
 
     # Display Name
     my $display_name;
@@ -805,6 +789,173 @@
         return $mret;
     };
 
+    # Contact
+    my @contacts;
+    if (($u->is_personal || $u->is_identity) && $remote && !$u->equals($remote) && $u->can_receive_message($remote)) {
+        push @contacts, "<a href='$LJ::SITEROOT/inbox/compose.bml?user=$u->{'user'}'>$ML{'.contact.pm'}</a>";
+    }
+
+    if (!$synd && $u->share_contactinfo($remote) || $viewall) {
+        my @emails = $u->emails_visible($remote);
+        foreach my $email (@emails) {
+            if ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/) {
+                push @contacts, $mangleaddress->($email);
+            } else {
+                push @contacts, "<a href='mailto:$email' class='email'>$email</a>";
+            }
+        }
+    }
+
+    if (!$synd && $u->can_be_text_messaged_by($remote)) {
+        push @contacts, "<a href='$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}'>$ML{'.contact.txtmsg'}</a>";
+    }
+
+    my $contact = join("<br />\n", @contacts);
+
+    # Community Membership and Posting Access
+    my $comm_settings;
+    if ($com) {
+        my ($membership, $postlevel) = LJ::get_comm_settings($u);
+
+        my $membership_string = $ML{'.commsettings.membership.open'};
+        if ($membership eq "moderated") {
+            $membership_string = $ML{'.commsettings.membership.moderated'};
+        } elsif ($membership eq "closed") {
+            $membership_string = $ML{'.commsettings.membership.closed'};
+        }
+
+        my $postlevel_string = $ML{'.commsettings.postlevel.members'};
+        if ($postlevel eq "select") {
+            $postlevel_string = $ML{'.commsettings.postlevel.select'};
+        } elsif ($u->prop('nonmember_posting')) {
+            $postlevel_string = $ML{'.commsettings.postlevel.anybody'};
+        }
+
+        $postlevel_string .= $ML{'.commsettings.postlevel.moderated'} if $u->prop('moderated');
+
+        $comm_settings .= "<tr><th>$ML{'.commsettings.membership.header'}</th><td>$membership_string</td></tr>";
+        $comm_settings .= "<tr><th>$ML{'.commsettings.postlevel.header'}</th><td>$postlevel_string</td></tr>";
+    }
+
+    # Community Theme
+    my $comm_theme;
+    if ($com && $u->prop('comm_theme')) {
+        $comm_theme .= "<tr><th>$ML{'.commdesc.header'}</th><td>" . LJ::ehtml($u->prop('comm_theme')) . "</td></tr>";
+    }
+
+    # Syndication Status
+    my $syn_status;
+    if ($synd) {
+        # syndication status
+        $syn_status .= "<tr valign='top'><th>$ML{'.label.syndicatedstatus'}</th><td>";
+        $syn_status .= "$ML{'.syn.lastcheck'} ";
+        $syn_status .= $synd->{'lastcheck'} || $ML{'.syn.last.never'};
+        my $status = {
+            'parseerror' => "Parse error",
+            'notmodified' => "Not modified",
+            'toobig' => "Too big",
+            'posterror' => "Posting error",
+            'ok' => "",     # no status line necessary
+            'nonew' => "",  # no status line necessary
+        }->{$synd->{'laststatus'}};
+        $syn_status .= " ($status)" if $status;
+
+        if ($synd->{'laststatus'} eq "parseerror") {
+           $syn_status .= "<br />$ML{'.syn.parseerror'} " . LJ::ehtml($u->{'rssparseerror'});
+        }
+
+        $syn_status .= "<br />$ML{'.syn.nextcheck'} $synd->{'checknext'}";
+        $syn_status .= "</td></tr>\n";
+    }
+
+    # Syndication Readers
+    my $syn_readers;
+    if ($synd) {
+        $syn_readers .= "<tr><th>$ML{'.label.syndreadcount'}</th></td>";
+        $syn_readers .= "<td>" . $fro_m->reader_count . "</td></tr>\n";
+    }
+
+    ### Basic Info
+    if ($display_name || $birthday || $location || $website || $comm_settings || $comm_theme || $syn_status || $syn_readers || $contact) {
+        $body .= "<div class='ljclear'></div>";
+        $body .= "<div class='section expandcollapse on' id='basics_header'>" . $arrowimg->("basics") . " $ML{'.basicinfo.header'}";
+        $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
+        $body .= "</div>";
+        $body .= "<div class='section_body' id='basics_body'>\n";
+
+        $body .= "<div class='userinfo'>";
+        $body .= "<table cellpadding='0' cellspacing='3'>";
+        $body .= $display_name;
+        if ($com) {
+            $body .= "$location$website$comm_settings$comm_theme";
+        } elsif ($synd) {
+            $body .= "$syn_status$syn_readers";
+        } else {
+            $body .= "$birthday$location$website";
+        }
+        $body .= "</table>";
+        $body .= "</div>";
+
+        if ($contact) {
+            $body .= "<div class='contact'>";
+            $body .= "<p class='section_body_title'>$ML{'.contact.header'}</p>";
+            $body .= $contact;
+            $body .= "</div>";
+        }
+
+        $body .= "</div>";
+    }
+
+    ### Bio
+    if ($u->{'has_bio'} eq "Y") {
+        $body .= "<div class='ljclear'></div>";
+        my $label = $u->is_person || $u->is_identity ? $ML{'.bio.header'} : $ML{'.about.header'};
+
+        if ($u->{journaltype} eq 'I' && $LJ::ONLY_USER_VHOSTS) {
+            $u->{'bio'} = LJ::ehtml($u->{'bio'}); # XXXXX FIXME: TEMP FIX
+            $u->{'bio'} =~ s!\n!<br />!g;
+        } else {
+            LJ::CleanHTML::clean_userbio(\$u->{'bio'});
+        }
+
+        LJ::EmbedModule->expand_entry($u, \$u->{'bio'});
+        $body .= "<div class='section expandcollapse on' id='bio_header'>" . $arrowimg->("bio") . " $label";
+        $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#bio'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
+        $body .= "</div>\n";
+        $body .= "<div class='section_body' id='bio_body'>$u->{'bio'}</div>\n";
+    }
+    ### End Bio
+
+    ### Interests
+    my $intlist;
+    my $intcount = 0;
+    if (@$intu) {
+        foreach my $int (@$intu) {
+            next if $intcount++ > 150;
+            LJ::text_out(\$int->[1]); # 1==interest
+            my $eint = LJ::eurl($int->[1]);
+            if ($int->[2] > 1) {  # 2==intcount
+                my $intline;
+                if ($remote && $remote->get_cap("directory")) {
+                    $intline = "<a href='$LJ::SITEROOT/directory.bml?int_like=$eint&opt_pagesize=100&start_search=1'>$int->[1]</a>";
+                } else {
+                    $intline = "<a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a>";
+                }
+                $intline = "<b>$intline</b>" if $remote_interest{$int->[0]};  # 0==intid
+
+                $intlist .= "$intline, ";
+            } else {
+                $intlist .= "$int->[1], ";
+            }
+        }
+        chop $intlist; chop $intlist;  # remove trailing ", "
+        if ($intcount > 150) {
+            my $notshown = $intcount - 150;
+            $intlist .= BML::ml('.label.intsnotshown',{'intnotshown'=>$notshown});
+        }
+    }
+    # End Interests
+
     # Instant Message
     my $instant_message;
     if ($u->is_personal && ($u->share_contactinfo($remote) || $viewall)) {
@@ -874,29 +1025,6 @@
         }
     }
 
-    # Contact
-    my @contacts;
-    if (($u->is_personal || $u->is_identity) && $remote && !$u->equals($remote) && $u->can_receive_message($remote)) {
-        push @contacts, "<a href='$LJ::SITEROOT/inbox/compose.bml?user=$u->{'user'}'>$ML{'.contact.pm'}</a>";
-    }
-
-    if (!$synd && $u->share_contactinfo($remote) || $viewall) {
-        my @emails = $u->emails_visible($remote);
-        foreach my $email (@emails) {
-            if ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/) {
-                push @contacts, $mangleaddress->($email);
-            } else {
-                push @contacts, "<a href='mailto:$email' class='email'>$email</a>";
-            }
-        }
-    }
-
-    if (!$synd && $u->can_be_text_messaged_by($remote)) {
-        push @contacts, "<a href='$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}'>$ML{'.contact.txtmsg'}</a>";
-    }
-
-    my $contact = join("<br />\n", @contacts);
-
     # Schools
     my $schools_list;
     if (!$synd && ($u->should_show_schools_to($remote) || (LJ::is_enabled("schools") && $viewall))) {
@@ -932,200 +1060,47 @@
                     $link .= ")";
                 }
 
-                push @links, "<span class='user_info_schools_item'>$link</span>";
+                push @links, "<span class='schools_item'>$link</span>";
             }
             $schools_list .= join("<br />\n", @links);
         }
     }
 
-    # Community Membership and Posting Access
-    my $comm_settings;
-    if ($com) {
-        my ($membership, $postlevel) = LJ::get_comm_settings($u);
+    ### Connect
+    if ($intlist || $instant_message || $schools_list) {
+        $body .= "<div class='ljclear'></div>";
+        $body .= "<div class='section expandcollapse on' id='interests_header'>" . $arrowimg->("interests") . " $ML{'.label.connect'}</div>";
+        $body .= "<div class='section_body' id='interests_body'>";
+        if ($intlist) {
+            $body .= "<p class='inner_section_header first'>$ML{'.label.interests'} ($intcount):";
+            $body .= " <span class='inner_section_header_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#interests'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
+            if ($remote) {
+                my $enmasse_link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
+                $enmasse_link .= "&fromuser=$user" unless $remote->id == $userid;
+                my $enmasse_text = $remote->id == $userid ? $ML{'.label.interests.removesome2'} : $ML{'.label.interests.modifyyours2'};
 
-        my $membership_string = $ML{'.commsettings.membership.open'};
-        if ($membership eq "moderated") {
-            $membership_string = $ML{'.commsettings.membership.moderated'};
-        } elsif ($membership eq "closed") {
-            $membership_string = $ML{'.commsettings.membership.closed'};
-        }
-
-        my $postlevel_string = $ML{'.commsettings.postlevel.members'};
-        if ($postlevel eq "select") {
-            $postlevel_string = $ML{'.commsettings.postlevel.select'};
-        } elsif ($u->prop('nonmember_posting')) {
-            $postlevel_string = $ML{'.commsettings.postlevel.anybody'};
-        }
-
-        $postlevel_string .= $ML{'.commsettings.postlevel.moderated'} if $u->prop('moderated');
-
-        $comm_settings .= "<tr><th>$ML{'.commsettings.membership.header'}</th><td>$membership_string</td></tr>";
-        $comm_settings .= "<tr><th>$ML{'.commsettings.postlevel.header'}</th><td>$postlevel_string</td></tr>";
-    }
-
-    # Community Theme
-    my $comm_theme;
-    if ($com && $u->prop('comm_theme')) {
-        $comm_theme .= "<tr><th>$ML{'.commdesc.header'}</th><td>" . LJ::ehtml($u->prop('comm_theme')) . "</td></tr>";
-    }
-
-    # Syndication Status
-    my $syn_status;
-    if ($synd) {
-        # syndication status
-        $syn_status .= "<tr valign='top'><th>$ML{'.label.syndicatedstatus'}</th><td>";
-        $syn_status .= "$ML{'.syn.lastcheck'} ";
-        $syn_status .= $synd->{'lastcheck'} || $ML{'.syn.last.never'};
-        my $status = {
-            'parseerror' => "Parse error",
-            'notmodified' => "Not modified",
-            'toobig' => "Too big",
-            'posterror' => "Posting error",
-            'ok' => "",     # no status line necessary
-            'nonew' => "",  # no status line necessary
-        }->{$synd->{'laststatus'}};
-        $syn_status .= " ($status)" if $status;
-
-        if ($synd->{'laststatus'} eq "parseerror") {
-           $syn_status .= "<br />$ML{'.syn.parseerror'} " . LJ::ehtml($u->{'rssparseerror'});
-        }
-
-        $syn_status .= "<br />$ML{'.syn.nextcheck'} $synd->{'checknext'}";
-        $syn_status .= "</td></tr>\n";
-    }
-
-    # Syndication Readers
-    my $syn_readers;
-    if ($synd) {
-        $syn_readers .= "<tr><th>$ML{'.label.syndreadcount'}</th></td>";
-        $syn_readers .= "<td>" . $fro_m->reader_count . "</td></tr>\n";
-    }
-
-    # Display Basic Info
-    my ($basics_left, $basics_right);
-
-    if (!$com && !$synd && ($display_name || $birthday || $location || $website)) {
-        $basics_left .= "<div class='user_info_stats_left'>";
-        $basics_left .= "<table cellpadding='0' cellspacing='3'>$display_name$birthday$location$website</table>";
-        $basics_left .= "</div>";
-    }
-
-    if ($com && ($display_name || $comm_settings || $comm_theme)) {
-        $basics_left .= "<div class='user_info_stats_left'>";
-        $basics_left .= "<table cellpadding='0' cellspacing='3'>$display_name$comm_settings$comm_theme</table>";
-        $basics_left .= "</div>";
-    }
-
-    if ($synd && ($display_name || $syn_status || $syn_readers)) {
-        $basics_left .= "<div class='user_info_stats_left'>";
-        $basics_left .= "<table cellpadding='0' cellspacing='3'>$display_name$syn_status$syn_readers</table>";
-        $basics_left .= "</div>";
-    }
-
-    if ($instant_message) {
-        $basics_left .= "<div class='user_info_im'>";
-        $basics_left .= "<p class='user_info_title'>$ML{'.im.header2'}</p>";
-        $basics_left .= "<table cellpadding='0' cellspacing='3'>$instant_message</table>";
-        $basics_left .= "</div>";
-    }
-
-    if ($com && ($location || $website)) {
-        $basics_right .= "<div class='user_info_stats_right'>";
-        $basics_right .= "<table cellpadding='0' cellspacing='3'>$location$website</table>";
-        $basics_right .= "</div>";
-    }
-
-    if ($contact) {
-        $basics_right .= "<div class='user_info_contact'>";
-        $basics_right .= "<p class='user_info_title'>$ML{'.contact.header'}</p>";
-        $basics_right .= $contact;
-        $basics_right .= "</div>";
-    }
-
-    if ($schools_list) {
-        $basics_right .= "<div class='user_info_schools'>";
-        $basics_right .= "<p class='user_info_title'>$ML{'.schools.header'}";
-        $basics_right .= " <span>[<a href='$LJ::SITEROOT/schools/manage.bml?authas=$user'>$ML{'.schools.manage'}</a>]</span>" if $remote && $remote->can_manage($u);
-        $basics_right .= "</p>";
-        $basics_right .= $schools_list;
-        $basics_right .= "</div>";
-    }
-
-    if ($basics_left || $basics_right) {
-        my $new_width = " style='width: 45%;'" unless $boxad;
-
-        $body .= "<div class='section$extra_section_class'><span class='expandcollapse on' id='basics_header'>" . $arrowimg->("basics") . " $ML{'.basicinfo.header'}</span>";
-        $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
-        $body .= "</div>";
-        $body .= "<div class='section_body' id='basics_body'>\n";
-        $body .= $basics_right ? "<div class='basics_left'$new_width>" : "<div class='basics'>";
-        $body .= "$basics_left</div>";
-        $body .= "<div class='basics_right'$new_width>$basics_right</div>" if $basics_right;
-        $body .= "</div>";
-    }
-
-    ### Bio
-    if ($u->{'has_bio'} eq "Y") {
-        $body .= "<div class='ljclear'></div><br />";
-        my $label = $u->is_person || $u->is_identity ? $ML{'.bio.header'} : $ML{'.about.header'};
-
-        if ($u->{journaltype} eq 'I' && $LJ::ONLY_USER_VHOSTS) {
-            $u->{'bio'} = LJ::ehtml($u->{'bio'}); # XXXXX FIXME: TEMP FIX
-            $u->{'bio'} =~ s!\n!<br />!g;
-        } else {
-            LJ::CleanHTML::clean_userbio(\$u->{'bio'});
-        }
-
-        LJ::EmbedModule->expand_entry($u, \$u->{'bio'});
-        $body .= "<div class='section'><span class='expandcollapse on' id='bio_header'>" . $arrowimg->("bio") . " $label</span>";
-        $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#bio'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
-        $body .= "</div>\n";
-        $body .= "<div class='section_body' id='bio_body'>$u->{'bio'}</div>\n";
-    }
-    ### End Bio
-
-    ### Interests
-    if (@$intu) {
-        $body .= "<div class='ljclear'></div><br />";
-        my $intcount = 0;
-        my $intlist = "";
-        foreach my $int (@$intu) {
-            next if $intcount++ > 150;
-            LJ::text_out(\$int->[1]); # 1==interest
-            my $eint = LJ::eurl($int->[1]);
-            if ($int->[2] > 1) {  # 2==intcount
-                my $intline;
-                if ($remote && $remote->get_cap("directory")) {
-                    $intline = "<a href='$LJ::SITEROOT/directory.bml?int_like=$eint&opt_pagesize=100&start_search=1'>$int->[1]</a>";
-                } else {
-                    $intline = "<a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a>";
-                }
-                $intline = "<b>$intline</b>" if $remote_interest{$int->[0]};  # 0==intid
-
-                $intlist .= "$intline, ";
-            } else {
-                $intlist .= "$int->[1], ";
+                $body .= " <span class='inner_section_header_link'>[<a href='$enmasse_link'>$enmasse_text</a>]</span>";
             }
+            $body .= "</p><div class='inner_section_body'>$intlist</div>";
         }
-        chop $intlist; chop $intlist;  # remove trailing ", "
-        if ($intcount > 150) {
-            my $notshown = $intcount - 150;
-            $intlist .= BML::ml('.label.intsnotshown',{'intnotshown'=>$notshown});
+        if ($instant_message) {
+            my $new_im_margin = " style='margin-top: 0;'" unless $intlist;
+            $body .= "<div class='external_services'$new_im_margin>";
+            $body .= "<p class='inner_section_header'$new_im_margin>$ML{'.im.header2'}</p>";
+            $body .= "<table cellpadding='0' cellspacing='3'>$instant_message</table>";
+            $body .= "</div>";
         }
-
-        $body .= "<div class='section'><span class='expandcollapse on' id='interests_header'>" . $arrowimg->("interests") . " $ML{'.label.interests'}</span>";
-        $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#interests'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
-        if ($remote) {
-            my $enmasse_link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
-            $enmasse_link .= "&fromuser=$user" unless $remote->id == $userid;
-            my $enmasse_text = $remote->id == $userid ? $ML{'.label.interests.removesome2'} : $ML{'.label.interests.modifyyours2'};
-
-            $body .= " <span class='section_link'>[<a href='$enmasse_link'>$enmasse_text</a>]</span>";
+        if ($schools_list) {
+            my $new_schools_margin = " style='margin-top: 0;'" unless $intlist;
+            $body .= "<div class='schools'$new_schools_margin>";
+            $body .= "<p class='inner_section_header'$new_schools_margin>$ML{'.schools.header'}";
+            $body .= " <span class='inner_section_header_link'>[<a href='$LJ::SITEROOT/schools/manage.bml?authas=$user'>$ML{'.schools.manage'}</a>]</span>" if $remote && $remote->can_manage($u);
+            $body .= "</p>";
+            $body .= $schools_list;
+            $body .= "</div>";
         }
         $body .= "</div>";
-        $body .= "<div class='section_body' id='interests_body'><p class='inner_section_header first'>$ML{'.label.interests'} ($intcount):</p><div class='inner_section_body'>$intlist</div></div>";
     }
-    # End Interests
 
     ## community maintainers and moderators
     ##
@@ -1144,7 +1119,7 @@
             my @maintlist = sort { $a->{'user'} cmp $b->{'user'} }
                             map { $userhash{$_} } @$maintainers;
 
-            $body .= "<div class='ljclear'></div><br />";
+            $body .= "<div class='ljclear'></div>";
             $body .= "<div class='section'>$ML{'.admins.header'}";
             $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/community/members.bml?authas=" . $u->user . "'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
             $body .= "</div>";
@@ -1386,7 +1361,7 @@
     }
 
     unless ($synd || $LJ::FORCE_EMPTY_FRIENDS{$userid}) {
-        $body .= "<div class='ljclear'></div><br />";
+        $body .= "<div class='ljclear'></div>";
         my $label;
         if ($com) {
             $label = $ML{'.members.header'};
@@ -1512,11 +1487,11 @@
         $comms .= "$mofs" if ($mofs);
         $comms .= "$posting" if ($posting);
         next unless $comms;
-        $body .= "<div class='ljclear'></div><br>";
+        $body .= "<div class='ljclear'></div>";
         $body .= "<div class='section'><img src='$LJ::IMGPREFIX/community.gif' alt='' /> $ML{'.comms.header'}$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends?show=C'>$ML{'.friends.viewentries'}</a>]</span></div>";
         $body .= "<div class='section_body'>$comms</div>";
         if ($feeds) {
-            $body .= "<div class='ljclear'></div><br><div class='section'><img src='$LJ::IMGPREFIX/syndicated.gif' alt='' /> $ML{'.syn.header'}$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends?show=Y'>$ML{'.friends.viewentries'}</a>]</span></div>";
+            $body .= "<div class='ljclear'></div><div class='section'><img src='$LJ::IMGPREFIX/syndicated.gif' alt='' /> $ML{'.syn.header'}$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends?show=Y'>$ML{'.friends.viewentries'}</a>]</span></div>";
             $body .= "<div class='section_body'>$feeds</div>";
         }
     }
