@@ -133,4 +133,6 @@ sub subscription_as_html {
     return BML::ml('event.officialpost', { sitename => $LJ::SITENAME }); # $LJ::SITENAME makes a new announcement
 }
 
+sub schwartz_role { 'mass' }
+
 1;

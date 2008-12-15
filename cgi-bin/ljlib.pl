@@ -316,21 +316,20 @@ sub mogclient {
 }
 
 sub theschwartz {
-    return LJ::Test->theschwartz() if $LJ::_T_FAKESCHWARTZ;
-    return $LJ::SchwartzClient     if $LJ::SchwartzClient;
+    return LJ::Test->theschwartz(@_) if $LJ::_T_FAKESCHWARTZ;
 
     my $opts = shift;
 
-    my $mode = $opts->{mode} || "";
-    my @dbs = @LJ::THESCHWARTZ_DBS;
-    push @dbs, @LJ::THESCHWARTZ_DBS_NOINJECT if $mode eq "drain";
+    my $role = $opts->{role} || "default";
 
-    if (@dbs) {
-        # FIXME: use LJ's DBI::Role system for this.
-        $LJ::SchwartzClient = TheSchwartz->new(databases => \@dbs);
-    }
+    return $LJ::SchwartzClient{$role} if $LJ::SchwartzClient{$role};
 
-    return $LJ::SchwartzClient;
+    my @dbs = grep { $_->{role}->{$role} } @LJ::THESCHWARTZ_DBS;
+    die "Unknown role in LJ::theschwartz: '$role'" unless @dbs;
+
+    $LJ::SchwartzClient{$role} = TheSchwartz->new(databases => \@dbs);
+
+    return $LJ::SchwartzClient{$role};
 }
 
 sub sms_gateway {

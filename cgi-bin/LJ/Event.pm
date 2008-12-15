@@ -206,6 +206,9 @@ sub available_for_user  {
     return 1;
 }
 
+# override for very hard events
+sub schwartz_role { 'default' }
+
 ############################################################################
 #            Don't override
 ############################################################################
@@ -231,7 +234,7 @@ sub fire {
     my $self = shift;
     return 0 if $LJ::DISABLED{'esn'};
 
-    my $sclient = LJ::theschwartz();
+    my $sclient = LJ::theschwartz( { role => $self->schwartz_role } );
     return 0 unless $sclient;
 
     my $job = $self->fire_job or
