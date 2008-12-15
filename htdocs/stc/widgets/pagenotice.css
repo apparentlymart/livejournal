@@ -4,3 +4,7 @@
     right: 3px;
     cursor: pointer;
 }
+
+* html #dismiss_notice {
+    right: 13px;
+}
