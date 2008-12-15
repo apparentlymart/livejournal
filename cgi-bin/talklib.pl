@@ -1903,7 +1903,7 @@ sub mark_comment_as_spam {
     my $row = LJ::Talk::get_talk2_row($dbcr, $journalu->{userid}, $jtalkid);
     my $temp = LJ::get_talktext2($journalu, $jtalkid);
     my ($subject, $body, $posterid) = ($temp->{$jtalkid}[0], $temp->{$jtalkid}[1], $row->{posterid});
-    return 0 unless $body;
+    return 0 unless ($body && $body ne '');
 
     # can't mark your own comments as spam.
     return 0 if $posterid && $posterid == $journalu->id;

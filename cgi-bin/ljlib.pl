@@ -1821,6 +1821,8 @@ sub get_talktext2
                                "WHERE journalid=$journalid AND jtalkid IN ($in)");
         $sth->execute;
         while (my ($id, $subject, $body) = $sth->fetchrow_array) {
+            $subject = "" unless defined $subject;
+            $body = "" unless defined $body;
             LJ::text_uncompress(\$body);
             $lt->{$id} = [ $subject, $body ];
             LJ::MemCache::add([$journalid,"talkbody:$clusterid:$journalid:$id"], $body)
