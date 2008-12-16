@@ -435,6 +435,83 @@ sub get_timeupdate_multi {
     return \%timeupdate;
 }
 
+
+
+
+
+# <LJFUNC>
+# name: LJ::get_times_multi
+# des: Get the last update time and time create.
+# args: opt?, uids
+# des-opt: optional hashref, currently can contain 'memcache_only'
+#          to only retrieve data from memcache
+# des-uids: list of userids to load timeupdate and timecreate for
+# returns: hashref; uid => {timeupdate => unix timeupdate, timecreate => unix timecreate}
+# </LJFUNC>
+sub get_times_multi {
+    my ($opt, @uids) = @_;
+
+    # allow optional opt hashref as first argument
+    unless (ref $opt eq 'HASH') {
+        push @uids, $opt;
+        $opt = {};
+    }
+    return {} unless @uids;
+
+    my @memkeys = map { [$_, "tu:$_"], [$_, "tc:$_"] } @uids;
+    my $mem = LJ::MemCache::get_multi(@memkeys) || {};
+
+    my @need  = ();
+    my %times = ();
+    foreach my $uid (@uids) {
+        my ($tc, $tu) = ('', '');
+        if ($tu = $mem->{"tu:$uid"}) {
+            $times{updated}->{$uid} = unpack("N", $tu);
+        } 
+        if ($tc = $mem->{"tc:$_"}){
+            $times{created}->{$_} = $tc;
+        }
+        
+        push @need => $uid
+            unless $tc and $tu;
+    }
+
+    # if everything was in memcache, return now
+    return \%times if $opt->{'memcache_only'} or not @need;
+
+    # fill in holes from the database.  safe to use the reader because we
+    # only do an add to memcache, whereas postevent does a set, overwriting
+    # any potentially old data
+    my $dbr = LJ::get_db_reader();
+    my $need_bind = join(",", map { "?" } @need);
+
+    # Fetch timeupdate and timecreate from DB.    
+    # Timecreate is loaded in pre-emptive goals.
+    # This is tiny optimization for 'get_timecreate_multi',
+    # which is called right after this method during 
+    # friends page generation.
+    my $sth = $dbr->prepare("
+        SELECT userid, 
+               UNIX_TIMESTAMP(timeupdate),
+               UNIX_TIMESTAMP(timecreate)
+        FROM   userusage 
+        WHERE 
+               userid IN ($need_bind)");
+    $sth->execute(@need);
+    while (my ($uid, $tu, $tc) = $sth->fetchrow_array){
+        $times{updated}->{$uid} = $tu;
+        $times{created}->{$uid} = $tc;
+
+        # set memcache for this row
+        LJ::MemCache::add([$uid, "tu:$uid"], pack("N", $tu), 30*60);
+        # set this for future use
+        LJ::MemCache::add([$uid, "tc:$uid"], $tc, 60*60*24); # as in LJ::User->timecreate
+    }
+
+    return \%times;
+}
+
+
 # <LJFUNC>
 # name: LJ::get_friend_items
 # des: Return friend items for a given user, filter, and period.
@@ -489,10 +566,15 @@ sub get_friend_items
     my $skip = $opts->{'skip'}+0;
     my $getitems = $itemshow + $skip;
 
-    my $filter = $opts->{'filter'}+0;
-
+    # friendspage per day is allowed only for journals with 
+    # special cap 'friendspage_per_day'
+    my $events_date = $opts->{u}->get_cap('friendspage_per_day')
+                        ? $opts->{events_date}
+                        : '';
+    
+    my $filter  = int $opts->{'filter'};
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14;  # 2 week default.
-    my $lastmax = $LJ::EndOfTime - time() + $max_age;
+    my $lastmax = $LJ::EndOfTime - ($events_date || (time() - $max_age));
     my $lastmax_cutoff = 0; # if nonzero, never search for entries with rlogtime higher than this (set when cache in use)
 
     # sanity check:
@@ -546,7 +628,11 @@ sub get_friend_items
         if ($LJ::SLOPPY_FRIENDS_THRESHOLD && $fcount > $LJ::SLOPPY_FRIENDS_THRESHOLD) {
             $tu_opts->{memcache_only} = 1;
         }
-        my $timeupdate = LJ::get_timeupdate_multi($tu_opts, keys %$friends);
+        
+        my $times = $events_date 
+                        ? LJ::get_times_multi($tu_opts, keys %$friends)
+                        : {updated => LJ::get_timeupdate_multi($tu_opts, keys %$friends)};
+        my $timeupdate = $times->{updated};
 
         # now push a properly formatted @friends_buffer row
         foreach my $fid (keys %$timeupdate) {
@@ -556,7 +642,16 @@ sub get_friend_items
             push @friends_buffer, [ $fid, $rupdate, $clusterid, $friends->{$fid}, $fu ];
         }
 
-        @friends_buffer = sort { $a->[1] <=> $b->[1] } @friends_buffer;
+        @friends_buffer = 
+            sort { $a->[1] <=> $b->[1] } 
+            grep { 
+                $timeupdate->{$_->[0]} >= $lastmax and # reverse index
+                ($events_date 
+                    ? $times->{created}->{$_->[0]} < $events_date
+                    : 1
+                )
+            }
+            @friends_buffer;
 
         # note that we've already loaded the friends
         $fr_loaded = 1;
@@ -723,13 +818,14 @@ sub get_friend_items
         $opts->{'friends_u'}->{$friendid} = $fr->[4]; # friend u object
 
         my @newitems = LJ::get_log2_recent_user({
-            'clusterid' => $fr->[2],
-            'userid' => $friendid,
-            'remote' => $remote,
-            'itemshow' => $itemsleft,
-            'notafter' => $lastmax,
-            'dateformat' => $opts->{'dateformat'},
-            'update' => $LJ::EndOfTime - $fr->[1], # reverse back to normal
+            'clusterid'   => $fr->[2],
+            'userid'      => $friendid,
+            'remote'      => $remote,
+            'itemshow'    => $itemsleft,
+            'notafter'    => $lastmax,
+            'dateformat'  => $opts->{'dateformat'},
+            'update'      => $LJ::EndOfTime - $fr->[1], # reverse back to normal
+            'events_date' => $events_date,
         });
 
         # stamp each with clusterid if from cluster, so ljviews and other
