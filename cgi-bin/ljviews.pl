@@ -1332,7 +1332,9 @@ sub create_view_lastn
         my $permalink = "$journalbase/$ditemid.html";
         $lastn_event{'permalink'} = $permalink;
 
-        $lastn_event{'subject'} = "<a href='$permalink'>" . $lastn_event{'subject'} . "</a>";
+        if($subject !~ /[<>]/) {
+            $lastn_event{'subject'} = "<a href='$permalink'>" . $lastn_event{'subject'} . "</a>";
+        }
 
         if ($u->{'opt_showtalklinks'} eq "Y" &&
             ! $logprops{$itemid}->{'opt_nocomments'}
