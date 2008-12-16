@@ -86,6 +86,28 @@ body<=
     return LJ::bad_input($ML{'.internal.changelanguage'})
         if LJ::is_enabled("support_request_language") && $FORM{'changelanguage'} && ($type ne "internal" || ! LJ::Support::can_read_internal($sp, $remote));
 
+    # make sure that the tier/answer combination is valid
+    my $tier;
+    if (LJ::is_enabled("support_response_tier")) {
+        my $is_answer = $type eq "answer" && LJ::Support::can_help($sp, $remote) ? 1 : 0;
+        my $is_approval = $type eq "internal" && LJ::Support::can_help($sp, $remote) && $FORM{approveans} && $FORM{approveas} eq "answer" ? 1 : 0;
+        my $is_internal = $type eq "internal" && LJ::Support::can_make_internal($sp, $remote) ? 1 : 0;
+
+        if ($FORM{settier}) {
+            return LJ::bad_input($ML{'.internal.settier'})
+                unless $is_answer || $is_approval || $is_internal;
+
+            $tier = $FORM{settier};
+            $tier =~ s/^tier//;
+            $tier += 0;
+
+            return LJ::bad_input($ML{'.invalid.badtier'})
+                unless $tier =~ /^[123]$/;
+        } elsif ($is_answer || $is_approval) {
+            return LJ::bad_input($ML{'.invalid.notier'});
+        }
+    }
+
     return LJ::bad_input($ML{'.internal.touch'})
         if ($FORM{'touch'} || $FORM{'untouch'}) &&
             ($type ne "internal" || ! LJ::Support::can_perform_actions($sp, $remote));
@@ -94,7 +116,7 @@ body<=
         if $FORM{'changesum'} && ($type ne "internal" || ! LJ::Support::can_change_summary($sp, $remote));
 
     return LJ::bad_input($ML{'.invalid.blank'})
-        if $FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} && !$FORM{'changelanguage'} &&
+        if $FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} && !$FORM{'changelanguage'} && !$FORM{'settier'} &&
             !$FORM{'touch'} && !$FORM{'untouch'} && !$FORM{'changesum'} && !$FORM{'bounce_email'};
 
     # Load up vars for approvals
@@ -223,11 +245,21 @@ body<=
 
     ## approving a screened response
     if ($FORM{'approveans'}) {
+        my $sql_extra;
+        if ($tier) {
+            $sql_extra = ", tier=${tier}0";
+        }
+
         # $res, $splid defined above
         # approve
         my $qtype = $dbh->quote($FORM{'approveas'});
-        $dbh->do("UPDATE supportlog SET type=$qtype WHERE splid=$splid");
-        $status .= "(Approving $FORM{'approveas'} \#$splid)\n\n";
+        $dbh->do("UPDATE supportlog SET type=$qtype$sql_extra WHERE splid=$splid");
+        if ($sql_extra) {
+            $status .= "(Approving $FORM{'approveas'} \#$splid as Tier $tier)\n\n";
+        } else {
+            $status .= "(Approving $FORM{'approveas'} \#$splid)\n\n";
+        }
+        $tier = undef; # we don't want the approval IC to have a tier, so delete this.
         LJ::Support::mail_response_to_user($sp, $splid);
     }
 
@@ -283,12 +315,18 @@ body<=
         $status .= "Changing language from \"[$oldlang] $langs{$oldlang}\" to \"[$newlang] $langs{$newlang}\".\n\n";
     }
 
+    # set the tier of the request using an internal comment instead of an answer
+    if ($tier && $type eq "internal") {
+        $status .= "Setting request to Tier $tier.\n\n";
+    }
+
     my $splid = LJ::Support::append_request($sp, {
         'body' => $status . $FORM{'body'},
         'type' => $type,
         'faqid' => $faqid,
         'uniq' => $r->notes('uniq'),
         'remote' => $remote,
+        'tier' => $tier,
     });
 
     LJ::Support::mail_response_to_user($sp, $splid)

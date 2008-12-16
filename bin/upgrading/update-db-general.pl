@@ -3910,6 +3910,12 @@ register_alter(sub {
                  "ALTER TABLE jobstatus " .
                  "ADD userid INT UNSIGNED DEFAULT NULL"); # yes, we allow userid to be NULL - it means no userid checking
     }
+
+    unless (column_type("supportlog", "tier")) {
+        do_alter("supportlog",
+                 "ALTER TABLE supportlog " .
+                 "ADD tier TINYINT UNSIGNED DEFAULT NULL");
+    }
 });
 
 

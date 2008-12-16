@@ -647,6 +647,7 @@ sub append_request
     # $re->{'faqid'}
     # $re->{'remote'}  (remote if known)
     # $re->{'uniq'}    (uniq of remote)
+    # $re->{'tier'}    (tier of response if type is answer or internal)
 
     my $remote = $re->{'remote'};
     my $posterid = $remote ? $remote->{'userid'} : 0;
@@ -683,8 +684,14 @@ sub append_request
     my $qfaqid = $re->{'faqid'}+0;
     my $quserid = $posterid+0;
     my $spid = $sp->{'spid'}+0;
+    my $qtier = $re->{'tier'} ? ($re->{'tier'}+0) . "0" : "NULL";
 
-    my $sql = "INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), $qtype, $qfaqid, $quserid, $qmessage)";
+    my $sql;
+    if (LJ::is_enabled("support_response_tier")) {
+        $sql = "INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message, tier) VALUES (NULL, $spid, UNIX_TIMESTAMP(), $qtype, $qfaqid, $quserid, $qmessage, $qtier)";
+    } else {
+        $sql = "INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), $qtype, $qfaqid, $quserid, $qmessage)";
+    }
     $dbh->do($sql);
     my $splid = $dbh->{'mysql_insertid'};
 
