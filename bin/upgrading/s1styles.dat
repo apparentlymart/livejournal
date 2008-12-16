@@ -8456,7 +8456,7 @@ LASTN_PAGE<=
 th,td {
 text-align: left;
 }
-span.subj A { text-decoration: none; color: inherit }
+span.subj A { text-decoration: none; color: #000; }
 
 -->
 </style>
