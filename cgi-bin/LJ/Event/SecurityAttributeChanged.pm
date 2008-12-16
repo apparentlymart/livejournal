@@ -243,7 +243,7 @@ sub _as_email {
     }
 
     my $vars = {
-            'user'      => $u->{name},
+            'user'      => $u->{user},
             'username'  => $u->{name},
             'sitename'  => $LJ::SITENAME,
             'siteroot'  => $LJ::SITEROOT,
