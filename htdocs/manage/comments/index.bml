@@ -44,7 +44,9 @@ _code?>
     LJ::load_user_props(
         $u, { use_master => 1 },
         qw/ opt_whoscreened opt_logcommentips
-            opt_getselfemail opt_show_captcha_to/
+            opt_getselfemail opt_show_captcha_to 
+            pingback
+            /
     );
 
     # to store values before they undergo normalisation
@@ -116,7 +118,6 @@ _code?>
         $ret .= "<br /><span class='helper'>\n$ML{'.captcha.text'}</span>";
         $ret .= "</td></tr>\n";
 
-
         # IP address log
         $ret .= "<tr><td class='field_name'>$ML{'.fn.iplog'}</td>\n<td>";
         $ret .= " $ML{'.logip'}: ";
@@ -141,6 +142,11 @@ _code?>
             $ret .= "</td></tr>\n";
         }
 
+        # Extra options
+        $ret .= join "" => 
+                map { ref $_ eq 'ARRAY' ? @$_ : $_ } 
+                LJ::run_hooks("add_extra_options_to_manage_comments", $u);
+        
         $ret .= "</table>\n";
 
         if ($u->is_person) { # same logic as above
@@ -205,7 +211,7 @@ _code?>
                       'opt_showtalklinks' => $POST{'opt_showtalklinks'} ? "Y" : "N",
                       'opt_gettalkemail'  => $POST{'opt_gettalkemail'} ? "Y" : "N",
                       'opt_htmlemail'     => $POST{'opt_htmlemail'},
-                      'opt_whocanreply' => $POST{'opt_whocanreply'},
+                      'opt_whocanreply'   => $POST{'opt_whocanreply'},
                       );
 
         LJ::update_user($u, \%update);
@@ -222,10 +228,13 @@ _code?>
               opt_whoscreened opt_logcommentips
               opt_getselfemail opt_show_captcha_to
             );
-
+            
+            my @extra_props = 
+                map { ref $_ eq 'ARRAY' ? @$_ : $_ } 
+                LJ::run_hooks("process_extra_options_for_manage_comments", $u, \%POST);
 
             # set userprops
-            foreach my $uprop (@uprops) {
+            foreach my $uprop (@uprops, @extra_props) {
                 my $eff_val = $POST{$uprop};   # effective value, since 0 isn't stored
                 $eff_val = "" unless $eff_val;
                 my $mem_only = $eff_val eq $u->{$uprop};

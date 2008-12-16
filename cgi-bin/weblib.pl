@@ -1538,6 +1538,10 @@ MOODS
             $out .= "</span>\n";
             $out .= "</p>\n";
 
+
+            ### Other Posting Options
+            $out .= LJ::run_hook('add_extra_entryform_fields', { opts => $opts, tabindex => $tabindex });
+
             $out .= "<p class='pkg' style='padding-top: 5px;'>\n";
             if ($show_lastfm) {
                 $out .= "<span class='inputgroup-left'><span class='lastfm'><span>POWERED<br />BY</span></span><a href='" . $LJ::LAST_FM_SITE_URL . "' target='_blank' class='lastfm_lnk'>Last.fm</a></span>";
@@ -1924,6 +1928,10 @@ sub entry_form_decode
             delete $req->{'prop_current_mood'};
         }
     }
+    
+    # process site-specific options
+    LJ::run_hooks('decode_entry_form', $POST, $req);
+    
     return $req;
 }
 

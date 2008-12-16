@@ -2018,6 +2018,20 @@ number.thousand=[[number]] thousand
 
 password.max30=Passwords may not be longer than 30 characters.
 
+pingback.option.journal_default=Journal default
+
+pingback.option.open=Open
+
+pingback.option.lj_only=LJ only
+
+pingback.option.disabled=Disabled
+
+pingback.sourceURI.default_title=No title
+
+pingback.ljping.comment.text=User <lj user="[[poster]]"> referenced to your post from <a href="[[sourceURI]]">[[subject]]</a> saying: [...] [[context]] [...]
+
+pingback.public.comment.text=Pingback from <a href="[[sourceURI]]">[[title]]</a>: [...] [[context]] [...]
+
 poll.dberror=Database error: [[errmsg]]
 
 poll.dberror.items=Database error inserting items: [[errmsg]]

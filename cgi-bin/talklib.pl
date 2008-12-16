@@ -3457,6 +3457,11 @@ sub check_rate {
     # return right away if the account is suspended
     return 0 if $remote && $remote->{'statusvis'} =~ /[SD]/;
 
+    # allow some users to be very aggressive commenters and authors. i.e. our bots.
+    return 1 if $remote 
+                and grep { $remote->username eq $_ } @LJ::NO_RATE_CHECK_USERS;
+
+
     my $ip = LJ::get_remote_ip();
     my $now = time();
     my @watch;

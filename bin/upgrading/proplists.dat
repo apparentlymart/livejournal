@@ -1415,3 +1415,17 @@ userproplist.default_copyright:
   indexed: 0
   multihomed: 0
   prettyname: Default value to entry prop 'copyright'
+
+userproplist.pingback:
+  cldversion: 0
+  datatype: char
+  des: (O)pen - all links from post should be processed with PingBack. (L)iveJournal - only leading to/from livejournal.com. (D)isabled - pingbacks disabled.
+  indexed: 0
+  multihomed: 0
+  prettyname: PingBack options
+
+logproplist.pingback:
+  datatype: char
+  des: (J)ournal default, (O)pen - all links from post should be processed with PingBack. (L)iveJournal - only leading to/from livejournal.com. (D)isabled - pingbacks disabled.
+  prettyname: PingBack options
+  sortorder: 105

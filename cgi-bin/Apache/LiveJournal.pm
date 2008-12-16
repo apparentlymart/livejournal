@@ -1211,7 +1211,6 @@ sub journal_content
 {
     my $r = shift;
     my $uri = $r->uri;
-
     my %GET = $r->args;
 
     if ($RQ{'mode'} eq "robots_txt")
@@ -1289,13 +1288,13 @@ sub journal_content
 
     my %headers = ();
     my $opts = {
-        'r' => $r,
-        'headers' => \%headers,
-        'args' => $RQ{'args'},
-        'getargs' => \%GET,
-        'vhost' => $RQ{'vhost'},
+        'r'         => $r,
+        'headers'   => \%headers,
+        'args'      => $RQ{'args'},
+        'getargs'   => \%GET,
+        'vhost'     => $RQ{'vhost'},
         'pathextra' => $RQ{'pathextra'},
-        'header' => {
+        'header'    => {
             'If-Modified-Since' => $r->header_in("If-Modified-Since"),
         },
         'handle_with_bml_ref' => \$handle_with_bml,
@@ -1304,7 +1303,11 @@ sub journal_content
 
     $r->notes("view" => $RQ{'mode'});
     my $user = $RQ{'user'};
+
     my $html = LJ::make_journal($user, $RQ{'mode'}, $remote, $opts);
+
+    # Allow to add extra http-header or even modify html
+    LJ::run_hooks("after_journal_content_created", $opts, \$html);
 
     return redir($r, $opts->{'redir'}) if $opts->{'redir'};
     return $opts->{'handler_return'} if defined $opts->{'handler_return'};
