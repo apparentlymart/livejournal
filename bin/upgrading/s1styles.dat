@@ -8382,7 +8382,7 @@ src="%%cons:img%%/style/webley/ul.png"></td>
 <td colspan="1" background="%%cons:img%%/style/webley/left.png">&nbsp;</td>
 <td colspan="2" width="600">
 %%datetime%%<br>
-%%subject%%<br><br>
+<span class="subj">%%subject%%</span><br><br>
 %%event%%<br><br>
 %%currents%%
 </td>
@@ -8456,6 +8456,8 @@ LASTN_PAGE<=
 th,td {
 text-align: left;
 }
+span.subj A { text-decoration: none; color: inherit }
+
 -->
 </style>
 %%head%%
