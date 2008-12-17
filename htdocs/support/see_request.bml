@@ -459,6 +459,7 @@ body<=
 
     # figure out the tier of the most recent answer
     my %tier_map = (
+        0  => "0",
         10 => "1",
         20 => "2",
         30 => "3",
@@ -541,10 +542,15 @@ body<=
     my %userpics;  # id -> {..}
 
     my @screened;
+    my $most_recent_tier = 0;
 
     ### reply loop
     foreach my $le (@replies)
     {
+        if (LJ::is_enabled("support_response_tier") && $can_see_tier && ($le->{type} eq "answer" || $le->{type} eq "internal") && $le->{tier}) {
+            $most_recent_tier = $le->{tier};
+        }
+
         next if ($le->{'type'} eq "internal" && ! (LJ::Support::can_read_internal($sp, $remote) ||
                                                    ($remote && $remote->{'userid'} == $le->{'userid'} )));
         next if ($le->{'type'} eq "screened" && ! (LJ::Support::can_read_screened($sp, $remote) ||
@@ -605,7 +611,11 @@ body<=
 
         my $link = "<a href='$LJ::SITEROOT/support/see_request.bml?id=$spid#e$le->{splid}'>#$le->{splid}</a>";
         $header .= "<span style='font-size: 0.9em;'><b>$what</b> ($link)</span><br />";
-        $header .= "<b>$ML{'.tier'}</b> $tier_map{$le->{tier}}<br />" if LJ::is_enabled("support_response_tier") && $can_see_tier && $le->{type} eq "answer" && $le->{tier};
+        if (LJ::is_enabled("support_response_tier") && $can_see_tier && $le->{type} eq "answer") {
+            # show the answer's tier level, or if there is no tier level, show the tier level at the time of posting
+            my $display_tier = $le->{tier} ? $le->{tier} : $most_recent_tier;
+            $header .= "<b>$ML{'.tier'}</b> $tier_map{$display_tier}<br />";
+        }
         my $timehelped = LJ::time_to_http($le->{'timelogged'});
         my $age = LJ::ago_text($le->{'age'});
         $header .= "<b>$ML{'.posted'}:</b> $timehelped ($age)";
