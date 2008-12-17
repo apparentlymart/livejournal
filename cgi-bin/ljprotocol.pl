@@ -250,8 +250,6 @@ sub getfriendspage
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
 
-    return fail($err,314) unless $u->get_cap('paid');
-
     my $itemshow = (defined $req->{itemshow}) ? $req->{itemshow} : 100;
     return fail($err, 209, "Bad itemshow value") if $itemshow ne int($itemshow ) or $itemshow  <= 0 or $itemshow  > 100;
     my $skip = (defined $req->{skip}) ? $req->{skip} : 0;
