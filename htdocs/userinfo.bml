@@ -1072,7 +1072,9 @@
         if ($instant_message) {
             my $new_im_margin = " style='margin-top: 0;'" unless $intlist;
             $body .= "<div class='external_services'$new_im_margin>";
-            $body .= "<p class='inner_section_header'$new_im_margin>$ML{'.im.header2'}</p>";
+            $body .= "<p class='inner_section_header'$new_im_margin>$ML{'.im.header2'}";
+            $body .= " <span class='inner_section_header_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#iminfo'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
+            $body .= "</p>";
             $body .= "<table cellpadding='0' cellspacing='3'>$instant_message</table>";
             $body .= "</div>";
         }
