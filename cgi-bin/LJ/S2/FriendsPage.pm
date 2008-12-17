@@ -416,6 +416,7 @@ sub FriendsPage
         my %linkvars;
         $linkvars{'filter'} = $linkfilter if $incfilter;
         $linkvars{'show'} = $get->{'show'} if $get->{'show'} =~ /^\w+$/;
+        $linkvars{'date'} = $get->{'date'} if $get->{'date'};
         my $newskip = $skip + $itemshow;
         $linkvars{'skip'} = $newskip;
         $nav->{'backward_url'} = LJ::make_link($base, \%linkvars);
