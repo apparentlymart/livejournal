@@ -362,8 +362,8 @@
     $body .= "<div id='profile_top'>";
 
     ### Box Ad
-    my $boxad = LJ::get_ads({ location => 'bml.userinfo', jounrnalu => $u }) .
-                LJ::get_ads({ location => 'bml.userinfo.sponsored', jounrnalu => $u });
+    my $boxad = LJ::get_ads({ location => 'bml.userinfo', journalu => $u }) .
+                LJ::get_ads({ location => 'bml.userinfo.sponsored', journalu => $u });
     
     if ($boxad) {
         $body .= "<div class='profile_right_ad'>";
@@ -1469,22 +1469,25 @@
         }
         $body .= "</div>";
 
-        next if ($com);
-        $comms .= "$mofs" if ($mofs);
-        $comms .= "$posting" if ($posting);
-        next unless $comms;
-        $body .= "<div class='ljclear'></div>";
-        $body .= "<div class='section'><img src='$LJ::IMGPREFIX/community.gif' alt='' /> $ML{'.comms.header'}$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends?show=C'>$ML{'.friends.viewentries'}</a>]</span></div>";
-        $body .= "<div class='section_body'>$comms</div>";
-        if ($feeds) {
-            $body .= "<div class='ljclear'></div><div class='section'><img src='$LJ::IMGPREFIX/syndicated.gif' alt='' /> $ML{'.syn.header'}$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends?show=Y'>$ML{'.friends.viewentries'}</a>]</span></div>";
-            $body .= "<div class='section_body'>$feeds</div>";
+        unless ($com) {
+            $comms .= "$mofs" if ($mofs);
+            $comms .= "$posting" if ($posting);
+            next unless $comms;
+            $body .= "<div class='ljclear'></div>";
+            $body .= "<div class='section'><img src='$LJ::IMGPREFIX/community.gif' alt='' /> $ML{'.comms.header'}$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends?show=C'>$ML{'.friends.viewentries'}</a>]</span></div>";
+            $body .= "<div class='section_body'>$comms</div>";
+            if ($feeds) {
+                $body .= "<div class='ljclear'></div><div class='section'><img src='$LJ::IMGPREFIX/syndicated.gif' alt='' /> $ML{'.syn.header'}$friend_edit_link <span class='section_link'>[<a href='" . $u->journal_base . "/friends?show=Y'>$ML{'.friends.viewentries'}</a>]</span></div>";
+                $body .= "<div class='section_body'>$feeds</div>";
+            }
         }
     }
 
+    $body .= LJ::get_ads({ location => 'bml.userinfo.bottom', journalu => $u });
+
     $body .= "</div>";
 
-	$body .= LJ::Widget::SettingProdDisplay->render;
+    $body .= LJ::Widget::SettingProdDisplay->render;
 
     $bml_okay = 0;
     return;
