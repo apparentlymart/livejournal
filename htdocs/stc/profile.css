@@ -190,7 +190,7 @@
     .section_body .alt_friends {
         margin: 1px 0 0 0;
     }
-div.expandcollapse, span.expandcollapse {
+span.expandcollapse {
     cursor: pointer;
 }
     .section_body .inner_section_header span.expandcollapse img {

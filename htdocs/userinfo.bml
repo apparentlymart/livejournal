@@ -864,7 +864,7 @@
     ### Basic Info
     if ($display_name || $birthday || $location || $website || $comm_settings || $comm_theme || $syn_status || $syn_readers || $contact) {
         $body .= "<div class='ljclear'></div>";
-        $body .= "<div class='section expandcollapse on' id='basics_header'>" . $arrowimg->("basics") . " $ML{'.basicinfo.header'}";
+        $body .= "<div class='section'><span class='expandcollapse on' id='basics_header'>" . $arrowimg->("basics") . " $ML{'.basicinfo.header'}</span>";
         $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
         $body .= "</div>";
         $body .= "<div class='section_body' id='basics_body'>\n";
@@ -905,7 +905,7 @@
         }
 
         LJ::EmbedModule->expand_entry($u, \$u->{'bio'});
-        $body .= "<div class='section expandcollapse on' id='bio_header'>" . $arrowimg->("bio") . " $label";
+        $body .= "<div class='section'><span class='expandcollapse on' id='bio_header'>" . $arrowimg->("bio") . " $label</span>";
         $body .= " <span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#bio'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
         $body .= "</div>\n";
         $body .= "<div class='section_body' id='bio_body'>$u->{'bio'}</div>\n";
@@ -1055,7 +1055,7 @@
     ### Connect
     if ($intlist || $instant_message || $schools_list) {
         $body .= "<div class='ljclear'></div>";
-        $body .= "<div class='section expandcollapse on' id='interests_header'>" . $arrowimg->("interests") . " $ML{'.label.connect'}</div>";
+        $body .= "<div class='section'><span class='expandcollapse on' id='interests_header'>" . $arrowimg->("interests") . " $ML{'.label.connect'}</span></div>";
         $body .= "<div class='section_body' id='interests_body'>";
         if ($intlist) {
             $body .= "<p class='inner_section_header first'>$ML{'.label.interests'} ($intcount):";
