@@ -391,34 +391,7 @@ body<=
     </script>
 };
 
-            $ret .= q(
-<script type="text/javascript">
-    var chPublic=document.getElementById('prop_copyright');
-    var chSecurity=document.getElementById('security');
-        if(chSecurity){
-       	if(chSecurity!='public'){
-		chPublic.checked=0;
-		chPublic.disabled=true;
-	}
-
-        chSecurity.onchange=function(){
-
-            if(chSecurity.value!='public'){
-                chPublic.checked=0;
-                chPublic.disabled=true;
-            }else{
-                if(Site.default_copyright=="P")
-                {
-                    chPublic.checked=1;
-                }
-            chPublic.disabled=false;
-            }
-        }
-    }
-</script>
-            );
-
-		    $ret .= LJ::Widget::SettingProdDisplay->render;
+            $ret .= LJ::Widget::SettingProdDisplay->render;
 
             return $ret;
         }

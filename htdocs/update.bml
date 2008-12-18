@@ -267,7 +267,7 @@
         $$body .= LJ::entry_form($entry, \$$head, $onload, $errors);
         $$body .= "</form><!-- end #updateForm -->\n";
 
-		$$body .= LJ::Widget::SettingProdDisplay->render;
+        $$body .= LJ::Widget::SettingProdDisplay->render;
 
         return;
     };
@@ -466,32 +466,6 @@
     $$body .= "</td>";
     $$body .= "<td>";
     $$body .= "</td></tr></table>";
-
-    $$body .= q(
-<script type="text/javascript">
-	var chPublic=document.getElementById('prop_copyright');
-	var chSecurity=document.getElementById('security');
-		if(chSecurity){
-		if(Site.default_copyright=="P"){
-				chPublic.checked=1;
-		}
-
-		chSecurity.onchange=function(){
-			
-			if(chSecurity.value!='public'){
-				chPublic.checked=0;
-				chPublic.disabled=true;
-			}else{
-				if(Site.default_copyright=="P")
-				{
-					chPublic.checked=1;
-				}
-			chPublic.disabled=false;
-			}
-		}
-	}
-</script>
-    );
 
     return;
 }

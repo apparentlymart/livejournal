@@ -91,6 +91,33 @@ function customboxes (e) {
     return false;
 }
 
+function setCopyrightUpdate() {
+    if ($('prop_copyright') && Site.default_copyright == "P") {
+        $('prop_copyright').checked = 1;
+    }
+}
+
+function setCopyrightEdit() {
+    if ($('prop_copyright') && $('security') && $('security').value != "public") {
+        $('prop_copyright').checked = 0;
+        $('prop_copyright').disabled = true;
+    }
+}
+
+function copyright () {
+    if ($('security') && $('prop_copyright')) {
+        if ($('security').value != "public") {
+            $('prop_copyright').checked = 0;
+            $('prop_copyright').disabled = true;
+        } else {
+            if (Site.default_copyright == "P") {
+                $('prop_copyright').checked = 1;
+            }
+            $('prop_copyright').disabled = false;
+        }
+    }
+}
+
 function altlogin (e) {
     var agt   = navigator.userAgent.toLowerCase();
     var is_ie = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
