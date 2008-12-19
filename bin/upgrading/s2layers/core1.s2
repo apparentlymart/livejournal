@@ -1102,6 +1102,15 @@ property string text_meta_groups {
 }
 set text_meta_groups = "Custom Friends Groups";
 
+property string text_copyr_agree {
+    des = "Text for copyright post agree"; }
+set text_copyr_agree= "Hereinafter I give my permission to reproduce in any form";
+
+property string text_copyr_disagree {
+    des = "Text for copyright post disagree"; }
+set text_copyr_disagree= "The reproduction is prohibited in any form";
+
+
 property string text_post_comment {
     des = "Link text to leave a comment";
     example = "Leave a comment";
