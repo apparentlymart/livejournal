@@ -568,13 +568,10 @@ sub get_friend_items
 
     # friendspage per day is allowed only for journals with 
     # special cap 'friendspage_per_day'
-    warn "FPPD 2: user=" . $opts->{u}->username . " date=" . $opts->{events_date};
     my $events_date = $opts->{u}->get_cap('friendspage_per_day')
                         ? $opts->{events_date}
                         : '';
-    warn "FPPD 3: user=" . $opts->{u}->username . " date=" . $events_date;
 
-    
     my $filter  = int $opts->{'filter'};
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14;  # 2 week default.
     my $lastmax = $LJ::EndOfTime - ($events_date || (time() - $max_age));

@@ -85,11 +85,6 @@ sub FriendsPage
     my $filter;
     my $group_name    = '';
     my $common_filter = 1;
-    
-    #
-    warn "FPPD 1: user=" . $u->username . " date=" . $get->{date};
-    
-    #
     my $events_date   = ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!)
                         ? LJ::mysqldate_to_time("$1-$2-$3")
                         : 0;

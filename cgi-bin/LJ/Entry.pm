@@ -1598,7 +1598,6 @@ sub get_log2_recent_log
     # timestamp
     $events_date = int $events_date;
     $use_cache = 0 if $events_date; # do not use memcache for dayly friends log
-    warn "FPPD 4: userid=" . $u . " date=" . $events_date;
     
     my $memkey  = [$jid, "log2lt:$jid"];
     my $lockkey = $memkey->[1];
