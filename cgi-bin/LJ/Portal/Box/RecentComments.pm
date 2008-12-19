@@ -99,7 +99,7 @@ sub generate_content {
         my ($subject, $body) = (@$trow[0,1]);
 
         $subject ||= '';
-        $body = (!defined $body || $body == '') ? '(No comment text)' : $body;
+        $body = (!defined $body || $body eq '') ? '(No comment text)' : $body;
 
         my $date = LJ::ago_text(time() - $r->{'datepostunix'});
 
