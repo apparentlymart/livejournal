@@ -3977,6 +3977,8 @@ sub userlite_base_url
 {
     my ($ctx, $UserLite) = @_;
     my $u = $UserLite->{_u};
+    return "#"
+            unless $UserLite;
     return $u->journal_base;
 }
 
