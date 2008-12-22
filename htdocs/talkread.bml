@@ -337,7 +337,7 @@ my $old_url = 0;
  my $r = Apache->request;
 
     if (LJ::SUP->is_sup_enabled($u)) {
-        if ($props->{'copyright'}) {
+        if ($props->{'copyright'} ne 'P') {
             $ret .= '<div class="copyrighted">&Oslash; ' . BML::ml("talk.copyright") . '</div>';
         }
     }
