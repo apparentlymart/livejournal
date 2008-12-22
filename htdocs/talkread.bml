@@ -312,7 +312,6 @@ my $old_url = 0;
      $current{'Music'} = $props->{'current_music'};
      LJ::CleanHTML::clean_subject(\$current{'Music'});
  }
-
  if ($props->{'current_location'} || $props->{'current_coords'}) {
      my $loc = eval { LJ::Location->new(coords   => $props->{'current_coords'},
                                         location => $props->{'current_location'}) };
@@ -334,6 +333,14 @@ my $old_url = 0;
  }
 
  $ret .= "<div style='margin-left: 30px'>";
+
+ my $r = Apache->request;
+
+    if (LJ::SUP->is_sup_enabled($u)) {
+        if ($props->{'copyright'}) {
+            $ret .= '<div class="copyrighted">&Oslash; ' . BML::ml("talk.copyright") . '</div>';
+        }
+    }
 
  if (%current)
  {

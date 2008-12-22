@@ -314,6 +314,15 @@ body<=
 
 
     $ret .= "<div style='margin-left: 30px'>";
+    ### copyright
+ my $r = Apache->request;
+
+    if (LJ::SUP->is_sup_enabled($u)) {
+ 
+        if ($props->{'copyright'}) {
+            $ret .= '<div class="copyrighted">&Oslash; ' . BML::ml("talk.copyright") . '</div>';
+        }
+    }
 
     ### currents
     if (! $init->{'replyto'} && %current)
