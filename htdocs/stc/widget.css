@@ -2,13 +2,14 @@
     margin-left: 8px;
 }
 .mailfinder {
-    border-top: 1px solid #c9c9c9;
+    border-bottom: 1px solid #c9c9c9;
     margin-top: 1.5em;
-    padding-top: 1.5em;
+    padding-bottom: 15px;
 }
 
 .exists {
-    margin-bottom: 3em;
+    margin-bottom: 0;
+    padding-bottom: 0px;
 }
 
 .mailfinder FORM {
@@ -59,8 +60,8 @@ SPAN.find_err {
 
 .comment {
    color:#808080;
-   margin-top: 10px;
-   margin-left: 7em;
+   margin: 10px 0 15px 7em;
+   /*margin-left: 7em;*/
 }
 .comment SPAN {
    font-size: .85em;
