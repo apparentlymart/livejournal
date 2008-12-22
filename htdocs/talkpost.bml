@@ -317,12 +317,12 @@ body<=
     ### copyright
     my $r = Apache->request;
 
-    #if (LJ::SUP->is_sup_enabled($u)) {
+    if (LJ::SUP->is_sup_enabled($u)) {
  
         if ($props->{'copyright'} ne 'P') {
             $ret .= '<div class="copyrighted">&Oslash; ' . BML::ml("talk.copyright") . '</div>';
         }
-    #}
+    }
 
     ### currents
     if (! $init->{'replyto'} && %current)
