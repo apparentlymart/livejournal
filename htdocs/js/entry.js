@@ -60,8 +60,10 @@ function pageload (dotime) {
 }
 
 function customboxes (e) {
+    copyright();
     if (! e) var e = window.event;
     if (! document.getElementById) return false;
+
     
     f = document.updateForm;
     if (! f) return false;
