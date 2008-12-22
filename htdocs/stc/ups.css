@@ -98,8 +98,3 @@ div.ups_closebuttonarea {
         img.ups_scalebtn_selected {
                 border: 1px solid #666 !important;
         }
-div.copyrighted {
-       font-size: smaller;
-       background: url(img/pencil.gif) no-repeat 0 50%;
-       padding-bottom: 10px;
-}
