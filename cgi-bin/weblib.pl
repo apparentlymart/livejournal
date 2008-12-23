@@ -1578,9 +1578,10 @@ PREVIEW
 
     $out .= "</div><!-- end #options -->\n\n";
 
-    ### Public conditions
-    if ($remote && LJ::SUP->is_sup_enabled($remote)) {
+    ## copyright
+    if ($remote && LJ::is_enabled('default_copyright', $remote)) {
         $out .= "<div id='public' class='pkg'>\n";
+        $out .= "<input type='hidden' id='defined_copyright' name='defined_copyright' value='1' />\n";
         $out .= "<input type='checkbox' id='prop_copyright' name='prop_copyright' " . ($opts->{'prop_copyright'} eq 'P' ? "checked" : "") . " />";
         $out .= "<label for='prop_copyright'>" . BML::ml('entryform.public') . "</label>";
         $out .= "</div>";
@@ -1879,7 +1880,9 @@ sub entry_form_decode
     $req->{"prop_opt_nocomments"}   ||= $POST->{'comment_settings'} eq "nocomments" ? 1 : 0;
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
-    $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C';
+    if ($req->{'defined_copyright'}) {
+        $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C';
+    }
 
     if (LJ::is_enabled("content_flag")) {
         $req->{prop_adult_content} = $POST->{prop_adult_content};

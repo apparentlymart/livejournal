@@ -317,8 +317,8 @@ _code?>
         $ret .= "<br />\n<span class='helper'>$ML{'.minsecurity.text'}</span>";
         $ret .= "</td></tr>";
 
-        # Public security
-        if (LJ::SUP->is_sup_enabled($u)) {
+        ## copyright 
+        if (LJ::is_enabled('default_copyright', $u)) {
 	        $ret .= "<tr><td class='field_name'>$ML{'.fn.public'}</td>\n<td>";
 	        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'default_copyright', 'id' => 'default_copyright',
 	                                 'selected' => $u->{'default_copyright'} eq 'P' ? 1 : 0 });

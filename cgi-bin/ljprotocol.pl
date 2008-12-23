@@ -1462,11 +1462,12 @@ sub postevent
         my $rv = LJ::Tags::update_logtags($uowner, $jitemid, $logtag_opts);
     }
 
-    unless (defined $req->{'props'}->{'copyright'}) { # unmade choice: fill default value
-        $req->{'props'}->{'copyright'} = $u->prop('default_copyright');
-    } else { # defined
-        $req->{'props'}->{'copyright'} = '' if $req->{'props'}->{'copyright'} eq 'C';
-            # we do not store 'C', but need distinguish it from unmade user choice
+    ## copyright 
+    if (LJ::is_enabled('default_copyright', $u)) {
+        $req->{'props'}->{'copyright'} = $u->prop('default_copyright')
+            unless defined $req->{'props'}->{'copyright'};
+    } else {
+        delete $req->{'props'}->{'copyright'};
     }
 
     # meta-data

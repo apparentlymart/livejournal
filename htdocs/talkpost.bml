@@ -314,13 +314,11 @@ body<=
 
 
     $ret .= "<div style='margin-left: 30px'>";
-    ### copyright
-    my $r = Apache->request;
 
-    if (LJ::SUP->is_sup_enabled($u)) {
- 
+    ## copyright
+    if (LJ::is_enabled('default_copyright', $u)) {
         if ($props->{'copyright'} ne 'P') {
-            $ret .= '<div class="copyrighted">&Oslash; ' . BML::ml("talk.copyright") . '</div>';
+             $ret .= '<div class="copyrighted">&Oslash; ' . BML::ml("talk.copyright") . '</div>';
         }
     }
 
