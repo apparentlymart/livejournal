@@ -4045,8 +4045,11 @@ sub UserLite__equals
 sub string__substr
 {
     my ($ctx, $this, $start, $length) = @_;
-    use utf8;
-    return substr($this, $start, $length);
+    
+    use Encode /decode_utf8 encode_utf8/;
+    my $ustr = decode_utf8($this);
+    my $result = substr($ustr, $start, $length);
+    return encode_utf8($result);
 }
 
 sub string__length
