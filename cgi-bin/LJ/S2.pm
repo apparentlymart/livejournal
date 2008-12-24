@@ -1898,9 +1898,8 @@ sub Entry
         $e->{'metadata'}->{'location'} = $loc->as_html_current if $loc;
     }
 
-    ## copyright
     my $r = Apache->request;
-    if (LJ::is_enabled('default_copyright', $u) && ($r->notes('codepath') eq 's2.entry' || $r->notes('codepath') eq 's2.reply')) {
+    if (LJ::SUP->is_sup_enabled($u) && ($r->notes('codepath') eq 's2.entry' || $r->notes('codepath') eq 's2.reply')) {
         if ($p->{'copyright'} ne 'P') {
             $e->{'metadata'}->{'<small>&Oslash; '} = $LJ::S2::CURR_CTX->[S2::PROPS]->{"text_copyr_disagree"} . '</small>';
         }
@@ -4046,7 +4045,7 @@ sub string__substr
 {
     my ($ctx, $this, $start, $length) = @_;
     
-    use Encode /decode_utf8 encode_utf8/;
+    use Encode qw/decode_utf8 encode_utf8/;
     my $ustr = decode_utf8($this);
     my $result = substr($ustr, $start, $length);
     return encode_utf8($result);
