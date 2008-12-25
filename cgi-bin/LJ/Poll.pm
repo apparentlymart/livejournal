@@ -875,6 +875,7 @@ sub render {
     # Default pagesize.
     $pagesize = 2000 unless $pagesize;
 
+    return "<b>[ Poll owner has been deleted ]</b>" unless $self->journal->clusterid;
     return "<b>[" . LJ::Lang::ml('poll.error.pollnotfound', { 'num' => $pollid }) . "]</b>" unless $pollid;
     return "<b>[" . LJ::Lang::ml('poll.error.noentry') . "</b>" unless $ditemid;
 
