@@ -1,97 +1,12 @@
 .indent_sm {
     margin-left: 8px;
 }
-.mailfinder {
-    border-bottom: 1px solid #c9c9c9;
-    margin-top: 1.5em;
-    padding-bottom: 15px;
+
+.friendsfinder {
+   font-family: Verdana, arial, sans-serif !important;
 }
 
-.exists {
-    margin-bottom: 0;
-    padding-bottom: 0px;
+.friendsfinder .rounded-box-content{
+    padding: 30px 25px 40px 25px;
 }
 
-.mailfinder FORM {
-    margin-top: 10px;
-}
-.mailfinder FIELDSET {
-    margin: 0px; padding: 0px;
-    border: none;
-}
-
-.mailfinder LABEL {
-    float: left;
-    min-width: 7em;
-    padding-top: 3px;
-}
-.mailfinder INPUT {
-   margin-bottom: 5px;
-}
-.mailfinder INPUT.btn {
-   margin-bottom: 0;
-}
-
-.mailfinder SELECT {
-   margin-bottom: 5px;
-   padding: 1px;
-}
-
-SPAN.find_err {
-   color:#ff0000;
-   padding: 0 0 5px 1em;
-   font-size: .85em;
-}
-
-*:first-child+html SPAN.find_err {
-   position: relative;
-   top: -3px;
-}
-
-.mailbox {
-   width: 13.5em;
-}
-.ffind {
-   margin: 5px 0 0 7em;
-}
-.ffind INPUT {
-   width: 14em;
-}
-
-.comment {
-   color:#808080;
-   margin: 10px 0 15px 7em;
-   /*margin-left: 7em;*/
-}
-.comment SPAN {
-   font-size: .85em;
-}
-.mailfinder H4 {
-   font-size: 1.1em;
-   margin: 0; padding: 0;
-}   
-H4.mymessage {
-   font-size: 1.1em;
-   margin: 10px 0 0; padding: 0;
-}
-
-.message {
-   width: 60%;
-   border: 1px solid #ddd;
-   background: #efefef;
-   padding: 10px;
-   margin: 5px 0 10px 0;
-}
-.messagetxt {
-   display: block;
-   margin: 1.5em 0 5px 0;
-   font-weight: bold;
-}
-.message_body {
-   width: 99%;
-}
-.status {
-   font-size: .85em;
-   font-style: italic;
-   clear: both;
-}

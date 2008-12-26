@@ -7,7 +7,7 @@ use Carp qw(croak);
 sub ajax { 1 }
 sub authas { 1 }
 
-sub need_res { qw( stc/widgets/search.css js/jobstatus.js) }
+sub need_res { qw( stc/widgets/search.css stc/widgets/friendsfinder.css js/jobstatus.js) }
 
 sub handle_post { }
 
@@ -27,6 +27,7 @@ sub render_body {
 
     $ret .= "<div class='mailfinder exists'>";
     $ret .= "<h4>" . $class->ml('.widget.search.existingtitle') . "</h4>\n";
+    $ret .= $class->ml('widget.search.note');
     $ret .= $class->start_form( id => $class->input_prefix . "_user_search" );
     $ret .= "<fieldset><label>" . $class->ml('.widget.search.title') . "</label>";
     $ret .= $class->html_text(name => 'q', 'class' => 'mailbox', 'size' => 30) . " ";
