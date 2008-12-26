@@ -1899,7 +1899,7 @@ sub Entry
     }
 
     my $r = Apache->request;
-    if (LJ::SUP->is_sup_enabled($u) && ($r->notes('codepath') eq 's2.entry' || $r->notes('codepath') eq 's2.reply')) {
+    if (LJ::is_enabled('default_copyright', $u) && ($r->notes('codepath') eq 's2.entry' || $r->notes('codepath') eq 's2.reply')) {
         if ($p->{'copyright'} ne 'P') {
             $e->{'metadata'}->{'<small>&Oslash; '} = $LJ::S2::CURR_CTX->[S2::PROPS]->{"text_copyr_disagree"} . '</small>';
         }
