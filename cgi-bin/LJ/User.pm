@@ -7237,7 +7237,7 @@ sub add_friend
 
             $sclient->insert_jobs(@jobs) if @jobs;
         }
-
+        LJ::run_hooks('befriended', LJ::load_userid($userid), LJ::load_userid($fid))
     }
     LJ::memcache_kill($userid, 'friends');
     LJ::memcache_kill($userid, 'friends2');
