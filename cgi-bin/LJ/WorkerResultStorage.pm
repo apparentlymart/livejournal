@@ -81,6 +81,7 @@ sub status {
         my $percent  = $gm_status->percent || 0;
         %gearman_status = (progress => $progress, percent => $percent);
         $gearman_status{status} = 'running' if $gm_status->running;
+        $gearman_status{status} = 'running' if $gm_status->known; # running by queue server, client must wait - job is not completed yet
     }
 
     if (! $gm_status || ! $gm_status->running) {
