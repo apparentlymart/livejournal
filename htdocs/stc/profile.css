@@ -70,6 +70,7 @@
         list-style: none;
         border-bottom: 1px solid #c7e0f6;
         background-color: #ecf6ff;
+        line-height: 18px;
     }
     .actions a {
         font-size: 0.9em;
@@ -253,6 +254,7 @@ span.expandcollapse {
 .schools {  
     float: left;
     margin: 10px 0 0 0;
+    width: 50%;
 }
     .schools_item {
         font-size: 0.77em;
