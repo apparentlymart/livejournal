@@ -576,7 +576,7 @@
     }
 
     ## stats
-    my $lastupdated = LJ::mysql_time($u->timeupdate);
+    my $lastupdated = substr(LJ::mysql_time($u->timeupdate), 0, 10);
     my $ago_text = LJ::ago_text($u->{secondsold});
 
     my $search_link = "[<a href='$LJ::SITEROOT/tools/search.bml?journal=$user'>$ML{'.details.search'}</a>]"
