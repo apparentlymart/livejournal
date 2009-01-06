@@ -298,7 +298,9 @@ body<=
             return BML::redirect($POST{ret_url}) if $POST{ret_url} && !scalar @notif_errors;
 
             # save the LJ::Setting notifications too
-            $save_rv = LJ::Setting->save_all($u, \%POST, \@settings);
+            unless ($POST{post_to_settings_page}) {
+                $save_rv = LJ::Setting->save_all($u, \%POST, \@settings);
+            }
 
             if (scalar @notif_errors || LJ::Setting->save_had_errors($save_rv)) {
                 $submit_msg .= LJ::error_list(@notif_errors) . "<br />";
