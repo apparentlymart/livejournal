@@ -379,6 +379,15 @@ sub can_send {
         return 0;
     }
 
+    # Can not send to deleted or expunged journals
+    if ($ru->is_deleted || $ru->is_expunged) {
+        push @$errors,
+             $ru->is_deleted
+                ? BML::ml('error.message.deleted', { 'ljuser' => $ru->ljuser_display })
+                : BML::ml('error.message.expunged', { 'ljuser' => $ru->ljuser_display });
+        return 0;
+    }
+
     # Will target user accept messages from sender
     unless ($ru->can_receive_message($ou)) {
         push @$errors, BML::ml('error.message.canreceive', { 'ljuser' => $ru->ljuser_display });
