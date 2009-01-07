@@ -3278,7 +3278,7 @@ sub subscribe_interface {
     }
 
     if ($post_to_settings_page) {
-        $ret .= "<form method='POST' action='$LJ::SITEROOT/manage/settings/index2.bml?cat=notifications'>$formauth";
+        $ret .= "<form method='POST' action='$LJ::SITEROOT/manage/settings/?cat=notifications'>$formauth";
     } elsif (!$settings_page) {
         $ret .= "<form method='POST' action='$LJ::SITEROOT/manage/subscriptions/$getextra'>$formauth";
     }
@@ -3504,7 +3504,7 @@ sub subscribe_interface {
 
             if ($is_tracking_category && ! $pending_sub->pending) {
                 my $subid = $pending_sub->id;
-                my $deletesub_url = $settings_page ? "$LJ::SITEROOT/manage/settings/index2.bml?cat=notifications&deletesub_$subid=1" : "?deletesub_$subid=1";
+                my $deletesub_url = $settings_page ? "$LJ::SITEROOT/manage/settings/?cat=notifications&deletesub_$subid=1" : "?deletesub_$subid=1";
                 $cat_html .= qq {
                     <a href='$deletesub_url'><img src="$LJ::IMGPREFIX/portal/btn_del.gif" /></a>
                 };

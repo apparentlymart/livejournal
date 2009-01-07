@@ -40,6 +40,7 @@ body<=
 
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+    my $getsep = $getextra ? "&" : "?";
 
     ### user is now authenticated ###
 
@@ -100,7 +101,7 @@ body<=
         $ret .= "</form>\n\n";
 
         $ret .= "<?p " . BML::ml(".intro1", { 'aopts1' => "href='$LJ::SITEROOT/manage/comments/$getextra'",
-                                             'aopts2' => "href='$LJ::SITEROOT/manage/settings/$getextra'"} )
+                                             'aopts2' => "href='$LJ::SITEROOT/manage/settings/$getextra${getsep}cat=display'"} )
                 . " p?>";
 
         $ret .= "</div>\n";
@@ -291,11 +292,7 @@ body<=
                                 "N" => BML::ml(".security.visibility.nobody"));
         $ret .= "</span></div>";
 
-        if ($remote->is_in_beta('settings2008')) {
-            $ret .= LJ::Widget::Location->render( skip_timezone => 1 );
-        } else {
-            $ret .= LJ::Widget::Location->render;
-        }
+        $ret .= LJ::Widget::Location->render( skip_timezone => 1 );
 
 
         ## CONTACT INFO
@@ -394,19 +391,17 @@ body<=
                                          'selected' => $u->hide_ljtalk });
                 $ret .= "<label for='opt_showljtalk' style='font-size: 10px;'>$ML{'.showljtalk'}</label>";
 
-                if ($remote->is_in_beta('settings2008')) {
-                    # Jabber Online Status
-                    my $jabber_title = LJ::run_hook("jabber_title") || $ML{'/manage/settings/index.bml.jabber.title'};
-                    $ret .= "<br />";
-                    $ret .= BML::ml('/manage/settings/index.bml.jabber', {'jabbertitle' => $jabber_title}) . " ";
-                    $ret .= LJ::html_select({ 'name' => 'opt_showonlinestatus',
-                                              'id' => 'opt_showonlinestatus',
-                                              'selected' => $u->opt_showonlinestatus },
-                                              "Y" => BML::ml("/manage/settings/index.bml.security.visibility.everybody"),
-                                              "F" => BML::ml("/manage/settings/index.bml.security.visibility.friends"),
-                                              "N"  => BML::ml("/manage/settings/index.bml.security.visibility.nobody") );
-                    $ret .= "<br />\n<span class='helper'>" . BML::ml('/manage/settings/index.bml.jabber.text', {'jabbertitle' => $jabber_title}) . "</span>";
-                }
+                # Jabber Online Status
+                my $jabber_title = LJ::run_hook("jabber_title") || $ML{'/manage/settings/index.bml.jabber.title'};
+                $ret .= "<br />";
+                $ret .= BML::ml('/manage/settings/index.bml.jabber', {'jabbertitle' => $jabber_title}) . " ";
+                $ret .= LJ::html_select({ 'name' => 'opt_showonlinestatus',
+                                          'id' => 'opt_showonlinestatus',
+                                          'selected' => $u->opt_showonlinestatus },
+                                          "Y" => BML::ml("/manage/settings/index.bml.security.visibility.everybody"),
+                                          "F" => BML::ml("/manage/settings/index.bml.security.visibility.friends"),
+                                          "N"  => BML::ml("/manage/settings/index.bml.security.visibility.nobody") );
+                $ret .= "<br />\n<span class='helper'>" . BML::ml('/manage/settings/index.bml.jabber.text', {'jabbertitle' => $jabber_title}) . "</span>";
             }
             $ret .= "</td></tr>\n";
         }
@@ -666,9 +661,7 @@ body<=
             # In this case, the question is actually if they want to hide
             # it, hence looking for a value of 'N' before 'Y'.
             $POST{'opt_showljtalk'} = $POST{'opt_showljtalk'} ? 'N' : 'Y';
-            if ($remote->is_in_beta('settings2008')) {
-                $POST{'opt_showonlinestatus'} = '' unless $POST{'opt_showonlinestatus'} =~ m/^(Y|F|N)$/;
-            }
+            $POST{'opt_showonlinestatus'} = '' unless $POST{'opt_showonlinestatus'} =~ m/^(Y|F|N)$/;
 
             # for the directory.
             $POST{'sidx_bdate'} = undef;
@@ -698,10 +691,8 @@ body<=
               sidx_bdate sidx_bday
               opt_showmutualfriends opt_showschools
               opt_showbday opt_showlocation opt_showljtalk
-              opt_sharebday
+              opt_sharebday opt_showonlinestatus
             );
-            push @uprops, "opt_showonlinestatus"
-                if $remote->is_in_beta('settings2008');
 
             # reset the gizmo account for this user account
             $u->gizmo_account( $POST{'gizmo'} )
