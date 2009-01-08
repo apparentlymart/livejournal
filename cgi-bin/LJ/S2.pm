@@ -3177,7 +3177,7 @@ sub _print_quickreply_link
     return unless $target =~ /^\w+$/; # if no target specified bail the fuck out
 
     my $opt_class = $opts->{'class'};
-    undef $opt_class unless $opt_class =~ /^[\w\s]+$/;
+    undef $opt_class unless $opt_class =~ /^[\w\s-]+$/;
 
     my $opt_img = LJ::CleanHTML::canonical_url($opts->{'img_url'});
     $replyurl = LJ::CleanHTML::canonical_url($replyurl);
