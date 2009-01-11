@@ -74,6 +74,12 @@ body<=
     LJ::CleanHTML::clean_subject(\$subj);
     LJ::CleanHTML::clean_event(\$evt, \%opts);
 
+    # prevent BML tags interpretation inside post body
+    $subj =~ s/<\?/&lt;?/g;
+    $subj =~ s/\?>/?&gt;/g;
+    $evt =~ s/<\?/&lt;?/g;
+    $evt =~ s/\?>/?&gt;/g;
+
     my $logtags = LJ::Tags::get_logtags($u, $jitemid);
     my $usertags = LJ::Tags::get_usertags($u, { remote => $remote }) || {};
     $logtags = $logtags->{$jitemid} || {};
