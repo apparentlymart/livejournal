@@ -33,7 +33,7 @@ body<=
 
     my $lastdate = $dbh->selectrow_array(qq{
         SELECT MAX(timechange) FROM infohistory
-        WHERE userid=? AND what='email'
+        WHERE userid=? AND (what='email' OR what='emaildeleted')
     }, undef, $u->{'userid'});
 
     # current address was set more, than 6 months ago?
