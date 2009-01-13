@@ -649,7 +649,7 @@ function print_ebox (Entry e) {
 function Page::print_entry(Entry e) {
     ## For most styles, this will be overridden by FriendsPage::print_entry and such.
     """<div class="entry" id="$e.dom_id">\n""";
-    "<h3>$e.security_icon $e.subject</h3>\n";
+    "<h3>$e.security_icon <a href=\"$e.permalink_url\">$e.subject</a></h3>\n";
     if ($.view == "friends" or $e.poster.username != $e.journal.username) {
         "<div>"; $this->print_entry_poster($e); "</div>";
     }
