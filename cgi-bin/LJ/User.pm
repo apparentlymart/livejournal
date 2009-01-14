@@ -3611,6 +3611,8 @@ sub set_statusvis {
 
 sub set_visible {
     my $u = shift;
+
+    LJ::run_hooks("account_will_be_visible", $u);
     return $u->set_statusvis('V');
 }
 
@@ -6938,7 +6940,7 @@ sub modify_caps {
 
     # run hooks for modified bits
     if (LJ::are_hooks("modify_caps")) {
-        $res = LJ::run_hook("modify_caps",
+        my @res = LJ::run_hooks("modify_caps",
                             { 'u' => $u,
                               'newcaps' => $newcaps,
                               'oldcaps' => $u->{'caps'},
@@ -6949,7 +6951,9 @@ sub modify_caps {
                           });
 
         # hook should return a status code
-        return undef unless defined $res;
+        foreach my $status (@res) {
+            return undef unless ref $status and defined $status->[0];
+        }
     }
 
     # update user row
