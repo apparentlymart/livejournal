@@ -184,6 +184,12 @@
         $sec .= "<br />\n" unless $sec eq "" or $req{'subject'};
         $ret .= $sec;
 
+        # prevent BML tags interpretation inside post body
+        $subject =~ s/<\?/<?/g;
+        $subject =~ s/\?>/?>/g;
+        $event =~ s/<\?/<?/g;
+        $event =~ s/\?>/?>/g;
+
         ###
         if ($subject) {
             BML::ebml(\$subject);
