@@ -185,10 +185,10 @@
         $ret .= $sec;
 
         # prevent BML tags interpretation inside post body
-        $subject =~ s/<\?/<?/g;
-        $subject =~ s/\?>/?>/g;
-        $event =~ s/<\?/<?/g;
-        $event =~ s/\?>/?>/g;
+        $subject =~ s/<\?/&lt;?/g;
+        $subject =~ s/\?>/?&gt;/g;
+        $event =~ s/<\?/&lt;?/g;
+        $event =~ s/\?>/?&gt;/g;
 
         ###
         if ($subject) {
@@ -307,6 +307,9 @@
         });
 
         LJ::S2::s2_run($r, $ctx, $opts, "EntryPage::print()", $p);
+        # prevent BML tags interpretation inside post body
+        $ret =~ s/<\?/&lt;?/g;
+        $ret =~ s/\?>/?&gt;/g;
     }
     return $ret;
 }
