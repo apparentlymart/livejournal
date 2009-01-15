@@ -51,13 +51,22 @@ sub render_body {
         my $entry = $comment->entry;
         my $class_name = ($ct == scalar(@comments) - 1) ? "last" : "";
 
+        my $subject = $entry->subject_text ? $entry->subject_text : $class->ml('widget.recentcomments.nosubject');
+        my $body_part = substr($comment->body_text, 0, 250) . "&nbsp;";
+
+        # prevent BML tags interpretation inside comment subject/body
+        $subject =~ s/<\?/&lt;?/g;
+        $subject =~ s/\?>/?&gt;/g;
+        $body_part =~ s/<\?/&lt;?/g;
+        $body_part =~ s/\?>/?&gt;/g;
+
         # print the comment
         $ret .= "<p class='pkg $class_name'>";
         $ret .= $comment->poster_userpic;
         $ret .= $class->ml('widget.recentcomments.commentheading', {'poster' => $poster, 'entry' => "<a href='" . $entry->url . "'>"});
-        $ret .= $entry->subject_text ? $entry->subject_text : $class->ml('widget.recentcomments.nosubject');
+        $ret .= $subject;
         $ret .= "</a><br />";
-        $ret .= substr($comment->body_text, 0, 250) . "&nbsp;";
+        $ret .= $body_part;
         $ret .= "<span class='detail'>(<a href='" . $comment->url . "'>" . $class->ml('widget.recentcomments.link') . "</a>)</span> ";
         $ret .= "<span class='detail'>(<a href='" . $comment->reply_url . "'>" . $class->ml('widget.recentcomments.reply') . "</a>)</span> ";
         $ret .= "</p>";
