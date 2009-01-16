@@ -3507,11 +3507,17 @@ widget.s2propgroup.presentation.basic=Basic Options
 
 widget.s2propgroup.presentation.note=Note: Additional options may vary based on the layout selected.
 
-widget.search.aim=AIM
+widget.search.aim=AOL IM
 
 widget.search.email=Email
 
+widget.search.empty.query=Please enter a query
+
+widget.search.google_talk=Google Talk
+
 widget.search.icq=ICQ Number
+
+widget.search.init_text=Gathering information...
 
 widget.search.interest=Interest
 
@@ -3525,13 +3531,23 @@ widget.search.msn=MSN
 
 widget.search.note=If you know some information for an existing LiveJournal user you can search for it here.
 
+widget.search.query_error=Sorry, there was an internal error. Please try again shortly.
+
 widget.search.region=Region
+
+widget.search.skype=Skype
 
 widget.search.submit=Search existing users
 
 widget.search.title=Search for
 
 widget.search.existingtitle=Or search for an individual user:
+
+widget.search.not_valid.email=Sorry, it looks like email address you entered is invalid. Could you please update the address or try a different one?
+
+widget.search.not_valid.username=Sorry, it looks like username you entered is invalid. Could you please update the username or try a different one?
+
+widget.search.not_valid.IM_handle=Sorry, it looks like IM handle you entered is invalid. Could you please update the IM handle or try a different one?
 
 widget.search.username=Username
 

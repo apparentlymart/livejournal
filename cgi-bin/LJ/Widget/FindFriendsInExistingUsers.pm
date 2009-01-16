@@ -23,6 +23,8 @@ sub render_body {
         'jabber' => $class->ml('.widget.search.jabber'),
         'msn' => $class->ml('.widget.search.msn'),
         'yahoo' => $class->ml('.widget.search.yahoo'),
+        'skype' => $class->ml('widget.search.skype'),
+        'google_talk' => $class->ml('widget.search.google_talk'),
     );
 
     $ret .= "<div class='mailfinder exists'>";
@@ -45,11 +47,12 @@ sub render_body {
 sub js {
     my $self = shift;
 
-    my $empty_query = $self->ml('widget.findfriendsinexistingusers.empty.query');
-    my $init_text = $self->ml('widget.findfriendsinexistingusers.init_text');
-    my $job_error = $self->ml('widget.findfriendsinexistingusers.job_error');
-    my $validate_error = 'Неправильный номер';
-    my $validate_name_error = 'Неправильное имя пользователя';
+    my $empty_query = $self->ml('widget.search.empty.query');
+    my $init_text = $self->ml('widget.search.init_text');
+    my $query_error = $self->ml('widget.search.query_error');
+    my $validate_email_error = $self->ml('widget.search.not_valid.email');
+    my $validate_name_error = $self->ml('widget.search.not_valid.username');
+    my $validate_IM_error = $self->ml('widget.search.not_valid.IM_handle');
 
     qq [
         initWidget: function() {
@@ -98,7 +101,7 @@ sub js {
             }
 
             if (info.status != 'success') {
-                return this.import_error('$job_error');
+                return this.import_error('$query_error');
             }
 
             \$('Widget[FindFriendsInExistingUsers]_ajax_status').innerHTML = info.result;
@@ -108,17 +111,19 @@ sub js {
             var v = this.form['Widget[FindFriendsInExistingUsers]_q'].value.trim(),
                 r,
                 select = this.form['Widget[FindFriendsInExistingUsers]_type'],
-                error_msg = '$validate_error';
+                error_msg = '$validate_IM_error';
 
             switch (select.options[select.selectedIndex].value) {
                 case 'user':
                     r = /^[0-9a-z_-]{1,15}\$/i;
                     error_msg = '$validate_name_error';
                     break;
-                case 'jabber':
                 case 'email':
+                case 'jabber':
                 case 'msn':
                 case 'yahoo':
+                case 'google_talk':
+                    error_msg = '$validate_email_error';
                     r = /^(("[\\w-\\s]+")|([\\w-]+(?:\\.[\\w-]+)*)|("[\\w-\\s]+")([\\w-]+(?:\\.[\\w-]+)*))(@((?:[\\w-]+\\.)*\\w[\\w-]{0,66})\\.([a-z]{2,6}(?:\\.[a-z]{2})?)\$)|(@\\[?((25[0-5]\\.|2[0-4][0-9]\\.|1[0-9]{2}\\.|[0-9]{1,2}\\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\\]?\$)/i;
                     break;
                 case 'skype':
