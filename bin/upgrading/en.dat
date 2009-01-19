@@ -3515,7 +3515,7 @@ widget.search.empty.email=Please, enter an email address to search for an exitin
 
 widget.search.empty.username=Please, enter a username to search for an exiting user
 
-widget.search.empty.IM_handle=Please, enter an IM handler to search for an exiting user
+widget.search.empty.IM_handle=Please, enter an IM handle to search for an exiting user
 
 widget.search.google_talk=Google Talk
 
