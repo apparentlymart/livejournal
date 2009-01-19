@@ -66,21 +66,14 @@ sub js {
         },
 
         AskAddressBook: function(form) {
-            var type  = this.form['Widget[FindFriendsInExistingUsers]_type'].value,
-                query = this.form['Widget[FindFriendsInExistingUsers]_q'].value;
-
-            if (query == '') {
-                \$('Widget[FindFriendsInExistingUsers]_errors').innerHTML = '$empty_query';
-                return;
-            }
-
-            this.query = query;
+            var type  = this.form['Widget[FindFriendsInExistingUsers]_type'].value;
+            this.query = this.form['Widget[FindFriendsInExistingUsers]_q'].value;
 
             \$('Widget[FindFriendsInExistingUsers]_errors').innerHTML = '';
             \$('Widget[FindFriendsInExistingUsers]_ajax_status').innerHTML = '$init_text';
 
             var req = {
-                        data: HTTPReq.formEncoded({q: query, type: type}),
+                        data: HTTPReq.formEncoded({q: this.query, type: type}),
                         method: 'POST',
                         url: LiveJournal.getAjaxUrl('multisearch'),
                         onData: this.import_handle.bind(this),
@@ -111,12 +104,14 @@ sub js {
             var v = this.form['Widget[FindFriendsInExistingUsers]_q'].value.trim(),
                 r,
                 select = this.form['Widget[FindFriendsInExistingUsers]_type'],
-                error_msg = '$validate_IM_error';
+                error_msg = '$validate_IM_error',
+                error_empty = '$empty_query';
 
             switch (select.options[select.selectedIndex].value) {
                 case 'user':
                     r = /^[0-9a-z_-]{1,15}\$/i;
                     error_msg = '$validate_name_error';
+                    error_empty = '$empty_query'; // TODO: replace, is example
                     break;
                 case 'email':
                 case 'jabber':
@@ -139,6 +134,11 @@ sub js {
                 case 'gizmo':
                     r =  /^[0-9a-z_-]+\$/i;
                     break;
+            }
+
+            if (!v) {
+                this.import_error(error_empty);
+                return false;
             }
 
             if (r && !r.test(v)) {
