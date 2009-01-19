@@ -47,9 +47,11 @@ sub render_body {
 sub js {
     my $self = shift;
 
-    my $empty_query = $self->ml('widget.search.empty.query');
     my $init_text = $self->ml('widget.search.init_text');
     my $query_error = $self->ml('widget.search.query_error');
+    my $empty_email = $self->ml('widget.search.empty.email');
+    my $empty_name = $self->ml('widget.search.empty.username');
+    my $empty_IM_handle = $self->ml('widget.search.empty.IM_handle');
     my $validate_email_error = $self->ml('widget.search.not_valid.email');
     my $validate_name_error = $self->ml('widget.search.not_valid.username');
     my $validate_IM_error = $self->ml('widget.search.not_valid.IM_handle');
@@ -105,13 +107,13 @@ sub js {
                 r,
                 select = this.form['Widget[FindFriendsInExistingUsers]_type'],
                 error_msg = '$validate_IM_error',
-                error_empty = '$empty_query';
+                error_empty = '$empty_IM_handle';
 
             switch (select.options[select.selectedIndex].value) {
                 case 'user':
                     r = /^[0-9a-z_-]{1,15}\$/i;
                     error_msg = '$validate_name_error';
-                    error_empty = '$empty_query'; // TODO: replace, is example
+                    error_empty = '$empty_name';
                     break;
                 case 'email':
                 case 'jabber':
@@ -119,20 +121,23 @@ sub js {
                 case 'yahoo':
                 case 'google_talk':
                     error_msg = '$validate_email_error';
+                    error_empty = '$empty_email';
                     r = /^(("[\\w-\\s]+")|([\\w-]+(?:\\.[\\w-]+)*)|("[\\w-\\s]+")([\\w-]+(?:\\.[\\w-]+)*))(@((?:[\\w-]+\\.)*\\w[\\w-]{0,66})\\.([a-z]{2,6}(?:\\.[a-z]{2})?)\$)|(@\\[?((25[0-5]\\.|2[0-4][0-9]\\.|1[0-9]{2}\\.|[0-9]{1,2}\\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\\]?\$)/i;
                     break;
                 case 'skype':
+                    r = /^[a-z0-9_.-]+\$/i;
+                    break;
                 case 'lastfm':
-                    r = /^[^@]+\$/;
+                    r = /^[a-z][_a-z0-9-]{1,20}\$/i; // /^[a-z][_a-z0-9\-]{1,14}\$/i - in last.fm website
                     break;
                 case 'icq':
                     r = /^\\d+\$/;
                     break;
                 case 'aolim':
-                    r = /^\\w+\$/;
+                    r = /^(\\d+)|([\\w-]+(\\.[\\w-]+)*\@aol.com)\$/i;
                     break;
                 case 'gizmo':
-                    r =  /^[0-9a-z_-]+\$/i;
+                    r = /^[0-9a-z_-]+\$/i;
                     break;
             }
 
