@@ -147,11 +147,12 @@ body<=
 
         $sth = $dbcr->prepare("SELECT posterid, state FROM talk2 ".
                               "WHERE journalid=? AND jtalkid=?");
-        $sth->execute($journalu->{userid}, $POST{itemid}+0);
+        $sth->execute($journalu->{userid}, int(($POST{itemid}+0)/256));
         $parpost = $sth->fetchrow_hashref;
 
         $title = $ML{'.title.error'} unless $need_captcha;
 
+        $POST{replyto} = $POST{parenttalkid}+0 unless exists $POST{replyto};
         $POST{edit} = $POST{editid}; # talkform expects the editid to be in "edit"
         return LJ::Talk::talkform({ 'remote'      => $remote,
                                     'journalu'    => $journalu,
