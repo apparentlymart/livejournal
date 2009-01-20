@@ -158,8 +158,8 @@ sub save_mapping {
     croak "invalid userid arg: $uid_arg"
         unless $uid;
 
-    my $dbh = LJ::get_db_writer()
-        or die "unable to contact global master for uniq mapping";
+    my $dbh = LJ::get_uniq_db_writer()
+        or die "unable to contact uniq master for uniq mapping";
 
     # allow tests to specify an insertion time callback which specifies 
     # how we calculate insertion times for rows
@@ -271,8 +271,8 @@ sub _load_mapping_uid {
         return @$memval;
     }
 
-    my $dbh = LJ::get_db_writer()
-        or die "unable to contact global reader";
+    my $dbh = LJ::get_uniq_db_writer() #FIXME should use reader when appropriate
+        or die "unable to contact uniq writer";
 
     my $limit = $window_size + 1;
     my $sth = $dbh->prepare
@@ -326,8 +326,8 @@ sub _load_mapping_uniq {
         return @$memval;
     }
 
-    my $dbh = LJ::get_db_reader()
-        or die "unable to contact global reader";
+    my $dbh = LJ::get_uniq_db_reader()
+        or die "unable to contact uniq reader";
 
     my $limit = $window_size + 1;
     my $sth = $dbh->prepare

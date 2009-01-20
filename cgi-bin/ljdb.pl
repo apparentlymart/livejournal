@@ -300,6 +300,15 @@ sub get_db_writer {
     return LJ::get_dbh("master");
 }
 
+sub get_uniq_db_reader {
+    return LJ::get_dbh("uniq_master") if $LJ::_PRAGMA_FORCE_MASTER;
+    return LJ::get_dbh("uniq_slave", "uniq_master");
+}
+
+sub get_uniq_db_writer {
+    return LJ::get_dbh("uniq_master");
+}
+
 # <LJFUNC>
 # name: LJ::get_cluster_reader
 # class: db
