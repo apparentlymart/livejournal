@@ -3551,7 +3551,19 @@ widget.search.not_valid.email=Sorry, it looks like email address you entered is 
 
 widget.search.not_valid.username=Sorry, it looks like username you entered is invalid. Could you please update the username or try a different one?
 
-widget.search.not_valid.IM_handle=Sorry, it looks like IM handle you entered is invalid. Could you please update the IM handle or try a different one?
+widget.search.not_valid.IM_handle.aim=Sorry, it looks like IM handle you entered is invalid. Could you please update the IM handle or try a different one?
+
+widget.search.not_valid.IM_handle.icq=Sorry, it looks like IM handle you entered is invalid. Could you please update the IM handle or try a different one?
+
+widget.search.not_valid.IM_handle.jabber=Sorry, it looks like IM handle you entered is invalid. Could you please update the IM handle or try a different one?
+
+widget.search.not_valid.IM_handle.msn=Sorry, it looks like IM handle you entered is invalid. Could you please update the IM handle or try a different one?
+
+widget.search.not_valid.IM_handle.yahoo=Sorry, it looks like IM handle you entered is invalid. Could you please update the IM handle or try a different one?
+
+widget.search.not_valid.IM_handle.skype=Sorry, it looks like IM handle you entered is invalid. Could you please update the IM handle or try a different one?
+
+widget.search.not_valid.IM_handle.google_talk=Sorry, it looks like IM handle you entered is invalid. Could you please update the IM handle or try a different one?
 
 widget.search.username=Username
 
