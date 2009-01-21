@@ -53,8 +53,15 @@ sub js {
     my $empty_name = $self->ml('widget.search.empty.username');
     my $empty_IM_handle = $self->ml('widget.search.empty.IM_handle');
     my $validate_email_error = $self->ml('widget.search.not_valid.email');
-    my $validate_name_error = $self->ml('widget.search.not_valid.username');
+    my $validate_user_error = $self->ml('widget.search.not_valid.username');
     my $validate_IM_error = $self->ml('widget.search.not_valid.IM_handle');
+    my $validate_IM_aim = $self->ml('widget.search.not_valid.IM_handle.aim');
+    my $validate_IM_icq = $self->ml('widget.search.not_valid.IM_handle.icq');
+    my $validate_IM_jabber = $self->ml('widget.search.not_valid.IM_handle.jabber');
+    my $validate_IM_msn = $self->ml('widget.search.not_valid.IM_handle.msn');
+    my $validate_IM_yahoo = $self->ml('widget.search.not_valid.IM_handle.yahoo');
+    my $validate_IM_skype = $self->ml('widget.search.not_valid.IM_handle.skype');
+    my $validate_IM_google_talk = $self->ml('widget.search.not_valid.IM_handle.google_talk');
 
     qq [
         initWidget: function() {
@@ -105,14 +112,26 @@ sub js {
         validate: function() {
             var v = this.form['Widget[FindFriendsInExistingUsers]_q'].value.trim(),
                 r,
+                rex_email = /^(("[\\w-\\s]+")|([\\w-]+(?:\\.[\\w-]+)*)|("[\\w-\\s]+")([\\w-]+(?:\\.[\\w-]+)*))(@((?:[\\w-]+\\.)*\\w[\\w-]{0,66})\\.([a-z]{2,6}(?:\\.[a-z]{2})?)\$)|(@\\[?((25[0-5]\\.|2[0-4][0-9]\\.|1[0-9]{2}\\.|[0-9]{1,2}\\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\\]?\$)/i,
                 select = this.form['Widget[FindFriendsInExistingUsers]_type'],
-                error_msg = '$validate_IM_error',
-                error_empty = '$empty_IM_handle';
+                error_valid = '$validate_IM_error',
+                error_empty = '$empty_IM_handle',
+                not_valid_txt = {
+                    user: '$validate_user_error',
+                    email: '$validate_email_error',
+                    aim: '$validate_IM_aim',
+                    icq: '$validate_IM_icq',
+                    jabber: '$validate_IM_jabber',
+                    msn: '$validate_IM_msn',
+                    yahoo: '$validate_IM_yahoo',
+                    skype: '$validate_IM_skype',
+                    google_talk: '$validate_IM_google_talk'
+                },
+                client = select.options[select.selectedIndex].value;
 
-            switch (select.options[select.selectedIndex].value) {
+            switch (client) {
                 case 'user':
                     r = /^[0-9a-z_-]{1,15}\$/i;
-                    error_msg = '$validate_name_error';
                     error_empty = '$empty_name';
                     break;
                 case 'email':
@@ -120,9 +139,8 @@ sub js {
                 case 'msn':
                 case 'yahoo':
                 case 'google_talk':
-                    error_msg = '$validate_email_error';
                     error_empty = '$empty_email';
-                    r = /^(("[\\w-\\s]+")|([\\w-]+(?:\\.[\\w-]+)*)|("[\\w-\\s]+")([\\w-]+(?:\\.[\\w-]+)*))(@((?:[\\w-]+\\.)*\\w[\\w-]{0,66})\\.([a-z]{2,6}(?:\\.[a-z]{2})?)\$)|(@\\[?((25[0-5]\\.|2[0-4][0-9]\\.|1[0-9]{2}\\.|[0-9]{1,2}\\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\\]?\$)/i;
+                    r = rex_email;
                     break;
                 case 'skype':
                     r = /^[a-z0-9_.-]+\$/i;
@@ -134,7 +152,7 @@ sub js {
                     r = /^\\d+\$/;
                     break;
                 case 'aolim':
-                    r = /^(\\d+)|([\\w-]+(\\.[\\w-]+)*\@aol.com)\$/i;
+                    r = new RegExp('(^\\\\d+\$)|' +rex_email.source, 'i');
                     break;
                 case 'gizmo':
                     r = /^[0-9a-z_-]+\$/i;
@@ -147,7 +165,10 @@ sub js {
             }
 
             if (r && !r.test(v)) {
-                this.import_error(error_msg);
+                if (not_valid_txt[client])
+                    error_valid = not_valid_txt[client];
+
+                this.import_error(error_valid);
                 return false;
             }
 
