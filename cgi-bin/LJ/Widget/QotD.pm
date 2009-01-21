@@ -93,18 +93,27 @@ sub qotd_display_embed {
             #
             #        -- Whitaker 2007/08/28
 
-            #my $ml_key = $class->ml_key("$q->{qid}.text");
-            #my $text = $class->ml($ml_key);
-            my $text = $q->{text};
+            # OK, it's time to try to fix it.
+            #
+            # We don't call dongerous BML::get_language() and get language code from remote
+            # user's settings. This can be done even in not bml context. But in case of disaster,
+            # we can revert this patch: get $text from "my $text = $q->{text};" without call $class->ml()
+            # and remove $lncode and $ml_key variables.
+            #
+            #       -- Chernyshev 2009/01/21
+
+            my $lncode = ($remote && $remote->prop('browselang')) ?
+                 $remote->prop('browselang') : 'en_LJ';
+
+            my $ml_key = $class->ml_key("$q->{qid}.text");
+            my $text = $class->ml($ml_key, undef, $lncode);
             LJ::CleanHTML::clean_event(\$text);
 
             my $from_text = '';
             if ($q->{from_user}) {
                 my $from_u = LJ::load_user($q->{from_user});
-                $from_text = "Submitted by " . $from_u->ljuser_display . "<br />"
+                $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}, $lncode) . "<br />"
                     if $from_u;
-                #$from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}) . "<br />"
-                #    if $from_u;
             }
 
             my $extra_text;

@@ -596,7 +596,7 @@ sub ml_is_missing_string {
 # -- also allows getting of strings from the 'widget' ML domain
 #    for text which was dynamically defined by an admin
 sub ml {
-    my ($class, $code, $vars) = @_;
+    my ($class, $code, $vars, $lncode) = @_;
 
     # can pass in a string and check 3 places in order:
     # 1) widget.foo.text => general .widget.foo.text (overridden by current page)
@@ -616,7 +616,7 @@ sub ml {
 
     # 3) now try with "widget" domain for user-entered translation string
     my $dmid = $class->ml_dmid;
-    my $lncode = LJ::Lang::get_effective_lang();
+    $lncode = LJ::Lang::get_effective_lang() unless $lncode;
     my $string = LJ::Lang::get_text($lncode, $code, $dmid, $vars);
     return "" if $string eq "_none";
     return $string unless LJ::Lang::is_missing_string($string);
