@@ -300,13 +300,21 @@ sub get_db_writer {
     return LJ::get_dbh("master");
 }
 
+# Use the uniq DB if available, otherwise fall back to the main database
+# Force the use of the uniq DB by setting $LJ::_PRAGMA_FORCE_UNIQ
 sub get_uniq_db_reader {
-    return LJ::get_dbh("uniq_master") if $LJ::_PRAGMA_FORCE_MASTER;
-    return LJ::get_dbh("uniq_slave", "uniq_master");
+    if ($LJ::_PRAGMA_FORCE_UNIQ) {
+        return $LJ::_PRAGMA_FORCE_MASTER ?
+            LJ::get_dbh("uniq_master") :
+            LJ::get_dbh("uniq_slave", "uniq_master");
+    }
+    return LJ::get_dbh("uniq_master", "master") if $LJ::_PRAGMA_FORCE_MASTER;
+    return LJ::get_dbh("uniq_slave", "uniq_master", "slave", "master");
 }
 
 sub get_uniq_db_writer {
-    return LJ::get_dbh("uniq_master");
+    return LJ::get_dbh("uniq_master") if $LJ::_PRAGMA_FORCE_UNIQ;
+    return LJ::get_dbh("uniq_master", "master");
 }
 
 # <LJFUNC>
