@@ -3513,6 +3513,9 @@ sub EntryLite__get_link
 sub Entry__formatted_subject {
     my ($ctx, $this, $attrs) = @_;
 
+    return "<a class=\"lj_invisible\">".$ctx->[S2::PROPS]->{'text_nosubject'}."</a>"
+        if !$this->{subject} || $this->{subject} =~ /^\s+$/;
+
     # if subject has html-tags - print raw subject
     return $this->{subject}
         if($this->{subject} =~ /[<>]/);
