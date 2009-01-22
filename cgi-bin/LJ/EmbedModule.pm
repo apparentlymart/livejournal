@@ -16,8 +16,8 @@ use constant {
     # inside explicit <lj-embed> tag
     EXPLICIT => 3,
     # maximum embed width and height
-    MAX_WIDTH => 800,
-    MAX_HEIGHT => 800,
+    MAX_WIDTH => 1100,
+    MAX_HEIGHT => 1100,
 };
 
 # can optionally pass in an id of a module to change its contents
