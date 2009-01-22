@@ -318,7 +318,7 @@ sub process {
     }
 
     # verizon crap.  remove paragraphs of text.
-    $body =~ s/This message was sent using.+?Verizon.+?faster download\.//s;
+    $body =~ s/This message was sent.+?Verizon.+\.//s;
 
     # virgin mobile adds text to the *top* of the message, killing lj-headers.
     # Kill this silly (and grammatically incorrect) string.
