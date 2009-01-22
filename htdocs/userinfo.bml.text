@@ -108,7 +108,7 @@
 
 .details.supportpoints=<a [[aopts]]>Support Points</a>: [[num]]
 
-.details.supportpoints2=[[num]] <a [[aopts]]>Support Points</a>
+.details.supportpoints2=[[num]] <a [[aopts]]>Support [[?num_raw|Point|Points]]</a>
 
 .details.tags=[[num]] <a [[aopts]]>[[?num|Tag|Tags]]</a>
 

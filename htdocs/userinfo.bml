@@ -593,7 +593,7 @@
         if LJ::is_enabled("show-talkleft") && ($u->is_personal || $u->is_identity);
 
     my $supportpoints = $u->support_points_count;
-    push @comment_stats, BML::ml('.details.supportpoints2', { aopts => "href='$LJ::SITEROOT/support/'", num => LJ::commafy($supportpoints) })
+    push @comment_stats, BML::ml('.details.supportpoints2', { aopts => "href='$LJ::SITEROOT/support/'", num => LJ::commafy($supportpoints), num_raw => $supportpoints })
         if $supportpoints;
 
     my $comment_stats_string = join(", ", @comment_stats);
