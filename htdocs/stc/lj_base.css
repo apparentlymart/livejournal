@@ -69,17 +69,17 @@ div.lj_ippu_titlebar {
     padding: 5px 0 0 5px;
 }
 
-	div.lj_ippu_titlebar div {
-		
-	}
+    div.lj_ippu_titlebar div {
+        
+    }
 
-	.lj_ippu_titlebar img {
-		opacity: .25;
-	}
-	
-		.lj_ippu_titlebar img:hover {
-			opacity: 1;
-		}
+    .lj_ippu_titlebar img {
+        opacity: .25;
+    }
+    
+        .lj_ippu_titlebar img:hover {
+            opacity: 1;
+        }
 
 .LJ_Placeholder_Container { /* see also lj_base-ie.css */
         display: table-cell;
@@ -137,4 +137,17 @@ div.lj_ippu_titlebar {
 
 .warning-background {
     background-image: url('/img/message-warning.gif');
+}
+
+.invisible {
+    display:-moz-inline-box;
+    display:inline-block;
+    line-height:0;
+    width:0;
+    height:0;
+    padding:0;
+    border:0 none transparent;
+    margin:0;
+    overflow:hidden;
+    text-decoration:none;
 }
