@@ -52,8 +52,8 @@ sub js {
     my $empty_email = $self->ml('widget.search.empty.email');
     my $empty_name = $self->ml('widget.search.empty.username');
     my $empty_IM_handle = $self->ml('widget.search.empty.IM_handle');
-    my $validate_email_error = $self->ml('widget.search.not_valid.email');
-    my $validate_user_error = $self->ml('widget.search.not_valid.username');
+    my $validate_email = $self->ml('widget.search.not_valid.email');
+    my $validate_username = $self->ml('widget.search.not_valid.username');
     my $validate_IM_error = $self->ml('widget.search.not_valid.IM_handle');
     my $validate_IM_aim = $self->ml('widget.search.not_valid.IM_handle.aim');
     my $validate_IM_icq = $self->ml('widget.search.not_valid.IM_handle.icq');
@@ -117,9 +117,9 @@ sub js {
                 error_valid = '$validate_IM_error',
                 error_empty = '$empty_IM_handle',
                 not_valid_txt = {
-                    user: '$validate_user_error',
-                    email: '$validate_email_error',
-                    aim: '$validate_IM_aim',
+                    user: '$validate_username',
+                    email: '$validate_email',
+                    aolim: '$validate_IM_aim',
                     icq: '$validate_IM_icq',
                     jabber: '$validate_IM_jabber',
                     msn: '$validate_IM_msn',
