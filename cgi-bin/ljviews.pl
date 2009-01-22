@@ -1665,6 +1665,10 @@ sub create_view_friends
         }
     }
 
+    my $events_date   = ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!)
+                        ? LJ::mysqldate_to_time("$1-$2-$3")
+                        : 0;
+
     ## load the itemids
     my %friends;
     my %friends_row;
@@ -1682,6 +1686,7 @@ sub create_view_friends
         'idsbycluster' => \%idsbycluster,
         'showtypes' => $get->{'show'},
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
+        'events_date' => $events_date,
     });
 
     while ($_ = each %friends) {
