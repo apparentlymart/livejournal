@@ -139,7 +139,7 @@ div.lj_ippu_titlebar {
     background-image: url('/img/message-warning.gif');
 }
 
-.invisible {
+.lj_invisible {
     display:-moz-inline-box;
     display:inline-block;
     line-height:0;
