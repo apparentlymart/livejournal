@@ -429,7 +429,14 @@ sub reconstruct {
             # FIXME: ultra ghetto.
             $attr->{$name} = LJ::no_utf8_flag($attr->{$name});
 
-            $txt .= " $name=\"" . LJ::ehtml($attr->{$name}) . "\"";
+            my $tribute = " $name=\"" . LJ::ehtml($attr->{$name}) . "\"";
+
+            # FIXME: This fixes problems caused by using ehtml on URLs
+            # but not very gracefully. Find a better way to clean URLs
+            $tribute =~ s/\&amp;/\&/g
+                if ($name =~ /movie|src/ && $attr->{$name} =~ /^http:\/\/.*/);
+
+            $txt .= $tribute;
         }
         $txt .= $selfclose ? " />" : ">";
 
