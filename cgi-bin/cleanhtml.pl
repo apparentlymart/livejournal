@@ -2,6 +2,8 @@
 
 use strict;
 use Class::Autouse qw(
+                      Encode
+                      HTML::Entities
                       URI
                       HTMLCleaner
                       LJ::CSS::Cleaner
@@ -112,6 +114,9 @@ sub clean
 
     # remove the auth portion of any see_request.bml links
     $$data =~ s/(see_request\.bml\S+?)auth=\w+/$1/ig;
+
+    # decode escapes to get a valid unicode string
+    $$data = Encode::encode_utf8(decode_entities(Encode::decode_utf8($$data)));
 
     my $p = HTML::TokeParser->new($data);
 
