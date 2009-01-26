@@ -192,7 +192,7 @@ sub process {
     # Currently, PictureMail can only contain one image per message
     # and the image is always a jpeg. (2/2/05)
     if ($return_path =~ /(?:messaging|pm)\.sprint(?:pcs)?\.com/ &&
-        $content_type =~ m#^multipart/alternative#i) {
+        $head->get('Content-type:') =~ m#^multipart/alternative#i) {
 
         $tent = get_entity( $entity, 'html' );
 
@@ -217,7 +217,7 @@ sub process {
 
         my $url =
           HTML::Entities::decode_entities(
-            $xml->{messageContents}->{mediaItems}->{mediaItem}->{url} );
+            $xml->{messageContents}->{mediaItems}->{mediaItem}->{content} );
         $url = LJ::trim($url);
         $url =~ s#</?url>##g;
 
