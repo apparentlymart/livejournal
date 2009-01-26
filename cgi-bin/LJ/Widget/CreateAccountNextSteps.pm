@@ -23,6 +23,7 @@ sub render_body {
     $ret .= "<li><a href='$LJ::SITEROOT/update.bml'>" . $class->ml('widget.createaccountnextsteps.steps.post') . "</a></li>";
     $ret .= "<li><a href='$LJ::SITEROOT/editpics.bml'>" . $class->ml('widget.createaccountnextsteps.steps.userpics') . "</a></li>";
     $ret .= "<li><a href='$LJ::SITEROOT/interests.bml'>" . $class->ml('widget.createaccountnextsteps.steps.find') . "</a></li>";
+    $ret .= "<li><a href='$LJ::SITEROOT/friends/find.bml'>" . $class->ml('widget.createaccountnextsteps.steps.friends.find') . "</a></li>";
     $ret .= "</ul></td><td><ul>";
     $ret .= "<li><a href='$LJ::SITEROOT/explore/'>" . $class->ml('widget.createaccountnextsteps.steps.explore', { sitenameabbrev => $LJ::SITENAMEABBREV }) . "</a></li>";
     $ret .= "<li><a href='$LJ::SITEROOT/customize/'>" . $class->ml('widget.createaccountnextsteps.steps.customize') . "</a></li>";

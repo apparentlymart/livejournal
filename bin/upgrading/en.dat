@@ -3161,6 +3161,8 @@ widget.createaccountnextsteps.steps.explore=Browse [[sitenameabbrev]] by categor
 
 widget.createaccountnextsteps.steps.find=Find others by interests
 
+widget.createaccountnextsteps.steps.friends.find=Find your friends
+
 widget.createaccountnextsteps.steps.post=Post your first entry
 
 widget.createaccountnextsteps.steps.profile=Finish editing your profile
