@@ -2,8 +2,6 @@
 
 use strict;
 use Class::Autouse qw(
-                      Encode
-                      HTML::Entities
                       URI
                       HTMLCleaner
                       LJ::CSS::Cleaner
@@ -15,6 +13,9 @@ use Class::Autouse qw(
 LJ::Config->load;
 
 package LJ;
+
+use Encode;
+use HTML::Entities;
 
 # <LJFUNC>
 # name: LJ::strip_bad_code
@@ -116,7 +117,7 @@ sub clean
     $$data =~ s/(see_request\.bml\S+?)auth=\w+/$1/ig;
 
     # decode escapes to get a valid unicode string
-    $$data = Encode::encode_utf8(decode_entities(Encode::decode_utf8($$data)));
+    $$data = Encode::encode_utf8(HTML::Entities::decode_entities(Encode::decode_utf8($$data)));
 
     my $p = HTML::TokeParser->new($data);
 
