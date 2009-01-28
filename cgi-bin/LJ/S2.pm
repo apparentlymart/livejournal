@@ -23,6 +23,7 @@ use Class::Autouse qw(
 use Storable;
 use Apache::Constants ();
 use POSIX ();
+use Encode;
 
 package LJ::S2;
 
@@ -4048,10 +4049,9 @@ sub string__substr
 {
     my ($ctx, $this, $start, $length) = @_;
     
-    use Encode qw/decode_utf8 encode_utf8/;
-    my $ustr = decode_utf8($this);
+    my $ustr = Encode::decode_utf8($this);
     my $result = substr($ustr, $start, $length);
-    return encode_utf8($result);
+    return Encode::encode_utf8($result);
 }
 
 sub string__length
