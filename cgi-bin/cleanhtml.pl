@@ -117,7 +117,8 @@ sub clean
     $$data =~ s/(see_request\.bml\S+?)auth=\w+/$1/ig;
 
     # decode escapes to get a valid unicode string
-    $$data = Encode::encode_utf8(HTML::Entities::decode_entities(Encode::decode_utf8($$data)));
+    # we encode it back before return
+    $$data = Encode::decode_utf8($$data);
 
     my $p = HTML::TokeParser->new($data);
 
@@ -1050,6 +1051,9 @@ sub clean
 
         $$data = $msg . $$data;
     }
+
+    # encode data back to utf8 before return
+    $$data = Encode::encode_utf8($$data);
 
     return 0;
 }
