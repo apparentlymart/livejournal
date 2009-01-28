@@ -9,10 +9,6 @@ sub need_res {
     return qw( js/widgets/qotd.js stc/widgets/qotd.css );
 }
 
-sub render {
-   render_body(@_);
-}
-
 sub render_body {
     my $class = shift;
     my %opts = @_;
