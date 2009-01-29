@@ -2663,6 +2663,16 @@ settings.gender.uns=(Unspecified)
 
 settings.option.select=(Please make a selection)
 
+settings.pingback=PingBack options
+
+settings.pingback.process=How process links in a post's text?
+
+settings.pingback.option.open=Populate all links
+
+settings.pingback.option.lj_only=Populate only links leading to livejournal.com
+
+settings.pingback.option.disabled=Do not populate links
+
 settings.province=or non-US State/province/territory
 
 settings.settingprod.intro=Hi from [[sitename]]. We have a new option that we'd like you to set:

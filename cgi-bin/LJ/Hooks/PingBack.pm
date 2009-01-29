@@ -2,19 +2,13 @@ package LJ::Hooks::PingBack;
 use strict;
 use LJ::PingBack;
 
-sub has_pingback {
-    my $u = shift;
-    return 0 if $LJ::DISABLED{'pingback'};
-    return 0 unless $u->is_in_beta("pingback");
-    return 1;
-}
 
 
 #
 LJ::register_hook("add_extra_options_to_manage_comments", sub {
     my $u = shift;
 
-    return unless has_pingback($u);
+    return unless LJ::PingBack->has_user_pingback($u);
 
     # PingBack options
     my $ret = '';
@@ -35,7 +29,7 @@ LJ::register_hook("process_extra_options_for_manage_comments", sub {
     my $u    = shift;
     my $POST = shift;
 
-    return unless has_pingback($u);
+    return unless LJ::PingBack->has_user_pingback($u);
 
     $POST->{'pingback'} = "D" unless $POST->{'pingback'}  =~ /^[OLD]$/;
     return 'pingback';
@@ -51,7 +45,7 @@ LJ::register_hook("add_extra_entryform_fields", sub {
     my $opts     = $args->{opts};
 
     return if $opts->{remote} and
-              not has_pingback($opts->{remote});
+              not LJ::PingBack->has_user_pingback($opts->{remote});
     
     # PINGBACK widget
     return "
@@ -89,7 +83,7 @@ LJ::register_hook("postpost", sub {
     my $entry    = $args->{entry};
     my $journal  = $args->{journal};
 
-    return unless has_pingback($journal);
+    return unless LJ::PingBack->has_user_pingback($journal);
 
     # check security
     return if $security ne 'public';
@@ -118,7 +112,7 @@ LJ::register_hook("postpost", sub {
 LJ::register_hook("editpost", sub {
     my $entry = shift;
 
-    return unless has_pingback($entry->journal);
+    return unless LJ::PingBack->has_user_pingback($entry->journal);
 
     # check security
     return if $entry->security ne 'public';
@@ -156,7 +150,7 @@ LJ::register_hook("after_journal_content_created", sub {
     return unless $r;
     return unless $entry;
     return unless $r->notes("view") eq 'entry';
-    return unless has_pingback($entry->journal);
+    return unless LJ::PingBack->has_user_pingback($entry->journal);
 
 
     if (LJ::PingBack->should_entry_recieve_pingback($entry)){

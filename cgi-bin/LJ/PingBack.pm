@@ -131,4 +131,15 @@ sub notify {
 }
 
 
+sub has_user_pingback {
+    my $class = shift;
+    my $u     = shift;
+    
+    return 0 if $LJ::DISABLED{'pingback'};
+    return 0 unless $u->get_cap('pingback');
+    return 1;
+}
+
+
+
 1;
