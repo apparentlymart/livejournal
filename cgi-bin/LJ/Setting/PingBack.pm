@@ -27,14 +27,12 @@ sub option {
 
     # PingBack options
     my $ret = '';
-#    $ret .= "<tr><td class='field_name'>" . "&nbsp;" . "</td>\n<td>";
     $ret .= $class->ml('settings.pingback.process') . "&nbsp;<br />";
     $ret .= LJ::html_select({ 'name' => "${key}pingback", 'selected' => $u->prop('pingback') },
                               "L" => $class->ml("settings.pingback.option.lj_only"),
                               "O" => $class->ml("settings.pingback.option.open"),
                               "D" => $class->ml("settings.pingback.option.disabled"),
                             );
-#    $ret .= "</td></tr>\n";
     return $ret;
 }
 
