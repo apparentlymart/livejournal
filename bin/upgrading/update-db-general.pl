@@ -927,10 +927,10 @@ EOC
 register_tablecreate("talk2", <<'EOC');
 CREATE TABLE talk2 (
   journalid INT UNSIGNED NOT NULL,
-  jtalkid MEDIUMINT UNSIGNED NOT NULL,
+  jtalkid INT UNSIGNED NOT NULL,
   nodetype CHAR(1) NOT NULL DEFAULT '',
   nodeid INT UNSIGNED NOT NULL default '0',
-  parenttalkid MEDIUMINT UNSIGNED NOT NULL,
+  parenttalkid INT UNSIGNED NOT NULL,
   posterid INT UNSIGNED NOT NULL default '0',
   datepost DATETIME NOT NULL default '0000-00-00 00:00:00',
   state CHAR(1) default 'A',
@@ -944,7 +944,7 @@ EOC
 register_tablecreate("talkprop2", <<'EOC');
 CREATE TABLE talkprop2 (
   journalid INT UNSIGNED NOT NULL,
-  jtalkid MEDIUMINT UNSIGNED NOT NULL,
+  jtalkid INT UNSIGNED NOT NULL,
   tpropid TINYINT UNSIGNED NOT NULL,
   value VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY  (journalid,jtalkid,tpropid)
@@ -954,7 +954,7 @@ EOC
 register_tablecreate("talktext2", <<'EOC');
 CREATE TABLE talktext2 (
   journalid INT UNSIGNED NOT NULL,
-  jtalkid MEDIUMINT UNSIGNED NOT NULL,
+  jtalkid INT UNSIGNED NOT NULL,
   subject VARCHAR(100) DEFAULT NULL,
   body TEXT,
   PRIMARY KEY (journalid, jtalkid)
@@ -970,7 +970,7 @@ CREATE TABLE talkleft (
   nodetype   CHAR(1) NOT NULL,
   nodeid     INT UNSIGNED NOT NULL,
   INDEX (journalid, nodetype, nodeid),
-  jtalkid    MEDIUMINT UNSIGNED NOT NULL,
+  jtalkid    INT UNSIGNED NOT NULL,
   publicitem   ENUM('1','0') NOT NULL DEFAULT '1'
 )
 EOC
@@ -984,7 +984,7 @@ CREATE TABLE talkleft_xfp (
   nodetype   CHAR(1) NOT NULL,
   nodeid     INT UNSIGNED NOT NULL,
   INDEX (journalid, nodetype, nodeid),
-  jtalkid    MEDIUMINT UNSIGNED NOT NULL,
+  jtalkid    INT UNSIGNED NOT NULL,
   publicitem   ENUM('1','0') NOT NULL DEFAULT '1'
 )
 EOC
@@ -1724,7 +1724,7 @@ register_tablecreate("commenturls", <<'EOC'); # global
 CREATE TABLE commenturls (
    posterid int unsigned NOT NULL,
    journalid int unsigned NOT NULL,
-   jtalkid mediumint unsigned NOT NULL,
+   jtalkid int unsigned NOT NULL,
    timecreate int unsigned NOT NULL,
    url varchar(255) NOT NULL,
    INDEX (timecreate)
@@ -3916,6 +3916,49 @@ register_alter(sub {
                  "ALTER TABLE supportlog " .
                  "ADD tier TINYINT UNSIGNED DEFAULT NULL");
     }
+    
+    if (column_type("talk2", "jtalkid") =~ /mediumint/) {
+        do_alter("talk2",
+                 "ALTER TABLE talk2 " .
+                 "MODIFY jtalkid INT UNSIGNED NOT NULL");
+    }
+    
+    if (column_type("talk2", "parenttalkid") =~ /mediumint/) {
+        do_alter("talk2",
+                 "ALTER TABLE talk2 " .
+                 "MODIFY parenttalkid INT UNSIGNED NOT NULL");
+    }
+    
+    if (column_type("talkprop2", "jtalkid") =~ /mediumint/) {
+        do_alter("talkprop2",
+                 "ALTER TABLE talkprop2 " .
+                 "MODIFY jtalkid INT UNSIGNED NOT NULL");
+    }
+    
+    if (column_type("talktext2", "jtalkid") =~ /mediumint/) {
+        do_alter("talktext2",
+                 "ALTER TABLE talktext2 " .
+                 "MODIFY jtalkid INT UNSIGNED NOT NULL");
+    }
+
+    if (column_type("talkleft", "jtalkid") =~ /mediumint/) {
+        do_alter("talkleft",
+                 "ALTER TABLE talkleft " .
+                 "MODIFY jtalkid INT UNSIGNED NOT NULL");
+    }
+
+    if (column_type("talkleft_xfp", "jtalkid") =~ /mediumint/) {
+        do_alter("talkleft_xfp",
+                 "ALTER TABLE talkleft_xfp " .
+                 "MODIFY jtalkid INT UNSIGNED NOT NULL");
+    }
+
+    if (column_type("commenturls", "jtalkid") =~ /mediumint/) {
+        do_alter("commenturls",
+                 "ALTER TABLE commenturls " .
+                 "MODIFY jtalkid INT UNSIGNED NOT NULL");
+    }
+
 });
 
 
