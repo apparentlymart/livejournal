@@ -1686,11 +1686,16 @@ sub editevent
             })
             unless $flags->{noauth};
 
+        # We must use property 'dupsig_post' in author of entry to be deleted, not in
+        # remote user or journal owner!
+        my $item = LJ::get_log2_row($uowner, $req->{'itemid'});
+        my $poster = LJ::want_user($item->{'posterid'}) if $item;
+
         LJ::delete_entry($uowner, $req->{'itemid'}, 'quick', $oldevent->{'anum'});
 
         # clear their duplicate protection, so they can later repost
         # what they just deleted.  (or something... probably rare.)
-        LJ::set_userprop($u, "dupsig_post", undef);
+        LJ::set_userprop($poster, "dupsig_post", undef) if $poster;
 
         my $res = { 'itemid' => $itemid,
                     'anum' => $oldevent->{'anum'} };
