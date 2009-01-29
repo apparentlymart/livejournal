@@ -2248,6 +2248,10 @@ protocol.old_win32_client=There are significantly newer Windows LiveJournal clie
 
 protocol.readonly=Your account is temporarily in read-only mode.  Some operations will fail for a few minutes.
 
+quote.left="
+
+quote.right="
+
 s2theme.themename.default=(Unnamed - [[themeid]])
 
 s2theme.themename.notheme=(Layout Default)
