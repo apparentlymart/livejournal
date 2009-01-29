@@ -353,7 +353,8 @@ sub subscription_as_html {
     if ($arg2) {
         $comment = LJ::Comment->new($journal, jtalkid => $arg2);
         return "(Invalid comment)" unless $comment && $comment->valid;
-        $arg1 = $comment->entry->ditemid unless $arg1;
+        $arg1 = eval { $comment->entry->ditemid } unless $arg1;
+        return "(Invalid entry [$arg1:$arg2])" if $@;
     }
 
     my $entry = LJ::Entry->new($journal, ditemid => $arg1);
