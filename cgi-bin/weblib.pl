@@ -3357,7 +3357,7 @@ sub subscribe_interface {
         my $cat_title = BML::ml('subscribe_interface.category.'.$cat_title_key);
         my $first_class = $catid == 0 ? " CategoryRowFirst" : "";
         $cat_html .= qq {
-            <div class="CategoryRow-$catid">
+            <tbody class="CategoryRow-$catid">
                 <tr class="CategoryRow$first_class">
                 <td>
                 <span class="CategoryHeading">$cat_title</span><br />
@@ -3434,12 +3434,12 @@ sub subscribe_interface {
                 my $sub_title = " " . $pending_sub->htmlcontrol_label($u);
                 $sub_title = LJ::run_hook("disabled_esn_sub", $u) . $sub_title if $pending_sub->disabled($u);
 
-                $cat_html .= "<tr class='$disabled_class $altrow_class'";
+                $cat_html .= "<tr class='$disabled_class $altrow_class'>";
                 $cat_html .= "<td>" . $pending_sub->htmlcontrol($u) . "$sub_title*</td>";
                 $cat_html .= "<td>&nbsp;</td>";
-                $cat_html .= "<td class='NotificationOptions'$hidden>" . $pending_sub->htmlcontrol($u, undef, undef, notif => 1, notif_catid => $catid, notif_ntypeid => 2) . "</td>";
-                $cat_html .= "<td class='NotificationOptions'$hidden>" . LJ::html_check({ disabled => 1 }) . "</td>";
-                $cat_html .= "<td class='NotificationOptions'$hidden>" . LJ::html_check({ disabled => 1 }) . "</td>";
+                $cat_html .= "<td><span class='NotificationOptions'$hidden>" . $pending_sub->htmlcontrol($u, undef, undef, notif => 1, notif_catid => $catid, notif_ntypeid => 2) . "</span></td>";
+                $cat_html .= "<td><span class='NotificationOptions'$hidden>" . LJ::html_check({ disabled => 1 }) . "</span></td>";
+                $cat_html .= "<td><span class='NotificationOptions'$hidden>" . LJ::html_check({ disabled => 1 }) . "</span></td>";
                 $cat_html .= "</tr>";
 
                 $special_subs++;
@@ -3500,11 +3500,11 @@ sub subscribe_interface {
             my $disabledclass = $pending_sub->enabled ? '' : 'Disabled';
             my $altrowclass = $sub_count % 2 == 1 ? "altrow" : "";
 
-            $cat_html  .= "<tr class='$inactiveclass $disabledclass $altrowclass'><td>";
+            $cat_html .= "<tr class='$inactiveclass $disabledclass $altrowclass'><td>";
 
             if ($is_tracking_category && ! $pending_sub->pending) {
                 my $subid = $pending_sub->id;
-                my $deletesub_url = $settings_page ? "$LJ::SITEROOT/manage/settings/?cat=notifications&deletesub_$subid=1" : "?deletesub_$subid=1";
+                my $deletesub_url = $settings_page ? "$LJ::SITEROOT/manage/settings/?cat=notifications&amp;deletesub_$subid=1" : "?deletesub_$subid=1";
                 $cat_html .= qq {
                     <a href='$deletesub_url'><img src="$LJ::IMGPREFIX/portal/btn_del.gif" /></a>
                 };
@@ -3520,7 +3520,7 @@ sub subscribe_interface {
                 noescape => 1,
                 label    => $title,
                 disabled => $disabled,
-            }) .  "</td>";
+            });
 
             unless ($pending_sub->pending) {
                 $cat_html .= LJ::html_hidden({
@@ -3529,13 +3529,15 @@ sub subscribe_interface {
                 });
             }
 
+            $cat_html .= "</td>";
+
             $shown_subids{$pending_sub->id}++ unless $pending_sub->pending;
 
             $cat_empty = 0;
 
             # print out notification options for this subscription (hidden if not subscribed)
             $cat_html .= "<td>&nbsp;</td>";
-            my $hidden = ($special_selected || $pending_sub->default_selected || ($subscribed && $pending_sub->active)) ? '' : 'style="visibility: hidden;"';
+            my $hidden = ($special_selected || $pending_sub->default_selected || ($subscribed && $pending_sub->active)) ? '' : ' style="visibility: hidden;"';
 
             # is there an inbox notification for this?
             my %sub_args = $pending_sub->sub_info;
@@ -3573,7 +3575,7 @@ sub subscribe_interface {
                 $disabled = 1 unless $note_class->configured_for_user($u);
 
                 $cat_html .= qq {
-                    <td class='NotificationOptions' $hidden>
+                    <td><span class='NotificationOptions'$hidden>
                     } . LJ::html_check({
                         id       => $notify_input_name,
                         name     => $notify_input_name,
@@ -3581,7 +3583,7 @@ sub subscribe_interface {
                         selected => $note_selected,
                         noescape => 1,
                         disabled => $disabled,
-                    }) . '</td>';
+                    }) . '</span>';
 
                 unless ($note_pending->pending) {
                     $cat_html .= LJ::html_hidden({
@@ -3589,6 +3591,8 @@ sub subscribe_interface {
                         value => (scalar @subs) ? 1 : 0,
                     });
                 }
+
+                $cat_html .= '</td>';
             }
 
             $cat_html .= "</tr>";
@@ -3602,12 +3606,13 @@ sub subscribe_interface {
             my $blurb = "<?p <strong>" . LJ::Lang::ml('subscribe_interface.nosubs.title') . "</strong><br />";
             $blurb .= LJ::Lang::ml('subscribe_interface.nosubs.text', { img => "<img src='$LJ::SITEROOT/img/btn_track.gif' width='22' height='20' align='absmiddle' alt='$ui_notify' />" }) . " p?>";
 
+            $cat_html .= "<tr>";
             $cat_html .= "<td colspan='$cols'>$blurb</td>";
+            $cat_html .= "</tr>";
         }
 
-        $cat_html .= "</tr>";
         $cat_html .= "<tr><td colspan='$cols' style='font-size: smaller;'>* " . LJ::Lang::ml('subscribe_interface.special_subs.note') . "</td></tr>" if $special_subs;
-        $cat_html .= "</div>";
+        $cat_html .= "</tbody>";
         $events_table .= $cat_html unless ($is_tracking_category && !$showtracking);
 
         $catid++;
