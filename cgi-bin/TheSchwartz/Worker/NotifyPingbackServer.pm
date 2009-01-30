@@ -27,7 +27,7 @@ sub send_ping {
     my $text = $args{text};
     my $mode = $args{mode};
     
-    my $pb_server_uri = $LJ::PINGBACK->{uri};
+    my $pb_server_uri = $LJ::PINGBACK->{internal_uri};
     my $content = JSON::objToJson({ uri => $uri, text => $text, mode => $mode }) . "\r\n";
 
     my $headers = HTTP::Headers->new;
