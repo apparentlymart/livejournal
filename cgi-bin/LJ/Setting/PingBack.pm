@@ -9,7 +9,8 @@ use LJ::PingBack;
 sub should_render {
     my $class = shift;
     my $u     = shift;
-    return unless LJ::PingBack->has_user_pingback($u);
+    # Render if widget enabled on server
+    return 0 if $LJ::DISABLED{'pingback'};
     return 1;
 }
 
@@ -25,14 +26,17 @@ sub option {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
 
+    my $upgrade_link = $u->get_cap('pingback') ? "" : (LJ::run_hook("upgrade_link", $u, "paid") || "");
+
     # PingBack options
     my $ret = '';
     $ret .= $class->ml('settings.pingback.process') . "&nbsp;<br />";
-    $ret .= LJ::html_select({ 'name' => "${key}pingback", 'selected' => $u->prop('pingback') },
+    $ret .= LJ::html_select({ 'name' => "${key}pingback", 'selected' => $u->prop('pingback'), disabled => LJ::PingBack->has_user_pingback($u) ? 0 : 1 },
                               "L" => $class->ml("settings.pingback.option.lj_only"),
                               "O" => $class->ml("settings.pingback.option.open"),
                               "D" => $class->ml("settings.pingback.option.disabled"),
                             );
+    $ret .= "&nbsp;" . $upgrade_link;
     return $ret;
 }
 
