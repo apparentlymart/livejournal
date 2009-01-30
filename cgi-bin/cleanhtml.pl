@@ -422,9 +422,6 @@ sub clean
                     my $text = "Read more...";
                     if ($attr->{'text'}) {
                         $text = $attr->{'text'};
-                        if ($text =~ /[^\x01-\x7f]/) {
-                            $text = pack('C*', unpack('C*', $text));
-                        }
                         $text =~ s/</&lt;/g;
                         $text =~ s/>/&gt;/g;
                     }
