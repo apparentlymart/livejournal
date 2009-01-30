@@ -36,6 +36,7 @@
     display: block;
     position: relative;
     float: right;
+    padding-left: .4em;
 }
 .appwidget-qotd .answer {
     font-weight: bold;
