@@ -42,7 +42,7 @@
     my $jid = $u->{'userid'};
     my $ditemid = $POST{'ditemid'}+0;
     my $commentlink = LJ::journal_base($u) . "/$ditemid.html";
-    my $itemid = $ditemid >> 8;
+    my $itemid = int($ditemid / 256);
     my $log = $dbcr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=?",
                                        undef, $jid, $itemid);
     return $err->($ML{'.error.inconsistent_data'}) unless $log && $log->{'anum'} == ($ditemid & 255);

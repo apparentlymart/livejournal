@@ -3143,7 +3143,7 @@ sub _Comment__get_link
 sub Comment__print_multiform_check
 {
     my ($ctx, $this) = @_;
-    my $tid = $this->{'talkid'} >> 8;
+    my $tid = int($this->{'talkid'} / 256);
     $S2::pout->("<input type='checkbox' name='selected_$tid' class='ljcomsel' id='ljcomsel_$this->{'talkid'}' />");
 }
 

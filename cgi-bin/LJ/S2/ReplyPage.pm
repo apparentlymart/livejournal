@@ -97,7 +97,7 @@ sub ReplyPage
     }
 
     if ($replytoid) {
-        my $re_talkid = int($replytoid >> 8);
+        my $re_talkid = int($replytoid / 256);
         my $re_anum = $replytoid % 256;
         unless ($re_anum == $entry->anum) {
             $opts->{'handler_return'} = 404;
@@ -235,7 +235,7 @@ sub ReplyForm__print
                                      'replyto'   => $parent,
                                      'ditemid'   => $form->{'_ditemid'},
                                      'stylemine' => $form->{'_stylemine'},
-                                     'form'      => $post_vars, 
+                                     'form'      => $post_vars,
                                      'do_captcha' => LJ::Talk::Post::require_captcha_test($remote, $u, $post_vars->{body}, $form->{'_ditemid'})}));
 
 }

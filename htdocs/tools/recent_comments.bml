@@ -138,7 +138,7 @@ body<=
         $r->{'props'} = $props{$r->{'jtalkid'}};
 
         my $lrow = $logrow{"$u->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($u, $r->{'nodeid'});
-        my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
+        my $talkid = ($r->{'jtalkid'} * 256) + $lrow->{'anum'};
 
         my $ditemid = "$root/$lrow->{ditemid}.html";
         my $talkurl = "$root/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
@@ -249,7 +249,7 @@ body<=
 
             my $ju = $us->{$r->{journalid}};
             my $lrow = $logrow{"$ju->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($ju, $r->{'nodeid'});
-            my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
+            my $talkid = ($r->{'jtalkid'} * 256) + $lrow->{'anum'};
 
             my $logurl = $ju->journal_base . "/$lrow->{ditemid}.html";
             my $talkurl = "$logurl?thread=$talkid\#t$talkid";

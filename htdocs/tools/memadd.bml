@@ -141,7 +141,7 @@
  if ($oldstyle) {
      # ditemid was an old-style itemid, so we update it to the new style.
      $anum = $log->{anum};
-     $ditemid = $itemid<<8 + $anum;
+     $ditemid = $itemid*256 + $anum;
  }
 
  # get keywords user has used

@@ -78,7 +78,7 @@ sub instance {
     $self->{jtalkid} = int(delete $opts{jtalkid});
 
     if (my $dtalkid = int(delete $opts{dtalkid})) {
-        $self->{jtalkid} = $dtalkid >> 8;
+        $self->{jtalkid} = int($dtalkid / 256);
     }
 
     croak("need to supply jtalkid or dtalkid")

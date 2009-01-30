@@ -47,7 +47,7 @@ sub reset_singletons {
 # des-uuserid: A user id or user object ($u ) to load the entry for.
 # des-opts: Hash of optional keypairs.
 #           'jitemid' => a journal itemid (no anum)
-#           'ditemid' => display itemid (a jitemid << 8 + anum)
+#           'ditemid' => display itemid (a jitemid * 256 + anum)
 #           'anum'    => the id passed was an ditemid, use the anum
 #                        to create a proper jitemid.
 # returns: A new LJ::Entry object.  undef on failure.
@@ -91,7 +91,7 @@ sub new
 
     if ($self->{ditemid}) {
         $self->{anum}    = $self->{ditemid} & 255;
-        $self->{jitemid} = $self->{ditemid} >> 8;
+        $self->{jitemid} = int($self->{ditemid} / 256);
     }
 
     # do we have a singleton for this entry?
@@ -189,7 +189,7 @@ sub jitemid {
 
 sub ditemid {
     my $self = shift;
-    return $self->{ditemid} ||= (($self->{jitemid} << 8) + $self->anum);
+    return $self->{ditemid} ||= (($self->{jitemid} * 256) + $self->anum);
 }
 
 sub reply_url {
@@ -1217,7 +1217,7 @@ sub put_logprop_in_history {
 
     my $p = LJ::get_prop("log", $prop);
     return undef unless $p;
-    
+
     my $propid = $p->{id};
 
     my $u = $self->journal;
@@ -1541,7 +1541,7 @@ sub get_log2_row
         $item->{'security'} = ($item->{'allowmask'} == 0 ? 'private' :
                                ($item->{'allowmask'} == 2**31 ? 'public' : 'usemask'));
         $item->{'journalid'} = $jid;
-        @$item{'jitemid', 'anum'} = ($item->{'ditemid'} >> 8, $item->{'ditemid'} % 256);
+        @$item{'jitemid', 'anum'} = (int($item->{'ditemid'} / 256), $item->{'ditemid'} % 256);
         $item->{'eventtime'} = LJ::mysql_time($item->{'eventtime'}, 1);
         $item->{'logtime'} = LJ::mysql_time($item->{'logtime'}, 1);
 
@@ -1594,11 +1594,11 @@ sub get_log2_recent_log
     my $DATAVER = "3"; # 1 char
 
     my $use_cache = 1;
-    
+
     # timestamp
     $events_date = int $events_date;
     $use_cache = 0 if $events_date; # do not use memcache for dayly friends log
-    
+
     my $memkey  = [$jid, "log2lt:$jid"];
     my $lockkey = $memkey->[1];
     my ($rows, $ret);
@@ -1638,7 +1638,7 @@ sub get_log2_recent_log
             $eventtime = LJ::mysql_time($eventtime, 1);
             my $security = $allowmask == 0 ? 'private' :
                 ($allowmask == 2**31 ? 'public' : 'usemask');
-            my ($jitemid, $anum) = ($ditemid >> 8, $ditemid % 256);
+            my ($jitemid, $anum) = (int($ditemid / 256), $ditemid % 256);
             my $item = {};
             @$item{'posterid','eventtime','rlogtime','allowmask','ditemid',
                    'security','journalid', 'jitemid', 'anum'} =
@@ -1676,7 +1676,7 @@ sub get_log2_recent_log
             return $construct_singleton->();
         }
     }
-    
+
     # ok. fetch data directly from DB.
     $rows = "";
 
@@ -1702,19 +1702,19 @@ sub get_log2_recent_log
     # get reliable log2lt data from the db
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14; # 2 weeks default
     my $sql = "
-        SELECT 
+        SELECT
             jitemid, posterid, eventtime, rlogtime,
             security, allowmask, anum, replycount
-         FROM log2 
-         USE INDEX (rlogtime) 
-         WHERE 
+         FROM log2
+         USE INDEX (rlogtime)
+         WHERE
                 journalid=?
-         " . 
+         " .
          ($events_date
-            ? 
+            ?
               "AND rlogtime <= ($LJ::EndOfTime - $events_date)
                AND rlogtime >= ($LJ::EndOfTime - " . ($events_date + 24*3600) . ")"
-            : 
+            :
             "AND rlogtime <= ($LJ::EndOfTime - UNIX_TIMESTAMP()) + $max_age"
          )
          ;
@@ -1751,9 +1751,9 @@ sub get_log2_recent_log
     }
 
     $rows = $DATAVER . pack("N", $tu) . $rows;
-    
+
     # store journal log in cache
-    LJ::MemCache::set($memkey, $rows) 
+    LJ::MemCache::set($memkey, $rows)
         if $use_cache and not $dont_store;
 
     $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
@@ -1856,15 +1856,15 @@ sub get_itemid_near2
 
     ##
     ## We need a next/prev record in journal before/after a given time
-    ## Since several records may have the same time (time is rounded to 1 minute), 
-    ## we're ordering them by jitemid. So, the SQL we need is 
-    ##      SELECT * FROM log2 
+    ## Since several records may have the same time (time is rounded to 1 minute),
+    ## we're ordering them by jitemid. So, the SQL we need is
+    ##      SELECT * FROM log2
     ##      WHERE journalid=? AND rlogtime>? AND jitmemid<?
     ##      ORDER BY rlogtime, jitemid DESC
     ##      LIMIT 1
     ## Alas, MySQL tries to do filesort for the query.
     ## So, we sort by rlogtime only and fetch all (2, 10, 50) records
-    ## with the same rlogtime (we skip records if rlogtime is different from the first one). 
+    ## with the same rlogtime (we skip records if rlogtime is different from the first one).
     ## If rlogtime of all fetched records is the same, increase the LIMIT and retry.
     ## Then we sort them in Perl by jitemid and takes just one.
     ##

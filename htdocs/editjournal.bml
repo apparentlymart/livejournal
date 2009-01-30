@@ -131,7 +131,7 @@ body<=
             # the 'itemid' form element is really an 'itemid'
             my $ditemid = $GET{'itemid'} || $POST{'itemid'};
             my $anum = $ditemid % 256;
-            my $itemid = $ditemid >> 8;
+            my $itemid = int($ditemid / 256);
 
             my $u_for_entry = $usejournal ? $usejournal_u : $u;
             my $entry_obj = LJ::Entry->new($u_for_entry, ditemid => $ditemid);
@@ -442,7 +442,7 @@ body<=
 
         # only one item returned?  go directly to edit it
         if ($res{'events_count'} == 1) {
-            my $ditemid = ($res{'events_1_itemid'} << 8) + $res{'events_1_anum'};
+            my $ditemid = ($res{'events_1_itemid'} * 256) + $res{'events_1_anum'};
             my $ditemid_get = $getextra ? "$getextra&itemid=$ditemid" : "?itemid=$ditemid";
             return BML::redirect("$LJ::SITEROOT/editjournal.bml$ditemid_get");
         }

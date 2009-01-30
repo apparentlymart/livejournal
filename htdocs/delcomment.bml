@@ -57,7 +57,7 @@ _info?><?_code
         unless $dbcr;
 
     # $tp is a hashref of info about this individual talkpost row
-    my $tpid = $GET{'id'} >> 8;
+    my $tpid = int($GET{'id'} / 256);
     my $tp = $dbcr->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, " .
                                       "nodeid AS 'itemid', parenttalkid, journalid, posterid " .
                                       "FROM talk2 ".

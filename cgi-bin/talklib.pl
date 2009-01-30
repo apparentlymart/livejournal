@@ -167,7 +167,7 @@ sub link_bar
     }
 
 
-    ## >>> Next
+    ## Next
     push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
     $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next' />\n";
 
@@ -687,8 +687,8 @@ sub get_talk_data
     # check for data in memcache
     my $DATAVER = "2";  # single character
     my $PACK_FORMAT = "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state
-    my $RECORD_SIZE = 17;   
-    
+    my $RECORD_SIZE = 17;
+
     my $memkey = [$u->{'userid'}, "talk2:$u->{'userid'}:$nodetype:$nodeid"];
     my $lockkey = $memkey->[1];
     my $packed = LJ::MemCache::get($memkey);
@@ -742,14 +742,14 @@ sub get_talk_data
     # used later in this request anyway) and let it know that its comments are already loaded
     my $set_entry_cache = sub {
         return 1 unless $nodetype eq 'L';
-        
+
         my $entry = LJ::Entry->new($u, jitemid => $nodeid);
 
         # find all singletons that LJ::Comment knows about, then grep for the ones we've set in
         # this get_talk_data call (ones for this userid / nodeid)
-        my @comments_for_entry = 
+        my @comments_for_entry =
             grep { $_->journalid == $u->{userid} && $_->nodeid == $nodeid } LJ::Comment->all_singletons;
-        
+
         $entry->set_comment_list(@comments_for_entry);
     };
 
@@ -911,7 +911,7 @@ sub fixup_logitem_replycount {
 # nodetype: "L" (for log) ... nothing else has been used
 # noteid: the jitemid for log.
 # opts keys:
-#   thread -- jtalkid to thread from ($init->{'thread'} or $GET{'thread'} >> 8)
+#   thread -- jtalkid to thread from ($init->{'thread'} or int($GET{'thread'} / 256))
 #   page -- $GET{'page'}
 #   view -- $GET{'view'} (picks page containing view's ditemid)
 #   flat -- boolean:  if set, threading isn't done, and it's just a flat chrono view
@@ -953,7 +953,7 @@ sub fixup_logitem_replycount {
 sub load_comments
 {
     my ($u, $remote, $nodetype, $nodeid, $opts) = @_;
-    
+
     my $n = $u->{'clusterid'};
     my $viewall = $opts->{viewall};
 
@@ -1041,7 +1041,7 @@ sub load_comments
     my $page_from_view = 0;
     if ($opts->{'view'} && !$opts->{'page'}) {
         # find top-level comment that this comment is under
-        my $viewid = $opts->{'view'} >> 8;
+        my $viewid = int($opts->{'view'} / 256);
         while ($posts->{$viewid} && $posts->{$viewid}->{'parenttalkid'}) {
             $viewid = $posts->{$viewid}->{'parenttalkid'};
         }
@@ -1066,7 +1066,7 @@ sub load_comments
     # and deeper until we've hit the page size.  if too many loaded,
     # just mark that we'll load the subjects;
     my @check_for_children = @posts_to_load;
-    
+
     ## expand first reply to top-level comments
     ## %expand_children - list of comments, children of which are to expand
     my %expand_children = map { $_ => 1 } @top_replies;
@@ -1078,7 +1078,7 @@ sub load_comments
             if (@posts_to_load < $page_size || $expand_children{$cfc} || $opts->{expand_all}) {
                 push @posts_to_load, $child;
                 ## expand only the first child, then clear the flag
-                delete $expand_children{$cfc}; 
+                delete $expand_children{$cfc};
             }
             elsif (@posts_to_load < $page_size) {
                 push @posts_to_load, $child;
@@ -1226,7 +1226,7 @@ sub talkform {
 
     # check max comments only if posting a new comment (not when editing)
     unless ($editid) {
-        my $jitemid = $opts->{'ditemid'} >> 8;
+        my $jitemid = int($opts->{'ditemid'} / 256);
         return "Sorry, this entry already has the maximum number of comments allowed."
             if LJ::Talk::Post::over_maxcomments($journalu, $jitemid);
     }
@@ -1328,7 +1328,7 @@ sub talkform {
     $ret .= "<tr><td align='right' valign='top'>$BML::ML{'.opt.from'}</td>";
     $ret .= "<td>";
     $ret .= "<table>"; # Internal for "From" options
-    my $screening = LJ::Talk::screening_level($journalu, $opts->{ditemid} >> 8);
+    my $screening = LJ::Talk::screening_level($journalu, int($opts->{ditemid} / 256));
 
     if ($editid) {
 
@@ -1398,7 +1398,7 @@ sub talkform {
                 $ret .= $BML::ML{'.opt.willscreen'} if $screening;
                 $ret .= "</td></tr>\n";
             }
-    
+
             # URL: [    ]  Verify? [ ]
             my $url_def = $form->{'oidurl'} || $oid_identity if defined $oid_identity;
 
@@ -2295,12 +2295,12 @@ sub mail_comments {
                 $paru->is_visible &&
                 $is_diff_email &&
                 $paru->{'status'} eq "A" &&
-                !$paru->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid}) 
+                !$paru->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid})
 
                 # it is possible to register a hook which will intercept this entire conditional block
                 # and do its own logic... if that's the case and the hook returns true, then we'll
                 # skip creating the email notification
-                && ! LJ::run_hook("talklib_email_parent_comment_poster", 
+                && ! LJ::run_hook("talklib_email_parent_comment_poster",
                                    user => $paru, journal => $journalu, talkid => $comment->{talkid}
                                  )
                 )
@@ -2992,7 +2992,7 @@ sub init {
     }
 
     if (($form->{'usertype'} ne "user" && $form->{'usertype'} ne 'openid' && $form->{'usertype'} ne 'openid_cookie')
-        && $journalu->{'opt_whocanreply'} ne "all") 
+        && $journalu->{'opt_whocanreply'} ne "all")
     {
         $bmlerr->("$SC.error.noanon");
     }
@@ -3071,7 +3071,7 @@ sub init {
 
     # figure out whether to post this comment screened
     my $state = 'A';
-    my $screening = LJ::Talk::screening_level($journalu, $ditemid >> 8);
+    my $screening = LJ::Talk::screening_level($journalu, int($ditemid / 256));
     if (!$form->{editid} && ($screening eq 'A' ||
         ($screening eq 'R' && ! $up) ||
         ($screening eq 'F' && !($up && LJ::is_friend($journalu, $up))))) {
@@ -3157,12 +3157,12 @@ sub init {
 # </LJFUNC>
 sub require_captcha_test {
     my ($commenter, $journal, $body, $ditemid) = @_;
-    
-    ## anonymous commenter user = 
+
+    ## anonymous commenter user =
     ## not logged-in user, or OpenID without validated e-mail
-    my $anon_commenter = !LJ::isu($commenter) || 
+    my $anon_commenter = !LJ::isu($commenter) ||
         ($commenter->identity && !$commenter->is_validated);
-    
+
     ##
     ## 1. Check rate by remote user and by IP (for anonymous user)
     ##
@@ -3178,7 +3178,7 @@ sub require_captcha_test {
     ## 4. Test preliminary limit on comment.
     ## We must check it before we will allow owner to pass.
     ##
-    if (LJ::Talk::get_replycount($journal, $ditemid >> 8) >= LJ::get_cap($journal, 'maxcomments-before-captcha')) {
+    if (LJ::Talk::get_replycount($journal, int($ditemid / 256)) >= LJ::get_cap($journal, 'maxcomments-before-captcha')) {
         return 1;
     }
 
@@ -3205,12 +3205,12 @@ sub require_captcha_test {
         ## all
         return 1;
     }
-    
+
     ##
     ## 4. Global (site) settings
     ## See if they have any tags or URLs in the comment's body
     ##
-    if ($LJ::HUMAN_CHECK{'comment_html_auth'} 
+    if ($LJ::HUMAN_CHECK{'comment_html_auth'}
         || ($LJ::HUMAN_CHECK{'comment_html_anon'} && $anon_commenter))
     {
         if ($body =~ /<[a-z]/i) {
@@ -3460,7 +3460,7 @@ sub check_rate {
     return 0 if $remote && $remote->{'statusvis'} =~ /[SD]/;
 
     # allow some users to be very aggressive commenters and authors. i.e. our bots.
-    return 1 if $remote 
+    return 1 if $remote
                 and grep { $remote->username eq $_ } @LJ::NO_RATE_CHECK_USERS;
 
 

@@ -86,7 +86,7 @@ sub EntryPage
     my %user;
     my $copts = {
         'flat' => $flat_mode,
-        'thread' => ($get->{'thread'} >> 8),
+        'thread' => int($get->{'thread'} / 256),
         'page' => $get->{'page'},
         'view' => $view_num,
         'userpicref' => \%userpic,
@@ -170,7 +170,7 @@ sub EntryPage
             }
 
             if ($com->{'parenttalkid'}) {
-                my $dparent = ($com->{'parenttalkid'} << 8) + $entry->anum;
+                my $dparent = ($com->{'parenttalkid'} * 256) + $entry->anum;
                 $par_url = LJ::Talk::talkargs($permalink, "thread=$dparent", $style_arg) . "#t$dparent";
             }
 

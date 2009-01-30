@@ -103,7 +103,7 @@ sub generate_content {
 
         my $date = LJ::ago_text(time() - $r->{'datepostunix'});
 
-        my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
+        my $talkid = ($r->{'jtalkid'} * 256) + $lrow->{'anum'};
 
         my $managebtns;
         my $ljcmt = $LJ_cmtinfo{$talkid} = {};

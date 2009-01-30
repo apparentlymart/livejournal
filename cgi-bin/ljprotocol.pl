@@ -225,10 +225,10 @@ sub addcomment
     my $comment = LJ::Comment->create(
                         journal      => $u,
                         ditemid      => $req->{ditemid},
-                        parenttalkid => ($req->{parenttalkid} || ($req->{parent} >> 8)),
-                               
+                        parenttalkid => ($req->{parenttalkid} || int($req->{parent} / 256)),
+
                         poster       => $u,
-                                
+
                         body         => $req->{body},
                         subject      => $req->{subject},
 
@@ -275,15 +275,15 @@ sub getfriendspage
         next unless $ei;
 
         # exit cycle if maximum friend items limit reached
-        last 
-            if scalar @res >= FRIEND_ITEMS_LIMIT; 
+        last
+            if scalar @res >= FRIEND_ITEMS_LIMIT;
 
         # if passed lastsync argument - skip items with logtime less than lastsync
         if($lastsync) {
-            next 
+            next
                 if $LJ::EndOfTime - $ei->{rlogtime} <= $lastsync;
         }
-        
+
         my $entry = LJ::Entry->new_from_item_hash($ei);
         next unless $entry;
 
@@ -295,7 +295,7 @@ sub getfriendspage
             $h{$method} = $entry->$method;
         }
 
-        # log time value 
+        # log time value
         $h{logtime} = $LJ::EndOfTime - $ei->{rlogtime};
 
         push @res, \%h;
@@ -357,24 +357,24 @@ sub getinbox
         UserNewEntry         => 21,
     );
     my %number_type = reverse %type_number;
-    
+
     my @notifications;
 
     my $sync_date;
-    # check lastsync for valid date 
+    # check lastsync for valid date
     if ($req->{'lastsync'}) {
         $sync_date = int $req->{'lastsync'};
         if($sync_date <= 0) {
             return fail($err,203,"Invalid syncitems date format (must be unixtime)");
         }
     }
-    
+
     if ($req->{gettype}) {
         @notifications = grep { $_->event->class eq "LJ::Event::" . $number_type{$req->{gettype}} } $inbox->items;
     } else {
         @notifications = $inbox->all_items;
     }
-    
+
     # By default, notifications are sorted as "oldest are the first"
     # Reverse it by "newest are the first"
     @notifications = reverse @notifications;
@@ -386,7 +386,7 @@ sub getinbox
         next if $sync_date && $item->when_unixtime < $sync_date;
 
         my $raw = $item->event->raw_info($u, {extended => $req->{extended}});
-        
+
         my $type_index = $type_number{$raw->{type}};
         if (defined $type_index) {
             $raw->{type} = $type_index;
@@ -397,14 +397,14 @@ sub getinbox
 
         $raw->{state} = $item->{state};
 
-        push @res, { %$raw, 
+        push @res, { %$raw,
                      when   => $item->when_unixtime,
                      qid    => $item->qid,
                    };
     }
 
-    return { 'items' => \@res, 
-             'login' => $u->user, 
+    return { 'items' => \@res,
+             'login' => $u->user,
              'journaltype' => $u->journaltype };
 }
 
@@ -412,13 +412,13 @@ sub setmessageread {
     my ($req, $err, $flags) = @_;
 
     return undef unless authenticate($req, $err, $flags);
-    
+
     my $u = $flags->{'u'};
 
     # get the user's inbox
     my $inbox = $u->notification_inbox or return fail($err, 500, "Cannot get user inbox");
     my @result;
-    
+
     # passing requested ids for loading
     my @notifications = $inbox->all_items;
 
@@ -437,8 +437,8 @@ sub setmessageread {
         # proccessing only requested ids
         foreach my $item (@notifications) {
             my $msgid = $item->event->raw_info($u)->{msgid};
-            next unless $requested_items{$msgid}; 
-            # if message already read - 
+            next unless $requested_items{$msgid};
+            # if message already read -
             if ($item->{state} eq 'R') {
                 push @result, { msgid => $msgid, result => 'already red' };
                 next;
@@ -511,7 +511,7 @@ sub sendmessage
                     userpic => $req->{'userpic'} || undef,
                   });
 
-        push @msg, $msg 
+        push @msg, $msg
             if $msg->can_send(\@errors);
     }
     return fail($err, 203, join('; ', @errors))
@@ -1462,7 +1462,7 @@ sub postevent
         my $rv = LJ::Tags::update_logtags($uowner, $jitemid, $logtag_opts);
     }
 
-    ## copyright 
+    ## copyright
     if (LJ::is_enabled('default_copyright', $u)) {
         $req->{'props'}->{'copyright'} = $u->prop('default_copyright')
             unless defined $req->{'props'}->{'copyright'};
@@ -1882,7 +1882,7 @@ sub editevent
         LJ::set_logprop($uowner, $itemid, $propset);
 
         if ($req->{'props'}->{'copyright'} ne $curprops{$itemid}->{'copyright'}) {
-            LJ::Entry->new($ownerid, jitemid => $itemid)->put_logprop_in_history('copyright', $curprops{$itemid}->{'copyright'}, 
+            LJ::Entry->new($ownerid, jitemid => $itemid)->put_logprop_in_history('copyright', $curprops{$itemid}->{'copyright'},
                                                                                   $req->{'props'}->{'copyright'});
         }
     }

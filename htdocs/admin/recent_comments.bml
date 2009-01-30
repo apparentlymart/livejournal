@@ -44,7 +44,7 @@
         my $hr_ago = sprintf("%.1f", ($now - $r->{'posttime'}) / 3600);
 
         if ($lrow) {
-            my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
+            my $talkid = ($r->{'jtalkid'} * 256) + $lrow->{'anum'};
             my $url = "$LJ::SITEROOT/users/$ju->{user}/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
             $ret .= "$hr_ago hr ago in " . LJ::ljuser($ju) . ": <a href='$url'>$url</a><br />\n";
         } else {

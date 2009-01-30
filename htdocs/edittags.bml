@@ -28,7 +28,7 @@ body<=
 
     my $ditemid = ($GET{itemid} || $POST{itemid})+0;
     my $anum = $ditemid % 256;
-    my $jitemid = $ditemid >> 8;
+    my $jitemid = int($ditemid / 256);
     return $err->($ML{'.invalid.entry'}) unless $jitemid;
 
     my $logrow = LJ::get_log2_row($u, $jitemid);
