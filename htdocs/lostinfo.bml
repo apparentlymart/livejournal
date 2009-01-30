@@ -36,7 +36,7 @@ body<=
 
         $ret .= "<div class='form-basic form-fix'><div class='tl'><div class='tr'><div class='br'><div class='bl'>\n";
         $ret .= "<fieldset><label>$ML{'.enter_username'}</label>\n";
-        $ret .= LJ::html_text({ 'name' => 'user', 'id' => 'userlost', 'size' => 30, 'maxlength' => 15, onkeyup => 'enable_pass();'}) . "</fieldset>\n";
+        $ret .= LJ::html_text({ 'name' => 'user', 'id' => 'userlost', 'size' => 30, 'maxlength' => 15 }) . "</fieldset>\n";
         $ret .= "<fieldset><label>$ML{'.enter_email_optional'}</label>\n";
         $ret .= LJ::html_text({ 'name' => 'email_p', 'size' => 30, 'maxlength' => 50 }) . "</fieldset>\n";
         $ret .= "<div class='btn-set'>\n";
@@ -47,23 +47,10 @@ body<=
         $ret .= "<?p $ML{'.lostusername.text'} p?>\n";
         $ret .= "<div class='form-basic form-fix'><div class='tl'><div class='tr'><div class='br'><div class='bl'>\n";
         $ret .= "<fieldset><label>$ML{'.enter_email'}</label>\n";
-        $ret .= LJ::html_text({ 'name' => 'email_u', 'id' => 'email_u', 'size' => 30, 'maxlength' => 50, onkeyup => 'enable_user();' }) . "</fieldset>\n";
+        $ret .= LJ::html_text({ 'name' => 'email_u', 'id' => 'email_u', 'size' => 30, 'maxlength' => 50 }) . "</fieldset>\n";
         $ret .= "<div class='btn-set'>\n";
         $ret .= LJ::html_submit('lostuser', $ML{'.btn.proceed'}, { id => 'lostuser' }) . "</div>\n";
         $ret .= "</div></div></div></div></div>\n";
-
-        $ret .= qq( <script type="text/javascript">
-                    function enable_pass () {
-                        \$("lostpass").disabled = !\$("userlost").value;
-                    }
-                    function enable_user () {
-                        \$("lostuser").disabled = !\$("email_u").value;
-                    }
-
-                    enable_pass();
-                    enable_user();
-                    </script>
-                  );
 
         $ret .= "</form>\n";
 
