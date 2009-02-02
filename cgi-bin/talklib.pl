@@ -1734,6 +1734,8 @@ sub talkform {
                 text = window.getSelection();
             }
 
+            // Fix for Safari
+            if (typeof(text) == 'object') text = text.toString();
             if (text == '') {
                 if (helped != 1 && pasted != 1) {
                     helped = 1; alert("If you'd like to quote a portion of the original message, highlight it then press 'Quote'");
