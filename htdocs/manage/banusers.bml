@@ -49,9 +49,11 @@ body<=
             # FIXME: we need load_user_multiple
             my @banlist_orig = split(/,/, $POST{ban_list});
             my @banlist;
+            my @cantbanlist;
             foreach my $banusername (@banlist_orig) {
                 my $banu = LJ::load_user($banusername);
                 push @banlist, $banu->id if $banu;
+                push @cantbanlist, $banusername unless $banu;
             }
 
             # make sure the user isn't over the max number of bans allowed
@@ -61,6 +63,11 @@ body<=
             } else {
                 # now ban the users
                 $u->ban_user_multi(@banlist) if @banlist;
+            }
+
+            if (scalar @cantbanlist) {
+                $submit_msg .= "<?errorbar The following usernames are not valid: " .
+                    join(', ', @cantbanlist) . " errorbar?>";
             }
         }
 
