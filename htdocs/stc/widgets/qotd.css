@@ -31,13 +31,23 @@
     margin: 0;
     padding: 5px 0 0 0;
     font-size: 10px;
+    line-height: 17px;
 }
 .appwidget-qotd p.detail span.suggestions {
     display: block;
     position: relative;
     float: right;
-    padding: 4px 0 0 .4em;
+    padding: 0 0 0 .6em;
 }
+
+* HTML .appwidget-qotd p.detail span.suggestions {
+    line-height: 12px;
+}
+*:first-child+html .appwidget-qotd p.detail span.suggestions {
+    line-height: 12px;
+}
+
+
 .appwidget-qotd .answer {
     font-weight: bold;
 }
