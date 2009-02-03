@@ -350,6 +350,14 @@ userproplist.init_bdate:
   multihomed: 0
   prettyname: Birthdate
 
+userproplist.user_comment_no_index:
+  cldversion: 4
+  datatype: bool
+  des: Exclude comments search from feed
+  indexed: 0
+  multihomed: 0
+  prettyname: No Index
+
 userproplist.interest_ids_blob:
   cldversion: 4
   datatype: blobchar

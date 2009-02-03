@@ -104,6 +104,7 @@ body<=
             settings => [qw(
                 LJ::Setting::MinSecurity
                 LJ::Setting::SearchInclusion
+                LJ::Setting::SearchCommentInclusion
                 LJ::Setting::ContentPromotion
                 LJ::Setting::NotifyWeblogs
                 LJ::Setting::FacebookBeacon

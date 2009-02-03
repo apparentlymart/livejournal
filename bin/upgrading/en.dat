@@ -2550,6 +2550,10 @@ setting.selfcommentemail.label=Self Comment Email Notification
 
 setting.selfcommentemail.option=I comment in someone's journal, on any entry
 
+setting.searchcommentinclusion.label=Comment Search Inclusion
+
+setting.searchcommentinclusion.option.self=Minimize my comment's inclusion in search engine results
+
 setting.searchinclusion.label=Search Inclusion
 
 setting.searchinclusion.option.comm=Minimize my community's inclusion in search engine results
