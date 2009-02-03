@@ -11,6 +11,13 @@ _code?>
     use strict;
     use vars qw(%POST %GET $head);
 
+    my $new_settings_page = "$LJ::SITEROOT/manage/settings/?cat=privacy";
+    if ($GET{'authas'}) {
+        $new_settings_page .= '&authas=' . LJ::eurl($GET{'authas'});
+    }
+    return BML::redirect($new_settings_page);
+
+    
     my $print_with_ad = sub {
         my $str = shift;
 
