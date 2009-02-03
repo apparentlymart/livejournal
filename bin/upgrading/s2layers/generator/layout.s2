@@ -580,7 +580,8 @@ function Page::print ()
                            "<a class='index' href='$.view_url{$v}'>"+lang_viewname($v)+"</a>");
     }
 
-"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">\n<html>\n<head>\n""";
+"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">\n<html>\n
+    <head>\n<meta http-equiv="X-UA-Compatible" content="IE=7"/>\n""";
 
     $this->print_head();
     $this->print_stylesheets();

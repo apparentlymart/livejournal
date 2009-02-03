@@ -871,7 +871,7 @@ function Page::lay_print_entrylite(EntryLite e) {
 """<div class="entryheader">
 <h3 class="entrysubject">""";
     if ($.view != "entry") {
-		var Entry en = $e as Entry;
+                var Entry en = $e as Entry;
         print $en->formatted_subject({"class"=>"subj-link"});
     }
     else { print "$e.subject"; }
@@ -999,6 +999,7 @@ function Page::print() {
    """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7"/>
 """;
     $this->print_head();
     $this->print_stylesheets();
