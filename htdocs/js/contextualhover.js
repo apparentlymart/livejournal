@@ -3,7 +3,6 @@ var ContextualPopup = new Object;
 ContextualPopup.popupDelay  = 500;
 ContextualPopup.hideDelay   = 250;
 ContextualPopup.disableAJAX = false;
-ContextualPopup.debug       = false;
 
 ContextualPopup.cachedResults   = {};
 ContextualPopup.currentRequests = {};
@@ -11,58 +10,50 @@ ContextualPopup.mouseInTimer    = null;
 ContextualPopup.mouseOutTimer   = null;
 ContextualPopup.currentId       = null;
 ContextualPopup.hourglass       = null;
-ContextualPopup.elements        = {};
 
 ContextualPopup.setup = function () {
     // don't do anything if no remote
     if (!Site || !Site.ctx_popup) return;
 
+    ContextualPopup.searchAndAdd(document)
+
+    DOM.addEventListener(document.body, "mousemove", ContextualPopup.mouseOver.bindEventListener());
+}
+
+ContextualPopup.searchAndAdd = function (node) {
+    if (!Site || !Site.ctx_popup) return;
+
     // attach to all ljuser head icons
-    var ljusers = DOM.getElementsByTagAndClassName(document, 'span', "ljuser");
+    var ljusers = DOM.getElementsByTagAndClassName(node, 'span', 'ljuser'),
+        rex_userid = /\?userid=(\d+)/i,
+        rex_userpic = /(userpic\..+\/\d+\/\d+)|(\/userpic\/\d+\/\d+)/;
 
-    var userElements = [];
     ljusers.forEach(function (ljuser) {
-        var nodes = ljuser.getElementsByTagName("img");
-        for (var i=0; i < nodes.length; i++) {
-            var node = nodes.item(i);
-
+        var nodes = ljuser.getElementsByTagName('img'), i = -1, node;
+        while (node = nodes[++i]) {
             // if the parent (a tag with link to userinfo) has userid in its URL, then
             // this is an openid user icon and we should use the userid
-            var parent = node.parentNode;
-            var userid;
-            if (parent && parent.href && (userid = parent.href.match(/\?userid=(\d+)/i)))
+            var parent = node.parentNode, userid;
+            if (parent && parent.href && (userid = parent.href.match(rex_userid)))
                 node.userid = userid[1];
             else
-                node.username = ljuser.getAttribute("lj:user");
+                node.username = ljuser.getAttribute('lj:user');
 
             if (!node.username && !node.userid) continue;
 
-            userElements.push(node);
-            DOM.addClassName(node, "ContextualPopup");
-
+            DOM.addClassName(node, 'ContextualPopup');
         }
     });
 
     // attach to all userpics
-    var images = document.getElementsByTagName("img") || [];
+    var images = node.getElementsByTagName('img') || [];
     Array.prototype.forEach.call(images, function (image) {
         // if the image url matches a regex for userpic urls then attach to it
-        if (image.src.match(/userpic\..+\/\d+\/\d+/) ||
-            image.src.match(/\/userpic\/\d+\/\d+/)) {
+        if (image.src.match(rex_userpic)) {
             image.up_url = image.src;
-            DOM.addClassName(image, "ContextualPopup");
-            userElements.push(image);
-
+            DOM.addClassName(image, 'ContextualPopup');
         }
     });
-
-    var ctxPopupId = 1;
-    userElements.forEach(function (userElement) {
-        ContextualPopup.elements[ctxPopupId + ""] = userElement;
-        userElement.ctxPopupId = ctxPopupId++;
-    });
-
-    DOM.addEventListener(document.body, "mousemove", ContextualPopup.mouseOver.bindEventListener());
 }
 
 ContextualPopup.isCtxPopElement = function (ele) {
@@ -71,14 +62,10 @@ ContextualPopup.isCtxPopElement = function (ele) {
 
 ContextualPopup.mouseOver = function (e) {
     var target = e.target;
-    var ctxPopupId = target.ctxPopupId;
-
-    // if the ctxpopup class isn't fully loaded and set up yet,
-    // skip the event handling for now
-    if (!eval("ContextualPopup") || !ContextualPopup.isCtxPopElement) return;
+    var ctxPopupId = target.username || target.userid || target.up_url;
 
     // did the mouse move out?
-    if (!target || !ContextualPopup.isCtxPopElement(target)) {
+    if (!ContextualPopup.isCtxPopElement(target)) {
         if (ContextualPopup.mouseInTimer) {
             window.clearTimeout(ContextualPopup.mouseInTimer);
             ContextualPopup.mouseInTimer = null;
@@ -103,11 +90,11 @@ ContextualPopup.mouseOver = function (e) {
     if (!ctxPopupId)
     return;
 
-    var cached = ContextualPopup.cachedResults[ctxPopupId + ""];
+    var cached = ContextualPopup.cachedResults[ctxPopupId];
 
     // if we don't have cached data background request it
     if (!cached) {
-        ContextualPopup.getInfo(target);
+        ContextualPopup.getInfo(target, ctxPopupId);
     }
 
     // start timer if it's not running
@@ -115,7 +102,7 @@ ContextualPopup.mouseOver = function (e) {
                                                                       ContextualPopup.currentId &&
                                                                       ContextualPopup.currentId != ctxPopupId))) {
         ContextualPopup.mouseInTimer = window.setTimeout(function () {
-            ContextualPopup.showPopup(ctxPopupId);
+            ContextualPopup.showPopup(ctxPopupId, target);
         }, ContextualPopup.popupDelay);
     }
 }
@@ -138,7 +125,7 @@ ContextualPopup.mouseOut = function (e) {
     ContextualPopup.hidePopup();
 }
 
-ContextualPopup.showPopup = function (ctxPopupId) {
+ContextualPopup.showPopup = function (ctxPopupId, ele) {
     if (ContextualPopup.mouseInTimer) {
         window.clearTimeout(ContextualPopup.mouseInTimer);
     }
@@ -152,8 +139,7 @@ ContextualPopup.showPopup = function (ctxPopupId) {
 
     ContextualPopup.constructIPPU(ctxPopupId);
 
-    var ele = ContextualPopup.elements[ctxPopupId + ""];
-    var data = ContextualPopup.cachedResults[ctxPopupId + ""];
+    var data = ContextualPopup.cachedResults[ctxPopupId];
 
     if (! ele || (data && data.noshow)) {
         return;
@@ -241,7 +227,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         bar.innerHTML = "&nbsp;| ";
 
         // userpic
-        if (data.url_userpic && data.url_userpic != ContextualPopup.elements[ctxPopupId].src) {
+        if (data.url_userpic && data.url_userpic != ctxPopupId) {
             var userpicContainer = document.createElement("div");
             var userpicLink = document.createElement("a");
             userpicLink.href = data.url_allpics;
@@ -303,8 +289,8 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         // member of community
         if (data.is_logged_in && data.is_comm) {
-            var membership      = document.createElement("span");
-            var membershipLink  = document.createElement("a");
+            var membership     = document.createElement("span");
+            var membershipLink = document.createElement("a");
 
             var membership_action = data.is_member ? "leave" : "join";
 
@@ -446,7 +432,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
                 ban.appendChild(setBan);
 
 
-                
+
             } else {
                 // if use banned - show unban link
                 var setUnban = document.createElement("span");
@@ -465,12 +451,11 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
                 }
 
                 ban.appendChild(setUnban);
- 
             }
         }
-        
+
         if(ban) {
-            content.appendChild(document.createElement("br"));    
+            content.appendChild(document.createElement("br"));
             content.appendChild(ban);
         }
 
@@ -505,8 +490,8 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         profileLink.innerHTML = "Profile";
         content.appendChild(profileLink);
 
-        
-        
+
+
         // clearing div
         var clearingDiv = document.createElement("div");
         DOM.addClassName(clearingDiv, "ljclear");
@@ -548,10 +533,10 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action, evt) {
 
         if (!data.success) return;
 
-        if (ContextualPopup.cachedResults[ctxPopupId + ""]) {
+        if (ContextualPopup.cachedResults[ctxPopupId]) {
             var updatedProps = ["is_friend", "is_member", 'is_banned'];
             updatedProps.forEach(function (prop) {
-                ContextualPopup.cachedResults[ctxPopupId + ""][prop] = data[prop];
+                ContextualPopup.cachedResults[ctxPopupId][prop] = data[prop];
             });
         }
 
@@ -582,16 +567,10 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action, evt) {
 }
 
 // create a little popup to notify the user of something
-ContextualPopup.showNote = function (note, ctxPopupId) {
-    var ele;
-
+ContextualPopup.showNote = function (note, ctxPopupId, ele) {
     if (ContextualPopup.ippu) {
         // pop up the box right under the element
         ele = ContextualPopup.ippu.getElement();
-    } else {
-        if (ctxPopupId) {
-            var ele = ContextualPopup.elements[ctxPopupId + ""];
-        }
     }
 
     LJ_IPPU.showNote(note, ele);
@@ -608,51 +587,43 @@ ContextualPopup.hidePopup = function (ctxPopupId) {
 }
 
 // do ajax request of user info
-ContextualPopup.getInfo = function (target) {
-    var ctxPopupId = target.ctxPopupId;
-    var username = target.username;
-    var userid = target.userid;
-    var up_url = target.up_url;
+ContextualPopup.getInfo = function (target, ctxPopupId) {
+    var username = target.username || '',
+        userid = target.userid || 0,
+        up_url = target.up_url || '';
 
-    if (!ctxPopupId)
-    return;
-
-    if (ContextualPopup.currentRequests[ctxPopupId + ""]) {
+    if (ContextualPopup.currentRequests[ctxPopupId]) {
         return;
     }
 
     ContextualPopup.currentRequests[ctxPopupId] = 1;
 
-    if (!username) username = "";
-    if (!userid) userid = 0;
-    if (!up_url) up_url = "";
-
     var params = HTTPReq.formEncoded ({
         "user": username,
-            "userid": userid,
-            "userpic_url": up_url,
-            "mode": "getinfo"
+        "userid": userid,
+        "userpic_url": up_url,
+        "mode": "getinfo"
     });
 
-    // needed on journal subdomains
     var url = LiveJournal.getAjaxUrl("ctxpopup");
-    var url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_ctxpopup" : "/__rpc_ctxpopup";
-    
+
     // got data callback
     var gotInfo = function (data) {
         if (ContextualPopup && ContextualPopup.hourglass) ContextualPopup.hideHourglass();
 
-        ContextualPopup.cachedResults[ctxPopupId] = data;
+        ContextualPopup.cachedResults[String(data.userid)] =
+        ContextualPopup.cachedResults[data.username] =
+        ContextualPopup.cachedResults[data.url_userpic] = data;
 
         if (data.error) {
             if (data.noshow) return;
 
-            ContextualPopup.showNote(data.error, ctxPopupId);
+            ContextualPopup.showNote(data.error, ctxPopupId, target);
             return;
         }
 
         if (data.note)
-        ContextualPopup.showNote(data.note, data.ctxPopupId);
+        ContextualPopup.showNote(data.note, data.ctxPopupId, target);
 
         ContextualPopup.currentRequests[ctxPopupId] = null;
 
@@ -666,11 +637,11 @@ ContextualPopup.getInfo = function (target) {
 
     HTTPReq.getJSON({
         "url": url,
-            "method" : "GET",
-            "data": params,
-            "onData": gotInfo,
-            "onError": ContextualPopup.gotError
-            });
+        "method": "GET",
+        "data": params,
+        "onData": gotInfo,
+        "onError": ContextualPopup.gotError
+    });
 }
 
 ContextualPopup.hideHourglass = function () {
@@ -682,11 +653,7 @@ ContextualPopup.hideHourglass = function () {
 
 ContextualPopup.gotError = function (err) {
     if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
-
-    if (ContextualPopup.debug)
-        ContextualPopup.showNote("Error: " + err);
 }
 
 // when page loads, set up contextual popups
 LiveJournal.register_hook("page_load", ContextualPopup.setup);
-

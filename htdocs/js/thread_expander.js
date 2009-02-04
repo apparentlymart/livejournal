@@ -1,9 +1,8 @@
-
 Expander = function(){
     this.__caller__;    // <a> HTML element from where Expander was called
     this.url;           // full url of thread to be expanded
     this.id;            // id of the thread
-    this.onclick;   
+    this.onclick;
     this.stored_caller;
     this.iframe;        // iframe, where the thread will be loaded
     this.is_S1;         // bool flag, true == journal is in S1, false == in S2
@@ -22,7 +21,7 @@ Expander.prototype.set = function(options){
 }
 
 Expander.prototype.getCanvas = function(id,context){
-    return context.document.getElementById('ljcmt'+id); 
+    return context.document.getElementById('ljcmt'+id);
 }
 
 Expander.prototype.parseLJ_cmtinfo = function(context,callback){
@@ -33,15 +32,15 @@ Expander.prototype.parseLJ_cmtinfo = function(context,callback){
         if(/^\d*$/.test(j) && (node = this.getCanvas(j,context))){
             map[j] = {info:LJ[j],canvas:node};
             if(typeof callback == 'function'){
-                callback(j,map[j]);     
+                callback(j,map[j]);
             }
         }
     }
-    return map; 
+    return map;
 }
 
 Expander.prototype.loadingStateOn = function(){
-    this.stored_caller = this.__caller__.cloneNode(true); 
+    this.stored_caller = this.__caller__.cloneNode(true);
     this.__caller__.setAttribute('already_clicked','already_clicked');
     this.onclick = this.__caller__.onclick;
     this.__caller__.onclick = function(){return false;}
@@ -61,7 +60,7 @@ Expander.prototype.loadingStateOff = function(){
 }
 
 Expander.prototype.killFrame = function(){
-    document.body.removeChild(this.iframe); 
+    document.body.removeChild(this.iframe);
 }
 
 Expander.prototype.isFullComment = function(comment){
@@ -87,35 +86,34 @@ Expander.prototype.killDuplicate = function(comments){
 }
 
 Expander.prototype.getS1width = function(canvas){
-  var w;
   //TODO:  may be we should should add somie ID to the spacer img instead of searching it
   //yet, this works until we have not changed the spacers url = 'dot.gif');
   var img, imgs, found;
   imgs = canvas.getElementsByTagName('img');
-  if(!imgs)return false;    
+  if(!imgs)return false;
   for(var j=0;j<imgs.length;j++){
     img=imgs[j];
     if(/dot\.gif$/.test(img.src)){
         found = true;
-        break;  
+        break;
     }
   }
-  if(found&&img.width)return Number(img.width);   
-  else return false;     
+  if(found&&img.width)return Number(img.width);
+  else return false;
 }
 
 Expander.prototype.setS1width = function(canvas,w){
   var img, imgs, found;
   imgs = canvas.getElementsByTagName('img');
-  if(!imgs)return false;    
+  if(!imgs)return false;
   for(var j=0;j<imgs.length;j++){
     img=imgs[j];
     if(/dot\.gif$/.test(img.src)){
         found = true;
-        break;  
+        break;
     }
   }
-  if(found)img.setAttribute('width',w);         
+  if(found)img.setAttribute('width',w);
 }
 
 Expander.prototype.onLoadHandler = function(iframe){
@@ -131,24 +129,25 @@ Expander.prototype.onLoadHandler = function(iframe){
                                         comments_intersection[id] = comments_page[id];
                                         // copy comment from iframe to main window if
                                         // 1) the comment is collapsed in main window and is full in iframe
-                                        // 2) or this is the root comment of this thread (it may be full in 
+                                        // 2) or this is the root comment of this thread (it may be full in
                                         //     main window too, it's copied so that to remove "expand" link from it)
                                         if((!obj.isFullComment(comments_page[id]) && obj.isFullComment(new_comment)) || (id===obj.id)){
                                             var w;
                                             if(obj.is_S1){
-                                                w =obj.getS1width(comments_page[id].canvas);        
+                                                w =obj.getS1width(comments_page[id].canvas);
                                             }
                                             comments_page[id].canvas.innerHTML = new_comment.canvas.innerHTML;
                                             if(obj.is_S1 && w!==null){
                                                     obj.setS1width(comments_page[id].canvas,w);
                                             }
+                                            ContextualPopup && ContextualPopup.searchAndAdd(comments_page[id].canvas);
                                             //TODO: may be this should be uncommented
                                             //comments_page[id].canvas.className = new_comment.canvas.className;
                                             LJ_cmtinfo[id].full=1;
                                         }
                                     }//if(id in comments_page){
                                 });
-       this.killDuplicate(comments_intersection);   
+       this.killDuplicate(comments_intersection);
        this.loadingStateOff();
        return true;
 }
@@ -156,7 +155,7 @@ Expander.prototype.onLoadHandler = function(iframe){
 
 //just for debugging
 Expander.prototype.toString = function(){
-  return '__'+this.id+'__'; 
+    return '__'+this.id+'__';
 }
 
 
@@ -165,7 +164,7 @@ Expander.prototype.get = function(){
         return false;
     }
     this.loadingStateOn();
-    
+
     var iframe;
     if(/*@cc_on !@*/0){
         // branch for IE
