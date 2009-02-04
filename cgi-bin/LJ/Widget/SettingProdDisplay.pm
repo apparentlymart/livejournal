@@ -17,7 +17,7 @@ sub render_body {
     foreach my $prod (@LJ::SETTING_PROD) {
         if (Apache->request->notes('codepath') =~ $prod->{codepaths} && $prod->{should_show}->($remote)) {
             $body .= "\n<script language='javascript'>setTimeout(\"displaySettingProd('" .
-                    $prod->{setting} . "', '" . $prod->{field} . "', '" . $title . "')\", 400)</script>\n";
+                    $prod->{setting} . "', '" . $prod->{field} . "', '" . $title . "', " .  $prod->{window_opts} . " )\", 400)</script>\n";
             last;
         }
     }

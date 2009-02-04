@@ -1466,6 +1466,8 @@ sub postevent
     if (LJ::is_enabled('default_copyright', $u)) {
         $req->{'props'}->{'copyright'} = $u->prop('default_copyright')
             unless defined $req->{'props'}->{'copyright'};
+        $req->{'props'}->{'copyright'} = 'P' # second try
+            unless defined $req->{'props'}->{'copyright'};
     } else {
         delete $req->{'props'}->{'copyright'};
     }
@@ -1864,11 +1866,18 @@ sub editevent
             });
     }
 
-    unless (defined $req->{'props'}->{'copyright'}) {
-        $req->{'props'}->{'copyright'} = $curprops{$itemid}->{'copyright'}; # save previous choice
-    } else { # defined
-        $req->{'props'}->{'copyright'} = '' if $req->{'props'}->{'copyright'} eq 'C';
-            # we do not store 'C', but need distinguish it from unmade user choice
+    if (LJ::is_enabled('default_copyright', $uowner)) {
+        unless (defined $req->{'props'}->{'copyright'}) { # try 1: previous value
+            $req->{'props'}->{'copyright'} = $curprops{$itemid}->{'copyright'};
+        }
+        unless (defined $req->{'props'}->{'copyright'}) { # try 2: global setting
+            $req->{'props'}->{'copyright'} = $uowner->prop('default_copyright');
+        }
+        unless (defined $req->{'props'}->{'copyright'}) { # try 3: allow
+            $req->{'props'}->{'copyright'} = 'P';
+        }
+    } else { # disabled feature
+        delete $req->{'props'}->{'copyright'};
     }
 
     # handle the props
