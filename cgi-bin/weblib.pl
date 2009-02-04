@@ -2059,7 +2059,7 @@ sub res_includes {
     # esn ajax enabled?
     my $esn_async = LJ::conf_test($LJ::DISABLED{esn_ajax}) ? 0 : 1;
 
-    my $default_copyright = $remote ? $remote->prop("default_copyright") : '';
+    my $default_copyright = $remote ? ($remote->prop("default_copyright") || 'P') : 'P';
 
     my %site = (
                 imgprefix => "$imgprefix",
@@ -2073,8 +2073,7 @@ sub res_includes {
                 media_embed_enabled => $embeds_enabled,
                 esn_async => $esn_async,
                 );
-    $site{default_copyright} = $remote->prop('default_copyright')
-        if $remote && LJ::SUP->is_sup_enabled($remote);
+    $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
 
     my $site_params = LJ::js_dumper(\%site);
     my $site_param_keys = LJ::js_dumper([keys %site]);

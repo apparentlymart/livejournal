@@ -518,6 +518,8 @@ body<=
 
     $ret .= "</div>";
 
+    $ret .= LJ::Widget::SettingProdDisplay->render;
+    
     return $ret;
 }
 _code?>

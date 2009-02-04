@@ -317,7 +317,7 @@ body<=
 
     ## copyright
     if (LJ::is_enabled('default_copyright', $u)) {
-        if ($props->{'copyright'} ne 'P') {
+        if ($props->{'copyright'} eq 'C') {
              $ret .= '<div class="copyrighted">&Oslash; ' . BML::ml("talk.copyright") . '</div>';
         }
     }
