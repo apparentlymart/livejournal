@@ -685,7 +685,7 @@ sub get_talk_data
     my $ret = {};
 
     # check for data in memcache
-    my $DATAVER = "2";  # single character
+    my $DATAVER = "3";  # single character
     my $PACK_FORMAT = "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state
     my $RECORD_SIZE = 17;
 
@@ -762,6 +762,7 @@ sub get_talk_data
         my $n = (length($packed) - 1) / $RECORD_SIZE;
         for (my $i=0; $i<$n; $i++) {
             my ($talkid, $par, $poster, $time, $state) = unpack($PACK_FORMAT,substr($packed,$i*$RECORD_SIZE+1,$RECORD_SIZE));
+            $state = chr($state);
             $ret->{$talkid} = {
                 talkid => $talkid,
                 state => $state,
@@ -832,7 +833,7 @@ sub get_talk_data
                         $r->{'parenttalkid'},
                         $r->{'posterid'},
                         $r->{'datepost_unix'},
-                        $r->{'state'});
+                        ord($r->{'state'}));
 
         $rp_ourcount++ if $r->{'state'} eq "A";
     }

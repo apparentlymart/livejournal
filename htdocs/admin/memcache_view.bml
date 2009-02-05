@@ -84,13 +84,14 @@
      # unpack packed data
      if ($key =~ /^talk2:/) {
          my $newval;
-         my $DATAVER = "2";  # single character
+         my $DATAVER = "3";  # single character
          my $PACK_FORMAT = "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state
          my $RECORD_SIZE = 17;
                      
          my $n = (length($val) - 1) / $RECORD_SIZE;
          for (my $i=0; $i<$n; $i++) {
              my ($talkid, $parenttalkid, $poster, $time, $state) = unpack($PACK_FORMAT,substr($val,$i*$RECORD_SIZE+1,$RECORD_SIZE));
+             $state = chr($state);
              $newval->{$talkid} = {
                  talkid => $talkid,
                  state => $state,
