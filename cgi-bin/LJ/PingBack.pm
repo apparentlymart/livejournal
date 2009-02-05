@@ -72,15 +72,14 @@ sub should_entry_recieve_pingback {
     my $class        = shift;
     my $target_entry = shift;
     my $source_entry = shift;
-
-    return 0 unless $target_entry->journal->is_in_beta("pingback");
+    
+    return 0 if $LJ::DISABLED{'pingback_receive'};
     return 0 if $target_entry->is_suspended;
-
     return 0 unless $target_entry->journal->get_cap('pingback');
-
+    
     # not RO?
     return 0 if $target_entry->journal->readonly; # Check "is_readonly".
-
+    
     # are comments allowed?
     return 0 if $target_entry->prop('opt_nocomments');
 
@@ -88,7 +87,6 @@ sub should_entry_recieve_pingback {
     # journal's default. We do not store "J" value in DB.
     my $entry_pb_prop = $target_entry->prop("pingback") || 'J';
     return 0 if $entry_pb_prop eq 'D';  # disabled
-
     return 0 if $entry_pb_prop eq 'L'   # author allowed PingBacks only from LJ
                 and not $source_entry;  # and sourceURI is not LJ.com's post
 
@@ -99,7 +97,6 @@ sub should_entry_recieve_pingback {
                         and not $source_entry     #    but sourceURI is not LJ page
                         );
     }
-    
     return 1;
 
 }
