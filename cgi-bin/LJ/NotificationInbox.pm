@@ -48,7 +48,10 @@ sub items {
 
     my @items = ();
     foreach my $qid (@qids) {
-        push @items, LJ::NotificationItem->new($self->owner, $qid);
+        my $nitem = LJ::NotificationItem->new($self->owner, $qid);
+        ($nitem && $nitem->event)
+            ? push @items, $nitem
+            : warn("NotificationItem[" . $self->owner->userid . ", $qid] not well defined");
     }
 
     $self->{items} = \@items;
