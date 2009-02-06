@@ -28,7 +28,7 @@ body<=
         return LJ::bad_input($ML{'error.invalidform'})  unless LJ::check_form_auth();
 
         # Timeframe
-        push @errors, 'No timeframe selected' unless ($POST{'time'});
+        push @errors, $ML{'timeframe.error.notselected'} unless ($POST{'time'});
 
         # date range
         if ($POST{'time'} eq 'range' && $mode eq 'change') {
@@ -50,7 +50,7 @@ body<=
 
         # security must change
         if ($POST{'s_security'} eq $POST{'e_security'}) {
-            push @errors, 'Privacy levels are the same';
+            push @errors, $ML{'.timeframe.error.same_privacy_levels'};
         }
 
         # display initial page if errors
@@ -61,7 +61,7 @@ body<=
         $more_public = 1 if ($POST{'s_security'} eq 'friends' && $POST{'e_security'} eq 'public');
 
         if (($mode eq 'amsure') && $more_public && !LJ::auth_okay($u, $POST{password}, undef, undef, undef)) {
-            push @errors, 'Password Incorrect';
+            push @errors, $ML{'.timeframe.error.incorrect_password'};
             $mode = 'change' if @errors;
         }
     }
@@ -183,7 +183,7 @@ body<=
             $body .= LJ::html_hidden( map { $_ => $POST{$_} }
                                       qw(s_security e_security time) );
             if ($more_public) {
-                $body .= "Password Required<br />\n";
+                $body .= $ML{'.timeframe.error.password_required'} . "<br />\n";
                 $body .= "<input type='password' name='password' size='20' maxlength='30' />";
             }
             $body .= "<?p " . LJ::html_submit(undef, $ML{'.button.ya.rly'}) . " p?>";

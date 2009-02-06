@@ -17,6 +17,14 @@
 
 .timeframe=Timeframe
 
+.timeframe.error.notselected=No timeframe selected
+
+.timeframe.error.same_privacy_levels=Privacy levels are the same
+
+.timeframe.error.incorrect_password=Password Incorrect
+
+.timeframe.error.password_required=Password Required
+
 .timeframe.all=All Dates
 
 .timeframe.range=Between
