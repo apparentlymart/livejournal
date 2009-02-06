@@ -477,7 +477,7 @@ sub clean
                         if ($opts->{'textonly'}) {
                             $newdata .= $user;
                         } else {
-                            $newdata .= LJ::ljuser($user);
+                            $newdata .= LJ::ljuser($user, { title => $attr->{title} } );
                         }
                     } else {
                         $orig_user = LJ::no_utf8_flag($orig_user);

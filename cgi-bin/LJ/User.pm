@@ -6319,7 +6319,8 @@ sub ljuser
 
         # Backwards check, because we want it to default to on
         my $bold = (exists $opts->{'bold'} and $opts->{'bold'} == 0) ? 0 : 1;
-        my $ljusername = $bold ? "<b>$user</b>" : "$user";
+        my $title = exists $opts->{'title'} ? LJ::ehtml($opts->{'title'}) : $user;
+        my $ljusername = $bold ? "<b>$title</b>" : "$title";
 
         my $link_color = "";
         # Make sure it's really a color
