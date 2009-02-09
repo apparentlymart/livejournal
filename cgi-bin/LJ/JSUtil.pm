@@ -19,12 +19,12 @@ sub autocomplete {
     my $formatted_list = join(",", @list);
 
     return qq{
-    <script type="text/javascript" language="JavaScript">
+    <script type="text/javascript">
         function AutoCompleteFriends (ele) \{
             var keywords = new InputCompleteData([$formatted_list], "ignorecase");
             var ic = new InputComplete(ele, keywords);
         \}
-        if (\$('$fieldid')) AutoCompleteFriends(\$('$fieldid'));
+        if ('$fieldid' && \$('$fieldid')) AutoCompleteFriends(\$('$fieldid'));
     </script>
     };
 }
