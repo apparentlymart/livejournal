@@ -1866,7 +1866,7 @@ sub editevent
             });
     }
 
-    if (LJ::is_enabled('default_copyright', $uowner)) {
+    if (LJ::is_enabled('default_copyright', $u)) {
         unless (defined $req->{'props'}->{'copyright'}) { # try 1: previous value
             $req->{'props'}->{'copyright'} = $curprops{$itemid}->{'copyright'};
         }

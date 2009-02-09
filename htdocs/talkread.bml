@@ -339,7 +339,7 @@ my $old_url = 0;
 
 
     ## copyright
-    if (LJ::is_enabled('default_copyright', $u)) {
+    if (LJ::is_enabled('show_copyright', $u)) {
         if ($props->{'copyright'} eq 'C') {
             $ret .= '<div class="copyrighted">&Oslash; ' . BML::ml("talk.copyright") . '</div>';
         }
