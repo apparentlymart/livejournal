@@ -37,7 +37,7 @@ sub as_html {
     push @options, { text => LJ::Lang::ml('settings.findbyemail.opt.N'), value => "N" };
     $ret .= LJ::html_select({ 'name' => "${key}opt_findbyemail",
                               'id' => "${key}opt_findbyemail",
-                              'class' => "select",
+                         ###  'class' => "select",
                               'selected' => $u->opt_findbyemail || '' },
                               @options );
 
