@@ -32,7 +32,7 @@
         if ($user) {
             if (my $u = LJ::load_user($user)) {
                 return JSON::objToJson({error => "No user found",})
-                    if $u->is_deleted or $u->is_suspended or $u->is_expunged or not $u->opt_showcontact =~ /Y|R/;
+                    if $u->is_deleted or $u->is_suspended or $u->is_expunged;
                 if ($what eq "pics") {
                     $url = "$LJ::SITEROOT/allpics.bml?user=$user";
                 } elsif ($output eq "foaf") {
