@@ -49,13 +49,6 @@ sub js {
     my $validate_email = $self->ml('widget.search.not_valid.email');
     my $validate_username = $self->ml('widget.search.not_valid.username');
     my $validate_IM_error = $self->ml('widget.search.not_valid.IM_handle');
-    my $validate_IM_aim = $self->ml('widget.search.not_valid.IM_handle.aim');
-    my $validate_IM_icq = $self->ml('widget.search.not_valid.IM_handle.icq');
-    my $validate_IM_jabber = $self->ml('widget.search.not_valid.IM_handle.jabber');
-    my $validate_IM_msn = $self->ml('widget.search.not_valid.IM_handle.msn');
-    my $validate_IM_yahoo = $self->ml('widget.search.not_valid.IM_handle.yahoo');
-    my $validate_IM_skype = $self->ml('widget.search.not_valid.IM_handle.skype');
-    my $validate_IM_google_talk = $self->ml('widget.search.not_valid.IM_handle.google_talk');
 
     qq [
         initWidget: function() {
@@ -74,6 +67,10 @@ sub js {
 
             \$('Widget[FindFriendsInExistingUsers]_errors').innerHTML = '';
             \$('Widget[FindFriendsInExistingUsers]_ajax_status').innerHTML = '$init_text';
+
+            if (type == 'instant_messengers') {
+                type = 'icq';
+            }
 
             var req = {
                         data: HTTPReq.formEncoded({q: this.query, type: type}),
@@ -113,13 +110,6 @@ sub js {
                 not_valid_txt = {
                     user: '$validate_username',
                     email: '$validate_email',
-                    aolim: '$validate_IM_aim',
-                    icq: '$validate_IM_icq',
-                    jabber: '$validate_IM_jabber',
-                    msn: '$validate_IM_msn',
-                    yahoo: '$validate_IM_yahoo',
-                    skype: '$validate_IM_skype',
-                    google_talk: '$validate_IM_google_talk'
                 },
                 client = select.options[select.selectedIndex].value;
 
