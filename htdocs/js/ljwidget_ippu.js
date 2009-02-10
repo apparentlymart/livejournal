@@ -4,6 +4,7 @@ LJWidgetIPPU = new Class(LJWidget, {
         var widgetClass = opts.widgetClass;
         var authToken = opts.authToken;
         var nearEle = opts.nearElement;
+        var not_view_close = opts.not_view_close;
 
         if (! reqParams) reqParams = {};
         this.reqParams = reqParams;
@@ -31,6 +32,7 @@ LJWidgetIPPU = new Class(LJWidget, {
 
         if (opts.center) ippu.center();
         ippu.show();
+        if (not_view_close) ippu.titlebar.getElementsByTagName('img')[0].style.display = 'none';
 
         var loadingText = document.createElement("div");
         loadingText.style.fontSize = '1.5em';
