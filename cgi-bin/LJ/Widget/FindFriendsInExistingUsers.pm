@@ -135,10 +135,6 @@ sub js {
                     error_empty = '$empty_name';
                     break;
                 case 'email':
-                case 'jabber':
-                case 'msn':
-                case 'yahoo':
-                case 'google_talk':
                     error_empty = '$empty_email';
                     r = rex_email;
                     break;
@@ -150,9 +146,6 @@ sub js {
                     break;
                 case 'icq':
                     r = /^\\d+\$/;
-                    break;
-                case 'aolim':
-                    r = new RegExp('(^\\\\d+\$)|' +rex_email.source, 'i');
                     break;
                 case 'gizmo':
                     r = /^[0-9a-z_-]+\$/i;
