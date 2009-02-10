@@ -18,13 +18,7 @@ sub render_body {
     my @search_opts = (
         'user' => $class->ml('.widget.search.username'),
         'email' => $class->ml('.widget.search.email'),
-        'aolim' => $class->ml('.widget.search.aim'),
-        'icq' => $class->ml('.widget.search.icq'),
-        'jabber' => $class->ml('.widget.search.jabber'),
-        'msn' => $class->ml('.widget.search.msn'),
-        'yahoo' => $class->ml('.widget.search.yahoo'),
-        'skype' => $class->ml('widget.search.skype'),
-        'google_talk' => $class->ml('widget.search.google_talk'),
+        'instant_messengers' => $class->ml('widget.search.instant_messengers'),
     );
 
     $ret .= "<div class='mailfinder exists'>";
@@ -137,18 +131,6 @@ sub js {
                 case 'email':
                     error_empty = '$empty_email';
                     r = rex_email;
-                    break;
-                case 'skype':
-                    r = /^[a-z0-9_.-]+\$/i;
-                    break;
-                case 'lastfm':
-                    r = /^[a-z][_a-z0-9-]{1,20}\$/i; // /^[a-z][_a-z0-9\-]{1,14}\$/i - in last.fm website
-                    break;
-                case 'icq':
-                    r = /^\\d+\$/;
-                    break;
-                case 'gizmo':
-                    r = /^[0-9a-z_-]+\$/i;
                     break;
             }
 

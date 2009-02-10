@@ -3543,6 +3543,8 @@ widget.search.icq=ICQ Number
 
 widget.search.init_text=Processing request...
 
+widget.search.instant_messengers=Instant Messengers
+
 widget.search.interest=Interest
 
 widget.search.interestonly=Find people and communities interested in:
