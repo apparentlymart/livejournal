@@ -776,15 +776,6 @@ sub clean
                         # output attributes in original order, but only those
                         # that are allowed (by still being in %$hash after cleaning)
                         foreach (@$attrs) {
-                            unless (LJ::is_ascii($hash->{$_})) {
-                                # FIXME: this is so ghetto.  make faster.  make generic.
-                                # HTML::Parser decodes entities for us (which is good)
-                                # but in Perl 5.8 also includes the "poison" SvUTF8
-                                # flag on the scalar it returns, thus poisoning the
-                                # rest of the content this scalar is appended with.
-                                # we need to remove that poison at this point.  *sigh*
-                                $hash->{$_} = LJ::no_utf8_flag($hash->{$_});
-                            }
                             $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\""
                                 if exists $hash->{$_};
                         }
