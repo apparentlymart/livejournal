@@ -103,6 +103,7 @@ function setCopyrightEdit() {
     if ($('prop_copyright') && $('security') && $('security').value != "public") {
         $('prop_copyright').checked = 0;
         $('prop_copyright').disabled = true;
+        $('defined_copyright').value = '0';
     }
 }
 
@@ -111,11 +112,13 @@ function copyright () {
         if ($('security').value != "public") {
             $('prop_copyright').checked = 0;
             $('prop_copyright').disabled = true;
+	    $('defined_copyright').value = '0';
         } else {
             if (Site.default_copyright == "P") {
                 $('prop_copyright').checked = 1;
             }
             $('prop_copyright').disabled = false;
+	    $('defined_copyright').value = '1';
         }
     }
 }
