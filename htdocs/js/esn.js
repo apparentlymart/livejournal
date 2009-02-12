@@ -63,20 +63,19 @@ ESN.eventChecked = function (evt) {
 }
 
 // attach event handlers to all track buttons
-ESN.initTrackBtns = function () {
+ESN.initTrackBtns = function (node) {
     // don't do anything if no remote
-    if (!Site || !Site.has_remote) return;
+    if (!Site.has_remote) return;
 
-    // attach to all ljuser head icons
-    var trackBtns = DOM.getElementsByTagAndClassName(document, "img", "TrackButton");
+    node = node || document;
+    var trackBtns = DOM.getElementsByTagAndClassName(node, 'img', 'TrackButton');
 
-    Array.prototype.forEach.call(trackBtns, function (trackBtn) {
+    trackBtns.forEach(function (trackBtn) {
         if (!trackBtn || !trackBtn.getAttribute) return;
 
         if (!trackBtn.getAttribute("lj_subid") && !trackBtn.getAttribute("lj_journalid")) return;
 
-        DOM.addEventListener(trackBtn, "click",
-                             ESN.trackBtnClickHandler.bindEventListener(trackBtn));
+        DOM.addEventListener(trackBtn, 'click', ESN.trackBtnClickHandler.bindEventListener(trackBtn));
     });
 };
 

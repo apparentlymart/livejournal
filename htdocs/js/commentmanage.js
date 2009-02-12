@@ -118,23 +118,6 @@ function hsv_to_rgb (h, s, v)
     return [v,p,q];
 }
 
-// stops the bubble
-function stopBubble (e) {
-    if (e.stopPropagation)
-        e.stopPropagation();
-    if ("cancelBubble" in e)
-        e.cancelBubble = true;
-}
-
-// stops the bubble, as well as the default action
-function stopEvent (e) {
-    stopBubble(e);
-    if (e.preventDefault)
-        e.preventDefault();
-    if ("returnValue" in e)
-        e.returnValue = false;
-    return false;
-}
 
 function scrollTop () {
     if (window.innerHeight)
@@ -335,8 +318,7 @@ function removeComment (ditemid, killChildren) {
     }
 }
 
-function docClicked (e) {
-  if (curPopup)
+function docClicked () {
     killPopup();
 
   // we didn't handle anything, who are we kidding
@@ -382,7 +364,7 @@ function createDeleteFunction (ae, dItemid) {
                 de = curPopup;
                 de.style.left = lx + "px";
                 de.style.top = (pos.y - diff_y + 5) + "px";
-                return stopEvent(e);
+                return Event.stop(e);
             }
 
             de = document.createElement("div");
@@ -395,9 +377,8 @@ function createDeleteFunction (ae, dItemid) {
             de.style.top = (pos.y - diff_y + 5) + "px";
             de.style.width = "250px";
             de.style.zIndex = 3;
-            regEvent(de, "click", function (e) {
-                e = e || window.event;
-                stopBubble(e);
+            DOM.addEventListener(de, 'click', function (e) {
+                Event.stopPropagation(e);
                 return true;
             });
 
@@ -452,7 +433,7 @@ function createDeleteFunction (ae, dItemid) {
             deleteComment(dItemid);
         }
 
-        return stopEvent(e);
+        Event.stop(e);
     }
 }
 
@@ -536,7 +517,7 @@ function createModerationFunction (ae, dItemid) {
         if (!e) e = window.event;
 
         if (tsInProg[dItemid])
-            return stopEvent(e);
+            return Event.preventDefault(e);
         tsInProg[dItemid] = 1;
 
         var clickTarget = getTarget(e);
@@ -595,45 +576,43 @@ function createModerationFunction (ae, dItemid) {
         xtr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xtr.send(postdata);
 
-        return stopEvent(e);
+        Event.preventDefault(e);
     };
 }
 
-function setupAjax () {
-    var ct = document.links.length;
-    for (var i=0; i<ct; i++) {
-        var ae = document.links[i];
-        if (ae.href.indexOf("talkscreen.bml") != -1) {
-            ae.onclick = createModerationFunction(ae, dItemid);
+function setupAjax (node) {
+    var links = node ? node.getElementsByTagName('a') : document.links,
+        rex_id = /id=(\d+)/,
+        i = -1, ae;
 
-        } else if (ae.href.indexOf("delcomment.bml") != -1) {
+    while (links[++i]) {
+        ae = links[i];
+        if (ae.href.indexOf('talkscreen.bml') != -1) {
+            var reMatch = rex_id.exec(ae.href);
+            if (!reMatch) continue;
 
-            var findIDre = /id=(\d+)/;
-            var reMatch = findIDre.exec(ae.href);
-            if (! reMatch) return true;
+            var id = reMatch[1];
+            if (!document.getElementById('ljcmt' + id)) continue;
 
-            var dItemid = reMatch[1];
-            var todel = document.getElementById("ljcmt" + dItemid);
-            if (! todel) return true;
-
+            ae.onclick = createModerationFunction(ae, id);
+        } else if (ae.href.indexOf('delcomment.bml') != -1) {
             if (LJ_cmtinfo && LJ_cmtinfo.disableInlineDelete) continue;
 
-            ae.onclick = createDeleteFunction(ae, dItemid);
-        }
+            var reMatch = rex_id.exec(ae.href);
+            if (!reMatch) continue;
 
+            var id = reMatch[1];
+            if (!document.getElementById('ljcmt' + id)) continue;
+
+            ae.onclick = createDeleteFunction(ae, id);
+        }
     }
 }
 
-function regEvent (target, evt, func) {
-    if (! target) return;
-    if (target.attachEvent)
-        target.attachEvent("on"+evt, func);
-    if (target.addEventListener)
-        target.addEventListener(evt, func, false);
-}
 
-if (document.getElementById && getXTR()) {
-       regEvent(window, "load", setupAjax);
-	regEvent(document, "click", docClicked);
-        document.write("<style> div.ljcmtmanage { color: #000; background: #e0e0e0; border: 2px solid #000; padding: 3px; }</style>");
-}
+
+LiveJournal.register_hook('page_load', function () {
+    setupAjax()
+});
+DOM.addEventListener(document, 'click', docClicked);
+document.write("<style> div.ljcmtmanage { color: #000; background: #e0e0e0; border: 2px solid #000; padding: 3px; }</style>");

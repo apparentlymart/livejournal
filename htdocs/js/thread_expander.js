@@ -81,6 +81,9 @@ Expander.prototype.killDuplicate = function(comments){
             el_.parentNode.removeChild(el_);
         }else{
             el_.id = id;
+            window.ContextualPopup && ContextualPopup.searchAndAdd(el_);
+            window.setupAjax && setupAjax(el_);
+            window.ESN && ESN.initTrackBtns(el_);
         }
     }
 }
@@ -140,7 +143,6 @@ Expander.prototype.onLoadHandler = function(iframe){
                                             if(obj.is_S1 && w!==null){
                                                     obj.setS1width(comments_page[id].canvas,w);
                                             }
-                                            ContextualPopup && ContextualPopup.searchAndAdd(comments_page[id].canvas);
                                             //TODO: may be this should be uncommented
                                             //comments_page[id].canvas.className = new_comment.canvas.className;
                                             LJ_cmtinfo[id].full=1;
