@@ -14,12 +14,13 @@ page<=
 {Fps}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7"/>
 <link rel="home" title="<?_ml lynx.nav.home _ml?>" href="<?siteroot?>/" />
 <link rel="contents" title="<?_ml lynx.nav.sitemap _ml?>" href="<?siteroot?>/site/" />
 <link rel="help" title="<?_ml lynx.nav.help _ml?>" href="<?siteroot?>/support/" />
 <?_code
     use strict;
-    LJ::need_res("stc/lj_base-app.css");
+    LJ::need_res("stc/lj_base-app.css", "stc/lynx/layout.css");
 
     my $crumb_up;
     if (LJ::get_active_crumb() ne '') {
