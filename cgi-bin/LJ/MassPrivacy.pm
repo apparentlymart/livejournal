@@ -22,9 +22,14 @@ sub enqueue_job {
     croak "missing options argument" unless %opts;
 
     # Check options
-    if (!($opts{s_security} =~ m/[private|usemask|public]/) ||
-        !($opts{e_security} =~ m/[private|usemask|public]/) ) {
+    if ( (!($opts{publicity}  =~ m/[restrict|permit]/)) &&
+         (!($opts{s_security} =~ m/[private|usemask|public]/) ||
+          !($opts{e_security} =~ m/[private|usemask|public]/) ) ) {
         croak "invalid privacy option";
+    }
+
+    if ($opts{publicity}) {
+        $opts{publicity} = ($opts{publicity} =~ m/restrict/) ? 'C' : 'P';
     }
 
     if ($opts{'start_date'} || $opts{'end_date'}) {
@@ -63,23 +68,26 @@ sub handle {
 
     my @jids;
     my $timeframe = ''; # date range string or empty
+    my %post_ids_filter;
+
     # If there is a date range
     # add 24h to the final date; otherwise we don't get entries on that date
+
     if ($opts->{s_unixtime} && $opts->{e_unixtime}) {
-        @jids = $u->get_post_ids(
-                             'security' => $opts->{'s_security'},
-                            'allowmask' => $s_allowmask,
-                           'start_date' => $opts->{'s_unixtime'},
-                             'end_date' => $opts->{'e_unixtime'} + 24*60*60 );
+        $post_ids_filter{'start_date'}  = $opts->{'s_unixtime'};
+        $post_ids_filter{'end_date'}    = $opts->{'e_unixtime'} + 24*60*60;
+
         my $s_dt = DateTime->from_epoch( epoch => $opts->{s_unixtime} );
         my $e_dt = DateTime->from_epoch( epoch => $opts->{e_unixtime} );
         $timeframe = "between " . $s_dt->ymd . " and " . $e_dt->ymd . " ";
-
-    } else {
-        @jids = $u->get_post_ids(
-                             'security' => $opts->{'s_security'},
-                            'allowmask' => $s_allowmask, );
     }
+
+    if ($opts->{'s_security'}) {
+        $post_ids_filter{'security'}    = $opts->{'s_security'};
+        $post_ids_filter{'allowmask'}   = $s_allowmask;
+    }
+
+    @jids = $u->get_post_ids(%post_ids_filter);
 
     # check if there are any posts to update
     return 1 unless (scalar @jids);
@@ -88,28 +96,41 @@ sub handle {
     my $okay_ct = 0;
 
     # Update each event using the API
-    foreach my $itemid (@jids) {
-        my %res = ();
-        my %req = ( 'mode' => 'editevent',
-                    'ver' => $LJ::PROTOCOL_VER,
-                    'user' => $u->{'user'},
-                    'itemid' => $itemid,
-                    'security' => $opts->{e_security},
-                    'allowmask' => $e_allowmask,
-                    );
 
-        # do editevent request
-        LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $u,
-                       'use_old_content' => 1 });
+    if ($opts->{e_security}) {  # Update security with LJ::do_request
+        foreach my $itemid (@jids) {
+            my %res = ();
+            my %req = ( 'mode' => 'editevent',
+                        'ver' => $LJ::PROTOCOL_VER,
+                        'user' => $u->{'user'},
+                        'itemid' => $itemid,
+                        'security' => $opts->{e_security},
+                        'allowmask' => $e_allowmask,
+                        );
 
-        # check response
-        if ($res{'success'} eq "OK") {
+            # do editevent request
+            LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $u,
+                           'use_old_content' => 1 });
+
+            # check response
+            if ($res{'success'} eq "OK") {
+                $okay_ct++;
+            } else {
+                push @errs, $res{'errmsg'};
+            }
+        }
+    } elsif ($opts->{publicity}) { # Update publicity with LJ::Entry->set_prop
+        my $publicity = $opts->{publicity};
+        foreach my $itemid (@jids) {
+            my $entry = LJ::Entry->new($u, jitemid => $itemid);
+            $entry->set_prop('copyright', $publicity) if $entry;
+            # There is no any errors returned from LJ::Entry->set_props,
+            # it always returns '1'.
             $okay_ct++;
-        } else {
-            push @errs, $res{'errmsg'};
         }
     }
 
+    # TODO: Correct mail and history for case of publicity changed.
 
     # better logging
     # Used when logging to statushistory
@@ -124,17 +145,40 @@ sub handle {
         die $errmsg;
     }
 
-    my $subject = "We've updated the privacy of your entries";
-    my $msg = "Hi " . $u->user . ",\n\n" .
-              "$okay_ct " . $privacy{$opts->{s_security}} . " entries " .
-              $timeframe . "have now " .
-              "been changed to be " . $privacy{$opts->{e_security}} . ".\n\n" .
-              "If you made this change by mistake, or if you want to change " .
-              "the security on more of your entries, you can do so at " .
-              "$LJ::SITEROOT/editprivacy.bml\n\n" .
-              "Thanks!\n\n" .
-              "$LJ::SITENAME Team\n" .
-              "$LJ::SITEROOT";
+    my ($subject, $msg, $status_history);
+    if ($opts->{e_security}) {  # Update security with LJ::do_request
+        $subject = "We've updated the privacy of your entries";
+        $msg = "Hi " . $u->user . ",\n\n" .
+               "$okay_ct " . $privacy{$opts->{s_security}} . " entries " .
+               $timeframe . "have now " .
+               "been changed to be " . $privacy{$opts->{e_security}} . ".\n\n" .
+               "If you made this change by mistake, or if you want to change " .
+               "the security on more of your entries, you can do so at " .
+               "$LJ::SITEROOT/editprivacy.bml\n\n" .
+               "Thanks!\n\n" .
+               "$LJ::SITENAME Team\n" .
+               "$LJ::SITEROOT";
+        $status_history = "mass_privacy", "Success: $okay_ct " .
+                          $privacy{$opts->{s_security}} . " entries " .
+                          $timeframe . "have now " . "been changed to be " .
+                          $privacy{$opts->{e_security}};
+    } elsif ($opts->{publicity}) { # Update publicity with LJ::Entry->set_prop
+        my $e_publicity = ($opts->{publicity} =~ m/C/) ? 'disallow' : 'allow';
+        $subject = "We've updated the publicity of your entries";
+        $msg = "Hi " . $u->user . ",\n\n" .
+               "$okay_ct entries " .
+               $timeframe . "have now " .
+               "been changed to be " . $e_publicity . ".\n\n" .
+               "If you made this change by mistake, or if you want to change " .
+               "the security on more of your entries, you can do so at " .
+               "$LJ::SITEROOT/editsyndi.bml\n\n" .
+               "Thanks!\n\n" .
+               "$LJ::SITENAME Team\n" .
+               "$LJ::SITEROOT";
+        $status_history = "mass_publicity", "Success: $okay_ct " .
+                          " entries " . $timeframe . "have now " . "been changed to be " .
+                          $opts->{publicity};
+    }
 
     LJ::send_mail({
         'to' => $u->email_raw,
@@ -144,13 +188,9 @@ sub handle {
         'charset' => 'utf-8',
         'subject' => $subject,
         'body' => $msg,
-    });
+    }) if $subject && $msg;
 
-    LJ::statushistory_add($u->{'userid'}, $sys_u,
-                          "mass_privacy", "Success: $okay_ct " .
-                          $privacy{$opts->{s_security}} . " entries " .
-                          $timeframe . "have now " . "been changed to be " .
-                          $privacy{$opts->{e_security}});
+    LJ::statushistory_add($u->{'userid'}, $sys_u, $status_history) if $status_history;
 
     return 1;
 }

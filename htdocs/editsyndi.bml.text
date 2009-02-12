@@ -1,0 +1,48 @@
+;; -*- coding: utf-8 -*-
+
+.also_change_privacy=You can also <a [[aopts]]>change the privacy level of all posts</a>.
+
+.button.update=Update Entries
+
+.button.ya.rly=Yes, Update these Posts
+
+.calendar=Your <a [[aopts]]>journal calendar</a> provides an easy way to browse through your posts by month.
+
+.intro=Change the publicity of all posts in a certain timeframe by choosing the start and end dates.
+
+.matching=<b>[[posts]] matching [[?posts|post has|posts have]]</b> been found.
+
+.notified=The publicity of your entries will be updated shortly. You will be notified by email when the update is complete.
+
+.publicity=Publicity
+
+.rusure=Are you sure you want to update these entries?
+
+.timeframe=Timeframe
+
+.timeframe.error.notselected=No timeframe selected
+
+.timeframe.error.start_date=Start date is not a valid date
+
+.timeframe.error.end_date=End date is not a valid date
+
+.error.incorrect_password=Password Incorrect
+
+.error.password_required=Password Required
+
+.timeframe.all=All Dates
+
+.timeframe.range=Between
+
+.timeframe.range.end=End date
+
+.timeframe.range.start=Start date
+
+.title=Edit Journal Publicity
+
+.unable=Sorry, the publicity settings is only to users who signed up for Cyrillic services.
+
+.label.publicity.permit=permit
+
+.label.publicity.restrict=restrict
+
