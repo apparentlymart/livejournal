@@ -1,6 +1,6 @@
 ;; -*- coding: utf-8 -*-
 
-.also_change_privacy=You can also <a [[aopts]]>change the privacy level of all posts</a>.
+.also_change_syndi=You can also <a [[aopts]]>change the publicity of all posts</a>.
 
 .button.update=Update Entries
 

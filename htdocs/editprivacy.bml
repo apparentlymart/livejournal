@@ -132,8 +132,8 @@ body<=
         $ret .= "<?p " . LJ::html_submit(undef, $ML{'.button.update'}) . " p?>";
         $ret .= "</form>";
 
-        $ret .= "<p>" . BML::ml('.also_change_privacy', { aopts => "href='/editprivacy.bml'" }) . "</p>"
-            if LJ::is_enabled('show_copyright', $u);
+        $ret .= "<p>" . BML::ml('.also_change_syndi', { aopts => "href='/editsyndi.bml'" }) . "</p>"
+            if LJ::is_enabled('default_copyright', $u);
 
         return $ret;
 
