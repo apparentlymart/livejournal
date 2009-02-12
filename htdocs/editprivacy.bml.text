@@ -1,4 +1,7 @@
 ;; -*- coding: utf-8 -*-
+
+.also_change_privacy=You can also <a [[aopts]]>change the privacy level of all posts</a>.
+
 .button.update=Update Entries
 
 .button.ya.rly=Yes, Update these Posts
@@ -19,11 +22,11 @@
 
 .timeframe.error.notselected=No timeframe selected
 
-.timeframe.error.same_privacy_levels=Privacy levels are the same
+.error.same_privacy_levels=Privacy levels are the same
 
-.timeframe.error.incorrect_password=Password Incorrect
+.error.incorrect_password=Password Incorrect
 
-.timeframe.error.password_required=Password Required
+.error.password_required=Password Required
 
 .timeframe.all=All Dates
 

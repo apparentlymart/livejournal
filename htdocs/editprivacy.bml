@@ -50,7 +50,7 @@ body<=
 
         # security must change
         if ($POST{'s_security'} eq $POST{'e_security'}) {
-            push @errors, $ML{'.timeframe.error.same_privacy_levels'};
+            push @errors, $ML{'.error.same_privacy_levels'};
         }
 
         # display initial page if errors
@@ -61,7 +61,7 @@ body<=
         $more_public = 1 if ($POST{'s_security'} eq 'friends' && $POST{'e_security'} eq 'public');
 
         if (($mode eq 'amsure') && $more_public && !LJ::auth_okay($u, $POST{password}, undef, undef, undef)) {
-            push @errors, $ML{'.timeframe.error.incorrect_password'};
+            push @errors, $ML{'.error.incorrect_password'};
             $mode = 'change' if @errors;
         }
     }
@@ -132,6 +132,9 @@ body<=
         $ret .= "<?p " . LJ::html_submit(undef, $ML{'.button.update'}) . " p?>";
         $ret .= "</form>";
 
+        $ret .= "<p>" . BML::ml('.also_change_privacy', { aopts => "href='/editprivacy.bml'" }) . "</p>"
+            if LJ::is_enabled('show_copyright', $u);
+
         return $ret;
 
     # User has chosen parameters for making change
@@ -183,7 +186,7 @@ body<=
             $body .= LJ::html_hidden( map { $_ => $POST{$_} }
                                       qw(s_security e_security time) );
             if ($more_public) {
-                $body .= $ML{'.timeframe.error.password_required'} . "<br />\n";
+                $body .= $ML{'.error.password_required'} . "<br />\n";
                 $body .= "<input type='password' name='password' size='20' maxlength='30' />";
             }
             $body .= "<?p " . LJ::html_submit(undef, $ML{'.button.ya.rly'}) . " p?>";
