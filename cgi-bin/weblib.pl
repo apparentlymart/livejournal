@@ -2782,7 +2782,7 @@ sub interests_for_adcall {
 
     my @interest_list = $u->notable_interests(100) if $u;
 
-    my $r = Apache->request;
+    my $r = eval { Apache->request };
 
     # pass in tag list if this ad relates to a special QotD
     if (ref $opts{extra} && $opts{extra}->{qotd} || $r && $r->notes('codepath') eq 'bml.update' && $BMLCodeBlock::GET{qotd}) {
