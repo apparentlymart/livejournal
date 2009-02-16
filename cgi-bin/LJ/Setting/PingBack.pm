@@ -14,6 +14,13 @@ sub should_render {
     return 1;
 }
 
+# the link to the FAQ
+sub helpurl {
+    my ($class, $u) = @_;
+
+    return "pingback_faq";
+}
+
 # Caption for widget
 sub label {
     my $class = shift;
