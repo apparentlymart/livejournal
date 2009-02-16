@@ -169,10 +169,8 @@ sub create_personal {
     # on create, with more private settings for non-adults
     if ($u->underage || $u->is_child) {
         $u->set_prop("opt_findbyemail", 'N');
-    } elsif ($u->is_minor) {
-        $u->set_prop("opt_findbyemail", 'H');
     } else {
-        $u->set_prop("opt_findbyemail", 'Y');
+        $u->set_prop("opt_findbyemail", 'H');
     }
 
     return $u;
