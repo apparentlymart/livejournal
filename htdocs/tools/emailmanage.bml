@@ -31,10 +31,17 @@ body<=
         AND oldvalue=?
     }, undef, $u->{'userid'}, $u->email_raw);
 
-    my $lastdate = $dbh->selectrow_array(qq{
+    my $lastdate_email = $dbh->selectrow_array(qq{
         SELECT MAX(timechange) FROM infohistory
-        WHERE userid=? AND (what='email' OR what='emaildeleted')
+        WHERE userid=? AND (what='email' OR what='emaildeleted' AND length(other)<=2)
     }, undef, $u->{'userid'});
+
+    my $lastdate_deleted = $dbh->selectrow_array(qq{
+        SELECT MAX(SUBSTRING(other FROM 3)) FROM infohistory
+        WHERE userid=? AND what='emaildeleted'
+    }, undef, $u->{'userid'});
+
+    my $lastdate = defined $lastdate_deleted ? ($lastdate_email gt $lastdate_deleted ? $lastdate_email : $lastdate_deleted) : $lastdate_email;
 
     # current address was set more, than 6 months ago?
     my $six_month_case = time() - str2time($lastdate) > 182 * 24 * 3600; # half year
