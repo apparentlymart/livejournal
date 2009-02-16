@@ -768,7 +768,15 @@ my $old_url = 0;
 
      my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine, $formatlight);
 
-     $ret .= "<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform' id='multiform' >";
+     my $stylemine = $GET{'style'} eq 'mine' ? 1 : 0;
+
+     my $viewing_thread;
+     if (defined $GET{'thread'}) {
+         $viewing_thread = $GET{'thread'};
+     }
+     $ret .= LJ::create_qr_div($u, $ditemid, $stylemine, $GET{'prop_picture_keyword'}, $viewing_thread);
+
+     $ret .= "<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform'>";
 
      # Quick Reply when posting a new top level comment
      # requires setup when logged in.
@@ -788,14 +796,6 @@ my $old_url = 0;
      $ret .= "</b></p>";
 
      $ret .= "<div align='center'>" . LJ::make_qr_target('top') . "</div>" if $remote;
-
-     my $stylemine = $GET{'style'} eq 'mine' ? 1 : 0;
-
-     my $viewing_thread;
-     if (defined $GET{'thread'}) {
-         $viewing_thread = $GET{'thread'};
-     }
-     $ret .= LJ::create_qr_div($u, $ditemid, $stylemine, $GET{'prop_picture_keyword'}, $viewing_thread);
 
      $ret .= LJ::html_hidden("ditemid", $ditemid);
      $ret .= LJ::html_hidden("journal", $u->{'user'});
@@ -844,7 +844,7 @@ my $old_url = 0;
                                                "onclick" =>
                                                    'return ((document.multiform.mode.value != "delete" ' .
                                                    '&& document.multiform.mode.value != "deletespam")) ' .
-                                                   "|| confirm(\"" . LJ::ejs($ML{'.confirm.action'}) . "\");"
+                                                   '|| confirm("' . LJ::ejs($ML{'.confirm.action'}) . '")'
                                            });
              $ret .= "</p>";
          }
