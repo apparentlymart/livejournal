@@ -1032,6 +1032,23 @@ sub blockquote {
     return LJ::Talk::Post::blockquote(@_);
 }
 
+sub start_thread_url {
+    my $self    = shift;
+
+    my $dtalkid = $self->dtalkid;
+    my $entry   = $self->entry;
+    my $url     = $entry->url;
+
+    # get all comments to post, makes singletons of many LJ::Comment objects
+    my $comments = LJ::Talk::get_talk_data($self->journal, 'L', $entry->jitemid) || {};
+
+    my $start = $self;
+    while ($start->parent) {
+        $start = $start->parent;
+    }
+    return $start->url;
+}
+
 # used for comment email notification headers
 sub email_messageid {
     my $self = shift;
@@ -1352,11 +1369,12 @@ sub _format_mail_both {
     $body .= LJ::Event::format_options(undef, $is_html, $lang, $vars,
         {
             'esn.view_thread'       => [ 1, $self->thread_url ],
-            'esn.view_comments'     => [ 2, $talkurl ],
-            'esn.reply_at_webpage'  => [ 3, $self->reply_url ],
-            'esn.unscreen_comment'  => [ $can_unscreen ? 4 : 0, $self->unscreen_url ],
-            'esn.delete_comment'    => [ $self->user_can_delete($targetu) ? 5 : 0, $self->delete_url ],
-            'esn.edit_comment'      => [ $self->user_can_edit($targetu) ? 6 : 0, $self->edit_url ],
+            'esn.view_thread_start' => [ 2, $self->start_thread_url ],
+            'esn.view_comments'     => [ 3, $talkurl ],
+            'esn.reply_at_webpage'  => [ 4, $self->reply_url ],
+            'esn.unscreen_comment'  => [ $can_unscreen ? 5 : 0, $self->unscreen_url ],
+            'esn.delete_comment'    => [ $self->user_can_delete($targetu) ? 6 : 0, $self->delete_url ],
+            'esn.edit_comment'      => [ $self->user_can_edit($targetu) ? 7 : 0, $self->edit_url ],
         });
 
     my $want_form = $is_html && ($self->is_active || $can_unscreen);  # this should probably be a preference, or maybe just always off.

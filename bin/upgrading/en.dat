@@ -1417,6 +1417,8 @@ esn.here_you_can=From here, you can:
 
 esn.view_thread=[[openlink]]View the thread[[closelink]] starting from this comment
 
+esn.view_thread_start=[[openlink]]View the thread[[closelink]] that includes this comment
+
 esn.view_comments=[[openlink]]View all comments[[closelink]] to this entry
 
 esn.reply_at_webpage=[[openlink]]Reply[[closelink]] at the webpage
