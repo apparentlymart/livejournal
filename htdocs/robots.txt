@@ -1,6 +1,8 @@
 User-Agent: *
 Disallow: /directory.bml
 
+Sitemap: http://www.livejournal.com/sitemap.xml
+
 #
 # Blocked journals aren't listed here because robots.txt files
 # can't be above 50k or so, depending on the spider.
