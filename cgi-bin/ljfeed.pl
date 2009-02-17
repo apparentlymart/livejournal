@@ -290,7 +290,7 @@ sub create_view_rss
     # header
     $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
     $ret .= LJ::run_hook("bot_director", "<!-- ", " -->") . "\n";
-    $ret .= "<rss version='2.0' xmlns:lj='http://www.livejournal.org/rss/lj/1.0/'>\n";
+    $ret .= "<rss version='2.0' xmlns:lj='http://www.livejournal.org/rss/lj/1.0/' xmlns:media='http://search.yahoo.com/mrss/'>\n";
 
     # channel attributes
     $ret .= "<channel>\n";
@@ -351,6 +351,7 @@ sub create_view_rss
                 { userid => $u->{userid}, ppid => $it->{ppid} }) if $it->{ppid};
         # TODO: add author field with posterid's email address, respect communities
         $ret .= "  <lj:music>" . LJ::exml($it->{music}) . "</lj:music>\n" if $it->{music};
+        $ret .= "  <media:title type=\"plain\">" . LJ::exml($it->{music}) . "</media:title>\n" if $it->{music};
         $ret .= "  <lj:mood>" . LJ::exml($it->{mood}) . "</lj:mood>\n" if $it->{mood};
         $ret .= "  <lj:security>" . LJ::exml($it->{security}) . "</lj:security>\n" if $it->{security};
         $ret .= "  <lj:poster>" . LJ::exml($poster->user) . "</lj:poster>\n" unless LJ::u_equals($u, $poster);
