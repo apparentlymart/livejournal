@@ -130,8 +130,6 @@ sub handle {
         }
     }
 
-    # TODO: Correct mail and history for case of publicity changed.
-
     # better logging
     # Used when logging to statushistory
     my $sys_u = LJ::load_user('system');
@@ -145,7 +143,7 @@ sub handle {
         die $errmsg;
     }
 
-    my ($subject, $msg, $status_history);
+    my ($subject, $msg, @status_history);
     if ($opts->{e_security}) {  # Update security with LJ::do_request
         $subject = "We've updated the privacy of your entries";
         $msg = "Hi " . $u->user . ",\n\n" .
@@ -158,26 +156,26 @@ sub handle {
                "Thanks!\n\n" .
                "$LJ::SITENAME Team\n" .
                "$LJ::SITEROOT";
-        $status_history = "mass_privacy", "Success: $okay_ct " .
+        @status_history = ("mass_privacy", "Success: $okay_ct " .
                           $privacy{$opts->{s_security}} . " entries " .
                           $timeframe . "have now " . "been changed to be " .
-                          $privacy{$opts->{e_security}};
+                          $privacy{$opts->{e_security}});
     } elsif ($opts->{publicity}) { # Update publicity with LJ::Entry->set_prop
-        my $e_publicity = ($opts->{publicity} =~ m/C/) ? 'disallow' : 'allow';
+        my $e_publicity = ($opts->{publicity} eq 'C') ? 'disallow' : 'allow';
         $subject = "We've updated the publicity of your entries";
         $msg = "Hi " . $u->user . ",\n\n" .
                "$okay_ct entries " .
                $timeframe . "have now " .
-               "been changed to be " . $e_publicity . ".\n\n" .
+               "been set to be " . $e_publicity . ".\n\n" .
                "If you made this change by mistake, or if you want to change " .
                "the security on more of your entries, you can do so at " .
                "$LJ::SITEROOT/editsyndi.bml\n\n" .
                "Thanks!\n\n" .
                "$LJ::SITENAME Team\n" .
                "$LJ::SITEROOT";
-        $status_history = "mass_publicity", "Success: $okay_ct " .
-                          " entries " . $timeframe . "have now " . "been changed to be " .
-                          $opts->{publicity};
+        @status_history = ("mass_publicity", "Success: $okay_ct " .
+                          " entries " . $timeframe . "have now " . "been set to be " .
+                          $opts->{publicity});
     }
 
     LJ::send_mail({
@@ -190,7 +188,7 @@ sub handle {
         'body' => $msg,
     }) if $subject && $msg;
 
-    LJ::statushistory_add($u->{'userid'}, $sys_u, $status_history) if $status_history;
+    LJ::statushistory_add($u->{'userid'}, $sys_u, @status_history) if @status_history;
 
     return 1;
 }

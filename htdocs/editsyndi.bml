@@ -8,16 +8,15 @@ body<=
     use Class::Autouse qw(LJ::MassPrivacy);
     BML::decl_params(_default => qr/./);
 
-    my $remote = LJ::get_remote();
-    return "<?needlogin?>" unless $remote;
-
-    my $u = LJ::load_user($remote->{'user'});
+    my $u = LJ::get_remote();
+    return "<?needlogin?>" unless $u;
 
     return "This feature is currently disabled."
         if $LJ::DISABLED{mass_privacy};
 
-    return "<?standout $ML{'.unable'} standout?>"
-        unless $u && LJ::is_enabled('show_copyright', $u);
+   return '<div class="warningbar" style="background: url(' . $LJ::IMGPREFIX . '/message-warning.gif) repeat-x #FFFFDD;">'
+          . $ML{'.unable'} . '</div>' 
+        unless $u && LJ::is_enabled('default_copyright', $u);
 
     my $mode = $POST{'mode'} || $GET{'mode'} || "init";
     my $more_public = 0; # flag indiciating if security is becoming more public
@@ -59,7 +58,6 @@ body<=
         }
     }
 
-    # map security form values to 0) DB value 1) From string 2) To string
     my %publicity = ('permit'   => BML::ml('.label.publicity.permit'),
                      'restrict' => BML::ml('.label.publicity.restrict') );
 
@@ -78,13 +76,13 @@ body<=
         $ret .= "<table><tr><td>\n";
         $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'time',
                                  'value' => 'all', 'id' => 'time_all',
-                                 'checked' => ($POST{time} eq 'time_all') })
+                                 'selected' => ($POST{time} eq 'all') })
                 . "</td>";
         $ret .= "<td><b><label for='time_all'>$ML{'.timeframe.all'}</label></b></td></tr>";
         $ret .= "<tr><td valign='top'>";
         $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'time',
                                  'value' => 'range', 'id' => 'time_range',
-                                 'checked' => ($POST{time} eq 'time_range') })
+                                 'selected' => ($POST{time} eq 'range') })
                 . "</td>";
         $ret .= "<td><b><label for='time_range'>$ML{'.timeframe.range'}</a></b><br />\n";
         $ret .= "<div style='float: left; text-align: right'>$ML{'.timeframe.range.start'}: ";
@@ -105,12 +103,17 @@ body<=
                                   map { $_, $_ } (1..31)) . "<br/>\n";
         $ret .= "</td></tr></table>";
 
-        my @publ = ("permit", $publicity{'permit'},
-                    "restrict", $publicity{'restrict'});
-
+        my $selected_publicity = $POST{publicity} || ($u->prop('default_copyright') eq 'C' ? 'restrict' : 'permit');
         $ret .= "<?h1 $ML{'.publicity'} h1?>";
-        $ret .= LJ::html_select({ 'name' => 'publicity',
-                                  'selected' => $POST{publicity} }, @publ) . "<br />\n";
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'publicity',
+                                 'value' => 'permit', 'id' => 'publicity_permit',
+                                 'selected' => ($selected_publicity eq 'permit') });
+        $ret .= "<label for='publicity_permit'>$publicity{'permit'}</label>";
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'publicity',
+                                 'value' => 'restrict', 'id' => 'publicity_restrict',
+                                 'selected' => ($selected_publicity eq 'restrict') });
+        $ret .= "<label for='publicity_restrict'>$publicity{'restrict'}</label>";
+        $ret .= "<br />\n";
 
         $ret .= LJ::form_auth();
         $ret .= LJ::html_hidden("mode","change");
@@ -118,7 +121,7 @@ body<=
         $ret .= "</form>";
 
         $ret .= "<p>" . BML::ml('.also_change_privacy', { aopts => "href='/editprivacy.bml'" }) . "</p>"
-            if $u && LJ::SUP->is_sup_enabled($u);
+            if LJ::is_enabled('default_copyright', $u);
 
         return $ret;
 
@@ -148,12 +151,10 @@ body<=
                 $body .= ", between " . $s_dt->ymd . " and " . $e_dt->ymd;
             }
             $posts = $u->get_post_count(
-                       'publicity'=> $POST{'publicity'},
                      'start_date' => $s_unixtime,
                        'end_date' => $e_unixtime + 24*60*60 );
         } else {
-            $posts = $u->get_post_count(
-                       'publicity'=> $publicity{$POST{'publicity'}} );
+            $posts = $u->get_post_count;
         }
 
         $body .= ".<p>";
@@ -175,7 +176,7 @@ body<=
         }
 
         $body .= "<p>" . BML::ml('.also_change_privacy', { aopts => "href='/editprivacy.bml'" }) . "</p>"
-            if $u && LJ::SUP->is_sup_enabled($u);
+            if LJ::is_enabled('default_copyright', $u);
 
         return $body;
 
@@ -190,10 +191,10 @@ body<=
                                             'e_unixtime' => $POST{e_unixtime} );
 
             if ($handle) {
-                $u->log_event('mass_publicity_change', {    remote => $remote,
-                                                            publicity  => $POST{publicity},
-                                                            s_unixtime => $POST{s_unixtime},
-                                                            e_unixtime => $POST{e_unixtime} } );
+                $u->log_event('mass_publicity_change', { remote => $u,
+                                                         publicity  => $POST{publicity},
+                                                         s_unixtime => $POST{s_unixtime},
+                                                         e_unixtime => $POST{e_unixtime} } );
                 return BML::redirect("$LJ::SITEROOT/editsyndi.bml?mode=secured");
             }
         }
