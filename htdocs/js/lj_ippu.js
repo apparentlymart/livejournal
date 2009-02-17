@@ -40,7 +40,7 @@ LJ_IPPU = new Class ( IPPU, {
   show: function() {
     LJ_IPPU.superClass.show.apply(this);
     var setupCallback = this.setup_lj_ippu.bind(this);
-    window.setTimeout(setupCallback, 300);
+    this.timerSetup = window.setTimeout(setupCallback, 300);
   },
 
   setup_lj_ippu: function (evt) {
@@ -48,11 +48,11 @@ LJ_IPPU = new Class ( IPPU, {
    //DOM.addEventListener($(this.uniqId + "_cancel"), "click", cancelCallback, true);
    $(this.uniqId + "_cancel").onclick = function(){
 	    cancelCallback();
-	    
     };
   },
 
   hide: function() {
+    clearInterval(this.timerSetup);
     LJ_IPPU.superClass.hide.apply(this);
   }
 } );
