@@ -193,6 +193,10 @@ sub create_community {
 
     LJ::set_comm_settings($u, $remote, { membership => $opts{membership},
                                          postlevel => $opts{postlevel} });
+
+    my $theme = LJ::S2Theme->load_by_uniq($LJ::DEFAULT_THEME_COMMUNITY);
+    LJ::Customize->apply_theme($u, $theme) if $theme;
+
     return $u;
 }
 

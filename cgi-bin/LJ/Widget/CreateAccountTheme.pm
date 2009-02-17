@@ -22,10 +22,24 @@ sub render_body {
     $ret .= "<h2>" . $class->ml('widget.createaccounttheme.title') . "</h2>";
     $ret .= "<p>" . $class->ml('widget.createaccounttheme.info') . "</p>";
 
+    my @featured = LJ::S2Theme->load_by_cat("featured");
+    my %main_themes = map { $_ => 1 } @LJ::MAIN_DEFAULT_THEME_PERSONAL;
+    for (my $i = 0; $i < @featured; $i++) {
+        next unless $main_themes{$featured[$i]->uniq};
+        splice(@featured, $i, 1);
+        $i--; # just deleted element from array
+    }
+    my @random;
+    foreach (0 .. 7) {
+        my $index = int(rand(scalar(@featured)));
+        push @random, splice(@featured, $index, 1);
+    }
+    unshift @random, LJ::S2Theme->load_by_uniq($_) foreach @LJ::MAIN_DEFAULT_THEME_PERSONAL;
+
     my $count = 0;
     $ret .= "<table cellspacing='3' cellpadding='0' align='center'>\n";
-    foreach my $uniq (@LJ::CREATE_ACCOUNT_THEMES) {
-        my $theme = LJ::S2Theme->load_by_uniq($uniq);
+    foreach my $theme (@random) {
+        my $uniq = $theme->uniq;
         my $image_class = $theme->uniq;
         $image_class =~ s/\//_/;
         my $name = $theme->name . ", " . $theme->layout_name;
