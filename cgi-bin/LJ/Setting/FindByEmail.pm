@@ -30,15 +30,13 @@ sub as_html {
 
     $ret .= "<br />";
     my @options;
-    push @options, { text => $class->ml('settings.option.select'), value => '' }
-        unless $u->opt_findbyemail;
     push @options, { text => LJ::Lang::ml('settings.findbyemail.opt.Y'), value => "Y" };
     push @options, { text => LJ::Lang::ml('settings.findbyemail.opt.H'), value => "H" };
     push @options, { text => LJ::Lang::ml('settings.findbyemail.opt.N'), value => "N" };
     $ret .= LJ::html_select({ 'name' => "${key}opt_findbyemail",
                               'id' => "${key}opt_findbyemail",
                          ###  'class' => "select",
-                              'selected' => $u->opt_findbyemail || '' },
+                              'selected' => $u->opt_findbyemail || 'H' },
                               @options );
 
     # Display helper text about setting?
