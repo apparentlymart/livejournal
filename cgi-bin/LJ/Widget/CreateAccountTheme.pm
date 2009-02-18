@@ -23,7 +23,7 @@ sub render_body {
     $ret .= "<p>" . $class->ml('widget.createaccounttheme.info') . "</p>";
 
     my @featured = LJ::S2Theme->load_by_cat("featured");
-    my %main_themes = map { $_ => 1 } @LJ::MAIN_DEFAULT_THEME_PERSONAL;
+    my %main_themes = map { $_ => 1 } @LJ::DEFAULT_THEMES_PERSONAL;
     for (my $i = 0; $i < @featured; $i++) {
         next unless $main_themes{$featured[$i]->uniq};
         splice(@featured, $i, 1);
@@ -34,7 +34,7 @@ sub render_body {
         my $index = int(rand(scalar(@featured)));
         push @random, splice(@featured, $index, 1);
     }
-    unshift @random, LJ::S2Theme->load_by_uniq($_) foreach @LJ::MAIN_DEFAULT_THEME_PERSONAL;
+    unshift @random, LJ::S2Theme->load_by_uniq($_) foreach @LJ::DEFAULT_THEMES_PERSONAL;
 
     my $count = 0;
     $ret .= "<table cellspacing='3' cellpadding='0' align='center'>\n";
