@@ -151,3 +151,21 @@ div.lj_ippu_titlebar {
     overflow:hidden;
     text-decoration:none;
 }
+
+
+/* Link to current LJ.com version 
+------------------------------------ */
+.current-version {
+    margin:10px 0;
+    padding:0;
+    text-align:left;
+    }
+    .current-version DT,
+    .current-version DD {
+        display:inline;
+        margin:0;
+        padding: 0 3px 0 0;
+        text-align:left;
+        white-space:nowrap;
+        font-size:11px;
+        }
