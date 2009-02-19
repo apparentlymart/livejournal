@@ -31,7 +31,7 @@ sub render_body {
 
     $body .= "<p>" .
              $class->html_submit( $class->ml('settings.settingprod.update') ) .
-             ' &nbsp;<a href="#" onclick="settingProd.cancel();return false">' . $class->ml('settings.settingprod.remindlater') . "</a>";
+             ' &nbsp;<a href="#" onclick="settingProd.cancel();return false">' . $class->ml('settings.settingprod.remindlater') . "</a>" .
              "</p>";
     $body .= $class->html_hidden({ name => 'setting_key', value => $key });
     $body .= "</div>";
