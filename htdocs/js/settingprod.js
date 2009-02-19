@@ -3,7 +3,7 @@ function displaySettingProd(sett, fname, title, options) {
     if (!title) title = 'New Setting!';
     if (!options) options = {}
 
-    var settingProd = new LJWidgetIPPU_SettingProd({
+    window.settingProd = new LJWidgetIPPU_SettingProd({
         title: title,
         center: true,
         not_view_close: options.close === false ? true : false // options.close may be undefined, default - true
