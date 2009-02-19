@@ -122,6 +122,7 @@ CREATE TABLE faq (
   answer text,
   sortorder int(11) default NULL,
   faqcat varchar(20) default NULL,
+  uses int(11) NOT NULL default '0',
   lastmodtime datetime default NULL,
   lastmoduserid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (faqid)
@@ -3574,6 +3575,12 @@ register_alter(sub {
         do_alter("faq",
                  "ALTER TABLE faq ADD summary TEXT AFTER question");
     }
+    
+    if (!column_type("faq", "uses")) {
+        do_alter("faq",
+                 "ALTER TABLE faq ADD uses int(11) NOT NULL default 0");
+    }
+
 
     if (column_type("spamreports", "srid") eq '') {
         do_alter("spamreports",

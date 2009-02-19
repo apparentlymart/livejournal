@@ -28,6 +28,7 @@ my $opt_nostyles;
 my $opt_forcebuild = 0;
 my $opt_compiletodisk = 0;
 my $opt_innodb;
+my $opt_force_production_alter;
 exit 1 unless
 GetOptions("runsql" => \$opt_sql,
            "drop" => \$opt_drop,
@@ -41,6 +42,7 @@ GetOptions("runsql" => \$opt_sql,
            "forcebuild|fb" => \$opt_forcebuild,
            "ctd" => \$opt_compiletodisk,
            "innodb" => \$opt_innodb,
+           "force-alter"   => \$opt_force_production_alter,
            );
 
 $opt_nostyles = 1 unless LJ::is_enabled("update_styles");
@@ -58,6 +60,9 @@ if ($opt_help) {
   -l  --listtables   Print used tables, one per line.
       --nostyles     When used in combination with --populate, disables population
                      of style information.
+      --force-alter  By default, alter statements on production database are not 
+                     executed (they may take too much time). This option forces
+                     these statements to be executed
 ";
 }
 
@@ -805,11 +810,16 @@ sub do_alter
 {
     my ($table, $sql) = @_;
     return if $cluster && ! defined $clustered_table{$table};
-
-    do_sql($sql);
-
-    # columns will have changed, so clear cache:
-    clear_table_info($table);
+    
+    if ($LJ::IS_DEV_SERVER || $opt_force_production_alter) {
+        do_sql($sql);
+        # columns will have changed, so clear cache:
+        clear_table_info($table);
+    } else {
+        warn "WARNING: Altering tables on production DB is disabled\n";
+        warn "The following SQL will NOT be executed without --force-alter flag:\n";
+        warn $sql, "\n";
+    }
 }
 
 sub create_table
