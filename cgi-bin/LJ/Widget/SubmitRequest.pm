@@ -108,7 +108,7 @@ sub render_body {
         $ret .= "<p><b>" . $class->ml('widget.support.submit.captcha') . "</b><br />";
         $ret .= "<div style='margin-left: 30px'>";
         $ret .= "<p><?de " . $class->text_captcha(%opts) . " de?></p>";
-        $ret .= "<div style='position: relative; height: 1%;'>" . $c->get_options_setter({ theme => 'white' });
+        $ret .= "<div style='position: relative; height: 1%;'>" . $c->get_options_setter({ theme => 'white', lang => BML::get_language() });
         $ret .= $c->get_html( LJ::conf_test($LJ::RECAPTCHA{public_key}) ) . "</div>";
         $ret .= "</div></p>";
     }

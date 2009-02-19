@@ -204,7 +204,7 @@ sub render_body {
             }
 
             my $c = Captcha::reCAPTCHA->new;
-            $ret .= $c->get_options_setter({ theme => 'white' });
+            $ret .= $c->get_options_setter({ theme => 'white', lang => BML::get_language() });
             $ret .= $c->get_html( LJ::conf_test($LJ::RECAPTCHA{public_key}), '', $LJ::IS_SSL );
         } else {
             # flag to indicate they've submitted with 'audio' as the answer to the captcha challenge
