@@ -60,7 +60,6 @@ function pageload (dotime) {
 }
 
 function customboxes (e) {
-    copyright();
     if (! e) var e = window.event;
     if (! document.getElementById) return false;
 
@@ -100,14 +99,23 @@ function setCopyrightUpdate() {
 }
 
 function setCopyrightEdit() {
-    if ($('prop_copyright') && $('security') && $('security').value != "public") {
-        $('prop_copyright').checked = 0;
-        $('prop_copyright').disabled = true;
-        $('defined_copyright').value = '0';
-    }
+    if ($('security') && $('prop_copyright')) {
+	var copyright_flag=$('prop_copyright').checked;
+	if($('security').value!='public'){
+		$('prop_copyright').checked=false;
+            	$('prop_copyright').disabled = true;
+	}		
+	$('security').onchange=function(){
+		copyright(copyright_flag);
+		customboxes();
+	}
+	$('prop_copyright').onchange=function(){
+		copyright_flag=$('prop_copyright').checked;
+	}
+     }
 }
 
-function copyright () {
+function copyright(copyright_flag) {
     if ($('security') && $('prop_copyright')) {
         if ($('security').value != "public") {
             $('prop_copyright').checked = 0;
@@ -118,8 +126,12 @@ function copyright () {
                 $('prop_copyright').checked = 1;
             }
             $('prop_copyright').disabled = false;
+	    $('prop_copyright').checked=copyright_flag;
+	    
 	    $('defined_copyright').value = '1';
-        }
+	   
+     	}
+
     }
 }
 
