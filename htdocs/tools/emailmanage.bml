@@ -92,7 +92,7 @@ body<=
     # current address
     $ret .= "<?h1 $ML{'.address.current.title'} h1?>\n";
     $ret .= "<div style='margin: 20px 0 20px 30px;'><b>";
-    $ret .= $u->email_raw . "</b></div>\n";
+    $ret .= $u->email_raw . "</b> " . BML::ml('.in_use_since', { 'time' => $lastdate }) . "</div>\n";
 
     # old addresses
     $ret .= "<?h1 $ML{'.address.old.title'} h1?>\n";
