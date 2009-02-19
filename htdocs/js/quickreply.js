@@ -59,7 +59,10 @@
 
         lastDiv = targetname;
 
-        if(!subject.value) subject.value = newsubject;
+        if(!subject.value || subject.value == subject.defaultValue || subject.value.substr(0, 4) == 'Re: ') {
+          subject.value = newsubject;
+          subject.defaultValue = newsubject;
+        }
 
         if(cur_div.className) {
           qr_form_div.className = cur_div.className;
@@ -258,5 +261,5 @@
     }
 
     //after the functions have been defined, register them
-    regEvent(window, 'load', restore_entry);
+    LiveJournal.register_hook('page_load', restore_entry);
     regEvent(window, 'unload', save_entry);
