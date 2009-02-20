@@ -8,7 +8,7 @@ use HTML::Template::Pro;
 # with some redefined default values.
 sub new {
     my $class = shift;
-    my $opts = shift;
+    my $opts = (ref $_[0]) ? shift : {};
     
     if ($opts->{'use_expr'}) {
         return HTML::Template::Pro->new(
