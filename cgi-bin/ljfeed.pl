@@ -614,6 +614,7 @@ sub create_view_foaf {
     $ret .= "   xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n";
     $ret .= "   xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\n";
     $ret .= "   xmlns:ya=\"http://blogs.yandex.ru/schema/foaf/\"\n";
+    $ret .= "   xmlns:lj=\"http://www.livejournal.org/rss/lj/1.0/\"\n";
     $ret .= "   xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\"\n";
     $ret .= "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n";
 
@@ -629,8 +630,9 @@ sub create_view_foaf {
     $ret .= ($comm ? "  <foaf:Group>\n" : "  <foaf:Person>\n");
     $ret .= "    <foaf:nick>$u->{user}</foaf:nick>\n";
     $ret .= "    <foaf:name>". LJ::exml($u->{name}) ."</foaf:name>\n";
-    $ret .= "    <foaf:openid rdf:resource=\"" . $u->journal_base . "/\" />\n"
-        unless $comm;
+    $ret .= "    <lj:journaltitle>". LJ::exml($u->{journaltitle}) ."</lj:journaltitle>\n" if $u->{journaltitle};
+    $ret .= "    <lj:journalsubtitle>". LJ::exml($u->{journalsubtitle}) ."</lj:journalsubtitle>\n" if $u->{journalsubtitle};
+    $ret .= "    <foaf:openid rdf:resource=\"" . $u->journal_base . "/\" />\n" unless $comm;
 
     # user location
     if ($u->{'country'}) {
