@@ -64,7 +64,7 @@ sub ping_post {
 
                     );
 
-    LJ::Talk::screen_comment($target_entry->journal, $target_entry->jitemid, $comment->jtalkid);
+    LJ::Talk::screen_comment($target_entry->journal, $target_entry->jitemid, $comment->jtalkid)
         if ref $comment;
         
     return $comment;
