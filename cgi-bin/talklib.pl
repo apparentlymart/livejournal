@@ -1186,6 +1186,10 @@ sub load_comments
     return map { $posts->{$_} } @top_replies;
 }
 
+# XXX these strings should be in talk, but moving them means we have
+# to retranslate.  so for now we're just gonna put it off.
+my $SC = '/talkpost_do.bml';
+
 sub talkform {
     # Takes a hashref with the following keys / values:
     # remote:      optional remote u object
@@ -1453,6 +1457,9 @@ sub talkform {
         }
     }
 
+    my $remote_can_comment = 1;
+    $remote_can_comment = 0 if $journalu->{'opt_whocanreply'} eq 'friends' and $remote and not LJ::is_friend($journalu, $remote);
+
     if ($journalu->{'opt_whocanreply'} eq 'friends') {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='center' width='20'><img src='$LJ::IMGPREFIX/anonymous.gif' /></td>";
@@ -1462,17 +1469,26 @@ sub talkform {
         $ret .= BML::ml($stringname, {'username'=>"<b>$journalu->{'user'}</b>"});
         $ret .= "</tr>\n";
 
-        ## the if clause is a copy of code from ($journalu->{'opt_whocanreply'} eq 'all')`
+        ## the if clause was a copy of code from ($journalu->{'opt_whocanreply'} eq 'all')`
         if (LJ::OpenID->consumer_enabled) {
             # OpenID!!
             # Logged in
             if (defined $oid_identity) {
                 $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
-                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
-                    $whocheck->('openid_cookie') . "/>";
-                $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
+                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td>";
+                if ($remote_can_comment) {
+                    $ret .= "<td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
+                        $whocheck->('openid_cookie') . "/>";
+                    $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
+                } else {
+                    $ret .= "<td align='center'>( )</td><td align='left'><b><font color='#c0c0c0'>OpenID identity:</font></b>&nbsp;";
+                }
 
-                $ret .= "<i>" . $remote->display_name . "</i>";
+                $ret .= "<font color='#000000'><b><i>" . $remote->display_name . "</i></b></font>";
+                unless ($remote_can_comment) {
+                    my $msg = $journalu->is_comm ? "notamember" : "notafriend";
+                    $ret .= "&nbsp;- " . BML::ml("$SC.error.$msg", {'user' => $journalu->{'user'} });
+                }
 
                 $ret .= $BML::ML{'.opt.willscreen'} if $screening;
                 $ret .= "</td></tr>\n";
@@ -1501,7 +1517,7 @@ sub talkform {
     }
 
     if ($remote && !defined $oid_identity) {
-        $ret .= "<tr valign='middle' id='ljuser_row'>";
+        $ret .= "<tr valign='middle' id='ljuser_row" . ($remote_can_comment ? '' : '_cannot') . "'>";
         my $logged_in = LJ::ehtml($remote->display_name);
 
         # Don't worry about a real href since js hides the row anyway
@@ -1512,12 +1528,25 @@ sub talkform {
             $ret .= "<td align='center'>( )</td>";
             $ret .= "<td align='left'><span class='ljdeem'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$logged_in</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$journalu->{'user'}}) . $other_user . "</td>";
         } else {
-            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/userinfo.gif'  onclick='handleRadios(1);' /></td><td align='center'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote'" .
-                     $whocheck->('remote') .
-                     " /></td>";
-            $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$logged_in</i>"}) . "</label>\n";
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/userinfo.gif'  onclick='handleRadios(1);' /></td>";
+            if ($remote_can_comment) {
+                $ret .= "<td align='center'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote'" .
+                        $whocheck->('remote') .
+                        " /></td>";
+            } else {
+                $ret .= "<td align='center'>( )</td>";
+            }
+            $ret .= "<td align='left'>";
+            $ret .= $remote_can_comment ? "<label for='talkpostfromremote'>" : "<font color='#c0c0c0'>";
+            $ret .= BML::ml(".opt.loggedin", {'username'=>"<font color='#000000'><b><i>$logged_in</i></b></font>"});
+            $ret .= $remote_can_comment ? "</label>\n" : "</font>\n";
 
-            $ret .= $other_user;
+            if ($remote_can_comment) {
+                $ret .= $other_user;
+            } else {
+                my $msg = $journalu->is_comm ? "notamember" : "notafriend";
+                $ret .= "&nbsp;- " . BML::ml("$SC.error.$msg", {'user' => $journalu->{'user'} });
+            }
 
             $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
             if ($screening eq 'A' ||
@@ -1532,7 +1561,7 @@ sub talkform {
     # ( ) LiveJournal user:
     $ret .= "<tr valign='middle' id='otherljuser_row' name='otherljuser_row'>";
     $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/pencil.gif' onclick='handleRadios(2);' /></td><td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj'" .
-        $whocheck->('ljuser') . "/>";
+        ( $remote_can_comment ? $whocheck->('ljuser') : ' checked="checked"' ) . "/>";
     $ret .= "</td><td align='left'><b><label for='talkpostfromlj' onclick='handleRadios(2); return false;'>$BML::ML{'.opt.ljuser2'}</label></b> ";
     $ret .= $BML::ML{'.opt.willscreenfriend'} if $screening eq 'F';
     $ret .= $BML::ML{'.opt.willscreen'} if $screening eq 'A';
