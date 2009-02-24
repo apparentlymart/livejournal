@@ -2719,10 +2719,6 @@ sub enter_comment {
     return $jtalkid;
 }
 
-# XXX these strings should be in talk, but moving them means we have
-# to retranslate.  so for now we're just gonna put it off.
-my $SC = '/talkpost_do.bml';
-
 sub init {
     my ($form, $remote, $need_captcha, $errret) = @_;
     my $sth;
