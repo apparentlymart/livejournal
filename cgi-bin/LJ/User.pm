@@ -1705,14 +1705,23 @@ sub best_guess_age {
 
 sub gender_for_adcall {
     my $u = shift;
+    my $format = shift || '6a';
     croak "Invalid user object" unless LJ::isu($u);
 
-    my $gender = $u->prop('gender');
-    if ($gender && $gender !~ /^U/i) {
-        return uc(substr($gender, 0, 1)); # M|F
+    my $gender = $u->prop('gender') || '';
+    if ($format eq '6a') {
+        if ($gender && $gender !~ /^U/i) {
+            return uc(substr($gender, 0, 1)); # M|F
+        } else {
+            return "unspecified";
+        }
+    } elsif ($format eq 'dc') {
+        $gender = uc(substr($gender, 0, 1)) || '';
+        return  ($gender eq 'M') ? 1 :
+                ($gender eq 'F') ? 2 : 0;
+    } else {
+        return;
     }
-
-    return "unspecified";
 }
 
 sub should_fire_birthday_notif {
