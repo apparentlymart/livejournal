@@ -63,7 +63,7 @@ LJ::register_hook("add_extra_entryform_fields", sub {
                               { value => "L", text => BML::ml("pingback.option.lj_only") },
                               { value => "D", text => BML::ml("pingback.option.disabled") },
                               ) . "
-        " . LJ::help_icon_html("pingback", "", " ") . "
+        " . LJ::help_icon_html("pingback_faq", "", " ") . "
         </span>
     </p>
     ";
