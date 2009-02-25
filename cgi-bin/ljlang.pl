@@ -652,7 +652,14 @@ sub get_text_multi
 
         my $cache_key = "ml.${lang}.${dmid}.${code}";
         $TXT_CACHE{$cache_key} = $text;
-        LJ::MemCache::set($cache_key, $text);
+        if ($text) {
+            LJ::MemCache::set($cache_key, $text);
+        } else {
+            ## Do not cache empty values forever - they may be inserted later.
+            ## This is a hack, what we actually need is a mechanism to delete
+            ## the entire language tree for a given $code if it's updated.
+            LJ::MemCache::set($cache_key, $text, 24*3600);
+        }
     }
 
     return \%strings;
