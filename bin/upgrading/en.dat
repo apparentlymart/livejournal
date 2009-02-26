@@ -2653,6 +2653,8 @@ settings.error.year.outofrange=Invalid birthday year.
 
 settings.findbyemail.error.invalid=Invalid Option
 
+settings.findbyemail.notice=Please note, that if you have chosen "Show email address" on the <a href="[[siteroot]]/manage/profile/">Edit Profile</a> page, it may be indexed by third party search engines even if you choose not to be found by this option.
+
 settings.findbyemail.question=Do you want users to be able to find you by searching for your primary email address?
 
 settings.findbyemail.helper=This setting will allow you to have your email address searchable without having to display it anywhere on [[sitename]]. You can also choose whether or not you want your [[siteabbrev]] identity to be shared in the search results.

@@ -45,7 +45,11 @@ sub as_html {
                 sitename => $LJ::SITENAMESHORT,
                 siteabbrev => $LJ::SITENAMEABBREV }) .
             "</div>" if ($helper);
-
+    $ret .= 
+        "<div class='helper'>" . 
+        $class->ml('settings.findbyemail.notice', {siteroot => $LJ::SITEROOT}) . 
+        "</div>";
+                
     $ret .= $class->errdiv($errs, "opt_findbyemail");
 
     return $ret;
