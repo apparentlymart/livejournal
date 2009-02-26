@@ -301,6 +301,7 @@ sub create_view_rss
     $ret .= "  <lastBuildDate>$journalinfo->{builddate}</lastBuildDate>\n";
     $ret .= "  <generator>LiveJournal / $LJ::SITENAME</generator>\n";
     $ret .= "  <lj:journal>" . $u->user . "</lj:journal>\n";
+    $ret .= "  <lj:journalid>" . $u->userid . "</lj:journalid>\n";
     $ret .= "  <lj:journaltype>" . $u->journaltype_readable . "</lj:journaltype>\n";
     $ret .= "  <copyright>" . $copyright . "</copyright>\n" if $copyright;
     # TODO: add 'language' field when user.lang has more useful information
@@ -354,7 +355,10 @@ sub create_view_rss
         $ret .= "  <media:title type=\"plain\">" . LJ::exml($it->{music}) . "</media:title>\n" if $it->{music};
         $ret .= "  <lj:mood>" . LJ::exml($it->{mood}) . "</lj:mood>\n" if $it->{mood};
         $ret .= "  <lj:security>" . LJ::exml($it->{security}) . "</lj:security>\n" if $it->{security};
-        $ret .= "  <lj:poster>" . LJ::exml($poster->user) . "</lj:poster>\n" unless LJ::u_equals($u, $poster);
+        unless (LJ::u_equals($u, $poster)) {
+            $ret .= "  <lj:poster>" . LJ::exml($poster->user) . "</lj:poster>\n";
+            $ret .= "  <lj:posterid>" . $poster->userid . "</lj:posterid>\n";
+        }
         $ret .= "</item>\n";
     }
 
@@ -449,6 +453,7 @@ sub create_view_atom
         $feed->updated( LJ::time_to_w3c($j->{'modtime'}, 'Z') );
 
         my $ljinfo = $xml->createElement( 'lj:journal' );
+        $ljinfo->setAttribute( 'userid', $u->userid );
         $ljinfo->setAttribute( 'username', LJ::exml($u->user) );
         $ljinfo->setAttribute( 'type', LJ::exml($u->journaltype_readable) );
         $xml->getDocumentElement->appendChild( $ljinfo );
@@ -498,6 +503,7 @@ sub create_view_atom
             # and the lj-specific stuff
             my $postauthor = $entry_xml->createElement( 'lj:poster' );
             $postauthor->setAttribute( 'user', LJ::exml($poster->user));
+            $postauthor->setAttribute( 'userid', $poster->userid);
             $entry_xml->getDocumentElement->appendChild( $postauthor );
         }
 
