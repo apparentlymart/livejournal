@@ -279,7 +279,9 @@ sub clean
                     # can pass in tokens to override passing the hook the @capture array
                     my ($token, $override_capture) = @_;
                     my $capture = $override_capture ? [$token] : \@capture;
-                    my $expanded = ($name =~ /^\w+$/) ? LJ::run_hook("expand_template_$name", $capture) : "";
+                    # In $expanded we must has valid unicode string.
+                    my $expanded = ($name =~ /^\w+$/) ?
+                        Encode::decode_utf8(LJ::run_hook("expand_template_$name", $capture)) : "";
                     $newdata .= $expanded || "<b>[Error: unknown template '" . LJ::ehtml($name) . "']</b>";
                 };
 
@@ -295,7 +297,7 @@ sub clean
 
             if ($tag eq "lj-replace") {
                 my $name = $attr->{name} || "";
-                my $replace = ($name =~ /^\w+$/) ? LJ::lj_replace($name, $attr) : undef;
+                my $replace = ($name =~ /^\w+$/) ? Encode::decode_utf8(LJ::lj_replace($name, $attr)) : undef;
                 $newdata .= defined $replace ? $replace : "<b>[Error: unknown lj-replace key '" . LJ::ehtml($name) . "']</b>";
 
                 next TOKEN;
