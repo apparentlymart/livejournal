@@ -10,14 +10,14 @@ sub work {
     my ($class, $job) = @_;
     my $args = $job->arg;
     my $client = $job->handle->client;
-    my $res = eval {
-        send_ping(uri  => $args->{uri},
-                  text => $args->{text},
-                  mode => $args->{mode},
-                  );
-    };
-    $job->completed if $res;
-
+    
+    send_ping(uri  => $args->{uri},
+              text => $args->{text},
+              mode => $args->{mode},
+              );
+                  
+    $job->completed;
+    
 }
 
 sub send_ping {
@@ -37,8 +37,10 @@ sub send_ping {
     my $ua  = LWP::UserAgent->new;
     my $res = $ua->request($req);
 
-    return 1 if $res->content eq 'OK';
-    return 0;
+    die $res->content
+        unless $res->content eq 'OK';
+
+    return 1;
 
 }
 
