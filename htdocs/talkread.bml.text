@@ -31,13 +31,21 @@
 
 .subjectdeleted=[deleted]
 
+.talkmulti.all=All
+
+.talkmulti.all.screen=Screen
+
+.talkmulti.all.unscreen=Unscreen
+
 .talkmulti.delete=Delete
 
 .talkmulti.deletespam=Delete as Spam
 
-.talkmulti.des=<b>Mass action</b> on selected comments:
+.talkmulti.des=<b>Mass action</b> on comments:
 
 .talkmulti.screen=Screen
+
+.talkmulti.selected=Selected
 
 .talkmulti.submit=Perform Action
 

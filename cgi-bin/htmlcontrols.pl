@@ -139,25 +139,65 @@ sub html_select
             $text = shift @items;
         }
 
-        my $sel = "";
-        # multiple-mode or single-mode?
-        if (ref $selref eq 'HASH' && $selref->{$value} ||
+        if (ref $text) {
+            my @sub_items = @$text;
+
+            $ret .= "<optgroup label='$value'>";
+
+            while (defined (my $value = shift @sub_items)) {
+                my $it = {};
+                my $text;
+                if (ref $value) {
+                    $it = $value;
+                    $value = $it->{value};
+                    $text = $it->{text};
+                } else {
+                    $text = shift @sub_items;
+                }
+
+                my $sel = "";
+                # multiple-mode or single-mode?
+                if (ref $selref eq 'HASH' && $selref->{$value} ||
+                    $opts->{'selected'} eq $value && !$did_sel++) {
+
+                    $sel = " selected='selected'";
+                }
+                $value  = $ehtml ? ehtml($value) : $value;
+
+                my $id;
+                if ($opts->{'include_ids'} && $opts->{'name'} ne "" && $value ne "") {
+                    $id = " id='$opts->{'name'}_$value'";
+                }
+
+                # is this individual option disabled?
+                my $dis = $it->{'disabled'} ? " disabled='disabled' style='color: #999;'" : '';
+
+                $ret .= "<option value=\"$value\"$id$sel$dis>" .
+                          ($ehtml ? ehtml($text) : $text) . "</option>\n";
+            }
+    
+            $ret .= "</optgroup>";
+        } else { # non-grouped options
+            my $sel = "";
+            # multiple-mode or single-mode?
+            if (ref $selref eq 'HASH' && $selref->{$value} ||
             $opts->{'selected'} eq $value && !$did_sel++) {
 
-            $sel = " selected='selected'";
+                $sel = " selected='selected'";
+            }
+            $value  = $ehtml ? ehtml($value) : $value;
+
+            my $id;
+            if ($opts->{'include_ids'} && $opts->{'name'} ne "" && $value ne "") {
+                $id = " id='$opts->{'name'}_$value'";
+            }
+
+            # is this individual option disabled?
+            my $dis = $it->{'disabled'} ? " disabled='disabled' style='color: #999;'" : '';
+
+            $ret .= "<option value=\"$value\"$id$sel$dis>" .
+                      ($ehtml ? ehtml($text) : $text) . "</option>\n";
         }
-        $value  = $ehtml ? ehtml($value) : $value;
-
-        my $id;
-        if ($opts->{'include_ids'} && $opts->{'name'} ne "" && $value ne "") {
-            $id = " id='$opts->{'name'}_$value'";
-        }
-
-        # is this individual option disabled?
-        my $dis = $it->{'disabled'} ? " disabled='disabled' style='color: #999;'" : '';
-
-        $ret .= "<option value=\"$value\"$id$sel$dis>" .
-                 ($ehtml ? ehtml($text) : $text) . "</option>\n";
     }
     $ret .= "</select>";
     return $ret;

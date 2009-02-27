@@ -30,6 +30,10 @@ if you would like to screen, unscreen, or delete the comments.
 
 .title.delete=Delete Multiple Comments
 
+.title.all.screen=Screen All Comments
+
+.title.all.unscreen=Unscreen All Comments
+
 .title.screen=Screen Multiple Comments
 
 .title.unscreen=Unscreen Multiple Comments

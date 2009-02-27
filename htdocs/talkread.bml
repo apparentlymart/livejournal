@@ -834,10 +834,16 @@ my $old_url = 0;
              $ret .= "<p>$ML{'.talkmulti.des'} ";
              $ret .= LJ::html_select({'name' => 'mode' },
                                      ''           => '',
-                                     'unscreen'   => $ML{'.talkmulti.unscreen'},
-                                     'screen'     => $ML{'.talkmulti.screen'},
-                                     'delete'     => $ML{'.talkmulti.delete'},
-                                     'deletespam' => $ML{'.talkmulti.deletespam'},
+                                     $ML{'.talkmulti.selected'} => [
+                                        'unscreen'   => $ML{'.talkmulti.unscreen'},
+                                        'screen'     => $ML{'.talkmulti.screen'},
+                                        'delete'     => $ML{'.talkmulti.delete'},
+                                        'deletespam' => $ML{'.talkmulti.deletespam'},
+                                     ],
+                                     $ML{'.talkmulti.all'} => [
+                                        'all:unscreen' => $ML{'.talkmulti.all.unscreen'},
+                                        'all:screen'   => $ML{'.talkmulti.all.screen'},
+                                     ],
                                      );
              $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'},
                                            {

@@ -14,6 +14,10 @@
         $title = $ML{'.title.screen'};
     } elsif ($mode eq 'unscreen') {
         $title = $ML{'.title.unscreen'};
+    } elsif ($mode eq 'all:screen') {
+        $title = $ML{'.title.all.screen'};
+    } elsif ($mode eq 'all:unscreen') {
+        $title = $ML{'.title.all.unscreen'};
     } elsif ($mode eq 'delete' || $mode eq 'deletespam') {
         $title = $ML{'.title.delete'};
     } else {
@@ -27,12 +31,6 @@
     return $err->($ML{'.error.login'}) unless $remote;
     return $err->("<?requirepost?>") unless LJ::did_post();
 
-    my @talkids;
-    foreach (keys %POST) {
-        push @talkids, $1 if /^selected_(\d+)$/;
-    }
-    return $err->($ML{'.error.none_selected'}) unless @talkids;
-
     my $u = LJ::load_user($POST{'journal'});
     return $err->($ML{'talk.error.bogusargs'}) unless $u && $u->{'clusterid'};
     return $err->($LJ::MSG_READONLY_USER) if LJ::get_cap($u, "readonly");
@@ -43,6 +41,22 @@
     my $ditemid = $POST{'ditemid'}+0;
     my $commentlink = LJ::journal_base($u) . "/$ditemid.html";
     my $itemid = int($ditemid / 256);
+
+    my @talkids;
+    if ($mode eq 'all:screen' or $mode eq 'all:unscreen') {
+        my $comments = LJ::Talk::get_talk_data($u, 'L', $itemid);
+        @talkids = keys %$comments;
+    } else {
+        foreach (keys %POST) {
+            push @talkids, $1 if /^selected_(\d+)$/;
+        }
+    }
+    return $err->($ML{'.error.none_selected'}) unless @talkids;
+
+    # here 'all' cases are same as 'selected'
+    $mode = 'screen' if $mode eq 'all:screen';
+    $mode = 'unscreen' if $mode eq 'all:unscreen';
+
     my $log = $dbcr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=?",
                                        undef, $jid, $itemid);
     return $err->($ML{'.error.inconsistent_data'}) unless $log && $log->{'anum'} == ($ditemid & 255);
