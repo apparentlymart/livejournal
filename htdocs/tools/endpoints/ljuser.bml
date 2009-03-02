@@ -15,6 +15,7 @@
     };
 
     my $username = $POST{'username'};
+    my $usertitle = $POST{'usertitle'};
     my $u = LJ::load_user($username);
 
     my %ret;
@@ -24,8 +25,7 @@
 
     return $err->("No such user") unless $u;
 
-    $ret{ljuser} = LJ::ljuser($u);
-    $ret{userstr} = "<lj user=\"$username\">";
+    $ret{ljuser} = LJ::ljuser($u, { title => $usertitle });
 
     sleep(1.5) if $LJ::IS_DEV_SERVER;
 
