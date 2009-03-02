@@ -3145,7 +3145,6 @@ sub init {
 
             return $err->("Incorrect response to spam robot challenge.") unless $result->{is_valid} eq '1';
         } elsif (!LJ::is_enabled("recaptcha") && $form->{captcha_chal}) {
-
             # assume they won't pass and re-set the flag
             $$need_captcha = 1;
 
@@ -3185,6 +3184,10 @@ sub init {
 # </LJFUNC>
 sub require_captcha_test {
     my ($commenter, $journal, $body, $ditemid) = @_;
+
+    ## allow some users (our bots) to post without captchas in any rate
+    return if $commenter and 
+              grep { $commenter->username eq $_ } @LJ::NO_RATE_CHECK_USERS;
 
     ## anonymous commenter user =
     ## not logged-in user, or OpenID without validated e-mail
