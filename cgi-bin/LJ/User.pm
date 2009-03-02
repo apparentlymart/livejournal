@@ -173,9 +173,6 @@ sub create_personal {
         $u->set_prop("opt_findbyemail", 'H');
     }
 
-    my $theme = LJ::S2Theme->load_by_uniq($LJ::DEFAULT_THEMES_PERSONAL[0]);
-    LJ::Customize->apply_theme($u, $theme) if $theme;
-
     return $u;
 }
 
