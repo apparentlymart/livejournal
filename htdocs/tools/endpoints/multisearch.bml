@@ -73,9 +73,7 @@
             if (my $u = LJ::load_userid($uid)) {
                 next unless $u->is_validated;
                 next if $u->is_deleted or $u->is_suspended or $u->is_expunged;
-                ## we find users if they either allowed to find them by email,
-                ## or if they made their email public on profile page
-                next unless $u->opt_findbyemail =~ /Y/ || $u->opt_showcontact =~ /Y|R/;
+                next unless $u->opt_findbyemail =~ /Y/;
                 if ($output eq "foaf") {
                     $ret{result} .= '<a href="' . LJ::journal_base($u) . '/data/foaf">' . $u->{user}. '</a>';
                 } else {
