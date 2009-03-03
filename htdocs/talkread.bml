@@ -832,6 +832,9 @@ my $old_url = 0;
 
          if ($showmultiform && $multiform_selects) {
              $ret .= "<p>$ML{'.talkmulti.des'} ";
+             my $args = BML::get_query_string;
+             $args = '?' . $args if $args;
+             $ret .= LJ::html_hidden( returnto => $u->journal_base . $uri . $args );
              $ret .= LJ::html_select({'name' => 'mode' },
                                      ''           => $ML{'.talkmulti.please'},
                                      $ML{'.talkmulti.selected'} => [

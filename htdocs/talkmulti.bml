@@ -39,7 +39,6 @@
 
     my $jid = $u->{'userid'};
     my $ditemid = $POST{'ditemid'}+0;
-    my $commentlink = LJ::journal_base($u) . "/$ditemid.html";
     my $itemid = int($ditemid / 256);
 
     my @talkids;
@@ -102,19 +101,15 @@
         my $num = LJ::delete_comments($u, "L", $itemid, @talkids);
         LJ::replycount_do($u, $itemid, "decr", $num);
         LJ::Talk::update_commentalter($u, $itemid);
-        $body = "<?h1 $ML{'.deleted.title'} h1?><?p " . BML::ml('.deleted.body2', {'aopts' => "href='$commentlink'"}) . " p?>";
-        return;
 
     } elsif ($mode eq "unscreen") {
         LJ::Talk::unscreen_comment($u, $itemid, @talkids);
-        $body = "<?h1 $ML{'.unscreened.title'} h1?><?p " . BML::ml('.unscreened.body2', {'aopts' => "href='$commentlink'"}) . " p?>";
-        return;
 
     } elsif ($mode eq "screen") {
         LJ::Talk::screen_comment($u, $itemid, @talkids);
-        $body = "<?h1 $ML{'.screened.title'} h1?><?p " . BML::ml('.screened.body2', {'aopts' => "href='$commentlink'"}) . " p?>";
-        return;
     }
+
+    return BML::redirect($POST{returnto});
 }
 _code?>
 <?page

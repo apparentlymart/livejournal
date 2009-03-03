@@ -1964,6 +1964,7 @@ sub Page
     my $p = {
         '_type' => 'Page',
         '_u' => $u,
+        '_getargs' => $opts->{'getargs'},
         'view' => '',
         'args' => \%args,
         'journal' => User($u),
@@ -3705,7 +3706,10 @@ sub EntryPage__print_multiform_actionline
     my ($ctx, $this) = @_;
     return unless $this->{'multiform_on'};
     my $pr = $ctx->[S2::PROPS];
+    my $args = join('&', map { $_ . '=' . $this->{'_getargs'}->{$_} } keys %{$this->{'_getargs'}});
+    $args = '?' . $args if $args;
     $S2::pout->($pr->{'text_multiform_des'} . "\n" .
+                LJ::html_hidden( returnto => $this->{'entry'}->{'permalink_url'} . $args ) . "\n" .
                 LJ::html_select({'name' => 'mode' },
                                 "" => $pr->{"text_multiform_opt_please"},
                                 $pr->{"text_multiform_opt_selected"} => [
