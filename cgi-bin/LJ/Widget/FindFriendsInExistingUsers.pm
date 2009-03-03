@@ -109,7 +109,7 @@ sub js {
                 error_empty = '$empty_IM_handle',
                 not_valid_txt = {
                     user: '$validate_username',
-                    email: '$validate_email',
+                    email: '$validate_email'
                 },
                 client = select.options[select.selectedIndex].value;
 
