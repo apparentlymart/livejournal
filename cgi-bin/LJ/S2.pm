@@ -3707,9 +3707,16 @@ sub EntryPage__print_multiform_actionline
     my $pr = $ctx->[S2::PROPS];
     $S2::pout->($pr->{'text_multiform_des'} . "\n" .
                 LJ::html_select({'name' => 'mode' },
-                                "" => "",
-                                map { $_ => $pr->{"text_multiform_opt_$_"} }
-                                qw(unscreen screen delete deletespam)) . "\n" .
+                                "" => $pr->{"text_multiform_opt_please"},
+                                $pr->{"text_multiform_opt_selected"} => [
+                                    map { $_ => $pr->{"text_multiform_opt_$_"} }
+                                    qw(unscreen screen delete deletespam)
+                                ],
+                                $pr->{"text_multiform_opt_all"} => [
+                                    'all:screen' => $pr->{"text_multiform_opt_screen"},
+                                    'all:unscreen' => $pr->{"text_multiform_opt_unscreen"},
+                                ],
+                               ) . "\n" .
                 LJ::html_submit('', $pr->{'text_multiform_btn'},
                                 { "onclick" =>
                                       'return ((document.multiform.mode.value != "delete" ' .

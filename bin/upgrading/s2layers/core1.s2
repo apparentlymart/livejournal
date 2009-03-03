@@ -1371,7 +1371,7 @@ set text_multiform_check = "Select:";
 property string text_multiform_des {
     des = "Text on the multiform action line.";
 }
-set text_multiform_des = "Mass action on selected comments:";
+set text_multiform_des = "Mass action on comments:";
 
 property string text_multiform_btn {
     des = "Text on the multiform action button.";
@@ -1432,6 +1432,21 @@ property string text_multiform_opt_edit {
     des = "Text for the comment editing action";
 }
 set text_multiform_opt_edit = "Edit";
+
+property string text_multiform_opt_selected {
+    des = "Text for drop-down: Sub-header for action on selected comments";
+}
+set text_multiform_opt_selected = "Selected";
+
+property string text_multiform_opt_all {
+    des = "Text for drop-down: Sub-header for action on all comments";
+}
+set text_multiform_opt_all = "All";
+
+property string text_multiform_opt_please {
+    des = "Text for drop-down: Invitation to choosing mass action on comments";
+}
+set text_multiform_opt_please = "(Select action)";
 
 property string text_comment_posted {
     des = "Text to display when a comment has just been posted by the user";

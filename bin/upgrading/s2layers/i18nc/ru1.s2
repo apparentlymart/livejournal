@@ -78,7 +78,7 @@ set text_watch_comments = "отслеживать";
 set text_unwatch_comments = "перестать отслеживать";
 set text_month_screened_comments = "со скрытыми";
 set text_multiform_check = "Выбрать:";
-set text_multiform_des = "Групповая операция над выбранными комментариями:";
+set text_multiform_des = "Групповая операция над комментариями:";
 set text_multiform_btn = "Выполнить";
 set text_multiform_opt_unscreen = "Раскрыть";
 set text_multiform_opt_screen = "Скрыть";
@@ -87,6 +87,9 @@ set text_multiform_conf_delete = "Вы уверены, что хотите уд�
 set text_multiform_opt_deletespam = "Удалить и отметить как спам";
 set text_multiform_opt_freeze = "Заморозить";
 set text_multiform_opt_unfreeze = "Разморозить";
+set text_multiform_opt_selected = "Выбранные";
+set text_multiform_opt_all = "Все";
+set text_multiform_opt_please = "(выберите операцию)";
 set text_comment_posted = "Комментарий добавлен.";
 set text_tags = "Метки: #";
 set text_tags_section_header = "Метки";
@@ -123,7 +126,7 @@ function lang_page_of_pages (int pg, int pgs) [notags] : string {
 function lang_ordinal(int num) [notags] : string
 "Make an ordinal number from a cardinal number"
 {
-	return $num+""; 
+    return $num+""; 
 }
 
 function lang_viewname(string viewid) [notags] : string {

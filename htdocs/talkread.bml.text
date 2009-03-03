@@ -33,15 +33,13 @@
 
 .talkmulti.all=All
 
-.talkmulti.all.screen=Screen
-
-.talkmulti.all.unscreen=Unscreen
-
 .talkmulti.delete=Delete
 
 .talkmulti.deletespam=Delete as Spam
 
 .talkmulti.des=<b>Mass action</b> on comments:
+
+.talkmulti.please=(Select action)
 
 .talkmulti.screen=Screen
 
