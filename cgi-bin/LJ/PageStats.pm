@@ -161,6 +161,12 @@ sub pagename {
     return $pagename;
 }
 
+sub get_journal {
+    my $self = shift;
+    my $j = LJ::get_active_journal();
+    return $j;
+}
+
 sub journaltype {
     my $self = shift;
 
