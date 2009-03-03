@@ -306,7 +306,7 @@ sub get_userpic_info
                 my $commemkey = [$u->{'userid'}, "upiccom:$u->{'userid'}"];
                 my $comminfo = LJ::MemCache::get($commemkey);
 
-                if ($comminfo) {
+                if (defined $comminfo) {
                     my ($pos, $nulpos);
                     $pos = $nulpos = 0;
                     while (($nulpos = index($comminfo, "\0", $pos)) > 0) {
@@ -328,7 +328,7 @@ sub get_userpic_info
                 my $urlmemkey = [$u->{'userid'}, "upicurl:$u->{'userid'}"];
                 my $urlinfo = LJ::MemCache::get($urlmemkey);
 
-                if ($urlinfo) {
+                if (defined $urlinfo) {
                     my ($pos, $nulpos);
                     $pos = $nulpos = 0;
                     while (($nulpos = index($urlinfo, "\0", $pos)) > 0) {
