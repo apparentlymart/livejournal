@@ -80,6 +80,7 @@ body<=
             form => 1,
             desc => $ML{'.cat.notifications.desc'},
             settings => [qw(
+                    LJ::Setting::CommentEmailNotify
             )],
         },
         mobile => {
@@ -180,12 +181,11 @@ body<=
             my @sub_edit;
             my @to_consider;
             my @to_activate;
-
             foreach my $postkey (keys %POST) {
                 my $subscr;
                 my $old_postkey = $postkey;
                 my $old = $postkey =~ /-old$/;
-
+                
                 # are there other options for this pending subscription? if so, process those not this one
                 next if $postkey =~ /\.arg\d/;
 
@@ -211,7 +211,6 @@ body<=
                                  $oldvalue,
                                  ];
             }
-
             # first process deletions
             foreach my $edit_info (@sub_edit) {
                 my ($subscr, $checked, $oldvalue) = @$edit_info;
@@ -472,30 +471,31 @@ body<=
             settings_page => 1,
         ) . "<br />";
 
+    } else {
+
+        my $setting_ct = 1;
+        $ret .= "<table cellpadding='0' cellspacing='0'>";
+        foreach my $setting (@settings) {
+            my $errors = $setting->errors_from_save($save_rv);
+            my $args = $setting->args_from_save($save_rv);
+
+            my $label = $setting->label;
+            my $option = $setting->option($u, $errors, $args, getargs => \%GET );
+            my $actionlink = $setting->actionlink($u);
+            my $helpicon = LJ::help_icon($setting->helpurl($u));
+            my $last_class = $setting_ct == scalar @settings ? " last" : "";
+
+            $ret .= "<tr>";
+            $ret .= "<td class='${given_cat}_label$last_class'>$label</td>" if $label;
+            $ret .= "<td class='${given_cat}_option$last_class'>" . ($option ? $option : "&nbsp;") . "</td>";
+            $ret .= "<td class='${given_cat}_actionlink$last_class'>" . ($actionlink ? $actionlink : "&nbsp;") . "</td>";
+            $ret .= "<td class='help$last_class'>" . ($helpicon ? $helpicon : "&nbsp;") . "</td>";
+            $ret .= "</tr>";
+
+            $setting_ct++;
+        }
+        $ret .= "</table>";
     }
-
-    my $setting_ct = 1;
-    $ret .= "<table cellpadding='0' cellspacing='0'>";
-    foreach my $setting (@settings) {
-        my $errors = $setting->errors_from_save($save_rv);
-        my $args = $setting->args_from_save($save_rv);
-
-        my $label = $setting->label;
-        my $option = $setting->option($u, $errors, $args, getargs => \%GET );
-        my $actionlink = $setting->actionlink($u);
-        my $helpicon = LJ::help_icon($setting->helpurl($u));
-        my $last_class = $setting_ct == scalar @settings ? " last" : "";
-
-        $ret .= "<tr>";
-        $ret .= "<td class='${given_cat}_label$last_class'>$label</td>" if $label;
-        $ret .= "<td class='${given_cat}_option$last_class'>" . ($option ? $option : "&nbsp;") . "</td>";
-        $ret .= "<td class='${given_cat}_actionlink$last_class'>" . ($actionlink ? $actionlink : "&nbsp;") . "</td>";
-        $ret .= "<td class='help$last_class'>" . ($helpicon ? $helpicon : "&nbsp;") . "</td>";
-        $ret .= "</tr>";
-
-        $setting_ct++;
-    }
-    $ret .= "</table>";
 
     if ($given_cat eq "account") {
         my $account_stats = LJ::run_hook("settings_account_stats", $u);

@@ -3293,7 +3293,6 @@ sub subscribe_interface {
     my $events_table = $settings_page ? '<table class="Subscribe" style="clear: none;" cellpadding="0" cellspacing="0">' : '<table class="Subscribe" cellpadding="0" cellspacing="0">';
 
     my @notify_classes = LJ::NotificationMethod->all_classes or return "No notification methods";
-
     # skip the inbox type; it's always on
     @notify_classes = grep { $_ ne 'LJ::NotificationMethod::Inbox' } @notify_classes;
 
@@ -3455,7 +3454,6 @@ sub subscribe_interface {
             }
 
             next if $u->is_identity && !$pending_sub->enabled;
-
             # print option to subscribe to this event, checked if already subscribed
             my $input_name = $pending_sub->freeze or next;
             my $title      = $pending_sub->as_html or next;
@@ -3535,7 +3533,7 @@ sub subscribe_interface {
                     value => $subscribed,
                 });
             }
-
+            
             $cat_html .= "</td>";
 
             $shown_subids{$pending_sub->id}++ unless $pending_sub->pending;
