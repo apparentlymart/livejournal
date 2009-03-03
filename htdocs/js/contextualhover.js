@@ -615,6 +615,9 @@ ContextualPopup.getInfo = function (target, ctxPopupId) {
         ContextualPopup.cachedResults[data.username] =
         ContextualPopup.cachedResults[data.url_userpic] = data;
 
+        if (up_url) // non default userpic
+            ContextualPopup.cachedResults[up_url] = data;
+
         if (data.error) {
             if (data.noshow) return;
 
