@@ -98,6 +98,8 @@ _info?><?_code
     # can mark as spam if they're not the comment poster
     my $can_spam = $remote && $remote->id != $tp->{'posterid'};
 
+    my $can_author = $tp->{'posterid'}; # all except anonymous
+
     ### perform actions
     if (LJ::did_post() && $POST{'confirm'}) {
         return $error->($ML{'error.invalidform'}) unless LJ::check_form_auth();
@@ -110,6 +112,9 @@ _info?><?_code
         if ($POST{delthread} && $can_delthread) {
             # delete entire thread ...
             LJ::Talk::delete_thread($u, $tp->{'itemid'}, $tpid);
+        } elsif ($POST{delauthor} && $can_author) {
+            # delete all comments of one author...
+            LJ::Talk::delete_author($u, $tp->{'itemid'}, $tp->{'posterid'});
         } else {
             # delete single comment...
             LJ::Talk::delete_comment($u, $tp->{'itemid'}, $tpid, $tp->{'state'});
@@ -160,6 +165,13 @@ _info?><?_code
     if ($can_delthread) {
         $body .= "<div>" . LJ::html_check({name => 'delthread', id => 'delthread'});
         $body .= "<label for='delthread'>$ML{'.confirm.delthread'}</label></div>";
+    }
+
+    if ($can_author) {
+        $body .= "<div>" . LJ::html_check({name => 'delauthor', id => 'delauthor'});
+        $body .= "<label for='delauthor'>";
+        $body .= $remote && $remote->id == $tp->{'posterid'} ? $ML{'.confirm.delauthor.my'} : BML::ml('.confirm.delauthor', { user => LJ::ljuser($tp->{'userpost'}) });
+        $body .= "</label></div>";
     }
 
     $body .= " standout?>";

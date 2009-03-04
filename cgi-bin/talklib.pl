@@ -493,6 +493,37 @@ sub delete_thread {
 }
 
 # <LJFUNC>
+# name: LJ::Talk::delete_author
+# class: web
+# des: Deletes all comments of one author for one entry.
+# args: u, jitemid, posterid
+# des-u: Userid or user object to delete thread from.
+# des-jitemid: Journal itemid of item to delete comments from.
+# des-posterid: Userid of author.
+# returns: 1 on success; undef on error
+# </LJFUNC>
+sub delete_author {
+    my ($u, $jitemid, $posterid) = @_;
+
+    # get all comments to post
+    my $comments = LJ::Talk::get_talk_data($u, 'L', $jitemid) || {};
+
+    my @screened;
+    my @ids;
+    foreach my $id (keys %$comments) {
+        next unless $comments->{$id}{posterid} eq $posterid;
+        push @ids, $id;
+        push @screened, $id if $comments->{$id}{state} eq 'S';
+    }
+
+    LJ::Talk::unscreen_comment($u, $jitemid, @screened) if @screened; # if needed only!
+    my $num = LJ::delete_comments($u, "L", $jitemid, @ids);
+    LJ::replycount_do($u, $jitemid, "decr", $num);
+    LJ::Talk::update_commentalter($u, $jitemid);
+    return 1;
+}
+
+# <LJFUNC>
 # name: LJ::Talk::delete_comment
 # class: web
 # des: Deletes a single comment.
