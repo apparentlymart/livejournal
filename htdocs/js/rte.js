@@ -9,7 +9,7 @@ function LJUser(textArea) {
 
     var html = oEditor.GetXHTML(false);
     html = html.replace(/<\/lj>/, '');
-    var regexp = /<lj (?:title=['"](.+)?['"])? ?user=['"](\w+?)['"] ?(?:title=['"](.+)?['"])? ?\/?>/g;
+    var regexp = /<lj (?:title="([^">]+)?")? ?(?:comm|user)="(\w+?)" ?(?:title="([^">]+)?")? ?\/?>/g;
 
     var userstr,
         ljusers = [],
@@ -40,7 +40,7 @@ function LJUser(textArea) {
             }
             if (!data.success) return;
             data.ljuser = data.ljuser.replace(/<span.+?class=['"]?ljuser['"]?.+?>/,'<div class="ljuser">');
-            data.ljuser = data.ljuser.replace(/<\/span>\s?/,'</div>&nbsp;');
+            data.ljuser = data.ljuser.replace(/<\/span>\s?/,'</div>');
             html = html.replace(userstr, data.ljuser);
             oEditor.SetData(html);
             oEditor.Focus();
@@ -253,6 +253,8 @@ function doLinkedFieldUpdate(oEditor) {
 }
 
 function convertToLJTags(html) {
+    html = html.replace(/<div class=['"]ljuser['"]><a href="http:\/\/community\.[-.\w]+\/(\w+)\/.+?<b>\1<\/b><\/a><\/div>/g, '<lj comm="$1"/>')
+    html = html.replace(/<div class=['"]ljuser['"]><a href="http:\/\/community\.[-.\w]+\/(\w+)\/.+?<b>(.+)?<\/b><\/a><\/div>/g, '<lj comm="$1" title="$2"/>')
     html = html.replace(/<div class=['"]ljuser['"]><a href="http:\/\/(\w+)\..+?<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>')
     html = html.replace(/<div class=['"]ljuser['"]><a href="http:\/\/(\w+)\..+?<b>(.+)?<\/b><\/a><\/div>/g, '<lj user="$1" title="$2"/>')
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><img.+?\/><\/div>/g, '<lj-template name="video">$1</lj-template>');
