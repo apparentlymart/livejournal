@@ -18,6 +18,7 @@ sub as_html {
     my $ret;
     my $helper = ($args && $args->{helper} == 0) ? 0 : 1;
     my $faq = ($args && $args->{faq} == 1) ? 1 : 0;
+    my $display_null = ($args && $args->{display_null} == 0) ? 0 : 1;
 
     $ret .= "<label for='${key}opt_findbyemail'>" .
             $class->ml('settings.findbyemail.question',
@@ -30,13 +31,16 @@ sub as_html {
 
     $ret .= "<br />";
     my @options;
+    push @options, { text => $class->ml('settings.option.select'), value => '' }
+        if not $u->opt_findbyemail and $display_null;
+    my $default = $display_null ? '' : 'H';
     push @options, { text => LJ::Lang::ml('settings.findbyemail.opt.Y'), value => "Y" };
     push @options, { text => LJ::Lang::ml('settings.findbyemail.opt.H'), value => "H" };
     push @options, { text => LJ::Lang::ml('settings.findbyemail.opt.N'), value => "N" };
     $ret .= LJ::html_select({ 'name' => "${key}opt_findbyemail",
                               'id' => "${key}opt_findbyemail",
                          ###  'class' => "select",
-                              'selected' => $u->opt_findbyemail || 'H' },
+                              'selected' => $u->opt_findbyemail || $default },
                               @options );
 
     # Display helper text about setting?

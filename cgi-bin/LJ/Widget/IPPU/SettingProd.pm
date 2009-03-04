@@ -27,7 +27,7 @@ sub render_body {
              );
 
     $body .= "<div class='warningbar'>";
-    $body .= $setting_class->as_html($remote, undef, { helper => 0, faq => 1} );
+    $body .= $setting_class->as_html($remote, undef, { helper => 0, faq => 1, display_null => 0} );
 
     $body .= "<p>" .
              $class->html_submit( $class->ml('settings.settingprod.update') ) .
