@@ -155,17 +155,19 @@ div.lj_ippu_titlebar {
 
 /* Link to current LJ.com version 
 ------------------------------------ */
-.current-version {
-    margin:10px 0;
-    padding:0;
-    text-align:left;
+DL.current-version {
+    margin: 10px 0;
+    padding: 0;
+    border: 0;
+    text-align: left;
     }
-    .current-version DT,
-    .current-version DD {
-        display:inline;
-        margin:0;
+    DL.current-version DT,
+    DL.current-version DD {
+        display: inline;
+        margin: 0;
         padding: 0 3px 0 0;
-        text-align:left;
-        white-space:nowrap;
-        font-size:11px;
+        text-align: left;
+        white-space: nowrap;
+        font-size: 11px !important;
+        font-weight: normal;
         }
