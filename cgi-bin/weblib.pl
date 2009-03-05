@@ -2795,7 +2795,7 @@ sub interests_for_adcall {
         my $qotd_param = ref $opts{extra} && $opts{extra}->{qotd} ? $opts{extra}->{qotd} : $BMLCodeBlock::GET{qotd};
         my $qotd = ref $qotd_param ? $qotd_param : LJ::QotD->get_single_question($qotd_param);
         my $tags = LJ::QotD->remove_default_tags($qotd->{tags});
-        if ($tags && $qotd->{is_special} eq "Y" && $qotd->{time_start} <= time() && $qotd->{time_end} >= time() && $qotd->{active} eq "Y") {
+        if ($tags && $qotd->{is_special} eq "Y") {
             unshift @interest_list, $tags;
         }
     }
