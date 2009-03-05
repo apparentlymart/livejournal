@@ -3721,11 +3721,7 @@ sub EntryPage__print_multiform_actionline
                                     'all:unscreen' => $pr->{"text_multiform_opt_unscreen"},
                                 ],
                                ) . "\n" .
-                LJ::html_submit('', $pr->{'text_multiform_btn'},
-                                { "onclick" =>
-                                      'return ((document.multiform.mode.value != "delete" ' .
-                                      '&& document.multiform.mode.value != "deletespam")) ' .
-                                      "|| confirm(\"" . LJ::ejs($pr->{'text_multiform_conf_delete'}) . "\");" }));
+                LJ::html_submit('', $pr->{'text_multiform_btn'}));
 }
 
 sub EntryPage__print_multiform_end
@@ -3739,7 +3735,13 @@ sub EntryPage__print_multiform_start
 {
     my ($ctx, $this) = @_;
     return unless $this->{'multiform_on'};
-    $S2::pout->("<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform'>\n" .
+    my $pr = $ctx->[S2::PROPS];
+    $S2::pout->("<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform' " .
+                    "onsubmit='return multiformSubmit(this, {" .
+                        "no_action: \"TODO: You have not selected one of the actions.\"," .
+                        "no_comments: \"TODO: You have not selected any comments\"," .
+                        "conf_delete: \"" . LJ::ejs($pr->{'text_multiform_conf_delete'}) . "\"" .
+                    "})'>\n" .
                 LJ::html_hidden("ditemid", $this->{'entry'}->{'itemid'},
                                 "journal", $this->{'entry'}->{'journal'}->{'username'}) . "\n");
 }

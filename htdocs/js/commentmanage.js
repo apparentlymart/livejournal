@@ -1,6 +1,3 @@
-var Site;
-if (! Site) Site = new Object();
-
 // called by S2:
 function setStyle (did, attr, val) {
     if (! document.getElementById) return;
@@ -33,6 +30,30 @@ function setAttr (did, attr, classname) {
     if (! de) return;
     de.setAttribute(attr, classname);
 }
+
+// called from Page:
+function multiformSubmit (form, txt) {
+    if (!form.mode.value) {
+        alert(txt.no_action);
+        return false;
+    }
+
+    var i = -1, has_selected = false;
+    while (form[++i]) {
+        if (form[i].name.substring(0, 9) == 'selected_' && form[i].checked) {
+            has_selected = true;
+            break;
+        }
+    }
+    if (!has_selected) {
+        alert(txt.no_comments);
+        return false;
+    }
+
+    if (form.mode.value == 'delete' || form.mode.value == 'deletespam')
+        return confirm(txt.conf_delete);
+}
+
 
 function getXTR () {
     var xtr;

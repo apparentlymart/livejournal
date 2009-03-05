@@ -776,7 +776,12 @@ my $old_url = 0;
      }
      $ret .= LJ::create_qr_div($u, $ditemid, $stylemine, $GET{'prop_picture_keyword'}, $viewing_thread);
 
-     $ret .= "<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform'>";
+     $ret .= "<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform' " .
+                 "onsubmit='return multiformSubmit(this, {" .
+                      "no_action: \"TODO: You have not selected one of the actions.\"," .
+                      "no_comments: \"TODO: You have not selected any comments\"," .
+                      "conf_delete: \"" . LJ::ejs($ML{'.confirm.action'}) . "\"" .
+                  "})'>";
 
      # Quick Reply when posting a new top level comment
      # requires setup when logged in.
@@ -818,10 +823,9 @@ my $old_url = 0;
             LJ::need_res('js/commentmanage.js');
              my $js_screen_color = "\"" . LJ::ejs(BML::get_template_def("screenedbarcolor") || BML::get_template_def("emcolor")) . "\"";
              my $js_normal_color = "\"" . LJ::ejs(BML::get_template_def("emcolor")) . "\"";
-             $$head .= "<script>var LJ_cmtinfo = " . LJ::js_dumper(\%LJ_cmtinfo) . ";\n" .
+             $$head .= '<script type="text/javascript">var LJ_cmtinfo = ' . LJ::js_dumper(\%LJ_cmtinfo) . ";\n" .
                  "function userhook_screen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_screen_color); }\n".
                  "function userhook_unscreen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_normal_color); }\n".
-                 "var Site; if (!Site) Site = new Object(); Site.imgprefix = \"$LJ::IMGPREFIX\";\n".
                  "</script>\n";
          }
 
@@ -848,13 +852,7 @@ my $old_url = 0;
                                         'all:unscreen' => $ML{'.talkmulti.unscreen'},
                                      ],
                                      );
-             $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'},
-                                           {
-                                               "onclick" =>
-                                                   'return ((document.multiform.mode.value != "delete" ' .
-                                                   '&& document.multiform.mode.value != "deletespam")) ' .
-                                                   '|| confirm("' . LJ::ejs($ML{'.confirm.action'}) . '")'
-                                           });
+             $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'});
              $ret .= "</p>";
          }
          
