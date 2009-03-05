@@ -36,10 +36,14 @@ sub option {
 
     my $upgrade_link = $u->get_cap('pingback') ? "" : (LJ::run_hook("upgrade_link", $u, "paid") || "");
 
+    ## no value selected == pingback disabled
+    my $value = $u->prop('pingback') || '';
+    $value = "D" unless $value  =~ /^[OLD]$/;
+    
     # PingBack options
     my $ret = '';
     $ret .= $class->ml('settings.pingback.process') . "&nbsp;<br />";
-    $ret .= LJ::html_select({ 'name' => "${key}pingback", 'selected' => $u->prop('pingback'), disabled => LJ::PingBack->has_user_pingback($u) ? 0 : 1 },
+    $ret .= LJ::html_select({ 'name' => "${key}pingback", 'selected' => $value, disabled => LJ::PingBack->has_user_pingback($u) ? 0 : 1 },
                               "L" => $class->ml("settings.pingback.option.lj_only"),
                               "O" => $class->ml("settings.pingback.option.open"),
                               "D" => $class->ml("settings.pingback.option.disabled"),
