@@ -2800,7 +2800,9 @@ sub interests_for_adcall {
         }
     }
 
-    return join(',', 
+    return wantarray
+      ? grep { ! defined $LJ::AD_BLOCKED_INTERESTS{$_} } @interest_list
+      : join(',',
                 grep { 
 
                     # not a blocked interest
