@@ -2056,6 +2056,8 @@ sub delete_entry
     my $and;
     if (defined $anum) { $and = "AND anum=" . ($anum+0); }
 
+    LJ::run_hooks("deletepost", $jid, $jitemid, $anum);
+
     # delete tags
     LJ::Tags::delete_logtags($u, $jitemid);
 
@@ -2063,7 +2065,6 @@ sub delete_entry
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     LJ::MemCache::decr([$jid, "log2ct:$jid"]) if $dc > 0;
     LJ::memcache_kill($jid, "dayct2");
-    LJ::run_hooks("deletepost", $jid, $jitemid, $anum);
 
     # if this is running the second time (started by the cmd buffer),
     # the log2 row will already be gone and we shouldn't check for it.
