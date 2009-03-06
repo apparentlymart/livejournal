@@ -7,6 +7,10 @@
 
 .confirm.action=Are you sure you wish to delete the selected comments?
 
+.multi.select.action=You have not selected one of the actions
+
+.multi.select.comment=You have not selected any comments
+
 .deletedpost=<b>(Deleted post)</b>
 
 .deleteduser=<i>(Deleted user: [[username]])</i>
@@ -50,4 +54,3 @@
 .talkmulti.unscreen=Unscreen
 
 .title=Read Comments
-

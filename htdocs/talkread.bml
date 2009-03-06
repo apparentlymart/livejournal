@@ -778,8 +778,8 @@ my $old_url = 0;
 
      $ret .= "<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform' " .
                  "onsubmit='return multiformSubmit(this, {" .
-                      "no_action: \"TODO: You have not selected one of the actions.\"," .
-                      "no_comments: \"TODO: You have not selected any comments\"," .
+                      "no_action: \"" . LJ::ejs($ML{'.multi.select.action'}) . "\"," .
+                      "no_comments: \"" . LJ::ejs($ML{'.multi.select.comments'}) . "\"," .
                       "conf_delete: \"" . LJ::ejs($ML{'.confirm.action'}) . "\"" .
                   "})'>";
 

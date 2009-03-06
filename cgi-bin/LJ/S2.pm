@@ -3738,8 +3738,8 @@ sub EntryPage__print_multiform_start
     my $pr = $ctx->[S2::PROPS];
     $S2::pout->("<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform' " .
                     "onsubmit='return multiformSubmit(this, {" .
-                        "no_action: \"TODO: You have not selected one of the actions.\"," .
-                        "no_comments: \"TODO: You have not selected any comments\"," .
+                        "no_action: \"" . LJ::ejs($pr->{'text_multiform_select_action'}) . "\"," .
+                        "no_comments: \"" . LJ::ejs($pr->{'text_multiform_select_comments'}) . "\"," .
                         "conf_delete: \"" . LJ::ejs($pr->{'text_multiform_conf_delete'}) . "\"" .
                     "})'>\n" .
                 LJ::html_hidden("ditemid", $this->{'entry'}->{'itemid'},
