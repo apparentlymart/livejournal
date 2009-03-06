@@ -27,7 +27,7 @@ function LJUser(textArea) {
         if (usertitle)
             postData.usertitle = usertitle;
 
-        var url = window.parent.Site.siteroot + "/tools/endpoints/ljuser.bml";
+        var url = Site.siteroot + "/tools/endpoints/ljuser.bml";
 
         var gotError = (function(username) { return function(err) {
             alert(err+' "'+username+'"');
@@ -47,7 +47,7 @@ function LJUser(textArea) {
         }})(ljusers[0], username);
 
         var opts = {
-            "data": window.parent.HTTPReq.formEncoded(postData),
+            "data":  HTTPReq.formEncoded(postData),
             "method": "POST",
             "url": url,
             "onError": gotError,
@@ -253,10 +253,10 @@ function doLinkedFieldUpdate(oEditor) {
 }
 
 function convertToLJTags(html) {
-    html = html.replace(/<div class=['"]ljuser['"]><a href="http:\/\/community\.[-.\w]+\/(\w+)\/.+?<b>\1<\/b><\/a><\/div>/g, '<lj comm="$1"/>')
-    html = html.replace(/<div class=['"]ljuser['"]><a href="http:\/\/community\.[-.\w]+\/(\w+)\/.+?<b>(.+)?<\/b><\/a><\/div>/g, '<lj comm="$1" title="$2"/>')
-    html = html.replace(/<div class=['"]ljuser['"]><a href="http:\/\/(\w+)\..+?<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>')
-    html = html.replace(/<div class=['"]ljuser['"]><a href="http:\/\/(\w+)\..+?<b>(.+)?<\/b><\/a><\/div>/g, '<lj user="$1" title="$2"/>')
+    html = html.replace(/<div class="ljuser"><a href="http:\/\/community\.[-.\w]+\/(\w+)\/.+?<b>\1<\/b><\/a><\/div>/g, '<lj comm="$1"/>')
+    html = html.replace(/<div class="ljuser"><a href="http:\/\/community\.[-.\w]+\/(\w+)\/.+?<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj comm="$1" title="$2"/>')
+    html = html.replace(/<div class="ljuser"><a href="http:\/\/(\w+)\..+?<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>')
+    html = html.replace(/<div class="ljuser"><a href="http:\/\/(\w+)\..+?<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj user="$1" title="$2"/>')
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><img.+?\/><\/div>/g, '<lj-template name="video">$1</lj-template>');
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><br \/><\/div>/g, '');
     html = html.replace(/<div class=['"]ljraw['"]>(.+?)<\/div>/g, '<lj-raw>$1</lj-raw>');
