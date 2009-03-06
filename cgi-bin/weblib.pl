@@ -2774,6 +2774,23 @@ sub ads_wrap {
     return $adhtml;
 }
 
+# pass in tag list if this ad relates to a special QotD
+sub modify_interests_for_adcall {
+    my $opts = shift;
+    my $list = shift;
+
+    my $r = eval { Apache->request };
+
+    if (ref $opts->{extra} && $opts->{extra}->{qotd} || $r && $r->notes('codepath') eq 'bml.update' && $BMLCodeBlock::GET{qotd}) {
+        my $qotd_param = ref $opts->{extra} && $opts->{extra}->{qotd} ? $opts->{extra}->{qotd} : $BMLCodeBlock::GET{qotd};
+        my $qotd = ref $qotd_param ? $qotd_param : LJ::QotD->get_single_question($qotd_param);
+        my $tags = LJ::QotD->remove_default_tags($qotd->{tags});
+        if ($tags && $qotd->{is_special} eq "Y") {
+            unshift @$list, $tags;
+        }
+    }
+}
+
 # this function will filter out blocked interests, as well filter out interests which
 # cause the 
 sub interests_for_adcall {
@@ -2788,21 +2805,9 @@ sub interests_for_adcall {
 
     my @interest_list = $u->notable_interests(100) if $u;
 
-    my $r = eval { Apache->request };
+    modify_interests_for_adcall(\%opts, \@interest_list);
 
-    # pass in tag list if this ad relates to a special QotD
-    if (ref $opts{extra} && $opts{extra}->{qotd} || $r && $r->notes('codepath') eq 'bml.update' && $BMLCodeBlock::GET{qotd}) {
-        my $qotd_param = ref $opts{extra} && $opts{extra}->{qotd} ? $opts{extra}->{qotd} : $BMLCodeBlock::GET{qotd};
-        my $qotd = ref $qotd_param ? $qotd_param : LJ::QotD->get_single_question($qotd_param);
-        my $tags = LJ::QotD->remove_default_tags($qotd->{tags});
-        if ($tags && $qotd->{is_special} eq "Y") {
-            unshift @interest_list, $tags;
-        }
-    }
-
-    return wantarray
-      ? grep { ! defined $LJ::AD_BLOCKED_INTERESTS{$_} } @interest_list
-      : join(',',
+    return join(',',
                 grep { 
 
                     # not a blocked interest
