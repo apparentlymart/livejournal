@@ -2010,6 +2010,12 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+multisearch.error.no_query=There is no any query provided
+
+multisearch.error.user_not_found=No user found
+
+multisearch.error.no_type=No type parameter
+
 notification_method.email.title=Email
 
 notification_method.im.title=IM
