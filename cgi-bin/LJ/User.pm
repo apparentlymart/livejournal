@@ -8723,6 +8723,9 @@ sub can_manage {
     # is same user?
     return 1 if LJ::u_equals($u, $remote);
 
+    # do not allow suspended users manage other accounts
+    return 0 if $remote->is_suspended;
+
     # people/syn/rename accounts can only be managed by the one account
     return undef if $u->{journaltype} =~ /^[PYR]$/;
 
