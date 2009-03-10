@@ -33,12 +33,17 @@ function setAttr (did, attr, classname) {
 
 // called from Page:
 function multiformSubmit (form, txt) {
-    if (!form.mode.value) {
+    var sel_val = form.mode.value;
+    if (!sel_val) {
         alert(txt.no_action);
         return false;
     }
 
-    var i = -1, has_selected = false;
+    if (sel_val.substring(0, 4) == 'all:') { // mass action
+        return;
+    }
+
+    var i = -1, has_selected = false; // at least one checkbox
     while (form[++i]) {
         if (form[i].name.substring(0, 9) == 'selected_' && form[i].checked) {
             has_selected = true;
@@ -50,8 +55,9 @@ function multiformSubmit (form, txt) {
         return false;
     }
 
-    if (form.mode.value == 'delete' || form.mode.value == 'deletespam')
+    if (sel_val == 'delete' || sel_val == 'deletespam') {
         return confirm(txt.conf_delete);
+    }
 }
 
 
