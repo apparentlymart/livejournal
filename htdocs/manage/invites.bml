@@ -118,7 +118,13 @@ body<=
         }
         my $ename = LJ::ehtml($cu->{name});
         my $date = LJ::mysql_time($invite->[2]);
-        
+
+        # if invited by a suspended user do not allow this user to accept
+        if ($us->{$invite->[1]}->is_suspended) {
+            $ret .= "<tr class='$rstyle'><td class='invite-info notice' colspan='4'>$ML{'.error.invitersuspended'}</td></tr>";
+            next;
+        }
+
         # now generate HTML
         $ret .= "<tr class='$rstyle'><td class='invite-info'>" . LJ::ljuser($cu, { type => 'C' }) . " <br />$ename<br /><span class='invite-from'>";
         $ret .= BML::ml('.fromline', { user => LJ::ljuser($us->{$invite->[1]}, { type => 'P' }), date => $date });
