@@ -249,65 +249,43 @@ function killPopup () {
     return true;
 }
 
-var pendingReqs = new Object ();
-
 function deleteComment (ditemid) {
-
-    var hasopt = function (opt) {
-        var el = document.getElementById("ljpopdel" + ditemid + opt);
-        if (!el) return false;
-        if (el.checked) return true;
-        return false;
-    };
-    var opt_delthread = hasopt("thread");
-    var opt_ban = hasopt("ban");
-    var opt_spam = hasopt("spam");
-
     killPopup();
 
-    var todel = document.getElementById("ljcmt" + ditemid);
+    var form = $('ljdelopts' + ditemid),
+        todel = $('ljcmt' + ditemid),
+        opt_delthread = opt_delauthor =
+        is_deleted = is_error = false,
+        pulse = 0;
 
-    var col = 0;
-    var pulse = 0;
-    var is_deleted = 0;
-    var is_error = 0;
-
-    var xtr = getXTR();
-    if (! xtr) {
-        alert("JS_ASSERT: no xtr now, but earlier?");
-        return false;
+    var postdata = 'confirm=1';
+    if (form.ban && form.ban.checked) postdata += '&ban=1';
+    if (form.spam && form.spam.checked) postdata += '&spam=1';
+    if (form.delthread && form.delthread.checked) {
+        postdata += '&delthread=1';
+        opt_delthread = true;
     }
-    pendingReqs[ditemid] = xtr;
+    if (form.delauthor && form.delauthor.checked) {
+        postdata += '&delauthor=1';
+        opt_delauthor = true;
+    }
+    postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
 
-    var state_callback = function () {
-        if (xtr.readyState != 4)
-             return;
-
-        if (xtr.status == 200) {
-            var val = eval(xtr.responseText);
-            is_deleted = val;
-            if (! is_deleted) is_error = 1;
-        } else {
-            alert("Error contacting server to delete comment.");
-            is_error = 1;
+    var opts = {
+        url: '/__rpc_delcomment?mode=js&journal=' + Site.currentJournal + '&id=' + ditemid,
+        data: postdata,
+        method: 'POST',
+        onData: function(data) {
+            is_deleted = !!data;
+            is_error = !is_deleted;
+        },
+        onError: function() {
+            alert('Error deleting ' + ditemid);
+            is_error = true;
         }
-    };
+    }
 
-    var error_callback = function () {
-        alert("Error deleting " + ditemid);
-        is_error = 1;
-    };
-
-    xtr.onreadystatechange = state_callback;
-    xtr.open("POST", "/" + LJ_cmtinfo.journal + "/__rpc_delcomment?mode=js&journal=" + LJ_cmtinfo.journal + "&id=" + ditemid, true);
-    var postdata = "confirm=1";
-    if (opt_ban) postdata += "&ban=1";
-    if (opt_spam) postdata += "&spam=1";
-    if (opt_delthread) postdata += "&delthread=1";
-    if (LJ_cmtinfo.form_auth) postdata += "&lj_form_auth=" + LJ_cmtinfo.form_auth;
-
-    xtr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xtr.send(postdata);
+    HTTPReq.getJSON(opts);
 
     var flash = function () {
         var rgb = hsv_to_rgb(0, Math.cos((pulse + 1) / 2), 1);
@@ -320,6 +298,13 @@ function deleteComment (ditemid) {
             // and let timer expire
         } else if (is_deleted) {
             removeComment(ditemid, opt_delthread);
+            if (opt_delauthor) {
+                for (var item in LJ_cmtinfo) {
+                    if (LJ_cmtinfo[item].u == LJ_cmtinfo[ditemid].u) {
+                        removeComment(item);
+                    }
+                }
+            }
         } else {
             window.setTimeout(flash, 50);
         }
@@ -338,7 +323,7 @@ function removeComment (ditemid, killChildren) {
             userhook(ditemid);
     }
     if (killChildren) {
-        var com = LJ_cmtinfo ? LJ_cmtinfo[ditemid] : null;
+        var com = LJ_cmtinfo[ditemid];
         for (var i = 0; i < com.rc.length; i++) {
             removeComment(com.rc[i], true);
         }
@@ -356,7 +341,7 @@ function createDeleteFunction (ae, dItemid) {
         if (!e) e = window.event;
         var FS = arguments.callee;
 
-        var finalHeight = 100;
+        var finalHeight = 115;
 
         if (e.shiftKey || (curPopup && curPopup_id != dItemid)) {
             killPopup();
@@ -413,24 +398,32 @@ function createDeleteFunction (ae, dItemid) {
             var lbl;
             if (remoteUser != "" && com.u != "" && com.u != remoteUser && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "ban";
-                inHTML += "<input type='checkbox' value='ban' id='" + lbl + "'> <label for='" + lbl + "'>Ban <b>" + com.u + "</b> from commenting</label><br />";
+                inHTML += "<input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>Ban <b>" + com.u + "</b> from commenting</label><br />";
             } else {
                 finalHeight -= 15;
             }
 
             if (remoteUser != com.u && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "spam";
-                inHTML += "<input type='checkbox' value='spam' id='" + lbl + "'> <label for='" + lbl + "'>Mark this comment as spam</label><br />";
+                inHTML += "<input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>Mark this comment as spam</label><br />";
             } else {
                 finalHeight -= 15;
             }
 
             if (com.rc && com.rc.length && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "thread";
-                inHTML += "<input type='checkbox' value='thread' id='" + lbl + "'> <label for='" + lbl + "'>Delete thread (all subcomments)</label><br />";
+                inHTML += "<input type='checkbox' name='delthread' id='" + lbl + "'> <label for='" + lbl + "'>Delete thread (all subcomments)</label><br />";
             } else {
                 finalHeight -= 15;
             }
+
+            if (canAdmin) {
+                lbl = "ljpopdel" + dItemid + "author";
+                inHTML += "<input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>Delete all <b>" + com.u + "</b> comments</label><br />";
+            } else {
+                finalHeight -= 15;
+            }
+
             inHTML += "<input type='button' value='Delete' onclick='deleteComment(" + dItemid + ");' /> <input type='button' value='Cancel' onclick='killPopup()' /></span><br /><span style='font-face: Arial; font-size: 8pt'><i>shift-click to delete without options</i></span></form>";
             de.innerHTML = inHTML;
 
@@ -593,7 +586,7 @@ function createModerationFunction (ae, dItemid) {
 
         xtr.onreadystatechange = state_callback;
 
-        var postUrl = ae.href.replace(/.+talkscreen\.bml/, "/" + LJ_cmtinfo.journal + "/__rpc_talkscreen");
+        var postUrl = ae.href.replace(/.+talkscreen\.bml/, "/" + Site.currentJournal + "/__rpc_talkscreen");
 
         //var postUrl = ae.href;
         xtr.open("POST", postUrl + "&jsmode=1", true);
