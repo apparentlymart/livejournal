@@ -103,9 +103,9 @@ body<=
             $ret .= "</td></tr></table>\n";
         }
         $ret .= "</td>";
-        my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
-        if ($ad && $show_ad) {
-            $ret .= "<td valign='top'>$ad</td>";
+        if ($show_ad) {
+            my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
+            $ret .= "<td valign='top'>$ad</td>" if $ad;
         }
         $ret .= "</tr></table>";
 
