@@ -3592,6 +3592,23 @@ sub statusvisdate_unix {
     return LJ::mysqldate_to_time($u->{statusvisdate});
 }
 
+# returns list of all previous statuses of the journal
+# in order from newest to oldest
+sub get_previous_statusvis {
+    my $u = shift;
+    
+    my $extra = $u->selectcol_arrayref(
+        "SELECT extra FROM userlog WHERE userid=? AND action='accountstatus' ORDER BY logtime DESC",
+        undef, $u->{userid});
+    my @statusvis;
+    foreach my $e (@$extra) {
+        my %fields;
+        LJ::decode_url_string($e, \%fields, []);
+        push @statusvis, $fields{old};
+    }
+    return @statusvis;
+}
+
 # set_statusvis only change statusvis parameter, all accompanied actions are done in set_* methods
 sub set_statusvis {
     my ($u, $statusvis) = @_;
