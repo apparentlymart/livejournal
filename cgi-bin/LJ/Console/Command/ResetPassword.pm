@@ -27,6 +27,8 @@ sub execute {
         unless $username && $reason && scalar(@args) == 0;
 
     my $u = LJ::load_user($username);
+    return $self->error("Can't change password for community")
+        unless $u->journaltype eq 'P';
     return $self->error("Invalid user $username")
         unless $u;
 
