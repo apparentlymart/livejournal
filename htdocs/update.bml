@@ -454,6 +454,16 @@
 
                 $$body .= "</td><td style=\"padding-left: 2em;\">";
 
+                {
+
+                    $$body .= LJ::get_ads({
+                        location    => 'bml.update/error',
+                        ljadwrapper => 1,
+                        below_ad    => LJ::CProd->full_box_for($u, width => 300),
+                        interests_extra => $qid ? { qotd => $qotd } : {},
+                    });
+                }
+
                 $$body .= "</td></tr></table>";
                 $$body .= LJ::run_hook('after_entry_post_extra_html', user => $ju, itemlink => $itemlink, request => \%req);
                 return;
@@ -464,7 +474,19 @@
     $$body .= "<table width='100%'><tr valign='top'><td>";
     $print_entry_form->();
     $$body .= "</td>";
-    $$body .= "<td>";
+
+    {
+        my $ad_details;
+        my $ad = LJ::get_ads({ location => 'bml.update/main', get_slots_params => \$ad_details, interests_extra => $qid ? { qotd => $qotd } : {} });
+        if ($ad) {
+            my $width = $ad_details->[-1]->{width};
+            my $adunit = $ad_details->[-1]->{adunit};
+            $$body .= "<td class='$adunit' style='width: ${width}px; padding-left: 1em;'>$ad";
+        } else {
+            $$body .= "<td>";
+        }
+    }
+
     $$body .= "</td></tr></table>";
 
     return;
