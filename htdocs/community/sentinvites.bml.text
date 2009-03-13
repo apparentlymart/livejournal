@@ -3,6 +3,8 @@
 
 .error.notcomm=[[user]] is not a community.
 
+.invites.cancelled=[[num]] [[?num|invitation|invitations]] cancelled.
+
 .key.date=Date
 
 .key.sentby=Sent By
@@ -12,6 +14,8 @@
 .none.body=No invites have been sent in the past 30 days.  If you wish to invite people to this community, please visit the <a [[aopts]]>Members page</a>.
 
 .none.title=No Invites Found
+
+.cancel=Cancel Invitations
 
 .send=Send Invitations
 
