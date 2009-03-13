@@ -332,9 +332,15 @@ sub theschwartz {
     my @dbs = grep { $_->{role}->{$role} } @LJ::THESCHWARTZ_DBS;
     die "Unknown role in LJ::theschwartz: '$role'" unless @dbs;
 
-    $LJ::SchwartzClient{$role} = TheSchwartz->new(databases => \@dbs);
+    my $client = TheSchwartz->new(databases => \@dbs);
 
-    return $LJ::SchwartzClient{$role};
+    if ($client && $client->can('delete_every_n_errors')) {
+        $client->delete_every_n_errors($LJ::DELETE_EVERY_N_ERRORS);
+    }
+
+    $LJ::SchwartzClient{$role} = $client;
+
+    return $client;
 }
 
 sub sms_gateway {
