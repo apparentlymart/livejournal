@@ -1,70 +1,66 @@
-function LJUser(textArea) {
-    var editor_frame = $(textArea + '___Frame');
-    if (!editor_frame ||
-        !FCKeditor_LOADED ||
-        !FCKeditorAPI
-    ) return;
-    var oEditor = FCKeditorAPI.GetInstance(textArea);
-    if (!oEditor) return;
-
+function LJUser(oEditor) {
     var html = oEditor.GetXHTML(false);
-    html = html.replace(/<\/lj>/, '');
-    var regexp = /<lj (?:title="([^">]+)?")? ?(?:comm|user)="(\w+?)" ?(?:title="([^">]+)?")? ?\/?>/g;
 
-    var userstr,
-        ljusers = [],
-        username,
-        usertitle;
-        
+    var regexp = /<lj (?:title="([^">]+)?")? ?(?:comm|user)="(\w+?)" ?(?:title="([^">]+)?")? ?\/?>/g,
+        orig_html = html,
+        ljusers;
+
     while (ljusers = regexp.exec(html)) {
-        username = ljusers[2];
-        usertitle = ljusers[1] || ljusers[3];
+        var username = ljusers[2],
+            usertitle = ljusers[1] || ljusers[3],
+            cachename = usertitle ? username + ':' + usertitle : username;
+
+        if (LJUser.cache[cachename]) {
+            if (LJUser.cache[cachename].html) {
+                html = html.replace(ljusers[0], LJUser.cache[cachename].html);
+            }
+            continue;
+        }
+
+        LJUser.cache[cachename] = {}
 
         var postData = {
-            'username' : username
+            username: username
         }
 
         if (usertitle)
             postData.usertitle = usertitle;
 
-        var url = Site.siteroot + "/tools/endpoints/ljuser.bml";
-
         var gotError = (function(username) { return function(err) {
-            alert(err+' "'+username+'"');
+            alert(err + ' "' + username + '"');
         }})(username);
 
-        var gotInfo = (function(userstr, username) { return function (data) {
+        var gotInfo = (function(userstr, username, cachename) { return function (data) {
             if (data.error) {
-                alert(data.error+' "'+username+'"');
-                return;
+                return alert(data.error+' "'+username+'"');
             }
             if (!data.success) return;
-            data.ljuser = data.ljuser.replace(/<span.+?class=['"]?ljuser['"]?.+?>/,'<div class="ljuser">');
-            data.ljuser = data.ljuser.replace(/<\/span>\s?/,'</div>');
+            data.ljuser = data.ljuser
+                .replace(/<span.+?class='ljuser'?.+?>/, '<div class="ljuser">')
+                .replace(/<\/span>\s?/, '</div>');
             html = html.replace(userstr, data.ljuser);
+            LJUser.cache[cachename].html = data.ljuser;
             oEditor.SetData(html);
-            oEditor.Focus();
-        }})(ljusers[0], username);
+        }})(ljusers[0], username, cachename);
 
         var opts = {
-            "data":  HTTPReq.formEncoded(postData),
-            "method": "POST",
-            "url": url,
-            "onError": gotError,
-            "onData": gotInfo
-        };
+            data:  HTTPReq.formEncoded(postData),
+            method: 'POST',
+            url: Site.siteroot + '/tools/endpoints/ljuser.bml',
+            onError: gotError,
+            onData: gotInfo
+        }
 
-        window.parent.HTTPReq.getJSON(opts);
+        HTTPReq.getJSON(opts);
+    }
+    if (html != orig_html) {
+        oEditor.SetData(html);
     }
 }
-
+LJUser.cache = {}
 
 function useRichText(textArea, statPrefix) {
-    if ( $("switched_rte_on").value == '1' ) return;
-
-    var rte = new FCKeditor();
-    var t = rte._IsCompatibleBrowser();
-    if (!t) return;
+    if ($("switched_rte_on").value == '1') return;
 
     if ($("insobj")) {
         $("insobj").className = 'on';
@@ -82,7 +78,7 @@ function useRichText(textArea, statPrefix) {
     var entry_html = $(textArea).value;
 
     entry_html = convertToHTMLTags(entry_html, statPrefix);
-    if ($("event_format") && !$("event_format").checked) {
+    if (!$('event_format').checked) {
         entry_html = entry_html.replace(/\n/g, '<br />');
     }
 
@@ -90,81 +86,78 @@ function useRichText(textArea, statPrefix) {
     // Check for RTE already existing.  IE will show multiple iframes otherwise.
     if (!editor_frame) {
         var oFCKeditor = new FCKeditor(textArea);
-        oFCKeditor.BasePath = statPrefix + "/fck/";
+        oFCKeditor.BasePath = statPrefix + '/fck/';
         oFCKeditor.Height = 350;
-        oFCKeditor.ToolbarSet = "Update";
+        oFCKeditor.ToolbarSet = 'Update';
         $(textArea).value = entry_html;
         oFCKeditor.ReplaceTextarea();
-
     } else {
-        if (! FCKeditorAPI) return;
-        var oEditor = FCKeditorAPI.GetInstance(textArea);
-        editor_frame.style.display = "block";
-        $(textArea).style.display = "none";
-        oEditor.SetData(entry_html);
-
-        oEditor.Focus();
-        // Hack for handling submitHandler
-        oEditor.switched_rte_on = '1';
+        editor_frame.style.display = 'block';
+        $(textArea).style.display = 'none';
+        if (window.FCKeditorAPI) {
+            var oEditor = FCKeditorAPI.GetInstance(textArea);
+            oEditor.SetData(entry_html);
+            oEditor.Focus();
+            oEditor.switched_rte_on = '1'; // Hack for handling submitHandler
+        }
     }
 
-    // Need to pause here as it takes some time for the editor
-    // to actually load within the browser before we can
-    // access it.
-    setTimeout("LJUser('" + textArea + "')", 2000);
-
-
-    if ($("qotd_html_preview")) {
-       $("qotd_html_preview").style.display='none';
+    if ($('qotd_html_preview')) {
+       $('qotd_html_preview').style.display = 'none';
     }
 
-    $("switched_rte_on").value = '1';
+    $('switched_rte_on').value = '1';
 
     return false; // do not follow link
 }
 
 function usePlainText(textArea) {
-    if ( $("switched_rte_on").value == '0' ) return;
+    if ($('switched_rte_on').value == '0') return;
 
-    if (! FCKeditorAPI) return;
-    var oEditor = FCKeditorAPI.GetInstance(textArea);
-    if (! oEditor) return;
+    if (FCKeditor_LOADED) {
+        var oEditor = FCKeditorAPI.GetInstance(textArea);
+
+        if (oEditor.Status == FCK_STATUS_COMPLETE) {
+            var html = oEditor.GetXHTML(false);
+            html = convertToLJTags(html);
+            if (!$('event_format').checked) {
+                html = html
+                    .replace(/<br \/>/g, '\n')
+                    .replace(/<p>(.*?)<\/p>/g, '$1\n')
+                    .replace(/&nbsp;/g, ' ');
+            }
+            $(textArea).value = html;
+        }
+        // Hack for handling submitHandler
+        oEditor.switched_rte_on = '0';
+    } else {
+        if (!$('event_format').checked) {
+            $(textArea).value = $(textArea).value.replace(/<br \/>/g, '\n');
+        }
+    }
+
     var editor_frame = $(textArea + '___Frame');
 
-    if ($("qotd_html_preview")) {
+    if ($('qotd_html_preview')) {
        $("qotd_html_preview").style.display='block';
     }
 
-    var html = oEditor.GetXHTML(false);
-    html = convertToLJTags(html);
-    if ($("event_format") && !$("event_format").checked) {
-        html = html.replace(/\<br \/\>/g, '\n');
-        html = html.replace(/\<p\>(.*?)\<\/p\>/g, '$1\n');
-        html = html.replace(/&nbsp;/g, ' ');
-    }
-
-    $(textArea).value = html;
-    oEditor.Focus();
-
-    if ($("insobj"))
-        $("insobj").className = '';
-    if ($("jrich"))
-        $("jrich").className = '';
-    if ($("jplain"))
-        $("jplain").className = 'on';
-    editor_frame.style.display = "none";
-    $(textArea).style.display = "block";
-    $('htmltools').style.display = "block";
-    $("switched_rte_on").value = '0';
-
-    // Hack for handling submitHandler
-    oEditor.switched_rte_on = '0';
+    if ($('insobj'))
+        $('insobj').className = '';
+    if ($('jrich'))
+        $('jrich').className = '';
+    if ($('jplain'))
+        $('jplain').className = 'on';
+    editor_frame.style.display = 'none';
+    $(textArea).style.display = 'block';
+    $('htmltools').style.display = 'block';
+    $('switched_rte_on').value = '0';
 
     return false;
 }
 
 function convert_post(textArea) {
-    if ( $("switched_rte_on").value == '0' ) return;
+    if ($("switched_rte_on").value == '0') return;
 
     var oEditor = FCKeditorAPI.GetInstance(textArea);
     var html = oEditor.GetXHTML(false);
@@ -177,7 +170,7 @@ function convert_post(textArea) {
 }
 
 function convert_to_draft(html) {
-    if ( $("switched_rte_on").value == '0' ) return html;
+    if ($("switched_rte_on").value == '0') return html;
 
     var out = convert_poll_to_ljtags(html, true);
     out = convert_qotd_to_ljtags(out);
@@ -240,8 +233,10 @@ function convert_qotd_to_HTML(html) {
 // Constant used to check if FCKeditorAPI is loaded
 var FCKeditor_LOADED = false;
 
-function FCKeditor_OnComplete( editorInstance ) {
-    editorInstance.Events.AttachEvent('OnAfterLinkedFieldUpdate', doLinkedFieldUpdate);
+function FCKeditor_OnComplete(oEditor) {
+    oEditor.Events.AttachEvent('OnAfterLinkedFieldUpdate', doLinkedFieldUpdate);
+    oEditor.Events.AttachEvent('OnAfterSetHTML', function() { LJUser(oEditor) });
+    LJUser(oEditor);
     FCKeditor_LOADED = true;
 }
 
@@ -253,18 +248,22 @@ function doLinkedFieldUpdate(oEditor) {
 }
 
 function convertToLJTags(html) {
-    html = html.replace(/<div class="ljuser"><a href="http:\/\/community\.[-.\w]+\/(\w+)\/.+?<b>\1<\/b><\/a><\/div>/g, '<lj comm="$1"/>')
-    html = html.replace(/<div class="ljuser"><a href="http:\/\/community\.[-.\w]+\/(\w+)\/.+?<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj comm="$1" title="$2"/>')
-    html = html.replace(/<div class="ljuser"><a href="http:\/\/(\w+)\..+?<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>')
-    html = html.replace(/<div class="ljuser"><a href="http:\/\/(\w+)\..+?<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj user="$1" title="$2"/>')
-    html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><img.+?\/><\/div>/g, '<lj-template name="video">$1</lj-template>');
-    html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><br \/><\/div>/g, '');
-    html = html.replace(/<div class=['"]ljraw['"]>(.+?)<\/div>/g, '<lj-raw>$1</lj-raw>');
-    html = html.replace(/<div class=['"]ljembed['"](\s*embedid="(\d*)")?\s*>(.*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>');
-    html = html.replace(/<div\s*(embedid="(\d*)")?\s*class=['"]ljembed['"]\s*>(.*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>');
-    html = html.replace(/<div class=['"]ljcut['"] text=['"](.+?)['"]>(.+?)<\/div>/g, '<lj-cut text="$1">$2</lj-cut>');
-    html = html.replace(/<div text=['"](.+?)['"] class=['"]ljcut['"]>(.+?)<\/div>/g, '<lj-cut text="$1">$2</lj-cut>');
-    html = html.replace(/<div class=['"]ljcut['"]>(.+?)<\/div>/g, '<lj-cut>$1</lj-cut>');
+    html = html
+        .replace(/<div class="ljuser"><a href="http:\/\/community\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj comm="$1"/>')
+        .replace(/<div class="ljuser"><a href="http:\/\/community\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj comm="$1" title="$2"/>')
+        .replace(/<div class="ljuser"><a href="http:\/\/users\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>')
+        .replace(/<div class="ljuser"><a href="http:\/\/users\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj user="$1" title="$2"/>')
+        .replace(/<div class="ljuser"><a href="http:\/\/([_\w]+)\.(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>')
+        .replace(/<div class="ljuser"><a href="http:\/\/([_\w]+)\.(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj user="$1" title="$2"/>')
+        .replace(/<\/lj>/g, '')
+        .replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><img.+?\/><\/div>/g, '<lj-template name="video">$1</lj-template>')
+        .replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><br \/><\/div>/g, '')
+        .replace(/<div class=['"]ljraw['"]>(.+?)<\/div>/g, '<lj-raw>$1</lj-raw>')
+        .replace(/<div class=['"]ljembed['"](\s*embedid="(\d*)")?\s*>(.*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')
+        .replace(/<div\s*(embedid="(\d*)")?\s*class=['"]ljembed['"]\s*>(.*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')
+        .replace(/<div class=['"]ljcut['"] text=['"](.+?)['"]>(.+?)<\/div>/g, '<lj-cut text="$1">$2</lj-cut>')
+        .replace(/<div text=['"](.+?)['"] class=['"]ljcut['"]>(.+?)<\/div>/g, '<lj-cut text="$1">$2</lj-cut>')
+        .replace(/<div class=['"]ljcut['"]>(.+?)<\/div>/g, '<lj-cut>$1</lj-cut>');
 
     html = convert_poll_to_ljtags(html);
     html = convert_qotd_to_ljtags(html);
@@ -284,3 +283,5 @@ function convertToHTMLTags(html, statPrefix) {
 
     return html;
 }
+// Utit test
+//document.write('<script src="/js/test/rte.js"></script>');

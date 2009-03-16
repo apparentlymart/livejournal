@@ -1302,7 +1302,7 @@ sub entry_form {
     ### Draft Status Area
     $out .= "<div id='draft-container' class='pkg'>\n";
     $out .= LJ::html_textarea({ 'name' => 'event', 'value' => $opts->{'event'},
-                                'rows' => '20', 'cols' => '50', 'style' => '',
+                                'rows' => '20', 'cols' => '50',
                                 'tabindex' => $tabindex->(), 'wrap' => 'soft',
                                 'disabled' => $opts->{'disabled_save'},
                                 'id' => 'draft'}) . "\n";
@@ -1314,17 +1314,11 @@ sub entry_form {
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
 
         $out .= <<RTE;
-        <script language='JavaScript' type='text/javascript'>
-            <!--
-
-        // Check if this browser supports FCKeditor
-        var rte = new FCKeditor();
-        var t = rte._IsCompatibleBrowser();
-        if (t) {
+        <script type="text/javascript">
+        if (FCKeditor_IsCompatibleBrowser()) {
 RTE
 
-    $out .= "var FCKLang;\n";
-    $out .= "if (!FCKLang) FCKLang = {};\n";
+    $out .= "if (!window.FCKLang) FCKLang = {};\n";
     $out .= "FCKLang.UserPrompt = \"".LJ::ejs(BML::ml('fcklang.userprompt'))."\";\n";
     $out .= "FCKLang.InvalidChars = \"".LJ::ejs(BML::ml('fcklang.invalidchars'))."\";\n";
     $out .= "FCKLang.LJUser = \"".LJ::ejs(BML::ml('fcklang.ljuser'))."\";\n";
@@ -1354,8 +1348,7 @@ RTE
             document.write("$jnorich");
             usePlainText('draft');
         }
-        //-->
-            </script>
+        </script>
 RTE
 
         $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich2') . ' de?><br /></noscript>';

@@ -549,11 +549,10 @@ head<=
     BML::noparse();
     $ret .= qq^
     <script type="text/javascript">
-    //<![CDATA[
         var restoredDraft = $draft;
 
         function init_update_bml() {
-            $initDraft
+            setTimeout(function(){ $initDraft }, 0)
             $_[1]->{'onload'}
             $pageload
         }
@@ -562,19 +561,18 @@ head<=
         LJDraft.autoSaveInterval = $LJ::AUTOSAVE_DRAFT_INTERVAL;
         LJDraft.savedMsg = '$eMLautosave';
 
-            function initDraft(askToRestore) {
-                if (askToRestore && restoredDraft) {
-                    if (confirm("$eMLconfirm")) {
-                        \$("draft").value = restoredDraft;
-                        \$("draftstatus").value = '$eMLrestored ';
-                    } else {
-                        // Clear out their current draft
-                        LJDraft.save('');
-                    }
+        function initDraft(askToRestore) {
+            if (askToRestore && restoredDraft) {
+                if (confirm("$eMLconfirm")) {
+                    \$("draft").value = restoredDraft;
+                    \$("draftstatus").value = '$eMLrestored ';
+                } else {
+                    // Clear out their current draft
+                    LJDraft.save('');
                 }
-                LJDraft.startTimer();
-           }
-    //]]>
+            }
+            LJDraft.startTimer();
+        }
     </script>^;
 
     $ret .= (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : "";
