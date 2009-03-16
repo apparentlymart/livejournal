@@ -2581,7 +2581,7 @@ sub ads {
 
     unless (ref $addetails eq "HASH") {
         LJ::run_hooks('notify_ad_block', $addetails);
-        $LJ::ADV_PER_PAGE++;
+        LJ::ADV->notify_ad_displayed;
         return $addetails;
     }
 
@@ -2729,7 +2729,7 @@ sub ads {
     $adhtml = LJ::ads_wrap($adhtml, \%opts, \%adcall, $iframe_url) unless $opts{nowrap};
 
     LJ::run_hooks('notify_ad_block', $adhtml);
-    $LJ::ADV_PER_PAGE++;
+    LJ::ADV->notify_ad_displayed;
     return $adhtml;
 }
 
