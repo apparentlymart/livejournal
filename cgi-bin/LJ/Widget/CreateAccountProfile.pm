@@ -4,6 +4,8 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 
+use LJ::GeoLocation;
+
 sub need_res { qw( stc/widgets/createaccountprofile.css js/widgets/createaccountprofile.js ) }
 
 sub render_body {
@@ -69,13 +71,17 @@ sub render_body {
     ### location
     my %countries;
     LJ::load_codes({ "country" => \%countries});
-    my $defalt_country;
+    my ($default_country, $default_region, $default_city);
     if ($LJ::USE_IPMAP) {    
-        $defalt_country = LJ::LJcom::get_ipmap()->Resolve(LJ::get_remote_ip());
-        undef $defalt_country unless $countries{$defalt_country};
+        my $geo = LJ::GeoLocation->get_city_info_by_ip();
+        $default_country = $geo->{country_short};
+        $default_region = $geo->{region};
+        $default_city = $geo->{city_rus_name} || $geo->{city_name};
+        undef $default_country unless $countries{$default_country};
     }
     $ret .= "<tr valign='middle'><td class='field-name'>" . $class->ml('widget.createaccountprofile.field.location') . "</td>\n<td>";
-    $ret .= LJ::Widget::Location->render( country => $defalt_country, minimal_display => 1, skip_timezone => 1 , $loc_post);
+    $ret .= LJ::Widget::Location->render( country => $default_country, state => $default_region, city => $default_city,
+                                          minimal_display => 1, skip_timezone => 1, $loc_post);
     $ret .= "</td></tr>\n";
 
     $ret .= "</table><br />\n";
