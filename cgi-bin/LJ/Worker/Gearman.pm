@@ -11,11 +11,6 @@ use Getopt::Long;
 use IO::Socket::INET ();
 use Carp qw(croak);
 
-my $quit_flag = 0;
-$SIG{TERM} = sub {
-    $quit_flag = 1;
-};
-
 my $opt_verbose;
 die "Unknown options" unless
     GetOptions("verbose|v" => \$opt_verbose);
@@ -79,16 +74,10 @@ sub gearman_work {
     my $periodic_checks = sub {
         LJ::Worker->check_limits();
 
-        # check to see if we should die
-        my $now = time();
-        if ($now != $last_death_check) {
-            $last_death_check = $now;
-            exit 0 if -e "/var/run/gearman/$$.please_die" || -e "/var/run/ljworker/$$.please_die";
-        }
-
+        # check to see if we should quit
         $worker->job_servers(@LJ::GEARMAN_SERVERS); # TODO: don't do this everytime, only when config changes?
 
-        exit 0 if $quit_flag;
+        exit 0 if LJ::Worker->should_quit;
     };
 
     my $start_cb = sub {

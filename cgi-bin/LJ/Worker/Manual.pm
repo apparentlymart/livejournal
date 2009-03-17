@@ -11,11 +11,6 @@ die "Unknown options" unless
     GetOptions('interval|n=i' => \$interval,
                'verbose|v'    => \$verbose);
 
-my $quit_flag = 0;
-$SIG{TERM} = sub {
-    $quit_flag = 1;
-};
-
 # don't override this in subclasses.
 sub run {
     my $class = shift;
@@ -32,7 +27,7 @@ sub run {
             $class->error("Error working: $@");
         }
         $class->cond_debug("  did work = $did_work");
-        exit 0 if $quit_flag;
+        exit 0 if LJ::Worker->should_quit;
         $class->on_afterwork($did_work);
         if ($did_work) {
             $sleep = 0;

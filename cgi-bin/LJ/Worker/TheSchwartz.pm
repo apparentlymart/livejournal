@@ -13,15 +13,6 @@ die "Unknown options" unless
     GetOptions('interval|n=i' => \$interval,
                'verbose|v'    => \$verbose);
 
-my $quit_flag = 0;
-$SIG{TERM} = sub {
-    $quit_flag = 1;
-};
-
-sub should_quit {
-    return $quit_flag;
-}
-
 @EXPORT = qw(schwartz_decl schwartz_work schwartz_on_idle schwartz_on_afterwork schwartz_on_prework);
 
 my $sclient;
@@ -81,21 +72,17 @@ sub schwartz_work {
         LJ::start_request();
         LJ::Worker->check_limits();
 
-        # check to see if we should die
-        my $now = time();
-        if ($now != $last_death_check) {
-            $last_death_check = $now;
-            exit 0 if -e "/var/run/gearman/$$.please_die" || -e "/var/run/ljworker/$$.please_die";
-        }
-
-        exit 0 if should_quit;
+        # check to see if we should quit
+        exit 0 if LJ::Worker->should_quit;
 
         my $did_work = 0;
         if ($on_prework->()) {
             $did_work = $sclient->work_once;
             $on_afterwork->($did_work);
-            exit 0 if should_quit;
         }
+
+        exit 0 if LJ::Worker->should_quit;
+
         if ($did_work) {
             $sleep--;
             $sleep = 0 if $sleep < 0;

@@ -5,15 +5,21 @@ use POSIX ();
 
 use strict;
 
-
 # this will force preloading (rather than lazy) or all
 # modules so they're loaded in shared memory before the
 # fork (mod_perl-style)
 use Class::Autouse qw{:devel};
 
+my $quit_flag = 0;
+
 BEGIN {
+    $SIG{TERM} = sub { $quit_flag = 1; };
     my $debug = $ENV{DEBUG} ? 1 : 0;
     eval "sub DEBUG () { $debug }";
+}
+
+sub should_quit {
+    return $quit_flag;
 }
 
 my $mother_sock_path;
