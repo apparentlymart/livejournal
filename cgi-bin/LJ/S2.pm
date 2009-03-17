@@ -1008,6 +1008,7 @@ sub load_style
     my $db = ref $_[0] ? shift : undef;
     my $id = shift;
     return undef unless $id;
+    return undef if $id eq "S2 ID";
     my %opts = @_;
 
     my $memkey = [$id, "s2s:$id"];
