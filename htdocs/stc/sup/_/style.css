@@ -1,0 +1,306 @@
+/*_*/
+
+/* Reset
+--------------------------------*/
+HTML{font-size:100.01%;}HTML,BODY,DIV,SPAN,APPLET,OBJECT,H1,H2,H3,H4,H5,H6,P,BLOCKQUOTE,PRE,A,ABBR,ACRONYM,ADDRESS,BIG,CITE,CODE,DEL,DFN,EM,FONT,IMG,INS,KBD,Q,S,SAMP,SMALL,STRIKE,STRONG,SUB,SUP,TT,VAR,B,U,I,CENTER,DL,DT,DD,OL,UL,LI,FIELDSET,FORM,LABEL,LEGEND,TABLE,CAPTION,TBODY,TFOOT,THEAD,TR,TH,TD{margin:0;padding:0;border:0;outline:0;font-size:100%;}HTML,BODY,DIV,SPAN,APPLET,OBJECT,H1,H2,H3,H4,H5,H6,P,BLOCKQUOTE,PRE,A,ABBR,ACRONYM,ADDRESS,BIG,CITE,CODE,DEL,DFN,EM,FONT,IMG,INS,KBD,Q,S,SAMP,SMALL,STRIKE,STRONG,SUB,SUP,TT,VAR,B,U,I,CENTER,DL,DT,DD,OL,UL,LI,FIELDSET,FORM,LABEL,LEGEND{vertical-align:baseline;}UL{list-style:none;}BLOCKQUOTE,Q{quotes:none;}BLOCKQUOTE:before,BLOCKQUOTE:after,Q:before,Q:after{content:"";content:none;}:focus{outline:0;}INS{text-decoration:none;}DEL{text-decoration:line-through;}TABLE{border-collapse:collapse;border-spacing:0;}BODY{line-height:1;}
+
+/* Text Typography
+--------------------------------*/
+.hr HR {
+	display:none;
+	}
+
+.text IMG {
+	max-width:100%;
+	width:auto !important;
+	height:auto !important;
+	}
+.text CODE,
+.text VAR {
+	font-style:normal;
+	font-family:Monaco,Consolas,"Lucida Console","Courier New",monospace;
+	}
+.text UL,
+.text OL,
+.text DL,
+.text P,
+.text BLOCKQUOTE,
+.text HR,
+.text CODE,
+.text TABLE {
+	margin-bottom:1.5em;
+	}
+.text .ljtags {
+	margin-top:1.5em;
+	}
+
+.text H1,
+.text H2,
+.text H3,
+.text H4,
+.text H5,
+.text H6 {
+	font-weight:normal;
+	margin-bottom:.5em;
+	}
+.text H1 {
+	margin-top:1.45em;
+	font-size:2em;
+	line-height:1.1;
+	}
+.text H2 {
+	margin-top:1.5em;
+	font-size:1.8em;
+	line-height:1.15;
+	}
+.text H3 {
+	margin-top:1.55em;
+	font-size:1.6em;
+	line-height:1.2;
+	}
+.text H4 {
+	margin-top:1.6em;
+	font-size:1.4em;
+	line-height:1.25;
+	}
+.text H5 {
+	margin-top:1.65em;
+	font-size:1.2em;
+	font-weight:bolder;
+	line-height:1.3;
+	}
+.text H6 {
+	margin-top:1.7em;
+	font-size:1em;
+	font-weight:bold;
+	line-height:1.35;
+	}
+.text H1:first-child,
+.text H2:first-child,
+.text H3:first-child,
+.text H4:first-child,
+.text H5:first-child,
+.text H6:first-child {
+	margin-top:0;
+	}
+	
+.text UL,
+.text UL UL UL {
+	list-style:disc outside;
+	}
+	.text UL UL,
+	.text UL UL UL UL {
+		list-style:circle outside;
+		}
+	.text UL LI,
+	.text OL LI,
+	.text DL DD {
+		margin-left:1.5em;
+		margin-bottom:.3em;
+		line-height:1.3;
+		}
+.text OL > LI:only-child {
+	list-style:circle outside;
+	}
+.text UL BR,
+.text OL BR,
+.text DL BR {
+	display:none;
+	}
+	.text UL LI BR,
+	.text OL LI BR,
+	.text DL DT BR,
+	.text DL DD BR {
+		display:block;
+		}
+.text UL UL,
+.text UL OL,
+.text OL UL,
+.text OL OL {
+	margin-bottom:0;
+	}
+.text BLOCKQUOTE {
+	border-left:2px solid;
+	padding:0 1em;
+	line-height:1.4;
+	}
+	.text BLOCKQUOTE P {
+		margin-bottom:1em;
+		}
+.text SUP,
+.text SUB {
+	line-height:1;
+	position:relative;
+	font-size:.7em;
+	}
+.text SUP {
+	bottom:1.4ex;
+	}
+.text SUB {
+	top:.5ex;
+	}
+.text TABLE {
+	max-width:100%;
+	}
+	.text TABLE CAPTION {
+		font-size:1.6em;
+		padding:.6em .5em 0;
+		border-bottom:2px solid;
+		text-align:center;
+		}
+	.text TABLE THEAD TH,
+	.text TABLE THEAD TD {
+		padding:.6em .5em;
+		border-bottom:2px solid;
+		font-size:1.2em;
+		font-weight:normal;
+		}
+		.text TABLE TD,
+		.text TABLE TH {
+			padding:.3em .6em;
+			border-bottom:1px solid;
+			text-align:left;
+			}
+		.text TABLE TFOOT TD,
+		.text TABLE TFOOT TH {
+			font-style:italic;
+			}
+		.text TABLE TH {
+			font-weight:bold;
+			}
+.text ABBR {
+	border:none;
+	}
+
+
+/* Frameworky
+--------------------------------*/
+
+/* clearfix */
+.comment-head:after,
+.clearfix:after { 
+	content:" ";
+	clear:both;
+	display:block;
+	width:0;
+	height:0;
+	overflow:hidden;
+	visibility:hidden;
+	}
+
+/* Some base styles */
+BODY {
+	font:62.5%/1.5 Helvetica, Arial, serif;
+	}
+
+/* Comments */
+#comments {
+	overflow:auto;
+	overflow-y:hidden;
+	}
+	#comments .hr {
+		margin:.5em 0;
+		}
+
+.comment-wrap {
+	margin-top:5px;
+	}
+	.comment-head {
+		padding:1px 4px;
+		margin-top:10px;
+		zoom:1; /* ToDo move to ie.css */
+		}
+		.comment-head H3 {
+			font-size:1.4em;
+			font-weight:bold;
+			}
+		.comment-head-in {
+			margin-left:105px;
+			}
+		.cwoup .comment-head-in {
+			margin-left:0;
+			}
+		.comment-head .comment-upic {
+			float:left;
+			display:inline;
+			width:100px;
+			text-align:center;
+			}
+			.comment-head .comment-upic IMG {
+				
+				}
+		.comment-head P, .comment-head IMG {
+			vertical-align:bottom;
+			}
+	.comment-text {
+		margin-top:.4em;
+		margin-left:1px;
+		}
+	.comment-menu {
+		margin-top:.1em;
+		margin-bottom:11px;
+		font-size:.75em;
+		}
+.comment-wrap .odd {
+	background-color:#BDF;
+	}
+.comment-wrap .even {
+	background-color:#ACE;
+	}
+.comment-wrap .hr {
+	display:none;
+	}
+.comment-wrap .comment-text .hr {
+	display:block;
+	}
+
+#qrdiv FORM {
+	display:block;
+	padding:5px;
+	border:1px solid #000;
+	margin:5px 1px 1px;
+	}
+	#qrdiv #subject {
+		margin:3px 0;
+		}
+	#qrdiv TABLE {
+		border:none !important;
+		}
+
+.replyform TABLE TD {
+	padding-right:.4em;
+	vertical-align:top;
+	}
+	.replyform TEXTAREA {
+		width:90%;
+		}
+		
+		
+/* lj-user */
+.ljuser {
+	white-space:nowrap;
+	font-weight:bold;
+	}
+	.ljuser .ico {
+		border:0 !important;
+		margin-right:.2em;
+		}
+		.ljuser IMG {
+			vertical-align:middle !important;
+			}
+		.ljuser .ico IMG {
+			vertical-align:-.4em !important;
+			}
+/* tags */
+P.tags A {
+	padding:0 .1em;
+	border:0 !important;
+	white-space:nowrap;
+	text-decoration:none !important;
+	}
+	P.tags A:hover {
+		text-decoration:underline !important;
+		}
+	P.tags .etc {
+		display:none;
+		}
