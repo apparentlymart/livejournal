@@ -179,6 +179,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('AS', 'American Samoa',
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AT', 'Austria', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AU', 'Australia', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AW', 'Aruba', '0', 'country');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('AX', 'Aland Islands', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AZ', 'Arizona', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AZ', 'Azerbaijan', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('BA', 'Bosnia and Herzegovina', '0', 'country');
@@ -203,6 +204,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('BZ', 'Belize', '0', 'c
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('CA', 'California', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('CA', 'Canada', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('CC', 'Cocos (Keeling) Islands', '0', 'country');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('CD', 'Congo, The Democratic Republic of the', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('CF', 'Central African Republic', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('CG', 'Congo', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('CH', 'Switzerland', '0', 'country');
@@ -254,6 +256,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('GA', 'Georgia', '0', '
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('GD', 'Grenada', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('GE', 'Georgia', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('GF', 'French Guiana', '0', 'country');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('GG', 'Guernsey', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('GH', 'Ghana', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('GI', 'Gibraltar', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('GL', 'Greenland', '0', 'country');
@@ -281,6 +284,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('ID', 'Indonesia', '0',
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('IE', 'Ireland', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('IL', 'Illinois', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('IL', 'Israel', '0', 'country');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('IM', 'Isle of Man', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('IN', 'India', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('IN', 'Indiana', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('IO', 'British Indian Ocean Territory', '0', 'country');
@@ -288,6 +292,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('IQ', 'Iraq', '0', 'cou
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('IR', 'Iran', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('IS', 'Iceland', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('IT', 'Italy', '0', 'country');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('JE', 'Jersey', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('JM', 'Jamaica', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('JO', 'Jordan', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('JP', 'Japan', '0', 'country');
@@ -323,6 +328,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('MC', 'Monaco', '0', 'c
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MD', 'Maryland', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MD', 'Moldova', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('ME', 'Maine', '0', 'state');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('ME', 'Montenegro', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MG', 'Madagascar', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MH', 'Marshall Islands', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MH', 'Marshall Islands', '0', 'state');
@@ -393,6 +399,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('QA', 'Qatar', '0', 'co
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('RE', 'Reunion', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('RI', 'Rhode Island', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('RO', 'Romania', '0', 'country');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('RS', 'Serbia', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('RU', 'Russian Federation', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('RU', 'Russian', '1', 'lang');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('RW', 'Rwanda', '0', 'country');
@@ -425,6 +432,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('TG', 'Togo', '0', 'cou
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('TH', 'Thailand', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('TJ', 'Tajikistan', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('TK', 'Tokelau', '0', 'country');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('TL', 'Timor-Leste', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('TM', 'Turkmenistan', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('TN', 'Tennessee', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('TN', 'Tunisia', '0', 'country');
@@ -613,6 +621,8 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('Name', 'Name of city.
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('State', 'State.', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('aaid', 'Primary key for each authaction.', 'authactions');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('acid', 'Account code ID.  Primary key.', 'acctcode');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('acid', 'The account code ID from [dbtable[acctcode]].', 'acctpay');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('acid', 'The resultant acid code in table [dbtable[acctcode]].', 'acctinvite');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('acktime', 'The time the user saw the box, either by clicking next/no/more info.', 'cprod');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('action', 'A textual description of what happened (up to 30 characters).', 'userlog');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('action', 'The action command name to be run when the authaction is confirmed (clicked/etc)', 'authactions');
@@ -648,6 +658,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('curr', 'The current w
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('datatype', 'Either \"char\" for text data, \"num\" for an integer, or \"bool\" for a 1/0 value.', 'userproplist');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('datatype', 'Type of property, e.g. bool(ean).', 'talkproplist');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateadd', 'Date and time syndicated account was updated with the entry item.', 'synitem');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateadd', 'Date code was create.', 'acctinvite');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('datecreate', 'Date the auth code was created.', 'authactions');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateins', 'The date the search was made.', 'dirsearchres2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateview', 'The time of the viewing.', 'faquses');
@@ -666,7 +677,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('etag', 'ETag (entity 
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('event', 'Journal entry text.', 'logtext2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('eventtime', 'The time of the entry, supplied by the user / according to the user\'s system clock.', 'log2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('expiretime', 'Unixtime. Can be 0, to mean \"never\".', 'subs');
-REPLACE INTO schemacols (colname, des, tablename) VALUES ('exptype', 'Session expiration type, the length a specific session should be defined for. \'short\' is 36 hours, \'long\' is 60 days,  \'once\' defaults to same length as \'short\'; just doesn\'t renew. ', 'sessions');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('exptype', 'Session expiration type, the length a specific session should be defined for. \'short\' is 36 hours, \'long\' is 60 days,  \'once\' defaults to same length as \'short\'; just doesn\'t renew.', 'sessions');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('faqcat', 'The name of the main category the FAQ item belongs to. Is the index to [dbtable[faqcat]]', 'faq');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('faqid', 'The faqid of the [dbtable[faq]] item which was viewed.', 'faquses');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('faqid', 'The unique id number of the FAQ.', 'faq');
@@ -732,6 +743,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('oldvalue', 'The old v
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('other', 'Optional note space.', 'infohistory');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('parentkwid', '(Can be null.)', 'usertags');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('parenttalkid', 'talkid of parent comment that this comment is in reply to within a comment thread. 0 if it is a top-level comment.', 'talk2');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('payid', 'The payment ID from [dbtable[payments]].', 'acctpay');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('pop1990', 'Population in 1990. (Table uses 1990 Census Bureau \'Gazetteer\' data).', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('posterid', 'The [dbtable[user]] userid of the person that posted the comment.', 'talk2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('posterid', 'The [dbtable[user]] userid of the person that posted the entry.', 'log2');
@@ -745,6 +757,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('qdigest', 'An MD5sum 
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('question', 'The question text, in plaintext.', 'faq');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('rcptid', 'Userid of recipient, or 0 if code is unused.', 'acctcode');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('realm', 'The area of the site the lock is being provided for.', 'duplock');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('reason', 'Reason code for generating invite code.  See invite/gen.bml', 'acctinvite');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('recentshowtime', 'A recent showing time. Perhaps not _the_ most recent, though.', 'cprod');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('redist_mode', 'Determines if data from this table is made available in the LJ source distribution.  And if so, is it to be updated with upgrades (REPLACE INTO) or just inserted once.', 'schematables');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('reid', 'Realm ID.  If you don\'t need it (most don\'t), use 0.  Example: for comment realm, reid is the itemid being replied to.', 'duplock');
@@ -788,6 +801,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid 
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid of the remote [dbtable[user]] viewing the FAQ item.', 'faquses');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid of the subscribing [dbtable[user]].', 'supportnotify');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid the disk usage item belongs to.', 'dudata');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'Userid of [dbtable[user]] that code was made for.', 'acctinvite');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'Userid of [dbtable[user]] using client.', 'clientusage');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'Userid of [dbtable[user]] we\'re verifying.', 'authactions');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'Userid of [dbtable[user]] whose journal should be loaded.', 'domains');
@@ -992,6 +1006,9 @@ REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tab
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Global.', '0', 'off', NULL, 'eventtypelist');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Historic. Global. Stores a user\'s posts on other clusters, when either 1) that user isn\'t clustered themselves yet, or 2) we\'re doing a mass conversion (moveucluster.pl) and don\'t want to look it up.\n\r\nA maintenance task (clean_caches) moves data from here to [dbtable[talkleft]] on clusters.', '0', 'off', NULL, 'talkleft_xfp');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Historic. Stored data for old \'1.0\' version of the Portal; used before the Portal was re-designed.', '0', 'off', NULL, 'portal');
+REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Keeps track of generated invite codes.', '0', 'off', NULL, 'acctinvite');
+REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Keeps track of relationship between invite codes and payments.  Some people pay to join the site before they have an account, so their invite code carries with it the knowledge that it comes with paid time.', '0', 'off', NULL, 'acctpay');
+REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('List of system secret questions', '0', 'replace', NULL, 'secret_questions');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Lookup table for states, countries, languages, etc...', '1', 'replace', NULL, 'codes');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Obsolete. Historic. Was used by mailusers script for sending out LiveJournal.com newsletters by e-mail.', '0', 'off', NULL, 'news_sent');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Obsolete. It was used to keep track of user activity, such as latest time a user posted in a week, for a given week. Used from data version 3, but ceased to be used later, when the Friends view algorithm was re-designed.', '0', 'off', NULL, 'weekuserusage');
