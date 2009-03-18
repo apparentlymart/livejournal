@@ -66,8 +66,9 @@ sub render_body {
             next unless $_->{is_selectable};
             push @choices, $_->{spcatid}, $_->{catname};
         }
-
-        $ret .= $class->html_select(name => 'spcatid', list => \@choices, selected => $post->{spcatid});
+        my $selected = $post->{spcatid};
+        LJ::run_hook("support_request_extra_cat", \@choices, \$selected, $cats);
+        $ret .= $class->html_select(name => 'spcatid', list => \@choices, selected => $selected);
         $ret .= LJ::run_hook("support_request_cat_extra_text");
         $ret .= "</div></p>";
     }
