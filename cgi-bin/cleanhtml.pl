@@ -126,6 +126,7 @@ sub clean
     my $addbreaks = $opts->{'addbreaks'};
     my $keepcomments = $opts->{'keepcomments'};
     my $mode = $opts->{'mode'};
+    my $undefined_tags = $opts->{undefined_tags} || '';
     my $cut = $opts->{'cuturl'} || $opts->{'cutpreview'};
     my $ljcut_disable = $opts->{'ljcut_disable'};
     my $s1var = $opts->{'s1var'};
@@ -374,7 +375,9 @@ sub clean
             # because IE understands them.
             $tag =~ s!/.+$!!;
 
-            if ($action{$tag} eq "eat") {
+            # Try to execute default action on undefined tags
+            if ((!$action{$tag} && $undefined_tags eq "eat") 
+             or ($action{$tag} eq "eat")) {
                 $p->unget_token($token);
                 $p->get_tag("/$tag");
                 next;
