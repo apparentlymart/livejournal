@@ -326,7 +326,7 @@ sub _load_mapping_uniq {
         return @$memval;
     }
 
-    my $dbh = LJ::get_uniq_db_reader()
+    my $dbh = LJ::get_uniq_db_writer() # FIXME switch to reader
         or die "unable to contact uniq reader";
 
     my $limit = $window_size + 1;
