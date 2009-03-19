@@ -2767,16 +2767,31 @@ sub ads_wrap {
     return $adhtml;
 }
 
-# pass in tag list if this ad relates to a special QotD
+# modifies list of interests (appends tags of sponsored questions to the list)
+# sponsored question may be taken
+#   1. from argument of function: $opts = { extra => {qotd => ...} }, 
+#   2. from URL args of /update.bml page (/update.bml?qotd=123)
+#   3. from first displayed entry on the page
 sub modify_interests_for_adcall {
     my $opts = shift;
     my $list = shift;
 
+    my $qotd;
     my $r = eval { Apache->request };
-
-    if (ref $opts->{extra} && $opts->{extra}->{qotd} || $r && $r->notes('codepath') eq 'bml.update' && $BMLCodeBlock::GET{qotd}) {
-        my $qotd_param = ref $opts->{extra} && $opts->{extra}->{qotd} ? $opts->{extra}->{qotd} : $BMLCodeBlock::GET{qotd};
-        my $qotd = ref $qotd_param ? $qotd_param : LJ::QotD->get_single_question($qotd_param);
+    if (ref $opts->{extra} && $opts->{extra}->{qotd}) {
+        $qotd = $opts->{extra}->{qotd};
+    } elsif ($r && $r->notes('codepath') eq 'bml.update' && $BMLCodeBlock::GET{qotd}) {
+        $qotd = $BMLCodeBlock::GET{qotd};
+    } elsif (@LJ::SUP_LJ_ENTRY_REQ) {
+        my ($journalid, $posterid, $ditemid) = @{ $LJ::SUP_LJ_ENTRY_REQ[0] };
+        my $entry = LJ::Entry->new(LJ::load_userid($journalid), ditemid => $ditemid);
+        if ($entry && $entry->prop("qotdid")) {
+            $qotd = $entry->prop("qotdid");
+        }
+    }
+    
+    if ($qotd) {
+        $qotd = LJ::QotD->get_single_question($qotd) unless ref $qotd;
         my $tags = LJ::QotD->remove_default_tags($qotd->{tags});
         if ($tags && $qotd->{is_special} eq "Y") {
             unshift @$list, $tags;
