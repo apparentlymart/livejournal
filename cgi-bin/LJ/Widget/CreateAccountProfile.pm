@@ -78,6 +78,7 @@ sub render_body {
         $default_region = $geo->{region};
         $default_city = $geo->{city_rus_name} || $geo->{city_name};
         undef $default_country unless $countries{$default_country};
+        undef $default_city if $default_country eq 'US'; # they cannot see city, but widget saves it to profile
     }
     $ret .= "<tr valign='middle'><td class='field-name'>" . $class->ml('widget.createaccountprofile.field.location') . "</td>\n<td>";
     $ret .= LJ::Widget::Location->render( country => $default_country, state => $default_region, city => $default_city,
