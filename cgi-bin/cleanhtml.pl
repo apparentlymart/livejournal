@@ -376,8 +376,9 @@ sub clean
             $tag =~ s!/.+$!!;
 
             # Try to execute default action on undefined tags
-            if ((!$action{$tag} && $undefined_tags eq "eat") 
-             or ($action{$tag} eq "eat")) {
+            next if (!$action{$tag} && $undefined_tags eq "eat");
+
+            if ($action{$tag} eq "eat") {
                 $p->unget_token($token);
                 $p->get_tag("/$tag");
                 next;
