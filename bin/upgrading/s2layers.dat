@@ -79,5 +79,7 @@ lickable/themes         theme+          lickable/layout
 
 hostedcomments/layout   layout          core1
 
+understroke/layout      layout          core1
+
 # include local file
 s2layers-local.dat      INCLUDE

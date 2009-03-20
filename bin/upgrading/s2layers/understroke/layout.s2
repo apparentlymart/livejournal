@@ -1,5 +1,6 @@
 layerinfo "type" = "layout";
-layerinfo "name" = "Underscore";
+layerinfo "name" = "Understroke";
+layerinfo redist_uniq = "understroke/layout";
 layerinfo des = "_";
 # DISCLAIMER
 #	this style is under construction and always in alpha status, it would be widely refactored and improved, so use it as a layout layer with caution
