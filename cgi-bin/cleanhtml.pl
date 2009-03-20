@@ -263,7 +263,18 @@ sub clean
             my $attr = $token->[2];  # hashref
 
             $good_until = length $newdata;
-
+            
+            if (LJ::is_enabled('remove_allowscriptaccess')) {
+                ## TODO: remove closing </param> tag, 
+                ## don't strip 'allowscriptaccess' from YouTube and other trusted sites
+                if ($tag eq 'param' && $attr->{name} eq 'allowscriptaccess') {
+                    next TOKEN;
+                }
+                if ($tag eq 'embed') {
+                    delete $attr->{allowscriptaccess};
+                }
+            }
+            
             if (@eatuntil) {
                 push @capture, $token if $capturing_during_eat;
                 if ($tag eq $eatuntil[-1]) {
