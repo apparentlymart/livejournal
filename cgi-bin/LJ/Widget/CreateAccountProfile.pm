@@ -73,10 +73,14 @@ sub render_body {
     LJ::load_codes({ "country" => \%countries});
     my ($default_country, $default_region, $default_city);
     if ($LJ::USE_IPMAP) {    
-        my $geo = LJ::GeoLocation->get_city_info_by_ip();
-        $default_country = $geo->{country_short};
-        $default_region = $geo->{region};
-        $default_city = $geo->{city_rus_name} || $geo->{city_name};
+        if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location'}) {
+            my $geo = LJ::GeoLocation->get_city_info_by_ip();
+            $default_country = $geo->{country_short};
+            $default_region = $geo->{region};
+            $default_city = $geo->{city_rus_name} || $geo->{city_name};
+        } else {
+            $default_country = LJ::GeoLocation->get_country_info_by_ip();
+        }
         undef $default_country unless $countries{$default_country};
         undef $default_city if $default_country eq 'US'; # they cannot see city, but widget saves it to profile
     }
