@@ -21,6 +21,7 @@ sub new {
                                     # $template->param(param_name => 'value') even 
                                     # if 'param_name' doesn't exist in the template body.
                                     # Defaults to 1.
+            loop_context_vars => 1, # special loop variables: __first__, __last__, __odd__, __inner__, __counter__
             @_
         );
     } else {
