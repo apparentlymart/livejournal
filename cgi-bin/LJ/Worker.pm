@@ -18,21 +18,33 @@ BEGIN {
     eval "sub DEBUG () { $debug }";
 }
 
-sub should_quit {
-    return $quit_flag;
+my $original_name = $0;
+my $mother_sock_path;
+
+sub socket_filename {
+    return "/var/run/workers/$_[1].sock";
 }
 
-my $mother_sock_path;
+sub _pid_file_path {
+    $original_name =~ m{([^/]+)$};
+    my $name = $1;
+    return "/var/run/gearman/$name.$$";
+}
+
+sub should_quit {
+    unlink _pid_file_path if $quit_flag;
+    return $quit_flag;
+}
 
 ##############################
 # Child and forking management
 
 my $fork_count = 0;
 
-my $original_name = $0;
-
 sub setup_mother {
     my $class = shift;
+
+    return unless $ENV{SETUP_MOTHER};
 
     # Curerntly workers use a SIGTERM handler to prevent shutdowns in the middle of operations,
     # we need TERM to apply right now in this code
@@ -40,20 +52,16 @@ sub setup_mother {
     local $SIG{CHLD} = "IGNORE";
     local $SIG{PIPE} = "IGNORE";
 
-    return unless $ENV{SETUP_MOTHER};
     my ($function) = $0 =~ m{([^/]+)$};
-    my $sock_path = "/var/run/workers/$function.sock";
+    my $sock_path = $class->socket_filename($function);
 
     warn "Checking for existing mother at $sock_path" if DEBUG;
 
     if (my $sock = IO::Socket::UNIX->new(Peer => $sock_path)) {
         warn "Asking other mother to stand down. We're in charge now" if DEBUG;
         print $sock "SHUTDOWN\n";
-    } else {
-        warn "Other mother didn't exist: $!";
     }
 
-    unlink $sock_path; # No error trap, the file may not exist
     my $listener = IO::Socket::UNIX->new(Local => $sock_path, Listen => 1);
 
     die "Error creating listening unix socket at '$sock_path': $!" unless $listener;
@@ -80,10 +88,14 @@ sub setup_mother {
 }
 
 sub MANAGE_shutdown {
+    my $class = shift;
+    unlink $mother_sock_path; # No error trap, the file may not exist
     exit;
 }
 
 sub MANAGE_fork {
+    my $class = shift;
+
     my $pid = fork();
 
     unless (defined $pid) {
@@ -98,18 +110,22 @@ sub MANAGE_fork {
         return $pid;
     }
 
+    # Create pid file
+    my $pidfilename = _pid_file_path;
+    my $pidfile;
+    open($pidfile, '>', $pidfilename) or die "can't write to pidfile $pidfilename: $!";
+    my $now = time();
+    my $ltime = localtime($now);
+    print $pidfile "start: $now ($ltime)\n";
+    close $pidfile;
+
     POSIX::setsid();
     $SIG{HUP} = 'IGNORE';
 
-    ## Close open file descriptors
-    close(STDIN);
-    close(STDOUT);
-    close(STDERR);
-
     ## Reopen stderr, stdout, stdin to /dev/null
-    open(STDIN,  "+>/dev/null");
-    open(STDOUT, "+>&STDIN");
-    open(STDERR, "+>&STDIN");
+    close(STDIN);   open(STDIN,  "+>/dev/null");
+    close(STDOUT);  open(STDOUT, "+>&STDIN");
+    close(STDERR);  open(STDERR, "+>&STDIN");
 
     return 0; # we're a child process, the management loop should cleanup and end because we want to start up the main worker loop.
 }
