@@ -9044,9 +9044,9 @@ sub country_of_remote_ip {
     my $ip = LJ::get_remote_ip();
     return undef unless $ip;
     
-    if (LJ::GeoLocation->can('get_city_info_by_ip')) {
+    if (LJ::GeoLocation->can('get_country_info_by_ip')) {
         ## use module LJ::GeoLocation if it's installed
-        return LJ::GeoLocation->get_city_info_by_ip($ip)
+        return LJ::GeoLocation->get_country_info_by_ip($ip)
     } elsif (eval "use IP::Country::Fast; 1;") {
         my $reg = IP::Country::Fast->new();
         my $country = $reg->inet_atocc($ip);
