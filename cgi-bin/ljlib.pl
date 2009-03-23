@@ -2876,7 +2876,10 @@ sub procnotify_check
 sub get_remote_ip
 {
     my $ip;
-    return $LJ::_T_FAKE_IP if $LJ::IS_DEV_SERVER && $LJ::_T_FAKE_IP;
+    if ($LJ::IS_DEV_SERVER) {
+        return $LJ::_T_FAKE_IP if $LJ::_T_FAKE_IP;
+        return $BML::COOKIE{'fake_ip'} if LJ::is_web_context() && $BML::COOKIE{'fake_ip'};
+    }
     eval {
         $ip = Apache->request->connection->remote_ip;
     };
