@@ -3163,7 +3163,7 @@ widget.createaccount.field.confirmpassword=Confirm Password:
 
 widget.createaccount.field.email=Email Address:
 
-widget.createaccount.field.news=Yes, email me [[sitename]] announcements.
+widget.createaccount.field.news=Yes, send me [[sitename]] announcements via email.
 
 widget.createaccount.field.password=Password:
 
@@ -3187,7 +3187,7 @@ widget.createaccount.tip.username=Your username is used in your journal URL. Use
 
 widget.createaccountnextsteps.steps=Now that your account is set up, you're ready to explore the rest of [[sitename]]. Here are some things to get you started:
 
-widget.createaccountnextsteps.steps.customize=Customize your journal further
+widget.createaccountnextsteps.steps.customize=Customize your journal
 
 widget.createaccountnextsteps.steps.explore=Browse [[sitenameabbrev]] by categories
 
@@ -3217,7 +3217,7 @@ widget.createaccountprofile.field.interests.moviestv=Movies/TV
 
 widget.createaccountprofile.field.interests.music=Music
 
-widget.createaccountprofile.field.interests.note=(separate multiple with commas)
+widget.createaccountprofile.field.interests.note=(Separate multiple interests with commas)
 
 widget.createaccountprofile.field.interests.other=Other
 
@@ -3225,7 +3225,7 @@ widget.createaccountprofile.field.location=Location
 
 widget.createaccountprofile.field.name=Name
 
-widget.createaccountprofile.info=Let others know who you are.  All fields are completely optional, but the more, the merrier.
+widget.createaccountprofile.info=Let others know who you are. All fields are completely optional, but the more the merrier.
 
 widget.createaccountprofile.title=Jump Start Your Profile
 
@@ -3569,7 +3569,7 @@ widget.search.jabber=Jabber ID
 
 widget.search.msn=MSN
 
-widget.search.note=If you know some information for an existing LiveJournal user you can search for it here.
+widget.search.note=If you have other contact information for a LiveJournal user (like a username or an IM account), you can search for it here.
 
 widget.search.query_error=Sorry, there was an internal error. Please try again shortly.
 
