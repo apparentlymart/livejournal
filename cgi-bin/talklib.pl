@@ -1418,7 +1418,7 @@ sub talkform {
                     $whocheck->('openid_cookie') . "/>";
                 $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
 
-                $ret .= "<i>" . $remote->display_name . "</i>";
+                $ret .= "<strong>" . $remote->display_name . "</strong>";
 
                 $ret .= $BML::ML{'.opt.willscreen'} if $screening;
                 $ret .= "</td></tr>\n";
@@ -1467,7 +1467,7 @@ sub talkform {
                         $whocheck->('openid_cookie') . "/>";
                     $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
 
-                    $ret .= "<i>" . $remote->display_name . "</i>";
+                    $ret .= "<strong>" . $remote->display_name . "</strong>";
 
                     $ret .= $BML::ML{'.opt.willscreen'} if $screening;
                 }
@@ -1515,7 +1515,7 @@ sub talkform {
                     $ret .= "<td align='center'>( )</td><td align='left'><b><font color='#c0c0c0'>OpenID identity:</font></b>&nbsp;";
                 }
 
-                $ret .= "<font color='#000000'><b><i>" . $remote->display_name . "</i></b></font>";
+                $ret .= "<strong>" . $remote->display_name . "</strong>";
                 unless ($remote_can_comment) {
                     my $msg = $journalu->is_comm ? "notamember" : "notafriend";
                     $ret .= "&nbsp;- " . BML::ml("$SC.error.$msg", {'user' => $journalu->{'user'} });
@@ -1568,10 +1568,15 @@ sub talkform {
                 $ret .= "<td align='center'>( )</td>";
             }
             $ret .= "<td align='left'>";
-            $ret .= $remote_can_comment ? "<label for='talkpostfromremote'>" : "<font color='#c0c0c0'>";
-            $ret .= BML::ml(".opt.loggedin", {'username'=>"<font color='#000000'><b><i>$logged_in</i></b></font>"});
-            $ret .= $remote_can_comment ? "</label>\n" : "</font>\n";
-
+            if ($remote_can_comment) {
+                $ret .= "<label for='talkpostfromremote'>";
+                $ret .= BML::ml(".opt.loggedin", {'username'=>"<strong>$logged_in</strong>"});
+                $ret .= "</label>\n";
+            } else {
+                $ret .= "<font color='#c0c0c0'>";
+                $ret .= BML::ml(".opt.loggedin", {'username'=>"</font> <strong>$logged_in</strong><font color='#c0c0c0'>"});
+                $ret .= "</font>\n";
+            }
             if ($remote_can_comment) {
                 $ret .= $other_user;
             } else {
