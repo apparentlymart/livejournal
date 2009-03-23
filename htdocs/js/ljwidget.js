@@ -28,8 +28,6 @@ LJWidget = new Class(Object, {
         classPrefix = "Widget[" + classPrefix.replace(/::/g, "_") + "]_";
 
         for (var k in params) {
-            if (! params.hasOwnProperty(k)) continue;
-
             var class_k = k;
             if (! k.match(/^Widget\[/) && k != 'lj_form_auth' && ! k.match(/^_widget/)) {
                 class_k = classPrefix + k;
@@ -144,8 +142,7 @@ LJWidget = new Class(Object, {
         };
 
         for (var k in params) {
-          if (! params.hasOwnProperty(k)) continue;
-          reqOpts[k] = params[k];
+            reqOpts[k] = params[k];
         }
 
         HTTPReq.getJSON(reqOpts);

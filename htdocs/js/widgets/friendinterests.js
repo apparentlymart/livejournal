@@ -13,7 +13,6 @@ FriendInterests.init = function () {
 FriendInterests.gotInterests = function (data) {
     FriendInterests.ints = data.interests;
     for (var interest in FriendInterests.ints) {
-        if (!FriendInterests.ints.hasOwnProperty(interest)) continue;
         DOM.addEventListener($('int_' + FriendInterests.ints[interest]), "change", FriendInterests.checkboxChanged.bindEventListener(interest));
     }
     DOM.addEventListener($('interests_box'), "keyup", FriendInterests.textChanged);
@@ -24,7 +23,6 @@ FriendInterests.textChanged = function () {
     var ints = val.split(',');
 
     for (var interest in FriendInterests.ints) {
-        if (!FriendInterests.ints.hasOwnProperty(interest)) continue;
         $('int_' + FriendInterests.ints[interest]).checked = false;
     }
 

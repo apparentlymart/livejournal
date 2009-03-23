@@ -361,7 +361,6 @@ sub js {
                     DOM.addEventListener(filter_link, "click", function (evt) { Customize.ThemeNav.filterThemes(evt, "page", getArgs["page"]) });
                 } else {
                     for (var arg in getArgs) {
-                        if (!getArgs.hasOwnProperty(arg)) continue;
                         if (arg == "authas" || arg == "filter_available" || arg == "show") continue;
                         DOM.addEventListener(filter_link, "click", function (evt) { Customize.ThemeNav.filterThemes(evt, arg, getArgs[arg]) });
                         break;

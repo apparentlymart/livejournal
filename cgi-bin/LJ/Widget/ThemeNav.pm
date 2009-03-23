@@ -295,7 +295,6 @@ sub js {
                 var evt_listener_added = 0;
                 var getArgs = LiveJournal.parseGetArgs(filter_link.href);
                 for (var arg in getArgs) {
-                    if (!getArgs.hasOwnProperty(arg)) continue;
                     if (arg == "authas" || arg == "filter_available" || arg == "show") continue;
                     DOM.addEventListener(filter_link, "click", function (evt) { self.filterThemes(evt, arg, getArgs[arg]) });
                     evt_listener_added = 1;

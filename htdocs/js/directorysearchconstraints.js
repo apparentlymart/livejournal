@@ -258,10 +258,10 @@ var DirectorySearchConstraint = new Class(Object, {
     this.fields = {};
 
     // reset this prototype to the base class
-    this.override(DirectorySearchConstraint.prototype);
+    Object.override(this, DirectorySearchConstraint.prototype);
 
     // override this with the subclass prototype
-    this.override(DirectorySearchConstraintPrototypes[this.type]);
+    Object.override(this, DirectorySearchConstraintPrototypes[this.type]);
 
     this.extraFields.innerHTML = "";
 

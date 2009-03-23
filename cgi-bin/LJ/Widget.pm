@@ -360,10 +360,10 @@ sub wrapped_js {
     my $widget_js_obj = $opts{page_js_obj} ? "$opts{page_js_obj}.$widgetclass = $widgetvar;" : "";
 
     return qq {
-        <script>
+        <script type="text/javascript">
             $widgetvar = new LJWidget("$widgetid", "$widgetclass", "$authtoken");
             $widget_js_obj
-            $widgetvar.extend({$js});
+            Object.extend($widgetvar, {$js});
             LiveJournal.register_hook("page_load", function () { $widgetvar.initWidget() });
         </script>
     };
