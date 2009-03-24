@@ -1628,6 +1628,7 @@ sub talkform {
             $ljuser_def = $remote->{user};
         }
     }
+    $ljuser_def = "" unless $remote_can_comment;
 
     $ret .= "<table><tr><td>";
     $ret .= "$BML::ML{'Username'}:</td><td>";
