@@ -2045,6 +2045,7 @@ sub res_includes {
 
     my $remote = LJ::get_remote();
     my $hasremote = $remote ? 1 : 0;
+    my $remote_is_suspended = $remote && $remote->is_suspended ? 1 : 0;
 
     # ctxpopup prop
     my $ctxpopup = 1;
@@ -2068,6 +2069,7 @@ sub res_includes {
                 currentJournalBase => "$journal_base",
                 currentJournal => "$journal",
                 has_remote => $hasremote,
+                remote_is_suspended => $remote_is_suspended,
                 ctx_popup => $ctxpopup,
                 inbox_update_poll => $inbox_update_poll,
                 media_embed_enabled => $embeds_enabled,
