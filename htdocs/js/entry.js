@@ -74,7 +74,7 @@ function customboxes (e) {
         custom_boxes.style.display = 'none';
         return false;
     }
-
+    
     var altlogin_username = $('altlogin_username');    
     if (altlogin_username != undefined && (altlogin_username.style.display == 'table-row' ||
                                            altlogin_username.style.display == 'block')) {
@@ -438,7 +438,8 @@ function changeSecurityOptions(defaultjournal) {
         onData: function (data) {
             if ($('security')) {
                 // first empty out whatever is in the drop-down
-                for (i = 0; i < $('security').options.length; i++) {
+		var prev_security=$('security').selectedIndex;
+                for (i = 0; i < $('security').options.length; i++){
                     $('security').options[i] = null;
                 }
 
@@ -448,6 +449,7 @@ function changeSecurityOptions(defaultjournal) {
                     if (data.ret['is_comm']) {
                         $('security').options[0] = new Option(UpdateFormStrings.public, 'public');
                         $('security').options[1] = new Option(UpdateFormStrings.friends_comm, 'friends');
+			if(prev_security>$('security').options.length-1){prev_security=$('security').options.length-1;}
                     } else {
                         $('security').options[0] = new Option(UpdateFormStrings.public, 'public');
                         $('security').options[1] = new Option(UpdateFormStrings.friends, 'friends');
@@ -459,15 +461,15 @@ function changeSecurityOptions(defaultjournal) {
 
                     // select the minsecurity value and disable the values with lesser security
                     if (data.ret['minsecurity'] == "friends") {
-                        $('security').selectedIndex = 1;
+                        $('security').selectedIndex = Math.max(1,prev_security);
                         _changeOptionState($('security').options[0], false);
                     } else if (data.ret['minsecurity'] == "private") {
-                        $('security').selectedIndex = 2;
+                        $('security').selectedIndex = Math.max(2,prev_security);
                         _changeOptionState($('security').options[0], false);
                         _changeOptionState($('security').options[1], false);
                         _changeOptionState($('security').options[3], false);
                     } else {
-                        $('security').selectedIndex = 0;
+                        $('security').selectedIndex = Math.max(0,prev_security);
                         _changeOptionState($('security').options[0], true);
                         _changeOptionState($('security').options[1], true);
                         _changeOptionState($('security').options[2], true);
