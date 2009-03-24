@@ -10,6 +10,8 @@ use strict;
 # fork (mod_perl-style)
 use Class::Autouse qw{:devel};
 
+use LJ::Worker::ErrorLog;
+
 my $quit_flag = 0;
 
 BEGIN {
@@ -43,6 +45,8 @@ my $fork_count = 0;
 
 sub setup_mother {
     my $class = shift;
+
+    tie(*STDERR, 'LJ::Worker::ErrorLog');
 
     return unless $ENV{SETUP_MOTHER};
 
