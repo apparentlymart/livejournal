@@ -457,7 +457,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         }
 
         var report_bot;
-        if (data.is_logged_in && !data.is_requester) {
+        if (data.is_logged_in && !data.is_requester && !window.Site.remote_is_suspended) {
             var report_bot = document.createElement('a');
             report_bot.href = window.Site.siteroot + '/abuse/bots.bml?user=' + data.username;
             report_bot.innerHTML = 'Report a Bot';
@@ -640,7 +640,7 @@ ContextualPopup.getInfo = function (target, ctxPopupId) {
 
         ContextualPopup.renderPopup(ctxPopupId);
 
-        // expire cache after 5 minutes
+        // expire cache after minute
         setTimeout(function () {
             ContextualPopup.cachedResults[ctxPopupId] = null;
         }, 60 * 1000);
