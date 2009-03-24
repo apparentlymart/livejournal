@@ -430,9 +430,6 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
                 }
 
                 ban.appendChild(setBan);
-
-
-
             } else {
                 // if use banned - show unban link
                 var setUnban = document.createElement("span");
@@ -459,6 +456,17 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             content.appendChild(ban);
         }
 
+        var report_bot;
+        if (data.is_logged_in && !data.is_requester) {
+            var report_bot = document.createElement('a');
+            report_bot.href = window.Site.siteroot + '/abuse/bots.bml?user=' + data.username;
+            report_bot.innerHTML = 'Report a Bot';
+        }
+
+        if(report_bot) {
+            content.appendChild(bar.cloneNode(true));
+            content.appendChild(report_bot);
+        }
 
         // break
         if ((data.is_logged_in && !data.is_requester) || vgift) content.appendChild(document.createElement("br"));
