@@ -4,6 +4,7 @@ use strict;
 use Carp qw/ croak /;
 use base 'LJ::NotificationMethod';
 use LJ::User;
+use LWP::UserAgent qw//;
 
 sub can_digest { 0 };
 
@@ -68,10 +69,36 @@ sub notify {
         croak "invalid event passed" unless ref $ev;
         my $msg = $ev->as_im($u);
         $u->send_im(message => $msg);
+
+        # notify ejabberd
+        $self->_notify_jabber($u, $msg)
+            unless $LJ::DISABLED{'ejabberd_notifications'}; 
     }
 
     return 1;
 }
+sub _notify_jabber {
+    my $self = shift;
+    my $u    = shift;
+    my $msg  = shift;
+
+    my $to_jid   = $u->username . '@' . $LJ::DOMAIN;
+
+    # Create a user agent object
+    my $ua = LWP::UserAgent->new;
+    $ua->agent("MyApp/0.1 ");
+    my $res = $ua->post('http://' . $LJ::JABBER_INTERFACE . '/message/send',
+                        { fromUser => $LJ::JABBER_BOT_2_JID,
+                          toUser   => $to_jid,
+                          message  => $msg,
+                          });
+
+    warn "jabber notify response: " . $res->code . " " . $res->content
+        unless $res->is_success;
+
+}
+
+
 
 sub configured {
     my $class = shift;
