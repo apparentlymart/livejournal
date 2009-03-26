@@ -412,11 +412,18 @@ sub clean
             # this is so the rte converts its source to the standard ljuser html
             my $ljuser_div = $tag eq "div" && $attr->{class} eq "ljuser";
             if ($ljuser_div) {
+                
+                my $href = $p->get_tag("a");
+                my $href_attr = $href->[1]->{"href"};
+                my $username = LJ::get_user_by_url ( $href_attr );
+                $attr->{'user'} = $username ? $username : '';
+                
                 my $ljuser_text = $p->get_text("/b");
                 $p->get_tag("/div");
                 $ljuser_text =~ s/\[info\]//;
                 $tag = "lj";
-                $attr->{'user'} = $ljuser_text;
+                $attr->{'title'} = $ljuser_text;
+                                                                    
             }
             # stupid hack to remove the class='ljcut' from divs when we're
             # disabling them, so we account for the open div normally later.

@@ -213,6 +213,58 @@ if ($SIG{'HUP'}) {
     $SIG{'HUP'} = \&LJ::clear_caches;
 }
 
+sub get_user_by_url
+{
+    my $url = shift;
+    
+    my $username = '';
+   
+    # drop protocol
+    $url =~ s/http(?:s)?:\/\///;
+   
+    #try to get username from domain name
+    if ($url =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E/ &&
+        $1 ne "www"
+    ) 
+    {
+        my $user = $1;
+        
+        # see if the "user" is really functional code
+        my $func = $LJ::SUBDOMAIN_FUNCTION{$user};
+        my $uri = '';
+        if ($func eq "journal") {
+            ($user, $uri) = $url =~ m!^[\w\-]{1,15}\.\Q$LJ::USER_DOMAIN\E/(\w{1,15})(/.*)?$!;
+            $uri ||= "/";
+            
+        }
+       
+        my $u = LJ::load_user($user);
+        if ($u && $u->{'journaltype'} eq 'R' && $u->{'statusvis'} eq 'R') {
+            LJ::load_user_props($u, 'renamedto');
+            my $renamedto = $u->{'renamedto'};
+            if ($renamedto ne '') {
+                $username = $renamedto;
+            }
+        } elsif ($u) {
+            $username = $u->user;
+        }
+    }
+    
+    # try to find userid in user domains
+    unless ($username) {
+        my $dbr = LJ::get_db_reader();
+        my ($checkhost) = $url =~ /^([\w\-.]+\.\Q$LJ::USER_DOMAIN\E)/;
+        $checkhost = lc($checkhost);
+        $checkhost =~ s/^www\.//i;
+        $checkhost = $dbr->quote($checkhost);
+        my $user = $dbr->selectrow_array(qq{
+            SELECT u.user FROM useridmap u, domains d WHERE
+            u.userid=d.userid AND d.domain=$checkhost
+        });
+        $username = $user if $user;
+    }
+    return $username;
+}
 
 sub get_blob_domainid
 {
