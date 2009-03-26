@@ -91,12 +91,12 @@ sub current {
 
         # remember song attributes
         if ($current_tag eq "artist") {
-            $artist = $string;
+            $artist .= $string;
             return;
         }
 
         if ($current_tag eq "name") {
-            $name = $string;
+            $name .= $string;
             return;
         }
     };
