@@ -36,6 +36,7 @@ property string text_unwatch_comments { noui = 1; }
 property string text_nosubject { noui = 1; }
 property string text_syndicate { noui = 1; }
 property string text_month_form_btn { noui = 1; }
+property string text_tags_section_header { noui = 1; }
 
 property string text_user_posts_in {
 	noui = 1;
@@ -242,6 +243,25 @@ function _navlist() : string[][] {
 			["archive",$*text_view_archive,$*_{"first_view"}!="archive"?$p.view_url{"archive"}:""],
 			["profile",$*text_view_userinfo,$p.view_url{"userinfo"}]
 		];
+}
+
+function _summary() : string[][] {
+	var string[][] result;
+	var RecentPage p = get_page() as RecentPage;
+	foreach var Entry e ($p.entries) {
+		var string user = "";
+		if (($p.journal.username == $e.journal.username) and $p.view != "friends" and $p.journal_type == "C") {
+			$user = _ljuser($e.poster,"") + " — ";
+		} elseif ($p.journal.username != $e.journal.username or $p.view == "friends") {
+			$user = _ljuser($e.journal,"") + " — ";
+		}
+		$result[size $result] = ["",
+			"""$user<a href="#post-$e.journal.username-$e.itemid">"""+ (($e.subject != "") ? striphtml($e.subject) : $*text_nosubject) +"</a>"
+			+ (($e.comments.count > 0) ? (""" — <a href="$e.permalink_url">""" + get_plural_phrase($e.comments.count, "text_read_comments") + "</a>"):"")
+		];
+	}
+
+	return $result;
 }
 
 
@@ -467,7 +487,7 @@ function _Header {
 	<meta name="viewport" id="iphone-viewport" content="width=480, maximum-scale=0.6667" />
 	<title>$title</title>
 </head>
-<body class="$bc">
+<body class="$bc">"""; if (viewer_sees_control_strip()) { """<div class="controlstrip">"""; $p->print_control_strip(); "</div>"; } """
 <div id="Page" class="$bc">
 """;
 }
@@ -487,6 +507,26 @@ function _merge (string{} a,string{} b) : string{} {
 	}
 	return $result;
 } 
+
+function _sort(string[] input, int[] order) : string {
+	var string result = "";
+	var string[] array;
+	var int i = 0;
+	foreach var string item ($input) {
+		if ($order[$i]) {
+			if ($array[$order[$i]*100]) {
+				$array[$order[$i]*100+$i+1] = $item;
+			} else {
+				$array[$order[$i]*100] = $item;
+			}
+		}
+		$i++;
+	}
+	foreach var string item ($array) {
+		$result = "$result$item";
+	}
+	return $result;
+}
 
 function _items(string[][] input, string{} _args) :string {
 	var string result = "";
@@ -600,6 +640,11 @@ function _Content {
 			"before" => "$*_{"HR"}<dl>",
 			"after" => "</dl>"
 		});
+	var string summary = _items(
+		_summary(),
+		{
+			"before" => "$*_{"HR"}<ul>"
+		});
 	var string extras = _items(
 		_extralinks(),
 		{
@@ -620,6 +665,7 @@ function _Content {
 	$cal
 	$tags
 	$links
+	$summary
 	$extras
 """;
 
@@ -693,7 +739,7 @@ function _print_entry(Entry e, string extraclasses) {
 	var string tags = _items(
 		_entry_tags($e),
 		{
-			"before" => """<div class="ljtags">$*text_tags: """,
+			"before" => """<div class="ljtags">$*text_tags_section_header: """,
 			"after" => "</div>",
 			"tag" => "",
 			"glue" => ", ",
@@ -922,7 +968,7 @@ function ReplyPage::print_body {
 			$c->print_linkbar();
 			"</p>";
 			if ($c.metadata{"poster_ip"}) { "<p>(" + $c.metadata{"poster_ip"} + ")</p>"; }
-			"""</div></div><div class="comment-text">"""; $c->print_text(); """</div></div><div class="hr"><hr /></div>""";
+			"""</div></div><div class="comment-text text">"""; $c->print_text(); """</div></div><div class="hr"><hr /></div>""";
 		}
 		"""<div class="replyform">""";
 		$.form->print();
@@ -977,7 +1023,7 @@ function EntryPage::print_comment (Comment c) {
 	"""</p>""";
 	if ($c.metadata{"poster_ip"}) { "<p>(" + $c.metadata{"poster_ip"} + ")</p>"; }
 	"</div></div>";
-	"""<div class="comment-text">"""; $c->print_text(); "</div>";
+	"""<div class="comment-text text">"""; $c->print_text(); "</div>";
 	"""<div class="comment-menu">""";
 	if ($c.frozen) {
 		print safe "($*text_comment_frozen) ";

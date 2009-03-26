@@ -177,6 +177,9 @@ HTML{font-size:100.01%;}HTML,BODY,DIV,SPAN,APPLET,OBJECT,H1,H2,H3,H4,H5,H6,P,BLO
 --------------------------------*/
 
 /* clearfix */
+#Page:after,
+.layout:after, 
+.layout-in:after,
 .comment-head:after,
 .clearfix:after { 
 	content:" ";
@@ -187,6 +190,13 @@ HTML{font-size:100.01%;}HTML,BODY,DIV,SPAN,APPLET,OBJECT,H1,H2,H3,H4,H5,H6,P,BLO
 	overflow:hidden;
 	visibility:hidden;
 	}
+	#Page,
+	.layout,
+	.layout-in,
+	.comment-head,
+	.clearfix { 
+		zoom:1;
+		}
 
 /* Some base styles */
 BODY {
@@ -208,7 +218,6 @@ BODY {
 	.comment-head {
 		padding:1px 4px;
 		margin-top:10px;
-		zoom:1; /* ToDo move to ie.css */
 		}
 		.comment-head H3 {
 			font-size:1.4em;
@@ -303,4 +312,72 @@ P.tags A {
 		}
 	P.tags .etc {
 		display:none;
+		}
+
+/* Layout */
+	/*bg stretching*/
+	HTML {
+		position:relative;
+		height:100%;
+		min-height:100%;
+		}
+	BODY {
+		position:relative;
+		min-height:100%;
+		//height:100%;
+		padding-top:0 !important;
+		}
+	.controlstrip {
+		overflow:hidden;
+		}
+	#lj_controlstrip {
+		position:relative !important;
+		}
+
+/* width/min-width */
+.lay .l-fix #Page {
+	margin:0 auto;
+	}
+.lay #Page,
+.lay .layout-in {
+	position:relative;
+	}
+.lay .header {
+	clear:both;
+	}
+
+/* columns */
+.lay .content {
+	float:left;
+	width:100%;
+	margin-right:-100%;
+	}
+	* HTML .lay .content {
+		margin-right:-65535px;
+		}
+	.lay .content-in {
+		position:relative;
+		}
+	.lay .l-type-2CR .content-in {
+		margin-right:300px;
+		}
+	.lay .l-type-2CL .content-in {
+		margin-left:300px;
+		}
+.lay .sidebar {
+	float:left;
+	width:100%;
+	}
+	.lay .sidebar-in {
+		width:300px;
+		position:relative;
+		}
+	.lay .l-type-1C .sidebar {
+		display:none;
+		}
+	.lay .l-type-2CL .sidebar-in {
+		float:left;
+		}
+	.lay .l-type-2CR .sidebar-in {
+		float:right;
 		}
