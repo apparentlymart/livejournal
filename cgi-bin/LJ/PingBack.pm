@@ -28,6 +28,10 @@ sub ping_post {
     return "pingbacks are forbidden for the target." 
         unless $class->should_entry_recieve_pingback($target_entry, $source_entry);
 
+    # 
+    return "no pingback notifications between posts of the same journal"
+        if $source_entry and $source_entry->journalid eq $target_entry->journalid;
+
     my $poster_u = LJ::load_user($LJ::PINGBACK->{comments_bot_username});
     unless ($poster_u){
         warn "Pingback bot user does not exists";
