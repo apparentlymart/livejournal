@@ -1489,4 +1489,44 @@ sub break_word {
     return $word;
 }
 
+
+sub clean_friends
+{
+    my $ref = shift;
+
+    my @tags_remove = qw(bgsound embed object link body meta noscript plaintext noframes);
+    my @tags_allow = qw(lj);
+
+    LJ::CleanHTML::clean($ref, {
+        'linkify' => 1,
+        'wordlength' => 160,
+        'undefined_tags' => 'eat',
+        'allow' => \@tags_allow,
+        'remove' => \@tags_remove,
+        'cleancss' => 1,
+        'noearlyclose' => 1,
+        'tablecheck' => 1,
+        'textonly' => 1,
+    });
+
+    # Trim function must be a part of cleanHTML::clean method,
+    # but now this method is too complicated to do this right way.
+    # Now just cut off last breaked tag.
+
+    # trim text
+    my $trunc = LJ::text_trim($$ref, 640, 320);
+    if ($$ref ne $trunc) {
+        $trunc =~ s/(\W+\w+)$//; # cut off last space and chars right from it.
+
+        # cut off last unclosed tag
+        if ($trunc =~ m!\</?([^>]+)$!) {        # ... <tag or ... </tag
+            my $tag = $1;
+            $trunc =~ s!</?\Q$tag\E>?.*?$!!;
+        }
+
+        # add '...' to the tail
+        $$ref = $trunc . ' ...';
+    }
+}
+
 1;
