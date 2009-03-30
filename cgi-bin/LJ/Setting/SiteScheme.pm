@@ -31,6 +31,16 @@ sub option {
     my $show_hidden = $opts{getargs}->{view} && $opts{getargs}->{view} eq "schemes";
     my $sitescheme = $class->get_arg($args, "sitescheme") || BML::get_scheme() || $BML::COOKIE{BMLschemepref} || $bml_schemes[0]->{scheme};
 
+    my $is_exist = 0;
+    foreach my $scheme (@bml_schemes) {
+        if ($sitescheme eq $scheme->{scheme}) {
+            $is_exist = 1;
+            last;
+        }
+    }
+    $sitescheme = 'horizon'
+        unless $is_exist;
+
     my $ret;
     foreach my $scheme (@bml_schemes) {
         my $label = $scheme->{title};
@@ -78,7 +88,7 @@ sub save {
     $class->error_check($u, $args);
 
     my $val = my $cval = $class->get_arg($args, "sitescheme");
-    return 1 unless $val;
+    $val = $cval = "horizon" unless $val;
     my @bml_schemes = LJ::site_schemes();
 
     # don't set cookie for default scheme
