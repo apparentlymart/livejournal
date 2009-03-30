@@ -416,8 +416,7 @@ function createDeleteFunction (ae, dItemid) {
             } else {
                 finalHeight -= 15;
             }
-
-            if (canAdmin) {
+            if (canAdmin&&com.u) {
                 lbl = "ljpopdel" + dItemid + "author";
                 inHTML += "<input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>Delete all <b>" + (com.u == remoteUser ? 'my' : com.u) + "</b> comments in this post</label><br />";
             } else {
