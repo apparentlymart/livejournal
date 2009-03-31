@@ -404,6 +404,7 @@ sub sysban_validate {
                'support_email' => 'email',
                'support_uniq' => 'uniq',
                'lostpassword' => 'user',
+               'lostpassword_email' => 'email',
                'talk_ip_test' => 'ip',
                'contentflag' => 'user',
                );

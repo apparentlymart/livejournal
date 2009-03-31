@@ -120,6 +120,12 @@ body<=
             return $err->( $ML{'Sorry'}, $ML{'.error.sysbanned'} );
         }
 
+        if (LJ::sysban_check('lostpassword_email', $email)) {
+            LJ::sysban_note($u->{'userid'}, "Password retrieval blocked based on email",
+                            { 'email' => $email });
+            return $err->( $ML{'Sorry'}, $ML{'.error.sysbannedemail'} );
+        }
+
         # check if this email address can receive password reminders
         $email ||= $u->email_raw;
         return LJ::bad_input($ML{'/lostinfo_do.bml.error1.text'})
