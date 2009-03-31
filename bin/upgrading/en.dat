@@ -3187,6 +3187,8 @@ widget.createaccount.tip.username=Your username is used in your journal URL. Use
 
 widget.createaccountnextsteps.steps=Now that your account is set up, you're ready to explore the rest of [[sitename]]. Here are some things to get you started:
 
+widget.createaccountnextsteps.steps.manage=Edit your account settings
+
 widget.createaccountnextsteps.steps.customize=Customize your journal
 
 widget.createaccountnextsteps.steps.explore=Browse [[sitenameabbrev]] by categories
