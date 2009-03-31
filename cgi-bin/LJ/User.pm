@@ -3878,6 +3878,7 @@ sub get_post_ids {
 
 sub password {
     my $u = shift;
+    return unless $u->is_person;
     $u->{_password} ||= LJ::MemCache::get_or_set([$u->{userid}, "pw:$u->{userid}"], sub {
         my $dbh = LJ::get_db_writer() or die "Couldn't get db master";
         return $dbh->selectrow_array("SELECT password FROM password WHERE userid=?",
