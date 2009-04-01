@@ -259,15 +259,17 @@ function deleteComment (ditemid) {
         pulse = 0;
 
     var postdata = 'confirm=1';
-    if (form.ban && form.ban.checked) postdata += '&ban=1';
-    if (form.spam && form.spam.checked) postdata += '&spam=1';
-    if (form.delthread && form.delthread.checked) {
-        postdata += '&delthread=1';
-        opt_delthread = true;
-    }
-    if (form.delauthor && form.delauthor.checked) {
-        postdata += '&delauthor=1';
-        opt_delauthor = true;
+    if (form){ 
+    	if (form.ban && form.ban.checked) postdata += '&ban=1';
+    	if (form.spam && form.spam.checked) postdata += '&spam=1';
+    	if (form.delthread && form.delthread.checked) {
+        	postdata += '&delthread=1';
+        	opt_delthread = true;
+   	 }
+    	if (form.delauthor && form.delauthor.checked) {
+        	postdata += '&delauthor=1';
+        	opt_delauthor = true;
+    	}
     }
     postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
 
