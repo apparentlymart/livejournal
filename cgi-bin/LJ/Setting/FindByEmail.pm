@@ -2,6 +2,8 @@ package LJ::Setting::FindByEmail;
 use base 'LJ::Setting';
 use strict;
 use warnings;
+no warnings 'unintialized';
+
 
 sub tags { qw(email search) }
 
