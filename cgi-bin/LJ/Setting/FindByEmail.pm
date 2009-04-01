@@ -2,8 +2,6 @@ package LJ::Setting::FindByEmail;
 use base 'LJ::Setting';
 use strict;
 use warnings;
-no warnings 'unintialized';
-
 
 sub tags { qw(email search) }
 
@@ -16,11 +14,12 @@ sub helpurl {
 *option = \&as_html;
 sub as_html {
     my ($class, $u, $errs, $args) = @_;
+    $args ||= {};
     my $key = $class->pkgkey;
     my $ret;
-    my $helper = ($args && $args->{helper} == 0) ? 0 : 1;
-    my $faq = ($args && $args->{faq} == 1) ? 1 : 0;
-    my $display_null = ($args && $args->{display_null} == 0) ? 0 : 1;
+    my $helper = (defined $args->{helper} and $args->{helper} == 0) ? 0 : 1;
+    my $faq = (defined $args->{faq} and $args->{faq} == 1) ? 1 : 0;
+    my $display_null = (defined $args->{display_null} and $args->{display_null} == 0) ? 0 : 1;
 
     $ret .= "<label for='${key}opt_findbyemail'>" .
             $class->ml('settings.findbyemail.question',
