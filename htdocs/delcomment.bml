@@ -94,6 +94,11 @@ _info?><?_code
     my $can_ban = $can_manage && $tp->{'posterid'}
                   && $remote && $remote->{'userid'} != $tp->{'posterid'};
     my $can_delthread = $can_manage || $jposterid == $remote->{userid};
+    if ($can_delthread) {
+        # get all comment in thread, including top
+        my $ids = LJ::Talk::get_comments_in_thread($u, $tp->{'itemid'}, $tpid, undef, undef);
+        $can_delthread = 0 unless scalar @$ids > 1; # no thread => no checkbox
+    }
 
     # can mark as spam if they're not the comment poster
     my $can_spam = $remote && $remote->id != $tp->{'posterid'};
