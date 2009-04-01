@@ -349,10 +349,12 @@ LiveJournal.parseGetArgs = function (url) {
     var urlParts = url.split("?");
     if (!urlParts[1]) return getArgsHash;
     var getArgs = urlParts[1].split("&");
-    for (var arg in getArgs) {
-        var pair = getArgs[arg].split("=");
+    
+    for(var arg=0;arg<getArgs.length;arg++){
+    	var pair = getArgs[arg].split("=");
         getArgsHash[pair[0]] = pair[1];
-    }
+
+    }	    
 
     return getArgsHash;
 };
