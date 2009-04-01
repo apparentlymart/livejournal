@@ -13,7 +13,7 @@ use IO::Socket::INET;
 
 sub TIEHANDLE {
     my $class = shift;
-    my $dest_point = shift or "$LJ::WATCHLOG_MYNET:$LJ::WATCHLOG_PORTNO";
+    my $dest_point = shift || "$LJ::WATCHLOG_BCASTADDR:$LJ::WATCHLOG_PORTNO";
 
     my $dest_proto = 'udp';
 
@@ -27,19 +27,43 @@ sub TIEHANDLE {
     my $sock = IO::Socket::INET->new(PeerAddr => $dest_point, Proto => $dest_proto, Timeout => 20)
         or die "Socket error: $!";
 
-    my $self = { sock => $sock, };
+    my $self = { handles => { sock => $sock } };
 
-    return bless $self, $class
+    bless $self, $class;
+
+    $self->reopen_handles;
+
+    return $self;
+}
+
+sub reopen_handles {
+    my $self = shift;
+    my $force = shift;
+
+    # In debug mode, when worker started from console,
+    # we must not close STDERR to let to see error messages on a console.
+
+    if ($force or (-t STDIN) or (-t STDOUT) or (-t STDERR)) {
+        # Save old, was not tied yet STDERR handle to use it for printing later.
+        open(OLDSTDERR, "+>&STDERR");
+        $self->{handles}->{stderr} = \*OLDSTDERR;
+        print OLDSTDERR "$0: Debug mode: control console is a terminal, don't detach from it.\n";
+    } else {
+        ## Reopen stderr, stdout, stdin to /dev/null
+        close(STDIN);   open(STDIN,  "+>/dev/null");
+        close(STDOUT);  open(STDOUT, "+>&STDIN");
+        close(STDERR);  open(STDERR, "+>&STDIN");
+    }
 }
 
 # warn, die and print STDERR
 
 sub PRINT {
     my $self = shift;
-    if ($self->{sock}) {
-        my $now = time();
-        my $ltime = localtime($now);
-        print { $self->{sock} } $ltime, ': ', join($,,@_),$\;
+    my $now = time();
+    my $ltime = localtime($now);
+    foreach my $h ( values %{$self->{handles}} ) {
+        print { $h } $ltime, ': ', join($,,@_),$\;
     }
 }
 

@@ -46,9 +46,10 @@ my $fork_count = 0;
 sub setup_mother {
     my $class = shift;
 
-    tie(*STDERR, 'LJ::Worker::ErrorLog');
-
     return unless $ENV{SETUP_MOTHER};
+
+    # tie STDERR for mother process
+    tie(*STDERR, 'LJ::Worker::ErrorLog');
 
     # Curerntly workers use a SIGTERM handler to prevent shutdowns in the middle of operations,
     # we need TERM to apply right now in this code
@@ -126,10 +127,8 @@ sub MANAGE_fork {
     POSIX::setsid();
     $SIG{HUP} = 'IGNORE';
 
-    ## Reopen stderr, stdout, stdin to /dev/null
-    close(STDIN);   open(STDIN,  "+>/dev/null");
-    close(STDOUT);  open(STDOUT, "+>&STDIN");
-    close(STDERR);  open(STDERR, "+>&STDIN");
+    # tie STDERR for worker process
+    tie(*STDERR, 'LJ::Worker::ErrorLog');
 
     return 0; # we're a child process, the management loop should cleanup and end because we want to start up the main worker loop.
 }
