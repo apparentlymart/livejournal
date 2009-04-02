@@ -20,7 +20,7 @@ sub TIEHANDLE {
     my @dest = split(/:/, $dest_point);
 
     if (3 == scalar @dest) {
-        $dest_proto = @dest[0];
+        $dest_proto = $dest[0];
         $dest_point = join(':', $dest[1], $dest[2]);
     }
 
