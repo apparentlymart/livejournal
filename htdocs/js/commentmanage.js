@@ -272,9 +272,8 @@ function deleteComment (ditemid) {
     	}
     }
     postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
-
     var opts = {
-        url: '/__rpc_delcomment?mode=js&journal=' + Site.currentJournal + '&id=' + ditemid,
+        url: LiveJournal.getAjaxUrl('delcomment')+'?mode=js&journal=' + Site.currentJournal + '&id=' + ditemid,
         data: postdata,
         method: 'POST',
         onData: function(data) {
@@ -282,7 +281,10 @@ function deleteComment (ditemid) {
             is_error = !is_deleted;
         },
         onError: function() {
-            alert('Error deleting ' + ditemid);
+
+	   //window.location='http://www.lj-10.bulyon.local/delcomment.bml?journal='+Site.currentJournal+'&id='+ditemid;
+           alert('Error deleting ' + ditemid);
+	    
             is_error = true;
         }
     }
