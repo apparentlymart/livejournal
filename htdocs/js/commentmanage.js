@@ -281,11 +281,8 @@ function deleteComment (ditemid) {
             is_error = !is_deleted;
         },
         onError: function() {
-
-	   //window.location='http://www.lj-10.bulyon.local/delcomment.bml?journal='+Site.currentJournal+'&id='+ditemid;
-           alert('Error deleting ' + ditemid);
-	    
-            is_error = true;
+          alert('Error deleting ' + ditemid);
+          is_error = true;
         }
     }
 
