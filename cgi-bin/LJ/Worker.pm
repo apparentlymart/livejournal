@@ -67,6 +67,7 @@ sub setup_mother {
         print $sock "SHUTDOWN\n";
     }
 
+    unlink $mother_sock_path; # No error trap, the file may not exist
     my $listener = IO::Socket::UNIX->new(Local => $sock_path, Listen => 1);
 
     die "Error creating listening unix socket at '$sock_path': $!" unless $listener;
@@ -94,7 +95,6 @@ sub setup_mother {
 
 sub MANAGE_shutdown {
     my $class = shift;
-    unlink $mother_sock_path; # No error trap, the file may not exist
     exit;
 }
 
