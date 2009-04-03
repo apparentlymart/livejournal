@@ -95,7 +95,6 @@ sub setup_mother {
 
 sub MANAGE_shutdown {
     my $class = shift;
-    unlink $mother_sock_path; # No error trap, the file may not exist
     exit;
 }
 
