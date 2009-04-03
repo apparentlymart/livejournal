@@ -63,7 +63,7 @@ sub PRINT {
     my $now = time();
     my $ltime = localtime($now);
     foreach my $h ( values %{$self->{handles}} ) {
-        print { $h } $ltime, ': ', join($,,@_),$\;
+        print { $h } $ltime, ': ', join($,,@_);
     }
 }
 
