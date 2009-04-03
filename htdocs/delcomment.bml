@@ -103,7 +103,7 @@ _info?><?_code
     # can mark as spam if they're not the comment poster
     my $can_spam = $remote && $remote->id != $tp->{'posterid'};
 
-    my $can_author = $tp->{'posterid'}; # all except anonymous
+    my $can_author = $tp->{'posterid'} && $remote->id == $jposterid; # all comments except anonymous on my journal entries
 
     ### perform actions
     if (LJ::did_post() && $POST{'confirm'}) {
