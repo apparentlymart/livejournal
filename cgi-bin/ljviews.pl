@@ -1348,9 +1348,7 @@ sub create_view_lastn
             my $readurl = LJ::Talk::talkargs($permalink, $nc);
 
             my $dispreadlink = $replycount ||
-                ($logprops{$itemid}->{'hasscreened'} &&
-                 ($remote->{'user'} eq $user
-                  || LJ::can_manage($remote, $u)));
+                ($logprops{$itemid}->{'hasscreened'} && LJ::can_manage($remote, $u));
 
             $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -1887,9 +1885,7 @@ sub create_view_friends
             )
         {
             my $dispreadlink = $replycount ||
-                ($logprops{$datakey}->{'hasscreened'} &&
-                 ($remote->{'user'} eq $friend
-                  || LJ::can_manage($remote, $friendid)));
+                ($logprops{$datakey}->{'hasscreened'} && LJ::can_manage($remote, $friendid));
 
             my $nc = "";
             $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
@@ -2559,9 +2555,7 @@ sub create_view_day
             my $readurl = LJ::Talk::talkargs($permalink, $nc);
 
             my $dispreadlink = $replycount ||
-                ($logprops{$itemid}->{'hasscreened'} &&
-                 ($remote->{'user'} eq $user
-                  || LJ::can_manage($remote, $u)));
+                ($logprops{$itemid}->{'hasscreened'} && LJ::can_manage($remote, $u));
             $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,
