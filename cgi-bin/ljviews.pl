@@ -1320,7 +1320,7 @@ sub create_view_lastn
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}),
-                                               'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'},
+                                               'ljcut_disable' => ($remote) ? $remote->{'opt_ljcut_disable_lastn'} : undef,
                                                'suspend_msg' => $suspend_msg,
                                                'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
@@ -2534,7 +2534,7 @@ sub create_view_day
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                               'cuturl' => LJ::item_link($u, $itemid, $anum),
-                                              'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'},
+                                              'ljcut_disable' => ($remote) ? $remote->{'opt_ljcut_disable_lastn'} : undef,
                                               'suspend_msg' => $suspend_msg,
                                               'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
