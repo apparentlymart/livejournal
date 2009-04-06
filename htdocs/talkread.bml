@@ -513,7 +513,7 @@ my $old_url = 0;
      }
 
      my $pu = $post->{'posterid'} ? $user{$post->{'posterid'}} : undef;
-     $LJci->{u} = $pu->{user} if $pu;
+     $LJci->{u} = $pu->{'I' eq $pu->{journaltype} ? 'name' : 'user'} if $pu;
 
      my $userpost = $post->{'userpost'};
      my $upost    = $post->{'upost'};
