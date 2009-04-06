@@ -1226,6 +1226,10 @@ sub display_name {
         $url = $id->value;
         $name = Net::OpenID::VerifiedIdentity::DisplayOfURL($url, $LJ::IS_DEV_SERVER);
         $name = LJ::run_hook("identity_display_name", $name) || $name;
+            
+        ## Decode URL's like below to human-readable names
+        ## http://blog.k.python.ru/accounts/5/%D0%94%D0%BC%D0%B8
+        $name =~ s/%([\dA-Fa-f]{2})/chr(hex($1))/ge;
     }
     return $name;
 }
