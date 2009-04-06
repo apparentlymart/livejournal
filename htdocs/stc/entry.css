@@ -403,11 +403,13 @@
     float: left;
     position: absolute;
     left: 80%;
+    top: -2px;
     font-size: 90%;
     text-align: center;
     background: transparent;
     min-width: 60px;
     display: block !important;
+    line-height: 1.1;
 }
 #mood_text_preview {
     display: block;
