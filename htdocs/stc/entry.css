@@ -409,7 +409,7 @@
     background: transparent;
     min-width: 60px;
     display: block !important;
-    line-height: 1.1;
+    line-height: 1;
 }
 #mood_text_preview {
     display: block;
