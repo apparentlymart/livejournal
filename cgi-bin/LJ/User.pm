@@ -20,6 +20,7 @@ use List::Util ();
 use LJ::Constants;
 use LJ::MemCache;
 use LJ::Session;
+use URI qw//;
 
 use Class::Autouse qw(
                       LJ::Subscription
@@ -1220,6 +1221,16 @@ sub display_name {
     my $id = $u->identity;
     return "[ERR:unknown_identity]" unless $id;
 
+
+    # if name does not have [] .com .ru or https it should be displayed as "name [domain.com]"
+    # otherwise - old code
+    unless ($u->name =~ m!(\w+\.\w{2,3}\b)|(https?://)!){
+        my $uri = new URI( $id->value );
+        my ($domain) = $uri->host =~ /(\w+\.\w{2,3})$/;
+        return $u->name ." [$domain]";
+    }
+
+    #
     my ($url, $name);
     if ($id->typeid == 0) {
         require Net::OpenID::Consumer;
@@ -1323,8 +1334,12 @@ sub load_identity_user {
         my $extuser = 'ext_' . LJ::alloc_global_counter('E');
 
         my $name = $extuser;
-        if ($type eq "O" && ref $vident) {
-            $name = $vident->display;
+        if ($type eq "O"){
+            if (ref $vident and $vident->can("display")) {
+                $name = $vident->display;
+            } elsif (not ref $vident){
+                $name = $vident;
+            }
         }
 
         $uid = LJ::create_account({
@@ -2517,7 +2532,9 @@ sub revert_style {
         if ($default_theme_uniq) {
             $new_theme = LJ::S2Theme->load_by_uniq($default_theme_uniq);
         } else {
-            my $layoutid = $public->{$default_layout_uniq}->{s2lid} if $public->{$default_layout_uniq} && $public->{$default_layout_uniq}->{type} eq "layout";
+            my $layoutid = '';
+            my $layoutid = $public->{$default_layout_uniq}->{s2lid} 
+                if $public->{$default_layout_uniq} && $public->{$default_layout_uniq}->{type} eq "layout";
             $new_theme = LJ::S2Theme->load_default_of($layoutid, user => $u) if $layoutid;
         }
 
@@ -6621,7 +6638,7 @@ sub get_daycounts
     if ($remote) {
         # do they have the viewall priv?
         my $r = eval { Apache->request; }; # web context
-        my %getargs = $r->args if $r;
+        my %getargs = $r ? $r->args : ();
         if (defined $getargs{'viewall'} and $getargs{'viewall'} eq '1' and LJ::check_priv($remote, 'canview', '*')) {
             $viewall = 1;
             LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
