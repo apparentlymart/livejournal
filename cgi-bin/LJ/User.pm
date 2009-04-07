@@ -1225,10 +1225,12 @@ sub display_name {
 
     # if name does not have [] .com .ru or https it should be displayed as "name [domain.com]"
     # otherwise - old code
-    unless ($u->name =~ m!(\w+\.\w{2,3}\b)|(https?://)!){
-        my $uri = new URI( $id->value );
-        my ($domain) = $uri->host =~ /(\w+\.\w{2,3})$/;
-        return $u->name ." [$domain]";
+    unless ($u->name_orig =~ m!(\w+\.\w{2,4})|(https?://)!){
+        my $uri = URI->new( $id->value );
+        my $domain = $id->value;
+        ($domain) = $uri->host =~ /(\w+\.\w{2,4})$/
+            if $uri->can('host');
+        return $u->name_orig ." [$domain]";
     }
 
     #
