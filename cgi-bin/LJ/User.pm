@@ -23,6 +23,7 @@ use LJ::Session;
 use URI qw//;
 
 use Class::Autouse qw(
+                      URI
                       LJ::Subscription
                       LJ::SMS
                       LJ::SMS::Message
@@ -1289,7 +1290,7 @@ sub ljuser_display {
         }
 
         my $profile = $profile_url ne '' ? $profile_url : "$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull";
-
+        
         return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
 
     } else {
@@ -2975,6 +2976,30 @@ sub is_person {
 sub is_identity {
     my $u = shift;
     return $u->{journaltype} eq "I";
+}
+
+## We trust OpenID users if they are either from trusted OpenID provider or
+## have e-mail validated. During e-mail validation, they answer CAPTCHA test.
+## Trusted OpenID users are like registered user, untrusted are like anonymous
+sub is_trusted_identity {
+    my $u = shift;
+    return unless $u->is_identity;
+    
+    return 1 if $u->is_validated;
+    
+    ## Check top-to-down domain names in list of trusted providers:
+    ## asdf.openid.somewhere.com -> openid.somewhere.com -> somewhere.com
+    my $identity = $u->openid_identity;
+    if ($identity and my $uri = URI->new($identity)) {
+        return unless $uri->can('host');
+        my $host = $uri->host;
+        while ($host =~ /\./) {
+            return 1 if $LJ::TRUSTED_OPENID_PROVIDERS{$host};
+            # remove first domain name
+            $host =~ s/^\w+\.//;
+        }
+    }
+    return;
 }
 
 # return the journal type as a name

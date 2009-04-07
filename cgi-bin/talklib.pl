@@ -1454,8 +1454,8 @@ sub talkform {
         $ret .= "</tr>\n";
 
         if (LJ::OpenID->consumer_enabled) {
-            # OpenID user can post if the account has validated e-mail address
-            if (defined $oid_identity && $remote->is_validated) {
+            # OpenID user can comment if the account has validated e-mail address or OpenID provider is trusted
+            if (defined $oid_identity && $remote->is_trusted_indentity) {
                 my $logged_in = LJ::ehtml($remote->display_name);
                 $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
                 if (LJ::is_banned($remote, $journalu)) {
@@ -3229,7 +3229,7 @@ sub require_captcha_test {
     ## anonymous commenter user =
     ## not logged-in user, or OpenID without validated e-mail
     my $anon_commenter = !LJ::isu($commenter) ||
-        ($commenter->identity && !$commenter->is_validated);
+        ($commenter->identity && !$commenter->is_trusted_identity);
 
     ##
     ## 1. Check rate by remote user and by IP (for anonymous user)

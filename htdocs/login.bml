@@ -133,7 +133,7 @@
 
             $body .= "<?p " . BML::ml(".loggedin.text2",
                                       { 'username' => LJ::ljuser($remote)} ) . " p?>\n";
-            if ($remote->is_identity && !$remote->is_validated) {
+            if ($remote->is_identity && !$remote->is_trusted_identity) {
                 $body .= "<?warningbar " . BML::ml('.loggedin.openidemail', { aopts1 => "href='$LJ::SITEROOT/changeemail.bml'", aopts2 => "href='$LJ::SITEROOT/register.bml'" }) . " warningbar?>";
             }
             $body .= "<br />\n";
