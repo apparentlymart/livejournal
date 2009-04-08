@@ -227,8 +227,7 @@ if ($modify) {
     $dbh->do("UPDATE sysban SET " . join(", ", @set) . " WHERE banid=?", undef, $ban->{'banid'});
 
     # log in statushistory
-    my $msg; map { $msg .= " " if $msg;
-                   $msg .= "$_=$ban->{$_};" }  qw(banid status bandate banuntil what value note);
+    my $msg = join " " => (map {"$_=$ban->{$_};"}  qw(banid status bandate banuntil what value note) );
     LJ::statushistory_add(0, 0, 'sysban_mod', $msg);
 
     print "MODIFIED: banid=$banid\n";
