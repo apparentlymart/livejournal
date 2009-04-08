@@ -62,6 +62,7 @@ sub PRINT {
     my $self = shift;
     my $now = time();
     my $ltime = localtime($now);
+    chomp($_[-1]);  # Remove last '\n'.
     foreach my $h ( values %{$self->{handles}} ) {
         print { $h } $ltime, ': ', join($,,@_);
     }
