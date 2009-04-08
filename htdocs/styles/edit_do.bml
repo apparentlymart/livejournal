@@ -84,7 +84,7 @@ body<=
 
     my $ret = "";
     # pass authas arguments in forms if necessary
-    my $getextra = "?authas=$authas" if $authas ne $remote->{'user'};
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 
     # delete confirmation
     if ($mode eq "delete") {
@@ -119,7 +119,7 @@ body<=
         $ret .= "<tr><td bgcolor='#d0d0d0'><b>$ML{'.edit.col.type'}</b></td><td><i>$LJ::viewinfo{$style->{'type'}}->{'des'}</i> -- <b>$style->{'type'}</b></td></tr>\n";
         $ret .= "<tr><td bgcolor='#d0d0d0'><b>$ML{'.edit.col.styleid'}</b></td><td><b>$style->{'styleid'}</b>";
 
-        my $extravars = "&amp;nocache=1" if $style->{'opt_cache'} eq "Y";
+        my $extravars = $style->{'opt_cache'} eq "Y" ? "&amp;nocache=1" : '';
         if ($style->{'type'} eq 'day') {
             my ($curmday, $curmon, $curyear) = (localtime(time))[3..5]; 
             $extravars .= sprintf("&amp;day=%02d&amp;month=%02d&amp;year=%04d",

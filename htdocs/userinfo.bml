@@ -368,7 +368,7 @@
     }
 
     ### Username
-    my $new_margin = " style='margin-right: 320px;'" if $boxad;
+    my $new_margin = $boxad ? " style='margin-right: 320px;'" : '';
     $body .= "<div class='username'$new_margin>" . $u->ljuser_display;
     if ($u->{public_key}) {
         $body .= " <a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
@@ -504,7 +504,7 @@
     $body .= "</div>";
 
     ### User Details
-    my $new_width = " style='width: 45%;'" if $boxad;
+    my $new_width = $boxad ? " style='width: 45%;'" : '';
     $body .= "<div class='user_details'$new_width>";
 
     # picture
@@ -550,7 +550,7 @@
 
     # journal titles
     my $title = $u->{journaltitle} ? LJ::ehtml($u->{journaltitle}) : BML::ml('.details.title', { user => $u->display_username });
-    my $subtitle = LJ::ehtml($u->{journalsubtitle}) if $u->{journalsubtitle};
+    my $subtitle = $u->{journalsubtitle} ?  LJ::ehtml($u->{journalsubtitle}) : '';
     $body .= "<div class='details_journal'>";
     $body .= "<p class='journal_title'>$title</p>";
     $body .= "<p class='journal_subtitle'>$subtitle</p>" if $subtitle;

@@ -56,7 +56,7 @@ body<=
     $type =~ s/^[^ripsync]+$//i;
     my %types = map { $_ => 1 } split(//, $type);
 
-    my %remote_friend_uids = map { $_ => 1 } $remote->friend_uids if $remote;
+    my %remote_friend_uids = $remote ? (map { $_ => 1 } $remote->friend_uids) : ();
     my $show_mutual_friends = $remote && (!$remote->equals($u) || $of) ? 1 : 0;
 
     if ($u->is_community) {

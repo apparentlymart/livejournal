@@ -4,7 +4,7 @@
  my $remote = LJ::get_remote();
 
  my $sty = LJ::S1::get_style($styleid); 
- my $styu = LJ::load_user($sty->{user}) if $sty; # if $sty so we don't auto-vivify!
+ my $styu = $sty ? LJ::load_user($sty->{user}) : undef; # if $sty so we don't auto-vivify!
  return "Style $styleid does not exist or is not public."
     unless $sty && 
           ($sty->{is_public} eq 'Y' ||       # straight up public

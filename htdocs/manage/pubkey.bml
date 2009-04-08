@@ -29,9 +29,9 @@ body<=
 
         # pull key data, return if suspicious
         my $ks = "$kt KEY BLOCK";
-        my $data = $1 if $key =~ /$ks-{5}(.+?)-{5}.+?$ks(?:-)+/s;
+        my ($data) = $key =~ /$ks-{5}(.+?)-{5}.+?$ks(?:-)+/s;
         foreach ($data =~ /^(\w+):/mg) {
-            return 0 unless $1 =~ /(Version|Hash|Comment|MessageID|Charset)/i;
+            return 0 unless $_ =~ /(Version|Hash|Comment|MessageID|Charset)/i;
         }
         $data =~ s/^(\s|\w+:).*//mg;
         $data =~ s/(?:\r)?\n//sg;

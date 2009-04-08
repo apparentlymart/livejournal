@@ -160,7 +160,7 @@ body<=
         $$body .= "<br />";
 
         if ($mode eq 'summary' && $f->has_summary) {
-            my $q = "&amp;q=" . LJ::eurl($qterm) if $qterm;
+            my $q = $qterm ? "&amp;q=" . LJ::eurl($qterm) : '';
 
             $$body .= "<div id='rm' name='rm'>";
             my $oc = $faqcatarg ? '' : "onclick='return showAnswer();'";

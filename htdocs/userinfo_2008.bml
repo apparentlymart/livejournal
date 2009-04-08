@@ -551,7 +551,8 @@
     # Left Section
     {
         my $title = $u->{journaltitle} ? LJ::ehtml($u->{journaltitle}) : BML::ml('.details.title', { user => $u->display_username });
-        my $subtitle = LJ::ehtml($u->{journalsubtitle}) if $u->{journalsubtitle};
+        my $subtitle = "";
+        $subtitle = LJ::ehtml($u->{journalsubtitle}) if $u->{journalsubtitle};
 
         $body .= "<div class='details_left'>";
         $body .= "<p class='journal_title'>$title</p>";
@@ -682,7 +683,7 @@
     }
     # End Box Ad
 
-    my $extra_section_class = " firsttwo" if $boxad;
+    my $extra_section_class = $boxad ? " firsttwo" : '';
 
     my $html_by_journal;
     LJ::run_hook("userinfo_html_by_journal", { ret => \$html_by_journal, u => $u, extra_section_class => $extra_section_class, with_header => 1 });

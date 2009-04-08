@@ -950,7 +950,8 @@ if ( ! $synd && ($u->bday_string || $viewall)) {
      my $count = my $incommon = 0;
      my $userlist = "";
      foreach (@$users) {
-         my $nofollow = " rel='nofollow'" if ($dontfollow && !$remote_friendid{$_->{'userid'}});
+         my $nofollow = "";
+         $nofollow = " rel='nofollow'" if ($dontfollow && !$remote_friendid{$_->{'userid'}});
          my $ulink = "<a$nofollow href='" . $_->profile_url() . "'>$_->{'user'}</a>";
          if ( $hilite_common && $remote_friendid{$_->{'userid'}} ) {
              $ulink = "<span class='incommon'>$ulink</span>";
