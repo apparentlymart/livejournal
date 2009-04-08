@@ -2997,8 +2997,8 @@ sub is_trusted_identity {
         my $host = $uri->host;
         while ($host =~ /\./) {
             return 1 if $LJ::TRUSTED_OPENID_PROVIDERS{$host};
-            # remove first domain name
-            $host =~ s/^\w+\.//;
+            # remove first domain name (or whatever) with dot
+            $host =~ s/^.*?\.//;
         }
     }
     return;

@@ -1455,7 +1455,7 @@ sub talkform {
 
         if (LJ::OpenID->consumer_enabled) {
             # OpenID user can comment if the account has validated e-mail address or OpenID provider is trusted
-            if (defined $oid_identity && $remote->is_trusted_indentity) {
+            if (defined $oid_identity && $remote->is_trusted_identity) {
                 my $logged_in = LJ::ehtml($remote->display_name);
                 $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
                 if (LJ::is_banned($remote, $journalu)) {
