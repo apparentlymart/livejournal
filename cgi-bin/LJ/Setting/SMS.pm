@@ -26,7 +26,7 @@ sub option {
     my $key = $class->pkgkey;
 
     my $current_msisdn = $class->get_arg($args, "sms_phone") || $u->sms_mapped_number;
-    my ($area, $prefix, $num) = $current_msisdn =~ /\+1(\d{3})(\d{3})(\d{4})/ if $current_msisdn;
+    my ($area, $prefix, $num) = $current_msisdn =~ /\+1(\d{3})(\d{3})(\d{4})/;
     $current_msisdn = "$area-$prefix-$num" if $area && $prefix && $num;
 
     my $carrier = $class->get_arg($args, "sms_carrier") || $u->prop("sms_carrier");

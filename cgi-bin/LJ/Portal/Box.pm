@@ -183,7 +183,7 @@ sub box_is_disabled {
 sub col {
     my LJ::Portal::Box $self = shift;
     if ( $_[0] ) {
-        my $newcol = shift if $_[0] =~ /^[A-Z]$/i;
+        my $newcol = ($_[0] =~ /^[A-Z]$/i) ? shift : '';
         $self->{'col'} = $newcol;
         $self->{'u'}->do("UPDATE portal_config SET col=? WHERE userid=? AND pboxid=?",
                           undef, $self->{'col'}, $self->{'u'}->{'userid'}, $self->{'pboxid'});
@@ -197,7 +197,7 @@ sub sortorder {
     my LJ::Portal::Box $self = shift;
     my $userid = $self->{'u'}->{'userid'};
     if ( $_[0] ) {
-        my $neworder = shift if $_[0] =~ /^\d$/;
+        my $neworder = ($_[0] =~ /^\d$/) ? shift : '';
         $self->{'sortorder'} = $neworder;
         $self->{'u'}->do("UPDATE portal_config SET sortorder=? WHERE userid=? AND pboxid=?",
                           undef, $self->{'sortorder'}, $userid, $self->{'pboxid'});

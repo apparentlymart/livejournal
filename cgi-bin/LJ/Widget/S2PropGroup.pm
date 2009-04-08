@@ -107,7 +107,7 @@ sub render_body {
                 # need to print the header inside the foreach because we don't want it printed if
                 # there's no props in this group that are also in this subheader
                 unless ($header_printed) {
-                    my $prop_list_class = " first" if $subheader_counter == 1;
+                    my $prop_list_class = ($subheader_counter == 1) ? " first" : '';
 
                     $ret .= "<div class='subheader subheader-$propgroup on' id='subheader__${propgroup}__${subheader}'>$subheaders{$subheader}</div>";
                     $ret .= "<table cellspacing='0' class='prop-list$prop_list_class' id='proplist__${propgroup}__${subheader}'>";

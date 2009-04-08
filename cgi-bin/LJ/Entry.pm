@@ -2148,7 +2148,7 @@ sub reject_entry_as_spam {
         undef, $journalu->{'userid'}, $modid);
 
     use Storable;
-    my $req = Storable::thaw($frozen) if $frozen;
+    my $req = $frozen ? Storable::thaw($frozen) : {};
 
     my ($subject, $body) = ($req->{subject}, $req->{event});
     return 0 unless $body;

@@ -37,7 +37,8 @@ sub render_body {
     my @entries_this_page = $vertical->entries( start => $start_index, limit => $num_entries_this_page + 1 );
 
     # pop off the last entry if we got more than we need, since we won't display it
-    my $last_entry = pop @entries_this_page if @entries_this_page > $num_entries_this_page;
+    my $last_entry = undef;
+       $last_entry = pop @entries_this_page if @entries_this_page > $num_entries_this_page;
 
     my $title_displayed = 0;
     my $count = 0;

@@ -44,7 +44,7 @@ sub render_body {
         $image_class =~ s/\//_/;
         my $name = $theme->name . ", " . $theme->layout_name;
 
-        my @checked = ( checked => "checked" ) if $current_theme->uniq eq $uniq;
+        my @checked = $current_theme->uniq eq $uniq ? ( checked => "checked" ) : ();
 
         $ret .= "<tr>" if $count % 3 == 0;
         $ret .= "<td class='theme-box'>";

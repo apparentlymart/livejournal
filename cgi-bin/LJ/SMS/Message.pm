@@ -815,7 +815,7 @@ sub respond {
         my $class_key = delete $opts{class_key};
 
         # explicit class_key
-        my $explicit = 1 if $class_key;
+        my $explicit = $class_key ? 1 : 0;
 
         # fall back to other means
         $class_key ||=

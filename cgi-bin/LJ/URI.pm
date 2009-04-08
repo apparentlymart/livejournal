@@ -46,7 +46,7 @@ sub handle {
     $full_uri .= "?$args" if $args;
     if (my $v = LJ::Vertical->load_by_url($full_uri)) {
         if ($v->is_canonical_url($full_uri)) {
-            my $args_for_redir = "?$args" if $args;
+            my $args_for_redir = $args ? "?$args" : '';
             return Apache::LiveJournal::redir($r, $v->url . $args_for_redir);
         } else {
             return LJ::URI->bml_handler($r, "explore/index.bml");
