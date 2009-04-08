@@ -1691,7 +1691,7 @@ sub editevent
         # We must use property 'dupsig_post' in author of entry to be deleted, not in
         # remote user or journal owner!
         my $item = LJ::get_log2_row($uowner, $req->{'itemid'});
-        my $poster = LJ::want_user($item->{'posterid'}) if $item;
+        my $poster = $item ? LJ::want_user($item->{'posterid'}) : '';
 
         LJ::delete_entry($uowner, $req->{'itemid'}, 'quick', $oldevent->{'anum'});
 

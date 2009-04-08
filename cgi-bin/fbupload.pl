@@ -143,7 +143,7 @@ sub do_upload
     $req->content($$rawdata);
     my $res = $ua->request($req);
 
-    my $res_code = $1 if $res->status_line =~ /^(\d+)/;
+    my $res_code = ($res->status_line =~ /^(\d+)/) ? $1 : '';
     unless ($res->is_success) {
         $$rv = "HTTP error uploading pict: " . $res->content();
         return $res_code;

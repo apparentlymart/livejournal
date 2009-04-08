@@ -893,7 +893,8 @@ sub get_lastcomment {
     # Figure out their last post
     my $memkey = [$remote->{'userid'}, "lastcomm:$remote->{'userid'}"];
     my $memval = LJ::MemCache::get($memkey);
-    my ($jid, $talkid) = split(/:/, $memval) if $memval;
+    my ($jid, $talkid);
+    ($jid, $talkid) = split(/:/, $memval) if $memval;
 
     return ($talkid, $jid);
 }
@@ -2813,7 +2814,7 @@ sub interests_for_adcall {
 
     my $int_len = 0;
 
-    my @interest_list = $u->notable_interests(100) if $u;
+    my @interest_list = $u ? $u->notable_interests(100) : ();
 
     modify_interests_for_adcall(\%opts, \@interest_list);
 
@@ -3880,7 +3881,8 @@ sub statusvis_message_js {
     my $statusvis = $u->statusvis;
     return "" unless $statusvis =~ /^[LMO]$/;
 
-    my $statusvis_full = "locked" if $statusvis eq "L";
+    my $statusvis_full = "";
+    $statusvis_full = "locked" if $statusvis eq "L";
     $statusvis_full = "memorial" if $statusvis eq "M";
     $statusvis_full = "readonly" if $statusvis eq "O";
 
