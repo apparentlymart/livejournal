@@ -501,13 +501,24 @@ sub is_custom {
 sub preview_imgurl {
     my $self = shift;
 
-    my $imgurl = "$LJ::IMGPREFIX/customize/previews/";
-    $imgurl .= $self->uniq ? $self->uniq : "custom-layer";
-    $imgurl .= ".png";
-
-    return $imgurl;
+    ## system styles
+    if (my $uniq = $self->uniq) {
+        return "$LJ::IMGPREFIX/customize/previews/$uniq.png";
+    }
+    
+    ## custom styles with defined preview image
+    my %info;
+    LJ::S2::load_layer_info(\%info, [ $self->{s2lid} ]);
+    if (my $url = $info{ $self->{s2lid} }{preview_imgurl}) {
+        $url = "$LJ::IMGPREFIX/$url" unless $url =~ /^http/i;
+        return LJ::ehtml($url);
+    }
+    
+    ## default "custom layer" icon
+    return "$LJ::IMGPREFIX/customize/previews/custom-layer.png";
 }
 
+    
 sub available_to {
     my $self = shift;
     my $u = shift;
