@@ -60,11 +60,11 @@ sub reopen_handles {
 
 sub PRINT {
     my $self = shift;
+    my $str = join($,,@_); chomp ($str);
     my $now = time();
     my $ltime = localtime($now);
-    chomp($_[-1]);  # Remove last '\n'.
-    foreach my $h ( values %{$self->{handles}} ) {
-        print { $h } $ltime, ': ', join($,,@_);
+    foreach my $k ( keys %{$self->{handles}} ) {
+        print { $self->{handles}->{$k} } $ltime, ': ', $str, ('stderr' eq $k ? "\n" : "");
     }
 }
 
