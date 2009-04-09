@@ -55,6 +55,7 @@
     color: #036;
     background-color: #c5dff9;
     border: 1px solid #8fc3f7;
+    clear: both;
 }
 
 .view_options {
@@ -77,3 +78,22 @@
 #contextual_help ul {
     list-style: circle;
 }
+
+.appwidget-location {
+	float: left;
+}
+
+DIV.lc_detect {
+	float: left;
+	width: 20%;
+	padding: 2em;	
+}
+
+.lc_detect SPAN {
+	display: block;	
+	margin-bottom: 5px;
+}
+DIV.lc_detect INPUT {
+	zoom: 1; margin: 0px;
+	
+	}

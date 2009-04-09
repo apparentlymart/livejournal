@@ -191,6 +191,10 @@
 
 .section.location=Location
 
+.section.location.detect=In order to automatically fill in the fields you can use the service determine your location
+
+.location.detect.btn=Detect
+
 .section.textmsg=Text Messaging
 
 .section.theme=Community Theme
