@@ -24,7 +24,7 @@ body<=
 
         # make sure it is a public key, not a private or a signature,
         # before we bother with other checks
-        my $kt = $1 if $key =~ /-{5}BEGIN PGP (\w+) /;
+        my ($kt) = $key =~ /-{5}BEGIN PGP (\w+) /;
         return 0 unless $kt eq 'PUBLIC';
 
         # pull key data, return if suspicious

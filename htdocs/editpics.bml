@@ -534,7 +534,7 @@
             # redirect back to ourselves/fotobilder
             $returl = LJ::CleanHTML::canonical_url($POST{'ret'});
             if ($returl) {
-                my $redir_host = $1 if $returl =~ m!^http://([\.:\w-]+)!i;
+                my ($redir_host) = $returl =~ m!^http://([\.:\w-]+)!i;
                 return BML::redirect($returl) if $LJ::REDIRECT_ALLOWED{$redir_host};
             }
 
@@ -625,7 +625,7 @@
             if (LJ::Userpic->user_supports_comments($u)) {
                 $body .= "<p class='pkg'>\n";
                 $body .= "<label class='left' for='comments'>$ML{'.label.comment'}</label>\n";
-                my $comments = $POST{'comments'} if $fotobilder;
+                my $comments = $fotobilder ? $POST{'comments'} : undef;
                 $body .= "<span class='input-wrapper'>";
                 $body .= LJ::html_text({ 'name' => 'comments', 'class' => 'text', id => 'comments', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments }) . "\n";
                 $body .= LJ::help_icon_html('upic_comments') . "\n";
