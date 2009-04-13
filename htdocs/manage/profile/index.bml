@@ -294,10 +294,10 @@ body<=
 
         $ret .= LJ::Widget::Location->render( skip_timezone => 1 );
 
-		$ret .= "<div class='lc_detect'><span>$ML{'.section.location.detect'}</span>";
-		$ret .= "<input type='button' name='detect' value='$ML{'.location.detect.btn'}' id='detect'>";
+		## $ret .= "<div class='lc_detect'><span>$ML{'.section.location.detect'}</span>";
+		## $ret .= "<input type='button' name='detect' value='$ML{'.location.detect.btn'}' id='detect'>";
 		## $ret .= " " . LJ::help_icon('upic_keywords');
-		$ret .= "</div>";
+		## $ret .= "</div>";
 
 
         ## CONTACT INFO

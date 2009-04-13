@@ -195,6 +195,11 @@ sub render_body {
 
     $ret .= "</table>\n" unless $minimal_display;
 
+		$ret .= "<div class='lc_detect'><span>" . $class->ml('.section.location.detect') . "</span>";
+		$ret .= "<input type='button' name='detect' value='" . $class->ml('.location.detect.btn') . "' id='detect'>";
+		## $ret .= " " . LJ::help_icon('upic_keywords');
+		$ret .= "</div>";
+
     $ret .= $class->html_hidden({ name => "minimal_display", value => $minimal_display, id => "minimal_display" });
 
     # javascript code in js/countryregions.js accepts list of countries with regions as a space-delimited list
