@@ -79,6 +79,10 @@
     list-style: circle;
 }
 
+.appwidget-location {
+	zoom: 1;
+}
+
 .appwidget-location TABLE {
 	float: left;
 }
