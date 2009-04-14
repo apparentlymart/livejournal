@@ -5,6 +5,31 @@ function CountryRegions (countrySelectId, regionSelectId, regionTextId, regionDe
     this.regionText = document.getElementById(regionTextId);
     this.zipBox = document.getElementById(zipBoxId);
     this.cityBox = document.getElementById(cityBoxId);
+    
+    var that=this;
+    $('detect').onclick=function(){
+        HTTPReq.getJSON({url:'/tools/endpoints/geo_location.bml',
+			onData:function(data){
+				if(data.data){
+					for(var i=0;i<that.countrySelect.options.length;i++){
+						if(that.countrySelect.options[i].value==data.data.country_short){
+							that.countrySelect.options[i].selected='true';
+						}
+					}
+					that.countryChanged(data);
+					if(data.data.city_rus_name!=null){
+						that.cityBox.value=data.data.city_rus_name;
+					}
+					else{
+						if(data.data.city_name!=null){
+							that.cityBox.value=data.data.city_name;
+						}
+					}
+				}		
+			},
+			onError:LiveJournal.ajaxError
+			});
+    }	    
 
     this.descColor = "#999";
     this.regionDesc = regionDesc;
@@ -66,8 +91,23 @@ function CountryRegions (countrySelectId, regionSelectId, regionTextId, regionDe
     }
 }
 
-CountryRegions.prototype.countryChanged = function () {
+
+CountryRegions.prototype.detectRegion=function(data){
+   if(this.regionSelect.options.length>0){
+	for(var i=0;i<this.regionSelect.options.length;i++){
+		if(this.regionSelect.options[i].value==data.data.region_code){
+			this.regionSelect.options[i].selected='true';
+		}
+	}
+    }else if(data.data.region_name!=null){
+	this.regionText.value=data.data.region_name;	
+    }
+
+}
+
+CountryRegions.prototype.countryChanged = function (data) {
     var self = this;
+    var that = this;
     this.selectedCountry = this.countrySelect.value;
 
     if (undefined != this.zipBox) {
@@ -79,12 +119,16 @@ CountryRegions.prototype.countryChanged = function () {
             method : "POST",
             data : HTTPReq.formEncoded({"country" : self.selectedCountry}),
             url : LiveJournal.getAjaxUrl("load_state_codes"),
-            onData : function (regions) { self.onRegionsLoad(regions); },
+            onData : function (regions) {
+	    	self.onRegionsLoad(regions);
+		if(data){that.detectRegion(data);}
+	    },
             onError : LiveJournal.ajaxError
         });
     }
-
+   
     this.createStatesOptions();
+    if(data){this.detectRegion(data);} 
 }
 
 CountryRegions.prototype.onRegionsLoad = function(regions) {
