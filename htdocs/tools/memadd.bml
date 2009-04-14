@@ -194,7 +194,9 @@
          # this is a new memory.
          my $user = LJ::get_username($log->{'journalid'});
          my $dt = substr($log->{'eventtime'}, 0, 10);
-         $des = "$dt: $user: $subject";
+         my $entry = LJ::Entry->new($ju, jitemid => $itemid);
+         my $auth_u = LJ::load_userid($authas);
+         $des = ($entry && $entry->visible_to($auth_u)) ? "$dt: $user: $subject" : "$user: (private entry)";
      }
 
      # it'd be nice to only show the authas form when adding an entry and not
