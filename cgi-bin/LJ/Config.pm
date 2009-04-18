@@ -69,7 +69,7 @@ sub load_defaults {
 sub load_policy {
     my $policyconfig = "$ENV{LJHOME}/etc/policyconfig.pl";
     return unless -e $policyconfig;
-    do "$policyconfig";
+    do "$policyconfig" or die $@;
 }
 
 # load config overrides
