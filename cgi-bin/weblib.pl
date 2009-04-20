@@ -1997,12 +1997,19 @@ sub js_dumper {
     }
 }
 
+## Support for conditional file inclusion:
+## e.g. LJ::need_res( {condition => 'IE'}, 'ie.css', 'myie.css') will result in
+## <!--[if IE]><link rel="stylesheet" type="text/css" href="$statprefix/..." /><![endif]-->
 sub need_res {
+    my $opts = (ref $_[0]) ? shift : {};
+    my $condition = $opts->{condition} || '';
+    
     foreach my $reskey (@_) {
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
-        unless ($LJ::NEEDED_RES{$reskey}++) {
+        unless (exists $LJ::NEEDED_RES{$reskey}) {
             push @LJ::NEEDED_RES, $reskey;
         }
+        $LJ::NEEDED_RES{$reskey} = $condition;
     }
 }
 
@@ -2097,18 +2104,20 @@ sub res_includes {
     };
 
     my $now = time();
-    my %list;   # type -> [];
-    my %oldest; # type -> $oldest
+    my %list;   # type -> condition -> [list of files];
+    my %oldest; # type -> condition -> $oldest
     my $add = sub {
-        my ($type, $what, $modtime) = @_;
+        my ($type, $what, $modtime, $condition) = @_;
 
+        $condition ||= ''; ## by default, no condtion is present
+        
         # in the concat-res case, we don't directly append the URL w/
         # the modtime, but rather do one global max modtime at the
         # end, which is done later in the tags function.
         $what .= "?v=$modtime" unless $do_concat;
 
-        push @{$list{$type} ||= []}, $what;
-        $oldest{$type} = $modtime if $modtime > $oldest{$type};
+        push @{$list{$type}{$condition} ||= []}, $what;
+        $oldest{$type}{$condition} = $modtime if $modtime > $oldest{$type}{$condition};
     };
 
     foreach my $key (@LJ::NEEDED_RES) {
@@ -2130,38 +2139,44 @@ sub res_includes {
         }
 
         if ($path =~ m!^js/(.+)!) {
-            $add->('js', $1, $mtime);
+            $add->('js', $1, $mtime, $LJ::NEEDED_RES{$key});
         } elsif ($path =~ /\.css$/ && $path =~ m!^(w?)stc/(.+)!) {
-            $add->("${1}stccss", $2, $mtime);
+            $add->("${1}stccss", $2, $mtime, $LJ::NEEDED_RES{$key});
         } elsif ($path =~ /\.js$/ && $path =~ m!^(w?)stc/(.+)!) {
-            $add->("${1}stcjs", $2, $mtime);
+            $add->("${1}stcjs", $2, $mtime, $LJ::NEEDED_RES{$key});
         }
     }
 
     my $tags = sub {
         my ($type, $template) = @_;
-        my $list;
-        return unless $list = $list{$type};
-
-        if ($do_concat) {
-            my $csep = join(',', @$list);
-            $csep .= "?v=" . $oldest{$type};
-            $template =~ s/__+/??$csep/;
-            $ret .= $template;
-        } else {
-            foreach my $item (@$list) {
+        return unless $list{$type};
+        
+        foreach my $cond (sort {length($a) <=> length($b)} keys %{ $list{$type} }) {
+            my $list = $list{$type}{$cond};
+            my $start = ($cond) ? "<!--[if $cond]>" : "";
+            my $end = ($cond) ? "<![endif]-->\n" : "\n";
+            
+            if ($do_concat) {
+                my $csep = join(',', @$list);
+                $csep .= "?v=" . $oldest{$type}{$cond};
                 my $inc = $template;
-                $inc =~ s/__+/$item/;
-                $ret .= $inc;
+                $inc =~ s/__+/??$csep/;
+                $ret .= $start . $inc . $end;
+            } else {
+                foreach my $item (@$list) {
+                    my $inc = $template;
+                    $inc =~ s/__+/$item/;
+                    $ret .= $start . $inc . $end;
+                }
             }
         }
     };
 
-    $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>\n");
-    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" />\n");
-    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" />\n");
-    $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>\n");
-    $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>\n");
+    $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
+    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" />");
+    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" />");
+    $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>");
+    $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>");
     return $ret;
 }
 
