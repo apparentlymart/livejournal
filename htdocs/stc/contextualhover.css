@@ -66,8 +66,10 @@ div.ContextualPopup .Userpic {
         vertical-align: middle;
         }
 
-   div.ContextualPopup div.Inner a, div.ContextualPopup div.Inner a:visited {
+   div.ContextualPopup div.Inner a:link,
+   div.ContextualPopup div.Inner a:visited {
         text-decoration: underline !important;
+        border-bottom:0 none;
         font-weight: bold;
         color: #00C !important;
         }
