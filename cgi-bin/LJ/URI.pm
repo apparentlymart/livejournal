@@ -53,7 +53,7 @@ sub handle {
         }
     }
 
-    if ($uri =~ m!^/statistics/!) {
+    if ($uri =~ m!^/statistics/! or $uri =~ m!^/ratings/!) {
         return LJ::URI->bml_handler($r, "statistics/index.bml");
     }
 
