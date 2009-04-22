@@ -40,7 +40,7 @@ sub render_body {
 
     $body .= "<p><span class='helper'>" .
              $class->ml('settings.settingprod.outro',
-                 { aopts => "href='$LJ::SITEROOT/manage/profile/'" } ) .
+                 { aopts => "href='$LJ::SITEROOT/manage/settings/'" } ) .
              "</span></p>";
 
     my $ret;

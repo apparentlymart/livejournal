@@ -2697,7 +2697,7 @@ settings.province=or non-US State/province/territory
 
 settings.settingprod.intro=Hi from [[sitename]]. We have a new option that we'd like you to set:
 
-settings.settingprod.outro=You can change this setting on the <a [[aopts]]>Edit Profile Page</a>.
+settings.settingprod.outro=You can change this setting on the <a [[aopts]]>Settings Page</a>.
 
 settings.settingprod.learn=Learn more
 

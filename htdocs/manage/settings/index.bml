@@ -116,6 +116,8 @@ body<=
                 LJ::Setting::Display::BanUsers
                 LJ::Setting::FindByEmail
                 LJ::Setting::PingBack
+                LJ::Setting::Ratings
+                LJ::Setting::InvisibilityGuests
             )],
         },
         history => {
