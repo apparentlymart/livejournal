@@ -206,8 +206,14 @@ sub ejs_all
 # strip all HTML tags from a string
 sub strip_html {
     my $str = shift;
+    my $opts = shift || {};
+
     $str =~ s/\<lj user\=['"]?([\w-]+)['"]?\>/$1/g;   # "
-    $str =~ s/\<([^\<])+\>//g;
+    if ($opts->{use_space}) {
+        $str =~ s/\<([^\<])+\>/ /g;
+    } else {
+        $str =~ s/\<([^\<])+\>//g;
+    }
     return $str;
 }
 
@@ -391,6 +397,31 @@ sub text_trim
         $char_max--;
     }
     return substr($text,0,$cur);
+}
+
+# trim string, but not truncate in middle of the word
+sub trim_at_word
+{
+    my ($text, $char_max) = @_;
+
+    return $text if length($text) <= $char_max;
+
+    $char_max -= 3; # space for '...'
+
+    my $short_text = text_trim($text, $char_max, $char_max);
+    my $short_len = length($short_text);
+    my $full_len = length($text);
+    if ($short_len < $full_len) { # really trimmed
+        # need correct last word and add '...'
+        my $last_char = substr($short_text, -1, 1);
+        my $first_char = substr($text, $short_len, 1);
+        if ($last_char ne ' ' and $first_char ne ' ') { 
+            my $may_stop = rindex($short_text, ' ');
+            $short_text = substr($text, 0, $may_stop);
+        }
+    }
+
+    return $short_text . '...';
 }
 
 # <LJFUNC>
