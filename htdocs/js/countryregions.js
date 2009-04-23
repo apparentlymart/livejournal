@@ -7,30 +7,6 @@ function CountryRegions (countrySelectId, regionSelectId, regionTextId, regionDe
     this.cityBox = document.getElementById(cityBoxId);
     
     var that=this;
-    $('detect').onclick=function(){
-        HTTPReq.getJSON({url:'/tools/endpoints/geo_location.bml',
-			onData:function(data){
-				if(data.data){
-					for(var i=0;i<that.countrySelect.options.length;i++){
-						if(that.countrySelect.options[i].value==data.data.country_short){
-							that.countrySelect.options[i].selected='true';
-						}
-					}
-					that.countryChanged(data);
-					if(data.data.city_rus_name!=null){
-						that.cityBox.value=data.data.city_rus_name;
-					}
-					else{
-						if(data.data.city_name!=null){
-							that.cityBox.value=data.data.city_name;
-						}
-					}
-				}		
-			},
-			onError:LiveJournal.ajaxError
-			});
-    }	    
-
     this.descColor = "#999";
     this.regionDesc = regionDesc;
     this.cityDesc = cityDesc;
@@ -188,4 +164,30 @@ CountryRegions.prototype.zipSwitch = function() {
             this.zipBox.disabled = 'disabled';
         }
     }
+}
+
+CountryRegions.prototype.autoDetect=function(){
+	that=this;
+	HTTPReq.getJSON({url:'/tools/endpoints/geo_location.bml',
+			onData:function(data){
+				if(data.data){
+					for(var i=0;i<that.countrySelect.options.length;i++){
+						if(that.countrySelect.options[i].value==data.data.country_short){
+							that.countrySelect.options[i].selected='true';
+						}
+					}
+					that.countryChanged(data);
+					if(data.data.city_rus_name!=null){
+						that.cityBox.value=data.data.city_rus_name;
+					}
+					else{
+						if(data.data.city_name!=null){
+							that.cityBox.value=data.data.city_name;
+						}
+					}
+				}		
+			},
+			onError:LiveJournal.ajaxError
+			});
+
 }
