@@ -15,6 +15,8 @@ use lib "$ENV{LJHOME}/cgi-bin";
 # needed to call S2::set_domain() so early:
 use LJ::S2;
 
+use Digest::MD5 qw/md5_hex/;
+
 use Class::Autouse qw(
                       LJ::Blob
                       Apache::LiveJournal::Interface::Blogger
@@ -1195,14 +1197,55 @@ sub userpic_content
 sub files_trans
 {
     my $r = shift;
-    return 404 unless $r->uri =~ m!^/(\w{1,15})/(\w+)(/\S+)!;
+    $r->uri =~ m!^/(\w{1,15})/(\w+)(/\S+)!;
     my ($user, $domain, $rest) = ($1, $2, $3);
 
-    if (my $handler = LJ::run_hook("files_handler:$domain", $user, $rest)) {
-        $r->notes("codepath" => "files.$domain");
-        $r->handler("perl-script");
-        $r->push_handlers(PerlHandler => $handler);
-        return OK;
+    if ($domain eq 'phonepost') {
+        if (my $handler = LJ::run_hook("files_handler:$domain", $user, $rest)) {
+            $r->notes("codepath" => "files.$domain");
+            $r->handler("perl-script");
+            $r->push_handlers(PerlHandler => $handler);
+            return OK;
+        }
+        return 404;
+    } else {
+        use LJ::FileStore;
+        my $result = LJ::FileStore->get_path_info( path => $r->uri );
+        
+        # file not found
+        return 404 unless $result;
+        
+        my $size = $result->{content_length};
+    
+        if ( !$LJ::REPROXY_DISABLE{files} &&
+             $r->header_in('X-Proxy-Capabilities') &&
+             $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
+        {
+            my $paths = $result->{paths};
+
+            my $cache_for = $LJ::MOGILE_PATH_CACHE_TIMEOUT || 3600;
+            # reproxy url
+            if ($paths->[0] =~ m/^http:/) {
+                $r->header_out('X-REPROXY-CACHE-FOR', "$cache_for; Last-Modified Content-Type");
+                $r->header_out('X-REPROXY-URL', join(' ', @$paths));
+            }
+
+            # reproxy file
+            else {
+                $r->header_out('X-REPROXY-FILE', $paths->[0]);
+            }
+
+            my $send_headers = sub {
+                $r->content_type ($result->{mime_type});
+                $r->header_out("Content-length", $size);
+                $r->header_out("Cache-Control", "no-transform");
+                $r->header_out("Last-Modified", LJ::time_to_http ($result->{change_time}));
+                $r->send_http_header();
+            };
+            $send_headers->();
+            warn "Sended...";
+            return OK;
+        }
     }
     return 404;
 }
