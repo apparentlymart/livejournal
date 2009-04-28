@@ -1,3 +1,7 @@
+activity.pl:
+  active_user - move clustered active_user stats from each cluster to the global active_user_summary table.
+  actionhistory - move clustered recentaction summaries from their respective clusters to the global actionhistory table
+
 stats.pl:
   genstats - Generates the nightly statistics
   genstats_size - Generates the site size stats
