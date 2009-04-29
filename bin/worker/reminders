@@ -1,0 +1,13 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use lib "$ENV{LJHOME}/cgi-bin";
+
+use LJ::Worker::Reminders;
+
+require 'ljlib.pl';
+
+LJ::Worker::Reminders->new()->run();
+
