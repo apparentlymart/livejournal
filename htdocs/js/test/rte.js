@@ -12,9 +12,9 @@ fireunit.compare(convertToLJTags('\
 
 // username start with "_"
 fireunit.compare(convertToLJTags('\
-    <div class="ljuser"><a href="http://users.livejournal.com/__h4__/profile"><img width="17" height="17" src="http://p-stat.livejournal.com/img/userinfo.gif" alt="[info]" style="border: 0pt none ; vertical-align: bottom; padding-right: 1px;" /></a><a href="http://users.livejournal.com/__h4__/"><b>__h4__</b></a></div>\
+    <div class="ljuser"><a href="http://users.livejournal.com/__h4__/profile"><img width="17" height="17" src="http://l-stat.livejournal.com/img/userinfo.gif" alt="[info]" style="border: 0pt none ; vertical-align: bottom; padding-right: 1px;" /></a><a href="http://users.livejournal.com/__h4__/"><b>__h4__</b></a></div>\
     <br />\
-    <div class="ljuser"><a href="http://akella_art.livejournal.com/profile"><img width="17" height="17" style="border: 0pt none ; vertical-align: bottom; padding-right: 1px;" alt="[info]" src="http://p-stat.livejournal.com/img/userinfo.gif" /></a><a href="http://akella_art.livejournal.com/"><b>akella</b></a></div>')
+    <div class="ljuser"><a href="http://akella_art.livejournal.com/profile"><img width="17" height="17" style="border: 0pt none ; vertical-align: bottom; padding-right: 1px;" alt="[info]" src="http://l-stat.livejournal.com/img/userinfo.gif" /></a><a href="http://akella_art.livejournal.com/"><b>akella</b></a></div>')
     ,
     '\
     <lj user="__h4__"/>\
@@ -28,7 +28,7 @@ fireunit.compare(convertToLJTags('\
     <br />\
     lj_core\
     <br />\
-    <div class="ljuser"><a href="http://community.livejournal.com/changelog/profile"><img width="16" height="16" style="border: 0pt none ; vertical-align: bottom; padding-right: 1px;" alt="[info]" src="http://p-stat.livejournal.com/img/community.gif"/></a><a href="http://community.livejournal.com/changelog/"><b>changelog "2 test</b></a></div>')
+    <div class="ljuser"><a href="http://community.livejournal.com/changelog/profile"><img width="16" height="16" style="border: 0pt none ; vertical-align: bottom; padding-right: 1px;" alt="[info]" src="http://l-stat.livejournal.com/img/community.gif"/></a><a href="http://community.livejournal.com/changelog/"><b>changelog "2 test</b></a></div>')
     ,
     '\
     <lj comm="lj_core"/>\
