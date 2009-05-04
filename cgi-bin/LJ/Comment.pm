@@ -1642,4 +1642,20 @@ sub is_edited {
     return $self->edit_time ? 1 : 0;
 }
 
+# Taken from cgi-bin/talklib.pl +1018
+sub visible_to {
+    my $self = shift;
+    my $u    = shift;
+    my $up   = int +shift; # optional: int (undef) return 0 that is OK.
+
+    return 0 if $self->state eq 'D';
+    return 0 if 
+            $self->state eq "S" 
+            and not ($u && ($u->userid == $self->entry->posterid ||
+                            $u->userid == $up ||
+                            $u->userid == $self->posterid ||
+                            LJ::can_manage($u, $self->event->poster) ));
+}
+
+
 1;
