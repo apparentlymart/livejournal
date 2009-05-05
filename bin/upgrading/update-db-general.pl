@@ -3121,6 +3121,50 @@ CREATE TABLE sch_mass_exitstatus (
 )
 EOC
 
+# global table for community directory
+register_tablecreate("category", <<'EOC');
+CREATE TABLE category (
+   catid       INT UNSIGNED NOT NULL AUTO_INCREMENT,
+   pretty_name VARCHAR(255) NOT NULL,
+   url_path    VARCHAR(120) NOT NULL,
+   parentcatid INT UNSIGNED,
+   PRIMARY KEY (catid),
+   INDEX       (url_path),
+   INDEX       (parentcatid)
+)
+EOC
+
+# Map journals to categories
+register_tablecreate("categoryjournals", <<'EOC');
+CREATE TABLE categoryjournals (
+   catid     INT UNSIGNED NOT NULL,
+   journalid INT UNSIGNED NOT NULL,
+   INDEX     (catid),
+   INDEX     (journalid)
+)
+EOC
+
+# Extra properties for categories
+register_tablecreate("categoryprop", <<'EOC');
+CREATE TABLE categoryprop (
+   catid     INT UNSIGNED NOT NULL,
+   propid    SMALLINT UNSIGNED NOT NULL,
+   propval   VARCHAR(255) NOT NULL,
+   INDEX     (catid, propid)
+)
+EOC
+
+# Property list for categories
+register_tablecreate("categoryproplist", <<'EOC');
+CREATE TABLE categoryproplist (
+  propid SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  name   VARCHAR(255) DEFAULT NULL,
+  des    VARCHAR(255) DEFAULT NULL,
+  scope  ENUM('general', 'local') DEFAULT 'general' NOT NULL,
+  UNIQUE KEY (name)
+)
+EOC
+
 
 ### changes
 

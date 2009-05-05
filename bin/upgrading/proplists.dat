@@ -1437,3 +1437,15 @@ logproplist.pingback:
   des: (J)ournal default, (O)pen - all links from post should be processed with PingBack. (L)iveJournal - only leading to/from livejournal.com. (D)isabled - pingbacks disabled.
   prettyname: PingBack options
   sortorder: 105
+
+categoryproplist.children:
+  des: The subcategories(propval=catid) for a given category.
+
+categoryproplist.top_children:
+  des: The categories(propval=catid) to display even when the category is summmarized or reduced to just a few of the total.
+
+categoryproplist.in_nav:
+  des: The top_level categories to display in the main navigation, sorted by the prop value
+
+categoryproplist.featured:
+  des: The communites(propval=journalid) to display at the top of a category.

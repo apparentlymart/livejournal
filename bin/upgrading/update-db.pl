@@ -565,6 +565,7 @@ sub populate_proplist_file {
               'talkproplist' => 'name',
               'usermsgproplist' => 'name',
               'pollproplist2'   => 'name',
+              'categoryproplist' => 'name',
               );
 
     my $table;  # table

@@ -1,0 +1,58 @@
+.appwidget-categorysummary {
+    margin: 0 !important;
+    padding: 2px;
+}
+
+.appwidget-categorysummary .catsummary-outer {
+    background-color: #fff;
+}
+
+.appwidget-categorysummary h2 {
+    font-size: 14px;
+    clear: left;
+    font-family: Arial;
+    font-weight: bold;
+    background: #d6e6f5 url(/img/corner-f6f6f6.gif) no-repeat 0 0;
+    margin: 0;
+    padding: 5px 8px;
+    color: #222;
+    text-transform: uppercase;
+    position: relative;
+}
+
+.appwidget-categorysummary h2 a span.catsummary-categoryname {
+    color: #000;
+}
+
+.appwidget-categorysummary .catsummary-inner {
+    border: 1px solid #ededed;
+    border-top: 0;
+    position: relative;
+}
+
+.appwidget-categorysummary .catsummary-subcats,
+.appwidget-categorysummary .catsummary-topcats{
+    font-size: 11px;
+    margin: 5px 0 5px 5px;
+}
+
+.appwidget-categorysummary hr {
+    color: #ededed;
+    background-color: #ededed;
+    border: 0;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+}
+
+.appwidget-categorysummary .catsummary-outer .expand {
+    float: right;
+    font-weight: bold;
+    font-size: 14px;
+}
+.appwidget-categorysummary .catsummary-outer .expand .control {
+    color: #00c;
+    cursor: pointer;
+    padding: 2px;
+    font-size: 16px;
+}

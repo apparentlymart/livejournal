@@ -53,6 +53,10 @@ sub handle {
         }
     }
 
+    if (my $c = LJ::Browse->load_by_url($full_uri)) {
+        return LJ::URI->bml_handler($r, "browse/index.bml");
+    }
+
     if ($uri =~ m!^/statistics/! or $uri =~ m!^/ratings/!) {
         return LJ::URI->bml_handler($r, "statistics/index.bml");
     }
