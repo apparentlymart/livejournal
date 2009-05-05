@@ -91,6 +91,10 @@ LJWidgetIPPU = new Class(LJWidget, {
     doAjaxRequest: function (params) {
       if (! params) params = {};
       params['_widget_ippu'] = 1;
+      if(document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_self")){
+      	params['Widget[IPPU_SettingProd]_LJ__Setting__InvisibilityGuests_invisibleguests']=
+	      (document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_self").checked==true)?(1):((document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_anon").checked==true)?(2):(0))
+      }
       LJWidgetIPPU.superClass.doAjaxRequest.apply(this, [params]);
     },
 
