@@ -2695,7 +2695,7 @@ settings.pingback.option.disabled=Disabled
 
 settings.province=or non-US State/province/territory
 
-settings.settingprod.intro=My Guests is a new feature that will allow you to see who visits your journal. To set your privacy preferences for this feature, please choose an option:
+settings.settingprod.intro=Soon, we will introduce My Guests - a new feature that will allow you to see who visits your journal. To set your privacy preferences for this feature, please choose an option:
 
 settings.settingprod.outro=You can change this setting on the <a [[aopts]]>Settings Page</a>.
 
