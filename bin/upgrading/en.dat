@@ -3185,6 +3185,8 @@ widget.createaccount.tip.password=Choose a secure password that is at least 6 ch
 
 widget.createaccount.tip.username=Your username is used in your journal URL. Use lower-case letters (a-z), digits (0-9), and underscores (_).
 
+widget.createaccount.yearcheck=The birth date you entered shows that you are under the age of 13. If this date is correct, then please proceed. But if it is not your actual date of birth, we suggest that you update the form with your real birth date. Some LiveJournal functionality is inaccessible for users under the age of 13 and you will need to complete one of the age verification processes described in this <a [[aopts]]>FAQ</a>
+
 widget.createaccountnextsteps.steps=Now that your account is set up, you're ready to explore the rest of [[sitename]]. Here are some things to get you started:
 
 widget.createaccountnextsteps.steps.manage=Edit your account settings

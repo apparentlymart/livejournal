@@ -180,7 +180,7 @@ sub render_body {
                 class => 'year',
                 maxlength => '4',
                 value => $post->{bday_yyyy} || "",
-            );
+            ); 
         } else {
             $ret .= "<tr><td class='field-name'>" . $class->ml('widget.createaccount.field.birthdate') . "</td>\n<td>";
             $ret .= $class->html_datetime(
@@ -189,6 +189,9 @@ sub render_body {
                 notime => 1,
                 default => sprintf("%04d-%02d-%02d", $post->{bday_yyyy}, $post->{bday_mm}, $post->{bday_dd}),
             );
+			$ret .= "<div id='bdayy_check'>" . $class->ml('widget.createaccount.yearcheck', { aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=244'" }) . "<span>";
+			$ret .= "<input type='button' name='proc' value='Proceed'> 
+					<input type='button' name='wait' value='Wait! I want to change my birth date'></span></div>";
         }
         $ret .= $error_msg->('bday', '<br /><span class="formitemFlag">', '</span>');
         $ret .= "</td></tr>\n" unless $alt_layout;
