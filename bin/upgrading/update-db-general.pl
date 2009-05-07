@@ -3139,8 +3139,8 @@ register_tablecreate("categoryjournals", <<'EOC');
 CREATE TABLE categoryjournals (
    catid     INT UNSIGNED NOT NULL,
    journalid INT UNSIGNED NOT NULL,
-   INDEX     (catid),
-   INDEX     (journalid)
+   PRIMARY KEY (catid, journalid),
+   INDEX       (journalid)
 )
 EOC
 
