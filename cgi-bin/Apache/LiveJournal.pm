@@ -1243,7 +1243,6 @@ sub files_trans
                 $r->send_http_header();
             };
             $send_headers->();
-            warn "Sended...";
             return OK;
         }
     }
