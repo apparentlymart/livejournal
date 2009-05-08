@@ -1,0 +1,107 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
+    $title = "Add Community to Category";
+    my $ret = "";
+
+    my $caturl = $POST{'caturl'};
+    my $journals = $POST{'journals'};
+
+    if (LJ::did_post() and $POST{'add'}) {
+        push @errors, "Invalid form submission" unless LJ::check_form_auth();
+        {
+            # Check for required data
+            unless ($caturl) {
+                push @errors, "Please select a category";
+                next;
+            }
+            unless ($journals) {
+                push @errors, "Please enter journal names to add";
+                next;
+            }
+
+            # Has a valid category been chosen
+            my $category = LJ::Browse->load_by_url("/browse" . $caturl);
+            push @errors, "Invalid category" unless $category;
+
+            # Extract usernames and get userids
+            my @usernames = split(/\n/, $journals);
+            my @baduser;
+            my %users;
+            foreach my $user (@usernames) {
+                # trim off extra whitespace characters
+                $user = LJ::trim($user);
+                my $uid = LJ::get_userid($user);
+                if ($uid) {
+                    $users{$user} = $uid;
+                } else {
+                    push @baduser, $user;
+                }
+            }
+            push @errors, "Invalid users (" . join(',', @baduser) . ")"
+                if @baduser;
+            next if @errors;
+
+            # Add journals to category
+            if ($category->add_communities(values %users)) {
+                $ret .= "<span class='super notice'>Communities successfully added to category.</span>";
+            } else {
+                $ret .= "<span class='super notice'>Communities not added.</span>";
+            }
+        }
+    }
+
+    $ret .= "<form method='POST'>\n";
+    $ret .= LJ::form_auth();
+
+    # Get the full list of categories
+    my @categories = LJ::Browse->load_all;
+    # Don't include the top level categories and get the unique URI for each
+    my @caturls = map { $_->uri, $_->uri } grep { $_->parent } @categories;
+    @caturls = sort { $a cmp $b } @caturls;
+
+    $ret .= "<p>Add to Category:<br />";
+    $ret .= LJ::html_select({
+                name => 'caturl',
+                selected => $caturl },
+                { text => 'Select Category',
+                value => '' },
+                @caturls
+            );
+    $ret .= "</p>\n";
+
+    $ret .= "<p>the following journals:<br />";
+    $ret .= LJ::html_textarea( {
+                name => 'journals',
+                cols => 40,
+                rows => 6,
+                value => $journals }
+            );
+    $ret .= "<br /><i>One username per line.</i></p>\n";
+
+    $ret .= "<p>" . LJ::html_submit('add', 'Add') . "</p>";
+
+    $ret .= "</form>";
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

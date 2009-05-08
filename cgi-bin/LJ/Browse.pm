@@ -401,6 +401,16 @@ sub clear_memcache {
     return;
 }
 
+sub clear_journals_memcache {
+    my $self = shift;
+
+    LJ::MemCache::delete($self->memkey_catid_journals);
+    $self->{_loaded_journals} = undef;
+
+    return;
+}
+
+
 sub absorb_row {
     my ($self, $row) = @_;
 
@@ -661,7 +671,14 @@ sub url {
     my $base = "$LJ::SITEROOT/browse";
     my $parent = "";
 
-    return $base . $self->path . $self->url_path . "/";
+    return $base . $self->uri . "/";
+}
+
+# returns the URI below "/browse"
+sub uri {
+    my $self = shift;
+
+    return $self->path . $self->url_path;
 }
 
 # returns HTML for the page heading
@@ -700,6 +717,44 @@ sub top_communities {
 
     my $comms = $self->{'featured'};
     return $comms ? @$comms : undef;
+}
+
+# Takes a list of userids and adds them to a category
+sub add_communities {
+    my $self = shift;
+    my @uids = @_;
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to create category";
+
+    foreach my $uid (@uids) {
+        $dbh->do("REPLACE INTO categoryjournals VALUES (?,?)", undef,
+                 $self->catid, $uid);
+        die $dbh->errstr if $dbh->err;
+    }
+
+    $self->clear_journals_memcache;
+
+    return 1;
+}
+
+# Takes a list of userids and removes them from a category
+sub remove_communities {
+    my $self = shift;
+    my @uids = @_;
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to create category";
+
+    foreach my $uid (@uids) {
+        $dbh->do("DELETE FROM categoryjournals WHERE catid=? AND journalid IN (?)", undef,
+                 $self->catid, @uids);
+        die $dbh->errstr if $dbh->err;
+    }
+
+    $self->clear_journals_memcache;
+
+    return 1;
 }
 
 # get the typemap for categoryprop

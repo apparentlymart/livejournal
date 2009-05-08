@@ -1,0 +1,130 @@
+<?_info
+nocache=>1
+_info?>
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
+    # Don't cache page
+    $headextra .= '<META HTTP-EQUIV="Pragma" CONTENT="no-cache">';
+
+    $title = "Remove Community from Category";
+    my $ret = "";
+
+    my $caturl = $POST{'caturl'};
+    my $journals = $POST{'journals'};
+
+    if (LJ::did_post() and $POST{'remove'}) {
+        push @errors, "Invalid form submission" unless LJ::check_form_auth();
+        {
+            # Check for required data
+            unless ($caturl) {
+                push @errors, "Please select a category";
+                next;
+            }
+            unless (grep { /^journal-/} keys %POST) {
+                push @errors, "Please select journals to remove";
+                next;
+            }
+
+            # Has a valid category been chosen
+            my $category = LJ::Browse->load_by_url("/browse" . $caturl);
+            push @errors, "Invalid category" unless $category;
+
+            # Extract usernames and get userids
+            my @baduser;
+            my @users;
+            foreach (grep { /^journal-/} keys %POST) {
+                my $user = $POST{$_};
+
+                my $uid = LJ::get_userid($user);
+                if ($uid) {
+                    push @users, $uid;
+                } else {
+                    push @baduser, $user;
+                }
+            }
+            push @errors, "Invalid users (" . join(',', @baduser) . ")"
+                if @baduser;
+            next if @errors;
+
+            # Remove journals from category
+            if ($category->remove_communities(@users)) {
+                $ret .= "<span class='super notice'>Communities successfully removed from category.</span>";
+            } else {
+                $ret .= "<span class='super notice'>Communities not removed.</span>";
+            }
+        }
+    }
+
+    $ret .= "<form method='POST'>\n";
+    $ret .= LJ::form_auth();
+
+    # Get the full list of categories
+    my @categories = LJ::Browse->load_all;
+    # Don't include the top level categories and get the unique URI for each
+    my @caturls = map { $_->uri, $_->uri } grep { $_->parent } @categories;
+    @caturls = sort { $a cmp $b } @caturls;
+
+    $ret .= "<p>Remove from Category:<br />";
+    $ret .= LJ::html_select({
+                name => 'caturl',
+                selected => $caturl },
+                { text => 'Select Category',
+                value => '' },
+                @caturls
+            );
+    $ret .= "</p>\n";
+
+    # Selected a category OR tried a remove and got an error
+    if ( LJ::did_post() && ($POST{'select'} || ($POST{'remove'} && @errors)) ) {
+        # Has a valid category been chosen
+        my $category = LJ::Browse->load_by_url("/browse" . $caturl);
+        push @errors, "Invalid category" unless $category;
+
+        my @comms = $category->communities;
+        if (@comms) {
+            $ret .= "<p>the following journals:<br />";
+        } else {
+            $ret .= "<p>No communities in category.</p>\n";
+        }
+        foreach my $c (@comms) {
+            my $name = 'journal-' . $c->userid;
+            $ret .= LJ::html_check( {
+                        name => $name,
+                        value => $c->user,
+                        selected => $POST{$name} ? 1 : 0,
+                    } );
+            $ret .= " <lable for='$name'>" . $c->user . "</label><br />";
+        }
+        $ret .= "</p>\n";
+
+        $ret .= "<p>" . LJ::html_submit('remove', 'Remove Communities') . " " .
+                LJ::html_submit('select', 'Select Category') . "</p>";
+    } else {
+        $ret .= "<p>" . LJ::html_submit('select', 'Select Category') . "</p>";
+    }
+
+    $ret .= "</form>";
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
