@@ -14,24 +14,20 @@ CreateAccount.init = function () {
     DOM.addEventListener($('create_email'), "focus", CreateAccount.eventShowTip.bindEventListener("create_email"));
     DOM.addEventListener($('create_password1'), "focus", CreateAccount.eventShowTip.bindEventListener("create_password1"));
     DOM.addEventListener($('create_password2'), "focus", CreateAccount.eventShowTip.bindEventListener("create_password1"));
-    DOM.addEventListener($('create_bday_mm'), "focus", CreateAccount.eventShowTip.bindEventListener("create_bday_mm"));
-    DOM.addEventListener($('create_bday_dd'), "focus", CreateAccount.eventShowTip.bindEventListener("create_bday_mm"));
-    DOM.addEventListener($('create_bday_yyyy'), "focus", CreateAccount.eventShowTip.bindEventListener("create_bday_mm"));
 
     if (CreateAccount.alt_layout) {
         DOM.addEventListener($('create_user'), "blur", CreateAccount.eventHideTip.bindEventListener("create_user"));
         DOM.addEventListener($('create_email'), "blur", CreateAccount.eventHideTip.bindEventListener("create_email"));
         DOM.addEventListener($('create_password1'), "blur", CreateAccount.eventHideTip.bindEventListener("create_password1"));
         DOM.addEventListener($('create_password2'), "blur", CreateAccount.eventHideTip.bindEventListener("create_password1"));
-        DOM.addEventListener($('create_bday_mm'), "blur", CreateAccount.eventHideTip.bindEventListener("create_bday_mm"));
-        DOM.addEventListener($('create_bday_dd'), "blur", CreateAccount.eventHideTip.bindEventListener("create_bday_mm"));
-        DOM.addEventListener($('create_bday_yyyy'), "blur", CreateAccount.eventHideTip.bindEventListener("create_bday_mm"));
     }
 
     if (!$('username_check')) return;
     if (!$('username_error')) return;
 
     DOM.addEventListener($('create_user'), "blur", CreateAccount.checkUsername);
+    DOM.addEventListener($('create_bday_yyyy'), "blur", CreateAccount.checkBirthDate);
+
 }
 
 CreateAccount.eventShowTip = function () {
@@ -113,6 +109,17 @@ CreateAccount.checkUsername = function () {
         },
         onError: function (msg) { }
     }); 
+}
+
+CreateAccount.checkBirthDate = function(){
+	if ($('create_bday_yyyy').value == ""||$('create_bday_mm').value == "") return;
+	var birthDate=new Date($('create_bday_yyyy').value,$('create_bday_mm').value-1,$('create_bday_dd').value);	
+	var today=new Date();
+	var dateFlag=true;
+	if((today.getFullYear()-birthDate.getFullYear())<13) dateFlag=false;
+	else if( (today.getFullYear()-birthDate.getFullYear())==13 && today.getMonth()<birthDate.getMonth() ) dateFlag=false;
+	else if( (today.getFullYear()-birthDate.getFullYear())==13 && today.getMonth()==birthDate.getMonth() && today.getDate()<birthDate.getDate()  ) dateFlag=false;
+	if(dateFlag==false) $('bdayy_error').style.display='block'; else $('bdayy_error').style.display='none'; 
 }
 
 LiveJournal.register_hook("page_load", CreateAccount.init);
