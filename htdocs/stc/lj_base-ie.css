@@ -16,3 +16,20 @@
     margin-left: 0px;
     margin-right: 0px;
 }
+
+/* singapoure news block */
+.sg-content UL {
+	display: block;
+}
+
+.sg-content LI {
+		width: 25%;
+		border-left: 1px solid #f9c5ab;
+		min-height: 10em;
+		display: block;
+		float: left;
+		margin-left: -3px;
+}
+*HTML .sg-content LI {
+		height: 220px;
+}
