@@ -3273,7 +3273,30 @@ sub _print_reply_container
 
         my $userpic = LJ::ehtml($page->{'_picture_keyword'}) || "";
         my $thread = $page->{'viewing_thread'} + 0 || "";
-        $S2::pout->(LJ::create_qr_div($u, $ditemid, $page->{'_stylemine'} || 0, $userpic, $thread));
+        my $text_hint = $ctx->[S2::PROPS]->{'comment_form_text_hint'} || '';
+    
+        $text_hint = LJ::dhtml ($text_hint);
+        LJ::CleanHTML::clean(\$text_hint, {
+            'linkify' => 1,
+            'wordlength' => 40,
+            'mode' => 'deny',
+            'allow' => [ qw/ abbr acronym address br code dd dfn dl dt em li ol p strong sub sup ul / ],
+            'cleancss' => 1,
+            'strongcleancss' => 1,
+            'noearlyclose' => 1,
+            'tablecheck' => 1,
+        });
+
+        $S2::pout->(
+                    LJ::create_qr_div(
+                                      $u, 
+                                      $ditemid, 
+                                      $page->{'_stylemine'} || 0, 
+                                      $userpic, 
+                                      $thread, 
+                                      $text_hint,
+                                     )
+                   );
     }
 }
 

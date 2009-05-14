@@ -1233,6 +1233,7 @@ sub talkform {
     # do_captcha:  optional toggle for creating a captcha challenge
     # require_tos: optional toggle to include TOS requirement form
     # errors:      optional error arrayref
+    # text_hint:   hint before message textarea
     my $opts = shift;
     return "Invalid talkform values." unless ref $opts eq 'HASH';
 
@@ -1741,6 +1742,9 @@ sub talkform {
     # finish off subject line
     $ret .= "<div id='ljnohtmlsubj' class='ljdeem'><span style='font-size: 8pt; font-style: italic;'>$BML::ML{'.nosubjecthtml'}</span></div>\n";
 
+    $ret .= "<div id=\"subjectCaptionText\">" . $opts->{text_hint} . "</div>"
+        if $opts->{text_hint};
+    
     $ret .= "<div id='userpics'>";
     my %res;
     if ($remote) {
@@ -1831,7 +1835,7 @@ QQ
 
     $ret .= "</div>";
     $ret .= "</td></tr>\n";
-
+    
     # textarea for their message body
     $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}";
     $ret .= "</td><td style='width: 90%'>";

@@ -1620,6 +1620,10 @@ set text_icon_alt_protected = "[protected post]";
 set text_icon_alt_private = "[private post]";
 set text_icon_alt_groups = "[custom friends groups post]";
 
+property string comment_form_text_hint {
+    des = "Text hint for comment message";
+}
+
 property bool use_shared_pic {
     des = "Use community userpics instead of poster's userpic.";
 }

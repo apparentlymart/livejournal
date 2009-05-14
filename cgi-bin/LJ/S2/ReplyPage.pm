@@ -224,6 +224,19 @@ sub ReplyForm__print
     my $u = $form->{'_u'};
     my $parpost = $form->{'_parpost'};
     my $parent = $parpost ? $parpost->{'jtalkid'} : 0;
+    my $comment_form_text_hint = $ctx->[S2::PROPS]->{'comment_form_text_hint'} || '';
+    $comment_form_text_hint = LJ::dhtml ($comment_form_text_hint);
+
+    LJ::CleanHTML::clean(\$comment_form_text_hint, {
+        'linkify' => 1,
+        'wordlength' => 40,
+        'mode' => 'deny',
+        'allow' => [ qw/ abbr acronym address br code dd dfn dl dt em li ol p strong sub sup ul / ],
+        'cleancss' => 1,
+        'strongcleancss' => 1,
+        'noearlyclose' => 1,
+        'tablecheck' => 1,
+    });
 
     my $r = Apache->request;
     my $post_vars = { $r->content };
@@ -231,12 +244,15 @@ sub ReplyForm__print
 
     $S2::pout->(LJ::Talk::talkform({ 'remote'    => $remote,
                                      'journalu'  => $u,
+                                     'text_hint' => $comment_form_text_hint,
                                      'parpost'   => $parpost,
                                      'replyto'   => $parent,
                                      'ditemid'   => $form->{'_ditemid'},
                                      'stylemine' => $form->{'_stylemine'},
                                      'form'      => $post_vars,
-                                     'do_captcha' => LJ::Talk::Post::require_captcha_test($remote, $u, $post_vars->{body}, $form->{'_ditemid'})}));
+                                     'do_captcha' => LJ::Talk::Post::require_captcha_test($remote, $u, $post_vars->{body}, $form->{'_ditemid'}),
+                                   }),
+                );
 
 }
 

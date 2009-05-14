@@ -643,7 +643,7 @@ sub check_form_auth {
 # </LJFUNC>
 sub create_qr_div {
 
-    my ($user, $ditemid, $stylemine, $userpic, $viewing_thread) = @_;
+    my ($user, $ditemid, $stylemine, $userpic, $viewing_thread, $text_hint) = @_;
     my $u = LJ::want_user($user);
     my $remote = LJ::get_remote();
     return undef unless $u && $remote && $ditemid;
@@ -724,12 +724,15 @@ sub create_qr_div {
 
     $qrhtml .= "</td></tr>";
 
-    $qrhtml .= "<tr><td align='right'>";
+    $qrhtml .= "<tr><td align='right' valign='top'>";
     $qrhtml .= "<b>".BML::ml('/talkpost.bml.opt.subject')."</b></td>";
     $qrhtml .= "<td colspan='2' align='left'>";
     $qrhtml .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value='' />";
+    
+    $qrhtml .= "<div id=\"subjectCaptionText\">" . $text_hint . "</div>" if $text_hint;
+    
     $qrhtml .= "</td></tr>";
-
+    
     $qrhtml .= "<tr valign='top'>";
     $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.message')."</b></td>";
     $qrhtml .= "<td colspan='3' style='width: 90%'>";
