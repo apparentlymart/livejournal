@@ -117,6 +117,9 @@ sub create_personal {
     my $u = LJ::User->create(%opts) or return;
 
     $u->set_prop("init_bdate", $opts{bdate});
+    while (my ($name, $val) = each %LJ::USERPROP_INIT_PERSONAL) {
+        $u->set_prop($name, $val);
+    }
 
     # so birthday notifications get sent
     $u->set_next_birthday;
