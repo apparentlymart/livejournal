@@ -189,7 +189,7 @@ sub render_body {
                 notime => 1,
                 default => sprintf("%04d-%02d-%02d", $post->{bday_yyyy}, $post->{bday_mm}, $post->{bday_dd}),
             );
-			$ret .= "<div id='bdayy_error' class='formitemFlag'>" . $class->ml('widget.createaccount.yearcheck', { aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=244'" }) . "<span>";
+			### $ret .= "<div id='bdayy_error' class='formitemFlag' style='display:none;'>" . $class->ml('widget.createaccount.yearcheck', { aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=244'" }) . "<span>";
         }
         $ret .= $error_msg->('bday', '<br /><span class="formitemFlag">', '</span>');
         $ret .= "</td></tr>\n" unless $alt_layout;
