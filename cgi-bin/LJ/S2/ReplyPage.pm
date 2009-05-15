@@ -236,6 +236,7 @@ sub ReplyForm__print
         'strongcleancss' => 1,
         'noearlyclose' => 1,
         'tablecheck' => 1,
+        'remove_all_attribs' => 1,
     });
 
     my $r = Apache->request;

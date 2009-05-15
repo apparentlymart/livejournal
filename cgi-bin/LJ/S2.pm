@@ -3285,6 +3285,7 @@ sub _print_reply_container
             'strongcleancss' => 1,
             'noearlyclose' => 1,
             'tablecheck' => 1,
+            'remove_all_attribs' => 1,
         });
 
         $S2::pout->(

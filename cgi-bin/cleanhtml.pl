@@ -58,6 +58,7 @@ package LJ::CleanHTML;
 #        'transform_embed_wmode' => <value>, # define a wmode value for videos (usually 'transparent' is the value you want)
 #        'blocked_links' => [ qr/evil\.com/, qw/spammer\.com/ ], # list of sites which URL's will be blocked
 #        'blocked_link_substitute' => 'http://domain.com/error.html' # blocked links will be replaced by this URL
+#        'remove_all_attribs' => 1, # remove all attributes from html tags
 #     });
 
 sub helper_preload
@@ -144,6 +145,7 @@ sub clean
         ($LJ::BLOCKED_LINK_SUBSTITUTE) ? $LJ::BLOCKED_LINK_SUBSTITUTE : '#';
     my $suspend_msg = $opts->{'suspend_msg'} || 0;
     my $unsuspend_supportid = $opts->{'unsuspend_supportid'} || 0;
+    my $remove_all_attribs = $opts->{'remove_all_attribs'} || 0;
 
     my @canonical_urls; # extracted links
     my %action = ();
@@ -553,6 +555,11 @@ sub clean
               ATTR:
                 foreach my $attr (keys %$hash)
                 {
+                    if ($remove_all_attribs) {
+                        delete $hash->{$attr};
+                        next;
+                    }
+
                     if ($attr =~ /^(?:on|dynsrc)/) {
                         delete $hash->{$attr};
                         next;
