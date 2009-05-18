@@ -1194,6 +1194,49 @@ sub userpic_content
     return OK;
 }
 
+sub files_handler {
+
+    my $r = Apache->request;
+
+    use LJ::FileStore;
+    my $result = LJ::FileStore->get_path_info( path => $r->uri );
+        
+    # file not found
+    return 404 unless $result;
+        
+    my $size = $result->{content_length};
+    
+    if ( !$LJ::REPROXY_DISABLE{files} &&
+        $r->header_in('X-Proxy-Capabilities') &&
+        $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
+    {
+        my $paths = $result->{paths};
+
+        my $cache_for = $LJ::MOGILE_PATH_CACHE_TIMEOUT || 3600;
+        # reproxy url
+        if ($paths->[0] =~ m/^http:/) {
+            $r->header_out('X-REPROXY-CACHE-FOR', "$cache_for; Last-Modified Content-Type");
+            $r->header_out('X-REPROXY-URL', join(' ', @$paths));
+        }
+
+        # reproxy file
+        else {
+            $r->header_out('X-REPROXY-FILE', $paths->[0]);
+        }
+
+        my $send_headers = sub {
+            $r->content_type ($result->{mime_type});
+            $r->header_out("Content-length", $size);
+            $r->header_out("Cache-Control", "no-transform");
+            $r->header_out("Last-Modified", LJ::time_to_http ($result->{change_time}));
+            $r->send_http_header();
+        };
+        $send_headers->();
+        return OK;
+    }
+    return 404;
+}
+
 sub files_trans
 {
     my $r = shift;
@@ -1209,42 +1252,9 @@ sub files_trans
         }
         return 404;
     } else {
-        use LJ::FileStore;
-        my $result = LJ::FileStore->get_path_info( path => $r->uri );
-        
-        # file not found
-        return 404 unless $result;
-        
-        my $size = $result->{content_length};
-    
-        if ( !$LJ::REPROXY_DISABLE{files} &&
-             $r->header_in('X-Proxy-Capabilities') &&
-             $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
-        {
-            my $paths = $result->{paths};
-
-            my $cache_for = $LJ::MOGILE_PATH_CACHE_TIMEOUT || 3600;
-            # reproxy url
-            if ($paths->[0] =~ m/^http:/) {
-                $r->header_out('X-REPROXY-CACHE-FOR', "$cache_for; Last-Modified Content-Type");
-                $r->header_out('X-REPROXY-URL', join(' ', @$paths));
-            }
-
-            # reproxy file
-            else {
-                $r->header_out('X-REPROXY-FILE', $paths->[0]);
-            }
-
-            my $send_headers = sub {
-                $r->content_type ($result->{mime_type});
-                $r->header_out("Content-length", $size);
-                $r->header_out("Cache-Control", "no-transform");
-                $r->header_out("Last-Modified", LJ::time_to_http ($result->{change_time}));
-                $r->send_http_header();
-            };
-            $send_headers->();
-            return OK;
-        }
+        $r->handler("perl-script");
+        $r->push_handlers(PerlHandler => \&files_handler);
+        return OK;
     }
     return 404;
 }
