@@ -288,8 +288,8 @@ sub module_iframe_tag {
         }
 
         # add padding
-        $width += 50 if $width;
-        $height += 50 if $height;
+        # $width += 50 if $width;
+        # $height += 50 if $height;
     }
 
     # use explicit values if we have them
@@ -310,8 +310,9 @@ sub module_iframe_tag {
     my $id = qq(name="embed_${journalid}_$moduleid");
 
     my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', moduleid => $moduleid, journalid => $journalid, preview => $preview,));
-    my $iframe_tag = qq {<iframe src="http://$LJ::EMBED_MODULE_DOMAIN/?journalid=$journalid&moduleid=$moduleid&preview=$preview&auth_token=$auth_token" } .
-        qq{width="$width" height="$height" allowtransparency="true" frameborder="0" class="lj_embedcontent" $id></iframe>};
+    my $iframe_link = qq{http://$LJ::EMBED_MODULE_DOMAIN/?journalid=$journalid&amp;moduleid=$moduleid&amp;preview=$preview&amp;auth_token=$auth_token};
+    my $iframe_tag = qq {<iframe src="$iframe_link" } .
+        qq{width="$width" height="$height" frameborder="0" class="lj_embedcontent" $id></iframe>};
 
     my $remote = LJ::get_remote();
     return $iframe_tag unless $remote;
@@ -339,6 +340,7 @@ sub module_iframe_tag {
                                 width            => $width,
                                 height           => $height,
                                 img              => "$LJ::IMGPREFIX/videoplaceholder.png",
+                                link             => $iframe_link,
                                 );
 }
 

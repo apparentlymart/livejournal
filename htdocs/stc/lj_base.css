@@ -81,23 +81,25 @@ div.lj_ippu_titlebar {
             opacity: 1;
         }
 
-.LJ_Placeholder_Container { /* see also lj_base-ie.css */
-        display: table-cell;
-        vertical-align: middle;
-        border: 1px dashed #ccc;
-        _position: relative;
-        overflow: hidden;
-}
-
-.LJ_Placeholder_Container img { /* see also lj_base-ie.css */
-        cursor: pointer;
-        display: block;
-        margin: 0 auto;
-        _position: absolute;
-        _top: 45%;
-        _left: 45%;
-}
-
+.LJ_Placeholder_Container {
+    position:relative;
+    display:-moz-inline-box;
+    display:inline-block;
+    border:1px dashed #ccc;
+    }
+.LJ_Placeholder_Container A {
+    position:relative;
+    top:50%;
+    left:50%;
+    }
+* HTML .LJ_Placeholder_Container A {
+    font-size:0;
+    }
+.LJ_Placeholder_Container A IMG {
+    margin:-17px 0 0 -17px;
+    cursor:pointer;
+	position:relative;
+    }
 .ljhidden {
         display: block;
         position: absolute;
@@ -171,3 +173,7 @@ DL.current-version {
         font-size: 11px !important;
         font-weight: normal;
         }
+
+
+/* transparency for ie */
+.lj_embedcontent { zoom:expression(runtimeStyle.zoom = '1',allowTransparency = true); }

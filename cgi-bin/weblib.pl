@@ -3714,13 +3714,13 @@ sub placeholder_link {
     my $img    = delete $opts{img}    || "$LJ::IMGPREFIX/videoplaceholder.png";
 
     return qq {
-            <div class="LJ_Placeholder_Container" style="width: ${width}px; height: ${height}px;">
-                <div class="LJ_Placeholder_HTML" style="display: none;">$placeholder_html</div>
-                <div class="LJ_Container"></div>
+            <span class="LJ_Placeholder_Container" style="width: ${width}px; height: ${height}px;">
+                <span class="LJ_Placeholder_HTML" style="display: none;">$placeholder_html</span>
+                <span class="LJ_Container"></span>
                 <a href="$link" onclick="return false;">
-                    <img src="$img" class="LJ_Placeholder" title="Click to show embedded content" />
+                    <img src="$img" class="LJ_Placeholder" title="Click to show embedded content" alt="" />
                 </a>
-            </div>
+            </span>
         };
 }
 

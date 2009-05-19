@@ -111,10 +111,10 @@ LiveJournal.initPlaceholders = function () {
         var parent = DOM.getFirstAncestorByClassName(placeholder, "LJ_Placeholder_Container", false);
         if (!parent) return;
 
-        var container = DOM.filterElementsByClassName(parent.getElementsByTagName("div"), "LJ_Container")[0];
+        var container = DOM.filterElementsByClassName(parent.getElementsByTagName("span"), "LJ_Container")[0];
         if (!container) return;
 
-        var html = DOM.filterElementsByClassName(parent.getElementsByTagName("div"), "LJ_Placeholder_HTML")[0];
+        var html = DOM.filterElementsByClassName(parent.getElementsByTagName("span"), "LJ_Placeholder_HTML")[0];
         if (!html) return;
 
         var placeholder_html = unescape(html.innerHTML);
