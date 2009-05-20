@@ -437,7 +437,7 @@ function createDeleteFunction (ae, dItemid) {
             var grow = function () {
                 height += 7;
                 if (height > finalHeight) {
-                    de.style.height = null;
+                    de.style.height = "";
                     de.style.filter = "";
                     de.style.opacity = 1.0;
                 } else {
