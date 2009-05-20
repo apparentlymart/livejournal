@@ -92,6 +92,8 @@ sub execute {
             } else {
                 $self->error("You don't have a group called '$group'.");
             }
+        } else {
+            $gmask = LJ::get_groupmask($remote, $fu);
         }
 
         my $opts = {};
