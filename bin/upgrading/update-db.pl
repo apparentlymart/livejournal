@@ -29,27 +29,10 @@ my $opt_forcebuild = 0;
 my $opt_compiletodisk = 0;
 my $opt_innodb;
 my $opt_force_production_alter;
-exit 1 unless
-GetOptions("runsql" => \$opt_sql,
-           "drop" => \$opt_drop,
-           "populate" => \$opt_pop,
-           "confirm=s" => \$opt_confirm,
-           "cluster=s" => \$cluster,
-           "skip=s" => \$opt_skip,
-           "help" => \$opt_help,
-           "listtables" => \$opt_listtables,
-           "nostyles" => \$opt_nostyles,
-           "forcebuild|fb" => \$opt_forcebuild,
-           "ctd" => \$opt_compiletodisk,
-           "innodb" => \$opt_innodb,
-           "force-alter"   => \$opt_force_production_alter,
-           );
+my $opt_beta;
 
-$opt_nostyles = 1 unless LJ::is_enabled("update_styles");
-$opt_innodb = 1 if $LJ::USE_INNODB;
-
-if ($opt_help) {
-    die "Usage: update-db.pl
+my $usage = "
+Usage: update-db.pl [options]
   -r  --runsql       Actually do the SQL, instead of just showing it.
   -p  --populate     Populate the database with the latest required base data.
   -d  --drop         Drop old unused tables (default is to never)
@@ -63,8 +46,32 @@ if ($opt_help) {
       --force-alter  By default, alter statements on production database are not 
                      executed (they may take too much time). This option forces
                      these statements to be executed
+  -b  --beta         Affects '--populate' option - only data that are safe during
+                     update of beta server will be loaded into DB
 ";
-}
+
+die $usage unless
+GetOptions("runsql"     => \$opt_sql,
+           "drop"       => \$opt_drop,
+           "populate"   => \$opt_pop,
+           "beta"       => \$opt_beta,
+           "confirm=s"  => \$opt_confirm,
+           "cluster=s"  => \$cluster,
+           "skip=s"     => \$opt_skip,
+           "help"       => \$opt_help,
+           "listtables" => \$opt_listtables,
+           "nostyles"   => \$opt_nostyles,
+           "forcebuild|fb" => \$opt_forcebuild,
+           "ctd"        => \$opt_compiletodisk,
+           "innodb"     => \$opt_innodb,
+           "force-alter"=> \$opt_force_production_alter,
+           );
+
+$opt_nostyles = 1 unless LJ::is_enabled("update_styles");
+$opt_innodb = 1 if $LJ::USE_INNODB;
+
+die $usage if $opt_help;
+die "You must specify '--populate' option with '--beta'" if $opt_beta && !$opt_pop;
 
 ## make sure $LJHOME is set so we can load & run everything
 unless (-d $ENV{'LJHOME'}) {
@@ -220,7 +227,8 @@ sub populate_database {
     ($su, $made_system) = vivify_system_user();
 
     # we have a flag to disable population of s1/s2 if the user requests
-    unless ($opt_nostyles) {
+    # moreover, styles are not populated during beta server update
+    unless ($opt_nostyles || $opt_beta) {
         populate_s1();
         populate_s2();
     }
@@ -235,11 +243,13 @@ sub populate_database {
     populate_schools();
     populate_basedata();
     populate_proplists();
-    populate_moods();
     clean_schema_docs();
     populate_mogile_conf();
-    schema_upgrade_scripts();
-
+   
+    unless ($opt_beta) {
+        schema_upgrade_scripts();
+        populate_moods();
+    }
     print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
         if $made_system;
 
