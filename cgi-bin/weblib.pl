@@ -1461,15 +1461,30 @@ MOODS
             $show_lastfm = 1 if $opts->{'prop_last_fm_user'};
 
             my @width_for_lastfm = ();
+			my @width_for_geolocation =();
             @width_for_lastfm = ('style' => 'width: 45%') if $show_lastfm;
+			@width_for_geolocation = ('style' => 'width: 45%') if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location'});
 
             # Current Location
             $out .= "<p class='pkg'>";
             unless ($LJ::DISABLED{'web_current_location'}) {
-                $out .= "<span class='inputgroup-left'>";
+                $out .= "<span class='inputgroup-left' style='position: relative'>";
                 $out .= "<label for='prop_current_location' class='left options'>" . BML::ml('entryform.location') . "</label>";
                 $out .= LJ::html_text({ 'name' => 'prop_current_location', 'value' => $opts->{'prop_current_location'}, 'id' => 'prop_current_location',
-                                        'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->(), @width_for_lastfm }) . "\n";
+                                        'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->(), @width_for_lastfm, @width_for_geolocation }) . "\n";
+
+  				if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location'}) {
+
+                	my $button_label = BML::ml('entryform.location.detect');
+                	$out .= qq[<span class="detect_btn"><input type="button" value="$button_label">];
+                	$out .= LJ::help_icon_html("screening", "", " ");
+					$out .="</span>";
+				
+					$out .=qq[<span class="save_loc"><input type="checkbox" checked name="save_loc">] . BML::ml('entryform.location.save', {'aopts' => 'href="#"'});
+					$out .= LJ::help_icon_html("screening", "", " ");
+					$out .="</span>";
+					$out .="<strong class='set_map'>" . BML::ml('entryform.location.map', {'aopts' => 'href="#"'}) . "</strong>";
+				}
                 $out .= "</span>";
             }
 

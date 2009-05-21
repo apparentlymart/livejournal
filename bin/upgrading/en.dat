@@ -1549,6 +1549,12 @@ entryform.insert.poll=Poll
 
 entryform.location=Location:
 
+entryform.location.save=Save my <a [[aopts]]>exact coordinates</a>
+
+entryform.location.map=<a href=[[aopts]]>Set by map</a>
+
+entryform.location.detect=Detect
+
 entryform.mood=Mood:
 
 entryform.mood.noneother=None, or other:
@@ -1556,6 +1562,7 @@ entryform.mood.noneother=None, or other:
 entryform.music=Music:
 
 entryform.music.detect=Detect
+
 
 entryform.nojstime.note=<b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.
 

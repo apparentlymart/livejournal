@@ -64,6 +64,7 @@
     margin-top: 4px;
     float: left;
 }
+
 #updateForm h4 {
     margin: 0 0 4px 0;
     padding: 0;
@@ -418,6 +419,8 @@
 #prop_current_location {
     width: 63%;
 }
+
+
 #prop_current_music.narrow,
 #prop_current_location.narrow {
     width: 39%;
@@ -568,4 +571,56 @@ td.subject-desc {
 
 td.tabs {
     width:41%;
+}
+
+/* Geo Location */
+* HTML #prop_current_location {
+	width: 50%;
+}
+
+.detect_btn {
+	float: left;
+}
+	.detect_btn INPUT {
+		float: left;
+	}
+/*	.detect_btn STRONG {
+		display: block; 
+		line-height: 2.5em; 
+		font-size: .85em;
+		clear: left;
+		margin-left: .4em;
+	}*/
+	.set_map A:link,
+	.save_loc A:link {
+		color:#003366;
+	}
+.save_loc {
+	display: block;
+	float: left;
+	width: 48%;
+	position: relative;
+	left: -3px;
+	margin-left: 6.5em;
+	font-size: 11px;
+}
+*:first-child+html .save_loc {
+	margin-left: 5.5em;
+}
+	.save_loc INPUT {
+		position: relative;
+		top: 2px;
+	}
+	#updateForm .save_loc a.helplink {
+		float: none;
+	}
+.set_map {
+	float: left;
+	font-size: 11px;
+}
+* HTML .save_loc {
+	width: 55%;
+	margin-left: 0;
+	padding-left: 6.5em;
+	left: 0px;
 }
