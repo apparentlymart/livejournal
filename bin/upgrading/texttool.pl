@@ -13,12 +13,14 @@ my $opt_help = 0;
 my $opt_local_lang;
 my $opt_only;
 my $opt_verbose;
+my $opt_all;    ## load texts for all known languages
 exit 1 unless
 GetOptions(
            "help" => \$opt_help,
            "local-lang=s" => \$opt_local_lang,
            "verbose" => \$opt_verbose,
            "only=s" => \$opt_only,
+           "all"    => \$opt_all,
            );
 
 my $mode = shift @ARGV;
@@ -32,7 +34,7 @@ sub help
 Where 'command' is one of:
   load         Runs the following four commands in order:
     popstruct  Populate lang data from text[-local].dat into db
-    poptext    Populate text from en.dat, etc into database.
+    poptext    Populate text in specified languages into database.
     copyfaq    If site is translating FAQ, copy FAQ data into trans area
     loadcrumbs Load crumbs from ljcrumbs.pl and ljcrumbs-local.pl.
     makeusable Setup internal indexes necessary after loading text
@@ -45,9 +47,13 @@ Where 'command' is one of:
   remove       takes two extra arguments: domain name and code, and removes
                that code and its text in all languages
 
-               Optionally:
-                  --local-lang=..  If given, works on local site files too
-
+Optionally:
+    --local-lang=..     If given, works on local site files too
+    --all               When loading texts, and no language is
+                        specified, load all languages
+Examples:
+    texttool.pl load en en_LJ
+    texttool.pl --all load
 ";
 }
 
@@ -352,7 +358,16 @@ sub popstruct
 sub poptext
 {
     my @langs = @_;
-    push @langs, (keys %lang_code) unless @langs;
+    unless (@langs) {
+        if ($opt_all) {
+            @langs = keys %lang_code;
+        } else {
+            die "No languages to load are specified.\n" . 
+                "Warning: most language files except en.dat and en_LJ.dat are obsolete.\n" .
+                "Either run 'texttool.pl load en en_LJ' to load up-to-date files,\n" .
+                "or 'texttool.pl --all load' if you really want to load texts in all languages.\n";
+        }
+    }
 
     $out->("Populating text...", '+');
 
