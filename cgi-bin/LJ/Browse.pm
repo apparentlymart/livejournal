@@ -56,23 +56,44 @@ sub create {
     croak("wrong number of arguments")
         unless $n_arg && ($n_arg % 2 == 0);
 
-    my %opts = @_;
+    my $opts = @_;
+    foreach my $f (qw(url_path pretty_name parentcatid in_nav)) {
+        $self->{$f} = delete $opts->{$f} if exists $opts->{$f};
+    }
+    my $topcat = delete $opts->{topcat} if exists $opts->{topcat};
 
-    $self->{url_path} = delete $opts{url_path};
-
+    croak("need to supply display name") unless defined $self->{pretty_name};
     croak("need to supply URL path") unless defined $self->{url_path};
 
-    croak("unknown parameters: " . join(", ", keys %opts))
-        if %opts;
+    croak("unknown parameters: " . join(", ", keys %$opts))
+        if %$opts;
 
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create category";
 
-    $dbh->do("INSERT INTO category SET url_path=?",
-             undef, $self->{url_path});
+    $dbh->do("INSERT INTO category SET url_path=?, pretty_name=?, parentcatid=?",
+             undef, $self->{url_path}, $self->{pretty_name}, $self->{parentcatid});
     die $dbh->errstr if $dbh->err;
+    my $catid = $dbh->{mysql_insertid};
 
-    return $class->new( catid => $dbh->{mysql_insertid} );
+    my $tm = $self->typemap;
+    # Handle in_nav prop
+    if ($self->{in_nav}) {
+        $dbh->do("INSERT INTO categoryprop SET catid=?, propid=?, propval=?",
+                 undef, $catid, $tm->class_to_typeid('in_nav'), $self->{in_nav});
+        die $dbh->errstr if $dbh->err;
+    }
+
+    # Handle top_children prop
+    if ($topcat) {
+        $dbh->do("INSERT INTO categoryprop SET catid=?, propid=?, propval=?",
+                 undef, $self->{parentcatid}, $tm->class_to_typeid('top_children'),
+                 $topcat);
+        die $dbh->errstr if $dbh->err;
+    }
+
+    $self = $class->new( catid => $catid );
+    return $self;
 }
 
 sub load_by_id {
