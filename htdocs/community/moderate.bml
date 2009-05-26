@@ -455,11 +455,17 @@ body<=
         $sec .= "<br />\n" unless $sec eq "" or $subject;
         $ret .= $sec;
 
+        my $is_adult = $req->{prop_adult_content} ? 1 : 0;
         if ($subject) {
             LJ::CleanHTML::clean_subject(\$subject);
               BML::ebml(\$subject);
-              $ret .= "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
-          }
+              $ret .= $is_adult
+                        ? "<img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif\" border=\"0\" alt=\"\">&nbsp;<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n"
+                        : "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
+        } else {
+            $ret .= "<img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif\" border=\"0\" alt=\"\"><br/>\n"
+                if $is_adult;
+        }
         $ret .= $event;
         $ret .= "</div>";
         $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
