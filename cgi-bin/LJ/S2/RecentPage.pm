@@ -89,7 +89,7 @@ sub RecentPage
         'viewall' => $viewall,
         'userid' => $u->{'userid'},
         'remote' => $remote,
-        'itemshow' => $itemshow,
+        'itemshow' => $itemshow + 1,
         'skip' => $skip,
         'tagids' => $opts->{tagids},
         'security' => $opts->{'securityfilter'},
@@ -99,6 +99,9 @@ sub RecentPage
             ? "logtime" : "",
         'err' => \$err,
     });
+
+    my $is_prev_exist = scalar @items - $itemshow > 0 ? 1 : 0;
+    pop @items if $is_prev_exist;
 
     die $err if $err;
 
@@ -283,7 +286,7 @@ sub RecentPage
             my $date_slashes = $lastdate;  # "yyyy mm dd";
             $date_slashes =~ s! !/!g;
             $nav->{'backward_url'} = "$p->{'base_url'}/$date_slashes";
-        } else {
+        } elsif ($is_prev_exist) {
             my $newskip = $skip + $itemshow;
             $nav->{'backward_url'} = LJ::make_link("$p->{'base_url'}/", { skip     => ($newskip                   || ""),
                                                                           tag      => (LJ::eurl($get->{tag})      || ""),

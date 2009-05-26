@@ -1199,13 +1199,16 @@ sub create_view_lastn
         'viewall' => $viewall,
         'userid' => $u->{'userid'},
         'remote' => $remote,
-        'itemshow' => $itemshow,
+        'itemshow' => $itemshow + 1,
         'skip' => $skip,
         'itemids' => \@itemids,
         'order' => ($u->{'journaltype'} eq "C" || $u->{'journaltype'} eq "Y")  # community or syndicated
             ? "logtime" : "",
         'err' => \$err,
     });
+
+    my $is_prev_exist = scalar @items - $itemshow > 0 ? 1 : 0;
+    pop @items if $is_prev_exist;
 
     if ($err) {
         $opts->{'errcode'} = $err;
@@ -1464,7 +1467,7 @@ sub create_view_lastn
     ## on the page, but who cares about that)
 
     unless ($item_total != $itemshow) {
-        $skip_b = 1;
+        $skip_b = 1 if $is_prev_exist;
 
         if ($skip==$maxskip) {
             $skiplinks{'skipbackward'} =
