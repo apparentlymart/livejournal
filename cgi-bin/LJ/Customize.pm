@@ -705,6 +705,9 @@ sub get_cats {
         pattern => {
             text => LJ::Lang::ml('customize.cats.pattern'),
         },
+        sponsored => {
+            text => LJ::Lang::ml('customize.cats.sponsored'),
+        },
         tech => {
             text => LJ::Lang::ml('customize.cats.tech'),
         },
