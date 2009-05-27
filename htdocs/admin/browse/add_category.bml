@@ -1,0 +1,131 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'category_admin') || $LJ::IS_DEV_SERVER;
+
+    $title = "Add New Category";
+    my $ret = "";
+
+    my $parentcaturl;
+    my $newcat;
+    my $newcaturl;
+
+    if (LJ::did_post() and $POST{'add'}) {
+        $parentcaturl = $POST{'parentcaturl'};
+        $newcat = $POST{'newcat'};
+        $newcaturl = $POST{'newcaturl'};
+
+        push @errors, "Invalid form submission" unless LJ::check_form_auth();
+        {
+            # Check for required data
+            unless ($parentcaturl) {
+                push @errors, "Please select a parent category";
+                next;
+            }
+            unless ($newcat) {
+                push @errors, "Please enter new category display name";
+                next;
+            }
+            if (!$newcaturl || $newcaturl eq '/' ) {
+                push @errors, "Please enter a URL path for the new category";
+                next;
+            }
+            unless ($newcaturl =~ /\/[\w_]+/) {
+                push @errors, "Please enter a valid URL path using alphanumeric characters and beginning with a '/'.";
+                next;
+            }
+
+            # Has a valid parent category been chosen
+            my $pcategory = LJ::Browse->load_by_url("/browse" . $parentcaturl);
+            push @errors, "Invalid category" unless $pcategory;
+
+            # Does a category with the same URL path and parent already exist?
+            my $existcat = LJ::Browse->load_by_url("/browse" . $parentcaturl . $newcaturl);
+            push @errors, "Category already exists" if $existcat;
+
+            next if @errors;
+
+            # Add category
+            if (LJ::Browse->create( pretty_name => $newcat,
+                                    url_path => $newcaturl,
+                                    parentcatid => $pcategory->catid,
+                                    topcat => $POST{topcat} ) ) {
+                $ret .= "<span class='super notice'>New category created.</span>";
+            } else {
+                $ret .= "<span class='super notice'>New category not created.</span>";
+            }
+        }
+    }
+
+    $headextra = "<style>table td.label { text-align: right; vertical-align: top;}</style>";
+
+    $ret .= "<form method='POST'>\n";
+    $ret .= LJ::form_auth();
+
+    # Get the full list of categories
+    my @categories = LJ::Browse->load_all;
+    # Get the unique URI for each
+    my @caturls = map { $_->uri, $_->uri } @categories;
+    @caturls = sort { $a cmp $b } @caturls;
+
+    $ret .= "<p>Add to Category:<br />";
+    $ret .= LJ::html_select({
+                name => 'parentcaturl',
+                selected => $parentcaturl },
+                { text => 'Select Category',
+                value => '' },
+                @caturls
+            );
+    $ret .= "</p>\n";
+
+    $ret .= "<p><b>New Category Details</b>";
+    $ret .= "<table>";
+    $ret .= "<tr><td class='label'>*Display Name:</td><td>";
+    $ret .= LJ::html_text( {
+                name => 'newcat',
+                size => 40,
+                value => $newcat }
+            );
+    $ret .= "</td></tr>\n";
+
+    $ret .= "<tr><td class='label'>*URL Path:</td><td>";
+    $ret .= LJ::html_text( {
+                name => 'newcaturl',
+                size => 40,
+                value => $POST{'newcaturl'} || '/'}
+            );
+    $ret .= "<br /><i>example: '\/monkey_bars'</i></td></tr>\n";
+
+    $ret .= "<tr><td class='label'>Top Category:</td><td>";
+    $ret .= LJ::html_check( {
+                name => 'topcat',
+                value => $POST{'topcat'} || '/'}
+            );
+    $ret .= " <i>Display on top-level directory page, even when containing category is reduced.</i></td></tr>\n";
+
+    $ret .= "</table></p>\n";
+
+    $ret .= "<p>" . LJ::html_submit('add', 'Add') . "</p>";
+
+    $ret .= "</form>";
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

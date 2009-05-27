@@ -4010,6 +4010,13 @@ register_alter(sub {
                  "MODIFY jtalkid INT UNSIGNED NOT NULL");
     }
 
+    # no row should have the same url_path and parentcatid
+    unless (index_name("category", "UNIQUE:url_path-parentcatid")) {
+        do_alter("category", "ALTER IGNORE TABLE category ".
+                 "DROP KEY `url_path`, ".
+                 "ADD UNIQUE `url_path` (url_path, parentcatid)");
+    }
+
 });
 
 

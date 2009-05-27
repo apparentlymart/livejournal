@@ -47,7 +47,7 @@ sub new
 }
 *instance = \&new;
 
-# TODO Complete and test this method
+# Create a new category
 sub create {
     my $class = shift;
     my $self  = bless {};
@@ -56,20 +56,30 @@ sub create {
     croak("wrong number of arguments")
         unless $n_arg && ($n_arg % 2 == 0);
 
-    my $opts = @_;
+    my %opts = @_;
     foreach my $f (qw(url_path pretty_name parentcatid in_nav)) {
-        $self->{$f} = delete $opts->{$f} if exists $opts->{$f};
+        $self->{$f} = delete $opts{$f} if exists $opts{$f};
     }
-    my $topcat = delete $opts->{topcat} if exists $opts->{topcat};
+    my $topcat = delete $opts{topcat} if exists $opts{topcat};
 
     croak("need to supply display name") unless defined $self->{pretty_name};
     croak("need to supply URL path") unless defined $self->{url_path};
 
-    croak("unknown parameters: " . join(", ", keys %$opts))
-        if %$opts;
+    croak("unknown parameters: " . join(", ", keys %opts))
+        if %opts;
 
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create category";
+
+    # there cannot be an existing row with the same url_path and parentcatid
+    my $parentcaturl = '';
+    my $parent;
+    if ($self->{parentcatid}) {
+        $parent = LJ::Browse->load_by_id($self->{parentcatid});
+        $parentcaturl = $parent->uri;
+    }
+    my $existcat = LJ::Browse->load_by_url("/browse" . $parentcaturl . $self->{url_path});
+    croak("Category exists already") if $existcat;
 
     $dbh->do("INSERT INTO category SET url_path=?, pretty_name=?, parentcatid=?",
              undef, $self->{url_path}, $self->{pretty_name}, $self->{parentcatid});
@@ -77,6 +87,22 @@ sub create {
     my $catid = $dbh->{mysql_insertid};
 
     my $tm = $self->typemap;
+    # Handle children prop
+    if ($self->{parentcatid}) {
+        $dbh->do("INSERT INTO categoryprop SET catid=?, propid=?, propval=?",
+                 undef, $self->{parentcatid}, $tm->class_to_typeid('children'),
+                 $catid);
+        die $dbh->errstr if $dbh->err;
+    }
+
+    # Handle top_children prop
+    if ($self->{parentcatid} && $topcat) {
+        $dbh->do("INSERT INTO categoryprop SET catid=?, propid=?, propval=?",
+                 undef, $self->{parentcatid}, $tm->class_to_typeid('top_children'),
+                 $catid);
+        die $dbh->errstr if $dbh->err;
+    }
+
     # Handle in_nav prop
     if ($self->{in_nav}) {
         $dbh->do("INSERT INTO categoryprop SET catid=?, propid=?, propval=?",
@@ -84,12 +110,11 @@ sub create {
         die $dbh->errstr if $dbh->err;
     }
 
-    # Handle top_children prop
-    if ($topcat) {
-        $dbh->do("INSERT INTO categoryprop SET catid=?, propid=?, propval=?",
-                 undef, $self->{parentcatid}, $tm->class_to_typeid('top_children'),
-                 $topcat);
-        die $dbh->errstr if $dbh->err;
+    # Remove data from cache
+    if ($parent) {
+        $parent->clear_props_memcache;
+    } else {
+        LJ::MemCache::delete("category_top");
     }
 
     $self = $class->new( catid => $catid );
@@ -419,6 +444,13 @@ sub clear_memcache {
 
     LJ::MemCache::delete($self->memkey_catid);
 
+    return;
+}
+
+sub clear_props_memcache {
+    my $self = shift;
+
+    LJ::MemCache::delete($self->memkey_catid_props);
     return;
 }
 
