@@ -698,6 +698,8 @@ sub unscreen_comment {
                                                  "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='S'");
         LJ::set_logprop($u, $itemid, { 'hasscreened' => 0 }) unless $hasscreened;
     }
+    
+    LJ::run_hooks('unscreen_comment', $userid, $itemid, $in);
 
     LJ::Talk::update_commentalter($u, $itemid);
     return;
