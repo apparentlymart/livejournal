@@ -454,8 +454,7 @@ body<=
 
         $sec .= "<br />\n" unless $sec eq "" or $subject;
         $ret .= $sec;
-
-        my $is_adult = $req->{prop_adult_content} ? 1 : 0;
+        my $is_adult = $req->{prop_adult_content} ||  $c->adult_content_calculated ? 1 : 0;
         if ($subject) {
             LJ::CleanHTML::clean_subject(\$subject);
               BML::ebml(\$subject);
