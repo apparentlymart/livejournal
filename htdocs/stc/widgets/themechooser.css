@@ -1,5 +1,10 @@
+
+.theme-selector-content {
+    position: relative;
+}
 .themes-area {
     margin-top: 10px;
+    overflow: hidden;
 }
 .theme-selector-content h3 {
     font-style: normal;
@@ -9,16 +14,36 @@
 }
 .theme-item {
     position: relative;
-    float: left;
+    display: -moz-inline-stack;
+    display: inline-block;
+    //display: inline;
+    zoom: 1;
+    width: 174px;
+    vertical-align: top;
+    border: 0 !important;
+    font-size: 11px;
+}
+.theme-item-in {
+    position: relative;
     width: 156px;
     text-align: center;
     padding: 8px;
-    border: 1px solid #fff;
+    border: 1px solid #FFF;
     font-size: 11px;
-    overflow: auto;
-    height: 205px;
+    overflow: hidden;
 }
-.theme-item.current {
+.theme-item .theme-options {
+    font-size:1em;
+}
+.theme-item .theme-form,
+.theme-item .theme-options {
+    min-height:2.5em;
+}
+* HTML .theme-item .theme-form,
+* HTML .theme-item .theme-options {
+    _height:2.5em;
+}
+.theme-item.current .theme-item-in {
     border: 1px solid #C7E0F6;
     background-color: #ECF6FF;
 }

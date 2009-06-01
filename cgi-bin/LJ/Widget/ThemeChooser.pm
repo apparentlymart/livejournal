@@ -18,7 +18,7 @@ sub render_body {
 
     my $remote = LJ::get_remote();
     my $getextra = $u->user ne $remote->user ? "?authas=" . $u->user : "";
-    my $getsep = $getextra ? "&" : "?";
+    my $getsep = $getextra ? "&amp;" : "?";
 
     # filter criteria
     my $cat = defined $opts{cat} ? $opts{cat} : "";
@@ -29,8 +29,8 @@ sub render_body {
     my $page = $opts{page} || 1;
     my $show = $opts{show} || 12;
 
-    my $filterarg = $filter_available ? "&filter_available=1" : "";
-    my $showarg = $show != 12 ? "&show=$opts{show}" : "";
+    my $filterarg = $filter_available ? "&amp;filter_available=1" : "";
+    my $showarg = $show != 12 ? "&amp;show=$opts{show}" : "";
 
     my $viewing_featured = !$cat && !$layoutid && !$designer;
 
@@ -172,8 +172,8 @@ sub render_body {
         my $theme_layout_name = $theme->layout_name;
         my $theme_designer = $theme->designer;
 
-        $ret .= "<div class='theme-item$theme_class'>";
-        $ret .= "<img src='" . $theme->preview_imgurl . "' class='theme-preview' />";
+        $ret .= "<div class='theme-item$theme_class'><div class='theme-item-in'>";
+        $ret .= "<img src='" . $theme->preview_imgurl . "' class='theme-preview' alt='' />";
         $ret .= "<h4>" . $theme->name . "</h4>";
 
         my $preview_redirect_url;
@@ -184,7 +184,7 @@ sub render_body {
         }
         $ret .= "<a href='$preview_redirect_url' target='_blank' class='theme-preview-link' title='" . $class->ml('widget.themechooser.theme.preview') . "'>";
 
-        $ret .= "<img src='$LJ::IMGPREFIX/customize/preview-theme.gif' class='theme-preview-image' /></a>";
+        $ret .= "<img src='$LJ::IMGPREFIX/customize/preview-theme.gif' class='theme-preview-image' alt='' /></a>";
         $ret .= $theme_icons;
 
         my $layout_link = "<a href='$LJ::SITEROOT/customize/$getextra${getsep}layoutid=" . $theme->layoutid . "$filterarg$showarg' class='theme-layout'><em>$theme_layout_name</em></a>";
@@ -203,7 +203,7 @@ sub render_body {
         $ret .= "</p>";
 
         if ($theme_options) {
-            $ret .= $theme_options;
+            $ret .= "<div class='theme-options'>" . $theme_options . "</div>";
         } else { # apply theme form
             $ret .= $class->start_form( class => "theme-form" );
             $ret .= $class->html_hidden(
@@ -216,7 +216,7 @@ sub render_body {
             );
             $ret .= $class->end_form;
         }
-        $ret .= "</div><!-- end .theme-item -->";
+        $ret .= "</div></div><!-- end .theme-item -->";
     }
     $ret .= "</div><!-- end .themes-area --->";
 
@@ -248,9 +248,9 @@ sub print_paging {
     my $getargs = $opts{getargs};
     my $getextra = $opts{getextra};
 
-    my $q_string = join("&", @$getargs);
-    my $q_sep = $q_string ? "&" : "";
-    my $getsep = $getextra ? "&" : "?";
+    my $q_string = join("&amp;", @$getargs);
+    my $q_sep = $q_string ? "&amp;" : "";
+    my $getsep = $getextra ? "&amp;" : "?";
 
     my $url = "$LJ::SITEROOT/customize/$getextra$getsep$q_string$q_sep";
 
