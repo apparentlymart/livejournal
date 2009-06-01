@@ -663,6 +663,7 @@ sub layout_prop { "" } # property that controls the layout/sidebar placement
 sub show_sidebar_prop { "" } # property that controls whether a sidebar shows or not
 sub designer { "" } # designer of the theme
 sub linklist_support_tab { "" } # themes that don't use the linklist_support prop will have copy pointing them to the correct tab
+sub sponsor_url {""} # url of "sponsored by <a href=...>Sponsor</a>" link
 
 # for appending layout-specific props to global props
 sub _append_props {
