@@ -296,6 +296,7 @@ body<=
                                     || ($c->adult_content_calculated ne 'none' && $c->adult_content_calculated ne '')
                                     ? 1 
                                     : 0;
+                    $is_adult = 0 if $req->{prop_adult_content} eq 'none';
                 }
                 my $link = "/community/moderate.bml?authas=$comm&amp;modid=" . $_->{'modid'};
                 my $subject = $_->{'subject'} ? LJ::eall($_->{'subject'}) : "<i>[No Subject]</i>";
@@ -470,6 +471,7 @@ body<=
                     || ($c->adult_content_calculated ne 'none' && $c->adult_content_calculated ne '')
                     ? 1 
                     : 0;
+        $is_adult = 0 if $req->{prop_adult_content} eq 'none';
         if ($subject) {
             LJ::CleanHTML::clean_subject(\$subject);
               BML::ebml(\$subject);
