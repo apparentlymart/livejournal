@@ -280,16 +280,28 @@ body<=
         unless (@entries) {
             $ret .= "<i>$ML{'.browse.empty'}</i>";
         } else {
-            $ret .= "<table cellpadding='5'><tr><td><b>$ML{'.brlist.time'}</b></td>" .
+            $ret .= "<table cellpadding='5'><tr><td>&nbsp;</td><td><b>$ML{'.brlist.time'}</b></td>" .
                 "<td><b>$ML{'.brlist.poster'}</b></td><td><b>$ML{'.brlist.subject'}</b></td>" .
                 "<td><b>$ML{'.brlist.actions'}</b></td></tr>";
 
             my %users;
             LJ::load_userids_multiple([ map { $_->{'posterid'}, \$users{$_->{'posterid'}} } @entries ]);
             foreach (sort { $a->{'logtime'} lt $b->{'logtime'} } @entries) {
+                my $is_adult = 0;
+                my $frozen = $dbcr->selectrow_array("SELECT request_stor FROM modblob WHERE journalid=? AND modid=?",
+                                                    undef, $c->{'userid'}, $_->{'modid'});
+                if ($frozen) {
+                    my $req = Storable::thaw($frozen);
+                    $is_adult = ($req->{prop_adult_content} ne '' && $req->{prop_adult_content} ne 'none')
+                                    || ($c->adult_content_calculated ne 'none' && $c->adult_content_calculated ne '')
+                                    ? 1 
+                                    : 0;
+                }
                 my $link = "/community/moderate.bml?authas=$comm&amp;modid=" . $_->{'modid'};
                 my $subject = $_->{'subject'} ? LJ::eall($_->{'subject'}) : "<i>[No Subject]</i>";
-                $ret .= "<tr><td>$_->{'logtime'}</td>" .
+                $ret .= "<tr>";
+                $ret .= "<td><img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif\" border=\"0\" alt=\"\"></td>\n" if $is_adult;
+                $ret .= "<td>$_->{'logtime'}</td>" .
                     "<td><?ljuser " . $users{$_->{'posterid'}}->{'user'} . " ljuser?></td>" .
                     "<td><a href='$link'>$subject</a></td>" .
                     "<td>" .
@@ -454,7 +466,10 @@ body<=
 
         $sec .= "<br />\n" unless $sec eq "" or $subject;
         $ret .= $sec;
-        my $is_adult = $req->{prop_adult_content} ne '' ||  $c->adult_content_calculated ne 'none' ? 1 : 0;
+        my $is_adult = ($req->{prop_adult_content} ne '' && $req->{prop_adult_content} ne 'none')
+                    || ($c->adult_content_calculated ne 'none' && $c->adult_content_calculated ne '')
+                    ? 1 
+                    : 0;
         if ($subject) {
             LJ::CleanHTML::clean_subject(\$subject);
               BML::ebml(\$subject);
