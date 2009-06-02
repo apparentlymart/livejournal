@@ -502,6 +502,11 @@ sub preview_imgurl {
     my $self = shift;
 
     ## system styles
+    ##
+    ## Note: if you want to override url of preview image of system style,
+    ## don't use 'preview_imgurl' S2 property of theme, override method 
+    ## in subclass (LJ::S2Theme::*) instead.
+    ##
     if (my $uniq = $self->uniq) {
         return "$LJ::IMGPREFIX/customize/previews/$uniq.png";
     }
