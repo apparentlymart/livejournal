@@ -299,15 +299,15 @@ body<=
                 }
                 my $link = "/community/moderate.bml?authas=$comm&amp;modid=" . $_->{'modid'};
                 my $subject = $_->{'subject'} ? LJ::eall($_->{'subject'}) : "<i>[No Subject]</i>";
-                $ret .= "<tr>";
-                $ret .= "<td><img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif\" border=\"0\" alt=\"\"></td>\n" if $is_adult;
-                $ret .= "<td>$_->{'logtime'}</td>" .
+                $ret .= "<tr><td>&nbsp;";
+                $ret .= "<img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif\" border=\"0\" alt=\"\">" if $is_adult;
+                $ret .= "</td>\n<td>$_->{'logtime'}</td>" .
                     "<td><?ljuser " . $users{$_->{'posterid'}}->{'user'} . " ljuser?></td>" .
                     "<td><a href='$link'>$subject</a></td>" .
-                    "<td>" .
+                    "<td>\n" .
                     BML::ml('Actionlink', {
                         'link'=>"<a href='$link'>$ML{'.brlist.view'}</a>"
-                        }) . "</td></tr>";
+                        }) . "</td></tr>\n";
             }
             $ret .= "</table>";
         }
