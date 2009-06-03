@@ -265,6 +265,7 @@ sub make_feed
             tags       => [ values %{$logtags->{$itemid} || {}} ],
             security   => $it->{security},
             posterid   => $it->{posterid},
+            replycount => $logprops{$itemid}->{'replycount'},
         };
         push @cleanitems, $cleanitem;
         push @entries,    $entry_obj;
@@ -359,6 +360,7 @@ sub create_view_rss
             $ret .= "  <lj:poster>" . LJ::exml($poster->user) . "</lj:poster>\n";
             $ret .= "  <lj:posterid>" . $poster->userid . "</lj:posterid>\n";
         }
+        $ret .= "  <lj:reply-count>$it->{replycount}</lj:reply-count>\n";
         $ret .= "</item>\n";
     }
 
