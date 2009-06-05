@@ -31,6 +31,16 @@
 {
     width: 300px;
 }
+.ljadmedrect OBJECT,
+.ljadmedrect EMBED,
+.ljadmedrect IMG {
+    margin: 0;
+    padding: 0;
+    display: block;
+}
+.ljadmedrect BR {
+    display: none;
+}
 .ljad5linkunit
 {
     width: 728px;
