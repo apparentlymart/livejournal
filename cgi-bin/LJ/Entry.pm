@@ -332,11 +332,33 @@ sub absorb_row {
 }
 
 # class method:
+# LJ::Entry->preload_props(\@entries);
+# @entries - array of LJ::Entry objects
+#
+# See also instance method '_load_props'
+# 
 sub preload_props {
     my ($class, $entlist) = @_;
+    
+    ## %needed_to_load: userid --> [LJ::Entry, LJ::Entry, ... ] 
+    ## %users:          userid --> LJ::User
+    my (%needed_to_load, %users); 
+    
     foreach my $en (@$entlist) {
         next if $en->{_loaded_props};
-        $en->_load_props;
+        my $u = $en->{u};
+        my $userid = $u->{userid};
+        push @{ $needed_to_load{$userid} }, $en;
+        $users{$userid}= $u;
+    }
+    while (my ($userid, $u) = each %users) {
+        my $props = {};
+        my @jitemids = map {$_->{jitemid}} @{ $needed_to_load{$userid} };
+        LJ::load_log_props2($u, \@jitemids, $props);
+        foreach my $en (@{ $needed_to_load{$userid} }) {
+            $en->{props} = $props->{ $en->{jitemid} };
+            $en->{_loaded_props} = 1;
+        }
     }
 }
 
