@@ -212,7 +212,7 @@ body<=
 
     $body .= "<td width='65%' style='padding: 0 0 0 .9em'>";
     $body .= LJ::run_hook('sms_bml_content', $u);
-    $body .= LJ::run_hook('sms_tos') || '';
+    $body .= LJ::run_hook('sms_tos', u => $u, POST => \%POST) || '';
     $body .= "</td></tr></table>";
 
     my $btn_label = $u->sms_active ? "Save Changes" : "Continue";
