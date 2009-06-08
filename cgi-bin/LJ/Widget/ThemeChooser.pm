@@ -193,8 +193,12 @@ sub render_body {
         if ($theme_designer) {
             my $designer_link = "<a href='$LJ::SITEROOT/customize/$getextra${getsep}designer=" . LJ::eurl($theme_designer) . "$filterarg$showarg' class='theme-designer'>$theme_designer</a>";
             if ($theme_types{special}) {
-                if (my $sponsor_link = $theme->sponsor_url) {
-                    $designer_link = "<a href='$sponsor_link' class='theme-designer'>$theme_designer</a>";
+                if (my %opts = $theme->sponsor_url_opts) {
+                    my $aopts = '';
+                    while (my ($k, $v) = each %opts) {
+                        $aopts .= "$k='" . LJ::ehtml($v) . "' ";
+                    }
+                    $designer_link = "<a $aopts>$theme_designer</a>";
                 }
                 $ret .= $class->ml('widget.themechooser.theme.specialdesc', {'aopts' => $special_link_opts, 'designer' => $designer_link});
             } else {
