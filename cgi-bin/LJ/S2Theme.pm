@@ -668,8 +668,8 @@ sub layout_prop { "" } # property that controls the layout/sidebar placement
 sub show_sidebar_prop { "" } # property that controls whether a sidebar shows or not
 sub designer { "" } # designer of the theme
 sub linklist_support_tab { "" } # themes that don't use the linklist_support prop will have copy pointing them to the correct tab
-sub sponsor_url_opts { } # url of "sponsored by <a href=...>Sponsor</a>" link
-
+sub sponsor_url_opts { } # hash of "<a>"-tag opts (href, target, class, etc)
+                         # (href => "http://url/", target => "_blank", class => "theme-designer")
 # for appending layout-specific props to global props
 sub _append_props {
     my $self = shift;
