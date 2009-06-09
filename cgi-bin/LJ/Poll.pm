@@ -1394,13 +1394,30 @@ sub process_submission {
                 my $remote_email = $remote->email_raw;
                 my $us = LJ::load_userids(@$uids);
 
+                # Get all emails for the user submitting the poll
+                my $dbr = LJ::get_db_reader();
+                my $sth = $dbr->prepare("SELECT oldvalue FROM infohistory " .
+                                        "WHERE userid=? AND what='email' " .
+                                        "ORDER BY timechange");
+                $sth->execute($remote->{'userid'});
+                my @emails;
+                push @emails, $remote_email;
+                while (my $em = $sth->fetchrow_array) {
+                    push @emails, $em;
+                }
+
                 foreach my $u (values %$us) {
                     next unless $u;
 
                     my $u_email = $u->email_raw;
-                    if (lc $u_email eq lc $remote_email) {
-                        $$error = LJ::Lang::ml('poll.error.alreadyvoted', { user => $u->ljuser_display });
-                        return 0;
+                    # compare all the emails for the user against the primary
+                    # emails of those who have already answered the poll
+                    foreach my $em (@emails) {
+                        if (lc $u_email eq lc $em) {
+                            $$error = LJ::Lang::ml('poll.error.alreadyvoted',
+                                          { user => $u->ljuser_display });
+                            return 0;
+                        }
                     }
                 }
             }
