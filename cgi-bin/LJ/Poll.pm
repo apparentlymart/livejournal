@@ -1462,6 +1462,8 @@ sub process_submission {
     #$poll->_remove_from_memcache;
     #delete $LJ::REQ_CACHE_POLL{ $poll->id };
 
+    LJ::run_hooks('poll_log', $poll->journalid, $pollid, $remote ? $remote->userid : undef);
+
     # don't notify if they blank-polled
     LJ::Event::PollVote->new($poll->poster, $remote, $poll)->fire
         if $ct;
