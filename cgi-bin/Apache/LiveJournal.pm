@@ -252,7 +252,8 @@ sub trans
     my $args_wq = $args ? "?$args" : "";
     my $host = $r->header_in("Host");
     my $hostport = ($host =~ s/:\d+$//) ? $& : "";
-
+    $host =~ s/\.$//; ## 'www.livejournal.com.' is a valid DNS hostname
+    
     # disable TRACE (so scripts on non-LJ domains can't invoke
     # a trace to get the LJ cookies in the echo)
     return FORBIDDEN if $r->method_number == M_TRACE;
