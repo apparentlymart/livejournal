@@ -7,10 +7,11 @@
     color: #444;
     margin: 0;
 }
-.ljad a
+.ljad A:link,
+.ljad A:visited
 {
     font-size: 10px;
-    border: 0;
+    border: 0 !important;
 }
 .ljad img { border: 0; }
 .ljadskyscraper
@@ -38,6 +39,7 @@
     padding: 0;
     display: block;
 }
+.ljadafter-post-a BR,
 .ljadmedrect BR {
     display: none;
 }
