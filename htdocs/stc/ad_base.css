@@ -39,10 +39,17 @@
     padding: 0;
     display: block;
 }
+
 .ljadafter-post-a BR,
 .ljadmedrect BR {
     display: none;
 }
+
+.ljadafter-post-a DL DD A IMG {
+	margin:0;
+	}
+
+
 .ljad5linkunit
 {
     width: 728px;
