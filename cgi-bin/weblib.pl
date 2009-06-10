@@ -1480,10 +1480,10 @@ MOODS
                 	$out .= LJ::help_icon_html("screening", "", " ");
 					$out .="</span>";
 				
-					$out .=qq[<span class="save_loc"><input type="checkbox" checked name="save_loc">] . BML::ml('entryform.location.save', {'aopts' => 'href="#"'});
-					$out .= LJ::help_icon_html("screening", "", " ");
-					$out .="</span>";
-					$out .="<strong class='set_map'>" . BML::ml('entryform.location.map', {'aopts' => 'href="#"'}) . "</strong>";
+					#$out .=qq[<span class="save_loc"><input type="checkbox" checked name="save_loc">] . BML::ml('entryform.location.save', {'aopts' => 'href="#"'});
+					#$out .= LJ::help_icon_html("screening", "", " ");
+					#$out .="</span>";
+					#$out .="<strong class='set_map'>" . BML::ml('entryform.location.map', {'aopts' => 'href="#"'}) . "</strong>";
 				}
                 $out .= "</span>";
             }
