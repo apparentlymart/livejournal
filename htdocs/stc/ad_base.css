@@ -45,9 +45,12 @@
     display: none;
 }
 
+.ljadafter-post-a IMG {
+    vertical-align:top;
+}
 .ljadafter-post-a DL DD A IMG {
-	margin:0;
-	}
+    margin:0;
+}
 
 
 .ljad5linkunit
