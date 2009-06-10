@@ -40,15 +40,18 @@
     display: block;
 }
 
+.adv-box BR,
 .ljadafter-post-a BR,
 .ljadmedrect BR {
     display: none;
 }
 
+.adv-box IMG,
 .ljadafter-post-a IMG,
 .ljadmedrect IMG {
     vertical-align:top;
 }
+.adv-box DL DD A IMG,
 .ljadafter-post-a DL DD A IMG,
 .ljadmedrect DL DD A IMG {
     margin:0;
