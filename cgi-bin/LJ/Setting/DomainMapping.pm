@@ -28,6 +28,7 @@ sub save {
     # Blank domain = delete mapping
     if ($domainname eq "") {
         $dbh->do("DELETE FROM domains WHERE userid=?", undef, $u->{userid});
+        LJ::MemCache::delete("domain:" . $u->prop("journaldomain")); 
         $u->set_prop("journaldomain", "");
     # If they're able to, change the mapping and update the userprop
     } elsif ($has_cap) {
@@ -42,6 +43,7 @@ sub save {
             }
         }
         $u->set_prop("journaldomain", $domainname);
+        LJ::MemCache::set("domain:$domainname", $u->{userid}); 
         if ($u->prop('journaldomain')) {
             $dbh->do("DELETE FROM domains WHERE userid=? AND domain <> ?",
                      undef, $u->{'userid'}, $domainname);

@@ -278,6 +278,21 @@ sub new_from_url {
         return LJ::load_user($1);
     }
 
+    # domains like 'http://news.independent.livejournal.com' or 'http://some.site.domain.com'
+    if ($url =~ m!^http://([\w.-]+)/?$!) {
+        my $host = $1;
+        my $expire = time() + 1800;
+        my $key = "domain:$host";
+        my $userid = LJ::MemCache::get($key);
+        unless (defined $userid) {
+            my $db = LJ::get_db_reader();
+            ($userid) = $db->selectrow_array(qq{SELECT userid FROM domains WHERE domain=?}, undef, $host);
+            $userid ||= 0; ## we do cache negative results - if no user for such domain, set userid=0
+            LJ::MemCache::set($key, $userid, $expire);
+        }
+        return ($userid) ? LJ::load_userid($userid) : undef;
+    }
+
     # subdomains that hold a bunch of users (eg, users.siteroot.com/username/)
     if ($url =~ m!^http://\w+\.\Q$LJ::USER_DOMAIN\E/([\w-]+)/?$!) {
         return LJ::load_user($1);
@@ -5679,7 +5694,7 @@ sub load_user
 
     $user = LJ::canonical_username($user);
     return undef unless length $user;
-
+    
     my $get_user = sub {
         my $use_dbh = shift;
         my $db = $use_dbh ? LJ::get_db_writer() : LJ::get_db_reader();
@@ -5694,9 +5709,9 @@ sub load_user
 
     # caller is forcing a master, return now
     return $get_user->("master") if $force || $LJ::_PRAGMA_FORCE_MASTER;
-
+    
     my $u;
-
+ 
     # return process cache if we have one
     if ($u = $LJ::REQ_CACHE_USER_NAME{$user}) {
         $u->selfassert;
