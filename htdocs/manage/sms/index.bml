@@ -30,8 +30,14 @@ body<=
 
     LJ::run_hook('sms_bml_init', $u);
 
-    # process changes
+    # Before handling any of the fields do basic checks
     if (LJ::did_post()) {
+        LJ::run_hook('sms_bml_post_check', u => $u,
+                     errors => \@errors, POST => \%POST);
+    }
+
+    # process changes
+    if (LJ::did_post() && !@errors) {
 
         # sms notification checkbox
         if ($POST{notif} eq 'on') {
@@ -155,11 +161,11 @@ body<=
             push @carriers, ($k, $v);
         }
 
-        $carrier = LJ::html_select({noescape => 1, name => 'carrier', selected => $u->prop('sms_carrier')},
+        $carrier = LJ::html_select({noescape => 1, name => 'carrier', selected => $u->prop('sms_carrier') || $POST{carrier}},
                                    ('', '(Select Carrier)'), @carriers);
     }
 
-    my $fgroup = LJ::html_select({name => 'fgroup', selected => $u->prop('sms_friend_group')},
+    my $fgroup = LJ::html_select({name => 'fgroup', selected => $u->prop('sms_friend_group') || $POST{fgroup}},
                                 ('', '(All Friends)'), map { $_, $_ } map { $_->{groupname} } @fgroups);
 
     my $body = '';
@@ -170,7 +176,7 @@ body<=
 
     my $notif = LJ::html_check({
         name     => "notif",
-        selected => ($u->prop('sms_post_notify') eq 'SMS'),
+        selected => ($u->prop('sms_post_notify') eq 'SMS' || $POST{notif}),
         id       => "notif",
         label    => "Notify me of comments to posts made using $LJ::SMS_TITLE by text message",
     });
