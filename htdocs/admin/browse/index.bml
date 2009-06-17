@@ -24,6 +24,7 @@ body<=
 
     $ret .= "<h2>Manage Categories</h2><blockquote>";
     $ret .= "<p><a href='./add_category.bml'>Add Category</a></p>";
+    $ret .= "<p><a href='./remove_category.bml'>Remove Category</a></p>";
     $ret .= "</blockquote>";
 
     return "<body>$ret</body>";

@@ -121,6 +121,45 @@ sub create {
     return $self;
 }
 
+sub delete {
+    my $self = shift;
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to delete category";
+
+    die "category cannot be deleted while sub-categories exist"
+        if ($self->children);
+
+    my $parent;
+    $parent = LJ::Browse->load_by_id($self->{parentcatid})
+        if ($self->{parentcatid});
+
+    foreach my $table (qw(categoryprop category)) {
+        $dbh->do("DELETE FROM $table WHERE catid=?", undef, $self->{catid});
+        die $dbh->errstr if $dbh->err;
+    }
+
+    # delete category from other category props
+    if ($parent) {
+        my $tm = $self->typemap;
+        $dbh->do("DELETE FROM categoryprop WHERE propval=? AND (propid=? OR propid=?)",
+            undef, $self->{catid}, $tm->class_to_typeid('children'),
+            $tm->class_to_typeid('top_children'));
+        $parent->clear_props_memcache;
+    # if top-level category clear top-level category cache
+    } else {
+        LJ::MemCache::delete("category_top");
+    }
+
+    # clear memcache of the category and its props
+    $self->clear_props_memcache;
+    $self->clear_memcache;
+
+    delete $singletons{$self->{catid}};
+
+    return 1;
+}
+
 sub load_by_id {
     my $class = shift;
     my $catid = shift;
@@ -441,8 +480,10 @@ sub set_journals_memcache {
 
 sub clear_memcache {
     my $self = shift;
+    my $uri = $self->uri;
 
     LJ::MemCache::delete($self->memkey_catid);
+    LJ::MemCache::delete($self->memkey_caturi($uri));
 
     return;
 }
@@ -451,6 +492,8 @@ sub clear_props_memcache {
     my $self = shift;
 
     LJ::MemCache::delete($self->memkey_catid_props);
+    $self->{_loaded_props} = undef;
+
     return;
 }
 
