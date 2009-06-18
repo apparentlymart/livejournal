@@ -5,10 +5,6 @@ use lib "$ENV{LJHOME}/cgi-bin";
 use base "LJ::Worker", "Exporter";
 require "ljlib.pl";
 use vars qw(@EXPORT @EXPORT_OK);
-use Getopt::Long qw(:config pass_through);
-
-my $interval = 5;
-die "Unknown options" unless GetOptions('interval|n=i' => \$interval);
 
 @EXPORT = qw(schwartz_decl schwartz_work schwartz_on_idle schwartz_on_afterwork schwartz_on_prework);
 
@@ -87,7 +83,7 @@ sub schwartz_work {
             $sleep = 0 if $sleep < 0;
         } else {
             $on_idle->();
-            $sleep = $interval if ++$sleep > $interval;
+            $sleep = LJ::Worker::interval if ++$sleep > LJ::Worker::interval;
             sleep $sleep;
         }
 

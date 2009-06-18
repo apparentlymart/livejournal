@@ -10,12 +10,12 @@ use Getopt::Long qw(:config pass_through); # We get only -v option, and leave al
 # this will force preloading (rather than lazy) or all
 # modules so they're loaded in shared memory before the
 # fork (mod_perl-style)
-## BUG: This try to load LJ::Worker::Manual, which eat '-i' parameter.
-#use Class::Autouse qw{:devel};
+use Class::Autouse qw{:devel};
 
 use LJ::Worker::ErrorLog;
 
 my $quit_flag = 0;
+my $interval  = 5;
 
 BEGIN {
     $SIG{TERM} = sub { $quit_flag = 1; };
@@ -23,7 +23,8 @@ BEGIN {
     # This variable increased if option -v|--verbose specified
     # or in DEBUG environment variable if it is not empty.
     my $verbose = 0;
-    die "Wrong options" unless GetOptions('verbose|v+' => \$verbose);
+    die "Wrong options" unless GetOptions('verbose|v+' => \$verbose,
+                                          'interval|i' => \$interval);
     $verbose = int($ENV{DEBUG}) if $ENV{DEBUG};
 
     # Access to this var by VERBOSE sub
@@ -36,6 +37,8 @@ BEGIN {
             return \$verbose;
           }";
 }
+
+sub interval { $interval }
 
 my $original_name = $0;
 my $mother_sock_path;

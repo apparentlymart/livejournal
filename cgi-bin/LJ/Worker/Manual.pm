@@ -3,10 +3,6 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::Worker';
 require "ljlib.pl";
-use Getopt::Long qw(:config pass_through);
-
-my $interval = 5;
-die "Unknown options" unless GetOptions('interval|n=i' => \$interval);
 
 # don't override this in subclasses.
 sub run {
@@ -35,7 +31,7 @@ sub run {
         # do some cleanup before we process another request
         LJ::end_request();
 
-        $sleep = $interval if ++$sleep > $interval;
+        $sleep = LJ::Worker::interval if ++$sleep > LJ::Worker::interval;
         sleep $sleep;
     }
 }
