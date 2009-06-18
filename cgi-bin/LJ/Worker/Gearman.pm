@@ -7,13 +7,9 @@ use LJ::WorkerResultStorage;
 
 require "ljlib.pl";
 use vars qw(@EXPORT @EXPORT_OK);
-use Getopt::Long;
+use Getopt::Long qw(:config pass_through);
 use IO::Socket::INET ();
 use Carp qw(croak);
-
-my $opt_verbose;
-die "Unknown options" unless
-    GetOptions("verbose|v" => \$opt_verbose);
 
 @EXPORT = qw(gearman_decl gearman_work gearman_set_idle_handler gearman_set_requester_id);
 
@@ -34,7 +30,7 @@ sub gearman_decl {
         $subref = shift;
     }
 
-    $subref = wrapped_verbose($name, $subref) if $opt_verbose;
+    $subref = wrapped_verbose($name, $subref) if LJ::Worker::VERBOSE();
 
     if (defined $timeout) {
         $worker->register_function($name => $timeout => $subref);
@@ -130,7 +126,7 @@ sub gearman_work {
 
     while (1) {
         $periodic_checks->();
-        warn "waiting for work...\n" if $opt_verbose;
+        LJ::Worker::DEBUG("Gearman waiting for work...");
 
         # do the actual work
         eval {
@@ -144,6 +140,7 @@ sub gearman_work {
         warn $@ if $@;
 
         if ($idle_handler) {
+            LJ::Worker::DEBUG("Gearman idle...");
             eval { 
                 LJ::start_request();
                 $idle_handler->();

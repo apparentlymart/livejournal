@@ -1,17 +1,14 @@
 package LJ::Worker::TheSchwartz;
 use strict;
+
 use lib "$ENV{LJHOME}/cgi-bin";
 use base "LJ::Worker", "Exporter";
-
 require "ljlib.pl";
 use vars qw(@EXPORT @EXPORT_OK);
-use Getopt::Long;
+use Getopt::Long qw(:config pass_through);
 
 my $interval = 5;
-my $verbose  = 0;
-die "Unknown options" unless
-    GetOptions('interval|n=i' => \$interval,
-               'verbose|v'    => \$verbose);
+die "Unknown options" unless GetOptions('interval|n=i' => \$interval);
 
 @EXPORT = qw(schwartz_decl schwartz_work schwartz_on_idle schwartz_on_afterwork schwartz_on_prework);
 
@@ -30,7 +27,7 @@ sub schwartz_init {
 
     $sclient = LJ::theschwartz({ role => $role }) or die "Could not get schwartz client";
     $used_role = $role; # save success role
-    $sclient->set_verbose($verbose);
+    $sclient->set_verbose(LJ::Worker::VERBOSE());
 }
 
 sub schwartz_decl {
@@ -76,10 +73,12 @@ sub schwartz_work {
         exit 0 if LJ::Worker->should_quit;
 
         my $did_work = 0;
+        LJ::Worker::DEBUG("looking for work...");
         if ($on_prework->()) {
             $did_work = $sclient->work_once;
             $on_afterwork->($did_work);
         }
+        LJ::Worker::DEBUG("   did work = ", $did_work);
 
         exit 0 if LJ::Worker->should_quit;
 

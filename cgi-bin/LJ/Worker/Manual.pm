@@ -3,13 +3,10 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::Worker';
 require "ljlib.pl";
-use Getopt::Long;
+use Getopt::Long qw(:config pass_through);
 
 my $interval = 5;
-my $verbose  = 0;
-die "Unknown options" unless
-    GetOptions('interval|n=i' => \$interval,
-               'verbose|v'    => \$verbose);
+die "Unknown options" unless GetOptions('interval|n=i' => \$interval);
 
 # don't override this in subclasses.
 sub run {
@@ -21,12 +18,12 @@ sub run {
     while (1) {
         LJ::start_request();
         LJ::Worker->check_limits();
-        $class->cond_debug("$class looking for work...");
+        LJ::Worker::DEBUG("$class looking for work...");
         my $did_work = eval { $class->work };
         if ($@) {
-            $class->error("Error working: $@");
+            LJ::Worker::DEBUG("Error working: $@");
         }
-        $class->cond_debug("  did work = $did_work");
+        LJ::Worker::DEBUG("  did work = ", $did_work);
         exit 0 if LJ::Worker->should_quit;
         $class->on_afterwork($did_work);
         if ($did_work) {
@@ -43,8 +40,6 @@ sub run {
     }
 }
 
-sub verbose { $verbose }
-
 sub work {
     print "NO WORK FUNCTION DEFINED\n";
     return 0;
@@ -52,21 +47,5 @@ sub work {
 
 sub on_afterwork { }
 sub on_idle { }
-sub error {
-    my ($class, $msg) = @_;
-    $class->debug($msg);
-}
-
-sub debug {
-    my ($class, $msg) = @_;
-    $msg =~ s/\s+$//;
-    print STDERR "$msg\n";
-}
-sub cond_debug {
-    my $class = shift;
-    return unless $verbose;
-    $class->debug(@_);
-
-}
 
 1;

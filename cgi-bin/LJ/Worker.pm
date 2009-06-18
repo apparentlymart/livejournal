@@ -1,14 +1,17 @@
 package LJ::Worker;
 
+use strict;
+
 use IO::Socket::UNIX ();
 use POSIX ();
 
-use strict;
+use Getopt::Long qw(:config pass_through); # We get only -v option, and leave all other for future using.
 
 # this will force preloading (rather than lazy) or all
 # modules so they're loaded in shared memory before the
 # fork (mod_perl-style)
-use Class::Autouse qw{:devel};
+## BUG: This try to load LJ::Worker::Manual, which eat '-i' parameter.
+#use Class::Autouse qw{:devel};
 
 use LJ::Worker::ErrorLog;
 
@@ -16,8 +19,22 @@ my $quit_flag = 0;
 
 BEGIN {
     $SIG{TERM} = sub { $quit_flag = 1; };
-    my $debug = $ENV{DEBUG} ? 1 : 0;
-    eval "sub DEBUG () { $debug }";
+
+    # This variable increased if option -v|--verbose specified
+    # or in DEBUG environment variable if it is not empty.
+    my $verbose = 0;
+    die "Wrong options" unless GetOptions('verbose|v+' => \$verbose);
+    $verbose = int($ENV{DEBUG}) if $ENV{DEBUG};
+
+    # Access to this var by VERBOSE sub
+    eval "sub VERBOSE () { $verbose }";
+    eval "sub DEBUG {
+            return \$verbose unless \$verbose && scalar \@_;
+            my \$l = join('', map { \$_ || '' } \@_);
+            \$l .= \"\n\" if \$l && \$l !~ m/\\n\$/;
+            print STDERR \$l;
+            return \$verbose;
+          }";
 }
 
 my $original_name = $0;
@@ -60,10 +77,10 @@ sub setup_mother {
     my ($function) = $0 =~ m{([^/]+)$};
     my $sock_path = $class->socket_filename($function);
 
-    warn "Checking for existing mother at $sock_path" if DEBUG;
+    DEBUG("Checking for existing mother at $sock_path");
 
     if (my $sock = IO::Socket::UNIX->new(Peer => $sock_path)) {
-        warn "Asking other mother to stand down. We're in charge now" if DEBUG;
+        DEBUG("Asking other mother to stand down. We're in charge now");
         print $sock "SHUTDOWN\n";
     }
 
@@ -72,7 +89,7 @@ sub setup_mother {
 
     die "Error creating listening unix socket at '$sock_path': $!" unless $listener;
 
-    warn "Waiting for input" if DEBUG;
+    DEBUG("Waiting for input");
     local $0 = "$original_name [mother]";
     $mother_sock_path = $sock_path;
     while (accept(my $sock, $listener)) {
@@ -82,7 +99,7 @@ sub setup_mother {
 
             my $method = "MANAGE_" . lc($input);
             if (my $cv = $class->can($method)) {
-                warn "Executing '$method' function" if DEBUG;
+                DEBUG("Executing '$method' function");
                 my $rv = $cv->($class);
                 return unless $rv; #return value of command handlers determines if the loop stays running.
                 print $sock "OK $rv\n";
