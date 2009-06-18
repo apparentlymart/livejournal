@@ -196,7 +196,7 @@
          my $dt = substr($log->{'eventtime'}, 0, 10);
          my $entry = LJ::Entry->new($ju, jitemid => $itemid);
          my $auth_u = LJ::load_user($authas);
-         $des = ($entry && $auth_u && !$auth_u->is_community && $entry->visible_to($auth_u)) ? "$dt: $user: $subject" : "$user: (private entry)";
+         $des = ($entry && $auth_u && $entry->visible_to($auth_u)) ? "$dt: $user: $subject" : "$user: (private entry)";
      }
 
      # it'd be nice to only show the authas form when adding an entry and not
