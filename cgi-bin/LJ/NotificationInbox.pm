@@ -69,7 +69,7 @@ sub items {
 sub all_items {
     my $self = shift;
 
-    return grep { $_->event->class ne "LJ::Event::UserMessageSent" } $self->items;
+    return grep { $_->event->class ne "LJ::Event::UserMessageSent" } grep {$_->event} $self->items;
 }
 
 # returns a list of friend-related notificationitems
@@ -261,7 +261,7 @@ sub instantiate_comment_singletons {
     # instantiate all the comment singletons so that they will all be
     # loaded efficiently later as soon as preload_rows is called on
     # the first comment object
-    my @comment_items = grep { $_->event->class eq 'LJ::Event::JournalNewComment' } $self->items;
+    my @comment_items = grep { $_->event->class eq 'LJ::Event::JournalNewComment' } grep {$_->event} $self->items;
     my @comment_events = map { $_->event } @comment_items;
     # instantiate singletons
     LJ::Comment->new($_->event_journal, jtalkid => $_->jtalkid) foreach @comment_events;
@@ -275,7 +275,7 @@ sub instantiate_message_singletons {
     # instantiate all the message singletons so that they will all be
     # loaded efficiently later as soon as preload_rows is called on
     # the first message object
-    my @message_items = grep { $_->event->class eq 'LJ::Event::UserMessageRecvd' } $self->items;
+    my @message_items = grep { $_->event->class eq 'LJ::Event::UserMessageRecvd' } grep {$_->event} $self->items;
     my @message_events = map { $_->event } @message_items;
     # instantiate singletons
     LJ::Message->load({msgid => $_->arg1, journalid => $_->u->{userid}}) foreach @message_events;
@@ -633,14 +633,14 @@ sub subset_unread_count {
     my ($self, @subset) = @_;
 
     my %subset_events = map { "LJ::Event::" . $_ => 1 } @subset;
-    my @events = grep { $subset_events{$_->event->class} && $_->unread } $self->items;
+    my @events = grep { $subset_events{$_->event->class} && $_->unread } grep {$_->event} $self->items;
     return scalar @events;
 }
 
 sub all_event_count {
     my $self = shift;
 
-    my @events = grep { $_->event->class ne 'LJ::Event::UserMessageSent' && $_->unread } $self->items;
+    my @events = grep { $_->event->class ne 'LJ::Event::UserMessageSent' && $_->unread } grep {$_->event} $self->items;
     return scalar @events;
 }
 
