@@ -4017,6 +4017,13 @@ register_alter(sub {
                  "ADD UNIQUE `url_path` (url_path, parentcatid)");
     }
 
+    # add an index on 'country' column
+    unless (index_name("schools_pending", "INDEX:country")) {
+        do_alter("schools_pending",
+                 "ALTER TABLE schools_pending ADD INDEX(country)");
+    }
+
+
 });
 
 
