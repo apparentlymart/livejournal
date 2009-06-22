@@ -79,7 +79,7 @@ sub friend_items {
     my @friend_events = friend_event_list();
 
     my %friend_events = map { "LJ::Event::" . $_ => 1 } @friend_events;
-    return grep { $friend_events{$_->event->class} } $self->items;
+    return grep { $friend_events{$_->event->class} } grep {$_->event} $self->items;
 }
 
 # returns a list of friend-related notificationitems
@@ -89,7 +89,7 @@ sub friendplus_items {
     my @friend_events = friendplus_event_list();
 
     my %friend_events = map { "LJ::Event::" . $_ => 1 } @friend_events;
-    return grep { $friend_events{$_->event->class} } $self->items;
+    return grep { $friend_events{$_->event->class} } grep {$_->event} $self->items;
 }
 
 # returns a list of non user-messaging notificationitems
@@ -104,7 +104,7 @@ sub non_usermsg_items {
     @usermsg_events = (@usermsg_events, (LJ::run_hook('usermsg_notification_types') || ()));
 
     my %usermsg_events = map { "LJ::Event::" . $_ => 1 } @usermsg_events;
-    return grep { !$usermsg_events{$_->event->class} } $self->items;
+    return grep { !$usermsg_events{$_->event->class} } grep {$_->event} $self->items;
 }
 
 # returns a list of non user-message recvd notificationitems
