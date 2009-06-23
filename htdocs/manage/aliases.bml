@@ -1,0 +1,99 @@
+<?page
+title=>Manage Aliases
+body<=
+<?_code
+{
+    # this file used to be /modify_do.bml, then /modify.bml, and now it's at
+    # /manage/domain.bml, but we don't want the translators to have to
+    # retranslate all of the phrases, so we're still using /modify_do.bml scope
+    BML::set_language_scope("/modify_do.bml");
+
+    use strict;
+    use vars qw(%GET %POST);
+    use JSON;
+
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+
+    LJ::set_active_crumb('aliases');
+
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    my $is_paid_perm = $remote && ($remote->in_class('paid') || $remote->in_class('perm') || $remote->in_class("sponsored"));
+    return "<?h1 You must be a paid account h1?>" unless $is_paid_perm;
+
+    my $authas = $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+
+    return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+
+    ### user is now authenticated ###
+    
+    my ${key} = 'new_aliases';
+
+    # if a POST, update their info
+    if (LJ::did_post()) {
+        return "<?badinput?>" unless LJ::text_in(\%POST);
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
+
+        my $new_user  = $POST{$key."new_user"};
+        my $new_alias = $POST{$key."new_alias"};
+
+        my $prop_aliases = $u->prop('aliases');
+        my $aliases = jsonToObj($prop_aliases) || {};
+
+        my @user_list = split /\|/, $POST{$key."_user_list"};
+        foreach my $user (@user_list) {
+            $aliases->{$user} = $POST{$key.$user};
+        }
+
+        $aliases->{$new_user} = $new_alias if $new_user && $new_alias && LJ::load_user($new_user);
+
+        $u->set_prop( aliases => objToJson($aliases) );
+
+
+        # tell the user all is well
+        return "<?h1 $ML{'.success.head'} h1?><?p Your aliasing settings have been updated. p?>";
+    }
+
+    # not submitting a post, show edit form
+    my $ret;
+
+    ###
+    ### JOURNAL DOMAIN OPTIONS
+    ###
+
+    $ret .= "<form method='post' action='/manage/aliases.bml'>\n";
+    $ret .= LJ::form_auth();
+
+    my $prop_aliases = $u->prop('aliases');
+    my $aliases = jsonToObj($prop_aliases);
+
+    $ret .= q|<table>|;
+    
+    $ret .= q|<tr><td><b>Username</b></td><td>Aliase (note)</td></tr>|."\n";
+    my @user_list = ();
+    foreach my $user (keys %$aliases) {
+        my $u = LJ::load_user($user);
+        $ret .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td><input type="text" name="|.${key}.$u->{user}.q|" value="|.LJ::ljuser_alias($u->{user}).q|"></td></tr>|."\n";
+        push @user_list, $user;
+    }
+    $ret .= q|<tr><td>New alias:</td></tr>|."\n";
+    $ret .= q|<tr><td><input type="text" name="|.${key}.q|new_user"></td><td><input type="text" name="|.${key}.q|new_alias"></td></tr>|."\n";
+    $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @user_list).q|">|."\n";
+    $ret .= q|</table>|."\n";
+
+    ### ending submit block
+    $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.done.btn.savechanges'}) . " standout?>\n";
+    $ret .= "</form>\n";
+
+    return $ret;
+
+}
+_code?>
+
+<=body
+page?>

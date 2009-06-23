@@ -5,6 +5,7 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST);
+    use JSON;
 
     LJ::set_active_crumb('managefriends');
 
@@ -106,6 +107,9 @@ body<=
             }
 
             $ret .= "</th><th align='left'>$ML{'.editfriends.name'}</th>";
+
+            $ret .= "<th>Alias</th>";
+            
             $ret .= "<th width='5%'>$ML{'.editfriends.friend'}</th></tr>";
 
             # TODO: paginate
@@ -130,6 +134,14 @@ body<=
                 $colors .= "background-color: " . $f->{'bg'} . ";" if $f->{'bg'};
                 $colors = " style='$colors'" if $colors;
                 $ret .= "<td$colors>" . LJ::ehtml($f->{'name'}) . "</td>\n";
+
+                $ret .= "<td>";
+                $ret .= LJ::html_text({
+                            name => "useralias_$who",
+                            id   => "useralias_$who",
+                            value => LJ::ljuser_alias($f->{username}),
+                        });
+                $ret .= "</td>";
 
                 $ret .= "<td align='center'>";
                 # non-checked checkboxes for "friend-of". checking these boxes adds the user
@@ -244,6 +256,17 @@ body<=
             my $who = $POST{$_};
             $request{"editfriend_delete_${who}"} = 1 unless $POST{"editfriend_keep_${who}"};
         }
+
+        # set new aliases for friends
+        my $aliases = $remote->prop('aliases');
+        $aliases = jsonToObj($aliases);
+        foreach (grep { /^useralias/ } keys %POST) {
+            my $key = my $who = $_;
+            my $value = $POST{$key};
+            $who =~ s/^useralias_//;
+            $aliases->{$who} = $value if (defined $value && $value ne '');
+        }
+        $remote->set_prop('aliases', objToJson($aliases));
 
         my %response = ();
         LJ::do_request(\%request, \%response, { 'noauth' => 1, 'u' => $u });

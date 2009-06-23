@@ -275,7 +275,8 @@ sub new_from_url {
 
     # user subdomains
     if ($LJ::USER_DOMAIN && $url =~ m!^http://([\w-]+)\.\Q$LJ::USER_DOMAIN\E/?$!) {
-        return LJ::load_user($1);
+        my $u = LJ::load_user($1);
+        return $u if $u;
     }
 
     # domains like 'http://news.independent.livejournal.com' or 'http://some.site.domain.com'
@@ -6374,6 +6375,21 @@ sub get_shared_journals
     my %users;
     LJ::load_userids_multiple([ map { $_, \$users{$_} } @$ids ], [$u]);
     return sort map { $_->{'user'} } values %users;
+}
+
+use JSON;
+sub ljuser_alias {
+    my $user = shift;
+
+    my $u = LJ::get_remote();
+    return undef unless $u;
+    
+    my $prop_aliases = $u->prop('aliases');
+    my $aliases = jsonToObj($prop_aliases);
+    foreach my $key (keys %$aliases) {
+        return $aliases->{$key} if $key eq $user;
+    }
+    return undef;
 }
 
 # <LJFUNC>

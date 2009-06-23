@@ -5,11 +5,14 @@
 use Errno qw(ENOENT);
 
 %LJ::CRUMBS = (
+                ## key => [ (name, not used), (link href), (parent) ]
+
                'acctstatus' => ['Account Status', '/accountstatus.bml', 'manage'],
                'addfriend' => ['Add Friend', '', 'friends'],
                'addtodo' => ['Add To-Do Item', '', 'todo'],
                'advcustomize' => ['Customize Advanced S2 Settings', '/customize/advanced/', 'manage'],
                'advsearch' => ['Advanced Search', '/directorysearch.bml', 'search'],
+               'aliases' => ['My Aliases', '/manage/aliases.bml', 'home'],
                'birthdays' => ['Birthdays', '/birthdays.bml', 'friends'],
                'changeemail' => ['Change Email Address', '/changeemail.bml', 'editprofile'],
                'changepass' => ['Change Password', '/changepassword.bml', 'manage'],

@@ -30,6 +30,14 @@ userproplist.adult_content:
   multihomed: 0
   prettyname: Adult Content Flag
 
+userproplist.aliases:
+  cldversion: 5
+  datatype: blobchar
+  des: Aliases
+  indexed: 0
+  multihomed: 0
+  prettyname: Aliases for LJ users
+
 userproplist.aolim:
   cldversion: 0
   datatype: char

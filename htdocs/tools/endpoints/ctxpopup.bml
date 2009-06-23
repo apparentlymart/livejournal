@@ -102,6 +102,14 @@
         push @actions, 'join', 'leave';
     }
 
+    if ($u && $remote) {
+        my $aliases = $u->prop('aliases');
+        $aliases = jsonToObj($aliases);
+        $ret{alias} = $aliases->{$u->{user}};
+        my $is_paid_perm = $remote && ($remote->in_class('paid') || $remote->in_class('perm') || $remote->in_class("sponsored"));
+        $ret{alias_enable} = $is_paid_perm ? 1 : 0;
+    }
+
     # generate auth tokens
     if ($remote) {
         push @actions, 'addFriend', 'removeFriend', 'setBan' , 'setUnban';

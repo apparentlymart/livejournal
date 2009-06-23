@@ -14,6 +14,14 @@
     $head = "";
     $windowtitle = "";
 
+    # Initialize some javascript variables
+    my $authtoken = LJ::Auth->ajax_auth_token(LJ::get_remote(), "/_widget");
+    $authtoken = LJ::ejs($authtoken);
+    $body .= "<script>";
+    $body .= "Aliases.authToken = \"$authtoken\";";
+#    $body .= "AddAlias.link = \$('vg_cat_" . $get->{cat} . "');" if ($get->{cat});
+    $body .= "</script>";
+    
     # Deal with bots
     my $sep  = "**";
     my $pre  = "<!-- \n" . ($sep x 40 . "\n") x 2 . "$sep\n" x 10 . $sep;
@@ -369,7 +377,9 @@
 
     ### Username
     my $new_margin = $boxad ? " style='margin-right: 320px;'" : '';
-    $body .= "<div class='username'$new_margin>" . $u->ljuser_display;
+    my $user_alias = LJ::ljuser_alias($u->{user});
+    $user_alias = "&nbsp;(".$user_alias.")" if $user_alias;
+    $body .= "<div class='username'$new_margin>" . $u->ljuser_display . $user_alias;
     if ($u->{public_key}) {
         $body .= " <a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
         $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt=\"$ML{'.pubkey.alt'}\" title=\"$ML{'.pubkey.alt'}\" style='vertical-align: middle; border: 0;' /></a>";
@@ -404,6 +414,8 @@
             }
         }
     }
+
+    $body .= q|<input type='button' value='Add' onclick='return addAlias(this, "Title aliases add", "|.$u->{user}.q|")' class='bright' />|;
 
     # add friend
     $url = "$LJ::SITEROOT/friends/add.bml?user=$user";
@@ -1497,7 +1509,19 @@ body=><?_code return $bml_okay ? $body : BML::noparse($body); _code?>
 head<=
 <?_code
 {
-    LJ::need_res('stc/profile.css', 'js/profile.js');
+    LJ::need_res('stc/profile.css', 'js/profile.js',
+       'js/widget_ippu/aliases.js',
+       'js/widgets/aliases.js',
+       'stc/widgets/aliases.css',
+       'js/ippu.js',
+       'js/lj_ippu.js',
+       'js/httpreq.js',
+       'js/ljwidget.js',
+       'js/ljwidget_ippu.js',
+       'js/widget_ippu/vgiftsmspay.js',
+       'js/inputcomplete.js'
+
+    );
     return $head;
 }
 _code?>
