@@ -14,7 +14,7 @@ LJ_IPPU = new Class ( IPPU, {
 
     this.addClass("lj_ippu");
     this.setAutoCenterCallback(IPPU.center);
-    this.setDimensions(400, "auto");
+    this.setDimensions(514, "auto");
     //this.setOverflow("hidden");
 
     this.setFixedPosition(true);

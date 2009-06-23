@@ -114,8 +114,8 @@ sub as_string {
             siteroot        => $LJ::SITEROOT,
             sitename        => $LJ::SITENAME,
             sitenameshort   => $LJ::SITENAMESHORT,
-            subject         => $self->entry->subject_text || '',
-            username        => $self->entry->journal->display_username,
+            subject         => $entry->subject_text || '',
+            username        => $entry->journal->display_username,
             url             => $entry->url,
         });
 }
@@ -126,6 +126,31 @@ sub as_sms {
     return sprintf("There is a new $LJ::SITENAMEABBREV announcement in %s. " .
                    "Reply with READ %s to read it. Standard rates apply.",
                    $entry->journal->display_username, $entry->journal->display_username);
+}
+
+# esn.officialpost.alert=There is a new [[sitenameabbrev]] announcement in [[username]]. Reply with READ [[username]] to read it. Standard rates apply.
+# esn.supofficialpost.alert=There is a new [[sitenameabbrev]] announcement in [[username]]. Reply with READ [[username]] to read it. Standard rates apply.
+
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+    my $entry = $self->entry or return "(Invalid entry)";
+
+    return LJ::Lang::get_text(
+        $u->prop("browselang"),
+        _construct_prefix($self) . '.alert',
+        undef,
+        {
+            siteroot        => $LJ::SITEROOT,
+            sitename        => $LJ::SITENAME,
+            sitenameshort   => $LJ::SITENAMESHORT,
+            sitenameabbrev  => $LJ::SITENAMEABBREV,
+            subject         => $entry->subject_text || '',
+            username        => $entry->journal->ljuser_display({ target => '_blank' }),
+            url             => $entry->url,
+            openlink        => '<a href="' . $entry->url . '" target="_blank">',
+            closelink       => '</a>',
+        });
 }
 
 sub subscription_as_html {

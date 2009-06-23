@@ -21,15 +21,6 @@ body<=
             unless $u;
     }
 
-    my @cats_order = qw(
-        account
-        display
-        notifications
-        mobile
-        privacy
-        history
-    );
-
     # the different navigation categories and their settings
     my %cats_with_settings = (
         account => {
@@ -38,6 +29,7 @@ body<=
             disabled => !$u ? 1 : 0,
             form => 0,
             desc => $ML{'.cat.account.desc'},
+            sort_weight => 10,
             settings => [qw(
                 LJ::Setting::Display::AccountLevel
                 LJ::Setting::Display::AccountStatus
@@ -54,6 +46,7 @@ body<=
             disabled => 0,
             form => 1,
             desc => $ML{'.cat.display.desc'},
+            sort_weight => 20,
             settings => [qw(
                 LJ::Setting::Language
                 LJ::Setting::TimeZone
@@ -79,6 +72,7 @@ body<=
             disabled => !$u || $u->is_community ? 1 : 0,
             form => 1,
             desc => $ML{'.cat.notifications.desc'},
+            sort_weight => 30,
             settings => [qw(
                     LJ::Setting::CommentEmailNotify
             )],
@@ -89,6 +83,7 @@ body<=
             disabled => !$u || $u->is_community ? 1 : 0,
             form => 1,
             desc => $ML{'.cat.mobile.desc'},
+            sort_weight => 40,
             settings => [qw(
                 LJ::Setting::VoicePosting
                 LJ::Setting::SMS
@@ -102,6 +97,7 @@ body<=
             disabled => !$u ? 1 : 0,
             form => 1,
             desc => $ML{'.cat.privacy.desc'},
+            sort_weight => 50,
             settings => [qw(
                 LJ::Setting::MinSecurity
                 LJ::Setting::SearchInclusion
@@ -126,6 +122,7 @@ body<=
             disabled => !$u || $u->is_community ? 1 : 0,
             form => 0,
             desc => $ML{'.cat.history.desc'},
+            sort_weight => 60,
             settings => [qw(
                 LJ::Setting::Display::Logins
                 LJ::Setting::Display::Payments
@@ -137,8 +134,9 @@ body<=
         },
     );
 
-    LJ::run_hook("settings_extra_cats", \@cats_order, \%cats_with_settings, user => $u);
+    LJ::run_hooks("settings_extra_cats", \%cats_with_settings, user => $u);
 
+    # Active tab
     my $given_cat = $GET{cat};
     if ($u) {
         $given_cat = "account"
@@ -148,6 +146,22 @@ body<=
     } else {
         $given_cat = "display";
     }
+
+
+    # http(s) access
+    my $QUERY_STRING = $ENV{QUERY_STRING};
+    return BML::redirect( "$LJ::SSLROOT/manage/settings/index.bml?$ENV{QUERY_STRING}")
+        if $cats_with_settings{$given_cat}
+            and $cats_with_settings{$given_cat}->{need_ssl}
+            and not $LJ::IS_SSL;
+
+    # Category order
+    my @cats_order =
+        map  { $_->[0] }
+        sort { $a->[1]->{sort_weight} <=> $b->[1]->{sort_weight} }
+        map  { [$_, $cats_with_settings{$_}] }
+        keys %cats_with_settings;
+
 
     my @settings = @{$cats_with_settings{$given_cat}->{settings}};
 
@@ -308,6 +322,7 @@ body<=
             } else {
                 $submit_msg .= "<?warningbar $ML{'.success'} warningbar?><br />";
             }
+
         } else {
             $save_rv = LJ::Setting->save_all($u, \%POST, \@settings);
 
@@ -381,7 +396,7 @@ body<=
     if ($cats_with_settings{$given_cat}->{form}) {
         my $confirm_msg = LJ::ejs($ML{'.form.confirm'});
         $ret .= "<script>Settings.confirm_msg = \"$confirm_msg\";</script>";
-        $ret .= "<form id='settings_form' action='$LJ::SITEROOT/manage/settings/$getextra${getsep}cat=$given_cat' method='post'>";
+        $ret .= "<form id='settings_form' action='".(($cats_with_settings{$given_cat} && $cats_with_settings{$given_cat}->{need_ssl})?$LJ::SSLROOT:$LJ::SITEROOT)."/manage/settings/$getextra${getsep}cat=$given_cat' method='post'>";
         $ret .= LJ::form_auth();
     }
     $ret .= "<div class='settings_content'>";
@@ -472,7 +487,10 @@ body<=
             showtracking  => 1,
             settings_page => 1,
         ) . "<br />";
-
+    } elsif ($cats_with_settings{$given_cat}->{raw_html}){
+        foreach my $setting (@{ $cats_with_settings{$given_cat}->{settings} }){
+            $ret .= $setting->raw_html($u);
+        }
     } else {
 
         my $setting_ct = 1;

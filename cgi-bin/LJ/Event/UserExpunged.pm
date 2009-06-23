@@ -15,6 +15,13 @@ sub as_string {
     return $self->event_journal->display_username . " has been purged.";
 }
 
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.purged.alert', undef, { journal => $self->event_journal->ljuser_display({ target => '_blank' }) });
+}
+
 sub as_html {
     my $self = shift;
     return $self->event_journal->ljuser_display . " has been purged.";

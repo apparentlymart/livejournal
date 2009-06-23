@@ -20,6 +20,7 @@ use List::Util ();
 use LJ::Constants;
 use LJ::MemCache;
 use LJ::Session;
+use LJ::RateLimit qw//;
 use URI qw//;
 
 use Class::Autouse qw(
@@ -1281,6 +1282,7 @@ sub ljuser_display {
     my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
     my $profile_url = $opts->{'profile_url'} || '';
     my $journal_url = $opts->{'journal_url'} || '';
+    my $target = $opts->{'target'} ? ' target="' . $opts->{'target'} . '"' : '';
 
     my ($url, $name);
 
@@ -1312,7 +1314,7 @@ sub ljuser_display {
 
         my $profile = $profile_url ne '' ? $profile_url : "$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull";
         
-        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
+        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'$target><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url' rel='nofollow'$target><b>$name</b></a></span>";
 
     } else {
         return "<b>????</b>";
@@ -3963,6 +3965,9 @@ sub friends {
     my $u = shift;
     my @friendids = $u->friend_uids;
     my $users = LJ::load_userids(@friendids);
+    while(my ($uid, $u) = each %$users){
+        delete $users->{$uid} unless $u;
+    }
     return values %$users if wantarray;
     return $users;
 }
@@ -6422,6 +6427,7 @@ sub ljuser
     my $profile_url = $opts->{'profile_url'} || '';
     my $journal_url = $opts->{'journal_url'} || '';
     my $profile;
+    my $target = $opts->{'target'} ? ' target="' . $opts->{'target'} . '"' : '';
 
     my $make_tag = sub {
         my ($fil, $url, $x, $y) = @_;
@@ -6442,7 +6448,7 @@ sub ljuser
         $profile = $profile_url ne '' ? $profile_url : $profile . $andfull;
         $url = $journal_url ne '' ? $journal_url : $url;
 
-        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color>$ljusername</a></span>";
+        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'$target><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color$target>$ljusername</a></span>";
     };
 
     my $u = isu($user) ? $user : LJ::load_user($user);
@@ -6951,7 +6957,7 @@ sub get_interests
         my $sth = $dbh->prepare("SELECT intid FROM $uitable WHERE userid=?");
         $sth->execute($uid);
         push @$ids, $_ while ($_) = $sth->fetchrow_array;
-        LJ::MemCache::add($mk_ids, $ids, 3600*12);
+        LJ::MemCache::add($mk_ids, $ids);
     }
 
     # FIXME: set a 'justids' $u cache key in this case, then only return that 
@@ -7296,7 +7302,20 @@ sub add_friend
     my @add_ids = ref $to_add eq 'ARRAY' ? map { LJ::want_userid($_) } @$to_add : ( LJ::want_userid($to_add) );
     return 0 unless @add_ids;
 
-    my $dbh = LJ::get_db_writer();
+    my $friender = LJ::load_userid($userid);
+
+    # check action rate
+    ## TODO: rate check of adding friends needs PM elaboration
+    ## Remove '1 ||' when specification is complete  
+    unless (1 || $opts->{no_rate_check}){
+        my $cond = ["ratecheck:add_friend:$userid",
+                    [ $LJ::ADD_FRIEND_RATE_LIMIT || [ 1, 3600 ] ]
+                   ];
+        return 0 unless LJ::RateLimit->check($friender, [ $cond ]);
+    }
+
+    my $dbh      = LJ::get_db_writer();
+    my $sclient  = LJ::theschwartz();
 
     my $fgcol = LJ::color_todb($opts->{'fgcolor'}) || LJ::color_todb("#000000");
     my $bgcol = LJ::color_todb($opts->{'bgcolor'});
@@ -7322,9 +7341,6 @@ sub add_friend
 
     my $res = LJ::_friends_do
         ($userid, "REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
-
-    my $sclient = LJ::theschwartz();
-    my $friender = LJ::load_userid($userid);
 
     # part of the criteria for whether to fire befriended event
     my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify}

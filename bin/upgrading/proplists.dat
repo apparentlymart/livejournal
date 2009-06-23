@@ -1457,3 +1457,4 @@ categoryproplist.in_nav:
 
 categoryproplist.featured:
   des: The communites(propval=journalid) to display at the top of a category.
+

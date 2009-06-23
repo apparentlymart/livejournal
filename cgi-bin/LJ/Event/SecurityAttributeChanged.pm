@@ -161,6 +161,16 @@ sub _arg1_to_mlkey {
     return 'esn.security_attribute_changed.' . $ml_actions[$action-1] . '.';
 }
 
+sub as_alert {
+    my ($self, $u) = @_;
+    my $lang    = $u->prop('browselang');
+    return LJ::Lang::get_text($lang, _arg1_to_mlkey($self->arg1) . 'alert',
+        undef,
+        {
+            'user' => $u->ljuser_display({ target => '_blank' })
+        });
+}
+
 sub as_email_subject {
     my ($self, $u) = @_;
     my $lang    = $u->prop('browselang');

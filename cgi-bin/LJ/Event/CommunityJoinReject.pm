@@ -20,7 +20,8 @@ sub is_visible { 0 }
 sub always_checked { 1 }
 
 my @_ml_strings_en = (
-    'esn.comm_join_approve.email_subject',  # 'Your Request to Join [[community]] community',
+    'esn.comm_join_reject.email_subject',  # 'Your Request to Join [[community]] community',
+    'esn.comm_join_reject.alert',          # 'Your request to join [[community]] community has been declined.',
     'esn.comm_join_reject.email_text',      # 'Dear [[user]],
                                             #
                                             #Your request to join the "[[community]]" community has been declined.
@@ -39,7 +40,7 @@ sub as_email_subject {
     my ($self, $u) = @_;
     my $cu      = $self->community;
     my $lang    = $u->prop('browselang');
-    return LJ::Lang::get_text($lang, 'esn.comm_join_approve.email_subject', undef, { 'community' => $cu->{user} });
+    return LJ::Lang::get_text($lang, 'esn.comm_join_reject.email_subject', undef, { 'community' => $cu->{user} });
 }
 
 sub _as_email {
@@ -72,6 +73,15 @@ sub as_email_html {
     my $cu = $self->community;
     return '' unless $u && $cu;
     return _as_email($self, $u, $cu, 1);
+}
+
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+    my $cu = $self->community;
+    return '' unless $u && $cu;
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.comm_join_reject.alert', undef, { 'community' => $cu->ljuser_display({ target => '_blank' }), });
 }
 
 sub community {

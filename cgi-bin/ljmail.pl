@@ -9,10 +9,10 @@ require "ljlib.pl";
 package LJ;
 
 use Text::Wrap ();
-use Time::HiRes ('gettimeofday', 'tv_interval');
+use Time::HiRes qw//;
 
-use Encode qw/encode from_to/;
-use MIME::Base64 qw/encode_base64/;
+use Encode qw//;
+use MIME::Base64 qw//;
 
 use Class::Autouse qw(
                       IO::Socket::INET
@@ -33,7 +33,7 @@ sub init {
     }
 }
 
-use MIME::Words qw/encode_mimeword/;
+use MIME::Words qw//;
 
 # <LJFUNC>
 # name: LJ::send_mail
@@ -76,7 +76,7 @@ sub send_mail
         $opt->{'charset'} ||= "utf-8";
         my $charset;
         if (!LJ::is_ascii($subject)
-         || !LJ::is_ascii($body) 
+         || !LJ::is_ascii($body)
          || ($opt->{html} && !LJ::is_ascii($opt->{html}))
          || !LJ::is_ascii($fromname)) {
             $charset = $opt->{'charset'};
@@ -86,19 +86,19 @@ sub send_mail
 
         # Don't convert from us-ascii and utf-8 charsets.
         unless (($charset =~ m/us-ascii/i) || ($charset =~ m/^utf-8$/i)) {
-            from_to($body,              "utf-8", $charset);
+            Encode::from_to($body,              "utf-8", $charset);
             # Convert also html-part if we has it.
             if ($opt->{html}) {
-                from_to($opt->{html},   "utf-8", $charset);
+                Encode::from_to($opt->{html},   "utf-8", $charset);
             }
         }
 
-        from_to($subject, "utf-8", $charset) unless $charset =~ m/^utf-8$/i;
+        Encode::from_to($subject, "utf-8", $charset) unless $charset =~ m/^utf-8$/i;
         if (!LJ::is_ascii($subject)) {
             $subject = MIME::Words::encode_mimeword($subject, 'B', $charset);
         }
 
-        from_to($fromname, "utf-8", $charset) unless $charset =~ m/^utf-8$/i;
+        Encode::from_to($fromname, "utf-8", $charset) unless $charset =~ m/^utf-8$/i;
         if (!LJ::is_ascii($fromname)) {
             $fromname = MIME::Words::encode_mimeword($fromname, 'B', $charset);
         }
@@ -156,7 +156,7 @@ sub send_mail
     LJ::note_recent_action(undef, $msg->attr('content-type') =~ /plain/i ? 'email_send_text' : 'email_send_html');
 
     my $enqueue = sub {
-        my $starttime = [gettimeofday()];
+        my $starttime = [Time::HiRes::gettimeofday()];
         my $sclient = LJ::theschwartz() or die "Misconfiguration in mail.  Can't go into TheSchwartz.";
         my ($env_from) = map { $_->address } Mail::Address->parse($msg->get('From'));
         my @rcpts;
@@ -177,7 +177,7 @@ sub send_mail
         my $h = $sclient->insert($job);
 
         LJ::blocking_report( 'the_schwartz', 'send_mail',
-                             tv_interval($starttime));
+                             Time::HiRes::tv_interval($starttime));
 
         return $h ? 1 : 0;
     };
@@ -188,7 +188,7 @@ sub send_mail
 
     return $enqueue->() if $LJ::ASYNC_MAIL && ! $async_caller;
 
-    my $starttime = [gettimeofday()];
+    my $starttime = [Time::HiRes::gettimeofday()];
     my $rv;
     if ($LJ::DMTP_SERVER) {
         my $host = $LJ::DMTP_SERVER;
@@ -218,7 +218,7 @@ sub send_mail
 
     unless ($async_caller) {
         LJ::blocking_report( $LJ::SMTP_SERVER || $LJ::SENDMAIL, 'send_mail',
-                             tv_interval($starttime), $notes );
+                             Time::HiRes::tv_interval($starttime), $notes );
     }
 
     return 1 if $rv;

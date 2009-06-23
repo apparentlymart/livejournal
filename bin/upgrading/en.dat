@@ -1050,6 +1050,8 @@ esn.month.day_dec=December [[day]]
 
 esn.comm_join_approve.email_subject=Your Request to Join [[community]] community
 
+esn.comm_join_reject.email_subject=Your Request to Join [[community]] community
+
 esn.comm_join_reject.email_text<<
 Dear [[user]],
 
@@ -1063,6 +1065,8 @@ Regards,
 [[sitename]] Team
 
 .
+
+esn.poll_vote.alert=[[user]] voted in a [[openlink]]poll[[closelink]]!
 
 esn.poll_vote.email_text<<
 Hi [[user]],
@@ -1281,6 +1285,8 @@ Options:
 
 esn.moderated_submission.subject=Moderated submission notification
 
+esn.security_attribute_changed.account_activated.alert=Your account has been activated
+
 esn.security_attribute_changed.account_activated.email_subject=Your account has been activated
 
 esn.security_attribute_changed.account_activated.email_text<<
@@ -1296,6 +1302,8 @@ Dear [[username]],
 
 esn.security_attribute_changed.account_deleted.email_subject=Your account has been deleted
 
+esn.security_attribute_changed.account_deleted.alert=Your account has been deleted
+
 esn.security_attribute_changed.account_deleted.email_text<<
 Dear [[username]],
  
@@ -1309,6 +1317,8 @@ Dear [[username]],
 
 esn.security_attribute_changed.account_renamed.email_subject=Your account has been renamed
 
+esn.security_attribute_changed.account_renamed.alert=Your account has been renamed
+
 esn.security_attribute_changed.account_renamed.email_text<<
 Dear [[user]],
 
@@ -1320,6 +1330,10 @@ If you did not change your username, it means that your journal's security was c
 
 This letter was sent out automatically to help you keep your account secure. You cannot opt-out of receiving these letters.
 .
+
+esn.officialpost.alert=There is a new [[sitenameabbrev]] announcement in [[username]]. Reply with READ [[username]] to read it. Standard rates apply.
+
+esn.supofficialpost.alert=There is a new [[sitenameabbrev]] announcement in [[username]]. Reply with READ [[username]] to read it. Standard rates apply.
 
 esn.supofficialpost.subject=[[sitenameshort]] Announcement: [[subject]]
 
@@ -1343,6 +1357,14 @@ esn.journal_new_entry.head_user=[[poster]] has posted a new entry[[about]].[[tag
 
 esn.journal_new_entry.about= titled "[[title]]"
 
+esn.user_new_entry.in_their_journal.alert=User '[[user]]' posted in their journal
+
+esn.user_new_entry.in_user_journal.alert=User '[[user]]' posted in '[[journal]]'
+
+esn.comm_invite.alert=You've been invited to join [[user]]
+
+esn.befriended.alert=[[who]] has added you as a friend.
+
 esn.befriended.subject=[[who]] added you as a friend!
 
 esn.befriended.email_text<<
@@ -1361,7 +1383,15 @@ Hi [[user]],
 You can:
 .
 
+esn.community_join_requst.alert=[[who]] requests membership in [[comm]]. Visit community settings to approve.
+
+esn.comm_join_approve.alert=Your request to join [[community]] community has been approved.
+
+esn.defriended.alert=[[who]] removed you from their Friends list.
+
 esn.defriended.subject=[[who]] removed you from their Friends list
+
+esn.comm_join_reject.alert=Your request to join [[community]] community has been declined.
 
 esn.defriended.email_text<<
 Hi [[user]],
@@ -1403,13 +1433,21 @@ esn.you_can=You can:
 
 esn.view_entry=[[openlink]]View the entry[[closelink]]
 
+esn.vgift.alert=[[who]] received a new virtual gift!
+
 esn.read_recent_entries=[[openlink]]Read the recent entries in [[journal]][[closelink]]
 
 esn.join_community=[[openlink]]Join [[journal]] to read Members-only entries[[closelink]]
 
+esn.journal_new_entry.alert=[[who]] posted a new entry in [[journal]]!
+
 esn.read_user_entries=[[openlink]]Read [[poster]]'s recent entries[[closelink]]
 
 esn.add_friend=[[openlink]]Add [[journal]] to your Friends list[[closelink]]
+
+esn.bday.alert=[[who]]'s birthday is on [[bdate]]!
+
+esn.purged.alert=[[journal]] has been purged.
 
 esn.screened=This comment was screened.
 
@@ -1429,6 +1467,8 @@ esn.reply_at_webpage=[[openlink]]Reply[[closelink]] at the webpage
 
 esn.unscreen_comment=[[openlink]]Unscreen the comment[[closelink]]
 
+esn.new_userpic.alert=[[who]] has uploaded a new userpic. You can view it at: [[userpic]].
+
 esn.delete_comment=[[openlink]]Delete the comment[[closelink]]
 
 esn.edit_comment=[[openlink]]Edit the comment[[closelink]]
@@ -1436,6 +1476,10 @@ esn.edit_comment=[[openlink]]Edit the comment[[closelink]]
 esn.email.pm.subject=[[sender]] sent you a message
 
 esn.if_suport_form=If your mail client supports it, you can also reply here:
+
+esn.invited_friend_joins.alert=A friend you invited has created the journal [[newuser]].
+
+esn.invited_friend_joins.alert.unnamed=A friend you invited has created a journal.
 
 esn.invited_friend_joins.subject=[[who]] created a journal!
 
@@ -1449,9 +1493,43 @@ Your friend [[newuser]] has created a journal on [[sitenameshort]]!
 You can:
 .
 
+esn.mail_comments.alert.user_edited_reply_to_your_comment=[[user]] edited a [[openlink]]reply[[closelink]] to your comment.
+
+esn.mail_comments.alert.user_edited_reply_to_a_comment=[[user]] edited a [[openlink]]reply[[closelink]] to a comment.
+
+esn.mail_comments.alert.user_reply_to_your_comment=[[user]] [[openlink]]replied[[closelink]] to your comment.
+
+esn.mail_comments.alert.user_reply_to_a_comment=[[user]] [[openlink]]replied[[closelink]] to a comment.
+
+esn.mail_comments.alert.user_edited_reply_to_your_post=[[user]] edited a [[openlink]]reply[[closelink]] to your post.
+
+esn.mail_comments.alert.user_edited_reply_to_a_post=[[user]] edited a [[openlink]]reply[[closelink]] to a post.
+
+esn.mail_comments.alert.user_reply_to_your_post=[[user]] [[openlink]]replied[[closelink]] to your post.
+
+esn.mail_comments.alert.user_reply_to_a_post=[[user]] [[openlink]]replied[[closelink]] to a post.
+
+esn.mail_comments.alert.anonymous_edited_reply_to_your_comment=Anonymous user edited a [[openlink]]reply[[closelink]] to your comment.
+
+esn.mail_comments.alert.anonymous_edited_reply_to_a_comment=Anonymous user edited a [[openlink]]reply[[closelink]] to a comment.
+
+esn.mail_comments.alert.anonymous_reply_to_your_comment=Anonymous user [[openlink]]replied[[closelink]] to your comment.
+
+esn.mail_comments.alert.anonymous_reply_to_a_comment=Anonymous user [[openlink]]replied[[closelink]] to a comment.
+
+esn.mail_comments.alert.anonymous_edited_reply_to_your_post=Anonymous user edited a [[openlink]]reply[[closelink]] to your post.
+
+esn.mail_comments.alert.anonymous_edited_reply_to_a_post=Anonymous user edited a [[openlink]]reply[[closelink]] to a post.
+
+esn.mail_comments.alert.anonymous_reply_to_your_post=Anonymous user [[openlink]]replied[[closelink]] to your post.
+
+esn.mail_comments.alert.anonymous_reply_to_a_post=Anonymous user [[openlink]]replied[[closelink]] to a post.
+
 esn.public=public
 
 esn.remove_friend=[[openlink]]Remove [[postername]] from your Friends list[[closelink]]
+
+event.user_message_recvd.alert=You've received a new message "[[subject]]" from [[user]]
 
 esn.post_entry=[[openlink]]Post an entry[[closelink]]
 
@@ -1837,7 +1915,7 @@ event.userpic_upload.me=One of my friends uploads a new userpic
 
 event.userpic_upload.user=[[user]] uploads a new userpic
 
-event.officialpost=[[sitename]] makes a new announcement
+event.officialpost=[[sitename]] makes a new [[openlink]]announcement[[closelink]].
 
 fckland.ljimage=Insert/Edit Image
 

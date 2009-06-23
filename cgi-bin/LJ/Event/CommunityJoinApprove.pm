@@ -20,6 +20,7 @@ sub is_visible { 0 }
 sub always_checked { 1 }
 
 my @_ml_strings_en = (
+    'esn.comm_join_approve.alert',          # 'Your request to join [[community]] community has been approved.',
     'esn.comm_join_approve.email_subject',  # 'Your Request to Join [[community]] community',
     'esn.add_friend_community',             # '[[openlink]]Add community "[[community]]" to your friends page reading list[[closelink]]',
     'esn.comm_join_approve.email_text',     # 'Dear [[user]],
@@ -81,6 +82,15 @@ sub as_email_html {
     my $cu = $self->community;
     return '' unless $u && $cu;
     return _as_email($self, $u, $cu, 1);
+}
+
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+    my $cu = $self->community;
+    return '' unless $u && $cu;
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.comm_join_approve.alert', undef, { 'community' => $cu->ljuser_display({ target => '_blank' }), });
 }
 
 sub community {

@@ -30,6 +30,23 @@ my @_ml_strings_en = (
     'esn.mail_comments.subject.reply_to_a_comment',         # "Reply to a comment...",
     'esn.mail_comments.subject.comment_you_posted',         # "Comment you posted...",
     'esn.mail_comments.subject.comment_you_edited',         # "Comment you edited...",
+    # as_im
+    'esn.mail_comments.alert.user_edited_reply_to_your_comment',        #[[user]] edited a reply to your comment.
+    'esn.mail_comments.alert.user_edited_reply_to_a_comment',           #[[user]] edited a reply to a comment.
+    'esn.mail_comments.alert.user_reply_to_your_comment',               #[[user]] replied to your comment.
+    'esn.mail_comments.alert.user_reply_to_a_comment',                  #[[user]] replied to a comment.
+    'esn.mail_comments.alert.user_edited_reply_to_your_post',           #[[user]] edited a reply to your post.
+    'esn.mail_comments.alert.user_edited_reply_to_a_post',              #[[user]] edited a reply to a post.
+    'esn.mail_comments.alert.user_reply_to_your_post',                  #[[user]] replied to your post.
+    'esn.mail_comments.alert.user_reply_to_a_post',                     #[[user]] replied to a post.
+    'esn.mail_comments.alert.anonymous_edited_reply_to_your_comment',   #Anonymous user edited a reply to your comment.
+    'esn.mail_comments.alert.anonymous_edited_reply_to_a_comment',      #Anonymous user edited a reply to a comment.
+    'esn.mail_comments.alert.anonymous_reply_to_your_comment',          #Anonymous user replied to your comment.
+    'esn.mail_comments.alert.anonymous_reply_to_a_comment',             #Anonymous user replied to a comment.
+    'esn.mail_comments.alert.anonymous_edited_reply_to_your_post',      #Anonymous user edited a reply to your post.
+    'esn.mail_comments.alert.anonymous_edited_reply_to_a_post',         #Anonymous user edited a reply to a post.
+    'esn.mail_comments.alert.anonymous_reply_to_your_post',             #Anonymous user replied to your post.
+    'esn.mail_comments.alert.anonymous_reply_to_a_post',                #Anonymous user replied to a post.
 );
 
 sub as_email_from_name {
@@ -158,6 +175,45 @@ sub as_string {
     } else {
         return "$poster has posted a new comment in $journal at " . $comment->url;
     }
+}
+
+# 'esn.mail_comments.alert.user_edited_reply_to_your_comment',      #[[user]] edited a reply to your comment.
+# 'esn.mail_comments.alert.user_edited_reply_to_a_comment',         #[[user]] edited a reply to a comment.
+# 'esn.mail_comments.alert.user_reply_to_your_comment',             #[[user]] replied to your comment.
+# 'esn.mail_comments.alert.user_reply_to_a_comment',                #[[user]] replied to a comment.
+# 'esn.mail_comments.alert.user_edited_reply_to_your_post',         #[[user]] edited a reply to your post.
+# 'esn.mail_comments.alert.user_edited_reply_to_a_post',            #[[user]] edited a reply to a post.
+# 'esn.mail_comments.alert.user_reply_to_your_post',                #[[user]] replied to your post.
+# 'esn.mail_comments.alert.user_reply_to_a_post',                   #[[user]] replied to a post.
+# 'esn.mail_comments.alert.anonymous_edited_reply_to_your_comment', #Anonymous user edited a reply to your comment.
+# 'esn.mail_comments.alert.anonymous_edited_reply_to_a_comment',    #Anonymous user edited a reply to a comment.
+# 'esn.mail_comments.alert.anonymous_reply_to_your_comment',        #Anonymous user replied to your comment.
+# 'esn.mail_comments.alert.anonymous_reply_to_a_comment',           #Anonymous user replied to a comment.
+# 'esn.mail_comments.alert.anonymous_edited_reply_to_your_post',    #Anonymous user edited a reply to your post.
+# 'esn.mail_comments.alert.anonymous_edited_reply_to_a_post',       #Anonymous user edited a reply to a post.
+# 'esn.mail_comments.alert.anonymous_reply_to_your_post',           #Anonymous user replied to your post.
+# 'esn.mail_comments.alert.anonymous_reply_to_a_post',              #Anonymous user replied to a post.
+
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+
+    # TODO: [[post]] [[reply]] etc
+    my $comment = $self->comment;
+    my $user = $comment->poster ? $comment->poster->ljuser_display({ target => '_blank' }) : '(Anonymous user)';
+    my $edited = $comment->is_edited;
+
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.mail_comments.alert.' .
+            ($comment->poster ? 'user' : 'anonymous') . '_' .
+            ($edited ? 'edited' : 'replied') . '_' .
+            (LJ::u_equals($comment->entry->poster, $u) ? 'to_your' : 'to_a') . '_' .
+            ($comment->parent ? 'post' : 'comment'), undef,
+                {
+                    user        => $user,
+                    openlink    => '<a href="' . $comment->url . '" target="_blank">',
+                    closelink   => '</a>',
+                });
 }
 
 sub as_sms {

@@ -19,6 +19,7 @@ sub helpurl { "" }
 sub option { "" }
 sub htmlcontrol { "" }
 sub htmlcontrol_label { "" }
+sub raw_html          { "" }
 
 sub error_check {
     my ($class, $u, $args) = @_;

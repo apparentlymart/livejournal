@@ -23,6 +23,7 @@ my @_ml_strings_en = (
     'esn.view_profile',                 # '[[openlink]]View [[postername]]\'s profile[[closelink]]',
     'esn.edit_friends',                 # '[[openlink]]Edit Friends[[closelink]]',
     'esn.edit_groups',                  # '[[openlink]]Edit Friends groups[[closelink]]',
+    'esn.befriended.alert',             # '[[who]] has added you as a friend.',
     'esn.befriended.email_text',        # 'Hi [[user]],
                                         #
                                         #[[poster]] has added you to their Friends list. They will now be able to read your[[entries]] entries on their Friends page.
@@ -129,6 +130,15 @@ sub as_sms {
     return sprintf("%s has added you to their friends list. Reply with ADD %s to add them " .
                    "to your friends list. Standard rates apply.",
                    $self->friend->user, $self->friend->user);
+}
+
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+    my $friend = $self->friend;
+    return '' unless $friend;
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.befriended.alert', undef, { who => $friend->ljuser_display({ target => '_blank' }) });
 }
 
 sub subscription_as_html {

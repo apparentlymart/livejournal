@@ -42,6 +42,18 @@ sub as_string {
                    $self->bday);
 }
 
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.bday.alert', undef,
+            {
+                who     => $self->bdayuser->ljuser_display({ target => '_blank' }),
+                bdate   => $self->bday,
+            });
+}
+
 sub as_html {
     my $self = shift;
 

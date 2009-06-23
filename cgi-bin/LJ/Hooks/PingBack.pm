@@ -1,8 +1,6 @@
 package LJ::Hooks::PingBack;
 use strict;
-use LJ::PingBack;
-
-
+use Class::Autouse qw (LJ::PingBack);
 
 #
 LJ::register_hook("add_extra_options_to_manage_comments", sub {

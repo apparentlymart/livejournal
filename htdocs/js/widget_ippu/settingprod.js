@@ -20,7 +20,12 @@ LJWidgetIPPU_SettingProd = new Class(LJWidgetIPPU, {
         post[field] = form[field].value;
       this.doPost(post);
     } else {
-      post[field] = form[field].value + "";
+      for(var i=0;i<form.length;i++){
+      	if(form[i].checked){
+		post[field]=form[i].value+"";
+	}
+      }	      
+      //post[field] = form[field].value + "";
       if (post[field] && post[field] != "") this.doPost(post);
     }
 
@@ -33,6 +38,7 @@ LJWidgetIPPU_SettingProd = new Class(LJWidgetIPPU, {
     if (data.res && data.res.success) success = data.res.success;
     if (data.res && data.res.extra) extra = data.res.extra;
     if (success) {
+      if(data.res.result.redirect) window.location=data.res.result.redirect;
       LJ_IPPU.showNote("Settings updated."+extra);
       this.ippu.hide();
     }

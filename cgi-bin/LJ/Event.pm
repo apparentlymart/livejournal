@@ -140,6 +140,11 @@ sub as_im {
     return $self->as_string($u);
 }
 
+sub as_alert {
+    my ($self, $u) = @_;
+    return $self->as_string($u);
+}
+
 # plaintext email subject
 sub as_email_subject {
     my ($self, $u) = @_;

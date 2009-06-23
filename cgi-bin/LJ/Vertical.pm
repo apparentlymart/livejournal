@@ -241,8 +241,10 @@ sub check_entry_for_image_restrictions {
         # first check that there's no more than N images
         return 0 unless @$img_urls <= $class->max_number_of_images_for_entry_in_journal($journal);
 
+        eval { require Image::Size; };
+        die "Error loading Image::Size: $@" if $@;
+
         # now check that these images are not over WxH in size
-        eval "use Image::Size;";
         foreach my $image_url (@$img_urls) {
             my $imageref = LJ::Image->prefetch_image($image_url, timeout => 1);
             return 0 unless $imageref;

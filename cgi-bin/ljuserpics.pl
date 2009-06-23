@@ -550,10 +550,10 @@ sub _get_upf_scaled
 
     my $mode = ($x1 || $y1 || $x2 || $y2) ? "crop" : "scale";
 
-    eval "use Image::Magick (); 1;"
+    eval { require Image::Magick }
         or return undef;
 
-    eval "use Image::Size (); 1;"
+    eval { require Image::Size }
         or return undef;
 
     $mogkey ||= 'upf:' . $u->{userid};

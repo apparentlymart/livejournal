@@ -211,6 +211,7 @@ sub user_cluster_details {
 package LJ;
 
 use Carp qw(croak);
+use LJ::User qw//;
 
 # when calling a supported function (currently: LJ::load_user() or LJ::load_userid*), LJ::SMS::load_mapping()
 # ignores in-process request cache, memcache, and selects directly
@@ -352,7 +353,7 @@ sub get_cluster_def_reader
 {
     my @dbh_opts = scalar(@_) == 2 ? (shift @_) : ();
     my $arg = shift;
-    my $id = isu($arg) ? $arg->{'clusterid'} : $arg;
+    my $id = LJ::isu($arg) ? $arg->{'clusterid'} : $arg;
     return LJ::get_cluster_reader(@dbh_opts, $id) if
         $LJ::DEF_READER_ACTUALLY_SLAVE{$id};
     return LJ::get_dbh(@dbh_opts, LJ::master_role($id));
@@ -371,7 +372,7 @@ sub get_cluster_master
 {
     my @dbh_opts = scalar(@_) == 2 ? (shift @_) : ();
     my $arg = shift;
-    my $id = isu($arg) ? $arg->{'clusterid'} : $arg;
+    my $id = LJ::isu($arg) ? $arg->{'clusterid'} : $arg;
     return undef if $LJ::READONLY_CLUSTER{$id};
     return LJ::get_dbh(@dbh_opts, LJ::master_role($id));
 }

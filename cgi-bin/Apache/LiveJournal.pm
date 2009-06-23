@@ -179,7 +179,6 @@ sub redir {
     my ($r, $url, $code) = @_;
     $r->content_type("text/html");
     $r->header_out(Location => $url);
-
     if ($LJ::DEBUG{'log_redirects'}) {
         $r->log_error("redirect to $url from: " . join(", ", caller(0)));
     }
@@ -409,6 +408,12 @@ sub trans
     # is this the embed module host
     if ($LJ::EMBED_MODULE_DOMAIN && $host =~ /$LJ::EMBED_MODULE_DOMAIN$/) {
         return $bml_handler->("$LJ::HOME/htdocs/tools/embedcontent.bml");
+    }
+
+    # allow html pages (with .html extention) in user domains and in common www. domain.
+    if ($r->uri =~ m|\A\/__html(\/.+\.html)\z|){
+        $r->uri($1);
+        return DECLINED;
     }
 
     my $journal_view = sub {

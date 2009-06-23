@@ -16,6 +16,7 @@ sub new {
 sub is_common { 0 }
 
 my @_ml_strings = (
+    'esn.comm_invite.alert',        # "You've been invited to join [[user]]"
     'esn.comm_invite.subject',      # "You've been invited to join [[user]]"
     'esn.comm_invite.email',        # 'Hi [[user]],
                                     #
@@ -131,6 +132,15 @@ sub as_sms {
     return sprintf("%s sent you an invitation to join the community %s. Visit the invitation page to accept",
                    $self->inviter->display_username,
                    $self->comm->display_username);
+}
+
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+    my $friend = $self->friend;
+    return '' unless $friend;
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.comm_invite.alert', undef, { user => $friend->ljuser_display({ target => '_blank' }) });
 }
 
 sub subscription_as_html {

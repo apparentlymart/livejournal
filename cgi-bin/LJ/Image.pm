@@ -1,7 +1,7 @@
 package LJ::Image;
 use strict;
 use Carp qw(croak);
-use Class::Autouse qw( Image::Size );
+#use Class::Autouse qw( Image::Size );
 
 # given an image and some dimensions, will return the dimensions that the image
 # should be if it was resized to be no greater than the given dimensions
@@ -20,6 +20,7 @@ sub get_dimensions_of_resized_image {
     my $given_height = $opts{height} || 240;
 
     my $percentage = 1;
+    require Image::Size;
     my ($width, $height) = Image::Size::imgsize($imageref);
     die "Unable to get image size." unless $width && $height;
 

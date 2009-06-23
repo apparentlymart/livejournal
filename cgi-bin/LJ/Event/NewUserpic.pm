@@ -32,6 +32,18 @@ sub as_sms {
         $self->userpic->url;
 }
 
+# esn.new_userpic.alert=[[who]] has uploaded a new userpic. You can view it at: [[userpic]].
+
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+    my $who = $self->event_journal;
+    my $userpic = $self->userpic->url;
+    return '' unless $who && $userpic;
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.new_userpic.alert', undef, { who => $who->ljuser_display({ target => '_blank' }), userpic => $userpic });
+}
+
 sub as_email_string {
     my ($self, $u) = @_;
     return unless $self->userpic && $self->userpic->valid;

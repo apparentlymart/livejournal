@@ -87,17 +87,17 @@ div.lj_ippu_titlebar {
     position:relative;
     top:50%;
     left:50%;
-	visibility:hidden;
+    visibility:hidden;
     }
 .LJ_Placeholder_Container A IMG {
     margin:-17px 0 0 -17px;
     cursor:pointer;
-	position:relative;
-	visibility:visible;
+    position:relative;
+    visibility:visible;
     }
 IFRAME.lj_embedcontent {
     border:0;
-	vertical-align:top;
+    vertical-align:top;
     }
 .ljhidden {
         display: block;
@@ -176,3 +176,43 @@ DL.current-version {
 
 /* transparency for ie */
 .lj_embedcontent { zoom:expression(runtimeStyle.zoom = '1',allowTransparency = true); }
+
+/* WLMInterstitial */
+.wlm-interstitial {
+    text-align:left;
+    padding:20px 230px 10px 10px;
+    background:url(/img/lj_wlm/interstitial-screenshot.jpg) no-repeat 274px 3px;
+    }
+    .wlm-interstitial H1 {
+        font-size:2.6em;
+        text-transform:uppercase;
+        color:#375991;
+        }
+    .wlm-interstitial FIELDSET {
+        border:0;
+        padding:10px 0 0;
+        margin:0;
+        }
+        .wlm-interstitial FIELDSET UL,
+        .wlm-interstitial FIELDSET LI {
+            padding:0;
+            margin:0;
+            display:block;
+            list-style:none;
+            }
+        .wlm-interstitial FIELDSET UL {
+            padding-bottom:10px;
+            }
+        .wlm-interstitial FIELDSET .wlm-submit-button {
+            width:55px;
+            }
+.lj_ippu_titlebar {
+    text-align:left;
+    }
+.lj_ippu_titlebar IMG {
+    cursor:pointer;
+    }
+
+.opera-filter { display:none; }
+HTML:first-child .opera-filter { display:block; } /* opera lt 9.5 */
+HTML:not(IE7) .opera-filter, x:-o-prefocus { display:block; } /* opera gte 9.5 */

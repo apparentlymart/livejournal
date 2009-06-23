@@ -16,6 +16,7 @@ use Class::Autouse qw(
                       LJ::EventLogRecord::EditEntry
                       LJ::Config
                       LJ::Comment
+                      LJ::RateLimit
                       );
 
 LJ::Config->load;
@@ -109,6 +110,7 @@ my %e = (
      "408" => [ E_TEMP, "Maximum queued posts for this community+poster combination reached." ],
      "409" => [ E_PERM, "Post too large." ],
      "410" => [ E_PERM, "Your trial account has expired.  Posting now disabled." ],
+     "411" => [ E_TEMP, "Action frequency limit." ],
 
      # Server Errors
      "500" => [ E_TEMP, "Internal server error" ],
@@ -1008,7 +1010,7 @@ sub postevent
 
     my $dbh = LJ::get_db_writer();
     my $dbcm = LJ::get_cluster_master($uowner);
-
+    
     return fail($err,306) unless $dbh && $dbcm && $uowner->writer;
     return fail($err,200) unless $req->{'event'} =~ /\S/;
 
@@ -1539,7 +1541,7 @@ sub postevent
         'entry'     => $entry,
         'jobs'      => \@jobs,  # for hooks to push jobs onto
     });
-
+    
     # cluster tracking
     LJ::mark_user_active($u, 'post');
     LJ::mark_user_active($uowner, 'post') unless LJ::u_equals($u, $uowner);
@@ -2285,11 +2287,25 @@ sub editfriends
     # do not let locked people do this
     return fail($err, 308) if $u->{statusvis} eq 'L';
 
+#
+# Do not have values for $LJ::ADD_FRIEND_RATE_LIMIT
+#
+#    # check action frequency
+#    unless ($flags->{no_rate_check}){
+#        my $cond = ["ratecheck:add_friend:$userid",
+#                    [ $LJ::ADD_FRIEND_RATE_LIMIT || [ 10, 600 ] ]
+#                   ];
+#        return fail($err, 411)
+#            unless LJ::RateLimit->check($u, [ $cond ]);
+#    }
+
     my $res = {};
 
     ## first, figure out who the current friends are to save us work later
     my %curfriend;
     my $friend_count = 0;
+    my $friends_changed = 0;
+
     # TAG:FR:protocol:editfriends1
     $sth = $dbh->prepare("SELECT u.user FROM useridmap u, friends f ".
                          "WHERE u.userid=f.friendid AND f.userid=$userid");
@@ -2311,6 +2327,7 @@ sub editfriends
         # TAG:FR:protocol:editfriends2_del
         LJ::remove_friend($userid, $friendid);
         $friend_count--;
+        $friends_changed = 1;
     }
 
     my $error_flag = 0;
@@ -2421,8 +2438,9 @@ sub editfriends
                                                   ) unless $LJ::DISABLED{'friendchange-schwartz'};
 
                 $sclient->insert_jobs(@jobs) if @jobs;
-            }
 
+            }
+            $friends_changed = 1;
             LJ::run_hooks('befriended', LJ::load_userid($userid), LJ::load_userid($friendid));
         }
     }
@@ -2433,6 +2451,8 @@ sub editfriends
     LJ::memcache_kill($userid, "friends");
     LJ::memcache_kill($userid, "friends2");
     LJ::mark_dirty($userid, "friends");
+
+    LJ::run_hooks('friends_changed', LJ::load_userid($userid)) if $friends_changed;
 
     return $res;
 }

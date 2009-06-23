@@ -71,21 +71,21 @@
 }
 
 /* Shared Content */
-.account table, .display table, .mobile table, .privacy table, .history table, .advertising table {
+.account table, .display table, .mobile table, .privacy table, .history table, .advertising table, .extension table, .extensions table {
     width: 100%;
 }
-.account td, .display td, .mobile td, .privacy td, .history td, .advertising td {
+.account td, .display td, .mobile td, .privacy td, .history td, .advertising td, .integration td, .extensions td {
     border-bottom: 1px #ccc solid;
     padding: 10px 10px 10px 5px;
 }
-.account td.last, .display td.last, .mobile td.last, .privacy td.last, .history td.last, .advertising td.last {
+.account td.last, .display td.last, .mobile td.last, .privacy td.last, .history td.last, .advertising td.last, .extension td.last, .extensions td.last {
     border-bottom: none;
 }
-.account td.help, .display td.help, .mobile td.help, .privacy td.help, .history td.help, .advertising td.help {
+.account td.help, .display td.help, .mobile td.help, .privacy td.help, .history td.help, .advertising td.help .extensions td.help {
     width: 14px;
     text-align: right;
 }
-.account_label, .display_label, .mobile_label, .privacy_label, .history_label {
+.account_label, .display_label, .mobile_label, .privacy_label, .history_label, .integration_label, .extensions_label {
     font-weight: bold;
 }
 .display_option, .mobile_option, .privacy_option {
@@ -129,7 +129,8 @@
     text-align: right;
     color: #000;
 }
-.mobile_label, .mobile .help {
+.mobile_label, .mobile .help,
+.extensions_label, .extensions .help {
     vertical-align: top;
 }
 .mobile_option p {
@@ -143,6 +144,138 @@
     font-style: italic;
     margin-bottom: 0;
 }
+
+/* Integration Content */
+.extension {
+	margin: 2px 0 5px;
+	/*background: url(/img/liveid.gif) 100% 2px no-repeat;*/
+	}
+.extension table {
+	border: 0;
+	border-collapse: collapse;
+	}
+
+.extension .inprogr TD {
+	border: none;
+	}
+
+.extension td.integration_label {
+	width: 15em;
+	vertical-align: top;
+	}
+	.extension td.integration_label A {
+		font-weight: normal;
+		}
+.extension .act_msn TD {
+	padding: 0px 10px 10px 5px;
+	}
+
+.extension td.msnlogo {
+	padding-right: 160px;
+	font-weight: bold;
+	}
+
+	.msnlogo DIV {
+		padding-top: 7px;
+		}
+	.msnlogo DIV INPUT {
+		padding: 0px 6px;
+		position: relative;
+		overflow: visible;
+		}
+
+	.extension TD.last STRONG {
+		font-weight: bold;
+		display: block;
+		margin-bottom: 7px;
+		}
+
+.extension SPAN {
+	display: block;
+	clear: both;
+	overflow: hidden;
+	}
+.extension SPAN.comment {
+	/*font-size: .85em;*/
+	color: #999;
+	margin: 5px 0 0 5px;
+	}
+	.extension .comment.act {
+		color:#000;
+		}
+
+.extension SPAN.msn-inprogr {
+	display: inline;
+	color:#336699;
+	}
+
+.extension span INPUT {
+	margin-right: 4px;
+	position: relative;
+	top: -2px;
+	float: left;
+	}
+.extension  span #msn1, .extension span #msn3 {
+	top: -1px;
+	left: -3px;
+	margin-bottom: 3px;
+	}
+
+.extension span LABEL {
+	float: left;
+	height: 1%;
+	width: 90%;
+	}
+	.extension SPAN.msn_id {
+		display: inline;
+		}
+
+.extension #passw, .extension #c-passw {
+	display: block;
+	margin-bottom: 7px;
+	width: 180px;
+	}
+
+.extension #c-passw {
+	margin-bottom: 16px;
+	float: left;
+	}
+
+#msn_err_diff_pass {
+	float: left;
+	clear: none;
+	padding-left: 7px;
+	line-height: 1;
+	font-size: 10px;
+	color: #FF0000;
+	}
+
+.extension SPAN.alert_txt {
+	font-size: .85em;
+	margin: 0px 0px 16px 23px;
+	color:#999;
+	}
+
+.extension .msn_error {
+	background: #FFE889;
+	border: 1px solid #FFCC33;
+	color:#993300;
+	padding: 10px;
+	font-weight: normal;
+	}
+	.extension .msn_error H3 {
+		font-style: normal;
+		color:#FF6600;
+		font-size: 1.2em;
+		margin-bottom: 17px;
+		}
+	.extension .msn_error UL {
+		margin-top: 0px;
+		}
+	.extension .msn_error A {
+		color:#990000;
+		}
+
 
 /* Advertising Content */
 .advertising table.setting_table {

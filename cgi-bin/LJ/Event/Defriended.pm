@@ -22,6 +22,7 @@ my @_ml_strings_en = (
     'esn.post_entry',               # '[[openlink]]Post an entry[[closelink]]',
     'esn.edit_friends',             # '[[openlink]]Edit Friends[[closelink]]',
     'esn.edit_groups',              # '[[openlink]]Edit Friends groups[[closelink]]',
+    'esn.defriended.alert',         # '[[who]] removed you from their Friends list.',
     'esn.defriended.email_text',    # 'Hi [[user]],
                                     #
                                     #[[poster]] has removed you from their Friends list.
@@ -110,6 +111,15 @@ sub as_string {
     my $self = shift;
     return sprintf("%s has removed you from their Friends list.",
                    $self->friend->{user});
+}
+
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+    my $friend = $self->friend;
+    return '' unless $friend;
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.defriended.alert', undef, { who => $friend->ljuser_display({ target => '_blank' }) });
 }
 
 sub subscription_as_html {

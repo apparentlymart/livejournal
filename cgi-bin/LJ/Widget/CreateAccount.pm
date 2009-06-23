@@ -195,6 +195,8 @@ sub render_body {
         $ret .= "</td></tr>\n" unless $alt_layout;
     }
 
+    $ret .= LJ::run_hook("create_account_extra_fields", {class => $class, errors => $errors});
+
     ### captcha
     if ($LJ::HUMAN_CHECK{create}) {
         if (LJ::is_enabled("recaptcha")) {
@@ -320,6 +322,18 @@ sub render_body {
         $ret .= $class->html_submit( submit => $class->ml('widget.createaccount.btn'), { class => "create-button" }) . "\n";
         $ret .= "</td></tr>\n";
     }
+	
+    $ret .=qq|<script type="text/javascript">
+	   var msn_accept=DOM.getElementsByAttributeAndValue(document,'name','Widget[CreateAccount]_service_agree')[0];
+	   var create_button=DOM.getElementsByClassName(document,'create-button')[0];
+	   create_button.onclick=function(){
+	   	if(msn_accept.checked==false && \$('msn-accept').style.display != 'none'){
+			
+			alert('| . BML::ml('msn_messanger.events') . qq|')
+			return false;
+		}
+	   };
+    </script>|;    
 
     $ret .= "</table>\n" unless $alt_layout;
 
@@ -375,6 +389,12 @@ sub handle_post {
         email => $email,
         name => $user,
     }) if LJ::sysban_check('email', $email);
+
+    my $pre_create_check = LJ::run_hook('preprocess_create_account_extra_fields', $class, $post, \%opts);
+    if ($pre_create_check->{microsoft_agreement_not_accepted}){
+        $from_post{errors}->{microsoft_agreement_not_accepted} = "microsoft_agreement_not_accepted";
+    }
+
 
     my $dbh = LJ::get_db_writer();
 
@@ -502,6 +522,9 @@ sub handle_post {
             # mark the captcha for deletion
             LJ::Captcha::expire($capid, $anum, $nu->id);
         }
+
+        #
+        LJ::run_hook('post_create_account', $class, $nu, $post, \%opts);
 
         # send welcome mail... unless they're underage
         unless ($is_underage) {

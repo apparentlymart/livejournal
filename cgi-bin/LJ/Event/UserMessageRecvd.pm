@@ -136,6 +136,21 @@ sub as_sms {
                    $subject, $other_u->user);
 }
 
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+
+    my $lang    = $u->prop('browselang');
+    my $message = $self->load_message;
+    my $subject = $message->subject;
+    my $other_u = $message->other_u;
+
+    return LJ::Lang::get_text($lang, 'event.user_message_recvd.alert', undef, {
+            subject => $subject,
+            user    => $other_u->ljuser_display({ target => '_blank' }),
+        });
+}
+
 sub subscription_as_html {
     my ($class, $subscr) = @_;
     my $journal = $subscr->journal or croak "No user";

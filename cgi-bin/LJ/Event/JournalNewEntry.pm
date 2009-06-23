@@ -85,6 +85,19 @@ sub as_sms {
             $self->entry->poster->user, $self->entry->journal->user);
 }
 
+# TODO: A word 'entry' in text must be a hyperlink to this entry.
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+    my $entry_url = $self->entry->url;
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.journal_new_entry.alert', undef,
+            {
+                who     => $self->entry->poster->ljuser_display({ target => '_blank' }),
+                journal => "<a href=\"$entry_url\" target='_blank'>" . $self->entry->journal->display_username() . "</a>",
+            });
+}
+
 sub as_html {
     my ($self, $target) = @_;
 
@@ -124,6 +137,7 @@ sub as_html_actions {
 }
 
 my @_ml_strings_en = (
+    'esn.journal_new_entry.alert',                  # '[[who]] posted a new entry in [[journal]]!',
     'esn.journal_new_entry.posted_new_entry',       # '[[who]] posted a new entry in [[journal]]!',
     'esn.journal_new_entry.updated_their_journal',  # '[[who]] updated their journal!',
     'esn.hi',                                       # 'Hi [[username]],',

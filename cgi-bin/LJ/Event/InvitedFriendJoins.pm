@@ -15,16 +15,18 @@ sub new {
 sub is_common { 0 }
 
 my @_ml_strings = (
-    'esn.invited_friend_joins.subject', # '[[who]] created a journal!'
-    'esn.add_friend',                   # '[[openlink]]Add [[journal]] to your Friends list[[closelink]]',
-    'esn.read_journal',                 # '[[openlink]]Read [[postername]]\'s journal[[closelink]]',
-    'esn.view_profile',                 # '[[openlink]]View [[postername]]\'s profile[[closelink]]',
-    'esn.invite_another_friend',        # '[[openlink]]Invite another friend[[closelink]]",
-    'esn.invited_friend_joins.email',   # 'Hi [[user]],
-                                        #
-                                        # Your friend [[newuser]] has created a journal on [[sitenameshort]]!
-                                        #
-                                        # You can:'
+    'esn.invited_friend_joins.subject',         # '[[who]] created a journal!'
+    'esn.add_friend',                           # '[[openlink]]Add [[journal]] to your Friends list[[closelink]]',
+    'esn.read_journal',                         # '[[openlink]]Read [[postername]]\'s journal[[closelink]]',
+    'esn.view_profile',                         # '[[openlink]]View [[postername]]\'s profile[[closelink]]',
+    'esn.invite_another_friend',                # '[[openlink]]Invite another friend[[closelink]]',
+    'esn.invited_friend_joins.alert.unnamed',   # 'A friend you invited has created a journal.'
+    'esn.invited_friend_joins.alert',           # 'A friend you invited has created the journal [[newuser]]',
+    'esn.invited_friend_joins.email',           # 'Hi [[user]],
+                                                #
+                                                # Your friend [[newuser]] has created a journal on [[sitenameshort]]!
+                                                #
+                                                # You can:'
 );
 
 sub as_email_subject {
@@ -107,9 +109,13 @@ sub as_string {
     return sprintf "A friend you invited has created the journal %s", $self->friend->user;
 }
 
-sub as_sms {
+sub as_alert {
     my $self = shift;
-    return $self->as_string;
+    my $u = shift;
+    my $friend = $self->friend;
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.invited_friend_joins.alert' . ($friend ? '' : '.unnamed'), undef,
+        $friend ? { newuser => $friend->ljuser_display({ target => '_blank' }) } : {} );
 }
 
 sub friend {

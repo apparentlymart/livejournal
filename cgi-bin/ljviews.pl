@@ -1107,7 +1107,7 @@ sub create_view_lastn
     $lastn_page{'head'} = "";
 
     if (LJ::are_hooks('s2_head_content_extra')) {
-        $lastn_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
+        LJ::run_hooks('s2_head_content_extra', \$lastn_page{'head'}, $remote, $opts->{r});
     }
 
     # if user has requested, or a skip back link has been followed, don't index or follow
@@ -1586,7 +1586,7 @@ sub create_view_friends
     $friends_page{'head'} = "";
 
     if (LJ::are_hooks('s2_head_content_extra')) {
-        $friends_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
+        LJ::run_hook('s2_head_content_extra', \$friends_page{'head'}, $remote, $opts->{r});
     }
 
     ## never have spiders index friends pages (change too much, and some
@@ -2089,7 +2089,7 @@ sub create_view_calendar
     $calendar_page{'head'} = "";
 
     if (LJ::are_hooks('s2_head_content_extra')) {
-        $calendar_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
+        LJ::run_hook('s2_head_content_extra', \$calendar_page{'head'}, $remote, $opts->{r});
     }
 
     if ($u->should_block_robots) {
@@ -2355,7 +2355,7 @@ sub create_view_day
     $day_page{'head'} = "";
 
     if (LJ::are_hooks('s2_head_content_extra')) {
-        $day_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
+        LJ::run_hook('s2_head_content_extra', \$day_page{'head'}, $remote, $opts->{r});
     }
 
     if ($u->should_block_robots) {

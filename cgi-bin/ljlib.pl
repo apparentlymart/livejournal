@@ -23,9 +23,11 @@ use LJ::Error;
 use LJ::User;      # has a bunch of pkg LJ, non-OO methods at bottom
 use LJ::Entry;     # has a bunch of pkg LJ, non-OO methods at bottom
 use LJ::Constants;
+use LJ::User;
 use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
+
 use Class::Autouse qw(
                       TheSchwartz
                       TheSchwartz::Job
@@ -94,6 +96,7 @@ sub END { LJ::end_request(); }
                     "embedcontent", "usermsg", "usermsgtext", "usermsgprop",
                     "notifyarchive", "notifybookmarks", "pollprop2", "embedcontent_preview",
                     "logprop_history",
+                    "comet_history",
                     );
 
 # keep track of what db locks we have out
@@ -1860,8 +1863,9 @@ sub challenge_check {
 
     if ($opts) {
         $opts->{'expired'} = $expired;
-        $opts->{'valid'} = $valid;
-        $opts->{'count'} = $count;
+        $opts->{'valid'}   = $valid;
+        $opts->{'count'}   = $count;
+        $opts->{'rand'}    = $rand;
     }
 
     return ($valid && !$expired && ($count==1 || $opts->{dont_check_count}));
@@ -2067,7 +2071,7 @@ sub start_request
     %LJ::NEEDED_RES = ();             # needed resources (css/js/etc):
     @LJ::NEEDED_RES = ();             # needed resources, in order requested (implicit dependencies)
                                       #  keys are relative from htdocs, values 1 or 2 (1=external, 2=inline)
-
+    @LJ::INCLUDE_RAW = ();            # raw js/css added after needed resources.
     %LJ::REQ_GLOBAL = ();             # per-request globals
     %LJ::_ML_USED_STRINGS = ();       # strings looked up in this web request
     %LJ::REQ_CACHE_USERTAGS = ();     # uid -> { ... }; populated by get_usertags, so we don't load it twice

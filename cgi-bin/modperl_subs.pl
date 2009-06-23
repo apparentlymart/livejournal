@@ -14,18 +14,18 @@ use Apache::BML;
 use Apache::SendStats;
 use Apache::DebateSuicide;
 
-use Digest::MD5;
+use Digest::MD5 qw//;
 use Text::Wrap ();
 use LWP::UserAgent ();
-use Storable;
+use Storable qw//;
 use Time::HiRes ();
 use Image::Size ();
-use POSIX ();
 
 use LJ::Portal ();
 use LJ::Blob;
 use LJ::Captcha;
 use LJ::Faq;
+
 
 use Class::Autouse qw(
                       DateTime
@@ -44,12 +44,6 @@ use Class::Autouse qw(
                       );
 
 LJ::Config->load;
-
-# force XML::Atom::* to be brought in (if we have it, it's optional),
-# unless we're in a test.
-BEGIN {
-    LJ::ModuleCheck->have_xmlatom unless LJ::is_from_test();
-}
 
 # in web context, Class::Autouse will load this, which loads MapUTF8.
 # otherwise, we'll rely on the AUTOLOAD in ljlib.pl to load MapUTF8

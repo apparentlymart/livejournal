@@ -2031,6 +2031,13 @@ sub need_res {
     }
 }
 
+sub include_raw  {
+    my $type = shift;
+    my $code = shift;
+    die "Bogus include type: $type" unless $type =~ m!^(js|css)$!;
+    push @LJ::INCLUDE_RAW => [$type, $code];
+}
+
 sub res_includes {
     # TODO: automatic dependencies from external map and/or content of files,
     # currently it's limited to dependencies on the order you call LJ::need_res();
@@ -2195,6 +2202,16 @@ sub res_includes {
     $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" />");
     $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>");
     $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>");
+
+    # add raw js/css
+    foreach my $inc (@LJ::INCLUDE_RAW){
+        if ($inc->[0] eq 'js'){
+            $ret .= qq|<script type=text/javascript">\r\n| . $inc->[1] . "</script>\r\n";
+        } elsif ($inc->[0] eq 'css'){
+            $ret .= qq|<style>\r\n| . $inc->[1] . "</style>\n";
+        }
+    }
+
     return $ret;
 }
 
@@ -3495,8 +3512,8 @@ sub subscribe_interface {
                 $cat_html .= "<td>" . $pending_sub->htmlcontrol($u) . "$sub_title*</td>";
                 $cat_html .= "<td>&nbsp;</td>";
                 $cat_html .= "<td><span class='NotificationOptions'$hidden>" . $pending_sub->htmlcontrol($u, undef, undef, notif => 1, notif_catid => $catid, notif_ntypeid => 2) . "</span></td>";
-                $cat_html .= "<td><span class='NotificationOptions'$hidden>" . LJ::html_check({ disabled => 1 }) . "</span></td>";
-                $cat_html .= "<td><span class='NotificationOptions'$hidden>" . LJ::html_check({ disabled => 1 }) . "</span></td>";
+                $cat_html .= "<td><span class='NotificationOptions'$hidden>" . LJ::html_check({ disabled => 1 }) . "</span></td>"
+                    for 1 .. scalar @notify_classes - 1;
                 $cat_html .= "</tr>";
 
                 $special_subs++;

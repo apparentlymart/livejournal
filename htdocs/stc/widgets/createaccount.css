@@ -61,3 +61,47 @@ span.appwidget-createaccount #username_error {
     display: block;
     width: 330px;
 }
+
+#create_user {
+    font-size:1em;
+    height:16px;
+    }
+
+.liveid {
+    padding:34px 0 16px 0;
+    background:url(/img/lj_wlm/llm.png) 0 16px no-repeat;
+    }
+    .liveid UL,
+    .liveid UL LI {
+        position:relative;
+        display:block;
+        padding:0;
+        margin:0;
+        }
+        .liveid UL LI {
+            padding:11px 50px 0 25px;
+            zoom:1;
+            }
+            .liveid UL LI INPUT {
+                position:absolute;
+                top:11px;
+                left:0;
+                zoom:1;
+                }
+            .liveid UL LI LABEL {
+                display:block;
+                padding-left:25px;
+                margin-left:-25px;
+                cursor:default;
+                }
+                #create-page .liveid UL LI .helper A:link,
+                #create-page .liveid UL LI .helper A:visited {
+                    color:#6A9AC2;
+                    text-decoration:underline;
+                    }
+            .liveid UL LI .helper {
+                font-size:11px;
+                width:430px;
+                display:block;
+                color:#999;
+                }

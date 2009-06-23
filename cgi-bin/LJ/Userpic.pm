@@ -514,7 +514,9 @@ sub create {
         my $msg = shift;
     };
 
-    eval "use Image::Size;";
+    eval { require Image::Size; };
+    die "Error loading Image::Size: $@" if $@;
+
     my ($w, $h, $filetype) = Image::Size::imgsize($dataref);
     my $MAX_UPLOAD = $maxbytesize || LJ::Userpic->max_allowed_bytes($u);
 

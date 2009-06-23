@@ -89,7 +89,7 @@ sub load_portal_boxes {
     my $self = shift;
 
     foreach my $boxclass (@LJ::PORTAL_BOXES) {
-        require "LJ/Portal/Box/${boxclass}.pm";
+        Class::Autouse->autouse( "LJ::Portal::Box::" . $boxclass );
     }
 }
 

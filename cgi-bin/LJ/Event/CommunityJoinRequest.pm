@@ -71,6 +71,7 @@ sub as_string {
 }
 
 my @_ml_strings_en = (
+    'esn.community_join_requst.alert',    # [[who]] requests membership in [[comm]]. Visit community settings to approve.
     'esn.community_join_requst.subject',    # '[[comm]] membership request by [[who]]!',
     'esn.manage_membership_reqs',           # '[[openlink]]Manage [[communityname]]\'s membership requests[[closelink]]',
     'esn.manage_community',                 # '[[openlink]]Manage your communities[[closelink]]',
@@ -139,6 +140,17 @@ sub as_sms {
     return sprintf("%s requests membership in %s. Visit community settings to approve.",
                    $self->requestor->display_username,
                    $self->comm->display_username);
+}
+
+sub as_alert {
+    my $self = shift;
+    my $u = shift;
+    return LJ::Lang::get_text($u->prop('browselang'),
+        'esn.community_join_requst.alert', undef,
+            {
+                who  => $self->requestor->ljuser_display({ target => '_blank' }),
+                comm => $self->comm->ljuser_display({ target => '_blank' }),
+            });
 }
 
 sub subscription_as_html {

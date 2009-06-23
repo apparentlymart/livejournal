@@ -2,7 +2,7 @@
 #
 # Stores all global crumbs and builds the crumbs hash
 
-use Errno qw(ENOENT);
+use POSIX qw/ENOENT/;
 
 %LJ::CRUMBS = (
                 ## key => [ (name, not used), (link href), (parent) ]

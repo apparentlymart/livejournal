@@ -28,6 +28,10 @@
 
 .cat.history.desc=Account history
 
+.cat.integration=Extensions
+
+.cat.integration.desc=Windows Live ID
+
 .cat.mobile=Mobile
 
 .cat.mobile.desc=Voice post, text messaging, and mobile options
@@ -212,6 +216,53 @@ as well.
 .security.visibility.friends=Friends only
 
 .security.visibility.nobody=Nobody
+
+.setting.integration.msn.activate=Account registration
+
+.setting.integration.msn.gadget.add=Add friends to my contact list automatically
+
+.setting.integration.msn.signout=Sign out Livejournal Messenger
+
+.setting.integration.msn.authorizationlabel=Livejournal Messenger
+
+.setting.integration.msn.signintext=For turning messenger on sign up or sign into your Live ID:
+
+.setting.integration.msn.signin=Sign up
+
+.setting.integration.msn.newlid=Sign into your Live ID account
+
+.setting.integration.msn.useid=<a [[aopts]]>Sign into your Live ID account</a>
+
+.setting.integraton.msn.yourid=You Live ID
+
+.setting.integration.msn.passw=Password
+
+.setting.integration.msn.c-passw=Confirm password
+
+.setting.integration.msn.passw_err=Wrong <br />password
+
+.setting.integration.msn.loadmsn=Turn messenger on
+
+.setting.integration.msn.events=Alert me about LJ-events
+
+.setting.integration.msn.addfriends=Add my friends into the contact list automatically
+
+.setting.integration.msn.alert=Post the entry about my Messenger into my journal automatically
+
+.setting.integration.msn.alert.comment=<b>Entry's text:</b> "Turn <a [[aopts1]]>LiveJournal Messenger</a> on. My Live ID - [[aopts2]]. Let's talk!"
+
+.setting.integration.msn.comment=You can set up LJ-events notifications in the <a [[aopts]]>Notifications</a> tab
+
+.setting.integration.msn.creating=Your Live ID is creating at the moment. Please wait.
+
+.setting.integration.msn.error=Error creating Live ID account
+
+.setting.integration.msn.error_txt<<
+The e-mail address is already in use. To continue, do one of the following:
+<ul><li>You may have already signed up with this e-mail address. If you have a hotmail.com or msn.com address, you're already signed up. <a [[aopts1]]>Sign in now</a>.</li>
+<li>If you haven't signed up, make sure you typed the address correctly.</li>
+<li>Someone else may have signed up with your e-mail address. To find out, <a [[aopts2]]>go here</a>
+.
 
 .stylealwaysmine=View all journals and communities in your own style
 
