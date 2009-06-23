@@ -19,7 +19,7 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    my $is_paid_perm = $remote && ($remote->in_class('paid') || $remote->in_class('perm') || $remote->in_class("sponsored"));
+    my $is_paid_perm = $remote && $remote->get_cap('aliases');
     return "<?h1 You must be a paid account h1?>" unless $is_paid_perm;
 
     my $authas = $remote->{'user'};
