@@ -103,7 +103,7 @@
     }
 
     if ($u && $remote) {
-        my $aliases = $u->prop('aliases');
+        my $aliases = $remote->prop('aliases');
         $aliases = jsonToObj($aliases);
         $ret{alias} = $aliases->{$u->{user}};
         my $is_paid_perm = $remote && $remote->get_cap('paid');
