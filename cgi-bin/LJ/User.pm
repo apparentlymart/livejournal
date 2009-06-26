@@ -1312,10 +1312,26 @@ sub ljuser_display {
             $imgurl = $site->icon_url;
         }
 
+
+        my $remote = LJ::get_remote();
+        my $alias_enable = $remote && $remote->get_cap('paid');
+        my $alias = $alias_enable ? LJ::ljuser_alias($u->{user}) : '';
+  
         my $profile = $profile_url ne '' ? $profile_url : "$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull";
         
-        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'$target><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url' rel='nofollow'$target><b>$name</b></a></span>";
-
+        my $user_html = '';
+        $user_html .= "<span class='ljuser ";
+        $user_html .= "with-alias"
+            if $alias;
+        $user_html .= "' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'";
+        $user_html .= " title='$name / $alias'"
+            if $alias;
+        $user_html .= " rel='nofollow'><b>$name</b>";
+        $user_html .= "<sup>&#x2714;</sup>"
+            if $alias;
+        $user_html .= "</a></span>";
+        return $user_html;
+        
     } else {
         return "<b>????</b>";
     }
@@ -6447,8 +6463,23 @@ sub ljuser
 
         $profile = $profile_url ne '' ? $profile_url : $profile . $andfull;
         $url = $journal_url ne '' ? $journal_url : $url;
-
-        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'$target><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color$target>$ljusername</a></span>";
+         
+        my $u = LJ::get_remote();
+        my $alias_enable = $u && $u->get_cap('paid');
+        my $alias = $alias_enable ? LJ::ljuser_alias($user) : '';
+        
+        my $user_html = '';
+        $user_html .= "<span class='ljuser ";
+        $user_html .= "with-alias"
+            if $alias;
+        $user_html .= "' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color";
+        $user_html .= "  title='$user / $alias'"
+            if $alias;
+        $user_html .= ">$ljusername";
+        $user_html .= "<sup>&#x2714;</sup>"
+            if $alias;
+        $user_html .= "</a></span>";
+        return $user_html;
     };
 
     my $u = isu($user) ? $user : LJ::load_user($user);
