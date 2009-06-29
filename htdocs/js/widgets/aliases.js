@@ -27,11 +27,12 @@ Aliases.navClicked = function(evt) {
 LiveJournal.register_hook("page_load", function () {
     Aliases.init_catnav() });
 
-function addAlias(target, ptitle, ljusername) {
+function addAlias(target, ptitle, ljusername, oldalias) {
     if (! ptitle) return true;
 
     var addvgift = new LJWidgetIPPU_AddAlias({
         title: ptitle,
+        alias : oldalias,
         width: 440,
         height: 320,
         authToken: Aliases.authToken

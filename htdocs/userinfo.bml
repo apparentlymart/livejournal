@@ -415,7 +415,7 @@
         }
     }
 
-    $body .= q|<input type='button' value='Add' onclick='return addAlias(this, "Title aliases add", "|.$u->{user}.q|")' class='bright' />|;
+    $body .= q|<input type='button' value='Add' onclick='return addAlias(this, "|.($user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'}).q|", "|.$u->{user}.q|", "|.$user_alias.q|")' class='bright' />|;
 
     # add friend
     $url = "$LJ::SITEROOT/friends/add.bml?user=$user";

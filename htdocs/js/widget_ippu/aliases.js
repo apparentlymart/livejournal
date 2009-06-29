@@ -3,6 +3,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
     opts.widgetClass = "IPPU::AddAlias";
     this.width = opts.width; // Use for resizing later
     this.height = opts.height; // Use for resizing later
+    this.alias = opts.alias;
     LJWidgetIPPU_AddAlias.superClass.init.apply(this, arguments);
   },
 

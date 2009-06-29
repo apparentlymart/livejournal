@@ -5,6 +5,8 @@
     use LJ::Auth;
     use JSON;
 
+    BML::set_language_scope('/tools/endpoints/ctxpopup.bml');
+    
     my $err = sub {
         my $msg = shift;
         my %extra = @_;
@@ -108,6 +110,7 @@
         $ret{alias} = $aliases->{$u->{user}};
         my $is_paid_perm = $remote && $remote->get_cap('paid');
         $ret{alias_enable} = $is_paid_perm ? 1 : 0;
+        $ret{alias_title} = $ret{alias} ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
     }
 
     # generate auth tokens

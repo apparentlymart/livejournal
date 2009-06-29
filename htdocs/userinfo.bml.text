@@ -6,6 +6,10 @@
 
 .about.user=Bio:
 
+.addalias.title=Add Alias
+
+.editalias.title=Edit Alias
+
 .admins.header=Administrators
 
 .allpics=View all userpics
