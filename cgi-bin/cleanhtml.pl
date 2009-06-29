@@ -503,7 +503,8 @@ sub clean
                         if ($opts->{'textonly'}) {
                             $newdata .= $user;
                         } else {
-                            my $ljuser = LJ::ljuser($user, { title => $attr->{title} } );
+                            my $title = Encode::encode_utf8($attr->{title});
+                            my $ljuser = LJ::ljuser($user, { title => $title } );
                             $newdata .= Encode::decode_utf8($ljuser);
                         }
                     } else {
