@@ -110,10 +110,11 @@ body<=
                         inputs[i].checked = this.checked;
                     } 
                 }", selected => 0 });
-        $ret .= "</th><th>$ML{'/community/members.bml.key.user'}</th></tr>\n";
+        $ret .= "</th><th>$ML{'/community/members.bml.key.user'}</th><th>$ML{'.intro.unban.alias'}</th></tr>\n";
 
         my $rc = 0;
 
+        my $alias_enable = $u->prop('aliases');
         foreach my $banuid (@$banned) {
             my $bu = $us->{$banuid};
             next unless $bu;
@@ -125,6 +126,7 @@ body<=
                 value => $bu->id,
             }) . "</td>";
             $ret .= "<td>" . $bu->ljuser_display . "</td>";
+            $ret .= "<td>".LJ::ljuser_alias($bu->{user})."</td>" if $alias_enable;
             $ret .= "</tr>";
         }
         $ret .= "</table>";
