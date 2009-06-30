@@ -415,7 +415,13 @@
         }
     }
 
-    $body .= q|<input type='button' value='Add' onclick='return addAlias(this, "|.($user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'}).q|", "|.$u->{user}.q|", "|.$user_alias.q|")' class='bright' />|;
+#   $body .= q|<input type='button' value='Add' onclick='return addAlias(this, "|.($user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'}).q|", "|.$u->{user}.q|", "|.$user_alias.q|")' class='bright' />|;
+
+# add alias
+
+	$text = $user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
+	$li_title = $ML{'.useralias.title'};
+	$body .= "<li class='profile_addfeed' title=\"$li_title\"><a href='#' onclick='return addAlias(this, " . ($user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'}) . ", " .$u->{user}. ", " .$user_alias . ")'><img src='$LJ::IMGPREFIX/profile_icons/alias.gif' alt='' />$text</a></li>";
 
     # add friend
     $url = "$LJ::SITEROOT/friends/add.bml?user=$user";
