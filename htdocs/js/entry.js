@@ -98,6 +98,116 @@ function setCopyrightUpdate() {
     }
 }
 
+
+function detectLocation(){
+
+	function myFunctionForLoadDistr(url)
+	{
+	 //alert('Magic Scanner is not installed, download it at '+url);
+	 wi2Geo.response=true;
+	}
+	
+	var wi2Geo={};
+	var gGears={};
+
+	wi2Geo.response=false;
+	gGears.response=false;
+
+	function updateWi2GeoPosition(q)
+	{
+	          if(q){		
+		  	wi2Geo.country=q.city.country;
+		  	wi2Geo.city=q.city.name;
+		  	wi2Geo.street=q.building.street;
+		  	wi2Geo.building=q.building.address;
+			wi2Geo.metro=q.metro.name;
+		  	wi2Geo.lat=q.lat;
+		  	wi2Geo.lng=q.lng;
+			wi2Geo.type=q.type;
+		  }
+		  wi2Geo.response=true;
+	 }
+	
+	function updateGearsPosition(p) {
+		if(p){
+		  gGears.country=p.gearsAddress.country;
+		  if(gGears.country=='USA') gGears.region=p.gearsAddress.region;
+		  gGears.city=p.gearsAddress.city;
+		  gGears.lat=p.coords.latitude;
+		  gGears.lng=p.coords.longitude;
+		  gGears.type=(p.accuracy<1000&&p.accuracy>0)?("nonIP"):("IP");
+		  if(gGears.type!='IP' && !p.gearsAddress.street.match(/\?\?/gi)){
+		  	gGears.street=p.gearsAddress.street;
+		  	gGears.building=p.gearsAddress.streetNumber;
+		  }
+		  
+		}
+		gGears.response=true;
+	}
+
+	try{
+		var geo = google.gears.factory.create('beta.geolocation');	
+		geo.getCurrentPosition(updateGearsPosition, handleError, {enableHighAccuracy: true, gearsRequestAddress: true});
+	}catch(e){
+		gGears.response=true;
+		try{
+			var myWi2GeoScanner = new Wi2GeoScanner('AQIAAKxzJUlHmzaMvzei5+vo3XLHJIdR', myFunctionForLoadDistr);
+			myWi2GeoScanner.scan(updateWi2GeoPosition);
+			if(window.opera) wi2Geo.response=true;
+		}catch(e){
+			wi2Geo.response=true;
+		}
+
+	}
+	
+	function handleError(positionError) {
+		  gGears.response=true;
+	}
+
+	var si=window.setInterval(function getLocation(){
+			if(wi2Geo.response==true && gGears.response==true){
+				window.clearInterval(si);
+				var fCountry=(gGears.country||wi2Geo.country)?((gGears.country||wi2Geo.country)+", "):("");
+				var fRegion=(gGears.region||wi2Geo.region)?((gGears.region||wi2Geo.region)+", "):("");
+				var fCity=(gGears.city||wi2Geo.city)?((gGears.city||wi2Geo.city)+", "):("");
+				if (fRegion==fCity) fRegion="";
+				var fStreet=(gGears.street||wi2Geo.street)?((gGears.street||wi2Geo.street)+", "):("");
+				if(fStreet=="") fCity=fCity.replace(/,/,"");
+				var fBuilding=gGears.building||wi2Geo.building||"";
+				var fMetro=(wi2Geo.metro)||"";
+				var fLat=(gGears.lat||wi2Geo.lat)?((gGears.lat||wi2Geo.lat)+", "):("");
+				var fLng=gGears.lng||wi2Geo.lng||"";
+				if((!fCountry || !fCity || !fLat || !fLng)||(gGears.type=='IP' && wi2Geo.type=='IP')){
+					HTTPReq.getJSON({url:'/tools/endpoints/geo_location.bml',
+						onData:function(data){
+							if(data.data){
+								fCountry=(data.data.country_rus_name)?(data.data.country_rus_name+", "):(data.data.country_name+", ");
+								fCity=data.data.city_rus_name||data.data.city_name;
+								if(data.data.country_short=='US') fRegion=data.data.region_name+", ";
+								fLat=data.data.latitude+", ";
+								fLng=data.data.longitude;
+								$('prop_current_location').value=fCountry+fRegion+fCity;
+							}else{
+								$('prop_current_location').value="Can't Detect";
+								window.setTimeout(function(){$('prop_current_location').value=" "},3000);
+							}
+						},
+						onError:LiveJournal.ajaxError
+						});
+				}
+				else{
+					$('prop_current_location').value=fCountry+fRegion+fCity+fStreet+fBuilding;
+				}
+				
+			}
+			else{
+				$('prop_current_location').value='detecting...';
+			}
+	},100);
+	
+	
+}
+
 function setCopyrightEdit() {
     if ($('security') && $('prop_copyright')) {
 	var copyright_flag=$('prop_copyright').checked;

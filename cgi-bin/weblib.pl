@@ -1476,7 +1476,7 @@ MOODS
   				if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location'}) {
 
                 	my $button_label = BML::ml('entryform.location.detect');
-                	$out .= qq[<span class="detect_btn"><input type="button" value="$button_label">];
+                	$out .= qq[<span class="detect_btn"><input type="button" value="$button_label" onclick="detectLocation()">];
                 	$out .= LJ::help_icon_html("screening", "", " ");
 					$out .="</span>";
 				
@@ -3818,6 +3818,7 @@ function sendForm (formid, checkuser)
     if (! document.getElementById) return true;
     var loginform = document.getElementById(formid);
     if (! loginform) return true;
+    if(document.getElementById('prop_current_location').value=='detecting...') document.getElementById('prop_current_location').value='';
 
     // Avoid accessing the password field if there is no username.
     // This works around Opera < 7 complaints when commenting.
