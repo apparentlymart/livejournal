@@ -1324,7 +1324,7 @@ sub ljuser_display {
         $user_html .= "with-alias"
             if $alias;
         $user_html .= "' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'";
-        $user_html .= " title='$name / $alias'"
+        $user_html .= " title='$alias'"
             if $alias;
         $user_html .= " rel='nofollow'><b>$name</b>";
         $user_html .= "<sup>&#x2714;</sup>"
@@ -6473,7 +6473,7 @@ sub ljuser
         $user_html .= "with-alias"
             if $alias;
         $user_html .= "' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color";
-        $user_html .= "  title='$user / $alias'"
+        $user_html .= "  title='$alias'"
             if $alias;
         $user_html .= ">$ljusername";
         $user_html .= "<sup>&#x2714;</sup>"
