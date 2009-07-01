@@ -26,6 +26,8 @@ sub render_body {
              );
     my $for_user = LJ::load_user($opts{foruser});
 
+    my $authtoken = LJ::Auth->ajax_auth_token(LJ::get_remote(), "/_widget");
+
 	$body .= "<div class='user_alias_act'>";
     $body .= "<label for='Widget[IPPU_AddAlias]_alias'>". BML::ml('widget.alias.setalias') ." ".$for_user->ljuser_display." (". BML::ml('widget.alias.faq') ."):</label>";
 
@@ -49,6 +51,7 @@ sub render_body {
     $body .= $class->end_form;
 	$body .= "</p>";
 
+    $body .= "<script>Aliases.authToken = \"$authtoken\";</script>";
 
     return $body;
 }
