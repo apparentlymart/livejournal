@@ -65,12 +65,19 @@ sub handle_post {
     die BML::ml('.error.cantfinduser', {'user' => $post->{foruser}})
         unless $user_for_alias;
 
+    my $is_edit = 0;
+    $is_edit = 1 if $aliases->{$post->{foruser}} ne '';
     $aliases->{$post->{foruser}} = $post->{alias};
     $aliases = objToJson($aliases);
 
     $remote->set_prop('aliases', $aliases);
     
-    return (success => 1);
+    return (
+        success => 1, 
+        link    => $user_for_alias->journal_base,
+        alias   => $post->{alias},
+        message => $is_edit ? BML::ml('widget.addalias.edit_alias') : BML::ml('widget.addalias.add_alias'),
+    );
 }
 
 1;
