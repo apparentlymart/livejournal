@@ -264,7 +264,7 @@ body<=
         $aliases = jsonToObj($aliases);
         foreach (grep { /^useralias/ } keys %POST) {
             my $key = my $who = $_;
-            my $value = $POST{$key};
+            my ($value) = $POST{$key} =~ m#^(.{0,80})#;
             $who =~ s/^useralias_//;
             $aliases->{$who} = $value if (defined $value && $value ne '');
         }
