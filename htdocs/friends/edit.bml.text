@@ -13,6 +13,8 @@
 
 .btn.toggle=Preview
 
+.editfriends.alias=Alias
+
 .editfriends.friend=Friend?
 
 .editfriends.head=Edit Friends

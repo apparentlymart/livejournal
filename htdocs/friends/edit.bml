@@ -106,9 +106,9 @@ body<=
                 $ret .= "<a href='". BML::self_link({'sort' => 'username'}) . "'>$ML{'.editfriends.username'}</a>";
             }
 
-            $ret .= "</th><th align='left'>$ML{'.editfriends.name'}</th>";
+            $ret .= "</th><th width='30%' style='text-align:left;'>$ML{'.editfriends.name'}</th>";
 
-            $ret .= "<th>Alias</th>";
+            $ret .= "<th style='text-align:left;'>$ML{'.editfriends.alias'}</th>";
             
             $ret .= "<th width='5%'>$ML{'.editfriends.friend'}</th></tr>";
 
@@ -137,6 +137,8 @@ body<=
 
                 $ret .= "<td>";
                 $ret .= LJ::html_text({
+ 							size => "30",
+							maxlength => "80",
                             name => "useralias_$who",
                             id   => "useralias_$who",
                             value => LJ::ljuser_alias($f->{username}),
