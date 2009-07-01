@@ -1,3 +1,428 @@
+LJWidget = new Class(Object, {
+    // replace the widget contents with an ajax call to render with params
+    updateContent: function (params) {
+        if (! params) params = {};
+        this._show_frame = params["showFrame"];
+
+        if ( params["method"] ) method = params["method"];
+        params["_widget_update"] = 1;
+
+        if (this.doAjaxRequest(params)) {
+            // hilight the widget to show that its updating
+            this.hilightFrame();
+        }
+    },
+
+    // returns the widget element
+    getWidget: function () {
+        return $(this.widgetId);
+    },
+
+    // do a simple post to the widget
+    doPost: function (params) {
+        if (! params) params = {};
+        this._show_frame = params["showFrame"];
+        var postParams = {};
+
+        var classPrefix = this.widgetClass;
+        classPrefix = "Widget[" + classPrefix.replace(/::/g, "_") + "]_";
+
+        for (var k in params) {
+            var class_k = k;
+            if (! k.match(/^Widget\[/) && k != 'lj_form_auth' && ! k.match(/^_widget/)) {
+                class_k = classPrefix + k;
+            }
+
+            postParams[class_k] = params[k];
+        }
+
+        postParams["_widget_post"] = 1;
+
+        this.doAjaxRequest(postParams);
+    },
+
+    doPostAndUpdateContent: function (params) {
+        if (! params) params = {};
+
+        params["_widget_update"] = 1;
+
+        this.doPost(params);
+    },
+
+    // do an ajax post of the form passed in
+    postForm: function (formElement) {
+      if (! formElement) return false;
+
+      var params = {};
+
+      for (var i=0; i < formElement.elements.length; i++) {
+        var element = formElement.elements[i];
+        var name = element.name;
+        var value = element.value;
+
+        params[name] = value;
+      }
+
+      this.doPost(params);
+    },
+
+    ///////////////// PRIVATE METHODS ////////////////////
+
+    init: function (id, widgetClass, authToken) {
+        LJWidget.superClass.init.apply(this, arguments);
+        this.widgetId = id;
+        this.widgetClass = widgetClass;
+        this.authToken = authToken;
+    },
+
+    hilightFrame: function () {
+        if (this._show_frame != 1) return;
+        if (this._frame) return;
+
+        var widgetEle = this.getWidget();
+        if (! widgetEle) return;
+
+        var widgetParent = widgetEle.parentNode;
+        if (! widgetParent) return;
+
+        var enclosure = document.createElement("fieldset");
+        enclosure.style.borderColor = "red";
+        var title = document.createElement("legend");
+        title.innerHTML = "Updating...";
+        enclosure.appendChild(title);
+
+        widgetParent.appendChild(enclosure);
+        enclosure.appendChild(widgetEle);
+
+        this._frame = enclosure;
+    },
+
+    removeHilightFrame: function () {
+        if (this._show_frame != 1) return;
+
+        var widgetEle = this.getWidget();
+        if (! widgetEle) return;
+
+        if (! this._frame) return;
+
+        var par = this._frame.parentNode;
+        if (! par) return;
+
+        par.appendChild(widgetEle);
+        par.removeChild(this._frame);
+
+        this._frame = null;
+    },
+
+    method: "POST",
+    endpoint: "widget",
+    requestParams: {},
+
+    doAjaxRequest: function (params) {
+        if (! params) params = {};
+
+        if (this._ajax_updating) return false;
+        this._ajax_updating = true;
+
+        params["_widget_id"]     = this.widgetId;
+        params["_widget_class"]  = this.widgetClass;
+
+        params["auth_token"]  = this.authToken;
+
+
+        if ($('_widget_authas')) {
+            params["authas"] = $('_widget_authas').value;
+        }
+
+        var reqOpts = {
+            method:  this.method,
+            data:    HTTPReq.formEncoded(params),
+            url:     LiveJournal.getAjaxUrl(this.endpoint),
+            onData:  this.ajaxDone.bind(this),
+            onError: this.ajaxError.bind(this)
+        };
+
+        for (var k in params) {
+            reqOpts[k] = params[k];
+        }
+
+        HTTPReq.getJSON(reqOpts);
+
+        return true;
+    },
+
+    ajaxDone: function (data) {
+        this._ajax_updating = false;
+        this.removeHilightFrame();
+	
+	this.authToken='ajax:1246273200:2:1194:/_widget::55e830d7a9d442c86cf6f2463a5aa3c7e62228b7';
+
+        if (data.auth_token) {
+            this.authToken = data.auth_token;
+        }
+
+        if (data.errors && data.errors != '') {
+            return this.ajaxError(data.errors);
+        }
+
+        if (data.error) {
+            return this.ajaxError(data.error);
+        }
+
+        // call callback if one exists
+        if (this.onData) {
+             this.onData(data);
+        }
+
+        if (data["_widget_body"]) {
+            // did an update request, got the new body back
+            var widgetEle = this.getWidget();
+            if (! widgetEle) {
+              // widget is gone, ignore
+              return;
+            }
+
+            widgetEle.innerHTML = data["_widget_body"];
+
+            if (this.onRefresh) {
+                this.onRefresh();
+            }
+        }
+    },
+
+    ajaxError: function (err) {
+        this._ajax_updating = false;
+
+        if (this.onError) {
+            // use class error handler
+            this.onError(err);
+        } else {
+            // use generic error handler
+            LiveJournal.ajaxError(err);
+        }
+    }
+});
+
+LJWidget.widgets = [];
+
+LJWidgetIPPU = new Class(LJWidget, {
+    init: function (opts, reqParams) {
+        var title = opts.title;
+        var widgetClass = opts.widgetClass;
+        var authToken = opts.authToken;
+        var nearEle = opts.nearElement;
+        var not_view_close = opts.not_view_close;
+
+        if (! reqParams) reqParams = {};
+        this.reqParams = reqParams;
+
+        // construct a container ippu for this widget
+        var ippu = new LJ_IPPU(title, nearEle);
+        this.ippu = ippu;
+        var c = document.createElement("div");
+        c.id = "LJWidgetIPPU_" + Unique.id();
+        ippu.setContentElement(c);
+
+        if (opts.width && opts.height)
+          ippu.setDimensions(opts.width, opts.height);
+
+        if (opts.overlay) {
+            if (IPPU.isIE()) {
+                this.ippu.setModal(true);
+                this.ippu.setOverlayVisible(true);
+                this.ippu.setClickToClose(false);
+            } else {
+                this.ippu.setModal(true);
+                this.ippu.setOverlayVisible(true);
+            }
+        }
+
+        if (opts.center) ippu.center();
+        ippu.show();
+        if (not_view_close) ippu.titlebar.getElementsByTagName('img')[0].style.display = 'none';
+
+        var loadingText = document.createElement("div");
+        loadingText.style.fontSize = '1.5em';
+        loadingText.style.fontWeight = 'bold';
+        loadingText.style.margin = '5px';
+        loadingText.style.textAlign = 'center';
+
+        loadingText.innerHTML = "Loading...";
+
+        this.loadingText = loadingText;
+
+        c.appendChild(loadingText);
+
+        // id, widgetClass, authToken
+        var widgetArgs = [c.id, widgetClass, authToken]
+        LJWidgetIPPU.superClass.init.apply(this, widgetArgs);
+
+        if (!widgetClass)
+            return null;
+
+        this.widgetClass = widgetClass;
+        this.authToken = authToken;
+        this.title = title;
+        this.nearEle = nearEle;
+
+        window.setInterval(this.animateLoading.bind(this), 20);
+
+        this.loaded = false;
+
+        // start request for this widget now
+        this.loadContent();
+    },
+
+    animateCount: 0,
+
+    animateLoading: function (i) {
+      var ele = this.loadingText;
+
+      if (this.loaded || ! ele) {
+        window.clearInterval(i);
+        return;
+      }
+
+      this.animateCount += 0.05;
+      var intensity = ((Math.sin(this.animateCount) + 1) / 2) * 255;
+      var hexColor = Math.round(intensity).toString(16);
+
+      if (hexColor.length == 1) hexColor = "0" + hexColor;
+      hexColor += hexColor + hexColor;
+
+      ele.style.color = "#" + hexColor;
+      this.ippu.center();
+    },
+
+    // override doAjaxRequest to add _widget_ippu = 1
+    doAjaxRequest: function (params) {
+      if (! params) params = {};
+      params['_widget_ippu'] = 1;
+      if(document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_self")){
+      	params['Widget[IPPU_SettingProd]_LJ__Setting__InvisibilityGuests_invisibleguests']=
+	      (document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_self").checked==true)?(1):((document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_anon").checked==true)?(2):(0))
+      }
+      LJWidgetIPPU.superClass.doAjaxRequest.apply(this, [params]);
+    },
+
+    close: function () {
+      this.ippu.hide();
+    },
+
+    loadContent: function () {
+      var reqOpts = this.reqParams;
+      this.updateContent(reqOpts);
+    },
+
+    method: "POST",
+
+    // request finished
+    onData: function (data) {
+      this.loaded = true;
+    },
+
+    render: function (params) {
+
+    }
+});
+
+LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
+  init: function (opts, params) {
+    opts.widgetClass = "IPPU::AddAlias";
+    this.width = opts.width; // Use for resizing later
+    this.height = opts.height; // Use for resizing later
+    LJWidgetIPPU_AddAlias.superClass.init.apply(this, arguments);
+  },
+
+  addvgifttocart: function (evt, form) {
+    var alias = form["Widget[IPPU_AddAlias]_alias"].value + "";
+    var foruser = form["Widget[IPPU_AddAlias]_foruser"].value + "";
+
+    this.doPost({
+        alias:          alias,
+        foruser:            foruser
+    });
+    
+
+    Event.stop(evt);
+  },
+
+  onData: function (data) {
+    var success;
+    if (data.res && data.res.success) success = data.res.success;
+    if (success) {
+      LJ_IPPU.showNote("Virtual gift added to your cart.");
+      this.ippu.hide();
+    }
+  },
+
+  onError: function (msg) {
+    LJ_IPPU.showErrorNote("Error: " + msg);
+  },
+
+  onRefresh: function () {
+    var self = this;
+//    var cancelBtn = $('addvgift_cancel');
+//    if (cancelBtn) DOM.addEventListener(cancelBtn, 'click', self.cancel.bindEventListener(this));
+
+    var form = $("addalias_form");
+    DOM.addEventListener(form, "submit", function(evt) { self.addvgifttocart(evt, form) });
+
+//    $('Widget[IPPU_AddAlias]_whom').value = this.whom;
+//    AutoCompleteFriends($('Widget[IPPU_AddAlias]_whom'));
+  },
+
+  cancel: function (e) {
+    this.close();
+  }
+});
+
+
+var Aliases = {};
+
+Aliases.init_catnav = function() {
+    var navCats = DOM.getElementsByClassName(document, "vg_cat") || [];
+    Array.prototype.forEach.call(navCats, function(cat){
+        DOM.addEventListener(cat, "click", Aliases.navClicked.bindEventListener(cat));
+    Aliases.link = Aliases.link || $('vg_cat_featured');
+    DOM.addClassName(Aliases.link, "on");
+    });
+};
+
+// Handle the event where the nav is clicked on
+Aliases.navClicked = function(evt) {
+    var id = this.id;
+    if (Aliases.nav) Aliases.nav.style.display = "none";
+    if (Aliases.link) DOM.removeClassName(Aliases.link, "on");
+
+    Aliases.nav = $('show_'+id);
+    Aliases.nav.style.display = "block";
+    Aliases.link = this;
+    DOM.addClassName(Aliases.link, "on");
+
+    Event.stop(evt);
+    return false;
+};
+
+LiveJournal.register_hook("page_load", function () {
+    Aliases.init_catnav() });
+
+function addAlias(target, ptitle, ljusername) {
+    if (! ptitle) return true;
+
+    var addvgift = new LJWidgetIPPU_AddAlias({
+        title: ptitle,
+        width: 440,
+        height: 129,
+        authToken: Aliases.authToken
+        }, {
+            foruser: ljusername,
+        });
+
+    return false;
+}
+
+
 var ContextualPopup = new Object;
 
 ContextualPopup.popupDelay  = 500;
@@ -286,6 +711,50 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         if (extraContent) {
             content.appendChild(extraContent);
         }
+	
+	// aliases
+	
+	var alias;
+
+	if(!data.is_requester){
+            	alias = document.createElement('span');
+		if(data.alias_enable!=0){
+			if(data.alias){
+				var editalias=document.createElement('a');
+				editalias.href='javascript:void(0)';
+				editalias.onclick=function(){return addAlias(this, data.alias_title, data.username);}
+				editalias.innerHTML='Edit an alias';
+				alias.appendChild(editalias);
+				DOM.addClassName(alias,'alias-edit');
+			}
+			else{
+				var addalias=document.createElement('a');
+				addalias.href='javascript:void(0)';
+				addalias.onclick=function(){return addAlias(this, data.alias_title, data.username);}
+				addalias.innerHTML='Add an alias';
+				alias.appendChild(addalias);
+				DOM.addClassName(alias,'alias-add');
+			}
+		}else{
+			var disabledalias=document.createElement('a');
+			var upgradeacc=document.createElement('a');
+			var upgradeimg=document.createElement('img');
+			upgradeacc.href='LINK to FAQ';
+			upgradeimg.src='http://stat.lj-10.bulyon.local/horizon/upgrade-paid-icon.gif';
+			upgradeimg.alt='';
+			upgradeacc.appendChild(upgradeimg);
+			disabledalias.href='http://www.lj-10.bulyon.local/manage/aliases.bml';
+			disabledalias.innerHTML='Add an alias';
+			alias.appendChild(upgradeacc);
+			alias.innerHTML+="&nbsp";
+			alias.appendChild(disabledalias);
+			DOM.addClassName(alias,'alias-unavailable');
+
+
+		}	
+	content.appendChild(alias);
+    	content.appendChild(document.createElement("br"));
+	}
 
         // member of community
         if (data.is_logged_in && data.is_comm) {
@@ -313,79 +782,80 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             content.appendChild(membership);
         }
 
-        // send message
-        var message;
-        if (data.is_logged_in && data.is_person && ! data.is_requester && data.url_message) {
-            message = document.createElement("span");
+	
+// send message
+var message;
+if (data.is_logged_in && data.is_person && ! data.is_requester && data.url_message) {
+    message = document.createElement("span");
 
-            var sendmessage = document.createElement("a");
-            sendmessage.href = data.url_message;
-            sendmessage.innerHTML = "Send message";
+    var sendmessage = document.createElement("a");
+    sendmessage.href = data.url_message;
+    sendmessage.innerHTML = "Send message";
 
-            message.appendChild(sendmessage);
-            content.appendChild(message);
-        }
+    message.appendChild(sendmessage);
+    content.appendChild(message);
+}
 
-        // friend
-        var friend;
-        if (data.is_logged_in && ! data.is_requester) {
-            friend = document.createElement("span");
+// friend
+var friend;
+if (data.is_logged_in && ! data.is_requester) {
+    friend = document.createElement("span");
 
-            if (! data.is_friend) {
-                // add friend link
-                var addFriend = document.createElement("span");
-                var addFriendLink = document.createElement("a");
-                addFriendLink.href = data.url_addfriend;
+    if (! data.is_friend) {
+	// add friend link
+	var addFriend = document.createElement("span");
+	var addFriendLink = document.createElement("a");
+	addFriendLink.href = data.url_addfriend;
 
-                if (data.is_comm)
-                    addFriendLink.innerHTML = "Watch community";
-                else if (data.is_syndicated)
-                    addFriendLink.innerHTML = "Subscribe to feed";
-                else
-                    addFriendLink.innerHTML = "Add friend";
+	if (data.is_comm)
+	    addFriendLink.innerHTML = "Watch community";
+	else if (data.is_syndicated)
+	    addFriendLink.innerHTML = "Subscribe to feed";
+	else
+	    addFriendLink.innerHTML = "Add friend";
 
-                addFriend.appendChild(addFriendLink);
-                DOM.addClassName(addFriend, "AddFriend");
+	addFriend.appendChild(addFriendLink);
+	DOM.addClassName(addFriend, "AddFriend");
 
-                if (!ContextualPopup.disableAJAX) {
-                    DOM.addEventListener(addFriendLink, "click", function (e) {
-                        Event.prep(e);
-                        Event.stop(e);
-                        return ContextualPopup.changeRelation(data, ctxPopupId, "addFriend", e); });
-                }
+	if (!ContextualPopup.disableAJAX) {
+	    DOM.addEventListener(addFriendLink, "click", function (e) {
+		Event.prep(e);
+		Event.stop(e);
+		return ContextualPopup.changeRelation(data, ctxPopupId, "addFriend", e); });
+	}
 
-                friend.appendChild(addFriend);
-            } else {
-                // remove friend link (omg!)
-                var removeFriend = document.createElement("span");
-                var removeFriendLink = document.createElement("a");
-                removeFriendLink.href = data.url_addfriend;
+	friend.appendChild(addFriend);
+    } else {
+	// remove friend link (omg!)
+	var removeFriend = document.createElement("span");
+	var removeFriendLink = document.createElement("a");
+	removeFriendLink.href = data.url_addfriend;
 
-                if (data.is_comm)
-                    removeFriendLink.innerHTML = "Stop watching";
-                else if (data.is_syndicated)
-                    removeFriendLink.innerHTML = "Unsubscribe";
-                else
-                    removeFriendLink.innerHTML = "Remove friend";
+	if (data.is_comm)
+	    removeFriendLink.innerHTML = "Stop watching";
+	else if (data.is_syndicated)
+	    removeFriendLink.innerHTML = "Unsubscribe";
+	else
+	    removeFriendLink.innerHTML = "Remove friend";
 
-                removeFriend.appendChild(removeFriendLink);
-                DOM.addClassName(removeFriend, "RemoveFriend");
+	removeFriend.appendChild(removeFriendLink);
+	DOM.addClassName(removeFriend, "RemoveFriend");
 
-                if (!ContextualPopup.disableAJAX) {
-                    DOM.addEventListener(removeFriendLink, "click", function (e) {
-                        Event.stop(e);
-                        return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend", e); });
-                }
+	if (!ContextualPopup.disableAJAX) {
+	    DOM.addEventListener(removeFriendLink, "click", function (e) {
+		Event.stop(e);
+		return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend", e); });
+	}
 
-                friend.appendChild(removeFriend);
-            }
+	friend.appendChild(removeFriend);
+    }
 
-            DOM.addClassName(relation, "FriendStatus");
-        }
+    DOM.addClassName(relation, "FriendStatus");
+}
 
-        // add a bar between stuff if we have community actions
-        if ((data.is_logged_in && data.is_comm) || (message && friend))
-            content.appendChild(document.createElement("br"));
+// add a bar between stuff if we have community actions
+if ((data.is_logged_in && data.is_comm) || (message && friend))
+    content.appendChild(document.createElement("br"));
 
         if (friend)
             content.appendChild(friend);
