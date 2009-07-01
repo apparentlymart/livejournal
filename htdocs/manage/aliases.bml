@@ -8,6 +8,7 @@ body<=
     # retranslate all of the phrases, so we're still using /modify_do.bml scope
     BML::set_language_scope("/modify_do.bml");
 
+
     use strict;
     use vars qw(%GET %POST);
     use JSON;
@@ -56,7 +57,7 @@ body<=
 
 
         # tell the user all is well
-        return "<?h1 $ML{'.success.head'} h1?><?p Your aliasing settings have been updated. p?>";
+        return "<?h1 $ML{'.success.head'} h1?><?p $ML{'.alias.comment.successupd'}. p?>";
     }
 
     # not submitting a post, show edit form
@@ -72,19 +73,22 @@ body<=
     my $prop_aliases = $u->prop('aliases');
     my $aliases = jsonToObj($prop_aliases);
 
-    $ret .= q|<table>|;
+    $ret .= q|<table class="aliaslist-table">|;
     
-    $ret .= q|<tr><td><b>Username</b></td><td>Aliase (note)</td></tr>|."\n";
+    $ret .= q|<tr><th>|. $ML{'.alias.header.username'} .q|</th><th>|.$ML{'.alias.header.alias'} .q|</th></tr>|."\n";
     my @user_list = ();
     foreach my $user (keys %$aliases) {
         my $u = LJ::load_user($user);
-        $ret .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td><input type="text" name="|.${key}.$u->{user}.q|" value="|.LJ::ljuser_alias($u->{user}).q|"></td></tr>|."\n";
+        $ret .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td class="user_alias"><input type="text" name="|.${key}.$u->{user}.q|" value="|.LJ::ljuser_alias($u->{user}).q|" size="50" maxlength="80"></td></tr>|."\n";
         push @user_list, $user;
     }
-    $ret .= q|<tr><td>New alias:</td></tr>|."\n";
-    $ret .= q|<tr><td><input type="text" name="|.${key}.q|new_user"></td><td><input type="text" name="|.${key}.q|new_alias"></td></tr>|."\n";
+    $ret .= q|<tr class="newalias"><td colspan="2"><label for="new-useralias">|. $ML{'.alias.header.newalias'} .q|</label></td></tr>|."\n";
+    $ret .= q|<tr><td><input type="text" name="|.${key}.q|new_user" id="new-useralias"></td><td class="user_alias"><input type="text" name="|.${key}.q|new_alias" size="50" maxlenght="80"></td></tr>|."\n";
     $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @user_list).q|">|."\n";
+	$ret .= q|<tr><td colspan="2"><a href="#">|. $ML{'.alias.aliaslist.more'} .q|</a></td></tr>|;
     $ret .= q|</table>|."\n";
+
+	
 
     ### ending submit block
     $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.done.btn.savechanges'}) . " standout?>\n";
