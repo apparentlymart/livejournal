@@ -12,6 +12,8 @@
 
 .useralias.title=Add/edit an alias to this user
 
+.useralias.title.disabled=Sorry, you don't have rights to add or edit an alias to this user. Please, upgrade your account to paid
+
 .admins.header=Administrators
 
 .allpics=View all userpics
