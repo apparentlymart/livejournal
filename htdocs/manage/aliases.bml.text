@@ -1,0 +1,10 @@
+;; -*- coding: utf-8 -*-
+
+.done.btn.savechanges=Save changes
+
+.error.user_not_exist=User "[[username]]" is not exist.
+
+.success.head=Success
+
+.success.saved=Your aliasing settings have been updated
+
