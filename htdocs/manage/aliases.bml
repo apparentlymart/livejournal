@@ -6,7 +6,7 @@ body<=
     # this file used to be /modify_do.bml, then /modify.bml, and now it's at
     # /manage/domain.bml, but we don't want the translators to have to
     # retranslate all of the phrases, so we're still using /modify_do.bml scope
-    BML::set_language_scope("/modify_do.bml");
+    BML::set_language_scope("/manage/aliases.bml");
 
 
     use strict;
@@ -22,6 +22,8 @@ body<=
 
     my $is_paid_perm = $remote && $remote->get_cap('aliases');
     return "<?h1 You must be a paid account h1?>" unless $is_paid_perm;
+
+    my $ret = '';
 
     my $authas = $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
@@ -42,27 +44,39 @@ body<=
 
         my $new_user  = $POST{$key."new_user"};
         my $new_alias = $POST{$key."new_alias"};
+        ($new_alias) = $new_alias =~ m#^(.{0,80})#;
 
         my $prop_aliases = $u->prop('aliases');
         my $aliases = jsonToObj($prop_aliases) || {};
 
         my @user_list = split /\|/, $POST{$key."_user_list"};
         foreach my $user (@user_list) {
-            $aliases->{$user} = $POST{$key.$user};
+            my $user_alias = $POST{$key.$user};
+            ($user_alias) = $user_alias =~ m#^(.{0,80})#;
+            if ($user_alias ne '') {
+                $aliases->{$user} = $user_alias;
+            } else {
+                delete $aliases->{$user};
+            }
         }
 
-        $aliases->{$new_user} = $new_alias if $new_user && $new_alias && LJ::load_user($new_user);
+        $aliases->{$new_user} = $new_alias if $new_user ne $u->{user} && $new_user && $new_alias && LJ::load_user($new_user);
 
         $u->set_prop( aliases => objToJson($aliases) );
 
+        my $error = '';
+        if ($new_user) {
+            $error = "<?p ".BML::ml('.error.user_not_exist', { username => $new_user } )." p?>" unless LJ::load_user($new_user);
+        }
 
         # tell the user all is well
-        return "<?h1 $ML{'.success.head'} h1?><?p $ML{'.alias.comment.successupd'}. p?>";
+        $ret .= "<?h1 $ML{'Error'} h1?>$error" if $error;
+        
+        $ret .= "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.saved'} p?>" unless $error;
     }
 
     # not submitting a post, show edit form
-    my $ret;
-
+    
     ###
     ### JOURNAL DOMAIN OPTIONS
     ###
