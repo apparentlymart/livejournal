@@ -50,6 +50,11 @@ form {
     padding: 8px;
 }
 
+.helper {
+    font-size: 0.8em;
+    color: #666;
+}
+
 div.lj_ippu {
     background-color: #fff;
     border: 2px solid #444;
@@ -216,3 +221,33 @@ DL.current-version {
 .opera-filter { display:none; }
 HTML:first-child .opera-filter { display:block; } /* opera lt 9.5 */
 HTML:not(IE7) .opera-filter, x:-o-prefocus { display:block; } /* opera gte 9.5 */
+
+/* SUP in Aliases
+
+-------------------------------------- */
+
+.with-alias SUP {
+	vertical-align:middle;
+	position:relative;
+	font-size:.75em;
+	}
+
+.with-alias SUP {
+	bottom:0.5em; 
+	margin: 0 0 0 2px;
+	}
+
+A {text-decoration: underline;}
+
+.user_alias_act {
+	padding: 10px;
+	}
+	.user_alias_act LABEL, .user_alias_act SPAN.helper {
+		display: block;
+		}
+	.user_alias_act LABEL {
+		margin-bottom: 5px;
+		}
+	.user_alias_act P {
+		margin: .75em 0px;
+	}

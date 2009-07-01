@@ -10,7 +10,7 @@ use Class::Autouse qw(
 use JSON;
 
 sub need_res {
-    return qw( js/widgets/aliases.js stc/widgets/aliases.css );
+    return qw( js/widgets/aliases.js );
 }
 
 sub authas { 1 }
@@ -24,13 +24,12 @@ sub render_body {
     $body .= $class->start_form(
                 id => 'addalias_form',
              );
-    $body .= "<table border='1' width='100%'>";
     my $for_user = LJ::load_user($opts{foruser});
-    $body .= "<tr><td>Set alias for ".$for_user->ljuser_display." (read FAQ for details):</td></tr>";
-    $body .= "<tr>";
 
-    $body .= "<div>" .
-             $class->html_text(
+	$body .= "<div class='user_alias_act'>";
+    $body .= "<label for='Widget[IPPU_AddAlias]_alias'>". BML::ml('widget.alias.setalias') ." ".$for_user->ljuser_display." (". BML::ml('widget.alias.faq') ."):</label>";
+
+    $body .= $class->html_text(
                 name  => 'alias',
                 id    => 'Widget[IPPU_AddAlias]_alias',
                 size  => 30,
@@ -38,19 +37,18 @@ sub render_body {
                 raw   => "autocomplete='off'",
              ) . "";
 
-    $body .= "</div>";
 
-    $body .= "<span class='helper'>(" . BML::ml('widget.vgiftadd.display.publicly') . ")</span></div>";
+    $body .= "<span class='helper'>(" . BML::ml('widget.vgiftadd.display.publicly') . ")</span>";
 
     $body .= $class->html_hidden(
                 foruser => $opts{foruser},
              );
     $body .= "<p>" .
-             $class->html_submit(BML::ml('widget.vgiftadd.addtocart')) .
-             "</p>";
+             $class->html_submit(BML::ml('widget.alias.aliaschange')) .
+             "</div>";
     $body .= $class->end_form;
+	$body .= "</p>";
 
-    $body .= "</td></tr></table>\n";
 
     return $body;
 }
