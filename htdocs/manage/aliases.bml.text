@@ -8,3 +8,12 @@
 
 .success.saved=Your aliasing settings have been updated
 
+.alias.header.username=Username
+
+.alias.header.alias=Alias (note)
+
+.alias.header.newalias=New alias:
+
+.alias.aliaslist.more=add more rows...
+
+.alias.comment.successupd=Your aliasing settings have been updated
