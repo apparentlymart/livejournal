@@ -335,6 +335,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
     opts.widgetClass = "IPPU::AddAlias";
     this.width = opts.width; // Use for resizing later
     this.height = opts.height; // Use for resizing later
+    this.alias = opts.alias;  
     LJWidgetIPPU_AddAlias.superClass.init.apply(this, arguments);
   },
 
@@ -355,32 +356,42 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
     var success;
     if (data.res && data.res.success) success = data.res.success;
     if (success) {
-      LJ_IPPU.showNote("Virtual gift added to your cart.");
-      this.ippu.hide();
-      var userLJ=data.res.link;
-      var searchUser1=DOM.getElementsByAttributeAndValue(document,'href',userLJ+"/");
-      var searchUser2=DOM.getElementsByAttributeAndValue(document,'href',userLJ);
-      var searchProfile=searchUser1.concat(searchUser2); 
-      var supSign;
-      for(var i=0;i<searchProfile.length;i++){
-	if(DOM.hasClassName(searchProfile[i].parentNode,'ljuser')){
-		if(!DOM.hasClassName(searchProfile[i].parentNode,'with-alias')){
-			DOM.addClassName(searchProfile[i].parentNode,'with-alias')
+        this.ippu.hide();
+
+	var userLJ=data.res.link;
+      	var userClassName='ljuser-name_'+ data.res.link;
+      	var searchProfile=DOM.getElementsByClassName(document,userClassName); 
+      	var supSign;
+      	for(var i=0;i<searchProfile.length;i++){
+		if(!DOM.hasClassName(searchProfile[i],'with-alias')){
+			DOM.addClassName(searchProfile[i],'with-alias')
 			supSign=document.createElement('sup');
 			supSign.innerHTML='&#x2714;';
-			searchProfile[i].appendChild(supSign);
-		}
-		else{
-			if(data.res.alias==""){
-				DOM.removeClassName(searchProfile[i].parentNode,'with-alias')
+			searchProfile[i].getElementsByTagName('a')[1].appendChild(supSign);
+		}else{
+			if(data.res.alias==''){
+				DOM.removeClassName(searchProfile[i],'with-alias')
 				supSign=searchProfile[i].getElementsByTagName('sup')[0];
-				searchProfile[i].removeChild(supSign);
+				searchProfile[i].getElementsByTagName('a')[1].removeChild(supSign);
 			}
-		
 		}
-		searchProfile[i].setAttribute('title',data.res.alias);
-	}
-      }
+		searchProfile[i].getElementsByTagName('a')[1].setAttribute('title',data.res.alias);
+		if($('profile_alias')){
+			if(data.res.alias==''){
+				searchProfile[i].parentNode.removeChild($('profile_alias'));
+			}else{
+				$('profile_alias').innerHTML='('+data.res.alias+')';
+			}
+		}
+		else if(data.res.alias!=''){
+			var pr_alias=document.createElement('span');
+			DOM.addClassName(pr_alias,'alias-value');
+			pr_alias.id='profile_alias';
+			pr_alias.innerHTML='('+data.res.alias+')';
+			searchProfile[i].parentNode.appendChild(pr_alias);
+		}
+       }
+
     }
   },
 
@@ -438,15 +449,14 @@ LiveJournal.register_hook("page_load", function () {
 function addAlias(target, ptitle, ljusername, oldalias) {
     if (! ptitle) return true;
 
-    console.log('x');
 
     var addvgift = new LJWidgetIPPU_AddAlias({
-	alias: oldalias,
         title: ptitle,
         width: 440,
         height: 129,
         authToken: Aliases.authToken
         }, {
+	    alias: oldalias,
             foruser: ljusername,
         });
 
@@ -549,9 +559,9 @@ ContextualPopup.mouseOver = function (e) {
     var cached = ContextualPopup.cachedResults[ctxPopupId];
 
     // if we don't have cached data background request it
-    if (!cached) {
+    //if (!cached) {
         ContextualPopup.getInfo(target, ctxPopupId);
-    }
+    //}
 
     // start timer if it's not running
     if (! ContextualPopup.mouseInTimer && (! ContextualPopup.ippu || (

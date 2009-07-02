@@ -73,3 +73,10 @@ div.ContextualPopup .Userpic {
         font-weight: bold;
         color: #00C !important;
         }
+
+	div.ContextualPopup div.Inner .alias-unavailable A, 
+	div.ContextualPopup div.Inner .alias-unavailable A:link, 
+	div.ContextualPopup div.Inner .alias-unavailable A:visited {
+		color:#999 !important;
+		}
+
