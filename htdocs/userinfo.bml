@@ -378,8 +378,8 @@
     ### Username
     my $new_margin = $boxad ? " style='margin-right: 320px;'" : '';
     my $user_alias = LJ::ljuser_alias($u->{user});
-    $user_alias = "&nbsp;<span class='alias-value'>(".$user_alias.")</span>" if $user_alias;
-    $body .= "<div class='username'$new_margin>" . $u->ljuser_display . $user_alias;
+    my $user_alias_sp = "&nbsp;<span class=\"alias-value\">(".$user_alias.")</span>" if $user_alias;
+    $body .= "<div class='username'$new_margin>" . $u->ljuser_display . $user_alias_sp;
     if ($u->{public_key}) {
         $body .= " <a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
         $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt=\"$ML{'.pubkey.alt'}\" title=\"$ML{'.pubkey.alt'}\" style='vertical-align: middle; border: 0;' /></a>";
@@ -422,7 +422,7 @@
 	$text = $user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
 	$li_title = ($remote->in_class('paid') || $remote->in_class('perm')) ? $ML{'.useralias.title'} : "$ML{'.useralias.title.disabled'}";
 	if ($remote->in_class('paid') || $remote->in_class('perm')) {
-		$body .= q|<li class='profile_addfeed' title=\"$li_title\"><a onclick='return addAlias(this, "|.($user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'}).q|", "|.$u->{user}.q|")' href='#'>|;
+		$body .= q|<li class='profile_addfeed' title=\"$li_title\"><a onclick='return addAlias(this, "|.($user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'}).q|", "|.$u->{user}.q|", "|.$user_alias.q|")' href='#'>|;
 		$body .= "<img src='$LJ::IMGPREFIX/profile_icons/alias.gif' alt='' />$text</a>";
 	} else {
 		$body .= "<li class='profile_addfeed_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/alias_disabled.gif' alt='' />$text";
