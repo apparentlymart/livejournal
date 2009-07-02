@@ -35,7 +35,7 @@ sub render_body {
                 name  => 'alias',
                 id    => 'Widget[IPPU_AddAlias]_alias',
                 size  => 30,
-                value => undef,
+                value => $opts{alias},
                 raw   => "autocomplete='off'",
              ) . "";
 
@@ -77,7 +77,7 @@ sub handle_post {
     
     return (
         success => 1, 
-        link    => $user_for_alias->journal_base,
+        link    => $user_for_alias->display_name,
         alias   => $post->{alias},
         message => $is_edit ? BML::ml('widget.addalias.edit_alias') : BML::ml('widget.addalias.add_alias'),
     );
