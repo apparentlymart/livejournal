@@ -1323,8 +1323,8 @@ sub ljuser_display {
         $user_html .= "<span class='ljuser ";
         $user_html .= "with-alias"
             if $alias;
-        ## add class as "ljuser_*username*" for find user on page to change alias
-        $user_html .= " ljuser_".$name;
+        ## add class as "ljuser-name_*username*" for find user on page to change alias
+        $user_html .= " ljuser-name_".$name;
         $user_html .= "' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'";
         $user_html .= " title='$alias'"
             if $alias;
@@ -6474,8 +6474,8 @@ sub ljuser
         $user_html .= "<span class='ljuser ";
         $user_html .= "with-alias"
             if $alias;
-        ## add class as "ljuser_*username*" for find user on page to change alias
-        $user_html .= " ljuser_".LJ::canonical_username($user);
+        ## add class as "ljuser-name_*username*" for find user on page to change alias
+        $user_html .= " ljuser-name_".LJ::canonical_username($user);
         $user_html .= "' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color";
         $user_html .= "  title='$alias'"
             if $alias;
