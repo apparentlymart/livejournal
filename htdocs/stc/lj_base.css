@@ -240,7 +240,7 @@ HTML:not(IE7) .opera-filter, x:-o-prefocus { display:block; } /* opera gte 9.5 *
 A {text-decoration: underline;}
 
 .user_alias_act {
-	padding: 10px;
+	padding: 24px;
 	}
 	.user_alias_act LABEL, .user_alias_act SPAN.helper {
 		display: block;
