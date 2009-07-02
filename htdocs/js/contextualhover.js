@@ -785,11 +785,13 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 			var disabledalias=document.createElement('a');
 			var upgradeacc=document.createElement('a');
 			var upgradeimg=document.createElement('img');
-			upgradeacc.href='LINK to FAQ';
-			upgradeimg.src='http://stat.lj-10.bulyon.local/horizon/upgrade-paid-icon.gif';
+			upgradeacc.href=window.Site.siteroot+'support/faqbrowse.bml?faqid=295';
+			var statroot=window.Site.siteroot.toString();
+			var statsiteroot=statroot.replace(/http\:\/\/www\./,'http://stat.');
+			upgradeimg.src=statsiteroot+'/horizon/upgrade-paid-icon.gif';
 			upgradeimg.alt='';
 			upgradeacc.appendChild(upgradeimg);
-			disabledalias.href='http://www.lj-10.bulyon.local/manage/aliases.bml';
+			disabledalias.href=window.Site.siteroot+'support/faqbrowse.bml?faqid=295';
 			disabledalias.innerHTML='Add an alias';
 			alias.appendChild(upgradeacc);
 			alias.innerHTML+="&nbsp";
