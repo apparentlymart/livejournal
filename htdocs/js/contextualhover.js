@@ -357,7 +357,6 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
     if (data.res && data.res.success) success = data.res.success;
     if (success) {
         this.ippu.hide();
-
 	var userLJ=data.res.link;
       	var userClassName='ljuser-name_'+ data.res.link;
       	var searchProfile=DOM.getElementsByClassName(document,userClassName); 
@@ -391,6 +390,18 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 			searchProfile[i].parentNode.appendChild(pr_alias);
 		}
        }
+       if(DOM.getElementsByClassName(document,'profile_addalias')[0]){
+		var alias_title;
+       		if(data.res.alias==''){
+			alias_title="[uhhh: /userinfo.bml.addalias.title]";
+		}else{
+			alias_title="[uhhh: /userinfo.bml.editalias.title]";
+		}
+		var onclick_string="return addAlias(this,\""+alias_title+"\",\""+data.res.link+"\", \""+data.res.alias+"\")";
+		DOM.getElementsByClassName(document,'profile_addalias')[0].setAttribute('title',alias_title);
+		DOM.getElementsByClassName(document,'profile_addalias')[0].firstChild.setAttribute('onclick',onclick_string);
+		DOM.getElementsByClassName(document,'profile_addalias')[0].getElementsByTagName('span')[0].innerHTML=alias_title;
+       }	       
 
     }
   },
