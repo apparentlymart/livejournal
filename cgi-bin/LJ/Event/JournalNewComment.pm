@@ -208,7 +208,7 @@ sub as_alert {
             ($comment->poster ? 'user' : 'anonymous') . '_' .
             ($edited ? 'edited_' : '') . 'reply_' .
             (LJ::u_equals($comment->entry->poster, $u) ? 'to_your' : 'to_a') . '_' .
-            ($comment->parent ? 'post' : 'comment'), undef,
+            ($comment->parent ? 'comment' : 'post'), undef,
                 {
                     user        => $user,
                     openlink    => '<a href="' . $comment->url . '" target="_blank">',
