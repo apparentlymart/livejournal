@@ -113,7 +113,7 @@ sub clean
     my $data = shift;
     my $opts = shift;
     my $newdata;
-
+    
     # remove the auth portion of any see_request.bml links
     $$data =~ s/(see_request\.bml\S+?)auth=\w+/$1/ig;
 
@@ -996,7 +996,7 @@ sub clean
             if ($auto_format && !$opencount{'textarea'}) {
                 $token->[1] =~ s/\r?\n/<br \/>/g;
                 if (! $opencount{'a'}) {
-                    $token->[1] =~ s/&url(\d+);(.*?)&urlend;/<a href=\"$url{$1}\">$2<\/a>/g;
+                    $token->[1] =~ s|&url(\d+);(.*?)&urlend;|<a href="$url{$1}" rel="nofollow">$2</a>|g;
                 }
             }
 
