@@ -88,10 +88,16 @@
     .profile_join_disabled, .profile_postentry_disabled, 
     .profile_sendvgift_disabled, .profile_sendmessage_disabled, 
     .profile_watch_disabled, .profile_addfeed_disabled,
-    .profile_addfriend_disabled, .profile_trackuser_disabled {
+    .profile_addfriend_disabled, .profile_trackuser_disabled,
+ 	.profile_addalias_disabled {
         color: #999;
         font-weight: bold;
+		font-size: 1em;
     }
+    .profile_addalias span {
+        display: inline;
+        margin-top: 0;    
+        }
 .user_details {
     margin: 5px 0 20px 0;
     float: left;
