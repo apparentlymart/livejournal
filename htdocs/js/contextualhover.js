@@ -435,10 +435,13 @@ Aliases.navClicked = function(evt) {
 LiveJournal.register_hook("page_load", function () {
     Aliases.init_catnav() });
 
-function addAlias(target, ptitle, ljusername) {
+function addAlias(target, ptitle, ljusername, oldalias) {
     if (! ptitle) return true;
 
+    console.log('x');
+
     var addvgift = new LJWidgetIPPU_AddAlias({
+	alias: oldalias,
         title: ptitle,
         width: 440,
         height: 129,
@@ -755,7 +758,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
     				content.appendChild(document.createElement("br"));
 				var editalias=document.createElement('a');
 				editalias.href='javascript:void(0)';
-				editalias.onclick=function(){return addAlias(this, data.alias_title, data.username);}
+				editalias.onclick=function(){return addAlias(this, data.alias_title, data.username, data.alias);}
 				editalias.innerHTML='Edit an alias';
 				alias.appendChild(editalias);
 				DOM.addClassName(alias,'alias-edit');
@@ -763,7 +766,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 			else{
 				var addalias=document.createElement('a');
 				addalias.href='javascript:void(0)';
-				addalias.onclick=function(){return addAlias(this, data.alias_title, data.username);}
+				addalias.onclick=function(){return addAlias(this, data.alias_title, data.username,'');}
 				addalias.innerHTML='Add an alias';
 				alias.appendChild(addalias);
 				DOM.addClassName(alias,'alias-add');

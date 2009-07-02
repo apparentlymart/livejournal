@@ -23,8 +23,44 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
     var success;
     if (data.res && data.res.success) success = data.res.success;
     if (success) {
+
       LJ_IPPU.showNote("Virtual gift added to your cart.");
       this.ippu.hide();
+      /*
+      var userLJ=data.res.link;
+      var searchUser1=DOM.getElementsByAttributeAndValue(document,'href',userLJ+"/");
+      var searchUser2=DOM.getElementsByAttributeAndValue(document,'href',userLJ);
+      var searchProfile=searchUser1.concat(searchUser2); 
+      var supSign;
+      for(var i=0;i<searchProfile.length;i++){
+	if(DOM.hasClassName(searchProfile[i].parentNode,'ljuser')){
+		if(!DOM.hasClassName(searchProfile[i].parentNode,'with-alias')){
+			DOM.addClassName(searchProfile[i].parentNode,'with-alias')
+			supSign=document.createElement('sup');
+			supSign.innerHTML='&#x2714;';
+			searchProfile[i].appendChild(supSign);
+		}
+		else{
+			if(data.res.alias==""){
+				DOM.removeClassName(searchProfile[i].parentNode,'with-alias')
+				supSign=searchProfile[i].getElementsByTagName('sup')[0];
+				searchProfile[i].removeChild(supSign);
+			}
+		
+		}
+		searchProfile[i].setAttribute('title',data.res.alias);
+		//Adding alias to name only in profile
+		if(DOM.hasClassName(searchProfile[i].parentNode.parentNode,'username')){
+			console.log(searchProfile[i].parentNode.parentNode.nextSibling);
+			if(DOM.hasClassName(searchProfile[i].parentNodentNode.nextSibling,'alias-value')){
+				console.log('x');
+				searchProfile[i].parentNode.nextSibling.innerHTML='('+data.res.alias+')';
+			}
+		}
+	}
+	
+      }
+      */
     }
   },
 

@@ -29,15 +29,14 @@ LiveJournal.register_hook("page_load", function () {
 
 function addAlias(target, ptitle, ljusername, oldalias) {
     if (! ptitle) return true;
-
     var addvgift = new LJWidgetIPPU_AddAlias({
         title: ptitle,
-        alias : oldalias,
         width: 440,
-        height: 320,
+        height: 130,
         authToken: Aliases.authToken
         }, {
             foruser: ljusername,
+	    alias: oldalias,
         });
 
     return false;
