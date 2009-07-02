@@ -418,11 +418,11 @@
 #   $body .= q|<input type='button' value='Add' onclick='return addAlias(this, "|.($user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'}).q|", "|.$u->{user}.q|", "|.$user_alias.q|")' class='bright' />|;
 
 # add alias
-
+	$url = "$LJ::SITEROOT/manage/aliases.bml";
 	$text = $user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
 	$li_title = ($remote && ($remote->in_class('paid') || $remote->in_class('perm'))) ? $ML{'.useralias.title'} : "$ML{'.useralias.title.disabled'}";
 	if ($remote && ($remote->in_class('paid') || $remote->in_class('perm'))) {
-		$body .= q|<li class='profile_addalias' title="|.$li_title.q|"><a onclick='return addAlias(this, "|.($user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'}).q|", "|.$u->{user}.q|", "|.$user_alias.q|")' href='#'>|;
+		$body .= q|<li class='profile_addalias' title="|.$li_title.q|"><a onclick='return addAlias(this, "|.($user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'}).q|", "|.$u->{user}.q|", "|.$user_alias.q|")'  href='|.$url.q|'>|;
 		$body .= "<img src='$LJ::IMGPREFIX/profile_icons/alias.gif' alt='' /><span>$text</span></a>";
 	} else {
 		$body .= "<li class='profile_addalias_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/alias_disabled.gif' alt='' /><span>$text</span>";
