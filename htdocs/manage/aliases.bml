@@ -38,13 +38,17 @@ body<=
 
     # if a POST, update their info
     if (LJ::did_post()) {
+        my $new_user = delete $POST{$key."new_user"};
+        my $new_alias = delete $POST{$key."new_alias"};
         return "<?badinput?>" unless LJ::text_in(\%POST);
         return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
             unless LJ::check_form_auth();
 
-        my $new_user  = $POST{$key."new_user"};
-        my $new_alias = $POST{$key."new_alias"};
-        ($new_alias) = $new_alias =~ m#^(.{0,80})#;
+        my @a_new_user  = split /\0/, $new_user;
+        my @a_new_alias = split /\0/, $new_alias;
+        foreach my $idx (0..$#a_new_alias) {
+            ($a_new_alias[$idx]) = $a_new_alias[$idx] =~ m#^(.{0,80})#;
+        }
 
         my $prop_aliases = $u->prop('aliases');
         my $aliases = jsonToObj($prop_aliases) || {};
@@ -60,15 +64,22 @@ body<=
             }
         }
 
-        $aliases->{$new_user} = $new_alias if $new_user ne $u->{user} && $new_user && $new_alias && LJ::load_user($new_user);
-
+        foreach my $idx (0..$#a_new_user) {
+            $aliases->{$a_new_user[$idx]} = $a_new_alias[$idx] if $a_new_user[$idx] ne $u->{user} && $a_new_user[$idx] && $a_new_alias[$idx] && LJ::load_user($a_new_user[$idx]);
+        }
+use Data::Dumper;
+warn Dumper $aliases;
         $u->set_prop( aliases => objToJson($aliases) );
 
         my $error = '';
-        if ($new_user) {
-            $error = "<?p ".BML::ml('.error.user_not_exist', { username => $new_user } )." p?>" unless LJ::load_user($new_user);
+        my @not_exists_users = ();
+        foreach my $idx (0..$#a_new_user) {
+            if ($a_new_user[$idx]) {
+                push @not_exists_users, $a_new_user[$idx] unless LJ::load_user($a_new_user[$idx]);
+            }
         }
-
+        $error = "<?p ".BML::ml('.error.user_not_exist', { username => join (", ", @not_exists_users) } )." p?>" if scalar @not_exists_users;
+        
         # tell the user all is well
         $ret .= "<?h1 $ML{'Error'} h1?>$error" if $error;
         
