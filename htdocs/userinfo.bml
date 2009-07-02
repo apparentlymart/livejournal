@@ -1004,7 +1004,7 @@
         if ($u->{'msn'}) {
             my $msnname = $mangleaddress->(LJ::ehtml($u->{'msn'}));
             my $msn_alt = $ML{'.im.msn'};
-            $instant_message .= "<tr class='im_msn'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/msn.gif' alt=\"$msn_alt\" title=\"$msn_alt\" /></td><td colspan='2'>$msnname</td></tr>\n";
+            $instant_message .= "<tr class='im_msn'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/wlm.gif' alt=\"$msn_alt\" title=\"$msn_alt\" /></td><td colspan='2'>$msnname</td></tr>\n";
         }
         if ($u->{'jabber'}) {
             my $jabber = $mangleaddress->(LJ::ehtml($u->{'jabber'}));
