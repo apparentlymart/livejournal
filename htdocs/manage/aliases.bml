@@ -99,7 +99,7 @@ body<=
     $ret .= q|<tr class="newalias"><td colspan="2"><label for="new-useralias">|. $ML{'.alias.header.newalias'} .q|</label></td></tr>|."\n";
     $ret .= q|<tr><td><input type="text" name="|.${key}.q|new_user" id="new-useralias"></td><td class="user_alias"><input type="text" name="|.${key}.q|new_alias" size="50" maxlenght="80"></td></tr>|."\n";
     $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @user_list).q|">|."\n";
-	$ret .= q|<tr><td colspan="2"><a href="#">|. $ML{'.alias.aliaslist.more'} .q|</a></td></tr>|;
+	$ret .= q|<tr><td colspan="2"><a href="#" id="adding-more-alias">|. $ML{'.alias.aliaslist.more'} .q|</a></td></tr>|;
     $ret .= q|</table>|."\n";
 
 	
