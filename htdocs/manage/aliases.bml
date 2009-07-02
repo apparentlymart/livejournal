@@ -100,25 +100,18 @@ warn Dumper $aliases;
     
     $ret .=q|<script type='text/javascript'>
 	    function addAliasLine(){
-		var newTR1=document.createElement('tr');
-		DOM.addClassName(newTR1,'newalias');
-		var newTD1_1=document.createElement('td');
-		newTD1_1.setAttribute('colspan','2');
-		newTD1_1.innerHTML="<label for=\"new-useralias\">[uhhh: /manage/aliases.bml.alias.header.newalias]</label>";
-		newTR1.appendChild(newTD1_1);
-		var newTR2=document.createElement('tr');
-		var newTD2_1=document.createElement('td');
-		var newTD2_2=document.createElement('td');
-		DOM.addClassName(newTD2_2,'user_alias');
-		newTD2_1.innerHTML="<input id=\"new-useralias\" type=\"text\" name=\"new_aliasesnew_user\"/>";
-		newTD2_2.innerHTML="<input type=\"text\" maxlenght=\"80\" size=\"50\" name=\"new_aliasesnew_alias\"/>";
-		newTR2.appendChild(newTD2_1);
-		newTR2.appendChild(newTD2_2);
-		moreBtn=$('adding-more-alias');
-		var aliasTable=DOM.getElementsByClassName(document,'aliaslist-table')[0].firstChild;
-		aliasTable.insertBefore(newTR1,aliasTable.lastChild);
-		aliasTable.insertBefore(newTR2,aliasTable.lastChild);
-		return false;
+		    var newTR2=document.createElement('tr');
+		    var newTD2_1=document.createElement('td');
+		    var newTD2_2=document.createElement('td');
+		    DOM.addClassName(newTD2_2,'user_alias');
+		    newTD2_1.innerHTML="<input id=\"new-useralias\" type=\"text\" name=\"new_aliasesnew_user\"/>";
+		    newTD2_2.innerHTML="<input type=\"text\" maxlenght=\"80\" size=\"50\" name=\"new_aliasesnew_alias\"/>";
+		    newTR2.appendChild(newTD2_1);
+		    newTR2.appendChild(newTD2_2);
+		    moreBtn=$('adding-more-alias');
+		    var aliasTable=DOM.getElementsByClassName(document,'aliaslist-table')[0].firstChild;
+		    aliasTable.insertBefore(newTR2,aliasTable.lastChild);
+		    return false;
 	    }
 	    </script>|;	
 
