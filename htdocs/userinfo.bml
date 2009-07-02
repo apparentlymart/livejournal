@@ -420,8 +420,8 @@
 # add alias
 
 	$text = $user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
-	$li_title = ($remote->in_class('paid') || $remote->in_class('perm')) ? $ML{'.useralias.title'} : "$ML{'.useralias.title.disabled'}";
-	if ($remote->in_class('paid') || $remote->in_class('perm')) {
+	$li_title = ($remote && ($remote->in_class('paid') || $remote->in_class('perm'))) ? $ML{'.useralias.title'} : "$ML{'.useralias.title.disabled'}";
+	if ($remote && ($remote->in_class('paid') || $remote->in_class('perm'))) {
 		$body .= q|<li class='profile_addfeed' title=\"$li_title\"><a onclick='return addAlias(this, "|.($user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'}).q|", "|.$u->{user}.q|", "|.$user_alias.q|")' href='#'>|;
 		$body .= "<img src='$LJ::IMGPREFIX/profile_icons/alias.gif' alt='' />$text</a>";
 	} else {
