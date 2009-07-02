@@ -154,8 +154,12 @@ LJWidget = new Class(Object, {
     ajaxDone: function (data) {
         this._ajax_updating = false;
         this.removeHilightFrame();
-	
-	this.authToken='ajax:1246273200:2:1194:/_widget::55e830d7a9d442c86cf6f2463a5aa3c7e62228b7';
+ 	
+	if(data["_widget_body"]){	
+		if(data["_widget_body"].match(/ajax:.[^"]+/)[0]){
+			this.authToken=data["_widget_body"].match(/ajax:.[^"]+/)[0];
+		}
+	}
 
         if (data.auth_token) {
             this.authToken = data.auth_token;
@@ -353,6 +357,30 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
     if (success) {
       LJ_IPPU.showNote("Virtual gift added to your cart.");
       this.ippu.hide();
+      var userLJ=data.res.link;
+      var searchUser1=DOM.getElementsByAttributeAndValue(document,'href',userLJ+"/");
+      var searchUser2=DOM.getElementsByAttributeAndValue(document,'href',userLJ);
+      var searchProfile=searchUser1.concat(searchUser2); 
+      var supSign;
+      for(var i=0;i<searchProfile.length;i++){
+	if(DOM.hasClassName(searchProfile[i].parentNode,'ljuser')){
+		if(!DOM.hasClassName(searchProfile[i].parentNode,'with-alias')){
+			DOM.addClassName(searchProfile[i].parentNode,'with-alias')
+			supSign=document.createElement('sup');
+			supSign.innerHTML='&#x2714;';
+			searchProfile[i].appendChild(supSign);
+		}
+		else{
+			if(data.res.alias==""){
+				DOM.removeClassName(searchProfile[i].parentNode,'with-alias')
+				supSign=searchProfile[i].getElementsByTagName('sup')[0];
+				searchProfile[i].removeChild(supSign);
+			}
+		
+		}
+		searchProfile[i].setAttribute('title',data.res.alias);
+	}
+      }
     }
   },
 
@@ -720,6 +748,11 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             	alias = document.createElement('span');
 		if(data.alias_enable!=0){
 			if(data.alias){
+				var currentalias=document.createElement('span');
+				currentalias.innerHTML=data.alias;
+				DOM.addClassName(currentalias,'alias-value');
+				content.appendChild(currentalias);
+    				content.appendChild(document.createElement("br"));
 				var editalias=document.createElement('a');
 				editalias.href='javascript:void(0)';
 				editalias.onclick=function(){return addAlias(this, data.alias_title, data.username);}
