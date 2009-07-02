@@ -382,7 +382,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 				$('profile_alias').innerHTML='('+data.res.alias+')';
 			}
 		}
-		else if(data.res.alias!=''){
+		else if(data.res.alias!='' && DOM.hasClassName(searchProfile[i].parentNode,'username')){
 			var pr_alias=document.createElement('span');
 			DOM.addClassName(pr_alias,'alias-value');
 			pr_alias.id='profile_alias';
