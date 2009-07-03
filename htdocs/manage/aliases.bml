@@ -47,7 +47,7 @@ body<=
         my @a_new_user  = split /\0/, $new_user;
         my @a_new_alias = split /\0/, $new_alias;
         foreach my $idx (0..$#a_new_alias) {
-            ($a_new_alias[$idx]) = $a_new_alias[$idx] =~ m#^(.{0,80})#;
+            ($a_new_alias[$idx]) = $a_new_alias[$idx] =~ m#^(.{0,200})#;
         }
 
         my $prop_aliases = $u->prop('aliases');
@@ -56,7 +56,7 @@ body<=
         my @user_list = split /\|/, $POST{$key."_user_list"};
         foreach my $user (@user_list) {
             my $user_alias = $POST{$key.$user};
-            ($user_alias) = $user_alias =~ m#^(.{0,80})#;
+            ($user_alias) = $user_alias =~ m#^(.{0,200})#;
             if ($user_alias ne '') {
                 $aliases->{$user} = $user_alias;
             } else {
@@ -67,8 +67,7 @@ body<=
         foreach my $idx (0..$#a_new_user) {
             $aliases->{$a_new_user[$idx]} = $a_new_alias[$idx] if $a_new_user[$idx] ne $u->{user} && $a_new_user[$idx] && $a_new_alias[$idx] && LJ::load_user($a_new_user[$idx]);
         }
-use Data::Dumper;
-warn Dumper $aliases;
+
         $u->set_prop( aliases => objToJson($aliases) );
 
         my $error = '';

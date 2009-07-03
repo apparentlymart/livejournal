@@ -71,6 +71,7 @@ sub handle_post {
 
     my $is_edit = 0;
     $is_edit = 1 if $aliases->{$post->{foruser}} ne '';
+    ($post->{alias}) = $post->{alias} =~ m#^(.{0,200})#;
     $aliases->{$post->{foruser}} = $post->{alias};
     $aliases = objToJson($aliases);
 
