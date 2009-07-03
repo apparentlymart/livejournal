@@ -393,14 +393,15 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
        if(DOM.getElementsByClassName(document,'profile_addalias')[0]){
 		var alias_title;
        		if(data.res.alias==''){
-			alias_title="[uhhh: /userinfo.bml.addalias.title]";
+			DOM.getElementsByClassName(document,'profile_addalias')[0].style.display='block';
+			DOM.getElementsByClassName(document,'profile_addalias')[1].style.display='none';
 		}else{
-			alias_title="[uhhh: /userinfo.bml.editalias.title]";
+			DOM.getElementsByClassName(document,'profile_addalias')[0].style.display='none';
+			DOM.getElementsByClassName(document,'profile_addalias')[1].style.display='block';
+			var onclickText=DOM.getElementsByClassName(document,'profile_addalias')[1].firstChild.getAttribute('onclick');
+			var newonclickText=onclickText.replace(/".[^"]+"\)$/,"\""+data.res.alias+"\")");
+			DOM.getElementsByClassName(document,'profile_addalias')[1].firstChild.setAttribute('onclick',newonclickText);
 		}
-		var onclick_string="return addAlias(this,\""+alias_title+"\",\""+data.res.link+"\", \""+data.res.alias+"\")";
-		DOM.getElementsByClassName(document,'profile_addalias')[0].setAttribute('title',alias_title);
-		DOM.getElementsByClassName(document,'profile_addalias')[0].firstChild.setAttribute('onclick',onclick_string);
-		DOM.getElementsByClassName(document,'profile_addalias')[0].getElementsByTagName('span')[0].innerHTML=alias_title;
        }	       
 
     }
