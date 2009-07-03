@@ -503,9 +503,7 @@ sub clean
                         if ($opts->{'textonly'}) {
                             $newdata .= $user;
                         } else {
-                            my $title = Encode::encode_utf8($attr->{title});
-                            my $ljuser = LJ::ljuser($user, { title => $title } );
-                            $newdata .= Encode::decode_utf8($ljuser);
+                            $newdata .= LJ::ljuser($user, { title => $attr->{title} } );
                         }
                     } else {
                         $orig_user = LJ::no_utf8_flag($orig_user);
@@ -996,7 +994,7 @@ sub clean
             if ($auto_format && !$opencount{'textarea'}) {
                 $token->[1] =~ s/\r?\n/<br \/>/g;
                 if (! $opencount{'a'}) {
-                    $token->[1] =~ s|&url(\d+);(.*?)&urlend;|<a href="$url{$1}" rel="nofollow">$2</a>|g;
+                    $token->[1] =~ s|&url(\d+);(.*?)&urlend;|<a href="$url{$1}">$2</a>|g;
                 }
             }
 
