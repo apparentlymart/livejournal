@@ -436,7 +436,7 @@
 		$body .= qq|<li class='profile_addalias' title="$li_title" style="$edit_style"><a onclick='return addAlias(this, "|.($ML{'.editalias.title'}).q|", "|.$u->{user}.q|", "|.$user_alias.q|")'  href='|.$url.q|'>|;
 		$body .= "<img src='$LJ::IMGPREFIX/profile_icons/alias.gif' alt='' /><span>$ML{'.editalias.title'}</span></a></li>";
 
-	} elsif($remote && $remote->userid eq $u->userid) {
+	} elsif($remote and $remote->userid eq $u->userid) {
 	    # noop. User can't set alias for himself
 	} else {
 		$body .= "<li class='profile_addalias_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/alias_disabled.gif' alt='' /><span>$text</span></li>";
