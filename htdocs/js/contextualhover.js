@@ -619,6 +619,8 @@ ContextualPopup.showPopup = function (ctxPopupId, ele) {
 
     var data = ContextualPopup.cachedResults[ctxPopupId];
 
+    console.log(data);
+
     if (! ele || (data && data.noshow)) {
         return;
     }
