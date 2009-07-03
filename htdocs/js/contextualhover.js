@@ -619,8 +619,6 @@ ContextualPopup.showPopup = function (ctxPopupId, ele) {
 
     var data = ContextualPopup.cachedResults[ctxPopupId];
 
-    console.log(data);
-
     if (! ele || (data && data.noshow)) {
         return;
     }
@@ -770,8 +768,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 	// aliases
 	
 	var alias;
-
-	if(!data.is_requester){
+	if(!data.is_requester && data.is_logged_in!='0'){
             	alias = document.createElement('span');
 		if(data.alias_enable!=0){
 			if(data.alias){
