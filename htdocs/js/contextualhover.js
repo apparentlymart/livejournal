@@ -469,7 +469,7 @@ function addAlias(target, ptitle, ljusername, oldalias) {
         authToken: Aliases.authToken
         }, {
 	    alias: oldalias,
-            foruser: ljusername,
+            foruser: ljusername
         });
 
     return false;
