@@ -78,6 +78,7 @@ body<=
             }
         }
         $error = "<?p ".BML::ml('.error.user_not_exist', { username => join (", ", @not_exists_users) } )." p?>" if scalar @not_exists_users;
+        $error = "<?p ".BML::ml('.error.yourself')." p?>" if scalar grep { $remote->{user} eq $_ } @a_new_user;
         
         # tell the user all is well
         $ret .= "<?h1 $ML{'Error'} h1?>$error" if $error;
