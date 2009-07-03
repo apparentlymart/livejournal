@@ -100,11 +100,7 @@ function _dateTime (DateTime time) : string {
 }	
 
 function _ljuser(UserLite user, string class) : string {
-	var string link = get_url($user,"recent");
-	var string profile = get_url($user,"userinfo");
-	var Image icon = userinfoicon($user);
-	var string type = $user.journal_type=="C"?"org":"nickname";
-	return """<span class="ljuser vcard$class" lj:user="$user.username"><a href="$profile" class="ico"><img src="$icon.url" alt="[info]" title="" /></a><a href="$link" class="fn $type url" title="$user.name">$user.username</a></span>""";
+	return """<span class="vcard$class">""" + $user->ljuser() + "</span>";
 }
 
 function _taglist(int max, int multiplier) : string[][] {
@@ -562,8 +558,9 @@ function _items(string[][] input, string{} _args) :string {
 		var int i = 0;
 		foreach var string[] item ($items) {
 			var string class = "$args{"class"}";
-			var string key_after = $args{"superkey"} == $item[0] ? $args{"superkey_after"} : "";
-			var string key_before = $args{"superkey"} == $item[0] ? $args{"superkey_before"} : "";
+			var bool isKey = ($args{"superkey"} == $item[0]) and ($args{"superkey"} != "");
+			var string key_after = $isKey ? $args{"superkey_after"} : "";
+			var string key_before = $isKey ? $args{"superkey_before"} : "";
 			if ($i++) { $result = "$result$args{"glue"}";}
 			$result = "$result$key_before";
 			if ($item[0]) {
@@ -577,7 +574,7 @@ function _items(string[][] input, string{} _args) :string {
 			}
 			if ($i == 1 and $args{"first"} == "1") { $class = "$class $args{"class"}-first"; }
 			if ($i == size $items and $args{"last"} == "1") { $class = "$class $args{"class"}-last"; }
-			if ($args{"superkey"} == $item[0]) { $class = "$class $args{"class"}-selected"; }
+			if ($isKey) { $class = "$class $args{"class"}-selected"; }
 			if ($args{"tag"}) {
 				$result = """$result<$args{"tag"} class="$class">$args{"in_before"}""" + ($item[2]?"""<a href="$item[2]"$args{"link_extras"}>$args{"link_before"}$item[1]$args{"link_after"}</a>""":"""$args{"nolink_before"}$item[1]$args{"nolink_after"}""") + """$args{"in_after"}</$args{"tag"}>""";
 			} else {
@@ -590,13 +587,15 @@ function _items(string[][] input, string{} _args) :string {
 	return $result;
 }
 
+
 function _prevnext() : string {
+	var Page p = get_page();
 	return _items(
 		[
-			["prev",$*_{"prev_text"},$*_{"prev_url"}],
-			["next",$*_{"next_text"},$*_{"next_url"}]
+			[($p.view == "recent" or $p.view == "friends") ? "next" : "prev", ($p.view != "archive" ? $*_{"prev_text"} : ""), $*_{"prev_url"}],
+			[($p.view == "recent" or $p.view == "friends") ? "prev" : "next", ($p.view != "archive" ? $*_{"next_text"} : ""), $*_{"next_url"}]
 		],{
-			"before"=>"$*_{"HR"}<ul>",
+			"before"=>"""$*_{"HR"}<ul class="prevnext">""",
 			"after"=>"</ul>",
 			"first"=>"0",
 			"last"=>"0",
@@ -604,7 +603,6 @@ function _prevnext() : string {
 			"nolink_after"=>"</strong>"
 		});
 }
-
 function _Content {
 	var Page p = get_page();
 	var string title = $p.global_title;
@@ -630,7 +628,7 @@ function _Content {
 				"after" => """<span class="etc">.</span></p>""",
 				"tag" => "span",
 				"class" => "tag",
-				"glue" => """<span class="etc">, </span>"""
+				"glue" => """<span class="etc">,</span> """
 			}
 		) : "";
 	var string links = _items(
@@ -904,7 +902,7 @@ function TagsPage::print_body {
 				"after" => """<span class="etc">.</span></p>""",
 				"tag" => "span",
 				"class" => "tag",
-				"glue" => """<span class="etc">, </span>"""
+				"glue" => """<span class="etc">,</span> """
 			}
 		);
 """
