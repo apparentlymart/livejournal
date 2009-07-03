@@ -105,7 +105,7 @@ warn Dumper $aliases;
 		    var newTD2_2=document.createElement('td');
 		    DOM.addClassName(newTD2_2,'user_alias');
 		    newTD2_1.innerHTML="<input id=\"new-useralias\" type=\"text\" name=\"new_aliasesnew_user\"/>";
-		    newTD2_2.innerHTML="<input type=\"text\" maxlenght=\"80\" size=\"50\" name=\"new_aliasesnew_alias\"/>";
+		    newTD2_2.innerHTML="<input type=\"text\" maxlenght=\"200\" size=\"50\" name=\"new_aliasesnew_alias\"/>";
 		    newTR2.appendChild(newTD2_1);
 		    newTR2.appendChild(newTD2_2);
 		    moreBtn=$('adding-more-alias');
@@ -121,11 +121,11 @@ warn Dumper $aliases;
     my @user_list = ();
     foreach my $user (keys %$aliases) {
         my $u = LJ::load_user($user);
-        $ret .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td class="user_alias"><input type="text" name="|.${key}.$u->{user}.q|" value="|.LJ::ljuser_alias($u->{user}).q|" size="50" maxlength="80"></td></tr>|."\n";
+        $ret .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td class="user_alias"><input type="text" name="|.${key}.$u->{user}.q|" value="|.LJ::ljuser_alias($u->{user}).q|" size="50" maxlength="200"></td></tr>|."\n";
         push @user_list, $user;
     }
     $ret .= q|<tr class="newalias"><td colspan="2"><label for="new-useralias">|. $ML{'.alias.header.newalias'} .q|</label></td></tr>|."\n";
-    $ret .= q|<tr><td><input type="text" name="|.${key}.q|new_user" id="new-useralias"></td><td class="user_alias"><input type="text" name="|.${key}.q|new_alias" size="50" maxlenght="80"></td></tr>|."\n";
+    $ret .= q|<tr><td><input type="text" name="|.${key}.q|new_user" id="new-useralias"></td><td class="user_alias"><input type="text" name="|.${key}.q|new_alias" size="50" maxlenght="200"></td></tr>|."\n";
     $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @user_list).q|">|."\n";
 	$ret .= q|<tr><td colspan="2"><a href="javascript:void(0)" id="adding-more-alias" onclick="addAliasLine()">|. $ML{'.alias.aliaslist.more'} .q|</a></td></tr>|;
     $ret .= q|</table>|."\n";

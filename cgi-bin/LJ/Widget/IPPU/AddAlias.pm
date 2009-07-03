@@ -35,6 +35,7 @@ sub render_body {
                 name  => 'alias',
                 id    => 'Widget[IPPU_AddAlias]_alias',
                 size  => 30,
+				maxlength => 200,
                 value => $opts{alias},
                 raw   => "autocomplete='off'",
              ) . "";
