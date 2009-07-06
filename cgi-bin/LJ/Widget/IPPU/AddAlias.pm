@@ -29,7 +29,7 @@ sub render_body {
     my $authtoken = LJ::Auth->ajax_auth_token(LJ::get_remote(), "/_widget");
 
 	$body .= "<div class='user_alias_act'>";
-    $body .= "<label for='Widget[IPPU_AddAlias]_alias'>". BML::ml('widget.alias.setalias') ." ".$for_user->ljuser_display." (". BML::ml('widget.alias.faq') ."):</label>";
+    $body .= "<div><label for='Widget[IPPU_AddAlias]_alias'>". BML::ml('widget.alias.setalias') ." ".$for_user->ljuser_display."</label> (". BML::ml('widget.alias.faq', {aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'"}) ."):</div>";
 
     $body .= $class->html_text(
                 name  => 'alias',
@@ -40,15 +40,13 @@ sub render_body {
                 raw   => "autocomplete='off'",
              ) . "";
 
-
-    $body .= "<span class='helper'>(" . BML::ml('widget.vgiftadd.display.publicly') . ")</span>";
-
     $body .= $class->html_hidden(
                 foruser => $opts{foruser},
              );
-    $body .= "<p>" .
-             $class->html_submit(BML::ml('widget.alias.aliaschange')) .
-             "</div>";
+    $body .= "<p>" . $class->html_submit(BML::ml('widget.alias.aliaschange')) ;
+
+    $body .= "<span class='helper'>" . BML::ml('widget.addalias.display.helper', {aopts => "href='$LJ::SITEROOT/manage/aliases.bml'"}) . "</span>";
+    $body .= "</div>";
     $body .= $class->end_form;
 	$body .= "</p>";
 
