@@ -364,13 +364,14 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
       	for(var i=0;i<searchProfile.length;i++){
 		if(!DOM.hasClassName(searchProfile[i],'with-alias')){
 			DOM.addClassName(searchProfile[i],'with-alias')
-			supSign=document.createElement('sup');
+			supSign=document.createElement('span');
+			DOM.addClassName(supSign,'useralias-value');
 			supSign.innerHTML='*';
 			searchProfile[i].getElementsByTagName('a')[1].appendChild(supSign);
 		}else{
 			if(data.res.alias==''){
 				DOM.removeClassName(searchProfile[i],'with-alias')
-				supSign=searchProfile[i].getElementsByTagName('sup')[0];
+				supSign=DOM.getElementsByClassName(searchProfile[i],'useralias-value')[0];
 				searchProfile[i].getElementsByTagName('a')[1].removeChild(supSign);
 			}
 		}
