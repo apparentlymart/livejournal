@@ -60,6 +60,8 @@ sub handle_post {
 
     my $remote = LJ::get_remote();
 
+    die "Must be logged in" unless $remote; # hope it is impossibly...
+
     my $aliases = $remote->prop('aliases');
     $aliases = jsonToObj($aliases);
     my $user_for_alias = LJ::load_user($post->{foruser});
@@ -67,20 +69,33 @@ sub handle_post {
     die BML::ml('.error.cantfinduser', {'user' => $post->{foruser}})
         unless $user_for_alias;
 
+    die "Cannot set alias to yourself" if $remote->{user} eq $user_for_alias->{user}; # again, hope it is impossible
+
     my $is_edit = 0;
     $is_edit = 1 if $aliases->{$post->{foruser}} ne '';
-    ($post->{alias}) = $post->{alias} =~ m#^(.{0,200})#;
-    $aliases->{$post->{foruser}} = $post->{alias};
-    $aliases = objToJson($aliases);
+    my $prepared_alias = substr($post->{alias}, 0, 200);
+    $aliases->{$user_for_alias->{userid}} = $prepared_alias if $prepared_alias;
+    delete $aliases->{$user_for_alias->{userid}} unless $prepared_alias;
 
-    $remote->set_prop('aliases', $aliases);
+    my $ready_aliases = objToJson($aliases);
+    if (length $ready_aliases < 65536) {
+        $remote->set_prop( aliases => $ready_aliases );
     
-    return (
-        success => 1, 
-        link    => $user_for_alias->display_name,
-        alias   => $post->{alias},
-        message => $is_edit ? BML::ml('widget.addalias.edit_alias') : BML::ml('widget.addalias.add_alias'),
-    );
+        return (
+            success => 1, 
+            link    => $user_for_alias->display_name,
+            alias   => $post->{alias},
+            message => $is_edit ? BML::ml('widget.addalias.edit_alias') : BML::ml('widget.addalias.add_alias'),
+        );
+
+    } else {
+        return (
+            success => 0, 
+            link    => $user_for_alias->display_name,
+            alias   => $post->{alias},
+            message => BML::ml('widget.addalias.too.long')
+        );
+    }
 }
 
 1;
