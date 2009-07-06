@@ -1330,7 +1330,7 @@ sub ljuser_display {
         $user_html .= " title='$alias'"
             if $alias;
         $user_html .= " rel='nofollow'><b>$name</b>";
-        $user_html .= "*"
+        $user_html .= "<span class='useralias-value'>*</span>"
             if $alias;
         $user_html .= "</a></span>";
         return $user_html;
@@ -6480,7 +6480,7 @@ sub ljuser
         $user_html .= "  title='$alias'"
             if $alias;
         $user_html .= ">$ljusername";
-        $user_html .= "*"
+        $user_html .= "<span class='useralias-value'>*</span>"
             if $alias;
         $user_html .= "</a></span>";
         return $user_html;
