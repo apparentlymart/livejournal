@@ -136,13 +136,17 @@ body<=
                 $ret .= "<td$colors>" . LJ::ehtml($f->{'name'}) . "</td>\n";
 
                 $ret .= "<td>";
-                $ret .= LJ::html_text({
- 							size => "30",
-							maxlength => "200",
-                            name => "useralias_$who",
-                            id   => "useralias_$who",
-                            value => LJ::ljuser_alias($f->{username}),
+				if ($who ne $authas) {
+                	$ret .= LJ::html_text({
+ 								size => "30",
+								maxlength => "200",
+                            	name => "useralias_$who",
+                            	id   => "useralias_$who",
+                            	value => LJ::ljuser_alias($f->{username}),
                         });
+				} else { 
+					$ret .= "&nbsp;";
+				}
                 $ret .= "</td>";
 
                 $ret .= "<td align='center'>";
