@@ -135,18 +135,15 @@ body<=
                 $colors = " style='$colors'" if $colors;
                 $ret .= "<td$colors>" . LJ::ehtml($f->{'name'}) . "</td>\n";
 
+                my $who_u = LJ::load_user($who);
                 $ret .= "<td>";
-				if ($who ne $authas) {
-                	$ret .= LJ::html_text({
- 								size => "30",
-								maxlength => "200",
-                            	name => "useralias_$who",
-                            	id   => "useralias_$who",
-                            	value => LJ::ljuser_alias($f->{username}),
+                $ret .= LJ::html_text({
+ 							size => "30",
+							maxlength => "200",
+                            name => "useralias_" . $who_u->{userid},
+                            id   => "useralias_$who",
+                            value => LJ::ljuser_alias($f->{username}),
                         });
-				} else { 
-					$ret .= "&nbsp;";
-				}
                 $ret .= "</td>";
 
                 $ret .= "<td align='center'>";
@@ -271,6 +268,7 @@ body<=
             my $value = substr($POST{$key}, 0, 200);
             $who =~ s/^useralias_//;
             $aliases->{$who} = $value if (defined $value && $value ne '' && $who ne $remote->{user});
+            delete $aliases->{$who} unless $value;
         }
         my $ready_aliases = objToJson($aliases);
         if (length $ready_aliases < 65536) {

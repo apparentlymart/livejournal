@@ -6404,15 +6404,15 @@ sub get_shared_journals
 sub ljuser_alias {
     my $user = shift;
 
-    my $u = LJ::get_remote();
+    my $remote = LJ::get_remote();
+    return undef unless $remote;
+
+    my $u = LJ::load_user($user);
     return undef unless $u;
     
-    my $prop_aliases = $u->prop('aliases');
+    my $prop_aliases = $remote->prop('aliases');
     my $aliases = JSON::jsonToObj($prop_aliases);
-    foreach my $key (keys %$aliases) {
-        return $aliases->{$key} if $key eq $user;
-    }
-    return undef;
+    return $aliases->{$u->{userid}};
 }
 
 # <LJFUNC>

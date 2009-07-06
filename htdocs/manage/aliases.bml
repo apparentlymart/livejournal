@@ -39,14 +39,14 @@ body<=
             $alias = substr($alias, 0, $max_alias_length);
         }
 
-        my @user_list = split /\|/, $POST{$key."_user_list"};
-        foreach my $user (@user_list) {
-            my $user_alias = $POST{$key.$user};
+        my @userid_list = split /\|/, $POST{$key."_user_list"};
+        foreach my $userid (@userid_list) {
+            my $user_alias = $POST{$key.$userid};
             $user_alias = substr($user_alias, 0, $max_alias_length);
             if ($user_alias ne '') {
-                $aliases->{$user} = $user_alias;
+                $aliases->{$userid} = $user_alias;
             } else {
-                delete $aliases->{$user};
+                delete $aliases->{$userid};
             }
         }
 
@@ -57,13 +57,15 @@ body<=
 
             next unless $a_new_user[$idx];
 
-            unless (LJ::load_user($a_new_user[$idx])) {
+            my $adding_u = LJ::load_user($a_new_user[$idx]);
+
+            unless ($adding_u) {
                 push @not_exists_users, $a_new_user[$idx];
                 next;
             }
 
-            $aliases->{$a_new_user[$idx]} = $a_new_alias[$idx] 
-                if $a_new_user[$idx] ne $u->{user} && $a_new_alias[$idx];
+            $aliases->{$adding_u->{userid}} = $a_new_alias[$idx] 
+                if $adding_u->{user} ne $u->{user} && $a_new_alias[$idx];
         }
 
         my $ready_aliases = objToJson($aliases);
@@ -109,16 +111,17 @@ body<=
     $ret .= q|<table class="aliaslist-table">|;
     
     $ret .= q|<tr><th>|. $ML{'.alias.header.username'} .q|</th><th>|.$ML{'.alias.header.alias'} .q|</th></tr>|."\n";
-    my @user_list = ();
-    foreach my $user (sort keys %$aliases) {
-        my $u = LJ::load_user($user);
-        $ret .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td class="user_alias"><input type="text" name="|.${key}.$u->{user}.q|" value="|
+    my @userid_list = ();
+    my $us = LJ::load_userids(keys %$aliases);
+    foreach my $userid (keys %$aliases) {
+        my $u = $us->{$userid};
+        $ret .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td class="user_alias"><input type="text" name="|.$key.$userid.q|" value="|
                 .LJ::ehtml(LJ::ljuser_alias($u->{user})).q|" size="50" maxlength="200"></td></tr>|."\n";
-        push @user_list, $user;
+        push @userid_list, $userid;
     }
     $ret .= q|<tr class="newalias"><td colspan="2"><label for="new-useralias">|. $ML{'.alias.header.newalias'} .q|</label></td></tr>|."\n";
     $ret .= q|<tr><td><input type="text" name="|.${key}.q|new_user" id="new-useralias"></td><td class="user_alias"><input type="text" name="|.${key}.q|new_alias" size="50" maxlenght="200"></td></tr>|."\n";
-    $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @user_list).q|">|."\n";
+    $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @userid_list).q|">|."\n";
 	$ret .= q|<tr><td colspan="2"><a href="javascript:void(0)" id="adding-more-alias" onclick="addAliasLine()">|. $ML{'.alias.aliaslist.more'} .q|</a></td></tr>|;
     $ret .= q|</table>|."\n";
 
