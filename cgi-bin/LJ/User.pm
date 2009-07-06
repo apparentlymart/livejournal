@@ -6408,7 +6408,7 @@ sub ljuser_alias {
     return undef unless $u;
     
     my $prop_aliases = $u->prop('aliases');
-    my $aliases = jsonToObj($prop_aliases);
+    my $aliases = JSON::jsonToObj($prop_aliases);
     foreach my $key (keys %$aliases) {
         return $aliases->{$key} if $key eq $user;
     }
