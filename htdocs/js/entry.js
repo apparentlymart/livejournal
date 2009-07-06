@@ -143,6 +143,7 @@ function detectLocation(){
 		  
 		}
 		gGears.response=true;
+		wi2Geo.response=true;
 	}
 
 	try{
