@@ -230,7 +230,6 @@ HTML:not(IE7) .opera-filter, x:-o-prefocus { display:block; } /* opera gte 9.5 *
 		padding-top: 5px;
 		margin-bottom: 5px;
 		}
-
 	.user_alias_act P {
 		margin: .75em 0px;
 	    }
@@ -239,4 +238,29 @@ HTML:not(IE7) .opera-filter, x:-o-prefocus { display:block; } /* opera gte 9.5 *
 		display: block;
 		color:#000;
 		}
-
+        .user_alias_act A:link,
+        .user_alias_act A:visited,
+        .user_alias_act A:hover,
+        .user_alias_act A:active {
+              border: 0 !important;
+              text-decoration: underline;
+              }
+        .user_alias_act A:link{
+            color: #0000CC;
+            }
+        .user_alias_act A:visited {
+            color: #330066;
+            }
+        .user_alias_act A:link:hover {
+            color: #0000CC;
+            }
+        .user_alias_act A:visited:hover {
+            color: #330066;
+            }
+        .user_alias_act A:link:active {
+            color: #0000CC;
+            }
+        .user_alias_act A:visited:active {
+            color: #330066;
+            }
+    
