@@ -137,13 +137,18 @@ body<=
 
                 my $who_u = LJ::load_user($who);
                 $ret .= "<td>";
-                $ret .= LJ::html_text({
+                if ($who ne $authas) {
+                    $ret .= LJ::html_text({
  							size => "30",
 							maxlength => "200",
                             name => "useralias_" . $who_u->{userid},
                             id   => "useralias_$who",
                             value => LJ::ljuser_alias($f->{username}),
                         });
+                } else { 
+                    $ret .= " ";
+                }
+                        
                 $ret .= "</td>";
 
                 $ret .= "<td align='center'>";
