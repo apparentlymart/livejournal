@@ -365,7 +365,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 		if(!DOM.hasClassName(searchProfile[i],'with-alias')){
 			DOM.addClassName(searchProfile[i],'with-alias')
 			supSign=document.createElement('sup');
-			supSign.innerHTML='&#x2714;';
+			supSign.innerHTML='*';
 			searchProfile[i].getElementsByTagName('a')[1].appendChild(supSign);
 		}else{
 			if(data.res.alias==''){
@@ -403,7 +403,13 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 			DOM.getElementsByClassName(document,'profile_addalias')[1].firstChild.setAttribute('onclick',newonclickText);
 		}
        }	       
-
+       if(data.res.alias==''){
+       		ContextualPopup.cachedResults[data.res.link].alias_title='Add Alias';
+       }else{
+       		ContextualPopup.cachedResults[data.res.link].alias_title='Edit Alias';
+       	
+       }
+       ContextualPopup.cachedResults[data.res.link].alias=data.res.alias;
     }
   },
 
@@ -571,9 +577,9 @@ ContextualPopup.mouseOver = function (e) {
     var cached = ContextualPopup.cachedResults[ctxPopupId];
 
     // if we don't have cached data background request it
-    //if (!cached) {
+    if (!cached) {
         ContextualPopup.getInfo(target, ctxPopupId);
-    //}
+    }
 
     // start timer if it's not running
     if (! ContextualPopup.mouseInTimer && (! ContextualPopup.ippu || (
@@ -779,7 +785,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 				var editalias=document.createElement('a');
 				editalias.href='javascript:void(0)';
 				editalias.onclick=function(){return addAlias(this, data.alias_title, data.username, data.alias);}
-				editalias.innerHTML='Edit an alias';
+				editalias.innerHTML=data.alias_title;
 				alias.appendChild(editalias);
 				DOM.addClassName(alias,'alias-edit');
 			}
@@ -787,7 +793,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 				var addalias=document.createElement('a');
 				addalias.href='javascript:void(0)';
 				addalias.onclick=function(){return addAlias(this, data.alias_title, data.username,'');}
-				addalias.innerHTML='Add an alias';
+				addalias.innerHTML=data.alias_title;
 				alias.appendChild(addalias);
 				DOM.addClassName(alias,'alias-add');
 			}
