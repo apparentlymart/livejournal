@@ -73,7 +73,7 @@ sub render_body {
     LJ::load_codes({ "country" => \%countries});
     my ($default_country, $default_region, $default_city);
     if ($LJ::USE_IPMAP) {    
-        if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location'}) {
+        if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location_create'}) {
             my $geo = LJ::GeoLocation->get_city_info_by_ip();
             $default_country = $geo->{country_short};
             $default_region = $geo->{region};
@@ -86,7 +86,7 @@ sub render_body {
     }
     $ret .= "<tr valign='middle'><td class='field-name'>" . $class->ml('widget.createaccountprofile.field.location') . "</td>\n<td>";
     $ret .= LJ::Widget::Location->render( country => $default_country, state => $default_region, city => $default_city,
-                                          minimal_display => 1, skip_timezone => 1, $loc_post);
+                                          minimal_display => 1, skip_timezone => 1, %$loc_post);
     $ret .= "</td></tr>\n";
 
     $ret .= "</table><br />\n";

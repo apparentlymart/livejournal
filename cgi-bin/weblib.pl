@@ -1463,7 +1463,7 @@ MOODS
             my @width_for_lastfm = ();
 			my @width_for_geolocation =();
             @width_for_lastfm = ('style' => 'width: 45%') if $show_lastfm;
-			@width_for_geolocation = ('style' => 'width: 45%') if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location'});
+			@width_for_geolocation = ('style' => 'width: 45%') if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location_update'});
 
             # Current Location
             $out .= "<p class='pkg'>";
@@ -1473,7 +1473,7 @@ MOODS
                 $out .= LJ::html_text({ 'name' => 'prop_current_location', 'value' => $opts->{'prop_current_location'}, 'id' => 'prop_current_location',
                                         'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->(), @width_for_lastfm, @width_for_geolocation }) . "\n";
 
-  				if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location'}) {
+  				if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location_update'}) {
 
                 	my $button_label = BML::ml('entryform.location.detect');
                 	$out .= qq[<span class="detect_btn"><input type="button" value="$button_label" onclick="detectLocation()">];
