@@ -472,7 +472,7 @@ function addAlias(target, ptitle, ljusername, oldalias) {
     var addvgift = new LJWidgetIPPU_AddAlias({
         title: ptitle,
         width: 440,
-        height: 160,
+        height: 180,
         authToken: Aliases.authToken
         }, {
 	    alias: oldalias,
