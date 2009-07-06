@@ -22,6 +22,7 @@ use LJ::MemCache;
 use LJ::Session;
 use LJ::RateLimit qw//;
 use URI qw//;
+use JSON;
 
 use Class::Autouse qw(
                       URI
@@ -6400,7 +6401,6 @@ sub get_shared_journals
     return sort map { $_->{'user'} } values %users;
 }
 
-use JSON;
 sub ljuser_alias {
     my $user = shift;
 
@@ -6467,8 +6467,8 @@ sub ljuser
         $url = $journal_url ne '' ? $journal_url : $url;
          
         my $u = LJ::get_remote();
-        my $alias_enable = $u && $u->get_cap('paid');
-        my $alias = $alias_enable ? LJ::ljuser_alias($user) : '';
+        my $alias_enable = $u && $u->get_cap('aliases');
+        my $alias = $alias_enable ? LJ::ehtml(LJ::ljuser_alias($user)) : '';
         
         my $user_html = '';
         $user_html .= "<span class='ljuser ";

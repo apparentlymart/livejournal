@@ -268,11 +268,16 @@ body<=
         $aliases = jsonToObj($aliases);
         foreach (grep { /^useralias/ } keys %POST) {
             my $key = my $who = $_;
-            my ($value) = $POST{$key} =~ m#^(.{0,200})#;
+            my $value = substr($POST{$key}, 0, 200);
             $who =~ s/^useralias_//;
-            $aliases->{$who} = $value if (defined $value && $value ne '');
+            $aliases->{$who} = $value if (defined $value && $value ne '' && $who ne $remote->{user});
         }
-        $remote->set_prop('aliases', objToJson($aliases));
+        my $ready_aliases = objToJson($aliases);
+        if (length $ready_aliases < 65536) {
+            $remote->set_prop( aliases => $ready_aliases );
+        } else {
+            return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'.error.too.long.aliases'} p?>\n");
+        }
 
         my %response = ();
         LJ::do_request(\%request, \%response, { 'noauth' => 1, 'u' => $u });

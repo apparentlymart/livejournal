@@ -1,14 +1,8 @@
 ;; -*- coding: utf-8 -*-
 
-.done.btn.savechanges=Save changes
+.alias.aliaslist.more=add more rows...
 
-.error.user_not_exist=User "[[username]]" is not exist.
-
-.error.yourself=You can not set an alias to yourself.
-
-.success.head=Success
-
-.success.saved=Your aliasing settings have been updated
+.alias.comment.successupd=Your aliasing settings have been updated
 
 .alias.header.username=Username
 
@@ -16,7 +10,18 @@
 
 .alias.header.newalias=New alias:
 
-.alias.aliaslist.more=add more rows...
+.done.btn.savechanges=Save changes
 
-.alias.comment.successupd=Your aliasing settings have been updated
+.error.user_not_exist=User "[[username]]" is not exist.
 
+.error.yourself=You can not set an alias to yourself.
+
+.error.too.long=You've reached the limit of the aliases.
+
+.not.allowed=Available to <a [[aopts]]>paid account members</a> only.
+
+.success.head=Success
+
+.success.saved=Your aliasing settings have been updated
+
+.title=Manage Aliases

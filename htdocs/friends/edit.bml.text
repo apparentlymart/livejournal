@@ -27,6 +27,8 @@
 
 .error.badjournaltype=Cannot modify friends of this journal type.
 
+.error.too.long.aliases=You've reached the limit of the aliases.
+
 .error.updating=There was an error updating your friends list:
 
 .foreground=Foreground
