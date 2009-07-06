@@ -267,7 +267,7 @@ body<=
             my $key = my $who = $_;
             my $value = substr($POST{$key}, 0, 200);
             $who =~ s/^useralias_//;
-            $aliases->{$who} = $value if (defined $value && $value ne '' && $who ne $remote->{user});
+            $aliases->{$who} = $value if (defined $value && $value ne '' && $who ne $remote->{userid});
             delete $aliases->{$who} unless $value;
         }
         my $ready_aliases = objToJson($aliases);
