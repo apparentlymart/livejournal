@@ -775,8 +775,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 				var currentalias=document.createElement('span');
 				currentalias.innerHTML=data.alias;
 				DOM.addClassName(currentalias,'alias-value');
-				content.appendChild(currentalias);
-    				content.appendChild(document.createElement("br"));
+				content.insertBefore(currentalias,content.firstChild.nextSibling);
 				var editalias=document.createElement('a');
 				editalias.href='javascript:void(0)';
 				editalias.onclick=function(){return addAlias(this, data.alias_title, data.username, data.alias);}
