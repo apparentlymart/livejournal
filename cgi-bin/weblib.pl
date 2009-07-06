@@ -1477,7 +1477,7 @@ MOODS
 
                 	my $button_label = BML::ml('entryform.location.detect');
                 	$out .= qq[<span class="detect_btn"><input type="button" value="$button_label" onclick="detectLocation()">];
-                	$out .= LJ::help_icon_html("screening", "", " ");
+                	$out .= LJ::help_icon_html("location", "", " ");
 					$out .="</span>";
 				
 					#$out .=qq[<span class="save_loc"><input type="checkbox" checked name="save_loc">] . BML::ml('entryform.location.save', {'aopts' => 'href="#"'});
