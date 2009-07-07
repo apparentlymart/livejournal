@@ -383,7 +383,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 				$('profile_alias').innerHTML='('+data.res.alias+')';
 			}
 		}
-		else if(data.res.alias!='' && DOM.hasClassName(searchProfile[i].parentNode,'username')){
+		else if(data.res.alias!='' && searchProfile[i].parentNode.parentNode.id=='profile_top'){
 			var pr_alias=document.createElement('span');
 			DOM.addClassName(pr_alias,'alias-value');
 			pr_alias.id='profile_alias';
@@ -391,6 +391,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 			searchProfile[i].parentNode.appendChild(pr_alias);
 		}
        }
+       //Changing button. Only on profile page
        if(DOM.getElementsByClassName(document,'profile_addalias')[0]){
 		var alias_title;
        		if(data.res.alias==''){
