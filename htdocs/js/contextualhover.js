@@ -357,8 +357,8 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
     if (data.res && data.res.success) success = data.res.success;
     if (success) {
         this.ippu.hide();
-	var userLJ=data.res.link;
-      	var userClassName='ljuser-name_'+ data.res.link;
+	var userLJ=data.res.journalname;
+      	var userClassName='ljuser-name_'+ data.res.journalname;
       	var searchProfile=DOM.getElementsByClassName(document,userClassName); 
       	var supSign;
       	for(var i=0;i<searchProfile.length;i++){
@@ -407,12 +407,12 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 		}
        }	       
        if(data.res.alias==''){
-       		ContextualPopup.cachedResults[data.res.link].alias_title='Add Alias';
+       		ContextualPopup.cachedResults[data.res.username].alias_title='Add Alias';
        }else{
-       		ContextualPopup.cachedResults[data.res.link].alias_title='Edit Alias';
+       		ContextualPopup.cachedResults[data.res.username].alias_title='Edit Alias';
        	
        }
-       ContextualPopup.cachedResults[data.res.link].alias=data.res.alias;
+       ContextualPopup.cachedResults[data.res.username].alias=data.res.alias;
     }
   },
 
@@ -804,13 +804,13 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 			var disabledalias=document.createElement('a');
 			var upgradeacc=document.createElement('a');
 			var upgradeimg=document.createElement('img');
-			upgradeacc.href=window.Site.siteroot+'support/faqbrowse.bml?faqid=295';
+			upgradeacc.href=window.Site.siteroot+'/support/faqbrowse.bml?faqid=295';
 			var statroot=window.Site.siteroot.toString();
 			var statsiteroot=statroot.replace(/http\:\/\/www\./,'http://stat.');
 			upgradeimg.src=statsiteroot+'/horizon/upgrade-paid-icon.gif';
 			upgradeimg.alt='';
 			upgradeacc.appendChild(upgradeimg);
-			disabledalias.href=window.Site.siteroot+'support/faqbrowse.bml?faqid=295';
+			disabledalias.href=window.Site.siteroot+'/support/faqbrowse.bml?faqid=295';
 			disabledalias.innerHTML='Add an alias';
 			alias.appendChild(upgradeacc);
 			alias.innerHTML+="&nbsp";
