@@ -1316,7 +1316,7 @@ sub ljuser_display {
 
         my $remote = LJ::get_remote();
         my $alias_enable = $remote && $remote->get_cap('paid');
-        my $alias = $alias_enable ? LJ::ljuser_alias($u->{user}) : '';
+        my $alias = $alias_enable ? LJ::ehtml(LJ::ljuser_alias($u->{user})) : '';
   
         my $profile = $profile_url ne '' ? $profile_url : "$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull";
         
