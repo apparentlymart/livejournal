@@ -394,25 +394,25 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
        }
        //Changing button. Only on profile page
        if(DOM.getElementsByClassName(document,'profile_addalias')[0]){
-		var alias_title;
        		if(data.res.alias==''){
 			DOM.getElementsByClassName(document,'profile_addalias')[0].style.display='block';
 			DOM.getElementsByClassName(document,'profile_addalias')[1].style.display='none';
 		}else{
 			DOM.getElementsByClassName(document,'profile_addalias')[0].style.display='none';
 			DOM.getElementsByClassName(document,'profile_addalias')[1].style.display='block';
-			var onclickText=DOM.getElementsByClassName(document,'profile_addalias')[1].firstChild.getAttribute('onclick');
-			var newonclickText=onclickText.replace(/".[^"]+"\)$/,"\""+data.res.alias+"\")");
-			DOM.getElementsByClassName(document,'profile_addalias')[1].firstChild.setAttribute('onclick',newonclickText);
+			DOM.getElementsByClassName(document,'profile_addalias')[1].firstChild.alias = data.res.alias;
 		}
+		
        }	       
-       if(data.res.alias==''){
-       		ContextualPopup.cachedResults[data.res.username].alias_title='Add Alias';
-       }else{
-       		ContextualPopup.cachedResults[data.res.username].alias_title='Edit Alias';
+       if(ContextualPopup.cachedResults[data.res.username]){
+       		if(data.res.alias==''){
+       			ContextualPopup.cachedResults[data.res.username].alias_title='Add Alias';
+       		}else{
+       			ContextualPopup.cachedResults[data.res.username].alias_title='Edit Alias';
        	
+       		}
+       		ContextualPopup.cachedResults[data.res.username].alias=data.res.alias;
        }
-       ContextualPopup.cachedResults[data.res.username].alias=data.res.alias;
     }
   },
 
@@ -469,15 +469,14 @@ LiveJournal.register_hook("page_load", function () {
 
 function addAlias(target, ptitle, ljusername, oldalias) {
     if (! ptitle) return true;
-
-
+	
     var addvgift = new LJWidgetIPPU_AddAlias({
         title: ptitle,
         width: 440,
         height: 180,
         authToken: Aliases.authToken
         }, {
-	    alias: oldalias,
+	    alias: target.alias||oldalias,
             foruser: ljusername
         });
 
