@@ -377,7 +377,7 @@
 
     ### Username
     my $new_margin = $boxad ? " style='margin-right: 320px;'" : '';
-    my $user_alias = LJ::ljuser_alias($u->{user});
+    my $user_alias = LJ::ehtml(LJ::ljuser_alias($u->{user}));
     my $user_alias_sp = "&nbsp;<span class=\"alias-value\" id=\"profile_alias\">(".$user_alias.")</span>" if $user_alias;
     $body .= "<div class='username'$new_margin>" . $u->ljuser_display . $user_alias_sp;
     if ($u->{public_key}) {

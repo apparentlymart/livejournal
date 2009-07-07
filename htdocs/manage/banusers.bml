@@ -126,7 +126,7 @@ body<=
                 value => $bu->id,
             }) . "</td>";
             $ret .= "<td>" . $bu->ljuser_display . "</td>";
-            $ret .= "<td>".LJ::ljuser_alias($bu->{user})."</td>" if $alias_enable;
+            $ret .= "<td>".LJ::ehtml(LJ::ljuser_alias($bu->{user}))."</td>" if $alias_enable;
             $ret .= "</tr>";
         }
         $ret .= "</table>";

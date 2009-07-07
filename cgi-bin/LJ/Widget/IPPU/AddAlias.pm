@@ -83,7 +83,7 @@ sub handle_post {
     
         return (
             success => 1, 
-            link    => $user_for_alias->display_name,
+            link    => $user_for_alias->user,
             alias   => LJ::dhtml($post->{alias}),
             message => $is_edit ? BML::ml('widget.addalias.edit_alias') : BML::ml('widget.addalias.add_alias'),
         );
@@ -91,8 +91,8 @@ sub handle_post {
     } else {
         return (
             success => 0, 
-            link    => $user_for_alias->display_name,
-            alias   => $post->{alias},
+            link    => $user_for_alias->user,
+            alias   => LJ::dhtml($post->{alias}),
             message => BML::ml('widget.addalias.too.long')
         );
     }
