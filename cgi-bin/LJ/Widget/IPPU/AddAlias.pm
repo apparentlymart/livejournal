@@ -82,18 +82,20 @@ sub handle_post {
         $remote->set_prop( aliases => $ready_aliases );
     
         return (
-            success => 1, 
-            link    => $user_for_alias->user,
-            alias   => LJ::dhtml($post->{alias}),
-            message => $is_edit ? BML::ml('widget.addalias.edit_alias') : BML::ml('widget.addalias.add_alias'),
+            success     => 1, 
+            username    => $user_for_alias->user,
+            journalname => $user_for_alias->display_name,
+            alias       => LJ::dhtml($post->{alias}),
+            message     => $is_edit ? BML::ml('widget.addalias.edit_alias') : BML::ml('widget.addalias.add_alias'),
         );
 
     } else {
         return (
-            success => 0, 
-            link    => $user_for_alias->user,
-            alias   => LJ::dhtml($post->{alias}),
-            message => BML::ml('widget.addalias.too.long')
+            success     => 0, 
+            username    => $user_for_alias->user,
+            journalname => $user_for_alias->display_name,
+            alias       => LJ::dhtml($post->{alias}),
+            message     => BML::ml('widget.addalias.too.long')
         );
     }
 }
