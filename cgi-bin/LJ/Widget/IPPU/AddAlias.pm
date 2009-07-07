@@ -84,7 +84,7 @@ sub handle_post {
         return (
             success => 1, 
             link    => $user_for_alias->display_name,
-            alias   => $post->{alias},
+            alias   => LJ::dhtml($post->{alias}),
             message => $is_edit ? BML::ml('widget.addalias.edit_alias') : BML::ml('widget.addalias.add_alias'),
         );
 

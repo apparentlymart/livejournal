@@ -380,14 +380,15 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 			if(data.res.alias==''){
 				searchProfile[i].parentNode.removeChild($('profile_alias'));
 			}else{
-				$('profile_alias').innerHTML='('+data.res.alias+')';
+				
+				$('profile_alias')[/*@cc_on'innerText'||@*/'textContent'] = '('+data.res.alias+')';
 			}
 		}
 		else if(data.res.alias!='' && searchProfile[i].parentNode.parentNode.id=='profile_top'){
 			var pr_alias=document.createElement('span');
 			DOM.addClassName(pr_alias,'alias-value');
 			pr_alias.id='profile_alias';
-			pr_alias.innerHTML='('+data.res.alias+')';
+			pr_alias[/*@cc_on'innerText'||@*/'textContent'] = '('+data.res.alias+')';
 			searchProfile[i].parentNode.appendChild(pr_alias);
 		}
        }
@@ -781,7 +782,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 		if(data.alias_enable!=0){
 			if(data.alias){
 				var currentalias=document.createElement('span');
-				currentalias.innerHTML=data.alias;
+				currentalias[/*@cc_on'innerText'||@*/'textContent']=data.alias;
 				DOM.addClassName(currentalias,'alias-value');
 				content.insertBefore(currentalias,content.firstChild.nextSibling);
 				var editalias=document.createElement('a');
