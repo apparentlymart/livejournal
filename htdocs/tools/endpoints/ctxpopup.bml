@@ -107,7 +107,7 @@
     if ($u && $remote) {
         my $aliases = $remote->prop('aliases');
         $aliases = jsonToObj($aliases);
-        $ret{alias} = $aliases->{$u->{user}};
+        $ret{alias} = $aliases->{$u->{userid}};
         my $is_paid_perm = $remote && $remote->get_cap('paid');
         $ret{alias_enable} = $is_paid_perm ? 1 : 0;
         $ret{alias_title} = $ret{alias} ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
