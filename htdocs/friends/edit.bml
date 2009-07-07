@@ -129,17 +129,17 @@ body<=
                     if $f->{'rel'} eq 'M';
                 $ret .= "</td>";
 
-                $ret .= "<td>" . LJ::ljuser($who) . "</td>\n";
+                $ret .= "<td style='text-align:left;'>" . LJ::ljuser($who) . "</td>\n";
 
                 my $colors;
                 $colors = "color: " . $f->{'fg'} . "; " if $f->{'fg'};
                 $colors .= "background-color: " . $f->{'bg'} . ";" if $f->{'bg'};
                 $colors = " style='$colors'" if $colors;
-                $ret .= "<td$colors>" . LJ::ehtml($f->{'name'}) . "</td>\n";
+                $ret .= "<td$colors  style='text-align:left;'>" . LJ::ehtml($f->{'name'}) . "</td>\n";
 
                 my $who_u = LJ::load_user($who);
 				if ($remote->in_class('paid') || $remote->in_class('perm')) {
-                	$ret .= "<td>";
+                	$ret .= "<td style='text-align: left;'>";
                 	if ($who ne $authas) {
                     	$ret .= LJ::html_text({
  								size => "30",
