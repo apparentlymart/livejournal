@@ -1064,6 +1064,7 @@ sub fetchTableInfo
             next if $idx;
             if ($r->{'Column_name'} eq "journalid" ||
                 $r->{'Column_name'} eq "userid" ||
+                $r->{'Column_name'} eq "uid" ||
                 $r->{'Column_name'} eq "commid") {
                 $idx = $r->{'Key_name'};
                 $idxcol = $r->{'Column_name'};
