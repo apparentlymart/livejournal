@@ -1535,7 +1535,6 @@ head<=
 <?_code
 {
     LJ::need_res('stc/profile.css', 'js/profile.js',
-       'stc/widgets/aliases.css',
        'js/ippu.js',
        'js/lj_ippu.js',
        'js/httpreq.js',
