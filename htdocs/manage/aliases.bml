@@ -114,6 +114,9 @@ body<=
     my @userid_list = ();
     my $us = LJ::load_userids(keys %$aliases);
     foreach my $userid (keys %$aliases) {
+        delete $aliases->{$userid} unless $us->{$userid}; # need safe sort below
+    }
+    foreach my $userid (sort { $us->{$a}->display_name cmp $us->{$b}->display_name } keys %$aliases) {
         my $u = $us->{$userid};
         $ret .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td class="user_alias"><input type="text" name="|.$key.$userid.q|" value="|
                 .LJ::ehtml(LJ::ljuser_alias($u->{user})).q|" size="50" maxlength="200"></td></tr>|."\n";
