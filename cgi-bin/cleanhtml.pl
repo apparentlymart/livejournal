@@ -146,6 +146,7 @@ sub clean
     my $suspend_msg = $opts->{'suspend_msg'} || 0;
     my $unsuspend_supportid = $opts->{'unsuspend_supportid'} || 0;
     my $remove_all_attribs = $opts->{'remove_all_attribs'} || 0;
+    my $remove_positioning = $opts->{'remove_positioning'} || 0;
 
     my @canonical_urls; # extracted links
     my %action = ();
@@ -636,6 +637,10 @@ sub clean
                             }
                             if ($remove_fonts) {
                                 $hash->{style} =~ s/font-family:.*?(?:;|$)//gi;
+                            }
+                            if ($remove_positioning) {
+                                $hash->{style} =~ s/margin.*?(?:;|$)//gi;
+                                $hash->{style} =~ s/height\s*?:.*?(?:;|$)//gi;
                             }
                         }
 
@@ -1401,6 +1406,7 @@ sub clean_comment
         'tablecheck' => 1,
         'nocss' => $opts->{'nocss'},
         'textonly' => $opts->{'textonly'} ? 1 : 0,
+        'remove_positioning' => 1,
     });
 }
 
