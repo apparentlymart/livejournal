@@ -1,0 +1,612 @@
+BODY {
+	background:#FFF;
+	color:#303030;
+	}
+.footer {
+	background:#FFF;
+	}
+A:link, A:visited {
+	color:#3F64B6;
+	text-decoration:none;
+	border-bottom:1px solid #B2B2B2;
+	}
+A:link:hover, A:link:active, A:visited:hover, A:visited:active {
+	border-bottom:1px solid #3F64B6;
+	}
+.entry-content A:visited {
+	color:#7E97CE;
+	}
+.hr {
+	background:#BFBFBF url(../i/x-1-1-line.gif) 0 100% repeat-x;
+	}
+
+.content .header .userpic {
+	background:#FFF 0 0 no-repeat;
+	}
+
+.content .header H1 A {
+	color:#6C6C6C;
+	}
+.content .header .nav .item A {
+	color:#303030;
+	}
+.content .entry .entry-title {
+	color:#303030;
+	}
+.content .entry .entry-title A {
+	color:#303030;
+	border:0;
+	}
+
+#page .btn {
+	background-image:url(../i/x-1-1.png);
+	}
+#page .btn SPAN {
+	background-image:url(../i/x-1-1.png);
+	}
+
+#page .btn-add, #page .btn-rss {
+	background-color:#ABABAB;
+	color:#FFF;
+	}
+
+#page .btn-comment, #page .btn-simple {
+	background-color:#E6E6E6;
+	color:#666;
+	}
+#page .btn-comment:link:hover, #page .btn-comment:visited:hover, #page .btn-simple:link:hover, #page .btn-simple:visited:hover {
+	color:#999;
+	}
+#page .btn-comments {
+	background-color:#404040;
+	color:#FFF;
+	}
+BODY {
+	background:#FFF url(../i/x-1-1-bg.gif) repeat-y;
+	}
+
+.sidebar-tags A:link, .content-tags A:link, .sidebar-tags A:visited, .content-tags A:visited {
+	color:#777;
+	}
+.sidebar-tags A:hover, .sidebar-tags A:active, .content-tags A:hover, .content-tags A:active {
+	color:#3F64B6;
+	}
+.sidebar-tags .tags-all A:link, .sidebar-tags .tags-all A:visited {
+	color:#3F64B6;
+	border-bottom:1px solid #B2B2B2;
+	}
+.sidebar-tags .tags-all A:link:hover, .sidebar-tags .tags-all A:link:active, .sidebar-tags .tags-all A:visited:hover, .sidebar-tags .tags-all A:visited:active {
+	border-bottom:1px solid #3F64B6;
+	}
+
+.view-archive .entry-text UL LI A {
+	color:#3F64B6;
+	border-bottom:1px solid #B2B2B2;
+	}
+.view-archive .entry-text A:hover, .view-archive .entry-text UL LI A:active {
+	border-bottom:1px solid #3F64B6;
+	}
+
+.calendar-wrap TABLE TD, .calendar-wrap TABLE TH {
+	background:#F0F0F0;
+	}
+.sidebar .calendar-wrap TABLE TD, .sidebar .calendar-wrap TABLE TH {
+	background:#E0E0E0;
+	}
+.calendar-wrap TABLE TD, .calendar-wrap TABLE TH {
+	color:#999999;
+	}
+#page .calendar-wrap TABLE TBODY TD A:hover {
+	background:#3F64B6;
+	color:#FFF;
+	}
+	
+.comment-wrap .odd {
+	background-color:#D7D7D7;
+	}
+.comment-wrap .even {
+	background-color:#C6C6C6;
+	}
+
+/*
+Design and Css by Yoksel
+*/
+
+BODY {
+	font:70%/1.5 Helvetica, Arial, serif;
+	background:#FFF;
+	border:0;
+	}
+A:link, A:visited {
+	border-bottom:0;
+	text-decoration:underline;
+	color:#777;
+	}
+
+A:visited,
+.entry-content A:visited {
+	color:#999;
+	}
+
+A:link:hover, A:link:active, 
+A:visited:hover, A:visited:active {
+	border-bottom:0;
+	color:#555;
+	}
+.ljuser A {
+	color:#333;
+	}
+
+.sidebar .ljuser A,
+.sidebar .ljuser A:visited {
+	color:#333 !important;
+	}
+.ljuser A:hover {
+	color:#555;
+	}
+
+.sidebar .ljuser A:hover,
+.sidebar .ljuser A:visited:hover {
+	color:#555 !important;
+	}
+
+
+.header .hr,
+.hr-afterhead {
+	display:none;
+	}
+.hr {
+	background:url(../i/10y-summer/line.png) 0 50% repeat-x;
+	height:15px;
+	}
+
+.layout {
+	background:url(../i/10y-summer/zipper.png) 100% -2px repeat-y;
+	}
+.column-left .layout {
+	background-position:363px -2px;
+	}
+.content {
+	background:url(../i/10y-summer/left.png) 0 0 no-repeat;
+	}
+.column-right .content-inner {
+	margin-right:490px;
+	margin-left:15px;
+	}
+.column-left .content-inner {
+	margin-left:490px;
+	margin-right:15px;
+	}
+.content .header {
+	margin:0;
+	height:245px !important;
+	padding-top:10px;
+	}
+.column-left .content .header {
+	text-align:right;
+	}
+
+.userpic {
+	padding:20px 0 0;
+	background-color:transparent !important;
+	position:relative;
+	top:60px;
+	}
+.content .header H1 {
+	width:100px;
+	left:0;
+	top:195px;
+	position:absolute;
+	padding:5px 0 0;
+	height:20px;
+	text-transform:none;
+	text-align:center;
+	}
+.column-left .content .header H1 {
+	left:auto;
+	right:0;
+	width:auto;
+	}
+.header H1 .ljuser {
+	padding:0;
+	color:#333;
+	font-weight:bold !important;
+	font-size:15px;
+	font-family:Georgia;
+	}
+
+.header H1 .nickname:link,
+.header H1 .nickname:visited {
+	color:#555 !important;
+	}
+.content .header H2 {
+	left:5px;
+	top:95px;
+	position:relative;
+	color:#222;
+	font-family:Georgia;
+	}
+.column-left .content .header H2 {
+	left:-5px;
+	clear:left;
+	}
+.content .header H3 {
+	left:7px;
+	top:80px;
+	position:relative;
+	color:#333;
+	font-size:14px;
+	font-family:Georgia;
+	}
+.column-left .content .header H3 {
+	left:-7px;
+	}
+.content .header .nav {
+	position:absolute;
+	text-align:left;
+	padding-left:0;
+	max-width:70%;
+	top:12px;
+	//top:22px;
+	left:0;
+	}
+.column-left .content .header .nav {
+	text-align:right;
+	left:auto;
+	right:0;
+	}
+.column-left .content .header .userpic {
+	float:right;
+	padding:20px 0 0 8px;
+	}
+
+.content .header .nav .item {
+	padding:0;
+	margin-right:10px;
+	font-family:Georgia;
+	background:white;
+	white-space:nowrap;
+	}
+.column-left .content .header .nav .item {
+	margin-left:10px;
+	margin-right:0;
+	}
+
+.content .header .nav .item-addfriend, 
+.content .header .nav .item-rss {
+	top:3px;
+	}
+.content .header .nav .item A {
+	font-size:10px;
+	line-height:2.3em;
+	}
+.item-selected {
+	padding:0;
+	}
+
+
+.item-recent A,
+.item-friends A,
+.item-archive A,
+.item-profile A {
+	font-weight:bold !important;
+	letter-spacing:.1em;
+	color:#555 !important;
+	}
+
+.item-recent A:hover,
+.item-friends A:hover,
+.item-archive A:hover,
+.item-profile A:hover {
+	color:#555 !important;
+	}
+.item-selected A {
+	font-weight:bold !important;
+	letter-spacing:.1em;
+	color:#000  !important;
+	}
+
+#page .btn-add SPAN, 
+#page .btn-rss SPAN {
+	padding-left:0;
+	}
+#page .nav .btn SPAN {
+	background-image:none;
+	}
+#page .nav .btn SPAN SPAN SPAN {
+	margin-top:2px;
+	background-image:none;
+	line-height:1;
+	}
+#page .nav .btn {
+	background-image:url(http://yoksel.ru/i/dises/tenyears/green/icons.png);
+	background-repeat:no-repeat;
+	}
+#page .btn-add, #page .btn-rss {
+	background-color:transparent !important;
+	color:#000;
+	}
+
+#page .btn-add SPAN SPAN SPAN, 
+#page .btn-rss SPAN SPAN SPAN {
+	padding-left:5px;
+	padding-top:0;
+	}
+#page .btn-add, #page .btn-rss {
+	height:20px;
+	padding-right:0;
+	padding-left:14px;
+	}
+#page .btn-add {
+	background-position:left -25px;
+	}
+#page .btn-rss {
+	background-position:left 1px;
+	}
+
+
+/*----------SIDEBAR-----------*/
+.sidebar {
+	font-size:11px;
+	color:#000;
+	background:url(../i/10y-summer/right.jpg) 100% 0 no-repeat;
+	}
+.column-left .sidebar {
+	background-position:-45px 0;
+	}
+
+.sidebar-inner {
+	padding-top:260px;
+	width:310px;
+	}
+.sidebar-block {
+	background:url(../i/10y-summer/line.png) 0 100% repeat-x;
+	padding-bottom:50px;
+	}
+.sidebar-block {
+	margin:0 10px 10px 0;
+	}
+.column-left .sidebar-block {
+	margin:0 0 10px 10px;
+	}
+.sidebar-custom,
+.sidebar-powered,
+.sidebar-tags,
+.sidebar-links,
+.sidebar-summary,
+.sidebar-cal {
+	margin:0 15px 10px;
+	}
+
+.sidebar-block DT,
+.sidebar TABLE CAPTION {
+	background:url(../i/10y-summer/post.png) 0 100% no-repeat;
+	}
+
+.sidebar TABLE CAPTION A,
+.sidebar DT {
+	font-weight:normal !important;
+	color:#333 !important;
+	font-size:28px;
+	font-family:Georgia;
+	}
+
+.sidebar TABLE CAPTION A:link,
+.sidebar TABLE CAPTION A:visited {
+	color:#333 !important;
+	text-decoration:none;
+	font-size:28px;
+	line-height:1em;
+	border:0;
+	}
+.calendar-wrap TD {
+	background-color:transparent !important;
+	color:#CCC !important;
+	font-size:14px !important;
+	font-weight:normal;
+	text-align:center;
+	}
+.sidebar .calendar-wrap TD {
+	background-color:transparent !important;
+	color:#555 !important;
+	font-size:14px !important;
+	font-weight:normal;
+	text-align:center;
+	}
+.sidebar .calendar-wrap TD A:link,
+.sidebar .calendar-wrap TD A:visited {
+	text-align:center !important;
+	text-decoration:none;
+	background:url(../i/10y-summer/date.png) 50% 0 no-repeat !important;
+	color:#222 !important;
+	font-weight:bold;
+	}
+.sidebar .calendar-wrap TD A:link:hover,
+.sidebar .calendar-wrap TD A:visited:hover {
+	background-position:50% 0 !important;
+	color:#555 !important;
+	font-weight:bold;
+	}
+.sidebar TH {
+	background-color:transparent !important;
+	}
+TH DIV {
+	color:#333;
+	font-family:Georgia;
+	font-weight:bold;
+	height:23px;
+	font-size:14px;
+	}
+
+.sidebar UL, 
+.sidebar LI,
+.sidebar DD,
+.content-tags UL LI {
+	margin:0 !important;
+	list-style:none !important;
+	}
+
+.sidebar UL LI,
+.sidebar-links DD,
+.tags LI,
+.content-tags UL LI {
+	background:url(../i/10y-summer/bull.png) 0 8px no-repeat;
+	padding-left:8px;
+	}
+.sidebar-custom {
+	padding:10px;
+	color:#333;
+	}
+
+.sidebar A,
+.sidebar .tags A {
+	color:#333;
+	}
+
+.sidebar A:visited,
+.sidebar .tags A:visited {
+	color:#AAA!important;
+	}
+
+.sidebar A:visited:hover,
+.sidebar .tags A:visited {
+	color:#555 !important;
+	}
+.sidebar-links DT {
+	margin-top:0;
+	}
+
+/*----------ENTRIES-----------*/
+
+.subj-link,
+.entry-title {
+	color:#333 !important;
+	font-size:28px;
+	font-family:Georgia;
+	text-decoration:none;
+	}
+.entry-title {
+	background:url(../i/10y-summer/post.png) 0 100% no-repeat;
+	}
+.subj-link:hover {
+	color:#000 !important;
+	text-decoration:none !important;
+	}
+.metadata {
+	color:#BBB;
+	font-family:Arial;
+	padding-left:15px;
+	}
+.entry {
+	margin-top:25px !important;
+	margin-bottom:5px !important;
+	}
+
+/*----------COMMENTS-----------*/
+.comment-permalink {
+	font-size:12px;
+	}
+.odd,DIV.even {
+	background-color:#FFF !important;
+	}
+.comment-wrap {
+	background:url(../i/10y-summer/line.png) 0 100% repeat-x;
+	padding-bottom:40px;
+	}
+
+.odd H3,
+.even H3 {
+	font-size:15px;
+	margin:7px 0;
+	color:#333;
+	background:url(../i/10y-summer/post.png) 0 100% no-repeat;
+	}
+
+.odd H3,
+.odd .comment-permalink,
+.odd .ljuser A,
+.odd .ljuser A:visited {
+	color:#333 !important;
+	}
+
+.even H3,
+.even .comment-permalink,
+.even .ljuser A,
+.even .ljuser A:visited {
+	color:#333 !important;
+	}
+
+/*----------CALENDAR-----------*/
+.view-archive .entry-text LI {
+	padding-right:5px !important;
+	font-family:Georgia;
+	}
+.view-archive .entry-text .active {
+	color:#222;
+	}
+.view-archive .entry-text LI A {
+	font-size:14px;
+	border-bottom:0;
+	}
+.view-archive .entry-text UL LI A {
+	color:#555;
+	border-bottom:0;
+	}
+.view-archive .entry-text A:hover, .view-archive .entry-text UL LI A:active {
+	border-bottom:0;
+	font-family:Georgia;
+	}
+.view-archive .entry-text LI {
+	padding-right:2px;
+	}
+.entry-text .entry-text .calendar-wrap {
+	padding-top:0;
+	}
+.view-archive .entry-text TABLE .month {
+	color:#333 !important;
+	font-size:22px;
+	font-family:Georgia;
+	text-decoration:none;
+	line-height:.6em;
+	}
+.view-archive .entry-text TABLE {
+	width:260px;
+	}
+.view-archive .calendar-wrap TH {
+	background-color:transparent !important;
+	}
+.view-archive .calendar-wrap TD A:link,
+.view-archive .calendar-wrap TD A:visited {
+	text-align:center !important;
+	text-decoration:none;
+	background:url(../i/10y-summer/date.png) 50% 0 no-repeat;
+	color:#222 !important;
+	font-weight:bold;
+	}
+.view-archive .calendar-wrap TD A:link:hover,
+.view-archive .calendar-wrap TD A:visited:hover {
+	color:#333 !important;
+	}
+.view-archive .calendar-wrap TD {
+	font-weight:normal !important;
+	color:#444 !important;
+	}
+
+/*----POPUP----*/
+.ContextualPopup .Inner {
+	background-color:#FFF !important;
+	color:#333 !important;
+	border:1px solid #333;
+	padding:5px;
+	top:5px;
+	}
+
+.ContextualPopup .Inner A:link,
+.ContextualPopup .Inner A:visited {
+	text-decoration:underline !important;
+	color:#333 !important;
+	}
+.ContextualPopup .Inner A:hover {
+	color:#555 !important;
+	}
+
