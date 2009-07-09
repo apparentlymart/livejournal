@@ -231,6 +231,9 @@ HTML:not(IE7) .opera-filter, x:-o-prefocus { display:block; } /* opera gte 9.5 *
 	.user_alias_act INPUT {
 	    font-family: Arial, sans-serif;    
 	    }
+		.user_alias_act .alias-value {
+			width: 380px;
+			}
 	.user_alias_act P {
 		margin: .75em 0px;
 		text-indent: 0;
