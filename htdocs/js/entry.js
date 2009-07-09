@@ -118,12 +118,14 @@ function detectLocation(){
 	          if(q){		
 		  	wi2Geo.country=q.city.country;
 		  	wi2Geo.city=q.city.name;
-		  	wi2Geo.street=q.building.street;
-		  	wi2Geo.building=q.building.address;
-			wi2Geo.metro=q.metro.name;
+			wi2Geo.type=q.type;
+			if(wi2Geo.type!='IP'){
+		  		wi2Geo.street=q.building.street;
+		  		wi2Geo.building=q.building.address;
+				wi2Geo.metro=q.metro.name;
+			}
 		  	wi2Geo.lat=q.lat;
 		  	wi2Geo.lng=q.lng;
-			wi2Geo.type=q.type;
 		  }
 		  wi2Geo.response=true;
 	 }
@@ -178,7 +180,7 @@ function detectLocation(){
 				var fMetro=(wi2Geo.metro)||"";
 				var fLat=(gGears.lat||wi2Geo.lat)?((gGears.lat||wi2Geo.lat)+", "):("");
 				var fLng=gGears.lng||wi2Geo.lng||"";
-				if((!fCountry || !fCity || !fLat || !fLng)||(gGears.type=='IP' && wi2Geo.type=='IP')){
+				if(!fCountry || !fCity || !fLat || !fLng){
 					HTTPReq.getJSON({url:'/tools/endpoints/geo_location.bml',
 						onData:function(data){
 							if(data.data){
