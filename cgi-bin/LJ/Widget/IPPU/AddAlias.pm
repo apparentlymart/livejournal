@@ -34,7 +34,8 @@ sub render_body {
     $body .= $class->html_text(
                 name  => 'alias',
                 id    => 'Widget[IPPU_AddAlias]_alias',
-                size  => 30,
+				class => 'alias-value',
+                size  => 60,
 				maxlength => 200,
                 value => $opts{alias},
                 raw   => "autocomplete='off'",

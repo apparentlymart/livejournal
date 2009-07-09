@@ -108,9 +108,9 @@ body<=
 
             $ret .= "</th><th width='30%' style='text-align:left;'>$ML{'.editfriends.name'}</th>";
 
-			if ($remote->in_class('paid') || $remote->in_class('perm')) {
-            	$ret .= "<th style='text-align:left;'>$ML{'.editfriends.alias'}</th>";
-			}
+            if ($remote->get_cap('aliases')) {
+                $ret .= "<th style='text-align:left;'>$ML{'.editfriends.alias'}</th>";
+            }
             
             $ret .= "<th width='5%'>$ML{'.editfriends.friend'}</th></tr>";
 
@@ -138,22 +138,22 @@ body<=
                 $ret .= "<td$colors  style='text-align:left;'>" . LJ::ehtml($f->{'name'}) . "</td>\n";
 
                 my $who_u = LJ::load_user($who);
-				if ($remote->in_class('paid') || $remote->in_class('perm')) {
-                	$ret .= "<td style='text-align: left;'>";
-                	if ($who ne $authas) {
-                    	$ret .= LJ::html_text({
- 								size => "30",
-								maxlength => "200",
-                            	name => "useralias_" . $who_u->{userid},
-                            	id   => "useralias_$who",
-                            	value => LJ::ljuser_alias($f->{username}),
-                        		});
-                		} else { 
-                    	$ret .= " ";
-                		}
+                if ($remote->get_cap('aliases')) {
+                    $ret .= "<td style='text-align: left;'>";
+                    if ($who ne $authas) {
+                        $ret .= LJ::html_text({
+                                size => "30",
+                                maxlength => "200",
+                                name => "useralias_" . $who_u->{userid},
+                                id   => "useralias_$who",
+                                value => LJ::ljuser_alias($f->{username}),
+                                });
+                    } else { 
+                        $ret .= " ";
+                    }
                         
-                		$ret .= "</td>";
-				}
+                    $ret .= "</td>";
+                }
 
                 $ret .= "<td align='center'>";
                 # non-checked checkboxes for "friend-of". checking these boxes adds the user
