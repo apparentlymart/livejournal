@@ -31,7 +31,7 @@ sub work {
         my $lockname = "synsuck-user-" . $urow->{user};
         my $lock = LJ::locker()->trylock($lockname);
         next unless $lock;
-        $class->cond_debug("got lock $lockname");
+        LJ::Worker::DEBUG("got lock $lockname");
         $done++;
         LJ::SynSuck::update_feed($urow, $class->verbose);
     }

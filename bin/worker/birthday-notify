@@ -95,7 +95,7 @@ sub on_idle {
 }
 
 sub debug {
-    LJ::Worker::Manual->cond_debug(@_);
+    LJ::Worker::DEBUG(@_);
 }
 
 

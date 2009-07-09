@@ -22,7 +22,7 @@ die "No \$LJ::MOVE_SERVER defined\n"
     unless $LJ::MOVE_SERVER;
 
 sub debug {
-    LJ::Worker::Manual->cond_debug(@_);
+    LJ::Worker::DEBUG(@_);
 }
 
 sub work {
