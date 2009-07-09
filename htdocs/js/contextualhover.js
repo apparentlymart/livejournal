@@ -803,7 +803,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 			var disabledalias=document.createElement('a');
 			var upgradeacc=document.createElement('a');
 			var upgradeimg=document.createElement('img');
-			upgradeacc.href=window.Site.siteroot+'/support/faqbrowse.bml?faqid=295';
+			upgradeacc.href=window.Site.siteroot+'/manage/account';
 			var statroot=window.Site.siteroot.toString();
 			var statsiteroot=statroot.replace(/http\:\/\/www\./,'http://stat.');
 			upgradeimg.src=statsiteroot+'/horizon/upgrade-paid-icon.gif';
