@@ -7,7 +7,7 @@ body<=
     use vars qw(%GET %POST);
     use JSON;
 
-    my $max_alias_length = 200; # max allowed chars(?) or bytes in alias
+    my $max_alias_length = 400; # max allowed chars(?) or bytes in alias
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
