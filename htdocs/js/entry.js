@@ -132,9 +132,9 @@ function detectLocation(){
 	
 	function updateGearsPosition(p) {
 		if(p){
-		  gGears.country=p.gearsAddress.country;
+		  gGears.country=(!p.gearsAddress.country.match(/\?\?/gi)?(p.gearsAddress.country):(""));
+		  gGears.city=(!p.gearsAddress.city.match(/\?\?/gi)?(p.gearsAddress.city):(""));
 		  if(gGears.country=='USA') gGears.region=p.gearsAddress.region;
-		  gGears.city=p.gearsAddress.city;
 		  gGears.lat=p.coords.latitude;
 		  gGears.lng=p.coords.longitude;
 		  gGears.type=(p.accuracy<1000&&p.accuracy>0)?("nonIP"):("IP");
