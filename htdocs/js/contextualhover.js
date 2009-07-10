@@ -188,10 +188,13 @@ LJWidget = new Class(Object, {
 
             widgetEle.innerHTML = data["_widget_body"];
 
+	    if($('Widget[IPPU_AddAlias]_alias')) $('Widget[IPPU_AddAlias]_alias').focus();
+
             if (this.onRefresh) {
                 this.onRefresh();
             }
         }
+	
     },
 
     ajaxError: function (err) {
@@ -803,7 +806,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 			var disabledalias=document.createElement('a');
 			var upgradeacc=document.createElement('a');
 			var upgradeimg=document.createElement('img');
-			upgradeacc.href=window.Site.siteroot+'/manage/account';
+            		upgradeacc.href=window.Site.siteroot+'/manage/account';
 			var statroot=window.Site.siteroot.toString();
 			var statsiteroot=statroot.replace(/http\:\/\/www\./,'http://stat.');
 			upgradeimg.src=statsiteroot+'/horizon/upgrade-paid-icon.gif';
