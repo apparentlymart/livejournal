@@ -554,12 +554,13 @@ TH DIV {
 	}
 .view-archive .entry-text A:hover, .view-archive .entry-text UL LI A:active {
 	border-bottom:0;
-	font-family:Georgia;
 	}
 .view-archive .entry-text LI {
 	padding-right:2px;
 	}
-.entry-text .entry-text .calendar-wrap {
+.view-archive .entry-text .calendar-wrap {
+	width:260px;
+	height:17em;
 	padding-top:0;
 	}
 .view-archive .entry-text TABLE .month {
