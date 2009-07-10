@@ -384,14 +384,14 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 				searchProfile[i].parentNode.removeChild($('profile_alias'));
 			}else{
 				
-				$('profile_alias')[/*@cc_on'innerText'||@*/'textContent'] = '('+data.res.alias+')';
+				$('profile_alias')[/*@cc_on'innerText'||@*/'textContent'] = ' — '+data.res.alias;
 			}
 		}
 		else if(data.res.alias!='' && searchProfile[i].parentNode.parentNode.id=='profile_top'){
 			var pr_alias=document.createElement('span');
 			DOM.addClassName(pr_alias,'alias-value');
 			pr_alias.id='profile_alias';
-			pr_alias[/*@cc_on'innerText'||@*/'textContent'] = '('+data.res.alias+')';
+			pr_alias[/*@cc_on'innerText'||@*/'textContent'] = ' — '+data.res.alias;
 			searchProfile[i].parentNode.appendChild(pr_alias);
 		}
        }
