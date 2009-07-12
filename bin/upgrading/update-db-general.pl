@@ -3165,6 +3165,22 @@ CREATE TABLE categoryproplist (
 )
 EOC
 
+# Moderation of submissions for Community Directory
+register_tablecreate("categoryjournals_pending", <<'EOC');
+CREATE TABLE categoryjournals_pending (
+  `pendid`   int unsigned NOT NULL auto_increment,
+  `jid`      int unsigned NOT NULL default '0',
+  `submitid` int unsigned,
+  `catid`    int unsigned NOT NULL,
+  `status`   CHAR(1),
+  `lastupdate` int(10) unsigned NOT NULL,
+  `modid`      int unsigned,
+  PRIMARY KEY (`pendid`),
+  KEY `jid` (`jid`),
+  KEY `catid` (`catid`)
+)
+EOC
+
 register_tablecreate("comet_history", <<'EOC');
 CREATE TABLE comet_history (
      rec_id   INT UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,

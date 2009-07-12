@@ -1,0 +1,152 @@
+<?page
+title=><?_ml .title _ml?>
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
+    use Class::Autouse qw( LJ::Browse );
+
+    return "This page is not available." unless LJ::is_enabled("browse");
+
+    my $ret;
+
+    # get remote
+    my $remote = LJ::get_remote();
+    unless ($remote) {
+        $ret .= "<?needlogin?>";
+    }
+
+    my $cname = $GET{authas};
+
+    $ret .= "<form action='directory.bml' method='GET'>\n";
+    $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
+    $ret .= "</form>\n\n";
+
+    return $ret unless $cname;
+
+    # get $c object
+    my $c = LJ::load_user($cname);
+    unless ($c) {
+        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nocomm'} p?>";
+        return $ret;
+    }
+
+    # make sure it is a comm
+    unless ($c->is_comm) {
+        $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+        $ret .= BML::ml('.error.notcomm', { 'user' => LJ::ljuser($c) });
+        $ret .= " p?>";
+        return $ret;
+    }
+
+    my $cid = $c->{'userid'};
+    # is $remote an admin?
+    unless (LJ::can_manage_other($remote, $c)) {
+        $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+        $ret .= BML::ml('.error.noaccess',
+                        { 'comm' => LJ::ljuser($cname, { 'type' => 'C' }) });
+        $ret .= " p?>";
+        return $ret;
+    }
+
+    my $limit = 2; # Max number of categories a community can appear in
+    my @caturl_;
+    my @catrem;
+    # Get categories the community belongs to or is pending approval for
+    my @listings = LJ::Browse->get_submitted_communities($c);
+    $limit = @listings if (@listings > $limit);
+
+    foreach my $i (1..$limit) {
+        push @caturl_, $POST{"caturl_$i"} if $POST{"caturl_$i"};
+        push @catrem, $POST{"catremove_$i"} if $POST{"catremove_$i"};
+    }
+
+
+    # saving a form submission
+    if ($POST{'action:update'}) {
+        # validate form auth
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
+
+        my $response;
+        # Handle submissions
+        foreach my $curl (@caturl_) {
+            LJ::Browse->submit_community( comm      => $c,
+                                          submitter => $remote,
+                                          caturl    => $curl, );
+            $response = "<span class='super notice'>$ML{'.listings.updated'}</span>";
+        }
+
+        # Handle removes
+        foreach my $pendid (@catrem) {
+            LJ::Browse->remove_community( comm      => $c,
+                                          submitter => $remote,
+                                          pendid    => $pendid, );
+            $response = "<span class='super notice'>$ML{'.listings.updated'}</span>";
+        }
+
+        # reset upper limit
+        @listings = LJ::Browse->get_submitted_communities($c);
+        $limit = (@listings > 2) ? @listings : 2;
+
+        $ret .= $response;
+    }
+
+    # Get the full list of categories
+    my @categories = LJ::Browse->load_all;
+    # Don't include the top level categories and get the unique URI for each
+    my @caturls = map { $_->uri, $_->uri } grep { $_->parent } @categories;
+    @caturls = sort { $a cmp $b } @caturls;
+
+    $ret .= "<form method='post' action='directory.bml?authas=$cname'>";
+    $ret .= LJ::form_auth();
+
+    $ret .= "<p>" . BML::ml('.update.listing', { 'user' => LJ::ljuser($c) });
+    $ret .= "<table>";
+    foreach my $i (1..$limit) {
+        $ret .= "<tr><td> $i.</td>";
+        my $j = $i - 1;
+        if (@listings[$j]) {
+            my $listing = @listings[$j];
+            my $cat = LJ::Browse->load_by_id($listing->{catid});
+            my $status = "<span style='font-weight: bold; color:";
+            $status .= "#FF6600'>$ML{'.status.pending'}</span>"
+                if ($listing->{status} eq 'P');
+            $status .= "#00AA00'>$ML{'.status.approved'}</span>"
+                if ($listing->{status} eq 'A');
+            $status .= "#AA0000'>$ML{'.status.denied'}</span>"
+                if ($listing->{status} eq 'D');
+
+            $ret .= "<td><b>" . $cat->display_name . "</b> " .
+                    "<span style='font-size: smaller; font-style: italic'>" .
+                    "(" . $cat->uri . ")</span> $status ";
+            $ret .= "</td><td style='text-align: right'> $ML{'.remove'}";
+            $ret .= LJ::html_check({ name => "catremove_$i",
+                                     id => "catremove_$i",
+                                     value => $listing->{pendid}, });
+        } else {
+            $ret .= "<td colspan='2'>";
+            $ret .= LJ::html_select({
+                        name => "caturl_$i",
+                        selected => $caturl_[$i] },
+                        { text => $ML{'.add'},
+                        value => '' },
+                        @caturls
+                    );
+        }
+        $ret .= "</td></tr>";
+    }
+    $ret .= "</table>\n";
+    $ret .= "</p>\n";
+
+    $ret .= "<p>" . LJ::html_submit('action:update', $ML{'.update'}) . "</p>\n";
+    $ret .= "</div></form>\n\n";
+
+    return $ret;
+
+}
+_code?>
+
+<=body
+page?>

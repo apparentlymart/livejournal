@@ -1,0 +1,105 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
+    $title = "Moderate Community Directory Submissions";
+    my $ret = "";
+
+    if (LJ::did_post() and $POST{'update'}) {
+        push @errors, "Invalid form submission" unless LJ::check_form_auth();
+        {
+            my %add;
+            foreach (grep { /^approve_/} keys %POST) {
+                my ($pid, $jid, $catid) = split('-', $POST{$_});
+                push @{$add{$catid}}, [$jid, $pid] unless $POST{"deny_$pid"};
+            }
+warn("add:". LJ::D(%add));
+
+            my @deny;
+            foreach (grep { /^deny_/} keys %POST) {
+                my $pid = $POST{$_};
+                push @deny, $pid unless $POST{"approve_$pid"};
+            }
+
+            foreach my $catid (keys %add) {
+                my $cat = LJ::Browse->load_by_id($catid);
+                # add_communities will also mark any submissions as approved
+                $cat->approve_communities(@{$add{$catid}});
+            }
+
+            LJ::Browse->deny_communities(@deny) if (scalar @deny);
+
+            # Add journals to category
+            unless (@errors) {
+                $ret .= "<span class='super notice'>Communities successfully updated.</span>";
+            } else {
+                $ret .= "<span class='super notice'>Communities not updated.</span>";
+            }
+        }
+    }
+
+    my @listings = LJ::Browse->get_pending_communities(undef);
+    @listings = sort { $a->{catid} <=> $b->{catid} } @listings;
+    my @jids = map { $_->{jid} } @listings;
+    my $jid = LJ::load_userids(@jids);
+
+    $ret .= "<form method='POST'>\n";
+    $ret .= LJ::form_auth();
+
+    $ret .= "<p>";
+    my $last_listing;
+    $ret .= "<table>";
+    foreach my $listing (@listings) {
+        my $cat = LJ::Browse->load_by_id($listing->{catid});
+        if ($last_listing != $cat->catid) {
+            $ret .= "<tr><td colspan='100%'>&nbsp;</td></tr>\n"
+                    if $last_listing;
+            $ret .= "<tr><td colspan='100%'><b>" . $cat->display_name . "</b> " .
+                    "<span style='font-size: smaller; font-style: italic'>" .
+                    "(" . $cat->uri . ")</span></td></tr>";
+            $ret .= "<tr><td></td><td style='text-align: center'>Approve</td>" .
+                    "<td style='text-align: center'>Deny</td></tr>\n";
+        }
+        my $u = LJ::load_userid($listing->{jid});
+        my $pendid = $listing->{pendid};
+        $ret .= "<tr><td>";
+        $ret .= " &nbsp; " . $u->ljuser_display();
+        $ret .= "</td><td style='text-align: center'>";
+        $ret .= LJ::html_check({ name => "approve_$pendid",
+                                 id => "approve_$pendid",
+                                 value => "$pendid-" . $u->userid . "-" .
+                                          $cat->catid, });
+        $ret .= "</td><td style='text-align: center'>";
+        $ret .= LJ::html_check({ name => "deny_$pendid",
+                                 id => "deny_$pendid",
+                                 value => $pendid, });
+        $ret .= "</td></tr>";
+        $last_listing = $cat->catid;
+    }
+    $ret .= "</table></p>";
+
+    $ret .= "<p>" . LJ::html_submit('update', 'Update') . "</p>";
+
+    $ret .= "</form>";
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

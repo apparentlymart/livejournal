@@ -179,6 +179,11 @@ body<=
 
  $ret .= "<?h1 $ML{'/manage/invites.bml.title'} h1?>";
  $ret .= "<?p <a href=\"/manage/invites.bml\"><?_ml /manage/invites.bml.title _ml?></a> p?>";
+
+ if (LJ::is_enabled("browse")) {
+     $ret .= "<?h1 $ML{'.communitydirectory'} h1?>";
+     $ret .= "<?p <a href=\"/community/directory.bml\">$ML{'.communitydirectory.manage'}</a> p?>";
+ }
  $ret .= "</div><!-- end .columns-2-right -->";
  $ret .= "</div><!-- end .columns-2 -->";
  return $ret;

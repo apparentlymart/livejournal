@@ -827,6 +827,10 @@ sub add_communities {
         $dbh->do("REPLACE INTO categoryjournals VALUES (?,?)", undef,
                  $self->catid, $uid);
         die $dbh->errstr if $dbh->err;
+
+        LJ::Browse->add_approved_community( comm  => LJ::want_user($uid),
+                                            mod_u => LJ::get_remote(),
+                                            catid => $self->catid, );
     }
 
     $self->clear_journals_memcache;
@@ -846,6 +850,10 @@ sub remove_communities {
         $dbh->do("DELETE FROM categoryjournals WHERE catid=? AND journalid IN (?)", undef,
                  $self->catid, @uids);
         die $dbh->errstr if $dbh->err;
+
+        LJ::Browse->remove_community( comm  => LJ::want_user($uid),
+                                      mod_u => LJ::get_remote(),
+                                      catid => $self->catid, );
     }
 
     $self->clear_journals_memcache;
@@ -895,5 +903,216 @@ sub catid          { shift->_get_set('catid')              }
 sub display_name   { shift->_get_set('pretty_name')        }
 sub url_path       { shift->_get_set('url_path')           }
 sub parentid       { shift->_get_set('parentcatid')        }
+
+
+# Community Moderation
+
+sub submit_community {
+    my $class = shift;
+    my %opts = @_;
+
+    my $c = delete $opts{comm} || undef;
+    my $u = delete $opts{submitter} || undef;
+    my $caturl = delete $opts{caturl} || undef;
+    my $status = delete $opts{status} || 'P';
+
+    # need a journal user object
+    croak "invalid user object[c]" unless LJ::isu($c);
+    # need a user object for submitter
+    croak "invalid user object[u]" unless LJ::isu($u);
+    # need a category
+    my $cat = LJ::Browse->load_by_url("/browse" . $caturl) if (defined $caturl);
+    die "invalid category" unless $cat;
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to create category";
+
+    $dbh->do("REPLACE INTO categoryjournals_pending (jid, submitid, catid," .
+             " status, modid, lastupdate) VALUES " .
+             "(?,?,?,?, NULL, UNIX_TIMESTAMP())", undef, $c->userid,
+             $u->userid, $cat->catid, $status);
+    die $dbh->errstr if $dbh->err;
+
+    return;
+}
+
+sub add_approved_community {
+    my $class = shift;
+    my %opts = @_;
+
+    my $c = delete $opts{comm} || undef;
+    my $mod = delete $opts{mod_u} || undef;
+    my $catid = delete $opts{catid} || undef;
+    my $status = delete $opts{status} || 'A';
+
+    # need a journal user object
+    croak "invalid user object[c]" unless LJ::isu($c);
+    # need a user object for moderator
+    croak "invalid user object[u]" unless LJ::isu($mod);
+    # need a category
+    my $cat = LJ::Browse->load_by_id($catid) if (defined $catid) ;
+    die "invalid category" unless $cat;
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to create category";
+
+    $dbh->do("REPLACE INTO categoryjournals_pending (jid, submitid, catid," .
+             " status, modid, lastupdate) VALUES " .
+             "(?, NULL,?,?,?, UNIX_TIMESTAMP())", undef, $c->userid,
+             $cat->catid, $status, $mod->userid );
+    die $dbh->errstr if $dbh->err;
+
+    return;
+}
+
+sub remove_community {
+    my $class = shift;
+    my %opts = @_;
+
+    my $c = delete $opts{comm} || undef;
+    my $u = delete $opts{submitter} || undef;
+    my $mod = delete $opts{mod_u} || undef;
+    my $catid = delete $opts{catid} || undef;
+    my $pendid = delete $opts{pendid} || undef;
+
+    croak "invalid user object[c]" unless LJ::isu($c);
+    croak "invalid user object[u]" unless (LJ::isu($u) || LJ::isu($mod));
+    croak "need category ID" unless $catid;
+
+    # need a category
+    my $cat = LJ::Browse->load_by_id($catid);
+    die "invalid category" unless $cat;
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to create category";
+
+    # Null out the value for submitid or modid, depending on who did the last
+    # update.
+    if ($u && $pendid) {
+        $dbh->do("UPDATE categoryjournals_pending SET status=?, " .
+                 "submitid=?, modid=NULL, lastupdate=UNIX_TIMESTAMP() " .
+                 "WHERE pendid=?", undef,
+                 'R', $u->userid, $pendid);
+    } elsif ($mod && $cat && $c) {
+        $dbh->do("UPDATE categoryjournals_pending SET status=?, " .
+                 "submitid=NULL, modid=?, lastupdate=UNIX_TIMESTAMP() " .
+                 "WHERE catid=? AND jid=? AND status IN ('P','A')", undef,
+                 'R', $mod->userid, $cat->catid, $c->userid);
+    } else {
+        croak "missing arguments";
+    }
+    die $dbh->errstr if $dbh->err;
+
+    return;
+}
+
+sub deny_communities {
+    my $class = shift;
+    my @pendids = @_;
+
+    my $mod_u = LJ::get_remote();
+    die "invalid user" unless $mod_u;
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to create category";
+
+    $dbh->do("UPDATE categoryjournals_pending SET status=?, " .
+             "modid=?, lastupdate=UNIX_TIMESTAMP() WHERE pendid IN(?)", undef,
+             'D', $mod_u->userid, @pendids);
+    die $dbh->errstr if $dbh->err;
+
+    return;
+}
+
+sub approve_communities {
+    my $self = shift;
+    my @ids = @_;
+
+    my $mod_u = LJ::get_remote();
+    die "invalid user" unless $mod_u;
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to create category";
+
+    my @pendids;
+    foreach my $id (@ids) {
+        $dbh->do("REPLACE INTO categoryjournals VALUES (?,?)", undef,
+                 $self->catid, @{$id}[0]);
+        die $dbh->errstr if $dbh->err;
+
+        push @pendids, @{$id}[1];
+    }
+
+    # Update moderation table
+    $dbh->do("UPDATE categoryjournals_pending SET status=?, " .
+             "modid=?, lastupdate=UNIX_TIMESTAMP() WHERE pendid IN(?)", undef,
+             'A', $mod_u->userid, @pendids);
+    die $dbh->errstr if $dbh->err;
+
+    $self->clear_journals_memcache;
+
+    return 1;
+}
+
+
+
+# Status can be: (P)ending, (A)pproved, (D)enied, (R)emoved
+sub get_communities {
+    my $class = shift;
+    my ($c, @status) = @_;
+
+    # Default to Pending status
+    my $status_sql = "'P'";
+    # Use status argument if passed in
+    if (@status) {
+        $status_sql = join("','", @status);
+        $status_sql = "'" . $status_sql . "'";
+    }
+
+    my $dbr = LJ::get_db_reader()
+        or die "unable to contact global db reader to get category submissions";
+    my $sth;
+
+    if ($c) {
+        $sth = $dbr->prepare("SELECT * FROM categoryjournals_pending where " .
+                                "jid=? AND status IN ($status_sql)");
+        $sth->execute($c->userid);
+    } else {
+        $sth = $dbr->prepare("SELECT * FROM categoryjournals_pending where " .
+                                "status IN ($status_sql)");
+        $sth->execute();
+    }
+    die $dbr->errstr if $dbr->err;
+
+    my @listings;
+    while (my $row = $sth->fetchrow_hashref) {
+        push @listings, { pendid     => $row->{pendid},
+                          jid        => $row->{jid},
+                          submitid   => $row->{submitid},
+                          catid      => $row->{catid},
+                          status     => $row->{status},
+                          lastupdate => $row->{lastupdate},
+                          modid      => $row->{modid},
+                         };
+
+    }
+
+    return @listings;
+}
+
+sub get_submitted_communities {
+    my $class = shift;
+    my @status = ('P','A','D');
+
+    return $class->get_communities(@_, @status);
+}
+
+sub get_pending_communities {
+    my $class = shift;
+    my @status = ('P');
+
+    return $class->get_communities(@_, @status);
+}
+
 
 1;

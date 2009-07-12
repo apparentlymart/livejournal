@@ -1,4 +1,8 @@
 ;; -*- coding: utf-8 -*-
+.communitydirectory=Community Directory
+
+.communitydirectory.manage=Manage Community Directory Listing
+
 .commlist.actinfo=Info
 
 .commlist.actinfo2=Profile

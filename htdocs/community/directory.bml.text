@@ -1,0 +1,24 @@
+;; -*- coding: utf-8 -*-
+.add=Add to Category
+
+.error.noaccess=Only community maintainers are able to submit to the Community Directory. You are not a maintainer of community [[comm]].
+
+.error.nocomm=Community not found.
+
+.error.notcomm=[[user]] is not a community.
+
+.listings.updated=Community listings updated.
+
+.remove=remove
+
+.status.approved=Approved
+
+.status.denied=Denied
+
+.status.pending=Pending
+
+.title=Community Directory Listing
+
+.update=Update
+
+.update.listing=Update directory listing for [[user]]:
