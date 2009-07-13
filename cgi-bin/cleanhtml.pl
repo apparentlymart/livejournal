@@ -572,8 +572,11 @@ sub clean
                         delete $hash->{$attr} unless $tag eq "object";
                         next;
                     }
-
-                    if ($attr eq "href" && $hash->{$attr} =~ /^data/) {
+                    
+                    ## warning: in commets left by anonymous users, <img src="something">
+                    ## is replaced by <a href="something"> (see 'extractimages' param)
+                    ## If "something" is "data:<script ...", we'll get a vulnerability
+                    if (($attr eq "href" || $attr eq 'src') && $hash->{$attr} =~ /^data/) {
                         delete $hash->{$attr};
                         next;
                     }
@@ -654,8 +657,8 @@ sub clean
                     if (($attr eq 'class' || $attr eq 'id') && $opts->{'strongcleancss'}) {
                         delete $hash->{$attr};
                         next;
-		    }
-		    
+                    }
+            
                     # reserve ljs_* ids for divs, etc so users can't override them to replace content
                     if ($attr eq 'id' && $hash->{$attr} =~ /^ljs_/i) {
                         delete $hash->{$attr};
@@ -729,9 +732,11 @@ sub clean
                         (! defined $hash->{'height'} ||
                          $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
-
-                    $hash->{src} = canonical_url($hash->{src}, 1);
-
+                    
+                    ## TODO: a better check of $hash->{src} is needed,
+                    ## known (fixed) vulnerability is src="data:..." 
+                    $hash->{src} = canonical_url($hash->{src}, 1);  
+                    
                     if ($img_bad) {
                         $newdata .= "<a class=\"ljimgplaceholder\" href=\"" .
                             LJ::ehtml($hash->{'src'}) . "\">" .
