@@ -457,7 +457,7 @@
     }
 
     # add alias
-	$url = "$LJ::SITEROOT/manage/aliases.bml";
+	$url = "$LJ::SITEROOT/manage/notes.bml";
 	$text = $user_alias ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
 	$li_title = ($remote && $remote->get_cap('aliases')) ? $ML{'.useralias.title'} : "$ML{'.useralias.title.disabled'}";
 	if ($remote && $remote->get_cap('aliases') && $remote->userid ne $u->userid) {

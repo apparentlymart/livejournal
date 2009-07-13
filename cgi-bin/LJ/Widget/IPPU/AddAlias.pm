@@ -46,7 +46,7 @@ sub render_body {
              );
     $body .= "<p>" . $class->html_submit(BML::ml('widget.alias.aliaschange')) ;
 
-    $body .= "<span class='helper'>" . BML::ml('widget.addalias.display.helper', {aopts => "href='$LJ::SITEROOT/manage/aliases.bml'"}) . "</span>";
+    $body .= "<span class='helper'>" . BML::ml('widget.addalias.display.helper', {aopts => "href='$LJ::SITEROOT/manage/notes.bml'"}) . "</span>";
     $body .= "</div>";
     $body .= $class->end_form;
 	$body .= "</p>";

@@ -12,7 +12,7 @@ use POSIX qw/ENOENT/;
                'addtodo' => ['Add To-Do Item', '', 'todo'],
                'advcustomize' => ['Customize Advanced S2 Settings', '/customize/advanced/', 'manage'],
                'advsearch' => ['Advanced Search', '/directorysearch.bml', 'search'],
-               'aliases' => ['My Aliases', '/manage/aliases.bml', 'home'],
+               'aliases' => ['My Aliases', '/manage/notes.bml', 'home'],
                'birthdays' => ['Birthdays', '/birthdays.bml', 'friends'],
                'changeemail' => ['Change Email Address', '/changeemail.bml', 'editprofile'],
                'changepass' => ['Change Password', '/changepassword.bml', 'manage'],
