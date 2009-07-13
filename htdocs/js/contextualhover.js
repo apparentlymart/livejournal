@@ -409,9 +409,9 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
        }	       
        if(ContextualPopup.cachedResults[data.res.username]){
        		if(data.res.alias==''){
-       			ContextualPopup.cachedResults[data.res.username].alias_title='Add Alias';
+       			ContextualPopup.cachedResults[data.res.username].alias_title='Add Note';
        		}else{
-       			ContextualPopup.cachedResults[data.res.username].alias_title='Edit Alias';
+       			ContextualPopup.cachedResults[data.res.username].alias_title='Edit Note';
        	
        		}
        		ContextualPopup.cachedResults[data.res.username].alias=data.res.alias;
@@ -813,7 +813,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 			upgradeimg.alt='';
 			upgradeacc.appendChild(upgradeimg);
 			disabledalias.href=window.Site.siteroot+'/support/faqbrowse.bml?faqid=295';
-			disabledalias.innerHTML='Add an alias';
+			disabledalias.innerHTML='Add Note';
 			alias.appendChild(upgradeacc);
 			alias.innerHTML+="&nbsp";
 			alias.appendChild(disabledalias);
