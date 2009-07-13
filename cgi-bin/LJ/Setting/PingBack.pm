@@ -39,12 +39,13 @@ sub option {
     ## no value selected == pingback disabled
     my $value = $u->prop('pingback') || '';
     $value = "D" unless $value  =~ /^[OLD]$/;
+    ## option "Livejournal only" is removed so far, now it means "Open"
+    $value = "O" if $value eq 'L'; 
     
     # PingBack options
     my $ret = '';
     $ret .= $class->ml('settings.pingback.process') . "&nbsp;<br />";
     $ret .= LJ::html_select({ 'name' => "${key}pingback", 'selected' => $value, disabled => LJ::PingBack->has_user_pingback($u) ? 0 : 1 },
-                              "L" => $class->ml("settings.pingback.option.lj_only"),
                               "O" => $class->ml("settings.pingback.option.open"),
                               "D" => $class->ml("settings.pingback.option.disabled"),
                             );
@@ -60,6 +61,7 @@ sub save {
     
     my $value = $class->get_arg($args, "pingback");
     $value = "D" unless $value  =~ /^[OLD]$/;
+    $value = "O" if $value eq 'L';
     return $u->set_prop('pingback', $value);
 }
 

@@ -92,15 +92,11 @@ sub should_entry_recieve_pingback {
     # journal's default. We do not store "J" value in DB.
     my $entry_pb_prop = $target_entry->prop("pingback") || 'J';
     return 0 if $entry_pb_prop eq 'D';  # disabled
-    return 0 if $entry_pb_prop eq 'L'   # author allowed PingBacks only from LJ
-                and not $source_entry;  # and sourceURI is not LJ.com's post
-
+    
+    ## Option value 'L' (Livejournal only) is removed so far, it means 'O' (Open) now
     if ($entry_pb_prop eq 'J'){             
         my $journal_pb_prop = $target_entry->journal->prop("pingback") || 'D';
-        return 0 if $journal_pb_prop eq 'D'       # pingback disabled
-                    or ($journal_pb_prop eq 'L'   # or allowed from LJ only
-                        and not $source_entry     #    but sourceURI is not LJ page
-                        );
+        return 0 if $journal_pb_prop eq 'D';       # pingback disabled
     }
     return 1;
 

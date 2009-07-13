@@ -8,13 +8,17 @@ LJ::register_hook("add_extra_options_to_manage_comments", sub {
 
     return unless LJ::PingBack->has_user_pingback($u);
 
+    ## Option value 'L' (Livejournal only) is removed, it means 'O' (Open) now
+    my $selected_value = $u->prop('pingback');
+    $selected_value = 'D' unless $selected_value =~ /^[OLD]$/;
+    $selected_value = 'O' if $selected_value eq 'L';
+    
     # PingBack options
     my $ret = '';
     $ret .= "<tr><td class='field_name'>" . BML::ml('.pingback') . "</td>\n<td>";
     $ret .= BML::ml('.pingback.process') . "&nbsp;";
-    $ret .= LJ::html_select({ 'name' => 'pingback', 'selected' => $u->{'pingback'} },
+    $ret .= LJ::html_select({ 'name' => 'pingback', 'selected' => $selected_value },
                               "O" => BML::ml(".pingback.option.open"),
-                              "L" => BML::ml(".pingback.option.lj_only"),
                               "D" => BML::ml(".pingback.option.disabled"),
                             );
     $ret .= "</td></tr>\n";
@@ -58,7 +62,6 @@ LJ::register_hook("add_extra_entryform_fields", sub {
                               }, 
                               { value => "J", text => BML::ml("pingback.option.journal_default") },
                               { value => "O", text => BML::ml("pingback.option.open") },
-                              { value => "L", text => BML::ml("pingback.option.lj_only") },
                               { value => "D", text => BML::ml("pingback.option.disabled") },
                               ) . "
         " . LJ::help_icon_html("pingback_faq", "", " ") . "
