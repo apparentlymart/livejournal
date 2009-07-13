@@ -14,11 +14,11 @@
 
 .error.user_not_exist=User "[[username]]" is not exist.
 
-.error.yourself=You can not set a note to yourself.
+.error.yourself=You can not add a note to yourself.
 
 .error.too.long=You've reached the maximum number of the notes.
 
-.not.allowed=Available to <a [[aopts]]>paid account members</a> only.
+.not.allowed=This feature is only available to <a [[aopts]]>Paid account</a> users.
 
 .success.head=Success
 
