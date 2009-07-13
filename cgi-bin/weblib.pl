@@ -1463,7 +1463,7 @@ MOODS
             my @width_for_lastfm = ();
 			my @width_for_geolocation =();
             @width_for_lastfm = ('style' => 'width: 45%') if $show_lastfm;
-			@width_for_geolocation = ('style' => 'width: 35%') if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location_update'});
+			@width_for_geolocation = ('style' => 'width: 32%') if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location_update'});
 
             # Current Location
             $out .= "<p class='pkg'>";

@@ -580,10 +580,13 @@ td.tabs {
 
 .detect_btn {
 	float: left;
-}
+    }
 	.detect_btn INPUT {
 		float: left;
-	}
+		padding-left: 5px;
+		padding-right: 5px;
+		overflow: visible;
+	    }
 /*	.detect_btn STRONG {
 		display: block; 
 		line-height: 2.5em; 
