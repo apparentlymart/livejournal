@@ -27,7 +27,7 @@
 
 .error.badjournaltype=Cannot modify friends of this journal type.
 
-.error.too.long.aliases=You've reached the limit of the notes.
+.error.too.long.aliases=You've reached the maximum number of the notes.
 
 .error.updating=There was an error updating your friends list:
 

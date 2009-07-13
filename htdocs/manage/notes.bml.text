@@ -2,7 +2,7 @@
 
 .alias.aliaslist.more=add more rows...
 
-.alias.comment.successupd=Your noting settings have been updated
+.alias.comment.successupd=Your notes settings have been updated
 
 .alias.header.username=Username
 
@@ -16,12 +16,12 @@
 
 .error.yourself=You can not set a note to yourself.
 
-.error.too.long=You've reached the limit of the notes.
+.error.too.long=You've reached the maximum number of the notes.
 
 .not.allowed=Available to <a [[aopts]]>paid account members</a> only.
 
 .success.head=Success
 
-.success.saved=Your noting settings have been updated
+.success.saved=Your notes settings have been updated
 
 .title=Manage Notes
