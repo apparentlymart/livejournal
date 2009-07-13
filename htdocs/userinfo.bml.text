@@ -6,13 +6,13 @@
 
 .about.user=Bio:
 
-.addalias.title=Add Alias
+.addalias.title=Add Note
 
-.editalias.title=Edit Alias
+.editalias.title=Edit Note
 
-.useralias.title=Add/edit an alias to this user
+.useralias.title=Add/edit a note to this user
 
-.useralias.title.disabled=Sorry, you don't have rights to add or edit an alias to this user. Please, upgrade your account to paid
+.useralias.title.disabled=Sorry, you don't have rights to add or edit a note to this user. Please, upgrade your account to paid
 
 .admins.header=Administrators
 
