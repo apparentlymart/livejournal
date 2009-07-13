@@ -2,26 +2,26 @@
 
 .alias.aliaslist.more=add more rows...
 
-.alias.comment.successupd=Your aliasing settings have been updated
+.alias.comment.successupd=Your noting settings have been updated
 
 .alias.header.username=Username
 
-.alias.header.alias=Alias (note)
+.alias.header.alias=Note
 
-.alias.header.newalias=New alias:
+.alias.header.newalias=New note:
 
 .done.btn.savechanges=Save changes
 
 .error.user_not_exist=User "[[username]]" is not exist.
 
-.error.yourself=You can not set an alias to yourself.
+.error.yourself=You can not set a note to yourself.
 
-.error.too.long=You've reached the limit of the aliases.
+.error.too.long=You've reached the limit of the notes.
 
 .not.allowed=Available to <a [[aopts]]>paid account members</a> only.
 
 .success.head=Success
 
-.success.saved=Your aliasing settings have been updated
+.success.saved=Your noting settings have been updated
 
-.title=Manage Aliases
+.title=Manage Notes
