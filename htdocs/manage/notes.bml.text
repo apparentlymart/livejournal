@@ -14,7 +14,7 @@
 
 .error.user_not_exist=User "[[username]]" is not exist.
 
-.error.yourself=You can not add a note to yourself.
+.error.yourself=You cannot add a note to yourself.
 
 .error.too.long=You've reached the maximum number of the notes.
 
