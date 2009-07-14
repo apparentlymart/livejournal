@@ -472,7 +472,7 @@
 		$body .= qq|<li class='profile_addalias' title="$li_title" style="$add_style"><a onclick='return addAlias(this, "$ML{'.addalias.title'}", "$u->{user}", "")'  href='$url'>|;
 		$body .= "<img src='$LJ::IMGPREFIX/profile_icons/alias.gif' alt='' /><span>$ML{'.addalias.title'}</span></a></li>";
 
-		$body .= qq|<li class='profile_addalias' title="$li_title" style="$edit_style"><a onclick='return addAlias(this, "$ML{'.editalias.title'}", "$u->{user}", "|.LJ::ehtml(LJ::ejs($user_alias)).q|")'  href='$url'>|;
+		$body .= qq|<li class='profile_addalias' title="$li_title" style="$edit_style"><a onclick='return addAlias(this, "$ML{'.editalias.title'}", "$u->{user}", "|.LJ::ehtml(LJ::ejs($user_alias)).qq|")'  href='$url'>|;
 		$body .= "<img src='$LJ::IMGPREFIX/profile_icons/alias.gif' alt='' /><span>$ML{'.editalias.title'}</span></a></li>";
 
 	} elsif($remote && $remote->userid eq $u->userid) {
@@ -1001,12 +1001,12 @@
             my $yimstatus_alt = $ML{'.im.yim.status'};
             $instant_message .= "<tr class='im_yahoo'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/yahoo.gif' alt=\"$yim_alt\" title=\"$yim_alt\" /></td><td><a href='http://profiles.yahoo.com/$yim'>$yim</a></td><td class='im_status'><img alt=\"$yimstatus_alt\" title=\"$yimstatus_alt\" src='http://opi.yahoo.com/online?u=$yim&amp;m=g&amp;t=0' width='12' height='12' /></td></tr>\n";
         }
-        #if ($u->{'msn'}) {
+        if ($u->{'msn'}) {
             my $msnname = $mangleaddress->(LJ::ehtml($u->{'msn'}));
             my $msn_alt = $ML{'.im.msn'};
             my $msn_status = $ML{'.im.msn.status'};
             $instant_message .= "<tr class='im_msn'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/wlm.gif' alt=\"$msn_alt\" title=\"$msn_alt\" /></td><td>$msnname</td><td class='msn_status'><span class='offline' title='$msn_status offline'>$msn_status offline</span></td></tr>\n";
-        #}
+        }
         if ($u->{'jabber'}) {
             my $jabber = $mangleaddress->(LJ::ehtml($u->{'jabber'}));
             my $jabber_alt = $ML{'.im.jabber'};
