@@ -256,6 +256,32 @@ span.expandcollapse {
         .external_services table td.im_status img {
             border: 0;
         }
+    .external_services td.msn_status SPAN {
+		background: url('/img/profile_icons/mlm-icons.png') no-repeat 0 -40px;
+		display: block;
+		width: 16px;
+		height: 16px;
+		text-indent: -2000px;
+    }
+	* HTML .external_services td.msn_status SPAN {
+		background: url('/img/profile_icons/mlm-icons.gif') no-repeat 0 -6px;
+	}
+		.external_services .msn_status .online {
+			background-position: 0 -60px;
+			_background-position: 0 -26px;
+		}
+		.external_services .msn_status .offline {
+			background-position: 0 -40px;
+			_background-position: 0 -6px;
+		}
+		.external_services .msn_status .away {
+			background-position: 0 -100px;
+			_background-position: 0 -66px;
+		}
+		.external_services .msn_status .busy {
+			background-position: 0 -80px;
+			_background-position: 0 -46px;
+		}
 
 .schools {  
     float: left;

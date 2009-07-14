@@ -194,6 +194,8 @@
 
 .im.msn=Windows Live ID
 
+.im.msn.status=LJ Messenger Status:
+
 .im.skype=Skype
 
 .im.skype.status=Skype status
