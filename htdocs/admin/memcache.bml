@@ -103,7 +103,7 @@ END_TOP
 	    }
             $ret .= sprintf(" %0.02f", $t2-$t1);
 	    $ret .= "</td>";
-	    my $gb_used = ($stat{'malloc'}{'mmapped_space'} + $stat{'malloc'}{'arena_size'}) / (1024*1024*1024);
+	    my $gb_used = $stat{''}{'bytes'} / (1024*1024*1024);
 	    my $gb_max = $stat{''}{'limit_maxbytes'} / (1024*1024*1024);
 	    if ($gb_used >= $gb_max) {
 		$ret .= sprintf("<td align='center'>%0.01fG</td>", $gb_max);
@@ -111,9 +111,8 @@ END_TOP
 		$ret .= sprintf("<td>%0.02f/%0.01fG (%0.02f%%)</td>", $gb_used, $gb_max, $gb_used*100/($gb_max||1));
 	    }
 
-	    my $utiliz = $stat{''}{'bytes'} /
-		(($stat{'malloc'}{'mmapped_space'} + $stat{'malloc'}{'arena_size'}) || 1);
-	    $ret .= sprintf("<td>%0.02f%%</td>", $utiliz*100);
+	    my $utiliz = $gb_used/$gb_max;
+    $ret .= sprintf("<td>%0.02f%%</td>", $utiliz*100);
 	    
 	    my $up = $stat{''}{'uptime'};
 	    my $upstring;
