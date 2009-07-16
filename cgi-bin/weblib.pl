@@ -3818,8 +3818,9 @@ function sendForm (formid, checkuser)
     if (! document.getElementById) return true;
     var loginform = document.getElementById(formid);
     if (! loginform) return true;
-    if(document.getElementById('prop_current_location').value=='detecting...') document.getElementById('prop_current_location').value='';
-
+    if(document.getElementById('prop_current_location')){
+        if(document.getElementById('prop_current_location').value=='detecting...') document.getElementById('prop_current_location').value='';
+    }
     // Avoid accessing the password field if there is no username.
     // This works around Opera < 7 complaints when commenting.
     if (checkuser) {
