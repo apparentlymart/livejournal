@@ -262,6 +262,7 @@ span.expandcollapse {
 		width: 16px;
 		height: 16px;
 		text-indent: -2000px;
+		margin: 0 auto;
     }
 	* HTML .external_services td.msn_status SPAN {
 		background: url('/img/profile_icons/mlm-icons.gif') no-repeat 0 -6px;
