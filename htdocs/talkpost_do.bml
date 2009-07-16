@@ -111,7 +111,7 @@ body<=
 
     # FIXME: this isn't entirely correct, if ecphash is present but ignored/incorrect
     # that fix would need to be done in talklib.pl
-    return "<?h1 $ML{'Error'} h1?> $ML{'error.invalidform'}"
+    push @errors, $ML{'.error.invalidform'}
         if $remote && ! ($skip_form_auth || $POST{'ecphash'} || LJ::check_form_auth());
 
     ## preview
