@@ -2381,6 +2381,11 @@ sub mail_comments {
                                  )
                 )
             {
+                ## security bug: if aliases are enabled, then e-mail recipient
+                ## may get e-mail with aliases of current remote user.
+                ## TODO: all e-mails should be sent from workers tier, not Apache
+                local $LJ::DISABLED{'aliases'} = 1;
+
                 $parentmailed = $paru->email_raw;
                 $encoding = $paru->mailencoding || "UTF-8";
                 my $part;
@@ -2445,6 +2450,8 @@ sub mail_comments {
         !$entryu->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid})
         )
     {
+        local $LJ::DISABLED{'aliases'} = 1;
+        
         LJ::load_user_props($entryu, 'mailencoding');
         my $part;
 
@@ -2518,6 +2525,8 @@ sub mail_comments {
     if ($u && $u->{'opt_getselfemail'} && LJ::get_cap($u, 'getselfemail')
         && !$u->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid})) {
         my $part;
+
+        local $LJ::DISABLED{'aliases'} = 1;
 
         # Now we going to send email to '$u'.
         $lang = $u->prop('browselang');

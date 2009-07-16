@@ -1315,8 +1315,7 @@ sub ljuser_display {
 
 
         my $remote = LJ::get_remote();
-        my $alias_enable = $remote && $remote->get_cap('paid');
-        my $alias = $alias_enable ? LJ::ehtml(LJ::ljuser_alias($u->{user})) : '';
+        my $alias = LJ::ehtml(LJ::ljuser_alias($u->{user}) || '');
   
         my $profile = $profile_url ne '' ? $profile_url : "$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull";
         
@@ -6404,11 +6403,14 @@ sub get_shared_journals
 sub ljuser_alias {
     my $user = shift;
 
+    return if $LJ::DISABLED{'aliases'};
+
     my $remote = LJ::get_remote();
-    return undef unless $remote;
+    return unless $remote;
+    return unless $remote->get_cap('aliases');
 
     my $u = LJ::load_user($user);
-    return undef unless $u;
+    return unless $u;
     
     my $prop_aliases = $remote->prop('aliases');
     my $aliases = JSON::jsonToObj($prop_aliases);
@@ -6467,8 +6469,7 @@ sub ljuser
         $url = $journal_url ne '' ? $journal_url : $url;
          
         my $u = LJ::get_remote();
-        my $alias_enable = $u && $u->get_cap('aliases');
-        my $alias = $alias_enable ? LJ::ehtml(LJ::ljuser_alias($user)) : '';
+        my $alias = LJ::ehtml(LJ::ljuser_alias($user) || '');
         
         my $user_html = '';
         $user_html .= "<span class='ljuser ";
