@@ -2109,6 +2109,7 @@ sub res_includes {
                 esn_async => $esn_async,
                 );
     $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
+    $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
 
     my $site_params = LJ::js_dumper(\%site);
     my $site_param_keys = LJ::js_dumper([keys %site]);
