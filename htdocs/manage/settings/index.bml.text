@@ -20,6 +20,10 @@
 
 .cat.account.desc=Basic account settings
 
+.cat.adsense=adSense
+
+.cat.adsense.desc=adSense settings
+
 .cat.display=Display
 
 .cat.display.desc=Viewing options, site navigation, and language
