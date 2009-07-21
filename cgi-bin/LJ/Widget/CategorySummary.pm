@@ -29,7 +29,7 @@ sub render_body {
     $ret .= "<h2>";
     $ret .= "<div class='expand'><span class='control grow'>[:) </span></div>" if $topcats;
     $ret .= "<a href='" . $category->url . "'>";
-    $ret .= "<span class='catsummary-categoryname'>" . $category->display_name . "</span> &raquo;</a>";
+    $ret .= "<span class='catsummary-categoryname'>" . $category->display_name . "</span></a>";
     $ret .= "</h2>\n";
 
     $ret .= "<div class='catsummary-inner'>";
