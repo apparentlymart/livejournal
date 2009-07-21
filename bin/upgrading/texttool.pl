@@ -14,14 +14,15 @@ my $opt_local_lang;
 my $opt_only;
 my $opt_verbose;
 my $opt_all;    ## load texts for all known languages
-exit 1 unless
+my $force_override = 0;
 GetOptions(
            "help" => \$opt_help,
            "local-lang=s" => \$opt_local_lang,
            "verbose" => \$opt_verbose,
            "only=s" => \$opt_only,
            "all"    => \$opt_all,
-           );
+           "force-override" => \$force_override,
+           ) or die "can't parse arguments";
 
 my $mode = shift @ARGV;
 
@@ -51,6 +52,9 @@ Optionally:
     --local-lang=..     If given, works on local site files too
     --all               When loading texts, and no language is
                         specified, load all languages
+    
+    --force-override    Force overriding existing keys when loading texts from disk.
+    
 Examples:
     texttool.pl load en en_LJ
     texttool.pl --all load
@@ -437,6 +441,12 @@ sub poptext
             # In database text stored without this '\r', LJ::Lang::set_text remove it
             # before update database.
             $text =~ s/\r//;
+
+            ## do not update existing texts in DB by default.
+            ## --force-override flag allows to disable this restriction.
+            return if exists $existing_item{$l->{'lnid'}}->{$code}
+                        and not $force_override;
+            
             unless ($existing_item{$l->{'lnid'}}->{$code} eq $text) {
                 $addcount++;
                 # if the text is changing, the staleness is at least 1
