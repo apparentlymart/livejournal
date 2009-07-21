@@ -214,6 +214,7 @@
             'prop_qotdid' => $qid,
             'altlogin' => $GET{altlogin} ? 1 : 0,
             'prop_opt_preformatted' => $opt_preformatted ? 1 : 0,
+            'qid' => $qid,
         };
 
         if ($remote) {
@@ -377,6 +378,18 @@
         if ($req{'event'} eq "") {
             $errors->{'entry'} = $ML{'.error.noentry'};
         }
+
+        unless (
+            (($req{'wepc_email'} ne '') && ($req{'wepc_agree'} ne ''))
+                or
+            (($req{'wepc_email'} eq '') && ($req{'wepc_agree'} eq ''))
+        ) {
+            $errors->{'wepc_error'} = "If you select the the checkbox above, you must fill in your email address." if $req{'wepc_agree'} ne '';
+            $errors->{'wepc_error'} = "If you fill in your email address, you must select the the checkbox above." if $req{'wepc_email'} ne '';
+            $print_entry_form->();
+            return
+        }
+
 
         $req{prop_qotdid} = $qid;
 

@@ -995,6 +995,7 @@ sub entry_form {
     $out .= "\n<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
     $out .= "<input type='hidden' name='response' id='login_response' value='' />\n\n";
     $out .= LJ::error_list($errors->{entry}) if $errors->{entry};
+    $out .= "<p>Error: $errors->{'wepc_error'}</p>\n" if $errors->{'wepc_error'};
     # do a login action to get pics and usejournals, but only if using remote
     my $res;
     if ($opts->{'auth_as_remote'}) {
@@ -1189,7 +1190,7 @@ sub entry_form {
 
         # Authentication box
         $out .= "<p class='update-errors'><?inerr $errors->{'auth'} inerr?></p>\n" if $errors->{'auth'};
-
+        
         # Date / Time
         {
             my ($year, $mon, $mday, $hour, $min) = split( /\D/, $opts->{'datetime'});
@@ -1311,6 +1312,9 @@ sub entry_form {
                                 'disabled' => $opts->{'disabled_save'},
                                 'id' => 'draft'}) . "\n";
     $out .= "</div><!-- end #draft-container -->\n\n";
+   
+    $out .= LJ::run_hook("wepc_html_render", $opts);
+    
     $out .= "<input type='text' disabled='disabled' name='draftstatus' id='draftstatus' />\n\n";
     LJ::need_res('stc/fck/fckeditor.js', 'js/rte.js', 'stc/display_none.css');
     if (!$opts->{'did_spellcheck'}) {
@@ -1948,7 +1952,7 @@ sub entry_form_decode
             delete $req->{'prop_current_mood'};
         }
     }
-    
+
     # process site-specific options
     LJ::run_hooks('decode_entry_form', $POST, $req);
     

@@ -1544,6 +1544,7 @@ sub postevent
         'props'     => $req->{'props'},
         'entry'     => $entry,
         'jobs'      => \@jobs,  # for hooks to push jobs onto
+        'req'       => $req,
     });
     
     # cluster tracking
