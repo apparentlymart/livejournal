@@ -56,16 +56,19 @@ sub render_body {
     return $ret;
 }
 
-sub question_text {
+##
+## Returns hash with question data
+## 
+sub get_random_question {
     my $class = shift;
-    my $qid = shift;
-
-    my $ml_key = $class->ml_key("$qid.text");
-    my $text = $class->ml($ml_key);
-    LJ::CleanHTML::clean_event(\$text);
-
-    return $text;
-}
+    my %opts = @_;
+    
+    my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
+    my $domain = $opts{domain};
+    my @questions = $opts{question} || LJ::QotD->get_questions( user => $u, domain => $domain );
+    return unless @questions;
+    return $class->_get_question_data( $questions[int rand scalar @questions], \%opts );
+ }
 
 # version suitable for embedding in journal entries
 sub qotd_display_embed {
@@ -73,7 +76,6 @@ sub qotd_display_embed {
     my %opts = @_;
 
     my $questions = $opts{questions} || [];
-    my $remote = LJ::get_remote();
 
     my $ret;
     if (@$questions) {
@@ -81,56 +83,9 @@ sub qotd_display_embed {
         $ret .= '<table cellpadding="0" cellspacing="0"><tr><td>';
         $ret .= "<div style='border: 1px solid #000; padding: 6px;'>";
         foreach my $q (@$questions) {
-
-            # FIXME: this is a dirty hack because if this widget is put into a journal page
-            #        as the first request of a given Apache, Apache::BML::cur_req will not
-            #        be instantiated and we'll auto-vivify it with a call to BML::get_language()
-            #        from within LJ::Lang.  We're working on a better fix.
-            #
-            #        -- Whitaker 2007/08/28
-
-            # OK, it's time to try to fix it.
-            #
-            # We don't call dongerous BML::get_language() and get language code from remote
-            # user's settings. This can be done even in not bml context. But in case of disaster,
-            # we can revert this patch: get $text from "my $text = $q->{text};" without call $class->ml()
-            # and remove $lncode and $ml_key variables.
-            #
-            #       -- Chernyshev 2009/01/21
-
-            my $lncode = ($remote && $remote->prop('browselang')) ?
-                 $remote->prop('browselang') : 'en_LJ';
-
-            my $ml_key = $class->ml_key("$q->{qid}.text");
-            my $text = $class->ml($ml_key, undef, $lncode);
-            LJ::CleanHTML::clean_event(\$text);
-
-            my $from_text = '';
-            if ($q->{from_user}) {
-                my $from_u = LJ::load_user($q->{from_user});
-                $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}, $lncode) . "<br />"
-                    if $from_u;
-            }
-
-            my $extra_text;
-            if ($q->{extra_text} && LJ::run_hook('show_qotd_extra_text', $remote)) {
-                $extra_text = $q->{extra_text};
-                LJ::CleanHTML::clean_event(\$extra_text);
-            }
-
-            my $between_text = $from_text && $extra_text ? "<br />" : "";
-
-            my $qid = $q->{qid};
-            my $answers_link = "<a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" . $class->ml('widget.qotd.view.other.answers') . "</a>";
-
-            my $answer_link = "";
-            unless ($opts{no_answer_link}) {
-                $answer_link = $class->answer_link
-                    ($q, user => $opts{user}, button_disabled => $opts{form_disabled});
-            }
-
-            $ret .= "<p>$text</p><p style='font-size: 0.8em;'>$from_text$between_text$extra_text</p><br />";
-            $ret .= "<p>$answer_link $answers_link" . $class->impression_img($q) . "</p>";
+            my $d = $class->_get_question_data($q, \%opts);
+            $ret .= "<p>$d->{text}</p><p style='font-size: 0.8em;'>$d->{from_text}$d->{between_text}$d->{extra_text}</p><br />";
+            $ret .= "<p>$d->{answer_link} $d->{view_other_answers_link}$d->{impression_img}</p>";
         }
         $ret .= "</div></td></tr></table>";
     }
@@ -148,26 +103,87 @@ sub qotd_display_archive {
 
     my $ret;
     foreach my $q (@$questions) {
-        my $ml_key = $class->ml_key("$q->{qid}.text");
-        my $text = $class->ml($ml_key);
-        LJ::CleanHTML::clean_event(\$text);
-
-        my $qid = $q->{qid};
-        my $answers_link = "<a href='$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid'>" . $class->ml('widget.qotd.viewanswers') . "</a>";
-
-        my $answer_link = "";
-        unless ($opts{no_answer_link}) {
-            $answer_link = $class->answer_link( $q, user => $opts{user}, button_disabled => $opts{form_disabled} );
-        }
-
-        my $date = DateTime->from_epoch( epoch => $q->{time_start}, time_zone => 'America/Los_Angeles' );
-
-        $ret .= "<p class='qotd-archive-item-date'>" . $date->strftime("%B %e, %Y") . "</p>";
-        $ret .= "<p class='qotd-archive-item-question'>$text</p>";
-        $ret .= "<p class='qotd-archive-item-answers'>$answer_link $answers_link" . $class->impression_img($q) . "</p>";
+        my $d = $class->_get_question_data($q, \%opts);
+        $ret .= "<p class='qotd-archive-item-date'>$d->{date}</p>";
+        $ret .= "<p class='qotd-archive-item-question'>$d->{text}</p>";
+        $ret .= "<p class='qotd-archive-item-answers'>$d->{answer_link} $d->{view_answers_link}$d->{impression_img}</p>";
     }
 
     return $ret;
+}
+
+
+sub _get_question_data {
+    my $class = shift;
+    my $q = shift;
+    my $opts = shift;
+    
+    # FIXME: this is a dirty hack because if this widget is put into a journal page
+    #        as the first request of a given Apache, Apache::BML::cur_req will not
+    #        be instantiated and we'll auto-vivify it with a call to BML::get_language()
+    #        from within LJ::Lang.  We're working on a better fix.
+    #
+    #        -- Whitaker 2007/08/28
+
+    # OK, it's time to try to fix it.
+    #
+    # We don't call dongerous BML::get_language() and get language code from remote
+    # user's settings. This can be done even in not bml context. But in case of disaster,
+    # we can revert this patch: get $text from "my $text = $q->{text};" without call $class->ml()
+    # and remove $lncode and $ml_key variables.
+    #
+    #       -- Chernyshev 2009/01/21
+
+    my $remote = LJ::get_remote();
+    my $lncode = ($remote && $remote->prop('browselang')) ?
+         $remote->prop('browselang') : 'en_LJ';
+
+    my $ml_key = $class->ml_key("$q->{qid}.text");
+    my $text = $class->ml($ml_key, undef, $lncode);
+    LJ::CleanHTML::clean_event(\$text);
+
+    my $from_text = '';
+    if ($q->{from_user}) {
+        my $from_u = LJ::load_user($q->{from_user});
+        $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}, $lncode) . "<br />"
+            if $from_u;
+    }
+
+    my $extra_text;
+    if ($q->{extra_text} && LJ::run_hook('show_qotd_extra_text', $remote)) {
+        $extra_text = $q->{extra_text};
+        LJ::CleanHTML::clean_event(\$extra_text);
+    }
+
+    my $between_text = $from_text && $extra_text ? "<br />" : "";
+
+    my $qid = $q->{qid};
+    my $view_answers_link       = "<a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" . $class->ml('widget.qotd.viewanswers') . "</a>";
+    my $view_other_answers_link = "<a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" . $class->ml('widget.qotd.view.other.answers') . "</a>";
+
+    my ($answer_link, $answer_url, $answer_text) = ("", "", "");
+    unless ($opts->{no_answer_link}) {
+        ($answer_link, $answer_url, $answer_text) = $class->answer_link
+            ($q, user => $opts->{user}, button_disabled => $opts->{form_disabled});
+    }
+
+    my $impression_img = $class->impression_img($q);
+
+    my $date = DateTime->from_epoch( epoch => $q->{time_start}, time_zone => 'America/Los_Angeles' );
+    
+    return {
+        text            => $text,
+        from_text       => $from_text,
+        extra_text      => $extra_text,
+        between_text    => $between_text,
+        view_other_answers_link => $view_other_answers_link,
+        view_answers_link       => $view_answers_link,
+        answer_link     => $answer_link,
+        answer_url      => $answer_url,
+        answer_text     => $answer_text,
+        impression_img  => $impression_img,
+        date            => $date->strftime("%B %e, %Y"),
+    };
 }
 
 sub qotd_display {
@@ -181,23 +197,7 @@ sub qotd_display {
     if (@$questions) {
         $ret .= "<div class='qotd'>";
         foreach my $q (@$questions) {
-            my $ml_key = $class->ml_key("$q->{qid}.text");
-            my $text = $class->ml($ml_key);
-            LJ::CleanHTML::clean_event(\$text);
-
-            my $extra_text;
-            if ($q->{extra_text} && LJ::run_hook('show_qotd_extra_text', $remote)) {
-                $ml_key = $class->ml_key("$q->{qid}.extra_text");
-                $extra_text = $class->ml($ml_key);
-                LJ::CleanHTML::clean_event(\$extra_text);
-            }
-
-            my $from_text;
-            if ($q->{from_user}) {
-                my $from_u = LJ::load_user($q->{from_user});
-                $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display})
-                    if $from_u;
-            }
+            my $d = $class->_get_question_data($q, \%opts);
 
             $ret .= "<table><tr><td>";
             my $viewanswers;
@@ -207,8 +207,8 @@ sub qotd_display {
                 $viewanswers .= " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">" . $class->ml('widget.qotd.viewanswers') . "</a>";
             }
 
-            $ret .= $text;
-            $ret .= $extra_text ? "<p class='detail' style='padding-bottom: 5px;'>$extra_text</p>" : " ";
+            $ret .= $d->{text};
+            $ret .= ($d->{extra_text}) ? "<p class='detail' style='padding-bottom: 5px;'>$d->{extra_text}</p>" : " ";
 
             $ret .= $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) .
                 "$viewanswers";
@@ -223,7 +223,7 @@ sub qotd_display {
 
             my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
             my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
-            $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text<br />" . $class->impression_img($q) . "</p>";
+            $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$d->{from_text}<br />" . $class->impression_img($q) . "</p>";
         }
 
         # show promo on vertical pages
@@ -246,8 +246,9 @@ sub answer_link {
 
     # if button is disabled, don't attach an onclick
     my $extra = $dis ? $dis : $onclick;
-
-    return qq{<input type="button" value="$txt" $extra />};
+    my $answer_link = qq{<input type="button" value="$txt" $extra />};
+    
+    return (wantarray) ? ($answer_link, $url, $txt) : $answer_link;
 }
 
 sub answer_url {
