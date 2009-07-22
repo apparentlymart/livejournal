@@ -587,6 +587,7 @@ TH DIV {
 .view-archive .calendar-wrap TD A:link:hover,
 .view-archive .calendar-wrap TD A:visited:hover {
 	color:#333 !important;
+	background:url(../i/10y-summer/date.png) 50% 0 no-repeat !important;
 	}
 .view-archive .calendar-wrap TD {
 	font-weight:normal !important;
