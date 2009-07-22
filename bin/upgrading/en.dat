@@ -1259,7 +1259,7 @@ esn.officialpost.html=There is <a href="[[url]]">a new announcement</a> in [[use
 
 esn.officialpost.string=There is a new announcement in [[username]] at [[url]]
 
-esn.officialpost.sms=There is a new [[sitename]] announcement in [[username]] Reply with READ [[username]] to read it. Standard rates apply.
+esn.officialpost.sms=There is a new [[sitename]] announcement in [[username]] Reply with READ [[username]] to read it. Msg+Data Rates May Apply.
 
 esn.officialpost.subscribtion.html=[[sitename]] makes a new announcement
 
@@ -1331,9 +1331,9 @@ If you did not change your username, it means that your journal's security was c
 This letter was sent out automatically to help you keep your account secure. You cannot opt-out of receiving these letters.
 .
 
-esn.officialpost.alert=There is a new [[sitenameabbrev]] announcement in [[username]]. Reply with READ [[username]] to read it. Standard rates apply.
+esn.officialpost.alert=There is a new [[sitenameabbrev]] announcement in [[username]]. Reply with READ [[username]] to read it. Msg+Data Rates May Apply.
 
-esn.supofficialpost.alert=There is a new [[sitenameabbrev]] announcement in [[username]]. Reply with READ [[username]] to read it. Standard rates apply.
+esn.supofficialpost.alert=There is a new [[sitenameabbrev]] announcement in [[username]]. Reply with READ [[username]] to read it. Msg+Data Rates May Apply.
 
 esn.supofficialpost.subject=[[sitenameshort]] Announcement: [[subject]]
 
@@ -1343,7 +1343,7 @@ esn.supofficialpost.html=There is <a href="[[url]]">a new announcement</a> in [[
 
 esn.supofficialpost.string=There is a new announcement in [[username]] at [[url]]
 
-esn.supofficialpost.sms=There is a new [[sitename]] announcement in [[username]] Reply with READ [[username]] to read it. Standard rates apply.
+esn.supofficialpost.sms=There is a new [[sitename]] announcement in [[username]] Reply with READ [[username]] to read it. Msg+Data Rates May Apply.
 
 esn.supofficialpost.subscribtion.html=[[sitename]] makes a new announcement
 
