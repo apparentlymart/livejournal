@@ -440,6 +440,9 @@
                         $ju = $remote;                             # posting as remote
                     };
                     $$body .= BML::ml('.update.success2', {'aopts' => "href='" . $ju->journal_base . "/'"});
+
+                    $$body .= $res{extra_result_message};
+                    
                     my $juser = $ju->{'user'};
                     my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
                     $itemlink = LJ::item_link($ju, $itemid, $anum);
