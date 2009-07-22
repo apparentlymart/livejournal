@@ -1313,9 +1313,10 @@ sub entry_form {
                                 'id' => 'draft'}) . "\n";
     $out .= "</div><!-- end #draft-container -->\n\n";
    
+    $out .= "<input type='text' disabled='disabled' name='draftstatus' id='draftstatus' />\n\n";
+
     $out .= LJ::run_hook("wepc_html_render", $opts);
     
-    $out .= "<input type='text' disabled='disabled' name='draftstatus' id='draftstatus' />\n\n";
     LJ::need_res('stc/fck/fckeditor.js', 'js/rte.js', 'stc/display_none.css');
     if (!$opts->{'did_spellcheck'}) {
 
