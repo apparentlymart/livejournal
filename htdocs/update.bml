@@ -390,6 +390,15 @@
             return
         }
 
+        if (($req{'wepc_email'} ne '') && ($req{'wepc_agree'} ne '')) {
+            my @errors_email = ();
+            LJ::check_email($req{'wepc_email'}, \@errors_email);
+            if (@errors_email) {
+                $errors->{entry} = $errors_email[0];
+                $print_entry_form->();
+                return;
+            }
+        }
 
         $req{prop_qotdid} = $qid;
 
