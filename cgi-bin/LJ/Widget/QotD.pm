@@ -169,7 +169,12 @@ sub _get_question_data {
 
     my $impression_img = $class->impression_img($q);
 
-    my $date = DateTime->from_epoch( epoch => $q->{time_start}, time_zone => 'America/Los_Angeles' );
+    my $date = '';
+    if ($q->{time_start}) {
+        $date = DateTime
+            -> from_epoch( epoch => $q->{time_start}, time_zone => 'America/Los_Angeles' )
+            -> strftime("%B %e, %Y");
+    }
     
     return {
         text            => $text,
@@ -182,7 +187,7 @@ sub _get_question_data {
         answer_url      => $answer_url,
         answer_text     => $answer_text,
         impression_img  => $impression_img,
-        date            => $date->strftime("%B %e, %Y"),
+        date            => $date,
     };
 }
 
