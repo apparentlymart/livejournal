@@ -1,15 +1,17 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+LJ::NewWorker::TheSchwart::SMS->start();
+
+package LJ::NewWorker::TheSchwart::SMS;
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use base 'LJ::NewWorker::TheSchwartz';
 require 'ljlib.pl';
 require 'ljprotocol.pl';
 require 'ljlang.pl';
-use LJ::Worker::TheSchwartz;
 use LJ::SMS;
 
-foreach my $classname (LJ::SMS->schwartz_capabilities) {
-    schwartz_decl($classname);
-}
+sub capabilities { map { [ $_ => '' ] } LJ::SMS->schwartz_capabilities() }
 
-schwartz_work();
-
+1;

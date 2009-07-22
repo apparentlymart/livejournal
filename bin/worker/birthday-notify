@@ -1,21 +1,29 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::NewWorker::Manual;
+LJ::NewWorker::Manual::BirthdayNotify->start();
 
-package LJ::Worker::BirthdayNotify;
+################################################################################
+
+package LJ::NewWorker::Manual::BirthdayNotify;
 
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-use base 'LJ::Worker::Manual';
+use base 'LJ::NewWorker::Manual';
 use LJ::Event::Birthday;
 use List::Util ();
 
+my $user;
+
 # send out for notifications up to two days in the future
-my $advance_notify = $LJ::BIRTHDAY_NOTIFS_ADVANCE || 2*86400; # 2 days
+my $advance_notify;
 
 # delay for polling clusters that last had no users
-my $delay_when_none = 15;
+my $delay_when_none;
 
 # how long to wait if we didn't process any at all
-my $sleep_when_idle = 10;
+my $sleep_when_idle;
 
 # mapping of clusterid -> when they were last empty
 my %last_empty;
@@ -23,9 +31,47 @@ my %last_empty;
 # the cluster we're working on. used in several places.
 my $working_clusterid;
 
+my $verbose;
+
+sub BEGIN {
+    $advance_notify  = $LJ::BIRTHDAY_NOTIFS_ADVANCE || 2*86400; # 2 days
+    $delay_when_none = 15;
+    $sleep_when_idle = 10;
+    $verbose = 0;
+}
+
+sub options {
+    my $self = shift;
+    return (
+        'user|u=s'  => \$user,
+        $self->SUPER::options(),
+    );
+}
+
+sub help {
+    my $self = shift;
+    return
+        $self->SUPER::help() .
+        "-u | --user login  work on one specific user\n";
+}
+
 sub work {
     my $class = shift;
-    my @uids = @_;
+    my @uids;
+
+    $verbose = $class->verbose();
+
+    $advance_notify = $LJ::BIRTHDAY_NOTIFS_ADVANCE || 2*86400; # 2 days
+
+    if ($user) {
+        my $u = LJ::load_user($user);
+        if ($u) {
+            $working_clusterid = $u->clusterid;
+            push @uids, $u->id;
+        } else {
+            print STDERR "Cannot find such user: \"$user\", continue with ignored option --user.\n";
+        }
+    }
 
     # pick a cluster to work on, get a lock
     my $lock;
@@ -95,9 +141,8 @@ sub on_idle {
 }
 
 sub debug {
-    LJ::Worker::DEBUG(@_);
+    print STDERR @_, "\n" if $verbose;
 }
-
 
 # checks if a cluster has pending notifications to send out.
 sub cluster_needs_work {
@@ -111,7 +156,7 @@ sub cluster_needs_work {
     return unless $dbcr;
 
     my $ct = $dbcr->selectrow_array("SELECT userid FROM birthdays WHERE " .
-                                    "nextbirthday < UNIX_TIMESTAMP() + $advance_notify LIMIT 1")+0;
+                                    "nextbirthday < UNIX_TIMESTAMP() + $advance_notify LIMIT 1") || 0;
     die $dbcr->errstr if $dbcr->err;
     return 1 if $ct;
 
@@ -144,14 +189,4 @@ sub remove_user_from_cluster {
     die $dbh->errstr if $dbh->err;
 }
 
-################################################################################
-
-# to be able to work on one specific user
-if (@ARGV) {
-    my $user = shift;
-    my $u = LJ::load_user($user);
-    $working_clusterid = $u->clusterid;
-    __PACKAGE__->work($u->id);
-} else {
-    __PACKAGE__->run();
-}
+1;

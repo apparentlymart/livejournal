@@ -1,15 +1,26 @@
 #!/usr/bin/perl
-
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require "ljlib.pl";
+use LJ::NewWorker::Gearman;
+LJ::NewWorker::Gearman::LoadFriendsGM->start();
+package LJ::NewWorker::Gearman::LoadFriendsGM;
+use base 'LJ::NewWorker::Gearman';
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 
-use LJ::Worker::Gearman;
+use LJ::NewWorker::Gearman;
 use Storable;
 
-gearman_decl("load_friends" => \&load_friends);
-gearman_decl("load_friend_friendof_uids" => \&load_friend_friendof_uids);
-gearman_work();
+sub declare {
+    [
+        "load_friends" => \&load_friends,
+        "load_friend_friendof_uids" => \&load_friend_friendof_uids,
+    ]
+}
+
+sub work {}
 
 sub load_friends {
     my $job = shift;

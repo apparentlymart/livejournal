@@ -1,15 +1,14 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-use LJ::Worker::TheSchwartz;
+use LJ::NewWorker::TheSchwartz;
 
 require "ljlib.pl";
 require "ljemailgateway.pl";
 require "supportlib.pl";
 require "sysban.pl";
 
-schwartz_decl('LJ::Worker::IncomingEmail');
-schwartz_work();
+LJ::NewWorker::TheSchwartz::IncomingEmail->start();
 
 package TempDirObj;
 use File::Path ();
@@ -30,14 +29,17 @@ sub DESTROY {
     File::Path::rmtree($self->{dir}) if -d $self->{dir};
 }
 
+1;
 
-package LJ::Worker::IncomingEmail;
+package LJ::NewWorker::TheSchwartz::IncomingEmail;
 use strict;
-use base 'TheSchwartz::Worker';
+use base 'LJ::NewWorker::TheSchwartz';
 
 use MIME::Parser;
 use File::Temp ();
 my $last_job;
+
+sub capabilities { [ 'LJ::NewWorker::TheSchwartz::IncomingEmail' ] }
 
 sub max_retries {   5 }
 sub retry_delay { 100 }
@@ -389,3 +391,5 @@ sub journal_destination {
     }
     return;
 }
+
+1;

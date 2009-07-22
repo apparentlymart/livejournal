@@ -1,21 +1,19 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-LJ::Worker::Test->set_memory_limit(40*1024*1024); # 80MB memory limit
-LJ::Worker::Test->run;
+use LJ::NewWorker::Manual;
+LJ::NewWorker::Manual::Test->start();
 
-package LJ::Worker::Test;
-use base 'LJ::Worker::Manual';
+package LJ::NewWorker::Manual::Test;
+use base 'LJ::NewWorker::Manual';
 
-my $iteration = 0;
+my $iteration;
 my %heap;
 
 # return 1 if we did work, false if not.
 sub work {
-    my $class = shift;
-
     $heap{$iteration++} = "x" x (1024 * 1024); # Shove 1MB onto the heap
-    print "Iteration: $iteration\n";
+    print STDERR "Iteration: $iteration\n";
 
     return 0;
 }
@@ -23,3 +21,4 @@ sub work {
 #3 each:
 #206, 207, 208, 235, 236, 247
 
+1;

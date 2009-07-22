@@ -2,10 +2,10 @@
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 
-LJ::Worker::DirectoryMeta->run;
+LJ::NewWorker::Manual::DirectoryMeta->start();
 
-package LJ::Worker::DirectoryMeta;
-use base 'LJ::Worker::Manual';
+package LJ::NewWorker::Manual::DirectoryMeta;
+use base 'LJ::NewWorker::Manual';
 use LJ::UserSearch::MetaUpdater;
 
 # return 1 if we did work, false if not.
@@ -30,3 +30,4 @@ sub work {
     return $did_work;
 }
 
+1;

@@ -1,29 +1,23 @@
 #!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require "ljlib.pl";
+require "ljprotocol.pl";
+use LJ::NewWorker::Gearman;
+LJ::NewWorker::Gearman::LJTalkGM->start();
 
+# ----------------------------------------------------------------------------
+
+package LJ::NewWorker::Gearman::LJTalkGM;
+use base 'LJ::NewWorker::Gearman';
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljprotocol.pl';
-use LJ::Worker::Gearman;
+use LJ::NewWorker::Gearman;
 use LJ::Jabber::Presence;
 use LJ::Jabber::LastSeen;
 use MIME::Base64;
 use Storable;
-gearman_decl("ljtalk_auth_check"  => \&ljtalk_auth_check);
-gearman_decl("ljtalk_get_roster"  => \&ljtalk_get_roster);
-gearman_decl("ljtalk_avatar_data" => \&ljtalk_avatar_data);
-gearman_decl("ljtalk_avatar_sha1" => \&ljtalk_avatar_sha1);
-gearman_decl("ljtalk_bot_talk"    => \&ljtalk_bot_talk);
-gearman_decl("ljtalk_load_roster_item" => \&ljtalk_load_roster_item);
-gearman_decl("ljtalk_delete_roster_item" => \&ljtalk_delete_roster_item);
-gearman_decl("ljtalk_addupdateset_roster" => \&ljtalk_addupdateset_roster);
-gearman_decl("ljtalk_initial_presence" => \&ljtalk_initial_presence);
-gearman_decl("ljtalk_alter_presence" => \&ljtalk_alter_presence);
-gearman_decl("ljtalk_connection_closing" => \&ljtalk_connection_closing);
-gearman_decl("ljtalk_init" => \&ljtalk_init);
-gearman_decl("ljtalk_user_motd" => \&ljtalk_user_motd);
-gearman_work();
-
-# ----------------------------------------------------------------------------
 
 use Image::Magick;
 use Digest::SHA1 qw(sha1_hex);
@@ -33,6 +27,26 @@ use constant REL_TO      => 1;
 use constant REL_FROM    => 2;
 use constant REL_PENDIN  => 4;
 use constant REL_PENDOUT => 8;
+
+sub declare {
+    [
+        'ljtalk_auth_check'  => \&ljtalk_auth_check,
+        'ljtalk_get_roster'  => \&ljtalk_get_roster,
+        'ljtalk_avatar_data' => \&ljtalk_avatar_data,
+        'ljtalk_avatar_sha1' => \&ljtalk_avatar_sha1,
+        'ljtalk_bot_talk'    => \&ljtalk_bot_talk,
+        'ljtalk_load_roster_item' => \&ljtalk_load_roster_item,
+        'ljtalk_delete_roster_item' => \&ljtalk_delete_roster_item,
+        'ljtalk_addupdateset_roster' => \&ljtalk_addupdateset_roster,
+        'ljtalk_initial_presence' => \&ljtalk_initial_presence,
+        'ljtalk_alter_presence' => \&ljtalk_alter_presence,
+        'ljtalk_connection_closing' => \&ljtalk_connection_closing,
+        'ljtalk_init' => \&ljtalk_init,
+        'ljtalk_user_motd' => \&ljtalk_user_motd,
+    ]
+}
+
+sub work    { [ save_result => 1 ] }
 
 # Plugin::LiveJournal
 sub ljtalk_init {
@@ -44,7 +58,6 @@ sub ljtalk_init {
 # Plugin::LiveJournal
 sub ljtalk_connection_closing {
     my $job = shift;
-
 
     my $args = Storable::thaw($job->arg);
     my ($user, $resource, $priority, $xml) = (@$args);

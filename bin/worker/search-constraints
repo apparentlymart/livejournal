@@ -1,14 +1,18 @@
 #!/usr/bin/perl
 use strict;
+use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
-use Gearman::Worker;
-use Storable;
-use LJ::Worker::Gearman;
+require 'ljlib.pl';
+use LJ::NewWorker::Gearman;
+
+LJ::NewWorker::Gearman::SearchConstraints->start();
+
+package LJ::NewWorker::Gearman::SearchConstraints;
+use base 'LJ::NewWorker::Gearman';
 use LJ::Directory::Constraint;
 
-gearman_decl("directory_search_constraint"  => \&dir_search_constraint);
-gearman_work();
+sub declare { return [ 'directory_search_constraint'  => \&dir_search_constraint ] }
+sub work    { }
 
 sub dir_search_constraint {
     my $job = shift;
@@ -22,3 +26,5 @@ sub dir_search_constraint {
     my $res_str = $res->as_string;
     return $res_str;
 }
+
+1;

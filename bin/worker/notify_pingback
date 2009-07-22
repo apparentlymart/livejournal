@@ -2,9 +2,11 @@
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
-use LJ::Worker::TheSchwartz;
-use TheSchwartz::Worker::NotifyPingbackServer;
+use LJ::NewWorker::TheSchwartz;
+LJ::NewWorker::TheSchwartz::NotifyPingbackServer->start();
+package LJ::NewWorker::TheSchwartz::NotifyPingbackServer;
+use base 'LJ::NewWorker::TheSchwartz';
 
-schwartz_decl('TheSchwartz::Worker::NotifyPingbackServer');
-schwartz_work();
+sub capabilities { [ 'TheSchwartz::Worker::NotifyPingbackServer' => '' ] }
 
+1;

@@ -1,13 +1,16 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+LJ::NewWorker::TheSchwart::MassPrivacy->start();
+
+package LJ::NewWorker::TheSchwart::MassPrivacy;
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use base 'LJ::NewWorker::TheSchwartz';
+require 'ljlib.pl';
 require 'ljprotocol.pl';
-use LJ::Worker::TheSchwartz;
 use LJ::MassPrivacy;
 
-foreach my $classname (LJ::MassPrivacy->schwartz_capabilities) {
-    schwartz_decl($classname);
-}
+sub capabilities { map { [ $_ => '' ] } LJ::MassPrivacy->schwartz_capabilities() }
 
-schwartz_work();
-
+1;

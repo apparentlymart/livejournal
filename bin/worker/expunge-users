@@ -1,11 +1,17 @@
 #!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::NewWorker::Manual;
+LJ::NewWorker::Manual::ExpungeUsers->start();
 
-package LJ::Worker::ExpungeUsers;
+################################################################################
+
+package LJ::NewWorker::Manual::ExpungeUsers;
 
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 
-use base 'LJ::Worker::Manual';
+use base 'LJ::NewWorker::Manual';
 
 my $days_before_expunge =  60; # 60 days before expiration
 my $lock_name           = "worker_expunge_user_query";
@@ -18,11 +24,39 @@ my $enqueue_pct         =  0.3; # percentage of target queue depth at which we s
 
 my $cache_sock; # [ $sock, connected_at ]
 
-die "No \$LJ::MOVE_SERVER defined\n"
-    unless $LJ::MOVE_SERVER;
+my $user;
+
+sub BEGIN {
+    die "No \$LJ::MOVE_SERVER defined\n"
+        unless $LJ::MOVE_SERVER;
+
+    $days_before_expunge =  60; # 60 days before expiration
+    $lock_name           = "worker_expunge_user_query";
+
+    $sleep_when_idle     = 10;
+    $sleep_for_lock      =  3;
+
+    $target_queue_depth  =  100; # try to keep queue depth near this number
+    $enqueue_pct         =  0.3; # percentage of target queue depth at which we should enqueue more jobs
+}
+
+sub options {
+    my $self = shift;
+    return (
+        'user|u=s'  => \$user,
+        $self->SUPER::options(),
+    );
+}
+
+sub help {
+    my $self = shift;
+    return
+        $self->SUPER::help() .
+        "-u | --user login  work on one specific user\n";
+}
 
 sub debug {
-    LJ::Worker::DEBUG(@_);
+    print STDERR @_, "\n";
 }
 
 sub work {
@@ -195,13 +229,4 @@ sub should_enqueue {
     return $in_queue < $enqueue_at ? 1 : 0;
 }
 
-################################################################################
-
-# in this mode, it's just debug... don't write to db.
-if (@ARGV) {
-    my $user = shift;
-    my $u = LJ::load_user($user);
-    __PACKAGE__->work($u->{userid});
-} else {
-    __PACKAGE__->run();
-}
+1;

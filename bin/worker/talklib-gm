@@ -1,15 +1,19 @@
 #!/usr/bin/perl
-
 use strict;
+use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
-require 'talklib.pl';
-
-use LJ::Worker::Gearman;
+use LJ::NewWorker::Gearman;
+LJ::NewWorker::Gearman::Talklib->start();
+package LJ::NewWorker::Gearman::Talklib;
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require "ljlib.pl";
+use base 'LJ::NewWorker::Gearman';
 use Storable;
 
-gearman_decl("fixup_logitem_replycount"  => \&fixup_logitem_replycount);
-gearman_work();
+sub declare { [ 'fixup_logitem_replycount'   => \&fixup_logitem_replycount ] }
+sub work    {}
 
 sub fixup_logitem_replycount {
     my $job = shift;
@@ -23,4 +27,4 @@ sub fixup_logitem_replycount {
     return "OK";
 }
 
-
+1;

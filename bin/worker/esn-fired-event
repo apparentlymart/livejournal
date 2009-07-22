@@ -4,10 +4,12 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'ljprotocol.pl';
 require 'ljlang.pl';
-use LJ::Worker::TheSchwartz;
+use LJ::NewWorker::TheSchwartz;
 use LJ::ESN;
+LJ::NewWorker::TheSchwartz::FiredEvent->start();
 
-schwartz_decl("LJ::Worker::FiredEvent");
+package LJ::NewWorker::TheSchwartz::FiredEvent;
+use base 'LJ::NewWorker::TheSchwartz';
+sub capabilities { [ "LJ::Worker::FiredEvent" => '' ] }
 
-schwartz_work();
-
+1;

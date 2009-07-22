@@ -2,19 +2,23 @@
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
-use LJ::Worker::TheSchwartz;
+use LJ::NewWorker::TheSchwartz;
 
-LJ::Worker::TheSchwartz->set_memory_limit(1024 * 1024 * 100); # 100MB memory limit.
-
-schwartz_decl('LJ::Worker::UpdateFotobilderFriends');
-schwartz_work();
+LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends->start();
 
 ############################################################################
 
-package LJ::Worker::UpdateFotobilderFriends;
-use base 'TheSchwartz::Worker';
+package LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends;
+use base 'LJ::NewWorker::TheSchwartz';
 use RPC::XML;
 use RPC::XML::Client;
+
+sub capabilities { [ 'LJ::NewWorker::UpdateFotobilderFriends' => '' ] }
+
+sub BEGIN {
+    print $_, "\n";
+    LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends->set_memory_limit(1024 * 1024 * 100); # 100MB memory limit.
+}
 
 sub keep_exit_status_for { 0 }
 sub grab_for { 60 }
@@ -100,3 +104,4 @@ sub work {
     }
 }
 
+1;

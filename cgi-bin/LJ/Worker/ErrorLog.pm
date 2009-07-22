@@ -51,8 +51,8 @@ sub reopen_handles {
     } else {
         ## Reopen stderr, stdout, stdin to /dev/null
         close(STDIN);   open(STDIN,  "+>/dev/null");
-        close(STDOUT);  open(STDOUT, "+>&STDIN");
-        close(STDERR);  open(STDERR, "+>&STDIN");
+        close(STDOUT);  open(STDOUT, "+>/dev/null");
+        close(STDERR);  open(STDERR, "+>/dev/null");
     }
 }
 

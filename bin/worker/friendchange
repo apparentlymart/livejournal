@@ -2,17 +2,15 @@
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
-use LJ::Worker::TheSchwartz;
+use LJ::NewWorker::TheSchwartz;
 
-LJ::Worker::TheSchwartz->set_memory_limit(1024 * 1024 * 100); # 100MB memory limit.
-
-schwartz_decl('LJ::Worker::FriendChange');
-schwartz_work();
+LJ::NewWorker::TheSchwartz::FriendChange->set_memory_limit(1024 * 1024 * 100); # 100MB memory limit.
+LJ::NewWorker::TheSchwartz::FriendChange->start();
 
 ############################################################################
 
-package LJ::Worker::FriendChange;
-use base 'TheSchwartz::Worker';
+package LJ::NewWorker::TheSchwartz::FriendChange;
+use base 'LJ::NewWorker::TheSchwartz';
 use LWP;
 use LWP::UserAgent;
 use LWP::ConnCache;
@@ -23,6 +21,8 @@ use XML::Atom::Person;
 use XML::Atom::Link;
 use XML::Atom::Content;
 use XML::LibXML;
+
+sub compatibility { [ 'LJ::NewWorker::FriendChange' => '' ] };
 
 my $ua;
 sub ua {
@@ -208,3 +208,4 @@ sub work {
     return;
 }
 
+1;

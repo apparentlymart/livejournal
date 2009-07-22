@@ -1,15 +1,21 @@
 #!/usr/bin/perl
-
 use strict;
+use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'taglib.pl';
-
-use LJ::Worker::Gearman;
+use LJ::NewWorker::Gearman;
+LJ::NewWorker::Gearman::Taglib->start();
+package LJ::NewWorker::Gearman::Taglib;
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require "ljlib.pl";
+require 'taglib.pl';
+use base 'LJ::NewWorker::Gearman';
 use Storable;
 
-gearman_decl("load_usertags" => \&load_usertags);
-gearman_work();
+sub declare { [ 'load_usertags' => \&load_usertags ] }
+sub work    {}
 
 sub load_usertags {
     my $job = shift;
@@ -32,3 +38,4 @@ sub load_usertags {
     my $res = LJ::Tags::get_usertagsmulti({ no_gearman => 1 }, $u);
     return $ret->($res->{$u->id} || {});
 }
+1;

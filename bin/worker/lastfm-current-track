@@ -1,17 +1,24 @@
 #!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require "ljlib.pl";
+use LJ::NewWorker::Gearman;
+LJ::NewWorker::Gearman::LastFMGetCurrentTrack->start();
 
+package LJ::NewWorker::Gearman::LastFMGetCurrentTrack;
+use base 'LJ::NewWorker::Gearman';
 use strict;
 use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 
-use LJ::Worker::Gearman;
+use LJ::NewWorker::Gearman;
 use LJ::LastFM;
 use Storable qw(freeze thaw); # safe across updating when use with simple structures only
 use JSON;
 
-gearman_decl('get_current_track' => \&get_current_track);
-gearman_work(save_result => 1);
+sub declare { [ 'get_current_track' => \&get_current_track ] }
+sub work    { [ 'save_result' => 1 ] }
 
 # get user's current last.fm track
 sub get_current_track {

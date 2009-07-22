@@ -2,11 +2,10 @@
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 
-#LJ::Worker::CleanCometHistory->run;
-LJ::Worker::CleanCometHistory->work;
+LJ::NewWorker::Manual::CleanCometHistory->start();
 
-package LJ::Worker::CleanCometHistory;
-use base 'LJ::Worker::Manual';
+package LJ::NewWorker::Manual::CleanCometHistory;
+use base 'LJ::NewWorker::Manual';
 use LJ::Comet::History;
 
 sub on_idle {
@@ -16,8 +15,7 @@ sub on_idle {
 # return 1 if we did work, false if not.
 sub work {
     my $class = shift;
-
     return LJ::Comet::History->remove_outdated();
-
 }
 
+1;

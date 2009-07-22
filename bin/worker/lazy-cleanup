@@ -1,15 +1,15 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
-use LJ::Entry;
-use LJ::Worker::TheSchwartz;
+use LJ::NewWorker::TheSchwartz;
 
-schwartz_decl('LJ::Worker::DeleteEntry');
-schwartz_work();
+LJ::NewWorker::TheSchwartz::DeleteEntry->start();
 
-package LJ::Worker::DeleteEntry;
-use base 'TheSchwartz::Worker';
+package LJ::NewWorker::TheSchwartz::DeleteEntry;
+use base 'LJ::NewWorker::TheSchwartz';
+
+sub capabilities { [ 'LJ::Worker::DeleteEntry' => '' ] }
 
 sub work {
     my ($class, $job) = @_;
@@ -31,3 +31,6 @@ sub retry_delay {
     my ($class, $fails) = @_;
     return ((5*60, 5*60, 15*60, 30*60)[$fails] || 3600);
 }
+
+1;
+

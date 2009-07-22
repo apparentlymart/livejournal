@@ -1,22 +1,26 @@
 #!/usr/bin/perl
 use strict;
+use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
-use Gearman::Worker;
+require 'ljlib.pl';
+use LJ::NewWorker::Gearman;
+
+LJ::NewWorker::Gearman::SearchLookup->start();
+
+package LJ::NewWorker::Gearman::SearchLookup;
+use base 'LJ::NewWorker::Gearman';
 use Storable;
-use LJ::Worker::Gearman;
+use LJ::NewWorker::Gearman;
 use LJ::Directory::Search;
 use LJ::UserSearch;
 use LJ::UserSearch::MetaUpdater;
 
-my $mtime = init_memory_datastructure();
-gearman_decl("directory_search"  => \&dir_search);
-gearman_set_idle_handler(\&idle);
-gearman_work(save_result => 1);
+my $mtime;
 
-sub idle {
-    $mtime = LJ::UserSearch::MetaUpdater::update_users($mtime);
-}
+sub declare { return [ 'directory_search' => \&dir_search ] }
+sub work    { return [ save_result => 1 ] };
+
+sub on_idle {  $mtime = LJ::UserSearch::MetaUpdater::update_users($mtime); }
 
 sub dir_search {
     my $job = shift;
@@ -51,3 +55,9 @@ sub init_memory_datastructure {
     die "Didn't read all file" unless $pushed == $size;
     return $filemtime;
 }
+
+sub BEGIN {
+    $mtime = init_memory_datastructure();
+}
+
+1;

@@ -4,12 +4,18 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'ljprotocol.pl';
 require 'ljlang.pl';
-use LJ::Worker::TheSchwartz;
+use LJ::NewWorker::TheSchwartz;
 use LJ::ESN;
 
-foreach my $classname (LJ::ESN->schwartz_capabilities) {
-    schwartz_decl($classname, 'mass');
-}
+LJ::NewWorker::TheSchwartz::ESN->start();
 
-schwartz_work();
+package LJ::NewWorker::TheSchwartz::ESN;
+use strict;
+use base 'LJ::NewWorker::TheSchwartz';
+use LJ::ESN;
 
+# Capabilities must return array of references to pairs: (classname, role).
+# LJ::ESN->schwartz_capabilities() returns array to classnames.
+sub capabilities { map { [ $_ => 'mass' ] } LJ::ESN->schwartz_capabilities() }
+
+1;

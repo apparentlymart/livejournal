@@ -1,11 +1,12 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::NewWorker::Manual;
 
-LJ::Worker::SynSuck->run;
+LJ::NewWorker::Manual::SynSuck->start();
 
-package LJ::Worker::SynSuck;
-use base 'LJ::Worker::Manual';
+package LJ::NewWorker::Manual::SynSuck;
+use base 'LJ::NewWorker::Manual';
 use LJ::SynSuck;  # the real work
 
 # return 1 if we did work, false if not.
@@ -31,7 +32,7 @@ sub work {
         my $lockname = "synsuck-user-" . $urow->{user};
         my $lock = LJ::locker()->trylock($lockname);
         next unless $lock;
-        LJ::Worker::DEBUG("got lock $lockname");
+        print STDERR "got lock $lockname" if $class->verbose;
         $done++;
         LJ::SynSuck::update_feed($urow, $class->verbose);
     }
