@@ -627,3 +627,26 @@ td.tabs {
 	padding-left: 6.5em;
 	left: 0px;
 }
+
+/* Sponsored QotD*/
+#updateForm .b-qotd {
+    margin: 10px 0;
+    }
+    #updateForm .b-qotd P {
+        margin: 0 0 0.75em;
+        }
+    #updateForm .b-qotd input.text {
+        float: none;
+        }
+    #updateForm .b-qotd-chekbox LABEL {
+        font-weight: normal;
+        }
+    #updateForm .b-qotd-chekbox INPUT {
+        position: relative;
+        top: 2px;
+        margin: 0 5px 0 0;
+        }
+    #updateForm .b-qotd-note {
+        font-size: 10px;
+        }
+

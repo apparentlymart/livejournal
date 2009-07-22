@@ -275,3 +275,14 @@ HTML:not(IE7) .opera-filter, x:-o-prefocus { display:block; } /* opera gte 9.5 *
             color: #330066;
             }
 
+/* Styles for messagers, 
+Must be removed into New CSS Framework */
+.b-message {
+    padding: 8px;
+    margin: 10px 0 24px;
+    }
+.b-message-suggestion {
+    background:#FFE8BF;
+    border:1px solid #FF8E44;
+    } 
+
