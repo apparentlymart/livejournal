@@ -399,6 +399,10 @@ A:visited:hover, A:visited:active {
 	line-height:1em;
 	border:0;
 	}
+.sidebar TABLE CAPTION A:hover {
+	color:#555 !important;
+	}
+
 .calendar-wrap TD {
 	background-color:transparent !important;
 	color:#CCC !important;
@@ -469,6 +473,7 @@ TH DIV {
 	}
 
 .sidebar A:visited:hover,
+.sidebar .tags A:hover,
 .sidebar .tags A:visited {
 	color:#555 !important;
 	}
@@ -549,8 +554,11 @@ TH DIV {
 	border-bottom:0;
 	}
 .view-archive .entry-text UL LI A {
-	color:#555;
+	color:#777;
 	border-bottom:0;
+	}
+.view-archive .entry-text UL LI A:hover {
+	color:#555;
 	}
 .view-archive .entry-text A:hover, .view-archive .entry-text UL LI A:active {
 	border-bottom:0;
@@ -570,6 +578,9 @@ TH DIV {
 	text-decoration:none;
 	line-height:.6em;
 	}
+	.view-archive .entry-text TABLE A.month:hover {
+		color:#555 !important;
+		}
 .view-archive .entry-text TABLE {
 	width:260px;
 	}
@@ -586,7 +597,7 @@ TH DIV {
 	}
 .view-archive .calendar-wrap TD A:link:hover,
 .view-archive .calendar-wrap TD A:visited:hover {
-	color:#333 !important;
+	color:#555 !important;
 	background:url(../i/10y-summer/date.png) 50% 0 no-repeat !important;
 	}
 .view-archive .calendar-wrap TD {
