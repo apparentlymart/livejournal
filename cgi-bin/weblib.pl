@@ -995,7 +995,6 @@ sub entry_form {
     $out .= "\n<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
     $out .= "<input type='hidden' name='response' id='login_response' value='' />\n\n";
     $out .= LJ::error_list($errors->{entry}) if $errors->{entry};
-    $out .= "<p>Error: $errors->{'wepc_error'}</p>\n" if $errors->{'wepc_error'};
     # do a login action to get pics and usejournals, but only if using remote
     my $res;
     if ($opts->{'auth_as_remote'}) {

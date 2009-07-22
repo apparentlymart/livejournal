@@ -384,8 +384,8 @@
                 or
             (($req{'wepc_email'} eq '') && ($req{'wepc_agree'} eq ''))
         ) {
-            $errors->{'wepc_error'} = $ML{'wepc.agree.error'} if $req{'wepc_agree'} ne '';
-            $errors->{'wepc_error'} = $ML{'wepc.email.error'} if $req{'wepc_email'} ne '';
+            $errors->{'entry'} = $ML{'wepc.agree.error'} if $req{'wepc_agree'} ne '';
+            $errors->{'entry'} = $ML{'wepc.email.error'} if $req{'wepc_email'} ne '';
             $print_entry_form->();
             return
         }
