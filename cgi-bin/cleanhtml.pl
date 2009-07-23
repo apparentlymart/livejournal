@@ -59,6 +59,7 @@ package LJ::CleanHTML;
 #        'blocked_links' => [ qr/evil\.com/, qw/spammer\.com/ ], # list of sites which URL's will be blocked
 #        'blocked_link_substitute' => 'http://domain.com/error.html' # blocked links will be replaced by this URL
 #        'remove_all_attribs' => 1, # remove all attributes from html tags
+#        'remove_attribs' => [qw/id class style/], # remove specified attributes only
 #     });
 
 sub helper_preload
@@ -146,6 +147,8 @@ sub clean
     my $suspend_msg = $opts->{'suspend_msg'} || 0;
     my $unsuspend_supportid = $opts->{'unsuspend_supportid'} || 0;
     my $remove_all_attribs = $opts->{'remove_all_attribs'} || 0;
+    my %remove_attribs = ($opts->{'remove_attribs'}) ? 
+        (map {$_ => 1} @{ $opts->{'remove_attribs'} }) : ();
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
 
     my @canonical_urls; # extracted links
@@ -558,7 +561,7 @@ sub clean
               ATTR:
                 foreach my $attr (keys %$hash)
                 {
-                    if ($remove_all_attribs) {
+                    if ($remove_all_attribs || $remove_attribs{$attr}) {
                         delete $hash->{$attr};
                         next;
                     }
@@ -1271,6 +1274,7 @@ sub clean_subject
         'remove' => $subject_remove,
         'autoclose' => $subject_allow,
         'noearlyclose' => 1,
+        'remove_attribs' => [qw/id class style/],
     });
 }
 
