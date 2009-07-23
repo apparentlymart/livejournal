@@ -391,7 +391,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 			var pr_alias=document.createElement('span');
 			DOM.addClassName(pr_alias,'alias-value');
 			pr_alias.id='profile_alias';
-			pr_alias[/*@cc_on'innerText'||@*/'textContent'] = '— '+data.res.alias;
+			pr_alias[/*@cc_on'innerText'||@*/'textContent'] = ' — '+data.res.alias;
 			searchProfile[i].parentNode.appendChild(pr_alias);
 		}
        }
