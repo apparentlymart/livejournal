@@ -2093,7 +2093,7 @@ sub delete_entry
     my $sclient = $quick ? LJ::theschwartz() : undef;
     if ($quick && $sclient) {
         return 1 if $dc < 1;  # already deleted?
-        return 1 if $sclient->insert("LJ::Worker::DeleteEntry", {
+        return 1 if $sclient->insert("LJ::NewWorker::TheSchwartz::DeleteEntry", {
             uid     => $jid,
             jitemid => $jitemid,
             anum    => $anum,

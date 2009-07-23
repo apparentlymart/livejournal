@@ -9,7 +9,7 @@ LJ::NewWorker::TheSchwartz::DeleteEntry->start();
 package LJ::NewWorker::TheSchwartz::DeleteEntry;
 use base 'LJ::NewWorker::TheSchwartz';
 
-sub capabilities { [ 'LJ::Worker::DeleteEntry' => '' ] }
+sub capabilities { [ 'LJ::NewWorker::TheSchwartz::DeleteEntry' => '' ] }
 
 sub work {
     my ($class, $job) = @_;
