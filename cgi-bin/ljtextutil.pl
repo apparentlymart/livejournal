@@ -167,6 +167,26 @@ sub ehtml
 *eall = \&ehtml;  # old BML syntax required eall to also escape BML.  not anymore.
 
 # <LJFUNC>
+# name: LJ::dhtml
+# class: text
+# des: Remove HTML-escaping
+# args: string
+# des-string: string to be un-escaped
+# returns: string with HTML
+# </LJFUNC>
+sub dhtml
+{
+    my $a = $_[0];
+    $a =~ s/&quot;/"/g;
+    $a =~ s/&\#39;/'/g;
+    $a =~ s/&apos;/'/g;
+    $a =~ s/&lt;/</g;
+    $a =~ s/&gt;/>/g;
+    $a =~ s/&amp;/&/g;
+    return $a;
+}
+
+# <LJFUNC>
 # name: LJ::etags
 # class: text
 # des: Escapes < and > from a string
