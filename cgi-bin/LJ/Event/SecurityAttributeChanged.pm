@@ -167,7 +167,7 @@ sub as_alert {
     return LJ::Lang::get_text($lang, _arg1_to_mlkey($self->arg1) . 'alert',
         undef,
         {
-            'user' => $u->ljuser_display({ target => '_blank' })
+            'user' => $u->ljuser_display()
         });
 }
 

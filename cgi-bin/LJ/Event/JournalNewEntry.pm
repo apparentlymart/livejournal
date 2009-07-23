@@ -93,8 +93,8 @@ sub as_alert {
     return LJ::Lang::get_text($u->prop('browselang'),
         'esn.journal_new_entry.alert', undef,
             {
-                who     => $self->entry->poster->ljuser_display({ target => '_blank' }),
-                journal => "<a href=\"$entry_url\" target='_blank'>" . $self->entry->journal->display_username() . "</a>",
+                who     => $self->entry->poster->ljuser_display(),
+                journal => "<a href=\"$entry_url\">" . $self->entry->journal->display_username() . "</a>",
             });
 }
 

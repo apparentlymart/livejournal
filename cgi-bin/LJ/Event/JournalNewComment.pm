@@ -200,7 +200,7 @@ sub as_alert {
 
     # TODO: [[post]] [[reply]] etc
     my $comment = $self->comment;
-    my $user = $comment->poster ? $comment->poster->ljuser_display({ target => '_blank' }) : '(Anonymous user)';
+    my $user = $comment->poster ? $comment->poster->ljuser_display() : '(Anonymous user)';
     my $edited = $comment->is_edited;
 
     return LJ::Lang::get_text($u->prop('browselang'),
@@ -211,7 +211,7 @@ sub as_alert {
             ($comment->parent ? 'comment' : 'post'), undef,
                 {
                     user        => $user,
-                    openlink    => '<a href="' . $comment->url . '" target="_blank">',
+                    openlink    => '<a href="' . $comment->url . '">',
                     closelink   => '</a>',
                 });
 }

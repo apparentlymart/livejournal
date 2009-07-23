@@ -90,7 +90,7 @@ sub as_alert {
     my $cu = $self->community;
     return '' unless $u && $cu;
     return LJ::Lang::get_text($u->prop('browselang'),
-        'esn.comm_join_approve.alert', undef, { 'community' => $cu->ljuser_display({ target => '_blank' }), });
+        'esn.comm_join_approve.alert', undef, { 'community' => $cu->ljuser_display(), });
 }
 
 sub community {

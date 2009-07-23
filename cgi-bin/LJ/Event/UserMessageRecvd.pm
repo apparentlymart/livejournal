@@ -147,7 +147,7 @@ sub as_alert {
 
     return LJ::Lang::get_text($lang, 'event.user_message_recvd.alert', undef, {
             subject => $subject,
-            user    => $other_u->ljuser_display({ target => '_blank' }),
+            user    => $other_u->ljuser_display(),
         });
 }
 

@@ -115,7 +115,7 @@ sub as_alert {
     my $friend = $self->friend;
     return LJ::Lang::get_text($u->prop('browselang'),
         'esn.invited_friend_joins.alert' . ($friend ? '' : '.unnamed'), undef,
-        $friend ? { newuser => $friend->ljuser_display({ target => '_blank' }) } : {} );
+        $friend ? { newuser => $friend->ljuser_display() } : {} );
 }
 
 sub friend {

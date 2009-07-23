@@ -41,7 +41,7 @@ sub as_alert {
     my $userpic = $self->userpic->url;
     return '' unless $who && $userpic;
     return LJ::Lang::get_text($u->prop('browselang'),
-        'esn.new_userpic.alert', undef, { who => $who->ljuser_display({ target => '_blank' }), userpic => $userpic });
+        'esn.new_userpic.alert', undef, { who => $who->ljuser_display(), userpic => $userpic });
 }
 
 sub as_email_string {
