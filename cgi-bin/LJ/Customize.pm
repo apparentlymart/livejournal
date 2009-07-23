@@ -671,6 +671,9 @@ sub get_cats {
         sup => {
             text => LJ::Lang::ml('customize.cats.sup'),
         },
+        anniversary => {
+            text => LJ::Lang::ml('customize.cats.anniversary'),
+        },
         animals => {
             text => LJ::Lang::ml('customize.cats.animals'),
         },
