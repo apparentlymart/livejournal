@@ -75,6 +75,7 @@ body<=
             sort_weight => 30,
             settings => [qw(
                     LJ::Setting::CommentEmailNotify
+                    LJ::Setting::SelfCommentEmail
             )],
         },
         mobile => {
@@ -204,9 +205,9 @@ body<=
                 
                 # are there other options for this pending subscription? if so, process those not this one
                 next if $postkey =~ /\.arg\d/;
-
+                
                 $subscr = LJ::Subscription->thaw($postkey, $u, \%POST) or next;
-
+                
                 if ($subscr->pending) {
                     push @to_consider, $subscr;
                 } else {
@@ -227,6 +228,7 @@ body<=
                                  $oldvalue,
                                  ];
             }
+
             # first process deletions
             foreach my $edit_info (@sub_edit) {
                 my ($subscr, $checked, $oldvalue) = @$edit_info;
