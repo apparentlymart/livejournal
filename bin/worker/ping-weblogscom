@@ -1,18 +1,17 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-use LJ::NewWorker::TheSchwartz;
-use Time::HiRes ();
-
-LJ::NewWorker::TheSchwartz::Ping::WeblogsCom->start();
-
-# ============================================================================
 
 package LJ::NewWorker::TheSchwartz::Ping::WeblogsCom;
 use base 'LJ::NewWorker::TheSchwartz';
-use XMLRPC::Lite;
+sub capabilities { [ 'LJ::Worker::Ping::WeblogsCom' => '' ] }
+__PACKAGE__->start();
 
-sub capabilities { [ 'LJ::NewWorker::TheSchwartz::Ping::WeblogsCom' => '' ] }
+package LJ::Worker::Ping::WeblogsCom;
+use base 'TheSchwartz::Worker';
+
+use XMLRPC::Lite;
+use Time::HiRes ();
 
 sub work {
     my ($class, $job) = @_;

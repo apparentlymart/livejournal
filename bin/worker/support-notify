@@ -1,14 +1,19 @@
 #!/usr/bin/perl -w
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-use LJ::NewWorker::TheSchwartz;
-LJ::NewWorker::TheSchwartz::SupportNotify->start();
+
 package LJ::NewWorker::TheSchwartz::SupportNotify;
 use strict;
-use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::TheSchwartz';
+sub capabilities { [ 'LJ::Worker::SupportNotify' ] }
+__PACKAGE__->start();
+
+package LJ::Worker::SupportNotify;
+use TheSchwartz::Worker;
+use lib "$ENV{LJHOME}/cgi-bin";
+use base 'TheSchwartz::Worker';
 require 'ljlib.pl';
-require "supportlib.pl";
+require "supportlib.pl";    # <-- here is LJ::Worker::SupportNotify::work().
 require "ljmail.pl";
-sub capabilities { { [ 'LJ::Worker::SupportNotify' => '' ] } }
+
 1;

@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-LJ::NewWorker::TheSchwart::SMS->start();
 
 package LJ::NewWorker::TheSchwart::SMS;
 use strict;
@@ -13,5 +12,7 @@ require 'ljlang.pl';
 use LJ::SMS;
 
 sub capabilities { map { [ $_ => '' ] } LJ::SMS->schwartz_capabilities() }
+
+__PACKAGE__->start();
 
 1;

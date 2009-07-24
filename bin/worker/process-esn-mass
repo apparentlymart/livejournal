@@ -4,10 +4,6 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'ljprotocol.pl';
 require 'ljlang.pl';
-use LJ::NewWorker::TheSchwartz;
-use LJ::ESN;
-
-LJ::NewWorker::TheSchwartz::ESN->start();
 
 package LJ::NewWorker::TheSchwartz::ESN;
 use strict;
@@ -17,5 +13,7 @@ use LJ::ESN;
 # Capabilities must return array of references to pairs: (classname, role).
 # LJ::ESN->schwartz_capabilities() returns array to classnames.
 sub capabilities { map { [ $_ => 'mass' ] } LJ::ESN->schwartz_capabilities() }
+
+__PACKAGE__->start();
 
 1;

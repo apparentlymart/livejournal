@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-LJ::NewWorker::TheSchwart::EventLogRecord->start();
 
 package LJ::NewWorker::TheSchwart::EventLogRecord;
 use strict;
@@ -12,5 +11,7 @@ require 'ljprotocol.pl';
 use LJ::EventLogRecord;
 
 sub capabilities { map { [ $_ => '' ] } LJ::EventLogRecord->schwartz_capabilities() }
+
+__PACKAGE__->start();
 
 1;

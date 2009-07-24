@@ -1,16 +1,18 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-LJ::NewWorker::TheSchwart::MassPrivacy->start();
 
 package LJ::NewWorker::TheSchwart::MassPrivacy;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::TheSchwartz';
+sub capabilities { map { [ $_ => '' ] } LJ::MassPrivacy->schwartz_capabilities() }
+__PACKAGE__->start();
+
+package LJ::Worker::MassPrivacy;
+use base 'TheSchwartz::Worker';
 require 'ljlib.pl';
 require 'ljprotocol.pl';
-use LJ::MassPrivacy;
-
-sub capabilities { map { [ $_ => '' ] } LJ::MassPrivacy->schwartz_capabilities() }
+use LJ::MassPrivacy; # work() is in cgi-bin/LJ/MassPrivacy.pm as LJ::Worker::MassPrivacy class.
 
 1;
