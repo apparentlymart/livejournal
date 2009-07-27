@@ -81,7 +81,7 @@
 .account td.last, .display td.last, .mobile td.last, .privacy td.last, .history td.last, .advertising td.last, .extension td.last, .extensions td.last {
     border-bottom: none;
 }
-.account td.help, .display td.help, .mobile td.help, .privacy td.help, .history td.help, .advertising td.help .extensions td.help {
+.account td.help, .display td.help, .mobile td.help, .privacy td.help, .history td.help, .advertising td.help, .extensions td.help {
     width: 14px;
     text-align: right;
 }
@@ -166,6 +166,13 @@
 	.extension td.integration_label A {
 		font-weight: normal;
 		}
+.extensions td.extentsions_label {
+	width: 19%;
+	white-space: nowrap;
+	}	
+.extensions td.extensions_option {
+	width: 80%;
+}
 .extension .act_msn TD {
 	padding: 0px 10px 10px 5px;
 	}
