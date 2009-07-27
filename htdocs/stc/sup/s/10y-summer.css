@@ -33,9 +33,11 @@ A:link:hover, A:link:active, A:visited:hover, A:visited:active {
 .content .entry .entry-title {
 	color:#303030;
 	}
-.content .entry .entry-title A {
+.content .entry .entry-title A:link,
+.content .entry .entry-title A:visited {
 	color:#303030;
 	border:0;
+	text-decoration:none;
 	}
 
 #page .btn {
@@ -606,7 +608,7 @@ TH DIV {
 	}
 
 /*----POPUP----*/
-.ContextualPopup .Inner {
+DIV.ContextualPopup DIV.Inner {
 	background-color:#FFF !important;
 	color:#333 !important;
 	border:1px solid #333;
@@ -614,12 +616,12 @@ TH DIV {
 	top:5px;
 	}
 
-.ContextualPopup .Inner A:link,
-.ContextualPopup .Inner A:visited {
+DIV.ContextualPopup DIV.Inner A:link,
+DIV.ContextualPopup DIV.Inner A:visited {
 	text-decoration:underline !important;
 	color:#333 !important;
 	}
-.ContextualPopup .Inner A:hover {
+DIV.ContextualPopup DIV.Inner A:hover {
 	color:#555 !important;
 	}
 
