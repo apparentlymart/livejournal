@@ -111,7 +111,7 @@ END_TOP
 		$ret .= sprintf("<td>%0.02f/%0.01fG (%0.02f%%)</td>", $gb_used, $gb_max, $gb_used*100/($gb_max||1));
 	    }
 
-	    my $utiliz = $gb_used/$gb_max;
+	    my $utiliz = $gb_used/($gb_max||1);
     $ret .= sprintf("<td>%0.02f%%</td>", $utiliz*100);
 	    
 	    my $up = $stat{''}{'uptime'};
