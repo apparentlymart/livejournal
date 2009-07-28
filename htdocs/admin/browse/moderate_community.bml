@@ -25,7 +25,6 @@ body<=
                 my ($pid, $jid, $catid) = split('-', $POST{$_});
                 push @{$add{$catid}}, [$jid, $pid] unless $POST{"deny_$pid"};
             }
-warn("add:". LJ::D(%add));
 
             my @deny;
             foreach (grep { /^deny_/} keys %POST) {
@@ -44,6 +43,7 @@ warn("add:". LJ::D(%add));
             # Add journals to category
             unless (@errors) {
                 $ret .= "<span class='super notice'>Communities successfully updated.</span>";
+                return $ret;
             } else {
                 $ret .= "<span class='super notice'>Communities not updated.</span>";
             }
@@ -51,6 +51,7 @@ warn("add:". LJ::D(%add));
     }
 
     my @listings = LJ::Browse->get_pending_communities(undef);
+    return $ret . "<p>No communities to moderate.</p>" unless @listings;
     @listings = sort { $a->{catid} <=> $b->{catid} } @listings;
     my @jids = map { $_->{jid} } @listings;
     my $jid = LJ::load_userids(@jids);
