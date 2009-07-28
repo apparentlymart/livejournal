@@ -1,0 +1,315 @@
+/*_*/
+BODY {
+	font:62.5%/1.5 Georgia, serif;
+	color:#333;
+	background:#FFF;
+	}
+A:link,
+A:visited {
+	border-bottom:1px solid #999;
+	text-decoration:none;
+	color:#333;
+	}
+A:link:hover,
+A:visited:hover {
+	border-color:#000;
+	}
+	.entry-content A:link {
+		border-color:#99ADC0;
+		color:#345C81;
+		}
+	.entry-content A:visited {
+		border-color:#99ADC0;
+		color:#798998;
+		}
+	.entry-title A:link,
+	.entry-title A:visited {
+		border-color:#D6D6D6;
+		}
+	.entry-title A:link:hover,
+	.entry-title A:visited:hover {
+		border-color:#000;
+		}
+	.entry-content A:link:hover,
+	.entry-content A:visited:hover {
+		border-color:#284764;
+		}
+	.sidebar .sidebar-tags A:link,
+	.sidebar .sidebar-tags A:visited {
+		border:0;
+		color:#445363;
+		}
+	.sidebar .sidebar-tags A:link:hover,
+	.sidebar .sidebar-tags A:visited:hover {
+		color:#000;
+		}
+	.calendar-wrap TABLE CAPTION A:link,
+	.calendar-wrap TABLE CAPTION A:visited,
+	.calendar-wrap TABLE TBODY TD A:link,
+	.calendar-wrap TABLE TBODY TD A:visited,
+	.calendar-wrap TABLE TBODY TD A:link:hover,
+	.calendar-wrap TABLE TBODY TD A:visited:hover,
+	.calendar-wrap TABLE TBODY TD A:link:active,
+	.calendar-wrap TABLE TBODY TD A:visited:active,
+	.entry-linkbar A:link,
+	.entry-linkbar A:visited,
+	.ljuser A:link,
+	.ljuser A:visited {
+		border:0;
+		}
+	.ljuser A:link B,
+	.ljuser A:visited B {
+		border-bottom:1px solid #999;
+		}
+	.ljuser A:link:hover B,
+	.ljuser A:visited:hover B {
+		border-color:#000;
+		}
+.hr {
+	background:#000 url(http://wh.lj.ru/s2/tmp/grid.gif) -1px 0 repeat-x;
+	}
+	.content .header .hr {
+		clear:both;
+		background-color:#CCC;
+		}
+	.hr-afterhead {
+		height:5px;
+		margin-top:20px;
+		background-position:0 0;
+		}
+
+.header {
+	clear:both;
+	padding:26px 0 0;
+	}
+	.column-left .header {
+		margin-left:-330px;
+		}
+	.column-right .header {
+		margin-right:-330px;
+		}
+	.header-in {
+		position:relative;
+		overflow:hidden;
+		}
+	.header .userpic {
+		float:left;
+		display:inline;
+		padding:5px 10px 19px 2px;
+		}
+	.header .nav {
+		display:inline;
+		}
+		.header .nav .item {
+			display:inline;
+			padding-bottom:19px;
+			padding-left:20px;
+			font-size:.9em;
+			text-transform:uppercase;
+			}
+		.header .nav .item-rss,
+		.header .nav .item-addfriend {
+			float:right;
+			padding-left:12px;
+			}
+#page .header .nav .btn {
+	height:1.444em;
+	padding-left:18px;
+	background:url(http://wh.lj.ru/s2/tmp/icons.gif) 0 -100px no-repeat;
+	}
+	#page .layout .layout-inner .btn SPAN {
+		float:none;
+		display:inline;
+		padding:0;
+		margin:0;
+		line-height:1.444;
+		}
+	#page .header .nav .btn SPAN SPAN SPAN {
+		border-bottom:1px solid #999;
+		}
+	#page .header .nav .btn:hover SPAN SPAN SPAN {
+		border-color:#000;
+		}
+	#page .header .nav .btn-add {
+		background-position:0 0;
+		}
+
+.header H1 {
+	float:left;
+	padding-bottom:19px;
+	font-size:.9em;
+	text-transform:uppercase;
+	}
+.header H2 {
+	clear:both;
+	margin-top:19px;
+	margin-right:340px;
+	font-size:3.6em;
+	font-weight:bold;
+	font-style:italic;
+	}
+.header H3 {
+	margin-right:340px;
+	font-size:1.8em;
+	font-weight:bold;
+	font-style:italic;
+	color:#777;
+	}
+
+.content-inner {
+	overflow:visible;
+	}
+	.column-right .content-inner {
+		margin-right:345px;
+		margin-left:16px;
+		}
+	.column-left .content-inner {
+		margin-right:16px;
+		margin-left:345px;
+		}
+	.content .entry {
+		margin-top:2.2em;
+		}
+		.content .entry .entry-text .author {
+			float:none;
+			display:inline;
+			max-width:none;
+			margin:0;
+			text-align:left;
+			}
+			.content .entry .entry-text .entry-date {
+				margin:-.5em 0 1em;
+				font-size:1.1em;
+				font-style:italic;
+				font-family:Georgia, serif;
+				}
+			.content .entry .entry-text .author DT {
+				float:right;
+				width:120px;
+				margin:-2.6em 0 0 1.2em;
+				text-align:center;
+				}
+			.content .entry .entry-text .author .username {
+				float:right;
+				clear:right;
+				width:120px;
+				margin:0 0 1.2em 1.2em;
+				text-align:center;
+				}
+		#page .entry .entrymenu {
+			padding-bottom:2.2em;
+			}
+			#page .entrymenu .btn {
+			display:inline;
+			border-bottom:1px solid #999;
+			font-size:1.3em;
+			font-style:italic;
+			line-height:1.2;
+			}
+			#page .entrymenu .btn:hover {
+				border-color:#000;
+				}
+				#page .layout .layout-inner .entrymenu .btn SPAN {
+					line-height:1.2;
+					}
+			#page .entrymenu .btn-simple {
+				color:#777;
+				}
+			#page .entrymenu .btn-comments {
+				font-size:2.5em;
+				padding-left:13px;
+				border:0;
+				font-weight:bold;
+				color:#345C81;
+				background:url(http://wh.lj.ru/s2/tmp/icons.gif) 0 -192px no-repeat;
+				}
+			#page .entrymenu .btn-comments:hover {
+				color:#000;
+				}
+	.content .entry .entry-text {
+		font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+		}
+	.content .page-nav {
+		padding-top:1em;
+		}
+	.content .entry .entry-linkbar IMG {
+		padding-right:0;
+		}
+
+.replylink {
+	display:block;
+	margin:1em 0;
+	}
+.entry-comments TABLE {
+	margin:0 auto;
+	}
+
+.sidebar-inner {
+	margin-top:158px;
+	}
+	.sidebar-block DT {
+		margin-bottom:.6em;
+		font-size:1.2em;
+		letter-spacing:.1em;
+		text-transform:uppercase;
+		}
+	.sidebar-links DD,
+	.sidebar-summary LI {
+		display:block;
+		padding-bottom:.6em;
+		margin-left:0;
+		list-style:none;
+		line-height:1.2;
+		}
+	.sidebar-tags .tags {
+		text-align:justify;
+		}
+	.sidebar-cal DT {
+		font-size:1.1em;
+		}
+	.sidebar .calendar-wrap {
+		font-size:1em;
+		}
+
+.calendar-wrap {
+	width:240px;
+	}
+	.entry .calendar-wrap {
+		height:16em;
+		}
+	.sidebar .calendar-wrap CAPTION {
+		display:none;
+		}
+	.calendar-wrap TH {
+		font-family:Arial;
+		text-transform:lowercase;
+		color:#FFF;
+		background:#1F2932;
+		}
+	.calendar-wrap TABLE TBODY TD {
+		text-align:center;
+		font-size:1.1em;
+		font-weight:normal;
+		font-style:italic;
+		color:#CCC;
+		}
+		.sidebar .calendar-wrap TABLE TBODY TD {
+			line-height:2.2;
+			}
+		#page .calendar-wrap TABLE TBODY TD A:link,
+		#page .calendar-wrap TABLE TBODY TD A:visited {
+			text-align:center;
+			color:#345C81;
+			}
+		#page .calendar-wrap TABLE TBODY TD A:link:hover,
+		#page .calendar-wrap TABLE TBODY TD A:visited:hover {
+			color:#FFF;
+			background:#1F2932;
+			}
+.footer {
+	padding-top:1px;
+	background:#000 url(http://wh.lj.ru/s2/tmp/grid.gif) 1px 0;
+	}
+	.footer A {
+		background:#FFF;
+		}
