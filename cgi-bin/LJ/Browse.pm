@@ -977,11 +977,14 @@ sub remove_community {
 
     croak "invalid user object[c]" unless LJ::isu($c);
     croak "invalid user object[u]" unless (LJ::isu($u) || LJ::isu($mod));
-    croak "need category ID" unless $catid;
 
-    # need a category
-    my $cat = LJ::Browse->load_by_id($catid);
-    die "invalid category" unless $cat;
+    # need a category if we don't have pendid
+    my $cat;
+    unless ($pendid) {
+        croak "need category ID" unless $catid;
+        $cat = LJ::Browse->load_by_id($catid);
+        die "invalid category" unless $cat;
+    }
 
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create category";
