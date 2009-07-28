@@ -400,7 +400,8 @@ sub load_layers {
         my $where = join(' OR ', map { "(userid=$us->{$_}->{userid} AND s2lid=$_)" } @{$bycluster{$cid}});
         my $sth = $db->prepare("SELECT s2lid, compdata, comptime FROM s2compiled2 WHERE $where");
         $sth->execute;
-
+        die "can't get layer from DB " if $sth->err;
+        
         # iterate over data, memcaching as we go
         while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
             LJ::text_uncompress(\$comp);
@@ -409,6 +410,7 @@ sub load_layers {
             S2::load_layer($id, $comp, $comptime);
             $maxtime = $comptime if $comptime > $maxtime;
         }
+        die "can't get layer from DB " if $sth->err;
     }
 
     # now we have to go through everything again and verify they're all loaded and
