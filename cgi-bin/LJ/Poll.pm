@@ -1163,12 +1163,24 @@ sub render {
             }
 
         }
-        
-        $ret .= LJ::Lang::ml('poll.participants', { 'total' => $usersvoted });
-        
-        $ret .= $results_table;
-        $ret .= "</div>";
+        $results_table .= "</div>";
     }
+
+    ## calc amount of participants.
+    if ($mode eq "results"){
+        my $sth = "";
+        if ($self->is_clustered) {
+            $sth = $self->journal->prepare("SELECT count(DISTINCT userid) FROM pollresult2 WHERE pollid=? AND journalid=?");
+            $sth->execute($pollid, $self->journalid);
+        } else {
+            $sth = $dbr->prepare("SELECT count(DISTINCT userid) FROM pollresult WHERE pollid=?");
+            $sth->execute($pollid);
+        }
+        my ($participants) = $sth->fetchrow_array;
+        $ret .= LJ::Lang::ml('poll.participants', { 'total' => $participants });
+    }
+    
+    $ret .= $results_table;
 
     if ($do_form) {
         $ret .= LJ::html_submit(
