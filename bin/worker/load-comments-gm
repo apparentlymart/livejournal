@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+use LJ::NewWorker::Gearman;
+
+LJ::NewWorker::Gearman::LoadComments->start();
+
+package LJ::NewWorker::Gearman::LoadComments;
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+use base 'LJ::NewWorker::Gearman';
+
+use Storable;
+
+sub declare { return [ 'get_talk_data' => \&get_talk_data ] }
+sub work { }
+
+sub get_talk_data {
+    my $job = shift;
+    my $args = Storable::thaw($job->arg);
+
+    my $result = LJ::Talk::get_talk_data_do($args->[0], $args->[1], $args->[2]);
+
+    # nfreeze friends hashref and return
+    return Storable::nfreeze($result);
+}
+
+1;

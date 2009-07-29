@@ -706,12 +706,46 @@ sub unscreen_comment {
     return;
 }
 
+sub get_talk_data {
+    my ($u, $nodetype, $nodeid) = @_;
+    return undef unless LJ::isu($u);
+    return undef unless $nodetype =~ /^\w$/;
+    return undef unless $nodeid =~ /^\d+$/;
+    my $uid = $u->id;
+
+    # call normally if no gearman/not wanted
+    my $gc = LJ::gearman_client();
+    return get_talk_data_do($uid, $nodetype, $nodeid)
+        unless $gc && LJ::conf_test($LJ::LOADCOMMENTS_USING_GEARMAN, $u->id);
+
+    # invoke gearman
+    my $result;
+    my @a = ($uid, $nodetype, $nodeid);
+    my $args = Storable::nfreeze(\@a);
+    my $task = Gearman::Task->new("get_talk_data", \$args,
+                                  {
+                                      uniq => join("-", $uid, $nodetype, $nodeid),
+                                      on_complete => sub {
+                                          my $res = shift;
+                                          return unless $res;
+                                          $result = Storable::thaw($$res);
+                                      }
+                                  });
+
+    my $ts = $gc->new_task_set();
+    $ts->add_task($task);
+    $ts->wait(timeout => 30); # 30 sec timeout
+
+    return $result;
+}
+
 # retrieves data from the talk2 table (but preferably memcache)
 # returns a hashref (key -> { 'talkid', 'posterid', 'datepost', 'datepost_unix',
 #                             'parenttalkid', 'state' } , or undef on failure
-sub get_talk_data
+sub get_talk_data_do
 {
-    my ($u, $nodetype, $nodeid) = @_;
+    my ($uid, $nodetype, $nodeid) = @_;
+    my $u = LJ::want_user($uid);
     return undef unless LJ::isu($u);
     return undef unless $nodetype =~ /^\w$/;
     return undef unless $nodeid =~ /^\d+$/;
