@@ -12,6 +12,7 @@ A:visited {
 	}
 A:link:hover,
 A:visited:hover {
+	color:#000;
 	border-color:#000;
 	}
 	.entry-content A:link {
@@ -42,6 +43,7 @@ A:visited:hover {
 	.sidebar .sidebar-tags A:link:hover,
 	.sidebar .sidebar-tags A:visited:hover {
 		color:#000;
+		text-decoration:underline !important;
 		}
 	.calendar-wrap TABLE CAPTION A:link,
 	.calendar-wrap TABLE CAPTION A:visited,
@@ -66,28 +68,31 @@ A:visited:hover {
 		border-color:#000;
 		}
 .hr {
-	background:#000 url(http://wh.lj.ru/s2/tmp/grid.gif) -1px 0 repeat-x;
+	margin-left:16px;
+	background:#000 url(../i/10y-georgia/grid.gif) -1px 0 repeat-x;
 	}
-	.content .header .hr {
+	.header .hr {
 		clear:both;
+		margin-left:0;
 		background-color:#CCC;
 		}
-	.hr-afterhead {
+	.header .hr-afterhead {
 		height:5px;
 		margin-top:20px;
+		background-color:#000;
 		background-position:0 0;
+		}
+	.column-right .hr-afterhead {
+		margin-right:330px;
+		}
+	.column-left .hr-afterhead {
+		margin-left:330px;
 		}
 
 .header {
 	clear:both;
-	padding:26px 0 0;
+	padding:22px 16px 0;
 	}
-	.column-left .header {
-		margin-left:-330px;
-		}
-	.column-right .header {
-		margin-right:-330px;
-		}
 	.header-in {
 		position:relative;
 		overflow:hidden;
@@ -95,28 +100,49 @@ A:visited:hover {
 	.header .userpic {
 		float:left;
 		display:inline;
-		padding:5px 10px 19px 2px;
+		height:50px;
+		padding:5px 10px 0 2px;
+		overflow:hidden;
+		}
+		.header .userpic IMG {
+			width:auto;
+			height:auto;
+			max-width:50px;
+			max-height:50px;
+			}
+			* HTML .header .userpic IMG {
+				_width:50px;
+				}
+	
+	.header-sec {
+		float:left;
+		padding:4px 0 19px;
 		}
 	.header .nav {
 		display:inline;
+		line-height:1;
 		}
-		.header .nav .item {
+		.header .item {
 			display:inline;
-			padding-bottom:19px;
 			padding-left:20px;
 			font-size:.9em;
 			text-transform:uppercase;
 			}
-		.header .nav .item-rss,
-		.header .nav .item-addfriend {
+		.header .nav-sub {
 			float:right;
+			padding:4px 0 19px;
+			}
+		.header .nav-sub .item {
 			padding-left:12px;
 			}
-#page .header .nav .btn {
+#page .header .nav-sub .btn {
 	height:1.444em;
 	padding-left:18px;
-	background:url(http://wh.lj.ru/s2/tmp/icons.gif) 0 -100px no-repeat;
+	background:url(../i/10y-georgia/icons.gif) 0 -100px no-repeat;
 	}
+	#page .header .nav-sub .btn:hover {
+		word-spacing:0;
+		}
 	#page .layout .layout-inner .btn SPAN {
 		float:none;
 		display:inline;
@@ -124,52 +150,70 @@ A:visited:hover {
 		margin:0;
 		line-height:1.444;
 		}
-	#page .header .nav .btn SPAN SPAN SPAN {
+	#page .header .nav-sub .btn SPAN SPAN SPAN {
 		border-bottom:1px solid #999;
 		}
-	#page .header .nav .btn:hover SPAN SPAN SPAN {
+	#page .header .nav-sub .btn:hover SPAN SPAN SPAN {
 		border-color:#000;
 		}
-	#page .header .nav .btn-add {
+	#page .header .nav-sub .btn-add {
 		background-position:0 0;
 		}
 
 .header H1 {
-	float:left;
+	display:inline;
+	padding-top:1px;
 	padding-bottom:19px;
 	font-size:.9em;
 	text-transform:uppercase;
+	line-height:1;
 	}
+	.header H1 B {
+		font-weight:normal;
+		}
+	.header H1 IMG {
+		margin:-8px 0;
+		}
 .header H2 {
 	clear:both;
-	margin-top:19px;
-	margin-right:340px;
+	padding-top:19px;
 	font-size:3.6em;
 	font-weight:bold;
 	font-style:italic;
 	}
 .header H3 {
-	margin-right:340px;
 	font-size:1.8em;
 	font-weight:bold;
 	font-style:italic;
 	color:#777;
 	}
+	.column-right .header H2,
+	.column-right .header H3 {
+		margin-right:340px;
+		}
+	.column-left .header H2,
+	.column-left .header H3 {
+		margin-left:330px;
+		}
 
 .content-inner {
 	overflow:visible;
 	}
 	.column-right .content-inner {
 		margin-right:345px;
-		margin-left:16px;
+		margin-left:0;
 		}
 	.column-left .content-inner {
 		margin-right:16px;
-		margin-left:345px;
+		margin-left:329px;
 		}
 	.content .entry {
 		margin-top:2.2em;
 		}
+		.content .entry .entry-title,
+		.content .entry .entry-text {
+			padding-left:16px;
+			}
 		.content .entry .entry-text .author {
 			float:none;
 			display:inline;
@@ -178,9 +222,10 @@ A:visited:hover {
 			text-align:left;
 			}
 			.content .entry .entry-text .entry-date {
-				margin:-.5em 0 1em;
+				margin:-.2em 0 1em;
 				font-size:1.1em;
 				font-style:italic;
+				text-transform:lowercase;
 				font-family:Georgia, serif;
 				}
 			.content .entry .entry-text .author DT {
@@ -197,9 +242,14 @@ A:visited:hover {
 				text-align:center;
 				}
 		#page .entry .entrymenu {
-			padding-bottom:2.2em;
+			padding:4px 0 2.2em 16px;
 			}
-			#page .entrymenu .btn {
+		#page .entrymenu .comments {
+			position:relative;
+			float:left;
+			top:-1em;
+			}
+		#page .entrymenu .btn {
 			display:inline;
 			border-bottom:1px solid #999;
 			font-size:1.3em;
@@ -215,13 +265,17 @@ A:visited:hover {
 			#page .entrymenu .btn-simple {
 				color:#777;
 				}
+			#page .entrymenu .btn-simple:hover {
+				color:#000;
+				}
 			#page .entrymenu .btn-comments {
 				font-size:2.5em;
-				padding-left:13px;
+				padding-left:11px;
 				border:0;
+				margin:0 0 0 -3px;
 				font-weight:bold;
 				color:#345C81;
-				background:url(http://wh.lj.ru/s2/tmp/icons.gif) 0 -192px no-repeat;
+				background:url(../i/10y-georgia/icons.gif) 0 -192px no-repeat;
 				}
 			#page .entrymenu .btn-comments:hover {
 				color:#000;
@@ -230,7 +284,7 @@ A:visited:hover {
 		font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
 		}
 	.content .page-nav {
-		padding-top:1em;
+		padding:1em 0 1em 16px;
 		}
 	.content .entry .entry-linkbar IMG {
 		padding-right:0;
@@ -245,10 +299,10 @@ A:visited:hover {
 	}
 
 .sidebar-inner {
-	margin-top:158px;
+	margin-top:-3.4em;
 	}
 	.sidebar-block DT {
-		margin-bottom:.6em;
+		margin-bottom:.85em;
 		font-size:1.2em;
 		letter-spacing:.1em;
 		text-transform:uppercase;
@@ -260,6 +314,7 @@ A:visited:hover {
 		margin-left:0;
 		list-style:none;
 		line-height:1.2;
+		font-family:Tahoma, Arial, sans-serif;
 		}
 	.sidebar-tags .tags {
 		text-align:justify;
@@ -308,7 +363,7 @@ A:visited:hover {
 			}
 .footer {
 	padding-top:1px;
-	background:#000 url(http://wh.lj.ru/s2/tmp/grid.gif) 1px 0;
+	background:#000 url(../i/10y-georgia/grid.gif) 1px 0;
 	}
 	.footer A {
 		background:#FFF;
