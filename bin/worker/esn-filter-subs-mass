@@ -6,10 +6,10 @@ require 'ljprotocol.pl';
 require 'ljlang.pl';
 use LJ::NewWorker::TheSchwartz;
 use LJ::ESN;
-LJ::NewWorker::TheSchwartz::FindSubsMass->start();
+LJ::NewWorker::TheSchwartz::FilterSubsMass->start();
 
-package LJ::NewWorker::TheSchwartz::FindSubsMass;
+package LJ::NewWorker::TheSchwartz::FilterSubsMass;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { [ "LJ::Worker::FindSubsMass" => 'mass' ] }
+sub capabilities { [ "LJ::Worker::FilterSubs" => 'mass' ] }
 
 1;
