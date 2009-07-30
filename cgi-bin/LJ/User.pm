@@ -3591,6 +3591,15 @@ sub has_enabled_getting_started {
     return $u->opt_getting_started eq 'Y' ? 1 : 0;
 }
 
+
+# ***                                                                      *** #
+# ***************************** OBSOLETE ************************************* #
+# ***                                                                      *** #
+# This method sends messages using djabberd servers
+# which have been changed with Ejabberd. So method is obsolete.
+# Code to send messages to Ejabberd is in cgi-bin/LJ/NotificationMethod/IM.pm
+#
+#
 # find what servers a user is logged in to, and send them an IM
 # returns true if sent, false if failure or user not logged on
 # Please do not call from web context

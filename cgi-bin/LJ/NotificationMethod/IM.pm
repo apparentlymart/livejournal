@@ -59,6 +59,9 @@ sub notify {
     croak "'notify' is an object method"
         unless ref $self eq __PACKAGE__;
 
+    return 
+        if $LJ::DISABLED{'ejabberd_notifications'};
+    
     my $u = $self->u;
 
     my @events = @_;
@@ -68,11 +71,9 @@ sub notify {
     foreach my $ev (@events) {
         croak "invalid event passed" unless ref $ev;
         my $msg = $ev->as_im($u);
-        $u->send_im(message => $msg);
 
         # notify ejabberd
         $self->_notify_jabber($u, $msg)
-            unless $LJ::DISABLED{'ejabberd_notifications'}; 
     }
 
     return 1;
