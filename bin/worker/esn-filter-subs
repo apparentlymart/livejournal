@@ -6,10 +6,10 @@ require 'ljprotocol.pl';
 require 'ljlang.pl';
 use LJ::NewWorker::TheSchwartz;
 use LJ::ESN;
-LJ::NewWorker::TheSchwartz::FindSubs->start();
+LJ::NewWorker::TheSchwartz::FilterSubs->start();
 
-package LJ::NewWorker::TheSchwartz::FindSubs;
+package LJ::NewWorker::TheSchwartz::FilterSubs;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { [ "LJ::Worker::FindSubs" => '' ] }
+sub capabilities { [ "LJ::Worker::FilterSubs" => '' ] }
 
 1;
