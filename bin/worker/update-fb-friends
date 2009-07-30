@@ -4,8 +4,6 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::NewWorker::TheSchwartz;
 
-LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends->start();
-
 ############################################################################
 
 package LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends;
@@ -13,11 +11,17 @@ use base 'LJ::NewWorker::TheSchwartz';
 use RPC::XML;
 use RPC::XML::Client;
 
-sub capabilities { [ 'LJ::NewWorker::UpdateFotobilderFriends' => '' ] }
+sub capabilities {
+        [   'LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends' => '' ],
+        [   'LJ::NewWorker::UpdateFotobilderFriends' => ''              ],
+        [   'LJ::Worker::UpdateFotobilderFriends' => ''                 ],
+}
+
+__PACKAGE__->start();
 
 sub BEGIN {
     print $_, "\n";
-    LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends->set_memory_limit(1024 * 1024 * 100); # 100MB memory limit.
+    __PACKAGE__->set_memory_limit(1024 * 1024 * 100); # 100MB memory limit.
 }
 
 sub keep_exit_status_for { 0 }
@@ -103,5 +107,11 @@ sub work {
         $j->completed;
     }
 }
+
+package LJ::NewWorker::UpdateFotobilderFriends;
+use base 'LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends';
+
+package LJ::Worker::UpdateFotobilderFriends;
+use base 'LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends';
 
 1;
