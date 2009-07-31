@@ -28,7 +28,7 @@ my @extra;
 my $vcv_exe = "multicvs.pl";
 if (-e "$ENV{LJHOME}/bin/vcv") {
     $vcv_exe = "vcv";
-    @extra = ("--headserver=code.sixapart.com:10000");
+    #@extra = ("--headserver=code.sixapart.com:10000");
 }
 
 exec("$ENV{'LJHOME'}/bin/$vcv_exe",
