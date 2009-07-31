@@ -14,10 +14,8 @@ use LJ::NewWorker::Gearman;
 use Storable;
 
 sub declare {
-    [
-        "load_friends" => \&load_friends,
-        "load_friend_friendof_uids" => \&load_friend_friendof_uids,
-    ]
+    [ "load_friends" => \&load_friends, ],
+    [ "load_friend_friendof_uids" => \&load_friend_friendof_uids, ],
 }
 
 sub work {}
