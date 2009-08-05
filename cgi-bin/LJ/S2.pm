@@ -3309,6 +3309,8 @@ sub _print_reply_container
 
 sub Comment__expand_link
 {
+    use Digest::MD5 qw( md5_hex );
+
     my ($ctx, $this, $opts) = @_;
     $opts ||= {};
 
@@ -3345,7 +3347,17 @@ sub Comment__expand_link
     my $title = $opts->{title} ? " title='" . LJ::ehtml($opts->{title}) . "'" : "";
     my $class = $opts->{class} ? " class='" . LJ::ehtml($opts->{class}) . "'" : "";
 
-    return "<a href='$this->{thread_url}'$title$class onClick=\"Expander.make(this,'$this->{thread_url}','$this->{talkid}'); return false;\">$text</a>";
+    ## Add key for disable banners
+    my $banners_off = md5_hex( $this->{journal}->{_u}->{_journalbase} .
+                               $this->{journal}->{_u}->{userid} .
+                               $this->{journal}->{_u}->{caps} .
+                               $this->{journal}->{_u}->{lang} .
+                               $this->{talkid} );
+
+    my $expand_url = $this->{thread_url};
+    $expand_url =~ s/(?=#)/&expand=$banners_off/;
+    
+    return "<a href='$this->{thread_url}'$title$class onClick=\"Expander.make(this,'$expand_url','$this->{talkid}'); return false;\">$text</a>";
 }
 
 sub Comment__print_expand_link
