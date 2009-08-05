@@ -32,11 +32,12 @@ OPTS
         $ret .= '<li><a href="friends.bml">Read friends page</a></li>';
     }
 
-return $ret;
+    return $ret;
 
 }
 _code?>
 </ul>
+    <p></p><p><a href="http://m.livejournal.com/">New version</a></p>
 
 </body>
 </html>
