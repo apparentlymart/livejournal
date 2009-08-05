@@ -36,7 +36,7 @@ body<=
         }
 
         $ret .= qq {
-            <p><a href=\"$LJ::SITEROOT/search/\">$ML{'.newsearch.link'}</a></p>
+            <p class=\"b-message b-message-suggestion\"><a href=\"$LJ::SITEROOT/search/\">$ML{'.newsearch.link'}</a></p>
             <div id="States">
                 <?h1 $ML{'.browse.usa.title'} h1?>
                 <?p $ML{'.browse.usa.desc'} p?>
