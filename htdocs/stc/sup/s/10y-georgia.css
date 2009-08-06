@@ -293,6 +293,9 @@ A:visited:hover {
 .entry-comments TABLE {
 	margin:0 auto;
 	}
+	.entry-comments TABLE TABLE {
+		margin:0;
+		}
 
 .sidebar-inner {
 	margin-top:-3.4em;
