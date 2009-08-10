@@ -189,6 +189,8 @@ body<=
             <a href="$url"><< $ML{'.new_search'}</a>
         </div>
     };
+    $ret .= "<p class=\"b-message b-message-suggestion\" style=\"margin-right:330px;\"><a href=\"$LJ::SITEROOT/search/\">$ML{'.newsearch.link'}</a></p>";
+s	
 
     $ret .= qq {
         <?h1 $ML{'.search_results'} h1?>
