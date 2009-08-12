@@ -423,6 +423,7 @@ $maint{'genstats'} = sub
             print OUT join("\t", @row), "\n";
         }
         close OUT;
+        system("$LJ::BIN/rdist.pl", "htdocs/stats/stats.txt");
     }
 
     print "-I- Done.\n";
