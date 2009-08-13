@@ -286,3 +286,37 @@ Must be removed after implementation of Framework! */
     border: 1px solid #FF8E44;
     } 
 
+/* Disabled block
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+.st-disabled {
+    position:relative;
+    }
+
+/* Blocking layer */
+.b-blocker {
+    position:absolute;
+    top:0;
+    left:0;
+    display:none;
+    width:100%;
+    height:100%;
+    }
+    .st-disabled .b-blocker {
+        display:block;
+        }
+    .b-blocker-over {
+        z-index:1000000000;
+        }
+    .b-blocker-white {
+        background:#FFF;
+        }
+    .b-blocker-gray {
+        background:#808080;
+        }
+    .b-blocker-gray,
+    .b-blocker-white {
+        -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+        filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+        opacity:.5;
+        }

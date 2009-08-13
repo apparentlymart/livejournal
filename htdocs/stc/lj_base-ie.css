@@ -33,3 +33,53 @@
 *HTML .sg-content LI {
 		height: 220px;
 }
+
+/* Disabled block
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+.st-disabled {
+    zoom:1;
+    }
+.b-blocker {
+    zoom:expression(
+        function(t){
+            t.runtimeStyle.zoom = 1;
+            t.insertAdjacentHTML('beforeBegin','<iframe class="b-blocker-iframe" src="about:blank"></iframe>')
+        }(this)
+    );
+    stretch:expression(
+        function(t){
+            var h = t.parentNode.offsetHeight;
+            if (t.h != h) {
+                t.style.height = t.h = h;
+            }           
+        }(this)
+    );
+    }
+.b-blocker-iframe {
+    position:absolute;
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+    display:none;
+    padding:0;
+    margin:0;
+    border:0;
+    opacity:0;
+    expression:expression(
+        function(t){
+            var L = t.nextSibling.offsetLeft;
+            var T = t.nextSibling.offsetTop;
+            var W = t.nextSibling.offsetWidth;
+            var H = t.nextSibling.offsetHeight;
+            if (t.L != L || t.T != T || t.W != W || t.H != H) {
+                t.runtimeStyle.left = t.L = L;
+                t.runtimeStyle.top = t.T = T;
+                t.runtimeStyle.width = t.W = W;
+                t.runtimeStyle.height = t.H = H;
+            }
+        }(this)
+    );
+    }
+    .st-disabled .b-blocker-iframe {
+        display:block;
+        }
