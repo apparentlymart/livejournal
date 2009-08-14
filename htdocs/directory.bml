@@ -35,8 +35,12 @@ body<=
             $count{$_->{'statcat'}}->{$_->{'statkey'}} = $_->{'statval'};
         }
 
+        $ret .= qq{
+                <p class="b-message b-message-suggestion"><a href="$LJ::SITEROOT/search/">$ML{'.newsearch.link'}</a></p>
+        } unless $LJ::DISABLED{'yandex_search'};
+        
         $ret .= qq {
-            <p class=\"b-message b-message-suggestion\"><a href=\"$LJ::SITEROOT/search/\">$ML{'.newsearch.link'}</a></p>
+
             <div id="States">
                 <?h1 $ML{'.browse.usa.title'} h1?>
                 <?p $ML{'.browse.usa.desc'} p?>
