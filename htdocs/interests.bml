@@ -394,7 +394,7 @@ body<=
 
         my $ret = '';
 
-	    $ret .= qq{<p class="b-message b-message-suggestion" style="margin-right:330px;"><a href="$LJ::SITEROOT/search/">$ML{'.newsearch.link'}</a></p>"}
+	    $ret .= qq{<p class="b-message b-message-suggestion" style="margin-right:330px;"><a href="$LJ::SITEROOT/search/">$ML{'.newsearch.link'}</a></p>} 
 	        unless $LJ::DISABLED{'yandex_search'};
         $ret .= "<table>";
         $ret .= "<tr valign='middle'><td class='findandmodify'>$ML{'.interested.in'}</td>";
@@ -530,7 +530,8 @@ body<=
     }
 
     my $ret = "";
-    $ret .= "<p class=\"b-message b-message-suggestion\" style=\"margin-right:330px;\"><a href=\"$LJ::SITEROOT/search/\">$ML{'.newsearch.link'}</a></p>";
+    $ret .= qq{<p class="b-message b-message-suggestion" style="margin-right:330px;"><a href="$LJ::SITEROOT/search/">$ML{'.newsearch.link'}</a></p>} 
+        unless $LJ::DISABLED{'yandex_search'};
     $ret .= "<?p $ML{'.interests.text'} p?>";
     $ret .= "<table cellspacing='5' style='margin-top: 10px; margin-left: 30px; margin-bottom: 10px;'>";
 
