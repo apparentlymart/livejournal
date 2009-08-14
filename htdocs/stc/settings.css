@@ -71,21 +71,29 @@
 }
 
 /* Shared Content */
-.account table, .display table, .mobile table, .privacy table, .history table, .advertising table, .extension table, .extensions table {
+.account table, .display table, .mobile table, 
+.privacy table, .history table, .advertising table, .extension table, .extensions table,
+.adsense table {
     width: 100%;
 }
-.account td, .display td, .mobile td, .privacy td, .history td, .advertising td, .integration td, .extensions td {
+.account td, .display td, .mobile td, .privacy td, .history td, .advertising td, .integration td, 
+.extensions td, .adsense td {
     border-bottom: 1px #ccc solid;
     padding: 10px 10px 10px 5px;
 }
-.account td.last, .display td.last, .mobile td.last, .privacy td.last, .history td.last, .advertising td.last, .extension td.last, .extensions td.last {
+.account td.last, .display td.last, .mobile td.last, .privacy td.last, 
+.history td.last, .advertising td.last, .extension td.last, 
+.extensions td.last, .adsense td {
     border-bottom: none;
 }
-.account td.help, .display td.help, .mobile td.help, .privacy td.help, .history td.help, .advertising td.help, .extensions td.help {
+.account td.help, .display td.help, .mobile td.help, .privacy td.help, 
+.history td.help, .advertising td.help .extensions td.help, .adsense td.help {
     width: 14px;
     text-align: right;
 }
-.account_label, .display_label, .mobile_label, .privacy_label, .history_label, .integration_label, .extensions_label {
+.account_label, .display_label, .mobile_label, 
+.privacy_label, .history_label, .integration_label, 
+.extensions_label, .adsense_label {
     font-weight: bold;
 }
 .display_option, .mobile_option, .privacy_option {
@@ -166,17 +174,16 @@
 	.extension td.integration_label A {
 		font-weight: normal;
 		}
-.extensions td.extentsions_label {
-	width: 19%;
-	white-space: nowrap;
-	}	
-.extensions td.extensions_option {
-	width: 80%;
-}
 .extension .act_msn TD {
 	padding: 0px 10px 10px 5px;
 	}
-
+	.extensions td.extentsions_label {
+		width: 19%;
+		white-space: nowrap;
+		}	
+	.extensions td.extensions_option {
+		width: 80%;
+	}
 .extension td.msnlogo {
 	padding-right: 160px;
 	font-weight: bold;
@@ -306,3 +313,225 @@
     margin-bottom: 10px;
     margin-left: 20px;
 }
+
+/* Google Adsense Content */
+.adsense {
+	position: relative;
+	}
+.adsense UL {
+	margin: .7em 0 0;
+	padding: 0;
+	list-style: none;
+	}
+	.adsense UL LI {
+		margin-bottom: 7px;
+		}
+
+.adsense_label {
+	vertical-align: top;
+	}
+.adsense_option {
+	width: 80%;
+	vertical-align: top;
+	}
+.adsense_option INPUT {
+	margin: 0px;
+	}
+.adsense_option INPUT.ads_opt {
+	position: relative;
+	top: 2px;
+	left: -2px;
+	margin-right: 3px;
+	}
+*:first-child+html .adsense_option INPUT.ads_opt {
+	top: 1px;
+	left: -3px;
+	}
+.adsense_option INPUT.ads_select {
+	position: relative;
+	top: 3px;
+	left: -2px;
+	margin-right: 3px;
+	}
+	*:first-child+html .adsense_option INPUT.ads_select {
+		top: 1px;
+		left: -3px;
+		}
+	.adsense_option .steps LI {
+		margin-bottom: 10px;
+		}
+	.adsense_option LI LABEL {
+		display: block;
+		margin-bottom: 3px;
+		}
+	.adsense_option .steps LI.adsense_more {
+		margin-bottom: 17px;
+		}
+		.adsense_option LI.adsense_more LABEL {
+			display: inline;
+			}
+		.adsense_option LI.adsense_more INPUT {
+			width: auto;
+			}
+	.adsense_option .steps INPUT, .adsense_option .steps SELECT {
+		width: 210px;
+		}
+		.adsense_option .steps INPUT.btn {
+			width: auto;
+			overflow: visible;
+			}
+
+.adv-types {
+	margin: 0px 0px 20px;
+	}
+	.adv-types DT, .adv-types DD {
+		margin: 0;
+		padding: 0;
+		}		
+	.adv-types DT {
+		font-weight: bold;
+		margin-bottom: 7px;
+		}
+	.adv-types DD {
+		margin-bottom: 5px;
+		}
+		.adsense_option .adv-types DD LABEL  {
+			display: inline;
+			}
+		.adsense_option .adv-types DD INPUT {
+			width: auto;
+			}
+		.adsense_option .adv-types DD TEXTAREA {
+			width: 80%;
+			margin-top: 12px;
+			}
+		.adsense_option .adv-types DD B {
+			display: block;
+			font-weight: normal;
+			}
+
+.adsense_status {
+		margin: 11px 0px;
+	}
+.adsense_label DIV {
+	font-size: 11px;
+	font-weight: normal;
+	}
+#adsense_user {
+	margin: 20px 0;
+	}
+	#adsense_user SPAN {
+		display: block;
+		}
+.adsense-settings {
+	border-top: 1px solid #CCC;
+	margin-top: 7px;
+	padding-top: 7px;
+	}
+.adsense_option .setting-type {
+	position: absolute;
+	left: 5px;
+	margin: 0;
+	}
+	.adsense_option .setting-type LI {
+		font-size: 11px;
+		}
+.adsense_option .adv-lang {
+	margin-bottom: 20px;
+	}
+	.adv-lang LABEL {
+		font-weight: bold;
+		display: block !important;
+		margin-bottom: 9px;
+	}
+.adsense_option .adv-type-tabs {
+	width: 100%;
+	overflow: hidden;
+	zoom: 1;
+	background: url('/img/corners/adsense-tabs.gif') repeat-x 0 100%;
+	margin-bottom: 12px;
+	}
+	.adsense_option .adv-type-tabs LI {
+		float: left;
+		padding: 7px 10px 5px;
+		margin: 0px 7px 2px 0px;
+		border: 1px solid #CCC;
+		border-width: 1px 1px 0px 1px;
+	}
+	.adsense_option .adv-type-tabs LI.cur {
+		padding: 7px 10px 6px;
+		margin: 0px 7px 0px 0px;
+		border-bottom: 1px solid #FFF;
+	
+	}
+	
+.adsense_option .adsense-banner {
+	float: left;
+	width: 100%;
+	zoom: 1;
+}
+	.adsense-banner .banner-preview {
+		margin-bottom: 15px;
+	}
+	.adsense-banner.vertical .banner-preview {
+		width: 160px; 
+		height: 600px; 
+		float: right;
+		margin-bottom: 0;
+	}
+	.adsense-banner .banner-settings {
+		width: 100%; 
+	}
+	.adsense-banner.vertical .banner-settings {
+		float: right; 
+		margin-right: -160px
+	}
+	.adsense-banner.vertical .banner-settings-in {
+		margin-right: 180px;
+	}
+
+/* Adsense color pickers */
+.adsense-color-pickers:after {
+	content:"";
+	clear:both;
+	display:block;
+	width:0;
+	height:0;
+	overflow:hidden;
+	visibility:hidden;
+	}
+.adsense-color-pickers {
+	position:relative;
+	z-index:100;
+	list-style:none;
+	margin:0 0 12px 0 !important;
+	padding:0 0 18px;
+	border-bottom:1px solid #CCC;
+	zoom:1;
+	}
+	.adsense-color-picker {
+		float:left;
+		display:inline;
+		width:133px;
+		margin:0 !important;
+		padding:0;
+		padding-bottom: 20px;
+		}
+	.adsense-color-picker-in {
+		margin:0;
+		padding:0;
+		}
+	.adsense-color-picker-in LABEL {
+		font-weight: bold;
+		}
+	.adsense_option .steps .adsense-color-picker INPUT {
+		width:97px;
+		margin-top:4px;
+		-moz-box-sizing:border-box;
+		-webkit-box-sizing:border-box;
+		box-sizing:border-box;
+		font-size:1em;
+		}
+	*+HTML .adsense_option .steps .adsense-color-picker INPUT {
+		width:92px;
+		}
