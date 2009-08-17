@@ -575,7 +575,7 @@
             $body .= qq {
                 <iframe name='upiframe' width='1' height='1' style='border: none'></iframe>
                 <div id='uploadBox' class='pkg}; 
-				if (scalar @userpics > $max) { $body .=' st-disabled'; }
+				if (scalar @userpics >= $max) { $body .=' st-disabled'; }
 				$body .= qq {
 					'><div id='uploadBox-inner'>
                     <form enctype="multipart/form-data" action="editpics$suffix.bml$getextra" method='post' id='uploadPic'>
@@ -583,7 +583,7 @@
             };
             if ($fotobilder) {
                 $body .= "<?h1 $ML{'.uploadheader.fb'} h1?>\n";
-                $body .= "<?p " . BML::ml('.uploaddesc.fb', {'aopts' => "href='$LJ::FB_SITEROOT'", 'sitename' => $LJ::FB_SITENAME}) . " p?>\n\n";
+                $body .= "<?p " .  BML::ml('.uploaddesc.fb', {'aopts' => "href='$LJ::FB_SITEROOT'", 'sitename' => $LJ::FB_SITENAME}) . " p?>\n\n";
             } else {
                 $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
                 $body .= "<p class='detail'><a href='javascript:void(0)' onclick='toggleElement(\"upload_desc\")' id='upload_desc_link'>About Userpics</a></p>";
@@ -603,7 +603,7 @@
                                           'accesskey' => $ML{'.fromfile.key'} }) . "\n";
                 $body .= "<label for='radio_file'>$ML{'.fromfile'}</label><br />\n";
                 $body .= "<input type='file' class='file' name='userpic' size='22'";
-				if (scalar @userpics > $max) {
+				if (scalar @userpics >= $max) {
 					$body .= "disabled='disabled' ";
 				}
 				$body .= " style='margin: 0em 0em 0.5em 2em;' />\n";
@@ -612,7 +612,7 @@
                 $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
                                           'id' => 'radio_url', 'class' => 'radio', 'accesskey' => $ML{'.fromurl.key'} }) . "\n";
                 $body .= "<label for='radio_url'>$ML{'.fromurl'}</label><br />\n";
-                $body .= LJ::html_text({ 'name' => 'urlpic', class => 'text', style => 'margin: 0em 0em 0.5em 2em;', disabled => scalar @userpics > $max }) . "\n";
+                $body .= LJ::html_text({ 'name' => 'urlpic', class => 'text', style => 'margin: 0em 0em 0.5em 2em;', disabled => scalar @userpics >= $max }) . "\n";
                 $body .= "</p>\n";
                 $body .= "<p class='detail'>$ML{'.label.formats.desc'}</p>\n";
                 $body .= "</div>\n";
@@ -623,7 +623,7 @@
             $body .= "<p class='pkg'>\n";
             $body .= "<label class='left' for='keywords'>$ML{'.label.keywords'}</label>\n";
             $body .= "<span class='input-wrapper'>";
-            $body .= LJ::html_text({ 'name' => 'keywords', class => 'text', id => 'keywords', disabled => scalar @userpics > $max }) . "\n";
+            $body .= LJ::html_text({ 'name' => 'keywords', class => 'text', id => 'keywords', disabled => scalar @userpics >= $max }) . "\n";
             $body .= LJ::help_icon_html('upic_keywords') . "\n";
             $body .= "</span>";
             $body .= "</p>\n";
@@ -634,7 +634,7 @@
                 $body .= "<label class='left' for='comments'>$ML{'.label.comment'}</label>\n";
                 my $comments = $fotobilder ? $POST{'comments'} : undef;
                 $body .= "<span class='input-wrapper'>";
-                $body .= LJ::html_text({ 'name' => 'comments', 'class' => 'text', id => 'comments', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments, disabled => scalar @userpics > $max }) . "\n";
+                $body .= LJ::html_text({ 'name' => 'comments', 'class' => 'text', id => 'comments', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments, disabled => scalar @userpics >= $max }) . "\n";
                 $body .= LJ::help_icon_html('upic_comments') . "\n";
                 $body .= "</span>";
                 $body .= "</p>\n";
@@ -647,7 +647,7 @@
                                       'id' => 'make_default',
                                       'value' => '1',
                                       'selected' => @userpics ? 0 : 1,
-									  'disabled' => scalar @userpics > $max,
+									  'disabled' => scalar @userpics >= $max,
                                       'accesskey' => $ML{'.makedefault.key'} });
 
             $body .= "<label for='make_default'>$ML{'.makedefault'}</label>\n";
