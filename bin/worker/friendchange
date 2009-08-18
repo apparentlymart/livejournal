@@ -22,7 +22,7 @@ use XML::Atom::Link;
 use XML::Atom::Content;
 use XML::LibXML;
 
-sub compatibility { [ 'LJ::NewWorker::FriendChange' => '' ] };
+sub capabilities { [ 'LJ::NewWorker::FriendChange' => '' ] };
 
 my $ua;
 sub ua {
