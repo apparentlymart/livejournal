@@ -665,11 +665,11 @@
                 };
 
       #  } else {
-      if (scalar @userpics > $max) {
+      if (scalar @userpics >= $max) {
             $body .= "<div id='limit'>\n";
             my $inline;
             if ($inline .= LJ::run_hook("cprod_inline", $u, 'EditPicsMax')) {
-                $body .= $inline;
+                $body .= "";
             } else {
                 $body .= BML::ml('.error.toomanypics_standout', { num => $max });
             }
