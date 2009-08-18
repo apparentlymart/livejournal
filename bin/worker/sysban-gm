@@ -17,4 +17,17 @@ use Storable;
 sub declare { [ 'sysban_populate' => \&sysban_populate ] }
 sub work    {}
 
+sub sysban_populate {
+    my $job = shift;
+    my $args = Storable::thaw($job->arg);
+
+    # what type of ban are we loading
+    my $what = $args->{what};
+
+    # empty hashref, we'll populate the caller from this
+    my $data = {};
+    my $res = LJ::_db_sysban_populate($data, $what);
+
+    return Storable::nfreeze($res);
+}
 1;
