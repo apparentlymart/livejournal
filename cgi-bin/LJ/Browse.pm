@@ -313,7 +313,7 @@ sub load_top_level {
     return @cats;
 }
 
-# TODO Not yet tested
+# Top level categories to appear in navigation
 sub load_for_nav {
     my $class = shift;
 
@@ -334,7 +334,7 @@ sub load_for_nav {
         push @$LJ::CACHED_CATEGORIES_FOR_NAV, {
             id => $c->catid,
             pretty_name => $c->display_name,
-            url => $c->url_path,
+            url => $c->url,
         };
     }
 
@@ -924,6 +924,8 @@ sub submit_community {
     my $cat = LJ::Browse->load_by_url("/browse" . $caturl) if (defined $caturl);
     die "invalid category" unless $cat;
 
+    return if ($class->_is_community_in_pending($c->userid, $cat->catid));
+
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create category";
 
@@ -1117,5 +1119,26 @@ sub get_pending_communities {
     return $class->get_communities(@_, @status);
 }
 
+# is a community already in a category in the moderation table
+sub _is_community_in_pending {
+    my $class = shift;
+    my ($jid, $catid) = @_;
+
+    die "missing argument" unless ($jid && $catid);
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to create category";
+
+    my $sth = $dbh->prepare("SELECT pendid FROM categoryjournals_pending " .
+                    "WHERE status IN ('P','A') AND jid=? AND catid=?");
+    $sth->execute($jid, $catid);
+    die $dbh->errstr if $dbh->err;
+
+    while (my $row = $sth->fetchrow_hashref) {
+        return 1 if $row;
+    }
+
+    return 0;
+}
 
 1;
