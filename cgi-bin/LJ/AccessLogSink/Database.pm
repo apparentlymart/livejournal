@@ -80,6 +80,7 @@ sub log {
                 "clientver VARCHAR(100),".
                 "secs TINYINT UNSIGNED,".
                 "ref VARCHAR(200),".
+                "host VARCHAR(255) NOT NULL,".
                 "pid SMALLINT UNSIGNED,".
                 "cpu_user FLOAT UNSIGNED,".
                 "cpu_sys FLOAT UNSIGNED,".
