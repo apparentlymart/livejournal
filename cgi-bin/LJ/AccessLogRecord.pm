@@ -42,6 +42,7 @@ sub new {
         'browser' => $r->header_in("User-Agent"),
         'secs' => $now - $r->request_time(),
         'ref' => $r->header_in("Referer"),
+        'host' => $r->header_in("Host"),
     }, $class;
     $self->populate_gtop_info($r);
     return $self;
