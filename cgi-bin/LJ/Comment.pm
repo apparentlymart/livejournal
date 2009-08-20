@@ -138,7 +138,7 @@ sub create {
     # %talk_opts emulates parameters received from web form.
     # Fill it with nessesary options.
     my %talk_opts = map { $_ => delete $opts{$_} }
-                    qw(nodetype parenttalkid body subject props);
+                    qw(nodetype parenttalkid body subject props state);
 
     # poster and journal should be $u objects,
     # but talklib wants usernames... we'll map here

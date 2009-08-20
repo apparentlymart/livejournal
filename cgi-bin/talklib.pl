@@ -2808,8 +2808,8 @@ sub enter_comment {
 
 sub init {
     my ($form, $remote, $need_captcha, $errret) = @_;
-    my $sth;
-
+    my $sth = undef;
+    
     my $err = sub {
         my $error = shift;
         push @$errret, $error;
@@ -3184,15 +3184,21 @@ sub init {
         $subjecticon = LJ::trim(lc($form->{'subjecticon'}));
     }
 
-    # figure out whether to post this comment screened
+    # New comment state
     my $state = 'A';
-    my $screening = LJ::Talk::screening_level($journalu, int($ditemid / 256));
-    if (!$form->{editid} && ($screening eq 'A' ||
-        ($screening eq 'R' && ! $up) ||
-        ($screening eq 'F' && !($up && LJ::is_friend($journalu, $up))))) {
-        $state = 'S';
+    if ($form->{state} =~ /^[A-Z]\z/){
+        # use provided state.
+        $state = $form->{state};
+    } else {
+        # figure out whether to post this comment screened
+        my $screening = LJ::Talk::screening_level($journalu, int($ditemid / 256));
+        if (!$form->{editid} && ($screening eq 'A' ||
+            ($screening eq 'R' && ! $up) ||
+            ($screening eq 'F' && !($up && LJ::is_friend($journalu, $up))))) {
+            $state = 'S';
+        }
+        $state = 'A' if LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{user});
     }
-    $state = 'A' if LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{user});
 
     my $parent = {
         state     => $parpost->{state},

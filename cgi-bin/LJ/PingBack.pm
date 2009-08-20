@@ -45,6 +45,7 @@ sub ping_post {
                     : ($title || BML::ml("pingback.sourceURI.default_title"));
 
     my $comment = LJ::Comment->create(
+                    state        => 'S', # this comment should be 'Screened'
                     journal      => $target_entry->journal,
                     ditemid      => $target_entry->ditemid,
                     poster       => $poster_u,
