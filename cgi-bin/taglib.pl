@@ -509,6 +509,8 @@ sub _remote_satisfies_permission {
         return 0;
     } elsif ($perm eq 'friends') {
         return LJ::is_friend($u, $remote);
+    } elsif ($perm eq 'author_moder') {
+        return LJ::is_friend($u, $remote) || LJ::can_manage($remote, $u);
     } elsif ($perm eq 'private') {
         return LJ::can_manage($remote, $u);
     } elsif ($perm =~ /^group:(\d+)$/) {

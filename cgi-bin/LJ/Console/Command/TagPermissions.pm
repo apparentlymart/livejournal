@@ -49,7 +49,7 @@ sub execute {
 
     my $validate_level = sub {
         my $level = shift;
-        return $level if $level =~ /^(?:private|public|none|friends)$/;
+        return $level if $level =~ /^(?:private|public|none|friends|author_moder)$/;
 
         my $grp = LJ::get_friend_group($foru, { name => $level });
         return "group:$grp->{groupnum}" if $grp;
@@ -59,7 +59,7 @@ sub execute {
 
     $add = $validate_level->($add);
     $control = $validate_level->($control);
-    return $self->error("Levels must be one of: 'private', 'public', 'friends', or the name of a friends group.")
+    return $self->error("Levels must be one of: 'private', 'public', 'friends', 'author_moder', or the name of a friends group.")
         unless $add && $control;
 
     $foru->set_prop('opt_tagpermissions', "$add,$control");

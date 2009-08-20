@@ -63,8 +63,8 @@ body<=
             my $control = $POST{"control_level"};
 
             return LJ::bad_input($ML{'.error.invalidsettings'})
-               unless $add =~ /^(?:private|public|friends|group:\d+)$/ &&
-               $control =~ /^(?:private|public|friends|group:\d+)$/;
+               unless $add =~ /^(?:private|public|friends|group:\d+|author_moder)$/ &&
+               $control =~ /^(?:private|public|friends|group:\d+|author_moder)$/;
 
             $u->set_prop("opt_tagpermissions", "$add,$control");
         }
@@ -279,6 +279,7 @@ body<=
     } else {
         push @groups, ("friends", $ML{'.setting.members'});
         push @groups, ("private", $ML{'.setting.maintainers'});
+        push @groups, ("author_moder", $ML{'.setting.author'});
     }
 
     my $grouplist = LJ::get_friend_group($u);

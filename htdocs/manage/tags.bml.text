@@ -35,6 +35,8 @@
 
 .setting.desc.control=Who can create new tags and add/remove tags from entries?
 
+.setting.author=Entry's author and maintainers
+
 .setting.public=Any user
 
 .setting.friends=Friends only
