@@ -1064,7 +1064,9 @@ sub approve_communities {
 # Status can be: (P)ending, (A)pproved, (D)enied, (R)emoved
 sub get_communities {
     my $class = shift;
-    my ($c, @status) = @_;
+    my %opts = @_;
+    my $c = $opts{comm};
+    my @status = @{$opts{status}};
 
     # Default to Pending status
     my $status_sql = "'P'";
@@ -1074,7 +1076,8 @@ sub get_communities {
         $status_sql = "'" . $status_sql . "'";
     }
 
-    my $dbr = LJ::get_db_reader()
+    # allow read from master, used when listings were just changed
+    my $dbr = $opts{use_master} ? LJ::get_db_writer() : LJ::get_db_reader()
         or die "unable to contact global db reader to get category submissions";
     my $sth;
 
@@ -1107,16 +1110,20 @@ sub get_communities {
 
 sub get_submitted_communities {
     my $class = shift;
+    my %opts = @_;
     my @status = ('P','A','D');
+    $opts{status} = \@status;
 
-    return $class->get_communities(@_, @status);
+    return $class->get_communities(%opts);
 }
 
 sub get_pending_communities {
     my $class = shift;
+    my %opts = @_;
     my @status = ('P');
+    $opts{status} = \@status;
 
-    return $class->get_communities(@_, @status);
+    return $class->get_communities(%opts);
 }
 
 # is a community already in a category in the moderation table
@@ -1130,7 +1137,7 @@ sub _is_community_in_pending {
         or die "unable to contact global db master to create category";
 
     my $sth = $dbh->prepare("SELECT pendid FROM categoryjournals_pending " .
-                    "WHERE status IN ('P','A') AND jid=? AND catid=?");
+                    "WHERE status IN ('P','A','D') AND jid=? AND catid=?");
     $sth->execute($jid, $catid);
     die $dbh->errstr if $dbh->err;
 

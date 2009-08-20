@@ -54,7 +54,7 @@ body<=
     my @caturl_;
     my @catrem;
     # Get categories the community belongs to or is pending approval for
-    my @listings = LJ::Browse->get_submitted_communities($c);
+    my @listings = LJ::Browse->get_submitted_communities( comm => $c );
     $limit = @listings if (@listings > $limit);
 
     foreach my $i (1..$limit) {
@@ -87,7 +87,7 @@ body<=
         }
 
         # reset upper limit
-        @listings = LJ::Browse->get_submitted_communities($c);
+        @listings = LJ::Browse->get_submitted_communities( comm => $c, use_master => 1);
         $limit = (@listings > 2) ? @listings : 2;
 
         $ret .= $response;

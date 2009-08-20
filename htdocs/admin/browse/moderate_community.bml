@@ -17,6 +17,7 @@ body<=
     $title = "Moderate Community Directory Submissions";
     my $ret = "";
 
+    my $use_master = 0;
     if (LJ::did_post() and $POST{'update'}) {
         push @errors, "Invalid form submission" unless LJ::check_form_auth();
         {
@@ -43,14 +44,14 @@ body<=
             # Add journals to category
             unless (@errors) {
                 $ret .= "<span class='super notice'>Communities successfully updated.</span>";
-                return $ret;
+                $use_master = 1;
             } else {
                 $ret .= "<span class='super notice'>Communities not updated.</span>";
             }
         }
     }
 
-    my @listings = LJ::Browse->get_pending_communities(undef);
+    my @listings = LJ::Browse->get_pending_communities( use_master => $use_master );
     return $ret . "<p>No communities to moderate.</p>" unless @listings;
     @listings = sort { $a->{catid} <=> $b->{catid} } @listings;
     my @jids = map { $_->{jid} } @listings;
