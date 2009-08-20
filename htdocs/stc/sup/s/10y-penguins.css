@@ -1,0 +1,340 @@
+/*_*/
+
+/* Layout */
+BODY {
+	background:#FFF;
+	color:#000;
+	font:62.5%/1.5 Verdana, Arial, sans-serif;
+	}
+.hr {
+	height:0;
+	border-top:1px solid #DADADA;
+	margin-right:20px;
+	}
+
+/* Links */
+A:link,
+A:visited {
+	color:#AAA;
+	text-decoration:none;
+	}
+A:link:hover,
+A:visited:hover {
+	text-decoration:underline;
+	}
+.entry-comments-text A:link,
+.entry-comments-text A:visited,
+.entry-content A:link {
+	color:#F99E00;
+	}
+.entry-content A:visited {
+	color:#EEC277;
+	}
+.entry-title A:link,
+.entry-title A:visited {
+	color:#000;
+	}
+.sidebar A:link,
+.sidebar A:visited {
+	color:#000;
+	}
+.sidebar .comments:link,
+.sidebar .comments:visited {
+	color:#AAA;
+	}
+
+/* Header */
+.header {
+	position:relative;
+	min-height:185px;
+	border-bottom:1px solid #DADADA;
+	margin-top:30px;
+	background:url(../i/10y-penguins/penguins.jpg) 100% 5px no-repeat;
+	}
+	.column-right .header {
+		padding-right:435px;
+		padding-left:20px;
+		}
+	.column-left .header {
+		padding-right:20px;
+		padding-left:325px;
+		background-position:0 5px;
+		}
+.header H1 {
+	margin-top:1.8em;
+	}
+.header H2 {
+	font-size:2.9em;
+	font-weight:normal;
+	}
+.header H3 {
+	margin-bottom:60px;
+	font-size:2em;
+	font-weight:normal;
+	}
+.header .u-wrap {
+	float:left;
+	display:inline;
+	margin:-10px 10px 0 0;
+	text-align:center;
+	}
+	.header .u-wrap .userpic {
+		position:relative;
+		margin-bottom:-1.8em;
+		//display:inline;
+		zoom:1;
+		}
+	.header .u-wrap IMG {
+		padding-bottom:.3em;
+		}
+.header .nav {
+	clear:left;
+	margin:60px 0 30px;
+	}
+.column-right .header .nav {
+	margin-right:-400px;
+	}
+.column-left .header .nav {
+	margin-left:0;
+	}
+	.header .nav .item-selected,
+	.header .nav .item-selected A:link,
+	.header .nav .item-selected A:visited {
+		color:#F99E00;
+		}
+	.header .nav .item {
+		display:inline;
+		padding-right:1.3em;
+		font-size:1.8em;
+		}
+		.header .nav .item A:link:hover,
+		.header .nav .item A:visited:hover {
+			text-decoration:none;
+			color:#F99E00;
+			}
+.header .nav-sub {
+	position:absolute;
+	top:30px;
+	right:200px;
+	width:220px;
+	}
+.column-left .header .nav-sub {
+	right:auto;
+	left:15px;
+	}
+	.header .nav-sub .item-rss A {
+		padding:0 0 3px 21px;
+		background:url(../i/10y-penguins/icons.gif) 0 -200px no-repeat;
+		}
+	.header .nav-sub .item-addfriend {
+		padding-bottom:.5em;
+		}
+	.header .nav-sub .item-addfriend A {
+		padding:0 0 3px 21px;
+		background:url(../i/10y-penguins/icons.gif) 0 0 no-repeat;
+		}
+
+/* Content */
+.content {
+	margin:4px -9999px 0 0;
+	}
+	.content-inner-in {
+		padding:0 0 0 20px;
+		overflow:hidden;
+		}
+.column-right .content-inner {
+	border-right:1px solid #DADADA;
+	margin-right:300px;
+	margin-left:0;
+	}
+	.column-right .content-inner-in {
+		border:solid #DADADA;
+		border-width:1px 1px 0 0;
+		margin-right:4px;
+		}
+.column-left .content-inner {
+	border-left:1px solid #DADADA;
+	margin-right:0;
+	margin-left:300px;
+	}
+	.column-left .content-inner-in {
+		border:solid #DADADA;
+		border-width:1px 0 0 1px;
+		margin-left:4px;
+		}
+
+/* Entry */
+.entry-wrap {
+	padding:0 0 40px;
+	}
+.content .entry .entry-title {
+	font-size:1.6em;
+	}
+.content .entry .entry-date {
+	color:#AAA;
+	}
+.content .entry .entry-text {
+	padding-right:20px;
+	}
+	.content .entry .entry-text .metadata {
+		font-size:1em;
+		}
+		.content .entry .entry-text .metadata DT {
+			font-weight:normal;
+			color:#AAA;
+			}
+	.entry-text .ljtags {
+		color:#AAA;
+		}
+.content .entry .entrymenu {
+	float:left;
+	padding-bottom:0;
+	font-size:1.1em;
+	}
+	.entrymenu A:link,
+	.entrymenu A:visited {
+		color:#000;
+		}
+.content .entry .entrysubmenu {
+	float:right;
+	padding-right:20px;
+	text-align:right;
+	font-size:1.1em;
+	}
+	.entrysubmenu LI {
+		display:inline;
+		padding-left:.6em;
+		white-space:nowrap;
+		}
+		.content .entry .postcomment A {
+			padding:0 0 3px 20px;
+			background:url(../i/10y-penguins/icons.gif) 0 -400px no-repeat;
+			}
+
+/* Sidebar */
+.sidebar {
+	margin-top:4px;
+	}
+	.sidebar .sidebar-inner {
+		width:300px;
+		border:solid #DADADA;
+		margin:0;
+		overflow:visible;
+		}
+	.column-right .sidebar-inner {
+		border-width:1px 0 0 1px;
+		}
+	.column-left .sidebar-inner {
+		border-width:1px 1px 0 0;
+		}
+.sidebar-block {
+	margin:0;
+	}
+.column-right .sidebar-block {
+	padding:0 0 2.8em 5px;
+	border-left:1px solid #DADADA;
+	margin-left:-6px;
+	}
+.column-left .sidebar-block {
+	padding:0 5px 2.8em 0;
+	border-right:1px solid #DADADA;
+	margin-right:-6px;
+	}
+	.sidebar-links DD, .sidebar-summary LI {
+		display:block;
+		padding:0 0 0 12px;
+		margin:0 0 1em;
+		list-style:none;
+		background:url(../i/10y-penguins/icons.gif) 0 -591px no-repeat;
+		}
+.column-right .sidebar-cal,
+.column-right .sidebar-links,
+.column-right .sidebar-tags,
+.column-right .sidebar-custom,
+.column-right .sidebar-summary,
+.column-right .sidebar-powered {
+	padding:0 15px 2.8em 21px;
+	}
+.column-left .sidebar-cal,
+.column-left .sidebar-links,
+.column-left .sidebar-tags,
+.column-left .sidebar-custom,
+.column-left .sidebar-summary,
+.column-left .sidebar-powered {
+	padding:0 21px 2.8em 15px;
+	}
+	.sidebar .calendar-wrap {
+		font-size:1em;
+		}
+	.sidebar-cal TABLE CAPTION,
+	.sidebar-block DT {
+		text-align:right;
+		font-size:1.2em;
+		font-weight:bold;
+		}
+	.sidebar-cal TABLE CAPTION A:link,
+	.sidebar-cal TABLE CAPTION A:visited {
+		color:#000;
+		}
+	.sidebar-tags .tags {
+		text-align:left;
+		}
+	.sidebar-powered {
+		text-align:right;
+		}
+/* Calendar */
+.sidebar .calendar-wrap {
+	padding-right:40px;
+	}
+	.sidebar CAPTION A {
+		position:relative;
+		left:40px;
+		}
+	.calendar-wrap TABLE THEAD TH {
+		font-size:1.1em;
+		color:#A0A0A0;
+		}
+	.calendar-wrap TABLE TBODY TD {
+		font-weight:normal;
+		font-size:1.2em;
+		}
+		.calendar-wrap TABLE TBODY TD A:link,
+		.calendar-wrap TABLE TBODY TD A:visited {
+			color:#F99E00;
+			}
+
+/* Comments */
+.comment-wrap .even {
+	background:#E0E0E0;
+	}
+.comment-wrap .odd {
+	background:#EFEFEF;
+	}
+/* Footer */
+.footer {
+	top:-1px;
+	border-top:1px solid #DADADA;
+	}
+	.footer .txtad {
+		height:300px;
+		}
+	.column-right .footer .txtad {
+		right:0;
+		//right:-1px;
+		padding-left:5px;
+		border-left:1px solid #DADADA;
+		}
+	.column-left .footer .txtad {
+		left:0;
+		padding-right:5px;
+		border-right:1px solid #DADADA;
+		}
+
+/* Page nav */
+.content .page-nav {
+	padding:2.5em 20px 2.5em 0;
+	}
+	.content .page-nav A:link,
+	.content .page-nav A:visited {
+		color:#F99E00;
+		}
