@@ -404,7 +404,7 @@ function createDeleteFunction (ae, dItemid) {
                 finalHeight -= 15;
             }
 
-            if (remoteUser != com.u && canAdmin) {
+            if (remoteUser != "" && remoteUser != com.u) {
                 lbl = "ljpopdel" + dItemid + "spam";
                 inHTML += "<input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>Mark this comment as spam</label><br />";
             } else {
