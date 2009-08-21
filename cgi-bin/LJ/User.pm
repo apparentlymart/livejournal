@@ -1047,6 +1047,7 @@ sub _logout_common {
     LJ::User->set_remote(undef);
     delete $BML::COOKIE{'BMLschemepref'};
     eval { BML::set_scheme(undef); };
+    LJ::run_hooks("user_logout");
 }
 
 # returns a new LJ::Session object, or undef on failure
