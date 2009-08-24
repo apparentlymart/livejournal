@@ -5,9 +5,8 @@ use warnings;
 
 use lib "$ENV{LJHOME}/cgi-bin";
 
-use LJ::Worker::Reminders;
+use LJ::NewWorker::Reminders;
 
 require 'ljlib.pl';
-
-LJ::Worker::Reminders->new()->run();
+LJ::NewWorker::Reminders->new()->start();
 
