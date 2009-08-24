@@ -320,3 +320,10 @@ Must be removed after implementation of Framework! */
         filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
         opacity:.5;
         }
+
+/* Block for adding HTML into headers.
+It must be invisible, use it only for reskining */
+.b-reskining-header {
+	display: none;
+	}
+
