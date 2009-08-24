@@ -10,11 +10,13 @@ body<=
     return "<?h1 Error h1?><?p You do not have the necessary privilege (supporthelp) to use this page. p?>"
         unless LJ::check_priv($remote, 'supporthelp');
 
+    my @SORTED_CLUSTERS = sort {$a <=> $b}(@LJ::CLUSTERS);
     my $ret;
-    foreach my $cid (@LJ::CLUSTERS) {
+
+    foreach my $cid (@SORTED_CLUSTERS) {
         my $name = LJ::get_cluster_description($cid) || 'no name';
 
-        $ret .= "<b>$name</b>: ";
+        $ret .= "<b>$cid - $name</b>: ";
 
         my $check = 0;
         if ($LJ::READONLY_CLUSTER{$cid}) {
