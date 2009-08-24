@@ -5,6 +5,10 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
+    use JSON;
+
+    my $max_alias_length = 400;
+
     $title = $ML{'.title'};
 
     my $remote = LJ::get_remote();
@@ -15,6 +19,7 @@ body<=
     return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
 
+    my $alias_enable = $u->get_cap('aliases');
     my $getextra = $authas ne $remote->user ? "?authas=$authas" : "";
 
     my $submit_msg;
@@ -27,6 +32,8 @@ body<=
         # unban users before banning users so that in the case of a collision (i.e. a particular
         # user is being banned and unbanned at the same time), that user is left banned
 
+        my $aliases = jsonToObj($u->prop('aliases')) || {};
+        
         # unban users
         if ($POST{unban_user}) {
             # first remove any users from the list that are not valid users
@@ -43,6 +50,15 @@ body<=
             $u->unban_user_multi(@unbanlist) if @unbanlist;
         }
 
+        if ($POST{unban_users_btn}) {
+            foreach my $new_alias (keys %POST) {
+                my ($uid) = $new_alias =~ m#new_alias_(\d+)#;
+                next unless $uid;
+                $alias = substr($POST{$new_alias}, 0, $max_alias_length)
+                $aliases->{$uid} = $alias if $alias_enable && LJ::load_userid($uid);
+            }
+        }
+
         # ban users
         if ($POST{ban_list}) {
             # first remove any users from the list that are not valid users
@@ -54,8 +70,12 @@ body<=
                 my $banu = LJ::load_user($banusername);
                 push @banlist, $banu->id if $banu;
                 push @cantbanlist, $banusername unless $banu;
-            }
 
+                ## set alias for banuser if alias was set, aliases available and banuser is exist
+                $alias = substr($POST{ban_note}, 0, $max_alias_length)
+                $aliases->{$banu->id} = $POST{ban_note} if $alias_enable && $POST{ban_note} && $banu;
+            }
+        
             # make sure the user isn't over the max number of bans allowed
             my $banned = LJ::load_rel_user($u, 'B') || [];
             if (scalar @$banned >= ($LJ::MAX_BANS || 5000)) {
@@ -69,6 +89,13 @@ body<=
                 $submit_msg .= "<?errorbar The following usernames are not valid: " .
                     join(', ', @cantbanlist) . " errorbar?>";
             }
+        }
+
+        my $ready_aliases = objToJson($aliases);
+        if (length $ready_aliases < 65536) {
+            $u->set_prop( aliases => $ready_aliases ) if $alias_enable;
+        } else {
+            $submit_msg = "<?errorbar $ML{'.error.too.long'} errorbar?>";
         }
 
         $submit_msg = "<?warningbar $ML{'.success'} warningbar?>" unless $submit_msg;
@@ -94,6 +121,13 @@ body<=
         cols => 50,
     });
 
+    $ret .= "<br/>";
+    $ret .= $ML{'.intro.ban.note.text'} . LJ::html_text ( { name => 'ban_note', value => $ML{'.intro.ban.note.value'} } ) if $alias_enable && !$u->is_community;
+    $ret .= "<br/>" . LJ::html_submit ( 'ban_users_btn', $ML{'.btn.ban_users'} );
+    $ret .= "</form>";
+
+    $ret .= "<form action='$LJ::SITEROOT/manage/banusers.bml$getextra' method='post'>";
+    $ret .= LJ::form_auth();
     # unban users
     $ret .= "<h2 style='margin-top: 20px;'>$ML{'.header.unban'}</h2>";
     my $banned = LJ::load_rel_user($u, 'B');
@@ -111,11 +145,11 @@ body<=
                     } 
                 }", selected => 0 });
         $ret .= "</th><th>$ML{'/community/members.bml.key.user'}</th>";
-		$ret .= "<th>$ML{'.intro.unban.alias'}</th></tr>\n" if (not $u->is_community);
+		$ret .= "<th>$ML{'.intro.unban.alias'}</th>\n" if !$u->is_community && $alias_enable;
+        $ret .= "</tr>";
 
         my $rc = 0;
 
-        my $alias_enable = $u->prop('aliases');
         foreach my $banuid (@$banned) {
             my $bu = $us->{$banuid};
             next unless $bu;
@@ -127,8 +161,8 @@ body<=
                 value => $bu->id,
             }) . "</td>";
             $ret .= "<td>" . $bu->ljuser_display . "</td>";
-			if (not $u->is_community) {
-            	$ret .= "<td>".LJ::ehtml(LJ::ljuser_alias($bu->{user}))."</td>" if $alias_enable;
+			if (not $u->is_community && $alias_enable) {
+            	$ret .= "<td>".LJ::html_text( { name => 'new_alias_'.$bu->id, value => LJ::ehtml(LJ::ljuser_alias($bu->{user})) })."</td>" if $alias_enable;
 			}
             $ret .= "</tr>";
         }
@@ -137,7 +171,7 @@ body<=
         $ret .= $u->is_community ? "<p>$ML{'.intro.unban.comm.none'}</p>" : "<p>$ML{'.intro.unban.self.none'}</p>";
     }
 
-    $ret .= "<p>" . LJ::html_submit($ML{'.btn.banunban'}) . "</p>";
+    $ret .= "<p>" . LJ::html_submit('unban_users_btn', $ML{'.btn.banunban'}) . "</p>";
     $ret .= "</form>";
 
     return $ret;

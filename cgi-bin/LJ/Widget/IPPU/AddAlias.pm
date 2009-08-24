@@ -44,7 +44,8 @@ sub render_body {
     $body .= $class->html_hidden(
                 foruser => $opts{foruser},
              );
-    $body .= "<p>" . $class->html_submit(BML::ml('widget.alias.aliaschange')) ;
+
+    $body .= "<p>" . $class->html_submit("aliaschange", BML::ml('widget.alias.aliaschange')) . " " . $class->html_submit("aliasdelete", BML::ml('widget.alias.aliasdelete')) ;
 
     $body .= "<span class='helper'>" . BML::ml('widget.addalias.display.helper', {aopts => "href='$LJ::SITEROOT/manage/notes.bml'"}) . "</span>";
     $body .= "</div>";
@@ -75,6 +76,7 @@ sub handle_post {
     my $is_edit = 0;
     $is_edit = 1 if $aliases->{$post->{foruser}} ne '';
     my $prepared_alias = substr($post->{alias}, 0, 400);
+    $prepared_alias = '' if $post->{'deletealias'} ne '';
     $aliases->{$user_for_alias->{userid}} = $prepared_alias if $prepared_alias;
     delete $aliases->{$user_for_alias->{userid}} unless $prepared_alias;
 

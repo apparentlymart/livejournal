@@ -1,7 +1,11 @@
 <?_code
 use strict;
 
+use JSON;
+
 use vars qw($body $title $windowtitle %GET %POST);
+
+my $max_alias_length = 400; # max allowed chars(?) or bytes in alias
 
  my $print_with_ad = sub {
     my $str = shift;
@@ -83,7 +87,19 @@ use vars qw($body $title $windowtitle %GET %POST);
 
      if ($res{'success'} eq "OK")
      {
-         $body = LJ::get_ads({ 
+        if ($remote->get_cap ('paid')) {
+            ## user has been added. setting alias for him
+            my $user_alias = $POST{'user_note'};
+            my $aliases = jsonToObj($remote->prop('aliases')) || {};
+            $user_alias = substr($user_alias, 0, $max_alias_length);
+            $aliases->{$userid} = $user_alias;
+            my $ready_aliases = objToJson($aliases);
+            if (length $ready_aliases < 65536) {
+                $remote->set_prop( aliases => $ready_aliases );
+            }
+        }
+        
+         $body .= LJ::get_ads({ 
             location    => 'bml.friends.add/main', 
             ljadwrapper => 1,
             below_ad    => LJ::CProd->full_box_for($remote, width => 300) 
@@ -183,6 +199,21 @@ use vars qw($body $title $windowtitle %GET %POST);
 
 # users that aren't visible can only be removed, not modified
 if ($u->is_visible) {
+
+    ## Add user alias while user's friending
+    if ($remote->get_cap ('paid')) {
+        $body .= "<i>" . $ML{'.optional'}. ":</i> " . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . "<br/>";
+        $body .= "<blockqoute>";
+        $body .= LJ::html_text ( { name => 'user_note' } );
+        $body .= "</blockqoute><br/>";
+    } else {
+        ## TODO!!! must set to gray font text
+        $body .= "<i>" . $ML{'.optional'}. ":</i> " . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . "<br/>";
+        $body .= "<blockqoute>";
+        $body .= LJ::html_text ( { 'disabled', name => 'user_note' } );
+        $body .= "</blockqoute><br/>";
+        $body .= LJ::run_hook("upgrade_link", $u, "paid") . BML::ml('.hint.paid.text', {aopts => "href='$LJ::SITEROOT/manage/account/'" }) unless $remote->get_cap ('paid');
+    }
 
  ## let them pick friend groups
  my $err;

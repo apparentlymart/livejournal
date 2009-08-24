@@ -12,11 +12,15 @@
 
 .done.btn.savechanges=Save changes
 
+.done.btn.delete=Delete selected notes
+
 .error.user_not_exist=User "[[username]]" is not exist.
 
 .error.yourself=You cannot add a note to yourself.
 
 .error.too.long=You've reached the maximum number of the notes.
+
+.error.override_old_value=Old note for "%username%" will be deleted!
 
 .not.allowed=This feature is only available to <a [[aopts]]>Paid account</a> users.
 

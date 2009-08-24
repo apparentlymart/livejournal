@@ -78,11 +78,17 @@
 
 .error3.title=Modify Friend
 
+.error.too.long=You've reached the maximum number of the notes.
+
 .groups.header=Friends Groups
 
 .groups.nogroup=No friend groups set up.
 
 .groups.text1=<i>Optional:</i> Include in one or more custom friends groups.
+
+.hint.paid.text=This feature is available only for <a [[aopts]]>Paid Account Level</a> users.
+
+.note.text=set note for [[username]] (read <a [[aopts]]>FAQ</a> for details):
 
 .optional=Optional
 
@@ -93,4 +99,5 @@
 .remove.text2=[[ljuser]] has now been removed from your friend list.  You can view your updated  <a [[aopts]]>friends page</a> or go back to your <a [[aopts2]]>profile</a>.
 
 .remove.title=Friend Removed!
+
 

@@ -1,8 +1,12 @@
 ;; -*- coding: utf-8 -*-
 
-.btn.banunban=Ban and Unban Users
+.btn.banunban=Save changes and unban selected
+
+.btn.ban_users=Ban users
 
 .error.toomanybans=Banning the user(s) that you specified will bring you over the maximum number of allowed bans. Please adjust your lists and try again. Any users that you chose to unban have been unbanned successfully.
+
+.error.too.long=You've reached the maximum number of the notes.
 
 .header.ban=Ban Users
 
@@ -11,6 +15,10 @@
 .intro.ban.comm=To ban users from commenting in your community, type in their usernames below. Separate multiple usernames with commas.
 
 .intro.ban.self=To ban users from commenting in your journal, type in their usernames below. Separate multiple usernames with commas.
+
+.intro.ban.note.text=Set note for all this users while banning:
+
+.intro.ban.note.value=enter note
 
 .intro.unban.alias=Notes
 
