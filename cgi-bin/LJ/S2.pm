@@ -3595,6 +3595,7 @@ sub _Entry__get_link
     my $remote = LJ::get_remote();
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
     my $journalu = LJ::load_user($journal);
+    my $entry = LJ::Entry->new($journalu, ditemid => $this->{itemid});
 
     if ($key eq "edit_entry") {
         return $null_link unless $remote && ($remote->{'user'} eq $journal ||
@@ -3605,7 +3606,7 @@ sub _Entry__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
     }
     if ($key eq "edit_tags") {
-        return $null_link unless $remote && LJ::Tags::can_add_tags(LJ::load_user($journal), $remote);
+        return $null_link unless $remote && LJ::Tags::can_add_entry_tags($remote, $entry);
         return LJ::S2::Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_edit_tags"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 22, 20));
@@ -3637,7 +3638,6 @@ sub _Entry__get_link
     if ($key eq "flag") {
         return $null_link unless LJ::is_enabled("content_flag");
 
-        my $entry = LJ::Entry->new($journalu, ditemid => $this->{itemid});
         return $null_link unless $remote && $remote->can_see_content_flag_button( content => $entry );
         return LJ::S2::Link(LJ::ContentFlag->adult_flag_url($entry),
                             $ctx->[S2::PROPS]->{"text_flag"},

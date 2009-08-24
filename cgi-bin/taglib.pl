@@ -472,6 +472,36 @@ sub can_add_tags {
 }
 
 # <LJFUNC>
+# name: LJ::Tags::can_add_entry_tags
+# class: tags
+# des: Determines if user is allowed to add tags to (edit tags of) an individual entry.
+# args: remote, entry
+# des-remote: User id or object of account performing the action
+# des-entry: LJ::Entry object
+# returns: 1 if allowed, 0 if not, undef on error
+# </LJFUNC>
+sub can_add_entry_tags {
+    return undef if $LJ::DISABLED{tags};
+
+    my $remote = LJ::want_user(shift);
+    my $entry = shift;
+    return unless $remote && $entry;
+    
+    ## generic case: if $remote can add tags to the entire journal of the entry
+    my $journal = $entry->journal;
+    return 1 if LJ::Tags::can_add_tags($journal, $remote);
+    
+    ## special case: $remote is author of the $entry in a community,
+    ## and community settings allows 'author or maintainters' to change tags 
+    my $perms = LJ::Tags::get_permission_levels($journal);
+    return 1 if $perms->{add} eq 'author_moder' && $remote==$entry->poster;
+    
+    ## not allowed.
+    return;
+}
+
+
+# <LJFUNC>
 # name: LJ::Tags::can_control_tags
 # class: tags
 # des: Determines if one account is allowed to control (add, edit, delete) the tags of another.
@@ -509,8 +539,6 @@ sub _remote_satisfies_permission {
         return 0;
     } elsif ($perm eq 'friends') {
         return LJ::is_friend($u, $remote);
-    } elsif ($perm eq 'author_moder') {
-        return LJ::is_friend($u, $remote) || LJ::can_manage($remote, $u);
     } elsif ($perm eq 'private') {
         return LJ::can_manage($remote, $u);
     } elsif ($perm =~ /^group:(\d+)$/) {
@@ -702,7 +730,8 @@ sub update_logtags {
 
     # get access levels
     my $can_control = LJ::Tags::can_control_tags($u, $remote);
-    my $can_add = $can_control || LJ::Tags::can_add_tags($u, $remote);
+    my $entry = LJ::Entry->new($u, jitemid=>$jitemid);
+    my $can_add = $can_control || LJ::Tags::can_add_entry_tags($remote, $entry);
 
     # bail out early if we can't do any actions
     return undef unless $can_add || $opts->{force};

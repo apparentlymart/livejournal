@@ -10,7 +10,7 @@ sub desc { "Set tagging permission levels for an account." }
 
 sub args_desc { [
                  'community' => "Optional; community to change permission levels for.",
-                 'add level' => "Accounts at this level can add existing tags to entries. One of 'public', 'friends', 'private', or a custom friend group name.",
+                 'add level' => "Accounts at this level can add existing tags to entries. One of 'public', 'friends', 'private', 'author_moder' or a custom friend group name.",
                  'control level' => "Accounts at this level can do everything: add, remove, and create new ones. Value is one of 'public', 'friends', 'private', or a custom friend group name.",
                  ] }
 
@@ -61,6 +61,10 @@ sub execute {
     $control = $validate_level->($control);
     return $self->error("Levels must be one of: 'private', 'public', 'friends', 'author_moder', or the name of a friends group.")
         unless $add && $control;
+    return $self->error("Only <add level> can be 'author_moder'") 
+        if $control eq 'author_moder';
+    return $self->error("'author_moder' level can be applied to communities only")
+        if $add eq 'author_moder' && !$foru->is_community;
 
     $foru->set_prop('opt_tagpermissions', "$add,$control");
 

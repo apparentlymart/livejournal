@@ -64,7 +64,7 @@ body<=
 
             return LJ::bad_input($ML{'.error.invalidsettings'})
                unless $add =~ /^(?:private|public|friends|group:\d+|author_moder)$/ &&
-               $control =~ /^(?:private|public|friends|group:\d+|author_moder)$/;
+               $control =~ /^(?:private|public|friends|group:\d+)$/;
 
             $u->set_prop("opt_tagpermissions", "$add,$control");
         }
@@ -279,13 +279,13 @@ body<=
     } else {
         push @groups, ("friends", $ML{'.setting.members'});
         push @groups, ("private", $ML{'.setting.maintainers'});
-        push @groups, ("author_moder", $ML{'.setting.author'});
     }
 
     my $grouplist = LJ::get_friend_group($u);
-    push @groups,  map  { "group:" . $_, $grouplist->{$_}->{groupname} }
-    sort { $grouplist->{$a}->{groupname} cmp $grouplist->{$b}->{groupname} }
-    keys %$grouplist;
+    push @groups,  
+        map  { "group:" . $_, $grouplist->{$_}->{groupname} }
+        sort { $grouplist->{$a}->{groupname} cmp $grouplist->{$b}->{groupname} }
+        keys %$grouplist;
 
     my $security = LJ::Tags::get_permission_levels($u);
 
@@ -293,6 +293,14 @@ body<=
         . LJ::html_select({ name => 'control_level', selected => $security->{control} }, @groups)
         . " $ML{'.setting.desc.control'} </div>";
 
+
+    ## security level "author_moder" (entry's tags can be changed by entry's author or
+    ## by moderator or a community can be applied to communities only
+    if ($u->is_community) {
+        # insert after (public, friends, private)
+        splice @groups, 3*2, 0, ("author_moder", $ML{'.setting.author'});
+    }
+    
     $ret .= "<div class='tagsec'>"
             . LJ::html_select({ name => 'add_level', selected => $security->{add} }, @groups)
             . " $ML{'.setting.desc.add'} </div>";

@@ -31,6 +31,7 @@ body<=
     my $jitemid = int($ditemid / 256);
     return $err->($ML{'.invalid.entry'}) unless $jitemid;
 
+    my $entry = LJ::Entry->new($u, ditemid=>$ditemid);
     my $logrow = LJ::get_log2_row($u, $jitemid);
     return $err->($ML{'.invalid.entry'}) unless $logrow;
     return $err->($ML{'.invalid.entry'}) unless $logrow->{anum} == $anum;
@@ -97,7 +98,8 @@ body<=
     $ret .= '<form method="POST" action="/edittags.bml" id="edit_tagform">';
     $ret .= LJ::form_auth();
     $ret .= "<td class='sep'>";
-    if ( LJ::Tags::can_add_tags($u, $remote) ) {
+    my $can_remote_add_entry_tags = LJ::Tags::can_add_entry_tags($remote, $entry);
+    if ($can_remote_add_entry_tags) {
         $ret .= LJ::html_text(
             {
                 name  => 'edittags',
@@ -130,7 +132,7 @@ body<=
     }
 
     $ret .= "<br /><br />";
-    $ret .= "$ML{'.permissions.add.yes'}<br />" if LJ::Tags::can_add_tags($u, $remote);
+    $ret .= "$ML{'.permissions.add.yes'}<br />" if $can_remote_add_entry_tags;
     $ret .= "$ML{'.permissions.control.yes'}<br />" if LJ::Tags::can_control_tags($u, $remote);
     $ret .= BML::ml('.view', { aopts => 'href="' . LJ::journal_base($u) . "/$ditemid.html" . '"' });
     $ret .= "</td></tr>";
