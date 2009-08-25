@@ -291,7 +291,9 @@ sub create_view_rss
     # header
     $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
     $ret .= LJ::run_hook("bot_director", "<!-- ", " -->") . "\n";
-    $ret .= "<rss version='2.0' xmlns:lj='http://www.livejournal.org/rss/lj/1.0/' xmlns:media='http://search.yahoo.com/mrss/'>\n";
+    $ret .= "<rss version='2.0' xmlns:lj='http://www.livejournal.org/rss/lj/1.0/' " .
+            "xmlns:media='http://search.yahoo.com/mrss/' " .
+            "xmlns:atom10='http://www.w3.org/2005/Atom'>\n";
 
     # channel attributes
     $ret .= "<channel>\n";
@@ -306,6 +308,10 @@ sub create_view_rss
     $ret .= "  <lj:journaltype>" . $u->journaltype_readable . "</lj:journaltype>\n";
     $ret .= "  <copyright>" . $copyright . "</copyright>\n" if $copyright;
     # TODO: add 'language' field when user.lang has more useful information
+
+    foreach my $hub (@LJ::HUBBUB_HUBS) {
+        $ret .= "  <atom10:link rel='hub' href='" . LJ::exml($hub) . "' />\n";
+    }
 
     ### image block, returns info for their current userpic
     if ($u->{'defaultpicid'}) {
@@ -412,7 +418,7 @@ sub create_view_atom
         my ( $rel, $type, $href, $title ) = @_;
         my $link = XML::Atom::Link->new( Version => 1 );
         $link->rel($rel);
-        $link->type($type);
+        $link->type($type) if $type;
         $link->href($href);
         $link->title( $title ) if $title;
         return $link;
@@ -478,6 +484,10 @@ sub create_view_atom
                 'Create a new entry'
             )
         ) if $opts->{'apilinks'};
+
+        foreach my $hub (@LJ::HUBBUB_HUBS) {
+            $feed->add_link($make_link->('hub', undef, $hub));
+        }
     }
 
     my $posteru = LJ::load_userids( map { $_->{posterid} } @$cleanitems);

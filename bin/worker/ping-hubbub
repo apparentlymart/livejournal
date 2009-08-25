@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+use LJ::NewWorker::TheSchwartz;
+use TheSchwartz::Worker::PubSubHubbubPublish;
+
+LJ::NewWorker::TheSchwartz::PubSubHubbubPublish->start();
+
+package LJ::NewWorker::TheSchwartz::PubSubHubbubPublish;
+use base 'LJ::NewWorker::TheSchwartz';
+sub capabilities { [ 'TheSchwartz::Worker::PubSubHubbubPublish' => '' ] }
+
+1;
