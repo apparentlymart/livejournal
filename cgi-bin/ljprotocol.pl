@@ -1561,26 +1561,7 @@ sub postevent
     push @jobs, LJ::EventLogRecord::NewEntry->new($entry)->fire_job;
 
     # PubSubHubbub Support
-    unless ($LJ::DISABLED{'hubbub'}) {
-        foreach my $hub (@LJ::HUBBUB_HUBS) {
-            my $make_hubbub_job = sub {
-                my $type = shift;
-
-                my $topic_url = $uowner->journal_base . "/data/$type";
-                return TheSchwartz::Job->new(
-                    funcname => 'TheSchwartz::Worker::PubSubHubbubPublish',
-                    arg => {
-                        hub => $hub,
-                        topic_url => $topic_url,
-                    },
-                    coalesce => $hub,
-                );
-            };
-
-            push @jobs, $make_hubbub_job->("rss");
-            push @jobs, $make_hubbub_job->("atom");
-        }
-    }
+    LJ::Feed::generate_hubbub_jobs($uowner, \@jobs);
 
     my $sclient = LJ::theschwartz();
     if ($sclient && @jobs) {
@@ -1957,7 +1938,17 @@ sub editevent
 
     my $entry = LJ::Entry->new($ownerid, jitemid => $itemid);
     LJ::EventLogRecord::EditEntry->new($entry)->fire;
-    LJ::run_hooks("editpost", $entry);
+    my @jobs; # jobs to insert into TheSchwartz
+    LJ::run_hooks("editpost", $entry, \@jobs);
+
+    # PubSubHubbub Support
+    LJ::Feed::generate_hubbub_jobs($uowner, \@jobs);
+
+    my $sclient = LJ::theschwartz();
+    if ($sclient && @jobs) {
+        my @handles = $sclient->insert_jobs(@jobs);
+        # TODO: error on failure?  depends on the job I suppose?  property of the job?
+    }
 
     return $res;
 }

@@ -1069,5 +1069,31 @@ sub create_view_comments
     return $ret;
 }
 
+sub generate_hubbub_jobs {
+    my $u = shift;
+    my $joblist = shift;
+
+    return if $LJ::DISABLED{'hubbub'};
+
+    foreach my $hub (@LJ::HUBBUB_HUBS) {
+        my $make_hubbub_job = sub {
+            my $type = shift;
+
+            my $topic_url = $u->journal_base . "/data/$type";
+            return TheSchwartz::Job->new(
+                funcname => 'TheSchwartz::Worker::PubSubHubbubPublish',
+                arg => {
+                    hub => $hub,
+                    topic_url => $topic_url,
+                },
+                coalesce => $hub,
+            );
+        };
+
+        push @$joblist, $make_hubbub_job->("rss");
+        push @$joblist, $make_hubbub_job->("atom");
+    }
+}
+
 
 1;
