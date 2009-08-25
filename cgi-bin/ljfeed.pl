@@ -309,8 +309,10 @@ sub create_view_rss
     $ret .= "  <copyright>" . $copyright . "</copyright>\n" if $copyright;
     # TODO: add 'language' field when user.lang has more useful information
 
-    foreach my $hub (@LJ::HUBBUB_HUBS) {
-        $ret .= "  <atom10:link rel='hub' href='" . LJ::exml($hub) . "' />\n";
+    unless ($LJ::DISABLED{'hubbub_discovery'}) {
+        foreach my $hub (@LJ::HUBBUB_HUBS) {
+            $ret .= "  <atom10:link rel='hub' href='" . LJ::exml($hub) . "' />\n";
+        }
     }
 
     ### image block, returns info for their current userpic
@@ -485,8 +487,10 @@ sub create_view_atom
             )
         ) if $opts->{'apilinks'};
 
-        foreach my $hub (@LJ::HUBBUB_HUBS) {
-            $feed->add_link($make_link->('hub', undef, $hub));
+        unless ($LJ::DISABLED{'hubbub_discovery'}) {
+            foreach my $hub (@LJ::HUBBUB_HUBS) {
+                $feed->add_link($make_link->('hub', undef, $hub));
+            }
         }
     }
 
