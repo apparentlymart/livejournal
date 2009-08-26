@@ -5,6 +5,7 @@ no warnings 'uninitialized';
 use Class::Autouse qw(
                       LJ::ConvUTF8
                       HTML::TokeParser
+                      HTML::Parser
                       );
 
 # <LJFUNC>
@@ -247,7 +248,7 @@ sub ejs_all
 sub strip_html {
     my $str = shift;
     my $opts = shift || {};
-
+=head
     $str =~ s/\<lj user\=['"]?([\w-]+)['"]?\>/$1/g;   # "
     if ($opts->{use_space}) {
         $str =~ s/\<([^\<])+\>/ /g;
@@ -255,6 +256,22 @@ sub strip_html {
         $str =~ s/\<([^\<])+\>//g;
     }
     return $str;
+=cut
+    my $p = HTML::Parser->new(api_version => 3,
+                handlers => {
+                    text  => [sub { $_[0]->{res} .= $_[1] }, 'self, text'], # concat plain text
+                    # handle tags
+                    start => [sub { $_[0]->{res} .= $_[2]->{user} if $_[1] eq 'lj'; # <lj user="username" title=".."> -> username
+                                    $_[0]->{res} .= ' ' if $opts->{use_space} and $_[1] ne 'lj'; # for other tags add spaces if needed.
+                                   },
+                                   'self, tagname, attr, text'
+                               ],
+                },
+            );
+    $p->parse($str);
+    $p->eof; 
+
+    return $p->{res};
 }
 
 # <LJFUNC>
@@ -447,17 +464,27 @@ sub trim_at_word
     return $text if length($text) <= $char_max;
 
     $char_max -= 3; # space for '...'
-
+   
     my $short_text = text_trim($text, $char_max, $char_max);
-    my $short_len = length($short_text);
-    my $full_len = length($text);
+    my $short_len  = length($short_text);
+    my $full_len   = length($text);
+
     if ($short_len < $full_len) { # really trimmed
         # need correct last word and add '...'
         my $last_char = substr($short_text, -1, 1);
         my $first_char = substr($text, $short_len, 1);
         if ($last_char ne ' ' and $first_char ne ' ') { 
-            my $may_stop = rindex($short_text, ' ');
-            $short_text = substr($text, 0, $may_stop);
+            my $space_idx = rindex($short_text, ' ');
+            my $dot_idx   = rindex($short_text, '.');
+            my $comma_idx = rindex($short_text, ',');
+            my $semi_idx  = rindex($short_text, ';');
+            my $colon_idx = rindex($short_text, ':');
+            
+            my $max = (sort {$b cmp $a} $space_idx, $dot_idx, $comma_idx, $semi_idx, $colon_idx)[0];
+            $short_text = substr($text, 0, $max);
+
+            # seconde attempt to reduce text to the end of phrase
+            return $short_text . '...' if $short_text =~ s/([.;:!?])[^\\1]{1,5}$//;
         }
     }
 
