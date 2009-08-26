@@ -1,0 +1,416 @@
+/*_*/
+
+/* Layout */
+BODY {
+	font:62.5%/1.5 Arial, sans-serif;
+	color:#000;
+	background:#C9A884 url(../i/10y-cardboard/bg.jpg) 0 0;
+	}
+.hr {
+	display:none;
+	}
+#page .layout .layout-inner .btn SPAN {
+	float:none;
+	display:inline;
+	padding:0;
+	margin:0;
+	}
+
+/* Links */
+A:link,
+A:visited {
+	color:#000;
+	}
+.entry-content A:link {
+	color:#DA2339;
+	}
+.entry-content A:visited {
+	color:#E68692;
+	}
+.entry-title A:link,
+.entry-title A:visited {
+	padding:0 .3em;
+	font-style:italic;
+	text-decoration:none;
+	color:#C5A583;
+	background:#000;
+	}
+.entry-title A:link:hover,
+.entry-title A:visited:hover {
+	color:#FFF;
+	}
+.entry-content A:link:hover,
+.entry-content A:visited:hover {
+	border-color:#FF001F;
+	}
+.sidebar .sidebar-tags A:link,
+.sidebar .sidebar-tags A:visited {
+	color:#C1A07C;
+	}
+.sidebar .sidebar-tags A:link:hover,
+.sidebar .sidebar-tags A:visited:hover {
+	color:#FFF;
+	}
+.entry-linkbar A:link,
+.entry-linkbar A:visited,
+.ljuser A:link,
+.ljuser A:visited {
+	text-decoration:none;
+	}
+
+/* Header */
+.header {
+	position:relative;
+	min-height:158px;
+	padding:38px 21px 0;
+	text-align:right;
+	background:url(../i/10y-cardboard/arrows.gif) 314px 53px no-repeat;
+	}
+* HTML .header {
+	_height:158px;
+	}
+.header .userpic {
+	padding-right:5px;
+	}
+	.header .userpic-in {
+		padding:7px 9px;
+		background:#000;
+		}
+.header H1 {
+	position:relative;
+	top:-38px;
+	padding:38px 0 0;
+	overflow:hidden;
+	text-align:left;
+	font-size:1.2em;
+	text-transform:uppercase;
+	background:url(../i/10y-cardboard/barcode.gif) 0 0 no-repeat;
+	zoom:1;
+	}
+.header H2,
+.header H3 {
+	display:inline;
+	padding:0 .3em;
+	text-transform:uppercase;
+	letter-spacing:.1em;
+	font-size:3.2em;
+	font-weight:bold;
+	color:#C5A583;
+	background:#DA2339;
+	}
+.header H3 {
+	font-size:1.8em;
+	}
+.header .nav {
+	position:absolute;
+	top:16px;
+	left:314px;
+	width:565px;
+	z-index:100;
+	}
+	.header .nav .item {
+		float:left;
+		font-size:1.4em;
+		line-height:1.5;
+		}
+		#page .header .nav .btn {
+			display:inline;
+			margin-left:1px;
+			vertical-align:top;
+			text-decoration:underline;
+			background:#000;
+			}
+		.header .nav .item A,
+		.header .nav .item A:link,
+		.header .nav .item A:visited {
+			position:relative;
+			padding:.2em .3em;
+			font-style:italic;
+			color:#C5A583;
+			background:#000;
+			}
+		.header .nav .item A:link:hover,
+		.header .nav .item A:visited:hover {
+			color:#FFF;
+			}
+
+/* Content */
+.content-inner {
+	overflow:visible;
+	}
+	.column-right .content-inner {
+		margin-right:328px;
+		margin-left:0;
+		}
+	.column-left .content-inner {
+		margin-right:16px;
+		margin-left:320px;
+		}
+.content .entry-wrap {
+	clear:both;
+	padding-left:28px;
+	overflow:hidden;
+	}
+
+/* Entry */
+.content .entry {
+	margin-top:2.2em;
+	overflow:visible;
+	}
+	.content .entry-title {
+		position:relative;
+		margin-bottom:.3em;
+		}
+		.content .entry .entry-title IMG {
+			position:absolute;
+			top:0;
+			right:100%;
+			padding:5px;
+			background:#DA2339;
+			}
+	.content .entry .entry-linkbar A {
+		display:-moz-inline-stack;
+		display:inline-block;
+		}
+		.content .entry .entry-linkbar IMG {
+			position:static;
+			padding-right:0;
+			background:transparent;
+			}
+	.content .entry .entry-text .author {
+		position:relative;
+		padding:3.2em 0 0;
+		margin:-3.4em -.4em 1.2em 1.2em;
+		}
+		.content .entry .entry-text .entry-date {
+			position:absolute;
+			top:0;
+			right:0;
+			padding:.2em .3em;
+			white-space:nowrap;
+			color:#C5A583;
+			background:#000;
+			}
+		.content .entry .entry-text .author .username {
+			display:inline;
+			background:#000;
+			color:#C5A583;
+			}
+			.content .entry .entry-text .author .username A:link,
+			.content .entry .entry-text .author .username A:visited {
+				color:#C5A583;
+				}
+			.content .entry .entry-text .author .username A:link:hover,
+			.content .entry .entry-text .author .username A:visited:hover {
+				color:#FFF;
+				}
+			.content .entry .entry-text .author .username B {
+				font-weight:normal;
+				}
+	#page .entrymenu {
+		font-variant:small-caps;
+		font-size:1.3em;
+		}
+	#page .btn-comment {
+		background:#000;
+		padding:.15em .4em;
+		color:#CFAD89;
+		}
+	#page .btn-comments {
+		display:inline-block;
+		padding:6px 0;
+		background:url(../i/10y-cardboard/tail.gif) 42% 100% no-repeat;
+		text-decoration:none;
+		}
+	#page .sidebar .btn-comments {
+		padding-top:0;
+		margin-bottom:-6px;
+		}
+	#page .layout .layout-inner .btn-comments SPAN {
+		background:#DA2339;
+		padding:.1em .4em;
+		color:#CFAD89;
+		}
+	#page .layout .layout-inner .btn-comment:hover SPAN,
+	#page .layout .layout-inner .btn-comments:hover SPAN {
+		color:#FFF;
+		}
+	#page .layout .layout-inner .btn-simple {
+		text-decoration:underline;
+		text-transform:lowercase;
+		}
+	#page .layout .layout-inner .btn-simple:hover {
+		text-decoration:none;
+		}
+	.content .entry .entry-text {
+		padding:.2em .3em;
+		margin-bottom:.9em;
+		overflow:hidden;
+		font-family:Verdana, sans-serif;
+		background:#FFF;
+		zoom:1;
+		}
+
+/* Sidebar */
+.sidebar-inner {
+	padding-top:77px;
+	background:url(../i/10y-cardboard/signs.gif) 155px 38px no-repeat;
+	}
+.sidebar-block {
+	padding-top:15px;
+	}
+	.sidebar-block DT {
+		display:inline-block;
+		//display:inline;
+		zoom:1;
+		padding:.1em;
+		margin-bottom:.6em;
+		font-size:1.6em;
+		letter-spacing:.1em;
+		font-weight:bold;
+		text-transform:uppercase;
+		color:#BA9977;
+		background:#000;
+		}
+	.sidebar-links DD,
+	.sidebar-summary LI {
+		display:block;
+		padding:0 0 1em 14px;
+		margin-left:0;
+		vertical-align:top;
+		line-height:1.2;
+		list-style:none;
+		}
+	.sidebar-links DD {
+		background:url(../i/10y-cardboard/bullet.gif) 0 .4em no-repeat;
+		}
+	.sidebar-summary LI {
+		background:url(../i/10y-cardboard/bullet.gif) -3px .4em no-repeat;
+		}
+		.sidebar-links DD A:link,
+		.sidebar-links DD A:visited,
+		.sidebar-summary LI A:link,
+		.sidebar-summary LI A:visited {
+			padding:.1em;
+			font-size:.923em;
+			color:#BA9977;
+			background:#FFF;
+			}
+		.sidebar-summary LI A:link,
+		.sidebar-summary LI A:visited {
+			font-style:italic;
+			font-weight:bold;
+			}
+		.sidebar-links DD A:link:hover,
+		.sidebar-links DD A:visited:hover,
+		.sidebar-summary LI A:link:hover,
+		.sidebar-summary LI A:visited:hover {
+			color:#000;
+			}
+		.sidebar-tags .tags {
+			padding:.5em;
+			background:#000;
+			}
+	.sidebar-powered {
+		font-size:1.2em;
+		letter-spacing:.1em;
+		}
+		.sidebar-powered,
+		.sidebar-powered A:link,
+		.sidebar-powered A:visited {
+			color:#FFF;
+			font-variant:small-caps;
+			}
+	.sidebar-cal DT {
+		display:none;
+		}
+	.sidebar .calendar-wrap {
+		font-size:1em;
+		}
+.calendar-wrap,
+.sidebar .calendar-wrap {
+	width:240px;
+	}
+	.entry .calendar-wrap {
+		height:31em;
+		font-size:.6em;
+		}
+		.layout .entry .calendar-wrap TD,
+		.layout .entry .calendar-wrap TH {
+			border-width:2px 4px;
+			border-color:#FFF;
+			}
+	.calendar-wrap table caption {
+		font-size:1.6em;
+		height:3em;
+		}
+	.layout .calendar-wrap CAPTION A:link,
+	.layout .calendar-wrap CAPTION A:visited {
+		padding:.2em .3em;
+		margin-right:-.4em;
+		color:#C5A583;
+		background:#000;
+		}
+	.layout .calendar-wrap CAPTION A:link:hover,
+	.layout .calendar-wrap CAPTION A:visited:hover {
+		color:#FFF;
+		}
+	.layout .calendar-wrap TH,
+	.layout .calendar-wrap TD {
+		border:solid #C9A884;
+		border-width:2px 6px;
+		font-size:1.6em;
+		}
+	.calendar-wrap TH {
+		color:#C5A583;
+		background:#FFF;
+		}
+	.calendar-wrap TABLE TBODY TD {
+		text-align:left;
+		font-style:italic;
+		font-weight:normal;
+		background:#000;
+		color:#C5A583;
+		}
+		.sidebar .calendar-wrap TABLE TBODY TD {
+			line-height:1.5;
+			}
+		#page .calendar-wrap TABLE TBODY TD A:link,
+		#page .calendar-wrap TABLE TBODY TD A:visited {
+			text-align:center;
+			color:#C5A583;
+			background:#CF0F24;
+			zoom:1;
+			}
+		#page .calendar-wrap TABLE TBODY TD A:link:hover,
+		#page .calendar-wrap TABLE TBODY TD A:visited:hover {
+			color:#000;
+			}
+	.calendar-wrap TABLE CAPTION A:link,
+	.calendar-wrap TABLE CAPTION A:visited,
+	.calendar-wrap TABLE TBODY TD A:link,
+	.calendar-wrap TABLE TBODY TD A:visited {
+		border:0;
+		}
+	.calendar-wrap TABLE TBODY TD A:link:hover,
+	.calendar-wrap TABLE TBODY TD A:visited:hover,
+	.calendar-wrap TABLE TBODY TD A:link:active,
+	.calendar-wrap TABLE TBODY TD A:visited:active {
+		border:0;
+		}
+
+/* Page nav */
+.content .page-nav {
+	padding-top:1em;
+	padding-left:28px;
+	}
+	.content .page-nav A:link,
+	.content .page-nav A:visited {
+		padding:.2em .3em;
+		background:#000;
+		color:#BA9977;
+		}
+	.content .page-nav A:link:hover,
+	.content .page-nav A:visited:hover {
+		color:#FFF;
+		}
