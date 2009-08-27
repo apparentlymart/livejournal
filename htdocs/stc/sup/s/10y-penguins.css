@@ -279,6 +279,10 @@ A:visited:hover {
 	.sidebar-tags .tags {
 		text-align:left;
 		}
+	.tags-cloud .sidebar-tags .tags .tags-all {
+		right:auto;
+		left:0;
+		}
 	.sidebar-powered {
 		text-align:right;
 		}
