@@ -176,6 +176,9 @@ A:visited:hover {
 .content .entry .entry-text {
 	padding-right:20px;
 	}
+	.content .entry .entry-text .author {
+		margin-top:-2.5em;
+		}
 	.content .entry .entry-text .metadata {
 		font-size:1em;
 		}
