@@ -324,12 +324,13 @@ sub load_for_nav {
         return @$LJ::CACHED_CATEGORIES_FOR_NAV;
     }
 
-    my @categories;
+    my @categories = ();
     foreach my $cat ($class->load_top_level) {
-        next unless $cat->in_nav;
-        push @categories, $cat if $cat;
+        next unless $cat and $cat->in_nav;
+        push @categories, $cat;
     }
 
+    $LJ::CACHED_CATEGORIES_FOR_NAV = [];
     foreach my $c (sort { $a->in_nav cmp $b->in_nav } @categories) {
         push @$LJ::CACHED_CATEGORIES_FOR_NAV, {
             id => $c->catid,
@@ -337,7 +338,7 @@ sub load_for_nav {
             url => $c->url,
         };
     }
-
+    
     return @$LJ::CACHED_CATEGORIES_FOR_NAV;
 }
 
