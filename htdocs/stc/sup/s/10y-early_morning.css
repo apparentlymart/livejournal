@@ -321,7 +321,7 @@ A:visited:hover {
 
 /* Sidebar */
 .sidebar-inner {
-	padding:0;
+	padding-top:0;
 	}
 	.column-right .sidebar-inner {
 		margin-right:31px;
