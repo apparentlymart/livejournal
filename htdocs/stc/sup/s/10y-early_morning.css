@@ -63,7 +63,10 @@ A:visited:hover {
 .ljuser A:visited {
 	border:0;
 	}
-
+.ljad A:link,
+.ljad A:visited {
+	color:#4F3B1B;
+	}
 /* header */
 .header {
 	float:none;
@@ -389,7 +392,9 @@ A:visited:hover {
 #page .sidebar-cal {
 	//padding:0 0 10px;
 	}
-
+.sidebar-cal .calendar-wrap TABLE {
+	border-spacing:1px;
+	}
 #page .sidebar-cal .calendar-wrap TABLE {
 	margin:0;
 	}
