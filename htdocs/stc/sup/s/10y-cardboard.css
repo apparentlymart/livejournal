@@ -183,6 +183,7 @@ A:visited {
 			background:transparent;
 			}
 	.content .entry .entry-text .author {
+		display:inline;
 		position:relative;
 		padding:3.2em 0 0;
 		margin:-3.4em -.4em 1.2em 1.2em;
@@ -197,9 +198,13 @@ A:visited {
 			background:#000;
 			}
 		.content .entry .entry-text .author .username {
-			display:inline;
+			display:-moz-inline-stack;
+			display:inline-block;
+			//display:inline;
+			padding:.1em .2em;
 			background:#000;
 			color:#C5A583;
+			zoom:1;
 			}
 			.content .entry .entry-text .author .username A:link,
 			.content .entry .entry-text .author .username A:visited {
