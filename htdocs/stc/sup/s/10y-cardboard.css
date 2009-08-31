@@ -316,6 +316,12 @@ A:visited {
 			padding:.5em;
 			background:#000;
 			}
+		.tags-cloud .sidebar-tags .tags .tags-all {
+			top:-2.2em;
+			}
+		.tags-cloud .sidebar-tags .tags .tags-all A {
+			background:#000;
+			}
 	.sidebar-powered {
 		font-size:1.2em;
 		letter-spacing:.1em;
