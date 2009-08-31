@@ -570,6 +570,8 @@ sub get_text_multi
     my ($lang, $dmid, $codes) = @_;
 
     return {} unless $codes;
+    return { map {$_ => $_} @$codes }
+        if $lang eq 'debug';
 
     $dmid = int($dmid || 1);
     $lang ||= $LJ::DEFAULT_LANG;
