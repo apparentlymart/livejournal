@@ -491,4 +491,23 @@ sub parse_url {
     return $url;
 }
 
+sub get_count {
+    my $calss = shift;
+    my $qid   = shift;
+
+    return undef unless $qid;
+
+    my $qlength = LJ::MemCache::get("qotd_count:$qid");
+    return $qlength if defined $qlength;
+
+    my $queue = LJ::queue("latest_qotd_$qid");
+    if ($queue) {
+        $qlength = $queue->length;
+        LJ::MemCache::set("qotd_count:$qid", $qlength);
+        return $qlength;
+    }
+
+    return undef;
+}
+
 1;

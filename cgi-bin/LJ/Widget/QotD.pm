@@ -158,7 +158,12 @@ sub _get_question_data {
     my $between_text = $from_text && $extra_text ? "<br />" : "";
 
     my $qid = $q->{qid};
-    my $view_answers_link       = "<a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" . $class->ml('widget.qotd.viewanswers') . "</a>";
+    my $view_answers_link = "";
+    my $count = LJ::QotD->get_count($qid);
+    if ($count) {
+        $count .= "+" if $count >= $LJ::RECENT_QOTD_SIZE;
+        $view_answers_link = "<a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" . $class->ml('widget.qotd.viewanswers', {'total_count' => $count}) . "</a>";
+    }
     my $view_other_answers_link = "<a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" . $class->ml('widget.qotd.view.other.answers') . "</a>";
 
     my ($answer_link, $answer_url, $answer_text) = ("", "", "");
@@ -209,7 +214,11 @@ sub qotd_display {
             if ($opts{small_view_link}) {
                 $viewanswers .= " <a class='small-view-link' href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">" . $class->ml('widget.qotd.view.more') . "</a>";
             } else {
-                $viewanswers .= " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">" . $class->ml('widget.qotd.viewanswers') . "</a>";
+                my $count = LJ::QotD->get_count($q->{qid});
+                if ($count) {
+                    $count .= "+" if $count >= $LJ::RECENT_QOTD_SIZE;
+                    $viewanswers .= " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">" . $class->ml('widget.qotd.viewanswers', {'total_count' => $count}) . "</a>";
+                }
             }
 
             $ret .= $d->{text};

@@ -441,6 +441,11 @@
                 } else {
 
                     # update success
+
+                    if ($qotd) {
+                        LJ::MemCache::delete('qotd_count:'.$qotd->{qid});
+                    }
+
                     if ($POST{'usejournal'}) {
                         $ju = LJ::load_user($POST{'usejournal'});  # posting as community
                     } elsif ($user) {

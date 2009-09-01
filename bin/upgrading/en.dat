@@ -3584,7 +3584,7 @@ widget.qotd.suggestions=Suggestions
 
 widget.qotd.title=Writer's Block
 
-widget.qotd.viewanswers=View Answers
+widget.qotd.viewanswers=View [[total_count]] Answers
 
 widget.qotd.view.other.answers=View other answers
 
