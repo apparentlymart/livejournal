@@ -215,6 +215,7 @@ A:visited:hover {
 			padding-left:16px;
 			}
 		.content .entry .entry-text .author {
+			position:static;
 			float:none;
 			display:inline;
 			max-width:none;
