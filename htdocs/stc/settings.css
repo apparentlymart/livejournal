@@ -364,6 +364,9 @@
 		display: block;
 		margin-bottom: 3px;
 		}
+		.adsense_option .adsense-create LI LABEL {
+			display:inline;
+			}
 	.adsense_option .steps LI.adsense_more {
 		margin-bottom: 17px;
 		}
@@ -380,17 +383,25 @@
 			width: auto;
 			overflow: visible;
 			}
+		.adsense_option .steps INPUT.ads_opt {
+			width: auto;
+			}
 
 .adv-types {
 	margin: 0px 0px 20px;
 	}
-	.adv-types DT, .adv-types DD {
+	.adv-types DT, .adv-types DD,
+	.adv-colors DT, .adv-colors DD {
 		margin: 0;
 		padding: 0;
 		}		
-	.adv-types DT {
+	.adv-types DT,
+	.adv-colors DT {
 		font-weight: bold;
 		margin-bottom: 7px;
+		}
+	.adv-types DT LABEL {
+		font-weight: normal;
 		}
 	.adv-types DD {
 		margin-bottom: 5px;
@@ -404,10 +415,14 @@
 		.adsense_option .adv-types DD TEXTAREA {
 			width: 80%;
 			margin-top: 12px;
+			display: block;
 			}
 		.adsense_option .adv-types DD B {
 			display: block;
 			font-weight: normal;
+			}
+		.adsense_option .adv-types DD A {
+			font-size: 11px;
 			}
 
 .adsense_status {
@@ -431,7 +446,7 @@
 .adsense_option .setting-type {
 	position: absolute;
 	left: 5px;
-	margin: 0;
+	margin: -5px 0 0;
 	}
 	.adsense_option .setting-type LI {
 		font-size: 11px;
@@ -452,7 +467,10 @@
 	margin-bottom: 12px;
 	}
 	.adsense_option .adv-type-tabs LI {
+		zoom:1;
+		position:relative;
 		float: left;
+		display:inline;
 		padding: 7px 10px 5px;
 		margin: 0px 7px 2px 0px;
 		border: 1px solid #CCC;
@@ -482,7 +500,7 @@
 	.adsense-banner .banner-settings {
 		width: 100%; 
 	}
-	.adsense-banner.vertical .banner-settings {
+	.adsense-settings-extended .adsense-banner.vertical .banner-settings {
 		float: right; 
 		margin-right: -160px
 	}
@@ -521,8 +539,11 @@
 		margin:0;
 		padding:0;
 		}
+	.adsense-color-picker DT {
+		margin-bottom: 0px;
+		}
 	.adsense-color-picker-in LABEL {
-		font-weight: bold;
+		font-weight: normal;
 		}
 	.adsense_option .steps .adsense-color-picker INPUT {
 		width:97px;
@@ -535,3 +556,119 @@
 	*+HTML .adsense_option .steps .adsense-color-picker INPUT {
 		width:92px;
 		}
+
+/* adsense banner scheme */
+.adsense-scheme {
+	position:relative;
+	width:78px;
+	height:123px;
+	border:1px solid #FC6;
+	padding:0 25px 0 8px;
+	overflow:hidden;
+	background:#FFFFE7;
+	}
+	.adsense-scheme-head {
+		display:block;
+		width:51px;
+		height:6px;
+		margin:5px 0 6px 0;
+		overflow:hidden;
+		background:#70948C;
+		}
+	.adsense-scheme-alt .adsense-scheme-head {
+		margin:11px 0 12px;
+		}
+	.adsense-scheme-content {
+		display:block;
+		width:71px;
+		height:66px;
+		margin:0 0 6px 0;
+		overflow:hidden;
+		background:#CCC url(/img/adsense/adsense-scheme.gif) 0 0 repeat-y;
+		}
+	.adsense-scheme-alt .adsense-scheme-content {
+		margin:0 0 11px 0;
+		}
+	.adsense-scheme-b1 {
+		display:block;
+		width:80px;
+		height:10px;
+		margin:7px 0 0;
+		overflow:hidden;
+		background:#CCC url(/img/adsense/adsense-scheme.gif) -95px 0 no-repeat;
+		}
+	.adsense-scheme-b2 {
+		display:block;
+		width:22px;
+		height:22px;
+		border-right:49px solid #FFFFE7;
+		margin:22px 0 0;
+		overflow:hidden;
+		background:#CCC url(/img/adsense/adsense-scheme.gif) -72px 0 no-repeat;
+		}
+	.adsense-scheme .adsense-scheme-b3 {
+		position:absolute;
+		left:91px;
+		top:21px;
+		width:11px;
+		height:68px;
+		overflow:hidden;
+		background:#CCC url(/img/adsense/adsense-scheme.gif) -74px 0 repeat-y;
+		}
+	.adsense-scheme-alt .adsense-scheme-b2 {
+		position:absolute;
+		left:83px;
+		top:26px;
+		border:0;
+		margin:0;
+		}
+	.adsense-scheme-alt .adsense-scheme-b1,
+	.adsense-scheme-alt .adsense-scheme-b3 {
+		display:none;
+		}
+	.adsense-scheme-b1-active .adsense-scheme-b1,
+	.adsense-scheme-b2-active .adsense-scheme-b2,
+	.adsense-scheme-b3-active .adsense-scheme-b3,
+	.adsense-scheme-b4-active .adsense-scheme-b4 {
+		background-color:#F66;
+		}
+	.adsense-scheme-b4 {
+		display:block;
+		width:80px;
+		height:10px;
+		margin:0 0 0 0;
+		overflow:hidden;
+		background:#CCC url(/img/adsense/adsense-scheme.gif) -95px 0 no-repeat;
+		}
+
+/* Adv types wrap */
+.adv-types-wrap {
+	margin:0 0 20px;
+	zoom:1;
+	}
+	.adv-types-wrap:after {
+		content:"";
+		clear:both;
+		display:block;
+		width:0;
+		height:0;
+		overflow:hidden;
+		visibility:hidden;
+		}
+	.adv-types-wrap .adv-types {
+		float:left;
+		padding-right:30px;
+		margin:0;
+		}
+	.adv-types-wrap .adsense-scheme {
+		float:left;
+		display:inline;
+		}
+
+/* Adsen */
+.adsense-settings-standard .adv-colors,
+.adsense-settings-standard .banner-preview-wrap,
+.adsense-settings-standard #banType,
+.adsense-settings-standard #tabs {
+	display:none;
+	}
