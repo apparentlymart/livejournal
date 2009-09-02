@@ -3628,6 +3628,7 @@ sub subscribe_interface {
 
                 $sub_args{ntypeid} = $ntypeid;
                 my @subs = $u->has_subscription(%sub_args);
+                @subs = () if !$u->prop('msn_enabled') && $sub_args{ntypeid} eq LJ::NotificationMethod::Alerts->ntypeid;
 
                 my $note_pending = LJ::Subscription::Pending->new($u, %sub_args);
                 if (@subs) {
