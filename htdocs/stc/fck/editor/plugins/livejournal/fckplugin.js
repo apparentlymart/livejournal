@@ -61,8 +61,9 @@ LJUserCommand.Execute=function() {
         }
         if (!data.success) return;
         data.ljuser = data.ljuser.replace(/<span.+?class=['"]?ljuser['"]?.+?>/,'<div class="ljuser">');
-        data.ljuser = data.ljuser.replace(/<\/span>/,'</div>&nbsp;');
+        data.ljuser = data.ljuser.replace(/<\/span>/,'</div>');
         FCK.InsertHtml(data.ljuser);
+        FCK.InsertHtml(' ');
         if (selection != '') FCKSelection.Collapse();
         FCK.Focus();
     }
