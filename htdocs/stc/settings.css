@@ -334,6 +334,11 @@
 	width: 80%;
 	vertical-align: top;
 	}
+.adsense_option FIELDSET {
+	padding:0;
+	border:0;
+	margin:0;
+	}
 .adsense_option INPUT {
 	margin: 0px;
 	}
@@ -379,13 +384,19 @@
 	.adsense_option .steps INPUT, .adsense_option .steps SELECT {
 		width: 210px;
 		}
-		.adsense_option .steps INPUT.btn {
+		.adsense_option .steps INPUT.adsense-btn {
 			width: auto;
 			overflow: visible;
 			}
 		.adsense_option .steps INPUT.ads_opt {
 			width: auto;
 			}
+.adsense-form-hint {
+	display:block;
+	padding:.2em 0 1em;
+	font-size:.85em;
+	font-style:italic;
+	}
 
 .adv-types {
 	margin: 0px 0px 20px;
@@ -446,7 +457,7 @@
 .adsense_option .setting-type {
 	position: absolute;
 	left: 5px;
-	margin: -5px 0 0;
+	margin: 0;
 	}
 	.adsense_option .setting-type LI {
 		font-size: 11px;
@@ -497,6 +508,9 @@
 		float: right;
 		margin-bottom: 0;
 	}
+	.banner-preview-text {
+		margin-top:0;
+		}
 	.adsense-banner .banner-settings {
 		width: 100%; 
 	}
@@ -664,10 +678,14 @@
 		float:left;
 		display:inline;
 		}
-
+	.adv-types-note {
+		clear:both;
+		padding:1em 0;
+		}
 /* Adsen */
 .adsense-settings-standard .adv-colors,
 .adsense-settings-standard .banner-preview-wrap,
+.adsense-settings-extended .banner-preview-text,
 .adsense-settings-standard #banType,
 .adsense-settings-standard #tabs {
 	display:none;
