@@ -1561,7 +1561,7 @@ sub postevent
     push @jobs, LJ::EventLogRecord::NewEntry->new($entry)->fire_job;
 
     # PubSubHubbub Support
-    LJ::Feed::generate_hubbub_jobs($uowner, \@jobs);
+    LJ::Feed::generate_hubbub_jobs($uowner, \@jobs) unless $uowner->is_syndicated;
 
     my $sclient = LJ::theschwartz();
     if ($sclient && @jobs) {
@@ -1942,7 +1942,7 @@ sub editevent
     LJ::run_hooks("editpost", $entry, \@jobs);
 
     # PubSubHubbub Support
-    LJ::Feed::generate_hubbub_jobs($uowner, \@jobs);
+    LJ::Feed::generate_hubbub_jobs($uowner, \@jobs) unless $uowner->is_syndicated;
 
     my $sclient = LJ::theschwartz();
     if ($sclient && @jobs) {
