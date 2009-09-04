@@ -2229,7 +2229,7 @@ sub replycount_do {
             LJ::MemCache::set($memkey, sprintf("%-4d", $rc)) if defined $rc;
         }
 
-        $u->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+        $u->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $memkey);
     
     } else {
     # used Cache::Memcached::Fast
