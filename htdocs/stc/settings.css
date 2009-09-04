@@ -576,7 +576,7 @@
 	position:relative;
 	width:78px;
 	height:123px;
-	border:1px solid #FC6;
+	border:1px solid #FFEABF;
 	padding:0 25px 0 8px;
 	overflow:hidden;
 	background:#FFFFE7;
@@ -587,7 +587,7 @@
 		height:6px;
 		margin:5px 0 6px 0;
 		overflow:hidden;
-		background:#70948C;
+		background:#EAEFDA;
 		}
 	.adsense-scheme-alt .adsense-scheme-head {
 		margin:11px 0 12px;
@@ -609,7 +609,7 @@
 		height:10px;
 		margin:7px 0 0;
 		overflow:hidden;
-		background:#CCC url(/img/adsense/adsense-scheme.gif) -95px 0 no-repeat;
+		background:#000 url(/img/adsense/adsense-scheme.gif) -95px 0 no-repeat;
 		}
 	.adsense-scheme-b2 {
 		display:block;
@@ -618,16 +618,16 @@
 		border-right:49px solid #FFFFE7;
 		margin:22px 0 0;
 		overflow:hidden;
-		background:#CCC url(/img/adsense/adsense-scheme.gif) -72px 0 no-repeat;
+		background:#000 url(/img/adsense/adsense-scheme.gif) -72px 0 no-repeat;
 		}
 	.adsense-scheme .adsense-scheme-b3 {
 		position:absolute;
 		left:91px;
 		top:21px;
 		width:11px;
-		height:68px;
+		height:54px;
 		overflow:hidden;
-		background:#CCC url(/img/adsense/adsense-scheme.gif) -74px 0 repeat-y;
+		background:#000 url(/img/adsense/adsense-scheme.gif) -74px 0 repeat-y;
 		}
 	.adsense-scheme-alt .adsense-scheme-b2 {
 		position:absolute;
@@ -644,7 +644,7 @@
 	.adsense-scheme-b2-active .adsense-scheme-b2,
 	.adsense-scheme-b3-active .adsense-scheme-b3,
 	.adsense-scheme-b4-active .adsense-scheme-b4 {
-		background-color:#F66;
+		background-color:#F00;
 		}
 	.adsense-scheme-b4 {
 		display:block;
@@ -652,7 +652,7 @@
 		height:10px;
 		margin:0 0 0 0;
 		overflow:hidden;
-		background:#CCC url(/img/adsense/adsense-scheme.gif) -95px 0 no-repeat;
+		background:#000 url(/img/adsense/adsense-scheme.gif) -95px 0 no-repeat;
 		}
 
 /* Adv types wrap */
@@ -690,3 +690,25 @@
 .adsense-settings-standard #tabs {
 	display:none;
 	}
+
+/* Adsense status */
+.adsense-status {
+	margin:.5em 0;
+	padding:0;
+	line-height:1.25;
+	}
+	.adsense-status DT {
+		display:inline;
+		margin:0;
+		padding:0;
+		font-weight:bold;
+		}
+	.adsense-status DD {
+		display:inline;
+		margin:0;
+		padding:0;
+		}
+		.adsense-status DD EM {
+			font-style:normal;
+			color:#D08707;
+			}
