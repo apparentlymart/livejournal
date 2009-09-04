@@ -137,21 +137,21 @@ sub delete {
 sub add       { 
     my ($key, $val, $exp) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if $use_fast and ref $key eq 'ARRAY';
+        if ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     return $memc->add($key, $val, $exp);
 }
 sub replace   { 
     my ($key, $val) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if $use_fast and ref $key eq 'ARRAY';
+        if ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     return $memc->replace($key, $val);
 }
 sub set       { 
     my ($key, $val, $exp) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if $use_fast and ref $key eq 'ARRAY';
+        if ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     $memc->set($key, $val, $exp);
 }
@@ -160,7 +160,7 @@ sub decr      { $memc->decr(@_);      }
 
 sub get       {
     return undef if $GET_DISABLED;
-    if ($use_fast and ref $_[0] eq 'ARRAY'){ # Cache::Memcached::Fast does not support combo [int, key] keys.
+    if (ref $_[0] eq 'ARRAY'){ # Cache::Memcached::Fast does not support combo [int, key] keys.
         $_[0] = $_[0][1];
     }
     $memc->get(@_);
@@ -175,7 +175,7 @@ sub gets {
     
     my $key = shift;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if $use_fast and ref $key eq 'ARRAY';
+        if ref $key eq 'ARRAY';
     return $memc->gets($key);
 }
 ## @ret: reference to hash, where $href->{$key} holds a reference to an array [$cas, $value].
@@ -184,9 +184,9 @@ sub gets_multi {
 
     # Cache::Memcached::Fast does not support combo [int, key] keys.
     @_ = map {
-            $_[0] = $_[0][1] if ref $_[0] eq 'ARRAY';
-            $_;
-        } @_;
+                $_[0] = $_[0][1] if ref $_[0] eq 'ARRAY';
+                $_;
+             } @_;
 
     return $memc->gets_multi(@_);
 }
@@ -194,19 +194,18 @@ sub gets_multi {
 ##
 sub get_multi {
     return {} if $GET_DISABLED;
-    if ($use_fast){ # Cache::Memcached::Fast does not support combo [int, key] keys.
-        @_ = map {
-            $_[0] = $_[0][1] if ref $_[0] eq 'ARRAY';
-            $_;
-        } @_;
-    }
+    # Cache::Memcached::Fast does not support combo [int, key] keys.
+    @_ = map {
+                $_[0] = $_[0][1] if ref $_[0] eq 'ARRAY';
+                $_;
+             } @_;
     $memc->get_multi(@_);
 }
 
 sub append {
     my ($key, $val) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if $use_fast and ref $key eq 'ARRAY';
+        if ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     return $use_fast
         ? $memc->append($key, $val)
@@ -216,7 +215,7 @@ sub append {
 sub prepend {
     my ($key, $val) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if $use_fast and ref $key eq 'ARRAY';
+        if ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     return $use_fast
         ? $memc->prepend($key, $val)
@@ -226,7 +225,7 @@ sub prepend {
 sub cas {
     my ($key, $cas, $val) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if $use_fast and ref $key eq 'ARRAY';
+        if ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     return $use_fast 
         ? $memc->cas($key, $cas, $val)
