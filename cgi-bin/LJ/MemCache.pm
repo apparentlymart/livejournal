@@ -136,21 +136,21 @@ sub delete {
 
 sub add       { 
     my ($key, $val, $exp) = @_;
-    $key = $key->[0][1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
+    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
         if $use_fast and ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     return $memc->add($key, $val, $exp);
 }
 sub replace   { 
     my ($key, $val) = @_;
-    $key = $key->[0][1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
+    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
         if $use_fast and ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     return $memc->replace($key, $val);
 }
 sub set       { 
     my ($key, $val, $exp) = @_;
-    $key = $key->[0][1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
+    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
         if $use_fast and ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     $memc->set($key, $val, $exp);
@@ -191,6 +191,8 @@ sub get_multi {
 
 sub append {
     my ($key, $val) = @_;
+    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
+        if $use_fast and ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     return $use_fast
         ? $memc->append($key, $val)
@@ -199,6 +201,8 @@ sub append {
 
 sub prepend {
     my ($key, $val) = @_;
+    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
+        if $use_fast and ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     return $use_fast
         ? $memc->prepend($key, $val)
@@ -207,6 +211,8 @@ sub prepend {
 
 sub cas {
     my ($key, $cas, $val) = @_;
+    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
+        if $use_fast and ref $key eq 'ARRAY';
     $val = '' unless defined $val;
     return $use_fast 
         ? $memc->cas($key, $cas, $val)
