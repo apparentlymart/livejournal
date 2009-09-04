@@ -2191,9 +2191,14 @@ sub reject_entry_as_spam {
 
 sub replycount_do {
     my ($u, $jitemid, $action, $value) = @_;
+
+    # check action name
+    die "unknown action: $action" 
+        unless $action =~ /^(init)|(incr)|(decr)$/;
+    
     $value = 1 unless defined $value;
     my $uid = $u->{'userid'};
-    my $memkey = [$uid, "rp:$uid:$jitemid"];
+    my $memkey = "rp:$uid:$jitemid";
 
     # "init" is easiest and needs no lock (called before the entry is live)
     if ($action eq 'init') {
@@ -2202,31 +2207,50 @@ sub replycount_do {
     }
 
     return 0 unless $u->writer;
+    
+    ##
+    my $update_memc = $action eq 'decr'
+            ? sub { LJ::MemCache::decr($memkey, $value) }
+            : sub { LJ::MemCache::incr($memkey, $value) };
+    
+    ##
+    my $sql_sign = $action eq 'decr' ? '-' : '+';
+    my $sql = "UPDATE log2 SET replycount=LAST_INSERT_ID(replycount $sql_sign $value) WHERE journalid=? AND jitemid=?";
+    
+    unless ( LJ::MemCache::can_gets() ){
+    # used Cache::Memcached driver that does not support 'gets' and 'cas' commands
+        $u->selectrow_array("SELECT GET_LOCK(?,10)", undef, $memkey);
 
-    my $lockkey = $memkey->[1];
-    $u->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
+        my $ret = $update_memc->();
+        $u->do($sql, undef, $uid, $jitemid);
 
-    my $ret;
+        if (@LJ::MEMCACHE_SERVERS && ! defined $ret) {
+            my ($rc) = $u->selectrow_array("SELECT LAST_INSERT_ID()");
+            LJ::MemCache::set($memkey, sprintf("%-4d", $rc)) if defined $rc;
+        }
 
-    if ($action eq 'decr') {
-        $ret = LJ::MemCache::decr($memkey, $value);
-        $u->do("UPDATE log2 SET replycount=replycount-$value WHERE journalid=$uid AND jitemid=$jitemid");
-    }
+        $u->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+    
+    } else {
+    # used Cache::Memcached::Fast
 
-    if ($action eq 'incr') {
-        $ret = LJ::MemCache::incr($memkey, $value);
-        $u->do("UPDATE log2 SET replycount=replycount+$value WHERE journalid=$uid AND jitemid=$jitemid");
-    }
-
-    if (@LJ::MEMCACHE_SERVERS && ! defined $ret) {
-        my $rc = $u->selectrow_array("SELECT replycount FROM log2 WHERE journalid=$uid AND jitemid=$jitemid");
-        if (defined $rc) {
-            $rc = sprintf("%-4d", $rc);
-            LJ::MemCache::set($memkey, $rc);
+        my $ret = $update_memc->();
+        $u->do($sql, undef, $uid, $jitemid);
+        if (@LJ::MEMCACHE_SERVERS and not defined $ret) {
+            ## Lock free update 
+            my $max_loops = 100; # prevent infinite loop
+            while ($max_loops--){
+                my $gets = LJ::MemCache::gets($memkey); # get [cas, $val]
+                if (not $gets){
+                    my $add_res = LJ::MemCache::add($memkey, sprintf("%-4d", 1)); # init value
+                    next;
+                }
+                my ($rc) = $u->selectrow_array("SELECT replycount FROM log2 WHERE journalid=$uid AND jitemid=$jitemid");
+                my $cas = $gets->[0];
+                LJ::MemCache::cas($memkey, $cas, $rc);
+            }
         }
     }
-
-    $u->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
     return 1;
 }
