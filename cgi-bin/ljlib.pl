@@ -2722,8 +2722,9 @@ sub delete_comments {
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 
-    my $num = $u->talk2_do($nodetype, $nodeid, undef,
-                           "UPDATE talk2 SET state='D' $where");
+    my $num = $u->talk2_do(nodetype => $nodetype, nodeid => $nodeid,
+                           sql => "UPDATE talk2 SET state='D' $where");
+
     return 0 unless $num;
     $num = 0 if $num == -1;
 
