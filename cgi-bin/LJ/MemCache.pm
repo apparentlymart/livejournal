@@ -171,20 +171,34 @@ sub can_gets { return $use_fast }
 
 ## @@ret: reference to an array [$cas, $value], or nothing.
 sub gets {
-    return $memc->gets(@_) if $use_fast and not $GET_DISABLED;
-    return; 
+    return if $GET_DISABLED or not $use_fast;
+    
+    my $key = shift;
+    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
+        if $use_fast and ref $key eq 'ARRAY';
+    return $memc->gets($key);
 }
 ## @ret: reference to hash, where $href->{$key} holds a reference to an array [$cas, $value].
 sub gets_multi {
-    return $memc->gets_multi(@_) if $use_fast and not $GET_DISABLED;
-    return;
+    return if $GET_DISABLED or not $use_fast;
+
+    # Cache::Memcached::Fast does not support combo [int, key] keys.
+    @_ = map {
+            $_[0] = $_[0][1] if ref $_[0] eq 'ARRAY';
+            $_;
+        } @_;
+
+    return $memc->gets_multi(@_);
 }
 
 ##
 sub get_multi {
     return {} if $GET_DISABLED;
     if ($use_fast){ # Cache::Memcached::Fast does not support combo [int, key] keys.
-        @_ = map { ref $_ eq 'ARRAY' ? $_[0][1] : $_ } @_;
+        @_ = map {
+            $_[0] = $_[0][1] if ref $_[0] eq 'ARRAY';
+            $_;
+        } @_;
     }
     $memc->get_multi(@_);
 }
