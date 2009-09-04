@@ -6,6 +6,8 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use Apache;
 
+$LJ::UPTIME = time();
+
 # Image::Size wants to pull in Image::Magick.  Let's not let it during
 # the init process.
 my $still_loading = 1;
