@@ -20,9 +20,9 @@
 
 .cat.account.desc=Basic account settings
 
-.cat.adsense=adSense
+.cat.adsense=My ads
 
-.cat.adsense.desc=adSense settings
+.cat.adsense.desc=Your Journal &mdash; Your Money
 
 .cat.display=Display
 
@@ -220,6 +220,94 @@ as well.
 .security.visibility.friends=Friends only
 
 .security.visibility.nobody=Nobody
+
+.setting.adsense.advertising.blocks=Advertising Blocks
+
+.setting.adsense.title=Google AdSense settings
+
+.setting.adsense.status=To see the Google Advertize, look the Terms of Service
+
+.setting.adsense.stats=Statistic
+
+.setting.adsense.invitation=I'd like to participate in revenue sharing program.
+
+.setting.adsense.otherjournal=I'd like to see context advertisment in other journals
+
+.setting.adsense.signin=I have AdSense account
+
+.setting.adsense.newaccount=Create a new Google AdSense account
+
+.setting.adsense.email=E-mail
+
+.setting.adsense.verification=Text about verification
+
+.setting.adsense.phone=Phone Number
+
+.setting.adsense.phone.hint=(last 5 numbers)
+
+.setting.adsense.postcode=Postal Code (ZIP code)
+
+.setting.adsense.agreement= I certify that I have read the <a href="[[uri]]">AdSense Program Policies</a>.
+
+.setting.adsense.locate=Language
+
+.setting.adsense.locate.ads=Language of ads
+
+.setting.adsense.interactive.scheme=Ads interactive scheme
+
+.setting.adsense.horiz_top=728x90 Top
+
+.setting.adsense.horiz_bottom=728x90 Bottom
+
+.setting.adsense.colors=Colors
+
+.setting.adsense.bgcolor=Background
+
+.setting.adsense.brdcolor=Border
+
+.settings.adsense.google.examples=Here is some text about the examples of <a href="[[uri]]">adsense banners</a>.
+
+.setting.adsense.txtcolor=Text
+
+.setting.adsense.urlcolor=Url
+
+.setting.adsense.ttlcolor=Title
+
+.setting.adsense.setting.extended=Extended settings
+
+.setting.adsense.setting.standard=Standard settings
+
+.setting.adsense.altcolor=Alternative
+
+.setting.adsense.txt=text
+
+.setting.adsense.graph=graphic
+
+.setting.adsense.txtgraph=text and graphic
+
+.setting.adsense.settype=Type of banner set:
+
+.setting.adsense.autoset=Automatic
+
+.setting.adsense.handset=Code for custom style
+
+.setting.adsense.codeset=Copy the code below:
+
+.setting.adsense.refresh=Refresh
+
+.setting.adsense.showother=I want to see AdSense over LJCOM
+
+.setting.adsense.schemes.about=Only two banners will be available for you if you have Minimalism as a journal style. You can change <a href="[[uri]]">style of your journal</a>.
+
+.setting.adsense.status.current=Current status
+
+.setting.adsense.status.update=Update status
+
+.setting.adsense.submit=Submit
+
+.setting.adsense.customize.style=Text about  styles customization.
+
+.setting.adsense.user=User's Google AdSense account
 
 .setting.integration.msn.activate=Account registration
 
