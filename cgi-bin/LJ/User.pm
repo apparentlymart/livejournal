@@ -1135,7 +1135,17 @@ sub mogfs_userpic_key {
 #   RELEASE_LOCK
 
 sub talk2_do {
-    my ($u, $nodetype, $nodeid, $errref, $sql, @args) = @_;
+    #my ($u, $nodetype, $nodeid, $errref, $sql, @args) = @_;
+    my $u = shift;
+    my %args = @_;
+    my $nodetype = $args{nodetype};
+    my $nodeid   = $args{nodeid};
+    my $errref   = $args{errref};
+    my $sql      = $args{sql};
+    my @bindings = ref $args{bindings} eq 'ARRAY' ? @{$args{bindings}} : ();
+    my $flush_cache = exists $args{flush_cache} ? $args{flush_cache} : 1;
+    
+    # some checks
     return undef unless $nodetype =~ /^\w$/;
     return undef unless $nodeid =~ /^\d+$/;
     return undef unless $u->writer;
@@ -1146,13 +1156,18 @@ sub talk2_do {
     my $lockkey = $memkey->[1];
 
     $dbcm->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
-    my $ret = $u->do($sql, undef, @args);
+    my $ret = $u->do($sql, undef, @bindings);
     $$errref = $u->errstr if ref $errref && $u->err;
     $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
-    LJ::MemCache::delete($memkey, 0) if int($ret);
+    # flush talks tree.
+    LJ::MemCache::delete($memkey, 0) if int($ret) and $flush_cache;
+
     return $ret;
 }
+
+
+
 
 # log2_do
 # see comments for talk2_do

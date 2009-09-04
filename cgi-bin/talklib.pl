@@ -23,6 +23,8 @@ use Class::Autouse qw(
 use MIME::Words;
 use Carp qw(croak);
 
+use constant PACK_FORMAT => "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state 
+
 # dataversion for rate limit logging
 our $RATE_DATAVER = "1";
 
@@ -629,10 +631,10 @@ sub freeze_comments {
     # now perform action
     my $in = join(',', map { $_+0 } @$ids);
     my $newstate = $unfreeze ? 'A' : 'F';
-    my $res = $u->talk2_do($nodetype, $nodeid, undef,
-                           "UPDATE talk2 SET state = '$newstate' " .
-                           "WHERE journalid = $quserid AND nodetype = $qnodetype " .
-                           "AND nodeid = $qnodeid AND jtalkid IN ($in)");
+    my $res = $u->talk2_do(nodetype => $nodetype, nodeid => $nodeid,
+                           sql =>   "UPDATE talk2 SET state = '$newstate' " .
+                                    "WHERE journalid = $quserid AND nodetype = $qnodetype " .
+                                    "AND nodeid = $qnodeid AND jtalkid IN ($in)");
 
     # invalidate talk2row memcache props
     LJ::Talk::invalidate_talk2row_memcache($u->id, @$ids);
@@ -652,11 +654,11 @@ sub screen_comment {
 
     my $userid = $u->{'userid'} + 0;
 
-    my $updated = $u->talk2_do("L", $itemid, undef,
-                               "UPDATE talk2 SET state='S' ".
-                               "WHERE journalid=$userid AND jtalkid IN ($in) ".
-                               "AND nodetype='L' AND nodeid=$itemid ".
-                               "AND state NOT IN ('S','D')");
+    my $updated = $u->talk2_do(nodetype => "L", nodeid => $itemid,
+                               sql =>   "UPDATE talk2 SET state='S' ".
+                                        "WHERE journalid=$userid AND jtalkid IN ($in) ".
+                                        "AND nodetype='L' AND nodeid=$itemid ".
+                                        "AND state NOT IN ('S','D')");
     return undef unless $updated;
 
     # invalidate talk2row memcache props
@@ -683,11 +685,11 @@ sub unscreen_comment {
     my $userid = $u->{'userid'} + 0;
     my $prop = LJ::get_prop("log", "hasscreened");
 
-    my $updated = $u->talk2_do("L", $itemid, undef,
-                               "UPDATE talk2 SET state='A' ".
-                               "WHERE journalid=$userid AND jtalkid IN ($in) ".
-                               "AND nodetype='L' AND nodeid=$itemid ".
-                               "AND state='S'");
+    my $updated = $u->talk2_do(nodetype => "L", nodeid => $itemid,
+                               sql =>   "UPDATE talk2 SET state='A' ".
+                                        "WHERE journalid=$userid AND jtalkid IN ($in) ".
+                                        "AND nodetype='L' AND nodeid=$itemid ".
+                                        "AND state='S'");
     return undef unless $updated;
 
     LJ::Talk::invalidate_talk2row_memcache($u->id, @jtalkids);
@@ -754,10 +756,10 @@ sub get_talk_data_do
 
     # check for data in memcache
     my $DATAVER = "3";  # single character
-    my $PACK_FORMAT = "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state
     my $RECORD_SIZE = 17;
 
     my $memkey = [$u->{'userid'}, "talk2:$u->{'userid'}:$nodetype:$nodeid"];
+
     my $lockkey = $memkey->[1];
     my $packed = LJ::MemCache::get($memkey);
 
@@ -829,7 +831,8 @@ sub get_talk_data_do
     my $memcache_decode = sub {
         my $n = (length($packed) - 1) / $RECORD_SIZE;
         for (my $i=0; $i<$n; $i++) {
-            my ($talkid, $par, $poster, $time, $state) = unpack($PACK_FORMAT,substr($packed,$i*$RECORD_SIZE+1,$RECORD_SIZE));
+            my ($talkid, $par, $poster, $time, $state) = unpack(LJ::Talk::PACK_FORMAT, substr($packed,$i*$RECORD_SIZE+1,$RECORD_SIZE));
+
             $state = chr($state);
             $ret->{$talkid} = {
                 talkid => $talkid,
@@ -896,7 +899,7 @@ sub get_talk_data_do
             LJ::Talk::add_talk2row_memcache($u->id, $r->{talkid}, \%row_arg);
         }
 
-        $memval .= pack($PACK_FORMAT,
+        $memval .= pack(LJ::Talk::PACK_FORMAT,
                         $r->{'talkid'},
                         $r->{'parenttalkid'},
                         $r->{'posterid'},
@@ -2647,16 +2650,31 @@ sub enter_comment {
     my $posterid = $comment->{u} ? $comment->{u}{userid} : 0;
 
     my $errstr;
-    $journalu->talk2_do("L", $itemid, \$errstr,
-                 "INSERT INTO talk2 ".
-                 "(journalid, jtalkid, nodetype, nodeid, parenttalkid, posterid, datepost, state) ".
-                 "VALUES (?,?,'L',?,?,?,NOW(),?)",
-                 $journalu->{userid}, $jtalkid, $itemid, $partid, $posterid, $comment->{state});
+    $journalu->talk2_do(nodetype => "L", nodeid => $itemid, errref => \$errstr,
+                        sql =>  "INSERT INTO talk2 ".
+                                "(journalid, jtalkid, nodetype, nodeid, parenttalkid, posterid, datepost, state) ".
+                                "VALUES (?,?,'L',?,?,?,NOW(),?)",
+                        bindings => [$journalu->{userid}, $jtalkid, $itemid, $partid, $posterid, $comment->{state}],
+                        flush_cache => 0, # do not flush cache with talks tree, just append a new comment.
+                        );
     if ($errstr) {
         return $err->("Database Error",
             "There was an error posting your comment to the database.  " .
             "Please report this.  The error is: <b>$errstr</b>");
     }
+
+    # append new comment to memcached tree
+    {
+        my $memkey = [$journalu->{'userid'}, "talk2:$journalu->{'userid'}:L:$itemid"];
+        my $append = pack(LJ::Talk::PACK_FORMAT,
+                        $jtalkid,
+                        $partid,
+                        $posterid,
+                        time(),
+                        ord($comment->{state}));
+        my $res = LJ::MemCache::append($memkey, $append);
+    }
+
 
     LJ::MemCache::incr([$journalu->{'userid'}, "talk2ct:$journalu->{'userid'}"]);
 
