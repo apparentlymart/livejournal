@@ -6,6 +6,7 @@ require "ljlib.pl";
 require "ljemailgateway.pl";
 require "supportlib.pl";
 require "sysban.pl";
+require "ljfeed.pl";
 
 package LJ::NewWorker::TheSchwartz::IncomingEmail;
 use base 'LJ::NewWorker::TheSchwartz';
