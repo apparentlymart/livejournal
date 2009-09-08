@@ -1,9 +1,9 @@
 #
 # Wrapper around MemCachedClient
 
-use lib "$ENV{LJHOME}/cgi-bin";
 package LJ::MemCache;
 use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
 
 my $use_fast = not $LJ::DISABLED{disabled_cache_memcached_fast};
 if ($use_fast){
@@ -160,10 +160,9 @@ sub decr      { $memc->decr(@_);      }
 
 sub get       {
     return undef if $GET_DISABLED;
-    if (ref $_[0] eq 'ARRAY'){ # Cache::Memcached::Fast does not support combo [int, key] keys.
-        $_[0] = $_[0][1];
-    }
-    $memc->get(@_);
+    my ($key, @others) = @_;
+    $key = $key->[1] if  ref $key eq 'ARRAY'; # Cache::Memcached::Fast does not support combo [int, key] keys.
+    $memc->get($key, @others);
 }
 
 ## gets supported only by ::Fast interface
@@ -183,23 +182,18 @@ sub gets_multi {
     return if $GET_DISABLED or not $use_fast;
 
     # Cache::Memcached::Fast does not support combo [int, key] keys.
-    @_ = map {
-                $_[0] = $_[0][1] if ref $_[0] eq 'ARRAY';
-                $_;
-             } @_;
+    my @keys = map { ref $_ eq 'ARRAY' ? $_[1] : $_ } @_;
 
-    return $memc->gets_multi(@_);
+    return $memc->gets_multi(@keys);
 }
 
 ##
 sub get_multi {
     return {} if $GET_DISABLED;
     # Cache::Memcached::Fast does not support combo [int, key] keys.
-    @_ = map {
-                $_[0] = $_[0][1] if ref $_[0] eq 'ARRAY';
-                $_;
-             } @_;
-    $memc->get_multi(@_);
+    my @keys = map { ref $_ eq 'ARRAY' ? $_[1] : $_ } @_;
+    
+    return $memc->get_multi(@keys);
 }
 
 sub append {
@@ -291,5 +285,7 @@ sub get_or_set {
     LJ::MemCache::set($memkey, $val, $expire);
     return $val;
 }
+
+
 
 1;
