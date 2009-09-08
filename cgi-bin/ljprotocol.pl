@@ -29,6 +29,9 @@ require "taglib.pl";
 # to do it if the site has enabled the hack
 require "talklib.pl" if $LJ::NEW_ENTRY_CLEANUP_HACK;
 
+# when posting or editing ping hubbub
+require "ljfeed.pl" unless $LJ::DISABLED{'hubbub'};
+
 #### New interface (meta handler) ... other handlers should call into this.
 package LJ::Protocol;
 
