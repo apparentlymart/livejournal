@@ -3380,6 +3380,12 @@ widget.customizetheme.nav.style=Style
 
 widget.customizetheme.title=Customize Your Theme
 
+widget.featuredstyles.title=Featured Styles
+
+widget.featuredstyles.viewall=More
+
+widget.featuredstyles.morestyles=More great styles
+
 widget.feeds.btn.add=Add
 
 widget.feeds.enterRSS=enter RSS url
@@ -3402,9 +3408,13 @@ widget.friendbirthdays.userbirthday=[[month]] [[day]]
 
 widget.friendbirthdays.viewall=More
 
+widget.friendbirthdays.moregifts=More free gifts
+
 widget.friendinterests.intro=You might also like some things your friend [[user]] is interested in:
 
 widget.friendupdates.noupdates=You have no updates.
+
+widget.friendupdates.statistics=<a [[aopts]]>Check full blog stats</a>
 
 widget.friendupdates.noupdates.setup=Set up your notifications in <a [[aopts]]>Manage Settings</a>.
 
@@ -3793,6 +3803,8 @@ widget.themenav.filteravailable=Only show themes available to me
 widget.themenav.switchtos1=Switch to old style system (S1)
 
 widget.themenav.title=2. Select a New Theme
+
+widget.upgradeaccount.title=Upgrade your account
 
 widget.verticaleditorials.byperson=by [[person]]
 
