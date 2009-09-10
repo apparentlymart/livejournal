@@ -50,6 +50,14 @@ sub render_body {
 
     $ret .= "</table></div>";
 
+	$ret .= "<ul class='giftlist'>
+				<li>1</li>
+			 	<li>2</li>
+			 	<li>3</li>
+			</ul>";
+
+	$ret .= "<a href='$LJ::SITEROOT/shop/vgifts.bml'>" . $class->ml('widget.friendbirthdays.moregifts') . " &rarr;</a>";
+
     $ret .= "<p class='indent_sm'>&raquo; <a href='$LJ::SITEROOT/birthdays.bml'>" .
             $class->ml('widget.friendbirthdays.friends_link') .
             "</a></p>" if $opts{friends_link};
