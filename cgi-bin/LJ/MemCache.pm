@@ -19,7 +19,7 @@ my $keep_complex_keys = (not $use_fast # Cache::Memcache::Fast does not support 
                                 and not $LJ::DISABLED{complex_keys_simplification})
                                 ) ? 1 : 0;
 warn "Keep complex keys: $keep_complex_keys";
-warn "Use " , ($use_fast ? "Cache::Memcached::Fast" : "Cache::Memcached";
+warn "Use " . ($use_fast ? "Cache::Memcached::Fast" : "Cache::Memcached");
 
 
 use vars qw($GET_DISABLED);
@@ -211,7 +211,7 @@ sub get_multi {
     # Cache::Memcached::Fast does not support combo [int, key] keys.
     my @keys = $keep_complex_keys
         ? @_
-        : map { ref $_ eq 'ARRAY' ? $_->[1] : $_ } @_
+        : map { ref $_ eq 'ARRAY' ? $_->[1] : $_ } @_;
     
     return $memc->get_multi(@keys);
 }
