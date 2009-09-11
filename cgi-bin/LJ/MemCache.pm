@@ -6,7 +6,7 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 
 ##
-my $use_fast = not $LJ::DISABLED{disabled_cache_memcached_fast};
+my $use_fast = not $LJ::DISABLED{cache_memcached_fast};
 if ($use_fast){
     require Cache::Memcached::Fast;
 } else {
@@ -14,9 +14,12 @@ if ($use_fast){
 }
 
 ##
-my $no_complex_keys = ($use_fast and not $LJ::DISABLED{complex_keys_simplification});
-warn "NO COMPLEX KEYS: $no_complex_keys";
-
+my $keep_complex_keys = (not $use_fast # Cache::Memcache::Fast does not support composite keys.
+                            or (exists $LJ::DISABLED{complex_keys_simplification}
+                                and not $LJ::DISABLED{complex_keys_simplification})
+                                ) ? 1 : 0;
+warn "Keep complex keys: $keep_complex_keys";
+warn "Use " , ($use_fast ? "Cache::Memcached::Fast" : "Cache::Memcached";
 
 
 use vars qw($GET_DISABLED);
@@ -132,32 +135,37 @@ sub forget_dead_hosts { $memc->forget_dead_hosts(); }
 sub disconnect_all    { $memc->disconnect_all();    }
 
 sub delete {
+    my $key = shift;
+    my $exp = shift;
+    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
+        if ref $key eq 'ARRAY' and not $keep_complex_keys;
+
     # use delete time if specified
-    return $memc->delete(@_) if defined $_[1];
+    return $memc->delete($key, $exp) if defined $exp;
 
     # else default to 4 seconds:
     # version 1.1.7 vs. 1.1.6
-    $memc->delete(@_, 4) || $memc->delete(@_);
+    $memc->delete($key, 4) || $memc->delete($key);
 }
 
 sub add       { 
     my ($key, $val, $exp) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and $no_complex_keys;
+        if ref $key eq 'ARRAY' and not $keep_complex_keys;
     $val = '' unless defined $val;
     return $memc->add($key, $val, $exp);
 }
 sub replace   { 
     my ($key, $val) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and $no_complex_keys;
+        if ref $key eq 'ARRAY' and not $keep_complex_keys;
     $val = '' unless defined $val;
     return $memc->replace($key, $val);
 }
 sub set       { 
     my ($key, $val, $exp) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and $no_complex_keys;
+        if ref $key eq 'ARRAY' and not $keep_complex_keys;
     $val = '' unless defined $val;
     $memc->set($key, $val, $exp);
 }
@@ -169,7 +177,7 @@ sub get       {
     my ($key, @others) = @_;
     $key = $key->[1] 
         if ref $key eq 'ARRAY'
-           and $no_complex_keys; # Cache::Memcached::Fast does not support combo [int, key] keys.
+           and not $keep_complex_keys; # Cache::Memcached::Fast does not support combo [int, key] keys.
     $memc->get($key, @others);
 }
 
@@ -192,7 +200,7 @@ sub gets_multi {
     return if $GET_DISABLED or not $use_fast;
 
     # Cache::Memcached::Fast does not support combo [int, key] keys.
-    my @keys = map { ref $_ eq 'ARRAY' ? $_[1] : $_ } @_;
+    my @keys = map { ref $_ eq 'ARRAY' ? $_->[1] : $_ } @_;
 
     return $memc->gets_multi(@keys);
 }
@@ -201,7 +209,9 @@ sub gets_multi {
 sub get_multi {
     return {} if $GET_DISABLED;
     # Cache::Memcached::Fast does not support combo [int, key] keys.
-    my @keys = map { ref $_ eq 'ARRAY' ? $_[1] : $_ } @_;
+    my @keys = $keep_complex_keys
+        ? @_
+        : map { ref $_ eq 'ARRAY' ? $_->[1] : $_ } @_
     
     return $memc->get_multi(@keys);
 }
@@ -209,7 +219,7 @@ sub get_multi {
 sub append {
     my ($key, $val) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and $no_complex_keys;
+        if ref $key eq 'ARRAY' and not $keep_complex_keys;
     $val = '' unless defined $val;
     return $use_fast
         ? $memc->append($key, $val)
@@ -220,7 +230,7 @@ sub prepend {
     my ($key, $val) = @_;
     
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and $no_complex_keys;
+        if ref $key eq 'ARRAY' and not $keep_complex_keys;
     $val = '' unless defined $val;
     return $use_fast
         ? $memc->prepend($key, $val)
@@ -230,7 +240,7 @@ sub prepend {
 sub cas {
     my ($key, $cas, $val) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and $no_complex_keys;
+        if ref $key eq 'ARRAY' and not $keep_complex_keys;
     $val = '' unless defined $val;
     return $use_fast 
         ? $memc->cas($key, $cas, $val)
