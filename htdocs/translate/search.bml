@@ -24,7 +24,8 @@
         return "This search type is restricted to $l->{'lnname'} translators." unless
             (LJ::check_priv($remote, "translate", "*") ||
              LJ::check_priv($remote, "translate", $l->{'lncode'}) ||
-             LJ::check_priv($remote, "faqedit", "*")); # FAQ admins can search too
+             LJ::check_priv($remote, "faqedit", "*") ||
+             $LJ::IS_DEV_SERVER); # FAQ admins can search too
 
         my $qtext = $dbr->quote($FORM{'searchtext'});
         my $dmid = $FORM{'searchdomain'}+0;
@@ -70,7 +71,7 @@
     $addlink->();
  
     if ($page == 0) { $ret .= "<i>(No matches)</i>"; }
-    
+
     return $ret;
     
 }

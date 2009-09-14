@@ -26,9 +26,10 @@
 
  my $remote = LJ::get_remote();
  my $can_edit = (LJ::check_priv($remote, "translate", "*") ||
-                 LJ::check_priv($remote, "translate", $l->{'lncode'}));
- my $can_delete = LJ::check_priv($remote, "translate", "[itemdelete]");
- my $can_rename = LJ::check_priv($remote, "translate", "[itemrename]");
+                 LJ::check_priv($remote, "translate", $l->{'lncode'}) ||
+                 $LJ::IS_DEV_SERVER);
+ my $can_delete = LJ::check_priv($remote, "translate", "[itemdelete]") || $LJ::IS_DEV_SERVER;
+ my $can_rename = LJ::check_priv($remote, "translate", "[itemrename]") || $LJ::IS_DEV_SERVER;
 
  my $mode = {
      '' => 'view', 
