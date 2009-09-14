@@ -467,6 +467,7 @@ sub can_add_tags {
     # get permission hashref and check it; note that we fall back to the control
     # permission, which will allow people to add even if they can't add by default
     my $perms = LJ::Tags::get_permission_levels($u);
+
     return LJ::Tags::_remote_satisfies_permission($u, $remote, $perms->{add}) ||
            LJ::Tags::_remote_satisfies_permission($u, $remote, $perms->{control});
 }
@@ -541,6 +542,8 @@ sub _remote_satisfies_permission {
         return LJ::is_friend($u, $remote);
     } elsif ($perm eq 'private') {
         return LJ::can_manage($remote, $u);
+    } elsif ($perm eq 'author_moder'){
+        return (LJ::can_manage($remote, $u) || LJ::is_friend($u, $remote));
     } elsif ($perm =~ /^group:(\d+)$/) {
         my $grpid = $1+0;
         return undef unless $grpid >= 1 && $grpid <= 30;
