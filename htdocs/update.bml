@@ -103,7 +103,8 @@
     my $qotd = $qid ? LJ::QotD->get_single_question($qid) : '';
     if ($qotd) {
         $subject = LJ::Widget::QotD->subject_text($qotd, user => $remote);
-        $event = LJ::Widget::QotD->embed_text($qotd);
+        my $lncode = ($remote && $remote->prop('browselang')) ? $remote->prop('browselang') : 'en_LJ';
+        $event = LJ::Widget::QotD->embed_text($qotd, $lncode);
         $tags = LJ::Widget::QotD->tags_text($qotd);
         my $text = LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], form_disabled => 1 );
         $$head .= "<script>LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";

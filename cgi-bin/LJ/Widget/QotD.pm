@@ -25,8 +25,11 @@ sub render_body {
 
     return "" unless @questions;
 
+    # If there is no lang tag, try to get user settings or use 'en_LJ' as default language.
+    $opts{lang} ||= ($u && $u->prop('browselang')) ? $u->prop('browselang') : 'en_LJ';
+
     unless ($embed || $archive) {
-        my $title = LJ::run_hook("qotd_title", $u) || $class->ml('widget.qotd.title');
+        my $title = LJ::run_hook("qotd_title", $u, $opts{lang}) || $class->ml('widget.qotd.title', undef, $opts{lang});
         $ret .= "<h2>$title";
     }
 
@@ -135,8 +138,10 @@ sub _get_question_data {
     #       -- Chernyshev 2009/01/21
 
     my $remote = LJ::get_remote();
-    my $lncode = ($remote && $remote->prop('browselang')) ?
-         $remote->prop('browselang') : 'en_LJ';
+    my $lncode = $opts->{lang} || (
+        ($remote && $remote->prop('browselang')) ?
+            $remote->prop('browselang') : 'en_LJ'
+    );
 
     my $ml_key = $class->ml_key("$q->{qid}.text");
     my $text = $class->ml($ml_key, undef, $lncode);
@@ -288,8 +293,9 @@ sub subject_text {
 sub embed_text {
     my $class = shift;
     my $question = shift;
+    my $lncode = shift || 'en_LJ';
 
-    return qq{<lj-template name="qotd" id="$question->{qid}" />};
+    return qq{<lj-template name="qotd" id="$question->{qid}" lang="$lncode" />};
 }    
 
 sub event_text {
