@@ -261,8 +261,13 @@ sub strip_html {
                 handlers => {
                     text  => [sub { $_[0]->{res} .= $_[1] }, 'self, text'], # concat plain text
                     # handle tags
-                    start => [sub { $_[0]->{res} .= $_[2]->{user} if $_[1] eq 'lj'; # <lj user="username" title=".."> -> username
-                                    $_[0]->{res} .= ' ' if $opts->{use_space} and $_[1] ne 'lj'; # for other tags add spaces if needed.
+                    start => [sub { 
+                                    my ($self, $tag, $attrs) = @_;
+                                    if ($tag =~ /lj/i){
+                                        $self->{res} .= $attrs->{user} || $attrs->{comm};  # <lj user="username" title=".."> -> username
+                                    } else {
+                                        $self->{res} .= ' ' if $opts->{use_space}; # for other tags add spaces if needed.
+                                    }
                                    },
                                    'self, tagname, attr, text'
                                ],
