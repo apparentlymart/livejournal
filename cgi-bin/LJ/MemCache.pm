@@ -145,7 +145,7 @@ sub delete {
 
     # else default to 4 seconds:
     # version 1.1.7 vs. 1.1.6
-    $memc->delete($key, 4) || $memc->delete($key);
+    $memc->delete($key, 1) || $memc->delete($key);
 }
 
 sub add       { 
@@ -169,8 +169,18 @@ sub set       {
     $val = '' unless defined $val;
     $memc->set($key, $val, $exp);
 }
-sub incr      { $memc->incr(@_);      }
-sub decr      { $memc->decr(@_);      }
+sub incr      {
+    my ($key, @other) = @_;
+    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
+            if ref $key eq 'ARRAY' and not $keep_complex_keys;
+    $memc->incr($key, @other);
+}
+sub decr      {
+    my ($key, @other) = @_;
+    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
+            if ref $key eq 'ARRAY' and not $keep_complex_keys;
+    $memc->decr($key, @other);
+}
 
 sub get       {
     return undef if $GET_DISABLED;
