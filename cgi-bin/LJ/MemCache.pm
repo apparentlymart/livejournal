@@ -7,6 +7,10 @@ use lib "$ENV{LJHOME}/cgi-bin";
 
 ##
 my $use_fast = not $LJ::DISABLED{cache_memcached_fast};
+
+# HACK: Hardcode option for the 54 release
+$use_fast = 0; 
+
 if ($use_fast){
     require Cache::Memcached::Fast;
 } else {
@@ -18,8 +22,9 @@ my $keep_complex_keys = (not $use_fast # Cache::Memcache::Fast does not support 
                             or (exists $LJ::DISABLED{complex_keys_simplification}
                                 and not $LJ::DISABLED{complex_keys_simplification})
                                 ) ? 1 : 0;
-warn "Keep complex keys: $keep_complex_keys";
-warn "Use " . ($use_fast ? "Cache::Memcached::Fast" : "Cache::Memcached");
+
+# HACK: Hardcode option for the 54 release
+$keep_complex_keys = 1;
 
 
 use vars qw($GET_DISABLED);
