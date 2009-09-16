@@ -1773,6 +1773,16 @@ sub xmlrpc_method {
     shift;   # get rid of package name that dispatcher includes.
     my $req = shift;
 
+    # For specified methods
+    if ($LJ::XMLRPC_VALIDATION_METHOD{$method}) {
+        # Deny access for accounts that have not validated their email
+        my $u = LJ::load_user($req->{'username'});
+        unless ($u->is_validated) {
+            die SOAP::Fault
+                ->faultstring("Account not validated.");
+       }
+    }
+
     if (@_) {
         # don't allow extra arguments
         die SOAP::Fault
