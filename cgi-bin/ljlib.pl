@@ -8,6 +8,10 @@ BEGIN {
     # ljlib.pl (via require, ick!).  so this lets them know if it's recursive.
     # we REALLY need to move the rest of this crap to .pm files.
     $LJ::_LJLIB_INIT = 1;
+
+    # All config options have to be loaded before any modules that depends on them.
+    use LJ::Config;
+    LJ::Config->load;
 }
 
 use lib "$ENV{LJHOME}/cgi-bin";
@@ -27,6 +31,7 @@ use LJ::User;
 use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
+use HTML::Entities ();
 
 use Class::Autouse qw(
                       TheSchwartz
@@ -2724,7 +2729,6 @@ sub delete_comments {
 
     my $num = $u->talk2_do(nodetype => $nodetype, nodeid => $nodeid,
                            sql => "UPDATE talk2 SET state='D' $where");
-
     return 0 unless $num;
     $num = 0 if $num == -1;
 
@@ -3087,7 +3091,6 @@ sub alloc_global_counter
         $newmax = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
         return $newmax;
     }
-
     return undef if $recurse;
 
     # no prior counter rows - initialize one.
@@ -3117,8 +3120,27 @@ sub alloc_global_counter
     }
     $newmax += 0;
     $dbh->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
-             undef, $uid, $dom, $newmax) or return LJ::errobj($dbh)->cond_throw;
-    return LJ::alloc_global_counter($dom, 1);
+             undef, $uid, $dom, $newmax) or die $dbh->errstr;
+             #return LJ::errobj($dbh)->cond_throw;
+    return LJ::alloc_global_counter($dom_unmod, 1);
+}
+sub global_coounter_value {
+    my $dom = shift;
+    my $dbr = LJ::get_db_reader();
+    return undef unless $dbr;
+
+    # $dom can come as a direct argument or as a string to be mapped via hook
+    my $dom_unmod = $dom;
+    # Yes, that's a duplicate L in the regex for xtra LOLS
+    unless ($dom =~ /^[MLOLSPACE]$/) {
+        $dom = LJ::run_hook('map_global_counter_domain', $dom);
+    }
+    return LJ::errobj("InvalidParameters", params => { dom => $dom_unmod })->cond_throw
+        unless defined $dom;
+    my ($max) = $dbr->selectrow_array("SELECT max FROM counter WHERE area = ? AND journalid = ?", undef,
+                        $dom, "0");
+    return $max;
+
 }
 
 sub system_userid {
