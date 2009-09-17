@@ -50,11 +50,18 @@ sub render_body {
 
     $ret .= "</table></div>";
 
-	$ret .= "<ul class='giftlist'>
-				<li>1</li>
-			 	<li>2</li>
-			 	<li>3</li>
-			</ul>";
+    my $to = $u->user;
+    $to =~ s/([^a-zA-Z0-9-_])//g; # Remove bad chars from lj-user name
+
+	$ret .= "<ul class='giftlist'>";
+    foreach my $vg_key (@LJ::FRIEND_BIRTHDAYS_VGIFTS) {
+        my $vg = LJ::Pay::ShopVGift->new(id => $vg_key);
+        my $vg_key_name = $vg->keyname;
+        my $hover = LJ::ehtml(BML::ml("vgift.$vg_key_name.anon"));
+        my $img_small = $vg->small_img_url;
+        $ret .= "<li><div class='vg_img'><img src='$img_small' alt='$hover' title='$hover' /></div></li>";
+    }
+	$ret .=	"</ul>";
 
 	$ret .= "<a href='$LJ::SITEROOT/shop/vgifts.bml'>" . $class->ml('widget.friendbirthdays.moregifts') . " &rarr;</a>";
 
