@@ -50,21 +50,23 @@ sub render_body {
 
     $ret .= "</table></div>";
 
-    my $to = $u->user;
-    $to =~ s/([^a-zA-Z0-9-_])//g; # Remove bad chars from lj-user name
+    unless ($LJ::DISABLED{'vgift_list'}) {
+        my $to = $u->user;
+        $to =~ s/([^a-zA-Z0-9-_])//g; # Remove bad chars from lj-user name
 
-    my @friend_birtdays_vgifts = LJ::run_hook('get_friend_birthdays_vgifts', $u);
-    @friend_birtdays_vgifts = @LJ::FRIEND_BIRTHDAYS_VGIFTS unless @friend_birtdays_vgifts;
-	$ret .= "<ul class='giftlist'>";
-    foreach my $vg_key (@friend_birtdays_vgifts) {
-        next unless $vg_key;
-        my $vg = LJ::Pay::ShopVGift->new(id => $vg_key);
-        my $vg_key_name = $vg->keyname;
-        my $hover = LJ::ehtml(BML::ml("vgift.$vg_key_name.anon"));
-        my $img_small = $vg->small_img_url;
-        $ret .= "<li><div class='vg_img'><img src='$img_small' alt='$hover' title='$hover' /></div></li>";
+        my @friend_birtdays_vgifts = LJ::run_hook('get_friend_birthdays_vgifts', $u);
+        @friend_birtdays_vgifts = @LJ::FRIEND_BIRTHDAYS_VGIFTS unless @friend_birtdays_vgifts;
+        $ret .= "<ul class='giftlist'>";
+        foreach my $vg_key (@friend_birtdays_vgifts) {
+            next unless $vg_key;
+            my $vg = LJ::Pay::ShopVGift->new(id => $vg_key);
+            my $vg_key_name = $vg->keyname;
+            my $hover = LJ::ehtml(BML::ml("vgift.$vg_key_name.anon"));
+            my $img_small = $vg->small_img_url;
+            $ret .= "<li><div class='vg_img'><img src='$img_small' alt='$hover' title='$hover' /></div></li>";
+        }
+        $ret .=	"</ul>";
     }
-	$ret .=	"</ul>";
 
 	$ret .= "<a href='$LJ::SITEROOT/shop/vgifts.bml'>" . $class->ml('widget.friendbirthdays.moregifts') . " &rarr;</a>";
 
