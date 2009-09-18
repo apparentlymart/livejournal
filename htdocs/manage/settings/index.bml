@@ -402,7 +402,15 @@ body<=
         $ret .= LJ::form_auth();
     }
     $ret .= "<div class='settings_content'>";
-    $ret .= "<div class='$given_cat'>";
+    
+    ## small hack: class 'adsense' is removed by FF plugin AdBlock,
+    ## so for category 'adsense' class is 'lj_adsense' 
+    if ($given_cat eq "adsense") {
+        $ret .= "<div class='lj_adsense'>";
+    } else {
+        $ret .= "<div class='$given_cat'>";
+    }
+    
 
     if ($given_cat eq "notifications") {
         my $my_account_extra = LJ::run_hook('subscriptions_manage_my_account_extra', $u);

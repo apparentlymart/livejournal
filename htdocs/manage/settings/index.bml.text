@@ -235,6 +235,8 @@ as well.
 
 .setting.adsense.signin=I have AdSense account
 
+.setting.adsense.choose=Please check the box that applies:
+
 .setting.adsense.newaccount=Create a new Google AdSense account
 
 .setting.adsense.email=E-mail
@@ -255,11 +257,15 @@ as well.
 
 .setting.adsense.interactive.scheme=Ads interactive scheme
 
+.setting.adsense.appearance.text=Please choose ad formats and ad types for Google AdSense ads which will be visible in your journal. 
+
 .setting.adsense.horiz_top=728x90 Top
 
 .setting.adsense.horiz_bottom=728x90 Bottom
 
 .setting.adsense.colors=Colors
+
+.setting.adsense.colors.hint=You can choose color by entering HEX-value or via palette, that will open by click on color box
 
 .setting.adsense.bgcolor=Background
 

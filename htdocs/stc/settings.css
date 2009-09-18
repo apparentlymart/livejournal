@@ -73,21 +73,21 @@
 /* Shared Content */
 .account table, .display table, .mobile table, 
 .privacy table, .history table, .advertising table, .extension table, .extensions table,
-.adsense table {
+.lj_adsense table {
     width: 100%;
 }
 .account td, .display td, .mobile td, .privacy td, .history td, .advertising td, .integration td, 
-.extensions td, .adsense td {
+.extensions td, .lj_adsense td {
     border-bottom: 1px #ccc solid;
     padding: 10px 10px 10px 5px;
 }
 .account td.last, .display td.last, .mobile td.last, .privacy td.last, 
 .history td.last, .advertising td.last, .extension td.last, 
-.extensions td.last, .adsense td {
+.extensions td.last, .lj_adsense td {
     border-bottom: none;
 }
 .account td.help, .display td.help, .mobile td.help, .privacy td.help, 
-.history td.help, .advertising td.help .extensions td.help, .adsense td.help {
+.history td.help, .advertising td.help .extensions td.help, .lj_adsense td.help {
     width: 14px;
     text-align: right;
 }
@@ -315,15 +315,20 @@
 }
 
 /* Google Adsense Content */
-.adsense {
+.lj_adsense {
 	position: relative;
+	zoom: 1;
 	}
-.adsense UL {
+* HTML .lj_adsense TABLE {
+	position: relative;
+	zoom: 1;
+}
+.lj_adsense UL {
 	margin: .7em 0 0;
 	padding: 0;
 	list-style: none;
 	}
-	.adsense UL LI {
+	.lj_adsense UL LI {
 		margin-bottom: 7px;
 		}
 
@@ -459,6 +464,14 @@
 	left: 5px;
 	margin: 0;
 	}
+* HTML .adsense_option .setting-type {
+	zoom: 1;
+	height: 1%;	
+	position: relative;
+	margin-left: -185px;
+	float: left;
+}
+
 	.adsense_option .setting-type LI {
 		font-size: 11px;
 		}
@@ -477,6 +490,14 @@
 	background: url('/img/corners/adsense-tabs.gif') repeat-x 0 100%;
 	margin-bottom: 12px;
 	}
+
+*:first-child+html .adsense_option .adv-type-tabs  {
+	padding-bottom: 2px;
+	}
+
+* HTML .adsense_option .adv-type-tabs  {
+	padding-bottom: 2px;
+}
 	.adsense_option .adv-type-tabs LI {
 		zoom:1;
 		position:relative;
@@ -491,7 +512,7 @@
 		padding: 7px 10px 6px;
 		margin: 0px 7px 0px 0px;
 		border-bottom: 1px solid #FFF;
-	
+		background: #FFF;
 	}
 	
 .adsense_option .adsense-banner {
@@ -536,7 +557,7 @@
 	position:relative;
 	z-index:100;
 	list-style:none;
-	margin:0 0 12px 0 !important;
+	margin:12px 0 12px 0 !important;
 	padding:0 0 18px;
 	border-bottom:1px solid #CCC;
 	zoom:1;
@@ -545,7 +566,7 @@
 		float:left;
 		display:inline;
 		width:133px;
-		margin:0 !important;
+		margin: 0 !important;
 		padding:0;
 		padding-bottom: 20px;
 		}
@@ -712,3 +733,21 @@
 			font-style:normal;
 			color:#D08707;
 			}
+			
+/* AdSense Help Icon correction for IE */
+*:first-child+html .lj_adsense DD A IMG {
+	vertical-align: bottom;
+	padding-bottom: 2px;
+}
+*:first-child+html .lj_adsense P A IMG {
+	vertical-align: bottom;
+	padding-bottom: 2px;
+}
+*HTML .lj_adsense DD A IMG {
+	vertical-align: bottom;
+	padding-bottom: 2px;
+}
+*HTML .lj_adsense P A IMG {
+	vertical-align: bottom;
+	padding-bottom: 2px;
+}
