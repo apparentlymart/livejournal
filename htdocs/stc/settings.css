@@ -492,11 +492,11 @@
 	}
 
 *:first-child+html .adsense_option .adv-type-tabs  {
-	padding-bottom: 2px;
+	padding-bottom: 1px;
 	}
 
 * HTML .adsense_option .adv-type-tabs  {
-	padding-bottom: 2px;
+	padding-bottom: 1px;
 }
 	.adsense_option .adv-type-tabs LI {
 		zoom:1;
@@ -507,14 +507,19 @@
 		margin: 0px 7px 2px 0px;
 		border: 1px solid #CCC;
 		border-width: 1px 1px 0px 1px;
-	}
+		}
 	.adsense_option .adv-type-tabs LI.cur {
 		padding: 7px 10px 6px;
 		margin: 0px 7px 0px 0px;
 		border-bottom: 1px solid #FFF;
 		background: #FFF;
-	}
-	
+		}
+	*:first-child+html .adsense_option .adv-type-tabs LI.cur {
+		border-bottom: none;
+		}
+	* HTML 	.adsense_option .adv-type-tabs LI.cur {
+		border-bottom: none;
+		}
 .adsense_option .adsense-banner {
 	float: left;
 	width: 100%;
