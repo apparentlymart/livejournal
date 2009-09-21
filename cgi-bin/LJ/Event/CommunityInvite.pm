@@ -137,10 +137,22 @@ sub as_sms {
 sub as_alert {
     my $self = shift;
     my $u = shift;
-    my $friend = $self->friend;
-    return '' unless $friend;
+
+    my $comm = $self->comm;
+    return '' unless $comm;
+    $comm = $comm->ljuser_display() if $comm;
+
+    my $inviter = $self->inviter;
+    $inviter = $inviter->ljuser_display() if $inviter;
+
     return LJ::Lang::get_text($u->prop('browselang'),
-        'esn.comm_invite.alert', undef, { user => $friend->ljuser_display() });
+        'esn.comm_invite.alert', undef,
+            {
+                user        => $comm, # for old ml-variable compatibility
+                community   => $comm,
+                inviter     => $inviter,
+            }
+        );
 }
 
 sub subscription_as_html {
