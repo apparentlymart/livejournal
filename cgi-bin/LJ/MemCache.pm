@@ -236,9 +236,16 @@ sub append {
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
         if ref $key eq 'ARRAY' and not $keep_complex_keys;
     $val = '' unless defined $val;
-    return $use_fast
+
+    ## Memcache v1.4.1 does not flush value if 'append' failed. But should!
+    ## Becouse value DO changed. Failed append means that cached key becomes invalid.
+    ## That's why we have to get result of command and delete key on if needed.
+    my $res = $use_fast
         ? $memc->append($key, $val)
         : _extended_set("append", $key, $val);
+    $memc->delete($key)
+        unless $res;
+    return $res;
 }
 
 sub prepend {
@@ -247,9 +254,14 @@ sub prepend {
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
         if ref $key eq 'ARRAY' and not $keep_complex_keys;
     $val = '' unless defined $val;
-    return $use_fast
+
+    ## See 'append' method for description.
+    my $res = $use_fast
         ? $memc->prepend($key, $val)
         : _extended_set("prepend", $key, $val);
+    $memc->delete($key)
+        unless $res;
+    return $res;
 }
 
 sub cas {
