@@ -227,6 +227,8 @@ as well.
 
 .setting.adsense.status=To see the Google Advertize, look the Terms of Service
 
+.setting.adsense.change=Change
+
 .setting.adsense.stats=Statistic
 
 .setting.adsense.invitation=I'd like to participate in revenue sharing program.
@@ -258,6 +260,8 @@ as well.
 .setting.adsense.interactive.scheme=Ads interactive scheme
 
 .setting.adsense.appearance.text=Please choose ad formats and ad types for Google AdSense ads which will be visible in your journal. 
+
+.setting.adsense.types.title=Advertising Type:
 
 .setting.adsense.horiz_top=728x90 Top
 
