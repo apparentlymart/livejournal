@@ -272,8 +272,9 @@ function deleteComment (ditemid) {
     	}
     }
     postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
+    var curJournal=(Site.currentJournal!="")?(Site.currentJournal):(LJ_cmtinfo.journal);
     var opts = {
-        url: LiveJournal.getAjaxUrl('delcomment')+'?mode=js&journal=' + Site.currentJournal + '&id=' + ditemid,
+        url: LiveJournal.getAjaxUrl('delcomment')+'?mode=js&journal=' + curJournal + '&id=' + ditemid,
         data: postdata,
         method: 'POST',
         onData: function(data) {
@@ -585,9 +586,8 @@ function createModerationFunction (ae, dItemid) {
         };
 
         xtr.onreadystatechange = state_callback;
-
-        var postUrl = ae.href.replace(/.+talkscreen\.bml/, "/" + Site.currentJournal + "/__rpc_talkscreen");
-
+    	var curJournal=(Site.currentJournal!="")?(Site.currentJournal):(LJ_cmtinfo.journal);
+        var postUrl = ae.href.replace(/.+talkscreen\.bml/, "/" + curJournal + "/__rpc_talkscreen");
         //var postUrl = ae.href;
         xtr.open("POST", postUrl + "&jsmode=1", true);
 
@@ -604,7 +604,7 @@ function setupAjax (node) {
     var links = node ? node.getElementsByTagName('a') : document.links,
         rex_id = /id=(\d+)/,
         i = -1, ae;
-
+    
     while (links[++i]) {
         ae = links[i];
         if (ae.href.indexOf('talkscreen.bml') != -1) {
