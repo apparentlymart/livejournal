@@ -550,6 +550,127 @@ sub text_uncompress
     return $ref ? undef : $$tref;
 }
 
+# trimm text for small widgets(myspace, yandexbar, facebook and etc.)
+# args:
+# text =>
+# length =>
+# img_length =>
+# return: trimmed text
+sub trim_widgets {
+     my %args = @_;
+     my $max_length = $args{length};
+     my $img_length = $args{img_length} || 50;
+     my @allow_tags = qw(img p li ol ul a br s strike table th tr td h1 h2 h3 h4 h5 h6 lj);
+     my @close_tags = qw(li ol ul a s strike h1 h2 h3 h4 h5 h6);
+     
+     my $event = '';
+     my $event_length = 0;
+     my $table_tags = 0;
+     my $buff = '';
+     my $buff_length = 0;
+     my @tags_stack;
+     my @parts = split /(<[^>]*>)/, $args{text};
+     while (defined(my $slice = shift @parts)){
+         if( my ($close_tag, $tag, $attrib) = ($slice =~ m#<(/?)\s*(\w+)(\s+[^>]*)?>#) ){
+             next unless grep {$tag eq $_} @allow_tags;
+             if( $close_tag ){
+                 my $j;
+                 for $j( 0 .. @tags_stack ){
+                     last if $tags_stack[$j] eq $tag;
+                 }
+                 splice(@tags_stack, $j, 1);
+                 $table_tags-- if ($tag eq 'table') && $table_tags;
+             } else {
+                 if( $tag eq 'img' ){
+                    if ($buff_length + $event_length > $max_length - $img_length){
+                        push @parts, $slice;
+                        last;
+                    };
+                    $attrib =~ s#.*(src=['"][^'"]*['"])$#$1 /#; 
+                    $buff_length += $img_length;                        
+                 } elsif( $tag eq 'a' ) {
+                    $attrib =~ s#.*(href=['"][^'"]*['"]).*$#$1#; 
+                    $attrib = 'target="_blank" ' . $attrib;
+                 } elsif( $tag eq 'table' ){
+                    $attrib = 'cellpadding="5" cellspacing="5" border="0"';
+                    $table_tags++;
+                 } elsif( $tag =~ /t[hdr]/ ){
+                    $attrib = join(' ', grep {$_ =~ /^(col|row)span/} 
+                        split /\s+/, $attrib);
+                 }
+
+                 unshift @tags_stack, $tag
+                    if grep {$tag eq $_} @close_tags;
+                         
+                 $slice = "<$tag" . ($attrib?" $attrib>":'>');
+             }
+             $slice = $close_tag?'</strong></p>':'<p><strong>' if $tag =~ /h\d/;
+         } else {
+            my $slice_length = LJ::text_length($slice);
+            if ($event_length + $buff_length > $max_length - $slice_length) {
+                if ($table_tags){
+                    push @parts, $slice;
+                    last; 
+                }
+                my @words = split /([\n\s]+)/, $slice;
+                for my $w (@words){
+                    my $word_length = LJ::text_length($w);
+                    if ($event_length + $word_length > $max_length){
+                        push @parts, $slice;
+                        last;
+                    }
+                    $event_length += $word_length;
+                    $event .= $w;
+                }
+                last;
+            } 
+            $buff_length += $slice_length;
+         }
+
+         $buff .= $slice;
+         unless( $table_tags ){
+             $event_length += $buff_length;
+             $event .= $buff;
+             $buff_length = 0;
+             $buff = '';                     
+         }
+     }
+
+     $event = $event . "</$_>" for @tags_stack;
+     $event = $event . $args{'read_more'} if @parts;
+     return $event;   
+}
+
+# event => text
+# embed_url => url
+sub convert_lj_tags_to_links {
+    my %args = @_;
+    while ($args{event} =~ /<lj-poll-(\d+)>/g) {
+       my $pollid = $1;
+       my $name = LJ::Poll->new($pollid)->name;
+       if ($name) {
+           LJ::Poll->clean_poll(\$name);
+       } else {
+           $name = "#$pollid";
+       }
+       $args{event} =~ s#<lj-poll-$pollid>#<a href="$LJ::SITEROOT/poll/?id=$pollid" target="_blank" >View Poll: $name.</a>#g;
+    }
+    
+    $args{event} =~ s#<lj\-embed[^>]+/>#<a href="$args{embed_url}">View movie.</a>#g;
+    while ( $args{event} =~ /<lj\s+user="([^>"]+)"\s*\/?>/g ){
+        # follow the documentation - no about communites, openid or syndicated, just user
+        my $user = LJ::load_user($1); 
+        my $name = $user->username;
+        my $html = '<a href="' . $user->profile_url . '" target="_blank"><img src="' 
+        . $LJ::IMGPREFIX . '/userinfo.gif" alt=""></a><a href="'
+        . $user->journal_base . '" target="_blank">' . $name . '</a>';
+        $args{event} =~ s#<lj\s+user="$name"\s*\/?>#$html#g;
+    }
+    $args{event} =~ s#</?lj-cut[^>]*>##g;
+    
+    return $args{event};
+}
+
 # function to trim a string containing HTML.  this will auto-close any
 # html tags that were still open when the string was truncated
 sub html_trim {

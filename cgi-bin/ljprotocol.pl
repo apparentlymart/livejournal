@@ -209,6 +209,7 @@ sub do_request
     if ($method eq "sendmessage")      { return sendmessage(@args);      }
     if ($method eq "setmessageread")   { return setmessageread(@args);   }
     if ($method eq "addcomment")       { return addcomment(@args);   }
+    if ($method eq "getrecentcomments")       { return getrecentcomments(@args);   }
 
 
     $r->notes("codepath" => "") if $r;
@@ -248,6 +249,40 @@ sub addcomment
              };
 }
 
+sub getrecentcomments {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    my $u = $flags->{'u'};
+    my $count = $req->{itemshow};
+    $count = 10 if !$count || ($count > 100) || ($count < 0);
+    
+    my @recv = $u->get_recent_talkitems($count);
+    my @recv_talkids = map { $_->{'jtalkid'} } @recv;
+    my %recv_userids = map { $_->{'posterid'} => 1} @recv;
+    my $comment_text = LJ::get_talktext2($u, @recv_talkids);
+    my $users = LJ::load_userids(keys(%recv_userids));
+    foreach my $comment ( @recv ) {
+        $comment->{subject} = $comment_text->{$comment->{jtalkid}}[0];
+        $comment->{text} = $comment_text->{$comment->{jtalkid}}[1];
+        
+        $comment->{text} = LJ::trim_widgets(
+            length     => $req->{trim_widgets},
+            img_length => $req->{widgets_img_length},
+            text      => $comment->{text},
+            read_more => '<a href="' . $comment->url . '"> ...</a>',
+        ) if $req->{trim_widgets};
+        
+        $comment->{text} = LJ::convert_lj_tags_to_links(
+            event => $comment->{text},
+            embed_url => $comment->url,
+        ) if $req->{parseljtags};
+        
+        $comment->{postername} = $users->{$comment->{posterid}} 
+            && $users->{$comment->{posterid}}->username;
+    }
+    return  { status => 'OK', comments => [ @recv ] };
+}
+
 
 sub getfriendspage
 {
@@ -269,7 +304,7 @@ sub getfriendspage
         'dateformat' => 'S2',
     });
 
-    my @attrs = qw/subject_raw event_raw journalid posterid ditemid security/;
+    my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count/;
 
     my @uids;
 
@@ -300,6 +335,18 @@ sub getfriendspage
             $h{$method} = $entry->$method;
         }
 
+        $h{event_raw} = LJ::trim_widgets(
+            length    => $req->{trim_widgets},
+            img_length => $req->{widgets_img_length},
+            text      => $h{event_raw},
+            read_more => '<a href="' . $entry->url . '"> ...</a>',
+        ) if $req->{trim_widgets};
+        
+        $h{event_raw} = LJ::convert_lj_tags_to_links(
+            event => $h{event_raw},
+            embed_url => $entry->url,
+        ) if $req->{parseljtags};
+            
         # log time value
         $h{logtime} = $LJ::EndOfTime - $ei->{rlogtime};
 
@@ -313,9 +360,13 @@ sub getfriendspage
     foreach (@res) {
         $_->{journalname} = $users->{ $_->{journalid} }->{'user'};
         $_->{journaltype} = $users->{ $_->{journalid} }->{'journaltype'};
+        $_->{journalurl}  = $users->{ $_->{journalid} }->journal_base;
         delete $_->{journalid};
         $_->{postername} = $users->{ $_->{posterid} }->{'user'};
         $_->{postertype} = $users->{ $_->{posterid} }->{'journaltype'};
+        $_->{posterurl}  = $users->{ $_->{posterid} }->journal_base;
+        my $userpic = $users->{ $_->{posterid} }->userpic;
+        $_->{poster_userpic_url} = $userpic && $userpic->url;
         delete $_->{posterid};
     }
 
@@ -1550,7 +1601,7 @@ sub postevent
         'req'       => $req,
         'res'       => $res,
     });
-
+    
     # cluster tracking
     LJ::mark_user_active($u, 'post');
     LJ::mark_user_active($uowner, 'post') unless LJ::u_equals($u, $uowner);
@@ -1571,7 +1622,6 @@ sub postevent
         my @handles = $sclient->insert_jobs(@jobs);
         # TODO: error on failure?  depends on the job I suppose?  property of the job?
     }
-
 
     return $res;
 }
@@ -2130,7 +2180,7 @@ sub getevents
 
     # common SQL template:
     unless ($sql) {
-        $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid ".
+        $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid, replycount ".
             "FROM log2 WHERE journalid=$ownerid $where $orderby $limit";
     }
 
@@ -2149,7 +2199,7 @@ sub getevents
     my $events = $res->{'events'} = [];
     my %evt_from_itemid;
 
-    while (my ($itemid, $eventtime, $sec, $mask, $anum, $jposterid) = $sth->fetchrow_array)
+    while (my ($itemid, $eventtime, $sec, $mask, $anum, $jposterid, $replycount) = $sth->fetchrow_array)
     {
         $count++;
         my $evt = {};
@@ -2166,6 +2216,7 @@ sub getevents
         $evt->{'anum'} = $anum;
         $evt->{'poster'} = LJ::get_username($dbr, $jposterid) if $jposterid != $ownerid;
         $evt->{'url'} = LJ::item_link($uowner, $itemid, $anum);
+        $evt->{'reply_count'} = $replycount;
         push @$events, $evt;
     }
 
@@ -2258,7 +2309,20 @@ sub getevents
             $t->[0] =~ s/[\r\n]/ /g;
             $evt->{'subject'} = $t->[0];
         }
-
+        
+        $t->[1] = LJ::trim_widgets(
+            length     => $req->{trim_widgets},
+            img_length => $req->{widgets_img_length},
+            text      => $t->[1],
+            read_more => '<a href="' . $evt->{url} . '"> ...</a>',
+        ) if $req->{trim_widgets};
+        
+        $t->[1] = LJ::convert_lj_tags_to_links(
+            event => $t->[1],
+            embed_url => $evt->{url},
+        ) if $req->{parseljtags};
+        
+        
         # truncate
         if ($req->{'truncate'} >= 4) {
             my $original = $t->[1];
@@ -3117,7 +3181,7 @@ sub authenticate
     my $ip_banned = 0;
     my $chal_expired = 0;
     my $auth_check = sub {
-
+        
         my $auth_meth = $req->{'auth_method'} || "clear";
         if ($auth_meth eq "clear") {
             return LJ::auth_okay($u,
