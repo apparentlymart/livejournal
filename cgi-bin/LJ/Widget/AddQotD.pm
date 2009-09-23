@@ -15,6 +15,8 @@ sub render_body {
     my (@classes, $show_logged_out);
     my ($subject, $text, $tags, $from_user, $img_url, $extra_text, $impression_url, $domain, $countries, $link_url, $is_special);
     my ($start_month, $start_day, $start_year);
+    my ($start_hour, $start_minute) = ('00', '00');
+    my ($end_hour, $end_minute) = ('23', '59');
     my ($end_month, $end_day, $end_year);
     if ($qid) {
         my $question = LJ::QotD->get_single_question($opts{qid})
@@ -40,9 +42,13 @@ sub render_body {
         $start_month = $start_date->month;
         $start_day = $start_date->day;
         $start_year = $start_date->year;
+        $start_hour = $start_date->hour;
+        $start_minute = $start_date->minute;
         $end_month = $end_date->month;
         $end_day = $end_date->day;
         $end_year = $end_date->year;
+        $end_hour = $end_date->hour;
+        $end_minute = $end_date->minute;
     }
 
     # default values for year/month/day = today's date
@@ -58,6 +64,7 @@ sub render_body {
         $end_day = $time_now->day;
         $end_year = $time_now->year;
     }
+
 
     # form entry
     my $ret =
@@ -83,7 +90,18 @@ sub render_body {
         ( name => 'year_start',
           size => 4,
           maxlength => 4,
-          value => $start_year ) . " @ 12:00 AM</td></tr>";
+          value => $start_year ) . " ";
+    
+    $ret .= $class->html_text
+        ( name => 'hour_start',
+          size => 2,
+          maxlength => 2,
+          value => $start_hour ) . ":";
+    $ret .= $class->html_text
+        ( name => 'minute_start',
+          size => 2,
+          maxlength => 2,
+          value => $start_minute ) . "  </td></tr>";
 
     $ret .= "<tr><td>End Date:</td><td>";
     $ret .= $class->html_select
@@ -101,7 +119,19 @@ sub render_body {
         ( name => 'year_end',
           size => 4,
           maxlength => 4,
-          value => $end_year ) . " @ 11:59 PM</td></tr>";
+          value => $end_year ) . " ";
+
+    $ret .= $class->html_text
+        ( name => 'hour_end',
+          size => 2,
+          maxlength => 2,
+          value => $end_hour ) . ":";
+
+    $ret .= $class->html_text
+        ( name => 'minute_end',
+          size => 2,
+          maxlength => 2,
+          value => $end_minute ) . " </td></tr>";
 
     $ret .= "<tr><td valign='top'>Show on:</td><td>";
     $ret .= $class->html_select
@@ -221,16 +251,20 @@ sub handle_post {
           month     => $post->{month_start}+0, 
           day       => $post->{day_start}+0, 
 
+          hour      => int $post->{hour_start},
+          minute    => int $post->{minute_start},
+          second    => int $post->{second_start},
+
           # Yes, this specific timezone
           time_zone => 'America/Los_Angeles' );
 
     my $time_end = DateTime->new
-        ( year      => $post->{year_end}+0, 
-          month     => $post->{month_end}+0, 
-          day       => $post->{day_end}+0, 
-          hour      => 23, 
-          minute    => 59, 
-          second    => 59, 
+        ( year      => int $post->{year_end}, 
+          month     => int $post->{month_end}, 
+          day       => int $post->{day_end}, 
+          hour      => (exists $post->{hour_end}   ? int $post->{hour_end}   : 23), 
+          minute    => (exists $post->{minute_end} ? int $post->{minute_end} : 59), 
+          second    => (exists $post->{second_end} ? int $post->{second_end} : 59), 
 
           # Yes, this specific timezone
           time_zone => 'America/Los_Angeles' );
