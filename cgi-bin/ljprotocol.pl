@@ -182,7 +182,7 @@ sub do_request
 
     $flags ||= {};
     my @args = ($req, $err, $flags);
-
+    
     my $r = eval { Apache->request };
     $r->notes("codepath" => "protocol.$method")
         if $r && ! $r->notes("codepath");
@@ -208,14 +208,30 @@ sub do_request
     if ($method eq "getinbox")         { return getinbox(@args);         }
     if ($method eq "sendmessage")      { return sendmessage(@args);      }
     if ($method eq "setmessageread")   { return setmessageread(@args);   }
-    if ($method eq "addcomment")       { return addcomment(@args);   }
+    if ($method eq "addcomment")       { return addcomment(@args);       }
+    if ($method eq 'checksession')     { return checksession(@args);     }
     if ($method eq "getrecentcomments")       { return getrecentcomments(@args);   }
-
 
     $r->notes("codepath" => "") if $r;
     return fail($err,201);
 }
 
+sub checksession {
+    my ($req, $err, $flags) = @_;
+    
+    return undef 
+        unless authenticate($req, $err, $flags);
+
+    my $u = $flags->{'u'};
+    
+    my $session = $u->session;
+    
+    return {
+        username => $u->username,
+        session  => $u->id.":".$session->id.":".$session->auth,
+        caps     => $u->caps,
+    }
+}
 
 sub addcomment
 {
