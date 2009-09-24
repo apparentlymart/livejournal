@@ -467,7 +467,7 @@ sub can_add_tags {
     # get permission hashref and check it; note that we fall back to the control
     # permission, which will allow people to add even if they can't add by default
     my $perms = LJ::Tags::get_permission_levels($u);
-
+    
     return LJ::Tags::_remote_satisfies_permission($u, $remote, $perms->{add}) ||
            LJ::Tags::_remote_satisfies_permission($u, $remote, $perms->{control});
 }
@@ -486,16 +486,22 @@ sub can_add_entry_tags {
 
     my $remote = LJ::want_user(shift);
     my $entry = shift;
-    return unless $remote && $entry;
-    
-    ## generic case: if $remote can add tags to the entire journal of the entry
+    return unless $remote && $entry; # how can it be?
+    return undef unless $remote->{journaltype} eq 'P';
+    return undef if LJ::is_banned($remote, $entry->journal);
+
     my $journal = $entry->journal;
-    return 1 if LJ::Tags::can_add_tags($journal, $remote);
     
     ## special case: $remote is author of the $entry in a community,
     ## and community settings allows 'author or maintainters' to change tags 
     my $perms = LJ::Tags::get_permission_levels($journal);
-    return 1 if $perms->{add} eq 'author_moder' && $remote==$entry->poster;
+    if ($perms->{add} eq 'author_moder'){
+        return 1 if $remote==$entry->poster; # check author
+        return LJ::can_manage($remote, $entry->journal);  # check moder
+    }
+    
+    ## generic case: if $remote can add tags to the entire journal of the entry
+    return 1 if LJ::Tags::can_add_tags($journal, $remote);
     
     ## not allowed.
     return;
