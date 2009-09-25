@@ -43,7 +43,7 @@ sub render_body {
         $ret .= "<li>" . $item->title . "</li>";
     }
     $ret .= "</ul>";
-    $ret .= "<div class='statlink'>". $class->ml('widget.friendupdates.statistics', {'aopts' => "href='$LJ::SITEROOT/manage/subscriptions/'"}) ."</div>";
+    #$ret .= "<div class='statlink'>". $class->ml('widget.friendupdates.statistics', {'aopts' => "href='$LJ::SITEROOT/manage/subscriptions/'"}) ."</div>";
 
 
     return $ret;
