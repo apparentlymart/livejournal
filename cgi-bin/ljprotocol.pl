@@ -103,6 +103,7 @@ my %e = (
      "317" => [ E_TEMP, "Journal is read-only and entries cannot be posted to it." ],
      "318" => [ E_TEMP, "Poster is read-only and cannot edit entries." ],
      "319" => [ E_TEMP, "Journal is read-only and its entries cannot be edited." ],
+     "320" => [ E_TEMP, "I'm watching you!" ],
 
      # Limit errors
      "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
@@ -1068,6 +1069,10 @@ sub postevent
 
     return undef unless LJ::run_hook('post_noauth', $req) || authenticate($req, $err, $flags);
 
+    my $spam = 0;
+    return undef unless LJ::run_hook('spam_detector', $req, \$spam);
+    return fail($err,320) if $spam;
+
     # if going through mod queue, then we know they're permitted to post at least this entry
     return undef unless check_altusage($req, $err, $flags) || $flags->{nomod};
 
@@ -1648,6 +1653,10 @@ sub editevent
     un_utf8_request($req);
 
     return undef unless authenticate($req, $err, $flags);
+
+    my $spam = 0;
+    return undef unless LJ::run_hook('spam_detector', $req, \$spam);
+    return fail($err,320) if $spam;
 
     # we check later that user owns entry they're modifying, so all
     # we care about for check_altusage is that the target journal
