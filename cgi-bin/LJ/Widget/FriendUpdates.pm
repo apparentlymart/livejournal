@@ -29,6 +29,9 @@ sub render_body {
     }
 
     my $ret;
+
+    $ret .= '<div class="right-mod"><div class="mod-tl"><div class="mod-tr"><div class="mod-br"><div class="mod-bl">';
+
     $ret .= "<h2><span>" . $class->ml('widget.friendupdates.title') . "</span></h2>";
     $ret .= "<a href='$LJ::SITEROOT/inbox/' class='more-link'>" . $class->ml('widget.friendupdates.viewall') . "</a>";
 
@@ -44,6 +47,8 @@ sub render_body {
     }
     $ret .= "</ul>";
     #$ret .= "<div class='statlink'>". $class->ml('widget.friendupdates.statistics', {'aopts' => "href='$LJ::SITEROOT/manage/subscriptions/'"}) ."</div>";
+
+    $ret .= '</div></div></div></div></div>';
 
 
     return $ret;

@@ -27,7 +27,9 @@ sub render_body {
     return "" unless @bdays;
 
     my $ret;
-    
+
+    $ret .= '<div class="right-mod"><div class="mod-tl"><div class="mod-tr"><div class="mod-br"><div class="mod-bl">';
+   
     $ret .= "<h2><span>" . $class->ml('widget.friendbirthdays.title') . "</span></h2>";
     $ret .= "<a href='$LJ::SITEROOT/birthdays.bml' class='more-link'>" . $class->ml('widget.friendbirthdays.viewall') . "</a></p>";
     $ret .= "<div class='indent_sm'><table>";
@@ -65,7 +67,7 @@ sub render_body {
             my $vg_key_name = $vg->keyname;
             my $hover = LJ::ehtml(BML::ml("vgift.$vg_key_name.anon"));
             my $img_small = $vg->small_img_url;
-            $ret .= "<li><a href=\"$vg_link\"><div class='vg_img'><img src='$img_small' alt='$hover' title='$hover' /><a></div></li>";
+            $ret .= "<li><a href=\"$vg_link\"><img src='$img_small' alt='$hover' title='$hover' /><a></li>";
         }
         $ret .=	"</ul>";
     }
@@ -78,6 +80,8 @@ sub render_body {
     $ret .= "<p class='indent_sm'>&raquo; <a href='$LJ::SITEROOT/paidaccounts/friends.bml'>" .
             $class->ml('widget.friendbirthdays.paidtime_link') .
             "</a></p>" if $opts{paidtime_link};
+
+    $ret .= '</div></div></div></div></div>';
             
     return $ret;
 }
