@@ -212,8 +212,13 @@ function generate_pollHTML(ljtags, pollID) {
 }
 
 function convert_qotd_to_ljtags(html) {
-    var tags = html.replace(/<div .*qotdid=['"]?(\d+)['"]? .*class=['"]?ljqotd['"]?.*>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
-    tags = tags.replace(/<div .*class=['"]?ljqotd['"]? .*qotdid=['"]?(\d+)['"]?.*>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
+    // div tag and qotdid attrib
+    var tags = html.replace(/<div(.*)qotdid=['"]?(\d+)['"]?([^>]*)>[^\b]*<\/div>(<br \/>)*/g, "<lj-template id=\"$2\"$1$3 /><br />");
+    // class attrib
+    tags = tags.replace(/(<lj-template id=\"\d+\" )(.*)class=['"]?ljqotd['"]?([^>]*\/>)?/g, "$1name=\"qotd\" $2$3");
+    // lang attrib
+    tags = tags.replace(/(<lj-template id=\"\d+\" name=\"qotd\" )(.*)(lang=['"]?(\w+)['"]?)([^>]*\/>)?/g, "$1$3 \/>");
+
     return tags;
 }
 
@@ -222,10 +227,14 @@ function convert_qotd_to_HTML(html) {
 
     var styleattr = " style='cursor: default; -moz-user-select: all; -moz-user-input: none; -moz-user-focus: none; -khtml-user-select: all;'";
 
-    html = html.replace(/<lj-template name=['"]?qotd['"]? id=['"]?(\d+)['"]?>.*?<\/lj-template>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\" contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n\n");
-    html = html.replace(/<lj-template id=['"]?(\d+)['"]? name=['"]?qotd['"]?>.*?<\/lj-template>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\" contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n\n");
-    html = html.replace(/<lj-template name=['"]?qotd['"]? id=['"]?(\d+)['"]? \/>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\" contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n\n");
-    html = html.replace(/<lj-template id=['"]?(\d+)['"]? name=['"]?qotd['"]? \/>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\" contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n\n");
+    // make self-closing tag
+    html = html.replace(/<lj-template(.*)><\/lj-template>/g, "<lj-template$1 />");
+    // name attrib
+    html = html.replace(/<lj-template(.*)(name=['"]?qotd['"]?)(.*)?\/>/g, "<lj-template$1class=\"ljqotd\"$3/>");
+    // id attrib
+    html = html.replace(/<lj-template(.*)id=['"]?(\d+)['"]?(.*)?\/>/g, "<lj-template$1qotdid=\"$2\"$3/>");
+    // the main regex
+    html = html.replace(/<lj-template(.*)\/>/g, "<div$1contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n");
 
     return html;
 }
