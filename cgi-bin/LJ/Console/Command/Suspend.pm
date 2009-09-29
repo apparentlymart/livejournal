@@ -87,15 +87,24 @@ sub execute {
             next;
         }
 
-        if ($u->is_expunged) {
-            $self->error("$username is purged; skipping.");
-            next;
-        }
 
-        if ($u->is_suspended) {
-            $self->error("$username is already suspended.");
-            next;
-        }
+        # LJSV-723: 
+        # It is currently not possible to suspend a user whose journal is deleted & purged, 
+        # or an entry left by a user whose journal is deleted & purged. 
+        # However, entries made to communities and comments left in other journals by a deleted & purged journal still appear, 
+        # and it is sometimes necessary to disable access to these. 
+        # Suspend functionality should be changed to allow Abuse to disable access to these journals & content.
+        # 
+        # So disable next lines:
+        #  if ($u->is_expunged) {
+        #    $self->error("$username is purged; skipping.");
+        #    next;
+        #  }
+        #  if ($u->is_suspended) {
+        #    $self->error("$username is already suspended.");
+        #    next;
+        #  }
+
 
         my $err;
         $self->error($err) 
