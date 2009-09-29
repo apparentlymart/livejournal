@@ -67,7 +67,7 @@ sub render_body {
             my $vg_key_name = $vg->keyname;
             my $hover = LJ::ehtml(BML::ml($vg->display_name()));
             my $img_small = $vg->small_img_url;
-            $ret .= "<li><a href=\"$vg_link\"><img src='$img_small' alt='$hover' title='$hover' /><a></li>";
+            $ret .= "<li><a href=\"$vg_link\"><img src='$img_small' alt='$hover' title='$hover' /></a></li>";
         }
         $ret .=	"</ul>";
     }
