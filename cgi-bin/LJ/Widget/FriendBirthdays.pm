@@ -65,7 +65,7 @@ sub render_body {
             my $vg_link = $friend_birtdays_vgifts{$vg_key};
             my $vg = LJ::Pay::ShopVGift->new(id => $vg_key);
             my $vg_key_name = $vg->keyname;
-            my $hover = LJ::ehtml(BML::ml("vgift.$vg_key_name.anon"));
+            my $hover = LJ::ehtml(BML::ml($vg->display_name()));
             my $img_small = $vg->small_img_url;
             $ret .= "<li><a href=\"$vg_link\"><img src='$img_small' alt='$hover' title='$hover' /><a></li>";
         }
