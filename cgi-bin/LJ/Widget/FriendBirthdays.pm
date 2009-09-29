@@ -53,7 +53,7 @@ sub render_body {
 
     $ret .= "</table></div>";
 
-    unless ($LJ::DISABLED{'vgift_list'}) {
+    unless ($LJ::DISABLED{'vgift_list'} || $opts{'no_vgifts'}) {
         my $to = $u->user;
         $to =~ s/([^a-zA-Z0-9-_])//g; # Remove bad chars from lj-user name
 
@@ -70,9 +70,8 @@ sub render_body {
             $ret .= "<li><a href=\"$vg_link\"><img src='$img_small' alt='$hover' title='$hover' /></a></li>";
         }
         $ret .=	"</ul>";
+        $ret .= "<a href='$LJ::SITEROOT/shop/vgift.bml'>" . $class->ml('widget.friendbirthdays.moregifts') . " &rarr;</a>";
     }
-
-	$ret .= "<a href='$LJ::SITEROOT/shop/vgift.bml'>" . $class->ml('widget.friendbirthdays.moregifts') . " &rarr;</a>";
 
     $ret .= "<p class='indent_sm'>&raquo; <a href='$LJ::SITEROOT/birthdays.bml'>" .
             $class->ml('widget.friendbirthdays.friends_link') .
