@@ -3785,6 +3785,15 @@ sub set_suspended {
     eval { $u->fb_push };
     warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
 
+    # close all spamreports on this user
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("UPDATE spamreports SET state='closed' WHERE posterid = ? AND state='open'", undef, $u->userid);
+    
+    # close all botreports on this user
+    require LJ::BotReport;
+    LJ::BotReport->close_requests($u->userid);
+
+    #
     LJ::run_hooks("account_cancel", $u);
 
     if (my $err = LJ::run_hook("cdn_purge_userpics", $u)) {
