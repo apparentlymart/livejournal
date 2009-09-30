@@ -2,6 +2,7 @@ package LJ;
 
 use strict;
 no warnings 'uninitialized';
+use lib "$ENV{LJHOME}/cgi-bin";
 
 BEGIN {
     # ugly hack to shutup dependent libraries which sometimes want to bring in
@@ -13,8 +14,6 @@ BEGIN {
     use LJ::Config;
     LJ::Config->load;
 }
-
-use lib "$ENV{LJHOME}/cgi-bin";
 
 use Carp;
 use DBI;
