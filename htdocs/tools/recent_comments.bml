@@ -156,6 +156,7 @@ body<=
 
         my $ljcmt = $LJ_cmtinfo{$talkid} = {};
         $ljcmt->{u} = $pu ? $pu->{user} : "";
+        $ljcmt->{ditemid} = $lrow->{ditemid};
 
         $ret .= "<tr valign='top' id='ljcmtbar$talkid'><td style='width: 150px; line-height: 1.5em; border-top: 1px solid #999; background-color: $bgcolor' id='cmtbar$talkid'>";
          $ret .= (LJ::isu($pu) ? LJ::ljuser($pu) : "Anonymous") . "<br />";
