@@ -103,7 +103,7 @@ my %e = (
      "317" => [ E_TEMP, "Journal is read-only and entries cannot be posted to it." ],
      "318" => [ E_TEMP, "Poster is read-only and cannot edit entries." ],
      "319" => [ E_TEMP, "Journal is read-only and its entries cannot be edited." ],
-     "320" => [ E_TEMP, "I'm watching you!" ],
+     "320" => [ E_TEMP, "Sorry, there was a problem with content of the entry" ],
 
      # Limit errors
      "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
