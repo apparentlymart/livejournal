@@ -309,6 +309,8 @@ as well.
 
 .setting.adsense.schemes.about=Only two banners will be available for you if you have Minimalism as a journal style. You can change <a href="[[uri]]">style of your journal</a>.
 
+.setting.adsense.schemes.about.min=Only two banners will be available for you if you have Minimalism as a journal style. You can change <a href="[[uri]]">style of your journal</a>.
+
 .setting.adsense.status.current=Current status
 
 .setting.adsense.status.update=Update status
