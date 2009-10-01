@@ -3192,6 +3192,26 @@ CREATE TABLE comet_history (
 )
 EOC
 
+register_tablecreate("antispam", <<'EOC');
+CREATE TABLE antispam (
+    journalid INT(10) UNSIGNED NOT NULL,
+    itemid INT(10) unsigned NOT NULL default 0,
+    type CHAR(1) NOT NULL,
+    posterid INT(10) UNSIGNED NOT NULL default 0,
+    eventtime DATETIME default NULL,
+    poster_ip CHAR(15),
+    email CHAR(50) default NULL,
+    user_agent VARCHAR(128),
+    uniq CHAR(15),
+    spam TINYINT UNSIGNED,
+    confidence FLOAT(4,3) UNSIGNED,
+    review CHAR(1),
+    PRIMARY KEY (journalid, itemid, type),
+    INDEX (posterid, eventtime),
+    INDEX (spam),
+    INDEX (review)
+)
+EOC
 
 ### changes
 
