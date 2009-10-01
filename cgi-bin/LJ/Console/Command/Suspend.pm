@@ -35,8 +35,17 @@ sub execute {
         return $self->error("Invalid entry.")
             unless $entry->valid;
 
-        return $self->error("Journal and/or poster is purged; cannot suspend entry.")
-            if $poster->is_expunged || $journal->is_expunged;
+        # LJSV-723: 
+        # It is currently not possible to suspend a user whose journal is deleted & purged, 
+        # or an entry left by a user whose journal is deleted & purged. 
+        # However, entries made to communities and comments left in other journals by a deleted & purged journal still appear, 
+        # and it is sometimes necessary to disable access to these. 
+        # Suspend functionality should be changed to allow Abuse to disable access to these journals & content.
+        # 
+        # So do not check $poster status.
+        # 
+        return $self->error("Journal is purged; cannot suspend entry.")
+            if $journal->is_expunged;
 
         return $self->error("Entry is already suspended.")
             if $entry->is_suspended;
@@ -87,24 +96,14 @@ sub execute {
             next;
         }
 
-
-        # LJSV-723: 
-        # It is currently not possible to suspend a user whose journal is deleted & purged, 
-        # or an entry left by a user whose journal is deleted & purged. 
-        # However, entries made to communities and comments left in other journals by a deleted & purged journal still appear, 
-        # and it is sometimes necessary to disable access to these. 
-        # Suspend functionality should be changed to allow Abuse to disable access to these journals & content.
-        # 
-        # So disable next lines:
-        #  if ($u->is_expunged) {
-        #    $self->error("$username is purged; skipping.");
-        #    next;
-        #  }
-        #  if ($u->is_suspended) {
-        #    $self->error("$username is already suspended.");
-        #    next;
-        #  }
-
+        if ($u->is_expunged) {
+            $self->error("$username is purged; skipping.");
+            next;
+        }
+        if ($u->is_suspended) {
+            $self->error("$username is already suspended.");
+            next;
+        }
 
         my $err;
         $self->error($err) 
