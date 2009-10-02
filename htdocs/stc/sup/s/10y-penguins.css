@@ -47,19 +47,12 @@ A:visited:hover {
 .header {
 	position:relative;
 	min-height:185px;
+	padding-right:435px;
+	padding-left:20px;
 	border-bottom:1px solid #DADADA;
-	margin-top:30px;
-	background:url(../i/10y-penguins/penguins.jpg) 100% 5px no-repeat;
+	margin-top:26px;
+	background:url(../i/10y-penguins/penguins.jpg) 100% 9px no-repeat;
 	}
-	.column-right .header {
-		padding-right:435px;
-		padding-left:20px;
-		}
-	.column-left .header {
-		padding-right:20px;
-		padding-left:325px;
-		background-position:0 5px;
-		}
 .header H1 {
 	margin-top:1.8em;
 	}
@@ -68,13 +61,13 @@ A:visited:hover {
 	font-weight:normal;
 	}
 .header H3 {
-	margin-bottom:60px;
+	margin:-4px 0 69px;
 	font-size:2em;
 	font-weight:normal;
 	}
 .header .u-wrap {
 	float:left;
-	display:inline;
+	display:none;
 	margin:-10px 10px 0 0;
 	text-align:center;
 	}
@@ -89,13 +82,7 @@ A:visited:hover {
 		}
 .header .nav {
 	clear:left;
-	margin:60px 0 30px;
-	}
-.column-right .header .nav {
-	margin-right:-400px;
-	}
-.column-left .header .nav {
-	margin-left:0;
+	margin:60px -400px 29px 0;
 	}
 	.header .nav .item-selected,
 	.header .nav .item-selected A:link,
@@ -114,13 +101,9 @@ A:visited:hover {
 			}
 .header .nav-sub {
 	position:absolute;
-	top:30px;
-	right:200px;
+	top:28px;
+	right:184px;
 	width:220px;
-	}
-.column-left .header .nav-sub {
-	right:auto;
-	left:15px;
 	}
 	.header .nav-sub .item-rss A {
 		padding:0 0 3px 21px;
@@ -250,6 +233,10 @@ A:visited:hover {
 		list-style:none;
 		background:url(../i/10y-penguins/icons.gif) 0 -591px no-repeat;
 		}
+	.sidebar-summary .summary-comments:link,
+	.sidebar-summary .summary-comments:visited {
+		color:#AAA;
+		}
 .column-right .sidebar-cal,
 .column-right .sidebar-links,
 .column-right .sidebar-tags,
@@ -257,6 +244,9 @@ A:visited:hover {
 .column-right .sidebar-summary,
 .column-right .sidebar-powered {
 	padding:0 15px 2.8em 21px;
+	}
+.column-right .sidebar-powered {
+	padding-right:20px;
 	}
 .column-left .sidebar-cal,
 .column-left .sidebar-links,
@@ -273,7 +263,8 @@ A:visited:hover {
 	.sidebar-block DT {
 		text-align:right;
 		font-size:1.2em;
-		font-weight:bold;
+		font-weight:normal;
+		letter-spacing:.15em;
 		}
 	.sidebar-cal TABLE CAPTION A:link,
 	.sidebar-cal TABLE CAPTION A:visited {
