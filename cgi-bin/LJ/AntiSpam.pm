@@ -78,15 +78,16 @@ sub load_recent {
 
     my $sth;
     my $ago = LJ::mysql_time(time() - $hours, 1);
+    my $sortby = "ORDER BY eventtime";
 
     # Retrieve all antispam
     if ($reviewed) {
-        $sth = $dbh->prepare("SELECT * FROM antispam WHERE eventtime > ?");
+        $sth = $dbh->prepare("SELECT * FROM antispam WHERE eventtime > ? $sortby");
 
     # Retrieve all anitspam not yet reviewed
     } else {
         $sth = $dbh->prepare("SELECT * FROM antispam WHERE eventtime > ? " .
-                             "AND review IS NULL");
+                             "AND review IS NULL $sortby");
     }
     $sth->execute($ago);
     die $dbh->errstr if $dbh->err;
@@ -166,5 +167,7 @@ sub spam        { shift->_get_set('spam')       }
 sub confidence  { shift->_get_set('confidence') }
 sub review      { shift->_get_set('review')     }
 
+
+sub column_list { return @cols }
 
 1;

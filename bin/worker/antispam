@@ -4,6 +4,10 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::AntiSpam;
 
+#
+# TPAS_KEY and TPAS_SERVER must be specified in config.
+#
+
 package LJ::NewWorker::TheSchwartz::AntiSpam;
 use base 'LJ::NewWorker::TheSchwartz';
 sub capabilities { return [ 'LJ::Worker::AntiSpam' ] }
@@ -51,10 +55,11 @@ sub work {
         return;
     }
 
+    # Setup key for TypePad
     my $tpas = Net::Akismet::TPAS->new(
-                KEY => "lj_$posterid",
+                KEY => $LJ::TPAS_KEY->($posterid),
                 URL => $url,
-                SERVER => 'api.antispam.typepad.com',
+                SERVER => $LJ::TPAS_SERVER,
                ) or die "Key verification failure!";
 
     my $verdict= $tpas->check(
