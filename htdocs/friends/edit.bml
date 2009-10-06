@@ -88,6 +88,7 @@ body<=
 
             my @friends;
 
+            $ret .= "<th width='5%'>$ML{'.editfriends.friend'}</th>";
             $ret .= "<th width='3%'>";
             if ($GET{'sort'} eq 'rel') {
                 $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif' />";
@@ -112,7 +113,7 @@ body<=
                 $ret .= "<th style='text-align:left;'>$ML{'.editfriends.alias'}</th>";
             }
             
-            $ret .= "<th width='5%'>$ML{'.editfriends.friend'}</th></tr>";
+            $ret .= "</tr>";
 
             # TODO: paginate
             my $j = 11; # to uniquely distinguish 'friend-of' checkboxes, 1-10 are reserved for friend-add boxes
@@ -120,6 +121,24 @@ body<=
                 my $who = $f->{'username'};
 
                 $ret .= "<tr>";
+                $ret .= "<td align='center'>";
+                # non-checked checkboxes for "friend-of". checking these boxes adds the user
+                if ($f->{'rel'} eq 'FO') {
+                    $ret .= LJ::html_check({ 'type' => 'check',
+                                             'name' => "editfriend_add_${j}_user",
+                                             'id' => "editfriend_add_${j}_user",
+                                             'value' => $who });
+                } else {
+                    # checked checkboxes for friend/mutual. unchecking these deletes the user.
+                    # protocol wants to know who we're deleting, though, so we keep a hidden field
+                    # so we can compare differences before/after
+                    $ret .= LJ::html_check({ 'type' => 'check',
+                                             'name' => "editfriend_keep_$who",
+                                             'id' => "editfriend_keep_$who",
+                                             'checked' => 1} );
+                    $ret .= LJ::html_hidden("editfriend_has_${j}", "$who");
+                }
+                $ret .= "</td>";
                 $ret .= "<td align='center'>";
                 $ret .= "<img src='$LJ::IMGPREFIX/arrow-friend.gif' alt='friend' title='friend'>"
                     if $f->{'rel'} eq 'FR';
@@ -155,24 +174,6 @@ body<=
                     $ret .= "</td>";
                 }
 
-                $ret .= "<td align='center'>";
-                # non-checked checkboxes for "friend-of". checking these boxes adds the user
-                if ($f->{'rel'} eq 'FO') {
-                    $ret .= LJ::html_check({ 'type' => 'check',
-                                             'name' => "editfriend_add_${j}_user",
-                                             'id' => "editfriend_add_${j}_user",
-                                             'value' => $who });
-                } else {
-                    # checked checkboxes for friend/mutual. unchecking these deletes the user.
-                    # protocol wants to know who we're deleting, though, so we keep a hidden field
-                    # so we can compare differences before/after
-                    $ret .= LJ::html_check({ 'type' => 'check',
-                                             'name' => "editfriend_keep_$who",
-                                             'id' => "editfriend_keep_$who",
-                                             'checked' => 1} );
-                    $ret .= LJ::html_hidden("editfriend_has_${j}", "$who");
-                }
-                $ret .= "</td>";
                 $ret .= "</tr>\n";
                 $j++;
             }
