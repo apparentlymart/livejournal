@@ -7,6 +7,12 @@
 #profile_page a:hover {
     text-decoration: underline;
 }
+#profile_page .userpicdiv A:link,
+#profile_page .userpicdiv A:visited,
+#profile_page #vgifts_body A:link,
+#profile_page #vgifts_body A:visited {
+    border:0;
+}
 #profile_page a:visited {
     color: #470196;
 }
