@@ -101,16 +101,17 @@ A:visited:hover {
 			}
 .header .nav-sub {
 	position:absolute;
-	top:28px;
+	top:5px;
 	right:184px;
 	width:220px;
+	font-size:1.1em;
 	}
 	.header .nav-sub .item-rss A {
 		padding:0 0 3px 21px;
 		background:url(../i/10y-penguins/icons.gif) 0 -200px no-repeat;
 		}
 	.header .nav-sub .item-addfriend {
-		padding-bottom:.5em;
+		padding-bottom:.8em;
 		}
 	.header .nav-sub .item-addfriend A {
 		padding:0 0 3px 21px;
@@ -154,12 +155,15 @@ A:visited:hover {
 	font-size:1.6em;
 	}
 .content .entry .entry-date {
+	white-space:nowrap;
 	color:#AAA;
 	}
 .content .entry .entry-text {
+	padding-top:1em;
 	padding-right:20px;
 	}
 	.content .entry .entry-text .author {
+		max-width:130px;
 		margin-top:-2.5em;
 		}
 	.content .entry .entry-text .metadata {
@@ -226,13 +230,27 @@ A:visited:hover {
 	border-right:1px solid #DADADA;
 	margin-right:-6px;
 	}
-	.sidebar-links DD, .sidebar-summary LI {
+	.sidebar-links DD,
+	.sidebar-summary LI,
+	.tags-list .tags UL LI {
 		display:block;
 		padding:0 0 0 12px;
-		margin:0 0 1em;
+		margin:0 0 .3em;
 		list-style:none;
+		line-height:1.5;
 		background:url(../i/10y-penguins/icons.gif) 0 -591px no-repeat;
 		}
+		.tags-list .tags UL LI .tag-count {
+			color:#AAA;
+			}
+		.tags-list .tags UL LI A:link,
+		.tags-list .tags UL LI A:visited {
+			text-decoration:none !important;
+			}
+		.tags-list .tags UL LI A:link:hover,
+		.tags-list .tags UL LI A:visited:hover {
+			text-decoration:underline !important;
+			}
 	.sidebar-summary .summary-comments:link,
 	.sidebar-summary .summary-comments:visited {
 		color:#AAA;
@@ -243,10 +261,14 @@ A:visited:hover {
 .column-right .sidebar-custom,
 .column-right .sidebar-summary,
 .column-right .sidebar-powered {
-	padding:0 15px 2.8em 21px;
+	padding:0 15px 1.8em 21px;
 	}
 .column-right .sidebar-powered {
 	padding-right:20px;
+	padding-top:2.4em;
+	}
+.column-right .sidebar-links {
+	margin-top:-15px;
 	}
 .column-left .sidebar-cal,
 .column-left .sidebar-links,
@@ -254,17 +276,21 @@ A:visited:hover {
 .column-left .sidebar-custom,
 .column-left .sidebar-summary,
 .column-left .sidebar-powered {
-	padding:0 21px 2.8em 15px;
+	padding:0 21px 1.8em 15px;
 	}
 	.sidebar .calendar-wrap {
 		font-size:1em;
 		}
 	.sidebar-cal TABLE CAPTION,
 	.sidebar-block DT {
+		margin-bottom:1.2em;
 		text-align:right;
 		font-size:1.2em;
 		font-weight:normal;
 		letter-spacing:.15em;
+		}
+	.sidebar-cal TABLE CAPTION {
+		margin-bottom:.6em;
 		}
 	.sidebar-cal TABLE CAPTION A:link,
 	.sidebar-cal TABLE CAPTION A:visited {
@@ -291,10 +317,13 @@ A:visited:hover {
 	.calendar-wrap TABLE THEAD TH {
 		font-size:1.1em;
 		color:#A0A0A0;
+		padding:0 4px .3em;
+		text-align:right;
 		}
 	.calendar-wrap TABLE TBODY TD {
 		font-weight:normal;
 		font-size:1.2em;
+		line-height:2.1;
 		}
 		.calendar-wrap TABLE TBODY TD A:link,
 		.calendar-wrap TABLE TBODY TD A:visited {
