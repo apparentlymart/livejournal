@@ -323,8 +323,10 @@ A:visited:hover {
 	.calendar-wrap TABLE TBODY TD {
 		font-weight:normal;
 		font-size:1.2em;
-		line-height:2.1;
 		}
+		.sidebar .calendar-wrap TABLE TBODY TD {
+			line-height:2.1;
+			}
 		.calendar-wrap TABLE TBODY TD A:link,
 		.calendar-wrap TABLE TBODY TD A:visited {
 			color:#F99E00;
