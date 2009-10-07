@@ -6,6 +6,7 @@
 
 package LJ::AntiSpam;
 use strict;
+use Net::Akismet::TPAS;
 use Carp qw/ croak cluck /;
 
 my @cols = qw( itemid type posterid journalid eventtime poster_ip email user_agent uniq spam confidence );
@@ -70,6 +71,7 @@ sub create {
 sub load_recent {
     my $class = shift;
     my $reviewed = shift || 0;
+    my $limit = shift || 50;
 
     my $hours = 3600 * 24; # 24 hours
 
@@ -78,16 +80,17 @@ sub load_recent {
 
     my $sth;
     my $ago = LJ::mysql_time(time() - $hours, 1);
-    my $sortby = "ORDER BY eventtime";
+    my $xsql = "ORDER BY eventtime DESC";
+    $xsql .= " LIMIT $limit";
 
     # Retrieve all antispam
     if ($reviewed) {
-        $sth = $dbh->prepare("SELECT * FROM antispam WHERE eventtime > ? $sortby");
+        $sth = $dbh->prepare("SELECT * FROM antispam WHERE eventtime > ? $xsql");
 
     # Retrieve all anitspam not yet reviewed
     } else {
         $sth = $dbh->prepare("SELECT * FROM antispam WHERE eventtime > ? " .
-                             "AND review IS NULL $sortby");
+                             "AND review IS NULL $xsql");
     }
     $sth->execute($ago);
     die $dbh->errstr if $dbh->err;
@@ -141,15 +144,16 @@ sub _get_set {
         my $dbh = LJ::get_db_writer()
             or die "unable to contact global db master to load category";
 
-        $dbh->do("UPDATE antispam SET $key=? WHERE itemid=? AND type=?",
-                 undef, $val, $self->{itemid}, $self->{type});
+        $dbh->do("UPDATE antispam SET $key=? WHERE journalid=? AND itemid=? " .
+                 "AND type=?", undef, $val, $self->{journalid},
+                 $self->{itemid}, $self->{type});
         die $dbh->errstr if $dbh->err;
 
         return $self->{$key} = $val;
     }
 
     # getter case
-    $self->preload_rows unless $self->{_loaded_row};
+    $self->load_row unless $self->{_loaded_row};
 
     return $self->{$key};
 }
@@ -166,8 +170,90 @@ sub uniq        { shift->_get_set('uniq')       }
 sub spam        { shift->_get_set('spam')       }
 sub confidence  { shift->_get_set('confidence') }
 sub review      { shift->_get_set('review')     }
+sub set_review  { shift->_get_set('review' => $_[0]) }
 
 
 sub column_list { return @cols }
+
+# Set review as 'T' for True.
+sub mark_reviewed {
+    my $class = shift;
+    my @recs = @_;
+
+    foreach my $rec (@recs) {
+        my $as = LJ::AntiSpam->new(journalid => $rec->{journalid},
+                                   itemid => $rec->{itemid},
+                                   type => $rec->{type} );
+        $as->set_review('T');
+    }
+}
+
+sub mark_false_neg {
+    my $class = shift;
+    return $class->_mark_false_do("false_neg", @_);
+}
+
+sub mark_false_pos {
+    my $class = shift;
+    return $class->_mark_false_do("false_pos", @_);
+}
+
+sub _mark_false_do {
+    my $class = shift;
+    my $sign = shift;
+    my @recs = @_;
+
+    foreach my $rec (@recs) {
+        my $as = LJ::AntiSpam->new(journalid => $rec->{journalid},
+                                   itemid => $rec->{itemid},
+                                   type => $rec->{type} );
+        my $ju = LJ::load_userid($as->journalid);
+        my $poster = LJ::load_userid($as->posterid);
+        my $content;
+
+        if ($as->type eq 'E') {
+            my $entry = LJ::Entry->new($ju, jitemid => $as->itemid);
+            $content = $entry->event_html;
+        } elsif ($as->type eq 'C') {
+            #TODO support comments also
+        }
+
+        my $tpas = LJ::AntiSpam->tpas($as->posterid, LJ::journal_base($ju) . "/");
+
+        if ($sign eq 'false_neg' && !$as->spam) {
+            my $feedback = $tpas->spam(
+                            USER_IP                 => $as->poster_ip,
+                            COMMENT_USER_AGENT      => $as->user_agent,
+                            COMMENT_CONTENT         => $content,
+                            COMMENT_AUTHOR          => $poster->user,
+                            COMMENT_AUTHOR_EMAIL    => $as->email,
+                           ) or die "Failed to get response from antispam server.\n";
+        } elsif ($sign eq 'false_pos' && $as->spam) {
+            my $feedback = $tpas->spam(
+                            USER_IP                 => $as->poster_ip,
+                            COMMENT_USER_AGENT      => $as->user_agent,
+                            COMMENT_CONTENT         => $content,
+                            COMMENT_AUTHOR          => $poster->user,
+                            COMMENT_AUTHOR_EMAIL    => $as->email,
+                           ) or die "Failed to get response from antispam server.\n";
+        }
+        $as->set_review('F');
+    }
+}
+
+
+sub tpas {
+    my $class = shift;
+    my $uid = shift;
+    my $url = shift;
+
+    my $tpas = Net::Akismet::TPAS->new(
+                KEY => $LJ::TPAS_KEY->($uid),
+                URL => $url,
+                SERVER => $LJ::TPAS_SERVER,
+               ) or die "Key verification failure!";
+
+    return $tpas;
+}
 
 1;
