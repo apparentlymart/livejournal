@@ -367,3 +367,13 @@ A:visited:hover {
 	.content .page-nav A:visited {
 		color:#F99E00;
 		}
+
+/* Month View */
+.view-month .entry-text A:link,
+.view-month .entry-text A:visited {
+	color:#F99E00;
+	}
+.view-month .entry-text .comments-count {
+	color:#AAA;
+	}
+	
