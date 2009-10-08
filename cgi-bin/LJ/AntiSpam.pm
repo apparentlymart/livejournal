@@ -228,7 +228,7 @@ sub _mark_false_do {
                             COMMENT_AUTHOR          => $poster->user,
                             COMMENT_AUTHOR_EMAIL    => $as->email,
                            ) or die "Failed to get response from antispam server.\n";
-        } elsif ($sign eq 'false_pos' && $as->spam) {
+        } elsif ($sign eq 'false_pos' && $as->ham) {
             my $feedback = $tpas->spam(
                             USER_IP                 => $as->poster_ip,
                             COMMENT_USER_AGENT      => $as->user_agent,
