@@ -152,6 +152,7 @@ A:visited:hover {
 	padding:0 0 40px;
 	}
 .content .entry .entry-title {
+	font-weight:bold;
 	font-size:1.6em;
 	}
 .content .entry .entry-date {
