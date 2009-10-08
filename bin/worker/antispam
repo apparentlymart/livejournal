@@ -64,7 +64,7 @@ sub work {
 
     my $verdict= $tpas->check(
                     USER_IP                 => $a->{remote_ip},
-                    COMMENT_USER_AGENT      => $a->{remote_ua},
+                    COMMENT_USER_AGENT      => $a->{remote_ua} || "-",
                     COMMENT_CONTENT         => $content,
                     COMMENT_AUTHOR          => $poster->user,
                     COMMENT_AUTHOR_EMAIL    => $email,
