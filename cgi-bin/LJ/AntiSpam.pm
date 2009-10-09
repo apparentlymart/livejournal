@@ -251,6 +251,7 @@ sub tpas {
                 KEY => $LJ::TPAS_KEY->($uid),
                 URL => $url,
                 SERVER => $LJ::TPAS_SERVER,
+                STRICT => 0,
                ) or die "Key verification failure!";
 
     return $tpas;
