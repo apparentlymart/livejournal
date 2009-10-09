@@ -321,6 +321,10 @@ as well.
 
 .setting.adsense.user=User's Google AdSense account
 
+.setting.adsensepromo.text1=<p><a [[aopts]]>First promo text</a></p>
+
+.setting.adsensepromo.text2=<p><a [[aopts]]>Second promo text</a></p>
+
 .setting.integration.msn.activate=Account registration
 
 .setting.integration.msn.gadget.add=Add friends to my contact list automatically
