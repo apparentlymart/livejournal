@@ -47,6 +47,7 @@ _info?><?_code
 	'security' => $sec,
 	'allowmask' => $allowmask,
     };
+    $req->{'props'}->{'interface'} = "web";
 
     my $errcode;
     my $res = LJ::Protocol::do_request("postevent", $req, \$errcode);

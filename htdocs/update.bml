@@ -402,6 +402,7 @@
         }
 
         $req{prop_qotdid} = $qid;
+        $req{prop_interface} = "web";
 
         my %res;
         LJ::do_request(\%req, \%res, $flags);

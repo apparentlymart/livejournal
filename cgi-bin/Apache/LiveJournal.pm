@@ -1796,6 +1796,7 @@ sub xmlrpc_method {
             $req->{$key} = pack('C*', unpack('C*', $req->{$key}))
                 if $req->{$key};
         }
+        $req->{'props'}->{'interface'} = "xml-rpc";
     }
     my $res = LJ::Protocol::do_request($method, $req, \$error);
     if ($error) {

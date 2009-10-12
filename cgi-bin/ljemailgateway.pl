@@ -496,6 +496,7 @@ sub process {
         'tz'    => 'guess',
     };
 
+    $req->{'props'}->{'interface'} = "email";
     # post!
     LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth => 1 });
     return $err->(LJ::Protocol::error_message($post_error)) if $post_error;

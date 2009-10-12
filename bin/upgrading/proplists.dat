@@ -1458,3 +1458,8 @@ categoryproplist.in_nav:
 categoryproplist.featured:
   des: The communites(propval=journalid) to display at the top of a category.
 
+logproplist.interface:
+  datatype: char
+  des: Name of interface used to post(web/xml-rpc/im etc.).
+  prettyname: Interface
+  sortorder: 106
