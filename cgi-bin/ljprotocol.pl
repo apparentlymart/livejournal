@@ -1130,7 +1130,7 @@ sub postevent
     # must have a validated email address to post to a community
     # unless this is approved from the mod queue (we'll error out initially, but in case they change later)
     return fail($err, 155, "You must have an authenticated email address in order to post to another account")
-        unless LJ::u_equals($u, $uowner) || $u->{'status'} eq 'A' || $flags->{'nomod'};
+        unless $u->{'status'} eq 'A';
 
     # post content too large
     # NOTE: requires $req->{event} be binary data, but we've already
