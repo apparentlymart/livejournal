@@ -560,7 +560,13 @@
         } elsif ($com) {
             $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
         } elsif ($u->is_identity) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/openid.gif' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
+            # Fanat.ru users have special icon
+            my $value = $u->identity->value;
+            my $img = ($value =~ m#^http://\w+\.fanat\.ru(\/|$)$#)
+                        ? 'openid_fanat.png'
+                        : 'openid.gif';
+            
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/$img' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
         }
 
         if ($remote && $remote->can_manage($u)) {

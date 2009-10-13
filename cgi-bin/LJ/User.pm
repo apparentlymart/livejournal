@@ -1319,6 +1319,10 @@ sub ljuser_display {
             $imgurl = "$img/openid_${head_size}.gif";
             $width = $head_size;
             $height = $head_size;
+        } elsif ($id->value =~ m/\.fanat\.ru(\/|$)/){ # Fanat.ru users have its own pic
+            $imgurl = "$img/openid_fanat-profile.gif";
+            $width  = 16;
+            $height = 16;
         } else {
             $imgurl = "$img/openid-profile.gif";
             $width = 16;
