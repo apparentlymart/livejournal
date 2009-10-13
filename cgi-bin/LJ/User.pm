@@ -4528,6 +4528,11 @@ sub can_add_friends {
         return 0;
     }
 
+    if ($u->{'status'} ne 'A') {
+        $$err = qq|Sorry, you aren't allowed to add to friends until your email address has been validated. If you've lost the confirmation email to do this, you can <a href="http://www.livejournal.com/register.bml">have it re-sent.</a>|;
+        return 0;
+    }
+
     # have they reached their friend limit?
     my $fr_count = $opts->{'numfriends'} || $u->friend_uids;
     my $maxfriends = $u->get_cap('maxfriends');
