@@ -282,6 +282,7 @@ sub handle_post {
         'tz'          => 'guess',
         %$security_opts,
     };
+    $req->{'props'}->{'interface'} = "atom";
 
     my $err;
     my $res = LJ::Protocol::do_request("postevent",

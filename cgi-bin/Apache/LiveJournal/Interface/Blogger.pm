@@ -69,6 +69,7 @@ sub newPost {
         'props' => $event->{'props'},
         'tz'    => 'guess',
     };
+    $req->{'props'}->{'interface'} = "blogger";
 
     my $res = LJ::Protocol::do_request("postevent", $req, \$err);
 

@@ -73,6 +73,7 @@ sub handle {
              props       => {
                  sms_msgid => $msg->id,
                  useragent => 'sms',
+                 interface => 'sms',
              },
              security    => $sec,
              allowmask   => $secmask,
