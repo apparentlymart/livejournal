@@ -61,6 +61,7 @@ sub work {
                 URL => $url,
                 SERVER => $LJ::TPAS_SERVER,
                 STRICT => 0,
+                VERIFY_KEY => 0,
                ) or die "Key verification failure!";
 
     my $verdict= $tpas->check(

@@ -52,7 +52,6 @@ body<=
             }
         }
 
-warn("correct: " . @correct . "; false_neg: " . @false_neg . "; false_pos: " . @false_pos);
         LJ::AntiSpam->mark_reviewed(@correct) if (@correct);
         LJ::AntiSpam->mark_false_neg(@false_neg) if (@false_neg);
         LJ::AntiSpam->mark_false_pos(@false_pos) if (@false_pos);
