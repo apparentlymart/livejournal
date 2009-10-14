@@ -59,6 +59,9 @@ sub render_body {
 
         my %friend_birtdays_vgifts = LJ::run_hook('get_friend_birthdays_vgifts', $u);
         %friend_birtdays_vgifts = %LJ::FRIEND_BIRTHDAYS_VGIFTS unless %friend_birtdays_vgifts;
+        
+        $ret .= "<p><b>". $class->ml('widget.friendbirthdays.sendgift') ."</b></p>";
+        
         $ret .= "<ul class='giftlist'>";
         foreach my $vg_key (keys %friend_birtdays_vgifts) {
             next unless $vg_key;

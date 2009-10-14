@@ -3404,6 +3404,8 @@ widget.friendbirthdays.friends_link=View all friends' birthdays
 
 widget.friendbirthdays.gift=Gift
 
+widget.friendbirthdays.sendgift=Send them a gift
+
 widget.friendbirthdays.paidtime_link=Find out which friends need paid time
 
 widget.friendbirthdays.title=Birthdays
