@@ -247,18 +247,18 @@ sub qotd_display {
 
             my $add_friend = '';
             my $writersblock = LJ::load_user("writersblock");
-            $add_friend = "<li><a href='$LJ::SITEROOT/friends/add.bml?user=writersblock'>" . $class->ml('widget.qotd.add_friend') . "</a></li>"
+            $add_friend = "<li><span><a href='$LJ::SITEROOT/friends/add.bml?user=writersblock'>" . $class->ml('widget.qotd.add_friend') . "</a></span></li>"
                 if $writersblock && !LJ::is_friend($remote,$writersblock);
 
             my $add_notification = '';
-            $add_notification = "<li><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=writersblock&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></li>"
+            $add_notification = "<li><span><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=writersblock&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></span></li>"
                 unless $remote->has_subscription(
                     journal         => $writersblock,
                     event           => 'JournalNewEntry',
                     require_active  => 1,
                     method          => 'Inbox');
 
-            $ret .= "<ul> $add_friend $add_notification </ul>" if $add_friend || $add_notification;
+            $ret .= "<ul class='subscript'> $add_friend $add_notification </ul>" if $add_friend || $add_notification;
         }
 
         # show promo on vertical pages

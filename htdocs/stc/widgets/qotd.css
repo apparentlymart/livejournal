@@ -55,3 +55,24 @@
     background: none !important;
     padding: 0 !important;
 }
+
+.appwidget-qotd .subscript {
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    zoom: 1;
+    list-style: none;
+    }
+    .appwidget-qotd .subscript LI {
+        float: left;
+        padding: 0 1em 2px 0;
+        }
+    .appwidget-qotd .subscript LI A {
+        color: #424242;
+        font-size: 11px;
+        font-weight: bold;
+        }
+    .appwidget-qotd .subscript LI SPAN {
+        background: url(/img/arrow-grey-rt.gif) no-repeat 0 50%;
+        padding-left: 8px;
+        }
