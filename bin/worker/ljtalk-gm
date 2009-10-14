@@ -447,6 +447,7 @@ sub _bot_post {
         'props' => $props,
         'tz'    => 'guess',
     };
+    $req->{'props'}->{'interface'} = 'ljtalk';
 
     # post!
     my $post_error;
