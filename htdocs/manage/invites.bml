@@ -57,6 +57,9 @@ body<=
             if ($POST{"pending_$commid"} eq 'yes') {
                 my $rval = LJ::accept_comm_invite($u, $us->{$commid});
                 push @accepted, [ $commid, $args ] if $rval;
+                unless ($rval) {
+                    return "<?h1 $ML{'error'} h1?><?p " . LJ::last_error() . " p?>";
+                }
             } elsif ($POST{"pending_$commid"} eq 'no') {
                 my $rval = LJ::reject_comm_invite($u, $us->{$commid});
                 push @rejected, $commid if $rval;
