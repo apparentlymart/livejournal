@@ -242,7 +242,23 @@ sub qotd_display {
 
             my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
             my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
+
             $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$d->{from_text}<br />" . $class->impression_img($q) . "</p>";
+
+            my $add_friend = '';
+            my $writersblock = LJ::load_user("writersblock");
+            $add_friend = "<li><a href='$LJ::SITEROOT/friends/add.bml?user=writersblock'>" . $class->ml('widget.qotd.add_friend') . "</a></li>"
+                if $writersblock && !LJ::is_friend($remote,$writersblock);
+
+            my $add_notification = '';
+            $add_notification = "<li><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=writersblock&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></li>"
+                unless $remote->has_subscription(
+                    journal         => $writersblock,
+                    event           => 'JournalNewEntry',
+                    require_active  => 1,
+                    method          => 'Inbox');
+
+            $ret .= "<ul> $add_friend $add_notification </ul>" if $add_friend || $add_notification;
         }
 
         # show promo on vertical pages

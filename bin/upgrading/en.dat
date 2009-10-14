@@ -3166,6 +3166,10 @@ widget.manageqotd.extratext=Extra Text
 
 widget.manageqotd.is_special=Special?
 
+widget.qotd.add_friend=Add to Friends Page
+
+widget.qotd.add_notifications=Add Notifications
+
 widget.betafeature.btn.off=Turn OFF beta testing
 
 widget.betafeature.btn.on=Turn ON beta testing

@@ -15,6 +15,7 @@ body<=
     BML::decl_params(
                      lj_form_auth => qr/./,
                      journal      => 'word',
+                     event        => 'word',
                      _default     => qr/./,
                      );
 
@@ -23,50 +24,40 @@ body<=
 
     my $journal = LJ::load_user($GET{journal}) or return LJ::bad_input("No journal specified");
 
-    return BML::redirect("$LJ::SITEROOT/manage/subscriptions/") if LJ::u_equals($remote, $journal);
+    return BML::redirect("$LJ::SITEROOT/manage/subscriptions/")
+        if LJ::u_equals($remote, $journal);
+
+    my $event = $GET{event};
 
     # what classes to display on this page
-    my $categories = [
-                      {
-                          "" => [
-                                      LJ::Subscription::Pending->new(
-                                                                     $remote,
-                                                                     event   => "JournalNewEntry",
-                                                                     arg1    => '?',
-                                                                     journal => $journal,
-                                                                     flags   => LJ::Subscription::TRACKING,
-                                                                     ),
-                                      LJ::Subscription::Pending->new(
-                                                                     $remote,
-                                                                     event   => "JournalNewEntry",
-                                                                     journal => $journal,
-                                                                     flags   => LJ::Subscription::TRACKING,
-                                                                     ),
-                                      LJ::Subscription::Pending->new(
-                                                                     $remote,
-                                                                     event    => "NewUserpic",
-                                                                     journal  => $journal,
-                                                                     flags    => LJ::Subscription::TRACKING,
-                                                                     disabled => ! $remote->get_cap('track_user_newuserpic'),
-                                                                     ),
-                                      LJ::Subscription::Pending->new(
-                                                                     $remote,
-                                                                     event   => "Birthday",
-                                                                     journal => $journal,
-                                                                     flags   => LJ::Subscription::TRACKING,
-                                                                     ),
-                                      ]
-                                  },
-                      ];
-
+    my $categories = [{ "" => [
+        map {
+            LJ::Subscription::Pending->new(
+                $remote,
+                journal => $journal,
+                flags   => LJ::Subscription::TRACKING,
+                %$_
+            )
+        }
+        grep { ! $event || $event eq $_->{event} }
+        (
+            { event => "JournalNewEntry", arg1    => '?' },
+            { event => "JournalNewEntry" },
+            { event => "NewUserpic", disabled => ! $remote->get_cap('track_user_newuserpic') },
+            { event => "Birthday" },
+        )
+    ]}];
 
     unless (LJ::User->is_protected_username($journal->user)) {
-        push @{@$categories[0]->{""}}, LJ::Subscription::Pending->new(
-                                                                      $remote,
-                                                                      event   => "UserExpunged",
-                                                                      journal => $journal,
-                                                                      flags   => LJ::Subscription::TRACKING,
-                                                                      );
+        if ($event ne '' && $event eq "UserExpunged") {
+            push @{@$categories[0]->{""}},
+                LJ::Subscription::Pending->new(
+                    $remote,
+                    event   => "UserExpunged",
+                    journal => $journal,
+                    flags   => LJ::Subscription::TRACKING,
+                );
+        }
     }
 
     return LJ::subscribe_interface(
