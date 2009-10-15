@@ -143,7 +143,9 @@ sub qotd_display {
             my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
             my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
 
-            $ret .= "<p class='detail'><span class='suggestions'>$d->{view_answers_link} | $archive | $suggest</span>$d->{from_text}<br />" . $class->impression_img($q) . "</p>";
+            $ret .= "<p class='detail'><span class='suggestions'>" .
+                ($d->{view_answers_link} ? "$d->{view_answers_link} | " : "") .
+                "$archive | $suggest</span>$d->{from_text}<br />" . $class->impression_img($q) . "</p>";
 
             my $add_friend = '';
             my $writersblock = LJ::load_user("writersblock");
