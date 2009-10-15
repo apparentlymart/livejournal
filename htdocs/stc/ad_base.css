@@ -31,6 +31,8 @@
 .ljadmedrect
 {
     width: 300px;
+    overflow: hidden;
+    zoom: 1;
 }
 .ljadmedrect OBJECT,
 .ljadmedrect EMBED,
