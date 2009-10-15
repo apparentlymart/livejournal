@@ -119,6 +119,7 @@ sub render_responses {
         }
 
         my $entry_html = LJ::trim($entry->event_html_summary($class->entry_show_length, { noexpandembedded => 1 }));
+        my $entry_author = $journal->ljuser_display();
         my $entry_subject = $entry->subject_html;
         my $entry_url = $entry->url;
         my $entry_cmt_link = $entry->reply_url;
@@ -127,7 +128,7 @@ sub render_responses {
         $ret .= qq {
             <div class="lj_qotd_entry_container">
                 $userpic_html
-                <div class="lj_qotd_entry_subject">$entry_subject</div>
+                <div class="lj_qotd_entry_subject">$entry_author $entry_subject</div>
                 <div class="lj_qotd_entry_body">$entry_html</div>
                 <div>
         };    
