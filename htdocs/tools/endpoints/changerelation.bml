@@ -103,13 +103,54 @@
         $success = $remote->ban_user($ban_user);
         LJ::run_hooks('ban_set', $remote, $ban_user);
 
-        #$ret{is_banned} = $remote->is_banned($ban_user) ? 1 : 0;
-        
     } elsif ($action eq 'setUnban') {    
         my $unban_user = LJ::load_user($target);
         $success = $remote->unban_user_multi($unban_user->{userid});
-        #$ret{is_banned} = $remote->is_banned($unban_user) ? 1 : 0;
     
+    } elsif ($action eq 'banEverywhere') {
+
+        my $ban_user = LJ::load_user($target);
+
+        my $cids = LJ::load_rel_target($remote, 'A'); # admined communities
+        my $mids = LJ::load_rel_target($remote, 'M'); # communities undermoderating
+
+        my $us = LJ::load_userids(@$cids, @$mids, $remote->userid); # all communities and remote personal account
+
+        my $ok = 1;
+        $success = 1;
+
+        foreach my $u (values %$us) {
+            my $list_of_banned = LJ::load_rel_user($u, 'B') || [ ];
+            if (@$list_of_banned >= ($LJ::MAX_BANS || 5000)) {
+                $ok = 0;
+                next;
+            }
+                
+            if ($u->ban_user($ban_user)) {
+                LJ::run_hooks('ban_set', $u, $ban_user);
+            } else { # failed
+                $success = 0;
+            }
+        }
+
+        # no so hard error, simply not success...
+        #return $err->("Exceeded limit maximum of banned users on some journals") unless $ok;
+
+    } elsif ($action eq 'unbanEverywhere') {
+
+        my $unban_user = LJ::load_user($target);
+
+        my $cids = LJ::load_rel_target($remote, 'A'); # admined communities
+        my $mids = LJ::load_rel_target($remote, 'M'); # communities undermoderating
+
+        my $us = LJ::load_userids(@$cids, @$mids, $remote->userid); # all communities and remote personal account
+
+        $success = 1;
+
+        foreach my $u (values %$us) {
+            $success = 0 unless $u->unban_user_multi($unban_user->userid);
+        }
+
     } else {
         return $err->("Invalid action $action");
     }

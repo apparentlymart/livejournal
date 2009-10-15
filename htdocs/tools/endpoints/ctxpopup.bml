@@ -112,9 +112,24 @@
         $ret{alias_title} = $ret{alias} ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
     }
 
+    my $cids = [];
+    if ($remote) {
+        $cids = LJ::load_rel_target($remote, 'A'); # admined communities
+        my $mids = LJ::load_rel_target($remote, 'M'); # communities undermoderating
+        push @$cids, @$mids;
+    }
+
     # generate auth tokens
     if ($remote) {
         push @actions, 'addFriend', 'removeFriend', 'setBan' , 'setUnban';
+
+        if (@$cids) {
+            $ret{have_communities} = 1;
+            push @actions, 'banEverywhere', 'unbanEverywhere';
+            $ret{ban_everywhere_title} = $ML{'.ban_everywhere.title'};
+            $ret{unban_everywhere_title} = $ML{'.unban_everywhere.title'};
+        }
+
         foreach my $action (@actions) {
             $ret{"${action}_authtoken"} = LJ::Auth->ajax_auth_token(
                                                                     $remote,
@@ -129,8 +144,16 @@
     my %extrainfo = LJ::run_hook("ctxpopup_extra_info", $u);
     %ret = (%ret, %extrainfo);
 
-    $ret{is_banned} = LJ::is_banned($u,$remote) ? 1 : 0
-        if $remote && $u;
+    if ($remote && $u) {
+        $ret{is_banned} = LJ::is_banned($u,$remote) ? 1 : 0;
+
+        if (@$cids) {
+            $ret{is_banned_everywhere} = 1;
+            foreach my $cid (@$cids) {
+                $ret{is_banned_everywhere} = 0 unless LJ::is_banned($u, $cid);
+            }
+        }
+    }
 
     $ret{success} = 1;
     return LJ::js_dumper(\%ret);
