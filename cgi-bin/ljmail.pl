@@ -54,11 +54,28 @@ sub send_mail
 
     init();
 
-    my $msg = $opt;
-
-    # did they pass a MIME::Lite object already?
-    unless (ref $msg eq 'MIME::Lite') {
-
+    my ($message_text, $from, @rcpts, $subject, $action);
+    
+    if (ref $opt eq 'MIME::Lite') {
+        # did they pass a MIME::Lite object already?
+        $message_text = $opt->as_string;
+        $from = (map { $_->address } Mail::Address->parse($opt->get('From')))[0];
+        foreach my $header (map { $opt->get($_) } qw(To Cc Bcc)) {
+            next unless $header;
+            push @rcpts, map { $_->address } Mail::Address->parse($header);
+        }
+        $subject = $opt->get('Subject');
+        $action = 'email_send_mimelite';
+    } elsif ($opt->{raw_data}) {
+        $message_text = $opt->{raw_data};
+        $from = (map { $_->address } Mail::Address->parse($opt->{from}))[0];
+        foreach my $header (map { $opt->{$_} } qw(To Cc Bcc)) {
+            next unless $header;
+            push @rcpts, map { $_->address } Mail::Address->parse($header);
+        }
+        $subject = "Unknown (raw message)";
+        $action = 'email_send_raw';
+    } else {
         my $clean_name = sub {
             my ($name, $email) = @_;
             return $email unless $name;
@@ -104,6 +121,7 @@ sub send_mail
         }
         $fromname = $clean_name->($fromname, $opt->{'from'});
 
+        my $msg;
         if ($opt->{html}) {
             # do multipart, with plain and HTML parts
 
@@ -148,19 +166,22 @@ sub send_mail
                 $msg->add($tag, $value);
             }
         }
+        
+        $message_text = $msg->as_string;
+        $from = (map { $_->address } Mail::Address->parse($msg->get("From")))[0];
+        foreach my $header (map { $msg->get($_) } qw(To Cc Bcc)) {
+            next unless $header;
+            push @rcpts, map { $_->address } Mail::Address->parse($header);
+        }
+        $subject = $msg->get('Subject');
+        $action = ($opt->{html}) ? 'email_send_html' : 'email_send_text';
     }
 
-    # at this point $msg is a MIME::Lite
-
-    # note that we sent an email
-    LJ::note_recent_action(undef, $msg->attr('content-type') =~ /plain/i ? 'email_send_text' : 'email_send_html');
-
+    LJ::note_recent_action(undef, $action);
+ 
     my $enqueue = sub {
         my $starttime = [Time::HiRes::gettimeofday()];
         my $sclient = LJ::theschwartz() or die "Misconfiguration in mail.  Can't go into TheSchwartz.";
-        my ($env_from) = map { $_->address } Mail::Address->parse($msg->get('From'));
-        my @rcpts;
-        push @rcpts, map { $_->address } Mail::Address->parse($msg->get($_)) foreach (qw(To Cc Bcc));
         my $host;
         if (@rcpts == 1) {
             $rcpts[0] =~ /(.+)@(.+)$/;
@@ -168,9 +189,9 @@ sub send_mail
         }
         my $job = TheSchwartz::Job->new(funcname => "TheSchwartz::Worker::SendEmail",
                                         arg      => {
-                                            env_from => $env_from,
+                                            env_from => $from,
                                             rcpts    => \@rcpts,
-                                            data     => $msg->as_string,
+                                            data     => $message_text,
                                         },
                                         coalesce => $host,
                                         );
@@ -182,7 +203,7 @@ sub send_mail
         return $h ? 1 : 0;
     };
 
-    if ($LJ::MAIL_TO_THESCHWARTZ || ($LJ::MAIL_SOMETIMES_TO_THESCHWARTZ && $LJ::MAIL_SOMETIMES_TO_THESCHWARTZ->($msg))) {
+    if ($LJ::MAIL_TO_THESCHWARTZ || ($LJ::MAIL_SOMETIMES_TO_THESCHWARTZ && $LJ::MAIL_SOMETIMES_TO_THESCHWARTZ->())) {
         return $enqueue->();
     }
 
@@ -199,24 +220,23 @@ sub send_mail
         $LJ::DMTP_SOCK ||= IO::Socket::INET->new(PeerAddr => $host,
                                                  Proto    => 'tcp');
         if ($LJ::DMTP_SOCK) {
-            my $as = $msg->as_string;
-            my $len = length($as);
-            my $env = $opt->{'from'};
+            my $len = length($message_text);
             $LJ::DMTP_SOCK->print("Content-Length: $len\r\n" .
-                                  "Envelope-Sender: $env\r\n\r\n$as");
+                                  "Envelope-Sender: $from\r\n\r\n$message_text");
             my $ok = $LJ::DMTP_SOCK->getline;
             $rv = ($ok =~ /^OK/);
         }
     } else {
-        # SMTP or sendmail case
-        $rv = eval { $msg->send && 1; };
+        # SMTP or sendmail case. Dev servers only I hope. Code is taken from MIME::Lite->send
+        open( my $fh, "| /usr/lib/sendmail -t -oi -oem -f '$from'") 
+            or die "Can't run sendmail: $!";
+        print $fh $message_text;
+        close $fh;
+        $rv = 1;
     }
-    my $notes = sprintf( "Direct mail send to %s %s: %s",
-                         $msg->get('to'),
-                         $rv ? "succeeded" : "failed",
-                         $msg->get('subject') );
 
     unless ($async_caller) {
+        my $notes = sprintf( "Direct mail send to %s %s: %s", $from, ($rv) ? "succeeded" : "failed", $subject);
         LJ::blocking_report( $LJ::SMTP_SERVER || $LJ::SENDMAIL, 'send_mail',
                              Time::HiRes::tv_interval($starttime), $notes );
     }
