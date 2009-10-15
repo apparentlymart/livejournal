@@ -1370,6 +1370,7 @@ CREATE TABLE ml_latest
    txtid    INT UNSIGNED NOT NULL,
    chgtime  DATETIME NOT NULL,
    staleness  TINYINT UNSIGNED DEFAULT 0 NOT NULL, # better than ENUM('0','1','2');
+   revid    INT UNSIGNED,
    INDEX (lnid, staleness),
    INDEX (dmid, itid),
    INDEX (lnid, dmid, chgtime),
@@ -4074,6 +4075,12 @@ register_alter(sub {
         do_alter("comet_history",
                  "ALTER TABLE comet_history " .
                  "ADD status char(1) default 'N' after message");
+    }
+
+    unless (column_type("ml_latest", "revid")) {
+        do_alter("ml_latest",
+                 "ALTER TABLE ml_latest " .
+                 "ADD revid int unsigned default null");
     }
 
 });

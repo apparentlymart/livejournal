@@ -9,7 +9,7 @@ use Class::Autouse qw(
                       );
 
 package LJ::Lang;
-
+#use LJ::ML;
 use constant MAXIMUM_ITCODE_LENGTH => 80;
 
 my @day_short   = (qw[Sun Mon Tue Wed Thu Fri Sat]);
@@ -369,9 +369,11 @@ sub set_text
         $txtid = $opts->{'txtid'}+0;
     }
 
-    my $staleness = $opts->{'staleness'}+0;
-    $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
-             "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), $staleness)");
+
+    my $revid     = LJ::alloc_global_counter("ml_latest_updates_counter");
+    my $staleness = int $opts->{'staleness'};
+    $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness, revid) ".
+             "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), $staleness, $revid)");
     return set_error("Error inserting ml_latest: ".$dbh->errstr) if $dbh->err;
     LJ::MemCache::set("ml.${lncode}.${dmid}.${itcode}", $text) if defined $text;
 
@@ -384,9 +386,10 @@ sub set_text
             foreach my $cid (@{$l->{'children'}}) {
                 my $clid = $LN_ID{$cid};
                 if ($opts->{'childrenlatest'}) {
+                    $revid = LJ::alloc_global_counter("ml_latest_updates_counter");
                     my $stale = $clid->{'parenttype'} eq "diff" ? 3 : 0;
                     $vals .= "," if $vals;
-                    $vals .= "($cid, $dmid, $itid, $txtid, NOW(), $stale)";
+                    $vals .= "($cid, $dmid, $itid, $txtid, NOW(), $stale, $revid)";
                 }
                 $langids .= "," if $langids;
                 $langids .= $cid+0;
@@ -397,15 +400,17 @@ sub set_text
         $rec->($l, $rec);
 
         # set descendants to use this mapping
-        $dbh->do("INSERT IGNORE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
+        $dbh->do("INSERT IGNORE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness, revid) ".
                  "VALUES $vals") if $vals;
 
         # update languages that have no translation yet
         if ($oldtextid) {
-            $dbh->do("UPDATE ml_latest SET txtid=$txtid WHERE dmid=$dmid ".
+            $revid = LJ::alloc_global_counter("ml_latest_updates_counter");
+            $dbh->do("UPDATE ml_latest SET txtid=$txtid, updid=$revid WHERE dmid=$dmid ".
                  "AND lnid IN ($langids) AND itid=$itid AND txtid=$oldtextid") if $langids;
         } else {
-            $dbh->do("UPDATE ml_latest SET txtid=$txtid WHERE dmid=$dmid ".
+            $revid = LJ::alloc_global_counter("ml_latest_updates_counter");
+            $dbh->do("UPDATE ml_latest SET txtid=$txtid, updid=$revid WHERE dmid=$dmid ".
                  "AND lnid IN ($langids) AND itid=$itid AND staleness >= 3") if $langids;
         }
     }
@@ -416,6 +421,9 @@ sub set_text
                  "dmid=$dmid AND itid=$itid AND txtid<>$txtid AND staleness < $newstale");
     }
 
+    #
+    LJ::MemCache::set('ml_latest_updates_counter', $revid);
+    
     return 1;
 }
 
@@ -543,6 +551,8 @@ sub get_text
         return "[missing string $code]";
     };
 
+
+    ##
     my $gen_mld = LJ::Lang::get_dom('general');
     my $is_gen_dmid = defined $dmid ? $dmid == $gen_mld->{dmid} : 1;
     my $text = ($LJ::IS_DEV_SERVER && $is_gen_dmid &&
@@ -550,6 +560,16 @@ sub get_text
                                        $lang eq $LJ::DEFAULT_LANG)) ?
                                        $from_files->() :
                                        $from_db->();
+=head
+    my $text = 
+        0 ? LJ::ML->get_text($lang, $dmid, $code) :
+        ($LJ::IS_DEV_SERVER && $is_gen_dmid &&
+                                      ($lang eq "en" ||
+                                       $lang eq $LJ::DEFAULT_LANG)) 
+                                       ? $from_files->()
+                                       : $from_db->();
+                                       #: LJ::ML->get_text($lang, $dmid, $code);
+=cut
 
     if ($vars) {
         $text =~ s/\[\[\?([\w\-]+)\|(.+?)\]\]/resolve_plural($lang, $vars, $1, $2)/eg;
