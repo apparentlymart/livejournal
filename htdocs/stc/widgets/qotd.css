@@ -29,13 +29,14 @@
 }
 .appwidget-qotd p.detail {
     margin: 0;
-    padding: 5px 0 0.5em 0;
+    padding: 5px 0 0.8em 0;
     font-size: 10px;
     line-height: 17px;
 }
 .appwidget-qotd p.detail span.suggestions {
+	display: block;
     position: relative;
-    padding: 0 0 0 .6em;
+    padding: 0 0 0.8em 0;
 }
 
 * HTML .appwidget-qotd p.detail span.suggestions {
