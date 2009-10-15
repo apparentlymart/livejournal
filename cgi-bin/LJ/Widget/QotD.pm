@@ -145,7 +145,7 @@ sub qotd_display {
 
             $ret .= "<p class='detail'><span class='suggestions'>" .
                 ($d->{view_answers_link} ? "$d->{view_answers_link} | " : "") .
-                "$archive | $suggest</span>$d->{from_text}<br />" . $class->impression_img($q) . "</p>";
+                "$archive | $suggest</span>$d->{from_text}" . $class->impression_img($q) . "</p>";
 
             my $add_friend = '';
             my $writersblock = LJ::load_user("writersblock");
