@@ -112,9 +112,7 @@
         my $ban_user = LJ::load_user($target);
 
         my $cids = LJ::load_rel_target($remote, 'A'); # admined communities
-        my $mids = LJ::load_rel_target($remote, 'M'); # communities undermoderating
-
-        my $us = LJ::load_userids(@$cids, @$mids, $remote->userid); # all communities and remote personal account
+        my $us = LJ::load_userids(@$cids, $remote->userid); # all communities and remote personal account
 
         my $ok = 1;
         $success = 1;
@@ -141,9 +139,7 @@
         my $unban_user = LJ::load_user($target);
 
         my $cids = LJ::load_rel_target($remote, 'A'); # admined communities
-        my $mids = LJ::load_rel_target($remote, 'M'); # communities undermoderating
-
-        my $us = LJ::load_userids(@$cids, @$mids, $remote->userid); # all communities and remote personal account
+        my $us = LJ::load_userids(@$cids, $remote->userid); # all communities and remote personal account
 
         $success = 1;
 

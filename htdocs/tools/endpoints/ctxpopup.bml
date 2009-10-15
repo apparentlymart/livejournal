@@ -115,8 +115,6 @@
     my $cids = [];
     if ($remote) {
         $cids = LJ::load_rel_target($remote, 'A'); # admined communities
-        my $mids = LJ::load_rel_target($remote, 'M'); # communities undermoderating
-        push @$cids, @$mids;
     }
 
     # generate auth tokens
