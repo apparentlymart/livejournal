@@ -234,7 +234,7 @@ function convert_qotd_to_HTML(html) {
     // id attrib
     html = html.replace(/<lj-template(.*)id=['"]?(\d+)['"]?(.*)?\/>/g, "<lj-template$1qotdid=\"$2\"$3/>");
     // the main regex
-    html = html.replace(/<lj-template(.*)\/>/g, "<div$1contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n");
+    html = html.replace(/<lj-template(.*?)\/>/g, "<div$1contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n");
 
     return html;
 }
