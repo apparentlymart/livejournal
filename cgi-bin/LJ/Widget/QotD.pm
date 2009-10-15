@@ -88,7 +88,7 @@ sub qotd_display_embed {
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
             $ret .= "<p>$d->{text}</p><p style='font-size: 0.8em;'>$d->{from_text}$d->{between_text}$d->{extra_text}</p><br />";
-            $ret .= "<p>$d->{answer_link} $d->{view_other_answers_link}$d->{impression_img}</p>";
+            $ret .= "<p>$d->{answer_link} $d->{view_answers_link}$d->{impression_img}</p>";
         }
         $ret .= "</div></td></tr></table>";
     }
@@ -102,7 +102,6 @@ sub qotd_display_archive {
     my %opts = @_;
 
     my $questions = $opts{questions} || [];
-    my $remote = LJ::get_remote();
 
     my $ret;
     foreach my $q (@$questions) {
@@ -115,6 +114,60 @@ sub qotd_display_archive {
     return $ret;
 }
 
+sub qotd_display {
+    my $class = shift;
+    my %opts = @_;
+
+    my $questions = $opts{questions} || [];
+    my $remote = LJ::get_remote();
+
+    my $ret;
+    if (@$questions) {
+        $ret .= "<div class='qotd'>";
+        foreach my $q (@$questions) {
+            my $d = $class->_get_question_data($q, \%opts);
+
+            $ret .= "<table><tr><td>";
+            $ret .= $d->{text};
+            $ret .= ($d->{extra_text}) ? "<p class='detail' style='padding-bottom: 5px;'>$d->{extra_text}</p>" : " ";
+
+            $ret .= $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) . "<br />";
+            if ($q->{img_url}) {
+                my $img_url = "<img src='$q->{img_url}' class='qotd-img' alt='' />";
+                $img_url = "<a href='$q->{link_url}'>$img_url</a>"
+                    if ($q->{link_url});
+                $ret .= "</td><td>$img_url";
+            }
+            $ret .= "</td></tr></table>";
+
+            my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
+            my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
+
+            $ret .= "<p class='detail'><span class='suggestions'>$d->{view_answers_link} | $archive | $suggest</span>$d->{from_text}<br />" . $class->impression_img($q) . "</p>";
+
+            my $add_friend = '';
+            my $writersblock = LJ::load_user("writersblock");
+            $add_friend = "<li><span><a href='$LJ::SITEROOT/friends/add.bml?user=writersblock'>" . $class->ml('widget.qotd.add_friend') . "</a></span></li>"
+                if $writersblock && !LJ::is_friend($remote,$writersblock);
+
+            my $add_notification = '';
+            $add_notification = "<li><span><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=writersblock&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></span></li>"
+                unless $remote->has_subscription(
+                    journal         => $writersblock,
+                    event           => 'JournalNewEntry',
+                    require_active  => 1,
+                    method          => 'Inbox');
+
+            $ret .= "<ul class='subscript'> $add_friend $add_notification </ul>" if $add_friend || $add_notification;
+        }
+
+        # show promo on vertical pages
+        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
+        $ret .= "</div>";
+    }
+
+    return $ret;
+}
 
 sub _get_question_data {
     my $class = shift;
@@ -167,9 +220,11 @@ sub _get_question_data {
     my $count = LJ::QotD->get_count($qid);
     if ($count) {
         $count .= "+" if $count >= $LJ::RECENT_QOTD_SIZE;
-        $view_answers_link = "<a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" . $class->ml('widget.qotd.viewanswers', {'total_count' => $count}) . "</a>";
+        $view_answers_link = "<a " . ($opts->{small_view_link} ? "class='small-view-link'" : '') .
+            "href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" .
+                $class->ml('widget.qotd.viewanswers', {'total_count' => $count}) .
+            "</a>";
     }
-    my $view_other_answers_link = "<a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" . $class->ml('widget.qotd.view.other.answers') . "</a>";
 
     my ($answer_link, $answer_url, $answer_text) = ("", "", "");
     unless ($opts->{no_answer_link}) {
@@ -191,7 +246,6 @@ sub _get_question_data {
         from_text       => $from_text,
         extra_text      => $extra_text,
         between_text    => $between_text,
-        view_other_answers_link => $view_other_answers_link,
         view_answers_link       => $view_answers_link,
         answer_link     => $answer_link,
         answer_url      => $answer_url,
@@ -201,73 +255,6 @@ sub _get_question_data {
     };
 }
 
-sub qotd_display {
-    my $class = shift;
-    my %opts = @_;
-
-    my $questions = $opts{questions} || [];
-    my $remote = LJ::get_remote();
-
-    my $ret;
-    if (@$questions) {
-        $ret .= "<div class='qotd'>";
-        foreach my $q (@$questions) {
-            my $d = $class->_get_question_data($q, \%opts);
-
-            $ret .= "<table><tr><td>";
-            my $viewanswers;
-            if ($opts{small_view_link}) {
-                $viewanswers .= " <a class='small-view-link' href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">" . $class->ml('widget.qotd.view.more') . "</a>";
-            } else {
-                my $count = LJ::QotD->get_count($q->{qid});
-                if ($count) {
-                    $count .= "+" if $count >= $LJ::RECENT_QOTD_SIZE;
-                    $viewanswers .= " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">" . $class->ml('widget.qotd.viewanswers', {'total_count' => $count}) . "</a>";
-                }
-            }
-
-            $ret .= $d->{text};
-            $ret .= ($d->{extra_text}) ? "<p class='detail' style='padding-bottom: 5px;'>$d->{extra_text}</p>" : " ";
-
-            $ret .= $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) .
-                "$viewanswers";
-            if ($q->{img_url}) {
-                if ($q->{link_url}) {
-                    $ret .= "</td><td><a href='$q->{link_url}'><img src='$q->{img_url}' class='qotd-img' alt='' /></a>";
-                } else {
-                    $ret .= "</td><td><img src='$q->{img_url}' class='qotd-img' alt='' />";
-                }
-            }
-            $ret .= "</td></tr></table>";
-
-            my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
-            my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
-
-            $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$d->{from_text}<br />" . $class->impression_img($q) . "</p>";
-
-            my $add_friend = '';
-            my $writersblock = LJ::load_user("writersblock");
-            $add_friend = "<li><span><a href='$LJ::SITEROOT/friends/add.bml?user=writersblock'>" . $class->ml('widget.qotd.add_friend') . "</a></span></li>"
-                if $writersblock && !LJ::is_friend($remote,$writersblock);
-
-            my $add_notification = '';
-            $add_notification = "<li><span><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=writersblock&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></span></li>"
-                unless $remote->has_subscription(
-                    journal         => $writersblock,
-                    event           => 'JournalNewEntry',
-                    require_active  => 1,
-                    method          => 'Inbox');
-
-            $ret .= "<ul class='subscript'> $add_friend $add_notification </ul>" if $add_friend || $add_notification;
-        }
-
-        # show promo on vertical pages
-        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
-        $ret .= "</div>";
-    }
-
-    return $ret;
-}
 
 sub answer_link {
     my $class = shift;
