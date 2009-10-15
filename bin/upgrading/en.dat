@@ -3416,6 +3416,14 @@ widget.friendbirthdays.viewall=More
 
 widget.friendbirthdays.moregifts=More free gifts
 
+widget.friendbirthdays.show_sponsored_vgifts=Show sponsored vgifts
+
+widget.friendbirthdays.hide_sponsored_vgifts=Hide sponsored vgifts
+
+widget.friendbirthdays.show_sponsored_styles=Show sponsored styles
+
+widget.friendbirthdays.hide_sponsored_styles=Hide sponsored styles
+
 widget.friendinterests.intro=You might also like some things your friend [[user]] is interested in:
 
 widget.friendupdates.noupdates=You have no updates.
