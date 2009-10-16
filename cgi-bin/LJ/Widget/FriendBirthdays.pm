@@ -62,7 +62,8 @@ sub render_body {
         my $get_sponsor_vgift = defined $opts{get}->{sponsor_vgift} ? $opts{get}->{sponsor_vgift} : $BML::COOKIE{show_sponsored_vgifts};
         $BML::COOKIE{show_sponsored_vgifts} = $get_sponsor_vgift if $get_sponsor_vgift =~ /^[01]$/;
 
-        
+        my $show_to_sup = LJ::SUP->is_remote_sup ? 1 : 0;
+ 
         my %friend_birtdays_vgifts = LJ::run_hook('get_friend_birthdays_vgifts', $u);
         %friend_birtdays_vgifts = %LJ::FRIEND_BIRTHDAYS_VGIFTS unless %friend_birtdays_vgifts;
 
@@ -84,6 +85,7 @@ sub render_body {
         foreach my $vg_key (sort { $friend_birtdays_vgifts{$b}->{sponsored} <=> $friend_birtdays_vgifts{$a}->{sponsored} } keys %friend_birtdays_vgifts) {
             next unless $vg_key;
             next if $friend_birtdays_vgifts{$vg_key}->{sponsored} && !$get_sponsor_vgift;
+            next if $friend_birtdays_vgifts{$vg_key}->{show_to_sup} ne $show_to_sup;
             next if ++$spons_cnt > 2 and $friend_birtdays_vgifts{$vg_key}->{sponsored};
             last if ++$vgift_cnt > 3;
             push @need_vgifts, $vg_key;
