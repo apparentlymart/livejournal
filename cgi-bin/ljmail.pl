@@ -46,6 +46,9 @@ use MIME::Words qw//;
 #          Subject line is encoded according to RFC 2047.
 #          Warning: opt can be a MIME::Lite ref instead, in which
 #          case it is sent as-is.
+#          Raw mode: if hashref contains key 'raw_data', it considered as 
+#          full text of e-mail message (including headers) and is sent as-is.
+#          
 # </LJFUNC>
 sub send_mail
 {
@@ -54,27 +57,28 @@ sub send_mail
 
     init();
 
-    my ($message_text, $from, @rcpts, $subject, $action);
+    my ($message_text, $from, @rcpts);
+    my ($log_subject, $log_action);
     
     if (ref $opt eq 'MIME::Lite') {
         # did they pass a MIME::Lite object already?
         $message_text = $opt->as_string;
         $from = (map { $_->address } Mail::Address->parse($opt->get('From')))[0];
-        foreach my $header (map { $opt->get($_) } qw(To Cc Bcc)) {
-            next unless $header;
-            push @rcpts, map { $_->address } Mail::Address->parse($header);
+        foreach my $field (map { $opt->get($_) } qw(To Cc Bcc)) {
+            next unless $field;
+            push @rcpts, map { $_->address } Mail::Address->parse($field);
         }
-        $subject = $opt->get('Subject');
-        $action = 'email_send_mimelite';
+        $log_subject = $opt->get('Subject');
+        $log_action = 'email_send_mimelite';
     } elsif ($opt->{raw_data}) {
         $message_text = $opt->{raw_data};
         $from = (map { $_->address } Mail::Address->parse($opt->{from}))[0];
-        foreach my $header (map { $opt->{$_} } qw(To Cc Bcc)) {
-            next unless $header;
-            push @rcpts, map { $_->address } Mail::Address->parse($header);
+        foreach my $field (map { $opt->{$_} } qw(to tc bcc)) {
+            next unless $field;
+            push @rcpts, map { $_->address } Mail::Address->parse($field);
         }
-        $subject = "Unknown (raw message)";
-        $action = 'email_send_raw';
+        $log_subject = "Unknown (raw message)";
+        $log_action = 'email_send_raw';
     } else {
         my $clean_name = sub {
             my ($name, $email) = @_;
@@ -169,15 +173,15 @@ sub send_mail
         
         $message_text = $msg->as_string;
         $from = (map { $_->address } Mail::Address->parse($msg->get("From")))[0];
-        foreach my $header (map { $msg->get($_) } qw(To Cc Bcc)) {
-            next unless $header;
-            push @rcpts, map { $_->address } Mail::Address->parse($header);
+        foreach my $field (map { $msg->get($_) } qw(To Cc Bcc)) {
+            next unless $field;
+            push @rcpts, map { $_->address } Mail::Address->parse($field);
         }
-        $subject = $msg->get('Subject');
-        $action = ($opt->{html}) ? 'email_send_html' : 'email_send_text';
+        $log_subject = $msg->get('Subject');
+        $log_action = ($opt->{html}) ? 'email_send_html' : 'email_send_text';
     }
 
-    LJ::note_recent_action(undef, $action);
+    LJ::note_recent_action(undef, $log_action);
  
     my $enqueue = sub {
         my $starttime = [Time::HiRes::gettimeofday()];
@@ -227,16 +231,19 @@ sub send_mail
             $rv = ($ok =~ /^OK/);
         }
     } else {
-        # SMTP or sendmail case. Dev servers only I hope. Code is taken from MIME::Lite->send
-        open( my $fh, "| /usr/lib/sendmail -t -oi -oem -f '$from'") 
-            or die "Can't run sendmail: $!";
+        ## SMTP or sendmail case, dev servers only I hope. Code is loosely taken from MIME::Lite->send
+        ## Sendmail command line option -t may be used to take recipiens from message headers 
+        ## instead of specifying them in command-line
+        my $command_line = "/usr/lib/sendmail -oi -oem -f '$from' " . join(" ", map {"'$_'"} @rcpts);
+        open( my $fh, "| $command_line" ) 
+            or die "Can't run sendmail ($command_line): $!";
         print $fh $message_text;
         close $fh;
         $rv = 1;
     }
 
     unless ($async_caller) {
-        my $notes = sprintf( "Direct mail send to %s %s: %s", $from, ($rv) ? "succeeded" : "failed", $subject);
+        my $notes = sprintf( "Direct mail send to %s %s: %s", $from, ($rv) ? "succeeded" : "failed", $log_subject);
         LJ::blocking_report( $LJ::SMTP_SERVER || $LJ::SENDMAIL, 'send_mail',
                              Time::HiRes::tv_interval($starttime), $notes );
     }
