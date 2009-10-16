@@ -1447,7 +1447,7 @@ sub prop {
 
 sub raw_prop {
     my ($u, $prop) = @_;
-    $u->preload_props($prop) unless exists $u->{$_};
+    $u->preload_props($prop) unless exists $u->{$prop};
     return $u->{$prop};
 }
 
