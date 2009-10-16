@@ -406,11 +406,11 @@ sub set_text
         # update languages that have no translation yet
         if ($oldtextid) {
             $revid = LJ::alloc_global_counter("ml_latest_updates_counter");
-            $dbh->do("UPDATE ml_latest SET txtid=$txtid, updid=$revid WHERE dmid=$dmid ".
+            $dbh->do("UPDATE ml_latest SET txtid=$txtid, revid=$revid WHERE dmid=$dmid ".
                  "AND lnid IN ($langids) AND itid=$itid AND txtid=$oldtextid") if $langids;
         } else {
             $revid = LJ::alloc_global_counter("ml_latest_updates_counter");
-            $dbh->do("UPDATE ml_latest SET txtid=$txtid, updid=$revid WHERE dmid=$dmid ".
+            $dbh->do("UPDATE ml_latest SET txtid=$txtid, revid=$revid WHERE dmid=$dmid ".
                  "AND lnid IN ($langids) AND itid=$itid AND staleness >= 3") if $langids;
         }
     }
