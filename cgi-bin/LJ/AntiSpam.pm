@@ -70,8 +70,10 @@ sub create {
 
 sub load_recent {
     my $class = shift;
-    my $reviewed = shift || 0;
-    my $limit = shift || 50;
+    my %opts = @_;
+    my $type = (exists $opts{type}) ? $opts{type} : 'E'; # default to entries
+    my $reviewed = $opts{reviewed} || 0;
+    my $limit = $opts{limit} || 50;
 
     my $hours = 3600 * 24; # 24 hours
 
@@ -80,7 +82,8 @@ sub load_recent {
 
     my $sth;
     my $ago = LJ::mysql_time(time() - $hours, 1);
-    my $xsql = "ORDER BY eventtime DESC";
+    my $xsql = "AND type='$type' ";
+    $xsql .= "ORDER BY eventtime DESC";
     $xsql .= " LIMIT $limit";
 
     # Retrieve all antispam
@@ -175,6 +178,84 @@ sub set_review  { shift->_get_set('review' => $_[0]) }
 
 sub column_list { return @cols }
 
+#############################
+# Comment/Entry related subs
+#
+
+sub is_entry {
+    my $self = shift;
+
+    return $self->type eq 'E' ? 1 : 0;
+}
+
+sub is_comment {
+    my $self = shift;
+
+    return $self->type eq 'C' ? 1 : 0;
+}
+
+# This can be an Entry or Comment object
+sub _post {
+    my $self = shift;
+
+    return $self->{_post} if $self->{_post};
+
+    if ($self->is_entry) {
+        $self->{_post} = LJ::Entry->new($self->journalid, jitemid => $self->itemid);
+    } elsif ($self->is_comment) {
+        $self->{_post} = LJ::Comment->new($self->journalid, jtalkid => $self->itemid);
+    }
+
+    return $self->{_post};
+}
+
+sub valid_post {
+    my $self = shift;
+
+    # valid is a method common to Entry and Comment objects
+    return $self->_post->valid;
+}
+
+sub url {
+    my $self = shift;
+
+    # url is a method common to Entry and Comment objects
+    return $self->_post->url;
+}
+
+sub subject {
+    my $self = shift;
+
+    # subject_html is a method common to Entry and Comment objects
+    return $self->_post->subject_html;
+}
+
+sub body {
+    my $self = shift;
+
+    if ($self->is_entry) {
+        return $self->_post->event_html;
+    } elsif ($self->is_comment) {
+        return $self->_post->body_html;
+    }
+}
+
+sub post_time {
+    my $self = shift;
+
+    if ($self->is_entry) {
+        return $self->_post->eventtime_mysql;
+    } elsif ($self->is_comment) {
+        return LJ::mysql_time($self->_post->unixtime);
+    }
+}
+
+#
+#######################################
+
+################################
+# Review subs
+
 # Set review as 'T' for True.
 sub mark_reviewed {
     my $class = shift;
@@ -215,7 +296,8 @@ sub _mark_false_do {
             my $entry = LJ::Entry->new($ju, jitemid => $as->itemid);
             $content = $entry->event_html;
         } elsif ($as->type eq 'C') {
-            #TODO support comments also
+            my $comment = LJ::Comment->new($ju->userid, jtalkid => $as->itemid);
+            $content = $comment->body_html;
         }
 
         my $tpas = LJ::AntiSpam->tpas($as->posterid, LJ::journal_base($ju) . "/");
@@ -241,6 +323,8 @@ sub _mark_false_do {
     }
 }
 
+#
+###############################
 
 sub tpas {
     my $class = shift;

@@ -24,8 +24,10 @@ body<=
         unless LJ::check_priv($remote, 'supporthelp', 'antispam');
 
     my $ret;
+    my $type = $GET{type} || $POST{type} || undef;
+    $type = 'E' unless ($type =~ /[EC]/);
 
-    if (LJ::did_post()) {
+    if (LJ::did_post() && $POST{mode} eq 'review') {
         push @errors, "Invalid form submission" unless LJ::check_form_auth();
 
         my @correct; # list of correct verdicts
@@ -68,24 +70,30 @@ body<=
         return $ret;
     }
 
-    my @posts = LJ::AntiSpam->load_recent;
+    my @posts = LJ::AntiSpam->load_recent(type => $type);
     my @cols = LJ::AntiSpam->column_list;
+
+    $ret .= "<form method='POST'>\n";
+    $ret .= LJ::form_auth();
+    $ret .= "<p>Display ";
+    $ret .= LJ::html_select({ name => 'type',
+                              selected => $type || undef,
+                }, ('E', 'Entries', 'C', 'Comments') );
+    $ret .= "<br />" . LJ::html_submit('mode', 'Refresh');
+    $ret .= "</p></form>";
 
     unless (@posts) {
         $ret .= "No recent posts to review";
         return $ret;
     }
 
-    # Instantiate Entries
-    foreach my $p (@posts) {
-        $p->{entry} = LJ::Entry->new($p->journalid, jitemid => $p->itemid);
-    }
-
     $ret .= "<form method='POST'>\n";
     $ret .= LJ::form_auth();
-
+    $ret .= LJ::html_hidden(mode => 'review');
+    $ret .= "<p style='text-align: center'>" . LJ::html_submit('submit', 'Submit') . "</p>";
     $ret .= "<table border=1>";
     foreach my $p (@posts) {
+        next unless $p->valid_post;
         $ret .= "<tr><td width='350'>";
 
         # Left Column
@@ -99,9 +107,9 @@ body<=
         }
         my $uj = LJ::want_user($p->journalid);
         my $up = LJ::want_user($p->posterid);
-        my $url = LJ::journal_base($uj) . "/" . $p->{entry}->ditemid . ".html";
-        my $subject = $p->{entry}->subject_raw;
-        my $body = $p->{entry}->event_raw;
+        my $url = $p->url;
+        my $subject = $p->subject;
+        my $body = $p->body;
 
         # Middle Column
         $ret .= "</td><td width=80>";
@@ -122,7 +130,7 @@ body<=
         $ret .= "</td><td>";
 
         $ret .= "<a href=\"$url\">" .
-                $p->{entry}->eventtime_mysql .
+                $p->post_time .
                 "</a><br />\n";
         $ret .= LJ::ljuser($up->{user});
         if ($up->{userid} != $uj->{userid}) {
@@ -131,15 +139,13 @@ body<=
         $ret .= ":<br />\n";
 
         $ret .= "<div class='entry'>";
-        LJ::CleanHTML::clean_subject(\$subject);
-        LJ::CleanHTML::clean_event(\$body, {'cuturl' => LJ::item_link($uj, $p->{entry}->{'itemid'}, $p->{entry}->{'anum'})});
         $ret .= "<h3>$subject</h3>\n" if $subject;
         $ret .= $body . "</div>";
         $ret .= "</td></tr>\n";
     }
     $ret .= "</table>";
 
-    $ret .= "<p style='text-align: center'>" . LJ::html_submit('submite', 'Submit') . "</p>";
+    $ret .= "<p style='text-align: center'>" . LJ::html_submit('submit', 'Submit') . "</p>";
 
     $ret .= "</form>";
 

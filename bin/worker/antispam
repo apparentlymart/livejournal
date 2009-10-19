@@ -42,7 +42,13 @@ sub work {
         $content = $entry->event_html;
     # Comment
     } elsif ($a->{type} eq 'C') {
-        #TODO support comments also
+        my $comment = LJ::Comment->new($ju, jtalkid => $itemid);
+
+        unless ($comment->valid && $comment->visible_to(undef)) {
+            $job->completed;
+            return;
+        }
+        $content = $comment->body_html;
     }
 
     my $url      = LJ::journal_base($ju) . "/";
