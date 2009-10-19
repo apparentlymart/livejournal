@@ -2211,7 +2211,7 @@ sub res_includes {
     # add raw js/css
     foreach my $inc (@LJ::INCLUDE_RAW){
         if ($inc->[0] eq 'js'){
-            $ret .= qq|<script type=text/javascript">\r\n| . $inc->[1] . "</script>\r\n";
+            $ret .= qq|<script type="text/javascript">\r\n| . $inc->[1] . "</script>\r\n";
         } elsif ($inc->[0] eq 'css'){
             $ret .= qq|<style>\r\n| . $inc->[1] . "</style>\n";
         }
