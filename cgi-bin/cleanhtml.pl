@@ -647,6 +647,8 @@ sub clean
                             if ($remove_positioning) {
                                 $hash->{style} =~ s/margin.*?(?:;|$)//gi;
                                 $hash->{style} =~ s/height\s*?:.*?(?:;|$)//gi;
+                                # strip excessive padding
+                                $hash->{style} =~ s/padding[^:]*?:\D*\d{3,}[^;]*(?:;|$)//gi;
                             }
                         }
 
