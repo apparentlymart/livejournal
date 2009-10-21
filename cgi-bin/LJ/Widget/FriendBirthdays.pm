@@ -82,10 +82,12 @@ sub render_body {
             }
         };
 
+        my $is_show_href = 0;
         foreach my $vg_key (sort { $friend_birtdays_vgifts{$b}->{sponsored} <=> $friend_birtdays_vgifts{$a}->{sponsored} } keys %friend_birtdays_vgifts) {
             next unless $vg_key;
-            next if $friend_birtdays_vgifts{$vg_key}->{sponsored} && !$get_sponsor_vgift;
             next if $friend_birtdays_vgifts{$vg_key}->{show_to_sup} ne $show_to_sup;
+            $is_show_href++ if $friend_birtdays_vgifts{$vg_key}->{sponsored};
+            next if $friend_birtdays_vgifts{$vg_key}->{sponsored} && !$get_sponsor_vgift;
             next if ++$spons_cnt > 2 and $friend_birtdays_vgifts{$vg_key}->{sponsored};
             last if ++$vgift_cnt > 3;
             push @need_vgifts, $vg_key;
@@ -105,7 +107,7 @@ sub render_body {
         $show_hide_href .= "<a href='$LJ::SITEROOT/?sponsor_vgift=0'>" . $class->ml('widget.friendbirthdays.hide_sponsored_vgifts') . "</a><br/>" if $get_sponsor_vgift;
 
         $ret .=	"</ul>";
-        $ret .= $show_hide_href if @need_vgifts;
+        $ret .= $show_hide_href if @need_vgifts && $is_show_href;
 
         $ret .= "<a href='$LJ::SITEROOT/shop/vgift.bml'>" . $class->ml('widget.friendbirthdays.moregifts') . " &rarr;</a>";
     }
