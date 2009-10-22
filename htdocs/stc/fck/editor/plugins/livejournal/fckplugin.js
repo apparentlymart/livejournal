@@ -244,7 +244,9 @@ LJCutCommand.Execute=function() {
 
     var html = "<div class='ljcut'" +  text + ">";
     html    += selection;
-    html    += "</div>";
+    // I need to be able to identify the correct closing div tag so
+    // insert a marker <endljcut />
+    html    += "<endljcut \/></div>";
 
     FCK.InsertHtml(html);
     FCK.Focus();
@@ -466,8 +468,8 @@ FCK.CustomCleanWord = function( oNode, bIgnoreFont, bRemoveStyles ) {
 	}
 
     // Convert LJ specific tags
-    html = html.replace(/&lt;lj-cut text=.{1}(.+?).{1}&gt;([\S\s]+?)&lt;\/lj-cut&gt;/gm, '<div text="$1" class="ljcut">$2</div>');
-    html = html.replace(/&lt;lj-cut&gt;([\S\s]+?)&lt;\/lj-cut&gt;/gm, '<div class="ljcut">$1</div>');
+    html = html.replace(/&lt;lj-cut text=.{1}(.+?).{1}&gt;([\S\s]+?)&lt;\/lj-cut&gt;/gm, '<div text="$1" class="ljcut">$2<endljcut \/></div>');
+    html = html.replace(/&lt;lj-cut&gt;([\S\s]+?)&lt;\/lj-cut&gt;/gm, '<div class="ljcut">$1<endljcut \/></div>');
 
 
 	return html ;

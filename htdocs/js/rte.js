@@ -270,9 +270,9 @@ function convertToLJTags(html) {
         .replace(/<div class=['"]ljraw['"]>(.+?)<\/div>/g, '<lj-raw>$1</lj-raw>')
         .replace(/<div class=['"]ljembed['"](\s*embedid="(\d*)")?\s*>(.*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')
         .replace(/<div\s*(embedid="(\d*)")?\s*class=['"]ljembed['"]\s*>(.*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')
-        .replace(/<div class=['"]ljcut['"] text=['"](.+?)['"]>(.+?)<\/div>/g, '<lj-cut text="$1">$2</lj-cut>')
-        .replace(/<div text=['"](.+?)['"] class=['"]ljcut['"]>(.+?)<\/div>/g, '<lj-cut text="$1">$2</lj-cut>')
-        .replace(/<div class=['"]ljcut['"]>(.+?)<\/div>/g, '<lj-cut>$1</lj-cut>');
+        .replace(/<div class=['"]ljcut['"] text=['"](.+?)['"]>(.+?)<endljcut \/><\/div>/g, '<lj-cut text="$1">$2</lj-cut>')
+        .replace(/<div text=['"](.+?)['"] class=['"]ljcut['"]>(.+?)<endljcut \/><\/div>/g, '<lj-cut text="$1">$2</lj-cut>')
+        .replace(/<div class=['"]ljcut['"]>(.+?)<endljcut \/><\/div>/g, '<lj-cut>$1</lj-cut>');
 
     html = convert_poll_to_ljtags(html);
     html = convert_qotd_to_ljtags(html);
@@ -280,8 +280,8 @@ function convertToLJTags(html) {
 }
 
 function convertToHTMLTags(html, statPrefix) {
-    html = html.replace(/<lj-cut text=['"](.+?)['"]>([\S\s]+?)<\/lj-cut>/gm, '<div text="$1" class="ljcut">$2</div>');
-    html = html.replace(/<lj-cut>([\S\s]+?)<\/lj-cut>/gm, '<div class="ljcut">$1</div>');
+    html = html.replace(/<lj-cut text=['"](.+?)['"]>([\S\s]+?)<\/lj-cut>/gm, '<div text="$1" class="ljcut">$2<endljcut \/></div>');
+    html = html.replace(/<lj-cut>([\S\s]+?)<\/lj-cut>/gm, '<div class="ljcut">$1<endljcut \/></div>');
     html = html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/gm, '<div class="ljraw">$1</div>');
     html = html.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, "<div url=\"$1\" class=\"ljvideo\"><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
     // Match across multiple lines and extract ID if it exists
