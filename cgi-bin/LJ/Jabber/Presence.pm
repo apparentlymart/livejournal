@@ -154,7 +154,7 @@ sub create {
 
     my $dbh = LJ::get_db_writer() or die "No db";
 
-    my $sth = $dbh->prepare( "INSERT INTO jabpresence (userid, reshash, resource, clusterid, client, presence, flags,".
+    my $sth = $dbh->prepare( "REPLACE INTO jabpresence (userid, reshash, resource, clusterid, client, presence, flags,".
                              "priority, ctime, mtime, remoteip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
     $sth->execute( $u->id, $self->reshash, $resource, $clusterid, $client, $presence, $flags, $priority, $time, $time, $remoteip );
 
