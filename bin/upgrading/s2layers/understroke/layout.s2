@@ -294,8 +294,8 @@ function _calendar(YearMonth mon) : string {
 			$Days[size $Days] = $noday;
 		}
 	}
-	var string year_link = $p.view!="archive"?"""&nbsp;<a href="$*_{"base"}/$year/" class="year">$year</a>""":"";
-	$result = """$result<div class="cal"><table cellspacing="1">
+	var string year_link = $p.view!="archive"?"""<a href="$*_{"base"}/$year/" class="year">$year</a>""":"";
+	$result = """$result<div class="cal-wrap"><table cellspacing="1">
 	<caption><a href="$mon.url" class="month">$month</a>$year_link</caption>
 	<thead>
 		<tr>""";
@@ -314,20 +314,20 @@ function _calendar(YearMonth mon) : string {
 		if ($ii%7 == 1) {
 		$result = """$result		<tr>""";
 		}
-		$result = """$result<td>""";
+		$result = """$result<td><div>""";
 		if ($day.num_entries > 0) { $result = """$result<a href="$day.url">"""; }
-		$result = $result + ($day.day == 0?" ":string($day.day));
+		$result = $result + ($day.day == 0?"&nbsp;":string($day.day));
 		if ($day.num_entries > 0) { $result = """$result</a>"""; }
-		$result = """$result</td>""";
+		$result = """$result</div></td>""";
 		if ($ii%7 == 0) {
 		$result = """$result</tr>""";
 		}
 		$ii++;
 	}
-	return """$result
+	return $mon.has_entries?"""$result
 	</tbody>
 </table></div>
-""";
+""":"";
 }
 
 function _CSS() : string {
