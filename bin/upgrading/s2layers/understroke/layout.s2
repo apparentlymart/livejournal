@@ -71,14 +71,16 @@ property bool feeds_always { des = "show base feeds when there is no native";
 	} set feeds_always = true;
 
 property string custom_css {
+	string_mode = "css";
 	} set custom_css = "";
 property string custom_ie_css {
+	string_mode = "css";
 	} set custom_ie_css = "";
+property string custom_ie_css_variants {
+	values = "ie|Any IE|lt IE 8|IE7 and less";
+	} set custom_ie_css_variants = "lt IE 8";
 
 property use include_default_stylesheet;
-
-
-function _bool(string input) : bool { return $input?true:false; }
 
 function _dateTime (DateTime time) : string {
 	var string result = "";
@@ -348,19 +350,19 @@ function _print_CSS {
 """	<link rel="stylesheet" type="text/css" href="$*linked_stylesheet" />
 """;
 	}
-	$*custom_css = $*custom_css + _CSS();
-	if ($*custom_css) {
+	var string custom_css = $*custom_css + _CSS();
+	if ($custom_css) {
 		"""	<style type="text/css">""";
 		start_css();
-		print $*custom_css;
+		print $custom_css;
 		end_css();
 		"""	</style>""";
 	}
-	$*custom_ie_css = $*custom_ie_css + _IE_CSS();
-	if ($*custom_ie_css) {
-		"""<!--[if lt IE 8]><style type="text/css">""";
+	var string custom_ie_css = $*custom_ie_css + _IE_CSS();
+	if ($custom_ie_css) {
+		"""<!--[if $*custom_ie_css_variants]><style type="text/css">""";
 		start_css();
-		print $*custom_ie_css;
+		print $custom_ie_css;
 		end_css();
 		"""	</style><![endif]-->""";
 	}
