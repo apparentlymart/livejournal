@@ -1,26 +1,23 @@
 /* Horizon
 --------------------------------------*/
-.logged-in {
+/* Logged-in */
+.logged-in #navigation {
+	background:#040404 url(/img/reskining/halloween09/halloween09-hor-in.jpg) 100% 0 no-repeat;
+	min-width:840px;
+	}
+.logged-in #Logo A {
 	position:relative;
+	left:-145px;
+	width:220px;
 	}
-	.logged-in #navigation {
-		background:#040404 url(/img/reskining/halloween09/halloween09-hor-in.jpg) 100% 0 no-repeat;
-		min-width:840px;
-		}
-	.logged-in #Logo A {
-		position:relative;
-		left:-145px;
-		width:220px;
-		}
 
-.logged-out {
+/* Logged-out */
+.logged-out #navigation {
+	background:#040404 url(/img/reskining/halloween09/halloween09-hor-out.jpg) 0 0 no-repeat;
 	}
-	.logged-out #navigation {
-		background:#040404 url(/img/reskining/halloween09/halloween09-hor-out.jpg) 0 0 no-repeat;
-		}
-	.logged-out #Logo A {
-		width:250px;
-		}
+.logged-out #Logo A {
+	width:250px;
+	}
 
 /* Lanzelot
 --------------------------------------*/
@@ -36,4 +33,3 @@
 #header .login-tl {
 	background: #040404;
 	}
-
