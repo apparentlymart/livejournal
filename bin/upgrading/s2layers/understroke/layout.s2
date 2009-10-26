@@ -415,6 +415,9 @@ function _Header {
 		if ($p.view == "recent" and not ($pp.nav.forward_url->length() > 0) and not ($p.data_link{"rss"}.url->contains("/rss?tag"))) {
 			$*_{"first_view"} = "recent";
 		}
+		if (size $pp.entries == 0) {
+			$bc = "$bc without-entries";
+		}
 	} elseif ($p.view == "archive") {  var YearPage pp = $p as YearPage;
 		var int i = 0;
 		foreach var YearYear year ($pp.years) {
@@ -446,7 +449,9 @@ function _Header {
 			var Link next = $pp.entry -> get_link("nav_next");
 			$*_{"prev_url"} = $prev.url;
 			$*_{"next_url"} = $next.url;
-
+			if (size $pp.comments == 0) {
+				$bc = "$bc without-comments";
+			}
 		} else { var ReplyPage pp = $p as ReplyPage;
 			var Link prev = $pp.entry -> get_link("nav_prev");
 			var Link next = $pp.entry -> get_link("nav_next");
@@ -459,10 +464,16 @@ function _Header {
 
 
 # Fill the bodyclasses
-# ToDo: Need moar
 	if ($*_{"first_view"}) {
 		$bc = "$bc $*_{"first_view"}-first";
 	}
+	if (viewer_sees_control_strip()) {
+		$bc = "$bc with-controlstrip";
+	}
+	$bc = "$bc user-$p.journal.username";
+	$bc = "$bc type-$p.journal_type";
+	$bc = "$bc lang-$*lang_current";
+
 
 """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="$*lang_current">
