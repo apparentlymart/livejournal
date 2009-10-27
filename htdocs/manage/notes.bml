@@ -109,7 +109,7 @@ body<=
         var errmsg_change = '|.LJ::ejs($ML{'.error.override_old_value'}).q|';
 	    </script>|;	
 
-    $ret .= q|<table class="aliaslist-table">|;
+    $ret .= q|<table class="aliaslist-table b-form-changelist">|;
     
     my @userid_list = ();
     my $us = LJ::load_userids(keys %$aliases);
@@ -119,7 +119,7 @@ body<=
     my $users_list_html = '';
     foreach my $userid (sort { $us->{$a}->display_name cmp $us->{$b}->display_name } keys %$aliases) {
         my $u = $us->{$userid};
-        $users_list_html .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td class="user_alias"><input type="text" name="|.$key.$userid.q|" value="|
+        $users_list_html .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td class="user_alias"><input type="text" class="type-text" name="|.$key.$userid.q|" value="|
                 .LJ::ehtml(LJ::ljuser_alias($u->{user})).q|" size="50" maxlength="200">|
                 .LJ::html_check({ 'type' => 'check',
                                   'name' => "check".$userid,

@@ -84,7 +84,7 @@ body<=
             $ret .= "<?p " . BML::ml('.editfriends.text', { 'img1' => "<img src='$LJ::IMGPREFIX/arrow-friend.gif'>",
                                                             'img2' => "<img src='$LJ::IMGPREFIX/arrow-friendof.gif'>" });
             $ret .= " p?><div align='center'>";
-            $ret .= "<table class='borderedtable' id='editfriends' width='90%' cellpadding='3' cellspacing='0'><tr>";
+            $ret .= "<table class='borderedtable b-form-changelist' id='editfriends' width='90%' cellpadding='3' cellspacing='0'><tr>";
 
             my @friends;
 
@@ -166,6 +166,7 @@ body<=
                                 name => "useralias_" . $who_u->{userid},
                                 id   => "useralias_$who",
                                 value => LJ::ljuser_alias($f->{username}),
+                                class => "type-text",
                                 });
                     } else { 
                         $ret .= " ";

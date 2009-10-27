@@ -327,3 +327,13 @@ It must be invisible, use it only for reskining */
 	display: none;
 	}
 
+/* List of [un]changed inputs
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+.b-form-changelist .type-text {
+	color:#808080;
+	}
+	.b-form-changelist .type-text:focus,
+	.b-form-changelist .type-text-changed {
+		color:#000;
+		}

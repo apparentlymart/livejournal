@@ -134,7 +134,7 @@ body<=
         my $us = LJ::load_userids(@$banned);
 
         $ret .= $u->is_community ? "<p>$ML{'.intro.unban.comm'}</p>" : "<p>$ML{'.intro.unban.self'}</p>";
-        $ret .= '<table class="userslist-table" cellspacing="0" cellpadding="0" id="all"><tr><th>';
+        $ret .= '<table class="userslist-table b-form-changelist" cellspacing="0" cellpadding="0" id="all"><tr><th>';
         $ret .= LJ::html_check({ name => 'all',
                 onclick=>
                 "var inputs=\$('all').getElementsByTagName('input');
@@ -161,7 +161,7 @@ body<=
             }) . "</td>";
             $ret .= "<td>" . $bu->ljuser_display . "</td>";
 			if (not $u->is_community && $alias_enable) {
-            	$ret .= "<td>".LJ::html_text( { name => 'new_alias_'.$bu->id, value => LJ::ehtml(LJ::ljuser_alias($bu->{user})) })."</td>" if $alias_enable;
+            	$ret .= "<td>".LJ::html_text( { class => 'type-text', name => 'new_alias_'.$bu->id, value => LJ::ehtml(LJ::ljuser_alias($bu->{user})) })."</td>" if $alias_enable;
 			}
             $ret .= "</tr>";
         }
