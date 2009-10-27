@@ -3204,18 +3204,24 @@ sub init {
 
     # New comment state
     my $state = 'A';
+    my $screening = LJ::Talk::screening_level($journalu, int($ditemid / 256));
     if ($form->{state} =~ /^[A-Z]\z/){
         # use provided state.
         $state = $form->{state};
     } else {
         # figure out whether to post this comment screened
-        my $screening = LJ::Talk::screening_level($journalu, int($ditemid / 256));
         if (!$form->{editid} && ($screening eq 'A' ||
             ($screening eq 'R' && ! $up) ||
             ($screening eq 'F' && !($up && LJ::is_friend($journalu, $up))))) {
             $state = 'S';
         }
         $state = 'A' if LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{user});
+    }
+
+    if ($state eq 'A' && $screening eq 'L' && !($up && LJ::is_friend($journalu, $up))) {
+        my $spam = 0;
+        LJ::run_hook('spam_comment_detector', $form, \$spam);
+        $state = 'S' if $spam;
     }
 
     my $parent = {

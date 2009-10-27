@@ -2035,6 +2035,10 @@ label.screening.default4=Journal Default
 
 label.screening.header=Screened Comments:
 
+label.screening.links=Comments from non-friends with links
+
+label.screening.links2=Non-friends With Links
+
 label.screening.none=None
 
 label.screening.none2=Disabled
@@ -2428,6 +2432,8 @@ setting.commentscreening.option.select.anon=anonymous comments
 setting.commentscreening.option.select.none=no comments (don't screen)
 
 setting.commentscreening.option.select.nonfriends=comments from non-friends
+
+setting.commentscreening.option.select.links=comments from non-friends with links
 
 setting.commentscreening.option.select.nonmembers=comments from non-members
 

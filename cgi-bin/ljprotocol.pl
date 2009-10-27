@@ -1070,7 +1070,7 @@ sub postevent
     return undef unless LJ::run_hook('post_noauth', $req) || authenticate($req, $err, $flags);
 
     my $spam = 0;
-    return undef unless LJ::run_hook('spam_detector', $req, \$spam);
+    LJ::run_hook('spam_detector', $req, \$spam);
     return fail($err,320) if $spam;
 
     # if going through mod queue, then we know they're permitted to post at least this entry

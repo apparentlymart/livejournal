@@ -1498,9 +1498,11 @@ MOODS
             my $screening_levels_default = $opts->{'prop_opt_default_screening'} eq 'N' ? BML::ml('label.screening.none2') :
                     $opts->{'prop_opt_default_screening'} eq 'R' ? BML::ml('label.screening.anonymous2') :
                     $opts->{'prop_opt_default_screening'} eq 'F' ? BML::ml('label.screening.nonfriends2') :
+                    $opts->{'prop_opt_default_screening'} eq 'L' ? BML::ml('label.screening.links2') :
                     $opts->{'prop_opt_default_screening'} eq 'A' ? BML::ml('label.screening.all2') : BML::ml('label.screening.none2');
             my @levels = ('', BML::ml('label.screening.default4', {'aopts'=>$screening_levels_default}), 'N', BML::ml('label.screening.none2'),
                       'R', BML::ml('label.screening.anonymous2'), 'F', BML::ml('label.screening.nonfriends2'),
+                      'L', BML::ml('label.screening.links2'),
                       'A', BML::ml('label.screening.all2'));
             $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'id' => 'prop_opt_screening', 'class' => 'select', 'selected' => $opts->{'prop_opt_screening'},
                       'tabindex' => $tabindex->() }, @levels);

@@ -31,6 +31,7 @@ sub option {
         N => $class->ml('setting.commentscreening.option.select.none'),
         R => $class->ml('setting.commentscreening.option.select.anon'),
         F => $u->is_community ? $class->ml('setting.commentscreening.option.select.nonmembers') : $class->ml('setting.commentscreening.option.select.nonfriends'),
+        L => $class->ml('setting.commentscreening.option.select.links'),
         A => $class->ml('setting.commentscreening.option.select.all'),
     );
 
@@ -47,7 +48,7 @@ sub save {
     my ($class, $u, $args) = @_;
 
     my $val = $class->get_arg($args, "commentscreening");
-    $val = "N" unless $val =~ /^[NRFA]$/;
+    $val = "N" unless $val =~ /^[NRFLA]$/;
 
     $u->set_prop( opt_whoscreened => $val );
 
