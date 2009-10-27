@@ -1,6 +1,6 @@
 ﻿/*
  * FCKeditor - The text editor for Internet - http://www.fckeditor.net
- * Copyright (C) 2003-2008 Frederico Caldeira Knabben
+ * Copyright (C) 2003-2009 Frederico Caldeira Knabben
  *
  * == BEGIN LICENSE ==
  *
@@ -44,7 +44,7 @@ RemoveFormat		: "フォーマット削除",
 InsertLinkLbl		: "リンク",
 InsertLink			: "リンク挿入/編集",
 RemoveLink			: "リンク削除",
-VisitLink			: "Open Link",	//MISSING
+VisitLink			: "リンクを開く",
 Anchor				: "アンカー挿入/編集",
 AnchorDelete		: "アンカー削除",
 InsertImageLbl		: "イメージ",
@@ -73,9 +73,9 @@ BlockJustify		: "両端揃え",
 DecreaseIndent		: "インデント解除",
 IncreaseIndent		: "インデント",
 Blockquote			: "ブロック引用",
-CreateDiv			: "Create Div Container",	//MISSING
-EditDiv				: "Edit Div Container",	//MISSING
-DeleteDiv			: "Remove Div Container",	//MISSING
+CreateDiv			: "Div 作成",
+EditDiv				: "Div 編集",
+DeleteDiv			: "Div 削除",
 Undo				: "元に戻す",
 Redo				: "やり直し",
 NumberedListLbl		: "段落番号",
@@ -161,7 +161,7 @@ UnknownToolbarSet	: "ツールバー設定 \"%1\" 存在しません。",
 NoActiveX			: "エラー、警告メッセージなどが発生した場合、ブラウザーのセキュリティ設定によりエディタのいくつかの機能が制限されている可能性があります。セキュリティ設定のオプションで\"ActiveXコントロールとプラグインの実行\"を有効にするにしてください。",
 BrowseServerBlocked : "サーバーブラウザーを開くことができませんでした。ポップアップ・ブロック機能が無効になっているか確認してください。",
 DialogBlocked		: "ダイアログウィンドウを開くことができませんでした。ポップアップ・ブロック機能が無効になっているか確認してください。",
-VisitLinkBlocked	: "It was not possible to open a new window. Make sure all popup blockers are disabled.",	//MISSING
+VisitLinkBlocked	: "新しいウィンドウを開くことができませんでした。ポップアップ・ブロック機能が無効になっているか確認してください。",
 
 // Dialogs
 DlgBtnOK			: "OK",
@@ -308,6 +308,11 @@ DlgTableCellSpace	: "セル内余白",
 DlgTableCellPad		: "セル内間隔",
 DlgTableCaption		: "ｷｬﾌﾟｼｮﾝ",
 DlgTableSummary		: "テーブル目的/構造",
+DlgTableHeaders		: "Headers",	//MISSING
+DlgTableHeadersNone		: "None",	//MISSING
+DlgTableHeadersColumn	: "First column",	//MISSING
+DlgTableHeadersRow		: "First Row",	//MISSING
+DlgTableHeadersBoth		: "Both",	//MISSING
 
 // Table Cell Dialog
 DlgCellTitle		: "セル プロパティ",
@@ -330,6 +335,9 @@ DlgCellVerAlignTop	: "上",
 DlgCellVerAlignMiddle	: "中央",
 DlgCellVerAlignBottom	: "下",
 DlgCellVerAlignBaseline	: "ベースライン",
+DlgCellType		: "Cell Type",	//MISSING
+DlgCellTypeData		: "Data",	//MISSING
+DlgCellTypeHeader	: "Header",	//MISSING
 DlgCellRowSpan		: "縦幅(行数)",
 DlgCellCollSpan		: "横幅(列数)",
 DlgCellBackColor	: "背景色",
@@ -519,8 +527,13 @@ DlgAboutVersion		: "バージョン",
 DlgAboutInfo		: "より詳しい情報はこちらで",
 
 // Div Dialog
-DlgDivGeneralTab	: "General",	//MISSING
-DlgDivAdvancedTab	: "Advanced",	//MISSING
-DlgDivStyle		: "Style",	//MISSING
-DlgDivInlineStyle	: "Inline Style"	//MISSING
+DlgDivGeneralTab	: "全般",
+DlgDivAdvancedTab	: "高度な設定",
+DlgDivStyle		: "スタイル",
+DlgDivInlineStyle	: "インラインスタイル",
+
+ScaytTitle			: "SCAYT",	//MISSING
+ScaytTitleOptions	: "Options",	//MISSING
+ScaytTitleLangs		: "Languages",	//MISSING
+ScaytTitleAbout		: "About"	//MISSING
 };

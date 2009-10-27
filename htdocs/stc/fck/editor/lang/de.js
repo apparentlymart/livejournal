@@ -1,6 +1,6 @@
 ﻿/*
  * FCKeditor - The text editor for Internet - http://www.fckeditor.net
- * Copyright (C) 2003-2008 Frederico Caldeira Knabben
+ * Copyright (C) 2003-2009 Frederico Caldeira Knabben
  *
  * == BEGIN LICENSE ==
  *
@@ -44,7 +44,7 @@ RemoveFormat		: "Formatierungen entfernen",
 InsertLinkLbl		: "Link",
 InsertLink			: "Link einfügen/editieren",
 RemoveLink			: "Link entfernen",
-VisitLink			: "Open Link",	//MISSING
+VisitLink			: "Link aufrufen",
 Anchor				: "Anker einfügen/editieren",
 AnchorDelete		: "Anker entfernen",
 InsertImageLbl		: "Bild",
@@ -73,9 +73,9 @@ BlockJustify		: "Blocksatz",
 DecreaseIndent		: "Einzug verringern",
 IncreaseIndent		: "Einzug erhöhen",
 Blockquote			: "Zitatblock",
-CreateDiv			: "Create Div Container",	//MISSING
-EditDiv				: "Edit Div Container",	//MISSING
-DeleteDiv			: "Remove Div Container",	//MISSING
+CreateDiv			: "Erzeuge Div Block",
+EditDiv				: "Bearbeite Div Block",
+DeleteDiv			: "Entferne Div Block",
 Undo				: "Rückgängig",
 Redo				: "Wiederherstellen",
 NumberedListLbl		: "Nummerierte Liste",
@@ -161,7 +161,7 @@ UnknownToolbarSet	: "Menüleiste \"%1\" existiert nicht",
 NoActiveX			: "Die Sicherheitseinstellungen Ihres Browsers beschränken evtl. einige Funktionen des Editors. Aktivieren Sie die Option \"ActiveX-Steuerelemente und Plugins ausführen\" in den Sicherheitseinstellungen, um diese Funktionen nutzen zu können",
 BrowseServerBlocked : "Ein Auswahlfenster konnte nicht geöffnet werden. Stellen Sie sicher, das alle Popup-Blocker ausgeschaltet sind.",
 DialogBlocked		: "Das Dialog-Fenster konnte nicht geöffnet werden. Stellen Sie sicher, das alle Popup-Blocker ausgeschaltet sind.",
-VisitLinkBlocked	: "It was not possible to open a new window. Make sure all popup blockers are disabled.",	//MISSING
+VisitLinkBlocked	: "Es war leider nicht möglich ein neues Fenster zu öffnen. Bitte versichern Sie sich das der Popup-Blocker ausgeschaltet ist.",
 
 // Dialogs
 DlgBtnOK			: "OK",
@@ -202,8 +202,8 @@ DlgImgHeight		: "Höhe",
 DlgImgLockRatio		: "Größenverhältniss beibehalten",
 DlgBtnResetSize		: "Größe zurücksetzen",
 DlgImgBorder		: "Rahmen",
-DlgImgHSpace		: "H-Abstand",
-DlgImgVSpace		: "V-Abstand",
+DlgImgHSpace		: "Horizontal-Abstand",
+DlgImgVSpace		: "Vertikal-Abstand",
 DlgImgAlign			: "Ausrichtung",
 DlgImgAlignLeft		: "Links",
 DlgImgAlignAbsBottom: "Abs Unten",
@@ -308,6 +308,11 @@ DlgTableCellSpace	: "Zellenabstand außen",
 DlgTableCellPad		: "Zellenabstand innen",
 DlgTableCaption		: "Überschrift",
 DlgTableSummary		: "Inhaltsübersicht",
+DlgTableHeaders		: "Headers",	//MISSING
+DlgTableHeadersNone		: "None",	//MISSING
+DlgTableHeadersColumn	: "First column",	//MISSING
+DlgTableHeadersRow		: "First Row",	//MISSING
+DlgTableHeadersBoth		: "Both",	//MISSING
 
 // Table Cell Dialog
 DlgCellTitle		: "Zellen-Eigenschaften",
@@ -330,6 +335,9 @@ DlgCellVerAlignTop	: "Oben",
 DlgCellVerAlignMiddle	: "Mitte",
 DlgCellVerAlignBottom	: "Unten",
 DlgCellVerAlignBaseline	: "Grundlinie",
+DlgCellType		: "Cell Type",	//MISSING
+DlgCellTypeData		: "Data",	//MISSING
+DlgCellTypeHeader	: "Header",	//MISSING
 DlgCellRowSpan		: "Zeilen zusammenfassen",
 DlgCellCollSpan		: "Spalten zusammenfassen",
 DlgCellBackColor	: "Hintergrundfarbe",
@@ -519,8 +527,13 @@ DlgAboutVersion		: "Version",
 DlgAboutInfo		: "Für weitere Informationen siehe",
 
 // Div Dialog
-DlgDivGeneralTab	: "General",	//MISSING
-DlgDivAdvancedTab	: "Advanced",	//MISSING
-DlgDivStyle		: "Style",	//MISSING
-DlgDivInlineStyle	: "Inline Style"	//MISSING
+DlgDivGeneralTab	: "Allgemein",
+DlgDivAdvancedTab	: "Erweitert",
+DlgDivStyle		: "Style",
+DlgDivInlineStyle	: "Inline Style",
+
+ScaytTitle			: "SCAYT",	//MISSING
+ScaytTitleOptions	: "Options",	//MISSING
+ScaytTitleLangs		: "Languages",	//MISSING
+ScaytTitleAbout		: "About"	//MISSING
 };

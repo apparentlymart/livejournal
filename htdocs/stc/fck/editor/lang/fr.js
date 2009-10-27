@@ -1,6 +1,6 @@
 ﻿/*
  * FCKeditor - The text editor for Internet - http://www.fckeditor.net
- * Copyright (C) 2003-2008 Frederico Caldeira Knabben
+ * Copyright (C) 2003-2009 Frederico Caldeira Knabben
  *
  * == BEGIN LICENSE ==
  *
@@ -44,7 +44,7 @@ RemoveFormat		: "Supprimer le format",
 InsertLinkLbl		: "Lien",
 InsertLink			: "Insérer/modifier le lien",
 RemoveLink			: "Supprimer le lien",
-VisitLink			: "Open Link",	//MISSING
+VisitLink			: "Suivre le lien",
 Anchor				: "Insérer/modifier l'ancre",
 AnchorDelete		: "Supprimer l'ancre",
 InsertImageLbl		: "Image",
@@ -73,9 +73,9 @@ BlockJustify		: "Texte justifié",
 DecreaseIndent		: "Diminuer le retrait",
 IncreaseIndent		: "Augmenter le retrait",
 Blockquote			: "Citation",
-CreateDiv			: "Create Div Container",	//MISSING
-EditDiv				: "Edit Div Container",	//MISSING
-DeleteDiv			: "Remove Div Container",	//MISSING
+CreateDiv			: "Créer Balise Div",
+EditDiv				: "Modifier Balise Div",
+DeleteDiv			: "Supprimer Balise Div",
 Undo				: "Annuler",
 Redo				: "Refaire",
 NumberedListLbl		: "Liste numérotée",
@@ -161,7 +161,7 @@ UnknownToolbarSet	: "La barre d'outils \"%1\" n'existe pas",
 NoActiveX			: "Les paramètres de sécurité de votre navigateur peuvent limiter quelques fonctionnalités de l'éditeur. Veuillez activer l'option \"Exécuter les contrôles ActiveX et les plug-ins\". Il se peut que vous rencontriez des erreurs et remarquiez quelques limitations.",
 BrowseServerBlocked : "Le navigateur n'a pas pu être ouvert. Assurez-vous que les bloqueurs de popups soient désactivés.",
 DialogBlocked		: "La fenêtre de dialogue n'a pas pu s'ouvrir. Assurez-vous que les bloqueurs de popups soient désactivés.",
-VisitLinkBlocked	: "It was not possible to open a new window. Make sure all popup blockers are disabled.",	//MISSING
+VisitLinkBlocked	: "Impossible d'ouvrir une nouvelle fenêtre. Assurez-vous que les bloqueurs de popups soient désactivés.",
 
 // Dialogs
 DlgBtnOK			: "OK",
@@ -308,6 +308,11 @@ DlgTableCellSpace	: "Espacement",
 DlgTableCellPad		: "Contour",
 DlgTableCaption		: "Titre",
 DlgTableSummary		: "Résumé",
+DlgTableHeaders		: "Entêtes",
+DlgTableHeadersNone		: "Sans",
+DlgTableHeadersColumn	: "Première colonne",
+DlgTableHeadersRow		: "Première Ligne",
+DlgTableHeadersBoth		: "Les 2",
 
 // Table Cell Dialog
 DlgCellTitle		: "Propriétés de la cellule",
@@ -330,6 +335,9 @@ DlgCellVerAlignTop	: "Haut",
 DlgCellVerAlignMiddle	: "Milieu",
 DlgCellVerAlignBottom	: "Bas",
 DlgCellVerAlignBaseline	: "Bas du texte",
+DlgCellType		: "Type de Cellule",
+DlgCellTypeData		: "Données",
+DlgCellTypeHeader	: "Entête",
 DlgCellRowSpan		: "Lignes fusionnées",
 DlgCellCollSpan		: "Colonnes fusionnées",
 DlgCellBackColor	: "Fond",
@@ -519,8 +527,13 @@ DlgAboutVersion		: "Version",
 DlgAboutInfo		: "Pour plus d'informations, aller à",
 
 // Div Dialog
-DlgDivGeneralTab	: "General",	//MISSING
-DlgDivAdvancedTab	: "Advanced",	//MISSING
-DlgDivStyle		: "Style",	//MISSING
-DlgDivInlineStyle	: "Inline Style"	//MISSING
+DlgDivGeneralTab	: "Général",
+DlgDivAdvancedTab	: "Avancé",
+DlgDivStyle		: "Style",
+DlgDivInlineStyle	: "Attribut Style",
+
+ScaytTitle			: "SCAYT",	//MISSING
+ScaytTitleOptions	: "Options",	//MISSING
+ScaytTitleLangs		: "Languages",	//MISSING
+ScaytTitleAbout		: "About"	//MISSING
 };

@@ -1,6 +1,6 @@
 ﻿/*
  * FCKeditor - The text editor for Internet - http://www.fckeditor.net
- * Copyright (C) 2003-2008 Frederico Caldeira Knabben
+ * Copyright (C) 2003-2009 Frederico Caldeira Knabben
  *
  * == BEGIN LICENSE ==
  *
@@ -44,7 +44,7 @@ RemoveFormat		: "Odstranit formátování",
 InsertLinkLbl		: "Odkaz",
 InsertLink			: "Vložit/změnit odkaz",
 RemoveLink			: "Odstranit odkaz",
-VisitLink			: "Open Link",	//MISSING
+VisitLink			: "Otevřít odkaz",
 Anchor				: "Vložít/změnit záložku",
 AnchorDelete		: "Odstranit kotvu",
 InsertImageLbl		: "Obrázek",
@@ -73,9 +73,9 @@ BlockJustify		: "Zarovnat do bloku",
 DecreaseIndent		: "Zmenšit odsazení",
 IncreaseIndent		: "Zvětšit odsazení",
 Blockquote			: "Citace",
-CreateDiv			: "Create Div Container",	//MISSING
-EditDiv				: "Edit Div Container",	//MISSING
-DeleteDiv			: "Remove Div Container",	//MISSING
+CreateDiv			: "Vytvořit Div kontejner",
+EditDiv				: "Upravit Div kontejner",
+DeleteDiv			: "Odstranit Div kontejner",
 Undo				: "Zpět",
 Redo				: "Znovu",
 NumberedListLbl		: "Číslování",
@@ -161,7 +161,7 @@ UnknownToolbarSet	: "Panel nástrojů \"%1\" neexistuje",
 NoActiveX			: "Nastavení bezpečnosti Vašeho prohlížeče omezuje funkčnost některých jeho možností. Je třeba zapnout volbu \"Spouštět ovládáací prvky ActiveX a moduly plug-in\", jinak nebude možné využívat všechny dosputné schopnosti editoru.",
 BrowseServerBlocked : "Průzkumník zdrojů nelze otevřít. Prověřte, zda nemáte aktivováno blokování popup oken.",
 DialogBlocked		: "Nelze otevřít dialogové okno. Prověřte, zda nemáte aktivováno blokování popup oken.",
-VisitLinkBlocked	: "It was not possible to open a new window. Make sure all popup blockers are disabled.",	//MISSING
+VisitLinkBlocked	: "Není možné otevřít nové okno. Prověřte, zda všechny nástroje pro blokování vyskakovacích oken jsou vypnuty.",
 
 // Dialogs
 DlgBtnOK			: "OK",
@@ -308,6 +308,11 @@ DlgTableCellSpace	: "Vzdálenost buněk",
 DlgTableCellPad		: "Odsazení obsahu",
 DlgTableCaption		: "Popis",
 DlgTableSummary		: "Souhrn",
+DlgTableHeaders		: "Záhlaví",
+DlgTableHeadersNone		: "Žádné",
+DlgTableHeadersColumn	: "První sloupec",
+DlgTableHeadersRow		: "První řádek",
+DlgTableHeadersBoth		: "Oboje",
 
 // Table Cell Dialog
 DlgCellTitle		: "Vlastnosti buňky",
@@ -330,6 +335,9 @@ DlgCellVerAlignTop	: "Nahoru",
 DlgCellVerAlignMiddle	: "Doprostřed",
 DlgCellVerAlignBottom	: "Dolů",
 DlgCellVerAlignBaseline	: "Na účaří",
+DlgCellType		: "Typ buňky",
+DlgCellTypeData		: "Data",
+DlgCellTypeHeader	: "Zálaví",
 DlgCellRowSpan		: "Sloučené řádky",
 DlgCellCollSpan		: "Sloučené sloupce",
 DlgCellBackColor	: "Barva pozadí",
@@ -519,8 +527,13 @@ DlgAboutVersion		: "verze",
 DlgAboutInfo		: "Více informací získáte na",
 
 // Div Dialog
-DlgDivGeneralTab	: "General",	//MISSING
-DlgDivAdvancedTab	: "Advanced",	//MISSING
-DlgDivStyle		: "Style",	//MISSING
-DlgDivInlineStyle	: "Inline Style"	//MISSING
+DlgDivGeneralTab	: "Obecné",
+DlgDivAdvancedTab	: "Rozšířené",
+DlgDivStyle		: "Styl",
+DlgDivInlineStyle	: "Vložený styl",
+
+ScaytTitle			: "SCAYT",	//MISSING
+ScaytTitleOptions	: "Options",	//MISSING
+ScaytTitleLangs		: "Languages",	//MISSING
+ScaytTitleAbout		: "About"	//MISSING
 };

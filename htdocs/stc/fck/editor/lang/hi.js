@@ -1,6 +1,6 @@
 ﻿/*
  * FCKeditor - The text editor for Internet - http://www.fckeditor.net
- * Copyright (C) 2003-2008 Frederico Caldeira Knabben
+ * Copyright (C) 2003-2009 Frederico Caldeira Knabben
  *
  * == BEGIN LICENSE ==
  *
@@ -44,7 +44,7 @@ RemoveFormat		: "फ़ॉर्मैट हटायें",
 InsertLinkLbl		: "लिंक",
 InsertLink			: "लिंक इन्सर्ट/संपादन",
 RemoveLink			: "लिंक हटायें",
-VisitLink			: "Open Link",	//MISSING
+VisitLink			: "लिंक खोलें",
 Anchor				: "ऐंकर इन्सर्ट/संपादन",
 AnchorDelete		: "ऐंकर हटायें",
 InsertImageLbl		: "तस्वीर",
@@ -73,9 +73,9 @@ BlockJustify		: "ब्लॉक जस्टीफ़ाई",
 DecreaseIndent		: "इन्डॅन्ट कम करें",
 IncreaseIndent		: "इन्डॅन्ट बढ़ायें",
 Blockquote			: "ब्लॉक-कोट",
-CreateDiv			: "Create Div Container",	//MISSING
-EditDiv				: "Edit Div Container",	//MISSING
-DeleteDiv			: "Remove Div Container",	//MISSING
+CreateDiv			: "डिव (Div) कन्टेनर बनायें",
+EditDiv				: "डिव (Div) कन्टेनर बदलें",
+DeleteDiv			: "डिव कन्टेनर हटायें",
 Undo				: "अन्डू",
 Redo				: "रीडू",
 NumberedListLbl		: "अंकीय सूची",
@@ -159,9 +159,9 @@ UnknownCommand		: "अनजान कमान्ड \"%1\"",
 NotImplemented		: "कमान्ड इम्प्लीमॅन्ट नहीं किया गया है",
 UnknownToolbarSet	: "टूलबार सॅट \"%1\" उपलब्ध नहीं है",
 NoActiveX			: "आपके ब्राउज़र् की सुरक्शा सेटिंग्स् एडिटर की कुछ् फ़ीचरों को सीमित कर् सकती हैं। क्रिपया \"Run ActiveX controls and plug-ins\" विकल्प को एनेबल करें. आपको एरर्स् और गायब फ़ीचर्स् का अनुभव हो सकता है।",
-BrowseServerBlocked : "रिसोर्सेज़ ब्राउज़र् नहीं खोला जा सका। क्रिपया सभी पॉप्-अप् ब्लॉकर्स् को डिसेबल करें।",
-DialogBlocked		: "डायलग विन्डो नहीं खोला जा सका। क्रिपया सभी पॉप्-अप् ब्लॉकर्स् को डिसेबल करें।",
-VisitLinkBlocked	: "It was not possible to open a new window. Make sure all popup blockers are disabled.",	//MISSING
+BrowseServerBlocked : "रिसोर्सेज़ ब्राउज़र् नहीं खोला जा सका। क्रिपया सभी पॉप्-अप् ब्लॉकर्स् को निष्क्रिय करें।",
+DialogBlocked		: "डायलग विन्डो नहीं खोला जा सका। क्रिपया सभी पॉप्-अप् ब्लॉकर्स् को निष्क्रिय करें।",
+VisitLinkBlocked	: "नया विन्डो नहीं खोला जा सका। क्रिपया सभी पॉप्-अप् ब्लॉकर्स् को निष्क्रिय करें।",
 
 // Dialogs
 DlgBtnOK			: "ठीक है",
@@ -308,6 +308,11 @@ DlgTableCellSpace	: "सैल अंतर",
 DlgTableCellPad		: "सैल पैडिंग",
 DlgTableCaption		: "शीर्षक",
 DlgTableSummary		: "सारांश",
+DlgTableHeaders		: "Headers",	//MISSING
+DlgTableHeadersNone		: "None",	//MISSING
+DlgTableHeadersColumn	: "First column",	//MISSING
+DlgTableHeadersRow		: "First Row",	//MISSING
+DlgTableHeadersBoth		: "Both",	//MISSING
 
 // Table Cell Dialog
 DlgCellTitle		: "सैल प्रॉपर्टीज़",
@@ -330,6 +335,9 @@ DlgCellVerAlignTop	: "ऊपर",
 DlgCellVerAlignMiddle	: "मध्य",
 DlgCellVerAlignBottom	: "नीचे",
 DlgCellVerAlignBaseline	: "मूलरेखा",
+DlgCellType		: "Cell Type",	//MISSING
+DlgCellTypeData		: "Data",	//MISSING
+DlgCellTypeHeader	: "Header",	//MISSING
 DlgCellRowSpan		: "पंक्ति स्पैन",
 DlgCellCollSpan		: "कालम स्पैन",
 DlgCellBackColor	: "बैक्ग्राउन्ड रंग",
@@ -519,8 +527,13 @@ DlgAboutVersion		: "वर्ज़न",
 DlgAboutInfo		: "अधिक जानकारी के लिये यहाँ जायें:",
 
 // Div Dialog
-DlgDivGeneralTab	: "General",	//MISSING
-DlgDivAdvancedTab	: "Advanced",	//MISSING
-DlgDivStyle		: "Style",	//MISSING
-DlgDivInlineStyle	: "Inline Style"	//MISSING
+DlgDivGeneralTab	: "सामान्य",
+DlgDivAdvancedTab	: "एड्वान्स्ड",
+DlgDivStyle		: "स्टाइल",
+DlgDivInlineStyle	: "इनलाइन स्टाइल",
+
+ScaytTitle			: "SCAYT",	//MISSING
+ScaytTitleOptions	: "Options",	//MISSING
+ScaytTitleLangs		: "Languages",	//MISSING
+ScaytTitleAbout		: "About"	//MISSING
 };

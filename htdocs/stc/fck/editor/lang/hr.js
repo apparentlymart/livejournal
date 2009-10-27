@@ -1,6 +1,6 @@
 ﻿/*
  * FCKeditor - The text editor for Internet - http://www.fckeditor.net
- * Copyright (C) 2003-2008 Frederico Caldeira Knabben
+ * Copyright (C) 2003-2009 Frederico Caldeira Knabben
  *
  * == BEGIN LICENSE ==
  *
@@ -44,7 +44,7 @@ RemoveFormat		: "Ukloni formatiranje",
 InsertLinkLbl		: "Link",
 InsertLink			: "Ubaci/promijeni link",
 RemoveLink			: "Ukloni link",
-VisitLink			: "Open Link",	//MISSING
+VisitLink			: "Otvori link",
 Anchor				: "Ubaci/promijeni sidro",
 AnchorDelete		: "Ukloni sidro",
 InsertImageLbl		: "Slika",
@@ -73,9 +73,9 @@ BlockJustify		: "Blok poravnanje",
 DecreaseIndent		: "Pomakni ulijevo",
 IncreaseIndent		: "Pomakni udesno",
 Blockquote			: "Blockquote",
-CreateDiv			: "Create Div Container",	//MISSING
-EditDiv				: "Edit Div Container",	//MISSING
-DeleteDiv			: "Remove Div Container",	//MISSING
+CreateDiv			: "Napravi Div kontejner",
+EditDiv				: "Uredi Div kontejner",
+DeleteDiv			: "Ukloni Div kontejner",
 Undo				: "Poništi",
 Redo				: "Ponovi",
 NumberedListLbl		: "Brojčana lista",
@@ -161,7 +161,7 @@ UnknownToolbarSet	: "Traka s alatima \"%1\" ne postoji",
 NoActiveX			: "Vaše postavke pretraživača mogle bi ograničiti neke od mogućnosti editora. Morate uključiti opciju \"Run ActiveX controls and plug-ins\" u postavkama. Ukoliko to ne učinite, moguće su razliite greške tijekom rada.",
 BrowseServerBlocked : "Pretraivač nije moguće otvoriti. Provjerite da li je uključeno blokiranje pop-up prozora.",
 DialogBlocked		: "Nije moguće otvoriti novi prozor. Provjerite da li je uključeno blokiranje pop-up prozora.",
-VisitLinkBlocked	: "It was not possible to open a new window. Make sure all popup blockers are disabled.",	//MISSING
+VisitLinkBlocked	: "Nije moguće otvoriti novi prozor. Provjerite da li je uključeno blokiranje pop-up prozora.",
 
 // Dialogs
 DlgBtnOK			: "OK",
@@ -308,6 +308,11 @@ DlgTableCellSpace	: "Prostornost ćelija",
 DlgTableCellPad		: "Razmak ćelija",
 DlgTableCaption		: "Naslov",
 DlgTableSummary		: "Sažetak",
+DlgTableHeaders		: "Headers",	//MISSING
+DlgTableHeadersNone		: "None",	//MISSING
+DlgTableHeadersColumn	: "First column",	//MISSING
+DlgTableHeadersRow		: "First Row",	//MISSING
+DlgTableHeadersBoth		: "Both",	//MISSING
 
 // Table Cell Dialog
 DlgCellTitle		: "Svojstva ćelije",
@@ -330,6 +335,9 @@ DlgCellVerAlignTop	: "Gornje",
 DlgCellVerAlignMiddle	: "Srednišnje",
 DlgCellVerAlignBottom	: "Donje",
 DlgCellVerAlignBaseline	: "Bazno",
+DlgCellType		: "Cell Type",	//MISSING
+DlgCellTypeData		: "Data",	//MISSING
+DlgCellTypeHeader	: "Header",	//MISSING
 DlgCellRowSpan		: "Spajanje redova",
 DlgCellCollSpan		: "Spajanje kolona",
 DlgCellBackColor	: "Boja pozadine",
@@ -519,8 +527,13 @@ DlgAboutVersion		: "inačica",
 DlgAboutInfo		: "Za više informacija posjetite",
 
 // Div Dialog
-DlgDivGeneralTab	: "General",	//MISSING
-DlgDivAdvancedTab	: "Advanced",	//MISSING
-DlgDivStyle		: "Style",	//MISSING
-DlgDivInlineStyle	: "Inline Style"	//MISSING
+DlgDivGeneralTab	: "Općenito",
+DlgDivAdvancedTab	: "Napredno",
+DlgDivStyle		: "Stil",
+DlgDivInlineStyle	: "Stil u redu",
+
+ScaytTitle			: "SCAYT",	//MISSING
+ScaytTitleOptions	: "Options",	//MISSING
+ScaytTitleLangs		: "Languages",	//MISSING
+ScaytTitleAbout		: "About"	//MISSING
 };

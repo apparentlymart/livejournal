@@ -1,6 +1,6 @@
 ﻿/*
  * FCKeditor - The text editor for Internet - http://www.fckeditor.net
- * Copyright (C) 2003-2008 Frederico Caldeira Knabben
+ * Copyright (C) 2003-2009 Frederico Caldeira Knabben
  *
  * == BEGIN LICENSE ==
  *
@@ -43,8 +43,8 @@ SelectAll			: "Selecciona-ho tot",
 RemoveFormat		: "Elimina Format",
 InsertLinkLbl		: "Enllaç",
 InsertLink			: "Insereix/Edita enllaç",
-RemoveLink			: "Elimina enllaç",
-VisitLink			: "Open Link",	//MISSING
+RemoveLink			: "Elimina l'enllaç",
+VisitLink			: "Obre l'enllaç",
 Anchor				: "Insereix/Edita àncora",
 AnchorDelete		: "Elimina àncora",
 InsertImageLbl		: "Imatge",
@@ -73,9 +73,9 @@ BlockJustify		: "Justificat",
 DecreaseIndent		: "Redueix el sagnat",
 IncreaseIndent		: "Augmenta el sagnat",
 Blockquote			: "Bloc de cita",
-CreateDiv			: "Create Div Container",	//MISSING
-EditDiv				: "Edit Div Container",	//MISSING
-DeleteDiv			: "Remove Div Container",	//MISSING
+CreateDiv			: "Crea un contenidor Div",
+EditDiv				: "Edita el contenidor Div",
+DeleteDiv			: "Elimina el contenidor Div",
 Undo				: "Desfés",
 Redo				: "Refés",
 NumberedListLbl		: "Llista numerada",
@@ -160,8 +160,8 @@ NotImplemented		: "Mètode no implementat",
 UnknownToolbarSet	: "Conjunt de barra d'eines \"%1\" inexistent",
 NoActiveX			: "Les preferències del navegador poden limitar algunes funcions d'aquest editor. Cal habilitar l'opció \"Executa controls ActiveX i plug-ins\". Poden sorgir errors i poden faltar algunes funcions.",
 BrowseServerBlocked : "El visualitzador de recursos no s'ha pogut obrir. Assegura't de que els bloquejos de finestres emergents estan desactivats.",
-DialogBlocked		: "No ha estat possible obrir una finestra de diàleg. Assegura't de que els bloquejos de finestres emergents estan desactivats.",
-VisitLinkBlocked	: "It was not possible to open a new window. Make sure all popup blockers are disabled.",	//MISSING
+DialogBlocked		: "No ha estat possible obrir una finestra de diàleg. Assegureu-vos que els bloquejos de finestres emergents estan desactivats.",
+VisitLinkBlocked	: "No ha estat possible obrir una nova finestra. Assegureu-vos que els bloquejos de finestres emergents estan desactivats.",
 
 // Dialogs
 DlgBtnOK			: "D'acord",
@@ -308,6 +308,11 @@ DlgTableCellSpace	: "Espaiat de cel·les",
 DlgTableCellPad		: "Encoixinament de cel·les",
 DlgTableCaption		: "Títol",
 DlgTableSummary		: "Resum",
+DlgTableHeaders		: "Headers",	//MISSING
+DlgTableHeadersNone		: "None",	//MISSING
+DlgTableHeadersColumn	: "First column",	//MISSING
+DlgTableHeadersRow		: "First Row",	//MISSING
+DlgTableHeadersBoth		: "Both",	//MISSING
 
 // Table Cell Dialog
 DlgCellTitle		: "Propietats de la cel·la",
@@ -330,6 +335,9 @@ DlgCellVerAlignTop	: "Top",
 DlgCellVerAlignMiddle	: "Middle",
 DlgCellVerAlignBottom	: "Bottom",
 DlgCellVerAlignBaseline	: "Baseline",
+DlgCellType		: "Cell Type",	//MISSING
+DlgCellTypeData		: "Data",	//MISSING
+DlgCellTypeHeader	: "Header",	//MISSING
 DlgCellRowSpan		: "Rows Span",
 DlgCellCollSpan		: "Columns Span",
 DlgCellBackColor	: "Color de fons",
@@ -519,8 +527,13 @@ DlgAboutVersion		: "versió",
 DlgAboutInfo		: "Per a més informació aneu a",
 
 // Div Dialog
-DlgDivGeneralTab	: "General",	//MISSING
-DlgDivAdvancedTab	: "Advanced",	//MISSING
-DlgDivStyle		: "Style",	//MISSING
-DlgDivInlineStyle	: "Inline Style"	//MISSING
+DlgDivGeneralTab	: "General",
+DlgDivAdvancedTab	: "Avançat",
+DlgDivStyle		: "Estil",
+DlgDivInlineStyle	: "Estil en línia",
+
+ScaytTitle			: "SCAYT",	//MISSING
+ScaytTitleOptions	: "Options",	//MISSING
+ScaytTitleLangs		: "Languages",	//MISSING
+ScaytTitleAbout		: "About"	//MISSING
 };
