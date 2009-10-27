@@ -54,7 +54,7 @@ body<=
             foreach my $new_alias (keys %POST) {
                 my ($uid) = $new_alias =~ m#new_alias_(\d+)#;
                 next unless $uid;
-                $alias = substr($POST{$new_alias}, 0, $max_alias_length)
+                my $alias = substr($POST{$new_alias}, 0, $max_alias_length);
                 $aliases->{$uid} = $alias if $alias_enable && LJ::load_userid($uid);
             }
         }
@@ -72,7 +72,6 @@ body<=
                 push @cantbanlist, $banusername unless $banu;
 
                 ## set alias for banuser if alias was set, aliases available and banuser is exist
-                $alias = substr($POST{ban_note}, 0, $max_alias_length)
                 $aliases->{$banu->id} = $POST{ban_note} if $alias_enable && $POST{ban_note} && $banu;
             }
         
