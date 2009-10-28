@@ -1127,10 +1127,11 @@ sub postevent
     # can't post to deleted/suspended community
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
 
-    # must have a validated email address to post to a community
+    # user must have a validated email address to post to any journal - including its own,
+    # except syndicated (rss, 'Y') journals
     # unless this is approved from the mod queue (we'll error out initially, but in case they change later)
     return fail($err, 155, "You must have an authenticated email address in order to post to another account")
-        unless $u->{'status'} eq 'A';
+        unless $u->{'status'} eq 'A' || $u->{'journaltype'} eq 'Y';
 
     # post content too large
     # NOTE: requires $req->{event} be binary data, but we've already
