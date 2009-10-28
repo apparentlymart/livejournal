@@ -4276,13 +4276,13 @@ sub render_promo_of_community {
         $box_class = 'Horizontal';
         $comm_display = qq {
             <div class="Userpic">$userpic_html</div>
-            <div class="Title">LJ Community Promo</div>
+            <div class="Title">Community Promo</div>
             <div class="CommLink">$commljuser</div>
         };
     } else {
         $box_class = 'Vertical';
         $comm_display = qq {
-            <div class="Title">LJ Community Promo</div>
+            <div class="Title">Community Promo</div>
             <div class="CommLink">$commljuser</div>
             <div class="Userpic">$userpic_html</div>
         };
