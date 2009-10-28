@@ -4,6 +4,10 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::NewWorker::TheSchwartz;
 
+## jobs 'LJ::Worker::FriendChange' and 'LJ::NewWorker::TheSchwartz::FriendChange' are the same,
+## two classes are due to historic reasons
+@LJ::Worker::FriendChange::ISA = 'LJ::NewWorker::TheSchwartz::FriendChange';
+
 LJ::NewWorker::TheSchwartz::FriendChange->set_memory_limit(1024 * 1024 * 100); # 100MB memory limit.
 LJ::NewWorker::TheSchwartz::FriendChange->start();
 
@@ -22,7 +26,12 @@ use XML::Atom::Link;
 use XML::Atom::Content;
 use XML::LibXML;
 
-sub capabilities { [ 'LJ::NewWorker::TheSchwartz::FriendChange' => '' ] };
+sub capabilities { 
+    return (
+        [ 'LJ::NewWorker::TheSchwartz::FriendChange' => '' ], 
+        [ 'LJ::Worker::FriendChange' => '' ], 
+    );
+};
 
 my $ua;
 sub ua {
