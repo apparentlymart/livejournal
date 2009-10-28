@@ -334,6 +334,14 @@ It must be invisible, use it only for reskining */
 	color:#808080;
 	}
 	.b-form-changelist .type-text:focus,
+	.b-form-changelist .type-text-focus,
 	.b-form-changelist .type-text-changed {
 		color:#000;
 		}
+
+/* Error text
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+.b-text-error {
+	color:#F00;
+	}
