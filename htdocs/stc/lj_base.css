@@ -338,10 +338,3 @@ It must be invisible, use it only for reskining */
 	.b-form-changelist .type-text-changed {
 		color:#000;
 		}
-
-/* Error text
---------------------------- */
-/* Must be removed after implementation of Framework! */
-.b-text-error {
-	color:#F00;
-	}
