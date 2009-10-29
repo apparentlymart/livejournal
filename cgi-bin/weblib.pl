@@ -2113,6 +2113,7 @@ sub res_includes {
                 inbox_update_poll => $inbox_update_poll,
                 media_embed_enabled => $embeds_enabled,
                 esn_async => $esn_async,
+                server_time => time(),
                 );
     $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
     $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
