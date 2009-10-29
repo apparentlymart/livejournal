@@ -119,27 +119,32 @@ body<=
     my $users_list_html = '';
     foreach my $userid (sort { $us->{$a}->display_name cmp $us->{$b}->display_name } keys %$aliases) {
         my $u = $us->{$userid};
-        $users_list_html .= q|<tr><td>|.LJ::ljuser($u->{user}).q|</td><td class="user_alias"><input type="text" class="type-text" name="|.$key.$userid.q|" value="|
-                .LJ::ehtml(LJ::ljuser_alias($u->{user})).q|" size="50" maxlength="200">|
-                .LJ::html_check({ 'type' => 'check',
+        $users_list_html .= q|<tr><td>|
+                                .LJ::html_check({ 'type' => 'check',
                                   'name' => "check".$userid,
                                   'id' => "check".$userid,
-                                  'value' => 'on' })
+                                  'class' => "user_check",
+                                  'value' => 'on' }) . q| |.        
+        LJ::ljuser($u->{user}).
+        
+        q|</td><td class="user_alias"><input type="text" class="type-text" name="|.$key.$userid.q|" value="|
+                .LJ::ehtml(LJ::ljuser_alias($u->{user})).q|" size="50" maxlength="200">|
                 .q|</td></tr>|."\n";
         push @userid_list, $userid;
     }
     $ret .= q|<tr class="newalias"><td colspan="2"><label for="new-useralias">|. $ML{'.alias.header.newalias'} .q|</label></td></tr>|."\n";
     $ret .= q|<tr><td><input type="text" name="|.${key}.q|new_user" id="new-useralias"></td><td class="user_alias"><input type="text" name="|.${key}.q|new_alias" size="50" maxlenght="200"></td></tr>|."\n";
     $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @userid_list).q|">|."\n";
-	$ret .= q|<tr><td colspan="2"><a href="javascript:void(0)" id="adding-more-alias" onclick="addAliasLine()">|. $ML{'.alias.aliaslist.more'} .q|</a></td></tr>|;
+	$ret .= q|<tr><td colspan="2" class="more"><a href="javascript:void(0)" id="adding-more-alias" onclick="addAliasLine()">|. $ML{'.alias.aliaslist.more'} .q|</a></td></tr>|;
     $ret .= q|<tr><th>|. $ML{'.alias.header.username'} .q|</th><th>|.$ML{'.alias.header.alias'} .q|</th></tr>|."\n";
     $ret .= $users_list_html;
+    $ret .= q|<tr><td colspan="2" class="notedel">| . LJ::html_submit("delete_btn", $ML{'.done.btn.delete'}) .  q|</td></tr> |;
     $ret .= q|</table>|."\n";
 
 	
 
     ### ending submit block
-    $ret .= "<?standout " . LJ::html_submit("save_btn", $ML{'.done.btn.savechanges'}) . " " . LJ::html_submit("delete_btn", $ML{'.done.btn.delete'}) . " standout?>\n";
+    $ret .= "<?standout " . LJ::html_submit("save_btn", $ML{'.done.btn.savechanges'}) . " standout?>\n";
     $ret .= "</form>\n";
 
     return $ret;
