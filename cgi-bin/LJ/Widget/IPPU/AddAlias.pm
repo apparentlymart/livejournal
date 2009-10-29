@@ -45,7 +45,8 @@ sub render_body {
                 foruser => $opts{foruser},
              );
 
-    $body .= "<p>" . $class->html_submit("aliaschange", BML::ml('widget.alias.aliaschange')) . " " . $class->html_submit("aliasdelete", BML::ml('widget.alias.aliasdelete')) ;
+    $body .= "<p>" . $class->html_submit("aliaschange", BML::ml('widget.alias.aliaschange')) . " ";
+    $body .= $class->html_submit("aliasdelete", BML::ml('widget.alias.aliasdelete')) if $opts{alias};
 
     $body .= "<span class='helper'>" . BML::ml('widget.addalias.display.helper', {aopts => "href='$LJ::SITEROOT/manage/notes.bml'"}) . "</span>";
     $body .= "</div>";

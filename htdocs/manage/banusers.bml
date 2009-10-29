@@ -161,7 +161,11 @@ body<=
             }) . "</td>";
             $ret .= "<td>" . $bu->ljuser_display . "</td>";
 			if (not $u->is_community && $alias_enable) {
-            	$ret .= "<td>".LJ::html_text( { class => 'type-text', name => 'new_alias_'.$bu->id, value => LJ::ehtml(LJ::ljuser_alias($bu->{user})) })."</td>" if $alias_enable;
+                $ret .= '<td><input type="text" class="type-text" '.
+                                 'name="new_alias_' . $bu->id . '" '.
+                                 'value="' . LJ::ljuser_alias($bu->{user}) . '" '.
+                                q|onblur="DOM[this.value==this.defaultValue?'removeClassName':'addClassName'](this, 'type-text-changed')"/>|
+                        ."</td>" if $alias_enable;
 			}
             $ret .= "</tr>";
         }

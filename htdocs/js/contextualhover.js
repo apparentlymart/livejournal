@@ -188,8 +188,6 @@ LJWidget = new Class(Object, {
 
             widgetEle.innerHTML = data["_widget_body"];
 
-	    if($('Widget[IPPU_AddAlias]_alias')) $('Widget[IPPU_AddAlias]_alias').focus();
-
             if (this.onRefresh) {
                 this.onRefresh();
             }
@@ -350,7 +348,6 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
         alias:          alias,
         foruser:            foruser
     });
-    
 
     Event.stop(evt);
   },
@@ -360,7 +357,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
     if (data.res && data.res.success) success = data.res.success;
     if (success) {
         this.ippu.hide();
-	var userLJ=data.res.journalname;
+		var userLJ=data.res.journalname;
       	var userClassName='ljuser-name_'+ data.res.journalname;
       	var searchProfile=DOM.getElementsByClassName(document,userClassName); 
       	var supSign;
@@ -424,13 +421,25 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
   },
 
   onRefresh: function () {
-    var self = this;
-//    var cancelBtn = $('addvgift_cancel');
-//    if (cancelBtn) DOM.addEventListener(cancelBtn, 'click', self.cancel.bindEventListener(this));
-
-    var form = $("addalias_form");
-    DOM.addEventListener(form, "submit", function(evt) { self.addvgifttocart(evt, form) });
-
+	var form = $("addalias_form"),
+		input = form['Widget[IPPU_AddAlias]_alias'],
+		delete_btn = form['Widget[IPPU_AddAlias]_aliasdelete'],
+		t = this;
+	input.focus();
+	
+	if (delete_btn) {
+		delete_btn.onclick=function(){
+			input.value = '';
+		}
+		input.onkeyup =
+		input.onpaste =
+		input.oninput = function() {
+			// save button disabled
+			form['Widget[IPPU_AddAlias]_aliaschange'].disabled = !this.value;
+		}
+	}
+	
+	DOM.addEventListener(form, 'submit', function(e) { t.addvgifttocart(e, form) });
 //    $('Widget[IPPU_AddAlias]_whom').value = this.whom;
 //    AutoCompleteFriends($('Widget[IPPU_AddAlias]_whom'));
   },

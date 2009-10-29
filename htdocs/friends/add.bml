@@ -204,7 +204,7 @@ if ($u->is_visible) {
     if ($remote->get_cap ('paid')) {
         $body .= "<i>" . $ML{'.optional'}. ":</i> " . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . "<br/>";
         $body .= "<blockqoute>";
-        $body .= LJ::html_text ( { name => 'user_note' } );
+        $body .= LJ::html_text( { name => 'user_note', value => LJ::ljuser_alias($u->{user}) } );
         $body .= "</blockqoute><br/>";
     } else {
         ## TODO!!! must set to gray font text
