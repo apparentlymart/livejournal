@@ -25,14 +25,15 @@
     return "/* invalid URL */" unless $GET{u} and $GET{u} !~ /[<>]/;
 
     my $url = $GET{u};
-    my $memkey = "css:" . Digest::SHA1::sha1_hex($url);
+    my $memkey = "cssproxy:" . Digest::SHA1::sha1_hex($url);
 
     if (my $clean = LJ::MemCache::get($memkey)) {
+        LJ::text_uncompress(\$clean);
         return $clean;
     }
 
     my $ua = LWPx::ParanoidAgent->new(
-                                      timeout => $LJ::CSS_FETCH_TIMEOUT || 2,
+                                      timeout => $LJ::CSS_FETCH_TIMEOUT || 10,
                                       max_size => 1024*300,
                                       );
     my $res = $ua->get($url);
@@ -57,7 +58,7 @@
 
     # Whitelist this host
     if ($url =~ m!^http://www\.typepad\.com/\.shared/!i) {
-        LJ::MemCache::set($memkey, $unclean, 600) unless $nocache;  # 10 minute caching
+        LJ::MemCache::set($memkey, LJ::text_compress($unclean), 600) unless $nocache;  # 10 minute caching
         return $unclean;
     }
 
@@ -66,7 +67,7 @@
 
     LJ::run_hook('css_cleaner_transform', \$clean);
 
-    LJ::MemCache::set($memkey, $clean, 300) unless $nocache;  # 5 minute caching
+    LJ::MemCache::set($memkey, LJ::text_compress($clean), 1800) unless $nocache;  # 30 minute caching
     return $clean;
 }
 _code?>
