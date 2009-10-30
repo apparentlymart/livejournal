@@ -167,6 +167,7 @@ body<=
                                 id   => "useralias_$who",
                                 value => LJ::ljuser_alias($f->{username}),
                                 class => "type-text",
+                                raw => q|onblur="DOM[this.value==this.defaultValue?'removeClassName':'addClassName'](this, 'type-text-changed')"|
                                 });
                     } else { 
                         $ret .= " ";

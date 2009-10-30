@@ -88,42 +88,9 @@ body<=
 
     # now show edit form
     
-    $ret .= "<form method='post'>\n";
+    $ret .= "<form method='post' onsubmit='aliasSubmit()'>\n";
     $ret .= LJ::form_auth();
     
-    $ret .=qq|<script type="text/javascript">
-	    function addAliasLine(){
-            var newTR2=document.createElement('tr'),
-                newTD2_1=document.createElement('td'),
-                newTD2_2=document.createElement('td');
-            DOM.addClassName(newTD2_2,'user_alias');
-            newTD2_1.innerHTML = '<input type="text" name="new_aliasesnew_user" oninput="checkAlias(this)" onpaste="checkAlias(this)" onkeyup="checkAlias(this)"/>';
-            newTD2_2.innerHTML = '<input type="text" name="new_aliasesnew_alias" maxlenght="$max_alias_length" size="50"/><span class="user_alias_error"></span>';
-            newTR2.appendChild(newTD2_1);
-            newTR2.appendChild(newTD2_2);
-            moreBtn = \$('adding-more-alias');
-            var aliasTable=DOM.getElementsByClassName(document,'aliaslist-table')[0].firstChild;
-            aliasTable.insertBefore(newTR2, \$('adding-more-alias').parentNode.parentNode);
-            return false;
-        }
-        var errmsg_change = '|.LJ::ejs($ML{'.error.override_old_value'}).q|';
-
-        function checkAlias(alias){
-            var i = -1,
-                aliasTable = DOM.getElementsByClassName(document,'aliaslist-table')[0].firstChild,
-                currentAliases = DOM.getElementsByAttribute(aliasTable,'lj:user'),
-                warningBlock = DOM.getElementsByClassName(alias.parentNode.parentNode,'user_alias_error')[0];
-
-            warningBlock.innerHTML = '';
-            while(currentAliases[++i]) {
-                if (alias.value == currentAliases[i].getAttribute('lj:user')) {
-                    warningBlock.innerHTML = errmsg_change.replace('%username%', alias.value);
-                    break;
-                }
-            }
-        }
-        </script>|;
-
     $ret .= q|<table class="aliaslist-table b-form-changelist">|;
     
     my @userid_list = ();
@@ -144,11 +111,27 @@ body<=
         
         q|</td><td class="user_alias"><input type="text" class="type-text" name="|.$key.$userid.q|" value="|
                 .LJ::ehtml(LJ::ljuser_alias($u->{user})).qq|" size="50" maxlength="$max_alias_length" onblur="DOM[this.value==this.defaultValue?'removeClassName':'addClassName'](this, 'type-text-changed')"/>|
-                .q|<span class="user_alias_error"></span></td></tr>|."\n";
+                ."</td></tr>\n";
         push @userid_list, $userid;
     }
-    $ret .= q|<tr class="newalias"><td colspan="2"><label for="new-useralias">|. $ML{'.alias.header.newalias'} .q|</label></td></tr>|."\n";
-    $ret .= q|<tr><td><input type="text" name="|.${key}.q|new_user" id="new-useralias"></td><td class="user_alias"><input type="text" name="|.${key}.qq|new_alias" maxlenght="$max_alias_length" size="50"/></td></tr>|."\n";
+    $ret .= q|<tr class="newalias"><td colspan="2"><label for="alias-new-user">|. $ML{'.alias.header.newalias'} .q|</label></td></tr>|."\n";
+    $ret .= '<tr id="new_alias_tr"><td>';
+    $ret .= LJ::html_text({
+                name  => "${key}new_user",
+                class => 'type-text',
+                id    => 'alias-new-user',
+                value => "\$ML: enter username"
+             });
+    $ret .= '</td><td class="user_alias">';
+    $ret .= LJ::html_text({
+                name  => "${key}new_alias",
+                class => 'type-text',
+                id    => 'alias-new-alias',
+                maxlenght => $max_alias_length,
+                size  => 50,
+                value => "\$ML: enter note"
+             });
+    $ret .= "<span class=\"user_alias_error\"></span></td></tr>\n";
     $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @userid_list).q|"/>|."\n";
     $ret .= q|<tr><td colspan="2" class="more"><a href="#" id="adding-more-alias" onclick="return addAliasLine()">|. $ML{'.alias.aliaslist.more'} .q|</a></td></tr>|;
     $ret .= q|<tr><th>|. $ML{'.alias.header.username'} .q|</th><th>|.$ML{'.alias.header.alias'} .q|</th></tr>|."\n";
@@ -156,7 +139,74 @@ body<=
     $ret .= q|<tr><td colspan="2" class="notedel"><input type="button" name="delete_btn" onclick="this.form.save_btn.name='delete_btn';this.form.save_btn.click()" value="|.$ML{'.done.btn.delete'}.q|"/></td></tr>|;
     $ret .= q|</table>|."\n";
 
+    $ret .=qq|<script type="text/javascript">
+        function addAliasLine(){
+            var more_link = \$('adding-more-alias'),
+                new_tr = \$('new_alias_tr').cloneNode(true),
+                inps = new_tr.getElementsByTagName('input');
+            inps[0].parentNode.innerHTML += ''; // IE 6 hack
+            inps[1].parentNode.innerHTML += ''; // IE 6 hack
+            inps[0].value = inps[0].defaultValue;
+            inps[1].value = inps[1].defaultValue;
+            inps[0].className = inps[1].className = 'type-text';
+            inps[0].id = '';
+            addLineEvents(inps[0], inps[1]);
+            more_link.parentNode.parentNode.parentNode.insertBefore(new_tr, more_link.parentNode.parentNode);
+            return false;
+        }
+        var errmsg_change = '|.LJ::ejs($ML{'.error.override_old_value'}).q|';
 
+        function addLineEvents(input_name, input_alias){
+            input_name.onblur =
+            input_alias.onblur =
+                function(){aliasPlaceholder(this, 'blur')}
+            input_name.onfocus =
+            input_alias.onfocus =
+                function(){aliasPlaceholder(this, 'focus')}
+            input_name.oninput =
+            input_name.onpaste =
+            input_name.onkeyup =
+                function(){checkAlias(this)}
+        }
+        addLineEvents($('alias-new-user'), $('alias-new-alias'))
+
+        function aliasSubmit() {
+            var i = -1,
+                inps_name = document.getElementsByName('new_aliasesnew_user'),
+                inps_alias = document.getElementsByName('new_aliasesnew_alias');
+            while(inps_name[++i]) {
+                inps_name[i].value == inps_name[i].defaultValue && (inps_name[i].value = '')
+                inps_alias[i].value == inps_alias[i].defaultValue && (inps_alias[i].value = '')
+            }
+        }
+
+        function checkAlias(alias){
+            var i = -1,
+                aliasTable = DOM.getElementsByClassName(document,'aliaslist-table')[0].firstChild,
+                currentAliases = DOM.getElementsByAttribute(aliasTable,'lj:user'),
+                warningBlock = DOM.getElementsByClassName(alias.parentNode.parentNode,'user_alias_error')[0];
+
+            warningBlock.innerHTML = '';
+            while(currentAliases[++i]) {
+                if (alias.value == currentAliases[i].getAttribute('lj:user')) {
+                    warningBlock.innerHTML = errmsg_change.replace('%username%', alias.value);
+                    break;
+                }
+            }
+        }
+
+        function aliasPlaceholder(inp, type){
+            if (type == 'blur') {
+                DOM[inp.value ? 'addClassName' : 'removeClassName'](inp, 'type-text-changed')
+                if (!inp.value) {
+                    inp.value = inp.defaultValue;
+                }
+            }
+            if (type == 'focus' && inp.value == inp.defaultValue) {
+                inp.value = '';
+            }
+        }
+        </script>|;
 
     ### ending submit block
     $ret .= "<?standout " . LJ::html_submit("save_btn", $ML{'.done.btn.savechanges'}) . " standout?>\n";
