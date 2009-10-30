@@ -120,7 +120,7 @@ body<=
                 name  => "${key}new_user",
                 class => 'type-text',
                 id    => 'alias-new-user',
-                value => "\$ML: enter username"
+                value => "$ML{'.alias.enterusername'}"
              });
     $ret .= '</td><td class="user_alias">';
     $ret .= LJ::html_text({
@@ -129,7 +129,7 @@ body<=
                 id    => 'alias-new-alias',
                 maxlenght => $max_alias_length,
                 size  => 50,
-                value => "\$ML: enter note"
+                value => "$ML{'.alias.enternote'}"
              });
     $ret .= "<span class=\"user_alias_error\"></span></td></tr>\n";
     $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @userid_list).q|"/>|."\n";

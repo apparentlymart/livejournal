@@ -10,6 +10,10 @@
 
 .alias.header.newalias=New note:
 
+.alias.enterusername=Enter username
+
+.alias.enternote=Enter note
+
 .done.btn.savechanges=Save changes
 
 .done.btn.delete=Delete selected notes
