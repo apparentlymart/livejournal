@@ -993,7 +993,9 @@ sub clean
                         return "&url$urlcount;$str&urlend;";
                     }
                 };
-                $token->[1] =~ s!https?://[^\s\'\"\<\>]+[a-zA-Z0-9_/&=\-]! $match->($&); !ge;
+                ## URL is http://anything-here-but-space-and-quotes/and-last-symbol-isn't-space-comma-period-etc
+                ## like this (http://example.com) and these: http://foo.bar, http://bar.baz.
+                $token->[1] =~ s!https?://[^\s\'\"\<\>]+[^\s\'\"\<\>\.\,\?\:\)]! $match->($&); !ge;
             }
 
             # escape tags in text tokens.  shouldn't belong here!
