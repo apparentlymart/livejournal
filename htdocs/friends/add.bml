@@ -202,17 +202,18 @@ if ($u->is_visible) {
 
     ## Add user alias while user's friending
     if ($remote->get_cap ('paid')) {
-        $body .= "<i>" . $ML{'.optional'}. ":</i> " . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . "<br/>";
-        $body .= "<blockqoute>";
-        $body .= LJ::html_text( { name => 'user_note', value => LJ::ljuser_alias($u->{user}) } );
-        $body .= "</blockqoute><br/>";
+        $body .= "<dl class=\"addfriend-options\"><dt><em>" . $ML{'.optional'}. ":</em> " . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . "</dt>";
+        $body .= "<dd>";
+        $body .= LJ::html_text ( { name => 'user_note', class => 'type-text', value => LJ::ljuser_alias($u->{user}) } );
+        $body .= "</dd></dl>";
     } else {
         ## TODO!!! must set to gray font text
-        $body .= "<i>" . $ML{'.optional'}. ":</i> " . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . "<br/>";
-        $body .= "<blockqoute>";
-        $body .= LJ::html_text ( { 'disabled', name => 'user_note' } );
-        $body .= "</blockqoute><br/>";
-        $body .= LJ::run_hook("upgrade_link", $u, "paid") . BML::ml('.hint.paid.text', {aopts => "href='$LJ::SITEROOT/manage/account/'" }) unless $remote->get_cap ('paid');
+        $body .= "<dl class=\"addfriend-options\"><dt class=\"st-disabled\"><em>" . $ML{'.optional'}. ":</em> " . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . "<span class=\"b-blocker b-blocker-white\"></span></dt>";
+        $body .= "<dd>";
+        $body .= LJ::html_text ( { class => 'type-text', 'disabled', name => 'user_note' } );
+        $body .= "</dd>";
+        $body .= "<dd>" . LJ::run_hook("upgrade_link", $u, "paid") . BML::ml('.hint.paid.text', {aopts => "href='$LJ::SITEROOT/manage/account/'" }) . "</dd>" unless $remote->get_cap ('paid');
+        $body .= "</dl>";
     }
 
  ## let them pick friend groups
