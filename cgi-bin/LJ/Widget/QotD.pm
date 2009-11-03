@@ -154,7 +154,7 @@ sub qotd_display {
 
             my $add_notification = '';
             $add_notification = "<li><span><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=writersblock&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></span></li>"
-                unless $writersblock && $remote->has_subscription(
+                unless $writersblock && $remote && $remote->has_subscription(
                     journal         => $writersblock,
                     event           => 'JournalNewEntry',
                     require_active  => 1,
