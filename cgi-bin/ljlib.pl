@@ -261,6 +261,7 @@ sub get_user_by_url
         my ($checkhost) = $url =~ /^([\w\-.]+\.\Q$LJ::USER_DOMAIN\E)/;
         $checkhost = lc($checkhost);
         $checkhost =~ s/^www\.//i;
+        return unless $checkhost;
         $checkhost = $dbr->quote($checkhost);
         my $user = $dbr->selectrow_array(qq{
             SELECT u.user FROM useridmap u, domains d WHERE
