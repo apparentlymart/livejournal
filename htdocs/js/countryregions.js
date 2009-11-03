@@ -177,11 +177,11 @@ CountryRegions.prototype.autoDetect=function(){
 						}
 					}
 					that.countryChanged(data);
-					if(data.data.city_rus_name!=null){
+					if(data.data.city_rus_name){
 						that.cityBox.value=data.data.city_rus_name;
 					}
 					else{
-						if(data.data.city_name!=null){
+						if(data.data.city_name){
 							that.cityBox.value=data.data.city_name;
 						}
 					}
