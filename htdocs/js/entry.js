@@ -1075,7 +1075,7 @@ LJDraft.checkIfDirty = function () {
         if (! FCKeditorAPI) return;
         var oEditor = FCKeditorAPI.GetInstance('draft');
         if (oEditor.GetXHTML) {
-            curBody = oEditor.GetXHTML(true);
+            curBody = oEditor.GetXHTML(false);
         }
     } else {
         curBody = $("draft").value;

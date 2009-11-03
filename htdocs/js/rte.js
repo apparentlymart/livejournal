@@ -141,8 +141,7 @@ function convert_to_draft(html) {
     if ($("switched_rte_on").value == '0') return html;
 
     html = convert_poll_to_ljtags(html, true);
-    html = convert_user_to_ljtags(html, true);
-    html = html.replace(/\n/g, '');
+    html = convert_user_to_ljtags(html);
 
     return html;
 }

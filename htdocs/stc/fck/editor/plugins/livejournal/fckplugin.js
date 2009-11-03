@@ -491,6 +491,8 @@ FCK.DataProcessor.ConvertToDataFormat = function()
 {
 	var html = FCKDataProcessor.prototype.ConvertToDataFormat.apply(this, arguments);
 	
+	html = html.replace(/<br \/>$/, ''); // rte fix, http://dev.fckeditor.net/ticket/3023
+	
 	html = top.convertToLJTags(html); // call from rte.js
 	if (!top.$('event_format').checked) {
 		html = html
