@@ -36,7 +36,7 @@ body<=
         }
 
         $ret .= qq{
-                <p class="b-message b-message-suggestion"><a href="$LJ::SITEROOT/search/">$ML{'.newsearch.link'}</a></p>
+                <p class="b-message b-message-suggestion">$ML{'.newsearch.link'}</p>
         } unless $LJ::DISABLED{'yandex_search_page'};
         
         $ret .= qq {
@@ -190,11 +190,11 @@ body<=
                                                           : "directorysearch.bml";
     $ret .= qq {
         <div id="NewSearch">
-            <a href="$url"><< $ML{'.new_search'}</a>
+            <a href="$url">$ML{'.new_search'}</a>
         </div>
     };
     $ret .= qq{
-            <p class="b-message b-message-suggestion"><a href="$LJ::SITEROOT/search/">$ML{'.newsearch.link'}</a></p>
+            <p class="b-message b-message-suggestion">$ML{'.newsearch.link'}</p>
     } unless $LJ::DISABLED{'yandex_search_page'};
 
     $ret .= qq {
