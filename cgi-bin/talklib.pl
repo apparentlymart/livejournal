@@ -3476,7 +3476,13 @@ sub edit_comment {
     if ($opt_logcommentips eq "A" || ($opt_logcommentips eq "S" && $comment->{usertype} ne "user")) {
         $comment_obj->set_poster_ip;
     }
-
+    
+    ## if state was changed, (e.g. now comment is screened because it contain 
+    ## spam), save changes
+    if ($comment_obj->state ne $comment->{state}) {
+        $comment_obj->set_state($comment->{state});
+    }
+    
     # set subject and body text
     $comment_obj->set_subject_and_body($comment->{subject}, $comment->{body});
 

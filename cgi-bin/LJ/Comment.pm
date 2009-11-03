@@ -822,6 +822,24 @@ sub state {
     return $self->{state};
 }
 
+sub set_state {
+    my $self = shift;
+    my $state = shift;
+   
+    my $u = LJ::load_userid($self->{journalid});
+    my $updated = $u->talk2_do(
+        nodetype    => "L", 
+        nodeid      => $self->{nodeid},
+        sql         => "UPDATE talk2 SET state=? ".
+                        "WHERE journalid=?  AND jtalkid = ? ".
+                        "AND nodetype='L' AND nodeid=? ",
+        bindings    => [$state, $self->{journalid}, $self->{jtalkid}, $self->{nodeid}], 
+    );
+    return undef unless $updated;
+
+    LJ::Talk::invalidate_talk2row_memcache($u->id, $self->{jtalkid});
+    $self->{state} = $state;
+}
 
 sub is_active {
     my $self = shift;
