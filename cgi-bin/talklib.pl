@@ -908,7 +908,8 @@ sub get_talk_data_do
 
         $rp_ourcount++ if $r->{'state'} eq "A";
     }
-    LJ::MemCache::set($memkey, $memval);
+    LJ::MemCache::set($memkey, $memval, 3600); # LJSV-748, using LJ::MemCache::append(...) in some (rare) cases 
+                                               # can produce comment lose. This is a workaround. Real solution is more complicated.
     $dbcr->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
     $fixup_rp->();
