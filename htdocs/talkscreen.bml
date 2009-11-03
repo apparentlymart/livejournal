@@ -6,6 +6,10 @@ _info?><?_code
     use vars qw(%GET %POST);
     use vars qw($body);
 
+    ## this page is called as endpoint from users journals, 
+    ## so language scope must be set explicitly
+    BML::set_language_scope('/talkscreen.bml');
+    
     my $jsmode = !!$GET{jsmode};
     $body = "";
 

@@ -2,7 +2,11 @@
 {
     use strict;
     use vars qw(%POST $title $body);
-
+    
+    ## this page is called as endpoint from users journals, 
+    ## so language scope must be set explicitly
+    BML::set_language_scope('/talkmulti.bml');
+    
     my $err = sub {
         my $errmsg = shift;
         $body = "<?h1 $ML{'Error'} h1?><?p $errmsg p?>";
