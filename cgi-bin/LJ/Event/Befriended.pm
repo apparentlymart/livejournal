@@ -128,7 +128,7 @@ sub as_string {
 sub as_sms {
     my $self = shift;
     return sprintf("%s has added you to their friends list. Reply with ADD %s to add them " .
-                   "to your friends list. Msg+Data Rates May Apply.",
+                   "to your friends list. $LJ::SMS_DISCLAIMER",
                    $self->friend->user, $self->friend->user);
 }
 

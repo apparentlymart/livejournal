@@ -11,7 +11,7 @@ sub handle {
     my $resp = eval { $msg->respond
                           ("Avail.cmnds: (P)OST, (F)RIENDS, (R)EAD, (A)DD, I LIKE, HELP. " .
                            "E.g. to read username frank send \"READ frank\". STOP2stop, " .
-                           "HELP4help. Msg+Data Rates May Apply.");
+                           "HELP4help. $LJ::SMS_DISCLAIMER");
                       };
 
     # FIXME: do we set error status on $resp?

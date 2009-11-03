@@ -434,7 +434,7 @@ sub handle_unmapped {
 
     # if it is a HELP request
     if ($body_text  =~ /^\s*help/i) {
-        my $help_text = "To use $LJ::SMS_TITLE go to $LJ::SITEROOT/sms/. For help contact support\@livejournal.com or 415-294-5054. Txt STOP 2 end. Msg+Data Rates May Apply.";
+        my $help_text = "To use $LJ::SMS_TITLE go to $LJ::SITEROOT/sms/. For help contact support\@livejournal.com or 415-294-5054. Txt STOP 2 end. $LJ::SMS_DISCLAIMER";
         my $gw =  LJ::sms_gateway()
             or die "unable to instantiate SMS gateway object";
 
