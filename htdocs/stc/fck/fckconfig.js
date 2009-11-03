@@ -176,13 +176,14 @@ FCKConfig.Keystrokes = [
 	[ CTRL + 89 /*Y*/, 'Redo' ],
 	[ CTRL + SHIFT + 90 /*Z*/, 'Redo' ],
 	[ CTRL + 76 /*L*/, 'Link' ],
-	[ CTRL + 66 /*B*/, 'Bold' ],
 	[ CTRL + 73 /*I*/, 'Italic' ],
 	[ CTRL + 85 /*U*/, 'Underline' ],
 	[ CTRL + SHIFT + 83 /*S*/, 'Save' ],
 	[ CTRL + ALT + 13 /*ENTER*/, 'FitWindow' ],
 	[ SHIFT + 32 /*SPACE*/, 'Nbsp' ]
 ] ;
+
+!FCKBrowserInfo.IsOpera && FCKConfig.Keystrokes.push([ CTRL + 66 /*B*/, 'Bold' ]); // LIVEJOURNAL SPECIFIC, LJSUP-4442
 
 FCKConfig.ContextMenu = ['Generic','Link','Anchor','Image','Flash','Select','Textarea','Checkbox','Radio','TextField','HiddenField','ImageButton','Button','BulletedList','NumberedList','Table','Form','DivContainer'] ;
 FCKConfig.BrowserContextMenuOnCtrl = false ;
