@@ -223,9 +223,9 @@ function doLinkedFieldUpdate(oEditor) {
 
 function convert_user_to_ljtags(html) {
 	html = html
-		.replace(/<div class="ljuser"><a href="http:\/\/community\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj comm="$1"/>')
-		.replace(/<div class="ljuser"><a href="http:\/\/community\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj comm="$1" title="$2"/>')
-		.replace(/<div class="ljuser"><a href="http:\/\/users\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>')
+		.replace(/<div class="ljuser"><a href="http:\/\/(?:community|syndicated)\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj comm="$1"/>')
+		.replace(/<div class="ljuser"><a href="http:\/\/(?:community|syndicated)\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj comm="$1" title="$2"/>')
+		.replace(/<div class="ljuser"><a href="http:\/\/users\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>') // username with special symbol
 		.replace(/<div class="ljuser"><a href="http:\/\/users\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj user="$1" title="$2"/>')
 		.replace(/<div class="ljuser"><a href="http:\/\/([_\w]+)\.(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>')
 		.replace(/<div class="ljuser"><a href="http:\/\/([_\w]+)\.(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj user="$1" title="$2"/>')
