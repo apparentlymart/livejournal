@@ -26,7 +26,7 @@
 
 FCKConfig.CustomConfigurationsPath = '' ;
 
-FCKConfig.EditorAreaCSS = FCKConfig.BasePath + 'css/fck_editorarea.css' ;
+FCKConfig.EditorAreaCSS = top.Site.statprefix + '/fck/editor/css/fck_editorarea.css' ;
 FCKConfig.EditorAreaStyles = '' ;
 FCKConfig.ToolbarComboPreviewCSS = '' ;
 
@@ -42,7 +42,7 @@ FCKConfig.StartupShowBlocks = false ;
 FCKConfig.Debug = false ;
 FCKConfig.AllowQueryStringDebug = true ;
 
-FCKConfig.SkinPath = FCKConfig.BasePath + 'skins/lj/' ;
+FCKConfig.SkinPath = top.Site.statprefix + '/fck/editor/skins/lj/' ;
 FCKConfig.SkinEditorCSS = '' ;	// FCKConfig.SkinPath + "|<minified css>" ;
 FCKConfig.SkinDialogCSS = '' ;	// FCKConfig.SkinPath + "|<minified css>" ;
 
@@ -57,18 +57,20 @@ FCKConfig.AutoGrowMax = 400 ;
 /////////////////////////////////
 // LIVEJOURNAL SPECIFIC
 FCKConfig.Plugins.Add('livejournal');
-FCKConfig.ProtectedSource.Add( /<lj user[\s\S]*?\/lj>/gi ); // <lj user>
-FCKConfig.ProtectedSource.Add( /<lj-template name=['"]\w+['"]\S+?<\/lj-template>/gi ); // <lj-template>
+// FCKConfig.ProtectedSource.Add( /<lj user[\s\S]*?\/lj>/gi ); // <lj user>
+// video tag exclude for DataProcessor.ConvertToHtml
+FCKConfig.ProtectedSource.Add( /<lj-template name=['"](?:(?!video))\w+['"]\S+?<\/lj-template>/gi ); // <lj-template>
 FCKConfig.ProtectedSource.Add( /<lj-template id=['"]?\d+['"]? name=['"]?\w+['"]?>.*?<\/lj-template>/gi ); // <lj-template></lj-template>
 FCKConfig.ProtectedSource.Add( /<lj-template name=['"]?\w+['"]? id=['"]?\d+['"]?>.*?<\/lj-template>/gi ); // <lj-template></lj-template>
 FCKConfig.ProtectedSource.Add( /<lj-template id=['"]?\d+['"]? name=['"]?\w+['"]? \/>/gi ); // <lj-template />
 FCKConfig.ProtectedSource.Add( /<lj-template name=['"]?\w+['"]? id=['"]?\d+['"]? \/>/gi ); // <lj-template />
 FCKConfig.ProtectedSource.Add( /<lj-poll[\s\S]*?<\/lj-poll>/gi ); // lj polls
 FCKConfig.ProtectedSource.Add( /<div.*?><lj-poll-\d+?><\/lj-poll-\d+?><\/div>/gi ); // generated lj polls
-//FCKConfig.ProtectedSource.Add( /<lj-pq.+?>.+?<\/lj-pq>/gi ); // lj polls
-//FCKConfig.ProtectedSource.Add( /<lj-pi.+?>.+?<\/lj-pi>/gi ); // lj polls
-FCKConfig.ProtectedSource.Add( /<lj-cut( text=['"]?\S+['"]?)?>\S+?<\/lj-cut>/gi ); // <lj-cut>
-FCKConfig.ProtectedSource.Add( /<endljcut \/>/gi ); // <lj-cut>
+FCKConfig.ProtectedSource.Add( /<lj-pq.+?>.+?<\/lj-pq>/gi ); // lj polls
+FCKConfig.ProtectedSource.Add( /<lj-pi.+?>.+?<\/lj-pi>/gi ); // lj polls
+FCKConfig.ProtectedSource.Add( /<lj-replace name="first_post" ?\/?>/gi );
+//FCKConfig.ProtectedSource.Add( /<lj-cut( text=['"]?\S+['"]?)?>\S+?<\/lj-cut>/gi ); // <lj-cut>
+//FCKConfig.ProtectedSource.Add( /<endljcut \/>/gi ); // <lj-cut>
 
 // END LJ SPECIFIC
 ///////////////////////////////////
@@ -359,4 +361,4 @@ FCKConfig.BackgroundBlockerOpacity = 0.50 ;
 
 FCKConfig.MsWebBrowserControlCompat = false ;
 
-FCKConfig.PreventSubmitHandler = false ;
+FCKConfig.PreventSubmitHandler = true ;

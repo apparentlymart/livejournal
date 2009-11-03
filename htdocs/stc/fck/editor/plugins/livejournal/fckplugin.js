@@ -245,8 +245,8 @@ LJCutCommand.Execute=function() {
     var html = "<div class='ljcut'" +  text + ">";
     html    += selection;
     // I need to be able to identify the correct closing div tag so
-    // insert a marker <endljcut />
-    html    += "<endljcut \/></div>";
+    // insert a marker <endljcut></endljcut>
+    html    += "<endljcut></endljcut></div>";
 
     FCK.InsertHtml(html);
     FCK.Focus();
@@ -468,10 +468,36 @@ FCK.CustomCleanWord = function( oNode, bIgnoreFont, bRemoveStyles ) {
 	}
 
     // Convert LJ specific tags
-    html = html.replace(/&lt;lj-cut text=.{1}(.+?).{1}&gt;([\S\s]+?)&lt;\/lj-cut&gt;/gm, '<div text="$1" class="ljcut">$2<endljcut \/></div>');
-    html = html.replace(/&lt;lj-cut&gt;([\S\s]+?)&lt;\/lj-cut&gt;/gm, '<div class="ljcut">$1<endljcut \/></div>');
+    html = html.replace(/&lt;lj-cut text=.{1}(.+?).{1}&gt;([\S\s]+?)&lt;\/lj-cut&gt;/gm, '<div text="$1" class="ljcut">$2<endljcut></endljcut></div>');
+    html = html.replace(/&lt;lj-cut&gt;([\S\s]+?)&lt;\/lj-cut&gt;/gm, '<div class="ljcut">$1<endljcut></endljcut></div>');
 
 
 	return html ;
 
 }
+
+// LJ tags Data Processor implementation.
+FCK.DataProcessor.ConvertToHtml = function(data)
+{
+	data = top.convertToHTMLTags(data); // call from rte.js
+	if (!top.$('event_format').checked) {
+		data = data.replace(/\n/g, '<br />');
+	}
+	data = FCKDataProcessor.prototype.ConvertToHtml.call(this, data);
+	return data;
+
+}
+FCK.DataProcessor.ConvertToDataFormat = function()
+{
+	var html = FCKDataProcessor.prototype.ConvertToDataFormat.apply(this, arguments);
+	
+	html = top.convertToLJTags(html); // call from rte.js
+	if (!top.$('event_format').checked) {
+		html = html
+			.replace(/<br \/>/g, '\n')
+			.replace(/<p>(.*?)<\/p>/g, '$1\n')
+			.replace(/&nbsp;/g, ' ');
+	}
+	return html;
+}
+

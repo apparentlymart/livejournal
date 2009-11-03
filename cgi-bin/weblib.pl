@@ -2156,11 +2156,7 @@ sub res_includes {
     foreach my $key (@LJ::NEEDED_RES) {
         my $path;
         my $mtime = _file_modtime($key, $now);
-        if ($key =~ m!^stc/fck/! || $LJ::FORCE_WSTAT{$key}) {
-            $path = "w$key";  # wstc/ instead of stc/
-        } else {
-            $path = $key;
-        }
+        $path = $key;
 
         # if we want to also include a local version of this file, include that too
         if (@LJ::USE_LOCAL_RES) {
