@@ -41,7 +41,10 @@ function changeSubmit(prefix, defaultjournal) {
 }
 
 function pageload (dotime) {
-    if (dotime) settime();
+	if (dotime) {
+		setInterval(settime, 1000)
+		settime();
+	}
     if (!document.getElementById) return false;
 
     var remotelogin = $('remotelogin');
@@ -369,8 +372,9 @@ function mood_preview() {
 }
 
 function entryPreview(entryForm) {
-    var f=entryForm;
-    var action=f.action;
+    var f=entryForm,
+		action=f.action;
+	f.onsubmit && f.onsubmit(); // for rich editor, syn content
     f.action='/preview/entry.bml'; 
     f.target='preview';
     window.open('','preview','width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes');
