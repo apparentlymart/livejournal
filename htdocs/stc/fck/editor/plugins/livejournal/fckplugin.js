@@ -62,8 +62,7 @@ LJUserCommand.Execute=function() {
         if (!data.success) return;
         data.ljuser = data.ljuser.replace(/<span.+?class=['"]?ljuser['"]?.+?>/,'<div class="ljuser">');
         data.ljuser = data.ljuser.replace(/<\/span>/,'</div>');
-        FCK.InsertHtml(data.ljuser);
-        FCK.InsertHtml(' ');
+        FCK.InsertHtml(data.ljuser + '&nbsp;');
         if (selection != '') FCKSelection.Collapse();
         FCK.Focus();
     }
