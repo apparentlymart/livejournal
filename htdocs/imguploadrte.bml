@@ -9,7 +9,6 @@
     my $head = \$_[1]->{'head'};
     my $body = \$_[1]->{'body'};
     my $u = LJ::User->remote;
-    return "<?needlogin?>" unless $u;
 
     LJ::need_res("stc/display_none.css",
                  "js/photobucket_jw.js",
@@ -62,17 +61,15 @@
                         <table cellspacing="1" cellpadding="1" border="0" width="99%" height="99%">
                         <tr>
                         <td>
-                            <table cellspacing="0" cellpadding="0" width="99%" border="0">
-                            <tr>
-                            <td width="100%"><span fckLang="DlgImgURL">URL</span></td>
-                            <td id="tdBrowse" style="DISPLAY: none" nowrap rowspan="2">&nbsp; <input id="btnBrowse" onclick="BrowseServer();" type="button" value="Browse Server" fckLang="DlgBtnBrowseServer"></td></tr>
+                            <span fckLang="DlgImgURL">URL</span><br />
+                            <span id="tdBrowse" style="DISPLAY: none">&nbsp; <input id="btnBrowse" onclick="BrowseServer();" type="button" value="Browse Server" fckLang="DlgBtnBrowseServer" /></span>
+                            <input id="txtUrl" style="WIDTH: 99%" type="text" onblur="UpdatePreview();"><br />
+                       </td>
+                       </tr>
                        <tr>
-                       <td valign="top"><input id="txtUrl" style="WIDTH: 99%" type="text" onblur="UpdatePreview();"></td></tr>
-                       </table>
-                       </td></tr>
-                       <tr>
-                       <td><span fckLang="DlgImgAlt">Short Description</span><br />
-                       <input id="txtAlt" style="WIDTH: 9%" type="text"><br />
+                       <td>
+                           <span fckLang="DlgImgAlt">Short Description</span><br />
+                           <input id="txtAlt" style="width: 99%" type="text" /><br />
                        </td></tr>
                        <tr height="100%">
                        <td valign="top">
