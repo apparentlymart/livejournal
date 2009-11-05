@@ -677,7 +677,7 @@ my $old_url = 0;
              $ret .= "<br /><b>$ML{'.posted'}</b>"
                  if $last_talkid == $dtid && $last_jid == $u->{'userid'};
 
-             $ret .= "</td></tr><tr><td>";
+             $ret .= "</td></tr><tr><td class='talk-comment-box'>";
 
              LJ::CleanHTML::clean_comment(\$post->{'body'}, { 'preformatted' => $post->{'props'}->{'opt_preformatted'},
                                                               'anon_comment' => (!$pu || $pu->{'journaltype'} eq 'I'),
