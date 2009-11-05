@@ -380,25 +380,9 @@
             $errors->{'entry'} = $ML{'.error.noentry'};
         }
 
-        unless (
-            (($req{'wepc_email'} ne '') && ($req{'wepc_agree'} ne ''))
-                or
-            (($req{'wepc_email'} eq '') && ($req{'wepc_agree'} eq ''))
-        ) {
-            $errors->{'entry'} = $ML{'wepc.agree.error'} if $req{'wepc_agree'} ne '';
-            $errors->{'entry'} = $ML{'wepc.email.error'} if $req{'wepc_email'} ne '';
+        if (grep { $_->[0] } LJ::run_hooks("validate_entry_form", \%req, $errors)) {
             $print_entry_form->();
-            return
-        }
-
-        if (($req{'wepc_email'} ne '') && ($req{'wepc_agree'} ne '')) {
-            my @errors_email = ();
-            LJ::check_email($req{'wepc_email'}, \@errors_email);
-            if (@errors_email) {
-                $errors->{entry} = $errors_email[0];
-                $print_entry_form->();
-                return;
-            }
+            return;
         }
 
         $req{prop_qotdid} = $qid;
