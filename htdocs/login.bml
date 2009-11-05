@@ -368,7 +368,7 @@
             my $bindip  = ($POST{'bindip'} eq "yes") ? BML::get_remote_ip() : "";
 
             $u->make_login_session($exptype, $bindip);
-            LJ::run_hook('user_login', $u);
+            LJ::run_hooks('user_login', $u);
             $cursess = $u->session;
 
             return if $want_success_redirect->();
