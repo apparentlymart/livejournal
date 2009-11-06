@@ -931,6 +931,8 @@
         $body .= "</div>";
     }
 
+    $body .= LJ::run_hook("profile_between_basicinfo_and_bio", $u);
+
     ### Bio
     if ($u->{'has_bio'} eq "Y") {
         $body .= "<div class='ljclear'></div>";
