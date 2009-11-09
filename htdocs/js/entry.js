@@ -10,12 +10,9 @@ if (! ("$" in window))
     };
 
 function editdate() {
-    if (document.getElementById) {
-        var currentdate = document.getElementById('currentdate');
-        var modifydate = document.getElementById('modifydate');
-        currentdate.style.display = 'none';
-        modifydate.style.display = 'inline';
-    }
+	clearInterval(settime.interval);
+	$('currentdate').style.display = 'none';
+	$('modifydate').style.display = 'inline';
 }
 
 function showEntryTabs() {
@@ -42,7 +39,7 @@ function changeSubmit(prefix, defaultjournal) {
 
 function pageload (dotime) {
 	if (dotime) {
-		setInterval(settime, 1000)
+		settime.interval = setInterval(settime, 1000)
 		settime();
 	}
     if (!document.getElementById) return false;
