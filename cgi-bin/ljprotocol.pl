@@ -224,6 +224,7 @@ sub checksession {
         unless authenticate($req, $err, $flags);
 
     my $u = $flags->{'u'};
+    
     my $session = $u->session;
     
     return {
