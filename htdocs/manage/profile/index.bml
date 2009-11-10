@@ -298,7 +298,7 @@ body<=
 		if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location_profile'}) {
 			$ret .= "<div class='lc_detect'><span>$ML{'.section.location.detect'}</span>";
 			$ret .= "<input type='button' name='detect' value='$ML{'.location.detect.btn'}' id='detect' onClick='countryregions.autoDetect()'> ";
-			$ret .= " " . LJ::help_icon('upic_keywords');
+			$ret .= " " . LJ::help_icon('location');
 			$ret .= "</div>";
 		}
 
