@@ -224,13 +224,13 @@ sub checksession {
         unless authenticate($req, $err, $flags);
 
     my $u = $flags->{'u'};
-    
     my $session = $u->session;
     
     return {
-        username => $u->username,
-        session  => $u->id.":".$session->id.":".$session->auth,
-        caps     => $u->caps,
+        username    => $u->username,
+        session     => $u->id.":".$session->id.":".$session->auth,
+        caps        => $u->caps,
+        usejournals => list_usejournals($u), 
     }
 }
 
