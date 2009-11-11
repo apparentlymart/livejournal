@@ -121,7 +121,7 @@ body<=
     });
 
     $ret .= "<br/>";
-    $ret .= $ML{'.intro.ban.note.text'} . LJ::html_text ( { name => 'ban_note', value => $ML{'.intro.ban.note.value'} } ) if $alias_enable && !$u->is_community;
+    $ret .= $ML{'.intro.ban.note.text'} . LJ::html_text ( { name => 'ban_note' } ) if $alias_enable && !$u->is_community;
     $ret .= "<br/>" . LJ::html_submit ( 'ban_users_btn', $ML{'.btn.ban_users'} );
     $ret .= "</form>";
 
