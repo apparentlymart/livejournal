@@ -59,8 +59,10 @@ function LJUser(oEditor) {
 }
 LJUser.cache = {}
 
+var switched_rte_on = false;
+
 function useRichText(textArea, statPrefix) {
-    if ($("switched_rte_on").value == '1') return;
+    if (switched_rte_on == true) return;
 
     if ($("insobj")) {
         $("insobj").className = 'on';
@@ -97,13 +99,13 @@ function useRichText(textArea, statPrefix) {
        $('qotd_html_preview').style.display = 'none';
     }
 
-    $('switched_rte_on').value = '1';
+    switched_rte_on = true;
 
     return false; // do not follow link
 }
 
 function usePlainText(textArea) {
-    if ($('switched_rte_on').value == '0') return;
+    if (switched_rte_on == false) return;
 
     if (FCKeditor_LOADED) {
         var oEditor = FCKeditorAPI.GetInstance(textArea);
@@ -132,13 +134,13 @@ function usePlainText(textArea) {
     editor_frame.style.display = 'none';
     $(textArea).style.display = 'block';
     $('htmltools').style.display = 'block';
-    $('switched_rte_on').value = '0';
+    switched_rte_on = false;
 
     return false;
 }
 
 function convert_to_draft(html) {
-    if ($("switched_rte_on").value == '0') return html;
+    if (switched_rte_on == false) return html;
 
     html = convert_poll_to_ljtags(html, true);
     html = convert_user_to_ljtags(html);
@@ -203,7 +205,7 @@ function FCKeditor_OnComplete(oEditor) {
 	oEditor.Events.AttachEvent('OnAfterSetHTML', function() { LJUser(oEditor) });
 	LJUser(oEditor);
 	$('updateForm').onsubmit = function() {
-		if ($('switched_rte_on').value == '0') return;
+		if (switched_rte_on == false) return;
 		
 		var html = oEditor.GetXHTML(false);
 		
