@@ -139,7 +139,7 @@
     }
 
     # Check for errors, store in hash to render later
-    my $errors;
+    my $errors = {};
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
     my $preview = $POST{'action:preview'};
     
@@ -391,7 +391,7 @@
         my %res;
         LJ::do_request(\%req, \%res, $flags);
 
-        if (!$errors) {
+        if (!keys %$errors) {
             # examine response
             my $update_message;
             if ($res{'success'} eq "OK" && $res{'message'}) {
