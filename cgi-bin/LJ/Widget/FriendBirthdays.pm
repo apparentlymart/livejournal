@@ -98,9 +98,10 @@ sub render_body {
             my $vg_link = $friend_birtdays_vgifts{$vg_key}->{url};
             my $vg = LJ::Pay::ShopVGift->new(id => $vg_key);
             my $vg_key_name = $vg->keyname;
-            my $hover = LJ::ehtml(BML::ml($vg->display_name()));
-            my $img_small = $vg->small_img_url;
-            $ret .= "<li><a href=\"$vg_link\"><img src='$img_small' alt='$hover' title='$hover' /></a></li>";
+            my $vg_html = $vg->display_html_code(
+                hover => LJ::ehtml(BML::ml($vg->display_name())),
+            );
+            $ret .= "<li><a href=\"$vg_link\">$vg_html</a></li>";
         }
         my $show_hide_href = '';
         $show_hide_href .= "<a href='$LJ::SITEROOT/?sponsor_vgift=1'>" . $class->ml('widget.friendbirthdays.show_sponsored_vgifts') . "</a><br/>" unless $get_sponsor_vgift;
