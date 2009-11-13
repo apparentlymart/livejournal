@@ -1068,14 +1068,15 @@ sub postevent
     my ($req, $err, $flags) = @_;
     un_utf8_request($req);
 
-    return undef unless LJ::run_hook('post_noauth', $req) || authenticate($req, $err, $flags);
+    my $post_noauth = LJ::run_hook('post_noauth', $req);
+    return undef unless $post_noauth || authenticate($req, $err, $flags);
 
     my $spam = 0;
     LJ::run_hook('spam_detector', $req, \$spam);
     return fail($err,320) if $spam;
 
     # if going through mod queue, then we know they're permitted to post at least this entry
-    return undef unless check_altusage($req, $err, $flags) || $flags->{nomod};
+    return undef unless $post_noauth || check_altusage($req, $err, $flags) || $flags->{nomod};
 
     my $u = $flags->{'u'};
     my $ownerid = $flags->{'ownerid'}+0;
