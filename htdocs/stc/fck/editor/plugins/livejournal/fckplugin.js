@@ -82,71 +82,14 @@ LJUserCommand.Execute=function() {
 FCKCommands.RegisterCommand('LJUserLink', LJUserCommand ); //otherwise our command will not be found
 
 // Create the toolbar button.
-var oLJUserLink = new FCKToolbarButton('LJUserLink', window.parent.FCKLang.LJUser);
-oLJUserLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljuser.gif' ;
+var oLJUserLink = new FCKToolbarButton('LJUserLink', window.parent.FCKLang.LJUser,
+										null, null, false, false,
+										[FCKConfig.PluginsPath + 'livejournal/lj_strip.png', 16, 2]
+									);
 
 // Register the button to use in the config
 FCKToolbarItems.RegisterItem('LJUserLink', oLJUserLink) ;
 
-
-//////////  LJ Video Button //////////////
-var LJVideoCommand=function(){
-};
-LJVideoCommand.prototype.Execute=function(){
-}
-LJVideoCommand.GetState=function() {
-    return FCK_TRISTATE_OFF; //we dont want the button to be toggled
-}
-
-LJVideoCommand.Execute=function() {
-    var url;
-    var selection = '';
-
-    if (FCK.EditorWindow.getSelection) {
-        selection = FCK.EditorWindow.getSelection();
-        // Create a new div to clone the selection's content into
-        var d = FCK.EditorDocument.createElement('DIV');
-        for (var i = 0; i < selection.rangeCount; i++) {
-            d.appendChild(selection.getRangeAt(i).cloneContents());
-        }
-        selection = d.innerHTML;
-    } else if (FCK.EditorDocument.selection) {
-        var range = FCK.EditorDocument.selection.createRange();
-        var type = FCKSelection.GetType();
-        if (type == 'Control') {
-            selection = range.item(0).outerHTML;
-        } else if (type == 'None') {
-            selection = '';
-        } else {
-            selection = range.htmlText;
-        }
-    }
-
-    if (selection != '') {
-        url = selection;
-    } else {
-        url = prompt(window.parent.FCKLang.VideoPrompt,'');
-    }
-
-    if (url != null && url != '') {
-        // Make the tag like the editor would
-        var html = "<div url=\""+url+"\" class=\"ljvideo\"><img src=\""+FCKConfig.PluginsPath + "livejournal/ljvideo.gif\" /></div>";
-
-        FCK.InsertHtml(html);
-        FCKSelection.Collapse();
-        FCK.Focus();
-    }
-    return;
-}
-
-FCKCommands.RegisterCommand('LJVideoLink', LJVideoCommand); //otherwise our command will not be found
-
-// Create the toolbar button.
-var oLJVideoLink = new FCKToolbarButton('LJVideoLink', window.parent.FCKLang.LJVideo);
-oLJVideoLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljvideo.gif';
-
-// Register the button to use in the config
-FCKToolbarItems.RegisterItem('LJVideoLink', oLJVideoLink);
 //////////  LJ Embed Media Button //////////////
 var LJEmbedCommand=function(){};
 LJEmbedCommand.prototype.Execute=function(){};
@@ -186,8 +129,10 @@ LJEmbedCommand.Execute=function() {
 FCKCommands.RegisterCommand('LJEmbedLink', LJEmbedCommand ); //otherwise our command will not be found
 
 // Create embed media button
-var oLJEmbedLink = new FCKToolbarButton('LJEmbedLink', "Embed Media");
-oLJEmbedLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljvideo.gif' ;
+var oLJEmbedLink = new FCKToolbarButton('LJEmbedLink', 'Embed Media',
+										null, null, false, false,
+										[FCKConfig.PluginsPath + 'livejournal/lj_strip.png', 16, 3]
+									);
 
 // Register the button to use in the config
 FCKToolbarItems.RegisterItem('LJEmbedLink', oLJEmbedLink) ;
@@ -195,69 +140,71 @@ FCKToolbarItems.RegisterItem('LJEmbedLink', oLJEmbedLink) ;
 //////////  LJ Cut Button //////////////
 var LJCutCommand=function(){
 };
-LJCutCommand.prototype.Execute=function(){
-}
-LJCutCommand.GetState=function() {
-    return FCK_TRISTATE_OFF; //we dont want the button to be toggled
-}
-
-LJCutCommand.Execute=function() {
-    var text = prompt(window.parent.FCKLang.CutPrompt, window.parent.FCKLang.ReadMore);
-    if (text == window.parent.FCKLang.ReadMore) {
-        text = '';
-    } else {
-        text = text.replace('"', '\"');
-        text = ' text="' + text + '"';
-    }
-
-    var selection = '';
-
-    if (FCK.EditorWindow.getSelection) {
-        selection = FCK.EditorWindow.getSelection();
-
-        // Create a new div to clone the selection's content into
-        var d = FCK.EditorDocument.createElement('DIV');
-        for (var i = 0; i < selection.rangeCount; i++) {
-            d.appendChild(selection.getRangeAt(i).cloneContents());
-        }
-        selection = d.innerHTML;
-
-    } else if (FCK.EditorDocument.selection) {
-        var range = FCK.EditorDocument.selection.createRange();
-
-        var type = FCKSelection.GetType();
-        if (type == 'Control') {
-            selection = range.item(0).outerHTML;
-        } else if (type == 'None') {
-            selection = '';
-        } else {
-            selection = range.htmlText;
-        }
-    }
-
-    if (selection != '') {
-        selection += ''; // Cast it to a string
-    } else {
-        selection += window.parent.FCKLang.CutContents;
-    }
-
-    var html = "<div class='ljcut'" +  text + ">";
-    html    += selection;
-    // I need to be able to identify the correct closing div tag so
-    // insert a marker <endljcut></endljcut>
-    html    += "<endljcut></endljcut></div>";
-
-    FCK.InsertHtml(html);
-    FCK.Focus();
-
-    return;
+LJCutCommand.prototype.GetState=function() {
+	// Disabled if not WYSIWYG.
+	if (FCK.EditMode != FCK_EDITMODE_WYSIWYG || ! FCK.EditorWindow)
+		return FCK_TRISTATE_DISABLED ;
+	
+	var path = new FCKElementPath(FCKSelection.GetBoundaryParentElement(true));
+	
+	// See if the first block has a ljcut parent.
+	for (var i = 0; i < path.Elements.length; i++) {
+		if (path.Elements[i].nodeName.IEquals('lj-cut') || path.Elements[i].nodeName.IEquals('cut'))
+			return FCK_TRISTATE_ON;
+	}
+	return FCK_TRISTATE_OFF;
 }
 
-FCKCommands.RegisterCommand('LJCutLink', LJCutCommand ); //otherwise our command will not be found
+LJCutCommand.prototype.Execute=function()
+{
+	if (this.GetState() == FCK_TRISTATE_ON) {
+		FCKUndo.SaveUndoStep();
+		
+		var path = new FCKElementPath(FCKSelection.GetBoundaryParentElement(true));
+		
+		// See if the first block has a ljcut parent.
+		for ( var i = 0 ; i < path.Elements.length ; i++ ) {
+			if (path.Elements[i].nodeName.IEquals('lj-cut') || path.Elements[i].nodeName.IEquals('cut')) {
+				var cut_node = path.Elements[i];
+				break;
+			}
+		}
+		var text = prompt(window.parent.FCKLang.CutPrompt, path.Elements[i].getAttribute('text') || window.parent.FCKLang.ReadMore);
+		
+		text && text != window.parent.FCKLang.ReadMore ?
+			cut_node.setAttribute('text', text) :
+			cut_node.removeAttribute('text');
+	} else {
+		var text = prompt(window.parent.FCKLang.CutPrompt, window.parent.FCKLang.ReadMore),
+			range = new FCKDomRange(FCK.EditorWindow);
+		
+		range.MoveToSelection();
+		
+		var bookmark = range.CreateBookmark(),
+			cut_node = FCK.EditorDocument.createElement('lj-cut');
+		
+		if (text && text != window.parent.FCKLang.ReadMore) {
+			cut_node.setAttribute('text', text);
+		}
+		
+		range.ExtractContents().AppendTo(cut_node);
+		range.InsertNode(cut_node);
+		
+		range.MoveToBookmark(bookmark);
+		range.Select();
+		
+		FCK.Focus();
+		FCK.Events.FireEvent('OnSelectionChange');
+	}
+}
+
+FCKCommands.RegisterCommand('LJCutLink', new LJCutCommand()); //otherwise our command will not be found
 
 // Create the toolbar button.
-var oLJCutLink = new FCKToolbarButton('LJCutLink', window.parent.FCKLang.LJCut);
-oLJCutLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljcut.gif' ;
+var oLJCutLink = new FCKToolbarButton('LJCutLink', window.parent.FCKLang.LJCut,
+										null, null, false, true,
+										[FCKConfig.PluginsPath + 'livejournal/lj_strip.png', 16, 1]
+									);
 
 // Register the button to use in the config
 FCKToolbarItems.RegisterItem('LJCutLink', oLJCutLink) ;
@@ -343,8 +290,10 @@ if (top.canmakepoll == false) {
 }
 
 // Create the toolbar button.
-var oLJPollLink = new FCKToolbarButton('LJPollLink', 'LiveJournal Poll');
-oLJPollLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljpoll.gif' ;
+var oLJPollLink = new FCKToolbarButton('LJPollLink', 'LiveJournal Poll',
+										null, null, false, false,
+										[FCKConfig.PluginsPath + 'livejournal/lj_strip.png', 16, 4]
+										);
 
 // Register the button to use in the config
 FCKToolbarItems.RegisterItem('LJPollLink', oLJPollLink) ;
@@ -353,6 +302,7 @@ FCKToolbarItems.RegisterItem('LJPollLink', oLJPollLink) ;
 // Original source taken from fck_paste.html
 FCK.CustomCleanWord = function( oNode, bIgnoreFont, bRemoveStyles ) {
 	var html = oNode.innerHTML ;
+
 	html = html.replace(/<o:p>\s*<\/o:p>/g, '') ;
 	html = html.replace(/<o:p>[\s\S]*?<\/o:p>/g, '&nbsp;') ;
 
@@ -360,11 +310,11 @@ FCK.CustomCleanWord = function( oNode, bIgnoreFont, bRemoveStyles ) {
 	html = html.replace( /\s*mso-[^:]+:[^;"]+;?/gi, '' ) ;
 
 	// Remove margin styles.
-	html = html.replace( /\s*MARGIN: 0cm 0cm 0pt\s*;/gi, '' ) ;
-	html = html.replace( /\s*MARGIN: 0cm 0cm 0pt\s*"/gi, "\"" ) ;
+	html = html.replace( /\s*MARGIN: 0(?:cm|in) 0(?:cm|in) 0pt\s*;/gi, '' ) ;
+	html = html.replace( /\s*MARGIN: 0(?:cm|in) 0(?:cm|in) 0pt\s*"/gi, "\"" ) ;
 
-	html = html.replace( /\s*TEXT-INDENT: 0cm\s*;/gi, '' ) ;
-	html = html.replace( /\s*TEXT-INDENT: 0cm\s*"/gi, "\"" ) ;
+	html = html.replace( /\s*TEXT-INDENT: 0(?:cm|in)\s*;/gi, '' ) ;
+	html = html.replace( /\s*TEXT-INDENT: 0(?:cm|in)\s*"/gi, "\"" ) ;
 
 	html = html.replace( /\s*TEXT-ALIGN: [^\s;]+;?"/gi, "\"" ) ;
 
@@ -416,7 +366,8 @@ FCK.CustomCleanWord = function( oNode, bIgnoreFont, bRemoveStyles ) {
 	html = html.replace( /<w:[^>]*>[\s\S]*?<\/w:[^>]*>/gi, '' ) ;
 
 	// Remove Tags with XML namespace declarations: <o:p><\/o:p>
-	html = html.replace(/<\/?\w+:[^>]*>/gi, '' ) ;
+	// LJ SPECIFIC: exclude "lj:" tags for IE
+	html = html.replace(/<\/?(?!lj:)\w+:[^>]*>/gi, '') ;
 
 	// Remove comments [SF BUG-1481861].
 	html = html.replace(/<\!--[\s\S]*?-->/g, '' ) ;
@@ -466,13 +417,7 @@ FCK.CustomCleanWord = function( oNode, bIgnoreFont, bRemoveStyles ) {
 		html = html.replace( /<([^\s>]+)(\s[^>]*)?>\s*<\/\1>/g, '' ) ;
 	}
 
-    // Convert LJ specific tags
-    html = html.replace(/&lt;lj-cut text=.{1}(.+?).{1}&gt;([\S\s]+?)&lt;\/lj-cut&gt;/gm, '<div text="$1" class="ljcut">$2<endljcut></endljcut></div>');
-    html = html.replace(/&lt;lj-cut&gt;([\S\s]+?)&lt;\/lj-cut&gt;/gm, '<div class="ljcut">$1<endljcut></endljcut></div>');
-
-
 	return html ;
-
 }
 
 // LJ tags Data Processor implementation.
@@ -482,14 +427,22 @@ FCK.DataProcessor.ConvertToHtml = function(data)
 	if (!top.$('event_format').checked) {
 		data = data.replace(/\n/g, '<br />');
 	}
+	
+	// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
+	if (FCKBrowserInfo.IsIE) {
+		data = data
+			.replace(/<lj-cut([^>]*)>/g, '<lj:cut$1>')
+			.replace(/<\/lj-cut>/g, '</lj:cut>')
+			.replace(/<([\/])?lj-raw>/g, '<$1lj:raw>');
+	}
 	data = FCKDataProcessor.prototype.ConvertToHtml.call(this, data);
+	
 	return data;
 
 }
 FCK.DataProcessor.ConvertToDataFormat = function()
 {
 	var html = FCKDataProcessor.prototype.ConvertToDataFormat.apply(this, arguments);
-	
 	html = html.replace(/<br \/>$/, ''); // rte fix, http://dev.fckeditor.net/ticket/3023
 	
 	html = top.convertToLJTags(html); // call from rte.js
@@ -499,6 +452,14 @@ FCK.DataProcessor.ConvertToDataFormat = function()
 			.replace(/<p>(.*?)<\/p>/g, '$1\n')
 			.replace(/&nbsp;/g, ' ');
 	}
+	
+	// IE custom tags
+	if (FCKBrowserInfo.IsIE) {
+		html = html
+			.replace(/<lj:cut([^>]*)>/g, '<lj-cut$1>')
+			.replace(/<\/lj:cut>/g, '</lj-cut>')
+			.replace(/<([\/])?lj:raw>/g, '<$1lj-raw>');
+	}
+	
 	return html;
 }
-

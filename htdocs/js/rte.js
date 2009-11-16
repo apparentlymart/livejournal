@@ -239,12 +239,8 @@ function convertToLJTags(html) {
     html = html
         .replace(/<div(?=[^>]*class="ljvideo")[^>]*url="(\S+)"[^>]*><img.+?\/><\/div>/g, '<lj-template name="video">$1</lj-template>')
         .replace(/<div(?=[^>]*class="ljvideo")[^>]*url="\S+"[^>]*>(.+?)<\/div>/g, '<p>$1</p>') // video img replaced on text
-        .replace(/<div class=['"]ljraw['"]>(.+?)<\/div>/g, '<lj-raw>$1</lj-raw>')
         .replace(/<div class=['"]ljembed['"](\s*embedid="(\d*)")?\s*>(.*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')
         .replace(/<div\s*(embedid="(\d*)")?\s*class=['"]ljembed['"]\s*>(.*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')
-        .replace(/<div class=['"]ljcut['"] text=['"](.+?)['"]>(.+?)<endljcut><\/endljcut><\/div>/g, '<lj-cut text="$1">$2</lj-cut>')
-        .replace(/<div text=['"](.+?)['"] class=['"]ljcut['"]>(.+?)<endljcut><]\/endljcut><\/div>/g, '<lj-cut text="$1">$2</lj-cut>')
-        .replace(/<div class=['"]ljcut['"]>(.+?)<endljcut><\/endljcut><\/div>/g, '<lj-cut>$1</lj-cut>')
         // convert qotd
         .replace(/<div(.*)qotdid=['"]?(\d+)['"]?([^>]*)>[^\b]*<\/div>(<br \/>)*/g, "<lj-template id=\"$2\"$1$3 /><br />") // div tag and qotdid attrib
         .replace(/(<lj-template id=\"\d+\" )(.*)class=['"]?ljqotd['"]?([^>]*\/>)?/g, "$1name=\"qotd\" $2$3") // class attrib
@@ -254,9 +250,6 @@ function convertToLJTags(html) {
 }
 
 function convertToHTMLTags(html) {
-    html = html.replace(/<lj-cut text=['"](.+?)['"]>([\S\s]+?)<\/lj-cut>/gm, '<div text="$1" class="ljcut">$2<endljcut></endljcut></div>');
-    html = html.replace(/<lj-cut>([\S\s]+?)<\/lj-cut>/gm, '<div class="ljcut">$1<endljcut></endljcut></div>');
-    html = html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/gm, '<div class="ljraw">$1</div>');
     html = html.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>');
     // Match across multiple lines and extract ID if it exists
     html = html.replace(/<lj-embed\s*(id="(\d*)")?\s*>\s*(.*)\s*<\/lj-embed>/gim, '<div class="ljembed" embedid="$2">$3</div>');

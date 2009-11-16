@@ -114,16 +114,18 @@ p, ul, li
 }
 
 /* LJ CSS */
-.ljraw
+lj\:raw,
+lj-raw
 {
 	border: #000000 1px dotted;
 }
 
-.ljcut
+lj\:cut,
+lj-cut
 {
-        display: inline;
-        border: #000000 1px dotted;
-        background-color: #d2d2d2;
+	display: inline;
+	border: #000000 1px dotted;
+	background-color: #d2d2d2;
 }
 
 .ljuser
