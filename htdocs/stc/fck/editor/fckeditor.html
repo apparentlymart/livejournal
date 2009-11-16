@@ -107,7 +107,8 @@ var FCK_IS_CUSTOM_DOMAIN = ( FCK_ORIGINAL_DOMAIN != FCK_RUNTIME_DOMAIN ) ;
 
 function LoadScript( url )
 {
-	document.write( '<scr' + 'ipt type="text/javascript" src="' + url + '"><\/scr' + 'ipt>' ) ;
+	// LJ SPECIFIC: URL for loading static server was changed
+	document.write( '<scr' + 'ipt type="text/javascript" src="' + top.Site.statprefix + '/fck/editor/' + url + '"><\/scr' + 'ipt>' ) ;
 }
 
 // Main editor scripts.
