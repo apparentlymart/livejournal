@@ -43,8 +43,9 @@ sub new {
 sub send {
     my $self = shift;
     my $errors = shift;
+    my $opts = shift || {};
 
-    return 0 unless ($self->can_send($errors));
+    return 0 unless ($opts->{'nocheck'} || $self->can_send($errors));
 
     # Set remaining message properties
     # M is the designated character code for Messaging counter
@@ -56,7 +57,7 @@ sub send {
     # Send message by writing to DB and triggering event
     if ($self->save_to_db) {
         $self->_send_msg_event;
-        $self->_orig_u->rate_log('usermessage', $self->rate_multiple) if $self->rate_multiple;
+        $self->_orig_u->rate_log('usermessage', $self->rate_multiple) if !$opts->{'nocheck'} and $self->rate_multiple;
         return 1;
     } else {
         return 0;
