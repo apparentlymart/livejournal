@@ -11,14 +11,14 @@ body<=
     return BML::redirect("$LJ::SITEROOT/editjournal.bml")
         unless $is_admin || $LJ::IS_DEV_SERVER;
 
-    $ret .= "<form method='POST'>";
+    $ret .= "<form method='GET'>";
     $ret .= "View properties for URL: ";
-    $ret .= LJ::html_text({name => 'url', maxlength => '100', size => '50'});
-    $ret .= LJ::html_submit(value => "View");
+    $ret .= LJ::html_text({name => 'url', maxlength => '100', size => '50', value => $GET{url}});
+    $ret .= "<button type='submit'>View</button>";
     $ret .= "</form>";
     $ret .= "<?hr?>";
 
-    my $entry = LJ::Entry->new_from_url($POST{url});
+    my $entry = LJ::Entry->new_from_url($GET{url});
     unless ($entry && $entry->valid) {
         $ret .= LJ::error_list("$POST{url} is not a valid entry URL.") if LJ::did_post();
         return $ret;
