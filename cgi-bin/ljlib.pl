@@ -3411,6 +3411,44 @@ sub is_enabled {
     return ! LJ::conf_test($LJ::DISABLED{$conf}, @_);
 }
 
+sub lang_to_locale {
+    my ($lang) = @_;
+
+    my %map = {
+        af    => "af_ZA",
+        be    => "be_BY",
+        da    => "da_DK",
+        de    => "de_DE",
+        eo    => "eo_EO",
+        es    => "es_ES",
+        fi    => "fi_FI",
+        fr    => "fr_FR",
+        gr    => "el_GR",
+        he    => "he_IL",
+        hi    => "hi_IN",
+        hu    => "hu_HU",
+        is    => "is_IS",
+        it    => "it_IT",
+        ja    => "ja_JP",
+        ms    => "ms_MY",
+        nb    => "nb_NO",
+        nl    => "nl_NL",
+        nn    => "nb_NO",
+        pl    => "pl_PL",
+        pt    => "pt_PT",
+        pt_BR => "pt_BR",
+        ru    => "ru_RU",
+        sv    => "sv_SE",
+        tr    => "tr_TR",
+        uk    => "uk_UA",
+        zh    => "zh_CN",
+        zh_TR => "zh_TW",
+    };
+
+    return 'en_US' unless $map{$lang};
+    return $map{$lang};
+}
+
 package LJ::S1;
 
 use vars qw($AUTOLOAD);
