@@ -3478,9 +3478,10 @@ sub edit_comment {
         $comment_obj->set_poster_ip;
     }
     
-    ## if state was changed, (e.g. now comment is screened because it contain 
-    ## spam), save changes
-    if ($comment_obj->state ne $comment->{state}) {
+    ## Save changes if comment is screened now and it wasn't.
+    ## Don't save opposite change (screened --> unscreened), because change
+    ## may be caused by that edit comment form misses 'state' field.
+    if ($comment_obj->state ne $comment->{state} && $comment->{state} eq 'S') {
         $comment_obj->set_state($comment->{state});
     }
     
