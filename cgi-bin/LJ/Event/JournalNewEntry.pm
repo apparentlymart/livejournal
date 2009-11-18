@@ -156,6 +156,14 @@ my @_ml_strings_en = (
 sub as_email_subject {
     my ($self, $u) = @_;
 
+    # Use special subject for some special communities
+    if ($self->entry->journal->is_comm) {
+        my $subject = LJ::run_hook(
+            'esn_new_journal_post_subject_' . $self->entry->journal->user,
+            $u, $self->entry);
+        return $subject if $subject;
+    }
+
     # Precache text lines
     my $lang = $u->prop('browselang');
     LJ::Lang::get_text_multi($lang, undef, \@_ml_strings_en);
@@ -193,13 +201,12 @@ sub _as_email {
     my $entry_url   = $self->entry->url;
     my $journal_url = $self->entry->journal->journal_base;
 
-    # Precache text lines
-    my $lang = $u->prop('browselang');
-    LJ::Lang::get_text_multi($lang, undef, \@_ml_strings_en);
+    my $email;
 
-    my $email = LJ::Lang::get_text($lang, 'esn.hi', undef, { username    => $username }) . "\n\n";
-    my $about = $self->entry->subject_text ?
-        (LJ::Lang::get_text($lang, 'esn.journal_new_entry.about', undef, { title => $self->entry->subject_text })) : '';
+    my $lang = $u->prop('browselang');
+
+    # Precache text lines
+    LJ::Lang::get_text_multi($lang, undef, \@_ml_strings_en);
 
     my $tags = '';
     # add tag info for entries that have tags
@@ -207,15 +214,32 @@ sub _as_email {
         $tags = ' ' . LJ::Lang::get_text($lang, 'esn.tags', undef, { tags => join(', ', $self->entry->tags ) });
     }
 
-    $email .= LJ::Lang::get_text($lang,
-        $self->entry->journal->is_comm ? 'esn.journal_new_entry.head_comm' : 'esn.journal_new_entry.head_user',
-        undef,
-            {
-                poster  => $poster,
-                about   => $about,
-                journal => $journal,
-                tags    => $tags,
-            }) . "\n\n";
+    my $about = $self->entry->subject_text ?
+        (LJ::Lang::get_text($lang, 'esn.journal_new_entry.about', undef, { title => $self->entry->subject_text })) : '';
+
+    my $opts = {
+        poster      => $poster,
+        about       => $about,
+        journal     => $journal,
+        tags        => $tags,
+        username    => $username,
+    };
+
+    # Try to run hook for special communities
+    if ($self->entry->journal->is_comm) {
+        $email = LJ::run_hook(
+            'esn_new_journal_post_email_' . $self->entry->journal->user,
+            $u, $self->entry, $opts);
+    }
+
+    unless ($email) {
+
+        $email = LJ::Lang::get_text($lang, 'esn.hi', undef, $opts) . "\n\n";
+        $email .= LJ::Lang::get_text($lang,
+            $self->entry->journal->is_comm ? 'esn.journal_new_entry.head_comm' : 'esn.journal_new_entry.head_user',
+            undef,
+            $opts) . "\n\n";
+    }
 
     # make hyperlinks for options
     # tags 'poster' and 'journal' cannot contain html <a> tags

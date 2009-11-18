@@ -1545,6 +1545,15 @@ esn.view_profile=[[openlink]]View [[postername]]'s profile[[closelink]]
 
 esn.your_inbox=your Inbox
 
+esn.writersblock.subject=New Writer's block question: [[title]]
+
+esn.writersblock.email<<
+A new <a href="[[entry_url]]">question of the day</a> was posted to [[journal]]
+[[tags]]
+
+[[event]]
+.
+
 entryform.adultcontent=Adult Content:
 
 entryform.adultcontent.concepts=Adult Concepts

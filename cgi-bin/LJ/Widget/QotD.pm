@@ -219,7 +219,7 @@ sub _get_question_data {
 
     my $qid = $q->{qid};
     my $view_answers_link = "";
-    my $count = LJ::QotD->get_count($qid);
+    my $count = eval { LJ::QotD->get_count($qid) };
     if ($count) {
         $count .= "+" if $count >= $LJ::RECENT_QOTD_SIZE;
         $view_answers_link = "<a" . ($opts->{small_view_link} ? " class='small-view-link'" : '') .
