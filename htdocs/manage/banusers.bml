@@ -7,8 +7,6 @@ body<=
 
     use JSON;
 
-    my $max_alias_length = 400;
-
     $title = $ML{'.title'};
 
     my $remote = LJ::get_remote();
@@ -32,8 +30,9 @@ body<=
         # unban users before banning users so that in the case of a collision (i.e. a particular
         # user is being banned and unbanned at the same time), that user is left banned
 
-        my $aliases = jsonToObj($u->prop('aliases')) || {};
-        
+
+        my @aliases;
+
         # unban users
         if ($POST{unban_user}) {
             # first remove any users from the list that are not valid users
@@ -51,11 +50,9 @@ body<=
         }
 
         if ($POST{unban_users_btn}) {
-            foreach my $new_alias (keys %POST) {
-                my ($uid) = $new_alias =~ m#new_alias_(\d+)#;
-                next unless $uid;
-                my $alias = substr($POST{$new_alias}, 0, $max_alias_length);
-                $aliases->{$uid} = $alias if $alias_enable && LJ::load_userid($uid);
+            foreach my $key (keys %POST) {
+                $key =~ m#new_alias_(\d+)# or next;
+                push @aliases, ($1, $POST{$key});
             }
         }
 
@@ -72,7 +69,7 @@ body<=
                 push @cantbanlist, $banusername unless $banu;
 
                 ## set alias for banuser if alias was set, aliases available and banuser is exist
-                $aliases->{$banu->id} = $POST{ban_note} if $alias_enable && $POST{ban_note} && $banu;
+                push @aliases, ($banu->id, $POST{ban_note}) if $alias_enable && $POST{ban_note} && $banu;
             }
         
             # make sure the user isn't over the max number of bans allowed
@@ -90,11 +87,9 @@ body<=
             }
         }
 
-        my $ready_aliases = objToJson($aliases);
-        if (length $ready_aliases < 65536) {
-            $u->set_prop( aliases => $ready_aliases ) if $alias_enable;
-        } else {
-            $submit_msg = "<?errorbar $ML{'.error.too.long'} errorbar?>";
+        my $error;
+        if (!LJ::set_alias(\@aliases, \$error)) {
+            $submit_msg = "<?errorbar $error errorbar?>";
         }
 
         $submit_msg = "<?warningbar $ML{'.success'} warningbar?>" unless $submit_msg;

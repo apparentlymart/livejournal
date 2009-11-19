@@ -65,8 +65,6 @@ sub handle_post {
 
     die "Must be logged in" unless $remote; # hope it is impossibly...
 
-    my $aliases = $remote->prop('aliases');
-    $aliases = jsonToObj($aliases);
     my $user_for_alias = LJ::load_user($post->{foruser});
 
     die BML::ml('.error.cantfinduser', {'user' => $post->{foruser}})
@@ -74,17 +72,9 @@ sub handle_post {
 
     die "Cannot set alias to yourself" if $remote->{user} eq $user_for_alias->{user}; # again, hope it is impossible
 
-    my $is_edit = 0;
-    $is_edit = 1 if $aliases->{$post->{foruser}} ne '';
-    my $prepared_alias = substr($post->{alias}, 0, 400);
-    $prepared_alias = '' if $post->{'deletealias'} ne '';
-    $aliases->{$user_for_alias->{userid}} = $prepared_alias if $prepared_alias;
-    delete $aliases->{$user_for_alias->{userid}} unless $prepared_alias;
-
-    my $ready_aliases = objToJson($aliases);
-    if (length $ready_aliases < 65536) {
-        $remote->set_prop( aliases => $ready_aliases );
-    
+    my $error;
+    my $is_edit = LJ::ljuser_alias($user_for_alias->{user}) ? 1 : 0;
+    if (LJ::set_alias($user_for_alias, ($post->{'deletealias'}) ? undef : $post->{alias}, \$error )) {
         return (
             success     => 1, 
             username    => $user_for_alias->user,
@@ -92,14 +82,13 @@ sub handle_post {
             alias       => LJ::dhtml($post->{alias}),
             message     => $is_edit ? BML::ml('widget.addalias.edit_alias') : BML::ml('widget.addalias.add_alias'),
         );
-
     } else {
         return (
             success     => 0, 
             username    => $user_for_alias->user,
             journalname => $user_for_alias->display_name,
             alias       => LJ::dhtml($post->{alias}),
-            message     => BML::ml('widget.addalias.too.long')
+            message     => $error || 'Unspecified error occured',
         );
     }
 }

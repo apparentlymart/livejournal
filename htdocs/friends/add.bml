@@ -5,8 +5,6 @@ use JSON;
 
 use vars qw($body $title $windowtitle %GET %POST);
 
-my $max_alias_length = 400; # max allowed chars(?) or bytes in alias
-
  my $print_with_ad = sub {
     my $str = shift;
     my $ad_box = LJ::get_ads({ location => 'bml.friends.add/error', ljadwrapper => 1 });
@@ -87,16 +85,9 @@ my $max_alias_length = 400; # max allowed chars(?) or bytes in alias
 
      if ($res{'success'} eq "OK")
      {
-        if ($remote->get_cap ('paid')) {
+        if ($remote->get_cap ('aliases')) {
             ## user has been added. setting alias for him
-            my $user_alias = $POST{'user_note'};
-            my $aliases = jsonToObj($remote->prop('aliases')) || {};
-            $user_alias = substr($user_alias, 0, $max_alias_length);
-            $aliases->{$userid} = $user_alias;
-            my $ready_aliases = objToJson($aliases);
-            if (length $ready_aliases < 65536) {
-                $remote->set_prop( aliases => $ready_aliases );
-            }
+            LJ::set_alias($u, $POST{'user_note'});
         }
         
          $body .= LJ::get_ads({ 
@@ -201,7 +192,7 @@ my $max_alias_length = 400; # max allowed chars(?) or bytes in alias
 if ($u->is_visible) {
 
     ## Add user alias while user's friending
-    if ($remote->get_cap ('paid')) {
+    if ($remote->get_cap ('aliases')) {
         $body .= "<dl class=\"addfriend-options\"><dt><em>" . $ML{'.optional'}. ":</em> " . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . "</dt>";
         $body .= "<dd>";
         $body .= LJ::html_text ( { name => 'user_note', class => 'type-text', value => LJ::ljuser_alias($u->{user}) } );

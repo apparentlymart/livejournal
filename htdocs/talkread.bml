@@ -553,7 +553,7 @@ my $old_url = 0;
          $ret .= "</td></tr></table>\n";
      } else {
          if ($upost) {
-             $user = LJ::ljuser($upost);
+             $user = LJ::ljuser($upost, { side_alias => 1 });
          }
          my $icon = LJ::Talk::show_image($pics, $post->{'props'}->{'subjecticon'});
          if ($post->{'_loaded'}) {

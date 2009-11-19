@@ -105,9 +105,7 @@
     }
 
     if ($u && $remote) {
-        my $aliases = $remote->prop('aliases');
-        $aliases = jsonToObj($aliases);
-        $ret{alias} = $aliases->{$u->{userid}};
+        $ret{alias} = LJ::ljuser_alias($u->{user});
         $ret{alias_enable} = $remote->get_cap('aliases') ? 1 : 0;
         $ret{alias_title} = $ret{alias} ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
     }

@@ -6443,6 +6443,8 @@ sub get_shared_journals
     return sort map { $_->{'user'} } values %users;
 }
 
+## my $text = LJ::ljuser_alias($u)
+## returns note text (former 'alias') for current remote user
 sub ljuser_alias {
     my $user = shift;
 
@@ -6454,10 +6456,79 @@ sub ljuser_alias {
 
     my $u = LJ::load_user($user);
     return unless $u;
+   
+    if (!$remote->{_aliases}) {
+        my $prop_aliases = $remote->prop('aliases');
+        $remote->{_aliases} = JSON::jsonToObj($prop_aliases);
+    }
+    return $remote->{_aliases}->{ $u->{userid} };
+}
+
+##
+## LJ::set_alias($u, $text, \$error)
+## LJ::set_alias([ $u1, $text1, $u2, $text2], \$error);
+##
+## Sets notes (alias) text for user $u to the current $remote user
+## $u is either user object or userid (number)
+## If aliases cannot be updated, undef value is returned and optional \$error reference is set
+## Use empty text for deleting alias
+##
+sub set_alias {
+    my $list = (ref $_[0] eq 'ARRAY') ? shift : [shift, shift];
+    my $err = shift;
     
-    my $prop_aliases = $remote->prop('aliases');
-    my $aliases = JSON::jsonToObj($prop_aliases);
-    return $aliases->{$u->{userid}};
+    return if $LJ::DISABLED{'aliases'};
+
+    my $remote = LJ::get_remote();
+    return unless $remote && $remote->get_cap('aliases');
+
+    ## load alias data
+    if (!$remote->{_aliases}) {
+        my $prop_aliases = $remote->prop('aliases');
+        $remote->{_aliases} = JSON::jsonToObj($prop_aliases) || {};
+    }
+    
+    ## modify (edit, add or delete)
+    for (my $i = 0; $i < @$list / 2; ++$i) {
+        my $userid = $list->[$i * 2];
+        my $alias  = $list->[$i * 2 + 1];
+        $alias = substr($alias, 0, 400);
+        $userid = $userid->{userid} if ref $userid;
+        die "Numeric id is expected, not $userid" unless $userid =~ /^\d+$/;
+        
+        if ($alias) {
+            $remote->{_aliases}->{$userid} = $alias;
+        } else {
+            delete $remote->{_aliases}->{$userid};
+        }
+    }
+    
+    ## save data back
+    my $serialized_text = JSON::objToJson($remote->{_aliases});
+    if (length $serialized_text < 65536) {
+        return $remote->set_prop( aliases => $serialized_text );
+    } else {
+        delete $remote->{_aliases}; ## drop unsuccessfully modified data
+        $$err = BML::ml('widget.addalias.too.long') if $err;
+        return 0;
+    }
+}
+
+## my %all_aliases = LJ::get_all_aliases();
+## Returns all aliases for current remote user as hash userid => alias
+sub get_all_aliases {
+
+    return if $LJ::DISABLED{'aliases'};
+
+    my $remote = LJ::get_remote();
+    return unless $remote and $remote->get_cap('aliases');
+
+    if (!$remote->{_aliases}) {
+        my $prop_aliases = $remote->prop('aliases');
+        $remote->{_aliases} = JSON::jsonToObj($prop_aliases);
+    }
+
+    return %{$remote->{_aliases}};
 }
 
 # <LJFUNC>
@@ -6513,7 +6584,13 @@ sub ljuser
          
         my $u = LJ::get_remote();
         my $alias = LJ::ehtml(LJ::ljuser_alias($user) || '');
-        
+
+        my $side_alias;
+        if ($alias and $opts->{side_alias}) {
+            $side_alias = ' - ' . $alias;
+            $alias = '';
+        }
+
         my $user_html = '';
         $user_html .= "<span class='ljuser ";
         $user_html .= "with-alias"
@@ -6526,7 +6603,9 @@ sub ljuser
         $user_html .= ">$ljusername";
         $user_html .= "<span class='useralias-value'>*</span>"
             if $alias;
-        $user_html .= "</a></span>";
+        $user_html .= "</a>";
+        $user_html .= $side_alias if $side_alias;
+        $user_html .= "</span>";
         return $user_html;
     };
 

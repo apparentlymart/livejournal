@@ -19,8 +19,7 @@ body<=
     return "<?h1 " . BML::ml('.not.allowed', { aopts => "href='$LJ::SITEROOT/paidaccounts/'" } ) . " h1?>" unless $u->get_cap('aliases');
 
     my $ret = '';
-    my $aliases = jsonToObj($u->prop('aliases')) || {};
-
+    my @aliases;
     ### user is now authenticated ###
     
     my $key = 'new_aliases';
@@ -35,18 +34,13 @@ body<=
 
         my @a_new_user  = split /\0/, $new_user;
         my @a_new_alias = split /\0/, $new_alias;
-        foreach my $alias (@a_new_alias) {
-            $alias = substr($alias, 0, $max_alias_length);
-        }
 
         my @userid_list = split /\|/, $POST{$key."_user_list"};
         foreach my $userid (@userid_list) {
-            my $user_alias = $POST{$key.$userid};
-            $user_alias = substr($user_alias, 0, $max_alias_length);
-            if (($POST{"delete_btn"} ne '' && $POST{"check".$userid} eq 'on') || $user_alias eq '') {
-                delete $aliases->{$userid};
-            } elsif ($user_alias ne '' && $POST{"save_btn"} ne '') {
-                $aliases->{$userid} = $user_alias;
+            if (($POST{"delete_btn"} ne '' && $POST{"check".$userid} eq 'on') || $POST{$key.$userid} eq '') {
+                push @aliases, ($userid, undef);
+            } elsif ($POST{$key.$userid} ne '' && $POST{"save_btn"} ne '') {
+                push @aliases, ($userid, $POST{$key.$userid});
             }
         }
 
@@ -64,15 +58,13 @@ body<=
                 next;
             }
 
-            $aliases->{$adding_u->{userid}} = $a_new_alias[$idx] 
+            push @aliases, ($adding_u->{userid}, $a_new_alias[$idx])
                 if $adding_u->{user} ne $u->{user} && $a_new_alias[$idx];
         }
 
-        my $ready_aliases = objToJson($aliases);
-        if (length $ready_aliases < 65536) {
-            $u->set_prop( aliases => $ready_aliases );
-        } else {
-            $error .= "<?p ".BML::ml('.error.too.long')." p?>";
+        my $alias_error;
+        if (!LJ::set_alias(\@aliases, \$alias_error)) {
+            $error .= "<?p $alias_error p?>";
         }
 
         $error .= "<?p ".BML::ml('.error.user_not_exist', { username => join (", ", @not_exists_users) } )." p?>" if scalar @not_exists_users;
@@ -94,12 +86,13 @@ body<=
     $ret .= q|<table class="aliaslist-table b-form-changelist">|;
     
     my @userid_list = ();
-    my $us = LJ::load_userids(keys %$aliases);
-    foreach my $userid (keys %$aliases) {
-        delete $aliases->{$userid} unless $us->{$userid}; # need safe sort below
+    my %all_aliases = LJ::get_all_aliases();
+    my $us = LJ::load_userids(keys %all_aliases);
+    foreach my $userid (keys %all_aliases) {
+        delete $all_aliases{$userid} unless $us->{$userid}; # need safe sort below
     }
     my $users_list_html = '';
-    foreach my $userid (sort { $us->{$a}->display_name cmp $us->{$b}->display_name } keys %$aliases) {
+    foreach my $userid (sort { $us->{$a}->display_name cmp $us->{$b}->display_name } keys %all_aliases) {
         my $u = $us->{$userid};
         $users_list_html .= q|<tr><td>|
                                 .LJ::html_check({ 'type' => 'check',

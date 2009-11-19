@@ -273,20 +273,13 @@ body<=
         }
 
         # set new aliases for friends
-        my $aliases = $remote->prop('aliases');
-        $aliases = jsonToObj($aliases);
-        foreach (grep { /^useralias/ } keys %POST) {
-            my $key = my $who = $_;
-            my $value = substr($POST{$key}, 0, 400);
-            $who =~ s/^useralias_//;
-            $aliases->{$who} = $value if (defined $value && $value ne '' && $who ne $remote->{userid});
-            delete $aliases->{$who} unless $value;
+        my (@aliases, $error);
+        foreach my $key (keys %POST) {
+            $key =~ /^useralias_(\d+)/ or next;
+            push @aliases, ($1, $POST{$key})
         }
-        my $ready_aliases = objToJson($aliases);
-        if (length $ready_aliases < 65536) {
-            $remote->set_prop( aliases => $ready_aliases );
-        } else {
-            return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'.error.too.long.aliases'} p?>\n<ul><li><a href='$LJ::SITEROOT/friends/edit.bml'>$ML{'.success.editfriends'}</a></li></ul>\n");
+        if (!LJ::set_alias(\@aliases, \$error)) {
+            return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $error p?>\n<ul><li><a href='$LJ::SITEROOT/friends/edit.bml'>$ML{'.success.editfriends'}</a></li></ul>\n");
         }
 
         my %response = ();
