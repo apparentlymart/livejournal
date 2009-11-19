@@ -4083,6 +4083,14 @@ register_alter(sub {
                  "ADD revid int unsigned default null");
     }
 
+    unless (column_type("antispam", "date")) {
+        do_alter("antispam",
+                 "ALTER TABLE antispam " .
+                 "MODIFY eventtime DATE DEFAULT NULL");
+        do_alter("antispam",
+                 "ALTER TABLE antispam ADD INDEX(eventtime)");
+    }
+
 });
 
 
