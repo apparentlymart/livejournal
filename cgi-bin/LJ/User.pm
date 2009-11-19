@@ -6459,7 +6459,7 @@ sub ljuser_alias {
    
     if (!$remote->{_aliases}) {
         my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = JSON::jsonToObj($prop_aliases);
+        $remote->{_aliases} = $prop_aliases ? JSON::jsonToObj($prop_aliases) : {};
     }
     return $remote->{_aliases}->{ $u->{userid} };
 }
@@ -6485,7 +6485,7 @@ sub set_alias {
     ## load alias data
     if (!$remote->{_aliases}) {
         my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = JSON::jsonToObj($prop_aliases) || {};
+        $remote->{_aliases} = $prop_aliases ? JSON::jsonToObj($prop_aliases) : {};
     }
     
     ## modify (edit, add or delete)
@@ -6525,7 +6525,7 @@ sub get_all_aliases {
 
     if (!$remote->{_aliases}) {
         my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = JSON::jsonToObj($prop_aliases);
+        $remote->{_aliases} = $prop_aliases ? JSON::jsonToObj($prop_aliases) : {};
     }
 
     return %{$remote->{_aliases}};
