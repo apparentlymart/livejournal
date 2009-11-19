@@ -1,23 +1,26 @@
 function LJUser(oEditor) {
-    var html = oEditor.GetXHTML(false);
-
-    var regexp = /<lj (?:title="([^">]+)?")? ?(?:comm|user)="(\w+?)" ?(?:title="([^">]+)?")? ?\/?>/g,
-        orig_html = html,
-        ljusers;
-
-    while (ljusers = regexp.exec(html)) {
-        var username = ljusers[2],
-            usertitle = ljusers[1] || ljusers[3],
-            cachename = usertitle ? username + ':' + usertitle : username;
-
-        if (LJUser.cache[cachename]) {
-            if (LJUser.cache[cachename].html) {
-                html = html.replace(ljusers[0], LJUser.cache[cachename].html);
-            }
-            continue;
-        }
-
-        LJUser.cache[cachename] = {}
+	var lj_tags = oEditor.EditorDocument.body.getElementsByTagName('lj'),
+		i = lj_tags.length;
+	
+	while (i--) {
+		var lj_tag = lj_tags[i],
+			username = lj_tag.getAttribute('user') || lj_tag.getAttribute('comm'),
+			usertitle = lj_tag.getAttribute('title'),
+			cachename = usertitle ? username + ':' + usertitle : username;
+		if (LJUser.cache[cachename]) {
+			if (LJUser.cache[cachename].html) {
+				var node = oEditor.EditorDocument.createElement('b');
+				node.innerHTML = LJUser.cache[cachename].html;
+				lj_tag.parentNode.replaceChild(node.firstChild, lj_tag);
+			} else {
+				LJUser.cache[cachename].queue.push(lj_tag);
+			}
+			continue;
+		}
+		
+		LJUser.cache[cachename] = {
+			queue: [lj_tag]
+		}
 
         var postData = {
             username: username
@@ -30,18 +33,23 @@ function LJUser(oEditor) {
             alert(err + ' "' + username + '"');
         }})(username);
 
-        var gotInfo = (function(userstr, username, cachename) { return function (data) {
+        var gotInfo = (function(username, cachename) { return function (data) {
             if (data.error) {
                 return alert(data.error+' "'+username+'"');
             }
             if (!data.success) return;
-            data.ljuser = data.ljuser
-                .replace(/<span.+?class='ljuser'?.+?>/, '<div class="ljuser">')
-                .replace(/<\/span>\s?/, '</div>');
-            html = html.replace(userstr, data.ljuser);
-            LJUser.cache[cachename].html = data.ljuser;
-            oEditor.SetData(html);
-        }})(ljusers[0], username, cachename);
+			
+			data.ljuser = data.ljuser.replace("<span class='useralias-value'>*</span>", '');
+			
+			var lj_tag;
+			while(lj_tag = LJUser.cache[cachename].queue.shift()) {
+				var node = oEditor.EditorDocument.createElement('b');
+				node.innerHTML = data.ljuser;
+				lj_tag.parentNode.replaceChild(node.firstChild, lj_tag);
+			}
+			
+			LJUser.cache[cachename].html = data.ljuser;
+        }})(username, cachename);
 
         var opts = {
             data:  HTTPReq.formEncoded(postData),
@@ -52,9 +60,6 @@ function LJUser(oEditor) {
         }
 
         HTTPReq.getJSON(opts);
-    }
-    if (html != orig_html) {
-        oEditor.SetData(html);
     }
 }
 LJUser.cache = {}
@@ -225,13 +230,23 @@ function doLinkedFieldUpdate(oEditor) {
 
 function convert_user_to_ljtags(html) {
 	html = html
-		.replace(/<div class="ljuser"><a href="http:\/\/(?:community|syndicated)\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj comm="$1"/>')
-		.replace(/<div class="ljuser"><a href="http:\/\/(?:community|syndicated)\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj comm="$1" title="$2"/>')
-		.replace(/<div class="ljuser"><a href="http:\/\/users\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>') // username with special symbol
-		.replace(/<div class="ljuser"><a href="http:\/\/users\.[-.\w]+\/([_\w]+)\/(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj user="$1" title="$2"/>')
-		.replace(/<div class="ljuser"><a href="http:\/\/([_\w]+)\.(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/div>/g, '<lj user="$1"/>')
-		.replace(/<div class="ljuser"><a href="http:\/\/([_\w]+)\.(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/div>/g, '<lj user="$1" title="$2"/>')
-		.replace(/<\/lj>/g, '')
+		.replace(/<span.*?class="ljuser.*?><a href="http:\/\/(?:community|syndicated)\.[-.\w]+\/([\w]+)\/(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/span>/g, '<lj comm="$1"/>')
+		.replace(/<span.*?class="ljuser.*?><a href="http:\/\/(?:community|syndicated)\.[-.\w]+\/([\w]+)\/(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/span>/g, '<lj comm="$1" title="$2"/>')
+		.replace(/<span.*?class="ljuser.*?><a href="http:\/\/users\.[-.\w]+\/([\w]+)\/(?:[^<]|<[^b])*<b>\1<\/b><\/a><\/span>/g, '<lj user="$1"/>') // username with special symbol
+		.replace(/<span.*?class="ljuser.*?><a href="http:\/\/users\.[-.\w]+\/([\w]+)\/(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/span>/g, '<lj user="$1" title="$2"/>')
+		.replace(/<span.*?class="ljuser.*?><a href="http:\/\/([-\w]+)\.(?:[^<]|<[^b])*<b>([^<]+)?<\/b><\/a><\/span>/g, '<lj user="$1" title="$2"/>')
+		.replace(/<\/lj>/g, '');
+	
+	//change user-name to user_name
+	var ljuser,
+		rex = /<lj user="([-\w]+)"([^>]+)?\/>/g;
+	while(ljuser = rex.exec(html)) {
+		html = html.replace(ljuser[0], '<lj user="'+ljuser[1].replace(/-/g, '_')+'"'+(ljuser[2]||'')+'/>');
+	}
+	
+	// for ex.: <lj user="tester_1" title="tester_1"/>
+	html = html.replace(/<lj user="([\w]+)" title="\1"\/>/g, '<lj user="$1"/>');
+	
 	return html;
 }
 
@@ -242,11 +257,11 @@ function convertToLJTags(html) {
         .replace(/<div class=['"]ljembed['"](\s*embedid="(\d*)")?\s*>(.*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')
         .replace(/<div\s*(embedid="(\d*)")?\s*class=['"]ljembed['"]\s*>(.*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')
         // convert qotd
-        .replace(/<div(.*)qotdid=['"]?(\d+)['"]?([^>]*)>[^\b]*<\/div>(<br \/>)*/g, "<lj-template id=\"$2\"$1$3 /><br />") // div tag and qotdid attrib
-        .replace(/(<lj-template id=\"\d+\" )(.*)class=['"]?ljqotd['"]?([^>]*\/>)?/g, "$1name=\"qotd\" $2$3") // class attrib
-        .replace(/(<lj-template id=\"\d+\" name=\"qotd\" )(.*)(lang=['"]?(\w+)['"]?)([^>]*\/>)?/g, "$1$3 \/>"); // lang attrib
-
-        return html;
+		.replace(/<div([^>]*)qotdid="(\d+)"([^>]*)>[^\b]*<\/div>(<br \/>)*/g, '<lj-template id="$2"$1$3 /><br />') // div tag and qotdid attrib
+		.replace(/(<lj-template id="\d+" )([^>]*)class="ljqotd"?([^>]*\/>)/g, '$1name="qotd" $2$3') // class attrib
+		.replace(/(<lj-template id="\d+" name="qotd" )[^>]*(lang="\w+")[^>]*\/>/g, '$1$2 \/>'); // lang attrib
+	
+	return html;
 }
 
 function convertToHTMLTags(html) {

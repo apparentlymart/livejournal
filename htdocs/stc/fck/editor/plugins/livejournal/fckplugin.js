@@ -60,8 +60,8 @@ LJUserCommand.Execute=function() {
             return;
         }
         if (!data.success) return;
-        data.ljuser = data.ljuser.replace(/<span.+?class=['"]?ljuser['"]?.+?>/,'<div class="ljuser">');
-        data.ljuser = data.ljuser.replace(/<\/span>/,'</div>');
+		data.ljuser = data.ljuser.replace("<span class='useralias-value'>*</span>", '');
+		
         FCK.InsertHtml(data.ljuser + '&nbsp;');
         if (selection != '') FCKSelection.Collapse();
         FCK.Focus();
@@ -433,13 +433,19 @@ FCK.DataProcessor.ConvertToHtml = function(data)
 		data = data
 			.replace(/<lj-cut([^>]*)>/g, '<lj:cut$1>')
 			.replace(/<\/lj-cut>/g, '</lj:cut>')
-			.replace(/<([\/])?lj-raw>/g, '<$1lj:raw>');
+			.replace(/<([\/])?lj-raw>/g, '<$1lj:raw>')
+			.replace(/(<lj [^>]*)> /g, '$1> '); // IE merge spaces
+	}
+	else
+	{
+		// close <lj user> tags
+		data = data.replace(/(<lj [^>]*[^\/])>/g, '$1/> ');
 	}
 	data = FCKDataProcessor.prototype.ConvertToHtml.call(this, data);
 	
 	return data;
-
 }
+
 FCK.DataProcessor.ConvertToDataFormat = function()
 {
 	var html = FCKDataProcessor.prototype.ConvertToDataFormat.apply(this, arguments);
