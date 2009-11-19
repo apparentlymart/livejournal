@@ -280,7 +280,7 @@ body<=
          $barbg = "green";
      }
      my $original_barbg = $barbg;
-     $barbg = 'clicked' if $GET{closeall} || $marked{$sp->{'spid'}};
+     $barbg = 'clicked' if ($GET{closeall} && $original_barbg eq 'yellow') || $marked{$sp->{'spid'}};
 
      next if $state eq "green" && $barbg ne "green";
 
@@ -331,7 +331,7 @@ body<=
      $ret .= "<tr valign='top' $style $js>\n";
      if ($can_close) {
          $ret .= "<td>" . LJ::html_check({ name => "check_$sp->{spid}", id => "check_$sp->{spid}",
-                                           onclick => "doClick($sp->{spid});", selected => $GET{closeall} || $marked{$sp->{spid}}, }) .
+                                           onclick => "doClick($sp->{spid});", selected => $barbg eq 'clicked', }) .
                  "<input type='hidden' name='c$sp->{spid}' id='c$sp->{spid}' value='$original_barbg' /></td>\n";
          $js = "onclick='return doClick($sp->{spid});'";
      }

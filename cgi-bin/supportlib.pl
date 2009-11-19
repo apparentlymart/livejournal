@@ -787,7 +787,6 @@ sub close_request_with_points {
         'ORDER BY timelogged DESC LIMIT 1', undef, $spid);
 
     unless (defined $response) {
-        warn "closing without points";
         my $res = $dbh->do(
             'INSERT INTO supportlog '.
             '(spid, timelogged, type, userid, message) VALUES '.
