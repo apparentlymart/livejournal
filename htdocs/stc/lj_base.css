@@ -73,7 +73,12 @@ div.lj_ippu_titlebar {
     div.lj_ippu_titlebar div {
         
     }
-
+    div.lj_ippu_titlebar A:link,
+    div.lj_ippu_titlebar A:visited {
+        color:#FFF;
+        text-decoration: none;
+        border: none !important;
+    }
     .lj_ippu_titlebar img {
         opacity: .25;
     }
@@ -81,6 +86,16 @@ div.lj_ippu_titlebar {
         .lj_ippu_titlebar img:hover {
             opacity: 1;
         }
+
+.vgift-img-l {
+    max-width: 220px;
+    max-height: 220px;
+}
+
+.vgift-img-s {
+    max-width: 100px;
+    max-height: 100px;
+}
 
 .LJ_Placeholder_Container {
     position:relative;

@@ -17,6 +17,31 @@
     margin-right: 0px;
 }
 
+*HTML .vgift-img-l {
+    zoom:expression(
+        function(t){
+            if (220 < t.scrollWidth && t.scrollWidth > t.scrollHeight) {
+                t.width = '220';
+            }
+            else if (220 < t.scrollHeight) {
+                t.height = '220';
+            }
+            t.runtimeStyle.zoom = 1;
+        }(this));
+    }
+*HTML .vgift-img-s {
+    zoom:expression(
+        function(t){
+            if (100 < t.scrollWidth && t.scrollWidth > t.scrollHeight) {
+                t.width = '100';
+            }
+            else if (100 < t.scrollHeight) {
+                t.height = '100';
+            }
+            t.runtimeStyle.zoom = 1;
+        }(this));
+    }
+
 /* singapoure news block */
 .sg-content UL {
 	display: block;
