@@ -20,7 +20,7 @@ LJ::register_hook('esn_new_journal_post_subject_writersblock', sub {
         $u->prop('browselang'),
         'esn.writersblock.subject', undef,
         {
-            subject => $entry->subject_raw(),
+            title   => $entry->subject_raw(),
             journal => $entry->journal->display_username(),
         });
 });
@@ -53,12 +53,12 @@ LJ::register_hook('esn_new_journal_post_email_writersblock', sub {
 
     $opts->{event}      = $event;
     $opts->{journal}    = $entry->journal->ljuser_display();
-    my %tags = LJ::Tags::get_usertags($u);
-    my $tags = '';
+
     # add tag info for entries that have tags
+    my $tags = '';
     if ($entry->tags) {
         $tags = LJ::Lang::get_text($lang, 'esn.tags', undef, {
-            tags => join(', ', grep { $tags{$_} } $entry->tags )
+            tags => join(', ', $entry->tags )
         });
     }
     $opts->{tags}       = $tags,
