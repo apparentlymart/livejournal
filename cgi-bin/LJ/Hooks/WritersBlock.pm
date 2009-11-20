@@ -43,26 +43,29 @@ LJ::register_hook('esn_new_journal_post_email_writersblock', sub {
     my $question = LJ::QotD->get_single_question($qid);
     return '' unless $question;
 
-    $event = LJ::Widget::QotD->render(
-        user        => $u,
-        embed       => 1,
-        lang        => $lang, 
-        nocontrols  => 1,
-        question    => $question,
-    );
+    if ($opts->{is_html}) {
+        $opts->{openlink}   = '<a href="' . $entry->url . '">';
+        $opts->{closelink}  = '</a>';
+        $opts->{event} = '<br /><br />'. LJ::Widget::QotD->render(
+            user        => $u,
+            embed       => 1,
+            lang        => $lang, 
+            nocontrols  => 1,
+            question    => $question,
+        ) . '<br />';
+    } else {
+        $opts->{openlink}   = '';
+        $opts->{closelink}  = '';
 
-    $opts->{event}      = $event;
-    $opts->{journal}    = $entry->journal->ljuser_display();
-
-    # add tag info for entries that have tags
-    my $tags = '';
-    if ($entry->tags) {
-        $tags = LJ::Lang::get_text($lang, 'esn.tags', undef, {
-            tags => join(', ', $entry->tags )
-        });
+        my $qotd = new LJ::Widget::QotD;
+        my $ml_text;
+        if ($question) {
+            my $ml_key = $qotd->ml_key("$question->{qid}.text");
+            my $ml_text = $qotd->ml($ml_key, undef, $lang);
+            LJ::CleanHTML::clean_event(\$ml_text);
+            $opts->{event} = $ml_text;
+        }
     }
-    $opts->{tags}       = $tags,
-    $opts->{entry_url}  = $entry->url;
 
     return
         LJ::Lang::get_text($lang, 'esn.writersblock.email', undef, $opts) . "\n\n";

@@ -223,6 +223,7 @@ sub _as_email {
         journal     => $journal,
         tags        => $tags,
         username    => $username,
+        is_html     => $is_html,
     };
 
     # Try to run hook for special communities

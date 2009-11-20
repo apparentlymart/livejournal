@@ -1548,8 +1548,8 @@ esn.your_inbox=your Inbox
 esn.writersblock.subject=New Writer's block question: [[title]]
 
 esn.writersblock.email<<
-A new <a href="[[entry_url]]">question of the day</a> was posted to [[journal]]
-[[tags]]
+A new [[openlink]]question of the day[[closelink]] was posted to [[journal]]!
+[[tags]].
 
 [[event]]
 .
