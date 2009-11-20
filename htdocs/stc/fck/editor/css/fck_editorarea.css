@@ -114,6 +114,12 @@ p, ul, li
 }
 
 /* LJ CSS */
+.lj-template
+{
+	background-color: #000;
+	color: #fff;
+}
+
 lj\:raw,
 lj-raw
 {
