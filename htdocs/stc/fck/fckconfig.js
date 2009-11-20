@@ -57,13 +57,12 @@ FCKConfig.AutoGrowMax = 400 ;
 /////////////////////////////////
 // LIVEJOURNAL SPECIFIC
 FCKConfig.Plugins.Add('livejournal');
-// FCKConfig.ProtectedSource.Add( /<lj user[\s\S]*?\/lj>/gi ); // <lj user>
 // video tag exclude for DataProcessor.ConvertToHtml
-FCKConfig.ProtectedSource.Add( /<lj-template name=['"](?:(?!video))\w+['"]\S+?<\/lj-template>/gi ); // <lj-template>
-FCKConfig.ProtectedSource.Add( /<lj-template id=['"]?\d+['"]? name=['"]?\w+['"]?>.*?<\/lj-template>/gi ); // <lj-template></lj-template>
-FCKConfig.ProtectedSource.Add( /<lj-template name=['"]?\w+['"]? id=['"]?\d+['"]?>.*?<\/lj-template>/gi ); // <lj-template></lj-template>
-FCKConfig.ProtectedSource.Add( /<lj-template id=['"]?\d+['"]? name=['"]?\w+['"]? \/>/gi ); // <lj-template />
-FCKConfig.ProtectedSource.Add( /<lj-template name=['"]?\w+['"]? id=['"]?\d+['"]? \/>/gi ); // <lj-template />
+//FCKConfig.ProtectedSource.Add( /<lj-template name=['"](?:(?!video))\w+['"]\S+?<\/lj-template>/gi ); // <lj-template>
+//FCKConfig.ProtectedSource.Add( /<lj-template id=['"]?\d+['"]? name=['"]?\w+['"]?>.*?<\/lj-template>/gi ); // <lj-template></lj-template>
+//FCKConfig.ProtectedSource.Add( /<lj-template name=['"]?\w+['"]? id=['"]?\d+['"]?>.*?<\/lj-template>/gi ); // <lj-template></lj-template>
+//FCKConfig.ProtectedSource.Add( /<lj-template id=['"]?\d+['"]? name=['"]?\w+['"]? \/>/gi ); // <lj-template />
+//FCKConfig.ProtectedSource.Add( /<lj-template name=['"]?\w+['"]? id=['"]?\d+['"]? \/>/gi ); // <lj-template />
 FCKConfig.ProtectedSource.Add( /<lj-poll[\s\S]*?<\/lj-poll>/gi ); // lj polls
 FCKConfig.ProtectedSource.Add( /<div.*?><lj-poll-\d+?><\/lj-poll-\d+?><\/div>/gi ); // generated lj polls
 FCKConfig.ProtectedSource.Add( /<lj-pq.+?>.+?<\/lj-pq>/gi ); // lj polls

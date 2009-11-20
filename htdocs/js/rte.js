@@ -64,6 +64,37 @@ function LJUser(oEditor) {
 }
 LJUser.cache = {}
 
+LJTagsInHTML = function(oEditor) {
+	var lj_tags = oEditor.EditorDocument.body.getElementsByTagName('lj-template'),
+		i = lj_tags.length,
+		style_no_edit = 'cursor: default; -moz-user-select: all; -moz-user-input: none; -moz-user-focus: none; -khtml-user-select: all;';
+	while (i--) {
+		var lj_tag = lj_tags[i],
+			name = lj_tag.getAttribute('name');
+		switch (name) {
+			case 'video':
+			case 'qotd':
+				break;
+			// lj-template any name: <lj-template name="" value="" alt="html code"/>
+			default:
+				var value = lj_tag.getAttribute('value'),
+					alt = lj_tag.getAttribute('alt');
+				if (!value || !alt) {
+					break;
+				}
+				var div = oEditor.EditorDocument.createElement('div');
+				div.className = 'lj-template';
+				div.setAttribute('name', name);
+				div.setAttribute('value', value);
+				div.setAttribute('alt', alt);
+				div.setAttribute('style', style_no_edit);
+				div.contentEditable = false;
+				div.innerHTML = alt;
+				lj_tag.parentNode.replaceChild(div, lj_tag);
+		}
+	}
+}
+
 var switched_rte_on = false;
 
 function useRichText(textArea, statPrefix) {
@@ -190,15 +221,12 @@ function convert_qotd_to_HTML(html) {
 
     var styleattr = " style='cursor: default; -moz-user-select: all; -moz-user-input: none; -moz-user-focus: none; -khtml-user-select: all;'";
 
-    // make self-closing tag
-    html = html.replace(/<lj-template(.*)><\/lj-template>/g, "<lj-template$1 />");
-    // name attrib
-    html = html.replace(/<lj-template(.*)(name=['"]?qotd['"]?)(.*)?\/>/g, "<lj-template$1class=\"ljqotd\"$3/>");
-    // id attrib
-    html = html.replace(/<lj-template(.*)id=['"]?(\d+)['"]?(.*)?\/>/g, "<lj-template$1qotdid=\"$2\"$3/>");
-    // the main regex
-    html = html.replace(/<lj-template(.*?)\/>/g, "<div$1contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n");
-
+    html = html
+		.replace(/<lj-template(.*?)><\/lj-template>/g, "<lj-template$1 />") // make self-closing tag
+		.replace(/<lj-template(.*?)(name=['"]?qotd['"]?)(.*)?\/>/g, '<lj-template class="ljqotd"$1$3/>') // name attrib
+		.replace(/<lj-template( class="ljqotd".*?)id=['"]?(\d+)['"]?(.*)?\/>/g, "<lj-template$1qotdid=\"$2\"$3/>") // id attrib
+		.replace(/<lj-template( class="ljqotd".*?)\/>/g, '<div$1contentEditable="false"' + styleattr + '>' + qotdText + '</div>\n'); // the main regex
+	
     return html;
 }
 
@@ -207,8 +235,12 @@ var FCKeditor_LOADED = false;
 
 function FCKeditor_OnComplete(oEditor) {
 	oEditor.Events.AttachEvent('OnAfterLinkedFieldUpdate', doLinkedFieldUpdate);
-	oEditor.Events.AttachEvent('OnAfterSetHTML', function() { LJUser(oEditor) });
+	oEditor.Events.AttachEvent('OnAfterSetHTML', function() {
+		LJUser(oEditor);
+		LJTagsInHTML(oEditor);
+	});
 	LJUser(oEditor);
+	LJTagsInHTML(oEditor);
 	$('updateForm').onsubmit = function() {
 		if (switched_rte_on == false) return;
 		
@@ -260,15 +292,15 @@ function convertToLJTags(html) {
 		.replace(/<div([^>]*)qotdid="(\d+)"([^>]*)>[^\b]*<\/div>(<br \/>)*/g, '<lj-template id="$2"$1$3 /><br />') // div tag and qotdid attrib
 		.replace(/(<lj-template id="\d+" )([^>]*)class="ljqotd"?([^>]*\/>)/g, '$1name="qotd" $2$3') // class attrib
 		.replace(/(<lj-template id="\d+" name="qotd" )[^>]*(lang="\w+")[^>]*\/>/g, '$1$2 \/>'); // lang attrib
-	
 	return html;
 }
 
 function convertToHTMLTags(html) {
-    html = html.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>');
-    // Match across multiple lines and extract ID if it exists
-    html = html.replace(/<lj-embed\s*(id="(\d*)")?\s*>\s*(.*)\s*<\/lj-embed>/gim, '<div class="ljembed" embedid="$2">$3</div>');
-
+	html = html
+		.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
+		// Match across multiple lines and extract ID if it exists
+		.replace(/<lj-embed\s*(id="(\d*)")?\s*>\s*(.*)\s*<\/lj-embed>/gim, '<div class="ljembed" embedid="$2">$3</div>')
+	
     html = convert_poll_to_HTML(html);
     html = convert_qotd_to_HTML(html);
 

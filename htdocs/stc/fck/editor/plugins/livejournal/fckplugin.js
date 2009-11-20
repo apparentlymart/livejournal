@@ -446,8 +446,39 @@ FCK.DataProcessor.ConvertToHtml = function(data)
 	return data;
 }
 
-FCK.DataProcessor.ConvertToDataFormat = function()
+FCK.DataProcessor.ConvertToDataFormat = function(body)
 {
+	// DOM methods are used for detection of node opening/closing
+	var new_body = FCK.EditorDocument.createElement('div'),
+		copy_node = body.firstChild;
+	if (copy_node) {
+		new_body.appendChild(copy_node.cloneNode(true));
+		while (copy_node = copy_node.nextSibling) {
+			new_body.appendChild(copy_node.cloneNode(true));
+		}
+		var divs = new_body.getElementsByTagName('div'),
+			i = divs.length;
+		while (i--) {
+			var div = divs[i];
+			switch (div.className) {
+				// lj-template any name: <lj-template name="" value="" alt="html code"/>
+				case 'lj-template':
+					var name = div.getAttribute('name'),
+						value = div.getAttribute('value'),
+						alt = div.getAttribute('alt');
+					if (!name || !value || !alt) {
+						break;
+					}
+					var ljtag = FCK.EditorDocument.createElement('lj-template');
+					ljtag.setAttribute('name', name);
+					ljtag.setAttribute('value', value);
+					ljtag.setAttribute('alt', alt);
+					div.parentNode.replaceChild(ljtag, div);
+			}
+		}
+	}
+	
+	arguments[0] = new_body;
 	var html = FCKDataProcessor.prototype.ConvertToDataFormat.apply(this, arguments);
 	html = html.replace(/<br \/>$/, ''); // rte fix, http://dev.fckeditor.net/ticket/3023
 	
@@ -466,6 +497,9 @@ FCK.DataProcessor.ConvertToDataFormat = function()
 			.replace(/<\/lj:cut>/g, '</lj-cut>')
 			.replace(/<([\/])?lj:raw>/g, '<$1lj-raw>');
 	}
+	
+	html = html
+		.replace(/><\/lj-template>/g, '/>');
 	
 	return html;
 }
