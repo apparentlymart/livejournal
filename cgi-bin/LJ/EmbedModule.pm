@@ -309,12 +309,15 @@ sub module_iframe_tag {
     # each iframe a unique 'name' attribute
     my $id = qq(name="embed_${journalid}_$moduleid");
 
-    my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', moduleid => $moduleid, journalid => $journalid, preview => $preview,));
-    my $iframe_link = qq{http://$LJ::EMBED_MODULE_DOMAIN/?journalid=$journalid&amp;moduleid=$moduleid&amp;preview=$preview&amp;auth_token=$auth_token};
+    my $remote = LJ::get_remote();
+    my %params = (moduleid => $moduleid, journalid => $journalid, preview => $preview,);
+    LJ::run_hook('modify_embed_iframe_params', \%params, $u, $remote);
+    my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', %params));
+    my $iframe_link = "http://$LJ::EMBED_MODULE_DOMAIN/?auth_token=$auth_token" . 
+        join('', map { "&amp;$_=" . LJ::eurl($params{$_}) } keys %params);
     my $iframe_tag = qq {<iframe src="$iframe_link" } .
         qq{width="$width" height="$height" frameborder="0" class="lj_embedcontent" $id></iframe>};
 
-    my $remote = LJ::get_remote();
     return $iframe_tag unless $remote;
     return $iframe_tag if $opts{edit};
 
