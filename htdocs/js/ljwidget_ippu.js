@@ -64,6 +64,7 @@ LJWidgetIPPU = new Class(LJWidget, {
 
         // start request for this widget now
         this.loadContent();
+        return this;
     },
 
     animateCount: 0,
