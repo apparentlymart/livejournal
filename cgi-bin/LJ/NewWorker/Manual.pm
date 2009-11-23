@@ -52,6 +52,8 @@ sub run {
 
         $sleep = $interval if ++$sleep > $interval;
         sleep $sleep;
+
+        return if $class->should_quit;
     }
 }
 
