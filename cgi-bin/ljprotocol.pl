@@ -104,6 +104,7 @@ my %e = (
      "318" => [ E_TEMP, "Poster is read-only and cannot edit entries." ],
      "319" => [ E_TEMP, "Journal is read-only and its entries cannot be edited." ],
      "320" => [ E_TEMP, "Sorry, there was a problem with content of the entry" ],
+     "321" => [ E_TEMP, "Sorry, deleting is temporary disabled. Entry is 'private' now" ],
 
      # Limit errors
      "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
@@ -183,7 +184,7 @@ sub do_request
 
     $flags ||= {};
     my @args = ($req, $err, $flags);
-    
+
     my $r = eval { Apache->request };
     $r->notes("codepath" => "protocol.$method")
         if $r && ! $r->notes("codepath");
@@ -219,19 +220,19 @@ sub do_request
 
 sub checksession {
     my ($req, $err, $flags) = @_;
-    
-    return undef 
+
+    return undef
         unless authenticate($req, $err, $flags);
 
     my $u = $flags->{'u'};
-    
+
     my $session = $u->session;
-    
+
     return {
         username    => $u->username,
         session     => $u->id.":".$session->id.":".$session->auth,
         caps        => $u->caps,
-        usejournals => list_usejournals($u), 
+        usejournals => list_usejournals($u),
     }
 }
 
@@ -273,7 +274,7 @@ sub getrecentcomments {
     my $u = $flags->{'u'};
     my $count = $req->{itemshow};
     $count = 10 if !$count || ($count > 100) || ($count < 0);
-    
+
     my @recv = $u->get_recent_talkitems($count);
     my @recv_talkids = map { $_->{'jtalkid'} } @recv;
     my %recv_userids = map { $_->{'posterid'} => 1} @recv;
@@ -282,20 +283,20 @@ sub getrecentcomments {
     foreach my $comment ( @recv ) {
         $comment->{subject} = $comment_text->{$comment->{jtalkid}}[0];
         $comment->{text} = $comment_text->{$comment->{jtalkid}}[1];
-        
+
         $comment->{text} = LJ::trim_widgets(
             length     => $req->{trim_widgets},
             img_length => $req->{widgets_img_length},
             text      => $comment->{text},
             read_more => '<a href="' . $comment->url . '"> ...</a>',
         ) if $req->{trim_widgets};
-        
+
         $comment->{text} = LJ::convert_lj_tags_to_links(
             event => $comment->{text},
             embed_url => $comment->url,
         ) if $req->{parseljtags};
-        
-        $comment->{postername} = $users->{$comment->{posterid}} 
+
+        $comment->{postername} = $users->{$comment->{posterid}}
             && $users->{$comment->{posterid}}->username;
     }
     return  { status => 'OK', comments => [ @recv ] };
@@ -359,12 +360,12 @@ sub getfriendspage
             text      => $h{event_raw},
             read_more => '<a href="' . $entry->url . '"> ...</a>',
         ) if $req->{trim_widgets};
-        
+
         $h{event_raw} = LJ::convert_lj_tags_to_links(
             event => $h{event_raw},
             embed_url => $entry->url,
         ) if $req->{parseljtags};
-            
+
         # log time value
         $h{logtime} = $LJ::EndOfTime - $ei->{rlogtime};
 
@@ -1087,7 +1088,7 @@ sub postevent
 
     my $dbh = LJ::get_db_writer();
     my $dbcm = LJ::get_cluster_master($uowner);
-    
+
     return fail($err,306) unless $dbh && $dbcm && $uowner->writer;
     return fail($err,200) unless $req->{'event'} =~ /\S/;
 
@@ -1340,7 +1341,7 @@ sub postevent
 
             # create tag <lj-embed> from HTML-tag <embed>
             LJ::EmbedModule->parse_module_embed($uowner, \$req->{event});
-            
+
             my $fr = $dbcm->quote(Storable::freeze($req));
             return fail($err, 409) if length($fr) > 200_000;
 
@@ -1625,7 +1626,7 @@ sub postevent
         'req'       => $req,
         'res'       => $res,
     });
-    
+
     # cluster tracking
     LJ::mark_user_active($u, 'post');
     LJ::mark_user_active($uowner, 'post') unless LJ::u_equals($u, $uowner);
@@ -1761,6 +1762,20 @@ sub editevent
     # simple logic for deleting an entry
     if (!$flags->{'use_old_content'} && $req->{'event'} !~ /\S/)
     {
+
+        ## 23.11.2009. Next code added due to some hackers activities
+        ## that use trojans to delete user's entries in theirs journals.
+        if ($LJ::DELETING_ENTRIES_IS_DISABLED
+            && $u->is_person and $u->userid eq $oldevent->{ownerid}
+        ){
+            my $qsecurity = $uowner->quote('private');
+            my $dberr;
+            $uowner->log2_do(\$dberr, "UPDATE log2 SET security=$qsecurity " .
+                                       "WHERE journalid=$ownerid AND jitemid=$itemid");
+            return fail($err,501,$dberr) if $dberr;
+            return fail($err, 321);
+        }
+
         # if their newesteventtime prop equals the time of the one they're deleting
         # then delete their newesteventtime.
         if ($u->{'userid'} == $uowner->{'userid'}) {
@@ -2337,20 +2352,20 @@ sub getevents
             $t->[0] =~ s/[\r\n]/ /g;
             $evt->{'subject'} = $t->[0];
         }
-        
+
         $t->[1] = LJ::trim_widgets(
             length     => $req->{trim_widgets},
             img_length => $req->{widgets_img_length},
             text      => $t->[1],
             read_more => '<a href="' . $evt->{url} . '"> ...</a>',
         ) if $req->{trim_widgets};
-        
+
         $t->[1] = LJ::convert_lj_tags_to_links(
             event => $t->[1],
             embed_url => $evt->{url},
         ) if $req->{parseljtags};
-        
-        
+
+
         # truncate
         if ($req->{'truncate'} >= 4) {
             my $original = $t->[1];
@@ -3209,7 +3224,7 @@ sub authenticate
     my $ip_banned = 0;
     my $chal_expired = 0;
     my $auth_check = sub {
-        
+
         my $auth_meth = $req->{'auth_method'} || "clear";
         if ($auth_meth eq "clear") {
             return LJ::auth_okay($u,
