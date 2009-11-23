@@ -109,7 +109,7 @@ sub render_body {
         $show_hide_href .= "<a href='$LJ::SITEROOT/?sponsor_vgift=0'>" . $class->ml('widget.friendbirthdays.hide_sponsored_vgifts') . "</a><br/>" if $get_sponsor_vgift;
 
         $ret .=	"</ul>";
-        $ret .= $show_hide_href if @need_vgifts && $is_show_href && $u->in_class('paid');
+        $ret .= $show_hide_href if @need_vgifts && $is_show_href && $u->get_cap('paid');
 
         $ret .= "<a href='$LJ::SITEROOT/shop/vgift.bml'>" . $class->ml('widget.friendbirthdays.moregifts') . " &rarr;</a>";
     }
