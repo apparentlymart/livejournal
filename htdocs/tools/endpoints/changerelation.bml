@@ -32,6 +32,8 @@
 
     my %ret = ();
 
+    my $cids;
+
     if ($action eq 'addFriend') {
         my $errmsg = "";
         return $err->($errmsg)
@@ -111,7 +113,7 @@
 
         my $ban_user = LJ::load_user($target);
 
-        my $cids = LJ::load_rel_target($remote, 'A'); # admined communities
+        $cids = LJ::load_rel_target($remote, 'A'); # admined communities
         my $us = LJ::load_userids(@$cids, $remote->userid); # all communities and remote personal account
 
         my $ok = 1;
@@ -138,7 +140,7 @@
 
         my $unban_user = LJ::load_user($target);
 
-        my $cids = LJ::load_rel_target($remote, 'A'); # admined communities
+        $cids = LJ::load_rel_target($remote, 'A'); # admined communities
         my $us = LJ::load_userids(@$cids, $remote->userid); # all communities and remote personal account
 
         $success = 1;
@@ -153,6 +155,13 @@
 
     sleep 1 if $LJ::IS_DEV_SERVER;
 
+    if (@$cids) {
+        $ret{is_banned_everywhere} = 1;
+        foreach my $cid (@$cids) {
+            $ret{is_banned_everywhere} = 0 unless LJ::is_banned($targetu, $cid);
+        }
+    }
+
     # we (maybe) just changed the relation. we don't want to return stale
     # relation status, so force is_friend to use the master
     local $LJ::_PRAGMA_FORCE_MASTER = 1;
@@ -160,7 +169,7 @@
         success   => $success,
         is_friend => LJ::is_friend($remote, $targetu),
         is_member => LJ::is_friend($targetu, $remote),
-        is_banned => $remote->is_banned(LJ::load_user($target)),
+        is_banned => $remote->is_banned($targetu),
         %ret,
     });
 }
