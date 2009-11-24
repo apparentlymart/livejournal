@@ -4810,7 +4810,12 @@ sub tags {
 sub newpost_minsecurity {
     my $u = shift;
 
-    return $u->prop('newpost_minsecurity') || 'public';
+    my $val = $u->raw_prop('newpost_minsecurity') || 'public';
+
+    $val = 'friends'
+        if ($u->journaltype ne 'P' && $val eq 'private');
+
+    return $val;
 }
 
 sub third_party_notify_list {
