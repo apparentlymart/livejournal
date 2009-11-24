@@ -31,8 +31,20 @@ sub save_module {
         or croak "No journal passed to LJ::EmbedModule::save_module";
     my $preview = $opts{preview};
 
+    my $need_new_id = !defined $id;
+    
+    if (defined $id) {
+        my $old_content = $class->module_content( moduleid => $id, journalid => LJ::want_userid($journal) );
+        my $new_content = $contents;
+
+        $old_content =~ s/\s//g;
+        $new_content =~ s/\s//g;
+        
+        $need_new_id = 1 unless $old_content eq $new_content;
+    }
+
     # are we creating a new entry?
-    unless (defined $id) {
+    if ($need_new_id) {
         $id = LJ::alloc_user_counter($journal, 'D')
             or die "Could not allocate embed module ID";
     }
