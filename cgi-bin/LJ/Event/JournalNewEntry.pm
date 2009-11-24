@@ -248,7 +248,7 @@ sub _as_email {
     my $show_join_option = $self->entry->journal->is_comm && !LJ::is_friend($self->entry->journal, $u);
 
     # Some special community (e.g. writersblock) don't want join option in esn.
-    $show_join_option = 0 if LJ::run_hook('esn_hide_join_option_for_' . $self->entry->journal->user);
+    $show_join_option = 0 if $show_join_option && LJ::run_hook('esn_hide_join_option_for_' . $self->entry->journal->user);
 
     $email .= LJ::Lang::get_text($lang, 'esn.you_can', undef) .
         $self->format_options($is_html, $lang, $vars,
