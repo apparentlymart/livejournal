@@ -2372,6 +2372,59 @@ sub can_receive_password {
                                  undef, $u->id, $email);
 }
 
+# my $u = LJ::want_user(12);
+# my $data = $u->get_email_data('test@test.ru');
+# print $data->{'email_state'}; # email status if test@test.ru is the
+#                               # current email; "P" otherwise
+# print $data->{'time'}; # time when that email was first added to the account
+sub get_email_data {
+    my ($u, $email) = @_;
+
+    return undef unless $u && $email;
+
+    warn $u->email_status;
+    
+    my $dbh = LJ::get_db_reader();
+    if (lc($email) eq lc($u->email_raw)) {
+        my ($time) = $dbh->selectrow_array(
+            'SELECT UNIX_TIMESTAMP(MAX(timechange)) FROM infohistory '.
+            'WHERE userid=? AND what="email"', undef,
+            $u->id);
+
+        return {
+            'email_state' => $u->email_status,
+            'time' => $time,
+        };
+    } elsif ($u->can_receive_password($email)) {
+        # well, the logic here is complicated
+        # infohistory only stores the date when the address was changed FROM
+        # the one given to something else; as such, we need to get that record,
+        # skip it, and then get the timestamp of last email change before that
+
+        my ($timechanged) = $dbh->selectrow_array(
+            'SELECT MIN(timechange) FROM infohistory '.
+            'WHERE userid=? AND what="email" '.
+            'AND oldvalue=? AND other="A"', undef,
+            $u->id, $email
+        );
+
+        my @time_row = $dbh->selectrow_array(
+            'SELECT UNIX_TIMESTAMP(MAX(timechange)) FROM infohistory '.
+            'WHERE userid=? AND what="email" AND timechange<?', undef,
+            $u->id, $timechanged
+        );
+
+        # if there was no email changes before that one, assume that the
+        # address was added when the user registered
+        my $time = @time_row ? $time_row[0] : $u->timecreate;
+
+        return {
+            'email_state' => 'P',
+            'time' => $time,
+        };
+    }
+}
+
 sub share_contactinfo {
     my ($u, $remote) = @_;
 

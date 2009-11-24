@@ -107,6 +107,16 @@ FORM
             # TODO: parse out e_unixtime and s_unixtime and display?
         } elsif ($row->{action} eq 'delete_userpic') {
             $action = "Deleted userpic #$extra->{picid}";
+        } elsif ($row->{action} eq 'pwd_reset_req') {
+            my $email = $extra->{email};
+            my $email_state = {
+                'A' => 'current, validated',
+                'T' => 'current, transitioning',
+                'N' => 'current, non-validated',
+                'P' => 'previously-validated'
+            }->{$extra->{email_state}};
+            my $time = scalar(localtime($extra->{time}));
+            $action = "Requested a password reset email to $email; $email_state; added on $time.";
         } elsif (my $info = LJ::run_hook('userlog_rows', $row)) {
             $action = $info;
         } else {
