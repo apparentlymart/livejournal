@@ -102,7 +102,8 @@ sub render_body {
                 hover => LJ::ehtml(BML::ml($vg->display_name())),
             );
             my $vg_name = $vg->name;
-            $ret .= "<li><div class='gift-holder'><span class='liner'></span><a href=\"$vg_link\">$vg_html</a></div><span>$vg_name</span></li>";
+            my $vg_price = ($vg->price+0)  ? '<b>' . $vg->price . '$</b>' : '<b style="color:#FF0000;">' . $class->ml('widget.friendbirthdays.freegift') . '</b>' ;
+            $ret .= "<li><div class='gift-holder'><span class='liner'></span><a href=\"$vg_link\">$vg_html</a></div><span>$vg_name<br />$vg_price</span></li>";
         }
         my $show_hide_href = '';
         $show_hide_href .= "<a href='$LJ::SITEROOT/?sponsor_vgift=1'>" . $class->ml('widget.friendbirthdays.show_sponsored_vgifts') . "</a><br/>" unless $get_sponsor_vgift;
