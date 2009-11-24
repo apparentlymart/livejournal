@@ -137,7 +137,7 @@ body<=
             unless $u->can_receive_password($email);
 
         return LJ::bad_input($ML{'.error.old_emails'})
-            unless lc($email) eq lc($u->email_raw); # TEMPORARY HACK
+            unless $LJ::DISABLED{'limit_password_reset'} or lc($email) eq lc($u->email_raw);
 
         # email address is okay, build email body
         my $encoding = 'utf-8';
