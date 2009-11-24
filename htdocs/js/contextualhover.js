@@ -473,7 +473,6 @@ var ContextualPopup = new Object;
 
 ContextualPopup.popupDelay  = 500;
 ContextualPopup.hideDelay   = 250;
-ContextualPopup.disableAJAX = false;
 
 ContextualPopup.cachedResults   = {};
 ContextualPopup.currentRequests = {};
@@ -822,12 +821,11 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
                 membershipLink.innerHTML = "Join community";
             }
 
-            if (!ContextualPopup.disableAJAX) {
-                DOM.addEventListener(membershipLink, "click", function (e) {
-                    Event.prep(e);
-                    Event.stop(e);
-                    return ContextualPopup.changeRelation(data, ctxPopupId, membership_action, e); });
-            }
+            DOM.addEventListener(membershipLink, "click", function (e) {
+                Event.prep(e);
+                Event.stop(e);
+                return ContextualPopup.changeRelation(data, ctxPopupId, membership_action, e);
+            });
 
             membership.appendChild(membershipLink);
             content.appendChild(membership);
@@ -868,12 +866,11 @@ if (data.is_logged_in && ! data.is_requester) {
 	addFriend.appendChild(addFriendLink);
 	DOM.addClassName(addFriend, "AddFriend");
 
-	if (!ContextualPopup.disableAJAX) {
-	    DOM.addEventListener(addFriendLink, "click", function (e) {
+	DOM.addEventListener(addFriendLink, "click", function (e) {
 		Event.prep(e);
 		Event.stop(e);
-		return ContextualPopup.changeRelation(data, ctxPopupId, "addFriend", e); });
-	}
+		return ContextualPopup.changeRelation(data, ctxPopupId, "addFriend", e);
+	});
 
 	friend.appendChild(addFriend);
     } else {
@@ -892,11 +889,10 @@ if (data.is_logged_in && ! data.is_requester) {
 	removeFriend.appendChild(removeFriendLink);
 	DOM.addClassName(removeFriend, "RemoveFriend");
 
-	if (!ContextualPopup.disableAJAX) {
-	    DOM.addEventListener(removeFriendLink, "click", function (e) {
+	DOM.addEventListener(removeFriendLink, "click", function (e) {
 		Event.stop(e);
-		return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend", e); });
-	}
+		return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend", e);
+	});
 
 	friend.appendChild(removeFriend);
     }
@@ -943,12 +939,11 @@ if ((data.is_logged_in && data.is_comm) || (message && friend))
 
                 DOM.addClassName(setBan, "SetBan");
 
-                if (!ContextualPopup.disableAJAX) {
-                    DOM.addEventListener(setBanLink, "click", function (e) {
-                        Event.prep(e);
-                        Event.stop(e);
-                        return ContextualPopup.changeRelation(data, ctxPopupId, "setBan", e); });
-                }
+                DOM.addEventListener(setBanLink, "click", function (e) {
+                    Event.prep(e);
+                    Event.stop(e);
+                    return ContextualPopup.changeRelation(data, ctxPopupId, "setBan", e);
+                });
 
                 ban.appendChild(setBan);
             } else {
@@ -961,12 +956,11 @@ if ((data.is_logged_in && data.is_comm) || (message && friend))
 
                 DOM.addClassName(setUnban, "SetUnban");
 
-                if (!ContextualPopup.disableAJAX) {
-                    DOM.addEventListener(setUnbanLink, "click", function (e) {
-                        Event.prep(e);
-                        Event.stop(e);
-                        return ContextualPopup.changeRelation(data, ctxPopupId, "setUnban", e); });
-                }
+                DOM.addEventListener(setUnbanLink, "click", function (e) {
+                    Event.prep(e);
+                    Event.stop(e);
+                    return ContextualPopup.changeRelation(data, ctxPopupId, "setUnban", e);
+                });
 
                 ban.appendChild(setUnban);
             }
@@ -988,6 +982,21 @@ if ((data.is_logged_in && data.is_comm) || (message && friend))
             content.appendChild(bar.cloneNode(true));
             content.appendChild(report_bot);
         }
+
+		// ban user from all maintained communities
+		if (data.have_communities) {
+			var ban_everywhere = document.createElement('a');
+			ban_everywhere.href = Site.siteroot + '/manage/banusers.bml';
+			ban_everywhere.innerHTML = data.is_banned_everywhere ? data.unban_everywhere_title : data.ban_everywhere_title;
+			DOM.addEventListener(ban_everywhere, 'click', function(e) {
+				Event.prep(e);
+				Event.stop(e);
+				var action = data.is_banned_everywhere ? 'unbanEverywhere' : 'banEverywhere';
+				return ContextualPopup.changeRelation(data, ctxPopupId, action, e);
+			});
+			content.appendChild(document.createElement('br'));
+			content.appendChild(ban_everywhere);
+		}
 
         // break
         if ((data.is_logged_in && !data.is_requester) || vgift) content.appendChild(document.createElement("br"));
@@ -1063,7 +1072,7 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action, evt) {
         if (!data.success) return;
 
         if (ContextualPopup.cachedResults[ctxPopupId]) {
-            var updatedProps = ["is_friend", "is_member", 'is_banned'];
+            var updatedProps = ['is_friend', 'is_member', 'is_banned', 'is_banned_everywhere'];
             updatedProps.forEach(function (prop) {
                 ContextualPopup.cachedResults[ctxPopupId][prop] = data[prop];
             });
