@@ -3,7 +3,7 @@ package LJ::Widget::QotD;
 use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
-use Class::Autouse qw( LJ::QotD );
+use Class::Autouse qw( LJ::QotD LJ::PromoText );
 
 sub need_res {
     return qw( js/widgets/qotd.js stc/widgets/qotd.css );
@@ -232,7 +232,9 @@ sub _get_question_data {
     my ($answer_link, $answer_url, $answer_text) = ("", "", "");
     unless ($opts->{no_answer_link}) {
         ($answer_link, $answer_url, $answer_text) = $class->answer_link
-            ($q, user => $opts->{user}, button_disabled => $opts->{form_disabled});
+            ($q, user => $opts->{user},
+                button_disabled => $opts->{form_disabled},
+                button_as_link  => $opts->{button_as_link});
     }
 
     my $impression_img = $class->impression_img($q);
@@ -271,7 +273,10 @@ sub answer_link {
 
     # if button is disabled, don't attach an onclick
     my $extra = $dis ? $dis : $onclick;
-    my $answer_link = qq{<input type="button" value="$txt" $extra />};
+    my $answer_link = $opts{button_as_link} ?
+        qq{<a href=\"$url\">$txt</a>} :
+        qq{<input type="button" value="$txt" $extra />};
+
     
     return (wantarray) ? ($answer_link, $url, $txt) : $answer_link;
 }

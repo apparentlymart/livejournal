@@ -47,11 +47,12 @@ LJ::register_hook('esn_new_journal_post_email_writersblock', sub {
         $opts->{openlink}   = '<a href="' . $entry->url . '">';
         $opts->{closelink}  = '</a>';
         $opts->{event} = '<br /><br />'. LJ::Widget::QotD->render(
-            user        => $u,
-            embed       => 1,
-            lang        => $lang, 
-            nocontrols  => 1,
-            question    => $question,
+            user            => $u,
+            embed           => 1,
+            lang            => $lang, 
+            nocontrols      => 1,
+            question        => $question,
+            button_as_link  => 1,
         ) . '<br />';
     } else {
         $opts->{openlink}   = '';
