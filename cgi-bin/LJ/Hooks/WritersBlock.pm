@@ -63,7 +63,7 @@ LJ::register_hook('esn_new_journal_post_email_writersblock', sub {
         if ($question) {
             my $ml_key = $qotd->ml_key("$question->{qid}.text");
             my $ml_text = $qotd->ml($ml_key, undef, $lang);
-            LJ::CleanHTML::clean_event(\$ml_text);
+            LJ::CleanHTML::clean_event(\$ml_text, { textonly => 1, } );
             $opts->{event} = $ml_text;
         }
     }
