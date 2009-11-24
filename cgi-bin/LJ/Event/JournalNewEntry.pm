@@ -234,7 +234,6 @@ sub _as_email {
     }
 
     unless ($email) {
-
         $email = LJ::Lang::get_text($lang, 'esn.hi', undef, $opts) . "\n\n";
         $email .= LJ::Lang::get_text($lang,
             $self->entry->journal->is_comm ? 'esn.journal_new_entry.head_comm' : 'esn.journal_new_entry.head_user',
@@ -245,10 +244,11 @@ sub _as_email {
     # make hyperlinks for options
     # tags 'poster' and 'journal' cannot contain html <a> tags
     # when it used between [[openlink]] and [[closelink]] tags.
-    my $vars = {
-                poster  => $poster_text,
-                journal => $journal_text,
-            };
+    my $vars = { poster  => $poster_text, journal => $journal_text, };
+    my $show_join_option = $self->entry->journal->is_comm && !LJ::is_friend($self->entry->journal, $u);
+
+    # Some special community (e.g. writersblock) don't want join option in esn.
+    $show_join_option = 0 if LJ::run_hook('esn_hide_join_option_for_' . $self->entry->journal->user);
 
     $email .= LJ::Lang::get_text($lang, 'esn.you_can', undef) .
         $self->format_options($is_html, $lang, $vars,
@@ -256,7 +256,7 @@ sub _as_email {
                 'esn.view_entry'            => [ 1, $entry_url ],
                 'esn.read_recent_entries'   => [ $self->entry->journal->is_comm ? 2 : 0,
                                                     $journal_url ],
-                'esn.join_community'        => [ ($self->entry->journal->is_comm && !LJ::is_friend($self->entry->journal, $u)) ? 3 : 0,
+                'esn.join_community'        => [ $show_join_option ? 3 : 0,
                                                     "$LJ::SITEROOT/community/join.bml?comm=$journal_user" ],
                 'esn.read_user_entries'     => [ ($self->entry->journal->is_comm) ? 0 : 4,
                                                     $journal_url ],

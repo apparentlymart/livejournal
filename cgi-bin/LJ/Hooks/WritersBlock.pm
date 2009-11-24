@@ -72,4 +72,7 @@ LJ::register_hook('esn_new_journal_post_email_writersblock', sub {
         LJ::Lang::get_text($lang, 'esn.writersblock.email', undef, $opts) . "\n\n";
 });
 
+# Never show 'join this community' option in esn for writersblock
+LJ::register_hook('esn_hide_join_option_for_writersblock', sub { return 1; });
+
 1;
