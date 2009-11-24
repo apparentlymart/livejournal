@@ -98,7 +98,12 @@ LJTagsInHTML = function(oEditor) {
 var switched_rte_on = false;
 
 function useRichText(textArea, statPrefix) {
-    if (switched_rte_on == true) return;
+	var oEditor = window.FCKeditorAPI && FCKeditorAPI.GetInstance(textArea);
+	
+	if (switched_rte_on == true) {
+		oEditor && oEditor.Focus(true);
+		return false;
+	}
 
     if ($("insobj")) {
         $("insobj").className = 'on';
@@ -109,26 +114,26 @@ function useRichText(textArea, statPrefix) {
     if ($("jplain")) {
         $("jplain").className = '';
     }
-    if ($("htmltools")) {
-        $("htmltools").style.display = 'none';
-    }
+	$('htmltools').style.display = 'none';
 
-    var editor_frame = $(textArea + '___Frame');
     // Check for RTE already existing. IE will show multiple iframes otherwise.
-    if (!editor_frame) {
+    if (!oEditor) {
         var oFCKeditor = new FCKeditor(textArea);
         oFCKeditor.BasePath = statPrefix + '/fck/';
         oFCKeditor.Height = 350;
         oFCKeditor.ToolbarSet = 'Update';
         oFCKeditor.ReplaceTextarea();
     } else {
-        editor_frame.style.display = 'block';
-        $(textArea).style.display = 'none';
-        if (window.FCKeditorAPI) {
-            var oEditor = FCKeditorAPI.GetInstance(textArea);
-            oEditor.SetData($(textArea).value);
-            oEditor.Focus();
-        }
+		var textarea_node = $(textArea);
+		textarea_node.style.display = 'none';
+		$(textArea + '___Frame').style.display = 'block';
+		
+		// IE async call SetData
+		oEditor.Events.AttachEvent('OnAfterSetHTML', function() {
+			oEditor.Focus(true);
+			oEditor.Events.DetachEvent('OnAfterSetHTML', arguments.callee)
+		});
+		oEditor.SetData(textarea_node.value);
     }
 
     if ($('qotd_html_preview')) {
@@ -141,38 +146,42 @@ function useRichText(textArea, statPrefix) {
 }
 
 function usePlainText(textArea) {
-    if (switched_rte_on == false) return;
-
-    if (FCKeditor_LOADED) {
-        var oEditor = FCKeditorAPI.GetInstance(textArea);
-
-        if (oEditor.Status == FCK_STATUS_COMPLETE) {
-            var html = oEditor.GetXHTML(false);
-
+	var textarea_node = $(textArea);
+	
+	if (switched_rte_on == false) {
+		textarea_node.focus();
+		return;
+	}
+	
+	if (FCKeditor_LOADED) {
+		var oEditor = FCKeditorAPI.GetInstance(textArea);
+		
+		if (oEditor.Status == FCK_STATUS_COMPLETE) {
+			var html = oEditor.GetXHTML(false);
 			html = convert_poll_to_ljtags(html);
 			html = convert_user_to_ljtags(html);
-            $(textArea).value = html;
-        }
-    }
-
-    var editor_frame = $(textArea + '___Frame');
-
-    if ($('qotd_html_preview')) {
-       $("qotd_html_preview").style.display='block';
-    }
-
-    if ($('insobj'))
-        $('insobj').className = '';
-    if ($('jrich'))
-        $('jrich').className = '';
-    if ($('jplain'))
-        $('jplain').className = 'on';
-    editor_frame.style.display = 'none';
-    $(textArea).style.display = 'block';
-    $('htmltools').style.display = 'block';
-    switched_rte_on = false;
-
-    return false;
+			textarea_node.value = html;
+		}
+	}
+	
+	if ($('qotd_html_preview')) {
+		$("qotd_html_preview").style.display = 'block';
+	}
+	
+	if ($('insobj'))
+		$('insobj').className = '';
+	if ($('jrich'))
+		$('jrich').className = '';
+	if ($('jplain'))
+		$('jplain').className = 'on';
+	
+	$(textArea + '___Frame').style.display = 'none';
+	textarea_node.style.display = 'block';
+	textarea_node.focus();
+	$('htmltools').style.display = 'block';
+	switched_rte_on = false;
+	
+	return false;
 }
 
 function convert_to_draft(html) {
@@ -245,12 +254,12 @@ function FCKeditor_OnComplete(oEditor) {
 		if (switched_rte_on == false) return;
 		
 		var html = oEditor.GetXHTML(false);
-		
 		html = convert_poll_to_ljtags(html, true);
 		html = convert_user_to_ljtags(html);
 		this['draft'].value = html;
 	}
 	FCKeditor_LOADED = true;
+	oEditor.Focus(true);
 }
 
 function doLinkedFieldUpdate(oEditor) {

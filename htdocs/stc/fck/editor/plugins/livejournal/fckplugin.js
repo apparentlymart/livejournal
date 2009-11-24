@@ -480,7 +480,11 @@ FCK.DataProcessor.ConvertToDataFormat = function(body)
 	
 	arguments[0] = new_body;
 	var html = FCKDataProcessor.prototype.ConvertToDataFormat.apply(this, arguments);
-	html = html.replace(/<br \/>$/, ''); // rte fix, http://dev.fckeditor.net/ticket/3023
+	// rte fix, http://dev.fckeditor.net/ticket/3023
+	// type="_moz" for Safari 4.0.11
+	if (!FCKBrowserInfo.IsIE) {
+		html = html.replace(/<br (type="_moz" )?\/>$/, '');
+	}
 	
 	html = top.convertToLJTags(html); // call from rte.js
 	if (!top.$('event_format').checked) {
@@ -502,4 +506,24 @@ FCK.DataProcessor.ConvertToDataFormat = function(body)
 		.replace(/><\/lj-template>/g, '/>');
 	
 	return html;
+}
+
+// set cursor to end document
+FCK.Focus = function(to_end) {
+	FCK.EditingArea.Focus();
+	if (to_end && FCK.EditingArea.Document.body.firstChild) {
+		var range = new FCKDomRange(FCK.EditingArea.Window);
+		
+		range.MoveToPosition(FCK.EditingArea.Document.body, 2);
+		range.Select();
+	}
+}
+
+// not realize in editor, need in rte.js
+FCKEvents.prototype.DetachEvent = function(eventName, functionPointer) {
+	var aTargets = this._RegisteredEvents[eventName];
+	
+	if (aTargets) {
+		aTargets.splice(aTargets.IndexOf(functionPointer), 1);
+	}
 }
