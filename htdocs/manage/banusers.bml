@@ -87,9 +87,11 @@ body<=
             }
         }
 
-        my $error;
-        if (!LJ::set_alias(\@aliases, \$error)) {
-            $submit_msg = "<?errorbar $error errorbar?>";
+        if ($alias_enable) {
+            my $error;
+            if (!LJ::set_alias(\@aliases, \$error)) {
+                $submit_msg = "<?errorbar $error errorbar?>";
+            }
         }
 
         $submit_msg = "<?warningbar $ML{'.success'} warningbar?>" unless $submit_msg;
