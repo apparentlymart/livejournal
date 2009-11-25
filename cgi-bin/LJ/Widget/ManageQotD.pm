@@ -71,7 +71,7 @@ sub table_display {
 
     my $ret;
     $ret .= "<table border='1' cellpadding='3'>";
-    $ret .= "<tr><th>Image</th><th>Subject</th><th>Question</th>";
+    $ret .= "<tr><th>ID</th><th>Image</th><th>Subject</th><th>Question</th>";
     $ret .= "<th>" . LJ::Lang::ml('widget.manageqotd.extratext') . "</th>";
     $ret .= "<th>" . LJ::Lang::ml('widget.manageqotd.is_special') . "</th>";
     $ret .= "<th>Domain</th><th>Who Sees Question</th><th>Countries</th><th>Tags</th><th>Submitted By</th><th>Start Date</th><th>End Date</th><th colspan='2'>Active Status</th><th>Edit</th></tr>";
@@ -89,7 +89,7 @@ sub table_display {
         LJ::CleanHTML::clean_event(\$row->{text});
         LJ::CleanHTML::clean_event(\$row->{extra_text});
 
-        $ret .= "<tr>";
+        $ret .= "<tr><td>$row->{qid}</td>";
         if ($row->{img_url}) {
             if ($row->{link_url}) {
                 $ret .= "<td><a href='$row->{link_url}'><img src='$row->{img_url}' /></a></td>";
