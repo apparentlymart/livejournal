@@ -33,6 +33,8 @@ attacker's email address.
 
 .log.deleted=Deleted: [[email]] @ [[time]]
 
+.log.deleted2=Deleted: [[email]]
+
 .log.deleted.title=Changes Saved
 
 .notvalidated.text2=To use this tool, your current email address, [[email]] , must be validated. If you've lost the confirmation email to do this, you can <a [[aopts]]>have it re-sent</a>. After you validate your email, come back here.

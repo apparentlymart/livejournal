@@ -2359,6 +2359,7 @@ sub update_email_alias {
     return 1;
 }
 
+# this is DEPRECATED in favor of can_reset_password_using_email
 sub can_receive_password {
     my ($u, $email) = @_;
 
@@ -2376,53 +2377,274 @@ sub can_receive_password {
 # my $data = $u->get_email_data('test@test.ru');
 # print $data->{'email_state'}; # email status if test@test.ru is the
 #                               # current email; "P" otherwise
-# print $data->{'time'}; # time when that email was first added to the account
+# print $data->{'time'}; # time when that email was added to the account
 sub get_email_data {
-    my ($u, $email) = @_;
+    my ($u, $addr) = @_;
 
     return undef unless $u && $email;
 
-    warn $u->email_status;
-    
-    my $dbh = LJ::get_db_reader();
-    if (lc($email) eq lc($u->email_raw)) {
-        my ($time) = $dbh->selectrow_array(
-            'SELECT UNIX_TIMESTAMP(MAX(timechange)) FROM infohistory '.
-            'WHERE userid=? AND what="email"', undef,
-            $u->id);
+    my $emails = $u->emails_info;
+    my $is_current = lc($addr) eq lc($u->email_raw);
 
-        return {
-            'email_state' => $u->email_status,
-            'time' => $time,
-        };
-    } elsif ($u->can_receive_password($email)) {
-        # well, the logic here is complicated
-        # infohistory only stores the date when the address was changed FROM
-        # the one given to something else; as such, we need to get that record,
-        # skip it, and then get the timestamp of last email change before that
+    foreach my $email (@$emails) {
+        next unless lc($email->{'email'}) eq lc($addr);
+        next if $email->{'deleted'};
+        next unless $email->{'status'} eq 'A';
+        next if $is_current && !$email->{'current'};
 
-        my ($timechanged) = $dbh->selectrow_array(
-            'SELECT MIN(timechange) FROM infohistory '.
-            'WHERE userid=? AND what="email" '.
-            'AND oldvalue=? AND other="A"', undef,
-            $u->id, $email
-        );
+        my $ret = {};
+        $ret->{'email_state'} = $is_current ? $email->{'status'} : 'P';
+        $ret->{'time'} = $email->{'set'};
 
-        my @time_row = $dbh->selectrow_array(
-            'SELECT UNIX_TIMESTAMP(MAX(timechange)) FROM infohistory '.
-            'WHERE userid=? AND what="email" AND timechange<?', undef,
-            $u->id, $timechanged
-        );
-
-        # if there was no email changes before that one, assume that the
-        # address was added when the user registered
-        my $time = @time_row ? $time_row[0] : $u->timecreate;
-
-        return {
-            'email_state' => 'P',
-            'time' => $time,
-        };
+        return $ret;
     }
+
+    return undef;
+}
+
+# get information about which emails the user has used previously or uses now
+# returns:
+# [
+#     { email => 'test@test.com', current => 1, set => 123142345234, status => 'A' },
+#     { email => 'test2@test.com', set => $timestamp, changed => 123142345234, status => 'A' },
+#     { email => 'test3@test.com', set => $timestamp2, changed => $timestamp, status => 'T', deleted => $timestamp3 },
+# ]
+sub emails_info {
+    my ($u) = @_;
+
+    return $u->{'_emails'} if defined $u->{'_emails'};
+
+    my @ret;
+
+    my $dbr = LJ::get_db_reader();
+    my $infohistory_rows = $dbr->selectall_arrayref(
+        'SELECT what, UNIX_TIMESTAMP(timechange) AS timechange, '.
+        'oldvalue, other FROM infohistory WHERE userid=? AND '.
+        'what IN ("email", "emaildeleted") ORDER BY timechange',
+        { Slice => {} }, $u->id
+    );
+    my @infohistory_rows = @$infohistory_rows;
+
+    # this actually finds the greatest timechange in rows before $rownum;
+    # if it fails to find it, it returns $u->timecreate
+    my $find_timeset = sub {
+        my ($rownum) = @_;
+
+        for (my $rownum2 = $rownum-1; $rownum2 >= 0; $rownum2--) {
+            my $row2 = $infohistory_rows->[$rownum2];
+            return $row2->{'timechange'} if ($row2->{'what'} eq 'email');
+        }
+
+        # in case we found nothing, the address was set when the account
+        # was registered
+        return $u->timecreate;
+    };
+
+    foreach my $rownum (0..$#infohistory_rows) {
+        my $row = $infohistory_rows->[$rownum];
+        if ($row->{'what'} eq 'email') {
+            # new email has been added to the list, but now, we're going to
+            # record the old address
+
+            my $email = { email => $row->{'oldvalue'} };
+            $email->{'changed'} = $row->{'timechange'};
+            $email->{'status'} = $row->{'other'};
+
+            # in case we found nothing, the address was set when the account
+            # was registered
+
+            $email->{'set'} = $find_timeset->($rownum);
+
+            push @ret, $email;
+        } elsif ($row->{'what'} eq 'emaildeleted') {
+            # there may be two cases here: 1) it was something like an admin
+            # deletion or 2) it was deletion through /tools/emailmanage.bml,
+            # which previously did 'UPDATE infohistory SET what="emaildelete"'
+            # (oh weird) and also changed `other` to "A; $timeset".
+            # /tools/emailmanage.bml has since been changed to record that
+            # change as a new entry, which returns us to the first case
+
+            unless ($row->{'other'} =~ /;/) {
+                # first case: find all other occurences of that email
+                # and mark them with the date of deletion
+
+                foreach my $email (@ret) {
+                    next unless $email->{'email'} eq $row->{'oldvalue'};
+                    next unless $email->{'set'} <= $row->{'timechange'};
+
+                    $email->{'deleted'} = $row->{'timechange'}
+                        unless $email->{'deleted'};
+                }
+            } else {
+                # second case: parse the timestamp, create an email hashref,
+                # find the row with the next address to set "set", and
+                # finally, mark it as deleted. ugh.
+
+                my ($status, $time) = split /;/, $row->{'other'};
+
+                # there is no joke here. in infohistory, time is stored as
+                # MySQL DATETIME. emailmanage.bml used to just append it to
+                # previous status, so now, we need to parse.
+                $time = str2time($time);
+
+                my $email = { email => $row->{'oldvalue'} };
+                $email->{'changed'} = $time;
+                $email->{'status'} = $status;
+                $email->{'deleted'} = $row->{'timechange'};
+
+                # now, we need to find the first row which has timestamp more
+                # or equal to $time so that we can call $find_timeset
+                my $nextrow = 0;
+                foreach my $rownum2 (0..$#infohistory_rows) {
+                    my $row2 = $infohistory_rows->[$rownum2];
+                    next unless $row2->{'what'} eq 'email';
+                    next if $row2->{'timechange'} < $time;
+
+                    $nextrow = $rownum2;
+                    last;
+                }
+
+                $email->{'set'} = $find_timeset->($nextrow);
+                push @ret, $email;
+            }
+        }
+    }
+
+    # finally, the current address
+    my $email = { email => $u->email_raw, current => 1 };
+    $email->{'status'} = $u->email_status;
+    $email->{'set'} = $find_timeset->($#infohistory_rows + 1);
+    push @ret, $email;
+
+    $u->{'_emails'} = \@ret;
+    return \@ret;
+}
+
+# returns array (not arrayref) of emails that the user has ever used, including
+# deleted ones
+sub emails_unique {
+    my ($u) = @_;
+
+    my $emails = $u->emails_info;
+    my %ret;
+
+    foreach my $email (@$emails) {
+        $ret{lc($email->{'email'})} = 1;
+    }
+
+    return sort keys %ret;
+}
+
+# returns time when the user has last stopped using the given email
+# (that is, switched their current address to a different one)
+# this ASSUMES that the address is not a current one, but that it was
+# validated previously.
+sub email_lastchange {
+    my ($u, $addr) = @_;
+
+    use Data::Dumper;
+    my $emails = $u->emails_info;
+    my $lastchange = 0;
+    my $found = 0;
+
+    foreach my $email (@$emails) {
+        next unless lc($email->{'email'}) eq lc($addr);
+        next unless $email->{'status'} eq 'A';
+        next if $email->{'current'};
+        next if $email->{'deleted'};
+
+        $found = 1;
+        $lastchange = $email->{'changed'} if $email->{'changed'} > $lastchange;
+    }
+
+    return undef unless $found;
+    return $lastchange;
+}
+
+# checks whether user is allowed to remove the given email from their history
+# and this way, disable themselves from sending a password reset to that address
+sub can_delete_email {
+    my ($u, $addr) = @_;
+
+    my $lastchange = $u->email_lastchange($addr);
+
+    return 0 unless defined $lastchange;
+    return $lastchange < time - 86400 * 180; # this is six months
+}
+
+# delete the given email from user's history, disabling the user from sending
+# a password reset to that address
+# this performs the necessary checks by calling can_delete_email() as defined
+# above
+sub delete_email {
+    my ($u, $addr) = @_;
+
+    return unless $u->can_delete_email($addr);
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do(
+        'INSERT INTO infohistory SET '.
+        'userid=?, what="emaildeleted", timechange=NOW(), '.
+        'oldvalue=?', undef, $u->id, $addr
+    );
+
+    # update cache now
+
+    my $emails = $u->emails_info;
+    foreach my $email (@$emails) {
+        next if $email->{'deleted'};
+
+        next unless lc($email->{'email'}) eq lc($addr);
+        $email->{'deleted'} = time;
+    }
+}
+
+# checks whether the given email has been validated, regardless of whether it is
+# set to current right now. despite the name, it specifically omits deleted
+# emails, too.
+sub is_email_validated {
+    my ($u, $addr) = @_;
+
+    my $emails = $u->emails_info;
+    foreach my $email (@$emails) {
+        next unless lc($email->{'email'}) eq lc($addr);
+        next if $email->{'deleted'};
+        next unless $email->{'status'} eq 'A';
+
+        return 1;
+    }
+
+    return 0;
+}
+
+# checks whether the user can send a password reset to the given email
+# the current logic is:
+# case 1: NOT $LJ::DISABLED{'limit_password_reset'}
+# yes if the email is set to current OR
+# (has been previously validated AND never has been deleted); no otherwise
+# case 2: $LJ::DISABLED{'limit_password_reset'}
+# yes if and only if the email is set to current
+sub can_reset_password_using_email {
+    my ($u, $addr) = @_;
+
+    return 1 if lc($addr) eq lc($u->email_raw);
+
+    return 0 unless $LJ::DISABLED{'limit_password_reset'};
+    return $u->is_email_validated($addr);
+}
+
+# returns date when the user has last changed their email
+sub get_current_email_set_date {
+    my ($u) = @_;
+
+    my $emails = $u->emails_info;
+
+    foreach my $email (@$emails) {
+        next unless $email->{'current'};
+        return $email->{'set'};
+    }
+
+    return undef;
 }
 
 sub share_contactinfo {
