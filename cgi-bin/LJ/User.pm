@@ -6254,7 +6254,6 @@ sub journal_base
         if (isu($user)) {
             ## $user is either LJ::User object or plain hash with 'userid' field
             if (!UNIVERSAL::isa($user, "LJ::User")) {
-                Carp::cluck("User HASH objects are deprecated");
                 $user = LJ::load_userid($user->{userid});
             }
         } else {
