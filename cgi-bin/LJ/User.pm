@@ -2381,7 +2381,7 @@ sub can_receive_password {
 sub get_email_data {
     my ($u, $addr) = @_;
 
-    return undef unless $u && $email;
+    return undef unless $u && $addr;
 
     my $emails = $u->emails_info;
     my $is_current = lc($addr) eq lc($u->email_raw);
