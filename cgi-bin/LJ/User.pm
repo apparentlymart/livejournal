@@ -6235,7 +6235,7 @@ sub get_bio {
 #       can't have some_user.example.com as a hostname, so that's changed into
 #       some-user.example.com.
 # args: uuser, vhost?
-# des-uuser: User hashref or username of user whose URL to make.
+# des-uuser: LJ::User object, user hashref or username of user whose URL to make.
 # des-vhost: What type of URL.  Acceptable options: "users", to make a
 #            http://user.example.com/ URL; "tilde" for http://example.com/~user/;
 #            "community" for http://example.com/community/user; or the default
@@ -6247,17 +6247,27 @@ sub journal_base
 {
     my ($user, $vhost) = @_;
 
-    if (! isu($user) && LJ::are_hooks("journal_base")) {
-        my $u = LJ::load_user($user);
-        $user = $u if $u;
+    return unless $user;
+    
+    if (LJ::are_hooks("journal_base")) {
+        ## We must pass a real LJ::User object into hook
+        if (isu($user)) {
+            ## $user is either LJ::User object or plain hash with 'userid' field
+            if (!UNIVERSAL::isa($user, "LJ::User")) {
+                Carp::cluck("User HASH objects are deprecated");
+                $user = LJ::load_userid($user->{userid});
+            }
+        } else {
+            ## $user is plain username
+            $user = LJ::load_user($user);
+        }
+
+        my $hookurl = LJ::run_hook("journal_base", $user, $vhost);
+        return $hookurl if $hookurl;
     }
 
     if (isu($user)) {
         my $u = $user;
-
-        my $hookurl = LJ::run_hook("journal_base", $u, $vhost);
-        return $hookurl if $hookurl;
-
         $user = $u->{'user'};
         unless (defined $vhost) {
             if ($LJ::FRONTPAGE_JOURNAL eq $user) {
