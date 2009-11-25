@@ -1077,7 +1077,8 @@ sub postevent
     return fail($err,320) if $spam;
 
     # if going through mod queue, then we know they're permitted to post at least this entry
-    return undef unless $post_noauth || check_altusage($req, $err, $flags) || $flags->{nomod};
+    $flags->{'usejournal_okay'} = 1 if $post_noauth;
+    return undef unless check_altusage($req, $err, $flags) || $flags->{nomod};
 
     my $u = $flags->{'u'};
     my $ownerid = $flags->{'ownerid'}+0;
