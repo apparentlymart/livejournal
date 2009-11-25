@@ -6767,10 +6767,20 @@ sub set_alias {
     my $list = (ref $_[0] eq 'ARRAY') ? shift : [shift, shift];
     my $err = shift;
     
-    return if $LJ::DISABLED{'aliases'};
+    if ($LJ::DISABLED{'aliases'}) {
+        $$err = "Notes (aliases) are disabled" if $err;
+        return;
+    }
 
     my $remote = LJ::get_remote();
-    return unless $remote && $remote->get_cap('aliases');
+    unless ($remote) {
+        $$err = "No remote user" if $err;
+        return;
+    }
+    unless ($remote->get_cap('aliases')) {
+        $$err = "Remote user can't manage notes (aliases)" if $err;
+        return;
+    }
 
     ## load alias data
     if (!$remote->{_aliases}) {
