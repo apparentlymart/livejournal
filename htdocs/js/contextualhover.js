@@ -1000,7 +1000,7 @@ if ((data.is_logged_in && data.is_comm) || (message && friend))
         }
 
 		// ban user from all maintained communities
-		if (data.have_communities) {
+		if (!data.is_requester && !data.is_comm && data.have_communities) {
 			var ban_everywhere = document.createElement('a');
 			ban_everywhere.href = Site.siteroot + '/manage/banusers.bml';
 			ban_everywhere.innerHTML = data.is_banned_everywhere ? data.unban_everywhere_title : data.ban_everywhere_title;
