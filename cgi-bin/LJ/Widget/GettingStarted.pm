@@ -53,7 +53,7 @@ sub render_body {
     $ret .= "</div>";
     $ret .= "<p class='account-controls'><strong>" . LJ::name_caps($remote->{caps}) . "</strong>";
     if ($remote->in_class('paid') && !$remote->in_class('perm')) {
-        my $exp_epoch = LJ::Pay::get_account_exp($remote);
+        my $exp_epoch = LJ::Pay::Payment::PayItem::PaidAccount->get_expire_time($remote);
         my $exp = $date_format->($exp_epoch);
         $ret .= " (<a href='$LJ::SITEROOT/manage/payments/'>" . $class->ml('.widget.gettingstarted.expires', {'date' => $exp}) . "</a>)"
             if $exp;

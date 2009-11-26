@@ -1046,6 +1046,7 @@ sub _logout_common {
     LJ::Session->clear_master_cookie;
     LJ::User->set_remote(undef);
     delete $BML::COOKIE{'BMLschemepref'};
+    delete $BML::COOKIE{'cart'};
     eval { BML::set_scheme(undef); };
     LJ::run_hooks("user_logout");
 }
