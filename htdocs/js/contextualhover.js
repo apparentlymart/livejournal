@@ -354,23 +354,40 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
   },
 
   onData: function (data) {
-    var success;
-    if (data.res && data.res.success) success = data.res.success;
-    if (success) {
-        this.ippu.hide();
-		var userLJ=data.res.journalname;
-      	var userClassName='ljuser-name_'+ data.res.journalname;
-      	var searchProfile=DOM.getElementsByClassName(document,userClassName); 
-      	var supSign;
-      	for(var i=0;i<searchProfile.length;i++){
-		if(!DOM.hasClassName(searchProfile[i],'with-alias')){
+	if (!data.res || !data.res.success) {
+		return;
+	}
+	this.ippu.hide();
+	var userLJ = data.res.journalname,
+		userClassName = 'ljuser-name_' + data.res.journalname,
+		searchProfile = DOM.getElementsByClassName(document, userClassName),
+		i = -1, supSign;
+	while (searchProfile[++i]) {
+		var ljuser_node = searchProfile[i];
+		if (DOM.hasClassName(ljuser_node, 'with-alias-value')) {
+			var alias_value = ljuser_node.nextSibling;
+			if (!alias_value || alias_value.tagName != 'SPAN' || alias_value.className != 'alias-value') {
+				alias_value = null;
+			}
+			if (data.res.alias) {
+				if (!alias_value) {
+					alias_value = document.createElement('span');
+					alias_value.className = 'alias-value';
+					alias_value[/*@cc_on'innerText'||@*/'textContent'] = ' — ' + data.res.alias;
+					ljuser_node.parentNode[ljuser_node.nextSibling ? 'insertBefore' : 'appendChild'](alias_value);
+				}
+				alias_value[/*@cc_on'innerText'||@*/'textContent'] = ' — ' + data.res.alias;
+			} else if (alias_value) { // delete
+				ljuser_node.parentNode.removeChild(alias_value);
+			}
+		} else if (!DOM.hasClassName(ljuser_node, 'with-alias')) {
 			DOM.addClassName(searchProfile[i],'with-alias')
 			supSign=document.createElement('span');
 			DOM.addClassName(supSign,'useralias-value');
 			supSign.innerHTML='*';
 			searchProfile[i].getElementsByTagName('a')[1].appendChild(supSign);
 		}else{
-			if(data.res.alias==''){
+			if(!data.res.alias){
 				DOM.removeClassName(searchProfile[i],'with-alias')
 				supSign=DOM.getElementsByClassName(searchProfile[i],'useralias-value')[0];
 				searchProfile[i].getElementsByTagName('a')[1].removeChild(supSign);
@@ -392,7 +409,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 			pr_alias[/*@cc_on'innerText'||@*/'textContent'] = ' — '+data.res.alias;
 			searchProfile[i].parentNode.appendChild(pr_alias);
 		}
-       }
+	}
        //Changing button. Only on profile page
        if(DOM.getElementsByClassName(document,'profile_addalias')[0]){
        		if(data.res.alias==''){
@@ -414,7 +431,6 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
        		}
        		ContextualPopup.cachedResults[data.res.username].alias=data.res.alias;
        }
-    }
   },
 
   onError: function (msg) {
