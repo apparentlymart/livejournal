@@ -223,7 +223,7 @@ sub _get_question_data {
     if ($count) {
         $count .= "+" if $count >= $LJ::RECENT_QOTD_SIZE;
         $view_answers_link = "<a" . ($opts->{small_view_link} ? " class='small-view-link'" : '') .
-            ($opts->{form_disabled} ? ' target="_top"' : '') . # Open links on top, not in current frame.
+            (($opts->{form_disabled} || $opts->{embed}) ? ' target="_top"' : '') . # Open links on top, not in current frame.
             " href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" .
                 $class->ml('widget.qotd.viewanswers', {'total_count' => $count}) .
             "</a>";
