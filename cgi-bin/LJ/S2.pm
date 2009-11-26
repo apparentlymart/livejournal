@@ -3482,7 +3482,7 @@ sub UserLite__ljuser
 {
     my ($ctx, $UserLite, $link_color) = @_;
     my $link_color_string = $link_color ? $link_color->{as_string} : "";
-    return LJ::ljuser($UserLite->{_u}, {link_color => $link_color_string, side_alias => 1 });
+    return LJ::ljuser($UserLite->{_u}, {link_color => $link_color_string, side_alias => $UserLite->{_opt_side_alias} });
 }
 
 sub UserLite__get_link

@@ -178,6 +178,7 @@ sub EntryPage
             if ($com->{'posterid'}) {
                 if ($pu) {
                     $poster = UserLite($pu);
+                    $poster->{'_opt_side_alias'} = 1;
                 } else {
                     $poster = {
                         '_type' => 'UserLite',
