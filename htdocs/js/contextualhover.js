@@ -394,43 +394,24 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 			}
 		}
 		searchProfile[i].getElementsByTagName('a')[1].setAttribute('title',data.res.alias);
-		if($('profile_alias')){
-			if(data.res.alias==''){
-				searchProfile[i].parentNode.removeChild($('profile_alias'));
-			}else{
-				
-				$('profile_alias')[/*@cc_on'innerText'||@*/'textContent'] = '— '+data.res.alias;
-			}
-		}
-		else if(data.res.alias!='' && searchProfile[i].parentNode.parentNode.id=='profile_top'){
-			var pr_alias=document.createElement('span');
-			DOM.addClassName(pr_alias,'alias-value');
-			pr_alias.id='profile_alias';
-			pr_alias[/*@cc_on'innerText'||@*/'textContent'] = ' — '+data.res.alias;
-			searchProfile[i].parentNode.appendChild(pr_alias);
+	}
+	//Changing button. Only on profile page
+	var edit_node = DOM.getElementsByClassName(document, 'profile_addalias');
+	if (edit_node.length) {
+		if (data.res.alias) {
+			edit_node[0].style.display = 'none';
+			edit_node[1].style.display = 'block';
+			edit_node[1].firstChild.alias = data.res.alias;
+		} else {
+			edit_node[0].style.display = 'block';
+			edit_node[1].style.display = 'none';
 		}
 	}
-       //Changing button. Only on profile page
-       if(DOM.getElementsByClassName(document,'profile_addalias')[0]){
-       		if(data.res.alias==''){
-			DOM.getElementsByClassName(document,'profile_addalias')[0].style.display='block';
-			DOM.getElementsByClassName(document,'profile_addalias')[1].style.display='none';
-		}else{
-			DOM.getElementsByClassName(document,'profile_addalias')[0].style.display='none';
-			DOM.getElementsByClassName(document,'profile_addalias')[1].style.display='block';
-			DOM.getElementsByClassName(document,'profile_addalias')[1].firstChild.alias = data.res.alias;
-		}
-		
-       }	       
-       if(ContextualPopup.cachedResults[data.res.username]){
-       		if(data.res.alias==''){
-       			ContextualPopup.cachedResults[data.res.username].alias_title='Add Note';
-       		}else{
-       			ContextualPopup.cachedResults[data.res.username].alias_title='Edit Note';
-       	
-       		}
-       		ContextualPopup.cachedResults[data.res.username].alias=data.res.alias;
-       }
+	
+	if(ContextualPopup.cachedResults[data.res.username]) {
+		ContextualPopup.cachedResults[data.res.username].alias_title = data.res.alias ? 'Edit Note' : 'Add Note';
+		ContextualPopup.cachedResults[data.res.username].alias = data.res.alias;
+	}
   },
 
   onError: function (msg) {
