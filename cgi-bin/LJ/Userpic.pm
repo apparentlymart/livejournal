@@ -380,6 +380,7 @@ sub userpics_partitioned {
 sub load_row {
     my $self = shift;
     my $u = $self->owner;
+    return unless $u;
     return if $u->is_expunged;
 
     my $cache = LJ::Userpic->get_cache($u);
