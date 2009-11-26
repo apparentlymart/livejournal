@@ -1345,7 +1345,7 @@ sub ljuser_display {
             if $alias;
         ## add class as "ljuser-name_*username*" for find user on page to change alias
         $user_html .= " ljuser-name_".$name;
-        $user_html .= "' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'";
+        $user_html .= " ljuser-inline_note' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'";
         $user_html .= " title='$alias'"
             if $alias;
         $user_html .= " rel='nofollow'><b>$name</b>";
@@ -6886,14 +6886,15 @@ sub ljuser
 
         my $side_alias;
         if ($alias and $opts->{side_alias}) {
-            $side_alias = ' - ' . $alias;
+            $side_alias = "<span class='alias-value'> &mdash; $alias</span>";
             $alias = '';
         }
 
         my $user_html = '';
-        $user_html .= "<span class='ljuser ";
-        $user_html .= "with-alias"
-            if $alias;
+        $user_html .= "<span class='ljuser";
+        $user_html .= " with-alias" if $alias;
+        $user_html .= " with-alias-value" if $opts->{side_alias};
+        
         ## add class as "ljuser-name_*username*" for find user on page to change alias
         $user_html .= " ljuser-name_".LJ::canonical_username($user);
         $user_html .= "' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color";
@@ -6903,8 +6904,8 @@ sub ljuser
         $user_html .= "<span class='useralias-value'>*</span>"
             if $alias;
         $user_html .= "</a>";
-        $user_html .= $side_alias if $side_alias;
         $user_html .= "</span>";
+        $user_html .= $side_alias if $side_alias;
         return $user_html;
     };
 
