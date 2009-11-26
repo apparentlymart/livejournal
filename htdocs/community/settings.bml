@@ -138,6 +138,11 @@ body<=
             LJ::set_comm_settings($cu, $remote, { membership => $qmembership,
                                    postlevel => $qpostlevel });
 
+            # the new maintainer will be listed as a member of that community
+            # with an ability to post to it, too
+            LJ::add_friend($cu->id, $remote->id);
+            LJ::set_rel($cu->id, $remote->id, 'P');
+
             # lazy-cleanup: if a community has subscriptions (most likely
             # due to a personal->comm conversion), nuke those subs.
             # (since they can't manage them anyway!)
