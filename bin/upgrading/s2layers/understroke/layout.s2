@@ -350,7 +350,7 @@ function _print_CSS {
 """	<link rel="stylesheet" type="text/css" href="$*linked_stylesheet" />
 """;
 	}
-	var string custom_css = $*custom_css + _CSS();
+	var string custom_css = _CSS() + $*custom_css;
 	if ($custom_css) {
 		"""	<style type="text/css">""";
 		start_css();
@@ -358,7 +358,7 @@ function _print_CSS {
 		end_css();
 		"""	</style>""";
 	}
-	var string custom_ie_css = $*custom_ie_css + _IE_CSS();
+	var string custom_ie_css = _IE_CSS() + $*custom_ie_css;
 	if ($custom_ie_css) {
 		"""<!--[if $*custom_ie_css_variants]><style type="text/css">""";
 		start_css();
