@@ -255,7 +255,6 @@ A:visited {
 	.content .entry .entry-text {
 		padding:.2em .3em;
 		margin-bottom:.9em;
-		overflow:hidden;
 		font-family:Verdana, sans-serif;
 		background:#FFF;
 		zoom:1;
