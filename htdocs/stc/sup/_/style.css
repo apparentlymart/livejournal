@@ -226,7 +226,7 @@ BODY {
 		.comment-head-in {
 			margin-left:105px;
 			}
-		.cwoup .comment-head-in {
+		.comment-woup .comment-head-in {
 			margin-left:0;
 			}
 		.comment-head .comment-upic {
@@ -244,16 +244,17 @@ BODY {
 	.comment-text {
 		margin-top:.4em;
 		margin-left:1px;
+		overflow:hidden;
 		}
 	.comment-menu {
 		margin-top:.1em;
 		margin-bottom:11px;
 		font-size:.75em;
 		}
-.comment-wrap .odd {
+.comment-odd .comment-head {
 	background-color:#BDF;
 	}
-.comment-wrap .even {
+.comment-even .comment-head {
 	background-color:#ACE;
 	}
 .comment-wrap .hr {

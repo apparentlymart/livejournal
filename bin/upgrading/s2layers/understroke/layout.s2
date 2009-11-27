@@ -991,11 +991,14 @@ function EntryPage::print_comments (Comment[] cs) {
 	foreach var Comment c ($cs) {
 		var int indent = ($c.depth - 1) * 25;
 		var string comment_classes = "comment-wrap";
-		if ($c.deleted) { $comment_classes = $comment_classes + " deleted"; }
-		if ($c.screened) { $comment_classes = $comment_classes + " screened"; }
-		if ($c.edited) { $comment_classes = $comment_classes + " edited"; }
-		if ($c.frozen) { $comment_classes = $comment_classes + " frozen"; }
-		if (not $c.full) { $comment_classes = $comment_classes + " partial"; }
+		$comment_classes = $comment_classes + ($c.depth % 2 ? " comment-odd" : " comment-even");
+		
+		if ($c.deleted) { $comment_classes = $comment_classes + " comment-deleted"; }
+		if ($c.screened) { $comment_classes = $comment_classes + " comment-screened"; }
+		if ($c.edited) { $comment_classes = $comment_classes + " comment-edited"; }
+		if ($c.frozen) { $comment_classes = $comment_classes + " comment-frozen"; }
+		if (not $c.full) { $comment_classes = $comment_classes + " comment-partial"; }
+		if (not(defined $c.userpic and $*comment_userpic_style != "off")) { $comment_classes = $comment_classes + " comment-woup"; }
 		"""<div id="$c.dom_id" class="$comment_classes" style="margin-left:${indent}px;">""";
 		if ($c.screened and not $c.full and not viewer_is_owner()) {
 			"""<strong>(Screened comment)</strong>""";
@@ -1014,13 +1017,12 @@ function EntryPage::print_comments (Comment[] cs) {
 
 function EntryPage::print_comment (Comment c) {
 	var string poster = defined $c.poster ? _ljuser($c.poster, "") : "<em>$*text_poster_anonymous</em>";
-	var string evenodd = $c.depth % 2 ? "odd" : "even";
 	if (defined $c.userpic and $*comment_userpic_style != "off") {
 		var int w = $c.userpic.width;
 		var int h = $c.userpic.height;
-		"""<div class="comment-head $evenodd" id="$c.anchor"><div class="comment-upic"><img src="$c.userpic.url" width="$w" height="$h" alt="$c.userpic.alttext" /></div>""";
+		"""<div class="comment-head" id="$c.anchor"><div class="comment-upic"><img src="$c.userpic.url" width="$w" height="$h" alt="$c.userpic.alttext" /></div>""";
 	} else {
-		"""<div class="comment-head $evenodd cwoup" id="$c.anchor">""";
+		"""<div class="comment-head" id="$c.anchor">""";
 	}
 	"""<div class="comment-head-in">""";
 	if (defined $c.subject_icon or $c.subject != "") {
