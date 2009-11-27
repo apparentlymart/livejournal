@@ -625,6 +625,7 @@ function _Content {
 	var string nav_items = _items(
 		_navlist(),
 		{
+			"before" => """<ul class="nav">""",
 			"nolink_before" => "<strong>",
 			"nolink_after" => "</strong>"
 		});
@@ -648,18 +649,18 @@ function _Content {
 		_userlinks(),
 		{
 			"tag" => "",
-			"before" => "$*_{"HR"}<dl>",
+			"before" => """$*_{"HR"}<dl class="aside-links">""",
 			"after" => "</dl>"
 		});
 	var string summary = _items(
 		_summary(),
 		{
-			"before" => "$*_{"HR"}<ul>"
+			"before" => """$*_{"HR"}<ul class="aside-summary">"""
 		});
 	var string extras = _items(
 		_extralinks(),
 		{
-			"before" => "$*_{"HR"}<ul>",
+			"before" => """$*_{"HR"}<ul class="aside-extras">""",
 			"after" => "</ul>"
 		});
 
@@ -906,12 +907,12 @@ function TagsPage::print_body {
 		_taglist(1201,270),
 		($*tag_display_all == "list") ?
 			{
-				"before" => "<ul>",
+				"before" => """<ul class="tags-list">""",
 				"class"=>"tag"
 			}
 		:
 			{
-				"before" => "<p>",
+				"before" => """<p class="tags-list">""",
 				"after" => """<span class="etc">.</span></p>""",
 				"tag" => "span",
 				"class" => "tag",
