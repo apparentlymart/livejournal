@@ -303,7 +303,7 @@ function _calendar(YearMonth mon) : string {
 		<tr>""";
 	var int i = 1;
 	foreach var int d ($weekdays) {
-		$result = """$result<th class="child-$i"><div>${*lang_dayname_shorter[$d]}</div></th>""";
+		$result = """$result<th class="th child-$i"><div class="th-in">${*lang_dayname_shorter[$d]}</div></th>""";
 		$i++;
 	}
 		$result = """$result</tr>
@@ -316,7 +316,7 @@ function _calendar(YearMonth mon) : string {
 		if ($ii%7 == 1) {
 		$result = """$result		<tr>""";
 		}
-		$result = """$result<td><div>""";
+		$result = """$result<td class="td"><div class="td-in">""";
 		if ($day.num_entries > 0) { $result = """$result<a href="$day.url">"""; }
 		$result = $result + ($day.day == 0?"&nbsp;":string($day.day));
 		if ($day.num_entries > 0) { $result = """$result</a>"""; }
@@ -808,7 +808,7 @@ function YearPage::print_body {
 		{
 			"nolink_before"=>"<strong>",
 			"nolink_after"=>"</strong>",
-			"before" => "<ul>",
+			"before" => """<ul class="years">""",
 			"after" => "</ul>",
 			"class" => "y"
 		});
@@ -822,12 +822,12 @@ function YearPage::print_body {
 			"before" => "",
 			"after" => "",
 			"tag" => "div",
-			"class" => "cal"
+			"class" => "c"
 		});
 #=============== S T A R T ================== Year
 
 """
-<div>
+<div class="cals-wrap">
 	<h2>$*text_view_archive</h2>
 	$menu
 	$calendars
@@ -855,7 +855,7 @@ function MonthPage::print_body {
 		});
 	var string dl = "";
 	if ($.days) {
-		$dl = """$dl<dl>""";
+		$dl = """$dl<dl class="month-days">""";
 		foreach var MonthDay d ($.days) {
 			if ($d.has_entries) {
 				$dl = """$dl<dt><a href="$d.url">"""+ lang_ordinal($d.day) +"""</a></dt>""";
@@ -878,7 +878,7 @@ function MonthPage::print_body {
 #=============== S T A R T ================== Month
 
 """
-<div>
+<div class="month-wrap">
 	<h2>$*text_view_archive</h2>
 	<form method="post" action="$.redir.url">
 		"""; $.redir->print_hiddens(); """

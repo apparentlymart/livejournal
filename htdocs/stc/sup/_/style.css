@@ -387,3 +387,15 @@ P.tags A {
 	.lay .l-type-2CR .sidebar-in {
 		float:right;
 		}
+
+.cals-wrap .c {
+	display:inline;
+	}
+.cals-wrap .cal-wrap {
+	display:-moz-inline-stack;
+	display:inline-block;
+	//display:inline;
+	zoom:1;
+	vertical-align:top;
+	margin:0 10px 20px 0;
+	}
