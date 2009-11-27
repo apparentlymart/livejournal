@@ -234,7 +234,9 @@ sub _get_question_data {
         ($answer_link, $answer_url, $answer_text) = $class->answer_link
             ($q, user => $opts->{user},
                 button_disabled => $opts->{form_disabled},
-                button_as_link  => $opts->{button_as_link});
+                button_as_link  => $opts->{button_as_link},
+                form_disabled   => $opts->{form_disabled},
+                embed           => $opts->{embed});
     }
 
     my $impression_img = $class->impression_img($q);
@@ -270,11 +272,12 @@ sub answer_link {
     my $txt = LJ::run_hook("qotd_answer_txt", $opts{user}) || $class->ml('widget.qotd.answer');
     my $dis = $opts{button_disabled} ? "disabled='disabled'" : "";
     my $onclick = qq{onclick="document.location.href='$url'"};
+    my $target = (($opts{form_disabled} || $opts{embed}) ? ' target="_top"' : '');
 
     # if button is disabled, don't attach an onclick
     my $extra = $dis ? $dis : $onclick;
     my $answer_link = $opts{button_as_link} ?
-        qq{<a href=\"$url\">$txt</a>} :
+        qq{<a href=\"$url\"$target>$txt</a>} :
         qq{<input type="button" value="$txt" $extra />};
 
     
