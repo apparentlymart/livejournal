@@ -711,7 +711,7 @@ function _entry_links(Entry e) : string[][] {
 	var Page p = get_page();
 	var string[][] result = (($p.view != "entry") and ($p.view != "reply"))?[
 		["count", $e.comments.show_readlink?get_plural_phrase($e.comments.count,"text_read_comments"):"", $e.comments.read_url],
-		["comments", $e.comments.show_postlink?($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment):"", $e.comments.post_url]
+		["comments", $e.comments.show_postlink?($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment):"", $e.comments.post_url + "#reply" ]
 	]:[[""]];
 	var string{} link_captions = {
 		"edit_entry" => $*text_edit_entry,
@@ -936,16 +936,32 @@ function _print_replylink(string target) {
 
 function EntryPage::print_body {
 	var Entry e = $.entry;
+
+    var string comments_count = string($e.comments.count);
+    if ($.viewing_thread) {
+        var string toplink = (($.comment_pages.total > 1) ? ($.comment_pages->url_of($.comment_pages.current)) : $e.permalink_url) + "#comments";
+        $comments_count = """<a href="$toplink">"""+ get_plural_phrase($e.comments.count, "text_read_all_comments") +"""</a>""";
+    } else {
+        $comments_count = get_plural_phrase($e.comments.count, "text_read_comments");
+    }
+    if ($e.comments.count > 0) {
+        $comments_count = """<span class="comments-count">$comments_count</span> <span class="emdash">—</span> """;
+    } else {
+        $comments_count = "";
+    }
+
 	_print_entry($e,"");
 	if ($.entry.comments.enabled) {
 		"""$*_{"HR"}<div id="comments">""";
-		_print_replylink("top");
+        """<div class="comments-links">( $comments_count<span class="replylink">"""; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "topcomment" });"""</span> )</div>""";
+        $this->print_reply_container({ "target" => "topcomment" });
 		if ($.comment_pages.total_subitems > 0) {
 			"$*_{"HR"}";
 			$.comment_pages->print();
 			$this->print_multiform_start();
 			$this->print_comments($.comments);
-			_print_replylink("bottom");
+            """<div class="comments-links">( $comments_count<span class="replylink">"""; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "bottomcomment" }); """</span> )</div>""";
+            $this->print_reply_container({"target" => "bottomcomment"});
 			if ($.comment_pages.all_subitems_displayed) { "$*_{"HR"}"; }
 			$this->print_multiform_actionline();
 			$this->print_multiform_end();
@@ -957,11 +973,13 @@ function EntryPage::print_body {
 function ReplyPage::print_body {
 	var Entry e = $.entry;
 	_print_entry($e,"");
+	"""$*_{"HR"}<div id="reply">""";
+    print $e.comments.count > 0 ? """<div class="comments-links">( <a href="$.entry.permalink_url#comments">"""+ get_plural_phrase($e.comments.count, "text_read_all_comments") +"""</a> )</div>""" : "";
 	if (not $.entry.comments.enabled) {
 		"""$*_{"HR"}<h1>$*text_reply_nocomments_header</h1><p>$*text_reply_nocomments</p>""";
 	} else {
 		if (not $.replyto isa Entry) {
-			"""$*_{"HR"}<div class="comment-wrap">""";
+			"""<div class="comment-wrap">""";
 			var EntryLite c = $.replyto;
 			var string poster = defined $c.poster ? _ljuser($c.poster, "") : "<em>$*text_poster_anonymous</em>";
 			if (defined $c.userpic and $*comment_userpic_style != "off") {
@@ -985,6 +1003,7 @@ function ReplyPage::print_body {
 		$.form->print();
 		"""</div>""";
 	}
+	"""</div>""";
 }
 function EntryPage::print_comments (Comment[] cs) {
 	if (size $cs == 0) { return; }
@@ -997,6 +1016,7 @@ function EntryPage::print_comments (Comment[] cs) {
 		if ($c.screened) { $comment_classes = $comment_classes + " comment-screened"; }
 		if ($c.edited) { $comment_classes = $comment_classes + " comment-edited"; }
 		if ($c.frozen) { $comment_classes = $comment_classes + " comment-frozen"; }
+		if (not defined $c.poster) { $comment_classes = $comment_classes + " comment-anon"; }
 		if (not $c.full) { $comment_classes = $comment_classes + " comment-partial"; }
 		if (not(defined $c.userpic and $*comment_userpic_style != "off")) { $comment_classes = $comment_classes + " comment-woup"; }
 		"""<div id="$c.dom_id" class="$comment_classes" style="margin-left:${indent}px;">""";
@@ -1031,7 +1051,7 @@ function EntryPage::print_comment (Comment c) {
 	"""<p>$poster</p><p><a class="comment-permalink" href="$c.permalink_url">""" + $c->time_display() +	"</a>";
 	$c->print_linkbar();
 	if ($this.multiform_on) {
-		""" <label for="ljcomsel_$c.talkid">"""; $c->print_multiform_check(); """ $*text_multiform_check</label>""";
+		""" <label class="comment-label-select" for="ljcomsel_$c.talkid">$*text_multiform_check"""; $c->print_multiform_check(); """</label>""";
 	}
 	"""</p>""";
 	if ($c.metadata{"poster_ip"}) { "<p>(" + $c.metadata{"poster_ip"} + ")</p>"; }

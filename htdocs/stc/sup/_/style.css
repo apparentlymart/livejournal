@@ -211,7 +211,9 @@ BODY {
 	#comments .hr {
 		margin:.5em 0;
 		}
-
+.comments-links {
+	text-align:center;
+	}
 .comment-wrap {
 	margin-top:5px;
 	}
@@ -250,6 +252,9 @@ BODY {
 		margin-top:.1em;
 		margin-bottom:11px;
 		font-size:.75em;
+		}
+	.comment-label-select {
+		margin-left:.4em;
 		}
 .comment-odd .comment-head {
 	background-color:#BDF;
