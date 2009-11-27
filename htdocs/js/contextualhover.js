@@ -921,7 +921,7 @@ if ((data.is_logged_in && data.is_comm) || (message && friend))
 
         // ban / unban
         var ban;
-        if (data.is_logged_in && ! data.is_requester) {
+		if (data.is_logged_in && !data.is_requester && !data.is_comm && !data.is_syndicated) {
             ban = document.createElement("span");
 
             if(!data.is_banned) {
@@ -969,7 +969,7 @@ if ((data.is_logged_in && data.is_comm) || (message && friend))
         }
 
         var report_bot;
-        if (data.is_logged_in && !data.is_requester && !window.Site.remote_is_suspended) {
+		if (data.is_logged_in && !data.is_requester  && !data.is_comm && !data.is_syndicated && !window.Site.remote_is_suspended) {
             var report_bot = document.createElement('a');
             report_bot.href = window.Site.siteroot + '/abuse/bots.bml?user=' + data.username;
             report_bot.innerHTML = 'Report a Bot';
@@ -981,7 +981,7 @@ if ((data.is_logged_in && data.is_comm) || (message && friend))
         }
 
 		// ban user from all maintained communities
-		if (!data.is_requester && !data.is_comm && data.have_communities) {
+		if (!data.is_requester && !data.is_comm && !data.is_syndicated && data.have_communities) {
 			var ban_everywhere = document.createElement('a');
 			ban_everywhere.href = Site.siteroot + '/manage/banusers.bml';
 			ban_everywhere.innerHTML = data.is_banned_everywhere ? data.unban_everywhere_title : data.ban_everywhere_title;
