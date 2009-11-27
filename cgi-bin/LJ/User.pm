@@ -2622,7 +2622,9 @@ sub is_email_validated {
 # the current logic is:
 # case 1: NOT $LJ::DISABLED{'limit_password_reset'}
 # yes if the email is set to current OR
-# (has been previously validated AND never has been deleted); no otherwise
+# (has been previously validated AND has not been deleted after that AND
+# the user has stopped using it no more than 6 months ago);
+# no otherwise
 # case 2: $LJ::DISABLED{'limit_password_reset'}
 # yes if and only if the email is set to current
 sub can_reset_password_using_email {
@@ -2631,7 +2633,9 @@ sub can_reset_password_using_email {
     return 1 if lc($addr) eq lc($u->email_raw);
 
     return 0 unless $LJ::DISABLED{'limit_password_reset'};
-    return $u->is_email_validated($addr);
+    return
+        $u->is_email_validated($addr) && # validated
+        $u->email_lastchange($addr) > time - 86400 * 180; # six months
 }
 
 # returns date when the user has last changed their email
