@@ -23,6 +23,7 @@ use LJ::Session;
 use LJ::RateLimit qw//;
 use URI qw//;
 use JSON;
+use HTTP::Date qw(str2time);
 
 use Class::Autouse qw(
                       URI
