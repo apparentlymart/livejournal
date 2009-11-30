@@ -284,7 +284,9 @@ if ( FCKBrowserInfo.IsGecko || FCKBrowserInfo.IsSafari )
 		if ( eInnerElement )
 		{
 			eInnerElement.style.height = '0px' ;
-			eInnerElement.style.height = ( oCell.scrollHeight - 2 ) + 'px' ;
+			// fix http://dev.fckeditor.net/ticket/4487 and LJSV-648
+			// ORIGINAL: eInnerElement.style.height = ( oCell.scrollHeight - 2 ) + 'px' ;
+			eInnerElement.style.height = ( oCell.offsetHeight - 2 ) + 'px' ;
 		}
 	}
 }
