@@ -456,11 +456,19 @@ userproplist.mailencoding:
 
 userproplist.moderated:
   cldversion: 4
-  datatype: bool
-  des: 1: This community is moderated
+  datatype: char
+  des: N - do not moderate; A - new entries must be approved; F - new entries, containing links to untrustworthy domains, must be approved
   indexed: 0
   multihomed: 0
   prettyname: Moderation status
+
+userproplist.moderated_whitelist:
+  cldversion: 4
+  datatype: blobchar
+  des: Whitelist for a community
+  indexed: 0
+  multihomed: 0
+  prettyname: Moderation whitelist
 
 userproplist.msn:
   cldversion: 0

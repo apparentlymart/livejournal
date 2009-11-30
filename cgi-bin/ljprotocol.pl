@@ -1322,8 +1322,13 @@ sub postevent
         }
     };
 
+    my $need_moderated = ( $uowner->{'moderated'} eq 'A' ) ? 1 : 0;
+    if ( $uowner->{'moderated'} eq 'F' ) {
+        ## Scan post for spam
+        LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
+    }
     # if posting to a moderated community, store and bail out here
-    if ($uowner->{'journaltype'} eq 'C' && $uowner->{'moderated'} && !$flags->{'nomod'}) {
+    if ($uowner->{'journaltype'} eq 'C' && $need_moderated && !$flags->{'nomod'}) {
         # don't moderate admins, moderators & pre-approved users
         my $dbh = LJ::get_db_writer();
         my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".

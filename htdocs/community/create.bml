@@ -32,8 +32,8 @@ body<=
         unless $POST{postlevel} =~ m/^(?:members|select)$/;
     $POST{nonmember_posting} = '0'
         unless $POST{nonmember_posting} =~ m/^[01]$/;
-    $POST{moderated} = '0'
-        unless $POST{moderated} =~ m/^[01]$/;
+    $POST{moderated} = 'F'
+        unless $POST{moderated} =~ m/^[NAF]$/;
     $POST{journal_adult_settings} = 'none'
         unless $POST{journal_adult_settings} =~ m/^(?:none|concepts|explicit)$/;
 
@@ -209,11 +209,14 @@ SUBMIT:
         $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'/community/settings.bml.label.modheader'}" .
             "</div><div class='formitemDesc'>$ML{'/community/settings.bml.label.modtext'}</div><div><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'moderated', id => 'radunmod',
-                value => '0', selected => ($POST{moderated} eq '0' ? 1 : 0)});
+                value => 'N', selected => ($POST{moderated} eq 'N' ? 1 : 0)});
         $ret .= "<label for='radunmod'> $ML{'/community/settings.bml.label.modisnt'}</label></p><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'moderated', id => 'radmod',
-                value => '1', selected => ($POST{moderated} eq '1' ? 1 : 0)});
+                value => 'A', selected => ($POST{moderated} eq 'A' ? 1 : 0)});
         $ret .= "<label for='radmod'> $ML{'/community/settings.bml.label.modis'}</label></p>";
+        $ret .= LJ::html_check({ type => 'radio', name => 'moderated', id => 'radmodf',
+                value => 'F', selected => ($POST{moderated} eq 'F' ? 1 : 0)});
+        $ret .= "<label for='radmodf'> $ML{'/community/settings.bml.label.modisfilter'}</label></p>";
         $ret .= "</div></div></li>";
 
         # adult content options

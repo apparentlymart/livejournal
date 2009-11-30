@@ -191,12 +191,12 @@ sub create_community {
     my $u = LJ::User->create(%opts) or return;
 
     $u->set_prop("nonmember_posting", $opts{nonmember_posting}+0);
-    $u->set_prop("moderated", $opts{moderated}+0);
+    $u->set_prop("moderated", $opts{moderated});
     $u->set_prop("adult_content", $opts{journal_adult_settings}) if LJ::is_enabled("content_flag");
 
     my $remote = LJ::get_remote();
     LJ::set_rel($u, $remote, "A");  # maintainer
-    LJ::set_rel($u, $remote, "M") if $opts{moderated}; # moderator if moderated
+    LJ::set_rel($u, $remote, "M") if $opts{moderated} =~ /^[AF]$/; # moderator if moderated
     LJ::join_community($remote, $u, 1, 1); # member
 
     LJ::set_comm_settings($u, $remote, { membership => $opts{membership},

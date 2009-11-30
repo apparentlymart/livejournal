@@ -43,6 +43,8 @@
 
 .label.adultcontenttext2=Does your community have adult content?
 
+.label.antispam=Community Moderation
+
 .label.anybodycan=<b>All Members</b><br />Anybody can post immediately once a member.
 
 .label.changeheader=Change Community Settings
@@ -87,13 +89,19 @@
 
 .label.moderation=Moderate entries to your community?
 
-.label.moderationyes=New entries must be approved by a moderator before they appear in the community.
+.label.moderationyes_none=Do not moderate.
+
+.label.moderationyes_all=New entries must be approved by a moderator before they appear in the community.
+
+.label.moderationyes_filter=New entries, containing links to untrustworthy domains, must be approved by a moderator before they appear in the community.
 
 .label.modheader=Entry Moderation
 
 .label.modis=<b>Moderated</b><br />New entries must be approved by a moderator.
 
 .label.modisnt=<b>Unmoderated</b><br />New entries appear immediately.
+
+.label.modisfilter=<b>Partly Moderated</b><br />New entries, containing links to untrustworthy domains, must be approved by a moderator.
 
 .label.modtext=Are submissions to this community moderated?
 
@@ -128,6 +136,8 @@
 .label.selcan=<b>Select Members</b><br />Only some members are able to post, once a maintainer gives them access.
 
 .label.username=Username:
+
+.label.whitelist=Edit white-list for this community
 
 .label.whocanjoin=Who can join your community?
 
