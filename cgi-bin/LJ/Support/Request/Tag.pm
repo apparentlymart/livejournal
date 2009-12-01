@@ -277,11 +277,7 @@ sub drop_tags {
         my @spcatids = map { $_ + 0 } @$spcatids;
         my $spcatids_cond = join(',', @spcatids);
 
-        use Data::Dumper;
-        warn Dumper($spcatids);
         $sptagids_cond = join(',', @sptagids);
-        warn "SELECT sptagid FROM supporttag WHERE ".
-            "sptagid IN ($sptagids_cond) AND spcatid IN ($spcatids_cond)";
         @sptagids = @{$dbh->selectcol_arrayref(
             "SELECT sptagid FROM supporttag WHERE ".
             "sptagid IN ($sptagids_cond) AND spcatid IN ($spcatids_cond)"
