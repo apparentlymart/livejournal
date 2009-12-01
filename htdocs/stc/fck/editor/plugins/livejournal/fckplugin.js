@@ -490,8 +490,7 @@ FCK.DataProcessor.ConvertToDataFormat = function(body)
 	if (!top.$('event_format').checked) {
 		html = html
 			.replace(/<br \/>/g, '\n')
-			.replace(/<p>(.*?)<\/p>/g, '$1\n')
-			.replace(/&nbsp;/g, ' ');
+			.replace(/<p>(.*?)<\/p>/g, '$1\n');
 	}
 	
 	// IE custom tags
