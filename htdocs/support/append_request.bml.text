@@ -21,6 +21,8 @@
 
 .internal.changesum=To change the summary of a request, you must select "Internal Comment / Action" and enter in the new summary.
 
+.internal.changetags=To change the tags of a request, you must select "Internal Comment / Action" and enter in the new tags.
+
 .internal.settier=To set a response's tier, you must select "Internal Comment / Action" or a screened response to approve as an answer, or you must select and write an "Answer".
 
 .internal.touch=To change a request's status, you must select "Internal Comment / Action" and explain why you're changing it.

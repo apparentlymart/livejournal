@@ -3214,6 +3214,30 @@ CREATE TABLE antispam (
 )
 EOC
 
+# interface for these two is in LJ::Support::Request::Tag
+
+register_tablecreate('supporttag', <<'EOC');
+CREATE TABLE supporttag (
+    sptagid INT NOT NULL AUTO_INCREMENT,
+    spcatid INT NOT NULL DEFAULT 0,
+    name CHAR(50) NOT NULL DEFAULT "",
+
+    PRIMARY KEY(sptagid),
+    KEY(name)
+)
+EOC
+
+register_tablecreate('supporttagmap', <<'EOC');
+CREATE TABLE supporttagmap (
+    sptagid INT NOT NULL DEFAULT 0,
+    spid INT NOT NULL DEFAULT 0,
+
+    UNIQUE KEY `uniq` (sptagid, spid),
+    KEY (sptagid),
+    KEY (spid)
+)
+EOC
+
 ### changes
 
 register_alter(sub {
@@ -4083,7 +4107,7 @@ register_alter(sub {
                  "ADD revid int unsigned default null");
     }
 
-    unless (column_type("antispam", "date")) {
+    unless (column_type("antispam", "eventtime") eq 'date') {
         do_alter("antispam",
                  "ALTER TABLE antispam " .
                  "MODIFY eventtime DATE DEFAULT NULL");

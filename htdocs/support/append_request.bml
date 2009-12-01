@@ -6,6 +6,7 @@ body<=
 {
     use strict;
     use vars qw(%FORM);
+    use LJ::Support::Request::Tag;
 
     LJ::set_active_crumb('supportappend');
 
@@ -116,9 +117,12 @@ body<=
     return LJ::bad_input($ML{'.internal.changesum'})
         if $FORM{'changesum'} && ($type ne "internal" || ! LJ::Support::can_change_summary($sp, $remote));
 
+    return LJ::bad_input($ML{'.internal.changetags'})
+        if $FORM{'changetags'} && ($type ne "internal" || ! LJ::Support::can_read_internal($sp, $remote));
+
     return LJ::bad_input($ML{'.invalid.blank'})
         if $FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} && !$FORM{'changelanguage'} && (!$FORM{'settier'} || $type eq "answer") &&
-            !$FORM{'touch'} && !$FORM{'untouch'} && !$FORM{'changesum'} && !$FORM{'bounce_email'};
+            !$FORM{'touch'} && !$FORM{'untouch'} && !$FORM{'changesum'} && !$FORM{'bounce_email'} && !$FORM{'changetags'};
 
     # Load up vars for approvals
     my $res;
@@ -236,6 +240,13 @@ body<=
 
     ## change category
     if ($FORM{'changecat'}) {
+        # remove all tags from the request, because different cats have
+        # different tags
+        if ($sp->{'spcatid'} != $newcat) {
+            $FORM{'changetags'} = 'on';
+            $FORM{'tags'} = '';
+        }
+
         # $newcat, $cats defined above
         $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
         $status .= "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n";
@@ -270,6 +281,69 @@ body<=
         my $qnewsub = $dbh->quote($FORM{'summary'});
         $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
         $status .= "Changing subject from \"$sp->{'subject'}\" to \"$FORM{'summary'}\".\n\n";
+    }
+
+    # change tags
+    if ($FORM{'changetags'}) {
+        $FORM{'tags'} =~ s/[\n\r]//g;
+        my $newtags = $FORM{'tags'};
+
+        my @newtags = split /,/, $newtags;
+        @newtags = map { LJ::Support::Request::Tag::normalize_tag_name($_); }
+            @newtags;
+
+        my (@newtagids, @cannot_add);
+
+        my $spcatid = $scat->{'spcatid'};
+
+        foreach my $newtag (@newtags) {
+            my $tagid = LJ::Support::Request::Tag::tag_name_to_id(
+                $newtag, $spcatid,
+                !LJ::Support::can_help($sp, $remote)
+            );
+
+            if (defined($tagid)) {
+                push @newtagids, $tagid;
+            } else {
+                push @cannot_add, $newtag;
+            }
+        }
+        my $res =
+            LJ::Support::Request::Tag::set_request_tags($spid, @newtagids);
+
+        my $dump_tags = sub {
+            my @tagids = @_;
+            my @tagnames = 
+                map { LJ::Support::Request::Tag::tag_id_to_name($_) }
+                @tagids;
+            return join(', ', @tagnames);
+        };
+
+        if (
+            scalar(@{$res->{'added'}}) ||
+            scalar(@{$res->{'removed'}}) ||
+            scalar(@cannot_add)
+        ) {
+            my @info_parts;
+            my @added = @{$res->{'added'}};
+            my @removed = @{$res->{'removed'}};
+
+            push @info_parts, "added: " . $dump_tags->(@added)
+                if scalar(@added);
+
+            push @info_parts, "removed: " . $dump_tags->(@removed)
+                if scalar(@removed);
+
+            push @info_parts, "couldn't add: " . join(', ', @cannot_add)
+                if scalar(@cannot_add);
+
+            my $info = join('; ', @info_parts);
+
+            $status .= "(Tags: $info)\n\n";
+        } else {
+            $status .= "(Attempted to change tags but there were no actual ".
+                " changes made)";
+        }
     }
 
     # change language and set it in the summary

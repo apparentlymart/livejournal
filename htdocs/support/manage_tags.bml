@@ -1,0 +1,105 @@
+<?page
+title=><?_ml .title _ml?>
+head<=
+<?_code return LJ::robot_meta_tags(); _code?>
+<=head
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%FORM);
+    use LJ::Support::Request::Tag;
+
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    return $ML{'.error.unauthorized'} unless
+        LJ::check_priv($remote, 'supportviewinternal');
+
+    my $cats = LJ::Support::load_cats();
+
+    my @can_see_cats =
+        map { $_->{'spcatid'} }
+        grep { LJ::Support::can_read_cat($_, $remote) }
+        values %$cats;
+
+    my @can_manage_cats;
+
+    if (LJ::check_priv($remote, 'siteadmin', 'manage-support-tags')) {
+        @can_manage_cats = @can_see_cats;
+    } else {
+        @can_manage_cats =
+            map { $_->{'spcatid'} }
+            grep { LJ::check_priv($remote, 'siteadmin',
+                'manage-support-tags/' . $_->{'catkey'} )}
+            grep { LJ::Support::can_read_cat($_, $remote) }
+            values %$cats;
+    }
+    
+    my %can_see_cats = map { $_ => 1 } @can_see_cats;
+    my %can_manage_cats = map { $_ => 1 } @can_manage_cats;
+    
+    if (LJ::did_post()) {
+        my @delete;
+        foreach my $k (keys %FORM) {
+            push @delete, $1 if ($k =~ /^delete-(\d+)$/ && $FORM{$k});
+        }
+        
+        LJ::Support::Request::Tag::drop_tags(\@delete, \@can_manage_cats);
+        
+        return BML::redirect($LJ::SITEROOT . '/support/manage_tags.bml');
+    }
+
+    my $ret;
+
+    $ret .= '<form action="" method="post">';
+
+    foreach my $spcat (values %$cats) {
+        my $catkey = $spcat->{'catkey'};
+        my $spcatid = $spcat->{'spcatid'};
+        my $catname = $spcat->{'catname'};
+
+        next unless $can_see_cats{$spcatid};
+
+        $ret .= '<h1>'.$catname.'</h1>';
+        my @tags = LJ::Support::Request::Tag::get_cats_tags($spcatid);
+
+        if (@tags) {
+            $ret .= '<ul>';
+
+            foreach my $sptagid (@tags) {
+                $ret .= '<li>';
+                my $name =
+                    LJ::Support::Request::Tag::tag_id_to_name($sptagid);
+                if ($can_manage_cats{$spcatid}) {
+                    $ret .= LJ::html_check({
+                        'type' => 'checkbox',
+                        'name' => 'delete-'.$sptagid,
+                        'id' => 'delete-'.$sptagid,
+                        'label' => $name,
+                    });
+                    $ret .=
+                        ' [<a href="'.$LJ::SITEROOT.'/support/help.bml?' .
+                        'tags=' . $name . '">' . $ML{'.requests'} . '</a>]';
+                } else {
+                    $ret .= '<a href="'.$LJ::SITEROOT.'/support/help.bml?' .
+                        'tags=' . $name . '">' . $name . '</a>';
+                }
+                $ret .= '</li>';
+            }
+
+            $ret .= '</ul>';
+        } else {
+            $ret .= '<p><em>'.$ML{'.notags'}.'</em></p>';
+        }
+    }
+
+    $ret .= '<button type="submit">'.$ML{'.delete'}.'</button>';
+    $ret .= '</form>';
+
+    return $ret;
+}
+_code?>
+
+<=body
+page?>

@@ -1,0 +1,11 @@
+;; -*- coding: utf-8 -*-
+.title=Manage Support Tags
+
+.error.unauthorized=You are not authorized to access this page.
+
+.notags=No tags are defined in this category
+
+.requests=requests
+
+.delete=Delete selected tags
+

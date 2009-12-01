@@ -5,9 +5,13 @@
 
 .cat.all=All
 
+.tags.all=(All)
+
 .interim=The support queue is intended for use by people with support privileges.
 
 .requests.type=requests of type
+
+.requests.tags=with the following tag:
 
 .showonlyhelp=Show only 
 

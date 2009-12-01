@@ -41,6 +41,12 @@ body<=
 <?_code
  use strict;
  use vars qw(%FORM);
+ use LJ::Support::Request::Tag;
+
+ # a shorter alias, for convenience
+ my $normalize_tag = sub {
+    return LJ::Support::Request::Tag::normalize_tag_name(@_);
+ };
 
  LJ::set_active_crumb('supporthelp');
 
@@ -65,6 +71,16 @@ body<=
  my $fcat = LJ::Support::get_cat_by_key($cats, $filtercat);
  my $can_read = LJ::Support::can_read_cat($fcat, $remote);
 
+ my $can_see_tags =
+    LJ::check_priv($remote, 'supportviewinternal') ||
+    LJ::check_priv($remote, 'supporthelp');
+
+ my $filtertags = $FORM{'tags'};
+ $filtertags = '' unless $can_see_tags;
+ my @filtertags = map { $normalize_tag->($_); }
+    split(/,/, $FORM{'tags'});
+ my %filtertags = map { $_ => 1 } @filtertags;
+
  # determine if user can close stuff
  my $can_close = 0;
  if ($remote && $state =~ /(?:green|open)/ && $filtercat && $filtercat !~ /^_/) {
@@ -88,6 +104,7 @@ body<=
  }
 
  my @support_log;
+ my @shown_cats;
 
  # if we have a cat to filter to and we have abstracts for it
  my $rct = 0;
@@ -110,38 +127,34 @@ body<=
      push @support_log, $_ while $_ = $sth->fetchrow_hashref();
      $rct = scalar(@support_log);
      $abstracts = 1;
+     @shown_cats = ($fcat->{spcatid});
  } else {
      my $filterwhere;
 
-     if ($filtercat eq "_nonpublic") {
-         $filterwhere = " AND s.spcatid IN (0";
-         foreach my $cat (values %$cats) {
-             $filterwhere .= ", $cat->{'spcatid'}"
-                 if !$cat->{'public_read'} && LJ::Support::can_read_cat($cat, $remote);
-         }
-         $filterwhere .= ")";
-     } elsif ($filtercat eq "_nonprivate") {
-         $filterwhere = " AND s.spcatid IN (0";
-         foreach my $cat (values %$cats) {
-             $filterwhere .= ", $cat->{'spcatid'}" if $cat->{public_read};
-         }
-         $filterwhere .= ")";
-     } elsif ($filtercat =~ /,/) {
-         my %filtercats = map { $_ => 1 } split(",", $filtercat);
-         $filterwhere .= " AND s.spcatid IN (0";
-         foreach my $cat (values %$cats) {
-             next unless $filtercats{$cat->{'catkey'}};
-             $filterwhere .= ", $cat->{'spcatid'}" if LJ::Support::can_read_cat($cat, $remote);
-         };
-         $filterwhere .= ")";
-
+     if ($filtercat eq '_nonpublic') {
+        @shown_cats =
+            grep { $_->{'public_read'} }
+            values %$cats;
+     } elsif ($filtercat eq '_nonpublic') {
+        @shown_cats =
+            grep { LJ::Support::can_read_cat($_, $remote) }
+            grep { !$_->{'public_read'} }
+            values %$cats;
+     } elsif ($filtercat) {
+        my %filter = map { $_ => 1 } split(/\s*,\s*/, $filtercat);
+        @shown_cats =
+            grep { LJ::Support::can_read_cat($_, $remote) }
+            grep { $filter{$_->{'catkey'}} }
+            values %$cats;
      } else {
-         if ($can_read) {
-             $filterwhere = " AND s.spcatid=$fcat->{'spcatid'}";
-         } else {
-             $filtercat = "";
-         }
+        @shown_cats =
+            grep { LJ::Support::can_read_cat($_, $remote) }
+            values %$cats;
      }
+     
+     @shown_cats = map { $_->{'spcatid'} } @shown_cats;
+
+     $filterwhere = ' AND s.spcatid IN ('.join(',', @shown_cats).')';
 
      my $dbr = LJ::get_db_reader();
      if ($state eq "closed") {
@@ -220,6 +233,12 @@ body<=
  $ret .= "</select>";
 
  $ret .= " $ML{'.requests.type'}: <select name='cat'>";
+
+ if ($filtercat =~ /,/) {
+    $ret .= '<option value="'.LJ::ehtml($filtercat).'" selected="selected">'.
+        LJ::ehtml($filtercat).'</option>';
+ }
+
  $ret .= "<option value=\"\">($ML{'.cat.all'})</option>";
  my @filter_cats = LJ::Support::filter_cats($remote, $cats);
  if (LJ::check_priv($remote, "supportread")) {
@@ -228,12 +247,36 @@ body<=
      unshift @filter_cats, { 'catkey' => '_nonprivate',
                              'catname' => '(Public)' };
  }
+
  foreach my $cat (@filter_cats)
  {
      my $sel = $filtercat eq $cat->{'catkey'} ? " selected='selected'" : "";
      $ret .= "<option value=\"$cat->{'catkey'}\"$sel>$cat->{'catname'}</option>";
  }
+
  $ret .= "</select>\n";
+
+ $ret .= ' ' . $ML{'.requests.tags'} . ' <select name="tags">';
+ 
+ my $render_option = sub {
+    my ($value, $name, $selected) = @_;
+
+    return '<option value="'.LJ::ehtml($value).'"'.
+        ($selected ? ' selected="selected"' : '').
+        '>'.
+        LJ::ehtml($name).
+        '</option>';
+ };
+ 
+ $ret .= $render_option->($filtertags, $filtertags, 1)
+    if ($filtertags =~ /,/);
+ $ret .= $render_option->('', $ML{'.tags.all'});
+ $ret .= $render_option->($_, $_,
+    $normalize_tag->($_) eq $normalize_tag->($filtertags))
+    foreach (LJ::Support::Request::Tag::get_cats_tag_names(@shown_cats));
+
+ $ret .= '</select>';
+ 
  $ret .= "<input type=submit value=\"$ML{'.button.filter'}\" /></form>";
  # /filter line
 
@@ -243,7 +286,7 @@ body<=
  # start the rest of the table
  
  my %marked = map { $_ => 1 } split(',', $GET{'mark'});
- my $uri = "$LJ::SITEROOT/support/help.bml?cat=$filtercat&state=$state";
+ my $uri = "$LJ::SITEROOT/support/help.bml?cat=$filtercat&state=$state&tags=$filtertags";
  $ret .= "<p><table cellpadding='4' cellspacing='1' border='1' bgcolor='#ffffff'><tr bgcolor='#d0d0d0'>\n";
  if ($can_close) {
     my $link = $uri . '&sort='.$sort . '&closeall=' . ($GET{'closeall'} ? 0 : 1);
@@ -260,10 +303,24 @@ body<=
  $ret .= "<td><b>$ML{'.th.status'}</b></td>\n";
  $ret .= "</tr>";
 
+ my @spids = map { $_->{'spid'} } @support_log;
+ my $tags = LJ::Support::Request::Tag::get_requests_tags(@spids)
+    if $can_see_tags;
  foreach my $sp (@support_log)
  {
      LJ::Support::fill_request_with_cat($sp, $cats);
      next unless (LJ::Support::can_read($sp, $remote));
+
+     my @tagids = @{$tags->{$sp->{'spid'}}};
+     my @tagnames = map { LJ::Support::Request::Tag::tag_id_to_name($_) }
+        @tagids;
+
+     if (@filtertags) {
+        my @tagnames_normalized =
+            map { $normalize_tag->($_) }
+            @tagnames;
+        next unless grep { $filtertags{$_} } @tagnames_normalized;
+     }
 
      my $status = "open";
      my $barbg = "green";
@@ -308,6 +365,15 @@ body<=
          $sp->{message} = LJ::ehtml($sp->{message}) . " <b>&#x00b6;</b>";
      }
      my $des = $abstracts ? "<br /><i>$sp->{message}</i>" : '';
+     my $tags_line;
+     if ($can_see_tags && scalar(@tagids)) {
+        my @links = map {
+            '<a href="' . $uri . '&sort='. $sort . '&tags=' . $_ . '">'.
+            $_ . '</a>';
+        } @tagnames;
+
+        $tags_line = '<br/><i>' . join(', ', @links) . '</i>';
+     }
 
      # other content for this request
      my $summary = LJ::ehtml($sp->{'subject'});
@@ -336,7 +402,7 @@ body<=
          $js = "onclick='return doClick($sp->{spid});'";
      }
      $ret .= "<td><b><a href=\"$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}\" $js>$sp->{'spid'}</a></b></td>";
-     $ret .= "<td><b>$summary</b>$des</td>\n";
+     $ret .= "<td><b>$summary</b>$des$tags_line</td>\n";
      $ret .= "<td>$probarea</td>\n";
      $ret .= "<td nowrap='nowrap'><font size='-1'>$age</font></td>\n";
      $ret .= "<td nowrap='nowrap'><font size='-1'>$status</font></td>\n";

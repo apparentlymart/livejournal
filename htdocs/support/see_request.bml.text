@@ -21,6 +21,8 @@
 
 .change.summary=Change summary
 
+.change.tags=Change Tags
+
 .clear=Clear
 
 .close.without.credit=close without credit
@@ -130,6 +132,8 @@ and correct, it will be sent to the user. p?>
 .select.canned.to.insert=select canned to insert
 
 .status=Status
+
+.tags=Tags
 
 .statushistory=statushistory
 

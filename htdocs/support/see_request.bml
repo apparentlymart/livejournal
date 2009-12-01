@@ -79,6 +79,17 @@ head<=
         return doSetReplyType('internal');
     }
 
+    function doTagsChanged () {
+        if (! document.getElementById) return false;
+
+        var tagsBox = document.getElementById('changetags');
+        if (!tagsBox) return false;
+
+        tagsBox.checked = true;
+
+        return doSetReplyType('internal');
+    }
+
     function doSetReplyType (replytype) {
         if (! document.getElementById) return false;
 
@@ -122,6 +133,19 @@ head<=
         return false;
     }
 
+    function doTagsClick () {
+        if (! document.getElementById) return false;
+
+        var tagsBox = document.getElementById('changetags');
+        if (!tagsBox) return false;
+
+        if (tagsBox.checked) {
+            doSetReplyType('internal');
+        }
+
+        return false;
+    }
+
     function doClearMessage () {
         if (! document.getElementById) return false;
 
@@ -154,6 +178,7 @@ body<=
 {
     use strict;
     use vars qw(%FORM);
+    use LJ::Support::Request::Tag;
         
     LJ::set_dynamic_crumb('Request #' . ($FORM{'id'}+0), 'supporthelp');
 
@@ -534,6 +559,31 @@ body<=
         }
     }
     $ret .= "</td></tr>\n";
+    
+    my $tags_string;
+    
+    if (
+        LJ::check_priv($remote, 'supportviewinternal') ||
+        LJ::check_priv($remote, 'supporthelp')
+    ) {
+        my $tags = LJ::Support::Request::Tag::get_request_tags($sp->{'spid'});
+        if (defined $tags && scalar(@$tags)) {
+            $ret .= '<tr>';
+            $ret .= '<td align="right"><b>'.$ML{'.tags'}.':</b></td>';
+            my @tags = @$tags;
+            @tags = map { LJ::Support::Request::Tag::tag_id_to_name($_); }
+                @tags;
+            @tags = sort @tags;
+            $tags_string = join(', ', @tags);
+            @tags = map {
+                '<a href="' . $LJ::SITEROOT . '/support/help.bml?tags=' . $_ .
+                '">' . $_ . '</a>';
+            } @tags;
+            $ret .= '<td>' . join(', ', @tags). '</td>';
+            $ret .= '</tr>';
+        }
+    }
+    
     $ret .= "<tr><td align='right'><b>$ML{'.summary'}:</b></td><td><span style='font-size: 1.1em'><b>" . LJ::ehtml($sp->{'subject'}) . "</b></span></td></tr>\n";
     $ret .= "</table>\n";
 
@@ -805,7 +855,7 @@ body<=
             $ret .= "<td>$ML{'.approve.screened'}:<br />";
             $ret .= LJ::html_select({ 'name' => 'approveans',
                                       'id' => 'approveans',
-                                      'onclick' => 'return doApproveAnswer();' },
+                                      'onchange' => 'return doApproveAnswer();' },
                                     ('', ''),
                                     map { $_->{'splid'}, "\#$_->{'splid'} (" . LJ::get_username($_->{'userid'}) . ")" }
                                     @screened);
@@ -883,13 +933,39 @@ body<=
         if (LJ::Support::can_change_summary($sp, $remote)) {
             $ret .= "<tr><td align='right'>$ML{'.change.summary'}:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'changesum', id => 'changesum', 'onClick' => 'doSummaryClick();' });
-            $ret .= LJ::html_text({ 'type' => 'text', 'name' => 'summary', 'size' => '50', 'maxlength' => '80', 'value' => $sp->{'subject'}, 'onChange' => 'doSummaryChanged();' });
+            $ret .= LJ::html_text({ 'type' => 'text', 'name' => 'summary', 'size' => '50', 'maxlength' => '80', 'value' => $sp->{'subject'}, 'onchange' => 'doSummaryChanged();', 'onkeyup' => 'doSummaryChanged();' });
             $ret .= "</td></tr>\n";
             $ret .= "<tr><td>&nbsp;</td><td>";
             $ret .= "<?de $ML{'.use.this.to.summary'} de?>\n";
             $ret .= "</td></tr>\n";
         }
     }
+    
+    if (LJ::Support::can_read_internal($sp, $remote) && !$is_poster) {
+        $ret .= '<tr>';
+        $ret .= '<td align="right">'.$ML{'.change.tags'}.'</td>';
+        $ret .= '<td>';
+        $ret .= LJ::html_check({
+            'type' => 'checkbox',
+            'name' => 'changetags',
+            'id' => 'changetags',
+            'onclick' => 'doTagsClick();',
+        });
+        $ret .= LJ::html_text({
+            'type' => 'text',
+            'name' => 'tags',
+            'size' => 50,
+            'maxlength' => 300,
+            'value' => $tags_string,
+            'onchange' => 'doTagsChanged();',
+            'onkeyup' => 'doTagsChanged();',
+        });
+        $ret .= '</td>';
+        $ret .= '</tr>';
+        $ret .= '<tr><td></td><td><p><em>'.$ML{'.tags.only.sh.can.add'}.
+            '</em></p></td></tr>' unless LJ::Support::can_help($sp, $remote);
+    }
+
     # Prefill an e-mail validation nag, if needed.
     my $validationnag;
     if (!(LJ::isu($u) && ($u->underage && $u->{'status'} eq 'T')) &&

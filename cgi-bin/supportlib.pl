@@ -772,7 +772,6 @@ sub set_points
 # closes request, assigning points for the last response left to the request
 
 sub close_request_with_points {
-    use Data::Dumper;
     my ($sp, $spcat, $remote) = @_;
 
     my $spid = $sp->{'spid'}+0;
