@@ -4,6 +4,8 @@
     use vars qw(%GET);
     my $remote = LJ::get_remote();
     return LJ::error_noremote() unless $remote;
+    return "You can only use this in the Userpic Factory"
+        unless LJ::check_referer('/tools/userpicfactory.bml');
 
     my $authas = $GET{'authas'} || $remote->user;
     my $u = LJ::get_authas_user($authas) or
