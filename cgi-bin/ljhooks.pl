@@ -251,11 +251,28 @@ register_setter("no_mail_alias", sub {
 register_setter("latest_optout", sub {
     my ($u, $key, $value, $err) = @_;
     unless ($value =~ /^(?:yes|no)$/i) {
-        $$err = "Illegal value.  Must be 'yes' or 'no'.";        return 0;
+        $$err = "Illegal value.  Must be 'yes' or 'no'.";
+        return 0;
     }
     $value = lc $value eq 'yes' ? 1 : 0;
     $u->set_prop("latest_optout", $value);
     return 1;
+});
+
+register_setter("maintainers_freeze", sub {
+    my ($u, $key, $value, $err) = @_;
+    unless ($value =~ /^(0|1)$/) {
+        $$err = "Illegal value. Must be '0' or '1'";
+        return 0;
+    }
+    my $remote = LJ::get_remote();
+    if (LJ::check_priv($remote, 'siteadmin', 'propedit') || $LJ::IS_DEV_SERVER) {
+        $u->set_prop("maintainers_freeze", $value);
+        return 1;
+    } else {
+        $$err = "You don't have permission to change this property";
+        return 0;
+    }
 });
 
 1;

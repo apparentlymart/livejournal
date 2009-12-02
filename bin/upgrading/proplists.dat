@@ -454,6 +454,14 @@ userproplist.mailencoding:
   multihomed: 0
   prettyname: Mail Encoding
 
+userproplist.maintainers_freeze:
+  cldversion: 4
+  datatype: bool
+  des: If the flag is on, one maintainer of a community cannot revoke maintainers rights from other maintainer.
+  indexed: 0
+  multihomed: 0
+  prettyname: Freeze list of community's maintainers
+
 userproplist.moderated:
   cldversion: 4
   datatype: char

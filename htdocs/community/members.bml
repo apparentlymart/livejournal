@@ -210,6 +210,7 @@ body<=
 
         # users already in community
         my $maints = 0;
+        my @maint_errors;
         my $us = LJ::load_userids(@userids);
         my (%addr, %delr); # store additions and removals sorted by userid
         foreach my $id (@userids) {
@@ -225,11 +226,15 @@ body<=
                     if ($was{$id}->{$_}) {
                         $delete{$_}->{$id} = 1;
                         $delr{$id}->{$_} = 1;
+                        if ($_ eq 'admin' && $c->prop("maintainers_freeze") && $remote->userid != $id) {
+                            push @maint_errors, BML::ml('.error.maintainer', { 'user' => LJ::ljuser($us->{$id}) });
+                        }
                     }
                 }
             }
             $maints++ if $POST{"edit_${id}_admin"} && !$us->{$id}->is_expunged;
         }
+        return $print_with_ad->(LJ::bad_input(@maint_errors)) if @maint_errors;
 
         # can't remove ALL maintainers, give them an error so they can
         # go back and decide who to keep

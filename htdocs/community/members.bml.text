@@ -13,6 +13,8 @@
 
 .error.limit=Unable to invite [[user]], the outstanding invitation limit for this community has been exceeded.
 
+.error.maintainer=Unable to revoke maintainer rights for [[user]].
+
 .error.noaccess=Only community maintainers are able to edit membership lists. You are not a maintainer of community [[comm]].
 
 .error.noattr=No attributes selected for user: [[user]]
