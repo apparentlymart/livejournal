@@ -32,14 +32,32 @@ sub save_module {
     my $preview = $opts{preview};
 
     my $need_new_id = !defined $id;
-    
+
     if (defined $id) {
-        my $old_content = $class->module_content( moduleid => $id, journalid => LJ::want_userid($journal) );
+        my $old_content = $class->module_content( moduleid => $id,
+            journalid => LJ::want_userid($journal) ) || '';
         my $new_content = $contents;
 
-        $old_content =~ s/\s//g;
-        $new_content =~ s/\s//g;
-        
+        # old content is cleaned by module_content(); new is not
+        LJ::CleanHTML::clean(\$new_content, {
+            addbreaks => 0,
+            tablecheck => 0,
+            mode => 'allow',
+            allow => [qw(object embed)],
+            deny => [qw(script iframe)],
+            remove => [qw(script iframe)],
+            ljcut_disable => 1,
+            cleancss => 0,
+            extractlinks => 0,
+            noautolinks => 1,
+            extractimages => 0,
+            noexpandembedded => 1,
+            transform_embed_nocheck => 1,
+        });
+
+        $old_content =~ s/\s//sg;
+        $new_content =~ s/\s//sg;
+
         $need_new_id = 1 unless $old_content eq $new_content;
     }
 
@@ -325,7 +343,7 @@ sub module_iframe_tag {
     my %params = (moduleid => $moduleid, journalid => $journalid, preview => $preview,);
     LJ::run_hook('modify_embed_iframe_params', \%params, $u, $remote);
     my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', %params));
-    my $iframe_link = "http://$LJ::EMBED_MODULE_DOMAIN/?auth_token=$auth_token" . 
+    my $iframe_link = "http://$LJ::EMBED_MODULE_DOMAIN/?auth_token=$auth_token" .
         join('', map { "&amp;$_=" . LJ::eurl($params{$_}) } keys %params);
     my $iframe_tag = qq {<iframe src="$iframe_link" } .
         qq{width="$width" height="$height" frameborder="0" class="lj_embedcontent" $id></iframe>};
