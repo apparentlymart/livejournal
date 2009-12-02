@@ -340,7 +340,7 @@ body<=
 
     $ret .= "</div></fieldset>";
 
-    $ret .= "<fieldset id='member-restrictions'>";
+    $ret .= "<fieldset id='moderation_type'>";
     $ret .= "<legend>$ML{'.label.antispam'}</legend><div><?p $ML{'.label.moderation'} p?>";
     $ret .= "<p class='input-wrapper'>";
     $ret .= LJ::html_check({ type => 'radio', id => 'moderate_none', name => 'moderated', value => 'N', selected => ($info{moderated} == 0 || $info{moderated} eq 'N') ? 1 : 0 });
