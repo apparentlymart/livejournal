@@ -175,7 +175,7 @@ function _taglist(int max, int multiplier) : string[][] {
 			$text = string($whole/100) + "." + (($mod->length()==1)?"0$mod":$mod);
 		}
 		if ($*tag_display == "list") {
-			$links[size $links][1] = """<a href="$tag.url" rel="tag">$tag.name</a> — $count_text""";
+			$links[size $links][1] = """<a href="$tag.url" rel="tag">$tag.name</a> <span class="emdash">—</span> <span class="tag-count">$count_text</span>""";
 		} else {
 			$links[size $links][1] = """<a href="$tag.url" title="$count_text" rel="tag" style="font-size:${text}em;">$tag.name</a>""";
 		}
@@ -866,7 +866,7 @@ function MonthPage::print_body {
 					+ (($e.poster.username != $e.journal.username) ? _ljuser($e.poster,"") : "")
 					+ $e.security_icon
 					+ (($e.subject != "") ? """ <a href="$e.permalink_url">$e.subject</a>""" : """ <a href="$e.permalink_url">$*text_nosubject</a>""")
-					+ (($e.comments.count > 0) ? (" — " + get_plural_phrase($e.comments.count, "text_read_comments")) : "")
+					+ (($e.comments.count > 0) ? (""" <span class="emdash">—</span> """ + get_plural_phrase($e.comments.count, "text_read_comments")) : "")
 					+ (($e.comments.screened) ? " $*text_month_screened_comments" : "")
 					+ "</dd>";
 				}
@@ -1084,7 +1084,7 @@ function EntryPage::print_comment_partial (Comment c) {
 	if ($subj == "...") {
 		$subj = "…";
 	}
-	print safe """<a href="$c.permalink_url">$subj</a> — $poster""";
+	print safe """<a href="$c.permalink_url">$subj</a> <span class="emdash">—</span> $poster""";
 	var Link expand_link = $c->get_link("expand_comments");
 	if ($c.thread_url != "" and defined $expand_link) {
 		" ("; $c->print_expand_link(); ")";
