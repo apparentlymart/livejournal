@@ -517,26 +517,6 @@ function _merge (string{} a,string{} b) : string{} {
 	return $result;
 } 
 
-function _sort(string[] input, int[] order) : string {
-	var string result = "";
-	var string[] array;
-	var int i = 0;
-	foreach var string item ($input) {
-		if ($order[$i]) {
-			if ($array[$order[$i]*100]) {
-				$array[$order[$i]*100+$i+1] = $item;
-			} else {
-				$array[$order[$i]*100] = $item;
-			}
-		}
-		$i++;
-	}
-	foreach var string item ($array) {
-		$result = "$result$item";
-	}
-	return $result;
-}
-
 function _items(string[][] input, string{} _args) :string {
 	var string result = "";
 	var string{} args = _merge({
