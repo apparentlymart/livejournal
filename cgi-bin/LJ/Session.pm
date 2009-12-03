@@ -411,7 +411,7 @@ sub helper_url {
     my $domcook = LJ::Session->domain_cookie($dest) or
         return;
 
-    if ($dest =~ m!^(https?://)([^/]*?)\.\Q$LJ::USER_DOMAIN\E/?([^/]*)!) {
+    if ($dest =~ m!^(https?://)([^/]*?)\.\Q$LJ::USER_DOMAIN\E/?([a-z0-9\-_]*)!i) {
         my $url = "$1$2.$LJ::USER_DOMAIN/";
         if ($LJ::SUBDOMAIN_FUNCTION{lc($2)} eq "journal") {
             $url .= "$3/" if $3 && ($3 ne '/'); # 'http://community.livejournal.com/name/__setdomsess'
