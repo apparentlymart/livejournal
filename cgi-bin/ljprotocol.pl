@@ -1322,7 +1322,7 @@ sub postevent
         }
     };
 
-    my $need_moderated = ( $uowner->{'moderated'} eq 'A' ) ? 1 : 0;
+    my $need_moderated = ( $uowner->{'moderated'} =~ /^[1A]$/ ) ? 1 : 0;
     if ( $uowner->{'moderated'} eq 'F' ) {
         ## Scan post for spam
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
