@@ -65,7 +65,7 @@ sub render_body {
 sub get_random_question {
     my $class = shift;
     my %opts = @_;
-    
+ 
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
     my $domain = $opts{domain};
     my @questions = $opts{question} || LJ::QotD->get_questions( user => $u, domain => $domain );
@@ -223,7 +223,7 @@ sub _get_question_data {
     if ($count) {
         $count .= "+" if $count >= $LJ::RECENT_QOTD_SIZE;
         $view_answers_link = "<a" . ($opts->{small_view_link} ? " class='small-view-link'" : '') .
-            (($opts->{form_disabled} || $opts->{embed}) ? ' target="_top"' : '') . # Open links on top, not in current frame.
+            (($opts->{form_disabled} || $opts->{embed}) ? ' target="_blank"' : '') . # Open links on top, not in current frame.
             " href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" .
                 $class->ml('widget.qotd.viewanswers', {'total_count' => $count}) .
             "</a>";
