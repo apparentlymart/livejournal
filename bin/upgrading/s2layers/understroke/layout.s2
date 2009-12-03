@@ -196,24 +196,24 @@ function _userlinks() : string[][] {
 				$Open=false;
 			}
 			if ($link.title->starts_with("http://") and ($link.title->ends_with(".jpg") or $link.title->ends_with(".png") or $link.title->ends_with(".gif"))) {
-				$result[$i][1] = """<dt class="img"><img src="$link.title" alt="" /></dt>""";
+				$result[$i][1] = """<dt class="ulink-title"><img class="ulink-title-img" src="$link.title" alt="" /></dt>""";
 			} else {
-				$result[$i][1] = "<dt>$link.title</dt>";
+				$result[$i][1] = """<dt class="ulink-title">$link.title</dt>""";
 			}
 			$Open=true;
 		}
 		elseif ($link.title == "") {
-			$result[$i][1] = "<dd>-</dd>";
+			$result[$i][1] = """<dd class="ulink-empty">-</dd>""";
 		}
 		else {
 			if (not $Open) {
 				$Open=true;
-				$result[$i++][1] = "<dt>$*text_links</dt>";
+				$result[$i++][1] = """<dt class="ulink-title">$*text_links</dt>""";
 			}
 			if ($link.title->starts_with("http://") and ($link.title->ends_with(".jpg") or $link.title->ends_with(".png") or $link.title->ends_with(".gif"))) {
-				$result[$i][1] = """<dd class="img"><a href="$link.url"><img src="$link.title" alt="" /></a></dd>""";
+				$result[$i][1] = """<dd class="ulink-item"><a class="ulink-item-in" href="$link.url"><img class="ulink-item-img" src="$link.title" alt="" /></a></dd>""";
 			} else {
-				$result[$i][1] = """<dd><a href="$link.url">$link.title</a></dd>""";
+				$result[$i][1] = """<dd class="ulink-item"><a class="ulink-item-in" href="$link.url">$link.title</a></dd>""";
 			}
 		}
 		$i++;
@@ -249,13 +249,13 @@ function _summary() : string[][] {
 	foreach var Entry e ($p.entries) {
 		var string user = "";
 		if (($p.journal.username == $e.journal.username) and $p.view != "friends" and $p.journal_type == "C") {
-			$user = _ljuser($e.poster,"") + " — ";
+			$user = _ljuser($e.poster,"") + """ <span class="emdash">—</span> """;
 		} elseif ($p.journal.username != $e.journal.username or $p.view == "friends") {
-			$user = _ljuser($e.journal,"") + " — ";
+			$user = _ljuser($e.journal,"") + """ <span class="emdash">—</span> """;
 		}
 		$result[size $result] = ["",
-			"""$user<a href="#post-$e.journal.username-$e.itemid">"""+ (($e.subject != "") ? striphtml($e.subject) : $*text_nosubject) +"</a>"
-			+ (($e.comments.count > 0) ? (""" — <a href="$e.permalink_url">""" + get_plural_phrase($e.comments.count, "text_read_comments") + "</a>"):"")
+			"""$user<a class="summary-link" href="#post-$e.journal.username-$e.itemid">"""+ (($e.subject != "") ? striphtml($e.subject) : $*text_nosubject) +"</a>"
+			+ (($e.comments.count > 0) ? (""" <span class="emdash">—</span> <a class="summary-comments" href="$e.permalink_url">""" + get_plural_phrase($e.comments.count, "text_read_comments") + "</a>"):"")
 		];
 	}
 
