@@ -1,0 +1,43 @@
+/* Horizon
+--------------------------------------*/
+/* Logged-in */
+.logged-in #navigation {
+	background:#000 url(/img/reskining/hn2010y/hn2010y-hor-in.jpg) 100% 0 no-repeat;
+	min-width:840px;
+	}
+.logged-in #Logo A {
+	position:relative;
+	left:-155px;
+	width:185px;
+	}
+
+/* Logged-out */
+.logged-out #navigation {
+	background:#000 url(/img/reskining/hn2010y/hn2010y-hor-out.jpg) 0 0 no-repeat;
+	}
+.logged-out #Logo A {
+	width:250px;
+	}
+
+/* Lanzelot
+--------------------------------------*/
+#header {
+	background:#000 url(/img/reskining/hn2010y/hn2010y-lanz.jpg) 0 0 no-repeat;
+	}
+	#header .logo,
+	#header .logo A,
+	#header .logo SPAN {
+		background:none;
+		width:225px !important;
+		}
+	#header .logo A {
+		position:relative;
+		top:80px;
+		}
+	#header .logo A,
+	#header .logo SPAN {
+		height:62px;
+		}
+#header .login-tl {
+	background:#000;
+	}
