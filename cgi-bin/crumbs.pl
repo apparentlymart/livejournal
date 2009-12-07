@@ -45,6 +45,7 @@ use POSIX qw/ENOENT/;
                'friends' => ['Friends Tools', '/friends/', 'manage'],
                'home' => ['Home', '/', ''],
                'invitefriend' => ['Invite a Friend', '/friends/invite.bml', 'friends'],
+               'invite2paid' => ['Invite To Paid', '/friends/invite2paid.bml', 'friends'],
                'joincomm' => ['Join Community', '', 'community'],
                'latestposts' => ['Latest Posts', '/stats/latest.bml', 'stats'],
                'layerbrowse' => ['Public Layer Browser', '/customize/advanced/layerbrowse.bml', 'advcustomize'],
