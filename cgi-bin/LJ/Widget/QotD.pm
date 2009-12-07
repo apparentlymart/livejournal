@@ -257,6 +257,7 @@ sub _get_question_data {
         answer_link     => $answer_link,
         answer_url      => $answer_url,
         answer_text     => $answer_text,
+        answers_url     => $class->answers_url($q, $opts),
         impression_img  => $impression_img,
         date            => $date,
     };
@@ -290,6 +291,14 @@ sub answer_url {
     my %opts = @_;
 
     return "$LJ::SITEROOT/update.bml?qotd=$question->{qid}";
+}
+
+sub answers_url {
+    my $class = shift;
+    my $question = shift;
+    my %opts = @_;
+
+    return "$LJ::SITEROOT/misc/latestqotd.bml?qotd=$question->{qid}";
 }
 
 sub subject_text {
