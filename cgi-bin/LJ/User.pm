@@ -4030,8 +4030,12 @@ sub set_statusvis {
         });
 
     # do update
-    return LJ::update_user($u, { statusvis => $statusvis,
+    my $ret = LJ::update_user($u, { statusvis => $statusvis,
                                  raw => 'statusvisdate=NOW()' });
+
+    $u->fb_push;
+
+    return $ret;
 }
 
 sub set_visible {
@@ -4066,9 +4070,6 @@ sub set_suspended {
     }
 
     LJ::statushistory_add($u, $who, "suspend", $reason);
-
-    eval { $u->fb_push };
-    warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
 
     # close all spamreports on this user
     my $dbh = LJ::get_db_writer();
@@ -4107,9 +4108,6 @@ sub set_unsuspended {
     }
 
     LJ::statushistory_add($u, $who, "unsuspend", $reason);
-
-    eval { $u->fb_push };
-    warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
 
     return $res; # success
 }
@@ -4443,8 +4441,12 @@ sub _friend_friendof_uids_do {
 
 sub fb_push {
     my $u = shift;
-    return unless $u && $u->get_cap("fb_account");
-    return Apache::LiveJournal::Interface::FotoBilder::push_user_info( $u->id );
+    eval {
+        if ($u && $u->get_cap("fb_account")) {
+            Apache::LiveJournal::Interface::FotoBilder::push_user_info( $u->id );
+        }
+    };
+    warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
 }
 
 sub grant_priv {
