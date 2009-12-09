@@ -5529,6 +5529,18 @@ sub dismissed_page_notices_remove {
     return 1;
 }
 
+sub custom_usericon {
+    my ($u) = @_;
+    return $u->prop('custom_usericon') || '';
+}
+
+sub set_custom_usericon {
+    my ($u, $url) = @_;
+    my $uid = $u->id;
+
+    LJ::set_userprop($u, 'custom_usericon', $url);
+}
+
 package LJ;
 
 use Carp;
@@ -6905,7 +6917,14 @@ sub ljuser
         
         ## add class as "ljuser-name_*username*" for find user on page to change alias
         $user_html .= " ljuser-name_".LJ::canonical_username($user);
-        $user_html .= "' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color";
+        
+        my $imgurl;
+        if ($fil =~ /^https?:\/\//) {
+            $url = $fil;
+        } else {
+            $url = "$img/$fil";
+        }
+        $user_html .= "' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'><img src='$url' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color";
         $user_html .= "  title='$alias'"
             if $alias;
         $user_html .= ">$ljusername";
@@ -6946,6 +6965,10 @@ sub ljuser
         return $make_tag->($icon, $url, $size || 16) if $icon;
     }
 
+    if (my $icon = $u->custom_usericon) {
+        return $make_tag->($icon, $url, 16);
+    }
+    
     if ($type eq 'C') {
         return $make_tag->("comm_${head_size}.gif", $url, $head_size) if $head_size;
         return $make_tag->('community.gif', $url, 16);

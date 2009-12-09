@@ -275,4 +275,17 @@ register_setter("maintainers_freeze", sub {
     }
 });
 
+register_setter('custom_usericon', sub {
+    my ($u, $key, $value, $err) = @_;
+
+    my $remote = LJ::get_remote();
+    unless ($remote && LJ::check_priv($remote, 'siteadmin', 'custom-usericon')) {
+        $$err = "You do not have privileges to set this property.";
+        return 0;
+    }
+
+    $u->set_custom_usericon($value);
+    return 1;
+});
+
 1;

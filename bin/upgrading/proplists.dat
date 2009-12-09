@@ -1479,3 +1479,8 @@ logproplist.interface:
   des: Name of interface used to post(web/xml-rpc/im etc.).
   prettyname: Interface
   sortorder: 106
+
+userproplist.custom_usericon:
+  datatype: char
+  des: Custom user icon, to be used instead of /img/userinfo.gif in ljuser
+  prettyname: Custom user icon
