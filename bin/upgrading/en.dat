@@ -1636,6 +1636,8 @@ entryform.insert.header=Insert...
 
 entryform.insert.image=Image
 
+entryform.insert.embed=Embed Media
+
 entryform.insert.image2=Insert Image
 
 entryform.insert.poll=Poll
