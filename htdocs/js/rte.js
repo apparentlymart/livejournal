@@ -139,10 +139,10 @@ function useRichText(textArea, statPrefix) {
     if ($('qotd_html_preview')) {
        $('qotd_html_preview').style.display = 'none';
     }
-
-    switched_rte_on = true;
-
-    return false; // do not follow link
+	
+	switched_rte_on = true;
+	$('switched_rte_on').value = '1';
+	return false; // do not follow link
 }
 
 function usePlainText(textArea) {
@@ -180,6 +180,7 @@ function usePlainText(textArea) {
 	textarea_node.focus();
 	$('htmltools').style.display = 'block';
 	switched_rte_on = false;
+	$('switched_rte_on').value = '0';
 	
 	return false;
 }

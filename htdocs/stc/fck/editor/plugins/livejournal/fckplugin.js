@@ -180,17 +180,18 @@ LJCutCommand.prototype.Execute=function()
 		
 		range.MoveToSelection();
 		
-		var bookmark = range.CreateBookmark(),
-			cut_node = FCK.EditorDocument.createElement('lj-cut');
+		var cut_node = FCK.EditorDocument.createElement('lj-cut');
 		
 		if (text && text != window.parent.FCKLang.ReadMore) {
 			cut_node.setAttribute('text', text);
 		}
 		
 		range.ExtractContents().AppendTo(cut_node);
+		// for empty selection
+		!cut_node.childNodes.length && cut_node.appendChild(FCK.EditorDocument.createTextNode(' '));
 		range.InsertNode(cut_node);
-		
-		range.MoveToBookmark(bookmark);
+		range.SetStart(cut_node, 1);
+		range.SetEnd(cut_node, 2);
 		range.Select();
 		
 		FCK.Focus();
@@ -483,7 +484,10 @@ FCK.DataProcessor.ConvertToDataFormat = function(body)
 	// rte fix, http://dev.fckeditor.net/ticket/3023
 	// type="_moz" for Safari 4.0.11
 	if (!FCKBrowserInfo.IsIE) {
-		html = html.replace(/<br (type="_moz" )?\/>$/, '');
+		html = html.replace(/<br (type="_moz" )? ?\/>$/, '');
+		if (FCKBrowserInfo.IsSafari) {
+			html = html.replace(/<br type="_moz" \/>/, '');
+		}
 	}
 	
 	html = top.convertToLJTags(html); // call from rte.js
