@@ -1327,15 +1327,31 @@ sub entry_form {
 RTE
 
     $out .= "if (!window.FCKLang) FCKLang = {};\n";
-    $out .= "FCKLang.UserPrompt = \"".LJ::ejs(BML::ml('fcklang.userprompt'))."\";\n";
-    $out .= "FCKLang.InvalidChars = \"".LJ::ejs(BML::ml('fcklang.invalidchars'))."\";\n";
-    $out .= "FCKLang.LJUser = \"".LJ::ejs(BML::ml('fcklang.ljuser'))."\";\n";
-    $out .= "FCKLang.VideoPrompt = \"".LJ::ejs(BML::ml('fcklang.videoprompt'))."\";\n";
-    $out .= "FCKLang.LJVideo = \"".LJ::ejs(BML::ml('fcklang.ljvideo2'))."\";\n";
-    $out .= "FCKLang.CutPrompt = \"".LJ::ejs(BML::ml('fcklang.cutprompt'))."\";\n";
-    $out .= "FCKLang.ReadMore = \"".LJ::ejs(BML::ml('fcklang.readmore'))."\";\n";
-    $out .= "FCKLang.CutContents = \"".LJ::ejs(BML::ml('fcklang.cutcontents'))."\";\n";
-    $out .= "FCKLang.LJCut = \"".LJ::ejs(BML::ml('fcklang.ljcut'))."\";\n";
+    
+    my %langmap = (
+        'UserPrompt' => 'userprompt',
+        'InvalidChars' => 'invalidchars',
+        'LJUser' => 'ljuser',
+        'VideoPrompt' => 'videoprompt',
+        'LJVideo' => 'ljvideo2',
+        'CutPrompt' => 'cutprompt',
+        'ReadMore' => 'readmore',
+        'CutContents' => 'cutcontents',
+        'LJCut' => 'ljcut',
+        'LJEmbedPrompt' => 'ljembedprompt',
+        'LJEmbedPromptTitle' => 'ljembedprompttitle',
+        'LJEmbed' => 'ljembed',
+        'Poll_PollWizardNotice' => 'poll.pollwizardnotice',
+        'Poll_PollWizardNoticeLink' => 'poll.pollwizardnoticelink',
+        'Poll_AccountLevelNotice' => 'poll.accountlevelnotice',
+        'Poll_PollWizardTitle' => 'poll.pollwizardtitle',
+        'Poll' => 'poll',
+    );
+    
+    foreach my $key (keys %langmap) {
+        my $val = $langmap{$key};
+        $out .= "FCKLang.$key = \"".LJ::ejs(BML::ml("fcklang.$val"))."\";\n";
+    }
 
         if ($opts->{'richtext_default'}) {
             $$onload .= 'useRichText("draft", "' . LJ::ejs($LJ::WSTATPREFIX) . '");';

@@ -1952,6 +1952,76 @@ fcklang.userprompt=Enter their username
 
 fcklang.videoprompt=Please enter the YouTube, PhotoBucket, or Google Video URL:
 
+fcklang.ljembedprompt=Add media from other websites by copying and pasting their embed code here.
+
+fcklang.ljembedprompttitle=Insert Embedded Content
+
+fcklang.ljembed=Embed Media
+
+fcklang.poll.pollwizardnotice=Polls must be edited inside the Poll Wizard
+
+fcklang.poll.pollwizardnoticelink=Go to poll wizard
+
+fcklang.poll.accountlevelnotice=You may only create and post polls if you have a Plus or Paid Account or if you are posting the poll to a Plus or Paid community that you maintain.
+
+fcklang.poll.pollwizardtitle=Poll Wizard
+
+fcklang.poll=LiveJournal Poll
+
+fcklang.poll.label.name=Poll Name
+
+fcklang.poll.label.whovote=Who can vote in this poll?
+
+fcklang.poll.whovote.option.everyone=Everyone
+
+fcklang.poll.whovote.option.friends=Friends
+
+fcklang.poll.label.whoview=Who can view this poll?
+
+fcklang.poll.whoview.option.everyone=Everyone
+
+fcklang.poll.whoview.option.friends=Friends
+
+fcklang.poll.whoview.option.owner=Only You
+
+fcklang.poll.nav.label.question=Question #1 of #2
+
+fcklang.poll.nav.label.prev=Previous
+
+fcklang.poll.nav.label.next=Next
+
+fcklang.poll.question.title=Question ##1
+
+fcklang.poll.question.label.anstype=Answer Type
+
+fcklang.poll.question.anstype.option.radio=Radio Buttons
+
+fcklang.poll.question.anstype.option.check=Check Boxes
+
+fcklang.poll.question.anstype.option.dropdown=Drop-down box
+
+fcklang.poll.question.anstype.option.text=Text entry
+
+fcklang.poll.question.anstype.option.scale=Scale
+
+fcklang.poll.question.label.insert=Insert
+
+fcklang.poll.question.label.switch=Switch
+
+fcklang.poll.question.text.label.size=Size:
+
+fcklang.poll.question.text.label.maxlength=Maximum response length:
+
+fcklang.poll.question.scale.label.from=From:
+
+fcklang.poll.question.scale.label.to=To:
+
+fcklang.poll.question.scale.label.by=By:
+
+fcklang.poll.question.label.more=More...
+
+fcklang.poll.wizard.notice.empty=Current question is empty.
+
 feeds.link=syndicated feeds
 
 feeds.text=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.

@@ -119,8 +119,8 @@ LJEmbedCommand.Execute=function() {
         html = selection;
         do_embed(html);
     } else {
-        var prompt = "Add media from other websites by copying and pasting their embed code here. ";
-        top.LJ_IPPU.textPrompt("Insert Embedded Content", prompt, do_embed);
+        var prompt = window.parent.FCKLang.LJEmbedPrompt;
+        top.LJ_IPPU.textPrompt(window.parent.FCKLang.LJEmbedPromptTitle, prompt, do_embed);
     }
 
     return;
@@ -129,7 +129,7 @@ LJEmbedCommand.Execute=function() {
 FCKCommands.RegisterCommand('LJEmbedLink', LJEmbedCommand ); //otherwise our command will not be found
 
 // Create embed media button
-var oLJEmbedLink = new FCKToolbarButton('LJEmbedLink', 'Embed Media',
+var oLJEmbedLink = new FCKToolbarButton('LJEmbedLink', window.parent.FCKLang.LJEmbed,
 										null, null, false, false,
 										[FCKConfig.PluginsPath + 'livejournal/lj_strip.png', 16, 3]
 									);
@@ -277,7 +277,9 @@ LJPollCommand.ippu=function(evt) {
     if (evt && node && node.id.match(/poll\d+/)) {
         var ele = top.document.getElementById("draft___Frame");
         var href = "href='javascript:Poll.callRichTextEditor()'";
-        var notice = parent.LJ_IPPU.showNote("Polls must be edited inside the Poll Wizard<br /><a "+href+">Go to poll wizard</a>", ele);
+        var lang_notice = window.parent.FCKLang.Poll_PollWizardNotice;
+        var lang_notice_link = window.parent.FCKLang.Poll_PollWizardNoticeLink;
+        var notice = parent.LJ_IPPU.showNote(lang_notice + "<br /><a "+href+">"+lang_notice_link+"</a>", ele);
         notice.centerOnWidget(ele);
         if (parent.Event.stop) parent.Event.stop(evt);
     }
@@ -293,7 +295,8 @@ LJNoPoll.GetState=function() {
 }
 LJNoPoll.Execute=function() {
     var ele = top.document.getElementById("draft___Frame");
-    var notice = top.LJ_IPPU.showNote("You may only create and post polls if you have a Plus or Paid Account or if you are posting the poll to a Plus or Paid community that you maintain.", ele);
+    var notice_text = window.parent.FCKLang.Poll_AccountLevelNotice;
+    var notice = top.LJ_IPPU.showNote(notice_text, ele);
     notice.centerOnWidget(ele);
     return;
 }
@@ -302,12 +305,12 @@ if (top.canmakepoll == false) {
     FCKCommands.RegisterCommand('LJPollLink', LJNoPoll);
 } else {
     FCKCommands.RegisterCommand('LJPollLink',
-            new FCKDialogCommand( 'LJPollCommand', 'Poll Wizard',
+            new FCKDialogCommand( 'LJPollCommand', window.parent.FCKLang.Poll_PollWizardTitle,
             '/tools/fck_poll.bml', 420, 370 ));
 }
 
 // Create the toolbar button.
-var oLJPollLink = new FCKToolbarButton('LJPollLink', 'LiveJournal Poll',
+var oLJPollLink = new FCKToolbarButton('LJPollLink', window.parent.FCKLang.Poll,
 										null, null, false, false,
 										[FCKConfig.PluginsPath + 'livejournal/lj_strip.png', 16, 4]
 										);
