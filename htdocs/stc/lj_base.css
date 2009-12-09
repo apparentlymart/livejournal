@@ -353,3 +353,30 @@ It must be invisible, use it only for reskining */
 	.b-form-changelist .type-text-changed {
 		color:#000;
 		}
+
+/* Flexible banner*/
+/* Must be removed after implementation of Framework! */
+.b-banner-flexible {
+	margin: 0 0 12px;
+	font-size: 0;
+	line-height: 0;
+	width: 970px;
+	}
+	.b-banner-flexible:after {
+	    content: " ";
+	    display: block;
+	    visibility: hidden;
+	    clear: both;
+	    height: 0;
+	    font-size: 0;
+	    line-height: 0;
+		}
+	.b-banner-flexible .b-banner-728 {
+		float: right;
+		width: 728px;
+		}
+	.b-banner-flexible .b-banner-236 {
+		float: left;
+		overflow: hidden;
+		width: 236px;
+		}
