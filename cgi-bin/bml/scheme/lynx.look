@@ -41,7 +41,10 @@ _code?>
 %%HEAD%%
 </head>
 
-<body %%bodyopts%%>
+<?_code {
+	my $class = (BML::get_uri() =~ m!^/index\.bml$!) ? 'class="index-page"' : '';
+    return "<body $class %%bodyopts%%>";
+} _code?>
 
 %%BODY%%
 
