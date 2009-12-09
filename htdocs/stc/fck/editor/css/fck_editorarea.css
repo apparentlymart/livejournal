@@ -133,6 +133,15 @@ lj-cut
 	border: #000 1px dotted;
 	background-color: #d2d2d2;
 }
+/* fix inline behavior, for no IE */
+lj-cut ul,
+lj-cut ol
+{
+	background-color: #d2d2d2;
+	border: #000 1px dotted;
+	//background-color: transparent;
+	//border: 0;
+}
 
 .ljuser
 {

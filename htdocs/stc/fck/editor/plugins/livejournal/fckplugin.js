@@ -157,9 +157,9 @@ LJCutCommand.prototype.GetState=function() {
 
 LJCutCommand.prototype.Execute=function()
 {
+	FCKUndo.SaveUndoStep();
+	
 	if (this.GetState() == FCK_TRISTATE_ON) {
-		FCKUndo.SaveUndoStep();
-		
 		var path = new FCKElementPath(FCKSelection.GetBoundaryParentElement(true));
 		
 		// See if the first block has a ljcut parent.
@@ -169,31 +169,47 @@ LJCutCommand.prototype.Execute=function()
 				break;
 			}
 		}
-		var text = prompt(window.parent.FCKLang.CutPrompt, path.Elements[i].getAttribute('text') || window.parent.FCKLang.ReadMore);
+		var text = prompt(top.FCKLang.CutPrompt, path.Elements[i].getAttribute('text') || top.FCKLang.ReadMore);
 		
-		text && text != window.parent.FCKLang.ReadMore ?
+		text && text != top.FCKLang.ReadMore ?
 			cut_node.setAttribute('text', text) :
 			cut_node.removeAttribute('text');
 	} else {
-		var text = prompt(window.parent.FCKLang.CutPrompt, window.parent.FCKLang.ReadMore),
+		var text = prompt(top.FCKLang.CutPrompt, top.FCKLang.ReadMore),
 			range = new FCKDomRange(FCK.EditorWindow);
 		
 		range.MoveToSelection();
 		
 		var cut_node = FCK.EditorDocument.createElement('lj-cut');
 		
-		if (text && text != window.parent.FCKLang.ReadMore) {
+		if (text && text != top.FCKLang.ReadMore) {
 			cut_node.setAttribute('text', text);
 		}
 		
-		range.ExtractContents().AppendTo(cut_node);
-		// for empty selection
-		!cut_node.childNodes.length && cut_node.appendChild(FCK.EditorDocument.createTextNode(' '));
-		range.InsertNode(cut_node);
-		range.SetStart(cut_node, 1);
-		range.SetEnd(cut_node, 2);
-		range.Select();
+		// The common parent must not be the following tags: table, tbody, tr, ol, ul.
+		while (range.StartBlock && range.StartBlock.parentNode.nodeName.IEquals('table', 'tbody', 'tr', 'ol', 'ul'))
+		{
+			range.SetStart(range.StartBlock.parentNode, 3);
+		}
+		while (range.EndBlock && range.EndBlock.parentNode.nodeName.IEquals('table', 'tbody', 'tr', 'ol', 'ul'))
+		{
+			range.SetEnd(range.EndBlock.parentNode, 4);
+		}
 		
+		range.ExtractContents().AppendTo(cut_node);
+		range.InsertNode(cut_node);
+		if (cut_node.childNodes.length) {
+			range.SetStart(cut_node, 1);
+			range.SetEnd(cut_node, 2);
+		}
+		// create one from the current selection position.
+		else {
+			cut_node.appendChild(FCK.EditorDocument.createTextNode('\ufeff'));
+			range.MoveToNodeContents(cut_node);
+			range.Collapse(true);
+		}
+		
+		range.Select();
 		FCK.Focus();
 		FCK.Events.FireEvent('OnSelectionChange');
 	}
