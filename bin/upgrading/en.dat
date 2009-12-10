@@ -2026,6 +2026,12 @@ feeds.link=syndicated feeds
 
 feeds.text=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
 
+gender.female=Female
+
+gender.male=Male
+
+gender.specify=Specify
+
 img.btn_del=Delete
 
 img.btn_down=Down
@@ -3341,6 +3347,8 @@ widget.createaccount.error.username.reserved=Sorry, that is a reserved username.
 
 widget.createaccount.field.birthdate=Birthdate:
 
+widget.createaccount.field.gender=Gender:
+
 widget.createaccount.field.captcha=Prove you're human:
 
 widget.createaccount.field.captcha.hear=Type the numbers you hear:
@@ -3368,6 +3376,8 @@ widget.createaccount.tip.birthdate=Required by law. No worries, you can set priv
 widget.createaccount.tip.birthdate2=Required by law. By default, we only display the month and day.
 
 widget.createaccount.tip.captcha=If you can't read the text, type "audio" to take a sound test instead.
+
+widget.createaccount.tip.gender=By default we do not show your gender to anybody.
 
 widget.createaccount.tip.email=We need your email address to send important information. We will never share or sell your email address.
 

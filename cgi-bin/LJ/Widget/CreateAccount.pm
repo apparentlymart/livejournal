@@ -29,6 +29,7 @@ sub render_body {
     LJ::run_hook('partners_registration_visited', $get->{from});
 
     my $alt_layout = $opts{alt_layout} ? 1 : 0;
+$alt_layout=1;
     my $ret;
 
     if ($alt_layout) {
@@ -43,9 +44,10 @@ sub render_body {
     $ret .= $class->start_form(%{$opts{form_attr}});
 
     my $tip_birthdate = LJ::ejs($class->ml('widget.createaccount.tip.birthdate2'));
-    my $tip_email = LJ::ejs($class->ml('widget.createaccount.tip.email'));
-    my $tip_password = LJ::ejs($class->ml('widget.createaccount.tip.password'));
-    my $tip_username = LJ::ejs($class->ml('widget.createaccount.tip.username'));
+    my $tip_email     = LJ::ejs($class->ml('widget.createaccount.tip.email'));
+    my $tip_password  = LJ::ejs($class->ml('widget.createaccount.tip.password'));
+    my $tip_username  = LJ::ejs($class->ml('widget.createaccount.tip.username'));
+    my $tip_gender    = LJ::ejs($class->ml('widget.createaccount.tip.gender'));
 
     # tip module
     if ($alt_layout) {
@@ -152,6 +154,30 @@ sub render_body {
     );
     $ret .= $error_msg->('confirmpass', '<br /><span class="formitemFlag">', '</span>');
     $ret .= "</td></tr>\n" unless $alt_layout;
+
+
+    ### gender
+    if ($alt_layout){
+        $ret .= "<label for='create_gender_mm' class='label_create'>" . $class->ml('widget.createaccount.field.gender') . "</label>";
+        $ret .= "<div class='bubble' id='bubble_gender'>";
+        $ret .= "<div class='bubble-arrow'></div>";
+        $ret .= "<div class='bubble-text'>$tip_gender</div>";
+        $ret .= "</div>";
+    } else {
+        $ret .= "<tr><td class='field-name'>" . $class->ml('widget.createaccount.field.gender') . "</td>\n<td>";
+    }
+    $ret .= $class->html_select(
+                name => "gender",
+                id => "create_gender_mm",
+                selected => $post->{gender},
+                list => [ 
+                    ''  =>  LJ::Lang::ml("gender.specify"),
+                    'M' =>  LJ::Lang::ml("gender.male"),
+                    'F' =>  LJ::Lang::ml("gender.female"),
+                    ],
+                ) . " ";
+    $ret .= "</td></tr>\n" unless $alt_layout;
+    
 
     ### birthdate
     if ($LJ::COPPA_CHECK) {
@@ -427,6 +453,10 @@ sub handle_post {
     unless (LJ::is_ascii($post->{password1})) {
         $from_post{errors}->{password} = $class->ml('widget.createaccount.error.password.asciionly');
     }
+
+    ### gender check
+    $from_post{errors}->{confirmpass} = $class->ml('widget.createaccount.error.nogender')
+        unless $post->{gender} =~ /^M|F$/;
 
     ### start COPPA_CHECK
     # age checking to determine how old they are
