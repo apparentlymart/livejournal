@@ -448,6 +448,8 @@ FCK.DataProcessor.ConvertToHtml = function(data)
 		data = data.replace(/\n/g, '<br />');
 	}
 	
+	data = data.replace(/<lj-cut([^>]*)><\/lj-cut>/g, '<lj-cut$1>\ufeff</lj-cut>');
+	
 	// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
 	if (FCKBrowserInfo.IsIE) {
 		data = data
@@ -533,11 +535,20 @@ FCK.DataProcessor.ConvertToDataFormat = function(body)
 // set cursor to end document
 FCK.Focus = function(to_end) {
 	FCK.EditingArea.Focus();
-	if (to_end && FCK.EditingArea.Document.body.firstChild) {
-		var range = new FCKDomRange(FCK.EditingArea.Window);
-		
-		range.MoveToPosition(FCK.EditingArea.Document.body, 2);
+	if (to_end && FCK.EditorDocument.body.firstChild) {
+		var win = FCK.EditorWindow, doc = FCK.EditorDocument,
+			range = new FCKDomRange(win);
+		range.MoveToPosition(doc.body, 2);
 		range.Select();
+		
+		// scroll to end
+		var iFrameHeight = FCKBrowserInfo.IsIE ? win.frameElement.offsetHeight : win.innerHeight,
+			iInnerHeight = iInnerHeight = doc.body.scrollHeight,
+			delta = iInnerHeight - iFrameHeight;
+		
+		if (delta != 0) {
+			win.scrollTo(0, delta);
+		}
 	}
 }
 
