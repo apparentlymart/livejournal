@@ -1,0 +1,83 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::QotD );
+
+    # sometimes need an Apache::Request object
+    my $req = shift;
+    my $r = $req->{'r'};
+
+    my $remote = LJ::get_remote();
+
+    $title = "Writer's Block Report";
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'qotd') || $LJ::IS_DEV_SERVER;
+
+    my $qid = $GET{qid} || undef;
+
+    my $ret = "";
+
+    $ret .= "<form>";
+    $ret .= "Writer's Block QID <input name='qid' value='$qid' /> ";
+    $ret .= "<input type=submit value='Submit' /></form>";
+
+    return $ret. "<p>Invalid QID.</p>"
+        if ($qid && !($qid =~ /^\d+$/));
+
+    return $ret unless $qid;
+
+    my $queue = LJ::queue("latest_qotd_$qid");
+    my @responses = $queue->get();
+
+    $ret .= "<p>No responses found.</p>" unless @responses;
+
+    my $delim = ",";
+    my $out = join($delim, ( "Username", "Age", "Gender", "#Comments", "Entry URL", "Answer"));
+    $out .= "\n";
+    foreach my $resp (@responses) {
+        my ($userid, $jitemid) = split(',', $resp);
+
+        if (! $userid || ! $jitemid) {
+            warn "invalid qotd queue item: '$resp'";
+            next;
+        }
+
+        my $journal = LJ::load_userid($userid);
+        my $entry = LJ::Entry->new($journal, jitemid => $jitemid);
+        next unless $journal && $entry && $entry->valid;
+        next unless $entry->visible_to(undef);
+        my $up = $entry->poster;
+        my $num_comments = $entry->reply_count || 0;
+        my $age = $up->can_share_bday ? $up->age_for_adcall : undef;
+        my $gender = $up->gender_for_adcall || undef;
+
+        my $answer = '"' . LJ::strip_html($entry->event_text) . '"';
+        $out .= join($delim, ( $up->user, $age, $gender, $num_comments, $entry->url, $answer ));
+        $out .= "\n";
+
+    }
+
+    BML::finish_suppress_all();
+    my $filename = "writersblockreport-$qid.csv";
+    $r->content_type("application/x-csv");
+    $r->header_out("Content-disposition" => "attachment; filename=\"$filename\"");
+    $r->send_http_header;
+    $r->print($out);
+
+    return;
+
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
