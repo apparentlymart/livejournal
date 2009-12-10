@@ -43,33 +43,37 @@ sub option {
 
     my $ret .= "<p>" . $class->ml('setting.sms.option', { sitename => $LJ::SITENAMESHORT, aopts => "href='$LJ::SITEROOT/manage/sms/textcommands.bml'" }) . "</p>";
 
-    $ret .= "<table class='setting_table' cellspacing='5' cellpadding='0'>";
+    if ($u->sms_active) {
+        $ret .= "<table class='setting_table' cellspacing='5' cellpadding='0'>";
 
-    $ret .= "<tr><td class='setting_label'><label for='${key}sms_phone'>" . $class->ml('setting.sms.option.phone') . "</label></td>";
-    $ret .= "<td>" . LJ::html_text({
-        name => "${key}sms_phone",
-        id => "${key}sms_phone",
-        value => $current_msisdn || "",
-    });
-    my $phone_errdiv = $class->errdiv($errs, "sms_phone");
-    $ret .= "<br />$phone_errdiv" if $phone_errdiv;
-    $ret .= "</td></tr>";
+        $ret .= "<tr><td class='setting_label'><label for='${key}sms_phone'>" . $class->ml('setting.sms.option.phone') . "</label></td>";
+        $ret .= "<td>" . LJ::html_text({
+            name => "${key}sms_phone",
+            id => "${key}sms_phone",
+            value => $current_msisdn || "",
+        });
+        my $phone_errdiv = $class->errdiv($errs, "sms_phone");
+        $ret .= "<br />$phone_errdiv" if $phone_errdiv;
+        $ret .= "</td></tr>";
 
-    $ret .= "<tr><td class='setting_label'><label for='${key}sms_carrier'>" . $class->ml('setting.sms.option.carrier') . "</label></td>";
-    $ret .= "<td>" . LJ::html_select({
-        name => "${key}sms_carrier",
-        id => "${key}sms_carrier",
-        selected => $carrier || "",
-        noescape => 1,
-    }, ("", $class->ml('setting.sms.option.carrier.selectone')), @carriers);
-    my $carrier_errdiv = $class->errdiv($errs, "sms_carrier");
-    $ret .= "<br />$carrier_errdiv" if $carrier_errdiv;
-    $ret .= "</td></tr>";
+        $ret .= "<tr><td class='setting_label'><label for='${key}sms_carrier'>" . $class->ml('setting.sms.option.carrier') . "</label></td>";
+        $ret .= "<td>" . LJ::html_select({
+            name => "${key}sms_carrier",
+            id => "${key}sms_carrier",
+            selected => $carrier || "",
+            noescape => 1,
+        }, ("", $class->ml('setting.sms.option.carrier.selectone')), @carriers);
+        my $carrier_errdiv = $class->errdiv($errs, "sms_carrier");
+        $ret .= "<br />$carrier_errdiv" if $carrier_errdiv;
+        $ret .= "</td></tr>";
 
-    $ret .= "<tr><td>&nbsp;</td>";
-    $ret .= "<td><a href='$LJ::SITEROOT/manage/sms/'>" . $class->ml('setting.sms.option.advanced') . "</a></td></tr>";
+        $ret .= "<tr><td>&nbsp;</td>";
+        $ret .= "<td><a href='$LJ::SITEROOT/manage/sms/'>" . $class->ml('setting.sms.option.advanced') . "</a></td></tr>";
 
-    $ret .= "</table>";
+        $ret .= "</table>";
+    } else {
+        $ret .= "<p>" . $class->ml('setting.sms.initial_setup', { smsname => $LJ::SMS_TITLE, aopts => "href='$LJ::SITEROOT/manage/sms/'" }) . "</p>";
+    }
 
     return $ret;
 }
