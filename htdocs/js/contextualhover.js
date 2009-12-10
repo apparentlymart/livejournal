@@ -338,6 +338,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
     this.width = opts.width; // Use for resizing later
     this.height = opts.height; // Use for resizing later
     this.alias = opts.alias;  
+    this.callback = opts.callback;
     LJWidgetIPPU_AddAlias.superClass.init.apply(this, arguments);
   },
 
@@ -358,6 +359,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 		return;
 	}
 	this.ippu.hide();
+	this.callback && this.callback();
 	var userLJ = data.res.journalname,
 		userClassName = 'ljuser-name_' + data.res.journalname,
 		searchProfile = DOM.getElementsByClassName(document, userClassName),
@@ -449,14 +451,15 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 
 
 Aliases = {}
-function addAlias(target, ptitle, ljusername, oldalias) {
+function addAlias(target, ptitle, ljusername, oldalias, callback) {
     if (! ptitle) return true;
 	
     var addvgift = new LJWidgetIPPU_AddAlias({
         title: ptitle,
         width: 440,
         height: 180,
-        authToken: Aliases.authToken
+		authToken: Aliases.authToken,
+		callback: callback
         }, {
 	    alias: target.alias||oldalias,
             foruser: ljusername
