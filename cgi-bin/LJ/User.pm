@@ -1438,9 +1438,7 @@ sub prop {
     if ({ map { $_ => 1 }
           qw(opt_sharebday opt_showbday opt_showlocation opt_showmutualfriends
              view_control_strip show_control_strip opt_ctxpopup opt_embedplaceholders
-             esn_inbox_default_expand opt_getting_started
-             opt_sharegender
-             )
+             esn_inbox_default_expand opt_getting_started)
         }->{$prop})
     {
         return $u->$prop;
@@ -1521,26 +1519,6 @@ sub opt_sharebday {
         return 'N' if ($u->underage || $u->is_child);
         return 'F' if ($u->is_minor);
         return 'A';
-    }
-}
-
-# opt_sharegender options
-# A - All people
-# R - Registered Users
-# F - Friends Only
-# N - Nobody
-# By default "N".
-sub opt_sharegender {
-    my $u = shift;
-
-    if ($u->raw_prop('opt_sharegender') =~ /^(A|F|N|R)$/) {
-        my $val = $u->raw_prop('opt_sharegender');
-        $val = 'N' unless $val =~ m/^(A|F|N|R)$/;
-        return $val;
-    } else {
-        return 'N' if $u->underage or $u->is_child;
-        return 'F' if $u->is_minor;
-        return 'N';
     }
 }
 

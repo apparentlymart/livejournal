@@ -1485,11 +1485,3 @@ userproplist.custom_usericon:
   des: Custom user icon, to be used instead of /img/userinfo.gif in ljuser
   prettyname: Custom user icon
 
-userproplist.opt_sharegender:
-  cldversion: 4
-  datatype: char
-  des: User selected security setting to determine who can see gender info
-  indexed: 0
-  multihomed: 0
-  prettyname: Share Gender
-

@@ -153,25 +153,6 @@ body<=
         $ret .= "<tr><td class='field_name'>$ML{'.fn.gender'}</td><td>";
         $ret .= LJ::html_select({ 'name' => 'gender', 'selected' => $u->{'gender'} },
                                   'U' => $ML{'.gender.unspecified'}, 'M' => $ML{'.gender.male'}, 'F' => $ML{'.gender.female'} );
-        
-        $ret .= "<div style=\"padding-top: .5em;\">\n";
-        $ret .= " <label for='opt_sharebday'>$ML{'.share.gender'}</label>\n";
-        $ret .= LJ::html_select({ 'name' => 'opt_sharegender',
-                                  'selected' => $u->opt_sharegender },
-                                  { text => BML::ml(".security.visibility.everybody"),
-                                    value => "A",
-                                    disabled => $u->is_child,},
-                                  { text => BML::ml(".security.visibility.regusers"),
-                                    value => "R",
-                                    disabled => $u->is_child,},
-                                  { text => BML::ml(".security.visibility.friends"),
-                                    value => "F",
-                                    disabled => $u->is_child,},
-                                  { text => BML::ml(".security.visibility.nobody"),
-                                    value => "N",});
-        $ret .= "</div>";
-        $ret .= "</td></tr>\n";
-
 
         # birthday
         $ret .= "<tr><td class='field_name'>$ML{'.fn.birthday'}</td><td>";
@@ -599,6 +580,11 @@ body<=
             push @errors, $ML{'.error.bio.toolong'};
         }
 
+        # gender
+        unless ($POST{gender} =~ /^F|M$/){
+            push @errors => $ML{'.error.gender.not_specified'};
+        }
+
         # text messaging
         if ($POST{'txtmsg_security'} =~ m/^(all|reg|friends)$/) {
             unless ($POST{'txtmsg_provider'}) {
@@ -677,8 +663,6 @@ body<=
             $POST{'opt_showmutualfriends'} = $POST{'opt_showmutualfriends'} ? 1 : 0;
             $POST{'opt_hidefriendofs'} = $POST{'opt_hidefriendofs'} ? 0 : 1;
             $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|R|Y|F)$/;
-            $POST{'opt_sharegender'} = undef unless $POST{'opt_sharegender'} =~ m/^(A|F|N|R)$/;
-            $POST{'gender'} = 'U' unless $POST{'gender'} =~ m/^[UMF]$/;
             $POST{'opt_sharebday'} = undef unless $POST{'opt_sharebday'} =~ m/^(A|F|N|R)$/;
             $POST{'opt_showbday'} = 'D' unless $POST{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
             # undefined means show to everyone, "N" means don't show
@@ -718,7 +702,6 @@ body<=
               opt_showmutualfriends opt_showschools
               opt_showbday opt_showlocation opt_showljtalk
               opt_sharebday opt_showonlinestatus
-              opt_sharegender
             );
 
             # reset the gizmo account for this user account

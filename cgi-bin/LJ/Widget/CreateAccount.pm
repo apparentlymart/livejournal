@@ -29,7 +29,6 @@ sub render_body {
     LJ::run_hook('partners_registration_visited', $get->{from});
 
     my $alt_layout = $opts{alt_layout} ? 1 : 0;
-$alt_layout=1;
     my $ret;
 
     if ($alt_layout) {
@@ -60,6 +59,7 @@ $alt_layout=1;
         $ret .= "CreateAccount.email = \"$tip_email\"\n";
         $ret .= "CreateAccount.password = \"$tip_password\"\n";
         $ret .= "CreateAccount.username = \"$tip_username\"\n";
+        $ret .= "CreateAccount.gender   = \"$tip_gender\"\n";
         $ret .= "</script>\n";
         $ret .= "<div id='tips_box_arrow'></div>";
         $ret .= "<div id='tips_box'></div>";
@@ -168,7 +168,7 @@ $alt_layout=1;
     }
     $ret .= $class->html_select(
                 name => "gender",
-                id => "create_gender_mm",
+                id => "create_gender",
                 selected => $post->{gender},
                 list => [ 
                     ''  =>  LJ::Lang::ml("gender.specify"),
@@ -176,6 +176,7 @@ $alt_layout=1;
                     'F' =>  LJ::Lang::ml("gender.female"),
                     ],
                 ) . " ";
+    $ret .= $error_msg->('gender', '<br /><span class="formitemFlag">', '</span>');
     $ret .= "</td></tr>\n" unless $alt_layout;
     
 
@@ -455,7 +456,7 @@ sub handle_post {
     }
 
     ### gender check
-    $from_post{errors}->{confirmpass} = $class->ml('widget.createaccount.error.nogender')
+    $from_post{errors}->{gender} = $class->ml('widget.createaccount.error.nogender')
         unless $post->{gender} =~ /^M|F$/;
 
     ### start COPPA_CHECK

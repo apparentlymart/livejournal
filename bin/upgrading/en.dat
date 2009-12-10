@@ -3329,6 +3329,8 @@ widget.createaccount.error.captcha.invalid=Invalid answer to previous challenge.
 
 widget.createaccount.error.email.lj_domain=You cannot use a [[domain]] alias when creating an account.  Please enter a different email address.
 
+widget.createaccount.error.nogender=Gender must be specified.
+
 widget.createaccount.error.password.asciionly=You can only use ASCII symbols in the password.
 
 widget.createaccount.error.password.bad=Bad password:
