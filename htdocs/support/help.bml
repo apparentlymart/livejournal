@@ -304,7 +304,10 @@ body<=
  $ret .= "</tr>";
 
  my @spids = map { $_->{'spid'} } @support_log;
- my $tags = LJ::Support::Request::Tag::get_requests_tags(@spids)
+ my %tags = map { $_ => [] } @spids;
+ my $tags = \%tags;
+
+ $tags = LJ::Support::Request::Tag::get_requests_tags(@spids)
     if $can_see_tags;
  foreach my $sp (@support_log)
  {
