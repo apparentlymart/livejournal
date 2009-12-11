@@ -1,7 +1,16 @@
 .appwidget-friendbirthdays table {
     width: 100%;
     border: 0;
-}
+	}
+.appwidget-friendbirthdays .indent_sm {
+	margin-bottom: 15px;
+	}
+.appwidget-friendbirthdays H3 {
+	padding-left: 8px;
+	font-style: normal;
+	font-family:Arial;
+	color:#222;
+	}
 
 .appwidget-friendbirthdays .gift-link {
     display: block;

@@ -67,7 +67,7 @@ sub render_body {
         my %friend_birtdays_vgifts = LJ::run_hook('get_friend_birthdays_vgifts', $u);
         %friend_birtdays_vgifts = %LJ::FRIEND_BIRTHDAYS_VGIFTS unless %friend_birtdays_vgifts;
 
-        $ret .= "<p><b>". $class->ml('widget.friendbirthdays.sendgift') ."</b></p>";
+        $ret .= "<h3>". $class->ml('widget.friendbirthdays.sendgift') ."</h3>";
         
         $ret .= "<ul class='giftlist'>";
         my ($spons_cnt, $vgift_cnt) = (0, 0);
