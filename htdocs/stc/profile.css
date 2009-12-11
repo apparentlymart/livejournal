@@ -308,3 +308,41 @@ span.expandcollapse {
     margin: 0 0 10px 10px;
     padding: 0 0 0 10px;
 }
+
+
+/* Vgift on profile page */
+.b-vgift-list {
+	list-style:none;
+	padding:0;
+	margin:0;
+	zoom:1;
+	}
+	.b-vgift-list:after {
+	    content: " ";
+	    display: block;
+	    visibility: hidden;
+	    clear: both;
+	    height: 0;
+	    font-size: 0;
+	    line-height: 0;
+		}
+		.b-vgift-list LI {
+			float:left;
+			height:150px;
+			margin:10px;
+			padding:0;
+			text-align:center;
+			width:120px;
+			display: inline;
+			}
+		.b-vgift-list .vg_img {
+			height:100px;
+			margin: 0 auto 5px;
+			width:100px;
+			position: relative;
+			zoom:1;
+			}
+			.b-vgift-list .vg_img IMG {
+				display:block;
+				}
+
