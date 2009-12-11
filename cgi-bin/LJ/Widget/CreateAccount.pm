@@ -549,6 +549,9 @@ sub handle_post {
         );
         return $class->ml('widget.createaccount.error.cannotcreate') unless $nu;
 
+        # set gender
+        $nu->set_prop(gender => $post->{gender});
+
         if ($LJ::HUMAN_CHECK{create} && !LJ::is_enabled("recaptcha")) {
             # mark the captcha for deletion
             LJ::Captcha::expire($capid, $anum, $nu->id);
