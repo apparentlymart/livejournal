@@ -150,6 +150,7 @@ sub clean
     my %remove_attribs = ($opts->{'remove_attribs'}) ? 
         (map {$_ => 1} @{ $opts->{'remove_attribs'} }) : ();
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
+    my $target = $opts->{'target'} || '';
 
     my @canonical_urls; # extracted links
     my %action = ();
@@ -508,7 +509,7 @@ sub clean
                             $newdata .= $user;
                         } else {
                             my $title = Encode::encode_utf8($attr->{title});
-                            my $ljuser = LJ::ljuser($user, { title => $title } );
+                            my $ljuser = LJ::ljuser($user, { title => $title, target => $target } );
                             $newdata .= Encode::decode_utf8($ljuser);
                         }
                     } else {

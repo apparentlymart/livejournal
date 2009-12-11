@@ -6924,7 +6924,7 @@ sub ljuser
         } else {
             $imgurl = "$img/$fil";
         }
-        $user_html .= "' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color";
+        $user_html .= "' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'$target><img src='$imgurl' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color$target";
         $user_html .= "  title='$alias'"
             if $alias;
         $user_html .= ">$ljusername";

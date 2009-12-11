@@ -175,6 +175,8 @@ sub _get_question_data {
     my $class = shift;
     my $q = shift;
     my $opts = shift;
+
+    my $target = $opts->{target};
     
     # FIXME: this is a dirty hack because if this widget is put into a journal page
     #        as the first request of a given Apache, Apache::BML::cur_req will not
@@ -200,7 +202,7 @@ sub _get_question_data {
 
     my $ml_key = $class->ml_key("$q->{qid}.text");
     my $text = $class->ml($ml_key, undef, $lncode);
-    LJ::CleanHTML::clean_event(\$text);
+    LJ::CleanHTML::clean_event(\$text, { target => $target });
 
     my $from_text = '';
     if ($q->{from_user}) {
@@ -212,7 +214,7 @@ sub _get_question_data {
     my $extra_text;
     if ($q->{extra_text} && LJ::run_hook('show_qotd_extra_text', $remote)) {
         $extra_text = $q->{extra_text};
-        LJ::CleanHTML::clean_event(\$extra_text);
+        LJ::CleanHTML::clean_event(\$extra_text, { target => $target });
     }
 
     my $between_text = $from_text && $extra_text ? "<br />" : "";
