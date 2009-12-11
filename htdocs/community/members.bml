@@ -226,7 +226,7 @@ body<=
                     if ($was{$id}->{$_}) {
                         $delete{$_}->{$id} = 1;
                         $delr{$id}->{$_} = 1;
-                        if ($_ eq 'admin' && $c->prop("maintainers_freeze") && $remote->userid != $id) {
+                        if ( $_ eq 'admin' && ( $c->prop("maintainers_freeze") || $LJ::DISABLED{'maintainers_freeze'} ) &&  $remote->userid != $id ) {
                             push @maint_errors, BML::ml('.error.maintainer', { 'user' => LJ::ljuser($us->{$id}) });
                         }
                     }
