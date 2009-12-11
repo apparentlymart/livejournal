@@ -371,7 +371,8 @@ body<=
      my $tags_line;
      if ($can_see_tags && scalar(@tagids)) {
         my @links = map {
-            '<a href="' . $uri . '&sort='. $sort . '&tags=' . $_ . '">'.
+            '<a href="' . $LJ::SITEROOT. 
+            '/support/help.bml?cat=$filtercat&state=$state&tags=' . $_ . '">'.
             $_ . '</a>';
         } @tagnames;
 
