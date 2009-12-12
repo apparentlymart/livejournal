@@ -314,7 +314,7 @@ span.expandcollapse {
 .b-vgift-list {
 	list-style:none;
 	padding:0;
-	margin:0;
+	margin:0 -10px;
 	zoom:1;
 	}
 	.b-vgift-list:after {
@@ -344,5 +344,6 @@ span.expandcollapse {
 			}
 			.b-vgift-list .vg_img IMG {
 				display:block;
+				margin: 0 auto;
 				}
 
