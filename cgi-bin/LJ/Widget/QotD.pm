@@ -227,7 +227,7 @@ sub _get_question_data {
         $view_answers_link = "<a" . ($opts->{small_view_link} ? " class='small-view-link'" : '') .
             (($opts->{form_disabled} || $opts->{embed}) ? ' target="_blank"' : '') . # Open links on top, not in current frame.
             " href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" .
-                $class->ml('widget.qotd.viewanswers', {'total_count' => $count}) .
+                $class->ml('widget.qotd.viewanswers', {'total_count' => $count}, $lncode) .
             "</a>";
     }
 
@@ -238,7 +238,8 @@ sub _get_question_data {
                 button_disabled => $opts->{form_disabled},
                 button_as_link  => $opts->{button_as_link},
                 form_disabled   => $opts->{form_disabled},
-                embed           => $opts->{embed});
+                embed           => $opts->{embed},
+                lang            => $lncode);
     }
 
     my $impression_img = $class->impression_img($q);
@@ -272,7 +273,7 @@ sub answer_link {
     my %opts = @_;
 
     my $url = $class->answer_url($question, user => $opts{user});
-    my $txt = LJ::run_hook("qotd_answer_txt", $opts{user}) || $class->ml('widget.qotd.answer');
+    my $txt = LJ::run_hook("qotd_answer_txt", $opts{user}) || $class->ml('widget.qotd.answer', undef, $opts{lang});
     my $dis = $opts{button_disabled} ? "disabled='disabled'" : "";
     my $onclick = qq{onclick="document.location.href='$url'"};
     my $target = (($opts{form_disabled} || $opts{embed}) ? ' target="_top"' : '');

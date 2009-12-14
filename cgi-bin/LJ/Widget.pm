@@ -606,17 +606,19 @@ sub ml {
     # whether passed with or without a ".", eat that immediately
     $code =~ s/^\.//;
 
+    $lncode = LJ::Lang::get_effective_lang() unless $lncode;
+
     # 1) try with a ., for current page override in 'general' domain
     # 2) try without a ., for global version in 'general' domain
     foreach my $curr_code (".$code", $code) {
-        my $string = LJ::Lang::ml($curr_code, $vars);
+        my $string = LJ::Lang::get_text($lncode, $curr_code, undef, $vars);
+
         return "" if $string eq "_none";
         return $string unless LJ::Lang::is_missing_string($string);
     }
 
     # 3) now try with "widget" domain for user-entered translation string
     my $dmid = $class->ml_dmid;
-    $lncode = LJ::Lang::get_effective_lang() unless $lncode;
     my $string = LJ::Lang::get_text($lncode, $code, $dmid, $vars);
     return "" if $string eq "_none";
     return $string unless LJ::Lang::is_missing_string($string);
