@@ -210,7 +210,7 @@ sub do_request
     if ($method eq "getinbox")         { return getinbox(@args);         }
     if ($method eq "sendmessage")      { return sendmessage(@args);      }
     if ($method eq "setmessageread")   { return setmessageread(@args);   }
-    if ($method eq "addcomment")       { return addcomment(@args);       }
+    if ($method eq "addcomment")       { return addcomment(@args);   }
     if ($method eq 'checksession')     { return checksession(@args);     }
     if ($method eq "getrecentcomments")       { return getrecentcomments(@args);   }
 
@@ -236,19 +236,30 @@ sub checksession {
     }
 }
 
+
 sub addcomment
 {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
-
+    
+    my $journal;
+    if( $req->{journal} ){
+        return fail($err,100) unless LJ::canonical_username($req->{journal});
+        $journal = LJ::load_user($req->{journal}) or return fail($err, 100);
+        return fail($err,214) 
+            if LJ::Talk::Post::require_captcha_test($u, $journal, $req->{body}, $req->{ditemid});
+    }else{
+        $journal = $u;
+    }
+    
     # some additional checks
-    return fail($err,314) unless $u->get_cap('paid');
+#    return fail($err,314) unless $u->get_cap('paid');
     return fail($err,214) if LJ::Comment->is_text_spam( \ $req->{body} );
-
+    
     # create
     my $comment = LJ::Comment->create(
-                        journal      => $u,
+                        journal      => $journal,
                         ditemid      => $req->{ditemid},
                         parenttalkid => ($req->{parenttalkid} || int($req->{parent} / 256)),
 
@@ -314,6 +325,15 @@ sub getfriendspage
     my $skip = (defined $req->{skip}) ? $req->{skip} : 0;
     return fail($err, 209, "Bad skip value") if $skip ne int($skip ) or $skip  < 0 or $skip  > 100;
 
+    my $lastsync = int $req->{lastsync};
+    my $before = int $req->{before};
+    my $before_count = 0;
+    my $before_skip = 0;
+    if ($before){
+        $before_skip = $skip + 0;
+        $skip = 0;
+    }
+    
     my @entries = LJ::get_friend_items({
         'u' => $u,
         'userid' => $u->{'userid'},
@@ -323,13 +343,12 @@ sub getfriendspage
         'dateformat' => 'S2',
     });
 
-    my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count/;
+    my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count userpic/;
 
     my @uids;
 
     my @res = ();
-    my $lastsync = int $req->{lastsync};
-    foreach my $ei (@entries) {
+    while (my $ei = shift @entries) {
 
         next unless $ei;
 
@@ -341,6 +360,20 @@ sub getfriendspage
         if($lastsync) {
             next
                 if $LJ::EndOfTime - $ei->{rlogtime} <= $lastsync;
+        }
+
+        if($before) {
+            last if @res >= $itemshow;
+            push @entries, LJ::get_friend_items({
+                'u' => $u,
+                'userid' => $u->{'userid'},
+                'remote' => $u,
+                'itemshow' => $itemshow,
+                'skip' => $skip + ($before_count += $itemshow),
+                'dateformat' => 'S2',
+            }) unless @entries;
+            next if $LJ::EndOfTime - $ei->{rlogtime} > $before;
+            next if $before_skip-- > 0;
         }
 
         my $entry = LJ::Entry->new_from_item_hash($ei);
@@ -365,9 +398,13 @@ sub getfriendspage
             event => $h{event_raw},
             embed_url => $entry->url,
         ) if $req->{parseljtags};
-
+        
+        #userpic 
+        $h{poster_userpic_url} = $h{userpic} && $h{userpic}->url;
+        
         # log time value
         $h{logtime} = $LJ::EndOfTime - $ei->{rlogtime};
+        $h{do_captcha} = LJ::Talk::Post::require_captcha_test($u, $entry->poster, '', $h{ditemid})?1:0;
 
         push @res, \%h;
 
@@ -384,14 +421,12 @@ sub getfriendspage
         $_->{postername} = $users->{ $_->{posterid} }->{'user'};
         $_->{postertype} = $users->{ $_->{posterid} }->{'journaltype'};
         $_->{posterurl}  = $users->{ $_->{posterid} }->journal_base;
-        my $userpic = $users->{ $_->{posterid} }->userpic;
-        $_->{poster_userpic_url} = $userpic && $userpic->url;
         delete $_->{posterid};
     }
 
     LJ::run_hooks("getfriendspage", { 'userid' => $u->userid, });
 
-    return { 'entries' => [ @res ] };
+    return { entries => [ @res ], skip => $skip };
 }
 
 sub getinbox
@@ -445,7 +480,12 @@ sub getinbox
     }
 
     if ($req->{gettype}) {
-        @notifications = grep { $_->event->class eq "LJ::Event::" . $number_type{$req->{gettype}} } $inbox->items;
+        $req->{gettype} = [$req->{gettype}] unless ref($req->{gettype});
+        
+        my %filter;
+        $filter{"LJ::Event::" . $number_type{$_}} = 1 for @{$req->{gettype}};
+        @notifications = grep { exists $filter{$_->event->class} } $inbox->items;
+        
     } else {
         @notifications = $inbox->all_items;
     }
@@ -453,6 +493,11 @@ sub getinbox
     # By default, notifications are sorted as "oldest are the first"
     # Reverse it by "newest are the first"
     @notifications = reverse @notifications;
+
+    if (my $before = $req->{'before'}) {
+        return fail($err,203,"Invalid syncitems date format (must be unixtime)") if $before <= 0;
+        @notifications = grep {$_->when_unixtime <= $before} @notifications;
+    }
 
     $itemshow = scalar @notifications - $skip if scalar @notifications < $skip + $itemshow;
 
@@ -478,7 +523,8 @@ sub getinbox
                    };
     }
 
-    return { 'items' => \@res,
+    return { 'skip'  => $skip,
+             'items' => \@res,
              'login' => $u->user,
              'journaltype' => $u->journaltype };
 }
@@ -645,10 +691,10 @@ sub login
     }
 
     ### picture keywords, if they asked for them.
-    if ($req->{'getpickws'}) {
+    if ($req->{'getpickws'} || $req->{'getpickwurls'}) {
         my $pickws = list_pickws($u);
         @$pickws = sort { lc($a->[0]) cmp lc($b->[0]) } @$pickws;
-        $res->{'pickws'} = [ map { $_->[0] } @$pickws ];
+        $res->{'pickws'} = [ map { $_->[0] } @$pickws ] if $req->{'getpickws'};
         if ($req->{'getpickwurls'}) {
             if ($u->{'defaultpicid'}) {
                  $res->{'defaultpicurl'} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}";
@@ -2105,10 +2151,18 @@ sub getevents
         $use_master = 1;  # see note above.
     }
 
+    # just synonym
+    if ($req->{'itemshow'}){
+        $req->{'selecttype'} = 'lastn' unless $req->{'selecttype'};
+        $req->{'howmany'} = $req->{'itemshow'};
+    }
+    my $skip = $req->{'skip'} + 0;
+    if ($skip > 500) { $skip = 500; }
+    
     # build the query to get log rows.  each selecttype branch is
     # responsible for either populating the following 3 variables
     # OR just populating $sql
-    my ($orderby, $where, $limit);
+    my ($orderby, $where, $limit, $offset);
     my $sql;
     if ($req->{'selecttype'} eq "day")
     {
@@ -2134,6 +2188,8 @@ sub getevents
         if ($howmany > 50) { $howmany = 50; }
         $howmany = $howmany + 0;
         $limit = "LIMIT $howmany";
+
+        $offset = "OFFSET $skip";
 
         # okay, follow me here... see how we add the revttime predicate
         # even if no beforedate key is present?  you're probably saying,
@@ -2222,6 +2278,43 @@ sub getevents
         my $in = join(',', @ids);
         $where = "AND jitemid IN ($in)";
     }
+    elsif ($req->{'selecttype'} eq 'before')
+    {
+        my $before = $req->{'before'};
+        my $itemshow = $req->{'howmany'};
+        my $itemselect = $itemshow + $skip;
+
+        my %item;
+        $sth = $dbcr->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
+                              "journalid=? and logtime < ? LIMIT $itemselect");
+        $sth->execute($ownerid, $before);
+        while (my ($id, $dt) = $sth->fetchrow_array) {
+            $item{$id} = $dt;
+            
+        }
+
+        my $p_revtime = LJ::get_prop("log", "revtime");
+
+        $sth = $dbcr->prepare("SELECT jitemid, FROM_UNIXTIME(value) ".
+                              "FROM logprop2 WHERE journalid=? ".
+                              "AND propid=$p_revtime->{'id'} ".
+                              "AND value+0 < ? LIMIT $itemselect");
+        $sth->execute($ownerid, $before);
+        while (my ($id, $dt) = $sth->fetchrow_array) {
+            $item{$id} = $dt;
+        }
+
+        my @ids = sort { $item{$a} cmp $item{$b} } keys %item;        
+        if (@ids > $skip){
+            @ids = @ids[$skip..(@ids-1)];
+            @ids = @ids[0..$itemshow-1] if @ids > $itemshow;
+        }else{
+            @ids = ();
+        }
+
+        my $in = join(',', @ids) || "0";
+        $where = "AND jitemid IN ($in)";
+    }
     else
     {
         return fail($err,200,"Invalid selecttype.");
@@ -2229,8 +2322,8 @@ sub getevents
 
     # common SQL template:
     unless ($sql) {
-        $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid, replycount ".
-            "FROM log2 WHERE journalid=$ownerid $where $orderby $limit";
+        $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid, replycount, UNIX_TIMESTAMP(eventtime) ".
+            "FROM log2 WHERE journalid=$ownerid $where $orderby $limit $offset";
     }
 
     # whatever selecttype might have wanted us to use the master db.
@@ -2244,11 +2337,11 @@ sub getevents
 
     my $count = 0;
     my @itemids = ();
-    my $res = {};
+    my $res = { skip => $skip };
     my $events = $res->{'events'} = [];
     my %evt_from_itemid;
 
-    while (my ($itemid, $eventtime, $sec, $mask, $anum, $jposterid, $replycount) = $sth->fetchrow_array)
+    while (my ($itemid, $eventtime, $sec, $mask, $anum, $jposterid, $replycount, $event_timestamp) = $sth->fetchrow_array)
     {
         $count++;
         my $evt = {};
@@ -2258,6 +2351,7 @@ sub getevents
         $evt_from_itemid{$itemid} = $evt;
 
         $evt->{"eventtime"} = $eventtime;
+        $evt->{event_timestamp} = $event_timestamp;
         if ($sec ne "public") {
             $evt->{'security'} = $sec;
             $evt->{'allowmask'} = $mask if $sec eq "usemask";
