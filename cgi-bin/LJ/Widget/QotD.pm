@@ -202,7 +202,13 @@ sub _get_question_data {
 
     my $ml_key = $class->ml_key("$q->{qid}.text");
     my $text = $class->ml($ml_key, undef, $lncode);
-    LJ::CleanHTML::clean_event(\$text, { target => $target });
+    if ($opts->{nohtml}) {
+        LJ::CleanHTML::clean_subject_all(\$text, { target => $target });
+    } else {
+        LJ::CleanHTML::clean_event(\$text, { target => $target });
+    }
+    $text =~ s/<br \/>/ /g if $opts->{nobr}; # Replace break lines with spaces.
+    $text = Encode::encode_utf8(LJ::trim_at_word(Encode::decode_utf8($text), $opts->{trim})) if $opts->{trim};
 
     my $from_text = '';
     if ($q->{from_user}) {
