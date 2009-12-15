@@ -340,9 +340,9 @@ body<=
             my $info = join('; ', @info_parts);
 
             $status .= "(Tags: $info)\n\n";
-        } else {
+        } elsif (!$FORM{'changecat'}) {
             $status .= "(Attempted to change tags but there were no actual ".
-                " changes made)";
+                " changes made)\n\n";
         }
     }
 

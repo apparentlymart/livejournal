@@ -233,6 +233,8 @@ sub get_cats_tag_names {
 
     @spcatids = map { $_ + 0 } @spcatids;
     my $spcatids = join(',', @spcatids);
+    return () if $spcatids eq '';
+
     my $dbr = LJ::get_db_reader();
     my $res = $dbr->selectcol_arrayref(
         'SELECT DISTINCT name FROM supporttag '.

@@ -131,7 +131,7 @@ body<=
  } else {
      my $filterwhere;
 
-     if ($filtercat eq '_nonpublic') {
+     if ($filtercat eq '_nonprivate') {
         @shown_cats =
             grep { $_->{'public_read'} }
             values %$cats;
@@ -372,7 +372,7 @@ body<=
      if ($can_see_tags && scalar(@tagids)) {
         my @links = map {
             '<a href="' . $LJ::SITEROOT. 
-            '/support/help.bml?cat=$filtercat&state=$state&tags=' . $_ . '">'.
+            "/support/help.bml?cat=$filtercat&state=$state&tags=" . $_ . '">'.
             $_ . '</a>';
         } @tagnames;
 
