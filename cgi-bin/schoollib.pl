@@ -4,6 +4,8 @@ package LJ::Schools;
 
 use strict;
 
+use LJ::Schools::Log;
+
 # <LJFUNC>
 # name: LJ::Schools::get_attended
 # class: schools
@@ -442,6 +444,20 @@ sub add_pending_school {
     $dbh->do("INSERT INTO schools_pending (userid, name, country, state, city, url) VALUES (?, ?, ?, ?, ?, ?)",
              undef, $u->{userid}, $opts->{name}, $ctc, $sc, $cc, $opts->{url});
     return undef if $dbh->err;
+
+    LJ::Schools::Log->log(
+        'action' => 'add-pending',
+        'userid' => $u->id,
+        'schoolid1' => 0,
+        'name1' => $opts->{'name'},
+        'country1' => $ctc,
+        'state1' => $sc,
+        'city1' => $cc,
+        'url1' => $opts->{'url'},
+    );
+
+    # we don't care of errors much at this step
+
     return 1;
 }
 
@@ -611,6 +627,27 @@ sub approve_pending {
     $dbh->do("INSERT INTO schools (schoolid, name, country, state, city, url) VALUES (?, ?, ?, ?, ?, ?)",
              undef, $sid, $opts->{name}, $ctc, $sc, $cc, $opts->{url});
     return undef if $dbh->err;
+
+    # now, log that we have approved this school
+    LJ::Schools::Log->log(
+        'action' => 'approve',
+        'userid' => 0, # Log module will pick up remote instead
+        'schoolid1' => 0,
+        'name1' => $opts->{'name'},
+        'country1' => $ctc,
+        'state1' => $sc,
+        'city1' => $cc,
+        'url1' => $opts->{'url'},
+        'schoolid2' => $sid,
+        'name2' => $opts->{'name'},
+        'country2' => $ctc,
+        'state2' => $sc,
+        'city2' => $cc,
+        'url2' => $opts->{'url'},
+        'nostats' => 1,
+    );
+
+    # we don't care of errors much at this step
 
     # now insert the user attendance lists
     my %userids;
@@ -909,6 +946,32 @@ sub edit_school {
 
     # get db and update
     my $dbh = LJ::get_db_writer();
+
+    # log that we are editing it first
+    my $oldsc = $dbh->selectrow_hashref("SELECT name, city, state, country, url FROM schools WHERE schoolid = ?",
+             undef, $sid);
+
+    # now, log that we have approved this school
+    LJ::Schools::Log->log(
+        'action' => 'edit',
+        'userid' => 0, # Log module will pick up remote instead
+        'schoolid1' => $sid,
+        'name1' => $oldsc->{'name'},
+        'country1' => $oldsc->{'country'},
+        'state1' => $oldsc->{'state'},
+        'city1' => $oldsc->{'city'},
+        'url1' => $oldsc->{'url'},
+        'schoolid2' => $sid,
+        'name2' => $opts->{'name'},
+        'country2' => $ctc,
+        'state2' => $sc,
+        'city2' => $cc,
+        'url2' => $opts->{'url'},
+    );
+
+    # we don't care of errors much at this step
+
+    # then, actually change
     $dbh->do("UPDATE schools SET name = ?, city = ?, state = ?, country = ?, url = ? WHERE schoolid = ?",
              undef, $opts->{name}, $cc, $sc, $ctc, $opts->{url}, $sid);
     return undef if $dbh->err;
@@ -976,10 +1039,28 @@ sub delete_school {
         return undef if $dbh->err;
     }
 
+    # log that we are deleting this school
+    my $oldsc = $dbh->selectrow_hashref("SELECT name, city, state, country, url FROM schools WHERE schoolid = ?",
+             undef, $sid);
+
+    # now, log that we have approved this school
+    LJ::Schools::Log->log(
+        'action' => 'delete',
+        'userid' => 0, # Log module will pick up remote instead
+        'schoolid1' => $sid,
+        'name1' => $oldsc->{'name'},
+        'country1' => $oldsc->{'country'},
+        'state1' => $oldsc->{'state'},
+        'city1' => $oldsc->{'city'},
+        'url1' => $oldsc->{'url'},
+    );
+    # we don't care of errors much at this step
+
     # Delete the actual school
     $dbh->do("DELETE FROM schools WHERE schoolid = ?",
              undef, $sid);
     return undef if $dbh->err;
+
 
     LJ::MemCache::delete([ $sid, "sasi:$sid" ]);
 
@@ -1007,6 +1088,27 @@ sub reject_pending {
     return undef unless $dbh;
 
     my $in = join(',', @$pendids);
+
+    # log that we are rejecting them first
+    foreach my $pendid (@$pendids) {
+        my $oldsc = $dbh->selectrow_hashref(qq{
+            SELECT name, country, state, url
+            FROM schools_pending
+            WHERE pendid=?
+        }, undef, $pendid);
+
+        LJ::Schools::Log->log(
+            'action' => 'reject',
+            'userid' => 0, # Log module will pick up remote instead
+            'schoolid1' => 0,
+            'name1' => $oldsc->{'name'},
+            'country1' => $oldsc->{'country'},
+            'state1' => $oldsc->{'state'},
+            'city1' => $oldsc->{'city'},
+            'url1' => $oldsc->{'url'},
+        );
+    }
+
     # and delete their pending rows, but ignore errors
     $dbh->do("DELETE FROM schools_pending WHERE pendid IN ($in)");
 
@@ -1036,7 +1138,18 @@ sub rename_state {
     my @args = grep { defined $_ && $_ } ($ctc, $from_sc, $to_sc);
     my $scs = $from_sc ? "state = ?" : "state IS NULL";
 
+    # but first log what we are going to do
+    LJ::Schools::Log->log_mass_action(
+        'movetype' => 'state',
+        'userid' => 0, # Log module will pick up remote instead
+        'country' => $ctc,
+        'state1' => $from_sc,
+        'state2' => $to_sc,
+    );
+
     # rename the state, with an update ignore (merge dupes!)
+
+    # and now, actually rename
     $dbh->do("UPDATE IGNORE schools SET state = ? WHERE country = ? AND $scs",
              undef, $to_sc, $ctc, $from_sc);
     return undef if $dbh->err;
@@ -1057,7 +1170,7 @@ sub rename_state {
     # now let's merge these down
     if ($rows && @$rows) {
         # merge a -> b, which is merge_schools(b, a)
-        LJ::Schools::merge_schools($_->[1], $_->[0])
+        LJ::Schools::merge_schools($_->[1], $_->[0], { nolog => 1 })
             foreach @$rows;
     }
 
@@ -1085,7 +1198,18 @@ sub rename_city {
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
 
-    # rename the state, with an update ignore (merge dupes!)
+    # rename the city, with an update ignore (merge dupes!)
+   
+    # but first log what we are going to do
+    LJ::Schools::Log->log_mass_action(
+        'movetype' => 'city',
+        'userid' => 0, # Log module will pick up remote instead
+        'country' => $ctc,
+        'state' => $sc,
+        'city1' => $from_cc,
+        'city2' => $to_cc,
+    );
+
     $dbh->do("UPDATE IGNORE schools SET city = ? WHERE country = ? AND state = ? AND city = ?",
              undef, $to_cc, $ctc, $sc, $from_cc);
     return undef if $dbh->err;
@@ -1107,7 +1231,7 @@ sub rename_city {
     # now let's merge these down
     if ($rows && @$rows) {
         # merge a -> b, which is merge_schools(b, a)
-        LJ::Schools::merge_schools($_->[1], $_->[0])
+        LJ::Schools::merge_schools($_->[1], $_->[0], { nolog => 1 })
             foreach @$rows;
     }
 
@@ -1126,11 +1250,13 @@ sub rename_city {
 # returns: 1 on success, undef on error.
 # </LJFUNC>
 sub merge_schools {
-    my ($psid, $csids) = @_;
+    my ($psid, $csids, $opts) = @_;
     $psid += 0;
     $csids = [ $csids ] unless ref $csids;
     $csids = [ grep { defined $_ && $_ > 0 && $_ != $psid } @$csids ];
     return undef unless $psid && @$csids;
+
+    $opts ||= {};
 
     # validate the schools
     my $schools = LJ::Schools::load_schools($psid, @$csids);
@@ -1197,7 +1323,31 @@ sub merge_schools {
             return undef if $dbh->err;
         }
 
-        # and again, delete the ones that didn't rename
+	# time for some logging
+	my $oldsc = $dbh->selectrow_hashref("SELECT name, city, state, country, url FROM schools WHERE schoolid = ?",
+	     undef, $csid);
+
+	my $newsc = $dbh->selectrow_hashref("SELECT name, city, state, country, url FROM schools WHERE schoolid = ?",
+	     undef, $psid);
+
+    LJ::Schools::Log->log(
+        'action' => 'add-pending',
+        'userid' => 0, # Log module will pick up remote instead
+        'schoolid1' => 0,
+        'name1' => $oldsc->{'name'},
+        'country1' => $oldsc->{'country'},
+        'state1' => $oldsc->{'state'},
+        'city1' => $oldsc->{'city'},
+        'url1' => $oldsc->{'url'},
+        'schoolid2' => 0,
+        'name2' => $newsc->{'name'},
+        'country2' => $newsc->{'country'},
+        'state2' => $newsc->{'state'},
+        'city2' => $newsc->{'city'},
+        'url2' => $newsc->{'url'},
+    );
+
+	# and again, delete the ones that didn't rename
         foreach my $table (qw(schools_attended schools)) {
             $dbh->do("DELETE FROM $table WHERE schoolid = ?", undef, $csid);
         }

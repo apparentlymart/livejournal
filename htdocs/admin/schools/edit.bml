@@ -85,6 +85,22 @@ body<=
         $ret .= "</td></tr></table>";
         $ret .= "</form>";
 
+        if (LJ::check_priv($remote, 'siteadmin', 'schools-logs')) {
+            my ($edited_by, $edited_time) =
+                LJ::Schools::Log->get_last_edit($sid);
+            if ($edited_by) {
+                my $u = LJ::want_user($edited_by);
+                my $lju_string = LJ::ljuser($u);
+                my $time = scalar(localtime($edited_time));
+                $ret .= qq{
+                    <p><em>
+                        Last edited by $lju_string on $time;
+                        <a href="history.bml?sid=$sid">view history</a>.
+                    </em></p>
+                };
+            }
+        }
+
         return $ret;
     } elsif (LJ::did_post()) {
         return $err->('Invalid form')

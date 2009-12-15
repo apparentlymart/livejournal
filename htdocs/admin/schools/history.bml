@@ -1,0 +1,51 @@
+<?page
+title=>Schools Edits History
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%POST);
+    use LJ::Schools::Log;
+    use LJ::Widget::Schools::LogItem;
+    use Data::Dumper;
+
+    my $ret = '';
+    my $err = sub { return "<?h1 Error h1?><?p $_[0] p?>"; };
+    my $remote = LJ::get_remote();
+
+    return $err->('The Schools Directory is currently disabled due to maintenance.')
+        if $LJ::DISABLED{'schools'};
+
+    return $err->('You do not have access to use this tool.')
+        unless (LJ::check_priv($remote, 'siteadmin', 'schools-logs'));
+
+    my $widget = LJ::Widget::Schools::LogItem->new;
+
+    my $ret = '';
+
+    my $skipto = $GET{'skipto'};
+    my $sid = $GET{'sid'};
+
+    my $items = LJ::Schools::Log->query(skipto => $skipto, schoolid => $sid);
+
+    if (scalar(@$items)) {
+        foreach my $item (@$items) {
+            $ret .= $widget->render('item' => $item);
+            $skipto = $item->{'logid'};
+        }
+
+        $ret .= qq{
+            <p><a href="history.bml?skipto=$skipto&sid=$sid">
+                earlier log entries</a></p>
+        };
+    } else {
+        $ret .= qq{
+            <p><em>Nothing found.</em></p>
+        };
+    }
+
+    return $ret;
+}
+_code?>
+<=body
+page?>

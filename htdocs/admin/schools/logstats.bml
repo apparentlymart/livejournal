@@ -1,0 +1,305 @@
+<?page
+title=>Schools Edits Statistics
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%POST);
+    use LJ::Schools::Stats;
+    use DateTime;
+
+    use Data::Dumper;
+
+    my $ret = '';
+    my $err = sub { return "<?h1 Error h1?><?p $_[0] p?>"; };
+    my $remote = LJ::get_remote();
+
+    return $err->('The Schools Directory is currently disabled due to maintenance.')
+        if $LJ::DISABLED{'schools'};
+
+    return $err->('You do not have access to use this tool.')
+        unless (LJ::check_priv($remote, 'siteadmin', 'schools-logs'));
+
+    $GET{'group'} = 'day'
+        unless $GET{'group'} =~ /^(userid|day|userid-day|userid-day|userid-action|day-action)$/;
+
+    my $group = $GET{'group'};
+
+    my $sunday = DateTime->now->truncate('to' => 'week');
+    $sunday->subtract(days => 1);
+
+    my $monday = $sunday->clone;
+    $monday->subtract(days => 6);
+
+    my $dump_datetime = sub {
+        my $dt = shift;
+        return $dt->ymd;
+    };
+
+    $GET{'mintime'} ||= $dump_datetime->($monday);
+    $GET{'maxtime'} ||= $dump_datetime->($sunday);
+
+    my $userid = 0;
+    my $username = '';
+    if ($GET{'user'}) {
+        $username = $GET{'user'};
+        my $u = LJ::load_user($GET{'user'});
+        $userid = $u->id if $u;
+    }
+
+    my ($mintime, $maxtime) = ($GET{'mintime'}, $GET{'maxtime'});
+    my $stats = LJ::Schools::Stats->query(
+        'mintime' => $mintime,
+        'maxtime' => $maxtime,
+        'group' => $group,
+        'userid' => $userid,
+    );
+
+    my %controls = (
+        'mintime' => LJ::html_text({
+            'name' => 'mintime',
+            'value' => $mintime,
+            'id' => 'input-mintime',
+        }),
+        'maxtime' => LJ::html_text({
+            'name' => 'maxtime',
+            'value' => $maxtime,
+            'id' => 'input-maxtime',
+        }),
+        'group' => LJ::html_select(
+            {
+                'name' => 'group',
+                'selected' => $group,
+                'id' => 'input-group',
+            },
+            'userid'         => 'User',
+            'day'            => 'Day',
+            'userid-day'     => 'User and Day',
+            'userid-action'  => 'User and Action',
+            'day-action'     => 'Day and Action',
+        ),
+        'user' => LJ::html_text({
+            'name' => 'user',
+            'value' => $username,
+            'id' => 'input-user',
+        }),
+    );
+
+    $ret .= qq{
+        <form action="logstats.bml" method="get">
+        <p>
+            <label for="input-mintime">From: </label>
+            $controls{mintime}
+            <label for="input-maxtime">Till: </label>
+            $controls{maxtime}
+        </p>
+        <p>
+            <label for="input-group">Report type: </label>
+            $controls{group}
+        </p>
+        <p>
+            <label for="input-user">User: </label>
+            $controls{user}
+            <br>
+            <em>Only applies to "Day" and "Day and Action" report types.</em>
+        </p>
+        <p><button type="submit">Show</button></p>
+        </form>
+    };
+
+    $ret .= '<?hr?>';
+
+    unless (scalar(@$stats)) {
+        $ret .= "<p><em>No statistics found.</em></p>";
+    } else {
+        if ($group eq 'userid') {
+            my %userids;
+            my @userids;
+            my %counts;
+
+            foreach my $row (@$stats) {
+                $userids{$row->{'userid'}} = 1;
+                $counts{$row->{'userid'}} = $row->{'count_touches'};
+            }
+
+            @userids = keys %userids;
+
+            my $users = LJ::load_userids(@userids);
+            @userids = sort {
+                $users->{$a}->display_name cmp $users->{$b}->display_name
+            } @userids;
+
+            $ret .= qq{
+                <table width="400" cellspacing="0" cellpadding="5" border="1">
+                    <tr><th>User</th><th>Toches Count</th></tr>
+            };
+
+            foreach my $userid (@userids) {
+                my $ljuser = LJ::ljuser($users->{$userid});
+                my $count = $counts{$userid};
+
+                $ret .= qq{
+                    <tr><td>$ljuser</td><td>$count</td></tr>
+                };
+            }
+
+            $ret .= '</table>';
+        } elsif ($group eq 'day') {
+            $ret .= qq{
+                <table width="400" cellspacing="0" cellpadding="5" border="1">
+                    <tr><th>Day</th><th>Toches Count</th></tr>
+            };
+
+            foreach my $row (@$stats) {
+                my $dt = DateTime->from_epoch(epoch => $row->{'time'});
+                my $time_print = $dump_datetime->($dt);
+                my $count = $row->{'count_touches'};
+
+                $ret .= qq{
+                    <tr><td>$time_print</td><td>$count</td></tr>
+                };
+            }
+
+            $ret .= '</table>';
+        } elsif ($group eq 'userid-day') {
+            my %stats;
+            my %times;
+
+            foreach my $row (@$stats) {
+                my $time = $row->{'time'};
+                my $userid = $row->{'userid'};
+                $stats{$userid} = {} unless $stats{$userid};
+                $stats{$userid}->{$time} = $row->{'count_touches'};
+
+                $times{$time} = 1;
+            }
+
+            my @times = sort keys %times;
+            my @userids = keys %stats;
+
+            my $users = LJ::load_userids(@userids);
+            @userids = sort {
+                $users->{$a}->display_name cmp $users->{$b}->display_name
+            } @userids;
+
+            $ret .= '<table cellspacing="0" cellpadding="5" border="1">';
+
+            # table heading
+            $ret .= '<tr><th></th>';
+            foreach my $time (@times) {
+                my $dt = DateTime->from_epoch(epoch => $time);
+                my $time_print = $dump_datetime->($dt);
+
+                $ret .= "<th>$time_print</th>";
+            }
+            $ret .= '</tr>';
+
+            # table body
+            foreach my $userid (@userids) {
+                my $lju = LJ::ljuser($users->{$userid});
+
+                $ret .= "<tr><th>$lju</th>";
+
+                foreach my $time (@times) {
+                    my $touches = $stats{$userid}->{$time} || '&mdash;';
+                    $ret .= "<td align=\"center\">$touches</td>";
+                }
+
+                $ret .= '</tr>';
+            }
+
+            $ret .= '</table>';
+        } elsif ($group eq 'userid-action') {
+            my %stats;
+            my %actions;
+
+            foreach my $row (@$stats) {
+                my $action = $row->{'action'};
+                my $userid = $row->{'userid'};
+                $stats{$userid} = {} unless $stats{$userid};
+                $stats{$userid}->{$action} = $row->{'count_touches'};
+
+                $actions{$action} = 1;
+            }
+
+            my @actions = sort keys %actions;
+            my @userids = keys %stats;
+
+            my $users = LJ::load_userids(@userids);
+            @userids = sort {
+                $users->{$a}->display_name cmp $users->{$b}->display_name
+            } @userids;
+
+            $ret .= '<table cellspacing="0" cellpadding="5" border="1">';
+
+            # table heading
+            $ret .= '<tr><th></th>';
+            foreach my $action (@actions) {
+                $ret .= "<th width=\"100\" align=\"center\">$action</th>";
+            }
+            $ret .= '</tr>';
+
+            # table body
+            foreach my $userid (@userids) {
+                my $lju = LJ::ljuser($users->{$userid});
+
+                $ret .= "<tr><th>$lju</th>";
+
+                foreach my $action (@actions) {
+                    my $touches = $stats{$userid}->{$action} || '&mdash;';
+                    $ret .= "<td align=\"center\">$touches</td>";
+                }
+
+                $ret .= '</tr>';
+            }
+
+            $ret .= '</table>';
+        } elsif ($group eq 'day-action') {
+            my %stats;
+            my %actions;
+
+            foreach my $row (@$stats) {
+                my $action = $row->{'action'};
+                my $time = $row->{'time'};
+                $stats{$time} = {} unless $stats{$time};
+                $stats{$time}->{$action} = $row->{'count_touches'};
+
+                $actions{$action} = 1;
+            }
+
+            my @actions = sort keys %actions;
+            my @times = sort { $a <=> $b } keys %stats;
+
+            $ret .= '<table cellspacing="0" cellpadding="5" border="1">';
+
+            # table heading
+            $ret .= '<tr><th></th>';
+            foreach my $action (@actions) {
+                $ret .= "<th width=\"100\" align=\"center\">$action</th>";
+            }
+            $ret .= '</tr>';
+
+            # table body
+            foreach my $time (@times) {
+                my $dt = DateTime->from_epoch(epoch => $time);
+                my $time_print = $dump_datetime->($dt);
+
+                $ret .= "<tr><th>$time_print</th>";
+
+                foreach my $action (@actions) {
+                    my $touches = $stats{$time}->{$action} || '&mdash;';
+                    $ret .= "<td align=\"center\">$touches</td>";
+                }
+
+                $ret .= '</tr>';
+            }
+
+            $ret .= '</table>';
+        }
+    }
+
+    return $ret;
+}
+_code?>
+<=body
+page?>

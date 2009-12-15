@@ -2179,6 +2179,44 @@ CREATE TABLE schools_pending (
 )
 EOC
 
+register_tablecreate("schools_log", <<'EOC');
+CREATE TABLE schools_log (
+    `logid` int(10) unsigned NOT NULL auto_increment,
+    `action` CHAR(15) NOT NULL DEFAULT "",
+    `userid` int(10) unsigned NOT NULL default '0',
+    `time` int(10) unsigned default NULL,
+    `schoolid1` int(10) unsigned NOT NULL default '0',
+    `name1` varchar(255) NOT NULL default '',
+    `country1` varchar(4) NOT NULL default '',
+    `state1` varchar(255) default NULL,
+    `city1` varchar(255) NOT NULL default '',
+    `url1` varchar(255) default NULL,
+    `schoolid2` int(10) unsigned NOT NULL default '0',
+    `name2` varchar(255) NOT NULL default '',
+    `country2` varchar(4) NOT NULL default '',
+    `state2` varchar(255) default NULL,
+    `city2` varchar(255) NOT NULL default '',
+    `url2` varchar(255) default NULL,
+
+    PRIMARY KEY (`logid`),
+    KEY (`userid`),
+    KEY (`schoolid1`),
+    KEY (`schoolid2`),
+    KEY (`time`, `action`)
+)
+EOC
+
+register_tablecreate("schools_stats", <<'EOC');
+CREATE TABLE schools_stats (
+    time INT NOT NULL DEFAULT 0,
+    userid INT NOT NULL DEFAULT 0,
+    action CHAR(15) NOT NULL DEFAULT "",
+    count_touches INT NOT NULL DEFAULT 0,
+
+    UNIQUE KEY (time, userid, action)
+)
+EOC
+
 register_tablecreate("user_schools", <<'EOC');
 CREATE TABLE `user_schools` (
   `userid` int(10) unsigned NOT NULL default '0',
