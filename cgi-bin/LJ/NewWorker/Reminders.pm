@@ -34,7 +34,7 @@ sub new {
     my $self = bless {}, $class;
 
     for my $db (@LJ::THESCHWARTZ_DBS) {
-        next if exists $db->{role}->{mass} && $db->{role}->{mass}; # Skip mass roles
+        next if exists $db->{role} && exists $db->{role}->{mass} && $db->{role}->{mass}; # Skip mass roles
         my $full = join '|', map { $db->{$_} || '' } qw( dsn user pass );
         # FIXME: Different roles can has same $full line!
         $self->{databases}{ md5_hex($full) } = $db;
