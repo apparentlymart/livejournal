@@ -57,8 +57,6 @@
 
 .error.findbyemail=Invalid option for find by email.
 
-.error.gender.not_specified=Gender must be specified.
-
 .error.invalidbio=Your stored bio contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
 
 .error.invalidname2=Your name contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
@@ -212,8 +210,6 @@
 .security.visibility.regusers=Registered Users
 
 .share.birthday=Show your Birthday to:
-
-.share.gender=Shaw your Gender to:
 
 .show.birthday=Birthday display options:
 
