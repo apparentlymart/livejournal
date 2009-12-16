@@ -4,6 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::QotD LJ::PromoText );
+use Encode qw(encode decode is_utf8);
 
 sub need_res {
     return qw( js/widgets/qotd.js stc/widgets/qotd.css );
@@ -183,8 +184,8 @@ sub _format_question_text {
     $text =~ s/<br \/>|\r|\n/ /g if $opts->{nobr}; # Replace break lines with spaces.
 
     if ($opts->{trim} || $opts->{addbreaks}) {
-        $text = Encode::decode_utf8($text); # Count characters, not a bytes
 
+        $text = decode('utf8', $text);
         my $break_len = $opts->{addbreaks};
         if ($break_len) {
             my $result = '';
@@ -201,11 +202,11 @@ sub _format_question_text {
             $text = $result;
         }
 
+        $text = encode('utf8', $text);
         $text = LJ::trim_at_word($text, $opts->{trim}) if $opts->{trim};
 
         $text =~ s/\r?\n/<br \/>/g;
 
-        $text = Encode::encode_utf8($text); # Return string as it was
     }
 
     return $text;
