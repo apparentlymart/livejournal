@@ -395,7 +395,7 @@ It must be invisible, use it only for reskining */
 		}
 		.i-vgift-details A:hover {
 			border: 0 !important;
-		}
+			}
 .adnectar-play {
 	position: absolute;
 	bottom: 0;
@@ -404,5 +404,8 @@ It must be invisible, use it only for reskining */
 	width: 20px;
 	height: 15px;
 	background: url(/img/play-button.png) no-repeat;
+	}
+.appwidget-friendbirthdays .adnectar-play {
+	display: none;	
 	}
 
