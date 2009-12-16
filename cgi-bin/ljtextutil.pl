@@ -451,6 +451,7 @@ sub text_trim
     # we will never have more characters than bytes, but we might have more bytes
     # than characters, so we can't inherit the other way.
     $char_max ||= $byte_max;
+    $byte_max ||= ($char_max + 0) * 4;
 
     while ($text =~ m/$utf_char/gco) {
     last unless $char_max;
@@ -470,7 +471,7 @@ sub trim_at_word
 
     $char_max -= 3; # space for '...'
    
-    my $short_text = text_trim($text, $char_max, $char_max);
+    my $short_text = text_trim($text, undef, $char_max);
     my $short_len  = length($short_text);
     my $full_len   = length($text);
 

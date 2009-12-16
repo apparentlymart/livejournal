@@ -186,26 +186,28 @@ sub _format_question_text {
     if ($opts->{trim} || $opts->{addbreaks}) {
 
         $text = decode('utf8', $text);
+
         my $break_len = $opts->{addbreaks};
-        if ($break_len) {
-            my $result = '';
-            while ($text) {
-                $text =~ /^(.{1,\Q$break_len\E}\s+)(.*)$/s;
-                my ($left, $right) = ($1, $2);
-                unless ($left) {   # a word too long, break it
-                    $text =~ m/^(.{1,\Q$break_len\E})(.*)$/s;
-                    ($left, $right) = ($1, $2);
-                }
-                $result .= $left . "\n";
-                $text = $right;
+
+        my $break_word = sub {
+            my ($word) = @_;
+            return $word unless $break_len;
+            return $word if length($word) < $break_len;
+
+            my @parts;
+            foreach my $i (0..(length($word) / $break_len)) {
+                push @parts, substr($word, $i * $break_len, $break_len);
             }
-            $text = $result;
-        }
+
+            return join(' ', @parts);
+        };
+
+        $text =~ s/(\w+)/$break_word->($1)/eg if $break_len;
 
         $text = encode('utf8', $text);
         $text = LJ::trim_at_word($text, $opts->{trim}) if $opts->{trim};
 
-        $text =~ s/\r?\n/<br \/>/g;
+        $text =~ s/\s+/ /sg;
 
     }
 
