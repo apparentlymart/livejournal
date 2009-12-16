@@ -883,7 +883,7 @@ sub mail_response_to_user
         # are not yet English-stripped. English-stripping them is a TODO though.
         my $faq = LJ::Faq->load($faqid);
         $faq->render_in_place;
-        my $faqname = $faq->{'question'};
+        my $faqname = $faq->question_raw;
 
         if ($faqname) {
             $body .= "FAQ REFERENCE: $faqname\n";
