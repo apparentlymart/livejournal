@@ -879,10 +879,12 @@ sub mail_response_to_user
 
     $body .= "="x70 . "\n\n";
     if ($faqid) {
-        my $faqname = "";
-        my $sth = $dbh->prepare("SELECT question FROM faq WHERE faqid=$faqid");
-        $sth->execute;
-        ($faqname) = $sth->fetchrow_array;
+        # default language is used here deliberately because the emails
+        # are not yet English-stripped. English-stripping them is a TODO though.
+        my $faq = LJ::Faq->load($faqid);
+        $faq->render_in_place;
+        my $faqname = $faq->{'question'};
+
         if ($faqname) {
             $body .= "FAQ REFERENCE: $faqname\n";
             $body .= "$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid&view=full";

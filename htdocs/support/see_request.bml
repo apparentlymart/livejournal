@@ -700,10 +700,10 @@ body<=
         $ret .= "<tr><td align='center'>\n";
         if ($le->{'faqid'}) {
             # faq question
-            my $dbr = LJ::get_db_reader();
-            my $sth = $dbr->prepare("SELECT question FROM faq WHERE faqid=?");
-            $sth->execute($le->{'faqid'});
-            my $faqname = $sth->fetchrow_array;
+            my $faq = LJ::Faq->load($le->{'faqid'}, lang => BML::get_language());
+            $faq->render_in_place;
+            my $faqname = $faq->{'question'};
+
             $ret .= "<div style='display: table; padding: 3px; background: <?emcolor?>; border: 1px solid #000000; margin-left: auto; margin-right: auto;'>\n";
             # whitespace between these two DIVs is necessary for proper
             # rendering in IE 5 for Mac OS < X
@@ -798,12 +798,8 @@ body<=
                 my $f = LJ::Faq->load($faqid, lang => BML::get_language());
                 $f->render_in_place({user => $user, url => $user_url});
                 my $q = "... " . $f->question_html;
-                $q =~ s/^\s+//;
-                $q =~ s/\s+$//;
-                $q =~ s/\n/ /g;
-                if (length($q) > 50) {
-                    $q = substr($q, 0, 50) . "...";
-                }
+                $q = LJ::trim_at_word($q, 50);
+
                 push @faqlist, ($faqid, $q);
             }
         }
