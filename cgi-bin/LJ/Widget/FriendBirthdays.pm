@@ -58,7 +58,9 @@ sub render_body {
         my $to = $u->user;
         $to =~ s/([^a-zA-Z0-9-_])//g; # Remove bad chars from lj-user name
 
-        $BML::COOKIE{show_sponsored_vgifts} = 1 unless defined $BML::COOKIE{show_sponsored_vgifts};
+        unless (defined $BML::COOKIE{show_sponsored_vgifts}) {
+            $BML::COOKIE{show_sponsored_vgifts} = ($u->get_cap('paid')) ? 0 : 1;
+        }
         my $get_sponsor_vgift = defined $opts{get}->{sponsor_vgift} ? $opts{get}->{sponsor_vgift} : $BML::COOKIE{show_sponsored_vgifts};
         $BML::COOKIE{show_sponsored_vgifts} = $get_sponsor_vgift if $get_sponsor_vgift =~ /^[01]$/;
 
