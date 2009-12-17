@@ -1295,8 +1295,8 @@ sub entry_form {
     $out .= "<ul class='pkg'>\n";
     $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertImage();' title='"
         . BML::ml('fckland.ljimage') . "'>" . BML::ml('entryform.insert.image2') . "</a></li>\n";
-    $out .= "<li class='media'><a href='javascript:void(0);' onclick='InOb.handleInsertEmbed();' title='". BML::ml('entryform.insert.embed') ."'>"
-        . "". BML::ml('entryform.insert.embed') ."</a></li>\n" unless $LJ::DISABLED{embed_module};
+    $out .= "<li class='media'><a href='javascript:void(0);' onclick='InOb.handleInsertEmbed();' title='Embed Media'>"
+        . "Embed Media</a></li>\n" unless $LJ::DISABLED{embed_module};
     $out .= "</ul>\n";
     my $format_selected = $opts->{'prop_opt_preformatted'} || $opts->{'event_format'} ? "checked='checked'" : "";
     $out .= "<span id='linebreaks'><input type='checkbox' class='check' value='preformatted' name='event_format' id='event_format' $format_selected  />
@@ -1327,31 +1327,15 @@ sub entry_form {
 RTE
 
     $out .= "if (!window.FCKLang) FCKLang = {};\n";
-    
-    my %langmap = (
-        'UserPrompt' => 'userprompt',
-        'InvalidChars' => 'invalidchars',
-        'LJUser' => 'ljuser',
-        'VideoPrompt' => 'videoprompt',
-        'LJVideo' => 'ljvideo2',
-        'CutPrompt' => 'cutprompt',
-        'ReadMore' => 'readmore',
-        'CutContents' => 'cutcontents',
-        'LJCut' => 'ljcut',
-        'LJEmbedPrompt' => 'ljembedprompt',
-        'LJEmbedPromptTitle' => 'ljembedprompttitle',
-        'LJEmbed' => 'ljembed',
-        'Poll_PollWizardNotice' => 'poll.pollwizardnotice',
-        'Poll_PollWizardNoticeLink' => 'poll.pollwizardnoticelink',
-        'Poll_AccountLevelNotice' => 'poll.accountlevelnotice',
-        'Poll_PollWizardTitle' => 'poll.pollwizardtitle',
-        'Poll' => 'poll',
-    );
-    
-    foreach my $key (keys %langmap) {
-        my $val = $langmap{$key};
-        $out .= "FCKLang.$key = \"".LJ::ejs(BML::ml("fcklang.$val"))."\";\n";
-    }
+    $out .= "FCKLang.UserPrompt = \"".LJ::ejs(BML::ml('fcklang.userprompt'))."\";\n";
+    $out .= "FCKLang.InvalidChars = \"".LJ::ejs(BML::ml('fcklang.invalidchars'))."\";\n";
+    $out .= "FCKLang.LJUser = \"".LJ::ejs(BML::ml('fcklang.ljuser'))."\";\n";
+    $out .= "FCKLang.VideoPrompt = \"".LJ::ejs(BML::ml('fcklang.videoprompt'))."\";\n";
+    $out .= "FCKLang.LJVideo = \"".LJ::ejs(BML::ml('fcklang.ljvideo2'))."\";\n";
+    $out .= "FCKLang.CutPrompt = \"".LJ::ejs(BML::ml('fcklang.cutprompt'))."\";\n";
+    $out .= "FCKLang.ReadMore = \"".LJ::ejs(BML::ml('fcklang.readmore'))."\";\n";
+    $out .= "FCKLang.CutContents = \"".LJ::ejs(BML::ml('fcklang.cutcontents'))."\";\n";
+    $out .= "FCKLang.LJCut = \"".LJ::ejs(BML::ml('fcklang.ljcut'))."\";\n";
 
         if ($opts->{'richtext_default'}) {
             $$onload .= 'useRichText("draft", "' . LJ::ejs($LJ::WSTATPREFIX) . '");';
@@ -2135,20 +2119,16 @@ sub res_includes {
     $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
 
     my $site_params = LJ::js_dumper(\%site);
-    my $site_param_keys = LJ::js_dumper([keys %site]);
 
     # include standard JS info
     $ret .= qq {
         <script type="text/javascript">
-            var Site;
-            if (!Site)
-                Site = {};
+            Site = window.Site || {};
 
-            var site_p = $site_params;
-            var site_k = $site_param_keys;
-            for (var i = 0; site_k.length > i; i++) {
-                Site[site_k[i]] = site_p[site_k[i]];
-            }
+            (function(){
+                var p = $site_params, i;
+                for (i in p) Site[i] = p[i];
+            })();
        </script>
     };
 
@@ -3268,38 +3248,12 @@ sub control_strip_js_inject
     my %opts = @_;
     my $user = delete $opts{user};
 
-    my $ret;
-
-    $ret .= "<script src='$LJ::JSPREFIX/core.js' type='text/javascript'></script>\n";
-    $ret .= "<script src='$LJ::JSPREFIX/dom.js' type='text/javascript'></script>\n";
-    $ret .= "<script src='$LJ::JSPREFIX/httpreq.js' type='text/javascript'></script>\n";
-
     LJ::need_res(qw(
                     js/livejournal.js
                     js/md5.js
                     js/login.js
+                    js/controlstrip.js
                     ));
-
-    $ret .= qq{
-<script type='text/javascript'>
-    function controlstrip_init() {
-        if (! \$('lj_controlstrip') ){
-            HTTPReq.getJSON({
-              url: "/$user/__rpc_controlstrip?user=$user",
-              onData: function (data) {
-                  var body = document.getElementsByTagName("body")[0];
-                  var div = document.createElement("div");
-                  div.innerHTML = data;
-                      body.appendChild(div);
-              },
-              onError: function (msg) { }
-            });
-        }
-    }
-    DOM.addEventListener(window, "load", controlstrip_init);
-</script>
-    };
-    return $ret;
 }
 
 # For the Rich Text Editor
@@ -3766,11 +3720,12 @@ sub placeholder_link {
     my $link   = delete $opts{link}   || '';
     my $img    = delete $opts{img}    || "$LJ::IMGPREFIX/videoplaceholder.png";
 
+    $width -= 2;
+    $height -= 2;
+
     return qq {
             <span class="LJ_Placeholder_Container" style="width: ${width}px; height: ${height}px;">
-                <span class="LJ_Placeholder_HTML" style="display: none;">$placeholder_html</span>
-                <span class="LJ_Container"></span>
-                <a href="$link" onclick="return false;">
+                <a href="$link" onclick="return LiveJournal.placeholder_click(this, '$placeholder_html')">
                     <img src="$img" class="LJ_Placeholder" title="Click to show embedded content" alt="" />
                 </a>
             </span>

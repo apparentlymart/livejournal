@@ -964,7 +964,7 @@ sub render {
         my $qid = $q->pollqid;
         my $text = $q->text;
         LJ::Poll->clean_poll(\$text);
-        $results_table .= "<p>$text</p><div style='margin: 10px 0 10px 40px'>";
+        $results_table .= "<p>$text</p><div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0 10px 40px'>";
 
         ### get statistics, for scale questions
         my ($valcount, $valmean, $valstddev, $valmedian);
@@ -1018,8 +1018,8 @@ sub render {
             my $posterid = $self->posterid;
             $results_table .= qq {
                 <a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'
-                     class='LJ_PollAnswerLink' lj_pollid='$pollid' lj_qid='$qid' lj_posterid='$posterid' lj_page='0' lj_pagesize="$pagesize"
-                     id="LJ_PollAnswerLink_${pollid}_$qid">
+                     class="LJ_PollAnswerLink" lj_posterid='$posterid'
+                     onclick="return LiveJournal.pollAnswerClick(event, {pollid:$pollid,pollqid:$qid,page:0,pagesize:$pagesize})">
                 } . LJ::Lang::ml('poll.viewanswers') . "</a><br />" if $self->can_view;
 
             ### but, if this is a non-text item, and we're showing results, need to load the answers:

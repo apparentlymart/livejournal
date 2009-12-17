@@ -324,8 +324,8 @@ sub js {
     qq[
 
     initWidget: function () {
-         LiveJournal.addClickHandlerToElementsWithClassName(this.contentFlagItemClicked.bindEventListener(this), "ctflag_item");
-         LiveJournal.addClickHandlerToElementsWithClassName(this.reporterListClicked.bindEventListener(this), "ctflag_reporterlist");
+         jQuery('.ctflag_item').click(this.contentFlagItemClicked.bindEventListener(this));
+         jQuery('.ctflag_reporterlist').click(this.reporterListClicked.bindEventListener(this));
     },
     reporterListClicked: function (evt) {
         var target = evt.target;
@@ -368,7 +368,6 @@ sub js {
              ditemid: itemid
            });
 
-         Event.stop(evt);
          return false;
      },
      onData: function (data) {

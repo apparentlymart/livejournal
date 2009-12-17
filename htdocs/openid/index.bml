@@ -9,26 +9,6 @@ head<=
    padding-left: 18px;
  }
 </style>
-<script>
-function regEvent (target, evt, func) {
-    if (! target) return;
-    if (target.attachEvent)
-        target.attachEvent("on"+evt, func);
-    if (target.addEventListener)
-        target.addEventListener(evt, func, false);
-}
-
-  function initPage () {
-    if (document.getElementById) {
-        var ur = document.getElementById('openid_url');
-        if (ur) ur.focus();
-    }
-}
-
-regEvent(window, "load", initPage);
-
-</script>
-
 
 <=head
 title=>OpenID
@@ -49,6 +29,10 @@ p?>
    <div style='padding: 0.4em; margin-left: 25px; margin-right: 25px; width: auto; text-align: center; background: #ccc; border: #000'>
 <form method='post' action='login.bml' style='display:inline; width:auto'><nobr><b>Your OpenID URL:</b> <input class='sexy' id='openid_url' name="openid_url" size='30' />
 <input style='background: #ff6200; color: #fff;' type='submit' value='Login' /></nobr><br />For example: <tt>melody.someblog.com</tt> (if your host supports OpenID)</form></div>
+
+<script type="text/javascript">
+	document.getElementById('openid_url').focus();
+</script>
 
 <?h1 Using your OpenID on another site. h1?>
 <?p

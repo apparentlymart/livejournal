@@ -1147,7 +1147,7 @@ sub create_view_lastn
         LJ::run_hook('control_strip_stylesheet_link', {
             user => $u->{user},
         });
-        $lastn_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
+        LJ::control_strip_js_inject( user => $u->{user} );
     }
 
     LJ::run_hooks("need_res_for_journals", $u);
@@ -1606,7 +1606,7 @@ sub create_view_friends
         LJ::run_hook('control_strip_stylesheet_link', {
             user => $u->{user},
         });
-        $friends_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
+        LJ::control_strip_js_inject( user => $u->{user} );
     }
 
     LJ::run_hooks("need_res_for_journals", $u);
@@ -2107,7 +2107,7 @@ sub create_view_calendar
         LJ::run_hook('control_strip_stylesheet_link', {
             user => $u->{user},
         });
-        $calendar_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
+        LJ::control_strip_js_inject( user => $u->{user} );
     }
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
@@ -2373,7 +2373,7 @@ sub create_view_day
         LJ::run_hook('control_strip_stylesheet_link', {
             user => $u->{user},
         });
-        $day_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
+        LJ::control_strip_js_inject( user => $u->{user} );
     }
 
     LJ::run_hooks("need_res_for_journals", $u);

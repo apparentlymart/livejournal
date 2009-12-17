@@ -205,18 +205,6 @@ sub clickthru_button {
     return $class->_trackable_button($text, 1, $version);
 }
 
-sub next_button {
-    my ($class, $style) = @_;
-    my $text = "Next";
-    my $btn = qq {
-        <input type="button" value="$text" id="CProd_nextbutton" />
-        };
-
-    $btn .= qq {
-        <div id="CProd_style" style="display: none;">$style</div>
-        };
-}
-
 sub clickthru_link {
     my ($class, $ml_key, $version, %opts) = @_;
     my $versioned_link_text = BML::ml($ml_key . ".v$version");
@@ -413,7 +401,6 @@ sub wrap_content {
     my $style = delete $opts{style} || 'fancy';
 
     my $alllink = $class->_trackable_link_url("$LJ::SITEROOT/didyouknow/", 0);
-    my $next_button = $class->next_button($style);
     my $clickthru_button = $class->clickthru_button($class->button_text, $version);
     my $cprod_title = BML::ml('cprod.box.title');
     my $cprod_next = BML::ml('cprod.box.nextlink');
@@ -425,20 +412,20 @@ sub wrap_content {
                 <h3>$cprod_title</h3>
                 <div class='content'>$content</div>
                 <div class='alllink'>
-                    <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">&raquo; $cprod_all</a> <a href="javascript:void(0);" id="CProd_nextbutton">&raquo; $cprod_next</a>
+                    <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">&raquo; $cprod_all</a>
+                    <a href="#" onclick="return CProd.nextClick(this, event, {'class': '$e_class'})">&raquo; $cprod_next</a>
                 </div>
-                <div style='display: none;' id='CProd_class'>$e_class</div>
-            </div></div><!-- end .cprod -->
+            </div></div>
             };
     } else {
         return qq {
-            <div id="CProd_box2">
+            <div id="CProd_box">
                 <h3>$cprod_title</h3>
                 <div class='content'>$content</div>
                 <div class='alllink'>
-                    <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">&raquo; $cprod_all</a> <a href="javascript:void(0);" id="CProd_nextbutton">&raquo; $cprod_next</a>
+                    <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">&raquo; $cprod_all</a>
+                    <a href="#" onclick="return CProd.nextClick(this, event, {'class': '$e_class', style: '$style'})">&raquo; $cprod_next</a>
                 </div>
-                <div style='display: none;' id='CProd_class'>$e_class</div>
             </div>
             };
     }

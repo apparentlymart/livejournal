@@ -2021,7 +2021,7 @@ sub Page
         LJ::run_hook('control_strip_stylesheet_link', {
             user => $u->{user},
         });
-        $p->{'head_content'} .= LJ::control_strip_js_inject( user => $u->{user} );
+        LJ::control_strip_js_inject( user => $u->{user} );
     }
 
     # FOAF autodiscovery

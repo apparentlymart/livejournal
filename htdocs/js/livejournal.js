@@ -1,9 +1,7 @@
 // This file contains general-purpose LJ code
-
-var LiveJournal = new Object;
-
-// The hook mappings
-LiveJournal.hooks = {};
+LiveJournal = {
+	hooks: {} // The hook mappings
+}
 
 LiveJournal.register_hook = function (hook, func) {
     if (! LiveJournal.hooks[hook])
@@ -34,34 +32,16 @@ LiveJournal.run_hook = function () {
     return rv;
 };
 
-LiveJournal.pageLoaded = false;
-
 LiveJournal.initPage = function () {
-    // only run once
-    if (LiveJournal.pageLoaded)
-        return;
-    LiveJournal.pageLoaded = 1;
-
     // set up various handlers for every page
-    LiveJournal.initPlaceholders();
-    LiveJournal.initLabels();
     LiveJournal.initInboxUpdate();
-    LiveJournal.initAds();
-    LiveJournal.initPolls();
+    AdEngine.init();
 
     // run other hooks
     LiveJournal.run_hook("page_load");
 };
 
-// Set up two different ways to test if the page is loaded yet.
-// The proper way is using DOMContentLoaded, but only Mozilla supports it.
-{
-    // Others
-    DOM.addEventListener(window, "load", LiveJournal.initPage);
-
-    // Mozilla
-    DOM.addEventListener(window, "DOMContentLoaded", LiveJournal.initPage);
-}
+jQuery(LiveJournal.initPage);
 
 // Set up a timer to keep the inbox count updated
 LiveJournal.initInboxUpdate = function () {
@@ -103,72 +83,14 @@ LiveJournal.gotInboxUpdate = function (resp) {
     unread.innerHTML = resp.unread_count ? "  (" + resp.unread_count + ")" : "";
 };
 
-// Search for placeholders and initialize them
-LiveJournal.initPlaceholders = function () {
-    var placeholders = DOM.getElementsByTagAndClassName(document, "img", "LJ_Placeholder") || [];
-
-    Array.prototype.forEach.call(placeholders, function (placeholder) {
-        var parent = DOM.getFirstAncestorByClassName(placeholder, "LJ_Placeholder_Container", false);
-        if (!parent) return;
-
-        var container = DOM.filterElementsByClassName(parent.getElementsByTagName("span"), "LJ_Container")[0];
-        if (!container) return;
-
-        var html = DOM.filterElementsByClassName(parent.getElementsByTagName("span"), "LJ_Placeholder_HTML")[0];
-        if (!html) return;
-
-        var placeholder_html = unescape(html.innerHTML);
-
-        var placeholderClickHandler = function (e) {
-            Event.stop(e);
-            // have to wrap placeholder_html in another block, IE is weird
-            container.innerHTML = "<span>" + placeholder_html + "</span>";
-            DOM.makeInvisible(placeholder);
-        };
-
-        DOM.addEventListener(placeholder, "click", placeholderClickHandler);
-
-        return false;
-    });
-};
-
-// set up labels for Safari
-LiveJournal.initLabels = function () {
-    // disabled because new webkit has labels that work
-    return;
-
-    // safari doesn't know what <label> tags are, lets fix them
-    if (navigator.userAgent.indexOf('Safari') == -1) return;
-
-    // get all labels
-    var labels = document.getElementsByTagName("label");
-
-    for (var i = 0; i < labels.length; i++) {
-        DOM.addEventListener(labels[i], "click", LiveJournal.labelClickHandler);
-    }
-};
-
-LiveJournal.labelClickHandler = function (evt) {
-    Event.prep(evt);
-
-    var label = DOM.getAncestorsByTagName(evt.target, "label", true)[0];
-    if (! label) return;
-
-    var targetId = label.getAttribute("for");
-    if (! targetId) return;
-
-    var target = $(targetId);
-    if (! target) return;
-
-    target.click();
-
-    return false;
-};
-
-// change drsc to src for ads
-LiveJournal.initAds = function () {
-    AdEngine.init();
-};
+// Placeholder onclick event
+LiveJournal.placeholderClick = function(link, html)
+{
+	// use replaceChild for no blink scroll effect
+	link.parentNode.parentNode.replaceChild(jQuery(unescape(html))[0], link.parentNode);
+	
+	return false
+}
 
 // handy utilities to create elements with just text in them
 function _textSpan () { return _textElements("span", arguments); }
@@ -185,108 +107,42 @@ function _textElements (eleType, txts) {
     return ele.length == 1 ? ele[0] : ele;
 };
 
-var PollPages = {
-    "hourglass": null
-};
+LiveJournal.pollAnswerClick = function(e, data)
+{
+	if (!data.pollid || !data.pollqid) return false;
+	
+	var xhr = jQuery.post(LiveJournal.getAjaxUrl('poll'), {
+			pollid   : data.pollid,
+			pollqid  : data.pollqid,
+			page     : data.page,
+			pagesize : data.pagesize,
+			action   : 'get_answers'
+		}, function(data, status) {
+			status == 'success' ?
+				LiveJournal.pollAnswersReceived(data):
+				LiveJournal.ajaxError(data);
+	}, 'json');
+	
+	jQuery(e).hourglass(xhr);
+	
+	return false;
+}
 
-LiveJournal.initPolls = function () {
-    var pollLinks = DOM.getElementsByTagAndClassName(document, 'a', "LJ_PollAnswerLink") || [];  
-
-    // attach click handlers to each answer link
-    Array.prototype.forEach.call(pollLinks, function (pollLink) {
-        DOM.addEventListener(pollLink, "click", LiveJournal.pollAnswerLinkClicked.bindEventListener(pollLink));
-    });
-};
-
-// invocant is the pollLink from above
-LiveJournal.pollAnswerLinkClicked = function (e) {
-    Event.stop(e);
-
-    if (! this || ! this.tagName || this.tagName.toLowerCase() != "a")
-    return true;
-
-    var pollid = this.getAttribute("lj_pollid");
-    if (! pollid) return true;
-
-    var pollqid = this.getAttribute("lj_qid");
-    if (! pollqid) return true;
-
-    var page     = this.getAttribute("lj_page");
-    var pagesize = this.getAttribute("lj_pagesize");
-
-    var action = "get_answers";
-
-    // Do ajax request to replace the link with the answers
-    var params = {
-        "pollid"   : pollid,
-        "pollqid"  : pollqid,
-        "page"     : page,
-        "pagesize" : pagesize,
-        "action"   : action
-    };
-
-    var opts = {
-        "url"    : LiveJournal.getAjaxUrl("poll"),
-        "method" : "POST",
-        "data"   : HTTPReq.formEncoded(params),
-        "onData" : LiveJournal.pollAnswersReceived,
-        "onError": LiveJournal.ajaxError
-    };
-
-    HTTPReq.getJSON(opts);
-
-    if (!PollPages.hourglass) {
-        var coords = DOM.getAbsoluteCursorPosition(e);
-        PollPages.hourglass = new Hourglass();
-        PollPages.hourglass.init();
-        PollPages.hourglass.hourglass_at(coords.x, coords.y);
-        PollPages.e = e;
-    }
-
-    return false;
-};
-
-LiveJournal.pollAnswersReceived = function (answers) {
-    if (! answers) return false;
-
-    if (PollPages.hourglass) {
-        PollPages.hourglass.hide();
-        PollPages.hourglass = null;
-    }
-
-    if (answers.error) return LiveJournal.ajaxError(answers.error);
-
-    var pollid = answers.pollid;
-    var pollqid = answers.pollqid;
-    if (! pollid || ! pollqid) return false;
-    var page     = answers.page;
-
-    var answerPagEle;
-    var answerEle;
-    if (page) {
-        answerPagEle = DOM.getElementsByTagAndClassName(document, 'div', "lj_pollanswer_paging")[0];
-        answerEle    = DOM.getElementsByTagAndClassName(document, 'div', "lj_pollanswer")[0];
-    } else {
-        var linkEle = $("LJ_PollAnswerLink_" + pollid + "_" + pollqid);
-        if (! linkEle) return false;
-
-        answerPagEle = document.createElement("div");
-        DOM.addClassName(answerPagEle, "lj_pollanswer_paging");
-
-        answerEle = document.createElement("div");
-        DOM.addClassName(answerEle, "lj_pollanswer");
-
-        linkEle.parentNode.insertBefore(answerEle,    linkEle);
-        linkEle.parentNode.insertBefore(answerPagEle, linkEle);
-
-        linkEle.parentNode.removeChild(linkEle);
-    }
-
-    answerPagEle.innerHTML  = answers.paging_html ? answers.paging_html : "";
-    answerEle.innerHTML     = answers.answer_html ? answers.answer_html : "(No answers)";
-
-    LiveJournal.initPolls();
-};
+LiveJournal.pollAnswersReceived = function(answers)
+{
+	if (!answers || !answers.pollid || !answers.pollqid) return;
+	
+	if (answers.error) return LiveJournal.ajaxError(answers.error);
+	
+	var id = '#LJ_Poll_' + answers.pollid + '_' + answers.pollqid,
+		to_remove = '.LJ_PollAnswerLink, .lj_pollanswer, .lj_pollanswer_paging',
+		html = '<div class="lj_pollanswer">' + (answers.answer_html || '(No answers)') + '</div>';
+	
+	answers.paging_html && (html += '<div class="lj_pollanswer_paging">' + answers.paging_html + '</div>');
+	
+	jQuery(id).find(to_remove).remove()
+		.end().prepend(html).find('.lj_pollanswer').ljAddContextualPopup();
+}
 
 // gets a url for doing ajax requests
 LiveJournal.getAjaxUrl = function (action) {
@@ -304,23 +160,6 @@ LiveJournal.ajaxError = function (err) {
     } else {
         alert("Error: " + err);
     }
-};
-
-// utility method to get all items on the page with a certain class name
-LiveJournal.getDocumentElementsByClassName = function (className) {
-  var domObjects = document.getElementsByTagName("*");
-  var items = DOM.filterElementsByClassName(domObjects, className) || [];
-
-  return items;
-};
-
-// utility method to add an onclick callback on all items with a classname
-LiveJournal.addClickHandlerToElementsWithClassName = function (callback, className) {
-  var items = LiveJournal.getDocumentElementsByClassName(className);
-
-  items.forEach(function (item) {
-    DOM.addEventListener(item, "click", callback);
-  })
 };
 
 LiveJournal.insertAdsMulti = function (params) {

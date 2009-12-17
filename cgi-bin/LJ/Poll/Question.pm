@@ -320,12 +320,8 @@ sub paging_bar_as_html {
 
     my $href_opts = sub {
         my $page = shift;
-        return  " class='LJ_PollAnswerLink'".
-                " lj_pollid='$pollid'".
-                " lj_qid='$pollqid'".
-                " lj_posterid='$jid'".
-                " lj_page='$page'".
-                " lj_pagesize='$pagesize'";
+        return  "onclick=\"return LiveJournal.pollAnswerClick(event, {pollid:$pollid,pollqid:$pollqid,page:$page,pagesize:$pagesize})\"".
+                " lj_posterid=\"$jid\"";
     };
 
     return LJ::paging_bar($page, $pages, { href_opts => $href_opts });

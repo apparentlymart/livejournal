@@ -23,7 +23,7 @@ sub box_updated {
     my $u = $self->{u};
     my $prod = LJ::CProd->prod_to_show($u);
     LJ::CProd->mark_acked($u, $prod) if $prod;
-    return 'CProd.attachNextClickListener();';
+    return '';
 }
 
 #######################################

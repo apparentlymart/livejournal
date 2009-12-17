@@ -14,6 +14,6 @@
 
     sleep 1 if $LJ::IS_DEV_SERVER;
 
-    return LJ::js_dumper($control_strip);
+    return $control_strip;
 }
 _code?>

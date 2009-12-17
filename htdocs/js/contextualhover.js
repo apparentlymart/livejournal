@@ -338,7 +338,6 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
     this.width = opts.width; // Use for resizing later
     this.height = opts.height; // Use for resizing later
     this.alias = opts.alias;  
-    this.callback = opts.callback;
     LJWidgetIPPU_AddAlias.superClass.init.apply(this, arguments);
   },
 
@@ -359,7 +358,6 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 		return;
 	}
 	this.ippu.hide();
-	this.callback && this.callback();
 	var userLJ = data.res.journalname,
 		userClassName = 'ljuser-name_' + data.res.journalname,
 		searchProfile = DOM.getElementsByClassName(document, userClassName),
@@ -454,7 +452,7 @@ Aliases = {}
 function addAlias(target, ptitle, ljusername, oldalias, callback) {
     if (! ptitle) return true;
 	
-    var addvgift = new LJWidgetIPPU_AddAlias({
+	new LJWidgetIPPU_AddAlias({
         title: ptitle,
         width: 440,
         height: 180,
@@ -469,183 +467,176 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 }
 
 
-var ContextualPopup = new Object;
-
-ContextualPopup.popupDelay  = 500;
-ContextualPopup.hideDelay   = 250;
-
-ContextualPopup.cachedResults   = {};
-ContextualPopup.currentRequests = {};
-ContextualPopup.mouseInTimer    = null;
-ContextualPopup.mouseOutTimer   = null;
-ContextualPopup.currentId       = null;
-ContextualPopup.hourglass       = null;
-
-ContextualPopup.setup = function () {
-    // don't do anything if no remote
-    if (!Site || !Site.ctx_popup) return;
-
-    ContextualPopup.searchAndAdd(document)
-
-    DOM.addEventListener(document.body, "mousemove", ContextualPopup.mouseOver.bindEventListener());
-}
-
-ContextualPopup.searchAndAdd = function (node) {
-    if (!Site || !Site.ctx_popup) return;
-
-    // attach to all ljuser head icons
-    var ljusers = DOM.getElementsByTagAndClassName(node, 'span', 'ljuser'),
-        rex_userid = /\?userid=(\d+)/i,
-        rex_userpic = /(userpic\..+\/\d+\/\d+)|(\/userpic\/\d+\/\d+)/;
-
-    ljusers.forEach(function (ljuser) {
-        var nodes = ljuser.getElementsByTagName('img'), i = -1, node;
-        while (node = nodes[++i]) {
-            // if the parent (a tag with link to userinfo) has userid in its URL, then
-            // this is an openid user icon and we should use the userid
-            var parent = node.parentNode, userid;
-            if (parent && parent.href && (userid = parent.href.match(rex_userid)))
-                node.userid = userid[1];
-            else
-                node.username = ljuser.getAttribute('lj:user');
-
-            if (!node.username && !node.userid) continue;
-
-            DOM.addClassName(node, 'ContextualPopup');
-        }
-    });
-
-    // attach to all userpics
-    var images = node.getElementsByTagName('img') || [];
-    Array.prototype.forEach.call(images, function (image) {
-        // if the image url matches a regex for userpic urls then attach to it
-        if (image.src.match(rex_userpic)) {
-            image.up_url = image.src;
-            DOM.addClassName(image, 'ContextualPopup');
-        }
-    });
-}
-
-ContextualPopup.isCtxPopElement = function (ele) {
-    return (ele && DOM.getAncestorsByClassName(ele, "ContextualPopup", true).length);
-}
-
-ContextualPopup.mouseOver = function (e) {
-    var target = e.target;
-    var ctxPopupId = target.username || target.userid || target.up_url;
-
-    // did the mouse move out?
-    if (!ContextualPopup.isCtxPopElement(target)) {
-        if (ContextualPopup.mouseInTimer) {
-            window.clearTimeout(ContextualPopup.mouseInTimer);
-            ContextualPopup.mouseInTimer = null;
-        };
-
-        if (ContextualPopup.ippu) {
-            if (ContextualPopup.mouseInTimer || ContextualPopup.mouseOutTimer) return;
-
-            ContextualPopup.mouseOutTimer = window.setTimeout(function () {
-                ContextualPopup.mouseOut(e);
-            }, ContextualPopup.hideDelay);
-            return;
-        }
-    }
-
-    // we're inside a ctxPopElement, cancel the mouseout timer
-    if (ContextualPopup.mouseOutTimer) {
-        window.clearTimeout(ContextualPopup.mouseOutTimer);
-        ContextualPopup.mouseOutTimer = null;
-    }
-
-    if (!ctxPopupId)
-    return;
-
-    var cached = ContextualPopup.cachedResults[ctxPopupId];
-
-    // if we don't have cached data background request it
-    if (!cached) {
-        ContextualPopup.getInfo(target, ctxPopupId);
-    }
-
-    // start timer if it's not running
-    if (! ContextualPopup.mouseInTimer && (! ContextualPopup.ippu || (
-                                                                      ContextualPopup.currentId &&
-                                                                      ContextualPopup.currentId != ctxPopupId))) {
-        ContextualPopup.mouseInTimer = window.setTimeout(function () {
-            ContextualPopup.showPopup(ctxPopupId, target);
-        }, ContextualPopup.popupDelay);
-    }
+var ContextualPopup =
+{
+	popupDelay  : 500,
+	hideDelay   : 250,
+	
+	cachedResults  : {},
+	currentRequests: {},
+	mouseInTimer   : null,
+	mouseOutTimer  : null,
+	currentId      : null,
+	hourglass      : null,
+	
+	setup: function()
+	{
+		// don't do anything if no remote
+		if (!Site.ctx_popup) return;
+		
+		jQuery(document.body)
+			.mouseover(ContextualPopup.mouseOver)
+			.ljAddContextualPopup();
+	},
+	
+	searchAndAdd: function(node)
+	{
+		if (!Site.ctx_popup) return;
+		
+		// attach to all ljuser head icons
+		var rex_userid = /\?userid=(\d+)/,
+			rex_userpic = /(userpic\..+\/\d+\/\d+)|(\/userpic\/\d+\/\d+)/,
+			ljusers = jQuery('span.ljuser>a>img', node),
+			i = -1, userid, ljuser, parent;
+		
+		// use while for speed
+		while (ljusers[++i])
+		{
+			var ljuser = ljusers[i], parent = ljuser.parentNode;
+			if (parent.href && (userid = parent.href.match(rex_userid))) {
+				ljuser.userid = userid[1];
+			} else if (parent.parentNode.getAttribute('lj:user')) {
+				ljuser.username = parent.parentNode.getAttribute('lj:user');
+			} else {
+				continue;
+			}
+			jQuery.className.add(ljuser, 'ContextualPopup');
+		}
+		
+		ljusers = node.getElementsByTagName('img');
+		i = -1;
+		while (ljusers[++i])
+		{
+			ljuser = ljusers[i];
+			if (ljuser.src.match(rex_userpic)) {
+				ljuser.up_url = ljuser.src;
+				jQuery.className.add(ljuser, 'ContextualPopup');
+			}
+		}
+	},
+	
+	mouseOver: function(e)
+	{
+		var target = e.target,
+			ctxPopupId = target.username || target.userid || target.up_url,
+			t = ContextualPopup;
+		
+		clearTimeout(t.mouseInTimer);
+		
+		if (ctxPopupId) {
+			// if we don't have cached data background request it
+			if (!t.cachedResults[ctxPopupId]) {
+				t.getInfo(target, ctxPopupId);
+			}
+			
+			// doesn't display alt as tooltip
+			if (jQuery.browser.msie && target.title !== undefined) {
+				target.title = '';
+			}
+			
+			if (t.ippu) {
+				clearTimeout(t.mouseOutTimer);
+				t.mouseOutTimer = null;
+				// show other popup
+				if (t.current_target != target) {
+					t.showPopup(ctxPopupId, target);
+				}
+			}
+			// start timer if it's not running
+			else {
+				t.mouseInTimer = setTimeout(function()
+				{
+					t.showPopup(ctxPopupId, target);
+				}, t.popupDelay);
+			}
+		} else if (t.ippu) {
+			// we're inside a ctxPopElement, cancel the mouseout timer
+			if (jQuery(target).closest('.ContextualPopup').length) {
+				clearTimeout(t.mouseOutTimer);
+				t.mouseOutTimer = null;
+			}
+			// did the mouse move out?
+			else if (t.mouseOutTimer === null) {
+				t.mouseOutTimer = setTimeout(function()
+				{
+					t.mouseOut();
+				}, t.hideDelay);
+			}
+		}
+	},
+	
+	mouseOut: function()
+	{
+		clearTimeout(ContextualPopup.mouseOutTimer);
+		
+		ContextualPopup.mouseOutTimer =
+		ContextualPopup.currentId =
+		ContextualPopup.current_target = null;
+		
+		ContextualPopup.hidePopup();
+	},
+	
+	showPopup: function(ctxPopupId, ele)
+	{
+		ContextualPopup.current_target = ele;
+		ContextualPopup.currentId = ctxPopupId;
+		var data = ContextualPopup.cachedResults[ctxPopupId];
+		
+		if (data && data.noshow) return;
+		
+		ContextualPopup.constructIPPU(ctxPopupId);
+		var ippu = ContextualPopup.ippu;
+		// default is to auto-center, don't want that
+		ippu.setAutoCenter(false, false);
+	
+		// pop up the box right under the element
+		ele = jQuery(ele);
+		var ele_offset = ele.offset(),
+			left = ele_offset.left,
+			top = ele_offset.top + ele.height();
+		
+		// hide the ippu content element, put it on the page,
+		// get its bounds and make sure it's not going beyond the client
+		// viewport. if the element is beyond the right bounds scoot it to the left.
+		var pop_ele = ippu.getElement();
+		pop_ele.style.visibility = 'hidden';
+		
+		// put the content element on the page so its dimensions can be found
+		ippu.show();
+		
+		var win_width = jQuery(document).width(),
+			win_height = jQuery(document).height(),
+			pop_width = jQuery(pop_ele).outerWidth(true),
+			pop_height = jQuery(pop_ele).outerHeight(true);
+		
+		if (left + pop_width > win_width) {
+			left = win_width - pop_width;
+		}
+		
+		if (top + pop_height > win_height) {
+			top = win_height - pop_height;
+		}
+		
+		ippu.setLocation(left, top);
+		
+		// finally make the content visible
+		pop_ele.style.visibility = 'visible';
+	}
 }
 
 // if the popup was not closed by us catch it and handle it
 ContextualPopup.popupClosed = function () {
     ContextualPopup.mouseOut();
-}
-
-ContextualPopup.mouseOut = function (e) {
-    if (ContextualPopup.mouseInTimer)
-        window.clearTimeout(ContextualPopup.mouseInTimer);
-    if (ContextualPopup.mouseOutTimer)
-        window.clearTimeout(ContextualPopup.mouseOutTimer);
-
-    ContextualPopup.mouseInTimer = null;
-    ContextualPopup.mouseOutTimer = null;
-    ContextualPopup.currentId = null;
-
-    ContextualPopup.hidePopup();
-}
-
-ContextualPopup.showPopup = function (ctxPopupId, ele) {
-    if (ContextualPopup.mouseInTimer) {
-        window.clearTimeout(ContextualPopup.mouseInTimer);
-    }
-    ContextualPopup.mouseInTimer = null;
-
-    if (ContextualPopup.ippu && (ContextualPopup.currentId && ContextualPopup.currentId == ctxPopupId)) {
-        return;
-    }
-
-    ContextualPopup.currentId = ctxPopupId;
-
-    ContextualPopup.constructIPPU(ctxPopupId);
-
-    var data = ContextualPopup.cachedResults[ctxPopupId];
-
-    if (! ele || (data && data.noshow)) {
-        return;
-    }
-
-    if (ContextualPopup.ippu) {
-        var ippu = ContextualPopup.ippu;
-        // default is to auto-center, don't want that
-        ippu.setAutoCenter(false, false);
-
-        // pop up the box right under the element
-        var dim = DOM.getAbsoluteDimensions(ele);
-        if (!dim) return;
-
-        var bounds = DOM.getClientDimensions();
-        if (!bounds) return;
-
-        // hide the ippu content element, put it on the page,
-        // get its bounds and make sure it's not going beyond the client
-        // viewport. if the element is beyond the right bounds scoot it to the left.
-
-        var popEle = ippu.getElement();
-        popEle.style.visibility = "hidden";
-        ContextualPopup.ippu.setLocation(dim.absoluteLeft, dim.absoluteBottom);
-
-        // put the content element on the page so its dimensions can be found
-        ContextualPopup.ippu.show();
-
-        var ippuBounds = DOM.getAbsoluteDimensions(popEle);
-        if (ippuBounds.absoluteRight > bounds.x) {
-            ContextualPopup.ippu.setLocation(bounds.x - ippuBounds.offsetWidth - 30, dim.absoluteBottom);
-        }
-
-        // finally make the content visible
-        popEle.style.visibility = "visible";
-    }
 }
 
 ContextualPopup.constructIPPU = function (ctxPopupId) {
@@ -1041,71 +1032,45 @@ if ((data.is_logged_in && data.is_comm) || (message && friend))
 }
 
 // ajax request to change relation
-ContextualPopup.changeRelation = function (info, ctxPopupId, action, evt) {
-    if (!info) return true;
-
-    var postData = {
-        "target": info.username,
-        "action": action
-    };
-
-    // get the authtoken
-    var authtoken = info[action + "_authtoken"];
-    if (!authtoken) log("no auth token for action" + action);
-    postData.auth_token = authtoken;
-
-    // needed on journal subdomains
-    var url = LiveJournal.getAjaxUrl("changerelation");
-
-    // callback from changing relation request
-    var changedRelation = function (data) {
-        if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
-
-        if (data.error) {
-            ContextualPopup.showNote(data.error, ctxPopupId);
-            return;
-        }
-
-        if (data.note)
-        ContextualPopup.showNote(data.note, ctxPopupId);
-
-        if (!data.success) return;
-
-        if (ContextualPopup.cachedResults[ctxPopupId]) {
-            var updatedProps = ['is_friend', 'is_member', 'is_banned', 'is_banned_everywhere'];
-            updatedProps.forEach(function (prop) {
-                ContextualPopup.cachedResults[ctxPopupId][prop] = data[prop];
-            });
-        }
-
-        // if the popup is up, reload it
-        ContextualPopup.renderPopup(ctxPopupId);
-    };
-
-    var opts = {
-        "data": HTTPReq.formEncoded(postData),
-        "method": "POST",
-        "url": url,
-        "onError": ContextualPopup.gotError,
-        "onData": changedRelation
-    };
-
-    // do hourglass at mouse coords
-    var mouseCoords = DOM.getAbsoluteCursorPosition(evt);
-    if (!ContextualPopup.hourglass && mouseCoords) {
-        ContextualPopup.hourglass = new Hourglass();
-        ContextualPopup.hourglass.init(null, "lj_hourglass");
-        ContextualPopup.hourglass.add_class_name("ContextualPopup"); // so mousing over hourglass doesn't make ctxpopup think mouse is outside
-        ContextualPopup.hourglass.hourglass_at(mouseCoords.x, mouseCoords.y);
-    }
-
-    HTTPReq.getJSON(opts);
-
-    return false;
+ContextualPopup.changeRelation = function (info, ctxPopupId, action, e) {
+	var changedRelation = function(data)
+	{
+		if (data.error) {
+			return ContextualPopup.showNote(data.error);
+		}
+		
+		if (ContextualPopup.cachedResults[ctxPopupId]) {
+			jQuery.extend(ContextualPopup.cachedResults[ctxPopupId], data);
+		}
+		
+		// if the popup is up, reload it
+		ContextualPopup.renderPopup(ctxPopupId);
+	}
+	
+	var xhr = jQuery.post(LiveJournal.getAjaxUrl('changerelation'),
+				{
+					target: info.username,
+					action: action,
+					auth_token: info[action + '_authtoken']
+				},
+				function(data)
+				{
+					ContextualPopup.hourglass = null;
+					changedRelation(data);
+				},
+				'json'
+			);
+	
+	ContextualPopup.hideHourglass();
+	ContextualPopup.hourglass = jQuery(e).hourglass(xhr)[0];
+	// so mousing over hourglass doesn't make ctxpopup think mouse is outside
+	ContextualPopup.hourglass.add_class_name('lj_hourglass ContextualPopup');
+	
+	return false;
 }
 
 // create a little popup to notify the user of something
-ContextualPopup.showNote = function (note, ctxPopupId, ele) {
+ContextualPopup.showNote = function (note, ele) {
     if (ContextualPopup.ippu) {
         // pop up the box right under the element
         ele = ContextualPopup.ippu.getElement();
@@ -1115,8 +1080,8 @@ ContextualPopup.showNote = function (note, ctxPopupId, ele) {
 }
 
 ContextualPopup.hidePopup = function (ctxPopupId) {
-    if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
-
+	ContextualPopup.hideHourglass();
+	
     // destroy popup for now
     if (ContextualPopup.ippu) {
         ContextualPopup.ippu.hide();
@@ -1125,64 +1090,46 @@ ContextualPopup.hidePopup = function (ctxPopupId) {
 }
 
 // do ajax request of user info
-ContextualPopup.getInfo = function (target, ctxPopupId) {
-    var username = target.username || '',
-        userid = target.userid || 0,
-        up_url = target.up_url || '';
-
-    if (ContextualPopup.currentRequests[ctxPopupId]) {
-        return;
-    }
-
-    ContextualPopup.currentRequests[ctxPopupId] = 1;
-
-    var params = HTTPReq.formEncoded ({
-        "user": username,
-        "userid": userid,
-        "userpic_url": up_url,
-        "mode": "getinfo"
-    });
-
-    var url = LiveJournal.getAjaxUrl("ctxpopup");
-
-    // got data callback
-    var gotInfo = function (data) {
-        if (ContextualPopup && ContextualPopup.hourglass) ContextualPopup.hideHourglass();
-
-        ContextualPopup.cachedResults[String(data.userid)] =
-        ContextualPopup.cachedResults[data.username] =
-        ContextualPopup.cachedResults[data.url_userpic] = data;
-
-        if (up_url) // non default userpic
-            ContextualPopup.cachedResults[up_url] = data;
-
-        if (data.error) {
-            if (data.noshow) return;
-
-            ContextualPopup.showNote(data.error, ctxPopupId, target);
-            return;
-        }
-
-        if (data.note)
-        ContextualPopup.showNote(data.note, data.ctxPopupId, target);
-
-        ContextualPopup.currentRequests[ctxPopupId] = null;
-
-        ContextualPopup.renderPopup(ctxPopupId);
-
-        // expire cache after minute
-        setTimeout(function () {
-            ContextualPopup.cachedResults[ctxPopupId] = null;
-        }, 60 * 1000);
-    };
-
-    HTTPReq.getJSON({
-        "url": url,
-        "method": "GET",
-        "data": params,
-        "onData": gotInfo,
-        "onError": ContextualPopup.gotError
-    });
+ContextualPopup.getInfo = function(target, ctxPopupId)
+{
+	if (ContextualPopup.currentRequests[ctxPopupId]) return;
+	
+	ContextualPopup.currentRequests[ctxPopupId] = 1;
+	
+	// got data callback
+	var gotInfo = function (data)
+	{
+		ContextualPopup.cachedResults[String(data.userid)] =
+		ContextualPopup.cachedResults[data.username] =
+		ContextualPopup.cachedResults[data.url_userpic] = data;
+		
+		// non default userpic
+		if (target.up_url) {
+			ContextualPopup.cachedResults[target.up_url] = data;
+		}
+		
+		if (data.error) {
+			!data.noshow && ContextualPopup.showNote(data.error, target);
+			return;
+		}
+		
+		ContextualPopup.currentRequests[ctxPopupId] = null;
+		
+		if (ContextualPopup.currentId == ctxPopupId) {
+			ContextualPopup.renderPopup(ctxPopupId);
+		}
+	};
+	
+	jQuery.getJSON(
+		LiveJournal.getAjaxUrl('ctxpopup'),
+		{
+			user: target.username || '',
+			userid: target.userid || 0,
+			userpic_url: target.up_url || '',
+			mode: 'getinfo'
+		},
+		gotInfo
+	);
 }
 
 ContextualPopup.hideHourglass = function () {
@@ -1192,9 +1139,5 @@ ContextualPopup.hideHourglass = function () {
     }
 }
 
-ContextualPopup.gotError = function (err) {
-    if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
-}
-
 // when page loads, set up contextual popups
-LiveJournal.register_hook("page_load", ContextualPopup.setup);
+jQuery(ContextualPopup.setup);

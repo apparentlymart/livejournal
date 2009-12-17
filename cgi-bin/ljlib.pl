@@ -2113,7 +2113,10 @@ sub start_request
     unless ($LJ::DISABLED{sitewide_includes}) {
         if (eval { Apache->request }) {
             # standard site-wide JS and CSS
+            # jQuery always should be the first in the list
             LJ::need_res(qw(
+                            js/jquery.js
+                            js/jquery_fn.js
                             js/core.js
                             js/dom.js
                             js/httpreq.js
