@@ -97,11 +97,11 @@ sub render_body {
         foreach my $vg_key (@need_vgifts) {
             my $vg_link = $friend_birtdays_vgifts{$vg_key}->{url};
             my $vg = LJ::Pay::ShopVGift->new(id => $vg_key);
-            my $vg_key_name = $vg->keyname;
             my $vg_html = $vg->display_html_code(
-                hover => LJ::ehtml(BML::ml($vg->display_name())),
+                remove_url => 1,
+                hover => LJ::ehtml($vg->name( remove_url => 1 )),
             );
-            my $vg_name = $vg->name;
+            my $vg_name = $vg->name( remove_url => 1 );
             my $vg_price = ($vg->price+0)  ? '<b>' . $vg->price . '$</b>' : '<b style="color:#FF0000;">' . $class->ml('widget.friendbirthdays.freegift') . '</b>' ;
             $ret .= "<li><div class='gift-holder'><span class='liner'></span><a href=\"$vg_link\">$vg_html</a></div><span>$vg_name<br />$vg_price</span></li>";
         }
