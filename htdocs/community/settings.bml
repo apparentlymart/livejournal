@@ -234,7 +234,7 @@ body<=
             $dbr->selectrow_array("SELECT membership, postlevel FROM community WHERE userid=$c->{'userid'}");
         LJ::load_user_props($c, "nonmember_posting", "moderated");
         $info{'nonmember_posting'} = $c->{'nonmember_posting'} ? 1 : 0;
-        $info{'moderated'} = ($c->{'moderated'} =~ /^[01NAF]$/) ? $c->{'moderated'} : 'F';
+        $info{'moderated'} = ($c->{'moderated'} =~ /^[01NAF]$/) ? $c->{'moderated'} : 'N';
     }
 
     $ret .= "<form method='post' action='settings.bml?mode=$mode'>";
