@@ -298,7 +298,7 @@ sub check_viewable
     # note $form no longer used
 
     my $err = sub {
-        $$errref = "<?h1 <?_ml Error _ml?> h1?><?p $_[0] p?>";
+        $$errref = "<h1><?_ml Error _ml?></h1><p>$_[0]</p>";
         return 0;
     };
 
@@ -1307,6 +1307,28 @@ sub talkform {
         my $jitemid = int($opts->{'ditemid'} / 256);
         return "Sorry, this entry already has the maximum number of comments allowed."
             if LJ::Talk::Post::over_maxcomments($journalu, $jitemid);
+    }
+
+    # can a comment even be made?
+    
+    my $entry = LJ::Entry->new($journalu->id, jitemid => $opts->{ditemid});
+    if ($entry->prop('opt_nocomments')) {
+        $ret .= "<h1>$BML::ML{'Sorry'}</h1><p>$BML::ML{'.error.nocommentspost'}</p>";
+        $opts->{'err'} = 1;
+        return $ret;
+    }
+    if ($journalu->{'opt_showtalklinks'} eq "N") {
+        $ret .= "<h1>$BML::ML{'Sorry'}</h1><p>$BML::ML{'.error.nocommentsjournal'}</p>";
+        $opts->{'err'} = 1;
+        return $ret;
+    }
+    unless (LJ::get_cap($journalu, "get_comments") ||
+            ($remote && LJ::get_cap($remote, "leave_comments"))) {
+        $ret .= "<h1>$BML::ML{'Sorry'}</h1><p>";
+        $ret .= $LJ::MSG_NO_COMMENT || "Sorry, you cannot leave comments at this time.";
+        $ret .= "</p>";
+        $opts->{'err'} = 1;
+        return $ret;
     }
 
     if (!$editid && $parpost->{'state'} eq "S") {
@@ -3131,7 +3153,7 @@ sub init {
         $bmlerr->("$SC.error.noanon");
     }
 
-    if ($iprops->{'opt_nocomments'}) {
+    if ($iprops->{'opt_nocomments'} || $journalu->{'opt_whocanreply'} eq '') {
         $bmlerr->("$SC.error.nocomments");
     }
 
@@ -3526,7 +3548,7 @@ sub make_preview {
     my $cleansubject = $form->{'subject'};
     LJ::CleanHTML::clean_subject(\$cleansubject);
 
-    $ret .= "<?h1 $BML::ML{'/talkpost_do.bml.preview.title'} h1?><?p $BML::ML{'/talkpost_do.bml.preview'} p?><?hr?>";
+    $ret .= "<h1>$BML::ML{'/talkpost_do.bml.preview.title'}</h1><p>$BML::ML{'/talkpost_do.bml.preview'}</p><?hr?>";
     $ret .= "<div align=\"center\"><b>(<a href=\"$talkurl\">$BML::ML{'talk.commentsread'}</a>)</b></div>";
 
     my $event = $form->{'body'};

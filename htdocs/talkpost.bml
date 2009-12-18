@@ -403,34 +403,23 @@ body<=
 
     $ret .= "<p align='center' class='lesstop'><b>(<a href=\"$readurl#comments\">$readlink_text</a>)</b></p>";
 
-    # can a comment even be made?
-    if ($props->{'opt_nocomments'}) {
-        $ret .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.nocommentspost'} p?>";
-        return $ret;
-    }
-    if ($u->{'opt_showtalklinks'} eq "N") {
-        $ret .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.nocommentsjournal'} p?>";
-        return $ret;
-    }
-    unless (LJ::get_cap($u, "get_comments") ||
-            ($remote && LJ::get_cap($remote, "leave_comments"))) {
-        $ret .= "<?h1 $ML{'Sorry'} h1?><?p ";
-        $ret .= $LJ::MSG_NO_COMMENT || "Sorry, you cannot leave comments at this time.";
-        $ret .= " p?>";
-        return $ret;
-    }
-
     my $h1title = $editid ? $ML{'.editresponse'} : $ML{'.postresponse'};
     $ret .= BML::fill_template("H1", { DATA => $h1title });
 
-    $ret .= LJ::Talk::talkform({ 'remote'    => $remote,
-                                 'journalu'  => $u,
-                                 'parpost'   => $parpost,
-                                 'replyto'   => $init->{replyto},
-                                 'ditemid'   => $ditemid,
-                                 'stylemine' => $GET{'style'} eq "mine",
-                                 'form'      => \%FORM,
-                                 'do_captcha' => LJ::Talk::Post::require_captcha_test($remote, $u, $FORM{body}, $ditemid)});
+    my $talkformprops = {
+        'remote'    => $remote,
+        'journalu'  => $u,
+        'parpost'   => $parpost,
+        'replyto'   => $init->{replyto},
+        'ditemid'   => $ditemid,
+        'stylemine' => $GET{'style'} eq "mine",
+        'form'      => \%FORM,
+        'do_captcha' => LJ::Talk::Post::require_captcha_test($remote, $u, $FORM{body}, $ditemid),
+    };
+    $ret .= LJ::Talk::talkform($talkformprops);
+
+    return $ret if ($talkformprops->{'err'});
+
     my $ad = LJ::get_ads({ location => 'bml.talk.bottom', journalu => $u, s1_view => 'reply', });
     if ($ad) {
         $ret .= "<hr width='100%' size='2' align='center' />";
