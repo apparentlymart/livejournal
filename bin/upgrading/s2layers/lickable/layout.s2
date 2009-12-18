@@ -1,4 +1,3 @@
-
 layerinfo "type" = "layout";
 layerinfo "name" = "Quite Lickable";
 layerinfo "author_name" = "Martin Atkins";
@@ -117,6 +116,22 @@ propgroup presentation {
 
     property use linklist_support;
     property use custom_control_strip_colors;
+
+    property string journal_sticky_post_link {
+        des = "Journal Sticky Post Link";
+    }
+
+    property string journal_sticky_post_title {
+        des = "Journal Sticky Post Title";
+    }
+
+    property string journal_sticky_post_text {
+        des = "Journal Sticky Post";
+        note = "You can write whatever you want in here; it'll get displayed above your entries.";
+        rows = 10;
+        cols = 25;
+        string_mode = "html";
+    }
 }
 propgroup colors {
     property Color clr_margins {
@@ -1345,6 +1360,28 @@ function RecentPage::lay_print_viewspec() {
 }
 
 function RecentPage::print_body() {
+    if ($.view == "recent" and $*journal_sticky_post_text != "") {
+        """
+            <div class="day">
+                <div class="entry">
+                    <div class="entryheader">
+                        <h3 class="entrysubject">
+                            <a class="subj-link" href="$*journal_sticky_post_link">$*journal_sticky_post_title</a>
+                        </h3>
+                    </div>
+                    <div class="entrycontent">
+                        $*journal_sticky_post_text
+                    </div>
+                    <div class="entryfooter">
+                        <ul class="entrycmdlinks">
+                            <li><a href="$*journal_sticky_post_link?mode=reply">Leave a comment</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        """;
+    }
+
     foreach var Entry e ($.entries) {
         if ($e.new_day) {
             """<div class="day" id="day"""+$e.time->date_format("%%yyyy%%%%mm%%%%dd%%")+"\">\n";
