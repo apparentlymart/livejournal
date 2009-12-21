@@ -14,7 +14,7 @@ jQuery.fn.hourglass = function(xhr)
 	this.each(function()
 	{
 		// is complete or was aborted
-		if (!xhr || xhr.readyState == 0 || xhr.readyState == 4) return;
+		if (xhr && (xhr.readyState == 0 || xhr.readyState == 4)) return;
 		
 		if (this.nodeType) { // node
 			
@@ -34,13 +34,16 @@ jQuery.fn.hourglass = function(xhr)
 		
 		hourglasses.push(hourglass)
 		
-		jQuery(hourglass.ele).bind('ajaxComplete', function(event, request)
+		if (xhr)
 		{
-			if (request == xhr) {
-				hourglass.hide();
-				jQuery(hourglass.ele).unbind('ajaxComplete', arguments.callee);
-			}
-		});
+			jQuery(hourglass.ele).bind('ajaxComplete', function(event, request)
+			{
+				if (request == xhr) {
+					hourglass.hide();
+					jQuery(hourglass.ele).unbind('ajaxComplete', arguments.callee);
+				}
+			});
+		}
 	});
 	
 	return hourglasses;

@@ -60,37 +60,6 @@ function multiformSubmit (form, txt) {
     }
 }
 
-
-function getXTR () {
-    var xtr;
-    var ex;
-
-    if (typeof(XMLHttpRequest) != "undefined") {
-        xtr = new XMLHttpRequest();
-    } else {
-        try {
-            xtr = new ActiveXObject("Msxml2.XMLHTTP.4.0");
-        } catch (ex) {
-            try {
-                xtr = new ActiveXObject("Msxml2.XMLHTTP");
-            } catch (ex) {
-            }
-        }
-    }
-
-    // let me explain this.  Opera 8 does XMLHttpRequest, but not setRequestHeader.
-    // no problem, we thought:  we'll test for setRequestHeader and if it's not present
-    // then fall back to the old behavior (treat it as not working).  BUT --- IE6 won't
-    // let you even test for setRequestHeader without throwing an exception (you need
-    // to call .open on the .xtr first or something)
-    try {
-        if (xtr && ! xtr.setRequestHeader)
-            xtr = null;
-    } catch (ex) { }
-
-    return xtr;
-}
-
 function positionedOffset(element) {
   var valueT = 0, valueL = 0;
   do {
@@ -532,72 +501,87 @@ function updateLink (ae, resObj, clickTarget) {
 
 }
 
-var tsInProg = new Object();  // dict of { ditemid => 1 }
-function createModerationFunction (ae, dItemid) {
-    return function (e) {
-        if (!e) e = window.event;
-
-        if (tsInProg[dItemid])
-            return Event.preventDefault(e);
-        tsInProg[dItemid] = 1;
-
-        var clickTarget = getTarget(e);
-
-        var imgTarget;
-        var imgs = ae.getElementsByTagName("img");
-        if (imgs.length)
-            imgTarget = imgs[0]
-
-        if (! clickTarget || typeof(clickTarget) != "object")
-            return true;
-
-        var clickPos = getEventPos(e);
-
-        var de = document.createElement("img");
-        de.style.position = "absolute";
-        de.width = 17;
-        de.height = 17;
-        de.src = Site.imgprefix + "/hourglass.gif";
-        de.style.top = (clickPos.y - 8) + "px";
-        de.style.left = (clickPos.x - 8) + "px";
-        document.body.appendChild(de);
-
-        var xtr = getXTR();
-        var state_callback = function () {
-            if (xtr.readyState != 4) return;
-
-            document.body.removeChild(de);
-            var rpcRes;
-
-            if (xtr.status == 200) {
-                var resObj = eval(xtr.responseText);
-                if (resObj) {
-                    poofAt(clickPos);
-                    updateLink(ae, resObj, imgTarget);
-                    tsInProg[dItemid] = 0;
-                } else {
-                    tsInProg[dItemid] = 0;
-                }
-
-            } else {
-                alert("Error contacting server.");
-                tsInProg[dItemid] = 0;
-            }
-        };
-
-        xtr.onreadystatechange = state_callback;
-    	var curJournal=(Site.currentJournal!="")?(Site.currentJournal):(LJ_cmtinfo.journal);
-        var postUrl = ae.href.replace(/.+talkscreen\.bml/, "/" + curJournal + "/__rpc_talkscreen");
-        //var postUrl = ae.href;
-        xtr.open("POST", postUrl + "&jsmode=1", true);
-
-        var postdata = "confirm=Y&lj_form_auth=" + LJ_cmtinfo.form_auth;
-
-        xtr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xtr.send(postdata);
-
-        Event.preventDefault(e);
-    };
+var tsInProg = {}  // dict of { ditemid => 1 }
+function createModerationFunction(ae, dItemid)
+{
+	return function(e)
+	{
+		var e = jQuery.event.fix(e || window.event);
+			pos = { x: e.pageX, y: e.pageY },
+			postUrl = ae.href.replace(/.+talkscreen\.bml/, LiveJournal.getAjaxUrl('talkscreen')),
+			hourglass = jQuery(e).hourglass()[0];
+		
+		var xhr = jQuery.post(postUrl + '&jsmode=1',
+			{
+				confirm: 'Y',
+				lj_form_auth: LJ_cmtinfo.form_auth
+			},
+			function(json)
+			{
+				tsInProg[dItemid] = 0;
+				var comms_ary = [dItemid]
+				var map_comms = function(id)
+				{
+					var i = -1, new_id;
+					while(new_id = LJ_cmtinfo[id].rc[++i])
+					{
+						if (LJ_cmtinfo[new_id].full) {
+							comms_ary.push(new_id);
+							map_comms(String(new_id));
+						}
+					}
+				}
+				// check rc for no comments page
+				if (LJ_cmtinfo[dItemid].rc) {
+					if (/mode=(un)?freeze/.test(ae.href)) {
+						map_comms(dItemid);
+					}
+					var ids = '#ljcmt' + comms_ary.join(',#ljcmt');
+				// /tools/recent_comments.bml
+				} else if (document.getElementById('ljcmtbar'+dItemid)) {
+					var ids = '#ljcmtbar'+dItemid, rpcRes;
+					eval(json);
+					updateLink(ae, rpcRes, ae.getElementsByTagName('img')[0]);
+				}
+				
+				// modified jQuery.fn.load
+				jQuery.ajax({
+					url: location.href,
+					type: 'GET',
+					cache: false,
+					dataType: 'html',
+					complete: function(res, status){
+						// If successful, inject the HTML into all the matched elements
+						if (status == 'success' || status == 'notmodified') {
+							// Create a dummy div to hold the results
+							var nodes = jQuery('<div />')
+								// inject the contents of the document in, removing the scripts
+								// to avoid any 'Permission Denied' errors in IE
+								.append(res.responseText.replace(/<script(.|\s)*?\/script>/g, ''))
+								// Locate the specified elements
+								.find(ids)
+								.each(function(){
+									var id = this.id.replace(/[^0-9]/g, '');
+									if (LJ_cmtinfo[id].expanded) {
+										var expand = this.innerHTML.match(/Expander\.make\(.+?\)/)[0];
+										(function(){
+											eval(expand);
+										}).apply(document.createElement('a'));
+									} else {
+										jQuery('#'+this.id).replaceWith(this);
+										setupAjax(this);
+									}
+								});
+							hourglass.hide();
+							poofAt(pos);
+						}
+					}
+				});
+			}
+		);
+		
+		return false;
+	}
 }
 
 function setupAjax (node) {
@@ -631,8 +615,7 @@ function setupAjax (node) {
 
 
 
-LiveJournal.register_hook('page_load', function () {
-    setupAjax()
-});
+jQuery(function(){setupAjax()});
+
 DOM.addEventListener(document, 'click', docClicked);
 document.write("<style> div.ljcmtmanage { color: #000; background: #e0e0e0; border: 2px solid #000; padding: 3px; }</style>");

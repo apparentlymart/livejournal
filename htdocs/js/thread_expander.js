@@ -2,7 +2,6 @@ Expander = function(){
     this.__caller__;    // <a> HTML element from where Expander was called
     this.url;           // full url of thread to be expanded
     this.id;            // id of the thread
-    this.onclick;
     this.stored_caller;
     this.iframe;        // iframe, where the thread will be loaded
     this.is_S1;         // bool flag, true == journal is in S1, false == in S2
@@ -42,8 +41,7 @@ Expander.prototype.parseLJ_cmtinfo = function(context,callback){
 Expander.prototype.loadingStateOn = function(){
     this.stored_caller = this.__caller__.cloneNode(true);
     this.__caller__.setAttribute('already_clicked','already_clicked');
-    this.onclick = this.__caller__.onclick;
-    this.__caller__.onclick = function(){return false;}
+    this.__caller__.onclick = function(){return false}
     this.__caller__.style.color = '#ccc';
 }
 
@@ -93,30 +91,27 @@ Expander.prototype.getS1width = function(canvas){
   //yet, this works until we have not changed the spacers url = 'dot.gif');
   var img, imgs, found;
   imgs = canvas.getElementsByTagName('img');
-  if(!imgs)return false;
   for(var j=0;j<imgs.length;j++){
     img=imgs[j];
     if(/dot\.gif$/.test(img.src)){
-        found = true;
+        if (img.width) { return Number(img.width); }
         break;
     }
   }
-  if(found&&img.width)return Number(img.width);
-  else return false;
+  return false;
 }
 
 Expander.prototype.setS1width = function(canvas,w){
-  var img, imgs, found;
+  var img, imgs;
   imgs = canvas.getElementsByTagName('img');
   if(!imgs)return false;
   for(var j=0;j<imgs.length;j++){
     img=imgs[j];
     if(/dot\.gif$/.test(img.src)){
-        found = true;
+        img.setAttribute('width',w);
         break;
     }
   }
-  if(found)img.setAttribute('width',w);
 }
 
 Expander.prototype.onLoadHandler = function(iframe){
@@ -146,6 +141,7 @@ Expander.prototype.onLoadHandler = function(iframe){
                                             //TODO: may be this should be uncommented
                                             //comments_page[id].canvas.className = new_comment.canvas.className;
                                             LJ_cmtinfo[id].full=1;
+                                            LJ_cmtinfo[id].expanded=1;
                                         }
                                     }//if(id in comments_page){
                                 });
