@@ -60,21 +60,6 @@ function multiformSubmit (form, txt) {
     }
 }
 
-function positionedOffset(element) {
-  var valueT = 0, valueL = 0;
-  do {
-    valueT += element.offsetTop  || 0;
-    valueL += element.offsetLeft || 0;
-    element = element.offsetParent;
-    if (element) {
-      if (element.tagName.toUpperCase() == 'BODY') break;
-      var p = DOM.getStyle(element, 'position');
-      if (p !== 'static') break;
-    }
-  } while (element);
-  return {x: valueL, y:valueT};
-}
-
 // push new element 'ne' after sibling 'oe' old element
 function addAfter (oe, ne) {
     if (oe.nextSibling) {
@@ -131,63 +116,6 @@ function scrollLeft () {
         return document.documentElement.scrollLeft;
     if (document.body)
         return document.body.scrollLeft;
-}
-
-function getElementPos (obj)
-{
-    var pos = new Object();
-    if (!obj)
-        return null;
-
-    var it;
-
-    it = obj;
-    pos.x = 0;
-    if (it.offsetParent) {
-	while (it.offsetParent) {
-	    pos.x += it.offsetLeft;
-	    it = it.offsetParent;
-	}
-    }
-    else if (it.x)
-	pos.x += it.x;
-
-    it = obj;
-    pos.y = 0;
-    if (it.offsetParent) {
-	while (it.offsetParent) {
-	    pos.y += it.offsetTop;
-	    it = it.offsetParent;
-	}
-    }
-    else if (it.y)
-	pos.y += it.y;
-
-    return pos;
-}
-
-// returns the mouse position of the event, or failing that, the top-left
-// of the event's target element.  (or the fallBack element, which takes
-// precendence over the event's target element if specified)
-function getEventPos (e, fallBack)
-{
-    var pos = { x:0, y:0 };
-
-    if (!e) var e = window.event;
-    if (e.pageX && e.pageY) {
-        // useful case (relative to document)
-        pos.x = e.pageX;
-        pos.y = e.pageY;
-    }
-    else if (e.clientX && e.clientY) {
-        // IE case (relative to viewport, so need scroll info)
-        pos.x = e.clientX + scrollLeft();
-        pos.y = e.clientY + scrollTop();
-    } else {
-        var targ = fallBack || getTarget(e);
-        var pos = getElementPos(targ);
-    }
-    return pos;
 }
 
 var curPopup = null;
@@ -310,6 +238,7 @@ function docClicked () {
 function createDeleteFunction (ae, dItemid) {
     return function (e) {
         if (!e) e = window.event;
+		e = jQuery.event.fix(e || window.event);
         var FS = arguments.callee;
 
         var finalHeight = 115;
@@ -332,21 +261,20 @@ function createDeleteFunction (ae, dItemid) {
                 return true;
             var canAdmin = LJ_cmtinfo["canAdmin"];
 
-            var clickTarget = getTarget(e);
-
-            var pos = getEventPos(e);
-            var pos_offset = positionedOffset(ae)
-            var diff_x = DOM.findPosX(ae) - pos_offset.x
-            var diff_y = DOM.findPosY(ae) - pos_offset.y
-
-            var lx = pos.x - diff_x + 5 - 250;
+			var clickTarget = e.target;
+			
+			var pos_offset = jQuery(ae).position(),
+				offset = jQuery(ae).offset();
+			var diff_x = offset.left - pos_offset.left;
+			var diff_y = offset.top - pos_offset.top;
+			var lx = e.pageX - diff_x + 5 - 250;
             if (lx < 5) lx = 5;
             var de;
 
             if (curPopup && curPopup_id == dItemid) {
                 de = curPopup;
                 de.style.left = lx + "px";
-                de.style.top = (pos.y - diff_y + 5) + "px";
+				de.style.top = (e.pageY - diff_y + 5) + "px";
                 return Event.stop(e);
             }
 
@@ -357,7 +285,7 @@ function createDeleteFunction (ae, dItemid) {
             de.style.overflow = "hidden";
             de.style.position = "absolute";
             de.style.left = lx + "px";
-            de.style.top = (pos.y - diff_y + 5) + "px";
+            de.style.top = (e.pageY - diff_y + 5) + "px";
             de.style.width = "250px";
             de.style.zIndex = 3;
             DOM.addEventListener(de, 'click', function (e) {
@@ -460,20 +388,6 @@ function poofAt (pos) {
         }
     };
     fade();
-}
-
-function getTarget (ev) {
-    var target;
-    if (ev.target)
-        target = ev.target;
-    else if (ev.srcElement)
-        target = ev.srcElement;
-
-    // Safari bug:
-    if (target && target.nodeType == 3)
-        target = target.parentNode;
-
-    return target;
 }
 
 function updateLink (ae, resObj, clickTarget) {
