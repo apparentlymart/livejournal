@@ -1,3 +1,7 @@
+jQuery.ajaxSetup({
+	cache: false
+});
+
 jQuery.fn.ljAddContextualPopup = function()
 {
 	if (!window.ContextualPopup) return this;

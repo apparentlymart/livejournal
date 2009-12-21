@@ -531,24 +531,33 @@ function createModerationFunction(ae, dItemid)
 						}
 					}
 				}
+				
 				// check rc for no comments page
 				if (LJ_cmtinfo[dItemid].rc) {
 					if (/mode=(un)?freeze/.test(ae.href)) {
 						map_comms(dItemid);
 					}
 					var ids = '#ljcmt' + comms_ary.join(',#ljcmt');
-				// /tools/recent_comments.bml
-				} else if (document.getElementById('ljcmtbar'+dItemid)) {
-					var ids = '#ljcmtbar'+dItemid, rpcRes;
+				} else {
+					var rpcRes;
 					eval(json);
 					updateLink(ae, rpcRes, ae.getElementsByTagName('img')[0]);
+					// /tools/recent_comments.bml
+					if (document.getElementById('ljcmtbar'+dItemid)) {
+						var ids = '#ljcmtbar'+dItemid;
+					}
+					// ex.: portal/
+					else {
+						hourglass.hide();
+						poofAt(pos);
+						return;
+					}
 				}
 				
 				// modified jQuery.fn.load
 				jQuery.ajax({
 					url: location.href,
 					type: 'GET',
-					cache: false,
 					dataType: 'html',
 					complete: function(res, status){
 						// If successful, inject the HTML into all the matched elements
