@@ -150,6 +150,9 @@ function usePlainText(textArea) {
 	
 	if (switched_rte_on == true)
 	{
+		switched_rte_on = false;
+		$('switched_rte_on').value = '0';
+		
 		if (FCKeditor_LOADED) {
 			var oEditor = FCKeditorAPI.GetInstance(textArea);
 		
@@ -175,8 +178,6 @@ function usePlainText(textArea) {
 		$(textArea + '___Frame').style.display = 'none';
 		textarea_node.style.display = 'block';
 		$('htmltools').style.display = 'block';
-		switched_rte_on = false;
-		$('switched_rte_on').value = '0';
 	}
 	// focus to end
 	var length = textarea_node.value.length;

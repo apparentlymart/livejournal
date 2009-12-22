@@ -512,7 +512,7 @@ FCK.DataProcessor.ConvertToDataFormat = function(body)
 	}
 	
 	html = top.convertToLJTags(html); // call from rte.js
-	if (!top.$('event_format').checked) {
+	if (!top.$('event_format').checked && !top.switched_rte_on) {
 		html = html
 			.replace(/<br \/>/g, '\n')
 			.replace(/<p>(.*?)<\/p>/g, '$1\n');
