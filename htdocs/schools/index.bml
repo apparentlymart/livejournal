@@ -59,6 +59,27 @@ body<=
         return $ret;
     };
 
+    my $self_link = sub {
+        my ($country, $state, $city) = @_;
+
+        return sub {
+            my ($page) = @_;
+
+            my $ret = "$LJ::SITEROOT/schools/";
+            
+            my @params;
+            
+            push @params, "ctc=".LJ::eurl($country) if $country;
+            push @params, "sc=".LJ::eurl($state) if $state;
+            push @params, "cc=".LJ::eurl($city) if $city;
+            push @params, "page=$page" if $page && $page != 1;
+
+            my $params = join('&', @params);
+            $ret .= '?' . $params if $params;
+
+            return $ret;
+        };
+    };
 
     my $add_school = sub {
         my ($country, $state, $city, $name, $remoterl, $class) = @_;
@@ -443,12 +464,28 @@ body<=
 
         $ret .= "<?h1 $ML{'.school.header'} h1?><?p $ML{'.school.select'} p?>";
 
+        my @sids = sort { $schools->{$a} cmp $schools->{$b} } keys %{$schools};
+
+        my $per_page = 500;
+
+        my %items = BML::paging(\@sids, $GET{'page'} || 1, $per_page);
+
+        my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'}, {
+            'self_link' => $self_link->($ctc, $sc, $cc),
+        });
+
+        @sids = @{$items{'items'}};
+
+        $ret .= $navbar;
+
         $ret .= "<ul>";
-        foreach my $sid (sort { $schools->{$a} cmp $schools->{$b} } keys %{$schools}) {
+        foreach my $sid (@sids) {
             $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$esc&cc=$ecc&sid=$sid'>";
             $ret .= LJ::ehtml($schools->{$sid}) . "</a></li>\n";
         }
         $ret .= "</ul>";
+
+        $ret .= $navbar;
 
         $ret .= "<div id='addlink'><?p <i>$ML{'.dontseeschool'}</i><br />";
         $ret .= "<a href='$LJ::SITEROOT/schools/?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>$ML{'.dontseeschool.add'}</a>";
