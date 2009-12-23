@@ -119,8 +119,32 @@ sub load_schools {
 # returns: List of userids that attended.
 # </LJFUNC>
 sub get_attendees {
+
+    # working with the years logic is a little bit hacky in this sub. we assume
+    # that everyone will graduate from their school by the year 3000 -- this
+    # way, "1999 - still attending" type of school will definitely come up in
+    # searches for "attended in 2000", because 1999 < 2000 < 3000.
+    # as for the "year" param of this prop, it allows for passing "now", which
+    # gets casted to 2999 -- and it only matches people who are still attending
+    # the school (that is, will graduate in 3000 ;-))
+    #
+    # I know that it is a sub-optimal way from the engineering standpoint,
+    # but this allowed me to limit SQL to just one query, and that query
+    # is quite efficient. (I considered doing ORs or UNIONs, and the solution
+    # here seems better to me.)
+    #
+    # NOTE: this will only work for about a thousand years; I think it's
+    # good enough for now. ;-)
+
     my $sid = shift() + 0;
-    my $year = shift() + 0;
+
+    my $year = shift;
+    if ($year eq 'now') {
+        $year = 2999;
+    } else {
+        $year = $year + 0;
+    }
+
     return undef unless $sid;
 
     # see if it's in memcache first
@@ -141,7 +165,7 @@ sub get_attendees {
                 SELECT userid
                 FROM schools_attended
                 WHERE schoolid = ?
-                  AND ? BETWEEN year_start AND year_end
+                  AND ? BETWEEN year_start AND COALESCE(year_end, 3000)
                 LIMIT 1000
             }, undef, $sid, $year);
     } else {

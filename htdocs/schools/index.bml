@@ -506,10 +506,7 @@ body<=
     my $year = $GET{'year'} || 0;
     $year += 1900 if $year =~ /^\d{2}$/;
     return $err->($ML{'.error.invalidyear'})
-        if $year && $year !~ /^\d{4}$/;
-
-    $year += 0;
-    $year = 0 if $year < 1900;
+        if $year && $year !~ /^\d{4}$/ && $year ne 'now';
 
     my @ids = LJ::Schools::get_attendees($sid, $year);
 
