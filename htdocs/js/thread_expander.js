@@ -89,7 +89,7 @@ Expander.prototype.killDuplicate = function(comments){
 Expander.prototype.getS1width = function(canvas){
   //TODO:  may be we should should add somie ID to the spacer img instead of searching it
   //yet, this works until we have not changed the spacers url = 'dot.gif');
-  var img, imgs, found;
+  var img, imgs;
   imgs = canvas.getElementsByTagName('img');
   for(var j=0;j<imgs.length;j++){
     img=imgs[j];
@@ -104,7 +104,6 @@ Expander.prototype.getS1width = function(canvas){
 Expander.prototype.setS1width = function(canvas,w){
   var img, imgs;
   imgs = canvas.getElementsByTagName('img');
-  if(!imgs)return false;
   for(var j=0;j<imgs.length;j++){
     img=imgs[j];
     if(/dot\.gif$/.test(img.src)){
@@ -135,7 +134,7 @@ Expander.prototype.onLoadHandler = function(iframe){
                                                 w =obj.getS1width(comments_page[id].canvas);
                                             }
                                             comments_page[id].canvas.innerHTML = new_comment.canvas.innerHTML;
-                                            if(obj.is_S1 && w!==null){
+                                            if(obj.is_S1 && w!==false){
                                                     obj.setS1width(comments_page[id].canvas,w);
                                             }
                                             //TODO: may be this should be uncommented

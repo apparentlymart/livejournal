@@ -99,25 +99,6 @@ function hsv_to_rgb (h, s, v)
     return [v,p,q];
 }
 
-
-function scrollTop () {
-    if (window.innerHeight)
-        return window.pageYOffset;
-    if (document.documentElement && document.documentElement.scrollTop)
-        return document.documentElement.scrollTop;
-    if (document.body)
-        return document.body.scrollTop;
-}
-
-function scrollLeft () {
-    if (window.innerWidth)
-        return window.pageXOffset;
-    if (document.documentElement && document.documentElement.scrollLeft)
-        return document.documentElement.scrollLeft;
-    if (document.body)
-        return document.body.scrollLeft;
-}
-
 var curPopup = null;
 var curPopup_id = 0;
 
@@ -237,9 +218,7 @@ function docClicked () {
 
 function createDeleteFunction (ae, dItemid) {
     return function (e) {
-        if (!e) e = window.event;
 		e = jQuery.event.fix(e || window.event);
-        var FS = arguments.callee;
 
         var finalHeight = 115;
 
@@ -251,6 +230,7 @@ function createDeleteFunction (ae, dItemid) {
         // immediately delete on shift key
         if (e.shiftKey) {
             doIT = 1;
+			deleteComment(dItemid);
         } else {
             if (! LJ_cmtinfo)
                 return true;
@@ -260,21 +240,18 @@ function createDeleteFunction (ae, dItemid) {
             if (!com || !remoteUser)
                 return true;
             var canAdmin = LJ_cmtinfo["canAdmin"];
-
-			var clickTarget = e.target;
 			
 			var pos_offset = jQuery(ae).position(),
 				offset = jQuery(ae).offset();
-			var diff_x = offset.left - pos_offset.left;
-			var diff_y = offset.top - pos_offset.top;
-			var lx = e.pageX - diff_x + 5 - 250;
-            if (lx < 5) lx = 5;
+			var pos_x = e.pageX - offset.left + pos_offset.left;
+			var pos_y = e.pageY - offset.top + pos_offset.top;
+			var lx = Math.max(pos_x + 5 - 250, 5);
             var de;
 
             if (curPopup && curPopup_id == dItemid) {
                 de = curPopup;
                 de.style.left = lx + "px";
-				de.style.top = (e.pageY - diff_y + 5) + "px";
+				de.style.top = pos_y + 5 + 'px';
                 return Event.stop(e);
             }
 
@@ -285,7 +262,7 @@ function createDeleteFunction (ae, dItemid) {
             de.style.overflow = "hidden";
             de.style.position = "absolute";
             de.style.left = lx + "px";
-            de.style.top = (e.pageY - diff_y + 5) + "px";
+            de.style.top = pos_y + 5 + 'px';
             de.style.width = "250px";
             de.style.zIndex = 3;
             DOM.addEventListener(de, 'click', function (e) {
@@ -295,14 +272,14 @@ function createDeleteFunction (ae, dItemid) {
 
             var inHTML = "<form style='display: inline' id='ljdelopts" + dItemid + "'><span style='font-face: Arial; font-size: 8pt'><b>Delete comment?</b><br />";
             var lbl;
-            if (remoteUser != "" && com.u != "" && com.u != remoteUser && canAdmin) {
+            if (com.u != "" && com.u != remoteUser && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "ban";
                 inHTML += "<input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>Ban <b>" + com.u + "</b> from commenting</label><br />";
             } else {
                 finalHeight -= 15;
             }
 
-            if (remoteUser != "" && remoteUser != com.u) {
+            if (remoteUser != com.u) {
                 lbl = "ljpopdel" + dItemid + "spam";
                 inHTML += "<input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>Mark this comment as spam</label><br />";
             } else {
@@ -344,13 +321,7 @@ function createDeleteFunction (ae, dItemid) {
                 }
             };
             grow();
-
         }
-
-        if (doIT) {
-            deleteComment(dItemid);
-        }
-
         Event.stop(e);
     }
 }
