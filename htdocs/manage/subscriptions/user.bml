@@ -30,7 +30,7 @@ body<=
     my $event = $GET{event};
 
     # what classes to display on this page
-    my $categories = [{ "" => [
+    my $categories = [{ "notices" => [
         map {
             LJ::Subscription::Pending->new(
                 $remote,
@@ -49,8 +49,8 @@ body<=
     ]}];
 
     unless (LJ::User->is_protected_username($journal->user)) {
-        if ($event ne '' && $event eq "UserExpunged") {
-            push @{@$categories[0]->{""}},
+        if (!$event || $event eq "UserExpunged") {
+            push @{@$categories[0]->{"notices"}},
                 LJ::Subscription::Pending->new(
                     $remote,
                     event   => "UserExpunged",
