@@ -17,7 +17,6 @@ body<=
     $LJ_cmtinfo{'form_auth'} = LJ::form_auth(1);
     $LJ_cmtinfo{'canAdmin'} = 1;
     $LJ_cmtinfo{'remote'} = $remote->{user};
-    $LJ_cmtinfo{'journal'} = $remote->{user};
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
@@ -25,6 +24,8 @@ body<=
         unless $u;
 
     my $user = $u->{'user'};
+
+    $LJ_cmtinfo{'journal'} = $user;
 
     my $dbcr = LJ::get_cluster_reader($u);
     return "Error: can't get DB for user" unless $dbcr;
@@ -50,7 +51,7 @@ body<=
     my $now = time();
     my $sth;
 
-    my $jargent ="journal=$u->{'user'}&amp;";
+    my $jargent ="journal=$user&amp;";
 
     # Retrieve received
     {

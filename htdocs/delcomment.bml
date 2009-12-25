@@ -6,6 +6,9 @@ _info?><?_code
     use vars qw(%GET %POST);
     use vars qw($body);
 
+    # because this BML may be called as __rpc_delcomment too
+    BML::set_language_scope('/delcomment.bml');
+
     my $jsmode = $GET{mode} eq "js";
     $body = "";
 
