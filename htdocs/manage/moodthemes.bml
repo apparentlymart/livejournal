@@ -180,7 +180,7 @@ body<=
             my %pic;
             LJ::get_mood_picture($tid, $mood->{'id'}, \%pic);
             if (%pic) {
-                $ret .= "<img id='$mood->{'id'}img' align='absmiddle' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' /></li>\n";
+                $ret .= "<img id='$mood->{'id'}img' align='absmiddle' src=\"$pic{'pic'}\" ".LJ::mood_size_attributes(%pic)." hspace='2' vspace='2' /></li>\n";
             }
 
             # Figure out if this picture is really just inherited from a parent
@@ -205,9 +205,9 @@ body<=
                                     size => 75, onchange => "update_children($mood->{id})" });
             $ret .= "</td></tr>\n";
             $ret .= "<tr><td>$ML{'.mood.label.width'} </td><td>";
-            $ret .= LJ::html_text({ name => "$mood->{id}w", id => "$mood->{id}w", value => $pic{w}, size => 4 });
+            $ret .= LJ::html_text({ name => "$mood->{id}w", id => "$mood->{id}w", value => $pic{w} || "", size => 4 });
             $ret .= " $ML{'.mood.label.height'} " . LJ::html_text({ name => "$mood->{id}h", id => "$mood->{id}h",
-                                                  value => $pic{h}, size => 4 });
+                                                  value => $pic{h} || '', size => 4 });
             $ret .= "<br /><br /></td></tr>\n";
             $ret .= LJ::html_hidden({ name => "$mood->{id}parent", id => "$mood->{id}parent", value => $mood->{parent} });
             $ret .= "</table>\n";
@@ -342,8 +342,8 @@ body<=
                         next;
                     }
 
-                    # one of these is blank, so delete the mood
-                    if (!$picurl || $width == 0 || $height == 0) {
+                    # picurl is blank, so we don't need this picture anymore
+                    if (!$picurl) {
                         push @del_values, $mid;
                         push @del_bind, ("?");
                         next;
@@ -444,7 +444,7 @@ body<=
                         LJ::get_mood_picture($tid, $moodid, \%pic);
                         $ret .= "<td>";
                         if (%pic) {
-                            $ret .= "<img align='absmiddle' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />";
+                            $ret .= "<img align='absmiddle' src=\"$pic{'pic'}\" ".LJ::mood_size_attributes(%pic)." hspace='2' vspace='2' />";
                         } else {
                             $ret .= "<i>$ML{'.yourthemes.example.none'}</i>";
                         }

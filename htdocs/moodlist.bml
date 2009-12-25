@@ -98,7 +98,7 @@ body<=
             # Output each of the displayed moods
             foreach my $mood (@show_moods) {
                 if (LJ::get_mood_picture($theme->{'moodthemeid'}, LJ::mood_id($mood), \ my %pic)) {
-                    $ret .= "<td align='center'><img align='absmiddle' alt='$theme->{name}' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />" .
+                    $ret .= "<td align='center'><img align='absmiddle' alt='$theme->{name}' src=\"$pic{'pic'}\" ".LJ::mood_size_attributes(%pic)." hspace='2' vspace='2' />" .
                         "</td>\n";
                 } else {
                     $ret .= "<td></td>\n";
@@ -209,7 +209,7 @@ body<=
                     my %pic;
                     if (LJ::get_mood_picture($themeid, $m->{id}, \%pic)) {
                         $ret .= "<td style='text-align:center; vertical-align:bottom'>" .
-                            "<img align='absmiddle' style='margin-top:25px' alt='$m->{name}' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />" .
+                            "<img align='absmiddle' style='margin-top:25px' alt='$m->{name}' src=\"$pic{'pic'}\" ".LJ::mood_size_attributes(%pic)." hspace='2' vspace='2' />" .
                             "<br /><a class='lj_moodlist_link' href='http://dictionary.reference.com/search?q=$mood'>$mood</a><br /></td>";
                     } else {
                         $ret .= "<td style='text-align:center; vertical-align:bottom'>" .
@@ -232,7 +232,7 @@ body<=
                 my %pic;
                 if (LJ::get_mood_picture($GET{moodtheme}, $mood->{'id'}, \%pic)) {
                     unless ($GET{'hidederived'} && $pic{'moodid'} != $mood->{'id'}) {
-                        $ret .= "<img align='absmiddle' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />\n";
+                        $ret .= "<img align='absmiddle' src=\"$pic{'pic'}\" ".LJ::mood_size_attributes(%pic)." hspace='2' vspace='2' />\n";
                     }
                     if ($GET{'details'} && ($pic{'moodid'} != $mood->{'id'})) {
                         $ret .= " $ML{'.moodname.fromparent'}";

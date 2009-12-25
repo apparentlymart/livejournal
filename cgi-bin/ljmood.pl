@@ -106,6 +106,16 @@ sub get_mood_picture
     return 0;
 }
 
+sub mood_size_attributes {
+    my %pic = @_;
+
+    my @attrs;
+    push @attrs, "width='$pic{'w'}'" if $pic{'w'};
+    push @attrs, "height='$pic{'h'}'" if $pic{'h'};
+    return join(' ', @attrs);
+
+}
+
 # mood id to name (or undef)
 sub mood_name
 {

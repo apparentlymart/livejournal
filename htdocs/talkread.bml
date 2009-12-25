@@ -304,8 +304,7 @@ my $old_url = 0;
           $moodname ||= LJ::mood_name($val);
           my %pic;
           if (LJ::get_mood_picture($themeid, $val, \%pic)) {
-              $moodpic = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' " .
-                           "height='$pic{'h'}' vspace='1' alt='' /> ";
+              $moodpic = "<img src=\"$pic{'pic'}\" align='absmiddle' ".LJ::mood_size_attributes(%pic)." vspace='1' alt='' /> ";
           }
      }
 
