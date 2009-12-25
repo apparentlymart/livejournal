@@ -96,10 +96,6 @@ sub execute {
             next;
         }
 
-        if ($u->is_expunged) {
-            $self->error("$username is purged; skipping.");
-            next;
-        }
         if ($u->is_suspended) {
             $self->error("$username is already suspended.");
             next;

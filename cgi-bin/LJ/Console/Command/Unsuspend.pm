@@ -95,8 +95,27 @@ sub execute {
             next;
         }
 
-        LJ::update_user($u->{'userid'}, { statusvis => 'V', raw => 'statusvisdate=NOW()' });
-        $u->{statusvis} = 'V';
+        ## Restore previous statusvis of journal. It may be different
+        ## from 'V', it may be read-only, or locked, or whatever.
+        my @previous_status = grep { $_ ne 'S' } $u->get_previous_statusvis;
+        my $new_status = $previous_status[0] || 'V';
+        my $method = {
+            V => 'set_visible',
+            L => 'set_locked',
+            M => 'set_memorial',
+            O => 'set_readonly',
+            R => 'set_renamed',
+            X => 'set_expunged',
+        }->{$new_status};
+
+        unless ($method) {
+            $self->error("Can't set status '$new_status'");
+            next;
+        }
+
+        my $res = $u->$method;
+
+        $u->{statusvis} = $new_status;
 
         LJ::statushistory_add($u, $remote, "unsuspend", $reason);
         eval { $u->fb_push };
