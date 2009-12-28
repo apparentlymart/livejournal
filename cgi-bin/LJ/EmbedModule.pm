@@ -6,6 +6,7 @@ use Class::Autouse qw (
                        LJ::Auth
                        HTML::TokeParser
                        );
+use Encode;
 
 # states for a finite-state machine we use in parse()
 use constant {
@@ -135,6 +136,7 @@ sub parse_module_embed {
 
     return if LJ::conf_test($LJ::DISABLED{embed_module});
 
+    $$postref = Encode::decode_utf8($$postref);
     # fast track out if we don't have to expand anything
     return unless $$postref =~ /lj\-embed|embed|object/i;
 
@@ -245,6 +247,7 @@ sub parse_module_embed {
 
     # update passed text
     $$postref = $newtxt;
+    $$postref = Encode::encode_utf8($$postref);
 }
 
 sub module_iframe_tag {
