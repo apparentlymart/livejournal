@@ -8751,13 +8751,13 @@ sub make_journal
     # be done above the s1shortcomings section so that we can fall through to that
     # style for lastn filtered by tags view
     if ($view eq 'lastn' && $opts->{pathextra} && $opts->{pathextra} =~ /^\/tag\/(.+)$/) {
-        $opts->{getargs}->{tag} = LJ::durl($1);
+        $opts->{getargs}->{tag} = $1;
         $opts->{pathextra} = undef;
     }
 
     # do the same for security filtering
     elsif ($view eq 'lastn' && $opts->{pathextra} && $opts->{pathextra} =~ /^\/security\/(.+)$/) {
-        $opts->{getargs}->{security} = LJ::durl($1);
+        $opts->{getargs}->{security} = $1;
         $opts->{pathextra} = undef;
     }
 
