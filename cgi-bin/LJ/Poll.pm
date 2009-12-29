@@ -1,7 +1,7 @@
 package LJ::Poll;
 use strict;
 use Carp qw (croak);
-use Class::Autouse qw (LJ::Entry LJ::Poll::Question LJ::Event::PollVote LJ::Typemap);
+use Class::Autouse qw (LJ::Entry LJ::Poll::Question LJ::Event::PollVote LJ::Typemap LJ::Text);
 
 ##
 ## Memcache routines
@@ -160,6 +160,8 @@ sub create {
 
 sub clean_poll {
     my ($class, $ref) = @_;
+    $$ref = LJ::Text->fix_utf8($$ref);
+
     if ($$ref !~ /[<>]/) {
         LJ::text_out($ref);
         return;
@@ -1359,6 +1361,7 @@ sub process_submission {
     my $class = shift;
     my $form = shift;
     my $error = shift;
+    my $warnings = shift;
     my $sth;
 
     my $remote = LJ::get_remote();
@@ -1463,6 +1466,21 @@ sub process_submission {
         }
         if ($val ne "") {
             $ct++;
+
+            my $newval = LJ::Text->truncate_with_ellipsis(
+                'str' => $val,
+                'bytes' => 255,
+            );
+
+            if ($newval ne $val) {
+                push @$warnings, LJ::Lang::ml('poll.warning.cutoff', {
+                    'oldval' => $val,
+                    'newval' => $newval,
+                });
+            }
+
+            $val = $newval;
+
             if ($poll->is_clustered) {
                 $poll->journal->do("REPLACE INTO pollresult2 (journalid, pollid, pollqid, userid, value) VALUES (?, ?, ?, ?, ?)",
                          undef, $poll->journalid, $pollid, $qid, $remote->userid, $val);

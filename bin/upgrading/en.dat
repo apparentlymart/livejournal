@@ -2286,6 +2286,8 @@ poll.error.whoview=whoview must be 'all', 'friends', or 'none'.
 
 poll.error.whovote=whovote must be 'all' or 'friends'.
 
+poll.warning.cutoff=Because your "[[oldval]]" answer exceeded the maximum length of 255 bytes, it has been cut off and now reads as "[[newval]]".
+
 poll.isclosed=This poll is closed.
 
 poll.participants=, participants: [[total]]

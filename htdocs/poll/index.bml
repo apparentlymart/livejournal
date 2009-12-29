@@ -98,10 +98,21 @@
         }
 
         my $error;
-        LJ::Poll->process_submission(\%FORM, \$error);
+        my @warnings;
+        LJ::Poll->process_submission(\%FORM, \$error, \@warnings);
         if ($error) {
             $title = $ML{'Error'};
             $body .= $error;
+            return;
+        }
+        if (@warnings) {
+            $title = $ML{'.title.warnings'};
+
+            unshift @warnings, $ML{'.text.warnings'};
+            push @warnings, LJ::Lang::ml('.text.warnings.back', {
+                url => $entry->url,
+            });
+            $body .= join('', map { "<p>$_</p>" } @warnings);
             return;
         }
         return BML::redirect($entry->url);

@@ -25,3 +25,9 @@
 
 .viewresults=View Poll Results
 
+.title.warnings=Posted, but...
+
+.text.warnings=Thank you. Your response to this poll has been saved, but we have made some corrections to it so as to cause Frank less problems handling it:
+
+.text.warnings.back=<a href="[[url]]">Return to the entry</a>.
+
