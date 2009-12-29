@@ -35,7 +35,7 @@ sub _as_email {
     my $msg         = $self->load_message;
     my $other_u     = $msg->other_u;
     my $sender      = $other_u->user;
-    my $inbox       = "$LJ::SITEROOT/inbox/";
+    my $inbox       = "$LJ::SITEROOT/inbox/?view=usermsg_recvd";
     $inbox = "<a href=\"$inbox\">" . LJ::Lang::get_text($lang, 'esn.your_inbox') . "</a>" if $is_html;
 
     my $vars = {
@@ -123,7 +123,7 @@ sub as_string {
     my $subject = $self->load_message->subject;
     my $other_u = $self->load_message->other_u;
     my $ret = sprintf("You've received a new message \"%s\" from %s. %s",
-                   $subject, $other_u->{user}, "$LJ::SITEROOT/inbox/");
+                   $subject, $other_u->{user}, "$LJ::SITEROOT/inbox/?view=usermsg_recvd");
     return $ret;
 }
 

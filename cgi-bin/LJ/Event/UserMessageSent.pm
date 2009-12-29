@@ -4,6 +4,7 @@ use Scalar::Util qw(blessed);
 use Carp qw(croak);
 use base 'LJ::Event';
 use LJ::Message;
+use LJ::NotificationMethod::Inbox;
 
 sub new {
     my ($class, $u, $msgid, $other_u) = @_;
