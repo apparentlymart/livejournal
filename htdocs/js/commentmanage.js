@@ -60,15 +60,6 @@ function multiformSubmit (form, txt) {
     }
 }
 
-// push new element 'ne' after sibling 'oe' old element
-function addAfter (oe, ne) {
-    if (oe.nextSibling) {
-        oe.parentNode.insertBefore(ne, oe.nextSibling);
-    } else {
-        oe.parentNode.appendChild(ne);
-    }
-}
-
 // hsv to rgb
 // h, s, v = [0, 1), [0, 1], [0, 1]
 // r, g, b = [0, 255], [0, 255], [0, 255]
@@ -242,29 +233,28 @@ function createDeleteFunction (ae, dItemid) {
             var canAdmin = LJ_cmtinfo["canAdmin"];
 			
 			var pos_offset = jQuery(ae).position(),
-				offset = jQuery(ae).offset();
-			var pos_x = e.pageX - offset.left + pos_offset.left;
-			var pos_y = e.pageY - offset.top + pos_offset.top;
-			var lx = Math.max(pos_x + 5 - 250, 5);
-            var de;
-
-            if (curPopup && curPopup_id == dItemid) {
-                de = curPopup;
-                de.style.left = lx + "px";
-				de.style.top = pos_y + 5 + 'px';
-                return Event.stop(e);
-            }
-
-            de = document.createElement("div");
-            de.style.textAlign = "left";
-            de.className = 'ljcmtmanage';
-            de.style.height = "10px";
-            de.style.overflow = "hidden";
-            de.style.position = "absolute";
-            de.style.left = lx + "px";
-            de.style.top = pos_y + 5 + 'px';
-            de.style.width = "250px";
-            de.style.zIndex = 3;
+				offset = jQuery(ae).offset(),
+				pos_x = e.pageX + pos_offset.left - offset.left,
+				top = e.pageY + pos_offset.top - offset.top + 5,
+				left = Math.max(pos_x + 5 - 250, 5),
+				$window = jQuery(window);
+			
+			//calc with viewport
+			if ($window.scrollLeft() > left + offset.left - pos_offset.left) {
+				left = $window.scrollLeft() + pos_offset.left - offset.left;
+			}
+			
+			if (curPopup && curPopup_id == dItemid) {
+				//calc with viewport
+				top = Math.min(top, $window.height() + $window.scrollTop() - jQuery(curPopup).outerHeight() + pos_offset.top - offset.top);
+				curPopup.style.left = left + 'px';
+				curPopup.style.top = top + 'px';
+				
+				return Event.stop(e);
+			}
+			
+			var de = jQuery('<div class="ljcmtmanage" style="text-align:left;position:absolute;visibility:hidden;width:250px;left:0;top:0;z-index:3"></div>');
+			
             DOM.addEventListener(de, 'click', function (e) {
                 Event.stopPropagation(e);
                 return true;
@@ -300,30 +290,37 @@ function createDeleteFunction (ae, dItemid) {
             }
 
             inHTML += "<input type='button' value='Delete' onclick='deleteComment(" + dItemid + ");' /> <input type='button' value='Cancel' onclick='killPopup()' /></span><br /><span style='font-face: Arial; font-size: 8pt'><i>shift-click to delete without options</i></span></form>";
-            de.innerHTML = inHTML;
-
-            // we do this so keyboard tab order is correct:
-            addAfter(ae, de);
-
-            curPopup = de;
-            curPopup_id = dItemid;
-
-            var height = 10;
-            var grow = function () {
-                height += 7;
-                if (height > finalHeight) {
-                    de.style.height = "";
-                    de.style.filter = "";
-                    de.style.opacity = 1.0;
-                } else {
-                    de.style.height = height + "px";
-                    window.setTimeout(grow, 20);
-                }
-            };
-            grow();
-        }
-        Event.stop(e);
-    }
+			
+			de.html(inHTML).insertAfter(ae);
+			
+			//calc with viewport
+			top = Math.min(top, $window.height() + $window.scrollTop() - de.outerHeight() + pos_offset.top - offset.top);
+			
+			de.css({
+				left: left,
+				top: top,
+				height: 10,
+				visibility: 'visible',
+				overflow: 'hidden'
+			});
+			
+			curPopup = de[0];
+			curPopup_id = dItemid;
+			
+			var height = 10;
+			var grow = function () {
+				height += 7;
+				if (height > finalHeight) {
+					de.height('auto');
+				} else {
+					de.height(height);
+					window.setTimeout(grow, 20);
+				}
+			}
+			grow();
+		}
+		Event.stop(e);
+	}
 }
 
 function poofAt (pos) {

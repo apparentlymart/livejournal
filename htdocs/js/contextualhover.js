@@ -374,7 +374,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 					alias_value = document.createElement('span');
 					alias_value.className = 'alias-value';
 					alias_value[/*@cc_on'innerText'||@*/'textContent'] = ' — ' + data.res.alias;
-					ljuser_node.parentNode[ljuser_node.nextSibling ? 'insertBefore' : 'appendChild'](alias_value);
+					ljuser_node.parentNode.insertBefore(alias_value, ljuser_node.nextSibling);
 				}
 				alias_value[/*@cc_on'innerText'||@*/'textContent'] = ' — ' + data.res.alias;
 			} else if (alias_value) { // delete
@@ -586,6 +586,28 @@ var ContextualPopup =
 		ContextualPopup.hidePopup();
 	},
 	
+	constructIPPU: function (ctxPopupId)
+	{
+		if (ContextualPopup.ippu) {
+			ContextualPopup.ippu.hide();
+			ContextualPopup.ippu = null;
+		}
+		ContextualPopup.ippu =
+		{
+			element: jQuery('<div class="ContextualPopup"></div>'),
+			show: function()
+			{
+				document.body.appendChild(this.element[0]);
+			},
+			hide: function()
+			{
+				this.element.remove();
+			}
+		}
+		
+		ContextualPopup.renderPopup(ctxPopupId);
+	},
+	
 	showPopup: function(ctxPopupId, ele)
 	{
 		ContextualPopup.current_target = ele;
@@ -596,9 +618,7 @@ var ContextualPopup =
 		
 		ContextualPopup.constructIPPU(ctxPopupId);
 		var ippu = ContextualPopup.ippu;
-		// default is to auto-center, don't want that
-		ippu.setAutoCenter(false, false);
-	
+		
 		// pop up the box right under the element
 		ele = jQuery(ele);
 		var ele_offset = ele.offset(),
@@ -608,55 +628,36 @@ var ContextualPopup =
 		// hide the ippu content element, put it on the page,
 		// get its bounds and make sure it's not going beyond the client
 		// viewport. if the element is beyond the right bounds scoot it to the left.
-		var pop_ele = ippu.getElement();
-		pop_ele.style.visibility = 'hidden';
+		var pop_ele = ippu.element;
+		pop_ele.css('visibility', 'hidden');
 		
 		// put the content element on the page so its dimensions can be found
 		ippu.show();
 		
-		var win_width = jQuery(document).width(),
-			win_height = jQuery(document).height(),
-			pop_width = jQuery(pop_ele).outerWidth(true),
-			pop_height = jQuery(pop_ele).outerHeight(true);
-		
-		if (left + pop_width > win_width) {
-			left = win_width - pop_width;
-		}
-		
-		if (top + pop_height > win_height) {
-			top = win_height - pop_height;
-		}
-		
-		ippu.setLocation(left, top);
+		ContextualPopup.calcPosition(pop_ele, left, top);
 		
 		// finally make the content visible
-		pop_ele.style.visibility = 'visible';
+		pop_ele.css('visibility', 'visible');
+	},
+	
+	//calc with viewport
+	calcPosition: function(pop_ele, left, top)
+	{
+		var $window = jQuery(window);
+		
+		left = Math.min(left,  $window.width() + $window.scrollLeft() - pop_ele.outerWidth(true));
+		top = Math.min(top, $window.height() + $window.scrollTop() - pop_ele.outerHeight(true));
+		
+		pop_ele.css({
+			left: left,
+			top: top
+		});
 	}
 }
 
 // if the popup was not closed by us catch it and handle it
 ContextualPopup.popupClosed = function () {
     ContextualPopup.mouseOut();
-}
-
-ContextualPopup.constructIPPU = function (ctxPopupId) {
-    if (ContextualPopup.ippu) {
-        ContextualPopup.ippu.hide();
-        ContextualPopup.ippu = null;
-    }
-
-    var ippu = new IPPU();
-    ippu.init();
-    ippu.setTitlebar(false);
-    ippu.setFadeOut(true);
-    ippu.setFadeIn(true);
-    ippu.setFadeSpeed(15);
-    ippu.setDimensions("auto", "auto");
-    ippu.addClass("ContextualPopup");
-    ippu.setCancelledCallback(ContextualPopup.popupClosed);
-    ContextualPopup.ippu = ippu;
-
-    ContextualPopup.renderPopup(ctxPopupId);
 }
 
 ContextualPopup.renderPopup = function (ctxPopupId) {
@@ -669,7 +670,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         var data = ContextualPopup.cachedResults[ctxPopupId];
 
         if (!data) {
-            ippu.setContent("<div class='Inner'>Loading...</div>");
+			ippu.element.append('<div class="Inner">Loading...</div>');
             return;
         } else if (!data.username || !data.success || data.noshow) {
             ippu.hide();
@@ -678,8 +679,12 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         var username = data.display_username;
 
-        var inner = document.createElement("div");
-        DOM.addClassName(inner, "Inner");
+		var inner = jQuery('<div class="Inner"></div>')[0];
+		if (ippu.element[0].firstChild) {
+			var last_inner_height = ippu.element[0].firstChild.offsetHeight;
+			ippu.element.height(ippu.element.height());
+			ippu.element.css('overflow', 'hidden');
+		}
 
         var content = document.createElement("div");
         DOM.addClassName(content, "Content");
@@ -1027,7 +1032,18 @@ if ((data.is_logged_in && data.is_comm) || (message && friend))
         clearingDiv.innerHTML = "&nbsp;";
         content.appendChild(clearingDiv);
 
-        ippu.setContentElement(inner);
+		ippu.element.html(inner);
+		
+		//calc position with viewport
+		if (ippu.element[0].style.overflow == 'hidden') {
+			inner = jQuery(inner);
+			var $window = jQuery(window),
+				top = parseInt(ippu.element[0].style.top),
+				diff = ippu.element[0].firstChild.offsetHeight - last_inner_height,
+				new_top = Math.min(top, $window.height() + $window.scrollTop() - ippu.element.outerHeight(true) - diff);
+			top != new_top && ippu.element.css('top', new_top);
+			ippu.element.css('overflow', 'visible');
+		}
     }
 }
 
@@ -1073,7 +1089,7 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action, e) {
 ContextualPopup.showNote = function (note, ele) {
     if (ContextualPopup.ippu) {
         // pop up the box right under the element
-        ele = ContextualPopup.ippu.getElement();
+        ele = ContextualPopup.ippu.element[0];
     }
 
     LJ_IPPU.showNote(note, ele);
