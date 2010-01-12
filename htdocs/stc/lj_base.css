@@ -409,3 +409,15 @@ It must be invisible, use it only for reskining */
 	display: none;	
 	}
 
+/* Button for ads */
+/* Must be removed after implementation of Framework! */
+.b-button-close {
+    width: 15px;
+    height: 15px;
+    background: url(/img/CloseButton2.gif) no-repeat;
+    position: relative;
+    top: 0;
+    margin: -25px -20px 0 10px;
+    cursor: pointer;
+    }
+
