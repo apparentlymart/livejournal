@@ -4027,7 +4027,7 @@ sub set_statusvis {
             # remote looked up by log_event
             old => $u->statusvis,
             new => $statusvis,
-        });
+        }) if $u->clusterid; # purged user can get suspended, but have no clusterid at that moment
 
     # do update
     my $ret = LJ::update_user($u, { statusvis => $statusvis,

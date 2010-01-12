@@ -97,7 +97,12 @@ sub execute {
 
         ## Restore previous statusvis of journal. It may be different
         ## from 'V', it may be read-only, or locked, or whatever.
-        my @previous_status = grep { $_ ne 'S' } $u->get_previous_statusvis;
+        my @previous_status;
+        if ($u->clusterid) { # purged user has no cluster, but can be suspended
+            @previous_status = grep { $_ ne 'S' } $u->get_previous_statusvis;
+        } else { # was purged - no data any more
+            @previous_status = ('X');
+        }
         my $new_status = $previous_status[0] || 'V';
         my $method = {
             V => 'set_visible',
