@@ -417,7 +417,7 @@ It must be invisible, use it only for reskining */
     background: url(/img/CloseButton2.gif) no-repeat;
     position: relative;
     top: 0;
-    margin: -25px -20px 0 10px;
+    margin: -25px -25px 0 10px;
     cursor: pointer;
     }
 
