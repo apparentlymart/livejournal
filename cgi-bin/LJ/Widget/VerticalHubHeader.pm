@@ -22,8 +22,12 @@ sub render_body {
     my @parents = $vertical->parents;
     my $parent = $parents[0];
 
-    my $ad = LJ::get_ads({ location => 'widget.verticalhubheader', vertical => $vertical->ad_name, page => $opts{page} });
-    my $show_leaderboard = $ad && LJ::run_hook("should_show_vertical_leaderboard", $remote) ? 1 : 0;
+    my $ad = '';
+    my $show_leaderboard = 0;
+    if (LJ::run_hook("should_show_vertical_leaderboard", $remote)){
+        $ad = LJ::get_ads({ location => 'widget.verticalhubheader', vertical => $vertical->ad_name, page => $opts{page} });
+        $show_leaderboard = 1 if $ad;
+    }
 
     if ($show_leaderboard) {
         $ret .= "<table class='title-box'><tr><td class='header-cell'>";
