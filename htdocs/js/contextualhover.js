@@ -510,7 +510,7 @@ var ContextualPopup =
 			} else {
 				continue;
 			}
-			jQuery.className.add(ljuser, 'ContextualPopup');
+			DOM.addClassName(ljuser, 'ContextualPopup');
 		}
 		
 		ljusers = node.getElementsByTagName('img');
@@ -520,7 +520,7 @@ var ContextualPopup =
 			ljuser = ljusers[i];
 			if (ljuser.src.match(rex_userpic)) {
 				ljuser.up_url = ljuser.src;
-				jQuery.className.add(ljuser, 'ContextualPopup');
+				DOM.addClassName(ljuser, 'ContextualPopup');
 			}
 		}
 	},
