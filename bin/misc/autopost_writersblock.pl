@@ -56,6 +56,7 @@ foreach my $row (@rows) {
         event => '<lj-template name="qotd" id="' . $row->{qid} . '" />',
         prop_taglist => $row->{tags},
         prop_opt_noemail => 1,
+        prop_qotdid => $row->{qid},
     );
 
     my %res;
