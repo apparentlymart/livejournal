@@ -7824,13 +7824,15 @@ sub add_friend
         $groupmask |= (1 << $grp) if $grp;
     }
 
-    # TAG:FR:ljlib:add_friend
-    my $bind = join(",", map { "(?,?,?,?,?)" } @add_ids);
-    my @vals = map { $userid, $_, $fgcol, $bgcol, $groupmask } @add_ids;
+    foreach my $add_id (@add_ids) {
+        my $cnt = $dbh->do("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) " .
+                           "VALUES ($userid, $add_id, $fgcol, $bgcol, $groupmask)");
 
-    my $res = LJ::_friends_do
-        ($userid, "REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
-
+        if (!$dbh->err && $cnt == 1) {
+            LJ::run_hooks('befriended', $friender, LJ::load_userid($add_id))
+        }
+    }
+    
     # part of the criteria for whether to fire befriended event
     my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify}
                  && $friender->is_visible && $friender->is_person;
@@ -7858,12 +7860,14 @@ sub add_friend
 
             $sclient->insert_jobs(@jobs) if @jobs;
         }
-        LJ::run_hooks('befriended', LJ::load_userid($userid), LJ::load_userid($fid))
     }
+
     LJ::memcache_kill($userid, 'friends');
     LJ::memcache_kill($userid, 'friends2');
+    LJ::mark_dirty($userid, "friends");
 
-    return $res;
+    # WARNING: always returns "true". Check result of executing "REPLACE INTO friends ..." statement above.
+    return 1;
 }
 
 # <LJFUNC>
@@ -7882,12 +7886,19 @@ sub remove_friend {
     my @del_ids = ref $to_del eq 'ARRAY' ? map { LJ::want_userid($_) } @$to_del : ( LJ::want_userid($to_del) );
     return 0 unless @del_ids;
 
-    my $bind = join(",", map { "?" } @del_ids);
-    my $res = LJ::_friends_do($userid, "DELETE FROM friends WHERE userid=? AND friendid IN ($bind)",
-                              $userid, @del_ids);
-
-    my $sclient = LJ::theschwartz();
     my $u = LJ::load_userid($userid);
+
+    my $dbh = LJ::get_db_writer() or return 0;
+
+    foreach my $del_id (@del_ids) {
+        my $cnt = $dbh->do("DELETE FROM friends WHERE userid=$userid AND friendid=$del_id");
+
+        if (!$dbh->err && $cnt > 0) {
+            LJ::run_hooks('defriended', $u, LJ::load_userid($del_id));
+        }
+    }
+    
+    my $sclient = LJ::theschwartz();
 
     # part of the criteria for whether to fire defriended event
     my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify} && $u->is_visible && $u->is_person;
@@ -7914,12 +7925,13 @@ sub remove_friend {
  
             $sclient->insert_jobs(@jobs);
         }
-        LJ::run_hooks('defriended', $u, $friendee);
     }
+
     LJ::memcache_kill($userid, 'friends');
     LJ::memcache_kill($userid, 'friends2');
+    LJ::mark_dirty($userid, "friends");
 
-    return $res;
+    return 1;
 }
 *delete_friend_edge = \&LJ::remove_friend;
 

@@ -148,10 +148,21 @@
 
             } elsif (@delete) {
 
+                my $cnt = 0;
+
                 # delete pics
                 foreach my $up (@delete) {
-                    eval { $up->delete; } or push @errors, $@;
+                    eval {
+                        my $r = $up->delete();
+                        if ($r) {
+                            $cnt += $r;
+                        } else {
+                            push @errors, $@;
+                        }
+                    };
                 }
+
+                LJ::run_hooks('set_userpics', $u, $cnt, 0);
 
                 # if any of the userpics they want to delete are active, then we want to
                 # re-run activate_userpics() - turns out it's faster to not check to

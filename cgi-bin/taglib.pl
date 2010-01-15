@@ -1109,9 +1109,13 @@ sub create_usertag {
 
     my $ct = scalar keys %res;
     my $bind = join(',', map { "(?,?,?,?)" } 1..$ct);
-    $u->do("INSERT IGNORE INTO usertags (journalid, kwid, parentkwid, display) VALUES $bind",
+    my $cnt = $u->do("INSERT IGNORE INTO usertags (journalid, kwid, parentkwid, display) VALUES $bind",
            undef, map { $u->{userid}, $_, $parentkwid, $display } values %res);
     return undef if $u->err;
+
+    if (defined $cnt && $cnt > 0) {
+        LJ::run_hooks('set_usertags', $u, 0, $cnt);
+    }
 
     LJ::Tags::reset_cache($u);
     return \%res;
@@ -1193,8 +1197,12 @@ sub delete_usertag {
     foreach my $table (qw(usertags logtags logtagsrecent logkwsum)) {
         # no error checking, we're just deleting data that's already semi-unlinked due
         # to us already updating the userprop above
-        $u->do("DELETE FROM $table WHERE journalid = ? AND kwid = ?",
-               undef, $u->{userid}, $kwid);
+        my $cnt = $u->do("DELETE FROM $table WHERE journalid = ? AND kwid = ?",
+                         undef, $u->{userid}, $kwid);
+
+        if ($table eq 'usertags' && defined $cnt && $cnt > 0) {
+            LJ::run_hooks('set_usertags', $u, $cnt, 0);
+        }
     }
 
     # all done with our updates

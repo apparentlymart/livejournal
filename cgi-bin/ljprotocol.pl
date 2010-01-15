@@ -2648,9 +2648,13 @@ sub editfriends
             $gmask |= 1;
 
             # TAG:FR:protocol:editfriends4_addeditfriend
-            $dbh->do("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
-                     "VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
+            my $cnt = $dbh->do("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
+                               "VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
             return $fail->(501,$dbh->errstr) if $dbh->err;
+
+            if ($cnt == 1) {
+                LJ::run_hooks('befriended', LJ::load_userid($userid), LJ::load_userid($friendid));
+            }
 
             my $memkey = [$userid,"frgmask:$userid:$friendid"];
             LJ::MemCache::set($memkey, $gmask+0, time()+60*15);
@@ -2671,7 +2675,6 @@ sub editfriends
 
             }
             $friends_changed = 1;
-            LJ::run_hooks('befriended', LJ::load_userid($userid), LJ::load_userid($friendid));
         }
     }
 

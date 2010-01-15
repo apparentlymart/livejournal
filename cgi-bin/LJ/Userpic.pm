@@ -655,6 +655,8 @@ sub create {
     my $upic = LJ::Userpic->new($u, $picid) or die "Error insantiating userpic";
     LJ::Event::NewUserpic->new($upic)->fire unless $LJ::DISABLED{esn};
 
+    LJ::run_hooks('set_userpics', $u, 0, 1);
+
     return $upic;
 }
 
@@ -712,9 +714,10 @@ sub delete {
 
     # delete meta-data first so it doesn't get stranded if errors
     # between this and deleting row
-    $u->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
-           "AND domain=?", undef, $u->{'userid'}, $picid,
-           LJ::get_blob_domainid('userpic'));
+    
+    my $cnt = $u->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
+                     "AND domain=?", undef, $u->{'userid'}, $picid,
+                     LJ::get_blob_domainid('userpic'));
     $fail->() if $@;
 
     # userpic keywords
@@ -724,7 +727,7 @@ sub delete {
                    "AND picid=?", undef, $u->{userid}, $picid) or die;
             $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
                    undef, $picid, $u->{'userid'}) or die;
-            };
+        };
     } else {
         eval {
             my $dbh = LJ::get_db_writer();
@@ -753,7 +756,7 @@ sub delete {
 
     LJ::Userpic->delete_cache($u);
 
-    return 1;
+    return $cnt > 0 ? $cnt : '0E0';
 }
 
 sub set_comment {
