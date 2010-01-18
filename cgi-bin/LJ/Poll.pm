@@ -1606,6 +1606,7 @@ sub make_polls_clustered {
     return 1;
 }
 
+## debug method - returns all data from a single poll in XML format
 sub dump_poll {
     my $self = shift;
     my $fh = shift || \*STDOUT;
@@ -1615,11 +1616,14 @@ sub dump_poll {
         qw(poll  pollquestion  pollitem  pollsubmission  pollresult );
     my $db = ($self->is_clustered) ? $self->journal : LJ::get_db_reader();
     my $id = $self->pollid;
-
+    my $journalid = $self->journalid;
+    
     print $fh "<poll id='$id'>\n";
     foreach my $t (@tables) {
-        my $sth = $db->prepare("SELECT * FROM $t WHERE pollid = ?");
-        $sth->execute($id);
+        ## journalid in SELECT is an optimization, 
+        ## because all tables have primary key like (journalid, pollid, ...) 
+        my $sth = $db->prepare("SELECT * FROM $t WHERE journalid = ? AND pollid = ?");
+        $sth->execute($journalid, $id);
         while (my $data = $sth->fetchrow_hashref) {
             print $fh "<$t ";
             foreach my $k (sort keys %$data) {
