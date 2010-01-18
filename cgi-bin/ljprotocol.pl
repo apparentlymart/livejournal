@@ -2672,7 +2672,6 @@ sub editfriends
                                                   ) unless $LJ::DISABLED{'friendchange-schwartz'};
 
                 $sclient->insert_jobs(@jobs) if @jobs;
-
             }
             $friends_changed = 1;
         }
