@@ -73,27 +73,28 @@
 /* Shared Content */
 .account table, .display table, .mobile table, 
 .privacy table, .history table, .advertising table, .extension table, .extensions table,
-.lj_adsense table {
+.lj_adsense table, .userapps table {
     width: 100%;
 }
 .account td, .display td, .mobile td, .privacy td, .history td, .advertising td, .integration td, 
-.extensions td, .lj_adsense td {
+.extensions td, .lj_adsense td, .userapps td {
     border-bottom: 1px #ccc solid;
     padding: 10px 10px 10px 5px;
 }
 .account td.last, .display td.last, .mobile td.last, .privacy td.last, 
 .history td.last, .advertising td.last, .extension td.last, 
-.extensions td.last, .lj_adsense td {
+.extensions td.last, .lj_adsense td, .userapps td.last {
     border-bottom: none;
 }
 .account td.help, .display td.help, .mobile td.help, .privacy td.help, 
-.history td.help, .advertising td.help .extensions td.help, .lj_adsense td.help {
+.history td.help, .advertising td.help .extensions td.help, .lj_adsense td.help,
+.userapps td.help {
     width: 14px;
     text-align: right;
 }
 .account_label, .display_label, .mobile_label, 
 .privacy_label, .history_label, .integration_label, 
-.extensions_label, .adsense_label {
+.extensions_label, .adsense_label, .userapps_label {
     font-weight: bold;
 }
 .display_option, .mobile_option, .privacy_option {
@@ -138,7 +139,8 @@
     color: #000;
 }
 .mobile_label, .mobile .help,
-.extensions_label, .extensions .help {
+.extensions_label, .extensions .help,
+.userapps_label, .userapps .help {
     vertical-align: top;
 }
 .mobile_option p {
@@ -755,4 +757,18 @@
 *HTML .lj_adsense P A IMG {
 	vertical-align: bottom;
 	padding-bottom: 2px;
+}
+
+/* User Apps */
+.userapps table.setting_table {
+    width: auto;
+}
+.userapps table.setting_table td {
+    border: 0;
+    padding: 0;
+}
+.userapps td.setting_label {
+    vertical-align: top;
+    text-align: right;
+    color: #000;
 }
