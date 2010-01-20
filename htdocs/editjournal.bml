@@ -157,6 +157,11 @@ body<=
             return "<?h1 $ML{'Error'} h1?><?p $ML{'/editjournal_do.bml.error.nofind'} p?>"
                 unless $res{'events_count'} && $res{'events_1_anum'} == $anum;
 
+            ####  Check security before viewing this post
+            my $errtxt;
+            my $item = LJ::Talk::get_journal_item($u_for_entry, $itemid);
+            return $errtxt unless LJ::Talk::check_viewable($remote, $item, undef, \$errtxt);
+
             # are we authorized to edit other peoples' posts in this community?
             my $disabled_save = 0;
             my $disabled_delete = 0;
@@ -171,6 +176,8 @@ body<=
             if (!$disabled_save && ($u->is_readonly || ($usejournal_u && $usejournal_u->is_readonly))) {
                 $disabled_save++;
             }
+
+            $disabled_save++ if $u_for_entry->is_banned($remote);
 
             ###
             ### SAVE EDITS

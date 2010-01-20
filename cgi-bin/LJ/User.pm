@@ -5642,6 +5642,9 @@ sub can_view
     # owners can always see their own.
     return 1 if ($userid == $remoteid);
 
+    # author in community can always see their post
+    return 1 if $remoteid == $item->{'posterid'};
+
     # other people can't read private
     return 0 if ($item->{'security'} eq "private");
 

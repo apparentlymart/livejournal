@@ -2320,6 +2320,24 @@ sub getevents
         return fail($err,200,"Invalid selecttype.");
     }
 
+    my $secmask = 0;
+    if ($u && ($u->{'journaltype'} eq "P" || $u->{'journaltype'} eq "I") && $posterid != $ownerid) {
+        $secmask = LJ::get_groupmask($ownerid, $posterid);
+    }
+
+    # decide what level of security the remote user can see
+    # 'getevents' used in small count of places and we will not pass 'viewall' through their call chain
+    my $secwhere = "";
+    if ($posterid == $ownerid) {
+        # no extra where restrictions... user can see all their own stuff
+    } elsif ($secmask) {
+        # can see public or things with them in the mask
+        $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $secmask != 0) OR posterid=$posterid)";
+    } else {
+        # not a friend?  only see public.
+        $secwhere = "AND (security='public' OR posterid=$posterid)";
+    }
+
     # common SQL template:
     unless ($sql) {
         $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid, replycount, UNIX_TIMESTAMP(eventtime) ".

@@ -1049,10 +1049,10 @@ sub get_recent_items
         # alternatively, if 'viewall' opt flag is set, security is off.
     } elsif ($mask) {
         # can see public or things with them in the mask
-        $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $mask != 0))";
+        $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $mask != 0) OR posterid = $remoteid)";
     } else {
         # not a friend?  only see public.
-        $secwhere = "AND security='public' ";
+        $secwhere = "AND (security='public' OR posterid=$remoteid)";
     }
 
     # because LJ::get_friend_items needs rlogtime for sorting.
