@@ -86,10 +86,10 @@ if ($text_format) {
 
     ## print header (3 lines):
     ## poll ID
-    ## userid, username, gender, birthday, question1, question1, question2, question2
-    ## -     , -       , -     , -       , answer11,  answer12,  answer21,  answer22...
+    ## userid, username, gender, birthday, city, question1, question1, question2, question2
+    ## -     , -       , -     , -       , -   , answer11,  answer12,  answer21,  answer22...
     print "Pollid = $pollid\n";
-    print "Userid\tusername\tgender\tbirthday\t";
+    print "Userid\tusername\tgender\tbirthday\tcity\t";
     foreach my $q (@questions) {
         if ($q->{type} eq 'radio') {
             ## one answer only
@@ -102,7 +102,7 @@ if ($text_format) {
         }
     }
     print "\n";
-    print "\t\t\t\t";
+    print "\t\t\t\t\t";
     foreach my $q (@questions) {
         if ($q->{type} eq 'radio') {
             ## one answer only
@@ -123,8 +123,9 @@ if ($text_format) {
         my $u = LJ::load_userid($userid);
         print "$userid\t";
         print "$u->{user}\t";
-        print $u->prop('gender'), "\t";
+        print $u->prop('gender')||'', "\t";
         print $u->{'bdate'}||'', "\t";
+        print $u->prop('city')||'', "\t";
         foreach my $q (@questions) {
             my $r = $users{$userid}->{ $q->{pollqid} };
             if ($q->{type} eq 'radio') {
