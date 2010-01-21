@@ -111,7 +111,7 @@ sub always_checked { 0 }
 
 sub is_significant { 1 }
 
-# override parent class sbuscriptions method to always return
+# override parent class subscriptions method to always return
 # a subscription object for the user
 sub subscriptions {
     my ($self, %args) = @_;
@@ -122,32 +122,20 @@ sub subscriptions {
 
     my @subs;
     my $u = $self->u;
-    return unless ( $cid == $u->clusterid );
 
-    my $row = { userid  => $self->u->{userid},
-                ntypeid => LJ::NotificationMethod::Email->ntypeid, # Email
-              };
+    if ($cid == $u->clusterid) {
+        my $row = { userid  => $self->u->{userid},
+                    ntypeid => LJ::NotificationMethod::Email->ntypeid, # Email
+                  };
 
-    push @subs, LJ::Subscription->new_from_row($row);
+        push @subs, LJ::Subscription->new_from_row($row);
+        $limit--;
+    }
 
     push @subs, eval { $self->SUPER::subscriptions(cluster => $cid,
                                                    limit   => $limit) };
 
     return @subs;
-}
-
-sub get_subscriptions {
-    my ($self, $u, $subid) = @_;
-
-    unless ($subid) {
-        my $row = { userid  => $u->{userid},
-                    ntypeid => LJ::NotificationMethod::Email->ntypeid, # Email
-                  };
-
-        return LJ::Subscription->new_from_row($row);
-    }
-
-    return $self->SUPER::get_subscriptions($u, $subid);
 }
 
 sub _arg1_to_mlkey {

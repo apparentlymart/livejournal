@@ -168,8 +168,14 @@ sub subscription_as_html {
 
 # only users with the track_pollvotes cap can use this
 sub available_for_user  {
-    my ($class, $u, $subscr) = @_;
+    my ($self, $u) = @_;
     return $u->get_cap("track_pollvotes") ? 1 : 0;
+}
+
+sub is_tracking {
+    my ($self) = @_;
+
+    return $self->{'arg1'} ? 1 : 0;
 }
 
 1;

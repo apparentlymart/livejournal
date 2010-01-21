@@ -48,11 +48,9 @@ foreach my $event (@EVENTS) {
 sub new {
     my ($class, $u, @args) = @_;
     croak("too many args")        if @args > 2;
-    croak("args must be numeric") if grep { /\D/ } @args;
-    croak("u isn't a user")       unless LJ::isu($u);
 
     return bless {
-        userid => $u->id,
+        userid => $u ? $u->id : 0,
         args => \@args,
     }, $class;
 }
@@ -62,7 +60,7 @@ sub new_from_raw_params {
     my (undef, $etypeid, $journalid, $arg1, $arg2) = @_;
 
     my $class   = LJ::Event->class($etypeid) or die "Classname cannot be undefined/false";
-    my $journal = LJ::load_userid($journalid) or die "Invalid journalid $journalid";
+    my $journal = LJ::load_userid($journalid);
     my $evt     = LJ::Event->new($journal, $arg1, $arg2);
 
     # bless into correct class
@@ -206,7 +204,7 @@ sub subscription_applicable {
 
 # can $u subscribe to this event?
 sub available_for_user  {
-    my ($class, $u, $subscr) = @_;
+    my ($self, $u) = @_;
 
     return 1;
 }
@@ -385,9 +383,9 @@ sub has_subscriptions {
 }
 
 sub get_subscriptions {
-    my ($self, $u, $subid) = @_;
+    my ($self, $u, $subdump) = @_;
 
-    return LJ::Subscription->new_by_id($u, $subid);
+    return LJ::Subscription->new_from_dump($u, $subdump);
 }
 
 
@@ -528,6 +526,64 @@ sub format_options {
     $options .= $tag_nul . $tag_br; 
 
     return $options;
+}
+
+sub is_tracking { 1 }
+
+sub is_subscription_visible_to {
+    my ($self, $u) = @_;
+
+    return 0 if ref $self eq 'LJ::Event';
+
+    return 0 if $self->is_subscription_disabled_for($u) && $u->is_identity;
+    return 1;
+}
+
+sub is_subscription_disabled_for {
+    my ($self, $u) = @_;
+
+    return !$self->available_for_user($u);
+}
+
+sub is_subscription_ntype_visible_to { 1 }
+
+sub is_subscription_ntype_disabled_for {
+    my ($self, $ntypeid, $u) = @_;
+
+    return 1 if $self->is_subscription_disabled_for($u);
+
+    my $nclass = LJ::NotificationMethod->class($ntypeid);
+    return 1 unless $nclass->configured_for_user($u);
+
+    return 0;
+}
+
+sub get_subscription_ntype_force { 0 }
+
+sub get_disabled_pic {
+    my ($self, $u) = @_;
+
+    return LJ::run_hook("disabled_esn_sub", $u) || '';
+}
+
+sub get_interface_status {
+    my ($self, $u) = @_;
+
+    return {
+        'visible' => $self->is_subscription_visible_to($u),
+        'disabled' => $self->is_subscription_disabled_for($u),
+        'disabled_pic' => $self->get_disabled_pic($u),
+    };
+}
+
+sub get_ntype_interface_status {
+    my ($self, $ntypeid, $u) = @_;
+
+    return {
+        'visible' => $self->is_subscription_ntype_visible_to($ntypeid, $u),
+        'disabled' => $self->is_subscription_ntype_disabled_for($ntypeid, $u),
+        'force' => $self->get_subscription_ntype_force($ntypeid, $u),
+    };
 }
 
 1;

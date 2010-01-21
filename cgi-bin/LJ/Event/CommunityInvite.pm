@@ -160,6 +160,8 @@ sub subscription_as_html {
     return BML::ml('event.comm_invite'); # "I receive an invitation to join a community";
 }
 
+sub is_tracking { 0 }
+
 package LJ::Error::Event::CommunityInvite;
 sub fields { 'u' }
 sub as_string {

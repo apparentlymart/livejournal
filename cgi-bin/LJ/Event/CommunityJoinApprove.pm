@@ -98,4 +98,6 @@ sub community {
     return LJ::load_userid($self->arg1);
 }
 
+sub is_tracking { 0 }
+
 1;

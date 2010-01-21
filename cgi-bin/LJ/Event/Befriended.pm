@@ -159,4 +159,6 @@ sub content {
     return $self->as_html_actions;
 }
 
+sub is_tracking { 0 }
+
 1;

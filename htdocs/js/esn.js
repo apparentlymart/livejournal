@@ -381,3 +381,24 @@ ESN.updateThreadIcons = function (dtalkid, tracking) {
 
     btn.src = Site.imgprefix + uri;
 };
+
+jQuery(function($)
+{
+    $(document).click(function(e)
+    {
+        var target = $(e.target),
+            parents = target.parents('a[class*=delete-group-]');
+
+        if (!parents.length) return;
+        
+        e.preventDefault();
+
+        var group = parents.attr('class').replace(/^delete-group-/, '');
+        $.post(location.href, {
+            delete_group : group
+        }, function()
+        {
+            parents.parents('tr').remove();
+        });
+    });
+});

@@ -324,7 +324,7 @@ sub unsubscribed_tags {
 }
 
 sub subscription_as_html {
-    my ($class, $subscr) = @_;
+    my ($class, $subscr, $field_num) = @_;
 
     my $journal = $subscr->journal;
 
@@ -334,16 +334,29 @@ sub subscription_as_html {
 
     if ($arg1 eq '?') {
         my @unsub_tags = $class->unsubscribed_tags($subscr);
-        my @tagdropdown;
+        my %tagdropdown;
 
         foreach my $unsub_tag (@unsub_tags) {
             while (my ($tagid, $name) = each %$unsub_tag) {
-                push @tagdropdown, ($tagid, $name);
+                my $group = bless({
+                    'userid' => $subscr->userid,
+                    'journalid' => $subscr->journalid,
+                    'etypeid' => $subscr->etypeid,
+                    'arg1' => $tagid,
+                    'arg2' => 0,
+                }, 'LJ::Subscription::Group');
+
+                $tagdropdown{$group->freeze} = $name;
             }
         }
 
+        my @tagdropdown =
+            map { $_ => $tagdropdown{$_} }
+            sort { $tagdropdown{$a} cmp $tagdropdown{$b} }
+            keys %tagdropdown;
+
         $usertags = LJ::html_select({
-            name => $subscr->freeze('arg1'),
+            name => 'event-'.$field_num,
         }, @tagdropdown);
 
     } elsif ($arg1) {
@@ -364,6 +377,36 @@ sub subscription_as_html {
             {
                 user    => $journal->ljuser_display,
             });
+}
+
+sub event_as_html {
+    my ($class, $group, $field_num) = @_;
+
+    my $ret = $class->subscription_as_html($group, $field_num);
+    $ret .= LJ::html_hidden('event-'.$field_num => $group->freeze)
+        unless $group->arg1 eq '?';
+
+    return $ret;
+}
+
+sub is_subscription_visible_to {
+    my ($self, $u) = @_;
+
+    if ($self->arg1 eq '?') {
+        my $journal = $self->u;
+        my $usertags = LJ::Tags::get_usertags($journal, { 'remote' => $u });
+        my @tagids = grep {
+            !$u->has_subscription(
+                etypeid => $self->etypeid,
+                arg1    => $_,
+                journal => $journal,
+            );
+        } (keys %$usertags);
+
+        return 0 unless scalar(@tagids);
+    }
+
+    return $self->SUPER::is_subscription_visible_to($u);
 }
 
 # when was this entry made?

@@ -87,19 +87,6 @@ sub subscriptions {
     return @subs;
 }
 
-sub get_subscriptions {
-    my ($self, $u, $subid) = @_;
-
-    unless ($subid) {
-        my $row = { userid  => $u->{userid},
-                    ntypeid => LJ::NotificationMethod::Inbox->ntypeid, # Inbox
-                  };
-
-        return LJ::Subscription->new_from_row($row);
-    }
-
-}
-
 # Have notifications for this event show up as read
 sub mark_read {
     my $self = shift;

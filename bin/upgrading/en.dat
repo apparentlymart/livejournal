@@ -1554,6 +1554,8 @@ A new [[openlink]]question of the day[[closelink]] was posted to [[journal]]!
 [[event]]
 .
 
+esn.error.quota=You have exceeded your quota of [[quota]] subscriptions. Please <a[[aopts]]>delete some of your existing subscriptions</a> in order to add new ones.
+
 entryform.adultcontent=Adult Content:
 
 entryform.adultcontent.concepts=Adult Concepts
@@ -1913,6 +1915,10 @@ event.journal_new_comment.user_journal.untitled_entry.untitled_thread.me=Someone
 event.journal_new_comment.user_journal.untitled_entry.titled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by (Anonymous) in <a href='[[entryurl]]'>an entry</a> in [[user]]
 
 event.journal_new_comment.user_journal.untitled_entry.untitled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>the thread</a> by (Anonymous) in <a href='[[entryurl]]'>an entry</a> in [[user]]
+
+event.comment_reply=Someone replies to my comment
+
+event.community_entry_reply=Someone replies to my entry in a community
 
 event.journal_new_entry.tag.community=Someone posts an entry tagged [[tags]] to [[user]]
 
@@ -2931,6 +2937,8 @@ subscribe_interface.category.notices=Notices
 
 subscribe_interface.category.subscription-tracking=Subscription Tracking
 
+subscribe_interface.category.this-journal=Events in [[journal]]
+
 subscribe_interface.inbox=Inbox
 
 subscribe_interface.manage=Manage settings
@@ -2948,6 +2956,8 @@ subscribe_interface.notify_me2=Notify me in my [[sitenameabbrev]] Inbox when...
 subscribe_interface.save=Save
 
 subscribe_interface.special_subs.note=These notification options are only available by email and will not show in your LJ Inbox.
+
+subscribe_interface.getselfemail=Email me copies of my comments
 
 taglib.error.toomany=This would make you exceed your maximum of [[max]] tags.  Please remove some and try again.
 

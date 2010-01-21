@@ -298,7 +298,7 @@ sub check_viewable
     # note $form no longer used
 
     my $err = sub {
-        $$errref = "<h1><?_ml Error _ml?></h1><p>$_[0]</p>";
+        $$errref = "<?h1 <?_ml Error _ml?> h1?><?p $_[0] p?>";
         return 0;
     };
 
@@ -1309,28 +1309,6 @@ sub talkform {
             if LJ::Talk::Post::over_maxcomments($journalu, $jitemid);
     }
 
-    # can a comment even be made?
-    
-    my $entry = LJ::Entry->new($journalu->id, jitemid => $opts->{ditemid});
-    if ($entry->prop('opt_nocomments')) {
-        $ret .= "<h1>$BML::ML{'Sorry'}</h1><p>$BML::ML{'.error.nocommentspost'}</p>";
-        $opts->{'err'} = 1;
-        return $ret;
-    }
-    if ($journalu->{'opt_showtalklinks'} eq "N") {
-        $ret .= "<h1>$BML::ML{'Sorry'}</h1><p>$BML::ML{'.error.nocommentsjournal'}</p>";
-        $opts->{'err'} = 1;
-        return $ret;
-    }
-    unless (LJ::get_cap($journalu, "get_comments") ||
-            ($remote && LJ::get_cap($remote, "leave_comments"))) {
-        $ret .= "<h1>$BML::ML{'Sorry'}</h1><p>";
-        $ret .= $LJ::MSG_NO_COMMENT || "Sorry, you cannot leave comments at this time.";
-        $ret .= "</p>";
-        $opts->{'err'} = 1;
-        return $ret;
-    }
-
     if (!$editid && $parpost->{'state'} eq "S") {
         $ret .= "<div class='ljwarnscreened'>$BML::ML{'.warnscreened'}</div>";
     }
@@ -2284,373 +2262,6 @@ sub generate_messageid {
     return "<$type-$jid-$did\@$LJ::DOMAIN>";
 }
 
-my @_ml_strings_en = (
-    'esn.mail_comments.fromname.user',                      # "[[user]] - [[sitenameabbrev]] Comment",
-    'esn.mail_comments.fromname.anonymous',                 # "[[sitenameshort]] Comment",
-    'esn.mail_comments.subject.edit_reply_to_your_comment', # "Edited reply to your comment...",
-    'esn.mail_comments.subject.reply_to_your_comment',      # "Reply to your comment...",
-    'esn.mail_comments.subject.edit_reply_to_your_entry',   # "Edited reply to your entry...",
-    'esn.mail_comments.subject.reply_to_your_entry',        # "Reply to your entry...",
-    'esn.mail_comments.subject.edit_reply_to_a_comment',    # "Edited reply to a comment...",
-    'esn.mail_comments.subject.reply_to_a_comment',         # "Reply to a comment...",
-    'esn.mail_comments.subject.comment_you_posted',         # "Comment you posted...",
-    'esn.mail_comments.subject.comment_you_edited',         # "Comment you edited...",
-);
-
-sub _format_headers {
-    my ($lang, $encoding, $comment, $u, $edited, $parent, $paru) = @_;
-
-    my $vars = {
-        user            => $comment->{u} ? $comment->{u}->display_username : '',
-        sitenameabbrev  => $LJ::SITENAMEABBREV,
-        sitenameshort   => $LJ::SITENAMESHORT,
-    };
-
-    my ($headersubject, $fromname);
-    unless ($headersubject = $comment->{subject}) {
-        my $key = 'esn.mail_comments.subject.';
-        if (LJ::u_equals($comment->{u}, $u)) {
-            $key .= 'comment_you_'. ($edited ? 'edited' : 'posted');
-        } else {
-            if ($parent->{talkid}) {
-                if(LJ::u_equals($paru, $u)) {
-                    $key .= ($edited ? 'edit_' : '') . 'reply_to_your_comment';
-                } else {
-                    $key .= ($edited ? 'edit_' : '') . 'reply_to_a_comment';
-                }
-            } else {
-                $key .= ($edited ? 'edit_' : '') . 'reply_to_your_entry';
-            }
-        }
-        $headersubject = LJ::Lang::get_text($lang, $key, undef, $vars);
-    }
-
-    if ($comment->{u}) {
-        # external users has lj-logins as 'ext_*', so
-        # we call external user by name, our user - by login.
-        $vars->{user} = $comment->{u}->display_username;
-        $fromname = LJ::Lang::get_text($lang, 'esn.mail_comments.fromname.user', undef, $vars);
-    } else {
-        $fromname = LJ::Lang::get_text($lang, 'esn.mail_comments.fromname.anonymous', undef, $vars);
-    }
-
-    if ($LJ::UNICODE && $encoding ne "UTF-8") {
-        $fromname = Unicode::MapUTF8::from_utf8({-string=>$fromname, -charset=>$encoding});
-        $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding});
-    }
-
-    if (!LJ::is_ascii($fromname)) {
-        $fromname = MIME::Words::encode_mimeword($fromname, 'B', $encoding);
-    }
-
-    if (!LJ::is_ascii($headersubject)) {
-        $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
-    }
-
-    return ( $headersubject, $fromname );
-}
-
-# entryu     : user who posted the entry this comment is under.
-# journalu   : journal this entry is in.
-# parent     : comment/entry this post is in response to.
-# comment    : the comment itself.
-# item       : entry this comment falls under.
-sub mail_comments {
-    my ($entryu, $journalu, $parent, $comment, $item) = @_;
-    my $itemid = $item->{itemid};
-    my $ditemid = $itemid*256 + $item->{anum};
-    my $dtalkid = $comment->{talkid}*256 + $item->{anum};
-    my $talkurl = LJ::journal_base($journalu) . "/$ditemid.html";
-    my $threadurl = LJ::Talk::talkargs($talkurl, "thread=$dtalkid");
-    my $edited = $comment->{editid} ? 1 : 0;
-
-    # FIXME: here we have to use existent comment object, not try to create temporary one.
-    my $comment_obj = LJ::Comment->new($journalu, dtalkid => $dtalkid);
-
-    # check to see if parent post is from a registered livejournal user, and
-    # mail them the response
-    my $parentcomment = "";
-    my $parentmailed = "";  # who if anybody was just mailed
-
-    # message ID of the mythical top-level journal entry (which
-    # currently is never emailed) so mail clients can group things
-    # together with a comment ancestor if parents are missing
-    my $top_msgid = generate_messageid("entry", $journalu, $ditemid);
-    # find first parent
-    my $par_msgid;
-    if (my $ptid = $parent->{talkid}) {
-        $par_msgid = generate_messageid("comment", $journalu,
-                                        $ptid * 256 + $item->{anum});
-    } else {
-        # is a reply to the top-level
-        $par_msgid = $top_msgid;
-        $top_msgid = "";  # so it's not duplicated
-    }
-    # and this message ID
-    my $this_msgid = generate_messageid("comment", $journalu, $dtalkid);
-
-    my ($lang, $encoding);
-    my ($headersubject, $fromname);
-
-    my $paru;
-
-    # if a response to another comment, send a mail to the parent commenter.
-    if ($parent->{talkid}) {
-        my $dbcr = LJ::get_cluster_def_reader($journalu);
-
-        # get row of data
-        my $row = LJ::Talk::get_talk2_row($dbcr, $journalu->{userid}, $parent->{talkid});
-        my $paruserid = $row->{posterid};
-
-        # now get body of comment
-        my $temp = LJ::get_talktext2($journalu, $parent->{talkid});
-        my $parbody = $temp->{$parent->{talkid}}[1];
-        LJ::text_uncompress(\$parbody);
-        $parentcomment = $parbody;
-
-        my %props = ($parent->{talkid} => {});
-        LJ::load_talk_props2($dbcr, $journalu->{'userid'}, [$parent->{talkid}], \%props);
-        $parent->{preformat} = $props{$parent->{talkid}}->{'opt_preformatted'};
-
-        # convert to UTF-8 if necessary
-        my $parentsubject = $parent->{subject};
-        if ($LJ::UNICODE && $props{$parent->{talkid}}->{'unknown8bit'}) {
-            LJ::item_toutf8($journalu, \$parentsubject, \$parentcomment, {});
-        }
-
-        if ($paruserid) {
-            $paru = LJ::load_userid($paruserid);
-
-            # we don't want to send email to a parent if the email address on the
-            # parent's user is the same as the email address on this comment's user
-            # is_diff_email: also so we don't auto-vivify $comment->{u}
-            my $is_diff_email = !$comment->{u} ||
-                $paru->email_raw ne $comment->{u}->email_raw;
-
-            if ($paru->{'opt_gettalkemail'} eq "Y" &&
-                $paru->is_visible &&
-                $is_diff_email &&
-                $paru->{'status'} eq "A" &&
-                !$paru->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid})
-
-                # it is possible to register a hook which will intercept this entire conditional block
-                # and do its own logic... if that's the case and the hook returns true, then we'll
-                # skip creating the email notification
-                && ! LJ::run_hook("talklib_email_parent_comment_poster",
-                                   user => $paru, journal => $journalu, talkid => $comment->{talkid}
-                                 )
-                )
-            {
-                ## security bug: if aliases are enabled, then e-mail recipient
-                ## may get e-mail with aliases of current remote user.
-                ## TODO: all e-mails should be sent from workers tier, not Apache
-                local $LJ::DISABLED{'aliases'} = 1;
-
-                $parentmailed = $paru->email_raw;
-                $encoding = $paru->mailencoding || "UTF-8";
-                my $part;
-
-                # Now we going to send email to '$paru'.
-                $lang = $paru->prop('browselang');
-
-                ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $paru, $edited, $parent, $paru);
-
-                my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
-                                           'To' => $paru->email_raw,
-                                           'Subject' => $headersubject,
-                                           'Type' => 'multipart/alternative',
-                                           'Message-Id' => $this_msgid,
-                                           'In-Reply-To:' => $par_msgid,
-                                           'References' => "$top_msgid $par_msgid",
-                                           );
-                $msg->add('X-LJ-JOURNAL' => $journalu->{'user'}); # for mail filters
-
-                $parent->{u} = $paru;
-                $parent->{body} = $parentcomment;
-                $parent->{ispost} = 0;
-                $item->{entryu} = $entryu;
-                $item->{journalu} = $journalu;
-                my $text = $comment_obj->format_text_mail($paru);
-
-                if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                    $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
-                }
-                $part = $msg->attach('Type' => 'TEXT',
-                                     'Data' => $text,
-                                     'Encoding' => 'quoted-printable',
-                                     );
-                $part->attr("content-type.charset" => $encoding)
-                    if $LJ::UNICODE;
-
-                if ($paru->{'opt_htmlemail'} eq "Y") {
-                    my $html = $comment_obj->format_html_mail($paru);
-                    if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                        $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
-                    }
-                    $part = $msg->attach('Type' => 'text/html',
-                                         'Data' => $html,
-                                         'Encoding' => 'quoted-printable',
-                                         );
-                    $part->attr("content-type.charset" => $encoding)
-                        if $LJ::UNICODE;
-                }
-
-                LJ::send_mail($msg);
-            }
-        }
-    }
-
-    # send mail to the poster of the entry
-    if ($entryu->{'opt_gettalkemail'} eq "Y" &&
-        $entryu->is_visible &&
-        !$item->{props}->{'opt_noemail'} &&
-        !LJ::u_equals($comment->{u}, $entryu) &&
-        $entryu->email_raw ne $parentmailed &&
-        $entryu->{'status'} eq "A" &&
-        !$entryu->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid})
-        )
-    {
-        local $LJ::DISABLED{'aliases'} = 1;
-        
-        LJ::load_user_props($entryu, 'mailencoding');
-        my $part;
-
-        # Now we going to send email to '$entryu'.
-        $lang = $entryu->prop('browselang');
-        $encoding = $entryu->mailencoding || "UTF-8";
-        ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $entryu, $edited, $parent, $paru);
-
-        my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
-                                   'To' => $entryu->email_raw,
-                                   'Subject' => $headersubject,
-                                   'Type' => 'multipart/alternative',
-                                   'Message-Id' => $this_msgid,
-                                   'In-Reply-To:' => $par_msgid,
-                                   'References' => "$top_msgid $par_msgid",
-                                   );
-        $msg->add('X-LJ-JOURNAL' => $journalu->{'user'}); # for mail filters
-
-        my $quote = $parentcomment ? $parentcomment : $item->{'event'};
-
-        # if this is a response to a comment inside our journal,
-        # we don't know who made the parent comment
-        # (and it's potentially anonymous).
-        if ($parentcomment) {
-            $parent->{u} = undef;
-            $parent->{body} = $parentcomment;
-            $parent->{ispost} = 0;
-        } else {
-            $parent->{u} = $entryu;
-            $parent->{body} = $item->{'event'},
-            $parent->{ispost} = 1;
-            $parent->{preformat} = $item->{'props'}->{'opt_preformatted'};
-        }
-        $item->{entryu} = $entryu;
-        $item->{journalu} = $journalu;
-
-        my $text = $comment_obj->format_text_mail($entryu);
-
-        if ($LJ::UNICODE && $encoding ne "UTF-8") {
-            $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
-        }
-        $part = $msg->attach('Type' => 'TEXT',
-                             'Data' => $text,
-                             'Encoding' => 'quoted-printable',
-                             );
-        $part->attr("content-type.charset" => $encoding)
-            if $LJ::UNICODE;
-
-        if ($entryu->{'opt_htmlemail'} eq "Y") {
-            my $html = $comment_obj->format_html_mail($entryu);
-            if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
-            }
-            $part = $msg->attach('Type' => 'text/html',
-                                 'Data' => $html,
-                                 'Encoding' => 'quoted-printable',
-                                 );
-            $part->attr("content-type.charset" => $encoding)
-                if $LJ::UNICODE;
-        }
-
-        LJ::send_mail($msg);
-    }
-
-    # now send email to the person who posted the comment we're using?  only if userprop
-    # opt_getselfemail is turned on.  no need to check for active/suspended accounts, as
-    # they couldn't have posted if they were.  (and if they did somehow, we're just emailing
-    # them, so it shouldn't matter.)
-    my $u = $comment->{u};
-    LJ::load_user_props($u, 'opt_getselfemail') if $u;
-    if ($u && $u->{'opt_getselfemail'} && LJ::get_cap($u, 'getselfemail')
-        && !$u->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid})) {
-        my $part;
-
-        local $LJ::DISABLED{'aliases'} = 1;
-
-        # Now we going to send email to '$u'.
-        $lang = $u->prop('browselang');
-        $encoding = $u->mailencoding || "UTF-8";
-        ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $u, $edited, $parent, $paru);
-
-        my $msg = new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
-                                  'To' => $u->email_raw,
-                                  'Subject' => $headersubject,
-                                  'Type' => 'multipart/alternative',
-                                  'Message-Id' => $this_msgid,
-                                  'In-Reply-To:' => $par_msgid,
-                                  'References' => "$top_msgid $par_msgid",
-                                  );
-        $msg->add('X-LJ-JOURNAL' => $journalu->{'user'}); # for mail filters
-
-        my $quote = $parentcomment ? $parentcomment : $item->{'event'};
-
-        # if this is a response to a comment inside our journal,
-        # we don't know who made the parent comment
-        # (and it's potentially anonymous).
-        if ($parentcomment) {
-            $parent->{u} = undef;
-            $parent->{body} = $parentcomment;
-            $parent->{ispost} = 0;
-        } else {
-            $parent->{u} = $entryu;
-            $parent->{body} = $item->{'event'},
-            $parent->{ispost} = 1;
-            $parent->{preformat} = $item->{'props'}->{'opt_preformatted'};
-        }
-        $item->{entryu} = $entryu;
-        $item->{journalu} = $journalu;
-
-        my $text = $comment_obj->format_text_mail($u);
-
-        if ($LJ::UNICODE && $encoding ne "UTF-8") {
-            $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
-        }
-        $part = $msg->attach('Type' => 'TEXT',
-                             'Data' => $text,
-                             'Encoding' => 'quoted-printable',
-                             );
-        $part->attr("content-type.charset" => $encoding)
-            if $LJ::UNICODE;
-
-        if ($u->{'opt_htmlemail'} eq "Y") {
-            my $html = $comment_obj->format_html_mail($u);
-            if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
-            }
-            $part = $msg->attach('Type' => 'text/html',
-                                 'Data' => $html,
-                                 'Encoding' => 'quoted-printable',
-                                 );
-            $part->attr("content-type.charset" => $encoding)
-                if $LJ::UNICODE;
-        }
-
-        LJ::send_mail($msg);
-
-    }
-}
-
 sub enter_comment {
     my ($journalu, $parent, $item, $comment, $errref) = @_;
 
@@ -2834,8 +2445,6 @@ sub enter_comment {
         my @jobs;
 
         push @jobs, LJ::Event::JournalNewComment->new($cmtobj)->fire_job;
-        push @jobs, LJ::Event::UserNewComment->new($cmtobj)->fire_job
-            if $cmtobj->poster && ! $LJ::DISABLED{'esn-userevents'};
         push @jobs, LJ::EventLogRecord::NewComment->new($cmtobj)->fire_job;
 
         my $sclient = LJ::theschwartz();
@@ -3153,7 +2762,7 @@ sub init {
         $bmlerr->("$SC.error.noanon");
     }
 
-    if ($iprops->{'opt_nocomments'} || $journalu->{'opt_whocanreply'} eq '') {
+    if ($iprops->{'opt_nocomments'}) {
         $bmlerr->("$SC.error.nocomments");
     }
 
@@ -3452,9 +3061,6 @@ sub post_comment {
 
         # save its identifying characteristics to protect against duplicates.
         LJ::MemCache::set($memkey, $jtalkid+0, time()+60*10);
-
-        # send some emails
-        mail_comments($entryu, $journalu, $parent, $comment, $item);
     }
 
     # the caller wants to know the comment's talkid.
@@ -3521,8 +3127,6 @@ sub edit_comment {
         my @jobs;
 
         push @jobs, LJ::Event::JournalNewComment->new($comment_obj)->fire_job;
-        push @jobs, LJ::Event::UserNewComment->new($comment_obj)->fire_job
-            if $comment_obj->poster && ! $LJ::DISABLED{'esn-userevents'};
         push @jobs, LJ::EventLogRecord::NewComment->new($comment_obj)->fire_job;
 
         my $sclient = LJ::theschwartz();
@@ -3530,9 +3134,6 @@ sub edit_comment {
             my @handles = $sclient->insert_jobs(@jobs);
         }
     }
-
-    # send some emails
-    mail_comments($entryu, $journalu, $parent, $comment, $item);
 
     LJ::run_hooks('edit_comment', $journalu->{userid}, $item->{itemid}, $comment->{talkid});
 
@@ -3548,7 +3149,7 @@ sub make_preview {
     my $cleansubject = $form->{'subject'};
     LJ::CleanHTML::clean_subject(\$cleansubject);
 
-    $ret .= "<h1>$BML::ML{'/talkpost_do.bml.preview.title'}</h1><p>$BML::ML{'/talkpost_do.bml.preview'}</p><?hr?>";
+    $ret .= "<?h1 $BML::ML{'/talkpost_do.bml.preview.title'} h1?><?p $BML::ML{'/talkpost_do.bml.preview'} p?><?hr?>";
     $ret .= "<div align=\"center\"><b>(<a href=\"$talkurl\">$BML::ML{'talk.commentsread'}</a>)</b></div>";
 
     my $event = $form->{'body'};

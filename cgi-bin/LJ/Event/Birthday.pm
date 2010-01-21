@@ -166,4 +166,10 @@ sub content {
     return $self->as_html_actions;
 }
 
+sub is_tracking {
+    my ($self) = @_;
+
+    return $self->{'userid'} ? 1 : 0;
+}
+
 1;

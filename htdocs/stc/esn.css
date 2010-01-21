@@ -62,6 +62,7 @@
 
 .CategoryRowFirst td {
     padding-top: .2em;
+    white-space: nowrap;
 }
 
 .CategoryRow .caption {

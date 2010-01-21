@@ -11,20 +11,11 @@ body<=
 
     return "Not ready" if $LJ::DISABLED{'esn'};
 
-    use Class::Autouse qw(
-                          LJ::NotificationMethod
-                          LJ::Event
-                          LJ::Comment
-                          );
-
-    BML::decl_params(
-                     lj_form_auth => qr/./,
-                     journal      => 'word',
-                     dtalkid     => 'digits',
-                     ditemid     => 'digits',
-                     talkid      => 'digits',
-                     itemid      => 'digits',
-                     );
+    use LJ::NotificationMethod;
+    use LJ::Event;
+    use LJ::Subscription::GroupSet;
+    use LJ::Widget::SubscribeInterface;
+    use LJ::Comment;
 
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
@@ -45,48 +36,91 @@ body<=
     my $entry = $comment->entry;
     $ditemid ||= $entry->ditemid;
 
-    my $thread_sub = LJ::Subscription::Pending->new(
-                                                    $remote,
-                                                    journal          => $journal,
-                                                    event            => 'JournalNewComment',
-                                                    arg2             => $comment && $comment->jtalkid,
-                                                    default_selected => 1,
-                                                    flags            => LJ::Subscription::TRACKING,
-                                                    );
+    my $u = $remote;
 
-    my $can_watch = $thread_sub->available_for_user;
+    my $ret = '';
 
-    push @errors, $ML{'.error.threads'}
-        unless $can_watch;
+    my $set = LJ::Subscription::GroupSet->fetch_for_user($u, sub {
+        my ($subhash) = @_;
 
-    my @pending = $thread_sub;
+        return 0 unless $subhash->{'journalid'} == $journal->id;
 
-    push @pending, LJ::Subscription::Pending->new(
-                                                  $remote,
-                                                  journal => $journal,
-                                                  event   => 'JournalNewComment',
-                                                  arg1    => $ditemid,
-                                                  default_selected => 1,
-                                                  flags   => LJ::Subscription::TRACKING,
-                                                  ) unless $can_watch;
+        my @events = qw(
+            JournalNewComment
+        );
 
-    my $categories = [
-                      {
-                          'Comments' => [
-                                         @pending,
-                                         ],
-                                     },
-                      ];
+        my %etypeids = map { LJ::Event->event_to_etypeid($_) => 1 } @events;
 
-    return LJ::subscribe_interface(
-                                   $remote,
-                                   categories => $categories,
-                                   journal => $journal,
-                                   ret_url => ($can_watch ? $comment->url : $entry->url),
-                                   default_selected_notifications => ['LJ::NotificationMethod::Email'],
-                                   post_to_settings_page => 1,
-                                   );
+        return 0 unless $etypeids{$subhash->{'etypeid'}};
 
+        return 1;
+    });
+
+    if (LJ::did_post()) {
+        my $newset = $set->clone;
+
+        my @ntypes = @LJ::NOTIFY_TYPES;
+
+        my %ntypeids = map { $_ => $_->ntypeid } @ntypes;
+
+        foreach my $field (keys %POST) {
+            next unless $field =~ /event\-(\d+)/;
+            my $field_num = $1;
+
+            my $group = LJ::Subscription::Group->thaw($POST{$field});
+
+            foreach my $ntypeid (values %ntypeids) {
+                next unless $POST{'sub-'.$field_num.'-'.$ntypeid};
+
+                $group->create_sub($ntypeid);
+            }
+
+            use Data::Dumper; warn Dumper($group);
+            $newset->insert_group($group);
+        }
+
+        eval {
+            $set->update($newset);
+        };
+
+        if ($@) {
+            if (ref $@ eq 'LJ::Subscription::QuotaError') {
+                my $mlstring = LJ::run_hook('esn_quota_error', $u) ||
+                    LJ::Lang::ml('esn.error.quota', {
+                        'quota' => LJ::get_cap($u, 'subscriptions'),
+                        'aopts' => qq{ href="$LJ::SITEROOT/manage/settings/?cat=notifications"},
+                    });
+
+                $ret .= "<?errorbar $mlstring errorbar?>";
+            }
+        } else {
+            return BML::redirect('/manage/settings/?cat=notifications');
+        }
+    }
+
+    my $widget = LJ::Widget::SubscribeInterface->new;
+
+    $widget->{'no_container_div'} = 1;
+    $widget->{'page'} = '/manage/subscriptions/comments.bml';
+
+    $ret .= '<form method="post" action="">';
+
+    my $groups = [
+        { event => "JournalNewComment", arg2 => $comment->jtalkid, 'journalid' => $journal->id },
+        { event => "JournalNewComment", arg1 => $ditemid, 'journalid' => $journal->id },
+    ];
+
+    $ret .= $widget->render({
+        'title' => BML::ml('subscribe_interface.category.this-journal', { 'journal' => $journal->ljuser_display }),
+        'groups' => $set->extract_groups($groups),
+        'u' => $u,
+        'css_class' => 'subscriptions_user',
+    });
+
+    $ret .= LJ::html_submit('value' => $ML{'subscribe_interface.save'});
+    $ret .= '</form>';
+
+    return $ret;
 }
 _code?>
 <=body

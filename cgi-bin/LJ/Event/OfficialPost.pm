@@ -160,4 +160,6 @@ sub subscription_as_html {
 
 sub schwartz_role { 'mass' }
 
+sub is_tracking { 0 }
+
 1;
