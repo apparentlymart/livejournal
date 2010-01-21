@@ -2341,7 +2341,7 @@ sub getevents
     # common SQL template:
     unless ($sql) {
         $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid, replycount, UNIX_TIMESTAMP(eventtime) ".
-            "FROM log2 WHERE journalid=$ownerid $where $orderby $limit $offset";
+            "FROM log2 WHERE journalid=$ownerid $secwhere $where $orderby $limit $offset";
     }
 
     # whatever selecttype might have wanted us to use the master db.
