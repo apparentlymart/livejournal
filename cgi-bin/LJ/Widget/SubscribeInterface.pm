@@ -125,13 +125,16 @@ sub render_body {
                 $ntype_interface->{'force'} :
                 $sub->active;
 
-            $ret .= '<td>' . LJ::html_check({
-                    'name' => 'sub-' . $field_num . '-' . $ntypeid,
-                    'id' => 'sub-' . $field_num . '-' . $ntypeid,
-                    'selected' => $value,
-                    'disabled' => $ntype_interface->{'disabled'},
-                    'class' => 'SubscribeCheckbox-'.$curcatnum.'-'.$ntypeids{$ntype},
-                }) . '</td>';
+            my $checkbox = '';
+            $checkbox = LJ::html_check({
+                'name' => 'sub-' . $field_num . '-' . $ntypeid,
+                'id' => 'sub-' . $field_num . '-' . $ntypeid,
+                'selected' => $value,
+                'disabled' => $ntype_interface->{'disabled'},
+                'class' => 'SubscribeCheckbox-'.$curcatnum.'-'.$ntypeids{$ntype},
+            }) if $ntype_interface->{'visible'};
+
+            $ret .= '<td>' . $checkbox . '</td>';
         }
         $ret .= '</td>';
     }    

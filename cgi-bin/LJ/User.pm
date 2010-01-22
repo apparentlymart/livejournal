@@ -2797,47 +2797,6 @@ sub activate_userpics {
     return 1;
 }
 
-# ensure that this user does not have more than the maximum number of subscriptions
-# allowed by their cap, and enable subscriptions up to their current limit
-sub enable_subscriptions {
-    my $u = shift;
-
-    # first thing, disable everything they don't have caps for
-    # and make sure everything is enabled that should be enabled
-    map { $_->available_for_user($u) ? $_->enable : $_->disable } $u->find_subscriptions(method => 'Inbox');
-
-    my $max_subs = $u->get_cap('subscriptions');
-    my @inbox_subs = grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
-
-    if ((scalar @inbox_subs) > $max_subs) {
-        # oh no, too many subs.
-        # disable the oldest subscriptions that are "tracking" subscriptions
-        my @tracking = grep { $_->is_tracking_category } @inbox_subs;
-
-        # oldest subs first
-        @tracking = sort {
-            return $a->createtime <=> $b->createtime;
-        } @tracking;
-
-        my $need_to_deactivate = (scalar @inbox_subs) - $max_subs;
-
-        for (1..$need_to_deactivate) {
-            my $sub_to_deactivate = shift @tracking;
-            $sub_to_deactivate->deactivate if $sub_to_deactivate;
-        }
-    } else {
-        # make sure all subscriptions are activated
-        my $need_to_activate = $max_subs - (scalar @inbox_subs);
-
-        # get deactivated subs
-        @inbox_subs = grep { $_->active && $_->available_for_user } $u->find_subscriptions(method => 'Inbox');
-
-        for (1..$need_to_activate) {
-            my $sub_to_activate = shift @inbox_subs;
-            $sub_to_activate->activate if $sub_to_activate;
-        }
-    }
-}
 
 # revert S2 style to the default if the user is using a layout/theme layer that they don't have permission to use
 sub revert_style {

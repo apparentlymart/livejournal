@@ -46,16 +46,21 @@ sub jobs_of_unique_matching_subs {
         warn "jobs of unique subs (@subs) matching event (@$params)\n";
     }
 
-    foreach my $s (grep { $evt->matches_filter($_) } @subs) {
+    @subs = grep {
+        $evt->available_for_user($_->owner) &&
+        $evt->matches_filter($_);
+    } @subs;
+
+    foreach my $s (@subs) {
         next if $has_done{$s->unique}++;
         push @subjobs, TheSchwartz::Job->new(
-                                             funcname => 'LJ::Worker::ProcessSub',
-                                             arg      => [
-                                                          $s->userid + 0,
-                                                          $s->dump,
-                                                          $params           # arrayref of event params
-                                                          ],
-                                             );
+            funcname => 'LJ::Worker::ProcessSub',
+            arg      => [
+                $s->userid + 0,
+                $s->dump,
+                $params,
+            ],
+        );
     }
     return @subjobs;
 }
@@ -269,7 +274,7 @@ sub work {
     my ($userid, $subdump, $eparams) = @$a;
     my $u     = LJ::load_userid($userid);
     my $evt   = LJ::Event->new_from_raw_params(@$eparams);
-    my $subsc = $evt->get_subscriptions($u, $subdump);
+    my $subsc = LJ::Subscription->new_from_dump($u, $subdump);
 
     # if the subscription doesn't exist anymore, we're done here
     # (race: if they delete the subscription between when we start processing

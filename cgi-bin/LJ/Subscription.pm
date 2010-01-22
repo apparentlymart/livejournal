@@ -11,8 +11,6 @@ use Class::Autouse qw(
 
 use constant {
               INACTIVE => 1 << 0, # user has deactivated
-              DISABLED => 1 << 1, # system has disabled
-              TRACKING => 1 << 2, # subs in the "notices" category
               };
 
 my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
@@ -204,7 +202,7 @@ sub find {
 
 # Instance method
 # Deactivates a subscription. If this is not a "tracking" subscription,
-# it will delete it instead. Does nothing to disabled subscriptions.
+# it will delete it instead.
 sub deactivate {
     my $self = shift;
 
@@ -217,9 +215,6 @@ sub deactivate {
         or croak "Invalid subsciption";
 
     my $u = $self->owner;
-
-    # don't care about disabled subscriptions
-    return if $self->disabled;
 
     # if it's the inbox method, deactivate/delete the other notification methods too
     my @to_remove = ();
@@ -428,18 +423,6 @@ sub _deactivate {
     $self->set_flag(INACTIVE);
 }
 
-sub enable {
-    my $self = shift;
-
-    $_->clear_flag(DISABLED) foreach $self->corresponding_subs;
-}
-
-sub disable {
-    my $self = shift;
-
-    $_->set_flag(DISABLED) foreach $self->corresponding_subs;
-}
-
 sub set_flag {
     my ($self, $flag) = @_;
 
@@ -501,16 +484,6 @@ sub flags {
 sub active {
     my $self = shift;
     return ! ($self->flags & INACTIVE);
-}
-
-sub enabled {
-    my $self = shift;
-    return ! ($self->flags & DISABLED);
-}
-
-sub disabled {
-    my $self = shift;
-    return ! $self->enabled;
 }
 
 sub is_tracking_category {

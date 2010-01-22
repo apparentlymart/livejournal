@@ -281,27 +281,6 @@ sub as_email_html {
     return _as_email($self, $u, 1);
 }
 
-sub subscription_applicable {
-    my ($class, $subscr) = @_;
-
-    return 1 unless $subscr->arg1;
-
-    # subscription is for entries with tsgs.
-    # not applicable if user has no tags
-    my $journal = $subscr->journal;
-
-    return 1 unless $journal; # ?
-
-    my $usertags = LJ::Tags::get_usertags($journal);
-
-    if ($usertags && (scalar keys %$usertags)) {
-        my @unsub = $class->unsubscribed_tags($subscr);
-        return (scalar @unsub) ? 1 : 0;
-    }
-
-    return 0;
-}
-
 # returns list of (hashref of (tagid => name))
 sub unsubscribed_tags {
     my ($class, $subscr) = @_;
