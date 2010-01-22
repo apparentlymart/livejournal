@@ -136,7 +136,6 @@ sub parse_module_embed {
 
     return if LJ::conf_test($LJ::DISABLED{embed_module});
 
-    $$postref = Encode::decode_utf8($$postref);
     # fast track out if we don't have to expand anything
     return unless $$postref =~ /lj\-embed|embed|object/i;
 
@@ -154,10 +153,12 @@ sub parse_module_embed {
         return $class->expand_entry($journal, $postref, %opts);
     }
 
+    my $text = Encode::decode_utf8($$postref);
+
     # ok, we can safely parse post text
     # machine state
     my $state = REGULAR;
-    my $p = HTML::TokeParser->new($postref);
+    my $p = HTML::TokeParser->new(\$text);
     my $newtxt = '';
     my %embed_attrs = (); # ($eid, $ewidth, $eheight);
     my $embed = '';
@@ -246,8 +247,7 @@ sub parse_module_embed {
     }
 
     # update passed text
-    $$postref = $newtxt;
-    $$postref = Encode::encode_utf8($$postref);
+    $$postref = Encode::encode_utf8($newtxt);
 }
 
 sub module_iframe_tag {
