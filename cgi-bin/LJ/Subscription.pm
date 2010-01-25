@@ -224,7 +224,7 @@ sub deactivate {
     foreach my $subscr (@subs) {
         # Don't deactivate if the Inbox is always subscribed to
         my $always_checked = $subscr->event_class->always_checked ? 1 : 0;
-        if ($subscr->is_tracking_category && ! $force) {
+        unless ($force) {
             # delete non-inbox methods if we're deactivating
             if ($subscr->method eq 'LJ::NotificationMethod::Inbox' && !$always_checked) {
                 $subscr->_deactivate;
@@ -250,6 +250,8 @@ sub delete {
     # delete from cache in user
     undef $u->{_subscriptions};
 
+    LJ::MemCache::delete('subscriptions_count:'.$u->id);
+
     return 1;
 }
 
@@ -260,6 +262,8 @@ sub delete_all_subs {
     return if $u->is_expunged;
     $u->do("DELETE FROM subs WHERE userid = ?", undef, $u->id);
     undef $u->{_subscriptions};
+
+    LJ::MemCache::delete('subscriptions_count:'.$u->id);
 
     return 1;
 }
@@ -382,6 +386,8 @@ sub create {
     $self->subscriptions_of_user($u) unless $u->{_subscriptions};
     push @{$u->{_subscriptions}}, $self;
 
+    LJ::MemCache::delete('subscriptions_count:'.$u->id);
+
     return $self;
 }
 
@@ -406,11 +412,6 @@ sub as_html {
     my $evtclass = LJ::Event->class($self->etypeid);
     return undef unless $evtclass;
     return $evtclass->subscription_as_html($self);
-}
-
-sub set_tracking {
-    my $self = shift;
-    $self->set_flag(TRACKING);
 }
 
 sub activate {
@@ -484,11 +485,6 @@ sub flags {
 sub active {
     my $self = shift;
     return ! ($self->flags & INACTIVE);
-}
-
-sub is_tracking_category {
-    my $self = shift;
-    return $self->flags & TRACKING;
 }
 
 sub expiretime {
@@ -626,6 +622,11 @@ sub available_for_user {
 sub group {
     my ($self) = @_;
     return LJ::Subscription::Group->group_from_sub($self);
+}
+
+sub event {
+    my ($self) = @_;
+    return $self->group->event;
 }
 
 package LJ::Error::Subscription::TooMany;

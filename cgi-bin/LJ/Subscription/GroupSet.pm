@@ -2,6 +2,8 @@ package LJ::Subscription::GroupSet;
 
 use strict;
 
+use LJ::MemCache;
+
 use LJ::Subscription::Group;
 use LJ::Subscription::QuotaError;
 
@@ -384,6 +386,8 @@ sub drop_group {
     my $sets = join(' AND ', @sets);
 
     $self->_dbh->do("DELETE FROM subs WHERE $sets", undef, @binds);
+
+    LJ::MemCache::delete('subscriptions_count:'.$self->user->id);
 }
 
 sub _db_collect_sets_binds {
@@ -419,6 +423,8 @@ sub _db_insert_sub {
     my $subid = LJ::alloc_user_counter($self->user, 'E');
 
     $self->_dbh->do("INSERT INTO subs SET $sets, subid=?", undef, @binds, $subid);
+
+    LJ::MemCache::delete('subscriptions_count:'.$self->user->id);
 }
 
 sub _db_update_sub {
@@ -444,6 +450,7 @@ sub _db_drop_sub {
     my $sets = join(' AND ', @sets);
 
     $self->_dbh->do("DELETE FROM subs WHERE $sets", undef, @binds);
+    LJ::MemCache::delete('subscriptions_count:'.$self->user->id);
 }
 
 1;

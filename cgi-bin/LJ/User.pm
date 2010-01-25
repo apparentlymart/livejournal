@@ -5500,6 +5500,26 @@ sub set_custom_usericon {
     LJ::set_userprop($u, 'custom_usericon', $url);
 }
 
+sub _subscriptions_count {
+    my ($u) = @_;
+
+    my $set = LJ::Subscription::GroupSet->fetch_for_user($u);
+    my @groups = grep { $_->is_tracking } $set->groups;
+
+    return scalar(@groups);
+}
+
+sub subscriptions_count {
+    my ($u) = @_;
+
+    my $cached = LJ::MemCache::get('subscriptions_count:'.$u->id);
+    return $cached if defined $cached;
+
+    my $count = $u->_subscriptions_count;
+    LJ::MemCache::set('subscriptions_count:'.$u->id, $count);
+    return $count;
+}
+
 package LJ;
 
 use Carp;
