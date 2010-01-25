@@ -259,9 +259,6 @@ sub trans
     my $args = LJ::Request->args;
     my $args_wq = $args ? "?$args" : "";
     my $host = LJ::Request->header_in("Host");
-warn "HOST: $host";
-warn "URI: " . LJ::Request->uri;
-warn "Filename: " . LJ::Request->filename;
     my $hostport = ($host =~ s/:\d+$//) ? $& : "";
     $host =~ s/\.$//; ## 'www.livejournal.com.' is a valid DNS hostname
 
@@ -288,7 +285,6 @@ warn "Filename: " . LJ::Request->filename;
 #=head
     my $bml_handler = sub {
         my $filename = shift;
-warn "BML HANDLER: filename=$filename";
         LJ::Request->handler("perl-script");
         LJ::Request->notes("bml_filename" => $filename);
         LJ::Request->push_handlers(PerlHandler => \&Apache::BML::handler);
@@ -371,7 +367,6 @@ warn "BML HANDLER: filename=$filename";
     if ($LJ::DOMAIN_WEB && LJ::Request->method eq "GET" &&
         $host eq $LJ::DOMAIN && $LJ::DOMAIN_WEB ne $LJ::DOMAIN)
     {
-warn "REDIRECT TO SITEROOT";
         my $url = "$LJ::SITEROOT$uri";
         $url .= "?" . $args if $args;
         return redir($url);
@@ -435,7 +430,6 @@ warn "REDIRECT TO SITEROOT";
     my $journal_view = sub {
         my $opts = shift;
         $opts ||= {};
-warn "Journal view";
 
         my $orig_user = $opts->{'user'};
         $opts->{'user'} = LJ::canonical_username($opts->{'user'});
@@ -594,7 +588,6 @@ warn "Journal view";
         my $mode = undef;
         my $pe;
         my $ljentry;
-warn "Determine view: uuri=$uuri";
 
         # if favicon, let filesystem handle it, for now, until
         # we have per-user favicons.
@@ -977,7 +970,6 @@ warn "Determine view: uuri=$uuri";
         return Apache::BML::handler();
     }
 #=cut
-warn "End of trans";
 
     return LJ::Request::DECLINED
 }
