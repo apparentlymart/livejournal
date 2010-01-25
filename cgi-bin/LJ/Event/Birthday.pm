@@ -169,7 +169,7 @@ sub content {
 sub available_for_user  { 1 }
 sub is_subscription_visible_to  { 1 }
 
-sub is_tracking
+sub is_tracking {
     my ($self, $u) = @_;
 
     return $self->userid ? 1 : 0;

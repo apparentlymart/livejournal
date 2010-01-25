@@ -153,7 +153,7 @@ sub available_for_user  {
     return $u->get_cap("track_user_newuserpic") ? 1 : 0;
 }
 
-sub is_tracking
+sub is_tracking {
     my ($self, $u) = @_;
 
     return $self->userid ? 1 : 0;
