@@ -42,6 +42,8 @@ use Class::Autouse qw(
                       LJ::M::FriendsOf
                       LJ::BetaFeatures
                       LJ::S2Theme
+                      LJ::Subscription
+                      LJ::Subscription::GroupSet
                       );
 
 # class method to create a new account.

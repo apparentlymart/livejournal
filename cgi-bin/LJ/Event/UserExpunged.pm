@@ -97,6 +97,6 @@ sub content {
 
 sub available_for_user  { 1 }
 sub is_subscription_visible_to  { 1 }
-sub is_tracking { 0 }
+sub is_tracking { 1 }
 
 1;

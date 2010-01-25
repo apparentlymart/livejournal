@@ -90,6 +90,7 @@ sub fetch_for_user {
         $self->insert_sub($sub);
     }
 
+
     if ($u->{'opt_gettalkemail'} eq 'Y') {
         my @virtual_subs = (
             {
@@ -272,8 +273,6 @@ sub convert_old_subs {
 
         LJ::update_user($u, {'opt_gettalkemail' => 'N'});
     }
-
-
 }
 
 sub update {
@@ -303,7 +302,7 @@ sub update {
         next unless keys %{$group_new->{'subs'}};
 
         # ensure that the inbox method is in there
-        $group_new->ensure_inbox_created;
+        $group_new->ensure_inbox_created if $group_new->is_tracking;
 
         foreach my $ntypeid (keys %{$group_new->{'subs'}}) {
             my $sub = $group_new->{'subs'}->{$ntypeid};
@@ -329,7 +328,7 @@ sub update {
 
         my $group_new = $newset->{'groups'}->{$gkey};
 
-        $group_new->ensure_inbox_created;
+        $group_new->ensure_inbox_created if $group_new->is_tracking;
 
         my %ntypeids = map { $_ => 1 } (
             keys %{$group_old->{'subs'}},
