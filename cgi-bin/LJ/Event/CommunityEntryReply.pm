@@ -10,6 +10,8 @@ sub subscription_as_html {
 
 sub available_for_user  { 1 }
 
+sub is_subscription_visible_to { 1 }
+
 sub is_tracking { 0 }
 
 1;

@@ -561,21 +561,35 @@ sub comment {
 sub available_for_user  {
     my ($self, $u) = @_;
 
-    # not allowed to track replies to comments
-    return 0 if ! $u->get_cap('track_thread') &&
-        $self->arg2;
-
-    return 1 if $self->arg1;
-
     my $journal = $self->event_journal;
+    my ($arg1, $arg2) = ($self->arg1, $self->arg2);
 
-    return 1 if LJ::u_equals($u, $journal); # one can always subscribe to self
+    # user can always track all comments to their own journal
+    if (LJ::u_equals($journal, $u) && !$arg1 && !$arg2) {
+        return 1;
+    }
 
-    return 0 unless LJ::can_manage($u, $journal); # not a maintainer
-    return 0 unless $journal->get_cap('maintainer_track_commments');
+    # user can track all comments to their community journal, provided
+    # that the community is paid
+    if (LJ::can_manage($u, $journal) && !$arg1 && !$arg2) {
+        return $journal->get_cap('maintainer_track_comments') ? 1 : 0;
+    }
 
-    return 1;
+    # user can always track comments to a specific entry
+    if ($arg1) {
+        return 1;
+    }
+
+    # user can track comments left to a thread if and only if they have a paid
+    # account
+    if ($arg2) {
+        return $u->get_cap('track_thread') ? 1 : 0;
+    }
+
+    return 0;
 }
+
+sub is_subscription_visible_to { 1 }
 
 sub get_disabled_pic {
     my ($self, $u) = @_;
@@ -729,7 +743,7 @@ sub is_tracking {
     my ($self, $ownerid) = @_;
 
     return 1 if $self->arg1 || $self->arg2;
-    return 1 unless $self->{'userid'} == $ownerid;
+    return 1 unless $self->event_journal->id == $ownerid;
 
     return 0;
 }

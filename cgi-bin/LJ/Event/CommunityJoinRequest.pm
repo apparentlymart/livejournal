@@ -158,7 +158,10 @@ sub subscription_as_html {
     return BML::ml('event.community_join_requst'); # Someone requests membership in a community I maintain';
 }
 
+sub available_for_user  { 1 }
+sub is_subscription_visible_to  { 1 }
 sub is_tracking { 0 }
+
 package LJ::Error::Event::CommunityJoinRequest;
 sub fields { 'u' }
 sub as_string {

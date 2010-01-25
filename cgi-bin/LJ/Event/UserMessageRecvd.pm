@@ -216,9 +216,6 @@ sub display_pic {
     return $ret;
 }
 
-# Event is always subscribed to
-sub always_checked { 1 }
-
 # return detailed data for XMLRPC::getinbox
 sub raw_info {
     my ($self, $target) = @_;
@@ -244,11 +241,19 @@ sub raw_info {
     return $res;
 }
 
-sub is_tracking {
-    my ($self, $ownerid) = @_;
+sub available_for_user  {
+    my ($self, $u) = @_;
 
-    return $self->{'userid'} == $ownerid ? 0 : 1;
+    return $self->userid != $u->id ? 0 : 1;
 }
+
+sub is_subscription_visible_to  {
+    my ($self, $u) = @_;
+
+    return $self->userid != $u->id ? 0 : 1;
+}
+
+sub is_tracking { 0 }
 
 sub is_subscription_ntype_disabled_for {
     my ($self, $ntypeid, $u) = @_;

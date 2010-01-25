@@ -385,8 +385,11 @@ sub is_subscription_visible_to {
         return 0 unless scalar(@tagids);
     }
 
-    return $self->SUPER::is_subscription_visible_to($u);
+    return 1;
 }
+
+sub is_tracking { 1 }
+sub available_for_user { 1 }
 
 # when was this entry made?
 sub eventtime_unix {

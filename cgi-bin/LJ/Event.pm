@@ -124,6 +124,7 @@ sub raw_params {
 # my $journal = $event->u;
 # my $arg1    = $event->arg1;
 sub event_journal { &u; }
+sub userid        { $_[0]->{userid}; }
 sub u    {  LJ::load_userid($_[0]->{userid}) }
 sub arg1 {  $_[0]->{args}[0] }
 sub arg2 {  $_[0]->{args}[1] }
@@ -726,18 +727,10 @@ sub is_tracking { 1 }
 # from showing for good -- when this is done, LJ::Widget::SubscribeInterface
 # will never show it, regardless of what is passed to it.
 #
-# this is a virtual function; base class function returns 1 if the user is
-# able to subscribe to the event and is not an OpenID one (this is done because
-# non-OpenID users are always able to upgrade their account type to change
-# that).
+# this is a virtual function; base class function returns 1 for "yes"
 #
 # next unless $event->is_subscription_visible_to($u);
-sub is_subscription_visible_to {
-    my ($self, $u) = @_;
-
-    return 0 if !$self->available_for_user($u) && $u->is_identity;
-    return 1;
-}
+sub is_subscription_visible_to { 1 }
 
 # return a string containing HTML code with information for the user about
 # what they can do to have this subscription available (e.g. upgrade account).
@@ -799,13 +792,22 @@ sub get_subscription_ntype_force { 0 }
 # * !available_for_user        (the 'disabled' key)
 # * get_disabled_pic           (the 'disabled_pic' key)
 #
+# note that this function forces the event to be invisible in case user is
+# unable to subscribe to this event and is unable to upgrade to it [that is, is
+# an OpenID user].
+#
 # my $interface_info = $event->get_interface_status($u);
 sub get_interface_status {
     my ($self, $u) = @_;
 
+    my $available = $self->available_for_user($u);
+
+    my $visible = $self->is_subscription_visible_to($u);
+    $visible &&= ($available || !$u->is_identity);
+
     return {
-        'visible' => $self->is_subscription_visible_to($u),
-        'disabled' => !$self->available_for_user($u),
+        'visible' => $visible,
+        'disabled' => !$available,
         'disabled_pic' => $self->get_disabled_pic($u),
     };
 }

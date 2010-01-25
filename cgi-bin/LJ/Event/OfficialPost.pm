@@ -162,4 +162,6 @@ sub schwartz_role { 'mass' }
 
 sub is_tracking { 0 }
 
+sub is_subscription_visible_to { 1 }
+
 1;

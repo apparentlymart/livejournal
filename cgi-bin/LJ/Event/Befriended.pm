@@ -159,6 +159,18 @@ sub content {
     return $self->as_html_actions;
 }
 
+sub available_for_user  {
+    my ($self, $u) = @_;
+
+    return $self->userid != $u->id ? 0 : 1;
+}
+
+sub is_subscription_visible_to  {
+    my ($self, $u) = @_;
+
+    return $self->userid != $u->id ? 0 : 1;
+}
+
 sub is_tracking { 0 }
 
 1;
