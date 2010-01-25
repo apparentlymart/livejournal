@@ -2942,7 +2942,7 @@ sub get_remote_ip
         return $BML::COOKIE{'fake_ip'} if LJ::is_web_context() && $BML::COOKIE{'fake_ip'};
     }
     eval {
-        $ip = LJ::Request->instance->connection->remote_ip;
+        $ip = LJ::Request::connection()->remote_ip;
     };
     return $ip || $ENV{'FAKE_IP'};
 }
