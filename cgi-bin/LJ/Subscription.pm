@@ -78,7 +78,7 @@ sub thaw {
 }
 
 sub pending { 0 }
-sub default_selected { $_[0]->active && $_[0]->enabled }
+sub default_selected { $_[0]->active }
 
 sub has_cached_subscriptions {
     my ($class, $u) = @_;
@@ -171,7 +171,7 @@ sub find {
     if ($class->has_cached_subscriptions($u)) {
         @subs = $u->subscriptions;
 
-        @subs = grep { $_->active && $_->enabled } @subs if $require_active;
+        @subs = grep { $_->active } @subs if $require_active;
 
         # filter subs on each parameter
         @subs = grep { $_->journalid == $journalid } @subs if defined $journalid;
@@ -194,7 +194,7 @@ sub find {
         @subs = map { $class->new_from_row($_) }
             @{ $class->query_user_subscriptions($u, %filters) };
 
-        @subs = grep { $_->active && $_->enabled } @subs if $require_active;
+        @subs = grep { $_->active } @subs if $require_active;
     }
 
     return @subs;
@@ -275,7 +275,7 @@ sub delete_all_inactive_subs {
     return if $u->is_expunged;
 
     my @subs = $class->find($u);
-    @subs = grep { !($_->active && $_->enabled) } @subs;
+    @subs = grep { !($_->active) } @subs;
     my $count = scalar @subs;
     if ($count > 0 && !$dryrun) {
         $_->delete foreach (@subs);
