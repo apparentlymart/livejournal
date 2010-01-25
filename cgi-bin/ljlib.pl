@@ -2110,7 +2110,7 @@ sub start_request
 
     # include standard files if this is web-context
     unless ($LJ::DISABLED{sitewide_includes}) {
-        if (eval { LJ::Request->instance }) {
+        if (LJ::Request->is_inited) {
             # standard site-wide JS and CSS
             # jQuery always should be the first in the list
             LJ::need_res(qw(

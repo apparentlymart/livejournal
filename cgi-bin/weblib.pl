@@ -2027,7 +2027,7 @@ sub js_dumper {
 sub need_res {
     my $opts = (ref $_[0]) ? shift : {};
     my $condition = $opts->{condition} || '';
-    
+
     foreach my $reskey (@_) {
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
         unless (exists $LJ::NEEDED_RES{$reskey}) {
