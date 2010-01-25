@@ -479,6 +479,10 @@ sub subscription_as_html {
 sub matches_filter {
     my ($self, $subscr) = @_;
 
+    return 1 if
+        LJ::Event->class($subscr->etypeid) ne __PACKAGE__ ||
+        !$subscr->id;
+
     my $sjid = $subscr->journalid;
     my $ejid = $self->event_journal->{userid};
 
@@ -681,6 +685,7 @@ sub subscriptions {
     # own comments are deliberately sent to email only
     if ($comment_author->prop('opt_getselfemail') && $acquire_sub_slot->()) {
         push @subs, LJ::Subscription->new_from_row({
+            'etypeid' => LJ::Event::JournalNewComment->etypeid,
             'userid'  => $comment_author->id,
             'ntypeid' => $email_ntypeid,
         });
@@ -695,10 +700,8 @@ sub subscriptions {
             'require_active' => 1,
         );
 
-        warn "sending an email to parent comment author: ". $parent_comment_author->display_name
-            if $parent_comment_author->{'opt_gettalkemail'};
-
         push @subs2, LJ::Subscription->new_from_row({
+            'etypeid' => LJ::Event::CommentReply->etypeid,
             'userid'  => $parent_comment_author->id,
             'ntypeid' => $email_ntypeid,
         }) if $parent_comment_author->{'opt_gettalkemail'};
@@ -710,17 +713,16 @@ sub subscriptions {
     }
 
     if (
-        !LJ::u_equals($comment_author, $entry_author)
+        !LJ::u_equals($comment_author, $entry_author) &&
+        !$entry->prop('opt_noemail')
     ) {
         my @subs2 = LJ::Subscription->find($entry_author,
             'event' => 'CommunityEntryReply',
             'require_active' => 1,
         );
 
-        warn "sending an email to entry author: ". $entry_author->display_name
-            if $entry_author->{'opt_gettalkemail'};
-
         push @subs2, LJ::Subscription->new_from_row({
+            'etypeid' => LJ::Event::CommunityEntryReply->etypeid,
             'userid'  => $entry_author->id,
             'ntypeid' => $email_ntypeid,
         }) if $entry_author->{'opt_gettalkemail'};
@@ -730,6 +732,8 @@ sub subscriptions {
             push @subs, @subs2;
         }
     }
+
+    return @subs unless ($limit || !$original_limit);
 
     push @subs, eval { $self->SUPER::subscriptions(
         cluster => $cid,
