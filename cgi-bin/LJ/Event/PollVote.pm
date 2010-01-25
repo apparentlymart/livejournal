@@ -169,8 +169,7 @@ sub subscription_as_html {
 sub available_for_user  {
     my ($self, $u) = @_;
 
-    return 0 if $self->arg1;
-    return 0 unless LJ::u_equals($u, $self->u);
+    return 0 if $self->arg1 || $self->userid;
 
     return $u->get_cap("track_pollvotes") ? 1 : 0;
 }
