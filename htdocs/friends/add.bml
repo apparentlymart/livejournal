@@ -11,7 +11,7 @@ use vars qw($body $title $windowtitle %GET %POST);
     return $ad_box . $str;
  };
 
- my $head     = \$_[1]->{'head'};
+ my $head     = \$_[0]->{'head'};
 
  my $remote = LJ::get_remote();
  my $user = $POST{'user'} || $GET{'user'};
@@ -504,7 +504,7 @@ _code?>
 title=><?_code return $title; _code?>
 windowtitle=><?_code return $windowtitle; _code?>
 head<=
-<?_code return $_[1]->{'head'}; _code?>
+<?_code return $_[0]->{'head'}; _code?>
 <=head
 body=><?_code return $body; _code?>
 page?><?_c <LJDEP>

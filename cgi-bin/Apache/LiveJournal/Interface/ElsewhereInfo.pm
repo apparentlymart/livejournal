@@ -13,7 +13,6 @@ use Class::Autouse qw(
 sub load { 1 }
 
 sub should_handle {
-    my $r = shift;
 
     # FIXME: trust specific consumers of this data?
     return $LJ::IS_DEV_SERVER ? 1 : 0;
@@ -24,27 +23,27 @@ sub should_handle {
 # prints the response.
 sub handle {
     shift if $_[0] eq __PACKAGE__;
-    my $r = shift;
+    #my $r = shift;
 
-    my %args = $r->args;
+    my %args = LJ::Request->args;
 
     # should we handle this request due according to access rules?
-    unless (should_handle($r)) {
-        return respond($r, 403, "Forbidden");
+    unless (should_handle()) {
+        return respond(403, "Forbidden");
     }
 
     # find what node_u we're dealing with
     my $u;
     if (my $id = $args{id}) {
         $u = LJ::load_userid($id);
-        return respond($r, 404, "Invalid id: $id")
+        return respond(404, "Invalid id: $id")
             unless $u;
     } elsif (my $node = $args{ident}) {
         $u = LJ::load_user($node);
-        return respond($r, 404, "Invalid ident: $node")
+        return respond(404, "Invalid ident: $node")
             unless $u;
     } else {
-        return respond($r, 400, "Must specify 'id' or 'ident'");
+        return respond(400, "Must specify 'id' or 'ident'");
     }
 
     # find what node type we're dealing with
@@ -58,7 +57,7 @@ sub handle {
         $node_type = 'openid';
         $node_ident = $u->url; # should be identity type O
     } else {
-        return respond($r, 403, "Node is neither person, group, nor openid: " . $u->user . " (" . $u->id . ")");
+        return respond(403, "Node is neither person, group, nor openid: " . $u->user . " (" . $u->id . ")");
     }
 
     # response hash to pass to JSON
@@ -86,13 +85,13 @@ sub handle {
         $resp{edges_out} = [ map { $_ } $u->friend_uids   ];
     }
 
-    respond($r, 200, JSON::objToJson(\%resp));
+    respond(200, JSON::objToJson(\%resp));
 
-    return OK;
+    return LJ::Request::OK;
 }
 
 sub respond {
-    my ($r, $status, $body) = @_;
+    my ($status, $body) = @_;
 
     my %msgs = (
                 200 => 'OK',
@@ -102,12 +101,12 @@ sub respond {
                 500 => 'Server Error',
                 );
 
-    $r->status_line(join(" ", grep { length } $status, $msgs{$status}));
-    $r->content_type('text/html');#'application/json');
-    $r->send_http_header();
-    $r->print($body);
+    LJ::Request->status_line(join(" ", grep { length } $status, $msgs{$status}));
+    LJ::Request->content_type('text/html');#'application/json');
+    LJ::Request->send_http_header();
+    LJ::Request->print($body);
 
-    return OK;
+    return LJ::Request::OK;
 };
 
 1;

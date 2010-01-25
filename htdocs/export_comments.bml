@@ -3,9 +3,6 @@
     use strict;
     use vars qw(%GET);
     
-    my $req = shift;
-    my $r = $req->{'r'};
-
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
@@ -34,9 +31,9 @@
     BML::suppress_content();
 
     # print top
-    $r->content_type("text/xml; charset=utf-8");
-    $r->send_http_header();
-    $r->print("<?xml version=\"1.0\" encoding='utf-8'?>\n<livejournal>\n");
+    LJ::Request->content_type("text/xml; charset=utf-8");
+    LJ::Request->send_http_header();
+    LJ::Request->print("<?xml version=\"1.0\" encoding='utf-8'?>\n<livejournal>\n");
 
     # startid specified?
     my $maxitems = $mode eq 'comment_meta' ? 10000 : 1000;
@@ -78,30 +75,30 @@
                                         "WHERE journalid = ? AND nodetype = 'L'",
                                         undef, $u->{userid});
         $max += 0;
-        $r->print("<maxid>$max</maxid>\n");
+        LJ::Request->print("<maxid>$max</maxid>\n");
         my $nextid = $startid + $gather;
-        $r->print("<nextid>$nextid</nextid>\n") unless ($nextid > $max);
+        LJ::Request->print("<nextid>$nextid</nextid>\n") unless ($nextid > $max);
         # load posterids
         my $us = LJ::load_userids(keys %posterids);
 
         # now spit out the metadata
-        $r->print("<comments>\n");
+        LJ::Request->print("<comments>\n");
         while (my ($id, $data) = each %comments) {
             my $ret = "<comment id='$id'";
             $ret .= " posterid='$data->{posterid}'" if $data->{posterid};
             $ret .= " state='$data->{state}'" if $data->{state} ne 'A';
             $ret .= " />\n";
-            $r->print($ret);
+            LJ::Request->print($ret);
         }
-        $r->print("</comments>\n<usermaps>\n");
+        LJ::Request->print("</comments>\n<usermaps>\n");
 
         # now spit out usermap
         my $ret = '';
         while (my ($id, $user) = each %$us) {
             $ret .= "<usermap id='$id' user='$user->{user}' />\n";
         }
-        $r->print($ret);
-        $r->print("</usermaps>\n");
+        LJ::Request->print($ret);
+        LJ::Request->print("</usermaps>\n");
 
     # comment data also presented in glorious XML:
     } elsif ($mode eq 'comment_body') {
@@ -118,7 +115,7 @@
         }
 
         # now start spitting out data
-        $r->print("<comments>\n");
+        LJ::Request->print("<comments>\n");
         foreach my $id (@ids) {
             # get text for this comment
             my $data = $comments{$id};
@@ -155,13 +152,13 @@
                 }
                 $ret .= "</comment>\n";
             }
-            $r->print($ret);
+            LJ::Request->print($ret);
         }
-        $r->print("</comments>\n");
+        LJ::Request->print("</comments>\n");
     }
 
     # all done
-    $r->print("</livejournal>\n");
+    LJ::Request->print("</livejournal>\n");
 }
 _code?><?_c <LJDEP>
 </LJDEP> _c?>

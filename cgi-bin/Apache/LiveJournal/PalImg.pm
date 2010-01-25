@@ -4,7 +4,7 @@
 package Apache::LiveJournal::PalImg;
 
 use strict;
-use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED);
+#use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED);
 use PaletteModify;
 
 # for callers to 'ping' as a class method for Class::Autouse to lazily load
@@ -16,14 +16,14 @@ sub load { 1 }
 
 sub handler
 {
-    my $r = shift;
-    my $uri = $r->uri;
+    #my $r = shift;
+    my $uri = LJ::Request->uri;
     my ($base, $ext, $extra) = $uri =~ m!^/palimg/(.+)\.(\w+)(.*)$!;
-    $r->notes("codepath" => "img.palimg");
-    return 404 unless $base && $base !~ m!\.\.!;
+    LJ::Request->notes("codepath" => "img.palimg");
+    return LJ::Request::NOT_FOUND unless $base && $base !~ m!\.\.!;
 
     my $disk_file = "$LJ::HOME/htdocs/palimg/$base.$ext";
-    return 404 unless -e $disk_file;
+    return LJ::Request::NOT_FOUND unless -e $disk_file;
 
     my @st = stat(_);
     my $size = $st[7];
@@ -40,11 +40,11 @@ sub handler
         if ($extra =~ m!^/p(.+)$!) {
             $palspec = $1;
         } else {
-            return 404;
+            return LJ::Request::NOT_FOUND;
         }
     }
 
-    return send_file($r, $disk_file, {
+    return send_file($disk_file, {
         'mime' => $mime,
         'etag' => $etag,
         'palspec' => $palspec,
@@ -61,7 +61,7 @@ sub parse_hex_color
 
 sub send_file
 {
-    my ($r, $disk_file, $opts) = @_;
+    my ($disk_file, $opts) = @_;
 
     my $etag = $opts->{'etag'};
 
@@ -73,7 +73,7 @@ sub send_file
             # gradient from index $1, color $2, to index $3, color $4
             my $from = hex($1);
             my $to = hex($3);
-            return 404 if $from == $to;
+            return LJ::Request::NOT_FOUND if $from == $to;
             my $fcolor = parse_hex_color($2);
             my $tcolor = parse_hex_color($4);
             if ($to < $from) {
@@ -94,10 +94,10 @@ sub send_file
             $pal_colors{'tint'} = parse_hex_color($t);
             $pal_colors{'tint_dark'} = $td ? parse_hex_color($td) : [0,0,0];
         } elsif (length($pals) > 42 || $pals =~ /[^0-9a-f]/) {
-            return 404;
+            return LJ::Request::NOT_FOUND;
         } else {
             my $len = length($pals);
-            return 404 if $len % 7;  # must be multiple of 7 chars
+            return LJ::Request::NOT_FOUND if $len % 7;  # must be multiple of 7 chars
             for (my $i = 0; $i < $len/7; $i++) {
                 my $palindex = hex(substr($pals, $i*7, 1));
                 $pal_colors{$palindex} = [
@@ -112,25 +112,48 @@ sub send_file
     }
 
     $etag = '"' . $etag . '"';
-    my $ifnonematch = $r->header_in("If-None-Match");
-    return HTTP_NOT_MODIFIED if
+    my $ifnonematch = LJ::Request->header_in("If-None-Match");
+    return LJ::Request::HTTP_NOT_MODIFIED if
         defined $ifnonematch && $etag eq $ifnonematch;
 
     # send the file
-    $r->content_type($opts->{'mime'});
-    $r->header_out("Content-length", $opts->{'size'});
-    $r->header_out("ETag", $etag);
+    LJ::Request->content_type($opts->{'mime'});
+    LJ::Request->header_out("Content-length", $opts->{'size'});
+    LJ::Request->header_out("ETag", $etag);
     if ($opts->{'modtime'}) {
-        $r->update_mtime($opts->{'modtime'});
-        $r->set_last_modified();
+        LJ::Request->update_mtime($opts->{'modtime'});
+        LJ::Request->set_last_modified();
     }
-    $r->send_http_header();
+    LJ::Request->send_http_header();
 
     # HEAD request?
-    return OK if $r->method eq "HEAD";
+    return LJ::Request::OK if LJ::Request->method eq "HEAD";
 
+    # this is slow way of sending file.
+    # but in productions this code should not be called.
+    open my $fh, "<" => $disk_file
+        or return LJ::Request::NOT_FOUND;
+    binmode $fh;
+    my $palette = undef;
+    if (%pal_colors) {
+        if ($opts->{'mime'} eq "image/gif") {
+            $palette = PaletteModify::new_gif_palette($fh, \%pal_colors);
+        } elsif ($opts->{'mime'} == "image/png") {
+            $palette = PaletteModify::new_png_palette($fh, \%pal_colors);
+        }
+        unless ($palette) {
+            return LJ::Request::NOT_FOUND;  # image isn't palette changeable?
+        }
+    }
+    LJ::Request->print($palette) if $palette;
+    while (my $readed = read($fh, my $buf, 1024*1024)){
+        LJ::Request->print($buf);
+    }
+    close $fh;
+
+=head
     my $fh = Apache::File->new($disk_file);
-    return 404 unless $fh;
+    return LJ::Request::NOT_FOUND unless $fh;
     binmode($fh);
 
     my $palette;
@@ -141,14 +164,15 @@ sub send_file
             $palette = PaletteModify::new_png_palette($fh, \%pal_colors);
         }
         unless ($palette) {
-            return 404;  # image isn't palette changeable?
+            return LJ::Request::NOT_FOUND;  # image isn't palette changeable?
         }
     }
 
     $r->print($palette) if $palette; # when palette modified.
     $r->send_fd($fh); # sends remaining data (or all of it) quickly
     $fh->close();
-    return OK;
+=cut
+    return LJ::Request::OK;
 }
 
 1;

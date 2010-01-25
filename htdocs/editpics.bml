@@ -8,7 +8,7 @@
     BML::set_language_scope("/editpics.bml");
 
     my $suffix = "";
-    if (Apache->request->uri =~ /editpics-beta/) {
+    if (LJ::Request->uri =~ /editpics-beta/) {
         $suffix = "-beta";
     }
 
@@ -196,8 +196,7 @@
         ### no post data, so we'll parse the multipart data
         unless (%POST) {
 
-            my $r = Apache->request;
-            my $size = $r->header_in("Content-length");
+            my $size = LJ::Request->header_in("Content-length");
             unless ($size) {
                 return $err->("No content-length header: can't upload");
             }
@@ -216,7 +215,8 @@
 
                 # pretend to tell apache that we care about parsing the data, but we really don't
                 my $bogus = sub {return 1;};
-                BML::parse_multipart_interactive($r, \$error, {
+                BML::parse_multipart_interactive(
+                    \$error, {
                     newheaders => $bogus,
                     data       => $bogus,
                     enddata    => $bogus,
@@ -386,7 +386,8 @@
                       # parse multipart-mime submission, one chunk at a time,
                       # calling our hooks as we go to put uploads in temporary
                       # MogileFS filehandles
-                      $res = eval { BML::parse_multipart_interactive($r, \$error, {
+                      $res = eval { BML::parse_multipart_interactive(
+                          \$error, {
                           newheaders => $hook_newheaders,
                           data       => $hook_data,
                           enddata    => $hook_enddata,

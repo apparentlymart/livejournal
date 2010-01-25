@@ -27,8 +27,7 @@
  # if new-style URLs, get the GET{user} arg from the request notes,
  # which was set by LiveJournal.pm
  unless ($GET{'user'}) {
-     my $r = Apache->request;
-     $GET{'user'} = $r->notes("_journal");
+     $GET{'user'} = LJ::Request->notes("_journal");
  }
 
  my $remote = LJ::get_remote();

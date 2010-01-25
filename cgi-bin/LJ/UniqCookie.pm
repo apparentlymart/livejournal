@@ -380,8 +380,7 @@ sub ensure_cookie_value {
     my $class = shift;
     return unless LJ::is_web_context();
 
-    my $r = Apache->request;
-    return unless $r;
+    return unless LJ::Request->is_inited;
     
     my ($uniq, $uniq_time, $uniq_extra) = $class->parts_from_cookie;
 
@@ -425,7 +424,7 @@ sub ensure_cookie_value {
     # set uniq cookies for all cookie_domains
     my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
     foreach my $dom (@domains) {
-        $r->err_headers_out->add("Set-Cookie" =>
+        LJ::Request->err_headers_out->add("Set-Cookie" =>
                                  "ljuniq=$new_cookie_value; " .
                                  "expires=" . LJ::time_to_cookie($now + 86400*60) . "; " .
                                  ($dom ? "domain=$dom; " : "") . "path=/");
@@ -438,8 +437,7 @@ sub sysban_should_block {
     my $class = shift;
     return 0 unless LJ::is_web_context();
 
-    my $r = Apache->request;
-    my $uri = $r->uri;
+    my $uri = LJ::Request->uri;
     return 0 if ( $LJ::BLOCKED_BOT_URI && index( $uri, $LJ::BLOCKED_BOT_URI ) == 0 );
 
     # if cookie exists, check for sysban
@@ -456,8 +454,7 @@ sub parts_from_cookie {
     my $class = shift;
     return unless LJ::is_web_context();
 
-    my $r = Apache->request;
-    my $cookieval = $r->header_in("Cookie");
+    my $cookieval = LJ::Request->header_in("Cookie");
 
     if ($cookieval =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)([^;]+)/) {
         return wantarray() ? ($1, $2, $3) : $1;
@@ -486,8 +483,7 @@ sub set_current_uniq {
 
     return unless LJ::is_web_context();
 
-    my $r = Apache->request;
-    $r->notes('uniq' => $uniq);
+    LJ::Request->notes('uniq' => $uniq);
 
     return;
 }
@@ -507,13 +503,11 @@ sub current_uniq {
     # otherwise, legacy place is in $r->notes
     return unless LJ::is_web_context();
 
-    my $r = Apache->request;
-
     # see if a uniq is set for this request
     # -- this accounts for cases when the cookie was initially
     #    set in this request, so it wasn't received in an 
     #    incoming headerno cookie was sent in
-    return $r->notes('uniq');
+    return LJ::Request->notes('uniq');
 }
 
 1;

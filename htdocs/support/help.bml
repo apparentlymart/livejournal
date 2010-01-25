@@ -52,14 +52,15 @@ body<=
 
  my ($ret, $sth);
  my $dbr = LJ::get_db_reader();
- my $r = Apache->request;
 
  my $remote = LJ::get_remote();
  LJ::Support::init_remote($remote);
 
  return $ML{'.interim'} if
     (!$remote || !$remote->{'_priv'}) &&
-    ($r->header_in("Referer") eq "$LJ::SITEROOT/support/" || $r->header_in("Referer") eq "$LJ::SITEROOT/support/index.bml" || $r->header_in("Referer") eq "$LJ::SITEROOT/support/submit.bml");
+    (LJ::Request->header_in("Referer") eq "$LJ::SITEROOT/support/" ||
+     LJ::Request->header_in("Referer") eq "$LJ::SITEROOT/support/index.bml" ||
+     LJ::Request->header_in("Referer") eq "$LJ::SITEROOT/support/submit.bml");
 
  my $cats = LJ::Support::load_cats();
 

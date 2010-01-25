@@ -4,8 +4,6 @@
 package Apache::LiveJournal::Interface::FotoBilder;
 
 use strict;
-use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED
-                         HTTP_MOVED_PERMANENTLY BAD_REQUEST);
 
 sub run_method
 {
@@ -28,25 +26,24 @@ sub run_method
 
 sub handler
 {
-    my $r = shift;
-    my $uri = $r->uri;
-    return 404 unless $uri =~ m#^/interface/fotobilder(?:/(\w+))?$#;
+    my $uri = LJ::Request->uri;
+    return LJ::Request::NOT_FOUND unless $uri =~ m#^/interface/fotobilder(?:/(\w+))?$#;
     my $cmd = $1;
 
-    return BAD_REQUEST unless $r->method eq "POST";
+    return LJ::Request::BAD_REQUEST unless LJ::Request->method eq "POST";
 
-    $r->content_type("text/plain");
-    $r->send_http_header();
+    LJ::Request->content_type("text/plain");
+    LJ::Request->send_http_header();
 
-    my %POST = $r->content;
+    my %POST = LJ::Request->post_params;
     my $res = run_method($cmd, \%POST)
-        or return BAD_REQUEST;
+        or return LJ::Request::BAD_REQUEST;
 
     $res->{"fotobilder-interface-version"} = 1;
 
-    $r->print(join("", map { "$_: $res->{$_}\n" } keys %$res));
+    LJ::Request->print(join("", map { "$_: $res->{$_}\n" } keys %$res));
 
-    return OK;
+    return LJ::Request::OK;
 }
 
 # Is there a current LJ session?

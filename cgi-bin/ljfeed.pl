@@ -5,6 +5,7 @@ use strict;
 no warnings 'uninitialized';
 
 use LJ::Entry;
+use LJ::Request;
 use XML::Atom::Person;
 use XML::Atom::Feed;
 
@@ -19,7 +20,7 @@ my %feedtypes = (
 
 sub make_feed
 {
-    my ($r, $u, $remote, $opts) = @_;
+    my ($u, $remote, $opts) = @_;
 
     $opts->{pathextra} =~ s!^/(\w+)!!;
     my $feedtype = $1;
@@ -30,7 +31,7 @@ sub make_feed
         return undef;
     }
 
-    $r->notes('codepath' => "feed.$feedtype") if $r;
+    LJ::Request->notes('codepath' => "feed.$feedtype") if LJ::Request->is_inited;
 
     my $dbr = LJ::get_db_reader();
 
@@ -71,7 +72,7 @@ sub make_feed
         return undef;
     }
 
-    my %FORM = $r->args;
+    my %FORM = LJ::Request->args;
 
     ## load the itemids
     my (@itemids, @items);
@@ -134,7 +135,7 @@ sub make_feed
             $lastmod = $itime if $itime > $lastmod;
         }
     }
-    $r->set_last_modified($lastmod) if $lastmod;
+    LJ::Request->set_last_modified($lastmod) if $lastmod;
 
     # use this $lastmod as the feed's last-modified time
     # we would've liked to use something like
@@ -149,7 +150,7 @@ sub make_feed
     # conjunction with a static request for a file on disk that has been
     # stat()ed in the course of the current request. It is inappropriate and
     # "dangerous" to use it for dynamic content.
-    if ((my $status = $r->meets_conditions) != Apache::Constants::OK()) {
+    if ((my $status = LJ::Request->meets_conditions) != Apache::Constants::OK()) {
         $opts->{handler_return} = $status;
         return undef;
     }
@@ -234,7 +235,7 @@ sub make_feed
                 $event =~ s!<lj-poll-$pollid>!<div><a href="$LJ::SITEROOT/poll/?id=$pollid">View Poll: $name</a></div>!g;
             }
             
-            my %args = $r->args;
+            my %args = LJ::Request->args;
             LJ::EmbedModule->expand_entry($u, \$event, expand_full => 1)
                 if %args && $args{'unfold_embed'};
 

@@ -4,6 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::Vertical );
+use LJ::Request;
 
 sub need_res { qw( stc/widgets/verticalentries.css ) }
 
@@ -24,9 +25,8 @@ sub render_body {
     my $num_entries_this_page = $page > 1 ? $num_entries_older_pages : $num_entries_first_page;
     my $start_index = $page > 1 ? (($page - 2) * $num_entries_this_page) + $num_entries_first_page : 0;
 
-    my $r = Apache->request;
-    my $return_url = "$LJ::SITEROOT" . $r->uri;
-    my $args = $r->args;
+    my $return_url = "$LJ::SITEROOT" . LJ::Request->uri;
+    my $args = LJ::Request->args;
     $return_url .= "?$args" if $args;
 
     my $ret;

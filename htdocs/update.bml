@@ -4,14 +4,14 @@
     use vars qw(%GET %POST %ML);
     BML::decl_params(_default => qr/./);
 
-    # $_[1] is a pre-request scratch area
+    # $_[0] is a pre-request scratch area
     # put variables here so that we can access them later
     # outside of this _code block
-    my $title    = \$_[1]->{'title'};
-    my $head     = \$_[1]->{'head'};
-    my $body     = \$_[1]->{'body'};
-    my $bodyopts = \$_[1]->{'bodyopts'};
-    my $onload   = \$_[1]->{'onload'};
+    my $title    = \$_[0]->{'title'};
+    my $head     = \$_[0]->{'head'};
+    my $body     = \$_[0]->{'body'};
+    my $bodyopts = \$_[0]->{'bodyopts'};
+    my $onload   = \$_[0]->{'onload'};
 
     $$title = $ML{'.title2'};
 
@@ -509,9 +509,9 @@
 }
 
 _code?><?page
-title=>   <?_code return $_[1]->{'title'}; _code?>
-body=>    <?_code return $_[1]->{'body'}; _code?>
-bodyopts=><?_code return $_[1]->{'bodyopts'}; _code?>
+title=>   <?_code return $_[0]->{'title'}; _code?>
+body=>    <?_code return $_[0]->{'body'}; _code?>
+bodyopts=><?_code return $_[0]->{'bodyopts'}; _code?>
 head<=
 
 <?entryformcss?>
@@ -519,7 +519,7 @@ head<=
 {
     use strict;
 
-    my $ret = $_[1]->{'head'};
+    my $ret = $_[0]->{'head'};
 
     LJ::need_res(qw(
                     js/core.js
@@ -569,7 +569,7 @@ head<=
 
         function init_update_bml() {
             setTimeout(function(){ $initDraft }, 0)
-            $_[1]->{'onload'}
+            $_[0]->{'onload'}
             $pageload
         }
 

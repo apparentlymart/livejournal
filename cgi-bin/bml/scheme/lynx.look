@@ -33,7 +33,7 @@ _code?>
     #Comments q { padding-left: 2.5em; font-style: italic; }
 </style>
 <title><?_code {
-    my $elhash = $_[2];
+    my $elhash = $_[1];
     return $elhash->{'WINDOWTITLE'} || $elhash->{'TITLE'};
 } _code?></title>
 <?_code return LJ::run_hook("insert_after_bml_title"); _code?>

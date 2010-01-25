@@ -17,6 +17,7 @@ package LJ::User;
 use Carp;
 use lib "$ENV{LJHOME}/cgi-bin";
 use List::Util ();
+use LJ::Request;
 use LJ::Constants;
 use LJ::MemCache;
 use LJ::Session;
@@ -515,7 +516,7 @@ sub log_event {
     my $uniq = delete $info->{uniq};
     unless ($uniq) {
         eval {
-            $uniq = Apache->request->notes('uniq');
+            $uniq = LJ::Request->notes('uniq');
         };
     }
     my $remote = delete($info->{remote}) || LJ::get_remote() || undef;
@@ -786,7 +787,7 @@ sub make_login_session {
     $exptype ||= 'short';
     return 0 unless $u;
 
-    eval { Apache->request->notes('ljuser' => $u->{'user'}); };
+    eval { LJ::Request->notes('ljuser' => $u->{'user'}); };
 
     # create session and log user in
     my $sess_opts = {
@@ -2233,9 +2234,8 @@ sub record_login {
 
     my ($ip, $ua);
     eval {
-        my $r  = Apache->request;
         $ip = LJ::get_remote_ip();
-        $ua = $r->header_in('User-Agent');
+        $ua = LJ::Request->header_in('User-Agent');
     };
 
     return $u->do("INSERT INTO loginlog SET userid=?, sessid=?, logintime=UNIX_TIMESTAMP(), ".
@@ -7175,8 +7175,7 @@ sub get_daycounts
     my $viewall = 0;
     if ($remote) {
         # do they have the viewall priv?
-        my $r = eval { Apache->request; }; # web context
-        my %getargs = $r ? $r->args : ();
+        my %getargs = eval { LJ::Request->args } || (); # eval for check web context
         if (defined $getargs{'viewall'} and $getargs{'viewall'} eq '1' and LJ::check_priv($remote, 'canview', '*')) {
             $viewall = 1;
             LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
@@ -8556,7 +8555,6 @@ sub make_journal
     &nodb;
     my ($user, $view, $remote, $opts) = @_;
 
-    my $r = $opts->{'r'};  # mod_perl $r, or undef
     my $geta = $opts->{'getargs'};
 
     if ($LJ::SERVER_DOWN) {
@@ -8755,8 +8753,8 @@ sub make_journal
         $opts->{pathextra} = undef;
     }
 
-    if ($r) {
-        $r->notes('journalid' => $u->{'userid'});
+    if (LJ::Request->is_inited) {
+        LJ::Request->notes('journalid' => $u->{'userid'});
     }
 
     my $notice = sub {
@@ -8860,7 +8858,7 @@ sub make_journal
         # render it in the lynx site scheme.
         if ($geta->{'format'} eq 'light') {
             $fallback = 'bml';
-            $r->notes('bml_use_scheme' => 'lynx');
+            LJ::Request->notes('bml_use_scheme' => 'lynx');
         }
 
         # there are no BML handlers for these views, so force s2
@@ -8975,11 +8973,11 @@ sub make_journal
     $opts->{'saycharset'} ||= "utf-8";
 
     if ($view eq 'data') {
-        return LJ::Feed::make_feed($r, $u, $remote, $opts);
+        return LJ::Feed::make_feed($u, $remote, $opts);
     }
 
     if ($stylesys == 2) {
-        $r->notes('codepath' => "s2.$view") if $r;
+        LJ::Request->notes('codepath' => "s2.$view") if LJ::Request->is_inited;
 
         eval { LJ::S2->can("dostuff") };  # force Class::Autouse
         my $mj = LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
@@ -9001,7 +8999,7 @@ sub make_journal
 
     # Everything from here on down is S1.  FIXME: this should be moved to LJ::S1::make_journal
     # to be more like LJ::S2::make_journal.
-    $r->notes('codepath' => "s1.$view") if $r;
+    LJ::Request->notes('codepath' => "s1.$view") if LJ::Request->is_inited;
     $u->{'_s1styleid'} = $styleid + 0;
 
     # For embedded polls
@@ -9378,8 +9376,7 @@ sub get_remote
     };
 
     # can't have a remote user outside of web context
-    my $r = eval { Apache->request; };
-    return $no_remote->() unless $r;
+    return $no_remote->() unless LJ::Request->is_inited;
 
     my $criterr = $opts->{criterr} || do { my $d; \$d; };
     $$criterr = 0;
@@ -9420,7 +9417,7 @@ sub get_remote
     }
 
     LJ::User->set_remote($u);
-    $r->notes("ljuser" => $u->{'user'});
+    LJ::Request->notes("ljuser" => $u->{'user'});
     return $u;
 }
 

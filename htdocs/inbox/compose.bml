@@ -19,10 +19,10 @@ body<=
     return "<?p " . BML::ml('protocol.not_validated', { sitename => $LJ::SITENAMESHORT, siteroot => $LJ::SITEROOT }) . " p?>"
         unless $remote->is_validated;
 
-    # $_[1] is a pre-request scratch area
+    # $_[0] is a pre-request scratch area
     # put variables here so that we can access them later
     # outside of this _code block
-    my $head     = \$_[1]->{'head'};
+    my $head     = \$_[0]->{'head'};
 
     my $body = '';
 
@@ -264,7 +264,7 @@ head<=
 <?_code
     use strict;
 
-    my $ret = $_[1]->{'head'};
+    my $ret = $_[0]->{'head'};
 
     return $ret;
 _code?>

@@ -146,16 +146,15 @@ LJ::register_hook("after_journal_content_created", sub {
     my $html_ref = shift;
 
     my $entry = $opts->{ljentry};
-    my $r     = $opts->{r};
 
-    return unless $r;
+    return unless LJ::Request->is_inited;
     return unless $entry;
-    return unless $r->notes("view") eq 'entry';
+    return unless LJ::Request->notes("view") eq 'entry';
     return unless LJ::PingBack->has_user_pingback($entry->journal);
 
 
     if (LJ::PingBack->should_entry_recieve_pingback($entry)){
-        $r->header_out('X-Pingback', $LJ::PINGBACK->{uri});
+        LJ::Request->set_header_out('X-Pingback', $LJ::PINGBACK->{uri});
     }
     
     

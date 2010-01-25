@@ -7,8 +7,8 @@ body<=
     use vars qw(%GET %POST);
     BML::decl_params(_default => qr/./);
 
-    my $head     = \$_[1]->{'head'};
-    my $bodyopts = \$_[1]->{'bodyopts'};
+    my $head     = \$_[0]->{'head'};
+    my $bodyopts = \$_[0]->{'bodyopts'};
 
     LJ::set_active_crumb('editentries');
 
@@ -383,7 +383,7 @@ body<=
             my $escaped_qotd_text = LJ::ejs($qotd_text);
 
             # javascript to initialize entry form since we've just called into entry_form
-            # -- shove into \$head which is a reference into $_[1]->{head} and will
+            # -- shove into \$head which is a reference into $_[0]->{head} and will
             #    be placed in the correct BML head portion later
             # -- this is a hack, should be done by weblib and pushed into \$$head above
             #    in a way which is compatible with both this page and update.bml
@@ -563,11 +563,11 @@ body<=
 _code?>
 <=body
 
-bodyopts=><?_code return $_[1]->{'bodyopts'}; _code?>
+bodyopts=><?_code return $_[0]->{'bodyopts'}; _code?>
 head<=
 
 <?entryformcss?>
-<?_code return $_[1]->{'head'}; _code?>
+<?_code return $_[0]->{'head'}; _code?>
 <?_code return $LJ::COMMON_CODE{'autoradio_check'}; _code?>
 
 <?_code

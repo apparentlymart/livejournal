@@ -186,17 +186,17 @@ sub log {
                   'usercaused'  => $err->user_caused, # 0, 1 or NULL
                   );
 
-    if (my $r = eval {Apache->request}) {
-        my $rl = $r->last;
+    if (LJ::Request->is_inited) {
+        my $rl = LJ::Request->r;
 
         my $remote = eval { LJ::load_user($rl->notes('ljuser')) };
         my $remotecaps = $remote ? $remote->{caps} : undef;
         my $remoteid   = $remote ? $remote->{userid} : 0;
         my $ju = eval { LJ::load_userid($rl->notes('journalid')) };
-        my $uri = $r->uri;
+        my $uri = LJ::Request->uri;
 
         my %insert_r = (
-                        'addr'        => $r->connection->remote_ip,
+                        'addr'        => LJ::Request->connection->remote_ip,
                         'remote'      => $rl->notes('ljuser'),
                         'remotecaps'  => $remotecaps,
                         'remoteid'    => $remoteid,
@@ -205,11 +205,11 @@ sub log {
                         'codepath'    => $rl->notes('codepath'),
                         'langpref'    => $rl->notes('langpref'),
                         'clientver'   => $rl->notes('clientver'),
-                        'method'      => $r->method,
+                        'method'      => LJ::Request->method,
                         'uri'         => $uri,
-                        'args'        => scalar $r->args,
-                        'browser'     => $r->header_in("User-Agent"),
-                        'ref'         => $r->header_in("Referer"),
+                        'args'        => scalar LJ::Request->args,
+                        'browser'     => LJ::Request->header_in("User-Agent"),
+                        'ref'         => LJ::Request->header_in("Referer"),
                         );
 
         while ( my ($k,$v) = each %insert_r ) {

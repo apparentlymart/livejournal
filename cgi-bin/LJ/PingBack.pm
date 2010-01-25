@@ -113,7 +113,9 @@ sub notify {
     my $text = $args{text};
     my $mode = $args{mode};
 
-    return unless $mode =~ m!^[LO]$!; # (L)ivejournal only, (O)pen.
+    # Send ALL posts to PB server
+    # return unless $mode =~ m!^[LO]$!; # (L)ivejournal only, (O)pen.
+
     my $sclient = LJ::theschwartz();
     unless ($sclient){
         warn "LJ::PingBack: Could not get TheSchwartz client";

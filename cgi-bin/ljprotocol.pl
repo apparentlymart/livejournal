@@ -185,9 +185,8 @@ sub do_request
     $flags ||= {};
     my @args = ($req, $err, $flags);
 
-    my $r = eval { Apache->request };
-    $r->notes("codepath" => "protocol.$method")
-        if $r && ! $r->notes("codepath");
+    LJ::Request->notes("codepath" => "protocol.$method")
+        if LJ::Request->is_inited && ! LJ::Request->notes("codepath");
 
     if ($method eq "login")            { return login(@args);            }
     if ($method eq "getfriendgroups")  { return getfriendgroups(@args);  }
@@ -214,7 +213,7 @@ sub do_request
     if ($method eq 'checksession')     { return checksession(@args);     }
     if ($method eq "getrecentcomments")       { return getrecentcomments(@args);   }
 
-    $r->notes("codepath" => "") if $r;
+    LJ::Request->notes("codepath" => "") if LJ::Request->is_inited;
     return fail($err,201);
 }
 
@@ -738,8 +737,7 @@ sub login
 
     if ($req->{'clientversion'} =~ /^\S+\/\S+$/) {
         eval {
-            my $r = Apache->request;
-            $r->notes("clientver", $req->{'clientversion'});
+            LJ::Request->notes("clientver", $req->{'clientversion'});
         };
     }
 
@@ -2125,8 +2123,7 @@ sub getevents
 
     my $reject_code = $LJ::DISABLE_PROTOCOL{getevents};
     if (ref $reject_code eq "CODE") {
-        my $r = eval { Apache->request };
-        my $errmsg = $reject_code->($req, $flags, $r);
+        my $errmsg = $reject_code->($req, $flags, eval { LJ::request->request });
         if ($errmsg) { return fail($err, "311", $errmsg); }
     }
 
@@ -3290,13 +3287,11 @@ sub check_altusage
     # complain if the username is invalid
     return fail($err,206) unless LJ::canonical_username($alt);
 
-    my $r = eval { Apache->request };
-
     # allow usage if we're told explicitly that it's okay
     if ($flags->{'usejournal_okay'}) {
         $flags->{'u_owner'} = LJ::load_user($alt);
         $flags->{'ownerid'} = $flags->{'u_owner'}->{'userid'};
-        $r->notes("journalid" => $flags->{'ownerid'}) if $r && !$r->notes("journalid");
+        LJ::Request->notes("journalid" => $flags->{'ownerid'}) if LJ::Request->is_inited && !LJ::Request->notes("journalid");
         return 1 if $flags->{'ownerid'};
         return fail($err,206);
     }
@@ -3306,7 +3301,7 @@ sub check_altusage
     my $canuse = LJ::can_use_journal($u->{'userid'}, $alt, $info);
     $flags->{'ownerid'} = $info->{'ownerid'};
     $flags->{'u_owner'} = $info->{'u_owner'};
-    $r->notes("journalid" => $flags->{'ownerid'}) if $r && !$r->notes("journalid");
+    LJ::Request->notes("journalid" => $flags->{'ownerid'}) if LJ::Request->is_inited && !LJ::Request->notes("journalid");
 
     return 1 if $canuse || $flags->{'ignorecanuse'};
 
@@ -3333,12 +3328,11 @@ sub authenticate
     return fail($err,100) if ($u->{'statusvis'} eq "X");
     return fail($err,505) unless $u->{'clusterid'};
 
-    my $r = eval { Apache->request };
     my $ip;
-    if ($r) {
-        $r->notes("ljuser" => $u->{'user'}) unless $r->notes("ljuser");
-        $r->notes("journalid" => $u->{'userid'}) unless $r->notes("journalid");
-        $ip = $r->connection->remote_ip;
+    if (LJ::Request->is_inited) {
+        LJ::Request->notes("ljuser" => $u->{'user'}) unless LJ::Request->notes("ljuser");
+        LJ::Request->notes("journalid" => $u->{'userid'}) unless LJ::Request->notes("journalid");
+        $ip = LJ::Request->connection->remote_ip;
     }
 
     my $ip_banned = 0;
@@ -3364,7 +3358,7 @@ sub authenticate
             return $chall_ok;
         }
         if ($auth_meth eq "cookie") {
-            return unless $r && $r->header_in("X-LJ-Auth") eq "cookie";
+            return unless LJ::Request->is_inited && LJ::Request->header_in("X-LJ-Auth") eq "cookie";
             my $remote = LJ::get_remote();
             return $remote && $remote->{'user'} eq $username ? 1 : 0;
         }

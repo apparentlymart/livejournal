@@ -5,6 +5,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 use Errno qw(ENOENT);
 use LJ::Config;
 LJ::Config->load;
+use LJ::Request;
 
 foreach (@LJ::LANGS, @LJ::LANGS_IN_PROGRESS) {
     BML::register_isocode(substr($_, 0, 2), $_);
@@ -16,13 +17,12 @@ BML::set_config("CookieDomain" => $LJ::COOKIE_DOMAIN);
 BML::set_config("CookiePath"   => $LJ::COOKIE_PATH);
 
 BML::register_hook("startup", sub {
-    my $r = Apache->request;
-    my $uri = "bml" . $r->uri;
+    my $uri = "bml" . LJ::Request->uri;
     unless ($uri =~ s/\.bml$//) {
         $uri .= ".index";
     }
     $uri =~ s!/!.!g;
-    $r->notes("codepath" => $uri);
+    LJ::Request->notes("codepath" => $uri);
 });
 
 BML::register_hook("codeerror", sub {
