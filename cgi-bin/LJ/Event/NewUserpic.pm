@@ -140,12 +140,6 @@ sub subscription_as_html {
         BML::ml('event.userpic_upload.me');
 }
 
-sub is_tracking {
-    my ($self) = @_;
-
-    return $self->{'userid'} ? 1 : 0;
-}
-
 sub available_for_user  {
     my ($self, $u) = @_;
 
