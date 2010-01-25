@@ -3503,10 +3503,6 @@ widget.friendbirthdays.friends_link=View all friends' birthdays
 
 widget.friendbirthdays.gift=Gift
 
-widget.friendbirthdays.vgifts.title=Virtual Gifts
-
-widget.friendbirthdays.freegift=Free!
-
 widget.friendbirthdays.sendgift=Send them a gift
 
 widget.friendbirthdays.paidtime_link=Find out which friends need paid time
@@ -3516,12 +3512,6 @@ widget.friendbirthdays.title=Birthdays
 widget.friendbirthdays.userbirthday=[[month]] [[day]]
 
 widget.friendbirthdays.viewall=More
-
-widget.friendbirthdays.moregifts=More free gifts
-
-widget.friendbirthdays.show_sponsored_vgifts=Show sponsored vgifts
-
-widget.friendbirthdays.hide_sponsored_vgifts=Hide sponsored vgifts
 
 widget.friendbirthdays.show_sponsored_styles=Show sponsored styles
 
@@ -3964,4 +3954,16 @@ widget.verticalsummary.nosubject=No Subject
 widget.verticalsummary.posttime=posted [[posttime]]
 
 widget.verticalsummary.subcats=more in [[subcats]]
+
+widget.vgifts.freegift=Free!
+
+widget.vgifts.hide_sponsored_vgifts=Hide sponsored vgifts
+
+widget.vgifts.moregifts=More free gifts
+
+widget.vgifts.show_sponsored_vgifts=Show sponsored vgifts
+
+widget.vgifts.title=Virtual Gifts
+
+widget.vgifts.viewall=more
 
