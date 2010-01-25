@@ -65,6 +65,15 @@ FORM
     $ret .= join('', map { "<th class='logrow'>$_</th>" } ("Date and Time", "Action", "Initiator", "IP Address", "Uniq Cookie"));
     $ret .= "</tr>\n";
 
+    my $format_email = sub {
+        my ($email) = @_;
+
+        my $cmd = LJ::eurl("finduser $email");
+        return qq{
+            <a href="$LJ::SITEROOT/admin/console?prefill=$cmd">$email</a>
+        };
+    };
+
     while (my $row = $sth->fetchrow_hashref) {
         my $extra = {};
         LJ::decode_url_string($row->{extra}, $extra);
@@ -101,7 +110,7 @@ FORM
         } elsif ($row->{action} eq 'password_reset') {
             $action = "User reset password via lost password email";
         } elsif ($row->{action} eq 'email_change') {
-            $action = "Email address changed to: $extra->{new}";
+            $action = "Email address changed to: ".$format_email->($extra->{'new'});
         } elsif ($row->{action} eq 'mass_privacy_change') {
             $action = "Entry privacy updated (from $extra->{s_security} to $extra->{e_security})";
             # TODO: parse out e_unixtime and s_unixtime and display?
@@ -109,6 +118,7 @@ FORM
             $action = "Deleted userpic #$extra->{picid}";
         } elsif ($row->{action} eq 'pwd_reset_req') {
             my $email = $extra->{email};
+            $email = $format_email->($email);
             my $email_state = {
                 'A' => 'current, validated',
                 'T' => 'current, transitioning',
@@ -134,7 +144,11 @@ FORM
         }
 
         my $ip = $row->{ip} || "<em>not recorded</em>";
-        my $uniq = $row->{uniq} || "<em>not recorded</em>";
+        my $uniq = $row->{uniq} ? qq{
+            <a href="$LJ::SITEROOT/admin/uniq.bml?what=$row->{uniq}">
+                $row->{uniq}
+            </a>
+        } : "<em>not recorded</em>";
 
         $ret .= "<tr>" . join('', map { "<td class='logrow'>$_</td>" } ($time, $action, $actor, $ip, $uniq)) . "</tr>\n";
     }

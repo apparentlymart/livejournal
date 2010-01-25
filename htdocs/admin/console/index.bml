@@ -5,7 +5,7 @@
 
  use strict;
  use LJ::Console;
- use vars qw(%POST %cmd);
+ use vars qw(%POST %GET %cmd);
 
  my ($ret, $sth);
  my $commands = $POST{'commands'};
@@ -42,7 +42,7 @@
      $ret .= "</TR>";
      $ret .= "<TR><TD COLSPAN=2>";
      $ret .= "<P><tt>enter commands:</tt><BR>";
-     $ret .= "<TEXTAREA NAME=commands ROWS=10 COLS=60 WRAP=OFF></TEXTAREA></TD></TR>\n";
+     $ret .= "<TEXTAREA NAME=commands ROWS=10 COLS=60 WRAP=OFF>".LJ::ehtml($GET{'prefill'})."</TEXTAREA></TD></TR>\n";
      $ret .= "<TR><TD COLSPAN=2 ALIGN=RIGHT><INPUT TYPE=SUBMIT VALUE=\"execute\"></P></TD></TR></TABLE></FORM>\n";
      return $ret;
  }
