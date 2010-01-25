@@ -70,7 +70,7 @@ sub get_usertagsmulti {
     # spawn gearman jobs to get each of the users
     my $ts = $gc->new_task_set();
     foreach my $u (values %need) {
-        $ts->add_task(Gearman::Task->new("load_usertags", \"$u->{userid}",
+        $ts->add_task(Gearman::Task->new("load_usertags", "$u->{userid}",
             {
                 uniq => '-',
                 on_complete => sub {
@@ -768,14 +768,17 @@ sub update_logtags {
         # and turn everything into ids
         $opts->{"${verb}_ids"} ||= [];
         foreach my $kw (@{$opts->{$verb} || []}) {
-            my $kwid = LJ::get_keyword_id($u, $kw, $can_control);
+            my $kwid = LJ::get_keyword_id($u, $kw, $can_control); # parameter 'autovivify(create-if-not-exist)' gets $can_control
             if ($can_control) {
                 # error if we failed to create
                 return undef unless $kwid;
             } else {
                 # if we're not creating, who cares, just skip; also skip if the keyword
                 # is not really a tag (don't promote it)
-                next unless $kwid && $utags->{$kwid};
+                unless ($kwid && $utags->{$kwid}) {
+                    push @{$opts->{skipped_tags}}, $kw if exists $opts->{skipped_tags} and ref $opts->{skipped_tags} eq 'ARRAY';
+                    next;
+                }
             }
 
             # add the ids to the list, and save to create later if needed
@@ -823,11 +826,28 @@ sub update_logtags {
     my $max = $u->get_cap('tags_max');
     if (@to_create && $max && $max > 0) {
         my $total = scalar(keys %$utags) + scalar(@to_create);
-        return $err->(LJ::Lang::ml('taglib.error.toomany', { max => $max })) if $total > $max;
+        if (exists $opts->{skipped_tags} and ref $opts->{skipped_tags} eq 'ARRAY') { # will do possible and give warning on impossible
+            my $may = $max - scalar(keys %$utags);
+            $may = 0 if $may < 0;
+            my @skip = splice(@to_create, $may); # @to_create remains with first $may elements
+            push @{$opts->{skipped_tags}}, @skip;
+            # now @to_create is safe
+        } else { # old behavior requested
+            return $err->(LJ::Lang::ml('taglib.error.toomany', { max => $max })) if $total > $max;
+        }
     }
 
     # now we can create the new tags, since we know we're safe
-    LJ::Tags::create_usertag($u, $_, { display => 1 }) foreach @to_create;
+    my $created = LJ::Tags::create_usertag($u, join(', ', @to_create), { display => 1 });
+    my %created = reverse %{$created || {}}; # tag - kwid => kwid - tag
+
+    # we may not set skipped tags on entry, but now they are in 'add' ids list
+    # clean 'add' list
+    foreach my $id (keys %add) {
+        delete $add{$id} unless $utags->{$id} or $created{$id};
+    } 
+
+    return 1 unless %add || %delete; # again - we cleaned %add
 
     # %add and %delete are accurate, but we need to track necessary
     # security updates; this is a hash of keyword ids and a modification

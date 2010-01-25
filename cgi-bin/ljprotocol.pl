@@ -1585,6 +1585,7 @@ sub postevent
 
         my $logtag_opts = {
             remote => $u,
+            skipped_tags => [], # do all possible and report impossible
         };
 
         if (ref $taginput eq 'ARRAY') {
@@ -1595,6 +1596,9 @@ sub postevent
         }
 
         my $rv = LJ::Tags::update_logtags($uowner, $jitemid, $logtag_opts);
+        push @{$res->{warnings} ||= []}, LJ::Lang::ml('/update.bml.tags.skipped', { 'tags' => join(', ', @{$logtag_opts->{skipped_tags}}),
+                                                             'limit' => $uowner->get_cap('tags_max') } )
+            if @{$logtag_opts->{skipped_tags}};
     }
 
     ## copyright
@@ -2014,14 +2018,21 @@ sub editevent
     $req->{'props'}->{'revnum'} = ($curprops{$itemid}->{'revnum'} || 0) + 1;
     $req->{'props'}->{'revtime'} = time();
 
+    my $res = { 'itemid' => $itemid };
+
     # handle tags if they're defined
     if ($do_tags) {
         my $tagerr = "";
+        my $skipped_tags = [];
         my $rv = LJ::Tags::update_logtags($uowner, $itemid, {
                 set_string => $req->{props}->{taglist},
                 remote => $u,
                 err_ref => \$tagerr,
+                skipped_tags => $skipped_tags, # do all possible and report impossible
             });
+        push @{$res->{warnings} ||= []}, LJ::Lang::ml('/update.bml.tags.skipped', { 'tags' => join(', ', @$skipped_tags),
+                                                             'limit' => $uowner->get_cap('tags_max') } )
+            if @$skipped_tags;
     }
 
     if (LJ::is_enabled('default_copyright', $u)) {
@@ -2076,7 +2087,6 @@ sub editevent
 
     LJ::memcache_kill($ownerid, "dayct2");
 
-    my $res = { 'itemid' => $itemid };
     if (defined $oldevent->{'anum'}) {
         $res->{'anum'} = $oldevent->{'anum'};
         $res->{'url'} = LJ::item_link($uowner, $itemid, $oldevent->{'anum'});
@@ -4003,6 +4013,7 @@ sub postevent
     $res->{'itemid'} = $rs->{'itemid'};
     $res->{'anum'} = $rs->{'anum'} if defined $rs->{'anum'};
     $res->{'url'} = $rs->{'url'} if defined $rs->{'url'};
+    # we may not translate 'warnings' here, because it may contain \n characters
     return 1;
 }
 

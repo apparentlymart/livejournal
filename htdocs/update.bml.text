@@ -113,6 +113,8 @@
 
 .success.links.view=View the entry
 
+.tags.skipped=<p>The entry has been saved. However, some tags have not been added because you have exceeded your maximum tags limit of [[limit]] tags. The tags we couldn't add are as follows:<p><p><strong>[[tags]]</strong></p>
+
 .timeformat=24 hour time
 
 .title2=Post an Entry

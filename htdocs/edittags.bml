@@ -53,12 +53,17 @@ body<=
             unless LJ::check_form_auth();
 
         my $tagerr = "";
+        my $skipped_tags = [];
         my $rv = LJ::Tags::update_logtags($u, $jitemid, {
             set_string => $POST{edittags},
             remote => $remote,
             err_ref => \$tagerr,
+            skipped_tags => $skipped_tags, # do all possible and report impossible
         });
         return $err->($tagerr) unless $rv;
+        return "<?h1 $ML{'.warning.title'} h1?><?p " . LJ::Lang::ml('/update.bml.tags.skipped', { 'tags' => join(', ', @$skipped_tags),
+                                                             'limit' => $u->get_cap('tags_max') } ) . " p?>"
+            if @$skipped_tags;
 
         BML::redirect( LJ::journal_base($u) . "/$ditemid.html" );
         #$msg = "<div class='update_good'>Tags successfully updated.</div>";
