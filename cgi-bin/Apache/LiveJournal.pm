@@ -155,6 +155,8 @@ sub handler
 
             foreach my $file (keys %to_reload) {
                 print STDERR "Reloading $file...\n";
+                LJ::clear_hooks($file);
+
                 my %reloaded;
                 local $SIG{__WARN__} = sub {
                     if ($_[0] =~ m/^Subroutine (\S+) redefined at /)
