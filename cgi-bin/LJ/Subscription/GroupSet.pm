@@ -321,7 +321,10 @@ sub update {
     # must stay.
     foreach my $gkey (@cleaned_groups) {
         push @changed_groups, $gkey;
+        my %props = map { $_ => $self->{'groups'}->{$gkey}->{$_} } @group_cols;
+
         $newset->{'groups'}->{$gkey} = bless({
+            %props,
             'subs' => {},
         }, 'LJ::Subscription::Group');
     }
