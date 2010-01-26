@@ -9,6 +9,8 @@ BEGIN {
         require LJ::Request::Apache2;
     } elsif($ENV{MOD_PERL_API_VERSION} or $ENV{MOD_PERL}) {
         require LJ::Request::Apache;
+    } else {
+        *LJ::Request::is_inited = sub { 0 };
     }
 }
 
