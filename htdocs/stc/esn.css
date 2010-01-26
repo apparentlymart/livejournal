@@ -28,7 +28,7 @@
 }
 
 .Subscribe td {
-    padding: .3em;
+    padding: .3em .4em;
 }
 
 .Subscribe td img {
@@ -359,5 +359,35 @@ span.InboxItem_Read:hover a {
 
 #compose label {
     font-weight: bold;
+}
+
+.Subscribe .opt_getselfemail TD {
+    padding-bottom: 1em;
+    border-top:1px solid #DDDDDD;
+}
+
+.Subscribe .CategoryRow td {
+    vertical-align: bottom;
+}
+
+.Subscribe .CategoryHeading {
+    display:block;
+}
+
+.Subscribe .CategoryHeading-delivery,
+.Subscribe .CategoryHeading-notify {
+    padding-bottom: 0.2em;
+}
+
+.Subscribe .CategoryHeading-delivery {
+    float:right;
+}
+
+.Subscribe .CategoryHeading-notify {
+    float:left;
+}
+
+.Subscribe .CategoryRow-tracking TD {
+    padding-top: 0.5em;
 }
 

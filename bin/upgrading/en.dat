@@ -2939,6 +2939,8 @@ subscribe_interface.category.subscription-tracking=Subscription Tracking
 
 subscribe_interface.category.this-journal=Events in [[journal]]
 
+subscribe_interface.delivery_method=Delivery method
+
 subscribe_interface.inbox=Inbox
 
 subscribe_interface.manage=Manage settings
