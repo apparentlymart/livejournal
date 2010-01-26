@@ -160,6 +160,8 @@ sub find_or_insert_group {
 sub insert_sub {
     my ($self, $sub) = @_;
 
+    $sub->{'userid'} = $self->userid;
+
     my $groupobj = $self->find_or_insert_group($sub->group);
     $groupobj->insert_sub($sub);
 }
@@ -167,12 +169,16 @@ sub insert_sub {
 sub find_sub {
     my ($self, $sub) = @_;
 
+    $sub->{'userid'} = $self->userid;
+
     my $groupobj = $self->find_group($sub->group) or return undef;
     return $groupobj->find_sub($sub);
 }
 
 sub find_or_insert_sub {
     my ($self, $sub) = @_;
+
+    $sub->{'userid'} = $self->userid;
 
     my $groupobj = $self->find_or_insert_group($sub->group);
     return $groupobj->find_or_insert_sub($sub);
