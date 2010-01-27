@@ -680,7 +680,7 @@ sub subscriptions {
 
     my @subs;
 
-    my $email_ntypeid =  LJ::NotificationMethod::Email->ntypeid;
+    my $email_ntypeid = LJ::NotificationMethod::Email->ntypeid;
 
     # own comments are deliberately sent to email only
     if ($comment_author->prop('opt_getselfemail') && $acquire_sub_slot->()) {
@@ -704,7 +704,7 @@ sub subscriptions {
             'etypeid' => LJ::Event::CommentReply->etypeid,
             'userid'  => $parent_comment_author->id,
             'ntypeid' => $email_ntypeid,
-        }) if $parent_comment_author->{'opt_gettalkemail'};
+        }) if $parent_comment_author->{'opt_gettalkemail'} eq 'Y';
 
         if (my $count = $acquire_sub_slot->(scalar(@subs2))) {
             $#subs2 = $count - 1;
@@ -716,21 +716,25 @@ sub subscriptions {
         !LJ::u_equals($comment_author, $entry_author) &&
         !$entry->prop('opt_noemail')
     ) {
-        my @subs2 = LJ::Subscription->find($entry_author,
-            'event' => 'CommunityEntryReply',
-            'require_active' => 1,
-        );
+        if (!LJ::u_equals($entry_author, $entry_journal)) {
+            # community journal
+            my @subs2 = LJ::Subscription->find($entry_author,
+                'event' => 'CommunityEntryReply',
+                'require_active' => 1,
+            );
 
-        push @subs2, LJ::Subscription->new_from_row({
-            'etypeid' => LJ::Event::CommunityEntryReply->etypeid,
+            if (my $count = $acquire_sub_slot->(scalar(@subs2))) {
+                $#subs2 = $count - 1;
+                push @subs, @subs2;
+            }
+        }
+
+        push @subs, LJ::Subscription->new_from_row({
+            'etypeid' => LJ::Event::JournalNewComment->etypeid,
             'userid'  => $entry_author->id,
             'ntypeid' => $email_ntypeid,
-        }) if $entry_author->{'opt_gettalkemail'};
-
-        if (my $count = $acquire_sub_slot->(scalar(@subs2))) {
-            $#subs2 = $count - 1;
-            push @subs, @subs2;
-        }
+        }) if
+            $entry_author->{'opt_gettalkemail'} eq 'Y' && $acquire_sub_slot->();
     }
 
     return @subs unless ($limit || !$original_limit);
