@@ -3337,6 +3337,8 @@ widget.createaccount.error.captcha.invalid=Invalid answer to previous challenge.
 
 widget.createaccount.error.email.lj_domain=You cannot use a [[domain]] alias when creating an account.  Please enter a different email address.
 
+widget.createaccount.error.nogender=You can not leave this field blank, please choose some option.
+
 widget.createaccount.error.password.asciionly=You can only use ASCII symbols in the password.
 
 widget.createaccount.error.password.bad=Bad password:
@@ -3354,6 +3356,8 @@ widget.createaccount.error.username.purged=The username you entered is that of a
 widget.createaccount.error.username.reserved=Sorry, that is a reserved username.
 
 widget.createaccount.field.birthdate=Birthdate:
+
+widget.createaccount.field.gender=Gender:
 
 widget.createaccount.field.captcha=Prove you're human:
 
@@ -3382,6 +3386,8 @@ widget.createaccount.tip.birthdate=Required by law. No worries, you can set priv
 widget.createaccount.tip.birthdate2=Required by law. By default, we only display the month and day.
 
 widget.createaccount.tip.captcha=If you can't read the text, type "audio" to take a sound test instead.
+
+widget.createaccount.tip.gender=We do not show your gender to anybody.
 
 widget.createaccount.tip.email=We need your email address to send important information. We will never share or sell your email address.
 
