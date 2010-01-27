@@ -375,7 +375,7 @@ span.InboxItem_Read:hover a {
 
 .Subscribe .CategoryHeading-delivery,
 .Subscribe .CategoryHeading-notify {
-    padding-bottom: 0.2em;
+    padding-bottom: 0em;
 }
 
 .Subscribe .CategoryHeading-delivery {
@@ -389,5 +389,9 @@ span.InboxItem_Read:hover a {
 .Subscribe .CategoryRow-tracking .CategoryRowFirst TD,
 .Subscribe .CategoryRow-friends_and_communities .CategoryRowFirst TD {
     padding-top:1.5em;
+}
+
+.Subscribe .CategoryRowFirst td INPUT {
+    vertical-align: bottom;
 }
 
