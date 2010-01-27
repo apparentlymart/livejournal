@@ -706,7 +706,8 @@ sub subscriptions {
             'ntypeid' => $email_ntypeid,
         }) if $parent_comment_author->{'opt_gettalkemail'} eq 'Y';
 
-        if (my $count = $acquire_sub_slot->(scalar(@subs2))) {
+        my $count = scalar(@subs2);
+        if ($count && ($count = $acquire_sub_slot->($count))) {
             $#subs2 = $count - 1;
             push @subs, @subs2;
         }
@@ -739,10 +740,10 @@ sub subscriptions {
 
     return @subs unless ($limit || !$original_limit);
 
-    push @subs, eval { $self->SUPER::subscriptions(
+    push @subs, $self->SUPER::subscriptions(
         cluster => $cid,
         limit   => $limit
-    ) };
+    );
 
     return @subs;
 }

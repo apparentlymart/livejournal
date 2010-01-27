@@ -47,6 +47,7 @@ sub jobs_of_unique_matching_subs {
     }
 
     @subs = grep {
+        defined $_ &&
         $evt->available_for_user($_->owner) &&
         $evt->matches_filter($_);
     } @subs;
