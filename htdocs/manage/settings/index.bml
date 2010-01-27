@@ -343,22 +343,25 @@ body<=
             'css_class' => 'my_account',
         });
 
-        $ret .= '<tbody class="opt_getselfemail"><tr><td colspan="6">';
         my $can_getselfemail = LJ::get_cap($u, 'getselfemail');
         my $value = $can_getselfemail ? $u->prop('opt_getselfemail') : 0;
 
-        my $label = $ML{'subscribe_interface.getselfemail'};
-        $label .= LJ::run_hook("upgrade_link", $u) unless $can_getselfemail;
+        if ($can_getselfemail || !$u->is_identity) {
+            $ret .= '<tbody class="opt_getselfemail"><tr><td colspan="6">';
 
-        $ret .= LJ::html_check({
-            'name' => 'opt_getselfemail',
-            'id' => 'opt_getselfemail',
-            'label' => $label,
-            'selected' => $value,
-            'disabled' => !$can_getselfemail,
-            'noescape' => 1,
-        });
-        $ret .= '</tr></td></tbody>';
+            my $label = $ML{'subscribe_interface.getselfemail'};
+            $label .= LJ::run_hook("upgrade_link", $u) unless $can_getselfemail;
+
+            $ret .= LJ::html_check({
+                'name' => 'opt_getselfemail',
+                'id' => 'opt_getselfemail',
+                'label' => $label,
+                'selected' => $value,
+                'disabled' => !$can_getselfemail,
+                'noescape' => 1,
+            });
+            $ret .= '</tr></td></tbody>';
+        }
 
         $ret .= $widget->render({
             'title' => $ML{'subscribe_interface.category.friends-and-communities'},
