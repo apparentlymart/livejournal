@@ -3365,7 +3365,7 @@ sub subscription_count {
 # this is the count used to check the maximum subscription count
 sub active_inbox_subscription_count {
     my $u = shift;
-    return scalar ( grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox') );
+    return $u->subscriptions_count;
 }
 
 sub max_subscriptions {
