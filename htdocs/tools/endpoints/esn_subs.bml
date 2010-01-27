@@ -76,7 +76,7 @@
 
         my ($subscr) = $remote->has_subscription(%subparams);
 
-        $subparams{flags} = LJ::Subscription::TRACKING;
+        $subparams{flags} = 0;
         eval { $subscr ||= $remote->subscribe(%subparams) };
         return $err->($@) if $@;
 
