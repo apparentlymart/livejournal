@@ -64,7 +64,7 @@ sub render_body {
         $title .= " " . LJ::help_icon($class->help_url) if $class->help_url;
 
         $ret .= LJ::html_check({
-            'name' => '',
+            'name' => 'CheckAll-'.$curcatnum.'-'.$ntypeids{$ntype},
             'class' => 'CheckAll',
             'id' => 'CheckAll-'.$curcatnum.'-'.$ntypeids{$ntype},
             'label' => $title,
