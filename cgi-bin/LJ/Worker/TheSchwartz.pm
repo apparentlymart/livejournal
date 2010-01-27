@@ -15,25 +15,14 @@ my $on_afterwork = sub {};
 
 my $on_prework = sub { 1 };  # return 1 to proceed and do work
 
-my $used_role;
-
 sub schwartz_init {
-    my ($role) = @_;
-    $role ||= 'drain';
-
-    $sclient = LJ::theschwartz({ role => $role }) or die "Could not get schwartz client";
-    $used_role = $role; # save success role
+    $sclient = LJ::theschwartz({ role => 'worker' }) or die "Could not get schwartz client";
     $sclient->set_verbose(LJ::Worker::VERBOSE());
 }
 
 sub schwartz_decl {
-    my ($classname, $role) = @_;
-    $role ||= 'drain';
-
-    die "Already connected to TheSchwartz with role '$used_role'" if defined $used_role and $role ne $used_role;
-
-    schwartz_init($role) unless $sclient;
-
+    my $classname = shift;
+    schwartz_init() unless $sclient;
     $sclient->can_do($classname);
 }
 

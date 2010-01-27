@@ -374,31 +374,37 @@ sub mogclient {
 }
 
 sub theschwartz {
-    return LJ::Test->theschwartz(@_) if $LJ::_T_FAKESCHWARTZ;
-
     my $opts = shift;
+    
+    return LJ::Test->theschwartz() if $LJ::_T_FAKESCHWARTZ;
 
-    my $role = $opts->{role} || "default";
+    if (%LJ::THESCHWARTZ_DBS_ROLES) {
+        ## new config - with roles
+        my $role = $opts->{role} || "default";
+        return $LJ::SchwartzClient{$role} if $LJ::SchwartzClient{$role};
 
-    return $LJ::SchwartzClient{$role} if $LJ::SchwartzClient{$role};
+        my @dbs;
+        die "LJ::theschwartz(): unknown role '$role'" unless $LJ::THESCHWARTZ_DBS_ROLES{$role};
+        foreach my $name (@{ $LJ::THESCHWARTZ_DBS_ROLES{$role} }) {
+            die "LJ::theschwartz(): unknown database name '$name' in role '$role'"
+                unless $LJ::THESCHWARTZ_DBS{$name};
+            push @dbs, $LJ::THESCHWARTZ_DBS{$name};
+        }
+        die "LJ::theschwartz(): no databases for role '$role'" unless @dbs;
 
-    unless (scalar grep { defined $_->{role} } @LJ::THESCHWARTZ_DBS) { # old config
-        $LJ::SchwartzClient{$role} = TheSchwartz->new(databases => \@LJ::THESCHWARTZ_DBS);
-        return $LJ::SchwartzClient{$role};
+        my $client = TheSchwartz->new(databases => \@dbs);
+
+        if ($client && $client->can('delete_every_n_errors')) {
+            $client->delete_every_n_errors($LJ::DELETE_EVERY_N_ERRORS);
+        }
+        
+        $LJ::SchwartzClient{$role} = $client;
+        return $client;
+    } else {
+        ## old config
+        $LJ::SchwartzClient ||= TheSchwartz->new(databases => \@LJ::THESCHWARTZ_DBS);
+        return $LJ::SchwartzClient;
     }
-
-    my @dbs = grep { $_->{role}->{$role} } @LJ::THESCHWARTZ_DBS;
-    die "Unknown role in LJ::theschwartz: '$role'" unless @dbs;
-
-    my $client = TheSchwartz->new(databases => \@dbs);
-
-    if ($client && $client->can('delete_every_n_errors')) {
-        $client->delete_every_n_errors($LJ::DELETE_EVERY_N_ERRORS);
-    }
-
-    $LJ::SchwartzClient{$role} = $client;
-
-    return $client;
 }
 
 sub sms_gateway {

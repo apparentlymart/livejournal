@@ -8,7 +8,6 @@ LJ::NewWorker::TheSchwartz::SendEmail->start();
 package LJ::NewWorker::TheSchwartz::SendEmail;
 use base 'LJ::NewWorker::TheSchwartz';
 require 'ljlib.pl';
-use LJ::NewWorker::TheSchwartz;
 use TheSchwartz::Worker::SendEmail;
 use Time::HiRes ();
 
@@ -19,9 +18,10 @@ sub BEGIN {
         my ($rcpt, $job, $details) = @_;
         LJ::errobj('DieString', message => "send_email to $rcpt failed: $details")->log;
     });
+}
 
-    my $sclient = LJ::theschwartz();
-    $sclient->set_verbose(sub {
+sub schwartz_verbose_handler {
+    return sub {
         my ($msg, $job) = @_;
         $msg =~ s/\s+$//;
         warn "$msg\n";
@@ -31,10 +31,10 @@ sub BEGIN {
         my $handle = $job->handle->as_string;
         my $now = sprintf("%0.05f", Time::HiRes::time());
         LJ::errobj('DieString', message => "ts_info: $now: [$handle] $msg")->log;
-    });
+    };
 }
 
-sub capabilities { { [ 'TheSchwartz::Worker::SendEmail' => '' ] } }
+sub capabilities { 'TheSchwartz::Worker::SendEmail'; }
 sub on_idle { $0 = "send-email [idle]"; }
 
 1;

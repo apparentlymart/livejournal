@@ -10,6 +10,6 @@ LJ::NewWorker::TheSchwartz::FiredEvent->start();
 
 package LJ::NewWorker::TheSchwartz::FiredEvent;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { [ "LJ::Worker::FiredEvent" => '' ] }
+sub capabilities { "LJ::Worker::FiredEvent" }
 
 1;

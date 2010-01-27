@@ -10,6 +10,6 @@ LJ::NewWorker::TheSchwartz::FilterSubs->start();
 
 package LJ::NewWorker::TheSchwartz::FilterSubs;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { [ "LJ::Worker::FilterSubs" => '' ] }
+sub capabilities { "LJ::Worker::FilterSubs" }
 
 1;

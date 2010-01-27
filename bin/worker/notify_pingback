@@ -9,6 +9,6 @@ LJ::NewWorker::TheSchwartz::NotifyPingbackServer->start();
 
 package LJ::NewWorker::TheSchwartz::NotifyPingbackServer;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { [ 'TheSchwartz::Worker::NotifyPingbackServer' => '' ] }
+sub capabilities { 'TheSchwartz::Worker::NotifyPingbackServer' }
 
 1;

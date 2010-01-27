@@ -5,7 +5,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 package LJ::NewWorker::TheSchwartz::SupportNotify;
 use strict;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { [ 'LJ::Worker::SupportNotify' ] }
+sub capabilities { 'LJ::Worker::SupportNotify' }
 __PACKAGE__->start();
 
 package LJ::Worker::SupportNotify;

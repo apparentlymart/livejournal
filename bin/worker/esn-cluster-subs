@@ -10,6 +10,6 @@ LJ::NewWorker::TheSchwartz::FindSubsByCluster->start();
 
 package LJ::NewWorker::TheSchwartz::FindSubsByCluster;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { [ "LJ::Worker::FindSubsByCluster" => '' ] }
+sub capabilities { "LJ::Worker::FindSubsByCluster" }
 
 1;

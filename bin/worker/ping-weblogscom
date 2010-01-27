@@ -4,7 +4,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 
 package LJ::NewWorker::TheSchwartz::Ping::WeblogsCom;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { [ 'LJ::Worker::Ping::WeblogsCom' => '' ] }
+sub capabilities { 'LJ::Worker::Ping::WeblogsCom' }
 __PACKAGE__->start();
 
 package LJ::Worker::Ping::WeblogsCom;

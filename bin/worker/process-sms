@@ -11,7 +11,7 @@ require 'ljprotocol.pl';
 require 'ljlang.pl';
 use LJ::SMS;
 
-sub capabilities { map { [ $_ => '' ] } LJ::SMS->schwartz_capabilities() }
+sub capabilities { return LJ::SMS->schwartz_capabilities() }
 
 __PACKAGE__->start();
 

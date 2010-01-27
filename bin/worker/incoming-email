@@ -10,7 +10,7 @@ require "ljfeed.pl";
 
 package LJ::NewWorker::TheSchwartz::IncomingEmail;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { [ 'LJ::Worker::IncomingEmail' ] }
+sub capabilities { 'LJ::Worker::IncomingEmail' }
 LJ::NewWorker::TheSchwartz::IncomingEmail->start();
 
 

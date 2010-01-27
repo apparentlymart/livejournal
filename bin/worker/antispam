@@ -10,7 +10,7 @@ use LJ::AntiSpam;
 
 package LJ::NewWorker::TheSchwartz::AntiSpam;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { return [ 'LJ::Worker::AntiSpam' ] }
+sub capabilities { 'LJ::Worker::AntiSpam' }
 __PACKAGE__->start();
 
 package LJ::Worker::AntiSpam;

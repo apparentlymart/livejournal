@@ -5,13 +5,15 @@ use lib "$ENV{LJHOME}/cgi-bin";
 use base "LJ::NewWorker", "Exporter";
 require "ljlib.pl";
 
-my  $interval   = 10;
-my  $verbose    = 0;
+my $interval        = 10;
+my $verbose         = 0;
+my $schwartz_role   = 'worker';
 
 sub options {
     my $self = shift;
     return (
-        'interval|i=i'  => \$interval,
+        'interval|i=i'          => \$interval,
+        'schwartz-role|r=s'     => \$schwartz_role,
         $self->SUPER::options(),
     );
 }
@@ -20,30 +22,35 @@ sub help {
     my $self = shift;
     return
         $self->SUPER::help() .
-        "-i | --interval n  set sleep interval to n secounds\n";
+        "-i | --interval=n          set sleep interval to n secounds\n";
+        "-r | --schwartz-role=role  connect to db with specified role (defualt is '$schwartz_role')\n";
 }
 
 sub capabilities    { }
-
 sub on_idle         { }
 sub on_afterwork    { }
 sub on_prework      { 1 }  # return 1 to proceed and do work
+sub schwartz_verbose_handler { } ## may return coderef for TheSchartz->set_verbose method
 
 my $sclient;
-my $used_role;
 
 sub _init {
-    my ($class, $role) = @_;
-    $role ||= 'drain';
+    my $class = shift;
+    
+    if ($sclient) {
+        warn "Schwartz client has been initialized already" if $verbose;
+        return;
+    }
+    
+    warn "The Schwartz _init(): init with role '$schwartz_role'.\n" if $verbose;
 
-    die "Already connected to TheSchwartz with role '$used_role'"
-        if defined $used_role and $role ne $used_role;
-
-    print STDERR "The Schwartz _init(): init with role $role.\n" if $verbose;
-
-    $sclient = LJ::theschwartz({ role => $role }) or die "Could not get schwartz client";
-    $used_role = $role; # save success role
-    $sclient->set_verbose($verbose);
+    $sclient = LJ::theschwartz({ role => $schwartz_role }) or die "Could not get schwartz client";
+    $sclient->set_verbose( $class->schwartz_verbose_handler || $class->verbose );
+    foreach my $classname ($class->capabilities) {
+        warn "The Schwartz run(): can_do('$classname').\n" if $verbose;
+        $sclient->can_do($classname);
+    }
+    
 }
 
 sub run {
@@ -51,21 +58,10 @@ sub run {
     my $sleep = 0;
 
     $verbose = $class->verbose;
-
-    print STDERR "The Schwartz run(): init.\n" if $verbose;
-
-    foreach my $cap ($class->capabilities()) {
-        my ($classname, $role) = @$cap;
-        print STDERR "The Schwartz run(): _init('$role').\n" if $verbose;
-        $class->_init($role) unless $sclient;
-        print STDERR "The Schwartz run(): can_do('$classname').\n" if $verbose;
-        $sclient->can_do($classname);
-    }
-
-    $class->_init() unless $sclient;
-
-    print STDERR "The Schwartz run(): init complete, let's do a work.\n" if $verbose;
-
+    
+    $class->_init;
+    warn "The Schwartz run(): init complete.\n" if $verbose;
+    
     my $last_death_check = time();
     while ( ! $class->should_quit()) {
         eval {
@@ -73,12 +69,12 @@ sub run {
             $class->check_limits();
 
             my $did_work = 0;
-            print STDERR "looking for work..." if $verbose;
+            warn "looking for work...\n" if $verbose;
             if ($class->on_prework()) {
                 $did_work = $sclient->work_once();
                 $class->on_afterwork($did_work);
             }
-            print STDERR "   did work = ", ($did_work || '') if $verbose;
+            warn "did work = " . ($did_work || '') . "\n" if $verbose;
 
             return if $class->should_quit();
 

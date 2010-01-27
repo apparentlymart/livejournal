@@ -464,14 +464,14 @@ sub as_sms {
     );
 }
 
-# return a string representing a Schwartz role [queue] used to handle this event
-#
-# this is a virtual function; base class function returns "default" which works
-# well for most events. it is perfectly fine not to override this unless
-# this event deals with a lot of users.
-#
-# my $schwartz = LJ::theschwartz({ 'role' => $event->schwartz_role});
-sub schwartz_role { 'default' }
+# Returns a string representing a Schwartz role [queue] used to handle this event
+# By default returns undef, which is ok for most cases.
+sub schwartz_role { 
+    my $self = shift;
+    my $class = ref $self || $self;
+
+    return $LJ::SCHWARTZ_ROLE_FOR_ESN_CLASS{$class};
+}
 
 # insert a job for TheSchwartz to process this event.
 #
