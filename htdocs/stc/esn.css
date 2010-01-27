@@ -7,7 +7,7 @@
 .Subscribe {
     width: 100%;
     padding: 0;
-    margin: .5em 0 0 0;
+    margin: .5em 0 1em 0;
     clear: both;
     }
 
@@ -343,7 +343,7 @@ span.InboxItem_Read:hover a {
 
 .ippu .track_btncontainer {
     margin-top: 5px;
-    padding: 1px;
+    padding: 1px; 
     width: 250px;
 }
 
@@ -362,7 +362,6 @@ span.InboxItem_Read:hover a {
 }
 
 .Subscribe .opt_getselfemail TD {
-    padding-bottom: 1em;
     border-top:1px solid #DDDDDD;
 }
 
@@ -387,7 +386,8 @@ span.InboxItem_Read:hover a {
     float:left;
 }
 
-.Subscribe .CategoryRow-tracking TD {
-    padding-top: 0.5em;
+.Subscribe .CategoryRow-tracking .CategoryRowFirst TD,
+.Subscribe .CategoryRow-friends_and_communities .CategoryRowFirst TD {
+    padding-top:1.5em;
 }
 
