@@ -113,7 +113,7 @@ sub raw_params {
     my @params = map { $_ || 0 } (
         $self->etypeid,
         $ju->id,
-        $self->{args},
+        @{$self->{args}},
     );
     return wantarray ? @params : \@params;
 }
