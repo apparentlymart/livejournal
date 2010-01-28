@@ -2837,7 +2837,7 @@ sub revert_style {
             $new_theme = LJ::S2Theme->load_by_uniq($default_theme_uniq);
         } else {
             my $layoutid = '';
-            my $layoutid = $public->{$default_layout_uniq}->{s2lid} 
+            $layoutid = $public->{$default_layout_uniq}->{s2lid} 
                 if $public->{$default_layout_uniq} && $public->{$default_layout_uniq}->{type} eq "layout";
             $new_theme = LJ::S2Theme->load_default_of($layoutid, user => $u) if $layoutid;
         }
