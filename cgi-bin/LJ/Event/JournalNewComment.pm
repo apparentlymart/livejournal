@@ -707,7 +707,7 @@ sub subscriptions {
         # if parent_comment_author is also the author of the container entry,
         # we should respect their choice to not get this comment, as set
         # in the entry properties
-        (!LJ::u_equals($parent_comment_author, $entry_poster) ||
+        (!LJ::u_equals($parent_comment_author, $entry_author) ||
         !$entry->prop('opt_noemail'))
     ) {
         my @subs2 = LJ::Subscription->find($parent_comment_author,
