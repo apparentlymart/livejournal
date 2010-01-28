@@ -74,6 +74,7 @@ ESN.initTrackBtns = function (node) {
         if (!trackBtn || !trackBtn.getAttribute) return;
 
         if (!trackBtn.getAttribute("lj_subid") && !trackBtn.getAttribute("lj_journalid")) return;
+        if (trackBtn.getAttribute("lj_dtalkid") && !Site.remote_can_track_threads) return;
 
         DOM.addEventListener(trackBtn, 'click', ESN.trackBtnClickHandler.bindEventListener(trackBtn));
     });
@@ -134,7 +135,7 @@ ESN.trackBtnClickHandler = function (evt) {
     var newEntryTrackBtn;
     var commentsTrackBtn;
 
-    if (Number(trackBtn.getAttribute("lj_dtalkid"))) {
+    if (trackBtn.getAttribute("lj_dtalkid")) {
         // this is a thread tracking button
         // always checked: either because they're subscribed, or because
         // they're going to subscribe.

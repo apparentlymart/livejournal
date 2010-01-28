@@ -77,6 +77,13 @@
         my ($subscr) = $remote->has_subscription(%subparams);
 
         $subparams{flags} = 0;
+        
+        my $evt = LJ::Event->new_from_raw_params(map { $subparams{$_} }
+            qw(etypeid journalid arg1 arg2));
+
+        return $err->("This user isn't allowed to subscribe to this event")
+            unless $evt->available_for_user($remote);
+
         eval { $subscr ||= $remote->subscribe(%subparams) };
         return $err->($@) if $@;
 

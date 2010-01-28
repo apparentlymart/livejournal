@@ -2107,6 +2107,7 @@ sub res_includes {
                 currentJournalBase => "$journal_base",
                 currentJournal => "$journal",
                 has_remote => $hasremote,
+                remote_can_track_threads => $remote && $remote->get_cap('track_thread'),
                 remote_is_suspended => $remote_is_suspended,
                 ctx_popup => $ctxpopup,
                 inbox_update_poll => $inbox_update_poll,
