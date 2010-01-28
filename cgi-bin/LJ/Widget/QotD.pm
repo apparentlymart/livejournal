@@ -60,7 +60,7 @@ sub render_body {
     return $ret;
 }
 
-my %cyr_countries = map { lc $_, $_ => $_ } qw(AM AZ BY EE GE KG KZ LT LV MD RU TJ TM UA UZ);
+my %cyr_countries = map {lc} map { $_ => $_ } qw(AM AZ BY EE GE KG KZ LT LV MD RU TJ TM UA UZ);
 
 sub community_name {
     my $class = shift;
