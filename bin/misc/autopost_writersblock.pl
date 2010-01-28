@@ -2,11 +2,12 @@
 #
 # Check if any Writer's Block question had a start time in the last number of
 # hours and if so, post them to the writersblock community.
-# If writersblock was recently updated don't post, this is to help
-# avoid duplicate posts even if this script is rerun or posts are
-# inserted manually.
 
 use strict;
+
+use Getopt::Long;
+use Data::Dumper;
+
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'ljprotocol.pl';
@@ -17,7 +18,31 @@ my %comms = (
     'writersblock_ru'   => { country => 'RU', },
 );
 
-my $u = LJ::want_user(LJ::get_userid('lj_bot'));
+my $bot_name = 'lj_bot';
+
+my $help    = 0;
+my $dry     = 0;
+my $verbose = 0;
+
+unless (GetOptions(
+    'help'          => \$help,
+    'dry'           => \$dry,
+    'bot=s'         => \$bot_name,
+    'verbose'       => \$verbose,
+) && !$help) {
+    print
+        "-----------------------------------------------------------\n" .
+        " Autopost question of the day to writers block communities.\n" .
+        "-----------------------------------------------------------\n" .
+        "Options are:\n".
+        "   verbose     - print more information\n".
+        "   dry         - dry run, do not post any information\n".
+        "   bot         - lj user name for bot\n" .
+        "\n";
+    exit(0);
+}
+
+my $u = LJ::want_user(LJ::get_userid($bot_name));
 
 my $now = time();
 
@@ -51,7 +76,7 @@ my $now = time();
                 if (@{$evts->{events}}) {
                     $comms{$comm}->{qids} = {
                         map { $_ => $_ }
-                        map { $_->{event} =~ m#<lj-template name="qotd" id="(\d+)" />#; $1 }
+                        map { $_->{event} =~ m#<lj-template\s+name=["']qotd["']\s+id=["'](\d+)["']#; $1 }
                             @{$evts->{events}}
                     };
                 }
@@ -60,7 +85,7 @@ my $now = time();
         }
     }
 
-    push @errors, "user 'lj_bot' doesn't exist" unless LJ::isu($u);
+    push @errors, "user '$bot_name' doesn't exist" unless LJ::isu($u);
 
     die
         "There was an error(s):\n" .
@@ -98,7 +123,7 @@ my @rows = ();
             # filter already posted
             next if $comms{$comm}->{qids}->{$row->{qid}};
 
-            print "Posting [$row->{qid}] $row->{subject} to $comm\n";
+            print "Posting [$row->{qid}] $row->{subject} to $comm\n" if $verbose;
 
             my %req = (
                 mode => 'postevent',
@@ -116,10 +141,19 @@ my @rows = ();
             my %res;
             my $flags = { noauth => 1, u => $u };
 
-            LJ::do_request(\%req, \%res, $flags);
+            unless ($dry) {
+                LJ::do_request(\%req, \%res, $flags);
+                unless ('OK' eq $res{success}) {
+                    print "Error in LJ::do_request call:\n",
+                        "request:\n",
+                        Dumper(\%req), "\n" .
+                        "result:\n",
+                        Dumper(\%res), "\n";
+                }
+            }
         }
     }
 }
 
-print "ALL DONE\n";
+print "ALL DONE\n" if $verbose;
 
