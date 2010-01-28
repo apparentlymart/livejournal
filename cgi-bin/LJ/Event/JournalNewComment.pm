@@ -683,7 +683,11 @@ sub subscriptions {
     my $email_ntypeid = LJ::NotificationMethod::Email->ntypeid;
 
     # own comments are deliberately sent to email only
-    if ($comment_author->prop('opt_getselfemail') && $acquire_sub_slot->()) {
+    if (
+        $comment_author->prop('opt_getselfemail') &&
+        $comment_author->get_cap('getselfemail') &&
+        $acquire_sub_slot->()
+    ) {
         push @subs, LJ::Subscription->new_from_row({
             'etypeid' => LJ::Event::JournalNewComment->etypeid,
             'userid'  => $comment_author->id,
@@ -691,9 +695,20 @@ sub subscriptions {
         });
     }
 
+    # send a notification to the author of the "parent" comment, if they
+    # want to get it
     if (
         $parent_comment &&
-        !LJ::u_equals($comment_author, $parent_comment_author)
+
+        # if they are responding to themselves and wish to get that, we've
+        # already handled it above
+        !LJ::u_equals($comment_author, $parent_comment_author) &&
+
+        # if parent_comment_author is also the author of the container entry,
+        # we should respect their choice to not get this comment, as set
+        # in the entry properties
+        (!LJ::u_equals($parent_comment_author, $entry_poster) ||
+        !$entry->prop('opt_noemail'))
     ) {
         my @subs2 = LJ::Subscription->find($parent_comment_author,
             'event' => 'CommentReply',
@@ -713,8 +728,13 @@ sub subscriptions {
         }
     }
 
+    # send a notification to the author of the entry, if they
+    # want to get it
     if (
+        # if they are responding to themselves and wish to get that, we've
+        # already handled it above
         !LJ::u_equals($comment_author, $entry_author) &&
+
         !$entry->prop('opt_noemail')
     ) {
         if (!LJ::u_equals($entry_author, $entry_journal)) {
@@ -740,6 +760,7 @@ sub subscriptions {
 
     return @subs unless ($limit || !$original_limit);
 
+    # handle tracks as usual
     push @subs, $self->SUPER::subscriptions(
         cluster => $cid,
         limit   => $limit
