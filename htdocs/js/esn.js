@@ -383,23 +383,19 @@ ESN.updateThreadIcons = function (dtalkid, tracking) {
     btn.src = Site.imgprefix + uri;
 };
 
-jQuery(function($)
+jQuery(document).click(function(e)
 {
-    $(document).click(function(e)
-    {
-        var target = $(e.target),
-            parents = target.parents('a[class*=delete-group-]');
-
-        if (!parents.length) return;
-        
-        e.preventDefault();
-
-        var group = parents.attr('class').replace(/^delete-group-/, '');
-        $.post(location.href, {
-            delete_group : group
-        }, function()
-        {
-            parents.parents('tr').remove();
-        });
-    });
+	var parents = jQuery(e.target).parents('a[class*=delete-group-]');
+	
+	if (!parents.length) return;
+	
+	var group = parents.attr('class').replace(/^delete-group-/, '');
+	jQuery.post(location.href, {
+		delete_group : group
+	}, function()
+	{
+		parents.parents('tr').eq(0).remove();
+	});
+	
+	e.preventDefault();
 });
