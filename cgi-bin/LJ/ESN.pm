@@ -46,13 +46,17 @@ sub jobs_of_unique_matching_subs {
         warn "jobs of unique subs (@subs) matching event (@$params)\n";
     }
 
-    @subs = grep {
-        defined $_ &&
-        $evt->available_for_user($_->owner) &&
-        $evt->matches_filter($_);
-    } @subs;
+    my @subs_filtered;
+    
+    foreach my $sub (@subs) {
+        next unless defined $sub;
+        next unless $evt->available_for_user($sub->owner);
+        next unless $evt->matches_filter($sub);
 
-    foreach my $s (@subs) {
+        push @subs_filtered, $sub;
+    }
+    
+    foreach my $s (@subs_filtered) {
         next if $has_done{$s->unique}++;
         push @subjobs, TheSchwartz::Job->new(
             funcname => 'LJ::Worker::ProcessSub',
