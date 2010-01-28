@@ -1764,6 +1764,7 @@ sub anti_squatter
 }
 
 package LJ::Protocol;
+use Encode();
 
 sub xmlrpc_method {
     my $method = shift;
@@ -1788,10 +1789,9 @@ sub xmlrpc_method {
     }
     my $error = 0;
     if (ref $req eq "HASH") {
-        foreach my $key ('subject', 'event') {
-            # get rid of the UTF8 flag in scalars
-            $req->{$key} = pack('C*', unpack('C*', $req->{$key}))
-                if $req->{$key};
+        # get rid of the UTF8 flag in scalars
+        while (my ($k, $v) = each %$req) {
+            $req->{$k} = Encode::encode_utf8($v) if Encode::is_utf8($v);
         }
         $req->{'props'}->{'interface'} = "xml-rpc";
     }
