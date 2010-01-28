@@ -4,6 +4,7 @@ CreateAccount.init = function () {
     if (!$('create_user')) return;
     if (!$('create_email')) return;
     if (!$('create_password1')) return;
+    if (!$('create_gender')) return;
     if (!$('create_bday_mm')) return;
     if (!$('create_bday_dd')) return;
     if (!$('create_bday_yyyy')) return;
@@ -14,6 +15,7 @@ CreateAccount.init = function () {
     DOM.addEventListener($('create_email'), "focus", CreateAccount.eventShowTip.bindEventListener("create_email"));
     DOM.addEventListener($('create_password1'), "focus", CreateAccount.eventShowTip.bindEventListener("create_password1"));
     DOM.addEventListener($('create_password2'), "focus", CreateAccount.eventShowTip.bindEventListener("create_password1"));
+    DOM.addEventListener($('create_gender'), "focus", CreateAccount.eventShowTip.bindEventListener("create_gender"));
     DOM.addEventListener($('create_bday_mm'), "focus", CreateAccount.eventShowTip.bindEventListener("create_bday_mm"));
     DOM.addEventListener($('create_bday_dd'), "focus", CreateAccount.eventShowTip.bindEventListener("create_bday_mm"));
     DOM.addEventListener($('create_bday_yyyy'), "focus", CreateAccount.eventShowTip.bindEventListener("create_bday_mm"));
@@ -23,6 +25,7 @@ CreateAccount.init = function () {
         DOM.addEventListener($('create_email'), "blur", CreateAccount.eventHideTip.bindEventListener("create_email"));
         DOM.addEventListener($('create_password1'), "blur", CreateAccount.eventHideTip.bindEventListener("create_password1"));
         DOM.addEventListener($('create_password2'), "blur", CreateAccount.eventHideTip.bindEventListener("create_password1"));
+	DOM.addEventListener($('create_gender'), "blur", CreateAccount.eventHideTip.bindEventListener("create_gender"));
 	DOM.addEventListener($('create_bday_mm'), "blur", CreateAccount.eventHideTip.bindEventListener("create_bday_mm"));
 	DOM.addEventListener($('create_bday_dd'), "blur", CreateAccount.eventHideTip.bindEventListener("create_bday_mm"));
 	DOM.addEventListener($('create_bday_yyyy'), "blur", CreateAccount.eventHideTip.bindEventListener("create_bday_mm"));
@@ -64,6 +67,8 @@ CreateAccount.showTip = function (id) {
             text = CreateAccount.email;
         } else if (id == "create_password1") {
             text = CreateAccount.password;
+        } else if (id == "create_gender") {
+            text = CreateAccount.gender;
         } else if (id == "create_user") {
             text = CreateAccount.username;
         }
