@@ -75,7 +75,6 @@ body<=
                 $group->create_sub($ntypeid);
             }
 
-            use Data::Dumper; warn Dumper($group);
             $newset->insert_group($group);
         }
 
