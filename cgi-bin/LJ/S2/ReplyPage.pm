@@ -238,7 +238,7 @@ sub ReplyForm__print
         'remove_all_attribs' => 1,
     });
 
-    my $post_vars = { LJ::Request::post_params };
+    my $post_vars = { LJ::Request->post_params() };
     $post_vars = $form->{_values} unless keys %$post_vars;
 
     $S2::pout->(LJ::Talk::talkform({ 'remote'    => $remote,
