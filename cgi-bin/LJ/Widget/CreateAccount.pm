@@ -172,9 +172,9 @@ sub render_body {
                 selected => $post->{gender},
                 list => [ 
                     '' => '',
-                    'U' =>  LJ::Lang::ml("/manage/profile/index.bml.gender.unspecified"),
                     'M' =>  LJ::Lang::ml("/manage/profile/index.bml.gender.male"),
                     'F' =>  LJ::Lang::ml("/manage/profile/index.bml.gender.female"),
+                    'U' =>  LJ::Lang::ml("/manage/profile/index.bml.gender.unspecified"),
                     ],
                 ) . " ";
     $ret .= $error_msg->('gender', '<br /><span class="formitemFlag">', '</span>');
