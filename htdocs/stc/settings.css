@@ -756,3 +756,14 @@
 	vertical-align: bottom;
 	padding-bottom: 2px;
 }
+
+/* Delete basket icon */
+/* Must be removed after implementation of Framework! */
+.i-basket {
+    border: 0 !important;
+    text-decoration: none !important;
+    }
+
+
+
+

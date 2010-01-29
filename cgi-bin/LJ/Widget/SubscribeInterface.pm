@@ -106,7 +106,7 @@ sub render_body {
             ));
 
             $event_html = qq{
-                <a href="$link" class="delete-group-$frozen">
+                <a href="$link" class="i-basket delete-group-$frozen">
                     <img src="$LJ::SITEROOT/img/portal/btn_del.gif">
                 </a>
                 $event_html
