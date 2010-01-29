@@ -17,6 +17,8 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require "htmlcontrols.pl";
 require "talklib.pl";
 
+use Encode();
+
 # internal fields:
 #
 #    journalid:     journalid where the commend was
@@ -1043,7 +1045,13 @@ sub info {
 }
 
 sub indent {
-    return LJ::Talk::Post::indent(@_);
+    my $str = shift;
+    return Encode::encode_utf8( LJ::Talk::Post::indent( Encode::decode_utf8($str), @_) );
+}
+
+sub wrap {
+    my $str = pop;
+    return Encode::encode_utf8( Text::Wrap::wrap( @_, Encode::decode_utf8($str) ) );
 }
 
 sub blockquote {
@@ -1365,12 +1373,12 @@ sub _format_mail_both {
         $body .= "<br />";
     } else {
         if (my $subj = $self->subject_raw) {
-            $body .= Text::Wrap::wrap(" " . LJ::Lang::get_text($lang, $ml_prefix . 'subject', undef) . " ", "", $subj) . "\n\n";
+            $body .= wrap(" " . LJ::Lang::get_text($lang, $ml_prefix . 'subject', undef) . " ", "", $subj) . "\n\n";
         }
         $body .= indent($self->body_raw) . "\n\n";
 
         # Don't wrap options, only text.
-        $body = Text::Wrap::wrap("", "", $body) . "\n";
+        $body = wrap("", "", $body) . "\n";
     }
 
     my $can_unscreen = $self->is_screened &&
