@@ -380,6 +380,12 @@ It must be invisible, use it only for reskining */
 		overflow: hidden;
 		width: 236px;
 		}
+	.b-banner-flexible A:link,
+	.b-banner-flexible A:visited,
+	.b-banner-flexible A:hover,
+	.b-banner-flexible A:active {
+	    border:0;
+	    }
 
 /* AdNEctar style for vgift */
 .i-vgift-details {
