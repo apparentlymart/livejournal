@@ -2441,15 +2441,8 @@ sub enter_comment {
     # fire events
     unless ($LJ::DISABLED{esn}) {
         my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
-        my @jobs;
-
-        push @jobs, LJ::Event::JournalNewComment->new($cmtobj)->fire_job;
-        push @jobs, LJ::EventLogRecord::NewComment->new($cmtobj)->fire_job;
-
-        my $sclient = LJ::theschwartz();
-        if ($sclient && @jobs) {
-            my @handles = $sclient->insert_jobs(@jobs);
-        }
+        LJ::Event::JournalNewComment->new($cmtobj)->fire;
+        LJ::EventLogRecord::NewComment->new($cmtobj)->fire;
     }
 
     return $jtalkid;
@@ -3122,15 +3115,8 @@ sub edit_comment {
 
     # fire events
     unless ($LJ::DISABLED{esn}) {
-        my @jobs;
-
-        push @jobs, LJ::Event::JournalNewComment->new($comment_obj)->fire_job;
-        push @jobs, LJ::EventLogRecord::NewComment->new($comment_obj)->fire_job;
-
-        my $sclient = LJ::theschwartz();
-        if ($sclient && @jobs) {
-            my @handles = $sclient->insert_jobs(@jobs);
-        }
+        LJ::Event::JournalNewComment->new($comment_obj)->fire;
+        LJ::EventLogRecord::NewComment->new($comment_obj)->fire;
     }
 
     LJ::run_hooks('edit_comment', $journalu->{userid}, $item->{itemid}, $comment->{talkid});
