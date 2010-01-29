@@ -22,7 +22,7 @@ sub help {
     my $self = shift;
     return
         $self->SUPER::help() .
-        "-i | --interval=n          set sleep interval to n secounds\n";
+        "-i | --interval=n          set sleep interval to n secounds\n" .
         "-r | --schwartz-role=role  connect to db with specified role (defualt is '$schwartz_role')\n";
 }
 
