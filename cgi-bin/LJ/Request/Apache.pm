@@ -1,6 +1,7 @@
 package LJ::Request::Apache;
 use strict;
 
+use Carp qw//;
 use Apache::Constants;
 #*OK        = \&Apache::Constants::OK;
 #*DONE      = \&Apache::Constants::DONE;
@@ -31,7 +32,7 @@ require Apache::URI;
 my $instance = '';
 sub LJ::Request::request { $instance }
 sub LJ::Request::r {
-    die "Request is not provided to LJ::Request" unless $instance;
+    Carp::confess("Request is not provided to LJ::Request") unless $instance;
     return $instance->{r};
 }
 
