@@ -409,12 +409,27 @@ sub underage {
     # has no bearing if this isn't on
     return undef unless LJ::class_bit("underage");
 
+    my @args = @_;
+    my $ret_zero = 0; # no need to return zero
+
     # now get the args and continue
-    my $u = shift;
-    return LJ::get_cap($u, 'underage') unless @_;
+    my $u = shift(@args);
+    unless (@args) { # we are getter
+        my $young = LJ::get_cap($u, 'underage');
+        return unless $young; # cap is clear -> return false        
+
+        # here cap is set -> may be we will return it, may be we will update
+        return 1 unless $u->underage_status eq 'Y'; # only "provided birthdate" may be updated, "manual" and "cookie" must be preserved
+        return 1 if $u->init_age < 14; # yes, user is young -> return true
+        
+        # here cap is set and user is not young now -> will update
+        @args = (0, undef, 'auto clear based on init_age()');
+        # fall to setter code
+        $ret_zero = 1;
+    }
 
     # now set it on or off
-    my $on = shift() ? 1 : 0;
+    my $on = shift(@args) ? 1 : 0;
     if ($on) {
         $u->add_to_class("underage");
     } else {
@@ -422,14 +437,14 @@ sub underage {
     }
 
     # now set their status flag if one was sent
-    my $status = shift();
+    my $status = shift(@args);
     if ($status || $on) {
         # by default, just records if user was ever underage ("Y")
         $u->underage_status($status || 'Y');
     }
 
     # add to statushistory
-    if (my $shwhen = shift()) {
+    if (my $shwhen = shift(@args)) {
         my $text = $on ? "marked" : "unmarked";
         my $status = $u->underage_status;
         LJ::statushistory_add($u, undef, "coppa", "$text; status=$status; when=$shwhen");
@@ -443,7 +458,7 @@ sub underage {
     });
 
     # return true if no failures
-    return 1;
+    return $ret_zero ? 0 : 1;
 }
 
 # return true if we know user is a minor (< 18)
