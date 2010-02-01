@@ -512,16 +512,16 @@ sub matches_filter {
         return 0 unless $watcher->get_cap('getselfemail') && $watcher->prop('opt_getselfemail');
     }
 
-    # not a match if this user posted the entry and they don't want comments emailed,
-    # unless they posted it. (don't need to check again for the cap, since we did above.)
-    if (LJ::u_equals($entry->poster, $watcher) && !$watcher->prop('opt_getselfemail')) {
-        return 0 if $entry->prop('opt_noemail') && $subscr->method =~ /Email$/;
-    }
-
     # watching a specific journal
     if ($sarg1 == 0 && $sarg2 == 0) {
-        # TODO: friend group filtering in case of $sjid == 0 when
-        # a subprop is filtering on a friend group
+        # if this is a community, maintainer gets notified no matter
+        # what entry settings are
+        return 1 unless LJ::u_equals($entry->journal, $entry->poster);
+
+        # if this is their own journal and they selected not to be notified
+        # of comments to this specific entry, well, don't notify them
+        return 0 if $entry->prop('opt_noemail');
+
         return 1;
     }
 
