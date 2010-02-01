@@ -14,6 +14,10 @@ use LJ::ESN;
 # LJ::ESN->schwartz_capabilities() returns array to classnames.
 sub capabilities { return LJ::ESN->schwartz_capabilities() }
 
+sub on_idle {
+    exit if $ENV{'ESN_TEST'};
+}
+
 __PACKAGE__->start();
 
 1;
