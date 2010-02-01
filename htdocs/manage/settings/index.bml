@@ -347,20 +347,26 @@ body<=
         my $value = $can_getselfemail ? $u->prop('opt_getselfemail') : 0;
 
         if ($can_getselfemail || !$u->is_identity) {
-            $ret .= '<tbody class="opt_getselfemail"><tr><td colspan="6">';
-
             my $label = $ML{'subscribe_interface.getselfemail'};
             $label .= LJ::run_hook("upgrade_link", $u) unless $can_getselfemail;
+            my $class = $can_getselfemail ? '' : 'disabled';
 
+            $ret .= '<tbody class="opt_getselfemail">';
+            $ret .= "<tr class=\"$class\">";
+            $ret .= '<td>';
+            $ret .= qq{<label for="opt_getselfemail">$label</label>};
+            $ret .= '</td>';
+            $ret .= '<td>';
             $ret .= LJ::html_check({
                 'name' => 'opt_getselfemail',
                 'id' => 'opt_getselfemail',
-                'label' => $label,
                 'selected' => $value,
                 'disabled' => !$can_getselfemail,
                 'noescape' => 1,
             });
-            $ret .= '</tr></td></tbody>';
+            $ret .= '</td>';
+            $ret .= '<td colspan="4"></td>';
+            $ret .= '</tr></tbody>';
         }
 
         $ret .= $widget->render({
