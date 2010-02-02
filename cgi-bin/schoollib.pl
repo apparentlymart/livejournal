@@ -1369,7 +1369,6 @@ sub merge_schools {
         'state2' => $newsc->{'state'},
         'city2' => $newsc->{'city'},
         'url2' => $newsc->{'url'},
-        'nostats' => 1,
     );
 
 	# and again, delete the ones that didn't rename
