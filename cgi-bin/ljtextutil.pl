@@ -99,7 +99,7 @@ sub durl
 {
     my ($a) = @_;
 
-    $a =~ s/+/ /g;
+    $a =~ s/\+/ /g;
     $a =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
     return $a;
 }
