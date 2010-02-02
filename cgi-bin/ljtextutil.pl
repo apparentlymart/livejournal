@@ -77,8 +77,13 @@ sub encode_url_string {
 sub eurl
 {
     my $a = $_[0];
+    ##
+    ## Warning: previous version of code replaced <space> by "+".
+    ## According to RFC 2396, <space> must be "%20", and only in query-string,
+    ## when application/x-www-form-urlencoded (old standard) is used, it may be "+".
+    ## See also: http://en.wikipedia.org/wiki/Percent-encoding.
+    ##
     $a =~ s/([^a-zA-Z0-9_\,\-.\/\\\:])/uc sprintf("%%%02x",ord($1))/eg;
-# we may not use '+' as code for ' ' in left to '?' part of URI - it is not standard and not supported in Apache::Request on enter to 'trans' phase
     return $a;
 }
 
@@ -93,7 +98,8 @@ sub eurl
 sub durl
 {
     my ($a) = @_;
-# we may not use '+' as code for ' ' in left to '?' part of URI - it is not standard and not supported in Apache::Request on enter to 'trans' phase
+
+    $a =~ s/+/ /g;
     $a =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
     return $a;
 }
