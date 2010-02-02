@@ -103,7 +103,6 @@ LJ::register_hook("postpost", sub {
     #
     LJ::PingBack->notify(
         uri  => $entry->url,
-        text => $args->{event},
         mode => $prop_pingback,
     );
     
@@ -133,7 +132,6 @@ LJ::register_hook("editpost", sub {
     #
     LJ::PingBack->notify(
         uri  => $entry->url,
-        text => $entry->event_raw,
         mode => $entry->prop('pingback'),
     );
 

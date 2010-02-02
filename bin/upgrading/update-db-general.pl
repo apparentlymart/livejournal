@@ -3276,6 +3276,19 @@ CREATE TABLE supporttagmap (
 )
 EOC
 
+# PingBack relations
+register_tablecreate("pingrel", <<'EOC');
+CREATE TABLE pingrel (
+    suid    INT UNSIGNED NOT NULL,
+    sjid    INT UNSIGNED NOT NULL,
+    tuid    INT UNSIGNED NOT NULL,
+    tjid    INT UNSIGNED NOT NULL,
+
+    UNIQUE INDEX(suid, sjid, tuid, tjid)
+    
+) TYPE=InnoDB
+EOC
+
 ### changes
 
 register_alter(sub {

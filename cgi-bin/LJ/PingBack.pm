@@ -16,7 +16,7 @@ sub ping_post {
     #
     my $target_entry = LJ::Entry->new_from_url($targetURI);
     unless ($target_entry){
-        warn "Unknown entry";
+        warn "Unknown entry: $targetURI";
         return "Unknown entry";
     }
 
@@ -41,8 +41,8 @@ sub ping_post {
 
     #
     my $subject = $source_entry
-                    ? ($source_entry->subject_raw || BML::ml("pingback.sourceURI.default_title"))
-                    : ($title || BML::ml("pingback.sourceURI.default_title"));
+                    ? ($source_entry->subject_raw || LJ::Lang::ml("pingback.sourceURI.default_title"))
+                    : ($title || LJ::Lang::ml("pingback.sourceURI.default_title"));
 
     my $comment = LJ::Comment->create(
                     state        => 'S', # this comment should be 'Screened'
@@ -51,13 +51,13 @@ sub ping_post {
                     poster       => $poster_u,
 
                     body         => ($source_entry
-                                        ? BML::ml("pingback.ljping.comment.text",
+                                        ? LJ::Lang::ml("pingback.ljping.comment.text",
                                             { context   => $context,
                                               subject   => $subject,
                                               sourceURI => $sourceURI,
                                               poster    => $source_entry->poster->username,
                                               })
-                                        : BML::ml("pingback.public.comment.text",
+                                        : LJ::Lang::ml("pingback.public.comment.text",
                                             { sourceURI => $sourceURI,
                                               title     => $subject,
                                               context   => $context
@@ -77,7 +77,6 @@ sub ping_post {
 sub should_entry_recieve_pingback {
     my $class        = shift;
     my $target_entry = shift;
-    my $source_entry = shift;
     
     return 0 if $LJ::DISABLED{'pingback_receive'};
     return 0 if $target_entry->is_suspended;
@@ -110,11 +109,9 @@ sub notify {
     my %args  = @_;
 
     my $uri  = $args{uri};
-    my $text = $args{text};
     my $mode = $args{mode};
 
-    # Send ALL posts to PB server
-    # return unless $mode =~ m!^[LO]$!; # (L)ivejournal only, (O)pen.
+    return unless $mode =~ m!^[LO]$!; # (L)ivejournal only, (O)pen.
 
     my $sclient = LJ::theschwartz();
     unless ($sclient){
@@ -125,7 +122,7 @@ sub notify {
     # 
     my $job = TheSchwartz::Job->new(
                   funcname  => "TheSchwartz::Worker::NotifyPingbackServer",
-                  arg       => { uri => $uri, text => $text, mode => $mode },
+                  arg       => { uri => $uri, mode => $mode },
                   );
     $sclient->insert($job);
 
@@ -140,7 +137,6 @@ sub has_user_pingback {
     return 0 unless $u->get_cap('pingback');
     return 1;
 }
-
 
 
 1;

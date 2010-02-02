@@ -1,48 +1,193 @@
 package TheSchwartz::Worker::NotifyPingbackServer;
 use strict;
 use base 'TheSchwartz::Worker';
-use LWP::UserAgent qw();
-use HTTP::Request  qw();
-use JSON;
-
+use LJ::Entry;
+use LJ::PingBack;
 
 sub work {
     my ($class, $job) = @_;
     my $args = $job->arg;
     my $client = $job->handle->client;
-    
+
     send_ping(uri  => $args->{uri},
-              text => $args->{text},
               mode => $args->{mode},
               );
-                  
+
     $job->completed;
-    
+
 }
 
 sub send_ping {
     my %args = @_;
 
-    my $uri  = $args{uri};
-    my $text = $args{text};
+    my $source_uri = $args{uri};
     my $mode = $args{mode};
+
+    return unless $mode =~ m/^[LO]$/; # (L)ivejournal only, (O)pen.
+
+    my $source_entry = LJ::Entry->new_from_url($source_uri);
+    return unless $source_entry;
     
-    my $pb_server_uri = $LJ::PINGBACK->{internal_uri};
-    my $content = JSON::objToJson({ uri => $uri, text => $text, mode => $mode }) . "\r\n";
+    my @links = ExtractLinksWithContext->do_parse($source_entry->event_raw);
+    # use Data::Dumper;
+    # warn "Links: " . Dumper(\@links);
+    return unless @links;
+    
+    foreach my $link (@links){
+        my $target_entry = LJ::Entry->new_from_url($link->{uri});
+        next unless $target_entry;
+        next unless LJ::PingBack->should_entry_recieve_pingback($target_entry);
+        next unless log_ping($source_entry, $target_entry);
 
-    my $headers = HTTP::Headers->new;
-       $headers->header('Content-Length' => length $content);
-
-    my $req = HTTP::Request->new('POST', $pb_server_uri, $headers, $content );
-    my $ua  = LWP::UserAgent->new;
-    my $res = $ua->request($req);
-
-    die $res->content
-        unless $res->content eq 'OK';
+        # on success returns LJ::Comment.
+        LJ::PingBack->ping_post(
+                    sourceURI => $source_uri,
+                    targetURI => $link->{uri},
+                    context   => $link->{context},
+                    title     => $source_entry->subject_raw,
+                    );
+    }
 
     return 1;
+}
+
+sub log_ping {
+    my ($source_entry, $target_entry) = @_;
+    my $target_entryer = $target_entry->poster;
+    return 1 unless $target_entryer; # positive value skips this link
+
+    my $dbh = $target_entryer->writer;
+    die "Can't get db writer for user " . $target_entryer->username
+        unless $dbh;
+
+    my $sth = $dbh->prepare("
+        INSERT INTO pingrel
+            (suid, sjid, tuid, tjid)
+        VALUES
+            (?, ?, ?, ?)
+    ");
+    $sth->execute(
+        $source_entry->posterid, $source_entry->jitemid,
+        $target_entry->posterid, $target_entry->jitemid
+        ) or return 0;
+
+    return 1;
+}
+
+package ExtractLinksWithContext;
+use strict;
+use HTML::Parser;
+use Encode qw//;
+use Data::Dumper;
+
+# if needed this vars easily can be moved to $parser object as its properties.
+my $prev_link_end = 0;
+my @links = ();
+my $res = '';
+
+
+sub do_parse {
+    my $class = shift;
+    my $text  = shift;
+
+    $res = '';
+    $prev_link_end = 0;
+    @links = ();
+
+    # text can be a plain text or html or combined.
+    # some links can be a well-formed <A> tags, other just a plain text like http://some.domain/page.html
+    # after detecting a link we need to extract a text (context) in which this link is.
+    # To fetching link context in the one way we do process text twice:
+    #   1) convert links in plain text in an <a> tags
+    #   2) extract links and its context.
+
+    # <a href="http://ya.ru">http://ya.ru</a> - well-formed a-tag
+    # <div>well-known search is http://google.ru</div> - link in plain text
+
+
+    # convert links from plain text in <a> tags.
+    my $normolized_text = '';
+    my $normolize = HTML::Parser->new(
+        api_version => 3,
+        start_h     => [ sub { 
+                            my ($self, $tagname, $text, $attr) = @_;
+                            $normolized_text .= $text;
+                            $self->{_smplf_in_a} = 1 if $tagname eq 'a';
+                        }, "self, tagname,text,attr" ],
+        end_h       => [ sub {
+                            my ($self, $tagname, $text, $attr) = @_;
+                            $normolized_text .= $text;
+                            $self->{_smplf_in_a} = 0 if $tagname eq 'a';
+                        }, "self,tagname,text,attr" ],
+        text_h      => [ sub {
+                            my ($self, $text) = @_;
+                            unless ($self->{_smplf_in_a}){
+                                $text =~ s|(http://[\w\-\_]{1,16}\.$LJ::DOMAIN/\d+\.html)|<a href="$1">$1</a>|g;
+                            }
+                            $normolized_text .= $text;
+                        },  "self,text" ],
+    );
+    $normolize->parse( Encode::decode_utf8($text) );
+
+    # parse
+    my $parser = HTML::Parser->new(
+        api_version => 3,
+        start_h     => [ \&tag_start, "tagname,text,attr" ],
+        end_h       => [ \&tag_end,   "tagname,text,attr" ],
+        text_h      => [ \&text,  "text" ],
+    );
+    $parser->parse($normolized_text);
+    
+    return 
+        map { $_->{context} =  Encode::encode_utf8($_->{context}); $_ } 
+        @links;
+}
+
+sub tag_start {
+    my $tag_name = shift;
+    my $text     = shift;
+    my $attr     = shift;
+
+    if ($tag_name eq 'a') {
+        parse_a ($text, $attr)
+    } elsif ($tag_name =~ m/(br|p|table|hr|object)/) {
+        $res .= ' ';
+    }
 
 }
+sub tag_end {
+    my $tag_name = shift;
+    if ($tag_name eq 'a'){
+        my $context = substr $res, (length($res) - 100 < $prev_link_end ? $prev_link_end : 100);
+        
+        if (length($context) eq 100 and length($res) > 100 ){ # context does not start from the text begining.
+            $context =~ s/^(\S{1,5}\s*)//;
+        }
+        
+        $links[-1]->{context} = $context;        
+        $prev_link_end = length($res);
+    }
+    return;
+}
+sub text {
+    my $text = shift;
+    $res .= $text;
+    return;
+
+}
+sub parse_a {
+    my $text = shift;
+    my $attr = shift;
+    
+    my $uri = URI->new($attr->{href});
+    return unless $uri;
+
+    my $context = $text;
+
+    push @links => { uri => $uri->as_string, context => $context };
+    return;
+}
+
 
 
 
