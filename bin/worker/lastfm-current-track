@@ -3,6 +3,8 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require "ljlib.pl";
 use LJ::NewWorker::Gearman;
+use HTML::Entities;
+
 LJ::NewWorker::Gearman::LastFMGetCurrentTrack->start();
 
 package LJ::NewWorker::Gearman::LastFMGetCurrentTrack;

@@ -21,7 +21,8 @@ sub work {
                             "FROM user u, syndicated s " .
                             "WHERE u.userid=s.userid " .
                             "AND s.checknext < NOW() " .
-                            "LIMIT 500");
+                            "ORDER BY checknext ASC " .
+                            "LIMIT 50");
     $sth->execute;
     while (my $urow = $sth->fetchrow_hashref) {
         push @todo, $urow;

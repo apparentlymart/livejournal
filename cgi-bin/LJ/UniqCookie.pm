@@ -9,7 +9,7 @@ my %req_cache_uid2uniqs = (); # uid  => [ uniq1, uniq2, ... ]
 my %req_cache_uniq2uids = (); # uniq => [  uid1,  uid2, ... ]
 
 # number of uniq cookies to keep in cache + db before being cleaned
-my $window_size = 10;
+my $window_size = 1000;
 
 sub clear_request_cache {
     my $class = shift;

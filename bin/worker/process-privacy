@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+require "ljfeed.pl";
 
 package LJ::NewWorker::TheSchwart::MassPrivacy;
 use strict;

@@ -299,6 +299,7 @@ sub get_validated_role_dbh {
     $LJ::DBIRole->clear_req_cache;
 
     my $db = LJ::get_dbh({raw=>1}, $role);
+    report_error_ops() unless $db;
     die "Couldn't get handle for role: $role" unless $db;
 
     # make sure any error is a fatal error.  no silent mistakes.
@@ -307,6 +308,16 @@ sub get_validated_role_dbh {
     $db->do("SET wait_timeout=28800");
 
     return $db;
+}
+
+# lets inform ops that the script has stopped at least.
+sub report_error_ops {
+    my $subject = 'Moveucluster.pl Script Failure';
+    my $to = 'sf-ops@livejournalinc.com';
+
+    open (MAIL, "|/usr/bin/mail -s \"$subject\" $to");
+    print MAIL "moveucluster.pl failed, please login and restart the job";
+    close (MAIL);
 }
 
 # some might call this $dboa
