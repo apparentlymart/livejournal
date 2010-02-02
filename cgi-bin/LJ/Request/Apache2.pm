@@ -1,6 +1,7 @@
 package LJ::Request::Apache2;
 use strict;
 
+use Carp qw//;
 use Apache2::Const;
 use Apache2::RequestRec;
 use Apache2::Response;
@@ -31,7 +32,7 @@ sub LJ::Request::BAD_REQUEST               { return Apache2::Const::BAD_REQUEST(
 my $instance = '';
 sub LJ::Request::request { $instance }
 sub LJ::Request::r {
-    die "Request is not provided to LJ::Request" unless $instance;
+    Carp::confess("Request is not provided to LJ::Request") unless $instance;
     return $instance->{r};
 }
 
