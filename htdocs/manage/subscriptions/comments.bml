@@ -93,7 +93,7 @@ body<=
                 $ret .= "<?errorbar $mlstring errorbar?>";
             }
         } else {
-            return BML::redirect('/manage/settings/?cat=notifications');
+            return BML::redirect('/manage/settings/?cat=notifications&saved=1');
         }
     }
 

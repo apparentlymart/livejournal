@@ -219,7 +219,7 @@ body<=
             my $group = LJ::Subscription::Group->thaw($FORM{'delete_group'});
             $set->drop_group($group);
 
-            return BML::redirect($selfuri . '&deleted_subs=1');
+            return BML::redirect($selfuri . '&saved=1');
         }
 
         if (LJ::did_post()) {
@@ -249,11 +249,11 @@ body<=
             $u->set_prop('opt_getselfemail' => exists($POST{'opt_getselfemail'}))
                 if LJ::get_cap($u, 'getselfemail');
 
-            return BML::redirect($selfuri);
+            return BML::redirect($selfuri . '&saved=1');
         }
 
         $submit_msg .= "<?warningbar $ML{'.success'} warningbar?><br />"
-            if $GET{'deleted_subs'};
+            if $GET{'saved'};
     }
 
     my $ret = "<div id='settings_page'>";
