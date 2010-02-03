@@ -3300,7 +3300,7 @@ sub placeholder_link {
 
     return qq {
             <span class="LJ_Placeholder_Container" style="width: ${width}px; height: ${height}px;">
-                <a href="$link" onclick="return LiveJournal.placeholder_click(this, '$placeholder_html')">
+                <a href="$link" onclick="return LiveJournal.placeholderClick(this, '$placeholder_html')">
                     <img src="$img" class="LJ_Placeholder" title="Click to show embedded content" alt="" />
                 </a>
             </span>
