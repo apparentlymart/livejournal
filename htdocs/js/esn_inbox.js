@@ -3,14 +3,15 @@ var ESN_Inbox = {
     "selected_qids": []
 };
 
-DOM.addEventListener(window, "load", function (evt) {
+jQuery(function()
+{
   for (var i=0; i<folders.length; i++) {
       var folder = folders[i];
-
       ESN_Inbox.initTableSelection(folder);
       ESN_Inbox.initContentExpandButtons(folder);
       ESN_Inbox.initInboxBtns(folder, cur_folder);
   }
+	document.getElementById('allForm').onsubmit = function(){ return false; };
 });
 
 // Set up table events
