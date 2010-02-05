@@ -169,7 +169,7 @@ sub subscription_as_html {
 sub available_for_user  {
     my ($self, $u) = @_;
 
-    return 0 if $self->arg1 || $self->userid;
+    return 0 if $self->arg1 && ($self->arg1 != $u->id);
 
     return $u->get_cap("track_pollvotes") ? 1 : 0;
 }
@@ -177,7 +177,7 @@ sub available_for_user  {
 sub is_subscription_visible_to  {
     my ($self, $u) = @_;
 
-    return $self->arg1 ? 0 : 1;
+    return 1;
 }
 
 sub is_tracking { 0 }

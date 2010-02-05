@@ -334,7 +334,7 @@ body<=
                 'JournalNewComment-u',
                 'CommunityEntryReply',
                 'CommentReply',
-                'PollVote',
+                'PollVote-u',
                 'Befriended-u',
                 'Defriended-u',
                 'UserMessageRecvd-u',
