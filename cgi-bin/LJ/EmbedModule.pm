@@ -170,7 +170,7 @@ sub parse_module_embed {
         $tag = lc $tag;
         my $newstate = undef;
         my $reconstructed = $class->reconstruct($token);
-
+        
         if ($state == REGULAR) {
             if ($tag eq 'lj-embed' && $type eq 'S' && ! $attr->{'/'}) {
                 # <lj-embed ...>, not self-closed
@@ -462,9 +462,6 @@ sub reconstruct {
                 $selfclose = 1;
                 next;
             }
-
-            # FIXME: ultra ghetto.
-            $attr->{$name} = LJ::no_utf8_flag($attr->{$name});
 
             my $tribute = " $name=\"" . LJ::ehtml($attr->{$name}) . "\"";
 
