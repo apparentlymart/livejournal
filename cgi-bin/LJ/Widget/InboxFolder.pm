@@ -51,7 +51,7 @@ sub render_body {
 
     # print form
     my $msgs_body .= qq {
-        <form action="$LJ::SITEROOT/inbox/" method="POST" id="${name}Form" onsubmit="return false;">
+        <form action="$LJ::SITEROOT/inbox/" method="POST" id="${name}Form">
         };
 
     $msgs_body .= LJ::html_hidden({
