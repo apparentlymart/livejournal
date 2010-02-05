@@ -684,6 +684,7 @@ sub subscriptions {
 
     # own comments are deliberately sent to email only
     if (
+        $comment_author &&
         $comment_author->prop('opt_getselfemail') &&
         $comment_author->get_cap('getselfemail') &&
         $acquire_sub_slot->()
@@ -698,7 +699,7 @@ sub subscriptions {
     # send a notification to the author of the "parent" comment, if they
     # want to get it
     if (
-        $parent_comment &&
+        $parent_comment && $parent_comment_author &&
 
         # if they are responding to themselves and wish to get that, we've
         # already handled it above
