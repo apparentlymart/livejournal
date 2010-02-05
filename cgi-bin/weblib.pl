@@ -1295,9 +1295,8 @@ sub entry_form {
     $out .= "<ul class='pkg'>\n";
     $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertImage();' title='"
         . BML::ml('fckland.ljimage') . "'>" . BML::ml('entryform.insert.image2') . "</a></li>\n";
-    $out .= "<li class='media'><a href='javascript:void(0);' onclick='InOb.handleInsertEmbed();' title='Embed Media'>"
-        . "Embed Media</a></li>\n" unless $LJ::DISABLED{embed_module};
-    $out .= "</ul>\n";
+    $out .= "<li class='media'><a href='javascript:void(0);' onclick='InOb.handleInsertEmbed();' title='". BML::ml('entryform.insert.embed') ."'>" 
+        . "". BML::ml('entryform.insert.embed') ."</a></li>\n" unless $LJ::DISABLED{embed_module};    $out .= "</ul>\n";
     my $format_selected = $opts->{'prop_opt_preformatted'} || $opts->{'event_format'} ? "checked='checked'" : "";
     $out .= "<span id='linebreaks'><input type='checkbox' class='check' value='preformatted' name='event_format' id='event_format' $format_selected  />
             <label for='event_format'>" . BML::ml('entryform.format3') . "</label>" . LJ::help_icon_html("noautoformat", "", " ") . "</span>\n";
@@ -1327,15 +1326,31 @@ sub entry_form {
 RTE
 
     $out .= "if (!window.FCKLang) FCKLang = {};\n";
-    $out .= "FCKLang.UserPrompt = \"".LJ::ejs(BML::ml('fcklang.userprompt'))."\";\n";
-    $out .= "FCKLang.InvalidChars = \"".LJ::ejs(BML::ml('fcklang.invalidchars'))."\";\n";
-    $out .= "FCKLang.LJUser = \"".LJ::ejs(BML::ml('fcklang.ljuser'))."\";\n";
-    $out .= "FCKLang.VideoPrompt = \"".LJ::ejs(BML::ml('fcklang.videoprompt'))."\";\n";
-    $out .= "FCKLang.LJVideo = \"".LJ::ejs(BML::ml('fcklang.ljvideo2'))."\";\n";
-    $out .= "FCKLang.CutPrompt = \"".LJ::ejs(BML::ml('fcklang.cutprompt'))."\";\n";
-    $out .= "FCKLang.ReadMore = \"".LJ::ejs(BML::ml('fcklang.readmore'))."\";\n";
-    $out .= "FCKLang.CutContents = \"".LJ::ejs(BML::ml('fcklang.cutcontents'))."\";\n";
-    $out .= "FCKLang.LJCut = \"".LJ::ejs(BML::ml('fcklang.ljcut'))."\";\n";
+
+    my %langmap = ( 
+        'UserPrompt' => 'userprompt', 
+        'InvalidChars' => 'invalidchars', 
+        'LJUser' => 'ljuser', 
+        'VideoPrompt' => 'videoprompt', 
+        'LJVideo' => 'ljvideo2', 
+        'CutPrompt' => 'cutprompt', 
+        'ReadMore' => 'readmore', 
+        'CutContents' => 'cutcontents', 
+        'LJCut' => 'ljcut', 
+        'LJEmbedPrompt' => 'ljembedprompt', 
+        'LJEmbedPromptTitle' => 'ljembedprompttitle', 
+        'LJEmbed' => 'ljembed', 
+        'Poll_PollWizardNotice' => 'poll.pollwizardnotice', 
+        'Poll_PollWizardNoticeLink' => 'poll.pollwizardnoticelink', 
+        'Poll_AccountLevelNotice' => 'poll.accountlevelnotice', 
+        'Poll_PollWizardTitle' => 'poll.pollwizardtitle', 
+        'Poll' => 'poll', 
+    ); 
+
+    foreach my $key (keys %langmap) { 
+        my $val = $langmap{$key}; 
+        $out .= "FCKLang.$key = \"".LJ::ejs(BML::ml("fcklang.$val"))."\";\n"; 
+    }
 
         if ($opts->{'richtext_default'}) {
             $$onload .= 'useRichText("draft", "' . LJ::ejs($LJ::WSTATPREFIX) . '");';
