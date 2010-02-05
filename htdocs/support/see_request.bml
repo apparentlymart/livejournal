@@ -371,7 +371,7 @@ body<=
     # uniq
     if (LJ::check_priv($remote, 'sysban', 'uniq') || LJ::check_priv($remote, "canview", "userlog")) {
         my $uniq = $props->{'uniq'} || "<i>$ML{'.none'}</i>";
-        $ret .= "<tr><td valign='bottom' align='right'><b>$ML{'.uniq'}</b></td><td>$uniq</td></tr>\n";
+        $ret .= "<tr><td valign='bottom' align='right'><b>$ML{'.uniq'}</b></td><td><a href='$LJ::SITEROOT/admin/uniq.bml?what=$uniq'>$uniq</a></td></tr>\n";
     }
 
     # account type
@@ -394,7 +394,7 @@ body<=
                $ML{'.userreadonly'} ."</span><br />";
         }
 
-        $ret .= "$ML{'.username'}: <?ljuserf $u->{'user'} ljuserf?>";
+        $ret .= "$ML{'.username'}: $u->{'user'}";
         $ret .= "<br />$ML{'.style'}: ";
         if ($u->{'stylesys'} == 2) {
             $ret .= "(S2) ";
@@ -476,13 +476,16 @@ body<=
 
         my $view_history = LJ::check_priv($remote, 'historyview');
         my $view_userlog = LJ::check_priv($remote, 'canview', 'userlog') || LJ::check_priv($remote, 'canview', '*');
+        my $view_money = LJ::check_priv($remote, 'moneysearch') || LJ::check_priv($remote, 'moneyview');
 
-        if ($view_history || $view_userlog) {
+        if ($view_history || $view_userlog || $view_money) {
             $ret .= "<br />$ML{'.view'}: ";
             $ret .= "<a href='$LJ::SITEROOT/admin/statushistory.bml?user=$u->{user}'>$ML{'.statushistory'}</a> "
                 if $view_history;
             $ret .= "<a href='$LJ::SITEROOT/admin/userlog.bml?user=$u->{user}'>userlog</a> "
                 if $view_userlog;
+            $ret .= "<a href='$LJ::SITEROOT/admin/accounts/paidsearch.bml?method=user&value=$u->{user}'>payments</a> "
+                if $view_money;
         }
 
         $ret .= "</td></tr>\n";
