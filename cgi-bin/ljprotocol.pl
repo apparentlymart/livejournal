@@ -2113,6 +2113,8 @@ sub getevents
 {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
+
+    $flags->{'ignorecanuse'} = 1; # later we will check security levels, so allow some access to communities
     return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
