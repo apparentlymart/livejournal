@@ -15,6 +15,9 @@ use vars qw(%udp_sock);
 
 sub handler
 {
+    my $r = shift;
+    LJ::Request->init($r) unless LJ::Request->is_inited;
+
     return LJ::Request::OK if LJ::Request->main;
     return LJ::Request::OK unless $LJ::HAVE_AVAIL && $LJ::FREECHILDREN_BCAST;
 

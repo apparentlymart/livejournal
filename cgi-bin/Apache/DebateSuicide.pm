@@ -15,7 +15,9 @@ our $ppid;
 # oh btw, this is totally linux-specific.  gtop didn't work, so so much for portability.
 sub handler
 {
-    #my $r = shift;
+    my $r = shift;
+    LJ::Request->init($r) unless LJ::Request->is_inited;
+    
     return LJ::Request::OK if LJ::Request->main;
     return LJ::Request::OK unless $LJ::SUICIDE && LJ::ModuleCheck->have("GTop");
 
