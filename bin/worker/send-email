@@ -22,6 +22,7 @@ sub BEGIN {
 
 sub schwartz_verbose_handler {
     return sub {
+        return unless __PACKAGE__->verbose;
         my ($msg, $job) = @_;
         $msg =~ s/\s+$//;
         warn "$msg\n";
