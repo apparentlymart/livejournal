@@ -166,7 +166,7 @@ sub qotd_display {
                 "$archive | $suggest</span>$d->{from_text}" . $class->impression_img($q) . "</p>";
 
             my $add_friend = '';
-            my $writersblock = LJ::load_user("writersblock");
+            my $writersblock = LJ::load_user($community_name);
             $add_friend = "<li><span><a href='$LJ::SITEROOT/friends/add.bml?user=$community_name'>" . $class->ml('widget.qotd.add_friend') . "</a></span></li>"
                 if $writersblock && !LJ::is_friend($remote,$writersblock);
 
