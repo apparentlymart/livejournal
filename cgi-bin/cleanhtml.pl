@@ -743,6 +743,12 @@ sub clean
                     ## known (fixed) vulnerability is src="data:..." 
                     $hash->{src} = canonical_url($hash->{src}, 1);  
                     
+                    ## Ratings can be cheated by commenting a popular post with 
+                    ## <img src="http://my-journal.livejournal.com/12345.html"> 
+                    if ($hash->{src} =~ m!/\d+\.html$!) {
+                        next TOKEN;    
+                    }
+                    
                     if ($img_bad) {
                         $newdata .= "<a class=\"ljimgplaceholder\" href=\"" .
                             LJ::ehtml($hash->{'src'}) . "\">" .
