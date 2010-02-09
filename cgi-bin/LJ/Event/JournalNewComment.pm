@@ -685,6 +685,7 @@ sub subscriptions {
     # own comments are deliberately sent to email only
     if (
         $comment_author &&
+        (!$cid || $comment_author->clusterid == $cid) &&
         $comment_author->prop('opt_getselfemail') &&
         $comment_author->get_cap('getselfemail') &&
         $acquire_sub_slot->()
@@ -700,6 +701,7 @@ sub subscriptions {
     # want to get it
     if (
         $parent_comment && $parent_comment_author &&
+        (!$cid || $parent_comment_author->clusterid == $cid) &&
 
         # if they are responding to themselves and wish to get that, we've
         # already handled it above
@@ -735,6 +737,7 @@ sub subscriptions {
         # if they are responding to themselves and wish to get that, we've
         # already handled it above
         !LJ::u_equals($comment_author, $entry_author) &&
+        (!$cid || $entry_author->clusterid == $cid) &&
 
         !$entry->prop('opt_noemail')
     ) {
@@ -745,7 +748,8 @@ sub subscriptions {
                 'require_active' => 1,
             );
 
-            if (my $count = $acquire_sub_slot->(scalar(@subs2))) {
+            my $count = scalar(@subs2);
+            if ($count && ($count = $acquire_sub_slot->($count))) {
                 $#subs2 = $count - 1;
                 push @subs, @subs2;
             }

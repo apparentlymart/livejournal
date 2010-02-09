@@ -224,7 +224,7 @@ sub work {
         # user from the right cluster. (to avoid user moves with old data
         # on old clusters from causing duplicates). easier to do it there
         # than here, to avoid a load_userids call.
-        my $sublist = [ map { [ $_->userid + 0, $_->dump + 0 ] } @set ];
+        my $sublist = [ map { [ $_->userid + 0, $_->dump ] } @set ];
         push @subjobs, TheSchwartz::Job->new(
                                              funcname => 'LJ::Worker::FilterSubs',
                                              arg      => [ $e_params, $sublist, $cid ],
