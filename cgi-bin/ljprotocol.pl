@@ -1181,6 +1181,8 @@ sub postevent
     return fail($err, 155, "You must have an authenticated email address in order to post to another account")
         unless $u->{'status'} eq 'A' || $u->{'journaltype'} eq 'Y';
 
+    $req->{'event'} =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
+
     # post content too large
     # NOTE: requires $req->{event} be binary data, but we've already
     # removed the utf-8 flag in the XML-RPC path, and it never gets
