@@ -321,4 +321,14 @@ sub createtime {
     return $self->{'subs'}->{$inbox_ntypeid}->{'createtime'};
 }
 
+sub active {
+    my ($self) = @_;
+
+    my $ret = 0;
+    $ret ||= $_->active foreach (values %{$self->{'subs'}});
+
+    warn $self->freeze, ', ', $ret;
+    return $ret;
+}
+
 1;

@@ -274,15 +274,14 @@ sub delete_all_inactive_subs {
 
     return if $u->is_expunged;
 
-    my @subs = $class->find($u);
-    @subs = grep { !($_->active) } @subs;
-    my $count = scalar @subs;
-    if ($count > 0 && !$dryrun) {
-        $_->delete foreach (@subs);
-        undef $u->{_subscriptions};
+    my $set = LJ::Subscription::GroupSet->fetch_for_user($u);
+    my @inactive_groups = grep { !$_->active } $set->groups;
+
+    unless ($dryrun) {
+        $set->drop_group($_) foreach (@inactive_groups);
     }
 
-    return $count;
+    return scalar(@inactive_groups);
 }
 
 # find matching subscriptions with different notification methods
