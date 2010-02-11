@@ -244,12 +244,21 @@ body<=
                 $newset->insert_group($group);
             }
 
-            $set->update($newset);
+            eval { $set->update($newset) };
+
+            my $error = $@;
 
             $u->set_prop('opt_getselfemail' => exists($POST{'opt_getselfemail'}))
                 if LJ::get_cap($u, 'getselfemail');
 
-            return BML::redirect($selfuri . '&saved=1');
+            if ($error) {
+                if ($error->isa('LJ::Subscription::QuotaError')) {
+                    my $mlstring = $error->as_string;
+                    $submit_msg .= "<?errorbar $mlstring errorbar?>";
+                }
+            } else {
+                return BML::redirect($selfuri . '&saved=1');
+            }
         }
 
         $submit_msg .= "<?warningbar $ML{'.success'} warningbar?><br />"

@@ -628,6 +628,14 @@ sub event {
     return $self->group->event;
 }
 
+sub enabled {
+    my ($self) = @_;
+
+    my $ret = $self->group->enabled;
+    # warn $self->group->freeze, ', ', $ret;
+    return $ret;
+}
+
 package LJ::Error::Subscription::TooMany;
 sub fields { qw(subscr u); }
 

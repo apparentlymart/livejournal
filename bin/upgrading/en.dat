@@ -1556,6 +1556,8 @@ A new [[openlink]]question of the day[[closelink]] was posted to [[journal]]!
 
 esn.error.quota=You have exceeded your quota of [[quota]] subscriptions. Please <a[[aopts]]>delete some of your existing subscriptions</a> in order to add new ones.
 
+esn.error.quota_total=You have exceeded your quota of [[quota]] subscriptions. Please <a[[aopts]]>delete some of your existing subscriptions</a> in order to add new ones.
+
 entryform.adultcontent=Adult Content:
 
 entryform.adultcontent.concepts=Adult Concepts

@@ -83,13 +83,8 @@ body<=
         };
 
         if ($@) {
-            if (ref $@ eq 'LJ::Subscription::QuotaError') {
-                my $mlstring = LJ::run_hook('esn_quota_error', $u) ||
-                    LJ::Lang::ml('esn.error.quota', {
-                        'quota' => LJ::get_cap($u, 'subscriptions'),
-                        'aopts' => qq{ href="$LJ::SITEROOT/manage/settings/?cat=notifications"},
-                    });
-
+            if ($@->isa('LJ::Subscription::QuotaError')) {
+                my $mlstring = $@->as_string;
                 $ret .= "<?errorbar $mlstring errorbar?>";
             }
         } else {

@@ -321,8 +321,17 @@ sub createtime {
     return $self->{'subs'}->{$inbox_ntypeid}->{'createtime'};
 }
 
+sub enabled {
+    my ($self) = @_;
+
+    my $u = LJ::want_user($self->userid);
+    return $self->event->available_for_user($u);
+}
+
 sub active {
     my ($self) = @_;
+
+    return 0 unless $self->enabled;
 
     my $ret = 0;
     $ret ||= $_->active foreach (values %{$self->{'subs'}});
