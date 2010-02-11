@@ -53,9 +53,20 @@ body<=
         next unless $cu && $cu->{statusvis} eq "V" || $cu->is_readonly;
         $names{$uid} = [ $cu->{user}, $cu->{name}, -1 ];
         if ($mods{$uid}) {
-            $udbr = LJ::get_cluster_reader($cu);
-            my $sql = "SELECT COUNT(*) FROM modlog WHERE journalid=$uid";
-            $modcount{$uid} = $names{$uid}[2] = $udbr->selectrow_array($sql) || 0;
+                $udbr = LJ::get_cluster_reader($cu);
+                my $sql = "SELECT COUNT(*), posterid" .
+                            " FROM modlog WHERE journalid=$uid GROUP BY posterid";
+                my $modlogref = $udbr->selectall_arrayref($sql);
+                foreach (@$modlogref) {
+                    my ($modlogcount, $posterid) = map {$_ || 0} @$_;
+                    if ($modlogcount && $posterid) {
+                        my $poster = LJ::want_user($posterid);
+                        if ($poster && $poster->is_suspended()) {
+                            $modlogcount = 0;   # Don't show requests from suspended users
+                        }
+                    }
+                    $modcount{$uid} = $names{$uid}[2] = $modlogcount;
+                }
         }
         if ($membership eq 'moderated') {
             my $ids = LJ::get_pending_members($uid) || [];
