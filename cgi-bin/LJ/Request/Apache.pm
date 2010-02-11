@@ -3,9 +3,8 @@ use strict;
 
 use Carp qw//;
 use Apache::Constants;
-#*OK        = \&Apache::Constants::OK;
-#*DONE      = \&Apache::Constants::DONE;
-#*NOT_FOUND = \&Apache::Constants::NOT_FOUND;
+require Apache::Request;
+require Apache::URI;
 
 sub LJ::Request::OK                        { return Apache::Constants::OK() }
 sub LJ::Request::REDIRECT                  { return Apache::Constants::REDIRECT() }
@@ -19,12 +18,6 @@ sub LJ::Request::M_OPTIONS                 { return Apache::Constants::M_OPTIONS
 sub LJ::Request::NOT_FOUND                 { return Apache::Constants::NOT_FOUND() }
 sub LJ::Request::SERVER_ERROR              { return Apache::Constants::SERVER_ERROR() }
 sub LJ::Request::BAD_REQUEST               { return Apache::Constants::BAD_REQUEST() }
-#sub LJ::Request:: { return Apache::Constants::() }
-
-
-
-require Apache::Request;
-require Apache::URI;
 
 my $instance = '';
 
