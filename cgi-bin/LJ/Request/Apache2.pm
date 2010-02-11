@@ -2,7 +2,7 @@ package LJ::Request::Apache2;
 use strict;
 
 use Carp qw//;
-use Apache2::Const;
+use Apache2::Const qw/:methods :common :http/;
 use Apache2::RequestRec;
 use Apache2::Response;
 use Apache2::RequestIO;
@@ -13,20 +13,22 @@ use Apache2::Access;
 use Apache2::Connection;
 use Apache2::URI;
 use ModPerl::Util;
+#use URI::Escape;
 
 
-sub LJ::Request::OK                        { return Apache2::Const::OK() }
-sub LJ::Request::REDIRECT                  { return Apache2::Const::REDIRECT() }
-sub LJ::Request::DECLINED                  { return Apache2::Const::DECLINED() }
-sub LJ::Request::FORBIDDEN                 { return Apache2::Const::FORBIDDEN() }
-sub LJ::Request::NOT_FOUND                 { return Apache2::Const::NOT_FOUND() }
-sub LJ::Request::HTTP_NOT_MODIFIED         { return Apache2::Const::HTTP_NOT_MODIFIED() }
-sub LJ::Request::HTTP_MOVED_PERMANENTLY    { return Apache2::Const::HTTP_MOVED_PERMANENTLY() }
-sub LJ::Request::HTTP_MOVED_TEMPORARILY    { return Apache2::Const::HTTP_MOVED_TEMPORARILY() }
-sub LJ::Request::M_TRACE                   { return Apache2::Const::M_TRACE() }
-sub LJ::Request::M_OPTIONS                 { return Apache2::Const::M_OPTIONS() }
-sub LJ::Request::SERVER_ERROR              { return Apache2::Const::SERVER_ERROR() }
-sub LJ::Request::BAD_REQUEST               { return Apache2::Const::BAD_REQUEST() }
+sub LJ::Request::OK                        { return Apache2::Const::OK }
+sub LJ::Request::REDIRECT                  { return Apache2::Const::REDIRECT }
+sub LJ::Request::DECLINED                  { return Apache2::Const::DECLINED }
+sub LJ::Request::FORBIDDEN                 { return Apache2::Const::FORBIDDEN }
+sub LJ::Request::NOT_FOUND                 { return Apache2::Const::NOT_FOUND }
+sub LJ::Request::HTTP_NOT_MODIFIED         { return Apache2::Const::HTTP_NOT_MODIFIED }
+sub LJ::Request::HTTP_MOVED_PERMANENTLY    { return Apache2::Const::HTTP_MOVED_PERMANENTLY }
+sub LJ::Request::HTTP_MOVED_TEMPORARILY    { return Apache2::Const::HTTP_MOVED_TEMPORARILY }
+sub LJ::Request::M_TRACE                   { return Apache2::Const::M_TRACE }
+sub LJ::Request::M_OPTIONS                 { return Apache2::Const::M_OPTIONS }
+sub LJ::Request::SERVER_ERROR              { return Apache2::Const::SERVER_ERROR }
+sub LJ::Request::BAD_REQUEST               { return Apache2::Const::HTTP_BAD_REQUEST }
+
 
 
 my $instance = '';
@@ -121,9 +123,18 @@ sub LJ::Request::path_info {
     return $instance->{r}->path_info(@_);
 }
 
+# $r->args in 2.0 returns the query string without parsing and splitting it into an array. 
 sub LJ::Request::args {
     my $class = shift;
-    return $instance->{r}->args(@_);
+    if (wantarray()){
+        my $qs = $instance->{r}->args(@_);
+        my @args = 
+            map { split /=/ => $_, 2 }
+            split /[\&\;]/ => $qs;
+        return @args;
+    } else {
+        return $instance->{r}->args(@_);
+    }
 }
 
 sub LJ::Request::method {
@@ -153,7 +164,8 @@ sub LJ::Request::filename {
 
 sub LJ::Request::add_httpd_conf {
     my $class = shift;
-    Apache2::ServerUtil->server->add_config(@_);
+    my @confs = @_;
+    Apache2::ServerUtil->server->add_config(\ @confs);
 }
 
 sub LJ::Request::is_initial_req {
@@ -163,17 +175,32 @@ sub LJ::Request::is_initial_req {
 
 sub LJ::Request::push_handlers_global {
     my $class = shift;
-    Apache2::ServerUtil->server->push_handlers(@_);
+    my @handlers = map {
+            my $el = $_;
+            $el =~ s/PerlHandler/PerlResponseHandler/g;
+            $el;
+        } @_;
+    Apache2::ServerUtil->server->push_handlers(@handlers);
 }
 
 sub LJ::Request::push_handlers {
     my $class = shift;
-    return $instance->{r}->push_handlers(@_);
+    my @handlers = map {
+            my $el = $_;
+            $el =~ s/PerlHandler/PerlResponseHandler/g;
+            $el;
+        } @_;
+    return $instance->{r}->push_handlers(@handlers);
 }
 
 sub LJ::Request::set_handlers {
     my $class = shift;
-    $instance->{r}->set_handlers(@_);
+    my @handlers = map {
+            my $el = $_;
+            $el =~ s/PerlHandler/PerlResponseHandler/g;
+            $el;
+        } @_;
+    $instance->{r}->set_handlers(@handlers);
 }
 
 sub LJ::Request::handler {
@@ -204,30 +231,30 @@ sub LJ::Request::free {
     $instance = undef;
 }
 
-# use pnotes instead of notes
+
 sub LJ::Request::notes {
     my $class = shift;
-    $instance->{apr}->pnotes (@_);
+    return $instance->{r}->pnotes(@_);
 }
 
 sub LJ::Request::pnotes {
     my $class = shift;
-    $instance->{apr}->pnotes (@_);
+    $instance->{r}->pnotes (@_);
 }
 
 sub LJ::Request::parse {
     my $class = shift;
-    $instance->{apr}->parse (@_);
+    $instance->{r}->parse (@_);
 }
 
 sub LJ::Request::uri {
     my $class = shift;
-    $instance->{apr}->uri (@_);
+    $instance->{r}->uri (@_);
 }
 
 sub LJ::Request::hostname {
     my $class = shift;
-    $instance->{apr}->hostname (@_);
+    $instance->{r}->hostname (@_);
 }
 
 sub LJ::Request::header_out {
@@ -242,7 +269,7 @@ sub LJ::Request::header_out {
 
 sub LJ::Request::headers_out {
     my $class = shift;
-    $instance->{apr}->headers_out (@_);
+    $instance->{r}->headers_out (@_);
 }
 
 sub LJ::Request::header_in {
@@ -262,7 +289,7 @@ sub LJ::Request::headers_in {
 
 sub LJ::Request::param {
     my $class = shift;
-    $instance->{apr}->param (@_);
+    $instance->{r}->param (@_);
 }
 
 sub LJ::Request::no_cache {
@@ -310,7 +337,7 @@ sub LJ::Request::send_http_header {
 
 sub LJ::Request::err_headers_out {
     my $class = shift;
-    $instance->{apr}->err_headers_out (@_)
+    $instance->{r}->err_headers_out (@_)
 }
 
 
@@ -321,19 +348,25 @@ sub LJ::Request::err_headers_out {
 # TODO: do we need this and 'args' methods? they are much the same.
 sub LJ::Request::get_params {
     my $class = shift;
-    if (wantarray) {
-        my @params = $instance->{r}->args;
-        return @params;
+    if (wantarray()){
+        my $qs = $instance->{r}->args(@_);
+        my @args =
+            map { URI::Escape::uri_unescape ($_) }
+            map { split /=/ => $_, 2 }
+            split /[\&\;]/ => $qs;
+        return @args;
     } else {
-        my $query_string = $instance->{r}->args;
-        return $query_string;
+        return $instance->{r}->args(@_);
     }
 }
 sub LJ::Request::post_params {
     my $class = shift;
 
     return @{ $instance->{params} } if $instance->{params};
-    my @params = $instance->{apr}->body;
+    my @params = ();
+    foreach my $name ($instance->{apr}->body){
+        push @params => $name, $instance->{apr}->body($name);
+    }
     $instance->{params} = \@params;
     return @params;
 
@@ -357,7 +390,7 @@ sub LJ::Request::set_header_out {
     my $header = shift;
     my $value  = shift;
 
-    $instance->{r}->err_header_out->set($header, $value);
+    $instance->{r}->err_headers_out->set($header, $value);
     $instance->{r}->headers_out->set($header, $value);
 
     return 1;
