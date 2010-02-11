@@ -280,9 +280,9 @@ sub trans
 
     my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check");
 
-#=head
     my $bml_handler = sub {
         my $filename = shift;
+
         LJ::Request->handler("perl-script");
         LJ::Request->notes("bml_filename" => $filename);
         LJ::Request->push_handlers(PerlHandler => \&Apache::BML::handler);
@@ -577,7 +577,7 @@ sub trans
         }
 
         LJ::Request->handler("perl-script");
-        LJ::Request->push_handlers(PerlHandler => \&journal_content);
+        LJ::Request->set_handlers(PerlHandler => \&journal_content);
         return LJ::Request::OK
     };
 
@@ -592,14 +592,14 @@ sub trans
         return LJ::Request::DECLINED if $uuri eq "/favicon.ico";
 
         # see if there is a modular handler for this URI
-        my $ret = LJ::URI->handle($uuri, LJ::Request->r);
+        my $ret = LJ::URI->handle($uuri);
         return $ret if defined $ret;
 
         if ($uuri eq "/__setdomsess") {
             return redir(LJ::Session->setdomsess_handler());
         }
 
-        if ($uuri =~ m#^/(\d+)\.html$#) {
+        if ($uuri =~ m#^/(\d+)\.html$#) { #
             my $u = LJ::load_user($user)
                 or return LJ::Request::NOT_FOUND;
 
@@ -609,6 +609,7 @@ sub trans
             } else {
                 $mode = "entry";
             }
+
         } elsif ($uuri =~ m#^/(\d\d\d\d)(?:/(\d\d)(?:/(\d\d))?)?(/?)$#) {
             my ($year, $mon, $day, $slash) = ($1, $2, $3, $4);
             unless ($slash) {
@@ -720,7 +721,7 @@ sub trans
                 return redir($redirect_url, 301);
             }
         }
-
+        
         return $journal_view->({
             'vhost' => $vhost,
             'mode' => $mode,
@@ -819,6 +820,7 @@ sub trans
         $host ne $LJ::DOMAIN && $host =~ /\./ &&
         $host =~ /[^\d\.]/)
     {
+
         my $dbr = LJ::get_db_reader();
         my $checkhost = lc($host);
         $checkhost =~ s/^www\.//i;
@@ -914,7 +916,7 @@ sub trans
     }
 
     # see if there is a modular handler for this URI
-    my $ret = LJ::URI->handle($uri, LJ::Request->r);
+    my $ret = LJ::URI->handle($uri);
     return $ret if defined $ret;
 
     # customview (get an S1 journal by number)
@@ -967,24 +969,27 @@ sub trans
         LJ::Request->notes("bml_filename" => $file);
         return Apache::BML::handler();
     }
-#=cut
+
+    # emulate DirectoryIndex directive
+    if ($host =~ m'^www' and (LJ::Request->uri =~ m"/" or -d "$LJ::SITEROOT/htdocs/" . LJ::Request->filename)){
+        LJ::Request->uri(LJ::Request->uri . "/index.bml");
+    }
 
     return LJ::Request::DECLINED
 }
 
 sub userpic_trans
 {
+
     return LJ::Request::NOT_FOUND unless LJ::Request->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
     my ($picid, $userid) = ($1, $2);
-
     LJ::Request->notes("codepath" => "img.userpic");
 
     # redirect to the correct URL if we're not at the right one,
     # and unless CDN stuff is in effect...
     unless ($LJ::USERPIC_ROOT ne $LJ::USERPICROOT_BAK) {
         my $host = LJ::Request->header_in("Host");
-        unless (    $LJ::USERPIC_ROOT =~ m!^http://\Q$host\E!i
-                    || $LJ::USERPIC_ROOT_CDN && $LJ::USERPIC_ROOT_CDN =~ m!^http://\Q$host\E!i
+        unless (    $LJ::USERPIC_ROOT =~ m!^http://\Q$host\E!i || $LJ::USERPIC_ROOT_CDN && $LJ::USERPIC_ROOT_CDN =~ m!^http://\Q$host\E!i
         ) {
             return redir("$LJ::USERPIC_ROOT/$picid/$userid");
         }
@@ -1024,7 +1029,7 @@ sub userpic_trans
     }
 
     LJ::Request->handler("perl-script");
-    LJ::Request->push_handlers(PerlHandler => \&userpic_content);
+    LJ::Request->set_handlers(PerlHandler => \&userpic_content);
     return LJ::Request::OK
 }
 
@@ -1111,6 +1116,7 @@ sub userpic_content
         }
 
         else {
+
             my $data = LJ::mogclient()->get_file_data( $key );
             return LJ::Request::NOT_FOUND unless $data;
             $size = length $$data;
