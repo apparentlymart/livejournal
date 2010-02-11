@@ -180,7 +180,10 @@ sub LJ::Request::push_handlers {
 sub LJ::Request::set_handlers {
     my $class = shift;
     _die_if_no_request();
-    $instance->{r}->set_handlers(@_);
+
+    my @args = shift @_;
+    $args[1] = ref $_[0] eq 'ARRAY' ? $_[0] : [@_]; # second arg should be an arrayref.
+    $instance->{r}->set_handlers(@args);
 }
 
 sub LJ::Request::handler {
