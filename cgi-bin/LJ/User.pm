@@ -5227,20 +5227,21 @@ sub openid_tags {
 # return the number of comments a user has posted
 sub num_comments_posted {
     my $u = shift;
+    my %opts = @_;
 
-    my $ret = $u->prop('talkleftct');
+    my $dbcr = $opts{dbh} || LJ::get_cluster_reader($u);
+    my $userid = $u->id;
 
-    unless (defined $ret) {
-        my $dbr = LJ::get_cluster_reader($u);
-        $ret = $dbr->selectrow_array(qq{
-            SELECT COUNT(*) FROM talkleft WHERE userid=?
-        }, undef, $u->id);
-
-        warn $u->clusterid, ", ", $ret;
-        $u->set_prop('talkleftct' => $ret);
+    my $memkey = [$userid, "talkleftct:$userid"];
+    my $count = LJ::MemCache::get($memkey);
+    unless ($count) {
+        my $expire = time() + 3600*24*2; # 2 days;
+        $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft " .
+                                        "WHERE userid=?", undef, $userid);
+        LJ::MemCache::set($memkey, $count, $expire) if defined $count;
     }
 
-    return $ret;
+    return $count;
 }
 
 # return the number of comments a user has received
@@ -5666,7 +5667,7 @@ sub wipe_major_memcache
 {
     my $u = shift;
     my $userid = LJ::want_userid($u);
-    foreach my $key ("userid","bio","talk2ct","log2ct",
+    foreach my $key ("userid","bio","talk2ct","talkleftct","log2ct",
                      "log2lt","memkwid","dayct2","s1overr","s1uc","fgrp",
                      "friends","friendofs","tu","upicinf","upiccom",
                      "upicurl", "intids", "memct", "lastcomm")
