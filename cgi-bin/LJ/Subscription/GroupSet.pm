@@ -10,8 +10,6 @@ use LJ::Subscription::QuotaError;
 my @group_cols = (LJ::Subscription::Group::GROUP_COLS);
 my @other_cols = (LJ::Subscription::Group::OTHER_COLS);
 
-my $inbox_ntypeid = LJ::NotificationMethod::Inbox->ntypeid;
-
 use Carp qw(confess cluck);
 
 sub new {
@@ -56,6 +54,8 @@ sub fetch_for_user {
     my ($class, $u, $filter) = @_;
 
     $filter ||= sub { 1 };
+
+    my $inbox_ntypeid = LJ::NotificationMethod::Inbox->ntypeid;
 
     my $self = $class->new($u);
 
@@ -310,6 +310,8 @@ sub update {
 
     my $u = $self->user;
 
+    my $inbox_ntypeid = LJ::NotificationMethod::Inbox->ntypeid;
+
     my $array2hash = sub {
         return map { $_ => 1 } @_;
     };
@@ -457,6 +459,8 @@ sub _check_can_activate {
 sub _db_insert_sub {
     my ($self, $sub) = @_;
 
+    my $inbox_ntypeid = LJ::NotificationMethod::Inbox->ntypeid;
+
     if ($sub->{'ntypeid'} == $inbox_ntypeid) {
         die LJ::Subscription::QuotaError::Total->new($self->user) if
             $self->{'total_count'} >= LJ::get_cap($self->user, 'subscriptions_total');
@@ -488,6 +492,8 @@ sub _db_update_sub {
 
 sub _db_drop_sub {
     my ($self, $sub) = @_;
+
+    my $inbox_ntypeid = LJ::NotificationMethod::Inbox->ntypeid;
 
     $self->{'total_count'}-- if
         $sub->{'ntypeid'} == $inbox_ntypeid &&
