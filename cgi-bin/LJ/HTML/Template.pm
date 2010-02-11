@@ -1,8 +1,5 @@
 package LJ::HTML::Template;
 use strict;
-use HTML::Template;
-use HTML::Template::Pro;
-
 
 # Returns a new HTML::Template object
 # with some redefined default values.
@@ -11,6 +8,7 @@ sub new {
     my $opts = (ref $_[0]) ? shift : {};
     
     if ($opts->{'use_expr'}) {
+        require HTML::Template::Pro; # load module on demand
         return HTML::Template::Pro->new(
             global_vars => 1, # normally variables declared outside a loop are not available inside
                               # a loop.  This option makes <TMPL_VAR>s like global variables in Perl 
@@ -25,6 +23,7 @@ sub new {
             @_
         );
     } else {
+        require HTML::Template; # load on demand
         return HTML::Template->new(
             global_vars => 1, # normally variables declared outside a loop are not available inside
                               # a loop.  This option makes <TMPL_VAR>s like global variables in Perl 
