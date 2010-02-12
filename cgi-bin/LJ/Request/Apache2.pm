@@ -13,8 +13,7 @@ use Apache2::Access;
 use Apache2::Connection;
 use Apache2::URI;
 use ModPerl::Util;
-#use URI::Escape;
-
+use URI::Escape;
 
 sub LJ::Request::OK                        { return Apache2::Const::OK }
 sub LJ::Request::REDIRECT                  { return Apache2::Const::REDIRECT }
@@ -29,6 +28,8 @@ sub LJ::Request::M_OPTIONS                 { return Apache2::Const::M_OPTIONS }
 sub LJ::Request::SERVER_ERROR              { return Apache2::Const::SERVER_ERROR }
 sub LJ::Request::BAD_REQUEST               { return Apache2::Const::HTTP_BAD_REQUEST }
 
+
+sub LJ::Request::interface_name { 'Apache2' }
 
 
 my $instance = '';

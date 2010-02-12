@@ -25,6 +25,9 @@ sub _die_if_no_request {
     Carp::confess("Request is not provided to LJ::Request") unless $instance;
 }
 
+sub LJ::Request::interface_name { 'Apache' }
+
+
 sub LJ::Request::request { $instance }
 sub LJ::Request::r {
     _die_if_no_request();
