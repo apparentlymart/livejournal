@@ -2264,6 +2264,8 @@ sub generate_messageid {
 sub enter_comment {
     my ($journalu, $parent, $item, $comment, $errref) = @_;
 
+    LJ::run_hooks('update_comment_props', $journalu, $comment);
+
     my $partid = $parent->{talkid};
     my $itemid = $item->{itemid};
 

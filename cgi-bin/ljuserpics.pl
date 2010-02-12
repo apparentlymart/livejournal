@@ -462,6 +462,9 @@ sub get_picid_from_keyword
 {
     my ($u, $kw, $default) = @_;
     $default ||= (ref $u ? $u->{'defaultpicid'} : 0);
+
+    LJ::run_hook('control_default_userpic', \$default);
+
     return $default unless $kw;
 
     my $info = LJ::get_userpic_info($u);
