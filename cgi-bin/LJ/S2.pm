@@ -1415,7 +1415,9 @@ sub get_layer_checker
         my $frz = $dbh->selectrow_array("SELECT checker FROM s2checker WHERE s2lid=?",
                                         undef, $parid) or return undef;
         LJ::text_uncompress(\$frz);
-        return Storable::thaw($frz); # can be undef, on failure
+        my $res = eval { Storable::thaw($frz) } || undef;
+        warn "Can't deserialize layer: $@" if $@;
+        return $res;
     };
 
     # the good path
