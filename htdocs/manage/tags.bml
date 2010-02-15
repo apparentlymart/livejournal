@@ -153,6 +153,12 @@ body<=
     $ret .= "</script>\n";
 
     my $formauth = LJ::form_auth();
+
+    my $tagcount_string = BML::ml('.label.count', {
+        'current' => $tagcount,
+        'quota' => $u->get_cap('tags_max'),
+    });
+
     # the extra 'padding' div is a workaround for how
     # IE incorrectly renders fieldsets.
     $ret .= qq{
@@ -161,7 +167,10 @@ body<=
     <table cellpadding="0" cellspacing="0" align="center">
     <tr><td valign="top">
         <fieldset>
-            <legend>$ML{'.label.yours'}</legend>
+            <legend>
+                $ML{'.label.yours'}
+                <span class="count">$tagcount_string</span>
+            </legend>
             <div style="padding-top: 6px;">
     };
 

@@ -29,6 +29,8 @@
 
 .label.yours=Your Tags
 
+.label.count=([[current]] of [[quota]])
+
 .none=You haven't created any tags yet.
 
 .setting.desc.add=Who can add existing tags to entries?
