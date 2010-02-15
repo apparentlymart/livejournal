@@ -1,0 +1,79 @@
+;; -*- coding: utf-8 -*-
+.msn_accept|staleness=1
+.msn_accept=I accept <a href="http://g.msn.com/0TO_/enus">Microsoft service agreement</a> and <a href="http://g.msn.com/2privacy/enus">privacy statement</a>. I agree to receive e-mail from Windows Live, Bing, and MSN with service updates, special offers, and survey invitations. I understand that I can unsubscribe at any time.
+
+.msn_already_have|staleness=1
+.msn_already_have=Already have a Windows Live ID?
+
+.msn_btntxt|staleness=1
+.msn_btntxt=Enter
+
+.msn_congratulations|staleness=1
+.msn_congratulations=Congratulations!
+
+.msn_entry_text|staleness=1
+.msn_entry_text=Entry text: "I turned on <a href="http://www.livejournal.com/manage/settings/?cat=ex">LiveJournal Messenger</a>. My Windows Live ID is [[user]]@livejournal.com. Let's talk!"
+
+.msn_intro|staleness=1
+.msn_intro<<
+<p>LiveJournal Messenger is a new service for LJ users that provides a quick and easy way to communicate with your friends. You don't need to install anything to use it &mdash; just log in to your LJ account from anywhere and LiveJournal Messenger will appear at the bottom of the page.</p>
+<p>Whenever you turn on LiveJournal Messenger, you can write directly to your friends and receive instant replies and LJ notifications.</p>
+<ul>
+	<li>&mdash; <b>Keep up:</b> Write directly to your friends and receive instant replies;</li> 
+	<li>&mdash; <b>Talk in private:</b> Discuss your personal matters one-on-one;</li> 
+	<li>&mdash; <b>Know who's online:</b> See which of your friends are on LJ now;</li> 
+	<li>&mdash; <b>Chat everywhere:</b> LiveJournal Messenger is on every LJ page.</li>
+</ul>
+.
+
+.msn_invtxt|staleness=1
+.msn_invtxt=Bla-bla-bla
+
+.msn_messanger.add|staleness=1
+.msn_messanger.add=Add your LJ-friends 
+
+.msn_messanger.contacts|staleness=1
+.msn_messanger.contacts=See which of your friends are online 
+
+.msn_messanger.events|staleness=1
+.msn_messanger.events=Your new LJ notifications
+
+.msn_messanger.talk|staleness=1
+.msn_messanger.talk=Chat on every LJ page 
+
+.msn_opera_filter|staleness=1
+.msn_opera_filter=Sorry, Opera is not currently supported.
+
+.msn_post_entry|staleness=1
+.msn_post_entry=Post an automatic entry about my new Windows Live ID in my journal.
+
+.msn_sendmsgtxt|staleness=1
+.msn_sendmsgtxt=Send a message to blog
+
+.msn_signup|staleness=1
+.msn_signup=Sign up for LiveJournal Messenger
+
+.msn_singup_password|staleness=1
+.msn_singup_password=Password
+
+.msn_singup_retype_password|staleness=1
+.msn_singup_retype_password=Retype password
+
+.msn_subtitle|staleness=1
+.msn_subtitle=Communicate directly in real time.
+
+.msn_success_already|staleness=1
+.msn_success_already=LiveJournal Messenger is at the right corner of any LJ-page.
+
+.msn_success_create|staleness=1
+.msn_success_create=LiveJournal Messenger is at the right corner of any LJ-page. Your Windows Live ID is being created. Please wait the confirmation letter.
+
+.msn_turn_on|staleness=1
+.msn_turn_on=Turn on LiveJournal Messenger
+
+.msn_your_liveid|staleness=1
+.msn_your_liveid=Your new Windows Live ID
+
+.title|staleness=1
+.title=LiveJournal Messenger
+

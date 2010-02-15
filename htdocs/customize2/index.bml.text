@@ -1,0 +1,13 @@
+;; -*- coding: utf-8 -*-
+.btn.nextpage|staleness=1
+.btn.nextpage=Customize Selected Theme ->
+
+.switcher.btn|staleness=1
+.switcher.btn=Go
+
+.switcher.label|staleness=1
+.switcher.label=Switch to:
+
+.title|staleness=1
+.title=Choose Journal Style
+
