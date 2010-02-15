@@ -795,7 +795,7 @@
                 $url = "http://$url";
             }
             my $urlname = LJ::ehtml($u->{'urlname'} || $url);
-            $url = "<a href='$url' class='url'>$urlname</a>";
+            $url = "<a href='$url' class='url' rel='me'>$urlname</a>";
             $website .= "<tr><th>$ML{'.label.website'}</th><td>$url</td></tr>\n" if ($u->{'url'});
         }
     }
