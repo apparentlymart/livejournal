@@ -2,12 +2,66 @@
 .addalias.title|staleness=1
 .addalias.title=Add Note
 
+.add_friend=Add friend
+
 .ban_everywhere.title|staleness=1
 .ban_everywhere.title=Ban user everywhere
+
+.ban=Ban user
+
+.community=Community
 
 .editalias.title|staleness=1
 .editalias.title=Edit Note
 
+.feed=Feed
+
+.join_community=Join community
+
+.journal=Journal
+
+.leave=Leave
+
+.lists_as_friend=lists you as a friend
+
+.loading=Loading...
+
+.mutual_friend=is your mutual friend
+
+.profile=Profile
+
+.remove_friend=Remove friend
+
+.report=Report a Bot
+
+.send_gift=Send a virtual gift
+
+.send_message=Send message
+
+.stop_community=Stop watching
+
+.subscribe_feed=Subscribe to feed
+
+.this_is_you=This is you
+
 .unban_everywhere.title|staleness=1
 .unban_everywhere.title=Unban user everywhere
+
+.unban=Unban user
+
+.unsubscribe_feed=Unsubscribe
+
+.updating=Updating...
+
+.view=View: 
+
+.watch_community=Watch community
+
+.your_friend=is your friend
+
+.you_member=You are a member of [[username]]
+
+.you_subscribed=You are subscribed to [[username]]
+
+.you_watching=You are watching [[username]]
 
