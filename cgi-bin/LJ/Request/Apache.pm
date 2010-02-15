@@ -5,6 +5,7 @@ use Carp qw//;
 use Apache::Constants;
 require Apache::Request;
 require Apache::URI;
+require Apache::File;
 
 sub LJ::Request::OK                        { return Apache::Constants::OK() }
 sub LJ::Request::REDIRECT                  { return Apache::Constants::REDIRECT() }
@@ -13,8 +14,12 @@ sub LJ::Request::FORBIDDEN                 { return Apache::Constants::FORBIDDEN
 sub LJ::Request::HTTP_NOT_MODIFIED         { return Apache::Constants::HTTP_NOT_MODIFIED() }
 sub LJ::Request::HTTP_MOVED_PERMANENTLY    { return Apache::Constants::HTTP_MOVED_PERMANENTLY() }
 sub LJ::Request::HTTP_MOVED_TEMPORARILY    { return Apache::Constants::HTTP_MOVED_TEMPORARILY() }
+sub LJ::Request::HTTP_METHOD_NOT_ALLOWED   { return Apache::Constants::HTTP_METHOD_NOT_ALLOWED() }
+sub LJ::Request::HTTP_BAD_REQUEST          { return Apache::Constants::HTTP_BAD_REQUEST() }
 sub LJ::Request::M_TRACE                   { return Apache::Constants::M_TRACE() }
 sub LJ::Request::M_OPTIONS                 { return Apache::Constants::M_OPTIONS() }
+sub LJ::Request::M_PUT                     { return Apache::Constants::M_PUT() }
+sub LJ::Request::M_POST                    { return Apache::Constants::M_POST() }
 sub LJ::Request::NOT_FOUND                 { return Apache::Constants::NOT_FOUND() }
 sub LJ::Request::SERVER_ERROR              { return Apache::Constants::SERVER_ERROR() }
 sub LJ::Request::BAD_REQUEST               { return Apache::Constants::BAD_REQUEST() }
@@ -463,6 +468,5 @@ sub LJ::Request::child_terminate {
     _die_if_no_request();
     return $instance->{r}->child_terminate;
 }
-
 
 1;

@@ -23,8 +23,12 @@ sub LJ::Request::NOT_FOUND                 { return Apache2::Const::NOT_FOUND }
 sub LJ::Request::HTTP_NOT_MODIFIED         { return Apache2::Const::HTTP_NOT_MODIFIED }
 sub LJ::Request::HTTP_MOVED_PERMANENTLY    { return Apache2::Const::HTTP_MOVED_PERMANENTLY }
 sub LJ::Request::HTTP_MOVED_TEMPORARILY    { return Apache2::Const::HTTP_MOVED_TEMPORARILY }
+sub LJ::Request::HTTP_METHOD_NOT_ALLOWED   { return Apache2::Const::HTTP_METHOD_NOT_ALLOWED() }
+sub LJ::Request::HTTP_BAD_REQUEST          { return Apache2::Const::HTTP_BAD_REQUEST() }
 sub LJ::Request::M_TRACE                   { return Apache2::Const::M_TRACE }
 sub LJ::Request::M_OPTIONS                 { return Apache2::Const::M_OPTIONS }
+sub LJ::Request::M_PUT                     { return Apache2::Const::M_PUT }
+sub LJ::Request::M_POST                    { return Apache2::Const::M_POST() }
 sub LJ::Request::SERVER_ERROR              { return Apache2::Const::SERVER_ERROR }
 sub LJ::Request::BAD_REQUEST               { return Apache2::Const::HTTP_BAD_REQUEST }
 
@@ -451,6 +455,5 @@ sub LJ::Request::child_terminate {
     my $class = shift;
     return $instance->{r}->child_terminate;
 }
-
 
 1;
