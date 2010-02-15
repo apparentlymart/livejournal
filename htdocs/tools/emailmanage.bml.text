@@ -29,13 +29,15 @@ attacker's email address.
 
 .desc.title=Description
 
+.in_use_since|staleness=1
 .in_use_since=is in use since [[time]]
 
 .log.deleted=Deleted: [[email]] @ [[time]]
 
-.log.deleted2=Deleted: [[email]]
-
 .log.deleted.title=Changes Saved
+
+.log.deleted2|staleness=1
+.log.deleted2=Deleted: [[email]]
 
 .notvalidated.text2=To use this tool, your current email address, [[email]] , must be validated. If you've lost the confirmation email to do this, you can <a [[aopts]]>have it re-sent</a>. After you validate your email, come back here.
 

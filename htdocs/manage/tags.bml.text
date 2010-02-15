@@ -33,13 +33,12 @@
 
 .none=You haven't created any tags yet.
 
+.setting.author|staleness=1
+.setting.author=Entry's author and maintainers
+
 .setting.desc.add=Who can add existing tags to entries?
 
 .setting.desc.control=Who can create new tags and add/remove tags from entries?
-
-.setting.author=Entry's author and maintainers
-
-.setting.public=Any user
 
 .setting.friends=Friends only
 
@@ -49,9 +48,14 @@
 
 .setting.private=Only you
 
+.setting.public=Any user
+
 .sort.a=<strong>sort</strong>: <a [[aopts]]>alphabetically</a> or by usage
 
 .sort.b=<strong>sort</strong>: alphabetically or by <a [[aopts]]>usage</a>
 
+.title=Tags Management
+
+.title2|staleness=1
 .title2=Manage Tags
 

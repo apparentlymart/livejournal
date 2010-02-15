@@ -1,7 +1,10 @@
 ;; -*- coding: utf-8 -*-
+.help.header|staleness=1
 .help.header=Did You Know?
 
+.help.text|staleness=1
 .help.text=<?sitename?> Support is primarily run by volunteers. Got time? <strong><a [[aopts]]>Help someone out!</a></strong>
 
+.title|staleness=1
 .title=Submit Support Request
 

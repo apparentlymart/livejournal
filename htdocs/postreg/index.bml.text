@@ -1,11 +1,12 @@
 ;; -*- coding: utf-8 -*-
-
 .btn.save=Save and Continue
 
 .btn.skip=Skip This Step ->
 
+.change_account_type|staleness=1
 .change_account_type=Change
 
+.intro|staleness=1
 .intro=Let others know who you are and what your journal is about! All fields are completely optional, but the more the merrier.
 
 .nav.editprofile=Edit Profile
@@ -26,7 +27,7 @@
 
 .setting.birthdaydisplay.question=Display:
 
-.setting.gender.error.invalid=You must pick male, female, or unspecified.
+.setting.gender.error.invalid=Gender is a required field: You can select Female, Male, or Unspecified/Other.
 
 .setting.gender.question=Gender:
 
@@ -38,8 +39,10 @@
 
 .setting.name.question=Display Name:
 
+.skip_step_title|staleness=1
 .skip_step_title=Skip This Step
 
 .title=Getting Started
 
 .welcome=Welcome to [[sitename]]! Your account has been created. An email has been sent to [[email]] containing further instructions. Click on the link provided in the email, and you'll be all set.
+

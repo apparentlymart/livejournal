@@ -232,8 +232,8 @@ If you uncheck it, LiveJournal will only send text emails.
 If you want other people to be able to search the directory and find you by interest, 
 list below everything you're interested in, separated by commas.  
 Short single-word phrases are best.  <b>Rule of thumb:</b> You should be able to put 
-the interest in the sentence "I like ________".  When referring to nouns, use the 
-plural form for consistency.  "I like DVDs" instead of "I like DVD".
+the interest in the sentence "I am interested in ________."  When referring to nouns, use the 
+plural form for consistency.  "I am interested in DVDs" instead of "I am interested in DVD."
 .
 
 .int.ex.bad=<FONT COLOR=#FF0000><B>BAD</B></FONT> Example: <B>I like lots of bands and watching movies and talking to friends and going to clubs.</B>  That sort of stuff goes in your bio above.
@@ -296,8 +296,7 @@ Regards,
 
 .newemail.subject=Email Address Changed
 
-.newemail_old.subject=Email Address Changed
-
+.newemail_old.body2|staleness=1
 .newemail_old.body2<<
 Someone just changed the e-mail address for your [[sitename]] account "[[username]]".
 time and date of request: [[datetime]]
@@ -313,6 +312,8 @@ Regards,
 [[sitelink]]
 .
 
+.newemail_old.subject|staleness=1
+.newemail_old.subject=Email Address Changed
 
 .numcomments.about=Check this if you want to append the comment count to URLs to make your browser possibly display the links in a different color.
 

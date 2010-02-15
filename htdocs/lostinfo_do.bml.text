@@ -45,6 +45,7 @@ The site team
 [[rooturl]]
 .
 
+.lostpasswordmail.reset|staleness=1
 .lostpasswordmail.reset<<
 A request has been made at [[lostinfolink]] to reset
 the password to the [[sitename]] account associated with this email address.

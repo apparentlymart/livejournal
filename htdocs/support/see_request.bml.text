@@ -1,62 +1,92 @@
 ;; -*- coding: utf-8 -*-
+.accounttype|staleness=1
 .accounttype=Account type
 
+.answer|staleness=1
 .answer=Answer
 
-.answered.need.help=<b><span style='color: #ff0000;'>answered</span></b> (<b>still needs help</b>)
-
+.answered|staleness=1
 .answered=<b><span style='color: #ff0000;'>answered</span></b> (awaiting close)
 
+.answered.need.help|staleness=1
+.answered.need.help=<b><span style='color: #ff0000;'>answered</span></b> (<b>still needs help</b>)
+
+.approve.screened|staleness=1
 .approve.screened=Approve Screened Response
 
+.back.link|staleness=1
 .back.link=Back to <a [[backlink]]>the support area</a>.
 
+.birthday|staleness=1
 .birthday=birthday
 
+.change.cat|staleness=1
 .change.cat=Change Category
 
+.change.language|staleness=1
 .change.language=Change Language:
 
+.change.language.nolang|staleness=1
 .change.language.nolang=(no language set)
 
+.change.summary|staleness=1
 .change.summary=Change summary
 
+.change.tags|staleness=1
 .change.tags=Change Tags
 
+.clear|staleness=1
 .clear=Clear
 
+.close.without.credit|staleness=1
 .close.without.credit=close without credit
 
+.cluster|staleness=1
 .cluster=cluster
 
+.comment|staleness=1
 .comment=Comment
 
+.credit.fix|staleness=1
 .credit.fix=credit fix here
 
+.dataversion|staleness=1
 .dataversion=data version 
 
+.diagnostics|staleness=1
 .diagnostics=Diagnostics
 
-.email.validared=email validated?
-
+.email.user|staleness=1
 .email.user=Email/User:
 
-.error.text1=You do not appear to have permission to read any support categories.
+.email.validared|staleness=1
+.email.validared=email validated?
 
-.error.text2=<?p No [[what]] open request [[cat]] found. p?>
-
+.error|staleness=1
 .error=Error
 
+.error.text1|staleness=1
+.error.text1=You do not appear to have permission to read any support categories.
+
+.error.text2|staleness=1
+.error.text2=<?p No [[what]] open request [[cat]] found. p?>
+
+.faq|staleness=1
 .faq=FAQ
 
+.faq.reference|staleness=1
 .faq.reference=FAQ Reference
 
+.from|staleness=1
 .from=From:
 
+.goback.text|staleness=1
 .goback.text=<?p Go back to <a [[request_link]]>Request #[[spid]]</a> p?>
 
+.help.link|staleness=1
 .help.link=Back to the <a href="help.bml">list of open requests</a>.<br />
 
+.important.notes.text|staleness=1
 .important.notes.text<<
 <?standout <b>Important Notes:</b>
 <?p [[sitenameshort]] Support is an open-source project run by a community of volunteers. 
@@ -68,138 +98,204 @@ and correct, it will be sent to the user. p?>
 <?p Thanks! p?> standout?>
 .
 
+.incat|staleness=1
 .incat=in the same category
 
+.internal.comment|staleness=1
 .internal.comment=Internal Comment
 
+.language|staleness=1
 .language=language
 
+.lock.request|staleness=1
 .lock.request=lock request
 
+.manualset|staleness=1
 .manualset=manual set 
 
+.mast.login|staleness=1
 .mast.login=You must <a [[loginlink]]>login</a> to help people out.
 
+.message|staleness=1
 .message=Message
 
+.next|staleness=1
 .next=next
 
-.no.html.allowed=No HTML allowed, so don't worry about about escaping &lt; and &gt;<br />URLs are automatically link-ified, so just reference those.
-
+.no|staleness=1
 .no=no
 
-.not.have.access=Sorry, you do not have access to answer people's support requests in this category.
+.no.html.allowed|staleness=1
+.no.html.allowed=No HTML allowed, so don't worry about about escaping &lt; and &gt;<br />URLs are automatically link-ified, so just reference those.
 
-.nothaveprivilege=You don't have the necessary privilege to view this request. 
-
+.none|staleness=1
 .none=none
 
+.not.have.access|staleness=1
+.not.have.access=Sorry, you do not have access to answer people's support requests in this category.
 
+.nothaveprivilege|staleness=1
+.nothaveprivilege=You don't have the necessary privilege to view this request. 
+
+.open|staleness=1
 .open=open
 
+.original.request|staleness=1
 .original.request=Original Request
 
+.overrides|staleness=1
 .overrides=overrides
 
+.post.comment|staleness=1
 .post.comment=Post a comment or solution
 
+.postbutton|staleness=1
 .postbutton=Post Comment/Solution
 
+.posted|staleness=1
 .posted=Posted
 
+.previous|staleness=1
 .previous=previous
 
+.private.request|staleness=1
 .private.request=<b>This is a private request.</b> It is not publicly visible.
 
+.put.in.queue|staleness=1
 .put.in.queue=Put in Queue
 
+.reference|staleness=1
 .reference=Reference
 
+.reopen.this.request|staleness=1
 .reopen.this.request=reopen this request
 
+.reply.type|staleness=1
 .reply.type=Reply Type
 
+.resend.validation.email|staleness=1
 .resend.validation.email=resend validation email
 
+.scheme|staleness=1
 .scheme=scheme
 
+.screened.response|staleness=1
 .screened.response=Screened Response
 
+.see.next|staleness=1
 .see.next=<a [[next_link]]>next open request</a>
 
+.see.preview|staleness=1
 .see.preview=Go to: <a [[preview_link]]>previous open request</a>,
 
+.select.canned.to.insert|staleness=1
 .select.canned.to.insert=select canned to insert
 
+.status|staleness=1
 .status=Status
 
-.tags=Tags
-
-.statushistory=statushistory
-
+.status.deleted.and.purged|staleness=1
 .status.deleted.and.purged=Status: <b>deleted and purged</b>
 
+.statushistory|staleness=1
+.statushistory=statushistory
+
+.style|staleness=1
 .style=style
 
+.summary|staleness=1
 .summary=Summary
 
+.supportcategory|staleness=1
 .supportcategory=Support category
 
-.tier=Tier:
+.tags|staleness=1
+.tags=Tags
 
-.tier.0=Tier 0
-
-.tier.1=Tier 1
-
-.tier.2=Tier 2
-
-.tier.3=Tier 3
-
-.tier.selectone=(select one)
-
-.tier.set=Set Tier for Response:
-
-.timeposted=Time posted
-
-.title=Request #[[reqid]]
-
-.transitioning=<b>transitioning</b> (used to be validated, but changed email addresses and hasn't reconfirmed)
-
+.take.out.of.queue|staleness=1
 .take.out.of.queue=Take out of Queue:
 
+.tier|staleness=1
+.tier=Tier:
+
+.tier.0|staleness=1
+.tier.0=Tier 0
+
+.tier.1|staleness=1
+.tier.1=Tier 1
+
+.tier.2|staleness=1
+.tier.2=Tier 2
+
+.tier.3|staleness=1
+.tier.3=Tier 3
+
+.tier.selectone|staleness=1
+.tier.selectone=(select one)
+
+.tier.set|staleness=1
+.tier.set=Set Tier for Response:
+
+.timeposted|staleness=1
+.timeposted=Time posted
+
+.title|staleness=1
+.title=Request #[[reqid]]
+
+.transitioning|staleness=1
+.transitioning=<b>transitioning</b> (used to be validated, but changed email addresses and hasn't reconfirmed)
+
+.unable.connect|staleness=1
 .unable.connect=(unable to connect to cluster, some data temporarily unavailable)
 
+.underage|staleness=1
 .underage=underage
 
-.uniquecookie=unique cookie 
-
+.uniq|staleness=1
 .uniq=Uniq:
 
+.uniquecookie|staleness=1
+.uniquecookie=unique cookie 
+
+.unknown|staleness=1
 .unknown=Unknown
 
+.unknownumber|staleness=1
 .unknownumber=Unknown support number.
 
+.unlock.request|staleness=1
 .unlock.request=unlock request
 
+.use.this.to.change.awaiting|staleness=1
 .use.this.to.change.awaiting=(Use this to change status to &quot;awaiting close&quot;.)
 
+.use.this.to.re-open|staleness=1
 .use.this.to.re-open=(Use this to re-open the request.)
 
+.use.this.to.summary|staleness=1
 .use.this.to.summary=(Use this to change the request summary.)
 
+.username|staleness=1
 .username=username
 
+.userreadonly|staleness=1
 .userreadonly=(this user is currently in read-only mode)
 
+.view|staleness=1
 .view=view
 
+.wasby|staleness=1
 .wasby=was by
 
+.yes|staleness=1
 .yes=yes
 
+.yesbirthday|staleness=1
 .yesbirthday=yes because of birthday
 
+.yesmanualset|staleness=1
 .yesmanualset=yes because of manual set
 
+.yesuniquecookie|staleness=1
 .yesuniquecookie=yes because of unique cookie
 

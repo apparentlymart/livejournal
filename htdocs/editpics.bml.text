@@ -1,7 +1,16 @@
 ;; -*- coding: utf-8 -*-
+.btn.del_photo|staleness=1
+.btn.del_photo=Delete photo
+
 .btn.proceed=Proceed
 
 .btn.save=Save Settings
+
+.curphoto|staleness=1
+.curphoto=Current Photo
+
+.curphoto.desc|staleness=1
+.curphoto.desc=Here is the photo you've uploaded in the past.
 
 .curpics=Current Pictures
 
@@ -9,10 +18,14 @@
 
 .error.badurl=The address for the picture to be uploaded does not look correct.  It should start with <b>http://</b>
 
+.error.duplicate|staleness=1
+.error.duplicate=You already have this picture as userpic or photo.
+
 .error.filetoolarge=Image uploaded is too large.  File size cannot exceed [[maxsize]].
 
 .error.giffiletoolarge=The GIF image you uploaded is too large.  GIF file size cannot exceed [[maxsize]].
 
+.error.imagetoolarge|staleness=1
 .error.imagetoolarge=The dimensions of your image ([[imagesize]]) exceed maximum size.  Your picture can only be 100x100 pixels large.  Use a image/photo editing program to reduce the image to thumbnail-size.
 
 .error.invalidimage=Invalid image file.
@@ -27,6 +40,7 @@
 
 .error.toomanypics_standout=You are at your limit of [[num]] [[?num|userpic|userpics]]. You cannot upload any more userpics until you delete one of your existing ones.
 
+.error.unknowntype|staleness=1
 .error.unknowntype=You can only upload GIF, PNG, or JPG files.
 
 .error.unsupportedtype=Files of type [[filetype]] are not supported.  You can only upload GIF, PNG or JPG files.  Nearly all image/photo programs can do this conversion for you.
@@ -58,6 +72,9 @@
 
 .label.formats.desc=Acceptable formats are GIF, JPG and PNG.
 
+.label.formats.desc.photo|staleness=1
+.label.formats.desc.photo=Acceptable formats are JPG and PNG.
+
 .label.keywords=Keywords:
 
 .label.keywords.desc=Comma-separated list of terms you'll use to select this picture.
@@ -73,6 +90,12 @@
 
 .noneupload2=You have no pictures uploaded.  Please upload one using the form above.
 
+.noneupload3|staleness=1
+.noneupload3=You have no photo uploaded.  Please upload one using the form above.
+
+.nophoto|staleness=1
+.nophoto=No Photo
+
 .nopics=No Pictures
 
 .piclimitstatus=Currently uploaded: [[current]] out of [[max]]. 
@@ -87,8 +110,13 @@
 
 .restriction.keywords.faq=Picture will be unusable if <a [[aopts]]>keywords</a> are not supplied
 
+.title|staleness=1
 .title=Edit Userpics
 
+.title2|notes=This is the new page title.  .title is used by multisearch.bml.
+.title2=Edit Userpics
+
+.title3|staleness=1
 .title3|notes=This is the new page title.  .title is used by multisearch.bml.
 .title3=Manage Userpics
 
@@ -96,11 +124,17 @@
 
 .uploaddesc.fb=Upload a thumbnail of an image hosted on your <a [[aopts]]>[[sitename]]</a> account as a new user picture.
 
+.uploaddesc.photo|staleness=1
+.uploaddesc.photo=Use the form below to upload a new photo.
+
 .uploaddesc.userpicfactory=Upload a JPG image of any size and we'll send you to the Userpic Factory where you can easily crop and resize it.
 
 .uploadheader=Upload a New Picture
 
 .uploadheader.fb=Upload a New Picture From ScrapBook
+
+.uploadheader.photo|staleness=1
+.uploadheader.photo=Upload a New Photo
 
 .warning.keywords=One or more of your pictures do not have keywords defined and thus cannot currently be used
 

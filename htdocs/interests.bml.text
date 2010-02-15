@@ -17,7 +17,12 @@
 
 .btn.switch=Switch
 
+.communities.head=Relevant Communities
+
+.communities.header|staleness=1
 .communities.header=Results for communities interested in "[[interest]]"
+
+.communities.text=The following communities are interested in <b>[[interest]]</b>.
 
 .count=Count
 
@@ -143,4 +148,10 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 .toomany.head=Many matches
 
+.users.head=Interested Users
+
+.users.header|staleness=1
 .users.header=Results for users interested in "[[interest]]"
+
+.users.text=The following users are interested in <b>[[interest]]</b>.
+

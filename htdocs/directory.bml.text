@@ -15,22 +15,29 @@ directory usage, be sure that you are logged in and then try again.
 
 .error.notloggedin=You must <a [[aopts]]>login</a> to use the directory.
 
+.error.search_dir|staleness=1
 .error.search_dir=There was an error searching the directory. Please try again in a few minutes.
 
 .navcrap.matches=[[count]] matches
 
 .navcrap.xofy=Page [[curpage]] of [[totpages]] shown (records [[reca]]-[[recb]])
 
-.new_search=New search
-
-.new_search_show=Show:
-
+.new_all_search|staleness=1
 .new_all_search=All
 
+.new_community_search|staleness=1
 .new_community_search=Communities Only
 
+.new_search|staleness=1
+.new_search=New search
+
+.new_search_show|staleness=1
+.new_search_show=Show:
+
+.new_user_search|staleness=1
 .new_user_search=Users Only
 
+.no_results|staleness=1
 .no_results=No Results Found!
 
 .open=Open
@@ -43,17 +50,21 @@ directory usage, be sure that you are logged in and then try again.
 
 .search.overflow=<b>Search results limited to [[count]] results.  Please refine your query.</b>
 
-.search_results=Search Results
-
 .search.title=Searching
 
+.search_results|staleness=1
+.search_results=Search Results
+
+.title|staleness=1
 .title=Directory Search
 
+.unable_find_users|staleness=1
 .unable_find_users=Sorry, we're unable to help you find users matching the interests you've provided.
 
 .update=Update:
 
-.us_map=US Map
-
 .user=User
+
+.us_map|staleness=1
+.us_map=US Map
 

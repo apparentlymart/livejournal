@@ -7,12 +7,15 @@
 
 .error.invaliduser=Cannot add community or syndicated account: [[user]]
 
+.error.ischild|staleness=1
 .error.ischild=Sorry, but [[user]] cannot be invited to this community because they do not have a registered birthday that is at least 14 years old.
 
+.error.isminor|staleness=1
 .error.isminor=Sorry, but [[user]] cannot be invited to this community because they do not have a registered birthday that is at least 18 years old.
 
 .error.limit=Unable to invite [[user]], the outstanding invitation limit for this community has been exceeded.
 
+.error.maintainer|staleness=1
 .error.maintainer=Unable to revoke maintainer rights for [[user]].
 
 .error.noaccess=Only community maintainers are able to edit membership lists. You are not a maintainer of community [[comm]].
@@ -29,11 +32,14 @@
 
 .error.unknown=Error inviting [[user]].  Please make sure they're not already a member and try again.
 
-.jump=Jump to user
-
+.intro|staleness=1
 .intro=You can define the roles of each of your members here.
 
+.intro.invite|staleness=1
 .intro.invite=To invite a user to your community, enter their username in one of the empty boxes below and select the checkboxes that correspond to the roles you which the user to have.
+
+.jump|staleness=1
+.jump=Jump to user
 
 .key.admin=<b>Maintainer</b>
 

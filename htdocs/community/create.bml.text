@@ -9,6 +9,9 @@
 
 .error.notperson=You must be logged in as a personal account to create a community.
 
+.error.notvalidated=Your email address must be validated in order to create a community.
+
+.error.notvalidated2|staleness=1
 .error.notvalidated2=You must <a [[aopts]]>validate your email address</a> in order to create a community.
 
 .error.postrequired=POST required.

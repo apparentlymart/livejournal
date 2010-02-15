@@ -25,8 +25,10 @@
 
 .permissions.none=(You do not have permission to edit tags on this entry.)
 
+.readonly.journal|staleness=1
 .readonly.journal=This journal is read-only.  Its entry tags cannot be edited.
 
+.readonly.poster|staleness=1
 .readonly.poster=This poster is read-only.  The tags for their entry cannot be edited.
 
 .subject=Subject:
@@ -37,4 +39,6 @@
 
 .view=<a [[aopts]]>View</a> this entry.
 
+.warning.title|staleness=1
 .warning.title=Warning
+

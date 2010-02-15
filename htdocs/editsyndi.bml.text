@@ -1,48 +1,70 @@
 ;; -*- coding: utf-8 -*-
-
+.also_change_privacy|staleness=1
 .also_change_privacy=You can also <a [[aopts]]>change the privacy level of all posts</a>.
 
+.button.update|staleness=1
 .button.update=Update Entries
 
+.button.ya.rly|staleness=1
 .button.ya.rly=Yes, Update these Posts
 
+.calendar|staleness=1
 .calendar=Your <a [[aopts]]>journal calendar</a> provides an easy way to browse through your posts by month.
 
-.intro=Change the publicity of all posts in a certain timeframe by choosing the start and end dates.
-
-.matching=<b>[[posts]] matching [[?posts|post has|posts have]]</b> been found.
-
-.notified=The publicity of your entries will be updated shortly. You will be notified by email when the update is complete.
-
-.publicity=Publicity
-
-.rusure=Are you sure you want to update these entries?
-
-.timeframe=Timeframe
-
-.timeframe.error.notselected=No timeframe selected
-
-.timeframe.error.start_date=Start date is not a valid date
-
-.timeframe.error.end_date=End date is not a valid date
-
+.error.incorrect_password|staleness=1
 .error.incorrect_password=Password Incorrect
 
+.error.password_required|staleness=1
 .error.password_required=Password Required
 
-.timeframe.all=All Dates
+.intro|staleness=1
+.intro=Change the publicity of all posts in a certain timeframe by choosing the start and end dates.
 
-.timeframe.range=Between
-
-.timeframe.range.end=End date
-
-.timeframe.range.start=Start date
-
-.title=Edit Journal Publicity
-
-.unable=Sorry, the publicity settings is only to users who signed up for Cyrillic services.
-
+.label.publicity.permit|staleness=1
 .label.publicity.permit=permit
 
+.label.publicity.restrict|staleness=1
 .label.publicity.restrict=restrict
+
+.matching|staleness=1
+.matching=<b>[[posts]] matching [[?posts|post has|posts have]]</b> been found.
+
+.notified|staleness=1
+.notified=The publicity of your entries will be updated shortly. You will be notified by email when the update is complete.
+
+.publicity|staleness=1
+.publicity=Publicity
+
+.rusure|staleness=1
+.rusure=Are you sure you want to update these entries?
+
+.timeframe|staleness=1
+.timeframe=Timeframe
+
+.timeframe.all|staleness=1
+.timeframe.all=All Dates
+
+.timeframe.error.end_date|staleness=1
+.timeframe.error.end_date=End date is not a valid date
+
+.timeframe.error.notselected|staleness=1
+.timeframe.error.notselected=No timeframe selected
+
+.timeframe.error.start_date|staleness=1
+.timeframe.error.start_date=Start date is not a valid date
+
+.timeframe.range|staleness=1
+.timeframe.range=Between
+
+.timeframe.range.end|staleness=1
+.timeframe.range.end=End date
+
+.timeframe.range.start|staleness=1
+.timeframe.range.start=Start date
+
+.title|staleness=1
+.title=Edit Journal Publicity
+
+.unable|staleness=1
+.unable=Sorry, the publicity settings is only to users who signed up for Cyrillic services.
 

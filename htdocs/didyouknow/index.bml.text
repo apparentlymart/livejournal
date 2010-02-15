@@ -9,8 +9,10 @@
 
 .notdisplayed.title=Not Displayed
 
+.notips.text|staleness=1
 .notips.text=You've hidden one or more tips, and so you won't see them here. If this makes you sad, you can restore them:
 
+.notips.title|staleness=1
 .notips.title=Hidden Tips
 
 .notips.value=Restore All

@@ -1,9 +1,10 @@
 ;; -*- coding: utf-8 -*-
 .birthday=Show your birthday to other users
 
-.birthday.year.opt=year is optional
-
+.birthday.underage|staleness=1
 .birthday.underage=Users under the age of 14 cannot display their age on profiles.
+
+.birthday.year.opt=year is optional
 
 .chat.aolim=AOL IM
 
@@ -15,6 +16,7 @@
 
 .chat.jabber=Jabber
 
+.chat.msnusername|staleness=1
 .chat.msnusername=Windows LiveID
 
 .chat.skype=Skype
@@ -39,10 +41,15 @@
 
 .email.opt.show=Show email address
 
+.error.bday.child|staleness=1
 .error.bday.child=Users under the age of 14 cannot display their birthday.
 
+.error.bio.toolong|staleness=1
 .error.bio.toolong=Your user bio is too long.
 
+.error.cmax_int=Sorry, you listed an interest with [[cl]] characters.  The limit is [[cmax]].  Any changes you made to your interests were not saved. Go back and remove, or modify "[[int]]".
+
+.error.contact.child|staleness=1
 .error.contact.child=Users under the age of 14 cannot publically share their contact information.
 
 .error.day.notinmonth=Invalid day for that month.
@@ -55,7 +62,13 @@
 
 .error.email.no_space=No spaces are allowed in an email address. If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
+.error.excessive_int=Sorry, you listed too many interests. The limit is 150, but you've listed [[intcount]]. Any changes you made to your interests were not saved. Go back and remove some of your interests, then save again.
+
+.error.findbyemail|staleness=1
 .error.findbyemail=Invalid option for find by email.
+
+.error.gender.not_specified|staleness=1
+.error.gender.not_specified=Gender must be specified.
 
 .error.invalidbio=Your stored bio contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
 
@@ -73,6 +86,7 @@
 
 .error.month.outofrange=Invalid birthday month.  Enter a month from 1-12.  (Jan-Dec)
 
+.error.name.toolong|staleness=1
 .error.name.toolong=The name you have provided is too long.
 
 .error.noname=Your name is a required field.  At least provide your first name, or a nickname or handle.
@@ -81,7 +95,10 @@
 
 .error.txt.require_provider=If you're going to use text messaging, you must select your service provider. If yours is not listed, please contact us with information about how your service's text messaging feature works so we can add support for it.
 
+.error.usermessaging|staleness=1
 .error.usermessaging=Invalid option for User Messaging.
+
+.error.wmax_int=Sorry, you listed an interest with [[wl]] words.  The limit is [[wmax]].  Any changes you made to your interests were not saved. Go back and remove, or modify "[[int]]".
 
 .error.year.notenoughdigits=Invalid birthday year.  Enter a 4-digit year.
 
@@ -107,12 +124,17 @@
 
 .fn.imservices2=Instant Messaging
 
+.fn.imservices3|staleness=1
 .fn.imservices3=Instant Messaging and other
 
 .fn.interests=List all your interests, separated by commas, to allow other users to find you using the Interest Search.
 
+.fn.interests3=List all your interests, separated by commas, to allow others to find you using the Interests Search.  Short single-word phrases are best.
+
+.fn.last_fm|staleness=1
 .fn.last_fm=Last.fm username 
 
+.fn.last_fm.desc|staleness=1
 .fn.last_fm.desc=Enter your last.fm username here and you will be able to automatically fill in Music field with scrobbled music when posting new entry.
 
 .fn.link=Link
@@ -147,29 +169,161 @@
 
 .gender.male=Male
 
-.gender.unspecified=(Unspecified)
+.gender.unspecified=Unspecified/Other
 
 .im=IM/Chat
 
 .interest.line1=Short single-word phrases are best.
 
-.interest.line2=Rule of thumb: You should be able to put the interest in the sentence "I like ________".
+.interest.line2=Rule of thumb: You should be able to put the interest in the sentence "I am interested in ________".
 
-.interest.line3=When referring to nouns, use the plural form for consistency, e.g.: "I like DVDs" instead of "I like DVD".
+.interest.line3=When referring to nouns, use the plural form for consistency, e.g.: "I am interested in DVDs" instead of "I am interested in DVD."
 
 .interest.line4=<font color='#009000'><b>GOOD</b></font> Example: <b>biking, snow skiing, computers, dvds, mp3s, cheese</b>
 
-.interest.line5=<font color='#ff0000'><b>BAD</b></font> Example: <b>I like lots of bands and watching movies and talking to friends and going to clubs.</b>  That sort of stuff goes in your bio below.
+.interest.line5=<font color='#ff0000'><b>BAD</b></font> Example: <b>I am interested in live music (mostly jazz), non-mainstream movies, and hanging out with my friends.</b>  That sort of stuff goes in your bio below.
 
 .intro1=Here's where you fill out your Profile page. You don't have to display all of your info to everyone - check out the options below. You may also want to edit your <a [[aopts1]]>comment settings</a> or your <a [[aopts2]]>viewing options</a>.
 
+.location|staleness=1
 .location=Show your location to
+
+.location.detect.btn|staleness=1
+.location.detect.btn=Detect
 
 .mutualfriends=Show friends who have also friended you
 
 .name=Your name will be displayed on your Profile and in search results
 
 .optional=Optional
+
+.pop_interests.heading=Here are some popular interests, choose any by selecting the checkbox.
+
+.pop_interests1.v2=animals
+
+.pop_interests1.v3=acting
+
+.pop_interests1.v4=astrology
+
+.pop_interests10.v2=fashion
+
+.pop_interests10.v3=food
+
+.pop_interests10.v4=gardening
+
+.pop_interests11.v2=friends
+
+.pop_interests11.v3=guitar
+
+.pop_interests11.v4=internet
+
+.pop_interests12.v2=history
+
+.pop_interests12.v3=internet
+
+.pop_interests12.v4=makeup
+
+.pop_interests13.v2=internet
+
+.pop_interests13.v3=literature
+
+.pop_interests13.v4=manga
+
+.pop_interests14.v2=movies
+
+.pop_interests14.v3=movies
+
+.pop_interests14.v4=motorcycles
+
+.pop_interests15.v2=music
+
+.pop_interests15.v3=philosophy
+
+.pop_interests15.v4=painting
+
+.pop_interests16.v2=photography
+
+.pop_interests16.v3=poetry
+
+.pop_interests16.v4=photoshop
+
+.pop_interests17.v2=reading
+
+.pop_interests17.v3=romance
+
+.pop_interests17.v4=politics
+
+.pop_interests18.v2=snowboarding
+
+.pop_interests18.v3=summer
+
+.pop_interests18.v4=psychology
+
+.pop_interests19.v2=traveling
+
+.pop_interests19.v3=tattoos
+
+.pop_interests19.v4=shopping
+
+.pop_interests2.v2=anime
+
+.pop_interests2.v3=art
+
+.pop_interests2.v4=bands
+
+.pop_interests20.v2=video games
+
+.pop_interests20.v3=video games
+
+.pop_interests20.v4=sports
+
+.pop_interests21.v2=writing
+
+.pop_interests21.v3=working out
+
+.pop_interests21.v4=theatre
+
+.pop_interests3.v2=art
+
+.pop_interests3.v3=books
+
+.pop_interests3.v4=beaches
+
+.pop_interests4.v2=books
+
+.pop_interests4.v3=cartoons
+
+.pop_interests4.v4=cars
+
+.pop_interests5.v2=computers
+
+.pop_interests5.v3=coffee
+
+.pop_interests5.v4=computers
+
+.pop_interests6.v2=dancing
+
+.pop_interests6.v3=concerts
+
+.pop_interests6.v4=cooking
+
+.pop_interests7.v2=dreams
+
+.pop_interests7.v3=dogs
+
+.pop_interests7.v4=digital art
+
+.pop_interests8.v2=emo
+
+.pop_interests8.v3=drawing
+
+.pop_interests8.v4=fanfiction
+
+.pop_interests9.v2=fantasy
+
+.pop_interests9.v3=family
+
+.pop_interests9.v4=gaming
 
 .save_button=Save Changes
 
@@ -181,6 +335,7 @@
 
 .section.contact=Contact Info
 
+.section.description|staleness=1
 .section.description=Community Description
 
 .section.friends=Friends
@@ -191,12 +346,12 @@
 
 .section.location=Location
 
+.section.location.detect|staleness=1
 .section.location.detect=In order to automatically fill in the fields you can use the service determine your location
-
-.location.detect.btn=Detect
 
 .section.textmsg=Text Messaging
 
+.section.theme|staleness=1
 .section.theme=Community Theme
 
 .section.web=Web Page
@@ -209,7 +364,10 @@
 
 .security.visibility.regusers=Registered Users
 
+.share.birthday|staleness=1
 .share.birthday=Show your Birthday to:
+
+.share.gender=Show gender to:
 
 .show.birthday=Birthday display options:
 
@@ -237,6 +395,7 @@
 
 .success.viewprofile=View your profile
 
+.theme|staleness=1
 .theme=Briefly describe the central focus of your community. This will be shown in interest searches.
 
 .timezone.select=(Select your timezone)

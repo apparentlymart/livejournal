@@ -1,21 +1,4 @@
 ;; -*- coding: utf-8 -*-
-
-/editinfo.bml.newemail_old.body2<<
-Someone just changed the e-mail address for your [[sitename]] account "[[username]]".
-ip: [[ip]]
-old email: [[old_email]]
-new email: [[new_email]]
-
-You can change your email here: [[email_change_link]],
-or you can to manage your previous addresses here: [[email_manage_link]]
-
-Regards,
-[[sitename]] Team
-[[sitelink]]
-.
-
-/editinfo.bml.newemail_old.subject=E-mail Address Changed
-
 .btn.change=Change email address
 
 .error.invalidemail=Invalid email address.
@@ -28,6 +11,7 @@ Regards,
 
 .error.notvalidated=Your account is not validated.
 
+.error.suspended|staleness=1
 .error.suspended=You cannot change your email address while your account is suspended.
 
 .instructions=To better protect your account we require you enter your current password when changing your email address.  As your email address is used to prove ownership of your account and request a new password, please make sure you also protect your email account.  Using the same password for [[sitename]] and your email account is a bad idea.

@@ -1,9 +1,13 @@
 ;; -*- coding: utf-8 -*-
-
+.addalias.title|staleness=1
 .addalias.title=Add Note
 
+.ban_everywhere.title|staleness=1
 .ban_everywhere.title=Ban user everywhere
 
+.editalias.title|staleness=1
 .editalias.title=Edit Note
 
+.unban_everywhere.title|staleness=1
 .unban_everywhere.title=Unban user everywhere
+

@@ -1,4 +1,19 @@
 ;; -*- coding: utf-8 -*-
+.alias.aliaslist.more|staleness=1
+.alias.aliaslist.more=add more rows...
+
+.alias.comment.successupd|staleness=1
+.alias.comment.successupd=Your aliasing settings have been updated
+
+.alias.header.alias|staleness=1
+.alias.header.alias=Alias (note)
+
+.alias.header.newalias|staleness=1
+.alias.header.newalias=New alias:
+
+.alias.header.username|staleness=1
+.alias.header.username=Username
+
 .availablestyles.disabledstyles=Disabled Styles:
 
 .availablestyles.head=Available Styles
@@ -100,14 +115,4 @@ used in the *_HEAD overrides are those elements that are valid in the head of a 
 .success.head=Success
 
 .success.text2=Your journal settings have been updated. You can view your journal <a [[aopts]]>here</a>.
-
-.alias.header.username=Username
-
-.alias.header.alias=Alias (note)
-
-.alias.header.newalias=New alias:
-
-.alias.aliaslist.more=add more rows...
-
-.alias.comment.successupd=Your aliasing settings have been updated
 

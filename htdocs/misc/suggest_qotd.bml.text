@@ -1,21 +1,31 @@
 ;; -*- coding: utf-8 -*-
-
+.btn.submit|staleness=1
 .btn.submit=Submit Writer's Block Suggestion(s)
 
+.error.noquestion|staleness=1
 .error.noquestion=You didn't fill out the question field.
 
+.form.credit.label|staleness=1
 .form.credit.label=I want my name to appear publicly with my suggested Writer's Block question(s).
 
+.form.error.header|staleness=1
 .form.error.header=Error:
 
+.form.error.sendfailed|staleness=1
 .form.error.sendfailed=Message failed to send.
 
+.form.question.label|staleness=1
 .form.question.label=Your suggested question(s):
 
+.intro|staleness=1
 .intro=Fill out this form to suggest one or more Writer's Block questions:
 
+.success.header|staleness=1
 .success.header=Success
 
+.success.text|staleness=1
 .success.text=Your Writer's Block suggestion(s) have been sent. Thanks!
 
+.title|staleness=1
 .title=Suggest Writer's Block Questions
+

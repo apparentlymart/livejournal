@@ -89,6 +89,9 @@
 
 .information.pubkey.about=Upload your public key
 
+.information.secret_question|staleness=1
+.information.secret_question=Secret question
+
 .information.settings.about=Change your viewing options and other account settings
 
 .information.siteopts.about=Select your preferred site layout &amp; language
@@ -99,10 +102,12 @@
 
 .login2=The following links will navigate you to pages where your login information is required. To save yourself some time, you can <a [[aopts]]>log in</a> beforehand.
 
+.manage.logins|staleness=1
 .manage.logins=Manage Logins
 
 .manage.subscriptions=Manage Subscriptions
 
+.mobile.settings|staleness=1
 .mobile.settings=Mobile Settings
 
 .schools=Manage School Attendance
@@ -111,6 +116,7 @@
 
 .title=Manage Accounts
 
+.undeleteaccount|staleness=1
 .undeleteaccount=Undelete Account
 
 .userpics=Upload and manage userpics for your account:

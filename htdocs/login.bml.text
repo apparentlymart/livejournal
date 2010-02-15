@@ -1,24 +1,51 @@
 ;; -*- coding: utf-8 -*-
-.createaccount.header=Not a <?sitename?> member?
+.bindip.label=Bind to IP address:
 
+.bindip.no=No (works with all ISPs)
+
+.bindip.yes=Yes (safer)
+
+.createaccount.button|staleness=1
 .createaccount.button=Create an Account
 
+.createaccount.header|staleness=1
+.createaccount.header=Not a <?sitename?> member?
+
+.createaccount.tour|staleness=1
 .createaccount.tour=Take the Feature Tour
 
+.createaccount.whylogin.benefit1|staleness=1
 .createaccount.whylogin.benefit1=Read friends-only posts that are addressed to you.
 
+.createaccount.whylogin.benefit2|staleness=1
 .createaccount.whylogin.benefit2=Leave comments in any journal or community.
 
+.createaccount.whylogin.benefit3|staleness=1
 .createaccount.whylogin.benefit3=Post entries in your own journal.
 
+.createaccount.whylogin.benefit4|staleness=1
 .createaccount.whylogin.benefit4=Add any journal or community to your Friends page.
 
+.createaccount.whylogin.benefit5|staleness=1
 .createaccount.whylogin.benefit5=Access features that are only visible when you're logged in.
 
 .error.notuser=Username not found.  Would you like to <a [[aopts]]>create an account</a> using this username?
 
+.expire.btn.neverexpire=Change expiration mode to NEVER
+
+.expire.btn.sessiononly=Change expiration mode to SESSION ONLY
+
+.expire.neverexpire.text=Your login will <b>never expire</b>, so if you're at a public internet terminal, a school, library, or other place where people may be using this computer shortly, make sure you log out when you're done!  Or, change your login mode to expire when you close your browser:
+
+.expire.sessiononly.text=Your login will expire after you close your browser.  If this is your own computer and you're the only user, you may want to set your login expiration such that it never expires:
+
+.links.head=Links
+
+.links.text=In the future this page will have all sorts of links and relevant information, but for now here are a few places you may want to go:
+
 .loggedin.head2=Welcome back to [[sitename]]!
 
+.loggedin.openidemail|staleness=1
 .loggedin.openidemail=Please <a [[aopts1]]>set</a> and <a [[aopts2]]>validate</a> your email address to get started.
 
 .loggedin.suggest1=Did you know you can now easily add a photo?
@@ -41,6 +68,11 @@
 
 .login.bindcookie.learnmore=Learn more about this option
 
+.login.btn.changeopts=Change Options
+
+.login.btn.create=Create an Account
+
+.login.btn.login|staleness=1
 .login.btn.login=Log in
 
 .login.btn.save=Save
@@ -51,8 +83,12 @@
 
 .login.forget2=Forgot password?
 
+.login.head|staleness=1
 .login.head=Log in
 
+.login.never=Never
+
+.login.openid|staleness=1
 .login.openid=Login with Open ID
 
 .login.optionssaved=Login options saved.
@@ -67,9 +103,47 @@
 
 .login.standard=Standard
 
+.login.text4=When you log in to your [[sitename]] account, you can:
+
+.login.text5=You can sign up for a [[sitename]] account for free.
+
+.login.text6|staleness=1
+.login.text6=Log in to your [[sitename]] account to:
+
+.login.text7|staleness=1
+.login.text7=Signing up for a [[sitename]] account is free.
+
 .login.title=Log in
 
 .login.username=Username:
 
+.login.welcome=Log in to [[sitename]]
+
+.login.whenbrowsercloses=When browser closes
+
+.logout.btn=Log Out
+
 .logout.btn1=Log out
+
+.logout.loggedout=You are logged out.
+
+.whylogin.benefit10|staleness=1
+.whylogin.benefit10=Add journals and communities to your Friends page.
+
+.whylogin.benefit11|staleness=1
+.whylogin.benefit11=Access feature not visible to logged-out users.
+
+.whylogin.benefit4=Read friends-only posts that are addressed to you.
+
+.whylogin.benefit5=Leave comments in any journal or community.
+
+.whylogin.benefit6=Add any journal or community to your Friends page.
+
+.whylogin.benefit7=Access features that are only visible when you're logged in.
+
+.whylogin.benefit8|staleness=1
+.whylogin.benefit8=Read Friends-only entries.
+
+.whylogin.benefit9|staleness=1
+.whylogin.benefit9=Leave comments in journals and communities.
 

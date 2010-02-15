@@ -1,6 +1,10 @@
 ;; -*- coding: utf-8 -*-
-.error.user=Invalid user.
-
+.error.id|staleness=1
 .error.id=No theme id or custom layout id specified.
 
+.error.preview|staleness=1
 .error.preview=Error loading preview.
+
+.error.user|staleness=1
+.error.user=Invalid user.
+

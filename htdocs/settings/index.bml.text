@@ -1,17 +1,25 @@
+;; -*- coding: utf-8 -*-
+.change.settings|staleness=1
 .change.settings=Change Settings
 
+.failed.to.load|staleness=1
 .failed.to.load=Failed to load
 
-.save=Save
-
-.sorry=Sorry
-
+.no.options.match|staleness=1
 .no.options.match=No options match
 
+.options.tagged|staleness=1
 .options.tagged=Options tagged
 
+.save|staleness=1
+.save=Save
+
+.sorry|staleness=1
+.sorry=Sorry
+
+.the.setting|staleness=1
 .the.setting=The '[[selminiclass]]' setting:
 
+.which.setting|staleness=1
 .which.setting=Which <a [[link]]>setting</a> do you want to change today?  Enter tag:
-
 

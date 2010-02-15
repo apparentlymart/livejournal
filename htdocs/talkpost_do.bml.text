@@ -1,5 +1,4 @@
 ;; -*- coding: utf-8 -*-
-
 .error.badpassword2=Incorrect password given for the username specified. You can recover your password <a [[aopts]]>here</a> if you've forgotten it.
 
 .error.badusername2=The [[sitename]] username you specified does not exist. You can recover your username <a [[aopts]]>here</a> if you've forgotten it, or you may post as "Anonymous" instead.
@@ -14,9 +13,8 @@
 
 .error.friendsonly=Only friends of [[user]] may post in this journal.
 
+.error.invalidform|staleness=1
 .error.invalidform=Invalid form submission. You may have left the reply form open too long, or logged out since you opened the page. Please try posting again.
-
-.error.membersonly=Only members of [[user]] can post in this community.
 
 .error.lostcookie=Your login cookie seems to have disappeared?
 
@@ -24,7 +22,11 @@
 
 .error.manychars=Sorry, but your comment of [[current]] characters exceeds the maximum character length of [[limit]]. Please go back, shorten it, and try posting it again.
 
+.error.maxcomments|staleness=1
 .error.maxcomments=Sorry, this entry already has the maximum number of comments allowed.
+
+.error.membersonly|staleness=1
+.error.membersonly=Only members of [[user]] can post in this community.
 
 .error.mustlogin=You must be logged in or using a username/password to reply to this protected entry.
 
@@ -32,14 +34,16 @@
 
 .error.noauth=You are not authorized to reply to this protected entry.
 
-.error.noopenid=OpenID users are not authorized to reply to this entry.
-
 .error.nocomments=User has disabled commenting on this journal entry.
+
+.error.noopenid|staleness=1
+.error.noopenid=OpenID users are not authorized to reply to this entry.
 
 .error.noparent=Cannot reply to a non-existent comment.
 
 .error.notafriend=Sorry, user <b>[[user]]</b> does not list you as a friend, and they've set the "friends only" option for who can reply to their journal.
 
+.error.notamember|staleness=1
 .error.notamember=Sorry, you are not a member of <b>[[user]]</b>, and commenting is restricted to members only.
 
 .error.nousername=You did not enter your LiveJournal username.  You can choose to post as "Anonymous" if you don't have a LiveJournal user account.

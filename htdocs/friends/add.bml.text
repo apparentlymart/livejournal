@@ -1,10 +1,13 @@
 ;; -*- coding: utf-8 -*-
-
 .add.header=Success
 
 .add.next.friends=Read your Friends page
 
 .add.next.subscribe=Get notifications for new entries
+
+.add.text.community2=Community [[ljuser]] was added to your friends list. You can view updates on your <a [[aopts]]>friends page</a>.
+
+.add.text.feed2=The [[ljuser]] feed was added to your friends list. You can view updates on your <a [[aopts]]>friends page</a>.
 
 .add.text2=[[ljuser]] has been added to your friends list.
 
@@ -68,6 +71,9 @@
 
 .error.sessionchanged=Session info changed. Try again.
 
+.error.too.long|staleness=1
+.error.too.long=You've reached the maximum number of the notes.
+
 .error1.title=Add Friend
 
 .error2.text2=Invalid or missing username given. To add a friend, go to the <a [[aopts]]>edit friends</a> page.
@@ -78,16 +84,16 @@
 
 .error3.title=Modify Friend
 
-.error.too.long=You've reached the maximum number of the notes.
-
 .groups.header=Friends Groups
 
 .groups.nogroup=No friend groups set up.
 
 .groups.text1=<i>Optional:</i> Include in one or more custom friends groups.
 
+.hint.paid.text|staleness=1
 .hint.paid.text=This feature is available only for <a [[aopts]]>Paid Account Level</a> users.
 
+.note.text|staleness=1
 .note.text=set note for [[username]] (read <a [[aopts]]>FAQ</a> for details):
 
 .optional=Optional
@@ -99,5 +105,4 @@
 .remove.text2=[[ljuser]] has now been removed from your friend list.  You can view your updated  <a [[aopts]]>friends page</a> or go back to your <a [[aopts2]]>profile</a>.
 
 .remove.title=Friend Removed!
-
 

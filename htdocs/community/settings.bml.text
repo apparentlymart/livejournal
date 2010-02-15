@@ -1,6 +1,7 @@
 ;; -*- coding: utf-8 -*-
 .button.changecommunity=Update Settings
 
+.button.changecommunity2|staleness=1
 .button.changecommunity2=Save Changes
 
 .button.createcommunity=Create Community
@@ -21,28 +22,40 @@
 
 .error.samenames=Maintainer account and community account cannot be the same.
 
-.label.adultcontentheader=Adult Content
-
-.label.adultcontentheader2=Adult Content Setting
-
+.label.adultcontentconcepts|staleness=1
 .label.adultcontentconcepts=Adult Concepts
 
+.label.adultcontentconcepts2|staleness=1
 .label.adultcontentconcepts2=<b>Adult Concepts</b><br />Users under the age of [[age]] will be not be able to join this community or view its entries.
 
+.label.adultcontentexplicit|staleness=1
 .label.adultcontentexplicit=Explicit Adult Content
 
+.label.adultcontentexplicit2|staleness=1
 .label.adultcontentexplicit2=<b>Explicit Adult Content</b><br />Users under the age of [[age]] will be not be able to join this community or view its entries.
 
+.label.adultcontentheader|staleness=1
+.label.adultcontentheader=Adult Content
+
+.label.adultcontentheader2|staleness=1
+.label.adultcontentheader2=Adult Content Setting
+
+.label.adultcontentnone|staleness=1
 .label.adultcontentnone=No Adult Content
 
+.label.adultcontentnone2|staleness=1
 .label.adultcontentnone2=<b>No Adult Content</b>
 
+.label.adultcontentnote|staleness=1
 .label.adultcontentnote=This is a global setting for the community. For "Explicit Adult Content", users under the age of [[explicitage]] will be restricted from viewing. "Adult Concepts" restricts users under the age of [[conceptsage]] years old from viewing.
 
+.label.adultcontenttext|staleness=1
 .label.adultcontenttext=Does this community have adult content?
 
+.label.adultcontenttext2|staleness=1
 .label.adultcontenttext2=Does your community have adult content?
 
+.label.antispam|staleness=1
 .label.antispam=Community Moderation
 
 .label.anybodycan=<b>All Members</b><br />Anybody can post immediately once a member.
@@ -87,21 +100,29 @@
 
 .label.moderatedmemb=<b>Moderated Membership</b><br />Requests to join are emailed to you for approval.
 
+.label.moderation|staleness=1
 .label.moderation=Moderate entries to your community?
 
-.label.moderationyes_none=Do not moderate.
+.label.moderationyes|staleness=1
+.label.moderationyes=New entries must be approved by a moderator before they appear in the community.
 
+.label.moderationyes_all|staleness=1
 .label.moderationyes_all=New entries must be approved by a moderator before they appear in the community.
 
+.label.moderationyes_filter|staleness=1
 .label.moderationyes_filter=New entries, containing links to untrustworthy domains, must be approved by a moderator before they appear in the community.
+
+.label.moderationyes_none|staleness=1
+.label.moderationyes_none=Do not moderate.
 
 .label.modheader=Entry Moderation
 
 .label.modis=<b>Moderated</b><br />New entries must be approved by a moderator.
 
-.label.modisnt=<b>Unmoderated</b><br />New entries appear immediately.
-
+.label.modisfilter|staleness=1
 .label.modisfilter=<b>Partly Moderated</b><br />New entries, containing links to untrustworthy domains, must be approved by a moderator.
+
+.label.modisnt=<b>Unmoderated</b><br />New entries appear immediately.
 
 .label.modtext=Are submissions to this community moderated?
 
@@ -123,12 +144,16 @@
 
 .label.postaccess=Member Posting Restrictions
 
+.label.postingaccess|staleness=1
 .label.postingaccess=Posting Access
 
+.label.postingaccessanybody|staleness=1
 .label.postingaccessanybody=<b>Anybody</b><br />Any user can post to this community without having to join it.
 
+.label.postingaccessmembers|staleness=1
 .label.postingaccessmembers=<b>All Members</b><br />Any user can post to this community once they've joined it.
 
+.label.postingaccessselect|staleness=1
 .label.postingaccessselect=<b>Select Members</b><br />Members can post only if a maintainer gives them access.
 
 .label.rellinks=Relevant links:
@@ -137,12 +162,14 @@
 
 .label.username=Username:
 
+.label.whitelist|staleness=1
 .label.whitelist=Edit white-list for this community
 
 .label.whocanjoin=Who can join your community?
 
 .label.whocanpost=Do you want to allow only certain members the ability to post?
 
+.label.whocanpost2|staleness=1
 .label.whocanpost2=Who can post entries to your community?
 
 .manage2=Manage communities

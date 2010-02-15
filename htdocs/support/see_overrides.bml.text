@@ -9,5 +9,6 @@
 
 .title=User Overrides
 
+.viewoverrides|staleness=1
 .viewoverrides=View overrides for user:
 

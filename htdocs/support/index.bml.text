@@ -1,21 +1,73 @@
 ;; -*- coding: utf-8 -*-
+.ask.head|staleness=1
 .ask.head=Ask a Question
 
+.ask.text|staleness=1
 .ask.text=If you can't find what you're looking for, <a [[aopts]]>open a support request</a> and we'll get back to you.
 
+.faq.all|staleness=1
 .faq.all=view all faqs
 
+.faq.head|staleness=1
 .faq.head=Frequently Asked Questions
 
+.faq.search.btn|staleness=1
 .faq.search.btn=Search
 
+.faq.text|staleness=1
 .faq.text=We've got answers to hundreds of questions. Search the FAQ -- you may just find what you're looking for.
 
+.knownissues.head|staleness=1
 .knownissues.head=Known Issues
 
+.read.faq|staleness=1
+.read.faq=Read the Frequently Asked Questions
+
+.read.faq.desc|staleness=1
+.read.faq.desc=Try and solve the problem first by yourself before asking other people.  You'll probably get the answer faster, too!
+
+.submit.request.desc|staleness=1
+.submit.request.desc=Is your question not in the FAQ?  Click "Ask a question" and you can submit a new support request and somebody in the LiveJournal community will read it and get back to you with an answer.  If they don't help you, your support request stays open until somebody does help and you confirm that your problem is solved.
+
+.sumbit.request|staleness=1
+.sumbit.request=Ask a question
+
+.support.areas|staleness=1
+.support.areas=Support Areas
+
+.support.major.things|staleness=1
+.support.major.things=Here are the three major things you can do here in the support area.
+
+.title|staleness=1
 .title=<?sitename?> Support
 
+.volunteer|staleness=1
+.volunteer=Help somebody out
+
+.volunteer.desc.nice|staleness=1
+.volunteer.desc.nice=Just to be nice
+
+.volunteer.desc.points|staleness=1
+.volunteer.desc.points=To get points just for fun and competition
+
+.volunteer.desc.summary|staleness=1
+.volunteer.desc.summary=Got some extra time on your hands?  Help out a LiveJournal user that has an open support request.  Users that help other users out will get "support points" that will show up on your userinfo page.  There are multiple reasons for helping other users out:
+
+.volunteer.head|staleness=1
 .volunteer.head=Did You Know?
 
+.volunteer.highscores|staleness=1
+.volunteer.highscores=If you're curious, check out the list of <a [[aopts]]>high scores</A>, showing who helps the most.
+
+.volunteer.notifications|staleness=1
+.volunteer.notifications=If you want to be notified when new support requests come in, <a [[aopts]]>set your notification settings</a>.
+
+.volunteer.text|staleness=1
 .volunteer.text=<?sitename?> Support is primarily run by volunteers. Got time? <strong><a [[aopts-help]]>Help someone out!</a></strong> Check out the <a [[aopts-points]]>high scores</a> page to see who helps out the most.</a>
+
+.welcome|staleness=1
+.welcome=Welcome!
+
+.welcome.text|staleness=1
+.welcome.text=Welcome to the LiveJournal community support center.  Listed below are some of the most frequent questions people ask.  If you don't find what you're looking for, you can submit a support request below.
 

@@ -1,10 +1,7 @@
 ;; -*- coding: utf-8 -*-
-.communitydirectory=Community Directory
-
-.communitydirectory.manage=Manage Community Directory Listing
-
 .commlist.actinfo=Info
 
+.commlist.actinfo2|staleness=1
 .commlist.actinfo2=Profile
 
 .commlist.actinvites=Invitations
@@ -18,8 +15,10 @@
 
 .commlist.actsettings2=Settings
 
+.commlist.customize|staleness=1
 .commlist.customize=Customize
 
+.commlist.customize2|staleness=1
 .commlist.customize2=Journal Style
 
 .commlist.header=Your communities
@@ -30,6 +29,7 @@
 
 .commlist.none=<i>You are not managing any communities.</i>
 
+.commlist.post|staleness=1
 .commlist.post=Post
 
 .commlist.text=Here are the communities that you manage or co-manage:
@@ -38,12 +38,21 @@
 
 .commlist.username=<b>Username</b>
 
+.communitydirectory|staleness=1
+.communitydirectory=Community Directory
+
+.communitydirectory.manage|staleness=1
+.communitydirectory.manage=Manage Community Directory Listing
+
 .create.header=Create a community
 
 .create.text2=You can also <a [[aopts]]><b>create a new community</b></a>.
 
 .error.badaccounttype=You must be logged in as a regular user account in order to access this page.
 
+.joinmail.body=For communities with moderated membership, you have several email options:
+
+.joinmail.body2|staleness=1
 .joinmail.body2=For communities with moderated membership, you can <a [[aopts]]>get notified</a> whenever anyone requests membership.
 
 .joinmail.email.all=E-mail every time someone requests to join
@@ -56,6 +65,7 @@
 
 .joinmail.title=Administrative options
 
+.managelinks|staleness=1
 .managelinks=Manage [[user]]'s:
 
 .modemail.body=For moderated communities, you can choose whether to send emails or not:
@@ -64,5 +74,8 @@
 
 .modemail.yes=Email me every time someone submits a post to the queue
 
+.title=Community Management
+
+.title2|staleness=1
 .title2=Manage Communities
 

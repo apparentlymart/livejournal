@@ -13,6 +13,7 @@
 
 .btn.toggle=Preview
 
+.editfriends.alias|staleness=1
 .editfriends.alias=Notes
 
 .editfriends.friend=Friend?
@@ -27,6 +28,7 @@
 
 .error.badjournaltype=Cannot modify friends of this journal type.
 
+.error.too.long.aliases|staleness=1
 .error.too.long.aliases=You've reached the maximum number of the notes.
 
 .error.updating=There was an error updating your friends list:
@@ -36,6 +38,8 @@
 .friend=Friend
 
 .hover=Hover your mouse over a color to see its name.
+
+.invite=Do you want to <a [[aopts]]>invite a friend</a>?
 
 .mrcolor=Mr. Color Viewer
 
@@ -53,10 +57,15 @@
 
 .textcolor=Text Color:
 
+.title=Edit Friends
+
+.title2|staleness=1
 .title2=Manage Friends
 
+.title3|staleness=1
 .title3=Add or Remove Friends
 
 .user=User
 
 .viewer=Color Viewer
+

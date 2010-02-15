@@ -1,7 +1,8 @@
 ;; -*- coding: utf-8 -*-
-
+.captcha|staleness=1
 .captcha=Show CAPTCHA while commenting to
 
+.captcha.text|staleness=1
 .captcha.text=This option will prevent spammer bots from commenting in your journal, but it makes life harder for regular users too.
 
 .commentnotify=Receive email copies of comments you make
@@ -20,6 +21,7 @@
 
 .finished.save_button=Save Changes
 
+.fn.captcha|staleness=1
 .fn.captcha=Human test
 
 .fn.commentnotify=Comment notifications
@@ -42,6 +44,7 @@
 
 .intro=Set your comment preferences below.
 
+.intro2|staleness=1
 .intro2=Set your comment preferences below. You may also want to edit your <a [[aopts1]]>profile settings</a> or your <a [[aopts2]]>viewing options</a>.
 
 .logip=Log IPs for replies from
@@ -86,6 +89,9 @@
 
 .success.text=Your comment settings have been updated.
 
+.title=Comment Settings
+
+.title2|staleness=1
 .title2=Manage Comment Settings
 
 .unban=You have the following users banned from posting in your journal. Check the checkbox by their username to remove the ban.

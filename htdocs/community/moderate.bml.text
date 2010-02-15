@@ -29,9 +29,10 @@
 
 .choice.bkreject=#e08291
 
-.choice.reject=Reject
-
+.choice.mark_as_spam|staleness=1
 .choice.mark_as_spam=Reject and mark as spam
+
+.choice.reject=Reject
 
 .error.noaccess=You do not moderate the community [[comm]].
 

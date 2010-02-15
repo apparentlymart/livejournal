@@ -15,6 +15,7 @@
 
 .decline=Decline
 
+.error.invitersuspended|staleness=1
 .error.invitersuspended=Invitation suspended: Inviter's account is currently suspended.
 
 .fromline=From [[user]] ([[date]])

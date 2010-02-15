@@ -19,10 +19,12 @@
 
 .moods.intro=The following are server-supported moods on [[sitename]]. You can always enter your own, but these are the ones that can have pictures associated with them and can be searched on, etc. You're encouraged to use these if possible.
 
+.moodtheme.byauthor|staleness=1
 .moodtheme.byauthor=by [[author]]
 
 .nav.viewall=View All
 
+.specialthemes.header|staleness=1
 .specialthemes.header=Special Mood Themes
 
 .title=[[sitename]] Moods

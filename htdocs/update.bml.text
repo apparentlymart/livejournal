@@ -29,6 +29,7 @@
 
 .error.disabled.title=Posting access disabled
 
+.error.invalidusejournal|staleness=1
 .error.invalidusejournal=Invalid usejournal argument.
 
 .error.login=Error logging on:
@@ -113,13 +114,17 @@
 
 .success.links.view=View the entry
 
+.tags.skipped|staleness=1
 .tags.skipped=<p>The entry has been saved. However, some tags have not been added because you have exceeded your maximum tags limit of [[limit]] tags. The tags we couldn't add are as follows:<p><p><strong>[[tags]]</strong></p>
 
 .timeformat=24 hour time
 
-.title2=Post an Entry
+.title=Post to Journal
 
 .title.readonly=Read-only mode
+
+.title2|staleness=1
+.title2=Post an Entry
 
 .update.head=Update your Journal...
 

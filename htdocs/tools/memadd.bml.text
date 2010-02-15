@@ -4,17 +4,24 @@
 <?p To add the journal entry you were just viewing to your "memories", fill out the form below. p?>
 .
 
+.body.added.body2=Your list of memorable posts has been updated.  You may return to <a [[aopts]]>the entry</a> just added.
+
 .body.added.header=Success
 
-.body.added.text=Your list of memorable entries has been updated.
-
+.body.added.next.entry|staleness=1
 .body.added.next.entry=Go back to the entry
 
+.body.added.next.friends|staleness=1
 .body.added.next.friends=Read your Friends page
 
+.body.added.next.journal|staleness=1
 .body.added.next.journal=Continue reading [[user]]
 
+.body.added.next.view|staleness=1
 .body.added.next.view=View all your memories
+
+.body.added.text|staleness=1
+.body.added.text=Your list of memorable entries has been updated.
 
 .description=Description:
 
