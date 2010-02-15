@@ -150,52 +150,100 @@ function show_props(div, id)
 }
 
 // for edittags.bml
-function edit_tagselect(list)
+EditTag =
 {
-    if (! list) return;
-
-    var selected = new Array();  // tagnames, for display
-    selected_num = 0;
-
-    for ( $i = 0; $i < list.options.length; $i++ ) {
-        if (list.options[$i].selected) {
-            selected[selected_num] = list.options[$i].value;
-            selected_num++;
-        }
-    }
-
-    var form = document.getElementById("edit_tagform");
-    if (! form) return;
-
-    var tagfield = form.elements[ "tagfield" ];
-    if (! tagfield ) return;
-
-    // merge selected and current tags into new array
-    var cur_tags = new Array();
-    cur_tags = cur_taglist.split(", ");
-
-    var taglist = new Array();
-
-    for ( $i = 0; $i < selected.length; $i++ ) {
-        var sel_tag = selected[$i];
-        var seen = 0;
-        for ( $j = 0; $j < cur_tags.length; $j++ ) {
-            if (sel_tag == cur_tags[$j]) seen = 1;
-        }
-        if (seen == 0) taglist.push(sel_tag);
-    }
-
-    if (taglist.length) {
-        if (cur_taglist.length > 0) {
-            tagfield.value = cur_taglist + ", " + taglist.join(", ");
-        } else {
-            tagfield.value = taglist.join(", ");
-        }
-    } else {
-        tagfield.value = cur_taglist;
-    }
-
-    return;
+	// cache options value
+	list_hash: {},
+	
+	init: function()
+	{
+		var tagfield = $('tagfield'),
+			list = $('edit_tagform').tags,
+			$list = jQuery(list),
+			i = list.options.length;
+		
+		$list.val(tagfield.value.split(/,\s*/));
+		
+		
+		while(i--) {
+			this.list_hash[list.options[i].value] = list.options[i];
+		}
+		
+		var timeout;
+		jQuery(tagfield).bind('input keyup paste', function()
+		{
+			clearTimeout(timeout);
+			timeout = setTimeout(function()
+			{
+				$list.val(tagfield.value.split(/,\s*/));
+			}, 50);
+		});
+		
+		$list.bind(jQuery.browser.msie ?
+		    'change' : // IE support metaKey in onchange
+		    'click keyup', EditTag.select)
+	},
+	
+	select: function(e)
+	{
+		var $list = jQuery(this);
+			selected = $list.val(), // tagnames, for display
+			cache_val = selected && selected.join(',');
+		
+		// no need update input
+		if (cache_val == EditTag.last_val) {
+			return;
+		}
+		
+		var cache_list = EditTag.list_hash,
+			tagfield = $('tagfield'),
+			cur_tags = tagfield.value.split(/,\s*/),
+			i, tag;
+		
+		if (e.metaKey) {
+			i = cur_tags.length;
+			while (i--) {
+				tag = cur_tags[i];
+				if (cache_list[tag]) {
+					if (!cache_list[tag].selected) {
+						cur_tags.splice(i, 1);
+					}
+				}
+			}
+		} else {
+			var index,
+				top = this.scrollTop; // jump to last element in FF 3.6
+			
+			i = cur_tags.length;
+			while (i--) {
+				tag = cur_tags[i];
+				// no items selected or empty
+				if ( (!selected && cache_list[tag]) || tag == '') {
+					cur_tags.splice(i, 1);
+				} else if (selected && ~(index = selected.indexOf(tag)) ) {
+					cur_tags.splice(i, 1);
+					cache_list[
+						selected.splice(index, 1)[0]
+					].selected = false;
+				} else if (cache_list[tag]) {
+					cache_list[tag].selected = true;
+				}
+			}
+			this.scrollTop = top;
+		}
+		
+		// unique merge
+		if (selected) {
+			i = -1;
+			while (selected[++i]) {
+				if (!~cur_tags.indexOf(selected[i])) {
+					cur_tags.push(selected[i]);
+				}
+			}
+		}
+		tagfield.value = cur_tags.join(', ');
+		
+		selected = $list.val();
+		EditTag.last_val = selected && selected.join(',');
+	}
 }
-
-
