@@ -971,8 +971,8 @@ sub trans
     }
 
     # emulate DirectoryIndex directive
-    if ($host =~ m'^www' and (LJ::Request->uri =~ m"/" or -d "$LJ::SITEROOT/htdocs/" . LJ::Request->filename)){
-        LJ::Request->uri(LJ::Request->uri . "/index.bml");
+    if ($host =~ m'^www' and (LJ::Request->uri =~ m|^/$| or -d "$LJ::SITEROOT/htdocs/" . LJ::Request->filename)){
+        LJ::Request->uri(LJ::Request->uri . "index.bml");
     }
 
     return LJ::Request::DECLINED
