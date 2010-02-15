@@ -541,8 +541,8 @@ sub dumptext
         };
 
         while (my ($itcode, $text, $staleness, $notes) = $sth->fetchrow_array) {
-            if ($itcode =~ m!\.bml/!) {
-                warn $itcode;
+            if ($itcode =~ m!\.bml/! || $itcode =~ /[\s=]/) {
+                warn "Skipping item code '$itcode'";
                 next;
             }
 
