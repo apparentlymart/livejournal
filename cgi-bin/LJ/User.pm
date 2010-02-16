@@ -4418,7 +4418,7 @@ sub _friend_friendof_uids_do {
 sub fb_push {
     my $u = shift;
     eval {
-        if ($u && $u->get_cap("fb_account")) {
+        if ($u) {
             require LJ::FBInterface;
             LJ::FBInterface->push_user_info( $u->id );
         }
