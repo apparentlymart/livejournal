@@ -859,14 +859,6 @@ $VERSION = '1.5.6';
         'totlimit'      => 90,
     },
 
-    'voicestream' => {
-        'name'          => 'Voicestream',
-        'notes'         => 'Enter your 10-digit phone number. Message is sent via the email gateway, since they changed their web gateway and we have not gotten it working with the new one yet.',
-        'fromlimit'     => 15,
-        'msglimit'      => 140,
-        'totlimit'      => 140,
-    },
-
     'weblinkwireless' => {
         'name'          => 'Weblink Wireless',
         'notes'         => 'Enter your phone number. Goes to @airmessage.net',
@@ -908,7 +900,6 @@ sub provider_info
 sub remap {
     my $provider = shift;
     return "o2mmail" if $provider eq "btcellnet";
-    return "voicestream" if $provider eq "voicestream2";
     return "tmobileusa" if $provider eq "tmomail";
     return "suncom" if $provider eq "tms-suncom";
     return "aliant" if $provider eq "nbtel";
@@ -1940,15 +1931,6 @@ sub send
             'from' => $msg->{'from'},
             'subject' => $msg->{'message'},
             'body' => "Your LiveJournal Text Message has been placed into the subject line."
-        },$errors);
-    }
-
-    elsif ($provider eq "voicestream" )
-    {
-        send_mail($self, {
-            'to'        => "$self->{'number'}\@voicestream.net",
-            'from'      => "$msg->{'from'}",
-            'body'      => "$msg->{'message'}",
         },$errors);
     }
 
