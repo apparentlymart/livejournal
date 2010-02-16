@@ -26,7 +26,42 @@ body<=
     my $skipto = $GET{'skipto'};
     my $sid = $GET{'sid'};
 
-    my $items = LJ::Schools::Log->query(skipto => $skipto, schoolid => $sid);
+    my $username = $GET{'user'};
+    my $u = LJ::load_user($username);
+    my $userid = $u ? $u->id : 0;
+
+    my %controls = (
+        'schoolid' => LJ::html_text({
+            'name' => 'schoolid',
+            'value' => $sid,
+            'id' => 'input-schoolid',
+        }),
+        'user' => LJ::html_text({
+            'name' => 'user',
+            'value' => $username,
+            'id' => 'input-user',
+        }),
+    );
+
+    $ret .= qq{
+        <form action="history.bml" method="get">
+        <p>
+            <label for="input-user">User: </label>
+            $controls{user}
+        </p>
+        <p>
+            <label for="input-schoolid">School ID: </label>
+            $controls{schoolid}
+        </p>
+        <p><button type="submit">Show</button></p>
+        </form>
+    };
+
+    my $items = LJ::Schools::Log->query(
+        skipto => $skipto,
+        schoolid => $sid,
+        userid => $userid,
+    );
 
     if (scalar(@$items)) {
         foreach my $item (@$items) {
