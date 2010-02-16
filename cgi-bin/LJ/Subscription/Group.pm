@@ -336,7 +336,6 @@ sub active {
     my $ret = 0;
     $ret ||= $_->active foreach (values %{$self->{'subs'}});
 
-    warn $self->freeze, ', ', $ret;
     return $ret;
 }
 
