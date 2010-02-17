@@ -721,7 +721,12 @@ sub create_view_foaf {
     }
 
     # include a user's journal page and web site info
-    $ret .= "    <foaf:weblog rdf:resource=\"" . LJ::journal_base($u) . "/\"/>\n";
+    my $time_create = ($u->timecreate) ? LJ::time_to_w3c($u->timecreate) : '';
+    my $time_update = ($u->timeupdate) ? LJ::time_to_w3c($u->timeupdate) : '';
+    $ret .= "    <foaf:weblog rdf:resource='" . LJ::journal_base($u) . "/'";
+    $ret .= " lj:dateCreated='$time_create'" if $time_create;
+    $ret .= " lj:dateLastUpdated='$time_update'" if $time_update;
+    $ret .= " />\n";
     if ($u->{url}) {
         $ret .= "    <foaf:homepage rdf:resource=\"" . LJ::eurl($u->{url});
         $ret .= "\" dc:title=\"" . LJ::exml($u->{urlname}) . "\" />\n";
