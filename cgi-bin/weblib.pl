@@ -11,6 +11,7 @@ require "crumbs.pl";
 
 use Carp;
 use LJ::Request;
+use JSON();
 use Class::Autouse qw(
                       LJ::Event
                       LJ::Subscription::Pending
@@ -1991,28 +1992,12 @@ sub no_access_error {
 # Data::Dumper for JavaScript
 sub js_dumper {
     my $obj = shift;
-    if (ref $obj eq "HASH") {
-        my $ret = "{";
-        foreach my $k (keys %$obj) {
-            # numbers as keys need to be quoted.  and things like "null"
-            my $kd = ($k =~ /^\w+$/) ? "\"$k\"" : LJ::js_dumper($k);
-            $ret .= "$kd: " . js_dumper($obj->{$k}) . ",\n";
-        }
-        if (keys %$obj) {
-            chop $ret;
-            chop $ret;
-        }
-        $ret .= "}";
-        return $ret;
-    } elsif (ref $obj eq "ARRAY") {
-        my $ret = "[" . join(", ", map { js_dumper($_) } @$obj) . "]";
-        return $ret;
+    if (ref $obj) {
+        return JSON::objToJson($obj);
     } else {
-        return $obj if $obj =~ /^\d+$/;
-        return "\"" . LJ::ejs($obj) . "\"";
+        return ($obj =~ /^\d+$/) ?  $obj : '"' . LJ::ejs($obj) . '"';
     }
 }
-
 
 {
     my %stat_cache = ();  # key -> {lastcheck, modtime}
