@@ -370,7 +370,9 @@ sub LJ::Request::post_params {
     return @{ $instance->{params} } if $instance->{params};
     my @params = ();
     foreach my $name ($instance->{apr}->body){
-        push @params => $name, $instance->{apr}->body($name);
+        foreach my $val ($instance->{apr}->body($name)){
+            push @params => $name, $val;
+        }
     }
     $instance->{params} = \@params;
     return @params;
