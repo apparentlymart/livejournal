@@ -2264,8 +2264,6 @@ sub generate_messageid {
 sub enter_comment {
     my ($journalu, $parent, $item, $comment, $errref) = @_;
 
-    LJ::run_hooks('update_comment_props', $journalu, $comment);
-
     my $partid = $parent->{talkid};
     my $itemid = $item->{itemid};
 
@@ -2276,6 +2274,8 @@ sub enter_comment {
 
     return $err->("Invalid user object passed.")
         unless LJ::isu($journalu);
+
+    LJ::run_hooks('update_comment_props', $journalu, $comment);
 
     my $jtalkid = LJ::alloc_user_counter($journalu, "T");
     return $err->("Database Error", "Could not generate a talkid necessary to post this comment.")
