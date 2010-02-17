@@ -660,391 +660,273 @@ ContextualPopup.popupClosed = function () {
     ContextualPopup.mouseOut();
 }
 
-ContextualPopup.renderPopup = function (ctxPopupId) {
-    var ippu = ContextualPopup.ippu;
-
-    if (!ippu)
-    return;
-
-    if (ctxPopupId) {
-        var data = ContextualPopup.cachedResults[ctxPopupId];
-
-        if (!data) {
-			ippu.element.append('<div class="Inner">Loading...</div>');
-            return;
-        } else if (!data.username || !data.success || data.noshow) {
-            ippu.hide();
-            return;
-        }
-
-        var username = data.display_username;
-
-		var inner = jQuery('<div class="Inner"></div>')[0];
-		if (ippu.element[0].firstChild) {
-			var last_inner_height = ippu.element[0].firstChild.offsetHeight;
-			ippu.element.height(ippu.element.height());
-			ippu.element.css('overflow', 'hidden');
+ContextualPopup.renderPopup = function (ctxPopupId)
+{
+	var ippu = ContextualPopup.ippu;
+	
+	if (!ippu || !ctxPopupId) {
+		return;
+	}
+	
+	var data = ContextualPopup.cachedResults[ctxPopupId];
+	
+	if (!data) {
+		ippu.element.append('<div class="Inner">Loading...</div>');
+		return;
+	} else if (!data.username || !data.success || data.noshow) {
+		ippu.hide();
+		return;
+	}
+	
+	var inner = jQuery('<div class="Inner"/>');
+	// if "Loading..." text
+	var last_inner_height;
+	if (ippu.element[0].firstChild) {
+		last_inner_height = ippu.element[0].firstChild.offsetHeight;
+		ippu.element.height(ippu.element.height());
+		ippu.element.css('overflow', 'hidden');
+	}
+	
+	var bar = document.createElement('span');
+	bar.innerHTML = '&nbsp;| ';
+	
+	// userpic
+	if (data.url_userpic && data.url_userpic != ctxPopupId) {
+		jQuery(
+			'<div class="Userpic">'+
+				'<a href="'+data.url_allpics+'">'+
+					'<img src="'+data.url_userpic+'" width="'+data.userpic_w+'" height="'+data.userpic_h+'"/>'+
+				'</a>'+
+			'</div>'
+		)
+		.appendTo(inner);
+	}
+	
+	var content = document.createElement('div');
+	content.className = 'Content';
+	
+	inner.append(content);
+	
+	// relation
+	var label, username = data.display_username;
+	if (data.is_comm) {
+		if (data.is_member)
+			label = data.ml_you_member.replace('[[username]]', username);
+		else if (data.is_friend)
+			labelL = data.ml_you_watching.replace('[[username]]', username);
+		else
+			label = username;
+	} else if (data.is_syndicated) {
+		if (data.is_friend)
+				label = data.ml_you_subscribed.replace('[[username]]', username);
+		else
+			label = username;
+	} else {
+		if (data.is_requester) {
+			label = data.ml_this_is_you;
+		} else {
+			label = username + ' ';
+			
+			if (data.is_friend_of) {
+				if (data.is_friend)
+					label += data.ml_mutual_friend;
+				else
+					label += data.ml_lists_as_friend;
+			} else if (data.is_friend) {
+				label += data.ml_your_friend;
+			}
 		}
-
-        var content = document.createElement("div");
-        DOM.addClassName(content, "Content");
-
-        var bar = document.createElement("span");
-        bar.innerHTML = "&nbsp;| ";
-
-        // userpic
-        if (data.url_userpic && data.url_userpic != ctxPopupId) {
-            var userpicContainer = document.createElement("div");
-            var userpicLink = document.createElement("a");
-            userpicLink.href = data.url_allpics;
-            var userpic = document.createElement("img");
-            userpic.src = data.url_userpic;
-            userpic.width = data.userpic_w;
-            userpic.height = data.userpic_h;
-
-            userpicContainer.appendChild(userpicLink);
-            userpicLink.appendChild(userpic);
-            DOM.addClassName(userpicContainer, "Userpic");
-
-            inner.appendChild(userpicContainer);
-        }
-
-        inner.appendChild(content);
-
-        // relation
-        var relation = document.createElement("div");
-        if (data.is_comm) {
-            if (data.is_member)
-                relation.innerHTML = "You are a member of " + username;
-            else if (data.is_friend)
-                relation.innerHTML = "You are watching " + username;
-            else
-                relation.innerHTML = username;
-        } else if (data.is_syndicated) {
-            if (data.is_friend)
-                relation.innerHTML = "You are subscribed to " + username;
-            else
-                relation.innerHTML = username;
-        } else {
-            if (data.is_requester) {
-                relation.innerHTML = "This is you";
-            } else {
-                var label = username + " ";
-
-                if (data.is_friend_of) {
-                    if (data.is_friend)
-                        label += "is your mutual friend";
-                    else
-                        label += "lists you as a friend";
-                } else {
-                    if (data.is_friend)
-                        label += "is your friend";
-                }
-
-                relation.innerHTML = label;
-            }
-        }
-        DOM.addClassName(relation, "Relation");
-        content.appendChild(relation);
-
-        // add site-specific content here
-        var extraContent = LiveJournal.run_hook("ctxpopup_extrainfo", data);
-        if (extraContent) {
-            content.appendChild(extraContent);
-        }
+	}
+	jQuery('<div/>', {
+		'class': 'Relation',
+		text: label
+	})
+	.appendTo(content);
+	
+	// add site-specific content here
+	var extraContent = LiveJournal.run_hook('ctxpopup_extrainfo', data);
+	extraContent && content.appendChild(extraContent);
 	
 	// aliases
-	
-	var alias;
-	if(!data.is_requester && data.is_logged_in!='0'){
-            	alias = document.createElement('span');
-		if(data.alias_enable!=0){
-			if(data.alias){
-				var currentalias=document.createElement('span');
-				currentalias[/*@cc_on'innerText'||@*/'textContent']=data.alias;
-				DOM.addClassName(currentalias,'alias-value');
-				content.insertBefore(currentalias,content.firstChild.nextSibling);
-				var editalias=document.createElement('a');
-				editalias.href='javascript:void(0)';
-				editalias.onclick=function(){return addAlias(this, data.alias_title, data.username, data.alias);}
-				editalias.innerHTML=data.alias_title;
-				alias.appendChild(editalias);
-				DOM.addClassName(alias,'alias-edit');
+	if (!data.is_requester && data.is_logged_in) {
+		if (data.alias_enable) {
+			if (data.alias) {
+				content.insertBefore(
+					content.firstChild.nextSibling,
+					document.createTextNode(data.alias)
+				);
 			}
-			else{
-				var addalias=document.createElement('a');
-				addalias.href='javascript:void(0)';
-				addalias.onclick=function(){return addAlias(this, data.alias_title, data.username,'');}
-				addalias.innerHTML=data.alias_title;
-				alias.appendChild(addalias);
-				DOM.addClassName(alias,'alias-add');
-			}
-		}else{
-			var disabledalias=document.createElement('a');
-			var upgradeacc=document.createElement('a');
-			var upgradeimg=document.createElement('img');
-            		upgradeacc.href=window.Site.siteroot+'/manage/account';
-			var statroot=window.Site.siteroot.toString();
-			var statsiteroot=statroot.replace(/http\:\/\/www\./,'http://stat.');
-			upgradeimg.src=statsiteroot+'/horizon/upgrade-paid-icon.gif';
-			upgradeimg.alt='';
-			upgradeacc.appendChild(upgradeimg);
-			disabledalias.href=window.Site.siteroot+'/support/faqbrowse.bml?faqid=295';
-			disabledalias.innerHTML='Add Note';
-			alias.appendChild(upgradeacc);
-			alias.innerHTML+="&nbsp";
-			alias.appendChild(disabledalias);
-			DOM.addClassName(alias,'alias-unavailable');
-
-
-		}	
-	content.appendChild(alias);
-    	content.appendChild(document.createElement("br"));
-	}
-
-        // member of community
-        if (data.is_logged_in && data.is_comm) {
-            var membership     = document.createElement("span");
-            var membershipLink = document.createElement("a");
-
-            var membership_action = data.is_member ? "leave" : "join";
-
-            if (data.is_member) {
-                membershipLink.href = data.url_leavecomm;
-                membershipLink.innerHTML = "Leave";
-            } else {
-                membershipLink.href = data.url_joincomm;
-                membershipLink.innerHTML = "Join community";
-            }
-
-            DOM.addEventListener(membershipLink, "click", function (e) {
-                Event.prep(e);
-                Event.stop(e);
-                return ContextualPopup.changeRelation(data, ctxPopupId, membership_action, e);
-            });
-
-            membership.appendChild(membershipLink);
-            content.appendChild(membership);
-        }
-
-	
-// send message
-var message;
-if (data.is_logged_in && data.is_person && ! data.is_requester && data.url_message) {
-    message = document.createElement("span");
-
-    var sendmessage = document.createElement("a");
-    sendmessage.href = data.url_message;
-    sendmessage.innerHTML = "Send message";
-
-    message.appendChild(sendmessage);
-    content.appendChild(message);
-}
-
-// friend
-var friend;
-if (data.is_logged_in && ! data.is_requester) {
-    friend = document.createElement("span");
-
-    if (! data.is_friend) {
-	// add friend link
-	var addFriend = document.createElement("span");
-	var addFriendLink = document.createElement("a");
-	addFriendLink.href = data.url_addfriend;
-
-	if (data.is_comm)
-	    addFriendLink.innerHTML = "Watch community";
-	else if (data.is_syndicated)
-	    addFriendLink.innerHTML = "Subscribe to feed";
-	else
-	    addFriendLink.innerHTML = "Add friend";
-
-	addFriend.appendChild(addFriendLink);
-	DOM.addClassName(addFriend, "AddFriend");
-
-	DOM.addEventListener(addFriendLink, "click", function (e) {
-		Event.prep(e);
-		Event.stop(e);
-		return ContextualPopup.changeRelation(data, ctxPopupId, "addFriend", e);
-	});
-
-	friend.appendChild(addFriend);
-    } else {
-	// remove friend link (omg!)
-	var removeFriend = document.createElement("span");
-	var removeFriendLink = document.createElement("a");
-	removeFriendLink.href = data.url_addfriend;
-
-	if (data.is_comm)
-	    removeFriendLink.innerHTML = "Stop watching";
-	else if (data.is_syndicated)
-	    removeFriendLink.innerHTML = "Unsubscribe";
-	else
-	    removeFriendLink.innerHTML = "Remove friend";
-
-	removeFriend.appendChild(removeFriendLink);
-	DOM.addClassName(removeFriend, "RemoveFriend");
-
-	DOM.addEventListener(removeFriendLink, "click", function (e) {
-		Event.stop(e);
-		return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend", e);
-	});
-
-	friend.appendChild(removeFriend);
-    }
-
-    DOM.addClassName(relation, "FriendStatus");
-}
-
-// add a bar between stuff if we have community actions
-if ((data.is_logged_in && data.is_comm) || (message && friend))
-    content.appendChild(document.createElement("br"));
-
-        if (friend)
-            content.appendChild(friend);
-
-        if ((data.is_person || data.is_comm) && !data.is_requester && data.can_receive_vgifts) {
-            var vgift = document.createElement("span");
-
-            var sendvgift = document.createElement("a");
-            sendvgift.href = window.Site.siteroot + "/shop/vgift.bml?to=" + data.username;
-            sendvgift.innerHTML = "Send a virtual gift";
-
-            vgift.appendChild(sendvgift);
-
-            if (friend)
-                content.appendChild(document.createElement("br"));
-
-            content.appendChild(vgift);
-        }
-
-        // ban / unban
-        var ban;
-		if (data.is_logged_in && !data.is_requester && !data.is_comm && !data.is_syndicated) {
-            ban = document.createElement("span");
-
-            if(!data.is_banned) {
-                // if user no banned - show ban link
-                var setBan = document.createElement("span");
-                var setBanLink = document.createElement("a");
-                
-                setBanLink.href = window.Site.siteroot + '/manage/banusers.bml';
-                setBanLink.innerHTML = 'Ban user';
-                
-                setBan.appendChild(setBanLink);
-
-                DOM.addClassName(setBan, "SetBan");
-
-                DOM.addEventListener(setBanLink, "click", function (e) {
-                    Event.prep(e);
-                    Event.stop(e);
-                    return ContextualPopup.changeRelation(data, ctxPopupId, "setBan", e);
-                });
-
-                ban.appendChild(setBan);
-            } else {
-                // if use banned - show unban link
-                var setUnban = document.createElement("span");
-                var setUnbanLink = document.createElement("a");
-                setUnbanLink.href = window.Site.siteroot + '/manage/banusers.bml';
-                setUnbanLink.innerHTML = 'Unban user';
-                setUnban.appendChild(setUnbanLink);
-
-                DOM.addClassName(setUnban, "SetUnban");
-
-                DOM.addEventListener(setUnbanLink, "click", function (e) {
-                    Event.prep(e);
-                    Event.stop(e);
-                    return ContextualPopup.changeRelation(data, ctxPopupId, "setUnban", e);
-                });
-
-                ban.appendChild(setUnban);
-            }
-        }
-
-        if(ban) {
-            content.appendChild(document.createElement("br"));
-            content.appendChild(ban);
-        }
-
-        var report_bot;
-		if (data.is_logged_in && !data.is_requester  && !data.is_comm && !data.is_syndicated && !window.Site.remote_is_suspended) {
-            var report_bot = document.createElement('a');
-            report_bot.href = window.Site.siteroot + '/abuse/bots.bml?user=' + data.username;
-            report_bot.innerHTML = 'Report a Bot';
-        }
-
-        if(report_bot) {
-            content.appendChild(bar.cloneNode(true));
-            content.appendChild(report_bot);
-        }
-
-		// ban user from all maintained communities
-		if (!data.is_requester && !data.is_comm && !data.is_syndicated && data.have_communities) {
-			var ban_everywhere = document.createElement('a');
-			ban_everywhere.href = Site.siteroot + '/manage/banusers.bml';
-			ban_everywhere.innerHTML = data.is_banned_everywhere ? data.unban_everywhere_title : data.ban_everywhere_title;
-			DOM.addEventListener(ban_everywhere, 'click', function(e) {
-				Event.prep(e);
-				Event.stop(e);
-				var action = data.is_banned_everywhere ? 'unbanEverywhere' : 'banEverywhere';
-				return ContextualPopup.changeRelation(data, ctxPopupId, action, e);
-			});
-			content.appendChild(document.createElement('br'));
-			content.appendChild(ban_everywhere);
+			
+			jQuery('<a/>', {
+				href: Site.siteroot + '/manage/notes.bml',
+				text: data.alias_title,
+				click: function(e)
+				{
+					e.preventDefault();
+					addAlias(this, data.alias_title, data.username, data.alias);
+				}
+			})
+			.appendTo(content);
+		} else {
+			jQuery(
+				'<span class="alias-unavailable">'+
+					'<a href="http://www.ljdev10.livejournal.ru/manage/account">'+
+						'<img src="'+Site.statprefix+'/horizon/upgrade-paid-icon.gif" width="13" height="16" alt=""/>'+
+					'</a> '+
+					'<a href="'+Site.siteroot+'/support/faqbrowse.bml?faqid=295">'+data.alias_title+'</a>'+
+				'</span>'
+			)
+			.appendTo(content)
 		}
-
-        // break
-        if ((data.is_logged_in && !data.is_requester) || vgift) content.appendChild(document.createElement("br"));
-
-        // view label
-        var viewLabel = document.createElement("span");
-        viewLabel.innerHTML = "View: ";
-        content.appendChild(viewLabel);
-
-        // journal
-        if (data.is_person || data.is_comm || data.is_syndicated) {
-            var journalLink = document.createElement("a");
-            journalLink.href = data.url_journal;
-
-            if (data.is_person)
-                journalLink.innerHTML = "Journal";
-            else if (data.is_comm)
-                journalLink.innerHTML = "Community";
-            else if (data.is_syndicated)
-                journalLink.innerHTML = "Feed";
-
-            content.appendChild(journalLink);
-            content.appendChild(bar.cloneNode(true));
-        }
-
-        // profile
-        var profileLink = document.createElement("a");
-        profileLink.href = data.url_profile;
-        profileLink.innerHTML = "Profile";
-        content.appendChild(profileLink);
-
-
-
-        // clearing div
-        var clearingDiv = document.createElement("div");
-        DOM.addClassName(clearingDiv, "ljclear");
-        clearingDiv.innerHTML = "&nbsp;";
-        content.appendChild(clearingDiv);
-
-		ippu.element.html(inner);
 		
-		//calc position with viewport
-		if (ippu.element[0].style.overflow == 'hidden') {
-			inner = jQuery(inner);
-			var $window = jQuery(window),
-				top = parseInt(ippu.element[0].style.top),
-				diff = ippu.element[0].firstChild.offsetHeight - last_inner_height,
-				new_top = Math.min(top, $window.height() + $window.scrollTop() - ippu.element.outerHeight(true) - diff);
-			top != new_top && ippu.element.css('top', new_top);
-			ippu.element.css('overflow', 'visible');
+		content.appendChild(document.createElement('br'));
+	}
+	
+	// member of community
+	if (data.is_logged_in && data.is_comm) {
+		jQuery('<a/>', {
+			href: data.is_member ? data.ml_leave : data.url_joincomm,
+			text: data.is_member ? data.ml_leave : data.ml_join_community,
+			click: function(e)
+			{
+				e.preventDefault();
+				ContextualPopup.changeRelation(data, ctxPopupId, data.is_member ? 'leave' : 'join', e);
+			}
+		})
+		.after('<br/>')
+		.appendTo(content);
+	}
+	
+	// send message
+	if (data.is_logged_in && data.is_person && ! data.is_requester && data.url_message) {
+		jQuery('<a/>', {
+			href: data.url_message,
+			text: data.ml_send_message
+		})
+		.after('<br/>')
+		.appendTo(content);
+	}
+	
+	// add/remove friend link
+	if (data.is_logged_in && !data.is_requester) {
+		jQuery('<a/>', {
+			href: data.url_addfriend,
+			click: function(e)
+			{
+				e.preventDefault();
+				ContextualPopup.changeRelation(data, ctxPopupId, data.is_friend ? 'removeFriend' : 'addFriend', e);
+			},
+			text: function()
+			{
+				if (data.is_comm)
+					return data.is_friend ? data.ml_stop_community : data.ml_watch_community;
+				else if (data.is_syndicated)
+					return data.is_friend ? data.ml_unsubscribe_feed : data.ml_subscribe_feed;
+				else
+					return data.is_friend ? data.ml_remove_friend : data.ml_add_friend;
+			}
+		})
+		.after('<br/>')
+		.appendTo(content);
+	}
+	
+	// vgift;
+	if ((data.is_person || data.is_comm) && !data.is_requester && data.can_receive_vgifts) {
+		jQuery('<a/>', {
+			href: Site.siteroot + '/shop/vgift.bml?to=' + data.username,
+			text: data.ml_send_gift
+		})
+		.after('<br/>')
+		.appendTo(content);
+	}
+	
+	if (data.is_logged_in && !data.is_requester && !data.is_comm && !data.is_syndicated) {
+		// ban/unban
+		jQuery('<a/>', {
+			href: Site.siteroot + '/manage/banusers.bml',
+			text: data.is_banned ? data.ml_unban : data.ml_ban,
+			click: function(e)
+			{
+				e.preventDefault();
+				ContextualPopup.changeRelation(data, ctxPopupId, data.is_banned ? 'setUnban' : 'setBan', e);
+			}
+		})
+		.appendTo(content);
+		
+		// report a bot
+		if (!Site.remote_is_suspended) {
+			content.appendChild(bar.cloneNode(true));
+			
+			jQuery('<a/>', {
+				href: Site.siteroot + '/abuse/bots.bml?user=' + data.username,
+				text: data.ml_report
+			})
+			.appendTo(content);
 		}
-    }
+		
+		content.appendChild(document.createElement('br'));
+	}
+	
+	// ban user from all maintained communities
+	if (!data.is_requester && !data.is_comm && !data.is_syndicated && data.have_communities) {
+		jQuery('<a/>', {
+			href: Site.siteroot + '/manage/banusers.bml',
+			text: data.is_banned_everywhere ? data.unban_everywhere_title : data.ban_everywhere_title,
+			click: function(e)
+			{
+				e.preventDefault();
+				var action = data.is_banned_everywhere ? 'unbanEverywhere' : 'banEverywhere';
+				ContextualPopup.changeRelation(data, ctxPopupId, action, e);
+			}
+		})
+		.after('<br/>')
+		.appendTo(content);
+	}
+	
+	// view label
+	content.appendChild(document.createTextNode(data.ml_view));
+	
+	// journal
+	if (data.is_person || data.is_comm || data.is_syndicated) {
+		jQuery('<a/>', {
+			href: data.url_journal,
+			text: function()
+			{
+				if (data.is_person)
+					return data.ml_journal;
+				else if (data.is_comm)
+					return data.ml_community;
+				else if (data.is_syndicated)
+					return data.ml_feed;
+			}
+		})
+		.appendTo(content)
+		
+		content.appendChild(bar.cloneNode(true));
+	}
+	
+	// profile
+	jQuery('<a/>', {
+		href: data.url_profile,
+		text: data.ml_profile
+	})
+	.appendTo(content);
+	
+	// clearing div
+	jQuery('<div class="ljclear">&nbsp;</div>')
+	.appendTo(content);
+	
+	ippu.element.html(inner);
+	
+	//calc position with viewport
+	if (last_inner_height) {
+		var $window = jQuery(window),
+			top = parseInt(ippu.element[0].style.top),
+			diff = ippu.element[0].firstChild.offsetHeight - last_inner_height,
+			new_top = Math.min(top, $window.height() + $window.scrollTop() - ippu.element.outerHeight(true) - diff);
+		top != new_top && ippu.element.css('top', new_top);
+		ippu.element.css('overflow', 'visible');
+	}
 }
 
 // ajax request to change relation
