@@ -660,7 +660,7 @@ ContextualPopup.popupClosed = function () {
     ContextualPopup.mouseOut();
 }
 
-ContextualPopup.renderPopup = function (ctxPopupId)
+ContextualPopup.renderPopup = function(ctxPopupId)
 {
 	var ippu = ContextualPopup.ippu;
 	
@@ -752,8 +752,8 @@ ContextualPopup.renderPopup = function (ctxPopupId)
 		if (data.alias_enable) {
 			if (data.alias) {
 				content.insertBefore(
-					content.firstChild.nextSibling,
-					document.createTextNode(data.alias)
+					document.createTextNode(data.alias),
+					content.firstChild.nextSibling
 				);
 			}
 			
@@ -763,7 +763,7 @@ ContextualPopup.renderPopup = function (ctxPopupId)
 				click: function(e)
 				{
 					e.preventDefault();
-					addAlias(this, data.alias_title, data.username, data.alias);
+					addAlias(this, data.alias_title, data.username, data.alias || '');
 				}
 			})
 			.appendTo(content);
@@ -988,46 +988,50 @@ ContextualPopup.hidePopup = function (ctxPopupId) {
 }
 
 // do ajax request of user info
-ContextualPopup.getInfo = function(target, ctxPopupId)
+ContextualPopup.getInfo = function(target, popup_id)
 {
-	if (ContextualPopup.currentRequests[ctxPopupId]) return;
+	var t = this;
+	if (t.currentRequests[popup_id]) {
+		return;
+	}
+	t.currentRequests[popup_id] = 1;
 	
-	ContextualPopup.currentRequests[ctxPopupId] = 1;
-	
-	// got data callback
-	var gotInfo = function (data)
-	{
-		ContextualPopup.cachedResults[String(data.userid)] =
-		ContextualPopup.cachedResults[data.username] =
-		ContextualPopup.cachedResults[data.url_userpic] = data;
-		
-		// non default userpic
-		if (target.up_url) {
-			ContextualPopup.cachedResults[target.up_url] = data;
-		}
-		
-		if (data.error) {
-			!data.noshow && ContextualPopup.showNote(data.error, target);
-			return;
-		}
-		
-		ContextualPopup.currentRequests[ctxPopupId] = null;
-		
-		if (ContextualPopup.currentId == ctxPopupId) {
-			ContextualPopup.renderPopup(ctxPopupId);
-		}
-	};
-	
-	jQuery.getJSON(
-		LiveJournal.getAjaxUrl('ctxpopup'),
-		{
+	jQuery.ajax({
+		url: LiveJournal.getAjaxUrl('ctxpopup'),
+		data: {
 			user: target.username || '',
 			userid: target.userid || 0,
 			userpic_url: target.up_url || '',
 			mode: 'getinfo'
 		},
-		gotInfo
-	);
+		dataType: 'json',
+		success: function(data)
+		{
+			t.cachedResults[String(data.userid)] =
+			t.cachedResults[data.username] =
+			t.cachedResults[data.url_userpic] = data;
+			
+			// non default userpic
+			if (target.up_url) {
+				t.cachedResults[target.up_url] = data;
+			}
+			
+			if (data.error) {
+				!data.noshow && t.showNote(data.error, target);
+				return;
+			}
+			
+			t.currentRequests[popup_id] = null;
+			
+			if (t.currentId == popup_id) {
+				t.renderPopup(popup_id);
+			}
+		},
+		error: function()
+		{
+			t.currentRequests[popup_id] = null;
+		}
+	});
 }
 
 ContextualPopup.hideHourglass = function () {
