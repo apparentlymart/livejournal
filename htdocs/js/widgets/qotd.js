@@ -2,21 +2,24 @@ QotD =
 {
 	skip: 0,
 	
-	init: function($)
+	init: function()
 	{
-		QotD.control = $('#prev_questions')
-			.add('#next_questions')
-			.add('#prev_questions_disabled')
-			.add('#next_questions_disabled');
+		QotD.control = [
+			$('prev_questions'),
+			$('next_questions'),
+			$('prev_questions_disabled'),
+			$('next_questions_disabled')
+		];
 		
-		if (QotD.control.length != 4) return;
+		if (!QotD.control[0]) {
+			return;
+		}
 		
-		QotD.domain = $('#vertical_name').val() || 'homepage';
-		QotD.cache = [$('#all_questions').html()];
+		QotD.domain = jQuery('#vertical_name').val() || 'homepage';
+		QotD.cache = [$('all_questions').innerHTML];
 		
-		QotD.control.eq(0).click(QotD.prevQuestions);
-		QotD.control.eq(1).click(QotD.nextQuestions);
-		
+		QotD.control[0].onclick = QotD.prevQuestions;
+		QotD.control[1].onclick = QotD.nextQuestions;
 		QotD.tryForQuestions();
 	},
 	
@@ -69,8 +72,11 @@ QotD =
 			QotD.printQuestions(QotD.cache[QotD.skip]) :
 			jQuery.getJSON(
 				LiveJournal.getAjaxUrl('qotd'),
-				{skip: QotD.skip, domain: QotD.domain },
-				function(data){ QotD.printQuestions(data.text) }
+				{skip: QotD.skip, domain: QotD.domain},
+				function(data)
+				{
+					QotD.printQuestions(data.text)
+				}
 			);
 	},
 	
