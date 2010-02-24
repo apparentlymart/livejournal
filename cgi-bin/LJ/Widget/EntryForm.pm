@@ -167,6 +167,13 @@ sub need_res {
         );
     }
 
+    if ($self->should_show_lastfm) {
+        push @ret, qw(
+            js/lastfm.js
+            js/jobstatus.js
+        );
+    }
+
     return @ret;
 }
 
