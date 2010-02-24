@@ -46,6 +46,7 @@ LJ::register_hook("add_extra_entryform_fields", sub {
     my $tabindex = $args->{tabindex};
     my $opts     = $args->{opts};
 
+    return if $LJ::DISABLED{'pingback'};
     return if $opts->{remote} and
               not LJ::PingBack->has_user_pingback($opts->{remote});
     

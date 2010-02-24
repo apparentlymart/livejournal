@@ -336,6 +336,8 @@ function mood_preview() {
     if (! document.getElementById) return false;
     var mood_list  = document.getElementById('prop_current_moodid'); // get select
     var moodid = mood_list[mood_list.selectedIndex].value; // get value of select
+    var moodPreview;
+
     if (moodid == "") {
         if ($('mood_preview')) {
             moodPreview = $('mood_preview');
@@ -343,12 +345,12 @@ function mood_preview() {
         }
         return false
     } else {
-        var wrapper = $('prop_mood_wrapper');
+        var wrapper = $('entryform-mood-wrapper');
         if ($('mood_preview')) {
             moodPreview = $('mood_preview');
             moodPreview.innerHTML = '';
         } else {
-            var moodPreview = document.createElement('span');
+            moodPreview = document.createElement('span');
             moodPreview.id = 'mood_preview';
             wrapper.appendChild(moodPreview);
         } 
