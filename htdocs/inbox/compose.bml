@@ -184,6 +184,7 @@ body<=
     $body .= qq{
         <table style="width: 100%"><tr><td valign="top" style="padding-right: 12px">};
     $body .= LJ::Widget::InboxFolderNav->render();
+    $body .= LJ::get_ads({ location => 'bml.compose.inbox' });
     $body .= qq{
         </td>
         <td width="1" height="100%" style="border-left: 1px solid #ccc"><img src="$LJ::IMGPREFIX/spacer.gif"></td>
