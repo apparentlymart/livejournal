@@ -166,7 +166,7 @@ sub handler
                 if ($good) {
                     $LJ::LIB_MOD_TIME{$file} = (stat($file))[9];
                 } else {
-                    die "Failed to reload module [$file] due to error: $@\n";
+                    die "Failed to reload module [$file] (ret=$good) due to error: \$\!=$!, \$\@=$@";
                 }
             }
         }
@@ -971,10 +971,22 @@ sub trans
     }
 
     # emulate DirectoryIndex directive
-    if ($host =~ m'^www' and (LJ::Request->uri =~ m|^/$| or -d "$LJ::SITEROOT/htdocs/" . LJ::Request->filename)){
-        LJ::Request->uri(LJ::Request->uri . "index.bml");
+    if ($host =~ m'^www' and 
+        not defined LJ::Request->filename   # it seems that under Apache v2 'filename' method maps to files only
+                                            # and for directories it returns undef.
+    ){
+        # maps uri to dir
+        my $uri = LJ::Request->uri;
+        return LJ::Request::NOT_FOUND if $uri =~ /\.\./; # forbids ANY .. in uri
+        
+        if ($uri and -d "$ENV{LJHOME}/htdocs/" . $uri){
+            $uri .= "/" unless $uri =~ /\/$/; # make sure it ends with /
+            my $new_uri  = $uri . "index.bml";
+            my $bml_file = "$ENV{LJHOME}/htdocs/" . $uri . "index.bml";
+            LJ::Request->uri($new_uri);
+            return $bml_handler->($bml_file);
+        }
     }
-
     return LJ::Request::DECLINED
 }
 
