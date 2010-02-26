@@ -550,6 +550,11 @@ sub handle_feed {
 # prints the response.
 sub handle {
 
+    { #
+        my $r = shift;
+        LJ::Request->init($r) unless LJ::Request->is_inited;
+    }
+
     my $have_xmlatom = eval {
         require XML::Atom;
         require XML::Atom::Feed;
