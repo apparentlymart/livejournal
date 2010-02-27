@@ -433,6 +433,10 @@
 
                     # update success
 
+                    # some other code at this bml-page can check this flag
+                    # with 'exists $BMLCodeBlock::POST{success}'
+                    $POST{success} = 1;
+
                     if ($qotd) {
                         LJ::MemCache::delete('qotd_count:'.$qotd->{qid});
                     }
