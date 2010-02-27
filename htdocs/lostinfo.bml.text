@@ -1,5 +1,14 @@
 ;; -*- coding: utf-8 -*-
+.5days_started|staleness=1
+.5days_started=You can also use the secret question to reset your password. For security reasons you can do this 5 days after requesting password via email. In order to do that, go to the password reset page after the [[datetime]] (UTC), enter your username and press "Continue"
+
+.already_started|staleness=1
+.already_started=You can also use the secret question to reset your password. For security reasons you can do this 5 days after requesting password via email. In order to do that, go to the password reset page after the [[datetime]] (UTC), enter your username and press "Continue"
+
 .btn.proceed=Proceed
+
+.captcha.invalid|staleness=1
+.captcha.invalid=Invalid answer in the antispam field. Please try again.
 
 .enter_email=Enter your email address:
 
@@ -19,6 +28,7 @@
 
 .error.sysbanned=Your account is not allowed to e-mail passwords.
 
+.error.sysbannedemail|staleness=1
 .error.sysbannedemail=Please email support@livejournal.com from the email address associated with your account and tell us the name of your account.
 
 .error.toofrequent=You are trying to send too many e-mails at once. You may only request five lost information e-mails within twenty-four hours.
@@ -31,8 +41,8 @@
 
 .lostusername.title=Lost your username?
 
+.recaptcha.title|staleness=1
+.recaptcha.title=Prove that you are human
+
 .title=Lost Information
 
-.captcha.invalid=Invalid answer in the antispam field. Please try again.
-
-.recaptcha.title=Prove that you are human

@@ -3,7 +3,6 @@
 package Apache::LiveJournal::Interface::AtomAPI;
 
 use strict;
-use Apache::Constants qw(:common);
 use Digest::SHA1;
 use MIME::Base64;
 use lib "$ENV{LJHOME}/cgi-bin";
@@ -15,8 +14,7 @@ require 'fbupload.pl';
 sub load { 1 }
 
 # check allowed Atom upload filetypes
-sub check_mime
-{
+sub check_mime {
     my $mime = shift;
     return unless $mime;
 
@@ -33,7 +31,7 @@ sub check_mime
 }
 
 sub respond {
-    my ($r, $status, $body, $type) = @_;
+    my ($status, $body, $type) = @_;
 
     my %msgs = (
         200 => 'OK',
@@ -67,16 +65,16 @@ HTML
     }
 
     $type = $mime{$type} || 'text/html';
-    $r->status_line("$status $msgs{$status}");
-    $r->content_type($type);
-    $r->send_http_header();
-    $r->print($out);
-    return OK;
+    LJ::Request->status_line("$status $msgs{$status}");
+    LJ::Request->content_type($type);
+    LJ::Request->send_http_header();
+    LJ::Request->print($out);
+    return LJ::Request::OK;
 };
 
 sub handle_upload
 {
-    my ($r, $remote, $u, $opts, $entry) = @_;
+    my ($remote, $u, $opts, $entry) = @_;
 
     # entry could already be populated from a standalone
     # service.post posting.
@@ -85,24 +83,24 @@ sub handle_upload
         my $buff;
 
         # Check length
-        my $len = $r->header_in("Content-length");
-        return respond($r, 400, "Content is too long")
+        my $len = LJ::Request->header_in("Content-length");
+        return respond(400, "Content is too long")
             if $len > $LJ::MAX_ATOM_UPLOAD;
 
-        $r->read($buff, $len);
+        LJ::Request->read($buff, $len);
 
         eval { $entry = XML::Atom::Entry->new( \$buff ); };
-        return respond($r, 400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
+        return respond(400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
             if $@;
     }
 
     my $mime = $entry->content()->type();
     my $mime_area = check_mime( $mime );
-    return respond($r, 400, "Unsupported MIME type: $mime") unless $mime_area;
+    return respond(400, "Unsupported MIME type: $mime") unless $mime_area;
 
     if ($mime_area eq 'image') {
 
-        return respond($r, 400, "Unable to upload media. Your account doesn't have the required access.")
+        return respond(400, "Unable to upload media. Your account doesn't have the required access.")
             unless LJ::get_cap($u, 'fb_can_upload') && $LJ::FB_SITEROOT;
 
         my $err;
@@ -124,12 +122,12 @@ sub handle_upload
             }
         );
 
-        return respond($r, 500, "There was an error uploading the media: $err")
+        return respond(500, "There was an error uploading the media: $err")
             if $err || ! $fb;
 
         if (ref $fb && $fb->{Error}->{code}) {
             my $errstr = $fb->{Error}->{content};
-            return respond($r, 500, "There was an error uploading the media: $errstr");
+            return respond(500, "There was an error uploading the media: $errstr");
         }
 
         my $atom_reply = XML::Atom::Entry->new();
@@ -151,30 +149,30 @@ sub handle_upload
         $link->href( $fb->{URL} );
         $atom_reply->add_link($link);
 
-        $r->header_out("Location", $fb->{URL});
-        return respond($r, 201, \$atom_reply->as_xml(), 'atom');
+        LJ::Request->header_out("Location", $fb->{URL});
+        return respond(201, \$atom_reply->as_xml(), 'atom');
     }
 }
 
 sub handle_post {
-    my ($r, $remote, $u, $opts) = @_;
+    my ($remote, $u, $opts) = @_;
     my ($buff, $entry);
 
     # Check length
-    my $len = $r->header_in("Content-length");
-    return respond($r, 400, "Content is too long")
+    my $len = LJ::Request->header_in("Content-length");
+    return respond(400, "Content is too long")
         if $len > $LJ::MAX_ATOM_UPLOAD;
 
     # read the content
-    $r->read($buff, $len);
+    LJ::Request->read($buff, $len);
 
     # try parsing it
     eval { $entry = XML::Atom::Entry->new( \$buff ); };
-    return respond($r, 400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
+    return respond(400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
         if $@;
 
     # on post, the entry must NOT include an id
-    return respond($r, 400, "Must not include an <b>&lt;id&gt;</b> field in a new entry.")
+    return respond(400, "Must not include an <b>&lt;id&gt;</b> field in a new entry.")
         if $entry->id;
 
     # detect 'standalone' media posts
@@ -290,7 +288,7 @@ sub handle_post {
 
     if ($err) {
         my $errstr = LJ::Protocol::error_message($err);
-        return respond($r, 500, "Unable to post new entry. Protocol error: <b>$errstr</b>.");
+        return respond(500, "Unable to post new entry. Protocol error: <b>$errstr</b>.");
     }
 
     my $atom_reply = XML::Atom::Entry->new();
@@ -341,12 +339,12 @@ sub handle_post {
     $link->title( $entry->title() );
     $atom_reply->add_link($link);
 
-    $r->header_out("Location", $edit_url);
-    return respond($r, 201, \$atom_reply->as_xml(), 'atom');
+    LJ::Request->header_out("Location", $edit_url);
+    return respond(201, \$atom_reply->as_xml(), 'atom');
 }
 
 sub handle_edit {
-    my ($r, $remote, $u, $opts) = @_;
+    my ($remote, $u, $opts) = @_;
 
     my $method = $opts->{'method'};
 
@@ -367,7 +365,7 @@ sub handle_edit {
 
     if ($err) {
         my $errstr = LJ::Protocol::error_message($err);
-        return respond($r, 404, "Unable to retrieve the item requested for editing. Protocol error: <b>$errstr</b>.");
+        return respond(404, "Unable to retrieve the item requested for editing. Protocol error: <b>$errstr</b>.");
     }
     $olditem = $olditem->{'events'}->[0];
 
@@ -378,7 +376,7 @@ sub handle_edit {
 
         # get the log2 row (need logtime for createtime)
         my $row = LJ::get_log2_row($u, $jitemid) ||
-            return respond($r, 404, "Could not load the original entry.");
+            return respond(404, "Could not load the original entry.");
 
         # we need to put into $item: itemid, ditemid, subject, event,
         # createtime, eventtime, modtime
@@ -409,23 +407,23 @@ sub handle_edit {
             [$item]
         );
 
-        return respond($r, 200, \$ret, 'xml');
+        return respond(200, \$ret, 'xml');
     }
 
     if ($method eq "PUT") {
         # Check length
-        my $len = $r->header_in("Content-length");
-        return respond($r, 400, "Content is too long")
+        my $len = LJ::Request->header_in("Content-length");
+        return respond(400, "Content is too long")
             if $len > $LJ::MAX_ATOM_UPLOAD;
 
         # read the content
         my $buff;
-        $r->read($buff, $len);
+        LJ::Request->read($buff, $len);
 
         # try parsing it
         my $entry;
         eval { $entry = XML::Atom::Entry->new( \$buff ); };
-        return respond($r, 400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
+        return respond(400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
             if $@;
 
         # remove the SvUTF8 flag. See same code in synsuck.pl for
@@ -438,7 +436,7 @@ sub handle_edit {
         # on GET
         unless ($entry->id() =~ m#atom1:$u->{'user'}:(\d+)$# &&
                 $1 == $olditem->{'itemid'}*256 + $olditem->{'anum'}) {
-            return respond($r, 400, "Incorrect <b>&lt;id&gt;</b> field in this request.");
+            return respond(400, "Incorrect <b>&lt;id&gt;</b> field in this request.");
         }
 
         # build an edit event request. Preserve fields that aren't being
@@ -464,10 +462,10 @@ sub handle_edit {
 
         if ($err) {
             my $errstr = LJ::Protocol::error_message($err);
-            return respond($r, 500, "Unable to update entry. Protocol error: <b>$errstr</b>.");
+            return respond(500, "Unable to update entry. Protocol error: <b>$errstr</b>.");
         }
 
-        return respond($r, 200, "The entry was successfully updated.");
+        return respond(200, "The entry was successfully updated.");
     }
 
     if ($method eq "DELETE") {
@@ -490,10 +488,10 @@ sub handle_edit {
 
         if ($err) {
             my $errstr = LJ::Protocol::error_message($err);
-            return respond($r, 500, "Unable to delete entry. Protocol error: <b>$errstr</b>.");
+            return respond(500, "Unable to delete entry. Protocol error: <b>$errstr</b>.");
         }
 
-        return respond($r, 200, "Entry successfully deleted.");
+        return respond(200, "Entry successfully deleted.");
     }
 
 }
@@ -501,7 +499,7 @@ sub handle_edit {
 # fetch lj tags, display as categories
 sub handle_categories
 {
-    my ($r, $remote, $u, $opts) = @_;
+    my ($remote, $u, $opts) = @_;
     my $ret = '<?xml version="1.0"?>';
     $ret .= '<categories xmlns="http://sixapart.com/atom/category#">';
 
@@ -511,11 +509,11 @@ sub handle_categories
     }
     $ret .= '</categories>';
 
-    return respond($r, 200, \$ret, 'xml');
+    return respond(200, \$ret, 'xml');
 }
 
 sub handle_feed {
-    my ($r, $remote, $u, $opts) = @_;
+    my ($remote, $u, $opts) = @_;
 
     # simulate a call to the S1 data view creator, with appropriate
     # options
@@ -523,7 +521,7 @@ sub handle_feed {
     my %op = ('pathextra' => "/atom",
               'apilinks'  => 1,
               );
-    my $ret = LJ::Feed::make_feed($r, $u, $remote, \%op);
+    my $ret = LJ::Feed::make_feed($u, $remote, \%op);
 
     unless (defined $ret) {
         if ($op{'redir'}) {
@@ -531,19 +529,19 @@ sub handle_feed {
             # the redir URL is wrong because ljfeed.pl is too
             # dataview-specific. Since this is an admin interface, we can
             # just fail.
-            return respond ($r, 404, "The account <b>$u->{'user'} </b> is of a wrong type and does not allow AtomAPI administration.");
+            return respond(404, "The account <b>$u->{'user'} </b> is of a wrong type and does not allow AtomAPI administration.");
         }
         if ($op{'handler_return'}) {
             # this could be a conditional GET shortcut, honor it
-            $r->status($op{'handler_return'});
-            return OK;
+            LJ::Request->status($op{'handler_return'});
+            return LJ::Request::OK;
         }
         # should never get here
-        return respond ($r, 404, "Unknown error.");
+        return respond(404, "Unknown error.");
     }
 
     # everything's fine, return the XML body with the correct content type
-    return respond($r, 200, \$ret, 'xml');
+    return respond(200, \$ret, 'xml');
 
 }
 
@@ -551,7 +549,11 @@ sub handle_feed {
 # authentication, calls the appropriate method handler, and
 # prints the response.
 sub handle {
-    my $r = shift;
+
+    { #
+        my $r = shift;
+        LJ::Request->init($r) unless LJ::Request->is_inited;
+    }
 
     my $have_xmlatom = eval {
         require XML::Atom;
@@ -561,12 +563,12 @@ sub handle {
         XML::Atom->VERSION < 0.09 ? 0 : 1
     };
 
-    return respond($r, 404, "This server does not support the Atom API.")
+    return respond(404, "This server does not support the Atom API.")
         unless $have_xmlatom;
 
     # break the uri down: /interface/atom/<verb>[/<number>]
     # or old format:      /interface/atomapi/<username>/<verb>[/<number>]
-    my $uri = $r->uri;
+    my $uri = LJ::Request->uri;
 
     # convert old format to new format:
     my $username;   # old
@@ -574,7 +576,7 @@ sub handle {
         $username = $1;
     }
 
-    $uri =~ s!^/interface/atom/?!! or return respond($r, 404, "Bogus URL");
+    $uri =~ s!^/interface/atom/?!! or return respond(404, "Bogus URL");
     my ($action, $param) = split(m!/!, $uri);
 
     my $valid_actions = qr{feed|edit|post|upload|categories};
@@ -583,18 +585,18 @@ sub handle {
     #
     # if wsse information is supplied, use it.
     # if not, fall back to digest.
-    my $wsse = $r->header_in('X-WSSE');
+    my $wsse = LJ::Request->header_in('X-WSSE');
     my $nonce_dup;
-    my $u = $wsse ? auth_wsse($wsse, \$nonce_dup) : LJ::auth_digest($r);
-    return respond( $r, 401, "Authentication failed for this AtomAPI request.")
+    my $u = $wsse ? auth_wsse($wsse, \$nonce_dup) : LJ::auth_digest();
+    return respond(401, "Authentication failed for this AtomAPI request.")
         unless $u;
 
-    return respond( $r, 401, "Authentication failed for this AtomAPI request.")
+    return respond(401, "Authentication failed for this AtomAPI request.")
         if $nonce_dup && $action && $action ne 'post';
 
     # service autodiscovery
     # TODO: Add communities?
-    my $method = $r->method;
+    my $method = LJ::Request->method;
     if ( $method eq 'GET' && ! $action ) {
         LJ::load_user_props( $u, 'journaltitle' );
         my $title = $u->{journaltitle} || $u->{user};
@@ -623,11 +625,11 @@ sub handle {
         $link->href( LJ::journal_base($u) );
         $feed->add_link($link);
 
-        return respond($r, 200, \$feed->as_xml(), 'atom');
+        return respond(200, \$feed->as_xml(), 'atom');
     }
 
     $action =~ /^$valid_actions$/
-      or return respond($r, 400, "Unknown URI scheme: /interface/atom/<b>" . LJ::ehtml($action) . "</b>");
+      or return respond(400, "Unknown URI scheme: /interface/atom/<b>" . LJ::ehtml($action) . "</b>");
 
     unless (($action eq 'feed' and $method eq 'GET')  or
             ($action eq 'categories' and $method eq 'GET') or
@@ -635,19 +637,19 @@ sub handle {
             ($action eq 'upload' and $method eq 'POST') or
             ($action eq 'edit' and
              {'GET'=>1,'PUT'=>1,'DELETE'=>1}->{$method})) {
-        return respond($r, 400, "URI scheme /interface/atom/<b>" . LJ::ehtml($action) . "</b> is incompatible with request method <b>$method</b>.");
+        return respond(400, "URI scheme /interface/atom/<b>" . LJ::ehtml($action) . "</b> is incompatible with request method <b>$method</b>.");
     }
 
     if (($action ne 'edit' && $param) or
         ($action eq 'edit' && $param !~ m#^\d+$#)) {
-        return respond($r, 400, "Either the URI lacks a required parameter, or its format is improper.");
+        return respond(400, "Either the URI lacks a required parameter, or its format is improper.");
     }
 
     # we've authenticated successfully and remote is set. But can remote
     # manage the requested account?
     my $remote = LJ::get_remote();
     unless (LJ::can_manage($remote, $u)) {
-        return respond($r, 403, "User <b>$remote->{'user'}</b> has no administrative access to account <b>$u->{user}</b>.");
+        return respond(403, "User <b>$remote->{'user'}</b> has no administrative access to account <b>$u->{user}</b>.");
     }
 
     # handle the requested action
@@ -663,9 +665,9 @@ sub handle {
         'edit'       => \&handle_edit,
         'upload'     => \&handle_upload,
         'categories' => \&handle_categories,
-    }->{$action}->( $r, $remote, $u, $opts );
+    }->{$action}->($remote, $u, $opts);
 
-    return OK;
+    return LJ::Request::OK;
 }
 
 # Authenticate via the WSSE header.

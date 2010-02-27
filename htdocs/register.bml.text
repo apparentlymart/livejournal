@@ -13,6 +13,7 @@
 
 .asterisk.name=* [[journal]]
 
+.email.body|staleness=1
 .email.body<<
 This is the validation email you have requested.
 To complete validating your account, please visit this URL:
@@ -38,27 +39,59 @@ Sincerely,
 
 .error.usernotfound=User not found.
 
+.new.101.community.answer|staleness=1
 .new.101.community.answer=Discussion groups built around every topic imaginable. From music to ninjas, there's something here for you.
 
+.new.101.community.question|staleness=1
 .new.101.community.question=What is a community?
 
+.new.101.friends.answer|staleness=1
 .new.101.friends.answer=It lets you read the latest from friends' journals and favorite web feeds all in one place.
 
+.new.101.friends.question|staleness=1
 .new.101.friends.question=What is a Friends Page?
 
+.new.101.journal.answer|staleness=1
 .new.101.journal.answer=Your journal is for writing and sharing stories, photos, videos, and more with others.
 
+.new.101.journal.question|staleness=1
 .new.101.journal.question=What is a journal?
 
+.new.101.profile.answer|staleness=1
 .new.101.profile.answer=A collection of goodies about yourself. Express yourself with userpics, interests, a bio, and more!
 
+.new.101.profile.question|staleness=1
 .new.101.profile.question=What is a profile?
 
+.new.101.title|staleness=1
 .new.101.title=[[sitename]] 101
 
+.new.bodyuser|staleness=1
 .new.bodyuser=Thanks!  The email address for [[user]] has now been verified.  Now that you're registered, what to do first?
 
+.new.customize=<a [[aopts]]>Customize Journal</a> -- Customize the look of your journal
+
+.new.customize2=<a [[aopts]]>Customize Journal</a> -- Change the look of your journal with styles and mood themes
+
+.new.editinfo2=<a [[aopts]]>Edit Information</a> -- Fill out your user profile and set various settings.
+
+.new.editinfo3=<a [[aopts]]>Edit Profile</a> -- Fill out your bio, add interests and contact information
+
+.new.header=Success
+
+.new.login2=<a [[aopts]]>Log In</a> -- So you don't have to enter your username and password everywhere.
+
+.new.modify2=<a [[aopts]]>Modify Journal</a> -- Modify the look of your journal.
+
+.new.search=<a [[aopts]]>Find Others</a> -- Find friends and communities that share your interests
+
 .new.title=Welcome to [[sitename]]
+
+.new.update2=<a [[aopts]]>Update Journal</a> -- Write in your journal.
+
+.new.update3=<a [[aopts]]>Post to Journal</a> -- Write or post pictures, videos, or polls
+
+.new.userpics=<a [[aopts]]>Upload Userpics</a> -- Upload avatars or icons that represent you
 
 .sent.body=A validation email has been sent to <b>[[email]]</b>. In order to complete validation, you need to click the link in that email.
 
@@ -70,6 +103,9 @@ Sincerely,
 
 .trans.header=Success
 
+.validate.human.submit|staleness=1
+.validate.human.submit=Continue
+
+.validate.human.title|staleness=1
 .validate.human.title=Please, verify that you are human
 
-.validate.human.submit=Continue

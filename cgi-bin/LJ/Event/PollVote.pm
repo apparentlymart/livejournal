@@ -166,10 +166,20 @@ sub subscription_as_html {
         BML::ml('event.poll_vote.me');  # "Someone votes in a poll I posted" unless $pollid;
 }
 
-# only users with the track_pollvotes cap can use this
 sub available_for_user  {
-    my ($class, $u, $subscr) = @_;
+    my ($self, $u) = @_;
+
+    return 0 if $self->arg1 && ($self->arg1 != $u->id);
+
     return $u->get_cap("track_pollvotes") ? 1 : 0;
 }
+
+sub is_subscription_visible_to  {
+    my ($self, $u) = @_;
+
+    return 1;
+}
+
+sub is_tracking { 0 }
 
 1;

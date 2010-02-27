@@ -9,6 +9,6 @@ LJ::NewWorker::TheSchwartz::PubSubHubbubPublish->start();
 
 package LJ::NewWorker::TheSchwartz::PubSubHubbubPublish;
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { [ 'TheSchwartz::Worker::PubSubHubbubPublish' => '' ] }
+sub capabilities { 'TheSchwartz::Worker::PubSubHubbubPublish' }
 
 1;

@@ -6,7 +6,7 @@ require 'ljlib.pl';
 package LJ::NewWorker::TheSchwartz::DeleteEntry;
 use base 'LJ::NewWorker::TheSchwartz';
 
-sub capabilities { [ 'LJ::Worker::DeleteEntry' => '' ] }
+sub capabilities { 'LJ::Worker::DeleteEntry' }
 
 __PACKAGE__->start();
 

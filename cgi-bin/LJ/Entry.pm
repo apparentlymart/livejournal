@@ -848,6 +848,7 @@ sub comments_manageable_by {
 }
 
 # instance method:  returns bool, if remote user can view this entry
+# is duplicate to LJ::can_view (LJ/User.pm), it is hard translate one to other because different entry attributes hashrefs
 sub visible_to
 {
     my ($self, $remote, $canview) = @_;
@@ -885,6 +886,9 @@ sub visible_to
 
     # owners can always see their own.
     return 1 if $userid == $remoteid;
+
+    # author in community can always see their post
+    return 1 if $remoteid == $self->posterid;
 
     # other people can't read private
     return 0 if $self->{'security'} eq "private";

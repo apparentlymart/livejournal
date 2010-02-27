@@ -43,19 +43,19 @@ sub get_usertagsmulti {
 
         # setup that we need this one
         $need{$u->{userid}} = $u;
-        push @memkeys, [ $u->{userid}, "tags:$u->{userid}" ];
+        push @memkeys, [ $u->{userid}, "tags2:$u->{userid}" ];
     }
     return $res unless @memkeys;
 
     # gather data from memcache if available
     my $memc = LJ::MemCache::get_multi(@memkeys) || {};
     foreach my $key (keys %$memc) {
-        if ($key =~ /^tags:(\d+)$/) {
+        if ($key =~ /^tags2:(\d+)$/) {
             my $jid = $1;
-
+            my $tags = LJ::Tags::_unpack_tags($memc->{$key});
             # set this up in our return hash and mark unneeded
-            $LJ::REQ_CACHE_USERTAGS{$jid} = $memc->{$key};
-            $res->{$jid} = $memc->{$key};
+            $LJ::REQ_CACHE_USERTAGS{$jid} = $tags;
+            $res->{$jid} = $tags;
             delete $need{$jid};
         }
     }
@@ -70,12 +70,12 @@ sub get_usertagsmulti {
     # spawn gearman jobs to get each of the users
     my $ts = $gc->new_task_set();
     foreach my $u (values %need) {
-        $ts->add_task(Gearman::Task->new("load_usertags", \"$u->{userid}",
+        $ts->add_task(Gearman::Task->new("load_usertags", "$u->{userid}",
             {
                 uniq => '-',
                 on_complete => sub {
                     my $resp = shift;
-                    my $tags = Storable::thaw($$resp);
+                    my $tags = LJ::Tags::_unpack_tags($$resp);
                     return unless $tags;
 
                     $LJ::REQ_CACHE_USERTAGS{$u->{userid}} = $tags;
@@ -246,7 +246,7 @@ sub _get_usertagsmulti {
                 foreach keys %{$res->{$jid}};
 
             $LJ::REQ_CACHE_USERTAGS{$jid} = $res->{$jid};
-            LJ::MemCache::add([ $jid, "tags:$jid" ], $res->{$jid});
+            LJ::MemCache::add([ $jid, "tags2:$jid" ], LJ::Tags::_pack_tags($res->{$jid}));
         }
     }
 
@@ -768,14 +768,17 @@ sub update_logtags {
         # and turn everything into ids
         $opts->{"${verb}_ids"} ||= [];
         foreach my $kw (@{$opts->{$verb} || []}) {
-            my $kwid = LJ::get_keyword_id($u, $kw, $can_control);
+            my $kwid = LJ::get_keyword_id($u, $kw, $can_control); # parameter 'autovivify(create-if-not-exist)' gets $can_control
             if ($can_control) {
                 # error if we failed to create
                 return undef unless $kwid;
             } else {
                 # if we're not creating, who cares, just skip; also skip if the keyword
                 # is not really a tag (don't promote it)
-                next unless $kwid && $utags->{$kwid};
+                unless ($kwid && $utags->{$kwid}) {
+                    push @{$opts->{skipped_tags}}, $kw if exists $opts->{skipped_tags} and ref $opts->{skipped_tags} eq 'ARRAY';
+                    next;
+                }
             }
 
             # add the ids to the list, and save to create later if needed
@@ -823,11 +826,28 @@ sub update_logtags {
     my $max = $u->get_cap('tags_max');
     if (@to_create && $max && $max > 0) {
         my $total = scalar(keys %$utags) + scalar(@to_create);
-        return $err->(LJ::Lang::ml('taglib.error.toomany', { max => $max })) if $total > $max;
+        if (exists $opts->{skipped_tags} and ref $opts->{skipped_tags} eq 'ARRAY') { # will do possible and give warning on impossible
+            my $may = $max - scalar(keys %$utags);
+            $may = 0 if $may < 0;
+            my @skip = splice(@to_create, $may); # @to_create remains with first $may elements
+            push @{$opts->{skipped_tags}}, @skip;
+            # now @to_create is safe
+        } else { # old behavior requested
+            return $err->(LJ::Lang::ml('taglib.error.toomany', { max => $max })) if $total > $max;
+        }
     }
 
     # now we can create the new tags, since we know we're safe
-    LJ::Tags::create_usertag($u, $_, { display => 1 }) foreach @to_create;
+    my $created = LJ::Tags::create_usertag($u, join(', ', @to_create), { display => 1 });
+    my %created = reverse %{$created || {}}; # tag - kwid => kwid - tag
+
+    # we may not set skipped tags on entry, but now they are in 'add' ids list
+    # clean 'add' list
+    foreach my $id (keys %add) {
+        delete $add{$id} unless $utags->{$id} or $created{$id};
+    } 
+
+    return 1 unless %add || %delete; # again - we cleaned %add
 
     # %add and %delete are accurate, but we need to track necessary
     # security updates; this is a hash of keyword ids and a modification
@@ -1041,7 +1061,7 @@ sub reset_cache {
         # standard user tags cleanup
         unless ($jitemid) {
             delete $LJ::REQ_CACHE_USERTAGS{$u->{userid}};
-            LJ::MemCache::delete([ $u->{userid}, "tags:$u->{userid}" ]);
+            LJ::MemCache::delete([ $u->{userid}, "tags2:$u->{userid}" ]);
         }
 
         # now, cleanup entries if necessary
@@ -1360,5 +1380,99 @@ sub deleted_friend_group {
     LJ::Tags::reset_cache($u);
     return 1;
 }
+
+{
+    my %sec_level_map = (
+        'public'    => 1,
+        'friends'   => 2,
+        'private'   => 3,
+        'group'     => 4,
+    );
+    my %sec_level_rmap = reverse %sec_level_map;
+
+    my $pack_format = "
+        w       # id
+        n/a*    # name
+        w       # uses
+        w       # display
+        w       # sec level
+        w       # sec public
+        w       # sec friends
+        w       # sec private
+        w*      # sec groups elements (0 or more)
+    ";
+
+    my $signature = "TGS2"; ## must be 4 bytes long
+
+##
+## LJ::Tags::_pack_tags
+## Input: hash reference with tags (sample is below)
+## Output: string with serialized data
+## It takes less space than Storable: for 37.000+ user tags
+## packed data is 562 Kb / 1070 Kb (gzip compressed/uncompressed) vs.
+## 814 Kb / 6227 Kb for Storable.
+## It faster than Storable v. 2.15 on Debian about ~10 times
+##
+## Sample element of tags hash:
+##    '8563' => {
+##        'name'          => 'aliens',
+##        'uses'          => 42,
+##        'display'       => '1',
+##        'security_level'=> 'friends',
+##        'security'      => {
+##                'friends'   => 37,
+##                'private'   => 1,
+##                'groups'    => { '2' => 4 },
+##                'public'    => 0
+##        },
+##    },
+##
+sub LJ::Tags::_pack_tags {
+    my $hashref = shift;
+
+    my $result = $signature;
+    while (my ($k, $v) = each %$hashref) {
+        my $sec_level = $sec_level_map{ $v->{security_level} } 
+            or die "Unknown security level: $v->{security_level}";
+        my $sec = $v->{security};
+        my $str = pack $pack_format, $k, (map { $v->{$_} } qw/name uses display/), 
+            $sec_level, (map { $sec->{$_} } qw/public friends private/), %{ $sec->{groups} };
+        $result .= pack("n", length($str)) . $str;
+    }
+    return $result;
+}
+
+## see LJ::Tags::_pack_tags above
+sub LJ::Tags::_unpack_tags {
+    my $str = shift;
+
+    die "Plain string was expected, not a " . ref($str) if ref($str);
+    return unless substr($str, 0, 4) eq $signature;
+    
+    my %res;
+    my $pos = 4;  ## length of signature/version prefix
+    while ($pos < length($str)) {
+        my $len = unpack("n", substr($str, $pos, 2));
+        my ($id, $name, $uses, $display, $sec_level, $sec_public, $sec_friends, $sec_private, @sec_group) = 
+            unpack $pack_format, substr($str, $pos+2, $len);
+        $res{$id} = {
+            name    => $name,
+            uses    => $uses,
+            display => $display,
+            security_level   => $sec_level_rmap{$sec_level},
+            security => {
+                public  => $sec_public,
+                friends => $sec_friends,
+                private => $sec_private,
+                groups  => {@sec_group},
+            },
+        };
+        $pos += $len + 2; ## length of record + length of short (unpack("n", ...))
+    }
+    return \%res;
+}
+
+} ## end of block with _pack_tags and _unpack_tags private variables
+
 
 1;

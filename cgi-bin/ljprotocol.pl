@@ -185,9 +185,8 @@ sub do_request
     $flags ||= {};
     my @args = ($req, $err, $flags);
 
-    my $r = eval { Apache->request };
-    $r->notes("codepath" => "protocol.$method")
-        if $r && ! $r->notes("codepath");
+    LJ::Request->notes("codepath" => "protocol.$method")
+        if LJ::Request->is_inited && ! LJ::Request->notes("codepath");
 
     if ($method eq "login")            { return login(@args);            }
     if ($method eq "getfriendgroups")  { return getfriendgroups(@args);  }
@@ -214,7 +213,7 @@ sub do_request
     if ($method eq 'checksession')     { return checksession(@args);     }
     if ($method eq "getrecentcomments")       { return getrecentcomments(@args);   }
 
-    $r->notes("codepath" => "") if $r;
+    LJ::Request->notes("codepath" => "") if LJ::Request->is_inited;
     return fail($err,201);
 }
 
@@ -738,8 +737,7 @@ sub login
 
     if ($req->{'clientversion'} =~ /^\S+\/\S+$/) {
         eval {
-            my $r = Apache->request;
-            $r->notes("clientver", $req->{'clientversion'});
+            LJ::Request->notes("clientver", $req->{'clientversion'});
         };
     }
 
@@ -1183,6 +1181,8 @@ sub postevent
     return fail($err, 155, "You must have an authenticated email address in order to post to another account")
         unless $u->{'status'} eq 'A' || $u->{'journaltype'} eq 'Y';
 
+    $req->{'event'} =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
+
     # post content too large
     # NOTE: requires $req->{event} be binary data, but we've already
     # removed the utf-8 flag in the XML-RPC path, and it never gets
@@ -1587,6 +1587,7 @@ sub postevent
 
         my $logtag_opts = {
             remote => $u,
+            skipped_tags => [], # do all possible and report impossible
         };
 
         if (ref $taginput eq 'ARRAY') {
@@ -1597,6 +1598,9 @@ sub postevent
         }
 
         my $rv = LJ::Tags::update_logtags($uowner, $jitemid, $logtag_opts);
+        push @{$res->{warnings} ||= []}, LJ::Lang::ml('/update.bml.tags.skipped', { 'tags' => join(', ', @{$logtag_opts->{skipped_tags}}),
+                                                             'limit' => $uowner->get_cap('tags_max') } )
+            if @{$logtag_opts->{skipped_tags}};
     }
 
     ## copyright
@@ -2016,14 +2020,21 @@ sub editevent
     $req->{'props'}->{'revnum'} = ($curprops{$itemid}->{'revnum'} || 0) + 1;
     $req->{'props'}->{'revtime'} = time();
 
+    my $res = { 'itemid' => $itemid };
+
     # handle tags if they're defined
     if ($do_tags) {
         my $tagerr = "";
+        my $skipped_tags = [];
         my $rv = LJ::Tags::update_logtags($uowner, $itemid, {
                 set_string => $req->{props}->{taglist},
                 remote => $u,
                 err_ref => \$tagerr,
+                skipped_tags => $skipped_tags, # do all possible and report impossible
             });
+        push @{$res->{warnings} ||= []}, LJ::Lang::ml('/update.bml.tags.skipped', { 'tags' => join(', ', @$skipped_tags),
+                                                             'limit' => $uowner->get_cap('tags_max') } )
+            if @$skipped_tags;
     }
 
     if (LJ::is_enabled('default_copyright', $u)) {
@@ -2078,7 +2089,6 @@ sub editevent
 
     LJ::memcache_kill($ownerid, "dayct2");
 
-    my $res = { 'itemid' => $itemid };
     if (defined $oldevent->{'anum'}) {
         $res->{'anum'} = $oldevent->{'anum'};
         $res->{'url'} = LJ::item_link($uowner, $itemid, $oldevent->{'anum'});
@@ -2105,6 +2115,8 @@ sub getevents
 {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
+
+    $flags->{'ignorecanuse'} = 1; # later we will check security levels, so allow some access to communities
     return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
@@ -2125,8 +2137,7 @@ sub getevents
 
     my $reject_code = $LJ::DISABLE_PROTOCOL{getevents};
     if (ref $reject_code eq "CODE") {
-        my $r = eval { Apache->request };
-        my $errmsg = $reject_code->($req, $flags, $r);
+        my $errmsg = $reject_code->($req, $flags, eval { LJ::request->request });
         if ($errmsg) { return fail($err, "311", $errmsg); }
     }
 
@@ -2320,10 +2331,28 @@ sub getevents
         return fail($err,200,"Invalid selecttype.");
     }
 
+    my $secmask = 0;
+    if ($u && ($u->{'journaltype'} eq "P" || $u->{'journaltype'} eq "I") && $posterid != $ownerid) {
+        $secmask = LJ::get_groupmask($ownerid, $posterid);
+    }
+
+    # decide what level of security the remote user can see
+    # 'getevents' used in small count of places and we will not pass 'viewall' through their call chain
+    my $secwhere = "";
+    if ($posterid == $ownerid) {
+        # no extra where restrictions... user can see all their own stuff
+    } elsif ($secmask) {
+        # can see public or things with them in the mask
+        $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $secmask != 0) OR posterid=$posterid)";
+    } else {
+        # not a friend?  only see public.
+        $secwhere = "AND (security='public' OR posterid=$posterid)";
+    }
+
     # common SQL template:
     unless ($sql) {
         $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid, replycount, UNIX_TIMESTAMP(eventtime) ".
-            "FROM log2 WHERE journalid=$ownerid $where $orderby $limit $offset";
+            "FROM log2 WHERE journalid=$ownerid $secwhere $where $orderby $limit $offset";
     }
 
     # whatever selecttype might have wanted us to use the master db.
@@ -3272,13 +3301,11 @@ sub check_altusage
     # complain if the username is invalid
     return fail($err,206) unless LJ::canonical_username($alt);
 
-    my $r = eval { Apache->request };
-
     # allow usage if we're told explicitly that it's okay
     if ($flags->{'usejournal_okay'}) {
         $flags->{'u_owner'} = LJ::load_user($alt);
         $flags->{'ownerid'} = $flags->{'u_owner'}->{'userid'};
-        $r->notes("journalid" => $flags->{'ownerid'}) if $r && !$r->notes("journalid");
+        LJ::Request->notes("journalid" => $flags->{'ownerid'}) if LJ::Request->is_inited && !LJ::Request->notes("journalid");
         return 1 if $flags->{'ownerid'};
         return fail($err,206);
     }
@@ -3288,7 +3315,7 @@ sub check_altusage
     my $canuse = LJ::can_use_journal($u->{'userid'}, $alt, $info);
     $flags->{'ownerid'} = $info->{'ownerid'};
     $flags->{'u_owner'} = $info->{'u_owner'};
-    $r->notes("journalid" => $flags->{'ownerid'}) if $r && !$r->notes("journalid");
+    LJ::Request->notes("journalid" => $flags->{'ownerid'}) if LJ::Request->is_inited && !LJ::Request->notes("journalid");
 
     return 1 if $canuse || $flags->{'ignorecanuse'};
 
@@ -3315,12 +3342,11 @@ sub authenticate
     return fail($err,100) if ($u->{'statusvis'} eq "X");
     return fail($err,505) unless $u->{'clusterid'};
 
-    my $r = eval { Apache->request };
     my $ip;
-    if ($r) {
-        $r->notes("ljuser" => $u->{'user'}) unless $r->notes("ljuser");
-        $r->notes("journalid" => $u->{'userid'}) unless $r->notes("journalid");
-        $ip = $r->connection->remote_ip;
+    if (LJ::Request->is_inited) {
+        LJ::Request->notes("ljuser" => $u->{'user'}) unless LJ::Request->notes("ljuser");
+        LJ::Request->notes("journalid" => $u->{'userid'}) unless LJ::Request->notes("journalid");
+        $ip = LJ::Request->connection->remote_ip;
     }
 
     my $ip_banned = 0;
@@ -3346,7 +3372,7 @@ sub authenticate
             return $chall_ok;
         }
         if ($auth_meth eq "cookie") {
-            return unless $r && $r->header_in("X-LJ-Auth") eq "cookie";
+            return unless LJ::Request->is_inited && LJ::Request->header_in("X-LJ-Auth") eq "cookie";
             my $remote = LJ::get_remote();
             return $remote && $remote->{'user'} eq $username ? 1 : 0;
         }
@@ -3991,6 +4017,7 @@ sub postevent
     $res->{'itemid'} = $rs->{'itemid'};
     $res->{'anum'} = $rs->{'anum'} if defined $rs->{'anum'};
     $res->{'url'} = $rs->{'url'} if defined $rs->{'url'};
+    # we may not translate 'warnings' here, because it may contain \n characters
     return 1;
 }
 

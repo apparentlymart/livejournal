@@ -25,8 +25,17 @@ sub are_hooks
 # </LJFUNC>
 sub clear_hooks
 {
-    %LJ::HOOKS = ();
-    $hooks_dir_scanned = 0;
+    my ($filename) = @_;
+
+    if (!$filename) {
+        %LJ::HOOKS = ();
+        $hooks_dir_scanned = 0;
+    } else {
+        foreach my $hookname (keys %LJ::HOOKS) {
+            @{$LJ::HOOKS{$hookname}} = grep { $_->[0] ne $filename }
+                @{$LJ::HOOKS{$hookname}};
+        }
+    }
 }
 
 # <LJFUNC>
@@ -44,7 +53,7 @@ sub run_hooks
 
     my @ret;
     foreach my $hook (@{$LJ::HOOKS{$hookname} || []}) {
-        push @ret, [ $hook->(@args) ];
+        push @ret, [ $hook->[1]->(@args) ];
     }
     return @ret;
 }
@@ -62,7 +71,7 @@ sub run_hook
     load_hooks_dir() unless $hooks_dir_scanned;
 
     return undef unless @{$LJ::HOOKS{$hookname} || []};
-    return $LJ::HOOKS{$hookname}->[0]->(@args);
+    return $LJ::HOOKS{$hookname}->[0]->[1]->(@args);
 }
 
 # <LJFUNC>
@@ -77,7 +86,9 @@ sub register_hook
 {
     my $hookname = shift;
     my $subref = shift;
-    push @{$LJ::HOOKS{$hookname}}, $subref;
+    my (undef, $filename, undef) = caller;
+
+    push @{$LJ::HOOKS{$hookname}}, [$filename, $subref];
 }
 
 sub load_hooks_dir {

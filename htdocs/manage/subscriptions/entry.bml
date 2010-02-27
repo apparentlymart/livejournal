@@ -10,14 +10,11 @@ body<=
 
     return "Not ready" if $LJ::DISABLED{'esn'};
 
-    use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
-
-    BML::decl_params(
-                     lj_form_auth => qr/./,
-                     journal      => 'word',
-                     ditemid     => 'digits',
-                     itemid      => 'digits',
-                     );
+    use LJ::NotificationMethod;
+    use LJ::Event;
+    use LJ::Subscription::GroupSet;
+    use LJ::Widget::SubscribeInterface;
+    use LJ::Entry;
 
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
@@ -35,41 +32,87 @@ body<=
     return LJ::error_list("Invalid entry") unless $entry && $entry->valid;
     return LJ::error_list("You are not authorized to subscribe to this entry.") unless $entry->visible_to($remote);
 
-    my $categories = [{
-        'Track' => [
-                    LJ::Subscription::Pending->new(
-                                                   $remote,
-                                                   event   => "JournalNewComment",
-                                                   arg1    => $ditemid,
-                                                   journal => $journal,
-                                                   default_selected => 1,
-                                                   flags   => LJ::Subscription::TRACKING,
-                                                   ),
-                    LJ::Subscription::Pending->new(
-                                                   $remote,
-                                                   event   => "JournalNewEntry",
-                                                   arg1    => '?',
-                                                   journal => $journal,
-                                                   flags   => LJ::Subscription::TRACKING,
-                                                   ),
-                    LJ::Subscription::Pending->new(
-                                                   $remote,
-                                                   event   => "JournalNewEntry",
-                                                   journal => $journal,
-                                                   flags   => LJ::Subscription::TRACKING,
-                                                   ),
-                    ],
-                }];
+    my $u = $remote;
 
-    $body .= LJ::subscribe_interface($remote,
-                                     journal      => $journal,
-                                     categories   => $categories,
-                                     ret_url      => $entry->url,
-                                     default_selected_notifications => ['LJ::NotificationMethod::Email'],
-                                     post_to_settings_page => 1,
-                                     );
+    my $ret = '';
 
-    return $body;
+    my $set = LJ::Subscription::GroupSet->fetch_for_user($u, sub {
+        my ($subhash) = @_;
+
+        return 0 unless $subhash->{'journalid'} == $journal->id;
+
+        my @events = qw(
+            JournalNewComment
+            JournalNewEntry
+        );
+
+        my %etypeids = map { LJ::Event->event_to_etypeid($_) => 1 } @events;
+
+        return 0 unless $etypeids{$subhash->{'etypeid'}};
+
+        return 1;
+    });
+
+    if (LJ::did_post()) {
+        my $newset = $set->clone;
+
+        my @ntypes = @LJ::NOTIFY_TYPES;
+
+        my %ntypeids = map { $_ => $_->ntypeid } @ntypes;
+
+        foreach my $field (keys %POST) {
+            next unless $field =~ /event\-(\d+)/;
+            my $field_num = $1;
+
+            my $group = LJ::Subscription::Group->thaw($POST{$field});
+
+            foreach my $ntypeid (values %ntypeids) {
+                next unless $POST{'sub-'.$field_num.'-'.$ntypeid};
+
+                $group->create_sub($ntypeid);
+            }
+
+            $newset->insert_group($group);
+        }
+
+        eval {
+            $set->update($newset);
+        };
+
+        if ($@) {
+            if ($@->isa('LJ::Subscription::QuotaError')) {
+                my $mlstring = $@->as_string;
+                $ret .= "<?errorbar $mlstring errorbar?>";
+            }
+        } else {
+            return BML::redirect('/manage/settings/?cat=notifications&saved=1');
+        }
+    }
+
+    my $widget = LJ::Widget::SubscribeInterface->new;
+
+    $widget->{'no_container_div'} = 1;
+    $widget->{'page'} = '/manage/subscriptions/comments.bml';
+
+    $ret .= '<form method="post" action="">';
+
+    my $groups = [
+        { event => "JournalNewComment", arg1 => $ditemid, 'journalid' => $journal->id },
+        { event => "JournalNewEntry", arg1 => '?', 'journalid' => $journal->id },
+        { event => "JournalNewEntry", 'journalid' => $journal->id },
+    ];
+
+    $ret .= $widget->render({
+        'title' => BML::ml('subscribe_interface.category.this-journal', { 'journal' => $journal->ljuser_display }),
+        'groups' => $set->extract_groups($groups),
+        'u' => $u,
+        'css_class' => 'subscriptions_user',
+    });
+
+    $ret .= LJ::html_submit('value' => $ML{'subscribe_interface.save'});
+    $ret .= '</form>';
+
+    return $ret;
 }
 _code?>
 <=body

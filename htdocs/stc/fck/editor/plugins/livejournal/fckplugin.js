@@ -175,12 +175,16 @@ LJCutCommand.prototype.Execute=function()
 			cut_node.setAttribute('text', text) :
 			cut_node.removeAttribute('text');
 	} else {
-		var text = prompt(top.FCKLang.CutPrompt, top.FCKLang.ReadMore),
+		var text = prompt(top.FCKLang.CutPrompt, top.FCKLang.ReadMore);
+		
+		if (text == null) {
+			return;
+		}
+		
+		var cut_node = FCK.EditorDocument.createElement('lj-cut'),
 			range = new FCKDomRange(FCK.EditorWindow);
 		
 		range.MoveToSelection();
-		
-		var cut_node = FCK.EditorDocument.createElement('lj-cut');
 		
 		if (text && text != top.FCKLang.ReadMore) {
 			cut_node.setAttribute('text', text);

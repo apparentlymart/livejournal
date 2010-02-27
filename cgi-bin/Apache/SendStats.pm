@@ -9,7 +9,6 @@ BEGIN {
 
 use strict;
 use IO::Socket::INET;
-use Apache::Constants qw(:common);
 use Socket qw(SO_BROADCAST);
 
 use vars qw(%udp_sock);
@@ -17,10 +16,12 @@ use vars qw(%udp_sock);
 sub handler
 {
     my $r = shift;
-    return OK if $r->main;
-    return OK unless $LJ::HAVE_AVAIL && $LJ::FREECHILDREN_BCAST;
+    LJ::Request->init($r) unless LJ::Request->is_inited;
 
-    my $callback = $r ? $r->current_callback() : '';
+    return LJ::Request::OK if LJ::Request->main;
+    return LJ::Request::OK unless $LJ::HAVE_AVAIL && $LJ::FREECHILDREN_BCAST;
+
+    my $callback = LJ::Request->is_inited ? LJ::Request->current_callback() : '';
     my $cleanup = $callback eq "PerlCleanupHandler";
     my $childinit = $callback eq "PerlChildInitHandler";
 
@@ -30,7 +31,7 @@ sub handler
         if ($cleanup) {
             LJ::MemCache::delete($key);
         } else {
-            LJ::MemCache::set($key, $r->header_in("Host") . $r->uri . "(" . $r->method . "/" . scalar($r->args) . ")");
+            LJ::MemCache::set($key, LJ::Request->header_in("Host") . LJ::Request->uri . "(" . LJ::Request->method . "/" . scalar(LJ::Request->get_params) . ")");
           }
     }
 
@@ -54,7 +55,7 @@ sub handler
                 $sock->sockopt(SO_BROADCAST, 1)
                     if $LJ::SENDSTATS_BCAST;
             } else {
-                $r->log_error("SendStats: couldn't create socket: $host");
+                LJ::Request->log_error("SendStats: couldn't create socket: $host");
                 next;
             }
         }
@@ -63,11 +64,11 @@ sub handler
         my $portaddr = sockaddr_in($port, $ipaddr);
         my $message = "bcast_ver=1\nfree=$free\nactive=$active\n";
         my $res = $sock->send($message, 0, $portaddr);
-        $r->log_error("SendStats: couldn't broadcast")
+        LJ::Request->log_error("SendStats: couldn't broadcast")
             unless $res;
     }
 
-    return OK;
+    return LJ::Request::OK;
 }
 
 1;

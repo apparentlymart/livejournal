@@ -1,12 +1,13 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+require "ljfeed.pl";
 
 package LJ::NewWorker::TheSchwart::MassPrivacy;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::TheSchwartz';
-sub capabilities { map { [ $_ => '' ] } LJ::MassPrivacy->schwartz_capabilities() }
+sub capabilities { LJ::MassPrivacy->schwartz_capabilities() }
 __PACKAGE__->start();
 
 package LJ::Worker::MassPrivacy;

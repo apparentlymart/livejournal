@@ -3,11 +3,11 @@
     use strict;
     use vars qw(%GET);
 
-    # $_[1] is a pre-request scratch area
+    # $_[0] is a pre-request scratch area
     # put variables here so that we can access them later
     # outside of this _code block
-    my $head = \$_[1]->{'head'};
-    my $body = \$_[1]->{'body'};
+    my $head = \$_[0]->{'head'};
+    my $body = \$_[0]->{'body'};
     my $u = LJ::User->remote;
 
     LJ::need_res("stc/display_none.css",
@@ -275,9 +275,9 @@
 _code?>
 <html>
 <head>
-<?_code return $_[1]->{'head'}; _code?>
+<?_code return $_[0]->{'head'}; _code?>
 </head>
 <body>
-<?_code return $_[1]->{'body'}; _code?>
+<?_code return $_[0]->{'body'}; _code?>
 </body>
 </html>

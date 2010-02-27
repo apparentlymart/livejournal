@@ -1,3 +1,4 @@
 ;; -*- coding: utf-8 -*-
-
+.suspended.cannot.send|staleness=1
 .suspended.cannot.send=Suspended accounts are not allowed to send private messages
+

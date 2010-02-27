@@ -54,69 +54,6 @@ sub render_body {
 
     $ret .= "</table></div>";
 
-    unless ($LJ::DISABLED{'vgift_list'} || $opts{'no_vgifts'}) {
-        my $to = $u->user;
-        $to =~ s/([^a-zA-Z0-9-_])//g; # Remove bad chars from lj-user name
-
-        unless (defined $BML::COOKIE{show_sponsored_vgifts}) {
-            $BML::COOKIE{show_sponsored_vgifts} = ($u->get_cap('paid')) ? 0 : 1;
-        }
-        my $get_sponsor_vgift = defined $opts{get}->{sponsor_vgift} ? $opts{get}->{sponsor_vgift} : $BML::COOKIE{show_sponsored_vgifts};
-        $BML::COOKIE{show_sponsored_vgifts} = $get_sponsor_vgift if $get_sponsor_vgift =~ /^[01]$/;
-
-        my $show_to_sup = LJ::SUP->is_remote_sup ? 1 : 0;
- 
-        my %friend_birtdays_vgifts = LJ::run_hook('get_friend_birthdays_vgifts', $u);
-        %friend_birtdays_vgifts = %LJ::FRIEND_BIRTHDAYS_VGIFTS unless %friend_birtdays_vgifts;
-
-        $ret .= "<h3>". $class->ml('widget.friendbirthdays.sendgift') ."</h3>";
-        
-        $ret .= "<ul class='giftlist'>";
-        my ($spons_cnt, $vgift_cnt) = (0, 0);
-        my @need_vgifts = ();
-        
-        my $array_shuffle = sub {
-            my $array = shift;
-            my $i = @$array;
-            while (--$i) {
-                my $j = int rand($i+1);
-                @$array[$i,$j] = @$array[$j,$i];
-            }
-        };
-
-        my $is_show_href = 0;
-        foreach my $vg_key (sort { $friend_birtdays_vgifts{$b}->{sponsored} <=> $friend_birtdays_vgifts{$a}->{sponsored} } keys %friend_birtdays_vgifts) {
-            next unless $vg_key;
-            next if $friend_birtdays_vgifts{$vg_key}->{show_to_sup} ne $show_to_sup;
-            $is_show_href++ if $friend_birtdays_vgifts{$vg_key}->{sponsored};
-            next if $friend_birtdays_vgifts{$vg_key}->{sponsored} && !$get_sponsor_vgift;
-            next if ++$spons_cnt > 2 and $friend_birtdays_vgifts{$vg_key}->{sponsored};
-            last if ++$vgift_cnt > 3;
-            push @need_vgifts, $vg_key;
-        }
-
-        @need_vgifts = shuffle (@need_vgifts);
-        foreach my $vg_key (@need_vgifts) {
-            my $vg_link = $friend_birtdays_vgifts{$vg_key}->{url};
-            my $vg = LJ::Pay::ShopVGift->new(id => $vg_key);
-            my $vg_html = $vg->display_html_code(
-                remove_url => 1,
-                hover => LJ::ehtml($vg->name( remove_url => 1 )),
-            );
-            my $vg_name = $vg->name( remove_url => 1 );
-            my $vg_price = ($vg->price+0)  ? '<b>' . $vg->price . '$</b>' : '<b style="color:#FF0000;">' . $class->ml('widget.friendbirthdays.freegift') . '</b>' ;
-            $ret .= "<li><div class='gift-holder'><span class='liner'></span><a href=\"$vg_link\">$vg_html</a></div><span>$vg_name<br />$vg_price</span></li>";
-        }
-        my $show_hide_href = '';
-        $show_hide_href .= "<a href='$LJ::SITEROOT/?sponsor_vgift=1'>" . $class->ml('widget.friendbirthdays.show_sponsored_vgifts') . "</a><br/>" unless $get_sponsor_vgift;
-        $show_hide_href .= "<a href='$LJ::SITEROOT/?sponsor_vgift=0'>" . $class->ml('widget.friendbirthdays.hide_sponsored_vgifts') . "</a><br/>" if $get_sponsor_vgift;
-
-        $ret .=	"</ul>";
-        $ret .= $show_hide_href if @need_vgifts && $is_show_href && $u->get_cap('paid');
-
-        $ret .= "<a href='$LJ::SITEROOT/shop/vgift.bml'>" . $class->ml('widget.friendbirthdays.moregifts') . " &rarr;</a>";
-    }
-
     $ret .= "<p class='indent_sm'>&raquo; <a href='$LJ::SITEROOT/birthdays.bml'>" .
             $class->ml('widget.friendbirthdays.friends_link') .
             "</a></p>" if $opts{friends_link};

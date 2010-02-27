@@ -1,67 +1,99 @@
 ;; -*- coding: utf-8 -*-
-
+.and|staleness=1
 .and=and
 
+.between|staleness=1
 .between=Between
 
+.by_age|staleness=1
 .by_age=By Age
 
+.by_friends|staleness=1
 .by_friends=By Friends
 
+.by_gender|staleness=1
 .by_gender=By Gender
 
+.by_interest|staleness=1
 .by_interest=By Interest
 
+.by_location|staleness=1
 .by_location=By Location
 
+.clear_form|staleness=1
 .clear_form=Clear Form
 
+.country|staleness=1
 .country=Country:
 
+.date|staleness=1
 .date=date
 
+.day|staleness=1
 .day=day
 
+.display_by|staleness=1
 .display_by=Display by
 
+.display_results|staleness=1
 .display_results=Display Results
 
 .error.notloggedin=You must <a [[aopts]]>login</a> to use the directory.
 
+.female|staleness=1
 .female=Female
 
+.h1|staleness=1
 .h1=Search Directory
 
+.lists_user_as_a_friend|staleness=1
 .lists_user_as_a_friend=[[input]] lists user as a friend.
 
+.male|staleness=1
 .male=Male
 
+.month|staleness=1
 .month=month
 
+.other_criteria|staleness=1
 .other_criteria=Other Criteria
 
+.picture|staleness=1
 .picture=Picture
 
+.recently_updated|staleness=1
 .recently_updated=Recently Updated
 
+.records_per_page|staleness=1
 .records_per_page=Records per page:
 
+.search|staleness=1
 .search=Search!
 
+.state_province|staleness=1
 .state_province=State/Province:
 
+.text_only|staleness=1
 .text_only=Text only
 
+.title|staleness=1
 .title=Directory Search
 
+.updated_in_last|staleness=1
 .updated_in_last=Updated in last
 
-.use_this_dir=Use this directory to search for LiveJournal users. If you fill in more than one blank, the directory will display results that match all your criteria. (i.e user lives in "San Francisco" AND lists "music" as an interest.). Check out our <a [[aopts]]>community search</a> page to find new and interesting communities.
-
+.user_likes|staleness=1
 .user_likes=User likes:
 
+.user_lists_as_a_friend|staleness=1
 .user_lists_as_a_friend=User lists [[input]] as a friend.
 
+.use_this_dir|staleness=1
+.use_this_dir=Use this directory to search for LiveJournal users. If you fill in more than one blank, the directory will display results that match all your criteria. (i.e user lives in "San Francisco" AND lists "music" as an interest.). Check out our <a [[aopts]]>community search</a> page to find new and interesting communities.
+
+.week|staleness=1
 .week=week
 
+.years_old|staleness=1
 .years_old=years old.
+

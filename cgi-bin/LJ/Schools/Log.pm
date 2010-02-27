@@ -219,6 +219,7 @@ sub get_last_edit {
 # %args can include:
 #  * skipto: return log entries with the ID less than the given one
 #  * schoolid: only show log entries in which the given school is affected
+#  * userid: the user who made the change
 #
 # Note that this function returns no more than 100 rows; you can manipulate
 # with the "skipto" argument for pagination.
@@ -237,6 +238,11 @@ sub query {
     if ($args{'skipto'}) {
         push @query_conditions, 'logid < ?';
         push @query_params, $args{'skipto'} + 0;
+    }
+
+    if ($args{'userid'}) {
+        push @query_conditions, 'userid=?';
+        push @query_params, int $args{'userid'};
     }
 
     my $cond = join ' AND ', @query_conditions;

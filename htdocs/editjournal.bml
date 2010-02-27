@@ -7,8 +7,8 @@ body<=
     use vars qw(%GET %POST);
     BML::decl_params(_default => qr/./);
 
-    my $head     = \$_[1]->{'head'};
-    my $bodyopts = \$_[1]->{'bodyopts'};
+    my $head     = \$_[0]->{'head'};
+    my $bodyopts = \$_[0]->{'bodyopts'};
 
     LJ::set_active_crumb('editentries');
 
@@ -157,6 +157,11 @@ body<=
             return "<?h1 $ML{'Error'} h1?><?p $ML{'/editjournal_do.bml.error.nofind'} p?>"
                 unless $res{'events_count'} && $res{'events_1_anum'} == $anum;
 
+            ####  Check security before viewing this post
+            my $errtxt;
+            my $item = LJ::Talk::get_journal_item($u_for_entry, $itemid);
+            return $errtxt unless LJ::Talk::check_viewable($remote, $item, undef, \$errtxt);
+
             # are we authorized to edit other peoples' posts in this community?
             my $disabled_save = 0;
             my $disabled_delete = 0;
@@ -171,6 +176,8 @@ body<=
             if (!$disabled_save && ($u->is_readonly || ($usejournal_u && $usejournal_u->is_readonly))) {
                 $disabled_save++;
             }
+
+            $disabled_save++ if $u_for_entry->is_banned($remote);
 
             ###
             ### SAVE EDITS
@@ -192,9 +199,9 @@ body<=
             if (!$spellcheck_html && ($POST{'action:save'} || $POST{'action:saveunsuspend'} || $POST{'action:delete'} || $POST{'action:deletespam'})) {
                 return LJ::bad_input($ML{'error.invalidform'}) unless LJ::check_form_auth();
 
-                my %req = ( 'mode' => 'editevent',
+                my %req = (
                             'ver' => $LJ::PROTOCOL_VER,
-                            'user' => $u->{'user'},
+                            'username' => $u->{'user'},
                             'usejournal' => $usejournal,
                             'itemid' => $itemid,
                             );
@@ -217,17 +224,23 @@ body<=
                 }
 
                 # do editevent request
-                LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $u });
+                foreach my $k (keys %req) {
+                    next unless ($k =~ /^prop_(.+)/);
+                    $req{'props'}->{$1} = $req{$k};
+                    delete $req{$k};
+                }
+                my $err = 0;
+                my $res = LJ::Protocol::do_request('editevent', \%req, \$err, { 'noauth' => 1, 'u' => $u });
 
                 # check response
-                unless ($res{'success'} eq "OK") {
-                    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.modify'} <ul><li><b>$res{'errmsg'}</b></li></ul> p?>";
+                unless ($res) {
+                    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.modify'} <ul><li><b>" . LJ::Protocol::error_message($err) . "</b></li></ul> p?>";
                 }
 
                 my $deleted = $req{event} ? 0 : 1;
                 my $journalu = $usejournal ? $usejournal_u : $u;
                 my $j_base = $journalu->journal_base;
-                my $entry_url = LJ::item_link($journalu, $itemid, $res{anum});
+                my $entry_url = LJ::item_link($journalu, $itemid, $res->{anum});
 
                 my $result = "<?h1 $ML{'.success.head'} h1?>";
                 $result .= "<table border='0' width='100%'><tr valign='top'><td>";
@@ -264,6 +277,8 @@ body<=
                         $result .= "<?p " . BML::ml('.success.editedstillsuspended', { aopts => "href='$LJ::SITEROOT/abuse/report.bml'" }) . " p?>";
                     }
                 }
+
+                $result .= join('<br>', @{$res->{warnings}} ) if $res->{warnings} and @{$res->{warnings}};
 
                 $result .= "<div id='fromhere'>$ML{'.success.fromhere'}<ul>";
                 $result .= "<li><a href='$entry_url'>$ML{'.success.fromhere.viewentry'}</a></li>" unless $deleted;
@@ -376,7 +391,7 @@ body<=
             my $escaped_qotd_text = LJ::ejs($qotd_text);
 
             # javascript to initialize entry form since we've just called into entry_form
-            # -- shove into \$head which is a reference into $_[1]->{head} and will
+            # -- shove into \$head which is a reference into $_[0]->{head} and will
             #    be placed in the correct BML head portion later
             # -- this is a hack, should be done by weblib and pushed into \$$head above
             #    in a way which is compatible with both this page and update.bml
@@ -556,11 +571,11 @@ body<=
 _code?>
 <=body
 
-bodyopts=><?_code return $_[1]->{'bodyopts'}; _code?>
+bodyopts=><?_code return $_[0]->{'bodyopts'}; _code?>
 head<=
 
 <?entryformcss?>
-<?_code return $_[1]->{'head'}; _code?>
+<?_code return $_[0]->{'head'}; _code?>
 <?_code return $LJ::COMMON_CODE{'autoradio_check'}; _code?>
 
 <?_code

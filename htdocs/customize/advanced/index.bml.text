@@ -9,6 +9,7 @@
 
 .documentation.text=Before you jump into tweaking/programming S2, you should understand how it works.
 
+.error.advanced.editing.denied|staleness=1
 .error.advanced.editing.denied=You are not allowed to use the advanced customization area.
 
 .publiclayers.desc=system layers (good reference &amp; place to learn)

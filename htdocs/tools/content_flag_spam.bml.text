@@ -1,9 +1,13 @@
 ;; -*- coding: utf-8 -*-
-
+.entryspam|staleness=1
 .entryspam=Please report this through the spam reports system.
 
+.journalspam|staleness=1
 .journalspam=Please report this through the spam reports system.
 
+.maint_communityspam|staleness=1
 .maint_communityspam=To report this entry as spam, go <a [[aopts]]>here</a> and click "Delete and Mark as Spam".
 
+.nonmaint_communityspam|staleness=1
 .nonmaint_communityspam=Please report this through the spam reports system.
+

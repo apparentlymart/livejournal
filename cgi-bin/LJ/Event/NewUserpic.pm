@@ -140,14 +140,17 @@ sub subscription_as_html {
         BML::ml('event.userpic_upload.me');
 }
 
-# only users with the track_user_newuserpic cap can use this
 sub available_for_user  {
-    my ($class, $u, $subscr) = @_;
+    my ($self, $u) = @_;
 
-    return 0 if ! $u->get_cap('track_user_newuserpic') &&
-        $subscr->journalid;
+    return 1 unless $self->userid;
+    return $u->get_cap("track_user_newuserpic") ? 1 : 0;
+}
 
-    return 1;
+sub is_tracking {
+    my ($self, $u) = @_;
+
+    return $self->userid ? 1 : 0;
 }
 
 1;

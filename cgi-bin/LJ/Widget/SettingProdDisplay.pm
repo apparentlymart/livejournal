@@ -11,7 +11,7 @@ sub render_body {
     my $remote = LJ::get_remote();
     return unless $remote;
     return unless LJ::is_web_context();
-    my $codepath = eval { Apache->request->notes('codepath'); };
+    my $codepath = eval { LJ::Request->notes('codepath'); };
     
     my $body;
     my $title = LJ::ejs( $class->ml('setting.prod.display.title') );

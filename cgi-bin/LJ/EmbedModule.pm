@@ -136,7 +136,6 @@ sub parse_module_embed {
 
     return if LJ::conf_test($LJ::DISABLED{embed_module});
 
-    $$postref = Encode::decode_utf8($$postref);
     # fast track out if we don't have to expand anything
     return unless $$postref =~ /lj\-embed|embed|object/i;
 
@@ -154,10 +153,12 @@ sub parse_module_embed {
         return $class->expand_entry($journal, $postref, %opts);
     }
 
+    my $text = Encode::decode_utf8($$postref);
+
     # ok, we can safely parse post text
     # machine state
     my $state = REGULAR;
-    my $p = HTML::TokeParser->new($postref);
+    my $p = HTML::TokeParser->new(\$text);
     my $newtxt = '';
     my %embed_attrs = (); # ($eid, $ewidth, $eheight);
     my $embed = '';
@@ -169,7 +170,7 @@ sub parse_module_embed {
         $tag = lc $tag;
         my $newstate = undef;
         my $reconstructed = $class->reconstruct($token);
-
+        
         if ($state == REGULAR) {
             if ($tag eq 'lj-embed' && $type eq 'S' && ! $attr->{'/'}) {
                 # <lj-embed ...>, not self-closed
@@ -246,8 +247,7 @@ sub parse_module_embed {
     }
 
     # update passed text
-    $$postref = $newtxt;
-    $$postref = Encode::encode_utf8($$postref);
+    $$postref = Encode::encode_utf8($newtxt);
 }
 
 sub module_iframe_tag {
@@ -361,8 +361,7 @@ sub module_iframe_tag {
     # if placeholder_prop is not set, then show placeholder on a friends
     # page view UNLESS the embedded content is only one embed/object
     # tag and it's whitelisted video.
-    my $r = eval { Apache->request };
-    my $view = $r ? $r->notes("view") : '';
+    my $view = LJ::Request->is_inited ? LJ::Request->notes("view") : '';
     if (! $placeholder_prop && $view eq 'friends') {
         # show placeholder if this is not whitelisted video
         $do_placeholder = 1 if $no_whitelist;
@@ -463,9 +462,6 @@ sub reconstruct {
                 $selfclose = 1;
                 next;
             }
-
-            # FIXME: ultra ghetto.
-            $attr->{$name} = LJ::no_utf8_flag($attr->{$name});
 
             my $tribute = " $name=\"" . LJ::ehtml($attr->{$name}) . "\"";
 

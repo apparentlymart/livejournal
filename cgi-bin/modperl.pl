@@ -4,7 +4,7 @@
 package LJ::ModPerl;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-use Apache;
+use LJ::Request;
 
 $LJ::UPTIME = time();
 

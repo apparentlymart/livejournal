@@ -3,6 +3,7 @@ package LJ::Widget::Login;
 use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
+use LJ::Request;
 
 sub need_res { qw( stc/widgets/login.css js/md5.js js/login.js) }
 
@@ -22,9 +23,8 @@ sub render_body {
 
     # Is this the login page?
     # If so treat ret value differently
-    my $r = eval { Apache->request };
     my $isloginpage = 0;
-    $isloginpage = 1 if ($r->uri eq '/login.bml');
+    $isloginpage = 1 if (LJ::Request->uri eq '/login.bml');
 
     if (!$isloginpage && $opts{get_ret} == 1) {
         $getextra .= $getextra eq '' ? '?ret=1' : '&ret=1';

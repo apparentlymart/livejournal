@@ -478,6 +478,7 @@ sub add_pending_school {
         'state1' => $sc,
         'city1' => $cc,
         'url1' => $opts->{'url'},
+        'nostats' => 1,
     );
 
     # we don't care of errors much at this step
@@ -668,7 +669,6 @@ sub approve_pending {
         'state2' => $sc,
         'city2' => $cc,
         'url2' => $opts->{'url'},
-        'nostats' => 1,
     );
 
     # we don't care of errors much at this step
@@ -1355,7 +1355,7 @@ sub merge_schools {
 	     undef, $psid);
 
     LJ::Schools::Log->log(
-        'action' => 'add-pending',
+        'action' => 'merge',
         'userid' => 0, # Log module will pick up remote instead
         'schoolid1' => 0,
         'name1' => $oldsc->{'name'},

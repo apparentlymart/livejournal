@@ -1,56 +1,73 @@
 ;; -*- coding: utf-8 -*-
-
+.adultcontentflag|staleness=1
 .adultcontentflag=This journal contains:
 
+.adultcontentflag.select.concepts|staleness=1
 .adultcontentflag.select.concepts=Adult Concepts
 
+.adultcontentflag.select.explicit|staleness=1
 .adultcontentflag.select.explicit=Explicit Adult Content
 
+.adultcontentflag.select.none|staleness=1
 .adultcontentflag.select.none=No Adult Content
 
+.adultcontentflag.text|staleness=1
 .adultcontentflag.text=This is a global setting for the journal. For explicit adult content, users under the age of [[explicitage]] years old will be restricted from viewing. Adult concepts only restricts users under the age of [[conceptsage]] years old.
 
 .bdayreminder=Receive email reminders for your friends' birthdays
 
 .bdayreminder.note=Note: This feature is currently disabled, but may be re-enabled in the future.
 
+.btn.save|staleness=1
 .btn.save=Save
 
+.cat.account|staleness=1
 .cat.account=Account
 
+.cat.account.desc|staleness=1
 .cat.account.desc=Basic account settings
 
-.cat.adsense=My ads
+.cat.adsense|staleness=1
+.cat.adsense=adSense
 
-.cat.adsense.desc=Your Journal &mdash; Your Money
+.cat.adsense.desc|staleness=1
+.cat.adsense.desc=adSense settings
 
+.cat.display|staleness=1
 .cat.display=Display
 
+.cat.display.desc|staleness=1
 .cat.display.desc=Viewing options, site navigation, and language
 
+.cat.history|staleness=1
 .cat.history=History
 
+.cat.history.desc|staleness=1
 .cat.history.desc=Account history
 
+.cat.integration|staleness=1
 .cat.integration=Extensions
 
+.cat.integration.desc|staleness=1
 .cat.integration.desc=Windows Live ID
 
+.cat.mobile|staleness=1
 .cat.mobile=Mobile
 
+.cat.mobile.desc|staleness=1
 .cat.mobile.desc=Voice post, text messaging, and mobile options
 
+.cat.notifications|staleness=1
 .cat.notifications=Notifications
 
+.cat.notifications.desc|staleness=1
 .cat.notifications.desc=Notification and subscription tracking options
 
+.cat.privacy|staleness=1
 .cat.privacy=Privacy
 
+.cat.privacy.desc|staleness=1
 .cat.privacy.desc=Journal privacy options
-
-.cat.userapps=User Apps
-
-.cat.userapps.desc=Connect your applications to LJ.
 
 .commentpage=View comment pages in your own journal style
 
@@ -60,12 +77,12 @@
 
 .contextualhover.text=Contextual hover menus appear when you hover over userhead images or userpics.
 
+.errors|staleness=1
 .errors=There were errors with your submission.  Please look below to fix them.
 
 .finished.save_button=Save Changes
 
-.form.confirm=Save your changes?
-
+.fn.adultcontentflag|staleness=1
 .fn.adultcontentflag=Adult Content
 
 .fn.bdayreminder=Birthday reminders
@@ -74,8 +91,10 @@
 
 .fn.contextualhover=Contextual Hover Menu
 
+.fn.gettingstarted|staleness=1
 .fn.gettingstarted=Getting Started Module
 
+.fn.graphicpreviews|staleness=1
 .fn.graphicpreviews=Graphic previews
 
 .fn.imageplace=Image placeholders
@@ -84,34 +103,51 @@
 
 .fn.language=Language
 
+.fn.ljnews=LiveJournal news
+
+.fn.minsecurity|staleness=1
 .fn.minsecurity=Entry Security
 
 .fn.navstrip=Navigation strip
 
+.fn.public|staleness=1
+.fn.public=Publicity
+
+.fn.safesearch|staleness=1
 .fn.safesearch=Safe Search Filtering
 
 .fn.scheme=Scheme
 
 .fn.searchincl=Search inclusion
 
-.fn.public=Publicity
-
+.fn.stylealwaysmine|staleness=1
 .fn.stylealwaysmine=Other Journals
 
+.fn.verticalincl|staleness=1
 .fn.verticalincl=Explore Area Inclusion
 
+.fn.viewingadult|staleness=1
 .fn.viewingadult=Viewing Adult Content
 
+.fn.weblogs|staleness=1
 .fn.weblogs=Weblogs.com
 
+.form.confirm|staleness=1
+.form.confirm=Save your changes?
+
+.gettingstarted|staleness=1
 .gettingstarted=Show Getting Started module
 
+.gettingstarted.text|staleness=1
 .gettingstarted.text=The Getting Started module displays on the homepage and confirmation pages until the required tasks have been completed.
 
+.gettingstarted.text.completed|staleness=1
 .gettingstarted.text.completed=Because you have completed all of the required tasks, the Getting Started module will not display.
 
+.graphicpreviews.desc|staleness=1
 .graphicpreviews.desc=Enable graphic previews for  external links
 
+.graphicpreviews.note|staleness=1
 .graphicpreviews.note=Displays a preview of external links and linked images on journals when hovering over them
 
 .imagelinks.size.custom=Custom: use placeholders for images larger than [[width]]x[[height]]
@@ -130,8 +166,10 @@
 
 .intro=Customize your viewing, notification and additional privacy options.
 
+.intro2|staleness=1
 .intro2=Customize your viewing, notification and additional privacy options. You may also want to edit your <a [[aopts1]]>profile settings</a> or your <a [[aopts2]]>comment settings</a>.
 
+.intro3|staleness=1
 .intro3=You can edit your account settings below. You may also want to edit your <a [[aopts1]]>profile</a> or your <a [[aopts2]]>journal style</a>.
 
 .jabber=Show [[jabbertitle]] online status to:
@@ -142,17 +180,25 @@
 
 .language=Select your language:
 
+.ljnews=Receive email copies of LiveJournal news and updates.
+
+.minsecurity|staleness=1
 .minsecurity=Default privacy of new entries:
 
-.minsecurity.text=This setting will override the security for all future entries, unless you choose a more restrictive privacy. In that case, the more restrictive privacy setting will be used.
-
+.minsecurity.friends|staleness=1
 .minsecurity.friends=Friends Only
 
+.minsecurity.members|staleness=1
 .minsecurity.members=Members Only
 
+.minsecurity.private|staleness=1
 .minsecurity.private=Just Me  (Private)
 
+.minsecurity.public|staleness=1
 .minsecurity.public=Everyone (Public)
+
+.minsecurity.text|staleness=1
+.minsecurity.text=This setting will override the security for all future entries, unless you choose a more restrictive privacy. In that case, the more restrictive privacy setting will be used.
 
 .navstrip=The navigation strip is a small toolbar that can show at the top of your journal/community, as well as when you're browsing other journals and communities. It provides:
 
@@ -176,6 +222,7 @@
 
 .navstrip.options.show=Always show the navigation strip to anyone who views your journal or community
 
+.public|staleness=1
 .public<<
 I hereby give my authorization to reproduce and/or 
 distribute any part or all of my Content by third parties, with the
@@ -185,6 +232,7 @@ of the Content may be transferred, copied, republished and distributed
 in any form or by any means for commercial use.
 .
 
+.public.helper|staleness=1
 .public.helper<<
 By ticking off this checkbox you will set  
 this level of publicity as default for your new entries in 
@@ -197,23 +245,41 @@ for any particular entry and edit publicity level of your older posts
 as well.
 .
 
+.safesearch|staleness=1
+.safesearch=You can choose to filter mature or offensive content out of search results.
+
+.safesearch.select.concepts|staleness=1
+.safesearch.select.concepts=Use strict filtering (filters all adult and offensive content)
+
+.safesearch.select.explicit|staleness=1
+.safesearch.select.explicit=Use moderate filtering (filters explicit adult and offensive content)
+
+.safesearch.select.none|staleness=1
+.safesearch.select.none=Do not filter my results
+
+.safesearch2|staleness=1
 .safesearch2=You can choose to filter mature or offensive content out of search results.
 
+.safesearch2.select.concepts|staleness=1
 .safesearch2.select.concepts=Use strict filtering (filters all adult and offensive content)
 
+.safesearch2.select.explicit|staleness=1
 .safesearch2.select.explicit=Use moderate filtering (filters explicit adult and offensive content)
-
-.safesearch.select.none=Do not filter my results
 
 .searchincl=Minimize your journal's inclusion in search engine results
 
-.searchincl2=Minimize your journal's inclusion in search engine results. Selecting this option also means that your entries will not be publicized at external sites that have content partnership with [[sitename]].
-
 .searchincl.text=We can instruct search engines not to include your journal entries in their search results. Not all search engines recognize this request; if you do not want a journal entry to show up in search results, then make sure it is posted private or Friends-only.
 
+.searchincl2|staleness=1
+.searchincl2=Minimize your journal's inclusion in search engine results. Selecting this option also means that your entries will not be publicized at external sites that have content partnership with [[sitename]].
+
+.section.adult_content|staleness=1
 .section.adult_content=Adult content options
 
+.section.adult_content.note|staleness=1
 .section.adult_content.note=Not all content on [[sitename]] is appropriate for everyone. These settings let you rate your journal as well as determine the level of content you are comfortable with viewing.
+
+.section.notify=LJ notifications
 
 .section.privacy=Additional privacy options
 
@@ -225,150 +291,187 @@ as well.
 
 .security.visibility.nobody=Nobody
 
+.setting.adsense.advertising.blocks|staleness=1
 .setting.adsense.advertising.blocks=Advertising Blocks
 
-.setting.adsense.title=Google AdSense settings
-
-.setting.adsense.status=To see the Google Advertize, look the Terms of Service
-
-.setting.adsense.change=Change
-
-.setting.adsense.stats=Statistic
-
-.setting.adsense.invitation=I'd like to participate in revenue sharing program.
-
-.setting.adsense.otherjournal=I'd like to see context advertisment in other journals
-
-.setting.adsense.signin=I have AdSense account
-
-.setting.adsense.choose=Please check the box that applies:
-
-.setting.adsense.newaccount=Create a new Google AdSense account
-
-.setting.adsense.email=E-mail
-
-.setting.adsense.verification=Text about verification
-
-.setting.adsense.phone=Phone Number
-
-.setting.adsense.phone.hint=(last 5 numbers)
-
-.setting.adsense.postcode=Postal Code (ZIP code)
-
+.setting.adsense.agreement|staleness=1
 .setting.adsense.agreement= I certify that I have read the <a href="[[uri]]">AdSense Program Policies</a>.
 
-.setting.adsense.locate=Language
-
-.setting.adsense.locate.ads=Language of ads
-
-.setting.adsense.interactive.scheme=Ads interactive scheme
-
-.setting.adsense.appearance.text=Please choose ad formats and ad types for Google AdSense ads which will be visible in your journal. 
-
-.setting.adsense.types.title=Advertising Type:
-
-.setting.adsense.horiz_top=728x90 Top
-
-.setting.adsense.horiz_bottom=728x90 Bottom
-
-.setting.adsense.colors=Colors
-
-.setting.adsense.colors.hint=You can choose color by entering HEX-value or via palette, that will open by click on color box
-
-.setting.adsense.bgcolor=Background
-
-.setting.adsense.brdcolor=Border
-
-.settings.adsense.google.examples=Here is some text about the examples of <a href="[[uri]]">adsense banners</a>.
-
-.setting.adsense.txtcolor=Text
-
-.setting.adsense.urlcolor=Url
-
-.setting.adsense.ttlcolor=Title
-
-.setting.adsense.setting.extended=Extended settings
-
-.setting.adsense.setting.standard=Standard settings
-
+.setting.adsense.altcolor|staleness=1
 .setting.adsense.altcolor=Alternative
 
-.setting.adsense.txt=text
+.setting.adsense.appearance.text|staleness=1
+.setting.adsense.appearance.text=Please choose ad formats and ad types for Google AdSense ads which will be visible in your journal. 
 
-.setting.adsense.graph=graphic
-
-.setting.adsense.txtgraph=text and graphic
-
-.setting.adsense.settype=Type of banner set:
-
+.setting.adsense.autoset|staleness=1
 .setting.adsense.autoset=Automatic
 
-.setting.adsense.handset=Code for custom style
+.setting.adsense.bgcolor|staleness=1
+.setting.adsense.bgcolor=Background
 
+.setting.adsense.brdcolor|staleness=1
+.setting.adsense.brdcolor=Border
+
+.setting.adsense.change|staleness=1
+.setting.adsense.change=Change
+
+.setting.adsense.choose|staleness=1
+.setting.adsense.choose=Please check the box that applies:
+
+.setting.adsense.codeset|staleness=1
 .setting.adsense.codeset=Copy the code below:
 
-.setting.adsense.refresh=Refresh
+.setting.adsense.colors|staleness=1
+.setting.adsense.colors=Colors
 
-.setting.adsense.showother=I want to see AdSense over LJCOM
+.setting.adsense.colors.hint|staleness=1
+.setting.adsense.colors.hint=You can choose color by entering HEX-value or via palette, that will open by click on color box
 
-.setting.adsense.schemes.about=Only two banners will be available for you if you have Minimalism as a journal style. You can change <a href="[[uri]]">style of your journal</a>.
-
-.setting.adsense.schemes.about.min=Only two banners will be available for you if you have Minimalism as a journal style. You can change <a href="[[uri]]">style of your journal</a>.
-
-.setting.adsense.status.current=Current status
-
-.setting.adsense.status.update=Update status
-
-.setting.adsense.submit=Submit
-
+.setting.adsense.customize.style|staleness=1
 .setting.adsense.customize.style=Text about  styles customization.
 
+.setting.adsense.email|staleness=1
+.setting.adsense.email=E-mail
+
+.setting.adsense.graph|staleness=1
+.setting.adsense.graph=graphic
+
+.setting.adsense.handset|staleness=1
+.setting.adsense.handset=Code for custom style
+
+.setting.adsense.horiz_bottom|staleness=1
+.setting.adsense.horiz_bottom=728x90 Bottom
+
+.setting.adsense.horiz_top|staleness=1
+.setting.adsense.horiz_top=728x90 Top
+
+.setting.adsense.interactive.scheme|staleness=1
+.setting.adsense.interactive.scheme=Ads interactive scheme
+
+.setting.adsense.invitation|staleness=1
+.setting.adsense.invitation=I'd like to participate in revenue sharing program.
+
+.setting.adsense.locate|staleness=1
+.setting.adsense.locate=Language
+
+.setting.adsense.locate.ads|staleness=1
+.setting.adsense.locate.ads=Language of ads
+
+.setting.adsense.newaccount|staleness=1
+.setting.adsense.newaccount=Create a new Google AdSense account
+
+.setting.adsense.otherjournal|staleness=1
+.setting.adsense.otherjournal=I'd like to see context advertisment in other journals
+
+.setting.adsense.phone|staleness=1
+.setting.adsense.phone=Phone Number
+
+.setting.adsense.phone.hint|staleness=1
+.setting.adsense.phone.hint=(last 5 numbers)
+
+.setting.adsense.postcode|staleness=1
+.setting.adsense.postcode=Postal Code (ZIP code)
+
+.setting.adsense.refresh|staleness=1
+.setting.adsense.refresh=Refresh
+
+.setting.adsense.schemes.about|staleness=1
+.setting.adsense.schemes.about=Only two banners will be available for you if you have Minimalism as a journal style. You can change <a href="[[uri]]">style of your journal</a>.
+
+.setting.adsense.schemes.about.min|staleness=1
+.setting.adsense.schemes.about.min=Only two banners will be available for you if you have Minimalism as a journal style. You can change <a href="[[uri]]">style of your journal</a>.
+
+.setting.adsense.setting.extended|staleness=1
+.setting.adsense.setting.extended=Extended settings
+
+.setting.adsense.setting.standard|staleness=1
+.setting.adsense.setting.standard=Standard settings
+
+.setting.adsense.settype|staleness=1
+.setting.adsense.settype=Type of banner set:
+
+.setting.adsense.showother|staleness=1
+.setting.adsense.showother=I want to see AdSense over LJCOM
+
+.setting.adsense.signin|staleness=1
+.setting.adsense.signin=I have AdSense account
+
+.setting.adsense.stats|staleness=1
+.setting.adsense.stats=Statistic
+
+.setting.adsense.status|staleness=1
+.setting.adsense.status=To see the Google Advertize, look the Terms of Service
+
+.setting.adsense.status.current|staleness=1
+.setting.adsense.status.current=Current status
+
+.setting.adsense.status.update|staleness=1
+.setting.adsense.status.update=Update status
+
+.setting.adsense.submit|staleness=1
+.setting.adsense.submit=Submit
+
+.setting.adsense.title|staleness=1
+.setting.adsense.title=Google AdSense settings
+
+.setting.adsense.ttlcolor|staleness=1
+.setting.adsense.ttlcolor=Title
+
+.setting.adsense.txt|staleness=1
+.setting.adsense.txt=text
+
+.setting.adsense.txtcolor|staleness=1
+.setting.adsense.txtcolor=Text
+
+.setting.adsense.txtgraph|staleness=1
+.setting.adsense.txtgraph=text and graphic
+
+.setting.adsense.types.title|staleness=1
+.setting.adsense.types.title=Advertising Type:
+
+.setting.adsense.urlcolor|staleness=1
+.setting.adsense.urlcolor=Url
+
+.setting.adsense.user|staleness=1
 .setting.adsense.user=User's Google AdSense account
 
+.setting.adsense.verification|staleness=1
+.setting.adsense.verification=Text about verification
+
+.setting.adsensepromo.text1|staleness=1
 .setting.adsensepromo.text1=<p><a [[aopts]]>First promo text</a></p>
 
+.setting.adsensepromo.text2|staleness=1
 .setting.adsensepromo.text2=<p><a [[aopts]]>Second promo text</a></p>
 
+.setting.integration.msn.activate|staleness=1
 .setting.integration.msn.activate=Account registration
 
-.setting.integration.msn.gadget.add=Add friends to my contact list automatically
-
-.setting.integration.msn.signout=Sign out Livejournal Messenger
-
-.setting.integration.msn.authorizationlabel=Livejournal Messenger
-
-.setting.integration.msn.signintext=For turning messenger on sign up or sign into your Live ID:
-
-.setting.integration.msn.signin=Sign up
-
-.setting.integration.msn.newlid=Sign into your Live ID account
-
-.setting.integration.msn.useid=<a [[aopts]]>Sign into your Live ID account</a>
-
-.setting.integraton.msn.yourid=You Live ID
-
-.setting.integration.msn.passw=Password
-
-.setting.integration.msn.c-passw=Confirm password
-
-.setting.integration.msn.passw_err=Wrong <br />password
-
-.setting.integration.msn.loadmsn=Turn messenger on
-
-.setting.integration.msn.events=Alert me about LJ-events
-
+.setting.integration.msn.addfriends|staleness=1
 .setting.integration.msn.addfriends=Add my friends into the contact list automatically
 
+.setting.integration.msn.alert|staleness=1
 .setting.integration.msn.alert=Post the entry about my Messenger into my journal automatically
 
+.setting.integration.msn.alert.comment|staleness=1
 .setting.integration.msn.alert.comment=<b>Entry's text:</b> "Turn <a [[aopts1]]>LiveJournal Messenger</a> on. My Live ID - [[aopts2]]. Let's talk!"
 
+.setting.integration.msn.authorizationlabel|staleness=1
+.setting.integration.msn.authorizationlabel=Livejournal Messenger
+
+.setting.integration.msn.c-passw|staleness=1
+.setting.integration.msn.c-passw=Confirm password
+
+.setting.integration.msn.comment|staleness=1
 .setting.integration.msn.comment=You can set up LJ-events notifications in the <a [[aopts]]>Notifications</a> tab
 
+.setting.integration.msn.creating|staleness=1
 .setting.integration.msn.creating=Your Live ID is creating at the moment. Please wait.
 
+.setting.integration.msn.error|staleness=1
 .setting.integration.msn.error=Error creating Live ID account
 
+.setting.integration.msn.error_txt|staleness=1
 .setting.integration.msn.error_txt<<
 The e-mail address is already in use. To continue, do one of the following:
 <ul><li>You may have already signed up with this e-mail address. If you have a hotmail.com or msn.com address, you're already signed up. <a [[aopts1]]>Sign in now</a>.</li>
@@ -376,48 +479,103 @@ The e-mail address is already in use. To continue, do one of the following:
 <li>Someone else may have signed up with your e-mail address. To find out, <a [[aopts2]]>go here</a>
 .
 
+.setting.integration.msn.events|staleness=1
+.setting.integration.msn.events=Alert me about LJ-events
+
+.setting.integration.msn.gadget.add|staleness=1
+.setting.integration.msn.gadget.add=Add friends to my contact list automatically
+
+.setting.integration.msn.loadmsn|staleness=1
+.setting.integration.msn.loadmsn=Turn messenger on
+
+.setting.integration.msn.newlid|staleness=1
+.setting.integration.msn.newlid=Sign into your Live ID account
+
+.setting.integration.msn.passw|staleness=1
+.setting.integration.msn.passw=Password
+
+.setting.integration.msn.passw_err|staleness=1
+.setting.integration.msn.passw_err=Wrong <br />password
+
+.setting.integration.msn.signin|staleness=1
+.setting.integration.msn.signin=Sign up
+
+.setting.integration.msn.signintext|staleness=1
+.setting.integration.msn.signintext=For turning messenger on sign up or sign into your Live ID:
+
+.setting.integration.msn.signout|staleness=1
+.setting.integration.msn.signout=Sign out Livejournal Messenger
+
+.setting.integration.msn.useid|staleness=1
+.setting.integration.msn.useid=<a [[aopts]]>Sign into your Live ID account</a>
+
+.setting.integraton.msn.yourid|staleness=1
+.setting.integraton.msn.yourid=You Live ID
+
+.settings.adsense.google.examples|staleness=1
+.settings.adsense.google.examples=Here is some text about the examples of <a href="[[uri]]">adsense banners</a>.
+
+.stylealwaysmine|staleness=1
 .stylealwaysmine=View all journals and communities in your own style
 
+.stylealwaysmine.text|staleness=1
 .stylealwaysmine.text=When you visit any journal or community, it will be displayed in your own journal style.
 
+.success|staleness=1
 .success=You have successfully saved your account settings.
 
 .success.header=Success!
 
-.success.text=Your viewing options have been updated.
-
+.success.next|staleness=1
 .success.next=What would you like to do next?
 
+.success.next.customize|staleness=1
 .success.next.customize=Customize your journal
 
+.success.next.friends|staleness=1
 .success.next.friends=Read your Friends page
 
+.success.next.home|staleness=1
 .success.next.home=Return to the home page
 
+.success.next.viewing|staleness=1
 .success.next.viewing=Change your viewing options
+
+.success.text=Your viewing options have been updated.
 
 .title=Viewing Options
 
+.title.comm|staleness=1
 .title.comm=[[user]]'s Account Settings
 
+.title.self|staleness=1
 .title.self=My Account Settings
 
+.verticalincl|staleness=1
 .verticalincl=Exclude your entries from site explore areas
 
+.verticalincl.text|staleness=1
 .verticalincl.text=Journal entries posted private or Friends-only are automatically excluded.
 
+.viewingadult|staleness=1
 .viewingadult=Collapse adult-oriented material written by other users:
 
+.viewingadult.select.concepts|staleness=1
 .viewingadult.select.concepts=Collapse adult concepts and explicit adult content
 
+.viewingadult.select.explicit|staleness=1
 .viewingadult.select.explicit=Collapse explicit adult content only
 
+.viewingadult.select.none|staleness=1
 .viewingadult.select.none=Do not collapse
 
 .weblogscom=Notify Weblogs.com when I post new public entries
 
 .weblogscom.text=Weblogs.com, a VeriSign service, is a ping server that automatically notifies subscribers when new content is posted to a website or a blog, allowing many more people to be aware of updates to your journal.
 
+.you.can.change|staleness=1
+.you.can.change=You can change other viewing options by <a [[login]]>logging in</a>. If you don't have an account, you can <a [[create.bml]]>create one now</a>.
+
+.you.could.not.auth|staleness=1
 .you.could.not.auth=You could not be authenticated as the specified user.
 
-.you.can.change=You can change other viewing options by <a [[login]]>logging in</a>. If you don't have an account, you can <a [[create.bml]]>create one now</a>.

@@ -46,16 +46,26 @@ sub jobs_of_unique_matching_subs {
         warn "jobs of unique subs (@subs) matching event (@$params)\n";
     }
 
-    foreach my $s (grep { $evt->matches_filter($_) } @subs) {
+    my @subs_filtered;
+    
+    foreach my $sub (@subs) {
+        next unless defined $sub;
+        next unless $evt->available_for_user($sub->owner);
+        next unless $evt->matches_filter($sub);
+
+        push @subs_filtered, $sub;
+    }
+    
+    foreach my $s (@subs_filtered) {
         next if $has_done{$s->unique}++;
         push @subjobs, TheSchwartz::Job->new(
-                                             funcname => 'LJ::Worker::ProcessSub',
-                                             arg      => [
-                                                          $s->userid + 0,
-                                                          $s->id     + 0,
-                                                          $params           # arrayref of event params
-                                                          ],
-                                             );
+            funcname => 'LJ::Worker::ProcessSub',
+            arg      => [
+                $s->userid + 0,
+                $s->dump,
+                $params,
+            ],
+        );
     }
     return @subjobs;
 }
@@ -209,12 +219,12 @@ sub work {
             last BUILD_SET if $finish_set;
         }
 
-        # $sublist is [ [userid, subid]+ ]. also, pass clusterid through
+        # $sublist is [ [userid, subdump]+ ]. also, pass clusterid through
         # to filtersubs so we can check that we got a subscription for that
         # user from the right cluster. (to avoid user moves with old data
         # on old clusters from causing duplicates). easier to do it there
         # than here, to avoid a load_userids call.
-        my $sublist = [ map { [ $_->userid + 0, $_->id + 0 ] } @set ];
+        my $sublist = [ map { [ $_->userid + 0, $_->dump ] } @set ];
         push @subjobs, TheSchwartz::Job->new(
                                              funcname => 'LJ::Worker::FilterSubs',
                                              arg      => [ $e_params, $sublist, $cid ],
@@ -238,7 +248,7 @@ sub work {
 
     my @subs;
     foreach my $sp (@$sublist) {
-        my ($userid, $subid) = @$sp;
+        my ($userid, $subdump) = @$sp;
         my $u = LJ::load_userid($userid)
             or die "Failed to load userid: $userid\n";
 
@@ -248,7 +258,7 @@ sub work {
 
         # TODO: discern difference between cluster not up and subscription
         #       having been deleted
-        my $subsc = LJ::Subscription->new_by_id($u, $subid)
+        my $subsc = LJ::Subscription->new_from_dump($u, $subdump)
             or next;
 
         push @subs, $subsc;
@@ -266,10 +276,10 @@ use base 'TheSchwartz::Worker';
 sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
-    my ($userid, $subid, $eparams) = @$a;
+    my ($userid, $subdump, $eparams) = @$a;
     my $u     = LJ::load_userid($userid);
     my $evt   = LJ::Event->new_from_raw_params(@$eparams);
-    my $subsc = $evt->get_subscriptions($u, $subid);
+    my $subsc = LJ::Subscription->new_from_dump($u, $subdump);
 
     # if the subscription doesn't exist anymore, we're done here
     # (race: if they delete the subscription between when we start processing
@@ -286,7 +296,7 @@ sub work {
         # in the subscription object so the email notifier can access them
         my $debug_headers = {
             'X-ESN_Debug-sch_jobid' => $job->jobid,
-            'X-ESN_Debug-subid'     => $subid,
+            'X-ESN_Debug-subid'     => $subdump,
             'X-ESN_Debug-eparams'   => join(', ', @$eparams),
         };
 
@@ -297,7 +307,7 @@ sub work {
 
     # NEXT: do sub's ntypeid, unless it's inbox, then we're done.
     $subsc->process($evt)
-        or die "Failed to process notification method for userid=$userid/subid=$subid, evt=[@$eparams]\n";
+        or die "Failed to process notification method for userid=$userid/subid=$subdump, evt=[@$eparams]\n";
     $job->completed;
 }
 

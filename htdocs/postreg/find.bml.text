@@ -1,5 +1,4 @@
 ;; -*- coding: utf-8 -*-
-
 .browse=Browse [[sitename]]
 
 .browse.feeds=Feeds
@@ -23,3 +22,4 @@
 .nav.findfriends=Find Friends and Communities
 
 .title=Getting Started
+

@@ -53,6 +53,9 @@ If you do this, all your old entries which are accessible to the old group will
 then be accessible to the new group.
 .
 
+.title=Edit Custom Friends Groups
+
+.title2|staleness=1
 .title2=Manage Custom Friends Groups
 
 .yourgroups=Your custom friends groups:

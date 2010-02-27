@@ -2,6 +2,7 @@ package LJ::Session;
 use strict;
 use Carp qw(croak);
 use Digest::HMAC_SHA1 qw(hmac_sha1 hmac_sha1_hex);
+use LJ::Request;
 use Class::Autouse qw(
                       LJ::EventLogRecord::SessionExpired
                       );
@@ -498,7 +499,7 @@ sub session_from_cookies {
     my %getopts = @_;
 
     # must be in web context
-    return undef unless eval { Apache->request; };
+    return undef unless LJ::Request->is_inited;
 
     my $sessobj;
 
@@ -750,8 +751,8 @@ sub session_length {
 
 # given an Apache $r object, returns the URL to go to after setting the domain cookie
 sub setdomsess_handler {
-    my ($class, $r) = @_;
-    my %get = $r->args;
+    my $class = shift;
+    my %get = LJ::Request->args;
 
     my $dest    = $get{'dest'};
     my $domcook = $get{'k'};
@@ -799,11 +800,10 @@ sub setdomsess_handler {
 ############################################################################
 
 sub _current_url {
-    my $r = Apache->request;
-    my $args = $r->args;
+    my $args = LJ::Request->args;
     my $args_wq = $args ? "?$args" : "";
-    my $host = $r->header_in("Host");
-    my $uri = $r->uri;
+    my $host = LJ::Request->header_in("Host");
+    my $uri = LJ::Request->uri;
     return "http://$host$uri$args_wq";
 }
 
@@ -842,8 +842,7 @@ sub _memkey {
 sub set_cookie {
     my ($key, $value, %opts) = @_;
 
-    my $r = eval { Apache->request };
-    return unless $r;
+    return unless LJ::Request->is_inited;
 
     my $http_only = delete $opts{http_only};
     my $domain = delete $opts{domain};
@@ -854,7 +853,7 @@ sub set_cookie {
 
     # Mac IE 5 can't handle HttpOnly, so filter it out
     if ($http_only && ! $LJ::DEBUG{'no_mac_ie_httponly'}) {
-        my $ua = $r->header_in("User-Agent");
+        my $ua = LJ::Request->header_in("User-Agent");
         $http_only = 0 if $ua =~ /MSIE.+Mac_/;
     }
 
@@ -873,7 +872,7 @@ sub set_cookie {
     $cookiestr .= '; path=' . $path if $path;
     $cookiestr .= '; HttpOnly' if $http_only;
 
-    $r->err_headers_out->add('Set-Cookie' => $cookiestr);
+    LJ::Request->err_headers_out->add('Set-Cookie' => $cookiestr);
 
     # Backwards compatability for older browsers
     my @labels = split(/\./, $domain);
@@ -884,7 +883,7 @@ sub set_cookie {
         $cookiestr .= '; path=' . $path if $path;
         $cookiestr .= '; HttpOnly' if $http_only;
 
-        $r->err_headers_out->add('Set-Cookie' => $cookiestr);
+        LJ::Request->err_headers_out->add('Set-Cookie' => $cookiestr);
     }
 }
 

@@ -35,8 +35,8 @@ body<=
     }
     
     # make title and body references to BML scratch area
-    my $title = \$_[1]->{'title'};
-    my $body = \$_[1]->{'body'};
+    my $title = \$_[0]->{'title'};
+    my $body = \$_[0]->{'body'};
     $$body = '';
     $$title = '';
 
@@ -237,13 +237,13 @@ body<=
      $$body .= BML::ml('.backsupport2', { 'aopts' => 'href="/support/"' });
 
      # we're dynamic, set title as crumb title
-     LJ::set_dynamic_crumb($_[1]->{'title'}, 'faq');
+     LJ::set_dynamic_crumb($_[0]->{'title'}, 'faq');
 
-     return $_[1]->{'body'};
+     return $_[0]->{'body'};
 }
 _code?>
 <=body
-title=><?_code return $_[1]->{'title'}; _code?>
+title=><?_code return $_[0]->{'title'}; _code?>
 page?><?_c <LJDEP>
 link: htdocs/support/index.bml, htdocs/support/faq.bml
 </LJDEP> _c?>

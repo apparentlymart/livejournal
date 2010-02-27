@@ -93,7 +93,9 @@ sub render {
 
     return "" unless $class->should_render;
 
-    my $ret = "<div class='appwidget appwidget-$css_subclass' id='$widget_ele_id'>\n";
+    my $ret = '';
+    $ret .= "<div class='appwidget appwidget-$css_subclass' id='$widget_ele_id'>\n"
+        unless ref $class && $class->{'no_container_div'};
 
     my $rv = eval {
         my $widget = ref $class ? $class : "LJ::Widget::$subclass";
@@ -127,7 +129,8 @@ sub render {
     } or $class->handle_error($@);
 
     $ret .= $rv;
-    $ret .= "</div><!-- end .appwidget-$css_subclass -->\n";
+    $ret .= "</div><!-- end .appwidget-$css_subclass -->\n"
+        unless ref $class && $class->{'no_container_div'};
 
     return $ret;
 }

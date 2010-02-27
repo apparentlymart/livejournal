@@ -4,7 +4,6 @@
 package Apache::DebateSuicide;
 
 use strict;
-use Apache::Constants qw(:common);
 use Class::Autouse qw(
                       LJ::ModuleCheck
                       );
@@ -17,11 +16,13 @@ our $ppid;
 sub handler
 {
     my $r = shift;
-    return OK if $r->main;
-    return OK unless $LJ::SUICIDE && LJ::ModuleCheck->have("GTop");
+    LJ::Request->init($r) unless LJ::Request->is_inited;
+    
+    return LJ::Request::OK if LJ::Request->main;
+    return LJ::Request::OK unless $LJ::SUICIDE && LJ::ModuleCheck->have("GTop");
 
     my $meminfo;
-    return OK unless open (MI, "/proc/meminfo");
+    return LJ::Request::OK unless open (MI, "/proc/meminfo");
     $meminfo = join('', <MI>);
     close MI;
 
@@ -31,7 +32,7 @@ sub handler
     }
 
     my $memfree = $meminfo{'MemFree'} + $meminfo{'Cached'};
-    return OK unless $memfree;
+    return LJ::Request::OK unless $memfree;
 
     my $goodfree = $LJ::SUICIDE_UNDER{$LJ::SERVER_NAME} || $LJ::SUICIDE_UNDER ||   150_000;
     my $is_under = $memfree < $goodfree;
@@ -51,7 +52,7 @@ sub handler
 
         $is_over = $proc_size_k > $maxproc;
     }
-    return OK unless $is_over || $is_under;
+    return LJ::Request::OK unless $is_over || $is_under;
 
     # we'll proceed to die if we're one of the largest processes
     # on this machine
@@ -77,17 +78,17 @@ sub handler
     if (grep { $$ == $_ } @pids[0,1]) {
         my $my_use_k = $stats{$$}[0] >> 10;
         if ($LJ::DEBUG{'suicide'}) {
-            $r->log_error("Suicide [$$]: system memory free = ${memfree}k; " .
+            LJ::Request->log_error("Suicide [$$]: system memory free = ${memfree}k; " .
                           "i'm big, using ${my_use_k}k");
         }
 
         # we should have logged by here, but be paranoid in any case
-        Apache::LiveJournal::db_logger($r) unless $r->pnotes('did_lj_logging');
+        Apache::LiveJournal::db_logger() unless LJ::Request->pnotes('did_lj_logging');
 
         # This is supposed to set MaxChildRequests to 1, then clear the
         # KeepAlive flag so that Apache will terminate after this request,
         # but it doesn't work.  We'll call it here just in case.
-        $r->child_terminate;
+        LJ::Request->child_terminate;
 
         # We should call Apache::exit(Apache::Constants::DONE) here because
         # it makes sure that the child shuts down cleanly after fulfilling
@@ -101,7 +102,7 @@ sub handler
         CORE::exit(0);
     }
 
-    return OK;
+    return LJ::Request::OK;
 }
 
 sub pid_info {

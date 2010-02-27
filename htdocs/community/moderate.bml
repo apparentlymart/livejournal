@@ -271,12 +271,8 @@ body<=
         $ret .= "<?h1 $ML{'.browse.header'} h1?><?p " .
             BML::ml('.browse.text', {'link'=>"<?ljcomm $comm ljcomm?>"}) . " p?>";
         $ret .= "<div style='margin: 10px 0 10px 40px'>";
-        my @entries;
-        my $sth = $dbcr->prepare("SELECT * FROM modlog WHERE journalid=$c->{'userid'}");
-        $sth->execute;
-        while ($_ = $sth->fetchrow_hashref) {
-            push @entries, $_;
-        }
+        my @entries = LJ::get_community_moderation_queue($c);
+
         unless (@entries) {
             $ret .= "<i>$ML{'.browse.empty'}</i>";
         } else {

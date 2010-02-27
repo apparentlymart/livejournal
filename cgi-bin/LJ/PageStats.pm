@@ -1,5 +1,6 @@
 package LJ::PageStats;
 use strict;
+use LJ::Request;
 
 # loads a page stat tracker
 sub new {
@@ -58,11 +59,11 @@ sub should_render {
     my $ctx = $self->get_context;
     return 0 unless ($ctx && $ctx =~ /^(app|journal)$/);
 
-    my $r = $self->get_request or return 0;
+    LJ::Request->is_inited or return 0;
 
     # Make sure we don't exclude tracking from this page or path
-    return 0 if grep { $r->uri =~ /$_/ } @{ $LJ::PAGESTATS_EXCLUDE{'uripath'} };
-    return 0 if grep { $r->notes('codepath') eq $_ } @{ $LJ::PAGESTATS_EXCLUDE{'codepath'} };
+    return 0 if grep { LJ::Request->uri =~ /$_/ } @{ $LJ::PAGESTATS_EXCLUDE{'uripath'} };
+    return 0 if grep { LJ::Request->notes('codepath') eq $_ } @{ $LJ::PAGESTATS_EXCLUDE{'codepath'} };
 
     # See if their ljuniq cookie has the PageStats flag
     if ($BML::COOKIE{'ljuniq'} =~ /[a-zA-Z0-9]{15}:\d+:pgstats([01])/) {
@@ -90,7 +91,7 @@ sub get_user {
 sub get_request {
     my ($self) = @_;
 
-    return Apache->request;
+    return LJ::Request->r;
 }
 
 sub get_root {
@@ -117,9 +118,8 @@ sub get_conf {
 
 sub filename {
     my ($self) = @_;
-    my $r = $self->get_request;
 
-    my $filename = $r->filename;
+    my $filename = LJ::Request->filename;
     $filename =~ s!$LJ::HOME/(?:ssldocs|htdocs)!!;
 
     return $filename;
@@ -127,9 +127,8 @@ sub filename {
 
 sub codepath {
     my ($self) = @_;
-    my $r = $self->get_request;
 
-    my $codepath = $r->notes('codepath');
+    my $codepath = LJ::Request->notes('codepath');
     # remove 's2.' or 's1.' prefix from codepath
     $codepath =~ s/^[Ss]\d{1}\.(.*)$/$1/;
 

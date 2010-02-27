@@ -5,7 +5,8 @@
     use LJ::Auth;
     use JSON;
 
-    BML::set_language_scope('/tools/endpoints/ctxpopup.bml');
+    my $language_scope = '/tools/endpoints/ctxpopup.bml';
+    BML::set_language_scope($language_scope);
     
     my $err = sub {
         my $msg = shift;
@@ -109,7 +110,20 @@
         $ret{alias_enable} = $remote->get_cap('aliases') ? 1 : 0;
         $ret{alias_title} = $ret{alias} ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
     }
-
+    
+    my @ml_keys = qw/ 
+        add_friend ban community feed join_community journal leave 
+        lists_as_friend loading mutual_friend profile remove_friend
+        report send_gift send_message stop_community subscribe_feed
+        this_is_you unban unsubscribe_feed updating view watch_community
+        your_friend you_member you_subscribed you_watching
+    /;
+    ## optimization: load all ML strings into local cache at once
+    LJ::Lang::get_text_multi(BML::get_language(), undef, [map { "$language_scope.$_" } @ml_keys]);
+    foreach my $key (@ml_keys) {
+        $ret{"ml_$key"} = $ML{".$key"};
+    }
+    
     my $cids = [];
     if ($remote) {
         $cids = LJ::load_rel_target($remote, 'A'); # admined communities

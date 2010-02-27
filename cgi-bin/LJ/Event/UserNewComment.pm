@@ -26,4 +26,8 @@ sub comment {
     return LJ::Comment->new($self->journal, jtalkid => $self->arg1);
 }
 
+sub available_for_user { 0 }
+sub is_tracking { 1 }
+sub is_subscription_visible_to { 1 }
+
 1;

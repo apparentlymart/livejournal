@@ -1,5 +1,5 @@
 ;; -*- coding: utf-8 -*-
-
+.awesomely|staleness=1
 .awesomely<<
 Awesomely Yours,
 The [[sitenameshort]] Team
@@ -7,12 +7,15 @@ The [[sitenameshort]] Team
 
 .btn.invite=Invite 'em!
 
+.btn.invite2|staleness=1
 .btn.invite2=Send Invite
 
+.custom.message.from|staleness=1
 .custom.message.from=Custom message from
 
 .error.bademail=Bogus looking email: [[errormsg]]
 
+.error.bademail2|staleness=1
 .error.bademail2=The email address you entered is invalid: [[errormsg]]
 
 .error.needcreatelink=You must include the link for your friend to create a journal: [[link]]
@@ -39,8 +42,14 @@ The [[sitenameshort]] Team
 
 .form.note=If you want to invite your friend to a specific community, you can mention the community name and URL here.
 
+.intro|staleness=1
 .intro=Use this form as often as you like, or just cut and paste this link and send from your own email account: <strong><a [[aopts]]>[[createlink]]</a></strong>
 
+.intro.link=Link: <a [[aopts]]>[[createlink]]</a>
+
+.intro.useform=You can use this form as often as you'd like, or just cut and paste the link and send it from your own email account. [[sitename]] doesn't store any of this after the invitation is sent.
+
+.msg|staleness=1
 .msg<<
 [[display_username]] has invited you to join [[sitenameshort]].
 
@@ -53,10 +62,10 @@ Create an account (yes, it's free):
 [[display_username]] will be automatically added to your Friends List, and we'll let them know when you create your account so they can add you as well.
 .
 
+.msg.header|staleness=1
 .msg.header=Message:
 
-.msg_body_top=Hi! [[displayname]] ([[username]]) has invited you to come check out [[sitename]].
-
+.msg_body_bottom|staleness=1
 .msg_body_bottom<<
 Creating an account is free, and you can get started here:
 
@@ -65,8 +74,13 @@ Creating an account is free, and you can get started here:
 [[username]] will automatically be added to your Friends list, and we'll let them know when you create your account so that they can add you as well.
 .
 
+.msg_body_top|staleness=1
+.msg_body_top=Hi! [[displayname]] ([[username]]) has invited you to come check out [[sitename]].
+
+.msg_custom|staleness=1
 .msg_custom=It's a place where people post and share thoughts on personal journals and communities. You can start your own journal or just kick back and enjoy the atmosphere.
 
+.msg_footer|staleness=1
 .msg_footer<<
 This message was sent via the friend 
 invite system on [[sitenameshort]] ([[siteroot]]) by 
@@ -74,16 +88,20 @@ the user [[username]] - [[name]].  If you believe this
 message to be spam, you may contact [[adminemail].
 .
 
+.msg_footer2|staleness=1
 .msg_footer2=This message was sent via the friend invite system on [[sitenameshort]] ([[siteroot]]) by the user [[username]] - [[name]].  If you believe this message to be spam, you may contact [[adminemail]].
 
+.msg_sig|staleness=1
 .msg_sig<<
 Awesomely Yours,
 The [[sitename]] Team
 [[siteroot]]
 .
 
+.msg_subject|staleness=1
 .msg_subject=[[username]] has invited you to join [[sitenameshort]]!
 
+.msg_subject.header|staleness=1
 .msg_subject.header=Subject:
 
 .success=Message sent to [[email]]! Want to invite somebody else?

@@ -8,14 +8,13 @@
  $body = "";
 
 my $uri = BML::get_uri();
-my $r = Apache->request;
 if ($uri =~ m!/(\d\d\d\d)/(\d\d)/?$!) {
-    $FORM{'user'} = $r->notes('_journal');
+    $FORM{'user'} = LJ::Request->notes('_journal');
     $FORM{'type'} = "month";
     $FORM{'y'} =  $1;
     $FORM{'m'} = $2 + 0;
 }
-$r->notes("codepath" => "bml.view.index");
+LJ::Request->notes("codepath" => "bml.view.index");
 
  my $view = $FORM{'type'};
  my $user = $FORM{'user'};

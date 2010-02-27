@@ -397,6 +397,65 @@ sub get_community_row {
 }
 
 # <LJFUNC>
+# name: LJ::get_community_moderation_queue
+# des: Gets a list of hashrefs for posts that people have requested to be posted to a community
+#      but have not yet actually been approved or rejected.
+# args: comm
+# des-comm: a userid or u object of the community to get pending members of
+# returns: an array of requests as it is in modlog db table
+# </LJFUNC>
+sub get_community_moderation_queue {
+    my $comm = shift;
+    my $c = LJ::want_user($comm);
+
+    my $dbcr = LJ::get_cluster_reader($c);
+    my @e;              # fetched entries
+    my @entries;        # entries to show
+    my @entries2del;    # entries to delete
+    my $sth = $dbcr->prepare("SELECT * FROM modlog WHERE journalid=$c->{'userid'}");
+    $sth->execute;
+    while ($_ = $sth->fetchrow_hashref) {
+            push @e, $_;
+    }
+
+    my %users;
+    my $suspend_time = $LJ::SUSPENDED_REQUESTS_TIMEOUT || 60; # days.
+    if (@e) {
+        LJ::load_userids_multiple([ map { $_->{'posterid'}, \$users{$_->{'posterid'}} } @e ]);
+        foreach my $e (@e) {
+            next unless keys %$e;
+            my $e_poster = $users{$e->{'posterid'}};
+            if (LJ::isu($e_poster)) {
+                if ($e_poster->is_suspended()) {
+                    if (time - $e_poster->statusvisdate_unix() > $suspend_time * 24 * 3600) {
+                        push @entries2del, $e;
+                    }
+                } else {
+                    push @entries, $e;
+                }
+            } else {
+                push @entries2del, $e;
+            }
+        }
+    }
+
+    if (@entries2del) {
+        # Users has been suspended more then 60 days ago.
+        # Delete entries of this user(s) from modlog and modblob.
+        my $count = scalar @entries2del;
+        my $max_count = $count > 50 ? 50 : $count;
+        while($count) {
+            my $lst = join(',', map {$_->{modid}} splice(@entries2del, 0, $max_count));
+            $c->do("DELETE FROM modlog WHERE modid in ($lst)");
+            $c->do("DELETE FROM modblob WHERE modid in ($lst)");
+            $count -= $max_count;
+        }
+    }
+
+    return @entries;
+}
+
+# <LJFUNC>
 # name: LJ::get_pending_members
 # des: Gets a list of userids for people that have requested to be added to a community
 #      but have not yet actually been approved or rejected.
@@ -410,15 +469,43 @@ sub get_pending_members {
     
     # database request
     my $dbr = LJ::get_db_reader();
-    my $args = $dbr->selectcol_arrayref('SELECT arg1 FROM authactions WHERE userid = ? ' .
-                                        "AND action = 'comm_join_request' AND used = 'N'",
-                                        undef, $cu->{userid}) || [];
 
+    my $sth = $dbr->prepare('SELECT aaid, arg1 FROM authactions' .
+                                ' WHERE userid = ' . $cu->{userid} .
+                                " AND action = 'comm_join_request' AND used = 'N'");
     # parse out the args
     my @list;
-    foreach (@$args) {
-        push @list, $1+0 if $_ =~ /^targetid=(\d+)$/;
+    my @delete;
+    $sth->execute;
+    my $suspend_time = $LJ::SUSPENDED_REQUESTS_TIMEOUT || 60; # days.
+    while (my $row = $sth->fetchrow_hashref) {
+        if ($row->{arg1} =~ /^targetid=(\d+)$/) {
+            my ($uid, $u) = ($1, LJ::want_user($1));
+            if (LJ::isu($u)) {
+                if ($u->is_suspended()) {
+                    if (time - $u->statusvisdate_unix() > $suspend_time * 24 * 3600) {
+                        push @delete, $row->{aaid};
+                    }
+                } else {
+                    push @list, $uid;
+                }
+            } else {
+                push @delete, $row->{aaid};
+            }
+        }
     }
+
+    if (@delete) {
+        my $count = scalar @delete;
+        my $max_count = $count > 50 ? 50 : $count;
+        while($count) {
+            my $lst = join(',', splice(@delete, 0, $max_count));
+            my $dbh = LJ::get_db_writer();
+            $dbh->do("DELETE FROM authactions WHERE aaid in ($lst)");
+            $count -= $max_count;
+        }
+    }
+
     return \@list;
 }
 

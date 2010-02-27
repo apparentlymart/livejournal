@@ -46,6 +46,7 @@ LJ::register_hook("add_extra_entryform_fields", sub {
     my $tabindex = $args->{tabindex};
     my $opts     = $args->{opts};
 
+    return if $LJ::DISABLED{'pingback'};
     return if $opts->{remote} and
               not LJ::PingBack->has_user_pingback($opts->{remote});
     
@@ -103,7 +104,6 @@ LJ::register_hook("postpost", sub {
     #
     LJ::PingBack->notify(
         uri  => $entry->url,
-        text => $args->{event},
         mode => $prop_pingback,
     );
     
@@ -133,7 +133,6 @@ LJ::register_hook("editpost", sub {
     #
     LJ::PingBack->notify(
         uri  => $entry->url,
-        text => $entry->event_raw,
         mode => $entry->prop('pingback'),
     );
 
@@ -146,16 +145,15 @@ LJ::register_hook("after_journal_content_created", sub {
     my $html_ref = shift;
 
     my $entry = $opts->{ljentry};
-    my $r     = $opts->{r};
 
-    return unless $r;
+    return unless LJ::Request->is_inited;
     return unless $entry;
-    return unless $r->notes("view") eq 'entry';
+    return unless LJ::Request->notes("view") eq 'entry';
     return unless LJ::PingBack->has_user_pingback($entry->journal);
 
 
     if (LJ::PingBack->should_entry_recieve_pingback($entry)){
-        $r->header_out('X-Pingback', $LJ::PINGBACK->{uri});
+        LJ::Request->set_header_out('X-Pingback', $LJ::PINGBACK->{uri});
     }
     
     

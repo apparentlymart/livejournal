@@ -4,14 +4,14 @@
     use vars qw(%GET %POST %ML);
     BML::decl_params(_default => qr/./);
 
-    # $_[1] is a pre-request scratch area
+    # $_[0] is a pre-request scratch area
     # put variables here so that we can access them later
     # outside of this _code block
-    my $title    = \$_[1]->{'title'};
-    my $head     = \$_[1]->{'head'};
-    my $body     = \$_[1]->{'body'};
-    my $bodyopts = \$_[1]->{'bodyopts'};
-    my $onload   = \$_[1]->{'onload'};
+    my $title    = \$_[0]->{'title'};
+    my $head     = \$_[0]->{'head'};
+    my $body     = \$_[0]->{'body'};
+    my $bodyopts = \$_[0]->{'bodyopts'};
+    my $onload   = \$_[0]->{'onload'};
 
     $$title = $ML{'.title2'};
 
@@ -367,9 +367,9 @@
             $$body .= "<?p <strong>$ML{'.loggingin'}</strong> $ML{'.servermsg'} p?><div style='margin-left: 40px'><b>$login_message</b></div>";
         }
 
-        my %req = ( 'mode'        => 'postevent',
+        my %req = (
                     'ver'         => $LJ::PROTOCOL_VER,
-                    'user'        => $user,
+                    'username'    => $user,
                     'password'    => $POST{'password'},
                     'usejournal'  => $POST{'usejournal'},
                     'tz'          => 'guess',
@@ -388,23 +388,28 @@
         $req{prop_qotdid} = $qid;
         $req{prop_interface} = "web";
 
-        my %res;
-        LJ::do_request(\%req, \%res, $flags);
+        foreach my $k (keys %req) {
+            next unless ($k =~ /^prop_(.+)/);
+            $req{'props'}->{$1} = $req{$k};
+            delete $req{$k};
+        }
+        my $err = 0;
+        my $res = LJ::Protocol::do_request("postevent", \%req, \$err, $flags);
 
         if (!keys %$errors) {
             # examine response
             my $update_message;
-            if ($res{'success'} eq "OK" && $res{'message'}) {
-                $update_message = LJ::auto_linkify(LJ::ehtml($res{'message'}));
+            if ($res && $res->{'message'}) {
+                $update_message = LJ::auto_linkify(LJ::ehtml($res->{'message'}));
             }
 
             # report results
             $$body .= "<?p <strong>$ML{'.updating'}</strong> ";
 
-            if ($res{'success'} ne 'OK') {
+            unless ($res) {
                 # update failed?
                 $$body .= "<br /><?errorbar <strong>$ML{'.error.update'}</strong> ";
-                $$body .= LJ::ehtml($res{'errmsg'}) . " errorbar?>";
+                $$body .= LJ::ehtml(LJ::Protocol::error_message($err)) . " errorbar?>";
                 $$body .= "<br /> p?>";
             } else {
                 # Clear out a draft
@@ -422,8 +427,8 @@
 
                 my ($ju, $itemlink);
                 # short bail if this was posted moderated or some other special case (no itemid but a message)
-                if (!defined $res{itemid} && $res{message}) {
-                    $$body .= "<br />$res{message} p?>";
+                if (!defined $res->{itemid} && $res->{message}) {
+                    $$body .= "<br />$res->{message} p?>";
                 } else {
 
                     # update success
@@ -441,10 +446,12 @@
                     };
                     $$body .= BML::ml('.update.success2', {'aopts' => "href='" . $ju->journal_base . "/'"});
 
-                    $$body .= $res{extra_result_message};
-                    
+                    $$body .= $res->{extra_result_message};
+
+                    $$body .= join('<br>', @{$res->{warnings}} ) if $res->{warnings} and @{$res->{warnings}};
+
                     my $juser = $ju->{'user'};
-                    my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
+                    my ($itemid, $anum) = ($res->{'itemid'}, $res->{'anum'});
                     $itemlink = LJ::item_link($ju, $itemid, $anum);
                     $itemid = $itemid * 256 + $anum;
 
@@ -509,9 +516,9 @@
 }
 
 _code?><?page
-title=>   <?_code return $_[1]->{'title'}; _code?>
-body=>    <?_code return $_[1]->{'body'}; _code?>
-bodyopts=><?_code return $_[1]->{'bodyopts'}; _code?>
+title=>   <?_code return $_[0]->{'title'}; _code?>
+body=>    <?_code return $_[0]->{'body'}; _code?>
+bodyopts=><?_code return $_[0]->{'bodyopts'}; _code?>
 head<=
 
 <?entryformcss?>
@@ -519,7 +526,7 @@ head<=
 {
     use strict;
 
-    my $ret = $_[1]->{'head'};
+    my $ret = $_[0]->{'head'};
 
     LJ::need_res(qw(
                     js/core.js
@@ -569,7 +576,7 @@ head<=
 
         function init_update_bml() {
             setTimeout(function(){ $initDraft }, 0)
-            $_[1]->{'onload'}
+            $_[0]->{'onload'}
             $pageload
         }
 

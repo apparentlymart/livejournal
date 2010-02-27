@@ -54,20 +54,6 @@ sub render_body {
     $ret .= $error_msg->('name', '<br /><span class="formitemFlag">', '</span>');
     $ret .= "</td></tr>\n";
 
-    ### gender
-    $ret .= "<tr valign='middle'><td class='field-name'>" . $class->ml('widget.createaccountprofile.field.gender') . "</td>\n<td>";
-    $ret .= $class->html_select(
-        name => 'gender',
-        selected => $post->{gender} || $u->prop('gender'),
-        list => [
-            U => LJ::Lang::ml('/manage/profile/index.bml.gender.unspecified'),
-            M => LJ::Lang::ml('/manage/profile/index.bml.gender.male'),
-            F => LJ::Lang::ml('/manage/profile/index.bml.gender.female'),
-        ],
-    );
-    $ret .= $error_msg->('gender', '<br /><span class="formitemFlag">', '</span>');
-    $ret .= "</td></tr>\n";
-
     ### location
     my %countries;
     LJ::load_codes({ "country" => \%countries});
@@ -205,9 +191,6 @@ sub handle_post {
     $post->{name} =~ s/[\n\r]//g;
     $post->{name} = LJ::text_trim($post->{name}, LJ::BMAX_NAME, LJ::CMAX_NAME);
 
-    # gender
-    $post->{gender} = 'U' unless $post->{gender} =~ m/^[UMF]$/;
-
     # location is handled by LJ::Widget::Location
 
     # interests
@@ -244,7 +227,6 @@ sub handle_post {
     unless (keys %{$from_post{errors}}) {
         LJ::update_user($u, { name => $post->{name} });
         $u->invalidate_directory_record;
-        $u->set_prop('gender', $post->{gender});
         $u->set_interests($old_interests, \@valid_ints);
         $u->set_bio($post->{bio}, $post->{bio_absent});
     }

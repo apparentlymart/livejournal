@@ -479,6 +479,10 @@ sub subscription_as_html {
 sub matches_filter {
     my ($self, $subscr) = @_;
 
+    return 1 if
+        LJ::Event->class($subscr->etypeid) ne __PACKAGE__ ||
+        !$subscr->id;
+
     my $sjid = $subscr->journalid;
     my $ejid = $self->event_journal->{userid};
 
@@ -490,10 +494,17 @@ sub matches_filter {
     my ($sarg1, $sarg2) = ($subscr->arg1, $subscr->arg2);
 
     my $comment = $self->comment;
+    my $parent_comment = $comment->parent;
+    my $parent_comment_author = $parent_comment ?
+        $parent_comment->poster : undef;
+
     my $entry   = $comment->entry;
 
     my $watcher = $subscr->owner;
-    return 0 unless $comment->visible_to($watcher);
+
+    return 0 unless 
+        $comment->visible_to($watcher) ||
+        LJ::u_equals($parent_comment_author, $watcher);
 
     # not a match if this user posted the comment and they don't
     # want to be notified of their own posts
@@ -501,16 +512,16 @@ sub matches_filter {
         return 0 unless $watcher->get_cap('getselfemail') && $watcher->prop('opt_getselfemail');
     }
 
-    # not a match if this user posted the entry and they don't want comments emailed,
-    # unless they posted it. (don't need to check again for the cap, since we did above.)
-    if (LJ::u_equals($entry->poster, $watcher) && !$watcher->prop('opt_getselfemail')) {
-        return 0 if $entry->prop('opt_noemail') && $subscr->method =~ /Email$/;
-    }
-
     # watching a specific journal
     if ($sarg1 == 0 && $sarg2 == 0) {
-        # TODO: friend group filtering in case of $sjid == 0 when
-        # a subprop is filtering on a friend group
+        # if this is a community, maintainer gets notified no matter
+        # what entry settings are
+        return 1 unless LJ::u_equals($entry->journal, $entry->poster);
+
+        # if this is their own journal and they selected not to be notified
+        # of comments to this specific entry, well, don't notify them
+        return 0 if $entry->prop('opt_noemail');
+
         return 1;
     }
 
@@ -552,13 +563,48 @@ sub comment {
 }
 
 sub available_for_user  {
-    my ($class, $u, $subscr) = @_;
+    my ($self, $u) = @_;
 
-    # not allowed to track replies to comments
-    return 0 if ! $u->get_cap('track_thread') &&
-        $subscr->arg2;
+    my $journal = $self->event_journal;
+    my ($arg1, $arg2) = ($self->arg1, $self->arg2);
 
-    return 1;
+    # user can always track all comments to their own journal
+    if (LJ::u_equals($journal, $u) && !$arg1 && !$arg2) {
+        return 1;
+    }
+
+    # user can track all comments to their community journal, provided
+    # that the community is paid
+    if (LJ::can_manage($u, $journal) && !$arg1 && !$arg2) {
+        return $journal->get_cap('maintainer_track_comments') ? 1 : 0;
+    }
+
+    # user can always track comments to a specific entry
+    if ($arg1) {
+        return 1;
+    }
+
+    # user can track comments left to a thread if and only if they have a paid
+    # account
+    if ($arg2) {
+        return $u->get_cap('track_thread') ? 1 : 0;
+    }
+
+    return 0;
+}
+
+sub is_subscription_visible_to { 1 }
+
+sub get_disabled_pic {
+    my ($self, $u) = @_;
+
+    my $journal = $self->event_journal;
+
+    return LJ::run_hook('esn_community_comments_track_upgrade', $u, $journal) || ''
+        unless ref $self ne 'LJ::Event::JournalNewComment' ||
+            $self->arg1 || $self->arg2 || LJ::u_equals($u, $journal);
+
+    return $self->SUPER::get_disabled_pic($u);
 }
 
 # return detailed data for XMLRPC::getinbox
@@ -598,6 +644,143 @@ sub raw_info {
     } else {
         return { %$res, action => 'new' };
     }
+}
+
+sub subscriptions {
+    my ($self, %args) = @_;
+    my $cid   = delete $args{'cluster'};  # optional
+    my $limit = int delete $args{'limit'};    # optional
+    my $original_limit = int $limit;
+
+    my $acquire_sub_slot = sub {
+        my ($how_much) = @_;
+        $how_much ||= 1;
+
+        return $how_much unless $original_limit;
+
+        $how_much = $limit if $limit < $how_much;
+
+        $limit -= $how_much;
+        return $how_much;
+    };
+
+    croak("Unknown options: " . join(', ', keys %args)) if %args;
+    croak("Can't call in web context") if LJ::is_web_context();
+
+    my $comment = $self->comment;
+    my $parent_comment = $comment->parent;
+    my $entry = $comment->entry;
+
+    my $comment_author = $comment->poster;
+    my $parent_comment_author = $parent_comment ?
+        $parent_comment->poster :
+        undef;
+    my $entry_author = $entry->poster;
+    my $entry_journal = $entry->journal;
+
+    my @subs;
+
+    my $email_ntypeid = LJ::NotificationMethod::Email->ntypeid;
+
+    # own comments are deliberately sent to email only
+    if (
+        $comment_author &&
+        (!$cid || $comment_author->clusterid == $cid) &&
+        $comment_author->prop('opt_getselfemail') &&
+        $comment_author->get_cap('getselfemail') &&
+        $acquire_sub_slot->()
+    ) {
+        push @subs, LJ::Subscription->new_from_row({
+            'etypeid' => LJ::Event::JournalNewComment->etypeid,
+            'userid'  => $comment_author->id,
+            'ntypeid' => $email_ntypeid,
+        });
+    }
+
+    # send a notification to the author of the "parent" comment, if they
+    # want to get it
+    if (
+        $parent_comment && $parent_comment_author &&
+        (!$cid || $parent_comment_author->clusterid == $cid) &&
+
+        # if they are responding to themselves and wish to get that, we've
+        # already handled it above
+        !LJ::u_equals($comment_author, $parent_comment_author) &&
+
+        # if parent_comment_author is also the author of the container entry,
+        # we should respect their choice to not get this comment, as set
+        # in the entry properties
+        (!LJ::u_equals($parent_comment_author, $entry_author) ||
+        !$entry->prop('opt_noemail'))
+    ) {
+        my @subs2 = LJ::Subscription->find($parent_comment_author,
+            'event' => 'CommentReply',
+            'require_active' => 1,
+        );
+
+        push @subs2, LJ::Subscription->new_from_row({
+            'etypeid' => LJ::Event::CommentReply->etypeid,
+            'userid'  => $parent_comment_author->id,
+            'ntypeid' => $email_ntypeid,
+        }) if $parent_comment_author->{'opt_gettalkemail'} eq 'Y';
+
+        my $count = scalar(@subs2);
+        if ($count && ($count = $acquire_sub_slot->($count))) {
+            $#subs2 = $count - 1;
+            push @subs, @subs2;
+        }
+    }
+
+    # send a notification to the author of the entry, if they
+    # want to get it
+    if (
+        # if they are responding to themselves and wish to get that, we've
+        # already handled it above
+        !LJ::u_equals($comment_author, $entry_author) &&
+        (!$cid || $entry_author->clusterid == $cid) &&
+
+        !$entry->prop('opt_noemail')
+    ) {
+        if (!LJ::u_equals($entry_author, $entry_journal)) {
+            # community journal
+            my @subs2 = LJ::Subscription->find($entry_author,
+                'event' => 'CommunityEntryReply',
+                'require_active' => 1,
+            );
+
+            my $count = scalar(@subs2);
+            if ($count && ($count = $acquire_sub_slot->($count))) {
+                $#subs2 = $count - 1;
+                push @subs, @subs2;
+            }
+        }
+
+        push @subs, LJ::Subscription->new_from_row({
+            'etypeid' => LJ::Event::JournalNewComment->etypeid,
+            'userid'  => $entry_author->id,
+            'ntypeid' => $email_ntypeid,
+        }) if
+            $entry_author->{'opt_gettalkemail'} eq 'Y' && $acquire_sub_slot->();
+    }
+
+    return @subs unless ($limit || !$original_limit);
+
+    # handle tracks as usual
+    push @subs, $self->SUPER::subscriptions(
+        cluster => $cid,
+        limit   => $limit
+    );
+
+    return @subs;
+}
+
+sub is_tracking {
+    my ($self, $ownerid) = @_;
+
+    return 1 if $self->arg1 || $self->arg2;
+    return 1 unless $self->event_journal->id == $ownerid;
+
+    return 0;
 }
 
 1;

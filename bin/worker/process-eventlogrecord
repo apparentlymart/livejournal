@@ -10,7 +10,7 @@ require 'ljlib.pl';
 require 'ljprotocol.pl';
 use LJ::EventLogRecord;
 
-sub capabilities { map { [ $_ => '' ] } LJ::EventLogRecord->schwartz_capabilities() }
+sub capabilities { return LJ::EventLogRecord->schwartz_capabilities }
 
 __PACKAGE__->start();
 

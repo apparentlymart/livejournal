@@ -541,9 +541,12 @@ sub dumptext
         };
 
         while (my ($itcode, $text, $staleness, $notes) = $sth->fetchrow_array) {
+            if ($itcode =~ m!\.bml/! || $itcode =~ /[\s=]/) {
+                warn "Skipping item code '$itcode'";
+                next;
+            }
 
             my $langdat_file = LJ::Lang::langdat_file_of_lang_itcode($lang, $itcode, $to_cvs);
-
             $itcode = LJ::Lang::itcode_for_langdat_file($langdat_file, $itcode);
 
             my $fh = $fh_map{$langdat_file};
@@ -557,7 +560,7 @@ sub dumptext
                 }
 
                 open ($fh, ">$langdat_file")
-                    or die "unable to open langdat file: $langdat_file ($!)";
+                    or die "unable to open langdat file: $langdat_file ($lang, $itcode, $to_cvs, $!)";
 
                 $fh_map{$langdat_file} = $fh;
 

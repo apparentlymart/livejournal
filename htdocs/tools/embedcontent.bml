@@ -6,9 +6,8 @@
     use LJ::EmbedModule;
 
     # this can only be accessed from the embed module subdomain
-    my $r = Apache->request;
     return "This page cannot be viewed from $LJ::DOMAIN"
-        unless $r->header_in("Host") =~ /.*$LJ::EMBED_MODULE_DOMAIN$/i;
+        unless LJ::Request->header_in("Host") =~ /.*$LJ::EMBED_MODULE_DOMAIN$/i;
 
     # we should have three GET params: journalid, moduleid, auth_token
     my $journalid = $GET{journalid}+0 or return "No journalid specified";

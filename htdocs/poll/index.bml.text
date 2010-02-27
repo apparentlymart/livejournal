@@ -1,4 +1,5 @@
 ;; -*- coding: utf-8 -*-
+.close|staleness=1
 .close=Close Poll
 
 .discuss=Discuss Results
@@ -13,6 +14,7 @@
 
 .pollnotfound=Poll not found.
 
+.reopen|staleness=1
 .reopen=Reopen Poll
 
 .submitted.head=Thanks
@@ -21,13 +23,16 @@
 
 .submitted.title=Submitted!
 
-.title=Poll
-
-.viewresults=View Poll Results
-
-.title.warnings=Posted, but...
-
+.text.warnings|staleness=1
 .text.warnings=Thank you. Your response to this poll has been saved, but we have made some corrections to it so as to cause Frank less problems handling it:
 
+.text.warnings.back|staleness=1
 .text.warnings.back=<a href="[[url]]">Return to the entry</a>.
+
+.title=Poll
+
+.title.warnings|staleness=1
+.title.warnings=Posted, but...
+
+.viewresults=View Poll Results
 

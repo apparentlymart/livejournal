@@ -17,6 +17,7 @@ package LJ::User;
 use Carp;
 use lib "$ENV{LJHOME}/cgi-bin";
 use List::Util ();
+use LJ::Request;
 use LJ::Constants;
 use LJ::MemCache;
 use LJ::Session;
@@ -41,6 +42,8 @@ use Class::Autouse qw(
                       LJ::M::FriendsOf
                       LJ::BetaFeatures
                       LJ::S2Theme
+                      LJ::Subscription
+                      LJ::Subscription::GroupSet
                       );
 
 # class method to create a new account.
@@ -406,12 +409,27 @@ sub underage {
     # has no bearing if this isn't on
     return undef unless LJ::class_bit("underage");
 
+    my @args = @_;
+    my $ret_zero = 0; # no need to return zero
+
     # now get the args and continue
-    my $u = shift;
-    return LJ::get_cap($u, 'underage') unless @_;
+    my $u = shift(@args);
+    unless (@args) { # we are getter
+        my $young = LJ::get_cap($u, 'underage');
+        return unless $young; # cap is clear -> return false        
+
+        # here cap is set -> may be we will return it, may be we will update
+        return 1 unless $u->underage_status eq 'Y'; # only "provided birthdate" may be updated, "manual" and "cookie" must be preserved
+        return 1 if $u->init_age < 14; # yes, user is young -> return true
+        
+        # here cap is set and user is not young now -> will update
+        @args = (0, undef, 'auto clear based on init_age()');
+        # fall to setter code
+        $ret_zero = 1;
+    }
 
     # now set it on or off
-    my $on = shift() ? 1 : 0;
+    my $on = shift(@args) ? 1 : 0;
     if ($on) {
         $u->add_to_class("underage");
     } else {
@@ -419,14 +437,14 @@ sub underage {
     }
 
     # now set their status flag if one was sent
-    my $status = shift();
+    my $status = shift(@args);
     if ($status || $on) {
         # by default, just records if user was ever underage ("Y")
         $u->underage_status($status || 'Y');
     }
 
     # add to statushistory
-    if (my $shwhen = shift()) {
+    if (my $shwhen = shift(@args)) {
         my $text = $on ? "marked" : "unmarked";
         my $status = $u->underage_status;
         LJ::statushistory_add($u, undef, "coppa", "$text; status=$status; when=$shwhen");
@@ -440,7 +458,7 @@ sub underage {
     });
 
     # return true if no failures
-    return 1;
+    return $ret_zero ? 0 : 1;
 }
 
 # return true if we know user is a minor (< 18)
@@ -515,7 +533,7 @@ sub log_event {
     my $uniq = delete $info->{uniq};
     unless ($uniq) {
         eval {
-            $uniq = Apache->request->notes('uniq');
+            $uniq = LJ::Request->notes('uniq');
         };
     }
     my $remote = delete($info->{remote}) || LJ::get_remote() || undef;
@@ -786,7 +804,7 @@ sub make_login_session {
     $exptype ||= 'short';
     return 0 unless $u;
 
-    eval { Apache->request->notes('ljuser' => $u->{'user'}); };
+    eval { LJ::Request->notes('ljuser' => $u->{'user'}); };
 
     # create session and log user in
     my $sess_opts = {
@@ -2233,9 +2251,8 @@ sub record_login {
 
     my ($ip, $ua);
     eval {
-        my $r  = Apache->request;
         $ip = LJ::get_remote_ip();
-        $ua = $r->header_in('User-Agent');
+        $ua = LJ::Request->header_in('User-Agent');
     };
 
     return $u->do("INSERT INTO loginlog SET userid=?, sessid=?, logintime=UNIX_TIMESTAMP(), ".
@@ -2797,47 +2814,6 @@ sub activate_userpics {
     return 1;
 }
 
-# ensure that this user does not have more than the maximum number of subscriptions
-# allowed by their cap, and enable subscriptions up to their current limit
-sub enable_subscriptions {
-    my $u = shift;
-
-    # first thing, disable everything they don't have caps for
-    # and make sure everything is enabled that should be enabled
-    map { $_->available_for_user($u) ? $_->enable : $_->disable } $u->find_subscriptions(method => 'Inbox');
-
-    my $max_subs = $u->get_cap('subscriptions');
-    my @inbox_subs = grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
-
-    if ((scalar @inbox_subs) > $max_subs) {
-        # oh no, too many subs.
-        # disable the oldest subscriptions that are "tracking" subscriptions
-        my @tracking = grep { $_->is_tracking_category } @inbox_subs;
-
-        # oldest subs first
-        @tracking = sort {
-            return $a->createtime <=> $b->createtime;
-        } @tracking;
-
-        my $need_to_deactivate = (scalar @inbox_subs) - $max_subs;
-
-        for (1..$need_to_deactivate) {
-            my $sub_to_deactivate = shift @tracking;
-            $sub_to_deactivate->deactivate if $sub_to_deactivate;
-        }
-    } else {
-        # make sure all subscriptions are activated
-        my $need_to_activate = $max_subs - (scalar @inbox_subs);
-
-        # get deactivated subs
-        @inbox_subs = grep { $_->active && $_->available_for_user } $u->find_subscriptions(method => 'Inbox');
-
-        for (1..$need_to_activate) {
-            my $sub_to_activate = shift @inbox_subs;
-            $sub_to_activate->activate if $sub_to_activate;
-        }
-    }
-}
 
 # revert S2 style to the default if the user is using a layout/theme layer that they don't have permission to use
 sub revert_style {
@@ -2876,7 +2852,7 @@ sub revert_style {
             $new_theme = LJ::S2Theme->load_by_uniq($default_theme_uniq);
         } else {
             my $layoutid = '';
-            my $layoutid = $public->{$default_layout_uniq}->{s2lid} 
+            $layoutid = $public->{$default_layout_uniq}->{s2lid} 
                 if $public->{$default_layout_uniq} && $public->{$default_layout_uniq}->{type} eq "layout";
             $new_theme = LJ::S2Theme->load_default_of($layoutid, user => $u) if $layoutid;
         }
@@ -3404,7 +3380,7 @@ sub subscription_count {
 # this is the count used to check the maximum subscription count
 sub active_inbox_subscription_count {
     my $u = shift;
-    return scalar ( grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox') );
+    return $u->subscriptions_count;
 }
 
 sub max_subscriptions {
@@ -4442,8 +4418,9 @@ sub _friend_friendof_uids_do {
 sub fb_push {
     my $u = shift;
     eval {
-        if ($u && $u->get_cap("fb_account")) {
-            Apache::LiveJournal::Interface::FotoBilder::push_user_info( $u->id );
+        if ($u) {
+            require LJ::FBInterface;
+            LJ::FBInterface->push_user_info( $u->id );
         }
     };
     warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
@@ -5251,21 +5228,20 @@ sub openid_tags {
 # return the number of comments a user has posted
 sub num_comments_posted {
     my $u = shift;
-    my %opts = @_;
 
-    my $dbcr = $opts{dbh} || LJ::get_cluster_reader($u);
-    my $userid = $u->id;
+    my $ret = $u->prop('talkleftct');
 
-    my $memkey = [$userid, "talkleftct:$userid"];
-    my $count = LJ::MemCache::get($memkey);
-    unless ($count) {
-        my $expire = time() + 3600*24*2; # 2 days;
-        $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft " .
-                                        "WHERE userid=?", undef, $userid);
-        LJ::MemCache::set($memkey, $count, $expire) if defined $count;
+    unless (defined $ret) {
+        my $dbr = LJ::get_cluster_reader($u);
+        $ret = $dbr->selectrow_array(qq{
+            SELECT COUNT(*) FROM talkleft WHERE userid=?
+        }, undef, $u->id);
+
+        warn $u->clusterid, ", ", $ret;
+        $u->set_prop('talkleftct' => $ret);
     }
 
-    return $count;
+    return $ret;
 }
 
 # return the number of comments a user has received
@@ -5541,6 +5517,25 @@ sub set_custom_usericon {
     LJ::set_userprop($u, 'custom_usericon', $url);
 }
 
+sub _subscriptions_count {
+    my ($u) = @_;
+
+    my $set = LJ::Subscription::GroupSet->fetch_for_user($u, sub { 0 });
+
+    return $set->{'active_count'};
+}
+
+sub subscriptions_count {
+    my ($u) = @_;
+
+    my $cached = LJ::MemCache::get('subscriptions_count:'.$u->id);
+    return $cached if defined $cached;
+
+    my $count = $u->_subscriptions_count;
+    LJ::MemCache::set('subscriptions_count:'.$u->id, $count);
+    return $count;
+}
+
 package LJ;
 
 use Carp;
@@ -5642,6 +5637,9 @@ sub can_view
     # owners can always see their own.
     return 1 if ($userid == $remoteid);
 
+    # author in community can always see their post
+    return 1 if $remoteid == $item->{'posterid'};
+
     # other people can't read private
     return 0 if ($item->{'security'} eq "private");
 
@@ -5669,7 +5667,7 @@ sub wipe_major_memcache
 {
     my $u = shift;
     my $userid = LJ::want_userid($u);
-    foreach my $key ("userid","bio","talk2ct","talkleftct","log2ct",
+    foreach my $key ("userid","bio","talk2ct","log2ct",
                      "log2lt","memkwid","dayct2","s1overr","s1uc","fgrp",
                      "friends","friendofs","tu","upicinf","upiccom",
                      "upicurl", "intids", "memct", "lastcomm")
@@ -7193,8 +7191,7 @@ sub get_daycounts
     my $viewall = 0;
     if ($remote) {
         # do they have the viewall priv?
-        my $r = eval { Apache->request; }; # web context
-        my %getargs = $r ? $r->args : ();
+        my %getargs = eval { LJ::Request->args } || (); # eval for check web context
         if (defined $getargs{'viewall'} and $getargs{'viewall'} eq '1' and LJ::check_priv($remote, 'canview', '*')) {
             $viewall = 1;
             LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
@@ -8574,7 +8571,6 @@ sub make_journal
     &nodb;
     my ($user, $view, $remote, $opts) = @_;
 
-    my $r = $opts->{'r'};  # mod_perl $r, or undef
     my $geta = $opts->{'getargs'};
 
     if ($LJ::SERVER_DOWN) {
@@ -8773,8 +8769,8 @@ sub make_journal
         $opts->{pathextra} = undef;
     }
 
-    if ($r) {
-        $r->notes('journalid' => $u->{'userid'});
+    if (LJ::Request->is_inited) {
+        LJ::Request->notes('journalid' => $u->{'userid'});
     }
 
     my $notice = sub {
@@ -8878,7 +8874,7 @@ sub make_journal
         # render it in the lynx site scheme.
         if ($geta->{'format'} eq 'light') {
             $fallback = 'bml';
-            $r->notes('bml_use_scheme' => 'lynx');
+            LJ::Request->notes('bml_use_scheme' => 'lynx');
         }
 
         # there are no BML handlers for these views, so force s2
@@ -8993,11 +8989,11 @@ sub make_journal
     $opts->{'saycharset'} ||= "utf-8";
 
     if ($view eq 'data') {
-        return LJ::Feed::make_feed($r, $u, $remote, $opts);
+        return LJ::Feed::make_feed($u, $remote, $opts);
     }
 
     if ($stylesys == 2) {
-        $r->notes('codepath' => "s2.$view") if $r;
+        LJ::Request->notes('codepath' => "s2.$view") if LJ::Request->is_inited;
 
         eval { LJ::S2->can("dostuff") };  # force Class::Autouse
         my $mj = LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
@@ -9019,7 +9015,7 @@ sub make_journal
 
     # Everything from here on down is S1.  FIXME: this should be moved to LJ::S1::make_journal
     # to be more like LJ::S2::make_journal.
-    $r->notes('codepath' => "s1.$view") if $r;
+    LJ::Request->notes('codepath' => "s1.$view") if LJ::Request->is_inited;
     $u->{'_s1styleid'} = $styleid + 0;
 
     # For embedded polls
@@ -9396,8 +9392,7 @@ sub get_remote
     };
 
     # can't have a remote user outside of web context
-    my $r = eval { Apache->request; };
-    return $no_remote->() unless $r;
+    return $no_remote->() unless LJ::Request->is_inited;
 
     my $criterr = $opts->{criterr} || do { my $d; \$d; };
     $$criterr = 0;
@@ -9438,7 +9433,7 @@ sub get_remote
     }
 
     LJ::User->set_remote($u);
-    $r->notes("ljuser" => $u->{'user'});
+    LJ::Request->notes("ljuser" => $u->{'user'});
     return $u;
 }
 

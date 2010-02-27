@@ -19,7 +19,9 @@
 
 .title_cat=FAQ - [[catname]]
 
+.title_num|staleness=1
 .title_num=Frequently Asked Question #[[num]]
 
+.translate.faq|staleness=1
 .translate.faq=Translate this FAQ
 

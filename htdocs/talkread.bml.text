@@ -7,17 +7,23 @@
 
 .confirm.action=Are you sure you wish to delete the selected comments?
 
-.multi.no.action=You have not selected one of the actions
-
-.multi.no.comments=You have not selected any comments
-
 .deletedpost=<b>(Deleted post)</b>
 
 .deleteduser=<i>(Deleted user: [[username]])</i>
 
+.edittime|staleness=1
 .edittime=Edited at [[edittime]]
 
 .fromip=(from [[ip]])
+
+.multi.no.action|staleness=1
+.multi.no.action=You have not selected one of the actions
+
+.multi.no.comment|staleness=1
+.multi.no.comment=You have not selected any comments
+
+.multi.no.comments|staleness=1
+.multi.no.comments=You have not selected any comments
 
 .noreplies=No replies
 
@@ -35,18 +41,22 @@
 
 .subjectdeleted=[deleted]
 
+.talkmulti.all|staleness=1
 .talkmulti.all=All
 
 .talkmulti.delete=Delete
 
 .talkmulti.deletespam=Delete as Spam
 
+.talkmulti.des|staleness=1
 .talkmulti.des=<b>Mass action</b> on comments:
 
+.talkmulti.please|staleness=1
 .talkmulti.please=(Select action)
 
 .talkmulti.screen=Screen
 
+.talkmulti.selected|staleness=1
 .talkmulti.selected=Selected
 
 .talkmulti.submit=Perform Action
@@ -54,3 +64,4 @@
 .talkmulti.unscreen=Unscreen
 
 .title=Read Comments
+

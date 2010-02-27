@@ -12,9 +12,11 @@ use RPC::XML;
 use RPC::XML::Client;
 
 sub capabilities {
-        [   'LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends' => '' ],
-        [   'LJ::NewWorker::UpdateFotobilderFriends' => ''              ],
-        [   'LJ::Worker::UpdateFotobilderFriends' => ''                 ],
+    return (
+        'LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends',
+        'LJ::NewWorker::UpdateFotobilderFriends',
+        'LJ::Worker::UpdateFotobilderFriends',
+    );
 }
 
 __PACKAGE__->start();

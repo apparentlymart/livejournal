@@ -98,7 +98,7 @@ sub END { LJ::end_request(); }
                     "embedcontent", "usermsg", "usermsgtext", "usermsgprop",
                     "notifyarchive", "notifybookmarks", "pollprop2", "embedcontent_preview",
                     "logprop_history",
-                    "comet_history",
+                    "comet_history", "pingrel"
                     );
 
 # keep track of what db locks we have out
@@ -374,31 +374,37 @@ sub mogclient {
 }
 
 sub theschwartz {
-    return LJ::Test->theschwartz(@_) if $LJ::_T_FAKESCHWARTZ;
-
     my $opts = shift;
+    
+    return LJ::Test->theschwartz() if $LJ::_T_FAKESCHWARTZ;
 
-    my $role = $opts->{role} || "default";
+    if (%LJ::THESCHWARTZ_DBS_ROLES) {
+        ## new config - with roles
+        my $role = $opts->{role} || "default";
+        return $LJ::SchwartzClient{$role} if $LJ::SchwartzClient{$role};
 
-    return $LJ::SchwartzClient{$role} if $LJ::SchwartzClient{$role};
+        my @dbs;
+        die "LJ::theschwartz(): unknown role '$role'" unless $LJ::THESCHWARTZ_DBS_ROLES{$role};
+        foreach my $name (@{ $LJ::THESCHWARTZ_DBS_ROLES{$role} }) {
+            die "LJ::theschwartz(): unknown database name '$name' in role '$role'"
+                unless $LJ::THESCHWARTZ_DBS{$name};
+            push @dbs, $LJ::THESCHWARTZ_DBS{$name};
+        }
+        die "LJ::theschwartz(): no databases for role '$role'" unless @dbs;
 
-    unless (scalar grep { defined $_->{role} } @LJ::THESCHWARTZ_DBS) { # old config
-        $LJ::SchwartzClient{$role} = TheSchwartz->new(databases => \@LJ::THESCHWARTZ_DBS);
-        return $LJ::SchwartzClient{$role};
+        my $client = TheSchwartz->new(databases => \@dbs);
+
+        if ($client && $client->can('delete_every_n_errors')) {
+            $client->delete_every_n_errors($LJ::DELETE_EVERY_N_ERRORS);
+        }
+        
+        $LJ::SchwartzClient{$role} = $client;
+        return $client;
+    } else {
+        ## old config
+        $LJ::SchwartzClient ||= TheSchwartz->new(databases => \@LJ::THESCHWARTZ_DBS);
+        return $LJ::SchwartzClient;
     }
-
-    my @dbs = grep { $_->{role}->{$role} } @LJ::THESCHWARTZ_DBS;
-    die "Unknown role in LJ::theschwartz: '$role'" unless @dbs;
-
-    my $client = TheSchwartz->new(databases => \@dbs);
-
-    if ($client && $client->can('delete_every_n_errors')) {
-        $client->delete_every_n_errors($LJ::DELETE_EVERY_N_ERRORS);
-    }
-
-    $LJ::SchwartzClient{$role} = $client;
-
-    return $client;
 }
 
 sub sms_gateway {
@@ -1049,10 +1055,10 @@ sub get_recent_items
         # alternatively, if 'viewall' opt flag is set, security is off.
     } elsif ($mask) {
         # can see public or things with them in the mask
-        $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $mask != 0))";
+        $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $mask != 0) OR posterid = $remoteid)";
     } else {
         # not a friend?  only see public.
-        $secwhere = "AND security='public' ";
+        $secwhere = "AND (security='public' OR posterid=$remoteid)";
     }
 
     # because LJ::get_friend_items needs rlogtime for sorting.
@@ -1689,7 +1695,6 @@ sub auth_okay
 # limits and nonce counts are used to prevent replay attacks.
 
 sub auth_digest {
-    my ($r) = @_;
 
     my $decline = sub {
         my $stale = shift;
@@ -1697,16 +1702,16 @@ sub auth_digest {
         my $nonce = LJ::challenge_generate(180); # 3 mins timeout
         my $authline = "Digest realm=\"lj\", nonce=\"$nonce\", algorithm=MD5, qop=\"auth\"";
         $authline .= ", stale=\"true\"" if $stale;
-        $r->header_out("WWW-Authenticate", $authline);
-        $r->status_line("401 Authentication required");
+        LJ::Request->header_out("WWW-Authenticate", $authline);
+        LJ::Request->status_line("401 Authentication required");
         return 0;
     };
 
-    unless ($r->header_in("Authorization")) {
+    unless (LJ::Request->header_in("Authorization")) {
         return $decline->(0);
     }
 
-    my $header = $r->header_in("Authorization");
+    my $header = LJ::Request->header_in("Authorization");
 
     # parse it
     # TODO: could there be "," or " " inside attribute values, requiring
@@ -1766,7 +1771,7 @@ sub auth_digest {
 
     my $a1src = $u->user . ':lj:' . $u->password;
     my $a1 = Digest::MD5::md5_hex($a1src);
-    my $a2src = $r->method . ":$attrs{'uri'}";
+    my $a2src = LJ::Request->method . ":$attrs{'uri'}";
     my $a2 = Digest::MD5::md5_hex($a2src);
     my $hashsrc = "$a1:$attrs{'nonce'}:$attrs{'nc'}:$attrs{'cnonce'}:$attrs{'qop'}:$a2";
     my $hash = Digest::MD5::md5_hex($hashsrc);
@@ -2111,7 +2116,7 @@ sub start_request
 
     # include standard files if this is web-context
     unless ($LJ::DISABLED{sitewide_includes}) {
-        if (eval { Apache->request }) {
+        if (LJ::Request->is_inited) {
             # standard site-wide JS and CSS
             # jQuery always should be the first in the list
             LJ::need_res(qw(
@@ -2639,9 +2644,8 @@ sub work_report {
     my $dest = $LJ::WORK_REPORT_HOST;
     return unless $dest;
 
-    my $r = eval { Apache->request; };
-    return unless $r;
-    return if $r->method eq "OPTIONS";
+    return unless LJ::Request->is_inited;
+    return if LJ::Request->method eq "OPTIONS";
 
     $dest = $dest->() if ref $dest eq "CODE";
     return unless $dest;
@@ -2654,9 +2658,9 @@ sub work_report {
 
     my @fields = ($$, $what);
     if ($what eq "start") {
-        my $host = $r->header_in("Host");
-        my $uri = $r->uri;
-        my $args = $r->args;
+        my $host = LJ::Request->header_in("Host");
+        my $uri = LJ::Request->uri;
+        my $args = LJ::Request->args;
         $args = substr($args, 0, 100) if length $args > 100;
         push @fields, $host, $uri, $args;
 
@@ -2944,7 +2948,7 @@ sub get_remote_ip
         return $BML::COOKIE{'fake_ip'} if LJ::is_web_context() && $BML::COOKIE{'fake_ip'};
     }
     eval {
-        $ip = Apache->request->connection->remote_ip;
+        $ip = LJ::Request->remote_ip;
     };
     return $ip || $ENV{'FAKE_IP'};
 }
@@ -3192,7 +3196,7 @@ sub is_web_context {
 sub is_open_proxy
 {
     my $ip = shift;
-    eval { $ip ||= Apache->request; };
+    eval { $ip ||= LJ::Request->instance; };
     return 0 unless $ip;
     if (ref $ip) { $ip = $ip->connection->remote_ip; }
 

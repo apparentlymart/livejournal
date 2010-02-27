@@ -87,7 +87,7 @@ sub send_mail
             return $name ? "\"$name\" <$email>" : $email;
         };
 
-        my $body = $opt->{'wrap'} ? Text::Wrap::wrap('','',$opt->{'body'}) : $opt->{'body'};
+        my $body = $opt->{'wrap'} ? Encode::encode_utf8(Text::Wrap::wrap('','',Encode::decode_utf8($opt->{'body'}))) : $opt->{'body'};
         my $subject = $opt->{'subject'};
         my $fromname = $opt->{'fromname'};
 

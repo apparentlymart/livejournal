@@ -1,24 +1,37 @@
 ;; -*- coding: utf-8 -*-
+.add|staleness=1
 .add=Add to Category
 
+.error.noaccess|staleness=1
 .error.noaccess=Only community maintainers are able to submit to the Community Directory. You are not a maintainer of community [[comm]].
 
+.error.nocomm|staleness=1
 .error.nocomm=Community not found.
 
+.error.notcomm|staleness=1
 .error.notcomm=[[user]] is not a community.
 
+.listings.updated|staleness=1
 .listings.updated=Community listings updated.
 
+.remove|staleness=1
 .remove=remove
 
+.status.approved|staleness=1
 .status.approved=Approved
 
+.status.denied|staleness=1
 .status.denied=Denied
 
+.status.pending|staleness=1
 .status.pending=Pending
 
+.title|staleness=1
 .title=Community Directory Listing
 
+.update|staleness=1
 .update=Update
 
+.update.listing|staleness=1
 .update.listing=Update directory listing for [[user]]:
+

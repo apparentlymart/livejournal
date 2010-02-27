@@ -172,13 +172,11 @@ head<=
 
 <?_code return $head; _code?>
 
-<script>
+<script type="text/javascript">
 LJ_cmtinfo = {};
 LJ_cmtinfo['disableInlineDelete'] = 1;
 var pageNum;
 var cur_folder = '<?_code return $POST{view} || $GET{view} || undef; _code?>';
-
-DOM.addEventListener(window, "load", setup, cur_folder);
 
 var tableview;
 var checkallButton;
@@ -213,6 +211,8 @@ for (var i=1; i<=2; i++) {
 
 if ($("pageNum")) pageNum = parseInt($("pageNum").value);
 }
+
+jQuery(setup);
 
 function xtra_args () {
     var args = '';

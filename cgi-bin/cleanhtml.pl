@@ -462,7 +462,7 @@ sub clean
                     my $etext = $link_text->();
                     my $url = LJ::ehtml($cut);
                     $newdata .= "<div>" if $tag eq "div";
-                    $newdata .= "<b>(&nbsp;<a href=\"$url#cutid$cutcount\">$etext</a>&nbsp;)</b>";
+                    $newdata .= "<b class=\"ljcut-link\">(&nbsp;<a href=\"$url#cutid$cutcount\">$etext</a>&nbsp;)</b>";
                     $newdata .= "</div>" if $tag eq "div";
                     unless ($opts->{'cutpreview'}) {
                         push @eatuntil, $tag;
@@ -743,6 +743,12 @@ sub clean
                     ## known (fixed) vulnerability is src="data:..." 
                     $hash->{src} = canonical_url($hash->{src}, 1);  
                     
+                    ## Ratings can be cheated by commenting a popular post with 
+                    ## <img src="http://my-journal.livejournal.com/12345.html"> 
+                    if ($hash->{src} =~ m!/\d+\.html$!) {
+                        next TOKEN;    
+                    }
+                    
                     if ($img_bad) {
                         $newdata .= "<a class=\"ljimgplaceholder\" href=\"" .
                             LJ::ehtml($hash->{'src'}) . "\">" .
@@ -972,9 +978,8 @@ sub clean
             }
 
             if ($opencount{'style'} && $LJ::DEBUG{'s1_style_textnode'}) {
-                my $r = Apache->request;
-                my $uri = $r->uri;
-                my $host = $r->header_in("Host");
+                my $uri = LJ::Request->uri;
+                my $host = LJ::Request->header_in("Host");
                 warn "Got text node while style elements open.  Shouldn't happen anymore. ($host$uri)\n";
             }
 

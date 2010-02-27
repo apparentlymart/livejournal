@@ -43,9 +43,10 @@ sub render_body {
     $ret .= $class->start_form(%{$opts{form_attr}});
 
     my $tip_birthdate = LJ::ejs($class->ml('widget.createaccount.tip.birthdate2'));
-    my $tip_email = LJ::ejs($class->ml('widget.createaccount.tip.email'));
-    my $tip_password = LJ::ejs($class->ml('widget.createaccount.tip.password'));
-    my $tip_username = LJ::ejs($class->ml('widget.createaccount.tip.username'));
+    my $tip_email     = LJ::ejs($class->ml('widget.createaccount.tip.email'));
+    my $tip_password  = LJ::ejs($class->ml('widget.createaccount.tip.password'));
+    my $tip_username  = LJ::ejs($class->ml('widget.createaccount.tip.username'));
+    my $tip_gender    = LJ::ejs($class->ml('widget.createaccount.tip.gender'));
 
     # tip module
     if ($alt_layout) {
@@ -58,6 +59,7 @@ sub render_body {
         $ret .= "CreateAccount.email = \"$tip_email\"\n";
         $ret .= "CreateAccount.password = \"$tip_password\"\n";
         $ret .= "CreateAccount.username = \"$tip_username\"\n";
+        $ret .= "CreateAccount.gender   = \"$tip_gender\"\n";
         $ret .= "</script>\n";
         $ret .= "<div id='tips_box_arrow'></div>";
         $ret .= "<div id='tips_box'></div>";
@@ -152,6 +154,32 @@ sub render_body {
     );
     $ret .= $error_msg->('confirmpass', '<br /><span class="formitemFlag">', '</span>');
     $ret .= "</td></tr>\n" unless $alt_layout;
+
+
+    ### gender
+    if ($alt_layout){
+        $ret .= "<label for='create_gender_mm' class='label_create'>" . $class->ml('widget.createaccount.field.gender') . "</label>";
+        $ret .= "<div class='bubble' id='bubble_gender'>";
+        $ret .= "<div class='bubble-arrow'></div>";
+        $ret .= "<div class='bubble-text'>$tip_gender</div>";
+        $ret .= "</div>";
+    } else {
+        $ret .= "<tr><td class='field-name'>" . $class->ml('widget.createaccount.field.gender') . "</td>\n<td>";
+    }
+    $ret .= $class->html_select(
+                name => "gender",
+                id => "create_gender",
+                selected => $post->{gender},
+                list => [ 
+                    '' => '',
+                    'M' =>  LJ::Lang::ml("/manage/profile/index.bml.gender.male"),
+                    'F' =>  LJ::Lang::ml("/manage/profile/index.bml.gender.female"),
+                    'U' =>  LJ::Lang::ml("/manage/profile/index.bml.gender.unspecified"),
+                    ],
+                ) . " ";
+    $ret .= $error_msg->('gender', '<br /><span class="formitemFlag">', '</span>');
+    $ret .= "</td></tr>\n" unless $alt_layout;
+    
 
     ### birthdate
     if ($LJ::COPPA_CHECK) {
@@ -428,12 +456,16 @@ sub handle_post {
         $from_post{errors}->{password} = $class->ml('widget.createaccount.error.password.asciionly');
     }
 
+    ### gender check
+    $from_post{errors}->{gender} = $class->ml('widget.createaccount.error.nogender')
+        unless $post->{gender} =~ /^M|F|U$/;
+
     ### start COPPA_CHECK
     # age checking to determine how old they are
     if ($LJ::COPPA_CHECK) {
         my $uniq;
         if ($LJ::UNIQ_COOKIES) {
-            $uniq = Apache->request->notes('uniq');
+            $uniq = LJ::Request->notes('uniq');
             if ($uniq) {
                 my $timeof = $dbh->selectrow_array('SELECT timeof FROM underage WHERE uniq = ?', undef, $uniq);
                 $is_underage = 1 if $timeof && $timeof > 0;
@@ -517,6 +549,9 @@ sub handle_post {
             status_history => $opts{status_history},
         );
         return $class->ml('widget.createaccount.error.cannotcreate') unless $nu;
+
+        # set gender
+        $nu->set_prop(gender => $post->{gender});
 
         if ($LJ::HUMAN_CHECK{create} && !LJ::is_enabled("recaptcha")) {
             # mark the captcha for deletion

@@ -1,0 +1,40 @@
+;; -*- coding: utf-8 -*-
+.alias.aliaslist.more|staleness=1
+.alias.aliaslist.more=add more rows...
+
+.alias.comment.successupd|staleness=1
+.alias.comment.successupd=Your aliasing settings have been updated
+
+.alias.header.alias|staleness=1
+.alias.header.alias=Alias (note)
+
+.alias.header.newalias|staleness=1
+.alias.header.newalias=New alias:
+
+.alias.header.username|staleness=1
+.alias.header.username=Username
+
+.done.btn.savechanges|staleness=1
+.done.btn.savechanges=Save changes
+
+.error.too.long|staleness=1
+.error.too.long=You've reached the limit of the aliases.
+
+.error.user_not_exist|staleness=1
+.error.user_not_exist=User "[[username]]" is not exist.
+
+.error.yourself|staleness=1
+.error.yourself=You can not set an alias to yourself.
+
+.not.allowed|staleness=1
+.not.allowed=Available to <a [[aopts]]>paid account members</a> only.
+
+.success.head|staleness=1
+.success.head=Success
+
+.success.saved|staleness=1
+.success.saved=Your aliasing settings have been updated
+
+.title|staleness=1
+.title=Manage Aliases
+

@@ -65,10 +65,9 @@ sub ReplyPage
         my $errref;
         $comment = LJ::Comment->new($u, dtalkid => $editid);
         unless ($remote) {
-            my $r = $opts->{'r'};
-            my $host = $r->header_in("Host");
-            my $uri = $r->uri;
-            my $args = scalar $r->args;
+            my $host = LJ::Request->header_in("Host");
+            my $uri = LJ::Request->uri;
+            my $args = scalar LJ::Request->args;
             my $querysep = $args ? "?" : "";
             my $redir = LJ::eurl("http://$host$uri$querysep$args");
 
@@ -239,8 +238,7 @@ sub ReplyForm__print
         'remove_all_attribs' => 1,
     });
 
-    my $r = Apache->request;
-    my $post_vars = { $r->content };
+    my $post_vars = { LJ::Request->post_params() };
     $post_vars = $form->{_values} unless keys %$post_vars;
 
     $S2::pout->(LJ::Talk::talkform({ 'remote'    => $remote,

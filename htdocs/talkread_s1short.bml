@@ -9,11 +9,10 @@ body<=
     LJ::set_active_journal($ju);
 
     my $remote = LJ::get_remote();
-    my $r = Apache->request;
 
     # call s2 entry point to talkread in s1shortcomings
     my $styleid = 's1short'; # special virtual styleid
-    my $ctx = LJ::S2::s2_context($r, $styleid);
+    my $ctx = LJ::S2::s2_context('UNUSED', $styleid);
 
     my $entry = LJ::Entry->new($ju, ditemid => 1891);
 
@@ -23,7 +22,7 @@ body<=
 
         my $s2_ret = '';
         $LJ::S2::ret_ref = \$s2_ret;
-        eval { LJ::S2::s2_run($r, $ctx, undef, $func, @args); };
+        eval { LJ::S2::s2_run('UNUSED', $ctx, undef, $func, @args); };
         return LJ::error_list($@) if $@;
         return $s2_ret;
     };
@@ -37,7 +36,7 @@ body<=
     if ($view eq 'month') {
         $pageClass = "MonthPage";
         my $opts = {
-            r => $r,
+            r => 'UNUSED',
             ctx => $ctx,
             pathextra => "/2006/10",
         };
@@ -48,7 +47,7 @@ body<=
     } elsif ($view eq 'entry') {
         $pageClass = "EntryPage";
         my $opts = {
-            r => $r,
+            r => 'UNUSED',
             ctx => $ctx,
             ljentry => $entry,
         };
@@ -56,7 +55,7 @@ body<=
     } elsif ($view eq 'tags') {
         $pageClass = "TagsPage";
         my $opts = {
-            r => $r,
+            r => 'UNUSED',
             ctx => $ctx,
         };
         $page = LJ::S2::TagsPage($ju, $remote, $opts);

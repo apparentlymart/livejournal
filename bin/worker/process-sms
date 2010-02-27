@@ -9,9 +9,10 @@ use base 'LJ::NewWorker::TheSchwartz';
 require 'ljlib.pl';
 require 'ljprotocol.pl';
 require 'ljlang.pl';
+require 'ljfeed.pl';
 use LJ::SMS;
 
-sub capabilities { map { [ $_ => '' ] } LJ::SMS->schwartz_capabilities() }
+sub capabilities { return LJ::SMS->schwartz_capabilities() }
 
 __PACKAGE__->start();
 

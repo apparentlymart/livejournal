@@ -1,35 +1,52 @@
 ;; -*- coding: utf-8 -*-
-
+.alias.aliaslist.more|staleness=1
 .alias.aliaslist.more=add more rows...
 
+.alias.comment.successupd|staleness=1
 .alias.comment.successupd=Your notes settings have been updated
 
-.alias.header.username=Username
-
-.alias.header.alias=Notes
-
-.alias.header.newalias=New note:
-
-.alias.enterusername=Enter username
-
+.alias.enternote|staleness=1
 .alias.enternote=Enter note
 
-.done.btn.savechanges=Save changes
+.alias.enterusername|staleness=1
+.alias.enterusername=Enter username
 
+.alias.header.alias|staleness=1
+.alias.header.alias=Notes
+
+.alias.header.newalias|staleness=1
+.alias.header.newalias=New note:
+
+.alias.header.username|staleness=1
+.alias.header.username=Username
+
+.done.btn.delete|staleness=1
 .done.btn.delete=Delete selected notes
 
-.error.user_not_exist=User "[[username]]" is not exist.
+.done.btn.savechanges|staleness=1
+.done.btn.savechanges=Save changes
 
-.error.yourself=You cannot add a note to yourself.
-
-.error.too.long=You've reached the maximum number of the notes.
-
+.error.override_old_value|staleness=1
 .error.override_old_value=Old note for "%username%" will be deleted!
 
+.error.too.long|staleness=1
+.error.too.long=You've reached the maximum number of the notes.
+
+.error.user_not_exist|staleness=1
+.error.user_not_exist=User "[[username]]" is not exist.
+
+.error.yourself|staleness=1
+.error.yourself=You cannot add a note to yourself.
+
+.not.allowed|staleness=1
 .not.allowed=This feature is only available to <a [[aopts]]>Paid account</a> users.
 
+.success.head|staleness=1
 .success.head=Success
 
+.success.saved|staleness=1
 .success.saved=Your notes settings have been updated
 
+.title|staleness=1
 .title=Manage Notes
+

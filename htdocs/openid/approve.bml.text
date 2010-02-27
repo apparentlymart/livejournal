@@ -1,30 +1,43 @@
 ;; -*- coding: utf-8 -*-
-
-.error.openid_support_disabled=OpenID consumer support is disabled
-
-.error.login_needed=You need to be logged in to grant another site permission to know your identity.
-
-.error.need_to_login=You Need to Login
-
+.error.cannot_provide_identity|staleness=1
 .error.cannot_provide_identity=The site you just came from seems to want to verify <a href='[[url]]'>an identity</a> that you, as [[user]], cannot provide.
 
-.error.invalid_site_address=Invalid site address
-
-.error.possible_form_tampering=Possible form tampering detected.
-
-.error.failed_to_save=Failed to save
-
+.error.failed_sign_url|staleness=1
 .error.failed_sign_url=Failed to make signed return URL.
 
-.form.title=Grant identity validation?
+.error.failed_to_save|staleness=1
+.error.failed_to_save=Failed to save
 
-.form.header1=<?h1 Identity Validation h1?><?p Another site on the web wants to validate your LiveJournal identity.  No information will be shared with them that isn't already public in your profile, only that you're who you've already told them you are (if you told them). p?><?p The address wanting permission is: p?>
+.error.invalid_site_address|staleness=1
+.error.invalid_site_address=Invalid site address
 
-.form.header2=<?p Do you want to pass your identity to them? p?>
+.error.login_needed|staleness=1
+.error.login_needed=You need to be logged in to grant another site permission to know your identity.
 
-.form.button.yes_this_time=Yes; just this time.
+.error.need_to_login|staleness=1
+.error.need_to_login=You Need to Login
 
+.error.openid_support_disabled|staleness=1
+.error.openid_support_disabled=OpenID consumer support is disabled
+
+.error.possible_form_tampering|staleness=1
+.error.possible_form_tampering=Possible form tampering detected.
+
+.form.button.no|staleness=1
+.form.button.no=No.
+
+.form.button.yes_always|staleness=1
 .form.button.yes_always=Yes; always.
 
-.form.button.no=No.
+.form.button.yes_this_time|staleness=1
+.form.button.yes_this_time=Yes; just this time.
+
+.form.header1|staleness=1
+.form.header1=<?h1 Identity Validation h1?><?p Another site on the web wants to validate your LiveJournal identity.  No information will be shared with them that isn't already public in your profile, only that you're who you've already told them you are (if you told them). p?><?p The address wanting permission is: p?>
+
+.form.header2|staleness=1
+.form.header2=<?p Do you want to pass your identity to them? p?>
+
+.form.title|staleness=1
+.form.title=Grant identity validation?
 

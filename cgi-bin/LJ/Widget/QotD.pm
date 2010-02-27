@@ -60,6 +60,22 @@ sub render_body {
     return $ret;
 }
 
+my %cyr_countries = map {lc} map { $_ => $_ } qw(AM AZ BY EE GE KG KZ LT LV MD RU TJ TM UA UZ);
+
+sub community_name {
+    my $class = shift;
+    my $u = shift;
+
+    $u = LJ::get_remote() unless $u;
+
+    my $country;
+    $country = lc $u->country if $u;
+    $country = lc LJ::country_of_remote_ip() unless $country;
+
+    return 'writersblock' .
+        (exists($cyr_countries{$country}) ? '_ru' : '');
+}
+
 ##
 ## Returns hash with question data
 ## 
@@ -121,6 +137,7 @@ sub qotd_display {
 
     my $questions = $opts{questions} || [];
     my $remote = LJ::get_remote();
+    my $community_name = $class->community_name($remote);
 
     my $ret;
     if (@$questions) {
@@ -149,12 +166,12 @@ sub qotd_display {
                 "$archive | $suggest</span>$d->{from_text}" . $class->impression_img($q) . "</p>";
 
             my $add_friend = '';
-            my $writersblock = LJ::load_user("writersblock");
-            $add_friend = "<li><span><a href='$LJ::SITEROOT/friends/add.bml?user=writersblock'>" . $class->ml('widget.qotd.add_friend') . "</a></span></li>"
+            my $writersblock = LJ::load_user($community_name);
+            $add_friend = "<li><span><a href='$LJ::SITEROOT/friends/add.bml?user=$community_name'>" . $class->ml('widget.qotd.add_friend') . "</a></span></li>"
                 if $writersblock && !LJ::is_friend($remote,$writersblock);
 
             my $add_notification = '';
-            $add_notification = "<li><span><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=writersblock&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></span></li>"
+            $add_notification = "<li><span><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$community_name&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></span></li>"
                 unless $writersblock && $remote && $remote->has_subscription(
                     journal         => $writersblock,
                     event           => 'JournalNewEntry',

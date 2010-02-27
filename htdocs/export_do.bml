@@ -2,9 +2,6 @@
 
         LJ::set_active_crumb('export');
 
-        my $req = shift;
-        my $r = $req->{'r'};
-
         my $remote = LJ::get_remote();
         return "<?needlogin?>"
             unless $remote;
@@ -66,21 +63,21 @@
 
         if ($POST{'format'} eq "csv") {
             $opts->{'format'} = "csv";
-            $r->content_type("text/plain");
+            LJ::Request->content_type("text/plain");
             my $filename = "$u->{user}-$year-$month.csv";
-            $r->header_out('Content-Disposition' => "attachment; filename=$filename");
-            $r->send_http_header();
+            LJ::Request->header_out('Content-Disposition' => "attachment; filename=$filename");
+            LJ::Request->send_http_header();
             if ($POST{'header'}) {
-                $r->print(join(",",@fields) . "\n");
+                LJ::Request->print(join(",",@fields) . "\n");
             }
         }
         if ($POST{'format'} eq "xml") {
             $opts->{'format'} = "xml";
             my $lenc = lc($encoding);
-            $r->content_type("text/xml; charset=$lenc");
-            $r->send_http_header();
-            $r->print("<?xml version=\"1.0\" encoding='$lenc'?>\n");
-            $r->print("<livejournal>\n");
+            LJ::Request->content_type("text/xml; charset=$lenc");
+            LJ::Request->send_http_header();
+            LJ::Request->print("<?xml version=\"1.0\" encoding='$lenc'?>\n");
+            LJ::Request->print("<livejournal>\n");
         }
 
         $opts->{'fields'} = \@fields;
@@ -91,7 +88,7 @@
         $sth = $dbcr->prepare("SELECT jitemid, anum, eventtime, logtime, security, allowmask FROM log2 ".
                               "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month");
         $sth->execute;
-        if ($dbcr->err) { $r->print($dbcr->errstr); return; }
+        if ($dbcr->err) { LJ::Request->print($dbcr->errstr); return; }
         my @buffer;
         while ($_ = $sth->fetchrow_hashref) {
             $_->{'ritemid'} = $_->{'jitemid'} || $_->{'itemid'};
@@ -106,7 +103,7 @@
         load_and_dump_buffer($u, \@buffer, $opts);
 
         if ($opts->{'format'} eq "xml") {
-            $r->print("</livejournal>\n");
+            LJ::Request->print("</livejournal>\n");
         }
         return;
 
@@ -157,7 +154,7 @@
                                                           -charset=>$opts->{'encoding'}});
                 }
 
-                $r->print($entry);
+                LJ::Request->print($entry);
             }
         }
 

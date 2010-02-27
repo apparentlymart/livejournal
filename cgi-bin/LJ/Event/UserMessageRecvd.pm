@@ -198,20 +198,6 @@ sub subscriptions {
     return @subs;
 }
 
-sub get_subscriptions {
-    my ($self, $u, $subid) = @_;
-
-    unless ($subid) {
-        my $row = { userid  => $u->{userid},
-                    ntypeid => LJ::NotificationMethod::Inbox->ntypeid, # Inbox
-                  };
-
-        return LJ::Subscription->new_from_row($row);
-    }
-
-    return $self->SUPER::get_subscriptions($u, $subid);
-}
-
 sub display_pic {
     my ($msg, $u) = @_;
 
@@ -229,9 +215,6 @@ sub display_pic {
 
     return $ret;
 }
-
-# Event is always subscribed to
-sub always_checked { 1 }
 
 # return detailed data for XMLRPC::getinbox
 sub raw_info {
@@ -256,6 +239,34 @@ sub raw_info {
     $res->{parent} = $msg->parent_msgid if $msg->parent_msgid;
 
     return $res;
+}
+
+sub available_for_user  {
+    my ($self, $u) = @_;
+
+    return $self->userid != $u->id ? 0 : 1;
+}
+
+sub is_subscription_visible_to  {
+    my ($self, $u) = @_;
+
+    return $self->userid != $u->id ? 0 : 1;
+}
+
+sub is_tracking { 0 }
+
+sub is_subscription_ntype_disabled_for {
+    my ($self, $ntypeid, $u) = @_;
+
+    return 1 if $ntypeid == LJ::NotificationMethod::Inbox->ntypeid;
+    return $self->SUPER::is_subscription_ntype_disabled_for($ntypeid, $u);
+}
+
+sub get_subscription_ntype_force {
+    my ($self, $ntypeid, $u) = @_;
+
+    return 1 if $ntypeid == LJ::NotificationMethod::Inbox->ntypeid;
+    return $self->SUPER::get_subscription_ntype_force($ntypeid, $u);
 }
 
 1;

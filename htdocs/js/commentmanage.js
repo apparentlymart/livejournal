@@ -253,13 +253,11 @@ function createDeleteFunction (ae, dItemid) {
 				return Event.stop(e);
 			}
 			
-			var de = jQuery('<div class="ljcmtmanage" style="text-align:left;position:absolute;visibility:hidden;width:250px;left:0;top:0;z-index:3"></div>');
+			var de = jQuery('<div class="ljcmtmanage" style="text-align:left;position:absolute;visibility:hidden;width:250px;left:0;top:0;z-index:3"></div>')
+						.click(function(e){
+							e.stopPropagation()
+						});
 			
-            DOM.addEventListener(de, 'click', function (e) {
-                Event.stopPropagation(e);
-                return true;
-            });
-
             var inHTML = "<form style='display: inline' id='ljdelopts" + dItemid + "'><span style='font-face: Arial; font-size: 8pt'><b>Delete comment?</b><br />";
             var lbl;
             if (com.u != "" && com.u != remoteUser && canAdmin) {

@@ -117,7 +117,7 @@ sub start_request_reload {
                 #
                 # only print when we're in web-context
                 print STDERR "[$$] ljconfig.pl reloaded\n"
-                    if eval { Apache->request };
+                    if LJ::Request->is_inited;
             }
         }
         $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = $now;

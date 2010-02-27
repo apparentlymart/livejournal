@@ -21,7 +21,7 @@ use Class::Autouse qw(
                       LJ::LastFM
                       );
 use Storable;
-use Apache::Constants ();
+use LJ::Request;
 use POSIX ();
 use Encode;
 
@@ -186,9 +186,8 @@ sub s2_run
         # expand lj-embed tags
         if ($text =~ /lj\-embed/i) {
             # find out what journal we're looking at
-            my $r = eval { Apache->request };
-            if ($r && $r->notes("journalid")) {
-                my $journal = LJ::load_userid($r->notes("journalid"));
+            if (LJ::Request->is_inited && LJ::Request->notes("journalid")) {
+                my $journal = LJ::load_userid(LJ::Request->notes("journalid"));
                 # expand tags
                 LJ::EmbedModule->expand_entry($journal, \$text)
                     if $journal;
@@ -207,9 +206,9 @@ sub s2_run
 
     my $send_header = sub {
         my $status = $ctx->[S2::SCRATCH]->{'status'} || 200;
-        $r->status($status);
-        $r->content_type($ctx->[S2::SCRATCH]->{'ctype'} || $ctype);
-        $r->send_http_header();
+        LJ::Request->status($status);
+        LJ::Request->content_type($ctx->[S2::SCRATCH]->{'ctype'} || $ctype);
+        LJ::Request->send_http_header();
     };
 
     my $need_flush;
@@ -665,8 +664,7 @@ sub s2_context
     # but it doesn't matter if we're using the minimal style ...
     my %style;
     eval {
-        my $r = Apache->request;
-        if ($r->notes('use_minimal_scheme')) {
+        if (LJ::Request->notes('use_minimal_scheme')) {
             my $public = get_public_layers();
             while (my ($layer, $name) = each %LJ::MINIMAL_STYLE) {
                 next unless $name ne "";
@@ -716,24 +714,24 @@ sub s2_context
         if ($styleid) { return s2_context($r, 0, $opts); }
 
         # were we trying to load the default style?
-        $r->content_type("text/html");
-        $r->send_http_header();
-        $r->print("<b>Error preparing to run:</b> One or more layers required to load the stock style have been deleted.");
+        LJ::Request->content_type("text/html");
+        LJ::Request->send_http_header();
+        LJ::Request->print("<b>Error preparing to run:</b> One or more layers required to load the stock style have been deleted.");
         return undef;
     }
 
     if ($opts->{'use_modtime'})
     {
-        my $ims = $r->header_in("If-Modified-Since");
+        my $ims = LJ::Request->header_in("If-Modified-Since");
         my $ourtime = LJ::time_to_http($modtime);
         if ($ims eq $ourtime) {
             # 304 return; unload non-public layers
             LJ::S2::cleanup_layers(@layers);
-            $r->status_line("304 Not Modified");
-            $r->send_http_header();
+            LJ::Request->status_line("304 Not Modified");
+            LJ::Request->send_http_header();
             return undef;
         } else {
-            $r->header_out("Last-Modified", $ourtime);
+            LJ::Request->header_out("Last-Modified", $ourtime);
         }
     }
 
@@ -759,9 +757,9 @@ sub s2_context
     LJ::S2::cleanup_layers(@layers);
 
     my $err = $@;
-    $r->content_type("text/html");
-    $r->send_http_header();
-    $r->print("<b>Error preparing to run:</b> $err");
+    LJ::Request->content_type("text/html");
+    LJ::Request->send_http_header();
+    LJ::Request->print("<b>Error preparing to run:</b> $err");
     return undef;
 
 }
@@ -1417,7 +1415,9 @@ sub get_layer_checker
         my $frz = $dbh->selectrow_array("SELECT checker FROM s2checker WHERE s2lid=?",
                                         undef, $parid) or return undef;
         LJ::text_uncompress(\$frz);
-        return Storable::thaw($frz); # can be undef, on failure
+        my $res = eval { Storable::thaw($frz) } || undef;
+        warn "Can't deserialize layer: $@" if $@;
+        return $res;
     };
 
     # the good path
@@ -1902,8 +1902,7 @@ sub Entry
         $e->{'metadata'}->{'location'} = $loc->as_html_current if $loc;
     }
 
-    my $r = Apache->request;
-    if (LJ::is_enabled('show_copyright', $u) && ($r->notes('codepath') eq 's2.entry' || $r->notes('codepath') eq 's2.reply')) {
+    if (LJ::is_enabled('show_copyright', $u) && (LJ::Request->notes('codepath') eq 's2.entry' || LJ::Request->notes('codepath') eq 's2.reply')) {
         if ($p->{'copyright'} eq 'C' and $arg->{'security'} eq "public") {
             $e->{'metadata'}->{'<small>&Oslash; '} = $LJ::S2::CURR_CTX->[S2::PROPS]->{"text_copyr_disagree"} . '</small>';
         }
@@ -2470,17 +2469,15 @@ sub viewer_sees_control_strip
 {
     return 0 unless $LJ::USE_CONTROL_STRIP;
 
-    my $r = Apache->request;
     return LJ::run_hook('show_control_strip', {
-        userid => $r->notes("journalid"),
+        userid => LJ::Request->notes("journalid"),
     });
 }
 
 sub _get_ad_box_args {
     my $ctx = shift;
     
-    my $r = Apache->request;
-    my $journalu = LJ::load_userid($r->notes("journalid"));
+    my $journalu = LJ::load_userid(LJ::Request->notes("journalid"));
     return unless $journalu;
     
     my $colors = _get_colors_for_ad($ctx);
@@ -2533,8 +2530,7 @@ sub viewer_sees_ad_box {
 }
 
 sub viewer_sees_ebox {
-    my $r = Apache->request;
-    my $u = LJ::load_userid($r->notes("journalid"));
+    my $u = LJ::load_userid(LJ::Request->notes("journalid"));
     return 0 unless $u;
 
     if (LJ::S2::current_box_type($u) eq "ebox") {
@@ -2547,8 +2543,7 @@ sub viewer_sees_ebox {
 sub _get_Entry_ebox_args {
     my ($ctx, $this) = @_;
     
-    my $r = Apache->request;
-    my $journalu = LJ::load_userid($r->notes("journalid"));
+    my $journalu = LJ::load_userid(LJ::Request->notes("journalid"));
     return unless $journalu;
 
     my $curr_entry_ct = LJ::S2::nth_entry_seen($this);
@@ -2605,17 +2600,15 @@ sub viewer_sees_ads # deprecated.
 {
     return 0 unless $LJ::USE_ADS;
 
-    my $r = Apache->request;
     return LJ::run_hook('should_show_ad', {
         ctx  => 'journal',
-        userid => $r->notes("journalid"),
+        userid => LJ::Request->notes("journalid"),
     });
 }
 
 sub control_strip_logged_out_userpic_css
 {
-    my $r = Apache->request;
-    my $u = LJ::load_userid($r->notes("journalid"));
+    my $u = LJ::load_userid(LJ::Request->notes("journalid"));
     return '' unless $u;
 
     return LJ::run_hook('control_strip_userpic', $u);
@@ -2623,8 +2616,7 @@ sub control_strip_logged_out_userpic_css
 
 sub control_strip_logged_out_full_userpic_css
 {
-    my $r = Apache->request;
-    my $u = LJ::load_userid($r->notes("journalid"));
+    my $u = LJ::load_userid(LJ::Request->notes("journalid"));
     return '' unless $u;
 
     return LJ::run_hook('control_strip_loggedout_userpic', $u);
@@ -2641,8 +2633,7 @@ sub journal_current_datetime {
 
     my $ret = { '_type' => 'DateTime' };
 
-    my $r = Apache->request;
-    my $u = LJ::load_userid($r->notes("journalid"));
+    my $u = LJ::load_userid(LJ::Request->notes("journalid"));
     return $ret unless $u;
 
     # turn the timezone offset number into a four character string (plus '-' if negative)

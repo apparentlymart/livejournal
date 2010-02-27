@@ -131,16 +131,25 @@ sub subscription_as_html {
     return BML::ml('event.defriended.' . ($journal_is_owner ? 'me' : 'user'), { user => $journal->ljuser_display });
 }
 
-# only users with the track_defriended cap can use this
-sub available_for_user  {
-    my ($class, $u, $subscr) = @_;
-    return $u->get_cap("track_defriended") ? 1 : 0;
-}
-
 sub content {
     my ($self) = @_;
 
     return $self->as_html_actions;
 }
+
+sub available_for_user  {
+    my ($self, $u) = @_;
+
+    return 0 if $self->userid != $u->id;
+    return $u->get_cap("track_defriended") ? 1 : 0;
+}
+
+sub is_subscription_visible_to  {
+    my ($self, $u) = @_;
+
+    return $self->userid != $u->id ? 0 : 1;
+}
+
+sub is_tracking { 0 }
 
 1;

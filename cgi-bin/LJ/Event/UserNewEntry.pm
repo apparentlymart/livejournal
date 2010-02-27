@@ -158,4 +158,8 @@ sub subscription_as_html {
         BML::ml('event.user_new_entry.any'); # "Any of my friends posts a new entry anywhere."
 }
 
+sub available_for_user { 0 }
+sub is_tracking { 1 }
+sub is_subscription_visible_to { 1 }
+
 1;

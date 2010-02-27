@@ -1,5 +1,4 @@
 ;; -*- coding: utf-8 -*-
-
 .birthday.birthdate=Birthdate:
 
 .birthday.head=Age Verification
@@ -20,6 +19,7 @@
 
 .btn.proceed=Proceed...
 
+.captcha.answer|staleness=1
 .captcha.answer=Answer:
 
 .captcha.audiodesc=Type the numbers you hear to prove that you're not a spam robot:
@@ -150,6 +150,7 @@ Thanks for supporting [[sitename]]!
 
 .success.text3=Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal.
 
+.title|staleness=1
 .title=Create New Journal
 
 .title_1=Create Your [[siteabbr]] Account
@@ -181,3 +182,4 @@ Thanks for supporting [[sitename]]!
 .username.text_1=Your username is what you use to log in to [[sitename]]. It will appear in your journal address (username.[[lc_sitename]]) as well as next to your posts and comments.
 
 .username.username=username
+

@@ -1,0 +1,10 @@
+;; -*- coding: utf-8 -*-
+.switcher.btn|staleness=1
+.switcher.btn=Go
+
+.switcher.label|staleness=1
+.switcher.label=Switch to:
+
+.title|staleness=1
+.title=Customize Journal Style
+

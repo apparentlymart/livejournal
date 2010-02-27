@@ -1,31 +1,46 @@
 ;; -*- coding: utf-8 -*-
+.as.theme|staleness=1
 .as.theme=As Theme
 
+.core.layer|staleness=1
 .core.layer=Core layer for layout not found.
 
-.customize=customize
-
+.core.layer.for.layout|staleness=1
 .core.layer.for.layout=Core layer for layout not found.
 
+.customize|staleness=1
+.customize=customize
+
+.layer.belongs|staleness=1
 .layer.belongs=Layer belongs to another user.
 
+.layer.isnt.type|staleness=1
 .layer.isnt.type=Layer isn't of type user or theme.
 
+.layout.layer|staleness=1
 .layout.layer=Layout layer for this [[layertype]] layer not found.
 
-.login.required=Login Required
-
+.login.first|staleness=1
 .login.first=You must first <a [[url]]>login</a>. 
 
+.login.required|staleness=1
+.login.required=Login Required
+
+.no.user.layer|staleness=1
 .no.user.layer=No user layer
 
+.raw|staleness=1
 .raw=Raw
 
+.style.not.found|staleness=1
 .style.not.found=Style not found.
 
+.switch|staleness=1
 .switch=Switch
 
+.user.layer|staleness=1
 .user.layer=User Layer
 
+.work.with.journal|staleness=1
 .work.with.journal=Work with journal: 
 

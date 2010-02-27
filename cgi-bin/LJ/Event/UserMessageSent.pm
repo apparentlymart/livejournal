@@ -65,7 +65,7 @@ sub content {
     return $body;
 }
 
-# override parent class sbuscriptions method to always return
+# override parent class subscriptions method to always return
 # a subscription object for the user
 sub subscriptions {
     my ($self, %args) = @_;
@@ -85,19 +85,6 @@ sub subscriptions {
     push @subs, LJ::Subscription->new_from_row($row);
 
     return @subs;
-}
-
-sub get_subscriptions {
-    my ($self, $u, $subid) = @_;
-
-    unless ($subid) {
-        my $row = { userid  => $u->{userid},
-                    ntypeid => LJ::NotificationMethod::Inbox->ntypeid, # Inbox
-                  };
-
-        return LJ::Subscription->new_from_row($row);
-    }
-
 }
 
 # Have notifications for this event show up as read
@@ -147,5 +134,15 @@ sub raw_info {
 
     return $res;
 }
+
+sub available_for_user  {
+    my ($self, $u) = @_;
+
+    return $self->userid != $u->id ? 0 : 1;
+}
+
+sub is_subscription_visible_to  { 0 }
+
+sub is_tracking { 0 }
 
 1;

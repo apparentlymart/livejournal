@@ -89,4 +89,8 @@ sub community {
     return LJ::load_userid($self->arg1);
 }
 
+sub available_for_user  { 1 }
+sub is_subscription_visible_to  { 0 }
+sub is_tracking { 0 }
+
 1;

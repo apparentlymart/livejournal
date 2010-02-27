@@ -12,8 +12,8 @@ use LJ::ESN;
 
 # Capabilities must return array of references to pairs: (classname, role).
 # LJ::ESN->schwartz_capabilities() returns array to classnames.
-sub capabilities { map { [ $_ => '' ] } LJ::ESN->schwartz_capabilities() }
+sub capabilities { return LJ::ESN->schwartz_capabilities() }
 
-__PACKAGE__->start();
+__PACKAGE__->start() unless caller;
 
 1;

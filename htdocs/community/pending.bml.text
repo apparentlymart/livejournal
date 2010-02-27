@@ -1,13 +1,19 @@
 ;; -*- coding: utf-8 -*-
+.approve.title=<b>Approve Membership?</b>
 
+.ban|staleness=1
 .ban=No and ban
 
+.button.approve|staleness=1
 .button.approve=Approve membership
 
+.button.reject|staleness=1
 .button.reject=Reject membership
 
+.button.reject_ban|staleness=1
 .button.reject_ban=Reject membership and set ban
 
+.jump|staleness=1
 .jump=Jump to user
 
 .no=No
@@ -16,11 +22,13 @@
 
 .nopending.title=Nobody Pending
 
+.succedd.ban_skipped|staleness=1
+.succedd.ban_skipped=You have [[num]] failed [[?num|ban|bans]] from this community. You can clean ban list and try again.
+
 .success.added=You have added [[num]] [[?num|person|persons]] to this community.
 
+.success.banned|staleness=1
 .success.banned=You have banned [[num]] [[?num|person|persons]] from this community.
-
-.succedd.ban_skipped=You have [[num]] failed [[?num|ban|bans]] from this community. You can clean ban list and try again.
 
 .success.ignored=[[num]] [[?num|request is|requests are]] still on file pending decisions.
 

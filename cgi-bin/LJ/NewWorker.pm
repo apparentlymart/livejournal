@@ -196,8 +196,8 @@ sub start {
 ##########################
 # Memory consuption checks
 
-use GTop ();
-my $gtop = GTop->new;
+#use GTop ();
+#my $gtop = GTop->new;
 my $last_mem_check = 0;
 
 sub set_memory_limit {

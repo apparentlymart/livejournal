@@ -1,19 +1,28 @@
 ;; -*- coding: utf-8 -*-
+.comm.success|staleness=1
 .comm.success=Success
 
+.commreject.text|staleness=1
 .commreject.text=You have rejected the membership request of [[user]] in [[comm]].
 
+.error.actionperformed|staleness=1
 .error.actionperformed=This action has already been performed
 
-.error.rejecting=There was an error rejecting this request to join.
-
+.error.internerr.invalidaction|staleness=1
 .error.internerr.invalidaction=Internal error: invalid action
 
+.error.invalidargument|staleness=1
 .error.invalidargument=Invalid argument given
 
+.error.rejecting|staleness=1
+.error.rejecting=There was an error rejecting this request to join.
+
+.error.unknownactiontype|staleness=1
 .error.unknownactiontype=Unknown action type
 
+.shared.success|staleness=1
 .shared.success=Success
 
+.title|staleness=1
 .title=Action Reject
 

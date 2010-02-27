@@ -1,137 +1,190 @@
 ;; -*- coding: utf-8 -*-
-
 .about.comm=About:
 
+.about.header|staleness=1
 .about.header=About
 
 .about.user=Bio:
 
+.addalias.title|staleness=1
 .addalias.title=Add Note
 
-.editalias.title=Edit Note
-
-.useralias.title=Add/edit a note to this user
-
-.useralias.title.disabled=Sorry, you don't have rights to add or edit a note to this user. Please, upgrade your account to paid
-
+.admins.header|staleness=1
 .admins.header=Administrators
 
 .allpics=View all userpics
 
+.basicinfo.header|staleness=1
 .basicinfo.header=Basic Info
 
+.bio.header|staleness=1
 .bio.header=Bio
 
 .body.leave2=You may <a [[aopts]]>leave the community</a> at any time.
 
+.commdesc.header|staleness=1
 .commdesc.header=Description:
 
 .comminfo.body=Below is information about the "[[commname]]" community on LiveJournal.
 
 .comminfo.name=Community Information
 
+.comms.header|staleness=1
 .comms.header=Communities
 
+.comms.memberof|staleness=1
 .comms.memberof=Member of
 
+.comms.postingaccess|staleness=1
 .comms.postingaccess=Posting Access
 
+.comms.watching|staleness=1
 .comms.watching=Watching
 
+.commsettings.membership.closed|staleness=1
 .commsettings.membership.closed=Closed
 
+.commsettings.membership.header|staleness=1
 .commsettings.membership.header=Membership:
 
+.commsettings.membership.moderated|staleness=1
 .commsettings.membership.moderated=Moderated
 
+.commsettings.membership.open|staleness=1
 .commsettings.membership.open=Open
 
+.commsettings.postlevel.anybody|staleness=1
 .commsettings.postlevel.anybody=Anybody
 
+.commsettings.postlevel.header|staleness=1
 .commsettings.postlevel.header=Posting Access:
 
+.commsettings.postlevel.members|staleness=1
 .commsettings.postlevel.members=All Members
 
+.commsettings.postlevel.moderated|staleness=1
 .commsettings.postlevel.moderated=, Moderated
 
+.commsettings.postlevel.select|staleness=1
 .commsettings.postlevel.select=Select Members
 
+.contact.header|staleness=1
 .contact.header=Contact:
 
+.contact.pm|staleness=1
 .contact.pm=Private Message
 
+.contact.txtmsg|staleness=1
 .contact.txtmsg=Text Message
 
 .date.never=<i>Never.</i>
 
+.details.comments.posted|staleness=1
 .details.comments.posted=[[num]] [[?num|comment|comments]] posted
 
+.details.comments.posted2|staleness=1
 .details.comments.posted2=[[num_comma]] [[?num_raw|comment|comments]] posted
 
+.details.comments.received|staleness=1
 .details.comments.received=[[num]] [[?num|comment|comments]] received
 
+.details.comments.received2|staleness=1
 .details.comments.received2=[[num_comma]] [[?num_raw|comment|comments]] received
 
+.details.created|staleness=1
 .details.created=Created: [[createdate]]
 
+.details.createdon|staleness=1
 .details.createdon=Created On: [[createdate]]
 
+.details.createdon2|staleness=1
 .details.createdon2=Created on [[createdate]]
 
+.details.entries|staleness=1
 .details.entries=[[num]] [[?num|entry|entries]]
 
+.details.entries2|staleness=1
 .details.entries2=[[num_comma]] [[?num_raw|entry|entries]]
 
+.details.entries3|staleness=1
 .details.entries3=[[num_comma]] <a [[aopts]]>[[?num_raw|Journal Entry|Journal Entries]]</a>
 
+.details.flag.other|staleness=1
 .details.flag.other=Flag this journal as mature/adult.
 
+.details.flag.self|staleness=1
 .details.flag.self=Set this journal as mature/adult.
 
+.details.fotobilder|staleness=1
 .details.fotobilder=[[num]] files in <a [[aopts]]>FotoBilder</a>
 
+.details.fotobilder2|staleness=1
 .details.fotobilder2=[[num]] <a [[aopts]]>FotoBilder Files</a>
 
+.details.id|staleness=1
 .details.id=LJ User No.: [[id]]
 
+.details.joined|staleness=1
 .details.joined=Joined: [[createdate]]
 
+.details.lastupdated|staleness=1
 .details.lastupdated=Last updated [[timestamp]]
 
-.details.lastupdated2=last updated [[timestamp]]
-
+.details.lastupdated.never|staleness=1
 .details.lastupdated.never=Never updated
 
+.details.lastupdated.never2|staleness=1
 .details.lastupdated.never2=never updated
 
+.details.lastupdated2|staleness=1
+.details.lastupdated2=last updated [[timestamp]]
+
+.details.membersince|staleness=1
 .details.membersince=Member Since: [[createdate]]
 
+.details.memories|staleness=1
 .details.memories=[[num]] <a [[aopts]]>[[?num|Memory|Memories]]</a>
 
+.details.memories2|staleness=1
 .details.memories2=[[num_comma]] <a [[aopts]]>[[?num_raw|Memory|Memories]]</a>
 
+.details.nudge|staleness=1
 .details.nudge=Nudge
 
+.details.search|staleness=1
 .details.search=Search
 
+.details.supportpoints|staleness=1
 .details.supportpoints=<a [[aopts]]>Support Points</a>: [[num]]
 
+.details.supportpoints2|staleness=1
 .details.supportpoints2=[[num]] <a [[aopts]]>Support [[?num_raw|Point|Points]]</a>
 
+.details.tags|staleness=1
 .details.tags=[[num]] <a [[aopts]]>[[?num|Tag|Tags]]</a>
 
+.details.tags2|staleness=1
 .details.tags2=[[num_comma]] <a [[aopts]]>[[?num_raw|Tag|Tags]]</a>
 
+.details.title|staleness=1
 .details.title=[[user]]'s Journal
 
+.details.userpics|staleness=1
 .details.userpics=[[num_comma]] <a [[aopts]]>[[?num_raw|Userpic|Userpics]]</a>
 
+.details.viewlinkssep|staleness=1
 .details.viewlinkssep=, 
 
+.details.warning.concepts|staleness=1
 .details.warning.concepts=This journal may contain adult concepts.
 
+.details.warning.explicit|staleness=1
 .details.warning.explicit=This journal may contain explicit adult content.
 
+.editalias.title|staleness=1
+.editalias.title=Edit Note
+
+.error.deleted.purgenotification|staleness=1
 .error.deleted.purgenotification=If you're interested in renaming your account to this username, <a [[aopts]]>set up your notifications</a> to be notified when the account is purged.
 
 .error.malfname=Malformed username.
@@ -140,6 +193,7 @@
 
 .fbpictures.over=over [[count]] public
 
+.flag|staleness=1
 .flag=Flag Journal
 
 .friendof.comm=Watched by:
@@ -150,58 +204,86 @@
 
 .friendof.user=Friend of:
 
+.friends.alsofriendof|staleness=1
 .friends.alsofriendof=Also Friend of
 
 .friends.comm=Members
 
+.friends.friendof|staleness=1
 .friends.friendof=Friend of
 
+.friends.friends|staleness=1
 .friends.friends=Friends
 
+.friends.header|staleness=1
 .friends.header=Friends
 
+.friends.mutual|staleness=1
 .friends.mutual=Mutual Friends
 
 .friends.user=Friends
 
+.friends.viewall.comm|staleness=1
+.friends.viewall.comm=This community has [[num]] members. <a [[aopts]]>View them all.</a>
+
+.friends.viewall.comm2|staleness=1
 .friends.viewall.comm2=<a [[aopts]]>View all</a>
 
+.friends.viewall.other|staleness=1
 .friends.viewall.other=This user is watching [[num]] friends, communities, and feeds. <a [[aopts]]>View them all.</a>
 
+.friends.viewall.self|staleness=1
 .friends.viewall.self=You are watching [[num]] friends, communities, and feeds. <a [[aopts]]>View them all.</a>
 
+.friends.viewentries|staleness=1
 .friends.viewentries=View Entries
 
+.im.aol|staleness=1
 .im.aol=AIM
 
+.im.aol.status|staleness=1
 .im.aol.status=AIM status
 
+.im.gizmo|staleness=1
 .im.gizmo=Gizmo
 
+.im.gtalk|staleness=1
 .im.gtalk=Google Talk
 
+.im.header|staleness=1
 .im.header=Instant Message:
 
+.im.header2|staleness=1
 .im.header2=External Services:
 
+.im.icq|staleness=1
 .im.icq=ICQ
 
+.im.icq.status|staleness=1
 .im.icq.status=ICQ status
 
+.im.jabber|staleness=1
 .im.jabber=Jabber
 
+.im.lastfm|staleness=1
 .im.lastfm=Last.fm
 
+.im.msn|staleness=1
 .im.msn=Windows Live ID
 
+.im.msn.status|staleness=1
 .im.msn.status=LJ Messenger Status:
 
+.im.skype|staleness=1
 .im.skype=Skype
 
+.im.skype.status|staleness=1
 .im.skype.status=Skype status
 
+.im.yim|staleness=1
 .im.yim=Yahoo!
 
+.im.yim.status|staleness=1
 .im.yim.status=Yahoo! status
 
 .label.addbuddy=Add Buddy
@@ -222,6 +304,7 @@
 
 .label.comreceived=<b>Received:</b> [[num]]
 
+.label.connect|staleness=1
 .label.connect=Connect
 
 .label.datecreated=Date created:
@@ -244,18 +327,21 @@
 
 .label.googletalk=Google Talk:
 
-.label.icq_send_message=Send Message
-
 .label.icquin=ICQ UIN:
+
+.label.icq_send_message|staleness=1
+.label.icq_send_message=Send Message
 
 .label.interests=Interests
 
 .label.interests.modifyyours=Modify&nbsp;yours
 
+.label.interests.modifyyours2|staleness=1
 .label.interests.modifyyours2=Modify Yours
 
 .label.interests.removesome=Remove&nbsp;some
 
+.label.interests.removesome2|staleness=1
 .label.interests.removesome2=Remove Some
 
 .label.intsnotshown=<b>... [[intnotshown]] interests not shown</b>
@@ -264,8 +350,10 @@
 
 .label.journalentrs=Journal entries:
 
+.label.last_fm_user|staleness=1
 .label.last_fm_user=Last.FM user:
 
+.label.last_fm_user2|staleness=1
 .label.last_fm_user2=Last.fm user:
 
 .label.location=Location:
@@ -276,6 +364,7 @@
 
 .label.memberof=Member of
 
+.label.memories|staleness=1
 .label.memories=Memories
 
 .label.moderators=Moderators
@@ -292,6 +381,7 @@
 
 .label.noschools=None listed
 
+.label.nudge|staleness=1
 .label.nudge=Nudge This Friend
 
 .label.post=Post to "[[journal]]"
@@ -316,10 +406,12 @@
 
 .label.syndicatedstatus=Syndication Status:
 
+.label.syndreadcount|staleness=1
 .label.syndreadcount=Number of Readers:
 
 .label.textmessage=<nobr>Text<br>Message</nobr>:
 
+.label.theme|staleness=1
 .label.theme=Theme:
 
 .label.todo=To-Do List
@@ -336,12 +428,16 @@
 
 .label.yahooid=Yahoo! ID:
 
+.members.header|staleness=1
 .members.header=Members
 
+.members.members|staleness=1
 .members.members=Members
 
+.members.postingaccess|staleness=1
 .members.postingaccess=Posting Access
 
+.members.watchedby|staleness=1
 .members.watchedby=Watched by
 
 .membership.body2=To join this community, <a [[aopts]]>click here</a>.
@@ -360,116 +456,171 @@
 
 .nonexist.name=Unknown user
 
+.optionlinks.addfriend|staleness=1
 .optionlinks.addfriend=Add Friend
 
-.optionlinks.addfriend.title.self=Add yourself as a friend
-
-.optionlinks.addfriend.title.other=Add this user as a friend
-
+.optionlinks.addfriend.title.loggedout|staleness=1
 .optionlinks.addfriend.title.loggedout=You must be logged in to add this user as a friend
 
+.optionlinks.addfriend.title.other|staleness=1
+.optionlinks.addfriend.title.other=Add this user as a friend
+
+.optionlinks.addfriend.title.self|staleness=1
+.optionlinks.addfriend.title.self=Add yourself as a friend
+
+.optionlinks.joincomm|staleness=1
 .optionlinks.joincomm=Join
 
+.optionlinks.joincomm.title.cantjoin|staleness=1
 .optionlinks.joincomm.title.cantjoin=You cannot join this community
 
+.optionlinks.joincomm.title.closed|staleness=1
 .optionlinks.joincomm.title.closed=Membership for this community is closed
 
+.optionlinks.joincomm.title.loggedout|staleness=1
 .optionlinks.joincomm.title.loggedout=You must be logged in to join this community
 
+.optionlinks.joincomm.title.open|staleness=1
 .optionlinks.joincomm.title.open=Join this community
 
+.optionlinks.leavecomm|staleness=1
 .optionlinks.leavecomm=Leave
 
+.optionlinks.leavecomm.title|staleness=1
 .optionlinks.leavecomm.title=Leave this community
 
+.optionlinks.modifyfriend|staleness=1
 .optionlinks.modifyfriend=Modify Friend
 
-.optionlinks.modifyfriend.title.self=Modify/remove yourself as a friend
-
+.optionlinks.modifyfriend.title.other|staleness=1
 .optionlinks.modifyfriend.title.other=Modify/remove this user as a friend
 
+.optionlinks.modifyfriend.title.self|staleness=1
+.optionlinks.modifyfriend.title.self=Modify/remove yourself as a friend
+
+.optionlinks.modifysub|staleness=1
 .optionlinks.modifysub=Modify Subscription
 
+.optionlinks.modifysub.title|staleness=1
 .optionlinks.modifysub.title=Modify/remove this feed from your Friends page
 
+.optionlinks.modifywatch|staleness=1
 .optionlinks.modifywatch=Modify Watch
 
+.optionlinks.modifywatch.title|staleness=1
 .optionlinks.modifywatch.title=Modify/remove this community from your Friends page
 
+.optionlinks.post|staleness=1
 .optionlinks.post=Post
 
+.optionlinks.post.title|staleness=1
 .optionlinks.post.title=Post to this community
 
+.optionlinks.post.title.cantpost|staleness=1
 .optionlinks.post.title.cantpost=You cannot post to this community
 
+.optionlinks.post.title.loggedout|staleness=1
 .optionlinks.post.title.loggedout=You must be logged in to post to this community
 
+.optionlinks.postentry|staleness=1
 .optionlinks.postentry=Post an Entry
 
+.optionlinks.postentry.title|staleness=1
 .optionlinks.postentry.title=Post to your journal
 
+.optionlinks.sendmessage|staleness=1
 .optionlinks.sendmessage=Send Message
 
+.optionlinks.sendmessage.title|staleness=1
 .optionlinks.sendmessage.title=Send a private message to this user
 
+.optionlinks.sendmessage.title.cantsendmessage|staleness=1
 .optionlinks.sendmessage.title.cantsendmessage=You cannot send a private message to this user
 
+.optionlinks.sendmessage.title.loggedout|staleness=1
 .optionlinks.sendmessage.title.loggedout=You must be logged in to send a private message to this user
 
+.optionlinks.sub|staleness=1
 .optionlinks.sub=Subscribe
 
+.optionlinks.sub.title|staleness=1
 .optionlinks.sub.title=Add this feed to your Friends page
 
+.optionlinks.sub.title.loggedout|staleness=1
 .optionlinks.sub.title.loggedout=You must be logged in to add this feed to your Friends page
 
+.optionlinks.track|staleness=1
 .optionlinks.track=Track
 
+.optionlinks.track.title|staleness=1
 .optionlinks.track.title=Receive notifications of updates to this community
 
+.optionlinks.tracking|staleness=1
 .optionlinks.tracking=Tracking
 
+.optionlinks.tracking.title|staleness=1
 .optionlinks.tracking.title=Manage your notifications
 
+.optionlinks.tracksyn|staleness=1
 .optionlinks.tracksyn=Track Feed
 
+.optionlinks.tracksyn.title|staleness=1
 .optionlinks.tracksyn.title=Receive notifications of updates to this feed
 
+.optionlinks.trackuser|staleness=1
 .optionlinks.trackuser=Track User
 
+.optionlinks.trackuser.title|staleness=1
 .optionlinks.trackuser.title=Receive notifications of updates from this user
 
+.optionlinks.trackuser.title.cantuseesn|staleness=1
 .optionlinks.trackuser.title.cantuseesn=You cannot manage notifications
 
+.optionlinks.trackuser.title.loggedout|staleness=1
 .optionlinks.trackuser.title.loggedout=You must be logged in manage notifications
 
+.optionlinks.viewjournal|staleness=1
 .optionlinks.viewjournal=View Journal
 
+.optionlinks.viewjournal.title.comm|staleness=1
 .optionlinks.viewjournal.title.comm=View this community's journal
 
+.optionlinks.viewjournal.title.self|staleness=1
 .optionlinks.viewjournal.title.self=View your journal
 
+.optionlinks.viewjournal.title.syn|staleness=1
 .optionlinks.viewjournal.title.syn=View this feed's journal
 
+.optionlinks.viewjournal.title.user|staleness=1
 .optionlinks.viewjournal.title.user=View this user's journal
 
+.optionlinks.watch|staleness=1
 .optionlinks.watch=Watch
 
+.optionlinks.watch.title|staleness=1
 .optionlinks.watch.title=Add this community to your Friends page
 
+.optionlinks.watch.title.loggedout|staleness=1
 .optionlinks.watch.title.loggedout=You must be logged in to add this community to your Friends page
 
+.pubkey.alt|staleness=1
 .pubkey.alt=View public key
 
+.schools.header|staleness=1
 .schools.header=Schools:
 
+.schools.manage|staleness=1
 .schools.manage=Manage
 
+.schools.presentyear|staleness=1
 .schools.presentyear=present
 
+.section.edit|staleness=1
 .section.edit=Edit
 
 .sendmessage.body2=<a [[aopts]]>Send [[user]] a text message</a><br />on his/her cellphone/pager.
 
+.syn.header|staleness=1
 .syn.header=Feeds
 
 .syn.last.never=Never
@@ -480,8 +631,10 @@
 
 .syn.parseerror=Error Message:
 
+.syn.watching|staleness=1
 .syn.watching=Watching
 
+.syn.xml|staleness=1
 .syn.xml=XML
 
 .syndinfo.body2=If you would like articles from the syndicated site to appear on your friends page, you can <a [[aopts]]>add this journal to your friends list</a>.
@@ -514,34 +667,54 @@
 
 .title.communityinfo=Community Info
 
+.title.communityprofile|staleness=1
 .title.communityprofile=Community Profile
 
+.title.openidprofile|staleness=1
 .title.openidprofile=OpenID Profile
 
 .title.syndicated=Syndicated Account
 
+.title.syndicatedprofile|staleness=1
 .title.syndicatedprofile=Syndicated Feed Profile
 
+.title.userprofile|staleness=1
 .title.userprofile=User Profile
 
 .title1=Profile
+
+.useralias.title|staleness=1
+.useralias.title=Add/edit a note to this user
+
+.useralias.title.disabled|staleness=1
+.useralias.title.disabled=Sorry, you don't have rights to add or edit a note to this user. Please, upgrade your account to paid
+
+.userinfo.body2=You can edit your information (or choose what information is considered public) at the <a [[aopts]]>Edit Personal Information</a> page.
 
 .userinfo.body3=You can edit your information (or choose what information is considered public) at the <a [[aopts]]>Edit Personal Information</a> page.
 
 .userinfo.name=User Information
 
+.userpic.alt|staleness=1
 .userpic.alt=Userpic
 
+.userpic.choose|staleness=1
 .userpic.choose=Choose userpic
 
 .userpic.none=no default userpic
 
+.userpic.none2|staleness=1
 .userpic.none2=(no userpics)
 
+.userpic.none3|staleness=1
 .userpic.none3=No Userpics
 
+.userpic.upload|staleness=1
 .userpic.upload=Upload Userpic
 
+.userpic.viewall|staleness=1
 .userpic.viewall=View All Userpics
 
+.userpic.viewall.edit|staleness=1
 .userpic.viewall.edit=<a [[aopts1]]>View All</a> / <a [[aopts2]]>Edit</a>
+

@@ -1,0 +1,50 @@
+/* Horizon
+--------------------------------------*/
+/* Logged-in */
+.logged-in #navigation {
+	background:#000 url(/img/reskining/olympic2010/olympic2010-in-bg.jpg) 100% 0 no-repeat;
+	}
+.logged-in #Logo A {
+	position:relative;
+	left:-98px;
+	width:227px;
+	}
+
+/* Logged-out */
+.logged-out #navigation {
+	background:#000 url(/img/reskining/olympic2010/olympic2010-out-bg.jpg) 0 0 no-repeat;
+	}
+.logged-out #Logo A {
+	width:250px;
+	}
+
+/* Lanzelot
+--------------------------------------*/
+#header {
+	background:#000 url(/img/reskining/olympic2010/olympic2010-lanz-bg.jpg) 0 100% no-repeat;
+	}
+	#header .logo,
+	#header .logo A,
+	#header .logo SPAN {
+		background:none;
+		width:255px !important;
+		}
+	#header .logo A {
+		position:relative;
+ 		}
+#header .login-tl {
+	background:none;
+	} 
+#header .themes .cur {
+    background-image:url(/img/reskining/olympic2010/olympic2010-l.gif);
+    }
+#header .themes .cur SPAN {
+    background-image:url(/img/reskining/olympic2010/olympic2010-r.gif);
+    }
+#header .themes .next {
+    background-image:url(/img/reskining/olympic2010/olympic2010-next.png);
+    }
+* HTML #header .themes .next {
+    background-image:none;
+    }
+

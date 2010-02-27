@@ -7,7 +7,6 @@ use strict;
 
 package LJ;
 
-use Apache;
 use Apache::LiveJournal;
 use Apache::CompressClientFixup;
 use Apache::BML;
@@ -119,14 +118,14 @@ sub setup_start {
 }
 
 sub setup_restart {
-
+    
     # setup httpd.conf things for the user:
-    Apache->httpd_conf("DocumentRoot $LJ::HTDOCS")
+    LJ::Request->add_httpd_conf("DocumentRoot $LJ::HTDOCS")
         if $LJ::HTDOCS;
-    Apache->httpd_conf("ServerAdmin $LJ::ADMIN_EMAIL")
+    LJ::Request->add_httpd_conf("ServerAdmin $LJ::ADMIN_EMAIL")
         if $LJ::ADMIN_EMAIL;
 
-    Apache->httpd_conf(qq{
+    LJ::Request->add_httpd_conf(qq{
 
 
 # User-friendly error messages
@@ -148,17 +147,27 @@ DirectoryIndex index.html index.bml
 });
 
     # setup child init handler to seed random using a good entropy source
-    Apache->push_handlers(PerlChildInitHandler => sub {
+    LJ::Request->push_handlers_global(PerlChildInitHandler => sub {
         srand(LJ::urandom_int());
     });
 
     if ($LJ::BML_DENY_CONFIG) {
-        Apache->httpd_conf("PerlSetVar BML_denyconfig \"$LJ::BML_DENY_CONFIG\"\n");
+        LJ::Request->add_httpd_conf("PerlSetVar BML_denyconfig \"$LJ::BML_DENY_CONFIG\"\n");
     }
 
     unless ($LJ::SERVER_TOTALLY_DOWN)
     {
-        Apache->httpd_conf(qq{
+        if (LJ::Request->interface_name eq 'Apache2'){
+            LJ::Request->add_httpd_conf(qq{
+# BML support:
+<Files ~ "\\.bml\$">
+  SetHandler perl-script
+  PerlResponseHandler Apache::BML
+</Files>
+
+});
+        } elsif (LJ::Request->interface_name eq 'Apache'){
+            LJ::Request->add_httpd_conf(qq{
 # BML support:
 <Files ~ "\\.bml\$">
   SetHandler perl-script
@@ -166,15 +175,16 @@ DirectoryIndex index.html index.bml
 </Files>
 
 });
+        }
     }
 
-    unless ($LJ::DISABLED{ignore_htaccess}) {
-        Apache->httpd_conf(qq{
-            <Directory />
-                AllowOverride none
-            </Directory>
-        });
-    }
+    #unless ($LJ::DISABLED{ignore_htaccess}) {
+    #    LJ::Request->add_httpd_conf(qq{
+    #        <Directory "/">
+    #            AllowOverride none
+    #        </Directory>
+    #    });
+    #}
 
     eval { setup_restart_local(); };
 
