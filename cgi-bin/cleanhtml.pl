@@ -901,6 +901,8 @@ sub clean
             elsif ($tag eq "lj-cut") {
                 if ($opts->{'cutpreview'}) {
                     $newdata .= "<b>&lt;/lj-cut&gt;</b>";
+                } else {
+                    $newdata .= "<a name='cutid$cutcount-end' />"
                 }
             } else {
                 if ($mode eq "allow") {
