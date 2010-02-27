@@ -413,15 +413,21 @@ sub props {
     return $self->{props} || {};
 }
 
+sub handle_prefetched_props {
+    my ($self, $props) = @_;
+
+    $self->{props} = $props;
+    $self->{_loaded_props} = 1;
+}
+
 sub _load_props {
     my $self = shift;
     return 1 if $self->{_loaded_props};
 
     my $props = {};
-    LJ::load_log_props2($self->{u}, [ $self->{jitemid} ], $props);
-    $self->{props} = $props->{ $self->{jitemid} };
+    LJ::load_log_props2($self->{u}, [ $self->jitemid ], $props);
 
-    $self->{_loaded_props} = 1;
+    $self->handle_prefetched_props($props->{$self->jitemid});
     return 1;
 }
 
@@ -1250,6 +1256,25 @@ sub put_logprop_in_history {
     $u->do("INSERT INTO logprop_history (journalid, jitemid, propid, change_time, old_value, new_value, note) VALUES (?, ?, ?, unix_timestamp(), ?, ?, ?)",
            undef, $self->journalid, $self->jitemid, $propid, $old_value, $new_value, $note);
     return undef if $u->err;
+    return 1;
+}
+
+sub comments_shown {
+    my ($self) = @_;
+
+    return 0 unless $self->journal->{'opt_showtalklinks'} eq 'Y';
+    return 0 if $self->prop('opt_nocomments');
+
+    return 1;
+}
+
+sub posting_comments_allowed {
+    my ($self) = @_;
+
+    return 0 unless $self->journal->{'opt_showtalklinks'} eq 'Y';
+    return 0 if $self->prop('opt_nocomments');
+    return 0 if $self->prop('opt_lockcomments');
+
     return 1;
 }
 

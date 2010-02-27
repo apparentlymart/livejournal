@@ -1267,6 +1267,7 @@ sub create_view_lastn
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         my $pu = $posteru{$posterid};
         next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && !$viewsome;
@@ -1340,11 +1341,7 @@ sub create_view_lastn
             $lastn_event{'subject'} = "<a href='$permalink'>" . $lastn_event{'subject'} . "</a>";
         }
 
-        if ($u->{'opt_showtalklinks'} eq "Y" &&
-            ! $logprops{$itemid}->{'opt_nocomments'}
-            )
-        {
-
+        if ($entry_obj->comments_shown) {
             my $nc;
             $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
@@ -1764,6 +1761,7 @@ sub create_view_friends
 
         my $datakey = "$friendid $itemid";
 
+        $entry_obj->handle_prefetched_props($logprops{$datakey});
         my $replycount = $logprops{$datakey}->{'replycount'};
         my $subject = $logtext->{$datakey}->[0];
         my $event = $logtext->{$datakey}->[1];
@@ -1884,9 +1882,7 @@ sub create_view_friends
 
         $friends_event{'subject'} = "<a href='$permalink'>" . $friends_event{'subject'} . "</a>";
 
-        if ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
-            ! $logprops{$datakey}->{'opt_nocomments'}
-            )
+        if ($entry_obj->comments_shown)
         {
             my $dispreadlink = $replycount ||
                 ($logprops{$datakey}->{'hasscreened'} && LJ::can_manage($remote, $friendid));
@@ -2497,6 +2493,7 @@ sub create_view_day
 
         my $ditemid = $itemid*256 + $anum;
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
@@ -2548,9 +2545,7 @@ sub create_view_day
 
         $day_event{'subject'} = "<a href='$permalink'>" . $day_event{'subject'} . "</a>";
 
-        if ($u->{'opt_showtalklinks'} eq "Y" &&
-            ! $logprops{$itemid}->{'opt_nocomments'}
-            )
+        if ($entry_obj->comments_shown)
         {
             my $nc;
             $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};

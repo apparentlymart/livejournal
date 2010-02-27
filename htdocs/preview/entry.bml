@@ -226,8 +226,13 @@
             'post_url' => "#",
             'count' => "0",
             'maxcomments' => 0,
-            'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && !
-                          $req{'prop_opt_nocomments'}) ? 1 : 0,
+            'enabled' => ($u->{'opt_showtalklinks'} eq "Y" &&
+                          ! $req{'prop_opt_nocomments'}
+                          ) ? 1 : 0,
+            'locked' => ($u->{'opt_showtalklinks'} eq "Y" &&
+                          ! $req{'prop_opt_nocomments'} &&
+                          ! $req{'prop_opt_lockcomments'}
+                          ) ? 0 : 1,
                 'screened' => 0,
             });
 

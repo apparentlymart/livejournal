@@ -117,6 +117,7 @@ sub DayPage
 
         my $ditemid = $itemid*256 + $anum;
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
@@ -161,12 +162,13 @@ sub DayPage
             'post_url' => $posturl,
             'count' => $replycount,
             'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
-            'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
+            'enabled' => $entry_obj->comments_shown,
+            'locked' => !$entry_obj->posting_comments_allowed,
             'screened' => ($logprops{$itemid}->{'hasscreened'} && $remote &&
                            ($remote->{'user'} eq $u->{'user'} || LJ::can_manage($remote, $u))) ? 1 : 0,
         });
-        $comments->{show_postlink} = $comments->{enabled};
-        $comments->{show_readlink} = $comments->{enabled} && ($replycount || $comments->{screened});
+        $comments->{show_postlink} = $entry_obj->posting_comments_allowed;
+        $comments->{show_readlink} = $entry_obj->comments_shown && ($replycount || $comments->{'screened'});
 
         my $userlite_poster = $userlite_journal;
         my $pu = $u;

@@ -828,6 +828,7 @@ sub render_options_block {
             my $comment_settings_selected = sub {
                 return "noemail" if $opts->{'prop_opt_noemail'};
                 return "nocomments" if $opts->{'prop_opt_nocomments'};
+                return "lockcomments" if $opts->{'prop_opt_lockcomments'};
                 return $opts->{'comment_settings'};
             };
 
@@ -842,6 +843,7 @@ sub render_options_block {
                 (
                     "" => BML::ml('entryform.comment.settings.default5'),
                     "nocomments" => BML::ml('entryform.comment.settings.nocomments'),
+                    "lockcomments" => BML::ml('entryform.comment.settings.lockcomments'),
                     "noemail" => BML::ml('entryform.comment.settings.noemail'),
                 )
             );

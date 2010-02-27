@@ -1321,6 +1321,12 @@ logproplist.opt_backdated:
 logproplist.opt_nocomments:
   datatype: bool
   des: Turn on if readers can't post comments on this entry.
+  prettyname: Don't Allow Comments and hide comments already posted to the entry
+  sortorder: 25
+
+logproplist.opt_lockcomments:
+  datatype: bool
+  des: Turn on if readers can't post comments on this entry.
   prettyname: Don't Allow Comments
   sortorder: 25
 

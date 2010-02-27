@@ -252,6 +252,7 @@ sub FriendsPage
         }
 
         my $eobj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
+        $eobj->handle_prefetched_props($logprops{$datakey});
 
         # do the picture
         my $picid = 0;
@@ -283,13 +284,13 @@ sub FriendsPage
             'post_url' => $posturl,
             'count' => $replycount,
             'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
-            'enabled' => ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
-                          ! $logprops{$datakey}->{'opt_nocomments'}) ? 1 : 0,
+            'enabled' => $eobj->comments_shown,
+            'locked' => !$eobj->posting_comments_allowed,
             'screened' => ($logprops{$datakey}->{'hasscreened'} && $remote &&
                            ($remote->{'user'} eq $fr->{'user'} || LJ::can_manage($remote, $fr))) ? 1 : 0,
         });
-        $comments->{show_postlink} = $comments->{enabled};
-        $comments->{show_readlink} = $comments->{enabled} && ($replycount || $comments->{screened});
+        $comments->{show_postlink} = $eobj->posting_comments_allowed;
+        $comments->{show_readlink} = $eobj->comments_shown && ($replycount || $comments->{'screened'});
 
         my $moodthemeid = $u->{'opt_forcemoodtheme'} eq 'Y' ?
             $u->{'moodthemeid'} : $friends{$friendid}->{'moodthemeid'};

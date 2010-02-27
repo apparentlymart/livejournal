@@ -1128,7 +1128,7 @@ sub entry_form_decode
                 prop_picture_keyword prop_current_moodid
                 prop_current_mood prop_current_music
                 prop_opt_screening prop_opt_noemail
-                prop_opt_preformatted prop_opt_nocomments
+                prop_opt_preformatted prop_opt_nocomments prop_opt_lockcomments
                 prop_current_location prop_current_coords
                 prop_taglist prop_qotdid)) {
         $req->{$_} = $POST->{$_};
@@ -1141,6 +1141,7 @@ sub entry_form_decode
     $req->{"prop_opt_preformatted"} ||= $POST->{'switched_rte_on'} ? 1 :
         $POST->{'event_format'} eq "preformatted" ? 1 : 0;
     $req->{"prop_opt_nocomments"}   ||= $POST->{'comment_settings'} eq "nocomments" ? 1 : 0;
+    $req->{'prop_opt_lockcomments'} ||= $POST->{'comment_settings'} eq 'lockcomments' ? 1 : 0;
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
     $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C' if LJ::is_enabled('default_copyright', LJ::get_remote()) 

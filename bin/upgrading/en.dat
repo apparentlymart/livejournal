@@ -1144,6 +1144,8 @@ entryform.comment.settings.default5=Journal Default
 
 entryform.comment.settings.nocomments=Disabled
 
+entryform.comment.settings.lockcomments=Locked
+
 entryform.comment.settings.noemail=Don't E-mail
 
 entryform.comment.settings2=Allow Comments?

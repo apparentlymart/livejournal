@@ -2495,6 +2495,9 @@ sub init {
     my $iprops = $item->{'props'};
     my $ditemid = $init->{'ditemid'}+0;
 
+    my $entry = LJ::Entry->new($journalu, ditemid => $ditemid);
+    $entry->handle_prefetched_props($iprops);
+
     my $talkurl = LJ::journal_base($journalu) . "/$ditemid.html";
     $init->{talkurl} = $talkurl;
 
@@ -2755,7 +2758,7 @@ sub init {
         $bmlerr->("$SC.error.noanon");
     }
 
-    if ($iprops->{'opt_nocomments'}) {
+    unless ($entry->posting_comments_allowed) {
         $bmlerr->("$SC.error.nocomments");
     }
 

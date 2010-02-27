@@ -86,7 +86,7 @@ sub should_entry_recieve_pingback {
     return 0 if $target_entry->journal->readonly; # Check "is_readonly".
     
     # are comments allowed?
-    return 0 if $target_entry->prop('opt_nocomments');
+    return 0 unless $target_entry->posting_comments_allowed;
 
     # did user allow to add pingbacks?
     # journal's default. We do not store "J" value in DB.

@@ -172,8 +172,10 @@ my $old_url = 0;
  }
 
  my $props = $item->{'props'};
- my $nocomments = $viewall                         ? 0 :
+ my $nocomments_old = $viewall ? 0 :
                   $u->{'opt_showtalklinks'} eq "N" ? 1 : $props->{'opt_nocomments'};
+ my $comments_shown = $viewall || $entry->comments_shown;
+ my $allow_commenting = $entry->posting_comments_allowed;
 
  # See if we should inject QuickReply javascript
  LJ::load_user_props($remote, "opt_no_quickreply");
@@ -184,7 +186,7 @@ my $old_url = 0;
 
  LJ::need_res('js/thread_expander.js');
 
- if (($remote && !$remote->{'opt_no_quickreply'}) && !$nocomments) {
+ if (($remote && !$remote->{'opt_no_quickreply'}) && $allow_commenting) {
     # quickreply js libs
     LJ::need_res(qw(
                     js/core.js
@@ -690,26 +692,27 @@ my $old_url = 0;
              $ret .= "$event$edit_html";
 
              $ret .= "<p style='margin: 0.7em 0 0.2em 0'><font size='-2'>";
-                     
 
-             my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine, $formatlight);
-             if ($post->{'state'} eq 'F') {
-                 $ret .= "($T{'frozen'})";
-             } elsif ($remote) {
-                 # See if we want to force them to change their password
-                 my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
-                 if ($bp) {
-                     $ret .= "(<a href='$bp'>$T{'replythis'}</a>) ";
+             if ($allow_commenting) {
+                 my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine, $formatlight);
+                 if ($post->{'state'} eq 'F') {
+                     $ret .= "($T{'frozen'})";
+                 } elsif ($remote) {
+                     # See if we want to force them to change their password
+                     my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
+                     if ($bp) {
+                         $ret .= "(<a href='$bp'>$T{'replythis'}</a>) ";
+                     } else {
+                        if ($post->{state} eq 'S') {
+                            # show unscreen to reply link id comment screened
+                            $ret .= "(<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>$T{'unscreentoreply'}</a>) ";
+                        } else {
+                            $ret .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, $T{'replythis'}, $replyurl) .  ") ";
+                        }
+                     }
                  } else {
-                    if ($post->{state} eq 'S') {
-                        # show unscreen to reply link id comment screened
-                        $ret .= "(<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>$T{'unscreentoreply'}</a>) ";
-                    } else {
-                        $ret .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, $T{'replythis'}, $replyurl) .  ") ";
-                    }
+                     $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
                  }
-             } else {
-                 $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
              }
 
              my $parentid = $post->{'parenttalkid'} || $post->{'parenttalkid_actual'};
@@ -755,7 +758,7 @@ my $old_url = 0;
      }
  };
 
- unless ($nocomments)
+ if ($comments_shown)
  {
      $ret .= "<div id='Comments'>";
      $ret .= "<a name='comments'></a>";
@@ -770,9 +773,11 @@ my $old_url = 0;
 	 if ($dthread && $pages == 1) {
          my $readurl = LJ::Talk::talkargs($talkurl, $stylemine, $formatlight);
 
-         $readlink = "(<a href='$readurl#comments'>$readlink_text</a>) - ";
-     } else { if ($replycount > 0) { $readlink = "($comments_count) - "; }
-	}
+         $readlink = "(<a href='$readurl#comments'>$readlink_text</a>)";
+     } elsif ($replycount > 0) {
+         $readlink = "($comments_count)";
+     }
+     $readlink .= ' - ' if $allow_commenting;
 
      my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine, $formatlight);
 
@@ -794,16 +799,18 @@ my $old_url = 0;
      # Quick Reply when posting a new top level comment
      # requires setup when logged in.
      $ret .= "<p class='lesstop' align='center'><b>$readlink";
-     if ($remote) {
-         # See if we want to force them to change their password
-         my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
-         if ($bp) {
-             $ret .= "(<a href='$bp'>$T{'replythis'} </a>)";
+     if ($allow_commenting) {
+         if ($remote) {
+             # See if we want to force them to change their password
+             my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
+             if ($bp) {
+                 $ret .= "(<a href='$bp'>$T{'replythis'} </a>)";
+             } else {
+                 $ret .= "(" . LJ::make_qr_link('top', '', $T{'postcomments'}, $posturl) . "</a>)";
+             }
          } else {
-             $ret .= "(" . LJ::make_qr_link('top', '', $T{'postcomments'}, $posturl) . "</a>)";
+             $ret .= "(<a href='$posturl'>$T{'postcomments'}</a>)";
          }
-     } else {
-         $ret .= "(<a href='$posturl'>$T{'postcomments'}</a>)";
      }
 
      $ret .= "</b></p>";
@@ -838,18 +845,19 @@ my $old_url = 0;
          }
 
          $ret .= "<hr /><p class='lesstop' align='center'><b>$readlink";
-	     if ($remote) {
-	         # See if we want to force them to change their password
-	         my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
-	         if ($bp) {
-	             $ret .= "(<a href='$bp'>$T{'replythis'} </a>)";
-	         } else {
-	             $ret .= "(" . LJ::make_qr_link('bottom', '', $T{'postcomments'}, $posturl) . "</a>)";
-	         }
-	     } else {
-	         $ret .= "(<a href='$posturl'>$T{'postcomments'}</a>)";
-	     }
-         #$ret .= "(" . LJ::make_qr_link('bottom', '', $T{'postcomments'}, $posturl) . "</a>)" if $remote;
+         if ($allow_commenting) {
+             if ($remote) {
+                 # See if we want to force them to change their password
+                 my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
+                 if ($bp) {
+                     $ret .= "(<a href='$bp'>$T{'replythis'} </a>)";
+                 } else {
+                     $ret .= "(" . LJ::make_qr_link('bottom', '', $T{'postcomments'}, $posturl) . "</a>)";
+                 }
+             } else {
+                 $ret .= "(<a href='$posturl'>$T{'postcomments'}</a>)";
+             }
+         }
          $ret .= "</b></p>";
          $ret .= "<div align='center'>" . LJ::make_qr_target('bottom') . "</div>" if $remote;
 

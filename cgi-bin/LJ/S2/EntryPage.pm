@@ -99,9 +99,8 @@ sub EntryPage
 
     my $userlite_journal = UserLite($u);
 
-    # Only load comments if commenting is enabled on the entry
     my @comments;
-    if ($p->{'entry'}->{'comments'}->{'enabled'}) {
+    if ($entry->comments_shown) {
         @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $copts);
     }
 
@@ -218,7 +217,7 @@ sub EntryPage
                 'depth' => $depth,
                 'parent_url' => $par_url,
                 'screened' => $com->{'state'} eq "S" ? 1 : 0,
-                'frozen' => $com->{'state'} eq "F" ? 1 : 0,
+                'frozen' => $com->{'state'} eq "F" || !$entry->posting_comments_allowed ? 1 : 0,
                 'deleted' => $com->{'state'} eq "D" ? 1 : 0,
                 'link_keyseq' => [ 'delete_comment' ],
                 'anchor' => "t$dtalkid",
@@ -247,7 +246,9 @@ sub EntryPage
             # Conditionally add more links to the keyseq
             my $link_keyseq = $s2com->{'link_keyseq'};
             push @$link_keyseq, $s2com->{'screened'} ? 'unscreen_comment' : 'screen_comment';
-            push @$link_keyseq, $s2com->{'frozen'} ? 'unfreeze_thread' : 'freeze_thread';
+            if ($entry->posting_comments_allowed) {
+                push @$link_keyseq, $s2com->{'frozen'} ? 'unfreeze_thread' : 'freeze_thread';
+            }
             push @$link_keyseq, "watch_thread" unless $LJ::DISABLED{'esn'};
             push @$link_keyseq, "unwatch_thread" unless $LJ::DISABLED{'esn'};
             push @$link_keyseq, "watching_parent" unless $LJ::DISABLED{'esn'};
@@ -441,12 +442,13 @@ sub EntryPage_entry
         'post_url' => $posturl,
         'count' => $replycount,
         'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
-        'enabled' => ($viewall || ($u->{'opt_showtalklinks'} eq "Y" && !$entry->prop("opt_nocomments"))) ? 1 : 0,
+        'enabled' => $entry->comments_shown,
+        'locked' => !$entry->posting_comments_allowed,
         'screened' => ($entry->prop("hasscreened") && $remote &&
                        ($remote->{'user'} eq $u->{'user'} || LJ::can_manage($remote, $u))) ? 1 : 0,
     });
-    $comments->{show_postlink} = $comments->{enabled} && $get->{mode} ne 'reply';
-    $comments->{show_readlink} = $comments->{enabled} && ($replycount || $comments->{screened}) && $get->{mode} eq 'reply';
+    $comments->{show_postlink} = $entry->posting_comments_allowed;
+    $comments->{show_readlink} = $entry->comments_shown && ($replycount || $comments->{'screened'});
 
     # load tags
     my @taglist;
