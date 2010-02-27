@@ -327,7 +327,7 @@ sub populate_s2 {
         my %layer;    # maps redist_uniq -> { 'type', 'parent' (uniq), 'id' (s2lid) }
 
         my $compile = sub {
-            my ($base, $type, $parent, $s2source) = @_;
+            my ($base, $type, $parent, $s2source, $dry) = @_;
             return unless $s2source =~ /\S/;
 
             my $id = $existing->{$base} ? $existing->{$base}->{'s2lid'} : 0;
@@ -372,43 +372,53 @@ sub populate_s2 {
             # we're going to go ahead and build it.
             $layer{$base}->{'built'} = 1;
 
-            # compile!
-            my $lay = {
-                's2lid' => $id,
-                'userid' => $sysid,
-                'b2lid' => $parid,
-                'type' => $type,
-            };
-            my $error = "";
-            my $compiled;
-            my $info;
+            unless ($dry) {
+                # compile!
+                my $lay = {
+                    's2lid' => $id,
+                    'userid' => $sysid,
+                    'b2lid' => $parid,
+                    'type' => $type,
+                };
+                my $error = "";
+                my $compiled;
+                my $info;
 
-            # do this in an eval, so that if the layer_compile call returns an error,
-            # we die and pass it up in $@.  but if layer_compile dies, it should pass up
-            # an error itself, which we can get.
-            eval {
-                die $error unless
-                    LJ::S2::layer_compile($lay, \$error, {
-                        's2ref' => \$s2source,
-                        'redist_uniq' => $base,
-                        'compiledref' => \$compiled,
-                        'layerinfo' => \$info,
-                    });
-            };
+                # do this in an eval, so that if the layer_compile call returns an error,
+                # we die and pass it up in $@.  but if layer_compile dies, it should pass up
+                # an error itself, which we can get.
+                eval {
+                    die $error unless
+                        LJ::S2::layer_compile($lay, \$error, {
+                            's2ref' => \$s2source,
+                            'redist_uniq' => $base,
+                            'compiledref' => \$compiled,
+                            'layerinfo' => \$info,
+                        });
+                };
 
-            if ($@) {
-                print "S2 compilation failed: $@\n";
-                exit 1;
+                if ($@) {
+                    print "S2 compilation failed: $@\n";
+                    exit 1;
+                }
+
+                if ($opt_compiletodisk) {
+                    open (CO, ">$LD/$base.pl") or die;
+                    print CO $compiled;
+                    close CO;
+                }
+
+                # put raw S2 in database.
+                LJ::S2::set_layer_source($id, \$s2source);
             }
+        };
 
-            if ($opt_compiletodisk) {
-                open (CO, ">$LD/$base.pl") or die;
-                print CO $compiled;
-                close CO;
-            }
+        my @to_compile;
+        my $dry_compile = sub {
+            my @args = @_;
 
-            # put raw S2 in database.
-            LJ::S2::set_layer_source($id, \$s2source);
+            $compile->(@args, 1);
+            push @to_compile, \@args;
         };
 
         my @layerfiles = ("s2layers.dat");
@@ -447,13 +457,13 @@ sub populate_s2 {
                         while (<$map_layout>) { $s2source .= $_; }
                     }
                     while (<L>) { $s2source .= $_; }
-                    $compile->($base, $type, $parent, $s2source);
+                    $dry_compile->($base, $type, $parent, $s2source);
                 } else {
                     my $curname;
                     while (<L>) {
                         if (/^\#NEWLAYER:\s*(\S+)/) {
                             my $newname = $1;
-                            $compile->($curname, $type, $parent, $s2source);
+                            $dry_compile->($curname, $type, $parent, $s2source);
                             $curname = $newname;
                             $s2source = "";
                         } elsif (/^\#NEWLAYER/) {
@@ -462,12 +472,31 @@ sub populate_s2 {
                             $s2source .= $_;
                         }
                     }
-                    $compile->($curname, $type, $parent, $s2source);
+                    $dry_compile->($curname, $type, $parent, $s2source);
                 }
                 close L;
             }
             close SL;
         }
+
+        my $compile_wrapper = sub {
+            my @args = @_;
+
+            LJ::end_request();
+            my $pid = fork;
+            if ($pid) {
+                waitpid($pid, 0);
+            } else {
+                exit $compile->(@args);
+            }
+        };
+
+        $compile_wrapper->(@$_) foreach @to_compile;
+
+        # it was a long operation, so we've likely lost a DB connection;
+        # therefore, let's reconnect
+        LJ::end_request();
+        $dbh = LJ::get_db_writer();
 
     if ($LJ::IS_DEV_SERVER) {
         # now, delete any system layers that don't below (from previous imports?)
