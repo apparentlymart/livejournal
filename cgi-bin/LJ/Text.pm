@@ -201,4 +201,56 @@ sub truncate_with_ellipsis {
     return $str;
 }
 
+sub truncate_to_word_with_ellipsis {
+    my ($class, @opts) = @_;
+
+    confess "must be called as a class method"
+        unless isa($class, __PACKAGE__);
+
+    confess "cannot coerce options to hash: " . Dumper(\@opts)
+        unless scalar(@opts) % 2 == 0;
+
+    my %opts = @opts;
+
+    my $str = delete $opts{'str'};
+    my $original_string = $str;
+    my $bytes = delete $opts{'bytes'};
+    my $chars = delete $opts{'chars'};
+    my $remainder = '';
+    my $ellipsis = delete $opts{'ellipsis'} || Encode::encode_utf8("\x{2026}");
+
+    confess "unknown options: " . Data::Dumper(\%opts)
+        if %opts;
+
+    cluck "not actually truncating"
+        unless $bytes || $chars;
+
+    if ($bytes && $class->byte_len($str) > $bytes) {
+        my $bytes_trunc = $bytes - $class->byte_len($ellipsis);
+        $str = $class->truncate(
+            'str' => $str,
+            'bytes' => $bytes_trunc + 1
+        );
+
+        $str =~ s/\S*\s*$//;
+        $remainder = substr($original_string, $class->byte_len($str));
+        $str .= $ellipsis;
+    }
+
+    if ($chars && $class->char_len($str) > $chars) {
+        my $chars_trunc = $chars - $class->char_len($ellipsis);
+        $str = $class->truncate(
+            'str' => $str,
+            'chars' => $chars_trunc + 1
+        );
+
+        $str =~ s/\S*\s*$//;
+        $remainder = substr($original_string, $class->byte_len($str));
+        $str .= $ellipsis;
+    }
+
+    $remainder =~ s/^\s+//;
+    return ($str, $remainder);
+}
+
 1;
