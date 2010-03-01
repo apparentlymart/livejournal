@@ -509,6 +509,10 @@ sub create {
     my $maxbytesize = delete $opts{'maxbytesize'};
     croak("dataref not a scalarref") unless ref $dataref eq 'SCALAR';
 
+    my $has_dangerous_content = 0;
+    LJ::run_hook('has_image_dangerous_content', $dataref, \$has_dangerous_content);
+    die "Image has dangerous content" if $has_dangerous_content;
+
     croak("Unknown options: " . join(", ", scalar keys %opts)) if %opts;
 
     my $err = sub {
