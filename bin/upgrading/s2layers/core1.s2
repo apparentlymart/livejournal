@@ -2319,7 +2319,7 @@ function RecentPage::print_body {
             "</div>";
         }
         if ($e.new_day) {
-            """<div class="day" id="dayYYYYMMMDD">\n<h2>""";
+            """<div class="day" id="day"""; print $e.time->date_format("%%yyyy%%%%mm%%%%dd%%"); """">\n<h2>""";
             print $e.time->date_format("long_day");
             "</h2>\n";
         }
@@ -2562,7 +2562,7 @@ function MonthDay::print_subjectlist() {
 
 function DayPage::print_body() {
     if ($.has_entries) {
-        "<div class=\"day\" id=\"dayyymmmmmdddd\">\n<h2>";
+        "<div class=\"day\" id=\"day"; print $.date->date_format("%%yyyy%%%%mm%%%%dd%%"); "\">\n<h2>";
         print $.date->date_format("long");
         "</h2>\n";
 
