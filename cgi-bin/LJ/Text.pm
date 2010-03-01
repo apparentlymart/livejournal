@@ -44,6 +44,7 @@ package LJ::Text;
 use Encode qw(encode_utf8 decode_utf8);
 use Carp qw(confess cluck);
 use UNIVERSAL qw(isa);
+use strict;
 
 # given a string, returns its length in bytes (that is, actual octets needed to
 # represent all characters in that string)
@@ -76,7 +77,7 @@ sub fix_utf8 {
     confess "must be called as a class method"
         unless isa($class, __PACKAGE__);
 
-    $str = decode_utf8($str, Encode::QUIET);
+    $str = decode_utf8($str, Encode::QUIET());
     return encode_utf8($str);
 }
 
@@ -225,6 +226,18 @@ sub truncate_to_word_with_ellipsis {
     cluck "not actually truncating"
         unless $bytes || $chars;
 
+    my $remove_last_word = sub {
+        my ($str) = @_;
+
+        if ($str =~ /\s+$/) {
+            $str =~ s/\s+$//;
+        } else {
+            $str =~ s/\s*\S+$//;
+        }
+
+        return $str;
+    };
+
     if ($bytes && $class->byte_len($str) > $bytes) {
         my $bytes_trunc = $bytes - $class->byte_len($ellipsis);
         $str = $class->truncate(
@@ -232,7 +245,7 @@ sub truncate_to_word_with_ellipsis {
             'bytes' => $bytes_trunc + 1
         );
 
-        $str =~ s/\S*\s*$//;
+        $str = $remove_last_word->($str);
         $remainder = substr($original_string, $class->byte_len($str));
         $str .= $ellipsis;
     }
@@ -244,13 +257,13 @@ sub truncate_to_word_with_ellipsis {
             'chars' => $chars_trunc + 1
         );
 
-        $str =~ s/\S*\s*$//;
+        $str = $remove_last_word->($str);
         $remainder = substr($original_string, $class->byte_len($str));
         $str .= $ellipsis;
     }
 
     $remainder =~ s/^\s+//;
-    return ($str, $remainder);
+    return wantarray ? ($str, $remainder) : $str;
 }
 
 1;
