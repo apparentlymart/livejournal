@@ -192,6 +192,7 @@ class Link
     var Image icon
     "A suggestion from the server as to which icon to use. layouts/users can override this of course.
     alt text works similarly to [member[Link.caption]].";
+    var readonly string raw "Raw html code instead of link parameters";
 
     function print_button
     "Output this Link as a clickable button using [member[Link.icon]]";
@@ -2622,6 +2623,11 @@ function Link::print_button() [fixed] {
 }
 
 function Link::as_string() [fixed] : string {
+
+    if ($.raw) {
+        return $.raw;
+    }
+
     if ($.url == "") { return ""; }
     var string ealt = ehtml($.caption);
     var string{} extra = $.icon.extra;

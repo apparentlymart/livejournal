@@ -153,10 +153,12 @@ sub link_bar
         }
     }
 
-    unless ($LJ::DISABLED{'tellafriend'}) {
-        push @linkele, $mlink->("$LJ::SITEROOT/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend")
-            if ($entry->can_tellafriend($remote));
-    }
+    unless ($LJ::DISABLED{'sharethis'}) {
+        my $entry_url = $entry->url;
+        my $entry_title = LJ::ejs($entry->subject_html);
+        push @linkele, qq|<script type="text/javascript">SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title' });</script>|
+            if $entry->security eq 'public';
+     }
 
     if ($remote && $remote->can_use_esn) {
         my $img_key = $remote->has_subscription(journal => $u, event => "JournalNewComment", arg1 => $itemid, require_active => 1) ?

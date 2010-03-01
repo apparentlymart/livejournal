@@ -115,6 +115,8 @@ my $old_url = 0;
      $$head .= LJ::robot_meta_tags();
  }
 
+ $$head .= $LJ::SHARE_THIS_URL unless $LJ::DISABLED{'sharethis'};
+
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
  }

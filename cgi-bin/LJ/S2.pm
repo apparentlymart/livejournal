@@ -148,6 +148,7 @@ sub make_journal
     $graphicpreviews_obj->need_res($u);
     my $extra_js = LJ::statusvis_message_js($u);
     $page->{head_content} .= LJ::res_includes() . $extra_js;
+    $page->{head_content} .= $LJ::SHARE_THIS_URL unless $LJ::DISABLED{'sharethis'};
 
     s2_run($r, $ctx, $opts, $entry, $page);
 
@@ -2046,6 +2047,7 @@ sub Link {
         'caption' => $caption,
         'url'     => $url,
         'icon'    => $icon,
+        'raw'     => '',
     };
 
     return $lnk;
@@ -3603,12 +3605,13 @@ sub _Entry__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 22, 20));
     }
     if ($key eq "tell_friend") {
-        return $null_link if $LJ::DISABLED{'tellafriend'};
+        return $null_link if $LJ::DISABLED{'sharethis'};
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
-        return $null_link unless $entry->can_tellafriend($remote);
-        return LJ::S2::Link("$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                            $ctx->[S2::PROPS]->{"text_tell_friend"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20));
+        return $null_link unless $entry->security eq 'public';
+        my $entry_url = $entry->url;
+        my $entry_title = LJ::ejs($entry->subject_html);
+        return { '_type' => 'Link',
+                 'raw'   => qq|<script type="text/javascript">SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title' });</script>| };
     }
     if ($key eq "mem_add") {
         return $null_link if $LJ::DISABLED{'memories'};
