@@ -134,6 +134,7 @@ sub LJ::Request::args {
     if (wantarray()){
         my $qs = $instance->{r}->args(@_);
         my @args = 
+            map { URI::Escape::uri_unescape ($_) }
             map { split /=/ => $_, 2 }
             split /[\&\;]/ => $qs;
         return @args;
