@@ -83,7 +83,6 @@
 
     ### save mode
     if (LJ::did_post()) {
-
         ### save changes to existing pics
         if ($POST{'action:save'}) {
             # form being posted isn't multipart, since we were able to read from %POST
@@ -194,342 +193,158 @@
         }
 
         ### no post data, so we'll parse the multipart data
-        unless (%POST) {
+        my $size = LJ::Request->header_in("Content-length");
+        unless ($size) {
+            return $err->("No content-length header: can't upload");
+        }
 
-            my $size = LJ::Request->header_in("Content-length");
-            unless ($size) {
-                return $err->("No content-length header: can't upload");
-            }
+        my $MAX_UPLOAD = LJ::Userpic->max_allowed_bytes($u);
+        my $error = '';
 
-            my $MAX_UPLOAD = LJ::Userpic->max_allowed_bytes($u);
-            my $error;
+        # act like the factory is disabled if no mogile
+        my $factory_disabled = $LJ::DISABLED{'userpicfactory'} || !LJ::mogclient();
 
-            # act like the factory is disabled if no mogile
-            my $factory_disabled = $LJ::DISABLED{'userpicfactory'} || !LJ::mogclient();
+        # file over 40k, return too large error
+        if ($factory_disabled && ($size > $MAX_UPLOAD + 2048)) {
+            # we have to suck in the data otherwise the browser gets upset because we're
+            # closing the connection before reading in all the data and it will sometimes
+            # refuse to show the error.
+            LJ::Request->post_params();
 
-            # file over 40k, return too large error
-            if ($factory_disabled && ($size > $MAX_UPLOAD + 2048)) {
-                # we have to suck in the data otherwise the browser gets upset because we're
-                # closing the connection before reading in all the data and it will sometimes
-                # refuse to show the error.
+            # send error
+            return $err->(BML::ml('.error.filetoolarge',
+                                  { 'maxsize' => int($MAX_UPLOAD / 1024) . $ML{'.kilobytes'} }));
+        }
 
-                # pretend to tell apache that we care about parsing the data, but we really don't
-                my $bogus = sub {return 1;};
-                BML::parse_multipart_interactive(
-                    \$error, {
-                    newheaders => $bogus,
-                    data       => $bogus,
-                    enddata    => $bogus,
-                });
+        ## User can upload image or set image's uri.
+        my $userpic_raw = '';
+        if ($POST{userpic} or $POST{src} eq "url"){
+            ##
+            my ($size, $content) = (undef, undef);
 
-                return $err->(BML::ml('.error.filetoolarge',
-                                      { 'maxsize' => int($MAX_UPLOAD / 1024) .
-                                            $ML{'.kilobytes'} }));
-            }
+            if ($POST{userpic}){
+                ## Read uploaded image
+                my $upload = LJ::Request->upload('userpic');
+                return $err->("No uploaded file")
+                    unless $upload;
 
-            my $gotofactory = !$factory_disabled && ($size > $MAX_UPLOAD + 2048);
+                $size = $upload->size;
 
-            # small file size, check the pic out
-            if (!$gotofactory) {
-                BML::parse_multipart(\%POST, \$error, $MAX_UPLOAD + 2048);
-
-                  # couldn't parse correctly
-                  if ($error) {
-                      # return parse_multipart error
-                      return $err->($error);
-                  }
-
-                  if ($POST{'userpic'}) {
-                      my ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
-
-                      return $err->(BML::ml(".error.unsupportedtype", {filetype => $filetype}))
-                          if (!$imagew || !$imageh);
-
-                      # we need to double-check the filesize here; we made it past the initial check because
-                      # the factory isn't disabled, but the factory doesn't work for GIF userpics
-                      return $err->(BML::ml('.error.filetoolarge', { 'maxsize' => int($MAX_UPLOAD / 1024) . $ML{'.kilobytes'} }))
-                          if ($filetype eq 'GIF' && ($size > $MAX_UPLOAD + 2048));
-
-                      if (int($imagew) > 100 || int($imageh) > 100) {
-                          if ($factory_disabled) {
-                              # less than 40k, greater than 100x100 and factory is disabled
-                              return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"}));
-                          } elsif ($filetype ne 'JPG' && $filetype ne 'PNG') {
-                              # factory only works on jpegs and pngs because Image::Magick has issues
-                              return $err->("Sorry, you cannot upload a userpic larger than 100x100 pixels if it is in GIF format.")
-                          } else {
-                              # large image size, to the factory!
-                              $gotofactory = 1;
-                          }
-                      }
-                  }
-              }
-
-            # if we're coming from the factory, we definitely don't want to go back!
-            $gotofactory = 0 if ($POST{'src'} && $POST{'src'} eq 'factory');
-
-            if ($gotofactory) {
-                # large path
-
-                my %upload = (); # { spool_fh, spool_path, filename, bytes, md5sum, md5ctx, mime }
-                my $curr_name;
-
-                # called when the beginning of an upload is encountered
-                my $hook_newheaders = sub {
-                    my ($name, $filename) = @_;
-
-                    # for uploaded files, just set POST value to filename
-                    $POST{$name} = '';
-
-                    $curr_name = $name;
-
-                    return 1 unless $curr_name eq 'userpic';
-
-                    # new file, need to create a filehandle, etc
-                    $upload{filename} = $filename;
-                    $upload{md5ctx} = new Digest::MD5;
-
-                    # get MogileFS filehandle
-                    return $err->("Sorry, MogileFS must be running to handle the uploading of large images.") unless LJ::mogclient();
-
-                    $upload{spool_fh} = LJ::mogclient()->new_file("upf:$u->{userid}", 'temp')
-                        or die "Failed to open MogileFS tempfile";
-
-                    return 1;
-                };
-
-                # called as data is received
-                my $hook_data = sub {
-                    my ($len, $data) = @_;
-
-                    unless ($curr_name eq 'userpic') {
-                        $POST{$curr_name} .= $data;
-                        return 1;
-                    }
-
-                    # check that we've not exceeded the max read limit
-                    my $max_read = (1<<20) * 5; # 5 MiB
-                    my $len_read = 0;
-
-                    $len_read = ($upload{bytes} += $len);
-
-                    die "Upload max exceeded at $len_read bytes"
-                        if $len_read > $max_read;
-
-                    $upload{md5ctx}->add($data);
-                    $upload{spool_fh}->print($data);
-
-                    return 1;
-                };
-
-                # called when the end of an upload is encountered
-                my $hook_enddata = sub {
-                    return 1 unless $curr_name eq 'userpic';
-
-                    # since we've just finished a potentially slow upload, we need to
-                    # make sure the database handles in DBI::Role's cache haven't expired,
-                    # so we'll just trigger a revalidation now so that subsequent database
-                    # calls will be safe.
-                    $LJ::DBIRole->clear_req_cache();
-
-                    # don't try to operate on 0-length spoolfiles
-                    unless ($upload{bytes}) {
-                        %upload = ();
-                        return 1;
-                    }
-
-                    # read magic and try to determine formatid of uploaded file. This
-                    # doesn't use fh->tell and fh->seek because the filehandle is
-                    # sysopen()ed, so isn't really an IO::Seekable like an IO::File
-                    # filehandle would be.
-                    my $magic;
-                    tell $upload{spool_fh}
-                    or die "read offset is 0, empty file?";
-                    seek $upload{spool_fh}, 0, 0;
-
-                    # $! should always be set in this case because a failed read will
-                    # always be an error, not EOF, which is handled above (tell)
-                    $upload{spool_fh}->read($magic, 20)
-                        or die "Couldn't read magic: $!";
-
-                    $upload{spool_fh}->close
-                        or die "Can't close Mogile filehandle";
-
-                    my $format_magic = sub {
-                        my $magic = shift;
-                        my $hex = unpack "H*", $magic;
-                        my $mime;
-
-                        # image formats
-                        $mime = 'image/jpeg' if $magic =~ /^\xff\xd8/; # JPEG
-                        $mime = 'image/gif'  if $magic =~ /^GIF8/;     # GIF
-                        $mime = 'image/png'  if $magic =~ /^\x89PNG/;  # PNG
-
-                        return $mime;
-                    };
-
-                    $upload{mime} = $format_magic->($magic)
-                        or die "Unknown format for upload";
-
-                    # finished adding data for md5, create digest (but don't destroy original)
-                    $upload{md5sum} = $upload{md5ctx}->digest;
-
-                    return 1;
-                };
-
-                my $res = 1;
-
-                if ($POST{userpic}) {
-                    # we already have the oversize pic, just stash it directly in mogile
-                    LJ::mogclient()->store_content("upf:$u->{userid}", "temp", \$POST{userpic});
-                  } else {
-                      # parse multipart-mime submission, one chunk at a time,
-                      # calling our hooks as we go to put uploads in temporary
-                      # MogileFS filehandles
-                      $res = eval { BML::parse_multipart_interactive(
-                          \$error, {
-                          newheaders => $hook_newheaders,
-                          data       => $hook_data,
-                          enddata    => $hook_enddata,
-                      }); };
-
-                      # we didn't know that the image was a gif until now, but since we do,
-                      # we can enforce GIF-specific error conditions
-                      if ($upload{mime} eq 'image/gif') {
-
-                          # can't be over 40k
-                          if ($size > $MAX_UPLOAD + 2048) {
-                              return $err->(BML::ml('.error.giffiletoolarge', 
-                                                    { 'maxsize' => int($MAX_UPLOAD / 1024) . $ML{'.kilobytes'} }));
-                          }
-
-                          # sorry, factory only works for jpegs and pngs
-                          return $err->("Sorry, you cannot upload a userpic larger than 100x100 pixels if it is in GIF format.")
-                      }
-                }
-
-                # if BML::Parse_multipart_interactive failed, we need to add
-                # all of our gpics to the gpic_delete queue.  if any of them
-                # still have refcounts, they won't really be deleted because
-                # the async job will realize and leave them alone
-                unless ($res) {
-                    if (index(lc($error), 'unknown format') == 0) {
-                        LJ::mogclient()->delete("upf:$u->{userid}");
-                        return $err->(BML::ml(".error.unknowntype"));
-                    }
-                    return $err->("couldn't parse upload: $error");
-                }
-
-                my $imgdata = $POST{userpic} ? \$POST{userpic} : $upload{spool_fh};
-                my ($imagew, $imageh, $filetype) = Image::Size::imgsize($imgdata);
-
-                return $err->("The dimensions of this image are too large.") if ($imagew > 5000 || $imageh > 5000);
-
-                # if image is >40k but under 100x100 try to compress it down
-                my $bytes = $POST{userpic} ? length($POST{userpic}) : $upload{bytes};
-                return $err->("Could not determine size of uploaded file") unless $bytes;
-
-                my $nofactory = 0;
-
-                if (($imagew <= 100 && $imageh <= 100) && $bytes > $MAX_UPLOAD) {
-                    # attempt to resize down
-                    eval {
-                        my $picinfo = LJ::get_upf_scaled(
-                                                         size => 100,
-                                                         u    => $u,
-                                                         );
-
-                        # success! don't go to the factory, and pretend the user just uploaded the file
-                        # and continue on normally
-                        $POST{userpic} = ${$picinfo->[0]};
-                        $nofactory = 1;
-                    };
-
-                    if ($@ || length($POST{userpic}) > $MAX_UPLOAD) {
-                        return $err->(BML::ml('.error.filetoolarge',
-                                              {maxsize => int($MAX_UPLOAD / 1024) . $ML{'.kilobytes'}}));
-                    }
-                }
-
-                return BML::redirect("$LJ::SITEROOT/tools/userpicfactory.bml?keywords=" .
-                                     BML::eurl($POST{'keywords'}) . "&comments=" .
-                                     BML::eurl($POST{'comments'}) . "&imageWidth=${imagew}&imageHeight=${imageh}".
-                                     "&make_default=" . BML::eurl($POST{'make_default'}) . '&authas=' .
-                                     BML::eurl($GET{'authas'}) . '&sfx=' . BML::eurl($suffix)) unless $nofactory;
-            }
-
-            # was there an error parsing the multipart form?
-            if ($error) {
-                if ($error =~ /^\[(\S+?)\]/) {
-                    my $code = $1;
-                    if ($code eq "toolarge") {
-                        return $err->(BML::ml('.error.filetoolarge',
-                                              { 'maxsize' => int($MAX_UPLOAD / 1024) .
-                                                    $ML{'.kilobytes'} }));
-                    }
-                    $error = BML::ml("BML.parse_multipart.$code");
-                }
-                return $err->($error) if $error;
-            }
-
-            # error check input contents
-            if ($POST{'src'} eq "url" && $POST{'urlpic'} !~ /^http:\/\//) {
-                return $err->($ML{'.error.badurl'});
-            }
-
-            if ($POST{'src'} eq "file")  {
-                # already loaded from multipart parse earlier
-                return $err->("You must choose a file to upload or enter the URL of an image") unless $POST{'userpic'};
-            } elsif ($POST{'src'} eq "factory") {
-                my $scaledsizemax = $POST{'scaledSizeMax'};
-                my $x1 = $POST{'x1'}+0;
-                my $x2 = $POST{'x2'}+0;
-                my $y1 = $POST{'y1'}+0;
-                my $y2 = $POST{'y2'}+0;
-
-                return $err->("Invalid userpic creation parameters.") if (!$scaledsizemax || !$x2);
-
-                my $picinfo = eval {
-                    LJ::get_upf_scaled(
-                                       x1 => $x1,
-                                       y1 => $y1,
-                                       x2 => $x2,
-                                       y2 => $y2,
-                                       border => $POST{'border'},
-                                       userid  => $u->id,
-                                       );
-                  }
-                or return $err->("There was an error in generating the userpic: $@");
-
-                $POST{userpic} = ${ $picinfo->[0] };
+                # upload image as temp file to mogileFS. this file is used in lj_upf_resize worker. 
+                seek $upload->fh, 0,0;
+                read $upload->fh, $content, $upload->size; # read content
 
             } elsif ($POST{'src'} eq "url") {
+                ## Get image somewhere from internet
+                ##
+                return $err->($ML{'.error.badurl'})
+                if $POST{'urlpic'} !~ /^http:\/\//;
+
                 my $ua = LJ::get_useragent(
                                            role     => 'userpic',
                                            max_size => $MAX_UPLOAD + 1024,
                                            timeout  => 10,
                                            );
                 my $res = $ua->get($POST{urlpic});
-                $POST{userpic} = $res->content if $res && $res->is_success;
-                return $err->($ML{'.error.urlerror'}) unless $POST{userpic};
-                return $err->("You cannot upload large images from URLs.") if length($POST{userpic}) > $MAX_UPLOAD;
+                return $err->($ML{'.error.urlerror'} . ":" . $res->status_line)
+                    unless $res and $res->is_success;
+
+                # read downloaded file
+                $content = $res->content;
+                $size    = length $content;
+
+                return $err->("You cannot upload large images from URLs. $size > $MAX_UPLOAD") if $size > $MAX_UPLOAD;
             }
 
-            ## see if they have too many pictures uploaded
-            my $inline;
-            if (scalar @userpics >= $max) {
-                if ($inline .= LJ::run_hook("cprod_inline", $u, 'EditPicsMax')) {
-                    return $err->($inline . LJ::help_icon('userpics', " ", ""));
-                } else {
-                    return $err->(BML::ml('.error.toomanypics4', { "num" => $max }). LJ::help_icon('userpics', " ", ""));
+            ## do we get an image?
+            if (defined $size and $size > 0 and defined $content){
+                ## OK, verify its size and dimentions (maybe resize)
+    
+                # If image is lagger than 100x100 we can resize it all
+                # or send user to /tools/userpicfactory.bml where user can
+                # select desired part of image
+
+                my ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$content);
+                return $err->(BML::ml(".error.unsupportedtype", {filetype => $filetype}))
+                    if not $imagew or not $imageh;
+                return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"})) 
+                    if $imagew > 5000 or $imageh > 5000;
+
+                ## resize or send user to factory.
+                if ($imagew > 100 or $imageh > 100 or $size > $MAX_UPLOAD + 2048){
+                    ## Image has to be resized!
+
+
+                    ## save image content to temporary file in MogileFS
+                    ## than german worker or UserpicFatory handle it.
+                    my $mog_fh = LJ::mogclient()->new_file("upf:" . $u->userid, 'temp');
+                    return $err->("Userpic uploading is temporary disabled")
+                        unless $mog_fh;
+                    $mog_fh->print($content);
+                    $mog_fh->close;
+
+                    if ($factory_disabled){
+                        # [ resized image data, MIME, w, h ]
+                        my $picinfo = eval { LJ::get_upf_scaled( size => 100,
+                                                             u    => $u,
+                                                             ) }
+                            or return $err->("There was an error in generating the userpic: $@");
+                    
+                        # we've got a resized image
+                        $content = ${ $picinfo->[0] }; # update data
+
+                    } else {
+                        # Send user to Factory Tool
+                        return BML::redirect("$LJ::SITEROOT/tools/userpicfactory.bml?keywords=" .
+                                     BML::eurl($POST{'keywords'}) . "&comments=" .
+                                     BML::eurl($POST{'comments'}) . "&imageWidth=${imagew}&imageHeight=${imageh}".
+                                     "&make_default=" . BML::eurl($POST{'make_default'}) . '&authas=' .
+                                     BML::eurl($GET{'authas'}) . '&sfx=' . BML::eurl($suffix));
+                    }
                 }
+
+                ## put verified content as ready to create Userpic
+                $userpic_raw = $content;
             }
 
-            my $userpic = eval { LJ::Userpic->create($u, data => \$POST{'userpic'}); };
+        } elsif ($POST{'src'} eq "factory") {
+            ##
+            ##
+            my $scaledsizemax = $POST{'scaledSizeMax'};
+            my $x1 = $POST{'x1'}+0;
+            my $x2 = $POST{'x2'}+0;
+            my $y1 = $POST{'y1'}+0;
+            my $y2 = $POST{'y2'}+0;
+
+            return $err->("Invalid userpic creation parameters.") if (!$scaledsizemax || !$x2);
+
+            my $picinfo = eval {
+                LJ::get_upf_scaled(
+                                   x1 => $x1,
+                                   y1 => $y1,
+                                   x2 => $x2,
+                                   y2 => $y2,
+                                   border => $POST{'border'},
+                                   userid  => $u->id,
+                                   );
+              }
+            or return $err->("There was an error in generating the userpic: $@");
+
+            $userpic_raw = ${ $picinfo->[0] };
+
+        }
+
+
+        ## Are there any image data that ready to be a.... USERPIC?!
+        if ($userpic_raw){
+            # pam-pam-pam.... ouuhhh...
+            my $userpic = eval { LJ::Userpic->create($u, data => \$userpic_raw); };
             if (!$userpic) {
+                # oh... no...
                 return $err->($@->as_string);
             }
 
+            ## Yaouhuuuu... we've got a new userpic... lalala.
             my $picid = $userpic->id;
 
             push @info, "Your userpic has been successfully uploaded";
@@ -552,6 +367,7 @@
 
             # yey we created a new pic, reload the @userpics
             @userpics = LJ::Userpic->load_user_userpics($u);
+
         }
 
         # now fall through to edit page and show the updated userpic info
