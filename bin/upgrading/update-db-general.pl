@@ -4166,6 +4166,12 @@ register_alter(sub {
                  "ALTER TABLE antispam ADD INDEX(eventtime)");
     }
 
+    unless (column_type("recbill_cc", "addr") eq 'varchar(120)') {
+        do_alter("recbill_cc",
+                 "ALTER TABLE recbill_cc " .
+                 "CHANGE addr addr varchar(120) NOT NULL");
+    }
+
 });
 
 
