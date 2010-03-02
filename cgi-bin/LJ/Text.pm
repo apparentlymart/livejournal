@@ -77,7 +77,7 @@ sub fix_utf8 {
     confess "must be called as a class method"
         unless isa($class, __PACKAGE__);
 
-    $str = decode_utf8($str, Encode::QUIET());
+    $str = decode_utf8($str, Encode::FB_QUIET());
     return encode_utf8($str);
 }
 
