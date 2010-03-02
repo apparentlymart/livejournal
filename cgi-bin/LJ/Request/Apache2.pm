@@ -7,6 +7,7 @@ use Apache2::RequestRec;
 use Apache2::Response;
 use Apache2::RequestIO;
 use Apache2::Request;
+use Apache2::Upload;
 use Apache2::ServerUtil;
 use Apache2::Log;
 use Apache2::Access;
@@ -14,6 +15,8 @@ use Apache2::Connection;
 use Apache2::URI;
 use ModPerl::Util;
 use URI::Escape;
+use APR::Finfo;
+
 
 sub LJ::Request::OK                        { return Apache2::Const::OK }
 sub LJ::Request::REDIRECT                  { return Apache2::Const::REDIRECT }
@@ -160,7 +163,7 @@ sub LJ::Request::document_root {
 
 sub LJ::Request::finfo {
     my $class = shift;
-    $instance->{r}->finfo;
+    $instance->{apr}->finfo;
 }
 
 sub LJ::Request::filename {
@@ -435,7 +438,10 @@ sub LJ::Request::aborted {
     return $instance->{r}->connection()->aborted;
 }
 
-
+sub LJ::Request::upload {
+    my $class = shift;
+    return $instance->{apr}->upload(@_);
+}
 sub LJ::Request::sendfile {
     my $class = shift;
     my $filename = shift;

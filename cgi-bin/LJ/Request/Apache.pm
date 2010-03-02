@@ -451,6 +451,11 @@ sub LJ::Request::sendfile {
 
 }
 
+sub LJ::Request::upload {
+    my $class = shift;
+    return $instance->{apr}->upload(@_);
+}
+
 sub LJ::Request::parsed_uri {
     my $class = shift;
     _die_if_no_request();
