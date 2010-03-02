@@ -3610,8 +3610,9 @@ sub _Entry__get_link
         return $null_link unless $entry->security eq 'public';
         my $entry_url = $entry->url;
         my $entry_title = LJ::ejs($entry->subject_html);
-        return { '_type' => 'Link',
-                 'raw'   => qq|<script type="text/javascript">SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title' });</script>| };
+        my $link = LJ::S2::Link("#", $ctx->[S2::PROPS]->{"text_share_this"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_sharethis.gif", 22, 20));
+        $link->{raw} = qq|<script type="text/javascript">SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title' });</script>|;
+        return $link;
     }
     if ($key eq "mem_add") {
         return $null_link if $LJ::DISABLED{'memories'};
