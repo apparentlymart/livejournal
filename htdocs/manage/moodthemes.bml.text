@@ -63,3 +63,7 @@
 
 .yourthemes.nothemes=You have not yet made any custom mood themes.
 
+.error.global=Error: Some pictures weren't saved
+
+.error.url=Error: The URL you entered is not valid.
+

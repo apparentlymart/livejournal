@@ -112,6 +112,8 @@ sub mood_size_attributes {
     my @attrs;
     push @attrs, "width='$pic{'w'}'" if $pic{'w'};
     push @attrs, "height='$pic{'h'}'" if $pic{'h'};
+    push @attrs, 'class="meta-mood-img"';
+
     return join(' ', @attrs);
 
 }

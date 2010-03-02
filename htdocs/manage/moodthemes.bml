@@ -27,15 +27,6 @@ head<=
 
             // Update itself
             img.src = url.value;
-            img.width = newimage.width;
-            img.height = newimage.height;
-
-            var w = id+'w';
-            var h = id+'h';
-            var width = document.getElementById(w);
-            var height = document.getElementById(h);
-            width.value = newimage.width;
-            height.value = newimage.height;
 
             var form = document.getElementById('editform');
             // Update everything to be its parent
@@ -54,16 +45,10 @@ head<=
                     }
                     var our_img = document.getElementById(oid+'img');
                     our_img.src = par_img.src;
-                    our_img.width = par_img.width;
-                    our_img.height = par_img.height;
 
                     // now copy our_img info into text fields
                     var our_url = document.getElementById(oid);
-                    var our_width = document.getElementById(oid+'w');
-                    var our_height = document.getElementById(oid+'h');
                     our_url.value = par_img.src;
-                    our_width.value = par_img.width;
-                    our_height.value = par_img.height;
                 }
             }
         }
@@ -76,44 +61,32 @@ head<=
 
         var check = document.getElementById(id+'inherit');
         var url = document.getElementById(id);
-        var w = document.getElementById(id+'w');
-        var h = document.getElementById(id+'h');
 
-        var fill = switchdisable(id, check, url, w, h);
+        var fill = switchdisable(id, check, url);
 
         var pi = document.getElementById(parent+'img');
         // For some dumb reason an img tag with no source has the src of the pages url
         if(fill && parent != id && pi.src != page_url) {
             url.value = pi.src;
-            w.value = pi.width;
-            h.value = pi.height;
             var i = document.getElementById(id+'img');
             i.src = pi.src;
-            i.width = pi.width;
-            i.height = pi.height;
         }
     }
 
     // If a set of fields is disabled, it enables them and vice versa
-    function switchdisable(id, check, url, w, h) {
+    function switchdisable(id, check, url) {
         if (! document.getElementById) return true;
 
         if (check == undefined) {
             var check = document.getElementById(id+'inherit');
             var url = document.getElementById(id);
-            var w = document.getElementById(id+'w');
-            var h = document.getElementById(id+'h');
         }
 
         if (check.checked == true) {
             url.disabled = true;
-            w.disabled = true;
-            h.disabled = true;
             return true;
         } else {
             url.disabled = false;
-            w.disabled = false;
-            h.disabled = false;
             return false;
         }
     }
@@ -169,6 +142,9 @@ body<=
 
     #### Closure Definitions ####
     my $make_tree;
+    my %save_errors;
+    my %saved_urls;
+
     $make_tree = sub {
         my ($num, $tid) = @_;
         return unless $lists{$num};
@@ -176,7 +152,15 @@ body<=
         $ret .= "<ul>\n";
 
         foreach my $mood (@{$lists{$num}}) {
-            $ret .= "<li><b>$mood->{'name'}</b>";
+            $ret .= "<li> ";
+            $ret .= "<b>$mood->{'name'}</b> ";
+            if (my $error = $save_errors{$mood->{'id'}}) {
+                $ret .= qq{
+                    <span class="error">
+                        $BML::ML{".error.$error"}
+                    </span>
+                };
+            }
             my %pic;
             LJ::get_mood_picture($tid, $mood->{'id'}, \%pic);
             if (%pic) {
@@ -201,14 +185,9 @@ body<=
                 $ret .= "</td></tr>\n";
             }
             $ret .= "<tr><td>$ML{'.mood.label.url'} </td><td>";
-            $ret .= LJ::html_text({ name => $mood->{id}, id => $mood->{id}, value => $pic{pic},
+            $ret .= LJ::html_text({ name => $mood->{id}, id => $mood->{id}, value => $pic{pic} || $saved_urls{$mood->{'id'}},
                                     size => 75, onchange => "update_children($mood->{id})" });
             $ret .= "</td></tr>\n";
-            $ret .= "<tr><td>$ML{'.mood.label.width'} </td><td>";
-            $ret .= LJ::html_text({ name => "$mood->{id}w", id => "$mood->{id}w", value => $pic{w} || "", size => 4 });
-            $ret .= " $ML{'.mood.label.height'} " . LJ::html_text({ name => "$mood->{id}h", id => "$mood->{id}h",
-                                                  value => $pic{h} || '', size => 4 });
-            $ret .= "<br /><br /></td></tr>\n";
             $ret .= LJ::html_hidden({ name => "$mood->{id}parent", id => "$mood->{id}parent", value => $mood->{parent} });
             $ret .= "</table>\n";
 
@@ -226,6 +205,10 @@ body<=
         foreach (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods) {
             my $m = $moods->{$_};
             push @{$lists{$m->{'parent'}}}, $m;
+        }
+
+        if (%save_errors) {
+            $ret .= '<?errorbar ' . BML::ml('.error.global') . ' errorbar?>';
         }
 
         $make_tree->(0, $id);
@@ -329,8 +312,6 @@ body<=
                 # about what the user specified.
                 if ($key =~ /(^\d+$)/) {
                     my $mid = $1;
-                    my $width = $POST{$mid.'w'};
-                    my $height = $POST{$mid.'h'};
                     my $picurl = $POST{$key};
                     my $mname = LJ::mood_name($mid);
 
@@ -342,6 +323,15 @@ body<=
                         next;
                     }
 
+                    if ($picurl) {
+                        # check that this URL is correct
+                        unless ($picurl =~ /^https?:/ && length($picurl) < 100) {
+                            $save_errors{$mid} = 'url';
+                            $saved_urls{$mid} = $picurl;
+                            $picurl = '';
+                        }
+                    }
+
                     # picurl is blank, so we don't need this picture anymore
                     if (!$picurl) {
                         push @del_values, $mid;
@@ -349,10 +339,10 @@ body<=
                         next;
                     }
 
-                    # we have a picurl, width, and height. add it.
+                    # we have a picurl. add it.
                     if ($picurl =~ m!^https?://[^\'\"\0\s]+$!) {
-                        push @repl_values, ($themeid, $mid, $picurl, $width, $height);
-                        push @repl_bind, ("(?, ?, ?, ?, ?)");
+                        push @repl_values, ($themeid, $mid, $picurl);
+                        push @repl_bind, ("(?, ?, ?)");
                         $ret .= BML::ml('.mood.setpic', {'mood' => "$mname($mid)", 'url' => $picurl}) . "<br />\n";
                     }
                 }
@@ -368,7 +358,7 @@ body<=
             if (@repl_values) {
                 my $bind = join(",", @repl_bind);
                 my $i = $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, " .
-                                 "picurl, width, height) VALUES $bind", undef, @repl_values);
+                                 "picurl) VALUES $bind", undef, @repl_values);
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.cantupdatetheme'} p?>" unless $i;
              }
 
@@ -377,8 +367,22 @@ body<=
 
             delete $LJ::CACHE_MOOD_THEME{$themeid};
 
-           $ret .= "<br />$ML{'.saved'}<br /><br />\n";
-           return BML::redirect($self_uri);
+            unless (%save_errors) {
+                return BML::redirect($self_uri);
+            } else {
+                # Make the form
+                $ret .= "<?p <form action='$self_uri' method='post' id='editform' name='editform'>\n";
+                $ret .= $form_auth;
+                $ret .= "<b>$ML{'.editingtheme.label.name'}</b> ";
+                $ret .= LJ::html_text({ name => 'name', value => $info->{name}, size => 50, maxlength => 255 });
+                $ret .= "<br /><br />\n";
+                $ret .= LJ::html_hidden('themeid' => $themeid) . "\n";
+
+                # Actually make the editor form
+                $editform->($themeid);
+
+                $ret .= LJ::html_submit('save' => $ML{'.btn.savechanges'}) . "</form> p?>\n";
+            }
         }
 
         $ret .= BML::ml('Backlink', {
