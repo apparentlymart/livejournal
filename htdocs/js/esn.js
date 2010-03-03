@@ -384,7 +384,7 @@ ESN.updateThreadIcons = function (dtalkid, tracking) {
 };
 
 jQuery(function($){
-	$({selector: 'a.delete-group', context: $('#settings_form')}).live('click', function(e)
+	$('#settings_form').delegate('a.delete-group', 'click', function(e)
 	{
 		var group = this.href.match('&delete_group=(.*?)&')[1];
 		$.post(location.href, {
