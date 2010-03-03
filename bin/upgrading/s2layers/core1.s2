@@ -1956,9 +1956,17 @@ function Image::as_string(string{} opts) [fixed] : string {
 }
 
 function Image::as_string(string alttext) [fixed] : string {
+    var string extraParams = "";
+
+    foreach var string extraKey ($.extra) {
+        $extraParams = $extraParams + """$extraKey="$.extra{$extraKey}" """;
+    }
+
+    if ($.height) { $extraParams = $extraParams + """height="$.height" """; }
+    if ($.width)  { $extraParams = $extraParams +  """width="$.width" """; }
+
     return "<img src=\"$.url\" title=\"\" alt=\"" + ehtml($alttext) + "\"" +
-        htmlattr("height", $.height) +
-        htmlattr("width", $.width) + " />";
+        $extraParams + " />";
 }
 
 function Image::as_string() [fixed] : string {

@@ -1885,12 +1885,14 @@ sub Entry
     if (my $mid = $p->{'current_moodid'}) {
         my $theme = defined $arg->{'moodthemeid'} ? $arg->{'moodthemeid'} : $u->{'moodthemeid'};
         my %pic;
-        $e->{'mood_icon'} = Image($pic{'pic'}, $pic{'w'}, $pic{'h'})
-            if LJ::get_mood_picture($theme, $mid, \%pic);
+        my $img_alt = undef;
         if (my $mood = LJ::mood_name($mid)) {
             my $extra = LJ::run_hook("current_mood_extra", $theme) || "";
+            $img_alt = $mood;
             $e->{'metadata'}->{'mood'} = "$mood$extra";
         }
+        $e->{'mood_icon'} = Image($pic{'pic'}, $pic{'w'}, $pic{'h'}, $img_alt, 'class' => 'meta-mood-img' )
+            if LJ::get_mood_picture($theme, $mid, \%pic);
     }
     if ($p->{'current_mood'}) {
         $e->{'metadata'}->{'mood'} = $p->{'current_mood'};
