@@ -192,13 +192,15 @@ class Link
     var Image icon
     "A suggestion from the server as to which icon to use. layouts/users can override this of course.
     alt text works similarly to [member[Link.caption]].";
-    var readonly string raw "Raw html code instead of link parameters";
 
     function print_button
     "Output this Link as a clickable button using [member[Link.icon]]";
 
     function as_string() : string
     "Return the button HTML link.";
+
+    function builtin print_raw() 
+    "Output additional link HTML code.";   
 }
 
 class ItemRange
@@ -2307,6 +2309,7 @@ function Entry::print_linkbar() {
     foreach var string k ($.link_keyseq) {
         $link = $this->get_link($k);
         " $link ";
+        $link->print_raw();
     }
     if ($show_interentry) {
         $this->print_link_next();
@@ -2629,13 +2632,7 @@ function Link::print_button() [fixed] {
 
 function Link::as_string() [fixed] : string {
 
-    if ($.url == "") { 
-        if ($.raw) {
-            return $.raw;
-        } else {
-            return "";
-        }
-    }
+    if ($.url == "") { return ""; }
     var string ealt = ehtml($.caption);
     var string{} extra = $.icon.extra;
     var string extraParams = "";
@@ -2644,7 +2641,7 @@ function Link::as_string() [fixed] : string {
         $extraParams = $extraParams + """$extraKey="$extra{$extraKey}" """;
     }
 
-    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" title="$ealt" src="$.icon.url" $extraParams /></a>$.raw""";
+    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" title="$ealt" src="$.icon.url" $extraParams /></a>""";
 }
 
 # Redirector

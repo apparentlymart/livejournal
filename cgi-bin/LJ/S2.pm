@@ -2047,7 +2047,7 @@ sub Link {
         'caption' => $caption,
         'url'     => $url,
         'icon'    => $icon,
-        'raw'     => '',
+        '_raw'     => '',
     };
 
     return $lnk;
@@ -2965,6 +2965,11 @@ sub Color__darker {
     return $new;
 }
 
+sub Link__print_raw {
+    my ($ctx, $this) = @_;
+    $S2::pout->($this->{_raw}) if $this->{_raw};
+}
+
 sub _Comment__get_link
 {
     my ($ctx, $this, $key) = @_;
@@ -3611,7 +3616,7 @@ sub _Entry__get_link
         my $entry_url = $entry->url;
         my $entry_title = LJ::ejs($entry->subject_html);
         my $link = LJ::S2::Link("#", $ctx->[S2::PROPS]->{"text_share_this"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_sharethis.gif", 24, 24));
-        $link->{raw} = qq|<script type="text/javascript">
+        $link->{_raw} = qq|<script type="text/javascript">
             SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title'}, {button: false})
                 .attachButton(jQuery('a:last')[0]);
             </script>|;
