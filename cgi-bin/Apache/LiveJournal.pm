@@ -904,7 +904,7 @@ sub trans
         if ($int =~ /^flat|xmlrpc|blogger|elsewhere_info|atom(?:api)?$/) {
             $RQ{'interface'} = $int;
             $RQ{'is_ssl'} = $is_ssl;
-            LJ::Request->push_handlers(PerlHandler => \&interface_content);
+            LJ::Request->set_handlers(PerlHandler => \&interface_content);
             return LJ::Request::OK
         }
         if ($int eq "s2") {
@@ -1646,6 +1646,14 @@ sub interface_content
 {
     my $args = LJ::Request->args;
 
+    # simplified code from 'package BML::Cookie' in Apache/BML.pm
+    my $cookie_str = LJ::Request->header_in("Cookie");
+    if ($cookie_str =~ /\blangpref=(\w{2,10})\/\d+\b/) { # simplified code from BML::decide_language
+        my $lang = $1;
+        # Attention! LJ::Lang::ml uses BML::ml in web context, so we must do full BML language initialization
+        BML::set_language($lang, \&LJ::Lang::get_text);
+    }
+
     if ($RQ{'interface'} eq "xmlrpc") {
         return LJ::Request::NOT_FOUND unless LJ::ModuleCheck->have('XMLRPC::Transport::HTTP');
         my $server = XMLRPC::Transport::HTTP::Apache
@@ -1859,6 +1867,9 @@ sub xmlrpc_method {
 package LJ::XMLRPC;
 
 use vars qw($AUTOLOAD);
+
+# pretend we can do everything; AUTOLOAD will handle that
+sub can { 1 }
 
 sub AUTOLOAD {
     my $method = $AUTOLOAD;
