@@ -896,7 +896,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     if ($p.view != "entry" and $p.view != "reply") {
         "<td align='right' class='comments'>"; $e.comments->print();
     } elseif ($e.comments.enabled) {
-        "<td align='right' class='comments'>"; $p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment"});
+        "<td align='right' class='comments'>";
+if (not $e.comments.locked) {
+		$p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment"});
+}
     } else {
         "<td>";
     }
