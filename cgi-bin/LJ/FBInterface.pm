@@ -59,11 +59,11 @@ sub get_user_info
 # sync cache timeouts, such as user suspensions.
 sub push_user_info
 {
-    my ($class, $uid) = $_;
+    my ($class, $uid) = @_;
 
     $uid = LJ::want_userid($uid);
     return unless $uid;
-
+ 
     my $ret = $class->get_user_info({ uid => $uid });
 
     eval "use XMLRPC::Lite;";
@@ -77,7 +77,7 @@ sub push_user_info
 
 sub can_upload
 {
-    my ($class, $u) = shift;
+    my ($class, $u) = @_;
 
     return LJ::get_cap($u, 'fb_account')
         && LJ::get_cap($u, 'fb_can_upload') ? 1 : 0;
