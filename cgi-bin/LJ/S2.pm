@@ -1891,7 +1891,13 @@ sub Entry
             $img_alt = $mood;
             $e->{'metadata'}->{'mood'} = "$mood$extra";
         }
-        $e->{'mood_icon'} = Image($pic{'pic'}, $pic{'w'}, $pic{'h'}, $img_alt, 'class' => 'meta-mood-img' )
+        my ($width, $height, %img_extra);
+        if ($pic{'w'} && $pic{'h'}) {
+            ($width, $height) = @pic{('w', 'h')};
+        } else {
+            $img_extra{'class'} = 'meta-mood-img';
+        }
+        $e->{'mood_icon'} = Image($pic{'pic'}, $width, $height, $img_alt, %img_extra )
             if LJ::get_mood_picture($theme, $mid, \%pic);
     }
     if ($p->{'current_mood'}) {
