@@ -793,8 +793,8 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 				ContextualPopup.changeRelation(data, ctxPopupId, data.is_member ? 'leave' : 'join', e);
 			}
 		})
-		.after('<br/>')
 		.appendTo(content);
+		content.appendChild(document.createElement('br'));
 	}
 	
 	// send message
@@ -803,8 +803,8 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 			href: data.url_message,
 			text: data.ml_send_message
 		})
-		.after('<br/>')
 		.appendTo(content);
+		content.appendChild(document.createElement('br'));
 	}
 	
 	// add/remove friend link
@@ -826,8 +826,8 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 					return data.is_friend ? data.ml_remove_friend : data.ml_add_friend;
 			}
 		})
-		.after('<br/>')
 		.appendTo(content);
+		content.appendChild(document.createElement('br'));
 	}
 	
 	// vgift;
@@ -836,8 +836,8 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 			href: Site.siteroot + '/shop/vgift.bml?to=' + data.username,
 			text: data.ml_send_gift
 		})
-		.after('<br/>')
 		.appendTo(content);
+		content.appendChild(document.createElement('br'));
 	}
 	
 	if (data.is_logged_in && !data.is_requester && !data.is_comm && !data.is_syndicated) {
@@ -879,8 +879,8 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 				ContextualPopup.changeRelation(data, ctxPopupId, action, e);
 			}
 		})
-		.after('<br/>')
 		.appendTo(content);
+		content.appendChild(document.createElement('br'));
 	}
 	
 	// view label
