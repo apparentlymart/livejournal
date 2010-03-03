@@ -3502,7 +3502,7 @@ sub UserLite__get_link
     my $has_journal = $u->{journaltype} ne 'I';
 
     my $button = sub {
-        return LJ::S2::Link($_[0], $_[1], LJ::S2::Image("$LJ::IMGPREFIX/$_[2]", 22, 20));
+        return LJ::S2::Link($_[0], $_[1], LJ::S2::Image("$LJ::IMGPREFIX/$_[2]", 24, 24));
     };
 
     if ($key eq 'add_friend' && defined($remote)) {

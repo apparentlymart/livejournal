@@ -28,36 +28,36 @@ $img{'btn_down'} = {
 
 $img{'btn_del'} = {
     'src' => '/btn_del.gif',
-    'width' => 22,
-    'height' => 20,
+    'width' => 24,
+    'height' => 24,
     'alt' => 'img.btn_del',
 };
 
 $img{'btn_freeze'} = {
     'src' => '/btn_freeze.gif',
-    'width' => 22,
-    'height' => 20,
+    'width' => 24,
+    'height' => 24,
     'alt' => 'img.btn_freeze',
 };
 
 $img{'btn_unfreeze'} = {
     'src' => '/btn_unfreeze.gif',
-    'width' => 22,
-    'height' => 20,
+    'width' => 24,
+    'height' => 24,
     'alt' => 'img.btn_unfreeze',
 };
 
 $img{'btn_scr'} = {
     'src' => '/btn_scr.gif',
-    'width' => 22,
-    'height' => 20,
+    'width' => 24,
+    'height' => 24,
     'alt' => 'img.btn_scr',
 };
 
 $img{'btn_unscr'} = {
     'src' => '/btn_unscr.gif',
-    'width' => 22,
-    'height' => 20,
+    'width' => 24,
+    'height' => 24,
     'alt' => 'img.btn_unscr',
 };
 
@@ -126,15 +126,15 @@ $img{'track'} = {
 
 $img{'track_active'} = {
     'src' => '/btn_tracking.gif',
-    'width' => 22,
-    'height' => 20,
+    'width' => 24,
+    'height' => 24,
     'alt' => 'img.track_active',
 };
 
 $img{'track_thread_active'} = {
     'src' => '/btn_tracking_thread.gif',
-    'width' => 22,
-    'height' => 20,
+    'width' => 24,
+    'height' => 24,
     'alt' => 'img.track_thread_active',
 };
 
