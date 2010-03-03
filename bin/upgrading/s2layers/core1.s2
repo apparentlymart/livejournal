@@ -179,6 +179,9 @@ class Image
     function as_string (string alttext) : string
     "Return an HTML tag for this Image with given alttext";
 
+    function as_string_ex (string alttext, string attributes) : string
+    "Return an HTML tag for this Image with given alttext and given additional HTML tag attributes";
+
     function as_string (string{} opts) : string
     "Return the HTML for an image, Supported keys are 'href' to create a link to the image source
      and 'a_attr' which adds attributes to the anchor tag if a link is to be printed.";
@@ -1956,6 +1959,10 @@ function Image::as_string(string{} opts) [fixed] : string {
 }
 
 function Image::as_string(string alttext) [fixed] : string {
+    return $this->as_string_ex($alttext, "");
+}
+
+function Image::as_string_ex(string alttext, string attributes) [fixed] : string {
     var string extraParams = "";
 
     foreach var string extraKey ($.extra) {
@@ -1964,6 +1971,8 @@ function Image::as_string(string alttext) [fixed] : string {
 
     if ($.height) { $extraParams = $extraParams + """height="$.height" """; }
     if ($.width)  { $extraParams = $extraParams +  """width="$.width" """; }
+
+    $extraParams = $extraParams + $attributes;
 
     return "<img src=\"$.url\" title=\"\" alt=\"" + ehtml($alttext) + "\"" +
         $extraParams + " />";
