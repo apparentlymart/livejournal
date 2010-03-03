@@ -474,10 +474,4 @@ sub LJ::Request::child_terminate {
     return $instance->{r}->child_terminate;
 }
 
-sub LJ::Request::meets_conditions {
-    my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->meets_conditions;
-}
-
 1;
