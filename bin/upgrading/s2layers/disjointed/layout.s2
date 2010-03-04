@@ -1116,7 +1116,9 @@ function EntryLite::print_linkbar() {
             """<a href="$link.url" title="$link.caption">$link.caption</a>"""; 
         } else {
             ### showing reply link if comment not screened
+if (not $c.frozen) {
             $c->print_reply_link({ "linktext" => $*text_comment_reply });
+}
         }
     
     print " - ";
@@ -1140,11 +1142,15 @@ function EntryLite::print_linkbar() {
       $linkbar = $linkbar + "$*text_max_comments$btwn_comments";
     } else {
       if ($p.view == "entry") {
+if (not $en.comments.locked) {
         $p->print_reply_link({"target" => "topcomment", "linktext" => "$*text_post_comment"}); print " - ";
+}
       } else {
+if (not $en.comments.locked) {
         $url  = $en.comments.post_url;
         $text = get_plural_phrase(0, ("text_post_comment" + ($p.view == "friends" ? "_friends" : "")));
         $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+}
       }
     }
   }
@@ -1152,9 +1158,9 @@ function EntryLite::print_linkbar() {
     var Link link = $this->get_link($link_key);
     $url          = $link.url;
     $text         = $link.caption;
-    if($url != "") {
+    if($url != "" and $link_key != "tell_friend") {
       $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
-    }
+      }
   }
   $url     = $.permalink_url;
   $text    = $*text_permalink;

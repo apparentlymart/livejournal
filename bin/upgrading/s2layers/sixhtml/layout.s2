@@ -1065,8 +1065,10 @@ function EntryPage::print_comment(Comment e) {
             println " $sep " + $e->expand_link();
         }
     }
-    if ($e.reply_url)  { 
-        print " $sep "; 
+    if ($e.reply_url)  {
+if (not $e.frozen) {
+        print " $sep ";
+}
         ###$e->print_reply_link({"linktext" => $*text_comment_reply}); 
 
         if($e.screened == true) {
@@ -1076,7 +1078,9 @@ function EntryPage::print_comment(Comment e) {
             """<a href="$link.url" title="$link.caption">$link.caption</a>""";
         } else {
             ### showing reply link if comment not screened
+if (not $e.frozen) {
             $e->print_reply_link({ "linktext" => $*text_comment_reply });
+}
         }
 
     }
@@ -1111,6 +1115,7 @@ function Entry::print_linkbar() {
         $text = $link.caption;
         if (defined $link) {
             """ $sep <a href="$url">$text</a>""";
+            $link->print_raw();
         }
     }
 }
