@@ -1160,10 +1160,12 @@ function EntryPage::print_body () {
     {
         var string pages;
         if ($.comment_pages.all_subitems_displayed) {
+if (not $.entry.comments.locked) {
             print_heading_bar_begin();
             $this->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
             $this->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
             print_heading_bar_end();
+}
         } else {
             $pages = lang_page_of_pages($.comment_pages.current, $.comment_pages.total) + " - ";
             foreach var int i (1 .. $.comment_pages.total) {
@@ -1180,10 +1182,12 @@ function EntryPage::print_body () {
             if ($this.multiform_on) { $this->print_multiform_start(); }
             $this->print_comments($.comments);
             if ($.comment_pages.all_subitems_displayed) {
+if (not $.entry.comments.locked) {
                print_heading_bar_begin();
                print "("; $this->print_reply_link({"target" => "bottomcomment", "linktext" => $*text_post_comment}); """)""";
                $this->print_reply_container({"target" => "bottomcomment", "class" => "quickreply"});
                print_heading_bar_end();
+}
             } else {
                 $pages = lang_page_of_pages($.comment_pages.current, $.comment_pages.total) + " - ";
             foreach var int i (1 .. $.comment_pages.total) {
