@@ -46,7 +46,7 @@ sub LJ::Request::init {
     my $r     = shift;
 
     $instance = bless {}, $class;
-    $instance->{apr} = Apache::Request->instance($r);
+    $instance->{apr} = Apache::Request->new($r);
     $instance->{r} = $r;
     $instance->{apr}->parse;
     return $instance;
