@@ -2146,10 +2146,8 @@ sub start_request
                               stc/contextualhover.css
                               )) if $LJ::CTX_POPUP;
 
-              LJ::need_res(qw(
-                              js/devel.js
-                              js/livejournal-devel.js
-                              )) if $LJ::IS_DEV_SERVER;
+              # Conditional IE CSS file for all pages 
+              LJ::need_res({condition => 'IE'}, 'stc/ie.css');
           }
     }
 
