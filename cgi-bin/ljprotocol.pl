@@ -2653,6 +2653,8 @@ sub editfriends
             $friends_added++;
             my $added = { 'username' => $aname,
                           'fullname' => $row->{'name'},
+                          'journaltype' => $row->{journaltype},
+                          'defaultpicurl' => ($row->{'defaultpicid'} && "$LJ::USERPIC_ROOT/$row->{'defaultpicid'}/$row->{'userid'}"),
                       };
             if ($req->{'ver'} >= 1) {
                 LJ::text_out(\$added->{'fullname'});
@@ -3019,7 +3021,9 @@ sub list_friends
             'S' => "suspended",
             'X' => "purged",
         }->{$u->{'statusvis'}} if $u->{'statusvis'} ne 'V';
-
+        
+        $r->{defaultpicurl} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}" if $u->{'defaultpicid'};
+        
         push @$res, $r;
         # won't happen for zero limit (which means no limit)
         last if @$res == $limitnum;
