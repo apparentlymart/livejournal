@@ -1,0 +1,20 @@
+/* Width & Height for Moods */
+* html IMG#mood_image_preview  {
+    height: auto;
+    }
+* html IMG.meta-mood-img,
+* html IMG#mood_image_preview {
+	zoom:expression(
+		function(t){
+			if (60 < t.scrollWidth && t.scrollWidth > t.scrollHeight) {
+				t.width = '60';
+			}
+			else if (60 < t.scrollHeight) {
+				t.height = '60';
+			}
+		t.runtimeStyle.zoom = 1;
+	}(this));
+}
+
+
+

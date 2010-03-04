@@ -427,3 +427,13 @@ It must be invisible, use it only for reskining */
     cursor: pointer;
     }
 
+/* Width & Height for Moods */
+IMG.meta-mood-img,
+IMG#mood_image_preview {
+    max-width: 60px;
+    max-height: 60px;
+    } 
+
+
+
+
