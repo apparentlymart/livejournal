@@ -46,8 +46,9 @@ sub LJ::Request::init {
     my $r     = shift;
 
     $instance = bless {}, $class;
-    $instance->{apr} = Apache::Request->new($r);
+    $instance->{apr} = Apache::Request->instance($r);
     $instance->{r} = $r;
+    $instance->{apr}->parse;
     return $instance;
 }
 
@@ -182,7 +183,7 @@ sub LJ::Request::push_handlers_global {
 sub LJ::Request::push_handlers {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{r}->push_handlers(@_);
+    return Apache->request->push_handlers(@_);
 }
 
 sub LJ::Request::set_handlers {
@@ -364,10 +365,15 @@ sub LJ::Request::post_params {
     ## but only if the request content type is application/x-www-form-urlencoded.
     ## ...
     ## NOTE: you can only ask for this once, as the entire body is read from the client.
-    return () if $instance->{r}->headers_in()->get("Content-Type") =~ m!^multipart/form-data!;
+    #return () if $instance->{r}->headers_in()->get("Content-Type") =~ m!^multipart/form-data!;
 
-    return @{ $instance->{params} } if $instance->{params};
-    my @params = $instance->{r}->content;
+    return @{ $instance->{params} } if $instance->{params};  
+    my @params = ();
+    foreach my $name ($instance->{apr}->param){
+        foreach my $val ($instance->{apr}->param($name)){
+            push @params => ($name, $val);
+        }
+    }
     $instance->{params} = \@params;
     return @params;
 }
