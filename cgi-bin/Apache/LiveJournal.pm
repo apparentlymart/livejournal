@@ -1283,7 +1283,7 @@ sub files_trans
         return LJ::Request::NOT_FOUND;
     } else {
         LJ::Request->handler("perl-script");
-        LJ::Request->push_handlers(PerlHandler => \&files_handler);
+        LJ::Request->set_handlers(PerlHandler => \&files_handler);
         return LJ::Request::OK
     }
     return LJ::Request::NOT_FOUND;
