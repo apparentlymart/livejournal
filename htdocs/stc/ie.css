@@ -2,7 +2,6 @@
 * html IMG#mood_image_preview  {
     height: auto;
     }
-* html IMG.meta-mood-img,
 * html IMG#mood_image_preview {
 	zoom:expression(
 		function(t){
@@ -11,6 +10,18 @@
 			}
 			else if (60 < t.scrollHeight) {
 				t.height = '60';
+			}
+		t.runtimeStyle.zoom = 1;
+	}(this));
+}
+* html IMG.meta-mood-img {
+	zoom:expression(
+		function(t){
+			if (100 < t.scrollWidth && t.scrollWidth > t.scrollHeight) {
+				t.width = '100';
+			}
+			else if (100 < t.scrollHeight) {
+				t.height = '100';
 			}
 		t.runtimeStyle.zoom = 1;
 	}(this));

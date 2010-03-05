@@ -428,11 +428,14 @@ It must be invisible, use it only for reskining */
     }
 
 /* Width & Height for Moods */
-IMG.meta-mood-img,
+IMG.meta-mood-img {
+    max-width: 100px;
+    max-height: 100px;
+    } 
 IMG#mood_image_preview {
     max-width: 60px;
     max-height: 60px;
-    } 
+    }
 
 
 
