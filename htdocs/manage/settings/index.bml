@@ -135,6 +135,19 @@ body<=
                 LJ::Setting::Display::GiftCerts
             )],
         },
+        extensions => {
+            name        => LJ::Lang::ml('.cat.integration'),
+            visible     => 1,
+            disabled    => !$u || $u->is_community ? 1 : 0,
+            form        => 1,
+            desc        => LJ::Lang::ml('.cat.integration.desc'),
+            need_ssl    => 0,
+            sort_weight => 70,
+            settings    => [qw(
+                LJ::Setting::MSN
+                LJ::Setting::GoogleAnalytics
+            )],
+        },
     );
 
     LJ::run_hooks("settings_extra_cats", \%cats_with_settings, user => $u);
@@ -420,7 +433,7 @@ body<=
             my $errors = $setting->errors_from_save($save_rv);
             my $args = $setting->args_from_save($save_rv);
 
-            my $label = $setting->label;
+            my $label = $setting->label($u);
             my $option = $setting->option($u, $errors, $args, getargs => \%GET );
             my $actionlink = $setting->actionlink($u);
             my $helpicon = LJ::help_icon($setting->helpurl($u));
