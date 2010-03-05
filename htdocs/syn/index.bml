@@ -8,12 +8,11 @@ body<=
     use vars qw(%POST);
 
     my $dbh = LJ::get_db_writer();
-    my $u = LJ::get_remote();
+    my $u   = LJ::get_remote();
 
-    unless ($u) {
-        return "<?needlogin?>";
-    }
-    return "<?h1 $ML{'error.suspended.title'} h1?><?p $ML{'error.suspended.text'} p?>" if $u->is_suspended;
+    return "<?needlogin?>" if LJ::did_post() and $u;
+    return "<?h1 $ML{'error.suspended.title'} h1?><?p $ML{'error.suspended.text'} p?>" 
+        if $u and $u->is_suspended;
 
     if (LJ::did_post() && $POST{'userid'} != $u->{'userid'}) {
         return "<?h1 $ML{'.invalid.submission'} h1?><?p $ML{'.user.nomatch'} p?>";
@@ -206,7 +205,7 @@ body<=
     $ret .= "<?p $ML{'.promo.text'} p?>";
 
     $ret .= "<form method='post' action='./'>";
-    $ret .= LJ::html_hidden("userid", $u->{'userid'});
+    $ret .= LJ::html_hidden("userid", $u->userid) if $u;
 
     if (@pop) {
         $ret .= "<?h1 $ML{'.add.pop.title'} h1?><?p $ML{'.add.pop.text'} p?>";
@@ -237,16 +236,16 @@ body<=
     }
 
     $ret .= "</form><form method='post' action='./'>";
-    $ret .= LJ::html_hidden("userid", $u->{'userid'});
+    $ret .= LJ::html_hidden("userid", $u->userid) if $u;
 
     $ret .= "<?h1 $ML{'.add.byurl.title'} h1?><?p $ML{'.add.byurl.text'} p?>";
-    unless (LJ::get_cap($u, "synd_create")) {
-        my $inline;
-        if ($inline .= LJ::run_hook("cprod_inline", $u, 'Syn')) {
-            $ret .= $inline;
-        } else {
-            $ret .= "<p>".BML::ml('cprod.syn.text.v1')."</p>";
-        }
+    if ($u 
+        and not LJ::get_cap($u, "synd_create") 
+        and my $inline .= LJ::run_hook("cprod_inline", $u, 'Syn')
+    ) {
+        $ret .= $inline;
+    } else {
+        $ret .= "<p>".BML::ml('cprod.syn.text.v1')."</p>";
     }
     $ret .= "<blockquote>";
     $ret .= "<p>$ML{'.feed.url'} <input size='40' maxlength='255' name='synurl' />";
