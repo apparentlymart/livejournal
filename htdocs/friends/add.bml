@@ -1,7 +1,7 @@
 <?_code
 use strict;
 
-use JSON;
+use LJ::JSON;
 
 use vars qw($body $title $windowtitle %GET %POST);
 

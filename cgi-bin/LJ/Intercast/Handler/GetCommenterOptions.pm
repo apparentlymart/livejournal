@@ -20,7 +20,7 @@ sub handle {
                results     => $retopts,
                );
 
-    return JSON::objToJson(\%ret);
+    return LJ::JSON->to_json(\%ret);
 }
 
 sub owns { $_[1] eq 'Member::getCommenterOptions' }

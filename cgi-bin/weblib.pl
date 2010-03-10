@@ -11,7 +11,7 @@ require "crumbs.pl";
 
 use Carp;
 use LJ::Request;
-use JSON();
+use LJ::JSON;
 use Class::Autouse qw(
                       LJ::Event
                       LJ::Subscription::Pending
@@ -1217,9 +1217,9 @@ sub no_access_error {
 sub js_dumper {
     my $obj = shift;
     if (ref $obj) {
-        return JSON::objToJson($obj);
+        return LJ::JSON->to_json($obj);
     } else {
-        return ($obj =~ /^\d+$/) ?  $obj : '"' . LJ::ejs($obj) . '"';
+        return ($obj =~ /^[1-9]\d*$/) ?  $obj : '"' . LJ::ejs($obj) . '"';
     }
 }
 

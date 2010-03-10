@@ -3,12 +3,12 @@
     use strict;
     use vars qw(%POST);
     use LJ::Auth;
-    use JSON;
+    use LJ::JSON;
     use Gearman::Client;
 
     my $err = sub {
         my $msg = shift;
-        return JSON::objToJson({
+        return LJ::JSON->to_json({
             error => "Error: $msg",
             meta  => $POST{meta},
         });

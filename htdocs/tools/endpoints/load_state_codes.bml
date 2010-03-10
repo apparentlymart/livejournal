@@ -2,10 +2,10 @@
 {
     use strict;
     use vars qw(%POST);
-    use JSON;
+    use LJ::JSON;
     BML::finish();
 
-    my $country = $POST{'country'} or return JSON::objToJson({ error => "no country parameter" });
+    my $country = $POST{'country'} or return LJ::JSON->to_json({ error => "no country parameter" });
 
     my %states;
 
@@ -13,7 +13,7 @@
 
     LJ::load_codes({ $states_type => \%states }) if defined $states_type;
 
-    my $json = JSON::objToJson({ states => [map { $_, $states{$_} } sort { $states{$a} cmp $states{$b} } keys %states],
+    my $json = LJ::JSON->to_json({ states => [map { $_, $states{$_} } sort { $states{$a} cmp $states{$b} } keys %states],
                              head => $ML{'states.head.defined'} });
     return $json;
 }

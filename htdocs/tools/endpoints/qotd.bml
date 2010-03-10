@@ -2,7 +2,7 @@
 {
     use strict;
     use vars qw(%GET);
-    use JSON;
+    use LJ::JSON;
 
     # if any opts aren't defined, they'll be passed in as empty strings
     my $skip = $GET{skip} eq "" ? undef : $GET{skip};
@@ -18,6 +18,6 @@
         $ret = LJ::Widget::QotD->qotd_display( questions => \@questions );
     }
 
-    return JSON::objToJson({ text => $ret });
+    return LJ::JSON->to_json({ text => $ret });
 }
 _code?>

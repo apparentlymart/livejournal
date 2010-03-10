@@ -23,7 +23,7 @@ use LJ::MemCache;
 use LJ::Session;
 use LJ::RateLimit qw//;
 use URI qw//;
-use JSON;
+use LJ::JSON;
 use HTTP::Date qw(str2time);
 
 use Class::Autouse qw(
@@ -6766,7 +6766,7 @@ sub ljuser_alias {
    
     if (!$remote->{_aliases}) {
         my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = $prop_aliases ? JSON::jsonToObj($prop_aliases) : {};
+        $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
     }
     return $remote->{_aliases}->{ $u->{userid} };
 }
@@ -6802,7 +6802,7 @@ sub set_alias {
     ## load alias data
     if (!$remote->{_aliases}) {
         my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = $prop_aliases ? JSON::jsonToObj($prop_aliases) : {};
+        $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
     }
     
     ## modify (edit, add or delete)
@@ -6821,7 +6821,7 @@ sub set_alias {
     }
     
     ## save data back
-    my $serialized_text = JSON::objToJson($remote->{_aliases});
+    my $serialized_text = LJ::JSON->to_json($remote->{_aliases});
     if (length $serialized_text < 65536) {
         return $remote->set_prop( aliases => $serialized_text );
     } else {
@@ -6842,7 +6842,7 @@ sub get_all_aliases {
 
     if (!$remote->{_aliases}) {
         my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = $prop_aliases ? JSON::jsonToObj($prop_aliases) : {};
+        $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
     }
 
     return %{$remote->{_aliases}};

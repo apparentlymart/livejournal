@@ -1,12 +1,12 @@
 <?_code # -*-bml-*-
 {
     use strict;
-    use JSON;
+    use LJ::JSON;
     use vars qw(%GET);
 
     my $err = sub {
         my $msg = shift;
-        return JSON::objToJson({
+        return LJ::JSON->to_json({
             'alert' => $msg,
         });
     };

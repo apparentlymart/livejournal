@@ -4,9 +4,7 @@ package Apache::LiveJournal::Interface::ElsewhereInfo;
 
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-use Class::Autouse qw(
-                      JSON
-                      );
+use LJ::JSON;
 
 # for Class::Autouse (so callers can 'ping' this method to lazy-load this class)
 sub load { 1 }
@@ -84,7 +82,7 @@ sub handle {
         $resp{edges_out} = [ map { $_ } $u->friend_uids   ];
     }
 
-    respond(200, JSON::objToJson(\%resp));
+    respond(200, LJ::JSON->to_json(\%resp));
 
     return LJ::Request::OK;
 }

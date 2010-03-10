@@ -5,7 +5,7 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
-    use JSON;
+    use LJ::JSON;
 
     $title = $ML{'.title'};
 

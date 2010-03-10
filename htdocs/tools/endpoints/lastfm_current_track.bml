@@ -2,7 +2,7 @@
 {
     use strict;
     use vars qw(%POST);
-    use JSON;
+    use LJ::JSON;
     use Storable qw(freeze thaw); # safe across updating when use with simple structures only
     use Gearman::Client;
 
@@ -16,6 +16,6 @@
 
     my $handle = $client->dispatch_background($task);
 
-    return JSON::objToJson({ handle => $handle });
+    return LJ::JSON->to_json({ handle => $handle });
 }
 _code?>

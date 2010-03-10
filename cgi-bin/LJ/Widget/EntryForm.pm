@@ -779,8 +779,8 @@ sub render_options_block {
                     }
                 }
 
-                my $moodlist = JSON::objToJson(\%moodlist);
-                my $moodpics = JSON::objToJson(\%moodpics);
+                my $moodlist = LJ::JSON->to_json(\%moodlist);
+                my $moodpics = LJ::JSON->to_json(\%moodpics);
                 $$onload .= " mood_preview();";
                 $$head .= $self->wrap_js(qq{
                     if (document.getElementById) {
@@ -1125,7 +1125,7 @@ sub render_security_container_block {
         $_ => LJ::ejs(BML::ml("label.security.$strings_map{$_}"))
     } keys %strings_map;
 
-    my $strings_map_converted = JSON::objToJson(\%strings_map_converted);
+    my $strings_map_converted = LJ::JSON->to_json(\%strings_map_converted);
     $out .= $self->wrap_js("var UpdateFormStrings = $strings_map_converted;");
 
     $$onload .= " setColumns();" if $remote;
@@ -1393,7 +1393,7 @@ sub render_body {
         my %langmap_translated = map { $_ => BML::ml("fcklang.$langmap{$_}") }
             keys %langmap;
 
-        my $langmap = JSON::objToJson(\%langmap_translated);
+        my $langmap = LJ::JSON->to_json(\%langmap_translated);
 
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
         $out .= $self->wrap_js(qq{

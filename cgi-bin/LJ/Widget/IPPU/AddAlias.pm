@@ -7,7 +7,7 @@ use Class::Autouse qw(
                       LJ::JSUtil
                       );
 
-use JSON;
+use LJ::JSON;
 
 sub need_res {
     return qw( js/widgets/aliases.js );

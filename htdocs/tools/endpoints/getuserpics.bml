@@ -1,11 +1,11 @@
 <?_code # -*-bml-*-
 {
     use strict;
-    use JSON;
+    use LJ::JSON;
 
     my $err = sub {
         my $msg = shift;
-        return JSON::objToJson({
+        return LJ::JSON->to_json({
             'alert' => $msg,
         });
     };
@@ -38,6 +38,6 @@
     $upics{ids} = [keys %{$upics{pics}}];
     sleep 1 if $LJ::IS_DEV_SERVER;
 
-    return JSON::objToJson(\%upics);
+    return LJ::JSON->to_json(\%upics);
 }
 _code?>
