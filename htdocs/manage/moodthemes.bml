@@ -156,7 +156,7 @@ body<=
             $ret .= "<b>$mood->{'name'}</b> ";
             if (my $error = $save_errors{$mood->{'id'}}) {
                 $ret .= qq{
-                    <span class="error">
+                    <span class="i-message i-message-error">
                         $BML::ML{".error.$error"}
                     </span>
                 };

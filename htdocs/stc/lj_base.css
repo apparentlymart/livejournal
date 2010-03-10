@@ -300,6 +300,13 @@ Must be removed after implementation of Framework! */
     background: #FFE8BF;
     border: 1px solid #FF8E44;
     } 
+.i-message {
+    padding: 1px 8px;
+    } 
+.i-message-error {
+    background: #FEE;
+    border: 1px solid #F99;
+    }    
 
 /* Disabled block
 --------------------------- */
