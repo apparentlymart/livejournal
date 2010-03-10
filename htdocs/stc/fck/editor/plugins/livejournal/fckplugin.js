@@ -239,53 +239,38 @@ LJPollCommand.GetState=function() {
     return FCK_TRISTATE_OFF; //we dont want the button to be toggled
 }
 
-LJPollCommand.Add=function(pollsource, index) {
-    var poll = pollsource;
-
-    if (poll != null && poll != '') {
-        // Make the tag like the editor would
-        var html = "<div id=\"poll"+index+"\">"+poll+"</div>";
-
-        // IE and Safari handle Selections differently and InsertHtml
-        // will not overwrite the enclosing DIVs in those browsers,
-        // so just replace the selected polls innerHTML
-        if (FCK.Selection.Element) {
-            FCK.Selection.Element.innerHTML = poll;
-        } else {
-            FCK.InsertHtml(html);
-        }
-
-    }
-
-    return;
+LJPollCommand.Add=function(html)
+{
+	if (FCK.Selection.Element) {
+		top.jQuery(FCK.Selection.Element).replaceWith(html);
+	} else {
+		FCK.InsertHtml(html);
+	}
 }
 
-LJPollCommand.setKeyPressHandler=function() {
-    var editor = FCK.EditorWindow.document;
-    if (editor) {
-        if (editor.addEventListener) {
-            editor.addEventListener('keypress', LJPollCommand.ippu, false);
-            editor.addEventListener('click', LJPollCommand.ippu, false);
-        } else if (editor.attachEvent) {
-            editor.attachEvent('onkeypress', function() { LJPollCommand.ippu(FCK.EditorWindow.event); } );
-            editor.attachEvent('onclick', function() { LJPollCommand.ippu(FCK.EditorWindow.event); } );
-        } else {
-            editor.onkeypress = LJPollCommand.ippu;
-        }
-    }
+FCK.LJPollSetKeyPressHandler = function()
+{
+	var editor = FCK.EditorWindow.document;
+	FCKTools.AddEventListener(editor, 'keypress', LJPollCommand.ippu);
+	FCKTools.AddEventListener(editor, 'click', LJPollCommand.ippu);
 }
 
-LJPollCommand.ippu=function(evt) {
-    evt = evt || window.event;
-    var node = FCKSelection.GetAncestorNode( 'DIV' );
-    if (evt && node && node.id.match(/poll\d+/)) {
+LJPollCommand.ippu=function(e) {
+	e = e || FCK.EditorWindow.event;
+	var node = FCKSelection.GetBoundaryParentElement(true);
+	while (node) {
+		if (node.nodeName.IEquals('form'))
+			break ;
+		node = node.parentNode ;
+	}
+	if (node && node.className == 'ljpoll') {
         var ele = top.document.getElementById("draft___Frame");
         var href = "href='javascript:Poll.callRichTextEditor()'";
         var lang_notice = window.parent.FCKLang.Poll_PollWizardNotice;
         var lang_notice_link = window.parent.FCKLang.Poll_PollWizardNoticeLink;
         var notice = parent.LJ_IPPU.showNote(lang_notice + "<br /><a "+href+">"+lang_notice_link+"</a>", ele);
         notice.centerOnWidget(ele);
-        if (parent.Event.stop) parent.Event.stop(evt);
+		top.Event.stop(e);
     }
 }
 

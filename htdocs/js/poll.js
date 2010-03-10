@@ -1,100 +1,162 @@
-// Poll Object Constructor
-function Poll (doc, q_num) {
-    var pollform = doc.poll;
-    this.name = pollform.name.value || '';
-    this.whovote = getRadioValue(pollform.whovote);
-    this.whoview = getRadioValue(pollform.whoview);
+/* Poll structure:
+	id: string
+	name: string
+	whovote: all | friends
+	whoview: all | friends | none
+	questions: {[
+		name: string
+		type: check | drop | radio | scale | text
+		size: string      // if type is text
+		maxlength: string // if type is text
+		from: string // if type is scale
+		to: string   // if type is scale
+		by: string   // if type is scale
+		answers: [string, ...] // if type is check | drop | radio
+	], ...}
 
-    // Array of Questions and Answers
-    // A single poll can have multiple questions
-    // Each question can have one or several answers
-    this.qa = new Array();
-    for (var i=0; i<q_num; i++) {
-        this.qa[i] = new Answer(doc, i);
-    }
+<lj-poll name="jkkkkkkkkkkkkhjk" id="poll0" whovote="all" whoview="all">
+ <lj-pq type="check">
+ QName
+  <lj-pi>hhh</lj-pi>
+  <lj-pi>hhhhhhhhhhhhh</lj-pi>
+  <lj-pi>hhhhhhhhhhhh</lj-pi>
+ </lj-pq>
+</lj-poll>
+
+*/
+
+
+// Poll Object Constructor
+function Poll(doc, q_num)
+{
+	if (typeof doc == 'string') {
+		var ljtags = jQuery(doc);
+		this.id = ljtags.attr('id');
+		this.name = ljtags.attr('name');
+		this.whovote = ljtags.attr('whovote');
+		this.whoview = ljtags.attr('whoview');
+		this.questions = [];
+		
+		ljtags.find('lj-pq').each(function(i, pq)
+		{
+			var pq = jQuery(pq),
+				name = pq.html().replace(/\n/g, '').match(/^(.*?)(?:<lj-pi>|$)/),
+				question = {
+					name: (name && name[1]) || '',
+					type: pq.attr('type')
+				};
+			
+			if (!/^check|drop|radio|scale|text$/.test(question.type)) {
+				return;
+			}
+			
+			if (/^check|drop|radio$/.test(question.type)) {
+				question.answers = [];
+				pq.find('lj-pi').each(function()
+				{
+					question.answers.push(jQuery(this).html())
+				});
+			}
+			if (question.type == 'text') {
+				question.size = pq.attr('size');
+				question.maxlength = pq.attr('maxlength');
+			}
+			if (question.type == 'scale') {
+				question.from = pq.attr('from');
+				question.to = pq.attr('to');
+				question.by = pq.attr('by');
+			}
+			this.questions.push(question);
+		}.bind(this));
+	} else {
+		var form = doc.poll;
+		this.name = form.name.value || '';
+		this.whovote = jQuery(form.whovote).val();
+		this.whoview = jQuery(form.whoview).val();
+		
+		// Array of Questions and Answers
+		// A single poll can have multiple questions
+		// Each question can have one or several answers
+		this.questions = [];
+		for (var i=0; i<q_num; i++) {
+			this.questions[i] = new Answer(doc, i);
+		}
+	}
 }
 
 // Poll method to generate HTML for RTE
-Poll.prototype.outputHTML = function () {
-    var html;
-
-    html = '<form action="#"><b>Poll #xxxx</b>';
-    if (this.name) html += " <i>"+this.name+"</i>";
-    html += "<br />Open to: ";
-    html += "<b>"+this.whovote+"</b>, results viewable to: ";
-    html += "<b>"+this.whoview+"</b>";
-    for (var i=0; i<this.qa.length; i++) {
-        html += "<br />\n<p>"+this.qa[i].question+"</p>\n";
-        html += '<p style="margin: 0px 0pt 10px 40px;">';
-        if (this.qa[i].atype == "radio" || this.qa[i].atype == "check") {
-            var type = this.qa[i].atype;
-            if (type == "check") type = "checkbox";
-            for (var j=0; j<this.qa[i].answer.length; j++) {
-                html += '<input type="'+type+'">';
-                html += this.qa[i].answer[j] + '<br />\n';
-            }
-        } else if (this.qa[i].atype == "drop") {
-            html += '<select name="select_'+i+'">\n';
-            html += '<option value=""></option>\n';
-            for (var j=0; j<this.qa[i].answer.length; j++) {
-                html += '<option value="">' + this.qa[i].answer[j] + '</option>\n';
-            }
-            html += '</select>\n';
-        } else if (this.qa[i].atype == "text") {
-            html += '<input maxlength="' + this.qa[i].maxlength + '" ';
-            html += 'size="' + this.qa[i].size + '" type="text">';
-        } else if (this.qa[i].atype == "scale") {
-            html += '<table><tbody><tr align="center" valign="top">'
-            var from = Number(this.qa[i].from);
-            var to = Number(this.qa[i].to);
-            var by = Number(this.qa[i].by);
-            for (var j=from; j<=to; j=j+by) {
-                html += '<td><input type="radio"><br>' +j+ '</td>';
-            }
-            html += '</tr></tbody></table>';
-        }
-        html += '</p>';
-    }
-
-    html += '<input type="submit" disabled="disabled" value="Submit Poll" /> </form>';
-
-    return html;
+Poll.prototype.outputHTML = function()
+{
+	var html = '<form action="#" class="ljpoll" data="'+escape(this.outputLJtags())+'"><b>Poll #xxxx</b>';
+	
+	if (this.name) html += ' <i>'+this.name+'</i>';
+	html += '<br/>Open to: '+
+			'<b>'+this.whovote+'</b>, results viewable to: '+
+			'<b>'+this.whoview+'</b>';
+	for (var i=0; i<this.questions.length; i++) {
+		html += '<br/><p>'+this.questions[i].name+'</p>'+
+				'<p style="margin:0 0 10px 40px">';
+		if (this.questions[i].type == 'radio' || this.questions[i].type == 'check') {
+			var type = this.questions[i].type == 'check' ? 'checkbox' : this.questions[i].type;
+			for (var j = 0;  j < this.questions[i].answers.length; j++) {
+				html += '<input type="'+type+'">'+this.questions[i].answers[j]+'<br/>';
+			}
+		} else if (this.questions[i].type == 'drop') {
+			html += '<select name="select_'+i+'">'+
+					'<option value=""></option>';
+			for (var j = 0; j < this.questions[i].answers.length; j++) {
+				html += '<option value="">' + this.questions[i].answers[j] + '</option>';
+			}
+			html += '</select>';
+		} else if (this.questions[i].type == 'text') {
+			html += '<input maxlength="' + this.questions[i].maxlength + '" size="' + this.questions[i].size + '" type="text"/>';
+		} else if (this.questions[i].type == 'scale') {
+			html += '<table><tbody><tr align="center" valign="top">'
+			var from = Number(this.questions[i].from),
+				to   = Number(this.questions[i].to),
+				by   = Number(this.questions[i].by);
+			for (var j = from; j <= to; j = j + by) {
+				html += '<td><input type="radio"/><br/>' + j + '</td>';
+			}
+			html += '</tr></tbody></table>';
+		}
+		html += '</p>';
+	}
+	
+	html += '<input type="submit" disabled="disabled" value="Submit Poll"/></form>';
+	return html;
 }
 
 // Poll method to generate LJ Poll tags
-Poll.prototype.outputLJtags = function (pollID, post) {
-    var tags = '';
-
-    if (post == true) tags += '<div class="LJpoll">';
-    tags+= '<lj-poll name="'+this.name+'" id="poll'+pollID+'" ';
-    tags+= 'whovote="'+this.whovote+'" whoview="'+this.whoview+'">\n';
-
-    for (var i=0; i<this.qa.length; i++) {
-        var extrargs = '' // for text and scale polls
-        if (this.qa[i].atype == 'text') {
-            extrargs = ' size="'+this.qa[i].size+'"';
-            extrargs += ' maxlength="'+this.qa[i].maxlength+'"';
-        } else if (this.qa[i].atype == 'scale') {
-            extrargs = ' from="'+this.qa[i].from+'"';
-            extrargs += ' to="'+this.qa[i].to+'"';
-            extrargs += ' by="'+this.qa[i].by+'"';
-        }
-
-        tags += ' <lj-pq type="'+this.qa[i].atype+'"'+extrargs+'>\n';
-        tags += ' ' + this.qa[i].question + '\n';
-        // answer choices for radio, checkbox and drop-down
-        if (this.qa[i].atype == "radio" || this.qa[i].atype == "check" || this.qa[i].atype == "drop") {
-            for (var j=0; j<this.qa[i].answer.length; j++) {
-                tags += '  <lj-pi>' + this.qa[i].answer[j] + '</lj-pi>\n';
-            }
-        }
-        tags += ' </lj-pq>\n';
-    }
-
-    tags += '</lj-poll>';
-    if (post == true) tags += '</div>';
-
-    return tags;
+Poll.prototype.outputLJtags = function(id)
+{
+	var tags = '';
+	
+	tags += '<lj-poll name="'+this.name+'" id="poll'+id+'" whovote="'+this.whovote+'" whoview="'+this.whoview+'">\n';
+	
+	for (var i = 0; i < this.questions.length; i++) {
+		var extrargs = '';
+		if (this.questions[i].type == 'text') {
+			extrargs = ' size="'+this.questions[i].size+'"'+
+						' maxlength="'+this.questions[i].maxlength+'"';
+		} else if (this.questions[i].type == 'scale') {
+			extrargs = ' from="'+this.questions[i].from+'"'+
+						' to="'+this.questions[i].to+'"'+
+						' by="'+this.questions[i].by+'"';
+		}
+		tags += ' <lj-pq type="'+this.questions[i].type+'"'+extrargs+'>\n'+
+				' ' + this.questions[i].name + '\n';
+		if (/^check|drop|radio$/.test(this.questions[i].type)) {
+			for (var j = 0; j < this.questions[i].answers.length; j++) {
+				tags += '  <lj-pi>' + this.questions[i].answers[j] + '</lj-pi>\n';
+			}
+		}
+		tags += ' </lj-pq>\n';
+	}
+	
+	tags += '</lj-poll>';
+	
+	return tags;
 }
 
 Poll.callRichTextEditor = function() {
@@ -103,66 +165,25 @@ Poll.callRichTextEditor = function() {
 }
 
 // Answer Object Constructor
-function Answer (doc, q_idx) {
-    var pollform = doc.poll;
-    this.question = pollform["question_"+q_idx].value;
-    var type = pollform["type_"+q_idx];
-    this.atype = type.options[type.selectedIndex].value;
-
-    this.answer = new Array();
-    if (this.atype == "radio" || this.atype == "check" || this.atype == "drop") {
-        for (var i=0; i<pollform.elements.length; i++) {
-            if (pollform.elements[i].name.match(/pq_\d+_opt_\d+/) &&
-                pollform.elements[i].value != '') {
-                var qID = pollform.elements[i].name.replace(/pq_(\d+)_opt_\d+/, "$1");
-                if (qID == q_idx) {
-                    var ansID = pollform.elements[i].name.replace(/pq_\d+_opt_(\d+)/, "$1");
-                    this.answer[ansID] = pollform.elements[i].value;
-                }
-            }
-        }
-    } else if (this.atype == "text") {
-        this.size = pollform["pq_"+q_idx+"_size"].value;
-        this.maxlength = pollform["pq_"+q_idx+"_maxlength"].value;
-    } else if (this.atype == "scale") {
-        this.from = pollform["pq_"+q_idx+"_from"].value;
-        this.to = pollform["pq_"+q_idx+"_to"].value;
-        this.by = pollform["pq_"+q_idx+"_by"].value;
-    }
-
-}
-
-// Useful Functions //
-function getRadioValue(radio) {
-    var radio_length = radio.length;
-    if(radio_length == undefined) {
-        if(radio.checked) return radio.value;
-    }
-
-    for(var i = 0; i < radio_length; i++) {
-        if(radio[i].checked) return radio[i].value;
-    }
-    return "";
-}
-
-function setRadioValue(radio, value) {
-    var radio_length = radio.length;
-    if(radio_length == undefined) {
-        radio.checked = (radio.value == value);
-        return;
-    }
-
-    for(var i = 0; i < radio_length; i++) {
-        radio[i].checked = false;
-        if(radio[i].value == value) radio[i].checked = true;
-    }
-}
-
-function setSelectValue(select, value) {
-    var select_length = select.options.length;
-
-    for(var i = 0; i < select_length; i++) {
-        select.options[i].selected = false;
-        if(select.options[i].value == value) select.options[i].selected = true;
-    }
+function Answer(doc, id)
+{
+	var form = doc.poll;
+	this.name = form['question_'+id].value;
+	this.type = jQuery(form['type_'+id]).val();
+	
+	if (/^check|drop|radio$/.test(this.type)) {
+		this.answers = [];
+		
+		jQuery('#QandA_'+id+' input[name^="answer_'+id+'_"][value!=""]', form).each(function(i, node)
+		{
+			this.answers.push(node.value);
+		}.bind(this));
+	} else if (this.type == 'text') {
+		this.size = form['pq_'+id+'_size'].value;
+		this.maxlength = form['pq_'+id+'_maxlength'].value;
+	} else if (this.type == 'scale') {
+		this.from = form['pq_'+id+'_from'].value;
+		this.to   = form['pq_'+id+'_to'].value;
+		this.by   = form['pq_'+id+'_by'].value;
+	}
 }
