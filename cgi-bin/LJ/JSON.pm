@@ -15,7 +15,7 @@ sub from_json {
 }
 
 BEGIN {
-    my @classes = qw(JSON JSON::XS);
+    my @classes = qw(JSON::XS JSON);
     foreach my $class (@classes) {
         eval "require $class";
         unless ($@) {
