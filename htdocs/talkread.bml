@@ -779,7 +779,7 @@ my $old_url = 0;
      } elsif ($replycount > 0) {
          $readlink = "($comments_count)";
      }
-     $readlink .= ' - ' if $allow_commenting;
+     $readlink .= ' - ' if $readlink && $allow_commenting;
 
      my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine, $formatlight);
 
