@@ -66,7 +66,7 @@ sub render_body {
             my %pic;
             if (LJ::get_mood_picture($preview_moodthemeid, LJ::mood_id($mood), \%pic)) {
                 $ret .= "<tr>" if $moodtheme_extra && $count % 2 == 0;
-                $ret .= "<td><img class='moodtheme-img' align='absmiddle' alt='$mood' src=\"$pic{pic}\" ".LJ::mood_size_attributes(%pic)."/><br />$mood</td>";
+                $ret .= "<td><img align='absmiddle' alt='$mood' src=\"$pic{pic}\" ".LJ::mood_size_attributes(%pic, 'class' => 'moodtheme-img')."/><br />$mood</td>";
                 $ret .= "</tr>" if $moodtheme_extra && $count % 2 != 0;
                 $count++;
             }
