@@ -256,7 +256,6 @@ FCK.LJPollSetKeyPressHandler = function()
 }
 
 LJPollCommand.ippu=function(e) {
-	e = e || FCK.EditorWindow.event;
 	var node = FCKSelection.GetBoundaryParentElement(true);
 	while (node) {
 		if (node.nodeName.IEquals('form'))
@@ -270,7 +269,9 @@ LJPollCommand.ippu=function(e) {
         var lang_notice_link = window.parent.FCKLang.Poll_PollWizardNoticeLink;
         var notice = parent.LJ_IPPU.showNote(lang_notice + "<br /><a "+href+">"+lang_notice_link+"</a>", ele);
         notice.centerOnWidget(ele);
-		top.Event.stop(e);
+        
+		e.preventDefault && e.preventDefault();
+		e.returnValue = false;
     }
 }
 

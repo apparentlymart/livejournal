@@ -14,9 +14,7 @@
     var FCKLang = oEditor.FCKLang ;
     var LJPollCommand = oEditor.LJPollCommand ;
 	var poll;
-    var pollID; // Poll ID loaded from existing poll
-    var index; // Poll index/ID for existing or new poll
-    var answer_count = new Array();
+	var answer_count = [];
     var Questions = 1; // Number of questions for a poll
     var current_question = 0;
 
@@ -81,8 +79,8 @@
     function populateWizard() {
         var form = document.poll;
 		if (poll.name) form.name.value = poll.name;
-		jQuery(form.whovote).val(poll.whovote);
-		jQuery(form.whoview).val(poll.whoview);
+		jQuery(form.whovote).val([poll.whovote]);
+		jQuery(form.whoview).val([poll.whoview]);
 		
         var aincrement = 5; // Answer Increment and default minimum
         // For each Question
@@ -120,7 +118,7 @@
             }
         // Switching type of answer fields
         } else if (switch_a) {
-			if (poll != null && poll.questions[q_num].answers.length > answer_count[q_num]) answer_count[q_num] = poll.questions[q_num].answers.length;
+			if (poll && poll.questions[q_num].answers.length > answer_count[q_num]) answer_count[q_num] = poll.questions[q_num].answers.length;
             acount = answer_count[q_num];
         } else if (answer_count[q_num]) {
             acount = answer_count[q_num];

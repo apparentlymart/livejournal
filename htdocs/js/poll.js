@@ -1,5 +1,4 @@
 /* Poll structure:
-	id: string
 	name: string
 	whovote: all | friends
 	whoview: all | friends | none
@@ -13,25 +12,13 @@
 		by: string   // if type is scale
 		answers: [string, ...] // if type is check | drop | radio
 	], ...}
-
-<lj-poll name="jkkkkkkkkkkkkhjk" id="poll0" whovote="all" whoview="all">
- <lj-pq type="check">
- QName
-  <lj-pi>hhh</lj-pi>
-  <lj-pi>hhhhhhhhhhhhh</lj-pi>
-  <lj-pi>hhhhhhhhhhhh</lj-pi>
- </lj-pq>
-</lj-poll>
-
 */
-
 
 // Poll Object Constructor
 function Poll(doc, q_num)
 {
 	if (typeof doc == 'string') {
 		var ljtags = jQuery(doc);
-		this.id = ljtags.attr('id');
 		this.name = ljtags.attr('name');
 		this.whovote = ljtags.attr('whovote');
 		this.whoview = ljtags.attr('whoview');
@@ -40,10 +27,11 @@ function Poll(doc, q_num)
 		ljtags.find('lj-pq').each(function(i, pq)
 		{
 			var pq = jQuery(pq),
-				name = pq.html().replace(/\n/g, '').match(/^(.*?)(?:<lj-pi>|$)/),
+				name = pq.html().match(/^\s*(.*?)\s*(?:<lj-pi>|$)/),
 				question = {
 					name: (name && name[1]) || '',
-					type: pq.attr('type')
+					type: pq.attr('type'),
+					answers: []
 				};
 			
 			if (!/^check|drop|radio|scale|text$/.test(question.type)) {
@@ -51,7 +39,6 @@ function Poll(doc, q_num)
 			}
 			
 			if (/^check|drop|radio$/.test(question.type)) {
-				question.answers = [];
 				pq.find('lj-pi').each(function()
 				{
 					question.answers.push(jQuery(this).html())
@@ -71,9 +58,8 @@ function Poll(doc, q_num)
 	} else {
 		var form = doc.poll;
 		this.name = form.name.value || '';
-		this.whovote = jQuery(form.whovote).val();
-		this.whoview = jQuery(form.whoview).val();
-		
+		this.whovote = jQuery(form.whovote).filter(':checked').val();
+		this.whoview = jQuery(form.whoview).filter(':checked').val();
 		// Array of Questions and Answers
 		// A single poll can have multiple questions
 		// Each question can have one or several answers
@@ -128,11 +114,11 @@ Poll.prototype.outputHTML = function()
 }
 
 // Poll method to generate LJ Poll tags
-Poll.prototype.outputLJtags = function(id)
+Poll.prototype.outputLJtags = function()
 {
 	var tags = '';
 	
-	tags += '<lj-poll name="'+this.name+'" id="poll'+id+'" whovote="'+this.whovote+'" whoview="'+this.whoview+'">\n';
+	tags += '<lj-poll name="'+this.name+'" whovote="'+this.whovote+'" whoview="'+this.whoview+'">\n';
 	
 	for (var i = 0; i < this.questions.length; i++) {
 		var extrargs = '';

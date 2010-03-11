@@ -64,7 +64,7 @@ FCKConfig.Plugins.Add('livejournal');
 //FCKConfig.ProtectedSource.Add( /<lj-template id=['"]?\d+['"]? name=['"]?\w+['"]? \/>/gi ); // <lj-template />
 //FCKConfig.ProtectedSource.Add( /<lj-template name=['"]?\w+['"]? id=['"]?\d+['"]? \/>/gi ); // <lj-template />
 //FCKConfig.ProtectedSource.Add( /<lj-poll[\s\S]*?<\/lj-poll>/gi ); // lj polls
-//FCKConfig.ProtectedSource.Add( /<div.*?><lj-poll-\d+?><\/lj-poll-\d+?><\/div>/gi ); // generated lj polls
+FCKConfig.ProtectedSource.Add( /<lj-poll-\d+\s*\/?>/gi ); // created lj polls
 //FCKConfig.ProtectedSource.Add( /<lj-pq.+?>.+?<\/lj-pq>/gi ); // lj polls
 //FCKConfig.ProtectedSource.Add( /<lj-pi.+?>.+?<\/lj-pi>/gi ); // lj polls
 FCKConfig.ProtectedSource.Add( /<lj-replace name="first_post" ?\/?>/gi );
