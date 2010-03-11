@@ -14,16 +14,48 @@ sub from_json {
     return $wrap->decode($dump);
 }
 
-BEGIN {
-    my @classes = qw(JSON::XS JSON);
-    foreach my $class (@classes) {
-        my $module = $class . '.pm'; $module =~ s|::|/|g;
-        eval { require $module };
-        unless ($@) {
-            $wrap = new $class;
-            last;
-        }
+foreach my $class (qw(LJ::JSON::XS LJ::JSON::JSONv2 LJ::JSON::JSONv1)) {
+    if ($class->can_load) {
+        $wrap = $class->new;
+        last;
     }
 }
+die unless $wrap;
+
+1;
+
+package LJ::JSON::XS;
+
+BEGIN { @ISA = qw(JSON::XS); }
+
+sub can_load {
+    eval { require JSON::XS; JSON::XS->import; };
+    return !$@;
+}
+
+1;
+
+package LJ::JSON::JSONv2;
+
+BEGIN { @ISA = qw(JSON); }
+
+sub can_load {
+    eval { require JSON };
+    return !$@ && $JSON::VERSION ge 2;
+}
+
+1;
+
+package LJ::JSON::JSONv1;
+
+BEGIN { @ISA = qw(JSON); }
+
+sub can_load {
+    eval { require JSON };
+    return !$@ && $JSON::VERSION ge 1;
+}
+
+*encode = \&JSON::objToJson;
+*decode = \&JSON::jsonToObj;
 
 1;
