@@ -832,6 +832,20 @@ sub render_options_block {
                 return $opts->{'comment_settings'};
             };
 
+            my %options = (
+                "" => BML::ml('entryform.comment.settings.default5'),
+                "nocomments" => BML::ml('entryform.comment.settings.nocomments'),
+                "noemail" => BML::ml('entryform.comment.settings.noemail'),
+            );
+
+            $options{"lockcomments"} = BML::ml('entryform.comment.settings.lockcomments')
+                if $opts->{'mode'} eq 'edit';
+            
+            my @options =
+                map { $_ => $options{$_} }
+                grep { exists $options{$_} } 
+                ( '', 'nocomments', 'lockcomments', 'noemail' );
+
             $out .= LJ::html_select(
                 {
                     'name' => "comment_settings",
@@ -840,12 +854,7 @@ sub render_options_block {
                     'selected' => $comment_settings_selected->(),
                     'tabindex' => $self->tabindex
                 },
-                (
-                    "" => BML::ml('entryform.comment.settings.default5'),
-                    "nocomments" => BML::ml('entryform.comment.settings.nocomments'),
-                    "lockcomments" => BML::ml('entryform.comment.settings.lockcomments'),
-                    "noemail" => BML::ml('entryform.comment.settings.noemail'),
-                )
+                @options
             );
 
             $out .= LJ::help_icon_html("comment", "", " ");
