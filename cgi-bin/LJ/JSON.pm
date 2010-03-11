@@ -1,6 +1,6 @@
 package LJ::JSON;
 
-my $wrap = undef;
+my $wrap;
 
 sub to_json {
     my ($class, @args) = @_;
@@ -17,7 +17,8 @@ sub from_json {
 BEGIN {
     my @classes = qw(JSON::XS JSON);
     foreach my $class (@classes) {
-        eval "require $class";
+        my $module = $class . '.pm'; $module =~ s|::|/|g;
+        require $module;
         unless ($@) {
             $wrap = new $class;
             last;
