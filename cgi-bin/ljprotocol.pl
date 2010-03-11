@@ -1042,14 +1042,26 @@ sub common_event_validation
     {
 
         if ($req->{'ver'} < 1) { # client doesn't support Unicode
-            # only people should have unknown8bit entries.
-            my $uowner = $flags->{u_owner} || $flags->{u};
-            return fail($err,207,'Posting in a community with international or special characters require a Unicode-capable LiveJournal client.  Download one at http://www.livejournal.com/download/.')
-                if $uowner->{journaltype} ne 'P';
+            ## Hack: some old clients do send valid UTF-8 data, 
+            ## but don't tell us about that.
+            ## Check, if the event/subject are valid UTF-8 strings.
+            my $tmp_event   = $req->{'event'};
+            my $tmp_subject = $req->{'subject'};
+            Encode::from_to($tmp_event,     "utf-8", "utf-8");
+            Encode::from_to($tmp_subject,   "utf-8", "utf-8");
+            if ($tmp_event eq $req->{'event'} && $tmp_subject eq $req->{'subject'}) {
+                ## ok, this looks like valid UTF-8
+            } else {
+                ## encoding is unknown - it's neither ASCII nor UTF-8
+                # only people should have unknown8bit entries.
+                my $uowner = $flags->{u_owner} || $flags->{u};
+                return fail($err,207,'Posting in a community with international or special characters require a Unicode-capable LiveJournal client.  Download one at http://www.livejournal.com/download/.')
+                    if $uowner->{journaltype} ne 'P';
 
-            # so rest of site can change chars to ? marks until
-            # default user's encoding is set.  (legacy support)
-            $req->{'props'}->{'unknown8bit'} = 1;
+                # so rest of site can change chars to ? marks until
+                # default user's encoding is set.  (legacy support)
+                $req->{'props'}->{'unknown8bit'} = 1;
+            }
         } else {
             return fail($err,207, "This installation does not support Unicode clients") unless $LJ::UNICODE;
             # validate that the text is valid UTF-8
