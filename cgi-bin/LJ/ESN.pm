@@ -151,7 +151,7 @@ sub retry_delay {
 package LJ::Worker::FindSubsByCluster;
 use base 'TheSchwartz::Worker';
 
-sub work {
+sub do_work {
     my ($class, $job) = @_;
     my $a = $job->arg;
     my ($cid, $e_params) = @$a;
@@ -233,6 +233,20 @@ sub work {
 
     warn "Filter sub jobs: [@subjobs]\n" if $ENV{DEBUG};
     return $job->replace_with(@subjobs);
+}
+
+sub work {
+    my ($class, $job) = @_;
+
+    my $pid = fork;
+    
+    if ($pid) {
+        my $status = waitpid($pid, 0);
+        $job->did_something($status);
+    } else {
+        $class->do_work($job);
+        exit $job->did_something;
+    }
 }
 
 # this is phase3 of processing.  see doc/server/ljp.int.esn.html
