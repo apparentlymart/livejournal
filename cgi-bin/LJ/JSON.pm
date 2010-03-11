@@ -18,7 +18,7 @@ BEGIN {
     my @classes = qw(JSON::XS JSON);
     foreach my $class (@classes) {
         my $module = $class . '.pm'; $module =~ s|::|/|g;
-        require $module;
+        eval { require $module };
         unless ($@) {
             $wrap = new $class;
             last;
