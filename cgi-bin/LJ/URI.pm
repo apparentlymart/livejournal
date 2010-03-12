@@ -54,7 +54,7 @@ sub handle {
         return LJ::URI->bml_handler("browse/index.bml");
     }
 
-    if ($uri =~ m!^/statistics(/.*|$)! or $uri =~ m!^/ratings(/.*|$)!) {
+    if ($uri =~ m!^/statistics(/.*|$)! or $uri =~ m!^/ratings(/.*|$)! and not $uri eq '/ratings/admin.bml') {
         return LJ::URI->bml_handler("statistics/index.bml");
     }
 
