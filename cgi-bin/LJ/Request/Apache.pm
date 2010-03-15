@@ -45,6 +45,14 @@ sub LJ::Request::init {
     my $class = shift;
     my $r     = shift;
 
+    # second init within a same request.
+    # Request object may differ between handlers.
+    if ($class->is_inited){
+        # NOTE. this is not good approach. becouse we would have Apache::Request based on other $r object.
+        $instance->{r} = $r;
+        return $instance;
+    }
+
     my $qs = $r->args;
     $r->args(''); # to exclude GET params from Apache::Request object.
                   # it allows us to separate GET params and POST params.
@@ -56,6 +64,7 @@ sub LJ::Request::init {
     
     $r->args($qs);
     $instance->{r} = $r;
+    
     return $instance;
 }
 
@@ -72,19 +81,19 @@ sub LJ::Request::update_mtime {
 sub LJ::Request::set_last_modified {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->set_last_modified(@_);
+    return $instance->{r}->set_last_modified(@_);
 }
 
 sub LJ::Request::request_time {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->request_time();
+    return $instance->{r}->request_time();
 }
 
 sub LJ::Request::meets_conditions {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->meets_conditions();
+    return $instance->{r}->meets_conditions();
 }
 
 sub LJ::Request::read {
@@ -108,31 +117,31 @@ sub LJ::Request::main {
 sub LJ::Request::dir_config {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->dir_config(@_);
+    return $instance->{r}->dir_config(@_);
 }
 
 sub LJ::Request::header_only {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->header_only;
+    return $instance->{r}->header_only;
 }
 
 sub LJ::Request::content_languages {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->content_languages(@_);
+    return $instance->{r}->content_languages(@_);
 }
 
 sub LJ::Request::register_cleanup {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->register_cleanup(@_);
+    return $instance->{r}->register_cleanup(@_);
 }
 
 sub LJ::Request::path_info {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->path_info(@_);
+    return $instance->{r}->path_info(@_);
 }
 
 sub LJ::Request::args {
@@ -144,7 +153,7 @@ sub LJ::Request::args {
 sub LJ::Request::method {
     my $class = shift;
     _die_if_no_request();
-    $instance->{apr}->method;
+    $instance->{r}->method;
 }
 
 sub LJ::Request::bytes_sent {
@@ -156,19 +165,19 @@ sub LJ::Request::bytes_sent {
 sub LJ::Request::document_root {
     my $class = shift;
     _die_if_no_request();
-    $instance->{apr}->document_root;
+    $instance->{r}->document_root;
 }
 
 sub LJ::Request::finfo {
     my $class = shift;
     _die_if_no_request();
-    $instance->{apr}->finfo;
+    $instance->{r}->finfo;
 }
 
 sub LJ::Request::filename {
     my $class = shift;
     _die_if_no_request();
-    $instance->{apr}->filename(@_);
+    $instance->{r}->filename(@_);
 }
 
 sub LJ::Request::add_httpd_conf {
@@ -179,7 +188,7 @@ sub LJ::Request::add_httpd_conf {
 sub LJ::Request::is_initial_req {
     my $class = shift;
     _die_if_no_request();
-    $instance->{apr}->is_initial_req(@_);
+    $instance->{r}->is_initial_req(@_);
 }
 
 sub LJ::Request::push_handlers_global {
@@ -190,15 +199,19 @@ sub LJ::Request::push_handlers_global {
 sub LJ::Request::push_handlers {
     my $class = shift;
     _die_if_no_request();
-    return Apache->request->push_handlers(@_);
+    #$instance->{r}->push_handlers(@_);
+    return ($_[0] =~ /PerlHandler/)
+        ? LJ::Request->set_handlers(@_)
+        : Apache->request->push_handlers(@_);
 }
 
 sub LJ::Request::set_handlers {
     my $class = shift;
     _die_if_no_request();
-
     my @args = shift @_;
     $args[1] = ref $_[0] eq 'ARRAY' ? $_[0] : [@_]; # second arg should be an arrayref.
+
+    #return Apache->request->set_handlers(@args);
     $instance->{r}->set_handlers(@args);
 }
 
