@@ -2190,9 +2190,6 @@ sub UserLite
     my ($u) = @_;
     my $o;
     return $o unless $u;
-use Carp qw//;
-use Scalar::Util qw/blessed/;
-Carp::cluck("non ref user") unless blessed($u);
 
     $o = {
         '_type' => 'UserLite',
