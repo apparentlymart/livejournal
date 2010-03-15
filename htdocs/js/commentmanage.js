@@ -439,14 +439,14 @@ function createModerationFunction(ae, dItemid)
 					url: location.href,
 					type: 'GET',
 					dataType: 'html',
-					complete: function(res, status){
+					complete: function(res, status) {
 						// If successful, inject the HTML into all the matched elements
 						if (status == 'success' || status == 'notmodified') {
 							// Create a dummy div to hold the results
-							var nodes = jQuery('<div />')
+							var nodes = jQuery('<div/>')
 								// inject the contents of the document in, removing the scripts
 								// to avoid any 'Permission Denied' errors in IE
-								.append(res.responseText.replace(/<script(.|\s)*?\/script>/g, ''))
+								.append(res.responseText.replace(/<script(.|\s)*?\/script>/gi, ''))
 								// Locate the specified elements
 								.find(ids)
 								.each(function(){
