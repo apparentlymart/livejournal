@@ -11,7 +11,10 @@ sub to_json {
 sub from_json {
     my ($class, $dump) = @_;
 
-    return $wrap->decode($dump);
+    my $ret = eval { $wrap->decode($dump) };
+
+    return undef if $@;
+    return $ret;
 }
 
 foreach my $class (qw(LJ::JSON::XS LJ::JSON::JSONv2 LJ::JSON::JSONv1)) {
