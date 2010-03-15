@@ -45,10 +45,17 @@ sub LJ::Request::init {
     my $class = shift;
     my $r     = shift;
 
+    my $qs = $r->args;
+    $r->args(''); # to exclude GET params from Apache::Request object.
+                  # it allows us to separate GET params and POST params.
+                  # otherwise Apache::Request's "parms" method returns them together.
+    
     $instance = bless {}, $class;
     $instance->{apr} = Apache::Request->new($r);
-    $instance->{r} = $r;
     $instance->{apr}->parse;
+    
+    $r->args($qs);
+    $instance->{r} = $r;
     return $instance;
 }
 
