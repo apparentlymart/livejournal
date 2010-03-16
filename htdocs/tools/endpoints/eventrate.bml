@@ -1,0 +1,93 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use JSON;
+    use vars qw(%GET);
+
+    my $err = sub {
+        my $msg = shift;
+        return JSON::objToJson({
+            'error' => $msg,
+        });
+    };
+
+    my $action = $GET{action};
+
+    my %actions = (
+        undorate   => sub {
+            my ($journalid, $jitemid) = map { $GET{$_} } qw(journalid jitemid);
+
+            return {
+                status  => 'error',
+                message => 'Missing args',
+            } unless $journalid && $jitemid;
+
+            my $result = LJ::reset_eventrate($journalid, $jitemid);
+
+            return {
+                status => 'OK',
+                result => $result,
+            };
+        },
+
+        rate   => sub {
+            my ($journalid, $jitemid) = map { $GET{$_} } qw(journalid jitemid);
+
+            return {
+                status  => 'error',
+                message => 'Missing args',
+            } unless $journalid && $jitemid;
+
+            my $result = LJ::set_eventrate($journalid, $jitemid);
+
+            return {
+                status => 'OK',
+                result => $result,
+            };
+        },
+
+        total   => sub {
+            my ($journalid, $jitemid) = map { $GET{$_} } qw(journalid jitemid);
+
+            return {
+                status  => 'error',
+                message => 'Missing args',
+            } unless $journalid && $jitemid;
+
+            my $result = LJ::get_eventratescounters($journalid,$jitemid);
+
+            return {
+                status => 'OK',
+                result => $result,
+            };
+        },
+
+        list  => sub {
+            my ($journalid, $jitemid) = map { $GET{$_} } qw(journalid jitemid);
+
+            return {
+                status  => 'error',
+                message => 'Missing args',
+            } unless $journalid && $jitemid;
+
+            my @result = LJ::get_eventrates(
+                journalid   => $journalid,
+                jitemid     => $jitemid,
+            );
+
+            return {
+                status => 'OK',
+                result => \@result,
+            };
+        },
+    );
+
+    if (exists($actions{$action})) {
+        my $data = $actions{$action}->();
+        return JSON::objToJson($data) if $data;
+        return $err->('Malfunction'); # :)
+    } else {
+        return $err->('Wrong args (no action provided)');
+    }
+}
+_code?>
