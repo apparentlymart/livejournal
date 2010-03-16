@@ -250,6 +250,11 @@ sub blocked_bot
 
 sub trans
 {
+    {
+        my $r = shift;
+        LJ::Request->init($r);
+    }
+
     return LJ::Request::DECLINED 
         if ! LJ::Request->is_main || LJ::Request->method_number == LJ::Request->M_OPTIONS;  # don't deal with subrequests or OPTIONS
 

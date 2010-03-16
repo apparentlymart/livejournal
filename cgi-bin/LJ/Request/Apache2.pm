@@ -57,6 +57,14 @@ sub LJ::Request::init {
     my $class = shift;
     my $r     = shift;
 
+    # second init within a same request.
+    # Request object may differ between handlers.
+    if ($class->is_inited){
+        # NOTE. this is not good approach. becouse we would have Apache::Request based on other $r object.
+        $instance->{r} = $r;
+        return $instance;
+    }
+
     $instance = bless {}, $class;
     $instance->{apr} = Apache2::Request->new($r);
     $instance->{r} = $r;
