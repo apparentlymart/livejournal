@@ -18,16 +18,20 @@
 function Poll(doc, q_num)
 {
 	if (typeof doc == 'string') {
-		var ljtags = jQuery(doc);
+		// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
+		doc = doc.replace(/<(\/?)lj-(poll|pq|pi)(>| )/gi, '<$1lj:$2$3')
+		var ljtags = jQuery(doc),
+			tag_prefix = jQuery.browser.msie ? '' : 'lj\\:';
+		
 		this.name = ljtags.attr('name');
 		this.whovote = ljtags.attr('whovote');
 		this.whoview = ljtags.attr('whoview');
 		this.questions = [];
 		
-		ljtags.find('lj-pq').each(function(i, pq)
+		ljtags.find(tag_prefix + 'pq').each(function(i, pq)
 		{
 			var pq = jQuery(pq),
-				name = pq.html().match(/^\s*(.*?)\s*(?:<lj-pi>|$)/),
+				name = pq.html().match(/^\s*(.*?)\s*(?:<lj:pi>|$)/),
 				question = {
 					name: (name && name[1]) || '',
 					type: pq.attr('type'),
@@ -39,7 +43,7 @@ function Poll(doc, q_num)
 			}
 			
 			if (/^check|drop|radio$/.test(question.type)) {
-				pq.find('lj-pi').each(function()
+				pq.find(tag_prefix + 'pi').each(function()
 				{
 					question.answers.push(jQuery(this).html())
 				});

@@ -199,7 +199,7 @@ function convert_to_draft(html) {
 
 function convert_poll_to_ljtags(html, post)
 {
-	html = html.replace(/<form (?=[^>]*class="ljpoll")data="([^\"]+?)"[^\b]*?<\/form>/gm,
+	html = html.replace(/<form (?=[^>]*class="ljpoll")[^>]*data="([^\"]+?)"[^\b]*?<\/form>/gm,
 		function(form, data){ return unescape(data); });
 	return html;
 }
