@@ -2445,4 +2445,242 @@ sub item_toutf8
     return;
 }
 
+# --= counters API for 'I like it!' button support =--
+# TODO: Must we check is this entry really exists?
+# TODO: Must we clean rates when delete entry?
+
+# LJ::is_eventrate_enable($journalid, $jitemid, $userid);
+sub is_eventrate_enable {
+    my $journal = shift;
+    $journal = LJ::get_remote() unless $journal;
+    return ($journal->prop('ilikeit_enable')) ? 1 : 0;
+}
+
+sub _update_total_counter {
+    my ($dbcm, $journalid, $jitemid, $counter) = @_;
+
+    my $count = LJ::get_eventratescounters($journalid, $jitemid) + $counter;
+
+    $count = 0 if $count < 0;
+
+    if ($count) {
+        $dbcm->do("REPLACE eventratescounters (journalid,jitemid,count)".
+            "VALUES($journalid,$jitemid,$count)");
+    } else {
+        $dbcm->do("DELETE FROM eventratescounters".
+            " WHERE journalid=$journalid AND jitemid=$jitemid");
+    }
+    LJ::MemCache::add([$journalid, "eventratescounts:$journalid:$jitemid"], $count);
+}
+
+# LJ::reset_eventrate($journalid, $jitemid, $userid);
+# TODO: userid must be from LJ::get_remote() in security reasons.
+sub reset_eventrate
+{
+    my $journalid   = shift;
+    my $jitemid     = shift;
+    my @userids     = @_;
+
+    @userids = [ LJ::get_remote() ] unless @userids;
+
+    my $journal = LJ::want_user($journalid);
+    return unless is_eventrate_enable($journal);
+
+    # get a list if user id which was rate selected entry.
+    @userids = LJ::get_eventrates(
+        journalid => $journalid,
+        jitemid => $jitemid,
+        userids => \@userids,
+    );
+
+    my $clusterid = $journal->{'clusterid'};
+
+    my $dbcm = LJ::get_cluster_master($clusterid);
+    die "Can't get database handle" unless $dbcm;
+
+    my $sth = $dbcm->prepare("DELETE FROM eventrates".
+        " WHERE journalid = ? AND jitemid = ? AND userid = ?") or die $dbcm->errstr;
+
+    my $counter = 0;
+    foreach my $uid (@userids) {
+        # TODO: check rights of $remote to rate a post as $uid.
+        if ($sth->execute($journalid,$jitemid,$uid)) {
+            LJ::MemCache::add([$journalid,"eventrates:$journalid:$jitemid:$uid"], 0);
+            $counter++;
+        } else {
+            warn "SQL DELETE error: ", $dbcm->errstr,  "\n";
+        }
+    }
+
+    _update_total_counter($dbcm, $journalid, $jitemid, -$counter) if $counter;
+
+    return $counter;
+}
+
+# LJ::set_eventrate($journalid, $jitemid, $userid [, $userid ...]);
+# TODO: userid must be from LJ::get_remote() in security reasons.
+sub set_eventrate
+{
+    my $journalid   = shift;
+    my $jitemid     = shift;
+    my @userids     = @_;
+
+    my $journal = LJ::want_user($journalid);
+    return unless is_eventrate_enable($journal);
+
+    my $clusterid = $journal->{'clusterid'};
+
+    my $dbcm = LJ::get_cluster_master($clusterid);
+    die "Can't get database handle" unless $dbcm;
+
+    my $sth = $dbcm->prepare("INSERT INTO eventrates(journalid,jitemid,userid,changetime)".
+        " VALUES (?, ?, ?, NOW())") or die $dbcm->errstr;
+
+    my @uids = ();
+    unless (@userids) {
+        my $remote = LJ::get_remote();
+        push @userids, $remote->userid if $remote;
+    }
+    return 0 unless @userids;
+
+    foreach my $uid (@userids) {
+        # TODO: check rights of $remote to rate a post as $uid.
+        if ($sth->execute($journalid,$jitemid,$uid)) {
+            LJ::MemCache::add([$journalid,"eventrates:$journalid:$jitemid:$uid"], 1);
+            push @uids, $uid;
+        } else {
+            warn "Error: ", $dbcm->errstr,  "\n"
+                unless $dbcm->errstr =~ /Duplicate entry/i;
+            # 'Duplicate entry' is normal. This is means that sombody try to
+            # rate same post twice.
+        }
+    }
+
+    _update_total_counter($dbcm, $journalid, $jitemid, scalar @uids) if @uids;
+
+    return @uids;
+}
+
+# LJ::get_eventratescounters($journalid,$jitemid)
+sub get_eventratescounters
+{
+    my $journalid   = shift;
+    my $jitemid     = shift;
+
+    my $journal = LJ::want_user($journalid);
+    return unless is_eventrate_enable($journal);
+
+    my $count = LJ::MemCache::get([$journalid, "eventratescounts:$journalid:$jitemid"]);
+    return $count if $count;
+
+    my $clusterid = $journal->{'clusterid'};
+
+    my $db = LJ::get_cluster_def_reader($clusterid);
+    die "Can't get database handle" unless $db;
+
+    $count = $db->selectrow_array("SELECT count FROM eventratescounters".
+        " WHERE journalid=$journalid AND jitemid=$jitemid");
+
+    $count ||= 0;
+
+    LJ::MemCache::add([$journalid, "eventratescounts:$journalid:$jitemid"], $count);
+
+    return $count;
+}
+
+# LJ::get_eventrates(
+#   journalid => $journalid,
+#   jitemid => $jitemid,
+#   userids => \@userids,
+#   limits => [ start, limit ],
+# );
+sub get_eventrates
+{
+    my %opts    = @_;
+
+    my $journalid   = $opts{'journalid'};
+
+    my $journal = LJ::want_user($journalid);
+    return unless is_eventrate_enable($journal);
+
+    my $jitemid     = $opts{'jitemid'};
+
+    my @userids = ();
+
+    # If we has 'userids' parameter and it is array ref
+    # and this array contains non zero user id,
+    # then we check for this list of users.
+    # Else we return complete list of users who rates post
+    # specified by journalid and jitemid.
+    if ($opts{'userids'} &&
+        'ARRAY' eq ref $opts{'userids'} &&
+        grep { $_+0 > 0 } @{$opts{'userids'}}) {    # check if this userid(s) is in a list
+        # pass 1: memcache
+
+        # keep track of itemids we still need to load.
+        my %need;
+        my @mem_keys;
+        foreach (@{$opts{'userids'}}) {
+            my $id = $_+0;
+            next unless $id; # Don't remember anonymous.
+            $need{$id} = 1;
+            push @mem_keys, [ $journalid, "eventrates:$journalid:$jitemid:$id" ];
+        }
+
+        my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
+
+        while (my ($k, $v) = each %$mem) {
+            next unless $v;
+            my (undef, undef, undef, $uid) = split(":", $k);
+            delete $need{$uid};
+            push @userids, $uid
+        }
+
+        return @userids unless %need;   # all keys was found in memcache
+
+        # pass 2: databases
+
+        my $clusterid = $journal->{'clusterid'};
+
+        my $db = LJ::get_cluster_def_reader($clusterid);
+        die "Can't get database handle" unless $db;
+
+        my $userid_in = join(", ", keys %need);
+
+        my $sth = $db->prepare("SELECT userid FROM eventrates".
+            " WHERE journalid=$journalid AND jitemid=$jitemid AND userid in ($userid_in)");
+        $sth->execute;
+
+        while (my ($id) = $sth->fetchrow_array) {
+            push @userids, $id;
+            LJ::MemCache::add([$journalid,"eventrates:$journalid:$jitemid:$id"], 1);
+        }
+
+    } else {   # fetch and return list of user ids
+
+        my $limits = 10;
+        if ($opts{'limits'} &&
+            'ARRAY' eq ref $opts{'limits'}) {
+            $limits = join(', ',  @{$opts{'limits'}});
+        }
+
+        my $clusterid = $journal->{'clusterid'};
+
+        my $db = LJ::get_cluster_def_reader($clusterid);
+        die "Can't get database handle loading entry text" unless $db;
+
+        my $sth = $db->prepare("SELECT userid FROM eventrates".
+            " WHERE journalid=? AND jitemid=?".
+            " ORDER BY changetime LIMIT $limits");
+
+        $sth->execute($journalid,$jitemid);
+        while (my ($id) = $sth->fetchrow_array) {
+            push @userids, $id;
+            LJ::MemCache::add([$journalid,"eventrates:$journalid:$jitemid:$id"], 1);
+        }
+    }
+
+    return @userids;
+}
+
 1;

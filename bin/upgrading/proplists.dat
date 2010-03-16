@@ -1494,3 +1494,8 @@ userproplist.custom_usericon:
 userproplist.talkleftct:
   datatype: char
   des: Count of comments left by the user
+
+userproplist.ilikeit_enable:
+  datatype: bool
+  des: Enable 'I like it' button in community.
+  prettyname: Enable 'I like it' button.
