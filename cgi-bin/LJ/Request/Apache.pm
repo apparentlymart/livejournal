@@ -60,11 +60,31 @@ sub LJ::Request::init {
                   # otherwise Apache::Request's "parms" method returns them together.
     
     $instance = bless {}, $class;
-    $instance->{apr} = Apache::Request->new($r);
-    $instance->{apr}->parse;
-    
-    $r->args($qs);
     $instance->{r} = $r;
+    $instance->{apr} = Apache::Request->new($r);
+
+    # Temporary HACK
+    if ($r->method eq 'POST'){
+        #$r->headers_in()->set("Content-Type", "multipart/form-data");
+    }
+
+    ## apreq parses only this encoding methods.
+    my $content_type = $instance->{r}->headers_in()->get("Content-Type");
+    if ($content_type =~ m!^application/x-www-form-urlencoded! or
+        $content_type =~ m!^multipart/form-data!
+    ){
+        my $parse_res = $instance->{apr}->parse;
+        if ($parse_res eq OK){
+            $instance->{post_parsed_successfully} = 1;
+        } else {
+            $instance->{post_parsed_successfully} = 0;
+            warn "Can't parse post data: content-type=" . $r->headers_in()->get("Content-Type") . "  uri=" . $r->uri . "?" . $qs;
+        }
+    }
+
+    
+    # set original QUERY_STRING 
+    $r->args($qs);
     
     return $instance;
 }
@@ -387,6 +407,8 @@ sub LJ::Request::post_params {
     ## ...
     ## NOTE: you can only ask for this once, as the entire body is read from the client.
     #return () if $instance->{r}->headers_in()->get("Content-Type") =~ m!^multipart/form-data!;
+
+    return () unless $instance->{post_parsed_successfully};
 
     return @{ $instance->{params} } if $instance->{params};  
     my @params = ();
