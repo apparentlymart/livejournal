@@ -54,11 +54,6 @@ sub LJ::Request::init {
         return $instance;
     }
 
-    my $qs = $r->args;
-    $r->args(''); # to exclude GET params from Apache::Request object.
-                  # it allows us to separate GET params and POST params.
-                  # otherwise Apache::Request's "parms" method returns them together.
-    
     $instance = bless {}, $class;
     $instance->{r} = $r;
     $instance->{apr} = Apache::Request->new($r);
@@ -68,23 +63,7 @@ sub LJ::Request::init {
         #$r->headers_in()->set("Content-Type", "multipart/form-data");
     }
 
-    ## apreq parses only this encoding methods.
-    my $content_type = $instance->{r}->headers_in()->get("Content-Type");
-    if ($content_type =~ m!^application/x-www-form-urlencoded!i or
-        $content_type =~ m!^multipart/form-data!i
-    ){
-        my $parse_res = $instance->{apr}->parse;
-        if ($parse_res eq OK){
-            $instance->{post_parsed_successfully} = 1;
-        } else {
-            $instance->{post_parsed_successfully} = 0;
-            warn "Can't parse post data: content-type=" . $r->headers_in()->get("Content-Type") . "  uri=" . $r->uri . "?" . $qs;
-        }
-    }
-
-    
-    # set original QUERY_STRING 
-    $r->args($qs);
+   
     
     return $instance;
 }
@@ -408,22 +387,9 @@ sub LJ::Request::post_params {
     ## NOTE: you can only ask for this once, as the entire body is read from the client.
     #return () if $instance->{r}->headers_in()->get("Content-Type") =~ m!^multipart/form-data!;
 
-    unless ($instance->{post_parsed_successfully}) {
-        my $r = $instance->{r};
-        my $content_type = $r->headers_in()->get("Content-Type");
-        my $host = $r->headers_in()->get("Host");
-        my $uri = $r->uri; 
-        warn "App has requested POST params that were not parsed. URI=$host/$uri, Content-Type=$content_type";
-        return;
-    }
-
     return @{ $instance->{params} } if $instance->{params};  
-    my @params = ();
-    foreach my $name ($instance->{apr}->param){
-        foreach my $val ($instance->{apr}->param($name)){
-            push @params => ($name, $val);
-        }
-    }
+
+    my @params = _parse_post();
     $instance->{params} = \@params;
     return @params;
 }
@@ -528,6 +494,53 @@ sub LJ::Request::child_terminate {
     my $class = shift;
     _die_if_no_request();
     return $instance->{r}->child_terminate;
+}
+
+sub _parse_post {
+    my $r = $instance->{r};
+    
+    my $method = $r->method;
+    return unless $method eq 'POST';
+    
+    my $qs = $r->args;
+    $r->args(''); # to exclude GET params from Apache::Request object.
+                  # it allows us to separate GET params and POST params.
+                  # otherwise Apache::Request's "parms" method returns them together.
+    
+    ## apreq parses only this encoding methods.
+    my $content_type = $r->headers_in()->get("Content-Type");
+    if ($content_type =~ m!^application/x-www-form-urlencoded!i or
+        $content_type =~ m!^multipart/form-data!i
+    ){
+        my $parse_res = $instance->{apr}->parse;
+        if ($parse_res eq OK){
+            $instance->{post_parsed_successfully} = 1;
+        } else {
+            $instance->{post_parsed_successfully} = 0;
+            warn "Can't parse post data: content-type=" . $r->headers_in()->get("Content-Type") . "  uri=" . $r->uri . "?" . $qs;
+        }
+    }
+    
+    # set original QUERY_STRING back
+    $r->args($qs);
+
+    unless ($instance->{post_parsed_successfully}) {
+        my $r = $instance->{r};
+        my $content_type = $r->headers_in()->get("Content-Type");
+        my $host = $r->headers_in()->get("Host");
+        my $uri = $r->uri; 
+        warn "App has requested POST params that were not parsed. URI=$host/$uri, Content-Type=$content_type";
+        return;
+    }
+
+    my @params = ();
+    foreach my $name ($instance->{apr}->param){
+        foreach my $val ($instance->{apr}->param($name)){
+            push @params => ($name, $val);
+        }
+    }
+
+    return @params;
 }
 
 1;
