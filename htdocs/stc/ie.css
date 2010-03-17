@@ -27,5 +27,11 @@
 	}(this));
 }
 
+/* UPDATE.bml bugfix 
+__________________________________________*/
+.appwidget-entryform {
+    zoom:1;
+    }
+
 
 
