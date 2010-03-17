@@ -139,9 +139,11 @@ sub s2_implicit_style_create
         my $layer = $pub->{$themeid} || $userlay->{$themeid} || $userlay->{$layoutid};
         my $uniq = $layer->{uniq} || $layer->{s2lid};
 
+        use Data::Dumper;
+
         my $s2_style;
         unless ($s2_style = LJ::S2::create_style($u, "wizard-$uniq")) {
-            die "Can't create style";
+            die "Can't create style " . Dumper({ u => $u, uniq => $uniq, style => \%style });
         }
         $u->set_prop("s2_style", $s2_style);
     }
