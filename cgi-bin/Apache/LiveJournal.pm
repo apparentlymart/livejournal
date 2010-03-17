@@ -1705,11 +1705,7 @@ sub interface_content
     LJ::Request->content_type("text/plain");
 
     my %out = ();
-    my %FORM = ();
-    my $content;
-    LJ::Request->read($content, LJ::Request->header_in("Content-Length"));
-    LJ::decode_url_string($content, \%FORM);
-
+    my %FORM = LJ::Request->post_params;
     # the protocol needs the remote IP in just one place, where tracking is done.
     $ENV{'_REMOTE_IP'} = LJ::Request->remote_ip();
     LJ::do_request(\%FORM, \%out);
