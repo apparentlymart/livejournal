@@ -3,6 +3,7 @@ use strict;
 
 use Carp qw//;
 use Apache::Constants;
+require Apache;
 require Apache::Request;
 require Apache::URI;
 require Apache::File;
