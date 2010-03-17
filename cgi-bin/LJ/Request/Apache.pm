@@ -70,8 +70,8 @@ sub LJ::Request::init {
 
     ## apreq parses only this encoding methods.
     my $content_type = $instance->{r}->headers_in()->get("Content-Type");
-    if ($content_type =~ m!^application/x-www-form-urlencoded! or
-        $content_type =~ m!^multipart/form-data!
+    if ($content_type =~ m!^application/x-www-form-urlencoded!i or
+        $content_type =~ m!^multipart/form-data!i
     ){
         my $parse_res = $instance->{apr}->parse;
         if ($parse_res eq OK){
@@ -408,7 +408,14 @@ sub LJ::Request::post_params {
     ## NOTE: you can only ask for this once, as the entire body is read from the client.
     #return () if $instance->{r}->headers_in()->get("Content-Type") =~ m!^multipart/form-data!;
 
-    return () unless $instance->{post_parsed_successfully};
+    unless ($instance->{post_parsed_successfully}) {
+        my $r = $instance->{r};
+        my $content_type = $r->headers_in()->get("Content-Type");
+        my $host = $r->headers_in()->get("Host");
+        my $uri = $r->uri; 
+        warn "App has requested POST params that were not parsed. URI=$host/$uri, Content-Type=$content_type";
+        return;
+    }
 
     return @{ $instance->{params} } if $instance->{params};  
     my @params = ();
