@@ -2669,7 +2669,7 @@ sub init {
             $form->{'exptype'} = $exptype;
             $form->{'etime'} = $etime;
             $form->{'ipfixed'} = $ipfixed;
-            my $penddata = Storable::freeze($form);
+            my $penddata = Storable::nfreeze($form);
 
             $err->("Unable to get database handle to store pending comment") unless $journalu->writer;
 

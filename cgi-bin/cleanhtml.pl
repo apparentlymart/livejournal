@@ -1466,7 +1466,7 @@ sub clean_s1_style
         });
     }
 
-    return Storable::freeze(\%tmpl);
+    return Storable::nfreeze(\%tmpl);
 }
 
 sub s1_attribute_clean {

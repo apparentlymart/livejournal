@@ -1406,7 +1406,7 @@ sub postevent
             # create tag <lj-embed> from HTML-tag <embed>
             LJ::EmbedModule->parse_module_embed($uowner, \$req->{event});
 
-            my $fr = $dbcm->quote(Storable::freeze($req));
+            my $fr = $dbcm->quote(Storable::nfreeze($req));
             return fail($err, 409) if length($fr) > 200_000;
 
             # store

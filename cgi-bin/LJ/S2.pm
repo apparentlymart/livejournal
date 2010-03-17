@@ -1343,7 +1343,7 @@ sub layer_compile
     # save the checker object for later
     if ($layer->{'type'} eq "core" || $layer->{'type'} eq "layout") {
         $checker->cleanForFreeze();
-        my $chk_frz = Storable::freeze($checker);
+        my $chk_frz = Storable::nfreeze($checker);
         LJ::text_compress(\$chk_frz);
         $dbh->do("REPLACE INTO s2checker (s2lid, checker) VALUES (?,?)", undef,
                  $lid, $chk_frz) or die "replace into s2checker (lid = $lid)";
