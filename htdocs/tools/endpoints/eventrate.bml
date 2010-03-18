@@ -15,7 +15,7 @@
 
     my %actions = (
         undorate   => sub {
-            my ($journalid, $jitemid) = map { $GET{$_} } qw(journalid jitemid);
+            my ($journalid, $jitemid) = map { int($GET{$_}) } qw(journalid jitemid);
 
             return {
                 status  => 'error',
@@ -31,7 +31,7 @@
         },
 
         rate   => sub {
-            my ($journalid, $jitemid) = map { $GET{$_} } qw(journalid jitemid);
+            my ($journalid, $jitemid) = map { int($GET{$_}) } qw(journalid jitemid);
 
             return {
                 status  => 'error',
@@ -47,7 +47,7 @@
         },
 
         total   => sub {
-            my ($journalid, $jitemid) = map { $GET{$_} } qw(journalid jitemid);
+            my ($journalid, $jitemid) = map { int($GET{$_}) } qw(journalid jitemid);
 
             return {
                 status  => 'error',
@@ -63,7 +63,10 @@
         },
 
         list  => sub {
-            my ($journalid, $jitemid) = map { $GET{$_} } qw(journalid jitemid);
+            my ($journalid, $jitemid, $skip, $limit) =
+                map { int($GET{$_}) } qw(journalid jitemid skip limit);
+
+            $skip ||= 0; $limit ||= 10;
 
             return {
                 status  => 'error',
@@ -73,6 +76,7 @@
             my @result = LJ::get_eventrates(
                 journalid   => $journalid,
                 jitemid     => $jitemid,
+                limits      => "'$skip', '$limit'",
             );
 
             return {

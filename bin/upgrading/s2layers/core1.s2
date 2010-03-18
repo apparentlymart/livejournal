@@ -362,6 +362,13 @@ class Entry extends EntryLite
     "True if opaque horizontal site-specific content boxes between entries should be displayed to the user.";
     function builtin print_ebox() [fixed]
     "Prints a small horizontal bar of site-specific content between entries in a journal.";
+
+    function builtin is_eventrate_enable() : bool
+    "True if users can rate entry.";
+    function builtin get_eventratescounters() : int
+    "How many users rates this entry.";
+    function builtin get_eventrates() : UserLite[]
+    "Id list of users who rates this entry.";
 }
 
 class Comment extends EntryLite

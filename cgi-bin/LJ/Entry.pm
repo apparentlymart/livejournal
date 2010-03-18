@@ -2591,9 +2591,11 @@ sub get_eventratescounters
 # LJ::get_eventrates(
 #   journalid => $journalid,
 #   jitemid => $jitemid,
-#   userids => \@userids,
-#   limits => [ start, limit ],
+# [ userids => \@userids, ]
+# [ limits => ['start,' . ] 'limit' ],
 # );
+#
+# Parameters between '[' and ']' is optional.
 sub get_eventrates
 {
     my %opts    = @_;
@@ -2658,11 +2660,7 @@ sub get_eventrates
 
     } else {   # fetch and return list of user ids
 
-        my $limits = 10;
-        if ($opts{'limits'} &&
-            'ARRAY' eq ref $opts{'limits'}) {
-            $limits = join(', ',  @{$opts{'limits'}});
-        }
+        my $limits = $opts{'limits'} || 10;
 
         my $clusterid = $journal->{'clusterid'};
 

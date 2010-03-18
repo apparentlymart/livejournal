@@ -3753,6 +3753,37 @@ sub Entry__plain_subject
     return $this->{'_subject_plain'};
 }
 
+# 'I like it' button
+
+sub Entry__is_eventrate_enable
+{
+    my ($ctx, $this) = @_;
+    return LJ::is_eventrate_enable($this->{'journal'}->{'_u'});
+}
+
+sub Entry__get_eventratescounters
+{
+    my ($ctx, $this) = @_;
+    return
+        LJ::get_eventratescounters(
+            $this->{'journal'}->{'_u'}->{'userid'},
+            int($this->{'itemid'}/256));
+}
+
+sub Entry__get_eventrates
+{
+    my ($ctx, $this, $skip, $limit) = @_;
+    $limit ||= 10; $skip ||= 0;
+    return [ # Return a list as array ref.
+        map { LJ::S2::UserLite(LJ::want_user($_)) }
+            LJ::get_eventrates(
+                journalid   => $this->{'journal'}->{'_u'}->{'userid'},
+                jitemid     => int($this->{'itemid'}/256),
+                limits      => "$skip, $limit",
+            )
+    ];
+}
+
 sub EntryPage__print_multiform_actionline
 {
     my ($ctx, $this) = @_;
