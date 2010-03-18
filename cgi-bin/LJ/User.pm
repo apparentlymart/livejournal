@@ -8920,7 +8920,6 @@ sub make_journal
         $opts->{tagids} = [];
         my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
         my %kwref = ( map { $tags->{$_}->{name} => $_ } keys %{$tags || {}} );
-
         foreach (@{$opts->{tags}}) {
             return $error->("Sorry, one or more specified tags do not exist.", "404 Not Found")
                 unless $kwref{$_};

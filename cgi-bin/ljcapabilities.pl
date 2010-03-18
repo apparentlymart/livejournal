@@ -200,6 +200,7 @@ sub get_cap
         next if (defined $max && $max > $v);
         $max = $v;
     }
+
     return defined $max ? $max : $LJ::CAP_DEF{$cname};
 }
 
