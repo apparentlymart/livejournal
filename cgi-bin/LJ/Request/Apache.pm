@@ -501,45 +501,44 @@ sub _parse_post {
     
     my $method = $r->method;
     return unless $method eq 'POST';
+    my $host = $r->headers_in()->get("Host");
+    my $uri = $r->uri;
     
+    ## apreq parses only this encoding methods.
+    my $content_type = $r->headers_in()->get("Content-Type");
+    if ($content_type !~ m!^application/x-www-form-urlencoded!i &&
+        $content_type !~ m!^multipart/form-data!i)
+    {
+        ## hack: if this is a POST request, and App layer asked us
+        ## for params, pretend that encoding is default 'application/x-www-form-urlencoded'
+        ## Some clients that use flat protocol issue malformed headers,
+        ## so don't even make a warn.
+        if ($uri ne '/interface/flat') {
+            warn "Changing content-type of POST ($host$uri) from $content_type to default";
+        }
+        $r->headers_in()->set("Content-Type", "application/x-www-form-urlencoded");
+    }
+   
     my $qs = $r->args;
     $r->args(''); # to exclude GET params from Apache::Request object.
                   # it allows us to separate GET params and POST params.
                   # otherwise Apache::Request's "parms" method returns them together.
-    
-    ## apreq parses only this encoding methods.
-    my $content_type = $r->headers_in()->get("Content-Type");
-    if ($content_type =~ m!^application/x-www-form-urlencoded!i or
-        $content_type =~ m!^multipart/form-data!i
-    ){
-        my $parse_res = $instance->{apr}->parse;
-        if ($parse_res eq OK){
-            $instance->{post_parsed_successfully} = 1;
-        } else {
-            $instance->{post_parsed_successfully} = 0;
-            warn "Can't parse post data: content-type=" . $r->headers_in()->get("Content-Type") . "  uri=" . $r->uri . "?" . $qs;
-        }
-    }
-    
+
+    my $parse_res = $instance->{apr}->parse;
     # set original QUERY_STRING back
     $r->args($qs);
-
-    unless ($instance->{post_parsed_successfully}) {
-        my $r = $instance->{r};
-        my $content_type = $r->headers_in()->get("Content-Type");
-        my $host = $r->headers_in()->get("Host");
-        my $uri = $r->uri; 
-        warn "App has requested POST params that were not parsed. URI=$host/$uri, Content-Type=$content_type";
+    
+    if (!$parse_res eq OK) {
+        warn "Can't parse POST data ($host$uri), Content-Type=$content_type";
         return;
     }
-
+    
     my @params = ();
     foreach my $name ($instance->{apr}->param){
         foreach my $val ($instance->{apr}->param($name)){
             push @params => ($name, $val);
         }
     }
-
     return @params;
 }
 
