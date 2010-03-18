@@ -113,7 +113,7 @@ Poll.prototype.outputHTML = function()
 		html += '</p>';
 	}
 	
-	html += '<input type="submit" disabled="disabled" value="Submit Poll"/></form>';
+	html += '<input type="submit" value="Submit Poll"/></form>\ufeff';
 	return html;
 }
 
