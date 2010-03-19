@@ -660,7 +660,7 @@ function onInsertObject (include) {
     iframe.style.position = "absolute";
     iframe.style.border = "0";
     iframe.style.backgroundColor = "#fff";
-    iframe.style.overflow = "hidden";
+	iframe.style.zIndex = 1000;
 
     //iframe.src = include;
     iframe.innerHTML = "<iframe id='popupsIframe' style='border:none' frameborder='0' width='100%' height='100%' src='" + include + "'></iframe>";
@@ -669,6 +669,9 @@ function onInsertObject (include) {
     currentPopup = iframe;
     setTimeout(function () { document.getElementById('popupsIframe').setAttribute('src', include); }, 500);
     InOb.smallCenter();
+	InOb.onresize = function() { return InOb.smallCenter(); }
+	
+	jQuery(window).resize(InOb.resize);
 }
 // the select's onchange:
 InOb.handleInsertSelect = function () {
@@ -721,9 +724,16 @@ InOb.handleInsertVideo = function() {
     draft.value = draft.value + video;
 }
 
+InOb.resize = function()
+{
+	InOb.onresize();
+}
+
 InOb.onClosePopup = function () {
     if (! currentPopup) return;
     document.body.removeChild(currentPopup);
+
+	jQuery(window).unbind('resize', InOb.resize);
     currentPopup = null;
 };
 
@@ -870,6 +880,7 @@ InOb.showSelectorPage = function () {
 
 InOb.fotobilderStepOne = function () {
     InOb.fullCenter();
+	InOb.onresize = function() { return InOb.fullCenter(); }
     var div_if = InOb.popid("img_iframe_holder");
     var windims = DOM.getClientDimensions();
     DOM.setHeight(div_if, windims.y - 300);
@@ -885,6 +896,7 @@ InOb.fotobilderStepOne = function () {
 
 InOb.photobucket= function (seedurl,pb_affsite_id) {
     InOb.tallCenter();
+	InOb.onresize = function() { return InOb.tallCenter(); }
     var div_if = InOb.popid("img_iframe_holder");
     var windims = DOM.getClientDimensions();
     DOM.setHeight(div_if, 450);
@@ -911,8 +923,6 @@ InOb.fullCenter = function () {
     DOM.setLeft(currentPopup, (40 / 2));
 
     scroll(0,0);
-
-    window.onresize = function() { return InOb.fullCenter(); };
 };
 
 InOb.tallCenter = function () {
@@ -924,8 +934,6 @@ InOb.tallCenter = function () {
     DOM.setLeft(currentPopup, (windims.x - 715) / 2);
 
     scroll(0,0);
-
-    window.onresize = function() { return InOb.tallCenter(); };
 };
 
 InOb.smallCenter = function () {
@@ -937,8 +945,6 @@ InOb.smallCenter = function () {
     DOM.setLeft(currentPopup, (windims.x - 715) / 2);
 
     scroll(0,0);
-
-    window.onresize = function() { return InOb.smallCenter(); };
 };
 
 InOb.setPreviousCb = function (cb) {
