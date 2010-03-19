@@ -48,7 +48,7 @@ _code?>
 
 %%BODY%%
 
-<hr />
+<hr style="clear:both;" />
 
 <p>[ <a href='<?siteroot?>/'><?_ml lynx.nav.home _ml?></a> | <a href='<?siteroot?>/update.bml'><?_ml lynx.nav.update _ml?></a> | <?_code
    use strict;
