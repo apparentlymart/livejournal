@@ -10,7 +10,7 @@ body<=
     my $dbh = LJ::get_db_writer();
     my $u   = LJ::get_remote();
 
-    return "<?needlogin?>" if LJ::did_post() and $u;
+    return "<?needlogin?>" if LJ::did_post() and !$u;
     return "<?h1 $ML{'error.suspended.title'} h1?><?p $ML{'error.suspended.text'} p?>" 
         if $u and $u->is_suspended;
 
