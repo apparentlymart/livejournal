@@ -66,7 +66,7 @@ body<=
                 # for the url, just pass that through (we'll recheck it anyway, though)
                 unless ($acct) {
                     my $ret .= "<?h1 $ML{'.create'} h1?><?p $ML{'.create.name'} p?>";
-                    $ret .= "<form method='post' action='./'>";
+                    $ret .= "<form method='post' action='$LJ::SITEROOT/syn/'>";
                     $ret .= LJ::html_hidden("userid", $u->{'userid'}, 'synurl', $url);
                     $ret .= "<blockquote>";
                     $ret .= "<p>$ML{'.account'} <input size='15' maxlength='15' name='acct' />";
@@ -204,7 +204,7 @@ body<=
     $ret .= "<?p " . BML::ml('.top1000.text', {'aopts' => "href='$LJ::SITEROOT/syn/list.bml'"}) . " p?>";
     $ret .= "<?p $ML{'.promo.text'} p?>";
 
-    $ret .= "<form method='post' action='./'>";
+    $ret .= "<form method='post' action='$LJ::SITEROOT/syn/'>";
     $ret .= LJ::html_hidden("userid", $u->userid) if $u;
 
     if (@pop) {
@@ -235,7 +235,7 @@ body<=
         $ret .= "</table>";
     }
 
-    $ret .= "</form><form method='post' action='./'>";
+    $ret .= "</form><form method='post' action='$LJ::SITEROOT/syn/'>";
     $ret .= LJ::html_hidden("userid", $u->userid) if $u;
 
     $ret .= "<?h1 $ML{'.add.byurl.title'} h1?><?p $ML{'.add.byurl.text'} p?>";

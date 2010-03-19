@@ -403,7 +403,7 @@ sub getfriendspage
         
         # log time value
         $h{logtime} = $LJ::EndOfTime - $ei->{rlogtime};
-        $h{do_captcha} = LJ::Talk::Post::require_captcha_test($u, $entry->poster, '', $h{ditemid})?1:0;
+        $h{do_captcha} = LJ::Talk::Post::require_captcha_test($u, $entry->poster, '', $h{ditemid}, 1)?1:0;
 
         push @res, \%h;
 

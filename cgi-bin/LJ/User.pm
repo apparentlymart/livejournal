@@ -6964,7 +6964,7 @@ sub ljuser
     }
 
     if (my $icon = $u->custom_usericon) {
-        return $make_tag->($icon, $url, 16);
+        return $make_tag->($icon, $url, 17);
     }
     
     if ($type eq 'C') {
