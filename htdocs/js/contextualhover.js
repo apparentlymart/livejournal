@@ -533,7 +533,7 @@ var ContextualPopup =
 		
 		clearTimeout(t.mouseInTimer);
 		
-		if (ctxPopupId) {
+		if (target.tagName == 'IMG' && ctxPopupId) {
 			// if we don't have cached data background request it
 			if (!t.cachedResults[ctxPopupId]) {
 				t.getInfo(target, ctxPopupId);
