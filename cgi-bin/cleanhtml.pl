@@ -731,12 +731,17 @@ sub clean
                 if ($tag eq "img")
                 {
                     my $img_bad = 0;
-                    if (defined $opts->{'maximgwidth'} &&
-                        (! defined $hash->{'width'} ||
-                         $hash->{'width'} > $opts->{'maximgwidth'})) { $img_bad = 1; }
-                    if (defined $opts->{'maximgheight'} &&
-                        (! defined $hash->{'height'} ||
-                         $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
+                    if ($opts->{'remove_img_sizes'}) {
+                        delete $hash->{'height'};
+                        delete $hash->{'width'};
+                    } else {
+                        if (defined $opts->{'maximgwidth'} &&
+                            (! defined $hash->{'width'} ||
+                             $hash->{'width'} > $opts->{'maximgwidth'})) { $img_bad = 1; }
+                        if (defined $opts->{'maximgheight'} &&
+                            (! defined $hash->{'height'} ||
+                             $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
+                    }
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
                     
                     ## TODO: a better check of $hash->{src} is needed,
@@ -1372,6 +1377,7 @@ sub clean_event
         'noearlyclose' => 1,
         'tablecheck' => 1,
         'extractimages' => $opts->{'extractimages'} ? 1 : 0,
+        'remove_img_sizes' => $opts->{'remove_img_sizes'} ? 1 : 0,
         'noexpandembedded' => $opts->{'noexpandembedded'} ? 1 : 0,
         'textonly' => $opts->{'textonly'} ? 1 : 0,
         'remove_colors' => $opts->{'remove_colors'} ? 1 : 0,
