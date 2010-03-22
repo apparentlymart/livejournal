@@ -989,11 +989,18 @@ sub trans
                 return redir("$LJ::SITEROOT$uri/");
             }
 
+            # index.bml
             my $new_uri  = $uri . "index.bml";
             my $bml_file = "$ENV{LJHOME}/htdocs/" . $uri . "index.bml";
             if (-e $bml_file) {
                 LJ::Request->uri($new_uri);
                 return $bml_handler->($bml_file);
+            } 
+
+            # index.html
+            my $html_file = "$ENV{LJHOME}/htdocs/" . $uri . "index.html";
+            if (-e $html_file){
+                return redir($uri . "index.html");
             }
         }
     }
