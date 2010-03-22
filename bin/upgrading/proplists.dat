@@ -1494,6 +1494,7 @@ userproplist.custom_usericon:
 userproplist.talkleftct:
   datatype: char
   des: Count of comments left by the user
+  cldversion: 8
 
 userproplist.ilikeit_enable:
   datatype: bool
