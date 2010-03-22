@@ -2344,10 +2344,12 @@ sub enter_comment {
                     "?, 'L', ?, ?, ?)", undef,
                     $posterid, $journalu->{userid}, $itemid, $jtalkid, $pub);
 
-            LJ::MemCache::incr([$posterid, "talkleftct:$posterid"]);
         } else {
             # both primary and backup talkleft hosts down.  can't do much now.
         }
+
+        my $poster = LJ::want_user($posterid);
+        $poster->set_prop('talkleftct' => $poster->prop('talkleftct') + 1);
     }
 
     $journalu->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
