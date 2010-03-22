@@ -142,7 +142,7 @@ ESN.trackBtnClickHandler = function (evt) {
         commentsTrackBtn = TrackCheckbox("someone replies in this comment thread", 1);
     } else {
         // entry tracking button
-        newEntryTrackBtn = TrackCheckbox(LJ_cmtinfo["journal"] + " posts a new entry", trackingNewEntries);
+		newEntryTrackBtn = TrackCheckbox(Site.currentJournal + ' posts a new entry', trackingNewEntries);
         commentsTrackBtn = TrackCheckbox("someone comments on this post", trackingNewComments);
     }
 
