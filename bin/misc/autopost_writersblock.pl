@@ -107,18 +107,40 @@ my @rows = ();
     }
 }
 
+# LJSUP-5545: Post to 'ru' community entries with empty 'country' field
+# only if there is no entries for cyrillic country.
+# Also remove spaces from country field.
+{
+    my $skip_cyrillic_with_defaults = 0; # set this if we find new row(s) with 'RU' country.
+    foreach my $row (@rows) {
+
+        # filter already posted
+        next if $comms{'RU'}->{qids}->{$row->{qid}};
+
+        $row->{countries} =~ s/^ *//;
+        $row->{countries} =~ s/ *$//;
+
+        $skip_cyrillic_with_defaults = 1 if $row->{countries} && ($row->{countries} =~ m/RU/i);
+    }
+    $comms{'RU'}->{'skip_with_defaults'} = $skip_cyrillic_with_defaults;
+}
+
 # Combine information, filter it and post to communities
 {
     foreach my $row (@rows) {
+
+        my $qotd_countries = $row->{countries}; # QotD's countries
+
         foreach my $comm (keys %comms) {
 
             # filter by country
             my $country = $comms{$comm}->{country}; # Community's country
-            if ($country) {
-                my $qotd_countries = $row->{countries}; # QotD's countries
-                $qotd_countries =~ s/^ *//; $qotd_countries =~ s/ *$//;
-                next if $qotd_countries && ($qotd_countries !~ m/$country/i);
-            }
+
+            # Skip if specified country does not match.
+            next if $qotd_countries && ($qotd_countries !~ m/$country/i);
+
+            # Don't post to community entries with 'default' country. 
+            next if $comms{$comm}->{'skip_with_defaults'} && ! $qotd_countries;
 
             # filter already posted
             next if $comms{$comm}->{qids}->{$row->{qid}};
