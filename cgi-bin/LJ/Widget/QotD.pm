@@ -29,35 +29,62 @@ sub render_body {
     # If there is no lang tag, try to get user settings or use $LJ::DEFAULT_LANG.
     $opts{lang} ||= ($u && $u->prop('browselang')) ? $u->prop('browselang') : $LJ::DEFAULT_LANG;
 
-    unless ($embed || $archive) {
-        my $title = LJ::run_hook("qotd_title", $u, $opts{lang}) || $class->ml('widget.qotd.title', undef, $opts{lang});
-        $ret .= "<h2>$title";
-    }
+#    unless ($embed || $archive) {
+#        my $title = LJ::run_hook("qotd_title", $u, $opts{lang}) || $class->ml('widget.qotd.title', undef, $opts{lang});
+#        $ret .= "<h2>$title";
+#    }
 
     unless ($opts{nocontrols}) {
-        $ret .= "<span class='qotd-controls'>";
-        $ret .= "<img id='prev_questions' src='$LJ::IMGPREFIX/arrow-spotlight-prev.gif' alt='Previous' title='Previous' />";
-        $ret .= "<img id='prev_questions_disabled' src='$LJ::IMGPREFIX/arrow-spotlight-prev-disabled.gif' alt='Previous' title='Previous' /> ";
-        $ret .= "<img id='next_questions' src='$LJ::IMGPREFIX/arrow-spotlight-next.gif' alt='Next' title='Next' />";
-        $ret .= "<img id='next_questions_disabled' src='$LJ::IMGPREFIX/arrow-spotlight-next-disabled.gif' alt='Next' title='Next' />";
-        $ret .= "</span>";
+#        $ret .= "<span class='qotd-controls'>";
+#        $ret .= "<img id='prev_questions' src='$LJ::IMGPREFIX/arrow-spotlight-prev.gif' alt='Previous' title='Previous' />";
+#        $ret .= "<img id='prev_questions_disabled' src='$LJ::IMGPREFIX/arrow-spotlight-prev-disabled.gif' alt='Previous' title='Previous' /> ";
+#        $ret .= "<img id='next_questions' src='$LJ::IMGPREFIX/arrow-spotlight-next.gif' alt='Next' title='Next' />";
+#        $ret .= "<img id='next_questions_disabled' src='$LJ::IMGPREFIX/arrow-spotlight-next-disabled.gif' alt='Next' title='Next' />";
+#        $ret .= "</span>";
+		$ret .= qq[<p class="i-qotd-nav"><i class="i-qotd-nav-first"></i><i class="i-qotd-nav-prev"></i><span>Feb, 11th (1/2)</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
     }
 
-    $ret .= "</h2>" unless $embed || $archive;
+#    $ret .= "</h2>" unless $embed || $archive;
 
-    $ret .= "<div id='all_questions'>" unless $opts{nocontrols};
+#    $ret .= "<div id='all_questions'>" unless $opts{nocontrols};
+#
+#    if ($embed) {
+#        $ret .= $class->qotd_display_embed( questions => \@questions, user => $u, %opts );
+#    } elsif ($archive) {
+#        $ret .= $class->qotd_display_archive( questions => \@questions, user => $u, %opts );
+#    } else {
+#        $ret .= $class->qotd_display( questions => \@questions, user => $u, %opts );
+#    }
+#
+#    $ret .= "</div>" unless $opts{nocontrols};
 
-    if ($embed) {
-        $ret .= $class->qotd_display_embed( questions => \@questions, user => $u, %opts );
-    } elsif ($archive) {
-        $ret .= $class->qotd_display_archive( questions => \@questions, user => $u, %opts );
-    } else {
-        $ret .= $class->qotd_display( questions => \@questions, user => $u, %opts );
-    }
+	my $txt = LJ::run_hook("qotd_answer_txt", $opts{user}) || $class->ml('widget.qotd.answer', undef, $opts{lang});
 
-    $ret .= "</div>" unless $opts{nocontrols};
+	$ret .= qq[<div class="b-qotd-question">
+		<img src="http://wh.lj.ru/temp/qotd-pic.jpg" width="100px" height="100" alt="Chocolate, spice, or anything nice" title="Chocolate, spice, or anything nice" class="qotd-pic" />
+		<div class="b-qotd-question-inner">
+			<h3>Chocolate, spice, or anything nice</h3>
+			<p>How often do you watch TV shows or movies on your computer? What determines whether you watch on your TV versus your computer? <em class="i-qotd-by">Submitted By <span class='ljuser ljuser-name_test' lj:user='test' style='white-space: nowrap;'><a href='http://test.ljdev5.livejournal.ru/profile'><img src='http://www.ljdev5.livejournal.ru/img/userinfo.gif' alt='[info]' width='17' height='17' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='http://test.ljdev5.livejournal.ru/'><b>test</b></a></span></em></p>
+			<ul class="canyon">
+				<li class="canyon-section"><button type="button">$txt</button></li>
+				<li class="canyon-side"><a href="#" class="more">View 1270 Answers</a></li>
+			</ul>
+		</div>
+	</div>];
+	
+	$ret .= qq[<div class="b-qotd-adv">
+		<dl>
+			<dt>Sponsored by <strong>My Life Scoop</strong><br /><img src="http://wh.lj.ru/temp/qotd-sponsor.gif" width="133" height="25" alt="My Life Scoop" title="My Life Scoop" /></dt>
+			<dd>
+				<h4>Win a \$250 Best Buy Gift Card!</h4>
+				<p>Welcome to MyLifeScoop, a site about how real people make surprising things happen with technology. At MyLifeScoop you'll find Featured Stories from A-list bloggers; <a href="#">Official Rules</a></p>
+				<p><a href="#" class="more">Answer today’s Writers Block</a></p>
+			</dd>
+		</dl>
+	</div>];
 
     return $ret;
+
 }
 
 my %cyr_countries = map {lc} map { $_ => $_ } qw(AM AZ BY EE GE KG KZ LT LV MD RU TJ TM UA UZ);
@@ -100,14 +127,13 @@ sub qotd_display_embed {
     my $ret;
     if (@$questions) {
         # table used for better inline display
-        $ret .= '<table cellpadding="0" cellspacing="0"><tr><td>';
         $ret .= "<div style='border: 1px solid #000; padding: 6px;'>";
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
             $ret .= "<p>$d->{text}</p><p style='font-size: 0.8em;'>$d->{from_text}$d->{between_text}$d->{extra_text}</p><br />";
             $ret .= "<p>$d->{answer_link} $d->{view_answers_link}$d->{impression_img}</p>";
         }
-        $ret .= "</div></td></tr></table>";
+        $ret .= "</div>";
     }
 
     return $ret;
@@ -141,11 +167,11 @@ sub qotd_display {
 
     my $ret;
     if (@$questions) {
-        $ret .= "<div class='qotd'>";
+        $ret .= "";
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
 
-            $ret .= "<table><tr><td>";
+            $ret .= $d->{subject};
             $ret .= $d->{text};
             $ret .= ($d->{extra_text}) ? "<p class='detail' style='padding-bottom: 5px;'>$d->{extra_text}</p>" : " ";
 
@@ -154,36 +180,34 @@ sub qotd_display {
                 my $img_url = "<img src='$q->{img_url}' class='qotd-img' alt='' />";
                 $img_url = "<a href='$q->{link_url}'>$img_url</a>"
                     if ($q->{link_url});
-                $ret .= "</td><td>$img_url";
+                $ret .= "$img_url";
             }
-            $ret .= "</td></tr></table>";
+            $ret .= "";
 
-            my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
-            my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
+            my $archive = '';
+            my $suggest = '';
 
-            $ret .= "<p class='detail'><span class='suggestions'>" .
-                ($d->{view_answers_link} ? "$d->{view_answers_link} | " : "") .
-                "$archive | $suggest</span>$d->{from_text}" . $class->impression_img($q) . "</p>";
+            $ret .= "<p class='detail'>$d->{from_text}" . $class->impression_img($q) . "</p>";
 
-            my $add_friend = '';
-            my $writersblock = LJ::load_user($community_name);
-            $add_friend = "<li><span><a href='$LJ::SITEROOT/friends/add.bml?user=$community_name'>" . $class->ml('widget.qotd.add_friend') . "</a></span></li>"
-                if $writersblock && !LJ::is_friend($remote,$writersblock);
-
-            my $add_notification = '';
-            $add_notification = "<li><span><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$community_name&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></span></li>"
-                unless $writersblock && $remote && $remote->has_subscription(
-                    journal         => $writersblock,
-                    event           => 'JournalNewEntry',
-                    require_active  => 1,
-                    method          => 'Inbox');
-
-            $ret .= "<ul class='subscript'> $add_friend $add_notification </ul>" if $add_friend || $add_notification;
+#            my $add_friend = '';
+#            my $writersblock = LJ::load_user($community_name);
+#            $add_friend = "<li><span><a href='$LJ::SITEROOT/friends/add.bml?user=$community_name'>" . $class->ml('widget.qotd.add_friend') . "</a></span></li>"
+#                if $writersblock && !LJ::is_friend($remote,$writersblock);
+#
+#            my $add_notification = '';
+#            $add_notification = "<li><span><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$community_name&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></span></li>"
+#                unless $writersblock && $remote && $remote->has_subscription(
+#                    journal         => $writersblock,
+#                    event           => 'JournalNewEntry',
+#                    require_active  => 1,
+#                    method          => 'Inbox');
+#
+#            $ret .= "<ul class='subscript'> $add_friend $add_notification </ul>" if $add_friend || $add_notification;
         }
 
         # show promo on vertical pages
         $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
-        $ret .= "</div>";
+        $ret .= "";
     }
 
     return $ret;
