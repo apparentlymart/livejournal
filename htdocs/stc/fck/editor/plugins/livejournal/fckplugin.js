@@ -212,6 +212,7 @@ LJCutCommand.prototype.Execute=function()
 			range.MoveToNodeContents(cut_node);
 			range.Collapse(true);
 		}
+		FCKDomTools.InsertAfterNode(cut_node, FCK.EditorDocument.createTextNode('\ufeff'))
 		
 		range.Select();
 		FCK.Focus();
@@ -523,12 +524,18 @@ FCK.DataProcessor.ConvertToDataFormat = function(body)
 }
 
 // set cursor to end document
-FCK.Focus = function(to_end) {
+FCK.Focus = function(to_end)
+{
 	FCK.EditingArea.Focus();
 	if (to_end && FCK.EditorDocument.body.firstChild) {
 		var win = FCK.EditorWindow, doc = FCK.EditorDocument,
+			last = doc.body.lastChild,
 			range = new FCKDomRange(win);
-		range.MoveToPosition(doc.body, 2);
+		if (last.tagName == 'BR', last.getAttribute('type') == '_moz') {
+			range.MoveToPosition(last, 3);
+		} else {
+			range.MoveToPosition(doc.body, 2);
+		}
 		range.Select();
 		
 		// scroll to end
