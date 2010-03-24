@@ -134,7 +134,7 @@ sub qotd_display_embed {
         $ret .= "<div style='border: 1px solid #000; padding: 6px;'>";
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
-            $ret .= "<p>$d->{text}</p><p style='font-size: 0.8em;'>$d->{from_text}$d->{between_text}$d->{extra_text}</p><br />";
+            $ret .= "<p>$d->{text}</p><p style='font-size: 0.8em;'>$d->{from_text}$d->{between_text}$d->{extra_text}</p>";
             $ret .= "<p>$d->{answer_link} $d->{view_answers_link}$d->{impression_img}</p>";
         }
         $ret .= "</div>";
