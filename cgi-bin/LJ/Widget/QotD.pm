@@ -66,8 +66,16 @@ sub render_body {
         my ($day, $month_num) = (gmtime( $cur_question->{old} ? $cur_question->{time_end} : time ))[3, 4];
         my $month_short = LJ::Lang::month_short($month_num + 1);
 
-		$ret .= qq[<p class="i-qotd-nav"><i class="i-qotd-nav-first"></i><i class="i-qotd-nav-prev"></i><span>$month_short, $day (<span class="qotd-current">$num</span>/<span class="qotd-total">$total</span>)</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
+        $ret .= qq[<p class="i-qotd-nav">];
+        if ($total > 1) {
+            $ret .= qq[<i class="i-qotd-nav-first"></i><i class="i-qotd-nav-prev"></i>];
+        } else {
+            $ret .= qq[<i class="i-qotd-nav-first i-qotd-nav-first-dis"></i><i class="i-qotd-nav-prev i-qotd-nav-prev-dis"></i>];
+        }
+        $ret .= qq[<span>$month_short, $day (<span class="qotd-current">$num</span>/<span class="qotd-total">$total</span>)</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
     }
+
+    $ret .= '<div class="b-qotd-question">';
 
     if ($embed) {
         $ret .= $class->qotd_display_embed( questions => \@questions, user => $u, %opts );
@@ -76,6 +84,8 @@ sub render_body {
     } else {
         $ret .= $class->qotd_display( questions => \@questions, user => $u, %opts );
     }
+
+    $ret .= '</div>';
 
     return $ret;
 
@@ -165,7 +175,7 @@ sub qotd_display {
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
 
-            $ret .= qq[<div class="b-qotd-question">] .
+            $ret .=
                 ($q->{img_url}
                     ? qq[<img src="$q->{img_url}" width="100px" height="100" alt="$q->{subject}" title="$q->{subject}" class="qotd-pic" />]
                     : ''
@@ -174,12 +184,10 @@ sub qotd_display {
                     <h3>$q->{subject}</h3>
                     <p>$d->{text}<em class="i-qotd-by">$d->{from_text}</em></p>
                     <ul class="canyon">
-                        <li class="canyon-section"><button type="button">$d->{answer_text}</button></li> <!-- $d->{answer_url} -->
+                        <li class="canyon-section"><button type="button" onclick="document.location.href='$d->{answer_url}'">$d->{answer_text}</button></li>
                         <li class="canyon-side">$d->{view_answers_link}</li>
                     </ul>
-                </div>
-            </div>];
-
+                </div>];
             $ret .= qq[<div class="b-qotd-adv">$q->{extra_text}</div>] if $q->{is_special} eq 'Y';
 
         }
@@ -290,7 +298,7 @@ sub _get_question_data {
        $count .= "+" if $count >= $LJ::RECENT_QOTD_SIZE;
     $view_answers_link = "<a" . ($opts->{small_view_link} ? " class='small-view-link'" : '') .
             (($opts->{form_disabled} || $opts->{embed}) ? ' target="_blank"' : '') . # Open links on top, not in current frame.
-            " href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\" class=\"more\">" .
+            " href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\" class=\"more\" target=\"_top\">" .
                 $class->ml('widget.qotd.viewanswers', {'total_count' => $count}, $lncode) .
             "</a>";
 
