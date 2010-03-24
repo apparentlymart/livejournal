@@ -105,7 +105,7 @@ sub load_current_questions {
         or die "no global database writer for QotD";
 
     my $sth = $dbh->prepare(
-        "SELECT * FROM qotd WHERE time_start <= UNIX_TIMESTAMP() AND time_end >= UNIX_TIMESTAMP() AND active='Y'"
+        "SELECT * FROM qotd WHERE time_start <= UNIX_TIMESTAMP() AND time_end >= UNIX_TIMESTAMP() AND active='Y' ORDER BY time_start desc"
     );
     $sth->execute;
 
@@ -113,6 +113,14 @@ sub load_current_questions {
     while (my $row = $sth->fetchrow_hashref) {
         push @rows, $row;
     }
+
+    # sponsored should be first
+    @rows = 
+        map  { delete $_->{is_special_num}; $_ }                             # remove 'is_special_num' member
+        sort { $b->{is_special_num} <=> $a->{is_special_num} }               # sort by is_special_num
+        map  { $_->{is_special_num} = $_->{is_special} eq 'Y' ? 1 : 0; $_  } # is_special as num
+        @rows;
+
     $class->cache_set('current', \@rows);
 
     return @rows;
@@ -131,7 +139,7 @@ sub load_old_questions {
         or die "no global database writer for QotD";
 
     my $sth = $dbh->prepare(
-        "SELECT * FROM qotd WHERE time_end >= UNIX_TIMESTAMP()-86400*30 AND time_end < UNIX_TIMESTAMP() AND active='Y'"
+        "SELECT * FROM qotd WHERE time_end >= UNIX_TIMESTAMP()-86400*31 AND time_end < UNIX_TIMESTAMP() AND active='Y' ORDER BY time_end desc"
     );
     $sth->execute;
 
@@ -139,6 +147,27 @@ sub load_old_questions {
     while (my $row = $sth->fetchrow_hashref) {
         push @rows, $row;
     }
+
+    # sort questions by end day then by 'is_special' flag
+    @rows = 
+        map  {
+                # remove temporary fields
+                delete $_->{day_end};
+                delete $_->{is_special_num};
+
+                # mark this question loaded as 'old'
+                $_->{old} = 1;
+
+                $_;
+                }
+        sort {
+                $b->{day_end} <=> $a->{day_end}                  # first by day 
+                || $b->{is_special_num} <=> $a->{is_special_num} # then sponsored first
+             }
+        map  { $_->{is_special_num} = $_->{is_special} eq 'Y' ? 1 : 0; $_  } # is_special as num
+        map  { $_->{day_end} = int $_->{time_end} / 86400; $_ } # add DAY of question
+        @rows;
+
     $class->cache_set('old', \@rows);
 
     return @rows;
@@ -174,7 +203,6 @@ sub filter_by_eff_class {
     } else {
         my @classes = ( $eff_class );
         my $class_mask = LJ::mask_from_classes(@classes);
-
         foreach my $q (@questions) {
             push @questions_ret, $q if ($q->{cap_mask} & $class_mask) > 0;
         }
@@ -233,7 +261,7 @@ sub get_questions {
     my $class = shift;
     my %opts = @_;
 
-    my $skip = defined $opts{skip} ? $opts{skip} : 0;
+    my $skip   = defined $opts{skip} ? int($opts{skip}) : 0;
     my $domain = defined $opts{domain} ? lc $opts{domain} : "homepage";
 
     # if true, get all questions for this user from the last month
@@ -243,45 +271,23 @@ sub get_questions {
     # direct the questions at the given $u, or remote if no $u given
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
 
-    my @questions;
-    if ($all) {
-        @questions = ( $class->load_current_questions, $class->load_old_questions );
-    } else {
-        if ($skip == 0) {
-            @questions = $class->load_current_questions;
-        } else {
-            @questions = $class->load_old_questions;
-        }
-    }
+    my @questions = ( $class->load_current_questions, $class->load_old_questions );
 
     @questions = $class->filter_by_domain($u, $domain, @questions) unless $all;
     @questions = $class->filter_by_eff_class($u, @questions);
     @questions = $class->filter_by_country($u, $skip, $all, @questions);
 
-    # sort questions in descending order by start time (newest first)
-    @questions = 
-        sort { $b->{time_start} <=> $a->{time_start} } 
-        grep { ref $_ } @questions;
+    @questions = grep { ref $_ } @questions;
 
-    if ($all) {
-        return grep { ref $_ } @questions;
-    } else {
-        # if we're getting the current question, return a random one from the list
-        if ($skip == 0) {
-            @questions = List::Util::shuffle(@questions);
+    # just amount of suitable questions in queue
+    return scalar @questions if $opts{count};
 
-            return $questions[0] if ref $questions[0];
-            return ();
+    return @questions if $all;
+    
+    # just one question...
+    my $index = $skip > 0 ? $skip - 1 : 0;
+    return $questions[$index];
 
-        # if we're getting old questions, we need to only return the one for this view
-        } else {
-            my $index = $skip - 1;
-
-            # only return the array elements that exist
-            my @ret = grep { ref $_ } $questions[$index];
-            return @ret;
-        }
-    }
 }
 
 sub store_question {

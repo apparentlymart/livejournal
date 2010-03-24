@@ -12,12 +12,13 @@
     $u = LJ::get_remote() unless $u;
 
     my @questions = LJ::QotD->get_questions( user => $u, skip => $skip, domain => $domain );
+    my $count     = LJ::QotD->get_questions( user => $u, count => 1, domain => $domain );
 
     my $ret = "";
     if (@questions) {
         $ret = LJ::Widget::QotD->qotd_display( questions => \@questions );
     }
 
-    return LJ::JSON->to_json({ text => $ret });
+    return LJ::JSON->to_json({ text => $ret, last => $count });
 }
 _code?>
