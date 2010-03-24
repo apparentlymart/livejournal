@@ -98,7 +98,7 @@ sub run {
 
     while ( ! $class->should_quit() ) {
         $class->periodic_checks();
-        print STDERR "Gearman waiting for work...\n";
+        print STDERR "Gearman waiting for work...\n" if $verbose;
 
         # do the actual work
         eval {
@@ -146,7 +146,7 @@ sub run {
         };
         warn $@ if $@;
 
-        print STDERR "Gearman idle...\n";
+        print STDERR "Gearman idle...\n" if $verbose;
         eval { 
             LJ::start_request();
             $class->idle();
