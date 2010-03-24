@@ -37,7 +37,7 @@ sub render_body {
         my $max = LJ::QotD->get_questions( user => $u, count => 1, domain => $domain );
 
         $ret .= qq[<p class="i-qotd-nav">];
-        if ($total > 1) {
+        if ($max > 1) {
             $ret .= qq[<i class="i-qotd-nav-first"></i><i class="i-qotd-nav-prev"></i>];
         } else {
             $ret .= qq[<i class="i-qotd-nav-first i-qotd-nav-first-dis"></i><i class="i-qotd-nav-prev i-qotd-nav-prev-dis"></i>];

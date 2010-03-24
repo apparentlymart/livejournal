@@ -16,15 +16,18 @@ QotD.prototype =
 			jQuery('.i-qotd-nav-last', node).click(this.last.bind(this))
 		];
 		
-		if (!this.control[0]) {
-			return;
-		}
-		this.content = jQuery('.b-qotd-question', node);
+		if (!this.control[0][0]) { return }
+		
+		this.content_node = jQuery('.b-qotd-question', node);
 		this.current_node = jQuery('.qotd-current', node);
-		this.total = +jQuery('.qotd-total', node).text();
+		this.counter_node = jQuery('.qotd-counter', node);
+		this.total = +jQuery('.i-qotd-nav-max', node).text();
 		
 		this.domain = jQuery('#vertical_name').val() || 'homepage';
-		this.cache = [null, this.content.html()];
+		this.cache = [0, {
+			text: this.content_node.html(),
+			info: this.counter_node.html()
+		}];
 	},
 	
 	first: function()
@@ -32,7 +35,7 @@ QotD.prototype =
 		if (this.skip == this.total) { return }
 		
 		this.skip = this.total;
-		this.getQuestions();
+		this.getQuestion();
 	},
 	
 	prev: function()
@@ -40,7 +43,7 @@ QotD.prototype =
 		if (this.skip == this.total) { return }
 		
 		this.skip++;
-		this.getQuestions();
+		this.getQuestion();
 	},
 	
 	next: function()
@@ -48,7 +51,7 @@ QotD.prototype =
 		if (this.skip == 1) { return }
 		
 		this.skip--;
-		this.getQuestions();
+		this.getQuestion();
 	},
 	
 	last: function()
@@ -56,7 +59,7 @@ QotD.prototype =
 		if (this.skip == 1) { return }
 		
 		this.skip = 1;
-		this.getQuestions();
+		this.getQuestion();
 	},
 	
 	renederControl: function()
@@ -72,27 +75,35 @@ QotD.prototype =
 		this.current_node.text(this.skip);
 	},
 	
-	getQuestions: function()
+	getQuestion: function()
 	{
 		this.renederControl();
 		
 		var skip = this.skip;
 		this.cache[skip] ?
-			this.content.html(this.cache[skip]) :
+			this.setQuestion(this.cache[skip]) :
 			jQuery.getJSON(
 				LiveJournal.getAjaxUrl('qotd'),
 				{skip: skip, domain: this.domain},
 				function(data)
 				{
-					this.cache[skip] = data.text;
-					this.skip == skip && this.content.html(data.text)
+					this.cache[skip] = data;
+					this.skip == skip && this.setQuestion(data);
 				}.bind(this)
 			);
+	},
+	
+	setQuestion: function(data)
+	{
+		this.content_node.html(data.text);
+		this.counter_node.html(data.info);
 	}
 }
-jQuery(function($){
+
+jQuery(function($)
+{
 	$('.appwidget-qotd').each(function()
 	{
 		new QotD(this);
 	});
-})
+});
