@@ -5229,7 +5229,7 @@ sub openid_tags {
 sub num_comments_posted {
     my $u = shift;
 
-    my $ret = $u->prop('talkleftct');
+    my $ret = $u->prop('talkleftct2');
 
     unless (defined $ret) {
         my $dbr = LJ::get_cluster_reader($u);
@@ -5237,11 +5237,17 @@ sub num_comments_posted {
             SELECT COUNT(*) FROM talkleft WHERE userid=?
         }, undef, $u->id);
 
-        #warn $u->clusterid, ", ", $ret;
-        $u->set_prop('talkleftct' => $ret);
+        $u->set_prop('talkleftct2' => $ret);
     }
 
     return $ret;
+}
+
+# increase the number of comments a user has posted by 1
+sub incr_num_comments_posted {
+    my $u = shift;
+
+    $u->set_prop('talkleftct2' => $u->num_comments_posted + 1);
 }
 
 # return the number of comments a user has received

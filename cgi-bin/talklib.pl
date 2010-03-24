@@ -2349,7 +2349,7 @@ sub enter_comment {
         }
 
         my $poster = LJ::want_user($posterid);
-        $poster->set_prop('talkleftct' => $poster->prop('talkleftct') + 1);
+        $poster->incr_num_comments_posted;
     }
 
     $journalu->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".

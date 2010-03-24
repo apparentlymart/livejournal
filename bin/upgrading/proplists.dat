@@ -1496,6 +1496,11 @@ userproplist.talkleftct:
   des: Count of comments left by the user
   cldversion: 8
 
+userproplist.talkleftct2:
+  datatype: char
+  des: Count of comments left by the user
+  cldversion: 8
+
 userproplist.ilikeit_enable:
   datatype: bool
   des: Enable 'I like it' button in community.
