@@ -12,13 +12,19 @@
     $u = LJ::get_remote() unless $u;
 
     my @questions = LJ::QotD->get_questions( user => $u, skip => $skip, domain => $domain );
-    my $count     = LJ::QotD->get_questions( user => $u, count => 1, domain => $domain );
 
     my $ret = "";
+    my $info = "";
     if (@questions) {
         $ret = LJ::Widget::QotD->qotd_display( questions => \@questions );
+        my ($month_short, $day, $num, $total) = LJ::QotD->question_info($questions[0], $u, $domain);
+        $info = "$month_short, $day ($num/$total)";
     }
 
-    return LJ::JSON->to_json({ text => $ret, last => $count });
+
+    return LJ::JSON->to_json({ 
+        text => $ret,
+        info => $info,
+        });
 }
 _code?>

@@ -516,4 +516,51 @@ sub get_count {
     return undef;
 }
 
+sub question_info {
+    my $class    = shift;
+    my $question = shift;
+    my $u        = shift;
+    my $domain   = shift;
+
+    # Get some additinal info to draw controlls
+    my @all_questions = 
+        map { 
+            # for OLD questions we should display the end day as day of question
+            # for CURRENT questions we display today as day of questsion.
+            $_->{day} = $_->{old}
+                ? int $_->{time_end} / 86400
+                : time / 86400;
+            # 
+            $_;
+        }
+        $class->get_questions( user => $u, all => 1, domain => $domain );
+
+    $question->{day} = $question->{old}
+                            ? int $_->{time_end} / 86400
+                            : time / 86400;
+
+    my @total_this_day = 
+        grep { $_->{day} eq $question->{day} }
+        @all_questions;
+
+    my $total = scalar @total_this_day;
+
+    # number of current question in this day questions
+    my $num = 0;
+    my @ar = @total_this_day;
+    while (my $q = shift @ar){
+        $num ++;
+        last if $q->{qid} eq $question->{qid};
+    }
+
+    # date
+    my ($day, $month_num) = (gmtime( $question->{old} ? $question->{time_end} : time ))[3, 4];
+    my $month_short = LJ::Lang::month_short($month_num + 1);
+
+    return ($month_short, $day, $num, $total);
+
+}
+
+
+
 1;

@@ -30,41 +30,11 @@ sub render_body {
 
     # Navigation controlls
     unless ($opts{nocontrols}) {
-        # Get some additinal info to draw controlls
-        my @all_questions = 
-            map { 
-                # for OLD questions we should display the end day as day of question
-                # for CURRENT questions we display today as day of questsion.
-                $_->{day} = $_->{old}
-                    ? int $_->{time_end} / 86400
-                    : time / 86400;
-                # 
-                $_;
-            }
-            LJ::QotD->get_questions( user => $u, all => 1, domain => $domain );
 
-        my $cur_question = $questions[0];
-        $cur_question->{day} = $cur_question->{old}
-                                ? int $_->{time_end} / 86400
-                                : time / 86400;
+        my ($month_short, $day, $num, $total) = LJ::QotD->question_info($questions[0], $u, $domain);
 
-        my @total_this_day = 
-            grep { $_->{day} eq $cur_question->{day} }
-            @all_questions;
-
-        my $total = scalar @total_this_day;
-
-        # number of current question in this day questions
-        my $num = 0;
-        my @ar = @total_this_day;
-        while (my $q = shift @ar){
-            $num ++;
-            last if $q->{qid} eq $cur_question->{qid};
-        }
-
-        # date
-        my ($day, $month_num) = (gmtime( $cur_question->{old} ? $cur_question->{time_end} : time ))[3, 4];
-        my $month_short = LJ::Lang::month_short($month_num + 1);
+        #
+        my $max = LJ::QotD->get_questions( user => $u, count => 1, domain => $domain );
 
         $ret .= qq[<p class="i-qotd-nav">];
         if ($total > 1) {
@@ -72,7 +42,7 @@ sub render_body {
         } else {
             $ret .= qq[<i class="i-qotd-nav-first i-qotd-nav-first-dis"></i><i class="i-qotd-nav-prev i-qotd-nav-prev-dis"></i>];
         }
-        $ret .= qq[<i class="i-qotd-nav-max"></i>];
+        $ret .= qq[<i class="i-qotd-nav-max">$max</i>];
         $ret .= qq[<span class="qotd-counter">$month_short, $day ($num/$total)</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
     }
 
@@ -194,7 +164,7 @@ sub qotd_display {
         }
 
         # show promo on vertical pages
-        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
+        #$ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
         $ret .= "";
     }
 
