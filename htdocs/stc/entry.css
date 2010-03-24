@@ -655,3 +655,16 @@ td.tabs {
         font-size: 10px;
         }
 
+/* Preview of QotD */
+#qotd_html_preview {
+    clear:both;
+    margin: 0 0 10px;
+    }
+    #qotd_html_preview A.more,
+    #qotd_html_preview A.more:hover {
+        background: none;
+        } 
+
+    
+    
+
