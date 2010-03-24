@@ -248,7 +248,7 @@ sub _get_question_data {
     my $from_text = '';
     if ($q->{from_user}) {
         my $from_u = LJ::load_user($q->{from_user});
-        $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}, $lncode)
+        $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display({target => "_top"})}, $lncode)
             if $from_u;
     }
 
