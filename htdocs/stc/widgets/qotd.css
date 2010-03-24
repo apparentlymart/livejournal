@@ -40,6 +40,9 @@
 		}
 		.i-qotd-nav SPAN {
 			}
+		.i-qotd-nav-max {
+		    display: none;
+		    }
 		.i-qotd-nav-first,
 		.i-qotd-nav-last,
 		.i-qotd-nav-prev,

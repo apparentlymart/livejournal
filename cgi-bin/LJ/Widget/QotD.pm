@@ -68,7 +68,7 @@ sub render_body {
 
         $ret .= qq[<p class="i-qotd-nav">];
         if ($total > 1) {
-            $ret .= qq[<i class="i-qotd-nav-first"></i><i class="i-qotd-nav-prev"></i>];
+            $ret .= qq[<i class="i-qotd-nav-max"></i><i class="i-qotd-nav-first"></i><i class="i-qotd-nav-prev"></i>];
         } else {
             $ret .= qq[<i class="i-qotd-nav-first i-qotd-nav-first-dis"></i><i class="i-qotd-nav-prev i-qotd-nav-prev-dis"></i>];
         }
