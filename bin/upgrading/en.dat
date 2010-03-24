@@ -6457,6 +6457,8 @@ widget.qotd.entry.subject=Writer's Block: [[subject]]
 widget.qotd.entry.submittedby|staleness=1
 widget.qotd.entry.submittedby=Submitted By [[user]]
 
+widget.qotd.subscribe=Subscribe
+
 widget.qotd.suggestions|staleness=1
 widget.qotd.suggestions=Suggestions
 
@@ -6471,6 +6473,8 @@ widget.qotd.view.other.answers=View other answers
 
 widget.qotd.viewanswers|staleness=1
 widget.qotd.viewanswers=View Answers
+
+widget.qotd.unplugged=Unplugged Questions
 
 widget.qotdarchive.skip.next|staleness=1
 widget.qotdarchive.skip.next=Newer
