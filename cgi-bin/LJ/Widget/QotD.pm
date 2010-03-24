@@ -66,7 +66,7 @@ sub render_body {
         my ($day, $month_num) = (gmtime( $cur_question->{old} ? $cur_question->{time_end} : time ))[3, 4];
         my $month_short = LJ::Lang::month_short($month_num + 1);
 
-		$ret .= qq[<p class="i-qotd-nav"><i class="i-qotd-nav-first"></i><i class="i-qotd-nav-prev"></i><span>$month_short, $day ($num/$total)</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
+		$ret .= qq[<p class="i-qotd-nav"><i class="i-qotd-nav-first"></i><i class="i-qotd-nav-prev"></i><span>$month_short, $day (<span class="qotd-current">$num</span>/<span class="qotd-total">$total</span>)</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
     }
 
     if ($embed) {

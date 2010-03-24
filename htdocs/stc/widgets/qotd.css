@@ -104,9 +104,11 @@
 			font-size:12px;
 			}
 		.b-qotd-question EM {
+			padding:0 0 0 0.5em;
 			font-size:11px;
 			font-style:normal;
 			color:#A9A9A9;
+			white-space:nowrap;
 			}
 		.b-qotd-question .canyon {
 			margin:0;
