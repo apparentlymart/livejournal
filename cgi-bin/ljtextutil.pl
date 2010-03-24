@@ -7,7 +7,6 @@ use Class::Autouse qw(
                       HTML::TokeParser
                       HTML::Parser
                       );
-
 # <LJFUNC>
 # name: LJ::trim
 # class: text
@@ -501,6 +500,207 @@ sub trim_at_word
     }
 
     return $short_text . '...';
+}
+
+# <LJFUNC>
+# name: LJ::html_trim_4gadgets
+# des: truncate string according to requirements on char length.
+# args: text, char_max
+# des-text: the string to trim
+# des-char_max: maximum allowed length in chars; if 0, there's no restriction
+# returns: the truncated string.
+# </LJFUNC>
+
+# internal subs
+
+sub _html_trim_4gadgets_count_chars
+{
+    my ($l, $text_out_len, $max_len) = @_;
+
+    if ($$text_out_len + $l > $max_len) {
+        return 0;
+    } else {
+        $$text_out_len += $l;
+        return $l;
+    }
+}
+
+my %_html_trim_4gadgets_autoclose = map { $_ => $_ } qw(p li ol ul a strike);
+
+# Subroutine itself
+sub html_trim_4gadgets
+{
+    my $text = shift;
+    my $max_len = shift;
+    my $link = shift;
+
+    my $text_out = '';
+    my $text_out_len = 0;
+    my $finish = 0;
+
+    my @tags2autoclose = ();
+    my $text_before_table = '';
+
+    # collapse all white spaces to one space.
+    $text =~ s/\s{2,}/ /g;
+
+    # remove <lj-cut> ... </lj-cut>
+    $text =~ s/\(\&nbsp;<a href="http:\/\/.+?\.html\?#cutid.+?<\/a>\&nbsp;\)//g;
+
+    my $clean_tag = sub {
+        my ($type, $tag, $attr, $protected) = @_;
+        my $ret = '';
+
+        $ret = "<$tag />" if 'S' eq $type && $attr->{'/'};
+
+        if ('S' eq $type) {
+            my $added_attrs = '';
+            if ($protected) {
+                foreach my $k (keys %$attr) {
+                    delete $attr->{$k} unless $protected->{lc $k};
+                }
+                $added_attrs = join(' ', map { $attr->{$_} . "=\"$_\"" } keys %$attr);
+            }
+            $ret = "<$tag$added_attrs>";
+            push @tags2autoclose, $tag if exists $_html_trim_4gadgets_autoclose{lc $tag};
+        } else {
+            warn "broken nested tags sequence\n" if $tag ne pop @tags2autoclose;
+            $ret = "</$tag>";
+        }
+
+        return $ret;
+    };
+
+    my $clean_table_tag = sub { $clean_tag->(@_, { map { $_ => $_ } qw(rowspan colspan) } ) };
+
+    my $clean_hn_tag = sub {
+        my ($type, $tag, $attr) = @_;
+        my $ret = '';
+
+        $ret = "<p /><strong />" if 'S' eq $type && $attr->{'/'};
+
+        if ('S' eq $type) {
+            $ret = "<p><strong>";
+        } else {
+            $ret = "</p></strong>";
+        }
+
+        return $ret;
+    };
+
+    my %reconstruct = (
+        img => sub {
+            my ($type, $tag, $attr) = @_;
+
+            if ('S' eq $type && $attr->{'src'}) {
+                # <img ...> tag count as 50 chars
+                if (_html_trim_4gadgets_count_chars(50, \$text_out_len, $max_len)) {
+                    return "<img src=\"".$attr->{'src'}."\" border=\"0\" />";
+                } else {
+                    $finish = 1;
+                }
+            }
+            return '';
+        },
+
+        a => sub {
+            my ($type, $tag, $attr) = @_;
+
+            if ('S' eq $type && $attr->{'href'}) {
+                push @tags2autoclose, $tag;
+                return "<$tag href=\"".$attr->{'href'}."\" target=\"_blank\">";
+            }
+            if ('E' eq $type) {
+                warn "broken nested tags sequence\n" if $tag ne pop @tags2autoclose;
+                return "</$tag>";
+            }
+            return '';
+        },
+
+        p       => $clean_tag,
+        br      => $clean_tag,
+        wbr     => $clean_tag,
+        li      => $clean_tag,
+        ol      => $clean_tag,
+        ul      => $clean_tag,
+        s       => $clean_tag,
+        strike  => $clean_tag,
+
+        table   => sub {
+            my ($type, $tag, $attr) = @_;
+
+            if ('S' eq $type && $attr->{'href'}) {
+                $text_before_table = $text_out unless $text_before_table;
+                push @tags2autoclose, $tag;
+                return "<$tag cellpadding=\"5\" cellspacing=\"5\" border=\"0\">"
+            }
+            if ('E' eq $type) {
+                warn "broken nested tags sequence\n" if $tag ne pop @tags2autoclose;
+                $text_before_table = '' unless grep { /table/i } @tags2autoclose;
+                return "</$tag>";
+            }
+            return '';
+        },
+
+        th      => $clean_table_tag,
+        tr      => $clean_table_tag,
+        td      => $clean_table_tag,
+
+        h1      => $clean_hn_tag,
+        h2      => $clean_hn_tag,
+        h3      => $clean_hn_tag,
+        h4      => $clean_hn_tag,
+        h5      => $clean_hn_tag,
+        h6      => $clean_hn_tag,
+
+        'lj-embed'  => sub {
+            my ($type, $tag, $attr) = @_;
+
+            if ('S' eq $type && $attr->{'id'}) {
+                return "<$tag id=\"".$attr->{'id'}."\" />";
+            }
+
+            return '';
+        },
+
+    );
+
+    my $p = HTML::TokeParser->new(\$text);
+
+    while (my $token = $p->get_token) {
+        my ($type, $tag, $attr) = @$token;
+
+        if ('T' eq $type) {
+            if(_html_trim_4gadgets_count_chars(length($tag),\$text_out_len,$max_len)) {
+                $text_out .= $tag;
+            } else {
+                # Try to cut $tag and add some words, not whole text.
+                $text_out .= LJ::trim_at_word($tag, $max_len - $text_out_len);
+                $text_out =~ s/\.\.\.$//; # remove last '...' added by LJ::trim_at_word()
+                $finish = 1;
+            }
+            next;
+        }
+
+        if (exists($reconstruct{lc $tag})) {
+            $text_out .= $reconstruct{$tag}->($type, $tag, $attr);
+        }
+
+        last if $finish;
+    }
+
+    # Close all open tags.
+    if ($finish && @tags2autoclose) {
+        while ($_ = pop @tags2autoclose) {
+            if ('table' eq lc $_) {
+                $text_out = $text_before_table;
+                last;
+            }
+            $text_out .= "</$_>";
+        }
+    }
+
+    return $text_out . ($finish && $link ? "<a href=\"$link\">...</a>" : '');
 }
 
 # <LJFUNC>
