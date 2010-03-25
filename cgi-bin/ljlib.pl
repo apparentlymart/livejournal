@@ -31,6 +31,7 @@ use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
 use HTML::Entities ();
+use JSON ();
 
 use Class::Autouse qw(
                       TheSchwartz
@@ -3454,6 +3455,23 @@ sub lang_to_locale {
 
     return 'en_US' unless $map{$lang};
     return $map{$lang};
+}
+
+# Data::Dumper for JavaScript
+sub to_json {
+    my $obj = shift;
+    if (ref $obj) {
+        return JSON::to_json($obj);
+    } else {
+        return ($obj =~ /^\d+$/) ?  $obj : '"' . LJ::ejs($obj) . '"';
+    }
+}
+
+*js_dumper = \&to_json;
+
+sub from_json {
+    my $json = shift;
+    return JSON::from_json($json);
 }
 
 package LJ::S1;

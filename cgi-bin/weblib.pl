@@ -11,7 +11,6 @@ require "crumbs.pl";
 
 use Carp;
 use LJ::Request;
-use JSON();
 use Class::Autouse qw(
                       LJ::Event
                       LJ::Subscription::Pending
@@ -1209,16 +1208,6 @@ sub no_access_error {
         return "$text <b>(DEVMODE: <a href='/admin/priv/?devmode=1&user=$remote->{user}&priv=$priv&arg=$privarg'>Grant $priv\[$privarg\]</a>)</b>";
     } else {
         return $text;
-    }
-}
-
-# Data::Dumper for JavaScript
-sub js_dumper {
-    my $obj = shift;
-    if (ref $obj) {
-        return JSON::objToJson($obj);
-    } else {
-        return ($obj =~ /^\d+$/) ?  $obj : '"' . LJ::ejs($obj) . '"';
     }
 }
 
