@@ -127,8 +127,8 @@ sub FriendsPage
         $p->{'friends_mode'} = "friendsfriends";
     }
 
-    use Time::HiRes qw//;
-    my $t0 = [Time::HiRes::gettimeofday];
+    # use Time::HiRes qw//;
+    # my $t0 = [Time::HiRes::gettimeofday];
 
     ## load the itemids
     my %friends;
@@ -151,7 +151,7 @@ sub FriendsPage
         'events_date'       => $events_date,
     });
 
-    warn "[FriendsPage=$user] Items loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
+    # warn "[FriendsPage=$user] Items loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
 
     while ($_ = each %friends) {
         # we expect fgcolor/bgcolor to be in here later
@@ -165,17 +165,17 @@ sub FriendsPage
     my %logprops = ();  # key is "$owneridOrZero $[j]itemid"
     LJ::load_log_props2multi(\%idsbycluster, \%logprops);
 
-    warn "[FriendsPage=$user] items props loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
+    # warn "[FriendsPage=$user] items props loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
 
     # load the text of the entries
     my $logtext = LJ::get_logtext2multi(\%idsbycluster);
 
-    warn "[FriendsPage=$user] items logtext2multi loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
+    # warn "[FriendsPage=$user] items logtext2multi loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
 
     # load tags on these entries
     my $logtags = LJ::Tags::get_logtagsmulti(\%idsbycluster);
 
-    warn "[FriendsPage=$user] LJ::Tags::get_logtagsmulti loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
+    # warn "[FriendsPage=$user] LJ::Tags::get_logtagsmulti loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
 
     my %posters;
     {
@@ -356,7 +356,7 @@ sub FriendsPage
         LJ::run_hook('notify_event_displayed', $eobj);
     } # end while
 
-    warn "[FriendsPage=$user] items prepared. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
+    # warn "[FriendsPage=$user] items prepared. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
 
     # set the new_day and end_day members.
     if ($eventnum) {
@@ -380,7 +380,7 @@ sub FriendsPage
     my %userpics;
     LJ::load_userpics(\%userpics, \@userpic_load);
 
-    warn "[FriendsPage=$user] userpics loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
+    # warn "[FriendsPage=$user] userpics loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
 
     foreach my $picid (keys %userpics) {
         my $up = Image("$LJ::USERPIC_ROOT/$picid/$userpics{$picid}->{'userid'}",
@@ -445,7 +445,7 @@ sub FriendsPage
         $p->{'head_content'} .= "<base target='_top' />";
     }
     
-    warn "[FriendsPage=$user] page prepared. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
+    # warn "[FriendsPage=$user] page prepared. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
 
     return $p;
 }
