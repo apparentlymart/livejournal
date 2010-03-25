@@ -58,6 +58,9 @@ sub render_body {
 
     $ret .= '</div>';
 
+    # show promo on vertical pages
+    $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
+
     return $ret;
 
 }
@@ -166,10 +169,7 @@ sub qotd_display {
             #$ret .= qq[<div class="b-qotd-adv">$q->{extra_text}</div>] if $q->{is_special} eq 'Y';
 
         }
-
-        # show promo on vertical pages
-        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
-    }
+   }
 
     return $ret;
 }
