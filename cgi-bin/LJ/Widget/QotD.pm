@@ -50,16 +50,16 @@ sub render_body {
 
     if ($embed) {
         $ret .= $class->qotd_display_embed( questions => \@questions, user => $u, %opts );
+        $ret .= '</div>';
     } elsif ($archive) {
         $ret .= $class->qotd_display_archive( questions => \@questions, user => $u, %opts );
+        $ret .= '</div>';
     } else {
         $ret .= $class->qotd_display( questions => \@questions, user => $u, %opts );
+        $ret .= '</div>';
+        # show promo on vertical pages
+        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
     }
-
-    $ret .= '</div>';
-
-    # show promo on vertical pages
-    $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
 
     return $ret;
 
