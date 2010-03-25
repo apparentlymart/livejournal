@@ -112,17 +112,19 @@ my @rows = ();
 # Also remove spaces from country field.
 {
     my $skip_cyrillic_with_defaults = 0; # set this if we find new row(s) with 'RU' country.
-    foreach my $row (@rows) {
+    foreach my $comm (grep { 'RU' eq $comms{$_}->{country} } keys %comms) {
+        foreach my $row (@rows) {
 
-        # filter already posted
-        next if $comms{'RU'}->{qids}->{$row->{qid}};
+            # filter already posted
+            next if $comms{$comm}->{qids}->{$row->{qid}};
 
-        $row->{countries} =~ s/^ *//;
-        $row->{countries} =~ s/ *$//;
+            $row->{countries} =~ s/^ *//;
+            $row->{countries} =~ s/ *$//;
 
-        $skip_cyrillic_with_defaults = 1 if $row->{countries} && ($row->{countries} =~ m/RU/i);
+            $skip_cyrillic_with_defaults = 1 if $row->{countries} && ($row->{countries} =~ m/RU/i);
+        }
+        $comms{$comm}->{'skip_with_defaults'} = $skip_cyrillic_with_defaults;
     }
-    $comms{'RU'}->{'skip_with_defaults'} = $skip_cyrillic_with_defaults;
 }
 
 # Combine information, filter it and post to communities
@@ -150,7 +152,7 @@ my @rows = ();
             my %req = (
                 mode => 'postevent',
                 ver => $LJ::PROTOCOL_VER,
-                user => $u->user,
+                user => $u->{user},
                 usejournal => $comms{$comm}->{object}->user(),
                 tz => 'guess',
                 subject => $row->{subject},
