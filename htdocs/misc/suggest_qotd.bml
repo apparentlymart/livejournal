@@ -24,7 +24,7 @@ body<=
             unless $questions;
 
         my $user = $remote->user;
-        my $is_sup = LJ::is_remote_sup() ? '_ru' : '';
+        my $is_sup = LJ::SUP->is_remote_sup() ? '_ru' : '';
 
         my $rv = LJ::send_mail({
             to => "writersblock\@$LJ::DOMAIN",

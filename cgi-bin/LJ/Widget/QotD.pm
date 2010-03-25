@@ -145,7 +145,10 @@ sub qotd_display {
         $ret .= "";
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
-
+            my $extra_text = $q->{extra_text}
+                                ? "<p>$q->{extra_text}</p>"
+                                : "";
+    
             $ret .=
                 ($q->{img_url}
                     ? qq[<img src="$q->{img_url}" width="100px" height="100" alt="$q->{subject}" title="$q->{subject}" class="qotd-pic" />]
@@ -154,18 +157,18 @@ sub qotd_display {
                 <div class="b-qotd-question-inner">
                     <h3>$q->{subject}</h3>
                     <p>$d->{text}<em class="i-qotd-by">$d->{from_text}</em></p>
+                    $extra_text
                     <ul class="canyon">
                         <li class="canyon-section"><button type="button" onclick="document.location.href='$d->{answer_url}'">$d->{answer_text}</button></li>
                         <li class="canyon-side">$d->{view_answers_link}</li>
                     </ul>
                 </div>];
-            $ret .= qq[<div class="b-qotd-adv">$q->{extra_text}</div>] if $q->{is_special} eq 'Y';
+            #$ret .= qq[<div class="b-qotd-adv">$q->{extra_text}</div>] if $q->{is_special} eq 'Y';
 
         }
 
         # show promo on vertical pages
-        #$ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
-        $ret .= "";
+        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
     }
 
     return $ret;

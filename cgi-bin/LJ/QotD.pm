@@ -536,7 +536,7 @@ sub question_info {
         $class->get_questions( user => $u, all => 1, domain => $domain );
 
     $question->{day} = $question->{old}
-                            ? int $_->{time_end} / 86400
+                            ? int $question->{time_end} / 86400
                             : time / 86400;
 
     my @total_this_day = 
