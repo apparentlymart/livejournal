@@ -460,6 +460,7 @@ sub underage {
     # return true if no failures
     return $ret_zero ? 0 : 1;
 }
+*is_underage = \&underage;
 
 # return true if we know user is a minor (< 18)
 sub is_minor {

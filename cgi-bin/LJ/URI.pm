@@ -58,6 +58,11 @@ sub handle {
         return LJ::URI->bml_handler("statistics/index.bml");
     }
 
+    if ($uri =~ m|^/wallet/?|) {
+        return Apache::LiveJournal::redir("$uri/") unless $uri =~ m|/$|;
+        return LJ::URI->bml_handler('shop/wallet.bml');
+    }
+
     return undef;
 }
 
