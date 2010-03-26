@@ -58,7 +58,7 @@ sub render_body {
         $ret .= $class->qotd_display( questions => \@questions, user => $u, %opts );
         $ret .= '</div>';
         # show promo on vertical pages
-        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
+        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain}) unless $opts{nopromo};
     }
 
     return $ret;
