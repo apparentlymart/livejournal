@@ -34,7 +34,7 @@ sub render_body {
         my ($month_short, $day, $num, $total) = LJ::QotD->question_info($questions[0], $u, $domain);
 
         #
-        my $max = LJ::QotD->get_questions( user => $u, count => 1, domain => $domain );
+        my $max = LJ::QotD->get_questions( user => $u, count => 1, all => 1, domain => $domain );
 
         $ret .= qq[<p class="i-qotd-nav">];
         if ($max > 1) {
