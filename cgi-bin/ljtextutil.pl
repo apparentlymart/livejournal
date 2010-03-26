@@ -686,6 +686,19 @@ sub html_trim_4gadgets
             $text_out .= $reconstruct{$tag}->($type, $tag, $attr);
         }
 
+        # <lj-poll-n>
+        if ($tag =~ m/^lj-poll-(\d+)$/g && 'S' eq $type) {
+           my $pollid = $1;
+           my $name = LJ::Poll->new($pollid)->name;
+           if ($name) {
+               LJ::Poll->clean_poll(\$name);
+           } else {
+               $name = "#$pollid";
+           }
+
+           $text_out .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid\" target=\"_blank\" >View Poll: $name.</a>";
+        }
+
         last if $finish;
     }
 
