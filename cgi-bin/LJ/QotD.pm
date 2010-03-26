@@ -528,19 +528,19 @@ sub question_info {
             # for OLD questions we should display the end day as day of question
             # for CURRENT questions we display today as day of questsion.
             $_->{day} = $_->{old}
-                ? int $_->{time_end} / 86400
-                : time / 86400;
+                ? int ($_->{time_end} / 86400)
+                : int (time / 86400);
             # 
             $_;
         }
         $class->get_questions( user => $u, all => 1, domain => $domain );
 
     $question->{day} = $question->{old}
-                            ? int $question->{time_end} / 86400
-                            : time / 86400;
+                            ? int ($question->{time_end} / 86400)
+                            : int (time / 86400);
 
     my @total_this_day = 
-        grep { $_->{day} eq $question->{day} }
+        grep { $_->{day} cmp $question->{day} }
         @all_questions;
 
     my $total = scalar @total_this_day;
