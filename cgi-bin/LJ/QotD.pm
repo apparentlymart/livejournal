@@ -540,7 +540,7 @@ sub question_info {
                             : int (time / 86400);
 
     my @total_this_day = 
-        grep { $_->{day} cmp $question->{day} }
+        grep { $_->{day} eq $question->{day} }
         @all_questions;
 
     my $total = scalar @total_this_day;
