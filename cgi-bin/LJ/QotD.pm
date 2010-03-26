@@ -99,7 +99,7 @@ sub load_current_questions {
     my %opts = @_;
 
     my $questions = $class->cache_get('current');
-    return @$questions if $questions;
+    return _sort_cur_questions(@$questions) if $questions;
 
     my $dbh = LJ::get_db_writer()
         or die "no global database writer for QotD";
@@ -113,14 +113,8 @@ sub load_current_questions {
     while (my $row = $sth->fetchrow_hashref) {
         push @rows, $row;
     }
-
-    # sponsored should be first
-    @rows = 
-        map  { delete $_->{is_special_num}; $_ }                             # remove 'is_special_num' member
-        sort { $b->{is_special_num} <=> $a->{is_special_num} }               # sort by is_special_num
-        map  { $_->{is_special_num} = $_->{is_special} eq 'Y' ? 1 : 0; $_  } # is_special as num
-        @rows;
-
+    
+    @rows = _sort_cur_questions(@rows);
     $class->cache_set('current', \@rows);
 
     return @rows;
@@ -133,8 +127,8 @@ sub load_old_questions {
     my %opts = @_;
 
     my $questions = $class->cache_get('old');
-    return @$questions if $questions;
-
+    return _sort_old_questions(@$questions) if $questions;
+    
     my $dbh = LJ::get_db_writer()
         or die "no global database writer for QotD";
 
@@ -147,9 +141,29 @@ sub load_old_questions {
     while (my $row = $sth->fetchrow_hashref) {
         push @rows, $row;
     }
+    
+    @rows = _sort_old_questions(@rows);
+    $class->cache_set('old', \@rows);
 
+    return @rows;
+}
+
+
+sub _sort_cur_questions {
+    my @questions = @_;
+    # sponsored should be first
+    @questions = 
+        map  { delete $_->{is_special_num}; $_ }                             # remove 'is_special_num' member
+        sort { $b->{is_special_num} <=> $a->{is_special_num} }               # sort by is_special_num
+        map  { $_->{is_special_num} = $_->{is_special} eq 'Y' ? 1 : 0; $_  } # is_special as num
+        @questions;
+    return @questions;
+}
+
+sub _sort_old_questions {
+    my @questions = @_;
     # sort questions by end day then by 'is_special' flag
-    @rows = 
+    @questions = 
         map  {
                 # remove temporary fields
                 delete $_->{day_end};
@@ -166,11 +180,9 @@ sub load_old_questions {
              }
         map  { $_->{is_special_num} = $_->{is_special} eq 'Y' ? 1 : 0; $_  } # is_special as num
         map  { $_->{day_end} = int $_->{time_end} / 86400; $_ } # add DAY of question
-        @rows;
+        @questions;
 
-    $class->cache_set('old', \@rows);
-
-    return @rows;
+    return @questions;
 }
 
 sub filter_by_domain {
@@ -214,8 +226,6 @@ sub filter_by_eff_class {
 sub filter_by_country {
     my $class = shift;
     my $u = shift;
-    my $skip = shift;
-    my $all = shift;
     my @questions = @_;
 
     # split the list into a list of questions with countries and a list of questions without countries
@@ -244,17 +254,7 @@ sub filter_by_country {
         }
     }
 
-    # if there are questions that are targeted at the user's country
-    # and we're getting the current view, return only those questions
-    #
-    # if the user has an unknown country or there are no questions
-    # targeted at their country, or if we're looking at the history,
-    # return all questions
-    if (@questions_ret && $skip == 0 && !$all) {
-        return @questions_ret;
-    } else {
-        return (@questions_ret, @questions_without_countries);
-    }
+    return (@questions_ret, @questions_without_countries);
 }
 
 sub get_questions {
@@ -275,14 +275,19 @@ sub get_questions {
 
     @questions = $class->filter_by_domain($u, $domain, @questions) unless $all;
     @questions = $class->filter_by_eff_class($u, @questions);
-    @questions = $class->filter_by_country($u, $skip, $all, @questions);
+    @questions = $class->filter_by_country($u, @questions);
 
     @questions = grep { ref $_ } @questions;
 
+    # resort questions
+    my @cur = grep { not $_->{old} } @questions;
+    my @old = grep { $_->{old}     } @questions;
+    @questions = (_sort_cur_questions(@cur), _sort_old_questions(@old));
+    
     # just amount of suitable questions in queue
     return scalar @questions if $opts{count};
 
-    return @questions if $all;
+    return @questions if $all or $opts{all_filtered}; # 
 
     # is there any question?
     return unless @questions; 
@@ -519,6 +524,7 @@ sub get_count {
     return undef;
 }
 
+
 sub question_info {
     my $class    = shift;
     my $question = shift;
@@ -536,12 +542,12 @@ sub question_info {
             # 
             $_;
         }
-        $class->get_questions( user => $u, all => 1, domain => $domain );
+        $class->get_questions( user => $u, all_filtered => 1, domain => $domain );
 
     $question->{day} = $question->{old}
                             ? int ($question->{time_end} / 86400)
                             : int (time / 86400);
-
+    
     my @total_this_day = 
         grep { $_->{day} eq $question->{day} }
         @all_questions;
@@ -557,7 +563,7 @@ sub question_info {
     }
 
     # date
-    my ($day, $month_num) = (gmtime( $question->{old} ? $question->{time_end} : time ))[3, 4];
+    my ($day, $month_num) = (gmtime( $question->{day} * 86400 + 1))[3, 4];
     my $month_short = LJ::Lang::month_short($month_num + 1);
 
     return ($month_short, $day, $num, $total);
