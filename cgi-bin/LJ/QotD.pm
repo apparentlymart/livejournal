@@ -283,7 +283,10 @@ sub get_questions {
     return scalar @questions if $opts{count};
 
     return @questions if $all;
-    
+
+    # is there any question?
+    return unless @questions; 
+
     # just one question...
     my $index = $skip > 0 ? $skip - 1 : 0;
     return $questions[$index];
