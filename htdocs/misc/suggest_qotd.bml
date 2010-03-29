@@ -63,8 +63,10 @@ $questions
     $ret .= "<p>" . LJ::html_check({ id => 'credit', name => 'credit', selected => 1 }) . " ";
     $ret .= "<label for='credit'>$ML{'.form.credit.label'}</label></p>";
 
+    my $unplugged_u = LJ::load_user(LJ::SUP->is_remote_sup ? 'wb_unplugged_ru' : 'wb_unplugged'); 
+
     $ret .= "<p>" . LJ::html_check({ id => 'unplugged', name => 'unplugged', selected => 0 }) . " ";
-    $ret .= "<label for='unplugged'>" . BML::ml('.form.unplugged.label', { user => $remote->ljuser_display }) .  "</label></p>";
+    $ret .= "<label for='unplugged'>" . BML::ml('.form.unplugged.label', { user => $unplugged_u ? $unplugged_u->ljuser_display : 'wb_unplugged' }) .  "</label></p>";
 
     $ret .= "<p>" . LJ::html_submit('submit', $ML{'.btn.submit'}) . "</p>";
 
