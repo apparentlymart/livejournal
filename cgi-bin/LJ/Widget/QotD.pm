@@ -154,7 +154,7 @@ sub qotd_display {
     
             $ret .=
                 ($q->{img_url}
-                    ? qq[<img src="$q->{img_url}" width="100px" height="100" alt="$q->{subject}" title="$q->{subject}" class="qotd-pic" />]
+                    ? qq[<img src="$q->{img_url}" alt="$q->{subject}" title="$q->{subject}" class="qotd-pic" />]
                     : ''
                 ) . qq[
                 <div class="b-qotd-question-inner">

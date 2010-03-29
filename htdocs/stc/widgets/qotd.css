@@ -26,7 +26,9 @@
 	.b-qotd .homepage-account-right {
 		background:#FFF;
 		}
-	.b-qotd .appwidget {
+	.b-qotd .appwidget,
+	.lz-body .b-qotd .appwidget {
+		position:relative;
 		margin:0;
 		padding:0;
 		border-bottom:0;
@@ -97,6 +99,8 @@
 		.b-qotd-question .qotd-pic {
 			float:left;
 			margin:10px 10px 0 0;
+			max-width:100px;
+			max-height:100px;
 			}
 		.b-qotd-question-inner {
 			overflow:hidden;
