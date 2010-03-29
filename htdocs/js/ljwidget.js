@@ -154,6 +154,12 @@ LJWidget = new Class(Object, {
         this._ajax_updating = false;
         this.removeHilightFrame();
 
+		if (data["_widget_body"]) {
+			if (data["_widget_body"].match(/ajax:.[^"]+/)) {
+				this.authToken = data["_widget_body"].match(/ajax:.[^"]+/)[0];
+			}
+		}
+
         if (data.auth_token) {
             this.authToken = data.auth_token;
         }
