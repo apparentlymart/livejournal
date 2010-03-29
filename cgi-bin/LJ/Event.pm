@@ -575,7 +575,10 @@ sub subscriptions {
         }
 
         while (my $row = $sth->fetchrow_hashref) {
-            push @subs, LJ::Subscription->new_from_row($row);
+            my $sub = LJ::Subscription->new_from_row($row);
+            next unless $sub->owner->clusterid == $cid;
+
+            push @subs, $sub;
         }
 
         # then we find wildcard matches.
@@ -597,7 +600,10 @@ sub subscriptions {
             die $sth->errstr if $sth->err;
 
             while (my $row = $sth->fetchrow_hashref) {
-                push @subs, LJ::Subscription->new_from_row($row);
+                my $sub = LJ::Subscription->new_from_row($row);
+                next unless $sub->owner->clusterid == $cid;
+
+                push @subs, $sub;
             }
         }
 
