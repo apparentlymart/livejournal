@@ -2138,6 +2138,7 @@ sub start_request
                               ))
                   unless LJ::conf_test($LJ::DISABLED{esn_ajax});
 
+              my %args = LJ::Request->args;
               # contextual popup JS
               LJ::need_res(qw(
                               js/ippu.js
@@ -2145,7 +2146,7 @@ sub start_request
                               js/hourglass.js
                               js/contextualhover.js
                               stc/contextualhover.css
-                              )) if $LJ::CTX_POPUP;
+                              )) if $LJ::CTX_POPUP and $args{ctxpp} ne 'no';
 
               # Conditional IE CSS file for all pages 
               LJ::need_res({condition => 'IE'}, 'stc/ie.css');
