@@ -243,12 +243,11 @@ ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
 
             if (info.subscribed) {
                 if (info.subid)
-                    DOM.setElementAttribute(btn, "lj_subid", info.subid);
+					btn.setAttribute('lj_subid', info.subid);
                 if (info.newentry_subid)
-                    DOM.setElementAttribute(btn, "lj_newentry_subid", info.newentry_subid);
+					btn.setAttribute('lj_newentry_subid', info.newentry_subid);
 
-
-                DOM.setElementAttribute(btn, "title", 'Untrack This');
+				btn.setAttribute('title', 'Untrack This');
 
                 // update subthread tracking icons
                 var dtalkid = btn.getAttribute("lj_dtalkid");
@@ -258,11 +257,11 @@ ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
                     btn.src = Site.imgprefix + "/btn_tracking.gif";
             } else {
                 if (info["event_class"] == "LJ::Event::JournalNewComment")
-                    DOM.setElementAttribute(btn, "lj_subid", 0);
+					btn.setAttribute('lj_subid', 0);
                 else if (info["event_class"] == "LJ::Event::JournalNewEntry")
-                    DOM.setElementAttribute(btn, "lj_newentry_subid", 0);
+					btn.setAttribute('lj_newentry_subid', 0);
 
-                DOM.setElementAttribute(btn, "title", 'Track This');
+				btn.setAttribute('title', 'Track This');
 
                 // update subthread tracking icons
                 var dtalkid = btn.getAttribute("lj_dtalkid");
@@ -293,9 +292,9 @@ ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
             }
 
             if (info.auth_token)
-                DOM.setElementAttribute(btn, "lj_auth_token", info.auth_token);
+				btn.setAttribute('lj_auth_token', info.auth_token);
             if (info.newentry_token)
-                DOM.setElementAttribute(btn, "lj_newentry_token", info.newentry_token);
+				btn.setAttribute('lj_newentry_token', info.newentry_token);
         }
     };
 
