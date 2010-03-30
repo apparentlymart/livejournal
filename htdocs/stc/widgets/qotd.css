@@ -1,3 +1,6 @@
+.lz-body .appwidget {
+	position:relative !important;
+	}
 .b-qotd {
 	margin:0 0 15px !important;
 	background:#FFF;
