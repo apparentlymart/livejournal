@@ -98,7 +98,7 @@
 		}
 		.b-qotd-question .qotd-pic {
 			float:left;
-			margin:10px 10px 0 0;
+			margin:5px 10px 0 0;
 			max-width:100px;
 			max-height:100px;
 			}
@@ -109,7 +109,6 @@
 			margin:5px 200px 0 0;
 			font-size:14px;
 			font-style:normal;
-			color:#000;
 			}
 		.b-qotd-question P {
 			font-size:12px;
