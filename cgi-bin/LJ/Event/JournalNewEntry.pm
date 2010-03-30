@@ -85,7 +85,6 @@ sub as_sms {
             $self->entry->poster->user, $self->entry->journal->user);
 }
 
-# TODO: A word 'entry' in text must be a hyperlink to this entry.
 sub as_alert {
     my $self = shift;
     my $u = shift;
@@ -95,6 +94,8 @@ sub as_alert {
             {
                 who     => $self->entry->poster->ljuser_display(),
                 journal => "<a href=\"$entry_url\">" . $self->entry->journal->display_username() . "</a>",
+                openlink        => '<a href="$entry_url">',
+                closelink       => '</a>',
             });
 }
 
