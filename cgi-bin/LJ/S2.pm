@@ -405,8 +405,7 @@ sub load_layers {
         # iterate over data, memcaching as we go
         while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
             LJ::text_uncompress(\$comp);
-            LJ::MemCache::set([ $id, "s2c:$id" ], [ $comptime, $comp ])
-                if length $comp <= $LJ::MAX_S2COMPILED_CACHE_SIZE;
+            LJ::MemCache::set([ $id, "s2c:$id" ], [ $comptime, $comp ]);
             S2::load_layer($id, $comp, $comptime);
             $maxtime = $comptime if $comptime > $maxtime;
         }
