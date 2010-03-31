@@ -388,7 +388,14 @@ sub load_layers {
         # function which already knows how to handle that
         unless ($cid) {
             my $dbr = LJ::S2::get_s2_reader();
-            S2::load_layers_from_db($dbr, @{$bycluster{$cid}});
+            my $opts = {
+                # connection to cache loaded layers
+                cache => sub {
+                            my ($id, $comp, $comptime) = @_;
+                            LJ::MemCache::set([ $id, "s2c:$id" ], [ $comptime, $comp ]);
+                        }
+                };
+            S2::load_layers_from_db($opts, $dbr, @{$bycluster{$cid}});
             next;
         }
 
@@ -446,6 +453,7 @@ sub load_layers {
     my $sth = $dbr->prepare("SELECT s2lid, compdata, comptime FROM s2compiled WHERE $where");
     $sth->execute;
     while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
+        LJ::MemCache::set([ $id, "s2c:$id" ], [ $comptime, $comp ]);
         S2::load_layer($id, $comp, $comptime);
         $maxtime = $comptime if $comptime > $maxtime;
     }
