@@ -4,6 +4,7 @@ use strict;
 use Carp qw//;
 use Apache2::Const qw/:methods :common :http/;
 use Apache2::RequestRec;
+use Apache2::RequestUtil;
 use Apache2::Response;
 use Apache2::RequestIO;
 use Apache2::Request;
