@@ -7241,7 +7241,7 @@ sub get_daycounts
         # so they store smaller in memcache
         push @days, [ int($y), int($m), int($d), int($c) ];
     }
-    LJ::MemCache::add($memkey, [time, @days]);
+    LJ::MemCache::set($memkey, [time, @days]);
     return \@days;
 }
 
