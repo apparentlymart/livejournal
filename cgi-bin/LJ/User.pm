@@ -9107,15 +9107,19 @@ sub make_journal
 
     # apply the overrides
     if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y") {
-        my $tw = Storable::thaw($s1uc->{'override_stor'});
+        my $tw = eval { Storable::thaw($s1uc->{'override_stor'}) };
+        warn "Deserialization error: $@" if $@;
         foreach (keys %$tw) {
             $vars{$_} = $tw->{$_};
         }
     }
 
     # apply the color theme
-    my $cols = $u->{'themeid'} ? LJ::S1::get_themeid($u->{'themeid'}) :
-        Storable::thaw($s1uc->{'color_stor'});
+    $@ = '';
+    my $cols = $u->{'themeid'} 
+                ? LJ::S1::get_themeid($u->{'themeid'})
+                : (eval {Storable::thaw($s1uc->{'color_stor'})} || {});
+    warn "Deserialization error: $@" if $@;
     foreach (keys %$cols) {
         $vars{"color-$_"} = $cols->{$_};
     }

@@ -402,7 +402,8 @@ sub load_style
                 map { $styc->{$_} } qw(type opt_cache vars_stor vars_cleanver));
     }
 
-    my $ret = Storable::thaw($styc->{'vars_stor'});
+    my $ret = eval { Storable::thaw($styc->{'vars_stor'}) };
+    warn "Deserialization error: $@" if $@;
     $$viewref = $styc->{'type'} if ref $viewref eq "SCALAR";
 
     if ($styc->{'opt_cache'} eq "Y") {
