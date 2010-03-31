@@ -95,7 +95,8 @@ QotD.prototype =
 	
 	setQuestion: function(data)
 	{
-		this.content_node.html(data.text);
+		this.content_node.html(data.text)
+			.ljAddContextualPopup();
 		this.counter_node.html(data.info);
 	}
 }
