@@ -2,7 +2,6 @@ var ESN = new Object();
 
 LiveJournal.register_hook("page_load", function () {
   ESN.initCheckAllBtns();
-  ESN.initEventCheckBtns();
   ESN.initTrackBtns();
 });
 
@@ -34,31 +33,6 @@ ESN.initCheckAllBtns = function () {
           "parent": $("CategoryRow-" + catid)
           });
     });
-  });
-}
-
-// set up auto show/hiding of notification methods
-ESN.initEventCheckBtns = function () {
-  var viewObjects = document.getElementsByTagName("*");
-  var boxes = DOM.filterElementsByClassName(viewObjects, "SubscriptionInboxCheck") || [];
-
-  boxes.forEach( function (box) {
-    DOM.addEventListener(box, "click", ESN.eventChecked.bindEventListener());
-  });
-}
-
-ESN.eventChecked = function (evt) {
-  var target = evt.target;
-  if (!target)
-    return;
-
-  var parentRow = DOM.getFirstAncestorByTagName(target, "tr", false);
-
-  var viewObjects = parentRow.getElementsByTagName("*");
-  var boxes = DOM.filterElementsByClassName(viewObjects, "NotificationOptions") || [];
-
-  boxes.forEach( function (box) {
-    box.style.visibility = target.checked ? "visible" : "hidden";
   });
 }
 

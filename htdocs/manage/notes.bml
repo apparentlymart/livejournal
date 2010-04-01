@@ -176,7 +176,7 @@ body<=
         function checkAlias(alias){
             var i = -1,
                 aliasTable = DOM.getElementsByClassName(document,'aliaslist-table')[0].firstChild,
-                currentAliases = DOM.getElementsByAttribute(aliasTable,'lj:user'),
+                currentAliases = jQuery('.ljuser', aliasTable),
                 warningBlock = DOM.getElementsByClassName(alias.parentNode.parentNode,'user_alias_error')[0];
 
             warningBlock.innerHTML = '';
