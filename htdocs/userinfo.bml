@@ -702,6 +702,12 @@
     $body .= "<p>" . join($ML{'.details.viewlinkssep'}, @view_links) . "</p>";
     $body .= "</div>";
 
+    {
+        my $userinfo_add = '';
+        LJ::run_hooks('userinfo_modify_details', journal => $u, ret => \$userinfo_add);
+        $body .= $userinfo_add if $userinfo_add;
+    }
+
     $body .= "</div>";
 
     $body .= "</div>";

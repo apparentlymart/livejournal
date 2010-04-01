@@ -347,3 +347,50 @@ span.expandcollapse {
 				margin: 0 auto;
 				}
 
+/* ONTD-Button */
+.details_ontd {
+	padding:0 0 10px;
+	}
+	.details_ontd_btn {
+		}
+	*+HTML .details_ontd_btn {
+		overflow:visible;
+		padding:0 10px;
+		}
+	* HTML .details_ontd_btn {
+		overflow:visible;
+		padding:0 10px;
+		}
+		.details_ontd_btn SPAN {
+			position:relative;
+			padding:0 21px 0 0;
+			}
+		* HTML .details_ontd_btn SPAN {
+			position:relative;
+			padding:0 11px 0 0;
+			}
+	.details_ontd_ontduser {
+		position:absolute;
+		top:50%;
+		right:0;
+		width:17px;
+		height:17px;
+		margin:-8px 0 0;
+		background:url(/img/user_ontd.gif) no-repeat 0 0;
+		}
+		.details_ontd_btn[disabled="disabled"] .details_ontd_ontduser {
+			opacity:0.5;
+			-moz-opacity:0.5; /* Netscape */
+			-khtml-opacity:0.5; /* Safari 1.x */
+			-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; /* IE 8 */
+			filter:alpha(opacity=50); /* IE 5-7 */
+			}
+	.details_ontd_user {
+		position:absolute;
+		top:50%;
+		right:0;
+		width:17px;
+		height:17px;
+		margin:-8px 0 0;
+		background:url(/img/userinfo.gif) no-repeat 0 0;
+		}
