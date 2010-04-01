@@ -106,6 +106,7 @@
         my $lncode = ($remote && $remote->prop('browselang')) ? $remote->prop('browselang') : $LJ::DEFAULT_LANG;
         $event = LJ::Widget::QotD->embed_text($qotd, $lncode);
         $tags = LJ::Widget::QotD->tags_text($qotd);
+        LJ::run_hooks('qotd_modify_tags', \$tags);
         my $text = LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], form_disabled => 1 );
         $$head .= "<script>LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";
     }
