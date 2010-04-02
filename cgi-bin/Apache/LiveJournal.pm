@@ -21,6 +21,7 @@ use Class::Autouse qw(
                       Apache::LiveJournal::Interface::S2
                       Apache::LiveJournal::Interface::ElsewhereInfo
                       Apache::LiveJournal::PalImg
+                      Apache::LiveJournal::Interface::Restful
                       LJ::ModuleCheck
                       LJ::AccessLogSink
                       LJ::AccessLogRecord
@@ -799,7 +800,12 @@ sub trans
 
             my $view = $determine_view->($user, "safevhost", $uri);
             return $view if defined $view;
-
+        } elsif ($func eq 'api') {
+            Apache::LiveJournal::Interface::Restful->load;
+            LJ::Request->handler("perl-script");
+            LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Restful::handler);
+            return LJ::Request::OK;
+        
         } elsif ($func) {
             my $code = {
                 'userpics' => \&userpic_trans,
@@ -820,7 +826,7 @@ sub trans
         $host ne $LJ::DOMAIN && $host =~ /\./ &&
         $host =~ /[^\d\.]/)
     {
-
+        
         my $dbr = LJ::get_db_reader();
         my $checkhost = lc($host);
         $checkhost =~ s/^www\.//i;
