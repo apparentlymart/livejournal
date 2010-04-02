@@ -235,13 +235,19 @@ sub blocked_bot
     LJ::Request->status_line("403 Denied");
     LJ::Request->content_type("text/html");
     LJ::Request->send_http_header();
-    my $subject = $LJ::BLOCKED_BOT_SUBJECT || "403 Denied";
-    my $message = $LJ::BLOCKED_BOT_MESSAGE || "You don't have permission to view this page.";
 
+    my ($ip, $uniq);
     if ($LJ::BLOCKED_BOT_INFO) {
-        my $ip = LJ::get_remote_ip();
-        my $uniq = LJ::UniqCookie->current_uniq;
-        $message .= " $uniq @ $ip";
+        $ip = LJ::get_remote_ip();
+        $uniq = LJ::UniqCookie->current_uniq;
+    }
+
+    my $subject = LJ::Lang::get_text(undef, 'error.banned.bot.subject') || $LJ::BLOCKED_BOT_SUBJECT || "403 Denied";
+    my $message = LJ::Lang::get_text(undef, 'error.banned.bot.message', undef, { ip => $ip, uniq => $uniq } );
+
+    unless ($message) {
+        $message = $LJ::BLOCKED_BOT_MESSAGE || "You don't have permission to view this page.";
+        $message .= " $uniq @ $ip" if $LJ::BLOCKED_BOT_INFO;
     }
 
     LJ::Request->print("<h1>$subject</h1>$message");

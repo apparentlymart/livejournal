@@ -1296,6 +1296,16 @@ Error=Error
 
 error.badpassword=Incorrect Password.
 
+error.banned.bot.subject=Access Forbidden
+
+error.banned.bot.message<<
+This page is not available at this time, perhaps because you were hitting the site too quickly. Please make sure that you're
+following our <a href='http://www.livejournal.com/bots/'>Bot Policy</a>.
+<br>If you are not using an automated service of the type described at the page above, then you may have been shown this page in error.
+Please refresh the page and try again. If you are still blocked from using LiveJournal after refreshing the page, contact us at
+webmaster&#064;livejournal.com with the following information: [[uniq]] @ [[ip]].
+.
+
 error.code.comm_not_comm=Account is not a community
 
 error.code.comm_not_found=Community not found
