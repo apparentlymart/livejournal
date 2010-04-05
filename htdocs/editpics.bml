@@ -76,8 +76,13 @@
     # get userpics and count 'em
     my @userpics = LJ::Userpic->load_user_userpics($u);
 
-    # get maximum number of userpics for this user
-    my $max      = LJ::get_cap($u, "userpics");
+    # get maximum number of userpics and expiring dates of its for this user
+    my %cap_opts = ();
+    my $max      = LJ::get_cap($u, "userpics", \%cap_opts);
+    my $trim = sub { return substr($_[0], 0, 10); };
+    my @upics_str = ();
+    push @upics_str => BML::ml('pay.widget.userpics.exp.small', { num => $cap_opts{small_packs}, date => $trim->($cap_opts{small_exp})}) if $cap_opts{small_packs};
+    push @upics_str => BML::ml('pay.widget.userpics.exp.large', { num => $cap_opts{large_packs}, date => $trim->($cap_opts{large_exp})}) if $cap_opts{large_packs};
 
     my @info;
 
@@ -520,7 +525,9 @@
                 <div class='EditPicsStatus'>
             };
 
-        $body .= "<p><strong>" . BML::ml('.piclimitstatus', {current => scalar @userpics, max => $max}) . "</strong></p>";;
+        $body .= "<p><strong>" . BML::ml('.piclimitstatus', {current => scalar @userpics, max => $max}) . "</strong>";
+        $body .= " (" . (join ';', @upics_str) . ")" if @upics_str;
+        $body .= "</p>";
         if (scalar @userpics >= $max) {
             my $inline;
             if ($inline .= LJ::run_hook("cprod_inline", $u, 'EditPics')) {
