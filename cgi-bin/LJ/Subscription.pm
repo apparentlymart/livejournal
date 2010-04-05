@@ -80,11 +80,6 @@ sub thaw {
 sub pending { 0 }
 sub default_selected { $_[0]->active }
 
-sub has_cached_subscriptions {
-    my ($class, $u) = @_;
-    return defined $u->{'_subscriptions'};
-}
-
 sub query_user_subscriptions {
     my ($class, $u, %filters) = @_;
     croak "subscriptions_of_user requires a valid 'u' object"
@@ -122,14 +117,31 @@ sub subscriptions_of_user {
         unless LJ::isu($u);
 
     return if $u->is_expunged;
-    return @{$u->{_subscriptions}} if $class->has_cached_subscriptions($u);
 
-    my @subs = map { $class->new_from_row($_) }
-        @{ $class->query_user_subscriptions($u) };
+    my $val = LJ::MemCache::get('subscriptions:' . $u->id);
+    if (defined $val) {
+        my @ints = unpack("N*", $val);
+        my @subs;
+        for (my $i = 0; $i < scalar(@ints); $i += 11) {
+            my %row;
+            @row{@subs_fields} = @ints[$i..$i+10];
+            push @subs, $class->new_from_row(\%row);
+        }
+        return @subs;
+    } else {
+        my @subs = map { $class->new_from_row($_) }
+            @{ $class->query_user_subscriptions($u) };
 
-    $u->{_subscriptions} = \@subs;
+        my @ints;
+        foreach my $sub (@subs) {
+            my %row = %$sub;
+            push @ints, @row{@subs_fields};
+        }
 
-    return @subs;
+        LJ::MemCache::set('subscriptions:' . $u->id, pack("N*", @ints));
+
+        return @subs;
+    }
 }
 
 # Class method
@@ -168,34 +180,18 @@ sub find {
     return () if defined $arg2 && $arg2 =~ /\D/;
 
     my @subs;
-    if ($class->has_cached_subscriptions($u)) {
-        @subs = $u->subscriptions;
+    @subs = $u->subscriptions;
 
-        @subs = grep { $_->active } @subs if $require_active;
+    @subs = grep { $_->active } @subs if $require_active;
 
-        # filter subs on each parameter
-        @subs = grep { $_->journalid == $journalid } @subs if defined $journalid;
-        @subs = grep { $_->ntypeid   == $ntypeid }   @subs if $ntypeid;
-        @subs = grep { $_->etypeid   == $etypeid }   @subs if $etypeid;
-        @subs = grep { $_->flags     == $flags }     @subs if defined $flags;
+    # filter subs on each parameter
+    @subs = grep { $_->journalid == $journalid } @subs if defined $journalid;
+    @subs = grep { $_->ntypeid   == $ntypeid }   @subs if $ntypeid;
+    @subs = grep { $_->etypeid   == $etypeid }   @subs if $etypeid;
+    @subs = grep { $_->flags     == $flags }     @subs if defined $flags;
 
-        @subs = grep { $_->arg1 == $arg1 }           @subs if defined $arg1;
-        @subs = grep { $_->arg2 == $arg2 }           @subs if defined $arg2;
-    } else {
-        my %filters;
-
-        $filters{'journalid'} = $journalid           if defined $journalid;
-        $filters{'ntypeid'}   = $ntypeid             if $ntypeid;
-        $filters{'etypeid'}   = $etypeid             if $etypeid;
-        $filters{'flags'}     = $flags               if defined $flags;
-        $filters{'arg1'}      = $arg1                if defined $arg1;
-        $filters{'arg2'}      = $arg2                if defined $arg2;
-
-        @subs = map { $class->new_from_row($_) }
-            @{ $class->query_user_subscriptions($u, %filters) };
-
-        @subs = grep { $_->active } @subs if $require_active;
-    }
+    @subs = grep { $_->arg1 == $arg1 }           @subs if defined $arg1;
+    @subs = grep { $_->arg2 == $arg2 }           @subs if defined $arg2;
 
     return @subs;
 }
@@ -250,7 +246,7 @@ sub delete {
     # delete from cache in user
     undef $u->{_subscriptions};
 
-    LJ::MemCache::delete('subscriptions_count:'.$u->id);
+    $self->invalidate_cache($u);
 
     return 1;
 }
@@ -263,7 +259,7 @@ sub delete_all_subs {
     $u->do("DELETE FROM subs WHERE userid = ?", undef, $u->id);
     undef $u->{_subscriptions};
 
-    LJ::MemCache::delete('subscriptions_count:'.$u->id);
+    $class->invalidate_cache($u);
 
     return 1;
 }
@@ -385,7 +381,7 @@ sub create {
     $self->subscriptions_of_user($u) unless $u->{_subscriptions};
     push @{$u->{_subscriptions}}, $self;
 
-    LJ::MemCache::delete('subscriptions_count:'.$u->id);
+    $self->invalidate_cache($u);
 
     return $self;
 }
@@ -632,8 +628,13 @@ sub enabled {
     my ($self) = @_;
 
     my $ret = $self->group->enabled;
-    # warn $self->group->freeze, ', ', $ret;
     return $ret;
+}
+
+sub invalidate_cache {
+    my ($class, $u) = @_;
+    LJ::MemCache::delete('subscriptions:'.$u->id);
+    LJ::MemCache::delete('subscriptions_count:'.$u->id);
 }
 
 package LJ::Error::Subscription::TooMany;
