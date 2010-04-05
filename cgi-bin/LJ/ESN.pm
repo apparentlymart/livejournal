@@ -305,7 +305,7 @@ sub work {
 package LJ::Worker::FindSubsByCluster;
 use base 'TheSchwartz::Worker';
 
-sub work {
+sub do_work {
     my ($class, $job) = @_;
     my $a = $job->arg;
     my ($cid, $e_params) = @$a;
@@ -388,6 +388,53 @@ sub work {
     warn "Filter sub jobs: [@subjobs]\n" if $ENV{DEBUG};
     return $job->replace_with(@subjobs);
 }
+
+sub work {
+    my ($class, $job) = @_;
+
+    my $pid = fork;
+    
+    ##
+    ## list of exit codes of child processes:
+    ## 0 - job didn't do the work (did_something==0)
+    ## 1 - did_something>0 (it's boolean value, actually)
+    ## 2 - exception was thrown, reason and message are lost :(
+    ##
+    ## This is a hack, the more solid solution will be later. 
+    ## 
+    if (!defined $pid) {
+        die "fork failed: $!";
+    } elsif ($pid) {
+        
+        ## Must use default CHLD handler, otherwise, waitpid will return -1
+        ## and no exit status of child process can be collected
+        local $SIG{CHLD}; 
+        
+        my $wpid = waitpid($pid, 0);
+        if ($wpid!=$pid) {
+            die "Something strange: waitpid($pid,0) returned $wpid";
+        }
+        my $status = $? >> 8;
+        if ($status==0 || $status==1) {
+            return $job->did_something($status);
+        } elsif ($status==2) {
+            die "Job died";
+        } else {
+            die "Job did something strange";
+        }
+    } else {
+        eval {
+            $class->do_work($job);
+        };
+        if ($@) {
+            warn $@;
+            exit 2;
+        } else {
+            exit( $job->did_something ? 1 : 0 );
+        }
+    }
+}
+
 
 # this is phase3 of processing.  see doc/server/ljp.int.esn.html
 package LJ::Worker::FilterSubs;
