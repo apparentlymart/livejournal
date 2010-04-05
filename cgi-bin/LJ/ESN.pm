@@ -13,6 +13,7 @@ our $MAX_FILTER_SET = 5_000;
 sub schwartz_capabilities {
     return (
             "LJ::Worker::FiredEvent",         # step 1: can go to 2 or 4
+            "LJ::Worker::FiredMass",          # alternative step 1: can go to 4
             "LJ::Worker::FindSubsByCluster",  # step 2: can go to 3 or 4
             "LJ::Worker::FilterSubs",         # step 3: goes to step 4
             "LJ::Worker::ProcessSub",         # step 4
@@ -147,11 +148,164 @@ sub retry_delay {
     return (10, 30, 60, 300, 600)[$fails];
 }
 
+package LJ::Worker::FiredMass;
+use base 'TheSchwartz::Worker';
+
+use constant BATCH_SIZE => 10000;
+
+# LJ::Worker::FiredMass: a worker to process the "mass" subscriptions,
+# including the OfficialPost ones. these need special handling, because handling
+# them the usual way can get us to the system swap quickly, which is a bad
+# thing.
+#
+# $arg = {
+#     # mandatory: an LJ::Event object detailing what happened
+#     'evt' => LJ::Event::OfficialPost->new($entry),
+#
+#     # optional: only search through subscriptions of the users with
+#     # userid > minuid; this parameter is used by the worker to "chain"
+#     # itself, each instance only processing about BATCH_SIZE subscriptions
+#     'minuid' => 15,
+#
+#     # optional: a cluster to search on
+#     # in case it's not specified, the job replaces itself with
+#     # scalar(@LJ::CLUSTERS) job, each handling a single cluster
+#     'cid' => 3,
+# };
+sub work {
+    my ($class, $job) = @_;
+    my $a = $job->arg;
+
+    my %arg = %$a;
+
+    # check arguments
+    my $evt = $arg{'evt'};
+    die "expecting $evt to be an LJ::Event object"
+        unless $evt->isa("LJ::Event");
+    my $etypeid = $evt->etypeid;
+
+    my $minuid = $arg{'minuid'} || 0;
+    my $cid = $arg{'cid'};
+
+    # oh no, there is no cluster, so we don't know where to search... yet. :)
+    # spawn additional jobs to search through the clusters.
+    unless ($cid) {
+        my @jobs;
+        foreach my $cid2 (@LJ::CLUSTERS) {
+            push @jobs, TheSchwartz::Job->new(
+                'funcname' => __PACKAGE__,
+                'arg' => {
+                    'evt' => $evt,
+                    'cid' => $cid2,
+                    'minuid' => $minuid,
+                },
+            );
+        }
+        return $job->replace_with(@jobs);
+    }
+
+    # at this point, we have a $cid, yay.
+
+    my $limit = BATCH_SIZE;
+
+    # here's how selecting works:
+    # the first query gets no more than $limit subs rows; after we get the
+    # result, we *remove* the greatest userid from it and then use the
+    # second query to re-fetch rows corresponding to that userid
+    #
+    # in more technical terms, @process_batch stores the selection result,
+    # @buffer is, well, a buffer of subs that were fetched from the DB but
+    # have not yet been transferred to @process_batch.
+    #
+    # @buffer is flushed when $row->{'userid'} changes.
+    #
+    # there's also a trick here: we specify journalid=0 deliberately to ensure
+    # that the (`etypeid`,`journalid`,`userid`) key is being used.
+    my (@process_batch, @buffer, $lastuid);
+
+    my $dbh = LJ::get_cluster_reader($cid) ||
+        die "cannot get cluster reader for cluster $cid";
+
+    # FIRST QUERY: get $limit rows, ordered by userid
+    my $res = $dbh->selectall_arrayref(qq{
+        SELECT *
+        FROM subs
+        WHERE etypeid=? AND journalid = 0 AND userid > ?
+        ORDER BY userid
+        LIMIT $limit
+    }, { Slice => {} }, $etypeid, $minuid);
+
+    foreach my $row (@$res) {
+        if ($row->{'userid'} != $lastuid) {
+            push @process_batch, @buffer;
+            @buffer = ();
+        }
+
+        $lastuid = $row->{'userid'};
+        push @buffer, $row;
+    }
+
+    # SECOND QUERY: get all rows matching the greatest userid we've found in
+    # the first query.
+    $res = $dbh->selectall_arrayref(qq{
+        SELECT *
+        FROM subs
+        WHERE etypeid=? AND journalid = 0 AND userid = ?
+    }, { Slice => {} }, $etypeid, $lastuid);
+
+    foreach my $row (@$res) {
+        push @process_batch, $row;
+    }
+
+    # uh, there's nothing left to process, so we can be happy.
+    return $job->completed unless @process_batch;
+
+    # at this point, we need to spawn the following jobs:
+    #
+    # 1). ourselves, to ensure that the other users are going to receive their
+    #     subs.
+    # 2). ProcessSub for each sub we've already found that is more-or-less
+    #     valid (active / available_for_user), to ensure that people actually
+    #     get notified.
+    my @jobs;
+
+    # OURSELVES
+    push @jobs, TheSchwartz::Job->new(
+        'funcname' => __PACKAGE__,
+        'arg' => {
+            'evt' => $evt,
+            'cid' => $cid,
+            'minuid' => $lastuid,
+        },
+    );
+
+    # PROCESSSUB
+    foreach my $row (@process_batch) {
+        my $sub = LJ::Subscription->new_from_row($row);
+
+        next unless $sub->active;
+        next unless $sub->available_for_user($sub->owner);
+
+        push @jobs, TheSchwarts::Job->new(
+            'funcname' => 'LJ::Worker::ProcessSub',
+            'arg' => [
+                $sub->userid,
+                $sub->dump,
+                $evt->raw_params,
+            ],
+        );
+    }
+
+    # we're done here, but there is staff to do; the other workers will
+    # pick that up. so long, and thanks for all the fish.
+    return $job->replace_with(@jobs);
+}
+
 # this is phase2 of processing.  see doc/server/ljp.int.esn.html
 package LJ::Worker::FindSubsByCluster;
 use base 'TheSchwartz::Worker';
 
-sub do_work {
+sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
     my ($cid, $e_params) = @$a;
@@ -233,20 +387,6 @@ sub do_work {
 
     warn "Filter sub jobs: [@subjobs]\n" if $ENV{DEBUG};
     return $job->replace_with(@subjobs);
-}
-
-sub work {
-    my ($class, $job) = @_;
-
-    my $pid = fork;
-    
-    if ($pid) {
-        my $status = waitpid($pid, 0);
-        $job->did_something($status);
-    } else {
-        $class->do_work($job);
-        exit $job->did_something;
-    }
 }
 
 # this is phase3 of processing.  see doc/server/ljp.int.esn.html
