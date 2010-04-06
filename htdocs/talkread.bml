@@ -7,7 +7,7 @@ body<=
 
  # load package for formatting current music
  use LJ::LastFM;
- 
+
  # make refs to both title and head, that work in cached or non-cached contexts
  # $_[0] is a pre-request scratch area.
  $r_head = "";
@@ -220,11 +220,12 @@ my $old_url = 0;
  my $multiform_selects = 0;  # are there select boxes?  don't show form if not.
 
  my $event = $item->{'event'};
-
  my $suspend_msg = $entry && $entry->should_show_suspend_msg_to($remote) ? 1 : 0;
  LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $props->{'opt_preformatted'},
                                        'suspend_msg' => $suspend_msg,
-                                       'unsuspend_supportid' => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, });
+                                       'unsuspend_supportid' => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, 
+                                       'cuturl' => $talkurl, 
+                                       });
  LJ::expand_embedded($u, $ditemid, $remote, \$event);
  BML::ebml(\$event);
 

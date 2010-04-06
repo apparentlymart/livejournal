@@ -3574,6 +3574,12 @@ quote.left="
 quote.right|staleness=1
 quote.right="
 
+repost.default_button=repost
+
+repost.default_subject=post
+
+repost.wrapper=Originaly posted by <lj user="[[username]]"> at <a href="[[url]]">[[subject]]</a><div class="repost">[[text]]</div>
+
 s2theme.themename.default|staleness=1
 s2theme.themename.default=(Unnamed - [[themeid]])
 

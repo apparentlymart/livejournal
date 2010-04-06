@@ -801,6 +801,8 @@ sub event_html
     $opts->{suspend_msg} = $suspend_msg;
     $opts->{unsuspend_supportid} = $suspend_msg ? $self->prop("unsuspend_supportid") : 0;
 
+    $opts->{cuturl} = $self->url unless $opts->{cuturl};
+
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};
     LJ::CleanHTML::clean_event(\$event, $opts);

@@ -199,7 +199,9 @@ body<=
     my $suspend_msg = $entry && $entry->should_show_suspend_msg_to($remote) ? 1 : 0;
     LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $preformatted,
                                           'suspend_msg' => $suspend_msg,
-                                          'unsuspend_supportid' => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, });
+                                          'unsuspend_supportid' => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, 
+                                          'cuturl' => $talkurl,
+                                          });
     LJ::expand_embedded($u, $ditemid, $remote, \$event);
     BML::ebml(\$event);
 

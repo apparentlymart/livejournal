@@ -111,6 +111,31 @@
         $$head .= "<script>LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";
     }
 
+    # in case of repost other entry by its uri we should check its visibility
+    # for remote user.
+    if (my $repost = ($POST{repost} || $GET{repost})){
+        my $entry = LJ::Entry->new_from_url($repost);
+        unless ($entry){
+            $$body = "<?badinput?>";
+            return;
+        }
+
+        if ($entry->visible_to($remote)){
+            $subject ||= (LJ::ehtml($entry->subject_orig) || LJ::Lang::ml("repost.default_subject"));
+            unless ($event){
+                $event = $entry->event_raw;
+                LJ::CleanHTML::clean_event(\$event, { cuturl => $entry->url });
+                $event = LJ::Lang::ml("repost.wrapper", { 
+                                            username => $entry->poster->username,
+                                            url      => $entry->url,
+                                            subject  => $subject,
+                                            text     => $event,
+                                            });
+            }
+        }
+        
+    }
+
     # try to call a hook to fill in the fields
     my $override_fields = LJ::run_hook('update_fields', \%GET);
     my $opt_preformatted = 0;

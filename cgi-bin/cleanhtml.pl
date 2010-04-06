@@ -322,6 +322,36 @@ sub clean
                 next TOKEN;
             }
 
+            # lj-repost tag adds button that allows easily post text in remote user's blog.
+            #
+            # Usage:
+            # 1. <lj-repost />
+            # 2. <lj-repost button="post this" />
+            # 3. <lj-repost>some text</lj-repost>
+            # 4. <lj-repost button="re-post to your journal" subject="WOW">
+            #       text to repost
+            #    </lj-repost>
+            #
+            if ($tag eq "lj-repost"){
+                next TOKEN if $opencount{$tag}; # no support for nested <lj-repost> tags
+
+                my $button = LJ::ehtml($attr->{button}) || LJ::Lang::ml("repost.default_button");
+                if ($attr->{'/'}){
+                    # short <lj-repost /> form of tag
+                    $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="GET">]
+                             .  qq[<input type=hidden name="repost" value="$opts->{cuturl}" />]
+                             .  qq(<input type="submit" value="$button" /> )
+                             .  qq[</form>];
+                } else {
+                    $opencount{$tag} = { 
+                        button  => $button, 
+                        subject => $attr->{subject},
+                        offset  => length $newdata,
+                    };
+                }
+                next TOKEN;
+            }
+
             # Capture object and embed tags to possibly transform them into something else.
             if ($tag eq "object" || $tag eq "embed") {
                 if (LJ::are_hooks("transform_embed") && !$noexpand_embedded) {
@@ -909,6 +939,36 @@ sub clean
                 } else {
                     $newdata .= "<a name='cutid$cutcount-end'></a>"
                 }
+            }
+            elsif ($tag eq "lj-repost"){
+                my $button   = LJ::ehtml($opencount{$tag}->{button}) || LJ::Lang::ml("repost.default_button");
+                my $subject  = LJ::ehtml($opencount{$tag}->{subject});
+                my $captured = substr $newdata => $opencount{$tag}->{offset};
+                
+                if (my $entry = LJ::Entry->new_from_url($opts->{cuturl})){
+                    # !!! avoid calling any 'text' methods on $entry, 
+                    #     it can produce inifinite loop of cleanhtml calls.
+
+                    $subject ||= LJ::ehtml($entry->subject_orig || LJ::Lang::ml("repost.default_subject"));
+                    $captured = LJ::Lang::ml("repost.wrapper", { 
+                                                username => $entry->poster->username,
+                                                url      => $entry->url,
+                                                subject  => $subject,
+                                                text     => $captured,
+                                                });
+                }
+                $captured = LJ::ehtml($captured);
+
+                # add <form> with invisible fields and visible submit button
+                $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="POST">
+                    <div style="display:none;visible:false">
+                    <input type="text" name="subject" value="$subject" />
+                    <textarea name="event">$captured</textarea>
+                    </div>
+                    <input type="submit" value="$button" /></form>];
+                
+                delete $opencount{$tag};
+
             } else {
                 if ($mode eq "allow") {
                     $allow = 1;
