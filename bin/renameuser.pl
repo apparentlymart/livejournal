@@ -6,8 +6,9 @@
 
 use strict;
 use Getopt::Long;
-
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin";
+require 'ljlib.pl';
+use LJ::User::Rename;
 
 sub usage {
     die "Usage: [--swap --force] <from_user> <to_user>\n";
@@ -27,11 +28,12 @@ usage() unless $from =~ /^\w{1,15}$/ && $to =~ /^\w{1,15}$/;
 
 my $dbh = LJ::get_db_writer();
 
+my $opts = { token => '[manual: bin/renameuser.pl]' };
 unless ($args{swap}) {
-    if (rename_user($from, $to)) {
+    if (LJ::User::Rename::basic_rename($from, $to, $opts)) {
         print "Success.  Renamed $from -> $to.\n";
     } else {
-        print "Failed: $error\n";
+        print "Failed: $opts->{error}\n";
     }
     exit;
 }
@@ -62,25 +64,27 @@ unless ($args{force}) {
     }
 }
 
-my $swapnum = 0;
 print "Swapping 1/3...\n";
-until ($swapnum == 10 || rename_user($from, "lj_swap_$swapnum")) {
-    $swapnum++;
+my $dummy_username = LJ::User::Rename::get_unused_name();
+unless ($dummy_username) {
+    print "Couldn't find a swap username\n";
+    exit 1;
 }
-if ($swapnum == 10) {
-    print "Couldn't find a swap position?\n";
+unless (LJ::User::Rename::basic_rename($from, $dummy_username, $opts)) {
+    print "Couldn't rename $from to $dummy_username: $opts->{error}\n";
     exit 1;
 }
 
+
 print "Swapping 2/3...\n";
-unless (rename_user($to, $from)) {
-    print "Swap failed in the middle, from $to -> $from failed.\n";
+unless (LJ::User::Rename::basic_rename($to, $from, $opts)) {
+    print "Swap failed in the middle, $to -> $from failed: $opts->{error}.\n";
     exit 1;
 }
 
 print "Swapping 3/3...\n";
-unless (rename_user("lj_swap_$swapnum", $to)) {
-    print "Swap failed in the middle, from lj_swap_$swapnum -> $to failed.\n";
+unless (LJ::User::Rename::basic_rename($dummy_username, $to, $opts)) {
+    print "Swap failed in the middle, $dummy_username -> $to failed: $opts->{error}.\n";
     exit 1;
 }
 
@@ -113,40 +117,5 @@ unless (rename_user("lj_swap_$swapnum", $to)) {
 print "Swapped.\n";
 exit 0;
 
-sub rename_user
-{
-    my $from = shift;
-    my $to = shift;
 
-    my $qfrom = $dbh->quote(LJ::canonical_username($from));
-    my $qto = $dbh->quote(LJ::canonical_username($to));
 
-    print "Renaming $from -> $to\n";
-
-    my $u = LJ::load_user($from, 'force');
-    unless ($u) {
-        $error = "Invalid source user: $from";
-        return 0;
-    }
-
-    foreach my $table (qw(user useridmap overrides style))
-    {
-        $dbh->do("UPDATE $table SET user=$qto WHERE user=$qfrom");
-        if ($dbh->err) {
-            $error = $dbh->errstr;
-            return 0;
-        }
-    }
-
-    # from user is now invalidated
-    LJ::memcache_kill($u->{userid}, "userid");
-    LJ::MemCache::delete("uidof:$from");
-    LJ::MemCache::delete("uidof:$to");
-
-    LJ::procnotify_add("rename_user", { 'user' => $u->{'user'},
-                                        'userid' => $u->{'userid'} });
-
-    $dbh->do("INSERT INTO renames (renid, token, payid, userid, fromuser, touser, rendate) ".
-             "VALUES (NULL,'[manual]',0,$u->{userid},$qfrom,$qto,NOW())");
-    return 1;
-}
