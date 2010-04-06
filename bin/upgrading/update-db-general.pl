@@ -4166,6 +4166,13 @@ register_alter(sub {
                  "ALTER TABLE antispam ADD INDEX(eventtime)");
     }
 
+    unless (column_type("site_messages", "countries")) {
+        do_alter("site_messages",
+                 "ALTER TABLE site_messages " .
+                 "ADD countries varchar(255) default NULL, " .
+                 "ADD accounts smallint(5) unsigned NOT NULL default '0'");
+    }
+
 });
 
 register_tablecreate("eventrates", <<'EOC'); # clustered

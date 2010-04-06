@@ -14,14 +14,32 @@ sub render_body {
     my %opts = @_;
     my $ret;
 
-    my @messages = LJ::SiteMessages->get_messages;
+    if ($opts{all}) {
+        my @messages = LJ::SiteMessages->get_messages;
 
-    $ret .= "<ul class='nostyle'>";
-    foreach my $message (@messages) {
-        my $ml_key = $class->ml_key("$message->{mid}.text");
-        $ret .= "<li>" . $class->ml($ml_key) . "</li>";
+        $ret .= "<ul class='nostyle'>";
+        foreach my $message (@messages) {
+            my $ml_key = $class->ml_key("$message->{mid}.text");
+            $ret .= "<li>" . $class->ml($ml_key) . "</li>";
+        }
+        $ret .= "</ul>";
+    } elsif ($opts{substitude}) {
+        my $message = LJ::SiteMessages->get_open_message;
+
+        if ($message) {
+            my $ml_key = $class->ml_key("$message->{mid}.text");
+            $ret .= $class->ml($ml_key);
+        }
+    } else {
+        my $message = LJ::SiteMessages->get_open_message;
+
+        $ret .= "<ul class='nostyle'>";
+        if ($message) {
+            my $ml_key = $class->ml_key("$message->{mid}.text");
+            $ret .= "<li>" . $class->ml($ml_key) . "</li>";
+        }
+        $ret .= "</ul>";
     }
-    $ret .= "</ul>";
 
     return $ret;
 }
@@ -29,10 +47,7 @@ sub render_body {
 sub should_render {
     my $class = shift;
 
-    my @messages = LJ::SiteMessages->get_messages;
-
-    return 1 if @messages;
-    return 0;
+    return LJ::SiteMessages->get_open_message ? 1 : 0;
 }
 
 1;

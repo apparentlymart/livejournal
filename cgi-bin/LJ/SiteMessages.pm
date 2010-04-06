@@ -2,6 +2,34 @@ package LJ::SiteMessages;
 use strict;
 use Carp qw(croak);
 
+use constant AccountMask => { 
+    Permanent => 1,
+    Sponsored => 2,
+    Paid      => 4,
+    Plus      => 8,
+    Basic     => 16,
+};
+
+sub get_user_class {
+    my $class = shift;
+    my $u = shift;
+
+    return AccountMask->{Permanent} if $u->in_class('perm');
+    return AccountMask->{Sponsored} if $u->in_class('sponsored');
+    return AccountMask->{Paid} if $u->get_cap('paid');
+    return AccountMask->{Plus} if $u->in_class('plus');
+    return AccountMask->{Basic};
+}
+
+sub get_class_string {
+    my $class = shift;
+    my $mask = shift;
+
+    return join(', ', grep { $mask & AccountMask->{$_} } 
+                      sort { LJ::SiteMessages::AccountMask->{$b} <=> LJ::SiteMessages::AccountMask->{$a} } 
+                      keys %{&AccountMask} );    
+}
+
 sub memcache_key {
     my $class = shift;
 
@@ -57,7 +85,6 @@ sub cache_clear {
 
 sub load_messages {
     my $class = shift;
-    my %opts = @_;
 
     my $messages = $class->cache_get;
     return @$messages if $messages;
@@ -79,16 +106,64 @@ sub load_messages {
     return @rows;
 }
 
+sub filter_by_country {
+    my $class = shift;
+    my $u = shift;
+    my @questions = @_;
+
+    # split the list into a list of questions with countries and a list of questions without countries
+    my @questions_with_countries;
+    my @questions_without_countries;
+    foreach my $question (@questions) {
+        if ($question->{countries}) {
+            push @questions_with_countries, $question;
+        } else {
+            push @questions_without_countries, $question;
+        }
+    }
+
+    # get the user's country if defined, otherwise the country of the remote IP
+    my $country;
+    $country = lc $u->country if $u;
+    $country = lc LJ::country_of_remote_ip() unless $country;
+
+    my @questions_ret;
+
+    # get the questions that are targeted at the user's country
+    if ($country) {
+        foreach my $question (@questions_with_countries) {
+            next unless grep { $_ eq $country } split(/\s*,\s*/, $question->{countries});
+            push @questions_ret, $question;
+        }
+    }
+
+    return (@questions_ret, @questions_without_countries);
+}
+
+sub filter_by_account {
+    my $class = shift;
+    my $u = shift;
+    my @questions = @_;
+
+    my $eff_class = $class->get_user_class($u);
+
+    return grep { $_->{accounts} & $eff_class } @questions;
+}
+
 sub get_messages {
     my $class = shift;
     my %opts = @_;
 
-    my @messages = $class->load_messages;
+    # direct the questions at the given $u, or remote if no $u given
+    my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
 
-    # sort messages in descending order by start time (newest first)
-    @messages = 
-        sort { $b->{time_start} <=> $a->{time_start} } 
-        grep { ref $_ } @messages;
+    return unless $u; # there are no messages for logged out users
+
+    my @messages = $class->load_messages;
+    @messages = grep { ref $_ } @messages;
+
+    @messages = $class->filter_by_country($u, @messages);
+    @messages = $class->filter_by_account($u, @messages);
 
     return @messages;
 }
@@ -104,15 +179,15 @@ sub store_message {
 
     # update existing message
     if ($vals{mid}) {
-        $dbh->do("UPDATE site_messages SET time_start=?, time_end=?, active=?, text=? WHERE mid=?",
-                 undef, (map { $vals{$_} } qw(time_start time_end active text mid)))
+        $dbh->do("UPDATE site_messages SET time_start=?, time_end=?, active=?, text=?, countries=?, accounts=?  WHERE mid=?",
+                 undef, (map { $vals{$_} } qw(time_start time_end active text countries accounts mid)))
             or die "Error updating site_messages: " . $dbh->errstr;
         $mid = $vals{mid};
     }
     # insert new message
     else {
-        $dbh->do("INSERT INTO site_messages VALUES (?,?,?,?,?)",
-                 undef, "null", (map { $vals{$_} } qw(time_start time_end active text)))
+        $dbh->do("INSERT INTO site_messages (mid, time_start, time_end, active, text, countries, accounts) VALUES (?,?,?,?,?,?,?)",
+                 undef, "null", (map { $vals{$_} } qw(time_start time_end active text countries accounts)))
             or die "Error adding site_messages: " . $dbh->errstr;
         $mid = $dbh->{mysql_insertid};
     }
@@ -193,6 +268,46 @@ sub change_active_status {
     $class->cache_clear;
 
     return $rv;
+}
+
+# get one message, that will be shown to current remote user
+sub get_open_message {
+    my $class = shift;
+
+    my $remote = LJ::get_remote();
+    return unless $remote; # this feature only for logged in users
+
+    my @messages = $class->get_messages(user => $remote);
+
+    my $closed = $remote->prop('closed_sm');
+    if ($closed) {
+        my %closed = map { $_ => 1 } split(',', $closed);
+        @messages = grep { not $closed{$_->{mid}} } @messages;
+    }
+
+    return unless scalar @messages;
+
+    my $index = int(rand(scalar @messages));
+    return $messages[$index];
+}
+
+sub close_message {
+    my $class = shift;
+    my $mid = shift;
+
+    my $remote = LJ::get_remote();
+    return unless $remote; # this feature only for logged in users
+
+    my @messages = $class->load_messages; # without filtering on country and account type
+    my %active = map { $_->{mid} => 1  } @messages;
+
+    my $closed = $remote->prop('closed_sm');
+    my @closed = split(',', $closed);
+
+    @closed = grep { $active{$_} } @closed;
+    push @closed, $mid;
+
+    $remote->set_prop('closed_sm', join(',', @closed));
 }
 
 1;

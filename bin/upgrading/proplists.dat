@@ -1505,3 +1505,8 @@ userproplist.ilikeit_enable:
   datatype: bool
   des: Enable 'I like it' button in community.
   prettyname: Enable 'I like it' button.
+
+userproplist.closed_sm:
+  datatype: char
+  des: List of closed site messages
+  cldversion: 8

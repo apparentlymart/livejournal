@@ -21,7 +21,7 @@ body<=
 
     # spotlight preview
     $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
-    $ret .= LJ::Widget::SiteMessages->render . "</div>";
+    $ret .= LJ::Widget::SiteMessages->render( all => 1 ) . "</div>";
 
     # activate/inactive site messages form
     $ret .= LJ::Widget::ManageSiteMessages->render( get => \%GET );
