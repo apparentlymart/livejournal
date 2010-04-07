@@ -2461,7 +2461,10 @@ LOGIN_BAR
 
     LJ::run_hooks('add_extra_cells_in_controlstrip', \$ret);
 
-    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr></table>";
+    my $message;
+    $message = LJ::Widget::SiteMessages->render if LJ::Widget::SiteMessages->should_render;
+
+    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr><tr><td colspan='5'>$message</td></tr></table>";
 }
 
 sub control_strip_js_inject

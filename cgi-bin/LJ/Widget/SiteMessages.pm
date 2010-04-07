@@ -23,22 +23,16 @@ sub render_body {
             $ret .= "<li>" . $class->ml($ml_key) . "</li>";
         }
         $ret .= "</ul>";
-    } elsif ($opts{substitude}) {
-        my $message = LJ::SiteMessages->get_open_message;
-
-        if ($message) {
-            my $ml_key = $class->ml_key("$message->{mid}.text");
-            $ret .= $class->ml($ml_key);
-        }
+    # -- same as below -- } elsif ($opts{substitude}) {
     } else {
         my $message = LJ::SiteMessages->get_open_message;
 
-        $ret .= "<ul class='nostyle'>";
         if ($message) {
+            $ret .= "<div id='sm$message->{mid}'>";
             my $ml_key = $class->ml_key("$message->{mid}.text");
-            $ret .= "<li>" . $class->ml($ml_key) . "</li>";
+            $ret .= $class->ml($ml_key);
+            $ret .= "</div>";
         }
-        $ret .= "</ul>";
     }
 
     return $ret;
