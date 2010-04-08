@@ -801,7 +801,10 @@ sub event_html
     $opts->{suspend_msg} = $suspend_msg;
     $opts->{unsuspend_supportid} = $suspend_msg ? $self->prop("unsuspend_supportid") : 0;
 
-    $opts->{cuturl} = $self->url unless $opts->{cuturl};
+    unless ($opts->{cuturl}){
+        $opts->{cuturl}     = $self->url;
+        $opts->{expand_cut} = 1;
+    }
 
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};

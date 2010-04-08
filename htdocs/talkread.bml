@@ -225,6 +225,7 @@ my $old_url = 0;
                                        'suspend_msg' => $suspend_msg,
                                        'unsuspend_supportid' => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, 
                                        'cuturl' => $talkurl, 
+                                       'expand_cut' => 1,
                                        });
  LJ::expand_embedded($u, $ditemid, $remote, \$event);
  BML::ebml(\$event);

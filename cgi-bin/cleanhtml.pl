@@ -152,6 +152,11 @@ sub clean
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
     my $target = $opts->{'target'} || '';
 
+    # cuturl or entry_url tells about context and texts address,
+    # Expand or close lj-cut tag should be switched directly by special flag
+    # - expand_cut
+    $cut = '' if $opts->{expand_cut}; 
+
     my @canonical_urls; # extracted links
     my %action = ();
     my %remove = ();
@@ -1424,6 +1429,7 @@ sub clean_event
         'linkify' => 1,
         'wordlength' => $wordlength,
         'addbreaks' => $opts->{'preformatted'} ? 0 : 1,
+        'expand_cut' => $opts->{expand_cut} ? 1 : 0,
         'cuturl' => $opts->{'cuturl'},
         'cutpreview' => $opts->{'cutpreview'},
         'eat' => $event_eat,
