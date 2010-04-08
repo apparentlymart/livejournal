@@ -46,7 +46,7 @@ _code?>
     return "<body $class %%bodyopts%%>";
 } _code?>
 
-<?_code return LJ::Widget::SiteMessages->render if LJ::Widget::SiteMessages->should_render; _code?>
+<?_code return (LJ::Widget::SiteMessages->should_render) ? LJ::Widget::SiteMessages->render : ''; _code?>
 %%BODY%%
 
 <hr style="clear:both;" />
