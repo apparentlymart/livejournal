@@ -1510,3 +1510,12 @@ userproplist.closed_sm:
   datatype: char
   des: List of closed site messages
   cldversion: 8
+
+userproplist.widget_top_entries:
+  cldversion: 7
+  datatype: char
+  des: Current setings and status of Top n entries
+  indexed: 1
+  multihomed: 0
+  prettyname: Current setings and status of Top n entries
+

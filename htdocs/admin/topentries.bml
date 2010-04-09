@@ -1,0 +1,82 @@
+<?page
+body<=
+<?_code
+{
+    # this is for viewing the properties set on a particular entry
+    use strict;
+    use vars qw(%POST);
+
+    use LJ::Widget::TopEntries;
+    use LJ::TopEntries;
+
+    my $remote = LJ::get_remote();
+
+    return LJ::error_list("Check your privs")
+        unless LJ::check_priv($remote, "admin", "topentries") || $LJ::IS_DEV_SERVER;
+
+    my $journal = LJ::load_user('ohnotheydidnt');
+
+    my $top_entries = LJ::TopEntries->new(journal => $journal);
+
+    if ($GET{url}) {
+        my $entry = LJ::Entry->new_from_url($GET{url});
+        unless ($entry && $entry->valid) {
+            return LJ::error_list("$POST{url} is not a valid entry URL.");
+        }
+        $top_entries->add_entry(entry => $entry);
+    } elsif (my @keys = grep { /^delete-(\d+:\d+)$/ } keys %GET) {
+        foreach my $key (@keys) {
+            $top_entries->delete_entry(key => $key);
+        }
+    } elsif ($GET{min_entries}) {
+        $top_entries->min_entries($GET{min_entries});
+    } elsif ($GET{max_entries}) {
+        $top_entries->max_entries($GET{max_entries});
+    } else {
+        my $ret = LJ::Widget::TopEntries->render(journal => $journal);
+
+        $ret .= "<form method='GET'>";
+
+# Buttons 'Add' and 'Store' is only to submit forms data.
+# If any of 'url' or (min|max)_entries is not empty, it
+# will be processed and then redirected to clean url out of parameters.
+#
+# 'delete-n:n' button will remove entry 'n:n' from the list.
+
+        $ret .= "Enter URL for adding featured post: ";
+        $ret .= LJ::html_text({name => 'url', maxlength => '100', size => '50', value => $GET{url}});
+        $ret .= "<button type='submit'>Add</button>";
+        $ret .= "<br />\n";
+
+        $ret .= "Number of shown entries: ";
+        $ret .= LJ::html_text({name => 'max_entries', maxlength => '1', size => '1', value => $top_entries->max_entries()});
+        $ret .= "<br />\n";
+
+        $ret .= "Number of entries, that can not be deleted: ";
+        $ret .= LJ::html_text({name => 'min_entries', maxlength => '1', size => '1', value => $top_entries->min_entries()});
+
+        $ret .= "<br />\n";
+
+        $ret .= "<button type='submit'>Store</button>";
+        $ret .= "<br />\n";
+
+        $ret .= "<table>";
+        foreach my $post ($top_entries->get_featured_posts(raw => 1)) {
+            $ret .= "<tr><td>$post->{subj}</td>";
+            $ret .= "<td><button type='submit' name='delete-$post->{'key'}' value=1>delete</button></td></tr>";
+        }
+        $ret .= "</table>";
+
+        $ret .= "</form>";
+        $ret .= "<?hr?>";
+
+        return $ret;
+    }
+
+    return BML::redirect("$LJ::SITEROOT/admin/topentries.bml")
+}
+_code?>
+<=body
+title=>Top Entries in communities
+<=body
+page?>
