@@ -509,18 +509,17 @@ sub create {
     my $maxbytesize = delete $opts{'maxbytesize'};
     croak("dataref not a scalarref") unless ref $dataref eq 'SCALAR';
 
-    my @errors;
     my $has_dangerous_content = 0;
     LJ::run_hook('has_image_dangerous_content', $dataref, \$has_dangerous_content);
     if ($has_dangerous_content) {
-        push @errors, LJ::errobj("Image has dangerous content");
+        LJ::throw(LJ::errobj("Image has dangerous content"));
     }
-    LJ::throw(@errors) if $has_dangerous_content;
 
     croak("Unknown options: " . join(", ", scalar keys %opts)) if %opts;
 
     my $err = sub {
         my $msg = shift;
+        return LJ::errobj($msg);
     };
 
     eval { require Image::Size; };
@@ -533,7 +532,7 @@ sub create {
 
     my $fmterror = 0;
 
-    @errors = ();
+    my @errors = ();
     if ($size > $MAX_UPLOAD) {
         push @errors, LJ::errobj("Userpic::Bytesize",
                                  size => $size,
@@ -652,7 +651,7 @@ sub create {
         push @errors, $clean_err->($u->errstr) if $u->err;
 
     } else { # We should never get here!
-        push @errors, "User picture uploading failed for unknown reason";
+        push @errors, LJ::errobj("User picture uploading failed for unknown reason");
     }
 
     LJ::throw(@errors);
