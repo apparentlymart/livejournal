@@ -6,6 +6,8 @@ use LJ::ModuleLoader;
 
 # Autouse all settings
 LJ::ModuleLoader->autouse_subclasses("LJ::Setting");
+use LJ::Setting::WebmasterTools;
+use LJ::Setting::WebmasterTools::Yandex;
 
 # ----------------------------------------------------------------------------
 
@@ -142,9 +144,12 @@ sub save_all {
     my %returns;
 
     while (my ($k, $v) = each %$post) {
-        next unless $k =~ /^LJ__Setting__([a-zA-Z0-9]+)_(\w+)$/;
-        my $class = "LJ::Setting::$1";
-        my $key = $2;
+        # matches both:
+        # LJ__Setting__Example_field (for LJ::Setting::Example)
+        # LJ__Setting__Example__Example2_field (for LJ::Setting::Example::Example2)
+        next unless $k =~ /^LJ__Setting__([a-zA-Z0-9]+)(__[a-zA-Z0-9]+)?_(\w+)$/;
+        my $class = "LJ::Setting::$1$2";
+        my $key = $3;
         $class =~ s/__/::/g;
         $posted{$class}{$key} = $v;
     }

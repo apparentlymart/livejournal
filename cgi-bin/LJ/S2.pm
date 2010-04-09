@@ -149,6 +149,7 @@ sub make_journal
     my $extra_js = LJ::statusvis_message_js($u);
     $page->{head_content} .= LJ::res_includes() . $extra_js;
     $page->{head_content} .= $LJ::SHARE_THIS_URL unless $LJ::DISABLED{'sharethis'};
+    LJ::run_hooks('head_content', \$page->{head_content});
 
     s2_run($r, $ctx, $opts, $entry, $page);
 

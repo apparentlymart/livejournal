@@ -39,6 +39,12 @@ _code?>
 <?_code return LJ::run_hook("insert_after_bml_title"); _code?>
 <?_code LJ::res_includes() _code?>
 %%HEAD%%
+    <?_code
+        my $head = '';
+        LJ::run_hooks('head_content', \$head);
+        return $head;
+    _code?>
+
 </head>
 
 <?_code {

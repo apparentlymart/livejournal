@@ -4108,6 +4108,16 @@ setting.viewingadultcontent.option.select.explicit=explicit adult content only
 setting.viewingadultcontent.option.select.none|staleness=1
 setting.viewingadultcontent.option.select.none=nothing
 
+setting.webmastertools_yandex.label=Yandex webmaster tools
+
+setting.webmastertools_yandex.label2=Enter your meta tag content value obtained from Yandex
+
+setting.webmastertools_google.label=Google webmaster tools
+
+setting.webmastertools_google.label2=Enter your meta tag content value obtained from Google
+
+setting.webmastertools.error=This field can only accept characters: A-Z, 0-9, dashes, and underlines.
+
 settings.city=City
 
 settings.country=Country

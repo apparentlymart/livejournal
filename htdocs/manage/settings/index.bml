@@ -146,6 +146,8 @@ body<=
             settings    => [qw(
                 LJ::Setting::MSN
                 LJ::Setting::GoogleAnalytics
+                LJ::Setting::WebmasterTools::Google
+                LJ::Setting::WebmasterTools::Yandex
             )],
         },
     );

@@ -1519,3 +1519,13 @@ userproplist.widget_top_entries:
   multihomed: 0
   prettyname: Current setings and status of Top n entries
 
+  userproplist.webmastertools_yandex:
+  datatype: char
+  des: Meta tag content value provided by Yandex
+  cldversion: 8
+
+userproplist.webmastertools_google:
+  datatype: char
+  des: Meta tag content value provided by Google
+  cldversion: 8
+
