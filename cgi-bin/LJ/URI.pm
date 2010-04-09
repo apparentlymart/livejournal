@@ -67,6 +67,10 @@ sub handle {
         return LJ::URI->bml_handler('shop/wallet.bml');
     }
 
+    if ($uri eq '/shop/cart.bml') {
+        return LJ::URI->bml_handler('/pay/index.bml');
+    }
+
     return undef;
 }
 
