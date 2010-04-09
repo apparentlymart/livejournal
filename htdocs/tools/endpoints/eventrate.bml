@@ -2,7 +2,7 @@
 {
     use strict;
     use JSON;
-    use vars qw(%GET);
+    use vars qw(%POST);
 
     my $err = sub {
         my $msg = shift;
@@ -11,50 +11,42 @@
         });
     };
 
-    my $action = $GET{action};
+    my $action = $POST{action};
+    my ($journal, $jitemid) = map { $POST{$_} } qw(journal jitemid);
+    my $journal_user = LJ::load_user($journal);
+    my $journalid = 0;
+    $journalid = $journal_user->userid() if $journal_user;
+
+    return {
+        status  => 'error',
+        message => 'Missing args',
+    } unless $journalid && $jitemid;
 
     my %actions = (
         undorate   => sub {
-            my ($journalid, $jitemid) = map { int($GET{$_}) } qw(journalid jitemid);
-
-            return {
-                status  => 'error',
-                message => 'Missing args',
-            } unless $journalid && $jitemid;
-
             my $result = LJ::reset_eventrate($journalid, $jitemid);
+            my $total = LJ::get_eventratescounters($journalid, $jitemid);
 
             return {
-                status => 'OK',
-                result => $result,
+                status  => 'OK',
+                result  => $result,
+                total   => $total,
             };
         },
 
         rate   => sub {
-            my ($journalid, $jitemid) = map { int($GET{$_}) } qw(journalid jitemid);
-
-            return {
-                status  => 'error',
-                message => 'Missing args',
-            } unless $journalid && $jitemid;
-
             my $result = LJ::set_eventrate($journalid, $jitemid);
+            my $total = LJ::get_eventratescounters($journalid, $jitemid);
 
             return {
-                status => 'OK',
-                result => $result,
+                status  => 'OK',
+                result  => $result,
+                total   => $total,
             };
         },
 
         total   => sub {
-            my ($journalid, $jitemid) = map { int($GET{$_}) } qw(journalid jitemid);
-
-            return {
-                status  => 'error',
-                message => 'Missing args',
-            } unless $journalid && $jitemid;
-
-            my $result = LJ::get_eventratescounters($journalid,$jitemid);
+            my $result = LJ::get_eventratescounters($journalid, $jitemid);
 
             return {
                 status => 'OK',
@@ -63,15 +55,8 @@
         },
 
         list  => sub {
-            my ($journalid, $jitemid, $skip, $limit) =
-                map { int($GET{$_}) } qw(journalid jitemid skip limit);
-
+            my ($skip, $limit) = map { int($POST{$_}) } qw(skip limit);
             $skip ||= 0; $limit ||= 10;
-
-            return {
-                status  => 'error',
-                message => 'Missing args',
-            } unless $journalid && $jitemid;
 
             my @result = LJ::get_eventrates(
                 journalid   => $journalid,
@@ -79,9 +64,12 @@
                 limits      => "'$skip', '$limit'",
             );
 
+            my $total = LJ::get_eventratescounters($journalid, $jitemid);
+
             return {
                 status => 'OK',
                 result => \@result,
+                total   => $total,
             };
         },
     );

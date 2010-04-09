@@ -2475,7 +2475,7 @@ sub _update_total_counter {
         $dbcm->do("DELETE FROM eventratescounters".
             " WHERE journalid=$journalid AND jitemid=$jitemid");
     }
-    LJ::MemCache::add([$journalid, "eventratescounts:$journalid:$jitemid"], $count);
+    LJ::MemCache::set([$journalid, "eventratescounts:$journalid:$jitemid"], $count);
 }
 
 # LJ::reset_eventrate($journalid, $jitemid, $userid);
@@ -2510,7 +2510,7 @@ sub reset_eventrate
     foreach my $uid (@userids) {
         # TODO: check rights of $remote to rate a post as $uid.
         if ($sth->execute($journalid,$jitemid,$uid)) {
-            LJ::MemCache::add([$journalid,"eventrates:$journalid:$jitemid:$uid"], 0);
+            LJ::MemCache::set([$journalid,"eventrates:$journalid:$jitemid:$uid"], 0);
             $counter++;
         } else {
             warn "SQL DELETE error: ", $dbcm->errstr,  "\n";
@@ -2551,7 +2551,7 @@ sub set_eventrate
     foreach my $uid (@userids) {
         # TODO: check rights of $remote to rate a post as $uid.
         if ($sth->execute($journalid,$jitemid,$uid)) {
-            LJ::MemCache::add([$journalid,"eventrates:$journalid:$jitemid:$uid"], 1);
+            LJ::MemCache::set([$journalid,"eventrates:$journalid:$jitemid:$uid"], 1);
             push @uids, $uid;
         } else {
             warn "Error: ", $dbcm->errstr,  "\n"
@@ -2588,7 +2588,7 @@ sub get_eventratescounters
 
     $count ||= 0;
 
-    LJ::MemCache::add([$journalid, "eventratescounts:$journalid:$jitemid"], $count);
+    LJ::MemCache::set([$journalid, "eventratescounts:$journalid:$jitemid"], $count);
 
     return $count;
 }
@@ -2660,7 +2660,7 @@ sub get_eventrates
 
         while (my ($id) = $sth->fetchrow_array) {
             push @userids, $id;
-            LJ::MemCache::add([$journalid,"eventrates:$journalid:$jitemid:$id"], 1);
+            LJ::MemCache::set([$journalid,"eventrates:$journalid:$jitemid:$id"], 1);
         }
 
     } else {   # fetch and return list of user ids
@@ -2679,7 +2679,7 @@ sub get_eventrates
         $sth->execute($journalid,$jitemid);
         while (my ($id) = $sth->fetchrow_array) {
             push @userids, $id;
-            LJ::MemCache::add([$journalid,"eventrates:$journalid:$jitemid:$id"], 1);
+            LJ::MemCache::set([$journalid,"eventrates:$journalid:$jitemid:$id"], 1);
         }
     }
 
