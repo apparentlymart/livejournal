@@ -3775,7 +3775,7 @@ sub Entry__get_eventratescounters
     return
         LJ::get_eventratescounters(
             $this->{'journal'}->{'_u'}->{'userid'},
-            int($this->{'itemid'}/256));
+            int($this->{'itemid'}));
 }
 
 sub Entry__get_eventrates
@@ -3786,7 +3786,7 @@ sub Entry__get_eventrates
         map { LJ::S2::UserLite(LJ::want_user($_)) }
             LJ::get_eventrates(
                 journalid   => $this->{'journal'}->{'_u'}->{'userid'},
-                jitemid     => int($this->{'itemid'}/256),
+                jitemid     => int($this->{'itemid'}),
                 limits      => "$skip, $limit",
             )
     ];
