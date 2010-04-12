@@ -4,7 +4,7 @@
     use LJ::JSON;
     use vars qw(%POST);
 
-    my $err = sub { return LJ::JSON->to_json({ status => 'error', 'error' => $_, }); };
+    my $err = sub { return LJ::JSON->to_json({ status => 'error', 'error' => $_[0], }); };
 
     my $action = $POST{action};
     my ($journal, $jitemid) = map { $POST{$_} } qw(journal jitemid);
@@ -15,9 +15,9 @@
     return $err->('Missing args') unless $journalid && $jitemid;
 
     my %actions = (
-        undorate    => LJ::reset_eventrate,
+        undorate    => sub { LJ::reset_eventrate(@_) },
 
-        rate        => LJ::set_eventrate,
+        rate        => sub { LJ::set_eventrate(@_) },
 
         list        => sub {
             my ($journalid, $jitemid) = @_;
