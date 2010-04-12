@@ -151,8 +151,6 @@ sub retry_delay {
 package LJ::Worker::FiredMass;
 use base 'TheSchwartz::Worker';
 
-use constant BATCH_SIZE => 10000;
-
 # LJ::Worker::FiredMass: a worker to process the "mass" subscriptions,
 # including the OfficialPost ones. these need special handling, because handling
 # them the usual way can get us to the system swap quickly, which is a bad
@@ -164,7 +162,8 @@ use constant BATCH_SIZE => 10000;
 #
 #     # optional: only search through subscriptions of the users with
 #     # userid > minuid; this parameter is used by the worker to "chain"
-#     # itself, each instance only processing about BATCH_SIZE subscriptions
+#     # itself, each instance only processing about $LJ::ESN_OFFICIALPOST_BATCH
+#     # subscriptions
 #     'minuid' => 15,
 #
 #     # optional: a cluster to search on
@@ -206,7 +205,7 @@ sub work {
 
     # at this point, we have a $cid, yay.
 
-    my $limit = BATCH_SIZE;
+    my $limit = $LJ::ESN_OFFICIALPOST_BATCH;
 
     # here's how selecting works:
     # the first query gets no more than $limit subs rows; after we get the
