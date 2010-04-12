@@ -560,11 +560,15 @@ sub subscriptions {
         ## inactive DB may be unavailable due to backup, or on dev servers
         ## TODO: check that LJ::get_cluster_master($cid) in other parts of code
         ## will return handle to 'active' db, not cached 'inactive' db handle
-        my $udbh = eval { 
+        my $udbh = '';
+        if (not $LJ::DISABLED{'try_to_load_subscriptions_from_slave'}){
+            $udbh = eval { 
                         require 'LJ/DBUtil.pm';
-                        LJ::DBUtil->get_inactive_db($cid) 
-                    }
-                    || LJ::get_cluster_master($cid);
+                        LJ::DBUtil->get_inactive_db($cid); # connect to slave 
+                    };
+        }
+        $udbh ||= LJ::get_cluster_master($cid); # default (master) connect
+
         die "Can't connect to db" unless $udbh;
 
         # first we find exact matches (or all matches)
