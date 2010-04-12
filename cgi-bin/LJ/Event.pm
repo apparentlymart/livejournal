@@ -555,8 +555,17 @@ sub subscriptions {
         # we got enough subs
         last if $limit && $limit_remain <= 0;
 
-        my $udbh = LJ::get_cluster_master($cid)
-            or die;
+        ## hack: use inactive server of user cluster to find subscriptions
+        ## LJ::DBUtil wouldn't load in web-context
+        ## inactive DB may be unavailable due to backup, or on dev servers
+        ## TODO: check that LJ::get_cluster_master($cid) in other parts of code
+        ## will return handle to 'active' db, not cached 'inactive' db handle
+        my $udbh = eval { 
+                        require 'LJ/DBUtil.pm';
+                        LJ::DBUtil->get_inactive_db($cid) 
+                    }
+                    || LJ::get_cluster_master($cid);
+        die "Can't connect to db" unless $udbh;
 
         # first we find exact matches (or all matches)
         my $journal_match = $allmatch ? "" : "AND journalid=?";
