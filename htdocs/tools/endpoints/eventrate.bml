@@ -27,10 +27,13 @@
             my @result = LJ::get_eventrates(
                 journalid   => $journalid,
                 jitemid     => $jitemid,
-                limits      => "'$skip', '$limit'",
+                limits      => "$skip, $limit",
             );
 
-            return \@result;
+            return join(', ', map {
+                my $user = undef;
+                $_ && ($user = LJ::load_userid($_)) && $user->ljuser_display();
+            } @result);
         },
     );
 
