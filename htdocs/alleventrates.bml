@@ -18,13 +18,9 @@ body<=
 
     return "There is no one like this page yet" unless $total;
 
-    my ($skip, $limit) = map { int($GET{$_}) } qw(skip limit);
-    $skip ||= 0; $limit ||= 10;
-
     my @result = LJ::get_eventrates(
         journalid   => $journalid,
         jitemid     => $jitemid,
-        limits      => "$skip, $limit",
     );
 
     return

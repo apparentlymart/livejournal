@@ -41,9 +41,11 @@
         my $result = $actions{$action}->($journalid, $jitemid);
         return LJ::JSON->to_json(
             {
-                status  => 'OK',
-                result  => $result,
-                total   => LJ::get_eventratescounters($journalid, $jitemid),
+                status                  => 'OK',
+                result                  => $result,
+                total                   => LJ::get_eventratescounters($journalid, $jitemid),
+                ml_view_all             => $ML{'eventrates.view_all'},
+                ml_users_who_like_it    => $ML{'eventrates.users_who_like_it'},
             }
         );
     } else {

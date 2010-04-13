@@ -2403,6 +2403,10 @@ event.user_new_entry.any=Any of my friends posts a new entry anywhere.
 event.user_new_entry.user|staleness=1
 event.user_new_entry.user=[[user]] posts a new entry anywhere.
 
+eventrates.view_all=View all
+
+eventrates.users_who_like_it=Users who like it
+
 fckland.ljimage=Insert/Edit Image
 
 fcklang.cutcontents=Type your cut contents here.
