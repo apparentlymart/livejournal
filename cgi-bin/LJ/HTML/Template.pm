@@ -15,13 +15,23 @@ sub new {
                 my %opts = @_;
                 return LJ::Lang::ml($key, \%opts);
             },
+        );
+        HTML::Template::Pro->register_function(
             ehtml => sub {
                 my $string = shift;
                 return LJ::ehtml($string);
             },
+        );
+        HTML::Template::Pro->register_function(
             ejs => sub {
                 my $string = shift;
                 return LJ::ejs($string);
+            },
+        );
+        HTML::Template::Pro->register_function(
+            ljuser => sub {
+                my $username = shift;
+                return LJ::ljuser($username);
             },
         );
         return HTML::Template::Pro->new(
