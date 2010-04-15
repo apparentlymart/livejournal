@@ -78,9 +78,22 @@ sub get_unused_name {
 }
 
 ##
-## input: username 'from', username 'to', [optional] options hashref
-## output: true or false 
+## Input: 
+##      username 'from', 
+##      username 'to', 
+##      [optional] options hashref
+## Options:
+##      renid                   - ID of the row to update in 'renames' table (for old rename tokens only)
+##      preserve_old_username   - If true, an account with the old username will be created
+##      opt_delfriends          - If true, no friends from old name will be transferred to new one
+##      opt_delfriendofs        - If true, no friends-of will be transferred
+##      opt_redir               - If true and 'preserve_old_username' is true, then
+##                                the account created with old username will be 'redirect' flagged.
+##                                This option is 'on' by default for non-personal accounts (historically)
+## Output: 
+##      true or false 
 ##      $opts->{error} is text of error
+##
 sub basic_rename {
     my ($from, $to, $opts) = @_;
 
@@ -157,6 +170,76 @@ sub basic_rename {
         ip           => BML::get_remote_ip(),
         datetime     => sprintf("%02d:%02d %02d/%02d/%04d", @date[2,1], $date[3], $date[4]+1, $date[5]+1900),
     })->fire;
+
+
+    if ($u->{journaltype} eq 'P') {
+        ## "Remove all users from your Friends list and leave all communities"
+        if ($opts->{opt_delfriends}) {
+            # delete friends
+            my $friends = LJ::get_friends($u, undef, undef, 'force') || {};
+            LJ::remove_friend($u, [ keys %$friends ], { 'nonotify' => 1 });
+        
+            # delete access to post to communities
+            LJ::clear_rel('*', $u, 'P');
+        
+            # delete friend-ofs that are communities
+            # TAG:fr:bml_rename_use:get_member_of
+            my $users = $dbh->selectcol_arrayref(qq{
+                SELECT u.userid FROM friends f, user u 
+                    WHERE f.friendid=$u->{'userid'} AND 
+                    f.userid=u.userid and u.journaltype <> 'P'
+            });
+            if ($users && @$users) {
+                my $in = join(',', @$users);
+                $dbh->do("DELETE FROM friends WHERE friendid=$u->{'userid'} AND userid IN ($in)");
+                LJ::memcache_kill($_, "friends") foreach @$users;
+            }
+        }
+    
+        ## "Remove everyone from your Friend Of list"
+        if ($opts->{'opt_delfriendofs'}) {
+            # delete people (only people) who list this user as a friend
+            my $users = $dbh->selectcol_arrayref(qq{
+                SELECT u.userid FROM friends f, user u 
+                    WHERE f.friendid=$u->{'userid'} AND 
+                    f.userid=u.userid and u.journaltype = 'P'
+            });
+            if ($users && @$users) {
+                my $in = join(',', @$users);
+                $dbh->do("DELETE FROM friends WHERE friendid=$u->{'userid'} AND userid IN ($in)");
+                LJ::memcache_kill($_, "friends") foreach @$users;
+            }
+        }
+
+        # delete friend of memcaching, as either path might have done it
+        LJ::MemCache::delete([ $u->{userid}, "friendofs:$u->{userid}" ]);
+    }
+    
+    my $u_old_username;
+    if ($opts->{preserve_old_username}) {
+        $u_old_username = LJ::create_account({
+            'user' => $from,
+            'password' => '',
+            'name' => '[renamed acct]',
+        });
+    }
+    
+    my $alias_changed = $dbh->do("UPDATE email_aliases SET alias=? WHERE alias=?",
+                                 undef, "$to\@$LJ::USER_DOMAIN",
+                                 "$from\@$LJ::USER_DOMAIN");
+    if ($u_old_username) {
+        if ($u->{journaltype} ne 'P' || $opts->{'opt_redir'}) {
+            LJ::update_user($u_old_username, { raw => "journaltype='R', statusvis='R', statusvisdate=NOW()" });
+            LJ::set_userprop($dbh, $u_old_username, "renamedto", $to);
+            if ($alias_changed > 0) {
+                $dbh->do("INSERT INTO email_aliases VALUES (?,?)", undef,
+                     "$u->{'user'}\@$LJ::USER_DOMAIN", 
+                     $u->email_raw);
+            }
+        } else {
+            LJ::update_user($u_old_username, { journaltype => $u->{journaltype}, raw => "statusvis='D', statusvisdate=NOW()" });
+        }
+    }   
 
     return 1;
 }
