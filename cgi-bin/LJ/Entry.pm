@@ -2486,8 +2486,10 @@ sub reset_eventrate
     my $jitemid     = shift;
     my @userids     = @_;
 
-    @userids = [ LJ::get_remote() ] unless @userids;
-
+    unless (@userids) {
+        my $remote = LJ::get_remote();
+        @userids = ( $remote->{'userid'} ) if $remote;
+    }
     my $journal = LJ::want_user($journalid);
     return unless is_eventrate_enable($journal);
 
