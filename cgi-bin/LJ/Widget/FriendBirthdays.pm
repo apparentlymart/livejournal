@@ -64,7 +64,7 @@ sub render_body {
             $class->ml('widget.friendbirthdays.paidtime_link') .
             "</a></p>" if $opts{paidtime_link};
 
-    $ret .= '</div></div></div></div></div>';
+    $ret .= '</div></div></div></div></div></div>';
     
         
     return $ret;
