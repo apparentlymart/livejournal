@@ -1,10 +1,8 @@
 package LJ::ESN;
 use strict;
 use Carp qw(croak);
-use Class::Autouse qw(
-                      LJ::Event
-                      LJ::Subscription
-                      );
+use LJ::Event;
+use LJ::Subscription;
 
 use Data::Dumper;
 
@@ -285,12 +283,13 @@ sub work {
         next unless $sub->active;
         next unless $sub->available_for_user($sub->owner);
 
-        push @jobs, TheSchwarts::Job->new(
+        my $params = $evt->raw_params;
+        push @jobs, TheSchwartz::Job->new(
             'funcname' => 'LJ::Worker::ProcessSub',
             'arg' => [
                 $sub->userid,
                 $sub->dump,
-                $evt->raw_params,
+                $params,
             ],
         );
     }
