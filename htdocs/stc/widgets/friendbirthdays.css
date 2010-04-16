@@ -1,29 +1,31 @@
-.appwidget-friendbirthdays H2 SPAN.w-head-in {
-    background: url("/img/birthday.gif") no-repeat  0 50%;
-    }
+.appwidget-friendbirthdays {
+    margin: 0 0 10px !important;
+    } 
+    .appwidget-friendbirthdays H2 SPAN.w-head-in {
+        background: url("/img/birthday.gif") no-repeat  0 50%;
+        }
 
-.appwidget-friendbirthdays .w-body {
-    padding: 5px 10px; 
-    margin: 0 0 10px;   
-    }
-    .appwidget-friendbirthdays table {
-        width: 100%;
-        border: 0;
-    	}
-    .appwidget-friendbirthdays H3 {
-    	padding-left: 8px;
-    	font-style: normal;
-    	font-family: Arial;
-    	color: #222;
-    	}
-    .appwidget-friendbirthdays .gift-link {
-        float: right;
-        display: block;
-        padding: 0 0 0 20px;
-        background: url(/img/gift.gif) no-repeat 0 50%;
-        line-height: 20px;
+    .appwidget-friendbirthdays .w-body {
+        padding: 5px 10px; 
         }
-    * html .appwidget-friendbirthdays .gift-link {
-        line-height: 14px;
-        }
+        .appwidget-friendbirthdays table {
+            width: 100%;
+            border: 0;
+        	}
+        .appwidget-friendbirthdays H3 {
+        	padding-left: 8px;
+        	font-style: normal;
+        	font-family: Arial;
+        	color: #222;
+        	}
+        .appwidget-friendbirthdays .gift-link {
+            float: right;
+            display: block;
+            padding: 0 0 0 20px;
+            background: url(/img/gift.gif) no-repeat 0 50%;
+            line-height: 20px;
+            }
+        * html .appwidget-friendbirthdays .gift-link {
+            line-height: 14px;
+            }
 

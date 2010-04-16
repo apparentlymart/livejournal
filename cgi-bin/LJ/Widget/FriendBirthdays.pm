@@ -32,7 +32,7 @@ sub render_body {
     $ret .= '<div class="right-mod"><div class="mod-tl"><div class="mod-tr"><div class="mod-br"><div class="mod-bl">';
     $ret .= "<div class='w-head'>";
     $ret .= "<h2><span class='w-head-in'>" . $class->ml('widget.friendbirthdays.title') . "</span></h2> ";
-    $ret .= "<a href='$LJ::SITEROOT/birthdays.bml' class='more-link'>" . $class->ml('widget.friendbirthdays.viewall') . "</a></p>";
+    $ret .= "<a href='$LJ::SITEROOT/birthdays.bml' class='more-link'>" . $class->ml('widget.friendbirthdays.viewall') . "</a>";
     $ret .= "<i class='w-head-coner'></i></div>";
 
     $ret .= "<div class='w-body'>";
