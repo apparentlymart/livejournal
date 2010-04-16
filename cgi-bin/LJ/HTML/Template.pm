@@ -9,6 +9,31 @@ sub new {
     
     if ($opts->{'use_expr'}) {
         require HTML::Template::Pro; # load module on demand
+        HTML::Template::Pro->register_function(
+            ml => sub { 
+                my $key = shift;
+                my %opts = @_;
+                return LJ::Lang::ml($key, \%opts);
+            },
+        );
+        HTML::Template::Pro->register_function(
+            ehtml => sub {
+                my $string = shift;
+                return LJ::ehtml($string);
+            },
+        );
+        HTML::Template::Pro->register_function(
+            ejs => sub {
+                my $string = shift;
+                return LJ::ejs($string);
+            },
+        );
+        HTML::Template::Pro->register_function(
+            ljuser => sub {
+                my $username = shift;
+                return LJ::ljuser($username);
+            },
+        );
         return HTML::Template::Pro->new(
             global_vars => 1, # normally variables declared outside a loop are not available inside
                               # a loop.  This option makes <TMPL_VAR>s like global variables in Perl 
