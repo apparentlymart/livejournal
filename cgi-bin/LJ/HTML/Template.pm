@@ -7,6 +7,7 @@ sub new {
     my $class = shift;
     my $opts = (ref $_[0]) ? shift : {};
     
+    my $template;
     if ($opts->{'use_expr'}) {
         require HTML::Template::Pro; # load module on demand
         HTML::Template::Pro->register_function(
@@ -34,7 +35,7 @@ sub new {
                 return LJ::ljuser($username);
             },
         );
-        return HTML::Template::Pro->new(
+        $template = HTML::Template::Pro->new(
             global_vars => 1, # normally variables declared outside a loop are not available inside
                               # a loop.  This option makes <TMPL_VAR>s like global variables in Perl 
                               # - they have unlimited scope.  
@@ -49,7 +50,7 @@ sub new {
         );
     } else {
         require HTML::Template; # load on demand
-        return HTML::Template->new(
+        $template = HTML::Template->new(
             global_vars => 1, # normally variables declared outside a loop are not available inside
                               # a loop.  This option makes <TMPL_VAR>s like global variables in Perl 
                               # - they have unlimited scope.  
@@ -62,6 +63,10 @@ sub new {
             @_
         );
     }
+    ## Add LJ params
+    $template->param(lj_siteroot => $LJ::SITEROOT);
+    
+    return $template;
 }
 
 
