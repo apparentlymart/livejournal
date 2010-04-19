@@ -25,9 +25,6 @@ sub render_body {
     my @questions = $opts{question} || LJ::QotD->get_questions( user => $u, skip => $skip, domain => $domain );
     return "" unless @questions;
 
-    # If there is no lang tag, try to get user settings or use $LJ::DEFAULT_LANG.
-    $opts{lang} ||= ($u && $u->prop('browselang')) ? $u->prop('browselang') : $LJ::DEFAULT_LANG;
-
     # Navigation controlls
     unless ($opts{nocontrols}) {
 
@@ -240,10 +237,7 @@ sub _get_question_data {
     #       -- Chernyshev 2009/01/21
 
     my $remote = LJ::get_remote();
-    my $lncode = $opts->{lang} || (
-        ($remote && $remote->prop('browselang')) ?
-            $remote->prop('browselang') : $LJ::DEFAULT_LANG
-    );
+    my $lncode = $opts->{lang};
 
     my $ml_key = $class->ml_key("$q->{qid}.text");
     my $text = $class->_format_question_text($class->ml($ml_key, undef, $lncode), $opts);
