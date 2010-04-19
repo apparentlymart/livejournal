@@ -15,9 +15,9 @@
     return $err->('Missing args') unless $journalid && $jitemid;
 
     my %actions = (
-        undorate    => sub { LJ::reset_eventrate(@_) },
+        undorate    => sub { LJ::reset_eventrate(map { int($_) } @_) },
 
-        rate        => sub { LJ::set_eventrate(@_) },
+        rate        => sub { LJ::set_eventrate(map { int($_) } @_) },
 
         list        => sub {
             my ($journalid, $jitemid) = @_;
