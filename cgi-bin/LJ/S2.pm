@@ -3792,6 +3792,19 @@ sub Entry__get_eventrates
     ];
 }
 
+sub Entry__is_myvoice
+{
+    my ($ctx, $this) = @_;
+    my $remote = LJ::get_remote();
+    return 0 unless $remote;
+    return
+        scalar LJ::get_eventrates(
+                journalid   => $this->{'journal'}->{'_u'}->{'userid'},
+                jitemid     => int($this->{'itemid'}),
+                userids     => [ $remote->{'userid'} ],
+        );
+}
+
 sub EntryPage__print_multiform_actionline
 {
     my ($ctx, $this) = @_;

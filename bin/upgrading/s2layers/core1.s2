@@ -369,6 +369,8 @@ class Entry extends EntryLite
     "How many users rates this entry.";
     function builtin get_eventrates() : UserLite[]
     "Id list of users who rates this entry.";
+    function builtin is_myvoice() : bool
+    "Is my voice already counted by the system.";
 }
 
 class Comment extends EntryLite
