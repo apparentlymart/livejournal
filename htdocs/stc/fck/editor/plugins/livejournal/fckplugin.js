@@ -518,7 +518,9 @@ FCK.DataProcessor.ConvertToDataFormat = function(body)
 	}
 	
 	html = html
-		.replace(/><\/lj-template>/g, '/>');
+		.replace(/><\/lj-template>/g, '/>')
+		// remove null pointer
+		.replace(/\ufeff/g, '');
 	
 	return html;
 }
@@ -531,7 +533,7 @@ FCK.Focus = function(to_end)
 		var win = FCK.EditorWindow, doc = FCK.EditorDocument,
 			last = doc.body.lastChild,
 			range = new FCKDomRange(win);
-		if (last.tagName == 'BR', last.getAttribute('type') == '_moz') {
+		if (last.tagName && last.tagName == 'BR' && last.getAttribute('type') == '_moz') {
 			range.MoveToPosition(last, 3);
 		} else {
 			range.MoveToPosition(doc.body, 2);
