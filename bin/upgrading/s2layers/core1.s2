@@ -563,6 +563,9 @@ class Page
 
     function builtin print_trusted(string key)
     "Prints a trusted string by key.";
+
+    function builtin widget(string{} opts) : string
+    "Returns rendered widget body.";
 }
 
 class TagsPage extends Page
