@@ -266,4 +266,24 @@ sub truncate_to_word_with_ellipsis {
     return wantarray ? ($str, $remainder) : $str;
 }
 
+sub durl {
+    my ($class, $str) = @_;
+
+    $str =~ s/\+/ /g;
+    $str =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+    return $str;
+}
+
+sub eurl {
+    my ($class, $str) = @_;
+    ##
+    ## Warning: previous version of code replaced <space> by "+".
+    ## According to RFC 2396, <space> must be "%20", and only in query-string,
+    ## when application/x-www-form-urlencoded (old standard) is used, it may be "+".
+    ## See also: http://en.wikipedia.org/wiki/Percent-encoding.
+    ##
+    $str =~ s/([^a-zA-Z0-9_\,\-.\/\\\:])/uc sprintf("%%%02x",ord($1))/eg;
+    return $str;
+}
+
 1;

@@ -188,12 +188,10 @@ sub redir {
     }
     
     my ($url, $code) = @_;
-    LJ::Request->content_type("text/html");
-    LJ::Request->header_out(Location => $url);
     if ($LJ::DEBUG{'log_redirects'}) {
         LJ::Request->log_error("redirect to $url from: " . join(", ", caller(0)));
     }
-    return $code || LJ::Request::REDIRECT;
+    return LJ::Request->redirect($url, $code);
 }
 
 # send the user to the URL for them to get their domain session cookie

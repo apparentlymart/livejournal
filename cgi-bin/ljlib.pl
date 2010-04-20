@@ -2110,7 +2110,7 @@ sub start_request
     $LJ::DBIRole->trigger_weight_reload();
 
     # reset BML's cookies
-    eval { BML::reset_cookies() };
+    eval { LJ::Request->start_request };
 
     # reload config if necessary
     LJ::Config->start_request_reload;

@@ -2719,4 +2719,14 @@ sub statusvis_message_js {
     return "<script>Site.StatusvisMessage=\"" . LJ::Lang::ml("statusvis_message.$statusvis_full") . "\";</script>";
 }
 
+sub needlogin_redirect {
+    my $uri = LJ::Request->uri;
+    if (my $qs = LJ::Request->args) {
+        $uri .= "?" . $qs;
+    }
+    $uri = LJ::eurl($uri);
+
+    return LJ::Request->redirect("$LJ::SITEROOT/?returnto=$uri");
+}
+
 1;

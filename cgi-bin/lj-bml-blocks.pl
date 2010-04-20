@@ -28,16 +28,7 @@ BML::register_block("LJUSERF", "DS", sub { LJ::ljuser($_[0]->{DATA}, { full => 1
 
 # dynamic needlogin block, needs to be dynamic so we can get at the full URLs and
 # so we can translate it
-BML::register_block("NEEDLOGIN", "", sub {
-
-    my $uri = BML::get_uri();
-    if (my $qs = BML::get_query_string()) {
-        $uri .= "?" . $qs;
-    }
-    $uri = LJ::eurl($uri);
-
-    return BML::redirect("$LJ::SITEROOT/?returnto=$uri");
-});
+BML::register_block("NEEDLOGIN", "", \&LJ::needlogin_redirect);
 
 {
     my $dl = "<a href=\"$LJ::SITEROOT/files/%%DATA%%\">HTTP</a>";
