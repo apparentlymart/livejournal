@@ -145,17 +145,18 @@ sub qotd_display {
         $ret .= "";
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
+            my $subject = $d->{subject} || $q->{subject};
             my $extra_text = $q->{extra_text}
                                 ? "<p>$q->{extra_text}</p>"
                                 : "";
     
             $ret .=
                 ($q->{img_url}
-                    ? qq[<img src="$q->{img_url}" alt="$q->{subject}" title="$q->{subject}" class="qotd-pic" />]
+                    ? qq[<img src="$q->{img_url}" alt="$subject" title="$subject" class="qotd-pic" />]
                     : ''
                 ) . qq[
                 <div class="b-qotd-question-inner">
-                    <h3>$q->{subject}</h3>
+                    <h3>$subject</h3>
                     <p>$d->{text}<em class="i-qotd-by">$d->{from_text}</em></p>
                     $extra_text
                     <ul class="canyon">
@@ -242,6 +243,8 @@ sub _get_question_data {
     my $ml_key = $class->ml_key("$q->{qid}.text");
     my $text = $class->_format_question_text($class->ml($ml_key, undef, $lncode), $opts);
 
+    my $subject = $class->ml( $class->ml_key("$q->{qid}.subject", undef, $lncode) );
+
     my $from_text = '';
     if ($q->{from_user}) {
         my $from_u = LJ::load_user($q->{from_user});
@@ -291,6 +294,7 @@ sub _get_question_data {
     }
     
     return {
+        subject         => $subject,
         text            => $text,
         from_text       => $from_text,
         extra_text      => $extra_text,
