@@ -374,8 +374,6 @@ sub set_text
     my $staleness = int $opts->{'staleness'};
     $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness, revid) ".
              "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), $staleness, $revid)");
-warn ("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness, revid) ".
-             "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), $staleness, $revid)")
 	if $dbh->err;
     return set_error("Error inserting ml_latest: ".$dbh->errstr) if $dbh->err;
     LJ::MemCache::set("ml.${lncode}.${dmid}.${itcode}", $text) if defined $text;
