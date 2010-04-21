@@ -256,7 +256,7 @@ sub send_cookies {
     return $LJ::Request::SEND_COOKIES_OVERRIDE->(@args)
         if ref $LJ::Request::SEND_COOKIES_OVERRIDE eq 'CODE';
 
-    $class->header_out('Set-Cookie' => $_->{'header'})
+    $class->add_header_out('Set-Cookie' => $_->{'header'})
         foreach @cookie_set;
 }
 
@@ -296,6 +296,7 @@ sub start_request {
     my ($class) = @_;
     $cookies_parsed = 0;
     $redirected = undef;
+    @cookie_set = ();
 }
 
 1;
