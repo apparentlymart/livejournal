@@ -155,6 +155,8 @@ sub _parse_cookies {
 
     return if $cookies_parsed;
 
+    %cookie = ();
+
     foreach my $cookie (split(/;\s+/, $class->header_in("Cookie"))) {
         my ($name, $value) = ($cookie =~ /(.*)=(.*)/);
         $name = LJ::Text->durl($name);
