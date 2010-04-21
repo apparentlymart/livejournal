@@ -48,6 +48,7 @@ sub _hash_from_key {
 
                 subj        => $entry->subject_text(),
                 text        => LJ::html_trim_4gadgets($entry->event_text(), 50, $entry->url()),
+                url         => $entry->url(),
                 time        => $entry->logtime_unix(),
                 userpic     => ($entry->userpic ? $entry->userpic->url : undef),
                 poster      => $poster->ljuser_display(),
