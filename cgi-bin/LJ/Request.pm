@@ -169,6 +169,13 @@ sub _parse_cookies {
     $cookies_parsed = 1;
 }
 
+sub _set_preparsed_cookies {
+    my ($class, %cookies) = @_;
+
+    %cookie = map { $_ => [ $cookies{$_} ] } keys %cookies;
+    $cookies_parsed = 1;
+}
+
 sub cookies {
     my ($class) = @_;
 

@@ -1,11 +1,10 @@
-package LJ::Request::Text;
+package LJ::Request::Test;
 use strict;
 
 my (
     $method,
     $get,
     $post,
-    $cookie,
     $redirected,
 );
 
@@ -32,13 +31,13 @@ sub init {
     $method = $params{'method'};
     $get = $params{'get'};
     $post = $params{'post'};
-    $cookie = $params{'cookie'};
+    LJ::Request->_set_preparsed_cookies(%{$params{'cookie'}});
 }
 
 sub LJ::Request::method { $method }
 sub LJ::Request::get_params { %$get }
 sub LJ::Request::post_params { %$post }
-
-
+sub LJ::Request::is_inited { 1 }
+sub LJ::Request::remote_ip { '127.0.0.1' }
 
 1;
