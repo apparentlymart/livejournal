@@ -31,7 +31,6 @@ use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
 use HTML::Entities ();
-use JSON ();
 
 use Class::Autouse qw(
                       TheSchwartz
@@ -99,7 +98,8 @@ sub END { LJ::end_request(); }
                     "embedcontent", "usermsg", "usermsgtext", "usermsgprop",
                     "notifyarchive", "notifybookmarks", "pollprop2", "embedcontent_preview",
                     "logprop_history",
-                    "comet_history", "pingrel"
+                    "comet_history", "pingrel",
+                    "eventrates", "eventratescounters",
                     );
 
 # keep track of what db locks we have out
@@ -347,7 +347,7 @@ sub mogclient {
     return $LJ::MogileFS if $LJ::MogileFS;
 
     if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
-        eval "use MogileFS::Client;";
+        eval { require MogileFS::Client; };
         die "Couldn't load MogileFS: $@" if $@;
 
         $LJ::MogileFS = MogileFS::Client->new(
@@ -2110,7 +2110,7 @@ sub start_request
     $LJ::DBIRole->trigger_weight_reload();
 
     # reset BML's cookies
-    eval { BML::reset_cookies() };
+    eval { LJ::Request->start_request };
 
     # reload config if necessary
     LJ::Config->start_request_reload;
@@ -2138,19 +2138,20 @@ sub start_request
                               ))
                   unless LJ::conf_test($LJ::DISABLED{esn_ajax});
 
+              my %args = LJ::Request->args;
               # contextual popup JS
               LJ::need_res(qw(
                               js/ippu.js
                               js/lj_ippu.js
+                              js/ljwidget.js
+                              js/ljwidget_ippu.js
                               js/hourglass.js
                               js/contextualhover.js
                               stc/contextualhover.css
-                              )) if $LJ::CTX_POPUP;
+                              )) if $LJ::CTX_POPUP and $args{ctxpp} ne 'no';
 
-              LJ::need_res(qw(
-                              js/devel.js
-                              js/livejournal-devel.js
-                              )) if $LJ::IS_DEV_SERVER;
+              # Conditional IE CSS file for all pages 
+              LJ::need_res({condition => 'IE'}, 'stc/ie.css');
           }
     }
 
@@ -3455,23 +3456,6 @@ sub lang_to_locale {
 
     return 'en_US' unless $map{$lang};
     return $map{$lang};
-}
-
-# Data::Dumper for JavaScript
-sub to_json {
-    my $obj = shift;
-    if (ref $obj) {
-        return JSON::to_json($obj);
-    } else {
-        return ($obj =~ /^\d+$/) ?  $obj : '"' . LJ::ejs($obj) . '"';
-    }
-}
-
-*js_dumper = \&to_json;
-
-sub from_json {
-    my $json = shift;
-    return JSON::from_json($json);
 }
 
 package LJ::S1;

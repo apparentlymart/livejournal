@@ -44,6 +44,7 @@ package LJ::Text;
 use Encode qw(encode_utf8 decode_utf8);
 use Carp qw(confess cluck);
 use UNIVERSAL qw(isa);
+use strict;
 
 # given a string, returns its length in bytes (that is, actual octets needed to
 # represent all characters in that string)
@@ -76,7 +77,7 @@ sub fix_utf8 {
     confess "must be called as a class method"
         unless isa($class, __PACKAGE__);
 
-    $str = decode_utf8($str, Encode::QUIET);
+    $str = decode_utf8($str, Encode::FB_QUIET());
     return encode_utf8($str);
 }
 
@@ -198,6 +199,90 @@ sub truncate_with_ellipsis {
         ) . $ellipsis;
     }
 
+    return $str;
+}
+
+sub truncate_to_word_with_ellipsis {
+    my ($class, @opts) = @_;
+
+    confess "must be called as a class method"
+        unless isa($class, __PACKAGE__);
+
+    confess "cannot coerce options to hash: " . Dumper(\@opts)
+        unless scalar(@opts) % 2 == 0;
+
+    my %opts = @opts;
+
+    my $str = delete $opts{'str'};
+    my $original_string = $str;
+    my $bytes = delete $opts{'bytes'};
+    my $chars = delete $opts{'chars'};
+    my $remainder = '';
+    my $ellipsis = delete $opts{'ellipsis'} || Encode::encode_utf8("\x{2026}");
+
+    confess "unknown options: " . Data::Dumper(\%opts)
+        if %opts;
+
+    cluck "not actually truncating"
+        unless $bytes || $chars;
+
+    my $remove_last_word = sub {
+        my ($str) = @_;
+
+        if ($str =~ /\s+$/) {
+            $str =~ s/\s+$//;
+        } else {
+            $str =~ s/\s*\S+$//;
+        }
+
+        return $str;
+    };
+
+    if ($bytes && $class->byte_len($str) > $bytes) {
+        my $bytes_trunc = $bytes - $class->byte_len($ellipsis);
+        $str = $class->truncate(
+            'str' => $str,
+            'bytes' => $bytes_trunc + 1
+        );
+
+        $str = $remove_last_word->($str);
+        $remainder = substr($original_string, $class->byte_len($str));
+        $str .= $ellipsis;
+    }
+
+    if ($chars && $class->char_len($str) > $chars) {
+        my $chars_trunc = $chars - $class->char_len($ellipsis);
+        $str = $class->truncate(
+            'str' => $str,
+            'chars' => $chars_trunc + 1
+        );
+
+        $str = $remove_last_word->($str);
+        $remainder = substr($original_string, $class->byte_len($str));
+        $str .= $ellipsis;
+    }
+
+    $remainder =~ s/^\s+//;
+    return wantarray ? ($str, $remainder) : $str;
+}
+
+sub durl {
+    my ($class, $str) = @_;
+
+    $str =~ s/\+/ /g;
+    $str =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+    return $str;
+}
+
+sub eurl {
+    my ($class, $str) = @_;
+    ##
+    ## Warning: previous version of code replaced <space> by "+".
+    ## According to RFC 2396, <space> must be "%20", and only in query-string,
+    ## when application/x-www-form-urlencoded (old standard) is used, it may be "+".
+    ## See also: http://en.wikipedia.org/wiki/Percent-encoding.
+    ##
+    $str =~ s/([^a-zA-Z0-9_\,\-.\/\\\:])/uc sprintf("%%%02x",ord($1))/eg;
     return $str;
 }
 

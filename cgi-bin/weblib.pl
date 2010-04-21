@@ -11,6 +11,7 @@ require "crumbs.pl";
 
 use Carp;
 use LJ::Request;
+use LJ::JSON;
 use Class::Autouse qw(
                       LJ::Event
                       LJ::Subscription::Pending
@@ -1127,7 +1128,7 @@ sub entry_form_decode
                 prop_picture_keyword prop_current_moodid
                 prop_current_mood prop_current_music
                 prop_opt_screening prop_opt_noemail
-                prop_opt_preformatted prop_opt_nocomments
+                prop_opt_preformatted prop_opt_nocomments prop_opt_lockcomments
                 prop_current_location prop_current_coords
                 prop_taglist prop_qotdid)) {
         $req->{$_} = $POST->{$_};
@@ -1140,6 +1141,7 @@ sub entry_form_decode
     $req->{"prop_opt_preformatted"} ||= $POST->{'switched_rte_on'} ? 1 :
         $POST->{'event_format'} eq "preformatted" ? 1 : 0;
     $req->{"prop_opt_nocomments"}   ||= $POST->{'comment_settings'} eq "nocomments" ? 1 : 0;
+    $req->{'prop_opt_lockcomments'} ||= $POST->{'comment_settings'} eq 'lockcomments' ? 1 : 0;
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
     $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C' if LJ::is_enabled('default_copyright', LJ::get_remote()) 
@@ -1208,6 +1210,16 @@ sub no_access_error {
         return "$text <b>(DEVMODE: <a href='/admin/priv/?devmode=1&user=$remote->{user}&priv=$priv&arg=$privarg'>Grant $priv\[$privarg\]</a>)</b>";
     } else {
         return $text;
+    }
+}
+
+# Data::Dumper for JavaScript
+sub js_dumper {
+    my $obj = shift;
+    if (ref $obj) {
+        return LJ::JSON->to_json($obj);
+    } else {
+        return ($obj =~ /^[1-9]\d*$/) ?  $obj : '"' . LJ::ejs($obj) . '"';
     }
 }
 
@@ -2449,7 +2461,10 @@ LOGIN_BAR
 
     LJ::run_hooks('add_extra_cells_in_controlstrip', \$ret);
 
-    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr></table>";
+    my $message;
+    $message = LJ::Widget::SiteMessages->render if LJ::Widget::SiteMessages->should_render;
+
+    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr><tr><td colspan='5'>$message</td></tr></table>";
 }
 
 sub control_strip_js_inject
