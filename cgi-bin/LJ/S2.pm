@@ -3904,12 +3904,14 @@ sub Page__print_ad_box {
     $S2::pout->($ad_html) if $ad_html;
 }
 
+my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers);
+
 sub Page__widget
 {
     my ($ctx, $this, $opts) = @_;
 
     my $class = $opts->{'class'};
-    return '' unless $class;
+    return '' unless $approved_widget_classes{$class};
 
     # if $opts->{'journal'} specified, try use it as name to load LJ::User object,
     # else get current journal.
