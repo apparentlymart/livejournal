@@ -6815,6 +6815,14 @@ widget.themenav.switchtos1=Switch to old style system (S1)
 widget.themenav.title|staleness=1
 widget.themenav.title=2. Select a New Theme
 
+widget.topusers.top5commenters.title=Top 5 commenters within 24h
+
+widget.topusers.head.nr=Nr
+
+widget.topusers.head.users=Users
+
+widget.topusers.top5posters.title=Top 5 posters within a week
+
 widget.upgradeaccount.title|staleness=1
 widget.upgradeaccount.title=Upgrade your account
 
