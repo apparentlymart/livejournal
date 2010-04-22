@@ -160,7 +160,7 @@ sub qotd_display {
                     <p>$d->{text}<em class="i-qotd-by">$d->{from_text}</em></p>
                     $extra_text
                     <ul class="canyon">
-                        <li class="canyon-section"><form action="$d->{answer_url}" target="_top"><button type="submit">$d->{answer_text}</button></form></li>
+                        <li class="canyon-section"><form action="$LJ::SITEROOT/update.bml" method="get" target="_top"><button type="submit">$d->{answer_text}</button><input type="hidden" name="qotd" value="$q->{qid}" /></form></li>
                         <li class="canyon-side">$d->{view_answers_link}</li>
                     </ul>
                 </div>];
