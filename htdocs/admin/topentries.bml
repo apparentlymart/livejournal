@@ -9,6 +9,8 @@ body<=
     use LJ::Widget::TopEntries;
     use LJ::TopEntries;
 
+    LJ::need_res('stc/framework/modules.css');
+
     my $remote = LJ::get_remote();
 
     return LJ::error_list("Check your privs")
@@ -33,9 +35,9 @@ body<=
     } elsif ($GET{max_entries}) {
         $top_entries->max_entries($GET{max_entries});
     } else {
-        my $ret = LJ::Widget::TopEntries->render(journal => $journal);
+        my $ret = '<div class="canyon">'."\n".'<div class="canyon-side">'."\n".LJ::Widget::TopEntries->render(journal => $journal).'</div>'."\n";
 
-        $ret .= "<form method='GET'>";
+        $ret .= '<div class="canyon-section">'."\n".'<form method="GET">'."\n";
 
 # Buttons 'Add' and 'Store' is only to submit forms data.
 # If any of 'url' or (min|max)_entries is not empty, it
@@ -43,32 +45,32 @@ body<=
 #
 # 'delete-n:n' button will remove entry 'n:n' from the list.
 
-        $ret .= "Enter URL for adding featured post: ";
+        $ret .= "<p>Enter URL for adding featured post:<br />";
         $ret .= LJ::html_text({name => 'url', maxlength => '100', size => '50', value => $GET{url}});
-        $ret .= "<button type='submit'>Add</button>";
-        $ret .= "<br />\n";
+        $ret .= " <button type='submit'>Add</button></p>\n";
 
-        $ret .= "Number of shown entries: ";
+        $ret .= '<table><tr><td style="width:27.2em">Number of shown entries: ';
         $ret .= LJ::html_text({name => 'max_entries', maxlength => '1', size => '1', value => $top_entries->max_entries()});
-        $ret .= "<br />\n";
+        $ret .= '</td><td style="vertical-align:middle;" rowspan="2"><button type="submit">Store</button></td></tr>'."\n";
 
-        $ret .= "Number of entries, that can not be deleted: ";
+        $ret .= "<tr><td>Number of entries, that can not be deleted: ";
         $ret .= LJ::html_text({name => 'min_entries', maxlength => '1', size => '1', value => $top_entries->min_entries()});
+        $ret .= "</td></tr>\n";
 
-        $ret .= "<br />\n";
+        $ret .= '';
+        $ret .= "</table>\n";
 
-        $ret .= "<button type='submit'>Store</button>";
-        $ret .= "<br />\n";
-
-        $ret .= "<table>";
+        $ret .= "<h3>Added Posts</h3><ul>";
         foreach my $post ($top_entries->get_featured_posts(raw => 1)) {
-            $ret .= "<tr><td>$post->{subj}</td>";
-            $ret .= "<td><button type='submit' name='delete-$post->{'key'}' value=1>delete</button></td></tr>";
+            $ret .= '<li><a href="'.$post->{url}.'">';
+            my $subj = $post->{subj};
+            if ($subj eq '') {$ret .= '(no subject)';} else {$ret .= $subj;}
+            $ret .= '</a> ';
+            $ret .= '<button type="submit" name="delete-'.$post->{"key"}.'" value="1">Remove post from widget</button></li>';
         }
-        $ret .= "</table>";
+        $ret .= "</ul>\n";
 
-        $ret .= "</form>";
-        $ret .= "<?hr?>";
+        $ret .= "</form>\n</div>\n</div>";
 
         return $ret;
     }
