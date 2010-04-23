@@ -1525,6 +1525,28 @@
         }
     }
 
+    my $apps_list = LJ::JSON->from_json($u->prop('userapps_authorized')||'{}');
+    my @userapps;
+    foreach (keys %$apps_list) {
+	my $app = LJ::UserApps->get_application($_);
+	next unless $app && $app->can_show_restricted;
+	my $app_string = '<a href="'.$LJ::SITEROOT.'/apps/info.bml?id='.$app->id.'">'.$app->name.'</a>';
+	if ($app->icon) {
+	    $app_string = '<img src='.$app->icon.' width="16" height="16"> '.$app_string;
+	}
+	push @userapps, $app_string;
+    }
+
+    my $text = $ML{'.apps.installed'};
+    my $apps = "<p class='inner_section_header first'><span class='expandcollapse on' id='apps_header'>".$arrowimg->("apps")." $text (".scalar(@userapps).")";
+    $apps .= '<div id="apps_body" class="inner_section_body" style="display: none;">';
+    $apps .= join(", ", @userapps);
+    $apps .= '</div>';
+
+    $body .= "<div class='ljclear'></div>";
+    $body .= "<div class='section'><img src='$LJ::IMGPREFIX/application.gif' alt='' /> $ML{'.apps.header'} <span class='section_link'>[<a href='$LJ::SITEROOT/manage/settings/?cat=userapps'>$ML{'.section.edit'}</a>]</span></div>";
+    $body .= $apps;
+
     $body .= LJ::get_ads({ location => 'bml.userinfo.bottom', journalu => $u });
 
     $body .= "</div>";
