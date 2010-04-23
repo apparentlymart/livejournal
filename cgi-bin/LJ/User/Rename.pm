@@ -217,6 +217,12 @@ sub basic_rename {
     
     my $u_old_username;
     if ($opts->{preserve_old_username}) {
+        # we need to create an account even in case the user chose to disconnect
+        # the old username; the older username is kept deleted for a while
+        # so as to 1) not allow strangers to obtain it right after the rename
+        # is complete, and 2) to allow the Billing team to fix it if the user
+        # has made a mistake; the Billing team uses rename_redir console command,
+        # see /admin/console and cgi-bin/LJ/Console/Command/RenameRedir.pm
         $u_old_username = LJ::create_account({
             'user' => $from,
             'password' => '',
