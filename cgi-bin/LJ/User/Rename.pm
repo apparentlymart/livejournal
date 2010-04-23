@@ -2,6 +2,9 @@ package LJ::User::Rename;
 use strict;
 use warnings;
 
+use LJ::Request;
+use LJ::Event::SecurityAttributeChanged;
+
 ## namespace for user-renaming actions
 
 ##
@@ -28,15 +31,15 @@ sub can_reuse_account {
     } elsif ($u && lc($tou->email_raw) eq lc($u->email_raw) && $tou->is_visible && $tou->is_person) {
         if ($tou->password eq $u->password) {
             if (!$tou->is_validated || !$u->is_validated) {
-                $opts->{error} = BML::ml('htdocs/rename/use.bml.error.notvalidated');
+                $opts->{error} = BML::ml('/rename/use.bml.error.notvalidated');
             } else {
                 return 1;
             }
         } else {
-            $opts->{error} = BML::ml('htdocs/rename/use.bml.error.badpass');
+            $opts->{error} = BML::ml('/rename/use.bml.error.badpass');
         }
     } else {
-        $opts->{error} = BML::ml('htdocs/rename/use.bml.error.usernametaken');
+        $opts->{error} = BML::ml('/rename/use.bml.error.usernametaken');
     }
     return 0;
 }
@@ -50,18 +53,14 @@ sub can_reuse_account {
 ##
 sub get_unused_name {
     my $tempname = shift;
-    my $proposed_name = shift;
     
     my $exname;
-    $tempname ||= "ljswap_00";   
-    $tempname = substr($tempname, 0, 9) if length($tempname) > 9;
+    $tempname ||= "lj_swap_"; # 'ex_lj_swap_00893' is too long - so omit '00'
+    $tempname = substr($tempname, 0, 8) if length($tempname) > 8;
     my $dbh = LJ::get_db_writer();
     for my $i (1..10) {
-        # first try the proposed name 
-        if ($i == 1 && $proposed_name) {
-            $exname = $proposed_name;
-        # otherwise we either didn't have one or it's been
-        # taken in the meantime?
+        if ($i == 1) {
+            $exname = "ex_$tempname";
         } else {
             $exname = "ex_$tempname" . int(rand(999));
         }
@@ -90,6 +89,7 @@ sub get_unused_name {
 ##      opt_redir               - If true and 'preserve_old_username' is true, then
 ##                                the account created with old username will be 'redirect' flagged.
 ##                                This option is 'on' by default for non-personal accounts (historically)
+##      $opts->{token} || "[unknown]" will be put into 'renames' DB table if $opts->{renid} is false
 ## Output: 
 ##      true or false 
 ##      $opts->{error} is text of error
@@ -99,7 +99,7 @@ sub basic_rename {
 
     $opts ||= {};
     ($from, $to) = map { LJ::canonical_username($_) } @_;
-    unless ($from ne "" && $to ne "") {
+    unless ($from ne "") {
         $opts->{error} = "Empty username";
         return;
     }
@@ -110,21 +110,37 @@ sub basic_rename {
         return;    
     }
 
-    LJ::run_hooks('rename_user', $u, $to);
-
     my $dbh = LJ::get_db_writer();
-    foreach my $table (qw(user useridmap overrides style))
-    {
-        $dbh->do("UPDATE $table SET user=? WHERE user=?",
-                 undef, $to, $from);
-        if ($dbh->err) {
-            $opts->{error} = "Database error: " . $dbh->errstr;
-            return;
+
+    my $actual_rename = sub {
+        my ($from, $to) = @_;
+        foreach my $table (qw(user useridmap overrides style)) {
+            $dbh->do("UPDATE $table SET user=? WHERE user=?",
+                     undef, $to, $from);
+            return 1 if $dbh->err;
         }
+        return 0;
+    };
+
+    my $err;
+    if ($to) {
+        $err = $actual_rename->($from, $to);
+    } else { # move away destination name as additional rename step
+        for my $i (1..3) {
+            $to = get_unused_name($from);
+            $err = $actual_rename->($from, $to);
+            last unless $err; # renamed ok? fix name!
+        }
+    }
+    if ($err) {
+        $opts->{error} = "Database error: " . $dbh->errstr;
+        return;
     }
     
     ## Done.
     ## From now on, there may be errors but the rename is actually done.
+
+    LJ::run_hooks('rename_user', $u, $to);
 
     # deal with cases of renames
     foreach my $col (qw(fromuser touser)) {
@@ -163,11 +179,13 @@ sub basic_rename {
     }
     $opts->{error} = $dbh->err if $dbh->err;
     
+    $u->kill_session;
+
     my @date = localtime(time);
     LJ::Event::SecurityAttributeChanged->new($u ,  { 
         action       => 'account_renamed', 
         old_username => $from, 
-        ip           => BML::get_remote_ip(),
+        ip           => LJ::is_web_context() ? LJ::Request->remote_ip() : '127.0.0.1', # without IP it will not work
         datetime     => sprintf("%02d:%02d %02d/%02d/%04d", @date[2,1], $date[3], $date[4]+1, $date[5]+1900),
     })->fire;
 
@@ -228,15 +246,14 @@ sub basic_rename {
             'password' => '',
             'name' => '[renamed acct]',
         });
-    }
-    
-    my $alias_changed = $dbh->do("UPDATE email_aliases SET alias=? WHERE alias=?",
-                                 undef, "$to\@$LJ::USER_DOMAIN",
-                                 "$from\@$LJ::USER_DOMAIN");
-    if ($u_old_username) {
+        my $alias_changed = $dbh->do("UPDATE email_aliases SET alias=? WHERE alias=?",
+                                     undef, "$to\@$LJ::USER_DOMAIN",
+                                     "$from\@$LJ::USER_DOMAIN");
+
         if ($u->{journaltype} ne 'P' || $opts->{'opt_redir'}) {
             LJ::update_user($u_old_username, { raw => "journaltype='R', statusvis='R', statusvisdate=NOW()" });
-            LJ::set_userprop($dbh, $u_old_username, "renamedto", $to);
+            LJ::set_userprop($dbh, $u_old_username, "renamedto", $to); # 'from' will point to 'to'
+            $u->set_prop('renamedto', undef) if $u->prop('renamedto') eq $from; # safeness against circular redirection
             if ($alias_changed > 0) {
                 $dbh->do("INSERT INTO email_aliases VALUES (?,?)", undef,
                      "$u->{'user'}\@$LJ::USER_DOMAIN", 
@@ -247,7 +264,7 @@ sub basic_rename {
         }
     }   
 
-    return 1;
+    return $to;
 }
 
 1;
