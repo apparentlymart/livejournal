@@ -1532,14 +1532,14 @@
 	next unless $app && $app->can_show_restricted;
 	my $app_string = '<a href="'.$LJ::SITEROOT.'/apps/info.bml?id='.$app->id.'">'.$app->name.'</a>';
 	if ($app->icon) {
-	    $app_string = '<img src='.$app->icon.' width="16" height="16"> '.$app_string;
+	    $app_string = '<img src='.$app->icon.' width="16" height="16" style="vertical-align:bottom"> '.$app_string;
 	}
 	push @userapps, $app_string;
     }
 
     my $text = $ML{'.apps.installed'};
     my $apps = "<p class='inner_section_header first'><span class='expandcollapse on' id='apps_header'>".$arrowimg->("apps")." $text (".scalar(@userapps).")";
-    $apps .= '<div id="apps_body" class="inner_section_body" style="display: none;">';
+    $apps .= '<div id="apps_body" class="inner_section_body">';
     $apps .= join(", ", @userapps);
     $apps .= '</div>';
 
