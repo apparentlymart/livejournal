@@ -10,6 +10,7 @@
         }
         .appwidget-friendbirthdays table {
             width: 100%;
+            margin: 0;
             border: 0;
         	}
         .appwidget-friendbirthdays H3 {
@@ -28,4 +29,9 @@
         * html .appwidget-friendbirthdays .gift-link {
             line-height: 14px;
             }
-
+        .appwidget-friendbirthdays UL.b-list-options {
+            padding: 10px 0 0;
+            }
+            .appwidget-friendbirthdays UL.b-list-options LI {
+                padding: 0 0 5px;
+                }

@@ -57,12 +57,14 @@ sub render_body {
 
     $ret .= "</table>";
 
-    $ret .= "<p class='indent_sm'>&raquo; <a href='$LJ::SITEROOT/birthdays.bml'>" .
+    $ret .= "<ul class='b-list-options'>"  if  $opts{friends_link} or $opts{paidtime_link};
+    $ret .= "<li>&raquo; <a href='$LJ::SITEROOT/birthdays.bml'>" .
             $class->ml('widget.friendbirthdays.friends_link') .
-            "</a></p>" if $opts{friends_link};
-    $ret .= "<p class='indent_sm'>&raquo; <a href='$LJ::SITEROOT/paidaccounts/friends.bml'>" .
+            "</a></li>" if $opts{friends_link};
+    $ret .= "<li>&raquo; <a href='$LJ::SITEROOT/paidaccounts/friends.bml'>" .
             $class->ml('widget.friendbirthdays.paidtime_link') .
-            "</a></p>" if $opts{paidtime_link};
+            "</a></li>" if $opts{paidtime_link};
+    $ret .= "</ul>"  if  $opts{friends_link} or $opts{paidtime_link};
 
     $ret .= '</div></div></div></div></div></div>';
     
