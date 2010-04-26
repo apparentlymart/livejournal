@@ -12,11 +12,11 @@ body<=
     my $journalid = 0;
     $journalid = $journal_user->userid() if $journal_user;
 
-    return 'Missing args' unless $journalid && $jitemid;
+    return '<h2>Missing args</h2>' unless $journalid && $jitemid;
 
     my $total = LJ::get_eventratescounters($journalid, $jitemid);
 
-    return "There is no one like this page yet" unless $total;
+    return "<h2>There is no one like this page yet</h2>" unless $total;
 
     my @result = LJ::get_eventrates(
         journalid   => $journalid,
@@ -24,11 +24,11 @@ body<=
     );
 
     return
-        "Likes this page ($total): " .
-            join(', ', map {
+        "<h2>Likes this page ($total):</h2> <ul class='likes-list'><li>" .
+            join('</li><li>', map {
                 my $user = undef;
                 $_ && ($user = LJ::load_userid($_)) && $user->ljuser_display();
-        } @result);
+        } @result)."</ul>";
 }
 _code?>
 <=body
