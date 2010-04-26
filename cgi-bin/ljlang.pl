@@ -466,6 +466,8 @@ sub remove_text {
 
 sub get_effective_lang {
 
+    return LJ::run_hook('effective_lang') if LJ::are_hooks('effective_lang');
+
     my $lang;
     if (LJ::is_web_context()) {
         $lang = BML::get_language();
