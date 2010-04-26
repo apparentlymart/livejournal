@@ -212,7 +212,8 @@ LJCutCommand.prototype.Execute=function()
 			range.MoveToNodeContents(cut_node);
 			range.Collapse(true);
 		}
-		FCKDomTools.InsertAfterNode(cut_node, FCK.EditorDocument.createTextNode('\ufeff'))
+		cut_node.parentNode.insertBefore(FCK.EditorDocument.createTextNode('\ufeff'), cut_node);
+		FCKDomTools.InsertAfterNode(cut_node, FCK.EditorDocument.createTextNode('\ufeff'));
 		
 		range.Select();
 		FCK.Focus();
@@ -439,7 +440,9 @@ FCK.DataProcessor.ConvertToHtml = function(data)
 		data = data.replace(/\n/g, '<br />');
 	}
 	
-	data = data.replace(/<lj-cut([^>]*)><\/lj-cut>/g, '<lj-cut$1>\ufeff</lj-cut>');
+	data = data.replace(/<lj-cut([^>]*)><\/lj-cut>/g, '<lj-cut$1>\ufeff</lj-cut>')
+		.replace(/(<lj-cut[^>]*>)/g, '\ufeff$1')
+		.replace(/(<\/lj-cut>)/g, '$1\ufeff');
 	
 	// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
 	if (FCKBrowserInfo.IsIE) {
