@@ -174,6 +174,9 @@ sub valid_stylesheet_url {
 sub make_authas_select {
     my ($u, $opts) = @_; # type, authas, label, button
 
+    die "make_authas_select called outside of web context"
+        unless LJ::is_web_context();
+
     my @list = LJ::get_authas_list($u, $opts);
 
     # only do most of form if there are options to select from
@@ -192,7 +195,9 @@ sub make_authas_select {
     }
 
     # no communities to choose from, give the caller a hidden
-    return  LJ::html_hidden('authas', $opts->{'authas'} || $u->{'user'});
+    my $ret = LJ::html_hidden('authas', $opts->{'authas'} || $u->{'user'});
+    $ret .= $opts->{'nocomms'} if $opts->{'nocomms'};
+    return $ret;
 }
 
 # <LJFUNC>
