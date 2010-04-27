@@ -210,6 +210,7 @@ my $old_url = 0;
       LJ::need_res(qw(
                       js/x_core.js
                       js/quickreply.js
+                      js/journal.js
                       ));
  }
 
@@ -817,6 +818,15 @@ my $old_url = 0;
          }
      }
 
+     my $rated_count = "";
+
+     if (LJ::is_eventrate_enable($u, $itemid)) {
+        $rated_count = " (<a href=\"\">+1</a>)".
+                " - (".LJ::get_eventratescounters($u->{'userid'}, $itemid).")";
+     }
+
+     $ret .= $rated_count;
+
      $ret .= "</b></p>";
 
      $ret .= "<div align='center'>" . LJ::make_qr_target('top') . "</div>" if $remote;
@@ -862,6 +872,7 @@ my $old_url = 0;
                  $ret .= "(<a href='$posturl'>$T{'postcomments'}</a>)";
              }
          }
+         $ret .= $rated_count;
          $ret .= "</b></p>";
          $ret .= "<div align='center'>" . LJ::make_qr_target('bottom') . "</div>" if $remote;
 
