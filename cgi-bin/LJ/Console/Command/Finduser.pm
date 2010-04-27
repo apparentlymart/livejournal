@@ -9,8 +9,8 @@ sub cmd { "finduser" }
 sub desc { "Finds all accounts matching a certain criterion." }
 
 sub args_desc { [
-                 'criteria' => "One of: 'user', 'userid', 'email', or 'timeupdate'.",
-                 'data' => "Either a username or email address, or a userid when using 'userid'.",
+                 'criteria' => "One of: 'user', 'userid', 'email', 'timeupdate', 'openid', or 'openid-raw'.",
+                 'data' => "Either a username or email address, a userid when using 'userid', or an OpenID identity URL.\nThe URL is canonicalized in the 'openid' mode.",
                  ] }
 
 sub usage { '<criteria> <data>' }
@@ -29,6 +29,8 @@ sub execute {
         $data = $args[0];
         if ($data =~ /@/) {
             $crit = 'email';
+        } elsif ($data =~ /^http:/) {
+            $crit = 'openid';
         } else {
             $crit = 'user';
         }
@@ -68,6 +70,15 @@ sub execute {
     } elsif ($crit eq 'user') {
         $data = LJ::canonical_username($data);
         $userlist = $dbh->selectcol_arrayref("SELECT userid FROM user WHERE user = ?", undef, $data);
+    } elsif ($crit eq 'openid' || $crit eq 'openid-raw') {
+        if ($crit eq 'openid') {
+            # canonicalize the address first
+            my $csr = LJ::OpenID::consumer();
+            my $id = $csr->claimed_identity($data);
+            $data = $id->claimed_url;
+        }
+
+        $userlist = $dbh->selectcol_arrayref('SELECT userid FROM identitymap WHERE identity=? AND idtype="O"', undef, $data);
     } else {
         return $self->error("Unknown criterion. Consult the reference.");
     }

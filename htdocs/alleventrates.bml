@@ -1,0 +1,35 @@
+<?page
+body<=
+<?_code # -*-bml-*-
+{
+    use strict;
+    use LJ::JSON;
+    use vars qw(%GET);
+
+    my $action = $GET{action};
+    my ($journal, $jitemid) = map { $GET{$_} } qw(journal jitemid);
+    my $journal_user = LJ::load_user($journal);
+    my $journalid = 0;
+    $journalid = $journal_user->userid() if $journal_user;
+
+    return '<h2>Missing args</h2>' unless $journalid && $jitemid;
+
+    my $total = LJ::get_eventratescounters($journalid, $jitemid);
+
+    return "<h2>There is no one like this page yet</h2>" unless $total;
+
+    my @result = LJ::get_eventrates(
+        journalid   => $journalid,
+        jitemid     => $jitemid,
+    );
+
+    return
+        "<h2>Likes this page ($total):</h2> <ul class='likes-list'><li>" .
+            join('</li><li>', map {
+                my $user = undef;
+                $_ && ($user = LJ::load_userid($_)) && $user->ljuser_display();
+        } @result)."</ul>";
+}
+_code?>
+<=body
+page?>

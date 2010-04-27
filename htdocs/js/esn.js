@@ -2,7 +2,6 @@ var ESN = new Object();
 
 LiveJournal.register_hook("page_load", function () {
   ESN.initCheckAllBtns();
-  ESN.initEventCheckBtns();
   ESN.initTrackBtns();
 });
 
@@ -34,31 +33,6 @@ ESN.initCheckAllBtns = function () {
           "parent": $("CategoryRow-" + catid)
           });
     });
-  });
-}
-
-// set up auto show/hiding of notification methods
-ESN.initEventCheckBtns = function () {
-  var viewObjects = document.getElementsByTagName("*");
-  var boxes = DOM.filterElementsByClassName(viewObjects, "SubscriptionInboxCheck") || [];
-
-  boxes.forEach( function (box) {
-    DOM.addEventListener(box, "click", ESN.eventChecked.bindEventListener());
-  });
-}
-
-ESN.eventChecked = function (evt) {
-  var target = evt.target;
-  if (!target)
-    return;
-
-  var parentRow = DOM.getFirstAncestorByTagName(target, "tr", false);
-
-  var viewObjects = parentRow.getElementsByTagName("*");
-  var boxes = DOM.filterElementsByClassName(viewObjects, "NotificationOptions") || [];
-
-  boxes.forEach( function (box) {
-    box.style.visibility = target.checked ? "visible" : "hidden";
   });
 }
 
@@ -142,7 +116,7 @@ ESN.trackBtnClickHandler = function (evt) {
         commentsTrackBtn = TrackCheckbox("someone replies in this comment thread", 1);
     } else {
         // entry tracking button
-        newEntryTrackBtn = TrackCheckbox(LJ_cmtinfo["journal"] + " posts a new entry", trackingNewEntries);
+		newEntryTrackBtn = TrackCheckbox(Site.currentJournal + ' posts a new entry', trackingNewEntries);
         commentsTrackBtn = TrackCheckbox("someone comments on this post", trackingNewComments);
     }
 
@@ -243,12 +217,11 @@ ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
 
             if (info.subscribed) {
                 if (info.subid)
-                    DOM.setElementAttribute(btn, "lj_subid", info.subid);
+					btn.setAttribute('lj_subid', info.subid);
                 if (info.newentry_subid)
-                    DOM.setElementAttribute(btn, "lj_newentry_subid", info.newentry_subid);
+					btn.setAttribute('lj_newentry_subid', info.newentry_subid);
 
-
-                DOM.setElementAttribute(btn, "title", 'Untrack This');
+				btn.setAttribute('title', 'Untrack This');
 
                 // update subthread tracking icons
                 var dtalkid = btn.getAttribute("lj_dtalkid");
@@ -258,11 +231,11 @@ ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
                     btn.src = Site.imgprefix + "/btn_tracking.gif";
             } else {
                 if (info["event_class"] == "LJ::Event::JournalNewComment")
-                    DOM.setElementAttribute(btn, "lj_subid", 0);
+					btn.setAttribute('lj_subid', 0);
                 else if (info["event_class"] == "LJ::Event::JournalNewEntry")
-                    DOM.setElementAttribute(btn, "lj_newentry_subid", 0);
+					btn.setAttribute('lj_newentry_subid', 0);
 
-                DOM.setElementAttribute(btn, "title", 'Track This');
+				btn.setAttribute('title', 'Track This');
 
                 // update subthread tracking icons
                 var dtalkid = btn.getAttribute("lj_dtalkid");
@@ -293,9 +266,9 @@ ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
             }
 
             if (info.auth_token)
-                DOM.setElementAttribute(btn, "lj_auth_token", info.auth_token);
+				btn.setAttribute('lj_auth_token', info.auth_token);
             if (info.newentry_token)
-                DOM.setElementAttribute(btn, "lj_newentry_token", info.newentry_token);
+				btn.setAttribute('lj_newentry_token', info.newentry_token);
         }
     };
 
@@ -384,7 +357,7 @@ ESN.updateThreadIcons = function (dtalkid, tracking) {
 };
 
 jQuery(function($){
-	$({selector: 'a.delete-group', context: $('#settings_form')}).live('click', function(e)
+	$('#settings_form').delegate('a.delete-group', 'click', function(e)
 	{
 		var group = this.href.match('&delete_group=(.*?)&')[1];
 		$.post(location.href, {

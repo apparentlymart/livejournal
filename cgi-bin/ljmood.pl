@@ -110,8 +110,17 @@ sub mood_size_attributes {
     my %pic = @_;
 
     my @attrs;
-    push @attrs, "width='$pic{'w'}'" if $pic{'w'};
-    push @attrs, "height='$pic{'h'}'" if $pic{'h'};
+    if ($pic{'w'} && $pic{'h'}) {
+        push @attrs, "width='$pic{'w'}'";
+        push @attrs, "height='$pic{'h'}'";
+        push @attrs, qq{class="$pic{class}"} if $pic{'class'};
+    } else {
+        my @classes = qw(meta-mood-img);
+        push @classes, $pic{'class'} if $pic{'class'};
+        my $classes = join(' ', @classes);
+        push @attrs, qq{class="$classes"};
+    }
+
     return join(' ', @attrs);
 
 }

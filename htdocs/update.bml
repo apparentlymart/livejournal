@@ -106,8 +106,34 @@
         my $lncode = ($remote && $remote->prop('browselang')) ? $remote->prop('browselang') : $LJ::DEFAULT_LANG;
         $event = LJ::Widget::QotD->embed_text($qotd, $lncode);
         $tags = LJ::Widget::QotD->tags_text($qotd);
+        LJ::run_hooks('qotd_modify_tags', \$tags);
         my $text = LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], form_disabled => 1 );
         $$head .= "<script>LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";
+    }
+
+    # in case of repost other entry by its uri we should check its visibility
+    # for remote user.
+    if (my $repost = ($POST{repost} || $GET{repost})){
+        my $entry = LJ::Entry->new_from_url($repost);
+        unless ($entry){
+            $$body = "<?badinput?>";
+            return;
+        }
+
+        if ($entry->visible_to($remote)){
+            $subject ||= (LJ::ehtml($entry->subject_orig) || LJ::Lang::ml("repost.default_subject"));
+            unless ($event){
+                $event = $entry->event_raw;
+                LJ::CleanHTML::clean_event(\$event, { cuturl => $entry->url });
+                $event = LJ::Lang::ml("repost.wrapper", { 
+                                            username => $entry->poster->username,
+                                            url      => $entry->url,
+                                            subject  => $subject,
+                                            text     => $event,
+                                            });
+            }
+        }
+        
     }
 
     # try to call a hook to fill in the fields
@@ -432,6 +458,10 @@
                 } else {
 
                     # update success
+
+                    # some other code at this bml-page can check this flag
+                    # with 'exists $BMLCodeBlock::POST{success}'
+                    $POST{success} = 1;
 
                     if ($qotd) {
                         LJ::MemCache::delete('qotd_count:'.$qotd->{qid});

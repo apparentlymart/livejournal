@@ -366,10 +366,8 @@ sub enqueue {
     if ($max && $self->count >= $max) {
 
         # Get list of bookmarks and ignore them when checking inbox limits
-        my $bmarks = join ',', map { $self->is_bookmark($_->qid) ? $_->qid : () } $self->items;
-        my $bookmark_sql = '';
-        $bookmark_sql = "AND qid NOT IN ($bmarks) " if ($bmarks);
-
+        my $bmarks = join ',', $self->get_bookmarks_ids;
+        my $bookmark_sql = ($bmarks) ? "AND qid NOT IN ($bmarks) " : '';
         my $too_old_qid = $u->selectrow_array
             ("SELECT qid FROM notifyqueue ".
              "WHERE userid=? $bookmark_sql".
@@ -454,6 +452,14 @@ sub load_bookmarks {
     LJ::MemCache::set($self->_bookmark_memkey, $row, 3600);
 
     return;
+}
+
+## returns array of qid of 'bookmarked' messages
+sub get_bookmarks_ids {
+    my $self = shift;
+    
+    $self->load_bookmarks unless $self->{bookmarks};
+    return keys %{ $self->{bookmarks} };
 }
 
 # add a bookmark

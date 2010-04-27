@@ -561,6 +561,8 @@ crumb.encodings=About Encodings
 
 crumb.export=Export Journal
 
+crumb.extralj=ExtraLJ
+
 crumb.faq=Frequently Asked Questions
 
 crumb.feedstersearch=Search a Journal
@@ -1144,6 +1146,8 @@ entryform.comment.settings.default5=Journal Default
 
 entryform.comment.settings.nocomments=Disabled
 
+entryform.comment.settings.lockcomments=Locked
+
 entryform.comment.settings.noemail=Don't E-mail
 
 entryform.comment.settings2=Allow Comments?
@@ -1291,6 +1295,16 @@ Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
 
 error.badpassword=Incorrect Password.
+
+error.banned.bot.subject=Access Forbidden
+
+error.banned.bot.message<<
+This page is not available at this time, perhaps because you were hitting the site too quickly. Please make sure that you're
+following our <a href='http://www.livejournal.com/bots/'>Bot Policy</a>.
+<br>If you are not using an automated service of the type described at the page above, then you may have been shown this page in error.
+Please refresh the page and try again. If you are still blocked from using LiveJournal after refreshing the page, contact us at
+webmaster&#064;livejournal.com with the following information: [[uniq]] @ [[ip]].
+.
 
 error.code.comm_not_comm=Account is not a community
 
@@ -2389,6 +2403,10 @@ event.user_new_entry.any=Any of my friends posts a new entry anywhere.
 event.user_new_entry.user|staleness=1
 event.user_new_entry.user=[[user]] posts a new entry anywhere.
 
+eventrates.view_all=View all
+
+eventrates.users_who_like_it=Users who like it
+
 fckland.ljimage=Insert/Edit Image
 
 fcklang.cutcontents=Type your cut contents here.
@@ -2564,6 +2582,8 @@ img.next_entry=Next Entry
 img.placeholder=Image
 
 img.prev_entry=Previous Entry
+
+img.sharethis=Share this!
 
 img.tellfriend=Tell a Friend!
 
@@ -3558,6 +3578,12 @@ quote.left="
 quote.right|staleness=1
 quote.right="
 
+repost.default_button=repost
+
+repost.default_subject=post
+
+repost.wrapper=Originaly posted by <lj user="[[username]]"> at <a href="[[url]]">[[subject]]</a><div class="repost">[[text]]</div>
+
 s2theme.themename.default|staleness=1
 s2theme.themename.default=(Unnamed - [[themeid]])
 
@@ -4085,6 +4111,16 @@ setting.viewingadultcontent.option.select.explicit=explicit adult content only
 
 setting.viewingadultcontent.option.select.none|staleness=1
 setting.viewingadultcontent.option.select.none=nothing
+
+setting.webmastertools_yandex.label=Yandex webmaster tools
+
+setting.webmastertools_yandex.label2=Enter your meta tag content value obtained from Yandex
+
+setting.webmastertools_google.label=Google webmaster tools
+
+setting.webmastertools_google.label2=Enter your meta tag content value obtained from Google
+
+setting.webmastertools.error=This field can only accept characters: A-Z, 0-9, dashes, and underlines.
 
 settings.city=City
 
@@ -6451,6 +6487,8 @@ widget.qotd.entry.subject=Writer's Block: [[subject]]
 widget.qotd.entry.submittedby|staleness=1
 widget.qotd.entry.submittedby=Submitted By [[user]]
 
+widget.qotd.subscribe=Subscribe
+
 widget.qotd.suggestions|staleness=1
 widget.qotd.suggestions=Suggestions
 
@@ -6465,6 +6503,8 @@ widget.qotd.view.other.answers=View other answers
 
 widget.qotd.viewanswers|staleness=1
 widget.qotd.viewanswers=View Answers
+
+widget.qotd.unplugged=Unplugged Questions
 
 widget.qotdarchive.skip.next|staleness=1
 widget.qotdarchive.skip.next=Newer
@@ -6774,6 +6814,14 @@ widget.themenav.switchtos1=Switch to old style system (S1)
 
 widget.themenav.title|staleness=1
 widget.themenav.title=2. Select a New Theme
+
+widget.topusers.top5commenters.title=Top 5 commenters within 24h
+
+widget.topusers.head.nr=Nr
+
+widget.topusers.head.users=Users
+
+widget.topusers.top5posters.title=Top 5 posters within a week
 
 widget.upgradeaccount.title|staleness=1
 widget.upgradeaccount.title=Upgrade your account

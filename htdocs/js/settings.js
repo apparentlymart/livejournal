@@ -5,13 +5,14 @@ Settings =
 
 	init: function($)
 	{
-		if (!$('#settings_form').length) {
+		Settings.$form = $('#settings_form');
+		if (!Settings.$form.length) {
 			return;
 		}
 		// delegate onclick on all links to confirm form saving
-		$({selector: 'a', context: document}).live('click', Settings.navclick_save);
+		$(document).delegate('a', 'click', Settings.navclick_save);
 		
-		$({selector:'select, input, textarea', context: $('#settings_form')}).live('change', function()
+		Settings.$form.delegate('select, input, textarea', 'change', function()
 		{
 			Settings.form_changed = true;
 		});
@@ -24,7 +25,7 @@ Settings =
 		}
 		
 		var confirmed = confirm(Settings.confirm_msg);
-		confirmed && $('settings_form').submit();
+		confirmed && Settings.$form.submit();
 	}
 }
 

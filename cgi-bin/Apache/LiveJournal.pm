@@ -189,12 +189,10 @@ sub redir {
     }
     
     my ($url, $code) = @_;
-    LJ::Request->content_type("text/html");
-    LJ::Request->header_out(Location => $url);
     if ($LJ::DEBUG{'log_redirects'}) {
         LJ::Request->log_error("redirect to $url from: " . join(", ", caller(0)));
     }
-    return $code || LJ::Request::REDIRECT;
+    return LJ::Request->redirect($url, $code);
 }
 
 # send the user to the URL for them to get their domain session cookie
@@ -236,13 +234,19 @@ sub blocked_bot
     LJ::Request->status_line("403 Denied");
     LJ::Request->content_type("text/html");
     LJ::Request->send_http_header();
-    my $subject = $LJ::BLOCKED_BOT_SUBJECT || "403 Denied";
-    my $message = $LJ::BLOCKED_BOT_MESSAGE || "You don't have permission to view this page.";
 
+    my ($ip, $uniq);
     if ($LJ::BLOCKED_BOT_INFO) {
-        my $ip = LJ::get_remote_ip();
-        my $uniq = LJ::UniqCookie->current_uniq;
-        $message .= " $uniq @ $ip";
+        $ip = LJ::get_remote_ip();
+        $uniq = LJ::UniqCookie->current_uniq;
+    }
+
+    my $subject = LJ::Lang::get_text(undef, 'error.banned.bot.subject') || $LJ::BLOCKED_BOT_SUBJECT || "403 Denied";
+    my $message = LJ::Lang::get_text(undef, 'error.banned.bot.message', undef, { ip => $ip, uniq => $uniq } );
+
+    unless ($message) {
+        $message = $LJ::BLOCKED_BOT_MESSAGE || "You don't have permission to view this page.";
+        $message .= " $uniq @ $ip" if $LJ::BLOCKED_BOT_INFO;
     }
 
     LJ::Request->print("<h1>$subject</h1>$message");
@@ -251,6 +255,11 @@ sub blocked_bot
 
 sub trans
 {
+    {
+        my $r = shift;
+        LJ::Request->init($r);
+    }
+
     return LJ::Request::DECLINED 
         if ! LJ::Request->is_main || LJ::Request->method_number == LJ::Request->M_OPTIONS;  # don't deal with subrequests or OPTIONS
 
@@ -910,7 +919,7 @@ sub trans
         if ($int =~ /^flat|xmlrpc|blogger|elsewhere_info|atom(?:api)?$/) {
             $RQ{'interface'} = $int;
             $RQ{'is_ssl'} = $is_ssl;
-            LJ::Request->push_handlers(PerlHandler => \&interface_content);
+            LJ::Request->set_handlers(PerlHandler => \&interface_content);
             return LJ::Request::OK
         }
         if ($int eq "s2") {
@@ -978,19 +987,31 @@ sub trans
 
     # emulate DirectoryIndex directive
     if ($host =~ m'^www' and 
-        not defined LJ::Request->filename   # it seems that under Apache v2 'filename' method maps to files only
-                                            # and for directories it returns undef.
+        not defined LJ::Request->filename  # it seems that under Apache v2 'filename' method maps to files only
+                                           # and for directories it returns undef.
     ){
         # maps uri to dir
         my $uri = LJ::Request->uri;
         return LJ::Request::NOT_FOUND if $uri =~ /\.\./; # forbids ANY .. in uri
         
         if ($uri and -d "$ENV{LJHOME}/htdocs/" . $uri){
-            $uri .= "/" unless $uri =~ /\/$/; # make sure it ends with /
+            unless ($uri =~ /\/$/) {
+                return redir("$LJ::SITEROOT$uri/");
+            }
+
+            # index.bml
             my $new_uri  = $uri . "index.bml";
             my $bml_file = "$ENV{LJHOME}/htdocs/" . $uri . "index.bml";
-            LJ::Request->uri($new_uri);
-            return $bml_handler->($bml_file);
+            if (-e $bml_file) {
+                LJ::Request->uri($new_uri);
+                return $bml_handler->($bml_file);
+            } 
+
+            # index.html
+            my $html_file = "$ENV{LJHOME}/htdocs/" . $uri . "index.html";
+            if (-e $html_file){
+                return redir($uri . "index.html");
+            }
         }
     }
     return LJ::Request::DECLINED
@@ -1289,7 +1310,7 @@ sub files_trans
         return LJ::Request::NOT_FOUND;
     } else {
         LJ::Request->handler("perl-script");
-        LJ::Request->push_handlers(PerlHandler => \&files_handler);
+        LJ::Request->set_handlers(PerlHandler => \&files_handler);
         return LJ::Request::OK
     }
     return LJ::Request::NOT_FOUND;
@@ -1652,6 +1673,14 @@ sub interface_content
 {
     my $args = LJ::Request->args;
 
+    # simplified code from 'package BML::Cookie' in Apache/BML.pm
+    my $cookie_str = LJ::Request->header_in("Cookie");
+    if ($cookie_str =~ /\blangpref=(\w{2,10})\/\d+\b/) { # simplified code from BML::decide_language
+        my $lang = $1;
+        # Attention! LJ::Lang::ml uses BML::ml in web context, so we must do full BML language initialization
+        BML::set_language($lang, \&LJ::Lang::get_text);
+    }
+
     if ($RQ{'interface'} eq "xmlrpc") {
         return LJ::Request::NOT_FOUND unless LJ::ModuleCheck->have('XMLRPC::Transport::HTTP');
         my $server = XMLRPC::Transport::HTTP::Apache
@@ -1698,11 +1727,7 @@ sub interface_content
     LJ::Request->content_type("text/plain");
 
     my %out = ();
-    my %FORM = ();
-    my $content;
-    LJ::Request->read($content, LJ::Request->header_in("Content-Length"));
-    LJ::decode_url_string($content, \%FORM);
-
+    my %FORM = LJ::Request->post_params;
     # the protocol needs the remote IP in just one place, where tracking is done.
     $ENV{'_REMOTE_IP'} = LJ::Request->remote_ip();
     LJ::do_request(\%FORM, \%out);
@@ -1865,6 +1890,9 @@ sub xmlrpc_method {
 package LJ::XMLRPC;
 
 use vars qw($AUTOLOAD);
+
+# pretend we can do everything; AUTOLOAD will handle that
+sub can { 1 }
 
 sub AUTOLOAD {
     my $method = $AUTOLOAD;

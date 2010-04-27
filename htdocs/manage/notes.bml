@@ -5,7 +5,7 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST);
-    use JSON;
+    use LJ::JSON;
 
     my $max_alias_length = 200; # max allowed chars(?) or bytes in alias
 
@@ -176,7 +176,7 @@ body<=
         function checkAlias(alias){
             var i = -1,
                 aliasTable = DOM.getElementsByClassName(document,'aliaslist-table')[0].firstChild,
-                currentAliases = DOM.getElementsByAttribute(aliasTable,'lj:user'),
+                currentAliases = jQuery('.ljuser', aliasTable),
                 warningBlock = DOM.getElementsByClassName(alias.parentNode.parentNode,'user_alias_error')[0];
 
             warningBlock.innerHTML = '';

@@ -25,6 +25,16 @@ sub update_user {
 
     my ($age, $good_until) = $u->usersearch_age_with_expire;
 
+    my $now = time();
+    if (defined $good_until && $good_until<$now) {
+        ## Sometimes $good_until is in past.
+        ## No cause is known, but method $u->next_birthday, table birthdays, 
+        ## method $u->set_next_birthday, script bin/upgrading/populate-next-birthdays
+        ## and/or worker bin/worker/birthday-notify may be involved.
+        ## There is a hack below:
+        $good_until = $now + 3600;
+    }
+
     my $regid = LJ::Directory::MajorRegion->most_specific_matching_region_id($u->prop("country"),
                                                                              $u->prop("state"),
                                                                              $u->prop("city"));

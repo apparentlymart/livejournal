@@ -106,6 +106,7 @@ sub MonthPage
 
         my $ditemid = $itemid*256 + $anum;
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         # don't show posts from suspended users or suspended posts
         next unless $pu{$posterid};
@@ -135,7 +136,8 @@ sub MonthPage
             'post_url' => $posturl,
             'count' => $replycount,
             'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
-            'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
+            'enabled' => $entry_obj->comments_shown,
+            'locked' => !$entry_obj->posting_comments_allowed,
             'screened' => ($logprops{$itemid}->{'hasscreened'} && $remote &&
                            ($remote->{'user'} eq $u->{'user'} || LJ::can_manage($remote, $u))) ? 1 : 0,
         });

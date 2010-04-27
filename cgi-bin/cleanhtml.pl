@@ -152,6 +152,11 @@ sub clean
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
     my $target = $opts->{'target'} || '';
 
+    # cuturl or entry_url tells about context and texts address,
+    # Expand or close lj-cut tag should be switched directly by special flag
+    # - expand_cut
+    $cut = '' if $opts->{expand_cut}; 
+
     my @canonical_urls; # extracted links
     my %action = ();
     my %remove = ();
@@ -319,6 +324,36 @@ sub clean
                 my $replace = ($name =~ /^\w+$/) ? Encode::decode_utf8(LJ::lj_replace($name, $attr)) : undef;
                 $newdata .= defined $replace ? $replace : "<b>[Error: unknown lj-replace key '" . LJ::ehtml($name) . "']</b>";
 
+                next TOKEN;
+            }
+
+            # lj-repost tag adds button that allows easily post text in remote user's blog.
+            #
+            # Usage:
+            # 1. <lj-repost />
+            # 2. <lj-repost button="post this" />
+            # 3. <lj-repost>some text</lj-repost>
+            # 4. <lj-repost button="re-post to your journal" subject="WOW">
+            #       text to repost
+            #    </lj-repost>
+            #
+            if ($tag eq "lj-repost"){
+                next TOKEN if $opencount{$tag}; # no support for nested <lj-repost> tags
+
+                my $button = LJ::ehtml($attr->{button}) || LJ::Lang::ml("repost.default_button");
+                if ($attr->{'/'}){
+                    # short <lj-repost /> form of tag
+                    $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="GET">]
+                             .  qq[<input type=hidden name="repost" value="$opts->{cuturl}" />]
+                             .  qq(<input type="submit" value="$button" /> )
+                             .  qq[</form>];
+                } else {
+                    $opencount{$tag} = { 
+                        button  => $button, 
+                        subject => $attr->{subject},
+                        offset  => length $newdata,
+                    };
+                }
                 next TOKEN;
             }
 
@@ -731,12 +766,17 @@ sub clean
                 if ($tag eq "img")
                 {
                     my $img_bad = 0;
-                    if (defined $opts->{'maximgwidth'} &&
-                        (! defined $hash->{'width'} ||
-                         $hash->{'width'} > $opts->{'maximgwidth'})) { $img_bad = 1; }
-                    if (defined $opts->{'maximgheight'} &&
-                        (! defined $hash->{'height'} ||
-                         $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
+                    if ($opts->{'remove_img_sizes'}) {
+                        delete $hash->{'height'};
+                        delete $hash->{'width'};
+                    } else {
+                        if (defined $opts->{'maximgwidth'} &&
+                            (! defined $hash->{'width'} ||
+                             $hash->{'width'} > $opts->{'maximgwidth'})) { $img_bad = 1; }
+                        if (defined $opts->{'maximgheight'} &&
+                            (! defined $hash->{'height'} ||
+                             $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
+                    }
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
                     
                     ## TODO: a better check of $hash->{src} is needed,
@@ -901,7 +941,39 @@ sub clean
             elsif ($tag eq "lj-cut") {
                 if ($opts->{'cutpreview'}) {
                     $newdata .= "<b>&lt;/lj-cut&gt;</b>";
+                } else {
+                    $newdata .= "<a name='cutid$cutcount-end'></a>"
                 }
+            }
+            elsif ($tag eq "lj-repost"){
+                my $button   = LJ::ehtml($opencount{$tag}->{button}) || LJ::Lang::ml("repost.default_button");
+                my $subject  = LJ::ehtml($opencount{$tag}->{subject});
+                my $captured = substr $newdata => $opencount{$tag}->{offset};
+                
+                if (my $entry = LJ::Entry->new_from_url($opts->{cuturl})){
+                    # !!! avoid calling any 'text' methods on $entry, 
+                    #     it can produce inifinite loop of cleanhtml calls.
+
+                    $subject ||= LJ::ehtml($entry->subject_orig || LJ::Lang::ml("repost.default_subject"));
+                    $captured = LJ::Lang::ml("repost.wrapper", { 
+                                                username => $entry->poster->username,
+                                                url      => $entry->url,
+                                                subject  => $subject,
+                                                text     => $captured,
+                                                });
+                }
+                $captured = LJ::ehtml($captured);
+
+                # add <form> with invisible fields and visible submit button
+                $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="POST">
+                    <div style="display:none;visible:false">
+                    <input type="text" name="subject" value="$subject" />
+                    <textarea name="event">$captured</textarea>
+                    </div>
+                    <input type="submit" value="$button" /></form>];
+                
+                delete $opencount{$tag};
+
             } else {
                 if ($mode eq "allow") {
                     $allow = 1;
@@ -1357,6 +1429,7 @@ sub clean_event
         'linkify' => 1,
         'wordlength' => $wordlength,
         'addbreaks' => $opts->{'preformatted'} ? 0 : 1,
+        'expand_cut' => $opts->{expand_cut} ? 1 : 0,
         'cuturl' => $opts->{'cuturl'},
         'cutpreview' => $opts->{'cutpreview'},
         'eat' => $event_eat,
@@ -1370,6 +1443,7 @@ sub clean_event
         'noearlyclose' => 1,
         'tablecheck' => 1,
         'extractimages' => $opts->{'extractimages'} ? 1 : 0,
+        'remove_img_sizes' => $opts->{'remove_img_sizes'} ? 1 : 0,
         'noexpandembedded' => $opts->{'noexpandembedded'} ? 1 : 0,
         'textonly' => $opts->{'textonly'} ? 1 : 0,
         'remove_colors' => $opts->{'remove_colors'} ? 1 : 0,
@@ -1464,7 +1538,7 @@ sub clean_s1_style
         });
     }
 
-    return Storable::freeze(\%tmpl);
+    return Storable::nfreeze(\%tmpl);
 }
 
 sub s1_attribute_clean {

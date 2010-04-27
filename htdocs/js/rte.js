@@ -131,6 +131,7 @@ function useRichText(textArea, statPrefix) {
 		// IE async call SetData
 		oEditor.Events.AttachEvent('OnAfterSetHTML', function() {
 			oEditor.Focus(true);
+			oEditor.LJPollSetKeyPressHandler();
 			oEditor.Events.DetachEvent('OnAfterSetHTML', arguments.callee)
 		});
 		oEditor.SetData(textarea_node.value);
@@ -196,36 +197,21 @@ function convert_to_draft(html) {
     return html;
 }
 
-function convert_poll_to_ljtags (html, post) {
-    html = html.replace(/<div id=['"]poll(.+?)['"]>[^\b]*?<\/div>/gm,
-                            function (div, id){ return generate_ljpoll(id, post) } );
-    return html;
+function convert_poll_to_ljtags(html, post)
+{
+	html = html.replace(/<form (?=[^>]*class="ljpoll")[^>]*data="([^\"]+?)"[^\b]*?<\/form>/gm,
+		function(form, data){ return unescape(data); });
+	return html;
 }
 
-function generate_ljpoll(pollID, post) {
-    var poll = LJPoll[pollID];
-    var tags = poll.outputLJtags(pollID, post);
-    return tags;
-}
-
-function convert_poll_to_HTML(plaintext) {
-    var html = plaintext.replace(/<lj-poll name=['"].*['"] id=['"]poll(\d+?)['"].*>[^\b]*?<\/lj-poll>/gm,
-                                 function (ljtags, id){ return generate_pollHTML(ljtags, id) } );
-    return html;
-}
-
-function generate_pollHTML(ljtags, pollID) {
-    try {
-        var poll = LJPoll[pollID];
-    } catch (e) {
-        return ljtags;
-    }
-
-    var tags = '<div id="poll'+pollID+'">';
-    tags += poll.outputHTML();
-    tags += '</div>';
-
-    return tags;
+function convert_poll_to_HTML(html)
+{
+	html = html.replace(/<lj-poll .*?>[^\b]*?<\/lj-poll>/gm, function(ljtags)
+	{
+		var poll = new Poll(ljtags);
+		return poll.outputHTML();
+	});
+	return html;
 }
 
 function convert_qotd_to_HTML(html) {
@@ -251,6 +237,7 @@ function FCKeditor_OnComplete(oEditor) {
 		LJUser(oEditor);
 		LJTagsInHTML(oEditor);
 	});
+	oEditor.LJPollSetKeyPressHandler();
 	LJUser(oEditor);
 	LJTagsInHTML(oEditor);
 	$('updateForm').onsubmit = function() {

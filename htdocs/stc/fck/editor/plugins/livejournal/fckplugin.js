@@ -212,6 +212,8 @@ LJCutCommand.prototype.Execute=function()
 			range.MoveToNodeContents(cut_node);
 			range.Collapse(true);
 		}
+		cut_node.parentNode.insertBefore(FCK.EditorDocument.createTextNode('\ufeff'), cut_node);
+		FCKDomTools.InsertAfterNode(cut_node, FCK.EditorDocument.createTextNode('\ufeff'));
 		
 		range.Select();
 		FCK.Focus();
@@ -239,53 +241,39 @@ LJPollCommand.GetState=function() {
     return FCK_TRISTATE_OFF; //we dont want the button to be toggled
 }
 
-LJPollCommand.Add=function(pollsource, index) {
-    var poll = pollsource;
-
-    if (poll != null && poll != '') {
-        // Make the tag like the editor would
-        var html = "<div id=\"poll"+index+"\">"+poll+"</div>";
-
-        // IE and Safari handle Selections differently and InsertHtml
-        // will not overwrite the enclosing DIVs in those browsers,
-        // so just replace the selected polls innerHTML
-        if (FCK.Selection.Element) {
-            FCK.Selection.Element.innerHTML = poll;
-        } else {
-            FCK.InsertHtml(html);
-        }
-
-    }
-
-    return;
+LJPollCommand.Add=function(html)
+{
+	if (FCK.Selection.Element) {
+		top.jQuery(FCK.Selection.Element).replaceWith(html);
+	} else {
+		FCK.InsertHtml(html);
+	}
 }
 
-LJPollCommand.setKeyPressHandler=function() {
-    var editor = FCK.EditorWindow.document;
-    if (editor) {
-        if (editor.addEventListener) {
-            editor.addEventListener('keypress', LJPollCommand.ippu, false);
-            editor.addEventListener('click', LJPollCommand.ippu, false);
-        } else if (editor.attachEvent) {
-            editor.attachEvent('onkeypress', function() { LJPollCommand.ippu(FCK.EditorWindow.event); } );
-            editor.attachEvent('onclick', function() { LJPollCommand.ippu(FCK.EditorWindow.event); } );
-        } else {
-            editor.onkeypress = LJPollCommand.ippu;
-        }
-    }
+FCK.LJPollSetKeyPressHandler = function()
+{
+	var editor = FCK.EditorWindow.document;
+	FCKTools.AddEventListener(editor, 'keypress', LJPollCommand.ippu);
+	FCKTools.AddEventListener(editor, 'click', LJPollCommand.ippu);
 }
 
-LJPollCommand.ippu=function(evt) {
-    evt = evt || window.event;
-    var node = FCKSelection.GetAncestorNode( 'DIV' );
-    if (evt && node && node.id.match(/poll\d+/)) {
+LJPollCommand.ippu=function(e) {
+	var node = FCKSelection.GetBoundaryParentElement(true);
+	while (node) {
+		if (node.nodeName.IEquals('form'))
+			break ;
+		node = node.parentNode ;
+	}
+	if (node && node.className == 'ljpoll') {
         var ele = top.document.getElementById("draft___Frame");
         var href = "href='javascript:Poll.callRichTextEditor()'";
         var lang_notice = window.parent.FCKLang.Poll_PollWizardNotice;
         var lang_notice_link = window.parent.FCKLang.Poll_PollWizardNoticeLink;
         var notice = parent.LJ_IPPU.showNote(lang_notice + "<br /><a "+href+">"+lang_notice_link+"</a>", ele);
         notice.centerOnWidget(ele);
-        if (parent.Event.stop) parent.Event.stop(evt);
+        
+		e.preventDefault && e.preventDefault();
+		e.returnValue = false;
     }
 }
 
@@ -452,7 +440,9 @@ FCK.DataProcessor.ConvertToHtml = function(data)
 		data = data.replace(/\n/g, '<br />');
 	}
 	
-	data = data.replace(/<lj-cut([^>]*)><\/lj-cut>/g, '<lj-cut$1>\ufeff</lj-cut>');
+	data = data.replace(/<lj-cut([^>]*)><\/lj-cut>/g, '<lj-cut$1>\ufeff</lj-cut>')
+		.replace(/(<lj-cut[^>]*>)/g, '\ufeff$1')
+		.replace(/(<\/lj-cut>)/g, '$1\ufeff');
 	
 	// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
 	if (FCKBrowserInfo.IsIE) {
@@ -531,18 +521,26 @@ FCK.DataProcessor.ConvertToDataFormat = function(body)
 	}
 	
 	html = html
-		.replace(/><\/lj-template>/g, '/>');
+		.replace(/><\/lj-template>/g, '/>')
+		// remove null pointer
+		.replace(/\ufeff/g, '');
 	
 	return html;
 }
 
 // set cursor to end document
-FCK.Focus = function(to_end) {
+FCK.Focus = function(to_end)
+{
 	FCK.EditingArea.Focus();
 	if (to_end && FCK.EditorDocument.body.firstChild) {
 		var win = FCK.EditorWindow, doc = FCK.EditorDocument,
+			last = doc.body.lastChild,
 			range = new FCKDomRange(win);
-		range.MoveToPosition(doc.body, 2);
+		if (last.tagName && last.tagName == 'BR' && last.getAttribute('type') == '_moz') {
+			range.MoveToPosition(last, 3);
+		} else {
+			range.MoveToPosition(doc.body, 2);
+		}
 		range.Select();
 		
 		// scroll to end

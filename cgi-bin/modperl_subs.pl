@@ -102,7 +102,7 @@ sub setup_start {
 
     # auto-load some stuff before fork (unless this is a test program)
     unless ($0 && $0 =~ m!(^|/)t/!) {
-        Storable::thaw(Storable::freeze({}));
+        Storable::thaw(Storable::nfreeze({}));
         foreach my $minifile ("GIF89a", "\x89PNG\x0d\x0a\x1a\x0a", "\xFF\xD8") {
             Image::Size::imgsize(\$minifile);
         }

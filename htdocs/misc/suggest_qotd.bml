@@ -18,11 +18,13 @@ body<=
 
         my $questions = LJ::ehtml($POST{questions});
         my $credit = $POST{credit} ? "DOES" : "DOES NOT";
+        my $unplugged = $POST{unplugged} ? "DOES" : "DOES NOT";
 
         return LJ::bad_input($ML{'.error.noquestion'})
             unless $questions;
 
         my $user = $remote->user;
+        my $is_sup = LJ::SUP->is_remote_sup() ? '_ru' : '';
 
         my $rv = LJ::send_mail({
             to => "writersblock\@$LJ::DOMAIN",
@@ -30,7 +32,8 @@ body<=
             charset => "utf-8",
             subject => "Writer's Block Suggestion(s) from $user",
             body => qq{
-The user $user $credit want credit for their Writer's Block suggestion(s).
+The user $user $credit want credit for their Writer's Block suggestion(s) and $unplugged want to consider question in Unplugged$is_sup.
+
 
 Their suggestion(s):
 
@@ -59,6 +62,11 @@ $questions
 
     $ret .= "<p>" . LJ::html_check({ id => 'credit', name => 'credit', selected => 1 }) . " ";
     $ret .= "<label for='credit'>$ML{'.form.credit.label'}</label></p>";
+
+    my $unplugged_u = LJ::load_user(LJ::SUP->is_remote_sup ? 'wb_unplugged_ru' : 'wb_unplugged'); 
+
+    $ret .= "<p>" . LJ::html_check({ id => 'unplugged', name => 'unplugged', selected => 0 }) . " ";
+    $ret .= "<label for='unplugged'>" . BML::ml('.form.unplugged.label', { user => $unplugged_u ? $unplugged_u->ljuser_display : 'wb_unplugged' }) .  "</label></p>";
 
     $ret .= "<p>" . LJ::html_submit('submit', $ML{'.btn.submit'}) . "</p>";
 

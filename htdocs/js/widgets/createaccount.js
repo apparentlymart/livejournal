@@ -59,7 +59,7 @@ CreateAccount.showTip = function (id) {
             $(CreateAccount.bubbleid).style.visibility = "visible";
         }
     } else {
-        var y = DOM.findPosY($(id)), text;
+		var y = jQuery($(id)).offset().top, text;
 
         if (id == "create_bday_mm") {
             text = CreateAccount.birthdate;

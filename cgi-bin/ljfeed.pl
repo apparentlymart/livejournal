@@ -173,6 +173,7 @@ sub make_feed
         my $itemid  = $it->{'itemid'};
         my $ditemid = $itemid*256 + $it->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         next ENTRY if $posteru{$it->{'posterid'}} && $posteru{$it->{'posterid'}}->{'statusvis'} eq 'S';
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
@@ -259,7 +260,7 @@ sub make_feed
             createtime => $createtime,
             eventtime  => $it->{alldatepart},  # ugly: this is of a different format than the other two times.
             modtime    => $logprops{$itemid}->{revtime} || $createtime,
-            comments   => ($logprops{$itemid}->{'opt_nocomments'} == 0),
+            comments   => $entry_obj->comments_shown,
             music      => $logprops{$itemid}->{'current_music'},
             mood       => $mood,
             ppid       => $ppid,

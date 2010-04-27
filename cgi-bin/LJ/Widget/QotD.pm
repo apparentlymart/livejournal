@@ -21,43 +21,45 @@ sub render_body {
 
     my $embed = $opts{embed};
     my $archive = $opts{archive};
-
+    
     my @questions = $opts{question} || LJ::QotD->get_questions( user => $u, skip => $skip, domain => $domain );
-
     return "" unless @questions;
 
-    # If there is no lang tag, try to get user settings or use $LJ::DEFAULT_LANG.
-    $opts{lang} ||= ($u && $u->prop('browselang')) ? $u->prop('browselang') : $LJ::DEFAULT_LANG;
-
-    unless ($embed || $archive) {
-        my $title = LJ::run_hook("qotd_title", $u, $opts{lang}) || $class->ml('widget.qotd.title', undef, $opts{lang});
-        $ret .= "<h2>$title";
-    }
-
+    # Navigation controlls
     unless ($opts{nocontrols}) {
-        $ret .= "<span class='qotd-controls'>";
-        $ret .= "<img id='prev_questions' src='$LJ::IMGPREFIX/arrow-spotlight-prev.gif' alt='Previous' title='Previous' />";
-        $ret .= "<img id='prev_questions_disabled' src='$LJ::IMGPREFIX/arrow-spotlight-prev-disabled.gif' alt='Previous' title='Previous' /> ";
-        $ret .= "<img id='next_questions' src='$LJ::IMGPREFIX/arrow-spotlight-next.gif' alt='Next' title='Next' />";
-        $ret .= "<img id='next_questions_disabled' src='$LJ::IMGPREFIX/arrow-spotlight-next-disabled.gif' alt='Next' title='Next' />";
-        $ret .= "</span>";
+
+        my ($month_short, $day, $num, $total) = LJ::QotD->question_info($questions[0], $u, $domain);
+
+        #
+        my $max = LJ::QotD->get_questions( user => $u, count => 1, all_filtered => 1, domain => $domain );
+
+        $ret .= qq[<p class="i-qotd-nav">];
+        if ($max > 1) {
+            $ret .= qq[<i class="i-qotd-nav-first"></i><i class="i-qotd-nav-prev"></i>];
+        } else {
+            $ret .= qq[<i class="i-qotd-nav-first i-qotd-nav-first-dis"></i><i class="i-qotd-nav-prev i-qotd-nav-prev-dis"></i>];
+        }
+        $ret .= qq[<i class="i-qotd-nav-max">$max</i>];
+        $ret .= qq[<span class="qotd-counter">$month_short, $day ($num/$total)</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
     }
 
-    $ret .= "</h2>" unless $embed || $archive;
-
-    $ret .= "<div id='all_questions'>" unless $opts{nocontrols};
+    $ret .= '<div class="b-qotd-question">';
 
     if ($embed) {
         $ret .= $class->qotd_display_embed( questions => \@questions, user => $u, %opts );
+        $ret .= '</div>';
     } elsif ($archive) {
         $ret .= $class->qotd_display_archive( questions => \@questions, user => $u, %opts );
+        $ret .= '</div>';
     } else {
         $ret .= $class->qotd_display( questions => \@questions, user => $u, %opts );
+        $ret .= '</div>';
+        # show promo on vertical pages
+        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain}) unless $opts{nopromo};
     }
 
-    $ret .= "</div>" unless $opts{nocontrols};
-
     return $ret;
+
 }
 
 my %cyr_countries = map {lc} map { $_ => $_ } qw(AM AZ BY EE GE KG KZ LT LV MD RU TJ TM UA UZ);
@@ -100,14 +102,13 @@ sub qotd_display_embed {
     my $ret;
     if (@$questions) {
         # table used for better inline display
-        $ret .= '<table cellpadding="0" cellspacing="0"><tr><td>';
         $ret .= "<div style='border: 1px solid #000; padding: 6px;'>";
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
-            $ret .= "<p>$d->{text}</p><p style='font-size: 0.8em;'>$d->{from_text}$d->{between_text}$d->{extra_text}</p><br />";
+            $ret .= "<p>$d->{text}</p><p style='font-size: 0.8em;'>$d->{from_text}$d->{between_text}$d->{extra_text}</p>";
             $ret .= "<p>$d->{answer_link} $d->{view_answers_link}$d->{impression_img}</p>";
         }
-        $ret .= "</div></td></tr></table>";
+        $ret .= "</div>";
     }
 
     return $ret;
@@ -141,50 +142,32 @@ sub qotd_display {
 
     my $ret;
     if (@$questions) {
-        $ret .= "<div class='qotd'>";
+        $ret .= "";
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
+            my $subject = $d->{subject} || $q->{subject};
+            my $extra_text = $q->{extra_text}
+                                ? "<p>$q->{extra_text}</p>"
+                                : "";
+    
+            $ret .=
+                ($q->{img_url}
+                    ? qq[<img src="$q->{img_url}" alt="$subject" title="$subject" class="qotd-pic" />]
+                    : ''
+                ) . qq[
+                <div class="b-qotd-question-inner">
+                    <h3>$subject</h3>
+                    <p>$d->{text}<em class="i-qotd-by">$d->{from_text}</em></p>
+                    $extra_text
+                    <ul class="canyon">
+                        <li class="canyon-section"><form action="$LJ::SITEROOT/update.bml" method="get" target="_top"><button type="submit">$d->{answer_text}</button><input type="hidden" name="qotd" value="$q->{qid}" /></form></li>
+                        <li class="canyon-side">$d->{view_answers_link}</li>
+                    </ul>
+                </div>];
+            #$ret .= qq[<div class="b-qotd-adv">$q->{extra_text}</div>] if $q->{is_special} eq 'Y';
 
-            $ret .= "<table><tr><td>";
-            $ret .= $d->{text};
-            $ret .= ($d->{extra_text}) ? "<p class='detail' style='padding-bottom: 5px;'>$d->{extra_text}</p>" : " ";
-
-            $ret .= $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) . "<br />";
-            if ($q->{img_url}) {
-                my $img_url = "<img src='$q->{img_url}' class='qotd-img' alt='' />";
-                $img_url = "<a href='$q->{link_url}'>$img_url</a>"
-                    if ($q->{link_url});
-                $ret .= "</td><td>$img_url";
-            }
-            $ret .= "</td></tr></table>";
-
-            my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
-            my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
-
-            $ret .= "<p class='detail'><span class='suggestions'>" .
-                ($d->{view_answers_link} ? "$d->{view_answers_link} | " : "") .
-                "$archive | $suggest</span>$d->{from_text}" . $class->impression_img($q) . "</p>";
-
-            my $add_friend = '';
-            my $writersblock = LJ::load_user($community_name);
-            $add_friend = "<li><span><a href='$LJ::SITEROOT/friends/add.bml?user=$community_name'>" . $class->ml('widget.qotd.add_friend') . "</a></span></li>"
-                if $writersblock && !LJ::is_friend($remote,$writersblock);
-
-            my $add_notification = '';
-            $add_notification = "<li><span><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$community_name&event=JournalNewEntry'>" . $class->ml('widget.qotd.add_notifications') . "</a></span></li>"
-                unless $writersblock && $remote && $remote->has_subscription(
-                    journal         => $writersblock,
-                    event           => 'JournalNewEntry',
-                    require_active  => 1,
-                    method          => 'Inbox');
-
-            $ret .= "<ul class='subscript'> $add_friend $add_notification </ul>" if $add_friend || $add_notification;
         }
-
-        # show promo on vertical pages
-        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
-        $ret .= "</div>";
-    }
+   }
 
     return $ret;
 }
@@ -255,18 +238,17 @@ sub _get_question_data {
     #       -- Chernyshev 2009/01/21
 
     my $remote = LJ::get_remote();
-    my $lncode = $opts->{lang} || (
-        ($remote && $remote->prop('browselang')) ?
-            $remote->prop('browselang') : $LJ::DEFAULT_LANG
-    );
+    my $lncode = $opts->{lang};
 
     my $ml_key = $class->ml_key("$q->{qid}.text");
     my $text = $class->_format_question_text($class->ml($ml_key, undef, $lncode), $opts);
 
+    my $subject = $class->ml( $class->ml_key("$q->{qid}.subject", undef, $lncode) );
+
     my $from_text = '';
     if ($q->{from_user}) {
         my $from_u = LJ::load_user($q->{from_user});
-        $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}, $lncode) . "<br />"
+        $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display({target => "_top"})}, $lncode)
             if $from_u;
     }
 
@@ -283,15 +265,13 @@ sub _get_question_data {
 
     my $qid = $q->{qid};
     my $view_answers_link = "";
-    my $count = eval { LJ::QotD->get_count($qid) };
-    if ($count) {
-        $count .= "+" if $count >= $LJ::RECENT_QOTD_SIZE;
-        $view_answers_link = "<a" . ($opts->{small_view_link} ? " class='small-view-link'" : '') .
+    my $count = eval { LJ::QotD->get_count($qid) } || 0;
+       $count .= "+" if $count >= $LJ::RECENT_QOTD_SIZE;
+    $view_answers_link = "<a" . ($opts->{small_view_link} ? " class='small-view-link'" : '') .
             (($opts->{form_disabled} || $opts->{embed}) ? ' target="_blank"' : '') . # Open links on top, not in current frame.
-            " href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" .
+            " href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\" class=\"more\" target=\"_top\">" .
                 $class->ml('widget.qotd.viewanswers', {'total_count' => $count}, $lncode) .
             "</a>";
-    }
 
     my ($answer_link, $answer_url, $answer_text) = ("", "", "");
     unless ($opts->{no_answer_link}) {
@@ -314,6 +294,7 @@ sub _get_question_data {
     }
     
     return {
+        subject         => $subject,
         text            => $text,
         from_text       => $from_text,
         extra_text      => $extra_text,

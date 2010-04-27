@@ -119,6 +119,12 @@ sub _expand_tag {
         return '<lj-embed ' . join(' ', map {"$_=\"$attrs{$_}\""} keys %attrs) . ">\n" .
                  $class->module_content(moduleid  => $attrs{id}, journalid => $journal->id) .
                  "\n<\/lj-embed>";
+    } elsif ($opts{expand_to_link}) {
+        return "<a href=\"".$opts{expand_to_link}->{link} . "\"" .
+            ($opts{expand_to_link}->{target} ?
+                (" target=\"" . $opts{expand_to_link}->{target} . "\"") : ''
+            ) .
+            ">" . $opts{expand_to_link}->{caption} . "</a>";
     } else {
         @opts{qw /width height/} = @attrs{qw/width height/};
         return $class->module_iframe_tag($journal, $attrs{id}, %opts)

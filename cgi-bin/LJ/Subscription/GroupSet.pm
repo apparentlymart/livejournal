@@ -4,6 +4,7 @@ use strict;
 
 use LJ::MemCache;
 
+use LJ::Event;
 use LJ::Subscription::Group;
 use LJ::Subscription::QuotaError;
 
@@ -71,29 +72,22 @@ sub fetch_for_user {
     my $group_cols = join(',', @group_cols);
     my $other_cols = join(',', @other_cols);
 
-    my $res = $dbr->selectall_arrayref(qq{
-        SELECT
-            $group_cols, $other_cols
-        FROM subs
-        WHERE userid=?
-    }, { Slice => {} }, $u->id);
+    my @subs = LJ::Subscription->subscriptions_of_user($u);
 
     my $lastrow = undef;
     my $lastobj = undef;
 
     my %counted_active;
 
-    foreach my $row (@$res) {
-        my $sub = bless($row, 'LJ::Subscription');
-
+    foreach my $sub (@subs) {
         if ($sub->group->is_tracking and $sub->enabled) {
-            $self->{'total_count'}++ if $row->{'ntypeid'} == $inbox_ntypeid;
+            $self->{'total_count'}++ if $sub->{'ntypeid'} == $inbox_ntypeid;
 
             $self->{'active_count'}++ if
                 $sub->active && !($counted_active{$sub->group->freeze}++);
         }
 
-        next unless $filter->($row);
+        next unless $filter->($sub);
 
         $self->insert_sub($sub);
     }
@@ -423,7 +417,7 @@ sub drop_group {
 
     $self->_dbh->do("DELETE FROM subs WHERE $sets", undef, @binds);
 
-    LJ::MemCache::delete('subscriptions_count:'.$self->user->id);
+    LJ::Subscription->invalidate_cache($self->user);
 }
 
 sub _db_collect_sets_binds {
@@ -477,7 +471,7 @@ sub _db_insert_sub {
 
     $self->_dbh->do("INSERT INTO subs SET $sets, subid=?", undef, @binds, $subid);
 
-    LJ::MemCache::delete('subscriptions_count:'.$self->user->id);
+    LJ::Subscription->invalidate_cache($self->user);
 }
 
 sub _db_update_sub {
@@ -507,7 +501,7 @@ sub _db_drop_sub {
     my $sets = join(' AND ', @sets);
 
     $self->_dbh->do("DELETE FROM subs WHERE $sets", undef, @binds);
-    LJ::MemCache::delete('subscriptions_count:'.$self->user->id);
+    LJ::Subscription->invalidate_cache($self->user);
 }
 
 1;

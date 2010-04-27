@@ -779,8 +779,8 @@ sub render_options_block {
                     }
                 }
 
-                my $moodlist = JSON::objToJson(\%moodlist);
-                my $moodpics = JSON::objToJson(\%moodpics);
+                my $moodlist = LJ::JSON->to_json(\%moodlist);
+                my $moodpics = LJ::JSON->to_json(\%moodpics);
                 $$onload .= " mood_preview();";
                 $$head .= $self->wrap_js(qq{
                     if (document.getElementById) {
@@ -828,8 +828,23 @@ sub render_options_block {
             my $comment_settings_selected = sub {
                 return "noemail" if $opts->{'prop_opt_noemail'};
                 return "nocomments" if $opts->{'prop_opt_nocomments'};
+                return "lockcomments" if $opts->{'prop_opt_lockcomments'};
                 return $opts->{'comment_settings'};
             };
+
+            my %options = (
+                "" => BML::ml('entryform.comment.settings.default5'),
+                "nocomments" => BML::ml('entryform.comment.settings.nocomments'),
+                "noemail" => BML::ml('entryform.comment.settings.noemail'),
+            );
+
+            $options{"lockcomments"} = BML::ml('entryform.comment.settings.lockcomments')
+                if $opts->{'mode'} eq 'edit';
+            
+            my @options =
+                map { $_ => $options{$_} }
+                grep { exists $options{$_} } 
+                ( '', 'nocomments', 'lockcomments', 'noemail' );
 
             $out .= LJ::html_select(
                 {
@@ -839,11 +854,7 @@ sub render_options_block {
                     'selected' => $comment_settings_selected->(),
                     'tabindex' => $self->tabindex
                 },
-                (
-                    "" => BML::ml('entryform.comment.settings.default5'),
-                    "nocomments" => BML::ml('entryform.comment.settings.nocomments'),
-                    "noemail" => BML::ml('entryform.comment.settings.noemail'),
-                )
+                @options
             );
 
             $out .= LJ::help_icon_html("comment", "", " ");
@@ -1123,7 +1134,7 @@ sub render_security_container_block {
         $_ => LJ::ejs(BML::ml("label.security.$strings_map{$_}"))
     } keys %strings_map;
 
-    my $strings_map_converted = JSON::objToJson(\%strings_map_converted);
+    my $strings_map_converted = LJ::JSON->to_json(\%strings_map_converted);
     $out .= $self->wrap_js("var UpdateFormStrings = $strings_map_converted;");
 
     $$onload .= " setColumns();" if $remote;
@@ -1391,7 +1402,7 @@ sub render_body {
         my %langmap_translated = map { $_ => BML::ml("fcklang.$langmap{$_}") }
             keys %langmap;
 
-        my $langmap = JSON::objToJson(\%langmap_translated);
+        my $langmap = LJ::JSON->to_json(\%langmap_translated);
 
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
         $out .= $self->wrap_js(qq{

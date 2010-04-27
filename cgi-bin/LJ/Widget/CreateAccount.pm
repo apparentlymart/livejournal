@@ -223,7 +223,7 @@ sub render_body {
         $ret .= "</td></tr>\n" unless $alt_layout;
     }
 
-    $ret .= LJ::run_hook("create_account_extra_fields", {class => $class, errors => $errors});
+    #$ret .= LJ::run_hook("create_account_extra_fields", {class => $class, errors => $errors});
 
     ### captcha
     if ($LJ::HUMAN_CHECK{create}) {
@@ -351,18 +351,6 @@ sub render_body {
         $ret .= "</td></tr>\n";
     }
 	
-    $ret .=qq|<script type="text/javascript">
-	   var msn_accept=DOM.getElementsByAttributeAndValue(document,'name','Widget[CreateAccount]_service_agree')[0];
-	   var create_button=DOM.getElementsByClassName(document,'create-button')[0];
-	   create_button.onclick=function(){
-	   	if(msn_accept.checked==false && \$('msn-accept').style.display != 'none'){
-			
-			alert('| . BML::ml('msn_messanger.events') . qq|')
-			return false;
-		}
-	   };
-    </script>|;    
-
     $ret .= "</table>\n" unless $alt_layout;
 
     $ret .= $class->end_form;

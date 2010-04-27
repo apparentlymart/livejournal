@@ -1,0 +1,18 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%POST);
+    use LJ::JSON;
+    use LJ::SiteMessages;
+
+    BML::finish();
+
+    my $remote = LJ::get_remote()
+        or return LJ::JSON->to_json({ error => BML::ml('error.notloggedin', { aopts => "$LJ::SITEROOT/login.bml" }) });
+
+    my $messageid = $POST{messageid} or return LJ::JSON->to_json({ error => "No messageid specified" });
+
+    LJ::SiteMessages->close_message($messageid);
+    return LJ::JSON->to_json({ substitude => LJ::Widget::SiteMessages->render( substitude => 1 )});
+}
+_code?>

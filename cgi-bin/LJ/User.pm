@@ -23,7 +23,7 @@ use LJ::MemCache;
 use LJ::Session;
 use LJ::RateLimit qw//;
 use URI qw//;
-use JSON;
+use LJ::JSON;
 use HTTP::Date qw(str2time);
 
 use Class::Autouse qw(
@@ -460,6 +460,7 @@ sub underage {
     # return true if no failures
     return $ret_zero ? 0 : 1;
 }
+*is_underage = \&underage;
 
 # return true if we know user is a minor (< 18)
 sub is_minor {
@@ -5229,7 +5230,7 @@ sub openid_tags {
 sub num_comments_posted {
     my $u = shift;
 
-    my $ret = $u->prop('talkleftct');
+    my $ret = $u->prop('talkleftct2');
 
     unless (defined $ret) {
         my $dbr = LJ::get_cluster_reader($u);
@@ -5237,11 +5238,17 @@ sub num_comments_posted {
             SELECT COUNT(*) FROM talkleft WHERE userid=?
         }, undef, $u->id);
 
-        warn $u->clusterid, ", ", $ret;
-        $u->set_prop('talkleftct' => $ret);
+        $u->set_prop('talkleftct2' => $ret);
     }
 
     return $ret;
+}
+
+# increase the number of comments a user has posted by 1
+sub incr_num_comments_posted {
+    my $u = shift;
+
+    $u->set_prop('talkleftct2' => $u->num_comments_posted + 1);
 }
 
 # return the number of comments a user has received
@@ -6766,7 +6773,7 @@ sub ljuser_alias {
    
     if (!$remote->{_aliases}) {
         my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = $prop_aliases ? JSON::jsonToObj($prop_aliases) : {};
+        $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
     }
     return $remote->{_aliases}->{ $u->{userid} };
 }
@@ -6802,7 +6809,7 @@ sub set_alias {
     ## load alias data
     if (!$remote->{_aliases}) {
         my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = $prop_aliases ? JSON::jsonToObj($prop_aliases) : {};
+        $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
     }
     
     ## modify (edit, add or delete)
@@ -6821,7 +6828,7 @@ sub set_alias {
     }
     
     ## save data back
-    my $serialized_text = JSON::objToJson($remote->{_aliases});
+    my $serialized_text = LJ::JSON->to_json($remote->{_aliases});
     if (length $serialized_text < 65536) {
         return $remote->set_prop( aliases => $serialized_text );
     } else {
@@ -6842,7 +6849,7 @@ sub get_all_aliases {
 
     if (!$remote->{_aliases}) {
         my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = $prop_aliases ? JSON::jsonToObj($prop_aliases) : {};
+        $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
     }
 
     return %{$remote->{_aliases}};
@@ -6964,7 +6971,7 @@ sub ljuser
     }
 
     if (my $icon = $u->custom_usericon) {
-        return $make_tag->($icon, $url, 16);
+        return $make_tag->($icon, $url, 17);
     }
     
     if ($type eq 'C') {
@@ -7234,7 +7241,7 @@ sub get_daycounts
         # so they store smaller in memcache
         push @days, [ int($y), int($m), int($d), int($c) ];
     }
-    LJ::MemCache::add($memkey, [time, @days]);
+    LJ::MemCache::set($memkey, [time, @days]);
     return \@days;
 }
 
@@ -8920,7 +8927,6 @@ sub make_journal
         $opts->{tagids} = [];
         my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
         my %kwref = ( map { $tags->{$_}->{name} => $_ } keys %{$tags || {}} );
-
         foreach (@{$opts->{tags}}) {
             return $error->("Sorry, one or more specified tags do not exist.", "404 Not Found")
                 unless $kwref{$_};
@@ -9068,7 +9074,7 @@ sub make_journal
         my $sth = $dbh->prepare("SELECT coltype, color FROM themecustom WHERE user=?");
         $sth->execute($u->{'user'});
         $col->{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
-        $update{'color_stor'} = Storable::freeze($col);
+        $update{'color_stor'} = Storable::nfreeze($col);
     }
 
     # save the updates
@@ -9101,15 +9107,19 @@ sub make_journal
 
     # apply the overrides
     if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y") {
-        my $tw = Storable::thaw($s1uc->{'override_stor'});
+        my $tw = eval { Storable::thaw($s1uc->{'override_stor'}) };
+        warn "Deserialization error: $@" if $@;
         foreach (keys %$tw) {
             $vars{$_} = $tw->{$_};
         }
     }
 
     # apply the color theme
-    my $cols = $u->{'themeid'} ? LJ::S1::get_themeid($u->{'themeid'}) :
-        Storable::thaw($s1uc->{'color_stor'});
+    $@ = '';
+    my $cols = $u->{'themeid'} 
+                ? LJ::S1::get_themeid($u->{'themeid'})
+                : (eval {Storable::thaw($s1uc->{'color_stor'})} || {});
+    warn "Deserialization error: $@" if $@;
     foreach (keys %$cols) {
         $vars{"color-$_"} = $cols->{$_};
     }

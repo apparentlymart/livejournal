@@ -155,6 +155,8 @@ sub _parse_cookies {
 
     return if $cookies_parsed;
 
+    %cookie = ();
+
     foreach my $cookie (split(/;\s+/, $class->header_in("Cookie"))) {
         my ($name, $value) = ($cookie =~ /(.*)=(.*)/);
         $name = LJ::Text->durl($name);
@@ -164,6 +166,13 @@ sub _parse_cookies {
         push @{$cookie{$name}}, $value;
     }
 
+    $cookies_parsed = 1;
+}
+
+sub _set_preparsed_cookies {
+    my ($class, %cookies) = @_;
+
+    %cookie = map { $_ => [ $cookies{$_} ] } keys %cookies;
     $cookies_parsed = 1;
 }
 
@@ -256,7 +265,7 @@ sub send_cookies {
     return $LJ::Request::SEND_COOKIES_OVERRIDE->(@args)
         if ref $LJ::Request::SEND_COOKIES_OVERRIDE eq 'CODE';
 
-    $class->header_out('Set-Cookie' => $_->{'header'})
+    $class->add_header_out('Set-Cookie' => $_->{'header'})
         foreach @cookie_set;
 }
 
@@ -296,6 +305,7 @@ sub start_request {
     my ($class) = @_;
     $cookies_parsed = 0;
     $redirected = undef;
+    @cookie_set = ();
 }
 
 1;

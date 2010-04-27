@@ -51,24 +51,20 @@ sub render_body {
     @responses = @responses[0..($show_size-1)] if @responses > $show_size;
 
     my $ret = "";
-    unless (@responses) {
-        my $answer_url = LJ::Widget::QotD->answer_url($q);
 
+    unless ($hide_question) {
+        my $widget_html = LJ::Widget::QotD->render(question => $q, nocontrols => 1);
+        $ret .= "<div class='qotd-container'>$widget_html</div>";
+    }
+
+    unless (@responses) {
         $ret .= "<?p " . $class->ml('widget.qotdresponses.there.are.no.answers') . " p?>";
         $ret .= "<ul>";
-        $ret .= "<li><a href='$answer_url'>" . $class->ml('widget.qotdresponses.answer.the.question') . "</a></li>" if $answer_url;
         $ret .= "<li><a href='" . $remote->journal_base . "/friends'>" . $class->ml('widget.qotdresponses.read.your.friends.page') . "</a></li>"
             if $remote;
         $ret .= "<li><a href='$LJ::SITEROOT/site/search.bml'>" . $class->ml('widget.qotdresponses.explore') . " $LJ::SITENAMEABBREV</a></li>";
         $ret .= "</ul>";
         return $ret;
-    }
-
-
-    unless ($hide_question) {
-       my $widget_html = LJ::Widget::QotD->render(question => $q, nocontrols => 1);
-
-        $ret .= "<div class='qotd-container'>$widget_html</div>";
     }
 
     $ret .= $class->render_responses(@responses);

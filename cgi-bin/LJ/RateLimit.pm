@@ -14,11 +14,13 @@ our $RATE_DATAVER = 1;
 #       [ memcache key, [ [rate, period-of-time], [rate, period-of-time] ],
 #       ...
 #      ]
-#
+#   3) nowrite (optional): do not write to the ratelog; just check what's
+#      already there.
 sub check {
     my $class = shift;
     my $u     = shift;
     my @watch = @{ shift || [] };
+    my $nowrite = shift;
 
     # we require memcache to do rate limiting efficiently
     return 1 unless @LJ::MEMCACHE_SERVERS;
@@ -61,12 +63,14 @@ sub check {
                 if $events > $allowed;
         }
 
-        # build the new log
-        my $newlog = $RATE_DATAVER;
-        foreach (@times) {
-            $newlog .= pack("N", $_);
+        unless ($nowrite) {
+            # build the new log
+            my $newlog = $RATE_DATAVER;
+            foreach (@times) {
+                $newlog .= pack("N", $_);
+            }
+            LJ::MemCache::set($key, $newlog, $max_period);
         }
-        LJ::MemCache::set($key, $newlog, $max_period);
     }
 
     return 1;
@@ -74,4 +78,3 @@ sub check {
 
 
 1;
-

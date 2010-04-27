@@ -622,7 +622,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                   if ($k == "mood" and defined $e.mood_icon)
                   {
                       var Image i = $e.mood_icon;
-                      $val = "<img src='$i.url' width='$i.width' height='$i.height' alt='' /> $val";
+                      $val = $i->as_string_ex($i.alttext, "align='middle' ") + $val;
                   }
                   "<strong>$key:</strong> $val<br />";
               }

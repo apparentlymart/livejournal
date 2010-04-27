@@ -4166,8 +4166,32 @@ register_alter(sub {
                  "ALTER TABLE antispam ADD INDEX(eventtime)");
     }
 
+    unless (column_type("site_messages", "countries")) {
+        do_alter("site_messages",
+                 "ALTER TABLE site_messages " .
+                 "ADD countries varchar(255) default NULL, " .
+                 "ADD accounts smallint(5) unsigned NOT NULL default '0'");
+    }
+
 });
 
+register_tablecreate("eventrates", <<'EOC'); # clustered
+CREATE TABLE eventrates (
+  journalid INT UNSIGNED NOT NULL,
+  jitemid MEDIUMINT UNSIGNED NOT NULL,
+  userid INT(10) unsigned NOT NULL,
+  changetime DATETIME NOT NULL,
+  PRIMARY KEY (journalid, jitemid, userid)
+)
+EOC
 
+register_tablecreate("eventratescounters", <<'EOC'); # clustered
+CREATE TABLE eventratescounters (
+  journalid INT UNSIGNED NOT NULL,
+  jitemid MEDIUMINT UNSIGNED NOT NULL,
+  count INT(10) unsigned NOT NULL,
+  PRIMARY KEY (journalid, jitemid)
+)
+EOC
 
 1; # return true

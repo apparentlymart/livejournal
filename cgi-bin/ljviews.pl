@@ -30,7 +30,7 @@ use Class::Autouse qw(LJ::LastFM);
 
 # updated everytime new S1 style cleaning rules are added,
 # so cached cleaned versions are invalidated.
-$LJ::S1::CLEANER_VERSION = 13;
+$LJ::S1::CLEANER_VERSION = 14;
 
 # PROPERTY Flags:
 
@@ -402,7 +402,8 @@ sub load_style
                 map { $styc->{$_} } qw(type opt_cache vars_stor vars_cleanver));
     }
 
-    my $ret = Storable::thaw($styc->{'vars_stor'});
+    my $ret = eval { Storable::thaw($styc->{'vars_stor'}) };
+    warn "Deserialization error: $@" if $@;
     $$viewref = $styc->{'type'} if ref $viewref eq "SCALAR";
 
     if ($styc->{'opt_cache'} eq "Y") {
@@ -1110,6 +1111,7 @@ sub create_view_lastn
     if (LJ::are_hooks('s2_head_content_extra')) {
         LJ::run_hooks('s2_head_content_extra', \$lastn_page{'head'}, $remote, $opts->{r});
     }
+    LJ::run_hooks('head_content', \$lastn_page{'head'});
 
     # if user has requested, or a skip back link has been followed, don't index or follow
     if ($u->should_block_robots || $get->{'skip'}) {
@@ -1267,6 +1269,7 @@ sub create_view_lastn
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         my $pu = $posteru{$posterid};
         next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && !$viewsome;
@@ -1340,11 +1343,7 @@ sub create_view_lastn
             $lastn_event{'subject'} = "<a href='$permalink'>" . $lastn_event{'subject'} . "</a>";
         }
 
-        if ($u->{'opt_showtalklinks'} eq "Y" &&
-            ! $logprops{$itemid}->{'opt_nocomments'}
-            )
-        {
-
+        if ($entry_obj->comments_shown) {
             my $nc;
             $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
@@ -1589,6 +1588,7 @@ sub create_view_friends
     if (LJ::are_hooks('s2_head_content_extra')) {
         LJ::run_hook('s2_head_content_extra', \$friends_page{'head'}, $remote, $opts->{r});
     }
+    LJ::run_hooks('head_content', \$friends_page{'head'});
 
     ## never have spiders index friends pages (change too much, and some
     ## people might not want to be indexed)
@@ -1764,6 +1764,7 @@ sub create_view_friends
 
         my $datakey = "$friendid $itemid";
 
+        $entry_obj->handle_prefetched_props($logprops{$datakey});
         my $replycount = $logprops{$datakey}->{'replycount'};
         my $subject = $logtext->{$datakey}->[0];
         my $event = $logtext->{$datakey}->[1];
@@ -1884,9 +1885,7 @@ sub create_view_friends
 
         $friends_event{'subject'} = "<a href='$permalink'>" . $friends_event{'subject'} . "</a>";
 
-        if ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
-            ! $logprops{$datakey}->{'opt_nocomments'}
-            )
+        if ($entry_obj->comments_shown)
         {
             my $dispreadlink = $replycount ||
                 ($logprops{$datakey}->{'hasscreened'} && LJ::can_manage($remote, $friendid));
@@ -2092,6 +2091,7 @@ sub create_view_calendar
     if (LJ::are_hooks('s2_head_content_extra')) {
         LJ::run_hook('s2_head_content_extra', \$calendar_page{'head'}, $remote, $opts->{r});
     }
+    LJ::run_hooks('head_content', \$calendar_page{'head'});
 
     if ($u->should_block_robots) {
         $calendar_page{'head'} .= LJ::robot_meta_tags();
@@ -2358,6 +2358,7 @@ sub create_view_day
     if (LJ::are_hooks('s2_head_content_extra')) {
         LJ::run_hook('s2_head_content_extra', \$day_page{'head'}, $remote, $opts->{r});
     }
+    LJ::run_hooks('head_content', \$day_page{'head'});
 
     if ($u->should_block_robots) {
         $day_page{'head'} .= LJ::robot_meta_tags();
@@ -2497,6 +2498,7 @@ sub create_view_day
 
         my $ditemid = $itemid*256 + $anum;
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
@@ -2548,9 +2550,7 @@ sub create_view_day
 
         $day_event{'subject'} = "<a href='$permalink'>" . $day_event{'subject'} . "</a>";
 
-        if ($u->{'opt_showtalklinks'} eq "Y" &&
-            ! $logprops{$itemid}->{'opt_nocomments'}
-            )
+        if ($entry_obj->comments_shown)
         {
             my $nc;
             $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};

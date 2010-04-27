@@ -299,4 +299,17 @@ register_setter('custom_usericon', sub {
     return 1;
 });
 
+register_setter('ilikeit_enable', sub {
+    my ($u, $key, $value, $err) = @_;
+
+    my $remote = LJ::get_remote();
+    unless ($remote && LJ::check_priv($remote, 'siteadmin', 'ilikeit')) {
+        $$err = "You do not have privileges to set this property.";
+        return 0;
+    }
+
+    $u->set_prop("ilikeit_enable", $value);
+    return 1;
+});
+
 1;

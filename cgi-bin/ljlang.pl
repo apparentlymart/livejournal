@@ -374,6 +374,9 @@ sub set_text
     my $staleness = int $opts->{'staleness'};
     $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness, revid) ".
              "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), $staleness, $revid)");
+    warn ("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness, revid) ".
+          "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), $staleness, $revid)")
+	     if $dbh->err;
     return set_error("Error inserting ml_latest: ".$dbh->errstr) if $dbh->err;
     LJ::MemCache::set("ml.${lncode}.${dmid}.${itcode}", $text) if defined $text;
 
@@ -463,6 +466,8 @@ sub remove_text {
 
 sub get_effective_lang {
 
+    return LJ::run_hook('effective_lang') if LJ::are_hooks('effective_lang');
+
     my $lang;
     if (LJ::is_web_context()) {
         $lang = BML::get_language();
@@ -471,6 +476,8 @@ sub get_effective_lang {
         # we have a user; try their browse language
         $lang ||= $remote->prop("browselang");
     }
+
+    load_lang_struct() unless $LS_CACHED;
 
     # did we get a valid language code?
     if ($lang && $LN_CODE{$lang}) {

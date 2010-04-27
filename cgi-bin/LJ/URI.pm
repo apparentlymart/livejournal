@@ -3,6 +3,8 @@ use strict;
 
 package LJ::URI;
 
+use LJ::Pay::Wallet;
+
 # Takes an Apache a path to BML filename relative to htdocs
 sub bml_handler {
     my ($class, $filename) = @_;
@@ -54,8 +56,15 @@ sub handle {
         return LJ::URI->bml_handler("browse/index.bml");
     }
 
-    if ($uri =~ m!^/statistics(/.*|$)! or $uri =~ m!^/ratings(/.*|$)!) {
+    if ($uri =~ m!^/statistics(/.*|$)! or $uri =~ m!^/ratings(/.*|$)! and not $uri eq '/ratings/admin.bml') {
         return LJ::URI->bml_handler("statistics/index.bml");
+    }
+
+    if (
+        "$uri"  eq LJ::Pay::Wallet::LANDING_URL or
+        "$uri/" eq LJ::Pay::Wallet::LANDING_URL
+    ) {
+        return LJ::URI->bml_handler('shop/wallet.bml');
     }
 
     return undef;

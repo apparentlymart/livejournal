@@ -555,8 +555,21 @@ sub subscriptions {
         # we got enough subs
         last if $limit && $limit_remain <= 0;
 
-        my $udbh = LJ::get_cluster_master($cid)
-            or die;
+        ## hack: use inactive server of user cluster to find subscriptions
+        ## LJ::DBUtil wouldn't load in web-context
+        ## inactive DB may be unavailable due to backup, or on dev servers
+        ## TODO: check that LJ::get_cluster_master($cid) in other parts of code
+        ## will return handle to 'active' db, not cached 'inactive' db handle
+        my $udbh = '';
+        if (not $LJ::DISABLED{'try_to_load_subscriptions_from_slave'}){
+            $udbh = eval { 
+                        require 'LJ/DBUtil.pm';
+                        LJ::DBUtil->get_inactive_db($cid); # connect to slave 
+                    };
+        }
+        $udbh ||= LJ::get_cluster_master($cid); # default (master) connect
+
+        die "Can't connect to db" unless $udbh;
 
         # first we find exact matches (or all matches)
         my $journal_match = $allmatch ? "" : "AND journalid=?";
@@ -575,7 +588,10 @@ sub subscriptions {
         }
 
         while (my $row = $sth->fetchrow_hashref) {
-            push @subs, LJ::Subscription->new_from_row($row);
+            my $sub = LJ::Subscription->new_from_row($row);
+            next unless $sub->owner->clusterid == $cid;
+
+            push @subs, $sub;
         }
 
         # then we find wildcard matches.
@@ -597,7 +613,10 @@ sub subscriptions {
             die $sth->errstr if $sth->err;
 
             while (my $row = $sth->fetchrow_hashref) {
-                push @subs, LJ::Subscription->new_from_row($row);
+                my $sub = LJ::Subscription->new_from_row($row);
+                next unless $sub->owner->clusterid == $cid;
+
+                push @subs, $sub;
             }
         }
 

@@ -3,7 +3,7 @@
     use strict;
     use vars qw(%GET);
     use LJ::Auth;
-    use JSON;
+    use LJ::JSON;
 
     my $language_scope = '/tools/endpoints/ctxpopup.bml';
     BML::set_language_scope($language_scope);
@@ -11,7 +11,7 @@
     my $err = sub {
         my $msg = shift;
         my %extra = @_;
-        return JSON::objToJson({
+        return LJ::JSON->to_json({
             error => "$msg",
             %extra,
         });
@@ -166,6 +166,6 @@
     }
 
     $ret{success} = 1;
-    return LJ::js_dumper(\%ret);
+    return LJ::JSON->to_json(\%ret);
 }
 _code?>

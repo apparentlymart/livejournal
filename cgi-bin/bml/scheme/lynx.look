@@ -39,6 +39,12 @@ _code?>
 <?_code return LJ::run_hook("insert_after_bml_title"); _code?>
 <?_code LJ::res_includes() _code?>
 %%HEAD%%
+    <?_code
+        my $head = '';
+        LJ::run_hooks('head_content', \$head);
+        return $head;
+    _code?>
+
 </head>
 
 <?_code {
@@ -46,9 +52,10 @@ _code?>
     return "<body $class %%bodyopts%%>";
 } _code?>
 
+<?_code return (LJ::Widget::SiteMessages->should_render) ? LJ::Widget::SiteMessages->render : ''; _code?>
 %%BODY%%
 
-<hr />
+<hr style="clear:both;" />
 
 <p>[ <a href='<?siteroot?>/'><?_ml lynx.nav.home _ml?></a> | <a href='<?siteroot?>/update.bml'><?_ml lynx.nav.update _ml?></a> | <?_code
    use strict;
@@ -62,6 +69,14 @@ _code?><a href='<?siteroot?>/login.bml'><?_ml lynx.nav.login _ml?></a>/<a href='
 {
     my $pagestats_obj = LJ::pagestats_obj();
     $pagestats_obj->render;
+}
+_code?>
+
+<?_code
+{
+    my $before_body_close = "";
+    LJ::run_hooks("insert_html_before_journalctx_body_close", \$before_body_close) if LJ::get_active_journal();
+    return $before_body_close;
 }
 _code?>
 <?_code LJ::final_body_html() _code?>

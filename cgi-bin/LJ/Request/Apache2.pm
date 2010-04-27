@@ -4,9 +4,11 @@ use strict;
 use Carp qw//;
 use Apache2::Const qw/:methods :common :http/;
 use Apache2::RequestRec;
+use Apache2::RequestUtil;
 use Apache2::Response;
 use Apache2::RequestIO;
 use Apache2::Request;
+use Apache2::Upload;
 use Apache2::ServerUtil;
 use Apache2::Log;
 use Apache2::Access;
@@ -14,6 +16,8 @@ use Apache2::Connection;
 use Apache2::URI;
 use ModPerl::Util;
 use URI::Escape;
+use APR::Finfo;
+
 
 sub LJ::Request::OK                        { return Apache2::Const::OK }
 sub LJ::Request::REDIRECT                  { return Apache2::Const::REDIRECT }
@@ -53,6 +57,14 @@ sub LJ::Request::instance {
 sub LJ::Request::init {
     my $class = shift;
     my $r     = shift;
+
+    # second init within a same request.
+    # Request object may differ between handlers.
+    if ($class->is_inited){
+        # NOTE. this is not good approach. becouse we would have Apache::Request based on other $r object.
+        $instance->{r} = $r;
+        return $instance;
+    }
 
     $instance = bless {}, $class;
     $instance->{apr} = Apache2::Request->new($r);
@@ -134,6 +146,7 @@ sub LJ::Request::args {
     if (wantarray()){
         my $qs = $instance->{r}->args(@_);
         my @args = 
+            map { URI::Escape::uri_unescape ($_) }
             map { split /=/ => $_, 2 }
             split /[\&\;]/ => $qs;
         return @args;
@@ -159,7 +172,7 @@ sub LJ::Request::document_root {
 
 sub LJ::Request::finfo {
     my $class = shift;
-    $instance->{r}->finfo;
+    $instance->{apr}->finfo;
 }
 
 sub LJ::Request::filename {
@@ -434,7 +447,10 @@ sub LJ::Request::aborted {
     return $instance->{r}->connection()->aborted;
 }
 
-
+sub LJ::Request::upload {
+    my $class = shift;
+    return $instance->{apr}->upload(@_);
+}
 sub LJ::Request::sendfile {
     my $class = shift;
     my $filename = shift;
@@ -456,6 +472,11 @@ sub LJ::Request::current_callback {
 sub LJ::Request::child_terminate {
     my $class = shift;
     return $instance->{r}->child_terminate;
+}
+
+sub LJ::Request::meets_conditions {
+    my $class = shift;
+        return $instance->{r}->meets_conditions;
 }
 
 1;

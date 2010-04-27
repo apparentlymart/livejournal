@@ -185,8 +185,7 @@ sub get_cap
     if (! $opts->{no_hook} && LJ::are_hooks("check_cap_$cname")) {
         die "Hook 'check_cap_$cname' requires full user object"
             unless LJ::isu($u);
-
-        my $val = LJ::run_hook("check_cap_$cname", $u);
+        my $val = LJ::run_hook("check_cap_$cname", $u, $opts);
         return $val if defined $val;
 
         # otherwise fall back to standard means
@@ -200,6 +199,7 @@ sub get_cap
         next if (defined $max && $max > $v);
         $max = $v;
     }
+
     return defined $max ? $max : $LJ::CAP_DEF{$cname};
 }
 

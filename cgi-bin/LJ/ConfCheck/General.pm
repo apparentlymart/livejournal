@@ -285,11 +285,6 @@ add_conf('$MAX_REPL_LAG',
          des => "The max number of bytes that a MySQL database slave can be behind in replication and still be considered usable.  Note that slave databases are never used for any 'important' read operations (and especially never writes, because writes only go to the master), so in general MySQL's async replication won't bite you.  This mostly controls how fresh of data a visitor would see, not a content owner.  But in reality, the default of 100k is pretty much real-time, so you can safely ignore this setting.",
          );
 
-add_conf('$MAX_S2COMPILED_CACHE_SIZE',
-         type => 'int',
-         des => "Threshold (in bytes) under which compiled S2 layers are cached in memcached.  Default is 7500 bytes.  If you have a lot of free memcached memory and a loaded database server with lots of queries to the s2compiled table, turn this up.",
-         );
-
 add_conf('$MAX_USERPIC_KEYWORDS',
          type => 'int',
          des => "Max number of keywords allowed per userpic.  Default is 10.",

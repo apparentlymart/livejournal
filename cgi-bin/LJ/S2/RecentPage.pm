@@ -141,6 +141,7 @@ sub RecentPage
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
@@ -201,7 +202,6 @@ sub RecentPage
         $readurl .= "?$nc" if $nc;
         my $posturl = $permalink . "?mode=reply";
 
-        my $comments_enabled = ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0;
         my $has_screened = ($logprops{$itemid}->{'hasscreened'} && LJ::can_manage($remote, $u)) ? 1 : 0;
 
         my $comments = CommentInfo({
@@ -209,10 +209,11 @@ sub RecentPage
             'post_url' => $posturl,
             'count' => $replycount,
             'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
-            'enabled' => $comments_enabled,
+            'enabled' => $entry_obj->comments_shown,
+            'locked' => !$entry_obj->posting_comments_allowed,
             'screened' => $has_screened,
-            'show_readlink' => $comments_enabled && ($replycount || $has_screened),
-            'show_postlink' => $comments_enabled,
+            'show_readlink' => $entry_obj->comments_shown && ($replycount || $has_screened),
+            'show_postlink' => $entry_obj->posting_comments_allowed,
         });
 
         my $userlite_poster = $userlite_journal;

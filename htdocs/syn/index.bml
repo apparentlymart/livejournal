@@ -8,12 +8,11 @@ body<=
     use vars qw(%POST);
 
     my $dbh = LJ::get_db_writer();
-    my $u = LJ::get_remote();
+    my $u   = LJ::get_remote();
 
-    unless ($u) {
-        return "<?needlogin?>";
-    }
-    return "<?h1 $ML{'error.suspended.title'} h1?><?p $ML{'error.suspended.text'} p?>" if $u->is_suspended;
+    return "<?needlogin?>" if LJ::did_post() and !$u;
+    return "<?h1 $ML{'error.suspended.title'} h1?><?p $ML{'error.suspended.text'} p?>" 
+        if $u and $u->is_suspended;
 
     if (LJ::did_post() && $POST{'userid'} != $u->{'userid'}) {
         return "<?h1 $ML{'.invalid.submission'} h1?><?p $ML{'.user.nomatch'} p?>";
@@ -67,7 +66,7 @@ body<=
                 # for the url, just pass that through (we'll recheck it anyway, though)
                 unless ($acct) {
                     my $ret .= "<?h1 $ML{'.create'} h1?><?p $ML{'.create.name'} p?>";
-                    $ret .= "<form method='post' action='./'>";
+                    $ret .= "<form method='post' action='$LJ::SITEROOT/syn/'>";
                     $ret .= LJ::html_hidden("userid", $u->{'userid'}, 'synurl', $url);
                     $ret .= "<blockquote>";
                     $ret .= "<p>$ML{'.account'} <input size='15' maxlength='15' name='acct' />";
@@ -205,8 +204,8 @@ body<=
     $ret .= "<?p " . BML::ml('.top1000.text', {'aopts' => "href='$LJ::SITEROOT/syn/list.bml'"}) . " p?>";
     $ret .= "<?p $ML{'.promo.text'} p?>";
 
-    $ret .= "<form method='post' action='./'>";
-    $ret .= LJ::html_hidden("userid", $u->{'userid'});
+    $ret .= "<form method='post' action='$LJ::SITEROOT/syn/'>";
+    $ret .= LJ::html_hidden("userid", $u->userid) if $u;
 
     if (@pop) {
         $ret .= "<?h1 $ML{'.add.pop.title'} h1?><?p $ML{'.add.pop.text'} p?>";
@@ -236,17 +235,17 @@ body<=
         $ret .= "</table>";
     }
 
-    $ret .= "</form><form method='post' action='./'>";
-    $ret .= LJ::html_hidden("userid", $u->{'userid'});
+    $ret .= "</form><form method='post' action='$LJ::SITEROOT/syn/'>";
+    $ret .= LJ::html_hidden("userid", $u->userid) if $u;
 
     $ret .= "<?h1 $ML{'.add.byurl.title'} h1?><?p $ML{'.add.byurl.text'} p?>";
-    unless (LJ::get_cap($u, "synd_create")) {
-        my $inline;
-        if ($inline .= LJ::run_hook("cprod_inline", $u, 'Syn')) {
-            $ret .= $inline;
-        } else {
-            $ret .= "<p>".BML::ml('cprod.syn.text.v1')."</p>";
-        }
+    if ($u 
+        and not LJ::get_cap($u, "synd_create") 
+        and my $inline .= LJ::run_hook("cprod_inline", $u, 'Syn')
+    ) {
+        $ret .= $inline;
+    } else {
+        $ret .= "<p>".BML::ml('cprod.syn.text.v1')."</p>";
     }
     $ret .= "<blockquote>";
     $ret .= "<p>$ML{'.feed.url'} <input size='40' maxlength='255' name='synurl' />";

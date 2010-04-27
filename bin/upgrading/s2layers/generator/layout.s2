@@ -858,7 +858,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
             }
             if ($k == "mood" and defined $e.mood_icon) {
                 var Image i = $e.mood_icon;
-                $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle'> $val";
+                $val = $i->as_string_ex($i.alttext, "align='absmiddle' ") + $val;
             }
             $metadata = """$metadata\n<tr><td class="meta">[</td><td class="meta" align="right"><b>$text</b></td>
             <td class="meta" align="center">|</td><td class="meta">$val</td><td class="meta">]</td></tr>""";
@@ -896,7 +896,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     if ($p.view != "entry" and $p.view != "reply") {
         "<td align='right' class='comments'>"; $e.comments->print();
     } elseif ($e.comments.enabled) {
-        "<td align='right' class='comments'>"; $p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment"});
+        "<td align='right' class='comments'>";
+if (not $e.comments.locked) {
+		$p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment"});
+}
     } else {
         "<td>";
     }

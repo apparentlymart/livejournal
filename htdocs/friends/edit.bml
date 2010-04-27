@@ -5,7 +5,7 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST);
-    use JSON;
+    use LJ::JSON;
 
     LJ::set_active_crumb('managefriends');
 

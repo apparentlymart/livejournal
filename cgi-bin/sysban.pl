@@ -151,8 +151,17 @@ sub sysban_check {
 
         # see if this domain is banned
         my @domains = split(/\./, $1);
-        return 0 unless scalar @domains >= 2;
-        return 1 if $check->('email_domain', "$domains[-2].$domains[-1]");
+        
+        ## invalid domain of e-mail address
+        return 1 if @domains<2;
+
+        ## for email like 'name@abc.def.ghi.klm',
+        ## check 'ghi.klm', 'def.ghi.klm' and 'abc.def.ghi.klm' domains
+        my $checking_domain = pop @domains;
+        while (@domains) {
+            $checking_domain = pop(@domains) . "." . $checking_domain;
+            return 1 if $check->('email_domain', $checking_domain);
+        }
 
         # must not be banned
         return 0;

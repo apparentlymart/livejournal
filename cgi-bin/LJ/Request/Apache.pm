@@ -3,6 +3,7 @@ use strict;
 
 use Carp qw//;
 use Apache::Constants;
+require Apache;
 require Apache::Request;
 require Apache::URI;
 require Apache::File;
@@ -45,9 +46,25 @@ sub LJ::Request::init {
     my $class = shift;
     my $r     = shift;
 
+    # second init within a same request.
+    # Request object may differ between handlers.
+    if ($class->is_inited){
+        # NOTE. this is not good approach. becouse we would have Apache::Request based on other $r object.
+        $instance->{r} = $r;
+        return $instance;
+    }
+
     $instance = bless {}, $class;
-    $instance->{apr} = Apache::Request->new($r);
     $instance->{r} = $r;
+    $instance->{apr} = Apache::Request->new($r);
+
+    # Temporary HACK
+    if ($r->method eq 'POST'){
+        #$r->headers_in()->set("Content-Type", "multipart/form-data");
+    }
+
+   
+    
     return $instance;
 }
 
@@ -64,19 +81,19 @@ sub LJ::Request::update_mtime {
 sub LJ::Request::set_last_modified {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->set_last_modified(@_);
+    return $instance->{r}->set_last_modified(@_);
 }
 
 sub LJ::Request::request_time {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->request_time();
+    return $instance->{r}->request_time();
 }
 
 sub LJ::Request::meets_conditions {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->meets_conditions();
+    return $instance->{r}->meets_conditions();
 }
 
 sub LJ::Request::read {
@@ -100,31 +117,31 @@ sub LJ::Request::main {
 sub LJ::Request::dir_config {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->dir_config(@_);
+    return $instance->{r}->dir_config(@_);
 }
 
 sub LJ::Request::header_only {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->header_only;
+    return $instance->{r}->header_only;
 }
 
 sub LJ::Request::content_languages {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->content_languages(@_);
+    return $instance->{r}->content_languages(@_);
 }
 
 sub LJ::Request::register_cleanup {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->register_cleanup(@_);
+    return $instance->{r}->register_cleanup(@_);
 }
 
 sub LJ::Request::path_info {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{apr}->path_info(@_);
+    return $instance->{r}->path_info(@_);
 }
 
 sub LJ::Request::args {
@@ -136,7 +153,7 @@ sub LJ::Request::args {
 sub LJ::Request::method {
     my $class = shift;
     _die_if_no_request();
-    $instance->{apr}->method;
+    $instance->{r}->method;
 }
 
 sub LJ::Request::bytes_sent {
@@ -148,19 +165,19 @@ sub LJ::Request::bytes_sent {
 sub LJ::Request::document_root {
     my $class = shift;
     _die_if_no_request();
-    $instance->{apr}->document_root;
+    $instance->{r}->document_root;
 }
 
 sub LJ::Request::finfo {
     my $class = shift;
     _die_if_no_request();
-    $instance->{apr}->finfo;
+    $instance->{r}->finfo;
 }
 
 sub LJ::Request::filename {
     my $class = shift;
     _die_if_no_request();
-    $instance->{apr}->filename(@_);
+    $instance->{r}->filename(@_);
 }
 
 sub LJ::Request::add_httpd_conf {
@@ -171,7 +188,7 @@ sub LJ::Request::add_httpd_conf {
 sub LJ::Request::is_initial_req {
     my $class = shift;
     _die_if_no_request();
-    $instance->{apr}->is_initial_req(@_);
+    $instance->{r}->is_initial_req(@_);
 }
 
 sub LJ::Request::push_handlers_global {
@@ -182,15 +199,19 @@ sub LJ::Request::push_handlers_global {
 sub LJ::Request::push_handlers {
     my $class = shift;
     _die_if_no_request();
-    return $instance->{r}->push_handlers(@_);
+    #$instance->{r}->push_handlers(@_);
+    return ($_[0] =~ /PerlHandler/)
+        ? LJ::Request->set_handlers(@_)
+        : Apache->request->push_handlers(@_);
 }
 
 sub LJ::Request::set_handlers {
     my $class = shift;
     _die_if_no_request();
-
     my @args = shift @_;
     $args[1] = ref $_[0] eq 'ARRAY' ? $_[0] : [@_]; # second arg should be an arrayref.
+
+    #return Apache->request->set_handlers(@args);
     $instance->{r}->set_handlers(@args);
 }
 
@@ -364,10 +385,11 @@ sub LJ::Request::post_params {
     ## but only if the request content type is application/x-www-form-urlencoded.
     ## ...
     ## NOTE: you can only ask for this once, as the entire body is read from the client.
-    return () if $instance->{r}->headers_in()->get("Content-Type") =~ m!^multipart/form-data!;
+    #return () if $instance->{r}->headers_in()->get("Content-Type") =~ m!^multipart/form-data!;
 
-    return @{ $instance->{params} } if $instance->{params};
-    my @params = $instance->{r}->content;
+    return @{ $instance->{params} } if $instance->{params};  
+
+    my @params = _parse_post();
     $instance->{params} = \@params;
     return @params;
 }
@@ -451,6 +473,11 @@ sub LJ::Request::sendfile {
 
 }
 
+sub LJ::Request::upload {
+    my $class = shift;
+    return $instance->{apr}->upload(@_);
+}
+
 sub LJ::Request::parsed_uri {
     my $class = shift;
     _die_if_no_request();
@@ -467,6 +494,52 @@ sub LJ::Request::child_terminate {
     my $class = shift;
     _die_if_no_request();
     return $instance->{r}->child_terminate;
+}
+
+sub _parse_post {
+    my $r = $instance->{r};
+    
+    my $method = $r->method;
+    return unless $method eq 'POST';
+    my $host = $r->headers_in()->get("Host");
+    my $uri = $r->uri;
+    
+    ## apreq parses only this encoding methods.
+    my $content_type = $r->headers_in()->get("Content-Type");
+    if ($content_type !~ m!^application/x-www-form-urlencoded!i &&
+        $content_type !~ m!^multipart/form-data!i)
+    {
+        ## hack: if this is a POST request, and App layer asked us
+        ## for params, pretend that encoding is default 'application/x-www-form-urlencoded'
+        ## Some clients that use flat protocol issue malformed headers,
+        ## so don't even make a warn.
+        if ($uri ne '/interface/flat') {
+            warn "Changing content-type of POST ($host$uri) from $content_type to default";
+        }
+        $r->headers_in()->set("Content-Type", "application/x-www-form-urlencoded");
+    }
+   
+    my $qs = $r->args;
+    $r->args(''); # to exclude GET params from Apache::Request object.
+                  # it allows us to separate GET params and POST params.
+                  # otherwise Apache::Request's "parms" method returns them together.
+
+    my $parse_res = $instance->{apr}->parse;
+    # set original QUERY_STRING back
+    $r->args($qs);
+    
+    if (!$parse_res eq OK) {
+        warn "Can't parse POST data ($host$uri), Content-Type=$content_type";
+        return;
+    }
+    
+    my @params = ();
+    foreach my $name ($instance->{apr}->param){
+        foreach my $val ($instance->{apr}->param($name)){
+            push @params => ($name, $val);
+        }
+    }
+    return @params;
 }
 
 1;

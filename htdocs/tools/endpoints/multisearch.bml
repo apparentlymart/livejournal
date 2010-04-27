@@ -1,7 +1,7 @@
 <?_code
 {
     use strict;
-    use JSON;
+    use LJ::JSON;
     use vars qw(%FORM %ML);
 
     my $max_users = 100;
@@ -14,7 +14,7 @@
     BML::finish();
     BML::noparse();
 
-    return JSON::objToJson({error => $ML{'multisearch.error.no_query'},}) unless $q;
+    return LJ::JSON->to_json({error => $ML{'multisearch.error.no_query'},}) unless $q;
 
     if ($type eq "user" || $type eq "ljtalk") {
         my $user = lc($q);
@@ -31,7 +31,7 @@
 
         if ($user) {
             if (my $u = LJ::load_user($user)) {
-                return JSON::objToJson({error => $ML{'multisearch.error.user_not_found'},})
+                return LJ::JSON->to_json({error => $ML{'multisearch.error.user_not_found'},})
                     if $u->is_deleted or $u->is_suspended or $u->is_expunged;
                 if ($what eq "pics") {
                     $url = "$LJ::SITEROOT/allpics.bml?user=$user";
@@ -48,7 +48,7 @@
             my %ret = ( status => 'success', result => '<a href="' . $url . '">' . $user . '</a>', );
             return LJ::js_dumper(\%ret);
         }
-        return JSON::objToJson({error => $ML{'multisearch.error.user_not_found'},});
+        return LJ::JSON->to_json({error => $ML{'multisearch.error.user_not_found'},});
     }
 
     if ($type eq "email") {
@@ -83,7 +83,7 @@
             }
         }
         return LJ::js_dumper(\%ret) if $ret{result};
-        return JSON::objToJson({error => $ML{'multisearch.error.user_not_found'},});
+        return LJ::JSON->to_json({error => $ML{'multisearch.error.user_not_found'},});
     }
 
     if ($type eq "im" ||
@@ -118,9 +118,9 @@
         }
 
         # If we haven't returned already then the search turned up nothing.
-        return JSON::objToJson({error => $ML{'multisearch.error.user_not_found'},});
+        return LJ::JSON->to_json({error => $ML{'multisearch.error.user_not_found'},});
     }
 
-    return JSON::objToJson({error => $ML{'multisearch.error.no_type'},});
+    return LJ::JSON->to_json({error => $ML{'multisearch.error.no_type'},});
 }
 _code?>

@@ -69,7 +69,7 @@ sub make_journal
     $con_opts->{'style_u'} = $opts->{'style_u'};
     my $ctx = s2_context($r, $styleid, $con_opts);
     unless ($ctx) {
-        $opts->{'handler_return'} = Apache::Constants::OK();
+        $opts->{'handler_return'} = LJ::Request::OK();
         return;
     }
 
@@ -148,6 +148,8 @@ sub make_journal
     $graphicpreviews_obj->need_res($u);
     my $extra_js = LJ::statusvis_message_js($u);
     $page->{head_content} .= LJ::res_includes() . $extra_js;
+    $page->{head_content} .= $LJ::SHARE_THIS_URL unless $LJ::DISABLED{'sharethis'};
+    LJ::run_hooks('head_content', \$page->{head_content});
 
     s2_run($r, $ctx, $opts, $entry, $page);
 
@@ -387,7 +389,14 @@ sub load_layers {
         # function which already knows how to handle that
         unless ($cid) {
             my $dbr = LJ::S2::get_s2_reader();
-            S2::load_layers_from_db($dbr, @{$bycluster{$cid}});
+            my $opts = {
+                # connection to cache loaded layers
+                cache => sub {
+                            my ($id, $comp, $comptime) = @_;
+                            LJ::MemCache::set([ $id, "s2c:$id" ], [ $comptime, $comp ]);
+                        }
+                };
+            S2::load_layers_from_db($opts, $dbr, @{$bycluster{$cid}});
             next;
         }
 
@@ -404,8 +413,7 @@ sub load_layers {
         # iterate over data, memcaching as we go
         while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
             LJ::text_uncompress(\$comp);
-            LJ::MemCache::set([ $id, "s2c:$id" ], [ $comptime, $comp ])
-                if length $comp <= $LJ::MAX_S2COMPILED_CACHE_SIZE;
+            LJ::MemCache::set([ $id, "s2c:$id" ], [ $comptime, $comp ]);
             S2::load_layer($id, $comp, $comptime);
             $maxtime = $comptime if $comptime > $maxtime;
         }
@@ -446,6 +454,7 @@ sub load_layers {
     my $sth = $dbr->prepare("SELECT s2lid, compdata, comptime FROM s2compiled WHERE $where");
     $sth->execute;
     while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
+        LJ::MemCache::set([ $id, "s2c:$id" ], [ $comptime, $comp ]);
         S2::load_layer($id, $comp, $comptime);
         $maxtime = $comptime if $comptime > $maxtime;
     }
@@ -1342,7 +1351,7 @@ sub layer_compile
     # save the checker object for later
     if ($layer->{'type'} eq "core" || $layer->{'type'} eq "layout") {
         $checker->cleanForFreeze();
-        my $chk_frz = Storable::freeze($checker);
+        my $chk_frz = Storable::nfreeze($checker);
         LJ::text_compress(\$chk_frz);
         $dbh->do("REPLACE INTO s2checker (s2lid, checker) VALUES (?,?)", undef,
                  $lid, $chk_frz) or die "replace into s2checker (lid = $lid)";
@@ -1884,12 +1893,20 @@ sub Entry
     if (my $mid = $p->{'current_moodid'}) {
         my $theme = defined $arg->{'moodthemeid'} ? $arg->{'moodthemeid'} : $u->{'moodthemeid'};
         my %pic;
-        $e->{'mood_icon'} = Image($pic{'pic'}, $pic{'w'}, $pic{'h'})
-            if LJ::get_mood_picture($theme, $mid, \%pic);
+        my $img_alt = undef;
         if (my $mood = LJ::mood_name($mid)) {
             my $extra = LJ::run_hook("current_mood_extra", $theme) || "";
+            $img_alt = $mood;
             $e->{'metadata'}->{'mood'} = "$mood$extra";
         }
+        my ($width, $height, %img_extra);
+        if ($pic{'w'} && $pic{'h'}) {
+            ($width, $height) = @pic{('w', 'h')};
+        } else {
+            $img_extra{'class'} = 'meta-mood-img';
+        }
+        $e->{'mood_icon'} = Image($pic{'pic'}, $width, $height, $img_alt, %img_extra )
+            if LJ::get_mood_picture($theme, $mid, \%pic);
     }
     if ($p->{'current_mood'}) {
         $e->{'metadata'}->{'mood'} = $p->{'current_mood'};
@@ -2046,6 +2063,7 @@ sub Link {
         'caption' => $caption,
         'url'     => $url,
         'icon'    => $icon,
+        '_raw'     => '',
     };
 
     return $lnk;
@@ -2963,6 +2981,11 @@ sub Color__darker {
     return $new;
 }
 
+sub Link__print_raw {
+    my ($ctx, $this) = @_;
+    $S2::pout->($this->{_raw}) if $this->{_raw};
+}
+
 sub _Comment__get_link
 {
     my ($ctx, $this, $key) = @_;
@@ -2979,35 +3002,35 @@ sub _Comment__get_link
         return $null_link unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 24, 24));
     }
     if ($key eq "freeze_thread") {
         return $null_link if $this->{'frozen'};
         return $null_link unless LJ::Talk::can_freeze($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_freeze"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 24, 24));
     }
     if ($key eq "unfreeze_thread") {
         return $null_link unless $this->{'frozen'};
         return $null_link unless LJ::Talk::can_unfreeze($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unfreeze"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 24, 24));
     }
     if ($key eq "screen_comment") {
         return $null_link if $this->{'screened'};
         return $null_link unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_screen"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 24, 24));
     }
     if ($key eq "unscreen_comment") {
         return $null_link unless $this->{'screened'};
         return $null_link unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 24, 24));
     }
 
     # added new button
@@ -3016,7 +3039,7 @@ sub _Comment__get_link
         #return $null_link unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen_to_reply"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 24, 24));
     }
 
     
@@ -3041,7 +3064,7 @@ sub _Comment__get_link
 
             return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=" . $comment->dtalkid,
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_untrack"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 24, 24, 'Untrack this',
                                               'lj_etypeid'    => $etypeid,
                                               'lj_journalid'  => $u->id,
                                               'lj_subid'      => $subscr->id,
@@ -3096,12 +3119,12 @@ sub _Comment__get_link
         if ($key eq "watch_thread" && !$watching_parent) {
             return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$dtalkid",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This', %btn_params));
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 24, 24, 'Track This', %btn_params));
         }
         if ($key eq "watching_parent" && $watching_parent) {
             return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$dtalkid",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20, 'Untrack This', %btn_params));
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 24, 24, 'Untrack This', %btn_params));
         }
         return $null_link;
     }
@@ -3110,7 +3133,7 @@ sub _Comment__get_link
         my $edit_url = $this->{edit_url} || $comment->edit_url;
         return LJ::S2::Link($edit_url,
                             $ctx->[S2::PROPS]->{"text_multiform_opt_edit"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 24, 24));
     }
     if ($key eq "expand_comments") {
         return $null_link unless LJ::run_hook('show_thread_expander');
@@ -3487,7 +3510,7 @@ sub UserLite__get_link
     my $has_journal = $u->{journaltype} ne 'I';
 
     my $button = sub {
-        return LJ::S2::Link($_[0], $_[1], LJ::S2::Image("$LJ::IMGPREFIX/$_[2]", 22, 20));
+        return LJ::S2::Link($_[0], $_[1], LJ::S2::Image("$LJ::IMGPREFIX/$_[2]", 24, 24));
     };
 
     if ($key eq 'add_friend' && defined($remote)) {
@@ -3594,37 +3617,44 @@ sub _Entry__get_link
                                         LJ::can_manage($remote, LJ::load_user($journal)));
         return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_edit_entry"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 24, 24));
     }
     if ($key eq "edit_tags") {
         return $null_link unless $remote && LJ::Tags::can_add_entry_tags($remote, $entry);
         return LJ::S2::Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_edit_tags"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 24, 24));
     }
     if ($key eq "tell_friend") {
-        return $null_link if $LJ::DISABLED{'tellafriend'};
+        return $null_link if $LJ::DISABLED{'sharethis'};
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
-        return $null_link unless $entry->can_tellafriend($remote);
-        return LJ::S2::Link("$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                            $ctx->[S2::PROPS]->{"text_tell_friend"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20));
+        return $null_link unless $entry->security eq 'public';
+        my $entry_url = $entry->url;
+        my $entry_title = LJ::ejs($entry->subject_html);
+        my $link = LJ::S2::Link("#", $ctx->[S2::PROPS]->{"text_share_this"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_sharethis.gif", 24, 24));
+        $link->{_raw} = qq|<script type="text/javascript">
+            var stLink = jQuery('a:last')[0];
+            stLink.href = 'javascript:void(0)'
+            SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title'}, {button: false})
+                .attachButton(stLink);
+            </script>|;
+        return $link;
     }
     if ($key eq "mem_add") {
         return $null_link if $LJ::DISABLED{'memories'};
         return LJ::S2::Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_mem_add"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 24, 24));
     }
     if ($key eq "nav_prev") {
         return LJ::S2::Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=prev",
                             $ctx->[S2::PROPS]->{"text_entry_prev"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 24, 24));
     }
     if ($key eq "nav_next") {
         return LJ::S2::Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=next",
                             $ctx->[S2::PROPS]->{"text_entry_next"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 24, 24));
     }
     if ($key eq "flag") {
         return $null_link unless LJ::is_enabled("content_flag");
@@ -3632,7 +3662,7 @@ sub _Entry__get_link
         return $null_link unless $remote && $remote->can_see_content_flag_button( content => $entry );
         return LJ::S2::Link(LJ::ContentFlag->adult_flag_url($entry),
                             $ctx->[S2::PROPS]->{"text_flag"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/button-flag.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/button-flag.gif", 24, 24));
     }
 
     my $etypeid          = 'LJ::Event::JournalNewComment'->etypeid;
@@ -3679,7 +3709,7 @@ sub _Entry__get_link
 
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_watch_comments"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This',
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 24, 24, 'Track This',
                                           'lj_journalid'        => $journalu->id,
                                           'lj_etypeid'          => $etypeid,
                                           'lj_subid'            => 0,
@@ -3709,7 +3739,7 @@ sub _Entry__get_link
 
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_unwatch_comments"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 24, 24, 'Untrack this',
                                           'lj_journalid'        => $journalu->id,
                                           'lj_subid'            => $subscr->id,
                                           'lj_etypeid'          => $etypeid,
@@ -3729,6 +3759,50 @@ sub Entry__plain_subject
     $this->{'_subject_plain'} = $this->{'subject'};
     LJ::CleanHTML::clean_subject_all(\$this->{'_subject_plain'});
     return $this->{'_subject_plain'};
+}
+
+# 'I like it' button
+
+sub Entry__is_eventrate_enable
+{
+    my ($ctx, $this) = @_;
+    return LJ::is_eventrate_enable($this->{'journal'}->{'_u'});
+}
+
+sub Entry__get_eventratescounters
+{
+    my ($ctx, $this) = @_;
+    return
+        LJ::get_eventratescounters(
+            $this->{'journal'}->{'_u'}->{'userid'},
+            int($this->{'itemid'}));
+}
+
+sub Entry__get_eventrates
+{
+    my ($ctx, $this, $skip, $limit) = @_;
+    $limit ||= 10; $skip ||= 0;
+    return [ # Return a list as array ref.
+        map { LJ::S2::UserLite(LJ::want_user($_)) }
+            LJ::get_eventrates(
+                journalid   => $this->{'journal'}->{'_u'}->{'userid'},
+                jitemid     => int($this->{'itemid'}),
+                limits      => "$skip, $limit",
+            )
+    ];
+}
+
+sub Entry__is_myvoice
+{
+    my ($ctx, $this) = @_;
+    my $remote = LJ::get_remote();
+    return 0 unless $remote;
+    return
+        scalar LJ::get_eventrates(
+                journalid   => $this->{'journal'}->{'_u'}->{'userid'},
+                jitemid     => int($this->{'itemid'}),
+                userids     => [ $remote->{'userid'} ],
+        );
 }
 
 sub EntryPage__print_multiform_actionline
@@ -3828,6 +3902,31 @@ sub Page__print_ad_box {
     $args->{location} = $location;
     my $ad_html = LJ::get_ads($args);
     $S2::pout->($ad_html) if $ad_html;
+}
+
+my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers);
+
+sub Page__widget
+{
+    my ($ctx, $this, $opts) = @_;
+
+    my $class = $opts->{'class'};
+    return '' unless $approved_widget_classes{$class};
+
+    # if $opts->{'journal'} specified, try use it as name to load LJ::User object,
+    # else get current journal.
+    $opts->{'journal'} = $opts->{'journal'} ?
+        LJ::load_user($opts->{'journal'}) : $LJ::S2::CURR_PAGE->{'journal'}->{'_u'};
+
+    my $ret = '';
+
+    eval { $ret = "LJ::Widget::$class"->render(%$opts); };
+    if ($@) {
+        warn "Error when Page::widget() try to call LJ::Widget::$class->render() from LJ::S2:\n$@\n";
+        return '';
+    }
+
+    return $ret;
 }
 
 sub Entry__print_ebox {

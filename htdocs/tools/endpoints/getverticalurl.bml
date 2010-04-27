@@ -2,10 +2,10 @@
 {
     use strict;
     use vars qw(%GET);
-    use JSON;
+    use LJ::JSON;
 
     my $vertical = LJ::Vertical->load_by_id($GET{vertid});
 
-    return JSON::objToJson({ verturl => $vertical ? $vertical->url : "" });
+    return LJ::JSON->to_json({ verturl => $vertical ? $vertical->url : "" });
 }
 _code?>

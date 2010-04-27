@@ -1,24 +1,37 @@
-.appwidget-friendbirthdays table {
-    width: 100%;
-    border: 0;
-	}
-.appwidget-friendbirthdays .indent_sm {
-	margin-bottom: 15px;
-	}
-.appwidget-friendbirthdays H3 {
-	padding-left: 8px;
-	font-style: normal;
-	font-family:Arial;
-	color:#222;
-	}
+.appwidget-friendbirthdays {
+    margin: 0 0 15px !important;
+    } 
+    .appwidget-friendbirthdays H2 SPAN.w-head-in {
+        background: url("/img/birthday.gif") no-repeat  0 50%;
+        }
 
-.appwidget-friendbirthdays .gift-link {
-    display: block;
-    padding: 0 0 0 20px;
-    line-height: 20px;
-    background: url(/img/gift.gif) no-repeat 0 50%;
-    float: right;
-}
-* html .appwidget-friendbirthdays .gift-link {
-    line-height: 14px;
-}
+    .appwidget-friendbirthdays .w-body {
+        padding: 5px 10px; 
+        }
+        .appwidget-friendbirthdays table {
+            width: 100%;
+            margin: 0;
+            border: 0;
+        	}
+        .appwidget-friendbirthdays H3 {
+        	padding-left: 8px;
+        	font-style: normal;
+        	font-family: Arial;
+        	color: #222;
+        	}
+        .appwidget-friendbirthdays .gift-link {
+            float: right;
+            display: block;
+            padding: 0 0 0 20px;
+            background: url(/img/gift.gif) no-repeat 0 50%;
+            line-height: 20px;
+            }
+        * html .appwidget-friendbirthdays .gift-link {
+            line-height: 14px;
+            }
+        .appwidget-friendbirthdays UL.b-list-options {
+            padding: 10px 0 0;
+            }
+            .appwidget-friendbirthdays UL.b-list-options LI {
+                padding: 0 0 5px;
+                }

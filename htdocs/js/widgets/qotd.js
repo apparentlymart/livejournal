@@ -1,90 +1,110 @@
-QotD =
+QotD = function(node)
 {
-	skip: 0,
+	this.init(node);
+}
+
+QotD.prototype =
+{
+	skip: 1,
 	
-	init: function()
+	init: function(node)
 	{
-		QotD.control = [
-			$('prev_questions'),
-			$('next_questions'),
-			$('prev_questions_disabled'),
-			$('next_questions_disabled')
+		this.control = [
+			jQuery('.i-qotd-nav-first', node).click(this.first.bind(this)),
+			jQuery('.i-qotd-nav-prev', node).click(this.prev.bind(this)),
+			jQuery('.i-qotd-nav-next', node).click(this.next.bind(this)),
+			jQuery('.i-qotd-nav-last', node).click(this.last.bind(this))
 		];
 		
-		if (!QotD.control[0]) {
-			return;
-		}
+		if (!this.control[0][0]) { return }
 		
-		QotD.domain = jQuery('#vertical_name').val() || 'homepage';
-		QotD.cache = [$('all_questions').innerHTML];
+		this.content_node = jQuery('.b-qotd-question', node);
+		this.current_node = jQuery('.qotd-current', node);
+		this.counter_node = jQuery('.qotd-counter', node);
+		this.total = +jQuery('.i-qotd-nav-max', node).text();
 		
-		QotD.control[0].onclick = QotD.prevQuestions;
-		QotD.control[1].onclick = QotD.nextQuestions;
-		QotD.tryForQuestions();
+		this.domain = jQuery('#vertical_name').val() || 'homepage';
+		this.cache = [0, {
+			text: this.content_node.html(),
+			info: this.counter_node.html()
+		}];
 	},
 	
-	prevQuestions: function()
+	first: function()
 	{
-		QotD.skip++;
-		QotD.getQuestions();
+		if (this.skip == this.total) { return }
+		
+		this.skip = this.total;
+		this.getQuestion();
 	},
 	
-	nextQuestions: function()
+	prev: function()
 	{
-		QotD.skip--;
-		QotD.getQuestions();
+		if (this.skip == this.total) { return }
+		
+		this.skip++;
+		this.getQuestion();
 	},
 	
-	tryForQuestions: function()
+	next: function()
 	{
-		var skip =  QotD.skip + 1;
+		if (this.skip == 1) { return }
 		
-		if (QotD.cache[skip] || QotD.get_last == skip) return;
+		this.skip--;
+		this.getQuestion();
+	},
+	
+	last: function()
+	{
+		if (this.skip == 1) { return }
 		
-		jQuery.getJSON(
-			LiveJournal.getAjaxUrl('qotd'),
-			{ skip: skip, domain: QotD.domain },
-			function(data)
-			{
-				if (data.text) {
-					QotD.cache[skip] = data.text;
-				} else {
-					QotD.get_last = skip;
-				}
-				QotD.renederControl();
-			}
-		);
+		this.skip = 1;
+		this.getQuestion();
 	},
 	
 	renederControl: function()
 	{
-		var len = QotD.cache.length - 1;
-		QotD.control[0].style.display = len > QotD.skip ?  'inline' : 'none';
-		QotD.control[1].style.display = QotD.skip ? 'inline' : 'none';
-		QotD.control[2].style.display = len <= QotD.skip ? 'inline' : 'none';
-		QotD.control[3].style.display = !QotD.skip ? 'inline' : 'none';
+		var method = this.skip == this.total ? 'addClass' : 'removeClass';
+		this.control[0][method]('i-qotd-nav-first-dis');
+		this.control[1][method]('i-qotd-nav-prev-dis');
+		
+		method = this.skip == 1 ? 'addClass' : 'removeClass';
+		this.control[2][method]('i-qotd-nav-next-dis');
+		this.control[3][method]('i-qotd-nav-last-dis');
+		
+		this.current_node.text(this.skip);
 	},
 	
-	getQuestions: function()
+	getQuestion: function()
 	{
-		QotD.renederControl();
-		QotD.cache[QotD.skip] ?
-			QotD.printQuestions(QotD.cache[QotD.skip]) :
+		this.renederControl();
+		
+		var skip = this.skip;
+		this.cache[skip] ?
+			this.setQuestion(this.cache[skip]) :
 			jQuery.getJSON(
 				LiveJournal.getAjaxUrl('qotd'),
-				{skip: QotD.skip, domain: QotD.domain},
+				{skip: skip, domain: this.domain},
 				function(data)
 				{
-					QotD.printQuestions(data.text)
-				}
+					this.cache[skip] = data;
+					this.skip == skip && this.setQuestion(data);
+				}.bind(this)
 			);
 	},
 	
-	printQuestions: function(text)
+	setQuestion: function(data)
 	{
-		$('all_questions').innerHTML = text;
-		QotD.tryForQuestions();
+		this.content_node.html(data.text)
+			.ljAddContextualPopup();
+		this.counter_node.html(data.info);
 	}
 }
 
-jQuery(QotD.init);
+jQuery(function($)
+{
+	$('.appwidget-qotd').each(function()
+	{
+		new QotD(this);
+	});
+});

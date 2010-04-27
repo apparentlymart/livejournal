@@ -1321,6 +1321,12 @@ logproplist.opt_backdated:
 logproplist.opt_nocomments:
   datatype: bool
   des: Turn on if readers can't post comments on this entry.
+  prettyname: Don't Allow Comments and hide comments already posted to the entry
+  sortorder: 25
+
+logproplist.opt_lockcomments:
+  datatype: bool
+  des: Turn on if readers can't post comments on this entry.
   prettyname: Don't Allow Comments
   sortorder: 25
 
@@ -1488,3 +1494,38 @@ userproplist.custom_usericon:
 userproplist.talkleftct:
   datatype: char
   des: Count of comments left by the user
+  cldversion: 8
+
+userproplist.talkleftct2:
+  datatype: char
+  des: Count of comments left by the user
+  cldversion: 8
+
+userproplist.ilikeit_enable:
+  datatype: bool
+  des: Enable 'I like it' button in community.
+  prettyname: Enable 'I like it' button.
+
+userproplist.closed_sm:
+  datatype: char
+  des: List of closed site messages
+  cldversion: 8
+
+userproplist.widget_top_entries:
+  cldversion: 7
+  datatype: char
+  des: Current setings and status of Top n entries
+  indexed: 1
+  multihomed: 0
+  prettyname: Current setings and status of Top n entries
+
+userproplist.webmastertools_yandex:
+  datatype: char
+  des: Meta tag content value provided by Yandex
+  cldversion: 8
+
+userproplist.webmastertools_google:
+  datatype: char
+  des: Meta tag content value provided by Google
+  cldversion: 8
+

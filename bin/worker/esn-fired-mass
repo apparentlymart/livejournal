@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+require 'ljprotocol.pl';
+require 'ljlang.pl';
+use LJ::NewWorker::TheSchwartz;
+use LJ::ESN;
+
+sub help {
+    my $self = shift;
+    return
+        $self->SUPER::help() .
+        "--official-post-batch <number>  change the size of the \"OfficialPost\" subscriptions batch"
+}
+
+my ($opt_officialpost_batch);
+
+sub options {
+    my $self = shift;
+    return (
+        'official-post-batch=i'  => \$opt_officialpost_batch,
+        $self->SUPER::options(),
+    );
+}
+
+$LJ::ESN_OFFICIALPOST_BATCH = $opt_officialpost_batch
+    if $opt_officialpost_batch;
+
+LJ::NewWorker::TheSchwartz::FiredMass->start();
+
+package LJ::NewWorker::TheSchwartz::FiredMass;
+use base 'LJ::NewWorker::TheSchwartz';
+sub capabilities { "LJ::Worker::FiredMass" }
+
+1;

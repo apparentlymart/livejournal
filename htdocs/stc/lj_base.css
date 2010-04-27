@@ -300,6 +300,13 @@ Must be removed after implementation of Framework! */
     background: #FFE8BF;
     border: 1px solid #FF8E44;
     } 
+.i-message {
+    padding: 1px 8px;
+    } 
+.i-message-error {
+    background: #FEE;
+    border: 1px solid #F99;
+    }    
 
 /* Disabled block
 --------------------------- */
@@ -426,4 +433,28 @@ It must be invisible, use it only for reskining */
     margin: -25px -25px 0 10px;
     cursor: pointer;
     }
+
+/* Width & Height for Moods */
+IMG.meta-mood-img {
+    max-width: 100px;
+    max-height: 100px;
+    } 
+IMG#mood_image_preview {
+    max-width: 60px;
+    max-height: 60px;
+    }
+
+/* The indicator of something new  */
+/* Must be removed after implementation of Framework! */
+SUP.i-new {
+	position: relative;
+	bottom: 0.5em; 
+	padding: 0 1px;
+	vertical-align: middle;
+	font-size: 11px;
+	color: #C00;
+    }
+
+
+
 

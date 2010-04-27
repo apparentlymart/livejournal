@@ -345,7 +345,15 @@ span.InboxItem_Read:hover a {
     margin-top: 5px;
     padding: 1px; 
     width: 250px;
-}
+    }
+    .ippu .track_btncontainer .track_moreopts:link,
+    .ippu .track_btncontainer .track_moreopts:visited {
+        color: #555;
+        }
+    .ippu .track_btncontainer .track_moreopts:link:hover,
+    .ippu .track_btncontainer .track_moreopts:visited:hover {
+        color: #CC6644;
+        }
 
 .ippu .track_moreopts {
     margin: auto auto auto 1em;

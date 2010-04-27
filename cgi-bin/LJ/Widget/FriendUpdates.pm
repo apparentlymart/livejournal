@@ -5,7 +5,7 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 
 sub need_res {
-    return qw( stc/widgets/friendupdates.css );
+    return qw( stc/widgets/widget-layout.css stc/widgets/friendupdates.css );
 }
 
 # args
@@ -31,10 +31,11 @@ sub render_body {
     my $ret;
 
     $ret .= '<div class="right-mod"><div class="mod-tl"><div class="mod-tr"><div class="mod-br"><div class="mod-bl">';
-
-    $ret .= "<h2><span>" . $class->ml('widget.friendupdates.title') . "</span></h2>";
+    $ret .= '<div class="w-head">';
+    $ret .= "<h2><span class='w-head-in'>" . $class->ml('widget.friendupdates.title') . "</span></h2>";
     $ret .= "<a href='$LJ::SITEROOT/inbox/' class='more-link'>" . $class->ml('widget.friendupdates.viewall') . "</a>";
-
+    $ret .= '<i class="w-head-corner"></i></div>';
+    $ret .= '<div class="w-body">';  
     unless (@notifications) {
         $ret .= $class->ml('widget.friendupdates.noupdates');
         $ret .= "<p class='detail'>" . $class->ml('widget.friendupdates.noupdates.setup', {'aopts' => "href='$LJ::SITEROOT/manage/subscriptions/'"}) . "</p>";
@@ -48,7 +49,7 @@ sub render_body {
     $ret .= "</ul>";
     #$ret .= "<div class='statlink'>". $class->ml('widget.friendupdates.statistics', {'aopts' => "href='$LJ::SITEROOT/manage/subscriptions/'"}) ."</div>";
 
-    $ret .= '</div></div></div></div></div>';
+    $ret .= '</div></div></div></div></div></div>';
 
 
     return $ret;

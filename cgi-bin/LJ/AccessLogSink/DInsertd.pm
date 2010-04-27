@@ -38,7 +38,7 @@ sub log {
     };
     $hash->{$_} = $rec->{$_} foreach $rec->keys;
 
-    my $string = "INSERT " . Storable::freeze($hash) . "\r\n";
+    my $string = "INSERT " . Storable::nfreeze($hash) . "\r\n";
     my $len = "\x01" . substr(pack("N", length($string) - 2), 1, 3);
     $string = $len . $string;
 

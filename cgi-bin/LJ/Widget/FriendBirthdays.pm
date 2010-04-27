@@ -6,7 +6,7 @@ use Carp qw(croak);
 use List::Util qw/shuffle/;
 
 sub need_res {
-    return qw( stc/widgets/friendbirthdays.css );
+    return qw( stc/widgets/widget-layout.css stc/widgets/friendbirthdays.css );
 }
 
 # args
@@ -30,10 +30,13 @@ sub render_body {
     my $ret;
 
     $ret .= '<div class="right-mod"><div class="mod-tl"><div class="mod-tr"><div class="mod-br"><div class="mod-bl">';
-   
-    $ret .= "<h2><span>" . $class->ml('widget.friendbirthdays.title') . "</span></h2>";
-    $ret .= "<a href='$LJ::SITEROOT/birthdays.bml' class='more-link'>" . $class->ml('widget.friendbirthdays.viewall') . "</a></p>";
-    $ret .= "<div class='indent_sm'><table>";
+    $ret .= "<div class='w-head'>";
+    $ret .= "<h2><span class='w-head-in'>" . $class->ml('widget.friendbirthdays.title') . "</span></h2> ";
+    $ret .= "<a href='$LJ::SITEROOT/birthdays.bml' class='more-link'>" . $class->ml('widget.friendbirthdays.viewall') . "</a>";
+    $ret .= "<i class='w-head-corner'></i></div>";
+
+    $ret .= "<div class='w-body'>";
+    $ret .= "<table>";
 
     foreach my $bday (@bdays) {
         my $u = LJ::load_user($bday->[2]);
@@ -52,16 +55,18 @@ sub render_body {
         $ret .= "</tr>";
     }
 
-    $ret .= "</table></div>";
+    $ret .= "</table>";
 
-    $ret .= "<p class='indent_sm'>&raquo; <a href='$LJ::SITEROOT/birthdays.bml'>" .
+    $ret .= "<ul class='b-list-options'>"  if  $opts{friends_link} or $opts{paidtime_link};
+    $ret .= "<li>&raquo; <a href='$LJ::SITEROOT/birthdays.bml'>" .
             $class->ml('widget.friendbirthdays.friends_link') .
-            "</a></p>" if $opts{friends_link};
-    $ret .= "<p class='indent_sm'>&raquo; <a href='$LJ::SITEROOT/paidaccounts/friends.bml'>" .
+            "</a></li>" if $opts{friends_link};
+    $ret .= "<li>&raquo; <a href='$LJ::SITEROOT/paidaccounts/friends.bml'>" .
             $class->ml('widget.friendbirthdays.paidtime_link') .
-            "</a></p>" if $opts{paidtime_link};
+            "</a></li>" if $opts{paidtime_link};
+    $ret .= "</ul>"  if  $opts{friends_link} or $opts{paidtime_link};
 
-    $ret .= '</div></div></div></div></div>';
+    $ret .= '</div></div></div></div></div></div>';
     
         
     return $ret;

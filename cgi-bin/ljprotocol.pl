@@ -403,7 +403,7 @@ sub getfriendspage
         
         # log time value
         $h{logtime} = $LJ::EndOfTime - $ei->{rlogtime};
-        $h{do_captcha} = LJ::Talk::Post::require_captcha_test($u, $entry->poster, '', $h{ditemid})?1:0;
+        $h{do_captcha} = LJ::Talk::Post::require_captcha_test($u, $entry->poster, '', $h{ditemid}, 1)?1:0;
 
         push @res, \%h;
 
@@ -1042,14 +1042,26 @@ sub common_event_validation
     {
 
         if ($req->{'ver'} < 1) { # client doesn't support Unicode
-            # only people should have unknown8bit entries.
-            my $uowner = $flags->{u_owner} || $flags->{u};
-            return fail($err,207,'Posting in a community with international or special characters require a Unicode-capable LiveJournal client.  Download one at http://www.livejournal.com/download/.')
-                if $uowner->{journaltype} ne 'P';
+            ## Hack: some old clients do send valid UTF-8 data, 
+            ## but don't tell us about that.
+            ## Check, if the event/subject are valid UTF-8 strings.
+            my $tmp_event   = $req->{'event'};
+            my $tmp_subject = $req->{'subject'};
+            Encode::from_to($tmp_event,     "utf-8", "utf-8");
+            Encode::from_to($tmp_subject,   "utf-8", "utf-8");
+            if ($tmp_event eq $req->{'event'} && $tmp_subject eq $req->{'subject'}) {
+                ## ok, this looks like valid UTF-8
+            } else {
+                ## encoding is unknown - it's neither ASCII nor UTF-8
+                # only people should have unknown8bit entries.
+                my $uowner = $flags->{u_owner} || $flags->{u};
+                return fail($err,207,'Posting in a community with international or special characters require a Unicode-capable LiveJournal client.  Download one at http://www.livejournal.com/download/.')
+                    if $uowner->{journaltype} ne 'P';
 
-            # so rest of site can change chars to ? marks until
-            # default user's encoding is set.  (legacy support)
-            $req->{'props'}->{'unknown8bit'} = 1;
+                # so rest of site can change chars to ? marks until
+                # default user's encoding is set.  (legacy support)
+                $req->{'props'}->{'unknown8bit'} = 1;
+            }
         } else {
             return fail($err,207, "This installation does not support Unicode clients") unless $LJ::UNICODE;
             # validate that the text is valid UTF-8
@@ -1179,7 +1191,7 @@ sub postevent
     # except syndicated (rss, 'Y') journals
     # unless this is approved from the mod queue (we'll error out initially, but in case they change later)
     return fail($err, 155, "You must have an authenticated email address in order to post to another account")
-        unless $u->{'status'} eq 'A' || $u->{'journaltype'} eq 'Y';
+        unless $flags->{'noauth'} || $u->{'status'} eq 'A' || $u->{'journaltype'} eq 'Y';
 
     $req->{'event'} =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
 
@@ -1394,7 +1406,7 @@ sub postevent
             # create tag <lj-embed> from HTML-tag <embed>
             LJ::EmbedModule->parse_module_embed($uowner, \$req->{event});
 
-            my $fr = $dbcm->quote(Storable::freeze($req));
+            my $fr = $dbcm->quote(Storable::nfreeze($req));
             return fail($err, 409) if length($fr) > 200_000;
 
             # store
@@ -2653,6 +2665,8 @@ sub editfriends
             $friends_added++;
             my $added = { 'username' => $aname,
                           'fullname' => $row->{'name'},
+                          'journaltype' => $row->{journaltype},
+                          'defaultpicurl' => ($row->{'defaultpicid'} && "$LJ::USERPIC_ROOT/$row->{'defaultpicid'}/$row->{'userid'}"),
                       };
             if ($req->{'ver'} >= 1) {
                 LJ::text_out(\$added->{'fullname'});
@@ -3019,7 +3033,9 @@ sub list_friends
             'S' => "suspended",
             'X' => "purged",
         }->{$u->{'statusvis'}} if $u->{'statusvis'} ne 'V';
-
+        
+        $r->{defaultpicurl} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}" if $u->{'defaultpicid'};
+        
         push @$res, $r;
         # won't happen for zero limit (which means no limit)
         last if @$res == $limitnum;

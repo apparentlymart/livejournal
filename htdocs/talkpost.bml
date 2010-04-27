@@ -151,6 +151,7 @@ body<=
     if (!$u->is_visible || $u->should_block_robots || ($entry && $entry->should_block_robots)) {
         $head = LJ::robot_meta_tags();
     }
+    $head .= $LJ::SHARE_THIS_URL unless $LJ::DISABLED{'sharethis'};
 
     # check suspended user
     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
@@ -198,7 +199,10 @@ body<=
     my $suspend_msg = $entry && $entry->should_show_suspend_msg_to($remote) ? 1 : 0;
     LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $preformatted,
                                           'suspend_msg' => $suspend_msg,
-                                          'unsuspend_supportid' => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, });
+                                          'unsuspend_supportid' => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, 
+                                          'cuturl' => $talkurl,
+                                          'expand_cut' => 1,
+                                          });
     LJ::expand_embedded($u, $ditemid, $remote, \$event);
     BML::ebml(\$event);
 

@@ -594,7 +594,8 @@ margin-left: 1em;
 .entrycmdlinks li:before {
 content: " - ";
 }
-.entrycmdlinks li:first-child:before {
+.entrycmdlinks li:first-child:before,
+.entrycmdlinks li.first:before {
 content: "";
 }
 
@@ -839,6 +840,7 @@ function Entry::lay_print_cmdlinks() {
 
 function Comment::lay_print_cmdlinks() {
     println """<ul class="entrycmdlinks">""";
+if (not $.frozen) {
     if ($.reply_url != "") {
         println "<li>"; 
         ##$this->print_reply_link({"linktext" => $*text_comment_reply}); 
@@ -852,6 +854,7 @@ function Comment::lay_print_cmdlinks() {
             $this->print_reply_link({ "linktext" => $*text_comment_reply });
         }
         "</li>";
+}
     }
     if ($.parent_url != "") {
         println """<li><a href="$.parent_url">$*text_comment_parent</a></li>""";
