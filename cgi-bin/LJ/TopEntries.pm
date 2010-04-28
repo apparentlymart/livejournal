@@ -19,18 +19,18 @@ sub new {
     return bless $self, $class;
 }
 
-# key <---> hash. Key - a string with three numbers, hash - full info about post.
+# key <---> hash. Key - a string with four numbers, hash - full info about post.
 sub _key_from_hash {
     my $self = shift;
     my $h = shift;
-    return "$h->{'timestamp'}:$h->{'journalid'}:$h->{'jitemid'}";
+    return "$h->{'timestamp'}:$h->{'journalid'}:$h->{'jitemid'}:$h->{'userpicid'}";
 }
 
 sub _hash_from_key {
     my $self = shift;
     my $key = shift;
 
-    my ($timestamp, $journalid, $jitemid) = @$key;
+    my ($timestamp, $journalid, $jitemid, $userpicid) = @$key;
 
     my $entry = LJ::Entry->new($journalid, jitemid => $jitemid);
     my $poster = $entry->poster();
@@ -41,16 +41,20 @@ sub _hash_from_key {
     my $comment_ref = LJ::Talk::get_talk_data($journal, 'L', $jitemid);
     return undef unless ref $comment_ref;
 
+    # Get userpic from entry
+    my $userpic = LJ::Userpic->new($poster, $userpicid);
+
     return  {
                 posterid    => $poster->{'userid'},
                 journalid   => $journalid,
                 jitemid     => $jitemid,
+                userpicid   => $userpicid,
 
                 subj        => $entry->subject_text(),
                 text        => LJ::html_trim_4gadgets($entry->event_text(), 50, $entry->url()),
                 url         => $entry->url(),
                 time        => $entry->logtime_unix(),
-                userpic     => ($entry->userpic ? $entry->userpic->url : undef),
+                userpic     => $userpic->url(),
                 poster      => $poster->ljuser_display(),
                 timestamp   => $timestamp,
 
@@ -66,6 +70,9 @@ sub _clean_list {
     my %opts = @_;
 
     my @list = sort {$b->{'timestamp'} <=> $a->{'timestamp'}} @{$self->{'featured_posts'}};
+
+    # Sanity check: remove items changed after entering top list.
+    @list = grep { $_->{'time'} < $_->{'timestamp'} } @list;
 
     return @list if $self->{'min_entries'} >= scalar @list; # We already has a minimum.
 
@@ -107,8 +114,8 @@ sub _sort_list {
 sub _store_featured_posts {
     my $self = shift;
     my %opts = @_;
-
-    my $prop = $self->{'min_entries'} . ':' . $self->{'max_entries'} . ':0|' .
+ 
+    my $prop = $self->{'min_entries'} . ':' . $self->{'max_entries'} . ':0:0|' .
         join('|', map { $self->_key_from_hash($_) } $self->_clean_list(%opts));
     $prop =~ s/\|$//;
 
@@ -126,11 +133,11 @@ sub _load_featured_posts {
 
     my $prop_val = $journal->prop('widget_top_entries');
 
-    $prop_val = '3:5:0' unless $prop_val;
+    $prop_val = '3:5:0:0' unless $prop_val;
 
     my @entities = map { [ split /:/ ] } split(/\|/, $prop_val);
 
-    my ($min_entries, $max_entries, undef) = @{shift @entities};
+    my ($min_entries, $max_entries, undef, undef) = @{shift @entities};
 
     $self->{'min_entries'}      = $min_entries;
     $self->{'max_entries'}      = $max_entries;
@@ -187,13 +194,19 @@ sub add_entry {
 
     my $timestamp = time();
 
-    my ($journalid, $jitemid) = ($entry->journalid(), $entry->jitemid());
+    my ($journalid, $jitemid, $poster, $userpic) =
+        ($entry->journalid(), $entry->jitemid(), $entry->poster(), $entry->userpic());
+
+    return unless $poster;
+
+    my $userpicid   = ($userpic ? LJ::get_picid_from_keyword($poster, $userpic) :
+            ($poster->{'defaultpicid'} || 0));
 
     $self->delete_entry(key => "$journalid:$jitemid");
 
     $self->get_featured_posts(raw => 1, %opts); # make sure we has all fresh data
     push @{$self->{'featured_posts'}},
-        $self->_hash_from_key( [ $timestamp, $journalid, $jitemid ] );
+        $self->_hash_from_key( [ $timestamp, $journalid, $jitemid, $userpicid ] );
     $self->_store_featured_posts(%opts);
 }
 
