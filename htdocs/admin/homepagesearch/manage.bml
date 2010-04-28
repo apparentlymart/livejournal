@@ -1,0 +1,47 @@
+<?_code
+    use strict;
+    use vars qw(%GET %POST $body);
+
+    my $remote = LJ::get_remote() or return "<?needlogin?>";
+
+    # priv check
+    unless (LJ::check_priv($remote, 'siteadmin', 'featured-searches')) {
+        $body = "access denied";
+        return;
+    }
+
+    $body = '';
+
+    $body .= '<form method="POST">';
+
+    my $system = LJ::load_user('system') or die "No 'system' user in DB";
+    my $stored_words = $system->prop('search_admin');
+    my $edited_words = $POST{words};
+
+    if ($POST{submit}) {
+        my @keywords = split /\s+/, $POST{words};
+        $stored_words = join(' ', @keywords); # update this value, it will be used below
+        $system->set_prop('search_admin', $stored_words);
+    }
+
+    my @keywords = split /\s+/, ($POST{preview} ? $edited_words : $stored_words);
+    $body .= LJ::html_textarea({ name => 'words', rows => 20, cols => 50, value => join("\n", @keywords), 
+                                 disabled => ($POST{edit} || $POST{preview}) ? 0 : 1 });
+
+    # preview
+    $body .= '<div>';
+    $body .= join ' ', map { "<a href='$LJ::SITEROOT/search/?q=" . LJ::eurl($_) . "&area=journals'>$_</a>" } @keywords;
+    $body .= '</div>';
+
+    $body .= '<input type="submit" name="preview" value="Preview">';
+    $body .= '<input type="submit" name="edit" value="Edit">';
+    $body .= '<input type="submit" name="submit" value="Submit">';
+    
+
+    return;
+_code?>
+
+<?page
+title=>HomePage admin - Searching
+body=><?_code return $body; _code?>
+page?>
