@@ -28,6 +28,14 @@ QotD.prototype =
 			text: this.content_node.html(),
 			info: this.counter_node.html()
 		}];
+		
+		this.lang = (function () {
+			var uselangMatch = window.location.search.match(/[?&]uselang=([^&]+)/);
+			
+			return uselangMatch ?
+				uselangMatch[1] :
+				false;
+		})();
 	},
 	
 	first: function()
@@ -62,7 +70,7 @@ QotD.prototype =
 		this.getQuestion();
 	},
 	
-	renederControl: function()
+	renderControl: function()
 	{
 		var method = this.skip == this.total ? 'addClass' : 'removeClass';
 		this.control[0][method]('i-qotd-nav-first-dis');
@@ -77,14 +85,24 @@ QotD.prototype =
 	
 	getQuestion: function()
 	{
-		this.renederControl();
+		this.renderControl();
 		
-		var skip = this.skip;
+		var skip = this.skip,
+			lang = this.lang,
+			params = {
+				skip : skip,
+				domain : this.domain
+			};
+		
+		if (lang) {
+			params.uselang = lang;
+		}
+		
 		this.cache[skip] ?
 			this.setQuestion(this.cache[skip]) :
 			jQuery.getJSON(
 				LiveJournal.getAjaxUrl('qotd'),
-				{skip: skip, domain: this.domain},
+				params,
 				function(data)
 				{
 					this.cache[skip] = data;
