@@ -2039,6 +2039,7 @@ sub Page
         });
         LJ::control_strip_js_inject( user => $u->{user} );
     }
+    LJ::journal_js_inject();
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$p->{base_url}/data/foaf";

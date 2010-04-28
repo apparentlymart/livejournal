@@ -2128,6 +2128,7 @@ sub start_request
                             js/httpreq.js
                             js/livejournal.js
                             js/common/AdEngine.js
+                            js/journal.js
                             stc/lj_base.css
                             ));
 
