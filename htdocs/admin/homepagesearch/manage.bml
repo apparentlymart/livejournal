@@ -19,12 +19,12 @@
     my $edited_words = $POST{words};
 
     if ($POST{submit}) {
-        my @keywords = split /\s+/, $POST{words};
-        $stored_words = join(' ', @keywords); # update this value, it will be used below
+        my @keywords = split /\s*\n+\s*/m, $POST{words};
+        $stored_words = join("\n", @keywords); # update this value, it will be used below
         $system->set_prop('search_admin', $stored_words);
     }
 
-    my @keywords = split /\s+/, ($POST{preview} ? $edited_words : $stored_words);
+    my @keywords = split /\s*\n+\s*/, ($POST{preview} ? $edited_words : $stored_words);
     $body .= LJ::html_textarea({ name => 'words', rows => 20, cols => 50, value => join("\n", @keywords), 
                                  disabled => ($POST{edit} || $POST{preview}) ? 0 : 1 });
 

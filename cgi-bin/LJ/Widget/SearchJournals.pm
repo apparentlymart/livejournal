@@ -14,16 +14,16 @@ sub render_body {
     $ret .= "<form action='$LJ::SITEROOT/search/' method='get'>";
     $ret .= "<input type='text' value='' size='12' name='q' id='SearchText' />";
     $ret .= "<select name='area'>
-                <option value='default'><?_ml ysearch.findall _ml?></option>
-                <option value='posts'><?_ml ysearch.findentries _ml?></option>
-                <option value='comments'><?_ml ysearch.findcomments _ml?></option>
-                <option value='journals' selected='1'><?_ml ysearch.findjournal _ml?></option>
-                <option value='faq'><?_ml ysearch.faq _ml?></option>
+                <option value='default'><?_ml /search/index.bml.ysearch.findall _ml?></option>
+                <option value='posts'><?_ml /search/index.bml.yseach.findposts _ml?></option>
+                <option value='comments'><?_ml /search/index.bml.ysearch.findcomments _ml?></option>
+                <option value='journals' selected='1'><?_ml /search/index.bml.ysearch.findusers _ml?></option>
+                <option value='faq'><?_ml /search/index.bml.ysearch.faq _ml?></option>
             </select>";
     $ret .= "<input type='submit' value='" . BML::ml('horizon.search.submit') . "' /></form>";
 
     my $system = LJ::load_user('system') or die "No 'system' user in DB";
-    my @keywords = split /\s+/, $system->prop('search_admin');
+    my @keywords = split /\s*\n+\s*/, $system->prop('search_admin');
     $ret .= join ' ', map { "<a href='$LJ::SITEROOT/search/?q=" . LJ::eurl($_) . "&area=journals'>$_</a>" } @keywords;
 
     if (LJ::get_remote()) { # logged in
