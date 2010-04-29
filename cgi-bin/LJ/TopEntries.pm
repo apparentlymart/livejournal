@@ -52,6 +52,7 @@ sub _hash_from_key {
 
                 subj        => $entry->subject_text(),
                 text        => LJ::html_trim_4gadgets($entry->event_text(), 50, $entry->url()),
+                revtime     => $entry->prop('revtime'),
                 url         => $entry->url(),
                 time        => $entry->logtime_unix(),
                 userpic     => $userpic->url(),
@@ -71,9 +72,6 @@ sub _clean_list {
 
     my @list = sort {$b->{'timestamp'} <=> $a->{'timestamp'}} @{$self->{'featured_posts'}};
 
-    # Sanity check: remove items changed after entering top list.
-    @list = grep { $_->{'time'} < $_->{'timestamp'} } @list;
-
     return @list if $self->{'min_entries'} >= scalar @list; # We already has a minimum.
 
     # Remove old entries - stay at least 'min_entries' recent and all within 24h from now.
@@ -87,7 +85,10 @@ sub _clean_list {
 sub _sort_list {
     my $self = shift;
     my %opts = @_;
-    my @list = sort {$b->{'timestamp'} <=> $a->{'timestamp'}} @{$self->{'featured_posts'}};
+    my @list =
+        sort {$b->{'timestamp'} <=> $a->{'timestamp'}}
+            grep { !($_->{'revtime'} && $_->{'revtime'} > $_->{'timestamp'}) }  # Sanity check
+                @{$self->{'featured_posts'}};
 
     return @list if $opts{'raw'};
 
