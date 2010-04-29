@@ -32,7 +32,7 @@ sub render_body {
         my $comments = $post->{comments} ? " ($post->{comments})" : '';
         my $subj = ($post->{subj} ne '') ? $post->{subj} : $class->ml('widget.officialjournals.nosubject');
         if ($counter % 2) {$classname = 'odd';} else {$classname = 'even';}
-        $ret .= '<li class="'.$classname.'"><dl><dt><img src="'.$post->{userpic}.'" /></dt><dd><p class="b-posts-head"><a href="'.$post->{url}.'">'.$subj.'</a></p><p class="b-posts-user">'.$post->{poster}.'</p></dd></dl></li>';
+        $ret .= '<li class="'.$classname.'"><dl><dt><img src="'.$post->{userpic}.'" /></dt><dd><h3 class="b-posts-head"><a href="'.$post->{url}.'">'.$subj.'</a></h3><p class="b-posts-user">'.$post->{poster}.'</p></dd></dl></li>';
         $counter = $counter + 1;
     }
 
