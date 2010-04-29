@@ -819,10 +819,16 @@ my $old_url = 0;
      }
 
      my $rated_count = "";
-
-     if (LJ::is_eventrate_enable($u, $itemid)) {
-        $rated_count = " (<a href=\"\">+1</a>)".
-                " - (".LJ::get_eventratescounters($u->{'userid'}, $itemid).")";
+     if (LJ::is_eventrate_enable($u)) {
+        $rated_count = " (".LJ::get_eventratescounters($u->{'userid'}, $ditemid).") (<a href=\"#\" class=\"i_like_this\">+1";
+		if (LJ::get_eventrates( 
+		   journalid => $u->{'userid'}, 
+		   itemid  => $ditemid,
+		   userids => [ $remote->{'userid'} ],
+		)) {
+			$rated_count .= "<i class=\"i_like_this_already\">/</i>";
+		}
+		$rated_count .= "</a>)";
      }
 
      $ret .= $rated_count;

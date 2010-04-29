@@ -19,7 +19,8 @@ sub entry {
 
 sub content {
     my $self = shift;
-    return $self->entry->event_html;
+    my $entry = $self->entry;
+    return $entry->event_html( {cuturl => $entry->url} );
 }
 
 sub is_common { 1 }

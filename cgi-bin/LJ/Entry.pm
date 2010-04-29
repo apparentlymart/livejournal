@@ -2454,7 +2454,7 @@ sub item_toutf8
 # TODO: Must we check is this entry really exists?
 # TODO: Must we clean rates when delete entry?
 
-# LJ::is_eventrate_enable($journalid, $jitemid, $userid);
+# LJ::is_eventrate_enable($journal);
 sub is_eventrate_enable {
     my $journal = shift;
     $journal = LJ::get_remote() unless $journal;
@@ -2462,28 +2462,27 @@ sub is_eventrate_enable {
 }
 
 sub _update_total_counter {
-    my ($dbcm, $journalid, $jitemid, $counter) = @_;
+    my ($dbcm, $journalid, $itemid, $counter) = @_;
 
-    my $count = LJ::get_eventratescounters($journalid, $jitemid) + $counter;
+    my $count = LJ::get_eventratescounters($journalid, $itemid) + $counter;
 
     $count = 0 if $count < 0;
 
     if ($count) {
-        $dbcm->do("REPLACE eventratescounters (journalid,jitemid,count)".
-            "VALUES($journalid,$jitemid,$count)");
+        $dbcm->do("REPLACE eventratescounters (journalid,itemid,count)".
+            "VALUES($journalid,$itemid,$count)");
     } else {
         $dbcm->do("DELETE FROM eventratescounters".
-            " WHERE journalid=$journalid AND jitemid=$jitemid");
+            " WHERE journalid=$journalid AND itemid=$itemid");
     }
-    LJ::MemCache::set([$journalid, "eventratescounts:$journalid:$jitemid"], $count);
+    LJ::MemCache::set([$journalid, "eventratescounts:$journalid:$itemid"], $count);
 }
 
-# LJ::reset_eventrate($journalid, $jitemid, $userid);
-# TODO: userid must be from LJ::get_remote() in security reasons.
+# LJ::reset_eventrate($journalid, $itemid [, $userid[, userid ...]]);
 sub reset_eventrate
 {
     my $journalid   = shift;
-    my $jitemid     = shift;
+    my $itemid      = shift;
     my @userids     = @_;
 
     unless (@userids) {
@@ -2495,9 +2494,9 @@ sub reset_eventrate
 
     # get a list if user id which was rate selected entry.
     @userids = LJ::get_eventrates(
-        journalid => $journalid,
-        jitemid => $jitemid,
-        userids => \@userids,
+        journalid   => $journalid,
+        itemid      => $itemid,
+        userids     => \@userids,
     );
 
     my $clusterid = $journal->{'clusterid'};
@@ -2506,30 +2505,30 @@ sub reset_eventrate
     die "Can't get database handle" unless $dbcm;
 
     my $sth = $dbcm->prepare("DELETE FROM eventrates".
-        " WHERE journalid = ? AND jitemid = ? AND userid = ?") or die $dbcm->errstr;
+        " WHERE journalid = ? AND itemid = ? AND userid = ?") or die $dbcm->errstr;
 
     my $counter = 0;
     foreach my $uid (@userids) {
         # TODO: check rights of $remote to rate a post as $uid.
-        if ($sth->execute($journalid,$jitemid,$uid)) {
-            LJ::MemCache::set([$journalid,"eventrates:$journalid:$jitemid:$uid"], 0);
+        if ($sth->execute($journalid,$itemid,$uid)) {
+            LJ::MemCache::set([$journalid,"eventrates:$journalid:$itemid:$uid"], 0);
             $counter++;
         } else {
             warn "SQL DELETE error: ", $dbcm->errstr,  "\n";
         }
     }
 
-    _update_total_counter($dbcm, $journalid, $jitemid, -$counter) if $counter;
+    _update_total_counter($dbcm, $journalid, $itemid, -$counter) if $counter;
 
     return $counter;
 }
 
-# LJ::set_eventrate($journalid, $jitemid, $userid [, $userid ...]);
+# LJ::set_eventrate($journalid, $itemid, $userid [, $userid ...]);
 # TODO: userid must be from LJ::get_remote() in security reasons.
 sub set_eventrate
 {
     my $journalid   = shift;
-    my $jitemid     = shift;
+    my $itemid      = shift;
     my @userids     = @_;
 
     my $journal = LJ::want_user($journalid);
@@ -2540,7 +2539,7 @@ sub set_eventrate
     my $dbcm = LJ::get_cluster_master($clusterid);
     die "Can't get database handle" unless $dbcm;
 
-    my $sth = $dbcm->prepare("INSERT INTO eventrates(journalid,jitemid,userid,changetime)".
+    my $sth = $dbcm->prepare("INSERT INTO eventrates(journalid,itemid,userid,changetime)".
         " VALUES (?, ?, ?, NOW())") or die $dbcm->errstr;
 
     my @uids = ();
@@ -2552,8 +2551,8 @@ sub set_eventrate
 
     foreach my $uid (@userids) {
         # TODO: check rights of $remote to rate a post as $uid.
-        if ($sth->execute($journalid,$jitemid,$uid)) {
-            LJ::MemCache::set([$journalid,"eventrates:$journalid:$jitemid:$uid"], 1);
+        if ($sth->execute($journalid,$itemid,$uid)) {
+            LJ::MemCache::set([$journalid,"eventrates:$journalid:$itemid:$uid"], 1);
             push @uids, $uid;
         } else {
             warn "Error: ", $dbcm->errstr,  "\n"
@@ -2563,21 +2562,21 @@ sub set_eventrate
         }
     }
 
-    _update_total_counter($dbcm, $journalid, $jitemid, scalar @uids) if @uids;
+    _update_total_counter($dbcm, $journalid, $itemid, scalar @uids) if @uids;
 
     return @uids;
 }
 
-# LJ::get_eventratescounters($journalid,$jitemid)
+# LJ::get_eventratescounters($journalid,$itemid)
 sub get_eventratescounters
 {
     my $journalid   = shift;
-    my $jitemid     = shift;
+    my $itemid      = shift;
 
     my $journal = LJ::want_user($journalid);
     return unless is_eventrate_enable($journal);
 
-    my $count = LJ::MemCache::get([$journalid, "eventratescounts:$journalid:$jitemid"]);
+    my $count = LJ::MemCache::get([$journalid, "eventratescounts:$journalid:$itemid"]);
     return $count if $count;
 
     my $clusterid = $journal->{'clusterid'};
@@ -2586,18 +2585,18 @@ sub get_eventratescounters
     die "Can't get database handle" unless $db;
 
     $count = $db->selectrow_array("SELECT count FROM eventratescounters".
-        " WHERE journalid=$journalid AND jitemid=$jitemid");
+        " WHERE journalid=$journalid AND itemid=$itemid");
 
     $count ||= 0;
 
-    LJ::MemCache::set([$journalid, "eventratescounts:$journalid:$jitemid"], $count);
+    LJ::MemCache::set([$journalid, "eventratescounts:$journalid:$itemid"], $count);
 
     return $count;
 }
 
 # LJ::get_eventrates(
 #   journalid => $journalid,
-#   jitemid => $jitemid,
+#   itemid => $itemid,
 # [ userids => \@userids, ]
 # [ limits => ['start,' . ] 'limit' ],
 # );
@@ -2612,7 +2611,7 @@ sub get_eventrates
     my $journal = LJ::want_user($journalid);
     return unless is_eventrate_enable($journal);
 
-    my $jitemid     = $opts{'jitemid'};
+    my $itemid      = $opts{'itemid'};
 
     my @userids = ();
 
@@ -2633,7 +2632,7 @@ sub get_eventrates
             my $id = $_+0;
             next unless $id; # Don't remember anonymous.
             $need{$id} = 1;
-            push @mem_keys, [ $journalid, "eventrates:$journalid:$jitemid:$id" ];
+            push @mem_keys, [ $journalid, "eventrates:$journalid:$itemid:$id" ];
         }
 
         my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
@@ -2657,12 +2656,12 @@ sub get_eventrates
         my $userid_in = join(", ", keys %need);
 
         my $sth = $db->prepare("SELECT userid FROM eventrates".
-            " WHERE journalid=$journalid AND jitemid=$jitemid AND userid in ($userid_in)");
+            " WHERE journalid=$journalid AND itemid=$itemid AND userid in ($userid_in)");
         $sth->execute;
 
         while (my ($id) = $sth->fetchrow_array) {
             push @userids, $id;
-            LJ::MemCache::set([$journalid,"eventrates:$journalid:$jitemid:$id"], 1);
+            LJ::MemCache::set([$journalid,"eventrates:$journalid:$itemid:$id"], 1);
         }
 
     } else {   # fetch and return list of user ids
@@ -2675,13 +2674,13 @@ sub get_eventrates
         die "Can't get database handle loading entry text" unless $db;
 
         my $sth = $db->prepare("SELECT userid FROM eventrates".
-            " WHERE journalid=? AND jitemid=?".
+            " WHERE journalid=? AND itemid=?".
             " ORDER BY changetime LIMIT $limits");
 
-        $sth->execute($journalid,$jitemid);
+        $sth->execute($journalid,$itemid);
         while (my ($id) = $sth->fetchrow_array) {
             push @userids, $id;
-            LJ::MemCache::set([$journalid,"eventrates:$journalid:$jitemid:$id"], 1);
+            LJ::MemCache::set([$journalid,"eventrates:$journalid:$itemid:$id"], 1);
         }
     }
 

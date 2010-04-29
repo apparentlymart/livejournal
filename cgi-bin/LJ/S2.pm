@@ -3787,7 +3787,7 @@ sub Entry__get_eventrates
         map { LJ::S2::UserLite(LJ::want_user($_)) }
             LJ::get_eventrates(
                 journalid   => $this->{'journal'}->{'_u'}->{'userid'},
-                jitemid     => int($this->{'itemid'}),
+                itemid      => int($this->{'itemid'}),
                 limits      => "$skip, $limit",
             )
     ];
@@ -3801,7 +3801,7 @@ sub Entry__is_myvoice
     return
         scalar LJ::get_eventrates(
                 journalid   => $this->{'journal'}->{'_u'}->{'userid'},
-                jitemid     => int($this->{'itemid'}),
+                itemid      => int($this->{'itemid'}),
                 userids     => [ $remote->{'userid'} ],
         );
 }

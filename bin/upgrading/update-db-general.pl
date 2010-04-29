@@ -4194,4 +4194,22 @@ CREATE TABLE eventratescounters (
 )
 EOC
 
+register_alter(sub {
+
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("eventrates", "itemid")) {
+        do_alter("eventrates",
+                 "ALTER TABLE eventrates " .
+                 "CHANGE COLUMN jitemid itemid MEDIUMINT UNSIGNED NOT NULL");
+    }
+
+    unless (column_type("eventratescounters", "itemid")) {
+        do_alter("eventratescounters",
+                 "ALTER TABLE eventratescounters " .
+                 "CHANGE COLUMN jitemid itemid MEDIUMINT UNSIGNED NOT NULL");
+    }
+});
+
 1; # return true
