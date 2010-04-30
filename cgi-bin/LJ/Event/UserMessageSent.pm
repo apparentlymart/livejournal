@@ -128,6 +128,7 @@ sub raw_info {
     }
 
     $res->{to} = $msg->other_u->user;
+    $res->{to_id} = $msg->other_u->{userid};
     $res->{picture} = $pic->url if $pic;
     $res->{picture_id} = $pic->picid if $pic;
     $res->{subject} = $msg->subject;
