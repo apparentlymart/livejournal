@@ -10,13 +10,14 @@ ILikeThis = {
 		node.onclick = null
 		// has undorate node
 		var action = jQuery('.i_like_this_already', node).remove().length ? 'undorate' : 'rate';
+		jQuery(node).parent().removeClass('i_dont_like_this');
 		
 		jQuery.ajax({
 			url: LiveJournal.getAjaxUrl('eventrate'),
 			data: {
 				action: action,
 				journal: username,
-				jitemid: itemid
+				itemid: itemid
 			},
 			type: 'POST',
 			dataType: 'json',
@@ -27,9 +28,19 @@ ILikeThis = {
 			success: function(data)
 			{
 				if (data.status === 'OK') {
-					jQuery('.we_like_this span>span>span', node.parentNode.parentNode).text(data.total);
+					var context = node.parentNode.parentNode
+						append_node = jQuery('.we_like_this span>span>span', context);
+					if (!append_node.length) { // s1
+						append_node = jQuery('.we_like_this', context);
+					}
+					append_node.text(data.total);
 					if (action == 'rate') {
-						jQuery('span>span>span', node).append('<i class="i_like_this_already">/</i>');
+						jQuery(node).parent().addClass('i_dont_like_this');
+						var append_node = jQuery('span>span>span', node);
+						if (!append_node.length) { // s1
+							append_node = jQuery(node);
+						}
+						append_node.append('<i class="i_like_this_already">/</i>');
 					}
 				}
 			}
@@ -48,7 +59,7 @@ ILikeThis = {
 			data: {
 				action: 'list',
 				journal: username,
-				jitemid: itemid,
+				itemid: itemid,
 				limit: 10
 			},
 			type: 'POST',
@@ -70,7 +81,7 @@ ILikeThis = {
 									+'</p>'
 								+'</div>'
 								+(data.total > 10 ? '<div class="b-popup-footer">'
-									+'<p><a href="'+Site.siteroot+'/alleventrates.bml?journal='+username+'&jitemid='+itemid+'">'
+									+'<p><a href="'+Site.siteroot+'/alleventrates.bml?journal='+username+'&itemid='+itemid+'">'
 										+data.ml_users_who_like_it
 									+'</a></p>' : ''
 								+'</div>')
@@ -92,8 +103,12 @@ ILikeThis = {
 						top: top,
 						visibility: 'visible'
 					});
-					
-					jQuery('.we_like_this span>span>span', node.parentNode.parentNode).text(data.total);
+					var context = node.parentNode.parentNode,
+						append_node = jQuery('.we_like_this span>span>span', context);
+					if (!append_node.length) { // s1
+						append_node = jQuery('.we_like_this', context);
+					}
+					append_node.text(data.total);
 				}
 			}
 		});
