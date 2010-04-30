@@ -342,7 +342,7 @@ sub getfriendspage
         'dateformat' => 'S2',
     });
 
-    my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count userpic/;
+    my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count userpic props security/;
 
     my @uids;
 
