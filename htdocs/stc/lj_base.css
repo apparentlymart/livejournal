@@ -290,7 +290,7 @@ HTML:not(IE7) .opera-filter, x:-o-prefocus { display:block; } /* opera gte 9.5 *
             color: #330066;
             }
 
-/* Styles for messagers, 
+/* Styles for messagers,
 Must be removed after implementation of Framework! */
 .b-message {
     padding: 8px;
@@ -299,14 +299,54 @@ Must be removed after implementation of Framework! */
 .b-message-suggestion {
     background: #FFE8BF;
     border: 1px solid #FF8E44;
-    } 
+    }
 .i-message {
     padding: 1px 8px;
-    } 
+    }
 .i-message-error {
     background: #FEE;
     border: 1px solid #F99;
-    }    
+    }
+.b-message-system {
+	position: absolute;
+	top: -9px;
+	left: 0;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	background: none;
+	border: none;
+	}
+	.b-message-system SPAN {
+		position: relative;
+		display: block;
+		padding: 4px 8px 6px 8px;
+		margin: 0;
+		background: #C6E0F6;
+	    border: 2px solid #8AB6DA;
+		text-align: center;
+		}
+	.b-message-system IMG {
+		padding: 0;
+		margin: 0 5px 0 0;
+		vertical-align: -2px;
+		}
+	.b-message-system A:link,
+	.b-message-system A:visited,
+	.b-message-system A:hover,
+	.b-message-system A:active {
+		color: #124787;
+		}
+	.b-message-system I.close {
+		position: absolute;
+		top: 8px;
+		right: 8px;
+		width: 12px;
+		height: 12px;
+		background: url(/img/message-system-close.gif) no-repeat;
+		cursor: pointer;
+		font-size: 0;
+		}
 
 /* Disabled block
 --------------------------- */
@@ -454,6 +494,51 @@ SUP.i-new {
 	font-size: 11px;
 	color: #C00;
     }
+
+
+/* Popup Messages */
+.b-popup {
+	}
+.b-popup-messagebox {
+	position:absolute;
+	width:311px;
+	background:#FFF;
+	border:2px solid #8CB7DA;
+	font-size:12px;
+	}
+	.b-popup-messagebox .b-popup-head {
+		position:relative;
+		margin:0;
+		padding:5px;
+		border:1px solid #DBECFB;
+		border-width:1px 1px 0;
+		background:#C7E0F6;
+		font-size:15px;
+		}
+		.b-popup-messagebox .b-popup-head H4 {
+			margin:0;
+			}
+	.b-popup-messagebox .i-popup-close {
+		position:absolute;
+		top:9px;
+		right:5px;
+		width:12px;
+		height:12px;
+		background:url(/img/popup-close.gif) no-repeat 0 0;
+		cursor:pointer;
+		}
+	.b-popup-messagebox .b-popup-content {
+		margin:0;;
+		padding:5px;
+		font-size:13px;
+		}
+	.b-popup-messagebox .b-popup-footer {
+		margin:0;
+		padding:5px;
+		background:#ECF6FF;
+		text-align:center;
+		font-size:13px;
+		}
 
 
 
