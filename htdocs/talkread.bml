@@ -822,7 +822,7 @@ my $old_url = 0;
 
      my $rated_count = "";
      if (LJ::is_eventrate_enable($u)) {
-         $rated_count = " (<a class=\"we_like_this\" href=\"/$LJ::SITEROOT/alleventrates.bml?journal=".$u->{'user'}."&amp;jitemid=$ditemid\" onclick=\"return ILikeThis.showList(event,this,'$ditemid','".$u->{'user'}."')\">".LJ::get_eventratescounters($u->{'userid'}, $ditemid)."</a>)"
+         $rated_count = " (<a class=\"we_like_this we_like_this_".$ditemid."\" href=\"/$LJ::SITEROOT/alleventrates.bml?journal=".$u->{'user'}."&amp;jitemid=$ditemid\" onclick=\"return ILikeThis.showList(event,this,'$ditemid','".$u->{'user'}."')\">".LJ::get_eventratescounters($u->{'userid'}, $ditemid)."</a>)"
             ." (<a href=\"#\" class=\"i_like_this\" onclick=\"return ILikeThis.rate(event,this,'$ditemid','".$u->{'user'}."')\">+1";
         if (LJ::get_eventrates( 
            journalid => $u->{'userid'},
