@@ -7,9 +7,9 @@ ILikeThis = {
 	{
 		ILikeThis.dialog.remove();
 		var click = node.onclick;
-		node.onclick = null
+		node.onclick = function(){ return false }
 		// has undorate node
-		var action = jQuery('.i_like_this_already', node).remove().length ? 'undorate' : 'rate';
+		var action = jQuery('.i_like_this_'+itemid+' .i_like_this_already').remove().length ? 'undorate' : 'rate';
 		jQuery(node).parent().removeClass('i_dont_like_this');
 		
 		jQuery.ajax({
@@ -28,17 +28,16 @@ ILikeThis = {
 			success: function(data)
 			{
 				if (data.status === 'OK') {
-					var context = node.parentNode.parentNode
-						append_node = jQuery('.we_like_this span>span>span', context);
+					var append_node = jQuery('.we_like_this_'+itemid+' span>span>span');
 					if (!append_node.length) { // s1
-						append_node = jQuery('.we_like_this', context);
+						append_node = jQuery('.we_like_this_'+itemid);
 					}
 					append_node.text(data.total);
 					if (action == 'rate') {
-						jQuery(node).parent().addClass('i_dont_like_this');
-						var append_node = jQuery('span>span>span', node);
+						var context = jQuery('.i_like_this_'+itemid).addClass('i_dont_like_this'),
+							append_node = context.find('span>span>span');
 						if (!append_node.length) { // s1
-							append_node = jQuery(node);
+							append_node = jQuery(context);
 						}
 						append_node.append('<i class="i_like_this_already">/</i>');
 					}
@@ -103,10 +102,9 @@ ILikeThis = {
 						top: top,
 						visibility: 'visible'
 					});
-					var context = node.parentNode.parentNode,
-						append_node = jQuery('.we_like_this span>span>span', context);
+					var append_node = jQuery('.we_like_this_'+itemid+' span>span>span');
 					if (!append_node.length) { // s1
-						append_node = jQuery('.we_like_this', context);
+						append_node = jQuery('.we_like_this_'+itemid);
 					}
 					append_node.text(data.total);
 				}
