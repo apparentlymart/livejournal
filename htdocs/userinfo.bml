@@ -860,6 +860,9 @@
             $postlevel_string = $ML{'.commsettings.postlevel.anybody'};
         }
 
+        $postlevel_string .= $ML{'.commsettings.postlevel.moderated'}
+            if $u->prop('moderated') && 'N' ne $u->prop('moderated');
+
         $comm_settings .= "<tr><th>$ML{'.commsettings.membership.header'}</th><td>$membership_string</td></tr>";
         $comm_settings .= "<tr><th>$ML{'.commsettings.postlevel.header'}</th><td>$postlevel_string</td></tr>";
     }
