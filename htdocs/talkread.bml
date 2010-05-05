@@ -186,7 +186,10 @@ my $old_url = 0;
  my $graphicpreviews_obj = LJ::graphicpreviews_obj();
  $graphicpreviews_obj->need_res($u);
 
- LJ::need_res('js/thread_expander.js');
+ LJ::need_res(qw(
+    js/thread_expander.js
+    js/journal.js
+    ));
 
  if (($remote && !$remote->{'opt_no_quickreply'}) && $allow_commenting) {
     # quickreply js libs
@@ -210,7 +213,6 @@ my $old_url = 0;
       LJ::need_res(qw(
                       js/x_core.js
                       js/quickreply.js
-                      js/journal.js
                       ));
  }
 
@@ -820,7 +822,7 @@ my $old_url = 0;
 
      my $rated_count = "";
      if (LJ::is_eventrate_enable($u)) {
-        $rated_count = " (<a class=\"we_like_this\" href=\"/$LJ::SITEROOT/alleventrates.bml?journal=".$u->{'user'}."&amp;jitemid=$ditemid\" onclick=\"return ILikeThis.showList(event,this,'$ditemid','tester')\">".LJ::get_eventratescounters($u->{'userid'}, $ditemid)."</a>)"
+         $rated_count = " (<a class=\"we_like_this\" href=\"/$LJ::SITEROOT/alleventrates.bml?journal=".$u->{'user'}."&amp;jitemid=$ditemid\" onclick=\"return ILikeThis.showList(event,this,'$ditemid','".$u->{'user'}."')\">".LJ::get_eventratescounters($u->{'userid'}, $ditemid)."</a>)"
             ." (<a href=\"#\" class=\"i_like_this\" onclick=\"return ILikeThis.rate(event,this,'$ditemid','".$u->{'user'}."')\">+1";
         if (LJ::get_eventrates( 
            journalid => $u->{'userid'},
