@@ -100,8 +100,6 @@ sub _sort_list {
 
     return @list if $opts{'raw'};
 
-    return @list if $self->{'min_entries'} >= scalar @list; # We already has a minimum.
-
     # Remove old entries - stay at least 'min_entries' recent and all within 24h from now.
     my $time_edge = time() - 24 * 3600;
     my $count = $self->{'min_entries'};
