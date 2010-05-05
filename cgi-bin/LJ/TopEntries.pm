@@ -32,11 +32,16 @@ sub _hash_from_key {
 
     my ($timestamp, $journalid, $jitemid, $userpicid) = @$key;
 
+    return undef unless $journalid && $jitemid && $userpicid;
+
     my $entry = LJ::Entry->new($journalid, jitemid => $jitemid);
+
+    return undef unless $entry;
+
     my $poster = $entry->poster();
     my $journal = LJ::load_userid($journalid);
 
-    return undef unless $entry && $poster && $journal;
+    return undef unless $poster && $journal;
 
     my $comment_ref = LJ::Talk::get_talk_data($journal, 'L', $jitemid);
     return undef unless ref $comment_ref;
@@ -44,25 +49,28 @@ sub _hash_from_key {
     # Get userpic from entry
     my $userpic = LJ::Userpic->new($poster, $userpicid);
 
-    return  {
-                posterid    => $poster->{'userid'},
-                journalid   => $journalid,
-                jitemid     => $jitemid,
-                userpicid   => $userpicid,
+    return undef unless $userpic && $userpic->valid();
 
-                subj        => $entry->subject_text(),
-                text        => LJ::html_trim_4gadgets($entry->event_text(), 50, $entry->url()),
-                revtime     => $entry->prop('revtime'),
-                url         => $entry->url(),
-                time        => $entry->logtime_unix(),
-                userpic     => $userpic->url(),
-                poster      => $poster->ljuser_display(),
-                timestamp   => $timestamp,
+    return
+        {
+            posterid    => $poster->{'userid'},
+            journalid   => $journalid,
+            jitemid     => $jitemid,
+            userpicid   => $userpicid,
 
-                comments    => scalar keys %$comment_ref,
+            subj        => $entry->subject_text(),
+            text        => LJ::html_trim_4gadgets($entry->event_text(), 50, $entry->url()),
+            revtime     => $entry->prop('revtime'),
+            url         => $entry->url(),
+            time        => $entry->logtime_unix(),
+            userpic     => $userpic->url(),
+            poster      => $poster->ljuser_display(),
+            timestamp   => $timestamp,
 
-                key         => "$journalid:$jitemid",
-            };
+            comments    => scalar keys %$comment_ref,
+
+            key         => "$journalid:$jitemid",
+        };
 }
 
 # Clean list before store: remove old elements.
@@ -87,8 +95,8 @@ sub _sort_list {
     my %opts = @_;
     my @list =
         sort {$b->{'timestamp'} <=> $a->{'timestamp'}}
-            grep { !($_->{'revtime'} && $_->{'revtime'} > $_->{'timestamp'}) }  # Sanity check
-                @{$self->{'featured_posts'}};
+            grep { $_ && !($_->{'revtime'} && $_->{'revtime'} > $_->{'timestamp'}) }  # Sanity check
+                    @{$self->{'featured_posts'}};
 
     return @list if $opts{'raw'};
 
@@ -191,14 +199,14 @@ sub add_entry {
     my %opts = @_;
 
     my $entry = $opts{'entry'};
-    return unless $entry;
+    return 'wrong entry' unless $entry;
 
     my $timestamp = time();
 
     my ($journalid, $jitemid, $poster, $userpic) =
         ($entry->journalid(), $entry->jitemid(), $entry->poster(), $entry->userpic());
 
-    return unless $poster;
+    return 'wrong entry poster' unless $poster;
 
     my $userpicid   = ($userpic ? LJ::get_picid_from_keyword($poster, $userpic) :
             ($poster->{'defaultpicid'} || 0));
@@ -206,9 +214,16 @@ sub add_entry {
     $self->delete_entry(key => "$journalid:$jitemid");
 
     $self->get_featured_posts(raw => 1, %opts); # make sure we has all fresh data
-    push @{$self->{'featured_posts'}},
-        $self->_hash_from_key( [ $timestamp, $journalid, $jitemid, $userpicid ] );
-    $self->_store_featured_posts(%opts);
+
+    my $post = $self->_hash_from_key( [ $timestamp, $journalid, $jitemid, $userpicid ] );
+    if ($post) {
+        push @{$self->{'featured_posts'}}, $post;
+        $self->_store_featured_posts(%opts);
+        return '';
+    }
+
+    # all other error conditions checked before call _hash_from_key()
+    return 'userpic missed or does not valid';
 }
 
 sub delete_entry {
