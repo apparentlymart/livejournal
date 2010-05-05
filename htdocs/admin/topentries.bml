@@ -25,7 +25,8 @@ body<=
         unless ($entry && $entry->valid) {
             return LJ::error_list("$POST{url} is not a valid entry URL.");
         }
-        $top_entries->add_entry(entry => $entry);
+        my $ret_code = $top_entries->add_entry(entry => $entry);
+        return LJ::error_list($ret_code) if $ret_code;
     } elsif (my @keys = grep { /^delete-(\d+:\d+)$/ } keys %GET) {
         foreach my $key (@keys) {
             $top_entries->delete_entry(key => $key);
