@@ -25,11 +25,16 @@ sub render_body {
             </select></td>";
     $ret .= "<td  width='10%'><button type='submit'>" . BML::ml('horizon.search.submit') . "</button></td></tr></table></div></fieldset></form>";
 
-
-    my $system = LJ::load_user('system') or die "No 'system' user in DB";
-    my @keywords = split /\s*\n+\s*/, $system->prop('search_admin');
+    my $words;
+    if ($opts{substitude_words}) {
+        $words = $opts{substitude_words};
+    } else {
+        my $system = LJ::load_user('system') or die "No 'system' user in DB";
+        $words = $system->prop('search_admin');
+    }
+    my @keywords = split /\s*\n+\s*/, $words;
     $ret .= "<ul class=i-cloud>";
-    $ret .= join ' ', map { "<li><h3><a href='$LJ::SITEROOT/search/?q=" . LJ::eurl($_) . "&area=journals'>$_</a></li></h3>" } @keywords;
+    $ret .= join ' ', map { "<li><h3><a href='$LJ::SITEROOT/search/?q=" . LJ::eurl($_) . "&area=journals'>" . LJ::ehtml($_) . "</a></li></h3>" } @keywords;
     $ret .= "</ul>";
     $ret .= "</div>";
 

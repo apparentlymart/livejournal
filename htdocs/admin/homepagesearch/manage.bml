@@ -24,17 +24,21 @@
         $system->set_prop('search_admin', $stored_words);
     }
 
-    my @keywords = split /\s*\n+\s*/, ($POST{preview} ? $edited_words : $stored_words);
-    $body .= LJ::html_textarea({ name => 'words', rows => 20, cols => 50, value => join("\n", @keywords), 
+    my $words = $POST{preview} ? $edited_words : $stored_words;
+    $body .= LJ::html_textarea({ name => 'words', rows => 20, cols => 50, value => $words, 
                                  disabled => ($POST{edit} || $POST{preview}) ? 0 : 1 });
 
     # preview
     $body .= '<div>';
-    $body .= join ' ', map { "<a href='$LJ::SITEROOT/search/?q=" . LJ::eurl($_) . "&area=journals'>$_</a>" } @keywords;
+    $body .= LJ::Widget::SearchJournals->render(substitude_words => $words);
     $body .= '</div>';
 
-    $body .= '<input type="submit" name="preview" value="Preview">';
-    $body .= '<input type="submit" name="edit" value="Edit">';
+    $body .= '<input type="submit" name="preview" value="Preview">' if $POST{edit};
+    if ($POST{edit}) {
+        $body .= '<input type="reset" name="cancel" value="Cancel">';
+    } else {
+        $body .= '<input type="submit" name="edit" value="Edit">';
+    }
     $body .= '<input type="submit" name="submit" value="Submit">';
     
 
