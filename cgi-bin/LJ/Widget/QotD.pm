@@ -40,7 +40,7 @@ sub render_body {
             $ret .= qq[<i class="i-qotd-nav-first i-qotd-nav-first-dis"></i><i class="i-qotd-nav-prev i-qotd-nav-prev-dis"></i>];
         }
         $ret .= qq[<i class="i-qotd-nav-max">$max</i>];
-        $ret .= qq[<span class="qotd-counter">$month_short, $day ($num/$total)</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
+        $ret .= qq[<span class="qotd-counter">$month_short, $day] . ($total > 1 ? "($num/$total)" : '') . qq[</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
     }
 
     $ret .= '<div class="b-qotd-question">';
