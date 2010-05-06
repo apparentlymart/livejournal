@@ -561,8 +561,8 @@ sub atom_entry {
                                   )
                      ) if $opts->{'apilinks'};
 
-    my $event_date = LJ::time_to_w3c($self->logtime_unix, "");
-    my $modtime    = LJ::time_to_w3c($self->modtime_unix, 'Z');
+    my $event_date = LJ::TimeUtil->time_to_w3c($self->logtime_unix, "");
+    my $modtime    = LJ::TimeUtil->time_to_w3c($self->modtime_unix, 'Z');
 
     $entry->published($event_date);
     $entry->issued   ($event_date);   # COMPAT

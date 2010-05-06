@@ -463,7 +463,7 @@ sub create_view_atom
                 : ( 'text/xml', $api )
             )
         );
-        $feed->updated( LJ::time_to_w3c($j->{'modtime'}, 'Z') );
+        $feed->updated( LJ::TimeUtil->time_to_w3c($j->{'modtime'}, 'Z') );
 
         my $ljinfo = $xml->createElement( 'lj:journal' );
         $ljinfo->setAttribute( 'userid', $u->userid );
@@ -555,8 +555,8 @@ sub create_view_atom
                        );
 
 
-        $entry->published( LJ::time_to_w3c($it->{createtime}, "Z") );
-        $entry->updated(   LJ::time_to_w3c($it->{modtime},    "Z") );
+        $entry->published( LJ::TimeUtil->time_to_w3c($it->{createtime}, "Z") );
+        $entry->updated(   LJ::TimeUtil->time_to_w3c($it->{modtime},    "Z") );
 
         # XML::Atom 0.13 doesn't support categories.   Maybe later?
         foreach my $tag ( @{$it->{tags} || []} ) {
@@ -723,8 +723,8 @@ sub create_view_foaf {
     }
 
     # include a user's journal page and web site info
-    my $time_create = ($u->timecreate) ? LJ::time_to_w3c($u->timecreate) : '';
-    my $time_update = ($u->timeupdate) ? LJ::time_to_w3c($u->timeupdate) : '';
+    my $time_create = ($u->timecreate) ? LJ::TimeUtil->time_to_w3c($u->timecreate) : '';
+    my $time_update = ($u->timeupdate) ? LJ::TimeUtil->time_to_w3c($u->timeupdate) : '';
     $ret .= "    <foaf:weblog rdf:resource='" . LJ::journal_base($u) . "/'";
     $ret .= " lj:dateCreated='$time_create'" if $time_create;
     $ret .= " lj:dateLastUpdated='$time_update'" if $time_update;
@@ -961,7 +961,7 @@ sub create_view_userpics {
         $latest = ($latest < $picdata{$pic->{picid}}->{picdate}) ? $picdata{$pic->{picid}}->{picdate} : $latest;
     }
 
-    $feed->updated( LJ::time_to_w3c($latest, 'Z') );
+    $feed->updated( LJ::TimeUtil->time_to_w3c($latest, 'Z') );
 
     foreach my $pic (@pics) {
         my $entry = XML::Atom::Entry->new( Version => 1 );
@@ -972,7 +972,7 @@ sub create_view_userpics {
         my $title = ($pic->{picid} == $u->{defaultpicid}) ? "default userpic" : "userpic";
         $entry->title( $title );
 
-        $entry->updated( LJ::time_to_w3c($picdata{$pic->{picid}}->{picdate}, 'Z') );
+        $entry->updated( LJ::TimeUtil->time_to_w3c($picdata{$pic->{picid}}->{picdate}, 'Z') );
 
         my $content;
         $content = $entry_xml->createElement( "content" );
