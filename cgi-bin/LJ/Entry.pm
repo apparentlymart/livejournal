@@ -1862,7 +1862,7 @@ sub get_log2_recent_user
             my $logtime = LJ::TimeUtil->mysql_time($LJ::EndOfTime - $item->{rlogtime}, 1);
             $item->{'system_alldatepart'} = LJ::alldatepart_s2($logtime);
         } else {
-            $item->{'alldatepart'} = LJ::alldatepart_s1($item->{'eventtime'});
+            $item->{'alldatepart'} = LJ::TimeUtil->alldatepart_s1($item->{'eventtime'});
         }
         push @$ret, $item;
     }

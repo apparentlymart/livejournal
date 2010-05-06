@@ -150,7 +150,7 @@ sub mysql_time {
 }
 
 # <LJFUNC>
-# name: LJ::alldatepart_s1
+# name: LJ::TimeUtil->alldatepart_s1
 # des: Gets date in MySQL format, produces s1dateformat.
 # class: time
 # args:
