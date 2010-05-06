@@ -6829,9 +6829,7 @@ sub set_alias {
     }
     
     ## save data back
-    warn LJ::D($remote->{_aliases});
     my $serialized_text = LJ::JSON->to_json($remote->{_aliases});
-    warn $serialized_text;
     if (length $serialized_text < 65536) {
         return $remote->set_prop( aliases => $serialized_text );
     } else {
