@@ -1,6 +1,8 @@
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw($title $windowtitle $body $head $bml_okay %GET);
 
     BML::set_language_scope('/userinfo.bml');
@@ -617,7 +619,7 @@
     }
 
     ## stats
-    my $lastupdated = substr(LJ::mysql_time($u->timeupdate), 0, 10);
+    my $lastupdated = substr(LJ::TimeUtil->mysql_time($u->timeupdate), 0, 10);
     my $ago_text = LJ::ago_text($u->{secondsold});
 
     my $search_link = "[<a href='$LJ::SITEROOT/tools/search.bml?journal=$user'>$ML{'.details.search'}</a>]"
@@ -639,7 +641,7 @@
 
     my $comment_stats_string = join(", ", @comment_stats);
 
-    my $timecreate = LJ::mysql_time($u->timecreate);
+    my $timecreate = LJ::TimeUtil->mysql_time($u->timecreate);
     my $createdate = "<span class='tooltip' title=\"$timecreate\">" . substr($timecreate, 0, 10) . "</span>";
 
     $body .= "<div class='details_stats'>";

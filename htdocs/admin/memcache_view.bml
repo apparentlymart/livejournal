@@ -6,6 +6,8 @@
  use strict;
  use vars qw(%GET %POST); 
  use Data::Dumper;
+ use LJ::TimeUtil;
+
  my $ret;
 
 
@@ -96,7 +98,7 @@
                  talkid => $talkid,
                  state => $state,
                  posterid => $poster,
-                 datepost => LJ::mysql_time($time),
+                 datepost => LJ::TimeUtil->mysql_time($time),
                  parenttalkid => $parenttalkid,
              };
          }
@@ -109,8 +111,8 @@
          $item->{'security'} = ($item->{'allowmask'} == 0 ? 'private' :
                                ($item->{'allowmask'} == 2**31 ? 'public' : 'usemask'));
          @$item{'jitemid', 'anum'} = (int($item->{'ditemid'} / 256), $item->{'ditemid'} % 256);
-         $item->{'eventtime'} = LJ::mysql_time($item->{'eventtime'}, 1);
-         $item->{'logtime'} = LJ::mysql_time($item->{'logtime'}, 1);
+         $item->{'eventtime'} = LJ::TimeUtil->mysql_time($item->{'eventtime'}, 1);
+         $item->{'logtime'} = LJ::TimeUtil->mysql_time($item->{'logtime'}, 1);
          $val = $item;
      }
 
@@ -128,7 +130,7 @@
          for (my $i=0; $i<$n; $i++) {
              my ($posterid, $eventtime, $rlogtime, $allowmask, $ditemid) =
                  unpack("NNNNN", substr($val, $i*20+$offset, 20));
-            $eventtime = LJ::mysql_time($eventtime, 1);
+            $eventtime = LJ::TimeUtil->mysql_time($eventtime, 1);
             my $security = $allowmask == 0 ? 'private' :
                 ($allowmask == 2**31 ? 'public' : 'usemask');
             my ($jitemid, $anum) = (int($ditemid / 256), $ditemid % 256);

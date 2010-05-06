@@ -4,6 +4,8 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw(%POST);
 
     LJ::set_active_crumb('comminvites');
@@ -120,7 +122,7 @@ body<=
             push @tags, $ML{".label.$_"} if $args->{$_};
         }
         my $ename = LJ::ehtml($cu->{name});
-        my $date = LJ::mysql_time($invite->[2]);
+        my $date = LJ::TimeUtil->mysql_time($invite->[2]);
 
         # if invited by a suspended user do not allow this user to accept
         if ($us->{$invite->[1]}->is_suspended) {

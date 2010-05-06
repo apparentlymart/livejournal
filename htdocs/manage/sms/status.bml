@@ -3,6 +3,8 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
     $title = "$LJ::SMS_TITLE Status";
@@ -94,7 +96,7 @@ body<=
     my $count  = 0;
     foreach my $msg (@msgs) {
         my $msgid     = $msg->id;
-        my $when      = LJ::mysql_time($msg->timecreate);
+        my $when      = LJ::TimeUtil->mysql_time($msg->timecreate);
         my $type      = $msg->type;
         my $status    = $msg->status;
         my $from      = $msg->from_num;

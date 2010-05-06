@@ -4,6 +4,8 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw($GET $POST);
 
     # must be logged in to access this page
@@ -196,7 +198,7 @@ body<=
                 $ret .= "<br />";
                 $ret .= LJ::html_textarea({ name => 'body', value => $body, rows => 15, cols => 80 });
                 $ret .= "<br />";
-                $ret .= "$ML{'.last.modified.by'} " . LJ::ljuser($lmu) . " on " . LJ::mysql_time($lmt) . ".<br />";
+                $ret .= "$ML{'.last.modified.by'} " . LJ::ljuser($lmu) . " on " . LJ::TimeUtil->mysql_time($lmt) . ".<br />";
                 if ($canedit) {
                     $ret .= LJ::html_submit('action:save', $ML{'.save_changes'});
                     $ret .= LJ::html_submit('action:delete', $ML{'.delete.answer'},
