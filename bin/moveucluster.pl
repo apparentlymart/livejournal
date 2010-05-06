@@ -72,6 +72,8 @@ use strict;
 use Getopt::Long;
 use Pod::Usage qw{pod2usage};
 use IO::Socket::INET;
+use lib "$ENV{'LJHOME'}/cgi-bin/";
+use LJ::TimeUtil;
 
 # NOTE: these options are used both by Getopt::Long for command-line parsing
 # in single user move move, and also set by hand when in --jobserver mode,
@@ -499,7 +501,7 @@ sub moveUser {
     }
 
     if ($opts->{expungedel} && $u->{'statusvis'} eq "D" &&
-        LJ::mysqldate_to_time($u->{'statusvisdate'}) < time() - 86400*31) {
+        LJ::TimeUtil->mysqldate_to_time($u->{'statusvisdate'}) < time() - 86400*31) {
 
         print "Expunging user '$u->{'user'}'\n";
         $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart, timedone) ".
