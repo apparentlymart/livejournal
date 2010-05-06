@@ -22,6 +22,7 @@ use Class::Autouse qw(
                       );
 use Storable;
 use LJ::Request;
+use LJ::TimeUtil;
 use POSIX ();
 use Encode;
 
@@ -3403,7 +3404,7 @@ sub Date__day_of_week
 {
     my ($ctx, $dt) = @_;
     return $dt->{'_dayofweek'} if defined $dt->{'_dayofweek'};
-    return $dt->{'_dayofweek'} = LJ::day_of_week($dt->{'year'}, $dt->{'month'}, $dt->{'day'}) + 1;
+    return $dt->{'_dayofweek'} = LJ::TimeUtil->day_of_week($dt->{'year'}, $dt->{'month'}, $dt->{'day'}) + 1;
 }
 *DateTime__day_of_week = \&Date__day_of_week;
 
