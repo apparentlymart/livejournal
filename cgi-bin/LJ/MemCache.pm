@@ -349,6 +349,7 @@ sub get_or_set {
 
 sub _is_compressable {
     my $key = shift;
+    $key = $key->[1] if ref $key eq 'ARRAY'; # here we should handle real key
 
     # now we have only one key whose value shouldn't be compressed:
     #   1. "talk2:$journalu->{'userid'}:L:$itemid"
