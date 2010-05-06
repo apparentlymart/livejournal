@@ -2455,6 +2455,7 @@ sub item_toutf8
 # TODO: Must we clean rates when delete entry?
 
 # LJ::is_eventrate_enable($journal);
+# returns non zero if rate is enabled for selected journal.
 sub is_eventrate_enable {
     my $journal = shift;
     $journal = LJ::get_remote() unless $journal;
@@ -2485,12 +2486,14 @@ sub reset_eventrate
     my $itemid      = shift;
     my @userids     = @_;
 
+    my $journal = LJ::want_user($journalid);
+    return 0 unless is_eventrate_enable($journal);
+
     unless (@userids) {
         my $remote = LJ::get_remote();
-        @userids = ( $remote->{'userid'} ) if $remote;
+        return 0 unless $remote;
+        @userids = ( $remote->userid() );
     }
-    my $journal = LJ::want_user($journalid);
-    return unless is_eventrate_enable($journal);
 
     # get a list if user id which was rate selected entry.
     @userids = LJ::get_eventrates(
@@ -2532,7 +2535,7 @@ sub set_eventrate
     my @userids     = @_;
 
     my $journal = LJ::want_user($journalid);
-    return unless is_eventrate_enable($journal);
+    return 0 unless is_eventrate_enable($journal);
 
     my $clusterid = $journal->{'clusterid'};
 
@@ -2545,9 +2548,9 @@ sub set_eventrate
     my @uids = ();
     unless (@userids) {
         my $remote = LJ::get_remote();
-        push @userids, $remote->userid if $remote;
+        return 0 unless $remote;
+        @userids = ( $remote->userid() );
     }
-    return 0 unless @userids;
 
     foreach my $uid (@userids) {
         # TODO: check rights of $remote to rate a post as $uid.
