@@ -209,7 +209,7 @@ sub alldatepart_s2 {
 }
 
 # <LJFUNC>
-# name: LJ::statushistory_time
+# name: LJ::TimeUtil->statushistory_time
 # des: Convert a time like "20070401120323" to "2007-04-01 12:03:23".
 # class: time
 # args:
