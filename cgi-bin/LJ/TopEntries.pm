@@ -235,7 +235,7 @@ sub delete_entry {
 
     @{$self->{'featured_posts'}} = grep {
             ! ( $_->{'journalid'} == $journalid && $_->{'jitemid'}   == $jitemid )
-        } $self->get_featured_posts();
+        } $self->get_featured_posts(raw => 1, %opts);
 
     $self->_store_featured_posts(%opts);
 }
