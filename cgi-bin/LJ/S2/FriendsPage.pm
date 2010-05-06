@@ -5,6 +5,7 @@ use strict;
 package LJ::S2;
 use Class::Autouse qw/LJ::ContentFlag/;
 use LJ::Request;
+use LJ::TimeUtil;
 
 sub FriendsPage
 {
@@ -45,7 +46,7 @@ sub FriendsPage
     # see if they have a previously cached copy of this page they
     # might be able to still use.
     if ($opts->{'header'}->{'If-Modified-Since'}) {
-        my $theirtime = LJ::http_to_time($opts->{'header'}->{'If-Modified-Since'});
+        my $theirtime = LJ::TimeUtil->http_to_time($opts->{'header'}->{'If-Modified-Since'});
 
         # send back a 304 Not Modified if they say they've reloaded this
         # document in the last $newinterval seconds:

@@ -42,7 +42,7 @@ sub day_of_week {
 
 # <LJFUNC>
 # class: time
-# name: LJ::http_to_time
+# name: LJ::TimeUtil->http_to_time
 # des: Converts HTTP date to Unix time.
 # info: Wrapper around HTTP::Date::str2time.
 #       See also [func[LJ::time_to_http]].
@@ -80,7 +80,7 @@ sub mysqldate_to_time {
 # name: LJ::time_to_http
 # des: Converts a Unix time to a HTTP date.
 # info: Wrapper around HTTP::Date::time2str to make an
-#       HTTP date (RFC 1123 format)  See also [func[LJ::http_to_time]].
+#       HTTP date (RFC 1123 format)  See also [func[LJ::TimeUtil->http_to_time]].
 # args: time
 # des-time: Integer; Unix time.
 # returns: String; RFC 1123 date.

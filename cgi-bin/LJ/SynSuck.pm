@@ -7,6 +7,8 @@ require "ljprotocol.pl";
 require "parsefeed.pl";
 require "cleanhtml.pl";
 
+use LJ::TimeUtil;
+
 sub update_feed {
     my ($urow, $verbose) = @_;
     return unless $urow;
@@ -415,7 +417,7 @@ sub process_content {
 
     }
 
-    my $r_lastmod = LJ::http_to_time($res->header('Last-Modified'));
+    my $r_lastmod = LJ::TimeUtil->http_to_time($res->header('Last-Modified'));
     my $r_etag = $res->header('ETag');
 
     # decide when to poll next (in minutes).
