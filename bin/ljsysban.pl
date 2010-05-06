@@ -125,7 +125,7 @@ if ($add) {
     # log in statushistory
     LJ::statushistory_add(0, 0, 'sysban_add',
                           "banid=$insertid; status=$status; " .
-                          "bandate=" . ($bandate || LJ::mysql_time()) . "; " .
+                          "bandate=" . ($bandate || LJ::TimeUtil->mysql_time()) . "; " .
                           "banuntil=" . ($banuntil || 'NULL') . "; " .
                           "what=$what; value=$value; " .
                           "note=$note;");

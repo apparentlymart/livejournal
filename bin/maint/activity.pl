@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 #
 
+use LJ::TimeUtil;
+
 $maint{'active_user'} = sub
 {
     my $dbh = LJ::get_db_writer();
@@ -33,7 +35,7 @@ $maint{'active_user'} = sub
 
         # one hour from the start of this hour (
         my $before_time = $now - 3600 - ($now % 3600);
-        my $time_str = LJ::mysql_time($before_time, 'gmt');
+        my $time_str = LJ::TimeUtil->mysql_time($before_time, 'gmt');
 
         # now extract parts from the modified time
         my ($yr, $mo, $day, $hr) =
