@@ -128,7 +128,7 @@ sub time_to_w3c {
 }
 
 # <LJFUNC>
-# name: LJ::mysql_time
+# name: LJ::TimeUtil->mysql_time
 # des:
 # class: time
 # info:

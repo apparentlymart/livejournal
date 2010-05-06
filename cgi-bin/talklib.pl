@@ -22,6 +22,7 @@ use Class::Autouse qw(
                       );
 use MIME::Words;
 use Carp qw(croak);
+use LJ::TimeUtil;
 
 use constant PACK_FORMAT => "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state 
 
@@ -843,7 +844,7 @@ sub get_talk_data_do
                 state => $state,
                 posterid => $poster,
                 datepost_unix => $time,
-                datepost => LJ::mysql_time($time),  # timezone surely fucked.  deprecated.
+                datepost => LJ::TimeUtil->mysql_time($time),  # timezone surely fucked.  deprecated.
                 parenttalkid => $par,
             };
 

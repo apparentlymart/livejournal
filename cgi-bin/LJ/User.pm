@@ -6624,7 +6624,7 @@ sub infohistory_add {
 
     # get writer and insert
     my $dbh = LJ::get_db_writer();
-    my $gmt_now = LJ::mysql_time(time(), 1);
+    my $gmt_now = LJ::TimeUtil->mysql_time(time(), 1);
     $dbh->do("INSERT INTO infohistory (userid, what, timechange, oldvalue, other) VALUES (?, ?, ?, ?, ?)",
              undef, $uuid, $what, $gmt_now, $value, $other);
     return $dbh->err ? 0 : 1;

@@ -8,6 +8,7 @@ package LJ::AntiSpam;
 use strict;
 use Net::Akismet::TPAS;
 use Carp qw/ croak cluck /;
+use LJ::TimeUtil;
 
 my @cols = qw( itemid type posterid journalid eventtime poster_ip email user_agent uniq spam confidence );
 my @extra_cols = qw( review );
@@ -58,7 +59,7 @@ sub create {
 
     $dbh->do("REPLACE INTO antispam VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL)",
              undef, $self->{journalid}, $self->{itemid}, $self->{type},
-             $self->{posterid}, LJ::mysql_time($self->{eventtime}, 1),
+             $self->{posterid}, LJ::TimeUtil->mysql_time($self->{eventtime}, 1),
              $self->{poster_ip}, $self->{email}, $self->{user_agent},
              $self->{uniq}, $self->{spam}, $self->{confidence} );
     die $dbh->errstr if $dbh->err;
@@ -81,7 +82,7 @@ sub load_recent {
         or die "unable to contact global db slave to load antispam";
 
     my $sth;
-    my $ago = LJ::mysql_time(time() - $hours, 1);
+    my $ago = LJ::TimeUtil->mysql_time(time() - $hours, 1);
     my $xsql = "AND type='$type' ";
     $xsql .= "ORDER BY eventtime DESC";
     $xsql .= " LIMIT $limit";
@@ -246,7 +247,7 @@ sub post_time {
     if ($self->is_entry) {
         return $self->_post->eventtime_mysql;
     } elsif ($self->is_comment) {
-        return LJ::mysql_time($self->_post->unixtime);
+        return LJ::TimeUtil->mysql_time($self->_post->unixtime);
     }
 }
 

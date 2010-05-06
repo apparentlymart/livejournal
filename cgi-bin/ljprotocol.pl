@@ -904,7 +904,7 @@ sub checkfriends
             while ($_ = each %$tu) {
                 $max = $tu->{$_} if $tu->{$_} > $max;
             }
-            $update = LJ::mysql_time($max) if $max;
+            $update = LJ::TimeUtil->mysql_time($max) if $max;
         } else {
             my $dbr = LJ::get_db_reader();
             unless ($dbr) {

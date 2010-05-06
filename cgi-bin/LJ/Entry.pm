@@ -1599,8 +1599,8 @@ sub get_log2_row
                                ($item->{'allowmask'} == 2**31 ? 'public' : 'usemask'));
         $item->{'journalid'} = $jid;
         @$item{'jitemid', 'anum'} = (int($item->{'ditemid'} / 256), $item->{'ditemid'} % 256);
-        $item->{'eventtime'} = LJ::mysql_time($item->{'eventtime'}, 1);
-        $item->{'logtime'} = LJ::mysql_time($item->{'logtime'}, 1);
+        $item->{'eventtime'} = LJ::TimeUtil->mysql_time($item->{'eventtime'}, 1);
+        $item->{'logtime'} = LJ::TimeUtil->mysql_time($item->{'logtime'}, 1);
 
         return $item;
     }
@@ -1670,7 +1670,7 @@ sub get_log2_recent_log
             # FIX:
             # logtime param should be datetime, not unixtimestamp.
             #
-            $row->{logtime} = LJ::mysql_time($LJ::EndOfTime - $row->{rlogtime}, 1);
+            $row->{logtime} = LJ::TimeUtil->mysql_time($LJ::EndOfTime - $row->{rlogtime}, 1);
             # construct singleton for later
             LJ::Entry->new_from_row(%$row);
         }
@@ -1692,7 +1692,7 @@ sub get_log2_recent_log
             my ($posterid, $eventtime, $rlogtime, $allowmask, $ditemid) =
                 unpack("NNNNN", substr($rows, $i*20+5, 20));
             next if $notafter and $rlogtime > $notafter;
-            $eventtime = LJ::mysql_time($eventtime, 1);
+            $eventtime = LJ::TimeUtil->mysql_time($eventtime, 1);
             my $security = $allowmask == 0 ? 'private' :
                 ($allowmask == 2**31 ? 'public' : 'usemask');
             my ($jitemid, $anum) = (int($ditemid / 256), $ditemid % 256);
@@ -1859,7 +1859,7 @@ sub get_log2_recent_user
             $item->{'alldatepart'} = LJ::alldatepart_s2($item->{'eventtime'});
 
             # conversion to get the system time of this entry
-            my $logtime = LJ::mysql_time($LJ::EndOfTime - $item->{rlogtime}, 1);
+            my $logtime = LJ::TimeUtil->mysql_time($LJ::EndOfTime - $item->{rlogtime}, 1);
             $item->{'system_alldatepart'} = LJ::alldatepart_s2($logtime);
         } else {
             $item->{'alldatepart'} = LJ::alldatepart_s1($item->{'eventtime'});
