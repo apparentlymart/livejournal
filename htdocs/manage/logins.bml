@@ -6,6 +6,8 @@ body<=
     use strict;
     LJ::set_active_crumb('managelogins');
     use vars qw(%GET %POST);
+    use LJ::TimeUtil;
+
     BML::decl_params(
        'user' => 'word',
        'x' => 'digits',
@@ -72,15 +74,15 @@ body<=
         }
 
         $body .= "<tr>\n";
-        $body .= "<td>" . LJ::ehtml(LJ::time_to_http($login->[0])) . "</td>\n";
+        $body .= "<td>" . LJ::ehtml(LJ::TimeUtil->time_to_http($login->[0])) . "</td>\n";
         $body .= "<td>" . LJ::ehtml($login->[2]) . "</td>\n";
         $body .= "<td>" . LJ::ehtml($login->[3]) . "</td>\n";
         if ($adminmode) {
             my $sid = $login->[1];
             $body .= "<td>" . LJ::ehtml($sessions->{$sid}->exptype) . "</td>\n";
             $body .= "<td>" . LJ::ehtml($sessions->{$sid}->{ipfixed} || '-') . "</td>\n";
-            $body .= "<td>" . LJ::ehtml(LJ::time_to_http($sessions->{$sid}->{timecreate})) . "</td>\n";
-            $body .= "<td>" . LJ::ehtml(LJ::time_to_http($sessions->{$sid}->{timeexpire})) . "</td>\n";
+            $body .= "<td>" . LJ::ehtml(LJ::TimeUtil->time_to_http($sessions->{$sid}->{timecreate})) . "</td>\n";
+            $body .= "<td>" . LJ::ehtml(LJ::TimeUtil->time_to_http($sessions->{$sid}->{timeexpire})) . "</td>\n";
         }
 
         # Is this their current session?
@@ -107,7 +109,7 @@ body<=
     $body .= "<table width='100%'><tr><th>$ML{'.prior.table.time'}</th><th>$ML{'.prior.table.ip'}</th><th width='57%'>$ML{'.prior.table.useragent'}</th></tr>";
     foreach my $login (sort { $b->[1] <=> $a->[1] } @prior) {
         $body .= "<tr>\n";
-        $body .= "<td>" . LJ::ehtml(LJ::time_to_http($login->[0])) . "</td>\n";
+        $body .= "<td>" . LJ::ehtml(LJ::TimeUtil->time_to_http($login->[0])) . "</td>\n";
         $body .= "<td>" . LJ::ehtml($login->[2]) . "</td>\n";
         $body .= "<td>" . LJ::ehtml($login->[3]) . "</td>\n";
         $body .= "</tr>\n";
