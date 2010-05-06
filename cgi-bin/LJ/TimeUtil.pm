@@ -185,7 +185,7 @@ sub alldatepart_s1 {
 
 
 # <LJFUNC>
-# name: LJ::alldatepart_s2
+# name: LJ::TimeUtil->alldatepart_s2
 # des: Gets date in MySQL format, produces s2dateformat.
 # class: time
 # args:

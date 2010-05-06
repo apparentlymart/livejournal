@@ -96,7 +96,7 @@ sub make_feed
             anum => $entry->anum,
             posterid => $entry->poster->id,
             security => $entry->security,
-            alldatepart => LJ::alldatepart_s2($entry->eventtime_mysql),
+            alldatepart => LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql),
         };
     } else {
         @items = LJ::get_recent_items({

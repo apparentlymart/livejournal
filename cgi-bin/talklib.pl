@@ -276,7 +276,7 @@ sub get_journal_item
     my $item = LJ::get_log2_row($u, $itemid);
     return undef unless $item;
 
-    $item->{'alldatepart'} = LJ::alldatepart_s2($item->{'eventtime'});
+    $item->{'alldatepart'} = LJ::TimeUtil->alldatepart_s2($item->{'eventtime'});
 
     $item->{'itemid'} = $item->{'jitemid'};    # support old & new keys
     $item->{'ownerid'} = $item->{'journalid'}; # support old & news keys

@@ -4,6 +4,8 @@
 use strict;
 package LJ::S2;
 
+use LJ::TimeUtil;
+
 sub EntryPage
 {
     my ($u, $remote, $opts) = @_;
@@ -489,8 +491,8 @@ sub EntryPage_entry
     my $s2entry = Entry($u, {
         'subject' => $subject,
         'text' => $event,
-        'dateparts' => LJ::alldatepart_s2($entry->eventtime_mysql),
-        'system_dateparts' => LJ::alldatepart_s2($entry->logtime_mysql),
+        'dateparts' => LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql),
+        'system_dateparts' => LJ::TimeUtil->alldatepart_s2($entry->logtime_mysql),
         'security' => $entry->security,
         'allowmask' => $entry->allowmask,
         'props' => $entry->props,

@@ -391,7 +391,7 @@ sub handle_edit {
         my $item = {
             'itemid'     => $olditem->{'itemid'},
             'ditemid'    => $olditem->{'itemid'}*256 + $olditem->{'anum'},
-            'eventtime'  => LJ::alldatepart_s2($row->{'eventtime'}),
+            'eventtime'  => LJ::TimeUtil->alldatepart_s2($row->{'eventtime'}),
             'createtime' => $ctime,
             'modtime'    => $olditem->{'props'}->{'revtime'} || $ctime,
             'subject'    => $olditem->{'subject'},
