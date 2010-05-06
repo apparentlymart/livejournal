@@ -163,7 +163,7 @@ sub mysql_time {
 sub alldatepart_s1 {
     my ($class, $time) = @_;
     my ($sec,$min,$hour,$mday,$mon,$year,$wday) =
-        gmtime(LJ::mysqldate_to_time($time, 1));
+        gmtime(LJ::TimeUtil->mysqldate_to_time($time, 1));
     my $ret = "";
 
     $ret .= LJ::Lang::day_short($wday+1) . " " .
@@ -196,7 +196,7 @@ sub alldatepart_s1 {
 sub alldatepart_s2 {
     my ($class, $time) = @_;
     my ($sec,$min,$hour,$mday,$mon,$year,$wday) =
-        gmtime(LJ::mysqldate_to_time($time, 1));
+        gmtime(LJ::TimeUtil->mysqldate_to_time($time, 1));
     return
         sprintf("%04d %02d %02d %02d %02d %02d %01d",
                 $year+1900,

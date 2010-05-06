@@ -11,6 +11,7 @@ use Class::Autouse qw(
 package LJ::Lang;
 #use LJ::ML;
 use constant MAXIMUM_ITCODE_LENGTH => 80;
+use LJ::TimeUtil;
 
 my @day_short   = (qw[Sun Mon Tue Wed Thu Fri Sat]);
 my @day_long    = (qw[Sunday Monday Tuesday Wednesday Thursday Friday Saturday]);
@@ -267,7 +268,7 @@ sub get_chgtime_unix
     my $chgtime = $dbr->selectrow_array("SELECT chgtime FROM ml_latest WHERE dmid=? AND itid=? AND lnid=?",
                                         undef, $dmid, $itid, $lnid);
     die $dbr->errstr if $dbr->err;
-    return $chgtime ? LJ::mysqldate_to_time($chgtime) : 0;
+    return $chgtime ? LJ::TimeUtil->mysqldate_to_time($chgtime) : 0;
 }
 
 sub get_itemid

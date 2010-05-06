@@ -11,6 +11,7 @@ use Digest::MD5 qw(md5_hex);
 
 use lib "$ENV{LJHOME}/cgi-bin";
 require "sysban.pl";
+use LJ::TimeUtil;
 
 # Constants
 my $SECONDS_IN_DAY  = 3600 * 24;
@@ -947,8 +948,8 @@ sub get_support_by_daterange {
     my ($date1, $date2) = @_;
 
     # Build the query out based on the dates specified
-    my $time1 = LJ::mysqldate_to_time($date1);
-    my $time2 = LJ::mysqldate_to_time($date2) + $SECONDS_IN_DAY;
+    my $time1 = LJ::TimeUtil->mysqldate_to_time($date1);
+    my $time2 = LJ::TimeUtil->mysqldate_to_time($date2) + $SECONDS_IN_DAY;
 
     # Convert from times to IDs because support.timecreate isn't indexed
     my ($start_id, $end_id) = LJ::DB::time_range_to_ids
@@ -1060,8 +1061,8 @@ sub get_touch_supportlogs_by_user_and_date {
     my ($userid, $date1, $date2) = @_;
 
     # Build the query out based on the dates specified
-    my $time1 = LJ::mysqldate_to_time($date1);
-    my $time2 = LJ::mysqldate_to_time($date2) + $SECONDS_IN_DAY;
+    my $time1 = LJ::TimeUtil->mysqldate_to_time($date1);
+    my $time2 = LJ::TimeUtil->mysqldate_to_time($date2) + $SECONDS_IN_DAY;
 
     # Convert from times to IDs because supportlog.timelogged isn't indexed
     my ($start_id, $end_id) = LJ::DB::time_range_to_ids

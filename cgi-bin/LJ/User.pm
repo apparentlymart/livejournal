@@ -25,6 +25,7 @@ use LJ::RateLimit qw//;
 use URI qw//;
 use LJ::JSON;
 use HTTP::Date qw(str2time);
+use LJ::TimeUtil;
 
 use Class::Autouse qw(
                       URI
@@ -1890,7 +1891,7 @@ sub set_next_birthday {
     }
 
     my $as_unix = sub {
-        return LJ::mysqldate_to_time(sprintf("%04d-%02d-%02d", @_));
+        return LJ::TimeUtil->mysqldate_to_time(sprintf("%04d-%02d-%02d", @_));
     };
 
     my $curyear = (gmtime(time))[5]+1900;
@@ -3658,7 +3659,7 @@ sub timecreate {
     my $dbr = LJ::get_db_reader() or die "No db";
     my $when = $dbr->selectrow_array("SELECT timecreate FROM userusage WHERE userid=?", undef, $u->id);
 
-    $timecreate = LJ::mysqldate_to_time($when);
+    $timecreate = LJ::TimeUtil->mysqldate_to_time($when);
     $u->{_cache_timecreate} = $timecreate;
     LJ::MemCache::set($memkey, $timecreate, 60*60*24);
 
@@ -3963,7 +3964,7 @@ sub statusvisdate {
 
 sub statusvisdate_unix {
     my $u = shift;
-    return LJ::mysqldate_to_time($u->{statusvisdate});
+    return LJ::TimeUtil->mysqldate_to_time($u->{statusvisdate});
 }
 
 # returns list of all previous statuses of the journal
@@ -6828,7 +6829,9 @@ sub set_alias {
     }
     
     ## save data back
+    warn LJ::D($remote->{_aliases});
     my $serialized_text = LJ::JSON->to_json($remote->{_aliases});
+    warn $serialized_text;
     if (length $serialized_text < 65536) {
         return $remote->set_prop( aliases => $serialized_text );
     } else {
@@ -7159,7 +7162,7 @@ sub get_timezone {
             ORDER BY rlogtime LIMIT 1
         }, undef, $u->{userid}, $LJ::EndOfTime)) {
         my $logtime = $LJ::EndOfTime - $last_row->{'rlogtime'};
-        my $eventtime = LJ::mysqldate_to_time($last_row->{'eventtime'}, 1);
+        my $eventtime = LJ::TimeUtil->mysqldate_to_time($last_row->{'eventtime'}, 1);
         my $hourdiff = ($eventtime - $logtime) / 3600;
 
         # if they're up to a quarter hour behind, round up.

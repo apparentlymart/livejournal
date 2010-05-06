@@ -3,6 +3,7 @@
 
 use strict;
 package LJ::S2;
+use LJ::TimeUtil;
 
 sub ReplyPage
 {
@@ -148,7 +149,7 @@ sub ReplyPage
             LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
         }
 
-        my $datetime = DateTime_unix(LJ::mysqldate_to_time($parpost->{'datepost'}));
+        my $datetime = DateTime_unix(LJ::TimeUtil->mysqldate_to_time($parpost->{'datepost'}));
 
         my ($s2poster, $pu);
         my $comment_userpic;

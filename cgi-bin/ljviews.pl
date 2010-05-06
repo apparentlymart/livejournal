@@ -1671,7 +1671,7 @@ sub create_view_friends
     }
 
     my $events_date   = ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!)
-                        ? LJ::mysqldate_to_time("$1-$2-$3")
+                        ? LJ::TimeUtil->mysqldate_to_time("$1-$2-$3")
                         : 0;
 
     ## load the itemids

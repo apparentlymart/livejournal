@@ -8,6 +8,7 @@ package LJ::Entry;
 use strict;
 use vars qw/ $AUTOLOAD /;
 use Carp qw/ croak /;
+use LJ::TimeUtil;
 
 # internal fields:
 #
@@ -280,7 +281,7 @@ sub logtime_mysql {
 sub logtime_unix {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
-    return LJ::mysqldate_to_time($self->{logtime}, 1);
+    return LJ::TimeUtil->mysqldate_to_time($self->{logtime}, 1);
 }
 
 sub modtime_unix {
@@ -288,7 +289,7 @@ sub modtime_unix {
     __PACKAGE__->preload_rows ([ $self ]) unless $self->{_loaded_row};
     __PACKAGE__->preload_props([ $self ]) unless $self->{_loaded_props};
 
-    return LJ::mysqldate_to_time($self->{logtime}, 1);
+    return LJ::TimeUtil->mysqldate_to_time($self->{logtime}, 1);
 }
 
 sub security {
@@ -1620,8 +1621,8 @@ sub get_log2_row
     $sec = $item->{'allowmask'};
     $sec = 0 if $item->{'security'} eq 'private';
     $sec = 2**31 if $item->{'security'} eq 'public';
-    $eventtime = LJ::mysqldate_to_time($item->{'eventtime'}, 1);
-    $logtime = LJ::mysqldate_to_time($item->{'logtime'}, 1);
+    $eventtime = LJ::TimeUtil->mysqldate_to_time($item->{'eventtime'}, 1);
+    $logtime = LJ::TimeUtil->mysqldate_to_time($item->{'logtime'}, 1);
 
     # note: this cannot distinguish between security == private and security == usemask with allowmask == 0 (no groups)
     # both should have the same display behavior, but we don't store the security value in memcache
@@ -1792,7 +1793,7 @@ sub get_log2_recent_log
         $sec = 0 if $item->{'security'} eq 'private';
         $sec = 2**31 if $item->{'security'} eq 'public';
         $ditemid = $item->{'jitemid'}*256 + $item->{'anum'};
-        $eventtime = LJ::mysqldate_to_time($item->{'eventtime'}, 1);
+        $eventtime = LJ::TimeUtil->mysqldate_to_time($item->{'eventtime'}, 1);
 
         $rows .= pack("NNNNN",
                       $item->{'posterid'},

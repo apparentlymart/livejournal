@@ -1993,8 +1993,8 @@ sub editevent
         $sec = 2**31 if $security eq 'public';
 
         my $row = pack("NNNNN", $oldevent->{'posterid'},
-                       LJ::mysqldate_to_time($eventtime, 1),
-                       LJ::mysqldate_to_time($oldevent->{'logtime'}, 1),
+                       LJ::TimeUtil->mysqldate_to_time($eventtime, 1),
+                       LJ::TimeUtil->mysqldate_to_time($oldevent->{'logtime'}, 1),
                        $sec,
                        $itemid*256 + $oldevent->{'anum'});
 

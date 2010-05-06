@@ -16,6 +16,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 
 require "htmlcontrols.pl";
 require "talklib.pl";
+use LJ::TimeUtil;
 
 use Encode();
 
@@ -406,7 +407,7 @@ sub valid {
 sub unixtime {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return LJ::mysqldate_to_time($self->{datepost}, 0);
+    return LJ::TimeUtil->mysqldate_to_time($self->{datepost}, 0);
 }
 
 # returns LJ::User object for the poster of this entry, or undef for anonymous

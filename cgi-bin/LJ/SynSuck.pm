@@ -308,7 +308,7 @@ sub process_content {
 
         # just bail on entries older than two weeks instead of reposting them
         if ($own_time) {
-            my $age = time() - LJ::mysqldate_to_time($it->{'time'});
+            my $age = time() - LJ::TimeUtil->mysqldate_to_time($it->{'time'});
             next if $age > $secs; # $secs is defined waaaaaaaay above
         }
 

@@ -88,7 +88,7 @@ sub FriendsPage
     my $group_name    = '';
     my $common_filter = 1;
     my $events_date   = ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!)
-                        ? LJ::mysqldate_to_time("$1-$2-$3")
+                        ? LJ::TimeUtil->mysqldate_to_time("$1-$2-$3")
                         : 0;
 
     if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {
