@@ -36,6 +36,11 @@ sub can_load {
     return !$@;
 }
 
+sub new {
+    my ($class) = @_;
+    return $class->SUPER::new->latin1;
+}
+
 1;
 
 package LJ::JSON::JSONv2;
@@ -45,6 +50,11 @@ BEGIN { @ISA = qw(JSON); }
 sub can_load {
     eval { require JSON };
     return !$@ && $JSON::VERSION ge 2;
+}
+
+sub new {
+    my ($class) = @_;
+    return $class->SUPER::new->latin1;
 }
 
 1;
