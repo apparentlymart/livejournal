@@ -13,6 +13,8 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw(%GET %POST);
 
     LJ::need_res( qw( stc/interests.css ) );
@@ -474,7 +476,7 @@ body<=
                 $list .= " <small class='lastupdated'>(";
                 if ($updated->{$_->id} > 0) {
                     $list .= "Updated ";
-                    $list .= LJ::ago_text(time() - $updated->{$_->id});
+                    $list .= LJ::TimeUtil->ago_text(time() - $updated->{$_->id});
                 } else {
                     $list .= "Never updated";
                 }

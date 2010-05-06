@@ -525,7 +525,7 @@ body<=
     }
 
     my $timecreate = LJ::TimeUtil->time_to_http($sp->{'timecreate'});
-    my $age = LJ::ago_text(time() - $sp->{'timecreate'});
+    my $age = LJ::TimeUtil->ago_text(time() - $sp->{'timecreate'});
     $ret .= "<tr><td align='right'><b>$ML{'.timeposted'}:</b></td><td>$timecreate ($age)</td></tr>\n";
     my $state = $sp->{'state'};
     if ($state eq "open") {
@@ -687,7 +687,7 @@ body<=
             $header .= "<b>$ML{'.tier'}</b> $tier_map{$display_tier}<br />";
         }
         my $timehelped = LJ::TimeUtil->time_to_http($le->{'timelogged'});
-        my $age = LJ::ago_text($le->{'age'});
+        my $age = LJ::TimeUtil->ago_text($le->{'age'});
         $header .= "<b>$ML{'.posted'}:</b> $timehelped ($age)";
         if ($can_close && $sp->{'state'} eq "open" && $le->{'type'} eq "answer") {
             $header .= ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'};$le->{'splid'}'><b>$ML{'.credit.fix'}</b></a>";

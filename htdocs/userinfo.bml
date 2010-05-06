@@ -620,7 +620,7 @@
 
     ## stats
     my $lastupdated = substr(LJ::TimeUtil->mysql_time($u->timeupdate), 0, 10);
-    my $ago_text = LJ::ago_text($u->{secondsold});
+    my $ago_text = LJ::TimeUtil->ago_text($u->{secondsold});
 
     my $search_link = "[<a href='$LJ::SITEROOT/tools/search.bml?journal=$user'>$ML{'.details.search'}</a>]"
         if LJ::is_enabled("offsite_journal_search") && $pm->has_journal;
