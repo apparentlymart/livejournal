@@ -19,6 +19,8 @@ use Class::Autouse qw(
                       LJ::RateLimit
                       );
 
+use LJ::TimeUtil;
+
 LJ::Config->load;
 
 use lib "$ENV{LJHOME}/cgi-bin";
@@ -984,7 +986,7 @@ sub common_event_validation
         return fail($err,203,"Invalid month value.");
     }
     if ($req->{'day'} !~ /^\d{1,2}$/ || $req->{'day'} < 1 ||
-        $req->{'day'} > LJ::days_in_month($req->{'mon'},
+        $req->{'day'} > LJ::TimeUtil->days_in_month($req->{'mon'},
                                           $req->{'year'}))
     {
         return fail($err,203,"Invalid day of month value.");

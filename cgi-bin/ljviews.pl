@@ -10,6 +10,7 @@ package LJ::S1;
 
 use vars qw(@themecoltypes);
 use Class::Autouse qw(LJ::LastFM);
+use LJ::TimeUtil;
 
 # this used to be in a table, but that was kinda useless
 @themecoltypes = (
@@ -2180,7 +2181,7 @@ sub create_view_calendar
 
         # calculate day of week
         my $time = eval { Time::Local::timegm(0, 0, 0, $day, $month-1, $year) } ||
-            eval { Time::Local::timegm(0, 0, 0, LJ::days_in_month($month, $year), $month-1, $year) } ||
+            eval { Time::Local::timegm(0, 0, 0, LJ::TimeUtil->days_in_month($month, $year), $month-1, $year) } ||
             0;
         next unless $time;
 
@@ -2239,7 +2240,7 @@ sub create_view_calendar
         if ($vars->{'CALENDAR_SORT_MODE'} eq "forward") { @months = reverse @months; }
         foreach my $month (@months)
         {
-          my $daysinmonth = LJ::days_in_month($month, $year);
+          my $daysinmonth = LJ::TimeUtil->days_in_month($month, $year);
 
           # this picks a random day there were journal entries (thus, we know
           # the %dayweek from above)  from that we go backwards and forwards
@@ -2428,7 +2429,7 @@ sub create_view_day
     if ($month < 1 || $month > 12 || int($month) != $month) { push @errors, "Invalid month."; }
     if ($year < 1970 || $year > 2038 || int($year) != $year) { push @errors, "Invalid year: $year"; }
     if ($day < 1 || $day > 31 || int($day) != $day) { push @errors, "Invalid day."; }
-    if (scalar(@errors)==0 && $day > LJ::days_in_month($month, $year)) { push @errors, "That month doesn't have that many days."; }
+    if (scalar(@errors)==0 && $day > LJ::TimeUtil->days_in_month($month, $year)) { push @errors, "That month doesn't have that many days."; }
 
     if (@errors) {
         $$ret .= "Errors occurred processing this page:\n<ul>\n";

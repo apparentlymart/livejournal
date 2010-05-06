@@ -4,6 +4,8 @@
 use strict;
 package LJ::S2;
 
+use LJ::TimeUtil;
+
 sub DayPage
 {
     my ($u, $remote, $opts) = @_;
@@ -38,7 +40,7 @@ sub DayPage
     if ($month < 1 || $month > 12 || int($month) != $month) { push @{$opts->{'errors'}}, "Invalid month."; }
     if ($year < 1970 || $year > 2038 || int($year) != $year) { push @{$opts->{'errors'}}, "Invalid year: $year"; }
     if ($day < 1 || $day > 31 || int($day) != $day) { push @{$opts->{'errors'}}, "Invalid day."; }
-    if (scalar(@{$opts->{'errors'}})==0 && $day > LJ::days_in_month($month, $year)) { push @{$opts->{'errors'}}, "That month doesn't have that many days."; }
+    if (scalar(@{$opts->{'errors'}})==0 && $day > LJ::TimeUtil->days_in_month($month, $year)) { push @{$opts->{'errors'}}, "That month doesn't have that many days."; }
     return if @{$opts->{'errors'}};
 
     $p->{'date'} = Date($year, $month, $day);

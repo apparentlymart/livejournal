@@ -2,7 +2,7 @@ package LJ::TimeUtil;
 use strict;
 
 # <LJFUNC>
-# name: LJ::days_in_month
+# name: LJ::TimeUtil->days_in_month
 # class: time
 # des: Figures out the number of days in a month.
 # args: month, year?
@@ -70,7 +70,7 @@ sub mysqldate_to_time {
     return $ret unless $@;
 
     # then fix the day up, if so.
-    my $max_day = LJ::days_in_month($mon, $y);
+    my $max_day = LJ::TimeUtil->days_in_month($mon, $y);
     $d = $max_day if $d > $max_day;
     return $calc->();
 }

@@ -4,6 +4,8 @@
 use strict;
 package LJ::S2;
 
+use LJ::TimeUtil;
+
 sub MonthPage
 {
     my ($u, $remote, $opts) = @_;
@@ -169,7 +171,7 @@ sub MonthPage
         push @{$day_entries{$day}}, $entry;
     }
 
-    my $days_month = LJ::days_in_month($month, $year);
+    my $days_month = LJ::TimeUtil->days_in_month($month, $year);
     for my $day (1..$days_month) {
         my $entries = $day_entries{$day} || [];
         my $month_day = {

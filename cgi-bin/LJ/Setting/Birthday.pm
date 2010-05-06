@@ -3,6 +3,8 @@ use base 'LJ::Setting';
 use strict;
 use warnings;
 
+use LJ::TimeUtil;
+
 sub tags { qw(birthday birthdate dob) }
 
 sub as_html {
@@ -59,7 +61,7 @@ sub error_check {
         $err_count++;
     }
 
-    if ($err_count == 0 && $day > LJ::days_in_month($month, $year)) {
+    if ($err_count == 0 && $day > LJ::TimeUtil->days_in_month($month, $year)) {
         $class->errors("day" => LJ::Lang::ml('.error.day.notinmonth'));
     }
 

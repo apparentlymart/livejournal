@@ -56,6 +56,8 @@ use Class::Autouse qw(
                       LJ::Vertical
                       );
 
+use LJ::TimeUtil;
+
 # make Unicode::MapUTF8 autoload:
 sub Unicode::MapUTF8::AUTOLOAD {
     die "Unknown subroutine $Unicode::MapUTF8::AUTOLOAD"
@@ -1123,7 +1125,7 @@ sub get_recent_items
             if ($month < 1 || $month > 12 || int($month) != $month) { $$err = "Invalid month." ; return (); }
             if ($year < 1970 || $year > 2038 || int($year) != $year) { $$err = "Invalid year: $year"; return (); }
             if ($day < 1 || $day > 31 || int($day) != $day) { $$err = "Invalid day."; return (); }
-            if ($day > LJ::days_in_month($month, $year)) { $$err = "That month doesn't have that many days."; return (); }
+            if ($day > LJ::TimeUtil->days_in_month($month, $year)) { $$err = "That month doesn't have that many days."; return (); }
         } else {
             $$err = "wrong date: " . $opts->{'ymd'};
             return ();
