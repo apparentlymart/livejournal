@@ -16,14 +16,8 @@ sub render_body {
     $ret .= "<div class='b-search-journals'>";
     $ret .= "<form action='$LJ::SITEROOT/search/' method='get'><fieldset><div class='search-item search-query'><table><tbody><tr>";
     $ret .= "<td width='60%'><label for='SearchText'></label><input type='search' value='' size='12' class='type-text' name='q' id='SearchText' /></td>";
-    $ret .= "<td  width='30%'><select name='area'>
-                <option value='default'><?_ml /search/index.bml.ysearch.findall _ml?></option>
-                <option value='posts'><?_ml /search/index.bml.yseach.findposts _ml?></option>
-                <option value='comments'><?_ml /search/index.bml.ysearch.findcomments _ml?></option>
-                <option value='journals' selected='1'><?_ml /search/index.bml.ysearch.findusers _ml?></option>
-                <option value='faq'><?_ml /search/index.bml.ysearch.faq _ml?></option>
-            </select></td>";
-    $ret .= "<td  width='10%'><button type='submit'>" . BML::ml('horizon.search.submit') . "</button></td></tr></table></div></fieldset></form>";
+    $ret .= "<input type='hidden' name='area' value='default'>";
+    $ret .= "<td width='10%'><button type='submit'>" . BML::ml('horizon.search.submit') . "</button></td></tr></table></div></fieldset></form>";
 
     my $words;
     if ($opts{substitude_words}) {
@@ -34,7 +28,7 @@ sub render_body {
     }
     my @keywords = split /\s*\n+\s*/, $words;
     $ret .= "<ul class=i-cloud>";
-    $ret .= join ' ', map { "<li><h3><a href='$LJ::SITEROOT/search/?q=" . LJ::eurl($_) . "&area=journals'>" . LJ::ehtml($_) . "</a></li></h3>" } @keywords;
+    $ret .= join ' ', map { "<li><h3><a href='$LJ::SITEROOT/search/?q=" . LJ::eurl($_) . "&area=default'>" . LJ::ehtml($_) . "</a></li></h3>" } @keywords;
     $ret .= "</ul>";
     $ret .= "</div>";
 
