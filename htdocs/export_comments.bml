@@ -132,7 +132,7 @@
 
             # setup the date to be GMT and formatted per W3C specs
             my $date = LJ::TimeUtil->mysqldate_to_time($data->{datepost});
-            $date = LJ::time_to_w3c($date, 'Z');
+            $date = LJ::TimeUtil->time_to_w3c($date, 'Z');
 
             # print the data
             my $ret = "<comment id='$id' jitemid='$data->{nodeid}'";
