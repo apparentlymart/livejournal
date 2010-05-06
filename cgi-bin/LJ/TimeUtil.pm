@@ -225,7 +225,7 @@ sub statushistory_time {
 
 # <LJFUNC>
 # class: time
-# name: LJ::ago_text
+# name: LJ::TimeUtil->ago_text
 # des: Converts integer seconds to English time span
 # info: Turns a number of seconds into the largest possible unit of
 #       time. "2 weeks", "4 days", or "20 hours".

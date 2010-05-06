@@ -1,6 +1,7 @@
 package LJ::Portal::Box::Notifications; # <--- Change this
 use base 'LJ::Portal::Box';
 use strict;
+use LJ::TimeUtil;
 
 ######################## override this stuff ######################
 
@@ -83,7 +84,7 @@ sub generate_content {
         next if $item->when_unixtime < $cutoff_date;
 
         my $timeago = $item->when_unixtime ?
-            LJ::ago_text(time() - $item->when_unixtime) :
+            LJ::TimeUtil->ago_text(time() - $item->when_unixtime) :
             "(?)";
 
         my $rowmod = $noticecount % 2 + 1;

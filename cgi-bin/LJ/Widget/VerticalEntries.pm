@@ -5,6 +5,7 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::Vertical );
 use LJ::Request;
+use LJ::TimeUtil;
 
 sub need_res { qw( stc/widgets/verticalentries.css ) }
 
@@ -138,7 +139,7 @@ sub print_entry {
 
     # post time and comments link
     my $secondsago = time() - $entry->logtime_unix;
-    my $posttime = LJ::ago_text($secondsago);
+    my $posttime = LJ::TimeUtil->ago_text($secondsago);
     $ret .= "<p class='posttime'>" . $class->ml('widget.verticalentries.posttime', { posttime => $posttime });
     if ($entry->reply_count) {
         $ret .= " | <a href='" . $entry->url . "'>";
@@ -209,7 +210,7 @@ sub print_collapsed_entry {
 
     # post time and comments link
     my $secondsago = time() - $entry->logtime_unix;
-    my $posttime = LJ::ago_text($secondsago);
+    my $posttime = LJ::TimeUtil->ago_text($secondsago);
     $ret .= "<p class='collapsed-posttime'>" . $class->ml('widget.verticalentries.posttime', { posttime => $posttime });
     if ($entry->reply_count) {
         $ret .= " | <a href='" . $entry->url . "'>";

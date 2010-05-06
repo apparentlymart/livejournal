@@ -3,6 +3,7 @@ package LJ::Widget::InboxFolder;
 use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
+use LJ::TimeUtil;
 
 # DO NOT COPY
 # This widget is not a good example of how to use JS and AJAX.
@@ -138,7 +139,7 @@ sub render_body {
             : "off";
         $bookmark = "<a href='$LJ::SITEROOT/inbox/?page=$page&bookmark_$bookmark=$qid'><img src='$LJ::IMGPREFIX/flag_$bookmark.gif' width='16' height='18' class='InboxItem_Bookmark' border='0' /></a>";
 
-        my $when = LJ::ago_text(time() - $inbox_item->when_unixtime);
+        my $when = LJ::TimeUtil->ago_text(time() - $inbox_item->when_unixtime);
         my $contents = $inbox_item->as_html || '';
 
         my $row_class = ($rownum++ % 2 == 0) ? "InboxItem_Meta" : "InboxItem_Meta alt";

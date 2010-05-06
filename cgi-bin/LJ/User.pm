@@ -9629,7 +9629,7 @@ sub user_search_display {
 
         if ($updated->{$u->{'userid'}} > 0) {
             $ret .= "Updated ";
-            $ret .= LJ::ago_text(time() - $updated->{$u->{'userid'}});
+            $ret .= LJ::TimeUtil->ago_text(time() - $updated->{$u->{'userid'}});
         } else {
             $ret .= "Never updated";
         }
