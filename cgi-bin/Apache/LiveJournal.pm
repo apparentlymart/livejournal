@@ -37,6 +37,8 @@ use Class::Autouse qw(
                       LJ::URI
                       );
 
+use LJ::TimeUtil;
+
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
 
@@ -1092,7 +1094,7 @@ sub userpic_content
         LJ::Request->content_type($mime);
         LJ::Request->header_out("Content-length", $size+0);
         LJ::Request->header_out("Cache-Control", "no-transform");
-        LJ::Request->header_out("Last-Modified", LJ::time_to_http($lastmod));
+        LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http($lastmod));
         LJ::Request->send_http_header();
     };
 
@@ -1280,7 +1282,7 @@ sub files_handler {
             LJ::Request->content_type ($result->{mime_type});
             LJ::Request->header_out("Content-length", $size);
             LJ::Request->header_out("Cache-Control", "no-transform");
-            LJ::Request->header_out("Last-Modified", LJ::time_to_http ($result->{change_time}));
+            LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http ($result->{change_time}));
             LJ::Request->send_http_header();
         };
         $send_headers->();

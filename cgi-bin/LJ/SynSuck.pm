@@ -69,7 +69,7 @@ sub get_content {
     print "[$$] Synsuck: $user ($synurl)\n" if $verbose;
 
     my $req = HTTP::Request->new("GET", $synurl);
-    $req->header('If-Modified-Since', LJ::time_to_http($lastmod))
+    $req->header('If-Modified-Since', LJ::TimeUtil->time_to_http($lastmod))
         if $lastmod;
     $req->header('If-None-Match', $etag)
         if $etag;

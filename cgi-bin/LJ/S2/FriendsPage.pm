@@ -56,7 +56,7 @@ sub FriendsPage
             return 1;
         }
     }
-    $opts->{'headers'}->{'Last-Modified'} = LJ::time_to_http($lastmod);
+    $opts->{'headers'}->{'Last-Modified'} = LJ::TimeUtil->time_to_http($lastmod);
 
     my $get = $opts->{'getargs'};
 

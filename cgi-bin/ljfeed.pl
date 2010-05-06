@@ -6,6 +6,7 @@ no warnings 'uninitialized';
 
 use LJ::Entry;
 use LJ::Request;
+use LJ::TimeUtil;
 use XML::Atom::Person;
 use XML::Atom::Feed;
 
@@ -52,7 +53,7 @@ sub make_feed
         link      => LJ::journal_base($u) . "/",
         title     => $u->{journaltitle} || $u->{name} || $u->{user},
         subtitle  => $u->{journalsubtitle} || $u->{name},
-        builddate => LJ::time_to_http(time()),
+        builddate => LJ::TimeUtil->time_to_http(time()),
     };
 
     # if we do not want items for this view, just call out
@@ -274,7 +275,7 @@ sub make_feed
     }
 
     # fix up the build date to use entry-time
-    $journalinfo->{'builddate'} = LJ::time_to_http($LJ::EndOfTime - $items[0]->{'rlogtime'}),
+    $journalinfo->{'builddate'} = LJ::TimeUtil->time_to_http($LJ::EndOfTime - $items[0]->{'rlogtime'}),
 
     return $viewfunc->{handler}->($journalinfo, $u, $opts, \@cleanitems, \@entries);
 }
@@ -345,7 +346,7 @@ sub create_view_rss
 
         $ret .= "<item>\n";
         $ret .= "  <guid isPermaLink='true'>$journalinfo->{link}$ditemid.html</guid>\n";
-        $ret .= "  <pubDate>" . LJ::time_to_http($it->{createtime}) . "</pubDate>\n";
+        $ret .= "  <pubDate>" . LJ::TimeUtil->time_to_http($it->{createtime}) . "</pubDate>\n";
         $ret .= "  <title>" . LJ::exml($it->{subject}) . "</title>\n" if $it->{subject};
         $ret .= "  <author>" . LJ::exml($journalinfo->{email}) . "</author>" if $journalinfo->{email};
         $ret .= "  <link>$journalinfo->{link}$ditemid.html</link>\n";
@@ -1057,7 +1058,7 @@ sub create_view_comments
         
         $ret .= "<item>\n";
         $ret .= "  <guid isPermaLink='true'>$thread_url</guid>\n";
-        $ret .= "  <pubDate>" . LJ::time_to_http($r->{datepostunix}) . "</pubDate>\n";
+        $ret .= "  <pubDate>" . LJ::TimeUtil->time_to_http($r->{datepostunix}) . "</pubDate>\n";
         $ret .= "  <title>" . LJ::exml($subject) . "</title>\n" if $subject;
         $ret .= "  <link>$thread_url</link>\n";
         # omit the description tag if we're only syndicating titles
