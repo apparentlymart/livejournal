@@ -1361,7 +1361,7 @@ sub journal_content
         # reset all cookies
         foreach my $dom (@LJ::COOKIE_DOMAIN_RESET) {
             my $cookiestr = 'ljsession=';
-            $cookiestr .= '; expires=' . LJ::time_to_cookie(1);
+            $cookiestr .= '; expires=' . LJ::TimeUtil->time_to_cookie(1);
             $cookiestr .= $dom ? "; domain=$dom" : '';
             $cookiestr .= '; path=/; HttpOnly';
             LJ::Request->request->err_headers_out->add('Set-Cookie' => $cookiestr);

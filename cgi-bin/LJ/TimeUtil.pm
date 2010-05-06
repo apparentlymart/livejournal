@@ -91,7 +91,7 @@ sub time_to_http {
 }
 
 # <LJFUNC>
-# name: LJ::time_to_cookie
+# name: LJ::TimeUtil->time_to_cookie
 # des: Converts Unix time to format expected in a Set-Cookie header.
 # args: time
 # des-time: unix time

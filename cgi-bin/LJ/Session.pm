@@ -6,6 +6,7 @@ use LJ::Request;
 use Class::Autouse qw(
                       LJ::EventLogRecord::SessionExpired
                       );
+use LJ::TimeUtil;
 
 use constant VERSION => 1;
 
@@ -867,7 +868,7 @@ sub set_cookie {
     }
 
     my $cookiestr = $key . '=' . $value;
-    $cookiestr .= '; expires=' . LJ::time_to_cookie($expires) if $expires;
+    $cookiestr .= '; expires=' . LJ::TimeUtil->time_to_cookie($expires) if $expires;
     $cookiestr .= '; domain=' . $domain if $domain;
     $cookiestr .= '; path=' . $path if $path;
     $cookiestr .= '; HttpOnly' if $http_only;
@@ -878,7 +879,7 @@ sub set_cookie {
     my @labels = split(/\./, $domain);
     if ($domain && scalar @labels == 2 && ! $LJ::DEBUG{'no_extra_dot_cookie'}) {
         my $cookiestr = $key . '=' . $value;
-        $cookiestr .= '; expires=' . LJ::time_to_cookie($expires) if $expires;
+        $cookiestr .= '; expires=' . LJ::TimeUtil->time_to_cookie($expires) if $expires;
         $cookiestr .= '; domain=.' . $domain;
         $cookiestr .= '; path=' . $path if $path;
         $cookiestr .= '; HttpOnly' if $http_only;
