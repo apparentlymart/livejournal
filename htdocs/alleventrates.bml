@@ -7,20 +7,20 @@ body<=
     use vars qw(%GET);
 
     my $action = $GET{action};
-    my ($journal, $jitemid) = map { $GET{$_} } qw(journal jitemid);
+    my ($journal, $itemid) = map { $GET{$_} } qw(journal itemid);
     my $journal_user = LJ::load_user($journal);
     my $journalid = 0;
     $journalid = $journal_user->userid() if $journal_user;
 
-    return '<h2>Missing args</h2>' unless $journalid && $jitemid;
+    return '<h2>Missing args</h2>' unless $journalid && $itemid;
 
-    my $total = LJ::get_eventratescounters($journalid, $jitemid);
+    my $total = LJ::get_eventratescounters($journalid, $itemid);
 
     return "<h2>There is no one like this page yet</h2>" unless $total;
 
     my @result = LJ::get_eventrates(
         journalid   => $journalid,
-        jitemid     => $jitemid,
+        itemid      => $itemid,
     );
 
     return
