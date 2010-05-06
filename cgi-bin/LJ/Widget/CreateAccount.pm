@@ -4,6 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::CreatePage Captcha::reCAPTCHA );
+use LJ::TimeUtil;
 
 sub need_res { qw( stc/widgets/createaccount.css js/widgets/createaccount.js js/browserdetect.js ) }
 
@@ -470,7 +471,7 @@ sub handle_post {
 
         # require dates in the 1900s (or beyond)
         if ($year && $mon && $day && $year >= 1900 && $year < $nyear) {
-            my $age = LJ::calc_age($year, $mon, $day);
+            my $age = LJ::TimeUtil->calc_age($year, $mon, $day);
             $is_underage = 1 if $age < 13;
             $ofage = 1 if $age >= 13;
         } else {

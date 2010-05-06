@@ -1769,7 +1769,7 @@ sub age {
     return unless length $bdate;
 
     my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
-    my $age = LJ::calc_age($year, $mon, $day);
+    my $age = LJ::TimeUtil->calc_age($year, $mon, $day);
     return $age if $age > 0;
     return;
 }
@@ -1791,7 +1791,7 @@ sub init_age {
     return unless $init_bdate;
 
     my ($year, $mon, $day) = $init_bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
-    my $age = LJ::calc_age($year, $mon, $day);
+    my $age = LJ::TimeUtil->calc_age($year, $mon, $day);
     return $age if $age > 0;
     return;
 }
