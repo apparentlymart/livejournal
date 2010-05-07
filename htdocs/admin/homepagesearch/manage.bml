@@ -12,7 +12,7 @@
 
     $body = '';
 
-    $body .= '<form method="POST">';
+    $body .= '<form method="POST"><div style="float:left;margin:0 0 0.75em;">';
 
     my $system = LJ::load_user('system') or die "No 'system' user in DB";
     my $stored_words = $system->prop('search_admin');
@@ -29,7 +29,7 @@
                                  disabled => ($POST{edit} || $POST{preview}) ? 0 : 1 });
 
     # preview
-    $body .= '<div style="float:right;width:650px;">';
+    $body .= '</div><div style="float:right;width:650px;">';
     $body .= LJ::Widget::SearchJournals->render(substitude_words => $words);
     $body .= '</div><p style="clear:both;">';
 
@@ -39,7 +39,7 @@
     } else {
         $body .= '<input type="submit" name="edit" value="Edit search words">';
     }
-    $body .= '</p><p><input type="submit" name="submit" value="Save search words"></p>';
+    $body .= '</p><p><input type="submit" name="submit" value="Save search words"></p></form>';
     
 
     return;
