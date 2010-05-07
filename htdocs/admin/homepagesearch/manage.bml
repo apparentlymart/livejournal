@@ -12,7 +12,7 @@
 
     $body = '';
 
-    $body .= '<form method="POST"><div style="float:left;margin:0 0 0.75em;">';
+    $body .= '<div style="float:left;"><form method="POST" action="">';
 
     my $system = LJ::load_user('system') or die "No 'system' user in DB";
     my $stored_words = $system->prop('search_admin');
@@ -28,18 +28,18 @@
     $body .= LJ::html_textarea({ name => 'words', rows => 20, cols => 50, value => $words, 
                                  disabled => ($POST{edit} || $POST{preview}) ? 0 : 1 });
 
+    $body .= '<p>';
+    $body .= '<button type="submit" name="preview" value="preview">Preview widget</button> ' if $POST{edit};
+    if ($POST{edit}) {
+        $body .= '<button type="reset" name="cancel">Cancel editing</button>';
+    } else {
+        $body .= '<button type="submit" name="edit" value="edit">Edit search words</button>';
+    }
+    $body .= '</p><p><button type="submit" name="save" value="save">Save search words</button></p></form>';
     # preview
     $body .= '</div><div style="float:right;width:650px;">';
     $body .= LJ::Widget::SearchJournals->render(substitude_words => $words);
-    $body .= '</div><p style="clear:both;">';
-
-    $body .= '<input type="submit" name="preview" value="Preview widget"> ' if $POST{edit};
-    if ($POST{edit}) {
-        $body .= '<input type="reset" name="cancel" value="Cancel editing">';
-    } else {
-        $body .= '<input type="submit" name="edit" value="Edit search words">';
-    }
-    $body .= '</p><p><input type="submit" name="submit" value="Save search words"></p></form>';
+    $body .= '</div>';
     
 
     return;
