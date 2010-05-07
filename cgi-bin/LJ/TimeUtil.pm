@@ -285,4 +285,55 @@ sub calc_age {
     return $age;
 }
 
+=head2 fancy_time_format
+
+Format a UNIX timestamp so that it can be displayed to the user, taking care
+of i18n.
+
+ my $timestamp = 1273215570;
+ 
+ print LJ::TimeUtil->fancy_time_format($timestamp, 'day');
+    # => April 7 2010
+ 
+ print LJ::TimeUtil->fancy_time_format($timestamp, 'min');
+    # => April 7 2010, 10:59
+ 
+ print LJ::TimeUtil->fancy_time_format($timestamp, 'sec');
+    # or
+ print LJ::TimeUtil->fancy_time_format($timestamp);
+    # => April 7 2010, 10:59:30
+
+Related ML variables are: C<esn.month.day_*>.
+
+=cut
+
+sub fancy_time_format {
+    my ($class, $timestamp, $precision) = @_;
+    $precision ||= 'sec';
+
+    my ($sec, $min, $hour, $mday, $mon, $year) = gmtime($timestamp);
+
+    # gmtime has returned month and year in a weird format; let's convert
+    # these to something more convenient
+    # reference: perldoc localtime
+    $mon  += 1;
+    $year += 1900;
+
+    my $month_code = lc(LJ::Lang::month_short($mon));
+    my $day_month  = LJ::Lang::ml("esn.month.day_$month_code", {
+        'day' => $mday,
+    });
+
+    my $ret = "$day_month $year";
+    return $ret if $precision eq 'day';
+
+    $ret .= sprintf(', %02d:%02d', $hour, $min);
+    return $ret if $precision eq 'min';
+
+    $ret .= sprintf(':%02d', $sec);
+    return $ret if $precision eq 'sec';
+
+    die "unknown precision $precision";
+}
+
 1;
