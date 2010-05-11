@@ -35,7 +35,7 @@
     } else {
         $body .= '<button type="submit" name="edit" value="edit">Edit search words</button>';
     }
-    $body .= '</p><p><button type="submit" name="save" value="save">Save search words</button></p></form>';
+    $body .= '</p><p><button type="submit" name="submit" value="save">Save search words</button></p></form>';
     # preview
     $body .= '</div><div style="float:right;width:650px;">';
     $body .= LJ::Widget::SearchJournals->render(substitude_words => $words);
