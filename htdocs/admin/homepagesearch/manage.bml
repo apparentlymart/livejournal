@@ -31,7 +31,7 @@
     $body .= '<p>';
     $body .= '<button type="submit" name="preview" value="preview">Preview widget</button> ' if $POST{edit} or $POST{preview};
     if ($POST{edit} or $POST{preview}) {
-        $body .= '<button type="reset" name="cancel">Cancel editing</button>';
+        $body .= '<button type="submit" name="cancel">Cancel editing</button>';
     } else {
         $body .= '<button type="submit" name="edit" value="edit">Edit search words</button>';
     }
