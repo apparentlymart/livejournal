@@ -888,7 +888,9 @@ sub get_talk_data_do
     # load them from any server in cluster: master or slave
     my $dbcr = undef;
     my $comments_updated = $u->prop("comment_alter_time");
-    if ($LJ::USER_CLUSTER_MAX_SECONDS_BEHIND_MASTER
+    if (LJ::is_web_context()
+        and not LJ::did_post()
+        and $LJ::USER_CLUSTER_MAX_SECONDS_BEHIND_MASTER
         and $comments_updated
         and time() - $comments_updated > $LJ::USER_CLUSTER_MAX_SECONDS_BEHIND_MASTER
     ){
