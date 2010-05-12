@@ -204,7 +204,7 @@ body<=
 
     my $save_rv;
     my $submit_msg;
-    if (LJ::did_post()) {
+    if (LJ::did_post() && $given_cat ne 'notifications') {
         return LJ::bad_input($ML{'error.invalidform'})
             unless LJ::check_form_auth() || $given_cat eq 'notifications';
 
