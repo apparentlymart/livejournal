@@ -411,6 +411,15 @@ sub update_commentalter {
     LJ::set_logprop($u, $itemid, { 'commentalter' => time() });
 }
 
+sub update_journals_commentalter {
+    my $u = shift;
+
+    # journal data consists of two types: posts and comments.
+    # last post time is stored in 'userusage' table.
+    # last comment add/update/delete/whateverchange time - here:
+    $u->set_prop("comment_alter_time", time());
+}
+
 # <LJFUNC>
 # name: LJ::Talk::get_comments_in_thread
 # class: web
@@ -497,6 +506,7 @@ sub delete_thread {
     my $num = LJ::delete_comments($u, "L", $jitemid, @$ids);
     LJ::replycount_do($u, $jitemid, "decr", $num);
     LJ::Talk::update_commentalter($u, $jitemid);
+    LJ::Talk::update_journals_commentalter($u);
     return 1;
 }
 
@@ -528,6 +538,7 @@ sub delete_author {
     my $num = LJ::delete_comments($u, "L", $jitemid, @ids);
     LJ::replycount_do($u, $jitemid, "decr", $num);
     LJ::Talk::update_commentalter($u, $jitemid);
+    LJ::Talk::update_journals_commentalter($u);
     return 1;
 }
 
@@ -563,6 +574,7 @@ sub delete_comment {
     my $num = LJ::delete_comments($u, "L", $jitemid, $jtalkid);
     LJ::replycount_do($u, $jitemid, "decr", $num);
     LJ::Talk::update_commentalter($u, $jitemid);
+    LJ::Talk::update_journals_commentalter($u);
 
     # done
     return 1;
@@ -643,6 +655,9 @@ sub freeze_comments {
 
     # invalidate talk2row memcache props
     LJ::Talk::invalidate_talk2row_memcache($u->id, @$ids);
+    
+    # set time of comments modification in the journal
+    LJ::Talk::update_journals_commentalter($u);    
 
     return undef unless $res;
     return 1;
@@ -675,6 +690,8 @@ sub screen_comment {
     }
 
     LJ::Talk::update_commentalter($u, $itemid);
+    LJ::Talk::update_journals_commentalter($u);
+
     return;
 }
 
@@ -710,6 +727,8 @@ sub unscreen_comment {
     LJ::run_hooks('unscreen_comment', $userid, $itemid, $in);
 
     LJ::Talk::update_commentalter($u, $itemid);
+    LJ::Talk::update_journals_commentalter($u);
+
     return;
 }
 
@@ -864,7 +883,20 @@ sub get_talk_data_do
 
     return $memcache_decode->() if $memcache_good->();
 
-    my $dbcr = LJ::get_cluster_def_reader($u);
+    # get time of last modification of comments in this journal.
+    # if comments in journal were not updated for a some time, we could
+    # load them from any server in cluster: master or slave
+    my $dbcr = undef;
+    my $comments_updated = $u->prop("comment_alter_time");
+    if ($LJ::USER_CLUSTER_MAX_SECONDS_BEHIND_MASTER
+        and $comments_updated
+        and time() - $comments_updated > $LJ::USER_CLUSTER_MAX_SECONDS_BEHIND_MASTER
+    ){
+        # try to load comments from Slave
+        $dbcr = LJ::get_cluster_reader($u);
+    } else {
+        $dbcr = LJ::get_cluster_def_reader($u);
+    }
     return undef unless $dbcr;
 
     my $lock = $dbcr->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
@@ -2448,6 +2480,11 @@ sub enter_comment {
     # update the comment alter property
     LJ::Talk::update_commentalter($journalu, $itemid);
 
+    # journals data consists of two types of data: posts and comments.
+    # last post time is stored in 'userusage' table.
+    # last comment add/update/delete/whateverchange time - here:
+    LJ::Talk::update_journals_commentalter($journalu);
+
     # fire events
     unless ($LJ::DISABLED{esn}) {
         my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
@@ -2772,7 +2809,7 @@ sub init {
 
     if ($up) {
         if ($up->{'status'} eq "N" && $up->{'journaltype'} ne "I" && !LJ::run_hook("journal_allows_unvalidated_commenting", $journalu, $up)) {
-            $err->(BML::ml("$SC.error.noverify2", {'aopts' => "href='$LJ::SITEROOT/register.bml'"}));
+            $err->(LJ::Lang::ml("$SC.error.noverify2", {'aopts' => "href='$LJ::SITEROOT/register.bml'"}));
         }
         if ($up->{'statusvis'} eq "D") {
             $bmlerr->("$SC.error.deleted");
@@ -3122,6 +3159,12 @@ sub edit_comment {
 
     # the caller wants to know the comment's talkid.
     $comment->{talkid} = $comment_obj->jtalkid;
+
+
+    # journals data consists of two types of data: posts and comments.
+    # last post time is stored in 'userusage' table.
+    # last comment add/update/delete/whateverchange time - here:
+    LJ::Talk::update_journals_commentalter($comment_obj->journal);
 
     # cluster tracking
     LJ::mark_user_active($comment_obj->poster, 'comment');
