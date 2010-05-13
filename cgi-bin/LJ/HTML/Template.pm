@@ -10,6 +10,7 @@ sub new {
     my %common_params = (
         'lj_siteroot'   => $LJ::SITEROOT,
         'lj_statprefix' => $LJ::STATPREFIX,
+        'lj_imgprefix'  => $LJ::IMGPREFIX,
     );
 
     if ($opts->{'use_expr'}) {
@@ -37,7 +38,11 @@ sub new {
         HTML::Template::Pro->register_function(
             ljuser => sub {
                 my $username = shift;
-                return LJ::ljuser($username);
+
+                my %opts;
+                $opts{'imgroot'} = "$LJ::SSLROOT/img" if $LJ::IS_SSL;
+
+                return LJ::ljuser($username, \%opts);
             },
         );
 
