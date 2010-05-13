@@ -949,12 +949,13 @@ sub clean
                 my $button   = LJ::ehtml($opencount{$tag}->{button}) || LJ::Lang::ml("repost.default_button");
                 my $subject  = LJ::ehtml($opencount{$tag}->{subject});
                 my $captured = substr $newdata => $opencount{$tag}->{offset};
-                
+
                 if (my $entry = LJ::Entry->new_from_url($opts->{cuturl})){
                     # !!! avoid calling any 'text' methods on $entry, 
                     #     it can produce inifinite loop of cleanhtml calls.
 
-                    $subject ||= LJ::ehtml($entry->subject_orig || LJ::Lang::ml("repost.default_subject"));
+                    $subject ||= LJ::ehtml($entry->subject_raw || LJ::Lang::ml("repost.default_subject"));
+                    $subject  = Encode::decode_utf8($subject);
                     $captured = LJ::Lang::ml("repost.wrapper", { 
                                                 username => $entry->poster->username,
                                                 url      => $entry->url,
