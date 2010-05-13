@@ -2549,6 +2549,8 @@ gender.specify=Specify
 
 Help=Help
 
+i_like_this_title=Please click Track this if you want to receive all comments to this entry
+
 img.btn_del=Delete
 
 img.btn_down=Down
@@ -5791,6 +5793,8 @@ web.lj-replace.first_post.subject=Welcome to [[sitename]]
 web.postto.btn=Switch
 
 web.postto.label=Post to:
+
+we_like_this_title=View people who like it
 
 widget.addqotd.extratext|staleness=1
 widget.addqotd.extratext=Extra Text (optional):

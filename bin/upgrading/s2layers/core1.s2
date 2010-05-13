@@ -1771,6 +1771,19 @@ property Color theme_linkcolor {
 }
 set theme_linkcolor = "";
 
+### I like it
+property string text_we_like_this {
+    des="Hint for “View all” link";
+    noui = 1;
+}
+set text_we_like_this = "View people who like it";
+
+property string text_i_like_this {
+    des="Hint for “+1” link";
+    noui = 1;
+}
+set text_i_like_this = "Please click Track this if you want to receive all comments to this entry";
+
 ###[ global function implementations ]
 
 function prop_init ()

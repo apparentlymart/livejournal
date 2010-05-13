@@ -3764,11 +3764,21 @@ sub Entry__plain_subject
 }
 
 # 'I like it' button
-
 sub Entry__is_eventrate_enable
 {
     my ($ctx, $this) = @_;
-    return LJ::is_eventrate_enable($this->{'journal'}->{'_u'});
+
+    my $is_enabled = LJ::is_eventrate_enable($this->{'journal'}->{'_u'});
+    return 0 unless $is_enabled;
+
+    # Load ml-strings into properties
+    my $lang = $this->{'journal'}->{'_u'}->prop('browselang');
+    my $pr = $ctx->[S2::PROPS];
+    foreach my $prop (qw(i_like_this we_like_this)) {
+        $pr->{'text_'.$prop} = LJ::Lang::get_text($lang, $prop.'_title');
+    }
+
+    return 1;
 }
 
 sub Entry__get_eventratescounters
