@@ -16,7 +16,7 @@
     my $ret = "";
     my $info = "";
     if (@questions) {
-        $ret = LJ::Widget::QotD->qotd_display( questions => \@questions );
+        $ret = LJ::Widget::QotD->qotd_display( questions => \@questions, lang => $GET{uselang} );
         my ($month_short, $day, $num, $total) = LJ::QotD->question_info($questions[0], $u, $domain);
         $info = "$month_short, $day" . ($total > 1 ? "($num/$total)" : '');
     }
