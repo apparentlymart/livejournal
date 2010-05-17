@@ -12,6 +12,7 @@ sub new {
         'lj_statprefix' => $LJ::STATPREFIX,
         'lj_imgprefix'  => $LJ::IMGPREFIX,
         'lj_sitename'   => $LJ::SITENAMESHORT,
+        'lj_sslroot'    => $LJ::SSLROOT,
     );
 
     if ($opts->{'use_expr'}) {
