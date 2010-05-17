@@ -11,6 +11,7 @@ sub new {
         'lj_siteroot'   => $LJ::SITEROOT,
         'lj_statprefix' => $LJ::STATPREFIX,
         'lj_imgprefix'  => $LJ::IMGPREFIX,
+        'lj_sitename'   => $LJ::SITENAMESHORT,
     );
 
     if ($opts->{'use_expr'}) {
