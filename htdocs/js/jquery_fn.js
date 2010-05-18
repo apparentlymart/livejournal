@@ -54,3 +54,40 @@ jQuery.fn.hourglass = function(xhr)
 	
 	return hourglasses;
 }
+
+// not work for password
+jQuery.fn.placeholder = function()
+{
+	var check_focus = function()
+		{
+			if (this.value === this.getAttribute('placeholder')) {
+				jQuery(this)
+					.val('')
+					.removeClass('placeholder');
+			}
+		},
+		check_blur = function()
+		{
+			if (!this.value) {
+				jQuery(this)
+					.val(this.getAttribute('placeholder'))
+					.addClass('placeholder');
+			}
+		};
+	
+	this.each(function()
+	{
+		var $this = jQuery(this);
+		if ('placeholder' in this) {
+			return;
+		}
+		
+		$this.focus(check_focus).blur(check_blur);
+		
+		check_blur.apply(this);
+		jQuery(this.form).submit(function()
+		{
+			$this.hasClass('placeholder') && $this.removeClass('placeholder').val('');
+		});
+	});
+}
