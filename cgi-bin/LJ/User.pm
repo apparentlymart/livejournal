@@ -1973,6 +1973,8 @@ sub set_prop {
     my ($u, $prop, $value) = @_;
     return 0 unless LJ::set_userprop($u, $prop, $value);  # FIXME: use exceptions
     $u->{$prop} = $value;
+
+    LJ::run_hook("props_changed", $u, {$prop => $value});
 }
 
 sub clear_prop {
@@ -4010,6 +4012,8 @@ sub set_statusvis {
     # do update
     my $ret = LJ::update_user($u, { statusvis => $statusvis,
                                  raw => 'statusvisdate=NOW()' });
+
+    LJ::run_hook("props_changed", $u, {statusvis => $statusvis});
 
     $u->fb_push;
 
@@ -7573,6 +7577,9 @@ sub modify_caps {
 
     $u->{caps} = $newcaps;
     $argu->{caps} = $newcaps if ref $argu; # temp hack
+
+    LJ::run_hook("props_changed", $u, {caps => $newcaps});
+    
     return $u;
 }
 
