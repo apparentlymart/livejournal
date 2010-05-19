@@ -341,6 +341,7 @@ sub render_body {
             }) . "</p>";
             $ret .= "</td></tr>\n";
         }
+        $ret .= $error_msg->('tos', '<span class="formitemFlag">', '</span><br />');
     }
 
     ### submit button
@@ -583,8 +584,11 @@ sub handle_post {
 
         if ($LJ::TOS_CHECK) {
             my $err = "";
-            $nu->tosagree_set(\$err)
-                or return LJ::bad_input($err);
+            my $rv = $nu->tosagree_set(\$err);
+            if (!$rv) {
+                $from_post{errors}->{tos} = $err;
+                return %from_post;
+            }
         }
 
         $nu->make_login_session;

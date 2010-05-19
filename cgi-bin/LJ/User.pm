@@ -1006,11 +1006,15 @@ sub tosagree_set
 
     my $newval = join(', ', time(), $rev);
     my $rv = $u->set_prop("legal_tosagree", $newval);
-
-    # set in $u object for callers later
-    $u->{legal_tosagree} = $newval if $rv;
-
-    return $rv;
+    if ($rv) {
+        # set in $u object for callers later
+        ## hm, doesn't "set_prop" do it?
+        $u->{legal_tosagree} = $newval;
+        return $rv;
+    } else {
+        $$err = "Internal error: can't set prop legal_tosagree";
+        return;
+    }
 }
 
 sub tosagree_verify {
