@@ -87,6 +87,7 @@ sub render {
 
     my $subclass = $class->subclass;
     my $css_subclass = lc($subclass);
+    $css_subclass =~ s/::/-/g;
     my %opt_hash = @opts;
 
     my $widget_ele_id = $class->widget_ele_id;
