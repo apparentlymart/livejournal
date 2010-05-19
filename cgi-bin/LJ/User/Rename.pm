@@ -185,7 +185,7 @@ sub basic_rename {
     LJ::Event::SecurityAttributeChanged->new($u ,  { 
         action       => 'account_renamed', 
         old_username => $from, 
-        ip           => ($opts->{ip} || '127.0.0.1'),
+        ip           => ($opts->{ip} || (LJ::is_web_context() ? LJ::Request->remote_ip() : '127.0.0.1')),
         datetime     => sprintf("%02d:%02d %02d/%02d/%04d", @date[2,1], $date[3], $date[4]+1, $date[5]+1900),
     })->fire;
 
