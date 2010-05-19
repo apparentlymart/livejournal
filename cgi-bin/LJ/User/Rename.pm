@@ -253,7 +253,9 @@ sub basic_rename {
         if ($u->{journaltype} ne 'P' || $opts->{'opt_redir'}) {
             LJ::update_user($u_old_username, { raw => "journaltype='R', statusvis='R', statusvisdate=NOW()" });
             LJ::set_userprop($dbh, $u_old_username, "renamedto", $to); # 'from' will point to 'to'
-            $u->set_prop('renamedto', undef) if $u->prop('renamedto') eq $from; # safeness against circular redirection
+            if ($u->prop('renamedto')) {
+                $u->set_prop('renamedto', undef) if $u->prop('renamedto') eq $from; # safeness against circular redirection
+            }
             if ($alias_changed > 0) {
                 $dbh->do("INSERT INTO email_aliases VALUES (?,?)", undef,
                      "$u->{'user'}\@$LJ::USER_DOMAIN", 
