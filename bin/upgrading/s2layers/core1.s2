@@ -1081,8 +1081,8 @@ property int page_friends_items {
     min = 5;
     max = 50;
 }
-set page_recent_items = 20;
-set page_friends_items = 20;
+set page_recent_items = 10;
+set page_friends_items = 10;
 
 property string page_day_sortorder {
     des = "Order of entries shown on a day page";
