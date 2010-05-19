@@ -110,7 +110,6 @@ sub END { LJ::end_request(); }
 require "ljdb.pl";
 require "taglib.pl";
 require "ljtextutil.pl";
-require "ljtimeutil.pl";
 require "ljcapabilities.pl";
 require "ljmood.pl";
 require "ljhooks.pl";
