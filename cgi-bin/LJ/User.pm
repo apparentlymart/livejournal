@@ -1975,6 +1975,8 @@ sub set_prop {
     $u->{$prop} = $value;
 
     LJ::run_hook("props_changed", $u, {$prop => $value});
+
+    return $value;
 }
 
 sub clear_prop {
