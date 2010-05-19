@@ -14,7 +14,7 @@ body<=
     my $remote = LJ::get_remote();
 
     return LJ::error_list("Check your privs")
-        unless LJ::check_priv($remote, "admin", "topentries") || $LJ::IS_DEV_SERVER;
+        unless LJ::check_priv($remote, "siteadmin", "topentries") || $LJ::IS_DEV_SERVER;
 
     my $journal = LJ::load_user('ohnotheydidnt');
 
