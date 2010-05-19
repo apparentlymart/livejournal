@@ -31,15 +31,15 @@ sub can_reuse_account {
     } elsif ($u && lc($tou->email_raw) eq lc($u->email_raw) && $tou->is_visible && $tou->is_person) {
         if ($tou->password eq $u->password) {
             if (!$tou->is_validated || !$u->is_validated) {
-                $opts->{error} = BML::ml('/rename/use.bml.error.notvalidated');
+                $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.notvalidated');
             } else {
                 return 1;
             }
         } else {
-            $opts->{error} = BML::ml('/rename/use.bml.error.badpass');
+            $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.badpass');
         }
     } else {
-        $opts->{error} = BML::ml('/rename/use.bml.error.usernametaken');
+        $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.usernametaken');
     }
     return 0;
 }
