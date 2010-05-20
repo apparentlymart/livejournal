@@ -151,7 +151,7 @@ sub make_feed
     # conjunction with a static request for a file on disk that has been
     # stat()ed in the course of the current request. It is inappropriate and
     # "dangerous" to use it for dynamic content.
-    if ((my $status = LJ::Request->meets_conditions) != Apache::Constants::OK()) {
+    if ((my $status = LJ::Request->meets_conditions) != LJ::Request::OK()) {
         $opts->{handler_return} = $status;
         return undef;
     }
