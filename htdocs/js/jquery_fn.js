@@ -90,4 +90,10 @@ jQuery.fn.placeholder = function()
 			$this.hasClass('placeholder') && $this.removeClass('placeholder').val('');
 		});
 	});
+	return this;
+}
+
+jQuery.fn.input = function(fn)
+{
+	jQuery(this).bind('input keyup paste', fn);
 }
