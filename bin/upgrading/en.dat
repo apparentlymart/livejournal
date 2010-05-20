@@ -6829,6 +6829,8 @@ widget.topusers.head.users=Users
 
 widget.topusers.top5posters.title=Top 5 posters within a week
 
+widget.updatesforuser.footer=Customize your [[openlink]]notifications[[closelink]] so you never miss a beat
+
 widget.upgradeaccount.title|staleness=1
 widget.upgradeaccount.title=Upgrade your account
 
