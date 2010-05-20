@@ -29,7 +29,9 @@ sub render_body {
     my $classname = '';
 
     foreach my $post ($top_entries->get_featured_posts()) {
-        my $comments = $post->{comments} ? '<p class="b-posts-comments">'.$post->{comments}.' comments</p>' : '';
+        my $comments = $post->{comments} ? '<p class="b-posts-comments">'.
+            BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
+            '</p>' : '';
         my $subj = ($post->{subj} ne '') ? $post->{subj} : $class->ml('widget.officialjournals.nosubject');
         if ($counter % 2) {$classname = 'odd';} else {$classname = 'even';}
         $ret .= '<li class="'.$classname.'"><dl><dt><img src="'.$post->{userpic}.'" /></dt><dd><h3 class="b-posts-head"><a href="'.$post->{url}.'">'.$subj.'</a></h3>'.$comments.'<p class="b-posts-user">'.$class->ml('widget.topentries.postedby').' '.$post->{poster}.'</p></dd></dl></li>';
