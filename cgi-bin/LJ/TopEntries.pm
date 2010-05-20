@@ -68,7 +68,7 @@ sub _hash_from_key {
             timestamp   => $timestamp,
 
             comments    => scalar keys %$comment_ref,
-            comments_url=> $entry->url(anchor => '#comments'),
+            comments_url=> $entry->url(anchor => 'comments'),
 
             key         => "$journalid:$jitemid",
         };
