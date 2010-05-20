@@ -30,7 +30,9 @@ sub render_body {
 
     foreach my $post ($top_entries->get_featured_posts()) {
         my $comments = $post->{comments} ? '<p class="b-posts-comments">'.
+            '<a href=\''.$post->{url}.'\'>'.
             BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
+            '</a>'.
             '</p>' : '';
         my $subj = ($post->{subj} ne '') ? $post->{subj} : $class->ml('widget.officialjournals.nosubject');
         if ($counter % 2) {$classname = 'odd';} else {$classname = 'even';}
