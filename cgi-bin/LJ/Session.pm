@@ -462,7 +462,10 @@ sub domain_journal {
     $host = lc($host);
 
     # don't return a domain cookie for the master domain
-    return undef if $host eq lc($LJ::DOMAIN_WEB) || $host eq lc($LJ::DOMAIN);
+    return undef if
+        $host eq lc($LJ::DOMAIN_WEB) ||
+        $host eq lc($LJ::DOMAIN) ||
+        $host eq lc($LJ::SSLDOMAIN);
 
     return undef unless
         $host =~ m!^([\w-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$!;
