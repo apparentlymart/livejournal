@@ -207,8 +207,7 @@ sub add_entry {
 
     return 'wrong entry poster' unless $poster;
 
-    my $userpicid   = ($userpic ? LJ::get_picid_from_keyword($poster, $userpic) :
-            ($poster->{'defaultpicid'} || 0));
+    my $userpicid   = $userpic ? $userpic->id() : ($poster->{'defaultpicid'} || 0);
 
     $self->delete_entry(key => "$journalid:$jitemid");
 
