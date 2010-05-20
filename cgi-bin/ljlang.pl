@@ -3,6 +3,7 @@
 
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+require "ljhooks.pl";
 
 use Class::Autouse qw(
                       LJ::LangDatFile
@@ -81,6 +82,10 @@ my %LN_ID = ();     # id -> { ..., ..., 'children' => [ $ids, .. ] }
 my %LN_CODE = ();   # $code -> ^^^^
 my $LAST_ERROR;
 my %TXT_CACHE;
+
+if ($LJ::IS_DEV_SERVER) {
+    LJ::register_hook('start_request', sub { %TXT_CACHE = (); });
+}
 
 sub last_error
 {
@@ -531,7 +536,7 @@ sub get_text
         return $text->{$code};
     };
 
-    my $from_files = sub {
+    my $_from_files = sub {
         my ($localcode, @files);
         if ($code =~ m!^(/.+\.bml)(\..+)!) {
             my $file;
@@ -543,14 +548,14 @@ sub get_text
                       "$LJ::HOME/bin/upgrading/en.dat");
         }
 
+        my $dbmodtime = LJ::Lang::get_chgtime_unix($lang, $dmid, $code);
         foreach my $tf (@files) {
             next unless -e $tf;
 
             # compare file modtime to when the string was updated in the DB.
             # whichever is newer is authoritative
             my $fmodtime = (stat $tf)[9];
-            my $dbmodtime = LJ::Lang::get_chgtime_unix($lang, $dmid, $code);
-            return $from_db->() if ! $fmodtime || $dbmodtime > $fmodtime;
+            return $from_db->() if !$fmodtime || $dbmodtime > $fmodtime;
 
             my $ldf = $LJ::REQ_LANGDATFILE{$tf} ||= LJ::LangDatFile->new($tf);
             my $val = $ldf->value($localcode);
@@ -559,6 +564,11 @@ sub get_text
         return "[missing string $code]";
     };
 
+    my $from_files = sub {
+        my $cache_key = "ml.${lang}.${dmid}.${code}";
+        return $TXT_CACHE{$cache_key} ||= $_from_files->();
+    };
+ 
 
     ##
     my $gen_mld = LJ::Lang::get_dom('general');
