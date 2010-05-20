@@ -30,7 +30,7 @@ sub render_body {
 
     foreach my $post ($top_entries->get_featured_posts()) {
         my $comments = $post->{comments} ? '<p class="b-posts-comments">'.
-            '<a href=\''.$post->{url}.'\'>'.
+            '<a href=\''.$post->{comments_url}.'\'>'.
             BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
             '</a>'.
             '</p>' : '';
