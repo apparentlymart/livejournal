@@ -60,13 +60,6 @@ sub handle {
         return LJ::URI->bml_handler("statistics/index.bml");
     }
 
-    if (
-        "$uri"  eq LJ::Pay::Wallet::LANDING_URL or
-        "$uri/" eq LJ::Pay::Wallet::LANDING_URL
-    ) {
-        return LJ::URI->bml_handler('shop/wallet.bml');
-    }
-
     return undef;
 }
 
