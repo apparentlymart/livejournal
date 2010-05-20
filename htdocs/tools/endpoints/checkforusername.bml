@@ -5,7 +5,20 @@
     use LJ::JSON;
     use Class::Autouse qw( LJ::CreatePage );
 
-    my $error = LJ::CreatePage->verify_username($GET{user});
+    my $error;
+
+    if ($GET{'for'} eq 'rename') {
+        my $remote = LJ::get_remote();
+        my $opts = {};
+
+        unless (LJ::User::Rename::can_reuse_account(
+            $GET{user}, $remote, $opts
+        )) {
+            $error = $opts->{'error'};
+        }
+    } else {
+        $error = LJ::CreatePage->verify_username($GET{user});
+    }
 
     return LJ::JSON->to_json({ error => $error ? $error : "" });
 }
