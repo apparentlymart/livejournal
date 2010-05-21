@@ -25,6 +25,11 @@ sub can_reuse_account {
     ## no user - the name can be occupied
     return 1 unless $tou;
 
+    if ($u->{'user'} eq $to->{'user'}) {
+        $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.same');
+        return 0;
+    }
+
     if ($tou->is_expunged) {
         # expunged usernames can be moved away. they're already deleted.
         return 1;
