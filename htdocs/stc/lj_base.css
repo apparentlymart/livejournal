@@ -300,12 +300,18 @@ Must be removed after implementation of Framework! */
     background: #FFE8BF;
     border: 1px solid #FF8E44;
     }
+
 .i-message {
     padding: 1px 8px;
     }
+.b-message-error,
 .i-message-error {
-    background: #FEE;
+	margin: 0 0 24px !important;
     border: 1px solid #F99;
+    background-color: #FEE;
+    background-image: url(/img/message-error.gif);
+    background-image: -moz-linear-gradient(100% 100% 90deg, #FED4D3, #FFF2F0);
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FFF2F0), to(#FED4D3));
     }
 .b-message-system {
 	position: absolute;
