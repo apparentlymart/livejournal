@@ -9,6 +9,9 @@ use LJ::PingBack;
 sub should_render {
     my $class = shift;
     my $u     = shift;
+
+    return 0; # disable all userdefined pingback settings.
+
     # Render if widget enabled on server
     return 0 if $LJ::DISABLED{'pingback'};
     return 0 unless $u && $u->get_cap('pingback');

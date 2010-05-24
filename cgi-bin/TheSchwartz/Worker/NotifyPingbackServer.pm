@@ -23,11 +23,11 @@ sub send_ping {
     my $source_uri = $args{uri};
     my $mode = $args{mode};
 
-    return unless $mode =~ m/^[LO]$/; # (L)ivejournal only, (O)pen.
+    # return unless $mode =~ m/^[LO]$/; # (L)ivejournal only, (O)pen.
 
     my $source_entry = LJ::Entry->new_from_url($source_uri);
     return unless $source_entry;
-    
+
     my @links = ExtractLinksWithContext->do_parse($source_entry->event_raw);
     # use Data::Dumper;
     # warn "Links: " . Dumper(\@links);
@@ -40,12 +40,14 @@ sub send_ping {
         next unless log_ping($source_entry, $target_entry);
 
         # on success returns LJ::Comment.
-        LJ::PingBack->ping_post(
+        my $res =
+            LJ::PingBack->ping_post(
                     sourceURI => $source_uri,
                     targetURI => $link->{uri},
                     context   => $link->{context},
                     title     => $source_entry->subject_raw,
-                    );
+                    ); # returns LJ::Comment object on success or error string otherwise.
+        drop_relation($source_entry, $target_entry) unless ref $res;
     }
 
     return 1;
@@ -53,11 +55,11 @@ sub send_ping {
 
 sub log_ping {
     my ($source_entry, $target_entry) = @_;
-    my $target_entryer = $target_entry->poster;
-    return 1 unless $target_entryer; # positive value skips this link
+    my $target_poster = $target_entry->poster;
+    return 1 unless $target_poster; # positive value skips this link
 
-    my $dbh = $target_entryer->writer;
-    die "Can't get db writer for user " . $target_entryer->username
+    my $dbh = $target_poster->writer;
+    die "Can't get db writer for user " . $target_poster->username
         unless $dbh;
 
     my $sth = $dbh->prepare("
@@ -65,6 +67,31 @@ sub log_ping {
             (suid, sjid, tuid, tjid)
         VALUES
             (?, ?, ?, ?)
+    ");
+    $sth->execute(
+        $source_entry->posterid, $source_entry->jitemid,
+        $target_entry->posterid, $target_entry->jitemid
+        ) or return 0;
+
+    return 1;
+}
+sub drop_relation {
+    my ($source_entry, $target_entry) = @_;
+    my $target_poster = $target_entry->poster;
+    return 1 unless $target_poster; # positive value skips this link
+
+    my $dbh = $target_poster->writer;
+    die "Can't get db writer for user " . $target_poster->username
+        unless $dbh;
+
+    my $sth = $dbh->prepare("
+        DELETE
+        FROM pingrel
+        WHERE
+            suid = ?
+            AND sjid = ? 
+            AND tuid = ? 
+            AND tjid = ?
     ");
     $sth->execute(
         $source_entry->posterid, $source_entry->jitemid,
@@ -122,12 +149,12 @@ sub do_parse {
         text_h      => [ sub {
                             my ($self, $text) = @_;
                             unless ($self->{_smplf_in_a}){
-                                $text =~ s|(http://[\w\-\_]{1,16}\.$LJ::DOMAIN/\d+\.html)|<a href="$1">$1</a>|g;
+                                $text =~ s|(http://[\w\-\_]{1,16}\.$LJ::DOMAIN/\d+\.html(\?\S*(\#\S*)?)?)|<a href="$1">$1</a>|g;
                             }
                             $normolized_text .= $text;
                         },  "self,text" ],
     );
-    $normolize->parse( Encode::decode_utf8($text) );
+    $normolize->parse( Encode::decode_utf8($text . "\n") );
 
     # parse
     my $parser = HTML::Parser->new(
