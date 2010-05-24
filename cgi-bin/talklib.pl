@@ -878,6 +878,11 @@ sub get_talk_data_do
         # set cache in LJ::Entry object for this set of comments
         $set_entry_cache->();
 
+        ## increase profiling counter
+        ## may be safely removed
+        LJ::MemCache::add("talk2fromMemc", 0);
+        LJ::MemCache::incr("talk2fromMemc");
+
         return $ret;
     };
 
@@ -896,6 +901,12 @@ sub get_talk_data_do
     ){
         # try to load comments from Slave
         $dbcr = LJ::get_cluster_reader($u);
+
+        ## increase profiling counter
+        ## may be safely removed
+        LJ::MemCache::add("talk2fromSlave", 0);
+        LJ::MemCache::incr("talk2fromSlave");
+
     } else {
         $dbcr = LJ::get_cluster_def_reader($u);
     }
@@ -912,6 +923,11 @@ sub get_talk_data_do
         $memcache_decode->();
         return $ret;
     }
+
+    ## increase profiling counter
+    ## may be safely removed
+    LJ::MemCache::add("talk2fromDB", 0);
+    LJ::MemCache::incr("talk2fromDB");
 
     my $memval = $DATAVER;
     my $sth = $dbcr->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, ".
