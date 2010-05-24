@@ -28,7 +28,7 @@ sub render_body {
     }
     my @keywords = split /\s*\n+\s*/, $words;
     $ret .= "<ul class=i-cloud>";
-    $ret .= join ' ', map { "<li><h3><a href='$LJ::SITEROOT/search/?q=" . LJ::eurl($_) . "&area=default'>" . LJ::ehtml($_) . "</a></li></h3>" } @keywords;
+    $ret .= join ' ', map { "<li><h3><a href='$LJ::SITEROOT/search/?q=" . LJ::eurl($_) . "&area=default'>" . LJ::ehtml($_) . "</a></h3></li>" } @keywords;
     $ret .= "</ul>";
     $ret .= "</div>";
 
