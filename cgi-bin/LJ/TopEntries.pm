@@ -51,6 +51,10 @@ sub _hash_from_key {
 
     return undef unless $userpic && $userpic->valid();
 
+    my $subject = $entry->subject_text();
+    my $subject_trimed = LJ::html_trim_4gadgets($subject, 70, '');
+    $subject_trimed .= '...' if $subject_trimed ne $subject;
+
     return
         {
             posterid    => $poster->{'userid'},
@@ -58,7 +62,7 @@ sub _hash_from_key {
             jitemid     => $jitemid,
             userpicid   => $userpicid,
 
-            subj        => $entry->subject_text(),
+            subj        => $subject_trimed,
             text        => LJ::html_trim_4gadgets($entry->event_text(), 50, $entry->url()),
             revtime     => $entry->prop('revtime'),
             url         => $entry->url(),
