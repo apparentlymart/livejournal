@@ -25,7 +25,7 @@ sub can_reuse_account {
     ## no user - the name can be occupied
     return 1 unless $tou;
 
-    if ($u->{'user'} eq $to->{'user'}) {
+    if ($u->{'user'} eq $to) {
         $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.same');
         return 0;
     }
