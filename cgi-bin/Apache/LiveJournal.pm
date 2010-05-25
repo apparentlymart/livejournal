@@ -1131,7 +1131,11 @@ sub userpic_content
 
             my $paths = LJ::MemCache::get($memkey);
             unless ($paths) {
-                my @paths = LJ::mogclient()->get_paths( $key, { noverify => 1, zone => $zone });
+                ## connect to storage
+                my $mogclient = LJ::mogclient();
+                return LJ::Request::NOT_FOUND unless $mogclient;
+
+                my @paths = $mogclient->get_paths($key, { noverify => 1, zone => $zone });
                 $paths = \@paths;
                 LJ::MemCache::add($memkey, $paths, $cache_for) if @paths;
             }
