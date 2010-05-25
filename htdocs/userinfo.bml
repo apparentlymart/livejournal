@@ -249,7 +249,7 @@
         }
         my %fr;
         LJ::load_userids_multiple([ map { $_ => \$fr{$_} } @ids ]);
-        push @friends, sort { $a->display_name cmp $b->display_name } values %fr;
+        push @friends, sort { $a->display_name cmp $b->display_name } grep {$_} values %fr;
         $friends{'loaded'} = 1;
     }
 
