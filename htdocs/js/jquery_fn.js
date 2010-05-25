@@ -102,5 +102,5 @@ jQuery.fn.placeholder = function()
 
 jQuery.fn.input = function(fn)
 {
-	jQuery(this).bind('input keyup paste', fn);
+	return fn ? this.bind('input keyup paste', fn) : this.trigger('input');
 }
