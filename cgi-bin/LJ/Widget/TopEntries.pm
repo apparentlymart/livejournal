@@ -36,7 +36,7 @@ sub render_body {
             '</span>' : '';
         my $subj = ($post->{subj} ne '') ? $post->{subj} : $class->ml('widget.officialjournals.nosubject');
         if ($counter % 2) {$classname = 'odd';} else {$classname = 'even';}
-        $ret .= '<li class="'.$classname.'"><dl><dt><img src="'.$post->{userpic}.'" /></dt><dd><h3 class="b-posts-head"><a href="'.$post->{url}.'">'.$subj.'</a></h3><p class="b-posts-user">'.$class->ml('widget.topentries.postedby').' '.$post->{poster}.$comments.'</p></dd></dl></li>';
+        $ret .= '<li class="'.$classname.'"><dl><dt><img src="'.$post->{userpic}.'" /></dt><dd><h3 class="b-posts-head"><a href="'.$post->{url}.'">'.$subj.'</a></h3><p class="b-posts-user"> '.$post->{poster}.$comments.'</p></dd></dl></li>';
         $counter = $counter + 1;
     }
 
