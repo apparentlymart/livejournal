@@ -350,7 +350,7 @@ sub module_iframe_tag {
 
     my $remote = LJ::get_remote();
     my %params = (moduleid => $moduleid, journalid => $journalid, preview => $preview,);
-    LJ::run_hook('modify_embed_iframe_params', \%params, $u, $remote);
+    LJ::run_hooks('modify_embed_iframe_params', \%params, $u, $remote);
     my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', %params));
     my $iframe_link = "http://$LJ::EMBED_MODULE_DOMAIN/?auth_token=$auth_token" .
         join('', map { "&amp;$_=" . LJ::eurl($params{$_}) } keys %params);
