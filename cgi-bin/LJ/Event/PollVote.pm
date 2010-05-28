@@ -162,8 +162,8 @@ sub subscription_as_html {
     my $pollid = $subscr->arg1;
 
     return $pollid ?
-        BML::ml('event.poll_vote.id') : # "Someone votes in poll #$pollid";
-        BML::ml('event.poll_vote.me');  # "Someone votes in a poll I posted" unless $pollid;
+        LJ::Lang::ml('event.poll_vote.id') : # "Someone votes in poll #$pollid";
+        LJ::Lang::ml('event.poll_vote.me');  # "Someone votes in a poll I posted" unless $pollid;
 }
 
 sub available_for_user  {

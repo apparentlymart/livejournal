@@ -5,7 +5,7 @@ use base 'LJ::Event::JournalNewComment';
 sub subscription_as_html {
     my ($class, $subscr) = @_;
     
-    return BML::ml('event.community_entry_reply');
+    return LJ::Lang::ml('event.community_entry_reply');
 }
 
 sub available_for_user  { 1 }

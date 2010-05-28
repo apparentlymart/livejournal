@@ -24,7 +24,7 @@ sub new {
     return bless $self, $class;
 }
 
-sub title { BML::ml('notification_method.im.title') }
+sub title { LJ::Lang::ml('notification_method.im.title') }
 
 sub help_url { "ljtalk_full" }
 

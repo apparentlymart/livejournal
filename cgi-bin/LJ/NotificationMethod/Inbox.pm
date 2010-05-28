@@ -28,7 +28,7 @@ sub new {
     return bless $self, $class;
 }
 
-sub title { BML::ml('notification_method.inbox.title') }
+sub title { LJ::Lang::ml('notification_method.inbox.title') }
 
 sub new_from_subscription {
     my $class = shift;

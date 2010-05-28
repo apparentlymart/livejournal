@@ -155,7 +155,7 @@ sub as_alert {
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-    return BML::ml('event.community_join_requst'); # Someone requests membership in a community I maintain';
+    return LJ::Lang::ml('event.community_join_requst'); # Someone requests membership in a community I maintain';
 }
 
 sub available_for_user  { 1 }

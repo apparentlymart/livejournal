@@ -384,7 +384,7 @@ sub subscription_as_html {
 
     if (!$journal) {
 ### 01 event.journal_new_comment.friend=Someone comments in any journal on my friends page
-        return BML::ml($key . '.friend');
+        return LJ::Lang::ml($key . '.friend');
     }
 
     my ($user, $journal_is_owner);
@@ -401,7 +401,7 @@ sub subscription_as_html {
     if ($arg1 == 0 && $arg2 == 0) {
 ### 02 event.journal_new_comment.my_journal=Someone comments in my journal, on any entry
 ### 03 event.journal_new_comment.user_journal=Someone comments in [[user]], on any entry
-        return BML::ml($key, { user => $user });
+        return LJ::Lang::ml($key, { user => $user });
     }
 
     # load ditemid from jtalkid if no ditemid
@@ -416,7 +416,7 @@ sub subscription_as_html {
     my $entry = LJ::Entry->new($journal, ditemid => $arg1);
 ### 04 event.journal_new_comment.user_journal.deleted=Someone comments on a deleted entry in [[user]]
 ### 05 event.journal_new_comment.my_journal.deleted=Someone comments on a deleted entry in my journal
-    return BML::ml($key . '.deleted', { user => $user }) unless $entry && $entry->valid;
+    return LJ::Lang::ml($key . '.deleted', { user => $user }) unless $entry && $entry->valid;
 
     my $entrydesc = $entry->subject_text;
     if ($entrydesc) {
@@ -432,7 +432,7 @@ sub subscription_as_html {
 ### 07 event.journal_new_comment.user_journal.untitled_entry=Someone comments on <a href='[[entryurl]]'>en entry</a> in [[user]]
 ### 08 event.journal_new_comment.my_journal.titled_entry=Someone comments on <a href='[[entryurl]]'>[[entrydesc]]</a> my journal
 ### 09 event.journal_new_comment.my_journal.untitled_entry=Someone comments on <a href='[[entryurl]]'>en entry</a> my journal
-    return BML::ml($key,
+    return LJ::Lang::ml($key,
         {
             user        => $user,
             entryurl    => $entryurl,
@@ -465,7 +465,7 @@ sub subscription_as_html {
         $key .= '.anonymous';
     }
 ### 10 ... 33
-    return BML::ml($key,
+    return LJ::Lang::ml($key,
     {
         user            => $user,
         threadurl       => $threadurl,

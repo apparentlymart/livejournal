@@ -147,10 +147,10 @@ sub subscription_as_html {
     my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
 
     if ($journal_is_owner) {
-        return BML::ml('event.befriended.me');   # "Someone adds me as a friend";
+        return LJ::Lang::ml('event.befriended.me');   # "Someone adds me as a friend";
     } else {
         my $user = $journal->ljuser_display;
-        return BML::ml('event.befriended.user', { user => $user } ); # "Someone adds $user as a friend";
+        return LJ::Lang::ml('event.befriended.user', { user => $user } ); # "Someone adds $user as a friend";
     }
 }
 

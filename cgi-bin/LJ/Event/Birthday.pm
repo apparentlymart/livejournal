@@ -153,11 +153,11 @@ sub subscription_as_html {
     my ($class, $subscr) = @_;
     my $journal = $subscr->journal;
 
-    return BML::ml('event.birthday.me') # "One of my friends has an upcoming birthday"
+    return LJ::Lang::ml('event.birthday.me') # "One of my friends has an upcoming birthday"
         unless $journal;
 
     my $ljuser = $journal->ljuser_display;
-    return BML::ml('event.birthday.user', { user => $ljuser } ); # "$ljuser\'s birthday is coming up";
+    return LJ::Lang::ml('event.birthday.user', { user => $ljuser } ); # "$ljuser\'s birthday is coming up";
 }
 
 sub content {

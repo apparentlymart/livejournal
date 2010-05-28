@@ -154,8 +154,8 @@ sub subscription_as_html {
     # posts made by a specific user
 
     return $journal ?
-        BML::ml('event.user_new_entry.user', { user => $journal->ljuser_display } ) : # $journaluser posts a new entry anywhere.
-        BML::ml('event.user_new_entry.any'); # "Any of my friends posts a new entry anywhere."
+        LJ::Lang::ml('event.user_new_entry.user', { user => $journal->ljuser_display } ) : # $journaluser posts a new entry anywhere.
+        LJ::Lang::ml('event.user_new_entry.any'); # "Any of my friends posts a new entry anywhere."
 }
 
 sub available_for_user { 0 }

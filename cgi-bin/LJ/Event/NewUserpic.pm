@@ -135,9 +135,9 @@ sub subscription_as_html {
     # "One of my friends uploads a new userpic"
     # or "$ljuser uploads a new userpic";
     return $journal ?
-        BML::ml('event.userpic_upload.user',
+        LJ::Lang::ml('event.userpic_upload.user',
             { user => $journal->ljuser_display }) :
-        BML::ml('event.userpic_upload.me');
+        LJ::Lang::ml('event.userpic_upload.me');
 }
 
 sub available_for_user  {

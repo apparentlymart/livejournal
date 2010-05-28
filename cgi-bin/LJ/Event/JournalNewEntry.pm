@@ -344,16 +344,16 @@ sub subscription_as_html {
     }
 
     if ($arg1) {
-        return BML::ml('event.journal_new_entry.tag.' . ($journal->is_comm ? 'community' : 'user'),
+        return LJ::Lang::ml('event.journal_new_entry.tag.' . ($journal->is_comm ? 'community' : 'user'),
                 {
                     user    => $journal->ljuser_display,
                     tags    => $usertags,
                 });
     }
 
-    return BML::ml('event.journal_new_entry.friendlist') unless $journal;
+    return LJ::Lang::ml('event.journal_new_entry.friendlist') unless $journal;
 
-    return BML::ml('event.journal_new_entry.' . ($journal->is_comm ? 'community' : 'user'),
+    return LJ::Lang::ml('event.journal_new_entry.' . ($journal->is_comm ? 'community' : 'user'),
             {
                 user    => $journal->ljuser_display,
             });
