@@ -2866,6 +2866,17 @@ CREATE TABLE qotd (
 )
 EOC
 
+register_tablecreate("qotd_imported", <<'EOC');
+CREATE TABLE qotd_imported (
+  qid           INT UNSIGNED NOT NULL,
+  remote_id     INT UNSIGNED NOT NULL,
+  provider      char(1),
+
+  PRIMARY KEY (qid, remote_id)
+)
+EOC
+
+
 register_tablecreate("jobstatus", <<'EOC');
 CREATE TABLE jobstatus (
   handle VARCHAR(100) PRIMARY KEY,
