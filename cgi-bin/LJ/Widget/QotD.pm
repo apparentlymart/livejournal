@@ -147,7 +147,7 @@ sub qotd_display {
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
             my $subject = $d->{subject} || $q->{subject};
-            my $extra_text = $q->{extra_text}
+            my $extra_text = ($q->{extra_text} and not $opts{no_extra_text})
                                 ? "<p>$q->{extra_text}</p>"
                                 : "";
     
