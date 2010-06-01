@@ -53,14 +53,12 @@ sub EntryPage
 
     # quickreply js libs
     LJ::need_res(qw(
-                    js/core.js
-                    js/dom.js
+                    js/basic.js
                     js/json.js
                     js/template.js
                     js/ippu.js
                     js/lj_ippu.js
                     js/userpicselect.js
-                    js/httpreq.js
                     js/hourglass.js
                     js/inputcomplete.js
                     stc/ups.css
@@ -70,9 +68,7 @@ sub EntryPage
                     )) if ! $LJ::DISABLED{userpicselect} && $remote && $remote->get_cap('userpicselect');
 
     LJ::need_res(qw(
-                    js/x_core.js
                     js/quickreply.js
-                    js/browserdetect.js
                     js/thread_expander.js
                     ));
 

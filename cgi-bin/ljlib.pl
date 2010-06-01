@@ -110,6 +110,7 @@ sub END { LJ::end_request(); }
 require "ljdb.pl";
 require "taglib.pl";
 require "ljtextutil.pl";
+require "ljtimeutil.pl";
 require "ljcapabilities.pl";
 require "ljmood.pl";
 require "ljhooks.pl";
@@ -2137,11 +2138,8 @@ sub start_request
             LJ::need_res(qw(
                             js/jquery.js
                             js/jquery_fn.js
-                            js/core.js
-                            js/dom.js
-                            js/httpreq.js
+                            js/basic.js
                             js/livejournal.js
-                            js/common/AdEngine.js
                             stc/lj_base.css
                             ));
 

@@ -722,7 +722,7 @@ sub create_qr_div {
 
             # userpic browse button
             $qrhtml .= qq {
-                <input type="button" id="lj_userpicselect" value="Browse" />
+                <input type="button" id="lj_userpicselect" value="Browse" onclick="QuickReply.userpicSelect()"/>
                 } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
             $qrhtml .= LJ::help_icon_html("userpics", " ");
@@ -752,12 +752,12 @@ sub create_qr_div {
 
     $qrhtml .= LJ::html_submit('submitpost', BML::ml('/talkread.bml.button.post'),
                                { 'id' => 'submitpost',
-                                 'raw' => 'onclick="if (checkLength()) {submitform();}"'
+                                 'raw' => 'onclick="if (QuickReply.check()){ QuickReply.submit() }"'
                                  });
 
     $qrhtml .= "&nbsp;" . LJ::html_submit('submitmoreopts', BML::ml('/talkread.bml.button.more'),
                                           { 'id' => 'submitmoreopts',
-                                            'raw' => 'onclick="if (moreopts()) {submitform();}"'
+                                            'raw' => 'onclick="if (QuickReply.more()){ QuickReply.submit() }"'
                                             });
     if ($LJ::SPELLER) {
         $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='do_spellcheck' /> <label for='do_spellcheck'>";
@@ -776,7 +776,7 @@ sub create_qr_div {
     $qrhtml .= "</form></div>";
 
     my $ret;
-    $ret = "<script language='JavaScript'>\n";
+    $ret = "<script type=\"text/javascript\">\n";
 
     $qrhtml = LJ::ejs($qrhtml);
 
@@ -793,57 +793,15 @@ sub create_qr_div {
                                       ));
 
     $ret .= qq{
-               var de;
-               if (document.createElement && document.body.insertBefore && !(xMac && xIE4Up)) {
-                   document.write("$qrsaveform");
-                   de = document.createElement("div");
-
-                   if (de) {
-                       de.id = "qrdiv";
-                       de.innerHTML = "$qrhtml";
-                       var bodye = document.getElementsByTagName("body");
-                       if (bodye[0])
-                           bodye[0].insertBefore(de, bodye[0].firstChild);
-                       de.style.display = 'none';
-                   }
-               }
+               document.write("$qrsaveform");
+               var de = document.createElement('div');
+               de.id = 'qrdiv';
+               de.innerHTML = "$qrhtml";
+               de.style.display = 'none';
+               document.body.insertBefore(de, document.body.firstChild);
            };
 
-    $ret .= "\n</script>";
-
-    $ret .= qq {
-        <script type="text/javascript" language="JavaScript">
-            DOM.addEventListener(window, "load", function (evt) {
-                // attach userpicselect code to userpicbrowse button
-                var ups_btn = \$("lj_userpicselect");
-                if (ups_btn) {
-                    DOM.addEventListener(ups_btn, "click", function (evt) {
-                     var ups = new UserpicSelect();
-                     ups.init();
-                     ups.setPicSelectedCallback(function (picid, keywords) {
-                         var kws_dropdown = \$("prop_picture_keyword");
-
-                         if (kws_dropdown) {
-                             var items = kws_dropdown.options;
-
-                             // select the keyword in the dropdown
-                             keywords.forEach(function (kw) {
-                                 for (var i = 0; i < items.length; i++) {
-                                     var item = items[i];
-                                     if (item.value == kw) {
-                                         kws_dropdown.selectedIndex = i;
-                                         return;
-                                     }
-                                 }
-                             });
-                         }
-                     });
-                     ups.show();
-                 });
-                }
-            });
-        </script>
-        } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
+    $ret .= "</script>";
 
     return $ret;
 }
@@ -876,15 +834,15 @@ sub make_qr_link
         $basesubject =~ s/^(Re:\s*)*//i;
         $basesubject = "Re: $basesubject" if $basesubject;
         $basesubject = LJ::ehtml(LJ::ejs($basesubject));
-        my $onclick = "return quickreply(\"$dtid\", $pid, \"$basesubject\")";
+        my $onclick = "return QuickReply.reply('$dtid',$pid,'$basesubject')";
 
         my $ju;
         $ju = LJ::load_userid(LJ::Request->notes('journalid')) if LJ::Request->is_inited and LJ::Request->notes('journalid');
 
         $onclick = "" if $ju->{'opt_whocanreply'} eq 'friends' and $remote and not LJ::is_friend($ju, $remote);
-        return "<a onclick='$onclick' href='$replyurl' >$linktext</a>";
+        return "<a href=\"$replyurl\" onclick=\"$onclick\">$linktext</a>";
     } else { # QR Disabled
-        return "<a href='$replyurl' >$linktext</a>";
+        return "<a href=\"$replyurl\">$linktext</a>";
     }
 }
 

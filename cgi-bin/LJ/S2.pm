@@ -3228,7 +3228,7 @@ sub _print_quickreply_link
     my $basesubject = $opts->{'basesubject'}; #cleaned later
 
     if ($opt_class) {
-        $opt_class = "class=\"$opt_class\"";
+        $opt_class = " class=\"$opt_class\"";
     }
 
     my $page = get_page();
@@ -3241,8 +3241,8 @@ sub _print_quickreply_link
         $basesubject =~ s/^(Re:\s*)*//i;
         $basesubject = "Re: $basesubject" if $basesubject;
         $basesubject = LJ::ejs($basesubject);
-        $onclick = "return quickreply(\"$target\", $pid, \"$basesubject\")";
-        $onclick = "onclick='$onclick'";
+        $onclick = "return QuickReply.reply('$target',$pid,'$basesubject')";
+        $onclick = " onclick=\"$onclick\"";
     }
 
     $onclick = "" unless $page->{'_type'} eq 'EntryPage';
@@ -3255,7 +3255,7 @@ sub _print_quickreply_link
     if ($bp) {
         $S2::pout->("<a href='$bp'>$linktext</a>");
     } else {
-        $S2::pout->("<a $onclick href='$replyurl' $opt_class>$linktext</a>");
+        $S2::pout->("<a$onclick href=\"$replyurl\"$opt_class>$linktext</a>");
     }
 }
 
