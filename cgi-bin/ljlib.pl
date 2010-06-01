@@ -2133,28 +2133,28 @@ sub start_request
                             stc/lj_base.css
                             ));
 
-              # esn ajax
-              LJ::need_res(qw(
-                              js/esn.js
-                              stc/esn.css
-                              ))
-                  unless LJ::conf_test($LJ::DISABLED{esn_ajax});
+            # esn ajax
+            LJ::need_res(qw(
+                            js/esn.js
+                            stc/esn.css
+                            ))
+                unless LJ::conf_test($LJ::DISABLED{esn_ajax});
 
-              my %args = LJ::Request->args;
-              # contextual popup JS
-              LJ::need_res(qw(
-                              js/ippu.js
-                              js/lj_ippu.js
-                              js/ljwidget.js
-                              js/ljwidget_ippu.js
-                              js/hourglass.js
-                              js/contextualhover.js
-                              stc/contextualhover.css
-                              )) if $LJ::CTX_POPUP and $args{ctxpp} ne 'no';
+            my %args = LJ::Request->args;
+            # contextual popup JS
+            LJ::need_res(qw(
+                            js/ippu.js
+                            js/lj_ippu.js
+                            js/ljwidget.js
+                            js/ljwidget_ippu.js
+                            js/hourglass.js
+                            js/contextualhover.js
+                            stc/contextualhover.css
+                            )) if $LJ::CTX_POPUP and $args{ctxpp} ne 'no';
 
-              # Conditional IE CSS file for all pages 
-              LJ::need_res({condition => 'IE'}, 'stc/ie.css');
-          }
+            # Conditional IE CSS file for all pages 
+            LJ::need_res({condition => 'IE'}, 'stc/ie.css');
+        }
     }
 
     LJ::run_hooks("start_request");
