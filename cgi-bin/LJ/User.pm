@@ -265,10 +265,6 @@ sub new_from_row {
     my ($class, $row) = @_;
     my $u = bless $row, $class;
 
-    # for selfassert method below:
-    $u->{_orig_userid} = $u->{userid};
-    $u->{_orig_user}   = $u->{user};
-
     return $u;
 }
 
@@ -3544,17 +3540,6 @@ sub new_entry_editor {
     return $LJ::DEFAULT_EDITOR; # Use config default
 }
 
-# do some internal consistency checks on self.  die if problems,
-# else returns 1.
-sub selfassert {
-    my $u = shift;
-    LJ::assert_is($u->{userid}, $u->{_orig_userid})
-        if $u->{_orig_userid};
-    LJ::assert_is($u->{user}, $u->{_orig_user})
-        if $u->{_orig_user};
-    return 1;
-}
-
 # Returns the NotificationInbox for this user
 *inbox = \&notification_inbox;
 sub notification_inbox {
@@ -6019,8 +6004,6 @@ sub _set_u_req_cache {
     # the latested data, but keep using its address
     if (my $eu = $LJ::REQ_CACHE_USER_ID{$u->{'userid'}}) {
         LJ::assert_is($eu->{userid}, $u->{userid});
-        $eu->selfassert;
-        $u->selfassert;
 
         $eu->{$_} = $u->{$_} foreach keys %$u;
         $u = $eu;
@@ -6097,7 +6080,6 @@ sub load_user
  
     # return process cache if we have one
     if ($u = $LJ::REQ_CACHE_USER_NAME{$user}) {
-        $u->selfassert;
         return $u;
     }
 
@@ -6190,7 +6172,6 @@ sub load_userid
     # check process cache
     $u = $LJ::REQ_CACHE_USER_ID{$userid};
     if ($u) {
-        $u->selfassert;
         return $u;
     }
 

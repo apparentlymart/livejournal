@@ -235,7 +235,8 @@ sub etypeid {
 
 sub journal {
     my ($self) = @_;
-    return LJ::want_user($self->journalid);
+    $self->{'journal'} ||= LJ::want_user($self->journalid);
+    return $self->{'journal'};
 }
 
 sub owner {
@@ -275,13 +276,13 @@ sub event_as_html {
 sub event {
     my ($self) = @_;
 
-    return LJ::Event->new_from_raw_params(
-        $self->etypeid,
-        $self->journalid,
-        $self->arg1,
-        $self->arg2,
-    );
+    unless ($self->{'event'}) {
+        my $evt = LJ::Event->new($self->journal, $self->arg1, $self->arg2);
+        bless $evt, $self->event_class;
+        $self->{'event'} = $evt;
+    }
 
+    return $self->{'event'};
 }
 
 sub is_tracking {

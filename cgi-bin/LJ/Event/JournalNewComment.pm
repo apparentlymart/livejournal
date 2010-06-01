@@ -573,12 +573,6 @@ sub available_for_user  {
         return 1;
     }
 
-    # user can track all comments to their community journal, provided
-    # that the community is paid
-    if (LJ::can_manage($u, $journal) && !$arg1 && !$arg2) {
-        return $journal->get_cap('maintainer_track_comments') ? 1 : 0;
-    }
-
     # user can always track comments to a specific entry
     if ($arg1) {
         return 1;
@@ -588,6 +582,12 @@ sub available_for_user  {
     # account
     if ($arg2) {
         return $u->get_cap('track_thread') ? 1 : 0;
+    }
+
+    # user can track all comments to their community journal, provided
+    # that the community is paid
+    if (LJ::can_manage($u, $journal)) {
+        return $journal->get_cap('maintainer_track_comments') ? 1 : 0;
     }
 
     return 0;
