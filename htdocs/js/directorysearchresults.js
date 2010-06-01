@@ -76,17 +76,12 @@ DirectorySearchResults = new Class(Object, {
 
             // add items to menu
             [10, 25, 50, 100, 150, 200].forEach(function (ct) {
-                var opt = document.createElement("option");
-                opt.value = ct;
-                opt.text = ct + " results";
+				var opt = new Option(ct + ' results', ct);
                 if (ct == self.resultsPerPage) {
                     opt.selected = true;
                 }
 
-                Try.these(
-                          function () { resultCountMenu.add(opt, 0);    }, // IE
-                          function () { resultCountMenu.add(opt, null); }  // Firefox
-                          );
+				resultCountMenu.options[resultCountMenu.options.length] = typeOpt;
             });
 
             content.appendChild(_textSpan("Show "));
@@ -161,7 +156,7 @@ DirectorySearchResults = new Class(Object, {
 
         // since a bunch of userpics and ljusers were created
         // we should reload contextualpopup so it can attach to them
-        if (eval(defined(ContextualPopup)) && ContextualPopup.setup)
+        if (window.ContextualPopup)
             ContextualPopup.setup();
     },
 

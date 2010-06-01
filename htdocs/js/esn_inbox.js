@@ -265,7 +265,7 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
         return;
     }
 
-    if (! info || ! info.success || ! defined(info.items)) return;
+    if (!info || !info.success || info.items === undefined) return;
 
     var unread_count = 0;
     var usermsg_recvd_count = 0;

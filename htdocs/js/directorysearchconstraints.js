@@ -38,17 +38,12 @@ var DirectorySearchConstraintsView = new Class(View, {
         DirectorySearchConstraintPrototypes[type].displayName :
         type;
 
-      var typeOpt = document.createElement("option");
-      typeOpt.value = type;
-      typeOpt.text = displayName;
+      var typeOpt = new Option(displayName, type);
       if (type == c.type) {
         typeOpt.selected = true;
       }
 
-      Try.these(
-                function () { typeMenu.add(typeOpt, 0);    }, // IE
-                function () { typeMenu.add(typeOpt, null); }  // Firefox
-                );
+		typeMenu.options[typeMenu.options.length] = typeOpt;
     });
     this.typeMenus.push(typeMenu);
     var constraintChangedHandler = c.typeChanged.bindEventListener(c);
