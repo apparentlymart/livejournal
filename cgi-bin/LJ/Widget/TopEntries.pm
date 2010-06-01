@@ -23,7 +23,7 @@ sub render_body {
 
     my $ret = '';
 
-    $ret .= '<div class="w-topentries"><div class="w-head"><h2><span class="w-head-in">'.$class->ml('widget.topentries.title').'</span></h2><i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">';
+    $ret .= '<div class="w-topentries"><div class="w-head"><h2><a href="http://community.livejournal.com/ohnotheydidnt/" class="w-head-in">'.$class->ml('widget.topentries.title').'</a></h2><i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">';
 
     my $counter = 1;
     my $classname = '';
@@ -40,7 +40,7 @@ sub render_body {
         $counter = $counter + 1;
     }
 
-    $ret .= '</ul><p class="b-more">'.$class->ml('widget.topentries.morein').' <a href="http://community.livejournal.com/ohnotheydidnt/">ONTD</a></p></div></div>';
+    $ret .= '</ul></div></div>';
 
     return $ret;
 }
