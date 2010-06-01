@@ -96,9 +96,21 @@ body<=
 
     $ret .= '<form method="post" action="">';
 
+    my $tag = '?';
+
+    if ($GET{'tag'}) {
+        my $usertags = LJ::Tags::get_usertags($journal, {remote => $remote});
+        foreach my $tag_num (keys %$usertags) {
+            if ($usertags->{$tag_num}->{'name'} eq $GET{'tag'}) {
+                $tag = $tag_num;
+                last;
+            }
+        }
+    }
+
     my $groups = [
         { event => "JournalNewComment", arg1 => $ditemid, 'journalid' => $journal->id },
-        { event => "JournalNewEntry", arg1 => '?', 'journalid' => $journal->id },
+        { event => "JournalNewEntry", arg1 => $tag, 'journalid' => $journal->id },
         { event => "JournalNewEntry", 'journalid' => $journal->id },
     ];
 
