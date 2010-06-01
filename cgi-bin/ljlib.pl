@@ -2046,6 +2046,18 @@ sub handle_caches
     return 1;
 }
 
+=head2 LJ::show_contextual_hover()
+
+A subroutine that returns a boolean value indicating whether we should
+show a contextual hover popup on the current page.
+
+=cut
+
+sub show_contextual_hover {
+    my %args = LJ::Request->args;
+    return $LJ::CTX_POPUP and !$LJ::IS_SSL and $args{ctxpp} ne 'no';
+}
+
 # <LJFUNC>
 # name: LJ::start_request
 # des: Before a new web request is obtained, this should be called to
@@ -2140,7 +2152,6 @@ sub start_request
                             ))
                 unless LJ::conf_test($LJ::DISABLED{esn_ajax});
 
-            my %args = LJ::Request->args;
             # contextual popup JS
             LJ::need_res(qw(
                             js/ippu.js
@@ -2150,7 +2161,8 @@ sub start_request
                             js/hourglass.js
                             js/contextualhover.js
                             stc/contextualhover.css
-                            )) if $LJ::CTX_POPUP and $args{ctxpp} ne 'no';
+                            )
+            ) if LJ::show_contextual_hover();
 
             # Conditional IE CSS file for all pages 
             LJ::need_res({condition => 'IE'}, 'stc/ie.css');
