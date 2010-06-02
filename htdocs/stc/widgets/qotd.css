@@ -18,6 +18,9 @@
 		list-style:none;
 		font-size:11px;
 		}
+	* HTML .i-qotd-menu {
+		zoom:1;
+		}
 		.i-qotd-menu LI {
 			float:left;
 			margin:0 5px 0 0;
@@ -98,6 +101,9 @@
 	.b-qotd-question {
 		overflow:hidden;
 		margin:0 0 10px;
+		}
+	* HTML .b-qotd-question {
+		zoom:1;
 		}
 		.b-qotd-question .qotd-pic {
 			float:left;
