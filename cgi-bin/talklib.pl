@@ -216,7 +216,6 @@ sub init
         return { 'error' => BML::ml('talk.error.purged')} if $ju->is_expunged;
 
         LJ::assert_is($ju->{user}, lc $journal);
-        $ju->selfassert;
 
         $init->{'clustered'} = 1;
         foreach (qw(itemid replyto)) {
