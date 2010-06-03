@@ -1,0 +1,19 @@
+<!-- paging -->
+<table class="communities" cellpadding="0" cellspacing="0" width="100%"><tbody>
+<TMPL_IF communities>
+<tr style="" class="head"><td style="" colspan="2">Community</td><td style="">Updated</td></tr>
+<TMPL_LOOP communities>
+    <TMPL_IF featured><tr class='featured'><TMPL_ELSE><tr class='regular'></TMPL_IF>
+    <td class='userpic'><TMPL_VAR userpic></td>
+    <td class='content'><p class='collapsed-poster'><TMPL_VAR journal_name></p>
+    <p class='collapsed-subject'>
+        <a href='<TMPL_VAR journal_base>'><strong><TMPL_VAR journal_title></strong></a>
+        <br />
+        <TMPL_VAR journal_subtitle></p>
+    </td><td class='posted' valign='top'><TMPL_VAR updated_ago></td>
+    </tr>
+</TMPL_LOOP>
+<TMPL_ELSE>
+<tr><td colspan='100%' class='content'><i>No communities in this category yet</i></td></tr>
+</TMPL_IF>
+</table>

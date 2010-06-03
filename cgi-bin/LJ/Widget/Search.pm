@@ -36,7 +36,11 @@ sub render_body {
         $search_btn = LJ::html_submit($class->ml('.widget.search.submit'));
     }
 
-    $ret .= "<form action='$LJ::SITEROOT/multisearch.bml' method='post'>\n";
+    if ($opts{type} eq 'yandex') {
+        $ret .= "<form action='$LJ::SITEROOT/search/' method='post'>\n";
+    } else {
+        $ret .= "<form action='$LJ::SITEROOT/multisearch.bml' method='post'>\n";
+    }
     $ret .= $select_box;
     $ret .= LJ::html_text({name => 'q', 'class' => 'text', 'size' => 30}) . " ";
     $ret .= $search_btn;

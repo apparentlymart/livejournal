@@ -1,0 +1,14 @@
+<!-- Left menu (aka shop-like) -->
+<TMPL_LOOP categories>
+
+    <!-- level marks -->
+    <TMPL_IF expr="level eq 0"><b>&gt;</b></TMPL_IF>
+    <TMPL_IF expr="level eq 1">&nbsp; &nbsp; &gt;</TMPL_IF>
+    <TMPL_IF expr="level eq 2">&nbsp; &nbsp; &nbsp; &nbsp; &gt;</TMPL_IF>
+
+    <a href="<TMPL_VAR url>"><strong><TMPL_VAR name></strong></a>
+
+    <TMPL_IF is_current> &lt;---- We are here</TMPL_IF>
+
+    <br />
+</TMPL_LOOP>

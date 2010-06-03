@@ -1,0 +1,25 @@
+<TMPL_IF interest_search_only>
+    <p class='search-interestonly'><TMPL_VAR expr="ml('widget.search.interestonly')"></p>
+    <form action='<TMPL_VAR lj_siteroot>/multisearch.bml' method='post'>
+    <input type="hidden">  <!-- $select_box = LJ::html_hidden( type => "int" ); -->
+    <input name='q' class='text' size=30>
+    <input type="submit" value="<TMPL_VAR expr="ml('widget.search.interestonly.btn')">">
+<TMPL_ELSE>
+    <h2><TMPL_VAR expr="ml('.widget.search.title')"></h2>
+    <form action='<TMPL_VAR lj_siteroot>/multisearch.bml' method='post'>
+    <select name='type' selected='int' class='select'>
+        <option name='int'><TMPL_VAR expr="ml('.widget.search.interest')"></option>
+        <option name='region'><TMPL_VAR expr="ml('.widget.search.region')"></option>
+        <option name='user'><TMPL_VAR expr="ml('.widget.search.username')"></option>
+        <option name='email'><TMPL_VAR expr="ml('.widget.search.email')"></option>
+        <option name='aolim'><TMPL_VAR expr="ml('.widget.search.aim')"></option>
+        <option name='icq'><TMPL_VAR expr="ml('.widget.search.icq')"></option>
+        <option name='jabber'><TMPL_VAR expr="ml('.widget.search.jabber')"></option>
+        <option name='msn'><TMPL_VAR expr="ml('.widget.search.msn')"></option>
+        <option name='yahoo'><TMPL_VAR expr="ml('.widget.search.yahoo')"></option>
+    </select>
+    <input name='q' class='text' size=30>
+    <input type="submit" value="<TMPL_VAR expr="ml('widget.search.submit')">">
+</TMPL_IF>
+</form>
+
