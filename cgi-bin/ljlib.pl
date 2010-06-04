@@ -382,7 +382,7 @@ sub theschwartz {
 
     if (%LJ::THESCHWARTZ_DBS_ROLES) {
         ## new config - with roles
-        my $role = $opts->{role} || "default";
+        my $role = $opts->{role} || $LJ::THESCHWARTZ_DEFAULT_ROLE || "default";
         return $LJ::SchwartzClient{$role} if $LJ::SchwartzClient{$role};
 
         my @dbs;

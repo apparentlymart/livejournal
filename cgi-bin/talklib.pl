@@ -2522,7 +2522,7 @@ sub init {
         return undef;
     };
     my $bmlerr = sub {
-        return $err->($BML::ML{$_[0]});
+        return $err->(LJ::Lang::ml($_[0]));
     };
 
     my $init = LJ::Talk::init($form);
