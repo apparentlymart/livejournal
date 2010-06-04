@@ -13,7 +13,8 @@ sub render_body {
     return <<EOT;
 <h2>Add community</h2>
 <form action='$LJ::SITEROOT/search/' method='post'>
---- text ---<br />
+Please submit your suggestion for Community<br />
+Directory. Or submit your suggestion for <a href="#">Spotlight</a>.<br />
 <input type="submit">
 </form>
 EOT
