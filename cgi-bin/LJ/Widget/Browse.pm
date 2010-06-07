@@ -9,23 +9,27 @@ use vars qw(%GET %POST $headextra @errors @warnings);
 sub need_res { qw( stc/widgets/browse.css stc/pagemodules.css ) }
 
 sub _build_flat_tree {
-    my ($parent, $level, $test_uri, $ret_ref, @categories) = @_;
+    my ($parent, $level, $test_uri, @categories) = @_;
+    my @tree = ();
     foreach my $c
         (grep { (!$parent && !$_->parent) || ($_->parent == $parent) } grep { $_ } @categories) {
 
-            push @$ret_ref,
+            ++$level;
+            push @tree,
                 {
-                    name        => $c->display_name(),
-                    title       => $c->title_html(),
-                    url         => $c->url(),
-                    summary     => LJ::Widget::CategorySummary->render( category => $c ),
-                    level       => $level,
-                    is_expanded => 0,
-                    is_current  => ($c->uri eq $test_uri),
+                    name            => $c->display_name(),
+                    title           => $c->title_html(),
+                    url             => $c->url(),
+                    summary         => LJ::Widget::CategorySummary->render( category => $c ),
+                    level           => $level,
+                    is_expanded     => 0,
+                    is_current      => ($c->uri eq $test_uri),
+                    "level$level"   => [ _build_flat_tree($c, $level, $test_uri, @categories) ],
                 };
+            --$level;
 
-            _build_flat_tree($c, $level+1, $test_uri, $ret_ref, @categories);
         }
+    return @tree;
 }
 
 sub render_body {
@@ -53,8 +57,7 @@ sub render_body {
     $test_uri =~ s/^\/browse//;
     $test_uri =~ s/\/$//;
 
-    my @tmpl_categories = ();
-    _build_flat_tree(undef, 0, $test_uri, \@tmpl_categories, @categories);
+    my @tmpl_categories = _build_flat_tree(undef, 0, $test_uri, @categories);
 
     my ($ad, $nav_line) = 2 x '';
 
@@ -97,11 +100,44 @@ sub render_body {
         $ad = LJ::get_ads({ location => 'bml.explore/novertical', ljadwrapper => 1 });
     }
 
-# TODO: paging: first, previouse, next, last pages.
+    # paging: first, previouse, next, last pages.
+    my $page_size = 2;
+    my ($page_first, $page_prev, $page_next, $page_last) = 4 x 0;
+    my $pages = (scalar @tmpl_communities) / $page_size + 1;
+    $page = 1 unless $page;
+    if($page > 1) {
+        $page_first = 1;
+        $page_prev = $page - 1;
+    }
+
+    if ($page < $pages) {
+        $page_next = $page + 1;
+        $page_last = $pages;
+        $page_next = $page_last if $page_next > $page_last;
+    }
+
+    my $args = '';
+    ($uri, $args) = split(/\?/, $uri);
+    $args =~ s/&?page=[^&]*//;  # cut off page= parameter
+    $args =~ s/^&//;
+
+    # make page_* urls
+    ($page_first, $page_prev, $page_next, $page_last) = map {
+        $_ ? $LJ::SITEROOT . $uri . ($args ? "?$args&page=$_" : "?page=$_") : ''
+    } ($page_first, $page_prev, $page_next, $page_last);
+
+    # merge args to uri.
+    $uri .= '?' . $args if $args;
 
     $template->param(
         communities             => \@tmpl_communities,
+        uri                     => $uri,
         page                    => $page,
+        pages                   => $pages,
+        page_first              => $page_first,
+        page_prev               => $page_prev,
+        page_next               => $page_next,
+        page_last               => $page_last,
         title                   => $$title,
         categories              => \@tmpl_categories,
         ad                      => $ad,

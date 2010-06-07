@@ -1,6 +1,14 @@
-<!-- paging -->
 <table class="communities" cellpadding="0" cellspacing="0" width="100%"><tbody>
 <TMPL_IF communities>
+
+<!-- paging -->
+Pages:
+
+<TMPL_IF page_first><a href="<TMPL_VAR page_first>">first</a><TMPL_ELSE>first</TMPL_IF>
+<TMPL_IF page_prev><a href="<TMPL_VAR page_prev>">prev</a><TMPL_ELSE>prev</TMPL_IF>
+<TMPL_IF page_next><a href="<TMPL_VAR page_next>">next</a><TMPL_ELSE>next</TMPL_IF>
+<TMPL_IF page_last><a href="<TMPL_VAR page_last>">last</a><TMPL_ELSE>last</TMPL_IF>
+
 <tr style="" class="head"><td style="" colspan="2">Community</td><td style="">Updated</td></tr>
 <TMPL_LOOP communities>
     <TMPL_IF featured><tr class='featured'><TMPL_ELSE><tr class='regular'></TMPL_IF>
