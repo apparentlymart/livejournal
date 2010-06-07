@@ -1,14 +1,22 @@
-<!-- Left menu (aka shop-like) -->
-<TMPL_LOOP categories>
+<ul class="m-section">
+    <TMPL_LOOP categories>
+        <li class="m-section-item"><i class="m-switch"></i><TMPL_VAR name>
+            <TMPL_IF level1>
+                <ul class="m-section-list">
+                    <TMPL_LOOP level1>
+                        <li><tmpl_if is_selected><strong><TMPL_VAR name></strong><tmpl_else><a href="<tmpl_var url>"><TMPL_VAR name></a></tmpl_if>
+                            <TMPL_IF level1>
+                                <ul class="m-section-list">
+                                    <TMPL_LOOP level2>
+                                        <li><tmpl_if is_selected><strong><TMPL_VAR name></strong><tmpl_else><a href="<tmpl_var url>"><TMPL_VAR name></a></tmpl_if></li>
+                                    </TMPL_LOOP>
+                                </ul>
+                             </TMPL_IF>
+                         </li>
+                     </TMPL_LOOP>
+                 </ul>
+            </TMPL_IF>
+        </li>
+    </TMPL_LOOP>
+</ul>
 
-    <!-- level marks -->
-    <TMPL_IF expr="level eq 0"><b>&gt;</b></TMPL_IF>
-    <TMPL_IF expr="level eq 1">&nbsp; &nbsp; &gt;</TMPL_IF>
-    <TMPL_IF expr="level eq 2">&nbsp; &nbsp; &nbsp; &nbsp; &gt;</TMPL_IF>
-
-    <a href="<TMPL_VAR url>"><strong><TMPL_VAR name></strong></a>
-
-    <TMPL_IF is_current> &lt;---- We are here</TMPL_IF>
-
-    <br />
-</TMPL_LOOP>

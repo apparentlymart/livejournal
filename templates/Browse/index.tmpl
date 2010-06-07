@@ -1,28 +1,16 @@
-<TMPL_VAR nav_line><br /><br />
+<div class="l-body">
+	<TMPL_VAR nav_line>
+    <div class="b-catalogue">
+        <div class="l-aside">    
+            <TMPL_INCLUDE menu.tmpl> 
+        </div>
+        <div class="l-content">
+            <TMPL_INCLUDE communities.tmpl>
+        </div>
+        <div class="l-sidebar">
+            <TMPL_INCLUDE sidebar.tmpl>
+        </div>
+    </div>
+</div>
 
-<table>
-<tr>
-<td valign='top'>
-
-<!-- left column -->
-
-<TMPL_INCLUDE menu.tmpl>        <!-- Left menu (aka shop-like) -->
-
-</td>
-<td valign='top'>
-
-<!-- center column -->
-
-<TMPL_INCLUDE communities.tmpl> <!-- A list of communities -->
-
-</td>
-<td valign='top'>
-
-<!-- right column -->
-
-<TMPL_INCLUDE sidebar.tmpl> <!-- Other stuff -->
-
-</td>
-<tr>
-</table>
 

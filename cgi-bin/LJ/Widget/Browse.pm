@@ -6,7 +6,7 @@ use Carp qw(croak);
 
 use vars qw(%GET %POST $headextra @errors @warnings);
 
-sub need_res { qw( stc/widgets/browse.css stc/pagemodules.css ) }
+#sub need_res { qw( stc/widgets/browse.css stc/pagemodules.css ) }
 
 sub _build_flat_tree {
     my ($parent, $level, $test_uri, @categories) = @_;
