@@ -147,7 +147,7 @@ sub LJ::Request::args {
         my $qs = $instance->{r}->args(@_);
         my @args = 
             map { URI::Escape::uri_unescape ($_) }
-            map { s/+/ /g; $_ }  # in query_string 'break' is encoded as '+' simbol
+            map { s/\+/ /g; $_ }  # in query_string 'break' is encoded as '+' simbol
             map { split /=/ => $_, 2 }
             split /[\&\;]/ => $qs;
         return @args;
@@ -371,7 +371,7 @@ sub LJ::Request::get_params {
         my $qs = $instance->{r}->args(@_);
         my @args =
             map { URI::Escape::uri_unescape ($_) }
-            map { s/+/ /g; $_ } # in query_string 'break' is encoded as '+' simbol
+            map { s/\+/ /g; $_ } # in query_string 'break' is encoded as '+' simbol
             map { split /=/ => $_, 2 }
             split /[\&\;]/ => $qs;
         return @args;
