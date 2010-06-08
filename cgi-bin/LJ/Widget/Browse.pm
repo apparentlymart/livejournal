@@ -63,6 +63,10 @@ sub render_body {
 
     my @tmpl_communities = ();
 
+    my $page_size = 10;  # const
+
+    my $count = 0;
+
     if ($cat) {
         # we're looking at a lower-level category
         $$windowtitle = $cat->display_name;
@@ -71,11 +75,20 @@ sub render_body {
         $nav_line = "<a href=\"$LJ::SITEROOT/browse/\"><strong>Home</strong></a> &gt; " .
             $cat->title_html();
 
+        $page ||= 1;
+        my $skip = ($page-1) * $page_size;
+        my $last = $skip + $page_size;
+
         # show actual communities
         if ($cat->parent) {
             my @comms = $cat->communities();
             foreach my $comm (@comms) {
                 next unless LJ::isu($comm);
+
+                # paging
+                $count++;
+                next if $count <= $skip || $count > $last;
+
                 my $secondsold = $comm->timeupdate ? time() - $comm->timeupdate : undef;
                 my $userpic = $comm->userpic ?
                     $comm->userpic->imgtag_percentagesize(0.5) :
@@ -101,9 +114,8 @@ sub render_body {
     }
 
     # paging: first, previouse, next, last pages.
-    my $page_size = 2;
     my ($page_first, $page_prev, $page_next, $page_last) = 4 x 0;
-    my $pages = (scalar @tmpl_communities) / $page_size + 1;
+    my $pages = int($count / $page_size) + 1;
     $page = 1 unless $page;
     if($page > 1) {
         $page_first = 1;
