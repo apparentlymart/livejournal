@@ -13,7 +13,8 @@ sub _build_flat_tree {
     my @tree = ();
     foreach my $c
         (grep { (!$parent && !$_->parent) || ($_->parent == $parent) } grep { $_ } @categories) {
-
+            my $c_uri = $c->uri;
+            my $is_current = ($test_uri =~ m/^\Q$c_uri\E/);
             ++$level;
             push @tree,
                 {
@@ -23,11 +24,10 @@ sub _build_flat_tree {
                     summary         => LJ::Widget::CategorySummary->render( category => $c ),
                     level           => $level,
                     is_expanded     => 0,
-                    is_current      => ($c->uri eq $test_uri),
+                    is_current      => $is_current,
                     "level$level"   => [ _build_flat_tree($c, $level, $test_uri, @categories) ],
                 };
             --$level;
-
         }
     return @tree;
 }
