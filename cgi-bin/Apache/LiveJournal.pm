@@ -342,7 +342,11 @@ sub trans
             return LJ::Request::OK
         }
     }
-
+    
+    if(LJ::Request->headers_in->{Accept} eq 'application/xrds+xml'){
+        LJ::Request->header_out('X-XRDS-Location' => 'http://api.' . $LJ::DOMAIN .'/xrds');
+    }
+    
     # only allow certain pages over SSL
     if ($is_ssl) {
         if ($uri =~ m!^/interface/! || $uri =~ m!^/__rpc_!) {
