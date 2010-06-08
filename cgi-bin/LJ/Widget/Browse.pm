@@ -106,10 +106,9 @@ sub render_body {
                     };
             }
         }
-        $$title .= " <img src='$LJ::IMGPREFIX/beta.gif' alt='Beta' align='absmiddle'>";
         $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $cat->display_name, ljadwrapper => 1 });
     } else {
-        $$title = "$$windowtitle <img src='$LJ::IMGPREFIX/beta.gif' align='absmiddle' alt='Beta' />";
+        $$title = "$$windowtitle";
         $ad = LJ::get_ads({ location => 'bml.explore/novertical', ljadwrapper => 1 });
     }
 
