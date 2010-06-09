@@ -5796,6 +5796,12 @@ web.postto.label=Post to:
 
 we_like_this_title=View people who like it
 
+widget.addcommunity.caption=Add community
+
+widget.addcommunity.form_text=Please submit your suggestion for Community Directory. Or submit your suggestion for [[openlink]]Spotlight[[closelink]].
+
+widget.addcommunity.submit_button_caption=Submit
+
 widget.addqotd.extratext|staleness=1
 widget.addqotd.extratext=Extra Text (optional):
 
