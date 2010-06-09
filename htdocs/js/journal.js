@@ -1,4 +1,3 @@
-
 ILikeThis = {
 	dialog: jQuery(),
 	
@@ -114,3 +113,19 @@ ILikeThis = {
 		return false;
 	}
 }
+
+jQuery(document).click(function(e)
+{
+	// Share in Facebook
+	var href = e.target.href;
+	if (href) {
+		if (href.indexOf('http://www.facebook.com/sharer.php') === 0) {
+			window.open(href, 'sharer', 'toolbar=0,status=0,width=626,height=436');
+			e.preventDefault();
+		} else if (href.indexOf('http://twitter.com/home/?status=') === 0) {
+			var status = LiveJournal.parseGetArgs(href).status;
+			window.open(Site.siteroot + '/share/twitter.bml?status='+status, 'sharer', 'toolbar=0,status=0,width=430,height=220');
+			e.preventDefault();
+		}
+	}
+})
