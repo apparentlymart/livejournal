@@ -3658,7 +3658,19 @@ sub _Entry__get_link
         # TODO short status text plz. 140 symbols
         my $entry_url = $entry->url;
         my $entry_title = LJ::ejs($entry->subject_html);
-        my $link = LJ::S2::Link("http://twitter.com/home/?status=$entry_title $entry_url via \@livejournal", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
+
+        ## Text for twitter
+        ## Twit's max length is 140 bytes. And we have to add sign with source to the twit,
+        ##  i.e. " via http://USERNAME.lj.ru/postid"
+        my $sign = " via http://" . $entry->journal->username . ".lj.ru/" . $entry->ditemid;
+        my $need = 140 - $sign;
+        my $twit = $entry->subject_text;
+        if (length $twit > $need){
+            $twit = LJ::trim_at_word($twit, $need);
+        }
+        $twit = LJ::eurl($twit . $sign);
+
+        my $link = LJ::S2::Link("http://twitter.com/home/?status=$twit", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
         return $link;
     }
     if ($key eq "share_email") {
