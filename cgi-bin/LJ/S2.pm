@@ -3642,6 +3642,33 @@ sub _Entry__get_link
             </script>|;
         return $link;
     }
+    if ($key eq "share_facebook") {
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->security eq 'public';
+        my $entry_url = $entry->url;
+        my $entry_title = $entry->subject_html;
+        # TODO to url format $entry_url, $entry_title in url
+        my $url = "http://www.facebook.com/sharer.php?u=$entry_url&t=$entry_title";
+        my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_facebook"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_facebook.gif", 24, 24));
+        return $link;
+    }
+    if ($key eq "share_twitter") {
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->security eq 'public';
+        # TODO short status text plz. 140 symbols
+        my $entry_url = $entry->url;
+        my $entry_title = LJ::ejs($entry->subject_html);
+        my $link = LJ::S2::Link("http://twitter.com/home/?status=$entry_title $entry_url via \@livejournal", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
+        return $link;
+    }
+    if ($key eq "share_email") {
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->security eq 'public';
+        my $entry_url = $entry->url;
+        my $entry_title = LJ::ejs($entry->subject_html);
+        my $link = LJ::S2::Link("#", $ctx->[S2::PROPS]->{"text_share_email"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_email.gif", 24, 24));
+        return $link;
+    }
     if ($key eq "mem_add") {
         return $null_link if $LJ::DISABLED{'memories'};
         return LJ::S2::Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
