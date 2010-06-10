@@ -17,21 +17,21 @@ sub render_body {
     if ($opts{all}) {
         my @messages = LJ::SiteMessages->get_messages;
 
-        $ret .= "<ul class='nostyle'>";
+        $ret .= "<p class='b-message b-message-suggestion b-message-system'><span><img width='16' height='14' alt='' src='http://www.ljdev5.livejournal.ru/img/message-system-alert.gif' />";
         foreach my $message (@messages) {
             my $ml_key = $class->ml_key("$message->{mid}.text");
-            $ret .= "<li>" . $class->ml($ml_key) . "</li>";
+            $ret .= $class->ml($ml_key);
         }
-        $ret .= "</ul>";
+        $ret .= "<i class='close'></i></span></p>";
     # -- same as below -- } elsif ($opts{substitude}) {
     } else {
         my $message = LJ::SiteMessages->get_open_message;
 
         if ($message) {
-            $ret .= "<div id='sm$message->{mid}'>";
+            $ret .= "<p class='b-message b-message-suggestion b-message-system'><span><img width='16' height='14' alt='' src='http://www.ljdev5.livejournal.ru/img/message-system-alert.gif' />";
             my $ml_key = $class->ml_key("$message->{mid}.text");
             $ret .= $class->ml($ml_key);
-            $ret .= "</div>";
+            $ret .= "<i class='close'></i></span></p>";
         }
     }
 
