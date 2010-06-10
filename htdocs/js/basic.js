@@ -1,5 +1,7 @@
 //document.write('<script type="text/javascript" src="'+Site.statprefix+'/js/core.js"></'+'script>');
 
+document.documentElement.id = 'js';
+
 /**
  * Utility method.
  * @param x <code>any</code> Any JavaScript value, including <code>undefined</code>.
