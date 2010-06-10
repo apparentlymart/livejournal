@@ -3645,32 +3645,18 @@ sub _Entry__get_link
     if ($key eq "share_facebook") {
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
-        my $entry_url = $entry->url;
-        my $entry_title = $entry->subject_html;
+        my $entry_url = LJ::eurl($entry->url);
+        my $entry_title = LJ::eurl($entry->subject_text);
         # TODO to url format $entry_url, $entry_title in url
-        my $url = "http://www.facebook.com/sharer.php?u=$entry_url&t=$entry_title";
+        my $url = "http://www.facebook.com/sharer.php?u=$entry_url&amp;t=$entry_title";
         my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_facebook"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_facebook.gif", 24, 24));
         return $link;
     }
     if ($key eq "share_twitter") {
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
-        # TODO short status text plz. 140 symbols
-        my $entry_url = $entry->url;
-        my $entry_title = LJ::ejs($entry->subject_html);
-
-        ## Text for twitter
-        ## Twit's max length is 140 bytes. And we have to add sign with source to the twit,
-        ##  i.e. " via http://USERNAME.lj.ru/postid"
-        my $sign = " via http://" . $entry->journal->username . ".lj.ru/" . $entry->ditemid;
-        my $need = 140 - $sign;
-        my $twit = $entry->subject_text;
-        if (length $twit > $need){
-            $twit = LJ::trim_at_word($twit, $need);
-        }
-        $twit = LJ::eurl($twit . $sign);
-
-        my $link = LJ::S2::Link("http://twitter.com/home/?status=$twit", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
+        my $post_id = $entry->journalid . ':' . $entry->ditemid;
+        my $link = LJ::S2::Link("$LJ::SITEROOT/share/twitter.bml?post_id=$post_id", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
         return $link;
     }
     if ($key eq "share_email") {
