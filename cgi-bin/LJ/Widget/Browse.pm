@@ -104,6 +104,7 @@ sub render_body {
                     };
             }
         }
+        $$title = "$$windowtitle";
         $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $cat->display_name, ljadwrapper => 1 });
     } else {
         $ad = LJ::get_ads({ location => 'bml.explore/novertical', ljadwrapper => 1 });

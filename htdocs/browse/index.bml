@@ -5,7 +5,7 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $windowtitle $headextra @errors @warnings);
 
-    LJ::need_res('stc/framework/layout.css', 'stc/framework/modules.css', 'stc/catalogue/catalogue.css');
+    LJ::need_res('js/communitydir.js', 'stc/framework/layout.css', 'stc/framework/modules.css', 'stc/catalogue/catalogue.css');
 	LJ::need_res( {condition => 'IE'}, 'stc/catalogue/ie.css');
 
 
