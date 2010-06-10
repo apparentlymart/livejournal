@@ -67,9 +67,7 @@ sub render_body {
 
     my $count = 0;
 
-    if ($cat) {
-        # we're looking at a lower-level category
-        $$windowtitle = $cat->display_name;
+    if ($cat) { # we're looking at a lower-level category
 
         # TODO: multilanguage world 'Home'.
         $nav_line = "<a href=\"$LJ::SITEROOT/browse/\"><strong>Home</strong></a> &gt; " .
@@ -99,18 +97,19 @@ sub render_body {
                         featured            => 0,
                         userpic             => $userpic,
                         journal_name        => $comm->ljuser_display({ bold => 0, head_size => 11 }), 
+                        journal_user        => $comm->{user},
                         journal_base        => $comm->journal_base(),
-                        journal_title       => $comm->prop('journaltitle') || '',
-                        journal_subtitle    => $comm->prop('journalsubtitle') || '',
+                        journal_title       => $comm->{'name'} || '',
+                        journal_subtitle    => $comm->prop('comm_theme') || '',
                         updated_ago         => LJ::TimeUtil->ago_text($secondsold),
                     };
             }
         }
         $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $cat->display_name, ljadwrapper => 1 });
     } else {
-        $$title = "$$windowtitle";
         $ad = LJ::get_ads({ location => 'bml.explore/novertical', ljadwrapper => 1 });
     }
+    $$title = "$$windowtitle";
 
     # paging: first, previouse, next, last pages.
     my ($page_first, $page_prev, $page_next, $page_last) = 4 x 0;
@@ -155,10 +154,7 @@ sub render_body {
         nav_line                => $nav_line,
         popular_interests_widget=> LJ::Widget::PopularInterests->render(),
         add_community_widget    => LJ::Widget::AddCommunity->render(),
-        search_widget           => LJ::Widget::Search->render(
-                                    single_search   => 'interest',
-                                    int             => 'myint',
-                                    type            => 'yandex' ),
+        search_widget           => LJ::Widget::Search->render(type => 'yandex'),
     );
 
     return $template->output;
