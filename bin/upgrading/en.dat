@@ -6686,6 +6686,20 @@ widget.search.username=Username
 
 widget.search.yahoo=Yahoo! ID
 
+widget.search.yandex.name=Search
+
+widget.search.yandex.find=Find
+
+widget.search.yandex.findall=All
+
+widget.search.yandex.findposts=Posts
+
+widget.search.yandex.findcomments=Comments
+
+widget.search.yandex.findusers=People and communitites
+
+widget.search.yandex.findfaq=FAQ
+
 widget.sitemessages.title|staleness=1
 widget.sitemessages.title=Announcement
 
