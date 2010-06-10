@@ -47,7 +47,7 @@ sub render_body {
         strict => 0,
     ) or die "Can't open template: $!";
 
-    $$windowtitle = "Community Directory";  # TODO: multilanguage
+    $$windowtitle = $class->ml('widget.browse.windowtitle');
 
     my $cat = LJ::Browse->load_by_url($uri); # Currently selected category
 
@@ -69,8 +69,7 @@ sub render_body {
 
     if ($cat) { # we're looking at a lower-level category
 
-        # TODO: multilanguage world 'Home'.
-        $nav_line = "<a href=\"$LJ::SITEROOT/browse/\"><strong>Home</strong></a> &gt; " .
+        $nav_line = "<a href=\"$LJ::SITEROOT/browse/\"><strong>".$class->ml('widget.browse.nav_bar.home')."</strong></a> &gt; " .
             $cat->title_html();
 
         $page ||= 1;

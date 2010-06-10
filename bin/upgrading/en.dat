@@ -5862,6 +5862,10 @@ widget.browse.findusers.school=School
 widget.browse.title|staleness=1
 widget.browse.title=Browse [[sitenameabbrev]]
 
+widget.browse.windowtitle=Community Directory
+
+widget.browse.nav_bar.home=Home
+
 widget.commsofuser.title=Communities [[user]] has added
 
 widget.commsofuser.viewfriendspage|staleness=1

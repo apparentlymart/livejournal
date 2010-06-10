@@ -2,10 +2,9 @@
 <TMPL_IF communities>
 
 <!-- paging -->
-Pages:
-
 <TMPL_IF page_first><a href="<TMPL_VAR page_first>">first</a><TMPL_ELSE>first</TMPL_IF>
 <TMPL_IF page_prev><a href="<TMPL_VAR page_prev>">prev</a><TMPL_ELSE>prev</TMPL_IF>
+&nbsp;<TMPL_VAR page>/<TMPL_VAR pages>&nbsp;
 <TMPL_IF page_next><a href="<TMPL_VAR page_next>">next</a><TMPL_ELSE>next</TMPL_IF>
 <TMPL_IF page_last><a href="<TMPL_VAR page_last>">last</a><TMPL_ELSE>last</TMPL_IF>
 
