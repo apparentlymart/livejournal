@@ -104,7 +104,52 @@ sub render_body {
 
         # show actual communities
         if ($cat->parent) {
-            my @comms = $cat->communities();
+            my @comms = ();
+            if ($cat->{'pretty_name'} eq 'lj_spotlight_community') {
+                # Load communities saved by spotlight admin
+
+                my $remote = LJ::get_remote();
+
+                my ($normal_rows, $sponsored_rows, $promoted_rows, $partner_rows) = map {
+                    [ LJ::JournalSpotlight->get_spotlights(
+                        filter  => $_,
+                        user => $remote ) ]
+                    } qw(normal sponsored promoted partner);
+
+                my $show_sponsored = LJ::run_hook('should_see_special_content', $remote);
+                my $show_promoted = LJ::run_hook('should_see_special_content', $remote);
+
+                my $promoted_row_count = @$promoted_rows;
+                my $sponsored_row_count = @$sponsored_rows;
+                my $partner_row_count = @$partner_rows;
+
+                my $showing_normal = @$normal_rows;
+                my $showing_sponsored = $sponsored_row_count && $show_sponsored;
+                my $showing_promoted = $promoted_row_count && $show_promoted;
+                my $showing_partner = $partner_row_count && $show_sponsored;
+
+                my @rows = ();
+
+                if ($showing_normal || $showing_sponsored || $showing_promoted || $showing_partner) {
+                    push @rows, @$normal_rows       if $showing_normal;
+                    push @rows, @$promoted_rows     if $showing_promoted;
+                    push @rows, @$sponsored_rows    if $showing_sponsored;
+                }
+
+                push @rows, @$partner_rows if $showing_partner;
+
+                my $us = LJ::load_userids(map { $_->{userid} } @rows);
+
+                foreach my $row (@rows) {
+                    my $u = $us->{$row->{userid}};
+                    next unless $u;
+                    push @comms, $u;
+                }
+
+            } else {
+                @comms = $cat->communities();
+            }
+
             foreach my $comm (@comms) {
                 next unless LJ::isu($comm);
 
