@@ -5866,6 +5866,20 @@ widget.browse.windowtitle=Community Directory
 
 widget.browse.nav_bar.home=Home
 
+widget.browse.page.first=First
+
+widget.browse.page.previous=Previous
+
+widget.browse.page.next=Next
+
+widget.browse.page.last=Last
+
+widget.browse.community.join=Join
+
+widget.browse.community.watch=Watch
+
+widget.browse.community.empty_list=No communities in this category yet
+
 widget.commsofuser.title=Communities [[user]] has added
 
 widget.commsofuser.viewfriendspage|staleness=1

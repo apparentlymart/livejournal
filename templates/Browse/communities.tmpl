@@ -1,10 +1,10 @@
 <TMPL_IF communities>
     <!-- paging -->
-    <TMPL_IF page_first><a href="<TMPL_VAR page_first>">first</a><TMPL_ELSE>first</TMPL_IF>
-    <TMPL_IF page_prev><a href="<TMPL_VAR page_prev>">prev</a><TMPL_ELSE>prev</TMPL_IF>
+    <TMPL_IF page_first><a href="<TMPL_VAR page_first>"><TMPL_VAR expr="ml('widget.browse.page.first')"></a><TMPL_ELSE><TMPL_VAR expr="ml('widget.browse.page.first')"></TMPL_IF>
+    <TMPL_IF page_prev><a href="<TMPL_VAR page_prev>"><TMPL_VAR expr="ml('widget.browse.page.previous')"></a><TMPL_ELSE><TMPL_VAR expr="ml('widget.browse.page.previous')"></TMPL_IF>
     &nbsp;<TMPL_VAR page>/<TMPL_VAR pages>&nbsp;
-    <TMPL_IF page_next><a href="<TMPL_VAR page_next>">next</a><TMPL_ELSE>next</TMPL_IF>
-    <TMPL_IF page_last><a href="<TMPL_VAR page_last>">last</a><TMPL_ELSE>last</TMPL_IF>
+    <TMPL_IF page_next><a href="<TMPL_VAR page_next>"><TMPL_VAR expr="ml('widget.browse.page.next')"></a><TMPL_ELSE><TMPL_VAR expr="ml('widget.browse.page.next')"></TMPL_IF>
+    <TMPL_IF page_last><a href="<TMPL_VAR page_last>"><TMPL_VAR expr="ml('widget.browse.page.last')"></a><TMPL_ELSE><TMPL_VAR expr="ml('widget.browse.page.last')"></TMPL_IF>
 
     <ul class="b-catalogue-list">
         <TMPL_LOOP communities>
@@ -17,8 +17,8 @@
                         <h4><TMPL_VAR journal_title></h4>
                         <p><TMPL_VAR journal_subtitle></p>
                         <ul class="b-catalogue-item-action">
-                            <li><form action="/community/join.bml" method="GET"><input type="hidden" name="comm" value="<TMPL_VAR journal_user>"><input type="submit" value="Join"  /></form><a href="/community/join.bml?comm=<TMPL_VAR journal_user>">fdsfjdaf</a></li>
-                            <li><form action="/friends/add.bml"><input type="hidden" name="user" value="<TMPL_VAR journal_user>"><input type="submit" value="Watch"  /></form></li>
+                            <li><form action="/community/join.bml" method="GET"><input type="hidden" name="comm" value="<TMPL_VAR journal_user>"><input type="submit" value="<TMPL_VAR expr="ml('widget.browse.community.join')">" /></form></li>
+                            <li><form action="/friends/add.bml"><input type="hidden" name="user" value="<TMPL_VAR journal_user>"><input type="submit" value="<TMPL_VAR expr="ml('widget.browse.community.watch')">" /></form></li>
                         </ul>
                     <dd>
                 </dl>
@@ -26,5 +26,5 @@
         </TMPL_LOOP>
     </ul>
 <TMPL_ELSE>
-    <p>No communities in this category yet</p>
+    <p><TMPL_VAR expr="ml('widget.browse.community.empty_list')"></p>
 </TMPL_IF>
