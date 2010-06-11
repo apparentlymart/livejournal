@@ -1,11 +1,13 @@
 <TMPL_IF communities>
     <!-- paging -->
-    <TMPL_IF page_first><a href="<TMPL_VAR page_first>"><TMPL_VAR expr="ml('widget.browse.page.first')"></a><TMPL_ELSE><TMPL_VAR expr="ml('widget.browse.page.first')"></TMPL_IF>
-    <TMPL_IF page_prev><a href="<TMPL_VAR page_prev>"><TMPL_VAR expr="ml('widget.browse.page.previous')"></a><TMPL_ELSE><TMPL_VAR expr="ml('widget.browse.page.previous')"></TMPL_IF>
-    &nbsp;<TMPL_VAR page>/<TMPL_VAR pages>&nbsp;
-    <TMPL_IF page_next><a href="<TMPL_VAR page_next>"><TMPL_VAR expr="ml('widget.browse.page.next')"></a><TMPL_ELSE><TMPL_VAR expr="ml('widget.browse.page.next')"></TMPL_IF>
-    <TMPL_IF page_last><a href="<TMPL_VAR page_last>"><TMPL_VAR expr="ml('widget.browse.page.last')"></a><TMPL_ELSE><TMPL_VAR expr="ml('widget.browse.page.last')"></TMPL_IF>
-
+    <ul class="b-nav-counter">
+        <li class="b-nav-counter-first"><TMPL_IF page_first><a href="<TMPL_VAR page_first>" title="<TMPL_VAR expr="ml('widget.browse.page.first')">"><i><TMPL_VAR expr="ml('widget.browse.page.first')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.first')"></i></span></TMPL_IF></li>
+        <li class="b-nav-counter-prev"><TMPL_IF page_prev><a href="<TMPL_VAR page_prev>" title="<TMPL_VAR expr="ml('widget.browse.page.previous')">"><i><TMPL_VAR expr="ml('widget.browse.page.previous')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.previous')"></i></span></TMPL_IF></li>
+        <li class="b-nav-counter-pages"><TMPL_VAR page>/<TMPL_VAR pages></li>
+        <li class="b-nav-counter-next"><TMPL_IF page_next><a href="<TMPL_VAR page_next>" title="<TMPL_VAR expr="ml('widget.browse.page.next')">"><i><TMPL_VAR expr="ml('widget.browse.page.next')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.next')"></i></span></TMPL_IF></li>
+        <li class="b-nav-counter-last"><TMPL_IF page_last><a href="<TMPL_VAR page_last>" title="<TMPL_VAR expr="ml('widget.browse.page.last')">"><i><TMPL_VAR expr="ml('widget.browse.page.last')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.last')"></i></span></TMPL_IF></li>
+    </ul>
+        
     <ul class="b-catalogue-list">
         <TMPL_LOOP communities>
             <li class="b-catalogue-item">
