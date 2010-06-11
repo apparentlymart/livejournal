@@ -83,8 +83,9 @@ my %LN_CODE = ();   # $code -> ^^^^
 my $LAST_ERROR;
 my %TXT_CACHE;
 
-if ($LJ::IS_DEV_SERVER) {
-    LJ::register_hook('start_request', sub { %TXT_CACHE = (); });
+if ($LJ::IS_DEV_SERVER || $LJ::IS_LJCOM_BETA) {
+    our $_hook_is_installed;
+    LJ::register_hook('start_request', sub { %TXT_CACHE = (); }) unless $_hook_is_installed++;
 }
 
 sub last_error
