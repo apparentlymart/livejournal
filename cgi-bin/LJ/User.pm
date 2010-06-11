@@ -8971,7 +8971,10 @@ sub make_journal
                                     'journal.deleted', undef, {username => $u->username})
                        || LJ::Lang::get_text($LJ::DEFAULT_LANG, 
                                     'journal.deleted', undef, {username => $u->username});
-            return $error->($warning, "404 Not Found");
+            LJ::Request->pnotes ('error' => 'deleted');
+            $opts->{'handler_return'} = "404 Not Found";
+            return;
+            #return $error->($warning, "404 Not Found");
 
         }
         return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);
@@ -8980,7 +8983,11 @@ sub make_journal
         return $error->("This entry has been suspended. You can visit the journal <a href='" . $u->journal_base . "/'>here</a>.", "403 Forbidden")
             if $entry && $entry->is_suspended_for($remote);
     }
-    return $error->("This journal has been deleted and purged.", "410 Gone") if ($u->is_expunged);
+    if ($u->is_expunged) {
+        LJ::Request->pnotes ('error' => 'expunged');
+        $opts->{'handler_return'} = "410 Gone";
+        return;
+    }
 
     return $error->("This user has no journal here.", "404 Not here") if $u->{'journaltype'} eq "I" && $view ne "friends";
 

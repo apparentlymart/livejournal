@@ -8,6 +8,7 @@ use Apache2::RequestRec;
 use Apache2::Response;
 use Apache2::RequestIO;
 use Apache2::Request;
+use Apache2::SubRequest;
 use Apache2::Upload;
 use Apache2::ServerUtil;
 use Apache2::Log;
@@ -35,6 +36,7 @@ sub LJ::Request::M_PUT                     { return Apache2::Const::M_PUT }
 sub LJ::Request::M_POST                    { return Apache2::Const::M_POST() }
 sub LJ::Request::SERVER_ERROR              { return Apache2::Const::SERVER_ERROR }
 sub LJ::Request::BAD_REQUEST               { return Apache2::Const::HTTP_BAD_REQUEST }
+sub LJ::Request::HTTP_GONE                 { return Apache2::Const::HTTP_GONE }
 
 
 sub LJ::Request::interface_name { 'Apache2' }
@@ -70,6 +72,12 @@ sub LJ::Request::init {
     $instance->{apr} = Apache2::Request->new($r);
     $instance->{r} = $r;
     return $instance;
+}
+
+sub LJ::Request::prev {
+    my $class = shift;
+    die "Request is not provided to LJ::Request" unless $instance;
+    return $instance->{r}->prev(@_);
 }
 
 sub LJ::Request::is_inited {

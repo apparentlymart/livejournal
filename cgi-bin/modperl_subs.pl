@@ -128,11 +128,6 @@ sub setup_restart {
     LJ::Request->add_httpd_conf(qq{
 
 
-# User-friendly error messages
-ErrorDocument 404 /404-error.html
-ErrorDocument 500 /500-error.html
-
-
 # This interferes with LJ's /~user URI, depending on the module order
 <IfModule mod_userdir.c>
   UserDir disabled
