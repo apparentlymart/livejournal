@@ -1,26 +1,30 @@
-<table class="communities" cellpadding="0" cellspacing="0" width="100%"><tbody>
 <TMPL_IF communities>
+    <!-- paging -->
+    <TMPL_IF page_first><a href="<TMPL_VAR page_first>">first</a><TMPL_ELSE>first</TMPL_IF>
+    <TMPL_IF page_prev><a href="<TMPL_VAR page_prev>">prev</a><TMPL_ELSE>prev</TMPL_IF>
+    &nbsp;<TMPL_VAR page>/<TMPL_VAR pages>&nbsp;
+    <TMPL_IF page_next><a href="<TMPL_VAR page_next>">next</a><TMPL_ELSE>next</TMPL_IF>
+    <TMPL_IF page_last><a href="<TMPL_VAR page_last>">last</a><TMPL_ELSE>last</TMPL_IF>
 
-<!-- paging -->
-<TMPL_IF page_first><a href="<TMPL_VAR page_first>">first</a><TMPL_ELSE>first</TMPL_IF>
-<TMPL_IF page_prev><a href="<TMPL_VAR page_prev>">prev</a><TMPL_ELSE>prev</TMPL_IF>
-&nbsp;<TMPL_VAR page>/<TMPL_VAR pages>&nbsp;
-<TMPL_IF page_next><a href="<TMPL_VAR page_next>">next</a><TMPL_ELSE>next</TMPL_IF>
-<TMPL_IF page_last><a href="<TMPL_VAR page_last>">last</a><TMPL_ELSE>last</TMPL_IF>
-
-<tr style="" class="head"><td style="" colspan="2">Community</td><td style="">Updated</td></tr>
-<TMPL_LOOP communities>
-    <TMPL_IF featured><tr class='featured'><TMPL_ELSE><tr class='regular'></TMPL_IF>
-    <td class='userpic'><TMPL_VAR userpic></td>
-    <td class='content'><p class='collapsed-poster'><TMPL_VAR journal_name></p>
-    <p class='collapsed-subject'>
-        <a href='<TMPL_VAR journal_base>'><strong><TMPL_VAR journal_title></strong></a>
-        <br />
-        <TMPL_VAR journal_subtitle></p>
-    </td><td class='posted' valign='top'><TMPL_VAR updated_ago></td>
-    </tr>
-</TMPL_LOOP>
+    <ul class="b-catalogue-list">
+        <TMPL_LOOP communities>
+            <li class="b-catalogue-item">
+                <dl>
+                    <dt class="b-catalogue-item-name"><TMPL_VAR journal_name></dt>
+                    <dd class="b-catalogue-item-userpic"><TMPL_IF userpic><TMPL_VAR userpic><TMPL_ELSE><TMPL_VAR userpic></TMPL_IF></dd>
+                    <dd class="b-catalogue-item-ago"><TMPL_VAR updated_ago></dd>
+                    <dd class="b-catalogue-item-desc">
+                        <h4><TMPL_VAR journal_title></h4>
+                        <p><TMPL_VAR journal_subtitle></p>
+                        <ul class="b-catalogue-item-action">
+                            <li><form action="/community/join.bml" method="GET"><input type="hidden" name="comm" value="<TMPL_VAR journal_user>"><input type="submit" value="Join"  /></form><a href="/community/join.bml?comm=<TMPL_VAR journal_user>">fdsfjdaf</a></li>
+                            <li><form action="/friends/add.bml"><input type="hidden" name="user" value="<TMPL_VAR journal_user>"><input type="submit" value="Watch"  /></form></li>
+                        </ul>
+                    <dd>
+                </dl>
+            </li>
+        </TMPL_LOOP>
+    </ul>
 <TMPL_ELSE>
-<tr><td colspan='100%' class='content'><i>No communities in this category yet</i></td></tr>
+    <p>No communities in this category yet</p>
 </TMPL_IF>
-</table>
