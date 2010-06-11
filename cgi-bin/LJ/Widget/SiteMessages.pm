@@ -17,7 +17,7 @@ sub render_body {
     if ($opts{all}) {
         my @messages = LJ::SiteMessages->get_messages;
 
-        $ret .= "<p class='b-message b-message-suggestion b-message-system'><span><img width='16' height='14' alt='' src='http://www.ljdev5.livejournal.ru/img/message-system-alert.gif' />";
+        $ret .= "<p class='b-message b-message-suggestion b-message-system'><span><img width='16' height='14' alt='' src='$LJ::IMGPREFIX/message-system-alert.gif' />";
         foreach my $message (@messages) {
             my $ml_key = $class->ml_key("$message->{mid}.text");
             $ret .= $class->ml($ml_key);
@@ -28,7 +28,7 @@ sub render_body {
         my $message = LJ::SiteMessages->get_open_message;
 
         if ($message) {
-            $ret .= "<p class='b-message b-message-suggestion b-message-system'><span><img width='16' height='14' alt='' src='http://www.ljdev5.livejournal.ru/img/message-system-alert.gif' />";
+            $ret .= "<p class='b-message b-message-suggestion b-message-system'><span><img width='16' height='14' alt='' src='$LJ::IMGPREFIX/message-system-alert.gif' />";
             my $ml_key = $class->ml_key("$message->{mid}.text");
             $ret .= $class->ml($ml_key);
             $ret .= "<i class='close'></i></span></p>";
