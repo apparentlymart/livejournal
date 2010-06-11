@@ -114,17 +114,36 @@ ILikeThis = {
 	}
 }
 
+// Share
+SHARETHIS_ary = [];
+SHARETHIS_ary.findByUrl = function(url)
+{
+	for (var i = this.length - 1; i >= 0; i--) {
+		if (url === this[i].properties.url) {
+			return this[i];
+		}
+	}
+}
+
 jQuery(document).click(function(e)
 {
 	// Share in Facebook
-	var href = e.target.href;
+	var a = e.target,
+		href = a.href;
 	if (href) {
 		if (href.indexOf('http://www.facebook.com/sharer.php') === 0) {
-			window.open(href, 'sharer', 'toolbar=0,status=0,width=626,height=436');
+			a.setAttribute('st_dest', 'facebook.com');
+			SHARETHIS_ary.findByUrl(LiveJournal.parseGetArgs(href).u).chicklet(e);
+			//else? window.open(href, 'sharer', 'toolbar=0,status=0,width=626,height=436');
 			e.preventDefault();
-		} else if (href.indexOf('http://twitter.com/home/?status=') === 0) {
-			var status = LiveJournal.parseGetArgs(href).status;
-			window.open(Site.siteroot + '/share/twitter.bml?status='+status, 'sharer', 'toolbar=0,status=0,width=430,height=220');
+		} else if (href.indexOf(Site.siteroot + '/share/twitter.bml') === 0) {
+			a.setAttribute('st_dest', 'twitter.com');
+			SHARETHIS_ary.findByUrl(LiveJournal.parseGetArgs(href).u).chicklet(e);
+			//else? window.open(href, 'sharer', 'toolbar=0,status=0,width=430,height=220');
+			e.preventDefault();
+		} else if (href.indexOf(Site.siteroot + '/tools/tellafriend.bml') === 0) {
+			a.setAttribute('st_page', 'send');
+			SHARETHIS_ary.findByUrl(LiveJournal.parseGetArgs(href).u).popup(e);
 			e.preventDefault();
 		}
 	}

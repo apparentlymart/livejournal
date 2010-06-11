@@ -3636,9 +3636,10 @@ sub _Entry__get_link
         my $link = LJ::S2::Link("#", $ctx->[S2::PROPS]->{"text_share_this"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_sharethis.gif", 24, 24));
         $link->{_raw} = qq|<script type="text/javascript">
             var stLink = jQuery('a:last')[0];
-            stLink.href = 'javascript:void(0)'
-            SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title'}, {button: false})
-                .attachButton(stLink);
+            stLink.href = 'javascript:void(0)';
+            SHARETHIS_post = SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title'}, {button: false});
+            SHARETHIS_post.attachButton(stLink);
+            SHARETHIS_ary.push(SHARETHIS_post);
             </script>|;
         return $link;
     }
@@ -3647,7 +3648,6 @@ sub _Entry__get_link
         return $null_link unless $entry->security eq 'public';
         my $entry_url = LJ::eurl($entry->url);
         my $entry_title = LJ::eurl($entry->subject_text);
-        # TODO to url format $entry_url, $entry_title in url
         my $url = "http://www.facebook.com/sharer.php?u=$entry_url&amp;t=$entry_title";
         my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_facebook"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_facebook.gif", 24, 24));
         return $link;
@@ -3656,15 +3656,16 @@ sub _Entry__get_link
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
         my $post_id = $entry->journalid . ':' . $entry->ditemid;
-        my $link = LJ::S2::Link("$LJ::SITEROOT/share/twitter.bml?post_id=$post_id", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
+        my $entry_url = LJ::eurl($entry->url); # for js
+        my $link = LJ::S2::Link("$LJ::SITEROOT/share/twitter.bml?post_id=$post_id&amp;u=$entry_url", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
         return $link;
     }
     if ($key eq "share_email") {
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
-        my $entry_url = $entry->url;
-        my $entry_title = LJ::ejs($entry->subject_html);
-        my $link = LJ::S2::Link("#", $ctx->[S2::PROPS]->{"text_share_email"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_email.gif", 24, 24));
+        my $entry_url = LJ::eurl($entry->url); # for js
+        my $url = "$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;u=$entry_url";
+        my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_email"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_email.gif", 24, 24));
         return $link;
     }
     if ($key eq "mem_add") {
