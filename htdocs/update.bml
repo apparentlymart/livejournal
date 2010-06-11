@@ -559,13 +559,8 @@ head<=
     my $ret = $_[0]->{'head'};
 
     LJ::need_res(qw(
-                    js/core.js
-                    js/dom.js
-                    js/httpreq.js
-                    js/livejournal.js
                     js/entry.js
                     js/poll.js
-                    js/browserdetect.js
                     ));
 
     # draft autosave and restore

@@ -1,6 +1,6 @@
-//document.write('<script type="text/javascript" src="'+Site.statprefix+'/js/core.js"></'+'script>');
-
 document.documentElement.id = 'js';
+
+//core.js
 
 /**
  * Utility method.
@@ -59,12 +59,12 @@ Event.preventDefault = function(e)
 
 Event.prep = function(e)
 {
-	e = event || window.event;
-	if (!e.stop)
+	e = e || window.event;
+	if (e.stop === undefined)
 		e.stop = this.stop;
-	if (!e.target)
+	if (e.target === undefined)
 		e.target = e.srcElement;
-	if (!e.relatedTarget)
+	if (e.relatedTarget === undefined)
 		e.relatedTarget = e.toElement;
 	return e;
 }
@@ -321,7 +321,7 @@ Object.extend(Array.prototype, {
 /* ajax */
 var XMLHttpRequest = XMLHttpRequest || window.ActiveXObject && function(){ return new ActiveXObject('Msxml2.XMLHTTP'); }
 
-//document.write('<script type="text/javascript" src="'+Site.statprefix+'/js/dom.js"></'+'script>');
+//dom.js
 /* DOM class */
 DOM = {
 	getElement: function( e ) {
@@ -701,7 +701,7 @@ $ = DOM.getElement;
 
 
 
-//document.write('<script type="text/javascript" src="'+Site.statprefix+'/js/httpreq.js"></'+'script>');
+//httpreq.js
 
 // opts:
 // url, onError, onData, method (GET or POST), data
