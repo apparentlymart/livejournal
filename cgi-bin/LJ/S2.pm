@@ -149,7 +149,10 @@ sub make_journal
     $graphicpreviews_obj->need_res($u);
     my $extra_js = LJ::statusvis_message_js($u);
     $page->{head_content} .= LJ::res_includes() . $extra_js;
-    $page->{head_content} .= $LJ::SHARE_THIS_URL unless $LJ::DISABLED{'sharethis'};
+    if (not $LJ::DISABLED{'sharethis'}){
+        ## generate <script src ..> to load ShareThis script with needed for journal set of services
+        $page->{head_content} .= $LJ::SHARE_THIS_URL_GEN->(journal => $u->username);
+    }
     LJ::run_hooks('head_content', \$page->{head_content});
 
     s2_run($r, $ctx, $opts, $entry, $page);
