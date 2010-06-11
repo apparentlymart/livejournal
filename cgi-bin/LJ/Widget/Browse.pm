@@ -8,7 +8,7 @@ use vars qw(%GET %POST $headextra @errors @warnings);
 
 #sub need_res { qw( stc/widgets/browse.css stc/pagemodules.css ) }
 
-sub _build_flat_tree {
+sub _build_tree {
     my ($parent, $level, $test_uri, @categories) = @_;
     my @tree = ();
     foreach my $c
@@ -23,9 +23,9 @@ sub _build_flat_tree {
                     url             => $c->url(),
                     summary         => LJ::Widget::CategorySummary->render( category => $c ),
                     level           => $level,
-                    is_expanded     => 0,
+                    is_expanded     => $is_current,
                     is_current      => $is_current,
-                    "level$level"   => [ _build_flat_tree($c, $level, $test_uri, @categories) ],
+                    "level$level"   => [ _build_tree($c, $level, $test_uri, @categories) ],
                 };
             --$level;
         }
@@ -57,7 +57,33 @@ sub render_body {
     $test_uri =~ s/^\/browse//;
     $test_uri =~ s/\/$//;
 
-    my @tmpl_categories = _build_flat_tree(undef, 0, $test_uri, @categories);
+    my @tmpl_categories = _build_tree(undef, 0, $test_uri, @categories);
+
+    # Spotlight categories:
+    #   if it found, move it to the top, add 'suggest' link to this list and
+    #   expand list of subcategories by default.
+
+    my $i = 0;
+    foreach my $c (@tmpl_categories) {
+        if ($c->{name} eq 'Spotlight') {
+            my @spotlight = splice(@tmpl_categories, $i, 1);
+            push @{$spotlight[0]->{level1}},
+                {
+                    name            => 'Suggest a Spotlight',
+                    title           => 'Suggest a Spotlight',
+                    url             => "$LJ::SITEROOT/misc/suggest_spotlight.bml",
+                    summary         => 'Suggest a Spotlight',
+                    level           => 1,
+                    is_expanded     => 1,
+                    is_current      => 0,
+                    "level2"        => 0,
+                };
+            $spotlight[0]->{is_expanded} = 1;
+            unshift(@tmpl_categories, $spotlight[0]);
+            last;
+        }
+        $i++;
+    }
 
     my ($ad, $nav_line) = 2 x '';
 
