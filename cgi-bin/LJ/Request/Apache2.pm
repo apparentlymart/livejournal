@@ -391,10 +391,11 @@ sub LJ::Request::post_params {
     my $class = shift;
 
     return @{ $instance->{params} } if $instance->{params};
-    my @params = ();
-    foreach my $name ($instance->{apr}->body){
-        foreach my $val ($instance->{apr}->body($name)){
-            push @params => $name, $val;
+    my (@params, %already_seen);
+    foreach my $name ($instance->{apr}->body) {
+        next if $already_seen{$name}++;
+        foreach my $val ($instance->{apr}->body($name)) {
+            push @params, ($name, $val);
         }
     }
     $instance->{params} = \@params;
