@@ -565,5 +565,11 @@ Must be removed after implementation of Framework! */
 	position: static;
 	margin-top: 20px;
 	}
+	#content-wrapper .appwidget-sitemessages .b-message-system {
+	    margin: 0 0 10px;
+	    }
+	
+
+
 
 
