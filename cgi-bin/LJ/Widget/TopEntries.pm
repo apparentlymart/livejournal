@@ -7,7 +7,7 @@ use Carp qw(croak);
 use LJ::TopEntries;
 
 sub need_res {
-    return qw( js/widgets/widget-layout.css stc/widgets/topentries.css );
+    return qw( stc/widgets/widget-layout.css stc/widgets/topentries.css );
 }
 
 sub render_body {
