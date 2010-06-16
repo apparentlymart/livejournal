@@ -124,7 +124,7 @@ sub render_body {
                     summary         => 'Suggest a Spotlight',
                     level           => 1,
                     is_expanded     => 1,
-                    is_current      => 0,,
+                    is_current      => 0,
                     "level2"        => 0,
                 };
             $spotlight[0]->{is_expanded} = 1;
