@@ -512,6 +512,7 @@ Must be removed after implementation of Framework! */
 	position: absolute;
 	top: 100px;
 	left: 0;
+	z-index: 9999;
 	width: 100%;
 	padding: 0;
 	margin: 0;
