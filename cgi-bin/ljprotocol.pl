@@ -1601,7 +1601,7 @@ sub postevent
                 xc3 => {
                     u => $u,
                     post => {
-                        id          => 
+                        coords      => $req->{props}->{current_coords},
                         has_images  => ($req->{event} =~ /pics\.livejournal\.com/ ? 1 : 0),
                         from_mobile => ($req->{event} =~ /m\.livejournal\.com/ ? 1 : 0)
                     }
@@ -1847,6 +1847,7 @@ sub postevent
         u => $u,
         post => {
             url         => $res->{url},
+            coords      => $req->{props}->{current_coords},
             has_images  => ($req->{event} =~ /pics\.livejournal\.com/ ? 1 : 0),
             from_mobile => ($req->{event} =~ /m\.livejournal\.com/ ? 1 : 0)
         }
@@ -2266,6 +2267,7 @@ sub editevent
         u => $u,
         post => {
             url         => $res->{url},
+            coords      => $req->{props}->{current_coords},
             has_images  => ($req->{event} =~ /pics\.livejournal\.com/ ? 1 : 0),
             from_mobile => ($req->{event} =~ /m\.livejournal\.com/ ? 1 : 0)
         }
