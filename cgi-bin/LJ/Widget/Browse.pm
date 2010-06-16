@@ -110,6 +110,12 @@ sub render_body {
     foreach my $c (@tmpl_categories) {
         if ($c->{name} eq 'Spotlight') {
             my @spotlight = splice(@tmpl_categories, $i, 1);
+
+            # Count root as spotlight category
+            if (!$cat && $spotlight[0]->{level1} && $spotlight[0]->{level1}->[0]) {
+                $spotlight[0]->{level1}->[0]->{is_current} = 1;
+            }
+
             push @{$spotlight[0]->{level1}},
                 {
                     name            => 'Suggest a Spotlight',
@@ -118,7 +124,7 @@ sub render_body {
                     summary         => 'Suggest a Spotlight',
                     level           => 1,
                     is_expanded     => 1,
-                    is_current      => ($cat ? 0 : 1),
+                    is_current      => 0,,
                     "level2"        => 0,
                 };
             $spotlight[0]->{is_expanded} = 1;
