@@ -717,7 +717,11 @@ sub get_lang_names {
         next unless $l;
 
         my $item = "langname.$code";
-        my $namethislang = BML::ml($item);
+
+        ## Language name in current lang
+        # my $namethislang = LJ::Lang::ml($item);
+
+        ## Native lang name
         my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
 
         push @list, $code, $namenative;
