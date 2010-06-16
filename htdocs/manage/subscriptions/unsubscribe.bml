@@ -19,6 +19,11 @@ my $hash     = $GET{'crc'};
 
 my $check_crc = md5_hex ($timest, $user, $subs_id, $LJ::ESN_UNSUBSCR_SECRET_CODE) eq $hash;
 
+## check sum has an error
+unless ($check_crc) {
+    return $ML{'esn.subscriptions.unsubscribe.crc_error'};
+}
+
 my $ret = '';
 
 ## url has been expired
