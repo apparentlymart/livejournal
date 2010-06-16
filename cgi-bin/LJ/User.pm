@@ -4565,20 +4565,43 @@ sub render_promo_of_community {
 sub can_expunge {
     my $u = shift;
 
-    # must be already deleted
-    return 0 unless $u->is_deleted;
+    my $statusvisdate = $u->statusvisdate_unix;
 
-    # and deleted 30 days ago
-    my $expunge_days = LJ::conf_test($LJ::DAYS_BEFORE_EXPUNGE) || 30;
-    return 0 unless $u->statusvisdate_unix < time() - 86400*$expunge_days;
-
-    my $hook_rv = 0;
-    if (LJ::are_hooks("can_expunge_user", $u)) {
-        $hook_rv = LJ::run_hook("can_expunge_user", $u);
-        return $hook_rv ? 1 : 0;        
+    # check admin flag "this journal must not be expunged for abuse team
+    # investigation". hack: if flag is on, then set statusvisdate to now,
+    # so that the next time worker bin/worker/expunge-users won't check
+    # this user again.
+    #
+    # optimization concern: isn't it too much strain checking this prop
+    # for every user? well, we've got to check this prop for every user
+    # that seems eligible anyway, and moveucluster isn't supposed to send
+    # us users who got too recent statusvisdate or something.
+    if ($u->prop('dont_expunge_journal')) {
+        LJ::update_user($u, { raw => 'statusvisdate=NOW()' });
+        return 0;
     }
 
-    return 1;
+    if ($u->is_deleted) {
+        my $expunge_days =
+            LJ::conf_test($LJ::DAYS_BEFORE_EXPUNGE) || 30;
+
+        return 0 unless $statusvisdate < time() - 86400 * $expunge_days;
+
+        return 1;
+    }
+
+    if ($u->is_suspended) {
+        return 0 if $LJ::DISABLED{'expunge_suspended'};
+
+        my $expunge_days =
+            LJ::conf_test($LJ::DAYS_BEFORE_EXPUNGE_SUSPENDED) || 30;
+
+        return 0 unless $statusvisdate < time() - 86400 * $expunge_days;
+
+        return 1;
+    }
+
+    return 0;
 }
 
 # Check to see if the user can use eboxes at all
