@@ -41,6 +41,9 @@ sub render_body {
 
 sub should_render {
     my $class = shift;
+    my %opts = @_;
+
+    return 1 if $opts{all}; # always show at admin pages
 
     return LJ::SiteMessages->get_open_message ? 1 : 0;
 }

@@ -92,7 +92,7 @@ sub render {
 
     my $widget_ele_id = $class->widget_ele_id;
 
-    return "" unless $class->should_render;
+    return "" unless $class->should_render(@opts);
 
     my $rv = eval {
         my $widget = ref $class ? $class : "LJ::Widget::$subclass";
