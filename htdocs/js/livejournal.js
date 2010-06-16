@@ -177,3 +177,16 @@ LiveJournal.parseGetArgs = function (url) {
 
     return getArgsHash;
 };
+
+LiveJournal.closeSiteMessage = function(node, e, id)
+{
+	jQuery.post(LiveJournal.getAjaxUrl('close_site_message'), {
+			messageid: id
+		}, function(data, status) {
+			if (status === 'success') {
+				jQuery(node.parentNode.parentNode.parentNode).replaceWith(data.substitude);
+			} else {
+				LiveJournal.ajaxError(data);
+			}
+		}, 'json');
+}
