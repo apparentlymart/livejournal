@@ -20,7 +20,8 @@ sub new {
     croak "invalid user object passed"
         unless LJ::isu($u);
 
-    my $self = { u => $u };
+    my $subs = shift;
+    my $self = { u => $u, subs => $subs };
 
     return bless $self, $class;
 }
@@ -31,7 +32,7 @@ sub new_from_subscription {
     my $class = shift;
     my $subs = shift;
 
-    return $class->new($subs->owner);
+    return $class->new($subs->owner, $subs);
 }
 
 sub u {
@@ -110,7 +111,8 @@ sub notify {
                  $html_body = $ev->as_email_html($u) or next;
                  $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
 
-                 my $html_footer = LJ::run_hook('esn_email_html_footer', event => $ev, rcpt_u => $u );
+                 my $html_footer = LJ::run_hook("esn_email_unsubscr", $ev, $u, $self->{subs});
+                 $html_footer .= LJ::run_hook('esn_email_html_footer', event => $ev, rcpt_u => $u );
                  unless ($html_footer) {
                      $html_footer = LJ::auto_linkify($footer);
                      $html_footer =~ s/\n/\n<br\/>/g;
