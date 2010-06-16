@@ -32,6 +32,49 @@ sub _build_tree {
     return @tree;
 }
 
+sub _get_spotlight_communities {    # Load communities saved by spotlight admin
+    my @comms = ();
+
+    my $remote = LJ::get_remote();
+
+    my ($normal_rows, $sponsored_rows, $promoted_rows, $partner_rows) = map {
+        [ LJ::JournalSpotlight->get_spotlights(
+            filter  => $_,
+            user => $remote ) ]
+        } qw(normal sponsored promoted partner);
+
+    my $show_sponsored = LJ::run_hook('should_see_special_content', $remote);
+    my $show_promoted = LJ::run_hook('should_see_special_content', $remote);
+
+    my $promoted_row_count = @$promoted_rows;
+    my $sponsored_row_count = @$sponsored_rows;
+    my $partner_row_count = @$partner_rows;
+
+    my $showing_normal = @$normal_rows;
+    my $showing_sponsored = $sponsored_row_count && $show_sponsored;
+    my $showing_promoted = $promoted_row_count && $show_promoted;
+    my $showing_partner = $partner_row_count && $show_sponsored;
+
+    my @rows = ();
+
+    if ($showing_normal || $showing_sponsored || $showing_promoted || $showing_partner) {
+        push @rows, @$normal_rows       if $showing_normal;
+        push @rows, @$promoted_rows     if $showing_promoted;
+        push @rows, @$sponsored_rows    if $showing_sponsored;
+    }
+
+    push @rows, @$partner_rows if $showing_partner;
+
+    my $us = LJ::load_userids(map { $_->{userid} } @rows);
+
+    foreach my $row (@rows) {
+        my $u = $us->{$row->{userid}};
+        next unless $u;
+        push @comms, $u;
+    }
+    return @comms;
+}
+
 sub render_body {
     my $class = shift;
     my %opts = @_;
@@ -93,94 +136,57 @@ sub render_body {
 
     my $count = 0;
 
-    if ($cat) { # we're looking at a lower-level category
+    my @comms = ();
 
+    $page ||= 1;
+    my $skip = ($page-1) * $page_size;
+    my $last = $skip + $page_size;
+
+    if ($cat) { # we're looking at a lower-level category
         $nav_line = "<a href=\"$LJ::SITEROOT/browse/\"><strong>".$class->ml('widget.browse.nav_bar.home')."</strong></a> &gt; " .
             $cat->title_html();
 
-        $page ||= 1;
-        my $skip = ($page-1) * $page_size;
-        my $last = $skip + $page_size;
-
         # show actual communities
         if ($cat->parent) {
-            my @comms = ();
             if ($cat->{'pretty_name'} eq 'lj_spotlight_community') {
                 # Load communities saved by spotlight admin
-
-                my $remote = LJ::get_remote();
-
-                my ($normal_rows, $sponsored_rows, $promoted_rows, $partner_rows) = map {
-                    [ LJ::JournalSpotlight->get_spotlights(
-                        filter  => $_,
-                        user => $remote ) ]
-                    } qw(normal sponsored promoted partner);
-
-                my $show_sponsored = LJ::run_hook('should_see_special_content', $remote);
-                my $show_promoted = LJ::run_hook('should_see_special_content', $remote);
-
-                my $promoted_row_count = @$promoted_rows;
-                my $sponsored_row_count = @$sponsored_rows;
-                my $partner_row_count = @$partner_rows;
-
-                my $showing_normal = @$normal_rows;
-                my $showing_sponsored = $sponsored_row_count && $show_sponsored;
-                my $showing_promoted = $promoted_row_count && $show_promoted;
-                my $showing_partner = $partner_row_count && $show_sponsored;
-
-                my @rows = ();
-
-                if ($showing_normal || $showing_sponsored || $showing_promoted || $showing_partner) {
-                    push @rows, @$normal_rows       if $showing_normal;
-                    push @rows, @$promoted_rows     if $showing_promoted;
-                    push @rows, @$sponsored_rows    if $showing_sponsored;
-                }
-
-                push @rows, @$partner_rows if $showing_partner;
-
-                my $us = LJ::load_userids(map { $_->{userid} } @rows);
-
-                foreach my $row (@rows) {
-                    my $u = $us->{$row->{userid}};
-                    next unless $u;
-                    push @comms, $u;
-                }
-
+                @comms = _get_spotlight_communities();  # Load communities saved by spotlight admin
             } else {
                 @comms = $cat->communities();
             }
-
-            foreach my $comm (@comms) {
-                next unless LJ::isu($comm);
-
-                # paging
-                $count++;
-                next if $count <= $skip || $count > $last;
-
-                my $secondsold = $comm->timeupdate ? time() - $comm->timeupdate : undef;
-                my $userpic = $comm->userpic ?
-                    $comm->userpic->imgtag_percentagesize(0.5) :
-                        LJ::run_hook('no_userpic_html', percentage => 0.5 );
-
-                push @tmpl_communities,
-                    {
-                        featured            => 0,
-                        userpic             => $userpic,
-                        journal_name        => $comm->ljuser_display({ bold => 0, head_size => 11 }), 
-                        journal_user        => $comm->{user},
-                        journal_base        => $comm->journal_base(),
-                        journal_title       => $comm->{'name'} || '',
-                        journal_subtitle    => $comm->prop('comm_theme') || '',
-                        updated_ago         => LJ::TimeUtil->ago_text($secondsold),
-                    };
-            }
         }
-        $$title = "$$windowtitle";
         $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $cat->display_name, ljadwrapper => 1 });
     } else {
+        @comms = _get_spotlight_communities();  # Show spotlight communities by default
         $ad = LJ::get_ads({ location => 'bml.explore/novertical', ljadwrapper => 1 });
     }
+
     $$title = "$$windowtitle";
+
+    foreach my $comm (@comms) {
+        next unless LJ::isu($comm);
+
+        # paging
+        $count++;
+        next if $count <= $skip || $count > $last;
+
+        my $secondsold = $comm->timeupdate ? time() - $comm->timeupdate : undef;
+        my $userpic = $comm->userpic ?
+            $comm->userpic->imgtag_percentagesize(0.5) :
+                LJ::run_hook('no_userpic_html', percentage => 0.5 );
+
+        push @tmpl_communities,
+            {
+                featured            => 0,
+                userpic             => $userpic,
+                journal_name        => $comm->ljuser_display({ bold => 0, head_size => 11 }), 
+                journal_user        => $comm->{user},
+                journal_base        => $comm->journal_base(),
+                journal_title       => $comm->{'name'} || '',
+                journal_subtitle    => $comm->prop('comm_theme') || '',
+                updated_ago         => LJ::TimeUtil->ago_text($secondsold),
+            };
+    }
 
     # paging: first, previouse, next, last pages.
     my ($page_first, $page_prev, $page_next, $page_last) = 4 x 0;
