@@ -3,18 +3,23 @@ package LJ::TopEntries;
 use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
+use LJ::ExtBlock;
+
+my %known_domains = map {$_ => 1} domains();
+
+sub domains { qw/hmp_ontd hmp_spotlight culture entertainment/ }
 
 sub new {
     my $class = shift;
     my %opts = @_;
 
-    my $journal = $opts{'journal'};
+    my $domain = $opts{domain};
+    Carp::confess("unknown domain: $domain")
+        unless exists $known_domains{$domain};
 
-    my $self = {journal => $journal};
-
-    $self->{'remote'} = $opts{'remote'} || LJ::get_remote();
-
-    $self->{'timelimit'} = $opts{'timelimit'} || 24 * 3600;
+    my $self = {domain => $domain};
+    $self->{remote}    = $opts{remote}    || LJ::get_remote();
+    $self->{timelimit} = $opts{timelimit} || 24 * 3600;
 
     return bless $self, $class;
 }
@@ -28,9 +33,18 @@ sub _key_from_hash {
 
 sub _hash_from_key {
     my $self = shift;
-    my $key = shift;
+    my %args = @_;
 
-    my ($timestamp, $journalid, $jitemid, $userpicid) = @$key;
+    my $timestamp = $args{timestamp};
+    my $journalid = $args{journalid};
+    my $jitemid   = $args{jitemid};
+    my $userpicid = $args{userpicid};
+    my $tags      = $args{tags};
+    my $vertical_name = $args{vertical_name};
+    my $vertical_uri  = $args{vertical_uri};
+
+#    my $key = shift;
+#    my ($timestamp, $journalid, $jitemid, $userpicid) = @$key;
 
     return undef unless $journalid && $jitemid && $userpicid;
 
@@ -73,6 +87,11 @@ sub _hash_from_key {
 
             comments    => scalar keys %$comment_ref,
             comments_url=> $entry->url(anchor => 'comments'),
+
+            logtime     => $entry->logtime_unix,
+            tags        => $tags,
+            vertical_name => $vertical_name,
+            vertical_uri  => $vertical_uri,
 
             key         => "$journalid:$jitemid",
         };
@@ -127,12 +146,24 @@ sub _store_featured_posts {
     my $self = shift;
     my %opts = @_;
  
-    my $prop = $self->{'min_entries'} . ':' . $self->{'max_entries'} . ':0:0|' .
-        join('|', map { $self->_key_from_hash($_) } $self->_clean_list(%opts));
-    $prop =~ s/\|$//;
+    # my $prop = $self->{'min_entries'} . ':' . $self->{'max_entries'} . ':0:0|' .
+    #    join('|', map { $self->_key_from_hash($_) } $self->_clean_list(%opts));
+    #$prop =~ s/\|$//;
 
-    my $journal = $self->{'journal'};
-    $journal->set_prop('widget_top_entries', $prop);
+    ##
+    my @spots = $self->_clean_list(%opts);
+    my $struct = {
+        min_entries => $self->{min_entries},
+        max_entries => $self->{max_entries},
+        timelimit   => $self->{timelimit},
+
+        spots       => \@spots,
+    };
+    my $json = LJ::JSON->to_json($struct);
+    ##
+
+    my $domain = $self->{domain};
+    LJ::ExtBlock->create_or_replace("spts_$domain" => $json);
 }
 
 # load all from property to blessed hash.
@@ -140,11 +171,10 @@ sub _load_featured_posts {
     my $self = shift;
     my %opts = @_;
 
-    my $journal = $self->{'journal'};
-    my $remote = $self->{'remote'};
-
-    my $prop_val = $journal->prop('widget_top_entries');
-
+    my $domain = $self->{domain};
+    my $ext_block = LJ::ExtBlock->load_by_id("spts_$domain");
+    my $prop_val = $ext_block ? $ext_block->blocktext : '';
+=head
     $prop_val = '3:5:0:0' unless $prop_val;
 
     my @entities = map { [ split /:/ ] } split(/\|/, $prop_val);
@@ -154,6 +184,18 @@ sub _load_featured_posts {
     $self->{'min_entries'}      = $min_entries;
     $self->{'max_entries'}      = $max_entries;
     $self->{'featured_posts'}   = [ map { $self->_hash_from_key($_) } @entities ];
+=cut
+    if ($prop_val){
+        my $struct = LJ::JSON->from_json($prop_val);
+        $self->{min_entries}    = $struct->{min_entries};
+        $self->{max_entries}    = $struct->{max_entries};
+        $self->{featured_posts} = $struct->{spots};
+        $self->{timelimit}      = $struct->{timelimit};
+    } else {
+        $self->{min_entries}    = 3;
+        $self->{max_entries}    = 5;
+        $self->{timelimit}    ||= 24*3600;
+    }
 
     return $self->_sort_list(%opts);
 }
@@ -204,6 +246,10 @@ sub add_entry {
     my $entry = $opts{'entry'};
     return 'wrong entry' unless $entry;
 
+    my $tags = $opts{tags};
+    my $vertical_name = $opts{vertical_name};
+    my $vertical_uri  = $opts{vertical_uri};
+
     my $timestamp = time();
 
     my ($journalid, $jitemid, $poster, $userpic) =
@@ -217,7 +263,17 @@ sub add_entry {
 
     $self->get_featured_posts(raw => 1, %opts); # make sure we has all fresh data
 
-    my $post = $self->_hash_from_key( [ $timestamp, $journalid, $jitemid, $userpicid ] );
+    ## Fullfill with other data
+    my $post = $self->_hash_from_key( 
+                timestamp => $timestamp, 
+                journalid => $journalid, 
+                jitemid   => $jitemid, 
+                userpicid => $userpicid,
+                tags      => $tags,
+                vertical_name => $vertical_name,
+                vertical_uri  => $vertical_uri,
+                );
+
     if ($post) {
         push @{$self->{'featured_posts'}}, $post;
         $self->_store_featured_posts(%opts);

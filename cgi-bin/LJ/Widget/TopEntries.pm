@@ -16,28 +16,99 @@ sub render_body {
 
     return '' unless LJ::is_enabled('widget_top_entries');
 
-    my $journal = $opts{'journal'};
-    my $remote = LJ::get_remote();
+    my $domain = $opts{domain};
 
-    my $top_entries = LJ::TopEntries->new(journal => $journal);
+    my $top_entries = LJ::TopEntries->new(domain => $domain);
 
-    my $ret = '';
+    ## Ontd spotlights widget has its own design
+    return $class->render_ontd_homepage($top_entries) 
+        if $domain eq 'hmp_ontd';
 
-    $ret .= '<div class="w-topentries"><div class="w-head"><h2><a href="http://community.livejournal.com/ohnotheydidnt/" class="w-head-in">'.$class->ml('widget.topentries.title').'</a></h2><i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">';
+    ## TODO: Cache on 5 minutes.
+    ##      !!! use lang_id in cache key.
 
-    my $counter = 1;
-    my $classname = '';
+    ## Default layout
+    my $ret = qq|
+        <div class="w-topentries">
+            <div class="w-head">
+                <h2><a href="http://community.livejournal.com/lj_spotlight/" class="w-head-in">| . $class->ml('widget.topentries.spotlight.title') . qq|</a></h2>
+                <i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">|;
 
+    my $classname = 'event';
     foreach my $post ($top_entries->get_featured_posts()) {
-        my $comments = $post->{comments} ? '<span class="b-posts-comments">, '.
-            '<a href=\''.$post->{comments_url}.'\'>'.
-            BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
-            '</a>'.
-            '</span>' : '';
-        my $subj = ($post->{subj} ne '') ? $post->{subj} : $class->ml('widget.officialjournals.nosubject');
-        if ($counter % 2) {$classname = 'odd';} else {$classname = 'even';}
-        $ret .= '<li class="'.$classname.'"><dl><dt><img src="'.$post->{userpic}.'" /></dt><dd><h3 class="b-posts-head"><a href="'.$post->{url}.'">'.$subj.'</a></h3><p class="b-posts-user"> '.$post->{poster}.$comments.'</p></dd></dl></li>';
-        $counter = $counter + 1;
+        ##
+        my $comments = '';
+        if ($post->{comments}){
+            $comments = qq|<span class="b-posts-comments">, <a href="$post->{comments_url}">|
+                            . BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
+                            "</a></span>" 
+        }
+
+        ## 
+        my $subj = $post->{subj} ne '' 
+                    ? $post->{subj} 
+                    : $class->ml('widget.officialjournals.nosubject');
+
+        ## period of time in well readable format.
+        my $secondsago = time() - $post->{logtime};
+        my $posttime = LJ::TimeUtil->ago_text($secondsago);
+
+        ## Spotlight row
+        $ret .= qq|
+            <li class="$classname">
+                <dl>
+                    <dt><img src="$post->{userpic}" /></dt>
+                    <dd>
+                        <h3 class="b-posts-head"><a href="$post->{url}">$subj</a></h3>| .
+                        ## add row with Vertical only if it's defined,
+                        ## add tags only if ther are as well as Vertical's name and uri.
+                        ($post->{vertical_uri} && $post->{vertical_name} 
+                            ? (qq|<p><a href="$post->{vertical_uri}">$post->{vertical_name}</a>| . ($post->{tags} ? ": $post->{tags}" : "") . "</p>")
+                            : ''
+                        ) . qq|
+                        <p>$posttime</p>
+                        <p class="b-posts-user"> $post->{poster}$comments</p>
+                    </dd>
+                </dl>
+            </li>|;
+        
+        ## switch classname
+        $classname = $classname eq 'even' ? 'odd' : 'even';
+    }
+
+    $ret .= '</ul></div></div>';
+
+    return $ret;
+
+
+}
+
+sub render_ontd_homepage {
+    my $class       = shift;
+    my $top_entries = shift;
+
+    my $ret = '<div class="w-topentries"><div class="w-head"><h2><a href="http://community.livejournal.com/ohnotheydidnt/" class="w-head-in">'.$class->ml('widget.topentries.title').'</a></h2><i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">';
+
+    my $classname = 'event';
+    foreach my $post ($top_entries->get_featured_posts()) {
+        ##
+        my $comments = '';
+        if ($post->{comments}){
+            $comments = qq|<span class="b-posts-comments">, <a href="$post->{comments_url}">|
+                            . BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
+                            "</a></span>" 
+        }
+
+        ## 
+        my $subj = $post->{subj} ne '' 
+                    ? $post->{subj} 
+                    : $class->ml('widget.officialjournals.nosubject');
+        
+        ## Spotlight row
+        $ret .= qq|<li class="$classname"><dl><dt><img src="$post->{userpic}" /></dt><dd><h3 class="b-posts-head"><a href="$post->{url}">$subj</a></h3><p class="b-posts-user"> $post->{poster}$comments</p></dd></dl></li>|;
+        
+        ## switch classname
+        $classname = $classname eq 'even' ? 'odd' : 'even';
     }
 
     $ret .= '</ul></div></div>';
