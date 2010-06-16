@@ -2131,6 +2131,7 @@ sub delete_entry
     # delete tags
     LJ::Tags::delete_logtags($u, $jitemid);
 
+    LJ::run_hooks('report_entry_delete', $u->{'userid'}, $jitemid);
     my $dc = $u->log2_do(undef, "DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     LJ::MemCache::decr([$jid, "log2ct:$jid"]) if $dc > 0;
@@ -2150,6 +2151,7 @@ sub delete_entry
     }
 
     # delete from clusters
+    LJ::run_hooks('report_entry_text_delete', $jid, $jitemid);
     foreach my $t (qw(logtext2 logprop2 logsec2)) {
         $u->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$jitemid");
     }
@@ -2270,6 +2272,7 @@ sub replycount_do {
         $u->selectrow_array("SELECT GET_LOCK(?,10)", undef, $memkey);
 
         my $ret = $update_memc->();
+        LJ::run_hooks('report_entry_update', $uid, $jitemid);
         $u->do($sql, undef, $uid, $jitemid);
 
         if (@LJ::MEMCACHE_SERVERS && ! defined $ret) {
@@ -2283,6 +2286,7 @@ sub replycount_do {
     # used Cache::Memcached::Fast
 
         my $ret = $update_memc->();
+        LJ::run_hooks('report_entry_update', $uid, $jitemid);
         $u->do($sql, undef, $uid, $jitemid);
         if (@LJ::MEMCACHE_SERVERS and not defined $ret) {
             ## Lock free update 

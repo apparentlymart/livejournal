@@ -645,8 +645,10 @@ sub freeze_comments {
     my $qnodeid = $nodeid+0;
 
     # now perform action
-    my $in = join(',', map { $_+0 } @$ids);
+    my @batch = map { int $_ } @$ids;
+    my $in = join(',', @batch);
     my $newstate = $unfreeze ? 'A' : 'F';
+    LJ::run_hooks('report_cmt_update', $quserid, \@batch);
     my $res = $u->talk2_do(nodetype => $nodetype, nodeid => $nodeid,
                            sql =>   "UPDATE talk2 SET state = '$newstate' " .
                                     "WHERE journalid = $quserid AND nodetype = $qnodetype " .
@@ -668,11 +670,13 @@ sub screen_comment {
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
 
-    my $in = join (',', map { $_+0 } @jtalkids);
+    my @batch = map { int $_ } @jtalkids;
+    my $in = join(',', @batch);
     return unless $in;
 
     my $userid = $u->{'userid'} + 0;
 
+    LJ::run_hooks('report_cmt_update', $userid, \@batch);
     my $updated = $u->talk2_do(nodetype => "L", nodeid => $itemid,
                                sql =>   "UPDATE talk2 SET state='S' ".
                                         "WHERE journalid=$userid AND jtalkid IN ($in) ".
@@ -700,12 +704,14 @@ sub unscreen_comment {
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
 
-    my $in = join (',', map { $_+0 } @jtalkids);
+    my @batch = map { int $_ } @jtalkids;
+    my $in = join(',', @batch);
     return unless $in;
 
     my $userid = $u->{'userid'} + 0;
     my $prop = LJ::get_prop("log", "hasscreened");
 
+    LJ::run_hooks('report_cmt_update', $userid, \@batch);
     my $updated = $u->talk2_do(nodetype => "L", nodeid => $itemid,
                                sql =>   "UPDATE talk2 SET state='A' ".
                                         "WHERE journalid=$userid AND jtalkid IN ($in) ".
@@ -1015,6 +1021,7 @@ sub fixup_logitem_replycount {
                                  "journalid=? AND nodetype='L' AND nodeid=? ".
                                  "AND state IN ('A','F') $sharedmode",
                                  undef, $u->{'userid'}, $jitemid);
+    LJ::run_hooks('report_entry_update', $u->{'userid'}, $jitemid);
     $u->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
            undef, int($ct), $u->{'userid'}, $jitemid);
     print STDERR "Fixing replycount for $u->{'userid'}/$jitemid from $rp_count to $ct\n"

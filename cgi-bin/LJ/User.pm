@@ -8367,8 +8367,12 @@ sub delete_all_comments {
                                            $nodetype, $u->{'userid'}, $nodeid))
            && $t && @$t)
     {
-        my $in = join(',', map { $_+0 } @$t);
+        my @batch = map { int $_ } @$t;
+        my $in = join(',', @batch);
         return 1 unless $in;
+
+        LJ::run_hooks('report_cmt_delete', $u->{'userid'}, \@batch);
+        LJ::run_hooks('report_cmt_text_delete', $u->{'userid'}, \@batch);
         foreach my $table (qw(talkprop2 talktext2 talk2)) {
             $u->do("DELETE FROM $table WHERE journalid=? AND jtalkid IN ($in)",
                    undef, $u->{'userid'});

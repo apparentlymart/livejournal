@@ -150,6 +150,7 @@ CLUSTER: foreach my $cluster (@clusters) {
     };
 
     $load_datfile->("$LJ::HOME/bin/upgrading/update-db-local.pl", 1);
+    $load_datfile->("$LJ::HOME/bin/upgrading/update-db-int.pl", 1);
     $load_datfile->("$LJ::HOME/bin/upgrading/update-db-general.pl");
 
     foreach my $t (sort keys %table_create) {

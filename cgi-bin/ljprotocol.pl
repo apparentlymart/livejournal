@@ -1975,6 +1975,7 @@ sub editevent
         ){
             my $qsecurity = $uowner->quote('private');
             my $dberr;
+            LJ::run_hooks('report_entry_update', $ownerid, $itemid);
             $uowner->log2_do(\$dberr, "UPDATE log2 SET security=$qsecurity " .
                                        "WHERE journalid=$ownerid AND jitemid=$itemid");
             return fail($err,501,$dberr) if $dberr;
@@ -2122,6 +2123,7 @@ sub editevent
 
         my $qsecurity = $uowner->quote($security);
         my $dberr;
+        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
         $uowner->log2_do(\$dberr, "UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
                          "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
                          "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
@@ -2162,6 +2164,7 @@ sub editevent
         $event ne $oldevent->{'event'} ||
         $req->{'subject'} ne $oldevent->{'subject'}))
     {
+        LJ::run_hooks('report_entry_text_update', $ownerid, $itemid);
         $uowner->do("UPDATE logtext2 SET subject=?, event=? ".
                     "WHERE journalid=$ownerid AND jitemid=$itemid", undef,
                     $req->{'subject'}, LJ::text_compress($event));
@@ -2229,6 +2232,7 @@ sub editevent
     if ($req->{'props'}->{'opt_backdated'} eq "1" &&
         $oldevent->{'rlogtime'} != $LJ::EndOfTime) {
         my $dberr;
+        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
         $uowner->log2_do(undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
                          "journalid=$ownerid AND jitemid=$itemid");
         return fail($err,501,$dberr) if $dberr;
@@ -2236,6 +2240,7 @@ sub editevent
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
         $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
         my $dberr;
+        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
         $uowner->log2_do(\$dberr, "UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
                          "WHERE journalid=$ownerid AND jitemid=$itemid");
         return fail($err,501,$dberr) if $dberr;
@@ -3025,6 +3030,7 @@ sub editfriendgroups
             }
 
             my $in = join(",", @batch);
+            LJ::run_hooks('report_entry_update', $userid, \@batch);
             $u->do("UPDATE log2 SET allowmask=allowmask & ~(1 << $bit) ".
                    "WHERE journalid=$userid AND jitemid IN ($in) AND security='usemask'");
             $u->do("UPDATE logsec2 SET allowmask=allowmask & ~(1 << $bit) ".

@@ -2737,7 +2737,8 @@ sub delete_comments {
     return 0 unless $u->writer;
 
     my $jid = $u->{'userid'}+0;
-    my $in = join(',', map { $_+0 } @talkids);
+    my @batch = map { int $_ } @talkids;
+    my $in = join(',', @batch);
 
     # invalidate talk2row memcache
     LJ::Talk::invalidate_talk2row_memcache($u->id, @talkids);
@@ -2745,6 +2746,7 @@ sub delete_comments {
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 
+    LJ::run_hooks('report_cmt_delete', $jid, \@batch);
     my $num = $u->talk2_do(nodetype => $nodetype, nodeid => $nodeid,
                            sql => "UPDATE talk2 SET state='D' $where");
 
@@ -2752,6 +2754,7 @@ sub delete_comments {
     $num = 0 if $num == -1;
 
     if ($num > 0) {
+        LJ::run_hooks('report_cmt_text_delete', $jid, \@batch);
         $u->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");
         $u->do("DELETE FROM talkprop2 $where");
     }
