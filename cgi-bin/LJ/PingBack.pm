@@ -89,7 +89,8 @@ sub should_entry_recieve_pingback {
     # are comments allowed?
     return 0 unless $target_entry->posting_comments_allowed;
 
-    return 1; # Disable user-specific settings for pingback and enables it for all.
+    # user can disable recieving pingback for entire journa for entire journall
+    return 0 if $target_entry->journal->prop("pingback") eq 'D';
 
 =head
     # did user allow to add pingbacks?
@@ -105,13 +106,17 @@ sub should_entry_recieve_pingback {
     return 1;
 =cut
 
+    return 1; # 
+
 }
 
 
-# Send notification to PingBack server
+# 
 sub notify {
     my $class = shift;
     my %args  = @_;
+
+    return if $LJ::DISABLED{pingback};
 
     my $uri  = $args{uri};
     my $mode = $args{mode};
