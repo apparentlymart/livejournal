@@ -161,23 +161,9 @@ lj-cut ol
     border: 1px solid #CCCCCC;
 }
 
-/* For polls already generated with a div wrapper */
-div.LJpoll {
-    display: block;
-    border: #000000 1px dotted;
-    background: #d2d2d2 url(/stc/fck/editor/plugins/livejournal/ljpoll.gif) 5px 5px no-repeat;
-    font-style: italic;
-    height: 30px;
-}
-/* For polls being edited */
-lj-poll {
-    display: block;
-    border: #000000 1px dotted;
-    background-color: #d2d2d2;
-}
-lj-pq {
-    display: block;
-}
-lj-pi {
-    display: inline;
+form.ljpoll {
+	display: block;
+	border: #000 1px dotted;
+	background-color: #d2d2d2;
+	font-style: italic;
 }
