@@ -191,11 +191,10 @@ sub _load_featured_posts {
         $self->{max_entries}    = $struct->{max_entries};
         $self->{featured_posts} = $struct->{spots};
         $self->{timelimit}      = $struct->{timelimit};
-    } else {
-        $self->{min_entries}    = 3;
-        $self->{max_entries}    = 5;
-        $self->{timelimit}    ||= 24*3600;
     }
+    $self->{min_entries} ||= 3;
+    $self->{max_entries} ||= 5;
+    $self->{timelimit}   ||= 24*3600;
 
     return $self->_sort_list(%opts);
 }
