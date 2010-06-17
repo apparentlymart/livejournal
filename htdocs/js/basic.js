@@ -459,25 +459,25 @@ DOM = {
 		var de = d.documentElement;
 		
 		// most browsers
-		if (w.pageXOffset === undefined) {
+		if (w.pageXOffset !== undefined) {
 			s.left = w.pageXOffset;
 			s.top = w.pageYOffset;
 		}
 		
 		// ie
-		else if ( de && de.scrollLeft === undefined) {
+		else if ( de && de.scrollLeft !== undefined) {
 			s.left = de.scrollLeft;
 			s.top = de.scrollTop;
 		}
 		
 		// safari
-		else if (w.scrollX === undefined ) {
+		else if (w.scrollX !== undefined ) {
 			s.left = w.scrollX;
 			s.top = w.scrollY;
 		}
 		
 		// opera
-		else if( d.body && d.body.scrollLeft === undefined) {
+		else if( d.body && d.body.scrollLeft !== undefined) {
 			s.left = d.body.scrollLeft;
 			s.top = d.body.scrollTop;
 		}
