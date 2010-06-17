@@ -6,6 +6,10 @@ use Carp qw(croak);
 use LJ::JSON;
 use LJ::ExtBlock;
 
+sub need_res {
+    return qw( stc/widgets/widget-layout.css stc/widgets/marqueefeatures.css );
+}
+
 sub render_body {
     my $class = shift;
     my %opts = @_;
