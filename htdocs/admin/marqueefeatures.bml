@@ -1,0 +1,67 @@
+<?page
+body<=
+<?_code
+{
+    # this is for viewing the properties set on a particular entry
+    use strict;
+    use vars qw(%POST %GET);
+
+    use LJ::Widget::MarqueeFeatures;
+
+    LJ::need_res('stc/framework/modules.css');
+
+    my $remote = LJ::get_remote();
+
+    ## Access control
+    return LJ::error_list("Check your privs")
+        unless LJ::check_priv($remote, "siteadmin", "marqueefeatures") || $LJ::IS_DEV_SERVER;
+
+    ## Add new entry
+
+    my @marquee_features;
+    for(my $i = 1; $i < 5; $i++) {
+        if ($POST{"text$i"} && $POST{"link$i"}) {
+            push @marquee_features,
+                {
+                    text    => $POST{"text$i"},
+                    link    => $POST{"link$i"},
+                };
+        }
+    }
+
+    if (%POST) {
+        my $marquee_features_json = LJ::JSON->to_json(\@marquee_features);
+        LJ::ExtBlock->create_or_replace('marquee_features', $marquee_features_json);
+        return BML::redirect("$LJ::SITEROOT/admin/marqueefeatures.bml")
+    }
+
+    ## Page
+    my $ret = qq|
+        <div class="canyon">
+            <div class="canyon-side"> | . 
+                LJ::Widget::MarqueeFeatures->render() . qq|
+            </div>
+            <div class="canyon-section">
+                <form method="POST">
+                |;
+
+    for(my $i = 1; $i < 5; $i++) {
+        $ret .= qq|
+            <p><br />
+            <table border="0">
+                <tr><td>Link: </td><td>| . LJ::html_text({name => "link$i", maxlength => '100', size => '50', value => $POST{"link$i"}}) . qq|</td></tr>
+                <tr><td>Text: </td><td>| . LJ::html_text({name => "text$i", maxlength => '100', size => '50', value => $POST{"text$i"}}) . qq|</td></tr>
+            </table>
+            </p><br />|;
+    }
+
+    $ret .= "<button type='submit'>Add</button></form>\n</div>\n</div>";
+
+    return $ret;
+}
+_code?>
+<=body
+title=>Top Entries in communities
+<=body
+page?>
+
