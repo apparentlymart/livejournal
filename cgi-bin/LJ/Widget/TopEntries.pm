@@ -39,7 +39,7 @@ sub render_body {
         ##
         my $comments = '';
         if ($post->{comments}){
-            $comments = qq|<span class="b-posts-comments">, <a href="$post->{comments_url}">|
+            $comments = qq|<span class="i-posts-comments"><a href="$post->{comments_url}">|
                             . BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
                             "</a></span>" 
         }
@@ -63,14 +63,13 @@ sub render_body {
                         ## add row with Vertical only if it's defined,
                         ## add tags only if ther are as well as Vertical's name and uri.
                         ($post->{vertical_uri} && $post->{vertical_name} 
-                            ? (qq|<p><a href="$post->{vertical_uri}">$post->{vertical_name}</a>| . ($post->{tags} ? ": $post->{tags}" : "") . "</p>")
+                            ? (qq|<p class="b-posts-vertical"><a href="$post->{vertical_uri}">$post->{vertical_name}</a>| . ($post->{tags} ? ": $post->{tags}" : "") . "</p>")
                             : ''
-                        ) . qq|
-                        <p>$posttime</p>
-                        <p class="b-posts-user"> $post->{poster}$comments</p>
+                        ) . qq!
+                        <p class="b-posts-data">$posttime | $comments</p>
                     </dd>
                 </dl>
-            </li>|;
+            </li>!;
         
         ## switch classname
         $classname = $classname eq 'even' ? 'odd' : 'even';
@@ -87,14 +86,14 @@ sub render_ontd_homepage {
     my $class       = shift;
     my $top_entries = shift;
 
-    my $ret = '<div class="w-topentries"><div class="w-head"><h2><a href="http://community.livejournal.com/ohnotheydidnt/" class="w-head-in">'.$class->ml('widget.topentries.title').'</a></h2><i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">';
+    my $ret = '<div class="w-topentries w-ontd"><div class="w-head"><h2><a href="http://community.livejournal.com/ohnotheydidnt/" class="w-head-in">'.$class->ml('widget.topentries.title').'</a></h2><i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">';
 
     my $classname = 'event';
     foreach my $post ($top_entries->get_featured_posts()) {
         ##
         my $comments = '';
         if ($post->{comments}){
-            $comments = qq|<span class="b-posts-comments">, <a href="$post->{comments_url}">|
+            $comments = qq|,</span> <span class="i-posts-comments"><a href="$post->{comments_url}">|
                             . BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
                             "</a></span>" 
         }
@@ -105,7 +104,7 @@ sub render_ontd_homepage {
                     : $class->ml('widget.officialjournals.nosubject');
         
         ## Spotlight row
-        $ret .= qq|<li class="$classname"><dl><dt><img src="$post->{userpic}" /></dt><dd><h3 class="b-posts-head"><a href="$post->{url}">$subj</a></h3><p class="b-posts-user"> $post->{poster}$comments</p></dd></dl></li>|;
+        $ret .= qq|<li class="$classname"><dl><dt><img src="$post->{userpic}" /></dt><dd><h3 class="b-posts-head"><a href="$post->{url}">$subj</a></h3><p class="b-posts-data"><span class="i-posts-user"> $post->{poster}$comments</p></dd></dl></li>|;
         
         ## switch classname
         $classname = $classname eq 'even' ? 'odd' : 'even';
