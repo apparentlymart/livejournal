@@ -62,7 +62,7 @@ body<=
     }
 
     ## Widgets selector
-    my $selector = qq|<select name="domain">|
+    my $selector = qq|<select name="domain" onchange="location.search='domain='+jQuery(this).val()">|
                     . join("\r\n" => 
                         map { 
                             my $name = LJ::TopEntries->domain2name($_);
