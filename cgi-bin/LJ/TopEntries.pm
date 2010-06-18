@@ -16,7 +16,7 @@ sub new {
     my %opts = @_;
 
     my $domain = $opts{domain};
-    if (not $domain and ref $opts{journal}){ 
+    if (not $domain){ 
         ## prev API to this class
         ## it can be removed after #66 release
         $domain = 'hmp_ontd';
@@ -82,7 +82,7 @@ sub _hash_from_key {
 
             subj        => $subject_trimed,
             text        => LJ::html_trim_4gadgets($entry->event_text(), 50, $entry->url()),
-            revtime     => $entry->prop('revtime'),
+            #revtime     => $entry->prop('revtime'),
             url         => $entry->url(),
             time        => $entry->logtime_unix(),
             userpic     => $userpic->url(),
@@ -201,6 +201,7 @@ sub _load_featured_posts {
             my $entry = LJ::Entry->new($spot->{journalid}, jitemid => $spot->{jitemid});
             next unless $entry;
             $spot->{comments} = $entry->reply_count();
+            $spot->{logtime}  = $spot->{time} = $entry->logtime_unix();
         }
     }
     $self->{min_entries} ||= 3;
