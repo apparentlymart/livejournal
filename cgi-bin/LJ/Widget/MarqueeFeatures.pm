@@ -21,8 +21,10 @@ sub render_body {
     my $also = shift @$marquee_features;
 
     my $template = LJ::HTML::Template->new(
-        {'use_expr' => 1},
-        filename => "$ENV{'LJHOME'}/templates/MarqueeFeatures/index.tmpl"
+        { use_expr => 1 }, # force HTML::Template::Pro with Expr support
+        die_on_bad_params => 0,
+        strict => 0,
+        filename => "$ENV{'LJHOME'}/templates/MarqueeFeatures/index.tmpl",
     );
 
     $template->param (

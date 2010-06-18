@@ -6428,6 +6428,10 @@ widget.manageqotd.extratext=Extra Text
 widget.manageqotd.is_special|staleness=1
 widget.manageqotd.is_special=Special?
 
+widget.marqueefeatures.title=Cool features on LiveJournal
+
+widget.marqueefeatures.also=Also check out
+
 widget.moodthemechooser.desc|staleness=1
 widget.moodthemechooser.desc=Mood themes are small icons that describe your mood or the mood of a post. Select from a variety of faces and characters.
 
