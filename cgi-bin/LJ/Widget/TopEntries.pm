@@ -22,7 +22,7 @@ sub render_body {
 
     ## Ontd spotlights widget has its own design
     return $class->render_ontd_homepage($top_entries) 
-        if $domain eq 'hmp_ontd';
+        if $domain eq 'hmp_ontd' or not $domain; # hmp_ontd is default
 
     ## TODO: Cache on 5 minutes.
     ##      !!! use lang_id in cache key.
