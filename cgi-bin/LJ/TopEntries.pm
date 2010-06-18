@@ -168,12 +168,16 @@ sub _store_featured_posts {
 
     my $domain = $self->{domain};
     LJ::ExtBlock->create_or_replace("spts_$domain" => $data);
+
+    $self->{_post_loaded} = 0;
 }
 
 # load all from property to blessed hash.
 sub _load_featured_posts {
     my $self = shift;
     my %opts = @_;
+
+    return if $self->{_post_loaded};
 
     my $domain = $self->{domain};
     my $ext_block = LJ::ExtBlock->load_by_id("spts_$domain");
@@ -208,6 +212,8 @@ sub _load_featured_posts {
     $self->{max_entries} ||= 5;
     $self->{timelimit}   ||= 24*3600;
 
+    $self->{_post_loaded} = 1;
+
     return $self->_sort_list(%opts);
 }
 
@@ -222,7 +228,7 @@ sub get_featured_posts {
 sub min_entries {
     my $self = shift;
 
-    $self->_load_featured_posts() unless $self->{'min_entries'};
+    $self->_load_featured_posts();
     if ($_[0]) {
         my $min_entries = shift;
         if ($self->{'min_entries'} != $min_entries) {
@@ -237,7 +243,7 @@ sub min_entries {
 sub max_entries {
     my $self = shift;
 
-    $self->_load_featured_posts() unless $self->{'max_entries'};
+    $self->_load_featured_posts();
     if ($_[0]) {
         my $max_entries = shift;
         if ($self->{'max_entries'} != $max_entries) {
@@ -247,6 +253,19 @@ sub max_entries {
     }
 
     return $self->{'max_entries'};
+}
+
+##
+sub remove_after {
+    my $self = shift;
+    $self->_load_featured_posts();
+
+    ## set new value
+    if (my $hours = shift @_){
+        $self->{timelimit} = $hours * 3600; ## keep in seconds
+        $self->_store_featured_posts();
+    }
+    return $self->{timelimit} / 3600;
 }
 
 # Add/del entries.

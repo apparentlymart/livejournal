@@ -52,6 +52,11 @@ body<=
         $top_entries->max_entries($POST{max_entries});
     }
 
+    ## 
+    if ($POST{remove_after}) {
+        $top_entries->remove_after($POST{remove_after});
+    }
+    
     if (%POST) {
         return BML::redirect("$LJ::SITEROOT/admin/topentries.bml?domain=$domain")
     }
@@ -105,6 +110,10 @@ body<=
 
     $ret .= "<tr><td>Number of entries, that can not be deleted: ";
     $ret .= LJ::html_text({name => 'min_entries', maxlength => '1', size => '1', value => $top_entries->min_entries()});
+    $ret .= "</td></tr>\n";
+
+    $ret .= "<tr><td>Remove post from widget after: ";
+    $ret .= LJ::html_text({name => 'remove_after', maxlength => '2', size => '2', value => $top_entries->remove_after()});
     $ret .= "</td></tr>\n";
 
     $ret .= '';
