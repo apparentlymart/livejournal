@@ -4,6 +4,8 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use LJ::ExtBlock;
+use Storable qw//;
+
 
 my %known_domains = map {$_ => 1} domains();
 
@@ -14,6 +16,11 @@ sub new {
     my %opts = @_;
 
     my $domain = $opts{domain};
+    if (not $domain and ref $opts{journal}){ 
+        ## prev API to this class
+        ## it can be removed after #66 release
+        $domain = 'hmp_ontd';
+    }
     Carp::confess("unknown domain: $domain")
         unless exists $known_domains{$domain};
 
@@ -57,9 +64,6 @@ sub _hash_from_key {
 
     return undef unless $poster && $journal;
 
-    my $comment_ref = LJ::Talk::get_talk_data($journal, 'L', $jitemid);
-    return undef unless ref $comment_ref;
-
     # Get userpic from entry
     my $userpic = LJ::Userpic->new($poster, $userpicid);
 
@@ -85,7 +89,7 @@ sub _hash_from_key {
             poster      => $poster->ljuser_display(),
             timestamp   => $timestamp,
 
-            comments    => scalar keys %$comment_ref,
+            comments    => $entry->reply_count,
             comments_url=> $entry->url(anchor => 'comments'),
 
             logtime     => $entry->logtime_unix,
@@ -159,11 +163,11 @@ sub _store_featured_posts {
 
         spots       => \@spots,
     };
-    my $json = LJ::JSON->to_json($struct);
+    my $data = Storable::freeze($struct);
     ##
 
     my $domain = $self->{domain};
-    LJ::ExtBlock->create_or_replace("spts_$domain" => $json);
+    LJ::ExtBlock->create_or_replace("spts_$domain" => $data);
 }
 
 # load all from property to blessed hash.
@@ -186,11 +190,18 @@ sub _load_featured_posts {
     $self->{'featured_posts'}   = [ map { $self->_hash_from_key($_) } @entities ];
 =cut
     if ($prop_val){
-        my $struct = LJ::JSON->from_json($prop_val);
+        my $struct = Storable::thaw($prop_val);
         $self->{min_entries}    = $struct->{min_entries};
         $self->{max_entries}    = $struct->{max_entries};
-        $self->{featured_posts} = $struct->{spots};
+        $self->{featured_posts} = $struct->{spots} || [];
         $self->{timelimit}      = $struct->{timelimit};
+
+        ## Update comments couter
+        foreach my $spot (@{ $self->{featured_posts} }){
+            my $entry = LJ::Entry->new($spot->{journalid}, jitemid => $spot->{jitemid});
+            next unless $entry;
+            $spot->{comments} = $entry->reply_count();
+        }
     }
     $self->{min_entries} ||= 3;
     $self->{max_entries} ||= 5;
