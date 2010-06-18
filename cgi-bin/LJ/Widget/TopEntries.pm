@@ -37,13 +37,9 @@ sub render_body {
     my $classname = 'event';
     foreach my $post ($top_entries->get_featured_posts()) {
         ##
-        my $comments = '';
-        if ($post->{comments}){
-            $comments = qq|<span class="i-posts-comments"><a href="$post->{comments_url}">|
+        my $comments = qq|<span class="i-posts-comments"><a href="$post->{comments_url}">|
                             . BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
-                            "</a></span>" 
-        }
-
+                            "</a></span>"; 
         ## 
         my $subj = $post->{subj} ne '' 
                     ? $post->{subj} 
@@ -91,12 +87,9 @@ sub render_ontd_homepage {
     my $classname = 'event';
     foreach my $post ($top_entries->get_featured_posts()) {
         ##
-        my $comments = '';
-        if ($post->{comments}){
-            $comments = qq|,</span> <span class="i-posts-comments"><a href="$post->{comments_url}">|
+        my $comments = qq|,</span> <span class="i-posts-comments"><a href="$post->{comments_url}">|
                             . BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
-                            "</a></span>" 
-        }
+                            "</a></span>"; 
 
         ## 
         my $subj = $post->{subj} ne '' 
