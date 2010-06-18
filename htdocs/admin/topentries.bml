@@ -65,9 +65,7 @@ body<=
     my $selector = qq|<select name="domain">|
                     . join("\r\n" => 
                         map { 
-                            my $name = $_;
-                            $name =~ s/hmp_/Homepage_/g;
-                            $name =~ s!\_!/!g;
+                            my $name = LJ::TopEntries->domain2name($_);
                             my $selected = $domain eq $_ ? " selected" : "";
                             qq|<option value="$_"$selected>$name</option>|;
                         } LJ::TopEntries->domains

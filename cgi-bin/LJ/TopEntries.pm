@@ -7,9 +7,72 @@ use LJ::ExtBlock;
 use Storable qw//;
 
 
-my %known_domains = map {$_ => 1} domains();
+=head
+   ·         Arts & Culture
+   ·         Books & Writing
+   ·         Computers & Technology
+   ·         Entertainment
+   ·         Fashion & Style
+   ·         Food & Drink
+   ·         Gaming
+   ·         Health & Fitness
+   ·         Hobbies & Crafts
+   ·         Home & Garden
+   ·         Life
+   ·         LiveJournal Culture
+   ·         News & Politics
+   ·         Regional
+   ·         Schools & Education
+   ·         Science & Nature
+   ·         Society & Culture
+   ·         Spirituality & Beliefs
+=cut
 
-sub domains { qw/hmp_ontd hmp_spotlight culture entertainment/ }
+my %domains = (
+    hmp_ontd        => 'Homepage/ONTD',
+    hmp_spotlight   => 'Homepage/Spotlight',
+    culture         => 'Arts & Culture',
+    entertainment   => 'Entertainment',
+    books           => 'Books & Writing',
+    computers       => 'Computers & Technology',
+    fashion         => 'Fashion & Style',
+    food            => 'Food & Drink',
+    gaming          => 'Gaming',
+    health          => 'Health & Fitness',
+    life            => 'Life',
+    lj_culture      => 'LiveJournal Culture',
+    news            => 'News & Politics',
+    regional        => 'Regional',
+    schools         => 'Schools & Education',
+    science         => 'Science & Nature',
+    society         => 'Society & Culture',
+    spirit          => 'Spirituality & Beliefs',
+    );
+
+my @order = qw/
+    hmp_ontd
+    hmp_spotlight
+    culture
+    entertainment
+    books
+    computers
+    fashion
+    food
+    gaming
+    health
+    life
+    lj_culture
+    news
+    regional
+    schools
+    science
+    society
+    spirit
+/;
+
+
+sub domains { @order }
+sub domain2name { my $class = shift; $domains{ +shift } }
 
 sub new {
     my $class = shift;
@@ -22,7 +85,7 @@ sub new {
         $domain = 'hmp_ontd';
     }
     Carp::confess("unknown domain: $domain")
-        unless exists $known_domains{$domain};
+        unless exists $domains{$domain};
 
     my $self = {domain => $domain};
     $self->{remote}    = $opts{remote}    || LJ::get_remote();
