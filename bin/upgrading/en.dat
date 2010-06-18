@@ -6495,6 +6495,10 @@ widget.navstripchooser.title=Navigation Strip
 widget.navstripchooser.upgradetos2|staleness=1
 widget.navstripchooser.upgradetos2=<a [[aopts]]><strong>Switch to S2</strong></a> and you'll be able to use custom colors for the navigation strip.
 
+widget.news.title=LiveJournal news
+
+widget.news.more=More in <a href="[[href]]">News</a>.
+
 widget.pagenotice.dismiss|staleness=1
 widget.pagenotice.dismiss=Dismiss
 
