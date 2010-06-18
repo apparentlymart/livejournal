@@ -1355,8 +1355,8 @@ sub res_includes {
     ## Include all even required only one of them.
     if ($LJ::NEEDED_RES{include_common_js}){
         foreach my $js (@LJ::STRICLY_INCLUDED_JS){
-            my $mtime = _file_modtime($js, $now);
-            $add->(common_js => $js, $mtime);
+            my $mtime = _file_modtime("js/$js", $now);
+            $add->(common_js => $js, $mtime); ## without "js" prefix
         }
     }
 
