@@ -1214,8 +1214,22 @@ sub js_dumper {
 sub need_res {
     my $opts = (ref $_[0]) ? shift : {};
     my $condition = $opts->{condition} || '';
+    my @keys = @_;
 
-    foreach my $reskey (@_) {
+    ## Filter included res.
+    ## if resource is a part of a common set, skip it here
+    ## and add to page inside the set.
+    @keys = grep {
+                ## check common JS sources.
+                if ($LJ::STRICLY_INCLUDED_JS_H{$_}){
+                    $LJ::NEEDED_RES{include_common_js} = 1;
+                    0; ## include this file as a part of common sources set.
+                } else {
+                    1; ## include them as is.
+                }
+            } @keys;
+
+    foreach my $reskey (@keys) {
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
         unless (exists $LJ::NEEDED_RES{$reskey}) {
             push @LJ::NEEDED_RES, $reskey;
@@ -1336,6 +1350,17 @@ sub res_includes {
         $oldest{$type}{$condition} = $modtime if $modtime > $oldest{$type}{$condition};
     };
 
+
+    ## Some of basic JS sources are widely used.
+    ## Include all even required only one of them.
+    if ($LJ::NEEDED_RES{include_common_js}){
+        foreach my $js (@LJ::STRICLY_INCLUDED_JS){
+            my $mtime = _file_modtime($js, $now);
+            $add->(common_js => $js, $mtime);
+        }
+    }
+
+
     foreach my $key (@LJ::NEEDED_RES) {
         my $path;
         my $mtime = _file_modtime($key, $now);
@@ -1384,6 +1409,7 @@ sub res_includes {
         }
     };
 
+    $tags->("common_js", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
     $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
     $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" />");
     $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" />");
