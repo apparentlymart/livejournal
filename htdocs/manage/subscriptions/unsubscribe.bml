@@ -19,32 +19,34 @@ my $hash     = $GET{'crc'};
 
 my $check_crc = md5_hex ($timest, $user, $subs_id, $LJ::ESN_UNSUBSCR_SECRET_CODE) eq $hash;
 
+my $ret = '';
+
+$ret = LJ::Lang::ml('esn.subscriptions.unsubscribe.link', { aopts => "href='$LJ::SITEROOT/manage/settings/?cat=notifications'" });
+
 ## check sum has an error
 unless ($check_crc) {
-    return $ML{'esn.subscriptions.unsubscribe.crc_error'};
+    return $ML{'esn.subscriptions.unsubscribe.crc_error'} . $ret;
 }
-
-my $ret = '';
 
 ## url has been expired
 if ($timest + 2629743 < time()) {
-    return $ML{'esn.subscriptions.unsubscribe.link_expired'};
+    return $ML{'esn.subscriptions.unsubscribe.link_expired'} . $ret;
 }
 
 ## passed user is not exists
 my $u = LJ::load_user ($user);
 unless ($u) {
-    return $ML{'esn.subscriptions.unsubscribe.user_not_found'};
+    return $ML{'esn.subscriptions.unsubscribe.user_not_found'} . $ret;
 }
 
 # deactivate
 my $sub = LJ::Subscription->new_by_id ($u, $subs_id);
 if ($sub) {
     $sub->delete;
-    $ret .= $ML{'esn.subscriptions.unsubscribe.success'};
+    $ret = $ML{'esn.subscriptions.unsubscribe.success'} . $ret;
 } else {
     ## Ooops, we can't find subscription
-    $ret .= $ML{'esn.subscriptions.unsubscribe.subs_not_found'};
+    $ret = $ML{'esn.subscriptions.unsubscribe.subs_not_found'} . $ret;
 }
 
 return $ret;
