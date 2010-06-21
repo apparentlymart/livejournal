@@ -574,7 +574,7 @@ sub handle_post {
 
             LJ::send_mail({
                 to => $email,
-                from => $LJ::ADMIN_EMAIL,
+                from => $LJ::DONOTREPLY_EMAIL,
                 fromname => $LJ::SITENAME,
                 charset => 'utf-8',
                 subject => LJ::Lang::ml('email.newacct.subject', { sitename => $LJ::SITENAME }),

@@ -1359,7 +1359,7 @@ sub shared_member_request {
 
     LJ::send_mail({
         'to' => $u->email_raw,
-        'from' => $LJ::ADMIN_EMAIL,
+        'from' => $LJ::DONOTREPLY_EMAIL,
         'fromname' => $LJ::SITENAME,
         'charset' => 'utf-8',
         'subject' => "Community Membership: $ju->{'name'}",

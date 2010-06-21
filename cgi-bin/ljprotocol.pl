@@ -1587,7 +1587,7 @@ sub postevent
 
                     LJ::send_mail({
                         'to'        => $to->{to},
-                        'from'      => $LJ::ADMIN_EMAIL,
+                        'from'      => $LJ::DONOTREPLY_EMAIL,
                         'charset'   => $to->{charset},
                         'subject'   => $subject,
                         'body'      => $body,

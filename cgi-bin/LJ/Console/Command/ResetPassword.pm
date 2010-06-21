@@ -51,7 +51,7 @@ sub execute {
 
     LJ::send_mail({
         'to' => $u->email_raw,
-        'from' => $LJ::ADMIN_EMAIL,
+        'from' => $LJ::DONOTREPLY_EMAIL,
         'subject' => "Password Reset",
         'body' => $body,
     }) or $self->info("New password notification email could not be sent.");

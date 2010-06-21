@@ -146,7 +146,7 @@ body<=
         my @date = localtime(time);
         LJ::send_mail({
             'to'      => $old_email,
-            'from'    => $LJ::ADMIN_EMAIL,
+            'from'    => $LJ::DONOTREPLY_EMAIL,
             'charset' => 'utf-8',
             'subject' => $ML{'/editinfo.bml.newemail_old.subject'},
             'body'    => BML::ml('/editinfo.bml.newemail_old.body2',
@@ -166,7 +166,7 @@ body<=
         my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $POST{'email'});
         LJ::send_mail({
             'to' => $POST{'email'},
-            'from' => $LJ::ADMIN_EMAIL,
+            'from' => $LJ::DONOTREPLY_EMAIL,
             'charset' => 'utf-8',
             'subject' => $ML{'/editinfo.bml.newemail.subject'},
             'body' => BML::ml('/editinfo.bml.newemail.body2',

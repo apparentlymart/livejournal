@@ -772,7 +772,7 @@ body<=
 
             LJ::send_mail({
                 'to' => $POST{'email'},
-                'from' => $LJ::ADMIN_EMAIL,
+                'from' => $LJ::DONOTREPLY_EMAIL,
                 'charset' => 'utf-8',
                 'subject' => $ML{'/editinfo.bml.newemail.subject'},
                 'body' => BML::ml('/editinfo.bml.newemail.body2',

@@ -200,7 +200,7 @@ body<=
 
         LJ::send_mail({
             'to' => $email,
-            'from' => $LJ::ADMIN_EMAIL,
+            'from' => $LJ::DONOTREPLY_EMAIL,
             'fromname' => $LJ::SITENAME,
             'charset' => $encoding,
             'subject' => $subject,
@@ -272,7 +272,7 @@ body<=
 
         LJ::send_mail({
             'to' => $email,
-            'from' => $LJ::ADMIN_EMAIL,
+            'from' => $LJ::DONOTREPLY_EMAIL,
             'fromname' => $LJ::SITENAME,
             'charset' => 'utf-8',
             'subject' => "Lost Username",
