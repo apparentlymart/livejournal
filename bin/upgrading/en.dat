@@ -6867,6 +6867,8 @@ widget.themenav.title=2. Select a New Theme
 
 widget.topentries.comments=[[count]] [[?count|comment|comments]]
 
+widget.topentries.spotlight.title=Community spotlight
+
 widget.topusers.top5commenters.title=Top 5 commenters within 24h
 
 widget.topusers.head.nr=Nr
