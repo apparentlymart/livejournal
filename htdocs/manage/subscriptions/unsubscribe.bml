@@ -21,7 +21,7 @@ my $check_crc = md5_hex ($timest, $user, $subs_id, $LJ::ESN_UNSUBSCR_SECRET_CODE
 
 my $ret = '';
 
-$ret = LJ::Lang::ml('esn.subscriptions.unsubscribe.link', { aopts => "href='$LJ::SITEROOT/manage/settings/?cat=notifications'" });
+$ret = '<p>' . LJ::Lang::ml('esn.subscriptions.unsubscribe.link', { aopts => "href='$LJ::SITEROOT/manage/settings/?cat=notifications'" }) . '</p>';
 
 ## check sum has an error
 unless ($check_crc) {
