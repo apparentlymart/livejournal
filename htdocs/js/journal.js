@@ -71,7 +71,7 @@ ILikeThis = {
 						'class': 'b-popup b-popup-messagebox',
 						css: {top: 0, visibility: 'hidden'},
 						html: '<div class="b-popup-head">'
-									+'<h4>'+data.ml_view_all+' ('+data.total+')</h4><i class="i-popup-close" onclick="ILikeThis.dialog.remove()"></i>'
+									+'<h4>'+data.ml_users_who_like_it+' ('+data.total+')</h4><i class="i-popup-close" onclick="ILikeThis.dialog.remove()"></i>'
 								+'</div>'
 								+'<div class="b-popup-content">'
 									+'<p class="b-popup-we_like_this">'
@@ -80,7 +80,7 @@ ILikeThis = {
 								+'</div>'
 								+(data.total > 10 ? '<div class="b-popup-footer">'
 									+'<p><a href="'+Site.siteroot+'/alleventrates.bml?journal='+username+'&itemid='+itemid+'">'
-										+data.ml_users_who_like_it
+										+data.ml_view_all
 									+'</a></p>' : ''
 								+'</div>')
 					}).ljAddContextualPopup();
