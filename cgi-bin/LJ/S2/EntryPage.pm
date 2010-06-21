@@ -301,10 +301,11 @@ sub EntryPage
                 my $has_threads = scalar @{$i->{'replies'}};
                 my $poster = $i->{'poster'} ? $i->{'poster'}{'username'} : "";
                 my @child_ids = map { $_->{'talkid'} } @{$i->{'replies'}};
+                my $parent = $cmt->parent;
                 $cmtinfo->{$i->{talkid}} = {
                     rc     => \@child_ids,
                     u      => $poster,
-                    parent => $cmt->parent ? $cmt->parent->dtalkid : undef,
+                    parent => $parent && $parent->valid ? $parent->dtalkid : undef,
                     full   => ($i->{full}),
                 };
                 $self->($self, $i->{'replies'}) if $has_threads;

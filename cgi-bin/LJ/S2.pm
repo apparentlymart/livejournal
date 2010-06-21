@@ -3087,7 +3087,7 @@ sub _Comment__get_link
 
         # see if any parents are being watched
         my $watching_parent = 0;
-        while ($comment && $comment->valid && $comment->parenttalkid) {
+        while ($comment && $comment->valid && $comment->parent && $comment->parent->valid) {
             # check cache
             $comment->{_watchedby} ||= {};
             my $thread_watched = $comment->{_watchedby}->{$u->{userid}};
