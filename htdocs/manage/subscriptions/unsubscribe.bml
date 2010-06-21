@@ -15,9 +15,9 @@ my $remote = LJ::get_remote ();
 my $user     = $GET{'user'};
 my $timest   = $GET{'timest'} || 0;
 my $subs_id  = $GET{'subs_id'};
-my $hash     = $GET{'crc'};
+my $hash     = $GET{'hash'};
 
-my $check_crc = md5_hex ($timest, $user, $subs_id, $LJ::ESN_UNSUBSCR_SECRET_CODE) eq $hash;
+my $check_crc = md5_hex ($timest, $user, $subs_id, $LJ::ESN_UNSUBSCR_SECRET_CODE) eq $hash ? 1 : 0;
 
 my $ret = '';
 
