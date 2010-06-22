@@ -96,7 +96,7 @@ sub END { LJ::end_request(); }
                     "sms_msgtext", "sms_msgerror",
                     "jabroster", "jablastseen", "random_user_set",
                     "poll2", "pollquestion2", "pollitem2",
-                    "pollresult2", "pollsubmission2",
+                    "pollresult2", "pollsubmission2", "pollresultaggregated2",
                     "embedcontent", "usermsg", "usermsgtext", "usermsgprop",
                     "notifyarchive", "notifybookmarks", "pollprop2", "embedcontent_preview",
                     "logprop_history",

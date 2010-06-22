@@ -2810,6 +2810,18 @@ CREATE TABLE pollresult2 (
 )
 EOC
 
+# aggregated results for all question - answer_variant pairs and count of participants
+# key may be: '<qid>:<itid>' or 'users'
+register_tablecreate("pollresultaggregated2", <<'EOC');
+CREATE TABLE pollresultaggregated2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  what VARCHAR(32) NOT NULL,
+  value INT SIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY (journalid,pollid,what)
+)
+EOC
+
 register_tablecreate("pollsubmission2", <<'EOC');
 CREATE TABLE pollsubmission2 (
   journalid INT UNSIGNED NOT NULL,
