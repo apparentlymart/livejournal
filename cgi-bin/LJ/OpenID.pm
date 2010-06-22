@@ -42,6 +42,7 @@ sub server {
                                     server_secret => \&LJ::OpenID::server_secret,
                                     secret_gen_interval => 3600,
                                     secret_expire_age   => 86400 * 14,
+                                    endpoint_url => $LJ::OPENID_SERVER,
                                     );
 }
 

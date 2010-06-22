@@ -5238,7 +5238,7 @@ sub openid_tags {
     # OpenID Server and Yadis
     if (LJ::OpenID->server_enabled and defined $u) {
         my $journalbase = $u->journal_base;
-        $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
+        $head .= qq{<link rel="openid2.provider" href="$LJ::OPENID_SERVER" />\n};
         $head .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
     }
 
