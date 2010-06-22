@@ -1461,7 +1461,7 @@ sub tag_cloud {
         my $pt     = int($base_font_size + $percentile->($ct) * $font_size_range);
         $ret .= "<a ";
         $ret .= "id='taglink_$tag' " unless $opts->{ignore_ids};
-        $ret .= "href='" . LJ::ehtml($tagurl) . "' style='color: <?altcolor2?>; font-size: ${pt}pt; text-decoration: none'><span style='color: <?altcolor2?>'>";
+        $ret .= "href='" . LJ::ehtml($tagurl) . "' style='font-size: ${pt}pt;'><span>";
         $ret .= LJ::ehtml($tag) . "</span></a>\n";
 
         # build hash of tagname => final point size for refresh
