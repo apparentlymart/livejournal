@@ -1361,17 +1361,17 @@ set text_share_this = "Share this!";
 property string text_share_facebook {
     des = "Text to share this with a friend on Facebook";
 }
-set text_share_facebook = "Share by Facebook";
+set text_share_facebook = "Post to Facebook";
 
 property string text_share_twitter {
     des = "Text to share this with a friend on Twitter";
 }
-set text_share_twitter = "Share by Twitter";
+set text_share_twitter = "TwitThis";
 
 property string text_share_email {
     des = "Text to share this with a friend by mail";
 }
-set text_share_email = "Share on mail";
+set text_share_email = "Send by e-mail";
 
 property string text_mem_add {
     des = "Text to add an entry into memories";
