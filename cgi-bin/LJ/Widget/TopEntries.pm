@@ -31,7 +31,7 @@ sub render_body {
     my $ret = qq|
         <div class="w-topentries">
             <div class="w-head">
-                <h2><a href="http://community.livejournal.com/lj_spotlight/" class="w-head-in">| . $class->ml('widget.topentries.spotlight.title') . qq|</a></h2>
+                <h2><a href="$LJ::SITEROOT/browse" class="w-head-in">| . $class->ml('widget.topentries.spotlight.title') . qq|</a></h2>
                 <i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">|;
 
     my $classname = 'event';
@@ -39,10 +39,10 @@ sub render_body {
         ##
         my $comments = qq|<span class="i-posts-comments"><a href="$post->{comments_url}">|
                             . BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
-                            "</a></span>"; 
-        ## 
-        my $subj = $post->{subj} ne '' 
-                    ? $post->{subj} 
+                            "</a></span>";
+        ##
+        my $subj = $post->{subj} ne ''
+                    ? $post->{subj}
                     : $class->ml('widget.officialjournals.nosubject');
 
         ## period of time in well readable format.
@@ -58,7 +58,7 @@ sub render_body {
                         <h3 class="b-posts-head"><a href="$post->{url}">$subj</a></h3>| .
                         ## add row with Vertical only if it's defined,
                         ## add tags only if ther are as well as Vertical's name and uri.
-                        ($post->{vertical_uri} && $post->{vertical_name} 
+                        ($post->{vertical_uri} && $post->{vertical_name}
                             ? (qq|<p class="b-posts-vertical"><a href="$post->{vertical_uri}">$post->{vertical_name}</a>| . ($post->{tags} ? ": $post->{tags}" : "") . "</p>")
                             : ''
                         ) . qq!
@@ -66,7 +66,7 @@ sub render_body {
                     </dd>
                 </dl>
             </li>!;
-        
+
         ## switch classname
         $classname = $classname eq 'even' ? 'odd' : 'even';
     }
