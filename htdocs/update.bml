@@ -98,6 +98,17 @@
     my $event   = $POST{'event'}   || $GET{'event'};
     my $tags    = $POST{'prop_taglist'} || $GET{'prop_taglist'};
 
+    # Tags
+    my @tag_names;
+    if (keys %$tags) {
+        @tag_names = map { $_->{name} } values %$tags;
+        @tag_names = sort { lc $a cmp lc $b } @tag_names;
+    }
+
+    $$body .= "<script>\n";
+    $$body .= "var user_tags = [" . join(', ', map {"'" . $_ . "'"} @tag_names) . "]\n";
+    $$body .= "</script>\n";
+
     # if a QotD id was passed in, fill in the fields with that QotD
     my $qid = $GET{qotd}+0;
     my $qotd = $qid ? LJ::QotD->get_single_question($qid) : '';
