@@ -1,3 +1,9 @@
 .appwidget-popularinterests p.viewall {
     font-size: 11px;
 }
+
+.appwidget-popularinterests .w-head {
+    display: none;
+    }
+
+

@@ -33,11 +33,16 @@ sub render_body {
                             value => $count,
                             };
     }
-
+    $body .= "<div class='right-mod'><div class='mod-tl'><div class='mod-tr'><div class='mod-br'><div class='mod-bl'>";
+    $body .= "<div class='w-head'><h2><span class='w-head-in'>" . $class->ml('widget.popularinterests.title') . "</span></h2><i class='w-head-corner'></i></div>";
+                            
+    $body .= "<div class='w-body'>";
     $body .= "<p>" . LJ::tag_cloud(\%interests, {'font_size_range' => 16}) . "</p>";
 
     $body .= "<p class='viewall'>&raquo; <a href='$LJ::SITEROOT/interests.bml?view=popular'>" .
              $class->ml('widget.popularinterests.viewall') . "</a></p>";
+    
+    $body .= "</div></div></div></div></div></div>";
 
     return $body;
 }

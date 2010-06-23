@@ -6502,6 +6502,8 @@ widget.news.more=More in <a href="[[href]]">News</a>.
 widget.pagenotice.dismiss|staleness=1
 widget.pagenotice.dismiss=Dismiss
 
+widget.popularinterests.title=Popular Interests
+
 widget.popularinterests.viewall|staleness=1
 widget.popularinterests.viewall=view all popular interests
 
