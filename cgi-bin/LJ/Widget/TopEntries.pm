@@ -31,7 +31,7 @@ sub render_body {
     my $ret = qq|
         <div class="w-topentries">
             <div class="w-head">
-                <h2><a href="$LJ::SITEROOT/browse" class="w-head-in">| . $class->ml('widget.topentries.spotlight.title') . qq|</a></h2>
+                <h2><span class="w-head-in"><a href="$LJ::SITEROOT/browse">| . $class->ml('widget.topentries.spotlight.title') . qq|</a></span></h2>
                 <i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">|;
 
     my $classname = 'event';
@@ -82,7 +82,7 @@ sub render_ontd_homepage {
     my $class       = shift;
     my $top_entries = shift;
 
-    my $ret = '<div class="w-topentries w-ontd"><div class="w-head"><h2><a href="http://community.livejournal.com/ohnotheydidnt/" class="w-head-in">'.$class->ml('widget.topentries.title').'</a></h2><i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">';
+    my $ret = '<div class="w-topentries w-ontd"><div class="w-head"><h2><span class="w-head-in"><a href="http://community.livejournal.com/ohnotheydidnt/">'.$class->ml('widget.topentries.title').'</a></span></h2><i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">';
 
     my $classname = 'event';
     foreach my $post ($top_entries->get_featured_posts()) {
