@@ -100,9 +100,16 @@
 
     # Tags
     my @tag_names;
-    if (keys %$tags) {
-        @tag_names = map { $_->{name} } values %$tags;
-        @tag_names = sort { lc $a cmp lc $b } @tag_names;
+
+    my $utags;
+    if ($GET{usejournal} && !LJ::load_user($GET{usejournal})) {
+        $utags = LJ::load_user($GET{usejournal})->tags;
+    } else {
+        $utags = $remote->tags;
+    }
+
+    if (keys %$utags) {
+        @tag_names = sort { lc $a cmp lc $b } map { $_->{name} } values %$utags;
     }
 
     $$body .= "<script>\n";
