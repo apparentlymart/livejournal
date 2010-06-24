@@ -179,8 +179,8 @@ sub render_body {
 
         my $secondsold = $comm->timeupdate ? time() - $comm->timeupdate : undef;
         my $userpic = $comm->userpic ?
-            $comm->userpic->imgtag_percentagesize(0.5) :
-                LJ::run_hook('no_userpic_html', percentage => 0.5 );
+            $comm->userpic->imgtag_percentagesize(1) :
+                LJ::run_hook('no_userpic_html', percentage => 1 );
 
         push @tmpl_communities,
             {
