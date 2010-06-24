@@ -186,7 +186,7 @@ sub render_body {
             {
                 featured            => 0,
                 userpic             => $userpic,
-                journal_name        => $comm->ljuser_display({ bold => 0, head_size => 11 }), 
+                journal_name        => $comm->ljuser_display(),
                 journal_user        => $comm->{user},
                 journal_base        => $comm->journal_base(),
                 journal_title       => $comm->{'name'} || '',
