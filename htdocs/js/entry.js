@@ -520,10 +520,44 @@ function getUserTags(defaultjournal) {
                 inputObjs[i].disable();
             }
             if (data.tags) {
-                if ($('prop_taglist')) {
-                    var keywords = new InputCompleteData(data.tags, "ignorecase");
-                    inputObjs.push(new InputComplete($('prop_taglist'), keywords));
-                }
+                //if ($('prop_taglist')) {
+					jQuery('#prop_taglist').autocomplete({
+						minLength: 1,
+						source: function(request, response) {
+							// delegate back to autocomplete, but extract the last term
+							console.time(1);
+							//response(jQuery.ui.autocomplete.filter(user_tags, request.term.split(/,\s*/).pop()));
+							console.timeEnd(1);
+							console.time(1);
+							var search = request.term.split(/,\s*/).pop(),
+								resp_ary = [], i = -1;
+							while (user_tags[++i]) {
+								if (user_tags[i].indexOf(search) === 0) {
+									resp_ary.push(user_tags[i])
+								}
+							}
+							response(resp_ary);
+							console.timeEnd(1);
+						},
+						focus: function() {
+							// prevent value inserted on focus
+							return false;
+						},
+						select: function(event, ui) {
+							var terms = split( this.value );
+							// remove the current input
+							terms.pop();
+							// add the selected item
+							terms.push( ui.item.value );
+							// add placeholder to get the comma-and-space at the end
+							terms.push("");
+							this.value = terms.join(", ");
+							return false;
+						}
+					});
+                    //var keywords = new InputCompleteData(data.tags, "ignorecase");
+                    //inputObjs.push(new InputComplete($('prop_taglist'), keywords));
+                //}
             }
         },
         onError: function (msg) { }
