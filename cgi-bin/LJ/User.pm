@@ -9004,7 +9004,12 @@ sub make_journal
             #return $error->($warning, "404 Not Found");
 
         }
-        return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);
+        if ($u->is_suspended) {
+            LJ::Request->pnotes ('error' => 'suspended');
+            $opts->{'handler_return'} = "403 Forbidden";
+            return;
+        }
+        #return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);
 
         my $entry = $opts->{ljentry};
         return $error->("This entry has been suspended. You can visit the journal <a href='" . $u->journal_base . "/'>here</a>.", "403 Forbidden")
