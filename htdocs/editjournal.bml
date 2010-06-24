@@ -311,6 +311,23 @@ body<=
             my $username = $usejournal ? $usejournal : $remote->user;
             $auth .= "<script>getUserTags('$username');</script>";
 
+            # Tags
+            my @tag_names;
+
+            my $utags;
+            if ($GET{usejournal} && !LJ::load_user($GET{usejournal})) {
+                $utags = LJ::load_user($GET{usejournal})->tags;
+            } else {
+                $utags = $remote->tags;
+            }
+
+            if (keys %$utags) {
+                @tag_names = sort { lc $a cmp lc $b } map { $_->{name} } values %$utags;
+            }
+
+            $auth .= "<script>\n";
+            $auth .= "var user_tags = [" . join(', ', map {"'" . $_ . "'"} @tag_names) . "]\n";
+            $auth .= "</script>\n";
 
             my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
             my $datetime; my $date = LJ::html_datetime_decode({ 'name' => "date_ymd", }, \%POST);
