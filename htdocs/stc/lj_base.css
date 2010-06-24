@@ -471,6 +471,7 @@ SUP.i-new {
 	background:#FFF;
 	border:2px solid #8CB7DA;
 	font-size:12px;
+	z-index:9999;
 	}
 	.b-popup-messagebox .b-popup-head {
 		position:relative;
