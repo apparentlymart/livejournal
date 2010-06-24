@@ -39,6 +39,7 @@ sub _get_spotlight_communities {    # Load communities saved by spotlight admin
 
     my ($normal_rows, $sponsored_rows, $promoted_rows, $partner_rows) = map {
         [ LJ::JournalSpotlight->get_spotlights(
+            limit => 6,
             filter  => $_,
             user => $remote ) ]
         } qw(normal sponsored promoted partner);
