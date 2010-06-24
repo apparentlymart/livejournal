@@ -1031,6 +1031,7 @@ sub trans
             }
         }
     }
+    LJ::Request->pnotes ('error' => 'e404');
     return LJ::Request::DECLINED
 }
 
