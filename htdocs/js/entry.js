@@ -501,7 +501,6 @@ function settime() {
     return false;
 }
 
-var inputObjs = new Array();
 function getUserTags(defaultjournal) {
     if (!defaultjournal) return;
 
@@ -514,51 +513,66 @@ function getUserTags(defaultjournal) {
         url: "/tools/endpoints/gettags.bml?user=" + user,
         method: "GET",
         onData: function (data) {
-            // disable any InputComplete objects that are already on the tag field
-            for (var i in inputObjs) {
-                if (!inputObjs.hasOwnProperty(i)) continue;
-                inputObjs[i].disable();
-            }
-            if (data.tags) {
-                //if ($('prop_taglist')) {
-					jQuery('#prop_taglist').autocomplete({
-						minLength: 1,
-						source: function(request, response) {
-							// delegate back to autocomplete, but extract the last term
-							console.time(1);
-							//response(jQuery.ui.autocomplete.filter(user_tags, request.term.split(/,\s*/).pop()));
-							console.timeEnd(1);
-							console.time(1);
-							var search = request.term.split(/,\s*/).pop(),
-								resp_ary = [], i = -1;
-							while (user_tags[++i]) {
-								if (user_tags[i].indexOf(search) === 0) {
-									resp_ary.push(user_tags[i])
-								}
+			if (data.tags) {
+				jQuery('#prop_taglist').autocomplete({
+					minLength: 1,
+					source: function(request, response) {
+						var val = this.element.context.value;
+							range = DOM.getSelectedRange(this.element.context);
+							if (range.start != range.end) {
+								return;
 							}
-							response(resp_ary);
-							console.timeEnd(1);
-						},
-						focus: function() {
-							// prevent value inserted on focus
-							return false;
-						},
-						select: function(event, ui) {
-							var terms = split( this.value );
-							// remove the current input
-							terms.pop();
-							// add the selected item
-							terms.push( ui.item.value );
-							// add placeholder to get the comma-and-space at the end
-							terms.push("");
-							this.value = terms.join(", ");
-							return false;
+						var search_ary = val.split(','), i = -1, sym_cnt = 0, search;
+						while (search_ary[++i]) {
+							sym_cnt += search_ary[i].length + 1;
+							if (sym_cnt > range.start) {
+								search = search_ary[i].replace(/^ +/, '');
+								break;
+							}
 						}
-					});
-                    //var keywords = new InputCompleteData(data.tags, "ignorecase");
-                    //inputObjs.push(new InputComplete($('prop_taglist'), keywords));
-                //}
-            }
+						// delegate back to autocomplete, but extract term
+						if (!search) {
+							return;
+						}
+						var resp_ary = [], i = -1;
+						while (user_tags[++i]) {
+							if (user_tags[i].indexOf(search) === 0) {
+								resp_ary.push(user_tags[i])
+							}
+						}
+						response(resp_ary);
+					},
+					focus: function() {
+						// prevent value inserted on focus
+						return false;
+					},
+					select: function(event, ui) {
+						var val = this.value,
+							range = DOM.getSelectedRange(this),
+							search_ary = val.split(','), i = -1, sym_cnt = 0;
+						while (search_ary[++i]) {
+							sym_cnt += search_ary[i].length + 1;
+							if (sym_cnt > range.start) {
+								sym_cnt -= search_ary[i].length
+								search_ary[i] = ui.item.value;
+								sym_cnt += search_ary[i].length - 1
+								if (i != 0) {
+									search_ary[i] = ' ' + search_ary[i];
+									sym_cnt++;
+								}
+								break;
+							}
+						}
+						this.value = search_ary.join(',');
+						if (sym_cnt == this.value.length) { // end
+							this.value += ', ';
+							sym_cnt += 2;
+						}
+						DOM.setSelectedRange(this, sym_cnt, sym_cnt);
+						return false;
+					}
+				});
+			}
         },
         onError: function (msg) { }
     });
