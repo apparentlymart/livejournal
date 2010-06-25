@@ -732,7 +732,10 @@ sub trans
 
         }
 
-        return undef unless defined $mode;
+        unless (defined $mode) {
+            LJ::Request->pnotes ('error' => 'e404');
+            return LJ::Request::NOT_FOUND;
+        }
 
         # Now that we know ourselves to be at a sensible URI, redirect renamed
         # journals. This ensures redirects work sensibly for all valid paths
