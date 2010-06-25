@@ -558,6 +558,9 @@ sub trans
             # works if journalid exists.
             if (my $u = LJ::load_user($opts->{user})) {
                 LJ::Request->notes("journalid" => $u->{userid});
+            } else {
+                LJ::Request->pnotes ('error' => 'baduser');
+                return LJ::Request::NOT_FOUND;
             }
 
             my $file = LJ::run_hook("profile_bml_file");
