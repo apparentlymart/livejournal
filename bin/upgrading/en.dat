@@ -3361,6 +3361,8 @@ poll.error.badmaxlength=Maxlength attribute on lj-pq text tags must be an intege
 
 poll.error.badsize=Size attribute on lj-pq text tags must be an integer from 1-100.
 
+poll.error.cantlock=Sorry, cannot lock DB.
+
 poll.error.cantview=Error: you don't have access to view these poll results.
 
 poll.error.cantvote=Sorry, you don't have permission to vote in this particular poll.
@@ -3423,6 +3425,8 @@ poll.participants|staleness=1
 poll.participants=, participants: [[total]]
 
 poll.pollnum=Poll #[[num]]
+
+poll.posted=Posted
 
 poll.scaleanswers=<b>Mean:</b> [[mean]] <b>Median:</b> [[median]] <b>Std. Dev</b> [[stddev]]
 

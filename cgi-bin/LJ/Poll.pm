@@ -876,6 +876,7 @@ sub render_ans {
 #   mode => enter|results|ans
 #   qid  => show a specific question
 #   page => page #
+#   widget => true if rendering must be short
 sub render {
     my ($self, %opts) = @_;
 
@@ -956,11 +957,17 @@ sub render {
         $ret .= LJ::html_hidden('pollid', $pollid);
     }
 
-    $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> ";
+    $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> "
+            unless $opts{widget};
     if ($self->name) {
         my $name = $self->name;
         LJ::Poll->clean_poll(\$name);
-        $ret .= "<i>$name</i>";
+        if ($opts{widget}) {
+            $name = LJ::trim_at_word($name, 70);
+            $ret .= "<b>$name</b><div>$opts{scroll_links}</div>";
+        } else {
+            $ret .= "<i>$name</i>";
+        }
     }
     $ret .= "<br />\n";
     $ret .= "<span style='font-family: monospace; font-weight: bold; font-size: 1.2em;'>" .
@@ -972,7 +979,8 @@ sub render {
         $whoview = $remote && $remote->id == $self->posterid ? "none_remote" : "none_others";
     }
     $ret .= LJ::Lang::ml('poll.security2', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote),
-                                       'whoview' => LJ::Lang::ml('poll.security.'.$whoview) });
+                                       'whoview' => LJ::Lang::ml('poll.security.'.$whoview) })
+            unless $opts{widget};
 
     my %aggr_results;
     my $aggr_users;
@@ -997,13 +1005,22 @@ sub render {
     $have_aggr_results = scalar keys %aggr_results ? 1 : 0;
 
     my $results_table = "";
+    my $posted = '';
+    if ($opts{widget}) {
+        my $ago = time() - LJ::TimeUtil->mysqldate_to_time($self->entry->{logtime}, 0);
+        # This will not work under friendspage, because of bug in calculating logtime from rlogtime somewhere in code - I do not know where...
+        $posted = LJ::Lang::ml('poll.posted') . ' ' . LJ::TimeUtil->ago_text($ago);
+        #$posted .= " ($ago; " . LJ::TimeUtil->mysqldate_to_time($self->entry->{logtime}, 0) . ")";
+        #$posted .= " (" . localtime . " - '" . $self->entry->{logtime} . "')";
+    }
     ## go through all questions, adding to buffer to return
     foreach my $q (@qs) {
         my $qid = $q->pollqid;
         my $text = $q->text;
+        $text = LJ::trim_at_word($text, 150) if $opts{widget};
         LJ::Poll->clean_poll(\$text);
-        $results_table .= "<p>$text</p><div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0 10px 40px'>";
-
+        $results_table .= "<p>$text</p>$posted<div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0 10px 40px'>";
+        $posted = '';
         
         if ($mode eq "results") {
             ### to see individual's answers
@@ -1260,7 +1277,7 @@ sub render {
     }
 
     ## calc amount of participants.
-    if ($mode eq "results"){
+    if ($mode eq "results" and not $opts{widget}){
         my $sth = "";
         my $participants;
         if ($have_aggr_results) {
