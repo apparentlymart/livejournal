@@ -315,7 +315,7 @@ body<=
             my @tag_names;
 
             my $utags;
-            if ($GET{journal} && !LJ::load_user($GET{journal})) {
+            if ($GET{journal} && LJ::load_user($GET{journal})) {
                 $utags = LJ::load_user($GET{journal})->tags;
             } else {
                 $utags = $remote->tags;

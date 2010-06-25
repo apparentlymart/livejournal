@@ -102,7 +102,7 @@
     my @tag_names;
 
     my $utags;
-    if ($GET{usejournal} && !LJ::load_user($GET{usejournal})) {
+    if ($GET{usejournal} && LJ::load_user($GET{usejournal})) {
         $utags = LJ::load_user($GET{usejournal})->tags;
     } else {
         $utags = $remote->tags;
