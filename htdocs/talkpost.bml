@@ -127,6 +127,9 @@ body<=
     }
 
     unless ($item && $item->{'anum'} == $init->{'anum'}) {
+        LJ::Request->pnotes ('error' => 'e404');
+        BML::http_response('404');
+        return;
         return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
     }
 
