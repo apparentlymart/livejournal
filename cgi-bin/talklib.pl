@@ -1158,7 +1158,7 @@ sub load_comments
         return;
     }
 
-    my $page_size = $LJ::TALK_PAGE_SIZE || 25;
+    my $page_size = $opts->{page_size} || $LJ::TALK_PAGE_SIZE || 25;
     my $max_subjects = $LJ::TALK_MAX_SUBJECTS || 200;
     my $threading_point = $LJ::TALK_THREAD_POINT || 50;
 
@@ -1204,6 +1204,30 @@ sub load_comments
     ## expand first reply to top-level comments
     ## %expand_children - list of comments, children of which are to expand
     my %expand_children = map { $_ => 1 } @top_replies;
+
+    ## new strategy to expand comments: by level 
+    if ($opts->{expand_strategy} eq 'by_level' and $opts->{expand_level} > 1) {
+        my $expand = sub {
+            my ($fun, $cur_level, $item_ids) = @_;
+            next if $cur_level >= $opts->{expand_level};
+
+            foreach my $itemid (@$item_ids){
+                $expand_children{$itemid} = 1;
+                next unless $children{$itemid};
+
+                ## expand next level it there are comments
+                $fun->($fun, $cur_level+1, $children{$itemid});
+            }
+        };
+
+        ## go through first level
+        foreach my $itemid (keys %expand_children){
+            next unless $children{$itemid};
+            ## expand next (second) level
+            $expand->($expand, 2, $children{$itemid});
+        }
+    }
+
     my (@subjects_to_load, @subjects_ignored);
     while (@check_for_children) {
         my $cfc = shift @check_for_children;
@@ -1211,8 +1235,10 @@ sub load_comments
         foreach my $child (@{$children{$cfc}}) {
             if (@posts_to_load < $page_size || $expand_children{$cfc} || $opts->{expand_all}) {
                 push @posts_to_load, $child;
-                ## expand only the first child, then clear the flag
-                delete $expand_children{$cfc};
+                ## expand only the first child (unless 'by_level' strategy is in use), 
+                ## then clear the flag
+                delete $expand_children{$cfc}
+                    unless $opts->{expand_strategy} eq 'by_level';
             }
             elsif (@posts_to_load < $page_size) {
                 push @posts_to_load, $child;

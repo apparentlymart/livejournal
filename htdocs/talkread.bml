@@ -446,6 +446,9 @@ my $old_url = 0;
      'viewall' => $viewall,
  };
 
+ ## allow to modify strategies to load/expand comments tree in S1 styles.
+ LJ::run_hooks('s1_load_comments_opts', $u, $itemid, $opts);
+
  my @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $opts);
  return $ML{'error.nodbmaintenance'} if $opts->{'out_error'} eq "nodb";
 
