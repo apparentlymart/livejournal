@@ -109,7 +109,17 @@
     }
 
     if (keys %$utags) {
-        @tag_names = sort { lc $a cmp lc $b } map { $_->{name} } values %$utags;
+        @tag_names =
+            sort { lc $a cmp lc $b }
+                map {
+                    s/\'/\\'/g;
+                    s/\&/&amp;/g;
+                    s/\</&lt;/g;
+                    s/\>/&gt;/g;
+                    $_
+                }
+                    map { $_->{name} }
+                        values %$utags;
     }
 
     $$body .= "<script>\n";
