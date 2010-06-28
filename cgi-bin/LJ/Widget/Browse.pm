@@ -150,8 +150,13 @@ sub render_body {
     my $last = $skip + $page_size;
 
     if ($cat) { # we're looking at a lower-level category
-        $nav_line = "<a href=\"$LJ::SITEROOT/browse/\"><strong>".$class->ml('widget.browse.nav_bar.home')."</strong></a> &gt; " .
-            $cat->title_html();
+
+        my @cat_title = split(/&gt;/, $cat->title_html());
+        shift @cat_title;
+
+        $nav_line = "<a href=\"$LJ::SITEROOT\"><strong>".$class->ml('widget.browse.nav_bar.home')."</strong></a> : " .
+                    "<a href=\"$LJ::SITEROOT/browse/\"><strong>".$class->ml('widget.browse.windowtitle')."</strong></a> : " .
+                    (pop(@cat_title) || '');
 
         # show actual communities
         if ($cat->parent) {
