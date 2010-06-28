@@ -159,16 +159,30 @@ my $old_url = 0;
  # check for deleted/suspended/security
  unless ($viewsome) {
      # check suspended user
-     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
-         if ($u->is_suspended || $up->is_suspended);
+     if ($u->is_suspended || $up->is_suspended) {
+        LJ::Request->pnotes ('error' => 'suspended');
+        BML::http_response('404');
+        return;
+     #   return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>";
+     }
 
      # check deleted
-     return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
-         if ($u->is_deleted);
+     if ($u->is_deleted) {
+        LJ::Request->pnotes ('error' => 'deleted');
+        BML::http_response('404');
+        return;
+     }
+     #return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
+     #    if ($u->is_deleted);
 
      # check suspended entry
-     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p " . BML::ml('talk.error.suspendedentry', { aopts => "href='" . $u->journal_base . "/'" }) . " p?>"
-         if $entry && $entry->is_suspended_for($remote);
+     if ($entry && $entry->is_suspended_for($remote)) {
+        LJ::Request->pnotes ('error' => 'suspended');
+        BML::http_response('404');
+        return;
+     }
+     #return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p " . BML::ml('talk.error.suspendedentry', { aopts => "href='" . $u->journal_base . "/'" }) . " p?>"
+     #    if $entry && $entry->is_suspended_for($remote);
  }
 
  unless ($viewall) {
