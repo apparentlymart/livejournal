@@ -75,6 +75,8 @@ body<=
                 })->fire;
             }
         } elsif ($statusvis eq 'V') {
+            LJ::run_hooks('account_undelete', $u);
+
             ## Restore previous statusvis of journal. It may be different
             ## from 'V', it may be read-only, or locked, or whatever.
             my @previous_status = grep { $_ ne 'D' } $u->get_previous_statusvis;

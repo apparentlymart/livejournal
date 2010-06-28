@@ -2265,6 +2265,19 @@ sub record_login {
                   "ip=?, ua=?", undef, $u->{userid}, $sessid, $ip, $ua);
 }
 
+sub last_login_time {
+    my ($u) = @_;
+
+    my $dbr = LJ::get_cluster_reader($u);
+    my ($time) = $dbr->selectrow_array(qq{
+        SELECT MAX(logintime) FROM loginlog WHERE userid=?
+    }, undef, $u->id);
+
+    $time ||= 0;
+
+    return $time;
+}
+
 # THIS IS DEPRECATED DO NOT USE
 sub email {
     my ($u, $remote) = @_;
