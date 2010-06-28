@@ -12,9 +12,10 @@ sub _memcache_key_prefix            { "poll" }
 sub _memcache_stored_props          {
     # first element of props is a VERSION
     # next - allowed object properties
-    return qw/ 1
+    return qw/ 2
                ditemid itemid
                pollid journalid posterid whovote whoview name status questions props
+               results
                /;
 }
     *_memcache_hashref_to_object    = \*absorb_row;
@@ -154,6 +155,10 @@ sub create {
         }
     }
     ## end inserting poll questions
+
+    $u->do("INSERT INTO pollresultaggregated2 (journalid, pollid, what, value) " .
+           "VALUES (?, ?, ?, ?)", undef, $journalid, $pollid, "users", 0);
+    die $u->errstr if $u->err;
 
     if (ref $classref eq 'LJ::Poll') {
         $classref->{pollid} = $pollid;
@@ -802,6 +807,43 @@ sub question {
     return $q;
 }
 
+sub load_aggregated_results {
+    my $self = shift;
+
+    my %aggr_results;
+    my $aggr_users;
+
+    if (ref $self->{results} eq 'HASH') { # if poll is new and have aggregated results
+        return;
+    } elsif (not $self->{results}) { # not loaded
+        my $sth = $self->journal->prepare("SELECT what, value FROM pollresultaggregated2 WHERE pollid=? AND journalid=?");
+        $sth->execute($self->pollid, $self->journalid);
+        while (my $row = $sth->fetchrow_arrayref) {
+            last unless ref $row eq 'ARRAY';
+            my ($key, $value) = @$row;
+            if ($key eq 'users') {
+                $aggr_users = $value;
+            } elsif ($key =~ /^(\d+):(\d+)$/) {
+                my $qid = $1;
+                my $item = $2;
+                $aggr_results{$qid}->{$item} = $value;
+            } else {
+                warn "Unknown key in pollresultaggrepated2: '$key'" if $LJ::IS_DEV_SERVER;
+            }
+        }
+    }
+
+    if (scalar keys %aggr_results) {
+        $self->{results} = { counts => \%aggr_results, users => $aggr_users};
+    } else {
+        $self->{results} = 'no'; # we tryed - there are no aggregated results in DB => save negative status to prevent new attempts
+    }
+
+    # store poll data with loaded results
+    $self->_store_to_memcache;
+    $LJ::REQ_CACHE_POLL{ $self->id } = $self;
+}
+
 ##### Poll rendering
 
 # returns the time that the given user answered the given poll
@@ -985,24 +1027,15 @@ sub render {
     my %aggr_results;
     my $aggr_users;
     my $have_aggr_results;
-    unless ($do_form) {
-        $sth = $self->journal->prepare("SELECT what, value FROM pollresultaggregated2 WHERE pollid=? AND journalid=?");
-        $sth->execute($pollid, $self->journalid);
-        while (my $row = $sth->fetchrow_arrayref) {
-            last unless ref $row eq 'ARRAY';
-            my ($key, $value) = @$row; 
-            if ($key eq 'users') {
-                $aggr_users = $value;
-            } elsif ($key =~ /^(\d+):(\d+)$/) {
-                my $qid = $1;
-                my $item = $2;
-                $aggr_results{$qid}->{$item} = $value;
-            } else {
-                warn "Unknown key in pollresultaggrepated2: '$key'" if $LJ::IS_DEV_SERVER;
-            }
+
+    unless ($do_form) { # we need know poll results
+        $self->load_aggregated_results;
+        if (ref $self->{results} eq 'HASH') { # if poll is new and have aggregated results
+            %aggr_results = %{$self->{results}->{counts}};
+            $aggr_users = $self->{results}->{users};
+            $have_aggr_results = 1;
         }
     }
-    $have_aggr_results = scalar keys %aggr_results ? 1 : 0;
 
     my $results_table = "";
     my $posted = '';
@@ -1281,7 +1314,7 @@ sub render {
         my $sth = "";
         my $participants;
         if ($have_aggr_results) {
-            $participants = $aggr_users;
+            $participants = $aggr_users || 0;
         } elsif ($self->is_clustered) {
             $sth = $self->journal->prepare("SELECT count(DISTINCT userid) FROM pollresult2 WHERE pollid=? AND journalid=?");
             $sth->execute($pollid, $self->journalid);
@@ -1649,6 +1682,8 @@ sub process_submission {
 
     ## finally, register the vote happened
     if ($poll->is_clustered) {
+        $poll->journal->do("UPDATE pollresultaggregated2 SET value = value + 1 WHERE journalid=? AND pollid=? AND what=?",
+                           undef, $poll->journalid, $pollid, 'users');
         $poll->journal->do("REPLACE INTO pollsubmission2 (journalid, pollid, userid, datesubmit) VALUES (?, ?, ?, NOW())",
                            undef, $poll->journalid, $pollid, $remote->userid);
     } else {
@@ -1658,9 +1693,9 @@ sub process_submission {
 
     LJ::release_lock($dbh, 'global', "poll:$pollid:$remote->{userid}");
 
-    # if vote results are not cached, there is no need to modify cache
-    #$poll->_remove_from_memcache;
-    #delete $LJ::REQ_CACHE_POLL{ $poll->id };
+    # vote results are cached now (in new polls), so we need to modify cache
+    $poll->_remove_from_memcache;
+    delete $LJ::REQ_CACHE_POLL{ $poll->id };
 
     LJ::run_hooks('poll_log', $poll->posterid, $pollid, $remote ? $remote->userid : undef);
 
