@@ -99,33 +99,27 @@
     my $tags    = $POST{'prop_taglist'} || $GET{'prop_taglist'};
 
     # Tags
-    my @tag_names;
+    if ($remote) {
+        my @tag_names;
 
-    my $utags;
-    if ($GET{usejournal} && LJ::load_user($GET{usejournal})) {
-        $utags = LJ::load_user($GET{usejournal})->tags;
-    } else {
-        $utags = $remote->tags;
+        my $utags;
+        my $username;
+        if ($POST{'usejournal'} && LJ::load_user($POST{'usejournal'})) {
+            $utags = LJ::load_user($POST{'usejournal'})->tags;
+            $username = $POST{'usejournal'};
+        } else {
+            $utags = $remote->tags;
+            $username = $remote->user;
+        }
+
+        if (keys %$utags) {
+            @tag_names = sort { lc $a cmp lc $b } map { $_->{name} } values %$utags;
+        }
+
+        $$head .= "<script type=\"text/javascript\">\n";
+        $$head .= "journalTags = " . LJ::JSON->to_json({$username => \@tag_names});
+        $$head .= "\n</script>\n";
     }
-
-    if (keys %$utags) {
-        @tag_names =
-            sort { lc $a cmp lc $b }
-                map {
-                    s/\'/\\'/g;
-                    s/\&/&amp;/g;
-                    s/\</&lt;/g;
-                    s/\>/&gt;/g;
-                    $_
-                }
-                    map { $_->{name} }
-                        values %$utags;
-    }
-
-    $$body .= "<script>\n";
-    $$body .= "var user_tags = [" . join(', ', map {"'" . $_ . "'"} @tag_names) . "]\n";
-    $$body .= "</script>\n";
-
     # if a QotD id was passed in, fill in the fields with that QotD
     my $qid = $GET{qotd}+0;
     my $qotd = $qid ? LJ::QotD->get_single_question($qid) : '';
@@ -136,7 +130,7 @@
         $tags = LJ::Widget::QotD->tags_text($qotd);
         LJ::run_hooks('qotd_modify_tags', \$tags);
         my $text = LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], form_disabled => 1 );
-        $$head .= "<script>LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";
+        $$head .= "<script type=\"text/javascript\">LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";
     }
 
     # in case of repost other entry by its uri we should check its visibility
@@ -615,7 +609,7 @@ head<=
         }
     }
 
-    my $pageload = $LJ::SPELLER && $POST{'action:spellcheck'} ? "pageload(0);" : "pageload(1);";
+    my $pageload = $LJ::SPELLER && $POST{'action:spellcheck'} ? "new_post_load(0);" : "new_post_load(1);";
 
     # JS vars for the RTE
     $ret .= LJ::rte_js_vars($remote);

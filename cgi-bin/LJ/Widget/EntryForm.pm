@@ -181,7 +181,7 @@ sub wrap_js {
     my ($class, $code) = @_;
 
     return qq{
-        <script type="text/javascript" language="JavaScript">
+        <script type="text/javascript">
         // <![CDATA[
             $code
         // ]]>
@@ -413,9 +413,9 @@ sub render_metainfo_block {
                     'tabindex' => $self->tabindex,
                     'class' => 'select',
                     "onchange" => "changeSubmit('" . $submitprefix . "','" .
-                        $remote->{'user'}."'); ".
-                        "getUserTags('$remote->{user}'); ".
-                        "changeSecurityOptions('$remote->{user}');"
+                        $remote->{'user'}."');".
+                        "getUserTags('$remote->{user}');".
+                        "changeSecurityOptions('$remote->{user}')"
                 },
                 (
                     "" => $remote->{'user'},
@@ -1218,18 +1218,15 @@ sub render_submitbar_block {
         $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
 
         my $defaultjournal;
-        my $not_a_journal = 0;
         if ($opts->{'usejournal'}) {
             $defaultjournal = $opts->{'usejournal'};
         } elsif ($remote && $opts->{auth_as_remote}) {
             $defaultjournal = $remote->user;
         } else {
             $defaultjournal = "Journal";
-            $not_a_journal = 1;
         }
 
         $$onload .= " changeSubmit('$BML::ML{'entryform.update3'}', '$defaultjournal');";
-        $$onload .= " getUserTags('$defaultjournal');" unless $not_a_journal;
         $$onload .= " changeSecurityOptions('$defaultjournal');";
 
         $out .= LJ::html_submit(

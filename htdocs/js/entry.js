@@ -37,13 +37,12 @@ function changeSubmit(prefix, defaultjournal) {
     }
 }
 
-function pageload (dotime) {
+function new_post_load(dotime) {
 	if (dotime) {
 		settime.interval = setInterval(settime, 1000)
 		settime();
 	}
-    if (!document.getElementById) return false;
-
+	
     var remotelogin = $('remotelogin');
     if (! remotelogin) return;
     var remotelogin_content = $('remotelogin_content');
@@ -51,7 +50,9 @@ function pageload (dotime) {
     remotelogin_content.onclick = altlogin;
     f = document.updateForm;
     if (! f) return false;
-
+	
+	getUserTags(jQuery('#usejournal').val());
+	
     var userbox = f.user;
     if (! userbox) return false;
     if (! Site.has_remote && userbox.value) altlogin();
@@ -501,81 +502,87 @@ function settime() {
     return false;
 }
 
-function getUserTags(defaultjournal) {
-    if (!defaultjournal) return;
-
-    var user = defaultjournal;
-    if ($('usejournal') && $('usejournal').value != "") {
-        user = $('usejournal').value;
-    }
-
-    HTTPReq.getJSON({
-        url: "/tools/endpoints/gettags.bml?user=" + user,
-        method: "GET",
-        onData: function (data) {
-			if (data.tags) {
-				jQuery('#prop_taglist').autocomplete({
-					minLength: 1,
-					source: function(request, response) {
-						var val = this.element.context.value;
-							range = DOM.getSelectedRange(this.element.context);
-							if (range.start != range.end) {
-								return;
-							}
-						var search_ary = val.split(','), i = -1, sym_cnt = 0, search;
-						while (search_ary[++i]) {
-							sym_cnt += search_ary[i].length + 1;
-							if (sym_cnt > range.start) {
-								search = search_ary[i].replace(/^ +/, '');
-								break;
-							}
-						}
-						// delegate back to autocomplete, but extract term
-						if (!search) {
-							return;
-						}
-						var resp_ary = [], i = -1;
-						while (user_tags[++i]) {
-							if (user_tags[i].indexOf(search) === 0) {
-								resp_ary.push(user_tags[i])
-							}
-						}
-						response(resp_ary);
-					},
-					focus: function() {
-						// prevent value inserted on focus
-						return false;
-					},
-					select: function(event, ui) {
-						var val = this.value,
-							range = DOM.getSelectedRange(this),
-							search_ary = val.split(','), i = -1, sym_cnt = 0;
-						while (search_ary[++i]) {
-							sym_cnt += search_ary[i].length + 1;
-							if (sym_cnt > range.start) {
-								sym_cnt -= search_ary[i].length
-								search_ary[i] = ui.item.value;
-								sym_cnt += search_ary[i].length - 1
-								if (i != 0) {
-									search_ary[i] = ' ' + search_ary[i];
-									sym_cnt++;
-								}
-								break;
-							}
-						}
-						this.value = search_ary.join(',');
-						if (sym_cnt == this.value.length) { // end
-							this.value += ', ';
-							sym_cnt += 2;
-						}
-						DOM.setSelectedRange(this, sym_cnt, sym_cnt);
-						return false;
-					}
-				});
+function tagAutocomplete(node, tags) {
+	jQuery(node).autocomplete({
+		minLength: 1,
+		source: function(request, response) {
+			var val = this.element.context.value;
+				range = DOM.getSelectedRange(this.element.context);
+				if (range.start != range.end) {
+					return;
+				}
+			var search_ary = val.split(','), i = -1, sym_cnt = 0, search;
+			while (search_ary[++i]) {
+				sym_cnt += search_ary[i].length + 1;
+				if (sym_cnt > range.start) {
+					search = search_ary[i].replace(/^ +/, '');
+					break;
+				}
 			}
-        },
-        onError: function (msg) { }
-    });
+			// delegate back to autocomplete, but extract term
+			if (!search) {
+				return;
+			}
+			var resp_ary = [], i = -1;
+			while (tags[++i]) {
+				if (tags[i].indexOf(search) === 0) {
+					resp_ary.push(tags[i]);
+					if (resp_ary.length === 10) {
+						break;
+					}
+				}
+			}
+			response(resp_ary);
+		},
+		focus: function() {
+			// prevent value inserted on focus
+			return false;
+		},
+		select: function(event, ui) {
+			var val = this.value,
+				range = DOM.getSelectedRange(this),
+				search_ary = val.split(','), i = -1, sym_cnt = 0;
+			while (search_ary[++i]) {
+				sym_cnt += search_ary[i].length + 1;
+				if (sym_cnt > range.start) {
+					sym_cnt -= search_ary[i].length
+					search_ary[i] = ui.item.value;
+					sym_cnt += search_ary[i].length - 1
+					if (i != 0) {
+						search_ary[i] = ' ' + search_ary[i];
+						sym_cnt++;
+					}
+					break;
+				}
+			}
+			this.value = search_ary.join(',');
+			if (sym_cnt == this.value.length) { // end
+				this.value += ', ';
+				sym_cnt += 2;
+			}
+			DOM.setSelectedRange(this, sym_cnt, sym_cnt);
+			return false;
+		}
+	});
+}
+
+function getUserTags(user)
+{
+	user = user || Site.currentJournal;
+	
+	jQuery('#prop_taglist').autocomplete('destroy');
+	
+	if (journalTags[user]) {
+		tagAutocomplete($('prop_taglist'), journalTags[user]);
+	} else {
+		jQuery.getJSON(
+			'/tools/endpoints/gettags.bml?user=' + user,
+			function(data) {
+				if (data.tags) {
+					tagAutocomplete($('prop_taglist'), data.tags);
+				}
+			});
+	}
 }
 
 function _changeOptionState(option, enable) {
