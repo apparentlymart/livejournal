@@ -120,7 +120,7 @@ my $old_url = 0;
 
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
      LJ::Request->pnotes ('error' => 'e404');
-     BML::http_response('404');
+     BML::return_error_status(404);
      return;
      #return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
  }
@@ -161,7 +161,7 @@ my $old_url = 0;
      # check suspended user
      if ($u->is_suspended || $up->is_suspended) {
         LJ::Request->pnotes ('error' => 'suspended');
-        BML::http_response('404');
+        BML::return_error_status(404);
         return;
      #   return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>";
      }
@@ -169,7 +169,7 @@ my $old_url = 0;
      # check deleted
      if ($u->is_deleted) {
         LJ::Request->pnotes ('error' => 'deleted');
-        BML::http_response('404');
+        BML::return_error_status(404);
         return;
      }
      #return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
@@ -178,7 +178,7 @@ my $old_url = 0;
      # check suspended entry
      if ($entry && $entry->is_suspended_for($remote)) {
         LJ::Request->pnotes ('error' => 'suspended');
-        BML::http_response('404');
+        BML::return_error_status(404);
         return;
      }
      #return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p " . BML::ml('talk.error.suspendedentry', { aopts => "href='" . $u->journal_base . "/'" }) . " p?>"
