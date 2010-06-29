@@ -101,7 +101,7 @@ sub render_ontd_homepage {
         my $posttime = LJ::TimeUtil->ago_text($secondsago);
 
         ## Spotlight row
-        $ret .= qq(<li class="$classname"><dl><dt><img src="$post->{userpic}" /></dt><dd><h3 class="b-posts-head"><a href="$post->{url}">$subj</a></h3><p class="b-posts-data">$posttime | <span class="i-posts-user">$post->{poster}$comments</p></dd></dl></li>);
+        $ret .= qq(<li class="$classname"><dl><dt><img src="$post->{userpic}" /></dt><dd><h3 class="b-posts-head"><a href="$post->{url}">$subj</a></h3><p class="b-posts-data"><span class="i-post-time">$posttime | </span><span class="i-posts-user">$post->{poster}$comments</p></dd></dl></li>);
         
         ## switch classname
         $classname = $classname eq 'even' ? 'odd' : 'even';
