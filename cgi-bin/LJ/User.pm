@@ -8967,6 +8967,8 @@ sub make_journal
                 unless $kwref{$_};
             push @{$opts->{tagids}}, $kwref{$_};
         }
+
+        $opts->{tagmode} = $opts->{getargs}->{mode} eq 'and' ? 'and' : 'or';
     }
 
     # validate the security filter
