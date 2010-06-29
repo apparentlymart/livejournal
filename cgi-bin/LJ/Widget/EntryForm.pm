@@ -412,10 +412,9 @@ sub render_metainfo_block {
                     'selected' => $usejournal,
                     'tabindex' => $self->tabindex,
                     'class' => 'select',
-                    "onchange" => "changeSubmit('" . $submitprefix . "','" .
-                        $remote->{'user'}."');".
-                        "getUserTags('$remote->{user}');".
-                        "changeSecurityOptions('$remote->{user}')"
+                    "onchange" => "changeSubmit('" . $submitprefix . "',this[this.selectedIndex].value);".
+                        "getUserTags(this[this.selectedIndex].value);".
+                        "changeSecurityOptions(this[this.selectedIndex].value)"
                 },
                 (
                     "" => $remote->{'user'},
@@ -1222,12 +1221,12 @@ sub render_submitbar_block {
             $defaultjournal = $opts->{'usejournal'};
         } elsif ($remote && $opts->{auth_as_remote}) {
             $defaultjournal = $remote->user;
-        } else {
-            $defaultjournal = "Journal";
         }
 
-        $$onload .= " changeSubmit('$BML::ML{'entryform.update3'}', '$defaultjournal');";
-        $$onload .= " changeSecurityOptions('$defaultjournal');";
+        if ($defaultjournal) {
+            $$onload .= " changeSubmit('$BML::ML{'entryform.update3'}', '$defaultjournal');";
+            $$onload .= " changeSecurityOptions('$defaultjournal');";
+        }
 
         $out .= LJ::html_submit(
             'action:update',

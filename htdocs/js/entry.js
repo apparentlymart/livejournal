@@ -502,13 +502,15 @@ function settime() {
     return false;
 }
 
-function tagAutocomplete(node, tags) {
+function tagAutocomplete(node, tags)
+{
 	jQuery(node).autocomplete({
 		minLength: 1,
 		source: function(request, response) {
 			var val = this.element.context.value;
 				range = DOM.getSelectedRange(this.element.context);
 				if (range.start != range.end) {
+					response([]);
 					return;
 				}
 			var search_ary = val.split(','), i = -1, sym_cnt = 0, search;
@@ -521,6 +523,7 @@ function tagAutocomplete(node, tags) {
 			}
 			// delegate back to autocomplete, but extract term
 			if (!search) {
+				response([]);
 				return;
 			}
 			var resp_ary = [], i = -1;
@@ -597,11 +600,9 @@ function _changeOptionState(option, enable) {
     }
 }
 
-function changeSecurityOptions(defaultjournal) {
-    var user = defaultjournal;
-    if ($('usejournal') && $('usejournal').value != "") {
-        user = $('usejournal').value;
-    }
+function changeSecurityOptions(user)
+{
+	user = user || Site.currentJournal;
 
     HTTPReq.getJSON({
         url: "/tools/endpoints/getsecurityoptions.bml?user=" + user,
