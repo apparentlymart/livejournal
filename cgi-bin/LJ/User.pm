@@ -9014,6 +9014,7 @@ sub make_journal
                        || LJ::Lang::get_text($LJ::DEFAULT_LANG, 
                                     'journal.deleted', undef, {username => $u->username});
             LJ::Request->pnotes ('error' => 'deleted');
+            LJ::Request->pnotes ('remote' => LJ::get_remote ());
             $opts->{'handler_return'} = "404 Not Found";
             return;
             #return $error->($warning, "404 Not Found");
@@ -9021,6 +9022,7 @@ sub make_journal
         }
         if ($u->is_suspended) {
             LJ::Request->pnotes ('error' => 'suspended');
+            LJ::Request->pnotes ('remote' => LJ::get_remote ());
             $opts->{'handler_return'} = "403 Forbidden";
             return;
         }
@@ -9032,6 +9034,7 @@ sub make_journal
     }
     if ($u->is_expunged) {
         LJ::Request->pnotes ('error' => 'expunged');
+        LJ::Request->pnotes ('remote' => LJ::get_remote ());
         $opts->{'handler_return'} = "410 Gone";
         return;
     }

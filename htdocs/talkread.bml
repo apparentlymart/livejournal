@@ -120,6 +120,7 @@ my $old_url = 0;
 
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
      LJ::Request->pnotes ('error' => 'e404');
+     LJ::Request->pnotes ('remote' => LJ::get_remote());
      BML::return_error_status(404);
      return;
      #return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
@@ -161,6 +162,7 @@ my $old_url = 0;
      # check suspended user
      if ($u->is_suspended || $up->is_suspended) {
         LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         BML::return_error_status(404);
         return;
      #   return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>";
@@ -169,6 +171,7 @@ my $old_url = 0;
      # check deleted
      if ($u->is_deleted) {
         LJ::Request->pnotes ('error' => 'deleted');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         BML::return_error_status(404);
         return;
      }
@@ -178,6 +181,7 @@ my $old_url = 0;
      # check suspended entry
      if ($entry && $entry->is_suspended_for($remote)) {
         LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         BML::return_error_status(404);
         return;
      }

@@ -370,6 +370,7 @@ sub EntryPage_entry
     unless ($entry || $uri =~ /(\d+)\.html/) {
         $opts->{'handler_return'} = 404;
         LJ::Request->pnotes ('error' => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return;
     }
 
@@ -378,6 +379,7 @@ sub EntryPage_entry
     unless ($entry->correct_anum) {
         $opts->{'handler_return'} = 404;
         LJ::Request->pnotes ('error' => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return;
     }
 
@@ -404,6 +406,7 @@ sub EntryPage_entry
         if ($remote) {
             $opts->{'handler_return'} = 403;
             LJ::Request->pnotes ('error' => 'private');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
             return;
         } else {
             my $host = LJ::Request->header_in("Host");
@@ -418,12 +421,14 @@ sub EntryPage_entry
     if (($pu && $pu->{'statusvis'} eq 'S') && !$viewsome) {
         $opts->{'suspendeduser'} = 1;
         LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return;
     }
 
     if ($entry && $entry->is_suspended_for($remote)) {
         $opts->{'suspendedentry'} = 1;
         LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return;
     }
 

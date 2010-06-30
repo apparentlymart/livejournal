@@ -220,6 +220,7 @@ sub totally_down_content
     }
 
     LJ::Request->pnotes ('error' => 'e500');
+    LJ::Request->pnotes ('remote' => LJ::get_remote());
 
     # set to 500 so people don't cache this error message
     my $body = "<h1>$LJ::SERVER_DOWN_SUBJECT</h1>$LJ::SERVER_DOWN_MESSAGE<!-- " . ("x" x 1024) . " -->";
@@ -278,8 +279,11 @@ sub trans
 
     # disable TRACE (so scripts on non-LJ domains can't invoke
     # a trace to get the LJ cookies in the echo)
-    LJ::Request->pnotes ('error' => 'baduser') if LJ::Request->method_number == LJ::Request::M_TRACE;
-    return LJ::Request::FORBIDDEN if LJ::Request->method_number == LJ::Request::M_TRACE;
+    if (LJ::Request->method_number == LJ::Request::M_TRACE) {
+        LJ::Request->pnotes ('error' => 'baduser');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        return LJ::Request::FORBIDDEN;
+    }
 
     # If the configuration says to log statistics and GTop is available, mark
     # values before the request runs so it can be turned into a delta later
@@ -329,6 +333,7 @@ sub trans
     } else {
         # on error we do internal redirect to error page
         LJ::Request->pnotes ('error' => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         if (LJ::Request->status == 404) {
             my $fn = $LJ::PAGE_404 || "404-error.html";
             return $bml_handler->("$LJ::HOME/htdocs/" . $fn);
@@ -560,6 +565,7 @@ sub trans
                 LJ::Request->notes("journalid" => $u->{userid});
             } else {
                 LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
                 return LJ::Request::NOT_FOUND;
             }
 
@@ -623,8 +629,11 @@ sub trans
 
         if ($uuri =~ m#^/(\d+)\.html$#) { #
             my $u = LJ::load_user($user);
-            LJ::Request->pnotes ('error' => 'baduser') unless $u;
-            return LJ::Request::NOT_FOUND unless $u;
+            unless ($u) {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
 
             $ljentry = LJ::Entry->new($u, ditemid => $1);
             if ($GET{'mode'} eq "reply" || $GET{'replyto'} || $GET{'edit'}) {
@@ -698,6 +707,7 @@ sub trans
                 if ($pe eq '/') {
                     # do a 404 for now
                     LJ::request->pnotes ('error' => 'e404');
+                    LJ::Request->pnotes ('remote' => LJ::get_remote());
                     return LJ::Request::NOT_FOUND;
                 } else {
                     # filtered lastn page
@@ -714,8 +724,11 @@ sub trans
             my $key = $uuri;
             $key =~ s!^/!!;
             my $u = LJ::load_user($user);
-                LJ::Request->pnotes ('error' => 'baduser') unless $u;
-                return LJ::Request::NOT_FOUND unless $u;
+            unless ($u) {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
 
             my ($type, $nodeid) =
                 $LJ::DISABLED{'named_permalinks'} ? () :
@@ -734,6 +747,7 @@ sub trans
 
         unless (defined $mode) {
             LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;
         }
 
@@ -813,6 +827,7 @@ sub trans
                                          $host, $uri);
                 return redir($redir) if $redir;
                 LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
                 return LJ::Request::NOT_FOUND;
             }
             ($user, $uri) = ($1, $2);
@@ -836,11 +851,13 @@ sub trans
             };
             return $code->{$func}->(LJ::Request->r) if $code->{$func};
             LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;  # bogus ljconfig
         } else {
             my $view = $determine_view->($user, "users", $uri);
             return $view if defined $view;
             LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;
         }
     }
@@ -861,12 +878,16 @@ sub trans
             SELECT u.user FROM useridmap u, domains d WHERE
             u.userid=d.userid AND d.domain=$checkhost
         });
-        LJ::Request->pnotes ('error' => 'baduser') unless $user;
-        return LJ::Request::NOT_FOUND unless $user;
+        unless ($user) {
+            LJ::Request->pnotes ('error' => 'baduser');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            return LJ::Request::NOT_FOUND;
+        }
 
         my $view = $determine_view->($user, "other:$host$hostport", $uri);
         return $view if defined $view;
         LJ::Request->pnotes ('error' => 'baduser');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return LJ::Request::NOT_FOUND;
     }
 
@@ -900,8 +921,11 @@ sub trans
             # FIXME: skip two redirects and send them right to __setdomsess with the right
             #        cookie-to-be-set arguments.  below is the easy/slow route.
             my $u = LJ::load_user($cuser);
-            LJ::Request->pnotes ('error' => 'baduser') unless $u;
-            return LJ::Request::NOT_FOUND unless $u;
+            unless ($u) {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
             my $base = $u->journal_base;
             return redir("$base$srest$args_wq", correct_url_redirect_code());
         }
@@ -931,8 +955,11 @@ sub trans
         my $int = $1 || "flat";
         LJ::Request->handler("perl-script");
         if ($int eq "fotobilder") {
-            LJ::Request->pnotes ('error' => 'baduser') unless $LJ::FOTOBILDER_IP{LJ::Request->remote_ip};
-            return LJ::Request::FORBIDDEN unless $LJ::FOTOBILDER_IP{LJ::Request->remote_ip};
+            unless ($LJ::FOTOBILDER_IP{LJ::Request->remote_ip}) {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::FORBIDDEN;
+            }
             LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return LJ::Request::OK
         }
@@ -948,6 +975,7 @@ sub trans
             return LJ::Request::OK
         }
         LJ::Request->pnotes ('error' => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return LJ::Request::NOT_FOUND;
     }
 
@@ -994,8 +1022,11 @@ sub trans
         return redir("$LJ::SITEROOT/reject.bml?$1");
     }
 
-    LJ::Request->pnotes ('error' => 'baduser') if $uri =~ m!^/userpics!;
-    return LJ::Request::FORBIDDEN if $uri =~ m!^/userpics!;
+    if ($uri =~ m!^/userpics!) {
+        LJ::Request->pnotes ('error' => 'baduser');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        return LJ::Request::FORBIDDEN;
+    }
 
     # avoid the fakeapache library having to deal with the <Files ~ *.bml> stuff
     # in the modperl_startup.pl http_conf
@@ -1014,8 +1045,13 @@ sub trans
     ){
         # maps uri to dir
         my $uri = LJ::Request->uri;
-        LJ::Request->pnotes ('error' => 'e404') if $uri =~ /\.\./;
-        return LJ::Request::NOT_FOUND if $uri =~ /\.\./; # forbids ANY .. in uri
+        
+        ## forbids ANY .. in uri
+        if ($uri =~ /\.\./) {
+            LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            return LJ::Request::NOT_FOUND;
+        }
 
         if ($uri and -d "$ENV{LJHOME}/htdocs/" . $uri){
             unless ($uri =~ /\/$/) {
@@ -1038,6 +1074,7 @@ sub trans
         }
     }
     LJ::Request->pnotes ('error' => 'e404');
+    LJ::Request->pnotes ('remote' => LJ::get_remote());
     return LJ::Request::DECLINED
 }
 
@@ -1248,8 +1285,11 @@ sub userpic_content
 
         unless ($data) {
             my $dbb = LJ::get_cluster_reader($u);
-            LJ::Request->pnotes ('error' => 'e500') unless $dbb;
-            return LJ::Request::SERVER_ERROR unless $dbb;
+            unless ($dbb) {
+                LJ::Request->pnotes ('error' => 'e500');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::SERVER_ERROR;
+            }
             $data = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
                                           "userid=$pic->{'userid'} AND picid=$picid");
         }
@@ -1512,6 +1552,7 @@ sub journal_content
             $status = "404 Friend group does not exist";
             $html = "<h1>Not Found</h1>" .
                     "<p>The friend group you are trying to access does not exist.</p>";
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;
 
         # otherwise be vague with a 403
@@ -1526,6 +1567,7 @@ sub journal_content
             $html .= "<p>You're not logged in.  If you're the owner of this journal, " .
                      "<a href='$LJ::SITEROOT/login.bml'>log in</a> and try again.</p>\n"
                          unless $remote;
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::FORBIDDEN;
         }
 
@@ -1536,6 +1578,7 @@ sub journal_content
         $status = "403 User suspended";
         $html = "<h1>Suspended User</h1>" .
                 "<p>The content at this URL is from a suspended user.</p>";
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return LJ::Request::FORBIDDEN;
 
         $generate_iejunk = 1;
@@ -1545,6 +1588,7 @@ sub journal_content
         $status = "403 Entry suspended";
         $html = "<h1>Suspended Entry</h1>" .
                 "<p>The entry at this URL is suspended.  You cannot reply to it.</p>";
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return LJ::Request::FORBIDDEN;
 
         $generate_iejunk = 1;
@@ -1554,6 +1598,7 @@ sub journal_content
         $status = "403 Read-only user";
         $html = "<h1>Read-Only User</h1>";
         $html .= $opts->{'readonlyremote'} ? "<p>You are read-only.  You cannot post comments.</p>" : "<p>This journal is read-only.  You cannot comment in it.</p>";
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return LJ::Request::FORBIDDEN;
 
         $generate_iejunk = 1;
@@ -1564,6 +1609,7 @@ sub journal_content
         $status = "500 Bad Template";
         $html = "<h1>Error</h1><p>User <b>$user</b> has messed up their journal template definition.</p>";
         $generate_iejunk = 1;
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return LJ::Request::SERVER_ERROR;
     }
 
