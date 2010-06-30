@@ -17,21 +17,32 @@ sub render_body {
     if ($opts{all}) {
         my @messages = LJ::SiteMessages->get_messages;
 
-        
         foreach my $message (@messages) {
             my $ml_key = $class->ml_key("$message->{mid}.text");
             $ret .= "<p class='b-message b-message-suggestion b-message-system'><span class='b-message-wrap'><img width='16' height='14' alt='' src='$LJ::IMGPREFIX/message-system-alert.gif' />";   
-            $ret .= $class->ml($ml_key);
+            my $text = $class->ml($ml_key);
+			LJ::CleanHTML::clean_subject(\$text);
+			$ret .= $text;
             $ret .= "<i class=\"close\" onclick=\"LiveJournal.closeSiteMessage(this, event, '$message->{mid}')\"></i></span></p>";
         }
     # -- same as below -- } elsif ($opts{substitude}) {
     } else {
         my $message = LJ::SiteMessages->get_open_message;
+		### ATTENTION!
+		# If you want to change 'LJ::CleanHTML::clean_subject(\$text);' line, make sure you test the following message body:
+		# News in <lj user="news/>
+		# -- note the missing attribute trailing quote
+		# Before introducing the HTML-cleaning, ALL pages on site were FULLY BROKEN by this type of the message. The reason 
+		# is that the head of each page contains the most recent site message; so form for managing the is broken - you will not be able to correct
+		# the mistake. Again: easy mistyping and you cannot correct your mistake.
+		# The solution is clean HTML using the rules for subjects of entries
 
         if ($message) {
             $ret .= "<p class='b-message b-message-suggestion b-message-system'><span class='b-message-wrap'><img width='16' height='14' alt='' src='$LJ::IMGPREFIX/message-system-alert.gif' />";
             my $ml_key = $class->ml_key("$message->{mid}.text");
-            $ret .= $class->ml($ml_key);
+            my $text = $class->ml($ml_key);
+			LJ::CleanHTML::clean_subject(\$text);
+			$ret .= $text;
             $ret .= "<i class=\"close\" onclick=\"LiveJournal.closeSiteMessage(this, event, '$message->{mid}')\"></i></span></p>";
         }
     }
