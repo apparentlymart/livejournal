@@ -676,6 +676,11 @@ sub subscriptions {
         $parent_comment->poster :
         undef;
     my $entry_author = $entry->poster;
+    if (!$entry_author) {
+        warn "No entry author for entry " . $entry->url;
+        return;
+    }
+    
     my $entry_journal = $entry->journal;
 
     my @subs;

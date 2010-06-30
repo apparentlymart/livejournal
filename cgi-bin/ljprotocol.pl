@@ -3099,7 +3099,7 @@ sub sessionexpire {
     return $res unless @$list;
 
     return fail($err,502) unless $u->writer;
-    $u->killi_sessions(@$list);
+    $u->kill_sessions(@$list);
 
     return $res;
 }
