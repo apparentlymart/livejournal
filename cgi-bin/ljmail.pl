@@ -186,7 +186,10 @@ sub send_mail
  
     my $enqueue = sub {
         my $starttime = [Time::HiRes::gettimeofday()];
-        my $sclient = LJ::theschwartz() or die "Misconfiguration in mail.  Can't go into TheSchwartz.";
+        ## '_reuse_any_existing_connection' will return 'mass' schwartz handle 
+        ## when called from 'mass' workers and will return 'default' for the rest.
+        my $sclient = LJ::theschwartz({ 'role' => '_reuse_any_existing_connection' }) 
+            or die "Misconfiguration in mail.  Can't go into TheSchwartz.";
         my $host;
         if (@rcpts == 1) {
             $rcpts[0] =~ /(.+)@(.+)$/;
