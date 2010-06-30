@@ -529,7 +529,7 @@ Must be removed after implementation of Framework! */
 	.appwidget-managesitemessages .b-message-system {
 		position: static !important;
 		}
-		.appwidget-sitemessages .b-message-system SPAN {
+		.appwidget-sitemessages .b-message-system .b-message-wrap {
 			position: relative;
 			display: block;
 			padding: 4px 25px 6px 25px;
