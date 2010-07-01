@@ -509,18 +509,15 @@ function tagAutocomplete(node, tags)
 		source: function(request, response) {
 			var val = this.element.context.value;
 				range = DOM.getSelectedRange(this.element.context);
-				if (range.start != range.end) {
+				if (!val || range.start != range.end) {
 					response([]);
 					return;
 				}
-			var search_ary = val.split(','), i = -1, sym_cnt = 0, search;
-			while (search_ary[++i]) {
-				sym_cnt += search_ary[i].length + 1;
-				if (sym_cnt > range.start) {
-					search = search_ary[i].replace(/^ +/, '');
-					break;
-				}
-			}
+			
+			// searach one tag
+			var search = val
+				.match(new RegExp('(?:^.{0,'+(range.start - 1)+'},|^)([^,]*),?'))[1]
+				.replace(/^ +/, '');
 			// delegate back to autocomplete, but extract term
 			if (!search) {
 				response([]);
@@ -541,30 +538,44 @@ function tagAutocomplete(node, tags)
 			// prevent value inserted on focus
 			return false;
 		},
-		select: function(event, ui) {
+		select: function(e, ui) {
 			var val = this.value,
-				range = DOM.getSelectedRange(this),
-				search_ary = val.split(','), i = -1, sym_cnt = 0;
-			while (search_ary[++i]) {
-				sym_cnt += search_ary[i].length + 1;
-				if (sym_cnt > range.start) {
-					sym_cnt -= search_ary[i].length
-					search_ary[i] = ui.item.value;
-					sym_cnt += search_ary[i].length - 1
-					if (i != 0) {
-						search_ary[i] = ' ' + search_ary[i];
-						sym_cnt++;
-					}
-					break;
-				}
+				range = DOM.getSelectedRange(this);
+				//search_ary = val.split(','), i = -1, sym_cnt = 0;
+				search = val.match(new RegExp('(^.{0,'+(range.start - 1)+'},|^)([^,]*),?(.*)'));
+			
+			ui.item.value += ',';
+			
+			if (search[1].length) { // no start
+				ui.item.value = ' ' + ui.item.value;
 			}
-			this.value = search_ary.join(',');
-			if (sym_cnt == this.value.length) { // end
-				this.value += ', ';
-				sym_cnt += 2;
+			var new_range = search[1].length + ui.item.value.length;
+			if (!search[3].length) { // empy in end
+				ui.item.value += ' ';
+				new_range++;
+			} else { // set range before ", ..."
+				new_range--;
 			}
-			DOM.setSelectedRange(this, sym_cnt, sym_cnt);
+			
+			this.value = search[1] + ui.item.value + search[3];
+			
+			DOM.setSelectedRange(this, new_range, new_range);
 			return false;
+		},
+		
+		open: function()
+		{
+			// fix left pos in FF 3.6
+			if (jQuery.browser.mozilla) {
+				var widget = jQuery(this).autocomplete('widget'),
+					offset = widget.offset();
+				offset.left++;
+				
+				widget.offset(offset);
+				widget.width(widget.width()+3);
+			} else {
+				widget.width(widget.width()+4);
+			}
 		}
 	});
 }
@@ -585,6 +596,83 @@ function getUserTags(user)
 					tagAutocomplete($('prop_taglist'), data.tags);
 				}
 			});
+	}
+}
+
+function selectTags(node)
+{
+	var widget = new LJWidgetIPPU();
+	
+	widget.onRefresh = function()
+	{
+		IPPUSelectTags.widget = widget;
+		IPPUSelectTags.init();
+	}
+	
+	widget.init({
+			title: node.firstChild.nodeValue,
+			height: 329,
+			width: jQuery(window).width()/2,
+			widgetClass: 'IPPU::SelectTags'
+		} , {
+			user:'test'
+		});
+	widget.ippu.addClass('ippu-select-tags');
+	
+	return false;
+}
+
+
+IPPUSelectTags =
+{
+	init: function(ippu_node)
+	{
+		$('selecttags-all').value = $('prop_taglist').value.split(/ *, */).join(', ');
+		
+		this.checkboxes = jQuery('input:checkbox', ippu_node);
+		
+		jQuery('#selecttags-all')
+			.input(this.input)
+			.input();
+	},
+	
+	change: function(node)
+	{
+		var inp = $('selecttags-all'),
+			ary = inp.value.replace(/ */, '') ? inp.value.split(/ *, */) : [],
+			i = -1;
+		if (node.checked) {
+			ary.push(node.value)
+		} else {
+			while (ary[++i]) {
+				if (ary[i] == node.value) {
+					ary.splice(i, 1);
+					break;
+				}
+			}
+		}
+		
+		inp.value = ary.join(', ');
+	},
+	
+	input: function()
+	{
+		var ary = $('selecttags-all').value.split(/ *, */),
+			checkboxes = IPPUSelectTags.checkboxes,
+			i = -1, j;
+		
+		while (ary[++i]) {
+			j = -1;
+			while (checkboxes[++j]) {
+				checkboxes[j].checked = ary[i] == checkboxes[j].value;
+			}
+		}
+	},
+	
+	save_click: function()
+	{
+		$('prop_taglist').value = $('selecttags-all').value.split(/ *, */).join(', ');
+		this.widget.close();
 	}
 }
 

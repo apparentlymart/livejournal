@@ -743,6 +743,7 @@ sub render_options_block {
                     $BML::ML{'entryform.tags'}
                 </label>
                 $field
+                <a href="#" onclick="return selectTags(this)" class="i-prop-selecttags">$BML::ML{'entryform.selecttags'}</a>
                 $help
             };
         },
@@ -1436,7 +1437,7 @@ sub render_body {
 
     $out .= "</div><!-- end #entry-form-wrapper -->\n\n";
 
-    $out .= $self->wrap_js("init_update_bml();");
+    $out .= $self->wrap_js("jQuery(init_update_bml);");
     return $out;
 }
 
