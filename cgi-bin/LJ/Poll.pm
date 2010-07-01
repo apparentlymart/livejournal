@@ -1006,12 +1006,12 @@ sub render {
         LJ::Poll->clean_poll(\$name);
         if ($opts{widget}) {
             $name = LJ::trim_at_word($name, 70);
-            $ret .= "<b>$name</b><div>$opts{scroll_links}</div>";
+            $ret .= "<h3>$name</h3>$opts{scroll_links}";
         } else {
             $ret .= "<i>$name</i>";
         }
     }
-    $ret .= "<br />\n";
+    $ret .= "<br />\n" if !$opts{widget};
     $ret .= "<span style='font-family: monospace; font-weight: bold; font-size: 1.2em;'>" .
             BML::ml('poll.isclosed') . "</span><br />\n"
         if ($self->is_closed);
@@ -1042,7 +1042,7 @@ sub render {
     if ($opts{widget}) {
         my $ago = time() - LJ::TimeUtil->mysqldate_to_time($self->entry->{logtime}, 0);
         # This will not work under friendspage, because of bug in calculating logtime from rlogtime somewhere in code - I do not know where...
-        $posted = LJ::Lang::ml('poll.posted') . ' ' . LJ::TimeUtil->ago_text($ago);
+        $posted = ' <span class="i-potd-ago">' . LJ::Lang::ml('poll.posted') . ' ' . LJ::TimeUtil->ago_text($ago) . '</span>';
         #$posted .= " ($ago; " . LJ::TimeUtil->mysqldate_to_time($self->entry->{logtime}, 0) . ")";
         #$posted .= " (" . localtime . " - '" . $self->entry->{logtime} . "')";
     }
@@ -1052,7 +1052,11 @@ sub render {
         my $text = $q->text;
         $text = LJ::trim_at_word($text, 150) if $opts{widget};
         LJ::Poll->clean_poll(\$text);
-        $results_table .= "<p>$text</p>$posted<div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0 10px 40px'>";
+        if ($opts{widget}) {
+            $results_table .= "<p class='b-post-question'>$opts{poll_pic}$text$posted</p><div id='LJ_Poll_${pollid}_$qid' class='b-potd-poll'>";
+        } else {
+            $results_table .= "<div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0pt 10px 40px;'>";
+        }
         $posted = '';
         
         if ($mode eq "results") {
