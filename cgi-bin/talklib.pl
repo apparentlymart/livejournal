@@ -309,6 +309,10 @@ sub check_viewable
 
     unless (LJ::can_view($remote, $item)) {
         if (defined $remote) {
+             LJ::Request->pnotes ('error' => 'private');
+             LJ::Request->pnotes ('remote' => LJ::get_remote());
+             BML::return_error_status(403);
+             return;
             return $err->(BML::ml('talk.error.notauthorised'));
         } else {
             my $host = LJ::Request->header_in("Host");
