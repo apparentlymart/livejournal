@@ -844,6 +844,9 @@ sub trans
             my $view = $determine_view->($user, "safevhost", $uri);
             return $view if defined $view;
 
+            LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            return LJ::Request::NOT_FOUND;
         } elsif ($func) {
             my $code = {
                 'userpics' => \&userpic_trans,
