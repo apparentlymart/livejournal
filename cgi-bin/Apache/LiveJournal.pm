@@ -1551,7 +1551,7 @@ sub journal_content
     {
         # give a real 404 to the journal owner
         if ($remote && $remote->{'user'} eq $user) {
-            LJ::Request->pnotes ('error' => 'baduser');
+            LJ::Request->pnotes ('error' => 'e404');
             $status = "404 Friend group does not exist";
             $html = "<h1>Not Found</h1>" .
                     "<p>The friend group you are trying to access does not exist.</p>";
