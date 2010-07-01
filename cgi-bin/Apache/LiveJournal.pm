@@ -1561,7 +1561,7 @@ sub journal_content
         # otherwise be vague with a 403
         } else {
             # send back a 403 and don't reveal if the group existed or not
-            LJ::Request->pnotes ('error' => 'forfriends');
+            LJ::Request->pnotes ('error' => 'e404');
             $status = "403 Friend group does not exist, or is not public";
             $html = "<h1>Denied</h1>" .
                     "<p>Sorry, the friend group you are trying to access does not exist " .
