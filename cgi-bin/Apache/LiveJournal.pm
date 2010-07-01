@@ -1484,7 +1484,14 @@ sub journal_content
     LJ::run_hooks("after_journal_content_created", $opts, \$html);
 
     return redir($opts->{'redir'}) if $opts->{'redir'};
-    return LJ::Request::DECLINED if defined $opts->{'handler_return'};
+    
+    if (defined $opts->{'handler_return'}) {
+        if ($opts->{'handler_return'} =~ /^(\d+)/) {
+            return $1;
+        } else {
+            return LJ::Request::DECLINED;
+        }
+    }
 
     # if LJ::make_journal() indicated it can't handle the request:
     if ($handle_with_bml) {
