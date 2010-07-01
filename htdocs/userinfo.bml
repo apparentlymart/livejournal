@@ -100,6 +100,9 @@
     }
 
     unless ($u) {
+        LJ::Request->pnotes ('error' => 'baduser');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        BML::return_error_status(404);
         $title = $ML{'Error'};
         $body = "<?h1 $ML{'.nonexist.name'} h1?><?p " . BML::ml('.nonexist.body',{'user'=>$user}) . " p?>";
         return;
@@ -114,6 +117,9 @@
         $title = $ML{'error.purged.title'};
         $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
         BML::set_status(410); # 410 Gone
+        LJ::Request->pnotes ('error' => 'expunged');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        BML::return_error_status(410);
         return;
     }
 
@@ -192,6 +198,9 @@
                     BML::ml('error.suspended.text', { 'user' => LJ::ljuser($user),
                                                       'sitename' => $LJ::SITENAME }) . " p?>";
             BML::set_status(403); # 403 Forbidden
+            LJ::Request->pnotes ('error' => 'suspended');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            BML::return_error_status(403);
             return;
         }
         if ($u->is_deleted) {
@@ -204,6 +213,9 @@
                 unless LJ::User->is_protected_username($username);
 
             BML::set_status(404); # 404 Not Found
+            LJ::Request->pnotes ('error' => 'deleted');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            BML::return_error_status(404);
             return;
         }
     }
