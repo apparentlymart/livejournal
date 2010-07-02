@@ -8963,8 +8963,14 @@ sub make_journal
         my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
         my %kwref = ( map { $tags->{$_}->{name} => $_ } keys %{$tags || {}} );
         foreach (@{$opts->{tags}}) {
-            return $error->("Sorry, one or more specified tags do not exist.", "404 Not Found")
-                unless $kwref{$_};
+            unless ($kwref{$_}) {
+                LJ::Request->pnotes ('error' => 'e404');
+                LJ::Request->pnotes ('remote' => LJ::get_remote ());
+                $opts->{'handler_return'} = "404 Not Found";
+                return;
+            }
+            #return $error->("Sorry, one or more specified tags do not exist.", "404 Not Found")
+            #    unless $kwref{$_};
             push @{$opts->{tagids}}, $kwref{$_};
         }
 
@@ -9029,6 +9035,15 @@ sub make_journal
         #return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);
 
         my $entry = $opts->{ljentry};
+=head
+for LJSUP-6347
+        if ($entry && $entry->is_suspended_for($remote)) {
+            LJ::Request->pnotes ('error' => 'suspended_post');
+            LJ::Request->pnotes ('remote' => LJ::get_remote ());
+            $opts->{'handler_return'} = "403 Forbidden";
+            return;
+        }
+=cut
         return $error->("This entry has been suspended. You can visit the journal <a href='" . $u->journal_base . "/'>here</a>.", "403 Forbidden")
             if $entry && $entry->is_suspended_for($remote);
     }
