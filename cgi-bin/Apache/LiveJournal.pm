@@ -1939,13 +1939,17 @@ sub xmlrpc_method {
             ->faultcode(202);
     }
     my $error = 0;
-    if (ref $req eq "HASH") {
-        # get rid of the UTF8 flag in scalars
-        while (my ($k, $v) = each %$req) {
-            $req->{$k} = Encode::encode_utf8($v) if Encode::is_utf8($v);
-        }
-        $req->{'props'}->{'interface'} = "xml-rpc";
+
+    ## All our functions take signle hashref as an argument.
+    ## Moreover, we use $req->{'props'} for our tracking purposes
+    $req = {} unless ref $req eq "HASH"; 
+
+    # get rid of the UTF8 flag in scalars
+    while (my ($k, $v) = each %$req) {
+        $req->{$k} = Encode::encode_utf8($v) if Encode::is_utf8($v);
     }
+    $req->{'props'}->{'interface'} = "xml-rpc";
+    
     my $res = LJ::Protocol::do_request($method, $req, \$error);
     if ($error) {
         die SOAP::Fault
