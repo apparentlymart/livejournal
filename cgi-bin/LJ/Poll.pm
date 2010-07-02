@@ -1006,7 +1006,7 @@ sub render {
         LJ::Poll->clean_poll(\$name);
         if ($opts{widget}) {
             $name = LJ::trim_at_word($name, 70);
-            $ret .= "$opts{scroll_links}<div class=\"b-potd-inner\"><h3>$name</h3>"; # this div tag close on /home/lj/cgi-bin/LJ/Widget/PollOfTheDay.pm file
+            $ret .= "$opts{scroll_links}<h3>$name</h3>";
         } else {
             $ret .= "<i>$name</i>";
         }
