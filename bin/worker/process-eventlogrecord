@@ -2,6 +2,13 @@
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 
+## Old version of XML::SAX (or XML::LibXML) has memory leak bug. 
+## One-liner to reproduce the problem:
+## perl -MXML::Simple -e 'XMLin(q[<foo id="123" />]) while 1'
+## Forcing XML::Simpel to use XML::Parser solves this problem.
+BEGIN { $ENV{"XML_SIMPLE_PREFERRED_PARSER"} = "XML::Parser"; }
+
+
 package LJ::NewWorker::TheSchwart::EventLogRecord;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
