@@ -615,7 +615,7 @@ function selectTags(node)
 			width: jQuery(window).width()/2,
 			widgetClass: 'IPPU::SelectTags'
 		} , {
-			user:'test'
+			user: jQuery('#usejournal').val()
 		});
 	widget.ippu.addClass('ippu-select-tags');
 	
