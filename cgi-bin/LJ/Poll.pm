@@ -1055,7 +1055,7 @@ sub render {
         if ($opts{widget}) {
             $results_table .= "<p class='b-post-question'>$opts{poll_pic}$text$posted</p><div id='LJ_Poll_${pollid}_$qid' class='b-potd-poll'>";
         } else {
-            $results_table .= "<div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0pt 10px 40px;'>";
+            $results_table .= "<p>$text</p><div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0pt 10px 40px;'>";
         }
         $posted = '';
         
