@@ -2392,14 +2392,24 @@ sub control_strip
         $show_login_form = 1 if !defined $show_login_form;
 
         if ($show_login_form) {
-            my $chal = LJ::challenge_generate(300);
+            my ($form_root, $extra_fields);
+            if ($LJ::USE_SSL_LOGIN) {
+                $form_root = $LJ::SSLROOT;
+                $extra_fields = '';
+            } else {
+                $form_root = $LJ::SITEROOT;
+                my $chal = LJ::challenge_generate(300);
+                $extra_fields = 
+                    "<input type='hidden' name='chal' id='login_chal' class='lj_login_chal' value='$chal' />" .
+                    "<input type='hidden' name='response' id='login_response' class='lj_login_response' value='' />";
+            }
             my $contents = LJ::run_hook('control_strip_userpic_contents', $uri) || "&nbsp;";
             $ret .= <<"LOGIN_BAR";
                 <td id='lj_controlstrip_userpic'>$contents</td>
-                <td id='lj_controlstrip_login' style='background-image: none;' nowrap='nowrap'><form id="login" class="lj_login_form" action="$LJ::SITEROOT/login.bml?ret=1" method="post"><div>
+                <td id='lj_controlstrip_login' style='background-image: none;' nowrap='nowrap'>
+                <form id="login" class="lj_login_form" action="$form_root/login.bml?ret=1" method="post"><div>
                 <input type="hidden" name="mode" value="login" />
-                <input type='hidden' name='chal' id='login_chal' class='lj_login_chal' value='$chal' />
-                <input type='hidden' name='response' id='login_response' class='lj_login_response' value='' />
+                $extra_fields
                 <table cellspacing="0" cellpadding="0" style="margin-right: 1em;"><tr><td>
                 <label for="xc_user">$BML::ML{'/login.bml.login.username'}</label> <input type="text" name="user" size="7" maxlength="17" tabindex="1" id="xc_user" value="" />
                 </td><td>
@@ -2463,8 +2473,6 @@ sub control_strip_js_inject
 
     LJ::need_res(qw(
                     js/livejournal.js
-                    js/md5.js
-                    js/login.js
                     js/controlstrip.js
                     ));
 }
@@ -2580,7 +2588,6 @@ sub std_max_length {
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
 $LJ::COMMON_CODE{'chalresp_js'} = qq{
-<script type="text/javascript" src="$LJ::JSPREFIX/md5.js"></script>
 <script language="JavaScript" type="text/javascript">
     <!--
 function sendForm (formid, checkuser)
