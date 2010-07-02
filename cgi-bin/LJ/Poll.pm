@@ -1066,7 +1066,7 @@ sub render {
                 <a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'
                      class="LJ_PollAnswerLink" lj_posterid='$posterid'
                      onclick="return LiveJournal.pollAnswerClick(event, {pollid:$pollid,pollqid:$qid,page:0,pagesize:$pagesize})">
-                } . LJ::Lang::ml('poll.viewanswers') . "</a><br />" if $self->can_view;
+                } . LJ::Lang::ml('poll.viewanswers') . "</a><br />" if $self->can_view and not $opts{widget};
         }
 
         #### text questions are the easy case
