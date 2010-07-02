@@ -1006,7 +1006,7 @@ sub render {
         LJ::Poll->clean_poll(\$name);
         if ($opts{widget}) {
             $name = LJ::trim_at_word($name, 70);
-            $ret .= "<h3>$name</h3>$opts{scroll_links}";
+            $ret .= "$opts{scroll_links}<div class=\"b-potd-inner\"><h3>$name</h3>";
         } else {
             $ret .= "<i>$name</i>";
         }
@@ -1281,7 +1281,7 @@ sub render {
                     $results_table .= LJ::html_check({ 'type' => $q->type, 'name' => "pollq-$qid",
                                              'value' => $itid, 'id' => "pollq-$pollid-$qid-$itid",
                                              'selected' => ($preval{$qid} =~ /\b$itid\b/) });
-                    $results_table .= " <label for='pollq-$pollid-$qid-$itid'>$item</label><br />";
+                    $results_table .= " <label for='pollq-$pollid-$qid-$itid'>$item</label><br class=\"i-potd-br\" />";
                     next;
                 }
                 
@@ -1289,6 +1289,9 @@ sub render {
                 my $count = $itvotes{$itid}+0;
                 my $percent = sprintf("%.1f", (100 * $count / ($usersvoted||1)));
                 my $width = 20+int(($count/$maxitvotes)*380);
+                if ($opts{widget}) {
+                    $width = $width -250;
+                }
 
                 if ($do_table) {
                     $results_table .= "<tr valign='middle'><td align='right'>$item</td>";
