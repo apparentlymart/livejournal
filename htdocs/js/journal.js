@@ -1,10 +1,15 @@
 ILikeThis = {
 	dialog: jQuery(),
 	
+	dialogRemove: function()
+	{
+		this.dialog.remove();
+		jQuery(document).unbind('click', this.document_click);
+	},
+	
 	// inline click
 	rate: function(e, node, itemid, username)
 	{
-		ILikeThis.dialog.remove();
 		var click = node.onclick;
 		node.onclick = function(){ return false }
 		// has undorate node
@@ -49,7 +54,6 @@ ILikeThis = {
 	// inline click
 	showList: function(e, node, itemid, username)
 	{
-		ILikeThis.dialog.remove();
 		this.ajax && this.ajax.abort();
 		
 		this.ajax = jQuery.ajax({
@@ -68,10 +72,10 @@ ILikeThis = {
 				if (data.status === 'OK') {
 					ILikeThis.dialog.remove();
 					ILikeThis.dialog = jQuery('<div/>', {
-						'class': 'b-popup b-popup-messagebox',
+						'class': 'b-popup b-popup-messagebox b-popup-ilikethis',
 						css: {top: 0, visibility: 'hidden'},
 						html: '<div class="b-popup-head">'
-									+'<h4>'+data.ml_users_who_like_it+' ('+data.total+')</h4><i class="i-popup-close" onclick="ILikeThis.dialog.remove()"></i>'
+									+'<h4>'+data.ml_users_who_like_it+' ('+data.total+')</h4><i class="i-popup-close" onclick="ILikeThis.dialogRemove()"></i>'
 								+'</div>'
 								+'<div class="b-popup-content">'
 									+'<p class="b-popup-we_like_this">'
@@ -96,21 +100,32 @@ ILikeThis = {
 					left = Math.min(left,  $window.width() + $window.scrollLeft() - ILikeThis.dialog.outerWidth(true));
 					top = Math.min(top, $window.height() + $window.scrollTop() - ILikeThis.dialog.outerHeight(true));
 					
+					jQuery(document).click(ILikeThis.document_click);
+					
 					ILikeThis.dialog.css({
 						left: left,
 						top: top,
 						visibility: 'visible'
 					});
+					
 					var append_node = jQuery('.we_like_this_'+itemid+' span>span>span');
 					if (!append_node.length) { // s1
 						append_node = jQuery('.we_like_this_'+itemid);
 					}
+					
 					append_node.text(data.total);
 				}
 			}
 		});
 		
 		return false;
+	},
+	
+	document_click: function(e)
+	{
+		if (!jQuery(e.target).parents('.b-popup-ilikethis').length) {
+			ILikeThis.dialogRemove();
+		}
 	}
 }
 
