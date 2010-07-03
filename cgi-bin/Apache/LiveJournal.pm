@@ -2005,7 +2005,11 @@ sub can { 1 }
 sub AUTOLOAD {
     my $method = $AUTOLOAD;
     $method =~ s/^.*:://;
-    LJ::Protocol::xmlrpc_method($method, @_);
+    ## Without eval/warn/die there will be no error message in our logs,
+    ## since XMLRPC::Transport::HTTP::Apache will send the error to client.
+    my $res = eval { LJ::Protocol::xmlrpc_method($method, @_) };
+    if ($@) { warn "LJ::XMLRPC::$method died: $@"; die $@; }
+    return $res;
 }
 
 1;
