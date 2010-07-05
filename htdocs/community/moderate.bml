@@ -103,6 +103,8 @@ body<=
             ($do_mail, $why_mail) = (1, 'reject')
                 if $poster->{'status'} eq 'A';
 
+            LJ::run_hooks('rejected_entry', $c, $modid, $poster);
+
             if ($POST{'mark_as_spam'} && !LJ::reject_entry_as_spam($c->{'userid'}, $modid)) {
                     $success = 0;
             }

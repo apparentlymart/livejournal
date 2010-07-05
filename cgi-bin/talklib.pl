@@ -664,6 +664,8 @@ sub freeze_comments {
     # set time of comments modification in the journal
     LJ::Talk::update_journals_commentalter($u);    
 
+    LJ::run_hooks('freeze_comment', $unfreeze, $u, $nodeid, [@batch]); # jitemid, [jtalkid]
+
     return undef unless $res;
     return 1;
 }
@@ -698,6 +700,8 @@ sub screen_comment {
 
     LJ::Talk::update_commentalter($u, $itemid);
     LJ::Talk::update_journals_commentalter($u);
+
+    LJ::run_hooks('screen_comment', $userid, $itemid, [@batch]); # jitemid, [jtalkid]
 
     return;
 }
@@ -2114,6 +2118,8 @@ sub mark_comment_as_spam {
 
     # can't mark your own comments as spam.
     return 0 if $posterid && $posterid == $journalu->id;
+
+    LJ::run_hooks('spam_comment', $journalu->userid, $row->{nodeid}, $jtalkid);
 
     # step 2a: if it's a suspended user, don't add, but pretend that we were successful
     if ($posterid) {

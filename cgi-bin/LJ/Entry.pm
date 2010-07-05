@@ -2195,6 +2195,8 @@ sub mark_entry_as_spam {
              'VALUES (UNIX_TIMESTAMP(), UNIX_TIMESTAMP(?), ?, ?, ?, ?, \'entry\')',
               undef, $item->{logtime}, $journalu->{userid}, $posterid, $subject, $body);
 
+    LJ::run_hooks('spam_entry', $journalu, $item->{ditemid}, $posterid);
+
     return 0 if $dbh->err;
     return 1;
 }
@@ -2229,6 +2231,8 @@ sub reject_entry_as_spam {
     $dbh->do('INSERT INTO spamreports (reporttime, posttime, journalid, posterid, subject, body, report_type) ' .
              'VALUES (UNIX_TIMESTAMP(), UNIX_TIMESTAMP(?), ?, ?, ?, ?, \'entry\')',
               undef, $logtime, $journalu->{userid}, $posterid, $subject, $body);
+
+    LJ::run_hooks('spam_entry', $journalu, $modid, $posterid);
 
     return 0 if $dbh->err;
     return 1;
