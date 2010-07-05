@@ -543,12 +543,26 @@ Must be removed after implementation of Framework! */
 			margin: 0 5px 0 0 !important;
 			vertical-align: -2px;
 			}
+			.appwidget-sitemessages .b-message-system .ljuser IMG {
+			    margin: 0 !important;
+			    padding: 0 0 0 1px !important;
+			    }
 		.appwidget-sitemessages .b-message-system A:link,
 		.appwidget-sitemessages .b-message-system A:visited,
 		.appwidget-sitemessages .b-message-system A:hover,
 		.appwidget-sitemessages .b-message-system A:active {
-			color: #124787;
+			color: #124787 !important;
+			text-decoration: underline;
+			border: 0 !important;
 			}
+    		.appwidget-sitemessages .b-message-system .ljuser A:link,
+    		.appwidget-sitemessages .b-message-system .ljuser A:visited	{
+    		    text-decoration: none;
+    		    }		
+			.appwidget-sitemessages .b-message-system .ljuser A:hover,
+    		.appwidget-sitemessages .b-message-system .ljuser A:active {
+    		    text-decoration: underline;
+    		    }
 		.appwidget-sitemessages .b-message-system I.close {
 			position: absolute;
 			top: 8px;
@@ -571,7 +585,9 @@ Must be removed after implementation of Framework! */
 	    margin: 0 0 10px;
 	    }
 	
-
+.scheme-lynx .appwidget-sitemessages {
+    top: 0;
+    }
 
 
 

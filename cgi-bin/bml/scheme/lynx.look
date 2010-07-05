@@ -48,7 +48,7 @@ _code?>
 </head>
 
 <?_code {
-	my $class = (BML::get_uri() =~ m!^/index\.bml$!) ? 'class="index-page"' : '';
+	my $class = (BML::get_uri() =~ m!^/index\.bml$!) ? 'class="scheme-lynx index-page"' : 'class="scheme-lynx"';
     return "<body $class %%bodyopts%%>";
 } _code?>
 
