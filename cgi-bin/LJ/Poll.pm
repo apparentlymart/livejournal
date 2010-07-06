@@ -1040,11 +1040,11 @@ sub render {
     my $results_table = "";
     my $posted = '';
     if ($opts{widget}) {
-        my $ago = time() - LJ::TimeUtil->mysqldate_to_time($self->entry->{logtime}, 0);
+        my $ago = time() - LJ::TimeUtil->mysqldate_to_time($self->entry->logtime_mysql, 0);
         # This will not work under friendspage, because of bug in calculating logtime from rlogtime somewhere in code - I do not know where...
         $posted = ' <span class="i-potd-ago">' . LJ::Lang::ml('poll.posted') . ' ' . LJ::TimeUtil->ago_text($ago) . '</span>';
-        #$posted .= " ($ago; " . LJ::TimeUtil->mysqldate_to_time($self->entry->{logtime}, 0) . ")";
-        #$posted .= " (" . localtime . " - '" . $self->entry->{logtime} . "')";
+        #$posted .= " ($ago; " . LJ::TimeUtil->mysqldate_to_time($self->entry->logtime_mysql, 0) . ")";
+        #$posted .= " (" . localtime . " - '" . $self->entry->logtime_mysql . "')";
     }
     ## go through all questions, adding to buffer to return
     foreach my $q (@qs) {
