@@ -8,6 +8,9 @@ use constant AccountMask => {
     Paid      => 4,
     Plus      => 8,
     Basic     => 16,
+    SUP       => 32,
+    NonSUP    => 64,
+    OfficeOnly => 128,
 };
 
 sub get_user_class {
@@ -150,6 +153,17 @@ sub filter_by_account {
     return grep { $_->{accounts} & $eff_class } @questions;
 }
 
+sub filter_by_sup_flag {
+    my $class = shift;
+    my $u = shift;
+    my @questions = @_;
+
+    my $u_sup = LJ::SUP->is_sup_enabled($u);
+    my $coded = $u_sup ? AccountMask->{SUP} : AccountMask->{NonSUP};
+
+    return grep { $_->{accounts} & $coded } @questions;
+}
+
 sub get_messages {
     my $class = shift;
     my %opts = @_;
@@ -162,8 +176,13 @@ sub get_messages {
     my @messages = $class->load_messages;
     @messages = grep { ref $_ } @messages;
 
+    my $office_only = LJ::GeoLocation->get_country_info_by_ip(LJ::get_remote_ip(), { allow_spec_country => 1 } ) eq '1S';
+
+    @messages = grep { ~$_->{accounts} & AccountMask->{OfficeOnly} or $office_only } @messages;
+
     @messages = $class->filter_by_country($u, @messages);
     @messages = $class->filter_by_account($u, @messages);
+    @messages = $class->filter_by_sup_flag($u, @messages);
 
     return @messages;
 }

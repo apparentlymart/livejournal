@@ -203,7 +203,7 @@ sub handle_post {
          mid        => $post->{mid},
          time_start => $time_start->epoch,
          time_end   => $time_end->epoch,
-         active     => 'Y',
+         active     => 'N',
          text       => $post->{text},
          countries  => $post->{countries},
          accounts   => $accounts,
