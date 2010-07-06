@@ -187,24 +187,22 @@ sub log {
                   );
 
     if (LJ::Request->is_inited) {
-        my $rl = LJ::Request->r;
-
-        my $remote = eval { LJ::load_user($rl->notes('ljuser')) };
+        my $remote = eval { LJ::load_user(LJ::Request->notes('ljuser')) };
         my $remotecaps = $remote ? $remote->{caps} : undef;
         my $remoteid   = $remote ? $remote->{userid} : 0;
-        my $ju = eval { LJ::load_userid($rl->notes('journalid')) };
+        my $ju = eval { LJ::load_userid(LJ::Request->notes('journalid')) };
         my $uri = LJ::Request->uri;
 
         my %insert_r = (
                         'addr'        => LJ::Request->connection->remote_ip,
-                        'remote'      => $rl->notes('ljuser'),
+                        'remote'      => LJ::Request->notes('ljuser'),
                         'remotecaps'  => $remotecaps,
                         'remoteid'    => $remoteid,
-                        'journalid'   => $rl->notes('journalid'),
+                        'journalid'   => LJ::Request->notes('journalid'),
                         'journaltype' => $ju ? $ju->{journaltype} : "",
-                        'codepath'    => $rl->notes('codepath'),
-                        'langpref'    => $rl->notes('langpref'),
-                        'clientver'   => $rl->notes('clientver'),
+                        'codepath'    => LJ::Request->notes('codepath'),
+                        'langpref'    => LJ::Request->notes('langpref'),
+                        'clientver'   => LJ::Request->notes('clientver'),
                         'method'      => LJ::Request->method,
                         'uri'         => $uri,
                         'args'        => scalar LJ::Request->args,
