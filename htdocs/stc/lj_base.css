@@ -523,9 +523,12 @@ Must be removed after implementation of Framework! */
 		margin: 0;
 		background: none;
 		border: none;
-		font-size: 12px;
+		font-size: 12px !important;
 		color: #000;
 		}
+	.appwidget-sitemessages .b-message-system A {
+	    font-size: 12px !important;
+	    }
 	.appwidget-managesitemessages .b-message-system {
 		position: static !important;
 		}
