@@ -1,0 +1,46 @@
+#!/usr/bin/perl
+use strict;
+
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+
+LJ::NewWorker::Manual::SendEmailErrorsFind->start();
+
+package LJ::NewWorker::Manual::SendEmailErrorsFind;
+use base 'LJ::NewWorker::Manual';
+
+use LJ::User::Email;
+
+sub work {
+    my %u_ids = LJ::User::Email->get_user_ids();
+    foreach my $email (keys %u_ids) {
+        my $complete = 1; # reset this in case of any error with one of user for this email
+        foreach my $uid (@{$u_ids{$email}}) {
+            my $u = LJ::want_user($uid);
+            if (LJ::isu($u)) {
+                if ($u->is_validated) {
+                    LJ::update_user($u, { status => 'N' });
+                    if ($u->is_validated) {
+                        $complete = 0;
+                    } else {
+                        print "user with id $uid and email <$email> validation has been revoked.\n" if LJ::NewWorker->verbose;
+                    }
+                } else { # user was not validated
+                    $complete = 0;
+                }
+            } else { # cannot find user for this uid.
+                $complete = 0;
+            }
+        }
+        LJ::User::Email->mark(undef, $email) if $complete;
+    }
+
+    return 0;
+}
+
+sub on_idle {
+    return if $LJ::IS_DEV_SERVER;
+    sleep 600;
+}
+
+1;
