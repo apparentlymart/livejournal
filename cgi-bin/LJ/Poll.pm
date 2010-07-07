@@ -1539,6 +1539,9 @@ sub process_submission {
         return 0;
     }
 
+    # if this particular user has already voted, let them change their answer
+    my $time = $poll->get_time_user_submitted($remote);
+
     # if unique prop is on, make sure that a particular email address can only vote once
     if ($poll->is_unique) {
         # make sure their email address is validated
@@ -1548,7 +1551,6 @@ sub process_submission {
         }
 
         # if this particular user has already voted, let them change their answer
-        my $time = $poll->get_time_user_submitted($remote);
         unless ($time) {
             my $uids;
             if ($poll->is_clustered) {
@@ -1689,8 +1691,10 @@ sub process_submission {
 
     ## finally, register the vote happened
     if ($poll->is_clustered) {
-        $poll->journal->do("UPDATE pollresultaggregated2 SET value = value + 1 WHERE journalid=? AND pollid=? AND what=?",
-                           undef, $poll->journalid, $pollid, 'users');
+        unless ($time) { # if new vote, not update of existing
+            $poll->journal->do("UPDATE pollresultaggregated2 SET value = value + 1 WHERE journalid=? AND pollid=? AND what=?",
+                               undef, $poll->journalid, $pollid, 'users');
+        }
         $poll->journal->do("REPLACE INTO pollsubmission2 (journalid, pollid, userid, datesubmit) VALUES (?, ?, ?, NOW())",
                            undef, $poll->journalid, $pollid, $remote->userid);
     } else {
