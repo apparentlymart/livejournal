@@ -1363,6 +1363,8 @@ sub can_vote {
         return 0;
     }
 
+    return 0 if $remote->is_deleted or $remote->is_suspended;
+
     if ($self->is_createdate_restricted) {
         my $propval = $self->prop("createdate");
         if ($propval =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/) {
