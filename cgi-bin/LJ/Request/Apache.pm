@@ -7,6 +7,7 @@ require Apache;
 require Apache::Request;
 require Apache::URI;
 require Apache::File;
+require Apache::Table;
 
 sub LJ::Request::OK                        { return Apache::Constants::OK() }
 sub LJ::Request::REDIRECT                  { return Apache::Constants::REDIRECT() }
