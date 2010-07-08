@@ -629,7 +629,7 @@ IPPUSelectTags =
 	{
 		$('selecttags-all').value = $('prop_taglist').value.split(/ *, */).join(', ');
 		
-		this.checkboxes = jQuery('input:checkbox', ippu_node);
+		this.checkboxes = jQuery('div.b-selecttags-tags input:checkbox', ippu_node);
 		
 		jQuery('#selecttags-all')
 			.input(this.input)
@@ -658,21 +658,21 @@ IPPUSelectTags =
 	input: function()
 	{
 		var ary = $('selecttags-all').value.split(/ *, */),
-			checkboxes = IPPUSelectTags.checkboxes,
-			i = -1, j;
-		
-		while (ary[++i]) {
-			j = -1;
-			while (checkboxes[++j]) {
-				checkboxes[j].checked = ary[i] == checkboxes[j].value;
-			}
-		}
+		    checkboxes = IPPUSelectTags.checkboxes;
+		checkboxes.attr('checked', false);
+		while(ary.length) checkboxes.filter('[value='+ary.pop()+']').attr('checked', true);
 	},
 	
 	save_click: function()
 	{
 		$('prop_taglist').value = $('selecttags-all').value.split(/ *, */).join(', ');
 		this.widget.close();
+	},
+	
+	reset_click: function()
+	{
+		$('selecttags-all').value = '';
+		IPPUSelectTags.checkboxes.attr('checked', false);
 	}
 }
 
