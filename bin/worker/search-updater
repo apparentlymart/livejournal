@@ -74,7 +74,7 @@ sub restart_workers {
     my $lock = LJ::locker()->trylock("usersearch:search-lookup-restart");
     return unless $lock;
 
-    system("$ENV{LJHOME}/bin/ljworkerctl", "restart", "host", $hostname, "search-lookup");
+    system("$ENV{LJHOME}/bin/ljworkerctl", "restart", "--host", $hostname, "search-lookup");
 
     # Reset things after we're finished.
     $last_restart_time = time();

@@ -1,6 +1,8 @@
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw($title $windowtitle $body $head $bml_okay %GET);
 
     BML::set_language_scope('/userinfo.bml');
@@ -98,6 +100,9 @@
     }
 
     unless ($u) {
+        LJ::Request->pnotes ('error' => 'baduser');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        BML::return_error_status(404);
         $title = $ML{'Error'};
         $body = "<?h1 $ML{'.nonexist.name'} h1?><?p " . BML::ml('.nonexist.body',{'user'=>$user}) . " p?>";
         return;
@@ -112,6 +117,9 @@
         $title = $ML{'error.purged.title'};
         $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
         BML::set_status(410); # 410 Gone
+        LJ::Request->pnotes ('error' => 'expunged');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        BML::return_error_status(410);
         return;
     }
 
@@ -190,6 +198,9 @@
                     BML::ml('error.suspended.text', { 'user' => LJ::ljuser($user),
                                                       'sitename' => $LJ::SITENAME }) . " p?>";
             BML::set_status(403); # 403 Forbidden
+            LJ::Request->pnotes ('error' => 'suspended');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            BML::return_error_status(403);
             return;
         }
         if ($u->is_deleted) {
@@ -202,6 +213,9 @@
                 unless LJ::User->is_protected_username($username);
 
             BML::set_status(404); # 404 Not Found
+            LJ::Request->pnotes ('error' => 'deleted');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            BML::return_error_status(404);
             return;
         }
     }
@@ -247,7 +261,7 @@
         }
         my %fr;
         LJ::load_userids_multiple([ map { $_ => \$fr{$_} } @ids ]);
-        push @friends, sort { $a->display_name cmp $b->display_name } values %fr;
+        push @friends, sort { $a->display_name cmp $b->display_name } grep {$_} values %fr;
         $friends{'loaded'} = 1;
     }
 
@@ -617,8 +631,8 @@
     }
 
     ## stats
-    my $lastupdated = substr(LJ::mysql_time($u->timeupdate), 0, 10);
-    my $ago_text = LJ::ago_text($u->{secondsold});
+    my $lastupdated = substr(LJ::TimeUtil->mysql_time($u->timeupdate), 0, 10);
+    my $ago_text = LJ::TimeUtil->ago_text($u->{secondsold});
 
     my $search_link = "[<a href='$LJ::SITEROOT/tools/search.bml?journal=$user'>$ML{'.details.search'}</a>]"
         if LJ::is_enabled("offsite_journal_search") && $pm->has_journal;
@@ -639,7 +653,7 @@
 
     my $comment_stats_string = join(", ", @comment_stats);
 
-    my $timecreate = LJ::mysql_time($u->timecreate);
+    my $timecreate = LJ::TimeUtil->mysql_time($u->timecreate);
     my $createdate = "<span class='tooltip' title=\"$timecreate\">" . substr($timecreate, 0, 10) . "</span>";
 
     $body .= "<div class='details_stats'>";
@@ -860,7 +874,8 @@
             $postlevel_string = $ML{'.commsettings.postlevel.anybody'};
         }
 
-        $postlevel_string .= $ML{'.commsettings.postlevel.moderated'} if $u->prop('moderated');
+        $postlevel_string .= $ML{'.commsettings.postlevel.moderated'}
+            if $u->prop('moderated') && 'N' ne $u->prop('moderated');
 
         $comm_settings .= "<tr><th>$ML{'.commsettings.membership.header'}</th><td>$membership_string</td></tr>";
         $comm_settings .= "<tr><th>$ML{'.commsettings.postlevel.header'}</th><td>$postlevel_string</td></tr>";

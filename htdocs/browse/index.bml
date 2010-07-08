@@ -5,7 +5,9 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $windowtitle $headextra @errors @warnings);
 
-    LJ::need_res(qw( stc/browse.css stc/pagemodules.css ));
+    LJ::need_res('js/communitydir.js', 'stc/framework/layout.css', 'stc/framework/modules.css', 'stc/catalogue/catalogue.css');
+	LJ::need_res( {condition => 'IE'}, 'stc/catalogue/ie.css');
+
 
     $windowtitle = "Community Directory";
 
@@ -16,125 +18,16 @@ body<=
     my $args = BML::get_query_string();
     $uri .= "?$args" if $args;
 
-    my $cat = LJ::Browse->load_by_url($uri);
     my $page = defined $GET{page} ? $GET{page} : 1;
-    my $ret;
 
-    # we're looking at the main Explore page
-    unless ($cat) {
-        $title = "$windowtitle <img src='$LJ::IMGPREFIX/beta.gif' align='absmiddle' alt='Beta' />";
-
-        $ret .= "<div id='browse-page'>";
-        $ret .= "<div class='pkg' style='padding-right: 320px;'>";
-        $ret .= "<div id='left-column'>";
-
-        $ret .= "<table class='category-summaries-main' cellspacing='0' cellpadding='0'>";
-
-        $ret .= "<tr><td class='category-summaries-top-left'></td>";
-        $ret .= "<td class='category-summaries-top'></td>";
-        $ret .= "<td class='category-summaries-top-right'></td></tr>";
-
-        $ret .= "<tr><td class='category-summaries-left'></td>";
-        $ret .= "<td class='category-summaries-content'>";
-        my @categories = LJ::Browse->load_top_level;
-        if (@categories) {
-            my $count = 0;
-            @categories = sort { lc $a->display_name cmp lc $b->display_name } @categories;
-            $ret .= "<table id='category-summaries' cellpadding='0' cellspacing='0'>";
-            foreach my $c (@categories) {
-                $ret .= "<tr valign='top'>" if $count % 2 == 0;
-                $ret .= "<td width='50%'>" . LJ::Widget::CategorySummary->render( category => $c ) . "</td>";
-                $ret .= "</tr>" if $count % 2 == 1;
-                $count++;
-            }
-            $ret .= "</table>";
-        }
-        $ret .= "</td>";
-        $ret .= "<td class='category-summaries-right'></td></tr>";
-
-        $ret .= "<tr><td class='category-summaries-bottom-left'></td>";
-        $ret .= "<td class='category-summaries-bottom'></td>";
-        $ret .= "<td class='category-summaries-bottom-right'></td></tr>";
-
-        $ret .= "</table>";
-
-        $ret .= LJ::Widget::JournalSpotlight->render( stylesheet_override => 'stc/widgets/journalspotlight-home.css', stylesheet => 'stc/widgets/journalspotlight-explore.css' );
-
-        $ret .= LJ::Widget::Feeds->render();
-
-        $ret .= "</div> <!-- end #left-column -->";
-        $ret .= "<div id='right-column'>";
-
-        my $ad = LJ::get_ads({ location => 'bml.explore/novertical', ljadwrapper => 1 });
-        if ($ad) {
-            $ret .= "$ad<div style='clear: right;'></div>";
-            $ret .= "<div style='margin-top: 20px;'>";
-            $ret .= LJ::Widget::Browse->render;
-            $ret .= "</div>";
-        } else {
-            $ret .= LJ::Widget::Browse->render;
-        }
-
-        $ret .= "</div> <!-- end #right-column -->";
-        $ret .= "</div> <!-- end inner div -->";
-        $ret .= "</div> <!-- end outer div -->";
-
-        return $ret;
-    }
-
-
-    $ret .= "<div id='browse-page'>";
-    $ret .= "<div class='pkg' style='padding-right: 320px;'>";
-    $ret .= "<div id='left-column'>";
-
-    $title = "<a href='$LJ::SITEROOT/browse/'><strong>&laquo;</strong></a> ";
-
-    # grey background soft corner area
-    $ret .= "<table class='category-summaries-main' cellspacing='0' cellpadding='0'>";
-
-    $ret .= "<tr><td class='category-summaries-top-left'></td>";
-    $ret .= "<td class='category-summaries-top'></td>";
-    $ret .= "<td class='category-summaries-top-right'></td></tr>";
-
-    $ret .= "<tr><td class='category-summaries-left'></td>";
-    $ret .= "<td class='category-summaries-content'>";
-
-    # we're looking at a lower-level category
-    # show actual communities
-    if ($cat->parent) {
-        $windowtitle = $cat->display_name;
-        $ret .= LJ::Widget::CategoryCommunities->render( cat => $cat, title => \$title );
-
-    # we're looking at a top-level category
-    # show full category break-down
-    } else {
-        $windowtitle = $cat->display_name;
-        $ret .= LJ::Widget::CategoryFull->render( cat => $cat, title => \$title );
-    }
-    $title .= " <img src='$LJ::IMGPREFIX/beta.gif' alt='Beta' align='absmiddle'>";
-
-    $ret .= "</td><td class='category-summaries-right'></td></tr><tr><td class='category-summaries-bottom-left'></td><td class='category-summaries-bottom'></td><td class='category-summaries-bottom-right'></td></tr></table>";
-    $ret .= "<div style='width: 500px; height: 1px;'> </div>";
-    $ret .= "</div> <!-- end #left-column -->";
-    $ret .= "<div id='right-column'>";
-
-    # FIXME pass in correct category keyword to ads
-    my $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $cat->display_name, ljadwrapper => 1 });
-    if ($ad) {
-        $ret .= "$ad<div style='clear: right;'></div>";
-    }
-    $ret .= "<div style='margin-top: 20px; margin-bottom: 20px;'>";
-    $ret .= LJ::Widget::QotD->render( small_view_link => 1, domain => $cat->display_name, stylesheet => 'stc/widgets/qotd-verticals.css' );
-    $ret .= "</div>";
-    $ret .= LJ::html_hidden({ name => "vertical_name", value => $cat->display_name, id => "vertical_name" }); # for QotD AJAX
-
-    $ret .= LJ::Widget::JournalSpotlight->render( stylesheet_override => 'stc/widgets/journalspotlight-home.css', stylesheet => 'stc/widgets/journalspotlight-verticals.css', head_size => 11 );
-
-    $ret .= "</div> <!-- end #right-column -->";
-    $ret .= "</div> <!-- end inner div -->";
-    $ret .= "</div> <!-- end outer div -->";
-
-    return $ret;
+    return LJ::Widget::Browse->render(
+        browse      => 'new',
+        title       => \$title,
+        windowtitle => \$windowtitle,
+        remote      => $remote,
+        uri         => $uri,
+        page        => $page,
+    );
 }
 _code?>
 <=body

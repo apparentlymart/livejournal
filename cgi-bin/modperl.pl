@@ -42,4 +42,12 @@ while (my ($k, $file) = each %INC) {
 # compatibility with old location of LJ::email_check:
 *BMLCodeBlock::check_email = \&LJ::check_email;
 
+##
+## Signal handler for debugging infinite loops
+## Taken from: http://perl.apache.org/docs/1.0/guide/debug.html
+## Usage: kill -USR2 <pid>
+##
+use Carp();
+$SIG{'USR2'} = sub { Carp::confess("caught SIGUSR2!"); };
+
 1;

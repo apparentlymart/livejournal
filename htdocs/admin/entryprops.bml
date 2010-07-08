@@ -4,6 +4,8 @@ body<=
 {
     # this is for viewing the properties set on a particular entry
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw($ret %POST);
 
     my $remote = LJ::get_remote();
@@ -63,7 +65,7 @@ body<=
         if (my $p = LJ::get_prop("log", $prop)) {
             $extra = "<br /><small>$p->{des}</small>";
             # an ugly hack, i know
-            $props{$prop} = LJ::mysql_time($props{$prop}) if $p->{des} =~ /unix/i;
+            $props{$prop} = LJ::TimeUtil->mysql_time($props{$prop}) if $p->{des} =~ /unix/i;
         }
 
         $ret .= "<li><strong>$prop</strong>: $props{$prop}$extra</li><br />";

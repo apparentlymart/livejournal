@@ -21,6 +21,8 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw($GET $POST);
 
     my $remote = LJ::get_remote();
@@ -134,7 +136,7 @@ FORM
             $action = "Unknown action ($row->{action})";
         }
 
-        my $time = LJ::mysql_time($row->{logtime});
+        my $time = LJ::TimeUtil->mysql_time($row->{logtime});
 
         my $actor;
         if ($row->{remoteid}) {

@@ -10,6 +10,7 @@ package LJ::S1;
 
 use vars qw(@themecoltypes);
 use Class::Autouse qw(LJ::LastFM);
+use LJ::TimeUtil;
 
 # this used to be in a table, but that was kinda useless
 @themecoltypes = (
@@ -1152,6 +1153,7 @@ sub create_view_lastn
         });
         LJ::control_strip_js_inject( user => $u->{user} );
     }
+    LJ::journal_js_inject();
 
     LJ::run_hooks("need_res_for_journals", $u);
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
@@ -1556,7 +1558,7 @@ sub create_view_friends
     # see if they have a previously cached copy of this page they
     # might be able to still use.
     if ($opts->{'header'}->{'If-Modified-Since'}) {
-        my $theirtime = LJ::http_to_time($opts->{'header'}->{'If-Modified-Since'});
+        my $theirtime = LJ::TimeUtil->http_to_time($opts->{'header'}->{'If-Modified-Since'});
 
         # send back a 304 Not Modified if they say they've reloaded this
         # document in the last $newinterval seconds:
@@ -1566,7 +1568,7 @@ sub create_view_friends
             return 1;
         }
     }
-    $opts->{'headers'}->{'Last-Modified'} = LJ::time_to_http($lastmod);
+    $opts->{'headers'}->{'Last-Modified'} = LJ::TimeUtil->time_to_http($lastmod);
 
     $$ret = "";
 
@@ -1609,6 +1611,7 @@ sub create_view_friends
         });
         LJ::control_strip_js_inject( user => $u->{user} );
     }
+    LJ::journal_js_inject();
 
     LJ::run_hooks("need_res_for_journals", $u);
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
@@ -1668,7 +1671,7 @@ sub create_view_friends
     }
 
     my $events_date   = ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!)
-                        ? LJ::mysqldate_to_time("$1-$2-$3")
+                        ? LJ::TimeUtil->mysqldate_to_time("$1-$2-$3")
                         : 0;
 
     ## load the itemids
@@ -2110,6 +2113,8 @@ sub create_view_calendar
         });
         LJ::control_strip_js_inject( user => $u->{user} );
     }
+    LJ::journal_js_inject();
+
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
 
@@ -2176,7 +2181,7 @@ sub create_view_calendar
 
         # calculate day of week
         my $time = eval { Time::Local::timegm(0, 0, 0, $day, $month-1, $year) } ||
-            eval { Time::Local::timegm(0, 0, 0, LJ::days_in_month($month, $year), $month-1, $year) } ||
+            eval { Time::Local::timegm(0, 0, 0, LJ::TimeUtil->days_in_month($month, $year), $month-1, $year) } ||
             0;
         next unless $time;
 
@@ -2235,7 +2240,7 @@ sub create_view_calendar
         if ($vars->{'CALENDAR_SORT_MODE'} eq "forward") { @months = reverse @months; }
         foreach my $month (@months)
         {
-          my $daysinmonth = LJ::days_in_month($month, $year);
+          my $daysinmonth = LJ::TimeUtil->days_in_month($month, $year);
 
           # this picks a random day there were journal entries (thus, we know
           # the %dayweek from above)  from that we go backwards and forwards
@@ -2377,6 +2382,7 @@ sub create_view_day
         });
         LJ::control_strip_js_inject( user => $u->{user} );
     }
+    LJ::journal_js_inject();
 
     LJ::run_hooks("need_res_for_journals", $u);
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
@@ -2423,7 +2429,7 @@ sub create_view_day
     if ($month < 1 || $month > 12 || int($month) != $month) { push @errors, "Invalid month."; }
     if ($year < 1970 || $year > 2038 || int($year) != $year) { push @errors, "Invalid year: $year"; }
     if ($day < 1 || $day > 31 || int($day) != $day) { push @errors, "Invalid day."; }
-    if (scalar(@errors)==0 && $day > LJ::days_in_month($month, $year)) { push @errors, "That month doesn't have that many days."; }
+    if (scalar(@errors)==0 && $day > LJ::TimeUtil->days_in_month($month, $year)) { push @errors, "That month doesn't have that many days."; }
 
     if (@errors) {
         $$ret .= "Errors occurred processing this page:\n<ul>\n";

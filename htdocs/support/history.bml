@@ -4,6 +4,8 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw(%GET);
     
     my $remote = LJ::get_remote();
@@ -62,7 +64,7 @@ body<=
                     state => $row->[2],
                     spcatid => $row->[3],
                     requserid => $row->[4],
-                    timecreate => LJ::mysql_time($row->[5]),
+                    timecreate => LJ::TimeUtil->mysql_time($row->[5]),
                     reqemail => LJ::ehtml($row->[6]),
                 };
                 push @userids, $row->[4] if $row->[4];

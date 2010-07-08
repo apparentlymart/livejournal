@@ -157,7 +157,10 @@ sub add       {
     my ($key, $val, $exp) = @_;
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
         if ref $key eq 'ARRAY' and not $keep_complex_keys;
+    
     $val = '' unless defined $val;
+    
+    $memc->enable_compress(_is_compressable($key));
     return $memc->add($key, $val, $exp);
 }
 sub replace   { 
@@ -165,6 +168,8 @@ sub replace   {
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
         if ref $key eq 'ARRAY' and not $keep_complex_keys;
     $val = '' unless defined $val;
+
+    $memc->enable_compress(_is_compressable($key));
     return $memc->replace($key, $val);
 }
 sub set       { 
@@ -172,7 +177,15 @@ sub set       {
     $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
         if ref $key eq 'ARRAY' and not $keep_complex_keys;
     $val = '' unless defined $val;
-    $memc->set($key, $val, $exp);
+    
+    # disable compression for some keys.
+    # we should keep it's values in raw string format to "append" some data later.
+    $memc->enable_compress(_is_compressable($key));
+
+    # perform action
+    my $res = $memc->set($key, $val, $exp);
+
+    return $res;
 }
 sub incr      {
     my ($key, @other) = @_;
@@ -334,6 +347,14 @@ sub get_or_set {
     return $val;
 }
 
+sub _is_compressable {
+    my $key = shift;
+    $key = $key->[1] if ref $key eq 'ARRAY'; # here we should handle real key
 
+    # now we have only one key whose value shouldn't be compressed:
+    #   1. "talk2:$journalu->{'userid'}:L:$itemid"
+    return 0 if $key =~ m/^talk2:/;
+    return 1;
+}
 
 1;

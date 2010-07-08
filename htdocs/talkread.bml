@@ -115,10 +115,15 @@ my $old_url = 0;
      $$head .= LJ::robot_meta_tags();
  }
 
- $$head .= $LJ::SHARE_THIS_URL unless $LJ::DISABLED{'sharethis'};
+ $$head .= $LJ::SHARE_THIS_URL_GEN->(journal => $u->username)
+    unless $LJ::DISABLED{'sharethis'};
 
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
-     return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
+     LJ::Request->pnotes ('error' => 'e404');
+     LJ::Request->pnotes ('remote' => LJ::get_remote());
+     BML::return_error_status(404);
+     return;
+     #return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
  }
 
  my $jarg = "journal=$u->{'user'}&";
@@ -155,16 +160,33 @@ my $old_url = 0;
  # check for deleted/suspended/security
  unless ($viewsome) {
      # check suspended user
-     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
-         if ($u->is_suspended || $up->is_suspended);
+     if ($u->is_suspended || $up->is_suspended) {
+        LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        BML::return_error_status(404);
+        return;
+     #   return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>";
+     }
 
      # check deleted
-     return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
-         if ($u->is_deleted);
+     if ($u->is_deleted) {
+        LJ::Request->pnotes ('error' => 'deleted');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        BML::return_error_status(404);
+        return;
+     }
+     #return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
+     #    if ($u->is_deleted);
 
      # check suspended entry
-     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p " . BML::ml('talk.error.suspendedentry', { aopts => "href='" . $u->journal_base . "/'" }) . " p?>"
-         if $entry && $entry->is_suspended_for($remote);
+     if ($entry && $entry->is_suspended_for($remote)) {
+        LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        BML::return_error_status(404);
+        return;
+     }
+     #return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p " . BML::ml('talk.error.suspendedentry', { aopts => "href='" . $u->journal_base . "/'" }) . " p?>"
+     #    if $entry && $entry->is_suspended_for($remote);
  }
 
  unless ($viewall) {
@@ -186,19 +208,19 @@ my $old_url = 0;
  my $graphicpreviews_obj = LJ::graphicpreviews_obj();
  $graphicpreviews_obj->need_res($u);
 
- LJ::need_res('js/thread_expander.js');
+ LJ::need_res(qw(
+    js/thread_expander.js
+    js/journal.js
+    ));
 
  if (($remote && !$remote->{'opt_no_quickreply'}) && $allow_commenting) {
     # quickreply js libs
     LJ::need_res(qw(
-                    js/core.js
-                    js/dom.js
                     js/json.js
                     js/template.js
                     js/ippu.js
                     js/lj_ippu.js
                     js/userpicselect.js
-                    js/httpreq.js
                     js/hourglass.js
                     js/inputcomplete.js
                     stc/ups.css
@@ -208,7 +230,6 @@ my $old_url = 0;
                     )) unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
       LJ::need_res(qw(
-                      js/x_core.js
                       js/quickreply.js
                       ));
  }
@@ -445,6 +466,9 @@ my $old_url = 0;
      'up' => $up,
      'viewall' => $viewall,
  };
+
+ ## allow to modify strategies to load/expand comments tree in S1 styles.
+ LJ::run_hooks('s1_load_comments_opts', $u, $itemid, $opts);
 
  my @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $opts);
  return $ML{'error.nodbmaintenance'} if $opts->{'out_error'} eq "nodb";
@@ -817,6 +841,28 @@ my $old_url = 0;
          }
      }
 
+     my $rated_count = "";
+     if (LJ::is_eventrate_enable($u)) {
+        my ($we_like_this_title, $i_like_this_title) = map { $ML{$_} } qw(we_like_this_title i_like_this_title);
+
+        $rated_count = " (<a class=\"we_like_this we_like_this_".$ditemid."\" href=\"/$LJ::SITEROOT/alleventrates.bml?journal=".$u->{'user'}."&amp;itemid=$ditemid\" onclick=\"return ILikeThis.showList(event,this,'$ditemid','".$u->{'user'}."')\" title=\"$we_like_this_title\">".LJ::get_eventratescounters($u->{'userid'}, $ditemid)."</a>)";
+
+        if ($remote) {
+            $rated_count .= " (<a href=\"#\" class=\"i_like_this i_like_this_".$ditemid."\" onclick=\"return ILikeThis.rate(event,this,'$ditemid','".$u->{'user'}."')\" title=\"$i_like_this_title\">+1";
+            if (LJ::get_eventrates( 
+                journalid => $u->{'userid'},
+                itemid  => $ditemid,
+                userids => [ $remote->{'userid'} ], )) {
+                    $rated_count .= "<i class=\"i_like_this_already\">/</i>";
+            }
+            $rated_count .= "</a>)";
+        } else {
+            $rated_count .= " (<a href=\"$LJ::SITEROOT/login.bml?ret=1\" class=\"i_like_this i_like_this_".$ditemid."\" title=\"$i_like_this_title\">+1</a>)";
+        }
+     }
+
+     $ret .= $rated_count;
+
      $ret .= "</b></p>";
 
      $ret .= "<div align='center'>" . LJ::make_qr_target('top') . "</div>" if $remote;
@@ -862,6 +908,7 @@ my $old_url = 0;
                  $ret .= "(<a href='$posturl'>$T{'postcomments'}</a>)";
              }
          }
+         $ret .= $rated_count;
          $ret .= "</b></p>";
          $ret .= "<div align='center'>" . LJ::make_qr_target('bottom') . "</div>" if $remote;
 

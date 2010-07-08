@@ -11,6 +11,7 @@ use Digest::MD5 qw(md5_hex);
 
 use lib "$ENV{LJHOME}/cgi-bin";
 require "sysban.pl";
+use LJ::TimeUtil;
 
 # Constants
 my $SECONDS_IN_DAY  = 3600 * 24;
@@ -947,8 +948,8 @@ sub get_support_by_daterange {
     my ($date1, $date2) = @_;
 
     # Build the query out based on the dates specified
-    my $time1 = LJ::mysqldate_to_time($date1);
-    my $time2 = LJ::mysqldate_to_time($date2) + $SECONDS_IN_DAY;
+    my $time1 = LJ::TimeUtil->mysqldate_to_time($date1);
+    my $time2 = LJ::TimeUtil->mysqldate_to_time($date2) + $SECONDS_IN_DAY;
 
     # Convert from times to IDs because support.timecreate isn't indexed
     my ($start_id, $end_id) = LJ::DB::time_range_to_ids
@@ -1060,8 +1061,8 @@ sub get_touch_supportlogs_by_user_and_date {
     my ($userid, $date1, $date2) = @_;
 
     # Build the query out based on the dates specified
-    my $time1 = LJ::mysqldate_to_time($date1);
-    my $time2 = LJ::mysqldate_to_time($date2) + $SECONDS_IN_DAY;
+    my $time1 = LJ::TimeUtil->mysqldate_to_time($date1);
+    my $time2 = LJ::TimeUtil->mysqldate_to_time($date2) + $SECONDS_IN_DAY;
 
     # Convert from times to IDs because supportlog.timelogged isn't indexed
     my ($start_id, $end_id) = LJ::DB::time_range_to_ids
@@ -1120,6 +1121,8 @@ sub support_notify {
 package LJ::Worker::SupportNotify;
 use base 'TheSchwartz::Worker';
 
+use LJ::Text;
+
 sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
@@ -1145,16 +1148,17 @@ sub work {
     my $body;
     my @emails;
 
+    my $req_subject = LJ::Text->fix_utf8($sp->{'subject'});
     if ($type eq 'new') {
         $body = "A $LJ::SITENAME support request has been submitted regarding the following:\n\n";
         $body .= "Category: $sp->{_cat}{catname}\n";
-        $body .= "Subject:  $sp->{subject}\n\n";
+        $body .= "Subject:  $req_subject\n\n";
         $body .= "You can track its progress or add information here:\n\n";
         $body .= "$LJ::SITEROOT/support/see_request.bml?id=$spid";
         $body .= "\n\nIf you do not wish to receive notifications of incoming support requests, you may change your notification settings here:\n\n";
         $body .= "$LJ::SITEROOT/support/changenotify.bml";
         $body .= "\n\n" . "="x70 . "\n\n";
-        $body .= $sp->{body};
+        $body .= LJ::Text->fix_utf8($sp->{body});
 
         foreach my $u (values %$userids) {
             next unless $u->is_visible;
@@ -1170,12 +1174,12 @@ sub work {
                                   undef, $sp->{spid}, $a->{splid}+0);
 
         # build body
-        $body = "A follow-up to the request regarding \"$sp->{subject}\" has ";
+        $body = "A follow-up to the request regarding \"$req_subject\" has ";
         $body .= "been submitted.  You can track its progress or add ";
         $body .= "information here:\n\n  ";
         $body .= "$LJ::SITEROOT/support/see_request.bml?id=$spid";
         $body .= "\n\n" . "="x70 . "\n\n";
-        $body .= $resp;
+        $body .= LJ::Text->fix_utf8($resp);
 
         # now see who this should be sent to
         foreach my $u (values %$userids) {

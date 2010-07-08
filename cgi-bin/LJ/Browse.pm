@@ -803,7 +803,23 @@ sub communities {
     my $comms = $self->{communities};
     my $cusers = LJ::load_userids(@$comms);
 
-    return sort { lc $a->username cmp lc $b->username } (values %$cusers);
+    # This sort code is equivalent to this:
+    #
+    #   return
+    #       sort { lc $a->username cmp lc $b->username }
+    #           grep { $_ }
+    #               (values %$cusers);
+    #
+    # but in code below for each of cusers we get function lc( $_->username() ) only once.
+    # For some of 200 elements of array lc( $_->username() ) was called
+    # up to 20-25 times during sort.
+
+    return                                  # 6. return result
+        map {$_->[1]}                       # 5. get a cargo from temporary containers
+            sort {$a->[0] cmp $b->[0]}      # 4. sort it by a sort-keys
+                map {[lc $_->username, $_]} # 3. create list of [ sort-key, cargo-to-sort ]
+                    grep { $_ }             # 2. remove empties from it, we don't want to die() on $_->username
+                        (values %$cusers);  # 1. get communities list
 }
 
 # Returns a list of top/featured communities

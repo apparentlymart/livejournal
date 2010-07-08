@@ -1,0 +1,85 @@
+<?page
+body<=
+<?_code
+{
+    # this is for viewing the properties set on a particular entry
+    use strict;
+    use vars qw(%POST %GET);
+
+    use LJ::Widget::MarqueeFeatures;
+
+    LJ::need_res('stc/framework/modules.css');
+
+    my $remote = LJ::get_remote();
+
+    ## Access control
+    return LJ::error_list("Check your privs")
+        unless LJ::check_priv($remote, "siteadmin", "marqueefeatures") || $LJ::IS_DEV_SERVER;
+
+    my @marquee_features;
+    if (%POST) {    # Add new entry
+        for (my $i = 1; $i < 20; $i++) {
+            if ($POST{"text$i"} && $POST{"link$i"}) {
+                push @marquee_features,
+                    {
+                        text    => $POST{"text$i"},
+                        link    => $POST{"link$i"},
+                    };
+            }
+        }
+
+        my $marquee_features_json = LJ::JSON->to_json(\@marquee_features);
+        LJ::ExtBlock->create_or_replace('marquee_features', $marquee_features_json);
+        return BML::redirect("$LJ::SITEROOT/admin/marqueefeatures.bml")
+    }
+
+    ## Read old data
+    my $marquee_features_json = LJ::ExtBlock->load_by_id('marquee_features');
+    if ($marquee_features_json) {
+        $marquee_features_json = $marquee_features_json->blocktext;
+        @marquee_features = @{LJ::JSON->from_json($marquee_features_json)};
+    }
+
+    ## Page
+    my $ret = qq|
+        <div class="canyon">
+            <div class="canyon-side"> | . 
+                LJ::Widget::MarqueeFeatures->render() . qq|
+            </div>
+            <div class="canyon-section">
+                <form method="POST">
+                <p><br />
+                <table border="0">
+                  <tr>
+                    <td>&nbsp;</td><td>Links</td><td>Texts</td>
+                  </tr>
+                |;
+
+    my $i = 6;
+    push @marquee_features, { text => '', link => '' } while --$i;
+    foreach my $line (@marquee_features) {
+        my $prefix = $i ? '&gt;&gt;' : 'Also check out ';
+
+        $i++;
+        $ret .= qq|
+              <tr>
+                <td>$prefix</td>
+                <td>| . LJ::html_text({name => "link$i", maxlength => '100', size => '50', value => $line->{"link"}}) . qq|</td>
+                <td>| . LJ::html_text({name => "text$i", maxlength => '100', size => '50', value => $line->{"text"}}) . qq|</td>
+              </tr>
+            |;
+    }
+
+    $ret .= "
+            </table>
+            </p><br />
+    <button type='submit'>Add</button></form>\n</div>\n</div>";
+
+    return $ret;
+}
+_code?>
+<=body
+title=>Marquee Features Widget administration
+<=body
+page?>
+

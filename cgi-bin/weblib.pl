@@ -722,7 +722,7 @@ sub create_qr_div {
 
             # userpic browse button
             $qrhtml .= qq {
-                <input type="button" id="lj_userpicselect" value="Browse" />
+                <input type="button" id="lj_userpicselect" value="Browse" onclick="QuickReply.userpicSelect()"/>
                 } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
             $qrhtml .= LJ::help_icon_html("userpics", " ");
@@ -752,12 +752,12 @@ sub create_qr_div {
 
     $qrhtml .= LJ::html_submit('submitpost', BML::ml('/talkread.bml.button.post'),
                                { 'id' => 'submitpost',
-                                 'raw' => 'onclick="if (checkLength()) {submitform();}"'
+                                 'raw' => 'onclick="if (QuickReply.check()){ QuickReply.submit() }"'
                                  });
 
     $qrhtml .= "&nbsp;" . LJ::html_submit('submitmoreopts', BML::ml('/talkread.bml.button.more'),
                                           { 'id' => 'submitmoreopts',
-                                            'raw' => 'onclick="if (moreopts()) {submitform();}"'
+                                            'raw' => 'onclick="if (QuickReply.more()){ QuickReply.submit() }"'
                                             });
     if ($LJ::SPELLER) {
         $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='do_spellcheck' /> <label for='do_spellcheck'>";
@@ -776,7 +776,7 @@ sub create_qr_div {
     $qrhtml .= "</form></div>";
 
     my $ret;
-    $ret = "<script language='JavaScript'>\n";
+    $ret = "<script type=\"text/javascript\">\n";
 
     $qrhtml = LJ::ejs($qrhtml);
 
@@ -793,57 +793,15 @@ sub create_qr_div {
                                       ));
 
     $ret .= qq{
-               var de;
-               if (document.createElement && document.body.insertBefore && !(xMac && xIE4Up)) {
-                   document.write("$qrsaveform");
-                   de = document.createElement("div");
-
-                   if (de) {
-                       de.id = "qrdiv";
-                       de.innerHTML = "$qrhtml";
-                       var bodye = document.getElementsByTagName("body");
-                       if (bodye[0])
-                           bodye[0].insertBefore(de, bodye[0].firstChild);
-                       de.style.display = 'none';
-                   }
-               }
+               document.write("$qrsaveform");
+               var de = document.createElement('div');
+               de.id = 'qrdiv';
+               de.innerHTML = "$qrhtml";
+               de.style.display = 'none';
+               document.body.insertBefore(de, document.body.firstChild);
            };
 
-    $ret .= "\n</script>";
-
-    $ret .= qq {
-        <script type="text/javascript" language="JavaScript">
-            DOM.addEventListener(window, "load", function (evt) {
-                // attach userpicselect code to userpicbrowse button
-                var ups_btn = \$("lj_userpicselect");
-                if (ups_btn) {
-                    DOM.addEventListener(ups_btn, "click", function (evt) {
-                     var ups = new UserpicSelect();
-                     ups.init();
-                     ups.setPicSelectedCallback(function (picid, keywords) {
-                         var kws_dropdown = \$("prop_picture_keyword");
-
-                         if (kws_dropdown) {
-                             var items = kws_dropdown.options;
-
-                             // select the keyword in the dropdown
-                             keywords.forEach(function (kw) {
-                                 for (var i = 0; i < items.length; i++) {
-                                     var item = items[i];
-                                     if (item.value == kw) {
-                                         kws_dropdown.selectedIndex = i;
-                                         return;
-                                     }
-                                 }
-                             });
-                         }
-                     });
-                     ups.show();
-                 });
-                }
-            });
-        </script>
-        } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
+    $ret .= "</script>";
 
     return $ret;
 }
@@ -876,15 +834,15 @@ sub make_qr_link
         $basesubject =~ s/^(Re:\s*)*//i;
         $basesubject = "Re: $basesubject" if $basesubject;
         $basesubject = LJ::ehtml(LJ::ejs($basesubject));
-        my $onclick = "return quickreply(\"$dtid\", $pid, \"$basesubject\")";
+        my $onclick = "return QuickReply.reply('$dtid',$pid,'$basesubject')";
 
         my $ju;
         $ju = LJ::load_userid(LJ::Request->notes('journalid')) if LJ::Request->is_inited and LJ::Request->notes('journalid');
 
         $onclick = "" if $ju->{'opt_whocanreply'} eq 'friends' and $remote and not LJ::is_friend($ju, $remote);
-        return "<a onclick='$onclick' href='$replyurl' >$linktext</a>";
+        return "<a href=\"$replyurl\" onclick=\"$onclick\">$linktext</a>";
     } else { # QR Disabled
-        return "<a href='$replyurl' >$linktext</a>";
+        return "<a href=\"$replyurl\">$linktext</a>";
     }
 }
 
@@ -1256,8 +1214,22 @@ sub js_dumper {
 sub need_res {
     my $opts = (ref $_[0]) ? shift : {};
     my $condition = $opts->{condition} || '';
+    my @keys = @_;
 
-    foreach my $reskey (@_) {
+    ## Filter included res.
+    ## if resource is a part of a common set, skip it here
+    ## and add to page inside the set.
+    @keys = grep {
+                ## check common JS sources.
+                if ($LJ::STRICTLY_INCLUDED_JS_H{$_}){
+                    $LJ::NEEDED_RES{include_common_js} = 1;
+                    0; ## include this file as a part of common sources set.
+                } else {
+                    1; ## include them as is.
+                }
+            } @keys;
+
+    foreach my $reskey (@keys) {
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
         unless (exists $LJ::NEEDED_RES{$reskey}) {
             push @LJ::NEEDED_RES, $reskey;
@@ -1378,6 +1350,17 @@ sub res_includes {
         $oldest{$type}{$condition} = $modtime if $modtime > $oldest{$type}{$condition};
     };
 
+
+    ## Some of basic JS sources are widely used.
+    ## Include all even required only one of them.
+    if ($LJ::NEEDED_RES{include_common_js}){
+        foreach my $js (@LJ::STRICTLY_INCLUDED_JS){
+            my $mtime = _file_modtime("js/$js", $now);
+            $add->(common_js => $js, $mtime); ## without "js" prefix
+        }
+    }
+
+
     foreach my $key (@LJ::NEEDED_RES) {
         my $path;
         my $mtime = _file_modtime($key, $now);
@@ -1426,6 +1409,7 @@ sub res_includes {
         }
     };
 
+    $tags->("common_js", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
     $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
     $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" />");
     $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" />");
@@ -1477,7 +1461,7 @@ sub tag_cloud {
         my $pt     = int($base_font_size + $percentile->($ct) * $font_size_range);
         $ret .= "<a ";
         $ret .= "id='taglink_$tag' " unless $opts->{ignore_ids};
-        $ret .= "href='" . LJ::ehtml($tagurl) . "' style='color: <?altcolor2?>; font-size: ${pt}pt; text-decoration: none'><span style='color: <?altcolor2?>'>";
+        $ret .= "href='" . LJ::ehtml($tagurl) . "' style='font-size: ${pt}pt;'><span>";
         $ret .= LJ::ehtml($tag) . "</span></a>\n";
 
         # build hash of tagname => final point size for refresh
@@ -2408,14 +2392,24 @@ sub control_strip
         $show_login_form = 1 if !defined $show_login_form;
 
         if ($show_login_form) {
-            my $chal = LJ::challenge_generate(300);
+            my ($form_root, $extra_fields);
+            if ($LJ::USE_SSL_LOGIN) {
+                $form_root = $LJ::SSLROOT;
+                $extra_fields = '';
+            } else {
+                $form_root = $LJ::SITEROOT;
+                my $chal = LJ::challenge_generate(300);
+                $extra_fields = 
+                    "<input type='hidden' name='chal' id='login_chal' class='lj_login_chal' value='$chal' />" .
+                    "<input type='hidden' name='response' id='login_response' class='lj_login_response' value='' />";
+            }
             my $contents = LJ::run_hook('control_strip_userpic_contents', $uri) || "&nbsp;";
             $ret .= <<"LOGIN_BAR";
                 <td id='lj_controlstrip_userpic'>$contents</td>
-                <td id='lj_controlstrip_login' style='background-image: none;' nowrap='nowrap'><form id="login" class="lj_login_form" action="$LJ::SITEROOT/login.bml?ret=1" method="post"><div>
+                <td id='lj_controlstrip_login' style='background-image: none;' nowrap='nowrap'>
+                <form id="login" class="lj_login_form" action="$form_root/login.bml?ret=1" method="post"><div>
                 <input type="hidden" name="mode" value="login" />
-                <input type='hidden' name='chal' id='login_chal' class='lj_login_chal' value='$chal' />
-                <input type='hidden' name='response' id='login_response' class='lj_login_response' value='' />
+                $extra_fields
                 <table cellspacing="0" cellpadding="0" style="margin-right: 1em;"><tr><td>
                 <label for="xc_user">$BML::ML{'/login.bml.login.username'}</label> <input type="text" name="user" size="7" maxlength="17" tabindex="1" id="xc_user" value="" />
                 </td><td>
@@ -2479,9 +2473,14 @@ sub control_strip_js_inject
 
     LJ::need_res(qw(
                     js/livejournal.js
-                    js/md5.js
-                    js/login.js
                     js/controlstrip.js
+                    ));
+}
+
+sub journal_js_inject
+{
+    LJ::need_res(qw(
+                    js/journal.js
                     ));
 }
 
@@ -2589,7 +2588,6 @@ sub std_max_length {
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
 $LJ::COMMON_CODE{'chalresp_js'} = qq{
-<script type="text/javascript" src="$LJ::JSPREFIX/md5.js"></script>
 <script language="JavaScript" type="text/javascript">
     <!--
 function sendForm (formid, checkuser)

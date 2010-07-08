@@ -4,6 +4,8 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw(%POST %GET);
 
     my $remote = LJ::get_remote();
@@ -48,7 +50,7 @@ body<=
 
         $ret .= "<ul>";
         $ret .= "<li>Style ID: $s2style->{styleid}</li>";
-        $ret .= "<li>Last modified: " . LJ::mysql_time($s2style->{modtime}) . "</li>";
+        $ret .= "<li>Last modified: " . LJ::TimeUtil->mysql_time($s2style->{modtime}) . "</li>";
 
         foreach my $lay (sort { $a cmp $b } keys %{$s2style->{'layer'}}) {
             my $lid = $s2style->{'layer'}->{$lay};

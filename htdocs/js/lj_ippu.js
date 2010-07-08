@@ -119,7 +119,7 @@ LJ_IPPU.showNoteElement = function (noteEle, underele, timeout, style) {
     notePopup.setClickToClose(true);
     notePopup.moveForward();
 
-    if (! defined(timeout)) {
+    if (timeout === undefined) {
         timeout = 5000;
     }
 

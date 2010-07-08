@@ -86,7 +86,7 @@ sub subscription_as_html {
     my $journal = $subscr->journal;
 
     my $ljuser = $subscr->journal->ljuser_display;
-    return BML::ml('event.user_expunged', { user => $ljuser }); # "$ljuser has been purged";
+    return LJ::Lang::ml('event.user_expunged', { user => $ljuser }); # "$ljuser has been purged";
 }
 
 sub content {

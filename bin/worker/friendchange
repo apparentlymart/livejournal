@@ -25,6 +25,7 @@ use XML::Atom::Person;
 use XML::Atom::Link;
 use XML::Atom::Content;
 use XML::LibXML;
+use LJ::TimeUtil;
 
 sub capabilities { 
     return (
@@ -95,7 +96,7 @@ sub work {
     $entry->title('Relation Change (' . $u->display_name . ' - ' . $f->display_name . ')');
     $entry->add_link($make_link->('related', '', $u->journal_base, $u->display_name));
     $entry->add_link($make_link->('related', '', $f->journal_base, $f->display_name));
-    $entry->published(LJ::time_to_w3c(time()));
+    $entry->published(LJ::TimeUtil->time_to_w3c(time()));
 
     # Create the entry content and summary
     {

@@ -25,6 +25,7 @@ use LJ::RateLimit qw//;
 use URI qw//;
 use LJ::JSON;
 use HTTP::Date qw(str2time);
+use LJ::TimeUtil;
 
 use Class::Autouse qw(
                       URI
@@ -150,7 +151,8 @@ sub create_personal {
         }
     }
     # if we have initial friends for new accounts, add them.
-    foreach my $friend (@LJ::INITIAL_FRIENDS) {
+    my @initial_friends = LJ::SUP->is_sup_enabled($u) ? @LJ::SUP_INITIAL_FRIENDS : @LJ::INITIAL_FRIENDS;
+    foreach my $friend (@initial_friends) {
         my $friendid = LJ::get_userid($friend);
         LJ::add_friend($u->id, $friendid) if $friendid;
     }
@@ -263,10 +265,6 @@ sub is_protected_username {
 sub new_from_row {
     my ($class, $row) = @_;
     my $u = bless $row, $class;
-
-    # for selfassert method below:
-    $u->{_orig_userid} = $u->{userid};
-    $u->{_orig_user}   = $u->{user};
 
     return $u;
 }
@@ -1005,11 +1003,15 @@ sub tosagree_set
 
     my $newval = join(', ', time(), $rev);
     my $rv = $u->set_prop("legal_tosagree", $newval);
-
-    # set in $u object for callers later
-    $u->{legal_tosagree} = $newval if $rv;
-
-    return $rv;
+    if ($rv) {
+        # set in $u object for callers later
+        ## hm, doesn't "set_prop" do it?
+        $u->{legal_tosagree} = $newval;
+        return $rv;
+    } else {
+        $$err = "Internal error: can't set prop legal_tosagree";
+        return;
+    }
 }
 
 sub tosagree_verify {
@@ -1768,7 +1770,7 @@ sub age {
     return unless length $bdate;
 
     my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
-    my $age = LJ::calc_age($year, $mon, $day);
+    my $age = LJ::TimeUtil->calc_age($year, $mon, $day);
     return $age if $age > 0;
     return;
 }
@@ -1790,7 +1792,7 @@ sub init_age {
     return unless $init_bdate;
 
     my ($year, $mon, $day) = $init_bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
-    my $age = LJ::calc_age($year, $mon, $day);
+    my $age = LJ::TimeUtil->calc_age($year, $mon, $day);
     return $age if $age > 0;
     return;
 }
@@ -1890,7 +1892,7 @@ sub set_next_birthday {
     }
 
     my $as_unix = sub {
-        return LJ::mysqldate_to_time(sprintf("%04d-%02d-%02d", @_));
+        return LJ::TimeUtil->mysqldate_to_time(sprintf("%04d-%02d-%02d", @_));
     };
 
     my $curyear = (gmtime(time))[5]+1900;
@@ -1972,6 +1974,10 @@ sub set_prop {
     my ($u, $prop, $value) = @_;
     return 0 unless LJ::set_userprop($u, $prop, $value);  # FIXME: use exceptions
     $u->{$prop} = $value;
+
+    LJ::run_hook("props_changed", $u, {$prop => $value});
+
+    return $value;
 }
 
 sub clear_prop {
@@ -2258,6 +2264,19 @@ sub record_login {
 
     return $u->do("INSERT INTO loginlog SET userid=?, sessid=?, logintime=UNIX_TIMESTAMP(), ".
                   "ip=?, ua=?", undef, $u->{userid}, $sessid, $ip, $ua);
+}
+
+sub last_login_time {
+    my ($u) = @_;
+
+    my $dbr = LJ::get_cluster_reader($u);
+    my ($time) = $dbr->selectrow_array(qq{
+        SELECT MAX(logintime) FROM loginlog WHERE userid=?
+    }, undef, $u->id);
+
+    $time ||= 0;
+
+    return $time;
 }
 
 # THIS IS DEPRECATED DO NOT USE
@@ -3535,17 +3554,6 @@ sub new_entry_editor {
     return $LJ::DEFAULT_EDITOR; # Use config default
 }
 
-# do some internal consistency checks on self.  die if problems,
-# else returns 1.
-sub selfassert {
-    my $u = shift;
-    LJ::assert_is($u->{userid}, $u->{_orig_userid})
-        if $u->{_orig_userid};
-    LJ::assert_is($u->{user}, $u->{_orig_user})
-        if $u->{_orig_user};
-    return 1;
-}
-
 # Returns the NotificationInbox for this user
 *inbox = \&notification_inbox;
 sub notification_inbox {
@@ -3658,7 +3666,7 @@ sub timecreate {
     my $dbr = LJ::get_db_reader() or die "No db";
     my $when = $dbr->selectrow_array("SELECT timecreate FROM userusage WHERE userid=?", undef, $u->id);
 
-    $timecreate = LJ::mysqldate_to_time($when);
+    $timecreate = LJ::TimeUtil->mysqldate_to_time($when);
     $u->{_cache_timecreate} = $timecreate;
     LJ::MemCache::set($memkey, $timecreate, 60*60*24);
 
@@ -3963,7 +3971,7 @@ sub statusvisdate {
 
 sub statusvisdate_unix {
     my $u = shift;
-    return LJ::mysqldate_to_time($u->{statusvisdate});
+    return LJ::TimeUtil->mysqldate_to_time($u->{statusvisdate});
 }
 
 # returns list of all previous statuses of the journal
@@ -4009,6 +4017,8 @@ sub set_statusvis {
     # do update
     my $ret = LJ::update_user($u, { statusvis => $statusvis,
                                  raw => 'statusvisdate=NOW()' });
+
+    LJ::run_hook("props_changed", $u, {statusvis => $statusvis});
 
     $u->fb_push;
 
@@ -4569,20 +4579,43 @@ sub render_promo_of_community {
 sub can_expunge {
     my $u = shift;
 
-    # must be already deleted
-    return 0 unless $u->is_deleted;
+    my $statusvisdate = $u->statusvisdate_unix;
 
-    # and deleted 30 days ago
-    my $expunge_days = LJ::conf_test($LJ::DAYS_BEFORE_EXPUNGE) || 30;
-    return 0 unless $u->statusvisdate_unix < time() - 86400*$expunge_days;
-
-    my $hook_rv = 0;
-    if (LJ::are_hooks("can_expunge_user", $u)) {
-        $hook_rv = LJ::run_hook("can_expunge_user", $u);
-        return $hook_rv ? 1 : 0;        
+    # check admin flag "this journal must not be expunged for abuse team
+    # investigation". hack: if flag is on, then set statusvisdate to now,
+    # so that the next time worker bin/worker/expunge-users won't check
+    # this user again.
+    #
+    # optimization concern: isn't it too much strain checking this prop
+    # for every user? well, we've got to check this prop for every user
+    # that seems eligible anyway, and moveucluster isn't supposed to send
+    # us users who got too recent statusvisdate or something.
+    if ($u->prop('dont_expunge_journal')) {
+        LJ::update_user($u, { raw => 'statusvisdate=NOW()' });
+        return 0;
     }
 
-    return 1;
+    if ($u->is_deleted) {
+        my $expunge_days =
+            LJ::conf_test($LJ::DAYS_BEFORE_EXPUNGE) || 30;
+
+        return 0 unless $statusvisdate < time() - 86400 * $expunge_days;
+
+        return 1;
+    }
+
+    if ($u->is_suspended) {
+        return 0 if $LJ::DISABLED{'expunge_suspended'};
+
+        my $expunge_days =
+            LJ::conf_test($LJ::DAYS_BEFORE_EXPUNGE_SUSPENDED) || 30;
+
+        return 0 unless $statusvisdate < time() - 86400 * $expunge_days;
+
+        return 1;
+    }
+
+    return 0;
 }
 
 # Check to see if the user can use eboxes at all
@@ -5219,7 +5252,7 @@ sub openid_tags {
     # OpenID Server and Yadis
     if (LJ::OpenID->server_enabled and defined $u) {
         my $journalbase = $u->journal_base;
-        $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
+        $head .= qq{<link rel="openid2.provider" href="$LJ::OPENID_SERVER" />\n};
         $head .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
     }
 
@@ -6008,8 +6041,6 @@ sub _set_u_req_cache {
     # the latested data, but keep using its address
     if (my $eu = $LJ::REQ_CACHE_USER_ID{$u->{'userid'}}) {
         LJ::assert_is($eu->{userid}, $u->{userid});
-        $eu->selfassert;
-        $u->selfassert;
 
         $eu->{$_} = $u->{$_} foreach keys %$u;
         $u = $eu;
@@ -6086,7 +6117,6 @@ sub load_user
  
     # return process cache if we have one
     if ($u = $LJ::REQ_CACHE_USER_NAME{$user}) {
-        $u->selfassert;
         return $u;
     }
 
@@ -6179,7 +6209,6 @@ sub load_userid
     # check process cache
     $u = $LJ::REQ_CACHE_USER_ID{$userid};
     if ($u) {
-        $u->selfassert;
         return $u;
     }
 
@@ -6623,7 +6652,7 @@ sub infohistory_add {
 
     # get writer and insert
     my $dbh = LJ::get_db_writer();
-    my $gmt_now = LJ::mysql_time(time(), 1);
+    my $gmt_now = LJ::TimeUtil->mysql_time(time(), 1);
     $dbh->do("INSERT INTO infohistory (userid, what, timechange, oldvalue, other) VALUES (?, ?, ?, ?, ?)",
              undef, $uuid, $what, $gmt_now, $value, $other);
     return $dbh->err ? 0 : 1;
@@ -6970,7 +6999,7 @@ sub ljuser
         return $make_tag->($icon, $url, $size || 16) if $icon;
     }
 
-    if (my $icon = $u->custom_usericon) {
+    if (!$LJ::IS_SSL && (my $icon = $u->custom_usericon)) {
         return $make_tag->($icon, $url, 17);
     }
     
@@ -7159,7 +7188,7 @@ sub get_timezone {
             ORDER BY rlogtime LIMIT 1
         }, undef, $u->{userid}, $LJ::EndOfTime)) {
         my $logtime = $LJ::EndOfTime - $last_row->{'rlogtime'};
-        my $eventtime = LJ::mysqldate_to_time($last_row->{'eventtime'}, 1);
+        my $eventtime = LJ::TimeUtil->mysqldate_to_time($last_row->{'eventtime'}, 1);
         my $hourdiff = ($eventtime - $logtime) / 3600;
 
         # if they're up to a quarter hour behind, round up.
@@ -7572,6 +7601,9 @@ sub modify_caps {
 
     $u->{caps} = $newcaps;
     $argu->{caps} = $newcaps if ref $argu; # temp hack
+
+    LJ::run_hook("props_changed", $u, {caps => $newcaps});
+    
     return $u;
 }
 
@@ -8372,8 +8404,12 @@ sub delete_all_comments {
                                            $nodetype, $u->{'userid'}, $nodeid))
            && $t && @$t)
     {
-        my $in = join(',', map { $_+0 } @$t);
+        my @batch = map { int $_ } @$t;
+        my $in = join(',', @batch);
         return 1 unless $in;
+
+        LJ::run_hooks('report_cmt_delete', $u->{'userid'}, \@batch);
+        LJ::run_hooks('report_cmt_text_delete', $u->{'userid'}, \@batch);
         foreach my $table (qw(talkprop2 talktext2 talk2)) {
             $u->do("DELETE FROM $table WHERE journalid=? AND jtalkid IN ($in)",
                    undef, $u->{'userid'});
@@ -8928,10 +8964,18 @@ sub make_journal
         my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
         my %kwref = ( map { $tags->{$_}->{name} => $_ } keys %{$tags || {}} );
         foreach (@{$opts->{tags}}) {
-            return $error->("Sorry, one or more specified tags do not exist.", "404 Not Found")
-                unless $kwref{$_};
+            unless ($kwref{$_}) {
+                LJ::Request->pnotes ('error' => 'e404');
+                LJ::Request->pnotes ('remote' => LJ::get_remote ());
+                $opts->{'handler_return'} = "404 Not Found";
+                return;
+            }
+            #return $error->("Sorry, one or more specified tags do not exist.", "404 Not Found")
+            #    unless $kwref{$_};
             push @{$opts->{tagids}}, $kwref{$_};
         }
+
+        $opts->{tagmode} = $opts->{getargs}->{mode} eq 'and' ? 'and' : 'or';
     }
 
     # validate the security filter
@@ -8976,16 +9020,40 @@ sub make_journal
                                     'journal.deleted', undef, {username => $u->username})
                        || LJ::Lang::get_text($LJ::DEFAULT_LANG, 
                                     'journal.deleted', undef, {username => $u->username});
-            return $error->($warning, "404 Not Found");
+            LJ::Request->pnotes ('error' => 'deleted');
+            LJ::Request->pnotes ('remote' => LJ::get_remote ());
+            $opts->{'handler_return'} = "404 Not Found";
+            return;
+            #return $error->($warning, "404 Not Found");
 
         }
-        return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);
+        if ($u->is_suspended) {
+            LJ::Request->pnotes ('error' => 'suspended');
+            LJ::Request->pnotes ('remote' => LJ::get_remote ());
+            $opts->{'handler_return'} = "403 Forbidden";
+            return;
+        }
+        #return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);
 
         my $entry = $opts->{ljentry};
+=head
+for LJSUP-6347
+        if ($entry && $entry->is_suspended_for($remote)) {
+            LJ::Request->pnotes ('error' => 'suspended_post');
+            LJ::Request->pnotes ('remote' => LJ::get_remote ());
+            $opts->{'handler_return'} = "403 Forbidden";
+            return;
+        }
+=cut
         return $error->("This entry has been suspended. You can visit the journal <a href='" . $u->journal_base . "/'>here</a>.", "403 Forbidden")
             if $entry && $entry->is_suspended_for($remote);
     }
-    return $error->("This journal has been deleted and purged.", "410 Gone") if ($u->is_expunged);
+    if ($u->is_expunged) {
+        LJ::Request->pnotes ('error' => 'expunged');
+        LJ::Request->pnotes ('remote' => LJ::get_remote ());
+        $opts->{'handler_return'} = "410 Gone";
+        return;
+    }
 
     return $error->("This user has no journal here.", "404 Not here") if $u->{'journaltype'} eq "I" && $view ne "friends";
 
@@ -9628,7 +9696,7 @@ sub user_search_display {
 
         if ($updated->{$u->{'userid'}} > 0) {
             $ret .= "Updated ";
-            $ret .= LJ::ago_text(time() - $updated->{$u->{'userid'}});
+            $ret .= LJ::TimeUtil->ago_text(time() - $updated->{$u->{'userid'}});
         } else {
             $ret .= "Never updated";
         }

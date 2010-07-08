@@ -6,6 +6,8 @@ body<=
     use strict;
     use vars qw(%POST %GET);
     use Class::Autouse qw(LJ::MassPrivacy);
+    use LJ::TimeUtil;
+
     BML::decl_params(_default => qr/./);
 
     my $remote = LJ::get_remote();
@@ -40,11 +42,11 @@ body<=
             }
 
             # Round down the day of month to the last day of the month
-            if ( $POST{'s_day'} > LJ::days_in_month($POST{'s_mon'}, $POST{'s_year'}) ) {
-                $POST{'s_day'} = LJ::days_in_month($POST{'s_mon'}, $POST{'s_year'});
+            if ( $POST{'s_day'} > LJ::TimeUtil->days_in_month($POST{'s_mon'}, $POST{'s_year'}) ) {
+                $POST{'s_day'} = LJ::TimeUtil->days_in_month($POST{'s_mon'}, $POST{'s_year'});
             }
-            if ( $POST{'e_day'} > LJ::days_in_month($POST{'e_mon'}, $POST{'e_year'}) ) {
-                $POST{'e_day'} = LJ::days_in_month($POST{'e_mon'}, $POST{'e_year'});
+            if ( $POST{'e_day'} > LJ::TimeUtil->days_in_month($POST{'e_mon'}, $POST{'e_year'}) ) {
+                $POST{'e_day'} = LJ::TimeUtil->days_in_month($POST{'e_mon'}, $POST{'e_year'});
             }
         }
 

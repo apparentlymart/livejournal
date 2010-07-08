@@ -4,6 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::CreatePage Captcha::reCAPTCHA );
+use LJ::TimeUtil;
 
 sub need_res { qw( stc/widgets/createaccount.css js/widgets/createaccount.js js/browserdetect.js ) }
 
@@ -340,6 +341,7 @@ sub render_body {
             }) . "</p>";
             $ret .= "</td></tr>\n";
         }
+        $ret .= $error_msg->('tos', '<span class="formitemFlag">', '</span><br />');
     }
 
     ### submit button
@@ -470,7 +472,7 @@ sub handle_post {
 
         # require dates in the 1900s (or beyond)
         if ($year && $mon && $day && $year >= 1900 && $year < $nyear) {
-            my $age = LJ::calc_age($year, $mon, $day);
+            my $age = LJ::TimeUtil->calc_age($year, $mon, $day);
             $is_underage = 1 if $age < 13;
             $ofage = 1 if $age >= 13;
         } else {
@@ -572,7 +574,7 @@ sub handle_post {
 
             LJ::send_mail({
                 to => $email,
-                from => $LJ::ADMIN_EMAIL,
+                from => $LJ::DONOTREPLY_EMAIL,
                 fromname => $LJ::SITENAME,
                 charset => 'utf-8',
                 subject => LJ::Lang::ml('email.newacct.subject', { sitename => $LJ::SITENAME }),
@@ -582,8 +584,11 @@ sub handle_post {
 
         if ($LJ::TOS_CHECK) {
             my $err = "";
-            $nu->tosagree_set(\$err)
-                or return LJ::bad_input($err);
+            my $rv = $nu->tosagree_set(\$err);
+            if (!$rv) {
+                $from_post{errors}->{tos} = $err;
+                return %from_post;
+            }
         }
 
         $nu->make_login_session;

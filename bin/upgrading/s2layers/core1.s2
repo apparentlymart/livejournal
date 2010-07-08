@@ -1081,8 +1081,8 @@ property int page_friends_items {
     min = 5;
     max = 50;
 }
-set page_recent_items = 20;
-set page_friends_items = 20;
+set page_recent_items = 10;
+set page_friends_items = 10;
 
 property string page_day_sortorder {
     des = "Order of entries shown on a day page";
@@ -1357,6 +1357,21 @@ property string text_share_this {
     des = "Text to share this with a friend";
 }
 set text_share_this = "Share this!";
+
+property string text_share_facebook {
+    des = "Text to share this with a friend on Facebook";
+}
+set text_share_facebook = "Post to Facebook";
+
+property string text_share_twitter {
+    des = "Text to share this with a friend on Twitter";
+}
+set text_share_twitter = "TwitThis";
+
+property string text_share_email {
+    des = "Text to share this with a friend by mail";
+}
+set text_share_email = "Send by e-mail";
 
 property string text_mem_add {
     des = "Text to add an entry into memories";
@@ -1770,6 +1785,19 @@ property Color theme_linkcolor {
     noui = 1;
 }
 set theme_linkcolor = "";
+
+### I like it
+property string text_we_like_this {
+    des="Hint for “View all” link";
+    noui = 1;
+}
+set text_we_like_this = "View people who like it";
+
+property string text_i_like_this {
+    des="Hint for “+1” link";
+    noui = 1;
+}
+set text_i_like_this = "Please click Track this if you want to receive all comments to this entry";
 
 ###[ global function implementations ]
 

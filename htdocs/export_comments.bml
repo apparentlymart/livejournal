@@ -2,7 +2,8 @@
 {
     use strict;
     use vars qw(%GET);
-    
+    use LJ::TimeUtil;
+
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
@@ -130,8 +131,8 @@
             $body = LJ::exml($body);
 
             # setup the date to be GMT and formatted per W3C specs
-            my $date = LJ::mysqldate_to_time($data->{datepost});
-            $date = LJ::time_to_w3c($date, 'Z');
+            my $date = LJ::TimeUtil->mysqldate_to_time($data->{datepost});
+            $date = LJ::TimeUtil->time_to_w3c($date, 'Z');
 
             # print the data
             my $ret = "<comment id='$id' jitemid='$data->{nodeid}'";

@@ -6,6 +6,7 @@ no warnings 'uninitialized';
 
 use LJ::Entry;
 use LJ::Request;
+use LJ::TimeUtil;
 use XML::Atom::Person;
 use XML::Atom::Feed;
 
@@ -52,7 +53,7 @@ sub make_feed
         link      => LJ::journal_base($u) . "/",
         title     => $u->{journaltitle} || $u->{name} || $u->{user},
         subtitle  => $u->{journalsubtitle} || $u->{name},
-        builddate => LJ::time_to_http(time()),
+        builddate => LJ::TimeUtil->time_to_http(time()),
     };
 
     # if we do not want items for this view, just call out
@@ -95,7 +96,7 @@ sub make_feed
             anum => $entry->anum,
             posterid => $entry->poster->id,
             security => $entry->security,
-            alldatepart => LJ::alldatepart_s2($entry->eventtime_mysql),
+            alldatepart => LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql),
         };
     } else {
         @items = LJ::get_recent_items({
@@ -106,6 +107,7 @@ sub make_feed
             'itemshow' => 25,
             'order' => "logtime",
             'tagids' => $opts->{tagids},
+            'tagmode' => $opts->{tagmode},
             'itemids' => \@itemids,
             'friendsview' => 1,           # this returns rlogtimes
             'dateformat' => "S2",         # S2 format time format is easier
@@ -150,7 +152,7 @@ sub make_feed
     # conjunction with a static request for a file on disk that has been
     # stat()ed in the course of the current request. It is inappropriate and
     # "dangerous" to use it for dynamic content.
-    if ((my $status = LJ::Request->meets_conditions) != Apache::Constants::OK()) {
+    if ((my $status = LJ::Request->meets_conditions) != LJ::Request::OK()) {
         $opts->{handler_return} = $status;
         return undef;
     }
@@ -274,7 +276,7 @@ sub make_feed
     }
 
     # fix up the build date to use entry-time
-    $journalinfo->{'builddate'} = LJ::time_to_http($LJ::EndOfTime - $items[0]->{'rlogtime'}),
+    $journalinfo->{'builddate'} = LJ::TimeUtil->time_to_http($LJ::EndOfTime - $items[0]->{'rlogtime'}),
 
     return $viewfunc->{handler}->($journalinfo, $u, $opts, \@cleanitems, \@entries);
 }
@@ -345,7 +347,7 @@ sub create_view_rss
 
         $ret .= "<item>\n";
         $ret .= "  <guid isPermaLink='true'>$journalinfo->{link}$ditemid.html</guid>\n";
-        $ret .= "  <pubDate>" . LJ::time_to_http($it->{createtime}) . "</pubDate>\n";
+        $ret .= "  <pubDate>" . LJ::TimeUtil->time_to_http($it->{createtime}) . "</pubDate>\n";
         $ret .= "  <title>" . LJ::exml($it->{subject}) . "</title>\n" if $it->{subject};
         $ret .= "  <author>" . LJ::exml($journalinfo->{email}) . "</author>" if $journalinfo->{email};
         $ret .= "  <link>$journalinfo->{link}$ditemid.html</link>\n";
@@ -462,7 +464,7 @@ sub create_view_atom
                 : ( 'text/xml', $api )
             )
         );
-        $feed->updated( LJ::time_to_w3c($j->{'modtime'}, 'Z') );
+        $feed->updated( LJ::TimeUtil->time_to_w3c($j->{'modtime'}, 'Z') );
 
         my $ljinfo = $xml->createElement( 'lj:journal' );
         $ljinfo->setAttribute( 'userid', $u->userid );
@@ -554,8 +556,8 @@ sub create_view_atom
                        );
 
 
-        $entry->published( LJ::time_to_w3c($it->{createtime}, "Z") );
-        $entry->updated(   LJ::time_to_w3c($it->{modtime},    "Z") );
+        $entry->published( LJ::TimeUtil->time_to_w3c($it->{createtime}, "Z") );
+        $entry->updated(   LJ::TimeUtil->time_to_w3c($it->{modtime},    "Z") );
 
         # XML::Atom 0.13 doesn't support categories.   Maybe later?
         foreach my $tag ( @{$it->{tags} || []} ) {
@@ -722,8 +724,8 @@ sub create_view_foaf {
     }
 
     # include a user's journal page and web site info
-    my $time_create = ($u->timecreate) ? LJ::time_to_w3c($u->timecreate) : '';
-    my $time_update = ($u->timeupdate) ? LJ::time_to_w3c($u->timeupdate) : '';
+    my $time_create = ($u->timecreate) ? LJ::TimeUtil->time_to_w3c($u->timecreate) : '';
+    my $time_update = ($u->timeupdate) ? LJ::TimeUtil->time_to_w3c($u->timeupdate) : '';
     $ret .= "    <foaf:weblog rdf:resource='" . LJ::journal_base($u) . "/'";
     $ret .= " lj:dateCreated='$time_create'" if $time_create;
     $ret .= " lj:dateLastUpdated='$time_update'" if $time_update;
@@ -858,9 +860,10 @@ sub create_view_yadis {
     if ($view eq 'recent') {
         # Only people (not communities, etc) can be OpenID authenticated
         if ($person && LJ::OpenID->server_enabled) {
-            $println->('    <Service>');
-            $println->('        <Type>http://openid.net/signon/1.0</Type>');
+            $println->('    <Service priority="0">');
+            $println->('        <Type>http://specs.openid.net/auth/2.0/server</Type>');
             $println->('        <URI>'.LJ::ehtml($LJ::OPENID_SERVER).'</URI>');
+            $println->('        <LocalID>'.LJ::ehtml($u->journal_base).'</LocalID>');
             $println->('    </Service>');
         }
     }
@@ -960,7 +963,7 @@ sub create_view_userpics {
         $latest = ($latest < $picdata{$pic->{picid}}->{picdate}) ? $picdata{$pic->{picid}}->{picdate} : $latest;
     }
 
-    $feed->updated( LJ::time_to_w3c($latest, 'Z') );
+    $feed->updated( LJ::TimeUtil->time_to_w3c($latest, 'Z') );
 
     foreach my $pic (@pics) {
         my $entry = XML::Atom::Entry->new( Version => 1 );
@@ -971,7 +974,7 @@ sub create_view_userpics {
         my $title = ($pic->{picid} == $u->{defaultpicid}) ? "default userpic" : "userpic";
         $entry->title( $title );
 
-        $entry->updated( LJ::time_to_w3c($picdata{$pic->{picid}}->{picdate}, 'Z') );
+        $entry->updated( LJ::TimeUtil->time_to_w3c($picdata{$pic->{picid}}->{picdate}, 'Z') );
 
         my $content;
         $content = $entry_xml->createElement( "content" );
@@ -1057,7 +1060,7 @@ sub create_view_comments
         
         $ret .= "<item>\n";
         $ret .= "  <guid isPermaLink='true'>$thread_url</guid>\n";
-        $ret .= "  <pubDate>" . LJ::time_to_http($r->{datepostunix}) . "</pubDate>\n";
+        $ret .= "  <pubDate>" . LJ::TimeUtil->time_to_http($r->{datepostunix}) . "</pubDate>\n";
         $ret .= "  <title>" . LJ::exml($subject) . "</title>\n" if $subject;
         $ret .= "  <link>$thread_url</link>\n";
         # omit the description tag if we're only syndicating titles

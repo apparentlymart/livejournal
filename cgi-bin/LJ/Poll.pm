@@ -12,9 +12,10 @@ sub _memcache_key_prefix            { "poll" }
 sub _memcache_stored_props          {
     # first element of props is a VERSION
     # next - allowed object properties
-    return qw/ 1
+    return qw/ 2
                ditemid itemid
                pollid journalid posterid whovote whoview name status questions props
+               results
                /;
 }
     *_memcache_hashref_to_object    = \*absorb_row;
@@ -130,7 +131,10 @@ sub create {
                 $u->do("INSERT INTO pollitem2 (journalid, pollid, pollqid, pollitid, sortorder, item) " .
                        "VALUES (?, ?, ?, ?, ?, ?)", undef, $journalid, $pollid, $qnum, $inum, $inum, $it->{'item'});
                 die $u->errstr if $u->err;
-            } else {
+                $u->do("INSERT INTO pollresultaggregated2 (journalid, pollid, what, value) " .
+                       "VALUES (?, ?, ?, ?)", undef, $journalid, $pollid, "$qnum:$inum", 0);
+                die $u->errstr if $u->err;
+            } else { # non-clustered poll will not have aggregated results
                 $dbh->do("INSERT INTO pollitem (pollid, pollqid, pollitid, sortorder, item) " .
                          "VALUES (?, ?, ?, ?, ?)", undef, $pollid, $qnum, $inum, $inum, $it->{'item'});
                 die $dbh->errstr if $dbh->err;
@@ -138,8 +142,23 @@ sub create {
         }
         ## end inserting poll items
 
+        ## prepare answer variants list for scale question
+        if ($q->{'type'} eq 'scale' and $u->polls_clustered) {
+            my ($from, $to, $by) = split(m!/!, $q->{'opts'});
+            $by ||= 1;
+            my $count = int(($to - $from) / $by) + 1;
+            for (my $at = $from; $at <= $to; $at += $by) {
+                $u->do("INSERT INTO pollresultaggregated2 (journalid, pollid, what, value) " .
+                       "VALUES (?, ?, ?, ?)", undef, $journalid, $pollid, "$qnum:$at", 0);
+                die $u->errstr if $u->err;
+            }
+        }
     }
     ## end inserting poll questions
+
+    $u->do("INSERT INTO pollresultaggregated2 (journalid, pollid, what, value) " .
+           "VALUES (?, ?, ?, ?)", undef, $journalid, $pollid, "users", 0);
+    die $u->errstr if $u->err;
 
     if (ref $classref eq 'LJ::Poll') {
         $classref->{pollid} = $pollid;
@@ -788,6 +807,43 @@ sub question {
     return $q;
 }
 
+sub load_aggregated_results {
+    my $self = shift;
+
+    my %aggr_results;
+    my $aggr_users;
+
+    if (ref $self->{results} eq 'HASH') { # if poll is new and have aggregated results
+        return;
+    } elsif (not $self->{results}) { # not loaded
+        my $sth = $self->journal->prepare("SELECT what, value FROM pollresultaggregated2 WHERE pollid=? AND journalid=?");
+        $sth->execute($self->pollid, $self->journalid);
+        while (my $row = $sth->fetchrow_arrayref) {
+            last unless ref $row eq 'ARRAY';
+            my ($key, $value) = @$row;
+            if ($key eq 'users') {
+                $aggr_users = $value;
+            } elsif ($key =~ /^(\d+):(\d+)$/) {
+                my $qid = $1;
+                my $item = $2;
+                $aggr_results{$qid}->{$item} = $value;
+            } else {
+                warn "Unknown key in pollresultaggrepated2: '$key'" if $LJ::IS_DEV_SERVER;
+            }
+        }
+    }
+
+    if (scalar keys %aggr_results) {
+        $self->{results} = { counts => \%aggr_results, users => $aggr_users};
+    } else {
+        $self->{results} = 'no'; # we tryed - there are no aggregated results in DB => save negative status to prevent new attempts
+    }
+
+    # store poll data with loaded results
+    $self->_store_to_memcache;
+    $LJ::REQ_CACHE_POLL{ $self->id } = $self;
+}
+
 ##### Poll rendering
 
 # returns the time that the given user answered the given poll
@@ -862,6 +918,7 @@ sub render_ans {
 #   mode => enter|results|ans
 #   qid  => show a specific question
 #   page => page #
+#   widget => true if rendering must be short
 sub render {
     my ($self, %opts) = @_;
 
@@ -942,13 +999,19 @@ sub render {
         $ret .= LJ::html_hidden('pollid', $pollid);
     }
 
-    $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> ";
+    $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> "
+            unless $opts{widget};
     if ($self->name) {
         my $name = $self->name;
         LJ::Poll->clean_poll(\$name);
-        $ret .= "<i>$name</i>";
+        if ($opts{widget}) {
+            $name = LJ::trim_at_word($name, 70);
+            $ret .= "$opts{scroll_links}<h3>$name</h3>";
+        } else {
+            $ret .= "<i>$name</i>";
+        }
     }
-    $ret .= "<br />\n";
+    $ret .= "<br />\n" if !$opts{widget};
     $ret .= "<span style='font-family: monospace; font-weight: bold; font-size: 1.2em;'>" .
             BML::ml('poll.isclosed') . "</span><br />\n"
         if ($self->is_closed);
@@ -958,62 +1021,43 @@ sub render {
         $whoview = $remote && $remote->id == $self->posterid ? "none_remote" : "none_others";
     }
     $ret .= LJ::Lang::ml('poll.security2', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote),
-                                       'whoview' => LJ::Lang::ml('poll.security.'.$whoview) });
+                                       'whoview' => LJ::Lang::ml('poll.security.'.$whoview) })
+            unless $opts{widget};
+
+    my %aggr_results;
+    my $aggr_users;
+    my $have_aggr_results;
+
+    unless ($do_form) { # we need know poll results
+        $self->load_aggregated_results;
+        if (ref $self->{results} eq 'HASH') { # if poll is new and have aggregated results
+            %aggr_results = %{$self->{results}->{counts}};
+            $aggr_users = $self->{results}->{users};
+            $have_aggr_results = 1;
+        }
+    }
 
     my $results_table = "";
+    my $posted = '';
+    if ($opts{widget}) {
+        my $ago = time() - LJ::TimeUtil->mysqldate_to_time($self->entry->logtime_mysql, 0);
+        # This will not work under friendspage, because of bug in calculating logtime from rlogtime somewhere in code - I do not know where...
+        $posted = ' <span class="i-potd-ago">' . LJ::Lang::ml('poll.posted') . ' ' . LJ::TimeUtil->ago_text($ago) . '</span>';
+        #$posted .= " ($ago; " . LJ::TimeUtil->mysqldate_to_time($self->entry->logtime_mysql, 0) . ")";
+        #$posted .= " (" . localtime . " - '" . $self->entry->logtime_mysql . "')";
+    }
     ## go through all questions, adding to buffer to return
     foreach my $q (@qs) {
         my $qid = $q->pollqid;
         my $text = $q->text;
+        $text = LJ::trim_at_word($text, 150) if $opts{widget};
         LJ::Poll->clean_poll(\$text);
-        $results_table .= "<p>$text</p><div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0 10px 40px'>";
-
-        ### get statistics, for scale questions
-        my ($valcount, $valmean, $valstddev, $valmedian);
-        if ($q->type eq "scale") {
-            # get stats
-            if ($self->is_clustered) {
-                $sth = $self->journal->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult2 " .
-                                               "WHERE pollid=? AND pollqid=? AND journalid=?");
-                $sth->execute($pollid, $qid, $self->journalid);
-            } else {
-                $sth = $dbr->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult WHERE pollid=? AND pollqid=?");
-                $sth->execute($pollid, $qid);
-            }
-
-            ($valcount, $valmean, $valstddev) = $sth->fetchrow_array;
-
-            # find median:
-            $valmedian = 0;
-            if ($valcount == 1) {
-                $valmedian = $valmean;
-            } elsif ($valcount > 1) {
-                my ($mid, $fetch);
-                # fetch two mids and average if even count, else grab absolute middle
-                $fetch = ($valcount % 2) ? 1 : 2;
-                $mid = int(($valcount+1)/2);
-                my $skip = $mid-1;
-
-                if ($self->is_clustered) {
-                    $sth = $self->journal->prepare("SELECT value FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=? " .
-                                         "ORDER BY value+0 LIMIT $skip,$fetch");
-                    $sth->execute($pollid, $qid, $self->journalid);
-                } else {
-                    $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=? " .
-                                         "ORDER BY value+0 LIMIT $skip,$fetch");
-                    $sth->execute($pollid, $qid);
-                }
-
-                while (my ($v) = $sth->fetchrow_array) {
-                    $valmedian += $v;
-                }
-                $valmedian /= $fetch;
-            }
+        if ($opts{widget}) {
+            $results_table .= "<p class='b-post-question'>$opts{poll_pic}$text$posted</p><div id='LJ_Poll_${pollid}_$qid' class='b-potd-poll'>";
+        } else {
+            $results_table .= "<p>$text</p><div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0pt 10px 40px;'>";
         }
-
-        my $usersvoted = 0;
-        my %itvotes;
-        my $maxitvotes = 1;
+        $posted = '';
         
         if ($mode eq "results") {
             ### to see individual's answers
@@ -1022,32 +1066,7 @@ sub render {
                 <a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'
                      class="LJ_PollAnswerLink" lj_posterid='$posterid'
                      onclick="return LiveJournal.pollAnswerClick(event, {pollid:$pollid,pollqid:$qid,page:0,pagesize:$pagesize})">
-                } . LJ::Lang::ml('poll.viewanswers') . "</a><br />" if $self->can_view;
-
-            ### but, if this is a non-text item, and we're showing results, need to load the answers:
-            if ($q->type ne "text") {
-                if ($self->is_clustered) {
-                    $sth = $self->journal->prepare("SELECT value FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=?");
-                    $sth->execute($pollid, $qid, $self->journalid);
-                } else {
-                    $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=?");
-                    $sth->execute($pollid, $qid);
-                }
-                while (my ($val) = $sth->fetchrow_array) {
-                    $usersvoted++;
-                    if ($q->type eq "check") {
-                        foreach (split(/,/,$val)) {
-                            $itvotes{$_}++;
-                        }
-                    } else {
-                        $itvotes{$val}++;
-                    }
-                }
-
-                foreach (values %itvotes) {
-                    $maxitvotes = $_ if ($_ > $maxitvotes);
-                }
-            }
+                } . LJ::Lang::ml('poll.viewanswers') . "</a><br />" if $self->can_view and not $opts{widget};
         }
 
         #### text questions are the easy case
@@ -1105,6 +1124,96 @@ sub render {
             my $do_table = 0;
 
             if ($q->type eq "scale") { # implies ! do_form
+
+                ### get statistics, for scale questions
+                my ($valcount, $valmean, $valstddev, $valmedian);
+
+                # get stats
+                if ($have_aggr_results) {
+                    $sth = undef;
+                    $valcount = 0;
+                    $valmean = 0;
+                    foreach my $item (keys %{$aggr_results{$qid} || {}}) {
+                        $valcount += $aggr_results{$qid}->{$item};
+                        $valmean += $aggr_results{$qid}->{$item} * $item;
+                    }
+                    $valmean /= $valcount;
+                    $valstddev = 0;
+                    foreach my $item (keys %{$aggr_results{$qid} || {}}) {
+                        $valstddev += $aggr_results{$qid}->{$item} * ($item - $valmean) * ($item - $valmean);
+                    }
+                    $valstddev = sqrt($valstddev / $valcount);
+                } elsif ($self->is_clustered) {
+                    $sth = $self->journal->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult2 " .
+                                                   "WHERE pollid=? AND pollqid=? AND journalid=?");
+                    $sth->execute($pollid, $qid, $self->journalid);
+                } else {
+                    $sth = $dbr->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult WHERE pollid=? AND pollqid=?");
+                    $sth->execute($pollid, $qid);
+                }
+
+                if ($sth) { # no aggregated results
+                    ($valcount, $valmean, $valstddev) = $sth->fetchrow_array;
+                }
+
+                # find median:
+                $valmedian = 0;
+                if ($valcount == 1) {
+                    $valmedian = $valmean;
+                } elsif ($valcount > 1) {
+                    my ($mid, $fetch);
+                    # fetch two mids and average if even count, else grab absolute middle
+                    $fetch = ($valcount % 2) ? 1 : 2;
+                    $mid = int(($valcount+1)/2);
+                    my $skip = $mid-1;
+
+                    if ($have_aggr_results) {
+                        $sth = undef;
+                        my @items = sort { $a <=> $b } keys %{$aggr_results{$qid} || {}};
+
+                        my @starting;
+                        my $index = 0;
+                        foreach my $item (@items) {
+                            push @starting, $index;
+                            $index += $aggr_results{$qid}->{$item};
+                        }
+                        push @starting, $index; # end-element, for safeness in accesses [$index + 1]
+                        # now we have start position (0-based) for any answer variant
+                        # we must fetch 1 or 2 elements
+                        for ($index = 0; $index < @items; $index++) {
+                            last if $starting[$index] >= $skip;
+                        }
+                        $index-- if $starting[$index] > $skip;
+                        # $item[$index] is first element, we must fetch
+
+                        my $sum = $items[$index];
+                        if ($fetch == 2) {
+                            if ($starting[$index + 1] > $skip + 1) {
+                                $sum += $items[$index];
+                            } else {
+                                $sum += $items[$index + 1];
+                            }
+                        }
+                        $valmedian = $sum / $fetch;
+
+                    } elsif ($self->is_clustered) {
+                        $sth = $self->journal->prepare("SELECT value FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=? " .
+                                             "ORDER BY value+0 LIMIT $skip,$fetch");
+                        $sth->execute($pollid, $qid, $self->journalid);
+                    } else {
+                        $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=? " .
+                                             "ORDER BY value+0 LIMIT $skip,$fetch");
+                        $sth->execute($pollid, $qid);
+                    }
+
+                    if ($sth) { # no aggregated results
+                        while (my ($v) = $sth->fetchrow_array) {
+                            $valmedian += $v;
+                        }
+                        $valmedian /= $fetch;
+                    }
+                }
+
                 my $stddev = sprintf("%.2f", $valstddev);
                 my $mean = sprintf("%.2f", $valmean);
                 $results_table .= LJ::Lang::ml('poll.scaleanswers', { 'mean' => $mean, 'median' => $valmedian, 'stddev' => $stddev });
@@ -1125,6 +1234,42 @@ sub render {
                 }
             }
 
+            my $usersvoted = 0;
+            my %itvotes;
+            my $maxitvotes = 1;
+
+            if ($have_aggr_results) {
+                $sth = undef;
+                %itvotes = %{$aggr_results{$qid} || {}};
+                $usersvoted = 0;
+                foreach my $item (keys %itvotes) {
+                    $usersvoted += $itvotes{$item};
+                }
+            } elsif ($self->is_clustered) {
+                $sth = $self->journal->prepare("SELECT value FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=?");
+                $sth->execute($pollid, $qid, $self->journalid);
+            } else {
+                $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=?");
+                $sth->execute($pollid, $qid);
+            }
+
+            if ($sth) {
+                while (my ($val) = $sth->fetchrow_array) {
+                    $usersvoted++;
+                    if ($q->type eq "check") {
+                        foreach (split(/,/,$val)) {
+                            $itvotes{$_}++;
+                        }
+                    } else {
+                        $itvotes{$val}++;
+                    }
+                }
+            }
+
+            foreach (values %itvotes) {
+                $maxitvotes = $_ if ($_ > $maxitvotes);
+            }
+
             foreach my $item (@items) {
                 # note: itid can be fake
                 my ($itid, $item) = @$item;
@@ -1136,14 +1281,17 @@ sub render {
                     $results_table .= LJ::html_check({ 'type' => $q->type, 'name' => "pollq-$qid",
                                              'value' => $itid, 'id' => "pollq-$pollid-$qid-$itid",
                                              'selected' => ($preval{$qid} =~ /\b$itid\b/) });
-                    $results_table .= " <label for='pollq-$pollid-$qid-$itid'>$item</label><br />";
+                    $results_table .= " <label for='pollq-$pollid-$qid-$itid'>$item</label><br class=\"i-potd-br\" />";
                     next;
                 }
-
+                
                 # displaying results
                 my $count = $itvotes{$itid}+0;
                 my $percent = sprintf("%.1f", (100 * $count / ($usersvoted||1)));
                 my $width = 20+int(($count/$maxitvotes)*380);
+                if ($opts{widget}) {
+                    $width = $width -250;
+                }
 
                 if ($do_table) {
                     $results_table .= "<tr valign='middle'><td align='right'>$item</td>";
@@ -1169,16 +1317,19 @@ sub render {
     }
 
     ## calc amount of participants.
-    if ($mode eq "results"){
+    if ($mode eq "results" and not $opts{widget}){
         my $sth = "";
-        if ($self->is_clustered) {
+        my $participants;
+        if ($have_aggr_results) {
+            $participants = $aggr_users || 0;
+        } elsif ($self->is_clustered) {
             $sth = $self->journal->prepare("SELECT count(DISTINCT userid) FROM pollresult2 WHERE pollid=? AND journalid=?");
             $sth->execute($pollid, $self->journalid);
         } else {
             $sth = $dbr->prepare("SELECT count(DISTINCT userid) FROM pollresult WHERE pollid=?");
             $sth->execute($pollid);
         }
-        my ($participants) = $sth->fetchrow_array;
+        ($participants) = $sth->fetchrow_array if $sth;
         $ret .= LJ::Lang::ml('poll.participants', { 'total' => $participants });
     }
     
@@ -1211,6 +1362,8 @@ sub can_vote {
     if (LJ::is_banned($remote, $self->journalid) || LJ::is_banned($remote, $self->posterid)) {
         return 0;
     }
+
+    return 0 if $remote->is_deleted or $remote->is_suspended;
 
     if ($self->is_createdate_restricted) {
         my $propval = $self->prop("createdate");
@@ -1388,6 +1541,9 @@ sub process_submission {
         return 0;
     }
 
+    # if this particular user has already voted, let them change their answer
+    my $time = $poll->get_time_user_submitted($remote);
+
     # if unique prop is on, make sure that a particular email address can only vote once
     if ($poll->is_unique) {
         # make sure their email address is validated
@@ -1397,7 +1553,6 @@ sub process_submission {
         }
 
         # if this particular user has already voted, let them change their answer
-        my $time = $poll->get_time_user_submitted($remote);
         unless ($time) {
             my $uids;
             if ($poll->is_clustered) {
@@ -1443,11 +1598,18 @@ sub process_submission {
         }
     }
 
-    # Handler needed only for 7th version of Polls.
-    my $dbh = $poll->is_clustered ? undef : LJ::get_db_writer();
+    my $dbh = $poll->is_clustered ? LJ::get_cluster_master($poll->journal) : LJ::get_db_writer();
 
     ### load all the questions
     my @qs = $poll->questions;
+
+    unless (LJ::get_lock($dbh, 'global', "poll:$pollid:$remote->{userid}")) {
+        $$error = LJ::Lang::ml('poll.error.cantlock');
+        return 0;
+        # it is not very correct, to use clustered $dbh with parameter 'global',
+        # but $pollid determines $dbh strongly, so second lock will be same DB
+        # that reason I think such code is safe
+    }
 
     my $ct = 0; # how many questions did they answer?
     foreach my $q (@qs) {
@@ -1462,6 +1624,14 @@ sub process_submission {
             if ($val < $from || $val > $to) {
                 # bogus! cheating?
                 $val = "";
+            }
+        }
+        my $prev_value;
+        if ($poll->is_clustered) {
+            my $sth = $poll->journal->prepare("SELECT value FROM pollresult2 WHERE journalid = ? AND pollid = ? AND pollqid = ? AND userid = ?");
+            $sth->execute($poll->journalid, $pollid, $qid, $remote->userid);
+            if (my $row = $sth->fetchrow_arrayref) {
+                $prev_value = $row->[0];
             }
         }
         if ($val ne "") {
@@ -1498,10 +1668,35 @@ sub process_submission {
                          undef, $pollid, $qid, $remote->userid);
             }
         }
+
+        next if $q->type eq "text"; # text questions does not have aggregated results
+        next unless $poll->is_clustered; # only clustered polls have aggrepaged results
+        my @val;
+
+        if ($prev_value) {
+            $val[0] = $prev_value if $prev_value;
+            @val = split(/,/, $prev_value) if $q->type eq "check";
+            foreach my $item (@val) {
+                $poll->journal->do("UPDATE pollresultaggregated2 SET value = value - 1 WHERE journalid=? AND pollid=? AND what=? AND value > 0",
+                                   undef, $poll->journalid, $pollid, "$qid:$item");        
+            }
+        }
+
+        @val = ();
+        $val[0] = $val if $val;
+        @val = split(/,/, $val) if $q->type eq "check";
+        foreach my $item (@val) {
+            $poll->journal->do("UPDATE pollresultaggregated2 SET value = value + 1 WHERE journalid=? AND pollid=? AND what=?",
+                               undef, $poll->journalid, $pollid, "$qid:$item");
+        }
     }
 
     ## finally, register the vote happened
     if ($poll->is_clustered) {
+        unless ($time) { # if new vote, not update of existing
+            $poll->journal->do("UPDATE pollresultaggregated2 SET value = value + 1 WHERE journalid=? AND pollid=? AND what=?",
+                               undef, $poll->journalid, $pollid, 'users');
+        }
         $poll->journal->do("REPLACE INTO pollsubmission2 (journalid, pollid, userid, datesubmit) VALUES (?, ?, ?, NOW())",
                            undef, $poll->journalid, $pollid, $remote->userid);
     } else {
@@ -1509,9 +1704,11 @@ sub process_submission {
                  undef, $pollid, $remote->userid);
     }
 
-    # if vote results are not cached, there is no need to modify cache
-    #$poll->_remove_from_memcache;
-    #delete $LJ::REQ_CACHE_POLL{ $poll->id };
+    LJ::release_lock($dbh, 'global', "poll:$pollid:$remote->{userid}");
+
+    # vote results are cached now (in new polls), so we need to modify cache
+    $poll->_remove_from_memcache;
+    delete $LJ::REQ_CACHE_POLL{ $poll->id };
 
     LJ::run_hooks('poll_log', $poll->posterid, $pollid, $remote ? $remote->userid : undef);
 
@@ -1612,7 +1809,7 @@ sub dump_poll {
     my $fh = shift || \*STDOUT;
 
     my @tables = ($self->is_clustered) ?
-        qw(poll2 pollquestion2 pollitem2 pollsubmission2 pollresult2) :
+        qw(poll2 pollquestion2 pollitem2 pollsubmission2 pollresult2 pollresultaggregated2) :
         qw(poll  pollquestion  pollitem  pollsubmission  pollresult );
     my $db = ($self->is_clustered) ? $self->journal : LJ::get_db_reader();
     my $id = $self->pollid;

@@ -4,6 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::Browse );
+use LJ::TimeUtil;
 
 sub need_res { qw( stc/browse.css stc/widgets/categorycommunities.css ) }
 
@@ -42,7 +43,7 @@ sub render_body {
                     $comm->prop('journaltitle') . "</strong></a><br />" .
                     $comm->prop('journalsubtitle') . "</p>" .
                     "</td><td class='posted' valign='top'>" .
-                    LJ::ago_text($secondsold) .
+                    LJ::TimeUtil->ago_text($secondsold) .
                     "</td></tr>\n";
 
         } else {
@@ -54,7 +55,7 @@ sub render_body {
                      $comm->prop('journaltitle') . "</strong></a><br />" .
                      $comm->prop('journalsubtitle') . "</p>" .
                      "</td><td class='posted' valign='top'>" .
-                     LJ::ago_text($secondsold) .
+                     LJ::TimeUtil->ago_text($secondsold) .
                      "</td></tr>\n";
         }
     }

@@ -53,7 +53,7 @@ sub handler
 sub get_user_info
 {
     my $POST = shift;
-    BML::reset_cookies();
+    LJ::Request->start_request();
 
     $LJ::_XFER_REMOTE_IP = $POST->{'remote_ip'};
 

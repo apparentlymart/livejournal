@@ -6,6 +6,7 @@ use LJ::Request;
 use Class::Autouse qw(
                       LJ::EventLogRecord::SessionExpired
                       );
+use LJ::TimeUtil;
 
 use constant VERSION => 1;
 
@@ -461,7 +462,10 @@ sub domain_journal {
     $host = lc($host);
 
     # don't return a domain cookie for the master domain
-    return undef if $host eq lc($LJ::DOMAIN_WEB) || $host eq lc($LJ::DOMAIN);
+    return undef if
+        $host eq lc($LJ::DOMAIN_WEB) ||
+        $host eq lc($LJ::DOMAIN) ||
+        $host eq lc($LJ::SSLDOMAIN);
 
     return undef unless
         $host =~ m!^([\w-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$!;
@@ -867,7 +871,7 @@ sub set_cookie {
     }
 
     my $cookiestr = $key . '=' . $value;
-    $cookiestr .= '; expires=' . LJ::time_to_cookie($expires) if $expires;
+    $cookiestr .= '; expires=' . LJ::TimeUtil->time_to_cookie($expires) if $expires;
     $cookiestr .= '; domain=' . $domain if $domain;
     $cookiestr .= '; path=' . $path if $path;
     $cookiestr .= '; HttpOnly' if $http_only;
@@ -878,7 +882,7 @@ sub set_cookie {
     my @labels = split(/\./, $domain);
     if ($domain && scalar @labels == 2 && ! $LJ::DEBUG{'no_extra_dot_cookie'}) {
         my $cookiestr = $key . '=' . $value;
-        $cookiestr .= '; expires=' . LJ::time_to_cookie($expires) if $expires;
+        $cookiestr .= '; expires=' . LJ::TimeUtil->time_to_cookie($expires) if $expires;
         $cookiestr .= '; domain=.' . $domain;
         $cookiestr .= '; path=' . $path if $path;
         $cookiestr .= '; HttpOnly' if $http_only;

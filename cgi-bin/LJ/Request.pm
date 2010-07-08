@@ -272,6 +272,7 @@ sub send_cookies {
 =head2 Redirects
 
     LJ::Request->redirect($LJ::SITEROOT);
+    LJ::Request->redirect_to_self;
     die unless LJ::Request->redirected;
 
 =cut
@@ -286,6 +287,16 @@ sub redirect {
     $redirected = [$code, $url];
 
     return $code;
+}
+
+sub redirect_to_self {
+    my ($class, $code) = @_;
+
+    my $uri = $class->uri;
+    my $args = $class->args;
+    $uri .= "?$args" if $args;
+
+    return $class->redirect($uri, $code);
 }
 
 sub redirected {

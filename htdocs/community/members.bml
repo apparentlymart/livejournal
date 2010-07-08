@@ -475,12 +475,9 @@ $LJ::SITEROOT
     $sth->execute($cid);
 
     while (my ($id, $user) = $sth->fetchrow_array) {
-        my $user_obj = LJ::want_user($id);
-        if ($user_obj && !$user_obj->is_suspended) {
-            $users{$id}->{'userid'} = $id;
-            $users{$id}->{'name'} = $user;
-            $users{$id}->{'member'} = 1;
-        }
+        $users{$id}->{'userid'} = $id;
+        $users{$id}->{'name'} = $user;
+        $users{$id}->{'member'} = 1;
     }
 
     my $sth = $dbr->prepare("SELECT r.targetid, r.type, u.user FROM reluser r, useridmap u " .
@@ -489,14 +486,11 @@ $LJ::SITEROOT
 
     my %count;
     while (my ($id, $type, $user) = $sth->fetchrow_array) {
-        my $user_obj = LJ::want_user($id);
-        if ($user_obj && !$user_obj->is_suspended) {
-            $users{$id}->{'userid'} = $id;
-            $users{$id}->{'name'} = $user;
-            my $key = {'A'=>'admin','P'=>'post','M'=>'moderate','N'=>'preapprove'}->{$type};
-            $users{$id}->{$key} = 1;
-            $count{$type}++;
-        }
+        $users{$id}->{'userid'} = $id;
+        $users{$id}->{'name'} = $user;
+        my $key = {'A'=>'admin','P'=>'post','M'=>'moderate','N'=>'preapprove'}->{$type};
+        $users{$id}->{$key} = 1;
+        $count{$type}++;
     }
 
     # columns of our table, excluding username

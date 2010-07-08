@@ -151,6 +151,7 @@ sub clean
         (map {$_ => 1} @{ $opts->{'remove_attribs'} }) : ();
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
     my $target = $opts->{'target'} || '';
+    my $ljrepost_allowed = ($opts->{ljrepost_allowed} && ! $opts->{'textonly'}) || 0;
 
     # cuturl or entry_url tells about context and texts address,
     # Expand or close lj-cut tag should be switched directly by special flag
@@ -337,9 +338,8 @@ sub clean
             #       text to repost
             #    </lj-repost>
             #
-            if ($tag eq "lj-repost"){
+            if ($tag eq "lj-repost" and $ljrepost_allowed){
                 next TOKEN if $opencount{$tag}; # no support for nested <lj-repost> tags
-
                 my $button = LJ::ehtml($attr->{button}) || LJ::Lang::ml("repost.default_button");
                 if ($attr->{'/'}){
                     # short <lj-repost /> form of tag
@@ -945,16 +945,16 @@ sub clean
                     $newdata .= "<a name='cutid$cutcount-end'></a>"
                 }
             }
-            elsif ($tag eq "lj-repost"){
+            elsif ($tag eq "lj-repost" and $ljrepost_allowed){
                 my $button   = LJ::ehtml($opencount{$tag}->{button}) || LJ::Lang::ml("repost.default_button");
                 my $subject  = LJ::ehtml($opencount{$tag}->{subject});
                 my $captured = substr $newdata => $opencount{$tag}->{offset};
-                
+
                 if (my $entry = LJ::Entry->new_from_url($opts->{cuturl})){
                     # !!! avoid calling any 'text' methods on $entry, 
                     #     it can produce inifinite loop of cleanhtml calls.
 
-                    $subject ||= LJ::ehtml($entry->subject_orig || LJ::Lang::ml("repost.default_subject"));
+                    $subject ||= LJ::ehtml($entry->subject_raw || LJ::Lang::ml("repost.default_subject"));
                     $captured = LJ::Lang::ml("repost.wrapper", { 
                                                 username => $entry->poster->username,
                                                 url      => $entry->url,
@@ -1453,6 +1453,7 @@ sub clean_event
         'transform_embed_wmode' => $opts->{'transform_embed_wmode'},
         'suspend_msg' => $opts->{'suspend_msg'} ? 1 : 0,
         'unsuspend_supportid' => $opts->{'unsuspend_supportid'},
+        'ljrepost_allowed' => 1,
     });
 }
 

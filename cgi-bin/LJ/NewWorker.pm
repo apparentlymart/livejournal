@@ -228,4 +228,12 @@ sub check_limits {
 #    die "Exceeded maximum ram usage: $rss greater than $memory_limit";
 }
 
+##
+## Signal handler for debugging infinite loops
+## Taken from: http://perl.apache.org/docs/1.0/guide/debug.html
+## Usage: kill -USR2 <pid>
+##
+use Carp();
+$SIG{'USR2'} = sub { Carp::confess("caught SIGUSR2!"); };
+
 1;

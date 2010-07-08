@@ -39,8 +39,8 @@ sub render_body {
     $ret .= '<tr class="CategoryRow CategoryRowFirst">';
     $ret .= '<td>';
     $ret .= '<span class="CategoryHeading">'.$opts->{'title'}.'</span>';
-    $ret .= '<span class="CategoryHeading-notify">'.$BML::ML{'subscribe_interface.notify_me'}.'</span>';
-    $ret .= '<span class="CategoryHeading-delivery">'.$BML::ML{'subscribe_interface.delivery_method'}.'</span>';
+    $ret .= '<span class="CategoryHeading-notify">'.LJ::Lang::ml('subscribe_interface.notify_me').'</span>';
+    $ret .= '<span class="CategoryHeading-delivery">'.LJ::Lang::ml('subscribe_interface.delivery_method').'</span>';
 
     unless ($self->{'printed_ntypeids_hidden'}) {
         $self->{'printed_ntypeids_hidden'} = 1;

@@ -290,7 +290,7 @@ HTML:not(IE7) .opera-filter, x:-o-prefocus { display:block; } /* opera gte 9.5 *
             color: #330066;
             }
 
-/* Styles for messagers, 
+/* Styles for messagers,
 Must be removed after implementation of Framework! */
 .b-message {
     padding: 8px;
@@ -299,14 +299,20 @@ Must be removed after implementation of Framework! */
 .b-message-suggestion {
     background: #FFE8BF;
     border: 1px solid #FF8E44;
-    } 
+    }
+
 .i-message {
     padding: 1px 8px;
-    } 
+    }
+.b-message-error,
 .i-message-error {
-    background: #FEE;
+	margin: 0 0 24px !important;
     border: 1px solid #F99;
-    }    
+    background-color: #FEE;
+    background-image: url(/img/message-error.gif);
+    background-image: -moz-linear-gradient(100% 100% 90deg, #FED4D3, #FFF2F0);
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FFF2F0), to(#FED4D3));
+    }
 
 /* Disabled block
 --------------------------- */
@@ -455,6 +461,136 @@ SUP.i-new {
 	color: #C00;
     }
 
+
+/* Popup Messages */
+.b-popup {
+	}
+.b-popup-messagebox {
+	position:absolute;
+	width:311px;
+	background:#FFF;
+	border:2px solid #8CB7DA;
+	font-size:12px;
+	z-index:9999;
+	}
+	.b-popup-messagebox .b-popup-head {
+		position:relative;
+		margin:0;
+		padding:5px;
+		border:1px solid #DBECFB;
+		border-width:1px 1px 0;
+		background:#C7E0F6;
+		font-size:15px;
+		}
+		.b-popup-messagebox .b-popup-head H4 {
+			margin:0;
+			}
+	.b-popup-messagebox .i-popup-close {
+		position:absolute;
+		top:9px;
+		right:5px;
+		width:12px;
+		height:12px;
+		background:url(/img/popup-close.gif) no-repeat 0 0;
+		cursor:pointer;
+		}
+	.b-popup-messagebox .b-popup-content {
+		margin:0;;
+		padding:5px;
+		font-size:13px;
+		}
+	.b-popup-messagebox .b-popup-footer {
+		margin:0;
+		padding:5px;
+		background:#ECF6FF;
+		text-align:center;
+		font-size:13px;
+		}
+
+/* Styles for messagers,
+Must be removed after implementation of Framework! */
+.appwidget-sitemessages {
+	position: absolute;
+	top: 100px;
+	left: 0;
+	z-index: 10;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	}
+	.appwidget-sitemessages .b-message-system {
+		padding: 0;
+		margin: 0;
+		background: none;
+		border: none;
+		font-size: 12px !important;
+		color: #000;
+		}
+	.appwidget-sitemessages .b-message-system A {
+	    font-size: 12px !important;
+	    }
+	.appwidget-managesitemessages .b-message-system {
+		position: static !important;
+		}
+		.appwidget-sitemessages .b-message-system .b-message-wrap {
+			position: relative;
+			display: block;
+			padding: 4px 25px 6px 25px;
+			margin: 0;
+			background: #C6E0F6;
+		    border: 2px solid #8AB6DA;
+			text-align: center;
+			}
+		.appwidget-sitemessages .b-message-system IMG {
+			padding: 0 !important;
+			margin: 0 5px 0 0 !important;
+			vertical-align: -2px;
+			}
+			.appwidget-sitemessages .b-message-system .ljuser IMG {
+			    margin: 0 !important;
+			    padding: 0 0 0 1px !important;
+			    }
+		.appwidget-sitemessages .b-message-system A:link,
+		.appwidget-sitemessages .b-message-system A:visited,
+		.appwidget-sitemessages .b-message-system A:hover,
+		.appwidget-sitemessages .b-message-system A:active {
+			color: #124787 !important;
+			text-decoration: underline;
+			border: 0 !important;
+			}
+    		.appwidget-sitemessages .b-message-system .ljuser A:link,
+    		.appwidget-sitemessages .b-message-system .ljuser A:visited	{
+    		    text-decoration: none;
+    		    }		
+			.appwidget-sitemessages .b-message-system .ljuser A:hover,
+    		.appwidget-sitemessages .b-message-system .ljuser A:active {
+    		    text-decoration: underline;
+    		    }
+		.appwidget-sitemessages .b-message-system I.close {
+			position: absolute;
+			top: 8px;
+			right: 8px;
+			width: 12px;
+			height: 12px;
+			background: url(/img/message-system-close.gif) no-repeat;
+			cursor: pointer;
+			font-size: 0;
+			}
+#lj_controlstrip .appwidget-sitemessages {
+	top: 44px;
+	z-index: 99999;
+	}
+#content-wrapper .appwidget-sitemessages {
+	position: static;
+	margin-top: 20px;
+	}
+	#content-wrapper .appwidget-sitemessages .b-message-system {
+	    margin: 0 0 10px;
+	    }
+	
+.scheme-lynx .appwidget-sitemessages {
+    top: 0;
+    }
 
 
 

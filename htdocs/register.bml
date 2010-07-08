@@ -56,7 +56,7 @@ body<=
      LJ::send_mail({
          'to' => $u->email_raw,
          'bcc' => $foru ? $remote->email_raw : undef,
-         'from' => $LJ::ADMIN_EMAIL,
+         'from' => $LJ::DONOTREPLY_EMAIL,
          'charset' => 'utf-8',
          'subject' => $ML{'.email.subject'},
          'body' => BML::ml('.email.body',

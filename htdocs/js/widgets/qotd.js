@@ -6,6 +6,7 @@ QotD = function(node)
 QotD.prototype =
 {
 	skip: 1,
+	ajax_params: {},
 	
 	init: function(node)
 	{
@@ -19,50 +20,49 @@ QotD.prototype =
 		if (!this.control[0][0]) { return }
 		
 		this.content_node = jQuery('.b-qotd-question', node);
-		this.current_node = jQuery('.qotd-current', node);
 		this.counter_node = jQuery('.qotd-counter', node);
 		this.total = +jQuery('.i-qotd-nav-max', node).text();
 		
-		this.domain = jQuery('#vertical_name').val() || 'homepage';
-		this.cache = [0, {
-			text: this.content_node.html(),
-			info: this.counter_node.html()
-		}];
+		
+		this.cache = new Array(this.total+1);
+		
+		this.ajax_params.domain = jQuery('#vertical_name').val() || 'homepage';
+		
+		var uselang = location.search.match(/[?&]uselang=([^&]+)/);
+		if (uselang) {
+			this.ajax_params.lang = uselang[1];
+		}
 	},
 	
 	first: function()
 	{
 		if (this.skip == this.total) { return }
 		
-		this.skip = this.total;
-		this.getQuestion();
+		this.getQuestion(this.total);
 	},
 	
 	prev: function()
 	{
 		if (this.skip == this.total) { return }
 		
-		this.skip++;
-		this.getQuestion();
+		this.getQuestion(this.skip+1);
 	},
 	
 	next: function()
 	{
 		if (this.skip == 1) { return }
 		
-		this.skip--;
-		this.getQuestion();
+		this.getQuestion(this.skip-1);
 	},
 	
 	last: function()
 	{
 		if (this.skip == 1) { return }
 		
-		this.skip = 1;
-		this.getQuestion();
+		this.getQuestion(1);
 	},
 	
-	renederControl: function()
+	renderControl: function()
 	{
 		var method = this.skip == this.total ? 'addClass' : 'removeClass';
 		this.control[0][method]('i-qotd-nav-first-dis');
@@ -71,32 +71,42 @@ QotD.prototype =
 		method = this.skip == 1 ? 'addClass' : 'removeClass';
 		this.control[2][method]('i-qotd-nav-next-dis');
 		this.control[3][method]('i-qotd-nav-last-dis');
-		
-		this.current_node.text(this.skip);
 	},
 	
-	getQuestion: function()
+	getQuestion: function(new_skip)
 	{
-		this.renederControl();
+		this.cache[this.skip] = {
+			// save DOM link for generated content, eg advertising.
+			text: this.content_node,
+			info: this.counter_node.html()
+		}
 		
-		var skip = this.skip;
-		this.cache[skip] ?
-			this.setQuestion(this.cache[skip]) :
+		this.skip = new_skip;
+		this.renderControl();
+		
+		this.cache[new_skip] ?
+			this.setQuestion(this.cache[new_skip]) :
 			jQuery.getJSON(
 				LiveJournal.getAjaxUrl('qotd'),
-				{skip: skip, domain: this.domain},
+				jQuery.extend(this.ajax_params, {skip : new_skip}),
 				function(data)
 				{
-					this.cache[skip] = data;
-					this.skip == skip && this.setQuestion(data);
+					this.skip == new_skip && this.setQuestion(data);
 				}.bind(this)
 			);
 	},
 	
 	setQuestion: function(data)
 	{
-		this.content_node.html(data.text)
-			.ljAddContextualPopup();
+		this.content_node.hide();
+		if (typeof data.text === 'string') {
+			data.text = jQuery('<div/>', {'class': 'b-qotd-question', html: data.text})
+				.insertAfter(this.content_node)
+				.ljAddContextualPopup();
+		}
+		
+		data.text.show();
+		this.content_node = data.text;
 		this.counter_node.html(data.info);
 	}
 }

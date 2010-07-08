@@ -2810,6 +2810,18 @@ CREATE TABLE pollresult2 (
 )
 EOC
 
+# aggregated results for all question - answer_variant pairs and count of participants
+# key may be: '<qid>:<itid>' or 'users'
+register_tablecreate("pollresultaggregated2", <<'EOC');
+CREATE TABLE pollresultaggregated2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  what VARCHAR(32) NOT NULL,
+  value INT SIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY (journalid,pollid,what)
+)
+EOC
+
 register_tablecreate("pollsubmission2", <<'EOC');
 CREATE TABLE pollsubmission2 (
   journalid INT UNSIGNED NOT NULL,
@@ -2865,6 +2877,17 @@ CREATE TABLE qotd (
   INDEX (time_end)
 )
 EOC
+
+register_tablecreate("qotd_imported", <<'EOC');
+CREATE TABLE qotd_imported (
+  qid           INT UNSIGNED NOT NULL,
+  remote_id     INT UNSIGNED NOT NULL,
+  provider      char(1),
+
+  PRIMARY KEY (qid, remote_id)
+)
+EOC
+
 
 register_tablecreate("jobstatus", <<'EOC');
 CREATE TABLE jobstatus (
@@ -4191,6 +4214,32 @@ CREATE TABLE eventratescounters (
   jitemid MEDIUMINT UNSIGNED NOT NULL,
   count INT(10) unsigned NOT NULL,
   PRIMARY KEY (journalid, jitemid)
+)
+EOC
+
+register_alter(sub {
+
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("eventrates", "itemid")) {
+        do_alter("eventrates",
+                 "ALTER TABLE eventrates " .
+                 "CHANGE COLUMN jitemid itemid MEDIUMINT UNSIGNED NOT NULL");
+    }
+
+    unless (column_type("eventratescounters", "itemid")) {
+        do_alter("eventratescounters",
+                 "ALTER TABLE eventratescounters " .
+                 "CHANGE COLUMN jitemid itemid MEDIUMINT UNSIGNED NOT NULL");
+    }
+});
+
+register_tablecreate("send_email_errors", <<'EOC');
+CREATE TABLE send_email_errors (
+  email VARCHAR(50) NOT NULL DEFAULT '',
+  time DATETIME DEFAULT NULL,
+  PRIMARY KEY (email)
 )
 EOC
 

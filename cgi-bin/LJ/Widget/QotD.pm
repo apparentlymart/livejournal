@@ -40,7 +40,7 @@ sub render_body {
             $ret .= qq[<i class="i-qotd-nav-first i-qotd-nav-first-dis"></i><i class="i-qotd-nav-prev i-qotd-nav-prev-dis"></i>];
         }
         $ret .= qq[<i class="i-qotd-nav-max">$max</i>];
-        $ret .= qq[<span class="qotd-counter">$month_short, $day ($num/$total)</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
+        $ret .= qq[<span class="qotd-counter">$month_short, $day] . ($total > 1 ? "($num/$total)" : '') . qq[</span><i class="i-qotd-nav-next i-qotd-nav-next-dis"></i><i class="i-qotd-nav-last i-qotd-nav-last-dis"></i></p>];
     }
 
     $ret .= '<div class="b-qotd-question">';
@@ -107,6 +107,7 @@ sub qotd_display_embed {
             my $d = $class->_get_question_data($q, \%opts);
             $ret .= "<p>$d->{text}</p><p style='font-size: 0.8em;'>$d->{from_text}$d->{between_text}$d->{extra_text}</p>";
             $ret .= "<p>$d->{answer_link} $d->{view_answers_link}$d->{impression_img}</p>";
+            #$ret .= ": $d->{tracking_text} : ";
         }
         $ret .= "</div>";
     }
@@ -146,7 +147,7 @@ sub qotd_display {
         foreach my $q (@$questions) {
             my $d = $class->_get_question_data($q, \%opts);
             my $subject = $d->{subject} || $q->{subject};
-            my $extra_text = $q->{extra_text}
+            my $extra_text = ($q->{extra_text} and not $opts{no_extra_text})
                                 ? "<p>$q->{extra_text}</p>"
                                 : "";
     
@@ -306,6 +307,7 @@ sub _get_question_data {
         answers_url     => $class->answers_url($q, $opts),
         impression_img  => $impression_img,
         date            => $date,
+        tracking_text   => LJ::run_hook("qotd_tracking_text", $q),
     };
 }
 

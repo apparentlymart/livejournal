@@ -20,7 +20,7 @@ body<=
     LJ::Widget->handle_post(\%POST, qw(AddSiteMessages));
     
     # site messages preview
-    $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
+    $ret .= "<div style='float: right; width: 400px;'>";
     $ret .= LJ::Widget::SiteMessages->render( all => 1 ) . "</div>";
     
     # add message form

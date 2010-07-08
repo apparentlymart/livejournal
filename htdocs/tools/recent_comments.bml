@@ -4,6 +4,8 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw(%GET %POST);
     my $ret;
     my %LJ_cmtinfo;
@@ -162,7 +164,7 @@ body<=
         $ret .= "<tr valign='top' id='ljcmtbar$talkid'><td style='width: 150px; line-height: 1.5em; border-top: 1px solid #999; background-color: $bgcolor' id='cmtbar$talkid'>";
          $ret .= (LJ::isu($pu) ? LJ::ljuser($pu) : "Anonymous") . "<br />";
 
-        $ret .= LJ::ago_text($now - $r->{datepostunix}) . "<br />";
+        $ret .= LJ::TimeUtil->ago_text($now - $r->{datepostunix}) . "<br />";
         $ret .= "<div id='state$talkid'>$state</div>" if $r->{state} ne "D";
 
         unless ($r->{state} eq "D")
@@ -256,7 +258,7 @@ body<=
             my $logurl = $ju->journal_base . "/$lrow->{ditemid}.html";
             my $talkurl = "$logurl?thread=$talkid\#t$talkid";
 
-            my $hr_ago = LJ::ago_text($now - $r->{'posttime'});
+            my $hr_ago = LJ::TimeUtil->ago_text($now - $r->{'posttime'});
             my $subject;
             if (defined $lrow->{ditemid}) {
                 $hr_ago = "<a href='$talkurl'>$hr_ago</a>";

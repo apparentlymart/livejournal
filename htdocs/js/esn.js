@@ -1,10 +1,5 @@
 var ESN = new Object();
 
-LiveJournal.register_hook("page_load", function () {
-  ESN.initCheckAllBtns();
-  ESN.initTrackBtns();
-});
-
 // When page loads, set up "check all" checkboxes
 ESN.initCheckAllBtns = function () {
   var ntids  = $("ntypeids");
@@ -248,7 +243,6 @@ ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
                     while (parentBtn = ESN.getThreadParentBtn(parent_dtalkid)) {
                         parent_dtalkid = parentBtn.getAttribute("lj_dtalkid");
                         if (! parent_dtalkid) {
-                            log("could not find parent_dtalkid");
                             break;
                         }
 
@@ -282,7 +276,6 @@ ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
 ESN.getThreadParentBtn = function (dtalkid) {
     var cmtInfo = LJ_cmtinfo[dtalkid + ""];
     if (! cmtInfo) {
-        log("no comment info");
         return null;
     }
 
@@ -297,13 +290,11 @@ ESN.getThreadParentBtn = function (dtalkid) {
 ESN.updateThreadIcons = function (dtalkid, tracking) {
     var btn = $("lj_track_btn_" + dtalkid);
     if (! btn) {
-        log("no button");
         return;
     }
 
     var cmtInfo = LJ_cmtinfo[dtalkid + ""];
     if (! cmtInfo) {
-        log("no comment info");
         return;
     }
 
@@ -356,7 +347,11 @@ ESN.updateThreadIcons = function (dtalkid, tracking) {
     btn.src = Site.imgprefix + uri;
 };
 
-jQuery(function($){
+jQuery(function($)
+{
+	ESN.initCheckAllBtns();
+	ESN.initTrackBtns();
+	
 	$('#settings_form').delegate('a.delete-group', 'click', function(e)
 	{
 		var group = this.href.match('&delete_group=(.*?)&')[1];

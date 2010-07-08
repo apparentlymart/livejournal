@@ -4,6 +4,8 @@
 use strict;
 package LJ::S2;
 
+use LJ::TimeUtil;
+
 sub EntryPage
 {
     my ($u, $remote, $opts) = @_;
@@ -51,14 +53,12 @@ sub EntryPage
 
     # quickreply js libs
     LJ::need_res(qw(
-                    js/core.js
-                    js/dom.js
+                    js/basic.js
                     js/json.js
                     js/template.js
                     js/ippu.js
                     js/lj_ippu.js
                     js/userpicselect.js
-                    js/httpreq.js
                     js/hourglass.js
                     js/inputcomplete.js
                     stc/ups.css
@@ -68,9 +68,7 @@ sub EntryPage
                     )) if ! $LJ::DISABLED{userpicselect} && $remote && $remote->get_cap('userpicselect');
 
     LJ::need_res(qw(
-                    js/x_core.js
                     js/quickreply.js
-                    js/browserdetect.js
                     js/thread_expander.js
                     ));
 
@@ -303,10 +301,11 @@ sub EntryPage
                 my $has_threads = scalar @{$i->{'replies'}};
                 my $poster = $i->{'poster'} ? $i->{'poster'}{'username'} : "";
                 my @child_ids = map { $_->{'talkid'} } @{$i->{'replies'}};
+                my $parent = $cmt->parent;
                 $cmtinfo->{$i->{talkid}} = {
                     rc     => \@child_ids,
                     u      => $poster,
-                    parent => $cmt->parent ? $cmt->parent->dtalkid : undef,
+                    parent => $parent && $parent->valid ? $parent->dtalkid : undef,
                     full   => ($i->{full}),
                 };
                 $self->($self, $i->{'replies'}) if $has_threads;
@@ -370,6 +369,8 @@ sub EntryPage_entry
 
     unless ($entry || $uri =~ /(\d+)\.html/) {
         $opts->{'handler_return'} = 404;
+        LJ::Request->pnotes ('error' => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return;
     }
 
@@ -377,6 +378,8 @@ sub EntryPage_entry
 
     unless ($entry->correct_anum) {
         $opts->{'handler_return'} = 404;
+        LJ::Request->pnotes ('error' => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return;
     }
 
@@ -402,6 +405,8 @@ sub EntryPage_entry
     unless ($entry->visible_to($remote, $canview)) {
         if ($remote) {
             $opts->{'handler_return'} = 403;
+            LJ::Request->pnotes ('error' => 'private');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
             return;
         } else {
             my $host = LJ::Request->header_in("Host");
@@ -415,11 +420,15 @@ sub EntryPage_entry
 
     if (($pu && $pu->{'statusvis'} eq 'S') && !$viewsome) {
         $opts->{'suspendeduser'} = 1;
+        LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return;
     }
 
     if ($entry && $entry->is_suspended_for($remote)) {
         $opts->{'suspendedentry'} = 1;
+        LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return;
     }
 
@@ -489,8 +498,8 @@ sub EntryPage_entry
     my $s2entry = Entry($u, {
         'subject' => $subject,
         'text' => $event,
-        'dateparts' => LJ::alldatepart_s2($entry->eventtime_mysql),
-        'system_dateparts' => LJ::alldatepart_s2($entry->logtime_mysql),
+        'dateparts' => LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql),
+        'system_dateparts' => LJ::TimeUtil->alldatepart_s2($entry->logtime_mysql),
         'security' => $entry->security,
         'allowmask' => $entry->allowmask,
         'props' => $entry->props,

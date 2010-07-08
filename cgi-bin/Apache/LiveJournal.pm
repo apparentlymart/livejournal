@@ -38,6 +38,8 @@ use Class::Autouse qw(
                       LJ::URI
                       );
 
+use LJ::TimeUtil;
+
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
 
@@ -86,7 +88,7 @@ my @req_hosts;  # client IP, and/or all proxies, real or claimed
 sub handler
 {
     my $class = ();
-    my $r     = shift; # 
+    my $r     = shift; #
 
     LJ::Request->free();
     LJ::Request->init($r);
@@ -185,9 +187,9 @@ sub redir {
     if (@_ == 3){
         require Carp;
         Carp::cluck("get 3 args instead of 2");
-        shift @_; # assumes the first arg is a Apache->request obj. 
+        shift @_; # assumes the first arg is a Apache->request obj.
     }
-    
+
     my ($url, $code) = @_;
     if ($LJ::DEBUG{'log_redirects'}) {
         LJ::Request->log_error("redirect to $url from: " . join(", ", caller(0)));
@@ -217,6 +219,9 @@ sub totally_down_content
         LJ::Request->print("<!-- $LJ::SERVER_DOWN_MESSAGE -->");
         return LJ::Request::OK;
     }
+
+    LJ::Request->pnotes ('error' => 'e500');
+    LJ::Request->pnotes ('remote' => LJ::get_remote());
 
     # set to 500 so people don't cache this error message
     my $body = "<h1>$LJ::SERVER_DOWN_SUBJECT</h1>$LJ::SERVER_DOWN_MESSAGE<!-- " . ("x" x 1024) . " -->";
@@ -260,19 +265,26 @@ sub trans
         LJ::Request->init($r);
     }
 
-    return LJ::Request::DECLINED 
+    return LJ::Request::DECLINED
         if ! LJ::Request->is_main || LJ::Request->method_number == LJ::Request->M_OPTIONS;  # don't deal with subrequests or OPTIONS
 
     my $uri  = LJ::Request->uri;
+
     my $args = LJ::Request->args;
     my $args_wq = $args ? "?$args" : "";
     my $host = LJ::Request->header_in("Host");
     my $hostport = ($host =~ s/:\d+$//) ? $& : "";
     $host =~ s/\.$//; ## 'www.livejournal.com.' is a valid DNS hostname
 
+    $host = $LJ::DOMAIN_WEB unless LJ::Request::request->{r}->is_initial_req;
+
     # disable TRACE (so scripts on non-LJ domains can't invoke
     # a trace to get the LJ cookies in the echo)
-    return LJ::Request::FORBIDDEN if LJ::Request->method_number == LJ::Request::M_TRACE;
+    if (LJ::Request->method_number == LJ::Request::M_TRACE) {
+        LJ::Request->pnotes ('error' => 'baduser');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        return LJ::Request::FORBIDDEN;
+    }
 
     # If the configuration says to log statistics and GTop is available, mark
     # values before the request runs so it can be turned into a delta later
@@ -319,7 +331,10 @@ sub trans
                   return LJ::Request::OK;
               }
           }
-    } else { # not is_initial_req
+    } else {
+        # on error we do internal redirect to error page
+        LJ::Request->pnotes ('error' => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         if (LJ::Request->status == 404) {
             my $fn = $LJ::PAGE_404 || "404-error.html";
             return $bml_handler->("$LJ::HOME/htdocs/" . $fn);
@@ -553,6 +568,10 @@ sub trans
             # works if journalid exists.
             if (my $u = LJ::load_user($opts->{user})) {
                 LJ::Request->notes("journalid" => $u->{userid});
+            } else {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
             }
 
             my $file = LJ::run_hook("profile_bml_file");
@@ -614,8 +633,12 @@ sub trans
         }
 
         if ($uuri =~ m#^/(\d+)\.html$#) { #
-            my $u = LJ::load_user($user)
-                or return LJ::Request::NOT_FOUND;
+            my $u = LJ::load_user($user);
+            unless ($u) {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
 
             $ljentry = LJ::Entry->new($u, ditemid => $1);
             if ($GET{'mode'} eq "reply" || $GET{'replyto'} || $GET{'edit'}) {
@@ -688,6 +711,8 @@ sub trans
                 return redir(LJ::journal_base($user) . "$uri/") unless $pe;
                 if ($pe eq '/') {
                     # do a 404 for now
+                    LJ::request->pnotes ('error' => 'e404');
+                    LJ::Request->pnotes ('remote' => LJ::get_remote());
                     return LJ::Request::NOT_FOUND;
                 } else {
                     # filtered lastn page
@@ -703,8 +728,12 @@ sub trans
         } else {
             my $key = $uuri;
             $key =~ s!^/!!;
-            my $u = LJ::load_user($user)
-                or return LJ::Request::NOT_FOUND;
+            my $u = LJ::load_user($user);
+            unless ($u) {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
 
             my ($type, $nodeid) =
                 $LJ::DISABLED{'named_permalinks'} ? () :
@@ -721,7 +750,11 @@ sub trans
 
         }
 
-        return undef unless defined $mode;
+        unless (defined $mode) {
+            LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            return LJ::Request::NOT_FOUND;
+        }
 
         # Now that we know ourselves to be at a sensible URI, redirect renamed
         # journals. This ensures redirects work sensibly for all valid paths
@@ -735,7 +768,7 @@ sub trans
                 return redir($redirect_url, 301);
             }
         }
-        
+
         return $journal_view->({
             'vhost' => $vhost,
             'mode' => $mode,
@@ -798,6 +831,8 @@ sub trans
                 my $redir = LJ::run_hook("journal_subdomain_redirect_url",
                                          $host, $uri);
                 return redir($redir) if $redir;
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
                 return LJ::Request::NOT_FOUND;
             }
             ($user, $uri) = ($1, $2);
@@ -819,16 +854,23 @@ sub trans
             LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Restful::handler);
             return LJ::Request::OK;
         
+            LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            return LJ::Request::NOT_FOUND;
         } elsif ($func) {
             my $code = {
                 'userpics' => \&userpic_trans,
                 'files' => \&files_trans,
             };
             return $code->{$func}->(LJ::Request->r) if $code->{$func};
+            LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;  # bogus ljconfig
         } else {
             my $view = $determine_view->($user, "users", $uri);
             return $view if defined $view;
+            LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;
         }
     }
@@ -849,10 +891,16 @@ sub trans
             SELECT u.user FROM useridmap u, domains d WHERE
             u.userid=d.userid AND d.domain=$checkhost
         });
-        return LJ::Request::NOT_FOUND unless $user;
+        unless ($user) {
+            LJ::Request->pnotes ('error' => 'baduser');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            return LJ::Request::NOT_FOUND;
+        }
 
         my $view = $determine_view->($user, "other:$host$hostport", $uri);
         return $view if defined $view;
+        LJ::Request->pnotes ('error' => 'baduser');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return LJ::Request::NOT_FOUND;
     }
 
@@ -885,8 +933,12 @@ sub trans
         if ($LJ::ONLY_USER_VHOSTS && ! $LJ::DEBUG{'user_vhosts_no_old_redirect'}) {
             # FIXME: skip two redirects and send them right to __setdomsess with the right
             #        cookie-to-be-set arguments.  below is the easy/slow route.
-            my $u = LJ::load_user($cuser)
-                or return LJ::Request::NOT_FOUND;
+            my $u = LJ::load_user($cuser);
+            unless ($u) {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
             my $base = $u->journal_base;
             return redir("$base$srest$args_wq", correct_url_redirect_code());
         }
@@ -916,7 +968,11 @@ sub trans
         my $int = $1 || "flat";
         LJ::Request->handler("perl-script");
         if ($int eq "fotobilder") {
-            return LJ::Request::FORBIDDEN unless $LJ::FOTOBILDER_IP{LJ::Request->remote_ip};
+            unless ($LJ::FOTOBILDER_IP{LJ::Request->remote_ip}) {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::FORBIDDEN;
+            }
             LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return LJ::Request::OK
         }
@@ -931,6 +987,8 @@ sub trans
             LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::S2::handler);
             return LJ::Request::OK
         }
+        LJ::Request->pnotes ('error' => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
         return LJ::Request::NOT_FOUND;
     }
 
@@ -977,7 +1035,11 @@ sub trans
         return redir("$LJ::SITEROOT/reject.bml?$1");
     }
 
-    return LJ::Request::FORBIDDEN if $uri =~ m!^/userpics!;
+    if ($uri =~ m!^/userpics!) {
+        LJ::Request->pnotes ('error' => 'baduser');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        return LJ::Request::FORBIDDEN;
+    }
 
     # avoid the fakeapache library having to deal with the <Files ~ *.bml> stuff
     # in the modperl_startup.pl http_conf
@@ -990,14 +1052,20 @@ sub trans
     }
 
     # emulate DirectoryIndex directive
-    if ($host =~ m'^www' and 
+    if ($host =~ m'^www' and
         not defined LJ::Request->filename  # it seems that under Apache v2 'filename' method maps to files only
                                            # and for directories it returns undef.
     ){
         # maps uri to dir
         my $uri = LJ::Request->uri;
-        return LJ::Request::NOT_FOUND if $uri =~ /\.\./; # forbids ANY .. in uri
         
+        ## forbids ANY .. in uri
+        if ($uri =~ /\.\./) {
+            LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            return LJ::Request::NOT_FOUND;
+        }
+
         if ($uri and -d "$ENV{LJHOME}/htdocs/" . $uri){
             unless ($uri =~ /\/$/) {
                 return redir("$LJ::SITEROOT$uri/");
@@ -1009,7 +1077,7 @@ sub trans
             if (-e $bml_file) {
                 LJ::Request->uri($new_uri);
                 return $bml_handler->($bml_file);
-            } 
+            }
 
             # index.html
             my $html_file = "$ENV{LJHOME}/htdocs/" . $uri . "index.html";
@@ -1018,12 +1086,15 @@ sub trans
             }
         }
     }
+    LJ::Request->pnotes ('error' => 'e404');
+    LJ::Request->pnotes ('remote' => LJ::get_remote());
     return LJ::Request::DECLINED
 }
 
 sub userpic_trans
 {
 
+    LJ::Request->pnotes (error => 'e404') unless LJ::Request->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
     return LJ::Request::NOT_FOUND unless LJ::Request->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
     my ($picid, $userid) = ($1, $2);
     LJ::Request->notes("codepath" => "img.userpic");
@@ -1102,7 +1173,7 @@ sub userpic_content
         LJ::Request->content_type($mime);
         LJ::Request->header_out("Content-length", $size+0);
         LJ::Request->header_out("Cache-Control", "no-transform");
-        LJ::Request->header_out("Last-Modified", LJ::time_to_http($lastmod));
+        LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http($lastmod));
         LJ::Request->send_http_header();
     };
 
@@ -1139,7 +1210,11 @@ sub userpic_content
 
             my $paths = LJ::MemCache::get($memkey);
             unless ($paths) {
-                my @paths = LJ::mogclient()->get_paths( $key, { noverify => 1, zone => $zone });
+                ## connect to storage
+                my $mogclient = LJ::mogclient();
+                return LJ::Request::NOT_FOUND unless $mogclient;
+
+                my @paths = $mogclient->get_paths($key, { noverify => 1, zone => $zone });
                 $paths = \@paths;
                 LJ::MemCache::add($memkey, $paths, $cache_for) if @paths;
             }
@@ -1223,7 +1298,11 @@ sub userpic_content
 
         unless ($data) {
             my $dbb = LJ::get_cluster_reader($u);
-            return LJ::Request::SERVER_ERROR unless $dbb;
+            unless ($dbb) {
+                LJ::Request->pnotes ('error' => 'e500');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::SERVER_ERROR;
+            }
             $data = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
                                           "userid=$pic->{'userid'} AND picid=$picid");
         }
@@ -1290,7 +1369,7 @@ sub files_handler {
             LJ::Request->content_type ($result->{mime_type});
             LJ::Request->header_out("Content-length", $size);
             LJ::Request->header_out("Cache-Control", "no-transform");
-            LJ::Request->header_out("Last-Modified", LJ::time_to_http ($result->{change_time}));
+            LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http ($result->{change_time}));
             LJ::Request->send_http_header();
         };
         $send_headers->();
@@ -1328,6 +1407,8 @@ sub journal_content
     if ($RQ{'mode'} eq "robots_txt")
     {
         my $u = LJ::load_user($RQ{'user'});
+
+        LJ::Request->pnotes (error => 'baduser') unless $u;
         return LJ::Request::NOT_FOUND unless $u;
 
         $u->preload_props("opt_blockrobots", "adult_content", "admin_content_flag");
@@ -1364,12 +1445,13 @@ sub journal_content
 
     # check for faked cookies here, since this is pretty central.
     if ($criterr) {
+        LJ::Request->pnotes (error => 'e500');
         LJ::Request->status_line("500 Invalid Cookies");
         LJ::Request->content_type("text/html");
         # reset all cookies
         foreach my $dom (@LJ::COOKIE_DOMAIN_RESET) {
             my $cookiestr = 'ljsession=';
-            $cookiestr .= '; expires=' . LJ::time_to_cookie(1);
+            $cookiestr .= '; expires=' . LJ::TimeUtil->time_to_cookie(1);
             $cookiestr .= $dom ? "; domain=$dom" : '';
             $cookiestr .= '; path=/; HttpOnly';
             LJ::Request->request->err_headers_out->add('Set-Cookie' => $cookiestr);
@@ -1412,7 +1494,14 @@ sub journal_content
     LJ::run_hooks("after_journal_content_created", $opts, \$html);
 
     return redir($opts->{'redir'}) if $opts->{'redir'};
-    return $opts->{'handler_return'} if defined $opts->{'handler_return'};
+    
+    if (defined $opts->{'handler_return'}) {
+        if ($opts->{'handler_return'} =~ /^(\d+)/) {
+            return $1;
+        } else {
+            return LJ::Request::DECLINED;
+        }
+    }
 
     # if LJ::make_journal() indicated it can't handle the request:
     if ($handle_with_bml) {
@@ -1464,6 +1553,7 @@ sub journal_content
     {
         # No special information to give to the user, so just let
         # Apache handle the 404
+        LJ::Request->pnotes (error => 'e404');
         return LJ::Request::NOT_FOUND;
     }
     elsif ($opts->{'baduser'})
@@ -1471,18 +1561,24 @@ sub journal_content
         $status = "404 Unknown User";
         $html = "<h1>Unknown User</h1><p>There is no user <b>$user</b> at <a href='$LJ::SITEROOT'>$LJ::SITENAME.</a></p>";
         $generate_iejunk = 1;
+        LJ::Request->pnotes ('error'  => 'baduser' );
+        return LJ::Request::NOT_FOUND;
     }
     elsif ($opts->{'badfriendgroup'})
     {
         # give a real 404 to the journal owner
         if ($remote && $remote->{'user'} eq $user) {
+            LJ::Request->pnotes ('error' => 'e404');
             $status = "404 Friend group does not exist";
             $html = "<h1>Not Found</h1>" .
                     "<p>The friend group you are trying to access does not exist.</p>";
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            return LJ::Request::NOT_FOUND;
 
         # otherwise be vague with a 403
         } else {
             # send back a 403 and don't reveal if the group existed or not
+            LJ::Request->pnotes ('error' => 'e404');
             $status = "403 Friend group does not exist, or is not public";
             $html = "<h1>Denied</h1>" .
                     "<p>Sorry, the friend group you are trying to access does not exist " .
@@ -1491,36 +1587,50 @@ sub journal_content
             $html .= "<p>You're not logged in.  If you're the owner of this journal, " .
                      "<a href='$LJ::SITEROOT/login.bml'>log in</a> and try again.</p>\n"
                          unless $remote;
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            return LJ::Request::FORBIDDEN;
         }
 
         $generate_iejunk = 1;
 
     } elsif ($opts->{'suspendeduser'}) {
+        LJ::Request->pnotes ('error' => 'suspended');
         $status = "403 User suspended";
         $html = "<h1>Suspended User</h1>" .
                 "<p>The content at this URL is from a suspended user.</p>";
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        return LJ::Request::FORBIDDEN;
 
         $generate_iejunk = 1;
 
     } elsif ($opts->{'suspendedentry'}) {
+        LJ::Request->pnotes ('error' => 'suspended');
         $status = "403 Entry suspended";
         $html = "<h1>Suspended Entry</h1>" .
                 "<p>The entry at this URL is suspended.  You cannot reply to it.</p>";
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        return LJ::Request::FORBIDDEN;
 
         $generate_iejunk = 1;
 
     } elsif ($opts->{'readonlyremote'} || $opts->{'readonlyjournal'}) {
+        LJ::Request->pnotes ('error' => 'readonly');
         $status = "403 Read-only user";
         $html = "<h1>Read-Only User</h1>";
         $html .= $opts->{'readonlyremote'} ? "<p>You are read-only.  You cannot post comments.</p>" : "<p>This journal is read-only.  You cannot comment in it.</p>";
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        return LJ::Request::FORBIDDEN;
 
         $generate_iejunk = 1;
     }
 
     unless ($html) {
+        LJ::Request->pnotes ('error' => 'e500');
         $status = "500 Bad Template";
         $html = "<h1>Error</h1><p>User <b>$user</b> has messed up their journal template definition.</p>";
         $generate_iejunk = 1;
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        return LJ::Request::SERVER_ERROR;
     }
 
     LJ::Request->status_line($status);
@@ -1839,13 +1949,17 @@ sub xmlrpc_method {
             ->faultcode(202);
     }
     my $error = 0;
-    if (ref $req eq "HASH") {
-        # get rid of the UTF8 flag in scalars
-        while (my ($k, $v) = each %$req) {
-            $req->{$k} = Encode::encode_utf8($v) if Encode::is_utf8($v);
-        }
-        $req->{'props'}->{'interface'} = "xml-rpc";
+
+    ## All our functions take signle hashref as an argument.
+    ## Moreover, we use $req->{'props'} for our tracking purposes
+    $req = {} unless ref $req eq "HASH"; 
+
+    # get rid of the UTF8 flag in scalars
+    while (my ($k, $v) = each %$req) {
+        $req->{$k} = Encode::encode_utf8($v) if Encode::is_utf8($v);
     }
+    $req->{'props'}->{'interface'} = "xml-rpc";
+    
     my $res = LJ::Protocol::do_request($method, $req, \$error);
     if ($error) {
         die SOAP::Fault
@@ -1901,7 +2015,11 @@ sub can { 1 }
 sub AUTOLOAD {
     my $method = $AUTOLOAD;
     $method =~ s/^.*:://;
-    LJ::Protocol::xmlrpc_method($method, @_);
+    ## Without eval/warn/die there will be no error message in our logs,
+    ## since XMLRPC::Transport::HTTP::Apache will send the error to client.
+    my $res = eval { LJ::Protocol::xmlrpc_method($method, @_) };
+    if ($@) { warn "LJ::XMLRPC::$method died: $@"; die $@; }
+    return $res;
 }
 
 1;

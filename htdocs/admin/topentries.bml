@@ -4,7 +4,7 @@ body<=
 {
     # this is for viewing the properties set on a particular entry
     use strict;
-    use vars qw(%POST);
+    use vars qw(%POST %GET);
 
     use LJ::Widget::TopEntries;
     use LJ::TopEntries;
@@ -12,32 +12,79 @@ body<=
     LJ::need_res('stc/framework/modules.css');
 
     my $remote = LJ::get_remote();
+    my $domain = $POST{domain} || $GET{domain} || 'hmp_ontd'; # widgets domain
 
+    ## Access control
     return LJ::error_list("Check your privs")
-        unless LJ::check_priv($remote, "admin", "topentries") || $LJ::IS_DEV_SERVER;
+        unless LJ::check_priv($remote, "siteadmin", "topentries") || $LJ::IS_DEV_SERVER;
 
-    my $journal = LJ::load_user('ohnotheydidnt');
+    ## load actual data
+    my $top_entries = LJ::TopEntries->new(domain => $domain);
 
-    my $top_entries = LJ::TopEntries->new(journal => $journal);
-
-    if ($GET{url}) {
-        my $entry = LJ::Entry->new_from_url($GET{url});
+    ## Add new entry
+    if ($POST{url}) {
+        my $entry = LJ::Entry->new_from_url($POST{url});
         unless ($entry && $entry->valid) {
             return LJ::error_list("$POST{url} is not a valid entry URL.");
         }
-        $top_entries->add_entry(entry => $entry);
-    } elsif (my @keys = grep { /^delete-(\d+:\d+)$/ } keys %GET) {
+        my $ret_code = $top_entries->add_entry(entry => $entry, 
+                                               tags => $POST{tags}, 
+                                               vertical_name => $POST{vertical_name},
+                                               vertical_uri  => $POST{vertical_uri},
+                                               );
+        return LJ::error_list($ret_code) if $ret_code;
+    }
+
+    ## remove
+    if (my @keys = grep { /^delete-(\d+:\d+)$/ } keys %POST) {
         foreach my $key (@keys) {
             $top_entries->delete_entry(key => $key);
         }
-    } elsif ($GET{min_entries}) {
-        $top_entries->min_entries($GET{min_entries});
-    } elsif ($GET{max_entries}) {
-        $top_entries->max_entries($GET{max_entries});
-    } else {
-        my $ret = '<div class="canyon">'."\n".'<div class="canyon-side">'."\n".LJ::Widget::TopEntries->render(journal => $journal).'</div>'."\n";
+    }
 
-        $ret .= '<div class="canyon-section">'."\n".'<form method="GET">'."\n";
+    ## 
+    if ($POST{min_entries}) {
+        $top_entries->min_entries($POST{min_entries});
+    }
+
+    ## 
+    if ($POST{max_entries}) {
+        $top_entries->max_entries($POST{max_entries});
+    }
+
+    ## 
+    if ($POST{remove_after}) {
+        $top_entries->remove_after($POST{remove_after});
+    }
+    
+    if (%POST) {
+        return BML::redirect("$LJ::SITEROOT/admin/topentries.bml?domain=$domain")
+    }
+
+    ## Widgets selector
+    my $selector = qq|<select name="domain" onchange="location.search='domain='+jQuery(this).val()">|
+                    . join("\r\n" => 
+                        map { 
+                            my $name = LJ::TopEntries->domain2name($_);
+                            my $selected = $domain eq $_ ? " selected" : "";
+                            qq|<option value="$_"$selected>$name</option>|;
+                        } LJ::TopEntries->domains
+                     )
+                    . "</select>";
+    
+    ## Page
+    my $ret = qq|
+        <div class="canyon">
+            <div class="canyon-side"> | . 
+                LJ::Widget::TopEntries->render(domain => $domain) . qq|
+            </div>
+            <div class="canyon-section">
+                <form method="GET">
+                    Select widget: $selector <input type="submit" value="go">
+                </form>
+                <form method="POST">
+                <input type="hidden" name="domain" value="$domain">
+                |;
 
 # Buttons 'Add' and 'Store' is only to submit forms data.
 # If any of 'url' or (min|max)_entries is not empty, it
@@ -45,37 +92,44 @@ body<=
 #
 # 'delete-n:n' button will remove entry 'n:n' from the list.
 
-        $ret .= "<p>Enter URL for adding featured post:<br />";
-        $ret .= LJ::html_text({name => 'url', maxlength => '100', size => '50', value => $GET{url}});
-        $ret .= " <button type='submit'>Add</button></p>\n";
+    $ret .= qq|
+        <p>Enter URL for adding featured post:<br />
+        <table border="0">
+            <tr><td>URL: </td><td>| . LJ::html_text({name => 'url', maxlength => '100', size => '50', value => $POST{url}}) . qq|</td></tr>
+            <tr><td>Vertical Name: </td><td><input type="text" name="vertical_name"></td></tr>
+            <tr><td>Vertical URI: </td><td><input type="text" name="vertical_uri"></td></tr>
+            <tr><td>Tags: </td><td><input type="text" name="tags" size="45"><button type='submit'>Add</button></td></tr>
+        </table>
+        </p><br />|;
 
-        $ret .= '<table><tr><td style="width:27.2em">Number of shown entries: ';
-        $ret .= LJ::html_text({name => 'max_entries', maxlength => '1', size => '1', value => $top_entries->max_entries()});
-        $ret .= '</td><td style="vertical-align:middle;" rowspan="2"><button type="submit">Store</button></td></tr>'."\n";
+    $ret .= '<table><tr><td style="width:27.2em">Number of shown entries: ';
+    $ret .= LJ::html_text({name => 'max_entries', maxlength => '1', size => '1', value => $top_entries->max_entries()});
+    $ret .= '</td><td style="vertical-align:middle;" rowspan="2"><button type="submit">Store</button></td></tr>'."\n";
 
-        $ret .= "<tr><td>Number of entries, that can not be deleted: ";
-        $ret .= LJ::html_text({name => 'min_entries', maxlength => '1', size => '1', value => $top_entries->min_entries()});
-        $ret .= "</td></tr>\n";
+    $ret .= "<tr><td>Number of entries, that can not be deleted: ";
+    $ret .= LJ::html_text({name => 'min_entries', maxlength => '1', size => '1', value => $top_entries->min_entries()});
+    $ret .= "</td></tr>\n";
 
-        $ret .= '';
-        $ret .= "</table>\n";
+    $ret .= "<tr><td>Remove post from widget after: ";
+    $ret .= LJ::html_text({name => 'remove_after', maxlength => '2', size => '2', value => $top_entries->remove_after()});
+    $ret .= "</td></tr>\n";
 
-        $ret .= "<h3>Added Posts</h3><ul>";
-        foreach my $post ($top_entries->get_featured_posts(raw => 1)) {
-            $ret .= '<li><a href="'.$post->{url}.'">';
-            my $subj = $post->{subj};
-            if ($subj eq '') {$ret .= '(no subject)';} else {$ret .= $subj;}
-            $ret .= '</a> ';
-            $ret .= '<button type="submit" name="delete-'.$post->{"key"}.'" value="1">Remove post from widget</button></li>';
-        }
-        $ret .= "</ul>\n";
+    $ret .= '';
+    $ret .= "</table><br />\n";
 
-        $ret .= "</form>\n</div>\n</div>";
-
-        return $ret;
+    $ret .= "<h3>Added Posts</h3><ul>";
+    foreach my $post ($top_entries->get_featured_posts(raw => 1)) {
+        $ret .= '<li><a href="'.$post->{url}.'">';
+        my $subj = $post->{subj};
+        if ($subj eq '') {$ret .= '(no subject)';} else {$ret .= $subj;}
+        $ret .= '</a> ';
+        $ret .= '<button type="submit" name="delete-'.$post->{"key"}.'" value="1">Remove post</button></li>';
     }
+    $ret .= "</ul>\n";
 
-    return BML::redirect("$LJ::SITEROOT/admin/topentries.bml")
+    $ret .= "</form>\n</div>\n</div>";
+
+    return $ret;
 }
 _code?>
 <=body

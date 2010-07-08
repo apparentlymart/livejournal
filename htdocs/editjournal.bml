@@ -25,7 +25,7 @@ body<=
     my $ret;
     my $getextra = $GET{'authas'} ? "?authas=$GET{'authas'}" : undef;
 
-    LJ::need_res('stc/entry.css', 'js/inputcomplete.js', 'js/gears_init.js', 'js/scanner.js');
+    LJ::need_res('stc/entry.css', 'js/inputcomplete.js', 'js/jquery-ui-autocomplete.js', 'js/gears_init.js', 'js/scanner.js');
     
     # are they asking to be authed as someone else?
     my $authas = $GET{'authas'} || $remote->{'user'};
@@ -308,9 +308,27 @@ body<=
                                    :  LJ::ljuser($remote);
             $auth .= LJ::html_hidden("usejournal", $usejournal);
             $auth   .= "</span></p>";
-            my $username = $usejournal ? $usejournal : $remote->user;
-            $auth .= "<script>getUserTags('$username');</script>";
 
+            # Tags
+            my @tag_names;
+
+            my $utags;
+            my $username;
+            if ($usejournal && LJ::load_user($usejournal)) {
+                $utags = LJ::load_user($usejournal)->tags;
+                $username = $usejournal;
+            } else {
+                $utags = $remote->tags;
+                $username = $remote->user;
+            }
+
+            if (keys %$utags) {
+                @tag_names = sort { lc $a cmp lc $b } map { $_->{name} } values %$utags;
+            }
+
+            $auth .= "<script type=\"text/javascript\">\n";
+            $auth .= "journalTags = " . LJ::JSON->to_json({$username => \@tag_names});
+            $auth .= "\n</script>\n";
 
             my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
             my $datetime; my $date = LJ::html_datetime_decode({ 'name' => "date_ymd", }, \%POST);

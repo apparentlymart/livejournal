@@ -6,6 +6,10 @@ use Class::Autouse qw (LJ::PingBack);
 LJ::register_hook("add_extra_options_to_manage_comments", sub {
     my $u = shift;
 
+    return; # Disable user-specific pingback options
+            # and Enable pingback by default
+
+=head
     return unless LJ::PingBack->has_user_pingback($u);
 
     ## Option value 'L' (Livejournal only) is removed, it means 'O' (Open) now
@@ -23,13 +27,17 @@ LJ::register_hook("add_extra_options_to_manage_comments", sub {
                             );
     $ret .= "</td></tr>\n";
     return $ret;
-    
+=cut
+
 });
 
 #
 LJ::register_hook("process_extra_options_for_manage_comments", sub {
     my $u    = shift;
     my $POST = shift;
+
+    return; # Disable user-specific pingback options
+            # and Enable pingback by default
 
     return unless LJ::PingBack->has_user_pingback($u);
 
@@ -50,6 +58,9 @@ LJ::register_hook("add_extra_entryform_fields", sub {
     return if $opts->{remote} and
               not LJ::PingBack->has_user_pingback($opts->{remote});
     
+    return; # Disable user-specific pingback options
+            # and Enable pingback by default
+=head
     # PINGBACK widget
     return "
     <p class='pkg'>
@@ -69,12 +80,18 @@ LJ::register_hook("add_extra_entryform_fields", sub {
         </span>
     </p>
     ";
+=cut
+
 });
 
 # Fetch pingback's option from POST data
 LJ::register_hook("decode_entry_form", sub {
     my ($POST, $req) = @_;
-    $req->{prop_pingback} = $POST->{prop_pingback};
+    
+    return; # Disable user-specific pingback options
+            # and Enable pingback by default
+
+    #$req->{prop_pingback} = $POST->{prop_pingback};
     
 });
 
@@ -89,7 +106,8 @@ LJ::register_hook("postpost", sub {
 
     # check security
     return if $security ne 'public';
-    
+
+=head
     # define pingback prop value
     my $prop_pingback = $args->{props}->{pingback};
     if ($prop_pingback eq 'J'){ 
@@ -100,7 +118,8 @@ LJ::register_hook("postpost", sub {
 
     return if $prop_pingback eq 'D'  # pingback is strictly disabled 
               or not $prop_pingback; # or not enabled.
-
+=cut
+    my $prop_pingback = 'O'; # Open
     #
     LJ::PingBack->notify(
         uri  => $entry->url,
@@ -117,7 +136,8 @@ LJ::register_hook("editpost", sub {
 
     # check security
     return if $entry->security ne 'public';
-    
+
+=head
     # define pingback prop value
     my $prop_pingback = $entry->prop("pingback");
     if ($prop_pingback eq 'J'){ 
@@ -128,12 +148,13 @@ LJ::register_hook("editpost", sub {
 
     return if $prop_pingback eq 'D'  # pingback is strictly disabled 
               or not $prop_pingback; # or not enabled.
-
+=cut
+    my $prop_pingback = 'O'; # Open
 
     #
     LJ::PingBack->notify(
         uri  => $entry->url,
-        mode => $entry->prop('pingback'),
+        mode => $prop_pingback,
     );
 
 });
@@ -146,16 +167,17 @@ LJ::register_hook("after_journal_content_created", sub {
 
     my $entry = $opts->{ljentry};
 
+    return; # External public endpoint is disabled
+            # and there is no internal yet.
+
     return unless LJ::Request->is_inited;
     return unless $entry;
     return unless LJ::Request->notes("view") eq 'entry';
     return unless LJ::PingBack->has_user_pingback($entry->journal);
 
-
     if (LJ::PingBack->should_entry_recieve_pingback($entry)){
         LJ::Request->set_header_out('X-Pingback', $LJ::PINGBACK->{uri});
     }
-    
     
 });
 

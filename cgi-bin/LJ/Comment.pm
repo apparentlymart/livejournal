@@ -16,6 +16,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 
 require "htmlcontrols.pl";
 require "talklib.pl";
+use LJ::TimeUtil;
 
 use Encode();
 
@@ -406,7 +407,7 @@ sub valid {
 sub unixtime {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return LJ::mysqldate_to_time($self->{datepost}, 0);
+    return LJ::TimeUtil->mysqldate_to_time($self->{datepost}, 0);
 }
 
 # returns LJ::User object for the poster of this entry, or undef for anonymous
@@ -554,6 +555,7 @@ sub _set_text {
     my $set_sql  = join(", ", map { "$_=?" } grep { $doing{$_} } qw(subject body));
     my @set_vals = map { $compressed{$_} } grep { $doing{$_} } qw(subject body);
 
+    LJ::run_hooks('report_cmt_text_update', $journalid, $jtalkid);
     # update is okay here because we verified we have a jtalkid, presumably from this table
     # -- compressed versions of the text here
     $journalu->do("UPDATE talktext2 SET $set_sql WHERE journalid=? AND jtalkid=?",
@@ -829,6 +831,11 @@ sub set_state {
     my $state = shift;
    
     my $u = LJ::load_userid($self->{journalid});
+
+    my $hookname = $state eq 'D' ? 'report_cmt_delete' :
+                                   'report_cmt_update' ;
+    LJ::run_hooks($hookname, $self->{'journalid'}, $self->{jtalkid});
+
     my $updated = $u->talk2_do(
         nodetype    => "L", 
         nodeid      => $self->{nodeid},

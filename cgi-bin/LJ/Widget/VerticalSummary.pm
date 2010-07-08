@@ -4,6 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::Vertical );
+use LJ::TimeUtil;
 
 sub need_res { qw( stc/widgets/verticalsummary.css ) }
 
@@ -55,7 +56,7 @@ sub render_body {
         $ret .= "</p>";
 
         my $secondsago = time() - $entry->logtime_unix;
-        my $posttime = LJ::ago_text($secondsago);
+        my $posttime = LJ::TimeUtil->ago_text($secondsago);
         $ret .= "<p class='vertsummary-posttime'>" . $class->ml('widget.verticalsummary.posttime', { posttime => $posttime }) . "</p>";
 
         $ret .= "</td></tr>";

@@ -1,0 +1,9 @@
+<div class='w-head'><h2><span class="w-head-in"><TMPL_VAR expr="ml('widget.news.title')"></span></h2><i class="w-head-corner"></i></div>
+<div class='w-body'>
+<TMPL_LOOP entries>
+<ul class='w-list'>
+<li><a href='<TMPL_VAR link>'><TMPL_VAR text></a></li>
+</ul>
+</TMPL_LOOP>
+<p><TMPL_VAR more></p>
+</div>

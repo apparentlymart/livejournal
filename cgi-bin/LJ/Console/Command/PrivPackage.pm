@@ -3,6 +3,7 @@ package LJ::Console::Command::PrivPackage;
 use strict;
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
+use LJ::TimeUtil;
 
 sub cmd { "priv_package" }
 
@@ -69,7 +70,7 @@ sub execute {
 
             foreach my $row (@{$packages || []}) {
                 my $u = LJ::load_userid($row->[2]);
-                my $time = LJ::mysql_time($row->[3]);
+                my $time = LJ::TimeUtil->mysql_time($row->[3]);
                 $self->info(sprintf("%5d  %-20s%-20s\%s", $row->[0], $row->[1], $u->{user}, $time));
             }
         }

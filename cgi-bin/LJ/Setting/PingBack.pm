@@ -9,9 +9,10 @@ use LJ::PingBack;
 sub should_render {
     my $class = shift;
     my $u     = shift;
+
     # Render if widget enabled on server
     return 0 if $LJ::DISABLED{'pingback'};
-    return 0 unless $u && $u->get_cap('pingback');
+    #return 0 unless $u && $u->get_cap('pingback');
     return 1;
 }
 
@@ -34,11 +35,9 @@ sub option {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
 
-    my $upgrade_link = $u->get_cap('pingback') ? "" : (LJ::run_hook("upgrade_link", $u, "paid") || "");
-
     ## no value selected == pingback disabled
-    my $value = $u->prop('pingback') || '';
-    $value = "D" unless $value  =~ /^[OLD]$/;
+    my $value = $u->prop('pingback') || 'O';
+    $value = "O" unless $value  =~ /^[OLD]$/;
     ## option "Livejournal only" is removed so far, now it means "Open"
     $value = "O" if $value eq 'L'; 
     
@@ -49,7 +48,6 @@ sub option {
                               "O" => $class->ml("settings.pingback.option.open"),
                               "D" => $class->ml("settings.pingback.option.disabled"),
                             );
-    $ret .= "&nbsp;" . $upgrade_link;
     return $ret;
 }
 
@@ -60,7 +58,7 @@ sub save {
     return unless $class->should_render($u);
     
     my $value = $class->get_arg($args, "pingback");
-    $value = "D" unless $value  =~ /^[OLD]$/;
+    $value = "O" unless $value  =~ /^[OLD]$/;
     $value = "O" if $value eq 'L';
     return $u->set_prop('pingback', $value);
 }

@@ -3,10 +3,11 @@
     use strict;
     use vars qw(%GET);
     use LJ::JSON;
-    use Class::Autouse qw( LJ::CreatePage );
+    use LJ::CreatePage;
 
-    my $error = LJ::CreatePage->verify_username($GET{user});
-
-    return LJ::JSON->to_json({ error => $error ? $error : "" });
+    my $username = $GET{user};
+    my @opts = ($GET{'for'} eq 'rename') ? (for_rename => 1) : ();
+    my $error = LJ::CreatePage->verify_username($username, @opts);
+    return LJ::JSON->to_json( $error ? { error => $error } : {} );
 }
 _code?>

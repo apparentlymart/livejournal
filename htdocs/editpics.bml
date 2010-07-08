@@ -235,7 +235,7 @@
 
                 $size = $upload->size;
 
-                # upload image as temp file to mogileFS. this file is used in lj_upf_resize worker. 
+                # upload image as temp file to mogileFS. this file is used in lj_upf_resize worker.
                 seek $upload->fh, 0,0;
                 read $upload->fh, $content, $upload->size; # read content
 
@@ -264,7 +264,7 @@
             ## do we get an image?
             if (defined $size and $size > 0 and defined $content){
                 ## OK, verify its size and dimentions (maybe resize)
-    
+
                 # If image is lagger than 100x100 we can resize it all
                 # or send user to /tools/userpicfactory.bml where user can
                 # select desired part of image
@@ -272,7 +272,7 @@
                 my ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$content);
                 return $err->(BML::ml(".error.unsupportedtype", {filetype => $filetype}))
                     if not $imagew or not $imageh;
-                return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"})) 
+                return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"}))
                     if $imagew > 5000 or $imageh > 5000;
 
                 ## resize or send user to factory.
@@ -294,7 +294,7 @@
                                                              u    => $u,
                                                              ) }
                             or return $err->("There was an error in generating the userpic: $@");
-                    
+
                         # we've got a resized image
                         $content = ${ $picinfo->[0] }; # update data
 
@@ -403,11 +403,11 @@
     my $emit_upload_box = sub {
         $body .= '<a name="uploadBox"></a>';
        # if (scalar @userpics < $max) {
-            
+
             # upload form (with perlbal upload-tracking)
             $body .= qq {
                 <iframe name='upiframe' width='1' height='1' style='border: none'></iframe>
-                <div id='uploadBox' class='pkg}; 
+                <div id='uploadBox' class='pkg};
 				if (scalar @userpics >= $max) { $body .=' st-disabled'; }
 				$body .= qq {
 					'><div id='uploadBox-inner'>
@@ -432,7 +432,7 @@
                 $body .= "<div id='upload_wrapper' class='pkg'>\n";
                 $body .= "<p class='pkg'>\n";
                 $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
-                                          'class' => 'radio', 'value' => 'file', 'selected' => '1', 
+                                          'class' => 'radio', 'value' => 'file', 'selected' => '1',
                                           'accesskey' => $ML{'.fromfile.key'} }) . "\n";
                 $body .= "<label for='radio_file'>$ML{'.fromfile'}</label><br />\n";
                 $body .= "<input type='file' class='file' name='userpic' size='22'";
@@ -485,7 +485,7 @@
 
             $body .= "<label for='make_default'>$ML{'.makedefault'}</label>\n";
             $body .= "</p>\n";
-            
+
             $body .= "<p class='pkg' id='submit_wrapper'>";
             $body .= LJ::html_submit(undef, $ML{'.btn.proceed'},
                                      { disabled => $LJ::DISABLE_MEDIA_UPLOADS });
@@ -570,7 +570,7 @@
 
                 $body .= "</div>\n";
             }
-            
+
             $body .= "<div class='userpic_defaultdelete pkg'>";
             $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'class' => "radio", 'value' => $pid,
                                       'selected' => $pic->is_default ? 1 : 0,
@@ -580,7 +580,7 @@
             $body .= LJ::html_check({ 'type' => 'checkbox', 'name' => "delete_$pid", 'class' => "checkbox",
                                       'id' => "del_$pid", 'value' => 1,
                                       'disabled' => $LJ::DISABLE_MEDIA_UPLOADS });
-            $body .= "<label for='del_$pid'>$ML{'.label.delete'}</label>"; 
+            $body .= "<label for='del_$pid'>$ML{'.label.delete'}</label>";
             if ($pic->inactive) {
                 $body .= " &nbsp;<i>[$ML{'userpic.inactive'}]</i> " . LJ::help_icon('userpic_inactive');
             }

@@ -2,6 +2,7 @@
 {
     use strict;
     use vars qw(%FORM);
+    use LJ::TimeUtil;
 
     return "no user" unless $FORM{'user'};
 
@@ -19,7 +20,7 @@
     # in mailing lists:
 
     # attempt #1:  (change HTTP last modified)
-    my $modtime = LJ::mysqldate_to_time($tu);
+    my $modtime = LJ::TimeUtil->mysqldate_to_time($tu);
     BML::want_last_modified(1);
     BML::note_mod_time($modtime);
 

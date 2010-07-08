@@ -1,0 +1,33 @@
+<TMPL_IF communities>
+    <!-- paging -->
+    <TMPL_IF expr="pages gt 1">
+    <ul class="b-nav-counter">
+        <li class="b-nav-counter-first"><TMPL_IF page_first><a href="<TMPL_VAR page_first>" title="<TMPL_VAR expr="ml('widget.browse.page.first')">"><i><TMPL_VAR expr="ml('widget.browse.page.first')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.first')"></i></span></TMPL_IF></li>
+        <li class="b-nav-counter-prev"><TMPL_IF page_prev><a href="<TMPL_VAR page_prev>" title="<TMPL_VAR expr="ml('widget.browse.page.previous')">"><i><TMPL_VAR expr="ml('widget.browse.page.previous')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.previous')"></i></span></TMPL_IF></li>
+        <li class="b-nav-counter-pages"><TMPL_VAR page>/<TMPL_VAR pages></li>
+        <li class="b-nav-counter-next"><TMPL_IF page_next><a href="<TMPL_VAR page_next>" title="<TMPL_VAR expr="ml('widget.browse.page.next')">"><i><TMPL_VAR expr="ml('widget.browse.page.next')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.next')"></i></span></TMPL_IF></li>
+        <li class="b-nav-counter-last"><TMPL_IF page_last><a href="<TMPL_VAR page_last>" title="<TMPL_VAR expr="ml('widget.browse.page.last')">"><i><TMPL_VAR expr="ml('widget.browse.page.last')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.last')"></i></span></TMPL_IF></li>
+    </ul>
+   </TMPL_IF>     
+    <ul class="b-catalogue-list">
+        <TMPL_LOOP communities>
+            <li class="b-catalogue-item">
+                <dl>
+                    <dt class="b-catalogue-item-name"><TMPL_VAR journal_name></dt>
+                    <dd class="b-catalogue-item-userpic"><TMPL_IF userpic><TMPL_VAR userpic><TMPL_ELSE><TMPL_VAR userpic></TMPL_IF></dd>
+                    <dd class="b-catalogue-item-ago"><TMPL_VAR updated_ago></dd>
+                    <dd class="b-catalogue-item-desc">
+                        <h4><TMPL_VAR journal_title></h4>
+                        <p><TMPL_VAR journal_subtitle></p>
+                        <ul class="b-catalogue-item-action">
+                            <li><form action="/community/join.bml" method="GET"><input type="hidden" name="comm" value="<TMPL_VAR journal_user>"><input type="submit" value="<TMPL_VAR expr="ml('widget.browse.community.join')">" /></form></li>
+                            <li><form action="/friends/add.bml"><input type="hidden" name="user" value="<TMPL_VAR journal_user>"><input type="submit" value="<TMPL_VAR expr="ml('widget.browse.community.watch')">" /></form></li>
+                        </ul>
+                    <dd>
+                </dl>
+            </li>
+        </TMPL_LOOP>
+    </ul>
+<TMPL_ELSE>
+    <p><TMPL_VAR expr="ml('widget.browse.community.empty_list')"></p>
+</TMPL_IF>

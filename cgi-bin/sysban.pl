@@ -6,6 +6,8 @@ no warnings 'uninitialized';
 
 package LJ;
 
+use LJ::TimeUtil;
+
 # <LJFUNC>
 # name: LJ::sysban_check
 # des: Given a 'what' and 'value', checks to see if a ban exists.
@@ -326,11 +328,11 @@ sub sysban_create {
 
     # log in statushistory
     my $remote = LJ::get_remote();
-    $banuntil = $opts{'bandays'} ? LJ::mysql_time($exptime) : "forever";
+    $banuntil = $opts{'bandays'} ? LJ::TimeUtil->mysql_time($exptime) : "forever";
 
     LJ::statushistory_add(0, $remote, 'sysban_add',
                               "banid=$banid; status=active; " .
-                              "bandate=" . LJ::mysql_time() . "; banuntil=$banuntil; " .
+                              "bandate=" . LJ::TimeUtil->mysql_time() . "; banuntil=$banuntil; " .
                               "what=$opts{'what'}; value=$opts{'value'}; " .
                               "note=$opts{'note'};");
 

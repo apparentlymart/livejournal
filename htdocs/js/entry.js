@@ -37,13 +37,12 @@ function changeSubmit(prefix, defaultjournal) {
     }
 }
 
-function pageload (dotime) {
+function new_post_load(dotime) {
 	if (dotime) {
 		settime.interval = setInterval(settime, 1000)
 		settime();
 	}
-    if (!document.getElementById) return false;
-
+	
     var remotelogin = $('remotelogin');
     if (! remotelogin) return;
     var remotelogin_content = $('remotelogin_content');
@@ -51,7 +50,9 @@ function pageload (dotime) {
     remotelogin_content.onclick = altlogin;
     f = document.updateForm;
     if (! f) return false;
-
+	
+	getUserTags(jQuery('#usejournal').val());
+	
     var userbox = f.user;
     if (! userbox) return false;
     if (! Site.has_remote && userbox.value) altlogin();
@@ -501,33 +502,178 @@ function settime() {
     return false;
 }
 
-var inputObjs = new Array();
-function getUserTags(defaultjournal) {
-    if (!defaultjournal) return;
+function tagAutocomplete(node, tags)
+{
+	jQuery(node).autocomplete({
+		minLength: 1,
+		source: function(request, response) {
+			var val = this.element.context.value;
+				range = DOM.getSelectedRange(this.element.context);
+				if (!val || range.start != range.end) {
+					response([]);
+					return;
+				}
+			
+			// searach one tag
+			var search = val
+				.match(new RegExp('(?:^.{0,'+(range.start - 1)+'},|^)([^,]*),?'))[1]
+				.replace(/^ +/, '');
+			// delegate back to autocomplete, but extract term
+			if (!search) {
+				response([]);
+				return;
+			}
+			var resp_ary = [], i = -1;
+			while (tags[++i]) {
+				if (tags[i].indexOf(search) === 0) {
+					resp_ary.push(tags[i]);
+					if (resp_ary.length === 10) {
+						break;
+					}
+				}
+			}
+			response(resp_ary);
+		},
+		focus: function() {
+			// prevent value inserted on focus
+			return false;
+		},
+		select: function(e, ui) {
+			var val = this.value,
+				range = DOM.getSelectedRange(this);
+				//search_ary = val.split(','), i = -1, sym_cnt = 0;
+				search = val.match(new RegExp('(^.{0,'+(range.start - 1)+'},|^)([^,]*),?(.*)'));
+			
+			ui.item.value += ',';
+			
+			if (search[1].length) { // no start
+				ui.item.value = ' ' + ui.item.value;
+			}
+			var new_range = search[1].length + ui.item.value.length;
+			if (!search[3].length) { // empy in end
+				ui.item.value += ' ';
+				new_range++;
+			} else { // set range before ", ..."
+				new_range--;
+			}
+			
+			this.value = search[1] + ui.item.value + search[3];
+			
+			DOM.setSelectedRange(this, new_range, new_range);
+			return false;
+		},
+		
+		open: function()
+		{
+			// fix left pos in FF 3.6
+			if (jQuery.browser.mozilla) {
+				var widget = jQuery(this).autocomplete('widget'),
+					offset = widget.offset();
+				offset.left++;
+				
+				widget.offset(offset);
+				widget.width(widget.width()+3);
+			} else {
+				widget.width(widget.width()+4);
+			}
+		}
+	});
+}
 
-    var user = defaultjournal;
-    if ($('usejournal') && $('usejournal').value != "") {
-        user = $('usejournal').value;
-    }
+function getUserTags(user)
+{
+	user = user || Site.currentJournal;
+	
+	jQuery('#prop_taglist').autocomplete('destroy');
+	
+	if (journalTags[user]) {
+		tagAutocomplete($('prop_taglist'), journalTags[user]);
+	} else {
+		jQuery.getJSON(
+			'/tools/endpoints/gettags.bml?user=' + user,
+			function(data) {
+				if (data.tags) {
+					tagAutocomplete($('prop_taglist'), data.tags);
+				}
+			});
+	}
+}
 
-    HTTPReq.getJSON({
-        url: "/tools/endpoints/gettags.bml?user=" + user,
-        method: "GET",
-        onData: function (data) {
-            // disable any InputComplete objects that are already on the tag field
-            for (var i in inputObjs) {
-                if (!inputObjs.hasOwnProperty(i)) continue;
-                inputObjs[i].disable();
-            }
-            if (data.tags) {
-                if ($('prop_taglist')) {
-                    var keywords = new InputCompleteData(data.tags, "ignorecase");
-                    inputObjs.push(new InputComplete($('prop_taglist'), keywords));
-                }
-            }
-        },
-        onError: function (msg) { }
-    });
+function selectTags(node)
+{
+	var widget = new LJWidgetIPPU();
+	
+	widget.onRefresh = function()
+	{
+		IPPUSelectTags.widget = widget;
+		IPPUSelectTags.init();
+	}
+	
+	widget.init({
+			title: node.firstChild.nodeValue,
+			height: 329,
+			width: jQuery(window).width()/2,
+			widgetClass: 'IPPU::SelectTags'
+		} , {
+			user: jQuery('#usejournal').val()
+		});
+	widget.ippu.addClass('ippu-select-tags');
+	
+	return false;
+}
+
+
+IPPUSelectTags =
+{
+	init: function(ippu_node)
+	{
+		$('selecttags-all').value = $('prop_taglist').value.split(/ *, */).join(', ');
+		
+		this.checkboxes = jQuery('div.b-selecttags-tags input:checkbox', ippu_node);
+		
+		jQuery('#selecttags-all')
+			.input(this.input)
+			.input();
+	},
+	
+	change: function(node)
+	{
+		var inp = $('selecttags-all'),
+			ary = inp.value.replace(/ */, '') ? inp.value.split(/ *, */) : [],
+			i = -1;
+		if (node.checked) {
+			ary.push(node.value)
+		} else {
+			while (ary[++i]) {
+				if (ary[i] == node.value) {
+					ary.splice(i, 1);
+					break;
+				}
+			}
+		}
+		
+		inp.value = ary.join(', ');
+	},
+	
+	input: function()
+	{
+		var ary = $('selecttags-all').value.split(/ *, */),
+		    checkboxes = IPPUSelectTags.checkboxes;
+		checkboxes.attr('checked', false);
+		while(ary.length) checkboxes.filter('[value='+ary.pop()+']').attr('checked', true);
+	},
+	
+	save_click: function()
+	{
+		$('prop_taglist').value = $('selecttags-all').value.split(/ *, */).join(', ');
+		this.widget.close();
+	},
+	
+	reset_click: function()
+	{
+		$('selecttags-all').value = '';
+		IPPUSelectTags.checkboxes.attr('checked', false);
+	}
 }
 
 function _changeOptionState(option, enable) {
@@ -542,11 +688,9 @@ function _changeOptionState(option, enable) {
     }
 }
 
-function changeSecurityOptions(defaultjournal) {
-    var user = defaultjournal;
-    if ($('usejournal') && $('usejournal').value != "") {
-        user = $('usejournal').value;
-    }
+function changeSecurityOptions(user)
+{
+	user = user || Site.currentJournal;
 
     HTTPReq.getJSON({
         url: "/tools/endpoints/getsecurityoptions.bml?user=" + user,

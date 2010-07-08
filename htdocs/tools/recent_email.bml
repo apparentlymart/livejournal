@@ -4,6 +4,7 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
 
     my $u = LJ::get_remote()
         or return "<?needlogin?>";
@@ -66,7 +67,7 @@ body<=
         my ($subject) = $email =~/Subject:(.*)/;
         my $jobid = $job->jobid;
         $body .= "(#$jobid) <strong>Subject: $subject</strong><br />";
-        $body .= "<small>Next try: " . LJ::time_to_http($job->run_after) . '</small><br /><br />';
+        $body .= "<small>Next try: " . LJ::TimeUtil->time_to_http($job->run_after) . '</small><br /><br />';
         if ($job->failures) {
             $body .= "Errors:";
             $body .= '<ul>';

@@ -7,6 +7,8 @@ require "ljprotocol.pl";
 require "parsefeed.pl";
 require "cleanhtml.pl";
 
+use LJ::TimeUtil;
+
 sub update_feed {
     my ($urow, $verbose) = @_;
     return unless $urow;
@@ -67,7 +69,7 @@ sub get_content {
     print "[$$] Synsuck: $user ($synurl)\n" if $verbose;
 
     my $req = HTTP::Request->new("GET", $synurl);
-    $req->header('If-Modified-Since', LJ::time_to_http($lastmod))
+    $req->header('If-Modified-Since', LJ::TimeUtil->time_to_http($lastmod))
         if $lastmod;
     $req->header('If-None-Match', $etag)
         if $etag;
@@ -306,7 +308,7 @@ sub process_content {
 
         # just bail on entries older than two weeks instead of reposting them
         if ($own_time) {
-            my $age = time() - LJ::mysqldate_to_time($it->{'time'});
+            my $age = time() - LJ::TimeUtil->mysqldate_to_time($it->{'time'});
             next if $age > $secs; # $secs is defined waaaaaaaay above
         }
 
@@ -415,7 +417,7 @@ sub process_content {
 
     }
 
-    my $r_lastmod = LJ::http_to_time($res->header('Last-Modified'));
+    my $r_lastmod = LJ::TimeUtil->http_to_time($res->header('Last-Modified'));
     my $r_etag = $res->header('ETag');
 
     # decide when to poll next (in minutes).

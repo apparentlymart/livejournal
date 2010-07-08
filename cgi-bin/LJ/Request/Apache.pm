@@ -7,6 +7,7 @@ require Apache;
 require Apache::Request;
 require Apache::URI;
 require Apache::File;
+require Apache::Table;
 
 sub LJ::Request::OK                        { return Apache::Constants::OK() }
 sub LJ::Request::REDIRECT                  { return Apache::Constants::REDIRECT() }
@@ -24,6 +25,7 @@ sub LJ::Request::M_POST                    { return Apache::Constants::M_POST() 
 sub LJ::Request::NOT_FOUND                 { return Apache::Constants::NOT_FOUND() }
 sub LJ::Request::SERVER_ERROR              { return Apache::Constants::SERVER_ERROR() }
 sub LJ::Request::BAD_REQUEST               { return Apache::Constants::BAD_REQUEST() }
+sub LJ::Request::HTTP_GONE                 { return Apache::Constants::NOT_FOUND() }
 
 my $instance = '';
 
@@ -66,6 +68,12 @@ sub LJ::Request::init {
    
     
     return $instance;
+}
+
+sub LJ::Request::prev {
+    my $class = shift;
+    die "Request is not provided to LJ::Request" unless $instance;
+    return $instance->{r}->prev(@_);
 }
 
 sub LJ::Request::is_inited {

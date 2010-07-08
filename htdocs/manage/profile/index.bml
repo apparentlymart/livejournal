@@ -6,6 +6,7 @@ body<=
     use strict;
     use vars qw(%POST %GET $headextra @errors);
     use LJ::Setting;
+    use LJ::TimeUtil;
 
     LJ::set_active_crumb('editprofile');
     LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css');
@@ -542,7 +543,7 @@ body<=
             push @errors, $ML{'.error.bday.child'};
         }
 
-        if (@errors == 0 && $POST{'day'} > LJ::days_in_month($POST{'month'}, $POST{'year'})) {
+        if (@errors == 0 && $POST{'day'} > LJ::TimeUtil->days_in_month($POST{'month'}, $POST{'year'})) {
             push @errors, $ML{'.error.day.notinmonth'};
         }
 
@@ -771,7 +772,7 @@ body<=
 
             LJ::send_mail({
                 'to' => $POST{'email'},
-                'from' => $LJ::ADMIN_EMAIL,
+                'from' => $LJ::DONOTREPLY_EMAIL,
                 'charset' => 'utf-8',
                 'subject' => $ML{'/editinfo.bml.newemail.subject'},
                 'body' => BML::ml('/editinfo.bml.newemail.body2',

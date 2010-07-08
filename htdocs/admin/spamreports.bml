@@ -1,6 +1,8 @@
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw($title $body %GET %POST);
 
     $title = "Spam Reports";
@@ -16,7 +18,7 @@
         $by = LJ::eurl($by);
         $what = LJ::eurl($what);
         $state = LJ::eurl($state);
-        $reporttime = LJ::mysql_time($reporttime);
+        $reporttime = LJ::TimeUtil->mysql_time($reporttime);
         $reporttime = $etext if $etext;
         return "<a href=\"spamreports.bml?mode=view&amp;by=$by&amp;what=$what&amp;state=$state\">$reporttime</a>";
     };
@@ -199,8 +201,8 @@
             my $srid = $_->[7];
             $body .= '<tr><td>' .  ($state eq 'open' ? $dellink->([$srid], 'Close') : '') . '</td><td>' .
                      "<strong>$spamlocation in:</strong> " . LJ::ljuser($u2) . '<br />' .
-                     '<strong>Report Time:</strong> ' . LJ::mysql_time($_->[0]) . '<br />' .
-                     "<strong>$spamlocation Time:</strong> " . ($_->[5] ? LJ::mysql_time($_->[5]) : 'not recorded') . '<br />' .
+                     '<strong>Report Time:</strong> ' . LJ::TimeUtil->mysql_time($_->[0]) . '<br />' .
+                     "<strong>$spamlocation Time:</strong> " . ($_->[5] ? LJ::TimeUtil->mysql_time($_->[5]) : 'not recorded') . '<br />' .
                      '<strong>Subject:</strong> ' . LJ::ehtml($_->[2] || 'no subject') . '<br />' .
                      '<strong>Body:</strong> ' . LJ::ehtml($comment_body || 'no body') . '<br />' .
                      '</td></tr><tr><td>&nbsp;</td></tr>';

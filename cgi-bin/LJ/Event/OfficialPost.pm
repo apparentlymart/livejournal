@@ -19,7 +19,8 @@ sub entry {
 
 sub content {
     my $self = shift;
-    return $self->entry->event_html;
+    my $entry = $self->entry;
+    return $entry->event_html;
 }
 
 sub is_common { 1 }
@@ -98,6 +99,7 @@ sub as_html {
             subject         => $self->entry->subject_text || '',
             username        => $entry->journal->ljuser_display,
             url             => $entry->url,
+            rcpt            => $u->ljuser_display,
         });
 }
 
@@ -117,6 +119,7 @@ sub as_string {
             subject         => $entry->subject_text || '',
             username        => $entry->journal->display_username,
             url             => $entry->url,
+            rcpt            => $u->display_username,
         });
 }
 
@@ -155,7 +158,7 @@ sub as_alert {
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-    return BML::ml('event.officialpost', { sitename => $LJ::SITENAME }); # $LJ::SITENAME makes a new announcement
+    return LJ::Lang::ml('event.officialpost', { sitename => $LJ::SITENAME }); # $LJ::SITENAME makes a new announcement
 }
 
 sub is_tracking { 0 }

@@ -113,23 +113,26 @@ sub query_user_subscriptions {
 
 sub subscriptions_of_user {
     my ($class, $u) = @_;
+
     croak "subscriptions_of_user requires a valid 'u' object"
         unless LJ::isu($u);
 
     return if $u->is_expunged;
 
+    return @{$u->{_subscriptions}} if $u->{_subscriptions};
+
+    my @subs;
+
     my $val = LJ::MemCache::get('subscriptions:' . $u->id);
     if (defined $val) {
         my @ints = unpack("N*", $val);
-        my @subs;
         for (my $i = 0; $i < scalar(@ints); $i += 11) {
             my %row;
             @row{@subs_fields} = @ints[$i..$i+10];
             push @subs, $class->new_from_row(\%row);
         }
-        return @subs;
     } else {
-        my @subs = map { $class->new_from_row($_) }
+        @subs = map { $class->new_from_row($_) }
             @{ $class->query_user_subscriptions($u) };
 
         my @ints;
@@ -137,11 +140,11 @@ sub subscriptions_of_user {
             my %row = %$sub;
             push @ints, @row{@subs_fields};
         }
-
         LJ::MemCache::set('subscriptions:' . $u->id, pack("N*", @ints));
-
-        return @subs;
     }
+
+    @{$u->{_subscriptions}} = @subs;
+    return @subs;
 }
 
 # Class method
@@ -180,7 +183,7 @@ sub find {
     return () if defined $arg2 && $arg2 =~ /\D/;
 
     my @subs;
-    @subs = $u->subscriptions;
+    @subs = $class->subscriptions_of_user($u);
 
     @subs = grep { $_->active } @subs if $require_active;
 
@@ -337,17 +340,15 @@ sub create {
     foreach (qw(userid subid createtime)) {
         croak "Can't specify field '$_'" if defined $args{$_};
     }
-    
-    # load current subscription, check if subscription already exists
-    $class->subscriptions_of_user($u) unless $u->{_subscriptions};
+
     my ($existing) = grep {
         $args{etypeid} == $_->{etypeid} &&
         $args{ntypeid} == $_->{ntypeid} &&
         $args{journalid} == $_->{journalid} &&
         $args{arg1} == $_->{arg1} &&
-        $args{arg2} == $_->{arg2} && 
-        $args{flags} == $_->flags
-    } @{$u->{_subscriptions}};
+        $args{arg2} == $_->{arg2} &&
+        $args{flags} == $_->{flags}
+    } $class->subscriptions_of_user($u);
 
     return $existing 
         if defined $existing;
@@ -361,24 +362,32 @@ sub create {
 
     my $self = $class->new_from_row( \%args );
 
-    my @columns;
-    my @values;
-
+    my @fields;
     foreach (@subs_fields) {
         if (exists( $args{$_} )) {
-            push @columns, $_;
-            push @values, delete $args{$_};
+            push @fields, { name => $_, value => delete $args{$_} };
         }
     }
 
     croak( "Extra args defined, (" . join( ', ', keys( %args ) ) . ")" ) if keys %args;
 
-    my $sth = $u->prepare( 'INSERT INTO subs (' . join( ',', @columns ) . ')' .
-                           'VALUES (' . join( ',', map {'?'} @values ) . ')' );
-    $sth->execute( @values );
+    # DELETE FROM subs records with all selected field values
+    # without 'subid', 'flags' and 'createtime'.
+    my $sql_filter = sub { $_->{'name'} !~ /subid|flags|createtime/ };
+
+    my $sth = $u->prepare( 'DELETE FROM subs WHERE ' .
+        join( ' AND ', map { $_->{'name'} . '=?' } grep { $sql_filter->($_) } @fields )
+    );
+
+    $sth->execute( map { $_->{'value'} } grep { $sql_filter->($_) } @fields );
+
+    $sth = $u->prepare(
+        'INSERT INTO subs (' . join( ',', map { $_->{'name'} } @fields ) . ')' .
+            'VALUES (' . join( ',', map {'?'} @fields ) . ')' );
+
+    $sth->execute( map { $_->{'value'} } @fields );
     LJ::errobj($u)->throw if $u->err;
 
-    $self->subscriptions_of_user($u) unless $u->{_subscriptions};
     push @{$u->{_subscriptions}}, $self;
 
     $self->invalidate_cache($u);

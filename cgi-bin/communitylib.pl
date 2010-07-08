@@ -117,6 +117,8 @@ sub send_comm_invite {
                  undef, $cu->{userid}, $u->{userid}, $mu->{userid}, $newargstr);
     }
 
+    LJ::run_hooks('invite_member', $cu, $u);
+
     # Fire community invite event
     LJ::Event::CommunityInvite->new($u, $mu, $cu)->fire unless $LJ::DISABLED{esn};
 
@@ -531,6 +533,8 @@ sub approve_pending_member {
                          undef, $cu->{userid}, "targetid=$u->{userid}");
     return unless $count;
 
+    LJ::run_hooks('approve_member', $cu, $u);
+
     # step 2, make user join the community
     # 1 means "add community to user's friends list"
     return unless LJ::join_community($u->{userid}, $cu->{userid}, 1);
@@ -565,6 +569,8 @@ sub reject_pending_member {
     my $count = $dbh->do("UPDATE authactions SET used = 'Y' WHERE userid = ? AND arg1 = ?",
                          undef, $cu->{userid}, "targetid=$u->{userid}");
     return unless $count;
+
+    LJ::run_hooks('reject_member', $cu, $u);
 
     # step 2, email the user
     my %params = (event => 'CommunityJoinReject', journal => $u);

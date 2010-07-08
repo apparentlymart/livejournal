@@ -1,6 +1,7 @@
 package LJ::Portal::Box::RecentComments; # <--- Change this
 use base 'LJ::Portal::Box';
 use strict;
+use LJ::TimeUtil;
 
 ######################## override this stuff ######################
 
@@ -101,7 +102,7 @@ sub generate_content {
         $subject ||= '';
         $body = (!defined $body || $body eq '') ? '(No comment text)' : $body;
 
-        my $date = LJ::ago_text(time() - $r->{'datepostunix'});
+        my $date = LJ::TimeUtil->ago_text(time() - $r->{'datepostunix'});
 
         my $talkid = ($r->{'jtalkid'} * 256) + $lrow->{'anum'};
 

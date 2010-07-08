@@ -3,7 +3,7 @@ package LJ::Widget::AddSiteMessages;
 use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
-use Class::Autouse qw( LJ::SiteMessages );
+use LJ::SiteMessages;
 
 sub need_res { }
 
@@ -143,12 +143,12 @@ sub render_body {
     $ret .= "<tr><td>&nbsp;</td><td>(if left blank, a user's country will be ignored)</td></tr>";
 
     $ret .= "<tr><td valign='top'>Show this question to:</td><td>";
-    foreach my $type (sort { LJ::SiteMessages::AccountMask->{$b} <=> LJ::SiteMessages::AccountMask->{$a} } keys %{&LJ::SiteMessages::AccountMask}) {
+    foreach my $type (sort { LJ::SiteMessages::AccountMask()->{$b} <=> LJ::SiteMessages::AccountMask()->{$a} } keys %{&LJ::SiteMessages::AccountMask()}) {
         my $ltype = lc $type;
         $ret .= $class->html_check
             ( name => 'show_' . $ltype,
               id => 'show_' . $ltype,
-              selected => $accounts & LJ::SiteMessages::AccountMask->{$type} ) . " <label for='show_$ltype'>$type Users</label><br />";
+              selected => $accounts & LJ::SiteMessages::AccountMask()->{$type} ) . " <label for='show_$ltype'>$type Users</label><br />";
     }
 
     $ret .= $class->html_hidden
@@ -194,8 +194,8 @@ sub handle_post {
     }
 
     my $accounts = 0;
-    foreach my $type (keys %{&LJ::SiteMessages::AccountMask}) {
-        $accounts |= LJ::SiteMessages::AccountMask->{$type}
+    foreach my $type (keys %{&LJ::SiteMessages::AccountMask()}) {
+        $accounts |= LJ::SiteMessages::AccountMask()->{$type}
             if $post->{'show_' . lc $type};
     }
 
@@ -203,7 +203,7 @@ sub handle_post {
          mid        => $post->{mid},
          time_start => $time_start->epoch,
          time_end   => $time_end->epoch,
-         active     => 'Y',
+         active     => 'N',
          text       => $post->{text},
          countries  => $post->{countries},
          accounts   => $accounts,

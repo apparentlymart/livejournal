@@ -6,6 +6,7 @@
     use LJ::Directory::Search;
     use LJ::WorkerResultStorage;
     use Storable;
+    use LJ::TimeUtil;
 
     my $err = sub {
         my $msg = shift;
@@ -47,7 +48,7 @@
                     my @users;
                     foreach my $u ($results->users) {
                         my $updatetime = $updated->{$u->userid};
-                        my $updatetimestring = $updatetime ? LJ::ago_text(time() - $updatetime) :
+                        my $updatetimestring = $updatetime ? LJ::TimeUtil->ago_text(time() - $updatetime) :
                             'Never';
 
                         push @users, {

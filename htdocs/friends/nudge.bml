@@ -4,6 +4,8 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw(%GET);
 
     LJ::set_active_crumb('nudgefriend');
@@ -53,7 +55,7 @@ body<=
         $ebody .= BML::ml('.email.body.greeting', {'user' => $u->{user}}) . "\n\n";
 
         if ($updated->{$u->{userid}} > 0) {
-            my $ago_text = LJ::ago_text(time() - $updated->{$u->{userid}});
+            my $ago_text = LJ::TimeUtil->ago_text(time() - $updated->{$u->{userid}});
             $ebody .= BML::ml('.email.body.lastupdated', {
                         'user' => $remote->{user},
                         'sitename' => $LJ::SITENAMESHORT,
@@ -125,7 +127,7 @@ body<=
             # Don't allow nudging someone who updated in past week
             if (time() - $updated->{$u->{userid}} >= 604800) {
                 my $time = BML::ml('.nudgeuser.neverupdated', {'user' => LJ::ljuser($u)});
-                my $ago_text = LJ::ago_text(time() - $updated->{$u->{userid}});
+                my $ago_text = LJ::TimeUtil->ago_text(time() - $updated->{$u->{userid}});
                 if ($updated->{$u->{userid}} > 0) {
                     $time = BML::ml('.nudgeuser.lastupdated', {'user' => LJ::ljuser($u), 'timeago' => $ago_text});
                 }
@@ -220,7 +222,7 @@ body<=
                 if ($updated > 0) {
                     my $secs = $now - $updated;
                     next if $secs < 604800; # Only show if it has been longer than a week
-                    $time = BML::ml('.mutualfriends.userinfo.lastupdated', {'timeago' => LJ::ago_text($secs)});
+                    $time = BML::ml('.mutualfriends.userinfo.lastupdated', {'timeago' => LJ::TimeUtil->ago_text($secs)});
                 }
 
                 $body .= "<li>" . BML::ml('.mutualfriends.userinfo', {'user' => LJ::ljuser($u), 'timeago' => $time, 'aopts' => "href='$LJ::SITEROOT/friends/nudge.bml?user=$u->{user}'"}) . "</li>";

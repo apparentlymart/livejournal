@@ -3,6 +3,8 @@ package LJ::Event::SecurityAttributeChanged;
 use strict;
 
 use Carp qw(croak);
+use LJ::TimeUtil;
+
 use base 'LJ::Event';
 
 sub new {
@@ -216,7 +218,7 @@ sub _as_email {
         # Convert $timechange from GMT to local for user
         my $offset = 0;
         LJ::get_timezone($u, \$offset);
-        my $timechange = LJ::mysql_time($timechange_stamp + 60*60*$offset, 0);
+        my $timechange = LJ::TimeUtil->mysql_time($timechange_stamp + 60*60*$offset, 0);
 
         $other =~ /ip=(.+)/;
         my ($ip) = ($1);

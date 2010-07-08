@@ -127,6 +127,10 @@ body<=
     }
 
     unless ($item && $item->{'anum'} == $init->{'anum'}) {
+        LJ::Request->pnotes ('error' => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        BML::return_error_status(404);
+        return;
         return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
     }
 
@@ -151,7 +155,8 @@ body<=
     if (!$u->is_visible || $u->should_block_robots || ($entry && $entry->should_block_robots)) {
         $head = LJ::robot_meta_tags();
     }
-    $head .= $LJ::SHARE_THIS_URL unless $LJ::DISABLED{'sharethis'};
+    $head .= $LJ::SHARE_THIS_URL_GEN->(journal => $u->username)
+        unless $LJ::DISABLED{'sharethis'};
 
     # check suspended user
     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"

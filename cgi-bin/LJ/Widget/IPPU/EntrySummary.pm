@@ -2,6 +2,7 @@ use strict;
 
 package LJ::Widget::IPPU::EntrySummary;
 use base "LJ::Widget::IPPU";
+use LJ::TimeUtil;
 
 sub render_body {
     my ($class, %opts) = @_;
@@ -25,7 +26,7 @@ sub render_body {
 
     my $journaltext = ! LJ::u_equals($poster, $entry->journal) ? " in " . $entry->journal->ljuser_display : '';
 
-    my $time = LJ::ago_text(time() - $entry->logtime_unix);
+    my $time = LJ::TimeUtil->ago_text(time() - $entry->logtime_unix);
     my $entrytext = LJ::ehtml($entry->event_text);
     my $subject = $entry->subject_html;
 

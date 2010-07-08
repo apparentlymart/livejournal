@@ -35,7 +35,6 @@ LiveJournal.run_hook = function () {
 LiveJournal.initPage = function () {
     // set up various handlers for every page
     LiveJournal.initInboxUpdate();
-    AdEngine.init();
 
     // run other hooks
     LiveJournal.run_hook("page_load");
@@ -162,25 +161,6 @@ LiveJournal.ajaxError = function (err) {
     }
 };
 
-LiveJournal.insertAdsMulti = function (params) {
-  var i = 0;
-  var containers = [];
-
-  for (i = 0; i < params.length; i++) {
-    if (! params[i].html || params[i].html == "<ul>\n</ul>") continue;
-    AdEngine.insertAdResponse( params[i] );
-    containers.push(document.getElementById(params[i].id));
-  }
-
-    // add the ad box style to the containers
-    containers.forEach(function (container) {
-      if (! container) return;
-
-      DOM.addClassName(container.parentNode, "lj_content_ad");
-      DOM.removeClassName(container.parentNode, "lj_inactive_ad");
-    });
-};
-
 // given a URL, parse out the GET args and return them in a hash
 LiveJournal.parseGetArgs = function (url) {
     var getArgsHash = {};
@@ -193,7 +173,20 @@ LiveJournal.parseGetArgs = function (url) {
     	var pair = getArgs[arg].split("=");
         getArgsHash[pair[0]] = pair[1];
 
-    }	    
+    }
 
     return getArgsHash;
 };
+
+LiveJournal.closeSiteMessage = function(node, e, id)
+{
+	jQuery.post(LiveJournal.getAjaxUrl('close_site_message'), {
+			messageid: id
+		}, function(data, status) {
+			if (status === 'success') {
+				jQuery(node.parentNode.parentNode.parentNode).replaceWith(data.substitude);
+			} else {
+				LiveJournal.ajaxError(data);
+			}
+		}, 'json');
+}

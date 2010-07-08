@@ -5,6 +5,7 @@ use strict;
 package LJ::S2;
 use Class::Autouse qw/LJ::ContentFlag/;
 use LJ::Request;
+use LJ::TimeUtil;
 
 sub FriendsPage
 {
@@ -45,7 +46,7 @@ sub FriendsPage
     # see if they have a previously cached copy of this page they
     # might be able to still use.
     if ($opts->{'header'}->{'If-Modified-Since'}) {
-        my $theirtime = LJ::http_to_time($opts->{'header'}->{'If-Modified-Since'});
+        my $theirtime = LJ::TimeUtil->http_to_time($opts->{'header'}->{'If-Modified-Since'});
 
         # send back a 304 Not Modified if they say they've reloaded this
         # document in the last $newinterval seconds:
@@ -55,7 +56,7 @@ sub FriendsPage
             return 1;
         }
     }
-    $opts->{'headers'}->{'Last-Modified'} = LJ::time_to_http($lastmod);
+    $opts->{'headers'}->{'Last-Modified'} = LJ::TimeUtil->time_to_http($lastmod);
 
     my $get = $opts->{'getargs'};
 
@@ -87,7 +88,7 @@ sub FriendsPage
     my $group_name    = '';
     my $common_filter = 1;
     my $events_date   = ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!)
-                        ? LJ::mysqldate_to_time("$1-$2-$3")
+                        ? LJ::TimeUtil->mysqldate_to_time("$1-$2-$3")
                         : 0;
 
     if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {

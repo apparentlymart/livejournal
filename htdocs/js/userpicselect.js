@@ -273,20 +273,14 @@ UserpicSelect = new Class (LJ_IPPU, {
       var self = this;
 
       pic.keywords.forEach(function (kw) {
-          // add to dropdown
-          var picopt = document.createElement("option");
-          picopt.text = kw;
-          picopt.value = picid;
+		// add to dropdown
+		var picopt = new Option(kw, picid);
 
-          if (! sel) {
+          if (!sel) {
               picopt.selected = self.selectedPicid ? self.selectedPicid == picid : false;
               sel = picopt.selected;
           }
-
-          Try.these(
-                    function () { menu.add(picopt, 0); },    // everything else
-                    function () { menu.add(picopt, null); }  // IE
-                    );
+		menu.options[menu.options.length] = picopt;
       });
     }
   },
@@ -384,7 +378,6 @@ UserpicSelect = new Class (LJ_IPPU, {
   },
 
   handleError: function(err) {
-    log("Error: " + err);
     this.hourglass.hide();
   },
 

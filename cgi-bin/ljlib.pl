@@ -56,6 +56,8 @@ use Class::Autouse qw(
                       LJ::Vertical
                       );
 
+use LJ::TimeUtil;
+
 # make Unicode::MapUTF8 autoload:
 sub Unicode::MapUTF8::AUTOLOAD {
     die "Unknown subroutine $Unicode::MapUTF8::AUTOLOAD"
@@ -94,7 +96,7 @@ sub END { LJ::end_request(); }
                     "sms_msgtext", "sms_msgerror",
                     "jabroster", "jablastseen", "random_user_set",
                     "poll2", "pollquestion2", "pollitem2",
-                    "pollresult2", "pollsubmission2",
+                    "pollresult2", "pollsubmission2", "pollresultaggregated2",
                     "embedcontent", "usermsg", "usermsgtext", "usermsgprop",
                     "notifyarchive", "notifybookmarks", "pollprop2", "embedcontent_preview",
                     "logprop_history",
@@ -108,7 +110,6 @@ sub END { LJ::end_request(); }
 require "ljdb.pl";
 require "taglib.pl";
 require "ljtextutil.pl";
-require "ljtimeutil.pl";
 require "ljcapabilities.pl";
 require "ljmood.pl";
 require "ljhooks.pl";
@@ -381,7 +382,22 @@ sub theschwartz {
 
     if (%LJ::THESCHWARTZ_DBS_ROLES) {
         ## new config - with roles
-        my $role = $opts->{role} || "default";
+        my $role = $opts->{role};
+
+        ## Special case: return any TheSchwartz client connection if any.
+        ## It's needed for 'mass' workers, so that all LJ::send_mail() jobs 
+        ## issued by the workers to be put in the same "mass" schwartz DB.
+        ## TODO: a better way to specify affinity for send_mail() jobs.
+        if ($role && $role eq '_reuse_any_existing_connection') {
+            if (%LJ::SchwartzClient) {
+                return (values %LJ::SchwartzClient)[0];
+            } else {
+                ## no schawartz client created - use default role below.
+                undef $role;
+            }
+        }
+        
+        $role ||= $LJ::THESCHWARTZ_DEFAULT_ROLE || "default";
         return $LJ::SchwartzClient{$role} if $LJ::SchwartzClient{$role};
 
         my @dbs;
@@ -1071,12 +1087,41 @@ sub get_recent_items
     # if we need to get by tag, get an itemid list now
     my $jitemidwhere;
     if (ref $opts->{tagids} eq 'ARRAY' && @{$opts->{tagids}}) {
-        # select jitemids uniquely
-        my $in = join(',', map { $_+0 } @{$opts->{tagids}});
-        my $jitemids = $logdb->selectcol_arrayref(qq{
-                SELECT DISTINCT jitemid FROM logtagsrecent WHERE journalid = ? AND kwid IN ($in)
-            }, undef, $userid);
-        die $logdb->errstr if $logdb->err;
+
+        my $jitemids;
+
+        # $opts->{tagmode} = $opts->{getargs}->{mode} eq 'and' ? 'and' : 'or';
+
+        if ($opts->{tagmode} eq 'and') {
+
+            my $limit = $LJ::TAG_INTERSECTION;
+            $#{$opts->{tagids}} = $limit - 1 if @{$opts->{tagids}} > $limit;
+            my $in = join(',', map { $_+0 } @{$opts->{tagids}});
+            my $sth = $logdb->prepare("SELECT jitemid, kwid FROM logtagsrecent WHERE journalid = ? AND kwid IN ($in)");
+            $sth->execute($userid);
+            die $logdb->errstr if $logdb->err;
+
+            my %mix;
+            while (my $row = $sth->fetchrow_arrayref) {
+                my ($jitemid, $kwid) = @$row;
+                $mix{$jitemid}++;
+            }
+
+            my $need = @{$opts->{tagids}};
+            foreach my $jitemid (keys %mix) {
+                delete $mix{$jitemid} if $mix{$jitemid} < $need;
+            }
+
+            $jitemids = [keys %mix];
+
+        } else { # mode: 'or'
+            # select jitemids uniquely
+            my $in = join(',', map { $_+0 } @{$opts->{tagids}});
+            $jitemids = $logdb->selectcol_arrayref(qq{
+                    SELECT DISTINCT jitemid FROM logtagsrecent WHERE journalid = ? AND kwid IN ($in)
+                }, undef, $userid);
+            die $logdb->errstr if $logdb->err;
+        }
 
         # set $jitemidwhere iff we have jitemids
         if (@$jitemids) {
@@ -1123,7 +1168,7 @@ sub get_recent_items
             if ($month < 1 || $month > 12 || int($month) != $month) { $$err = "Invalid month." ; return (); }
             if ($year < 1970 || $year > 2038 || int($year) != $year) { $$err = "Invalid year: $year"; return (); }
             if ($day < 1 || $day > 31 || int($day) != $day) { $$err = "Invalid day."; return (); }
-            if ($day > LJ::days_in_month($month, $year)) { $$err = "That month doesn't have that many days."; return (); }
+            if ($day > LJ::TimeUtil->days_in_month($month, $year)) { $$err = "That month doesn't have that many days."; return (); }
         } else {
             $$err = "wrong date: " . $opts->{'ymd'};
             return ();
@@ -1358,7 +1403,7 @@ sub shared_member_request {
 
     LJ::send_mail({
         'to' => $u->email_raw,
-        'from' => $LJ::ADMIN_EMAIL,
+        'from' => $LJ::DONOTREPLY_EMAIL,
         'fromname' => $LJ::SITENAME,
         'charset' => 'utf-8',
         'subject' => "Community Membership: $ju->{'name'}",
@@ -2045,6 +2090,18 @@ sub handle_caches
     return 1;
 }
 
+=head2 LJ::show_contextual_hover()
+
+A subroutine that returns a boolean value indicating whether we should
+show a contextual hover popup on the current page.
+
+=cut
+
+sub show_contextual_hover {
+    my %args = LJ::Request->args;
+    return $LJ::CTX_POPUP and !$LJ::IS_SSL and $args{ctxpp} ne 'no';
+}
+
 # <LJFUNC>
 # name: LJ::start_request
 # des: Before a new web request is obtained, this should be called to
@@ -2084,6 +2141,7 @@ sub start_request
     %LJ::REQ_GLOBAL = ();             # per-request globals
     %LJ::_ML_USED_STRINGS = ();       # strings looked up in this web request
     %LJ::REQ_CACHE_USERTAGS = ();     # uid -> { ... }; populated by get_usertags, so we don't load it twice
+    %LJ::LOCK_OUT = ();
 
     $LJ::CACHE_REMOTE_BOUNCE_URL = undef;
     LJ::Userpic->reset_singletons;
@@ -2123,36 +2181,33 @@ sub start_request
             LJ::need_res(qw(
                             js/jquery.js
                             js/jquery_fn.js
-                            js/core.js
-                            js/dom.js
-                            js/httpreq.js
+                            js/basic.js
                             js/livejournal.js
-                            js/common/AdEngine.js
                             stc/lj_base.css
                             ));
 
-              # esn ajax
-              LJ::need_res(qw(
-                              js/esn.js
-                              stc/esn.css
-                              ))
-                  unless LJ::conf_test($LJ::DISABLED{esn_ajax});
+            # esn ajax
+            LJ::need_res(qw(
+                            js/esn.js
+                            stc/esn.css
+                            ))
+                unless LJ::conf_test($LJ::DISABLED{esn_ajax});
 
-              my %args = LJ::Request->args;
-              # contextual popup JS
-              LJ::need_res(qw(
-                              js/ippu.js
-                              js/lj_ippu.js
-                              js/ljwidget.js
-                              js/ljwidget_ippu.js
-                              js/hourglass.js
-                              js/contextualhover.js
-                              stc/contextualhover.css
-                              )) if $LJ::CTX_POPUP and $args{ctxpp} ne 'no';
+            # contextual popup JS
+            LJ::need_res(qw(
+                            js/ippu.js
+                            js/lj_ippu.js
+                            js/ljwidget.js
+                            js/ljwidget_ippu.js
+                            js/hourglass.js
+                            js/contextualhover.js
+                            stc/contextualhover.css
+                            )
+            ) if LJ::show_contextual_hover();
 
-              # Conditional IE CSS file for all pages 
-              LJ::need_res({condition => 'IE'}, 'stc/ie.css');
-          }
+            # Conditional IE CSS file for all pages 
+            LJ::need_res({condition => 'IE'}, 'stc/ie.css');
+        }
     }
 
     LJ::run_hooks("start_request");
@@ -2726,7 +2781,8 @@ sub delete_comments {
     return 0 unless $u->writer;
 
     my $jid = $u->{'userid'}+0;
-    my $in = join(',', map { $_+0 } @talkids);
+    my @batch = map { int $_ } @talkids;
+    my $in = join(',', @batch);
 
     # invalidate talk2row memcache
     LJ::Talk::invalidate_talk2row_memcache($u->id, @talkids);
@@ -2734,6 +2790,7 @@ sub delete_comments {
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 
+    LJ::run_hooks('report_cmt_delete', $jid, \@batch);
     my $num = $u->talk2_do(nodetype => $nodetype, nodeid => $nodeid,
                            sql => "UPDATE talk2 SET state='D' $where");
 
@@ -2741,8 +2798,9 @@ sub delete_comments {
     $num = 0 if $num == -1;
 
     if ($num > 0) {
+        LJ::run_hooks('report_cmt_text_delete', $jid, \@batch);
         $u->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");
-        $u->do("DELETE FROM talkprop2 WHERE $where");
+        $u->do("DELETE FROM talkprop2 $where");
     }
 
     my @jobs;

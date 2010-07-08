@@ -4,6 +4,8 @@
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw(%FORM);
 
     my $dbr = LJ::get_db_reader();
@@ -96,7 +98,7 @@
             if ($hist->{$_} && ($_ eq 'user' || $_ eq 'admin')) {
                 $ret .= LJ::ljuser($hist->{$_});
             } elsif ($_ eq 'shdate') {
-                $ret .= LJ::statushistory_time($hist->{$_});
+                $ret .= LJ::TimeUtil->statushistory_time($hist->{$_});
             } elsif ($_ eq 'notes') {
                 # notes need to be ehtml'd, but afterwards, we can convert \n to <br />
                 my $enotes = LJ::ehtml($hist->{$_});

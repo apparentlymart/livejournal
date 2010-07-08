@@ -2,13 +2,72 @@ package LJ::Widget::Search;
 
 use strict;
 use base qw(LJ::Widget);
+use vars qw(%GET %POST);
+
 use Carp qw(croak);
 
-sub need_res { qw( stc/widgets/search.css ) }
+sub need_res { qw(stc/widgets/search.css) }
 
 sub render_body {
     my $class = shift;
     my %opts = @_;
+
+    if ($opts{type} eq 'yandex') {
+        return "" unless LJ::is_enabled('yandex_search_page');
+
+        # ML-vars
+        my %ML;
+        foreach my $k (qw(name find findall findposts findcomments findusers findfaq)) {
+            $ML{"widget.search.yandex.$k"} = $class->ml("widget.search.yandex.$k")
+        }
+
+return <<EOF
+<div class="right-mod">
+    <div class="mod-tl">
+        <div class="mod-tr">
+            <div class="mod-br">
+                <div class="mod-bl">
+                    <div class="w-head"><h2><span class="w-head-in">$ML{'widget.search.yandex.name'}</span></h2><i class="w-head-corner"></i></div>
+                    <div class="w-body">
+                        <form action="/search/" method="get" id="search_form_basic" class="form-on">
+                            <fieldset>
+                                <div class="search-item search-query">
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td width="80%">
+                                                    <label for="basic_query"><input id="basic_query" name="q" class="type-text" value="" type="search"></label>
+                                                </td>
+                                                <td width="20%">
+                                                    <button type="submit">$ML{'widget.search.yandex.find'}</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="80%">
+                                                    <select id="area_basic_query" class="type-select" name="area">
+                                                        <option value="journals">$ML{'widget.search.yandex.findusers'}</option>
+                                                        <option value="default">$ML{'widget.search.yandex.findall'}</option>
+                                                        <option value="posts">$ML{'widget.search.yandex.findposts'}</option>
+                                                        <option value="comments">$ML{'widget.search.yandex.findcomments'}</option>
+                                                        <option value="faq">$ML{'widget.search.yandex.findfaq'}</option>
+                                                    </select>
+                                                </td>
+                                                <td width="20%"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                 </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+EOF
+    }
+
     my $ret;
 
     my $single_search = $opts{single_search};

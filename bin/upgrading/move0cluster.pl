@@ -29,6 +29,7 @@ my $optv = $opt_verbose;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljcmdbuffer.pl";
+use LJ::TimeUtil;
 
 my $dbh = LJ::get_dbh({raw=>1}, "master");
 die "No master db available.\n" unless $dbh;
@@ -124,7 +125,7 @@ if ($opt_prelocked) {
 }
 
 if ($opt_expungedel && $u->{'statusvis'} eq "D" &&
-    LJ::mysqldate_to_time($u->{'statusvisdate'}) < time() - 86400*31) {
+    LJ::TimeUtil->mysqldate_to_time($u->{'statusvisdate'}) < time() - 86400*31) {
 
     print "Expunging user '$u->{'user'}'\n";
     $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart, timedone) ".

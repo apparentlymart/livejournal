@@ -4,6 +4,8 @@ body<=
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw(%GET %POST);
 
     LJ::set_active_crumb('commsentinvites');
@@ -103,7 +105,7 @@ body<=
         $users{$id}{user} = $us->{$id}{user};
         $users{$id}{$_} = 1 foreach keys %{$invite->{args}};
         $users{$id}{status} = $invite->{status};
-        $users{$id}{date} = LJ::mysql_time($invite->{recvtime});
+        $users{$id}{date} = LJ::TimeUtil->mysql_time($invite->{recvtime});
         $users{$id}{date} =~ s/\s.+$//; # we just want the date, ignore time
     }
 

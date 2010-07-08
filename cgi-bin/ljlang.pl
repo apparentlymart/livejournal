@@ -3,6 +3,7 @@
 
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+require "ljhooks.pl";
 
 use Class::Autouse qw(
                       LJ::LangDatFile
@@ -11,6 +12,7 @@ use Class::Autouse qw(
 package LJ::Lang;
 #use LJ::ML;
 use constant MAXIMUM_ITCODE_LENGTH => 80;
+use LJ::TimeUtil;
 
 my @day_short   = (qw[Sun Mon Tue Wed Thu Fri Sat]);
 my @day_long    = (qw[Sunday Monday Tuesday Wednesday Thursday Friday Saturday]);
@@ -80,6 +82,11 @@ my %LN_ID = ();     # id -> { ..., ..., 'children' => [ $ids, .. ] }
 my %LN_CODE = ();   # $code -> ^^^^
 my $LAST_ERROR;
 my %TXT_CACHE;
+
+if ($LJ::IS_DEV_SERVER || $LJ::IS_LJCOM_BETA) {
+    our $_hook_is_installed;
+    LJ::register_hook('start_request', sub { %TXT_CACHE = (); }) unless $_hook_is_installed++;
+}
 
 sub last_error
 {
@@ -267,7 +274,7 @@ sub get_chgtime_unix
     my $chgtime = $dbr->selectrow_array("SELECT chgtime FROM ml_latest WHERE dmid=? AND itid=? AND lnid=?",
                                         undef, $dmid, $itid, $lnid);
     die $dbr->errstr if $dbr->err;
-    return $chgtime ? LJ::mysqldate_to_time($chgtime) : 0;
+    return $chgtime ? LJ::TimeUtil->mysqldate_to_time($chgtime) : 0;
 }
 
 sub get_itemid
@@ -530,7 +537,7 @@ sub get_text
         return $text->{$code};
     };
 
-    my $from_files = sub {
+    my $_from_files = sub {
         my ($localcode, @files);
         if ($code =~ m!^(/.+\.bml)(\..+)!) {
             my $file;
@@ -542,14 +549,14 @@ sub get_text
                       "$LJ::HOME/bin/upgrading/en.dat");
         }
 
+        my $dbmodtime = LJ::Lang::get_chgtime_unix($lang, $dmid, $code);
         foreach my $tf (@files) {
             next unless -e $tf;
 
             # compare file modtime to when the string was updated in the DB.
             # whichever is newer is authoritative
             my $fmodtime = (stat $tf)[9];
-            my $dbmodtime = LJ::Lang::get_chgtime_unix($lang, $dmid, $code);
-            return $from_db->() if ! $fmodtime || $dbmodtime > $fmodtime;
+            return $from_db->() if !$fmodtime || $dbmodtime > $fmodtime;
 
             my $ldf = $LJ::REQ_LANGDATFILE{$tf} ||= LJ::LangDatFile->new($tf);
             my $val = $ldf->value($localcode);
@@ -558,6 +565,11 @@ sub get_text
         return "[missing string $code]";
     };
 
+    my $from_files = sub {
+        my $cache_key = "ml.${lang}.${dmid}.${code}";
+        return $TXT_CACHE{$cache_key} ||= $_from_files->();
+    };
+ 
 
     ##
     my $gen_mld = LJ::Lang::get_dom('general');
@@ -705,7 +717,11 @@ sub get_lang_names {
         next unless $l;
 
         my $item = "langname.$code";
-        my $namethislang = BML::ml($item);
+
+        ## Language name in current lang
+        # my $namethislang = LJ::Lang::ml($item);
+
+        ## Native lang name
         my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
 
         push @list, $code, $namenative;

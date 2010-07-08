@@ -54,8 +54,6 @@ set entryborder_size = "";
 set entryborder_style = "hidden";
 set transparent = false;
 set show_entry_userpic = true;
-set page_recent_items = 20;
-set page_friends_items = 20;
 set view_entry_disabled = false;
 set counter_code = "";
 

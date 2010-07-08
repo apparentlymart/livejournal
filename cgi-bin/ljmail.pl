@@ -87,6 +87,7 @@ sub send_mail
             return $name ? "\"$name\" <$email>" : $email;
         };
 
+        $Text::Wrap::huge = 'overflow'; # Don't break long lines with urls.
         my $body = $opt->{'wrap'} ? Encode::encode_utf8(Text::Wrap::wrap('','',Encode::decode_utf8($opt->{'body'}))) : $opt->{'body'};
         my $subject = $opt->{'subject'};
         my $fromname = $opt->{'fromname'};
@@ -185,7 +186,10 @@ sub send_mail
  
     my $enqueue = sub {
         my $starttime = [Time::HiRes::gettimeofday()];
-        my $sclient = LJ::theschwartz() or die "Misconfiguration in mail.  Can't go into TheSchwartz.";
+        ## '_reuse_any_existing_connection' will return 'mass' schwartz handle 
+        ## when called from 'mass' workers and will return 'default' for the rest.
+        my $sclient = LJ::theschwartz({ 'role' => '_reuse_any_existing_connection' }) 
+            or die "Misconfiguration in mail.  Can't go into TheSchwartz.";
         my $host;
         if (@rcpts == 1) {
             $rcpts[0] =~ /(.+)@(.+)$/;

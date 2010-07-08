@@ -394,3 +394,52 @@ span.expandcollapse {
 		margin:-8px 0 0;
 		background:url(/img/userinfo.gif) no-repeat 0 0;
 		}
+
+
+/* Vederko-Button */
+.details_ru_vederko {
+	padding:0 0 10px;
+	}
+	.details_ru_vederko_btn {
+		}
+	*+HTML .details_ru_vederko_btn {
+		overflow:visible;
+		padding:0 10px;
+		}
+	* HTML .details_ru_vederko_btn {
+		overflow:visible;
+		padding:0 10px;
+		}
+		.details_ru_vederko_btn SPAN {
+			position:relative;
+			padding:0 21px 0 0;
+			}
+		* HTML .details_ru_vederko_btn SPAN {
+			position:relative;
+			padding:0 11px 0 0;
+			}
+	.details_ru_vederko_vederkouser {
+		position:absolute;
+		top:50%;
+		right:0;
+		width:17px;
+		height:17px;
+		margin:-8px 0 0;
+		background:url(/img/user_vederko.gif) no-repeat 0 0;
+		}
+		.details_ru_vederko_btn[disabled="disabled"] .details_ru_vederko_vederkouser {
+			opacity:0.5;
+			-moz-opacity:0.5; /* Netscape */
+			-khtml-opacity:0.5; /* Safari 1.x */
+			-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; /* IE 8 */
+			filter:alpha(opacity=50); /* IE 5-7 */
+			}
+	.details_ru_vederko_user {
+		position:absolute;
+		top:50%;
+		right:0;
+		width:17px;
+		height:17px;
+		margin:-8px 0 0;
+		background:url(/img/userinfo.gif) no-repeat 0 0;
+		}

@@ -77,10 +77,11 @@ sub ping_post {
 sub should_entry_recieve_pingback {
     my $class        = shift;
     my $target_entry = shift;
-    
+
     return 0 if $LJ::DISABLED{'pingback_receive'};
     return 0 if $target_entry->is_suspended;
-    return 0 unless $target_entry->journal->get_cap('pingback');
+    # Pingback is open for all users
+    # return 0 unless $target_entry->journal->get_cap('pingback');
     
     # not RO?
     return 0 if $target_entry->journal->readonly; # Check "is_readonly".
@@ -88,6 +89,10 @@ sub should_entry_recieve_pingback {
     # are comments allowed?
     return 0 unless $target_entry->posting_comments_allowed;
 
+    # user can disable recieving pingback for entire journa for entire journall
+    return 0 if $target_entry->journal->prop("pingback") eq 'D';
+
+=head
     # did user allow to add pingbacks?
     # journal's default. We do not store "J" value in DB.
     my $entry_pb_prop = $target_entry->prop("pingback") || 'J';
@@ -99,19 +104,24 @@ sub should_entry_recieve_pingback {
         return 0 if $journal_pb_prop eq 'D';       # pingback disabled
     }
     return 1;
+=cut
+
+    return 1; # 
 
 }
 
 
-# Send notification to PingBack server
+# 
 sub notify {
     my $class = shift;
     my %args  = @_;
 
+    return if $LJ::DISABLED{pingback};
+
     my $uri  = $args{uri};
     my $mode = $args{mode};
 
-    return unless $mode =~ m!^[LO]$!; # (L)ivejournal only, (O)pen.
+    # return unless $mode =~ m!^[LO]$!; # (L)ivejournal only, (O)pen.
 
     my $sclient = LJ::theschwartz();
     unless ($sclient){
@@ -132,9 +142,9 @@ sub notify {
 sub has_user_pingback {
     my $class = shift;
     my $u     = shift;
-    
+
     return 0 if $LJ::DISABLED{'pingback'};
-    return 0 unless $u->get_cap('pingback');
+    #return 0 unless $u->get_cap('pingback');
     return 1;
 }
 

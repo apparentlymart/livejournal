@@ -5,7 +5,7 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 use LJ::Request;
 
-sub need_res { qw( stc/widgets/login.css js/md5.js js/login.js) }
+sub need_res { return 'stc/widgets/login.css' }
 
 sub render_body {
     my $class = shift;
@@ -18,7 +18,7 @@ sub render_body {
     my $nojs = $opts{nojs};
     my $user = $opts{user};
     my $mode = $opts{mode};
-
+    
     my $getextra = $nojs ? '?nojs=1' : '';
 
     # Is this the login page?
@@ -33,12 +33,15 @@ sub render_body {
     my $root = $LJ::IS_SSL ? $LJ::SSLROOT : $LJ::SITEROOT;
     my $form_class = LJ::run_hook("login_form_class_name_$opts{mode}");
     $form_class = "lj_login_form pkg" unless $form_class;
-    $ret .= "<form action='$root/login.bml$getextra' method='post' class='$form_class'>\n";
-    $ret .= LJ::form_auth();
+    my $form_siteroot = ($LJ::USE_SSL_LOGIN) ? $LJ::SSLROOT : $root;
+    $ret .= "<form action='$form_siteroot/login.bml$getextra' method='post' class='$form_class'>\n";
 
-    my $chal = LJ::challenge_generate(300); # 5 minute auth token
-    $ret .= "<input type='hidden' name='chal' class='lj_login_chal' value='$chal' />\n";
-    $ret .= "<input type='hidden' name='response' class='lj_login_response' value='' />\n";
+    if (!$LJ::USE_SSL_LOGIN) {
+        $ret .= LJ::form_auth();
+        my $chal = LJ::challenge_generate(300); # 5 minute auth token
+        $ret .= "<input type='hidden' name='chal' class='lj_login_chal' value='$chal' />\n";
+        $ret .= "<input type='hidden' name='response' class='lj_login_response' value='' />\n";
+    }
 
     my $referer = BML::get_client_header('Referer');
     if ($isloginpage && $opts{get_ret} == 1 && $referer) {

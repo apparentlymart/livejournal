@@ -4,6 +4,7 @@ package LJ::UniqCookie;
 
 use strict;
 use Carp qw(croak);
+use LJ::TimeUtil;
 
 my %req_cache_uid2uniqs = (); # uid  => [ uniq1, uniq2, ... ]
 my %req_cache_uniq2uids = (); # uniq => [  uid1,  uid2, ... ]
@@ -426,7 +427,7 @@ sub ensure_cookie_value {
     foreach my $dom (@domains) {
         LJ::Request->err_headers_out->add("Set-Cookie" =>
                                  "ljuniq=$new_cookie_value; " .
-                                 "expires=" . LJ::time_to_cookie($now + 86400*60) . "; " .
+                                 "expires=" . LJ::TimeUtil->time_to_cookie($now + 86400*60) . "; " .
                                  ($dom ? "domain=$dom; " : "") . "path=/");
     }
 

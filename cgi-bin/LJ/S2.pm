@@ -22,6 +22,7 @@ use Class::Autouse qw(
                       );
 use Storable;
 use LJ::Request;
+use LJ::TimeUtil;
 use POSIX ();
 use Encode;
 
@@ -148,7 +149,10 @@ sub make_journal
     $graphicpreviews_obj->need_res($u);
     my $extra_js = LJ::statusvis_message_js($u);
     $page->{head_content} .= LJ::res_includes() . $extra_js;
-    $page->{head_content} .= $LJ::SHARE_THIS_URL unless $LJ::DISABLED{'sharethis'};
+    if (not $LJ::DISABLED{'sharethis'}){
+        ## generate <script src ..> to load ShareThis script with needed for journal set of services
+        $page->{head_content} .= $LJ::SHARE_THIS_URL_GEN->(journal => $u->username);
+    }
     LJ::run_hooks('head_content', \$page->{head_content});
 
     s2_run($r, $ctx, $opts, $entry, $page);
@@ -732,7 +736,7 @@ sub s2_context
     if ($opts->{'use_modtime'})
     {
         my $ims = LJ::Request->header_in("If-Modified-Since");
-        my $ourtime = LJ::time_to_http($modtime);
+        my $ourtime = LJ::TimeUtil->time_to_http($modtime);
         if ($ims eq $ourtime) {
             # 304 return; unload non-public layers
             LJ::S2::cleanup_layers(@layers);
@@ -1397,10 +1401,10 @@ sub layer_compile
         $dbcm->do("REPLACE INTO s2compiled2 (userid, s2lid, comptime, compdata) ".
                   "VALUES (?, ?, UNIX_TIMESTAMP(), ?)", undef,
                   $layer->{'userid'}, $lid, $gzipped) or die "replace into s2compiled2 (lid = $lid)";
-
-        # delete from memcache; we can't store since we don't know the exact comptime
-        LJ::MemCache::delete([ $lid, "s2c:$lid" ]);
     }
+
+    # delete from memcache; we can't store since we don't know the exact comptime
+    LJ::MemCache::delete([ $lid, "s2c:$lid" ]);
 
     # caller might want the compiled source
     if (ref $opts->{'compiledref'} eq "SCALAR") {
@@ -2039,6 +2043,7 @@ sub Page
         });
         LJ::control_strip_js_inject( user => $u->{user} );
     }
+    LJ::journal_js_inject();
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$p->{base_url}/data/foaf";
@@ -3082,7 +3087,7 @@ sub _Comment__get_link
 
         # see if any parents are being watched
         my $watching_parent = 0;
-        while ($comment && $comment->valid && $comment->parenttalkid) {
+        while ($comment && $comment->valid && $comment->parent && $comment->parent->valid) {
             # check cache
             $comment->{_watchedby} ||= {};
             my $thread_watched = $comment->{_watchedby}->{$u->{userid}};
@@ -3226,7 +3231,7 @@ sub _print_quickreply_link
     my $basesubject = $opts->{'basesubject'}; #cleaned later
 
     if ($opt_class) {
-        $opt_class = "class=\"$opt_class\"";
+        $opt_class = " class=\"$opt_class\"";
     }
 
     my $page = get_page();
@@ -3239,8 +3244,8 @@ sub _print_quickreply_link
         $basesubject =~ s/^(Re:\s*)*//i;
         $basesubject = "Re: $basesubject" if $basesubject;
         $basesubject = LJ::ejs($basesubject);
-        $onclick = "return quickreply(\"$target\", $pid, \"$basesubject\")";
-        $onclick = "onclick='$onclick'";
+        $onclick = "return QuickReply.reply('$target',$pid,'$basesubject')";
+        $onclick = " onclick=\"$onclick\"";
     }
 
     $onclick = "" unless $page->{'_type'} eq 'EntryPage';
@@ -3253,7 +3258,7 @@ sub _print_quickreply_link
     if ($bp) {
         $S2::pout->("<a href='$bp'>$linktext</a>");
     } else {
-        $S2::pout->("<a $onclick href='$replyurl' $opt_class>$linktext</a>");
+        $S2::pout->("<a$onclick href=\"$replyurl\"$opt_class>$linktext</a>");
     }
 }
 
@@ -3402,7 +3407,7 @@ sub Date__day_of_week
 {
     my ($ctx, $dt) = @_;
     return $dt->{'_dayofweek'} if defined $dt->{'_dayofweek'};
-    return $dt->{'_dayofweek'} = LJ::day_of_week($dt->{'year'}, $dt->{'month'}, $dt->{'day'}) + 1;
+    return $dt->{'_dayofweek'} = LJ::TimeUtil->day_of_week($dt->{'year'}, $dt->{'month'}, $dt->{'day'}) + 1;
 }
 *DateTime__day_of_week = \&Date__day_of_week;
 
@@ -3634,10 +3639,36 @@ sub _Entry__get_link
         my $link = LJ::S2::Link("#", $ctx->[S2::PROPS]->{"text_share_this"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_sharethis.gif", 24, 24));
         $link->{_raw} = qq|<script type="text/javascript">
             var stLink = jQuery('a:last')[0];
-            stLink.href = 'javascript:void(0)'
-            SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title'}, {button: false})
-                .attachButton(stLink);
+            stLink.href = 'javascript:void(0)';
+            SHARETHIS_post = SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title'}, {button: false});
+            SHARETHIS_post.attachButton(stLink);
+            SHARETHIS_ary.push(SHARETHIS_post);
             </script>|;
+        return $link;
+    }
+    if ($key eq "share_facebook") {
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->security eq 'public';
+        my $entry_url = LJ::eurl($entry->url);
+        my $entry_title = LJ::eurl($entry->subject_text);
+        my $url = "http://www.facebook.com/sharer.php?u=$entry_url&amp;t=$entry_title";
+        my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_facebook"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_facebook.gif", 24, 24));
+        return $link;
+    }
+    if ($key eq "share_twitter") {
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->security eq 'public';
+        my $post_id = $entry->journalid . ':' . $entry->ditemid;
+        my $entry_url = LJ::eurl($entry->url); # for js
+        my $link = LJ::S2::Link("$LJ::SITEROOT/share/twitter.bml?post_id=$post_id&amp;u=$entry_url", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
+        return $link;
+    }
+    if ($key eq "share_email") {
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->security eq 'public';
+        my $entry_url = LJ::eurl($entry->url); # for js
+        my $url = "$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;u=$entry_url";
+        my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_email"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_email.gif", 24, 24));
         return $link;
     }
     if ($key eq "mem_add") {
@@ -3762,11 +3793,21 @@ sub Entry__plain_subject
 }
 
 # 'I like it' button
-
 sub Entry__is_eventrate_enable
 {
     my ($ctx, $this) = @_;
-    return LJ::is_eventrate_enable($this->{'journal'}->{'_u'});
+
+    my $is_enabled = LJ::is_eventrate_enable($this->{'journal'}->{'_u'});
+    return 0 unless $is_enabled;
+
+    # Load ml-strings into properties
+    my $lang = $this->{'journal'}->{'_u'}->prop('browselang');
+    my $pr = $ctx->[S2::PROPS];
+    foreach my $prop (qw(i_like_this we_like_this)) {
+        $pr->{'text_'.$prop} = LJ::Lang::get_text($lang, $prop.'_title');
+    }
+
+    return 1;
 }
 
 sub Entry__get_eventratescounters
@@ -3786,7 +3827,7 @@ sub Entry__get_eventrates
         map { LJ::S2::UserLite(LJ::want_user($_)) }
             LJ::get_eventrates(
                 journalid   => $this->{'journal'}->{'_u'}->{'userid'},
-                jitemid     => int($this->{'itemid'}),
+                itemid      => int($this->{'itemid'}),
                 limits      => "$skip, $limit",
             )
     ];
@@ -3800,7 +3841,7 @@ sub Entry__is_myvoice
     return
         scalar LJ::get_eventrates(
                 journalid   => $this->{'journal'}->{'_u'}->{'userid'},
-                jitemid     => int($this->{'itemid'}),
+                itemid      => int($this->{'itemid'}),
                 userids     => [ $remote->{'userid'} ],
         );
 }

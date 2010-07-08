@@ -4,6 +4,8 @@
 use strict;
 package LJ::S2;
 
+use LJ::TimeUtil;
+
 sub YearPage
 {
     my ($u, $remote, $opts) = @_;
@@ -101,9 +103,9 @@ sub YearMonth {
         }
     };
 
-    my $day_of_week = LJ::day_of_week($year, $month, 1);
+    my $day_of_week = LJ::TimeUtil->day_of_week($year, $month, 1);
 
-    my $daysinmonth = LJ::days_in_month($month, $year);
+    my $daysinmonth = LJ::TimeUtil->days_in_month($month, $year);
 
     for my $day (1..$daysinmonth) {
         # so we don't auto-vivify years/months

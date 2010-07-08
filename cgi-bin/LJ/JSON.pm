@@ -30,31 +30,104 @@ die unless $wrap;
 
 1;
 
+package LJ::JSON::Wrapper;
+
+use Encode qw();
+
+sub traverse {
+    my ($class, $what, $sub) = @_;
+
+    my $type = ref $what;
+
+    # simple scalar
+    if ($type eq '') {
+        return $sub->($what);
+    }
+
+    # hashref
+    if ($type eq 'HASH') {
+        my %ret;
+        foreach my $k (keys %$what) {
+            $ret{$sub->($k)} = $class->traverse($what->{$k}, $sub);
+        }
+        return \%ret;
+    }
+
+    # arrayref
+    if ($type eq 'ARRAY') {
+        my @ret;
+        foreach my $v (@$what) {
+            push @ret, $class->traverse($v, $sub);
+        }
+        return \@ret;
+    }
+
+    # unknown type; for now, silently ignore it.
+    # TODO: better error handling?
+    return undef;
+}
+
+sub traverse_fix_encoding {
+    my ($class, $what) = @_;
+
+    return $class->traverse($what, sub {
+        my ($scalar) = @_;
+        return Encode::encode("iso-8859-1", $scalar);
+    });
+
+}
+
 package LJ::JSON::XS;
 
-BEGIN { @ISA = qw(JSON::XS); }
+BEGIN { @ISA = qw(LJ::JSON::Wrapper JSON::XS); }
 
 sub can_load {
     eval { require JSON::XS; JSON::XS->import; };
     return !$@;
 }
 
+sub new {
+    my ($class) = @_;
+    return $class->SUPER::new->latin1;
+}
+
+sub decode {
+    my ($class, $dump) = @_;
+
+    my $decoded = $class->SUPER::decode($dump);
+    $decoded = $class->traverse_fix_encoding($decoded);
+    return $decoded;
+}
+
 1;
 
 package LJ::JSON::JSONv2;
 
-BEGIN { @ISA = qw(JSON); }
+BEGIN { @ISA = qw(LJ::JSON::Wrapper JSON); }
 
 sub can_load {
     eval { require JSON };
     return !$@ && $JSON::VERSION ge 2;
 }
 
+sub new {
+    my ($class) = @_;
+    return $class->SUPER::new->latin1;
+}
+
+sub decode {
+    my ($class, $dump) = @_;
+
+    my $decoded = $class->SUPER::decode($dump);
+    $decoded = $class->traverse_fix_encoding($decoded);
+    return $decoded;
+}
+
 1;
 
 package LJ::JSON::JSONv1;
 
-BEGIN { @ISA = qw(JSON); }
+BEGIN { @ISA = qw(LJ::JSON::Wrapper JSON); }
 
 sub can_load {
     eval { require JSON };

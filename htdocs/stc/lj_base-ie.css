@@ -59,6 +59,18 @@
 		height: 220px;
 }
 
+/* Widgets
+--------------------------- */
+* HTML .appwidget .w-head {
+	zoom: 1;
+	}
+	* HTML .appwidget .w-head-corner  {
+		border-right: 5px solid #C7E0F6;
+		}
+
+
+
+
 /* Disabled block
 --------------------------- */
 /* Must be removed after implementation of Framework! */
@@ -108,3 +120,9 @@
     .st-disabled .b-blocker-iframe {
         display:block;
         }
+
+/* ONTD
+--------------------------- */
+#qotd_html_preview {
+	zoom:1;
+	}

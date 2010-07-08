@@ -1529,3 +1529,13 @@ userproplist.webmastertools_google:
   des: Meta tag content value provided by Google
   cldversion: 8
 
+userproplist.comment_alter_time:
+  datatype: num
+  des: Unix time of last modification of comment's data in journal. Comment added/deleted/updated/screened/etc...
+  cldversion: 8
+
+userproplist.dont_expunge_journal:
+  datatype: num
+  des: explicitly prevent the system from purging this user
+  cldversion: 8
+

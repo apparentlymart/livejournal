@@ -10,7 +10,7 @@ var tagCloudRefresh;
 // or set to a time value it should refresh.  Defaults to 10 seconds.
 
 // Let them override refresh time
-if (!defined(tagCloudRefresh)) {
+if (tagCloudRefresh === undefined) {
     setInterval(dataRefresh, 10000); // 10 seconds
 } else if (tagCloudRefresh != 0) {
     setInterval(dataRefresh, tagCloudRefresh);

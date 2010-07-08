@@ -46,7 +46,7 @@ sub execute {
 
     LJ::send_mail({
         'to' => $newemail,
-        'from' => $LJ::ADMIN_EMAIL,
+        'from' => $LJ::DONOTREPLY_EMAIL,
         'subject' => "Email Address Reset",
         'body' => $body,
     }) or $self->info("Confirmation email could not be sent.");

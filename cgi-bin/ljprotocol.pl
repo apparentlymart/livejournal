@@ -19,6 +19,8 @@ use Class::Autouse qw(
                       LJ::RateLimit
                       );
 
+use LJ::TimeUtil;
+
 LJ::Config->load;
 
 use lib "$ENV{LJHOME}/cgi-bin";
@@ -127,6 +129,33 @@ my %e = (
      "506" => [ E_TEMP, "Journal sync temporarily unavailable." ],
 );
 
+my %HANDLERS = (
+    login             => \&login,
+    getfriendgroups   => \&getfriendgroups,
+    getfriends        => \&getfriends,
+    friendof          => \&friendof,
+    checkfriends      => \&checkfriends,
+    getdaycounts      => \&getdaycounts,
+    postevent         => \&postevent,
+    editevent         => \&editevent,
+    syncitems         => \&syncitems,
+    getevents         => \&getevents,
+    editfriends       => \&editfriends,
+    editfriendgroups  => \&editfriendgroups,
+    consolecommand    => \&consolecommand,
+    getchallenge      => \&getchallenge,
+    sessiongenerate   => \&sessiongenerate,
+    sessionexpire     => \&sessionexpire,
+    getusertags       => \&getusertags,
+    getfriendspage    => \&getfriendspage,
+    getinbox          => \&getinbox,
+    sendmessage       => \&sendmessage,
+    setmessageread    => \&setmessageread,
+    addcomment        => \&addcomment,
+    checksession      => \&checksession,
+    getrecentcomments => \&getrecentcomments
+);
+
 sub translate
 {
     my ($u, $msg, $vars) = @_;
@@ -188,33 +217,48 @@ sub do_request
     LJ::Request->notes("codepath" => "protocol.$method")
         if LJ::Request->is_inited && ! LJ::Request->notes("codepath");
 
-    if ($method eq "login")            { return login(@args);            }
-    if ($method eq "getfriendgroups")  { return getfriendgroups(@args);  }
-    if ($method eq "getfriends")       { return getfriends(@args);       }
-    if ($method eq "friendof")         { return friendof(@args);         }
-    if ($method eq "checkfriends")     { return checkfriends(@args);     }
-    if ($method eq "getdaycounts")     { return getdaycounts(@args);     }
-    if ($method eq "postevent")        { return postevent(@args);        }
-    if ($method eq "editevent")        { return editevent(@args);        }
-    if ($method eq "syncitems")        { return syncitems(@args);        }
-    if ($method eq "getevents")        { return getevents(@args);        }
-    if ($method eq "editfriends")      { return editfriends(@args);      }
-    if ($method eq "editfriendgroups") { return editfriendgroups(@args); }
-    if ($method eq "consolecommand")   { return consolecommand(@args);   }
-    if ($method eq "getchallenge")     { return getchallenge(@args);     }
-    if ($method eq "sessiongenerate")  { return sessiongenerate(@args);  }
-    if ($method eq "sessionexpire")    { return sessionexpire(@args);    }
-    if ($method eq "getusertags")      { return getusertags(@args);      }
-    if ($method eq "getfriendspage")   { return getfriendspage(@args);   }
-    if ($method eq "getinbox")         { return getinbox(@args);         }
-    if ($method eq "sendmessage")      { return sendmessage(@args);      }
-    if ($method eq "setmessageread")   { return setmessageread(@args);   }
-    if ($method eq "addcomment")       { return addcomment(@args);   }
-    if ($method eq 'checksession')     { return checksession(@args);     }
-    if ($method eq "getrecentcomments")       { return getrecentcomments(@args);   }
+    my $method_ref = $HANDLERS{$method};
+
+    if ($method_ref)
+    {
+        my $result = $method_ref->(@args);
+
+        if ($result && exists $result->{xc3})
+        {
+            my $xc3 = delete $result->{xc3};
+
+            if ($req->{props}->{interface} eq 'xml-rpc')
+            {
+                my $ua = eval { LJ::Request->header_in("User-Agent") };
+                Encode::from_to($ua, 'utf8', 'utf8') if $ua;
+
+                my ($ip_class, $country) = LJ::GeoLocation->ip_class();
+
+                my $args = {
+                    function => $method || ''
+                };
+
+                if ($xc3->{u})
+                {
+                    my $u = $xc3->{u};
+                    $args->{userid} = $u->userid;
+                    $args->{usercaps} = $u->caps;
+                }
+
+                $args->{useragent} = $ua if $ua;
+                $args->{country}   = $country if $country;
+                $args->{post}      = $xc3->{post} if $xc3->{post};
+                $args->{comment}   = $xc3->{comment} if $xc3->{comment};
+
+                LJ::run_hooks("remote_procedure_call", $args);
+            }
+        }
+
+        return $result;
+    }
 
     LJ::Request->notes("codepath" => "") if LJ::Request->is_inited;
-    return fail($err,201);
+    return fail($err, 201);
 }
 
 sub checksession {
@@ -232,9 +276,11 @@ sub checksession {
         session     => $u->id.":".$session->id.":".$session->auth,
         caps        => $u->caps,
         usejournals => list_usejournals($u),
+        xc3 => {
+            u => $u
+        }
     }
 }
-
 
 sub addcomment
 {
@@ -258,24 +304,30 @@ sub addcomment
     
     # create
     my $comment = LJ::Comment->create(
-                        journal      => $journal,
-                        ditemid      => $req->{ditemid},
-                        parenttalkid => ($req->{parenttalkid} || int($req->{parent} / 256)),
+        journal      => $journal,
+        ditemid      => $req->{ditemid},
+        parenttalkid => ($req->{parenttalkid} || int($req->{parent} / 256)),
 
-                        poster       => $u,
+        poster       => $u,
 
-                        body         => $req->{body},
-                        subject      => $req->{subject},
+        body         => $req->{body},
+        subject      => $req->{subject},
 
-                        props        => { picture_keyword => $req->{prop_picture_keyword} }
-                        );
+        props        => { picture_keyword => $req->{prop_picture_keyword} }
+    );
 
     # OK
     return {
-             status      => "OK",
-             commentlink => $comment->url,
-             dtalkid     => $comment->dtalkid,
-             };
+        status      => "OK",
+        commentlink => $comment->url,
+        dtalkid     => $comment->dtalkid,
+        xc3 => {
+            u => $u,
+            comment => {
+                toplevel => ($comment->parenttalkid == 0 ? 1 : 0),
+            }
+        }
+    };
 }
 
 sub getrecentcomments {
@@ -309,7 +361,14 @@ sub getrecentcomments {
         $comment->{postername} = $users->{$comment->{posterid}}
             && $users->{$comment->{posterid}}->username;
     }
-    return  { status => 'OK', comments => [ @recv ] };
+
+    return {
+        status => 'OK',
+        comments => [ @recv ],
+        xc3 => {
+            u => $u
+        }
+    };
 }
 
 
@@ -342,7 +401,7 @@ sub getfriendspage
         'dateformat' => 'S2',
     });
 
-    my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count userpic/;
+    my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count userpic props security/;
 
     my @uids;
 
@@ -423,9 +482,15 @@ sub getfriendspage
         delete $_->{posterid};
     }
 
-    LJ::run_hooks("getfriendspage", { 'userid' => $u->userid, });
-
-    return { entries => [ @res ], skip => $skip };
+    LJ::run_hooks("getfriendspage", {userid => $u->userid, });
+    
+    return {
+        entries => [ @res ],
+        skip => $skip,
+        xc3 => {
+            u => $u
+        }
+    };
 }
 
 sub getinbox
@@ -522,10 +587,15 @@ sub getinbox
                    };
     }
 
-    return { 'skip'  => $skip,
-             'items' => \@res,
-             'login' => $u->user,
-             'journaltype' => $u->journaltype };
+    return {
+        'skip'  => $skip,
+        'items' => \@res,
+        'login' => $u->user,
+        'journaltype' => $u->journaltype,
+        xc3 => {
+            u => $u
+        }
+    };
 }
 
 sub setmessageread {
@@ -570,9 +640,11 @@ sub setmessageread {
     }
 
     return {
-        result => \@result
+        result => \@result,
+        xc3 => {
+            u => $u
+        }
     };
-
 }
 
 sub sendmessage
@@ -641,9 +713,14 @@ sub sendmessage
         $msg->send(\@errors);
     }
 
-    return { 'sent_count' => scalar @msg, 'msgid' => [ grep { $_ } map { $_->msgid } @msg ],
-             (@errors ? ('last_errors' => \@errors) : () ),
-           };
+    return {
+        'sent_count' => scalar @msg,
+        'msgid' => [ grep { $_ } map { $_->msgid } @msg ],
+        (@errors ? ('last_errors' => \@errors) : () ),
+        xc3 => {
+            u => $u
+        }
+    };
 }
 
 sub login
@@ -652,7 +729,11 @@ sub login
     return undef unless authenticate($req, $err, $flags);
 
     my $u = $flags->{'u'};
-    my $res = {};
+    my $res = {
+        xc3 => {
+            u => $u
+        }
+    };
     my $ver = $req->{'ver'};
 
     ## check for version mismatches
@@ -765,7 +846,7 @@ sub login
             $sth->execute;
         }
     }
-
+    
     return $res;
 }
 
@@ -774,7 +855,12 @@ sub getfriendgroups
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
-    my $res = {};
+    my $res = {
+        xc3 => {
+            u => $u
+        }
+    };
+    
     $res->{'friendgroups'} = list_friendgroups($u);
     return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
     if ($req->{'ver'} >= 1) {
@@ -782,6 +868,7 @@ sub getfriendgroups
             LJ::text_out(\$_->{'name'});
         }
     }
+
     return $res;
 }
 
@@ -796,7 +883,12 @@ sub getusertags
     return fail($req, 502) unless $u && $uowner;
 
     my $tags = LJ::Tags::get_usertags($uowner, { remote => $u });
-    return { tags => [ values %$tags ] };
+    return {
+        tags => [ values %$tags ],
+        xc3 => {
+            u => $u
+        }
+    };
 }
 
 sub getfriends
@@ -805,7 +897,12 @@ sub getfriends
     return undef unless authenticate($req, $err, $flags);
     return fail($req,502) unless LJ::get_db_reader();
     my $u = $flags->{'u'};
-    my $res = {};
+    my $res = {
+        xc3 => {
+            u => $u
+        }
+    };
+
     if ($req->{'includegroups'}) {
         $res->{'friendgroups'} = list_friendgroups($u);
         return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
@@ -833,6 +930,7 @@ sub getfriends
     if ($req->{'ver'} >= 1) {
         foreach(@{$res->{'friends'}}) { LJ::text_out(\$_->{'fullname'}) };
     }
+    
     return $res;
 }
 
@@ -842,7 +940,11 @@ sub friendof
     return undef unless authenticate($req, $err, $flags);
     return fail($req,502) unless LJ::get_db_reader();
     my $u = $flags->{'u'};
-    my $res = {};
+    my $res = {
+        xc3 => {
+            u => $u
+        }
+    };
 
     # TAG:FR:protocol:getfriends_of2 (same as TAG:FR:protocol:getfriends_of)
     $res->{'friendofs'} = list_friends($u, {
@@ -852,6 +954,7 @@ sub friendof
     if ($req->{'ver'} >= 1) {
         foreach(@{$res->{'friendofs'}}) { LJ::text_out(\$_->{'fullname'}) };
     }
+
     return $res;
 }
 
@@ -860,7 +963,11 @@ sub checkfriends
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
-    my $res = {};
+    my $res = {
+        xc3 => {
+            u => $u
+        }
+    };
 
     # return immediately if they can't use this mode
     unless (LJ::get_cap($u, "checkfriends")) {
@@ -902,7 +1009,7 @@ sub checkfriends
             while ($_ = each %$tu) {
                 $max = $tu->{$_} if $tu->{$_} > $max;
             }
-            $update = LJ::mysql_time($max) if $max;
+            $update = LJ::TimeUtil->mysql_time($max) if $max;
         } else {
             my $dbr = LJ::get_db_reader();
             unless ($dbr) {
@@ -930,6 +1037,7 @@ sub checkfriends
     }
 
     $res->{'lastupdate'} = $update;
+
     return $res;
 }
 
@@ -943,7 +1051,12 @@ sub getdaycounts
     my $uowner = $flags->{'u_owner'} || $u;
     my $ownerid = $flags->{'ownerid'};
 
-    my $res = {};
+    my $res = {
+        xc3 => {
+            u => $u
+        }
+    };
+
     my $daycts = LJ::get_daycounts($uowner, $u);
     return fail($err,502) unless $daycts;
 
@@ -951,6 +1064,7 @@ sub getdaycounts
         my $date = sprintf("%04d-%02d-%02d", $day->[0], $day->[1], $day->[2]);
         push @{$res->{'daycounts'}}, { 'date' => $date, 'count' => $day->[3] };
     }
+
     return $res;
 }
 
@@ -984,7 +1098,7 @@ sub common_event_validation
         return fail($err,203,"Invalid month value.");
     }
     if ($req->{'day'} !~ /^\d{1,2}$/ || $req->{'day'} < 1 ||
-        $req->{'day'} > LJ::days_in_month($req->{'mon'},
+        $req->{'day'} > LJ::TimeUtil->days_in_month($req->{'mon'},
                                           $req->{'year'}))
     {
         return fail($err,203,"Invalid day of month value.");
@@ -1141,6 +1255,7 @@ sub postevent
     my $uowner = $flags->{'u_owner'} || $u;
     # Make sure we have a real user object here
     $uowner = LJ::want_user($uowner) unless LJ::isu($uowner);
+    r($uowner) unless LJ::isu($uowner);
     my $clusterid = $uowner->{'clusterid'};
 
     my $dbh = LJ::get_db_writer();
@@ -1472,7 +1587,7 @@ sub postevent
 
                     LJ::send_mail({
                         'to'        => $to->{to},
-                        'from'      => $LJ::ADMIN_EMAIL,
+                        'from'      => $LJ::DONOTREPLY_EMAIL,
                         'charset'   => $to->{charset},
                         'subject'   => $subject,
                         'body'      => $body,
@@ -1481,13 +1596,25 @@ sub postevent
             }
 
             my $msg = translate($u, "modpost", undef);
-            return { 'message' => $msg };
+            return {
+                'message' => $msg,
+                xc3 => {
+                    u => $u,
+                    post => {
+                        coords      => $req->{props}->{current_coords},
+                        has_images  => ($req->{event} =~ /pics\.livejournal\.com/ ? 1 : 0),
+                        from_mobile => ($req->{event} =~ /m\.livejournal\.com/ ? 1 : 0)
+                    }
+                }
+            };
         }
     } # /moderated comms
 
     # posting:
 
-    $getlock->(); return $res if $res_done;
+    $getlock->();
+    
+    return $res if $res_done;
 
     # do rate-checking
     if ($u->{'journaltype'} ne "Y" && ! LJ::rate_log($u, "post", 1)) {
@@ -1716,6 +1843,16 @@ sub postevent
         # TODO: error on failure?  depends on the job I suppose?  property of the job?
     }
 
+    $res->{xc3} = {
+        u => $u,
+        post => {
+            url         => $res->{url},
+            coords      => $req->{props}->{current_coords},
+            has_images  => ($req->{event} =~ /pics\.livejournal\.com/ ? 1 : 0),
+            from_mobile => ($req->{event} =~ /m\.livejournal\.com/ ? 1 : 0)
+        }
+    };
+
     return $res;
 }
 
@@ -1838,6 +1975,7 @@ sub editevent
         ){
             my $qsecurity = $uowner->quote('private');
             my $dberr;
+            LJ::run_hooks('report_entry_update', $ownerid, $itemid);
             $uowner->log2_do(\$dberr, "UPDATE log2 SET security=$qsecurity " .
                                        "WHERE journalid=$ownerid AND jitemid=$itemid");
             return fail($err,501,$dberr) if $dberr;
@@ -1875,8 +2013,14 @@ sub editevent
         # what they just deleted.  (or something... probably rare.)
         LJ::set_userprop($poster, "dupsig_post", undef) if $poster;
 
-        my $res = { 'itemid' => $itemid,
-                    'anum' => $oldevent->{'anum'} };
+        my $res = {
+            'itemid' => $itemid,
+            'anum' => $oldevent->{'anum'},
+            xc3 => {
+                u => $u
+            }
+        };
+
         return $res;
     }
 
@@ -1979,6 +2123,7 @@ sub editevent
 
         my $qsecurity = $uowner->quote($security);
         my $dberr;
+        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
         $uowner->log2_do(\$dberr, "UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
                          "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
                          "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
@@ -1991,8 +2136,8 @@ sub editevent
         $sec = 2**31 if $security eq 'public';
 
         my $row = pack("NNNNN", $oldevent->{'posterid'},
-                       LJ::mysqldate_to_time($eventtime, 1),
-                       LJ::mysqldate_to_time($oldevent->{'logtime'}, 1),
+                       LJ::TimeUtil->mysqldate_to_time($eventtime, 1),
+                       LJ::TimeUtil->mysqldate_to_time($oldevent->{'logtime'}, 1),
                        $sec,
                        $itemid*256 + $oldevent->{'anum'});
 
@@ -2019,6 +2164,7 @@ sub editevent
         $event ne $oldevent->{'event'} ||
         $req->{'subject'} ne $oldevent->{'subject'}))
     {
+        LJ::run_hooks('report_entry_text_update', $ownerid, $itemid);
         $uowner->do("UPDATE logtext2 SET subject=?, event=? ".
                     "WHERE journalid=$ownerid AND jitemid=$itemid", undef,
                     $req->{'subject'}, LJ::text_compress($event));
@@ -2086,6 +2232,7 @@ sub editevent
     if ($req->{'props'}->{'opt_backdated'} eq "1" &&
         $oldevent->{'rlogtime'} != $LJ::EndOfTime) {
         my $dberr;
+        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
         $uowner->log2_do(undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
                          "journalid=$ownerid AND jitemid=$itemid");
         return fail($err,501,$dberr) if $dberr;
@@ -2093,6 +2240,7 @@ sub editevent
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
         $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
         my $dberr;
+        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
         $uowner->log2_do(\$dberr, "UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
                          "WHERE journalid=$ownerid AND jitemid=$itemid");
         return fail($err,501,$dberr) if $dberr;
@@ -2119,6 +2267,16 @@ sub editevent
         my @handles = $sclient->insert_jobs(@jobs);
         # TODO: error on failure?  depends on the job I suppose?  property of the job?
     }
+
+    $res->{xc3} = {
+        u => $u,
+        post => {
+            url         => $res->{url},
+            coords      => $req->{props}->{current_coords},
+            has_images  => ($req->{event} =~ /pics\.livejournal\.com/ ? 1 : 0),
+            from_mobile => ($req->{event} =~ /m\.livejournal\.com/ ? 1 : 0)
+        }
+    };
 
     return $res;
 }
@@ -2378,7 +2536,12 @@ sub getevents
 
     my $count = 0;
     my @itemids = ();
-    my $res = { skip => $skip };
+    my $res = {
+        skip => $skip,
+        xc3 => {
+            u => $u
+        }
+    };
     my $events = $res->{'events'} = [];
     my %evt_from_itemid;
 
@@ -2570,7 +2733,11 @@ sub editfriends
 #            unless LJ::RateLimit->check($u, [ $cond ]);
 #    }
 
-    my $res = {};
+    my $res = {
+        xc3 => {
+            u => $u
+        }
+    };
 
     ## first, figure out who the current friends are to save us work later
     my %curfriend;
@@ -2863,6 +3030,7 @@ sub editfriendgroups
             }
 
             my $in = join(",", @batch);
+            LJ::run_hooks('report_entry_update', $userid, \@batch);
             $u->do("UPDATE log2 SET allowmask=allowmask & ~(1 << $bit) ".
                    "WHERE journalid=$userid AND jitemid IN ($in) AND security='usemask'");
             $u->do("UPDATE logsec2 SET allowmask=allowmask & ~(1 << $bit) ".
@@ -2902,26 +3070,38 @@ sub editfriendgroups
     LJ::mark_dirty($u, "friends");
 
     # return value for this is nothing.
-    return {};
+    return {
+        xc3 => {
+            u => $u
+        }
+    };
 }
 
 sub sessionexpire {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{u};
+    my $res = {
+        xc3 => {
+            u => $u
+        }
+    };
 
     # expunge one? or all?
     if ($req->{expireall}) {
         $u->kill_all_sessions;
-        return {};
+        return $res;
     }
 
     # just expire a list
     my $list = $req->{expire} || [];
-    return {} unless @$list;
+
+    return $res unless @$list;
+
     return fail($err,502) unless $u->writer;
     $u->kill_sessions(@$list);
-    return {};
+
+    return $res;
 }
 
 sub sessiongenerate {
@@ -2948,6 +3128,9 @@ sub sessiongenerate {
     # return our hash
     return {
         ljsession => $sess->master_cookie_string,
+        xc3 => {
+            u => $u
+        }
     };
 }
 
@@ -3094,7 +3277,11 @@ sub syncitems
 
     my @ev = sort { $a->[2] cmp $b->[2] } (values %item, values %cmt);
 
-    my $res = {};
+    my $res = {
+        xc3 => {
+            u => $flags->{'u'}
+        }
+    };
     my $list = $res->{'syncitems'} = [];
     $res->{'total'} = scalar @ev;
     my $ct = 0;
@@ -3106,6 +3293,7 @@ sub syncitems
         last if $ct >= $LIMIT;
     }
     $res->{'count'} = $ct;
+
     return $res;
 }
 
@@ -3116,7 +3304,11 @@ sub consolecommand
     # logging in isn't necessary, but most console commands do require it
     LJ::set_remote($flags->{'u'}) if authenticate($req, $err, $flags);
 
-    my $res = {};
+    my $res = {
+        xc3 => {
+            u => $flags->{'u'}
+        }
+    };
     my $cmdout = $res->{'results'} = [];
 
     foreach my $cmd (@{$req->{'commands'}}) {
@@ -3144,11 +3336,13 @@ sub getchallenge
     my $res = {};
     my $now = time();
     my $etime = 60;
-    $res->{'challenge'} = LJ::challenge_generate($etime);
-    $res->{'server_time'} = $now;
-    $res->{'expire_time'} = $now + $etime;
-    $res->{'auth_scheme'} = "c0";  # fixed for now, might support others later
-    return $res;
+    return {
+        challenge   => LJ::challenge_generate($etime),
+        server_time => $now,
+        expire_time => $now + $etime,
+        auth_scheme => "c0",  # fixed for now, might support others later
+        xc3         => {}
+    };
 }
 
 sub login_message
@@ -3468,6 +3662,7 @@ sub un_utf8_request {
         $props->{$k} = LJ::no_utf8_flag($props->{$k});
     }
 }
+
 
 #### Old interface (flat key/values) -- wrapper aruond LJ::Protocol
 package LJ;

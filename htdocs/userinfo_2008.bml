@@ -1,6 +1,8 @@
 <?_code
 {
     use strict;
+    use LJ::TimeUtil;
+
     use vars qw($title $windowtitle $body $head $bml_okay %GET);
 
     BML::set_language_scope('/userinfo.bml');
@@ -583,8 +585,8 @@
     # Middle Section
     {
         my $entry_count = $u->number_of_posts;
-        my $lastupdated = LJ::mysql_time($u->timeupdate);
-        my $ago_text = LJ::ago_text($u->{secondsold});
+        my $lastupdated = LJ::TimeUtil->mysql_time($u->timeupdate);
+        my $ago_text = LJ::TimeUtil->ago_text($u->{secondsold});
 
         my $search_link = "[<a href='$LJ::SITEROOT/tools/search.bml?journal=$user'>$ML{'.details.search'}</a>]"
             if LJ::is_enabled("offsite_journal_search") && $pm->has_journal;
@@ -652,7 +654,7 @@
 
     # Right Section
     {
-        my $timecreate = LJ::mysql_time($u->timecreate);
+        my $timecreate = LJ::TimeUtil->mysql_time($u->timecreate);
         my $createdate = "<span class='tooltip' title=\"$timecreate\">" . substr($timecreate, 0, 10) . "</span>";
         my $createdate_label = $u->is_personal || $u->is_identity ? BML::ml('.details.joined', { createdate => $createdate }) : BML::ml('.details.created', { createdate => $createdate });
         my $supportpoints = $u->support_points_count;
@@ -944,7 +946,8 @@
             $postlevel_string = $ML{'.commsettings.postlevel.anybody'};
         }
 
-        $postlevel_string .= $ML{'.commsettings.postlevel.moderated'} if $u->prop('moderated');
+        $postlevel_string .= $ML{'.commsettings.postlevel.moderated'}
+            if $u->prop('moderated') && 'N' ne $u->prop('moderated');
 
         $comm_settings .= "<tr><th>$ML{'.commsettings.membership.header'}</th><td>$membership_string</td></tr>";
         $comm_settings .= "<tr><th>$ML{'.commsettings.postlevel.header'}</th><td>$postlevel_string</td></tr>";

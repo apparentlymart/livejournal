@@ -87,15 +87,12 @@ sub render {
 
     my $subclass = $class->subclass;
     my $css_subclass = lc($subclass);
+    $css_subclass =~ s/::/-/g;
     my %opt_hash = @opts;
 
     my $widget_ele_id = $class->widget_ele_id;
 
-    return "" unless $class->should_render;
-
-    my $ret = '';
-    $ret .= "<div class='appwidget appwidget-$css_subclass' id='$widget_ele_id'>\n"
-        unless ref $class && $class->{'no_container_div'};
+    return "" unless $class->should_render(@opts);
 
     my $rv = eval {
         my $widget = ref $class ? $class : "LJ::Widget::$subclass";
@@ -128,11 +125,16 @@ sub render {
         return $widget->render_body(@opts);
     } or $class->handle_error($@);
 
-    $ret .= $rv;
-    $ret .= "</div><!-- end .appwidget-$css_subclass -->\n"
-        unless ref $class && $class->{'no_container_div'};
-
-    return $ret;
+    if (!$rv) {
+        return '';
+    } elsif (ref $class && $class->{'no_container_div'}) {
+        return $rv;
+    } else {
+        return 
+            "<div class='appwidget appwidget-$css_subclass' id='$widget_ele_id'>\n" .
+            $rv .
+            "</div><!-- end .appwidget-$css_subclass -->\n";
+    }
 }
 
 sub post_fields_by_widget {

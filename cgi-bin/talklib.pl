@@ -22,6 +22,7 @@ use Class::Autouse qw(
                       );
 use MIME::Words;
 use Carp qw(croak);
+use LJ::TimeUtil;
 
 use constant PACK_FORMAT => "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state 
 
@@ -215,7 +216,6 @@ sub init
         return { 'error' => BML::ml('talk.error.purged')} if $ju->is_expunged;
 
         LJ::assert_is($ju->{user}, lc $journal);
-        $ju->selfassert;
 
         $init->{'clustered'} = 1;
         foreach (qw(itemid replyto)) {
@@ -275,7 +275,7 @@ sub get_journal_item
     my $item = LJ::get_log2_row($u, $itemid);
     return undef unless $item;
 
-    $item->{'alldatepart'} = LJ::alldatepart_s2($item->{'eventtime'});
+    $item->{'alldatepart'} = LJ::TimeUtil->alldatepart_s2($item->{'eventtime'});
 
     $item->{'itemid'} = $item->{'jitemid'};    # support old & new keys
     $item->{'ownerid'} = $item->{'journalid'}; # support old & news keys
@@ -309,6 +309,10 @@ sub check_viewable
 
     unless (LJ::can_view($remote, $item)) {
         if (defined $remote) {
+             LJ::Request->pnotes ('error' => 'private');
+             LJ::Request->pnotes ('remote' => LJ::get_remote());
+             BML::return_error_status(403);
+             return;
             return $err->(BML::ml('talk.error.notauthorised'));
         } else {
             my $host = LJ::Request->header_in("Host");
@@ -410,6 +414,15 @@ sub update_commentalter {
     LJ::set_logprop($u, $itemid, { 'commentalter' => time() });
 }
 
+sub update_journals_commentalter {
+    my $u = shift;
+
+    # journal data consists of two types: posts and comments.
+    # last post time is stored in 'userusage' table.
+    # last comment add/update/delete/whateverchange time - here:
+    $u->set_prop("comment_alter_time", time());
+}
+
 # <LJFUNC>
 # name: LJ::Talk::get_comments_in_thread
 # class: web
@@ -496,6 +509,7 @@ sub delete_thread {
     my $num = LJ::delete_comments($u, "L", $jitemid, @$ids);
     LJ::replycount_do($u, $jitemid, "decr", $num);
     LJ::Talk::update_commentalter($u, $jitemid);
+    LJ::Talk::update_journals_commentalter($u);
     return 1;
 }
 
@@ -527,6 +541,7 @@ sub delete_author {
     my $num = LJ::delete_comments($u, "L", $jitemid, @ids);
     LJ::replycount_do($u, $jitemid, "decr", $num);
     LJ::Talk::update_commentalter($u, $jitemid);
+    LJ::Talk::update_journals_commentalter($u);
     return 1;
 }
 
@@ -562,6 +577,7 @@ sub delete_comment {
     my $num = LJ::delete_comments($u, "L", $jitemid, $jtalkid);
     LJ::replycount_do($u, $jitemid, "decr", $num);
     LJ::Talk::update_commentalter($u, $jitemid);
+    LJ::Talk::update_journals_commentalter($u);
 
     # done
     return 1;
@@ -633,8 +649,10 @@ sub freeze_comments {
     my $qnodeid = $nodeid+0;
 
     # now perform action
-    my $in = join(',', map { $_+0 } @$ids);
+    my @batch = map { int $_ } @$ids;
+    my $in = join(',', @batch);
     my $newstate = $unfreeze ? 'A' : 'F';
+    LJ::run_hooks('report_cmt_update', $quserid, \@batch);
     my $res = $u->talk2_do(nodetype => $nodetype, nodeid => $nodeid,
                            sql =>   "UPDATE talk2 SET state = '$newstate' " .
                                     "WHERE journalid = $quserid AND nodetype = $qnodetype " .
@@ -642,6 +660,11 @@ sub freeze_comments {
 
     # invalidate talk2row memcache props
     LJ::Talk::invalidate_talk2row_memcache($u->id, @$ids);
+    
+    # set time of comments modification in the journal
+    LJ::Talk::update_journals_commentalter($u);    
+
+    LJ::run_hooks('freeze_comment', $unfreeze, $u, $nodeid, [@batch]); # jitemid, [jtalkid]
 
     return undef unless $res;
     return 1;
@@ -653,11 +676,13 @@ sub screen_comment {
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
 
-    my $in = join (',', map { $_+0 } @jtalkids);
+    my @batch = map { int $_ } @jtalkids;
+    my $in = join(',', @batch);
     return unless $in;
 
     my $userid = $u->{'userid'} + 0;
 
+    LJ::run_hooks('report_cmt_update', $userid, \@batch);
     my $updated = $u->talk2_do(nodetype => "L", nodeid => $itemid,
                                sql =>   "UPDATE talk2 SET state='S' ".
                                         "WHERE journalid=$userid AND jtalkid IN ($in) ".
@@ -674,6 +699,10 @@ sub screen_comment {
     }
 
     LJ::Talk::update_commentalter($u, $itemid);
+    LJ::Talk::update_journals_commentalter($u);
+
+    LJ::run_hooks('screen_comment', $userid, $itemid, [@batch]); # jitemid, [jtalkid]
+
     return;
 }
 
@@ -683,12 +712,14 @@ sub unscreen_comment {
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
 
-    my $in = join (',', map { $_+0 } @jtalkids);
+    my @batch = map { int $_ } @jtalkids;
+    my $in = join(',', @batch);
     return unless $in;
 
     my $userid = $u->{'userid'} + 0;
     my $prop = LJ::get_prop("log", "hasscreened");
 
+    LJ::run_hooks('report_cmt_update', $userid, \@batch);
     my $updated = $u->talk2_do(nodetype => "L", nodeid => $itemid,
                                sql =>   "UPDATE talk2 SET state='A' ".
                                         "WHERE journalid=$userid AND jtalkid IN ($in) ".
@@ -709,6 +740,8 @@ sub unscreen_comment {
     LJ::run_hooks('unscreen_comment', $userid, $itemid, $in);
 
     LJ::Talk::update_commentalter($u, $itemid);
+    LJ::Talk::update_journals_commentalter($u);
+
     return;
 }
 
@@ -843,7 +876,7 @@ sub get_talk_data_do
                 state => $state,
                 posterid => $poster,
                 datepost_unix => $time,
-                datepost => LJ::mysql_time($time),  # timezone surely fucked.  deprecated.
+                datepost => LJ::TimeUtil->mysql_time($time),  # timezone surely fucked.  deprecated.
                 parenttalkid => $par,
             };
 
@@ -858,12 +891,38 @@ sub get_talk_data_do
         # set cache in LJ::Entry object for this set of comments
         $set_entry_cache->();
 
+        ## increase profiling counter
+        ## may be safely removed
+        LJ::MemCache::add("talk2fromMemc", 0);
+        LJ::MemCache::incr("talk2fromMemc");
+
         return $ret;
     };
 
     return $memcache_decode->() if $memcache_good->();
 
-    my $dbcr = LJ::get_cluster_def_reader($u);
+    # get time of last modification of comments in this journal.
+    # if comments in journal were not updated for a some time, we could
+    # load them from any server in cluster: master or slave
+    my $dbcr = undef;
+    my $comments_updated = $u->prop("comment_alter_time");
+    if (LJ::is_web_context()
+        and not LJ::did_post()
+        and $LJ::USER_CLUSTER_MAX_SECONDS_BEHIND_MASTER
+        and $comments_updated
+        and time() - $comments_updated > $LJ::USER_CLUSTER_MAX_SECONDS_BEHIND_MASTER
+    ){
+        # try to load comments from Slave
+        $dbcr = LJ::get_cluster_reader($u);
+
+        ## increase profiling counter
+        ## may be safely removed
+        LJ::MemCache::add("talk2fromSlave", 0);
+        LJ::MemCache::incr("talk2fromSlave");
+
+    } else {
+        $dbcr = LJ::get_cluster_def_reader($u);
+    }
     return undef unless $dbcr;
 
     my $lock = $dbcr->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
@@ -877,6 +936,11 @@ sub get_talk_data_do
         $memcache_decode->();
         return $ret;
     }
+
+    ## increase profiling counter
+    ## may be safely removed
+    LJ::MemCache::add("talk2fromDB", 0);
+    LJ::MemCache::incr("talk2fromDB");
 
     my $memval = $DATAVER;
     my $sth = $dbcr->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, ".
@@ -965,6 +1029,7 @@ sub fixup_logitem_replycount {
                                  "journalid=? AND nodetype='L' AND nodeid=? ".
                                  "AND state IN ('A','F') $sharedmode",
                                  undef, $u->{'userid'}, $jitemid);
+    LJ::run_hooks('report_entry_update', $u->{'userid'}, $jitemid);
     $u->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
            undef, int($ct), $u->{'userid'}, $jitemid);
     print STDERR "Fixing replycount for $u->{'userid'}/$jitemid from $rp_count to $ct\n"
@@ -1101,7 +1166,7 @@ sub load_comments
         return;
     }
 
-    my $page_size = $LJ::TALK_PAGE_SIZE || 25;
+    my $page_size = $opts->{page_size} || $LJ::TALK_PAGE_SIZE || 25;
     my $max_subjects = $LJ::TALK_MAX_SUBJECTS || 200;
     my $threading_point = $LJ::TALK_THREAD_POINT || 50;
 
@@ -1147,6 +1212,30 @@ sub load_comments
     ## expand first reply to top-level comments
     ## %expand_children - list of comments, children of which are to expand
     my %expand_children = map { $_ => 1 } @top_replies;
+
+    ## new strategy to expand comments: by level 
+    if ($opts->{expand_strategy} eq 'by_level' and $opts->{expand_level} > 1) {
+        my $expand = sub {
+            my ($fun, $cur_level, $item_ids) = @_;
+            next if $cur_level >= $opts->{expand_level};
+
+            foreach my $itemid (@$item_ids){
+                $expand_children{$itemid} = 1;
+                next unless $children{$itemid};
+
+                ## expand next level it there are comments
+                $fun->($fun, $cur_level+1, $children{$itemid});
+            }
+        };
+
+        ## go through first level
+        foreach my $itemid (keys %expand_children){
+            next unless $children{$itemid};
+            ## expand next (second) level
+            $expand->($expand, 2, $children{$itemid});
+        }
+    }
+
     my (@subjects_to_load, @subjects_ignored);
     while (@check_for_children) {
         my $cfc = shift @check_for_children;
@@ -1154,8 +1243,10 @@ sub load_comments
         foreach my $child (@{$children{$cfc}}) {
             if (@posts_to_load < $page_size || $expand_children{$cfc} || $opts->{expand_all}) {
                 push @posts_to_load, $child;
-                ## expand only the first child, then clear the flag
-                delete $expand_children{$cfc};
+                ## expand only the first child (unless 'by_level' strategy is in use), 
+                ## then clear the flag
+                delete $expand_children{$cfc}
+                    unless $opts->{expand_strategy} eq 'by_level';
             }
             elsif (@posts_to_load < $page_size) {
                 push @posts_to_load, $child;
@@ -2028,6 +2119,8 @@ sub mark_comment_as_spam {
     # can't mark your own comments as spam.
     return 0 if $posterid && $posterid == $journalu->id;
 
+    LJ::run_hooks('spam_comment', $journalu->userid, $row->{nodeid}, $jtalkid);
+
     # step 2a: if it's a suspended user, don't add, but pretend that we were successful
     if ($posterid) {
     	my $posteru = LJ::want_user($posterid);
@@ -2447,6 +2540,11 @@ sub enter_comment {
     # update the comment alter property
     LJ::Talk::update_commentalter($journalu, $itemid);
 
+    # journals data consists of two types of data: posts and comments.
+    # last post time is stored in 'userusage' table.
+    # last comment add/update/delete/whateverchange time - here:
+    LJ::Talk::update_journals_commentalter($journalu);
+
     # fire events
     unless ($LJ::DISABLED{esn}) {
         my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
@@ -2467,7 +2565,7 @@ sub init {
         return undef;
     };
     my $bmlerr = sub {
-        return $err->($BML::ML{$_[0]});
+        return $err->(LJ::Lang::ml($_[0]));
     };
 
     my $init = LJ::Talk::init($form);
@@ -2771,7 +2869,7 @@ sub init {
 
     if ($up) {
         if ($up->{'status'} eq "N" && $up->{'journaltype'} ne "I" && !LJ::run_hook("journal_allows_unvalidated_commenting", $journalu, $up)) {
-            $err->(BML::ml("$SC.error.noverify2", {'aopts' => "href='$LJ::SITEROOT/register.bml'"}));
+            $err->(LJ::Lang::ml("$SC.error.noverify2", {'aopts' => "href='$LJ::SITEROOT/register.bml'"}));
         }
         if ($up->{'statusvis'} eq "D") {
             $bmlerr->("$SC.error.deleted");
@@ -3121,6 +3219,12 @@ sub edit_comment {
 
     # the caller wants to know the comment's talkid.
     $comment->{talkid} = $comment_obj->jtalkid;
+
+
+    # journals data consists of two types of data: posts and comments.
+    # last post time is stored in 'userusage' table.
+    # last comment add/update/delete/whateverchange time - here:
+    LJ::Talk::update_journals_commentalter($comment_obj->journal);
 
     # cluster tracking
     LJ::mark_user_active($comment_obj->poster, 'comment');

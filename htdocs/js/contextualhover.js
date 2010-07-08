@@ -436,7 +436,7 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 		} else {
 			jQuery(
 				'<span class="alias-unavailable">'+
-					'<a href="http://www.ljdev10.livejournal.ru/manage/account">'+
+					'<a href="'+Site.siteroot+'/manage/account">'+
 						'<img src="'+Site.statprefix+'/horizon/upgrade-paid-icon.gif" width="13" height="16" alt=""/>'+
 					'</a> '+
 					'<a href="'+Site.siteroot+'/support/faqbrowse.bml?faqid=295">'+data.alias_title+'</a>'+

@@ -25,21 +25,26 @@ sub can_reuse_account {
     ## no user - the name can be occupied
     return 1 unless $tou;
 
+    if ($u->{'user'} eq $to) {
+        $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.same');
+        return 0;
+    }
+
     if ($tou->is_expunged) {
         # expunged usernames can be moved away. they're already deleted.
         return 1;
     } elsif ($u && lc($tou->email_raw) eq lc($u->email_raw) && $tou->is_visible && $tou->is_person) {
         if ($tou->password eq $u->password) {
             if (!$tou->is_validated || !$u->is_validated) {
-                $opts->{error} = BML::ml('/rename/use.bml.error.notvalidated');
+                $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.notvalidated');
             } else {
                 return 1;
             }
         } else {
-            $opts->{error} = BML::ml('/rename/use.bml.error.badpass');
+            $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.badpass');
         }
     } else {
-        $opts->{error} = BML::ml('/rename/use.bml.error.usernametaken');
+        $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.usernametaken');
     }
     return 0;
 }
@@ -185,7 +190,7 @@ sub basic_rename {
     LJ::Event::SecurityAttributeChanged->new($u ,  { 
         action       => 'account_renamed', 
         old_username => $from, 
-        ip           => LJ::is_web_context() ? LJ::Request->remote_ip() : '127.0.0.1', # without IP it will not work
+        ip           => ($opts->{ip} || (LJ::is_web_context() ? LJ::Request->remote_ip() : '127.0.0.1')),
         datetime     => sprintf("%02d:%02d %02d/%02d/%04d", @date[2,1], $date[3], $date[4]+1, $date[5]+1900),
     })->fire;
 
@@ -253,7 +258,9 @@ sub basic_rename {
         if ($u->{journaltype} ne 'P' || $opts->{'opt_redir'}) {
             LJ::update_user($u_old_username, { raw => "journaltype='R', statusvis='R', statusvisdate=NOW()" });
             LJ::set_userprop($dbh, $u_old_username, "renamedto", $to); # 'from' will point to 'to'
-            $u->set_prop('renamedto', undef) if $u->prop('renamedto') eq $from; # safeness against circular redirection
+            if ($u->prop('renamedto')) {
+                $u->set_prop('renamedto', undef) if $u->prop('renamedto') eq $from; # safeness against circular redirection
+            }
             if ($alias_changed > 0) {
                 $dbh->do("INSERT INTO email_aliases VALUES (?,?)", undef,
                      "$u->{'user'}\@$LJ::USER_DOMAIN", 

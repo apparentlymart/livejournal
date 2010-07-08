@@ -92,6 +92,7 @@ sub RecentPage
         'itemshow' => $itemshow + 1,
         'skip' => $skip,
         'tagids' => $opts->{tagids},
+        'tagmode' => $opts->{tagmode},
         'security' => $opts->{'securityfilter'},
         'itemids' => \@itemids,
         'dateformat' => 'S2',

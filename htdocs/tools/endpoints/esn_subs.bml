@@ -73,9 +73,6 @@
         }
 
         $subparams{method} = 'Inbox';
-
-        my ($subscr) = $remote->has_subscription(%subparams);
-
         $subparams{flags} = 0;
         
         my $evt = LJ::Event->new_from_raw_params(map { $subparams{$_} }
@@ -84,7 +81,10 @@
         return $err->("This user isn't allowed to subscribe to this event")
             unless $evt->available_for_user($remote);
 
-        eval { $subscr ||= $remote->subscribe(%subparams) };
+        # LJ::Subscription->create($remote, %subpaarms) return LJ::Subscription object of new subscription
+        # or just already existed subscription with %subparams if it exists.
+        my $subscr = 0;
+        eval { $subscr = LJ::Subscription->create($remote, %subparams) };
         return $err->($@) if $@;
 
         if ($subscr) {

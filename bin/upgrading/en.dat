@@ -2549,6 +2549,8 @@ gender.specify=Specify
 
 Help=Help
 
+i_like_this_title=Please click Track this if you want to receive all comments to this entry
+
 img.btn_del=Delete
 
 img.btn_down=Down
@@ -3359,6 +3361,8 @@ poll.error.badmaxlength=Maxlength attribute on lj-pq text tags must be an intege
 
 poll.error.badsize=Size attribute on lj-pq text tags must be an integer from 1-100.
 
+poll.error.cantlock=Sorry, cannot lock DB.
+
 poll.error.cantview=Error: you don't have access to view these poll results.
 
 poll.error.cantvote=Sorry, you don't have permission to vote in this particular poll.
@@ -3421,6 +3425,8 @@ poll.participants|staleness=1
 poll.participants=, participants: [[total]]
 
 poll.pollnum=Poll #[[num]]
+
+poll.posted=Posted
 
 poll.scaleanswers=<b>Mean:</b> [[mean]] <b>Median:</b> [[median]] <b>Std. Dev</b> [[stddev]]
 
@@ -5792,6 +5798,14 @@ web.postto.btn=Switch
 
 web.postto.label=Post to:
 
+we_like_this_title=View people who like it
+
+widget.addcommunity.caption=Add community
+
+widget.addcommunity.form_text=Please submit your suggestion for Community Directory. Or submit your suggestion for [[openlink]]Spotlight[[closelink]].
+
+widget.addcommunity.submit_button_caption=Submit
+
 widget.addqotd.extratext|staleness=1
 widget.addqotd.extratext=Extra Text (optional):
 
@@ -5851,6 +5865,24 @@ widget.browse.findusers.school=School
 
 widget.browse.title|staleness=1
 widget.browse.title=Browse [[sitenameabbrev]]
+
+widget.browse.windowtitle=Community Directory
+
+widget.browse.nav_bar.home=Home
+
+widget.browse.page.first=First
+
+widget.browse.page.previous=Previous
+
+widget.browse.page.next=Next
+
+widget.browse.page.last=Last
+
+widget.browse.community.join=Join
+
+widget.browse.community.watch=Watch
+
+widget.browse.community.empty_list=No communities in this category yet
 
 widget.commsofuser.title=Communities [[user]] has added
 
@@ -6400,6 +6432,10 @@ widget.manageqotd.extratext=Extra Text
 widget.manageqotd.is_special|staleness=1
 widget.manageqotd.is_special=Special?
 
+widget.marqueefeatures.title=Cool features on LiveJournal
+
+widget.marqueefeatures.also=Also check out
+
 widget.moodthemechooser.desc|staleness=1
 widget.moodthemechooser.desc=Mood themes are small icons that describe your mood or the mood of a post. Select from a variety of faces and characters.
 
@@ -6463,8 +6499,14 @@ widget.navstripchooser.title=Navigation Strip
 widget.navstripchooser.upgradetos2|staleness=1
 widget.navstripchooser.upgradetos2=<a [[aopts]]><strong>Switch to S2</strong></a> and you'll be able to use custom colors for the navigation strip.
 
+widget.news.title=LiveJournal news
+
+widget.news.more=More in <a href="[[href]]">News</a>.
+
 widget.pagenotice.dismiss|staleness=1
 widget.pagenotice.dismiss=Dismiss
+
+widget.popularinterests.title=Popular Interests
 
 widget.popularinterests.viewall|staleness=1
 widget.popularinterests.viewall=view all popular interests
@@ -6676,6 +6718,20 @@ widget.search.username=Username
 
 widget.search.yahoo=Yahoo! ID
 
+widget.search.yandex.name=Search
+
+widget.search.yandex.find=Find
+
+widget.search.yandex.findall=All
+
+widget.search.yandex.findposts=Posts
+
+widget.search.yandex.findcomments=Comments
+
+widget.search.yandex.findusers=People and communitites
+
+widget.search.yandex.findfaq=FAQ
+
 widget.sitemessages.title|staleness=1
 widget.sitemessages.title=Announcement
 
@@ -6815,6 +6871,10 @@ widget.themenav.switchtos1=Switch to old style system (S1)
 widget.themenav.title|staleness=1
 widget.themenav.title=2. Select a New Theme
 
+widget.topentries.comments=[[count]] [[?count|comment|comments]]
+
+widget.topentries.spotlight.title=Community spotlight
+
 widget.topusers.top5commenters.title=Top 5 commenters within 24h
 
 widget.topusers.head.nr=Nr
@@ -6822,6 +6882,8 @@ widget.topusers.head.nr=Nr
 widget.topusers.head.users=Users
 
 widget.topusers.top5posters.title=Top 5 posters within a week
+
+widget.updatesforuser.footer=Customize your [[openlink]]notifications[[closelink]] so you never miss a beat
 
 widget.upgradeaccount.title|staleness=1
 widget.upgradeaccount.title=Upgrade your account

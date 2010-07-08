@@ -125,7 +125,13 @@ sub raw_params {
 # my $arg1    = $event->arg1;
 sub event_journal { &u; }
 sub userid        { $_[0]->{userid}; }
-sub u    {  LJ::load_userid($_[0]->{userid}) }
+
+sub u {
+    my ($self) = @_;
+    $self->{'u'} ||= LJ::load_userid($self->{userid});
+    return $self->{'u'};
+}
+
 sub arg1 {  $_[0]->{args}[0] }
 sub arg2 {  $_[0]->{args}[1] }
 
@@ -171,17 +177,24 @@ sub typemap {
     );
 }
 
+my (%classes, %etypeids);
+
 # return the class name, given an etypeid
 #
 # my $class = LJ::Event->class($etypeid);
 sub class {
     my ($class, $typeid) = @_;
-    my $tm = $class->typemap
-        or return undef;
 
-    $typeid ||= $class->etypeid;
+    unless ($classes{$typeid}) {
+        my $tm = $class->typemap
+            or return undef;
 
-    return $tm->typeid_to_class($typeid);
+        $typeid ||= $class->etypeid;
+
+        $classes{$typeid} = $tm->typeid_to_class($typeid);
+    }
+
+    return $classes{$typeid};
 }
 
 # return etypeid for the class
@@ -191,10 +204,14 @@ sub etypeid {
     my ($class_self) = @_;
     my $class = ref $class_self ? ref $class_self : $class_self;
 
-    my $tm = $class->typemap
-        or return undef;
+    unless ($etypeids{$class}) {
+        my $tm = $class->typemap
+            or return undef;
 
-    return $tm->class_to_typeid($class);
+        $etypeids{$class} = $tm->class_to_typeid($class);
+    }
+
+    return $etypeids{$class};
 }
 
 # return etypeid for the given class
@@ -447,6 +464,14 @@ sub as_email_headers {
     my ($self, $u) = @_;
     return undef;
 }
+
+# return a boolean value indicating that email notifications of this event need
+# a standard footer (ml(esn.email.html.footer)) appended to them.
+#
+# this is a virtual function; the base class function returns 1 for "yes".
+#
+# if ($evt->need_standard_footer) { $html .= BML::ml('esn.email.html.footer'); }
+sub need_standard_footer { 1 }
 
 # return a string representing an "SMS" (TxtLJ) notification sent to the passed
 # user notifying them that this event has happened.

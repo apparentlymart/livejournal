@@ -20,9 +20,9 @@ sub autocomplete {
 
     return qq{
     <script type="text/javascript">
-        function AutoCompleteFriends (ele) \{
+        function AutoCompleteFriends(ele) \{
             var keywords = new InputCompleteData([$formatted_list], "ignorecase");
-            var ic = new InputComplete(ele, keywords);
+            new InputComplete(ele, keywords);
         \}
         if ('$fieldid' && \$('$fieldid')) AutoCompleteFriends(\$('$fieldid'));
     </script>

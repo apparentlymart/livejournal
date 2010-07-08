@@ -1,0 +1,10 @@
+<div class="w-head"><h2><span class="w-head-in"><TMPL_VAR expr="ml('widget.marqueefeatures.title')"></span></h2><i class="w-head-corner"></i></div>
+<div class="w-body">
+    <ul class="w-list">
+        <TMPL_LOOP links>
+            <li><a href="<TMPL_VAR link>"><TMPL_VAR text></a></li>
+        </TMPL_LOOP>
+    </ul>
+    <p><TMPL_VAR expr="ml('widget.marqueefeatures.also')"> <a href="<TMPL_VAR also_link>"><TMPL_VAR also_text></a></p>
+</div>
+

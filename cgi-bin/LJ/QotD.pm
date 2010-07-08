@@ -342,7 +342,8 @@ sub store_question {
     # clear cache
     my $type = $class->get_type( start => $vals{time_start}, end => $vals{time_end} );
     $class->cache_clear($type);
-    return 1;
+    
+    return $qid;
 }
 
 # returns all questions that started during the given month

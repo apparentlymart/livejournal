@@ -1,8 +1,8 @@
-package LJ;
+package LJ::TimeUtil;
 use strict;
 
 # <LJFUNC>
-# name: LJ::days_in_month
+# name: LJ::TimeUtil->days_in_month
 # class: time
 # des: Figures out the number of days in a month.
 # args: month, year?
@@ -11,9 +11,8 @@ use strict;
 #           will return 29.
 # returns: Number of days in that month in that year.
 # </LJFUNC>
-sub days_in_month
-{
-    my ($month, $year) = @_;
+sub days_in_month {
+    my ($class, $month, $year) = @_;
     if ($month == 2)
     {
         return 29 unless $year;  # assume largest
@@ -32,9 +31,10 @@ sub days_in_month
     return ((31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[$month-1]);
 }
 
-sub day_of_week
-{
-    my ($year, $month, $day) = @_;
+sub day_of_week {
+    my ($class, $year, $month, $day) = @_;
+
+    require Time::Local;
     my $time = eval { Time::Local::timelocal(0,0,0,$day,$month-1,$year) };
     return undef if $@;
     return (localtime($time))[6];
@@ -42,21 +42,21 @@ sub day_of_week
 
 # <LJFUNC>
 # class: time
-# name: LJ::http_to_time
+# name: LJ::TimeUtil->http_to_time
 # des: Converts HTTP date to Unix time.
 # info: Wrapper around HTTP::Date::str2time.
-#       See also [func[LJ::time_to_http]].
+#       See also [func[LJ::TimeUtil->time_to_http]].
 # args: string
 # des-string: HTTP Date.  See RFC 2616 for format.
 # returns: integer; Unix time.
 # </LJFUNC>
 sub http_to_time {
-    my $string = shift;
+    my ($class, $string) = @_;
     return HTTP::Date::str2time($string);
 }
 
 sub mysqldate_to_time {
-    my ($string, $gmt) = @_;
+    my ($class, $string, $gmt) = @_;
     return undef unless $string =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d)(?::(\d\d))?)?$/;
     my ($y, $mon, $d, $h, $min, $s) = ($1, $2, $3, $4, $5, $6);
     my $calc = sub {
@@ -70,35 +70,35 @@ sub mysqldate_to_time {
     return $ret unless $@;
 
     # then fix the day up, if so.
-    my $max_day = LJ::days_in_month($mon, $y);
+    my $max_day = LJ::TimeUtil->days_in_month($mon, $y);
     $d = $max_day if $d > $max_day;
     return $calc->();
 }
 
 # <LJFUNC>
 # class: time
-# name: LJ::time_to_http
+# name: LJ::TimeUtil->time_to_http
 # des: Converts a Unix time to a HTTP date.
 # info: Wrapper around HTTP::Date::time2str to make an
-#       HTTP date (RFC 1123 format)  See also [func[LJ::http_to_time]].
+#       HTTP date (RFC 1123 format)  See also [func[LJ::TimeUtil->http_to_time]].
 # args: time
 # des-time: Integer; Unix time.
 # returns: String; RFC 1123 date.
 # </LJFUNC>
 sub time_to_http {
-    my $time = shift;
+    my ($class, $time) = @_;
     return HTTP::Date::time2str($time);
 }
 
 # <LJFUNC>
-# name: LJ::time_to_cookie
+# name: LJ::TimeUtil->time_to_cookie
 # des: Converts Unix time to format expected in a Set-Cookie header.
 # args: time
 # des-time: unix time
 # returns: string; Date/Time in format expected by cookie.
 # </LJFUNC>
 sub time_to_cookie {
-    my $time = shift;
+    my ($class, $time) = @_;
     $time = time() unless defined $time;
 
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($time);
@@ -114,7 +114,7 @@ sub time_to_cookie {
 # http://www.w3.org/TR/NOTE-datetime
 # http://www.w3.org/TR/xmlschema-2/#dateTime
 sub time_to_w3c {
-    my ($time, $ofs) = @_;
+    my ($class, $time, $ofs) = @_;
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($time);
 
     $mon++;
@@ -128,7 +128,7 @@ sub time_to_w3c {
 }
 
 # <LJFUNC>
-# name: LJ::mysql_time
+# name: LJ::TimeUtil->mysql_time
 # des:
 # class: time
 # info:
@@ -136,9 +136,8 @@ sub time_to_w3c {
 # des-:
 # returns:
 # </LJFUNC>
-sub mysql_time
-{
-    my ($time, $gmt) = @_;
+sub mysql_time {
+    my ($class, $time, $gmt) = @_;
     $time ||= time();
     my @ltime = $gmt ? gmtime($time) : localtime($time);
     return sprintf("%04d-%02d-%02d %02d:%02d:%02d",
@@ -151,7 +150,7 @@ sub mysql_time
 }
 
 # <LJFUNC>
-# name: LJ::alldatepart_s1
+# name: LJ::TimeUtil->alldatepart_s1
 # des: Gets date in MySQL format, produces s1dateformat.
 # class: time
 # args:
@@ -161,11 +160,10 @@ sub mysql_time
 #       Thu Thursday Oct October 03 2003 10 10 2 02 2nd AM 33 9 09 9 09
 # returns:
 # </LJFUNC>
-sub alldatepart_s1
-{
-    my $time = shift;
+sub alldatepart_s1 {
+    my ($class, $time) = @_;
     my ($sec,$min,$hour,$mday,$mon,$year,$wday) =
-        gmtime(LJ::mysqldate_to_time($time, 1));
+        gmtime(LJ::TimeUtil->mysqldate_to_time($time, 1));
     my $ret = "";
 
     $ret .= LJ::Lang::day_short($wday+1) . " " .
@@ -187,7 +185,7 @@ sub alldatepart_s1
 
 
 # <LJFUNC>
-# name: LJ::alldatepart_s2
+# name: LJ::TimeUtil->alldatepart_s2
 # des: Gets date in MySQL format, produces s2dateformat.
 # class: time
 # args:
@@ -195,11 +193,10 @@ sub alldatepart_s1
 # info: s2 dateformat is: yyyy mm dd hh mm ss day_of_week
 # returns:
 # </LJFUNC>
-sub alldatepart_s2
-{
-    my $time = shift;
+sub alldatepart_s2 {
+    my ($class, $time) = @_;
     my ($sec,$min,$hour,$mday,$mon,$year,$wday) =
-        gmtime(LJ::mysqldate_to_time($time, 1));
+        gmtime(LJ::TimeUtil->mysqldate_to_time($time, 1));
     return
         sprintf("%04d %02d %02d %02d %02d %02d %01d",
                 $year+1900,
@@ -212,7 +209,7 @@ sub alldatepart_s2
 }
 
 # <LJFUNC>
-# name: LJ::statushistory_time
+# name: LJ::TimeUtil->statushistory_time
 # des: Convert a time like "20070401120323" to "2007-04-01 12:03:23".
 # class: time
 # args:
@@ -221,14 +218,14 @@ sub alldatepart_s2
 # returns:
 # </LJFUNC>
 sub statushistory_time {
-    my $time = shift;
+    my ($class, $time) = @_;
     $time =~ s/(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/$1-$2-$3 $4:$5:$6/;
     return $time;
 }
 
 # <LJFUNC>
 # class: time
-# name: LJ::ago_text
+# name: LJ::TimeUtil->ago_text
 # des: Converts integer seconds to English time span
 # info: Turns a number of seconds into the largest possible unit of
 #       time. "2 weeks", "4 days", or "20 hours".
@@ -236,9 +233,8 @@ sub statushistory_time {
 # args: secondsold
 # des-secondsold: The number of seconds from now something was made.
 # </LJFUNC>
-sub ago_text
-{
-    my $secondsold = shift;
+sub ago_text {
+    my ($class, $secondsold) = @_;
     return $BML::ML{'time.ago.never'} unless $secondsold > 0;
     my $num;
     my $unit;
@@ -264,7 +260,7 @@ sub ago_text
 # zero if called in such a way as would cause those.
 
 sub calc_age {
-    my ($year, $mon, $day) = @_;
+    my ($class, $year, $mon, $day) = @_;
 
     $year += 0; # Force all the numeric context, so 0s become false.
     $mon  += 0;
@@ -289,6 +285,55 @@ sub calc_age {
     return $age;
 }
 
+=head2 fancy_time_format
 
+Format a UNIX timestamp so that it can be displayed to the user, taking care
+of i18n.
+
+ my $timestamp = 1273215570;
+ 
+ print LJ::TimeUtil->fancy_time_format($timestamp, 'day');
+    # => April 7 2010
+ 
+ print LJ::TimeUtil->fancy_time_format($timestamp, 'min');
+    # => April 7 2010, 10:59
+ 
+ print LJ::TimeUtil->fancy_time_format($timestamp, 'sec');
+    # or
+ print LJ::TimeUtil->fancy_time_format($timestamp);
+    # => April 7 2010, 10:59:30
+
+Related ML variables are: C<esn.month.day_*>.
+
+=cut
+
+sub fancy_time_format {
+    my ($class, $timestamp, $precision) = @_;
+    $precision ||= 'sec';
+
+    my ($sec, $min, $hour, $mday, $mon, $year) = gmtime($timestamp);
+
+    # gmtime has returned month and year in a weird format; let's convert
+    # these to something more convenient
+    # reference: perldoc localtime
+    $mon  += 1;
+    $year += 1900;
+
+    my $month_code = lc(LJ::Lang::month_short($mon));
+    my $day_month  = LJ::Lang::ml("esn.month.day_$month_code", {
+        'day' => $mday,
+    });
+
+    my $ret = "$day_month $year";
+    return $ret if $precision eq 'day';
+
+    $ret .= sprintf(', %02d:%02d', $hour, $min);
+    return $ret if $precision eq 'min';
+
+    $ret .= sprintf(':%02d', $sec);
+    return $ret if $precision eq 'sec';
+
+    die "unknown precision $precision";
+}
 
 1;

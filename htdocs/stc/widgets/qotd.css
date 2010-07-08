@@ -18,6 +18,9 @@
 		list-style:none;
 		font-size:11px;
 		}
+	* HTML .i-qotd-menu {
+		zoom:1;
+		}
 		.i-qotd-menu LI {
 			float:left;
 			margin:0 5px 0 0;
@@ -98,6 +101,9 @@
 	.b-qotd-question {
 		overflow:hidden;
 		margin:0 0 10px;
+		}
+	* HTML .b-qotd-question {
+		zoom:1;
 		}
 		.b-qotd-question .qotd-pic {
 			float:left;
@@ -181,7 +187,7 @@
 					}
 	.b-qotd .more {
 		background:url("/img/arrow-double-blue.gif") no-repeat scroll 0 60% transparent;
-		color:#00C !important;
 		padding:0 0 0 10px;
-		text-decoration:underline !important;
 		}
+
+

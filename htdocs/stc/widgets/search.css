@@ -1,15 +1,28 @@
-/* css for search widget */
-
+/* css for the search widget */
 .appwidget-search {
-    padding: 10px 0;
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-}
-.appwidget-search h2 {
-    font-size: 12px;
-    float: left;
-    margin: 0 5px 0 0;
-    padding: 0;
-    line-height: 22px;
-    font-weight: bold;
-}
+    margin: 0 0 15px !important;
+    } 
+    .appwidget-search H2 SPAN.w-head-in {
+        background: url("/img/search.gif") no-repeat  0 50%;
+        }
+    .appwidget-search .w-body {
+        padding: 10px; 
+        background: #FFF;
+        }
+        .appwidget-search FORM,
+        .appwidget-search FIELDSET {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            }
+            .appwidget-search TABLE {
+                width: 100%;
+                }
+                .appwidget-search TABLE TD {
+                    padding: 0 3px 7px;
+                    }
+             .appwidget-search SELECT,
+             .appwidget-search INPUT.type-text {
+                width: 97%; 
+                }
+                

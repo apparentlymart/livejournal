@@ -1,0 +1,51 @@
+<?_code
+    use strict;
+    use vars qw(%GET %POST $body);
+
+    my $remote = LJ::get_remote() or return "<?needlogin?>";
+
+    # priv check
+    unless (LJ::check_priv($remote, 'siteadmin', 'featured-searches')) {
+        $body = "access denied";
+        return;
+    }
+
+    $body = '';
+
+    $body .= '<div style="float:left;"><form method="POST" action="">';
+
+    my $system = LJ::load_user('system') or die "No 'system' user in DB";
+    my $stored_words = $system->prop('search_admin');
+    my $edited_words = $POST{words};
+
+    if ($POST{submit}) {
+        my @keywords = split /\s*\n+\s*/m, $POST{words};
+        $stored_words = join("\n", @keywords); # update this value, it will be used below
+        $system->set_prop('search_admin', $stored_words);
+    }
+
+    my $words = $POST{preview} ? $edited_words : $stored_words;
+    $body .= LJ::html_textarea({ name => 'words', rows => 20, cols => 50, value => $words, 
+                                 disabled => ($POST{edit} || $POST{preview}) ? 0 : 1 });
+
+    $body .= '<p>';
+    $body .= '<button type="submit" name="preview" value="preview">Preview widget</button> ' if $POST{edit} or $POST{preview};
+    if ($POST{edit} or $POST{preview}) {
+        $body .= '<button type="submit" name="cancel">Cancel editing</button>';
+    } else {
+        $body .= '<button type="submit" name="edit" value="edit">Edit search words</button>';
+    }
+    $body .= '</p><p><button type="submit" name="submit" value="save">Save search words</button></p></form>';
+    # preview
+    $body .= '</div><div style="float:right;width:650px;">';
+    $body .= LJ::Widget::SearchJournals->render(substitude_words => $words);
+    $body .= '</div>';
+    
+
+    return;
+_code?>
+
+<?page
+title=>HomePage admin - Searching
+body=><?_code return $body; _code?>
+page?>

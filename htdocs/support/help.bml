@@ -41,6 +41,8 @@ body<=
 <?_code
  use strict;
  use vars qw(%FORM);
+
+ use LJ::TimeUtil;
  use LJ::Support::Request::Tag;
 
  # a shorter alias, for convenience
@@ -383,7 +385,7 @@ body<=
      # other content for this request
      my $summary = LJ::ehtml($sp->{'subject'});
      my $secold = time() - $sp->{'timecreate'};
-     my $age = $GET{rawdates} ? LJ::mysql_time($sp->{'timecreate'}) : LJ::ago_text($secold);
+     my $age = $GET{rawdates} ? LJ::TimeUtil->mysql_time($sp->{'timecreate'}) : LJ::TimeUtil->ago_text($secold);
      my $probarea = $sp->{_cat}->{'catname'};
      my $points = LJ::Support::calc_points($sp, $secold);
 

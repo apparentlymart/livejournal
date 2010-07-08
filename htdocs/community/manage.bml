@@ -35,7 +35,6 @@ body<=
  # keep track of what communities remote moderates
  my $mods = LJ::load_rel_target($remote, 'M');
  my %mods; 
- my %modcount;
  if ($mods) { foreach (@$mods) { $mods{$_} = $show{$_} = 1; } }
 
  my %names = ();
@@ -51,12 +50,13 @@ body<=
     while (my ($uid, $membership) = $sth->fetchrow_array) {
         my $cu = $us->{$uid};
         next unless $cu && $cu->{statusvis} eq "V" || $cu->is_readonly;
-        $names{$uid} = [ $cu->{user}, $cu->{name}, -1 ];
+        $names{$uid} = { user => $cu->{user}, name => $cu->{name}, count => 0 };
         if ($mods{$uid}) {
                 $udbr = LJ::get_cluster_reader($cu);
                 my $sql = "SELECT COUNT(*), posterid" .
                             " FROM modlog WHERE journalid=$uid GROUP BY posterid";
                 my $modlogref = $udbr->selectall_arrayref($sql);
+                my $modlogcount_for_users = 0;
                 foreach (@$modlogref) {
                     my ($modlogcount, $posterid) = map {$_ || 0} @$_;
                     if ($modlogcount && $posterid) {
@@ -65,8 +65,9 @@ body<=
                             $modlogcount = 0;   # Don't show requests from suspended users
                         }
                     }
-                    $modcount{$uid} = $names{$uid}[2] = $modlogcount;
+                    $modlogcount_for_users += $modlogcount;
                 }
+                $names{$uid}->{'count'} = $modlogcount_for_users;
         }
         if ($membership eq 'moderated') {
             my $ids = LJ::get_pending_members($uid) || [];
@@ -84,14 +85,14 @@ body<=
 
     if (!defined $GET{'sortby'} || $GET{'sortby'} eq 'username') {
         $ret .= "<th>$ML{'.commlist.username'}</th>";
-        @snames = sort { $names{$a}->[0] cmp $names{$b}->[0] } keys %names;
+        @snames = sort { $names{$a}->{'user'} cmp $names{$b}->{'user'} } keys %names;
     } else {
         $ret .= "<th><a href='".BML::self_link({'sortby' => 'username'}) . "'>$ML{'.commlist.username'}</a></th>";
     }
 
     if ($GET{'sortby'} eq 'title') {
         $ret .= "<th>$ML{'.commlist.title'}</th>";
-        @snames = sort { $names{$a}->[1] cmp $names{$b}->[1] } keys %names;
+        @snames = sort { $names{$a}->{'name'} cmp $names{$b}->{'name'} } keys %names;
     } else {
         $ret .= "<th><a href='".BML::self_link({'sortby' => 'title'}) . "'>$ML{'.commlist.title'}</a></th>";
     }
@@ -100,7 +101,7 @@ body<=
 
     if ($GET{'sortby'} eq 'mod') {
         $ret .= "<th>$ML{'.commlist.moderation'}</th>";
-        @snames = sort { $names{$b}->[2] <=> $names{$a}->[2] } keys %names;
+        @snames = sort { $names{$b}->{'count'} <=> $names{$a}->{'count'} } keys %names;
     } elsif (@$mods) {
         $ret .= "<th><a href='".BML::self_link({'sortby' => 'mod'}) . "'>$ML{'.commlist.moderation'}</a></th>";
     } else {
@@ -109,8 +110,8 @@ body<=
 
     my $rc = 0;
     foreach my $id (@snames) {
-        my $user = $names{$id}->[0];
-        my $name = $names{$id}->[1];
+        my $user = $names{$id}->{'user'};
+        my $name = $names{$id}->{'name'};
         my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
         $ret .= "<tr class='$rstyle'><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td nowrap='nowrap'>";
         if ($admin{$id}) {
@@ -132,7 +133,7 @@ body<=
         }
         $ret .= "</td><td align='center'>";
         if ($mods{$id}) {
-            my $num = $modcount{$id} || "0"; # relying on this to be <b>-wrapped
+            my $num = $names{$id}->{'count'} || "0"; # relying on this to be <b>-wrapped
             $ret .= BML::ml('.commlist.moderation.num2', {'aopts' => "href='$LJ::SITEROOT/community/moderate.bml?authas=$user'", 'num' => $num});
         } else {
             $ret .= "&nbsp";
@@ -145,7 +146,6 @@ body<=
     $ret .= "$ML{'.commlist.none'}";
     $ret .= "</div><hr class='hr' />";
  }
-
 
  # save any changes
  if (LJ::did_post()) {

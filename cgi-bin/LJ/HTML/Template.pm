@@ -10,6 +10,9 @@ sub new {
     my %common_params = (
         'lj_siteroot'   => $LJ::SITEROOT,
         'lj_statprefix' => $LJ::STATPREFIX,
+        'lj_imgprefix'  => $LJ::IMGPREFIX,
+        'lj_sitename'   => $LJ::SITENAMESHORT,
+        'lj_sslroot'    => $LJ::SSLROOT,
     );
 
     if ($opts->{'use_expr'}) {
@@ -21,13 +24,27 @@ sub new {
                 my %opts = @_;
                 return LJ::Lang::ml($key, \%opts);
             },
+        );
+        HTML::Template::Pro->register_function(
             ehtml => sub {
                 my $string = shift;
                 return LJ::ehtml($string);
             },
+        );
+        HTML::Template::Pro->register_function(
             ejs => sub {
                 my $string = shift;
                 return LJ::ejs($string);
+            },
+        );
+        HTML::Template::Pro->register_function(
+            ljuser => sub {
+                my $username = shift;
+
+                my %opts;
+                $opts{'imgroot'} = "$LJ::SSLROOT/img" if $LJ::IS_SSL;
+
+                return LJ::ljuser($username, \%opts);
             },
         );
 
@@ -42,6 +59,7 @@ sub new {
                                     # if 'param_name' doesn't exist in the template body.
                                     # Defaults to 1.
             loop_context_vars => 1, # special loop variables: __first__, __last__, __odd__, __inner__, __counter__
+            path => $ENV{'LJHOME'},
             @_
         );
 
@@ -60,6 +78,7 @@ sub new {
                                     # $template->param(param_name => 'value') even
                                     # if 'param_name' doesn't exist in the template body.
                                     # Defaults to 1.
+            path => $ENV{'LJHOME'},
             @_
         );
 

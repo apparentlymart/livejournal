@@ -4,6 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use LJ::ContentFlag;
+use LJ::TimeUtil;
 
 sub need_res {
     return qw(
@@ -108,11 +109,11 @@ sub render_body {
     my $remote = LJ::get_remote();
     my %fields = (
                   instime => sub {
-                      LJ::ago_text(time() - shift());
+                      LJ::TimeUtil->ago_text(time() - shift());
                     },
                   modtime => sub {
                       my $time = shift;
-                      return $time ? LJ::ago_text(time() - $time) : "Never";
+                      return $time ? LJ::TimeUtil->ago_text(time() - $time) : "Never";
                     },
                   journalid => sub {
                       LJ::ljuser(LJ::load_userid(shift()));

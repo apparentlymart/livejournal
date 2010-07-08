@@ -3,6 +3,7 @@ package LJ::Console::Command::Finduser;
 use strict;
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
+use LJ::TimeUtil;
 
 sub cmd { "finduser" }
 
@@ -120,7 +121,7 @@ sub execute {
             $self->info("  User is marked underage due to $reason");
         }
 
-        $self->info("  Last updated: " . ($timeupdate->{$userid} ? LJ::time_to_http($timeupdate->{$userid}) : "Never"))
+        $self->info("  Last updated: " . ($timeupdate->{$userid} ? LJ::TimeUtil->time_to_http($timeupdate->{$userid}) : "Never"))
             if $opt eq 'timeupdate';
 
         foreach (LJ::run_hooks("finduser_extrainfo", { 'dbh' => $dbh, 'u' => $u })) {

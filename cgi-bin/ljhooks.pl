@@ -86,9 +86,16 @@ sub register_hook
 {
     my $hookname = shift;
     my $subref = shift;
-    my (undef, $filename, undef) = caller;
+    my (undef, $filename, $line) = caller;
 
-    push @{$LJ::HOOKS{$hookname}}, [$filename, $subref];
+    ## Check that no hook is registered twice
+    foreach my $h (@{$LJ::HOOKS{$hookname}}) {
+        if ($h->[0] eq $filename && $h->[2]==$line) {
+            warn "Hook '$hookname' may be registered twice from $filename:$line";
+            last;
+        }
+    }
+    push @{$LJ::HOOKS{$hookname}}, [$filename, $subref, $line];
 }
 
 sub load_hooks_dir {

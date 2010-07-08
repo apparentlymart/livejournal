@@ -16,6 +16,7 @@ use vars qw($ALL_CATEGORIES_ID);
 
 use Carp qw(croak);
 use DateTime;
+use LJ::TimeUtil;
 
 # Constants
 $ALL_CATEGORIES_ID = -1;
@@ -109,7 +110,7 @@ sub percent_formatter {
 sub get_grains_from_seconds {
     my $seconds_since_epoch = shift or croak('No parameter specified');
 
-    my $date = LJ::mysql_time($seconds_since_epoch);
+    my $date = LJ::TimeUtil->mysql_time($seconds_since_epoch);
 
     my %grain;
     $grain{grand} = 'Grand';

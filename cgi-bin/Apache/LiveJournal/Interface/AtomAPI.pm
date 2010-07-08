@@ -10,6 +10,8 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require 'parsefeed.pl';
 require 'fbupload.pl';
 
+use LJ::TimeUtil;
+
 # for Class::Autouse (so callers can 'ping' this method to lazy-load this class)
 sub load { 1 }
 
@@ -381,7 +383,7 @@ sub handle_edit {
         # we need to put into $item: itemid, ditemid, subject, event,
         # createtime, eventtime, modtime
 
-        my $ctime = LJ::mysqldate_to_time($row->{'logtime'}, 1);
+        my $ctime = LJ::TimeUtil->mysqldate_to_time($row->{'logtime'}, 1);
 
         my $tagstring = $olditem->{'props'}->{'taglist'} || '';
         my $tags = [ split(/\s*,\s*/, $tagstring) ];
@@ -389,7 +391,7 @@ sub handle_edit {
         my $item = {
             'itemid'     => $olditem->{'itemid'},
             'ditemid'    => $olditem->{'itemid'}*256 + $olditem->{'anum'},
-            'eventtime'  => LJ::alldatepart_s2($row->{'eventtime'}),
+            'eventtime'  => LJ::TimeUtil->alldatepart_s2($row->{'eventtime'}),
             'createtime' => $ctime,
             'modtime'    => $olditem->{'props'}->{'revtime'} || $ctime,
             'subject'    => $olditem->{'subject'},
@@ -696,7 +698,7 @@ sub auth_wsse
         return $fail->("no created date");
 
     # prevent replay attacks.
-    $ctime = LJ::mysqldate_to_time( $ctime, 'gmt' );
+    $ctime = LJ::TimeUtil->mysqldate_to_time( $ctime, 'gmt' );
     return $fail->("replay time skew") if abs(time() - $ctime) > 42300;
 
     my $u = LJ::load_user( LJ::canonical_username( $creds{'username'} ) )

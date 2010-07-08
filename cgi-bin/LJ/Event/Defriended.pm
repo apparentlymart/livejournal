@@ -128,7 +128,7 @@ sub subscription_as_html {
     my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
     # "Someone removes $user from their Friends list"
     # where $user may be also 'me'.
-    return BML::ml('event.defriended.' . ($journal_is_owner ? 'me' : 'user'), { user => $journal->ljuser_display });
+    return LJ::Lang::ml('event.defriended.' . ($journal_is_owner ? 'me' : 'user'), { user => $journal->ljuser_display });
 }
 
 sub content {
