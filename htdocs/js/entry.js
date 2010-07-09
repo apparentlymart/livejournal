@@ -565,10 +565,10 @@ function tagAutocomplete(node, tags)
 		
 		open: function()
 		{
+			var widget = jQuery(this).autocomplete('widget')
 			// fix left pos in FF 3.6
 			if (jQuery.browser.mozilla) {
-				var widget = jQuery(this).autocomplete('widget'),
-					offset = widget.offset();
+				var offset = widget.offset();
 				offset.left++;
 				
 				widget.offset(offset);
