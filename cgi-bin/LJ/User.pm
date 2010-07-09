@@ -151,8 +151,7 @@ sub create_personal {
         }
     }
     # if we have initial friends for new accounts, add them.
-    my @initial_friends = LJ::SUP->is_sup_enabled($u) ? @LJ::SUP_INITIAL_FRIENDS : @LJ::INITIAL_FRIENDS;
-    foreach my $friend (@initial_friends) {
+    foreach my $friend (@LJ::INITIAL_FRIENDS) {
         my $friendid = LJ::get_userid($friend);
         LJ::add_friend($u->id, $friendid) if $friendid;
     }
@@ -4746,6 +4745,7 @@ sub ban_user {
 
     my $remote = LJ::get_remote();
     $u->log_event('ban_set', { actiontarget => $ban_u->id, remote => $remote });
+    LJ::run_hooks('ban_set', $u, $ban_u);
 
     return LJ::set_rel($u->id, $ban_u->id, 'B');
 }

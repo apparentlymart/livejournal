@@ -533,6 +533,7 @@ sub delete_author {
     my @ids;
     foreach my $id (keys %$comments) {
         next unless $comments->{$id}{posterid} eq $posterid;
+        next if $comments->{$id}{state} eq 'D';
         push @ids, $id;
         push @screened, $id if $comments->{$id}{state} eq 'S';
     }

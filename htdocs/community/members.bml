@@ -456,8 +456,23 @@ $LJ::SITEROOT
         $ret .= "<?p " . BML::ml('.success.return2', {'aopts' => "href='" . BML::get_uri() . "?authas=$cname'"}) . " p?>";
         $ret .= LJ::Widget::GettingStarted->render;
 
-        return $ret;
+        LJ::run_hooks('add_moderator',
+            {
+                journalid   => $c->userid,
+                journalcaps => $c->caps,
+                users       => [ map { { id => $_ } } keys %{$add{moderate}} ]
+            }
+        ) if keys %{$add{moderate}};
 
+        LJ::run_hooks('remove_moderator',
+            {
+                journalid   => $c->userid,
+                journalcaps => $c->caps,
+                users       => [ map { { id => $_ } } keys %{$delete{moderate}} ]
+            }
+        ) if keys %{$delete{moderate}};
+
+        return $ret;
     }
 
     # browsing mode

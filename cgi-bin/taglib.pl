@@ -1213,6 +1213,7 @@ sub delete_usertag {
     push @jitemids, $_
         while $_ = $sth->fetchrow_array;
 
+    my $res = 0;
     # delete this tag's information from the relevant tables
     foreach my $table (qw(usertags logtags logtagsrecent logkwsum)) {
         # no error checking, we're just deleting data that's already semi-unlinked due
@@ -1221,7 +1222,7 @@ sub delete_usertag {
                          undef, $u->{userid}, $kwid);
 
         if ($table eq 'usertags' && defined $cnt && $cnt > 0) {
-            LJ::run_hooks('set_usertags', $u, $cnt, 0);
+            $res = $cnt;
         }
     }
 
@@ -1231,7 +1232,7 @@ sub delete_usertag {
     # reset caches, have to do both of these, one for the usertags one for logtags
     LJ::Tags::reset_cache($u);
     LJ::Tags::reset_cache($u => \@jitemids);
-    return 1;
+    return $res;
 }
 
 # <LJFUNC>

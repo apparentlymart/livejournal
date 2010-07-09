@@ -36,9 +36,15 @@ body<=
 
         # Deleting tags
         if ($POST{delete}) {
+            my $deleted = 0;
             foreach my $id (split /\0/, $POST{tags}) {
                 $id =~ s/_.*//;
-                LJ::Tags::delete_usertag( $u, 'id', $id );
+                my $res = LJ::Tags::delete_usertag( $u, 'id', $id );
+                $deleted += $res if defined $res;
+            }
+            if ($deleted > 0) {
+                # use $remote as actorid
+                LJ::run_hooks('set_usertags', $u, $deleted, 0);
             }
         }
 
