@@ -45,7 +45,6 @@ sub make_journal
     my $con_opts = {};
 
     if ($view eq "res") {
-
         # the s1shortcomings virtual styleid doesn't have a styleid
         # so we're making the rule that it can't have resource URLs.
         if ($styleid eq "s1short") {
@@ -53,7 +52,7 @@ sub make_journal
             return;
         }
 
-        if ($opts->{'pathextra'} =~ m!/(\d+)/stylesheet$!) {
+        if ($opts->{'pathextra'} =~ m|/(\d+)/stylesheet$|) {
             $styleid = $1;
             $entry = "print_stylesheet()";
             $opts->{'contenttype'} = 'text/css';
@@ -740,8 +739,9 @@ sub s2_context
         if ($ims eq $ourtime) {
             # 304 return; unload non-public layers
             LJ::S2::cleanup_layers(@layers);
-            LJ::Request->status_line("304 Not Modified");
+            LJ::Request->status(LJ::Request::HTTP_NOT_MODIFIED);
             LJ::Request->send_http_header();
+            $opts->{'handler_return'} = LJ::Request::HTTP_NOT_MODIFIED;
             return undef;
         } else {
             LJ::Request->header_out("Last-Modified", $ourtime);
