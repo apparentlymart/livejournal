@@ -395,6 +395,7 @@
 		margin: 0;
 		padding: 0;
 		cursor: pointer;
+		text-align: left;
 		}
 		.ui-autocomplete LI A {
 			display: block;
@@ -402,6 +403,7 @@
 			padding: 1px 10px;
 			color: #000;
 			text-decoration: none;
+			text-align: left;
 			}
 		.ui-autocomplete .ui-state-hover {
 			background: #EEE;
