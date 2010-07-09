@@ -618,6 +618,7 @@ function selectTags(node)
 			user: jQuery('#usejournal').val()
 		});
 	widget.ippu.addClass('ippu-select-tags');
+	widget.ippu.setClickToClose(false);
 	
 	return false;
 }
