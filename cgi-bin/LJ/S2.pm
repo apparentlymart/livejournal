@@ -739,9 +739,10 @@ sub s2_context
         if ($ims eq $ourtime) {
             # 304 return; unload non-public layers
             LJ::S2::cleanup_layers(@layers);
-            LJ::Request->status(LJ::Request::HTTP_NOT_MODIFIED);
+            use LJ::Request;
+            LJ::Request->status(LJ::Request::HTTP_NOT_MODIFIED());
             LJ::Request->send_http_header();
-            $opts->{'handler_return'} = LJ::Request::HTTP_NOT_MODIFIED;
+            $opts->{'handler_return'} = LJ::Request::HTTP_NOT_MODIFIED();
             return undef;
         } else {
             LJ::Request->header_out("Last-Modified", $ourtime);
