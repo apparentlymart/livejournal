@@ -3672,6 +3672,14 @@ sub _Entry__get_link
         my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_email"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_email.gif", 24, 24));
         return $link;
     }
+    if ($key eq "facebook_like") {
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->security eq 'public';
+        my $entry_url = LJ::eurl($entry->url);
+        my $url = "http://www.facebook.com/plugins/like.php?href=$entry_url&layout=standard&show_faces=false&width=450&action=like&colorscheme=light&height=35";
+        my $link = LJ::S2::Link($url, 'caption unused', LJ::S2::Image("$LJ::IMGPREFIX/btn_facebook.gif", 24, 24));
+        return $link;
+    }
     if ($key eq "mem_add") {
         return $null_link if $LJ::DISABLED{'memories'};
         return LJ::S2::Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
