@@ -52,7 +52,7 @@ sub get_marked {
         SELECT email
         FROM send_email_errors
         WHERE (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(time))/3600 > $timeout
-        ORDER BY last_time DESC
+        ORDER BY time DESC
         LIMIT $limit
     });
 }
