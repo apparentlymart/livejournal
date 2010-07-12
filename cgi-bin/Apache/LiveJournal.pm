@@ -21,7 +21,7 @@ use Class::Autouse qw(
                       Apache::LiveJournal::Interface::S2
                       Apache::LiveJournal::Interface::ElsewhereInfo
                       Apache::LiveJournal::PalImg
-                      Apache::LiveJournal::Interface::Restful
+                      Apache::LiveJournal::Interface::Api
                       LJ::ModuleCheck
                       LJ::AccessLogSink
                       LJ::AccessLogRecord
@@ -849,9 +849,9 @@ sub trans
             my $view = $determine_view->($user, "safevhost", $uri);
             return $view if defined $view;
         } elsif ($func eq 'api') {
-            Apache::LiveJournal::Interface::Restful->load;
+            Apache::LiveJournal::Interface::Api->load;
             LJ::Request->handler("perl-script");
-            LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Restful::handler);
+            LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Api::handler);
             return LJ::Request::OK;
         
             LJ::Request->pnotes ('error' => 'e404');
