@@ -117,15 +117,6 @@ sub send_comm_invite {
                  undef, $cu->{userid}, $u->{userid}, $mu->{userid}, $newargstr);
     }
 
-    LJ::run_hooks(
-        'send_invite',
-        {
-            journalid   => $cu->userid,
-            journalcaps => $cu->caps,
-            users => [ { id => $u->userid, caps => $u->caps } ]
-        }
-    );
-
     # Fire community invite event
     LJ::Event::CommunityInvite->new($u, $mu, $cu)->fire unless $LJ::DISABLED{esn};
 
@@ -550,8 +541,7 @@ sub approve_pending_member {
                          undef, $cu->{userid}, "targetid=$u->{userid}");
     return unless $count;
 
-    LJ::run_hooks(
-        'approve_member',
+    LJ::run_hooks('approve_member',
         {
             journalid   => $cu->userid,
             journalcaps => $cu->caps,
