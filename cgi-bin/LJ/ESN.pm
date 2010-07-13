@@ -77,7 +77,8 @@ sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
 
-    my $evt = eval { LJ::Event->new_from_raw_params(@$a) };
+    my $params = (ref $a eq 'HASH') ? $a->{'event_params'} : $a;
+    my $evt = eval { LJ::Event->new_from_raw_params(@$params) };
 
     if ($ENV{DEBUG}) {
         warn "FiredEvent for $evt (@$a)\n";
@@ -306,7 +307,7 @@ use base 'TheSchwartz::Worker';
 sub do_work {
     my ($class, $job) = @_;
     my $a = $job->arg;
-    my ($cid, $e_params) = @$a;
+    my ($cid, $e_params) = (ref $a eq 'HASH') ? ($a->{'cid'}, $a->{'e_params'}) : @$a;
     my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
         die "Couldn't load event: $@";
     my $dbch = LJ::get_cluster_master($cid) or
@@ -441,7 +442,7 @@ use base 'TheSchwartz::Worker';
 sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
-    my ($e_params, $sublist, $cid) = @$a;
+    my ($e_params, $sublist, $cid) = (ref $a eq 'HASH') ? ($a->{'e_params'}, $a->{'sublist'}, $a->{'cid'}) : @$a;
     my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
         die "Couldn't load event: $@";
 
@@ -475,7 +476,7 @@ use base 'TheSchwartz::Worker';
 sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
-    my ($userid, $subdump, $eparams) = @$a;
+    my ($userid, $subdump, $eparams) = (ref $a eq 'HASH') ? ($a->{'userid'}, $a->{'subdump'}, $a->{'e_params'}) : @$a;
     my $u     = LJ::load_userid($userid);
     my $evt   = LJ::Event->new_from_raw_params(@$eparams);
     my $subsc = LJ::Subscription->new_from_dump($u, $subdump);
@@ -497,6 +498,8 @@ sub work {
             'X-ESN_Debug-sch_jobid' => $job->jobid,
             'X-ESN_Debug-subid'     => $subdump,
             'X-ESN_Debug-eparams'   => join(', ', @$eparams),
+            'X-ESN_Debug-failures'  => $job->failures,
+            'X-ESN_Debug-pid'       => $$,
         };
 
         $subsc->{_debug_headers} = $debug_headers;
