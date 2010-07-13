@@ -103,7 +103,7 @@ body<=
                 return $ML{"error.nodb"} unless $u->writer;
                 $u->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
                 $u->do("UPDATE s1usercache SET color_stor=? WHERE userid=?", undef,
-                       Storable::freeze(\%cols), $u->{'userid'});
+                       Storable::nfreeze(\%cols), $u->{'userid'});
                 LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
 
                 my $dbh = LJ::get_db_writer();

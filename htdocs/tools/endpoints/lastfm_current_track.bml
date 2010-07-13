@@ -3,7 +3,7 @@
     use strict;
     use vars qw(%POST);
     use LJ::JSON;
-    use Storable qw(freeze thaw); # safe across updating when use with simple structures only
+    use Storable qw(nfreeze thaw); # safe across updating when use with simple structures only
     use Gearman::Client;
 
     my $username = $POST{'username'};
@@ -11,7 +11,7 @@
     my $client = new Gearman::Client;
     $client->job_servers( @LJ::GEARMAN_SERVERS );
 
-    my $arg = freeze( [ $username ] );
+    my $arg = nfreeze( [ $username ] );
     my $task = Gearman::Task->new('get_current_track', \$arg);
 
     my $handle = $client->dispatch_background($task);

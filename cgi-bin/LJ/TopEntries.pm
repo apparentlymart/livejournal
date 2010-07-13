@@ -226,7 +226,7 @@ sub _store_featured_posts {
 
         spots       => \@spots,
     };
-    my $data = Storable::freeze($struct);
+    my $data = Storable::nfreeze($struct);
     ##
 
     my $domain = $self->{domain};
