@@ -60,11 +60,6 @@ sub notify {
 
     my $u = $self->u;
 
-    # for LJSUP-6332
-    my $not_active_user = 0;
-    my @sessions = $u->sessions();
-    $not_active_user = 1 if $u->last_login_time < time - 6*2_628_000 && !@sessions;
-
     my $lang = $u->prop('browselang');
     my $vars = { sitenameshort => $LJ::SITENAMESHORT, sitename => $LJ::SITENAME, siteroot => $LJ::SITEROOT };
 
@@ -77,14 +72,15 @@ sub notify {
 
         # LJSUP-6332
         # Unsubscribe form [ru-]news subscription users who has not logins in 6 months
-        # TODO: move this to hook
-        # TODO: use $LJ::DISABLE{}
-        if ($not_active_user && ref($ev) =~ /OfficialPost/) {
-            my @subs = LJ::Subscription->find($u, event => ref($ev));
-            foreach my $sub (@subs) {
-                $sub->delete();
+        if (ref($ev) =~ /OfficialPost/) {
+            my @sessions = $u->sessions();
+            if ($u->last_login_time < time - 6*2_628_000 && !@sessions) {
+                my @subs = LJ::Subscription->find($u, event => ref($ev));
+                foreach my $sub (@subs) {
+                    $sub->delete();
+                }
+                next;
             }
-            next;
         }
 
         $vars->{'hook'} = LJ::run_hook("esn_email_footer", $ev, $u);
