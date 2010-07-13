@@ -59,6 +59,12 @@ sub notify {
         unless ref $self eq __PACKAGE__;
 
     my $u = $self->u;
+
+    # for LJSUP-6332
+    my $not_active_user = 0;
+    my @sessions = $u->sessions();
+    $not_active_user = 1 if $u->last_login_time < time - 6*2_628_000 && !@sessions;
+
     my $lang = $u->prop('browselang');
     my $vars = { sitenameshort => $LJ::SITENAMESHORT, sitename => $LJ::SITENAME, siteroot => $LJ::SITEROOT };
 
@@ -68,6 +74,18 @@ sub notify {
 
     foreach my $ev (@events) {
         croak "invalid event passed" unless ref $ev;
+
+        # LJSUP-6332
+        # Unsubscribe form [ru-]news subscription users who has not logins in 6 months
+        # TODO: move this to hook
+        # TODO: use $LJ::DISABLE{}
+        if ($not_active_user && ref($ev) =~ /OfficialPost/) {
+            my @subs = LJ::Subscription->find($u, event => ref($ev));
+            foreach my $sub (@subs) {
+                $sub->delete();
+            }
+            next;
+        }
 
         $vars->{'hook'} = LJ::run_hook("esn_email_footer", $ev, $u);
         my $footer = LJ::Lang::get_text($lang, 'esn.footer.text', undef, $vars);
