@@ -6802,8 +6802,8 @@ sub ljuser_alias {
     return unless $u;
    
     if (!$remote->{_aliases}) {
-        my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
+        my $prop_aliases = LJ::text_uncompress( $remote->prop('aliases') );
+        $remote->{_aliases} = ($prop_aliases) ? LJ::JSON->from_json($prop_aliases) : {};
     }
     return $remote->{_aliases}->{ $u->{userid} };
 }
@@ -6859,6 +6859,7 @@ sub set_alias {
     
     ## save data back
     my $serialized_text = LJ::JSON->to_json($remote->{_aliases});
+    $serialized_text = LJ::text_compress( $serialized_text ) unless $LJ::DISABLED{'aliases_compress'};
     if (length $serialized_text < 65536) {
         return $remote->set_prop( aliases => $serialized_text );
     } else {
@@ -6878,8 +6879,8 @@ sub get_all_aliases {
     return unless $remote and $remote->get_cap('aliases');
 
     if (!$remote->{_aliases}) {
-        my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
+        my $prop_aliases = LJ::text_uncompress($remote->prop('aliases'));
+        $remote->{_aliases} = ($prop_aliases) ? LJ::JSON->from_json($prop_aliases) : {};
     }
 
     return %{$remote->{_aliases}};
