@@ -857,6 +857,11 @@ sub trans
             LJ::Request->pnotes ('error' => 'e404');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;
+        } elsif ($func eq "apps") {
+            LJ::get_remote();
+            return redir(LJ::Session->setdomsess_handler()) if LJ::Request->uri eq "/__setdomsess";
+    	    return remote_domsess_bounce() if LJ::remote_bounce_url();
+            return $bml_handler->("$LJ::HOME/htdocs/apps/game.bml");
         } elsif ($func) {
             my $code = {
                 'userpics' => \&userpic_trans,

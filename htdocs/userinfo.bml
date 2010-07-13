@@ -1548,21 +1548,46 @@
 
     my $apps_list = LJ::JSON->from_json($u->prop('userapps_authorized')||'{}');
     my @userapps;
-    foreach (keys %$apps_list) {
-	my $app = LJ::UserApps->get_application($_);
-	next unless $app && $app->can_show_restricted;
-	my $app_string = '<a href="'.$LJ::SITEROOT.'/apps/info.bml?id='.$app->id.'">'.$app->name.'</a>';
-	if ($app->icon) {
-	    $app_string = '<img src='.$app->icon.' width="16" height="16" style="vertical-align:bottom"> '.$app_string;
-	}
-	push @userapps, $app_string;
+    foreach (sort keys %$apps_list) {
+        my $app = LJ::UserApps->get_application( id => $_ );
+        next unless $app && $app->can_show_restricted;
+        my $app_string = '<a href="'.$app->href.'">'.$app->name.'</a>';
+        if ($app->icon) {
+            $app_string = '<img src='.$app->icon.' width="16" height="16" style="vertical-align:bottom"> '.$app_string;
+        }
+        push @userapps, $app_string;
+    }
+    
+    my @activities;
+    if (scalar @userapps) {
+        my $result = LJ::API::Activity->get_last( user => $u );
+        if ($result->{status} eq 'OK') {
+            foreach (@{$result->{activities}}) {
+                my $app = LJ::UserApps->get_application( id => $_->{application_id} );
+                push @activities, {
+                    app_name  => $app->name,
+                    app_href  => $app->href,
+                    app_image => $app->image,
+                    title     => $_->{title},
+                    date      => substr(LJ::TimeUtil->mysql_time($_->{ts_create}), 0, 16),
+                };
+            }
+        }
     }
 
     my $text = $ML{'.apps.installed'};
     my $apps = "<p class='inner_section_header first'><span class='expandcollapse on' id='apps_header'>".$arrowimg->("apps")." $text (".scalar(@userapps).")";
     $apps .= '<div id="apps_body" class="inner_section_body">';
     $apps .= join(", ", @userapps);
+    foreach (@activities) {
+        $apps .= '<p>';
+        if ($_->{app_image}) {
+            $apps .= '<img src="'.$_->{app_image}.'"> ';
+        }
+        $apps .= $_->{date}.' <a href="'.$_->{app_href}.'">'.$_->{app_name}.'</a>: '.$_->{title}.'</p>';
+    }
     $apps .= '</div>';
+    $apps .= '</span></p>';
 
     $body .= "<div class='ljclear'></div>";
     $body .= "<div class='section'><img src='$LJ::IMGPREFIX/application.gif' alt='' /> $ML{'.apps.header'} <span class='section_link'>[<a href='$LJ::SITEROOT/manage/settings/?cat=userapps'>$ML{'.section.edit'}</a>]</span></div>";
