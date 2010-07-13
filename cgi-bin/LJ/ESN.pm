@@ -77,8 +77,8 @@ sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
 
-    my $params = (ref $a eq 'HASH') ? $a->{'event_params'} : $a;
-    my $evt = eval { LJ::Event->new_from_raw_params(@$params) };
+    my $e_params = (ref $a eq 'HASH') ? $a->{'event_params'} : $a;
+    my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) };
 
     if ($ENV{DEBUG}) {
         warn "FiredEvent for $evt (@$a)\n";
