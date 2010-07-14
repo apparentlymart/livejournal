@@ -12,10 +12,10 @@ use base 'LJ::NewWorker::Manual';
 use LJ::User::Email;
 
 sub work {
-    my %u_ids = LJ::User::Email->get_user_ids();
-    foreach my $email (keys %u_ids) {
+    my $emails = LJ::User::Email->get_marked_with_uids();
+    foreach my $email (keys %$emails) {
         my $complete = 1; # reset this in case of any error with one of user for this email
-        foreach my $uid (@{$u_ids{$email}}) {
+        foreach my $uid (@{$emails->{$email}->{user_ids}}) {
             my $u = LJ::want_user($uid);
             if (LJ::isu($u)) {
                 if ($u->is_validated) {
@@ -23,15 +23,18 @@ sub work {
                     if ($u->is_validated) {
                         $complete = 0;
                     } else {
-                        print "user with id $uid and email <$email> validation has been revoked.\n" if LJ::NewWorker->verbose;
+                        $u->log_event('revoke_validation',
+                            {
+                                email   => $email,
+                                message => $emails->{$email}->{message}
+                            });
+                        warn "Validation for user with id $uid and email <$email>".
+                            " has been revoked.\n"
+                                if LJ::NewWorker::Manual::SendEmailErrorsFind->verbose;
                     }
-                } else { # user was not validated
-                    $complete = 0;
                 }
-            } else { # cannot find user for this uid.
-                $complete = 0;
             }
-        }
+        } # end of foreach my $uid ...
         LJ::User::Email->mark(undef, $email) if $complete;
     }
 

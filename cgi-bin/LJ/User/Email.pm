@@ -10,15 +10,16 @@ sub mark {
     my $self        = shift;
     my $status_code = shift;
     my $emails      = shift;    # One email if scalar or list of emails if array ref.
+    my $message     = shift;
 
     return if $LJ::DISABLED{'revoke_validation_on_errors'};
 
     if ('ARRAY' eq ref $emails) {
         foreach my $email (@$emails) {
-            $self->_log_one_email_status($status_code, $email);
+            $self->_log_one_email_status($status_code, $email, $message);
         }
     } else {
-        $self->_log_one_email_status($status_code, $emails);
+        $self->_log_one_email_status($status_code, $emails, $message);
     }
 }
 
@@ -26,18 +27,20 @@ sub _log_one_email_status {
     my $self        = shift;
     my $status_code = shift;
     my $email       = shift;
+    my $message     = shift;
 
     eval {  # Don't die if somthing wrong with database.
         my $dbh = LJ::get_db_writer();
         if (defined $status_code) {
-            $dbh->do("INSERT IGNORE INTO send_email_errors (email, time) VALUES (?, NOW())",
-            undef, $email);
+            $dbh->do("INSERT IGNORE INTO send_email_errors (email, time, message) VALUES (?, NOW(), ?)",
+            undef, $email, $message);
         } else { # undef: OK, remove row if any
             $dbh->do("DELETE FROM send_email_errors WHERE email = ?", undef, $email);
         }
     };
 }
 
+# returns hashref whith emails as keys and fields: 'time' and 'message'.
 sub get_marked {
     my $self    = shift;
     my %opts    = @_;
@@ -45,19 +48,24 @@ sub get_marked {
     return () if $LJ::DISABLED{'revoke_validation_on_errors'};
 
     my $limit   = $opts{limit}  || 1000;
-    my $timeout = $opts{timeout}|| 72;
+    my $timeout = (int($opts{timeout})|| 72) . ':00:00';    # get this as 'hh:00:00'.
 
     my $dbh = LJ::get_db_reader();
-    return $dbh->selectcol_arrayref(qq{
-        SELECT email
+    my $sth = $dbh->prepare(qq{
+        SELECT email, time, message
         FROM send_email_errors
-        WHERE (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(time))/3600 > $timeout
+        WHERE time < SUBTIME(NOW(), ?)
         ORDER BY time DESC
         LIMIT $limit
-    });
+        });
+
+    $sth->execute($timeout);
+
+    return $sth->fetchall_hashref('email');
 }
 
-sub get_user_ids {
+# Like get_marked(), but with user_ids: ref to array of uids.
+sub get_marked_with_uids {
     my $self    = shift;
     my %opts    = @_;
 
@@ -66,21 +74,14 @@ sub get_user_ids {
     my $dbh = LJ::get_db_reader();
 
     my $emails = $self->get_marked(%opts);
-    my %user_ids = ();
 
-    foreach my $email (@$emails) {
-        my $userids = $dbh->selectcol_arrayref(qq{
-            SELECT userid
-            FROM email
-            WHERE email = ?
-        }, undef, $email);
-
-        foreach my $userid (@$userids) {
-            push @{$user_ids{$email}}, $userid;
-        }
+    my $sth = $dbh->prepare("SELECT userid FROM email WHERE email = ?");
+    foreach my $email (keys %$emails) {
+        $sth->execute($email);
+        $emails->{$email}->{user_ids} = [ map { @{$_}[0] } @{$sth->fetchall_arrayref()} ];
     }
 
-    return %user_ids;
+    return $emails;
 }
 
 1;
