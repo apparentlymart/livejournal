@@ -11,16 +11,11 @@ body<=
     LJ::set_active_crumb('editprofile');
     LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css');
 
-    # We only show one ad on a page, so if this
-    # hook returns an ad use that instead of the one
-    # defined by the page
-    my $ad_override = LJ::run_hook('identity_section_ad');
-
     my $print_with_ad = sub {
         my $str = shift;
 
         my $ad_full_width = LJ::get_ads({ location => 'bml.manage.profile/error', ljadwrapper => 1 });
-        return $ad_override ? $str : $ad_full_width . $str;
+        return $ad_full_width . $str;
     };
 
     return $print_with_ad->(LJ::server_down_html()) if $LJ::SERVER_DOWN;
@@ -134,7 +129,6 @@ body<=
         $ret .= LJ::help_icon('upic_keywords');
         $ret .= "<?p <a href='$LJ::SITEROOT/editpics.bml$getextra'>$ML{'.userpic.change'}</a> p?>\n";
         $ret .= "</td>";
-        $ret .= "<td rowspan=5 style='padding-left: 20px'>$ad_override</td>" if $ad_override;
         $ret .= "</tr>\n";
 
         # name
