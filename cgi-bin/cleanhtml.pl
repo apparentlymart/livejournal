@@ -789,6 +789,12 @@ sub clean
                         next TOKEN;    
                     }
                     
+                    # http://pics.livejournal.com/brad/pic/000fbt9x* -> l-pics.livejournal.com for some journals
+                    if ($hash->{src} =~ m!^http://pics.livejournal.com/\w+/pic/!) {
+                        my $ju = LJ::get_active_journal();
+                        $hash->{src} =~ s!^http://pics.!http://l-pics.! if $ju and $LJ::USE_CDN_FOR_PICS{$ju->user};
+                    }
+
                     if ($img_bad) {
                         $newdata .= "<a class=\"ljimgplaceholder\" href=\"" .
                             LJ::ehtml($hash->{'src'}) . "\">" .
