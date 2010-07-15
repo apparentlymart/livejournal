@@ -4239,7 +4239,8 @@ register_tablecreate("send_email_errors", <<'EOC');
 CREATE TABLE send_email_errors (
   email VARCHAR(50) NOT NULL DEFAULT '',
   time DATETIME DEFAULT NULL,
-  PRIMARY KEY (email)
+  PRIMARY KEY (email),
+  INDEX (time)
 )
 EOC
 
