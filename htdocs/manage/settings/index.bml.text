@@ -80,6 +80,8 @@
 .errors|staleness=1
 .errors=There were errors with your submission.  Please look below to fix them.
 
+.error.notvalidated=Your account is not validated.
+
 .finished.save_button=Save Changes
 
 .fn.adultcontentflag|staleness=1
