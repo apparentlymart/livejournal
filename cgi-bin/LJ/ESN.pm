@@ -59,11 +59,11 @@ sub jobs_of_unique_matching_subs {
         next if $has_done{$s->unique}++;
         push @subjobs, TheSchwartz::Job->new(
             funcname => 'LJ::Worker::ProcessSub',
-            arg      => [
-                $s->userid + 0,
-                $s->dump,
-                $params,
-            ],
+            arg      => {
+                'userid'    => $s->userid + 0,
+                'subdump'   => $s->dump,
+                'e_params'  => $params,
+            },
         );
     }
     return @subjobs;
@@ -124,9 +124,12 @@ sub work {
         my @subjobs;
         foreach my $cid (@LJ::CLUSTERS) {
             push @subjobs, TheSchwartz::Job->new(
-                                                 funcname => 'LJ::Worker::FindSubsByCluster',
-                                                 arg      => [ $cid, $params ],
-                                                 );
+                funcname => 'LJ::Worker::FindSubsByCluster',
+                arg      => { 
+                    'cid'       => $cid, 
+                    'e_params'  => $params,
+                },
+            );
         }
         return $job->replace_with(@subjobs);
     }
@@ -287,11 +290,11 @@ sub work {
         my $params = $evt->raw_params;
         push @jobs, TheSchwartz::Job->new(
             'funcname' => 'LJ::Worker::ProcessSub',
-            'arg' => [
-                $sub->userid,
-                $sub->dump,
-                $params,
-            ],
+            'arg' => {
+                'userid'    => $sub->userid, 
+                'subdump'   => $sub->dump,
+                'e_params'  => $params,
+            },
         );
     }
 
@@ -379,9 +382,13 @@ sub do_work {
         # than here, to avoid a load_userids call.
         my $sublist = [ map { [ $_->userid + 0, $_->dump ] } @set ];
         push @subjobs, TheSchwartz::Job->new(
-                                             funcname => 'LJ::Worker::FilterSubs',
-                                             arg      => [ $e_params, $sublist, $cid ],
-                                             );
+            funcname => 'LJ::Worker::FilterSubs',
+            arg      => { 
+                'e_params'  => $e_params, 
+                'sublist'   => $sublist, 
+                'cid'       => $cid, 
+            },
+        );
     }
 
     warn "Filter sub jobs: [@subjobs]\n" if $ENV{DEBUG};
