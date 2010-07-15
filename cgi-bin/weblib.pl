@@ -2415,4 +2415,23 @@ sub needlogin_redirect {
     return LJ::Request->redirect("$LJ::SITEROOT/?returnto=$uri");
 }
 
+sub get_body_class_for_service_pages {
+    my %opts = @_;
+    
+    my @classes;
+    push @classes, (LJ::get_remote()) ? 'logged-in' : 'logged-out';
+   
+    my $uri = LJ::Request->uri;
+    if ($uri =~ m!^/index\.bml$!) {
+        push @classes, "index-page";
+    } elsif ($uri =~ m!^/shop(/.*)?$!) {
+        push @classes, "shop-page";
+    } elsif ($uri =~ m!^/browse(/.*)?$!) {
+        push @classes, "catalogue-page";
+    } elsif ($uri =~ m!^/apps(/.*)?$!) {
+        push @classes, 'framework-page';    
+    } 
+    return join(" ", @classes);
+}
+
 1;
