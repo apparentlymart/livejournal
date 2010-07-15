@@ -1001,12 +1001,13 @@ sub render {
 
     $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> "
             unless $opts{widget};
+    $ret .= $opts{scroll_links} if $opts{widget};
     if ($self->name) {
         my $name = $self->name;
         LJ::Poll->clean_poll(\$name);
         if ($opts{widget}) {
             $name = LJ::trim_at_word($name, 70);
-            $ret .= "$opts{scroll_links}<h3>$name</h3>";
+            $ret .= "<h3>$name</h3>";
         } else {
             $ret .= "<i>$name</i>";
         }

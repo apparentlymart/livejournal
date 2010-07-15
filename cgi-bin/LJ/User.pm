@@ -4122,7 +4122,7 @@ sub set_renamed {
 # returns if this user is considered visible
 sub is_visible {
     my $u = shift;
-    return $u->statusvis eq 'V';
+    return $u->statusvis eq 'V' and $u->clusterid != 0;
 }
 
 sub is_deleted {
@@ -4746,6 +4746,7 @@ sub ban_user {
 
     my $remote = LJ::get_remote();
     $u->log_event('ban_set', { actiontarget => $ban_u->id, remote => $remote });
+    LJ::run_hooks('ban_set', $u, $ban_u);
 
     return LJ::set_rel($u->id, $ban_u->id, 'B');
 }
@@ -6801,8 +6802,8 @@ sub ljuser_alias {
     return unless $u;
    
     if (!$remote->{_aliases}) {
-        my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
+        my $prop_aliases = LJ::text_uncompress( $remote->prop('aliases') );
+        $remote->{_aliases} = ($prop_aliases) ? LJ::JSON->from_json($prop_aliases) : {};
     }
     return $remote->{_aliases}->{ $u->{userid} };
 }
@@ -6858,6 +6859,7 @@ sub set_alias {
     
     ## save data back
     my $serialized_text = LJ::JSON->to_json($remote->{_aliases});
+    $serialized_text = LJ::text_compress( $serialized_text ) unless $LJ::DISABLED{'aliases_compress'};
     if (length $serialized_text < 65536) {
         return $remote->set_prop( aliases => $serialized_text );
     } else {
@@ -6877,8 +6879,8 @@ sub get_all_aliases {
     return unless $remote and $remote->get_cap('aliases');
 
     if (!$remote->{_aliases}) {
-        my $prop_aliases = $remote->prop('aliases');
-        $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
+        my $prop_aliases = LJ::text_uncompress($remote->prop('aliases'));
+        $remote->{_aliases} = ($prop_aliases) ? LJ::JSON->from_json($prop_aliases) : {};
     }
 
     return %{$remote->{_aliases}};

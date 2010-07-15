@@ -133,8 +133,9 @@ _info?><?_code
         # ban the user, if selected
         my $msg;
         if ($POST{'ban'} && $can_ban) {
-            LJ::set_rel($u->{'userid'}, $tp->{'posterid'}, 'B');
-            $u->log_event('ban_set', { actiontarget => $tp->{'posterid'}, remote => $remote });
+            my $ban_u = LJ::load_userid($tp->{'posterid'});
+            LJ::User::ban_user($u, $ban_u) if $ban_u;
+
             $msg = BML::ml('.success.andban', { 'user' => LJ::ljuser($tp->{'userpost'}) });
         }
         $msg ||= $ML{'.success.noban'};

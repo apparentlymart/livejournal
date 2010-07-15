@@ -59,11 +59,11 @@ sub jobs_of_unique_matching_subs {
         next if $has_done{$s->unique}++;
         push @subjobs, TheSchwartz::Job->new(
             funcname => 'LJ::Worker::ProcessSub',
-            arg      => [
-                $s->userid + 0,
-                $s->dump,
-                $params,
-            ],
+            arg      => {
+                'userid'    => $s->userid + 0,
+                'subdump'   => $s->dump,
+                'e_params'  => $params,
+            },
         );
     }
     return @subjobs;
@@ -77,7 +77,8 @@ sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
 
-    my $evt = eval { LJ::Event->new_from_raw_params(@$a) };
+    my $e_params = (ref $a eq 'HASH') ? $a->{'event_params'} : $a;
+    my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) };
 
     if ($ENV{DEBUG}) {
         warn "FiredEvent for $evt (@$a)\n";
@@ -123,9 +124,12 @@ sub work {
         my @subjobs;
         foreach my $cid (@LJ::CLUSTERS) {
             push @subjobs, TheSchwartz::Job->new(
-                                                 funcname => 'LJ::Worker::FindSubsByCluster',
-                                                 arg      => [ $cid, $params ],
-                                                 );
+                funcname => 'LJ::Worker::FindSubsByCluster',
+                arg      => { 
+                    'cid'       => $cid, 
+                    'e_params'  => $params,
+                },
+            );
         }
         return $job->replace_with(@subjobs);
     }
@@ -286,11 +290,11 @@ sub work {
         my $params = $evt->raw_params;
         push @jobs, TheSchwartz::Job->new(
             'funcname' => 'LJ::Worker::ProcessSub',
-            'arg' => [
-                $sub->userid,
-                $sub->dump,
-                $params,
-            ],
+            'arg' => {
+                'userid'    => $sub->userid, 
+                'subdump'   => $sub->dump,
+                'e_params'  => $params,
+            },
         );
     }
 
@@ -306,7 +310,7 @@ use base 'TheSchwartz::Worker';
 sub do_work {
     my ($class, $job) = @_;
     my $a = $job->arg;
-    my ($cid, $e_params) = @$a;
+    my ($cid, $e_params) = (ref $a eq 'HASH') ? ($a->{'cid'}, $a->{'e_params'}) : @$a;
     my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
         die "Couldn't load event: $@";
     my $dbch = LJ::get_cluster_master($cid) or
@@ -378,9 +382,13 @@ sub do_work {
         # than here, to avoid a load_userids call.
         my $sublist = [ map { [ $_->userid + 0, $_->dump ] } @set ];
         push @subjobs, TheSchwartz::Job->new(
-                                             funcname => 'LJ::Worker::FilterSubs',
-                                             arg      => [ $e_params, $sublist, $cid ],
-                                             );
+            funcname => 'LJ::Worker::FilterSubs',
+            arg      => { 
+                'e_params'  => $e_params, 
+                'sublist'   => $sublist, 
+                'cid'       => $cid, 
+            },
+        );
     }
 
     warn "Filter sub jobs: [@subjobs]\n" if $ENV{DEBUG};
@@ -441,7 +449,7 @@ use base 'TheSchwartz::Worker';
 sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
-    my ($e_params, $sublist, $cid) = @$a;
+    my ($e_params, $sublist, $cid) = (ref $a eq 'HASH') ? ($a->{'e_params'}, $a->{'sublist'}, $a->{'cid'}) : @$a;
     my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
         die "Couldn't load event: $@";
 
@@ -475,7 +483,7 @@ use base 'TheSchwartz::Worker';
 sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
-    my ($userid, $subdump, $eparams) = @$a;
+    my ($userid, $subdump, $eparams) = (ref $a eq 'HASH') ? ($a->{'userid'}, $a->{'subdump'}, $a->{'e_params'}) : @$a;
     my $u     = LJ::load_userid($userid);
     my $evt   = LJ::Event->new_from_raw_params(@$eparams);
     my $subsc = LJ::Subscription->new_from_dump($u, $subdump);
@@ -497,6 +505,8 @@ sub work {
             'X-ESN_Debug-sch_jobid' => $job->jobid,
             'X-ESN_Debug-subid'     => $subdump,
             'X-ESN_Debug-eparams'   => join(', ', @$eparams),
+            'X-ESN_Debug-failures'  => $job->failures,
+            'X-ESN_Debug-pid'       => $$,
         };
 
         $subsc->{_debug_headers} = $debug_headers;

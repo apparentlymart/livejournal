@@ -48,8 +48,8 @@ _code?>
 </head>
 
 <?_code {
-	my $class = (BML::get_uri() =~ m!^/index\.bml$!) ? 'class="scheme-lynx index-page"' : 'class="scheme-lynx"';
-    return "<body $class %%bodyopts%%>";
+    my $class = LJ::get_body_class_for_service_pages();
+    return "<body class='scheme-lynx $class' %%bodyopts%%>";
 } _code?>
 
 <?_code return (LJ::Widget::SiteMessages->should_render) ? LJ::Widget::SiteMessages->render : ''; _code?>

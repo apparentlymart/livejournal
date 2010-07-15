@@ -172,6 +172,21 @@ body<=
                     push @fail, [ $target, LJ::last_error_code() ];
                 }
             }
+
+            if (@invited)
+            {
+                my $event = {
+                    journalid   => $c->userid,
+                    journalcaps => $c->caps,
+                    users       => []
+                };
+                foreach my $row (@invited)
+                {
+                    my $u = $row->[0];
+                    push @{$event->{users}}, { id => $u->userid, caps => $u->caps };
+                }
+                LJ::run_hooks('send_invite', $event);
+            }
         }
         if (@fail) {
             my @bad;
@@ -346,6 +361,11 @@ $LJ::SITEROOT
         # perform additions
         my @msgs;
         if (%{$add{'member'}}) {
+            my $event = {
+                journalid   => $c->userid,
+                journalcaps => $c->caps,
+                users       => []
+            };
             foreach my $id (keys %{$add{'member'}}) {
                 next if $was{$id}->{'member'};
                 my $u = LJ::load_userid($id);
@@ -358,8 +378,13 @@ $LJ::SITEROOT
                         push @msgs, BML::ml('.reinvited2',
                             { user => LJ::ljuser($u),
                               aopts => "href='$LJ::SITEROOT/manage/invites.bml'" });
+                        push @{$event->{users}}, { id => $u->userid, caps => $u->caps };
                     }
                 }
+            }
+            if (@{$event->{users}})
+            {
+                LJ::run_hooks('send_invite', $event);
             }
         }
 
@@ -456,8 +481,23 @@ $LJ::SITEROOT
         $ret .= "<?p " . BML::ml('.success.return2', {'aopts' => "href='" . BML::get_uri() . "?authas=$cname'"}) . " p?>";
         $ret .= LJ::Widget::GettingStarted->render;
 
-        return $ret;
+        LJ::run_hooks('add_moderator',
+            {
+                journalid   => $c->userid,
+                journalcaps => $c->caps,
+                users       => [ map { { id => $_ } } keys %{$add{moderate}} ]
+            }
+        ) if keys %{$add{moderate}};
 
+        LJ::run_hooks('remove_moderator',
+            {
+                journalid   => $c->userid,
+                journalcaps => $c->caps,
+                users       => [ map { { id => $_ } } keys %{$delete{moderate}} ]
+            }
+        ) if keys %{$delete{moderate}};
+
+        return $ret;
     }
 
     # browsing mode

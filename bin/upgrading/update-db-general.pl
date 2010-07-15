@@ -4239,8 +4239,28 @@ register_tablecreate("send_email_errors", <<'EOC');
 CREATE TABLE send_email_errors (
   email VARCHAR(50) NOT NULL DEFAULT '',
   time DATETIME DEFAULT NULL,
-  PRIMARY KEY (email)
+  PRIMARY KEY (email),
+  INDEX (time)
 )
 EOC
+
+register_alter(sub {
+
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("send_email_errors", "message")) {
+        do_alter("send_email_errors",
+                 "ALTER TABLE send_email_errors " .
+                 "ADD message VARCHAR(255) DEFAULT NULL");
+    }
+
+    unless (index_name("send_email_errors", "INDEX:time")) {
+        do_alter("send_email_errors",
+                "ALTER TABLE send_email_errors " .
+                "ADD INDEX(time)");
+    }
+
+});
 
 1; # return true

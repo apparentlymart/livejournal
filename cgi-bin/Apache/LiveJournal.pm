@@ -103,10 +103,12 @@ sub handler
 
     # only perform this once in case of internal redirects
     if (LJ::Request->is_initial_req) {
-        LJ::Request->push_handlers(PerlCleanupHandler => sub { %RQ = () });
-        LJ::Request->push_handlers(PerlCleanupHandler => "Apache::LiveJournal::db_logger");
-        LJ::Request->push_handlers(PerlCleanupHandler => "LJ::end_request");
-        LJ::Request->push_handlers(PerlCleanupHandler => "Apache::DebateSuicide");
+        LJ::Request->set_handlers(PerlCleanupHandler => [
+                                                            sub { %RQ = () },
+                                                            "Apache::LiveJournal::db_logger",
+                                                            "LJ::end_request",
+                                                            "Apache::DebateSuicide"
+                                                        ]);
 
         if ($LJ::TRUST_X_HEADERS) {
             # if we're behind a lite mod_proxy front-end, we need to trick future handlers
@@ -307,7 +309,7 @@ sub trans
 
         LJ::Request->handler("perl-script");
         LJ::Request->notes("bml_filename" => $filename);
-        LJ::Request->push_handlers(PerlHandler => \&Apache::BML::handler);
+        LJ::Request->set_handlers(PerlHandler => \&Apache::BML::handler);
         return LJ::Request::OK;
     };
 
@@ -327,7 +329,7 @@ sub trans
               # apply sysban block if applicable
               if (LJ::UniqCookie->sysban_should_block) {
                   LJ::Request->handler("perl-script");
-                  LJ::Request->push_handlers(PerlHandler => \&blocked_bot );
+                  LJ::Reiquest->set_handlers(PerlHandler => \&blocked_bot );
                   return LJ::Request::OK;
               }
           }
@@ -347,13 +349,13 @@ sub trans
         foreach my $ip (@req_hosts) {
             if (LJ::sysban_check('ip', $ip)) {
                 LJ::Request->handler("perl-script");
-                LJ::Request->push_handlers(PerlHandler => \&blocked_bot );
+                LJ::Request->set_handlers(PerlHandler => \&blocked_bot);
                 return LJ::Request::OK;
             }
         }
         if (LJ::run_hook("forbid_request")) {
             LJ::Request->handler("perl-script");
-            LJ::Request->push_handlers(PerlHandler => \&blocked_bot );
+            LJ::Request->set_handlers(PerlHandler => \&blocked_bot);
             return LJ::Request::OK
         }
     }
@@ -437,7 +439,7 @@ sub trans
                 # the first time with the handlers pushed?  nothing
                 # else requires this chicanery!
                 LJ::Request->handler("perl-script");
-                LJ::Request->push_handlers(PerlHandler => \&anti_squatter);
+                LJ::Request->set_handlers(PerlHandler => \&anti_squatter);
             }
             return LJ::Request::OK
         }
@@ -463,7 +465,7 @@ sub trans
 
         my $remote = LJ::get_remote();
         my $u = LJ::load_user($orig_user);
-
+        
         # do redirects:
         # -- communities to the right place
         # -- uppercase usernames
@@ -599,12 +601,12 @@ sub trans
             my ($mode, $path) = ($1, $2);
             if ($mode eq "customview") {
                 LJ::Request->handler("perl-script");
-                LJ::Request->push_handlers(PerlHandler => \&customview_content);
+                LJ::Request->set_handlers(PerlHandler => \&customview_content);
                 return LJ::Request::OK
             }
             if (my $handler = LJ::run_hook("data_handler:$mode", $RQ{'user'}, $path)) {
                 LJ::Request->handler("perl-script");
-                LJ::Request->push_handlers(PerlHandler => $handler);
+                LJ::Request->set_handlers(PerlHandler => $handler);
                 return LJ::Request::OK
             }
         }
@@ -978,7 +980,7 @@ sub trans
                 LJ::Request->pnotes ('remote' => LJ::get_remote());
                 return LJ::Request::FORBIDDEN;
             }
-            LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
+            LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return LJ::Request::OK
         }
         if ($int =~ /^flat|xmlrpc|blogger|elsewhere_info|atom(?:api)?$/) {
@@ -989,7 +991,7 @@ sub trans
         }
         if ($int eq "s2") {
             Apache::LiveJournal::Interface::S2->load;
-            LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::S2::handler);
+            LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::Interface::S2::handler);
             return LJ::Request::OK
         }
         LJ::Request->pnotes ('error' => 'e404');
@@ -1004,15 +1006,15 @@ sub trans
     # customview (get an S1 journal by number)
     if ($uri =~ m!^/customview\.cgi!) {
         LJ::Request->handler("perl-script");
-        LJ::Request->push_handlers(PerlHandler => \&customview_content);
-        return LJ::Request::OK
+        LJ::Request->set_handlers(PerlHandler => \&customview_content);
+        return LJ::Request::OK;
     }
 
     if ($uri =~ m!^/palimg/!) {
         Apache::LiveJournal::PalImg->load;
         LJ::Request->handler("perl-script");
-        LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::PalImg::handler);
-        return LJ::Request::OK
+        LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::PalImg::handler);
+        return LJ::Request::OK;
     }
 
     # redirected resources
@@ -1392,7 +1394,7 @@ sub files_trans
         if (my $handler = LJ::run_hook("files_handler:$domain", $user, $rest)) {
             LJ::Request->notes("codepath" => "files.$domain");
             LJ::Request->handler("perl-script");
-            LJ::Request->push_handlers(PerlHandler => $handler);
+            LJ::Request->set_handlers(PerlHandler => $handler);
             return LJ::Request::OK
         }
         return LJ::Request::NOT_FOUND;
@@ -1911,7 +1913,7 @@ sub db_logger
 
 sub anti_squatter
 {
-    LJ::Request->push_handlers(PerlHandler => sub {
+    LJ::Request->set_handlers(PerlHandler => sub {
         LJ::Request->content_type("text/html");
         LJ::Request->send_http_header();
         LJ::Request->print("<html><head><title>Dev Server Warning</title>",

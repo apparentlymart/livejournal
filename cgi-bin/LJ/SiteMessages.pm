@@ -178,7 +178,8 @@ sub get_messages {
 
     my $office_only = LJ::GeoLocation->get_country_info_by_ip(LJ::get_remote_ip(), { allow_spec_country => 1 } ) eq '1S';
 
-    @messages = grep { ~$_->{accounts} & AccountMask->{OfficeOnly} or $office_only } @messages;
+    # +0 is important for doing integer bitwise operation, opposite to string operation
+    @messages = grep { ~($_->{accounts}+0) & AccountMask->{OfficeOnly} or $office_only } @messages;
 
     @messages = $class->filter_by_country($u, @messages);
     @messages = $class->filter_by_account($u, @messages);

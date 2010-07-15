@@ -117,8 +117,6 @@ sub send_comm_invite {
                  undef, $cu->{userid}, $u->{userid}, $mu->{userid}, $newargstr);
     }
 
-    LJ::run_hooks('invite_member', $cu, $u);
-
     # Fire community invite event
     LJ::Event::CommunityInvite->new($u, $mu, $cu)->fire unless $LJ::DISABLED{esn};
 
@@ -267,13 +265,23 @@ sub revoke_invites {
             "userid IN ($in)", undef, $cu->{userid});
     return LJ::error('db') if $cu->err;
 
+    my $stats = {
+        journalid   => $cu->userid,
+        journalcaps => $cu->caps,
+        users       => []
+    };
+
     # remove from inviterecv also,
     # otherwise invite cannot be resent for over 30 days
     foreach my $uid (@uids) {
         my $u =  LJ::want_user($uid);
-        $u->do("DELETE FROM inviterecv WHERE userid = ? AND " .
-               "commid = ?", undef, $uid, $cu->{userid});
+        my $res = $u->do("DELETE FROM inviterecv WHERE userid = ? AND " .
+                         "commid = ?", undef, $uid, $cu->{userid});
+
+        push @{$stats->{users}}, { id => $u->userid, caps => $u->caps } if $res;
     }
+
+    LJ::run_hooks('revoke_invite', $stats);
 
     # success
     return 1;
@@ -533,7 +541,13 @@ sub approve_pending_member {
                          undef, $cu->{userid}, "targetid=$u->{userid}");
     return unless $count;
 
-    LJ::run_hooks('approve_member', $cu, $u);
+    LJ::run_hooks('approve_member',
+        {
+            journalid   => $cu->userid,
+            journalcaps => $cu->caps,
+            users       => [ { id => $u->userid, caps => $u->caps } ]
+        }
+    );
 
     # step 2, make user join the community
     # 1 means "add community to user's friends list"
@@ -570,7 +584,14 @@ sub reject_pending_member {
                          undef, $cu->{userid}, "targetid=$u->{userid}");
     return unless $count;
 
-    LJ::run_hooks('reject_member', $cu, $u);
+    LJ::run_hooks(
+        'reject_member',
+        {
+            journalid   => $cu->userid,
+            journalcaps => $cu->caps,
+            users       => [ { id => $u->userid, caps => $u->caps } ]
+        }
+    );
 
     # step 2, email the user
     my %params = (event => 'CommunityJoinReject', journal => $u);

@@ -23,7 +23,7 @@ PotD =
 		}
 		this.pause = true;
 		var widget_node = jQuery(node).parents('.appwidget');
-		
+
 		this.cache[skip] ?
 			this.setQuestion(this.cache[skip], widget_node) :
 			jQuery.getJSON(
@@ -54,3 +54,31 @@ PotD =
 }
 
 PotD.init();
+
+jQuery(document).ready(function() {
+	jQuery('div.appwidget-polloftheday').find('form').live("submit",function(){
+		var form = jQuery(this);
+		jQuery('<i class="potd-preloader" />').appendTo('div.appwidget-polloftheday').height(jQuery('div.appwidget-polloftheday').height());
+		var timer_reached = false,
+			response_received = false;
+		function checkStatus() {
+			if (timer_reached && response_received) {
+				if (jQuery('i.potd-preloader').length > 0) {
+					jQuery('i.potd-preloader').remove();
+				};
+			}
+		}
+		setTimeout(function() {
+			timer_reached = true;
+			checkStatus();
+		}, 1000);
+		jQuery.post(form.attr('action'), form.serialize() + '&poll-submit=submit', function() {
+			var skip = form.prev('input[name="skip"]').val();
+			PotD.cache[skip] = null;
+			PotD.getQuestion(form, skip);
+			response_received = true;
+			checkStatus();
+		});
+		return false;
+	});
+});

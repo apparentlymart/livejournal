@@ -368,9 +368,15 @@
 }
 
 #prop_taglist {
-    width: 80%;
+    width: 70%;
 }
-
+* HTML #prop_taglist {
+	width: 68%;
+}
+.i-prop-selecttags {
+	float: left;
+	margin: 0 0 0 5px;
+	}
 .ui-autocomplete {
 	position: absolute;
 	left: 0;
@@ -379,6 +385,7 @@
 	margin: 0;
 	padding: 0;
 	border: 1px solid #AAA;
+	border-top:0;
 	list-style: none;
 	line-height: 1.4;
 	background: #FFF;
@@ -388,6 +395,7 @@
 		margin: 0;
 		padding: 0;
 		cursor: pointer;
+		text-align: left;
 		}
 		.ui-autocomplete LI A {
 			display: block;
@@ -395,6 +403,7 @@
 			padding: 1px 10px;
 			color: #000;
 			text-decoration: none;
+			text-align: left;
 			}
 		.ui-autocomplete .ui-state-hover {
 			background: #EEE;

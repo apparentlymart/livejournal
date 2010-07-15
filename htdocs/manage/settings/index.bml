@@ -304,6 +304,12 @@ body<=
         if $u;
     $ret .= $submit_msg;
 
+    # Warn them if logged in and not validated
+    if ($given_cat eq 'notifications' && $u && !$u->is_identity && $u->email_raw && $u->email_status ne 'A') {
+        $ret .= "<?warningbar <b>$ML{'label.warning'}</b> $ML{'.error.notvalidated'} warningbar?>";
+        $ret .= "<br />";
+    }
+
     $ret .= "<div id='settings_left'>";
 
     $ret .= "<ul id='settings_nav'>";

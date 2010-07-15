@@ -45,7 +45,6 @@ sub make_journal
     my $con_opts = {};
 
     if ($view eq "res") {
-
         # the s1shortcomings virtual styleid doesn't have a styleid
         # so we're making the rule that it can't have resource URLs.
         if ($styleid eq "s1short") {
@@ -53,7 +52,7 @@ sub make_journal
             return;
         }
 
-        if ($opts->{'pathextra'} =~ m!/(\d+)/stylesheet$!) {
+        if ($opts->{'pathextra'} =~ m|/(\d+)/stylesheet$|) {
             $styleid = $1;
             $entry = "print_stylesheet()";
             $opts->{'contenttype'} = 'text/css';
@@ -740,8 +739,10 @@ sub s2_context
         if ($ims eq $ourtime) {
             # 304 return; unload non-public layers
             LJ::S2::cleanup_layers(@layers);
-            LJ::Request->status_line("304 Not Modified");
+            use LJ::Request;
+            LJ::Request->status(LJ::Request::HTTP_NOT_MODIFIED());
             LJ::Request->send_http_header();
+            $opts->{'handler_return'} = LJ::Request::HTTP_NOT_MODIFIED();
             return undef;
         } else {
             LJ::Request->header_out("Last-Modified", $ourtime);
@@ -3669,6 +3670,14 @@ sub _Entry__get_link
         my $entry_url = LJ::eurl($entry->url); # for js
         my $url = "$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;u=$entry_url";
         my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_email"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_email.gif", 24, 24));
+        return $link;
+    }
+    if ($key eq "facebook_like") {
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->security eq 'public';
+        my $entry_url = LJ::eurl($entry->url);
+        my $url = "http://www.facebook.com/plugins/like.php?href=$entry_url&layout=standard&show_faces=false&width=450&action=like&colorscheme=light&height=35";
+        my $link = LJ::S2::Link($url, 'caption unused', LJ::S2::Image("$LJ::IMGPREFIX/btn_facebook.gif", 24, 24));
         return $link;
     }
     if ($key eq "mem_add") {

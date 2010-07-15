@@ -118,26 +118,6 @@ sub exml
 }
 
 # <LJFUNC>
-# name: LJ::dhtml
-# class: text
-# des: Decode a value before it can be put in HTML.
-# args: string
-# des-string: string to be decoded
-# returns: string decoded.
-# </LJFUNC>
-sub dhtml
-{
-    # this is faster than doing one substitution with a map:
-    my $a = $_[0];
-    $a =~ s/&amp;/\&/g;
-    $a =~ s/&quot;/\"/g;
-    $a =~ s/&\#39;/\'/g;
-    $a =~ s/&lt;/</g;
-    $a =~ s/&gt;/>/g;
-    return $a;
-}
-
-# <LJFUNC>
 # name: LJ::ehtml
 # class: text
 # des: Escapes a value before it can be put in HTML.
