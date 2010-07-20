@@ -1101,6 +1101,13 @@ sub trans
 sub userpic_trans
 {
 
+    if (LJ::Request->uri eq '/crossdomain.xml') {
+        Apache::LiveJournal::Interface::Api->load; 
+        LJ::Request->handler("perl-script"); 
+        LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Api::crossdomain); 
+        return LJ::Request::OK;
+    }
+    
     LJ::Request->pnotes (error => 'e404') unless LJ::Request->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
     return LJ::Request::NOT_FOUND unless LJ::Request->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
     my ($picid, $userid) = ($1, $2);
