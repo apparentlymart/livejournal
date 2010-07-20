@@ -48,7 +48,8 @@ sub get_marked {
     return () if $LJ::DISABLED{'revoke_validation_on_errors'};
 
     my $limit   = $opts{limit}  || 1000;
-    my $timeout = (int($opts{timeout})|| 72) . ':00:00';    # get this as 'hh:00:00'.
+    # 97 = 1 + 24 + 72. It's a total time to deliver mail.
+    my $timeout = (int($opts{timeout})|| 97) . ':00:00';    # get this as 'hh:00:00'.
 
     my $dbh = LJ::get_db_reader();
     my $sth = $dbh->prepare(qq{
