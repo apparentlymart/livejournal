@@ -16,7 +16,7 @@ sub new {
 
     # fields
     foreach my $f (qw(msgid journalid otherid subject body type parent_msgid
-                      timesent userpic)) {
+                      timesent userpic preformatted)) {
         $self->{$f} = delete $opts->{$f} if exists $opts->{$f};
     }
 
@@ -189,11 +189,12 @@ sub _save_msgtxt_row_to_db {
 sub _save_msgprop_row_to_db {
     my ($self, $u, $userid) = @_;
 
-    my $propval = $self->userpic;
-
-    if ($propval) {
+    for my $prop (qw(userpic preformatted)){
+        my $propval = $self->$prop;
+        next unless $propval;
+        
         my $tm = $self->typemap;
-        my $propid = $tm->class_to_typeid('userpic');
+        my $propid = $tm->class_to_typeid($prop);
         my $sql = "INSERT INTO usermsgprop (journalid, msgid, propid, propval) " .
                   "VALUES (?,?,?,?)";
 
@@ -209,7 +210,7 @@ sub _save_msgprop_row_to_db {
             return 0;
         }
     }
-
+    
     return 1;
 }
 
@@ -279,12 +280,20 @@ sub body_raw {
 
 sub body {
     my $self = shift;
-    return LJ::ehtml($self->body_raw);
+    my $body = $self->body_raw;
+    return LJ::ehtml($body) unless $self->preformatted;
+    LJ::CleanHTML::clean_message(\$body);
+    return $body;
 }
 
 sub userpic {
     my $self = shift;
     return $self->_row_getter("userpic", "msgprop");
+}
+
+sub preformatted {
+    my $self = shift;
+    return $self->_row_getter("preformatted", "msgprop");
 }
 
 sub valid {
@@ -325,7 +334,7 @@ sub absorb_row {
     my ($self, $table, %row) = @_;
 
     foreach (qw(journalid type parent_msgid otherid timesent state subject
-                body userpic)) {
+                body userpic preformatted)) {
         if (exists $row{$_}) {
             $self->{$_} = $row{$_};
             $self->{"_loaded_${table}_row"} = 1;
@@ -438,14 +447,17 @@ sub unloaded_singletons {
 
 sub preload_rows {
     my ($class, $table, $self) = @_;
-
     my @objlist = $self->unloaded_singletons($table);
     my @msglist = (map  { [ $_->journalid, $_->msgid ] }
                      grep { ! $_->{"_loaded_${table}_row"} }
                        @objlist);
-
-    my @rows = eval "${class}::_get_${table}_rows(\$self, \@msglist)";
-
+    my $getter;
+    {
+        no strict 'refs';
+        $getter = *{$class . "::_get_${table}_rows"};
+    }
+    my @rows = $self->$getter(@msglist);
+    
     # make a mapping of journalid-msgid=> $row
     my %row_map = map { join("-", $_->{journalid}, $_->{msgid}) => $_ } @rows;
 
@@ -635,6 +647,7 @@ sub _get_msgtext_rows {
 }
 
 # get the userpic data from memcache or the DB
+# called by preload_rows
 sub _get_msgprop_rows {
     my ($self, @items) = @_; # obj, [ journalid, msgid ], ...
 
@@ -666,13 +679,13 @@ sub _get_msgprop_rows {
     my $mem = LJ::MemCache::get_multi(@keys);
     if ($mem) {
         while (my ($key, $array) = each %$mem) {
-            my $row = LJ::MemCache::array_to_hash('usermsg', $array);
+            my $row = LJ::MemCache::array_to_hash('usermsgprop', $array);
             next unless $row;
 
             my (undef, $uid, $msgid) = split(":", $key);
 
             # update our needs
-            $have{$uid}->{$msgid} = { userpic => $row };
+            $have{$uid}->{$msgid} = $row;
             delete $need{$uid}->{$msgid};
             delete $need{$uid} unless %{$need{$uid}};
         }
@@ -699,25 +712,34 @@ sub _get_msgprop_rows {
     return $ret->() unless @vals;
 
     my $tm = __PACKAGE__->typemap;
-    my $propid = $tm->class_to_typeid('userpic');
+    my %props = map {$tm->class_to_typeid($_) => $_} qw(userpic preformatted);
+    my $propid = join ',', keys(%props);
     my $where = join(" OR ", @where);
     my $sth = $u->prepare
-        ( "SELECT journalid, msgid, propval FROM usermsgprop WHERE propid = ? AND ($where)" );
-    $sth->execute($propid, @vals);
+        ( "SELECT journalid, msgid, propval, propid FROM usermsgprop WHERE propid IN ($propid) AND ($where)" );
+    $sth->execute(@vals);
 
+    my %loaded;
     while (my $row = $sth->fetchrow_hashref) {
         my $uid = $row->{journalid};
         my $msgid = $row->{msgid};
-        $row->{'userpic'} = $row->{'propval'};
 
         # update our needs
-        $have{$uid}->{$msgid} = $row;
-        delete $need{$uid}->{$msgid};
-        delete $need{$uid} unless %{$need{$uid}};
-
+        $have{$uid}->{$msgid} = { journalid => $uid, msgid => $msgid }
+            unless $have{$uid}->{$msgid};
+        $have{$uid}->{$msgid}->{$props{$row->{'propid'}}} = $row->{'propval'};
+#        delete $need{$uid}->{$msgid};
+#        delete $need{$uid} unless %{$need{$uid}};
+        $loaded{$uid}->{$msgid} = 1;
         # update memcache
-        my $memkey = [$uid, "msgprop:$uid:$msgid"];
-        LJ::MemCache::set($memkey, $row->{'userpic'});
+    }
+
+
+    for my $uid (keys(%loaded)){
+        for my $msgid (keys(%loaded)){
+            my $memkey = [$uid, "msgprop:$uid:$msgid"];
+            LJ::MemCache::set($memkey, LJ::MemCache::array_to_hash("usermsgprop", $have{$uid}->{$msgid} ));
+        }
     }
 
     return $ret->();

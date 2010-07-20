@@ -1504,6 +1504,30 @@ sub clean_comment
     });
 }
 
+# ref: scalarref of text to clean, gets cleaned in-place
+sub clean_message
+{
+    my ($ref, $opts) = @_;
+
+    # slow path: need to be run it through the cleaner
+    return clean($ref, {
+        'linkify' => 1,
+        'wordlength' => 40,
+        'addbreaks' => 0,
+        'eat' => [qw[head title style layer iframe applet object]],
+        'mode' => 'deny',
+        'allow' => \@comment_all,
+        'autoclose' => \@comment_close,
+        'cleancss' => 1,
+        'strongcleancss' => 1,
+        'noearlyclose' => 1,
+        'tablecheck' => 1,
+        'nocss' => $opts->{'nocss'},
+        'textonly' => $opts->{'textonly'} ? 1 : 0,
+        'remove_positioning' => 1,
+    });
+}
+
 sub clean_userbio {
     my $ref = shift;
     return undef unless ref $ref;
