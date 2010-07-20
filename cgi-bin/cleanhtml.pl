@@ -788,13 +788,17 @@ sub clean
                     if ($hash->{src} =~ m!/\d+\.html$!) {
                         next TOKEN;    
                     }
-                    
-                    # http://pics.livejournal.com/brad/pic/000fbt9x* -> l-pics.livejournal.com for some journals
-                    if ($hash->{src} =~ m!^http://pics.livejournal.com/\w+/pic/!) {
-                        my $ju = LJ::get_active_journal();
-                        $hash->{src} =~ s!^http://pics.!http://l-pics.! if $ju and $LJ::USE_CDN_FOR_PICS{$ju->user};
+                   
+                    ## CDN:
+                    ##  http://pics.livejournal.com/<certain-journal>/pic/000fbt9x* -> l-pics.livejournal.com
+                    ##  TODO: make it work for communities too
+                    if ($hash->{'src'} =~ m!^http://(l-)?pics.livejournal.com/(\w+)/pic/(.*)$!i) {
+                        my ($journal, $rest) = ($1, $2);
+                        my $host = (!$LJ::DISABLED{'pics_via_cdn'} && $LJ::USE_CDN_FOR_PICS{$journal}) 
+                                ? "pics.livejournal.com" : "l-pics.livejournal.com";
+                        $hash->{'src'} = "http://$host/$journal/pic/$rest";
                     }
-
+            
                     if ($img_bad) {
                         $newdata .= "<a class=\"ljimgplaceholder\" href=\"" .
                             LJ::ehtml($hash->{'src'}) . "\">" .
