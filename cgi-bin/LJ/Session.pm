@@ -67,6 +67,27 @@ sub active_sessions {
     return @ret;
 }
 
+sub record_login {
+    my ( $class, $u, $sessid ) = @_;
+    $sessid ||= 0;
+
+    my $too_old = time() - 86400 * 30;
+    $u->do( "DELETE FROM loginlog WHERE userid=? AND logintime < ?",
+        undef, $u->{userid}, $too_old );
+
+    my ( $ip, $ua );
+    eval {
+        $ip = LJ::get_remote_ip();
+        $ua = LJ::Request->header_in('User-Agent');
+    };
+
+    return $u->do(
+        "INSERT INTO loginlog SET userid=?, sessid=?, "
+            . "logintime=UNIX_TIMESTAMP(), ip=?, ua=?",
+        undef, $u->{userid}, $sessid, $ip, $ua
+    );
+}
+
 sub create {
     my ($class, $u, %opts) = @_;
 
@@ -99,7 +120,7 @@ sub create {
     my $id = LJ::alloc_user_counter($u, 'S');
     return undef unless $id;
 
-    $u->record_login($id)
+    $class->record_login($u, $id)
         unless $nolog;
 
     $u->do("REPLACE INTO sessions (userid, sessid, auth, exptype, ".
@@ -147,12 +168,21 @@ sub set_ipfixed {
 }
 
 sub set_exptype {
-    my ($sess, $exptype) = @_;
-    croak("Invalid exptype") unless $exptype =~ /^short|long|once$/;
-    return $sess->_dbupdate(exptype => $exptype,
-                            timeexpire => time() + LJ::Session->session_length($exptype));
-}
+    my ( $sess, $exptype ) = @_;
 
+    croak("Invalid exptype") unless $exptype =~ /^short|long|once$/;
+
+    my $ret = $sess->_dbupdate(
+        exptype    => $exptype,
+        timeexpire => time() + LJ::Session->session_length($exptype),
+    );
+
+    if ($ret) {
+        $sess->record_login( $sess->owner, $sess->{'sessid'} );
+    }
+
+    return $ret;
+}
 
 sub _dbupdate {
     my ($sess, %changes) = @_;
@@ -371,25 +401,30 @@ sub destroy {
 }
 
 
-# based on our type and current expiration length, update this cookie if we need to
+# based on our type and current expiration length, update this cookie if we
+# need to
 sub try_renew {
-    my ($sess, $cookies) = @_;
+    my ( $sess, $cookies ) = @_;
 
     # only renew long type cookies
     return if $sess->{exptype} ne 'long';
 
     # how long to live for
-    my $u = $sess->owner;
-    my $sess_length = LJ::Session->session_length($sess->{exptype});
-    my $now = time();
+    my $u           = $sess->owner;
+    my $sess_length = LJ::Session->session_length( $sess->{exptype} );
+    my $now         = time();
     my $new_expire  = $now + $sess_length;
 
-    # if there is a new session length to be set and the user's db writer is available,
-    # go ahead and set the new session expiration in the database. then only update the
-    # cookies if the database operation is successful
-    if ($sess_length && $sess->{'timeexpire'} - $now < $sess_length/2 &&
-        $u->writer && $sess->_dbupdate(timeexpire => $new_expire))
+    # if there is a new session length to be set and the user's db writer is
+    # available, go ahead and set the new session expiration in the database.
+    # then only update the cookies if the database operation is successful
+    if (   $sess_length
+        && $sess->{'timeexpire'} - $now < $sess_length / 2
+        && $u->writer )
     {
+        return unless $sess->_dbupdate( 'timeexpire' => $new_expire );
+
+        $sess->record_login( $u, $sess->{'sessid'} );
         $sess->update_master_cookie;
     }
 }

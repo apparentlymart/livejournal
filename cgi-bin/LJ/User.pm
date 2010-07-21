@@ -2249,23 +2249,6 @@ sub get_recent_talkitems {
     return reverse @recv;
 }
 
-sub record_login {
-    my ($u, $sessid) = @_;
-
-    my $too_old = time() - 86400 * 30;
-    $u->do("DELETE FROM loginlog WHERE userid=? AND logintime < ?",
-           undef, $u->{userid}, $too_old);
-
-    my ($ip, $ua);
-    eval {
-        $ip = LJ::get_remote_ip();
-        $ua = LJ::Request->header_in('User-Agent');
-    };
-
-    return $u->do("INSERT INTO loginlog SET userid=?, sessid=?, logintime=UNIX_TIMESTAMP(), ".
-                  "ip=?, ua=?", undef, $u->{userid}, $sessid, $ip, $ua);
-}
-
 sub last_login_time {
     my ($u) = @_;
 

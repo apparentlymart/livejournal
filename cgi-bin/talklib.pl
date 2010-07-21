@@ -2706,9 +2706,15 @@ sub init {
                     }
                 }
 
-                # if the user chooses to log in, do so
-                if ($form->{'do_login'} && ! @$errret) {
-                    $init->{didlogin} = $up->make_login_session($exptype, $ipfixed);
+                unless (@$errret) {
+                    # if the user chooses to log in, do so
+                    if ($form->{'do_login'}) {
+                        $init->{didlogin} =
+                            $up->make_login_session($exptype, $ipfixed);
+                    } else {
+                        # record their login session anyway
+                        LJ::Session->record_login($up);
+                    }
                 }
             } else {
                 $err->(BML::ml("$SC.error.badusername2", {'sitename' => $LJ::SITENAMESHORT, 'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'"}));
