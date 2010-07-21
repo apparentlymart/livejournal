@@ -101,6 +101,11 @@ FCKConfig.EMailProtectionFunction = 'mt(NAME,DOMAIN,SUBJECT,BODY)' ;
 
 FCKConfig.StartupFocus	= false ;
 FCKConfig.ForcePasteAsPlainText	= false ;
+
+// temp fix for http://dev.ckeditor.com/ticket/4960
+if (FCKBrowserInfo.IsSafari){
+	FCKConfig.ForcePasteAsPlainText	= true ;
+}
 FCKConfig.AutoDetectPasteFromWord = true ;	// IE only.
 FCKConfig.ShowDropDialog = true ;
 FCKConfig.ForceSimpleAmpersand	= false ;
