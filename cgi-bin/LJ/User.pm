@@ -5237,6 +5237,7 @@ sub openid_tags {
     if (LJ::OpenID->server_enabled and defined $u) {
         my $journalbase = $u->journal_base;
         $head .= qq{<link rel="openid2.provider" href="$LJ::OPENID_SERVER" />\n};
+        $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
         $head .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
     }
 
@@ -5558,6 +5559,19 @@ sub subscriptions_count {
     my $count = $u->_subscriptions_count;
     LJ::MemCache::set('subscriptions_count:'.$u->id, $count);
     return $count;
+}
+
+##
+## Returns bool value - if the username has ever belonged to other user.
+## No memcache use is intentional - GC database with SSD is used for SQL query.
+##
+sub does_own_previously_occupied_name {
+    my $u = shift;
+    my $dbh = LJ::get_db_reader() or die;
+    return $dbh->selectrow_array(
+        "SELECT userid FROM renames WHERE fromuser = ? LIMIT 1", 
+        {RaiseError => 1}, $u->{'user'}
+    );
 }
 
 package LJ;
