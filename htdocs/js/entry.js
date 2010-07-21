@@ -51,7 +51,8 @@ function new_post_load(dotime) {
     f = document.updateForm;
     if (! f) return false;
 	
-	getUserTags(jQuery('#usejournal').val());
+	// ID used two variants: usejournal or usejournal_username
+	getUserTags(jQuery(document.forms.updateForm.usejournal).val());
 	
     var userbox = f.user;
     if (! userbox) return false;
@@ -540,7 +541,7 @@ function tagAutocomplete(node, tags)
 		},
 		select: function(e, ui) {
 			var val = this.value,
-				range = DOM.getSelectedRange(this);
+				range = DOM.getSelectedRange(this),
 				//search_ary = val.split(','), i = -1, sym_cnt = 0;
 				search = val.match(new RegExp('(^.{0,'+(range.start - 1)+'},|^)([^,]*),?(.*)'));
 			
@@ -615,7 +616,7 @@ function selectTags(node)
 			width: jQuery(window).width()/2,
 			widgetClass: 'IPPU::SelectTags'
 		} , {
-			user: jQuery('#usejournal').val()
+			user: jQuery(document.forms.updateForm.usejournal).val()
 		});
 	widget.ippu.addClass('ippu-select-tags');
 	widget.ippu.setClickToClose(false);

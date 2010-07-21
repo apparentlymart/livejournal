@@ -28,8 +28,6 @@ LJ_IPPU = new Class ( IPPU, {
       "<img src='" + Site.imgprefix + "/CloseButton.gif' width='15' height='15' id='" + this.uniqId + "_cancel' /></div>" + title;
 
     LJ_IPPU.superClass.setTitle.apply(this, [titlebarContent]);
-    
-      
   },
 
   generateUniqId: function() {
@@ -45,7 +43,6 @@ LJ_IPPU = new Class ( IPPU, {
 
   setup_lj_ippu: function (evt) {
     var cancelCallback = this.cancelThisFunc;
-   //DOM.addEventListener($(this.uniqId + "_cancel"), "click", cancelCallback, true);
    $(this.uniqId + "_cancel").onclick = function(){
 	    cancelCallback();
     };
