@@ -216,11 +216,13 @@ sub LJ::Request::push_handlers {
 sub LJ::Request::set_handlers {
     my $class = shift;
     _die_if_no_request();
-    my @args = shift @_;
-    $args[1] = ref $_[0] eq 'ARRAY' ? $_[0] : [@_]; # second arg should be an arrayref.
-
-    #return Apache->request->set_handlers(@args);
-    $instance->{r}->set_handlers(@args);
+    my $handler_name = shift;
+    my $handlers = (ref $_[0] eq 'ARRAY') ? shift : [@_]; # second arg should be an arrayref.
+    if ($handler_name eq 'PerlCleanupHandler') {
+        $instance->{r}->push_handlers($handler_name, $_) foreach (@$handlers);
+    } else {
+        $instance->{r}->set_handlers($handler_name, $handlers);
+    }
 }
 
 sub LJ::Request::handler {
