@@ -5562,14 +5562,15 @@ sub subscriptions_count {
 }
 
 ##
-## Returns bool value - if the username has ever belonged to other user.
+## Instance method - if the username has ever belonged to other user.
+## Returns last (most recent) date (MySQL datetime) of this username rename.
 ## No memcache use is intentional - GC database with SSD is used for SQL query.
 ##
 sub does_own_previously_occupied_name {
     my $u = shift;
     my $dbh = LJ::get_db_reader() or die;
     return $dbh->selectrow_array(
-        "SELECT userid FROM renames WHERE fromuser = ? LIMIT 1", 
+        "SELECT max(rendate) FROM renames WHERE fromuser = ?", 
         {RaiseError => 1}, $u->{'user'}
     );
 }

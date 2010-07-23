@@ -11,10 +11,12 @@ _info?><?_code
     
     ## Don't allow users who renamed their accounts into someone's else usernames
     ## to use OpenID identity of that person.
-    if ($remote && $remote->does_own_previously_occupied_name) {
-        return  "Sorry, you have renamed your account into '$remote->{user}'" .
-                " which previoulsly belonged to someone else," .
-                " so you can't use that OpenID identity";
+    if ($remote && (my $last_rename_date = $remote->does_own_previously_occupied_name)) {
+        if ($last_rename_date gt '2010-07-19') {    
+            return  "Sorry, you have renamed your account into '$remote->{user}'" .
+                    " which previoulsly belonged to someone else," .
+                    " so you can't use that OpenID identity";
+        }
     }
 
     ## Non-OpenID-compliant section: let trusted sites query remote user,
