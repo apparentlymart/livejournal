@@ -3481,7 +3481,7 @@ sub is_enabled {
 sub lang_to_locale {
     my ($lang) = @_;
 
-    my %map = {
+    my %map = (
         af    => "af_ZA",
         be    => "be_BY",
         da    => "da_DK",
@@ -3510,7 +3510,7 @@ sub lang_to_locale {
         uk    => "uk_UA",
         zh    => "zh_CN",
         zh_TR => "zh_TW",
-    };
+    );
 
     return 'en_US' unless $map{$lang};
     return $map{$lang};
