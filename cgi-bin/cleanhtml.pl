@@ -792,7 +792,7 @@ sub clean
                     ## CDN:
                     ##  http://pics.livejournal.com/<certain-journal>/pic/000fbt9x* -> l-pics.livejournal.com
                     ##  TODO: make it work for communities too
-                    if ($hash->{'src'} =~ m!^http://(l-)?pics.livejournal.com/(\w+)/pic/(.*)$!i) {
+                    if ($hash->{'src'} =~ m!^http://(?:l-)?pics.livejournal.com/(\w+)/pic/(.*)$!i) {
                         my ($journal, $rest) = ($1, $2);
                         my $host = (!$LJ::DISABLED{'pics_via_cdn'} && $LJ::USE_CDN_FOR_PICS{$journal}) 
                                 ? "pics.livejournal.com" : "l-pics.livejournal.com";
