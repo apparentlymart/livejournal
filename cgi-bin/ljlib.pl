@@ -2205,6 +2205,12 @@ sub start_request
                             )
             ) if LJ::show_contextual_hover();
 
+            # lj_live
+            LJ::need_res(qw(stc/ljtimes/ctrl.css
+                            js/ljlive.js
+                           )
+            ) if LJ::is_enabled('lj_live');
+
             # Conditional IE CSS file for all pages 
             LJ::need_res({condition => 'IE'}, 'stc/ie.css');
         }
