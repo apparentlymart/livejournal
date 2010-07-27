@@ -2711,7 +2711,7 @@ sub init {
                     if ($form->{'do_login'}) {
                         $init->{didlogin} =
                             $up->make_login_session($exptype, $ipfixed);
-                    } else {
+                    } elsif (!$cookie_auth) {
                         # record their login session anyway
                         LJ::Session->record_login($up);
                     }
