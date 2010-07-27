@@ -636,7 +636,7 @@ function Entry::print_metadata() {
                 $caption = $*text_meta_mood;
                 if (defined $.mood_icon) {
                     $i = $.mood_icon;
-                    $val = """<img src="$i.url" width="$i.width" height="$i.height" align="absmiddle"> $val""";
+                    $val = $i->as_string_ex($i.alttext, "align='absmiddle' ") + " " + $val;
                 }
             }
             println """<div class="metadata-$k"><span style="font-weight: bold;">$caption:</span> $val</div>""";
