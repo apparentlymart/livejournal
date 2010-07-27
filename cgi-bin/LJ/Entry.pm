@@ -96,17 +96,20 @@ sub new
     }
 
     # do we have a singleton for this entry?
-    {
-        my $journalid = $self->{u}->{userid};
-        my $jitemid   = $self->{jitemid};
+    my $journalid = $self->{u}->{userid};
+    my $jitemid   = $self->{jitemid};
 
-        $singletons{$journalid} ||= {};
-        return $singletons{$journalid}->{$jitemid}
-            if $singletons{$journalid}->{$jitemid};
+    $singletons{$journalid} ||= {};
+    return $singletons{$journalid}->{$jitemid}
+        if $singletons{$journalid}->{$jitemid};
 
-        # save the singleton if it doesn't exist
-        $singletons{$journalid}->{$jitemid} = $self;
-    }
+    # no singleton, will load row
+    my $anum = $self->{anum}; # caller supplied anum
+    __PACKAGE__->preload_rows([ $self ]);
+    return undef if $anum and $anum != $self->{anum}; # incorrect anum -> 'no such entry'
+
+    # save the singleton if it doesn't exist
+    $singletons{$journalid}->{$jitemid} = $self;
 
     return $self;
 }
