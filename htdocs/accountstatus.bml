@@ -51,6 +51,13 @@ body<=
         return LJ::bad_input($ML{'.error.invalid'})
             unless $statusvis eq 'D' || $statusvis eq 'V';
 
+        # save changes of purge_community_entries/purge_comments
+        {
+            my $purge_comments = ($POST{'purge_comments'}) ? 1 : 0;
+            my $purge_community_entries = ($POST{'purge_community_entries'}) ? 1 : 0;
+            $u->set_prop("purge_external_content", "$purge_comments:$purge_community_entries");
+        }
+
         # no need to change?
         return $ok->(BML::ml('.message.nochange', {'statusvis' => $statusvis{$statusvis} }))
             if $u->statusvis eq $statusvis;
@@ -138,6 +145,19 @@ body<=
     $ret .= LJ::html_select({ 'name' => 'statusvis', 'selected' => $u->statusvis },
                               map { $_, $statusvis{$_} }
                               reverse sort keys %statusvis) . "\n";
+
+    unless ($u->is_suspended) {
+        my ($purge_comments, $purge_community_entries) = split /:/, $u->prop("purge_external_content");
+        
+        $ret .= $ML{'.label.purge_external_content'};
+        $ret .= "<label for='purge_comments'>";
+        $ret .= LJ::html_check({ 'name' => 'purge_comments', 'id' => 'purge_comments', 'selected' => $purge_comments });
+        $ret .= "$ML{'.label.purge_comments'}</label>";
+
+        $ret .= "<label for='purge_community_entries'>";
+        $ret .= LJ::html_check({ 'name' => 'purge_community_entries', 'id' => 'purge_community_entries', 'selected' => $purge_community_entries });
+        $ret .= "$ML{'.label.purge_community_entries'}</label>";
+    }
 
     $ret .= LJ::html_submit(undef, $ML{'.btn.status'}, 
                             { 'disabled' => $u->is_suspended }) . "\n";

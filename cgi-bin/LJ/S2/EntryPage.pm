@@ -172,18 +172,9 @@ sub EntryPage
             }
 
             my $poster;
-            if ($com->{'posterid'}) {
-                if ($pu) {
-                    $poster = UserLite($pu);
-                    $poster->{'_opt_side_alias'} = 1;
-                } else {
-                    $poster = {
-                        '_type' => 'UserLite',
-                        'username' => $com->{'userpost'},
-                        'name' => $com->{'userpost'},  # we don't have this, so fake it
-                        'journal_type' => 'P',         # fake too, but only people can post, so correct
-                    };
-                }
+            if ($com->{'posterid'} && $pu) {
+                $poster = UserLite($pu);
+                $poster->{'_opt_side_alias'} = 1;
             }
 
             # Comment Posted Notice
@@ -230,15 +221,26 @@ sub EntryPage
                 'edit_url' => $edit_url,
             };
 
-            # don't show info from suspended users
-            # FIXME: ideally the load_comments should only return these
-            # items if there are children, otherwise they should be hidden entirely
-            if ($pu && $pu->{'statusvis'} eq "S" && !$viewsome) {
-                $s2com->{'text'} = "";
-                $s2com->{'subject'} = "";
-                $s2com->{'full'} = 0;
-                $s2com->{'subject_icon'} = undef;
-                $s2com->{'userpic'} = undef;
+            # don't show info from suspended users, and from users who deleted their journals 
+            # and choosed to delete their comments in other journals
+            if (!$viewsome && $pu) {
+                my $hide_comment;
+                if ($pu->is_suspended) {
+                    $hide_comment = 1;
+                } elsif ($pu->is_deleted) {
+                    my ($purge_comments, $purge_community_entries) = split /:/, $pu->prop("purge_external_content");
+                    if ($purge_comments && !$LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $u->{user} }) {
+                        $hide_comment = 1;
+                    }
+                }
+                
+                if ($hide_comment) {
+                    $s2com->{'text'} = "";
+                    $s2com->{'subject'} = "";
+                    $s2com->{'full'} = 0;
+                    $s2com->{'subject_icon'} = undef;
+                    $s2com->{'userpic'} = undef;
+                }
             }
 
             # Conditionally add more links to the keyseq

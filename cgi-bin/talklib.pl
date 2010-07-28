@@ -1326,6 +1326,23 @@ sub load_comments
         }
     }
 
+    ## Fix: if authors of comments deleted their journals, 
+    ## and choosed to delete their content in other journals,
+    ## then show their comments as deleted.
+    ## Note: only posts with loaded users (posts that will be shown) are processed here.
+    if (!$LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $u->{'user'} }) {
+        foreach my $post (values %$posts) {
+            my $up = $up{ $post->{'posterid'} };
+            if ($up && $up->is_deleted) {
+                my ($purge_comments, undef) = split /:/, $up->prop("purge_external_content");
+                if ($purge_comments) {
+                    delete @$post{qw/ _loaded subject body /};
+                    $post->{'status'} = 'D';
+                }
+            }
+        }
+    } 
+
     # optionally give them back user refs
     if (ref($opts->{'userref'}) eq "HASH") {
         my %userpics = ();

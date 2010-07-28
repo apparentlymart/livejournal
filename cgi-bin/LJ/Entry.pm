@@ -884,7 +884,20 @@ sub visible_to
         return 0 if $self->journal->{statusvis} =~ m/[DSX]/;
 
         # can't see anything by suspended users
-        return 0 if $self->poster->{statusvis} eq 'S';
+        my $poster = $self->poster;
+        return 0 if $poster->{statusvis} eq 'S';
+
+        # if poster choosed to delete jouranl and all external content, 
+        # then don't show his/her entries, except in some protected journals like 'lj_core'
+        if ($poster->{statusvis} eq 'D') {
+            my ($purge_comments, $purge_community_entries) = split /:/, $poster->prop("purge_external_content");
+            if ($purge_community_entries) {
+                my $journal_name = $self->journal->{user};
+                if (!$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$journal_name}) {
+                    return 0;
+                }
+            }
+        }
 
         # can't see suspended entries
         return 0 if $self->is_suspended_for($remote);
