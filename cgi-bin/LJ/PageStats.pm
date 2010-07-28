@@ -18,7 +18,8 @@ sub new {
 # render JS output for embedding in pages
 #   ctx can be "journal" or "app".  defaults to "app".
 sub render {
-    my ($self) = @_;
+
+    my ($self, $params) = @_;
 
     my $ctx = $self->get_context;
 
@@ -31,7 +32,7 @@ sub render {
         die "Error loading PageStats '$plugin': $@" if $@;
         my $plugin_obj = $class->new;
         next unless $plugin_obj->should_render;
-        $output .= $plugin_obj->render(conf => $self->{conf}->{$plugin});
+        $output .= $plugin_obj->render(conf => $self->{conf}->{$plugin}, params => (ref($params) eq 'HASH' ? $params : {}) );
     }
 
     # return nothing
@@ -78,7 +79,7 @@ sub should_render {
 sub get_context {
     my ($self) = @_;
 
-    return LJ::get_active_journal() ? 'journal' : 'app';
+    return $self->get_journal() ? 'journal' : 'app';
 }
 
 sub get_user {
@@ -162,14 +163,53 @@ sub pagename {
 
 sub get_journal {
     my $self = shift;
+
     my $j = LJ::get_active_journal();
-    return $j;
+    return $j if $j;
+
+    # Now try to determine active_journal from base request if it is requests chain.
+    # Cache it in $self->{active_journal}.
+    # This code is necessary for getting active_journal in 'error-page.bml'.
+
+    return $self->{active_journal} if exists $self->{active_journal};
+
+    $self->{active_journal} = undef;
+
+    if (!LJ::Request::is_initial_req())
+    {
+        my $request = LJ::Request::prev();
+        my $host = $request->header_in('Host');
+        my $uri = $request->uri;
+
+        if (($LJ::USER_VHOSTS || $LJ::ONLY_USER_VHOSTS) &&
+            $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
+            $1 ne 'www')
+        {
+            my $user = $1;
+
+            my $func = $LJ::SUBDOMAIN_FUNCTION{$user};
+
+            if ($func eq 'journal' && $uri =~ m!^/(\w{1,15})(/.*)?$!) {
+                $user = $1;
+            }
+            elsif ($func) {
+                $user = '';
+            }
+
+            if ($user) {
+                my $u = LJ::load_user($user);
+                $self->{active_journal} = $u if $u;
+            }
+        }
+    }
+
+    return $self->{active_journal};
 }
 
 sub journaltype {
     my $self = shift;
 
-    my $j = LJ::get_active_journal();
+    my $j = $self->get_journal;
 
     return $j->journaltype_readable;
 }
@@ -177,7 +217,7 @@ sub journaltype {
 sub journalbase {
     my $self = shift;
 
-    my $j = LJ::get_active_journal();
+    my $j = $self->get_journal;
 
     return $j->journal_base;
 }
