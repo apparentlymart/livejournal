@@ -538,6 +538,7 @@ sub work {
     # if the user deleted their account (or otherwise isn't visible), bail
     return $job->completed unless $u->is_visible || $evt->is_significant;
 
+    my %opts;
     if ($LJ::DEBUG{esn_email_headers}) {
         my $subscription_signature  = join(",", (
             "u=$subsc->{'userid'}",
@@ -557,10 +558,16 @@ sub work {
         foreach my $i (0..$#$headers_list) {
            $debug_headers{ sprintf('X-Esn-Debug-%02d', $i) } = $headers_list->[$i]; 
         }
-        $subsc->{_debug_headers} = \%debug_headers;
+        $opts{'_debug_headers'} = \%debug_headers;
     }
 
-    $subsc->process($evt)
+    if ($evt->isa('LJ::Event::OfficialPost')) {
+        ## "TheSchwartz::Worker::SendEmail" tasks for events
+        ## "OfficialPost" and "SupOfficialPost" should go to their database
+        $opts{'_schwartz_role'} = $LJ::THESCHWARTZ_ROLE_MASS;
+    }
+
+    $subsc->process(\%opts, $evt)
         or die "Failed to process notification method for userid=$userid/subid=$subdump, evt=[@$eparams]\n";
     $job->completed;
 }

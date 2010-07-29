@@ -382,22 +382,7 @@ sub theschwartz {
 
     if (%LJ::THESCHWARTZ_DBS_ROLES) {
         ## new config - with roles
-        my $role = $opts->{role};
-
-        ## Special case: return any TheSchwartz client connection if any.
-        ## It's needed for 'mass' workers, so that all LJ::send_mail() jobs 
-        ## issued by the workers to be put in the same "mass" schwartz DB.
-        ## TODO: a better way to specify affinity for send_mail() jobs.
-        if ($role && $role eq '_reuse_any_existing_connection') {
-            if (%LJ::SchwartzClient) {
-                return (values %LJ::SchwartzClient)[0];
-            } else {
-                ## no schawartz client created - use default role below.
-                undef $role;
-            }
-        }
-        
-        $role ||= $LJ::THESCHWARTZ_DEFAULT_ROLE || "default";
+        my $role = $opts->{'role'} || $LJ::THESCHWARTZ_ROLE_DEFAULT;
         return $LJ::SchwartzClient{$role} if $LJ::SchwartzClient{$role};
 
         my @dbs;

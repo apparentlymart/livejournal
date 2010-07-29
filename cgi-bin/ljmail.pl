@@ -188,7 +188,7 @@ sub send_mail
         my $starttime = [Time::HiRes::gettimeofday()];
         ## '_reuse_any_existing_connection' will return 'mass' schwartz handle 
         ## when called from 'mass' workers and will return 'default' for the rest.
-        my $sclient = LJ::theschwartz({ 'role' => '_reuse_any_existing_connection' }) 
+        my $sclient = LJ::theschwartz({ 'role' => $opt->{'_schwartz_role'} }) 
             or die "Misconfiguration in mail.  Can't go into TheSchwartz.";
         my $host;
         if (@rcpts == 1) {
@@ -211,31 +211,8 @@ sub send_mail
         return $h ? 1 : 0;
     };
 
-    if ($LJ::MAIL_TO_THESCHWARTZ || ($LJ::MAIL_SOMETIMES_TO_THESCHWARTZ && $LJ::MAIL_SOMETIMES_TO_THESCHWARTZ->())) {
-        return $enqueue->();
-    }
-
-    return $enqueue->() if $LJ::ASYNC_MAIL && ! $async_caller;
-
-    my $starttime = [Time::HiRes::gettimeofday()];
-    my $rv;
-    if ($LJ::DMTP_SERVER) {
-        my $host = $LJ::DMTP_SERVER;
-        unless ($host =~ /:/) {
-            $host .= ":7005";
-        }
-        # DMTP (Danga Mail Transfer Protocol)
-        $LJ::DMTP_SOCK ||= IO::Socket::INET->new(PeerAddr => $host,
-                                                 Proto    => 'tcp');
-        if ($LJ::DMTP_SOCK) {
-            my $len = length($message_text);
-            $LJ::DMTP_SOCK->print("Content-Length: $len\r\n" .
-                                  "Envelope-Sender: $from\r\n\r\n$message_text");
-            my $ok = $LJ::DMTP_SOCK->getline;
-            $rv = ($ok =~ /^OK/);
-        }
-    } else {
-        ## SMTP or sendmail case, dev servers only I hope. Code is loosely taken from MIME::Lite->send
+    if ($LJ::IS_DEV_SERVER) {
+        ## SMTP or sendmail case, dev servers only. Code is loosely taken from MIME::Lite->send
         ## Sendmail command line option -t may be used to take recipiens from message headers 
         ## instead of specifying them in command-line
         my $command_line = "/usr/lib/sendmail -oi -oem -f '$from' " . join(" ", map {"'$_'"} @rcpts);
@@ -243,19 +220,11 @@ sub send_mail
             or die "Can't run sendmail ($command_line): $!";
         print $fh $message_text;
         close $fh;
-        $rv = 1;
+        return 1;
+    } else {
+        ## TODO: if ($async_caller) { $success = send_mail_directly() }; $enqueue->() unless $success;
+        return $enqueue->();
     }
-
-    unless ($async_caller) {
-        my $notes = sprintf( "Direct mail send to %s %s: %s", $from, ($rv) ? "succeeded" : "failed", $log_subject);
-        LJ::blocking_report( $LJ::SMTP_SERVER || $LJ::SENDMAIL, 'send_mail',
-                             Time::HiRes::tv_interval($starttime), $notes );
-    }
-
-    return 1 if $rv;
-    return 0 if $@ =~ /no data in this part/;  # encoding conversion error higher
-    return $enqueue->() unless $opt->{'no_buffer'};
-    return 0;
 }
 
 1;

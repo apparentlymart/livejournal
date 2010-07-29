@@ -55,6 +55,8 @@ sub u {
 # send emails for events passed in
 sub notify {
     my $self = shift;
+    my $opts = shift || {};
+
     croak "'notify' is an object method"
         unless ref $self eq __PACKAGE__;
 
@@ -98,7 +100,7 @@ sub notify {
         my %headers = (
                        "X-LJ-Recipient" => $u->user,
                        %{$ev->as_email_headers($u) || {}},
-                       %{$self->{_debug_headers}   || {}}
+                       %{$opts->{_debug_headers}   || {}}
                        );
 
         my $email_subject =

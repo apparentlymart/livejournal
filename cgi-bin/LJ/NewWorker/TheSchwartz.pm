@@ -7,7 +7,7 @@ require "ljlib.pl";
 
 my $interval        = 10;
 my $verbose         = 0;
-my $schwartz_role   = 'worker';
+my $schwartz_role   = $LJ::THESCHWARTZ_ROLE_WORKER;
 
 sub options {
     my $self = shift;

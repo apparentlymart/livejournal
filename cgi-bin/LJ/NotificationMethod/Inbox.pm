@@ -57,6 +57,8 @@ sub u {
 # notify a single event
 sub notify {
     my $self = shift;
+    my $opts = shift || {};
+
     croak "'notify' is an object method"
         unless ref $self eq __PACKAGE__;
 
