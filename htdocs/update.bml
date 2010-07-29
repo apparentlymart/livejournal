@@ -29,10 +29,14 @@
         return;
     }
 
-    # invalid usejournal
-    if ($GET{usejournal} && !LJ::load_user($GET{usejournal})) {
-        $$body = $ML{'.error.invalidusejournal'};
-        return;
+    my $usejournalu;
+    if (my $usejournal = $GET{'usejournal'} || $POST{'usejournal'}) {
+        $usejournalu = LJ::load_user($usejournal);
+        unless ($usejournalu) {
+            # invalid usejournal
+            $$body = $ML{'.error.invalidusejournal'};
+            return;
+        }
     }
 
     # get remote and see if they can post right now
@@ -102,15 +106,9 @@
     if ($remote) {
         my @tag_names;
 
-        my $utags;
-        my $username;
-        if ($POST{'usejournal'} && LJ::load_user($POST{'usejournal'})) {
-            $utags = LJ::load_user($POST{'usejournal'})->tags;
-            $username = $POST{'usejournal'};
-        } else {
-            $utags = $remote->tags;
-            $username = $remote->user;
-        }
+        my $u = $usejournalu || $remote;
+        my $utags = $u->tags;
+        my $username = $u->user;
 
         if (keys %$utags) {
             @tag_names = sort { lc $a cmp lc $b } map { $_->{name} } values %$utags;
@@ -120,6 +118,7 @@
         $$head .= "journalTags = " . LJ::JSON->to_json({$username => \@tag_names});
         $$head .= "\n</script>\n";
     }
+
     # if a QotD id was passed in, fill in the fields with that QotD
     my $qid = $GET{qotd}+0;
     my $qotd = $qid ? LJ::QotD->get_single_question($qid) : '';
@@ -251,7 +250,7 @@
             'event' => $event,
             'prop_taglist' => $tags,
             'datetime' => "$year-$mon-$mday $hour:$min",
-            'usejournal' => LJ::canonical_username($POST{'usejournal'} || $GET{'usejournal'}),
+            'usejournal' => ($usejournalu) ? $usejournalu->user : undef,
             'auth' => $auth,
             'remote' => $remote,
             'spellcheck_html' => $spellcheck_html,
@@ -372,7 +371,7 @@
         }
 
         # Check if the account they're posting to is read-only
-        my $uj = $POST{'usejournal'} ? LJ::load_user($POST{'usejournal'}) : $u;
+        my $uj = $usejournalu || $u;
         if ($uj && $uj->readonly) {
             # Tell the user they can't post since read only
             $$body .= "<?errorbar ";
@@ -419,7 +418,7 @@
                     'ver'         => $LJ::PROTOCOL_VER,
                     'username'    => $user,
                     'password'    => $POST{'password'},
-                    'usejournal'  => $POST{'usejournal'},
+                    'usejournal'  => ($usejournalu) ? $usejournalu->user : undef,
                     'tz'          => 'guess',
                     );
 
@@ -489,8 +488,8 @@
                         LJ::MemCache::delete('qotd_count:'.$qotd->{qid});
                     }
 
-                    if ($POST{'usejournal'}) {
-                        $ju = LJ::load_user($POST{'usejournal'});  # posting as community
+                    if ($usejournalu) {
+                        $ju = $usejournalu;                        # posting as community
                     } elsif ($user) {
                         $ju = LJ::load_user($user);                # posting not as user from form
                     } else {
