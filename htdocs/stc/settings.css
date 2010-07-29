@@ -764,6 +764,164 @@
     text-decoration: none !important;
     }
 
+/*  APPS settings
+---------------------------------- */
+.b-settings {
+    }
+    .b-settings-apps {
+        }
+        .b-settings-apps-no {
+            padding: 50px;
+            text-align: center;
+            }
+    
+
+/* App name
+--------------------------------------*/
+.b-settings-apps-item-name {
+	padding: 0;
+	margin: 0 0 0 0;
+	font-style: normal;
+	font-size: 10px;
+	color: #000;
+	}
+	.b-settings-apps-item-name IMG {
+		padding: 0;
+		margin: 0 4px 0 0;
+		border: none;
+		vertical-align: middle;
+		}
+
+.b-settings-apps-items {
+    margin: 0;
+    padding: 10px 20px 0;
+    list-style: none;
+    }   	
+	.b-settings-apps-item {
+	    position: relative;
+        margin: 0;
+        padding: 0 10px 10px;
+	    }
+	    .b-settings-apps-item H3 {
+	        cursor: pointer;    
+	        }
+	    .b-settings-apps-item-desc {
+	        padding: 10px 0 10px 20px;
+	        }
+	        .b-settings-apps-item-desc H4 {
+	            padding: 0;
+	            margin: 0 0 5px;
+	            font-weight: normal;
+	            }
+
+
+.b-settings-apps-item .m-switch {
+    position: absolute;
+    display: none;
+    left: -10px;
+    top: 0.4em;
+    width: 9px;
+    height: 9px;
+    background: url(/img/arrows-menu.gif) no-repeat;
+    }
+    .b-settings-apps-item-open .m-switch {
+         background-position: 0 -10px;
+        }
+        /* IF JS isn't disabled */
+        #js .b-settings-apps-item .m-switch {
+            display: block;
+            }
+        #js .b-settings-apps-item  .b-settings-apps-item-desc  {
+            display: none;
+            }
+             #js .b-settings-apps-item-open  .b-settings-apps-item-desc  {
+                display: block;    
+                }
+.b-settings-apps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    }
+    .b-settings-apps-list LI {
+        padding: 2px 10px;
+        background: #f1f1f1;
+        }
+    .b-settings-apps-list LI.odd {
+        background: #FFF;
+        }
+.b-settings-apps-item-submit {
+    padding: 2px 10px;
+    background: #c5e1f7;
+    }
+
+
+
+.b-catalogue-item {
+    position: relative;
+     clear: both;
+     margin: 0 0 10px;
+     padding: 5px 10px 0 !important;
+     border: 1px solid #d2d2d2;
+     -moz-border-radius: 5px;
+     -webkit-border-radius: 5px;
+     border-radius: 5px;
+     }
+     .b-catalogue-item DL {
+         position: relative; 
+         min-height: 70px;
+         margin: 0 0 0 70px;  
+         padding: 0;
+         }
+         .b-catalogue-item DL DD {
+            padding: 0;
+            margin: 0; 
+            }
+         .b-catalogue-item DD.b-catalogue-item-count {
+             display: none;
+             position: absolute;
+             top: 3px;
+             right: 0;
+             color: #999;
+             font-size: 11px;
+             }
+         .b-catalogue-item DD.b-catalogue-item-img {
+             position: absolute;
+             left: -70px;
+             top: 0;
+             }
+              .b-catalogue-item DD.b-catalogue-item-img IMG {
+                 max-width: 60px;
+                 max-height: 60px; 
+                 }
+
+             .b-catalogue-item DD.b-catalogue-item-desc H4 {
+                  margin: 0 0 3px;
+                  padding: 0;
+                  font-style: normal;
+                  }
+              .b-catalogue-item-author {
+                  font-size: 10px;
+                  color: #999;
+                  }
+             .b-catalogue-item-action {
+                 overflow: hidden;
+                 zoom:1;
+                 }
+                 .b-catalogue-item-action LI {
+                     float: left; 
+                     padding: 0 5px 0 0;
+                     }
+
+.b-catalogue-item-tail {
+    position: absolute;
+    top: -6px;
+    left: 37px;
+    width: 11px;
+    height: 6px;
+    background: url(/img/tail-top.gif) no-repeat;
+    font: 0/0;
+    }
+
 
 
 
