@@ -50,11 +50,20 @@ sub LJ::Request::r {
 }
 
 
+sub LJ::Request::_new {
+    my $class = shift;
+    my $r     = shift;
+
+    return bless {
+        r   => $r,
+        apr => Apache2::Request->new($r),
+    }, $class;
+}
+
 sub LJ::Request::instance {
     my $class = shift;
     die "use 'request' instead";
 }
-
 
 sub LJ::Request::init {
     my $class = shift;
@@ -68,16 +77,15 @@ sub LJ::Request::init {
         return $instance;
     }
 
-    $instance = bless {}, $class;
-    $instance->{apr} = Apache2::Request->new($r);
-    $instance->{r} = $r;
+    $instance = LJ::Request->_new($r);
+
     return $instance;
 }
 
 sub LJ::Request::prev {
     my $class = shift;
     die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->prev(@_);
+    return LJ::Request->_new($instance->{r}->prev(@_));
 }
 
 sub LJ::Request::is_inited {

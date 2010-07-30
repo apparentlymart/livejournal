@@ -42,8 +42,18 @@ sub LJ::Request::r {
     return $instance->{r};
 }
 
+sub LJ::Request::_new {
+    my $class = shift;
+    my $r     = shift;
+
+    return bless {
+        r   => $r,
+        apr => Apache::Request->new($r),
+    }, $class;
+}
 
 sub LJ::Request::instance { Carp::confess("use 'request' instead") }
+
 sub LJ::Request::init {
     my $class = shift;
     my $r     = shift;
@@ -56,16 +66,12 @@ sub LJ::Request::init {
         return $instance;
     }
 
-    $instance = bless {}, $class;
-    $instance->{r} = $r;
-    $instance->{apr} = Apache::Request->new($r);
+    $instance = LJ::Request->_new($r);
 
     # Temporary HACK
     if ($r->method eq 'POST'){
         #$r->headers_in()->set("Content-Type", "multipart/form-data");
     }
-
-   
     
     return $instance;
 }
@@ -73,7 +79,7 @@ sub LJ::Request::init {
 sub LJ::Request::prev {
     my $class = shift;
     die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->prev(@_);
+    return LJ::Request->_new($instance->{r}->prev(@_));
 }
 
 sub LJ::Request::is_inited {
