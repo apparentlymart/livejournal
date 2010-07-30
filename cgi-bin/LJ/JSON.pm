@@ -69,6 +69,14 @@ sub traverse_fix_encoding {
 
     return $class->traverse($what, sub {
         my ($scalar) = @_;
+
+        # if the string does indeed contain wide characters (which happens
+        # in case the source string literals contained chars specified as
+        # '\u041c'), encode stuff as utf8
+        if ($scalar =~ /[^\x01-\xff]/) {
+            return Encode::encode("utf8", $scalar);
+        }
+
         return Encode::encode("iso-8859-1", $scalar);
     });
 
