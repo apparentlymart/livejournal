@@ -6836,7 +6836,7 @@ sub set_alias {
 
     ## load alias data
     if (!$remote->{_aliases}) {
-        my $prop_aliases = $remote->prop('aliases');
+        my $prop_aliases = LJ::text_uncompress( $remote->prop('aliases') );
         $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
     }
     
