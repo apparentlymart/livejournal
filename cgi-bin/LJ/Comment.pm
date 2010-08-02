@@ -831,22 +831,24 @@ sub set_state {
     my $state = shift;
    
     my $u = LJ::load_userid($self->{journalid});
-
+    my $nodeid  = $self->{'nodeid'};
+    my $jtalkid = $self->{'jtalkid'};  
     my $hookname = $state eq 'D' ? 'report_cmt_delete' :
                                    'report_cmt_update' ;
-    LJ::run_hooks($hookname, $self->{'journalid'}, $self->{jtalkid});
+    LJ::run_hooks($hookname, $self->{'journalid'}, $jtalkid);
 
     my $updated = $u->talk2_do(
         nodetype    => "L", 
-        nodeid      => $self->{nodeid},
+        nodeid      => $nodeid,
         sql         => "UPDATE talk2 SET state=? ".
                         "WHERE journalid=?  AND jtalkid = ? ".
                         "AND nodetype='L' AND nodeid=? ",
-        bindings    => [$state, $self->{journalid}, $self->{jtalkid}, $self->{nodeid}], 
+        bindings    => [$state, $self->{journalid}, $jtalkid, $nodeid], 
     );
     return undef unless $updated;
 
-    LJ::Talk::invalidate_talk2row_memcache($u->id, $self->{jtalkid});
+    # invalidate memcache for this comment
+    LJ::Talk::invalidate_comment_cache($u->id, $nodeid, $jtalkid);
     $self->{state} = $state;
 }
 

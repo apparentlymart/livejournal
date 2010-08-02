@@ -659,8 +659,8 @@ sub freeze_comments {
                                     "WHERE journalid = $quserid AND nodetype = $qnodetype " .
                                     "AND nodeid = $qnodeid AND jtalkid IN ($in)");
 
-    # invalidate talk2row memcache props
-    LJ::Talk::invalidate_talk2row_memcache($u->id, @$ids);
+    # invalidate memcache for this comment
+    LJ::Talk::invalidate_comment_cache($u->id, $nodeid, @$ids);
     
     # set time of comments modification in the journal
     LJ::Talk::update_journals_commentalter($u);    
@@ -676,7 +676,7 @@ sub screen_comment {
     return undef unless LJ::isu($u);
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
-
+    
     my @batch = map { int $_ } @jtalkids;
     my $in = join(',', @batch);
     return unless $in;
@@ -691,8 +691,8 @@ sub screen_comment {
                                         "AND state NOT IN ('S','D')");
     return undef unless $updated;
 
-    # invalidate talk2row memcache props
-    LJ::Talk::invalidate_talk2row_memcache($u->id, @jtalkids);
+    # invalidate memcache for this comment
+    LJ::Talk::invalidate_comment_cache($u->id, $itemid, @jtalkids);
 
     if ($updated > 0) {
         LJ::replycount_do($u, $itemid, "decr", $updated);
@@ -728,7 +728,8 @@ sub unscreen_comment {
                                         "AND state='S'");
     return undef unless $updated;
 
-    LJ::Talk::invalidate_talk2row_memcache($u->id, @jtalkids);
+    # invalidate memcache for this comment
+    LJ::Talk::invalidate_comment_cache($u->id, $itemid, @jtalkids);
 
     if ($updated > 0) {
         LJ::replycount_do($u, $itemid, "incr", $updated);
@@ -2319,13 +2320,19 @@ sub add_talk2row_memcache {
     return LJ::MemCache::add($memkey, $array, $exptime);
 }
 
-sub invalidate_talk2row_memcache {
-    my ($jid, @jtalkids) = @_;
+sub invalidate_comment_cache {
+    my ($jid, $nodeid, @jtalkids) = @_;
 
+    ## invalidate cache with all commments for this entry
+    LJ::MemCache::delete([$jid, "talk2:$jid:L:$nodeid"]);
+ 
+    ## and invalidate all individual caches for each comment
     foreach my $jtalkid (@jtalkids) {
-        my $memkey = [ $jid, "talk2row:$jid:$jtalkid" ];
-        LJ::MemCache::delete($memkey);
+        LJ::MemCache::delete([ $jid, "talk2row:$jid:$jtalkid" ]);
     }
+
+    ## and invalidate items for "/tools/recent_comments.bml" page
+    LJ::MemCache::delete([$jid, "rcntalk:$jid" ]);
 
     return 1;
 }
