@@ -3394,14 +3394,16 @@ sub get_useragent {
     my $role     = $opts{'role'};
     return unless $role;
 
-    my $lib = 'LWPx::ParanoidAgent';
-    $lib = $LJ::USERAGENT_LIB{$role} if defined $LJ::USERAGENT_LIB{$role};
+    my $lib = $LJ::USERAGENT_LIB{$role} || 'LWPx::ParanoidAgent';
 
     eval "require $lib";
     my $ua = $lib->new(
                        timeout  => $timeout,
                        max_size => $max_size,
                        );
+    if (@LJ::PARANOID_AGENT_WHITELISTED_HOSTS && $ua->can('whitelisted_hosts')) {
+        $ua->whitelisted_hosts(@LJ::PARANOID_AGENT_WHITELISTED_HOSTS);
+    }
 
     return $ua;
 }
