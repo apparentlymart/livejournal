@@ -1383,6 +1383,7 @@ sub create_view_lastn
         {
             my %lastn_altposter = ();
 
+            my $pu = $posteru{$posterid};
             my $poster = $pu->{'user'};
             $lastn_altposter{'poster'} = $poster;
             $lastn_altposter{'owner'} = $user;
