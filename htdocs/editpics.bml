@@ -275,6 +275,17 @@
                 return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"}))
                     if $imagew > 5000 or $imageh > 5000;
 
+                # Verify it's content.
+                {
+                    my $error = 0;
+                    LJ::run_hooks('check_img_content', \$error, $content, {
+                        user    => $u,
+                        uniq    => LJ::Request->cookie('ljuniq'),
+                        ip      => $ENV{'REMOTE_ADDR'},
+                    });
+                    return $err->(BML::ml(".error.restrictedimage")) if $error;
+                }
+
                 ## resize or send user to factory.
                 if ($imagew > 100 or $imageh > 100 or $size > $MAX_UPLOAD + 2048){
                     ## Image has to be resized!

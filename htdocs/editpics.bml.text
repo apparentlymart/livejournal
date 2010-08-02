@@ -34,6 +34,8 @@
 
 .error.nomediauploads.delete=Unable to delete userpics at this time.  Media modification is currently disabled for the site.
 
+.error.restrictedimage=Error: The image you attempted to upload could not be processed.
+
 .error.toomanykeywords=The [[?numwords|keyword|keywords]] "[[words]]" [[?numwords|has|have]] not been saved as [[?numwords|its|their]] user picture icon already has [[max]] keywords.
 
 .error.toomanypics4=You are already at your limit of [[num]] [[?num|userpic|userpics]]. You cannot upload this userpic until you delete <a [[aopts]]>one of your existing ones</a>.
