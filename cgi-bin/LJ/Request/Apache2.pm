@@ -421,7 +421,7 @@ sub LJ::Request::add_header_out {
     my $header = shift;
     my $value  = shift;
 
-    $r = $class->r();
+    my $r = $class->r();
     $r->err_headers_out->add($header, $value);
     $r->headers_out->add($header, $value);
 
