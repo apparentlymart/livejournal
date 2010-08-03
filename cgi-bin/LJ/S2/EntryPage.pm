@@ -9,7 +9,6 @@ use LJ::TimeUtil;
 sub EntryPage
 {
     my ($u, $remote, $opts) = @_;
-
     my $get = $opts->{'getargs'};
 
     my $p = Page($u, $opts);
@@ -92,7 +91,7 @@ sub EntryPage
         # user object is cached from call just made in EntryPage_entry
         'up' => LJ::load_user($s2entry->{'poster'}->{'username'}),
         'viewall' => $viewall,
-        'expand_all' => $opts->{expand_all},
+        'expand_all' => defined $opts->{expand_all} ? $opts->{expand_all} : ($get->{expand} eq 'all'),
     };
 
     my $userlite_journal = UserLite($u);
