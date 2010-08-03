@@ -279,9 +279,7 @@
                 {
                     my $error = 0;
                     LJ::run_hooks('check_img_content', \$error, $content, {
-                        user    => $u,
-                        uniq    => LJ::Request->cookie('ljuniq'),
-                        ip      => $ENV{'REMOTE_ADDR'},
+                        username    => $u->{'user'},    # it can be not a $remote.
                     });
                     return $err->(BML::ml(".error.restrictedimage")) if $error;
                 }
