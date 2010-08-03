@@ -1572,6 +1572,7 @@
                     app_href  => $app->href,
                     app_image => $app->image,
                     title     => $_->{title},
+                    body      => $_->{body},
                     date      => substr(LJ::TimeUtil->mysql_time($_->{ts_create}), 0, 16),
                 };
             }
@@ -1591,14 +1592,16 @@
         if ($_->{app_image}) {
             $apps .= '<img src="'.$_->{app_image}.'" width="60" height="60" alt="' . $_->{app_name} . '" /> ';
         }
-        $apps .= '<p class="date">'. $_->{date}.'</p><p><a href="'.$_->{app_href}.'">'.$_->{app_name}.'</a></p></li>';
+        $apps .= '<p class="date">'. $_->{date}.'</p><p><a href="'.$_->{app_href}.'">'.$_->{app_name}.'</a>: '.$_->{title};
+	$apps .= $_->{body} ? "<br/>$_->{body}" : '';
+        $apps .= '</p></li>';
     }
 	$apps .= '</ul>';
     $apps .= '</div>';
     $apps .= '</div></div>';
 
     $body .= "<div class='ljclear'></div>";
-    $body .= "<div class='section'><img src='$LJ::IMGPREFIX/application.gif' alt='' /> $ML{'.apps.header'} <span class='section_link'>[<a href='$LJ::SITEROOT/manage/settings/?cat=userapps'>$ML{'.section.edit'}</a>]</span></div>";
+    $body .= "<div class='section'><img src='$LJ::IMGPREFIX/application.gif' alt='' /> $ML{'.apps.header'} <span class='section_link'>[<a href='$LJ::SITEROOT/manage/settings/?cat=userapps'>$ML{'.section.edit'}</a>]</span> <span class='section_link'>[<a href='$LJ::SITEROOT/apps/info.bml?user=".$u->username."'>$ML{'.section.view_all'}</a>]</span></div>";
     $body .= $apps;
 
     $body .= LJ::get_ads({ location => 'bml.userinfo.bottom', journalu => $u });

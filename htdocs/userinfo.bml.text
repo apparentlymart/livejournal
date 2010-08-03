@@ -622,6 +622,8 @@
 .section.edit|staleness=1
 .section.edit=Edit
 
+.section.view_all=View All
+
 .sendmessage.body2=<a [[aopts]]>Send [[user]] a text message</a><br />on his/her cellphone/pager.
 
 .syn.header|staleness=1
