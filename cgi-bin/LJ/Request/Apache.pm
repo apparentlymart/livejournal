@@ -29,17 +29,25 @@ sub LJ::Request::HTTP_GONE                 { return Apache::Constants::NOT_FOUND
 
 my $instance = '';
 
-sub _die_if_no_request {
+sub LJ::Request::_get_instance {
+    my $class = shift;
+
+    return $class if ref $class;
+
     Carp::confess("Request is not provided to LJ::Request") unless $instance;
+    return $instance;
 }
 
 sub LJ::Request::interface_name { 'Apache' }
 
-
 sub LJ::Request::request { $instance }
+
 sub LJ::Request::r {
-    _die_if_no_request();
-    return $instance->{r};
+    return shift->_get_instance()->{r};
+}
+
+sub LJ::Request::apr {
+    return shift->_get_instance()->{apr};
 }
 
 sub LJ::Request::_new {
@@ -78,8 +86,7 @@ sub LJ::Request::init {
 
 sub LJ::Request::prev {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return LJ::Request->_new($instance->{r}->prev(@_));
+    return LJ::Request->_new($class->r()->prev(@_));
 }
 
 sub LJ::Request::is_inited {
@@ -88,110 +95,92 @@ sub LJ::Request::is_inited {
 
 sub LJ::Request::update_mtime {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{apr}->update_mtime(@_);
+    return $class->apr()->update_mtime(@_);
 }
 
 sub LJ::Request::set_last_modified {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->set_last_modified(@_);
+    return $class->r()->set_last_modified(@_);
 }
 
 sub LJ::Request::request_time {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->request_time();
+    return $class->r()->request_time();
 }
 
 sub LJ::Request::meets_conditions {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->meets_conditions();
+    return $class->r()->meets_conditions();
 }
 
 sub LJ::Request::read {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{apr}->read(@_);
+    return $class->apr()->read(@_);
 }
 
 sub LJ::Request::is_main {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->is_main(@_);
+    return $class->r()->is_main(@_);
 }
 
 sub LJ::Request::main {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->main(@_);
+    return $class->r()->main(@_);
 }
 
 sub LJ::Request::dir_config {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->dir_config(@_);
+    return $class->r()->dir_config(@_);
 }
 
 sub LJ::Request::header_only {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->header_only;
+    return $class->r()->header_only;
 }
 
 sub LJ::Request::content_languages {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->content_languages(@_);
+    return $class->r()->content_languages(@_);
 }
 
 sub LJ::Request::register_cleanup {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->register_cleanup(@_);
+    return $class->r()->register_cleanup(@_);
 }
 
 sub LJ::Request::path_info {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->path_info(@_);
+    return $class->r()->path_info(@_);
 }
 
 sub LJ::Request::args {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{apr}->args(@_);
+    return $class->apr()->args(@_);
 }
 
 sub LJ::Request::method {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{r}->method;
+    $class->r()->method;
 }
 
 sub LJ::Request::bytes_sent {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{r}->bytes_sent(@_);
+    $class->r()->bytes_sent(@_);
 }
 
 sub LJ::Request::document_root {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{r}->document_root;
+    $class->r()->document_root;
 }
 
 sub LJ::Request::finfo {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{r}->finfo;
+    $class->r()->finfo;
 }
 
 sub LJ::Request::filename {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{r}->filename(@_);
+    $class->r()->filename(@_);
 }
 
 sub LJ::Request::add_httpd_conf {
@@ -201,8 +190,7 @@ sub LJ::Request::add_httpd_conf {
 
 sub LJ::Request::is_initial_req {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{r}->is_initial_req(@_);
+    $class->r()->is_initial_req(@_);
 }
 
 sub LJ::Request::push_handlers_global {
@@ -212,47 +200,44 @@ sub LJ::Request::push_handlers_global {
 
 sub LJ::Request::push_handlers {
     my $class = shift;
-    _die_if_no_request();
-    #$instance->{r}->push_handlers(@_);
+    my $self = $class->_get_instance();
+
+    # $instance->{r}->push_handlers(@_);
     return ($_[0] =~ /PerlHandler/)
-        ? LJ::Request->set_handlers(@_)
+        ? $self->set_handlers(@_)
         : Apache->request->push_handlers(@_);
 }
 
 sub LJ::Request::set_handlers {
     my $class = shift;
-    _die_if_no_request();
+    my $r = $class->r();
     my $handler_name = shift;
     my $handlers = (ref $_[0] eq 'ARRAY') ? shift : [@_]; # second arg should be an arrayref.
     if ($handler_name eq 'PerlCleanupHandler') {
-        $instance->{r}->push_handlers($handler_name, $_) foreach (@$handlers);
+        $r->push_handlers($handler_name, $_) foreach (@$handlers);
     } else {
-        $instance->{r}->set_handlers($handler_name, $handlers);
+        $r->set_handlers($handler_name, $handlers);
     }
 }
 
 sub LJ::Request::handler {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{r}->handler(@_);
+    $class->r()->handler(@_);
 }
 
 sub LJ::Request::method_number {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->method_number(@_);
+    return $class->r()->method_number(@_);
 }
 
 sub LJ::Request::status {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->status(@_);
+    return $class->r()->status(@_);
 }
 
 sub LJ::Request::status_line {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->status_line(@_);
+    return $class->r()->status_line(@_);
 }
 
 ##
@@ -266,117 +251,98 @@ sub LJ::Request::free {
 
 sub LJ::Request::notes {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->notes (@_);
+    $class->apr()->notes (@_);
 }
 
 sub LJ::Request::pnotes {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->pnotes (@_);
+    $class->apr()->pnotes (@_);
 }
 
 sub LJ::Request::parse {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->parse (@_);
+    $class->apr()->parse (@_);
 }
 
 sub LJ::Request::uri {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->uri (@_);
+    $class->apr()->uri (@_);
 }
 
 sub LJ::Request::hostname {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->hostname (@_);
+    $class->apr()->hostname (@_);
 }
 
 sub LJ::Request::header_out {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->header_out (@_);
+    $class->apr()->header_out (@_);
 }
 
 sub LJ::Request::headers_out {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->headers_out (@_);
+    $class->apr()->headers_out (@_);
 }
 
 sub LJ::Request::header_in {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->header_in (@_);
+    $class->apr()->header_in (@_);
 }
 
 sub LJ::Request::headers_in {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->headers_in (@_);
+    $class->apr()->headers_in (@_);
 }
 
 sub LJ::Request::param {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->param (@_);
+    $class->apr()->param (@_);
 }
 
 sub LJ::Request::no_cache {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->no_cache (@_);
+    $class->apr()->no_cache (@_);
 }
 
 sub LJ::Request::content_type {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->content_type (@_);
+    $class->apr()->content_type (@_);
 }
 
 sub LJ::Request::pool {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->pool;
+    $class->apr()->pool;
 }
 
 sub LJ::Request::connection {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->connection;
+    $class->apr()->connection;
 }
 
 sub LJ::Request::output_filters {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->output_filters;
+    $class->apr()->output_filters;
 }
 
 sub LJ::Request::print {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{r}->print (@_);
+    $class->r()->print(@_);
 }
 
 sub LJ::Request::content_encoding {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{r}->content_encoding(@_);
+    $class->r()->content_encoding(@_);
 }
 
 sub LJ::Request::send_http_header {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->send_http_header (@_)
+    $class->apr()->send_http_header(@_);
 }
 
 
 sub LJ::Request::err_headers_out {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{apr}->err_headers_out (@_)
+    $class->apr()->err_headers_out (@_)
 }
 
 
@@ -387,14 +353,13 @@ sub LJ::Request::err_headers_out {
 # TODO: do we need this and 'args' methods? they are much the same.
 sub LJ::Request::get_params {
     my $class = shift;
-    _die_if_no_request();
-    my @params = $instance->{r}->args;
+    my @params = $class->r()->args;
     return @params;
 }
 
 sub LJ::Request::post_params {
     my $class = shift;
-    _die_if_no_request();
+    my $self = $class->_get_instance();
 
     ## $r->content
     ## The $r->content method will return the entity body read from the client,
@@ -403,10 +368,10 @@ sub LJ::Request::post_params {
     ## NOTE: you can only ask for this once, as the entire body is read from the client.
     #return () if $instance->{r}->headers_in()->get("Content-Type") =~ m!^multipart/form-data!;
 
-    return @{ $instance->{params} } if $instance->{params};  
+    return @{ $self->{params} } if $self->{params};  
 
-    my @params = _parse_post();
-    $instance->{params} = \@params;
+    my @params = $self->_parse_post();
+    $self->{params} = \@params;
     return @params;
 }
 
@@ -416,10 +381,9 @@ sub LJ::Request::add_header_out {
     my $header = shift;
     my $value  = shift;
 
-    _die_if_no_request();
-    
-    $instance->{r}->err_headers_out->add($header, $value);
-    $instance->{r}->headers_out->add($header, $value);
+    my $r = $class->r();
+    $r->err_headers_out->add($header, $value);
+    $r->headers_out->add($header, $value);
 
     return 1;
 }
@@ -430,10 +394,9 @@ sub LJ::Request::set_header_out {
     my $header = shift;
     my $value  = shift;
 
-    _die_if_no_request();
-
-    $instance->{r}->err_header_out($header, $value);
-    $instance->{r}->header_out($header, $value);
+    my $r = $class->r();    
+    $r->err_header_out($header, $value);
+    $r->header_out($header, $value);
 
     return 1;
 }
@@ -442,39 +405,33 @@ sub LJ::Request::unset_headers_in {
     my $class = shift;
     my $header = shift;
     
-    _die_if_no_request();
-    
-    $instance->{r}->headers_in->unset($header);
+    my $r = $class->r();
+    $r->headers_in->unset($header);
 }
 
 sub LJ::Request::log_error {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->log_error(@_);
+    return $class->r()->log_error(@_);
 }
 
 sub LJ::Request::remote_ip {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->connection()->remote_ip(@_);
+    return $class->r()->connection()->remote_ip(@_);
 }
 
 sub LJ::Request::remote_host {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->connection()->remote_host;
+    return $class->r()->connection()->remote_host;
 }
 
 sub LJ::Request::user {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->connection()->user;
+    return $class->r()->connection()->user;
 }
 
 sub LJ::Request::aborted {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->connection()->aborted;
+    return $class->r()->connection()->aborted;
 }
 
 
@@ -483,37 +440,35 @@ sub LJ::Request::sendfile {
     my $filename = shift;
     my $fh       = shift;
 
-    _die_if_no_request();
-    $instance->{r}->send_fd($fh);
+    $class->r()->send_fd($fh);
     $fh->close();
 
 }
 
 sub LJ::Request::upload {
     my $class = shift;
-    return $instance->{apr}->upload(@_);
+    return $class->apr()->upload(@_);
 }
 
 sub LJ::Request::parsed_uri {
     my $class = shift;
-    _die_if_no_request();
-    $instance->{r}->parsed_uri; # Apache::URI
+    $class->r()->parsed_uri; # Apache::URI
 }
 
 sub LJ::Request::current_callback {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->current_callback;
+    return $class->r()->current_callback;
 }
 
 sub LJ::Request::child_terminate {
     my $class = shift;
-    _die_if_no_request();
-    return $instance->{r}->child_terminate;
+    return $class->r()->child_terminate;
 }
 
-sub _parse_post {
-    my $r = $instance->{r};
+sub LJ::Request::_parse_post {
+    my $class = shift;
+    my $r = $class->r();
+    my $apr = $class->apr();
     
     my $method = $r->method;
     return unless $method eq 'POST';
@@ -540,7 +495,7 @@ sub _parse_post {
                   # it allows us to separate GET params and POST params.
                   # otherwise Apache::Request's "parms" method returns them together.
 
-    my $parse_res = $instance->{apr}->parse;
+    my $parse_res = $apr->parse;
     # set original QUERY_STRING back
     $r->args($qs);
     
@@ -550,8 +505,8 @@ sub _parse_post {
     }
     
     my @params = ();
-    foreach my $name ($instance->{apr}->param){
-        foreach my $val ($instance->{apr}->param($name)){
+    foreach my $name ($apr->param){
+        foreach my $val ($apr->param($name)){
             push @params => ($name, $val);
         }
     }

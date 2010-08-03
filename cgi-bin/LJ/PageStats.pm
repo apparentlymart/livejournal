@@ -175,9 +175,9 @@ sub get_journal {
 
     $self->{active_journal} = undef;
 
-    if (!LJ::Request::is_initial_req())
+    if (!LJ::Request->is_initial_req())
     {
-        my $request = LJ::Request::prev();
+        my $request = LJ::Request->prev();
         my $host = $request->header_in('Host');
         my $uri = $request->uri;
 
