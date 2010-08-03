@@ -91,8 +91,13 @@ sub EntryPage
         # user object is cached from call just made in EntryPage_entry
         'up' => LJ::load_user($s2entry->{'poster'}->{'username'}),
         'viewall' => $viewall,
-        'expand_all' => defined $opts->{expand_all} ? $opts->{expand_all} : ($get->{expand} eq 'all'),
+        'expand_all' => $opts->{expand_all},
     };
+    
+    ## Expand all comments on page
+    unless ($LJ::DISABLED{allow_expand_all_comments}){
+        $copts->{expand_all} = 1 if $get->{expand} eq 'all';
+    }
 
     my $userlite_journal = UserLite($u);
 

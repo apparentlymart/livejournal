@@ -461,7 +461,10 @@ my $old_url = 0;
      'viewall' => $viewall,
  };
 
- $opts->{expand_all} = 1 if $GET{expand} eq 'all';
+ ## Expand all comments on page
+ unless ($LJ::DISABLED{allow_expand_all_comments}){
+    $opts->{expand_all} = 1 if $GET{expand} eq 'all';
+ }
 
  ## allow to modify strategies to load/expand comments tree in S1 styles.
  LJ::run_hooks('s1_load_comments_opts', $u, $itemid, $opts);
