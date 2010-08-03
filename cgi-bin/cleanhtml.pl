@@ -746,6 +746,16 @@ sub clean
                         next ATTR;
                     }
                 }
+
+                ## attribute lj-sys-message-close is used in SiteMessage's only
+                if (exists $hash->{'lj-sys-message-close'}) {
+                    delete $hash->{'lj-sys-message-close'};
+                    if (my $mid = $opts->{'lj_sys_message_id'}) {
+                        $hash->{'onclick'} = "LiveJournal.closeSiteMessage(this, event, $mid)";
+                        push @$attrs, 'onclick';
+                    }
+                }
+
                 if (exists $hash->{href}) {
                     ## links to some resources will be completely blocked
                     ## and replaced by value of 'blocked_link_substitute' param
@@ -1357,6 +1367,8 @@ sub clean_subject
 {
     my $ref = shift;
     return unless $$ref =~ /[\<\>]/;
+    my $opts = shift || {};
+
     clean($ref, {
         'wordlength' => 40,
         'addbreaks' => 0,
@@ -1367,6 +1379,7 @@ sub clean_subject
         'autoclose' => $subject_allow,
         'noearlyclose' => 1,
         'remove_attribs' => [qw/id class style/],
+        %$opts,
     });
 }
 
@@ -1436,34 +1449,19 @@ sub clean_event
 
     # slow path: need to be run it through the cleaner
     clean($ref, {
-        'linkify' => 1,
-        'wordlength' => $wordlength,
-        'addbreaks' => $opts->{'preformatted'} ? 0 : 1,
-        'expand_cut' => $opts->{expand_cut} ? 1 : 0,
-        'cuturl' => $opts->{'cuturl'},
-        'cutpreview' => $opts->{'cutpreview'},
-        'eat' => $event_eat,
-        'mode' => 'allow',
-        'remove' => $event_remove,
-        'autoclose' => \@comment_close,
-        'cleancss' => 1,
-        'maximgwidth' => $opts->{'maximgwidth'},
-        'maximgheight' => $opts->{'maximgheight'},
-        'ljcut_disable' => $opts->{'ljcut_disable'},
-        'noearlyclose' => 1,
-        'tablecheck' => 1,
-        'extractimages' => $opts->{'extractimages'} ? 1 : 0,
-        'remove_img_sizes' => $opts->{'remove_img_sizes'} ? 1 : 0,
-        'noexpandembedded' => $opts->{'noexpandembedded'} ? 1 : 0,
-        'textonly' => $opts->{'textonly'} ? 1 : 0,
-        'remove_colors' => $opts->{'remove_colors'} ? 1 : 0,
-        'remove_sizes' => $opts->{'remove_sizes'} ? 1 : 0,
-        'remove_fonts' => $opts->{'remove_fonts'} ? 1 : 0,
-        'transform_embed_nocheck' => $opts->{'transform_embed_nocheck'} ? 1 : 0,
-        'transform_embed_wmode' => $opts->{'transform_embed_wmode'},
-        'suspend_msg' => $opts->{'suspend_msg'} ? 1 : 0,
-        'unsuspend_supportid' => $opts->{'unsuspend_supportid'},
+        'linkify'       => 1,
+        'wordlength'    => $wordlength,
+        'addbreaks'     => $opts->{'preformatted'} ? 0 : 1,
+        'cutpreview'    => $opts->{'cutpreview'},
+        'eat'           => $event_eat,
+        'mode'          => 'allow',
+        'remove'        => $event_remove,
+        'autoclose'     => \@comment_close,
+        'cleancss'      => 1,
+        'noearlyclose'  => 1,
+        'tablecheck'    => 1,
         'ljrepost_allowed' => 1,
+        %$opts,
     });
 }
 
