@@ -169,7 +169,7 @@ sub subscription_as_html {
 sub available_for_user  {
     my ($self, $u) = @_;
 
-    return 0 if $self->arg1 && ($self->arg1 != $u->id);
+    return 0 if $self->userid != $u->id;
 
     return $u->get_cap("track_pollvotes") ? 1 : 0;
 }

@@ -1542,3 +1542,8 @@ userproplist.dont_expunge_journal:
   des: explicitly prevent the system from purging this user
   cldversion: 8
 
+userproplist.purge_external_content:
+    datatype: char
+    cldversion: 8
+    des: Should external content be deleted when journal is deleted. Two bool flags separated by comma: <delete-comments>:<delete-community-entries>
+

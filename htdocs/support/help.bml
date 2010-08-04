@@ -259,26 +259,28 @@ body<=
 
  $ret .= "</select>\n";
 
- $ret .= ' ' . $ML{'.requests.tags'} . ' <select name="tags">';
- 
- my $render_option = sub {
-    my ($value, $name, $selected) = @_;
+ if ($can_see_tags) {
+     $ret .= ' ' . $ML{'.requests.tags'} . ' <select name="tags">';
+     
+     my $render_option = sub {
+        my ($value, $name, $selected) = @_;
 
-    return '<option value="'.LJ::ehtml($value).'"'.
-        ($selected ? ' selected="selected"' : '').
-        '>'.
-        LJ::ehtml($name).
-        '</option>';
- };
- 
- $ret .= $render_option->($filtertags, $filtertags, 1)
-    if ($filtertags =~ /,/);
- $ret .= $render_option->('', $ML{'.tags.all'});
- $ret .= $render_option->($_, $_,
-    $normalize_tag->($_) eq $normalize_tag->($filtertags))
-    foreach (LJ::Support::Request::Tag::get_cats_tag_names(@shown_cats));
+        return '<option value="'.LJ::ehtml($value).'"'.
+            ($selected ? ' selected="selected"' : '').
+            '>'.
+            LJ::ehtml($name).
+            '</option>';
+     };
+     
+     $ret .= $render_option->($filtertags, $filtertags, 1)
+        if ($filtertags =~ /,/);
+     $ret .= $render_option->('', $ML{'.tags.all'});
+     $ret .= $render_option->($_, $_,
+        $normalize_tag->($_) eq $normalize_tag->($filtertags))
+        foreach (LJ::Support::Request::Tag::get_cats_tag_names(@shown_cats));
 
- $ret .= '</select>';
+     $ret .= '</select>';
+ }
  
  $ret .= "<input type=submit value=\"$ML{'.button.filter'}\" /></form>";
  # /filter line

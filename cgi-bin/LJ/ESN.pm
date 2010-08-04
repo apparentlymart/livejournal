@@ -35,19 +35,20 @@ sub process_fired_events {
 }
 
 sub jobs_of_unique_matching_subs {
-    my ($class, $evt, @subs) = @_;
+    my ($class, $evt, $subs, $debug_args) = @_;
     my %has_done = ();
+    $debug_args ||= {};
     my @subjobs;
 
     my $params = $evt->raw_params;
 
     if ($ENV{DEBUG}) {
-        warn "jobs of unique subs (@subs) matching event (@$params)\n";
+        warn "jobs of unique subs (@$subs) matching event (@$params)\n";
     }
 
     my @subs_filtered;
     
-    foreach my $sub (@subs) {
+    foreach my $sub (@$subs) {
         next unless defined $sub;
         next unless $evt->available_for_user($sub->owner);
         next unless $evt->matches_filter($sub);
@@ -63,11 +64,39 @@ sub jobs_of_unique_matching_subs {
                 'userid'    => $s->userid + 0,
                 'subdump'   => $s->dump,
                 'e_params'  => $params,
+                %$debug_args,
             },
         );
     }
     return @subjobs;
 }
+
+## class method
+## Returns list ('debug_info' => \@info)
+## May append signature of the current job to the @info
+sub _get_debug_args {
+    my $worker_class = shift;
+    my $job = shift;
+    my $append_current_job = shift;
+    my $extra_arg = shift;
+
+    return unless $LJ::DEBUG{esn_email_headers};
+    
+    my $arg = $job->arg;
+    my @info = (ref $arg eq 'HASH' && $arg->{'debug_info'}) ? @{ $arg->{'debug_info'} } : ();
+   
+    if ($append_current_job) {
+        my $jobid = $job->jobid;
+        my $failures = $job->failures;
+        my $grabbed_until = $job->grabbed_until;
+        my $time = time;
+        my ($short_class_name) = ($worker_class =~ /::(\w+)$/);
+        push @info, "c=$short_class_name j=$jobid f=$failures t=$time g=$grabbed_until p=$$ $extra_arg";
+    }
+
+    return ('debug_info' => \@info); 
+}
+
 
 # this is phase1 of processing.  see doc/server/ljp.int.esn.html
 package LJ::Worker::FiredEvent;
@@ -119,6 +148,8 @@ sub work {
         warn "split_per_cluster=[$split_per_cluster], params=[@$params]\n";
     }
 
+    my %debug_args = LJ::ESN::_get_debug_args($class, $job, 1, "ep=" . join(":", @$e_params));
+
     # this is the slow/safe/on-error/lots-of-subscribers path
     if ($ENV{FORCE_P1_P2} || $LJ::_T_ESN_FORCE_P1_P2 || $split_per_cluster) {
         my @subjobs;
@@ -128,17 +159,17 @@ sub work {
                 arg      => { 
                     'cid'       => $cid, 
                     'e_params'  => $params,
+                    %debug_args,
                 },
             );
         }
         return $job->replace_with(@subjobs);
+    } else {
+        # the fast path, filter those max 5,000 subscriptions down to ones that match,
+        # then split right into processing those notification methods
+        my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, \@subs, \%debug_args);
+        return $job->replace_with(@subjobs);
     }
-
-    # the fast path, filter those max 5,000 subscriptions down to ones that match,
-    # then split right into processing those notification methods
-    my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, @subs);
-
-    return $job->replace_with(@subjobs);
 }
 
 
@@ -199,6 +230,7 @@ sub work {
                     'evt' => $evt,
                     'cid' => $cid2,
                     'minuid' => $minuid,
+                    LJ::ESN::_get_debug_args($class, $job, 1, "cid=$cid2"),   
                 },
             );
         }
@@ -277,6 +309,10 @@ sub work {
             'evt' => $evt,
             'cid' => $cid,
             'minuid' => $lastuid,
+            
+            ## keep exisiting debug args, but don't append signature of the current job,
+            ## because there may be up to 1000+ 'FiredMass' consequent jobs before 'ProcessSub' job
+            LJ::ESN::_get_debug_args($class, $job), 
         },
     );
 
@@ -294,6 +330,7 @@ sub work {
                 'userid'    => $sub->userid, 
                 'subdump'   => $sub->dump,
                 'e_params'  => $params,
+                LJ::ESN::_get_debug_args($class, $job, 1, "min=$minuid"),
             },
         );
     }
@@ -324,8 +361,9 @@ sub do_work {
 
     # fast path:  job from phase2 to phase4, skipping filtering.
     if (@subs <= $LJ::ESN::MAX_FILTER_SET && ! $LJ::_T_ESN_FORCE_P2_P3 && ! $ENV{FORCE_P2_P3}) {
-        my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, @subs);
-        warn "fast path:  subjobs=@subjobs\n" if $ENV{DEBUG};
+        my %debug_args = LJ::ESN::_get_debug_args($class, $job, 1, "cid=$cid fast=true");
+        my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, \@subs, \%debug_args);
+        warn "fast path: subjobs=@subjobs\n" if $ENV{DEBUG};
         return $job->replace_with(@subjobs);
     }
 
@@ -386,7 +424,8 @@ sub do_work {
             arg      => { 
                 'e_params'  => $e_params, 
                 'sublist'   => $sublist, 
-                'cid'       => $cid, 
+                'cid'       => $cid,
+                LJ::ESN::_get_debug_args($class, $job, 1, "cid=$cid fast=false"),
             },
         );
     }
@@ -471,7 +510,8 @@ sub work {
         push @subs, $subsc;
     }
 
-    my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, @subs);
+    my %debug_args = LJ::ESN::_get_debug_args($class, $job, 1, "cid=$cid sl=$#$sublist");
+    my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, \@subs, \%debug_args);
     return $job->replace_with(@subjobs) if @subjobs;
     $job->completed;
 }
@@ -498,24 +538,36 @@ sub work {
     # if the user deleted their account (or otherwise isn't visible), bail
     return $job->completed unless $u->is_visible || $evt->is_significant;
 
+    my %opts;
     if ($LJ::DEBUG{esn_email_headers}) {
-        # if debugging esn emails, stick the debug headers
-        # in the subscription object so the email notifier can access them
-        my $debug_headers = {
-            'X-ESN_Debug-sch_jobid' => $job->jobid,
-            'X-ESN_Debug-subid'     => $subdump,
-            'X-ESN_Debug-eparams'   => join(', ', @$eparams),
-            'X-ESN_Debug-failures'  => $job->failures,
-            'X-ESN_Debug-pid'       => $$,
-        };
-
-        $subsc->{_debug_headers} = $debug_headers;
+        my $subscription_signature  = join(",", (
+            "u=$subsc->{'userid'}",
+            "s=$subsc->{'subid'}",
+            "i=$subsc->{'is_dirty'}",
+            "j=$subsc->{'journalid'}",
+            "e=$subsc->{'etypeid'}",
+            "a1=$subsc->{'arg1'}",
+            "a2=$subsc->{'arg2'}",
+            "n=$subsc->{'ntypeid'}",
+            "c=$subsc->{'createtime'}",
+            "x=$subsc->{'expiretime'}",
+            "f=$subsc->{'flags'}",
+        ));
+        my (undef, $headers_list) = LJ::ESN::_get_debug_args($class, $job, 1, "uid=$userid sub=($subscription_signature)");
+        my %debug_headers;
+        foreach my $i (0..$#$headers_list) {
+           $debug_headers{ sprintf('X-Esn-Debug-%02d', $i) } = $headers_list->[$i]; 
+        }
+        $opts{'_debug_headers'} = \%debug_headers;
     }
 
-    # TODO: do inbox notification method here, first.
+    if ($evt->isa('LJ::Event::OfficialPost')) {
+        ## "TheSchwartz::Worker::SendEmail" tasks for events
+        ## "OfficialPost" and "SupOfficialPost" should go to their database
+        $opts{'_schwartz_role'} = $LJ::THESCHWARTZ_ROLE_MASS;
+    }
 
-    # NEXT: do sub's ntypeid, unless it's inbox, then we're done.
-    $subsc->process($evt)
+    $subsc->process(\%opts, $evt)
         or die "Failed to process notification method for userid=$userid/subid=$subdump, evt=[@$eparams]\n";
     $job->completed;
 }

@@ -96,17 +96,20 @@ sub new
     }
 
     # do we have a singleton for this entry?
-    {
-        my $journalid = $self->{u}->{userid};
-        my $jitemid   = $self->{jitemid};
+    my $journalid = $self->{u}->{userid};
+    my $jitemid   = $self->{jitemid};
 
-        $singletons{$journalid} ||= {};
-        return $singletons{$journalid}->{$jitemid}
-            if $singletons{$journalid}->{$jitemid};
+    $singletons{$journalid} ||= {};
+    return $singletons{$journalid}->{$jitemid}
+        if $singletons{$journalid}->{$jitemid};
 
-        # save the singleton if it doesn't exist
-        $singletons{$journalid}->{$jitemid} = $self;
-    }
+    # no singleton, will load row
+    my $anum = $self->{anum}; # caller supplied anum
+    __PACKAGE__->preload_rows([ $self ]);
+    return undef if $anum and $anum != $self->{anum}; # incorrect anum -> 'no such entry'
+
+    # save the singleton if it doesn't exist
+    $singletons{$journalid}->{$jitemid} = $self;
 
     return $self;
 }
@@ -881,7 +884,20 @@ sub visible_to
         return 0 if $self->journal->{statusvis} =~ m/[DSX]/;
 
         # can't see anything by suspended users
-        return 0 if $self->poster->{statusvis} eq 'S';
+        my $poster = $self->poster;
+        return 0 if $poster->{statusvis} eq 'S';
+
+        # if poster choosed to delete jouranl and all external content, 
+        # then don't show his/her entries, except in some protected journals like 'lj_core'
+        if ($poster->{statusvis} eq 'D') {
+            my ($purge_comments, $purge_community_entries) = split /:/, $poster->prop("purge_external_content");
+            if ($purge_community_entries) {
+                my $journal_name = $self->journal->{user};
+                if (!$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$journal_name}) {
+                    return 0;
+                }
+            }
+        }
 
         # can't see suspended entries
         return 0 if $self->is_suspended_for($remote);

@@ -3565,11 +3565,16 @@ sub authenticate
 
         my $auth_meth = $req->{'auth_method'} || "clear";
         if ($auth_meth eq "clear") {
-            return LJ::auth_okay($u,
-                                 $req->{'password'},
-                                 $req->{'hpassword'},
-                                 $u->password,
-                                 \$ip_banned);
+            my $res = LJ::auth_okay($u,
+                                    $req->{'password'},
+                                    $req->{'hpassword'},
+                                    $u->password,
+                                    \$ip_banned);
+
+            if ($res) {
+                LJ::Session->record_login($u);
+            }
+            return $res;
         }
         if ($auth_meth eq "challenge") {
             my $chal_opts = {};
@@ -3579,6 +3584,9 @@ sub authenticate
                                                      \$ip_banned,
                                                      $chal_opts);
             $chal_expired = 1 if $chal_opts->{expired};
+            if ($chall_ok && !$chal_opts->{expired}) {
+                LJ::Session->record_login($u);
+            }
             return $chall_ok;
         }
         if ($auth_meth eq "cookie") {

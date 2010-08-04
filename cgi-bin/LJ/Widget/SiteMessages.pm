@@ -9,41 +9,38 @@ sub need_res {
     return qw( stc/widgets/sitemessages.css );
 }
 
+sub _format_one_message {
+    my $class = shift;
+    my $message = shift;
+
+    my $mid = $message->{'mid'};
+    my $text = $class->ml( $class->ml_key("$mid.text") );
+    $text .= "<i class='close' lj-sys-message-close='1'></i>";
+    ## LJ::CleanHTML::clean* will fix broken HTML and expand 
+    ## <lj user> tags and lj-sys-message-close attributes
+    LJ::CleanHTML::clean_event(\$text, { 'lj_sys_message_id' => $mid });
+
+    return 
+        "<p class='b-message b-message-suggestion b-message-system'>" .
+        "<span class='b-message-wrap'>" .
+        "<img width='16' height='14' alt='' src='$LJ::IMGPREFIX/message-system-alert.gif' />" .
+        $text .
+        "</span></p>";
+}
+
 sub render_body {
     my $class = shift;
     my %opts = @_;
     my $ret;
 
     if ($opts{all}) {
-        my @messages = LJ::SiteMessages->get_messages;
-
-        foreach my $message (@messages) {
-            my $ml_key = $class->ml_key("$message->{mid}.text");
-            $ret .= "<p class='b-message b-message-suggestion b-message-system'><span class='b-message-wrap'><img width='16' height='14' alt='' src='$LJ::IMGPREFIX/message-system-alert.gif' />";   
-            my $text = $class->ml($ml_key);
-			LJ::CleanHTML::clean_subject(\$text);
-			$ret .= $text;
-            $ret .= "<i class=\"close\" onclick=\"LiveJournal.closeSiteMessage(this, event, '$message->{mid}')\"></i></span></p>";
+        foreach my $message (LJ::SiteMessages->get_messages) {
+            $ret .= $class->_format_one_message($message);
         }
-    # -- same as below -- } elsif ($opts{substitude}) {
     } else {
         my $message = LJ::SiteMessages->get_open_message;
-		### ATTENTION!
-		# If you want to change 'LJ::CleanHTML::clean_subject(\$text);' line, make sure you test the following message body:
-		# News in <lj user="news/>
-		# -- note the missing attribute trailing quote
-		# Before introducing the HTML-cleaning, ALL pages on site were FULLY BROKEN by this type of the message. The reason 
-		# is that the head of each page contains the most recent site message; so form for managing the is broken - you will not be able to correct
-		# the mistake. Again: easy mistyping and you cannot correct your mistake.
-		# The solution is clean HTML using the rules for subjects of entries
-
         if ($message) {
-            $ret .= "<p class='b-message b-message-suggestion b-message-system'><span class='b-message-wrap'><img width='16' height='14' alt='' src='$LJ::IMGPREFIX/message-system-alert.gif' />";
-            my $ml_key = $class->ml_key("$message->{mid}.text");
-            my $text = $class->ml($ml_key);
-			LJ::CleanHTML::clean_subject(\$text);
-			$ret .= $text;
-            $ret .= "<i class=\"close\" onclick=\"LiveJournal.closeSiteMessage(this, event, '$message->{mid}')\"></i></span></p>";
+            $ret .= $class->_format_one_message($message);
         }
     }
 

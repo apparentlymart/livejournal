@@ -142,8 +142,10 @@ sub RecentPage
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
-        $entry_obj->handle_prefetched_props($logprops{$itemid});
+        
+        next ENTRY unless $entry_obj->visible_to($remote);
 
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
         my $text = $logtext->{$itemid}->[1];
@@ -154,10 +156,6 @@ sub RecentPage
         }
 
         $itemnum++;
-
-        # don't show posts from suspended users or suspended posts unless the user doing the viewing says to (and is allowed)
-        next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
-        next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
 
         if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
             LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});

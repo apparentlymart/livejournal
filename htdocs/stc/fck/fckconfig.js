@@ -67,7 +67,8 @@ FCKConfig.Plugins.Add('livejournal');
 FCKConfig.ProtectedSource.Add( /<lj-poll-\d+\s*\/?>/gi ); // created lj polls
 //FCKConfig.ProtectedSource.Add( /<lj-pq.+?>.+?<\/lj-pq>/gi ); // lj polls
 //FCKConfig.ProtectedSource.Add( /<lj-pi.+?>.+?<\/lj-pi>/gi ); // lj polls
-FCKConfig.ProtectedSource.Add( /<lj-replace name="first_post" ?\/?>/gi );
+FCKConfig.ProtectedSource.Add( /<lj-replace name="first_post"\s*\/?>/gi );
+FCKConfig.ProtectedSource.Add( /<lj-repost\s*\/?>/gi );
 //FCKConfig.ProtectedSource.Add( /<lj-cut( text=['"]?\S+['"]?)?>\S+?<\/lj-cut>/gi ); // <lj-cut>
 //FCKConfig.ProtectedSource.Add( /<endljcut \/>/gi ); // <lj-cut>
 
@@ -101,6 +102,11 @@ FCKConfig.EMailProtectionFunction = 'mt(NAME,DOMAIN,SUBJECT,BODY)' ;
 
 FCKConfig.StartupFocus	= false ;
 FCKConfig.ForcePasteAsPlainText	= false ;
+
+// temp fix for http://dev.ckeditor.com/ticket/4960
+if (FCKBrowserInfo.IsSafari){
+	FCKConfig.ForcePasteAsPlainText	= true ;
+}
 FCKConfig.AutoDetectPasteFromWord = true ;	// IE only.
 FCKConfig.ShowDropDialog = true ;
 FCKConfig.ForceSimpleAmpersand	= false ;

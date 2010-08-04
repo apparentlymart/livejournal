@@ -114,9 +114,6 @@
 
     # account purged?
     if ($u->is_expunged) {
-        $title = $ML{'error.purged.title'};
-        $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
-        BML::set_status(410); # 410 Gone
         LJ::Request->pnotes ('error' => 'expunged');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
         BML::return_error_status(410);
@@ -193,26 +190,12 @@
     } else {
 
         if ($u->is_suspended) {
-            $title = $ML{'error.suspended.title'};
-            $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " .
-                    BML::ml('error.suspended.text', { 'user' => LJ::ljuser($user),
-                                                      'sitename' => $LJ::SITENAME }) . " p?>";
-            BML::set_status(403); # 403 Forbidden
             LJ::Request->pnotes ('error' => 'suspended');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             BML::return_error_status(403);
             return;
         }
         if ($u->is_deleted) {
-            $title = $ML{'error.deleted.title'};
-            $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
-              BML::ml('error.deleted.text',{'user'=>$user}) . " p?>";
-            my $username = $u->user;
-
-            $body .= BML::ml('.error.deleted.purgenotification', { aopts => "href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$username'" })
-                unless LJ::User->is_protected_username($username);
-
-            BML::set_status(404); # 404 Not Found
             LJ::Request->pnotes ('error' => 'deleted');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             BML::return_error_status(404);

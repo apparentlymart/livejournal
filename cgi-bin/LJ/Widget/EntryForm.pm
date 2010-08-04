@@ -737,13 +737,16 @@ sub render_options_block {
             });
 
             my $help = LJ::help_icon_html('addtags');
-
+            my $selectTags = (LJ::get_remote()) 
+                ? qq[<a href="#" onclick="return selectTags(this)" class="i-prop-selecttags">$BML::ML{'entryform.selecttags'}</a>]
+                : '';
+            
             return qq{
                 <label for='prop_taglist' class='left options'>
                     $BML::ML{'entryform.tags'}
                 </label>
                 $field
-                <a href="#" onclick="return selectTags(this)" class="i-prop-selecttags">$BML::ML{'entryform.selecttags'}</a>
+                $selectTags
                 $help
             };
         },

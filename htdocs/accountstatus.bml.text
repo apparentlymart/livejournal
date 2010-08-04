@@ -25,6 +25,12 @@
 
 .journalstatus.select.suspended=Suspended
 
+.label.purge_external_content=Do you want to delete comments and community entries as well?
+
+.label.purge_comments=Delete my comments in other journals and communities
+
+.label.purge_community_entries=Delete all community entries I have made
+
 .message.deleted=If you wish to undelete this journal, you can return to this page at any time in the next 30 days to undelete it.
 
 .message.nochange=Your journal status has been left as <b>[[statusvis]]</b>.

@@ -56,6 +56,8 @@ sub u {
 # send IMs for events passed in
 sub notify {
     my $self = shift;
+    my $opts = shift || {};
+
     croak "'notify' is an object method"
         unless ref $self eq __PACKAGE__;
 

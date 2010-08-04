@@ -382,22 +382,7 @@ sub theschwartz {
 
     if (%LJ::THESCHWARTZ_DBS_ROLES) {
         ## new config - with roles
-        my $role = $opts->{role};
-
-        ## Special case: return any TheSchwartz client connection if any.
-        ## It's needed for 'mass' workers, so that all LJ::send_mail() jobs 
-        ## issued by the workers to be put in the same "mass" schwartz DB.
-        ## TODO: a better way to specify affinity for send_mail() jobs.
-        if ($role && $role eq '_reuse_any_existing_connection') {
-            if (%LJ::SchwartzClient) {
-                return (values %LJ::SchwartzClient)[0];
-            } else {
-                ## no schawartz client created - use default role below.
-                undef $role;
-            }
-        }
-        
-        $role ||= $LJ::THESCHWARTZ_DEFAULT_ROLE || "default";
+        my $role = $opts->{'role'} || $LJ::THESCHWARTZ_ROLE_DEFAULT;
         return $LJ::SchwartzClient{$role} if $LJ::SchwartzClient{$role};
 
         my @dbs;
@@ -2205,6 +2190,12 @@ sub start_request
                             )
             ) if LJ::show_contextual_hover();
 
+            # lj_live
+            LJ::need_res(qw(stc/ljtimes/ctrl.css
+                            js/ljlive.js
+                           )
+            ) if LJ::is_enabled('lj_live');
+
             # Conditional IE CSS file for all pages 
             LJ::need_res({condition => 'IE'}, 'stc/ie.css');
         }
@@ -2784,8 +2775,8 @@ sub delete_comments {
     my @batch = map { int $_ } @talkids;
     my $in = join(',', @batch);
 
-    # invalidate talk2row memcache
-    LJ::Talk::invalidate_talk2row_memcache($u->id, @talkids);
+    # invalidate memcache for this comment
+    LJ::Talk::invalidate_comment_cache($u->id, $nodeid, @talkids);
 
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
@@ -3403,14 +3394,16 @@ sub get_useragent {
     my $role     = $opts{'role'};
     return unless $role;
 
-    my $lib = 'LWPx::ParanoidAgent';
-    $lib = $LJ::USERAGENT_LIB{$role} if defined $LJ::USERAGENT_LIB{$role};
+    my $lib = $LJ::USERAGENT_LIB{$role} || 'LWPx::ParanoidAgent';
 
     eval "require $lib";
     my $ua = $lib->new(
                        timeout  => $timeout,
                        max_size => $max_size,
                        );
+    if (@LJ::PARANOID_AGENT_WHITELISTED_HOSTS && $ua->can('whitelisted_hosts')) {
+        $ua->whitelisted_hosts(@LJ::PARANOID_AGENT_WHITELISTED_HOSTS);
+    }
 
     return $ua;
 }

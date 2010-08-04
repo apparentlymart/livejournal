@@ -1030,7 +1030,7 @@ function EntryLite::lay_print_metadata() {
     if(defined $en.mood_icon) {
       var Image  i   = $en.mood_icon;
       var string alt = $.metadata{"mood"};
-      $icon = """<img src="$i.url" width="$i.width" height="$i.height" alt="$alt" title="$alt" /> """;
+      $icon = $i->as_string_ex($alt, "title='$alt' ");
     }
     if(size($en.tags) > 0 and $*tags_aware) {
       var int count = 0;

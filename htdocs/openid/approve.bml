@@ -16,11 +16,18 @@
     my $u = LJ::get_remote() or
         return $err->($ML{'.error.login_needed'}, $ML{'.error.need_to_login'});
 
-    my $identity = LJ::OpenID::is_identity($u, $GET{'identity'}, \%GET);
-    unless ($identity) {
-        return $err->(BML::ml('.error.cannot_provide_identity',
-                { url => LJ::ehtml($GET{'identity'}), user => LJ::ljuser($u)})
-        );
+    my $identity = $GET{'identity'};
+    if ($identity eq 'http://specs.openid.net/auth/2.0/identifier_select') {
+        ## OpenID 2.0 mode.
+        ## TODO: we must (may?) generate a unique identity for every site.
+        $identity = $u->journal_base . "/";
+    } else {
+        ## OpenID 1.x
+        unless (LJ::OpenID::is_identity($u, $identity, \%GET)) {
+            return $err->(BML::ml('.error.cannot_provide_identity',
+                { url => LJ::ehtml($identity), user => LJ::ljuser($u)})
+            );
+        }
     }
 
     my $site = $GET{'trust_root'};
@@ -29,13 +36,16 @@
 
     # TODO: check URL and see if it contains images or external scripts/css/images, where
     # an attacker could sniff the validation tokens in the Referer header?
-    
-    my $nos = LJ::OpenID::server();
+   
+    # Hack:
+    $GET{'openid.ns'} ||= $GET{'ns'};
+    my $nos = LJ::OpenID::server(\%GET, \%POST);
     my $sig_return = $nos->signed_return_url(
-                        identity     => $GET{'identity'},
+                        identity     => $identity,
                         return_to    => $GET{'return_to'},
                         trust_root   => $GET{'trust_root'},
                         assoc_handle => $GET{'assoc_handle'},
+                        ns           => "http://specs.openid.net/auth/2.0",
     );
 
     ##
@@ -60,6 +70,7 @@
             LJ::OpenID::add_trust($u, $site)
                 or return $err->($ML{'.error.failed_to_save'});
         }
+
         return BML::redirect($sig_return) if $sig_return;
         return $err->($ML{'.error.failed_sign_url'});
     }

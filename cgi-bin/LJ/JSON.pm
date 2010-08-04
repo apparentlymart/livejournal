@@ -11,10 +11,8 @@ sub to_json {
 sub from_json {
     my ($class, $dump) = @_;
 
-    my $ret = eval { $wrap->decode($dump) };
-
-    return undef if $@;
-    return $ret;
+    return unless $dump;
+    return $wrap->decode($dump);
 }
 
 sub true  { $wrap->true  };
@@ -72,6 +70,14 @@ sub traverse_fix_encoding {
 
     return $class->traverse($what, sub {
         my ($scalar) = @_;
+
+        # if the string does indeed contain wide characters (which happens
+        # in case the source string literals contained chars specified as
+        # '\u041c'), encode stuff as utf8
+        if ($scalar =~ /[^\x01-\xff]/) {
+            return Encode::encode("utf8", $scalar);
+        }
+
         return Encode::encode("iso-8859-1", $scalar);
     });
 

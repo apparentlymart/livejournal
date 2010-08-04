@@ -1193,10 +1193,13 @@ sub userpic_content
     };
     my $size;
 
+    my $MAX_AGE = 86400 * 365; # one year
     my $send_headers = sub {
+        my $expires_str = LJ::TimeUtil->time_to_http(time + $MAX_AGE);
         LJ::Request->content_type($mime);
         LJ::Request->header_out("Content-length", $size+0);
-        LJ::Request->header_out("Cache-Control", "no-transform");
+        LJ::Request->header_out("Expires", $expires_str);
+        LJ::Request->header_out("Cache-Control", "public, max-age=$MAX_AGE");
         LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http($lastmod));
         LJ::Request->send_http_header();
     };

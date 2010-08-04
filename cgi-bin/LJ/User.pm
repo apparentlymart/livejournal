@@ -2249,23 +2249,6 @@ sub get_recent_talkitems {
     return reverse @recv;
 }
 
-sub record_login {
-    my ($u, $sessid) = @_;
-
-    my $too_old = time() - 86400 * 30;
-    $u->do("DELETE FROM loginlog WHERE userid=? AND logintime < ?",
-           undef, $u->{userid}, $too_old);
-
-    my ($ip, $ua);
-    eval {
-        $ip = LJ::get_remote_ip();
-        $ua = LJ::Request->header_in('User-Agent');
-    };
-
-    return $u->do("INSERT INTO loginlog SET userid=?, sessid=?, logintime=UNIX_TIMESTAMP(), ".
-                  "ip=?, ua=?", undef, $u->{userid}, $sessid, $ip, $ua);
-}
-
 sub last_login_time {
     my ($u) = @_;
 
@@ -5254,6 +5237,7 @@ sub openid_tags {
     if (LJ::OpenID->server_enabled and defined $u) {
         my $journalbase = $u->journal_base;
         $head .= qq{<link rel="openid2.provider" href="$LJ::OPENID_SERVER" />\n};
+        $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
         $head .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
     }
 
@@ -5575,6 +5559,20 @@ sub subscriptions_count {
     my $count = $u->_subscriptions_count;
     LJ::MemCache::set('subscriptions_count:'.$u->id, $count);
     return $count;
+}
+
+##
+## Instance method - if the username has ever belonged to other user.
+## Returns last (most recent) date (MySQL datetime) of this username rename.
+## No memcache use is intentional - GC database with SSD is used for SQL query.
+##
+sub does_own_previously_occupied_name {
+    my $u = shift;
+    my $dbh = LJ::get_db_reader() or die;
+    return $dbh->selectrow_array(
+        "SELECT max(rendate) FROM renames WHERE fromuser = ?", 
+        {RaiseError => 1}, $u->{'user'}
+    );
 }
 
 package LJ;
@@ -6838,7 +6836,7 @@ sub set_alias {
 
     ## load alias data
     if (!$remote->{_aliases}) {
-        my $prop_aliases = $remote->prop('aliases');
+        my $prop_aliases = LJ::text_uncompress( $remote->prop('aliases') );
         $remote->{_aliases} = $prop_aliases ? LJ::JSON->from_json($prop_aliases) : {};
     }
     

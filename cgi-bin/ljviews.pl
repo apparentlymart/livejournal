@@ -1271,12 +1271,10 @@ sub create_view_lastn
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        
+        next ENTRY unless $entry_obj->visible_to($remote);
+
         $entry_obj->handle_prefetched_props($logprops{$itemid});
-
-        my $pu = $posteru{$posterid};
-        next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && !$viewsome;
-        next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
-
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
@@ -1385,6 +1383,7 @@ sub create_view_lastn
         {
             my %lastn_altposter = ();
 
+            my $pu = $posteru{$posterid};
             my $poster = $pu->{'user'};
             $lastn_altposter{'poster'} = $poster;
             $lastn_altposter{'owner'} = $user;

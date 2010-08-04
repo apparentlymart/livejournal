@@ -38,23 +38,43 @@ sub LJ::Request::SERVER_ERROR              { return Apache2::Const::SERVER_ERROR
 sub LJ::Request::BAD_REQUEST               { return Apache2::Const::HTTP_BAD_REQUEST }
 sub LJ::Request::HTTP_GONE                 { return Apache2::Const::HTTP_GONE }
 
+my $instance = '';
+
+sub LJ::Request::_get_instance {
+    my $class = shift;
+
+    return $class if ref $class;
+
+    Carp::confess("Request is not provided to LJ::Request") unless $instance;
+    return $instance;
+}
 
 sub LJ::Request::interface_name { 'Apache2' }
 
-
-my $instance = '';
 sub LJ::Request::request { $instance }
+
 sub LJ::Request::r {
-    Carp::confess("Request is not provided to LJ::Request") unless $instance;
-    return $instance->{r};
+    return shift->_get_instance()->{r};
 }
 
+sub LJ::Request::apr {
+    return shift->_get_instance()->{apr};
+}
+
+sub LJ::Request::_new {
+    my $class = shift;
+    my $r     = shift;
+
+    return bless {
+        r   => $r,
+        apr => Apache2::Request->new($r),
+    }, $class;
+}
 
 sub LJ::Request::instance {
     my $class = shift;
-    die "use 'request' instead";
+    Carp::confess("use 'request' instead");
 }
-
 
 sub LJ::Request::init {
     my $class = shift;
@@ -68,16 +88,14 @@ sub LJ::Request::init {
         return $instance;
     }
 
-    $instance = bless {}, $class;
-    $instance->{apr} = Apache2::Request->new($r);
-    $instance->{r} = $r;
+    $instance = LJ::Request->_new($r);
+
     return $instance;
 }
 
 sub LJ::Request::prev {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->prev(@_);
+    return LJ::Request->_new($class->r()->prev(@_));
 }
 
 sub LJ::Request::is_inited {
@@ -86,73 +104,65 @@ sub LJ::Request::is_inited {
 
 sub LJ::Request::update_mtime {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->update_mtime(@_);
+    return $class->r()->update_mtime(@_);
 }
 
 sub LJ::Request::set_last_modified {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->set_last_modified(@_);
+    return $class->r()->set_last_modified(@_);
 }
 
 sub LJ::Request::request_time {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->request_time();
+    return $class->r()->request_time();
 }
 
 sub LJ::Request::read {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->read(@_);
+    return $class->r()->read(@_);
 }
 
 sub LJ::Request::is_main {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return !$instance->{r}->main;
+    return !$class->r()->main;
 }
 
 sub LJ::Request::main {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->main(@_);
+    return $class->r()->main(@_);
 }
 
 sub LJ::Request::dir_config {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->dir_config(@_);
+    return $class->r()->dir_config(@_);
 }
 
 sub LJ::Request::header_only {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->header_only;
+    return $class->r()->header_only;
 }
 
 sub LJ::Request::content_languages {
     my $class = shift;
-    die "Request is not provided to LJ::Request" unless $instance;
-    return $instance->{r}->content_languages(@_);
+    return $class->r()->content_languages(@_);
 }
 
 sub LJ::Request::register_cleanup {
     my $class = shift;
-    return $instance->{r}->pool->cleanup_register(@_);
+    return $class->r()->pool->cleanup_register(@_);
 }
 
 sub LJ::Request::path_info {
     my $class = shift;
-    return $instance->{r}->path_info(@_);
+    return $class->r()->path_info(@_);
 }
 
 # $r->args in 2.0 returns the query string without parsing and splitting it into an array. 
 sub LJ::Request::args {
     my $class = shift;
-    if (wantarray()){
-        my $qs = $instance->{r}->args(@_);
+    my $r = $class->r();
+    if (wantarray()) {
+        my $qs = $r->args(@_);
         my @args = 
             map { URI::Escape::uri_unescape ($_) }
             map { s/\+/ /g; $_ }  # in query_string 'break' is encoded as '+' simbol
@@ -160,33 +170,33 @@ sub LJ::Request::args {
             split /[\&\;]/ => $qs;
         return @args;
     } else {
-        return $instance->{r}->args(@_);
+        return $r->args(@_);
     }
 }
 
 sub LJ::Request::method {
     my $class = shift;
-    $instance->{r}->method;
+    $class->r()->method;
 }
 
 sub LJ::Request::bytes_sent {
     my $class = shift;
-    $instance->{r}->bytes_sent(@_);
+    $class->r()->bytes_sent(@_);
 }
 
 sub LJ::Request::document_root {
     my $class = shift;
-    $instance->{r}->document_root;
+    $class->r()->document_root;
 }
 
 sub LJ::Request::finfo {
     my $class = shift;
-    $instance->{apr}->finfo;
+    $class->apr()->finfo;
 }
 
 sub LJ::Request::filename {
     my $class = shift;
-    $instance->{r}->filename(@_);
+    $class->r()->filename(@_);
 }
 
 sub LJ::Request::add_httpd_conf {
@@ -197,7 +207,7 @@ sub LJ::Request::add_httpd_conf {
 
 sub LJ::Request::is_initial_req {
     my $class = shift;
-    $instance->{r}->is_initial_req(@_);
+    $class->r()->is_initial_req(@_);
 }
 
 sub LJ::Request::push_handlers_global {
@@ -217,7 +227,7 @@ sub LJ::Request::push_handlers {
             $el =~ s/PerlHandler/PerlResponseHandler/g;
             $el;
         } @_;
-    return $instance->{r}->push_handlers(@handlers);
+    return $class->r()->push_handlers(@handlers);
 }
 
 sub LJ::Request::set_handlers {
@@ -227,27 +237,27 @@ sub LJ::Request::set_handlers {
             $el =~ s/PerlHandler/PerlResponseHandler/g;
             $el;
         } @_;
-    $instance->{r}->set_handlers(@handlers);
+    $class->r()->set_handlers(@handlers);
 }
 
 sub LJ::Request::handler {
     my $class = shift;
-    $instance->{r}->handler(@_);
+    $class->r()->handler(@_);
 }
 
 sub LJ::Request::method_number {
     my $class = shift;
-    return $instance->{r}->method_number(@_);
+    return $class->r()->method_number(@_);
 }
 
 sub LJ::Request::status {
     my $class = shift;
-    return $instance->{r}->status(@_);
+    return $class->r()->status(@_);
 }
 
 sub LJ::Request::status_line {
     my $class = shift;
-    return $instance->{r}->status_line(@_);
+    return $class->r()->status_line(@_);
 }
 
 ##
@@ -261,97 +271,97 @@ sub LJ::Request::free {
 
 sub LJ::Request::notes {
     my $class = shift;
-    return $instance->{r}->pnotes(@_);
+    return $class->r()->pnotes(@_);
 }
 
 sub LJ::Request::pnotes {
     my $class = shift;
-    $instance->{r}->pnotes (@_);
+    $class->r()->pnotes (@_);
 }
 
 sub LJ::Request::parse {
     my $class = shift;
-    $instance->{r}->parse (@_);
+    $class->r()->parse (@_);
 }
 
 sub LJ::Request::uri {
     my $class = shift;
-    $instance->{r}->uri (@_);
+    $class->r()->uri (@_);
 }
 
 sub LJ::Request::hostname {
     my $class = shift;
-    $instance->{r}->hostname (@_);
+    $class->r()->hostname (@_);
 }
 
 sub LJ::Request::header_out {
     my $class = shift;
     my $header = shift;
     if (@_ > 0){
-        return $instance->{r}->err_headers_out->{$header} = shift;
+        return $class->r()->err_headers_out->{$header} = shift;
     } else {
-        return $instance->{r}->err_headers_out->{$header};
+        return $class->r()->err_headers_out->{$header};
     }
 }
 
 sub LJ::Request::headers_out {
     my $class = shift;
-    $instance->{r}->headers_out (@_);
+    $class->r()->headers_out (@_);
 }
 
 sub LJ::Request::header_in {
     my $class = shift;
     my $header = shift;
     if (@_ > 0){
-        return $instance->{r}->headers_in->{$header} = shift;
+        return $class->r()->headers_in->{$header} = shift;
     } else {
-        return $instance->{r}->headers_in->{$header};
+        return $class->r()->headers_in->{$header};
     }
 }
 
 sub LJ::Request::headers_in {
     my $class = shift;
-    $instance->{r}->headers_in();
+    $class->r()->headers_in();
 }
 
 sub LJ::Request::param {
     my $class = shift;
-    $instance->{r}->param (@_);
+    $class->r()->param (@_);
 }
 
 sub LJ::Request::no_cache {
     my $class = shift;
-    $instance->{r}->no_cache (@_);
+    $class->r()->no_cache (@_);
 }
 
 sub LJ::Request::content_type {
     my $class = shift;
-    $instance->{r}->content_type (@_);
+    $class->r()->content_type (@_);
 }
 
 sub LJ::Request::pool {
     my $class = shift;
-    $instance->{r}->pool;
+    $class->r()->pool;
 }
 
 sub LJ::Request::connection {
     my $class = shift;
-    $instance->{r}->connection;
+    $class->r()->connection;
 }
 
 sub LJ::Request::output_filters {
     my $class = shift;
-    $instance->{r}->output_filters(@_);
+    $class->r()->output_filters(@_);
 }
 
 sub LJ::Request::print {
     my $class = shift;
-    $instance->{r}->print (@_);
+    $class->r()->print (@_);
 }
 
 sub LJ::Request::content_encoding {
     my $class = shift;
-    $instance->{r}->content_encoding(@_);
+    $class->r()->content_encoding(@_);
 }
 
 sub LJ::Request::send_http_header {
@@ -364,7 +374,7 @@ sub LJ::Request::send_http_header {
 
 sub LJ::Request::err_headers_out {
     my $class = shift;
-    $instance->{r}->err_headers_out (@_)
+    $class->r()->err_headers_out (@_)
 }
 
 
@@ -375,8 +385,9 @@ sub LJ::Request::err_headers_out {
 # TODO: do we need this and 'args' methods? they are much the same.
 sub LJ::Request::get_params {
     my $class = shift;
+    my $r = $class->r();
     if (wantarray()){
-        my $qs = $instance->{r}->args(@_);
+        my $qs = $r->args(@_);
         my @args =
             map { URI::Escape::uri_unescape ($_) }
             map { s/\+/ /g; $_ } # in query_string 'break' is encoded as '+' simbol
@@ -384,33 +395,35 @@ sub LJ::Request::get_params {
             split /[\&\;]/ => $qs;
         return @args;
     } else {
-        return $instance->{r}->args(@_);
+        return $r->args(@_);
     }
 }
+
 sub LJ::Request::post_params {
     my $class = shift;
+    my $self = $class->_get_instance();
+    my $apr = $self->apr();
 
-    return @{ $instance->{params} } if $instance->{params};
+    return @{ $self->{params} } if $self->{params};
     my (@params, %already_seen);
-    foreach my $name ($instance->{apr}->body) {
+    foreach my $name ($apr->body) {
         next if $already_seen{$name}++;
-        foreach my $val ($instance->{apr}->body($name)) {
+        foreach my $val ($apr->body($name)) {
             push @params, ($name, $val);
         }
     }
-    $instance->{params} = \@params;
+    $self->{params} = \@params;
     return @params;
-
 }
-
 
 sub LJ::Request::add_header_out {
     my $class  = shift;
     my $header = shift;
     my $value  = shift;
 
-    $instance->{r}->err_headers_out->add($header, $value);
-    $instance->{r}->headers_out->add($header, $value);
+    my $r = $class->r();
+    $r->err_headers_out->add($header, $value);
+    $r->headers_out->add($header, $value);
 
     return 1;
 }
@@ -421,8 +434,9 @@ sub LJ::Request::set_header_out {
     my $header = shift;
     my $value  = shift;
 
-    $instance->{r}->err_headers_out->set($header, $value);
-    $instance->{r}->headers_out->set($header, $value);
+    my $r = $class->r();
+    $r->err_headers_out->set($header, $value);
+    $r->headers_out->set($header, $value);
 
     return 1;
 }
@@ -430,49 +444,50 @@ sub LJ::Request::set_header_out {
 sub LJ::Request::unset_headers_in {
     my $class = shift;
     my $header = shift;
-    $instance->{r}->headers_in->unset($header);
+    $class->r()->headers_in->unset($header);
 }
 
 sub LJ::Request::log_error {
     my $class = shift;
-    return $instance->{r}->log_error(@_);
+    return $class->r()->log_error(@_);
 }
 
 sub LJ::Request::remote_ip {
     my $class = shift;
-    return $instance->{r}->connection()->remote_ip(@_);
+    return $class->r()->connection()->remote_ip(@_);
 }
 
 sub LJ::Request::remote_host {
     my $class = shift;
-    return $instance->{r}->connection()->remote_host;
+    return $class->r()->connection()->remote_host;
 }
 
 sub LJ::Request::user {
     my $class = shift;
-    return $instance->{r}->auth_name();
+    return $class->r()->auth_name();
 }
 
 sub LJ::Request::aborted {
     my $class = shift;
-    return $instance->{r}->connection()->aborted;
+    return $class->r()->connection()->aborted;
 }
 
 sub LJ::Request::upload {
     my $class = shift;
-    return $instance->{apr}->upload(@_);
+    return $class->apr()->upload(@_);
 }
+
 sub LJ::Request::sendfile {
     my $class = shift;
     my $filename = shift;
     my $fh       = shift; # used in Apache v.1
 
-    return $instance->{r}->sendfile($filename);
+    return $class->r()->sendfile($filename);
 }
 
 sub LJ::Request::parsed_uri {
     my $class = shift;
-    $instance->{r}->parsed_uri; # Apache2::URI
+    $class->r()->parsed_uri; # Apache2::URI
 }
 
 sub LJ::Request::current_callback {
@@ -482,12 +497,12 @@ sub LJ::Request::current_callback {
 
 sub LJ::Request::child_terminate {
     my $class = shift;
-    return $instance->{r}->child_terminate;
+    return $class->r()->child_terminate;
 }
 
 sub LJ::Request::meets_conditions {
     my $class = shift;
-        return $instance->{r}->meets_conditions;
+    return $class->r()->meets_conditions;
 }
 
 1;

@@ -131,7 +131,6 @@ body<=
         LJ::Request->pnotes ('remote' => LJ::get_remote());
         BML::return_error_status(404);
         return;
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
     }
 
     my $props = $item->{'props'};

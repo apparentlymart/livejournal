@@ -1138,12 +1138,12 @@ sub render {
                         $valcount += $aggr_results{$qid}->{$item};
                         $valmean += $aggr_results{$qid}->{$item} * $item;
                     }
-                    $valmean /= $valcount;
+                    $valmean /= $valcount if $valcount;
                     $valstddev = 0;
                     foreach my $item (keys %{$aggr_results{$qid} || {}}) {
                         $valstddev += $aggr_results{$qid}->{$item} * ($item - $valmean) * ($item - $valmean);
                     }
-                    $valstddev = sqrt($valstddev / $valcount);
+                    $valstddev = sqrt($valstddev / $valcount) if $valcount;
                 } elsif ($self->is_clustered) {
                     $sth = $self->journal->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult2 " .
                                                    "WHERE pollid=? AND pollqid=? AND journalid=?");
