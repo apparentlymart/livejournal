@@ -33,5 +33,31 @@ __________________________________________*/
     zoom:1;
     }
 
+/* LJTimes
+__________________________________________*/
+* HTML .b-ljtimes-wrapper {
+	position: absolute;
+	bottom: auto;
+	top: expression(eval(document.compatMode && document.compatMode=='CSS1Compat') ? documentElement.scrollTop +(documentElement.clientHeight-this.clientHeight) : document.body.scrollTop +(document.body.clientHeight-this.clientHeight));
+	}
+.b-ljtimes-login .i-ljtimes-checkbox {
+	vertical-align: -3px;
+	}
+.b-ljtimes-logged-submit {
+	height: 34px;
+	padding: 5px 22px 0;
+	}
+* HTML .b-ljtimes-login-form {
+	zoom: 1;
+	}
+* HTML .i-ljtimes-bl,
+* HTML .i-ljtimes-br {
+	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg : this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='scale')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
+	}
+* HTML .i-ljtimes-drag,
+* HTML .i-ljtimes-click {
+	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg : this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='crop')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
+	}
+
 
 
