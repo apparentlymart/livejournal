@@ -1098,18 +1098,8 @@ sub trans
     return LJ::Request::DECLINED
 }
 
-sub crossdomain_content {
-    return Apache::LiveJournal::Interface::Api::crossdomain();
-}
-
 sub userpic_trans
 {
-    # crossdomain.xml addon
-    if (LJ::Request->uri eq '/crossdomain.xml') {
-        LJ::Request->handler("perl-script");
-        LJ::Request->set_handlers(PerlHandler => \&crossdomain_content);
-        return LJ::Request::OK;
-    }
 
     if (LJ::Request->uri eq '/crossdomain.xml') {
         Apache::LiveJournal::Interface::Api->load; 
