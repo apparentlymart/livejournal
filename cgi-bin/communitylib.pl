@@ -156,8 +156,11 @@ sub accept_comm_invite {
 
     # valid invite.  let's accept it as far as the community listing us goes.
     # 1, 0 means add comm to user's friends list, but don't auto-add P edge.
-    my $ret = LJ::join_community($u, $cu, 1, 0) if $args->{member};
-    return undef unless $ret;
+    if ($args->{'member'}) {
+        if (!LJ::join_community($u, $cu, 1, 0)) {
+            return LJ::error("Can't call LJ::join_community($u->{user}, $cu->{user})");
+        }
+    }
 
     # now grant necessary abilities
     my %edgelist = (
