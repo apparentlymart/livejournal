@@ -459,11 +459,13 @@ sub trans
     ##
     if ($host eq $LJ::DOMAIN_WEB && $uri =~ m!^/redirect/!) {
         my $url = $GET{'url'};
-        $url = $LJ::SITE_ROOT 
-            unless $url 
-                    && $url =~ m! ^ https?:// [-\w.]*? ([-\w]+ \. [-\w]+) / !x 
-                    && $LJ::ALLOWED_REDIRECT_TO_DOMAIN{$1};
-        return redir($url);
+        if ($url 
+            && $url =~ m! ^ https?:// [-\w.]*? ([-\w]+ \. [-\w]+) / !x 
+            && $LJ::ALLOWED_REDIRECT_TO_DOMAIN{$1}) 
+        {
+            return redir($url);
+        }
+        ## else - returns 404
     }
 
 
