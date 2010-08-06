@@ -1,6 +1,60 @@
 package LJ;
 use strict;
 
+use Digest::MD5 qw(md5_hex);
+
+# <LJFUNC>
+# name: LJ::fetch_userpic
+# des: Fetch source content of userpic by url or post
+# args: userpic, src, urlpic
+# return: hashref: { content, size }
+# </LJFUNC>
+sub fetch_userpic {
+    my %args = @_;
+
+    my $size = 0;
+    my $content = undef;
+    if ($args{userpic}){
+        ## Read uploaded image
+        my $upload = LJ::Request->upload('userpic');
+
+        return { undef, -1 }
+            unless $upload;
+
+        $size = $upload->size;
+
+        # upload image as temp file to mogileFS. this file is used in lj_upf_resize worker.
+        seek $upload->fh, 0,0;
+        read $upload->fh, $content, $upload->size; # read content
+
+        return {
+            content => $content,
+            size    => $upload->size,
+        }
+
+    } elsif ($args{'src'} eq "url") {
+        ## Get image somewhere from internet
+
+        my $ua = LJ::get_useragent(
+                                   role     => 'userpic',
+                                   max_size => $args{maxupload} + 1024,
+                                   timeout  => 10,
+                                   );
+
+        my $res = $ua->get($args{urlpic});
+        if ($res && $res->is_success) {
+            # read downloaded file
+            $content = $res->content;
+            $size    = length $content;
+        }
+
+        return {
+            content => $content,
+            size    => $size,
+        }
+    }
+}
+
 # <LJFUNC>
 # name: LJ::load_userpics
 # des: Loads a bunch of userpics at once.
@@ -535,6 +589,7 @@ sub get_upf_scaled {
 sub _get_upf_scaled
 {
     my %opts = @_;
+    my $dataref = delete $opts{source};
     my $size = delete $opts{size} || 640;
     my $x1 = delete $opts{x1};
     my $y1 = delete $opts{y1};
@@ -545,13 +600,16 @@ sub _get_upf_scaled
     my $u = LJ::want_user(delete $opts{userid} || delete $opts{u}) || LJ::get_remote();
     my $mogkey = delete $opts{mogkey};
     my $downsize_only = delete $opts{downsize_only};
+    my $save_to_FB = delete $opts{save_to_FB} || 0;
+    my $fb_gallery = delete $opts{fb_gallery};
+    my $auto_crop = delete $opts{auto_crop};
     croak "No userid or remote" unless $u || $mogkey;
 
     $maxfilesize *= 1024;
 
     croak "Invalid parameters to get_upf_scaled\n" if scalar keys %opts;
 
-    my $mode = ($x1 || $y1 || $x2 || $y2) ? "crop" : "scale";
+    my $mode = ($x1 || $y1 || $x2 || $y2 || $auto_crop) ? "crop" : "scale";
 
     eval { require Image::Magick }
         or return undef;
@@ -560,7 +618,11 @@ sub _get_upf_scaled
         or return undef;
 
     $mogkey ||= 'upf:' . $u->{userid};
-    my $dataref = LJ::mogclient()->get_file_data($mogkey) or return undef;
+    $dataref = LJ::mogclient()->get_file_data($mogkey)
+        unless $dataref;
+
+    return undef
+        unless $dataref;
 
     # original width/height
     my ($ow, $oh) = Image::Size::imgsize($dataref);
@@ -592,13 +654,15 @@ sub _get_upf_scaled
 
     # get the "medium sized" width/height.  this is the size which
     # the user selects from
-    my ($medw, $medh) = $getSizedCoords->($size);
+    my @sizes = split /x/, $size;
+    my ($medw, $medh) = scalar @sizes > 1 ? @sizes : $getSizedCoords->($size);
     return undef unless $medw && $medh;
 
     # simple scaling mode
     if ($mode eq "scale") {
         my $image = Image::Magick->new(size => "${medw}x${medh}")
             or return undef;
+
         $image->BlobToImage($$dataref);
         unless ($downsize_only && ($medw > $ow || $medh > $oh)) {
             $image->Resize(width => $medw, height => $medh);
@@ -623,26 +687,60 @@ sub _get_upf_scaled
     # decode to a smaller size so we get 100px when we crop
     my $min_dim = $tw < $th ? $tw : $th;
     my ($decodew, $decodeh) = ($ow, $oh);
-    my $wanted_size = 100;
-    if ($min_dim > $wanted_size) {
-        # then let's not decode the full JPEG down from its huge size
-        my $de_scale = $wanted_size / $min_dim;
-        $decodew = int($de_scale * $decodew);
-        $decodeh = int($de_scale * $decodeh);
-        $_ *= $de_scale foreach ($x1, $x2, $y1, $y2);
+    if ($auto_crop) {
+        $decodew = $sizes[0];
+        $decodeh = $sizes[1];
+    } else {
+        my $wanted_size = 100;
+        if ($min_dim > $wanted_size) {
+            # then let's not decode the full JPEG down from its huge size
+            my $de_scale = $wanted_size / $min_dim;
+
+            $decodew = int($de_scale * $decodew);
+            $decodeh = int($de_scale * $decodeh);
+
+            $_ *= $de_scale foreach ($x1, $x2, $y1, $y2);
+        }
     }
 
     $_ = int($_) foreach ($x1, $x2, $y1, $y2, $tw, $th);
 
     # make the pristine (uncompressed) 100x100 image
-    my $timage = Image::Magick->new(size => "${decodew}x${decodeh}")
-        or return undef;
-    $timage->BlobToImage($$dataref);
-    $timage->Scale(width => $decodew, height => $decodeh);
+    my $timage = $auto_crop ? Image::Magick->new() : Image::Magick->new(size => "${decodew}x${decodeh}");
+    return undef unless $timage;
 
-    my $w = ($x2 - $x1);
-    my $h = ($y2 - $y1);
-    my $foo = $timage->Mogrify(crop => "${w}x${h}+$x1+$y1");
+    $timage->BlobToImage($$dataref);
+
+    if ($auto_crop) {
+        my ($crop_w, $crop_h) = ();
+        if ($ow / $decodew >= $oh / $decodeh) {
+            $crop_w = $oh * $decodew / $decodeh;
+            $crop_h = $oh;
+            $x1 = ($ow - $crop_w) / 2;
+            $y1 = 0;
+        } else {
+            $crop_w = $ow;
+            $crop_h = $ow * $decodeh / $decodew;
+            $y1 = ($oh - $crop_h) / 2;
+            $x1 = 0;
+        }
+        $timage->Crop($crop_w."x".$crop_h."+$x1+$y1");
+        $timage->Scale(width => $decodew, height => $decodeh);
+    } else {
+        my $w = ($x2 - $x1);
+        my $h = ($y2 - $y1);
+        $timage->Scale(width => $decodew, height => $decodeh);
+        $timage->Mogrify(crop => "${w}x${h}+$x1+$y1");
+    }
+
+    if ($save_to_FB) {
+        my $im_blob = $timage->ImageToBlob;
+        my $res = upload_to_fb (
+            dataref => $im_blob,
+            gals    => [ $fb_gallery ],
+        );
+        return $res;
+    }
 
     my $targetSize = $border ? 98 : 100;
 
@@ -652,17 +750,160 @@ sub _get_upf_scaled
     # add border if desired
     $timage->Border(geometry => "1x1", color => 'black') if $border;
 
+    my $ret = undef;
     foreach my $qual (qw(100 90 85 75)) {
         # work off a copy of the image so we aren't recompressing it
         my $piccopy = $timage->Clone();
         $piccopy->Set('quality' => $qual);
-        my $ret = $imageParams->($piccopy);
-        return $ret if length(${ $ret->[0] }) < $maxfilesize;
+        $ret = $imageParams->($piccopy);
+        last if length(${ $ret->[0] }) < $maxfilesize;
     }
 
-    return undef;
+    return $ret;
 }
 
+sub format_magic {
+    my $magic = shift;
+    my $hex = unpack "H*", $magic;
+    my $mime;
+
+    $mime = 'text/plain'; # default value
+    # image formats
+    $mime = 'image/jpeg' if $magic =~ /^\xff\xd8/; # JPEG
+    $mime = 'image/gif'  if $magic =~ /^GIF8/;     # GIF
+    $mime = 'image/png'  if $magic =~ /^\x89PNG/;  # PNG
+
+    return $mime;
+}
+
+sub get_challenge
+{
+    my $username = shift;
+    
+    my $ua = LWP::UserAgent->new;
+    $ua->agent("FotoBilder_Uploader/0.2");
+
+    my $req = HTTP::Request->new(GET => "$LJ::FB_SITEROOT/interface/simple");
+    $req->push_header("X-FB-Mode" => "GetChallenge");
+    $req->push_header("X-FB-User" => $username);
+
+    my $res = $ua->request($req);
+    die "HTTP error: " . $res->content . "\n"
+        unless $res->is_success;
+
+    my $xmlres = XML::Simple::XMLin($res->content);
+    my $methres = $xmlres->{GetChallengeResponse};
+
+    if (my $err = $xmlres->{Error} || $methres->{Error}) {
+        use Data::Dumper;
+        die Dumper $err;
+    }
+
+    return $methres->{Challenge};
+}
+
+sub make_auth
+{
+    my $chal = shift;
+    return "crp:$chal:" . md5_hex($chal . md5_hex($LJ::FB_PASS));
+}
+
+sub upload_to_fb {
+    my %opts = @_;
+
+    my $dataref = $opts{dataref};
+    my $gals    = $opts{gals};
+
+    my $username = $LJ::FB_USER;
+
+    my $chal = "";
+    unless ($chal) {
+        print "Getting challenge...\n";
+        $chal = get_challenge($username)
+            or die "No challenge string available.\n";
+    }
+
+    my $ua = LWP::UserAgent->new;
+    $ua->agent("FotoBilder_Uploader/0.2");
+
+    # Create a request
+    my $req = HTTP::Request->new(PUT => "$LJ::FB_SITEROOT/interface/simple");
+    $req->push_header("X-FB-Mode" => "UploadPic");
+    $req->push_header("X-FB-User" => $username);
+    $req->push_header("X-FB-Auth" => make_auth($chal));
+    $req->push_header("X-FB-GetChallenge" => 1);
+
+    # picture security
+    my $sec = 255; ## public
+    $req->push_header("X-FB-UploadPic.PicSec" => $sec);
+
+    # add to galleries
+    if (@$gals) {
+
+        # initialize galleries struct array
+        $req->push_header(":X-FB-UploadPic.Gallery._size" => scalar(@$gals));
+
+        # add individual galleries
+        foreach my $idx (0..@$gals-1) {
+            my $gal = $gals->[$idx];
+
+            my @path = split(/\0/, $gal);
+            my $galname = pop @path;
+
+            if (@path) {
+                print "Adding to gallery: [", join(" // ", @path, $galname), "]\n";
+            } else {
+                print "Adding to gallery: $galname\n";
+            }
+
+            $req->push_header
+                ("X-FB-UploadPic.Gallery.$idx.GalName" => $galname);
+            $req->push_header
+                ("X-FB-UploadPic.Gallery.$idx.GalDate" => time());
+            $req->push_header
+                ("X-FB-UploadPic.Gallery.$idx.GalSec" => $sec);
+
+            if (@path) {
+                $req->push_header
+                    (":X-FB-UploadPic.Gallery.$idx.Path._size" => scalar(@path));
+                foreach (0..@path-1) {
+                    $req->push_header
+                        (":X-FB-UploadPic.Gallery.$idx.Path.$_" => $path[$_]);
+                }
+
+            }
+        }
+    }
+
+    $req->push_header("X-FB-UploadPic.ImageLength" => length($dataref));
+    $req->push_header("Content-Length" => length($dataref));
+    $req->content($dataref);
+
+    my $res = $ua->request($req);
+    die "HTTP error: " . $res->content . "\n"
+        unless $res->is_success;
+
+    my $xmlres = XML::Simple::XMLin($res->content);
+    my $methres = $xmlres->{UploadPicResponse};
+    my $chalres = $xmlres->{GetChallengeResponse};
+
+    $chal = $chalres->{Challenge};
+
+    if (my $err = $xmlres->{Error} || $methres->{Error} || $chalres->{Error}) {
+        return {
+            picid  => -1,
+            url    => undef,
+            status => 'error',
+            errstr => $err->[0],
+        }
+    }
+
+    return {
+        picid  => $methres->{PicID},
+        url    => $methres->{URL},
+        status => 'ok',
+    }
+}
 
 1;
 

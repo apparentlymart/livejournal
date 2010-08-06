@@ -224,41 +224,27 @@
         ## User can upload image or set image's uri.
         my $userpic_raw = '';
         if ($POST{userpic} or $POST{src} eq "url"){
-            ##
+ 
             my ($size, $content) = (undef, undef);
 
-            if ($POST{userpic}){
-                ## Read uploaded image
-                my $upload = LJ::Request->upload('userpic');
+            return $err->($ML{'.error.badurl'})
+            if $POST{'src'} eq "url" && $POST{'urlpic'} !~ /^http:\/\//;
+
+            
+            if ($POST{'userpic'} || $POST{'src'} eq "url") {
+                my $res = LJ::fetch_userpic(%POST, maxupload => $MAX_UPLOAD);
+
                 return $err->("No uploaded file")
-                    unless $upload;
+                    if $res->{size} == -1;
 
-                $size = $upload->size;
+                return $err->($ML{'.error.urlerror'})
+                    unless $res->{content};
 
-                # upload image as temp file to mogileFS. this file is used in lj_upf_resize worker.
-                seek $upload->fh, 0,0;
-                read $upload->fh, $content, $upload->size; # read content
+                return $err->("You cannot upload large images from URLs. ".$res->{size}." > $MAX_UPLOAD")
+                    if $res->{size} > $MAX_UPLOAD;
 
-            } elsif ($POST{'src'} eq "url") {
-                ## Get image somewhere from internet
-                ##
-                return $err->($ML{'.error.badurl'})
-                if $POST{'urlpic'} !~ /^http:\/\//;
-
-                my $ua = LJ::get_useragent(
-                                           role     => 'userpic',
-                                           max_size => $MAX_UPLOAD + 1024,
-                                           timeout  => 10,
-                                           );
-                my $res = $ua->get($POST{urlpic});
-                return $err->($ML{'.error.urlerror'} . ":" . $res->status_line)
-                    unless $res and $res->is_success;
-
-                # read downloaded file
-                $content = $res->content;
-                $size    = length $content;
-
-                return $err->("You cannot upload large images from URLs. $size > $MAX_UPLOAD") if $size > $MAX_UPLOAD;
+                $content = $res->{content};
+                $size    = $res->{size};
             }
 
             ## do we get an image?
