@@ -1,3 +1,13 @@
+.hr {
+	height: 1px;
+	overflow: hidden;
+	background: #D2D2D2;
+	font-size: 0;
+	}
+	.hr HR {
+		display: none;
+		}
+
 #profile_page {
     margin: 0 10px 0 0;
 }
@@ -443,3 +453,55 @@ span.expandcollapse {
 		margin:-8px 0 0;
 		background:url(/img/userinfo.gif) no-repeat 0 0;
 		}
+
+/* App User list
+--------------------------------------*/
+.b-app-user-list {
+	overflow: hidden;
+	padding: 0;
+	margin: 10px 0 15px 0;
+	list-style: none;
+	}
+	.b-app-user-list LI {
+		float: left;
+		display: inline;
+		padding: 0;
+		margin: 0 30px 0 0;
+		}
+		.b-app-user-list LI IMG {
+			padding: 0;
+			margin: 0 2px 0 0;
+			border: none;
+			vertical-align: middle;
+			}
+
+/* App Activity list
+--------------------------------------*/
+.b-app-activity-list {
+	overflow: hidden;
+	padding: 0;
+	margin: 15px 0 0 0;
+	list-style: none;
+	}
+	.b-app-activity-list LI {
+		overflow: hidden;
+		padding: 0;
+		margin: 0 0 13px 0;
+		}
+		.b-app-activity-list LI IMG {
+			float: left;
+			padding: 0;
+			margin: 0 17px 0 0;
+			border: none;
+			}
+		.b-app-activity-list LI P {
+			padding: 0;
+			margin: 0;
+			font-size: 12px;
+			}
+		.b-app-activity-list LI .date {
+			padding: 0;
+			margin: 0 0 3px 0;
+			font-size: 10px;
+			color: #999;
+			}

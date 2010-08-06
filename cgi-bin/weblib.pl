@@ -2428,7 +2428,7 @@ sub get_body_class_for_service_pages {
         push @classes, "shop-page";
     } elsif ($uri =~ m!^/browse(/.*)?$!) {
         push @classes, "catalogue-page";
-    } elsif ($uri =~ m!^/apps(/.*)?$!) {
+    } elsif ($uri =~ m!^/apps(/.*)?$! || LJ::Request->header_in("Host") eq "$LJ::USERAPPS_SUBDOMAIN.$LJ::DOMAIN") {
         push @classes, 'framework-page';    
     } 
     return join(" ", @classes);

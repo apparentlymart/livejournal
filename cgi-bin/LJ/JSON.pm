@@ -15,6 +15,9 @@ sub from_json {
     return $wrap->decode($dump);
 }
 
+sub true  { $wrap->true  };
+sub false { $wrap->false };
+
 foreach my $class (qw(LJ::JSON::XS LJ::JSON::JSONv2 LJ::JSON::JSONv1)) {
     if ($class->can_load) {
         $wrap = $class->new;

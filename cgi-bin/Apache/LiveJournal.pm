@@ -21,6 +21,7 @@ use Class::Autouse qw(
                       Apache::LiveJournal::Interface::S2
                       Apache::LiveJournal::Interface::ElsewhereInfo
                       Apache::LiveJournal::PalImg
+                      Apache::LiveJournal::Interface::Api
                       LJ::ModuleCheck
                       LJ::AccessLogSink
                       LJ::AccessLogRecord
@@ -358,7 +359,11 @@ sub trans
             return LJ::Request::OK
         }
     }
-
+    
+    if(LJ::Request->headers_in->{Accept} eq 'application/xrds+xml'){
+        LJ::Request->header_out('X-XRDS-Location' => 'http://api.' . $LJ::DOMAIN .'/xrds');
+    }
+    
     # only allow certain pages over SSL
     if ($is_ssl) {
         if ($uri =~ m!^/interface/! || $uri =~ m!^/__rpc_!) {
@@ -845,10 +850,20 @@ sub trans
 
             my $view = $determine_view->($user, "safevhost", $uri);
             return $view if defined $view;
-
+        } elsif ($func eq 'api') {
+            Apache::LiveJournal::Interface::Api->load;
+            LJ::Request->handler("perl-script");
+            LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Api::handler);
+            return LJ::Request::OK;
+        
             LJ::Request->pnotes ('error' => 'e404');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;
+        } elsif ($func eq "apps") {
+            LJ::get_remote();
+            return redir(LJ::Session->setdomsess_handler()) if LJ::Request->uri eq "/__setdomsess";
+    	    return remote_domsess_bounce() if LJ::remote_bounce_url();
+            return $bml_handler->("$LJ::HOME/htdocs/apps/game.bml");
         } elsif ($func) {
             my $code = {
                 'userpics' => \&userpic_trans,
@@ -873,7 +888,7 @@ sub trans
         $host ne $LJ::DOMAIN && $host =~ /\./ &&
         $host =~ /[^\d\.]/)
     {
-
+        
         my $dbr = LJ::get_db_reader();
         my $checkhost = lc($host);
         $checkhost =~ s/^www\.//i;
@@ -1086,6 +1101,13 @@ sub trans
 sub userpic_trans
 {
 
+    if (LJ::Request->uri eq '/crossdomain.xml') {
+        Apache::LiveJournal::Interface::Api->load; 
+        LJ::Request->handler("perl-script"); 
+        LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Api::crossdomain); 
+        return LJ::Request::OK;
+    }
+    
     LJ::Request->pnotes (error => 'e404') unless LJ::Request->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
     return LJ::Request::NOT_FOUND unless LJ::Request->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
     my ($picid, $userid) = ($1, $2);

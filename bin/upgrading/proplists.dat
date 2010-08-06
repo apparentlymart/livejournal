@@ -1435,6 +1435,9 @@ logproplist.verticals_list:
 usermsgproplist.userpic:
   des: Userpic chosen by the user who created the message
 
+usermsgproplist.preformatted:
+  des: message contains HTML
+
 pollproplist2.unique:
   des: If set to 1, then a person with a given email address can only vote once in the poll
 

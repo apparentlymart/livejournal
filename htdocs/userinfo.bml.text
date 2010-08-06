@@ -14,6 +14,10 @@
 
 .allpics=View all userpics
 
+.apps.header=Applications
+
+.apps.installed=Installed Applications
+
 .basicinfo.header|staleness=1
 .basicinfo.header=Basic Info
 
@@ -617,6 +621,8 @@
 
 .section.edit|staleness=1
 .section.edit=Edit
+
+.section.view_all=View All
 
 .sendmessage.body2=<a [[aopts]]>Send [[user]] a text message</a><br />on his/her cellphone/pager.
 

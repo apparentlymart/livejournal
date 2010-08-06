@@ -128,9 +128,15 @@ sub raw_info {
     }
 
     $res->{to} = $msg->other_u->user;
+    $res->{to_id} = $msg->other_u->{userid};
     $res->{picture} = $pic->url if $pic;
+    $res->{picture_id} = $pic->picid if $pic;
     $res->{subject} = $msg->subject;
     $res->{body} = $msg->body;
+    $res->{msgid} = $msg->msgid;
+    $res->{msg_type} = $msg->type;
+    $res->{timesent} = $msg->timesent;
+    $res->{parent} = $msg->parent_msgid if $msg->parent_msgid;
 
     return $res;
 }

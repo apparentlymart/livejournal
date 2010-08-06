@@ -16,6 +16,8 @@ Settings =
 		{
 			Settings.form_changed = true;
 		});
+		
+		Settings.application_page_toggling();
 	},
 	
 	navclick_save: function(e)
@@ -29,4 +31,12 @@ Settings =
 	}
 }
 
+var applicationPageToggling = function ($) {
+	$('.b-settings-apps-item-name')
+		.click(function () {
+			$(this).parent().toggleClass('b-settings-apps-item-open');
+		});
+}
+
 jQuery(Settings.init);
+jQuery(applicationPageToggling);
