@@ -108,6 +108,7 @@ body<=
                 LJ::Setting::ContentPromotion
                 LJ::Setting::NotifyWeblogs
                 LJ::Setting::FacebookBeacon
+                LJ::Setting::TwitterConnect
                 LJ::Setting::EnableComments
                 LJ::Setting::CommentScreening
                 LJ::Setting::CommentCaptcha

@@ -1,0 +1,63 @@
+<?page
+body<=
+<?_code
+{
+#line 6
+    use strict;
+    use vars qw($title);
+
+    # logged-in users don't get to here
+    if (LJ::get_remote()) {
+        return LJ::Request->redirect("$LJ::SITEROOT/login.bml");
+    }
+
+    $title = LJ::Lang::ml('.title');
+
+    my $thispage = "$LJ::SITEROOT/identity/login.bml";
+    my @errors;
+
+    if (LJ::Request->did_post) {
+        my $idtype = LJ::Request->post_param('type');
+        my $idclass = LJ::Identity->find_class($idtype);
+
+        if ($idclass) {
+            $idclass->attempt_login(\@errors,
+                'returl_fail' => "$thispage?type=$idtype",
+            );
+            return if LJ::Request->redirected;
+        } else {
+            push @errors, 'unknown identity type';
+        }
+    }
+
+    my $template = LJ::HTML::Template->new(
+        { use_expr => 1 }, # force HTML::Template::Pro with Expr support
+        filename => "$ENV{'LJHOME'}/templates/Identity/Login.tmpl",
+        die_on_bad_params => 0,
+        strict => 0,
+    ) or die "Can't open template: $!";
+
+    my @types;
+    foreach my $type (@LJ::IDENTITY_TYPES) {
+        push @types, {
+            'type' => $type,
+            'ml_tab_heading' => LJ::Lang::ml(".tab.$type"),
+        };
+    }
+
+    $template->param(
+        'types' => \@types,
+        'current_type' => LJ::Request->get_param('type') ||
+                          $LJ::IDENTITY_TYPES[0],
+        'errors' => [ map { { 'error' => $_ } } @errors ],
+    );
+
+    return $template->output;
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

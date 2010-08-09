@@ -55,7 +55,7 @@ sub _as_email {
     LJ::Lang::get_text_multi($lang, undef, \@_ml_strings_en);
 
     my $entries = LJ::is_friend($u, $self->friend) ? "" : " " . LJ::Lang::get_text($lang, 'esn.public', undef);
-    my $is_open_identity = $self->friend->openid_identity;
+    my $is_open_identity = $self->friend->is_identity;
 
     my $vars = {
         who         => $self->friend->display_username,
@@ -67,7 +67,7 @@ sub _as_email {
     };
 
     my $email_body_key = 'esn.befriended.' .
-        ($u->openid_identity ? 'openid_' : '' ) . 'email_text';
+        ($u->is_identity ? 'openid_' : '' ) . 'email_text';
 
     return LJ::Lang::get_text($lang, $email_body_key, undef, $vars) .
         $self->format_options($is_html, $lang, $vars,

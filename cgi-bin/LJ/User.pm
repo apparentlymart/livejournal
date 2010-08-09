@@ -1218,17 +1218,12 @@ sub url {
 
     my $url;
 
-    if ($u->{'journaltype'} eq "I" && ! $u->{url}) {
-        my $id = $u->identity;
-        if ($id && $id->typeid == 0) {
-            $u->set_prop("url", $id->[1]) if $id->[1];
-            $url = $id->value;
-        }
+    if ($u->is_identity && !$u->prop('url')) {
+        $u->set_prop( 'url' => $u->identity->url($u) );
     }
 
-    # not openid, what does their 'url' prop say?
     $url ||= $u->prop('url');
-    return undef unless $url;
+    return unless $url;
 
     $url = "http://$url" unless $url =~ m!^http://!;
 
@@ -1263,7 +1258,8 @@ sub identity {
                                   );
         return $i;
     }
-    return undef;
+
+    return;
 }
 
 # returns a URL if account is an OpenID identity.  undef otherwise.
@@ -1277,109 +1273,16 @@ sub openid_identity {
 # returns username or identity display name, not escaped
 sub display_name {
     my $u = shift;
-    return $u->{'user'} unless $u->{'journaltype'} eq "I";
+    return $u->username unless $u->is_identity;
 
     my $id = $u->identity;
     return "[ERR:unknown_identity]" unless $id;
-
-
-    # if name does not have [] .com .ru or https it should be displayed as "name [domain.com]"
-    # otherwise - old code
-    unless ($u->name_orig =~ m!(\w+\.\w{2,4})|(https?://)!){
-        my $uri = URI->new( $id->value );
-        my $domain = $id->value;
-        ($domain) = $uri->host =~ /(\w+\.\w{2,4})$/
-            if $uri->can('host');
-        return $u->name_orig ." [$domain]";
-    }
-
-    #
-    my ($url, $name);
-    if ($id->typeid == 0) {
-        require Net::OpenID::Consumer;
-        $url = $id->value;
-        $name = Net::OpenID::VerifiedIdentity::DisplayOfURL($url, $LJ::IS_DEV_SERVER);
-        $name = LJ::run_hook("identity_display_name", $name) || $name;
-            
-        ## Decode URL's like below to human-readable names
-        ## http://blog.k.python.ru/accounts/5/%D0%94%D0%BC%D0%B8
-        $name =~ s/%([\dA-Fa-f]{2})/chr(hex($1))/ge;
-    }
-    return $name;
+    return $id->display_name($u);
 }
 
 sub ljuser_display {
-    my $u = shift;
-    my $opts = shift;
-
-    return LJ::ljuser($u, $opts) unless $u->{'journaltype'} eq "I";
-
-    my $id = $u->identity;
-    return "<b>????</b>" unless $id;
-
-    my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
-    my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
-    my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
-    my $profile_url = $opts->{'profile_url'} || '';
-    my $journal_url = $opts->{'journal_url'} || '';
-    my $target = $opts->{'target'} ? ' target="' . $opts->{'target'} . '"' : '';
-
-    my ($url, $name);
-
-    if ($id->typeid == 0) {
-        $url = $journal_url ne '' ? $journal_url : $id->value;
-        $name = $u->display_name;
-
-        $url ||= "about:blank";
-        $name ||= "[no_name]";
-
-        $url = LJ::ehtml($url);
-        $name = LJ::ehtml($name);
-
-        my ($imgurl, $width, $height);
-        my $head_size = $opts->{head_size};
-        if ($head_size) {
-            $imgurl = "$img/openid_${head_size}.gif";
-            $width = $head_size;
-            $height = $head_size;
-        } elsif ($id->value =~ m/\.fanat\.ru(\/|$)/){ # Fanat.ru users have its own pic
-            $imgurl = "$img/openid_fanat-profile.gif";
-            $width  = 16;
-            $height = 16;
-        } else {
-            $imgurl = "$img/openid-profile.gif";
-            $width = 16;
-            $height = 16;
-        }
-
-        if (my $site = LJ::ExternalSite->find_matching_site($url)) {
-            $imgurl = $site->icon_url;
-        }
-
-
-        my $remote = LJ::get_remote();
-        my $alias = LJ::ehtml(LJ::ljuser_alias($u->{user}) || '');
-  
-        my $profile = $profile_url ne '' ? $profile_url : "$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull";
-        
-        my $user_html = '';
-        $user_html .= "<span class='ljuser ";
-        $user_html .= "with-alias"
-            if $alias;
-        ## add class as "ljuser-name_*username*" for find user on page to change alias
-        $user_html .= " ljuser-name_".$name;
-        $user_html .= " ljuser-inline_note' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'";
-        $user_html .= " title='$alias'"
-            if $alias;
-        $user_html .= " rel='nofollow'><b>$name</b>";
-        $user_html .= "<span class='useralias-value'>*</span>"
-            if $alias;
-        $user_html .= "</a></span>";
-        return $user_html;
-        
-    } else {
-        return "<b>????</b>";
-    }
+    my ($u, $opts) = @_;
+    return LJ::ljuser($u, $opts);
 }
 
 # class function - load an identity user, but only if they're already known to us
@@ -1394,7 +1297,7 @@ sub load_existing_identity_user {
 
 # class function - load an identity user, and if we've never seen them before create a user account for them
 sub load_identity_user {
-    my ($type, $ident, $vident) = @_;
+    my ($type, $ident, $extra, $created_ref) = @_;
 
     my $u = load_existing_identity_user($type, $ident);
 
@@ -1418,21 +1321,13 @@ sub load_identity_user {
     for (1..10) {
         my $extuser = 'ext_' . LJ::alloc_global_counter('E');
 
-        my $name = $extuser;
-        if ($type eq "O"){
-            if (ref $vident and $vident->can("display")) {
-                $name = $vident->display;
-            } elsif (not ref $vident){
-                $name = $vident;
-            }
-        }
-
         $uid = LJ::create_account({
             caps => undef,
             user => $extuser,
-            name => $name,
+            name => $extuser,
             journaltype => 'I',
         });
+
         last if $uid;
         select undef, undef, undef, .10;  # lets not thrash over this
     }
@@ -1442,11 +1337,23 @@ sub load_identity_user {
 
     $u = LJ::load_userid($uid);
 
+    $u->identity->initialize_user($u, $extra);
+    $$created_ref = 1 if $created_ref;
+
     # record create information
     my $remote = LJ::get_remote();
     $u->log_event('account_create', { remote => $remote });
 
     return $u;
+}
+
+sub remove_identity {
+    my ($u) = @_;
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do( 'DELETE FROM identitymap WHERE userid=?', undef, $u->id );
+
+    delete $u->{'_identity'};
 }
 
 # instance method:  returns userprop for a user.  currently from cache with no
@@ -3307,19 +3214,26 @@ sub is_trusted_identity {
     return unless $u->is_identity;
     
     return 1 if $u->is_validated;
-    
-    ## Check top-to-down domain names in list of trusted providers:
-    ## asdf.openid.somewhere.com -> openid.somewhere.com -> somewhere.com
-    my $identity = $u->openid_identity;
-    if ($identity and my $uri = URI->new($identity)) {
-        return unless $uri->can('host');
-        my $host = $uri->host;
-        while ($host =~ /\./) {
-            return 1 if $LJ::TRUSTED_OPENID_PROVIDERS{$host};
-            # remove first domain name (or whatever) with dot
-            $host =~ s/^.*?\.//;
+
+    my $id = $u->identity;
+
+    if ($id->short_code eq 'openid') {
+        ## Check top-to-down domain names in list of trusted providers:
+        ## asdf.openid.somewhere.com -> openid.somewhere.com -> somewhere.com
+        my $url = $id->url;
+        if ($url and my $uri = URI->new($url)) {
+            return unless $uri->can('host');
+            my $host = $uri->host;
+            while ($host =~ /\./) {
+                return 1 if $LJ::TRUSTED_OPENID_PROVIDERS{$host};
+                # remove first domain name (or whatever) with dot
+                $host =~ s/^.*?\.//;
+            }
         }
+
+        return;
     }
+
     return;
 }
 
@@ -6904,120 +6818,193 @@ sub get_all_aliases {
 #           Key 'no_follow', when true, disables traversal of renamed users.
 # returns: HTML with a little head image & bold text link.
 # </LJFUNC>
-sub ljuser
-{
+sub ljuser {
+    my ($user, $opts) = @_;
     my $user = shift;
     my $opts = shift;
 
-    my $andfull = $opts->{'full'} ? "?mode=full" : "";
-    my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
-    my $profile_url = $opts->{'profile_url'} || '';
-    my $journal_url = $opts->{'journal_url'} || '';
-    my $profile;
-    my $target = $opts->{'target'} ? ' target="' . $opts->{'target'} . '"' : '';
-
-    my $make_tag = sub {
-        my ($fil, $url, $x, $y) = @_;
-        $y ||= $x;  # make square if only one dimension given
-        my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
-
-        # Backwards check, because we want it to default to on
-        my $bold = (exists $opts->{'bold'} and $opts->{'bold'} == 0) ? 0 : 1;
-        my $title = (exists $opts->{'title'} and $opts->{'title'} ne '') ? LJ::ehtml($opts->{'title'}) : $user;
-        my $ljusername = $bold ? "<b>$title</b>" : "$title";
-
-        my $link_color = "";
-        # Make sure it's really a color
-        if ($opts->{'link_color'} && $opts->{'link_color'} =~ /^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/) {
-            $link_color = " style='color: " . $opts->{'link_color'} . ";'";
-        }
-
-        $profile = $profile_url ne '' ? $profile_url : $profile . $andfull;
-        $url = $journal_url ne '' ? $journal_url : $url;
-         
-        my $u = LJ::get_remote();
-        my $alias = LJ::ehtml(LJ::ljuser_alias($user) || '');
-
-        my $side_alias;
-        if ($alias and $opts->{side_alias}) {
-            $side_alias = "<span class='alias-value'> &mdash; $alias</span>";
-            $alias = '';
-        }
-
-        my $user_html = '';
-        $user_html .= "<span class='ljuser";
-        $user_html .= " with-alias" if $alias;
-        $user_html .= " with-alias-value" if $opts->{side_alias};
-        
-        ## add class as "ljuser-name_*username*" for find user on page to change alias
-        $user_html .= " ljuser-name_".LJ::canonical_username($user);
-        
-        my $imgurl;
-        if ($fil =~ /^https?:\/\//) {
-            $imgurl = $fil;
-        } else {
-            $imgurl = "$img/$fil";
-        }
-        $user_html .= "' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'$target><img src='$imgurl' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url'$link_color$target";
-        $user_html .= "  title='$alias'"
-            if $alias;
-        $user_html .= ">$ljusername";
-        $user_html .= "<span class='useralias-value'>*</span>"
-            if $alias;
-        $user_html .= "</a>";
-        $user_html .= "</span>";
-        $user_html .= $side_alias if $side_alias;
-        return $user_html;
-    };
-
-    my $u = isu($user) ? $user : LJ::load_user($user);
-
-    # Traverse the renames to the final journal
-    if ($u && !$opts->{'no_follow'}) {
-        $u = $u->get_renamed_user;
+    my ($u, $username);
+    if (isu($user)) {
+        $u = $user;
+        $username = $u->username;
+    } else {
+        $u = LJ::load_user($user);
+        $username = $user;
     }
+
+    my ( @span_classes,
+         @span_styles,
+         $profile_url,
+         @profile_link_tag_extra,
+         $userhead,
+         $userhead_w,
+         $userhead_h,
+         $journal_url,
+         @link_tag_extra,
+         $journal_name,
+         @link_extra,
+         @extra );
+
+    $profile_url = $opts->{'profile_url'};
 
     # if invalid user, link to dummy userinfo page
-    unless ($u && isu($u)) {
-        $user = LJ::canonical_username($user);
-        $profile = "$LJ::SITEROOT/userinfo.bml?user=$user";
-        return $make_tag->('userinfo.gif', "$LJ::SITEROOT/userinfo.bml?user=$user", 17);
-    }
-
-    $profile = $u->profile_url;
-
-    my $type = $u->{'journaltype'};
-
-    # Mark accounts as deleted that aren't visible, memorial, locked, or read-only
-    $opts->{'del'} = 1 unless $u->is_visible || $u->is_memorial || $u->is_locked || $u->is_readonly;
-    $user = $u->{'user'};
-
-    my $url = $u->journal_base . "/";
-    my $head_size = $opts->{head_size};
-
-    if (my ($icon, $size) = LJ::run_hook("head_icon", $u, head_size => $head_size)) {
-        return $make_tag->($icon, $url, $size || 16) if $icon;
-    }
-
-    if (!$LJ::IS_SSL && (my $icon = $u->custom_usericon)) {
-        return $make_tag->($icon, $url, 17);
-    }
-    
-    if ($type eq 'C') {
-        return $make_tag->("comm_${head_size}.gif", $url, $head_size) if $head_size;
-        return $make_tag->('community.gif', $url, 16);
-    } elsif ($type eq 'Y') {
-        return $make_tag->("syn_${head_size}.gif", $url, $head_size) if $head_size;
-        return $make_tag->('syndicated.gif', $url, 16);
-    } elsif ($type eq 'N') {
-        return $make_tag->("news_${head_size}.gif", $url, $head_size) if $head_size;
-        return $make_tag->('newsinfo.gif', $url, 16);
-    } elsif ($type eq 'I') {
-        return $u->ljuser_display($opts);
+    if (!$u || !LJ::isu($u)) {
+        $username = LJ::canonical_username($username);
+        $journal_url = "$LJ::SITEROOT/userinfo.bml?user=$username";
+        $profile_url ||= $journal_url;
+        $userhead = 'userinfo.gif';
+        $userhead_w = 17;
     } else {
-        return $make_tag->("user_${head_size}.gif", $url, $head_size) if $head_size;
-        return $make_tag->('userinfo.gif', $url, 17);
+        # Traverse the renames to the final journal
+        if (!$opts->{'no_follow'}) {
+            $u = $u->get_renamed_user;
+        }
+
+        if (!$profile_url) {
+            $profile_url = $u->profile_url;
+            $profile_url .= '?mode=full' if $opts->{'full'};
+        }
+
+        # Mark accounts as deleted that aren't visible, memorial, locked, or
+        # read-only
+        if ($u->statusvis !~ /[VMLO]/) {
+            push @span_styles, 'text-decoration:line-through';
+        }
+
+        $journal_name = $username;
+
+        $journal_url = $u->journal_base . "/";
+        my $head_size = $opts->{head_size};
+
+        my ($icon, $size) = LJ::run_hook("head_icon",
+                                         $u, head_size => $head_size);
+
+        if ($icon) {
+            $userhead = $icon;
+            $userhead_w = $size || 16;
+        } elsif (!$LJ::IS_SSL && ($icon = $u->custom_usericon)) {
+            $userhead = $icon;
+            $userhead_w = 17;
+        } elsif ($u->is_community) {
+            if ($head_size) {
+                $userhead = "comm_${head_size}.gif";
+                $userhead_w = $head_size;
+            } else {
+                $userhead = "community.gif";
+                $userhead_w = 16;
+            }
+        } elsif ($u->is_syndicated) {
+            if ($head_size) {
+                $userhead = "syn_${head_size}.gif";
+                $userhead_w = $head_size;
+            } else {
+                $userhead = "syndicated.gif";
+                $userhead_w = 16;
+            }
+        } elsif ($u->is_news) {
+            if ($head_size) {
+                $userhead = "news_${head_size}.gif";
+                $userhead_w = $head_size;
+            } else {
+                $userhead = "newsinfo.gif";
+                $userhead_w = 16;
+            }
+        } elsif ($u->is_identity) {
+            my $params = $u->identity->ljuser_display_params($u, $opts);
+
+            $profile_url  = $params->{'profile_url'}  || $profile_url;
+            $journal_url  = $params->{'journal_url'}  || $journal_url;
+            $journal_name = $params->{'journal_name'} || $journal_name;
+            $userhead     = $params->{'userhead'}     || $userhead;
+            $userhead_w   = $params->{'userhead_w'}   || $userhead_w;
+            $userhead_h   = $params->{'userhead_h'}   || $userhead_h;
+        } else {
+            if ($head_size) {
+                $userhead = "user_${head_size}.gif";
+                $userhead_w = $head_size;
+            } else {
+                $userhead = "userinfo.gif";
+                $userhead_w = 17;
+            }
+        }
     }
+
+    my $user_alias       = LJ::ljuser_alias($user);
+    my $side_alias       = $opts->{'side_alias'};
+    my $show_alias_popup = $user_alias and not $side_alias;
+    my $target           = $opts->{'target'};
+    my $link_color       = $opts->{'link_color'};
+
+    # verify that it's indeed a color:
+    if ($link_color !~ /^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/) {
+        $link_color = '';
+    }
+
+    ### populate @span_classes
+    unshift @span_classes, 'ljuser';
+    if ($show_alias_popup)   { push @span_classes, 'with-alias'; }
+    if ($opts->{side_alias}) { push @span_classes, 'with-alias-value'; }
+
+    # add class as "ljuser-name_*username*" for find user on page to
+    # change alias
+    push @span_classes, 'ljuser-name_' . LJ::canonical_username($user);
+    my $span_classes = join(' ', @span_classes);
+
+    ### populate @span_styles
+    unshift @span_styles, 'white-space:nowrap';
+    my $span_styles = join(';', @span_styles);
+
+    ### populate @profile_link_tag_extra
+    if ($target) { push @profile_link_tag_extra, " target=\"$target\""; }
+    my $profile_link_tag_extra = join('', @profile_link_tag_extra);
+
+    ### populate userhead data
+    if ($userhead !~ /^https?:\/\//) {
+        my $imgroot = $opts->{'imgroot'} || $LJ::IMGPREFIX;
+        $userhead = $imgroot . '/' . $userhead;
+    }
+
+    $userhead_h ||= $userhead_w;  # make square if only one dimension given
+
+    ### populate @link_tag_extra
+    if ($link_color) { push @link_tag_extra, " style=\"color:$link_color\""; }
+    if ($target)     { push @link_tag_extra, " target=\"$target\""; }
+    if ($show_alias_popup) {
+        push @link_tag_extra, " title=\"" . LJ::ehtml($user_alias) . "\"";
+    }
+    my $link_tag_extra = join('', @link_tag_extra);
+
+    ### fix $journal_name
+    if (!exists $opts->{'bold'} || $opts->{'bold'} != 0) {
+        $journal_name = "<b>$journal_name</b>";
+    }
+
+    ### populate @link_extra
+    if ($show_alias_popup) {
+        push @link_extra, "<span class='useralias-value'>*</span>";
+    }
+    my $link_extra = join('', @link_extra);
+
+    ### populate @extra
+    if ($user_alias and $side_alias) {
+        push @extra, "<span class='alias-value'> &mdash; " .
+                     LJ::ehtml($user_alias) . "</span>";
+    }
+    my $extra = join('', @extra);
+
+    return
+        "<span class='$span_classes' lj:user='$user' style='$span_styles'>" .
+        "<a href='$profile_url'$profile_link_tag_extra>" .
+        "<img src='$userhead' alt='[info]' " .
+            "width='$userhead_w' height='$userhead_h' " .
+            "style='vertical-align: bottom; border: 0; padding-right: 1px;'" .
+        "/>" .
+        "</a>" .
+        "<a href='$journal_url'$link_tag_extra>" .
+        $journal_name . $link_extra .
+        "</a>" .
+        "</span>" .
+        $extra;
 }
 
 sub set_email {

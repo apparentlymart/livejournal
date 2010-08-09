@@ -2,6 +2,11 @@
 {
     use strict;
     use vars qw($title $head $body %GET %POST);
+
+    return LJ::Request->redirect(
+        "$LJ::SITEROOT/identity/login.bml?type=openid"
+    );
+
     use LJ::OpenID;
     LJ::set_active_crumb("openid_login");
 

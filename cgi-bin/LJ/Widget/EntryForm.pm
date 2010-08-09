@@ -1436,6 +1436,7 @@ sub render_body {
     });
 
     $out .= $self->render_options_block;
+    $out .= LJ::run_hook('entryform_pre_submitbar', $opts);
     $out .= $self->render_submitbar_block;
 
     $out .= "</div><!-- end #entry-form-wrapper -->\n\n";

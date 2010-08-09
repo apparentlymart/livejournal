@@ -1,0 +1,44 @@
+<div id="tabs">
+    <TMPL_LOOP types>
+        <TMPL_IF expr="type eq current_type">
+            <a href="?type=<TMPL_VAR type>" class="active"><TMPL_VAR ml_tab_heading></a>
+        <TMPL_ELSE>
+            <a href="?type=<TMPL_VAR type>"><TMPL_VAR ml_tab_heading></a>
+        </TMPL_IF>
+    </TMPL_LOOP>
+</div>
+
+<div id="tabs-content">
+    <TMPL_LOOP types>
+        <TMPL_IF expr="type eq current_type">
+            <div id="tab-<TMPL_VAR type>" class="tab">
+        <TMPL_ELSE>
+            <div id="tab-<TMPL_VAR type>" class="tab" style="display:none">
+        </TMPL_IF>
+
+            <form action="" method="post">
+                <input type="hidden" name="type" value="<TMPL_VAR type>">
+                <TMPL_INCLUDE expr="sprintf('templates/Identity/Login-%s.tmpl', type)">
+            </form>
+        </div>
+    </TMPL_LOOP>
+</div>
+
+<script type="text/javascript">
+    jQuery(function($) {
+        $("#tabs a").click(function(e) {
+            e.preventDefault();
+
+            var type = $(this).attr("href").replace(/.*type=/, "");
+
+            $("#tabs a").removeClass("active");
+            $("#tabs-content .tab").hide();
+            $(this).addClass("active");
+            $("#tab-" + type).show();
+        });
+    });
+</script>
+
+<style type="text/css">
+#tabs a.active { font-weight: bold; }
+</style>

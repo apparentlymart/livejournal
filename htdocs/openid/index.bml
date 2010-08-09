@@ -1,3 +1,9 @@
+<?_code
+    return LJ::Request->redirect(
+        "$LJ::SITEROOT/identity/login.bml?type=openid"
+    );
+_code?>
+
 <?page
 head<=
 

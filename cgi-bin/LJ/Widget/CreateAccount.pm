@@ -369,6 +369,45 @@ sub render_body {
     return $ret;
 }
 
+sub create_account {
+    my ($class, $opts) = @_;
+    return LJ::User->create_personal(%$opts);
+}
+
+sub send_welcome_email {
+    my ($class, $nu) = @_;
+
+    my $email = $nu->email_raw;
+
+    my $aa = LJ::register_authaction($nu->id, "validateemail", $email);
+
+    my $body = LJ::Lang::ml('email.newacct5.body', {
+        sitename => $LJ::SITENAME,
+        regurl => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
+        journal_base => $nu->journal_base,
+        username => $nu->user,
+        siteroot => $LJ::SITEROOT,
+        sitenameshort => $LJ::SITENAMESHORT,
+        lostinfourl => "$LJ::SITEROOT/lostinfo.bml",
+        editprofileurl => "$LJ::SITEROOT/manage/profile/",
+        searchinterestsurl => "$LJ::SITEROOT/interests.bml",
+        editpicsurl => "$LJ::SITEROOT/editpics.bml",
+        customizeurl => "$LJ::SITEROOT/customize/",
+        postentryurl => "$LJ::SITEROOT/update.bml",
+        setsecreturl => "$LJ::SITEROOT/set_secret.bml",
+        LJ::run_hook('extra_fields_in_postreg_esn'),
+    });
+
+    LJ::send_mail({
+        to => $email,
+        from => $LJ::DONOTREPLY_EMAIL,
+        fromname => $LJ::SITENAME,
+        charset => 'utf-8',
+        subject => LJ::Lang::ml('email.newacct.subject', { sitename => $LJ::SITENAME }),
+        body => $body,
+    });
+}
+
 sub handle_post {
     my $class = shift;
     my $post = shift;
@@ -526,7 +565,7 @@ sub handle_post {
     unless ($second_submit || keys %{$from_post{errors}} || (!LJ::is_enabled("recaptcha") && $wants_audio)) {
         my $bdate = sprintf("%04d-%02d-%02d", $post->{bday_yyyy}, $post->{bday_mm}, $post->{bday_dd});
 
-        my $nu = LJ::User->create_personal(
+        my $nu = $class->create_account({
             user => $user,
             bdate => $bdate,
             email => $email,
@@ -537,7 +576,7 @@ sub handle_post {
             ofage => $ofage,
             extra_props => $opts{extra_props},
             status_history => $opts{status_history},
-        );
+        });
         return $class->ml('widget.createaccount.error.cannotcreate') unless $nu;
 
         # set gender
@@ -552,34 +591,8 @@ sub handle_post {
         LJ::run_hook('post_create_account', $class, $nu, $post, \%opts);
 
         # send welcome mail... unless they're underage
-        unless ($is_underage) {
-            my $aa = LJ::register_authaction($nu->id, "validateemail", $email);
-
-            my $body = LJ::Lang::ml('email.newacct5.body', {
-                sitename => $LJ::SITENAME,
-                regurl => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
-                journal_base => $nu->journal_base,
-                username => $nu->user,
-                siteroot => $LJ::SITEROOT,
-                sitenameshort => $LJ::SITENAMESHORT,
-                lostinfourl => "$LJ::SITEROOT/lostinfo.bml",
-                editprofileurl => "$LJ::SITEROOT/manage/profile/",
-                searchinterestsurl => "$LJ::SITEROOT/interests.bml",
-                editpicsurl => "$LJ::SITEROOT/editpics.bml",
-                customizeurl => "$LJ::SITEROOT/customize/",
-                postentryurl => "$LJ::SITEROOT/update.bml",
-                setsecreturl => "$LJ::SITEROOT/set_secret.bml",
-                LJ::run_hook('extra_fields_in_postreg_esn'),
-            });
-
-            LJ::send_mail({
-                to => $email,
-                from => $LJ::DONOTREPLY_EMAIL,
-                fromname => $LJ::SITENAME,
-                charset => 'utf-8',
-                subject => LJ::Lang::ml('email.newacct.subject', { sitename => $LJ::SITENAME }),
-                body => $body,
-            });
+        if (!$is_underage) {
+            $class->send_welcome_email($nu);
         }
 
         if ($LJ::TOS_CHECK) {

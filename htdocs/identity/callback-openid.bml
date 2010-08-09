@@ -1,0 +1,73 @@
+<?page
+body<=
+<?_code
+{
+#line 6
+    use strict;
+    use vars qw($title);
+
+    # user will unlikely ever need to see this
+    $title = 'OpenID Landing Page';
+
+    unless (LJ::Request->get_param('openid.mode')) {
+        return LJ::Request->redirect(
+            "$LJ::SITEROOT/identity/login.bml?type=openid"
+        );
+    }
+
+    my $returl = LJ::Request->get_param('ret') || $LJ::SITEROOT;
+    my $returl_fail = LJ::Request->get_param('ret_fail') ||
+                      $returl ||$LJ::SITEROOT;
+
+    my %get_params = LJ::Request->get_params;
+    my $csr = LJ::Identity::OpenID->consumer(\%get_params);
+
+    if ($csr->user_cancel) {
+        return BML::redirect($returl_fail);
+    }
+
+    if (my $setup = $csr->user_setup_url) {
+        return BML::redirect($setup);
+    }
+
+    my $err = sub {
+        my ($what) = @_;
+        return "<?errorbar $what errorbar?>";
+    };
+
+    my $vident = eval { $csr->verified_identity; };
+    return $err->($@) if $@;
+    return $err->($csr->err) unless $vident;
+
+    my $url = $vident->url;
+    return $err->('Invalid characters in identity URL.') if $url =~ /[\<\>\s]/;
+
+    my $u = LJ::User::load_identity_user('O', $url, { 'vident' => $vident });
+    unless ($u) {
+        return $err->("Couldn't vivify your account (but we verified that " .
+                      "you're " . LJ::ehtml($url) . ")")
+    };
+
+    my $sess_opts = {
+        'exptype' => 'short',
+        'ipfixed' => 0,
+    };
+
+    if (LJ::Request->post_param('expire') eq "never") {
+        $sess_opts->{'exptype'} = "long";
+    }
+
+    $u->make_login_session($sess_opts->{'exptype'}, $sess_opts->{'ipfixed'});
+    LJ::set_remote($u);
+
+    my $returl = LJ::Request->get_param('ret') || $LJ::SITEROOT;
+    return LJ::Request->redirect($returl);
+
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

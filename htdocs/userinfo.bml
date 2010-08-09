@@ -172,7 +172,7 @@
         $u->{'opt_whatemailshow'} = "N";  # don't show email
         $friends{'load'} = $friends{'display'} = 0;
     } elsif ($extid) {
-        $title = $ML{'.title.openidprofile'};
+        $title = $extid->profile_window_title($u);
     }
 
     $windowtitle = $u->display_name . " - $title";

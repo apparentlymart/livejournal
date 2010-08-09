@@ -1,0 +1,104 @@
+<TMPL_IF is_person>
+    <tr valign='middle' id='<TMPL_VAR css_ljuser_row_id>'>
+
+    <TMPL_IF remote_banned>
+        <td align='center'><img src='<TMPL_VAR lj_imgprefix>/userinfo.gif' /></td>
+        <td align='center'>( )</td>
+        <td align='left'>
+            <span class='ljdeem'><TMPL_VAR ml_loggedin></font>
+            <TMPL_VAR ml_banned>
+
+            <TMPL_IF 0> Don't worry about a real href since js hides the row anyway </TMPL_IF>
+            <script language='JavaScript'>
+                if (document.getElementById) {
+                    document.write("&nbsp;<a href='#' onClick='otherLJUser();return false;'>[other]</a>");
+                }
+            </script>
+        </td>
+    <TMPL_ELSE>
+        <td align='center'><img src='<TMPL_VAR lj_imgprefix>/userinfo.gif'  onclick='handleRadios(1);' /></td>
+        <TMPL_IF remote_can_comment>
+            <td align='center'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> /></td>
+            <td align='left'>
+                <label for='talkpostfromremote'><TMPL_VAR ml_loggedin></label>
+
+                <TMPL_IF 0> Don't worry about a real href since js hides the row anyway </TMPL_IF>
+                <script language='JavaScript'>
+                    if (document.getElementById) {
+                        document.write("&nbsp;<a href='#' onClick='otherLJUser();return false;'>[other]</a>");
+                    }
+                </script>
+                <input type='hidden' name='cookieuser' value='<TMPL_VAR remote_username>' id='cookieuser' />
+                <TMPL_VAR ml_willscreen>
+            </td>
+        <TMPL_ELSE>
+            <td align='center'>( )</td>
+            <td align='left'>
+                <font color='#c0c0c0'><TMPL_VAR ml_loggedin></font>
+                &nbsp;- <TMPL_VAR ml_notafriend>
+                <input type='hidden' name='cookieuser' value='<TMPL_VAR remote_username>' id='cookieuser' />
+                <TMPL_VAR ml_willscreen>
+            </td>
+        </TMPL_IF>
+    </TMPL_IF>
+    </tr>
+</TMPL_IF>
+
+<tr valign='middle' id='otherljuser_row' name='otherljuser_row'>
+<td align='center'><img src='<TMPL_VAR lj_imgprefix>/pencil.gif' onclick='handleRadios(2);' /></td>
+<td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj' <TMPL_IF whocheck_ljuser>checked="checked"</TMPL_IF> /></td>
+<td align='left'>
+    <b><label for='talkpostfromlj' onclick='handleRadios(2); return false;'><TMPL_VAR expr="ml('/talkpost.bml.opt.ljuser2')"></label></b>
+    <TMPL_VAR ml_willscreen>
+    <TMPL_VAR ml_willscreenfriend>
+</td>
+</tr>
+
+<TMPL_IF is_person>
+    <script language='JavaScript'>
+    <!--
+        if (document.getElementById) {
+            var radio_user = document.getElementById("talkpostfromlj");
+            if (!radio_user.checked) {
+                var otherljuser_row = document.getElementById("otherljuser_row");
+                otherljuser_row.className = 'display_none';
+            }
+        }
+    //-->
+    </script>
+</TMPL_IF>
+
+<tr valign='middle' align='left' id='lj_more'>
+<td colspan='2'></td>
+<td>
+    <table>
+        <tr>
+            <td><TMPL_VAR expr="ml('Username')">:</td>
+            <td>
+                <input class='textbox' name='userpost' size='13' maxlength='15' id='username' value='<TMPL_VAR username_default>' onclick='this.value=""'
+                    style='background: url(<TMPL_VAR lj_imgprefix>/userinfo.gif) no-repeat; background-color: #fff; background-position: 0px 1px; padding-left: 18px; color: #00C; font-weight: bold;'
+                />
+            </td>
+        </tr>
+        <tr>
+            <td><TMPL_VAR expr="ml('Password')">:</td>
+            <td><input class='textbox' name='password' type='password' maxlength='30' size='18' id='password' /></td>
+        </tr>
+        <tr>
+            <td colspan='2'>
+                <label for='logincheck'><TMPL_VAR expr="ml('/talkpost.bml.loginq')">&nbsp;</label>
+                <input type='checkbox' name='do_login' id='logincheck' />
+            </td>
+        </tr>
+    </table>
+</td>
+</tr>
+
+<TMPL_UNLESS create_link>
+    <TMPL_UNLESS is_person>
+        <tr valign='middle' align='left'>
+        <td colspan='2'></td>
+        <td><span style='font-size: 8pt; font-style: italic;'><TMPL_VAR ml_noaccount></span></td>
+        </tr>
+    </TMPL_UNLESS>
+</TMPL_UNLESS>

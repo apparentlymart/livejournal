@@ -365,6 +365,7 @@ body<=
         # chat thingies
         $ret .= "<tr><td colspan='2'></td></tr><tr><td class='field_name' colspan='2' style='text-align: center;'><a name='iminfo'></a>$ML{'.fn.imservices3'}</td></tr>";
 
+        $ret .= LJ::run_hook('extra_im_services', $u);
 
         $u->{'gizmo'} = $u->gizmo_account();
 
@@ -708,6 +709,8 @@ body<=
                 my $mem_only = $eff_val eq $u->{$uprop};
                 LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
             }
+
+            LJ::run_hook('save_extra_profile_fields', $u);
 
             # location or bday could've changed... (who cares about checking exactly)
             $u->invalidate_directory_record;

@@ -148,7 +148,8 @@ sub save_all {
         # LJ__Setting__Example_field (for LJ::Setting::Example)
         # LJ__Setting__Example__Example2_field (for LJ::Setting::Example::Example2)
         next unless $k =~ /^LJ__Setting__([a-zA-Z0-9]+)(__[a-zA-Z0-9]+)?_(\w+)$/;
-        my $class = "LJ::Setting::$1$2";
+        my $class = "LJ::Setting::$1";
+        $class .= $2 if defined $2;
         my $key = $3;
         $class =~ s/__/::/g;
         $posted{$class}{$key} = $v;
@@ -163,6 +164,7 @@ sub save_all {
                 $class->save($u, $post_args);
             };
             if (my $err = $@) {
+                warn $err;
                 $save_errors = $err->field('map') if ref $err;
             }
         }

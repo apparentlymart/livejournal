@@ -3,7 +3,6 @@ package LJ::OpenID;
 use strict;
 use Digest::SHA1 qw(sha1 sha1_hex);
 use LWPx::ParanoidAgent;
-use LJ::OpenID::Cache;
 
 BEGIN {
     $LJ::OPTMOD_OPENID_CONSUMER = $LJ::OPENID_CONSUMER ? eval "use Net::OpenID::Consumer; 1;" : 0;
@@ -50,36 +49,7 @@ sub server {
 # When planning to verify identity, needs GET
 # arguments passed in
 sub consumer {
-    my $get_args = shift || {};
-
-    my $ua;
-    unless ($LJ::IS_DEV_SERVER) {
-        $ua = LWPx::ParanoidAgent->new(
-                                       timeout => 10,
-                                       max_size => 1024*300,
-                                       );
-    }
-
-    my $cache = undef;
-    if (! $LJ::OPENID_STATELESS && scalar(@LJ::MEMCACHE_SERVERS)) {
-        $cache = LJ::OpenID::Cache->new;
-    }
-
-    my $csr = Net::OpenID::Consumer->new(
-                                         ua => $ua,
-                                         args => $get_args,
-                                         cache => $cache,
-                                         consumer_secret => \&LJ::OpenID::consumer_secret,
-                                         debug => $LJ::IS_DEV_SERVER || 0,
-                                         required_root => $LJ::SITEROOT,
-                                         );
-
-    return $csr;
-}
-
-sub consumer_secret {
-    my $time = shift;
-    return server_secret($time - $time % 3600);
+    return LJ::Identity::OpenID->consumer(@_);
 }
 
 sub server_secret {
@@ -160,43 +130,10 @@ sub add_trust {
     return $rv;
 }
 
-# From Digest::HMAC
-sub hmac_sha1_hex {
-    unpack("H*", &hmac_sha1);
-}
-sub hmac_sha1 {
-    hmac($_[0], $_[1], \&sha1, 64);
-}
-sub hmac {
-    my($data, $key, $hash_func, $block_size) = @_;
-    $block_size ||= 64;
-    $key = &$hash_func($key) if length($key) > $block_size;
-
-    my $k_ipad = $key ^ (chr(0x36) x $block_size);
-    my $k_opad = $key ^ (chr(0x5c) x $block_size);
-
-    &$hash_func($k_opad, &$hash_func($k_ipad, $data));
-}
-
 # Returns 1 if destination identity server
 # is blocked
 sub blocked_hosts {
-    my $csr = shift;
-
-    return do { my $dummy = 0; \$dummy; } if $LJ::IS_DEV_SERVER;
-
-    my $tried_local_id = 0;
-    $csr->ua->blocked_hosts(
-                            sub {
-                                my $dest = shift;
-
-                                if ($dest =~ /(^|\.)\Q$LJ::DOMAIN\E$/i) {
-                                    $tried_local_id = 1;
-                                    return 1;
-                                }
-                                return 0;
-                            });
-    return \$tried_local_id;
+    return LJ::Identity::OpenID->blocked_hosts(@_);
 }
 
 1;

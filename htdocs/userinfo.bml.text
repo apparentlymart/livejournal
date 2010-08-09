@@ -676,6 +676,8 @@
 .title.communityprofile|staleness=1
 .title.communityprofile=Community Profile
 
+.title.jabberprofile=Profile
+
 .title.openidprofile|staleness=1
 .title.openidprofile=OpenID Profile
 

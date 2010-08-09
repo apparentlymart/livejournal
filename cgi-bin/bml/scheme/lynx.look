@@ -57,12 +57,22 @@ _code?>
 
 <hr style="clear:both;" />
 
-<p>[ <a href='<?siteroot?>/'><?_ml lynx.nav.home _ml?></a> | <a href='<?siteroot?>/update.bml'><?_ml lynx.nav.update _ml?></a> | <?_code
+<p>[ <a href='<?siteroot?>/'><?_ml lynx.nav.home _ml?></a> | <?_code
+   my $remote = LJ::get_remote();
+   return if !$remote || $remote->is_identity;
+   return qq{<a href='<?siteroot?>/update.bml'>$ML{'lynx.nav.update'}</a> | };
+_code?><?_code
    use strict;
-   if (my $u = LJ::get_remote()) {
-        my $baseurl = $u->journal_base();
-        return "<a href='$baseurl/'>$ML{'lynx.nav.recent'}</a> | <a href='$baseurl/friends/'>$ML{'lynx.nav.friends'}</a> | ";
+   my $remote = LJ::get_remote();
+   return unless $remote;
+
+   my $ret;
+   my $baseurl = $remote->journal_base();
+   unless ($remote->is_identity) {
+       $ret .= "<a href='$baseurl/'>$ML{'lynx.nav.recent'}</a> | ";
    }
+   $ret .= "<a href='$baseurl/friends/'>$ML{'lynx.nav.friends'}</a> | ";
+   return $ret;
 _code?><a href='<?siteroot?>/login.bml'><?_ml lynx.nav.login _ml?></a>/<a href='<?siteroot?>/logout.bml'><?_ml lynx.nav.logout _ml?></a> | <a href='<?siteroot?>/site/search.bml'><?_ml lynx.nav.search _ml?></a> | <a href='<?siteroot?>/manage/settings/index2.bml?cat=account '><?_ml lynx.nav.siteopts _ml?></a> | <a href='<?siteroot?>/site/'><?_ml lynx.nav.sitemap _ml?></a> ]</p>
 <?breadcrumbs?>
 <?_code

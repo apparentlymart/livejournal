@@ -282,7 +282,7 @@ sub eurl {
     ## when application/x-www-form-urlencoded (old standard) is used, it may be "+".
     ## See also: http://en.wikipedia.org/wiki/Percent-encoding.
     ##
-    $str =~ s/([^a-zA-Z0-9_\,\-.\/\\\:])/uc sprintf("%%%02x",ord($1))/eg;
+    $str =~ s/([^a-zA-Z0-9_\,\-.\\])/uc sprintf("%%%02x",ord($1))/eg;
     return $str;
 }
 

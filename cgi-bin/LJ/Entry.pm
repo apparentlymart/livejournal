@@ -301,6 +301,12 @@ sub security {
     return $self->{security};
 }
 
+sub is_public {
+    my ($self) = @_;
+
+    return $self->security eq 'public';
+}
+
 sub allowmask {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
@@ -1298,6 +1304,33 @@ sub posting_comments_allowed {
     return 0 if $self->prop('opt_lockcomments');
 
     return 1;
+}
+
+sub everyone_can_comment {
+    my ($self) = @_;
+
+    return 0 unless $self->posting_comments_allowed;
+    return 0 unless $self->journal->{'opt_whocanreply'} eq 'all';
+
+    return 1;
+}
+
+sub registered_can_comment {
+    my ($self) = @_;
+
+    return 1 if $self->everyone_can_comment;
+    return 1 if $self->journal->{'opt_whocanreply'} eq 'reg';
+
+    return 0;
+}
+
+sub friends_can_comment {
+    my ($self) = @_;
+
+    return 1 if $self->registered_can_comment;
+    return 1 if $self->journal->{'opt_whocanreply'} eq 'friends';
+
+    return 0;
 }
 
 package LJ;

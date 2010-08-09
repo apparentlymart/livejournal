@@ -164,6 +164,7 @@ $maint{'clean_caches'} = sub
         print "    rows remaining: " . ($xfp_count - $row_ct) . "\n";
     }
 
+    LJ::run_hooks('extra_cache_clean');
 };
 
 1;

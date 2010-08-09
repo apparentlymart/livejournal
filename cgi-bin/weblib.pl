@@ -667,7 +667,14 @@ sub create_qr_div {
 
     my $stylemineuri = $stylemine ? "style=mine&" : "";
     my $basepath =  LJ::journal_base($u) . "/$ditemid.html?${stylemineuri}";
-    my $usertype = ($remote->openid_identity && $remote->is_trusted_identity) ? 'openid_cookie' : 'cookieuser';
+    my $usertype;
+
+    if ($remote->is_identity && $remote->is_trusted_identity) {
+        $usertype = lc($remote->identity->short_code) . '_cookie';
+    } else {
+        $usertype = 'cookieuser';
+    }
+
     $qrhtml .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
                                {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
                                {'name' => 'journal', 'id' => 'journal', 'value' => $u->{'user'}},
@@ -746,6 +753,11 @@ sub create_qr_div {
 
     $qrhtml .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='body' style='width: 99%'></textarea>";
     $qrhtml .= "</td></tr>";
+
+    $qrhtml .= LJ::run_hook('extra_quickreply_rows', {
+        'user'    => $user,
+        'ditemid' => $ditemid,
+    });
 
     $qrhtml .= "<tr><td>&nbsp;</td>";
     $qrhtml .= "<td colspan='3' align='left'>";
@@ -1840,8 +1852,7 @@ sub control_strip
     # Build up some common links
     my %links = (
                  'login'             => "<a href='$LJ::SITEROOT/?returnto=$uri'>$BML::ML{'web.controlstrip.links.login'}</a>",
-                 'post_journal'      => "<a href='$LJ::SITEROOT/update.bml'>$BML::ML{'web.controlstrip.links.post2'}</a>",
-                 'home'              => "<a href='$LJ::SITEROOT/'>" . $BML::ML{'web.controlstrip.links.home'} . "</a>",
+                 'home'              => "<a href='$LJ::SITEROOT/'>" . $BML::ML{'web.controlstrip.links.home'} . "</a>&nbsp;&nbsp; ",
                  'recent_comments'   => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>$BML::ML{'web.controlstrip.links.recentcomments'}</a>",
                  'manage_friends'    => "<a href='$LJ::SITEROOT/friends/'>$BML::ML{'web.controlstrip.links.managefriends'}</a>",
                  'manage_entries'    => "<a href='$LJ::SITEROOT/editjournal.bml'>$BML::ML{'web.controlstrip.links.manageentries'}</a>",
@@ -1851,6 +1862,10 @@ sub control_strip
                  'learn_more'        => LJ::run_hook('control_strip_learnmore_link') || "<a href='$LJ::SITEROOT/'>$BML::ML{'web.controlstrip.links.learnmore'}</a>",
                  'explore'           => "<a href='$LJ::SITEROOT/explore/'>" . BML::ml('web.controlstrip.links.explore', { sitenameabbrev => $LJ::SITENAMEABBREV }) . "</a>",
                  );
+
+    if ($remote && $remote->is_person) {
+        $links{'post_journal'} = "<a href='$LJ::SITEROOT/update.bml'>$BML::ML{'web.controlstrip.links.post2'}</a>&nbsp;&nbsp; ";
+    }
 
     if ($remote) {
         $links{'view_friends_page'} = "<a href='" . $remote->journal_base . "/friends/'>$BML::ML{'web.controlstrip.links.viewfriendspage2'}</a>";
@@ -1931,7 +1946,7 @@ sub control_strip
         my $logout = "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.logout'}\" id='Logout' />";
         $ret .= "$remote_display $logout";
         $ret .= "</div></form>\n";
-        $ret .= "$links{'home'}&nbsp;&nbsp; $links{'post_journal'}&nbsp;&nbsp; $links{'view_friends_page'}";
+        $ret .= "$links{'home'} $links{'post_journal'} $links{'view_friends_page'}";
         $ret .= "</td>\n";
 
         $ret .= "<td id='lj_controlstrip_actionlinks' nowrap='nowrap'>";

@@ -432,6 +432,16 @@
         profile_design => 1,
         settings_design => 1,
     );
+
+    @LJ::IDENTITY_TYPES = qw( openid ) unless @LJ::IDENTITY_TYPES;
+
+    unless (@LJ::TALK_METHODS_ORDER) {
+        @LJ::TALK_METHODS_ORDER = qw(
+            Anonymous
+            OpenID
+            User
+        );
+    }
 }
 
 # no dependencies.

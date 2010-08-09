@@ -1,0 +1,10 @@
+<TMPL_VAR expr="ml('.openid.label.url')">
+<input type="text" name="openid:url">
+
+<TMPL_IF errors>
+    <TMPL_LOOP errors>
+        <?errorbar <TMPL_VAR error> errorbar?>
+    </TMPL_LOOP>
+</TMPL_IF>
+
+<button type="submit"><TMPL_VAR expr="ml('.openid.btn.login')"></button>
