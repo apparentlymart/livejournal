@@ -143,7 +143,7 @@ sub RecentPage
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
         
-        next ENTRY unless $entry_obj->visible_to($remote);
+        next ENTRY unless $entry_obj->visible_to($remote, {'viewall' => $viewall, 'viewsome' => $viewsome});
 
         $entry_obj->handle_prefetched_props($logprops{$itemid});
         my $replycount = $logprops{$itemid}->{'replycount'};

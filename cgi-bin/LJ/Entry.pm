@@ -872,21 +872,15 @@ sub comments_manageable_by {
 # is duplicate to LJ::can_view (LJ/User.pm), it is hard translate one to other because different entry attributes hashrefs
 sub visible_to
 {
-    my ($self, $remote, $canview) = @_;
+    my ($self, $remote, $opts) = @_;
     return 0 unless $self->valid;
 
-    my ($viewall, $viewsome) = (0, 0);
-    if ($canview) {
-        $viewall = LJ::check_priv($remote, 'canview', '*');
-        $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
-    }
-
     # can see anything with viewall
-    return 1 if $viewall;
+    return 1 if $opts->{'viewall'};
 
     # can't see anything unless the journal is visible
     # unless you have viewsome. then, other restrictions apply
-    if (!$viewsome) {
+    if (!$opts->{'viewsome'}) {
         return 0 if $self->journal->{statusvis} =~ m/[DSX]/;
 
         # can't see anything by suspended users
