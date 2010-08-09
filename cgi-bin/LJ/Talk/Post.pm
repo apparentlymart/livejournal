@@ -303,7 +303,7 @@ sub init {
     my $author_class = LJ::Talk::Author->get_handler($form->{'usertype'});
 
     # whoops, a bogus usertype value. no way.
-    unless ($author_class) {
+    unless ( $author_class && $author_class->enabled ) {
         return $bmlerr->('error.invalidform');
     }
 

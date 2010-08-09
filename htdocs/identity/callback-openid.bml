@@ -19,6 +19,9 @@ body<=
     my $returl_fail = LJ::Request->get_param('ret_fail') ||
                       $returl ||$LJ::SITEROOT;
 
+    return LJ::Request->redirect($returl_fail)
+        unless LJ::Identity::OpenID->enabled;
+
     my %get_params = LJ::Request->get_params;
     my $csr = LJ::Identity::OpenID->consumer(\%get_params);
 

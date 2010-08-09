@@ -56,6 +56,15 @@ sub get_handler {
 
 =head2 (Purely) virtual
 
+=head3 enabled
+
+Return a boolean value indicating that this author choice is enabled on the
+server. Disabled choices are not displayed to the user.
+
+=cut
+
+sub enabled { 1 }
+
 =head3 short_code
 
 Return the "short code" for this author choice. It is used by the

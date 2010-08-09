@@ -172,6 +172,12 @@ profile_window_title: return a string to be used as a window title
 for the profile page of this user. Used in htdocs/userinfo.bml. It is
 suggested that implementations use LJ::Lang::ml for i18n.
 
+=item *
+
+enabled: return a boolean value indicating that this identity type is
+enabled on the server. Disabled identity types are not displayed to the
+user.
+
 =back
 
 =cut
@@ -185,5 +191,7 @@ sub initialize_user         { Carp::confess 'Invalid identity type' }
 sub display_name            { Carp::confess 'Invalid identity type' }
 sub ljuser_display_params   { Carp::confess 'Invalid identity type' }
 sub profile_window_title    { Carp::confess 'Invalid identity type' }
+
+sub enabled { 1 }
 
 1;

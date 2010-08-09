@@ -3,6 +3,10 @@ use strict;
 
 use base qw(LJ::Talk::Author);
 
+sub enabled {
+    return LJ::Identity::OpenID->enabled;
+}
+
 sub display_params {
     my ($class, $opts) = @_;
 

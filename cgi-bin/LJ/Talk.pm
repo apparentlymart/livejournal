@@ -1493,6 +1493,8 @@ sub talkform {
 
     my @author_options;
     foreach my $author_class (LJ::Talk::Author->all) {
+        next unless $author_class->enabled;
+
         my $params = $author_class->display_params($opts);
         $params->{'short_code'} = $author_class->short_code;
         push @author_options, $params;

@@ -9,6 +9,10 @@ sub typeid { 'O' }
 sub pretty_type { 'OpenID' }
 sub short_code { 'openid' }
 
+sub enabled {
+    return LJ::OpenID->consumer_enabled;
+}
+
 sub url {
     my ($self) = @_;
     return $self->value;
