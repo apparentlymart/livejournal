@@ -9087,6 +9087,15 @@ for LJSUP-6347
     my $s1uc_memkey = [$u->{'userid'}, "s1uc:$u->{'userid'}"];
     if ($u->{'useoverrides'} eq "Y" || $u->{'themeid'} == 0) {
         $s1uc = LJ::MemCache::get($s1uc_memkey);
+
+        ## validate integrity memcached data
+        if ($s1uc->{'override_stor'}  
+            and not eval { Storable::thaw($s1uc->{'override_stor'}); 1 }
+        ){
+            ## recache data if it's not deserializable.
+            $s1uc = undef;
+        }
+
         unless ($s1uc) {
             my $db;
             my $setmem = 1;
@@ -9098,6 +9107,14 @@ for LJSUP-6347
             }
             $s1uc = $db->selectrow_hashref("SELECT * FROM s1usercache WHERE userid=?",
                                            undef, $u->{'userid'});
+            
+            ## validate integrity of the data that has been cached in mysql
+            if ($s1uc->{'override_stor'} 
+                and not eval { Storable::thaw($s1uc->{'override_stor'}); 1 }
+            ){
+                ## recache data if it's not deserializable.
+                $s1uc = undef;
+            }
             LJ::MemCache::set($s1uc_memkey, $s1uc) if $s1uc && $setmem;
         }
     }
