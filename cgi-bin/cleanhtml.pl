@@ -805,7 +805,7 @@ sub clean
                     if ($hash->{'src'} =~ m!^http://(?:l-)?pics.livejournal.com/(\w+)/pic/(.*)$!i) {
                         my ($journal, $rest) = ($1, $2);
                         my $host = (!$LJ::DISABLED{'pics_via_cdn'} && $LJ::USE_CDN_FOR_PICS{$journal}) 
-                                ? "pics.livejournal.com" : "l-pics.livejournal.com";
+                                ? "l-pics.livejournal.com" : "pics.livejournal.com";
                         $hash->{'src'} = "http://$host/$journal/pic/$rest";
                     }
             
