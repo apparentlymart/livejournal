@@ -456,18 +456,10 @@ sub trans
         return LJ::Request::DECLINED
     }
 
-    ##
-    if ($host eq $LJ::DOMAIN_WEB && $uri =~ m!^/redirect/!) {
-        my $url = $GET{'url'};
-        if ($url 
-            && $url =~ m! ^ https?:// [-\w.]*? ([-\w]+ \. [-\w]+) / !x 
-            && $LJ::ALLOWED_REDIRECT_TO_DOMAIN{$1}) 
-        {
-            return redir($url);
-        }
-        ## else - returns 404
+    ## TODO: handler/hooks like below must be modular/chainable/extendable
+    if (my $redirect_url = LJ::run_hook("should_redirect", $host, $uri, \%GET)) {
+        return redir($redirect_url);
     }
-
 
     my $journal_view = sub {
         my $opts = shift;
