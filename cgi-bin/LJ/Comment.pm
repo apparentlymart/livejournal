@@ -336,7 +336,8 @@ sub jtalkid {
 
 sub dtalkid {
     my $self = shift;
-    my $entry = $self->entry;
+    my $entry = $self->entry; # may return undef for non valid comment
+    return undef unless $entry;
     return ($self->jtalkid * 256) + $entry->anum;
 }
 
