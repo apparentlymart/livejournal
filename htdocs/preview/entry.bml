@@ -6,6 +6,15 @@
     my $ret;
     my $remote = LJ::get_remote();
     my $styleid; my $stylesys = 1;
+   
+    ## This header is to pass page content through IE8 XSS Filter.
+    ## Use-case: 
+    ##  (1) gazeta.ru has POST form with destination http://www.livejournal.com/preview/entry.bml
+    ##  (2) browser sends form data with HTML formatting to /preview
+    ##  (3) LJ.com server sends most of the form input back to browser with unescaped HTML
+    ##  (4) IE8 thinks that LJ.com has XSS vulnerability and rejects to display the page
+    ## http://download.microsoft.com/download/6/6/B/66B06981-67F0-4151-B71D-848BEF65F3C7/Developing%20Securely%20with%20Cross%20Site%20Scripting%20Filter%20%20-%20IE8%20Developer%20Series%20Information%20Page.pdf
+    LJ::Request->header_out("X-XSS-Protection" => 0);
 
     ### Figure out poster/journal
     my ($u, $up);
