@@ -70,40 +70,40 @@ sub check_html {
     $lineidx = 1;
     $mscnt = 0;
     foreach my $inline (split(/\n/, $$journal)) {
-	$srcidx = 0;
-	chomp($inline);
-	print $iwrite "^$inline\n";
-	
-	my $idata;
-	do {
-	    $idata = <$iread>;
-	    chomp($idata);
-	    
-	    if ($idata =~ /^& /) {
-		$idata =~ s/^& (\S+) (\d+) (\d+): //;
-		$mscnt++;
-		my ($word, $sugcount, $ofs) = ($1, $2, $3);
-		$ofs -= 1; # because ispell reports "1" for first character
-		
-		$output .= LJ::ehtml(substr($inline, $srcidx, $ofs-$srcidx));
-		$output .= "<font color=\"$self->{'color'}\">".LJ::ehtml($word)."</font>";
-		
-		$footnotes .= "<tr valign=top><td align=right><font color=$self->{'color'}>".LJ::ehtml($word).
+        $srcidx = 0;
+        chomp($inline);
+        print $iwrite "^$inline\n";
+        
+        my $idata;
+        do {
+            $idata = <$iread>;
+            chomp($idata);
+            
+            if ($idata =~ /^& /) {
+                $idata =~ s/^& (\S+) (\d+) (\d+): //;
+                $mscnt++;
+                my ($word, $sugcount, $ofs) = ($1, $2, $3);
+                $ofs -= 1; # because ispell reports "1" for first character
+                
+                $output .= LJ::ehtml(substr($inline, $srcidx, $ofs-$srcidx));
+                $output .= "<font color=\"$self->{'color'}\">".LJ::ehtml($word)."</font>";
+                
+                $footnotes .= "<tr valign=top><td align=right><font color=$self->{'color'}>".LJ::ehtml($word).
                               "</font></td><td>".LJ::ehtml($idata)."</td></tr>";
-		
-		$srcidx = $ofs + length($word);
-	    } elsif ($idata =~ /^\# /) {
-		$other_bad = 1;
-		$idata =~ /^\# (\S+) (\d+)/;
-		my ($word, $ofs) = ($1, $2);
-		$ofs -= 1; # because ispell reports "1" for first character
-		$output .= LJ::ehtml(substr($inline, $srcidx, $ofs-$srcidx));
-		$output .= "<font color=\"$self->{'color'}\">".LJ::ehtml($word)."</font>";
-		$srcidx = $ofs + length($word);
-	    }
-	} while ($idata ne "");
-	$output .= LJ::ehtml(substr($inline, $srcidx, length($inline)-$srcidx)) . "<br>\n";
-	$lineidx++;
+                
+                $srcidx = $ofs + length($word);
+            } elsif ($idata =~ /^\# /) {
+                $other_bad = 1;
+                $idata =~ /^\# (\S+) (\d+)/;
+                my ($word, $ofs) = ($1, $2);
+                $ofs -= 1; # because ispell reports "1" for first character
+                $output .= LJ::ehtml(substr($inline, $srcidx, $ofs-$srcidx));
+                $output .= "<font color=\"$self->{'color'}\">".LJ::ehtml($word)."</font>";
+                $srcidx = $ofs + length($word);
+            }
+        } while ($idata ne "");
+        $output .= LJ::ehtml(substr($inline, $srcidx, length($inline)-$srcidx)) . "<br>\n";
+        $lineidx++;
     }
 
     $iread->close;
@@ -128,8 +128,8 @@ LJ::SpellCheck - let users check spelling on web pages
 
   use LJ::SpellCheck;
   my $s = new LJ::SpellCheck { 'spellcommand' => 'ispell -a -h',
-			       'color' => '#ff0000',
-			   };
+                               'color' => '#ff0000',
+                           };
 
   my $text = "Lets mispell thigns!";
   my $correction = $s->check_html(\$text);
