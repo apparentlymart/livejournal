@@ -17,9 +17,7 @@
 package LJ::SpellCheck;
 
 use strict;
-use FileHandle;
-use IPC::Open2;
-use POSIX ":sys_wait_h";
+use IPC::Run qw/run timeout/;
 
 use vars qw($VERSION);
 $VERSION = '1.0';
@@ -33,7 +31,7 @@ sub new {
     my $self = {};
     bless $self, ref $class || $class;
 
-    $self->{'command'} = $args->{'spellcommand'} || "ispell -a -h";
+    $self->{'command'} = $args->{'spellcommand'} || [qw/ispell -a -h/];
     $self->{'color'} = $args->{'color'} || "#FF0000";
     return $self;
 }
@@ -45,76 +43,65 @@ sub new {
 sub check_html {
     my $self = shift;
     my $journal = shift;
-    
-    my $iread = new FileHandle;
-    my $iwrite = new FileHandle;
-    my $ierr = new FileHandle;
-    my $pid;
+ 
+    my @in_lines    = split /[\r\n]+/, $$journal;
+    my @out_lines; 
+    my $color = $self->{'color'};
 
-    # work-around for mod_perl
-    my $tie_stdin = tied *STDIN;
-    untie *STDIN if $tie_stdin;
-
-    $iwrite->autoflush(1);
-
-    $pid = open2($iread, $iwrite, $self->{'command'}) || die "spell process failed";
-    die "Couldn't find spell checker\n" unless $pid;
-    my $banner = <$iread>;
-    die "banner=$banner\n" unless ($banner =~ /^@\(\#\)/);
-    print $iwrite "!\n";
-    
-    my $output = "";
-    my $footnotes = "";
-    
-    my ($srcidx, $lineidx, $mscnt, $other_bad);
-    $lineidx = 1;
-    $mscnt = 0;
-    foreach my $inline (split(/\n/, $$journal)) {
-        $srcidx = 0;
-        chomp($inline);
-        print $iwrite "^$inline\n";
+    {
+        my ($in, $out, $err);
         
-        my $idata;
-        do {
-            $idata = <$iread>;
-            chomp($idata);
-            
-            if ($idata =~ /^& /) {
-                $idata =~ s/^& (\S+) (\d+) (\d+): //;
-                $mscnt++;
-                my ($word, $sugcount, $ofs) = ($1, $2, $3);
-                $ofs -= 1; # because ispell reports "1" for first character
-                
-                $output .= LJ::ehtml(substr($inline, $srcidx, $ofs-$srcidx));
-                $output .= "<font color=\"$self->{'color'}\">".LJ::ehtml($word)."</font>";
-                
-                $footnotes .= "<tr valign=top><td align=right><font color=$self->{'color'}>".LJ::ehtml($word).
-                              "</font></td><td>".LJ::ehtml($idata)."</td></tr>";
-                
-                $srcidx = $ofs + length($word);
-            } elsif ($idata =~ /^\# /) {
-                $other_bad = 1;
-                $idata =~ /^\# (\S+) (\d+)/;
-                my ($word, $ofs) = ($1, $2);
-                $ofs -= 1; # because ispell reports "1" for first character
-                $output .= LJ::ehtml(substr($inline, $srcidx, $ofs-$srcidx));
-                $output .= "<font color=\"$self->{'color'}\">".LJ::ehtml($word)."</font>";
-                $srcidx = $ofs + length($word);
-            }
-        } while ($idata ne "");
-        $output .= LJ::ehtml(substr($inline, $srcidx, length($inline)-$srcidx)) . "<br>\n";
-        $lineidx++;
+        ## ! = turn terse mode on (don't write correct words to output)
+        ## ^ = escape each line (i.e. each line is text, not control command for aspell)
+        $in = "!\n" . join("\n", map { "^$_" } @in_lines);
+
+        run($self->{'command'}, \$in, \$out, \$err, timeout(10))
+            or die "Can't run spellchecker: $?";
+        @out_lines = split /\n/, $out;
+        
+        warn "Spellchecker warning: $err" 
+            if $err;
+        
+        my $signature = shift @out_lines;
+        die "Invalid spellchecker reply: $signature"
+            unless $signature && $signature =~ /^@\(#\)/;
     }
 
-    $iread->close;
-    $iwrite->close;
- 
-    $pid = waitpid($pid, 0);
+    my ($output, $footnotes, $has_errors, %seen_mispelled_words);
 
-    # return mod_perl to previous state, though not necessary?
-    tie *STDIN, $tie_stdin if $tie_stdin;
+    INPUT_LINE:
+    foreach my $input_line (@in_lines) {
+        my $pos = 0;
+        ASPELL_LINE: 
+        while (my $aspell_line = shift @out_lines) {
+            my ($word, $offset, $suggestions_list);
+            if (!$aspell_line) {
+                next INPUT_LINE;
+            } elsif ($aspell_line =~ /^& (\S+) \d+ (\d+): (.*)$/) {
+                ($word, $offset, $suggestions_list) = ($1, $2, $3);
+            } elsif ($aspell_line =~ /^\# (\S+) (\d+)/) {
+                my ($word, $offset, $suggestions_list) = ($1, $2, undef);
+            } else {
+                next ASPELL_LINE;
+            }
 
-    return (($mscnt || $other_bad) ? "$output<p><b>Suggestions:</b><table cellpadding=3 border=0>$footnotes</table>" : "");
+            $output .= LJ::ehtml(substr($input_line, $pos, $offset-$pos-1));
+            $output .= "<font color='$color'>".LJ::ehtml($word)."</font>";
+
+            if ($suggestions_list && !$seen_mispelled_words{$word}++) {
+                $footnotes .= 
+                    "<tr valign=top><td align=right><font color='$color'>".LJ::ehtml($word).
+                    "</font></td><td>".LJ::ehtml($suggestions_list)."</td></tr>\n";
+            }
+            $pos = $offset + length($word) - 1;
+            $has_errors++;
+        }
+        $output .= LJ::ehtml(substr($input_line, $pos, length($input_line)-$pos)) . "<br>\n";
+    }
+   
+    return ($has_errors) 
+            ? "$output<p><b>Suggestions:</b><table cellpadding=3 border=0>$footnotes</table>"
+            : "";
 }
 
 1;
@@ -127,7 +114,7 @@ LJ::SpellCheck - let users check spelling on web pages
 =head1 SYNOPSIS
 
   use LJ::SpellCheck;
-  my $s = new LJ::SpellCheck { 'spellcommand' => 'ispell -a -h',
+  my $s = new LJ::SpellCheck { 'spellcommand' => [ qw/ispell -a -h/ ],
                                'color' => '#ff0000',
                            };
 
