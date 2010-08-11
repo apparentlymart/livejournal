@@ -6993,7 +6993,7 @@ sub ljuser {
     my $extra = join('', @extra);
 
     return
-        "<span class='$span_classes' lj:user='$user' style='$span_styles'>" .
+        "<span class='$span_classes' lj:user='$username' style='$span_styles'>" .
         "<a href='$profile_url'$profile_link_tag_extra>" .
         "<img src='$userhead' alt='[info]' " .
             "width='$userhead_w' height='$userhead_h' " .
