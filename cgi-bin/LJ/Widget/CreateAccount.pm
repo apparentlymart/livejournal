@@ -6,7 +6,26 @@ use Carp qw(croak);
 use Class::Autouse qw( LJ::CreatePage Captcha::reCAPTCHA );
 use LJ::TimeUtil;
 
+if (pramanaDetectionEnabled()) {
+    require "Pramana/HPMX.pm";
+    $Pramana::HPMXConf::hpmx_auth_key= $LJ::PramanaHash{'authKey'};
+}
+
 sub need_res { qw( stc/widgets/createaccount.css js/widgets/createaccount.js js/browserdetect.js ) }
+sub _init_pramana_req_id { return "${\(time())}.${\(LJ::rand_chars(20))}"; }
+
+sub pramanaDetectionEnabled {
+    return(defined($LJ::PramanaHash{'enabled'}) && $LJ::PramanaHash{'enabled'});
+}
+
+
+##  this needs to be generalize to detect the scheme (http:// or https://)
+sub pramanaHeadTagContent {
+    my $ret= '';
+    return $ret unless (pramanaDetectionEnabled());
+    $ret .= &Pramana::HPMX::hpmxACOD();
+    return($ret);
+}
 
 sub render_body {
     my $class = shift;
@@ -41,7 +60,14 @@ sub render_body {
         $ret .= "<div class='rounded-box-content'>";
     }
 
-    $ret .= $class->start_form(%{$opts{form_attr}});
+    my %locForm= %{$opts{form_attr}} if(exists($opts{form_attr}));
+    $locForm{id}= 'lj_create_account_form' unless defined($locForm{id});
+    $ret .= $class->start_form(%locForm); 
+
+    ##  if there is an existing pramana id then use it, otherwise init a new one
+    if (pramanaDetectionEnabled()) {
+        $ret .= LJ::html_hidden('lj_pramana_req_id', $post->{'lj_pramana_req_id'} || _init_pramana_req_id());
+    }
 
     my $tip_birthdate = LJ::ejs($class->ml('widget.createaccount.tip.birthdate2'));
     my $tip_email     = LJ::ejs($class->ml('widget.createaccount.tip.email'));
@@ -345,14 +371,34 @@ sub render_body {
     }
 
     ### submit button
+    my %submitButtonAttrs= ();
+    if (pramanaDetectionEnabled()) {
+	$ret .= <<EOSCRIPT;
+<script type="text/javascript">
+/* <![CDATA[ */
+    function pramanaHidden() {
+        var frm = document.getElementById('$locForm{'id'}');
+	if(SGAVY_HPMX && SGAVY_HPMX.appendHPMXData) SGAVY_HPMX.appendHPMXData(frm);
+	return true;
+    }
+/* ]]> */
+</script>
+
+EOSCRIPT
+
+	$submitButtonAttrs{onClick} = "pramanaHidden();";
+    }
+    $submitButtonAttrs{class}= ($alt_layout) ? "login-button" : "create-button";
+
     if ($alt_layout) {
-        $ret .= $class->html_submit( submit => $class->ml('widget.createaccount.btn'), { class => "login-button" }) . "\n";
+        $ret .= $class->html_submit( submit => $class->ml('widget.createaccount.btn'), \%submitButtonAttrs) . "\n";
+
     } else {
         $ret .= "<tr valign='top'><td class='field-name'>&nbsp;</td>\n<td>";
-        $ret .= $class->html_submit( submit => $class->ml('widget.createaccount.btn'), { class => "create-button" }) . "\n";
+        $ret .= $class->html_submit( submit => $class->ml('widget.createaccount.btn'), \%submitButtonAttrs) . "\n";
         $ret .= "</td></tr>\n";
     }
-	
+
     $ret .= "</table>\n" unless $alt_layout;
 
     $ret .= $class->end_form;
@@ -428,7 +474,14 @@ sub handle_post {
     if ($LJ::HUMAN_CHECK{create} && !LJ::is_enabled("recaptcha") && lc $post->{answer} eq 'audio') {
         $wants_audio = $from_post{wants_audio} = 1;
     }
+    $from_post{hpmxNNNNRequestId}= $post->{lj_pramana_req_id} || "NO RID";
 
+    if ($post->{lj_pramana_req_id} && pramanaDetectionEnabled()) {
+	$from_post{lj_pramana_req_id}= $post->{lj_pramana_req_id};
+	$from_post{hpmxData}= $post->{hpmxData};
+	$from_post{pramanaReturn}= &Pramana::HPMX::hpmxVALI('perlApi', $post->{hpmxRequestId}, $post->{hpmxData});
+
+    }
     $post->{user} = LJ::trim($post->{user});
     my $user = LJ::canonical_username($post->{user});
     my $email = LJ::trim(lc $post->{email});
