@@ -1417,7 +1417,7 @@ sub talkform {
     my $is_person = $remote && $remote->is_person;
     my $is_friend = LJ::is_friend( $journalu, $remote );
     my $remote_can_comment = $entry->registered_can_comment
-        or ( $remote and $is_friend );
+        || ( $remote and $is_friend );
 
     return "You cannot edit this comment."
         if $editid && !$is_person;

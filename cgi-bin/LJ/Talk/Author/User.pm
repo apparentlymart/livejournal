@@ -13,7 +13,7 @@ sub display_params {
                                              ditemid => $opts->{ditemid} );
     my $is_friend          = LJ::is_friend( $journalu, $remote );
     my $remote_can_comment = $entry->registered_can_comment
-        or ( $remote and $is_friend );
+        || ( $remote and $is_friend );
 
     my %whocheck;
 
