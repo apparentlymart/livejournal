@@ -4,6 +4,7 @@ use strict;
 use base qw(LJ::Identity);
 
 use LJ::OpenID;
+use Net::OpenID::VerifiedIdentity;
 
 sub typeid { 'O' }
 sub pretty_type { 'OpenID' }
