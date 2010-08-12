@@ -16,8 +16,6 @@ Settings =
 		{
 			Settings.form_changed = true;
 		});
-		
-		Settings.application_page_toggling();
 	},
 	
 	navclick_save: function(e)
