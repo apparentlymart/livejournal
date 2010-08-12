@@ -1406,7 +1406,7 @@ sub _format_mail_both {
         {
             'esn.view_thread'       => [ 1, $self->thread_url ],
             'esn.view_thread_start' => [ 2, $self->start_thread_url ],
-            'esn.view_comments'     => [ 3, $talkurl ],
+            'esn.view_comments'     => [ 3, $talkurl."?view=comments" ],
             'esn.reply_at_webpage'  => [ 4, $self->reply_url ],
             'esn.unscreen_comment'  => [ $can_unscreen ? 5 : 0, $self->unscreen_url ],
             'esn.delete_comment'    => [ $self->user_can_delete($targetu) ? 6 : 0, $self->delete_url ],
