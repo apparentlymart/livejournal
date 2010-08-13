@@ -9083,18 +9083,21 @@ for LJSUP-6347
     BML::set_language($LJ::LANGS[0] || 'en', \&LJ::Lang::get_text);
 
     # load the user-related S1 data  (overrides and colors)
-    my $s1uc = {};
+    my $s1uc;
+    my $is_s1uc_valid = sub {
+        ## Storable::thaw takes valid date, undef or empty string; 
+        ## dies on invalid data
+        return 
+            eval {
+                Storable::thaw($_[0]->{'color_stor'});
+                Storable::thaw($_[0]->{'override_stor'}); 
+                1;
+            };
+    };
     my $s1uc_memkey = [$u->{'userid'}, "s1uc:$u->{'userid'}"];
     if ($u->{'useoverrides'} eq "Y" || $u->{'themeid'} == 0) {
         $s1uc = LJ::MemCache::get($s1uc_memkey);
-
-        ## validate integrity memcached data
-        if ($s1uc->{'override_stor'}  
-            and not eval { Storable::thaw($s1uc->{'override_stor'}); 1 }
-        ){
-            ## recache data if it's not deserializable.
-            $s1uc = undef;
-        }
+        undef($s1uc) if $s1uc && !$is_s1uc_valid->($s1uc);
 
         unless ($s1uc) {
             my $db;
@@ -9107,14 +9110,7 @@ for LJSUP-6347
             }
             $s1uc = $db->selectrow_hashref("SELECT * FROM s1usercache WHERE userid=?",
                                            undef, $u->{'userid'});
-            
-            ## validate integrity of the data that has been cached in mysql
-            if ($s1uc->{'override_stor'} 
-                and not eval { Storable::thaw($s1uc->{'override_stor'}); 1 }
-            ){
-                ## recache data if it's not deserializable.
-                $s1uc = undef;
-            }
+            undef($s1uc) if $s1uc && !$is_s1uc_valid->($s1uc); 
             LJ::MemCache::set($s1uc_memkey, $s1uc) if $s1uc && $setmem;
         }
     }
@@ -9158,10 +9154,6 @@ for LJSUP-6347
             $set .= "$k=" . $u->quote($update{$k});
         }
         my $rv = $u->do("UPDATE s1usercache SET $set WHERE userid=?", undef, $u->{'userid'});
-        if ($rv && $update{'color_stor'}) {
-            $dbh ||= LJ::get_db_writer();
-            $dbh->do("DELETE FROM themecustom WHERE user=?", undef, $u->{'user'});
-        }
         LJ::MemCache::set($s1uc_memkey, $s1uc);
     }
 
@@ -9179,8 +9171,7 @@ for LJSUP-6347
 
     # apply the overrides
     if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y") {
-        my $tw = eval { Storable::thaw($s1uc->{'override_stor'}) };
-        warn "Deserialization error: $@" if $@;
+        my $tw = Storable::thaw($s1uc->{'override_stor'});
         foreach (keys %$tw) {
             $vars{$_} = $tw->{$_};
         }
@@ -9190,8 +9181,7 @@ for LJSUP-6347
     $@ = '';
     my $cols = $u->{'themeid'} 
                 ? LJ::S1::get_themeid($u->{'themeid'})
-                : (eval {Storable::thaw($s1uc->{'color_stor'})} || {});
-    warn "Deserialization error: $@" if $@;
+                : Storable::thaw($s1uc->{'color_stor'});
     foreach (keys %$cols) {
         $vars{"color-$_"} = $cols->{$_};
     }
