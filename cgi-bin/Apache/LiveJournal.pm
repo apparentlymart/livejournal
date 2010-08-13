@@ -39,6 +39,7 @@ use Class::Autouse qw(
                       );
 
 use LJ::TimeUtil;
+use Apache::WURFL;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
@@ -410,6 +411,10 @@ sub trans
             LJ::Request->notes('bml_use_scheme' => $LJ::MINIMAL_BML_SCHEME);
         }
     }
+
+    # Redirect to mobile version if needed.
+    my $new_url = Apache::WURFL->redirect4mobile( host => $host, uri => $uri, );
+    return redir($new_url, LJ::Request::HTTP_MOVED_PERMANENTLY) if $new_url;
 
     # now we know that the request is going to succeed, so do some checking if they have a defined
     # referer.  clients and such don't, so ignore them.
