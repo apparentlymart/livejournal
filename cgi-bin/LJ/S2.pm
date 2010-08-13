@@ -3687,7 +3687,7 @@ sub _Entry__get_link
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
         my $entry_url = LJ::eurl($entry->url);
-        my $url = "http://www.facebook.com/plugins/like.php?href=$entry_url&layout=standard&show_faces=false&width=450&action=like&colorscheme=light&height=35";
+        my $url = "http://www.facebook.com/plugins/like.php?href=$entry_url&layout=standard&show_faces=true&width=450&action=like&colorscheme=light&height=35";
         my $link = LJ::S2::Link($url, 'caption unused', LJ::S2::Image("$LJ::IMGPREFIX/btn_facebook.gif", 24, 24));
         return $link;
     }
