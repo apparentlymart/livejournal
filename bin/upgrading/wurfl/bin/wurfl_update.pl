@@ -20,10 +20,9 @@ use strict;
 
 use File::Spec::Functions 'catfile';
 use FindBin;
-use Set::Object ();
 use XML::Simple 'XMLin';
 
-use Storable 'store';
+use Storable 'nstore';
 
 BEGIN {
 	$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
@@ -61,5 +60,5 @@ foreach my $device_id (keys %$devices) {
 
 delete $user_agents{'Mozilla'};
 
-store(\%user_agents, catfile($data_dir, 'devices_useragents.stor'));
+nstore(\%user_agents, catfile($data_dir, 'devices_useragents.stor'));
 
