@@ -585,7 +585,28 @@ sub get_upf_scaled {
     return $result;
 }
 
-# actual method
+# <LJFUNC>
+# name: _get_upf_scaled
+# des: Crop and scale images
+# agrs:
+#   size - max width of target image or [ width x height, ...]
+#   x1, x2, y1, y2 - coords in a source image for crop
+#   border (bool) - is it need to add border to target image
+#   save_to_FB (bool) - is it need to save to FB (FotoBilder)
+#   fb_gallery - gallery to save target image
+#   auto_crop - is it need to auto_crop image
+#####
+# Sample for use as auto-crop:
+#
+#    my $res = LJ::get_upf_scaled(
+#            source      => \$content,
+#            size        => [ "140x105" ],
+#            save_to_FB  => 1,
+#            fb_gallery  => 'test_gal',
+#            auto_crop   => 1,
+#    );
+#####
+# </LJFUNC>
 sub _get_upf_scaled
 {
     my %opts = @_;
