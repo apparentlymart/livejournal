@@ -5,6 +5,12 @@
 
 .bindip.yes=Yes (safer)
 
+.connect.facebook=Login with Facebook
+
+.connect.openid=Login with Openid
+
+.connect.twitter=Login with Twitter
+
 .createaccount.button|staleness=1
 .createaccount.button=Create an Account
 
@@ -126,6 +132,8 @@
 .logout.btn1=Log out
 
 .logout.loggedout=You are logged out.
+
+.or.connect.using=Or connect using: 
 
 .whylogin.benefit10|staleness=1
 .whylogin.benefit10=Add journals and communities to your Friends page.
