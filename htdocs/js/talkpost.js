@@ -7,6 +7,8 @@ if (document.getElementById) {
     var radio_remote = document.getElementById("talkpostfromremote");
     var radio_user = document.getElementById("talkpostfromlj");
     var radio_anon = document.getElementById("talkpostfromanon");
+	var radio_fblo = document.getElementById("talkpostfromfblo");
+	var radio_fbli = document.getElementById("talkpostfromfbli");
     var radio_oidlo = document.getElementById("talkpostfromoidlo");
     var radio_oidli = document.getElementById("talkpostfromoidli");
 
@@ -22,13 +24,16 @@ if (document.getElementById) {
     }
     var password = form.password;
 
-    var oidurl = document.getElementById("oidurl");
-    var oid_more = document.getElementById("oid_more");
+    var oidurl = document.getElementById("openid:url");
     var lj_more = document.getElementById("lj_more");
     var ljuser_row = document.getElementById("ljuser_row");
     var otherljuser_row = document.getElementById("otherljuser_row");
     var oidlo_row = document.getElementById("oidlo");
     var oidli_row = document.getElementById("oidli");
+    var oid_more = document.getElementById("oid_more");
+	var fblo_row = document.getElementById("fblo");
+	var fbli_row = document.getElementById("fbli");
+	var fb_more = document.getElementById("fb_more");
 
     var remotef = document.getElementById("cookieuser");
     var remote;
@@ -76,7 +81,7 @@ function handleRadios(sel) {
             hideMe(ljuser_row);
         }
         if (lj_more) {
-                showMe(lj_more);
+			showMe(lj_more);
         }
         username.focus();
 
@@ -89,31 +94,28 @@ function handleRadios(sel) {
             hideMe(lj_more);
         }
     }
-
+	
+	// Facebook
+	if (fb_more) {
+		if (sel == 3) {
+			var radio = radio_fblo || radio_fbli;
+			
+			showMe(fb_more);
+			
+			radio.checked = 1;
+		} else {
+			hideMe(fb_more);
+		}
+	}
     // OpenID
     if (oid_more) {
-        if (sel == 3) {
+        if (sel == 4) {
+			var radio = radio_oidli || radio_oidlo;
+			
             showMe(oid_more);
             oidurl.focus();
-            if (oidli_row) {
-               hideMe(oidli_row);
-            }
-            showMe(oidlo_row);
-
-            if (radio_oidlo.checked != 1) {
-                radio_oidlo.checked = 1;
-            }
-
-        } else if (sel == 4) {
-            if (oidlo_row) {
-               hideMe(oidlo_row);
-            }
-            showMe(oidli_row);
-            hideMe(oid_more);
-
-            if (radio_oidli.checked != 1) {
-                radio_oidli.checked = 1;
-            }
+			
+			radio.checked = 1;
         } else {
             hideMe(oid_more);
         }
@@ -123,8 +125,8 @@ function handleRadios(sel) {
 }
 
 function submitHandler() {
-    if (remote && username.value == remote && ((! radio_anon || ! radio_anon.checked) && (! radio_oidlo || ! radio_oidlo.checked))) {
-        //  Quietly arrange for cookieuser auth instead, to avoid
+    if (remote && username.value == remote && ((! radio_anon || ! radio_anon.checked) && (! radio_oidlo || ! radio_oidlo.checked) && (! radio_fblo || ! radio_fblo.checked))) {
+        // Quietly arrange for cookieuser auth instead, to avoid
         // sending cleartext password.
         password.value = "";
         username.value = "";
@@ -146,7 +148,9 @@ if (document.getElementById) {
     if (radio_anon && radio_anon.checked) handleRadios(0);
     if (radio_remote && radio_remote.checked) handleRadios(1);
     if (radio_user && radio_user.checked) handleRadios(2);
-    if (radio_oidlo && radio_oidlo.checked) handleRadios(3);
+	if (radio_fblo && radio_fblo.checked) handleRadios(3);
+    if (radio_fbli && radio_fbli.checked) handleRadios(3);
+    if (radio_oidlo && radio_oidlo.checked) handleRadios(4);
     if (radio_oidli && radio_oidli.checked) handleRadios(4);
 
     if (radio_remote) {
@@ -163,9 +167,17 @@ if (document.getElementById) {
         radio_anon.onclick = function () {
             handleRadios(0);
         };
+    if (radio_fbli)
+        radio_fbli.onclick = function () {
+            handleRadios(3);
+        };
+    if (radio_fblo)
+        radio_fblo.onclick = function () {
+            handleRadios(3);
+        };
     if (radio_oidlo)
         radio_oidlo.onclick = function () {
-            handleRadios(3);
+            handleRadios(4);
         };
     if (radio_oidli)
         radio_oidli.onclick = function () {
@@ -189,7 +201,9 @@ if (document.getElementById) {
         if (radio_anon && radio_anon.checked) handleRadios(0);
         if (radio_user && radio_user.checked) otherLJUser();
         if (radio_remote && radio_remote.checked) handleRadios(1);
-        if (radio_oidlo && radio_oidlo.checked) handleRadios(3);
+        if (radio_fblo && radio_fblo.checked) handleRadios(3);
+        if (radio_fbli && radio_fbli.checked) handleRadios(3);
+        if (radio_oidlo && radio_oidlo.checked) handleRadios(4);
         if (radio_oidli && radio_oidli.checked) handleRadios(4);
     }
 
@@ -253,15 +267,19 @@ function otherLJUser() {
 }
 
 function otherOIDUser() {
-   handleRadios(3);
+   handleRadios(4);
 
    radio_oidlo.checked = 1;
 }
 
 function hideMe(e) {
-   e.className = 'display_none';
+   //e.className = 'display_none';
+   
+   jQuery(e).addClass('display_none');
 }
 
 function showMe(e) {
-   e.className = '';
+   //e.className = '';
+   
+   jQuery(e).removeClass('display_none');
 }

@@ -5,7 +5,7 @@
         <td align='center'>(  )</td>
         <td align='left' colspan='2'>
             <font color='#c0c0c0'><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></font>
-            <TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost.nonpublic')">
+            <p class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost.nonpublic')"></p>
         </td>
         </tr>
     <TMPL_ELSE>
@@ -24,7 +24,7 @@
     <td align='center'>(  )</td>
     <td align='left' colspan='2'>
         <font color='#c0c0c0'><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></font>
-        <TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')">
+        <p class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></p>
     </td>
     </tr>
 <TMPL_ELSIF friends_can_comment>

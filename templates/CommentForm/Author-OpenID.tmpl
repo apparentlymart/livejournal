@@ -14,23 +14,14 @@
             <tr valign='middle' id='oidlo' name='oidlo'>
             <td align='center'><img src='<TMPL_VAR lj_imgprefix>/openid-profile.gif' onclick='handleRadios(3);' /></td>
             <td align='center'><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo' <TMPL_IF whocheck_openid>checked='checked'</TMPL_IF> /></td>
-            <td align='left'>
-                <b><label for='talkpostfromoidlo' onclick='handleRadios(3);return false;'>OpenID</label></b>
-                <TMPL_VAR helpicon_openid>
+            <td align='left' class="b-postform-td">
+                <b><label for='talkpostfromoidlo' onclick='handleRadios(4);return false;'>OpenID</label></b>
                 <TMPL_VAR ml_willscreen>
+                <p id="oid_more" class="i-bubble b-bubble-lite b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><label for="openid:url"><TMPL_VAR expr="ml('/talkpost.bml.openid.identity.url')">&nbsp;</label><input class='textbox' name='openid:url' maxlength='60' size='42' id='openid:url' value='<TMPL_VAR openid_url_default>' /> <label for='oidlogincheck'><TMPL_VAR expr="ml('/talkpost.bml.loginq')">&nbsp;</label><input type='checkbox' name='oiddo_login' id='oidlogincheck' <TMPL_VAR oiddo_login_checked> /> <TMPL_VAR helpicon_openid></p>
             </td>
             </tr>
         </TMPL_IF>
 
-        <tr valign='middle' align='left' id='oid_more'>
-        <td colspan='2'></td>
-        <td>
-            Identity URL:&nbsp;<input class='textbox' name='openid:url' maxlength='60' size='53' id='openid:url' value='<TMPL_VAR openid_url_default>' />
-            <br />
-            <label for='oidlogincheck'><TMPL_VAR expr="ml('/talkpost.bml.loginq')">&nbsp;</label>
-            <input type='checkbox' name='oiddo_login' id='oidlogincheck' <TMPL_VAR oiddo_login_checked> />
-        </td>
-        </tr>
     <TMPL_ELSIF registered_can_comment>
         <TMPL_IF is_trusted_identity>
             <tr valign='middle' id='oidli' name='oidli'>
@@ -86,23 +77,14 @@
             <tr valign='middle' id='oidlo' name='oidlo'>
             <td align='center'><img src='<TMPL_VAR lj_imgprefix>/openid-profile.gif' onclick='handleRadios(3);' /></td>
             <td align='center'><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo' <TMPL_IF whocheck_openid>checked='checked'</TMPL_IF> /></td>
-            <td align='left'>
-                <b><label for='talkpostfromoidlo' onclick='handleRadios(3);return false;'>OpenID</label></b>
-                <TMPL_VAR helpicon_openid>
+            <td align='left' class="b-postform-td">
+                <b><label for='talkpostfromoidlo' onclick='handleRadios(4);return false;'>OpenID</label></b>
                 <TMPL_VAR ml_willscreen>
+                <p id="oid_more" class="i-bubble b-bubble-lite b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><label for="openid:url"><TMPL_VAR expr="ml('/talkpost.bml.openid.identity.url')">&nbsp;</label><input class='textbox' name='openid:url' maxlength='60' size='42' id='openid:url' value='<TMPL_VAR openid_url_default>' /> <label for='oidlogincheck'><TMPL_VAR expr="ml('/talkpost.bml.loginq')">&nbsp;</label><input type='checkbox' name='oiddo_login' id='oidlogincheck' <TMPL_VAR oiddo_login_checked> /> <TMPL_VAR helpicon_openid></p>
             </td>
             </tr>
         </TMPL_IF>
-
-        <tr valign='middle' align='left' id='oid_more'>
-        <td colspan='2'></td>
-        <td>
-            Identity URL:&nbsp;<input class='textbox' name='openid:url' maxlength='60' size='53' id='openid:url' value='<TMPL_VAR openid_url_default>' />
-            <br />
-            <label for='oidlogincheck'><TMPL_VAR expr="ml('/talkpost.bml.loginq')">&nbsp;</label>
-            <input type='checkbox' name='oiddo_login' id='oidlogincheck' <TMPL_VAR oiddo_login_checked> />
-        </td>
-        </tr>
+s
     </TMPL_IF>
 </TMPL_IF>
 

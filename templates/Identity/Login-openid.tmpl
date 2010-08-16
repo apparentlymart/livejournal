@@ -1,10 +1,3 @@
-<TMPL_VAR expr="ml('.openid.label.url')">
-<input type="text" name="openid:url">
-
-<TMPL_IF errors>
-    <TMPL_LOOP errors>
-        <?errorbar <TMPL_VAR error> errorbar?>
-    </TMPL_LOOP>
-</TMPL_IF>
-
-<button type="submit"><TMPL_VAR expr="ml('.openid.btn.login')"></button>
+<p class="b-auth-desc"><TMPL_VAR expr="ml('.openid.desc')"></p>
+<p class="b-auth-openid-form"><label for=""><TMPL_VAR expr="ml('.openid.label.url')"></label> <input type="url" name="openid:url" id="" value="http://" class="b-auth-openid-input" /> <button type="submit"><TMPL_VAR expr="ml('.openid.btn.login')"></button></p>
+<TMPL_IF errors><TMPL_LOOP errors><p class="b-auth-error"><span class="i-message i-message-error"><?errorbar <TMPL_VAR error> errorbar?></span></p></TMPL_LOOP></TMPL_IF>
