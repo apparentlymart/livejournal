@@ -105,3 +105,36 @@ __________________________________________*/
 	}
 
 
+/* Facebook & Openid
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+.m-auth,
+.m-auth-item,
+.b-auth-desc,
+.b-auth-item FORM,
+.m-auth-bl,
+.m-auth-br {
+	zoom: 1;
+	}
+.b-auth-fbconnect {
+	overflow: visible;
+	}
+* HTML .m-auth-item {
+	position: relative;
+	}
+* HTML .m-auth-bl,
+* HTML .m-auth-br {
+	bottom: auto;
+	top: expression(this.parentNode.clientHeight);
+	}
+* HTML .m-auth-openid .m-auth-bl {
+	left: -1px;
+	}
+* HTML .m-auth-facebook .m-auth-bl {
+	left: expression(this.parentNode.offsetLeft*(-1)-11);
+	}
+* HTML .m-auth-br {
+	margin: 0;
+	left: expression(this.parentNode.parentNode.clientWidth-this.parentNode.offsetLeft-2);
+	}
+

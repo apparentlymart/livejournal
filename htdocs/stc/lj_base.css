@@ -314,6 +314,79 @@ Must be removed after implementation of Framework! */
     background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FFF2F0), to(#FED4D3));
     }
 
+
+/* Styles for bubbles
+--------------------------- */
+/*Must be removed after implementation of Framework! */
+.b-bubble {
+	display: block;
+	}
+.i-bubble {
+	display: inline-block;
+	}
+.b-bubble,
+.i-bubble {
+	position:relative;
+	margin: 0 0 0 10px;
+	padding: 10px;
+	border-width: 1px;
+	border-style: solid;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	}
+	.i-bubble-arrow {
+		position: absolute;
+		top: 50%;
+		left: -9px;
+		height: 0;
+		width: 0;
+		margin: -5px 0 0;
+		border-style: solid;
+		border-width: 5px 10px 5px 0;
+		}
+	.i-bubble-arrow-border {
+		position:absolute;
+		top: 50%;
+		left: -11px;
+		height: 0;
+		width: 0;
+		margin: -5px 0 0;
+		border-style: solid;
+		border-width: 5px 10px 5px 0;
+		}
+.b-bubble-noarrow {
+	margin: 0;
+	}
+	.b-bubble-noarrow .i-bubble-arrow,
+	.b-bubble-noarrow .i-bubble-arrow-border {
+		display: none;
+		}
+.b-bubble-lite {
+	border-color: #CCC;
+	background: #FFF;
+	}
+	.b-bubble-lite .i-bubble-arrow {
+		border-color: transparent #FFF transparent transparent;
+		}
+	.b-bubble-lite .i-bubble-arrow-border {
+		border-color: transparent #CCC transparent transparent;
+		}
+.b-bubble-yellow {
+	border-color: #EAE8AC;
+	background: #FFFFD5;
+	}
+	.b-bubble-yellow .i-bubble-arrow {
+		border-color: transparent #FFFFD5 transparent transparent;
+		}
+	.b-bubble-yellow .i-bubble-arrow-border {
+		border-color: transparent #EAE8AC transparent transparent;
+		}
+.b-bubble-intext {
+	margin: 10px 0;
+	}
+
+
 /* Disabled block
 --------------------------- */
 /* Must be removed after implementation of Framework! */
@@ -591,6 +664,232 @@ Must be removed after implementation of Framework! */
 .scheme-lynx .appwidget-sitemessages {
     top: 0;
     }
+
+
+
+
+
+/* Facebook & Twitter authorization
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+.b-identity{
+	overflow:hidden;
+	}
+
+.m-auth {
+	position: relative;
+	margin: 0 10px 10px;
+	padding: 0;
+	list-style: none;
+	border-bottom:1px solid #C1C1C1;
+	z-index:2;
+	}
+.m-auth:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+	}
+	.m-auth-item {
+		float: left;
+		margin: 0;
+		padding: 15px 30px 15px 40px;
+		list-style: none;
+		}
+	.m-auth-openid {
+		margin: 0 0 0 -10px;
+		}
+	.m-auth-facebook {
+		}
+	.m-auth .current {
+		margin-bottom: -1px;
+		background: #FFF;
+		-webkit-border-top-left-radius: 10px;
+		-webkit-border-top-right-radius: 10px;
+		-moz-border-radius-topleft: 10px;
+		-moz-border-radius-topright: 10px;
+		border-top-left-radius: 10px;
+		border-top-right-radius: 10px;
+		border: 1px solid #C1C1C1;
+		border-bottom-color: #FFF;
+		}
+		.m-auth-item A:link,
+		.m-auth-item A:visited,
+		.m-auth-item A:hover,
+		.m-auth-item A:active {
+			display: block;
+			margin: -15px -30px -15px -40px;
+			padding: 15px 30px 15px 40px;
+			border: 0;
+			color: #000;
+			text-decoration: none;
+			}
+		.m-auth-openid A {
+			background: url(/img/icons/openid-16.gif) no-repeat 20px 50%;
+			}
+		.m-auth-facebook A {
+			background: url(/img/icons/facebook-16.gif) no-repeat 20px 50%;
+			}
+			.m-auth-item A SPAN {
+				color: #000;
+				border-bottom: 1px dotted #000;
+				}
+			.m-auth .current A SPAN {
+				border:0;
+				}
+		.m-auth .current .m-auth-bl,
+		.m-auth .current .m-auth-br {
+			display: block;
+			}
+		.m-auth-bl,
+		.m-auth-br {
+			overflow: hidden;
+			position: absolute;
+			display: none;
+			width: 10px;
+			height: 10px;
+			border: 1px solid #C1C1C1;
+			font: 0/0 serif;
+			}
+		.m-auth-bl {
+			bottom: -11px;
+			left: -10px;
+			border-width: 1px 0 0 1px;
+			-webkit-border-top-left-radius: 10px;
+			-moz-border-radius-topleft: 10px;
+			border-top-left-radius: 10px;
+			}
+		.m-auth-openid .m-auth-bl {
+			border-width: 0 0 0 1px;
+			-webkit-border-top-left-radius: 0;
+			-moz-border-radius-topleft: 0;
+			border-top-left-radius: 0;
+			}
+		.m-auth-br {
+			bottom: -11px;
+			left: -1px;
+			margin: 0 0 0 100%;
+			border-width: 1px 1px 0 0;
+			-webkit-border-top-right-radius: 10px;
+			-moz-border-radius-topright: 10px;
+			border-top-right-radius: 10px;
+			}
+
+.b-auth {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	border: 1px solid #C1C1C1;
+	border-width:0 1px 1px;
+	-webkit-border-bottom-right-radius: 10px;
+	-webkit-border-bottom-left-radius: 10px;
+	-moz-border-radius-bottomright: 10px;
+	-moz-border-radius-bottomleft: 10px;
+	border-bottom-right-radius: 10px;
+	border-bottom-left-radius: 10px;
+	z-index: 1;
+	}
+	.b-auth-item {
+		margin: 0;
+		padding: 10px 20px 20px;
+		list-style: none;
+		}
+		.b-auth-openid-form {
+			margin: 20px 0 0;
+			text-align: center;
+			}
+			.b-auth-openid-form LABEL {
+				font-weight: bold;
+				}
+			.b-auth-openid-input {
+				width: 300px;
+				}
+		.b-auth-error {
+			margin: 0;
+			text-align: center;
+			}
+		.b-auth-desc {
+			overflow: hidden;
+			margin: 0;
+			}
+		.b-auth-fbconnect {
+			position: relative;
+			float: left;
+			width: 154px;
+			height: 22px;
+			margin: 0 20px 0 0;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			color: #6676AB;
+			font: 12px/1 Tahoma,Arial,sans-serif;
+			}
+			.b-auth-fbconnect SPAN {
+				position: relative;
+				display: block;
+				width: 154px;
+				height: 22px;
+				cursor: pointer;
+				}
+				.b-auth-fbconnect SPAN I {
+					position: absolute;
+					top: 0;
+					left: 0;
+					display: block;
+					width: 154px;
+					height: 22px;
+					margin: 0;
+					padding: 0;
+					background: url(/img/buttons/btn-fb-login.png) no-repeat 0 0;
+					font: 0/0 serif;
+					cursor: pointer;
+					}
+
+.b-fbinterstitial-question {
+	margin: 0 0 10px;
+	}
+.b-fbinterstitial-form {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	}
+	.b-fbinterstitial-form LI {
+		margin: 0 0 5px;
+		padding: 0;
+		list-style: none;
+		}
+	.b-fbinterstitial-form .b-fbinterstitial-submit {
+		margin: 7px 0 0;
+		}
+
+.i-setting-fbconnect-icon {
+	vertical-align: -3px;
+	}
+
+.b-repost-items {
+	margin: 10px 0;
+	}
+	.b-repost-item {
+		margin: 0 0 5px;
+		}
+	#entry-form-wrapper .b-repost-item {
+		display: inline;
+		}
+		.b-repost-item IMG {
+			vertical-align: -3px;
+			}
+
+.b-postform-td {
+	white-space: nowrap;
+	}
+
+.b-loginpage-btns {
+	}
+	.b-loginpage-btns IMG {
+		border: 0;
+		}
 
 
 
