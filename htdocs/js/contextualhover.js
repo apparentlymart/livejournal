@@ -463,6 +463,16 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 		content.appendChild(document.createElement('br'));
 	}
 	
+	// buy the same userhead
+	if (data.is_logged_in && data.is_person && ! data.is_requester && data.url_message) {
+		jQuery('<a/>', {
+			href: data.url_buy_userhead,
+			text: data.ml_buy_same_userhead
+		})
+		.appendTo(content);
+		content.appendChild(document.createElement('br'));
+	}
+
 	// send message
 	if (data.is_logged_in && data.is_person && ! data.is_requester && data.url_message) {
 		jQuery('<a/>', {

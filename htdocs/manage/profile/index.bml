@@ -7,6 +7,7 @@ body<=
     use vars qw(%POST %GET $headextra @errors);
     use LJ::Setting;
     use LJ::TimeUtil;
+    use LJ::UserHead;
 
     LJ::set_active_crumb('editprofile');
     LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css');
@@ -16,6 +17,14 @@ body<=
 
         my $ad_full_width = LJ::get_ads({ location => 'bml.manage.profile/error', ljadwrapper => 1 });
         return $ad_full_width . $str;
+    };
+
+    # epoch -> pretty
+    my $date_format = sub {
+        my $date = localtime( shift() );
+        return "$1 $2, $3"
+          if $date =~ /^\w+\s+(\w+)\s+(\d+)\s+[\d:]+\s+(\d+)/;
+        return "[ $ML{'.error.invaliddate'} ]";
     };
 
     return $print_with_ad->(LJ::server_down_html()) if $LJ::SERVER_DOWN;
@@ -218,6 +227,56 @@ body<=
             $ret .= $ML{'.theme'} . "<br />";
             $ret .= LJ::html_text({ 'name' => 'comm_theme', 'value' => $u->{comm_theme},
                                     'size' => '50', 'maxlength' => '100' });
+        }
+
+        ## USERHEADS
+        if ($u->is_personal) {
+            $ret .= "<a name='userheads'></a><div class='section_head'>$ML{'.section.userheads'}</div>\n";
+
+            $ret .= "<table>\n";
+
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.active.userhead'}</td><td>";
+            my $uh_prop = $u->custom_usericon;
+            my $class = LJ::Pay::Payment::PayItem->get_class_for_item('userhead');
+            my $uhs = $class->get_expire_times ($u);
+            if ($uh_prop) {
+                ## Try to fetch expire date by userhead user's prop
+                ## At first we try to find uh in a shop
+                my $uhs_all = LJ::UserHead->get_all_userheads ();
+                my ($uh) = grep { $_->get_uh_img eq $uh_prop } @$uhs_all;
+                if ($uh) {
+                    ## we found a uh. get id and look at paid exp for expire date
+                    $ret .= "<img src='".$uh->get_uh_img."' border='0'>";
+                    ## whether the user bought userhead?
+                    if (my ($found_uh) = grep { $_->{item} == "uh_".$uh->get_uh_id } @$uhs) {
+                        $ret .= LJ::Lang::ml('.section.userheads.expire_date', { date => $date_format->($found_uh->{expdate}) });
+                    }
+                } else {
+                    if ($uh_prop =~ /^http/) {
+                        $ret .= "<img src='$uh_prop'>";
+                    } else {
+                        $ret .= "<img src='$LJ::FILEPREFIX/$uh_prop'>";
+                    }
+                }
+            } else {
+                $ret .= "<img src='$LJ::DEFAULT_USERHEAD'>&nbsp; $ML{'.fn.userheads.default_userhead'}";
+            }
+            $ret .= "</td></tr>";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.userheads.collection'}</td><td>";
+            if (scalar @$uhs) {
+                $ret .= LJ::Lang::ml('.section.userhead.apply.href', { aopts => "href='$LJ::SITEROOT/shop/userheads.bml'" } );
+                $ret .= "<br><input type='radio' name='uh_id' value='default'><img src='$LJ::DEFAULT_USERHEAD'>&nbsp; $ML{'.fn.userheads.default_userhead'}</br>";
+                foreach my $uh (@$uhs) {
+                    my ($uh_id) = $uh->{item} =~ /uh-(\d+)/;
+                    my $uh_obj = LJ::UserHead->get_userhead ($uh_id);
+                    $ret .= "<input type='radio' name='uh_id' value='$uh_id'><img src='".$uh_obj->get_uh_img."' border='0'> ".LJ::Lang::ml('.section.userheads.expire_date', { date => $date_format->($uh->{expdate}) })."<br/> <!--(<a href='/shop/'>extend</a>)--><hr>";
+                }
+            } else {
+                $ret .= LJ::Lang::ml('.section.userhead.no_userheads', { url => $LJ::SITEROOT."/shop/userheads.bml" });
+            }
+            $ret .= "</td></tr>\n\n";
+
+            $ret .= "</table>\n";
         }
 
         ## INTERESTS
@@ -760,6 +819,15 @@ body<=
 
             LJ::set_interests($u, \%interests, \@valid_ints);
         }
+
+        ## save the changed userhead
+        if ($POST{'uh_id'} eq 'default') {
+            $u->set_custom_usericon (undef);
+        } else {
+            my $uh = LJ::UserHead->get_userhead ($POST{'uh_id'});
+            $u->set_custom_usericon ($uh->get_uh_img)
+                if $uh;
+         }
 
         # actions if email changed
         if ($email_changed) {
