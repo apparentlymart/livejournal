@@ -37,6 +37,7 @@ sub LJ::Request::M_POST                    { return Apache2::Const::M_POST() }
 sub LJ::Request::SERVER_ERROR              { return Apache2::Const::SERVER_ERROR }
 sub LJ::Request::BAD_REQUEST               { return Apache2::Const::HTTP_BAD_REQUEST }
 sub LJ::Request::HTTP_GONE                 { return Apache2::Const::HTTP_GONE }
+sub LJ::Request::AUTH_REQUIRED             { return Apache2::Const::AUTH_REQUIRED }
 
 my $instance = '';
 

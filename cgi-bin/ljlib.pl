@@ -27,6 +27,7 @@ use LJ::User;      # has a bunch of pkg LJ, non-OO methods at bottom
 use LJ::Entry;     # has a bunch of pkg LJ, non-OO methods at bottom
 use LJ::Constants;
 use LJ::User;
+use LJ::Request;
 use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
@@ -1734,7 +1735,7 @@ sub auth_digest {
         my $authline = "Digest realm=\"lj\", nonce=\"$nonce\", algorithm=MD5, qop=\"auth\"";
         $authline .= ", stale=\"true\"" if $stale;
         LJ::Request->header_out("WWW-Authenticate", $authline);
-        LJ::Request->status_line("401 Authentication required");
+        LJ::Request->status (LJ::Request::AUTH_REQUIRED ());
         return 0;
     };
 
