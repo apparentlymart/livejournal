@@ -14,7 +14,7 @@
         <td align='center'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon' <TMPL_IF whocheck_anonymous>checked='checked'</TMPL_IF> /></td>
         <td align='left'>
             <b><label for='talkpostfromanon'><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></label></b>
-            <p class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_willscreen></p>
+            <TMPL_VAR ml_willscreen>
         </td>
         </tr>
     </TMPL_IF>
