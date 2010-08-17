@@ -1,38 +1,23 @@
 package Apache::WURFL;
 use strict;
 
-use Storable 'retrieve';
+use LJ::WURFL;
 
-my $devices_capabilities;
+my $wurfl;
 
-#
-# This method stolen from LJMob::WURFL::is_mobile() which used in http://m.livejournal.com/
-#
 sub is_mobile {
     my $class = shift;
     my $user_agent = shift;
 
-    $devices_capabilities->{useragents} = retrieve($LJ::WURFL{'database_storage'})
-        unless defined $devices_capabilities;
-
-    if ($devices_capabilities->{useragents}) {
-        my @parts = split /\// , $user_agent;
-
-        for(0 .. @parts) {
-            my $ua = join "/", @parts[0 .. (@parts-$_)];
-
-            return 0
-                if $ua eq 'Mozilla';
-
-            return 1
-                if $devices_capabilities->{useragents}{$ua};
-        }
-    } else {
-        warn "Error: empty useragents storage, run wurfl_update.pl!";
+    unless ($wurfl) {
+        $wurfl = LJ::WURFL->new();
+        unless ($wurfl->load($LJ::WURFL{'wireless_storage'})) {
+            warn "Error: empty useragents storage, run bin/upgrading/wurfl/bin/wurfl_update.pl";
             return 0;
+        }
     }
 
-    return 0;
+    return $wurfl->is_mobile($user_agent);
 }
 
 my $mobile_domain = 'http://m.livejournal.com';

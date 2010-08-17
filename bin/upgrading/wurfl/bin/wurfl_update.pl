@@ -1,64 +1,51 @@
 #!/usr/bin/perl
+#
 
-=for copyright
-(c) 2006 ZAO Sup Fabrik. All rights reserved.
-This Software is protected by copyright law and international copyright treaty. 
-No actions permitted without permission of the ZAO Sup Fabrik. 
+use lib "$ENV{'LJHOME'}/cgi-bin";
 
-Should you have any questions arise contact us at info@sup.com 
+use LJ::WURFL;
+use LJ::WURFL::Parser;
 
-(c) 2006 ЗАО "Суп Фабрик". Все права защищены.
-Данное программное обеспечение подлежит защите в соответствии с нормами законодательства об авторских правах, а также международных конвенций по авторскому праву. 
-Запрещено осуществлять какие либо действия с данным програмным обеспечением без согласия ЗАО "Суп Фабрик".
-
-При возникновении каких-либо вопросов вы можете связаться с нами info@sup.com
-=cut
-
-# $Id: wurfl_update.pl 3196 2009-05-15 08:00:45Z slobin $
-
-use strict;
-
-use File::Spec::Functions 'catfile';
 use FindBin;
-use XML::Simple 'XMLin';
+use File::Spec::Functions qw(catfile);
 
-use Storable 'nstore';
+use Getopt::Long;
 
-BEGIN {
-	$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
+use Devel::Size qw(total_size);
+
+my $wurfl_file = "wurfl.xml";
+my $store_file = "wireless.stor";
+
+my $datadir = catfile($FindBin::Bin, '..', 'data');
+
+my ($noparse, $test, $verbose) = 3 x 0;
+
+GetOptions(
+	"noparse"	=> \$noparse,
+	"test"		=> \$test,
+	"verbose"	=> \$verbose,
+) or die "cannot parse arguments\n";
+
+unless ($noparse) {
+	print "Parsing wurfl file.\n" if $verbose;
+	my $wurfl = new LJ::WURFL::Parser;
+	$wurfl->parse(catfile($datadir, $wurfl_file));
+	$wurfl->store(catfile($datadir, $store_file));
+	print "Parsed.\n" if $verbose;
 }
 
-# unbuffered output
-local $/;
+if ($test) {
+	print "Load wireless data.\n";
+	my $wurfl = new LJ::WURFL;
+	print "Cannot load data file.\n" unless $wurfl->load(catfile($datadir,$store_file));
+	print "Size after load: ", total_size(\$wurfl), "\n";
+	print "Ready to accept ua strings.\n";
 
-my $data_dir = catfile($FindBin::Bin, '..', 'data');
-
-my $xml = XMLin(catfile($data_dir, 'wurfl.xml'), KeyAttr => [ qw(id name) ] , ForceArray => 1);
-
-my $devices = $xml->{devices}[0]->{device};
-
-my %user_agents;
-
-foreach my $device_id (keys %$devices) {
-
-    my $device_ua = $devices->{$device_id}->{user_agent};
-
-    my @parts = split /\//, $device_ua;
-
-    my $ua = '';
-
-    foreach (@parts) {
-        $ua .= $ua ? "/$_" : $_;
-        $user_agents{$ua} = 1;
-    }
-
-    while ($device_id) {
-        my $device_capabilities = eval { $devices->{$device_id}{group}{object_download} };
-        $device_id = $devices->{$device_id}->{fall_back};
-    }
+	while(<>) {
+		chomp;
+		print "result is_mobile(): ", $wurfl->is_mobile($_), "\n";
+	}
+	print "Size load: ", total_size(\$wurfl), "\n";
 }
 
-delete $user_agents{'Mozilla'};
-
-nstore(\%user_agents, catfile($data_dir, 'devices_useragents.stor'));
-
+print "Done.\n" if $verbose;
