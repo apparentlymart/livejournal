@@ -623,6 +623,8 @@ sub _get_upf_scaled
     my $downsize_only = delete $opts{downsize_only};
     my $save_to_FB = delete $opts{save_to_FB} || 0;
     my $fb_gallery = delete $opts{fb_gallery};
+    my $fb_username = delete $opts{fb_username}; 
+    my $fb_password = delete $opts{fb_password};
     my $auto_crop = delete $opts{auto_crop};
     croak "No userid or remote" unless $u || $mogkey;
 
@@ -745,8 +747,12 @@ sub _get_upf_scaled
             $y1 = ($oh - $crop_h) / 2;
             $x1 = 0;
         }
-        $timage->Crop($crop_w."x".$crop_h."+$x1+$y1");
-        $timage->Scale(width => $decodew, height => $decodeh);
+        if ($oh > $decodeh or $ow > $decodew) {
+            $timage->Crop($crop_w."x".$crop_h."+$x1+$y1");
+            if ($crop_h > $decodeh or $crop_w > $decodew) {
+                $timage->Scale(width => $decodew, height => $decodeh);
+            }
+        }
     } else {
         my $w = ($x2 - $x1);
         my $h = ($y2 - $y1);
@@ -757,8 +763,10 @@ sub _get_upf_scaled
     if ($save_to_FB) {
         my $im_blob = $timage->ImageToBlob;
         my $res = upload_to_fb (
-            dataref => $im_blob,
-            gals    => [ $fb_gallery ],
+            dataref  => $im_blob,
+            gals     => $fb_gallery,
+            username => $fb_username,
+            password => $fb_password,
         );
         return $res;
     }
@@ -826,7 +834,8 @@ sub get_challenge
 sub make_auth
 {
     my $chal = shift;
-    return "crp:$chal:" . md5_hex($chal . md5_hex($LJ::FB_PASS));
+    my $password = shift;
+    return "crp:$chal:" . md5_hex($chal . md5_hex($password));
 }
 
 sub upload_to_fb {
@@ -835,11 +844,11 @@ sub upload_to_fb {
     my $dataref = $opts{dataref};
     my $gals    = $opts{gals};
 
-    my $username = $LJ::FB_USER;
+    my $username = $opts{username} || $LJ::FB_USER;
+    my $password = $opts{password} || $LJ::FB_PASS;
 
     my $chal = "";
     unless ($chal) {
-        print "Getting challenge...\n";
         $chal = get_challenge($username)
             or die "No challenge string available.\n";
     }
@@ -851,7 +860,7 @@ sub upload_to_fb {
     my $req = HTTP::Request->new(PUT => "$LJ::FB_SITEROOT/interface/simple");
     $req->push_header("X-FB-Mode" => "UploadPic");
     $req->push_header("X-FB-User" => $username);
-    $req->push_header("X-FB-Auth" => make_auth($chal));
+    $req->push_header("X-FB-Auth" => make_auth($chal, $password));
     $req->push_header("X-FB-GetChallenge" => 1);
 
     # picture security
@@ -870,12 +879,6 @@ sub upload_to_fb {
 
             my @path = split(/\0/, $gal);
             my $galname = pop @path;
-
-            if (@path) {
-                print "Adding to gallery: [", join(" // ", @path, $galname), "]\n";
-            } else {
-                print "Adding to gallery: $galname\n";
-            }
 
             $req->push_header
                 ("X-FB-UploadPic.Gallery.$idx.GalName" => $galname);
@@ -915,7 +918,7 @@ sub upload_to_fb {
             picid  => -1,
             url    => undef,
             status => 'error',
-            errstr => $err->[0],
+            errstr => ref $err eq 'HASH' ? $err->{content} : (ref $err eq 'ARRAY' ? $err->[0] : $err),
         }
     }
 
