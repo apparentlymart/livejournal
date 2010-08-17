@@ -14,7 +14,7 @@
         <td align='center'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon' <TMPL_IF whocheck_anonymous>checked='checked'</TMPL_IF> /></td>
         <td align='left'>
             <b><label for='talkpostfromanon'><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></label></b>
-            <TMPL_VAR ml_willscreen>
+            <p class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_willscreen></p>
         </td>
         </tr>
     </TMPL_IF>
@@ -33,7 +33,7 @@
     <td align='center'>(  )</td>
     <td align='left' colspan='2'>
         <font color='#c0c0c0'><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></font>
-        <TMPL_VAR ml_friendsonly>
+        <p class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_friendsonly></p>
     </td>
     </tr>
 </TMPL_IF>
