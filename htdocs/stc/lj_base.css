@@ -887,6 +887,12 @@ Must be removed after implementation of Framework! */
 
 .b-loginpage-btns {
 	}
+	.b-loginpage-btns A:link,
+	.b-loginpage-btns A:visited,
+	.b-loginpage-btns A:hover,
+	.b-loginpage-btns A:active {
+		border: 0;
+		}
 	.b-loginpage-btns IMG {
 		border: 0;
 		}
