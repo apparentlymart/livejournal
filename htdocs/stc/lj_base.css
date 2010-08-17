@@ -327,7 +327,7 @@ Must be removed after implementation of Framework! */
 .b-bubble,
 .i-bubble {
 	position:relative;
-	margin: 0 0 0 10px;
+	margin: 0 0 0 10px !important;
 	padding: 10px;
 	border-width: 1px;
 	border-style: solid;
@@ -872,7 +872,7 @@ Must be removed after implementation of Framework! */
 	margin: 10px 0;
 	}
 	.b-repost-item {
-		margin: 0 0 5px;
+		margin: 0 0 5px !important;
 		}
 	#entry-form-wrapper .b-repost-item {
 		display: inline;
