@@ -10,7 +10,7 @@ body<=
     use LJ::UserHead;
 
     LJ::set_active_crumb('editprofile');
-    LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css');
+    LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css', 'js/editprofile.js');
 
     my $print_with_ad = sub {
         my $str = shift;
