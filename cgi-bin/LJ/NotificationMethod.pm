@@ -5,6 +5,7 @@ use Carp qw/ croak /;
 use Class::Autouse qw (LJ::Typemap
                        LJ::NotificationMethod::Email
                        LJ::NotificationMethod::SMS
+                       LJ::NotificationMethod::SMSru
                        LJ::NotificationMethod::Inbox
                        LJ::NotificationMethod::IM
                        LJ::NotificationMethod::DebugLog

@@ -20,6 +20,12 @@ sub render_body {
     my $u = $opts->{'u'} || LJ::get_remote();
 
     my @ntypes = @LJ::NOTIFY_TYPES;
+    my (undef, $country) = LJ::GeoLocation->ip_class;
+    if ($country eq 'ru'){
+        @ntypes = map { $_ eq 'LJ::NotificationMethod::SMS' ? 'LJ::NotificationMethod::SMSru' : $_ }
+                    @ntypes;
+    }
+
     my $colnum = scalar(@ntypes) + 1;
 
     my %ntypeids = map { $_ => $_->ntypeid } @ntypes;

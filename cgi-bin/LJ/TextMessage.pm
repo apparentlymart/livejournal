@@ -882,6 +882,22 @@ $VERSION = '1.5.6';
         'msglimit'      => 480,
         'totlimit'      => 500,
     },
+    'beeline'   => {
+        'name'          => 'Beeline Russia',
+        'notes'         => 'Russia only',
+        'fromlimit'     => 0,
+        'msglimit'      => 0,
+        'totlimit'      => 0,
+        'api'           => 'LJ::SMS::API::RU',
+        },
+    'megafon'   => {
+        'name'          => 'Megafon Russia',
+        'notes'         => 'Russia only',
+        'fromlimit'     => 0,
+        'msglimit'      => 0,
+        'totlimit'      => 0,
+        'api'           => 'LJ::SMS::API::RU',
+        },
 
 );
 

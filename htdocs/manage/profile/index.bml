@@ -481,7 +481,8 @@ body<=
 
         ## TEXT MESSAGING
 
-        $ret .= "<a name='txtmsg'></a><div class='section_head'>$ML{'.section.textmsg'}\n";
+        $ret .= "<a name='txtmsg'></a><div class='section_head'>" . 
+            (LJ::GeoLocation->ip_country() eq 'RU' ? $ML{'.section.phone'} : $ML{'.section.textmsg'}) . "\n";
         unless (LJ::get_cap($u, "textmessaging")) {
             my $inline;
             if ($inline .= LJ::run_hook("cprod_inline", $u, 'TextMessaging')) {
@@ -514,6 +515,7 @@ body<=
                     my $info = LJ::TextMessage::provider_info($p);
                     push @opts, ($p, $info->{'name'});
                 }
+
                 $ret .= LJ::html_select({ 'name' => 'txtmsg_provider',
                                           'selected' => $tminfo->{'provider'}, },
                                           @opts);

@@ -5295,8 +5295,15 @@ sub can_be_text_messaged_by {
 
     return 0 unless $u->get_cap("textmessaging");
 
-    my $security = LJ::TextMessage->tm_security($u);
+    my $tminfo = LJ::TextMessage->tm_info($u);
 
+    ## messaging is disabled for some providers
+    my $provider = $tminfo ? $tminfo->{provider} : '';
+    return 0 if $provider eq 'beeline';
+    return 0 if $provider eq 'megafon';
+
+    ##
+    my $security = $tminfo && $tminfo->{security} ? $tminfo->{security} : "none";
     return 0 if $security eq "none";
     return 1 if $security eq "all";
 

@@ -61,6 +61,13 @@ body<=
         return $ret;
     }
 
+    ## Text messaging is disabled for some providers
+    if ($tminfo->{provider} eq 'megafon' or $tminfo->{provider} eq 'beeline'){
+        $ret .= "<?h1 $ML{'.error.unavailable.head'} h1?> <br />";
+        add_footer();
+        return $ret;
+    }
+
     my $remote = LJ::get_remote();
     if ($tminfo->{'security'} ne "all") {
         my $andbefriend;
