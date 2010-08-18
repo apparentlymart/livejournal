@@ -335,28 +335,28 @@ Must be removed after implementation of Framework! */
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	}
-	.i-bubble-arrow {
+	.i-bubble-arrow,
+	.i-bubble-arrow-border {
+		overflow: hidden;
 		position: absolute;
 		top: 50%;
-		left: -9px;
 		height: 0;
 		width: 0;
+		}
+	.i-bubble-arrow {
+		left: -9px;
 		margin: -5px 0 0;
 		border-style: solid;
 		border-width: 5px 10px 5px 0;
 		}
 	.i-bubble-arrow-border {
-		position:absolute;
-		top: 50%;
 		left: -11px;
-		height: 0;
-		width: 0;
 		margin: -5px 0 0;
 		border-style: solid;
 		border-width: 5px 10px 5px 0;
 		}
 .b-bubble-noarrow {
-	margin: 0;
+	margin: 0 !important;
 	}
 	.b-bubble-noarrow .i-bubble-arrow,
 	.b-bubble-noarrow .i-bubble-arrow-border {
@@ -383,7 +383,7 @@ Must be removed after implementation of Framework! */
 		border-color: transparent #EAE8AC transparent transparent;
 		}
 .b-bubble-intext {
-	margin: 10px 0;
+	margin: 10px 0 !important;
 	}
 
 
@@ -807,9 +807,13 @@ Must be removed after implementation of Framework! */
 				width: 300px;
 				}
 		.b-auth-error {
-			margin: 0;
+			margin: 15px 0 5px;
 			text-align: center;
 			}
+			.b-auth-error .i-message-error {
+				display: inline-block;
+				padding: 3px 8px;
+				}
 		.b-auth-desc {
 			overflow: hidden;
 			margin: 0;
@@ -825,6 +829,7 @@ Must be removed after implementation of Framework! */
 			background: transparent;
 			color: #6676AB;
 			font: 12px/1 Tahoma,Arial,sans-serif;
+			cursor: pointer;
 			}
 			.b-auth-fbconnect SPAN {
 				position: relative;
@@ -842,7 +847,7 @@ Must be removed after implementation of Framework! */
 					height: 22px;
 					margin: 0;
 					padding: 0;
-					background: url(/img/buttons/btn-fb-login.png) no-repeat 0 0;
+					background: url(/img/buttons/facebook-login-wide.gif) no-repeat 0 0;
 					font: 0/0 serif;
 					cursor: pointer;
 					}
@@ -881,9 +886,28 @@ Must be removed after implementation of Framework! */
 			vertical-align: -3px;
 			}
 
-.b-postform-td {
+
+.replyform TABLE.b-postform-from {
+	margin: 0 0 0.5em;
+	}
+.replyform TABLE TD.b-postform-icon,
+.replyform TABLE TD.b-postform-radio {
+	vertical-align: middle !important;
+	text-align: center;
+	}
+	.replyform TABLE TD.b-postform-radio INPUT {
+		margin: 0;
+		}
+.replyform TABLE TD.b-postform-data {
+	text-align: left;
 	white-space: nowrap;
 	}
+	.replyform TABLE TD.b-postform-data .i-postform-label {
+		display: inline-block;
+		}
+	.i-postform-disabled {
+		color: #C0C0C0;
+		}
 
 .b-loginpage-btns {
 	}
@@ -897,5 +921,71 @@ Must be removed after implementation of Framework! */
 		border: 0;
 		}
 
+.b-manage-connectbtn {
+	margin: 0 0 0.5em;
+	}
+.b-manage-connectopt {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	}
+	.b-manage-connectopt LI {
+		margin: 0 0 0.1em;
+		padding: 0;
+		list-style: none;
+		}
+
+.b-connectbtn {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	font: 12px/1 Tahoma,Arial,sans-serif;
+	cursor: pointer;
+	}
+	.b-connectbtn SPAN {
+		position: relative;
+		display: block;
+		cursor: pointer;
+		}
+		.b-connectbtn SPAN I {
+			position: absolute;
+			top: 0;
+			left: 0;
+			display: block;
+			margin: 0;
+			padding: 0;
+			font: 0/0 serif;
+			cursor: pointer;
+			}
+.b-connectbtn-facebook {
+	width: 65px;
+	height: 22px;
+	color: #6676AB;
+	}
+	.b-connectbtn-facebook SPAN {
+		width: 65px;
+		height: 22px;
+		}
+		.b-connectbtn-facebook SPAN I {
+			width: 65px;
+			height: 22px;
+			background: url(/img/buttons/facebook-login-tiny.gif) no-repeat 0 0;
+			}
+.b-connectbtn-twitter {
+	width: 61px;
+	height: 23px;
+	color: #32CBFF;
+	}
+	.b-connectbtn-twitter SPAN {
+		width: 61px;
+		height: 23px;
+		}
+		.b-connectbtn-twitter SPAN I {
+			width: 61px;
+			height: 23px;
+			background: url(/img/buttons/twitter-login-tiny.gif) no-repeat 0 0;
+			}
 
 

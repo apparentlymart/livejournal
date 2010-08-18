@@ -105,6 +105,33 @@ __________________________________________*/
 	}
 
 
+/* Styles for bubbles
+--------------------------- */
+/*Must be removed after implementation of Framework! */
+* HTML .i-bubble-arrow,
+* HTML .i-bubble-arrow-border {
+	zoom: 1;
+	filter: chroma(color=pink);
+	}
+* HTML .b-bubble-lite .i-bubble-arrow {
+	border-color: pink #FFF pink pink;
+	}
+* HTML .b-bubble-lite .i-bubble-arrow-border {
+	border-color: pink #CCC pink pink;
+	}
+* HTML .b-bubble-yellow .i-bubble-arrow {
+	border-color: pink #FFFFD5 pink pink;
+	}
+* HTML .b-bubble-yellow .i-bubble-arrow-border {
+	border-color: pink #EAE8AC pink pink;
+	}
+
+
+.replyform TABLE TD.b-postform-active .i-postform-label {
+	vertical-align: 1em !important;
+	}
+
+
 /* Facebook & Openid
 --------------------------- */
 /* Must be removed after implementation of Framework! */
