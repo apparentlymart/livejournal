@@ -2,9 +2,9 @@
     <tr valign='middle' id='<TMPL_VAR css_ljuser_row_id>'>
 
     <TMPL_IF remote_banned>
-        <td align='center'><img src='<TMPL_VAR lj_imgprefix>/userinfo.gif' /></td>
-        <td align='center'>( )</td>
-        <td align='left'>
+        <td class="b-postform-icon"><img src='<TMPL_VAR lj_imgprefix>/userinfo.gif' /></td>
+        <td class="b-postform-radio">( )</td>
+        <td class="b-postform-data">
             <span class='ljdeem'><TMPL_VAR ml_loggedin></font>
             <TMPL_VAR ml_banned>
 
@@ -16,11 +16,11 @@
             </script>
         </td>
     <TMPL_ELSE>
-        <td align='center'><img src='<TMPL_VAR lj_imgprefix>/userinfo.gif'  onclick='handleRadios(1);' /></td>
+        <td class="b-postform-icon"><img src='<TMPL_VAR lj_imgprefix>/userinfo.gif'  onclick='handleRadios(1);' /></td>
         <TMPL_IF remote_can_comment>
-            <td align='center'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> /></td>
-            <td align='left'>
-                <label for='talkpostfromremote'><TMPL_VAR ml_loggedin></label>
+            <td class="b-postform-radio"><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> /></td>
+            <td class="b-postform-data">
+                <label for='talkpostfromremote' class="i-postform-label"><TMPL_VAR ml_loggedin></label>
 
                 <TMPL_IF 0> Don't worry about a real href since js hides the row anyway </TMPL_IF>
                 <script language='JavaScript'>
@@ -32,9 +32,9 @@
                 <TMPL_VAR ml_willscreen>
             </td>
         <TMPL_ELSE>
-            <td align='center'>( )</td>
-            <td align='left'>
-                <font color='#c0c0c0'><TMPL_VAR ml_loggedin></font>
+            <td class="b-postform-radio">( )</td>
+            <td class="b-postform-data">
+                <span class="i-postform-label i-postform-disabled"><TMPL_VAR ml_loggedin></span>
                 &nbsp;- <TMPL_VAR ml_notafriend>
                 <input type='hidden' name='cookieuser' value='<TMPL_VAR remote_username>' id='cookieuser' />
                 <TMPL_VAR ml_willscreen>
@@ -45,10 +45,10 @@
 </TMPL_IF>
 
 <tr valign='middle' id='otherljuser_row' name='otherljuser_row'>
-<td align='center'><img src='<TMPL_VAR lj_imgprefix>/pencil.gif' onclick='handleRadios(2);' /></td>
-<td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj' <TMPL_IF whocheck_ljuser>checked="checked"</TMPL_IF> /></td>
-<td align='left'>
-    <b><label for='talkpostfromlj' onclick='handleRadios(2); return false;'><TMPL_VAR expr="ml('/talkpost.bml.opt.ljuser2')"></label></b>
+<td class="b-postform-icon"><img src='<TMPL_VAR lj_imgprefix>/pencil.gif' onclick='handleRadios(2);' /></td>
+<td class="b-postform-radio"><input type='radio' name='usertype' value='user' id='talkpostfromlj' <TMPL_IF whocheck_ljuser>checked="checked"</TMPL_IF> /></td>
+<td class="b-postform-data">
+    <label for='talkpostfromlj' onclick='handleRadios(2); return false;' class="i-postform-label"><b><TMPL_VAR expr="ml('/talkpost.bml.opt.ljuser2')"></b></label>
     <TMPL_VAR ml_willscreen>
     <TMPL_VAR ml_willscreenfriend>
 </td>

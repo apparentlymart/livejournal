@@ -1,39 +1,39 @@
 <TMPL_IF everyone_can_comment>
     <TMPL_UNLESS is_public>
         <tr valign='middle'>
-        <td align='center' width='20'><img src='<TMPL_VAR lj_imgprefix>/anonymous.gif' /></td>
-        <td align='center'>(  )</td>
-        <td align='left' colspan='2'>
-            <font color='#c0c0c0'><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></font>
-            <p class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost.nonpublic')"></p>
+        <td class="b-postform-icon" width='20'><img src='<TMPL_VAR lj_imgprefix>/anonymous.gif' /></td>
+        <td class="b-postform-radio">(  )</td>
+        <td class="b-postform-data b-postform-active" colspan='2'>
+            <span class="i-postform-label i-postform-disabled"><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></span>
+            <span class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost.nonpublic')"></span>
         </td>
         </tr>
     <TMPL_ELSE>
         <tr valign='center'>
-        <td align='center'><img src='<TMPL_VAR lj_imgprefix>/anonymous.gif' onclick='handleRadios(0);'/></td>
-        <td align='center'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon' <TMPL_IF whocheck_anonymous>checked='checked'</TMPL_IF> /></td>
-        <td align='left'>
-            <b><label for='talkpostfromanon'><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></label></b>
+        <td class="b-postform-icon"><img src='<TMPL_VAR lj_imgprefix>/anonymous.gif' onclick='handleRadios(0);'/></td>
+        <td class="b-postform-radio"><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon' <TMPL_IF whocheck_anonymous>checked='checked'</TMPL_IF> /></td>
+        <td class="b-postform-data">
+            <label for='talkpostfromanon' class="i-postform-label"><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></label>
             <TMPL_VAR ml_willscreen>
         </td>
         </tr>
     </TMPL_IF>
 <TMPL_ELSIF registered_can_comment>
     <tr valign='middle'>
-    <td align='center' width='20'><img src='<TMPL_VAR lj_imgprefix>/anonymous.gif' /></td>
-    <td align='center'>(  )</td>
-    <td align='left' colspan='2'>
-        <font color='#c0c0c0'><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></font>
-        <p class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></p>
+    <td class="b-postform-icon" width='20'><img src='<TMPL_VAR lj_imgprefix>/anonymous.gif' /></td>
+    <td class="b-postform-radio">(  )</td>
+    <td class="b-postform-data b-postform-active" colspan='2'>
+        <span class="i-postform-label i-postform-disabled"><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></span>
+        <span class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></span>
     </td>
     </tr>
 <TMPL_ELSIF friends_can_comment>
     <tr valign='middle'>
-    <td align='center' width='20'><img src='<TMPL_VAR lj_imgprefix>/anonymous.gif' /></td>
-    <td align='center'>(  )</td>
-    <td align='left' colspan='2'>
-        <font color='#c0c0c0'><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></font>
-        <p class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_friendsonly></p>
+    <td class="b-postform-icon" width='20'><img src='<TMPL_VAR lj_imgprefix>/anonymous.gif' /></td>
+    <td class="b-postform-radio">(  )</td>
+    <td class="b-postform-data b-postform-active" colspan='2'>
+        <span class="i-postform-label i-postform-disabled"><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></span>
+        <span class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_friendsonly></span>
     </td>
     </tr>
 </TMPL_IF>

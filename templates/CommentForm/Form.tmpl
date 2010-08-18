@@ -22,7 +22,7 @@
 <tr>
     <td align='right' valign='top'><TMPL_VAR expr="ml('/talkpost.bml.opt.from')"></td>
     <td> <TMPL_IF 0> Internal for "From" options </TMPL_IF>
-        <table>
+        <table class="b-postform-from">
             <TMPL_IF editid>
                 <tr valign='middle' id='ljuser_row'>
                     <TMPL_IF remote_banned>
@@ -109,9 +109,7 @@
                 <TMPL_VAR helpicon_userpics>
             </TMPL_IF>
 
-            &nbsp;&nbsp;<label for='prop_opt_preformatted'><TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')"></label>
-            <input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1" <TMPL_IF opt_preformatted_selected>checked="checked"</TMPL_IF>>
-            <TMPL_VAR helpicon_noautoformat>
+            &nbsp;&nbsp;<input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
 
             <TMPL_IF show_quick_quote>
                 <script type='text/javascript' language='JavaScript'>
