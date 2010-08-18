@@ -101,10 +101,12 @@ function handleRadios(sel) {
 			var radio = radio_fblo || radio_fbli;
 			
 			showMe(fb_more);
+			toggleTextHighlight(fb_more, true);
 			
 			radio.checked = 1;
 		} else {
 			hideMe(fb_more);
+			toggleTextHighlight(fb_more, false);
 		}
 	}
     // OpenID
@@ -113,11 +115,13 @@ function handleRadios(sel) {
 			var radio = radio_oidli || radio_oidlo;
 			
             showMe(oid_more);
+			toggleTextHighlight(oid_more, true);
             oidurl.focus();
 			
 			radio.checked = 1;
         } else {
             hideMe(oid_more);
+			toggleTextHighlight(oid_more, false);
         }
     }
 
@@ -282,4 +286,15 @@ function showMe(e) {
    //e.className = '';
    
    jQuery(e).removeClass('display_none');
+}
+
+function toggleTextHighlight(e, show) {
+	var elem = jQuery(e).closest('td.b-postform-data'),
+		highlightClass = 'b-postform-active';
+	
+	if (show) {
+		elem.addClass(highlightClass);
+	} else {
+		elem.removeClass(highlightClass);
+	}
 }
