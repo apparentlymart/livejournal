@@ -408,7 +408,7 @@ sub EntryPage_entry
     }
 
     # check using normal rules
-    unless ($entry->visible_to($remote, $canview)) {
+    unless ($entry->visible_to($remote, { viewall => $canview })) {
         if ($remote) {
             $opts->{'handler_return'} = 403;
             LJ::Request->pnotes ('error' => 'private');
