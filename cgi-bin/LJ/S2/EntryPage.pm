@@ -382,7 +382,7 @@ sub EntryPage_entry
 
     $entry ||= LJ::Entry->new($u, ditemid => $1);
 
-    unless ($entry->correct_anum) {
+    unless ($entry and $entry->correct_anum) {
         $opts->{'handler_return'} = 404;
         LJ::Request->pnotes ('error' => 'e404');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
