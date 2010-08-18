@@ -626,7 +626,7 @@ sub _get_upf_scaled
     my $fb_username = delete $opts{fb_username}; 
     my $fb_password = delete $opts{fb_password};
     my $auto_crop = delete $opts{auto_crop};
-    croak "No userid or remote" unless $u || $mogkey;
+    croak "No userid or remote" unless $u || $mogkey || $dataref;
 
     $maxfilesize *= 1024;
 
@@ -736,7 +736,20 @@ sub _get_upf_scaled
 
     if ($auto_crop) {
         my ($crop_w, $crop_h) = ();
-        if ($ow / $decodew >= $oh / $decodeh) {
+        if ($oh <= $decodeh and $ow <= $decodew) {
+            ; # nothing to do
+        # else one (or two) size is bigger
+        } elsif ($oh < $decodeh) { # than ow > decodew
+            $crop_h = $oh;
+            $crop_w = $decodew;
+            $x1 = ($ow - $crop_w) / 2;
+            $y1 = 0;
+        } elsif ($ow < $decodew) { # than oh > decodeh
+            $crop_w = $ow;
+            $crop_h = $decodeh;
+            $y1 = ($oh - $crop_h) / 2;
+            $x1 = 0;
+        } elsif ($ow / $decodew >= $oh / $decodeh) {
             $crop_w = $oh * $decodew / $decodeh;
             $crop_h = $oh;
             $x1 = ($ow - $crop_w) / 2;
