@@ -125,6 +125,9 @@
     foreach my $key (@ml_keys) {
         $ret{"ml_$key"} = $ML{".$key"};
     }
+    if ($u && $remote && $u==$remote && $u->is_identity) {
+        $ret{"ml_upgrade_account"} = $ML{"horizon.nav.identity_convert"};
+    }
     
     my $cids = [];
     if ($remote) {
