@@ -334,6 +334,7 @@ Must be removed after implementation of Framework! */
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
+	font-size: 90%;
 	}
 	.i-bubble-arrow,
 	.i-bubble-arrow-border {
@@ -342,6 +343,9 @@ Must be removed after implementation of Framework! */
 		top: 50%;
 		height: 0;
 		width: 0;
+		border-top-color: transparent;
+		border-bottom-color: transparent;
+		border-left-color: transparent;
 		}
 	.i-bubble-arrow {
 		left: -9px;
@@ -367,20 +371,42 @@ Must be removed after implementation of Framework! */
 	background: #FFF;
 	}
 	.b-bubble-lite .i-bubble-arrow {
-		border-color: transparent #FFF transparent transparent;
+		border-right-color: #FFF;
 		}
 	.b-bubble-lite .i-bubble-arrow-border {
-		border-color: transparent #CCC transparent transparent;
+		border-right-color: #CCC;
 		}
-.b-bubble-yellow {
+.b-bubble-alert {
 	border-color: #EAE8AC;
 	background: #FFFFD5;
 	}
-	.b-bubble-yellow .i-bubble-arrow {
-		border-color: transparent #FFFFD5 transparent transparent;
+	.b-bubble-alert .i-bubble-arrow {
+		border-right-color: #FFFFD5;
 		}
-	.b-bubble-yellow .i-bubble-arrow-border {
-		border-color: transparent #EAE8AC transparent transparent;
+	.b-bubble-alert .i-bubble-arrow-border {
+		border-right-color: #EAE8AC;
+		}
+.b-bubble-warning {
+	border-color: #FF9B97;
+	background: #FFECEA;
+	color: #D51C00;
+	}
+	.b-bubble-warning .i-bubble-arrow {
+		border-right-color: #FFECEA;
+		}
+	.b-bubble-warning .i-bubble-arrow-border {
+		border-right-color: #FF9B97;
+		}
+.b-bubble-success {
+	border-color: #6FBA55;
+	background: #D0F4C3;
+	color: #358D16;
+	}
+	.b-bubble-success .i-bubble-arrow {
+		border-right-color: #D0F4C3;
+		}
+	.b-bubble-success .i-bubble-arrow-border {
+		border-right-color: #6FBA55;
 		}
 .b-bubble-intext {
 	margin: 10px 0 !important;
@@ -987,5 +1013,32 @@ Must be removed after implementation of Framework! */
 			height: 23px;
 			background: url(/img/buttons/twitter-login-tiny.gif) no-repeat 0 0;
 			}
+
+
+
+/* Facebook & Twitter authorization
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+.b-manage-smsn {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	}
+	.b-manage-smsn LI {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		}
+	.b-manage-smsn .b-manage-smsn-sms {
+		float: left;
+		margin: 0 10px 10px 0;
+		}
+	.b-manage-smsn .b-manage-smsn-status {
+		float: left;
+		}
+	.b-manage-smsn .b-manage-smsn-btn {
+		clear: both;
+		}
+
 
 
