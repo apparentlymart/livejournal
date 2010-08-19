@@ -9,6 +9,13 @@ sub is_mobile {
     my $class = shift;
     my $user_agent = shift;
 
+    if ($LJ::WURFL{'ua_keys_mobile'}) {
+        foreach my $key (@{$LJ::WURFL{'ua_keys_mobile'}}) {
+            return 1 if $user_agent =~ /\Q$key\E/i;
+        }
+        return 0;
+    }
+
     unless ($wurfl) {
         $wurfl = LJ::WURFL->new();
         unless ($wurfl->load($LJ::WURFL{'wireless_storage'})) {
