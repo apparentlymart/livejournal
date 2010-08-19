@@ -5,7 +5,7 @@
         <td class="b-postform-radio">(  )</td>
         <td class="b-postform-data b-postform-active" colspan='2'>
             <span class="i-postform-label i-postform-disabled"><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></span>
-            <span class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost.nonpublic')"></span>
+            <span class="i-bubble b-bubble-alert b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost.nonpublic')"></span>
         </td>
         </tr>
     <TMPL_ELSE>
@@ -24,7 +24,7 @@
     <td class="b-postform-radio">(  )</td>
     <td class="b-postform-data b-postform-active" colspan='2'>
         <span class="i-postform-label i-postform-disabled"><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></span>
-        <span class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></span>
+        <span class="i-bubble b-bubble-alert b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></span>
     </td>
     </tr>
 <TMPL_ELSIF friends_can_comment>
@@ -33,7 +33,7 @@
     <td class="b-postform-radio">(  )</td>
     <td class="b-postform-data b-postform-active" colspan='2'>
         <span class="i-postform-label i-postform-disabled"><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></span>
-        <span class="i-bubble b-bubble-yellow b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_friendsonly></span>
+        <span class="i-bubble b-bubble-alert b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_friendsonly></span>
     </td>
     </tr>
 </TMPL_IF>
