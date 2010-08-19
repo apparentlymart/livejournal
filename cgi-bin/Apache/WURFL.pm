@@ -94,7 +94,7 @@ sub map2mobile {
                     return $self->_process_url_args_for_friends($1, $args);
                 }
 
-                if ($uri =~ /^\/(\w+)\/tag\/(\w+)/) {
+                if ($uri =~ /^\/(\w+)\/tag\/(.+)/) {
                     # $username = $1; $tagname  = $2;
                     return "$mobile_domain/read/user/$1/tag/$2";
                 }
@@ -109,7 +109,7 @@ sub map2mobile {
                     return $self->_process_url_args_for_friends($username, $args);
                 }
 
-                if ($uri =~ /^\/tag\/(\w+)/) {
+                if ($uri =~ /^\/tag\/(.+)/) {
                     # $tagname  = $1;
                     return "$mobile_domain/read/user/$username/tag/$1";
                 }
