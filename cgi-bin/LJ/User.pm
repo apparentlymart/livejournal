@@ -1540,7 +1540,9 @@ sub opt_showonlinestatus {
 sub can_show_location {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
-    my $remote = LJ::get_remote();
+
+    my %opts = @_;
+    my $remote = $opts{remote} || LJ::get_remote();
 
     return 0 if $u->underage;
     return 0 if ($u->opt_showlocation eq 'N');
@@ -5284,8 +5286,8 @@ sub should_show_schools_to {
     my ($u, $targetu) = @_;
 
     return 0 unless LJ::is_enabled("schools");
-    return 1 if $u->{'opt_showschools'} eq '' || $u->{'opt_showschools'} eq 'Y';
-    return 1 if $u->{'opt_showschools'} eq 'F' && $u->has_friend($targetu);
+    return 1 if $u->prop('opt_showschools') eq '' || $u->prop('opt_showschools') eq 'Y';
+    return 1 if $u->prop('opt_showschools') eq 'F' && $u->has_friend($targetu);
 
     return 0;
 }
