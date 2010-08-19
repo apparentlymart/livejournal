@@ -190,7 +190,7 @@ sub make_authas_select {
                                  'class' => 'hideable',
                                  },
                                  map { $_, $_ } @list) . " ";
-        $ret .= LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'});
+        $ret .= $opts->{'button_tag'} . LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'}) . $opts->{'button_close_tag'};
         return $ret;
     }
 
