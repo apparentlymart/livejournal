@@ -882,24 +882,27 @@ $VERSION = '1.5.6';
         'msglimit'      => 480,
         'totlimit'      => 500,
     },
-    'beeline'   => {
+);
+
+## ADD Russian providers
+unless ($LJ::DISALBED{'smsru-notifications'}){
+    $providers{'beeline'} => {
         'name'          => 'Beeline Russia',
         'notes'         => 'Russia only',
         'fromlimit'     => 0,
         'msglimit'      => 0,
         'totlimit'      => 0,
         'api'           => 'LJ::SMS::API::RU',
-        },
-    'megafon'   => {
+        };
+    $providers{'megafon'} = {
         'name'          => 'Megafon Russia',
         'notes'         => 'Russia only',
         'fromlimit'     => 0,
         'msglimit'      => 0,
         'totlimit'      => 0,
         'api'           => 'LJ::SMS::API::RU',
-        },
-
-);
+        };
+};
 
 sub providers
 {
