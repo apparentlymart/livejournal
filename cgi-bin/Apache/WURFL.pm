@@ -10,10 +10,9 @@ sub is_mobile {
     my $user_agent = shift;
 
     if ($LJ::WURFL{'ua_keys_mobile'}) {
-        foreach my $key (@{$LJ::WURFL{'ua_keys_mobile'}}) {
-            return 1 if $user_agent =~ /\Q$key\E/i;
-        }
-        return 0;
+        grep { $user_agent =~ /\Q$_\E/i } @{$LJ::WURFL{'ua_keys_mobile'}}
+            ? return 1
+            : return 0;
     }
 
     unless ($wurfl) {
@@ -59,8 +58,7 @@ sub _process_url_args_for_friends {
 
     my $remote = LJ::get_remote();
     return '' unless $remote;
-    my $remote_name = $remote->user;
-    return '' if $username ne $remote_name;
+    return '' unless LJ::u_equals($remote, LJ::load_user($username));
 
     if ($args =~ /show=(P|C|Y)/i) { 
         return "$mobile_domain/read/friends/?show=".lc($1);
@@ -105,7 +103,7 @@ sub map2mobile {
 
             } elsif (!$func) { # it's username.livejournal.com and we has var $username.
 
-                if ($uri =~ /^\/friends/) {
+                if ($uri =~ m#^/friends#) {
                     return $self->_process_url_args_for_friends($username, $args);
                 }
 
