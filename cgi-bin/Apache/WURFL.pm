@@ -10,8 +10,8 @@ sub is_mobile {
     my $user_agent = shift;
 
     if ($LJ::WURFL{'ua_keys_mobile'}) {
-        grep { $user_agent =~ /\Q$_\E/i } @{$LJ::WURFL{'ua_keys_mobile'}}
-            ? return 1
+        my @redir = grep { $user_agent =~ /\Q$_\E/i } @{$LJ::WURFL{'ua_keys_mobile'}};
+        scalar @redir ? return 1
             : return 0;
     }
 
@@ -60,7 +60,7 @@ sub _process_url_args_for_friends {
     return '' unless $remote;
     return '' unless LJ::u_equals($remote, LJ::load_user($username));
 
-    if ($args =~ /show=(P|C|Y)/i) { 
+    if ($args =~ /show=(P|C|Y)/i) {
         return "$mobile_domain/read/friends/?show=".lc($1);
     }
 
