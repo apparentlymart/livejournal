@@ -166,8 +166,12 @@ sub redirect4mobile {
     # set cookie to future redirections and try to redirect to mobile version.
     if ($cookie eq 'no' || $self->is_mobile($user_agent)) {
         my $new_url = $self->map2mobile(%opts);
-        $self->set_our_cookie('no') if $cookie ne 'no';
-        LJ::Request->send_cookies() if $new_url; # send cookies right now if we request to redirect.
+        if ($cookie ne 'no') {
+            $self->set_our_cookie('no');
+
+            # send cookies right now if we request to redirect.
+            LJ::Request->send_cookies() if $new_url;
+        }
         return $new_url;
     } else {
         $self->set_our_cookie('yes') if $cookie ne 'yes';
