@@ -615,15 +615,12 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 		ippu.element.css('overflow', 'visible');
 	}
 	
-	// stat in 5%
-	if (Math.random()*1.05 > 1) {
-		if (!data.is_logged_in) { //  anonymouse
-			new Image().src = 'http://ad.adriver.ru/cgi-bin/rle.cgi?sid=1&ad=186396&bt=21&pid=482107&bid=893162&bn=893162&rnd='+Math.random();
-		} else if (data.is_requester) { // self
-			new Image().src = 'http://ad.adriver.ru/cgi-bin/rle.cgi?sid=1&ad=186396&bt=21&pid=482107&bid=893165&bn=893165&rnd='+Math.random();
-		} else { // not self
-			new Image().src = 'http://ad.adriver.ru/cgi-bin/rle.cgi?sid=1&ad=186396&bt=21&pid=482107&bid=893167&bn=893167&rnd='+Math.random();
-		}
+	if (!data.is_logged_in) { //  anonymouse
+		new Image().src = 'http://ad.adriver.ru/cgi-bin/rle.cgi?sid=1&ad=186396&bt=21&pid=482107&bid=893162&bn=893162&rnd='+Math.random();
+	} else if (data.is_requester) { // self
+		new Image().src = 'http://ad.adriver.ru/cgi-bin/rle.cgi?sid=1&ad=186396&bt=21&pid=482107&bid=893165&bn=893165&rnd='+Math.random();
+	} else { // not self
+		new Image().src = 'http://ad.adriver.ru/cgi-bin/rle.cgi?sid=1&ad=186396&bt=21&pid=482107&bid=893167&bn=893167&rnd='+Math.random();
 	}
 }
 
