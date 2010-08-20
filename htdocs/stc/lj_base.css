@@ -328,7 +328,7 @@ Must be removed after implementation of Framework! */
 .i-bubble {
 	position:relative;
 	margin: 0 0 0 10px !important;
-	padding: 10px;
+	padding: 8px 10px;
 	border-width: 1px;
 	border-style: solid;
 	-webkit-border-radius: 5px;
@@ -1016,13 +1016,23 @@ Must be removed after implementation of Framework! */
 
 
 
-/* Facebook & Twitter authorization
+/* SMS Notifications
 --------------------------- */
 /* Must be removed after implementation of Framework! */
 .b-manage-smsn {
 	margin: 0;
 	padding: 0;
 	list-style: none;
+	}
+.b-manage-smsn:after {
+	content: "";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+	}
+.b-manage-smsn-hide {
 	}
 	.b-manage-smsn LI {
 		margin: 0;
@@ -1031,13 +1041,55 @@ Must be removed after implementation of Framework! */
 		}
 	.b-manage-smsn .b-manage-smsn-sms {
 		float: left;
-		margin: 0 10px 10px 0;
+		margin: 0 0.3em 0.3em 0;
+		padding: 0.3em 0 0;
+		line-height: 1.5;
+		}
+	.b-manage-smsn-hide .b-manage-smsn-sms {
+		padding: 0;
 		}
 	.b-manage-smsn .b-manage-smsn-status {
+		position: relative;
 		float: left;
+		padding: 0 0 0 2em;
 		}
+	.b-manage-smsn-hide .b-manage-smsn-status {
+		display: none;
+		}
+		.i-manage-smsn-icon {
+			position: absolute;
+			top: 50%;
+			left: 0;
+			width: 16px;
+			height: 16px;
+			margin: -9px 0 0 0;
+			background-image: url(/img/icons/smsn.gif);
+			background-repeat: no-repeat;
+			background-position: 0 -800px;
+			}
+		.i-manage-smsn-initial {
+			background-position: 0 0;
+			}
+		.i-manage-smsn-correctnum {
+			background-position: 0 0;
+			}
+		.i-manage-smsn-badnum {
+			background-position: 0 -1000px;
+			}
+		.i-manage-smsn-reqsent {
+			background-position: 0 -200px;
+			}
+		.i-manage-smsn-smssent {
+			background-position: 0 -400px;
+			}
+		.i-manage-smsn-verified {
+			background-position: 0 -600px;
+			}
 	.b-manage-smsn .b-manage-smsn-btn {
 		clear: both;
+		}
+	.b-manage-smsn-hide .b-manage-smsn-btn {
+		display: none;
 		}
 
 

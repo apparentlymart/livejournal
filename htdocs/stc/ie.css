@@ -157,3 +157,15 @@ __________________________________________*/
 	left: expression(this.parentNode.parentNode.clientWidth-this.parentNode.offsetLeft-2);
 	}
 
+/* SMS Notifications
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+.b-manage-smsn {
+	zoom: 1;
+	}
+	.b-manage-smsn .b-manage-smsn-status {
+		padding: 0 0 0 2.5em;
+		}
+	.b-manage-smsn-status #link_2 {
+		vertical-align: 7px;
+		}
