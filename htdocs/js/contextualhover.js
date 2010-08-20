@@ -559,6 +559,17 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 		content.appendChild(document.createElement('br'));
 	}
 	
+	// identity
+	if (data.is_identity) {
+		jQuery('<a/>', {
+			href: Site.siteroot + '/identity/convert.bml',
+			text: data.ml_upgrade_account
+		})
+		.appendTo(content);
+		
+		content.appendChild(document.createElement('br'));
+	}
+	
 	// view label
 	content.appendChild(document.createTextNode(data.ml_view));
 	
