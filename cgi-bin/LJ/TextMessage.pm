@@ -886,7 +886,7 @@ $VERSION = '1.5.6';
 
 ## ADD Russian providers
 unless ($LJ::DISALBED{'smsru-notifications'}){
-    $providers{'beeline'} => {
+    $providers{'beeline'} = {
         'name'          => 'Beeline Russia',
         'notes'         => 'Russia only',
         'fromlimit'     => 0,
