@@ -433,7 +433,7 @@ sub EntryPage_entry
 
     if ($entry && $entry->is_suspended_for($remote)) {
         $opts->{'suspendedentry'} = 1;
-        LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('error' => 'suspended_post');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
         return;
     }

@@ -9032,15 +9032,14 @@ sub make_journal
         #return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);
 
         my $entry = $opts->{ljentry};
-=head
-for LJSUP-6347
+
         if ($entry && $entry->is_suspended_for($remote)) {
             LJ::Request->pnotes ('error' => 'suspended_post');
             LJ::Request->pnotes ('remote' => LJ::get_remote ());
             $opts->{'handler_return'} = "403 Forbidden";
             return;
         }
-=cut
+
         return $error->("This entry has been suspended. You can visit the journal <a href='" . $u->journal_base . "/'>here</a>.", "403 Forbidden")
             if $entry && $entry->is_suspended_for($remote);
     }

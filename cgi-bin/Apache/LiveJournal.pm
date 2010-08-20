@@ -1631,7 +1631,7 @@ sub journal_content
         $generate_iejunk = 1;
 
     } elsif ($opts->{'suspendedentry'}) {
-        LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('error' => 'suspended_post');
         $status = "403 Entry suspended";
         $html = "<h1>Suspended Entry</h1>" .
                 "<p>The entry at this URL is suspended.  You cannot reply to it.</p>";
