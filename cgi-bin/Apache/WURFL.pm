@@ -77,7 +77,7 @@ sub map2mobile {
     my $host = $opts{'host'};
     my $args = $opts{'args'};
 
-    if ($host =~ /^([\w|-]+)\.\Q$LJ::DOMAIN\Q/) {
+    if ($host =~ /^([\w\-]+)\.\Q$LJ::DOMAIN\Q/) {
         my $username = $1;
         if ($username eq 'www') { # main lj pages
 
