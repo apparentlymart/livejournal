@@ -6,9 +6,8 @@ use warnings;
 sub should_render {
     my ($class, $u) = @_;
 
-    warn "here";
     return 0 if $class eq __PACKAGE__; # this is an abstract class
-    return !$u || $u->is_community ? 0 : 1;
+    return $u && $u->is_personal;
 }
 
 sub code {
