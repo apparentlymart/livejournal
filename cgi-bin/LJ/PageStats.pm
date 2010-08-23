@@ -120,8 +120,7 @@ sub get_conf {
 sub filename {
     my ($self) = @_;
 
-    my $filename = LJ::Request->filename;
-    $filename =~ s!$LJ::HOME/(?:ssldocs|htdocs)!!;
+    my $filename = LJ::Request->uri;
 
     return $filename;
 }
