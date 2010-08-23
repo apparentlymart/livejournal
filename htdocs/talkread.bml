@@ -176,7 +176,7 @@ my $old_url = 0;
 
      # check suspended entry
      if ($entry && $entry->is_suspended_for($remote)) {
-        LJ::Request->pnotes ('error' => 'suspended');
+        LJ::Request->pnotes ('error' => 'suspended_post');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
         BML::return_error_status(404);
         return;
