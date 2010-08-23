@@ -60,7 +60,7 @@ sub _process_url_args_for_friends {
     return '' unless LJ::u_equals($remote, LJ::load_user($username));
 
     if ($args =~ /show=(P|C|Y)/i) {
-        return "$mobile_domain/read/friends/?show=".lc($1);
+        return "$mobile_domain/read/friends/?filter=".lc($1);
     }
 
     return "$mobile_domain/read/friends/";   # just /friends
