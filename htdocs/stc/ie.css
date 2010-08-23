@@ -169,3 +169,10 @@ __________________________________________*/
 	.b-manage-smsn-status #link_2 {
 		vertical-align: 7px;
 		}
+
+/* Custom Userheads in Edit Profile Page
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+* HTML .b-manage-userheads LI {
+	behavior: expression(this.onmouseover = new Function("this.className += ' hover'"), this.onmouseout = new Function("this.className = this.className.replace(' hover','')"), this.style.behavior = null);
+}

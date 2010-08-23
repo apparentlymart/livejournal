@@ -233,7 +233,7 @@ body<=
         if ($u->is_personal) {
             $ret .= "<a name='userheads'></a><div class='section_head'>$ML{'.section.userheads'}</div>\n";
 
-            $ret .= "<table>\n";
+            $ret .= "<table class='field_block' style='width:100%'>\n";
 
             $ret .= "<tr><td class='field_name'>$ML{'.fn.active.userhead'}</td><td>";
             my $uh_prop = $u->custom_usericon;
@@ -246,31 +246,33 @@ body<=
                 my ($uh) = grep { $_->get_uh_img eq $uh_prop } @$uhs_all;
                 if ($uh) {
                     ## we found a uh. get id and look at paid exp for expire date
-                    $ret .= "<img src='".$uh->get_uh_img."' border='0'>";
+                    $ret .= "<img src='".$uh->get_uh_img."' class='i-manage-userhead' />";
                     ## whether the user bought userhead?
                     if (my ($found_uh) = grep { $_->{item} == "uh_".$uh->get_uh_id } @$uhs) {
-                        $ret .= LJ::Lang::ml('.section.userheads.expire_date', { date => $date_format->($found_uh->{expdate}) });
+                        $ret .= '&nbsp;'. LJ::Lang::ml('.section.userheads.expire_date', { date => $date_format->($found_uh->{expdate}) });
                     }
                 } else {
                     if ($uh_prop =~ /^http/) {
-                        $ret .= "<img src='$uh_prop'>";
+                        $ret .= "<img src='$uh_prop' class='i-manage-userhead' />";
                     } else {
-                        $ret .= "<img src='$LJ::FILEPREFIX/$uh_prop'>";
+                        $ret .= "<img src='$LJ::FILEPREFIX/$uh_prop' class='i-manage-userhead' />";
                     }
                 }
             } else {
-                $ret .= "<img src='$LJ::DEFAULT_USERHEAD'>&nbsp; $ML{'.fn.userheads.default_userhead'}";
+                $ret .= "<img src='$LJ::DEFAULT_USERHEAD' class='i-manage-userhead' />&nbsp;$ML{'.fn.userheads.default_userhead'}";
             }
             $ret .= "</td></tr>";
             $ret .= "<tr><td class='field_name'>$ML{'.fn.userheads.collection'}</td><td>";
             if (scalar @$uhs) {
-                $ret .= LJ::Lang::ml('.section.userhead.apply.href', { aopts => "href='$LJ::SITEROOT/shop/userheads.bml'" } );
-                $ret .= "<br><input type='radio' name='uh_id' value='default'><img src='$LJ::DEFAULT_USERHEAD'>&nbsp; $ML{'.fn.userheads.default_userhead'}</br>";
+                $ret .= '<p class="b-manage-userheads-desc">' . LJ::Lang::ml('.section.userhead.apply.href', { aopts => "href='$LJ::SITEROOT/shop/userheads.bml'" } ) . '</p>';
+                $ret .= '<ul class="b-manage-userheads">';
+                $ret .= "<li><label for='userhead0'><input type='radio' name='uh_id' value='default' id='userhead0' /><img src='$LJ::DEFAULT_USERHEAD' class='i-manage-userhead' />&nbsp;$ML{'.fn.userheads.default_userhead'}</label></li>";
                 foreach my $uh (@$uhs) {
                     my ($uh_id) = $uh->{item} =~ /uh-(\d+)/;
                     my $uh_obj = LJ::UserHead->get_userhead ($uh_id);
-                    $ret .= "<input type='radio' name='uh_id' value='$uh_id'><img src='".$uh_obj->get_uh_img."' border='0'> ".LJ::Lang::ml('.section.userheads.expire_date', { date => $date_format->($uh->{expdate}) })."<br/> <!--(<a href='/shop/'>extend</a>)--><hr>";
+                    $ret .= "<li><label for='userhead$uh_id'><input type='radio' name='uh_id' value='$uh_id' id='userhead$uh_id' /><img src='".$uh_obj->get_uh_img . "' class='i-manage-userhead' /> " . LJ::Lang::ml('.section.userheads.expire_date', { date => $date_format->($uh->{expdate}) })."</label></li>";
                 }
+                $ret .= '</ul>';
             } else {
                 $ret .= LJ::Lang::ml('.section.userhead.no_userheads', { url => $LJ::SITEROOT."/shop/userheads.bml" });
             }
