@@ -11,8 +11,7 @@ sub is_mobile {
 
     if ($LJ::WURFL{'ua_keys_mobile'}) {
         my @redir = grep { $user_agent =~ /\Q$_\E/i } @{$LJ::WURFL{'ua_keys_mobile'}};
-        scalar @redir ? return 1
-            : return 0;
+        return scalar @redir ? 1 : 0;
     }
 
     unless ($wurfl) {
@@ -112,9 +111,10 @@ sub map2mobile {
                     return "$mobile_domain/read/user/$username/tag/$1";
                 }
 
-                $uri =~ /^\/(\d+\.html)?$/;
-                # $post_id = int($1);
-                return $self->_process_url_args($username, $args, int($1));
+                if ($uri =~ /^\/(\d+\.html)?$/) {
+                    # $post_id = int($1);
+                    return $self->_process_url_args($username, $args, int($1));
+                }
             }
         }
     }
