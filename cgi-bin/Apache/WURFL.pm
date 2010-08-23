@@ -96,9 +96,10 @@ sub map2mobile {
                     return "$mobile_domain/read/user/$1/tag/$2";
                 }
 
-                $uri =~ /^\/(\w+)\/(\d+\.html)?$/;
-                # $username = $1; $post_id = int($2); $post_id = 0 if there is not '/NNNNN.html'
-                return $self->_process_url_args($1, $args, int($2));
+                if ($uri =~ /^\/(\w+)\/(\d+\.html)?$/) {
+                    # $username = $1; $post_id = int($2); $post_id = 0 if there is not '/NNNNN.html'
+                    return $self->_process_url_args($1, $args, int($2));
+                }
 
             } elsif (!$func) { # it's username.livejournal.com and we has var $username.
 
