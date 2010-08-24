@@ -464,7 +464,7 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 	}
 	
 	// buy the same userhead
-	if (data.is_logged_in && data.is_person && ! data.is_requester && data.url_message) {
+	if (data.is_logged_in && data.is_person && ! data.is_requester && data.is_custom_userhead) {
 		jQuery('<a/>', {
 			href: data.url_buy_userhead,
 			text: data.ml_buy_same_userhead
@@ -472,7 +472,7 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 		.appendTo(content);
 		content.appendChild(document.createElement('br'));
 	}
-
+	
 	// send message
 	if (data.is_logged_in && data.is_person && ! data.is_requester && data.url_message) {
 		jQuery('<a/>', {
