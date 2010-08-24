@@ -77,7 +77,7 @@ sub handle_user_input {
         }
 
         $init->{'cookie_auth'} = 1;
-        return LJ::get_remote();
+        return $remote;
     }
 
     # starting from here, we're provided that $form->{'usertype'} eq "user"
