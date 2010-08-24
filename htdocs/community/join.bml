@@ -19,7 +19,7 @@ body<=
 
     # make sure a community doesn't join a community
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.commlogged'} p?>"
-        unless $remote->{'journaltype'} eq "P";
+        unless $remote->is_personal || $remote->is_identity;
 
     # get info about the community
 
@@ -30,7 +30,7 @@ body<=
         unless $cu;
 
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.notcomm'} p?>"
-        unless $cu->{journaltype} eq "C";
+        unless $cu->is_community;
 
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.locked'} p?>"
         if $cu->{statusvis} eq "L";

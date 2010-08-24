@@ -344,7 +344,7 @@ sub join_community {
     return LJ::error('comm_not_found') unless $u && $cu;
     return LJ::error('comm_not_comm') unless $cu->{journaltype} eq 'C';
 
-    return LJ::error(qq|Sorry, you aren't allowed to join communities until your email address has been validated. If you've lost the confirmation email to do this, you can <a href="http://www.livejournal.com/register.bml">have it re-sent.</a>|)
+    return LJ::error(qq|Sorry, you aren't allowed to join communities until your email address has been validated. If you've lost the confirmation email to do this, you can <a href="$LJ::SITEROOT/register.bml">have it re-sent.</a>|)
         unless $u->is_validated;
 
     # friend comm -> user
