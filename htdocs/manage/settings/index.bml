@@ -402,14 +402,23 @@ body<=
 
         $ret .= $widget->render({
             'title' => $ML{'subscribe_interface.category.friends-and-communities'},
-            'groups' => $set->extract_groups([
-                'InvitedFriendJoins-u',
-                'CommunityInvite-u',
-                'CommunityJoinRequest-u',
-                'NewUserpic',
-                'Birthday',
-                'NewVGift',
-            ]),
+            'groups' => $set->extract_groups( 
+                $u->is_identity
+                ? [
+                    'InvitedFriendJoins-u',
+                    'CommunityInvite-u',
+                    'NewUserpic',
+                    'Birthday',
+                    'NewVGift',
+                ]
+                : [
+                    'InvitedFriendJoins-u',
+                    'CommunityInvite-u',
+                    'CommunityJoinRequest-u',
+                    'NewUserpic',
+                    'Birthday',
+                    'NewVGift',
+                ]),
             'u' => $u,
             'css_class' => 'friends_and_communities',
         });
