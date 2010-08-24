@@ -174,5 +174,5 @@ __________________________________________*/
 --------------------------- */
 /* Must be removed after implementation of Framework! */
 * HTML .b-manage-userheads LI {
-	behavior: expression(this.onmouseover = new Function("this.className += ' hover'"), this.onmouseout = new Function("this.className = this.className.replace(' hover','')"), this.style.behavior = null);
+	behavior: expression(this.onmouseover = new Function("this.className += ' hover'"), this.onmouseout = new Function("this.className = this.className.replace(/ ?hover/g,'')"), this.style.behavior = null);
 }
