@@ -251,7 +251,7 @@
  }
 
  $title = $ML{'.title.memorable'};
- $body .= BML::ml(".body.list_categories", { 'user' => $user });
+ $body .= BML::ml(".body.list_categories", { 'user' => $u->display_username });
 
  my $rows = LJ::Memories::get_keyword_counts($u, { security => $securities, filter => $filter });
  return $dberr->() unless defined $rows;
