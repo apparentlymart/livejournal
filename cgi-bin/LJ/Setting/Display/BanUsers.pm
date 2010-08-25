@@ -34,4 +34,9 @@ sub option {
     return $ret;
 }
 
+sub save {
+    ## the method is empty, because this class is for pseudo-option that has no data, just help links.
+    return 1;
+}
+
 1;
