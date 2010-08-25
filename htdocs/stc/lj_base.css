@@ -905,6 +905,9 @@ Must be removed after implementation of Framework! */
 	.b-repost-item {
 		margin: 0 0 5px !important;
 		}
+	.b-repost-item .repost_disabled {
+		color: #CCC;
+		}
 	#entry-form-wrapper .b-repost-item {
 		display: inline;
 		}
