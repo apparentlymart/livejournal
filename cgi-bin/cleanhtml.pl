@@ -970,7 +970,7 @@ sub clean
                 my $subject  = LJ::ehtml($opencount{$tag}->{subject});
                 my $captured = substr $newdata => $opencount{$tag}->{offset};
 
-                if (my $entry = LJ::Entry->new_from_url($opts->{cuturl})){
+                if ($captured and my $entry = LJ::Entry->new_from_url($opts->{cuturl})){
                     # !!! avoid calling any 'text' methods on $entry, 
                     #     it can produce inifinite loop of cleanhtml calls.
 
@@ -985,12 +985,20 @@ sub clean
                 $captured = LJ::ehtml($captured);
 
                 # add <form> with invisible fields and visible submit button
-                $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="POST">
-                    <div style="display:none;visible:false">
-                    <input type="text" name="subject" value="$subject" />
-                    <textarea name="event">$captured</textarea>
-                    </div>
-                    <input type="submit" value="$button" /></form>];
+                if ($captured){
+                    $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="POST">
+                        <div style="display:none;visible:false">
+                        <input type="text" name="subject" value="$subject" />
+                        <textarea name="event">$captured</textarea>
+                        </div>
+                        <input type="submit" value="$button" /></form>];
+                } else {
+                    ## treat <lj-repost></lj-repost> as <lj-repost />
+                    $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="GET">]
+                             .  qq[<input type=hidden name="repost" value="$opts->{cuturl}" />]
+                             .  qq(<input type="submit" value="$button" /> )
+                             .  qq[</form>];
+                }
                 
                 delete $opencount{$tag};
 
