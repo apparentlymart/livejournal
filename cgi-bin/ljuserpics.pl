@@ -2,6 +2,7 @@ package LJ;
 use strict;
 
 use Digest::MD5 qw(md5_hex);
+use HTTP::Request::Common qw/GET/;
 
 # <LJFUNC>
 # name: LJ::fetch_userpic
@@ -855,7 +856,7 @@ sub upload_to_fb {
     my %opts = @_;
 
     my $dataref = $opts{dataref};
-    my $gals    = $opts{gals};
+    my $gals    = $opts{gals} || [];
 
     my $username = $opts{username} || $LJ::FB_USER;
     my $password = $opts{password} || $LJ::FB_PASS;
@@ -932,6 +933,7 @@ sub upload_to_fb {
             url    => undef,
             status => 'error',
             errstr => ref $err eq 'HASH' ? $err->{content} : (ref $err eq 'ARRAY' ? $err->[0] : $err),
+            opts => \%opts,
         }
     }
 
@@ -940,6 +942,66 @@ sub upload_to_fb {
         url    => $methres->{URL},
         status => 'ok',
     }
+}
+
+# get picture from internet $opts{source} and crop it to $opts{size},
+# than save result into $opts{galleries} (arrayref) of scrapbook of $opts{username}, using $opts{password}
+# returns result of &upload_to_fb
+sub crop_picture_from_web {
+    my %opts = @_;
+
+    my $source = LJ::trim($opts{source});
+
+    return {
+        url    => '',
+        status => 'ok',
+    } unless $source;
+
+    ## fetch a photo from Net
+    my $ua = LJ::get_useragent( role     => 'crop_picture',
+                                max_size => 10 * 1024 * 1024,
+                                timeout  => 10,
+                              );
+    my $result = $ua->request(GET($source));
+
+    unless ($result and $result->is_success) {
+        return {
+            picid  => -1,
+            url    => undef,
+            status => 'error',
+            errstr => $result ? $result->status_line : 'unknown error in downloading',
+        };
+    }
+
+    my $data = $result->content;
+
+    my $res = LJ::_get_upf_scaled(
+                    source => \$data,
+                    size => $opts{size},
+                    save_to_FB => 1,
+                    auto_crop => 1,
+                    fb_username => $opts{username},
+                    fb_password => $opts{password},
+                    fb_gallery => $opts{galleries},
+              );
+
+    unless ($res) {
+        return {
+            picid  => -1,
+            url    => undef,
+            status => 'error',
+            errstr => 'probably bad picture',
+        };
+    }
+
+    # need to repeat? (because of bad auth in CentOS-32 ScrapBook)
+    # DELETE THIS IN FUTURE!!!
+    if ($res->{picid} == -1) {
+        warn $res->{errstr} if $LJ::IS_DEV_SERVER;
+        return upload_to_fb(%{$res->{opts}});
+    }
+
+    return $res;
 }
 
 1;
