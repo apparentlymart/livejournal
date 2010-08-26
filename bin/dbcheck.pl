@@ -151,7 +151,7 @@ my $check = sub {
     }
 
     my $tzone;
-    (undef, $tzone) = $db->selectrow_array("show variables like 'timezone'");
+    #(undef, $tzone) = $db->selectrow_array("show variables like 'timezone'");
     $tzone ||= "???";
 
     $sth = $db->prepare("SHOW PROCESSLIST");
