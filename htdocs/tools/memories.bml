@@ -140,7 +140,7 @@
  }
 
  my %filters = ("all" => $ML{'.filter.all'},
-                "own" => BML::ml(".filter.own", { 'user' => $user }),
+                "own" => BML::ml(".filter.own", { 'user' => $u->display_name }),
                 "other" => $ML{'.filter.other'});
  my $filter = $GET{'filter'} || "all";
  unless (defined $filters{$filter}) { $filter = "all"; }
@@ -251,7 +251,7 @@
  }
 
  $title = $ML{'.title.memorable'};
- $body .= BML::ml(".body.list_categories", { 'user' => $u->display_username });
+ $body .= BML::ml(".body.list_categories", { 'user' => $u->ljuser_display });
 
  my $rows = LJ::Memories::get_keyword_counts($u, { security => $securities, filter => $filter });
  return $dberr->() unless defined $rows;
