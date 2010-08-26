@@ -148,18 +148,18 @@ jQuery(document).click(function(e)
 	if (href) {
 		if (href.indexOf('http://www.facebook.com/sharer.php') === 0) {
 			a.setAttribute('st_dest', 'facebook.com');
-			SHARETHIS_ary.findByUrl(LiveJournal.parseGetArgs(href).u).chicklet(e);
+			SHARETHIS_ary.findByUrl(decodeURIComponent(LiveJournal.parseGetArgs(href).u)).chicklet(e);
 			//else? window.open(href, 'sharer', 'toolbar=0,status=0,width=626,height=436');
 			e.preventDefault();
 		} else if (href.indexOf(Site.siteroot + '/share/twitter.bml') === 0) {
 			a.setAttribute('st_dest', 'twitter.com');
-			SHARETHIS_ary.findByUrl(LiveJournal.parseGetArgs(href).u).chicklet(e);
+			SHARETHIS_ary.findByUrl(decodeURIComponent(LiveJournal.parseGetArgs(href).u)).chicklet(e);
 			//else? window.open(href, 'sharer', 'toolbar=0,status=0,width=430,height=220');
 			e.preventDefault();
 		} else if (href.indexOf(Site.siteroot + '/tools/tellafriend.bml') === 0) {
 			a.setAttribute('st_page', 'send');
-			SHARETHIS_ary.findByUrl(LiveJournal.parseGetArgs(href).u).popup(e);
+			SHARETHIS_ary.findByUrl(decodeURIComponent(LiveJournal.parseGetArgs(href).u)).popup(e);
 			e.preventDefault();
 		}
 	}
-})
+});
