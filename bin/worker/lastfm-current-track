@@ -17,7 +17,7 @@ require 'ljlib.pl';
 use LJ::NewWorker::Gearman;
 use LJ::LastFM;
 use Storable qw(freeze thaw); # safe across updating when use with simple structures only
-use JSON;
+use LJ::JSON;
 
 sub declare { [ 'get_current_track' => \&get_current_track ] }
 sub work    { [ 'save_result' => 1 ] }
@@ -28,7 +28,7 @@ sub get_current_track {
     my $arg = $job->arg; # restricted to be a scalar
     my ( $username ) = @{thaw($arg)};
 
-    return JSON::objToJson( LJ::LastFM::current($username) );
+    return LJ::JSON->to_json( LJ::LastFM::current($username) );
 }
 
 
