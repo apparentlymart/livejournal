@@ -72,7 +72,8 @@
     $ret{url_addfriend} = "$LJ::SITEROOT/friends/add.bml?user=" . $u->{user};
 
     $ret{url_buy_userhead} = $LJ::SITEROOT."/shop/userheads.bml";
-    $ret{is_custom_userhead} = $u->custom_usericon ? 1 : 0;
+    my $usericon = $u->custom_usericon;
+    $ret{is_custom_userhead} = scalar grep { $usericon eq $_ } @LJ::DEFAULT_USERHEADS_LIST ? 1 : 0;
 
     my $up = $u->userpic;
     if ($up) {
