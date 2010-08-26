@@ -23,6 +23,7 @@ body<=
         if ($idclass && $idclass->enabled) {
             $idclass->attempt_login(\@errors,
                 'returl_fail' => "$thispage?type=$idtype",
+                'forwhat' => 'login',
             );
             return if LJ::Request->redirected;
         } else {
