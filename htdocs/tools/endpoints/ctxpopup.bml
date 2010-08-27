@@ -73,7 +73,11 @@
 
     $ret{url_buy_userhead} = $LJ::SITEROOT."/shop/userheads.bml";
     my $usericon = $u->custom_usericon;
-    $ret{is_custom_userhead} = scalar grep { $usericon eq $_ } @LJ::DEFAULT_USERHEADS_LIST ? 1 : 0;
+    if ($usericon eq '' || scalar grep { $usericon eq $_ } @LJ::DEFAULT_USERHEADS_LIST) {
+        $ret{is_custom_userhead} = 0;
+    } else {
+        $ret{is_custom_userhead} = 1;
+    }
 
     my $up = $u->userpic;
     if ($up) {
