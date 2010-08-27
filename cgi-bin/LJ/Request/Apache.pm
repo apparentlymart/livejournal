@@ -10,6 +10,7 @@ require Apache::File;
 require Apache::Table;
 
 sub LJ::Request::OK                        { return Apache::Constants::OK() }
+sub LJ::Request::DONE                      { return Apache::Constants::DONE() }
 sub LJ::Request::REDIRECT                  { return Apache::Constants::REDIRECT() }
 sub LJ::Request::DECLINED                  { return Apache::Constants::DECLINED() }
 sub LJ::Request::FORBIDDEN                 { return Apache::Constants::FORBIDDEN() }
