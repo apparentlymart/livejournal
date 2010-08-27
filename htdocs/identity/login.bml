@@ -38,7 +38,8 @@ body<=
         strict => 0,
     ) or die "Can't open template: $!";
 
-    my $current_type = LJ::Request->get_param('type') ||
+    my $current_type = LJ::Request->post_param('type') ||
+                       LJ::Request->get_param('type')  ||
                        $LJ::IDENTITY_TYPES[0];
 
     my @types;
