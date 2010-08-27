@@ -270,7 +270,7 @@ body<=
                 foreach my $uh (@$uhs) {
                     my ($uh_id) = $uh->{item} =~ /uh-(\d+)/;
                     my $uh_obj = LJ::UserHead->get_userhead ($uh_id);
-                    $ret .= "<li><label for='userhead$uh_id'><input type='radio' name='uh_id' value='$uh_id' id='userhead$uh_id' /><img src='".$uh_obj->get_uh_img . "' class='i-manage-userhead' /> " . LJ::Lang::ml('.section.userheads.expire_date', { date => $date_format->($uh->{expdate}) })."</label></li>";
+                    $ret .= "<li><label for='userhead$uh_id'><input type='radio' name='uh_id' value='$uh_id' id='userhead$uh_id' /><img src='".$uh_obj->get_uh_img . "' class='i-manage-userhead' /> " . LJ::Lang::ml('.section.userheads.expire_date', { date => $date_format->($uh->{expdate}) })."</label></li>" if $uh_obj;
                 }
                 $ret .= '</ul>';
             } else {
