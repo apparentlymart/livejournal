@@ -38,22 +38,29 @@ body<=
         strict => 0,
     ) or die "Can't open template: $!";
 
+    my $current_type = LJ::Request->get_param('type') ||
+                       $LJ::IDENTITY_TYPES[0];
+
     my @types;
     foreach my $type (@LJ::IDENTITY_TYPES) {
         my $idclass = LJ::Identity->find_class($type);
         next unless $idclass->enabled;
 
-        push @types, {
+        my $type_display = {
             'type' => $type,
             'ml_tab_heading' => LJ::Lang::ml(".tab.$type"),
         };
+
+        if ($type eq $current_type) {
+            $type_display->{'errors'} = [ map { { 'error' => $_ } } @errors ];
+        }
+
+        push @types, $type_display;
     }
 
     $template->param(
         'types' => \@types,
-        'current_type' => LJ::Request->get_param('type') ||
-                          $LJ::IDENTITY_TYPES[0],
-        'errors' => [ map { { 'error' => $_ } } @errors ],
+        'current_type' => $current_type,
     );
 
     return $template->output;
