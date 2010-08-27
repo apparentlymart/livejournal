@@ -1387,10 +1387,10 @@ sub talkform {
     my $opts = shift;
     return "Invalid talkform values." unless ref $opts eq 'HASH';
 
-    my ( $remote, $journalu, $parpost, $form, $editid ) =
-        map { $opts->{$_} } qw(remote journalu parpost form edit);
+    my ( $remote, $journalu, $parpost, $form ) =
+        map { $opts->{$_} } qw(remote journalu parpost form);
 
-    $editid ||= 0;
+    my $editid = $form->{'edit'} || 0;
 
     # early bail if the user can't be making comments yet
     return $LJ::UNDERAGE_ERROR
