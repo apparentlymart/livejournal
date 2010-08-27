@@ -370,6 +370,18 @@ sub trans
         if ($uri =~ m!^/interface/! || $uri =~ m!^/__rpc_!) {
             # handled later
         } elsif ($LJ::SSLDOCS && $uri !~ m!(\.\.|\%|\.\/)!) {
+            if ($uri =~ m#^/img/userinfo.gif#) {
+                my $remote = LJ::get_remote();
+                if ($remote) {
+                    my $custom_userhead = $remote->custom_usericon;
+                    require URI;
+                    my $uri = URI->new ($custom_userhead);
+                    my $res = send_files ($uri->path);
+                    LJ::Request->content_type ("image/gif");
+                    return ($res == LJ::Request::OK) ? LJ::Request::DONE : $res;
+                }
+            }
+
             my $file = "$LJ::SSLDOCS/$uri";
             unless (-e $file) {
                 # no such file.  send them to the main server if it's a GET.
@@ -1364,10 +1376,11 @@ sub userpic_content
     return LJ::Request::OK
 }
 
-sub files_handler {
+sub send_files {
+    my $uri = shift;
 
-    use LJ::FileStore;
-    my $result = LJ::FileStore->get_path_info( path => LJ::Request->uri );
+    require LJ::FileStore;
+    my $result = LJ::FileStore->get_path_info( path => $uri );
 
     # file not found
     return LJ::Request::NOT_FOUND unless $result;
@@ -1392,17 +1405,18 @@ sub files_handler {
             LJ::Request->header_out('X-REPROXY-FILE', $paths->[0]);
         }
 
-        my $send_headers = sub {
-            LJ::Request->content_type ($result->{mime_type});
-            LJ::Request->header_out("Content-length", $size);
-            LJ::Request->header_out("Cache-Control", "no-transform");
-            LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http ($result->{change_time}));
-            LJ::Request->send_http_header();
-        };
-        $send_headers->();
-        return LJ::Request::OK
+        LJ::Request->content_type ($result->{mime_type});
+        LJ::Request->header_out("Content-length", $size);
+        LJ::Request->header_out("Cache-Control", "no-transform");
+        LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http ($result->{change_time}));
+        LJ::Request->send_http_header();
+        return LJ::Request::OK;
     }
     return LJ::Request::NOT_FOUND;
+}
+
+sub files_handler {
+    return send_files (LJ::Request->uri);
 }
 
 sub files_trans

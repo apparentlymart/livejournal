@@ -21,6 +21,7 @@ use APR::Finfo;
 
 
 sub LJ::Request::OK                        { return Apache2::Const::OK }
+sub LJ::Request::DONE                      { return Apache2::Const::DONE }
 sub LJ::Request::REDIRECT                  { return Apache2::Const::REDIRECT }
 sub LJ::Request::DECLINED                  { return Apache2::Const::DECLINED }
 sub LJ::Request::FORBIDDEN                 { return Apache2::Const::FORBIDDEN }
