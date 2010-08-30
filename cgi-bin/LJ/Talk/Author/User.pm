@@ -12,8 +12,9 @@ sub display_params {
     my $entry              = LJ::Entry->new( $journalu,
                                              ditemid => $opts->{ditemid} );
     my $is_friend          = LJ::is_friend( $journalu, $remote );
-    my $remote_can_comment = $entry->registered_can_comment
-        || ( $remote and $is_friend );
+    my $remote_can_comment = $entry->everyone_can_comment
+        || ( $remote     and $entry->registered_can_comment )
+        || ( $is_friend  and $entry->friends_can_comment );
 
     my %whocheck;
 
