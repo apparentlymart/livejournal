@@ -39,7 +39,7 @@
                 </td>
             </TMPL_IF>
             </tr>
-        <TMPL_ELSE>
+        <TMPL_ELSIF is_identity>
             <tr valign='middle'>
             <td class="b-postform-icon"><img src='<TMPL_VAR lj_imgprefix>/openid-profile.gif' onclick='handleRadios(3);' /></td>
             <td class="b-postform-radio">(  )</td>
@@ -47,6 +47,16 @@
                 <span class="i-postform-label i-postform-disabled"><b>OpenID</b></span>
                 <TMPL_IF is_identity><TMPL_VAR ml_noopenidpost></TMPL_IF>
                 <TMPL_VAR helpicon_openid>
+            </td>
+            </tr>
+        <TMPL_ELSE>
+            <tr valign='middle' id='oidlo' name='oidlo'>
+            <td class="b-postform-icon"><img src='<TMPL_VAR lj_imgprefix>/openid-profile.gif' onclick='handleRadios(3);' /></td>
+            <td class="b-postform-radio"><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo' <TMPL_IF whocheck_openid>checked='checked'</TMPL_IF> /></td>
+            <td class="b-postform-data">
+                <label for='talkpostfromoidlo' onclick='handleRadios(4);return false;' class="i-postform-label"><b>OpenID</b></label>
+                <TMPL_VAR ml_willscreen>
+                <span id="oid_more" class="i-bubble b-bubble-lite b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><label for="openid:url"><TMPL_VAR expr="ml('/talkpost.bml.openid.identity.url')">&nbsp;</label><input class='textbox' name='openid:url' maxlength='60' size='42' id='openid:url' value='<TMPL_VAR openid_url_default>' /> <input type='hidden' name='oiddo_login' id='oidlogincheck' <TMPL_VAR oiddo_login_checked> /> <TMPL_VAR helpicon_openid></span>
             </td>
             </tr>
         </TMPL_IF>
