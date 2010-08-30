@@ -974,7 +974,10 @@ sub clean
                     # !!! avoid calling any 'text' methods on $entry, 
                     #     it can produce inifinite loop of cleanhtml calls.
 
-                    $subject ||= LJ::ehtml($entry->subject_raw || LJ::Lang::ml("repost.default_subject"));
+                    unless ($subject){
+                        $subject = LJ::ehtml($entry->subject_raw || LJ::Lang::ml("repost.default_subject"));
+                        $subject = Encode::decode_utf8($subject) if $subject;
+                    }
                     $captured = LJ::Lang::ml("repost.wrapper", { 
                                                 username => $entry->poster->username,
                                                 url      => $entry->url,
