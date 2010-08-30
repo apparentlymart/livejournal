@@ -61,6 +61,34 @@ function new_post_load(dotime) {
     return false;
 }
 
+function updateRepostButtons(stateIndex)
+{
+    var boxes = ['facebook', 'twitter'],
+        input, label, parentNode,
+        parentDisableClass = 'b-repost-item-disabled';
+
+    for(var i in boxes)
+    {
+        input = $('repost_' + boxes[i]);
+        if(!input) continue;
+
+        parentNode = input.parentNode;
+        label = parentNode.getElementsByTagName('label')[0];
+
+        if(stateIndex > 0 || parentNode.className.indexOf(parentDisableClass) != -1)
+        {
+            input.setAttribute('disabled', 'disabled');
+            label.className = "repost_disabled";
+            input.checked = false;
+        }
+        else {
+            input.removeAttribute('disabled');
+            label.className = "repost_" + boxes[i];
+        }
+    }
+
+}
+
 function customboxes (e) {
     if (! e) var e = window.event;
     if (! document.getElementById) return false;
@@ -71,6 +99,8 @@ function customboxes (e) {
     
     var custom_boxes = $('custom_boxes');
     if (! custom_boxes) return false;
+
+    updateRepostButtons(f.security.selectedIndex);
     
     if (f.security.selectedIndex != 3) {
         custom_boxes.style.display = 'none';
