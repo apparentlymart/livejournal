@@ -24,7 +24,9 @@
     <td class="b-postform-radio">(  )</td>
     <td class="b-postform-data b-postform-active" colspan='2'>
         <span class="i-postform-label i-postform-disabled"><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></span>
-        <span class="i-bubble b-bubble-alert b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></span>
+        <TMPL_UNLESS remote_username>
+            <span class="i-bubble b-bubble-alert b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></span>
+        </TMPL_UNLESS>
     </td>
     </tr>
 <TMPL_ELSIF friends_can_comment>
@@ -33,7 +35,9 @@
     <td class="b-postform-radio">(  )</td>
     <td class="b-postform-data b-postform-active" colspan='2'>
         <span class="i-postform-label i-postform-disabled"><b><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></b></span>
-        <span class="i-bubble b-bubble-alert b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_friendsonly></span>
+        <TMPL_IF is_friend>
+            <span class="i-bubble b-bubble-alert b-postform-openid"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_friendsonly></span>
+        </TMPL_IF>
     </td>
     </tr>
 </TMPL_IF>
