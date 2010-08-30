@@ -1690,7 +1690,7 @@ sub talkform {
             }
         ),
         'friendsonly' => LJ::Lang::ml(
-            '/talpost.bml.opt.'
+            '/talkpost.bml.opt.'
                 . ( $is_person ? 'friends' : 'members' ) . 'only',
             { 'username' => '<b>' . $journalu->username . '</b>', }
         ),
