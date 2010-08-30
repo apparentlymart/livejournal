@@ -6924,9 +6924,9 @@ sub ljuser {
         }
     }
 
-    my $user_alias       = LJ::ljuser_alias($user);
+    my $user_alias       = LJ::ljuser_alias($username);
     my $side_alias       = $opts->{'side_alias'};
-    my $show_alias_popup = $user_alias and not $side_alias;
+    my $show_alias_popup = $user_alias && !$side_alias;
     my $target           = $opts->{'target'};
     my $link_color       = $opts->{'link_color'};
 
@@ -6970,6 +6970,9 @@ sub ljuser {
     my $link_tag_extra = join('', @link_tag_extra);
 
     ### fix $journal_name
+    if ($opts->{'title'}) {
+        $journal_name = $opts->{'title'};
+    }
     if (!exists $opts->{'bold'} || $opts->{'bold'} != 0) {
         $journal_name = "<b>$journal_name</b>";
     }
