@@ -107,8 +107,6 @@ body<=
                 LJ::Setting::SearchCommentInclusion
                 LJ::Setting::ContentPromotion
                 LJ::Setting::NotifyWeblogs
-                LJ::Setting::FacebookBeacon
-                LJ::Setting::TwitterConnect
                 LJ::Setting::EnableComments
                 LJ::Setting::CommentScreening
                 LJ::Setting::CommentCaptcha
@@ -147,6 +145,8 @@ body<=
             settings    => [qw(
                 LJ::Setting::MSN
                 LJ::Setting::GoogleAnalytics
+                LJ::Setting::FacebookBeacon
+                LJ::Setting::TwitterConnect
                 LJ::Setting::WebmasterTools::Google
                 LJ::Setting::WebmasterTools::Yandex
             )],
