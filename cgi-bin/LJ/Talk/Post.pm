@@ -136,8 +136,9 @@ sub enter_comment {
     $talkprop{'picture_keyword'} = $comment->{picture_keyword};
 
     $talkprop{'opt_preformatted'} = $comment->{preformat} ? 1 : 0;
-    if ($journalu->{'opt_logcommentips'} eq "A" ||
-        ($journalu->{'opt_logcommentips'} eq "S" && $comment->{usertype} ne "user"))
+    my $opt_logcommentips = $journalu->{'opt_logcommentips'};
+    if ($opt_logcommentips eq "A" ||
+        ($opt_logcommentips eq "S" && $comment->{usertype} !~ /^(?:user|cookieuser)$/))
     {
         if (LJ::is_web_context()) {
             my $ip = BML::get_remote_ip();
@@ -738,7 +739,9 @@ sub edit_comment {
 
     # set poster IP separately since it has special conditions
     my $opt_logcommentips = $comment_obj->journal->prop('opt_logcommentips');
-    if ($opt_logcommentips eq "A" || ($opt_logcommentips eq "S" && $comment->{usertype} ne "user")) {
+    if ($opt_logcommentips eq "A" || 
+        ($opt_logcommentips eq "S" && $comment->{usertype} !~ /^(?:user|cookieuser)$/)) 
+    {
         $comment_obj->set_poster_ip;
     }
     
