@@ -3008,8 +3008,8 @@ sub _Comment__get_link
     my ($ctx, $this, $key) = @_;
     my $page = get_page();
     my $u = $page->{'_u'};
-    my $post_user = $page->{'entry'} ? $page->{'entry'}->{'poster'}->{'username'} : undef;
-    my $com_user = $this->{'poster'} ? $this->{'poster'}->{'username'} : undef;
+    my $post_user = $page->{'entry'} ? $page->{'entry'}->{'poster'}->{'_u'}->{'user'} : undef;
+    my $com_user = $this->{'poster'} ? $this->{'poster'}->{'_u'}->{'user'} : undef;
     my $remote = LJ::get_remote();
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
     my $dtalkid = $this->{talkid};
