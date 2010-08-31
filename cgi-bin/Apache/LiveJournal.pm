@@ -1124,9 +1124,8 @@ sub userpic_trans
 {
 
     if (LJ::Request->uri eq '/crossdomain.xml') {
-        Apache::LiveJournal::Interface::Api->load; 
         LJ::Request->handler("perl-script"); 
-        LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Api::crossdomain); 
+        LJ::Request->set_handlers(PerlHandler => \&crossdomain_content); 
         return LJ::Request::OK;
     }
     
@@ -1181,6 +1180,24 @@ sub userpic_trans
     LJ::Request->handler("perl-script");
     LJ::Request->set_handlers(PerlHandler => \&userpic_content);
     return LJ::Request::OK
+}
+
+sub crossdomain_content 
+{
+    my $crossdomain = '<?xml version="1.0"?>
+<!DOCTYPE cross-domain-policy SYSTEM "http://www.adobe.com/xml/dtds/cross-domain-policy.dtd">
+<cross-domain-policy>
+    <site-control permitted-cross-domain-policies="master-only"/>
+    <allow-access-from domain="*.livejournal.com"/>
+    <allow-access-from domain="*.livejournal.ru"/>
+    <allow-access-from domain="*.i-jet.ru"/>
+</cross-domain-policy>';
+    my $r = LJ::Request->request;
+    $r->content_type('application/xml');
+    $r->status(200);
+    $r->send_http_header();
+    $r->print($crossdomain);
+    return LJ::Request::OK;
 }
 
 sub userpic_content
