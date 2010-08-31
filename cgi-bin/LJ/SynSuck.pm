@@ -8,6 +8,7 @@ require "parsefeed.pl";
 require "cleanhtml.pl";
 
 use LJ::TimeUtil;
+use Encode qw(encode_utf8 is_utf8);
 
 sub update_feed {
     my ($urow, $verbose) = @_;
@@ -412,8 +413,11 @@ sub process_content {
         }
 
         my $bio = $su->bio;
-        $su->set_bio($feed->{'description'})
-            unless $bio && $bio =~ /\[LJ:KEEP\]/;
+        unless ($bio && $bio =~ /\[LJ:KEEP\]/) {
+            my $new_bio = $feed->{'description'};
+            $new_bio = encode_utf8($new_bio) if is_utf8($new_bio);
+            $su->set_bio($new_bio);
+        }
 
     }
 
