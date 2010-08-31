@@ -311,6 +311,7 @@ sub EntryPage
                 $cmtinfo->{$i->{talkid}} = {
                     rc     => \@child_ids,
                     u      => $poster,
+                    username => $i->{'poster'} ? $i->{'poster'}->{'_u'}->{'user'} : '',
                     parent => $parent && $parent->valid ? $parent->dtalkid : undef,
                     full   => ($i->{full}),
                 };
