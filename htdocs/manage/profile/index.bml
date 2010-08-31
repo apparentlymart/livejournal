@@ -257,7 +257,7 @@ body<=
                         if ($uh_prop =~ /^http/) {
                             $ret .= "<img src='$uh_prop' class='i-manage-userhead' />";
                         } else {
-                            $ret .= "<img src='$LJ::FILEPREFIX/$uh_prop' class='i-manage-userhead' />";
+                            $ret .= "<img src='$LJ::IMGPREFIX/$uh_prop' class='i-manage-userhead' />";
                         }
                     }
                 } else {
