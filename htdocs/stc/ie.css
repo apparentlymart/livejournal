@@ -60,16 +60,25 @@ __________________________________________*/
 	}
 
 
-* HTML .b-ttiny {
+* HTML .b-ttiny,
+* HTML .b-tlarge {
 	width: expression((document.documentElement.clientWidth || document.body.clientWidth) < 995 ? "995px" : "100%");
 	}
-* HTML .b-tlarge {
-	width: expression((document.documentElement.offsetWidth) >(1020/12) * parseInt(document.body.currentStyle.fontSize)?  "1590px" : ((document.documentElement.offsetWidth) < 995? "995px" : "auto"));
+.b-header,
+.b-outer {
+	margin-right: 27px;
+	margin-left: 27px;
 	}
-* HTML .b-tlarge,
-* HTML .b-inner,
-* HTML .b-header {
-	zoom:1;
+* HTML .b-header,
+* HTML .b-outer {
+	margin-right: 29px;
+	margin-left: 29px;
+	}
+.b-tlarge,
+.b-inner,
+.b-header,
+.b-live-clmn {
+	*zoom:1;
 	}
 * HTML .b-quick .b-inbox .outer,
 * HTML .b-quick .b-inbox .inner,
@@ -91,17 +100,24 @@ __________________________________________*/
 	this.style.behavior = null 
 	);
 	}
-* HTML .b-live-ctrl-menu LI.b-live-ctrl-go A I,
-* HTML .b-live-ctrl-menu LI.b-live-ctrl-fav A I,
-* HTML .b-live-ctrl-menu LI.b-live-ctrl-share A I {
-	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg : this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='crop')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
+.b-live-item:hover .b-live-post,
+.b-live-item-hover .b-live-post {
+	top: -21px;
+	left: -21px;
+	border: 1px solid #999;
 	}
-	
 * HTML .b-themes-content .pic {
 	width: expression(document.body.clientWidth > 96? "96px": "auto" );
 	}
 * HTML .b-live-pic IMG {
 	width: expression(document.body.clientWidth > 140? "140px": "auto" );
+	}
+* HTML .b-domino-pic LI { 
+	behavior: expression( 
+	this.onmouseover = new Function("this.className += ' hover'"), 
+	this.onmouseout = new Function("this.className = this.className.replace(' hover','')"), 
+	this.style.behavior = null 
+	);
 	}
 
 
