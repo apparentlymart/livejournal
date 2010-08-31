@@ -260,14 +260,14 @@ function createDeleteFunction (ae, dItemid) {
 			
             var inHTML = "<form style='display: inline' id='ljdelopts" + dItemid + "'><span style='font-face: Arial; font-size: 8pt'><b>Delete comment?</b><br />";
             var lbl;
-            if (com.u != "" && com.u != remoteUser && canAdmin) {
+            if (com.username != "" && com.username != remoteUser && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "ban";
                 inHTML += "<input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>Ban <b>" + com.u + "</b> from commenting</label><br />";
             } else {
                 finalHeight -= 15;
             }
 
-            if (remoteUser != com.u) {
+            if (remoteUser != com.username) {
                 lbl = "ljpopdel" + dItemid + "spam";
                 inHTML += "<input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>Mark this comment as spam</label><br />";
             } else {
@@ -280,9 +280,9 @@ function createDeleteFunction (ae, dItemid) {
             } else {
                 finalHeight -= 15;
             }
-            if (canAdmin&&com.u) {
+            if (canAdmin&&com.username) {
                 lbl = "ljpopdel" + dItemid + "author";
-                inHTML += "<input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>Delete all <b>" + (com.u == remoteUser ? 'my' : com.u) + "</b> comments in this post</label><br />";
+                inHTML += "<input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>Delete all <b>" + (com.username == remoteUser ? 'my' : com.u) + "</b> comments in this post</label><br />";
             } else {
                 finalHeight -= 15;
             }
