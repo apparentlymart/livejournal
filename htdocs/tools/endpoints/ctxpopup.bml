@@ -19,6 +19,7 @@
 
     # get user
     my $remote = LJ::get_remote();
+    my $is_remote_sup = LJ::SUP->is_remote_sup();
 
     my $get_user = sub {
         # three ways to load a user:
@@ -78,6 +79,7 @@
     } else {
         $ret{is_custom_userhead} = 1;
     }
+    $ret{is_custom_userhead} = 0 if !$is_remote_sup && $LJ::DISABLED{'userhead_nonsup'};
 
     my $up = $u->userpic;
     if ($up) {
