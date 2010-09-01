@@ -29,7 +29,7 @@ sub option {
 
     my ($maxwidth, $maxheight) = (0, 0);
     ($maxwidth, $maxheight) = ($1, $2)
-        if $imgplaceholders =~ /^(\d+)\|(\d+)$/;
+        if $imgplaceholders and $imgplaceholders =~ /^(\d+)\|(\d+)$/;
 
     my $is_stock = {
         "320|240" => 1,
