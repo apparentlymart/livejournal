@@ -176,7 +176,8 @@ sub get_messages {
     my @messages = $class->load_messages;
     @messages = grep { ref $_ } @messages;
 
-    my $office_only = LJ::GeoLocation->get_country_info_by_ip(LJ::get_remote_ip(), { allow_spec_country => 1 } ) eq '1S';
+    my $country = LJ::GeoLocation->get_country_info_by_ip(LJ::get_remote_ip(), { allow_spec_country => 1 } );
+    my $office_only = $country eq '1S' || $country eq '6A';
 
     # +0 is important for doing integer bitwise operation, opposite to string operation
     @messages = grep { ~($_->{accounts}+0) & AccountMask->{OfficeOnly} or $office_only } @messages;
