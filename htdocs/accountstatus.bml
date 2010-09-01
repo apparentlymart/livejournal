@@ -141,14 +141,16 @@ body<=
 
     $ret .= LJ::run_hook("accountstatus_delete_text", $u);
 
-    unless ($u->is_suspended) {
-        my ($purge_comments, $purge_community_entries) = split /:/, $u->prop("purge_external_content");
-        
+    my ($purge_comments, $purge_community_entries) = split /:/, $u->prop("purge_external_content");
+
+    if (($u->is_person || $u->is_identity) && !$u->is_suspended) {
         $ret .= '<h3>' . $ML{'.label.purge_external_content'} . '</h3>';
         $ret .= "<ul style='list-style:none;margin:0;padding:0;'><li><label for='purge_comments'>";
         $ret .= LJ::html_check({ 'name' => 'purge_comments', 'id' => 'purge_comments', 'selected' => $purge_comments });
         $ret .= "$ML{'.label.purge_comments'}</label></li>";
+    }
 
+    if ($u->is_person && !$u->is_suspended) {
         $ret .= "<li><label for='purge_community_entries'>";
         $ret .= LJ::html_check({ 'name' => 'purge_community_entries', 'id' => 'purge_community_entries', 'selected' => $purge_community_entries });
         $ret .= "$ML{'.label.purge_community_entries'}</label></li></ul>";
