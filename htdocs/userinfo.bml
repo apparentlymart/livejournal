@@ -400,7 +400,7 @@
 
             $url = "$LJ::SITEROOT/community/join.bml?comm=$user";
             $text = $ML{'.optionlinks.joincomm'};
-            if ($comm_settings[0] eq "closed" || !$remote || $remote->is_identity || !$u->is_visible) {
+            if ($comm_settings[0] eq "closed" || !$remote || !$u->is_visible) {
                 $li_title = $comm_settings[0] eq "closed" ? $ML{'.optionlinks.joincomm.title.closed'} : $ML{'.optionlinks.joincomm.title.loggedout'};
                 $li_title = $ML{'.optionlinks.joincomm.title.cantjoin'} if $remote && $remote->is_identity;
                 $body .= "<li class='profile_join_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/join-comm-disabled.gif' alt='' />$text</li>";
