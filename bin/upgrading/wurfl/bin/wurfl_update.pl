@@ -5,17 +5,12 @@ use lib "$ENV{'LJHOME'}/cgi-bin";
 
 use LJ::WURFL;
 use LJ::WURFL::Parser;
-
 use FindBin;
 use File::Spec::Functions qw(catfile);
-
 use Getopt::Long;
-
-use Devel::Size qw(total_size);
 
 my $wurfl_file = "wurfl.xml";
 my $store_file = "wireless.stor";
-
 my $datadir = catfile($FindBin::Bin, '..', 'data');
 
 my ($noparse, $test, $verbose) = 3 x 0;
@@ -35,6 +30,12 @@ unless ($noparse) {
 }
 
 if ($test) {
+    if (eval {require "Devel/Size.pm"}) {
+        *total_size = \&Devel::Size::total_size;
+    } else {
+        *total_size = sub { "unknown" };
+    }
+
 	print "Load wireless data.\n";
 	my $wurfl = new LJ::WURFL;
 	print "Cannot load data file.\n" unless $wurfl->load(catfile($datadir,$store_file));
