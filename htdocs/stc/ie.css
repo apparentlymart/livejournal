@@ -119,6 +119,12 @@ __________________________________________*/
 	this.style.behavior = null 
 	);
 	}
+* HTML .b-live-share-arr {
+	_border-top-color: pink;
+	_border-right-color: pink;
+	_border-left-color: pink;
+	_filter: chroma(color=pink);
+	}
 
 
 /* Styles for bubbles
