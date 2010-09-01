@@ -14,17 +14,19 @@ use constant NS_SOAP => 'http://schemas.xmlsoap.org/soap/envelope/';
 use constant NS_WSSE => 'http://schemas.xmlsoap.org/ws/2002/07/secext';
 use constant NS_WSU => 'http://schemas.xmlsoap.org/ws/2002/07/utility';
 
+use LJ::Request;
+
+
 sub handler ($$) {
     my $class = shift;
     my($r) = @_;
-    require Apache::Constants;
     if (lc($r->dir_config('Filter') || '') eq 'on') {
         $r = $r->filter_register;
     }
     my $server = $class->new or die $class->errstr;
     $server->{apache} = $r;
     $server->run;
-    return Apache::Constants::OK();
+    return LJ::Request::OK();
 }
 
 sub new {
