@@ -2,6 +2,7 @@ package LJ::Setting::SMS;
 use base 'LJ::Setting';
 use strict;
 use warnings;
+no warnings 'uninitialized';
 
 sub should_render {
     my ($class, $u) = @_;

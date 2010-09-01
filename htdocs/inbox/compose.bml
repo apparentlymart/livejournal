@@ -6,10 +6,9 @@ body<=
     use vars qw(%GET %POST);
 
     use warnings;
-    use Class::Autouse qw(
-                          LJ::Message
-                          LJ::JSUtil
-                          );
+    no warnings 'uninitialized';
+    use LJ::Message;
+    use LJ::JSUtil;
 
     return "User messaging is currently disabled" if $LJ::DISABLED{user_messaging};
 
