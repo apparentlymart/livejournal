@@ -1783,7 +1783,8 @@ sub talkform {
         'author_options'        => \@author_options,
 
         'extra_rows'            => LJ::run_hook('extra_talkform_rows', {
-            'entry' => $entry,
+            'entry'     => $entry,
+            'editid'    => $editid,
         }),
     );
 
