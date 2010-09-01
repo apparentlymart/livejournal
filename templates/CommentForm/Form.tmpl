@@ -49,7 +49,7 @@
 <tr valign='top'>
     <td align='right'><TMPL_VAR expr="ml('/talkpost.bml.opt.subject')"></td>
     <td>
-        <input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value="<TMPL_VAR basesubject>" onKeyPress='subjectNoHTML(event);'/>
+        <input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value="<TMPL_VAR basesubject>" onKeyPress='subjectNoHTML(event);' tabindex='10' />
 
         <TMPL_IF 0> subject icon </TMPL_IF>
             <input type='hidden' id='subjectIconField' name='subjecticon' value='$subjicon'>
@@ -162,7 +162,7 @@
 <tr valign='top'>
     <td align='right'><TMPL_VAR expr="ml('/talkpost.bml.opt.message')"></td>
     <td style='width: 90%'>
-        <textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext'><TMPL_VAR comment_body></textarea>
+        <textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext' tabindex='20'><TMPL_VAR comment_body></textarea>
     </td>
 </tr>
 
@@ -192,7 +192,7 @@
             // -->
         </script>
 
-        <input type='submit' name='submitpost' onclick='return checkLength() && sendForm("postform", "username")'
+        <input type='submit' name='submitpost' onclick='return checkLength() && sendForm("postform", "username")' tabindex='30'
             <TMPL_IF editid>
                 value="<TMPL_VAR expr="ml('/talkpost.bml.opt.edit')">"
             <TMPL_ELSE>

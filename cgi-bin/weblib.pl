@@ -741,7 +741,7 @@ sub create_qr_div {
     $qrhtml .= "<tr><td align='right' valign='top'>";
     $qrhtml .= "<b>".BML::ml('/talkpost.bml.opt.subject')."</b></td>";
     $qrhtml .= "<td colspan='2' align='left'>";
-    $qrhtml .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value='' />";
+    $qrhtml .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value='' tabindex='10' />";
     
     $qrhtml .= "<div id=\"subjectCaptionText\">" . $text_hint . "</div>" if $text_hint;
     
@@ -751,7 +751,7 @@ sub create_qr_div {
     $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.message')."</b></td>";
     $qrhtml .= "<td colspan='3' style='width: 90%'>";
 
-    $qrhtml .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='body' style='width: 99%'></textarea>";
+    $qrhtml .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='body' style='width: 99%' tabindex='20'></textarea>";
     $qrhtml .= "</td></tr>";
 
     $qrhtml .= LJ::run_hook('extra_quickreply_rows', {
@@ -764,7 +764,7 @@ sub create_qr_div {
 
     $qrhtml .= LJ::html_submit('submitpost', BML::ml('/talkread.bml.button.post'),
                                { 'id' => 'submitpost',
-                                 'raw' => 'onclick="if (QuickReply.check()){ QuickReply.submit() }"'
+                                 'raw' => q|onclick="if (QuickReply.check()){ QuickReply.submit() }" tabindex='30' |,
                                  });
 
     $qrhtml .= "&nbsp;" . LJ::html_submit('submitmoreopts', BML::ml('/talkread.bml.button.more'),

@@ -77,12 +77,13 @@
             <td>
                 <input class='textbox' name='userpost' size='13' maxlength='15' id='username' value='<TMPL_VAR username_default>' onclick='this.value=""'
                     style='background: url(<TMPL_VAR lj_imgprefix>/userinfo.gif) no-repeat; background-color: #fff; background-position: 0px 1px; padding-left: 18px; color: #00C; font-weight: bold;'
+                    tabindex='4'
                 />
             </td>
         </tr>
         <tr>
             <td><TMPL_VAR expr="ml('Password')">:</td>
-            <td><input class='textbox' name='password' type='password' maxlength='30' size='18' id='password' /></td>
+            <td><input class='textbox' name='password' type='password' maxlength='30' size='18' id='password' tabindex='5' /></td>
         </tr>
         <tr>
             <td colspan='2'>
