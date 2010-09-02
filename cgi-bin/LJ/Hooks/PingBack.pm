@@ -132,6 +132,11 @@ LJ::register_hook("postpost", sub {
 LJ::register_hook("editpost", sub {
     my $entry = shift;
 
+    ## LJSUP-6720: Pingbacks - only after creating entry or comment
+    ## Pingbacks should be sent only after creating entry or comment, and shouldn't be sent after modifiyng.
+    ## 02.09.2010
+    return;
+
     return unless LJ::PingBack->has_user_pingback($entry->journal);
 
     # check security
