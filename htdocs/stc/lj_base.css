@@ -895,7 +895,7 @@ Must be removed after implementation of Framework! */
 		margin: 7px 0 0;
 		}
 
-.i-setting-fbconnect-icon {
+.i-setting-connect-icon {
 	vertical-align: -3px;
 	}
 
@@ -904,6 +904,7 @@ Must be removed after implementation of Framework! */
 	}
 	.b-repost-item {
 		margin: 0 0 5px !important;
+		text-align: left !important;
 		}
 	.b-repost-item .repost_disabled {
 		color: #CCC;
