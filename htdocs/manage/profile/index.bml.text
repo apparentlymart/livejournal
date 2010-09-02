@@ -167,6 +167,8 @@
 
 .fn.userheads.collection=Collection
 
+.fn.vernum=Verification number
+
 .fn.zip=ZIP Code
 
 .friendof=Show other users who have friended you, but you have not friended
@@ -367,6 +369,8 @@
 .section.userheads.expire_date=Expire [[date]]
 
 .section.userhead.apply.href=Click userhead to apply (or <a [[aopts]]>buy more userheads</a>):
+
+.section.vernum.button=Verify
 
 .section.web=Web Page
 

@@ -528,13 +528,15 @@ body<=
 
             $ret .= " <span>" . BML::ml('.txt.details', {'aopts' => "href='$LJ::SITEROOT/tools/textmessage.bml?mode=details'"}) . "</span></td></tr>\n";
             $ret .= "<tr><td class='field_name'>$ML{'.fn.txtnum'}</td><td>";
-            #$ret .= '<ul class="b-manage-smsn b-manage-smsn-hide">';
-            #$ret .= '<li class="b-manage-smsn-sms">' . LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '15', 'maxlength' => '15' }) . '<br /><span class="helper">' . $ML{'.section.textmsg.example'} . '</span></li>';
-            $ret .= LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '15', 'maxlength' => '15' });
-            #$ret .= '<li class="b-manage-smsn-status"><i class="i-manage-smsn-icon"></i><span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><span>' . $ML{'.section.textmsg.info'} . '</span></span>&nbsp;&nbsp;' . LJ::help_icon('sms_notification') . '</li>';
-            #$ret .= "<li class='b-manage-smsn-btn'><input type='button' name='sendsms' value='$ML{'.section.textmsg.button'}' disabled='disabled' /></li>";
-            #$ret .= '</ul>';
-            #$ret .= '<p class="helper" style="display: none;">' . $ML{'.section.textmsg.adv'} . '</p>';
+            $ret .= '<ul class="b-manage-smsn b-manage-smsn-hide">';
+            $ret .= '<li class="b-manage-smsn-sms">' . LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '15', 'maxlength' => '15' }) . '<br /><span class="helper">' . $ML{'.section.textmsg.example'} . '</span></li>';
+            $ret .= '<li class="b-manage-smsn-status"><i class="i-manage-smsn-icon"></i><span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><span>' . $ML{'.section.textmsg.info'} . '</span></span>&nbsp;&nbsp;' . LJ::help_icon('sms_notification') . '</li>';
+            $ret .= "<li class='b-manage-smsn-btn'><input type='button' name='sendsms' value='$ML{'.section.textmsg.button'}' disabled='disabled' /></li>";
+            $ret .= '</ul>';
+            $ret .= "</td></tr>\n";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.vernum'}</td><td>";
+            $ret .= LJ::html_text({ 'name' => 'txtmsg_verify', 'size' => '4', 'maxlength' => '4' }) ." <input type='button' name='verify' value='$ML{'.section.vernum.button'}' />";
+            $ret .= '<p class="helper" style="display: none;">' . $ML{'.section.textmsg.adv'} . '</p>';
             $ret .= "</td></tr>\n";
             $ret .= "</table>\n";
 
