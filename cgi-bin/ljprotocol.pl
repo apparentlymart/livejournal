@@ -2142,7 +2142,7 @@ sub editevent
                        $itemid*256 + $oldevent->{'anum'});
 
         LJ::MemCache::set([$ownerid, "log2:$ownerid:$itemid"], $row);
-
+        LJ::Entry->reset_singletons; ## flush cached LJ::Entry objects
     }
 
     if ($security ne $oldevent->{'security'} ||
