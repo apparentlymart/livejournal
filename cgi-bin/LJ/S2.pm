@@ -4233,7 +4233,9 @@ sub YearMonth__month_format
 
 sub Image__set_url {
     my ($ctx, $img, $newurl) = @_;
-    $img->{'url'} = LJ::eurl($newurl);
+    require URI;
+    my $uri = new URI($newurl);
+    $img->{'url'} = $uri->as_string;
 }
 
 sub ItemRange__url_of
