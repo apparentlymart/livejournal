@@ -677,7 +677,7 @@ Must be removed after implementation of Framework! */
 			}
 #lj_controlstrip .appwidget-sitemessages {
 	top: 44px;
-	z-index: 99999;
+	z-index: 9999;
 	}
 #content-wrapper .appwidget-sitemessages {
 	position: static;
