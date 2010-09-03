@@ -85,8 +85,9 @@
     $ret .= "<div id='close'><a href='#close' onclick='onCancel();return false;'>close</a></div>";
 
     # content
+    my $ml_unavailable = LJ::Lang::ml('/imgupload.bml.msg.unavailable');
     $ret .= "<div class='insobjContent' id='img_iframe_holder' style='display: none; margin: 0px 0px 0px 0px;'>
-        TODO ML: Service temporary unavailable.
+        $ml_unavailable
     </div><div id='img_fromwhere' class='insobjContent'>";
 
     $ret .= "<p class='wintitle' id='wintitle'></p>";

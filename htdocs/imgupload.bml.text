@@ -5,3 +5,5 @@
 
 .size=When uploading from file or from a gallery, the image will display as 320 x 240 (medium) and will link to the image in the gallery.
 
+.msg.unavailable=This service is temporarily unavailable.
+
