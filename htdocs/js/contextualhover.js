@@ -340,7 +340,7 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 		ippu.element.append('<div class="Inner">Loading...</div>');
 		return;
 	} else if (!data.username || !data.success || data.noshow) {
-		ippu.hide();
+		ContextualPopup.hidePopup();
 		return;
 	}
 	
@@ -702,6 +702,12 @@ ContextualPopup.getInfo = function(target, popup_id)
 		dataType: 'json',
 		success: function(data)
 		{
+			if (data.error) {
+				ContextualPopup.hidePopup();
+				t.showNote(data.error, target);
+				return;
+			}
+			
 			t.cachedResults[String(data.userid)] =
 			t.cachedResults[data.username] =
 			t.cachedResults[data.url_userpic] = data;
@@ -709,11 +715,6 @@ ContextualPopup.getInfo = function(target, popup_id)
 			// non default userpic
 			if (target.up_url) {
 				t.cachedResults[target.up_url] = data;
-			}
-			
-			if (data.error) {
-				!data.noshow && t.showNote(data.error, target);
-				return;
 			}
 			
 			t.currentRequests[popup_id] = null;
