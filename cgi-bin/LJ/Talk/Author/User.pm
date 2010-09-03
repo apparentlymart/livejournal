@@ -158,7 +158,13 @@ sub handle_user_input {
         }
     }
 
-    $init->{'didlogin'} = $up->make_login_session($exptype, $ipfixed);
+    # if the user chooses to log in, do so
+    if ($form->{'do_login'} && ! @$errret) {
+        $init->{'didlogin'} = $up->make_login_session($exptype, $ipfixed);
+    } else {
+        # record their login session anyway
+        LJ::Session->record_login($up);
+    }
 
     return $up;
 }
