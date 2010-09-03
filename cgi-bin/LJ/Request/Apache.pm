@@ -373,10 +373,19 @@ sub LJ::Request::post_params {
     return @{ $self->{params} } if $self->{params};  
 
     my @params = $self->_parse_post();
+    if(@params == 1){
+        $self->{raw_content} = shift @params;   
+    }
     $self->{params} = \@params;
     return @params;
 }
 
+sub LJ::Request::raw_content {
+    my $class = shift;
+    my $self = $class->_get_instance();
+    return if $self->post_params;
+    return $self->{raw_content};
+} 
 
 sub LJ::Request::add_header_out {
     my $class  = shift;
@@ -473,13 +482,17 @@ sub LJ::Request::_parse_post {
     my $apr = $class->apr();
     
     my $method = $r->method;
-    return unless $method eq 'POST';
+    return if $method eq 'GET'; # unless POST PUT DELETE HEAD
     my $host = $r->headers_in()->get("Host");
     my $uri = $r->uri;
     
     ## apreq parses only this encoding methods.
     my $content_type = $r->headers_in()->get("Content-Type");
-    if ($content_type !~ m!^application/x-www-form-urlencoded!i &&
+    if ($content_type =~ m!^application/(json|xml)!i){
+        my $content;
+        $apr->read($content, $r->headers_in()->get('Content-Length')) if $r->headers_in()->get('Content-Length');
+        return $content;
+    }elsif ($content_type !~ m!^application/x-www-form-urlencoded!i &&
         $content_type !~ m!^multipart/form-data!i)
     {
         ## hack: if this is a POST request, and App layer asked us
@@ -491,6 +504,8 @@ sub LJ::Request::_parse_post {
         }
         $r->headers_in()->set("Content-Type", "application/x-www-form-urlencoded");
     }
+    
+    return unless $method eq 'POST';
    
     my $qs = $r->args;
     $r->args(''); # to exclude GET params from Apache::Request object.

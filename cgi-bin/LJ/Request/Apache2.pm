@@ -418,6 +418,15 @@ sub LJ::Request::post_params {
     return @params;
 }
 
+sub LJ::Request::raw_content {
+    my $class = shift;
+    my $self = $class->_get_instance();
+    my $r = $self->apr();
+    return $self->{raw_content} if $self->{raw_content};
+    $r->read($self->{raw_content}, $r->headers_in()->get('Content-Length')) if $r->headers_in()->get('Content-Length');
+    return $self->{raw_content};
+}
+
 sub LJ::Request::add_header_out {
     my $class  = shift;
     my $header = shift;
