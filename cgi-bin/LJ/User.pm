@@ -4389,6 +4389,8 @@ sub _friend_friendof_uids_do {
 
     return @$uids;
 }
+
+## Attention: if 'limit' arg is omited, this method loads all userid from friends table.
 sub _load_friend_friendof_uids_from_db {
     my $u     = shift;
     my $mode  = shift;
@@ -4409,6 +4411,40 @@ sub _load_friend_friendof_uids_from_db {
     my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
     return $uids;
 }
+
+## Returns exact friendsOf count. Whitout limit.
+sub precise_friendsof_count {
+    my $u = shift;
+
+    ## TODO: add caching here
+    my $ckey = [ $u->userud, "friendof:precise_cnt:" . $u->userid ];
+    my $cached = LJ::MemCache::get($ckey);
+    return $cached if defined $cached;
+
+    ## arrayref with all users friends
+    my $uids = $u->_load_friend_friendof_uids_from_db('friendofs');
+
+    my $res = 0;
+    ## work with batches
+    while (my @uid_batch = splice @$uids, 0 => 5000){
+        my $us = LJ::load_userids(@uid_batch);
+        foreach my $fuid (@uid_batch){
+            my $fu = $us->{$fuid};
+            next unless $fu;
+            my $status = $u->statusvis;
+            next unless $u->statusvis =~ /^[VML]$/o;
+            next unless $u->journal_type =~ /^[PI]$/o;
+            
+            ## Friend!!!
+            $res++;
+        }
+    }
+    
+    LJ::MemCache::set($ckey => $res);
+
+    return $res;
+}
+
 
 sub fb_push {
     my $u = shift;
@@ -7901,6 +7937,7 @@ sub add_friend
     # delete friend-of memcache keys for anyone who was added
     foreach my $fid (@add_ids) {
         LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
+        LJ::MemCache::delete([ $fid, "friendof:precise_cnt:$fid" ]);
         LJ::memcache_kill($fid, 'friendofs');
         LJ::memcache_kill($fid, 'friendofs2');
 
@@ -7967,6 +8004,7 @@ sub remove_friend {
     # delete friend-of memcache keys for anyone who was removed
     foreach my $fid (@del_ids) {
         LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
+        LJ::MemCache::delete([ $fid, "friendof:precise_cnt:$fid" ]);
         LJ::memcache_kill($fid, 'friendofs');
         LJ::memcache_kill($fid, 'friendofs2');
 

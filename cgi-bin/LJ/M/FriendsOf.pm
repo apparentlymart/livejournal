@@ -66,7 +66,7 @@ sub friend_ofs {
         # total edges in, less their mutual friend count if necessary
         # (which generally includes all communities they're a member of,
         # as people watch those)
-        $ct = scalar @{ $fom->_friendof_ids };
+        $ct = $fom->{u}->precise_friendsof_count;
         if ($fom->{mutualsep}) {
             $ct -= scalar @{ $fom->_mutual_friendids };
         } else {
