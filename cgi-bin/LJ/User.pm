@@ -4417,7 +4417,7 @@ sub precise_friendsof_count {
     my $u = shift;
 
     ## TODO: add caching here
-    my $ckey = [ $u->userud, "friendof:precise_cnt:" . $u->userid ];
+    my $ckey = [ $u->userid, "friendof:precise_cnt:" . $u->userid ];
     my $cached = LJ::MemCache::get($ckey);
     return $cached if defined $cached;
 
