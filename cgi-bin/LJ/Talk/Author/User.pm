@@ -158,9 +158,9 @@ sub handle_user_input {
         }
     }
 
-    # if the user chooses to log in, do so
-    if ($form->{'do_login'} && ! @$errret) {
-        $init->{'didlogin'} = $up->make_login_session($exptype, $ipfixed);
+    # unless the user came from the email form, log them in
+    if ( !$init->{'used_ecp'} && ! @$errret ) {
+        $up->make_login_session($exptype, $ipfixed);
     } else {
         # record their login session anyway
         LJ::Session->record_login($up);
