@@ -3692,6 +3692,14 @@ sub _Entry__get_link
         $link->{_raw} = qq|<iframe src="$url" scrolling="no" frameborder="0" style="border:none;overflow:hidden;width:150px;height:21px;" allowTransparency="true"></iframe>|;
         return $link;
     }
+    if ($key eq "facebook_faces") {
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->security eq 'public';
+        my $entry_url = LJ::eurl($entry->url);
+        my $link = {};
+        $link->{_raw} = qq|<iframe src="http://www.facebook.com/plugins/like.php?href=$entry_url&amp;layout=standard&amp;show_faces=true&amp;width=450&amp;action=like&amp;colorscheme=light&amp;height=80" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:80px;" allowTransparency="true"></iframe>|;
+        return $link;
+    }
     if ($key eq "mem_add") {
         return $null_link if $LJ::DISABLED{'memories'};
         return LJ::S2::Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
