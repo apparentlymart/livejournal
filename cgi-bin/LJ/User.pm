@@ -4433,7 +4433,7 @@ sub precise_friendsof_count {
             next unless $fu;
             my $status = $u->statusvis;
             next unless $u->statusvis =~ /^[VML]$/o;
-            next unless $u->journal_type =~ /^[PI]$/o;
+            next unless $u->journaltype =~ /^[PI]$/o;
             
             ## Friend!!!
             $res++;
