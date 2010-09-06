@@ -47,7 +47,6 @@ body<=
         );
 
         my %etypeids = map { LJ::Event->event_to_etypeid($_) => 1 } @events;
-
         return 0 unless $etypeids{$subhash->{'etypeid'}};
 
         return 1;
@@ -120,6 +119,9 @@ body<=
 
     push @$groups, { event => "UserExpunged", 'journalid' => $journal->id }
         unless LJ::User->is_protected_username($journal->user);
+
+    push @$groups, { event => "CommunityJoinReject", 'journalid' => $journal->id }
+        if LJ::can_manage($u, $journal); 
 
     $ret .= $widget->render({
         'title' => BML::ml('subscribe_interface.category.this-journal', { 'journal' => $journal->ljuser_display }),

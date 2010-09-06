@@ -575,11 +575,13 @@ sub approve_pending_member {
 # des-userid: userid of the user doing the join
 # returns: 1 on success, 0/undef on error
 # </LJFUNC>
+## LJ::reject_pending_member($cid, $id, $remote->{userid}, $POST{'reason'});
 sub reject_pending_member {
-    my ($commid, $userid) = @_;
+    my ($commid, $userid, $maintid, $reason) = @_;
     my $cu = LJ::want_user($commid);
     my $u = LJ::want_user($userid);
-    return unless $cu && $u;
+    my $mu = LJ::want_user($maintid);
+    return unless $cu && $u && $mu;
 
     # step 1, update authactions table
     my $dbh = LJ::get_db_writer();
@@ -601,7 +603,20 @@ sub reject_pending_member {
     unless ($u->has_subscription(%params)) {
         $u->subscribe(%params, method => 'Email');
     }
+
+    # Email to user about rejecting
     LJ::Event::CommunityJoinReject->new($u, $cu)->fire unless $LJ::DISABLED{esn};
+
+    # Email to maints about user rejecting
+    my $maintainers = LJ::load_rel_user($commid, 'A');
+    foreach my $mid (@$maintainers) {
+        next if $mid == $maintid;
+        my $maintu = LJ::load_userid($mid);
+        my %params = (event => 'CommunityJoinReject', journal => $cu);
+        if ($maintu && $maintu->has_subscription(%params)) {
+            LJ::Event::CommunityJoinReject->new($cu, $maintu, $mu, $u, $reason)->fire unless $LJ::DISABLED{esn};
+        }
+    }
 
     return 1;
 }

@@ -72,7 +72,7 @@ use Class::Autouse qw(
 # my $event = LJ::Event::ExampleEvent->new($u, $arg1, $arg2);
 sub new {
     my ($class, $u, @args) = @_;
-    confess("too many args")        if @args > 2;
+    confess("too many args")        if @args > 4;
 
     return bless {
         userid => $u ? $u->id : 0,
@@ -85,13 +85,13 @@ sub new {
 # determining type, and userid for journalid for determining journal.
 #
 # my $event =
-#     LJ::Event->new_from_raw_params($example_etypeid, $u->id, $arg1, $arg2);
+#     LJ::Event->new_from_raw_params($example_etypeid, $u->id, $arg1, $arg2, $arg3, $arg4);
 sub new_from_raw_params {
-    my (undef, $etypeid, $journalid, $arg1, $arg2) = @_;
+    my (undef, $etypeid, $journalid, $arg1, $arg2, $arg3, $arg4) = @_;
 
     my $class   = LJ::Event->class($etypeid) or confess "Classname cannot be undefined/false";
     my $journal = LJ::load_userid($journalid);
-    my $evt     = LJ::Event->new($journal, $arg1, $arg2);
+    my $evt     = LJ::Event->new($journal, $arg1, $arg2, $arg3, $arg4);
 
     # bless into correct class
     bless $evt, $class;
@@ -598,6 +598,7 @@ sub subscriptions {
 
         # first we find exact matches (or all matches)
         my $journal_match = $allmatch ? "" : "AND journalid=?";
+
         my $limit_sql = ($limit && $limit_remain) ? "LIMIT $limit_remain" : '';
         my $sql = "SELECT userid, subid, is_dirty, journalid, etypeid, " .
             "arg1, arg2, ntypeid, createtime, expiretime, flags  " .

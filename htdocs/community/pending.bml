@@ -53,149 +53,208 @@ body<=
         unless @$pendids || LJ::did_post();
 
     # saving a form submission
+    my ($added, $rejected, $ignored, $previous, $banned, $ban_skipped);
     if (LJ::did_post()) {
         unless (LJ::check_form_auth()) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
             return $ret;
         }
-        my @userids = split(',', $POST{'ids'});
 
-        # need a db handle now
-        my $dbh = LJ::get_db_writer();
-        
-        # hit up each user to find out what to do with them
-        my ($added, $rejected, $ignored, $previous, $banned, $ban_skipped);
-        foreach my $id (@userids) {
-            unless ($us->{$id}) {
-                $previous++;
-                next;
-            }
+        $ret .= "<?h1 $ML{'/community/members.bml.success.header'} h1?><?p $ML{'/community/members.bml.success.message'} p?>"
+            if ($POST{'reject_select'} eq '1' and $POST{'approve'}) or $POST{'reject_done'} eq '1';
 
-            unless (defined $POST{"pending_$id"}) {
-                $ignored++;
-                next;
-            }
+        if ($POST{'reject_select'} eq '1') {
+            $ret .= "<h3>".$ML{'.following_users'}."</h3>";
+            $ret .= $ML{'.you_can_remove'};
 
-            if ($POST{"pending_$id"} eq 'on' and $POST{"approve"}) {
-                LJ::approve_pending_member($cid, $id);
-                $added++;
-            } elsif ($POST{"pending_$id"} eq 'on' and $POST{"reject"}) {
-                LJ::reject_pending_member($cid, $id);
-                $rejected++;
-            } elsif ($POST{"pending_$id"} eq 'on' and $POST{"reject_ban"}) {
-                my $banlist = LJ::load_rel_user($c, 'B') || [];
-                if (scalar(@$banlist) >= ($LJ::MAX_BANS || 5000)) {
-                    $ban_skipped++;
-                } else {
-                    LJ::set_rel($c, $us->{$id}, 'B');
-                    $c->log_event('ban_set', { actiontarget => $id, remote => $remote });
-                    LJ::run_hooks('ban_set', $c, $us->{$id});
-                    $banned++;
+            my @userids = split(',', $POST{'ids'});
 
-                    LJ::reject_pending_member($cid, $id); # only in case of successful ban
-                    $rejected++; # for keeping this user in list for later reject
+            my @to_show = ();
+            foreach my $id (@userids) {
+                unless ($us->{$id}) {
+                    $previous++;
+                    next;
+                }
+                unless (defined $POST{"pending_$id"}) {
+                    $ignored++;
+                    next;
+                }
+                next unless $POST{"pending_$id"} eq 'on';
+
+                push @to_show, $us->{$id};
+
+                if ($POST{"approve"}) {
+                    LJ::approve_pending_member($cid, $id);
+                    $added++;
                 }
             }
-        }
-
-        $ret .= "<?h1 $ML{'/community/members.bml.success.header'} h1?><?p $ML{'/community/members.bml.success.message'} p?>";
-        $ret .= "<?p " . BML::ml('.success.added', { num => $added }) . " p?>" if $added;
-        $ret .= "<?p " . BML::ml('.success.rejected', { num => $rejected }) . " p?>" if $rejected;
-        $ret .= "<?p " . BML::ml('.success.ignored', { num => $ignored }) . " p?>" if $ignored;
-        $ret .= "<?p " . BML::ml('.success.previous', { num => $previous }) . " p?>" if $previous;
-        $ret .= "<?p " . BML::ml('.success.banned', { num => $banned }) . " p?>" if $banned;
-        $ret .= "<?p " . BML::ml('.success.ban_skipped', { num => $ban_skipped }) . " p?>" if $ban_skipped;
-        $ret .= "<?p " . BML::ml("/community/members.bml.success.return", { 'link' => BML::get_uri() . "?authas=$cname" }) . " p?>";
-
-        return $ret;
-    }
-
-    my @users = sort { $a->{user} cmp $b->{user} } values %$us;
-    my $page_size = 100; # change to adjust page size
-
-    # are we going to jump to a specific user ?
-    my $jumppage;
-    my $jumpuser;
-    my $jumpto = $POST{'jumpto'} || $GET{'jumpto'};
-    if (@users > $page_size && $jumpto =~ /^\w+$/) {
-        my $ct;
-        foreach (@users) {
-            $jumppage++ if $ct % $page_size == 0;
-            if ($jumpto eq $_->{'name'}) {
-                $jumpuser = $_->{'name'};
-                last;
+            if ($POST{"approve"}) {
+                $ret .= "<?p " . BML::ml('.success.added', { num => $added }) . " p?>" if $added;
+            } else {
+                $ret .= "<form method='post' action='pending.bml?authas=$cname'>\n";
+                $ret .= LJ::form_auth();
+                $ret .= "<div>" . join ("</div>, <div>", map { $_->{'user'} } @to_show) . "</div>\n";
+                $ret .= LJ::html_hidden('ids', join(',', map { $_->{'userid'} } @to_show)) . "\n";
+                $ret .= "<textarea name='reason' rows='7' cols='50'>".$ML{'.reason.default.text'}."</textarea><br/>\n";
+                $ret .= $ML{'.reason.reject.text'}."<br/>\n";
+                $ret .= LJ::html_hidden('reject_done', 1);
+                $ret .= LJ::html_hidden('reject', $POST{'reject'});
+                $ret .= LJ::html_submit('yes_reject', $ML{'.button.yes.reject'});
+                $ret .= LJ::html_hidden('previous', $previous);
+                $ret .= LJ::html_hidden('ignored', $ignored);
+                $ret .= "</form>";
             }
-            $ct++;
         }
-        undef $jumppage unless $jumpuser;
+
+        if ($POST{'reject_done'} eq '1') {
+            my @userids = split(',', $POST{'ids'});
+
+            # need a db handle now
+            my $dbh = LJ::get_db_writer();
+            
+            # hit up each user to find out what to do with them
+            foreach my $id (@userids) {
+                if ($POST{"approve"}) {
+                    LJ::approve_pending_member($cid, $id);
+                    $added++;
+                } elsif ($POST{"reject"}) {
+                    LJ::reject_pending_member($cid, $id, $remote->{userid}, $POST{'reason'});
+                    $rejected++;
+                } elsif ($POST{"reject_ban"}) {
+                    my $banlist = LJ::load_rel_user($c, 'B') || [];
+                    if (scalar(@$banlist) >= ($LJ::MAX_BANS || 5000)) {
+                        $ban_skipped++;
+                    } else {
+                        LJ::set_rel($c, $us->{$id}, 'B');
+                        $c->log_event('ban_set', { actiontarget => $id, remote => $remote });
+                        LJ::run_hooks('ban_set', $c, $us->{$id});
+                        $banned++;
+
+                        LJ::reject_pending_member($cid, $id, $remote->{userid}, $POST{'reason'}); # only in case of successful ban
+                        $rejected++; # for keeping this user in list for later reject
+                    }
+                }
+                if ($POST{"reject"} or $POST{"reject_ban"}) {
+                    LJ::send_mail({ 'to' => $us->{$id}->email_raw,
+                                    'from' => $LJ::ACCOUNTS_EMAIL,
+                                    'fromname' => $LJ::SITENAMESHORT,
+                                    'wrap' => 1,
+                                    'charset' => 'utf-8',
+                                    'subject' => LJ::Lang::ml ('pending.mail.reject.subject', { community => $cname }),
+                                    'body'    => ( LJ::Lang::ml ('pending.mail.reject.body', 
+                                                    {
+                                                        community => $cname,
+                                                        username  => $us->{$id}->{'user'},
+                                                        reason    => $POST{'reason'},
+                                                        sitename  => $LJ::SITENAMESHORT,
+                                                    }
+                                                ))
+                                           });
+                }
+            }
+
+            $previous = $POST{'previous'};
+            $ignored = $POST{'ignored'};
+            $ret .= "<?p " . BML::ml('.success.rejected', { num => $rejected }) . " p?>" if $rejected;
+            $ret .= "<?p " . BML::ml('.success.ignored', { num => $ignored }) . " p?>" if $ignored;
+            $ret .= "<?p " . BML::ml('.success.previous', { num => $previous }) . " p?>" if $previous;
+            $ret .= "<?p " . BML::ml('.success.banned', { num => $banned }) . " p?>" if $banned;
+            $ret .= "<?p " . BML::ml('.success.ban_skipped', { num => $ban_skipped }) . " p?>" if $ban_skipped;
+
+        }
+        $ret .= "<?p " . BML::ml("/community/members.bml.success.return", { 'aopts' => "href='".BML::get_uri() . "?authas=$cname'" }) . " p?>";
+    } else {
+
+        my @users = sort { $a->{user} cmp $b->{user} } values %$us;
+        my $page_size = 100; # change to adjust page size
+
+        # are we going to jump to a specific user ?
+        my $jumppage;
+        my $jumpuser;
+        my $jumpto = $POST{'jumpto'} || $GET{'jumpto'};
+        if (@users > $page_size && $jumpto =~ /^\w+$/) {
+            my $ct;
+            foreach (@users) {
+                $jumppage++ if $ct % $page_size == 0;
+                if ($jumpto eq $_->{'name'}) {
+                    $jumpuser = $_->{'name'};
+                    last;
+                }
+                $ct++;
+            }
+            undef $jumppage unless $jumpuser;
+        }
+
+        # how to make links back to this page
+        my $self_link = sub {
+            return "pending.bml?authas=$cname&page=$_[0]";
+        };
+
+        my %items = BML::paging(\@users, $jumppage || $GET{page}, $page_size);
+        my $navbar = LJ::paging_bar($items{page}, $items{pages},
+                                     { self_link => $self_link });
+        @users = @{$items{items}};
+
+        # output starts here
+        $ret .= "<div align='center'>";
+        $ret .= "<form method='post' action='pending.bml?authas=$cname'>";
+        $ret .= LJ::form_auth();
+
+        # jump to user
+        if ($items{'pages'} > 1 || $GET{'jumpto'} ne '') {
+            $ret .= "<div style='margin-left: 30px;'>$ML{'.jump'}: ";
+            $ret .= LJ::html_text({ 'name' => 'jumpto', 'value' => ($POST{'jumpto'} || $GET{'jumpto'}),
+                                    'class' => 'text', 'size' => '10', 'maxlength' => '15' }) . " ";
+            $ret .= LJ::html_submit(undef, 'Go') . "</div>";
+        }
+
+        # table headers
+        $ret .= "<br /><table class='userslist-table' cellspacing='0' cellpadding='2'>\n<tr><th>";
+        $ret .= LJ::html_check({ id => 'all', name => 'all', checked => 'checked', 
+        onchange =>
+            "var inputs = document.getElementById('content-wrapper').getElementsByTagName('input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].type == 'checkbox' && inputs[i].getAttribute('id') !== 'all') {
+                    inputs[i].checked = this.checked;
+                }
+            }", 
+        onclick =>
+            "var inputs = document.getElementById('content-wrapper').getElementsByTagName('input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].type == 'checkbox' && inputs[i].getAttribute('id') !== 'all') {
+                    inputs[i].checked = this.checked;
+                }
+            }", 
+         selected => 0 });
+        $ret .= "</th><th>$ML{'/community/members.bml.key.user'}</th></tr>\n";
+
+        # rows for existing users
+        my $rc = 0;
+        foreach (@users) {
+            my $rstyle = ($rc++ & 1) ? '#efefef' : '#fff';
+            $ret .= "<tr style='background-color: $rstyle;'><td>";
+            $ret .= LJ::html_check({ id => 'pending_' . $_->userid, name => 'pending_' . $_->userid, 
+                                     selected => $jumpto ? ($_->user eq $jumpto ? 1 : 0) : 1 });
+            $ret .= "</td><td>" . LJ::ljuser($_->{user}) . "</td></tr>\n";
+        }
+
+        # some hidden values
+        $ret .= LJ::html_hidden('ids', join(',', map { $_->{userid}} @users)) . "\n";
+        $ret .= "</table>";
+        $ret .= LJ::html_submit('approve', $ML{'.button.approve'});
+        $ret .= LJ::html_hidden('reject_select', 1);
+        $ret .= LJ::html_submit('reject', $ML{'.button.reject'});
+        $ret .= LJ::html_submit('reject_ban', $ML{'.button.reject_ban'});
+        $ret .= "</form></div>\n\n";
+
+        $ret .= $navbar;
+
+        $ret .= BML::ml('Backlink', {
+            'link' => '/community/manage.bml',
+            'text' => $ML{'/community/members.bml.manage2'},
+        });
+
     }
-
-    # how to make links back to this page
-    my $self_link = sub {
-        return "pending.bml?authas=$cname&page=$_[0]";
-    };
-
-    my %items = BML::paging(\@users, $jumppage || $GET{page}, $page_size);
-    my $navbar = LJ::paging_bar($items{page}, $items{pages},
-                                 { self_link => $self_link });
-    @users = @{$items{items}};
-
-    # output starts here
-    $ret .= "<form method='post' action='pending.bml?authas=$cname'>";
-    $ret .= LJ::form_auth();
-
-    # jump to user
-    if ($items{'pages'} > 1 || $GET{'jumpto'} ne '') {
-        $ret .= "<div style='margin-left: 30px;'>$ML{'.jump'}: ";
-        $ret .= LJ::html_text({ 'name' => 'jumpto', 'value' => ($POST{'jumpto'} || $GET{'jumpto'}),
-                                'class' => 'text', 'size' => '10', 'maxlength' => '15' }) . " ";
-        $ret .= LJ::html_submit(undef, 'Go') . "</div>";
-    }
-
-    # table headers
-    $ret .= "<br /><div align='center'><table class='userslist-table' cellspacing='0' cellpadding='2'>\n<tr><th>";
-    $ret .= LJ::html_check({ id => 'all', name => 'all', checked => 'checked', 
-	onchange =>
-		"var inputs = document.getElementById('content-wrapper').getElementsByTagName('input');
-		for (var i = 0; i < inputs.length; i++) {
-			if (inputs[i].type == 'checkbox' && inputs[i].getAttribute('id') !== 'all') {
-				inputs[i].checked = this.checked;
-			}
-		}", 
-	onclick =>
-		"var inputs = document.getElementById('content-wrapper').getElementsByTagName('input');
-		for (var i = 0; i < inputs.length; i++) {
-			if (inputs[i].type == 'checkbox' && inputs[i].getAttribute('id') !== 'all') {
-				inputs[i].checked = this.checked;
-			}
-		}", 
-  	 selected => 0 });
-    $ret .= "</th><th>$ML{'/community/members.bml.key.user'}</th></tr>\n";
-
-    # rows for existing users
-    my $rc = 0;
-    foreach (@users) {
-        my $rstyle = ($rc++ & 1) ? '#efefef' : '#fff';
-        $ret .= "<tr style='background-color: $rstyle;'><td>";
-        $ret .= LJ::html_check({ id => 'pending_' . $_->userid, name => 'pending_' . $_->userid, 
-                                 selected => $jumpto ? ($_->user eq $jumpto ? 1 : 0) : 1 });
-        $ret .= "</td><td>" . LJ::ljuser($_->{user}) . "</td></tr>\n";
-    }
-
-    # some hidden values
-    $ret .= LJ::html_hidden('ids', join(',', map { $_->{userid}} @users)) . "\n";
-    $ret .= "</table><p>";
-    $ret .= LJ::html_submit('approve', $ML{'.button.approve'});
-    $ret .= LJ::html_submit('reject', $ML{'.button.reject'});
-    $ret .= LJ::html_submit('reject_ban', $ML{'.button.reject_ban'});
-    $ret .= "</p></div></form>\n\n";
-
-    $ret .= $navbar;
-
-    $ret .= BML::ml('Backlink', {
-        'link' => '/community/manage.bml',
-        'text' => $ML{'/community/members.bml.manage2'},
-    });
 
     return $ret;
 

@@ -1512,6 +1512,8 @@ esn.comm_join_reject.alert=Your request to join [[community]] community has been
 esn.comm_join_reject.email_subject|staleness=1
 esn.comm_join_reject.email_subject=Your Request to Join [[community]] community
 
+esn.comm_join_reject.maint.email_subject=[[username]] has been rejected from joining [[community]]
+
 esn.comm_join_reject.email_text|staleness=1
 esn.comm_join_reject.email_text<<
 Dear [[user]],
@@ -1523,6 +1525,30 @@ like to discuss the reasons for your request's rejection, you will need to conta
 a maintainer directly.
 
 Regards,
+[[sitename]] Team
+
+.
+
+esn.comm_join_reject.maint.email_text<<
+Dear [[user]], 
+
+A membership request from [[username]] to the [[community]] (which you maintain) has been rejected by [[maintainer]] for the following reason: [[reason]].
+
+Regards,
+[[sitename]] Team
+
+.
+
+pending.mail.reject.subject=Your Request to Join [[community]] community
+
+pending.mail.reject.body<<
+Dear [[username]], 
+
+Your request to join the [[community]] community has been declined by the maintainer(s) of the community for the following reason: [[reason]]. 
+
+Replies to this email are not sent to the community's maintainer(s). If you would like to discuss the reasons your membership request was rejected, you will need to contact a maintainer directly. Maintainers are listed on the community's Profile page. 
+
+Regards, 
 [[sitename]] Team
 
 .

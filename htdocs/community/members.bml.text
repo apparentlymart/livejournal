@@ -77,7 +77,11 @@
 
 .success.message2=The following changes have been made:
 
+.success.message=The following changes have been made:
+
 .success.nochanges=No changes have been made.
+
+.success.return=<a [[aopts]]>Return to the list</a>
 
 .success.return2=<a [[aopts]]>Return to the list</a>
 

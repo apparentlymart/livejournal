@@ -10,8 +10,12 @@
 .button.reject|staleness=1
 .button.reject=Reject membership
 
+.button.yes.reject=Yes, reject listed users
+
 .button.reject_ban|staleness=1
 .button.reject_ban=Reject membership and set ban
+
+.following_users=You have selected to reject the following user(s):
 
 .jump|staleness=1
 .jump=Jump to user
@@ -21,6 +25,10 @@
 .nopending.body=There are no pending membership requests for this community.
 
 .nopending.title=Nobody Pending
+
+.reason.reject.text=Use the above field to specify the reason you are rejecting membership. This field is optional.
+
+.reason.default.text=No reason given
 
 .succedd.ban_skipped|staleness=1
 .succedd.ban_skipped=You have [[num]] failed [[?num|ban|bans]] from this community. You can clean ban list and try again.
@@ -39,4 +47,7 @@
 .title=Pending Membership Requests
 
 .yes=Yes
+
+.you_can_remove=You can remove users from this list by hovering over the username and clicking the 'x' button.
+
 
