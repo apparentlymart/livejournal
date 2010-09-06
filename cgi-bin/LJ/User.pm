@@ -3677,6 +3677,76 @@ sub split_by_cluster {
     return \%clusters;
 }
 
+## Returns current userhead for user.
+sub userhead {
+    my $u    = shift;
+    my $opts = +shift || {};
+
+    my $head_size = $opts->{head_size};
+
+    my $userhead   = 'userinfo.gif';
+    my $userhead_w = 17;
+    my $userhead_h = undef;
+
+    ## special icon?
+    my ($icon, $size) = LJ::run_hook("head_icon",
+                                     $u, head_size => $head_size);
+    if ($icon){
+        ## yeap.
+        $userhead = $icon;
+        $userhead_w = $size || 16;
+        $userhead_h = $userhead_w;
+        return $userhead, $userhead_w, $userhead_h;
+    }
+
+    ## default way
+    if (!$LJ::IS_SSL && ($icon = $u->custom_usericon)) {
+        $userhead = $icon;
+        $userhead_w = 17;
+    } elsif ($u->is_community) {
+        if ($head_size) {
+            $userhead = "comm_${head_size}.gif";
+            $userhead_w = $head_size;
+        } else {
+            $userhead = "community.gif";
+            $userhead_w = 16;
+        }
+    } elsif ($u->is_syndicated) {
+        if ($head_size) {
+            $userhead = "syn_${head_size}.gif";
+            $userhead_w = $head_size;
+        } else {
+            $userhead = "syndicated.gif";
+            $userhead_w = 16;
+        }
+    } elsif ($u->is_news) {
+        if ($head_size) {
+            $userhead = "news_${head_size}.gif";
+            $userhead_w = $head_size;
+        } else {
+            $userhead = "newsinfo.gif";
+            $userhead_w = 16;
+        }
+    } elsif ($u->is_identity) {
+        my $params = $u->identity->ljuser_display_params($u, $opts);
+        $userhead     = $params->{'userhead'}     || $userhead;
+        $userhead_w   = $params->{'userhead_w'}   || $userhead_w;
+        $userhead_h   = $params->{'userhead_h'}   || $userhead_h;
+    } else {
+        if ($head_size) {
+            $userhead = "user_${head_size}.gif";
+            $userhead_w = $head_size;
+        } else {
+            $userhead = "userinfo.gif";
+            $userhead_w = 17;
+        }
+    }
+    $userhead_h ||= $userhead_w;
+    return $userhead, $userhead_w, $userhead_h;
+}
+
+
+
 sub bio {
     my $u = shift;
     return LJ::get_bio($u);
@@ -4279,14 +4349,11 @@ sub _friend_friendof_uids_do {
     my $mode = delete $args{mode};
     Carp::croak("unknown option") if %args;
 
-    my $sql;
     my $memkey;
 
     if ($mode eq "friends") {
-        $sql = "SELECT friendid FROM friends WHERE userid=? LIMIT $limit";
         $memkey = [$u->id, "friends2:" . $u->id];
     } elsif ($mode eq "friendofs") {
-        $sql = "SELECT userid FROM friends WHERE friendid=? LIMIT $limit";
         $memkey = [$u->id, "friendofs2:" . $u->id];
     } else {
         Carp::croak("mode must either be 'friends' or 'friendofs'");
@@ -4308,8 +4375,7 @@ sub _friend_friendof_uids_do {
         return @uids if @uids < $slimit;
     }
 
-    my $dbh = LJ::get_db_reader();
-    my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
+    my $uids = $u->_load_friend_friendof_uids_from_db($mode, $limit);
 
     # if the list of uids is greater than 950k
     # -- slow but this definitely works
@@ -4323,7 +4389,26 @@ sub _friend_friendof_uids_do {
 
     return @$uids;
 }
+sub _load_friend_friendof_uids_from_db {
+    my $u     = shift;
+    my $mode  = shift;
+    my $limit = shift;
 
+    $limit = " LIMIT $limit" if $limit;
+
+    my $sql = '';
+    if ($mode eq 'friends'){
+        $sql = "SELECT friendid FROM friends WHERE userid=? $limit";
+    } elsif ($mode eq 'friendofs'){
+        $sql = "SELECT userid FROM friends WHERE friendid=? $limit";
+    } else {
+        Carp::croak("mode must either be 'friends' or 'friendofs'");
+    }
+
+    my $dbh = LJ::get_db_reader();
+    my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
+    return $uids;
+}
 
 sub fb_push {
     my $u = shift;
@@ -5483,6 +5568,7 @@ sub subscriptions_count {
     LJ::MemCache::set('subscriptions_count:'.$u->id, $count);
     return $count;
 }
+
 
 package LJ;
 
@@ -6869,58 +6955,12 @@ sub ljuser {
         $journal_name = $username;
 
         $journal_url = $u->journal_base . "/";
-        my $head_size = $opts->{head_size};
-
-        my ($icon, $size) = LJ::run_hook("head_icon",
-                                         $u, head_size => $head_size);
-
-        if ($icon) {
-            $userhead = $icon;
-            $userhead_w = $size || 16;
-        } elsif (!$LJ::IS_SSL && ($icon = $u->custom_usericon)) {
-            $userhead = $icon;
-            $userhead_w = 17;
-        } elsif ($u->is_community) {
-            if ($head_size) {
-                $userhead = "comm_${head_size}.gif";
-                $userhead_w = $head_size;
-            } else {
-                $userhead = "community.gif";
-                $userhead_w = 16;
-            }
-        } elsif ($u->is_syndicated) {
-            if ($head_size) {
-                $userhead = "syn_${head_size}.gif";
-                $userhead_w = $head_size;
-            } else {
-                $userhead = "syndicated.gif";
-                $userhead_w = 16;
-            }
-        } elsif ($u->is_news) {
-            if ($head_size) {
-                $userhead = "news_${head_size}.gif";
-                $userhead_w = $head_size;
-            } else {
-                $userhead = "newsinfo.gif";
-                $userhead_w = 16;
-            }
-        } elsif ($u->is_identity) {
+        ($userhead, $userhead_w, $userhead_h) = $u->userhead($opts);
+        if ($u->is_identity) {
             my $params = $u->identity->ljuser_display_params($u, $opts);
-
             $profile_url  = $params->{'profile_url'}  || $profile_url;
             $journal_url  = $params->{'journal_url'}  || $journal_url;
             $journal_name = $params->{'journal_name'} || $journal_name;
-            $userhead     = $params->{'userhead'}     || $userhead;
-            $userhead_w   = $params->{'userhead_w'}   || $userhead_w;
-            $userhead_h   = $params->{'userhead_h'}   || $userhead_h;
-        } else {
-            if ($head_size) {
-                $userhead = "user_${head_size}.gif";
-                $userhead_w = $head_size;
-            } else {
-                $userhead = "userinfo.gif";
-                $userhead_w = 17;
-            }
         }
     }
 
