@@ -7987,8 +7987,8 @@ sub add_friend
                            "VALUES ($userid, $add_id, $fgcol, $bgcol, $groupmask)");
 
         if (!$dbh->err && $cnt == 1) {
-            LJ::run_hooks('befriended', $friender, LJ::load_userid($add_id))
-            LJ::User->increase_friendsof_counter($fid);
+            LJ::run_hooks('befriended', $friender, LJ::load_userid($add_id));
+            LJ::User->increase_friendsof_counter($add_id);
         }
     }
     
