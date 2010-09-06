@@ -2864,6 +2864,7 @@ sub editfriends
 
             if ($cnt == 1) {
                 LJ::run_hooks('befriended', LJ::load_userid($userid), LJ::load_userid($friendid));
+                LJ::User->increase_friendsof_counter($friendid);
             }
 
             my $memkey = [$userid,"frgmask:$userid:$friendid"];

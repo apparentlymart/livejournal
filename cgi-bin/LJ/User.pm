@@ -3208,6 +3208,14 @@ sub is_identity {
     return $u->{journaltype} eq "I";
 }
 
+## Can we add this account to someone's friendsOf list
+sub can_be_counted_as_friendof {
+    my $u = shift;
+    return 0 unless $u->statusvis =~ /^[VML]$/o;
+    return 0 unless $u->journaltype =~ /^[PI]$/o;
+    return 1;
+}
+
 ## We trust OpenID users if they are either from trusted OpenID provider or
 ## have e-mail validated. During e-mail validation, they answer CAPTCHA test.
 ## Trusted OpenID users are like registered user, untrusted are like anonymous
@@ -4413,11 +4421,11 @@ sub _load_friend_friendof_uids_from_db {
 }
 
 ## Returns exact friendsOf count. Whitout limit.
+## Use it with care.
 sub precise_friendsof_count {
     my $u = shift;
 
-    ## TODO: add caching here
-    my $ckey = [ $u->userid, "friendof:precise_cnt:" . $u->userid ];
+    my $ckey = [ $u->userid, "friendof:person_cnt:" . $u->userid ];
     my $cached = LJ::MemCache::get($ckey);
     return $cached if defined $cached;
 
@@ -4431,20 +4439,74 @@ sub precise_friendsof_count {
         foreach my $fuid (@uid_batch){
             my $fu = $us->{$fuid};
             next unless $fu;
-            my $status = $u->statusvis;
-            next unless $u->statusvis =~ /^[VML]$/o;
-            next unless $u->journaltype =~ /^[PI]$/o;
+            next unless $fu->can_be_counted_as_friendof;
             
             ## Friend!!!
             $res++;
         }
     }
-    
+
+    ## actual data
     LJ::MemCache::set($ckey => $res);
+    LJ::MemCache::set([ $u->userid, "friendof:person_cnt:added:" . $u->userid ], time()); ## and it's age
+
 
     return $res;
 }
 
+## Class method
+sub increase_friendsof_counter {
+    my $class = shift;
+    my $uid   = shift;
+    $class->_incr_decr_friendsof_counter($uid, 'incr');
+}
+sub decrease_friendsof_counter {
+    my $class = shift;
+    my $uid   = shift;
+    $class->_incr_decr_friendsof_counter($uid, 'decr');
+}
+sub _incr_decr_friendsof_counter {
+    my $class  = shift;
+    my $uid    = shift;
+    my $action = shift;
+
+    ## it takes a lot of time (>5 seconds) to calculate 'friendof:person_cnt:X' counter.
+    ## So update it with a bit of intellect.
+    my $precise_friendsof_counter = [ $uid, "friendof:person_cnt:$uid" ];
+    my $precise_frof_cnt_added = [ $uid, "friendof:person_cnt:added:$uid" ];
+    my $vals = LJ::MemCache::get_multi($precise_friendsof_counter, $precise_frof_cnt_added);
+
+    my $counter = $vals->{"friendof:person_cnt:$uid"};
+    my $added   = $vals->{"friendof:person_cnt:added:$uid"};
+
+    if ($counter and $added){
+        if ($added < time - 24*3600){
+        ## flush data to avoid long-life accumulation of errors
+            LJ::MemCache::delete($precise_friendsof_counter);
+
+        } else {
+        ## just increment counter.
+        ##
+        ## Much better to use CAS operation here. But original perl Cache::Memcached client 
+        ## does not provide appropriate functionality. 
+        ## we use two memcache keys instead:
+        ##  - one as lifetime mark ('friendof:person_cnt:added:$fid')
+        ##  - other as counter value ('friendof:person_cnt:$fid')
+        ##
+            my $u = LJ::load_userid($uid);
+            if ($u->can_be_counted_as_friendof){
+                ## update memcached value
+                if ($action eq 'incr'){
+                    LJ::MemCache::incr($precise_friendsof_counter);
+                } elsif ($action eq 'decr'){
+                    LJ::MemCache::decr($precise_friendsof_counter);
+                }
+            }
+
+        }
+    }
+
+}
 
 sub fb_push {
     my $u = shift;
@@ -5604,7 +5666,6 @@ sub subscriptions_count {
     LJ::MemCache::set('subscriptions_count:'.$u->id, $count);
     return $count;
 }
-
 
 package LJ;
 
@@ -7927,6 +7988,7 @@ sub add_friend
 
         if (!$dbh->err && $cnt == 1) {
             LJ::run_hooks('befriended', $friender, LJ::load_userid($add_id))
+            LJ::User->increase_friendsof_counter($fid);
         }
     }
     
@@ -7937,7 +7999,6 @@ sub add_friend
     # delete friend-of memcache keys for anyone who was added
     foreach my $fid (@add_ids) {
         LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
-        LJ::MemCache::delete([ $fid, "friendof:precise_cnt:$fid" ]);
         LJ::memcache_kill($fid, 'friendofs');
         LJ::memcache_kill($fid, 'friendofs2');
 
@@ -7993,6 +8054,7 @@ sub remove_friend {
 
         if (!$dbh->err && $cnt > 0) {
             LJ::run_hooks('defriended', $u, LJ::load_userid($del_id));
+            LJ::User->decrease_friendsof_counter($del_id);
         }
     }
     
@@ -8004,7 +8066,6 @@ sub remove_friend {
     # delete friend-of memcache keys for anyone who was removed
     foreach my $fid (@del_ids) {
         LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
-        LJ::MemCache::delete([ $fid, "friendof:precise_cnt:$fid" ]);
         LJ::memcache_kill($fid, 'friendofs');
         LJ::memcache_kill($fid, 'friendofs2');
 
