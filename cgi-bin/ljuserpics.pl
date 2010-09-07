@@ -950,30 +950,36 @@ sub upload_to_fb {
 sub crop_picture_from_web {
     my %opts = @_;
 
+    my $data;
+
     my $source = LJ::trim($opts{source});
 
-    return {
-        url    => '',
-        status => 'ok',
-    } unless $source;
-
-    ## fetch a photo from Net
-    my $ua = LJ::get_useragent( role     => 'crop_picture',
-                                max_size => 10 * 1024 * 1024,
-                                timeout  => 10,
-                              );
-    my $result = $ua->request(GET($source));
-
-    unless ($result and $result->is_success) {
+    if ($source) {
         return {
-            picid  => -1,
-            url    => undef,
-            status => 'error',
-            errstr => $result ? $result->status_line : 'unknown error in downloading',
-        };
-    }
+            url    => '',
+            status => 'ok',
+        } unless $source;
 
-    my $data = $result->content;
+        ## fetch a photo from Net
+        my $ua = LJ::get_useragent( role     => 'crop_picture',
+                                    max_size => 10 * 1024 * 1024,
+                                    timeout  => 10,
+                                  );
+        my $result = $ua->request(GET($source));
+
+        unless ($result and $result->is_success) {
+            return {
+                picid  => -1,
+                url    => undef,
+                status => 'error',
+                errstr => $result ? $result->status_line : 'unknown error in downloading',
+            };
+        }
+
+        $data = $result->content;
+    } else {
+        $data = ${$opts{'dataref'}};
+    }
 
     my $res = LJ::_get_upf_scaled(
                     source => \$data,
