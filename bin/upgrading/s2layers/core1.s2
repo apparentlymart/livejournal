@@ -566,6 +566,9 @@ class Page
 
     function builtin widget(string{} opts) : string
     "Returns rendered widget body.";
+
+    function builtin render_widget(string{} opts)
+    "Prints rendered widget body.";
 }
 
 class TagsPage extends Page
