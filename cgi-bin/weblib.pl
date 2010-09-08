@@ -2180,6 +2180,8 @@ sub journal_js_inject
     LJ::need_res(qw(
                     js/journal.js
                     ));
+
+    LJ::run_hooks('extra_journal_js');
 }
 
 # For the Rich Text Editor
