@@ -5568,10 +5568,14 @@ sub get_renamed_user {
 
     # Traverse the renames to the final journal
     if ($u) {
-        while ($u->{'journaltype'} eq 'R' && $hops-- > 0) {
+        while ($u and $u->journaltype eq 'R' and $hops-- > 0) {
             my $rt = $u->prop("renamedto");
             last unless length $rt;
-            $u = LJ::load_user($rt);
+            if ($rt =~ /^https?:\/\//){
+                $u = LJ::User->new_from_url($rt);
+            } else {
+                $u = LJ::load_user($rt);
+            }
         }
     }
 
