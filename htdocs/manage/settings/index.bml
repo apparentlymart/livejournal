@@ -89,7 +89,6 @@ body<=
             sort_weight => 40,
             settings => [qw(
                 LJ::Setting::VoicePosting
-                LJ::Setting::SMS
                 LJ::Setting::EmailPosting
                 LJ::Setting::Display::MobileApps
             )],

@@ -168,7 +168,8 @@ body<=
     my $fgroup = LJ::html_select({name => 'fgroup', selected => $u->prop('sms_friend_group') || $POST{fgroup}},
                                 ('', '(All Friends)'), map { $_, $_ } map { $_->{groupname} } @fgroups);
 
-    my $body = '';
+    my $body = 'Service is currently unavailable';
+    return $body;
 
     my $carrier_html = $carrier || '';
 
