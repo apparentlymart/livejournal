@@ -7,6 +7,8 @@
 .button.approve|staleness=1
 .button.approve=Approve membership
 
+.button.remove=Remove user from list
+
 .button.reject|staleness=1
 .button.reject=Reject membership
 

@@ -130,6 +130,10 @@ __________________________________________*/
 /* Styles for bubbles
 --------------------------- */
 /*Must be removed after implementation of Framework! */
+.i-bubble {
+	*display:inline;
+	*zoom:1;
+	}
 * HTML .i-bubble-arrow,
 * HTML .i-bubble-arrow-border {
 	zoom: 1;
@@ -197,4 +201,15 @@ __________________________________________*/
 /* Must be removed after implementation of Framework! */
 * HTML .b-manage-userheads LI {
 	behavior: expression(this.onmouseover = new Function("this.className += ' hover'"), this.onmouseout = new Function("this.className = this.className.replace(/ ?hover/g,'')"), this.style.behavior = null);
-}
+	}
+
+/* Reject Users in Manage Community
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+* HTML .b-pending-users LI {
+	behavior: expression(this.onmouseover = new Function("this.className += ' hover'"), this.onmouseout = new Function("this.className = this.className.replace(/ ?hover/g,'')"), this.style.behavior = null);
+	}
+.b-pending-users {
+	zoom: 1;
+	}
+

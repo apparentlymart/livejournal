@@ -64,8 +64,9 @@ body<=
             if ($POST{'reject_select'} eq '1' and $POST{'approve'}) or $POST{'reject_done'} eq '1';
 
         if ($POST{'reject_select'} eq '1') {
+            $ret .= '<div class="b-pending">';
             $ret .= "<h3>".$ML{'.following_users'}."</h3>";
-            $ret .= $ML{'.you_can_remove'};
+            $ret .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext">' . $ML{'.you_can_remove'} . '</p>';
 
             my @userids = split(',', $POST{'ids'});
 
@@ -93,17 +94,18 @@ body<=
             } else {
                 $ret .= "<form method='post' action='pending.bml?authas=$cname'>\n";
                 $ret .= LJ::form_auth();
-                $ret .= "<div>" . join ("</div>, <div>", map { $_->{'user'} } @to_show) . "</div>\n";
+                $ret .= '<ul class="b-pending-users"><li>' . join (", </li><li>", map { "<span><a href='" . $_->journal_base . "' target='_blank'>" . $_->{user} . "</a><i class='i-pending-close' title='" . $ML{'.button.remove'} . "'></i></span>" } @to_show) . "</li></ul>\n";
                 $ret .= LJ::html_hidden('ids', join(',', map { $_->{'userid'} } @to_show)) . "\n";
-                $ret .= "<textarea name='reason' rows='7' cols='50'>".$ML{'.reason.default.text'}."</textarea><br/>\n";
-                $ret .= $ML{'.reason.reject.text'}."<br/>\n";
+                $ret .= "<textarea name='reason' rows='7' cols='50' class='b-pending-reason' placeholder='".$ML{'.reason.default.text'}."'></textarea>\n";
                 $ret .= LJ::html_hidden('reject_done', 1);
                 $ret .= LJ::html_hidden('reject', $POST{'reject'});
-                $ret .= LJ::html_submit('yes_reject', $ML{'.button.yes.reject'});
+                $ret .= LJ::html_submit('yes_reject', $ML{'.button.yes.reject'}, {class=>'i-pending-reject'});
+                $ret .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.reason.reject.text'} . '</p>' ."\n";
                 $ret .= LJ::html_hidden('previous', $previous);
                 $ret .= LJ::html_hidden('ignored', $ignored);
                 $ret .= "</form>";
             }
+            $ret .= '</div>';
         }
 
         if ($POST{'reject_done'} eq '1') {
