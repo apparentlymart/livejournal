@@ -521,6 +521,7 @@ body<=
             $ret .= "</table>\n";
 
 			$ret .= "<script type='text/javascript'>";
+			$ret .= "var supportedDEF = [901,903,905,906,909,920,921,922,923,924,925,926,927,928,929,930,931,932,933,934,936,937,938,960,961,962,963,964,965,967,968,997];";
 			$ret .= "var smsNotifyDict = {";
 			$ret .= "";
 			$ret .= "sendsmsbut : \"$ML{'.section.textmsg.button'}\",";
