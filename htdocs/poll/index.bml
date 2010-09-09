@@ -37,6 +37,8 @@
 
     my $u = $poll->journal;
 
+    LJ::set_active_journal($u);
+
     my $mode = "";
     $mode = $FORM{'mode'} if ($FORM{'mode'} =~ /(enter|results|ans)/);
 
