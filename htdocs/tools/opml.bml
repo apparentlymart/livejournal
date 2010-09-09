@@ -36,7 +36,7 @@
     foreach my $uid (sort { $a <=> $b } @uids) {
         my $fr = $us->{$uid} or next;
         my $title = $fr->{name};
-        $x .= "<outline text=\"" . LJ::exml($title) . "\" xmlURL=\"" . LJ::exml($fr->journal_base . "/data/rss") . "\" />\n";
+        $x .= "<outline text=\"" . LJ::exml($title) . "\" xmlUrl=\"" . LJ::exml($fr->journal_base . "/data/rss") . "\" />\n";
     }
     $x .= "</body></opml>\n";
     BML::noparse();
