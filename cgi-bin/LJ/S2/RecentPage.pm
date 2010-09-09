@@ -273,7 +273,8 @@ sub RecentPage
         $nav->{'forward_skip'} = $newskip;
         $nav->{'forward_url'} = LJ::make_link("$p->{base_url}/", { skip     => ($newskip                   || ""),
                                                                    tag      => (LJ::eurl($get->{tag})      || ""),
-                                                                   security => (LJ::eurl($get->{security}) || "") });
+                                                                   security => (LJ::eurl($get->{security}) || ""),
+                                                                   mode     => (LJ::eurl($get->{mode})     || ""), });
         $nav->{'forward_count'} = $itemshow;
     }
 
@@ -290,7 +291,8 @@ sub RecentPage
             my $newskip = $skip + $itemshow;
             $nav->{'backward_url'} = LJ::make_link("$p->{'base_url'}/", { skip     => ($newskip                   || ""),
                                                                           tag      => (LJ::eurl($get->{tag})      || ""),
-                                                                          security => (LJ::eurl($get->{security}) || "") });
+                                                                          security => (LJ::eurl($get->{security}) || ""),
+                                                                          mode     => (LJ::eurl($get->{mode})     || ""), });
             $nav->{'backward_skip'} = $newskip;
         }
     }
