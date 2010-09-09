@@ -30,23 +30,30 @@
 			
 			var currentControl = $(this),
 				elemToRemove = currentControl.closest('li'),
-				userId = currentControl.attr('id').replace(/\D+/g, '');
-			
+				userId = currentControl.attr('id').replace(/\D+/g, ''),
+				userListLength = _userList.find('li').length;
+				
+			if (userListLength === 1) {
+				return false;
+			}
+				
 			removeUserIdFromHidden(userId);
 			
 			elemToRemove.remove();
+			
 			removeUnwantedCommas();
 		}
 		
 		function removeUnwantedCommas () {
 			var userListLength = _userList.find('li').length,
-				firstUserElem, firstUserContent;
+				lastUserElem, lastUserContent;
 			
-			if (userListLength === 1) {
-				firstUserElem = _userList.first();
-				contentWithoutCommas = firstUserElem.html().replace(/\,/g, '');
-				firstUserElem.html(contentWithoutCommas);
-			}
+			lastUserElem = _userList.find('li').last();
+			contentWithoutCommas = lastUserElem.html().replace(/\,/g, '');
+			lastUserElem
+				.html(contentWithoutCommas)
+				.find(CONFIG.removeControlsSelector)
+					.click(removeUser);
 		}
 		
 		function removeUserIdFromHidden (userId) {
