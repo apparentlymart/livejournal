@@ -7040,6 +7040,7 @@ sub ljuser {
         # Traverse the renames to the final journal
         if (!$opts->{'no_follow'}) {
             $u = $u->get_renamed_user;
+            $username = $u->username;
         }
 
         if (!$profile_url) {
