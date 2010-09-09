@@ -51,9 +51,6 @@ function new_post_load(dotime) {
     f = document.updateForm;
     if (! f) return false;
 	
-	// ID used two variants: usejournal or usejournal_username
-	getUserTags(jQuery(document.forms.updateForm.usejournal).val());
-	
     var userbox = f.user;
     if (! userbox) return false;
     if (! Site.has_remote && userbox.value) altlogin();
