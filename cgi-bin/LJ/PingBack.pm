@@ -89,8 +89,8 @@ sub should_entry_recieve_pingback {
     # are comments allowed?
     return 0 unless $target_entry->posting_comments_allowed;
 
-    # user can disable recieving pingback for entire journa for entire journall
-    return 0 if $target_entry->journal->prop("pingback") eq 'D';
+    # Poster's preferences have more priority than Communities have.
+    return 0 if $target_entry->poster->prop("pingback") eq 'D';
 
 =head
     # did user allow to add pingbacks?
@@ -121,7 +121,7 @@ sub notify {
     my $uri  = $args{uri};
     my $mode = $args{mode};
 
-    # return unless $mode =~ m!^[LO]$!; # (L)ivejournal only, (O)pen.
+    return unless $mode =~ m!^[LO]$!; # (L)ivejournal only, (O)pen.
 
     my $sclient = LJ::theschwartz();
     unless ($sclient){

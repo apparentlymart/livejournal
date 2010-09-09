@@ -119,7 +119,9 @@ LJ::register_hook("postpost", sub {
     return if $prop_pingback eq 'D'  # pingback is strictly disabled 
               or not $prop_pingback; # or not enabled.
 =cut
-    my $prop_pingback = 'O'; # Open
+
+    my $poster = $entry->poster;
+    my $prop_pingback = $poster ? $poster->prop('pingback') : 'O';
     #
     LJ::PingBack->notify(
         uri  => $entry->url,
