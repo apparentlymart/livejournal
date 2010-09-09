@@ -25,7 +25,7 @@ body<=
     my $ret;
     my $getextra = $GET{'authas'} ? "?authas=$GET{'authas'}" : undef;
 
-    LJ::need_res('stc/entry.css', 'js/inputcomplete.js', 'js/jquery-ui-autocomplete.js', 'js/gears_init.js', 'js/scanner.js');
+    LJ::need_res('stc/entry.css', 'stc/widgets/selecttags.css', 'js/inputcomplete.js', 'js/jquery-ui-autocomplete.js', 'js/gears_init.js', 'js/scanner.js');
     
     # are they asking to be authed as someone else?
     my $authas = $GET{'authas'} || $remote->{'user'};
