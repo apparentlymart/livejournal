@@ -717,7 +717,7 @@ sub create_view_foaf {
         my $count = $u->number_of_posts;
         $ret .= "    <ya:blogActivity>\n";
         $ret .= "      <ya:Posts>\n";
-        $ret .= "        <ya:feed rdf:resource=\"" . LJ::journal_base($u) ."/data/foaf\" dc:type=\"application/rss+xml\" />\n";
+        $ret .= "        <ya:feed rdf:resource=\"" . LJ::journal_base($u) ."/data/rss\" dc:type=\"application/rss+xml\" />\n";
         $ret .= "        <ya:posted>$count</ya:posted>\n";
         $ret .= "      </ya:Posts>\n";
         $ret .= "    </ya:blogActivity>\n";
