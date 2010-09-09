@@ -800,6 +800,7 @@ body<=
         } else {
             $dbh->do("REPLACE INTO txtmsg (userid, number) VALUES (?, ?)",
                      undef, $u->{'userid'}, $POST{'txtmsg_number'});
+            LJ::SMS::API::RU::Phone->set_status($u->{'userid'}, $POST{'txtmsg_number'}, 'not_verified');
         }
 
         # clear text message security caches
