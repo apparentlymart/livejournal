@@ -419,12 +419,14 @@ body<=
             $ret .= "</td></tr>\n";
         }
 
+=head
         # opt_usermsg
         unless ($LJ::DISABLED{'user_messaging'}) {
             $ret .= "<tr><td class='field_name'>LJ User Messaging</td><td>";
             $ret .= LJ::Setting::UserMessaging->as_html($u);
             $ret .= "</td></tr>\n";
         }
+=cut
 
         # chat thingies
         $ret .= "<tr><td colspan='2'></td></tr><tr><td class='field_name' colspan='2' style='text-align: center;'><a name='iminfo'></a>$ML{'.fn.imservices3'}</td></tr>";
@@ -653,16 +655,6 @@ body<=
             push @errors, $ML{'.error.bio.toolong'};
         }
 
-        # text messaging
-        if ($POST{'txtmsg_security'} =~ m/^(all|reg|friends)$/) {
-            unless ($POST{'txtmsg_provider'}) {
-                push @errors, $ML{'.error.txt.require_provider'};
-            }
-            unless ($POST{'txtmsg_number'}) {
-                push @errors, $ML{'.error.txt.require.number'};
-            }
-        }
-
         # FIXME: validation AND POSTING are handled by widgets' handle_post() methods
         # (introduce validate_post() ?)
         my $save_search_index = $POST{'opt_showlocation'} =~ /^[YR]$/;
@@ -802,14 +794,12 @@ body<=
         my $tminfo = LJ::TextMessage->tm_info($u);
         # Check that text messaging is turned off and either
         # the provider or number have been set to null
-        if ($txtmsg_status eq "off" &&
-            (($tminfo->{'provider'} && ! $POST{'txtmsg_provider'}) ||
-            ($tminfo->{'number'} && ! $POST{'txtmsg_number'})) )
+        if ($tminfo->{'number'} && ! $POST{'txtmsg_number'} )
         {
             $dbh->do("DELETE FROM txtmsg WHERE userid=?", undef, $u->{'userid'});
-        } elsif ($txtmsg_status eq "on") {
-            $dbh->do("REPLACE INTO txtmsg (userid, provider, number, security) VALUES (?, ?, ?, ?)",
-                     undef, $u->{'userid'}, $POST{'txtmsg_provider'}, $POST{'txtmsg_number'}, $POST{'txtmsg_security'});
+        } else {
+            $dbh->do("REPLACE INTO txtmsg (userid, number) VALUES (?, ?)",
+                     undef, $u->{'userid'}, $POST{'txtmsg_number'});
         }
 
         # clear text message security caches
