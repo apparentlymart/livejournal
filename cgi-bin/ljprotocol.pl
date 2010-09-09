@@ -391,14 +391,20 @@ sub getfriendspage
         $before_skip = $skip + 0;
         $skip = 0;
     }
-    
+
+    my %get_params = (
+        u          => $u,
+        userid     => $u->{'userid'},
+        remote     => $u,
+        dateformat => 'S2',
+        itemshow   => $itemshow,
+        filter     => $req->{groupmask},
+        showtypes  => $req->{journaltype},
+    );
+
     my @entries = LJ::get_friend_items({
-        'u' => $u,
-        'userid' => $u->{'userid'},
-        'remote' => $u,
-        'itemshow' => $itemshow,
+        %get_params,
         'skip' => $skip,
-        'dateformat' => 'S2',
     });
 
     my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count userpic props security/;
@@ -423,12 +429,8 @@ sub getfriendspage
         if($before) {
             last if @res >= $itemshow;
             push @entries, LJ::get_friend_items({
-                'u' => $u,
-                'userid' => $u->{'userid'},
-                'remote' => $u,
-                'itemshow' => $itemshow,
+                %get_params,
                 'skip' => $skip + ($before_count += $itemshow),
-                'dateformat' => 'S2',
             }) unless @entries;
             next if $LJ::EndOfTime - $ei->{rlogtime} > $before;
             next if $before_skip-- > 0;
@@ -492,6 +494,7 @@ sub getfriendspage
         }
     };
 }
+
 
 sub getinbox
 {
