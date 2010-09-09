@@ -180,8 +180,9 @@ sub basic_rename {
         );
     } else {
         my $token = $opts->{token} || "[unknown]";
+        my $payid = $opts->{'payid'} || 0;
         $dbh->do("INSERT INTO renames (token, payid, userid, fromuser, touser, rendate) ".
-             "VALUES (?,0,?,?,?,NOW())", undef, $token, $u->{'userid'}, $from, $to,
+             "VALUES (?,?,?,?,?,NOW())", undef, $token, $payid, $u->{'userid'}, $from, $to,
         );
     }
     $opts->{error} = $dbh->err if $dbh->err;
