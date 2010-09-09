@@ -711,6 +711,7 @@ td.tabs {
 --------------------------- */
 /* Must be removed after implementation of Framework! */
 .b-repost-pics {
+	display: none;
 	position: absolute;
 	top: -150px;
 	left: 72px;
