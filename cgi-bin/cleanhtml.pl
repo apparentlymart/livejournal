@@ -339,7 +339,7 @@ sub clean
             #    </lj-repost>
             #
             if ($tag eq "lj-repost" and $ljrepost_allowed){
-                next TOKEN if $opencount{$tag}; # no support for nested <lj-repost> tags
+                next TOKEN if ref $opencount{$tag}; # no support for nested <lj-repost> tags
                 my $button = LJ::ehtml($attr->{button}) || LJ::Lang::ml("repost.default_button");
                 if ($attr->{'/'}){
                     # short <lj-repost /> form of tag
@@ -965,7 +965,7 @@ sub clean
                     $newdata .= "<a name='cutid$cutcount-end'></a>"
                 }
             }
-            elsif ($tag eq "lj-repost" and $ljrepost_allowed and exists $opencount{$tag}){
+            elsif ($tag eq "lj-repost" and $ljrepost_allowed and ref $opencount{$tag}){
                 ## Add repost button
                 ## If there is opening <lj-repost> tag than $opencount{$tag} exists.
                 ##
