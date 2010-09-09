@@ -40,9 +40,10 @@ use Class::Autouse qw(
 
 use LJ::TimeUtil;
 use Apache::WURFL;
+use Digest::MD5 qw/md5_base64/;
 
 BEGIN {
-    $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
+    $LJ::OPTMOD_ZLIB = eval { require Compress::Zlib; 1;};
 
     require "ljlib.pl";
     require "ljviews.pl";
@@ -1737,7 +1738,6 @@ sub journal_content
     }
     my $length = length($html);
     $do_gzip = 0 if $length < 500;
-
     if ($do_gzip) {
         my $pre_len = $length;
         LJ::Request->notes("bytes_pregzip" => $pre_len);
@@ -1745,8 +1745,13 @@ sub journal_content
         $length = length($html);
         LJ::Request->header_out('Content-Encoding', 'gzip');
     }
+    #
+    my $html_md5 = md5_base64($html);
+    LJ::Request->header_out(ETag => $html_md5);
+    LJ::Request->header_out('Content-MD5' => $html_md5);
+
     # Let caches know that Accept-Encoding will change content
-    LJ::Request->header_out('Vary', 'Accept-Encoding');
+    LJ::Request->header_out('Vary', 'Accept-Encoding, ETag');
 
     LJ::Request->header_out("Content-length", $length);
     LJ::Request->send_http_header();
