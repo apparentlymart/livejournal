@@ -2113,14 +2113,14 @@ sub editevent
         LJ::load_user_props($u, "newesteventtime");
         if ($u->{userid} == $uowner->{userid} &&
             $u->{newesteventtime} eq $oldevent->{eventtime}) {
-            # did they change the time?
-            if ($eventtime ne $oldevent->{eventtime}) {
+            if (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) {
+                # if they set the backdated flag, then we no longer know
+                # the newesteventtime.
+                LJ::set_userprop($u, "newesteventtime", undef);
+            } elsif ($eventtime ne $oldevent->{eventtime}) {
+                # otherwise, if they changed time on this event,
                 # the newesteventtime is this event's new time.
                 LJ::set_userprop($u, "newesteventtime", $eventtime);
-            } elsif (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) {
-                # otherwise, if they set the backdated flag,
-                # then we no longer know the newesteventtime.
-                LJ::set_userprop($u, "newesteventtime", undef);
             }
         }
 
