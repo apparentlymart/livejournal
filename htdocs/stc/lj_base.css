@@ -897,6 +897,7 @@ Must be removed after implementation of Framework! */
 	}
 
 .b-repost-items {
+	position: relative;
 	margin: 10px 0;
 	}
 	.b-repost-item {
