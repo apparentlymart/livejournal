@@ -29,6 +29,8 @@ body<=
         return $errtxt unless $comment->remote_can_edit(\$errtxt);
 
         my $parent = $comment->parent;
+        $parent = undef if $parent && !$parent->is_active;
+
         $FORM{replyto} = $parent ? $comment->parent->dtalkid : 0;
 
         $FORM{subject} = $comment->subject_orig;
@@ -75,7 +77,7 @@ body<=
     my $parpost;
     my $reply;
 
-    if ($init->{'replyto'} || ($editid && $comment->parenttalkid))
+    if ($init->{'replyto'})
     {
         my $qparentid = $init->{'replyto'};
 

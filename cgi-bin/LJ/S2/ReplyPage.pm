@@ -85,6 +85,8 @@ sub ReplyPage
         }
 
         $parpost = $comment->parent;
+        $parpost = undef if $parpost && !$parpost->is_active;
+
         $replytoid = $parpost ? $comment->parent->dtalkid : 0;
 
         $comment_values{edit} = $editid;
