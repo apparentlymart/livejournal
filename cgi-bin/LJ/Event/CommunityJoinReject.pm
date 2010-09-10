@@ -127,7 +127,7 @@ sub as_email_subject {
     if ($cu->is_community && $mt->can_manage ($cu)) {
         my $rej_user = LJ::load_userid($self->{'args'}[2]);
         my $lang    = $mt->prop('browselang');
-        return LJ::Lang::get_text($lang, 'esn.comm_join_reject.maint.email_subject', undef, { 'username' => $rej_user->{user}, 'community' => $cu->{user} });
+        return LJ::Lang::get_text($lang, 'esn.comm_join_reject.maint.email_subject', undef, { 'username' => $rej_user->{name}, 'community' => $cu->{user} });
     } else {
         my $lang    = $u->prop('browselang');
         return LJ::Lang::get_text($lang, 'esn.comm_join_reject.email_subject', undef, { 'community' => $cu->{user} });
