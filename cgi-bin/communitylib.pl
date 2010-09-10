@@ -578,6 +578,7 @@ sub approve_pending_member {
 ## LJ::reject_pending_member($cid, $id, $remote->{userid}, $POST{'reason'});
 sub reject_pending_member {
     my ($commid, $userid, $maintid, $reason) = @_;
+    $reason = LJ::Lang::ml('/community/pending.bml.reason.default.text') if $reason == 0;
     my $cu = LJ::want_user($commid);
     my $u = LJ::want_user($userid);
     my $mu = LJ::want_user($maintid);
