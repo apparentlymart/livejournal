@@ -77,7 +77,8 @@ __________________________________________*/
 .b-tlarge,
 .b-inner,
 .b-header,
-.b-live-clmn {
+.b-live-clmn,
+* HTML .b-top-content LI {
 	*zoom:1;
 	}
 * HTML .b-quick .b-inbox .outer,
