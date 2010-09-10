@@ -100,7 +100,7 @@ sub _as_email {
     my $communityname   = $self->comm->user;
     my $community       = $is_html ? ($self->comm->ljuser_display) : ($self->comm->display_username);
     my $auth_url        = $self->authurl;
-    my $rej_url         = $auth_url;
+    my $rej_url         = $auth_url.".".$u->userid;
        $rej_url         =~ s/approve/reject/;
     my $lang            = $u->prop('browselang');
 

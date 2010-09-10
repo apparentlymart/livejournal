@@ -1061,7 +1061,7 @@ sub trans
     }
 
     # reject
-    if ($uri =~ m!^/reject/(\w+\.\w+)!) {
+    if ($uri =~ m!^/reject/(\w+\.\w+\.\d+)!) {
         return redir("$LJ::SITEROOT/reject.bml?$1");
     }
 
