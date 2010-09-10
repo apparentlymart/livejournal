@@ -8,6 +8,7 @@ body<=
     use LJ::Setting;
     use LJ::TimeUtil;
     use LJ::UserHead;
+    use LJ::SMS::API::RU::Phone;
 
     LJ::set_active_crumb('editprofile');
     LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css', 'js/editprofile.js');
@@ -523,6 +524,7 @@ body<=
             $ret .= "</table>\n";
 
 			$ret .= "<script type='text/javascript'>";
+			$ret .= "smsNotifyInitialState = \"".LJ::SMS::API::RU::Phone->get_status($u->{'userid'}, $tminfo->{'number'})."\";";
 			$ret .= "var supportedDEF = [901,903,905,906,909,920,921,922,923,924,925,926,927,928,929,930,931,932,933,934,936,937,938,960,961,962,963,964,965,967,968,997];";
 			$ret .= "var smsNotifyDict = {";
 			$ret .= "";

@@ -21,9 +21,8 @@ sub render_body {
 
     my @ntypes = @LJ::NOTIFY_TYPES;
     my (undef, $country) = LJ::GeoLocation->ip_class;
-    if ($country eq 'ru'){
-        @ntypes = map { $_ eq 'LJ::NotificationMethod::SMS' ? 'LJ::NotificationMethod::SMSru' : $_ }
-                    @ntypes;
+    if ($country ne 'RU'){
+        @ntypes = grep { $_ ne 'LJ::NotificationMethod::SMSru' ? 1 : 0 } @ntypes;
     }
 
     my $colnum = scalar(@ntypes) + 1;
