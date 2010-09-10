@@ -56,7 +56,7 @@ PotD =
 PotD.init();
 
 jQuery(document).ready(function() {
-	jQuery('div.appwidget-polloftheday').find('form').live("submit",function(){
+	jQuery('div.appwidget-polloftheday form').live('submit', function(){
 		var form = jQuery(this);
 		jQuery('<i class="potd-preloader" />').appendTo('div.appwidget-polloftheday').height(jQuery('div.appwidget-polloftheday').height());
 		var timer_reached = false,
