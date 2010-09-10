@@ -704,13 +704,16 @@ sub create_qr_div {
     $qrhtml .= LJ::ljuser($remote->{'user'});
     $qrhtml .= "</td><td align='center'>";
 
+    my %userpicmap;
+
     # Userpic selector
     {
         my %res;
         LJ::do_request({ "mode" => "login",
                          "ver" => ($LJ::UNICODE ? "1" : "0"),
                          "user" => $remote->{'user'},
-                         "getpickws" => 1, },
+                         "getpickws" => 1,
+                         'getpickwurls' => 1, },
                        \%res, { "noauth" => 1, "userid" => $remote->{'userid'}}
                        );
 
@@ -733,6 +736,10 @@ sub create_qr_div {
                 } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
             $qrhtml .= LJ::help_icon_html("userpics", " ");
+
+            foreach my $i (1 .. $res{'pickw_count'}) {
+                $userpicmap{$res{"pickw_$i"}} = $res{"pickwurl_$i"};
+            }
         }
     }
 
@@ -804,7 +811,9 @@ sub create_qr_div {
                                       {'name' => 'saved_ptid', 'id' => 'saved_ptid'},
                                       ));
 
+    my $userpicmap = LJ::JSON->to_json(\%userpicmap);
     $ret .= qq{
+               var userpicmap = $userpicmap;
                document.write("$qrsaveform");
                var de = document.createElement('div');
                de.id = 'qrdiv';

@@ -1569,13 +1569,14 @@ sub talkform {
                 "ver"       => ( $LJ::UNICODE ? "1" : "0" ),
                 "user"      => $remote->{'user'},
                 "getpickws" => 1,
+                'getpickwurls' => 1,
             },
             \%res,
             { "noauth" => 1, "userid" => $remote->{'userid'} }
         );
     }
 
-    my ( $show_userpics, @pics_display );
+    my ( $show_userpics, @pics_display, %userpicmap );
     if ( $res{'pickw_count'} ) {
         $show_userpics = 1;
 
@@ -1597,6 +1598,10 @@ sub talkform {
                 'userpic_selected' => $pickw eq
                     $form->{'prop_picture_keyword'},
                 };
+        }
+
+        foreach my $i (1 .. $res{'pickw_count'}) {
+            $userpicmap{$res{"pickw_$i"}} = $res{"pickwurl_$i"};
         }
     }
 
@@ -1765,6 +1770,7 @@ sub talkform {
         'opt_preformatted_selected' => $form->{'prop_opt_preformatted'},
         'show_userpics'             => $show_userpics,
         'userpics'                  => \@pics_display,
+        'userpicmap'                => LJ::JSON->to_json(\%userpicmap),
         'subjicon_types'            => \@subjicon_types,
         'text_hint'                 => $opts->{'text_hint'},
         'create_link'               => $create_link,
