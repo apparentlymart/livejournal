@@ -146,14 +146,20 @@ body<=
                                     'wrap' => 1,
                                     'charset' => 'utf-8',
                                     'subject' => LJ::Lang::ml ('pending.mail.reject.subject', { community => $cname }),
-                                    'body'    => ( LJ::Lang::ml ('pending.mail.reject.body', 
+                                    'html'    => ( LJ::Lang::ml ('pending.mail.reject.body', 
                                                     {
-                                                        community => $cname,
-                                                        username  => $us->{$id}->{'user'},
+                                                        community => $c->ljuser_display,
+                                                        username  => $us->{$id}->ljuser_display,
                                                         reason    => $reason,
                                                         sitename  => $LJ::SITENAMESHORT,
                                                     }
-                                                ))
+                                                ).
+                                                    LJ::Lang::ml ('esn.footer.html', 
+                                                    {
+                                                        siteroot    => $LJ::SITEROOT,
+                                                    }
+                                                )
+                                                )
                                            });
                 }
             }

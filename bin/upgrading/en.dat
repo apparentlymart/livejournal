@@ -1558,13 +1558,13 @@ Regards,
 pending.mail.reject.subject=Your Request to Join [[community]] community
 
 pending.mail.reject.body<<
-Dear [[username]], 
-
-Your request to join the [[community]] community has been declined by the maintainer(s) of the community for the following reason: [[reason]]. 
-
-Replies to this email are not sent to the community's maintainer(s). If you would like to discuss the reasons your membership request was rejected, you will need to contact a maintainer directly. Maintainers are listed on the community's Profile page. 
-
-Regards, 
+Dear [[username]],<br> 
+<br>
+Your request to join the [[community]] community has been declined by the maintainer(s) of the community for the following reason: [[reason]]. <br/>
+<br/>
+Replies to this email are not sent to the community's maintainer(s). If you would like to discuss the reasons your membership request was rejected, you will need to contact a maintainer directly. Maintainers are listed on the community's Profile page. <br/>
+<br/>
+Regards, </br>
 [[sitename]] Team
 
 .
