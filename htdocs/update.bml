@@ -650,6 +650,7 @@ head<=
 _code?>
 <script type='text/javascript'>
         LiveJournal.register_hook("page_load", setCopyrightEdit);
+        LiveJournal.register_hook("page_load", registerFbImageSelection);
 </script>
 
 <=head
