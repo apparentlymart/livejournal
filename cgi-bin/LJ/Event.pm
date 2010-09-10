@@ -818,6 +818,8 @@ sub is_subscription_ntype_disabled_for {
     my $nclass = LJ::NotificationMethod->class($ntypeid);
     return 1 unless $nclass->configured_for_user($u);
 
+    return 1 unless $nclass->is_subtype_enabled($self);
+
     return 0;
 }
 

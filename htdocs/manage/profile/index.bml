@@ -506,7 +506,11 @@ body<=
 
             $ret .= "</div>\n";
 
-            $ret .= "<table class='field_block' id='phone_verification'>\n";
+            ##
+            my $block_id = 'phone_verification';
+               $block_id = '' if $LJ::DISABLED{smsru}; ## empty block_id disables JS script
+
+            $ret .= "<table class='field_block' id='$block_id'>\n";
 
             foreach (values %$tminfo) { LJ::text_out(\$_); }
 
@@ -798,11 +802,27 @@ body<=
         # the provider or number have been set to null
         if ($tminfo->{'number'} && ! $POST{'txtmsg_number'} )
         {
-            $dbh->do("DELETE FROM txtmsg WHERE userid=?", undef, $u->{'userid'});
+            $dbh->do("DELETE FROM txtmsg WHERE userid=?", undef, $u->userid);
+            LJ::SMS::API::RU::Phone->delete($u->userid);
+
         } else {
+            my $number = $POST{'txtmsg_number'};
             $dbh->do("REPLACE INTO txtmsg (userid, number) VALUES (?, ?)",
-                     undef, $u->{'userid'}, $POST{'txtmsg_number'});
-            LJ::SMS::API::RU::Phone->set_status($u->{'userid'}, $POST{'txtmsg_number'}, 'not_verified');
+                     undef, $u->userid, $number);
+
+            ## update supported providers info
+            if (LJ::SMS::API::RU::Phone->is_supported($number)){
+                ## set the new phone number to table SMSru_phones if 
+                ## phone number has been changed.
+                LJ::SMS::API::RU::Phone->set($u->userid, $number => 'not_verified')
+                    if LJ::SMS::API::RU::Phone->normalize($number) ne 
+                        LJ::SMS::API::RU::Phone->normalize($tminfo->{number});
+
+            } elsif(LJ::SMS::API::RU::Phone->is_supported($tminfo->{number})) {
+                ## if previously there was a supported provider 
+                LJ::SMS::API::RU::Phone->delete($u->userid);
+            }
+
         }
 
         # clear text message security caches

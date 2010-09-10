@@ -164,7 +164,7 @@ sub save_all {
                 $class->save($u, $post_args);
             };
             if (my $err = $@) {
-                warn $err;
+                warn LJ::D($err) . " ";
                 $save_errors = $err->field('map') if ref $err;
             }
         }

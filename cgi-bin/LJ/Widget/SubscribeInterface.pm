@@ -2,6 +2,7 @@ package LJ::Widget::SubscribeInterface;
 
 use strict;
 use base qw(LJ::Widget);
+use LJ::SMS::API::RU::Phone;
 
 sub need_res {
     return qw(
@@ -21,7 +22,9 @@ sub render_body {
 
     my @ntypes = @LJ::NOTIFY_TYPES;
     my (undef, $country) = LJ::GeoLocation->ip_class;
-    if ($country ne 'RU'){
+    if ($country ne 'RU' or
+        LJ::SMS::API::RU::Phone->is_users_number_supported($u)
+    ){
         @ntypes = grep { $_ ne 'LJ::NotificationMethod::SMSru' ? 1 : 0 } @ntypes;
     }
 
