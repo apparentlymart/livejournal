@@ -904,6 +904,11 @@ Must be removed after implementation of Framework! */
 		margin: 0 0 5px !important;
 		text-align: left !important;
 		}
+	#entry-form-wrapper .b-repost-item-dis,
+	#entry-form-wrapper .b-repost-item-dis A:link,
+	#entry-form-wrapper .b-repost-item-dis A:visited,
+	#entry-form-wrapper .b-repost-item-dis A:hover,
+	#entry-form-wrapper .b-repost-item-dis A:active,
 	.b-repost-item .repost_disabled {
 		color: #CCC;
 		}
