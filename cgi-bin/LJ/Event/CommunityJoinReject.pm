@@ -152,6 +152,7 @@ sub _as_email {
                 maintainer  => $remover->{'user'},
                 reason      => $reason,
                 sitename    => $LJ::SITENAME,
+                siteroot    => $LJ::SITEROOT,
         });
     } else {
         # Precache text lines

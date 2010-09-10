@@ -1526,6 +1526,14 @@ a maintainer directly.
 
 Regards,
 [[sitename]] Team
+<p align="left" style="font-size: 10px;"><a href="[[siteroot]]">LiveJournal Inc 2007 All Rights Reserved.</a></p>
+<p align="left">
+<a href="[[siteroot]]/support/faq.bml">FAQs</a> |
+<a href="http://news.livejournal.com">[[sitenameshort]] News</a> |
+<a href="[[siteroot]]/site/search.bml">Explore [[sitenameshort]]</a> |
+<a href="[[siteroot]]/shop/">Gift Shop</a> |
+<a href="[[siteroot]]/legal">Site Policies</a>
+</p>
 
 .
 
@@ -1536,6 +1544,14 @@ A membership request from [[username]] to the [[community]] (which you maintain)
 
 Regards,
 [[sitename]] Team
+<p align="left" style="font-size: 10px;"><a href="[[siteroot]]">LiveJournal Inc 2007 All Rights Reserved.</a></p>
+<p align="left">
+<a href="[[siteroot]]/support/faq.bml">FAQs</a> |
+<a href="http://news.livejournal.com">[[sitenameshort]] News</a> |
+<a href="[[siteroot]]/site/search.bml">Explore [[sitenameshort]]</a> |
+<a href="[[siteroot]]/shop/">Gift Shop</a> |
+<a href="[[siteroot]]/legal">Site Policies</a>
+</p>
 
 .
 
@@ -2778,6 +2794,8 @@ notification_method.inbox.title=Inbox
 
 notification_method.sms.title|staleness=1
 notification_method.sms.title=TxtLJ
+
+notification_method.sms-ru.title=SMS
 
 number.million|staleness=1
 number.million=[[number]] million
