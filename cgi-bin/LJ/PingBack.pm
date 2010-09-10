@@ -31,6 +31,9 @@ sub ping_post {
     # 
     return "no pingback notifications between posts of the same journal"
         if $source_entry and $source_entry->journalid eq $target_entry->journalid;
+    
+    return "no pingback notifications between posts of the same user"
+        if $source_entry and $source_entry->posterid eq $target_entry->posterid;
 
     my $poster_u = LJ::load_user($LJ::PINGBACK->{comments_bot_username});
     unless ($poster_u){
