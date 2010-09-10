@@ -741,7 +741,7 @@ sub render_options_block {
             my $selectTags = '';
             if ($remote) {
                 $selectTags = qq|<a href="#" onclick="return selectTags(this)" class="i-prop-selecttags">$BML::ML{'entryform.selecttags'}</a>|;
-                $$onload .= " getUserTags();";
+                $$onload .= " getUserTags(jQuery(document.updateForm.usejournal).val());";
             }
 
             return qq{
