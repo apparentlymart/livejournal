@@ -62,7 +62,8 @@ function updateRepostButtons(stateIndex)
 {
     var boxes = ['facebook', 'twitter'],
         input, label, parentNode,
-        parentDisableClass = 'b-repost-item-disabled';
+        parentDisableClass = 'b-repost-item-disabled',
+		linkDisclass = 'b-repost-item-dis';
 
     for(var i in boxes)
     {
@@ -77,13 +78,192 @@ function updateRepostButtons(stateIndex)
             input.setAttribute('disabled', 'disabled');
             label.className = "repost_disabled";
             input.checked = false;
+			parentNode.className += " " + linkDisclass;
         }
         else {
             input.removeAttribute('disabled');
             label.className = "repost_" + boxes[i];
+			parentNode.className = parentNode.className.replace(" " + linkDisclass, "");
         }
     }
 
+}
+
+function registerFbImageSelection()
+{
+	var fbInput = $('repost_facebook'),
+		thumb = $('repost_facebook_thumbnail'),
+		select = $('select-fb-thumbnail'),
+		userPic = $('userpic_preview_image'),
+		selectWindow = $('fbimg_select_window'),
+		selectNav = $('fbimg_select_window_nav');
+
+	var noThumb = "nothumb";
+	var userpicVal = "userpic";
+			
+	if(select == null) {
+		return;
+	}
+
+	var selectPopup = {
+		init: function() {
+			this.opened = false;
+			this.page = 1;
+			this.totalImages = 1;
+			this.pager = {
+				prev: jQuery(selectNav).children('.i-repost-nav-prev'),
+				next: jQuery(selectNav).children('.i-repost-nav-next'),
+				counter: jQuery(selectNav).children('.i-repost-nav-counter')
+			};
+			this.listWrapper = jQuery(selectWindow).children('.b-repost-pics-wrapper');
+			this.list = this.listWrapper.children('.b-repost-pics-items');
+			this.pagerSize = 4;
+			this.pagesNum = 1;
+			this.cellWidth = 0;
+
+			this.pager.prev.click(function(){ selectPopup.changePage(-1)});
+			this.pager.next.click(function(){ selectPopup.changePage(1)});
+
+			this.firstLi = this.list.children('li:first').click(function() {
+					selectPopup.setPicture(noThumb);
+			});
+		},
+
+		setPicture: function(url) {
+			thumb.value = url;
+			this.close();
+		},
+
+		updatePager: function() {
+			selectNav.style.display = (this.totalImages < this.pagerSize)?"none":"block";
+			this.pager.prev[(this.page == 1)?"addClass":"removeClass"]('i-repost-nav-prev-dis');
+			this.pager.next[(this.page == this.pagesNum)?"addClass":"removeClass"]('i-repost-nav-next-dis');
+
+			this.pager.counter.html(this.page + '/' + this.pagesNum);
+		},
+
+		makeListItem: function(url, value, selected) {
+			var selClass = (selected)?"b-repost-pics-active":"";
+
+			return jQuery('<li>')
+				.addClass(selClass)
+				.append ( jQuery('<img>').attr('src', url) )
+				.click(function () { selectPopup.setPicture(value) });
+		},
+
+		open: function(imgList) {
+			this.list.children('li:gt(0)').remove();
+			this.totalImages = imgList.length;
+			this.page = 1;
+
+			if((imgList.length == 0 || !jQuery.inArray(thumb.value, imgList)) && thumb.value != userpicVal && thumb.value != noThumb) {
+				thumb.value = "";
+			}
+
+
+			if(userPic) {
+				var userPicImg = userPic.src;
+				this.makeListItem(userPicImg, userpicVal, userpicVal == thumb.value).appendTo(this.list);
+				this.totalImages++;
+			}
+			this.pagesNum = Math.ceil((this.totalImages + 1) / this.pagerSize);
+
+			if(this.totalImages > 1 && thumb.value == "") {
+				thumb.value = imgList[0];
+			}
+
+			var selected = "";
+			for(var i=0; i < imgList.length; ++i) {
+				this.makeListItem(imgList[i], imgList[i], imgList[i] == thumb.value).appendTo(this.list);
+			}
+
+			this.firstLi[((this.totalImages <= 1 && thumb.value == "") || thumb.value == noThumb)?"addClass":"removeClass"]("b-repost-pics-active");
+
+			selectWindow.style.display = 'block';
+			this.opened = true;
+
+			this.firstLi.each(function() {
+				selectPopup.cellWidth = this.offsetWidth + this.offsetLeft; //calc cell width there because it's not visible on init
+			});
+
+			var wrapperWidth = (this.pagerSize > this.totalImages) ? (this.cellWidth * (this.totalImages + 1)) + "px" : "";
+			this.listWrapper.css('width', wrapperWidth);
+			this.changePage(0);
+		},
+
+		changePage: function(num)
+		{
+			this.page += num;
+			this.page = (this.page < 1)? 1: 
+						((this.page > this.pagesNum) ? this.pagesNum : this.page);
+
+			var offset =  - this.cellWidth * (this.page - 1) * this.pagerSize;
+			this.list.css('left', offset + "px");
+
+			this.updatePager();
+		},
+
+		close: function() {
+			selectWindow.style.display = 'none';
+			this.opened = false;
+		}
+	}
+	
+	selectPopup.init();
+	selectWindow.onmousedown = function(event) {
+		event = event || window.event;
+		if (event.stopPropagation) event.stopPropagation(); else event.cancelBubble = true;
+	};
+
+	function extractImageUrls(arr)
+	{
+		var text = getPostText('draft'),
+			regexp = /<img(.*?)src\s*=\s*"(.*?)"(.*?)\/?>/g,
+			resArr;
+
+		while((resArr = regexp.exec(text)) != null) {
+			arr.push(resArr[2]);
+		}
+	}
+
+	function closeSelWindow(ev)
+	{
+		selectPopup.close();
+	}
+
+	select.onmousedown = function(ev) {
+		ev = ev || window.event;
+
+		if(!selectPopup.opened) {
+			return;
+		}
+
+		if (ev.stopPropagation) ev.stopPropagation(); else ev.cancelBubble = true;
+	};
+
+	select.onclick = function(ev) {
+		ev = ev || window.event;
+		urls = [];
+
+		if(fbInput.getAttribute('disabled') === null || fbInput.getAttribute('disabled') === false) {
+			if(selectPopup.opened) {
+				closeSelWindow();
+			}
+			else {
+				urls.length=0;
+				extractImageUrls(urls);
+				selectPopup.open(urls);	
+				setTimeout(function() {	DOM.addEventListener(document, 'mousedown', closeSelWindow, false); }, 0);
+			}
+		}
+
+		if(ev.preventDefault) {
+			ev.preventDefault();
+		}
+		else {
+			ev.returnValue = false;
+		}
+	}
 }
 
 function customboxes (e) {

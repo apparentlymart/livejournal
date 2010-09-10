@@ -146,6 +146,22 @@ function useRichText(textArea, statPrefix) {
 	return false; // do not follow link
 }
 
+function getPostText(textArea) {
+	var textarea_node = $(textArea);
+
+	if(switched_rte_on == true) {
+		var oEditor = FCKeditorAPI.GetInstance(textArea);
+		var html = oEditor.GetXHTML(false);
+		html = convert_poll_to_ljtags(html);
+		html = convert_user_to_ljtags(html);
+
+		return html;
+	}
+	else {
+		return textarea_node.value;
+	}
+}
+
 function usePlainText(textArea) {
 	var textarea_node = $(textArea);
 	
