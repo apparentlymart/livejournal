@@ -147,7 +147,7 @@ sub _as_email {
         my $lang    = $mt->prop('browselang');
         return LJ::Lang::get_text($lang, 'esn.comm_join_reject.maint.email_text', undef, {
                 user        => $mt->{'name'},
-                username    => $rej_u ? $rej_u->{'name'} : '',
+                username    => $rej_u ? $rej_u->ljuser_display : '',
                 community   => $cu->{'user'},
                 maintainer  => $remover->{'user'},
                 reason      => $reason,
