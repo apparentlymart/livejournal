@@ -734,6 +734,7 @@ sub _get_upf_scaled
     return undef unless $timage;
 
     $timage->BlobToImage($$dataref);
+    $timage->Set(magick => 'PNG');
 
     if ($auto_crop) {
         my ($crop_w, $crop_h) = ();
