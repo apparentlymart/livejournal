@@ -22,8 +22,8 @@ sub render_body {
 
     my @ntypes = @LJ::NOTIFY_TYPES;
     my (undef, $country) = LJ::GeoLocation->ip_class;
-    if ($country ne 'RU' or
-        LJ::SMS::API::RU::Phone->is_users_number_supported($u)
+    if ($country ne 'RU' and
+        not LJ::SMS::API::RU::Phone->is_users_number_supported($u)
     ){
         @ntypes = grep { $_ ne 'LJ::NotificationMethod::SMSru' ? 1 : 0 } @ntypes;
     }
