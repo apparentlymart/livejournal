@@ -1,0 +1,143 @@
+<?page
+head<=
+<?_code
+{
+    LJ::need_res('stc/tour.css');
+}
+_code?>
+<style type='text/css'>
+	.cell { border-collapse: collapse; padding: 0; }
+	.cell th { font-style: italic; font-weight: bold; }
+	.cell th small {font-weight: normal; display: block;}
+	.cell td { border: 1px solid #e7e7e7; padding: 5px; border-bottom: 1px solid #e7e7e7;}
+	.cell td.country { background: #e7e7e7; font-style: italic; font-weight: bold; padding: 10px; }
+	.cell td.top { border-bottom: 1px solid #ccc !important; }
+	.cell td.price { text-align: right;}
+
+</style>
+<=head
+title=><?_ml .title _ml?>
+body<=
+<?_code
+{
+
+    ## BML::ml('.confirm.title.news', {'user'=> $user });
+
+    my $number = "6365";
+    my $rub = BML::ml('.rub');
+    my $grn = BML::ml('.grn');
+	my $brb = BML::ml('.brb');
+    my $how_to_pay = BML::ml('.how_to_pay', {'number'=> $number });
+    my $price_for = BML::ml('.price_for', {'number'=> $number });
+    my $problems_text = BML::ml('.problems_text', {'aopts'=> 'href=\'mailto:support@sup.com\''});
+
+    my $ret;
+    $ret = <<EOF_HTML;
+<div class="layout-2col-r300 pkg">
+<div class="primary">
+<p>$how_to_pay</p>
+<p><?_ml .avail_for _ml?></p>
+  <table class="cell">
+    <tr>
+      <th><?_ml .operator _ml?></th>
+      <th>$price_for</th>
+    </tr>
+    <tr>
+      <td><?_ml .op.bl _ml?></td>
+      <td class="price">77.77 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.tl2 _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.akos _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.as _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.bvk _ml?></td>
+      <td class="price">76 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.dalsv _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.etk _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.mts _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.mf _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.motiv _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.nss _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.orenburg _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.smarts _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.stek_gsm _ml?></td>
+      <td class="price">75  $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.svyaz _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.sky _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.uude _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.ulyanovsk _ml?></td>
+      <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+    <td><?_ml .op.elain _ml?></td>
+    <td class="price">75 $rub</td>
+    </tr>
+    <tr>
+      <td><?_ml .op.utel _ml?></td>
+      <td class="price">70.8 $rub</td>
+    </tr>
+    <tr>
+        <td><?_ml .op.ntk _ml?></td>
+        <td class="price">68.44 $rub</td>
+    </tr>
+
+  </table>
+<p>$problems_text</p>
+</div><!-- .primary -->
+<div class="secondary">
+&nbsp;
+</div><!-- .secondary -->
+</div><!-- end .layout-2col-r300 -->
+EOF_HTML
+
+    return $ret;
+}
+_code?>
+<=body
+page?>

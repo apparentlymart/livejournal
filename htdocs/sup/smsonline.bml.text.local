@@ -1,0 +1,169 @@
+;; -*- coding: utf-8 -*-
+.avail_for|staleness=1
+.avail_for=This service is available for the subscribers of the following operators in Russia:
+
+.brb|staleness=1
+.brb=brb
+
+.cnt.belarus|staleness=1
+.cnt.belarus=Belarus
+
+.cnt.kazakhstan|staleness=1
+.cnt.kazakhstan=Kazakhstan
+
+.cnt.kirgizia|staleness=1
+.cnt.kirgizia=Kirgizia
+
+.cnt.russia|staleness=1
+.cnt.russia=RUSSIA
+
+.cnt.tajikistan|staleness=1
+.cnt.tajikistan=Tajikistan
+
+.cnt.ukraine|staleness=1
+.cnt.ukraine=Ukraine
+
+.cnt.uzbekistan|staleness=1
+.cnt.uzbekistan=Uzbekistan
+
+.country|staleness=1
+.country=Country
+
+.grn|staleness=1
+.grn=uah
+
+.how_to_pay|staleness=1
+.how_to_pay=In order to pay for a userhead you should send the SMS with generated code to number [[number]].
+
+.op.akos|staleness=1
+.op.akos=Akos
+
+.op.as|staleness=1
+.op.as=Altajsvjaz'
+
+.op.babilon|staleness=1
+.op.babilon=Babilon
+
+.op.bl|staleness=1
+.op.bl=Beeline
+
+.op.bl_ua|staleness=1
+.op.bl_ua=Beeline
+
+.op.bl_uz|staleness=1
+.op.bl_uz=ООО "UNITEL" (Beeline)
+
+.op.bvk|staleness=1
+.op.bvk=BajkalVestKom
+
+.op.dalsv=Dalsvyaz GSM
+
+.op.cexp|staleness=1
+.op.cexp=Cifrovaya ekspansia
+
+.op.ekb_2000|staleness=1
+.op.ekb_2000=Ekaterinburg-2000
+
+.op.elain=Elain GSM
+
+.op.etk|staleness=1
+.op.etk=ETK
+
+.op.kar_tel|staleness=1
+.op.kar_tel=Kar-Tel
+
+.op.kg_bitel|staleness=1
+.op.kg_bitel=Kirgizija - Bitel
+
+.op.ks|staleness=1
+.op.ks=KyivStar
+
+.op.k_cell|staleness=1
+.op.k_cell=K-Cell
+
+.op.life|staleness=1
+.op.life=Life
+
+.op.mf|staleness=1
+.op.mf=MegaFon
+
+.op.mms_p|staleness=1
+.op.mms_p=MSS-Povolzh'e
+
+.op.motiv|staleness=1
+.op.motiv=Motiv
+
+.op.mts|staleness=1
+.op.mts=MTS
+
+.op.mts_bl|staleness=1
+.op.mts_bl=MTS
+
+.op.mts_ua|staleness=1
+.op.mts_ua=MTS
+
+.op.nss|staleness=1
+.op.nss=NCC
+
+.op.ntk|staleness=1
+.op.ntk=NTK
+
+.op.orenburg=Orenburg GSM
+
+.op.rss|staleness=1
+.op.rss=Rostovskaja sotovaja svjaz'
+
+.op.sky=SkyLink
+
+.op.smarts|staleness=1
+.op.smarts=SMARTS
+
+.op.stek_gsm|staleness=1
+.op.stek_gsm=Stek GSM
+
+.op.svyaz=Svjaz'inform
+
+.op.tl2|staleness=1
+.op.tl2=Tele2
+
+.op.ts_ltd|staleness=1
+.op.ts_ltd=Teleset LTD
+
+.op.ulyanovsk=Ulyanovsk GSM
+
+.op.umc|staleness=1
+.op.umc=UMC
+
+.op.usi|staleness=1
+.op.usi=Uralsvjaz'inform
+
+.op.utel|staleness=1
+.op.utel=Utel
+
+.op.uude|staleness=1
+.op.uude=Ulan-Udenskaya sotovaya svayz'
+
+.op.u_gsm|staleness=1
+.op.u_gsm=Ural'skij GSM
+
+.op.velc|staleness=1
+.op.velc=VELCOM
+
+.operator|staleness=1
+.operator=Operator
+
+.operators_rate|staleness=1
+.operators_rate=operator's rate
+
+.price_for|staleness=1
+.price_for=Price for sending sms <br /> to short number [[number]]<small>(without V.A.T)</small>
+
+.problems_text|staleness=1
+.problems_text=If you encounter problems with SMS payments please call 8-800-333-11-24 (the call is toll-free in Russia, only calls regarding SMS payments are accepted) or e-mail <a [[aopts]]>support@sup.com</a>
+
+.rub|staleness=1
+.rub=rub
+
+.title|staleness=1
+.title=SMS Payments for Userheads
+
