@@ -704,7 +704,7 @@ sub create_qr_div {
     $qrhtml .= LJ::ljuser($remote->{'user'});
     $qrhtml .= "</td><td align='center'>";
 
-    my %userpicmap;
+    my (%userpicmap, $defaultpicurl);
 
     # Userpic selector
     {
@@ -739,6 +739,10 @@ sub create_qr_div {
 
             foreach my $i (1 .. $res{'pickw_count'}) {
                 $userpicmap{$res{"pickw_$i"}} = $res{"pickwurl_$i"};
+            }
+
+            if (my $upi = $remote->userpic) {
+                $defaultpicurl = $upi->url;
             }
         }
     }
@@ -814,6 +818,7 @@ sub create_qr_div {
     my $userpicmap = LJ::JSON->to_json(\%userpicmap);
     $ret .= qq{
                var userpicmap = $userpicmap;
+               var defaultpicurl = "$defaultpicurl";
                document.write("$qrsaveform");
                var de = document.createElement('div');
                de.id = 'qrdiv';

@@ -1576,7 +1576,7 @@ sub talkform {
         );
     }
 
-    my ( $show_userpics, @pics_display, %userpicmap );
+    my ( $show_userpics, @pics_display, %userpicmap, $defaultpicurl );
     if ( $res{'pickw_count'} ) {
         $show_userpics = 1;
 
@@ -1602,6 +1602,10 @@ sub talkform {
 
         foreach my $i (1 .. $res{'pickw_count'}) {
             $userpicmap{$res{"pickw_$i"}} = $res{"pickwurl_$i"};
+        }
+
+        if (my $upi = $remote->userpic) {
+            $defaultpicurl = $upi->url;
         }
     }
 
@@ -1771,6 +1775,7 @@ sub talkform {
         'show_userpics'             => $show_userpics,
         'userpics'                  => \@pics_display,
         'userpicmap'                => LJ::JSON->to_json(\%userpicmap),
+        'defaultpicurl'             => $defaultpicurl,
         'subjicon_types'            => \@subjicon_types,
         'text_hint'                 => $opts->{'text_hint'},
         'create_link'               => $create_link,
