@@ -21,6 +21,8 @@ sub always_checked { 1 }
 
 my @_ml_strings_en = (
     'esn.comm_join_reject.email_subject',  # 'Your Request to Join [[community]] community',
+    'esn.comm_join_reject.maint.email_text', # 
+
     'esn.comm_join_reject.alert',          # 'Your request to join [[community]] community has been declined.',
     'esn.comm_join_reject.email_text',      # 'Dear [[user]],
                                             #
@@ -139,11 +141,11 @@ sub _as_email {
 
     my $mt  = LJ::load_userid($self->{'args'}[0]);
     my $remover = LJ::load_userid($self->{'args'}[1]);
-    my $rej_u = LJ::load_userid($self->{'args'}[2]);
     $cu = LJ::load_userid($self->{'userid'}) unless $cu->is_community;
     my $reason = $self->{'args'}[3];
 
     if ($mt && $mt->can_manage ($cu)) {
+        my $rej_u = LJ::load_userid($self->{'args'}[2]);
         my $lang    = $mt->prop('browselang');
         return LJ::Lang::get_text($lang, 'esn.comm_join_reject.maint.email_text', undef, {
                 user        => $mt->ljuser_display,
@@ -155,16 +157,17 @@ sub _as_email {
                 siteroot    => $LJ::SITEROOT,
         });
     } else {
+        my $rej_u = LJ::load_userid($self->{'args'}[0]);
         # Precache text lines
         my $lang    = $u->prop('browselang');
-        #LJ::Lang::get_text_multi($lang, undef, \@_ml_strings_en);
+        LJ::Lang::get_text_multi($lang, undef, \@_ml_strings_en);
 
         my $vars = {
-                'user'      => $u->{name},
-                'username'  => $u->{name},
-                'community' => $cu->{user},
-                'sitename'  => $LJ::SITENAME,
-                'siteroot'  => $LJ::SITEROOT,
+                username    => $rej_u ? $rej_u->ljuser_display : '',
+                community   => $cu->ljuser_display,
+                reason      => $reason,
+                sitename    => $LJ::SITENAME,
+                siteroot    => $LJ::SITEROOT,
         };
 
         return LJ::Lang::get_text($lang, 'esn.comm_join_reject.email_text', undef, $vars);

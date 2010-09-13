@@ -139,29 +139,6 @@ body<=
                         $rejected++; # for keeping this user in list for later reject
                     }
                 }
-                if ($POST{"reject"} or $POST{"reject_ban"}) {
-                    LJ::send_mail({ 'to' => $us->{$id}->email_raw,
-                                    'from' => $LJ::ACCOUNTS_EMAIL,
-                                    'fromname' => $LJ::SITENAMESHORT,
-                                    'wrap' => 1,
-                                    'charset' => 'utf-8',
-                                    'subject' => LJ::Lang::ml ('pending.mail.reject.subject', { community => $cname }),
-                                    'html'    => ( LJ::Lang::ml ('pending.mail.reject.body', 
-                                                    {
-                                                        community => $c->ljuser_display,
-                                                        username  => $us->{$id}->ljuser_display,
-                                                        reason    => $reason,
-                                                        sitename  => $LJ::SITENAMESHORT,
-                                                    }
-                                                ).
-                                                    LJ::Lang::ml ('esn.footer.html', 
-                                                    {
-                                                        siteroot    => $LJ::SITEROOT,
-                                                    }
-                                                )
-                                                )
-                                           });
-                }
             }
 
             $previous = $POST{'previous'};

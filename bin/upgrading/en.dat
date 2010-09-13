@@ -1516,24 +1516,14 @@ esn.comm_join_reject.maint.email_subject=[[username]] has been rejected from joi
 
 esn.comm_join_reject.email_text|staleness=1
 esn.comm_join_reject.email_text<<
-Dear [[user]],
-
-Your request to join the "[[community]]" community has been declined.
-
-Replies to this email are not sent to the community's maintainer(s). If you would 
-like to discuss the reasons for your request's rejection, you will need to contact 
-a maintainer directly.
-
-Regards,
+Dear [[username]],<br> 
+<br>
+Your request to join the [[community]] community has been declined by the maintainer(s) of the community for the following reason: [[reason]]. <br/>
+<br/>
+Replies to this email are not sent to the community's maintainer(s). If you would like to discuss the reasons your membership request was rejected, you will need to contact a maintainer directly. Maintainers are listed on the community's Profile page. <br/>
+<br/>
+Regards, </br>
 [[sitename]] Team
-<p align="left" style="font-size: 10px;"><a href="[[siteroot]]">LiveJournal Inc 2007 All Rights Reserved.</a></p>
-<p align="left">
-<a href="[[siteroot]]/support/faq.bml">FAQs</a> |
-<a href="http://news.livejournal.com">[[sitenameshort]] News</a> |
-<a href="[[siteroot]]/site/search.bml">Explore [[sitenameshort]]</a> |
-<a href="[[siteroot]]/shop/">Gift Shop</a> |
-<a href="[[siteroot]]/legal">Site Policies</a>
-</p>
 
 .
 
@@ -1544,14 +1534,6 @@ A membership request from [[username]] to the [[community]] (which you maintain)
 
 Regards,
 [[sitename]] Team
-<p align="left" style="font-size: 10px;"><a href="[[siteroot]]">LiveJournal Inc 2007 All Rights Reserved.</a></p>
-<p align="left">
-<a href="[[siteroot]]/support/faq.bml">FAQs</a> |
-<a href="http://news.livejournal.com">[[sitenameshort]] News</a> |
-<a href="[[siteroot]]/site/search.bml">Explore [[sitenameshort]]</a> |
-<a href="[[siteroot]]/shop/">Gift Shop</a> |
-<a href="[[siteroot]]/legal">Site Policies</a>
-</p>
 
 .
 

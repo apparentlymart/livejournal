@@ -578,7 +578,8 @@ sub approve_pending_member {
 ## LJ::reject_pending_member($cid, $id, $remote->{userid}, $POST{'reason'});
 sub reject_pending_member {
     my ($commid, $userid, $maintid, $reason) = @_;
-    $reason = LJ::Lang::ml('/community/pending.bml.reason.default.text') if $reason == 0;
+
+    $reason = LJ::Lang::ml('/community/pending.bml.reason.default.text') if $reason eq '0';
     my $cu = LJ::want_user($commid);
     my $u = LJ::want_user($userid);
     my $mu = LJ::want_user($maintid);
@@ -586,6 +587,7 @@ sub reject_pending_member {
 
     # step 1, update authactions table
     my $dbh = LJ::get_db_writer();
+
     my $count = $dbh->do("UPDATE authactions SET used = 'Y' WHERE userid = ? AND arg1 = ?",
                          undef, $cu->{userid}, "targetid=$u->{userid}");
     return unless $count;
@@ -600,13 +602,13 @@ sub reject_pending_member {
     );
 
     # step 2, email the user
-    my %params = (event => 'CommunityJoinReject', journal => $u);
+    my %params = (event => 'CommunityJoinReject', journal => $cu);
     unless ($u->has_subscription(%params)) {
         $u->subscribe(%params, method => 'Email');
     }
 
     # Email to user about rejecting
-    LJ::Event::CommunityJoinReject->new($u, $cu)->fire unless $LJ::DISABLED{esn};
+    LJ::Event::CommunityJoinReject->new($cu, $u, undef, undef, $reason)->fire unless $LJ::DISABLED{esn};
 
     # Email to maints about user rejecting
     my $maintainers = LJ::load_rel_user($commid, 'A');
