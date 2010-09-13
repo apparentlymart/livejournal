@@ -2044,7 +2044,8 @@ sub Page
     $p->{'head_content'} .= $u->openid_tags if $opts && $opts->{'addopenid'};
 
     # Ads and control strip
-    $p->{'head_content'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n};
+    my $ad_base_url = LJ::stat_src_to_url('/ad_base.css');
+    $p->{'head_content'} .= qq{<link rel='stylesheet' href='$ad_base_url' type='text/css' />\n};
 
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},

@@ -1222,17 +1222,19 @@ sub js_dumper {
             }
         }
 
-        my $set = sub {
-            my $mtime = shift;
-            $stat_cache{$key} = { lastcheck => $now, modtime => $mtime };
-            return $mtime;
-        };
-
         my $file = "$LJ::HOME/htdocs/$key";
         my $mtime = (stat($file))[9];
-        return $set->($mtime);
+        $stat_cache{$key} = { lastcheck => $now, modtime => $mtime };
+        return $mtime;
     }
 }
+
+sub stat_src_to_url {
+    my $url = shift;
+    my $mtime = _file_modtime("/stc" . $url, time);
+    return $LJ::STATPREFIX . $url . "?v=" . $mtime;
+}
+
 
 ## Support for conditional file inclusion:
 ## e.g. LJ::need_res( {condition => 'IE'}, 'ie.css', 'myie.css') will result in
