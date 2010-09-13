@@ -210,8 +210,6 @@ __________________________________________*/
 * HTML .b-repost-pics-bg {
 	width: expression(this.parentNode.clientWidth);
 	height: 151px;
-	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true,sizingMethod=scale,src=/img/repost/pics-bg.png);
 	}
 * HTML .b-repost-pics-l {
 	background: none;
@@ -223,7 +221,7 @@ __________________________________________*/
 	}
 * HTML .b-repost-pics-arr {
 	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true,sizingMethod=crop,src=/img/repost/pics-arr.png;
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true,sizingMethod=crop,src=/img/repost/pics-arr.png);
 	}
 * HTML .b-repost-pics-items LI IMG {
 	width: 96px;
