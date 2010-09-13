@@ -150,6 +150,7 @@ sub do_parse {
                             my ($self, $text) = @_;
                             unless ($self->{_smplf_in_a}){
                                 $text =~ s|(http://[\w\-\_]{1,16}\.$LJ::DOMAIN/\d+\.html(\?\S*(\#\S*)?)?)|<a href="$1">$1</a>|g;
+                                $text =~ s|(http://community\.$LJ::DOMAIN/[\w\-\_]{1,16}/\d+\.html(\?\S*(\#\S*)?)?)|<a href="$1">$1</a>|g;
                             }
                             $normolized_text .= $text;
                         },  "self,text" ],
@@ -178,19 +179,19 @@ sub tag_start {
     if ($tag_name eq 'a') {
         parse_a ($text, $attr)
     } elsif ($tag_name =~ m/(br|p|table|hr|object)/) {
-        $res .= ' ';
+        $res .= ' ' if substr($res, -1, 1) ne ' ';
     }
 
 }
 sub tag_end {
     my $tag_name = shift;
     if ($tag_name eq 'a'){
-        my $context = substr $res, (length($res) - 100 < $prev_link_end ? $prev_link_end : 100);
+        my $context = substr $res, (length($res) - 100 < $prev_link_end ? $prev_link_end : -100); # last 100 or less unused chars
         
-        if (length($context) eq 100 and length($res) > 100 ){ # context does not start from the text begining.
+        if ( length($res) > length($context) ){ # context does not start from the text begining.
             $context =~ s/^(\S{1,5}\s*)//;
         }
-        
+
         $links[-1]->{context} = $context;        
         $prev_link_end = length($res);
     }
@@ -198,7 +199,9 @@ sub tag_end {
 }
 sub text {
     my $text = shift;
-    $res .= $text;
+    my $copy = $text;
+    $copy =~ s/\s+/ /g;
+    $res .= $copy;
     return;
 
 }
@@ -215,8 +218,15 @@ sub parse_a {
     return;
 }
 
+=comment Debug:
+use lib "$ENV{LJHOME}/cgi-bin";
+require "ljlib.pl";
 
-
-
+my $input = join('', <ARGV>);
+print $input;
+my @output = ExtractLinksWithContext->do_parse($input);
+print "\n>>\n", join("\n", map { "$_->{uri} 'in' $_->{context}" } @output);
+print "\n";
+=cut
 
 1;
