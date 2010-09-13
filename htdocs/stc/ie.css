@@ -60,20 +60,10 @@ __________________________________________*/
 	}
 
 
-* HTML .b-ttiny,
-* HTML .b-tlarge {
+* HTML .b-ttiny {
 	width: expression((document.documentElement.clientWidth || document.body.clientWidth) < 995 ? "995px" : "100%");
 	}
-.b-header,
-.b-outer {
-	margin-right: 27px;
-	margin-left: 27px;
-	}
-* HTML .b-header,
-* HTML .b-outer {
-	margin-right: 29px;
-	margin-left: 29px;
-	}
+
 .b-tlarge,
 .b-inner,
 .b-header,
