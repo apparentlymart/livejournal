@@ -1191,10 +1191,10 @@ Must be removed after implementation of Framework! */
 			display: block;
 			position: absolute;
 			top: 50%;
-			left: -12px;
+			right:6px;
 			width: 6px;
 			height: 7px;
-			margin: -3px 0 0 100%;
+			margin: -3px 0 0;
 			padding: 0;
 			background: url(/img/buttons/pending-close.gif) no-repeat 0 0;
 			cursor: pointer;
