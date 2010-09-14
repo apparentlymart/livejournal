@@ -120,12 +120,14 @@
         $success = 1;
 
         foreach my $u (values %$us) {
+            next if $u->is_expunged;
+
             my $list_of_banned = LJ::load_rel_user($u, 'B') || [ ];
             if (@$list_of_banned >= ($LJ::MAX_BANS || 5000)) {
                 $ok = 0;
                 next;
             }
-                
+
             if ($u->ban_user($ban_user)) {
                 LJ::run_hooks('ban_set', $u, $ban_user);
             } else { # failed
@@ -146,6 +148,7 @@
         $success = 1;
 
         foreach my $u (values %$us) {
+            next if $u->is_expunged;
             $success = 0 unless $u->unban_user_multi($unban_user->userid);
         }
 
@@ -157,8 +160,10 @@
 
     if (@$cids) {
         $ret{is_banned_everywhere} = 1;
-        foreach my $cid (@$cids) {
-            $ret{is_banned_everywhere} = 0 unless LJ::is_banned($targetu, $cid);
+        my $us = LJ::load_userids(@$cids, $remote->userid); # all communities and remote personal account
+        foreach my $u (values %$us) {
+            next if $u->is_expunged;
+            $ret{is_banned_everywhere} = 0 unless LJ::is_banned($targetu, $u->id);
         }
     }
 
