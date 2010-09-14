@@ -42,6 +42,7 @@ sub work {
     return 0 unless $lock;
 
     my $dbr = LJ::get_db_reader() or die "No db";
+    $dbr->{'RaiseError'} = 1;
 
     unless ($fh) {
         # Open the filehandle if we haven't done so already.
@@ -59,9 +60,11 @@ sub work {
     do {
         $count = LJ::UserSearch::MetaUpdater::update_file_partial($dbr, $fh, $loop_limit);
         $updates_since_last_restart += $count;
-    } while ($count == $loop_limit);
+    } while ($count == $loop_limit && !$class->should_quit);
 
-    restart_workers();
+    unless ($class->should_quit) {
+        restart_workers();
+    }
 
     return $count;
 }
