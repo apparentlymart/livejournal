@@ -78,7 +78,9 @@ function updateRepostButtons(stateIndex)
             input.setAttribute('disabled', 'disabled');
             label.className = "repost_disabled";
             input.checked = false;
-			parentNode.className += " " + linkDisclass;
+			if(parentNode.className.indexOf(linkDisclass) == -1) {
+				parentNode.className += " " + linkDisclass;
+			}
         }
         else {
             input.removeAttribute('disabled');
