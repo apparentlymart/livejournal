@@ -3,6 +3,8 @@ use strict;
 use Scalar::Util qw(blessed);
 use Class::Autouse qw(LJ::Comment LJ::HTML::Template);
 use Carp qw(croak);
+use LJ::API::BitLy;
+use LJ::Bitly;
 use base 'LJ::Event';
 
 # we don't allow subscriptions to comments on friends' journals, so
@@ -224,21 +226,33 @@ sub as_sms {
 
     my $msg;
 
+    my $lang = $self->comment->poster ? $self->comment->poster->prop('browselang') : $LJ::DEFAULT_LANG;
     if ($self->comment->parent) {
         if ($edited) {
-            $msg = LJ::u_equals($self->comment->parent->poster, $u) ? "$user edited a reply to your comment: " : "$user edited a reply to a comment: ";
+            $msg = LJ::u_equals($self->comment->parent->poster, $u)
+                    ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_your_comment', undef, { user => $user } )
+                    : LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_a_comment', undef, { user => $user } );
         } else {
-            $msg = LJ::u_equals($self->comment->parent->poster, $u) ? "$user replied to your comment: " : "$user replied to a comment: ";
+            $msg = LJ::u_equals($self->comment->parent->poster, $u)
+                    ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_your_comment', undef, { user => $user } )
+                    : LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_a_comment', undef, { user => $user } );
         }
     } else {
         if ($edited) {
-            $msg = LJ::u_equals($self->comment->entry->poster, $u) ? "$user edited a reply to your post: " : "$user edited a reply to a post: ";
+            $msg = LJ::u_equals($self->comment->entry->poster, $u)
+                    ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_your_post', undef, { user => $user } )
+                    : LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_a_post', undef, { user => $user } );
         } else {
-            $msg = LJ::u_equals($self->comment->entry->poster, $u) ? "$user replied to your post: " : "$user replied to a post: ";
+            $msg = LJ::u_equals($self->comment->entry->poster, $u)
+                    ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_your_post', undef, { user => $user } )
+                    : LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_a_post', undef, { user => $user } );
         }
     }
 
-    return $msg . $self->comment->body_text;
+    #my $tinyurl = LJ::API::BitLy->shorten($self->comment->url);
+    my $tinyurl = LJ::Bitly->to_short($self->comment->url);
+
+    return $msg . " " . $tinyurl; 
 }
 
 sub content {

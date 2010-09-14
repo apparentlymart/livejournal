@@ -4289,6 +4289,22 @@ settings.yearofbirth=Year of Birth
 
 settings.zipcode=ZIP Code
 
+sms.journalnewcomment.edit_reply_your_comment=[[user]] edited a reply to your comment
+
+sms.journalnewcomment.edit_reply_a_comment=[[user]] edited a reply to a comment
+
+sms.journalnewcomment.replied_your_comment=[[user]] replied to your comment
+
+sms.journalnewcomment.replied_a_comment=[[user]] replied to a comment
+
+sms.journalnewcomment.edit_reply_your_post=[[user]] edited a reply to your post
+
+sms.journalnewcomment.edit_reply_a_post=[[user]] edited a reply to a post
+
+sms.journalnewcomment.replied_your_post=[[user]] replied to your post
+
+sms.journalnewcomment.replied_a_post=[[user]] replied to a post
+
 Sorry|notes=typically used to announce that the requested action can't be done.
 Sorry=Sorry
 
