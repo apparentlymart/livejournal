@@ -208,6 +208,7 @@
 
         # act like the factory is disabled if no mogile
         my $factory_disabled = $LJ::DISABLED{'userpicfactory'} || !LJ::mogclient();
+        $MAX_UPLOAD *= 10 unless $factory_disabled;
 
         # file over 40k, return too large error
         if ($factory_disabled && ($size > $MAX_UPLOAD + 2048)) {
@@ -215,7 +216,7 @@
             # closing the connection before reading in all the data and it will sometimes
             # refuse to show the error.
             LJ::Request->post_params();
-
+        
             # send error
             return $err->(BML::ml('.error.filetoolarge',
                                   { 'maxsize' => int($MAX_UPLOAD / 1024) . $ML{'.kilobytes'} }));
@@ -271,7 +272,7 @@
                 }
 
                 ## resize or send user to factory.
-                if ($imagew > 100 or $imageh > 100 or $size > $MAX_UPLOAD + 2048){
+                if ($imagew > 100 or $imageh > 100 or $size > LJ::Userpic->max_allowed_bytes($u) + 2048){
                     ## Image has to be resized!
 
 
@@ -328,7 +329,7 @@
                                    userid  => $u->id,
                                    );
               }
-            or return $err->("There was an error in generating the userpic: $@");
+                or return $err->("There was an error in generating the userpic: $@");
 
             $userpic_raw = ${ $picinfo->[0] };
 
