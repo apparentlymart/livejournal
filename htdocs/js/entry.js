@@ -537,12 +537,12 @@ function settime() {
 
 function tagAutocomplete(node, tags)
 {
-	var range_start;
+	var searched;
 	
 	jQuery(node).autocomplete({
 		minLength: 1,
 		source: function(request, response) {
-			var val = this.element.context.value;
+			var val = this.element.context.value,
 				range = DOM.getSelectedRange(this.element.context);
 			
 			if (!val || range.start != range.end) {
@@ -550,20 +550,17 @@ function tagAutocomplete(node, tags)
 				return;
 			}
 			
-			range_start = range.start;
-			
-			// searach one tag
-			var search = val
-				.match(new RegExp('(?:^.{0,'+(range_start - 1)+'},|^)([^,]*),?'))[1]
-				.replace(/^ +/, '');
+			// search one tag
+			searched = val.match(new RegExp('(^.{0,'+(range.start - 1)+'},|^)([^,]*),?(.*)'))
+			var tag = searched[2].replace(/^ +/, '');
 			// delegate back to autocomplete, but extract term
-			if (!search) {
+			if (!tag) {
 				response([]);
 				return;
 			}
 			var resp_ary = [], i = -1;
 			while (tags[++i]) {
-				if (tags[i].indexOf(search) === 0) {
+				if (tags[i].indexOf(tag) === 0) {
 					resp_ary.push(tags[i]);
 					if (resp_ary.length === 10) {
 						break;
@@ -578,23 +575,20 @@ function tagAutocomplete(node, tags)
 			return false;
 		},
 		select: function(e, ui) {
-			var val = this.value,
-				search = val.match(new RegExp('(^.{0,'+(range_start - 1)+'},|^)([^,]*),?(.*)'));
-			
 			ui.item.value += ',';
 			
-			if (search[1].length) { // no start
+			if (searched[1].length) { // no start
 				ui.item.value = ' ' + ui.item.value;
 			}
-			var new_range = search[1].length + ui.item.value.length;
-			if (!search[3].length) { // empy in end
+			var new_range = searched[1].length + ui.item.value.length;
+			if (!searched[3].length) { // empy in end
 				ui.item.value += ' ';
 				new_range++;
 			} else { // set range before ", ..."
 				new_range--;
 			}
 			
-			this.value = search[1] + ui.item.value + search[3];
+			this.value = searched[1] + ui.item.value + searched[3];
 			DOM.setSelectedRange(this, new_range, new_range);
 			
 			e.preventDefault();
