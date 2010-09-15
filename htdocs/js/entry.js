@@ -537,19 +537,24 @@ function settime() {
 
 function tagAutocomplete(node, tags)
 {
+	var range_start;
+	
 	jQuery(node).autocomplete({
 		minLength: 1,
 		source: function(request, response) {
 			var val = this.element.context.value;
 				range = DOM.getSelectedRange(this.element.context);
-				if (!val || range.start != range.end) {
-					response([]);
-					return;
-				}
+			
+			if (!val || range.start != range.end) {
+				response([]);
+				return;
+			}
+			
+			range_start = range.start;
 			
 			// searach one tag
 			var search = val
-				.match(new RegExp('(?:^.{0,'+(range.start - 1)+'},|^)([^,]*),?'))[1]
+				.match(new RegExp('(?:^.{0,'+(range_start - 1)+'},|^)([^,]*),?'))[1]
 				.replace(/^ +/, '');
 			// delegate back to autocomplete, but extract term
 			if (!search) {
@@ -565,6 +570,7 @@ function tagAutocomplete(node, tags)
 					}
 				}
 			}
+			
 			response(resp_ary);
 		},
 		focus: function() {
@@ -573,9 +579,7 @@ function tagAutocomplete(node, tags)
 		},
 		select: function(e, ui) {
 			var val = this.value,
-				range = DOM.getSelectedRange(this),
-				//search_ary = val.split(','), i = -1, sym_cnt = 0;
-				search = val.match(new RegExp('(^.{0,'+(range.start - 1)+'},|^)([^,]*),?(.*)'));
+				search = val.match(new RegExp('(^.{0,'+(range_start - 1)+'},|^)([^,]*),?(.*)'));
 			
 			ui.item.value += ',';
 			
@@ -591,9 +595,9 @@ function tagAutocomplete(node, tags)
 			}
 			
 			this.value = search[1] + ui.item.value + search[3];
-			
 			DOM.setSelectedRange(this, new_range, new_range);
-			return false;
+			
+			e.preventDefault();
 		},
 		
 		open: function()
