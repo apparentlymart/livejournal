@@ -121,7 +121,7 @@ LJ::register_hook("postpost", sub {
 =cut
 
     my $poster = $entry->poster;
-    my $prop_pingback = $poster ? $poster->prop('pingback') : 'O';
+    my $prop_pingback = ($poster && $poster->prop('pingback')) ? $poster->prop('pingback') : 'O';
     #
     LJ::PingBack->notify(
         uri  => $entry->url,
