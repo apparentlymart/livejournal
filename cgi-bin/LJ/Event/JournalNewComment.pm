@@ -4,7 +4,6 @@ use Scalar::Util qw(blessed);
 use Class::Autouse qw(LJ::Comment LJ::HTML::Template);
 use Carp qw(croak);
 use LJ::API::BitLy;
-use LJ::Bitly;
 use base 'LJ::Event';
 
 # we don't allow subscriptions to comments on friends' journals, so
@@ -249,9 +248,7 @@ sub as_sms {
         }
     }
 
-    #my $tinyurl = LJ::API::BitLy->shorten($self->comment->url);
-    my $tinyurl = LJ::Bitly->to_short($self->comment->url);
-
+    my $tinyurl = LJ::API::BitLy->shorten($self->comment->url);
     return $msg . " " . $tinyurl; 
 }
 
