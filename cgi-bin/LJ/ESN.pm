@@ -3,7 +3,7 @@ use strict;
 use Carp qw(croak);
 use LJ::Event;
 use LJ::Subscription;
-
+use Sys::Hostname qw/hostname/;
 use Data::Dumper;
 
 our $MAX_FILTER_SET = 5_000;
@@ -91,7 +91,8 @@ sub _get_debug_args {
         my $grabbed_until = $job->grabbed_until;
         my $time = time;
         my ($short_class_name) = ($worker_class =~ /::(\w+)$/);
-        push @info, "c=$short_class_name j=$jobid f=$failures t=$time g=$grabbed_until p=$$ $extra_arg";
+        my $host = hostname();  ## this is not expensive, since Sys::Hostname caches result
+        push @info, "c=$short_class_name j=$jobid f=$failures t=$time g=$grabbed_until p=$$ h=$host $extra_arg";
     }
 
     return ('debug_info' => \@info); 
