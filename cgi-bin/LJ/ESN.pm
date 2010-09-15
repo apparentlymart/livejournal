@@ -566,6 +566,7 @@ sub work {
         ## "TheSchwartz::Worker::SendEmail" tasks for events
         ## "OfficialPost" and "SupOfficialPost" should go to their database
         $opts{'_schwartz_role'} = $LJ::THESCHWARTZ_ROLE_MASS;
+        $opts{'_debug_headers'}->{"X-Esn-TheSchwartz-Role"} = $LJ::THESCHWARTZ_ROLE_MASS;
     }
 
     $subsc->process(\%opts, $evt)
