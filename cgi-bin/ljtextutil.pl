@@ -463,6 +463,14 @@ sub trim_at_word
             my $max = (sort {$b cmp $a} $space_idx, $dot_idx, $comma_idx, $semi_idx, $colon_idx)[0];
             $short_text = substr($text, 0, $max);
 
+            # attention: &#2116; must not lose ';' sign
+            if ($max == $semi_idx) {
+                my $one_char_longer = substr($text, 0, $max + 1);
+                if ($one_char_longer =~ /&.+;$/) { # entity in any form
+                    $short_text = $one_char_longer; # we must keep in whole
+                }
+            }
+
             # seconde attempt to reduce text to the end of phrase
             return $short_text . '...' if $short_text =~ s/([.;:!?])[^\\1]{1,5}$//;
         }
