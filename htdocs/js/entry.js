@@ -537,9 +537,28 @@ function settime() {
 
 function tagAutocomplete(node, tags)
 {
-	var searched;
+	var searched,
+		suppressKeypress = false;
 	
-	jQuery(node).autocomplete({
+	jQuery(node)
+	.keydown(function(event){ //fix form submit bug in opera
+		var self = jQuery(this).data('autocomplete');
+		var keyCode = jQuery.ui.keyCode;
+
+		if ( self.options.disabled  || !self.menu.element.is( ":visible" ) ) {
+			return;
+		}
+		if ( event.keyCode == keyCode.ENTER || event.keyCode == keyCode.NUMPAD_ENTER) {
+			suppressKeypress = true;
+		}
+	})
+	.keypress(function(event){
+		if ( suppressKeypress ) {
+			suppressKeypress = false;
+			event.preventDefault();
+		}
+	})
+	.autocomplete({
 		minLength: 1,
 		source: function(request, response) {
 			var val = this.element.context.value,
