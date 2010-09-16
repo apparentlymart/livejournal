@@ -103,6 +103,8 @@ sub EntryPage
 
     my @comments;
     if ($entry->comments_shown) {
+        ## allow to modify strategies to load/expand comments tree.
+        LJ::run_hooks('load_comments_opts', $u, $itemid, $copts);
         @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $copts);
     }
 
