@@ -203,6 +203,13 @@ background: $*clr_boxhead_back;
    background: none;
 }
 
+.box h1 .ljuser A,
+.box h2 .ljuser A,
+.box h3 .ljuser A {
+	background: none;
+	color: #0000FF;
+	}
+
 #navbar .box div.userpic {
 margin: 1em;
 text-align: center;
@@ -656,7 +663,7 @@ function FriendsPage::print_entry(Entry e) {
 function colored_ljuser(UserLite u, Color fg, Color bg) : string {
     var Image uiimg = userinfoicon($u);
     var string dir = $u.journal_type == "C" ? "community" : "users";
-    return """<span class="ljuser" style="white-space:nowrap;"><a href="$*SITEROOT/userinfo.bml?user=$u.username" style="color: $fg; background: $bg;"><img src="$uiimg.url" alt="[i]" width="$uiimg.width" height="$uiimg.height" style="vertical-align:bottom;border:0;" /></a><a href="$*SITEROOT/$dir/$u.username/" style="color: $fg; background: $bg; font-weight: bold;">$u.username</a></span>""";
+	return $u->ljuser();
 }
 function FriendsPage::print_entry_poster(Entry e) {
     var Friend f = $.friends{$e.journal.username};
