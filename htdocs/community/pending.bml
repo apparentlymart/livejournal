@@ -219,10 +219,12 @@ body<=
         # rows for existing users
         my $rc = 0;
         foreach (@users) {
+            my $disabled = $_->is_validated ? {} : { disabled => 1 };
+            my $selected = $_->is_validated ? 1 : 0;
             my $rstyle = ($rc++ & 1) ? '#efefef' : '#fff';
             $ret .= "<tr style='background-color: $rstyle;'><td>";
             $ret .= LJ::html_check({ id => 'pending_' . $_->userid, name => 'pending_' . $_->userid, 
-                                     selected => $jumpto ? ($_->user eq $jumpto ? 1 : 0) : 1 });
+                                     selected => $jumpto ? ($_->user eq $jumpto ? $selected : 0) : $selected, %$disabled });
             $ret .= "</td><td>" . LJ::ljuser($_->{user}) . "</td></tr>\n";
         }
 
