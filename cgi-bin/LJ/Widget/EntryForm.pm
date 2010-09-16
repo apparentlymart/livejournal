@@ -1162,6 +1162,10 @@ sub render_security_container_block {
 
         push @secopts, ("onchange" => "customboxes()");
     }
+    else {
+        push @secopts, ("onchange" => "updateRepostButtons(this.selectedIndex)");
+    }
+
 
     $out .= LJ::html_select({
         'id' => "security",
