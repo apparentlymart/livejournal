@@ -135,8 +135,7 @@ __________________________________________*/
 	}
 
 
-
-.replyform TABLE TD.b-postform-active .i-postform-label {
+#postform TABLE TD.b-postform-active .i-postform-label {
 	vertical-align: 1em !important;
 	}
 
