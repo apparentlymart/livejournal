@@ -66,8 +66,6 @@ body<=
 
         if ($POST{'reject_select'} eq '1') {
             $ret .= '<div class="b-pending">';
-            $ret .= "<h3>".$ML{'.following_users'}."</h3>";
-            $ret .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext">' . $ML{'.you_can_remove'} . '</p>';
 
             my @userids = split(',', $POST{'ids'});
 
@@ -93,6 +91,8 @@ body<=
             if ($POST{"approve"}) {
                 $ret .= "<?p " . BML::ml('.success.added', { num => $added }) . " p?>" if $added;
             } else {
+                $ret .= "<h3>".$ML{'.following_users'}."</h3>";
+                $ret .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext">' . $ML{'.you_can_remove'} . '</p>';
                 $ret .= "<form method='post' action='pending.bml?authas=$cname'>\n";
                 $ret .= LJ::form_auth();
                 $ret .= '<ul class="b-pending-users"><li>' . join (",</li><li>", map { "<span><a href='" . $_->profile_url . "' target='_blank'>" . $_->display_name . "</a><i id=\"reject_user_id_".$_->{userid}."\" class='i-pending-close' title='" . $ML{'.button.remove'} . "'></i></span>" } @to_show) . "</li></ul>\n";
