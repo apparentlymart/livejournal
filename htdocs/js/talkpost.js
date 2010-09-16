@@ -1,4 +1,3 @@
-
 var usernameWasFocused = 0;
 
 if (document.getElementById) {
@@ -277,15 +276,11 @@ function otherOIDUser() {
 }
 
 function hideMe(e) {
-   //e.className = 'display_none';
-   
-   jQuery(e).addClass('display_none');
+   jQuery(e).hide();
 }
 
 function showMe(e) {
-   //e.className = '';
-   
-   jQuery(e).removeClass('display_none');
+   jQuery(e).show();
 }
 
 function toggleTextHighlight(e, show) {
