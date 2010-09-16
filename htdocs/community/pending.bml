@@ -100,6 +100,7 @@ body<=
                 $ret .= "<textarea name='reason' rows='7' cols='50' class='b-pending-reason' placeholder='".$ML{'.reason.default.text'}."'></textarea>\n";
                 $ret .= LJ::html_hidden('reject_done', 1);
                 $ret .= LJ::html_hidden('reject', $POST{'reject'});
+                $ret .= LJ::html_hidden('reject_ban', $POST{'reject_ban'});
                 $ret .= LJ::html_submit('yes_reject', $ML{'.button.yes.reject'}, {class=>'i-pending-reject'});
                 $ret .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.reason.reject.text'} . '</p>' ."\n";
                 $ret .= LJ::html_hidden('previous', $previous);
