@@ -1884,7 +1884,7 @@ sub set_prop {
     return 0 unless LJ::set_userprop($u, $prop, $value);  # FIXME: use exceptions
     $u->{$prop} = $value;
 
-    LJ::run_hook("props_changed", $u, {$prop => $value});
+    LJ::run_hooks("props_changed", $u, {$prop => $value});
 
     return $value;
 }

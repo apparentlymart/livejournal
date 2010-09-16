@@ -1,6 +1,8 @@
 package LJ::TimeUtil;
 use strict;
 
+use DateTime;
+
 # <LJFUNC>
 # name: LJ::TimeUtil->days_in_month
 # class: time
@@ -334,6 +336,21 @@ sub fancy_time_format {
     return $ret if $precision eq 'sec';
 
     die "unknown precision $precision";
+}
+
+sub next_afternoon {
+    my ($class, $tz, $after) = @_;
+
+    $after ||= time;
+
+    my $dt = DateTime->from_epoch('epoch' => $after, 'time_zone' => $tz);
+    $dt->set( 'hour'    => 12,
+              'minute'  => 0,
+              'second'  => 0 );
+
+    my $epoch = $dt->epoch;
+
+    return ($epoch > $after ? $epoch : $epoch + 86400);
 }
 
 1;
