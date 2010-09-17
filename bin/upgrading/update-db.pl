@@ -606,7 +606,12 @@ sub populate_proplist_file {
               'usermsgproplist' => 'name',
               'pollproplist2'   => 'name',
               'categoryproplist' => 'name',
+              'ratelist' => 'name',
               );
+
+    my %noscope = (
+        'ratelist' => 1,
+    );
 
     my $table;  # table
     my $pk;     # table's primary key name
@@ -637,7 +642,7 @@ sub populate_proplist_file {
             ($table, $pkv) = ($1, $2);
             $pk = $pk{$table} or die "Don't know non-numeric primary key for table '$table'";
             $vals{$pk} = $pkv;
-            $vals{"scope"} = $scope;
+            $vals{"scope"} = $scope unless exists $noscope{$table};
             next;
         }
         if (/^\s+(\w+)\s*:\s*(.+)/) {

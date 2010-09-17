@@ -1543,7 +1543,40 @@ userproplist.dont_expunge_journal:
   cldversion: 8
 
 userproplist.purge_external_content:
-    datatype: char
-    cldversion: 8
-    des: Should external content be deleted when journal is deleted. Two bool flags separated by comma: <delete-comments>:<delete-community-entries>
+  datatype: char
+  cldversion: 8
+  des: Should external content be deleted when journal is deleted. Two bool flags separated by comma: <delete-comments>:<delete-community-entries>
+
+ratelist.addfriend:
+  des: Logged when a user adds someone to their Friends list
+
+ratelist.comm_in_vertical:
+  des: Logged when a community's entry gets added to a vertical
+
+ratelist.ctflag:
+  des: Logged when user flags content
+
+ratelist.failed_login:
+  des: Logged when wrong username/password is used
+
+ratelist.in_vertical:
+  des: Logged when a journal's entry gets added to a vertical
+
+ratelist.lostinfo:
+  des: Logged when a forgotten password or username e-mail is requested
+
+ratelist.post:
+  des: Logged whenever user posts (to any journal)
+
+ratelist.sms_register:
+  des: Logged when a user registers a number for SMS
+
+ratelist.syn_in_vertical:
+  des: Logged when a syndicated account's entry gets added to a vertical
+
+ratelist.tellafriend:
+  des: Logged when a users sends a message via Tell A Friend
+
+ratelist.usermessage:
+  des: Logged when a users sends a message to another user
 
