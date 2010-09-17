@@ -42,6 +42,8 @@
 
 .success.ignored=[[num]] [[?num|request is|requests are]] still on file pending decisions.
 
+.success.not_validated=Following users was not added: [[list]] because they emails are not validated.
+
 .success.previous=[[num]] [[?num|request has|requests have]] not been processed, as they were no longer pending.  Another maintainer might have already processed [[?num|it|them]].
 
 .success.rejected=You have rejected [[num]] [[?num|request|requests]] to join this community.

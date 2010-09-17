@@ -54,7 +54,7 @@ body<=
         unless @$pendids || LJ::did_post();
 
     # saving a form submission
-    my ($added, $rejected, $ignored, $previous, $banned, $ban_skipped);
+    my ($added, $rejected, $ignored, $previous, $banned, $ban_skipped, @not_validated);
     if (LJ::did_post()) {
         unless (LJ::check_form_auth()) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
@@ -77,6 +77,10 @@ body<=
                 }
                 unless (defined $POST{"pending_$id"}) {
                     $ignored++;
+                    next;
+                }
+                unless ($us->{$id}->is_validated) {
+                    push @not_validated, $us->{$id}->userid;
                     next;
                 }
                 next unless $POST{"pending_$id"} eq 'on';
@@ -105,6 +109,7 @@ body<=
                 $ret .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.reason.reject.text'} . '</p>' ."\n";
                 $ret .= LJ::html_hidden('previous', $previous);
                 $ret .= LJ::html_hidden('ignored', $ignored);
+                $ret .= LJ::html_hidden('validated', join(",", @not_validated));
                 $ret .= "</form>";
             }
             $ret .= '</div>';
@@ -144,10 +149,13 @@ body<=
 
             $previous = $POST{'previous'};
             $ignored = $POST{'ignored'};
+            @not_validated = split /,/, $POST{'validated'};
+            my $not_valid_users = LJ::load_userids(@not_validated);
             $ret .= "<?p " . BML::ml('.success.rejected', { num => $rejected }) . " p?>" if $rejected;
             $ret .= "<?p " . BML::ml('.success.ignored', { num => $ignored }) . " p?>" if $ignored;
             $ret .= "<?p " . BML::ml('.success.previous', { num => $previous }) . " p?>" if $previous;
             $ret .= "<?p " . BML::ml('.success.banned', { num => $banned }) . " p?>" if $banned;
+            $ret .= "<?p " . BML::ml('.success.not_validated', { list => join ",", map { $_->ljuser_display } values %$not_valid_users }) . " p?>" if scalar @not_validated;
             $ret .= "<?p " . BML::ml('.success.ban_skipped', { num => $ban_skipped }) . " p?>" if $ban_skipped;
 
         }
@@ -220,12 +228,10 @@ body<=
         # rows for existing users
         my $rc = 0;
         foreach (@users) {
-            my $disabled = $_->is_validated ? {} : { disabled => 1 };
-            my $selected = $_->is_validated ? 1 : 0;
             my $rstyle = ($rc++ & 1) ? '#efefef' : '#fff';
             $ret .= "<tr style='background-color: $rstyle;'><td>";
             $ret .= LJ::html_check({ id => 'pending_' . $_->userid, name => 'pending_' . $_->userid, 
-                                     selected => $jumpto ? ($_->user eq $jumpto ? $selected : 0) : $selected, %$disabled });
+                                     selected => $jumpto ? ($_->user eq $jumpto ? 1 : 0) : 1 });
             $ret .= "</td><td>" . LJ::ljuser($_->{user}) . "</td></tr>\n";
         }
 
