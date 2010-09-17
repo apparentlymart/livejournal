@@ -102,7 +102,7 @@ div.lj_ippu_titlebar {
 	display:-moz-inline-box;
 	display:inline-block;
 	border:1px dashed #ccc;
-	text-align:center;
+	text-align:left;
 	}
 .LJ_Placeholder_Container A {
 	position:relative;
