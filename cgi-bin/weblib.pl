@@ -1279,6 +1279,10 @@ sub res_includes {
     my $ret = "";
     my $do_concat = $LJ::IS_SSL ? $LJ::CONCAT_RES_SSL : $LJ::CONCAT_RES;
 
+    # all conditions must be complete here
+    # example: cyr/non-cyr flag changed at settings page
+    LJ::run_hooks('sitewide_resources');
+
     # use correct root and prefixes for SSL pages
     my ($siteroot, $imgprefix, $statprefix, $jsprefix, $wstatprefix);
     if ($LJ::IS_SSL) {

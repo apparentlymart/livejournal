@@ -2191,8 +2191,6 @@ sub start_request
                             )
             ) if LJ::show_contextual_hover();
 
-            LJ::run_hooks('sitewide_resources');
-
             # Conditional IE CSS file for all pages 
             LJ::need_res({condition => 'IE'}, 'stc/ie.css');
         }
