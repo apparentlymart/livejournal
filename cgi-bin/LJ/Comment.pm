@@ -66,7 +66,6 @@ sub reset_singletons {
 # </LJFUNC>
 sub instance {
     my $class = shift;
-    my $self  = bless {};
 
     my $uuserid = shift;
     my $n_arg   = scalar @_;
@@ -75,35 +74,29 @@ sub instance {
 
     my %opts = @_;
 
-    $self->{journalid} = LJ::want_userid($uuserid) or
+    my $journalid = LJ::want_userid($uuserid) or
         croak("invalid journalid parameter");
 
-    $self->{jtalkid} = int(delete $opts{jtalkid});
+    my $jtalkid = int(delete $opts{jtalkid});
 
     if (my $dtalkid = int(delete $opts{dtalkid})) {
-        $self->{jtalkid} = int($dtalkid / 256);
+        $jtalkid = int($dtalkid / 256);
     }
 
     croak("need to supply jtalkid or dtalkid")
-        unless $self->{jtalkid};
+        unless $jtalkid;
 
     croak("unknown parameter: " . join(", ", keys %opts))
         if %opts;
 
-    my $journalid = $self->{journalid};
-    my $jtalkid   = $self->{jtalkid};
-
     # do we have a singleton for this comment?
-    $singletons{$journalid} ||= {};
     return $singletons{$journalid}->{$jtalkid}
         if $singletons{$journalid}->{$jtalkid};
-
-    # save the singleton if it doesn't exist
+    
+    my $self = bless { journalid => $journalid, jtalkid => $jtalkid };
+    # save the singleton 
     $singletons{$journalid}->{$jtalkid} = $self;
 
-    croak("need to supply jtalkid") unless $self->{jtalkid};
-    croak("unknown parameters: " . join(", ", keys %opts))
-        if %opts;
     return $self;
 }
 *new = \&instance;
@@ -211,9 +204,9 @@ sub create {
 
 
 sub absorb_row {
-    my ($self, %row) = @_;
+    my ($self, $row) = @_;
 
-    $self->{$_} = $row{$_} foreach (qw(nodetype nodeid parenttalkid posterid datepost state));
+    $self->{$_} = $row->{$_} foreach (qw(nodetype nodeid parenttalkid posterid datepost state));
     $self->{_loaded_row} = 1;
 }
 
@@ -472,7 +465,7 @@ sub preload_rows {
         next unless $row;
 
         # absorb row into the given LJ::Comment object
-        $obj->absorb_row(%$row);
+        $obj->absorb_row($row);
     }
 
     return 1;

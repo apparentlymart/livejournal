@@ -1205,7 +1205,7 @@ sub get_recent_items
 
         # construct an LJ::Entry singleton
         my $entry = LJ::Entry->new($userid, jitemid => $li->{itemid});
-        $entry->absorb_row(%$li);
+        $entry->absorb_row($li);
     }
     $flush->();
 

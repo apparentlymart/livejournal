@@ -742,7 +742,7 @@ sub unscreen_comment {
 }
 
 sub get_talk_data {
-    my ($u, $nodetype, $nodeid, $opts) = @_;
+    my ($u, $nodetype, $nodeid) = @_;
     return undef unless LJ::isu($u);
     return undef unless $nodetype =~ /^\w$/;
     return undef unless $nodeid =~ /^\d+$/;
@@ -750,12 +750,12 @@ sub get_talk_data {
 
     # call normally if no gearman/not wanted
     my $gc = LJ::gearman_client();
-    return get_talk_data_do($uid, $nodetype, $nodeid, $opts)
+    return get_talk_data_do($uid, $nodetype, $nodeid)
         unless $gc && LJ::conf_test($LJ::LOADCOMMENTS_USING_GEARMAN, $u->id);
 
     # invoke gearman
     my $result;
-    my @a = ($uid, $nodetype, $nodeid, $opts);
+    my @a = ($uid, $nodetype, $nodeid);
     my $args = Storable::nfreeze(\@a);
     my $task = Gearman::Task->new("get_talk_data", \$args,
                                   {
@@ -779,14 +779,11 @@ sub get_talk_data {
 #                             'parenttalkid', 'state' } , or undef on failure
 sub get_talk_data_do
 {
-    my ($uid, $nodetype, $nodeid, $opts) = @_;
+    my ($uid, $nodetype, $nodeid) = @_;
     my $u = LJ::want_user($uid);
     return undef unless LJ::isu($u);
     return undef unless $nodetype =~ /^\w$/;
     return undef unless $nodeid =~ /^\d+$/;
-
-    my $init_comobj = 1;
-       $init_comobj = $opts->{init_comobj} if exists $opts->{init_comobj};
 
     my $ret = {};
 
@@ -829,8 +826,8 @@ sub get_talk_data_do
 
     my $make_comment_singleton = sub {
         my ($jtalkid, $row) = @_;
-        return 1 unless $init_comobj;
         return 1 unless $nodetype eq 'L';
+
         # at this point we have data for this comment loaded in memory
         # -- instantiate an LJ::Comment object as a singleton and absorb
         #    that data into the object
@@ -838,7 +835,7 @@ sub get_talk_data_do
         # add important info to row
         $row->{nodetype} = $nodetype;
         $row->{nodeid}   = $nodeid;
-        $comment->absorb_row(%$row);
+        $comment->absorb_row($row);
 
         return 1;
     };
@@ -1098,8 +1095,7 @@ sub load_comments
     my $n = $u->{'clusterid'};
     my $viewall = $opts->{viewall};
 
-    my $gtd_opts = {init_comobj => $opts->{init_comobj}};
-    my $posts = get_talk_data($u, $nodetype, $nodeid, $gtd_opts);  # hashref, talkid -> talk2 row, or undef
+    my $posts = get_talk_data($u, $nodetype, $nodeid);  # hashref, talkid -> talk2 row, or undef
     unless ($posts) {
         $opts->{'out_error'} = "nodb";
         return;

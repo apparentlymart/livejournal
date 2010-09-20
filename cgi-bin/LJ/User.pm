@@ -2148,7 +2148,7 @@ sub get_recent_talkitems {
 
         # construct an LJ::Comment singleton
         my $comment = LJ::Comment->new($u, jtalkid => $r->{jtalkid});
-        $comment->absorb_row(%$r);
+        $comment->absorb_row($r);
         next unless $comment->visible_to($remote);
         push @recv, $r;
     }

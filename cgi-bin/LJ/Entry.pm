@@ -171,7 +171,7 @@ sub new_from_row {
 
     my $journalu = LJ::load_userid($row{journalid});
     my $self = $class->new($journalu, jitemid => $row{jitemid});
-    $self->absorb_row(%row);
+    $self->absorb_row(\%row);
 
     return $self;
 }
@@ -330,14 +330,14 @@ sub preload_rows {
         next unless $lg;
 
         # absorb row into given LJ::Entry object
-        $en->absorb_row(%$lg);
+        $en->absorb_row($lg);
     }
 }
 
 sub absorb_row {
-    my ($self, %row) = @_;
+    my ($self, $row) = @_;
 
-    $self->{$_} = $row{$_} foreach (qw(allowmask posterid eventtime logtime security anum));
+    $self->{$_} = $row->{$_} foreach (qw(allowmask posterid eventtime logtime security anum));
     $self->{_loaded_row} = 1;
 }
 
