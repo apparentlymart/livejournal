@@ -46,4 +46,27 @@ sub validate_clusters {
     return 1;
 }
 
+## get cluster DB handler, preferred order: inactive DB, active DB
+sub connect_to_cluster {
+    my $class = shift;
+    my $clid = shift;
+    my $verbose = shift;
+    
+    my $dbr = ($LJ::IS_DEV_SERVER) ?
+        LJ::get_cluster_reader($clid) : LJ::DBUtil->get_inactive_db($clid);
+    unless ($dbr) {
+        warn "Using master database for cluster #$clid"
+            if $verbose;
+        $dbr = LJ::get_cluster_reader($clid);
+    }
+    
+    die "Can't get DB connection for cluster #$clid"
+        unless $dbr;
+    $dbr->{RaiseError} = 1;
+
+    warn "Connected to cluster #$clid" if $verbose;
+
+    return $dbr;
+}
+
 1;
