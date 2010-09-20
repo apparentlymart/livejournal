@@ -71,6 +71,10 @@
 
 .success.header=Success
 
+.success_empty.header=Success
+
+.success_empty.message=No users has been selected.
+
 .success.invited=The following users have been successfully invited to this community with the listed privileges:
 
 .success.invited2=The following users have been successfully invited to this community with the listed privileges.  They will need to accept the invite from the <a [[aopts]]>Community Invitation Page</a> before they can become a member of the community.

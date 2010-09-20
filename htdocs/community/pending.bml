@@ -61,64 +61,66 @@ body<=
             return $ret;
         }
 
-        $ret .= "<?h1 $ML{'/community/members.bml.success.header'} h1?><?p $ML{'/community/members.bml.success.message'} p?>"
-            if ($POST{'reject_select'} eq '1' and $POST{'approve'}) or $POST{'reject_done'} eq '1';
+        my @userids = split(',', $POST{'ids'});
+        my @is_selected = grep { defined $POST{"pending_$_"} } @userids;
+
+        $ret .= (($POST{'reject_select'} eq '1' and $POST{'approve'} and scalar @is_selected ) or $POST{'reject_done'} eq '1')
+                ? "<?h1 $ML{'/community/members.bml.success.header'} h1?><?p $ML{'/community/members.bml.success.message'} p?>"
+                : "<?h1 $ML{'/community/members.bml.success_empty.header'} h1?><?p $ML{'/community/members.bml.success_empty.message'} p?>";
 
         if ($POST{'reject_select'} eq '1') {
             $ret .= '<div class="b-pending">';
 
-            my @userids = split(',', $POST{'ids'});
+            unless (scalar @is_selected) {
+                my @to_show = ();
+                foreach my $id (@userids) {
+                    unless ($us->{$id}) {
+                        $previous++;
+                        next;
+                    }
+                    unless (defined $POST{"pending_$id"}) {
+                        $ignored++;
+                        next;
+                    }
+                    if ($POST{"approve"} && !$us->{$id}->is_validated) {
+                        push @not_validated, $us->{$id};
+                        next;
+                    }
+                    next unless $POST{"pending_$id"} eq 'on';
 
-            my @to_show = ();
-            foreach my $id (@userids) {
-                unless ($us->{$id}) {
-                    $previous++;
-                    next;
-                }
-                unless (defined $POST{"pending_$id"}) {
-                    $ignored++;
-                    next;
-                }
-                if ($POST{"approve"} && !$us->{$id}->is_validated) {
-                    push @not_validated, $us->{$id};
-                    next;
-                }
-                next unless $POST{"pending_$id"} eq 'on';
+                    push @to_show, $us->{$id};
 
-                push @to_show, $us->{$id};
-
+                    if ($POST{"approve"}) {
+                        LJ::approve_pending_member($cid, $id);
+                        $added++;
+                    }
+                }
                 if ($POST{"approve"}) {
-                    LJ::approve_pending_member($cid, $id);
-                    $added++;
+                    $ret .= "<?p " . BML::ml('.success.added', { num => $added }) . " p?>" if $added;
+                    $ret .= "<?p " . BML::ml('.success.not_validated', { list => join ",", map { $_->ljuser_display } @not_validated }) . " p?>" if scalar @not_validated;
+                } else {
+                    $ret .= "<h3>".$ML{'.following_users'}."</h3>";
+                    $ret .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext">' . $ML{'.you_can_remove'} . '</p>';
+                    $ret .= "<form method='post' action='pending.bml?authas=$cname'>\n";
+                    $ret .= LJ::form_auth();
+                    $ret .= '<ul class="b-pending-users"><li>' . join (",</li><li>", map { "<span><a href='" . $_->profile_url . "' target='_blank'>" . $_->display_name . "</a><i id=\"reject_user_id_".$_->{userid}."\" class='i-pending-close' title='" . $ML{'.button.remove'} . "'></i></span>" } @to_show) . "</li></ul>\n";
+                    $ret .= LJ::html_hidden('ids', join(',', map { $_->{'userid'} } @to_show)) . "\n";
+                    $ret .= "<textarea name='reason' rows='7' cols='50' class='b-pending-reason' placeholder='".$ML{'.reason.default.text'}."'></textarea>\n";
+                    $ret .= LJ::html_hidden('reject_done', 1);
+                    $ret .= LJ::html_hidden('reject', $POST{'reject'});
+                    $ret .= LJ::html_hidden('reject_ban', $POST{'reject_ban'});
+                    $ret .= LJ::html_submit('yes_reject', $ML{'.button.yes.reject'}, {class=>'i-pending-reject'});
+                    $ret .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.reason.reject.text'} . '</p>' ."\n";
+                    $ret .= LJ::html_hidden('previous', $previous);
+                    $ret .= LJ::html_hidden('ignored', $ignored);
+                    $ret .= LJ::html_hidden('validated', join(",", @not_validated));
+                    $ret .= "</form>";
                 }
-            }
-            if ($POST{"approve"}) {
-                $ret .= "<?p " . BML::ml('.success.added', { num => $added }) . " p?>" if $added;
-                $ret .= "<?p " . BML::ml('.success.not_validated', { list => join ",", map { $_->ljuser_display } @not_validated }) . " p?>" if scalar @not_validated;
-            } else {
-                $ret .= "<h3>".$ML{'.following_users'}."</h3>";
-                $ret .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext">' . $ML{'.you_can_remove'} . '</p>';
-                $ret .= "<form method='post' action='pending.bml?authas=$cname'>\n";
-                $ret .= LJ::form_auth();
-                $ret .= '<ul class="b-pending-users"><li>' . join (",</li><li>", map { "<span><a href='" . $_->profile_url . "' target='_blank'>" . $_->display_name . "</a><i id=\"reject_user_id_".$_->{userid}."\" class='i-pending-close' title='" . $ML{'.button.remove'} . "'></i></span>" } @to_show) . "</li></ul>\n";
-                $ret .= LJ::html_hidden('ids', join(',', map { $_->{'userid'} } @to_show)) . "\n";
-                $ret .= "<textarea name='reason' rows='7' cols='50' class='b-pending-reason' placeholder='".$ML{'.reason.default.text'}."'></textarea>\n";
-                $ret .= LJ::html_hidden('reject_done', 1);
-                $ret .= LJ::html_hidden('reject', $POST{'reject'});
-                $ret .= LJ::html_hidden('reject_ban', $POST{'reject_ban'});
-                $ret .= LJ::html_submit('yes_reject', $ML{'.button.yes.reject'}, {class=>'i-pending-reject'});
-                $ret .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.reason.reject.text'} . '</p>' ."\n";
-                $ret .= LJ::html_hidden('previous', $previous);
-                $ret .= LJ::html_hidden('ignored', $ignored);
-                $ret .= LJ::html_hidden('validated', join(",", @not_validated));
-                $ret .= "</form>";
             }
             $ret .= '</div>';
         }
 
         if ($POST{'reject_done'} eq '1') {
-            my @userids = split(',', $POST{'ids'});
-
             my $reason = $POST{'reason'} || $ML{'.reason.default.text'};
 
             # need a db handle now
