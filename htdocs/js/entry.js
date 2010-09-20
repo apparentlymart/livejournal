@@ -692,6 +692,8 @@ IPPUSelectTags =
 		var inp = $('selecttags-all'),
 			ary = inp.value.replace(/ */, '') ? inp.value.split(/ *, */) : [],
 			i = -1;
+
+		ary = jQuery.map( ary, function (val, idx) { return (val.length > 0) ? val : null } );
 		if (node.checked) {
 			ary.push(node.value)
 		} else {
@@ -710,6 +712,7 @@ IPPUSelectTags =
 	{
 		var ary = $('selecttags-all').value.split(/ *, */),
 		    checkboxes = IPPUSelectTags.checkboxes;
+		ary = jQuery.map( ary, function (val, idx) { return (val.length > 0) ? val : null } );
 		checkboxes.attr('checked', false);
 		while(ary.length) checkboxes.filter('[value='+ary.pop()+']').attr('checked', true);
 	},
