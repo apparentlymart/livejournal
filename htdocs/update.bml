@@ -582,6 +582,7 @@ head<=
     LJ::need_res(qw(
                     js/entry.js
                     js/poll.js
+                    js/md5.js
                     ));
 
     # draft autosave and restore

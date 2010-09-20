@@ -68,6 +68,7 @@ sub EntryPage
 
     LJ::need_res(qw(
                     js/quickreply.js
+                    js/md5.js
                     js/thread_expander.js
                     ));
 
