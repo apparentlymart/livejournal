@@ -249,6 +249,7 @@ sub as_sms {
     }
 
     my $tinyurl = LJ::API::BitLy->shorten($self->comment->url);
+    return undef if $tinyurl =~ /^500/;
     return $msg . " " . $tinyurl; 
 }
 
