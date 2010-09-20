@@ -14,7 +14,7 @@ other options for this user.
 
 .error.actionperformed=This action has already been performed
 
-.error.approving=There was an error approving this request to join.<br/>Following user was not added: [[username]] because they emails are not validated
+.error.approving=There was an error approving this request to join.<br/>Following user was not added: [[username]] because they email are not validated
 
 .error.internerr.invalidaction=Internal error: invalid action
 
