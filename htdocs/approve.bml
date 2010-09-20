@@ -89,7 +89,8 @@ body<=
         return LJ::bad_input($ML{'.error.internerr.invalidaction'}) unless $targetid;
 
         # add to community
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.approving'} p?>"
+        my $user = LJ::load_userid($aa->{userid});
+        return "<?h1 $ML{'Error'} h1?><?p ".LJ::Lang::ml('.error.approving', { username => $user->ljuser_display } )." p?>"
             unless LJ::approve_pending_member($aa->{userid}, $targetid);
 
         # return success
