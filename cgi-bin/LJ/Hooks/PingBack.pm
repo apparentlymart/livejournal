@@ -107,6 +107,9 @@ LJ::register_hook("postpost", sub {
     # check security
     return if $security ne 'public';
 
+    # do not send pingback from posts to Syndicated journals
+    return if $journal->is_syndicated;
+
 =head
     # define pingback prop value
     my $prop_pingback = $args->{props}->{pingback};
