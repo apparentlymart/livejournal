@@ -27,8 +27,6 @@
 .error.noreply_suspended|staleness=1
 .error.noreply_suspended=This entry is suspended.  You cannot reply to it.
 
-.facebook.who.you.are=We will figure who you are
-
 .label.picturetouse2=<a [[aopts]]>Picture</a> to use:
 
 .loganonip=<b>Notice!</b> This user has turned on the option that logs IP addresses of anonymous posters.

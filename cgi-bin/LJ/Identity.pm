@@ -194,4 +194,28 @@ sub profile_window_title    { Carp::confess 'Invalid identity type' }
 
 sub enabled { 1 }
 
+sub unpack_forwhat {
+    my ($class, $forwhat) = @_;
+
+    my ($returl, $returl_fail);
+    if ($forwhat eq 'login') {
+        $returl = $LJ::SITEROOT;
+        $returl_fail = "$LJ::SITEROOT/identity/login.bml?type=facebook"
+    } elsif ($forwhat =~ /^comment-(\d+)-(\d+)$/) {
+        my ($journalid, $pendcid) = ($1, $2);
+
+        $returl = "$LJ::SITEROOT/talkpost_do.bml?" .
+                  "jid=$journalid&" .
+                  "pendcid=$pendcid";
+        $returl_fail = $returl . '&failed=1';
+    } else {
+        # the warning will sit in error logs, and the exception
+        # will be handled
+        warn "invalid forwhat passed: $forwhat";
+        die;
+    }
+
+    return ($returl, $returl_fail);
+}
+
 1;
