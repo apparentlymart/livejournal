@@ -15,7 +15,8 @@ sub render_body {
     my $submitted = $opts{submitted} ? 1 : 0;
 
     $ret .= "This widget does an AJAX POST.<br />";
-    $ret .= "Render it with: <code>LJ::Widget::ExampleAjaxWidget->render;</code>";
+    $ret .= 'Render it with: <code><br>my $widget = LJ::Widget::ExampleAjaxWidget->new;';
+    $ret .= '<br>$headextra .= $widget->wrapped_js;<br>$body .= $widget->render();</code>';
     $ret .= $class->start_form( id => "ajax_form" );
     $ret .= "<p>Type in a word: " . $class->html_text( name => "text", size => 10 ) . " ";
     $ret .= $class->html_submit( button => "Click me!" ) . "</p>";
