@@ -58,6 +58,8 @@ body<=
     my $dbr = LJ::get_db_reader();
     my $sth;
 
+    my $is_remote_sup = LJ::SUP->is_remote_sup();
+
     # load user props
     LJ::load_user_props(
         $u, { use_master => 1 },
@@ -231,7 +233,6 @@ body<=
         }
 
         ## USERHEADS
-        my $is_remote_sup = LJ::SUP->is_remote_sup();
         unless (!$is_remote_sup && $LJ::DISABLED{'userhead_nonsup'}) {
             if ($u->is_personal) {
                 $ret .= "<a name='userheads'></a><div class='section_head'>$ML{'.section.userheads'}</div>\n";
@@ -420,14 +421,12 @@ body<=
             $ret .= "</td></tr>\n";
         }
 
-=head
         # opt_usermsg
         unless ($LJ::DISABLED{'user_messaging'}) {
             $ret .= "<tr><td class='field_name'>LJ User Messaging</td><td>";
             $ret .= LJ::Setting::UserMessaging->as_html($u);
             $ret .= "</td></tr>\n";
         }
-=cut
 
         # chat thingies
         $ret .= "<tr><td colspan='2'></td></tr><tr><td class='field_name' colspan='2' style='text-align: center;'><a name='iminfo'></a>$ML{'.fn.imservices3'}</td></tr>";
@@ -488,7 +487,6 @@ body<=
         $ret .= "</table>\n";
 
         ## TEXT MESSAGING
-
         $ret .= "<a name='txtmsg'></a><div class='section_head'>" . 
             (LJ::GeoLocation->ip_country() eq 'RU' ? $ML{'.section.phone'} : $ML{'.section.textmsg'}) . "\n";
         unless (LJ::get_cap($u, "textmessaging")) {
@@ -504,16 +502,38 @@ body<=
             foreach (values %$tminfo) { LJ::text_out(\$_); }
             $tminfo->{'security'} = "N" if ($u->{'txtmsg_status'} eq 'off' || $u->{'txtmsg_status'} eq 'none');
 
-            $ret .= "</div>\n";
+            if ($LJ::DISABLED{smsru} || !$is_remote_sup) {
+                $ret .= "<span id='phone_view_options' class='view_options'>$ML{'.fn.txtmsg'}&nbsp;";
+                $ret .= LJ::html_select({ 'name' => 'txtmsg_security', 'selected' => $tminfo->{'security'} },
+                                          "all" => BML::ml(".security.visibility.everybody"),
+                                          "reg" => BML::ml(".security.visibility.regusers"),
+                                          "friends" => BML::ml(".security.visibility.friends"),
+                                          "N"   => BML::ml(".security.visibility.nobody") );
+                $ret .= "</span></div>\n";
+            } else {
+                $ret .= "</div>\n";
+            }
 
-            ##
             my $block_id = 'phone_verification';
-               $block_id = '' if $LJ::DISABLED{smsru}; ## empty block_id disables JS script
-
+               $block_id = '' if $LJ::DISABLED{smsru} || !$is_remote_sup; ## empty block_id disables JS script
             $ret .= "<table class='field_block' id='$block_id'>\n";
+            if ($LJ::DISABLED{smsru} || !$is_remote_sup) {
+                foreach (values %$tminfo) { LJ::text_out(\$_); }
+                ##
+                $ret .= "<tr><td class='field_name'>$ML{'.fn.servprov'}</td><td>";
+                {
+                    my @opts = ("", "");
+                    foreach my $p (LJ::TextMessage::providers()) {
+                        my $info = LJ::TextMessage::provider_info($p);
+                        push @opts, ($p, $info->{'name'});
+                    }
 
-            foreach (values %$tminfo) { LJ::text_out(\$_); }
-
+                    $ret .= LJ::html_select({ 'name' => 'txtmsg_provider',
+                                              'selected' => $tminfo->{'provider'}, },
+                                              @opts);
+                }
+                $ret .= " <span>" . BML::ml('.txt.details', {'aopts' => "href='$LJ::SITEROOT/tools/textmessage.bml?mode=details'"}) . "</span></td></tr>\n";
+            }
             $ret .= "<tr><td class='field_name'>$ML{'.fn.txtnum'}</td><td>";
             $ret .= '<ul class="b-manage-smsn b-manage-smsn-hide">';
             $ret .= '<li class="b-manage-smsn-sms">' . LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '15', 'maxlength' => '15' }) . '<br /><span class="helper">' . $ML{'.section.textmsg.example'} . '</span></li>';
@@ -661,6 +681,18 @@ body<=
             push @errors, $ML{'.error.bio.toolong'};
         }
 
+        # text messaging
+        if ($LJ::DISABLED{smsru} || !$is_remote_sup) {
+            if ($POST{'txtmsg_security'} =~ m/^(all|reg|friends)$/) {
+                unless ($POST{'txtmsg_provider'}) {
+                    push @errors, $ML{'.error.txt.require_provider'};
+                }
+                unless ($POST{'txtmsg_number'}) {
+                    push @errors, $ML{'.error.txt.require.number'};
+                }
+            }
+        }
+
         # FIXME: validation AND POSTING are handled by widgets' handle_post() methods
         # (introduce validate_post() ?)
         my $save_search_index = $POST{'opt_showlocation'} =~ /^[YR]$/;
@@ -800,29 +832,39 @@ body<=
         my $tminfo = LJ::TextMessage->tm_info($u);
         # Check that text messaging is turned off and either
         # the provider or number have been set to null
-        if ($tminfo->{'number'} && ! $POST{'txtmsg_number'} )
-        {
-            $dbh->do("DELETE FROM txtmsg WHERE userid=?", undef, $u->userid);
-            LJ::SMS::API::RU::Phone->delete($u->userid);
-
-        } else {
-            my $number = $POST{'txtmsg_number'};
-            $dbh->do("REPLACE INTO txtmsg (userid, number) VALUES (?, ?)",
-                     undef, $u->userid, $number);
-
-            ## update supported providers info
-            if (LJ::SMS::API::RU::Phone->is_supported($number)){
-                ## set the new phone number to table SMSru_phones if 
-                ## phone number has been changed.
-                LJ::SMS::API::RU::Phone->set($u->userid, $number => 'not_verified')
-                    if LJ::SMS::API::RU::Phone->normalize($number) ne 
-                        LJ::SMS::API::RU::Phone->normalize($tminfo->{number});
-
-            } elsif(LJ::SMS::API::RU::Phone->is_supported($tminfo->{number})) {
-                ## if previously there was a supported provider 
-                LJ::SMS::API::RU::Phone->delete($u->userid);
+        if ($LJ::DISABLED{'smsru'} || !$is_remote_sup) {
+            if ($txtmsg_status eq "off" &&
+                (($tminfo->{'provider'} && ! $POST{'txtmsg_provider'})
+                || ($tminfo->{'number'} && ! $POST{'txtmsg_number'}))
+            )
+            {
+                $dbh->do("DELETE FROM txtmsg WHERE userid=?", undef, $u->{'userid'});
+            } elsif ($txtmsg_status eq "on") {
+                $dbh->do("REPLACE INTO txtmsg (userid, provider, number, security) VALUES (?, ?, ?, ?)",
+                         undef, $u->{'userid'}, $POST{'txtmsg_provider'}, $POST{'txtmsg_number'}, $POST{'txtmsg_security'});
             }
+        } else {
+            if ($tminfo->{'number'} && ! $POST{'txtmsg_number'}) {
+                $dbh->do("DELETE FROM txtmsg WHERE userid=?", undef, $u->{'userid'});
+                LJ::SMS::API::RU::Phone->delete($u->userid);
+            } else {
+                my $number = $POST{'txtmsg_number'};
+                $dbh->do("REPLACE INTO txtmsg (userid, number) VALUES (?, ?)",
+                         undef, $u->userid, $number);
 
+                ## update supported providers info
+                if (LJ::SMS::API::RU::Phone->is_supported($number)){
+                    ## set the new phone number to table SMSru_phones if 
+                    ## phone number has been changed.
+                    LJ::SMS::API::RU::Phone->set($u->userid, $number => 'not_verified')
+                        if LJ::SMS::API::RU::Phone->normalize($number) ne 
+                            LJ::SMS::API::RU::Phone->normalize($tminfo->{number});
+
+                } elsif(LJ::SMS::API::RU::Phone->is_supported($tminfo->{number})) {
+                    ## if previously there was a supported provider 
+                    LJ::SMS::API::RU::Phone->delete($u->userid);
+                }
+            }
         }
 
         # clear text message security caches
