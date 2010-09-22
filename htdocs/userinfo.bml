@@ -832,9 +832,11 @@
         }
     }
 
+=head
     if (!$synd && $u->can_be_text_messaged_by($remote)) {
         push @contacts, "<a href='$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}'>$ML{'.contact.txtmsg'}</a>";
     }
+=cut
 
     my $contact = join("<br />\n", @contacts);
 
