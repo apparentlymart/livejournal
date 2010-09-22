@@ -1376,6 +1376,8 @@ Must be removed after implementation of Framework! */
 		#updateForm .b-repost-pics-items SPAN.b-repost-pics-no {
 			color: #999;
 			}
+		.b-repost-pics-items SPAN:hover,
+		#updateForm .b-repost-pics-items SPAN:hover,
 		.b-repost-pics-items SPAN.b-repost-pics-active,
 		#updateForm .b-repost-pics-items SPAN.b-repost-pics-active {
 			background: url(/img/repost/pics-aframe.gif) no-repeat 0 0;
