@@ -60,9 +60,9 @@ sub traverse {
         return \@ret;
     }
 
-    # unknown type; for now, silently ignore it.
-    # TODO: better error handling?
-    return undef;
+    # unknown type; let the subclass decode it to a scalar
+    # (base class function defaults to plain stringification)
+    return $sub->($class->decode_unknown_type($what));
 }
 
 sub traverse_fix_encoding {
@@ -80,7 +80,12 @@ sub traverse_fix_encoding {
 
         return Encode::encode("iso-8859-1", $scalar);
     });
+}
 
+sub decode_unknown_type {
+    my ($class, $what) = @_;
+
+    return "$what";
 }
 
 package LJ::JSON::XS;
@@ -105,6 +110,16 @@ sub decode {
     return $decoded;
 }
 
+sub decode_unknown_type {
+    my ($class, $what) = @_;
+
+    # booleans get converted to undef for false and 1 for true
+    return $what ? 1 : undef if JSON::XS::is_bool($what);
+
+    # otherwise, stringify
+    return "$what";
+}
+
 1;
 
 package LJ::JSON::JSONv2;
@@ -127,6 +142,16 @@ sub decode {
     my $decoded = $class->SUPER::decode($dump);
     $decoded = $class->traverse_fix_encoding($decoded);
     return $decoded;
+}
+
+sub decode_unknown_type {
+    my ($class, $what) = @_;
+
+    # booleans get converted to undef for false and 1 for true
+    return $what ? 1 : undef if JSON::is_bool($what);
+
+    # otherwise, stringify
+    return "$what";
 }
 
 1;
