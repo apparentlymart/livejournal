@@ -7002,8 +7002,6 @@ sub get_all_aliases {
 # </LJFUNC>
 sub ljuser {
     my ($user, $opts) = @_;
-    my $user = shift;
-    my $opts = shift;
 
     my ($u, $username);
     if (isu($user)) {
