@@ -68,7 +68,7 @@ body<=
                 ? "<?h1 $ML{'/community/members.bml.success.header'} h1?><?p $ML{'/community/members.bml.success.message'} p?>"
                 : "<?h1 $ML{'/community/members.bml.success_empty.header'} h1?><?p $ML{'/community/members.bml.success_empty.message'} p?>";
 
-        if ($POST{'reject_select'} eq '1') {
+        if ($POST{'reject_select'} eq '1' and scalar @is_selected) {
             $ret .= '<div class="b-pending">';
 
             unless (scalar @is_selected) {
