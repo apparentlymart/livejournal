@@ -1423,7 +1423,10 @@ sub send_files {
             LJ::Request->header_out('X-REPROXY-FILE', $paths->[0]);
         }
 
-        LJ::Request->content_type ($result->{mime_type});
+        my $mime_type = $result->{mime_type};
+        $mime_type ||= 'image/gif' if $uri =~ m|^/userhead/\d+|; ## default for userheads
+
+        LJ::Request->content_type ($mime_type);
         LJ::Request->header_out("Content-length", $size);
         LJ::Request->header_out("Cache-Control", "no-transform");
         LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http ($result->{change_time}));
