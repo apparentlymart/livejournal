@@ -1428,8 +1428,26 @@ sub send_files {
 
         LJ::Request->content_type ($mime_type);
         LJ::Request->header_out("Content-length", $size);
-        LJ::Request->header_out("Cache-Control", "no-transform");
         LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http ($result->{change_time}));
+        ## Add Expires and Cache-Control headers
+        if ($uri =~ m|^/userhead/\d+|o){
+            ## Userheads are never changed
+            my $max_age = 86400 * 365; # one year
+            my $expires_str = HTTP::Date::time2str(time + $max_age);
+            LJ::Request->header_out("Expires" => $expires_str);
+            LJ::Request->header_out("Cache-Control", "no-transform, public, max-age=$max_age");
+        } elsif ($uri =~ m|^/vgift/\d+|){
+            ## vgifts may be changed.
+            my $max_age = 86400 * 2 + 600; # 2 days and 10 minutes
+            my $expires_str = HTTP::Date::time2str(time + $max_age);
+            LJ::Request->header_out("Expires" => $expires_str);
+            LJ::Request->header_out("Cache-Control", "no-transform, public, max-age=$max_age");
+        } else {
+            ## ... no Expires by defaul
+            ## Set Cache-Control only
+            LJ::Request->header_out("Cache-Control", "no-transform, public");
+        }
+
         LJ::Request->send_http_header();
         return LJ::Request::OK;
     }
