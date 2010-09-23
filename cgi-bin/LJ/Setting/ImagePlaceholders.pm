@@ -2,6 +2,7 @@ package LJ::Setting::ImagePlaceholders;
 use base 'LJ::Setting';
 use strict;
 use warnings;
+no warnings 'uninitialized';
 
 sub should_render {
     my ($class, $u) = @_;
@@ -31,12 +32,9 @@ sub option {
     ($maxwidth, $maxheight) = ($1, $2)
         if $imgplaceholders and $imgplaceholders =~ /^(\d+)\|(\d+)$/;
 
-    my $is_stock = {
-        "320|240" => 1,
-        "640|480" => 1,
-        "0|0" => 1,
-        "" => 1,
-    }->{$imgplaceholders};
+    my $is_stock = grep { $imgplaceholders eq $_ }
+                    (qw/320|240 640|480 0|0/, ''); # standard sizes
+
     my $extra = $class->ml('setting.imageplaceholders.option.select.custom', { width => $maxwidth, height => $maxheight })
         unless $is_stock;
 
