@@ -1934,6 +1934,11 @@ sub get_itemid_near2
     }
 
     my $dbr = LJ::get_cluster_reader($u);
+    unless ($dbr){
+        warn "Can't connect to cluster reader. Cluster: " . $u->clusterid;
+        return 0;
+    }
+
     my $jid = $u->{'userid'}+0;
     my $field = $u->{'journaltype'} eq "P" ? "revttime" : "rlogtime";
 
