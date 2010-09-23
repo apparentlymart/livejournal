@@ -433,7 +433,9 @@ sub trans
     # referer.  clients and such don't, so ignore them.
     my $referer = LJ::Request->header_in("Referer");
     if ($referer && LJ::Request->method eq 'POST' && !LJ::check_referer('', $referer)) {
-       LJ::Request->log_error("REFERER WARNING: POST to $uri from $referer");
+       ## uncomment log statement after adding some code in this if-block.
+       ## LJ::Request->log_error("REFERER WARNING: POST to $uri from $referer");
+       ## ...
     }
 
     my %GET = LJ::Request->args;
