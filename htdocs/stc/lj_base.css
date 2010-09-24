@@ -1071,9 +1071,11 @@ Must be removed after implementation of Framework! */
 		.i-manage-smsn-correctnum {
 			background-position: 0 0;
 			}
-		.i-manage-smsn-badnum,
-		.i-manage-smsn-wrongcode {
+		.i-manage-smsn-badnum {
 			background-position: 0 -1000px;
+			}
+		.i-manage-smsn-wrongcode {
+			background-position: 0 -800px;
 			}
 		.i-manage-smsn-reqsent {
 			background-position: 0 -200px;
