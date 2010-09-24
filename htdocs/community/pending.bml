@@ -64,10 +64,14 @@ body<=
         my @userids = split(',', $POST{'ids'});
         my @is_selected = grep { defined $POST{"pending_$_"} } @userids;
 
-        $ret .= (($POST{'reject_select'} eq '1' and $POST{'approve'} and scalar @is_selected ) or $POST{'reject_done'} eq '1')
-                ? "<?h1 $ML{'/community/members.bml.success.header'} h1?><?p $ML{'/community/members.bml.success.message'} p?>"
-                : "<?h1 $ML{'/community/members.bml.success_empty.header'} h1?><?p $ML{'/community/members.bml.success_empty.message'} p?>";
+        if (($POST{'reject_select'} eq '1' or $POST{'approve'}) and scalar @is_selected == 0) {
+            $ret .= "<?h1 $ML{'/community/members.bml.success_empty.header'} h1?><?p $ML{'/community/members.bml.success_empty.message'} p?>";
+        }
 
+        if ($POST{'reject_done'} eq '1' or ($POST{'approve'} and scalar @is_selected)) {
+            $ret .= "<?h1 $ML{'/community/members.bml.success.header'} h1?><?p $ML{'/community/members.bml.success.message'} p?>";
+        }
+ 
         if ($POST{'reject_select'} eq '1' and scalar @is_selected) {
             $ret .= '<div class="b-pending">';
 
@@ -94,7 +98,7 @@ body<=
                     $added++;
                 }
             }
-            if ($POST{"approve"}) {
+            if ($POST{"approve"} and scalar @is_selected) {
                 $ret .= "<?p " . BML::ml('.success.added', { num => $added }) . " p?>" if $added;
                 $ret .= "<?p " . BML::ml('.success.not_validated', { list => join ",", map { $_->ljuser_display } @not_validated }) . " p?>" if scalar @not_validated;
             } else {
@@ -126,10 +130,7 @@ body<=
             
             # hit up each user to find out what to do with them
             foreach my $id (@userids) {
-                if ($POST{"approve"}) {
-                    LJ::approve_pending_member($cid, $id);
-                    $added++;
-                } elsif ($POST{"reject"}) {
+                if ($POST{"reject"}) {
                     LJ::reject_pending_member($cid, $id, $remote->{userid}, $reason);
                     $rejected++;
                 } elsif ($POST{"reject_ban"}) {
