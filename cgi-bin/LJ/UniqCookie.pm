@@ -382,7 +382,18 @@ sub ensure_cookie_value {
     return unless LJ::is_web_context();
 
     return unless LJ::Request->is_inited;
-    
+
+    ## do not set cookie from some domains:
+    ##      stat, l-stat
+    ##      files, 
+    ##      userpic, l-userpic
+    ##      ...
+    ## these are domains with public, mostly static content.
+    ##
+    my $domain = LJ::Request->header_in("Host");
+    my ($subdomain) = $domain =~ m|^(.+?)\.\Q$LJ::DOMAIN\E|;
+    return if $subdomain and $LJ::COOKIE_FREE_DOMAINS{$subdomain};
+
     my ($uniq, $uniq_time, $uniq_extra) = $class->parts_from_cookie;
 
     # set this uniq as our current
