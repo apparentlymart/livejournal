@@ -151,7 +151,8 @@ __________________________________________*/
 .m-auth-br {
 	zoom: 1;
 	}
-.b-auth-fbconnect {
+.b-facebookbtn,
+.b-twitterbtn {
 	overflow: visible;
 	}
 * HTML .m-auth-item {
