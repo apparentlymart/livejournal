@@ -579,7 +579,7 @@ sub set_dbcm {
 
 sub nodb_err {
     my $u = shift;
-    return "Database handle unavailable (user: " . $u->user . "; cluster: " . $u->clusterid . ")";
+    return "Database handle unavailable [user: " . $u->user . "; cluster: " . $u->clusterid . ", errstr: $DBI::errstr]";
 }
 
 sub is_innodb {
