@@ -2022,6 +2022,10 @@ sub xmlrpc_method {
     if ($LJ::XMLRPC_VALIDATION_METHOD{$method}) {
         # Deny access for accounts that have not validated their email
         my $u = LJ::load_user($req->{'username'});
+        unless ($u){
+            die SOAP::Fault
+                ->faultstring("Unknown username.");
+        }
         unless ($u->is_validated) {
             die SOAP::Fault
                 ->faultstring("Account not validated.");
