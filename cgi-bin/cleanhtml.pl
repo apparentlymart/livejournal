@@ -8,6 +8,7 @@ use Class::Autouse qw(
                       HTML::TokeParser
                       LJ::EmbedModule
                       LJ::Config
+                      LJ::Maps
                       );
 
 LJ::Config->load;
@@ -327,6 +328,12 @@ sub clean
 
                 next TOKEN;
             }
+            
+            if ($tag eq 'lj-map') {
+                $newdata .= LJ::Maps->expand_ljmap_tag($attr);
+                next TOKEN;
+            }
+
 
             # lj-repost tag adds button that allows easily post text in remote user's blog.
             #

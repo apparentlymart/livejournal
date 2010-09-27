@@ -4,29 +4,36 @@
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use LJ::Auth;
     use LJ::EmbedModule;
+    use LJ::Maps;
 
     # this can only be accessed from the embed module subdomain
     return "This page cannot be viewed from $LJ::DOMAIN"
         unless LJ::Request->header_in("Host") =~ /.*$LJ::EMBED_MODULE_DOMAIN$/i;
 
-    # we should have three GET params: journalid, moduleid, auth_token
-    my $journalid = $GET{journalid}+0 or return "No journalid specified";
-    my $moduleid  = $GET{moduleid};
-    return "No module id specified" unless defined $moduleid;
-    $moduleid += 0;
-    my $preview = $GET{preview};
-    # check auth_token
-    return "Invalid auth string" unless
-        LJ::Auth->check_sessionless_auth_token('embedcontent', %GET);
+    my $mode = $GET{'mode'} || 'lj-embed';
+    if ($mode eq 'lj-map') {
+        return LJ::Maps->get_iframe_source(%GET);
+    } elsif ($mode eq 'lj-embed') {
+        # we should have three GET params: journalid, moduleid, auth_token
+        my $journalid = $GET{journalid}+0 or return "No journalid specified";
+        my $moduleid  = $GET{moduleid};
+        return "No module id specified" unless defined $moduleid;
+        $moduleid += 0;
+        my $preview = $GET{preview};
+        # check auth_token
+        return "Invalid auth string" unless
+            LJ::Auth->check_sessionless_auth_token('embedcontent', %GET);
 
-    # ok we're cool, return content
-    my $content = LJ::EmbedModule->module_content(
-        journalid => $journalid,
-        moduleid  => $moduleid,
-        preview => $preview,
-    );
-    LJ::run_hooks('modify_embed_content', \$content, \%GET);
+        # ok we're cool, return content
+        my $content = LJ::EmbedModule->module_content(
+            journalid => $journalid,
+            moduleid  => $moduleid,
+            preview => $preview,
+        );
+        LJ::run_hooks('modify_embed_content', \$content, \%GET);
 
-    return qq {<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>iframe</title><style type="text/css">HTML, BODY { background:transparent; padding:0; margin:0; border:0; overflow:hidden; }</style></head><body>$content</body></html>};
-}
+        return qq {<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>iframe</title><style type="text/css">HTML, BODY { background:transparent; padding:0; margin:0; border:0; overflow:hidden; }</style></head><body>$content</body></html>};
+    }
+} 
 _code?>
+
