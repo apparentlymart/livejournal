@@ -547,6 +547,8 @@ sub trans
             if ($adult_content ne "none" && $is_journal_page && !$should_show_page) {
                 my $returl = LJ::eurl("http://$host" . LJ::Request->uri . "$args_wq");
 
+                LJ::Request->notes("journalid" => $u->{userid}) if $u;
+
                 LJ::ContentFlag->check_adult_cookie($returl, \%BMLCodeBlock::POST, "concepts");
                 LJ::ContentFlag->check_adult_cookie($returl, \%BMLCodeBlock::POST, "explicit");
 
