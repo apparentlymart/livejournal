@@ -543,10 +543,12 @@ body<=
             $ret .= "</td></tr>\n";
             $ret .= "<tr id=\"phone_vercode\" style=\"display: none;\"><td class='field_name'>$ML{'.fn.vernum'}</td><td>";
             $ret .= LJ::html_text({ 'name' => 'txtmsg_verify', 'size' => '4', 'maxlength' => '4' }) ." <input type='button' name='verify' value='$ML{'.section.vernum.button'}' />";
-            if( $u->in_class("paid") || $u->in_class("sponsored") || $u->in_class("perm") ) {
-                $ret .= '<p class="helper">' . $ML{'.section.textmsg.adv'} . '</p>';
-            }
             $ret .= "</td></tr>\n";
+            if( $u->in_class("paid") || $u->in_class("sponsored") || $u->in_class("perm") ) {
+                $ret .= "<tr><td>&nbsp;</td><td>";
+                $ret .= '<p class="helper">' . $ML{'.section.textmsg.adv'} . '</p>';
+                $ret .= "</td></tr>\n";
+            }
             $ret .= "</table>\n";
 
 			$ret .= "<script type='text/javascript'>";
