@@ -141,8 +141,8 @@ sub enter_comment {
         ($opt_logcommentips eq "S" && $comment->{usertype} !~ /^(?:user|cookieuser)$/))
     {
         if (LJ::is_web_context()) {
-            my $ip = BML::get_remote_ip();
-            my $forwarded = BML::get_client_header('X-Forwarded-For');
+            my $ip = LJ::Request->remote_ip;
+            my $forwarded = LJ::Request->header_in('X-Forwarded-For');
             $ip = "$forwarded, via $ip" if $forwarded && $forwarded ne $ip;
             $talkprop{'poster_ip'} = $ip;
         }
