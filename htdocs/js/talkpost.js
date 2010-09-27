@@ -8,6 +8,8 @@ if (document.getElementById) {
     var radio_anon = document.getElementById("talkpostfromanon");
 	var radio_fblo = document.getElementById("talkpostfromfblo");
 	var radio_fbli = document.getElementById("talkpostfromfbli");
+    var radio_twlo = document.getElementById("talkpostfromtwlo");
+    var radio_twli = document.getElementById("talkpostfromtwli");
     var radio_oidlo = document.getElementById("talkpostfromoidlo");
     var radio_oidli = document.getElementById("talkpostfromoidli");
 
@@ -33,6 +35,9 @@ if (document.getElementById) {
 	var fblo_row = document.getElementById("fblo");
 	var fbli_row = document.getElementById("fbli");
 	var fb_more = document.getElementById("fb_more");
+	var twlo_row = document.getElementById("twlo");
+	var twli_row = document.getElementById("twli");
+	var tw_more = document.getElementById("tw_more");
 
     var remotef = document.getElementById("cookieuser");
     var remote;
@@ -57,6 +62,8 @@ if (! sel_pickw) {
 }
 
 function handleRadios(sel) {
+	var currentRadio;
+	
     password.disabled = check_login.disabled = (sel != 2);
     if (password.disabled) password.value='';
 
@@ -97,34 +104,52 @@ function handleRadios(sel) {
 	// Facebook
 	if (fb_more) {
 		if (sel == 3) {
-			var radio = radio_fblo || radio_fbli;
+			currentRadio = radio_fblo || radio_fbli;
 			
 			showMe(fb_more);
 			toggleTextHighlight(fb_more, true);
 			
-			radio.checked = 1;
+			currentRadio.checked = 1;
 		} else {
 			hideMe(fb_more);
 			toggleTextHighlight(fb_more, false);
 		}
 	}
+	
+	// Twitter
+	if (tw_more) {
+		if (sel == 4) {
+			currentRadio = radio_twlo || radio_twli;
+			
+			showMe(tw_more);
+			toggleTextHighlight(tw_more, true);
+			
+			currentRadio.checked = 1;
+		} else {
+			hideMe(tw_more);
+			toggleTextHighlight(fb_more, false);
+		}
+	}
+	
     // OpenID
     if (oid_more) {
-        if (sel == 4) {
-			var radio = radio_oidli || radio_oidlo;
+        if (sel == 5) {
+			currentRadio = radio_oidli || radio_oidlo;
 			
             showMe(oid_more);
 			toggleTextHighlight(oid_more, true);
             oidurl.focus();
 			
-			radio.checked = 1;
+			currentRadio.checked = 1;
         } else {
             hideMe(oid_more);
 			toggleTextHighlight(oid_more, false);
         }
     }
 
-    if (sel_pickw.disabled = (sel != 1)) sel_pickw.value='';
+    if (sel_pickw.disabled = (sel != 1)) {
+		sel_pickw.value = '';
+	}
 }
 
 function submitHandler() {
@@ -153,8 +178,10 @@ if (document.getElementById) {
     if (radio_user && radio_user.checked) handleRadios(2);
 	if (radio_fblo && radio_fblo.checked) handleRadios(3);
     if (radio_fbli && radio_fbli.checked) handleRadios(3);
-    if (radio_oidlo && radio_oidlo.checked) handleRadios(4);
-    if (radio_oidli && radio_oidli.checked) handleRadios(4);
+    if (radio_twlo && radio_twlo.checked) handleRadios(4);
+    if (radio_twli && radio_twli.checked) handleRadios(4);
+    if (radio_oidlo && radio_oidlo.checked) handleRadios(5);
+    if (radio_oidli && radio_oidli.checked) handleRadios(5);
 
     if (radio_remote) {
         radio_remote.onclick = function () {
@@ -178,13 +205,21 @@ if (document.getElementById) {
         radio_fblo.onclick = function () {
             handleRadios(3);
         };
+    if (radio_twli)
+        radio_twli.onclick = function () {
+            handleRadios(4);
+        };
+    if (radio_twlo)
+        radio_twlo.onclick = function () {
+            handleRadios(4);
+        };
     if (radio_oidlo)
         radio_oidlo.onclick = function () {
-            handleRadios(4);
+            handleRadios(5);
         };
     if (radio_oidli)
         radio_oidli.onclick = function () {
-            handleRadios(4);
+            handleRadios(5);
         };
     if (username) {
         username.onkeydown = username.onchange = function () {
@@ -200,16 +235,17 @@ if (document.getElementById) {
     }
     form.onsubmit = submitHandler;
 
-    document.onload = function () {
+    jQuery(function () {
         if (radio_anon && radio_anon.checked) handleRadios(0);
         if (radio_user && radio_user.checked) otherLJUser();
         if (radio_remote && radio_remote.checked) handleRadios(1);
         if (radio_fblo && radio_fblo.checked) handleRadios(3);
         if (radio_fbli && radio_fbli.checked) handleRadios(3);
-        if (radio_oidlo && radio_oidlo.checked) handleRadios(4);
-        if (radio_oidli && radio_oidli.checked) handleRadios(4);
-    }
-
+        if (radio_twlo && radio_twlo.checked) handleRadios(4);
+        if (radio_twli && radio_twli.checked) handleRadios(4);
+        if (radio_oidlo && radio_oidlo.checked) handleRadios(5);
+        if (radio_oidli && radio_oidli.checked) handleRadios(5);
+    });
 }
 
 // toggle subject icon list
