@@ -3,6 +3,8 @@
 
 use strict;
 use vars qw(%maint);
+use File::Path  qw{mkpath};
+use File::Copy;
 
 require "$ENV{'LJHOME'}/cgi-bin/statslib.pl";
 
@@ -11,11 +13,11 @@ $LJ::Stats::VERBOSE = $LJ::LJMAINT_VERBOSE >= 2 ? 1 : 0;
 
 $maint{'genstats'} = sub
 {
-    my @which = @_ || qw(users countries 
+    my @which = @_ || qw(users countries
                          states gender clients
                          pop_interests meme popfaq
                          schools);
-    
+
     # popular faq items
     LJ::Stats::register_stat
         ({ 'type' => "global",
@@ -191,7 +193,7 @@ $maint{'genstats'} = sub
                            $ret{'userinfo'}->{'allow_getljnews'}++
                                if $rec->{'status'} eq "A" && $rec->{'allow_getljnews'} eq "Y";
                        }
-                       
+
                        # userusage query: gets timeupdate,datereg,nowdate
                        my $sth = $db->prepare
                            ("SELECT DATE_FORMAT(timecreate, '%Y-%m-%d') AS 'datereg', " .
@@ -206,7 +208,7 @@ $maint{'genstats'} = sub
                            # date registered
                            $ret{'newbyday'}->{$rec->{'datereg'}}++
                                unless $rec->{'datereg'} eq $rec->{'nowdate'};
-                
+
                            # total user/activity counts
                            $ret{'userinfo'}->{'total'}++;
                            if (my $time = $rec->{'timeupdate'}) {
@@ -424,6 +426,34 @@ $maint{'genstats'} = sub
         }
         close OUT;
         system("$LJ::BIN/rdist.pl", "htdocs/stats/stats.txt");
+
+        ##--------------------------------------------------------------
+        ##  archive a  copy of the stats.txt file
+        ##--------------------------------------------------------------
+        my $stderrMsg='';
+
+        ##  first try the remote mounted stats archive.
+        my $outDir= '/mnt/bil1-backup02/stats';
+        if (! -w $outDir) {
+            $stderrMsg .= "'$outDir' does not exist or is not writeble by user lj\n";
+            ##  try a local directory instead
+            $outDir= $ENV{'LJHOME'}.'/temp/stats';
+            if (! -e $outDir) {
+                $stderrMsg .= "$outDir does not exist.  Making $outDir\n";
+                mkpath($outDir, 0, 0775);
+                $stderrMsg .= "'$outDir' is not writeble by user lj\n" unless ( -w $outDir);
+            }
+        }
+        ##  construct a dated file name and save a copy of stats.txt
+        my @loc= localtime;
+        my $name= sprintf("stats-%04d-%02d-%02d.txt", $loc[5]+1900, $loc[4]+1, $loc[3]);
+        if (!copy("$LJ::HTDOCS/stats/stats.txt", "$outDir/$name")) {
+            $stderrMsg .= "failed copy: $LJ::HTDOCS/stats/stats.txt => $outDir/$name\n";
+        } else {
+            $stderrMsg .= "copied: $LJ::HTDOCS/stats/stats.txt => $outDir/$name\n" if (length($stderrMsg))
+        }
+        ##
+        print STDERR $stderrMsg if (length($stderrMsg));
     }
 
     print "-I- Done.\n";
@@ -443,7 +473,7 @@ $maint{'genstats_size'} = sub {
                    my $db = $db_getter->();
                    return undef unless $db;
 
-                   # not that this isn't a total of current accounts (some rows may have 
+                   # not that this isn't a total of current accounts (some rows may have
                    # been deleted), but rather a total of accounts ever created
                    my $size = $db->selectrow_array("SELECT MAX(userid) FROM user");
                    return { 'accounts' => $size };
