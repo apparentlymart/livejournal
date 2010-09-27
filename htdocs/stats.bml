@@ -2,17 +2,12 @@
 title=>Statistics
 body<=
 
-<?h1 <?sitename?> Statistics h1?>
-<?p
-The following statistics may be interesting for some of you.  Note that for speed, most of this page is only updated every 24 hours.  However, certain parts are live.  Raw data can be picked up <a href="stats/stats.txt">here</a>.
-p?>
-<?hr?>
-
 <?_code
 
  use strict;
 
  LJ::set_active_crumb('stats');
+ my $ret= '';
 
  my $dbr = LJ::get_db_reader();
  my $sth;
@@ -50,7 +45,23 @@ p?>
  my $allow_getljnews = $stat{'userinfo'}->{'allow_getljnews'}+0;
  my $active = $stat{'size'}->{'accounts_active_30'}+0;
 
- my $ret = "";
+my $fileTimeMesg='';
+
+my @fileStat= stat("${\($LJ::HTDOCS)}/stats/stats.txt");
+if (scalar(@fileStat)) {
+    my @fileModTime= localtime($fileStat[9]);
+    $fileTimeMesg .= "It was last updated ${\(sprintf('%04d-%02d-%02d', $fileModTime[5]+1900, $fileModTime[4]+1, $fileModTime[3]))}.  ";
+	
+}
+
+ $ret .= <<EOSTAT;
+<?h1 <?sitename?> Statistics h1?>
+<?p
+The following statistics may be interesting for some of you.  Note that for speed, most of this page is only updated every 24 hours.  ${fileTimeMesg}However, certain parts are live.  Raw data can be picked up <a href="stats/stats.txt">here</a>.
+p?>
+<?hr?>
+EOSTAT
+
  $ret .= "<?h1 Users h1?>\n";
  $ret .= "<?p How many users, and how many of those are active? p?> <ul>";
  $ret .= "<li><b>Total accounts: </b> $total</li>\n";
@@ -79,8 +90,8 @@ p?>
      ret => \$ret,
  });
 
- unless ($LJ::DISABLED{'stats-recentupdates'}) 
- { 
+ unless ($LJ::DISABLED{'stats-recentupdates'})
+ {
      $ret .= "<?h1 Recent Updates h1?>\n";
      $ret .= "<?p The following are the 10 most recently updated journals: p?><ul>";
      $sth = $dbr->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 30 DAY) ORDER BY uu.timeupdate DESC LIMIT 10");
@@ -94,7 +105,7 @@ p?>
      $ret .= "</ul> \n";
  }
 
- unless ($LJ::DISABLED{'stats-newjournals'}) 
+ unless ($LJ::DISABLED{'stats-newjournals'})
  {
      $ret .= "<?h1 New Journals h1?>\n";
      $ret .= "<?p The following are the 10 most recently created journals.  It's very likely these users haven't modified their journals much, and probably haven't written much in them yet either... p?><ul>";
@@ -166,7 +177,7 @@ p?>
      }
 
      my $out;
-     foreach my $cn (sort { $stat{'clientname'}->{$b} <=> $stat{'clientname'}->{$a} } 
+     foreach my $cn (sort { $stat{'clientname'}->{$b} <=> $stat{'clientname'}->{$a} }
                      keys %{$stat{'clientname'}})
      {
          last unless $stat{'clientname'}->{$cn} >= 50;
@@ -198,7 +209,7 @@ p?>
 
  ### graphs!
  $ret .= "<?h1 Pretty Graphs! h1?><?p These are the most fun, aren't they? p?>";
- 
+
  $ret .= "<?h2 Journal entries -- last 60 days h2?><?p How often do people post over the last 60 days? p?>";
  $ret .= "<p align='center'><img src=\"stats/postsbyday.png\" width='520' height='350' /></p>";
 
