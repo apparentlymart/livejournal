@@ -358,7 +358,14 @@ sub LJ::Request::output_filters {
 
 sub LJ::Request::print {
     my $class = shift;
-    $class->r()->print (@_);
+    my $res = eval { $class->r()->print (@_) };
+    if ($@){
+        return undef if $@ =~ m'Software caused connection abort';  ## that's not a real error. 
+                                                                    ## upcoming client closed connection. 
+                                                                    ## catch it and allow handler to complete work.
+        die $@; ## throw error
+    }
+    return $res;
 }
 
 sub LJ::Request::content_encoding {
