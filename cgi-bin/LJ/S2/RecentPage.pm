@@ -80,6 +80,11 @@ sub RecentPage
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
 
+    my $posteru_filter;
+    if ($get->{'poster'}) {
+        $posteru_filter = LJ::load_user($get->{'poster'});
+    }
+    
     ## load the itemids
     my @itemids;
     my $err;
@@ -99,6 +104,7 @@ sub RecentPage
         'order' => ($u->{'journaltype'} eq "C" || $u->{'journaltype'} eq "Y")  # community or syndicated
             ? "logtime" : "",
         'err' => \$err,
+        ($posteru_filter) ?  ('posterid'  => $posteru_filter->{'userid'}) : (),
     });
 
     my $is_prev_exist = scalar @items - $itemshow > 0 ? 1 : 0;
@@ -271,10 +277,13 @@ sub RecentPage
         my $newskip = $skip - $itemshow;
         $newskip = 0 if $newskip <= 0;
         $nav->{'forward_skip'} = $newskip;
-        $nav->{'forward_url'} = LJ::make_link("$p->{base_url}/", { skip     => ($newskip                   || ""),
-                                                                   tag      => (LJ::eurl($get->{tag})      || ""),
-                                                                   security => (LJ::eurl($get->{security}) || ""),
-                                                                   mode     => (LJ::eurl($get->{mode})     || ""), });
+        $nav->{'forward_url'} = LJ::make_link("$p->{base_url}/", { 
+            skip     => ($newskip                   || ""),
+            tag      => (LJ::eurl($get->{tag})      || ""),
+            security => (LJ::eurl($get->{security}) || ""),
+            mode     => (LJ::eurl($get->{mode})     || ""), 
+            poster   => ($posteru_filter) ? $posteru_filter->{user} : "", 
+        });
         $nav->{'forward_count'} = $itemshow;
     }
 
@@ -289,10 +298,13 @@ sub RecentPage
             $nav->{'backward_url'} = "$p->{'base_url'}/$date_slashes";
         } elsif ($is_prev_exist) {
             my $newskip = $skip + $itemshow;
-            $nav->{'backward_url'} = LJ::make_link("$p->{'base_url'}/", { skip     => ($newskip                   || ""),
-                                                                          tag      => (LJ::eurl($get->{tag})      || ""),
-                                                                          security => (LJ::eurl($get->{security}) || ""),
-                                                                          mode     => (LJ::eurl($get->{mode})     || ""), });
+            $nav->{'backward_url'} = LJ::make_link("$p->{'base_url'}/", { 
+                skip     => ($newskip                   || ""),
+                tag      => (LJ::eurl($get->{tag})      || ""),
+                security => (LJ::eurl($get->{security}) || ""),
+                mode     => (LJ::eurl($get->{mode})     || ""), 
+                poster   => ($posteru_filter) ? $posteru_filter->{user} : "", 
+            });
             $nav->{'backward_skip'} = $newskip;
         }
     }

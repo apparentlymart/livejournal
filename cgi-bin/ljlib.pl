@@ -982,6 +982,7 @@ sub get_friend_items
 #           -- viewall: if set, no security is used.
 #           -- dateformat: if "S2", uses S2's 'alldatepart' format.
 #           -- itemids: optional arrayref onto which itemids should be pushed
+#           -- posterid: optional, return (community) posts made by this poster only
 # returns: array of hashrefs containing keys:
 #          -- itemid (the jitemid)
 #          -- posterid
@@ -1167,17 +1168,25 @@ sub get_recent_items
         $sql_select = "AND $sort_key <= $notafter";
     }
 
+
+    my $posterwhere;
+    if ($opts->{'posterid'} && $opts->{'posterid'} =~ /^(\d+)$/) {
+        $posterwhere = " AND posterid=$1";
+    } else {
+        $posterwhere = '';
+    }
+
     $sql = qq{
         SELECT jitemid AS 'itemid', posterid, security, $extra_sql
                DATE_FORMAT(eventtime, "$dateformat") AS 'alldatepart', anum,
                DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
                allowmask, eventtime, logtime
         FROM log2 USE INDEX ($sort_key)
-        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere
+        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere
         ORDER BY journalid, $sort_key
         $sql_limit
     };
-
+    
     unless ($logdb) {
         $$err = "nodb" if ref $err eq "SCALAR";
         return ();

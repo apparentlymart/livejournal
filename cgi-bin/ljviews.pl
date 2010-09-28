@@ -1195,6 +1195,11 @@ sub create_view_lastn
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
 
+    my $posteru_filter;
+    if ($get->{'poster'}) {
+        $posteru_filter = LJ::load_user($get->{'poster'});
+    }
+ 
     ## load the itemids
     my @itemids;
     my $err;
@@ -1210,6 +1215,7 @@ sub create_view_lastn
         'order' => ($u->{'journaltype'} eq "C" || $u->{'journaltype'} eq "Y")  # community or syndicated
             ? "logtime" : "",
         'err' => \$err,
+        ($posteru_filter) ?  ('posterid'  => $posteru_filter->{'userid'}) : (),
     });
 
     my $is_prev_exist = scalar @items - $itemshow > 0 ? 1 : 0;
@@ -1448,6 +1454,9 @@ sub create_view_lastn
     my ($skip_f, $skip_b) = (0, 0);
     my %skiplinks;
 
+    ### filter by poster in skip links
+    my $poster_filter = ($posteru_filter) ? "poster=$posteru_filter->{user}" : "";
+
     ### if we've skipped down, then we can skip back up
 
     if ($skip) {
@@ -1455,7 +1464,14 @@ sub create_view_lastn
         my $newskip = $skip - $itemshow;
         if ($newskip <= 0) { $newskip = ""; }
         else { $newskip = "?skip=$newskip"; }
-
+        
+        if ($poster_filter) {
+            if ($newskip) {
+                $newskip .= "&$poster_filter";
+            } else {
+                $newskip = "?$poster_filter";
+            }
+        }
         $skiplinks{'skipforward'} =
             LJ::fill_var_props($vars, 'LASTN_SKIP_FORWARD', {
                 "numitems" => $itemshow,
@@ -1470,15 +1486,18 @@ sub create_view_lastn
     unless ($item_total != $itemshow) {
         $skip_b = 1 if $is_prev_exist;
 
-        if ($skip==$maxskip) {
+        if ($skip>=$maxskip) {
+            my $url = "$journalbase/" . sprintf("%04d/%02d/%02d/", $lastyear, $lastmonth, $lastday);
+            $url .= "?$poster_filter" if $poster_filter;
             $skiplinks{'skipbackward'} =
                 LJ::fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
                     "numitems" => "Day",
-                    "url" => "$journalbase/" . sprintf("%04d/%02d/%02d/", $lastyear, $lastmonth, $lastday),
+                    "url" => $url,
                 });
         } else {
             my $newskip = $skip + $itemshow;
             $newskip = "?skip=$newskip";
+            $newskip .= "&$poster_filter" if $poster_filter;
             $skiplinks{'skipbackward'} =
                 LJ::fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
                     "numitems" => $itemshow,
