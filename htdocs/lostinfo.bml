@@ -128,10 +128,6 @@ body<=
 
         # check if this email address can receive password reminders
         $email ||= $u->email_raw;
-        # temporary hotmail hack
-        if ($email=~/hotmail\.com$/i && $email ne $u->email_raw) {
-            return LJ::bad_input('Lost Information emails have been temporarily disabled for Hotmail email addresses. Please use another email address or email support@livejournal.com with your request.');
-        }
 
         return LJ::bad_input($ML{'/lostinfo_do.bml.error1.text'})
             unless $u->can_reset_password_using_email($email);
