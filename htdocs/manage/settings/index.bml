@@ -148,6 +148,7 @@ body<=
                 LJ::Setting::TwitterConnect
                 LJ::Setting::WebmasterTools::Google
                 LJ::Setting::WebmasterTools::Yandex
+                LJ::Setting::LJTimes
             )],
         },
     );
