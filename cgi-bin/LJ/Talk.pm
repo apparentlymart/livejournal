@@ -1209,18 +1209,24 @@ sub load_comments
     # just mark that we'll load the subjects;
     my @check_for_children = @posts_to_load;
 
-    ## expand first reply to top-level comments
-    ## %expand_children - list of comments, children of which are to expand
-    my %expand_children = map { $_ => 1 } @top_replies;
+    unless ($opts->{expand_strategy}) {
+        # the default strategy is to show first replies to top-level
+        # comments
+        foreach my $itemid (@top_replies) {
+            next unless $children{$itemid};
+            push @posts_to_load, $children{$itemid}->[0];
+        }
+    }
 
-    ## new strategy to expand comments: by level 
+    # 'by_level' strategy means that all comments up to the selected
+    # level are expanded
     if ($opts->{expand_strategy} eq 'by_level' and $opts->{expand_level} > 1) {
         my $expand = sub {
             my ($fun, $cur_level, $item_ids) = @_;
             next if $cur_level >= $opts->{expand_level};
 
             foreach my $itemid (@$item_ids){
-                $expand_children{$itemid} = 1;
+                push @posts_to_load, $itemid;
                 next unless $children{$itemid};
 
                 ## expand next level it there are comments
@@ -1229,10 +1235,43 @@ sub load_comments
         };
 
         ## go through first level
-        foreach my $itemid (keys %expand_children){
+        foreach my $itemid (@top_replies){
             next unless $children{$itemid};
             ## expand next (second) level
             $expand->($expand, 2, $children{$itemid});
+        }
+    }
+
+    # 'detailed' strategy means that all top-level and second level
+    # comments are expanded; as for the third level comments,
+    # we only expand five first replies to every first reply to
+    # any top-level comment (yeah, this is tricky, watch me)
+    if ($opts->{'expand_strategy'} eq 'detailed') {
+        foreach my $itemid_l1 (@top_replies) {
+            next unless $children{$itemid_l1};
+
+            my $counter_l2 = 1;
+            foreach my $itemid_l2 (@{$children{$itemid_l1}}) {
+                # we're handling a second-level comment here
+
+                # the comment itself is always shown
+                push @posts_to_load, $itemid_l2;
+
+                # if it's not the first reply, children can be hidden,
+                # so we don't care
+                next if $counter_l2 > 1;
+
+                # if there is no children at all, we don't care either
+                next unless $children{$itemid_l2};
+
+                # well, let's handle children now
+                # we're copying a list here deliberately, so that
+                # later on, we can splice() to modify the copy
+                my @children = @{$children{$itemid_l2}};
+                push @posts_to_load, splice(@children, 0, 5);
+
+                $counter_l2++;
+            }
         }
     }
 
@@ -1241,12 +1280,8 @@ sub load_comments
         my $cfc = shift @check_for_children;
         next unless defined $children{$cfc};
         foreach my $child (@{$children{$cfc}}) {
-            if (@posts_to_load < $page_size || $expand_children{$cfc} || $opts->{expand_all}) {
+            if (@posts_to_load < $page_size || $opts->{expand_all}) {
                 push @posts_to_load, $child;
-                ## expand only the first child (unless 'by_level' strategy is in use), 
-                ## then clear the flag
-                delete $expand_children{$cfc}
-                    unless $opts->{expand_strategy} eq 'by_level';
             }
             elsif (@posts_to_load < $page_size) {
                 push @posts_to_load, $child;
