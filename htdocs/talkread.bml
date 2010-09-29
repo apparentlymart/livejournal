@@ -459,6 +459,7 @@ my $old_url = 0;
      'userref' => \%user,
      'up' => $up,
      'viewall' => $viewall,
+     'init_comobj' => 0,
  };
 
  ## Expand all comments on page

@@ -93,8 +93,9 @@ sub EntryPage
         'up' => LJ::load_user($s2entry->{'poster'}->{'username'}),
         'viewall' => $viewall,
         'expand_all' => $opts->{expand_all},
+        'init_comobj' => 0,
     };
-    
+
     ## Expand all comments on page
     unless ($LJ::DISABLED{allow_expand_all_comments}){
         $copts->{expand_all} = 1 if $get->{expand} eq 'all';
