@@ -549,7 +549,7 @@ body<=
             $ret .= "</td></tr>\n";
             if( $u->in_class("paid") || $u->in_class("sponsored") || $u->in_class("perm") ) {
                 $ret .= "<tr><td>&nbsp;</td><td>";
-                $ret .= '<p class="helper">' . $ML{'.section.textmsg.adv'} . '</p>';
+                $ret .= '<div class="helper">' . $ML{'.section.textmsg.adv'} . '</div>';
                 $ret .= "</td></tr>\n";
             }
             $ret .= "</table>\n";
