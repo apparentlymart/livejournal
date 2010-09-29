@@ -502,7 +502,7 @@ body<=
             foreach (values %$tminfo) { LJ::text_out(\$_); }
             $tminfo->{'security'} = "N" if ($u->{'txtmsg_status'} eq 'off' || $u->{'txtmsg_status'} eq 'none');
 
-            if ($LJ::DISABLED{smsru} || !$is_remote_sup) {
+            if ($LJ::DISABLED{smsru} || LJ::GeoLocation->ip_country() ne 'RU') {
                 $ret .= "<span id='phone_view_options' class='view_options'>$ML{'.fn.txtmsg'}&nbsp;";
                 $ret .= LJ::html_select({ 'name' => 'txtmsg_security', 'selected' => $tminfo->{'security'} },
                                           "all" => BML::ml(".security.visibility.everybody"),
@@ -515,9 +515,9 @@ body<=
             }
 
             my $block_id = 'phone_verification';
-               $block_id = '' if $LJ::DISABLED{smsru} || !$is_remote_sup; ## empty block_id disables JS script
+               $block_id = '' if $LJ::DISABLED{smsru} || LJ::GeoLocation->ip_country() ne 'RU'; ## empty block_id disables JS script
             $ret .= "<table class='field_block' id='$block_id'>\n";
-            if ($LJ::DISABLED{smsru} || !$is_remote_sup) {
+            if ($LJ::DISABLED{smsru} || LJ::GeoLocation->ip_country() ne 'RU') {
                 foreach (values %$tminfo) { LJ::text_out(\$_); }
                 ##
                 $ret .= "<tr><td class='field_name'>$ML{'.fn.servprov'}</td><td>";
