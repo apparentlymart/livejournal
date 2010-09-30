@@ -1239,9 +1239,18 @@ sub stat_src_to_url {
 ## Support for conditional file inclusion:
 ## e.g. LJ::need_res( {condition => 'IE'}, 'ie.css', 'myie.css') will result in
 ## <!--[if IE]><link rel="stylesheet" type="text/css" href="$statprefix/..." /><![endif]-->
+## Support 'args' option. Example: LJ::need_res( { args => 'media="screen"' }, 'stc/ljtimes/iframe.css' );
+## Results in: <link rel="stylesheet" type="text/css" href="http://stat.lj-3-32.bulyon.local/ljtimes/iframe.css?v=1285833891" media="screen"/>
+## LJ::need_res( {clean_list} ) will suppress ALL previous resources and do NOTHING more!
 sub need_res {
     my $opts = (ref $_[0]) ? shift : {};
     my @keys = @_;
+
+    if ($opts->{clean_list}) {
+        %LJ::NEEDED_RES = ();
+        @LJ::NEEDED_RES = ();
+        return;
+    }
 
     ## Filter included res.
     ## if resource is a part of a common set, skip it here
