@@ -226,25 +226,49 @@ sub as_sms {
     my $msg;
 
     my $lang = $self->comment->poster ? $self->comment->poster->prop('browselang') : $LJ::DEFAULT_LANG;
-    if ($self->comment->parent) {
-        if ($edited) {
-            $msg = LJ::u_equals($self->comment->parent->poster, $u)
-                    ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_your_comment', undef, { user => $user } )
-                    : LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_a_comment', undef, { user => $user } );
+    if ($self->event_journal->journaltype eq 'C') {
+        if ($self->comment->parent) {
+            if ($edited) {
+                $msg = LJ::u_equals($self->comment->parent->poster, $u)
+                        ? LJ::Lang::get_text($lang, 'sms.communityentryreply.edit_reply_your_comment', undef, { user => $user, community => $self->event_journal->user } )
+                        : LJ::Lang::get_text($lang, 'sms.communityentryreply.edit_reply_a_comment', undef, { user => $user, community => $self->event_journal->user } );
+            } else {
+                $msg = LJ::u_equals($self->comment->parent->poster, $u)
+                        ? LJ::Lang::get_text($lang, 'sms.communityentryreply.replied_your_comment', undef, { user => $user, community => $self->event_journal->user } )
+                        : LJ::Lang::get_text($lang, 'sms.communityentryreply.replied_a_comment', undef, { user => $user, community => $self->event_journal->user } );
+            }
         } else {
-            $msg = LJ::u_equals($self->comment->parent->poster, $u)
-                    ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_your_comment', undef, { user => $user } )
-                    : LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_a_comment', undef, { user => $user } );
+            if ($edited) {
+                $msg = LJ::u_equals($self->comment->entry->poster, $u)
+                        ? LJ::Lang::get_text($lang, 'sms.communityentryreply.edit_reply_your_post', undef, { user => $user, community => $self->event_journal->user } )
+                        : LJ::Lang::get_text($lang, 'sms.communityentryreply.edit_reply_a_post', undef, { user => $user, community => $self->event_journal->user } );
+            } else {
+                $msg = LJ::u_equals($self->comment->entry->poster, $u)
+                        ? LJ::Lang::get_text($lang, 'sms.communityentryreply.replied_your_post', undef, { user => $user, community => $self->event_journal->user } )
+                        : LJ::Lang::get_text($lang, 'sms.communityentryreply.replied_a_post', undef, { user => $user, community => $self->event_journal->user } );
+            }
         }
     } else {
-        if ($edited) {
-            $msg = LJ::u_equals($self->comment->entry->poster, $u)
-                    ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_your_post', undef, { user => $user } )
-                    : LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_a_post', undef, { user => $user } );
+        if ($self->comment->parent) {
+            if ($edited) {
+                $msg = LJ::u_equals($self->comment->parent->poster, $u)
+                        ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_your_comment', undef, { user => $user } )
+                        : LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_a_comment', undef, { user => $user } );
+            } else {
+                $msg = LJ::u_equals($self->comment->parent->poster, $u)
+                        ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_your_comment', undef, { user => $user } )
+                        : LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_a_comment', undef, { user => $user } );
+            }
         } else {
-            $msg = LJ::u_equals($self->comment->entry->poster, $u)
-                    ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_your_post', undef, { user => $user } )
-                    : LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_a_post', undef, { user => $user } );
+            if ($edited) {
+                $msg = LJ::u_equals($self->comment->entry->poster, $u)
+                        ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_your_post', undef, { user => $user } )
+                        : LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_a_post', undef, { user => $user } );
+            } else {
+                $msg = LJ::u_equals($self->comment->entry->poster, $u)
+                        ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_your_post', undef, { user => $user } )
+                        : LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_a_post', undef, { user => $user } );
+            }
         }
     }
 
