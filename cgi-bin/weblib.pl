@@ -1241,7 +1241,6 @@ sub stat_src_to_url {
 ## <!--[if IE]><link rel="stylesheet" type="text/css" href="$statprefix/..." /><![endif]-->
 sub need_res {
     my $opts = (ref $_[0]) ? shift : {};
-    my $condition = $opts->{condition} || '';
     my @keys = @_;
 
     ## Filter included res.
@@ -1262,7 +1261,7 @@ sub need_res {
         unless (exists $LJ::NEEDED_RES{$reskey}) {
             push @LJ::NEEDED_RES, $reskey;
         }
-        $LJ::NEEDED_RES{$reskey} = $condition;
+        $LJ::NEEDED_RES{$reskey} = $opts;
     }
 }
 
@@ -1274,6 +1273,9 @@ sub include_raw  {
 }
 
 sub res_includes {
+    my $opts = shift || {};
+    my $only_needed = $opts->{only_needed}; # do not include defaults
+
     # TODO: automatic dependencies from external map and/or content of files,
     # currently it's limited to dependencies on the order you call LJ::need_res();
     my $ret = "";
@@ -1363,23 +1365,28 @@ sub res_includes {
                 for (i in p) Site[i] = p[i];
             })();
        </script>
-    };
+    } unless $only_needed;
 
     my $now = time();
-    my %list;   # type -> condition -> [list of files];
-    my %oldest; # type -> condition -> $oldest
+    my %list;   # type -> condition -> args -> [list of files];
+    my %oldest; # type -> condition -> args -> $oldest
     my $add = sub {
-        my ($type, $what, $modtime, $condition) = @_;
+        my ($type, $what, $modtime, $opts) = @_;
 
+        $opts ||= {};
+        my $condition = $opts->{condition};
         $condition ||= ''; ## by default, no condtion is present
         
+        my $args = $opts->{args};
+        $args ||= '';
+
         # in the concat-res case, we don't directly append the URL w/
         # the modtime, but rather do one global max modtime at the
         # end, which is done later in the tags function.
         $what .= "?v=$modtime" unless $do_concat;
 
-        push @{$list{$type}{$condition} ||= []}, $what;
-        $oldest{$type}{$condition} = $modtime if $modtime > $oldest{$type}{$condition};
+        push @{$list{$type}{$condition}{$args} ||= []}, $what;
+        $oldest{$type}{$condition}{$args} = $modtime if $modtime > $oldest{$type}{$condition}{$args};
     };
 
 
@@ -1421,21 +1428,25 @@ sub res_includes {
         return unless $list{$type};
         
         foreach my $cond (sort {length($a) <=> length($b)} keys %{ $list{$type} }) {
-            my $list = $list{$type}{$cond};
-            my $start = ($cond) ? "<!--[if $cond]>" : "";
-            my $end = ($cond) ? "<![endif]-->\n" : "\n";
-            
-            if ($do_concat) {
-                my $csep = join(',', @$list);
-                $csep .= "?v=" . $oldest{$type}{$cond};
-                my $inc = $template;
-                $inc =~ s/__+/??$csep/;
-                $ret .= $start . $inc . $end;
-            } else {
-                foreach my $item (@$list) {
+            foreach my $args (sort {length($a) <=> length($b)} keys %{ $list{$type}{$cond} }) {
+                my $list = $list{$type}{$cond}{$args};
+                my $start = ($cond) ? "<!--[if $cond]>" : "";
+                my $end = ($cond) ? "<![endif]-->\n" : "\n";
+                
+                if ($do_concat) {
+                    my $csep = join(',', @$list);
+                    $csep .= "?v=" . $oldest{$type}{$args}{$cond};
                     my $inc = $template;
-                    $inc =~ s/__+/$item/;
+                    $inc =~ s/__+/??$csep/;
+                    $inc =~ s/##/$args/;
                     $ret .= $start . $inc . $end;
+                } else {
+                    foreach my $item (@$list) {
+                        my $inc = $template;
+                        $inc =~ s/__+/$item/;
+                        $inc =~ s/##/$args/;
+                        $ret .= $start . $inc . $end;
+                    }
                 }
             }
         }
@@ -1443,10 +1454,12 @@ sub res_includes {
 
     $tags->("common_js", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
     $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
-    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" />");
-    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" />");
+    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
+    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>");
     $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>");
     $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>");
+
+    return $ret if $only_needed;
 
     # add raw js/css
     foreach my $inc (@LJ::INCLUDE_RAW){
