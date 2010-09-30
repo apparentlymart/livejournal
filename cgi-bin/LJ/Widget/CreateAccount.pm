@@ -41,10 +41,6 @@ sub render_body {
         $ret .= "<div class='rounded-box-content'>";
     }
 
-    $ret .= "<p><b>" . $class->ml('widget.createaccount.head1') . "</b></p>";
-    $ret .= "<p>" . $class->ml('widget.createaccount.intro') . "</p>";
-    $ret .= "<p><b>" . $class->ml('widget.createaccount.head2') . "</b></p>";
-
     $ret .= $class->start_form(%{$opts{form_attr}});
 
     my $tip_birthdate = LJ::ejs($class->ml('widget.createaccount.tip.birthdate2'));
@@ -52,7 +48,6 @@ sub render_body {
     my $tip_password  = LJ::ejs($class->ml('widget.createaccount.tip.password'));
     my $tip_username  = LJ::ejs($class->ml('widget.createaccount.tip.username'));
     my $tip_gender    = LJ::ejs($class->ml('widget.createaccount.tip.gender'));
-    my $tip_location  = LJ::ejs($class->ml('widget.createaccount.tip.location'));
 
     # tip module
     if ($alt_layout) {
@@ -66,7 +61,6 @@ sub render_body {
         $ret .= "CreateAccount.password = \"$tip_password\"\n";
         $ret .= "CreateAccount.username = \"$tip_username\"\n";
         $ret .= "CreateAccount.gender   = \"$tip_gender\"\n";
-        $ret .= "CreateAccount.location = \"$tip_location\"\n";
         $ret .= "</script>\n";
         $ret .= "<div id='tips_box_arrow'></div>";
         $ret .= "<div id='tips_box'></div>";
@@ -230,58 +224,7 @@ sub render_body {
         $ret .= "</td></tr>\n" unless $alt_layout;
     }
 
-    ### location
-    if ($alt_layout) {
-        $ret .= "<label for='create_location' class='label_create'>" . $class->ml('widget.createaccount.field.location') . "</label>";
-        $ret .= "<div class='bubble' id='bubble_location'>";
-        $ret .= "<div class='bubble-arrow'></div>";
-        $ret .= "<div class='bubble-text'>$tip_location</div>";
-        $ret .= "</div>";
-    } else {
-        $ret .= "<tr><td class='field-name'>" . $class->ml('widget.createaccount.field.location') . "</td>\n<td>";
-    }
-    $ret .= $class->html_text(
-        name => 'location',
-        id => 'create_location',
-        size => 15,
-        maxlength => 50,
-        value => $post->{location},
-    );
-    $ret .= $error_msg->('location', '<br /><span class="formitemFlag">', '</span>');
-
-    if ($IpMap::VERSION ge "1.1.0") {
-        $ret .= "<div class='lc_detect'>";
-        $ret .= "<input type='button' name='detect' value='" . $class->ml('widget.createaccount.field.location.detect') . "' id='detect' onClick='countryregions.autoDetect()'> ";
-        $ret .= "</div>";
-    }
-
-    $ret .= "</td></tr>\n" unless $alt_layout;
-
     #$ret .= LJ::run_hook("create_account_extra_fields", {class => $class, errors => $errors});
-
-    if ($alt_layout) {
-
-        ### site news
-        $ret .= $class->html_check(
-            name => 'news',
-            id => 'create_news',
-            value => '1',
-            selected => LJ::did_post() ? $post->{news} : 0,
-        );
-        $ret .= " <label for='create_news' class='text'>" . $class->ml('widget.createaccount.field.news', { sitename => $LJ::SITENAMESHORT }) . "</label>";
-
-    } else {
-        ### site news
-        $ret .= "<tr valign='top'><td class='field-name'>&nbsp;</td>\n<td>";
-        $ret .= $class->html_check(
-            name => 'news',
-            id => 'create_news',
-            value => '1',
-            selected => LJ::did_post() ? $post->{news} : 1,
-            label => $class->ml('widget.createaccount.field.news', { sitename => $LJ::SITENAMESHORT }),
-        );
-        $ret .= "</td></tr>\n";
-    }
 
     ### captcha
     if ($LJ::HUMAN_CHECK{create}) {
@@ -365,17 +308,37 @@ sub render_body {
             }
         }
 
+        ### site news
+        $ret .= $class->html_check(
+            name => 'news',
+            id => 'create_news',
+            value => '1',
+            selected => LJ::did_post() ? $post->{news} : 0,
+        );
+        $ret .= " <label for='create_news' class='text'>" . $class->ml('widget.createaccount.field.news', { sitename => $LJ::SITENAMESHORT }) . "</label>";
+
         $ret .= "</p>";
         $ret .= $error_msg->('tos', '<span class="formitemFlag">', '</span><br />');
     } else {
+        ### site news
+        $ret .= "<tr valign='top'><td class='field-name'>&nbsp;</td>\n<td>";
+        $ret .= $class->html_check(
+            name => 'news',
+            id => 'create_news',
+            value => '1',
+            selected => LJ::did_post() ? $post->{news} : 1,
+            label => $class->ml('widget.createaccount.field.news', { sitename => $LJ::SITENAMESHORT }),
+        );
+        $ret .= "</td></tr>\n";
+
         ### TOS
         if ($LJ::TOS_CHECK) {
             $ret .= "<tr valign='top'><td class='field-name'>&nbsp;</td>\n<td>";
             $ret .= "<p class='tos-blurb'>" . $class->ml('widget.createaccount.field.tos', {
                     sitename => $LJ::SITENAMESHORT,
-                    aopts1 => LJ::SUP->is_remote_sup ? "href='$LJ::SITEROOT/legal/tos-russian-translation.bml'" : "href='$LJ::SITEROOT/legal/tos.bml'",
-                    aopts2 =>  LJ::SUP->is_remote_sup ? "href='$LJ::SITEROOT/legal/privacy-russian-translation.bml'" : "href='$LJ::SITEROOT/legal/privacy.bml'",
-            }) . "</p>"; 
+                    aopts1 => "href='$LJ::SITEROOT/legal/tos.bml'",
+                    aopts2 => "href='$LJ::SITEROOT/legal/privacy.bml'",
+            }) . "</p>";
             $ret .= "</td></tr>\n";
         }
         $ret .= $error_msg->('tos', '<span class="formitemFlag">', '</span><br />');

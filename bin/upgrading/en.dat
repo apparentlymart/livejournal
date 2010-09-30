@@ -6057,10 +6057,6 @@ widget.createaccount.field.email=Email Address:
 widget.createaccount.field.gender|staleness=1
 widget.createaccount.field.gender=Gender:
 
-widget.createaccount.field.location=Location
-
-widget.createaccount.field.location.detect=Detect
-
 widget.createaccount.field.news|staleness=1
 widget.createaccount.field.news=Yes, send me [[sitename]] announcements via email.
 
@@ -6076,16 +6072,6 @@ widget.createaccount.field.username=Username:
 widget.createaccount.field.username.available|staleness=1
 widget.createaccount.field.username.available=Username available
 
-widget.createaccount.head1=Find yourself and each other on LiveJournal!
-
-widget.createaccount.head2=It only takes a few minutes to sign up! Here's all we need:
-
-widget.createaccount.intro<<
-LiveJournal is a global journaling platform that helps you share your unique passions and interests and form deep connections with friends, old and new! 
-Whether you’re interested in baking, writing, politics, photography, or pretty much anything else, you’re sure to find like-minded friends from around 
-the corner and around the world!
-.
-
 widget.createaccount.tip.birthdate|staleness=1
 widget.createaccount.tip.birthdate=Required by law. No worries, you can set privacy on this after you're done creating an account.
 
@@ -6099,8 +6085,6 @@ widget.createaccount.tip.email|staleness=1
 widget.createaccount.tip.email=We need your email address to send important information. We will never share or sell your email address.
 
 widget.createaccount.tip.gender=By default we will not show your gender to anybody.
-
-widget.createaccount.tip.location=LiveJournal detects your location automatically, but you can change if you want
 
 widget.createaccount.tip.password|staleness=1
 widget.createaccount.tip.password=Choose a secure password that is at least 6 characters long. Passwords cannot be based on your username, name, or email address.
