@@ -799,8 +799,8 @@ Must be removed after implementation of Framework! */
 			}
 		.m-auth-br {
 			bottom: -11px;
-			left: -1px;
-			margin: 0 0 0 100%;
+			right: -10px;
+			margin: 0;
 			border-width: 1px 1px 0 0;
 			-webkit-border-top-right-radius: 10px;
 			-moz-border-radius-topright: 10px;
