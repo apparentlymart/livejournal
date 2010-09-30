@@ -596,6 +596,8 @@ sub get_upf_scaled {
 #   save_to_FB (bool) - is it need to save to FB (FotoBilder)
 #   fb_gallery - gallery to save target image
 #   auto_crop - is it need to auto_crop image
+#   cancel_size - if size of picture is equal or smaller => cancel processing, caller will not use such small picture
+#                 returns status 'small'
 #####
 # Sample for use as auto-crop:
 #
@@ -627,6 +629,7 @@ sub _get_upf_scaled
     my $fb_username = delete $opts{fb_username}; 
     my $fb_password = delete $opts{fb_password};
     my $auto_crop = delete $opts{auto_crop};
+    my $cancel_size = delete $opts{cancel_size};
     croak "No userid or remote" unless $u || $mogkey || $dataref;
 
     $maxfilesize *= 1024;
@@ -651,6 +654,10 @@ sub _get_upf_scaled
     # original width/height
     my ($ow, $oh) = Image::Size::imgsize($dataref);
     return undef unless $ow && $oh;
+
+    my @cancel_size = split /x/, $cancel_size;
+    return { status => 'small' }
+        if $cancel_size and $ow <= $cancel_size[0] and $oh <= $cancel_size[1];
 
     # converts an ImageMagick object to the form returned to our callers
     my $imageParams = sub {
@@ -985,6 +992,7 @@ sub crop_picture_from_web {
     my $res = LJ::_get_upf_scaled(
                     source => \$data,
                     size => $opts{size},
+                    cancel_size => $opts{cancel_size},
                     save_to_FB => 1,
                     auto_crop => 1,
                     fb_username => $opts{username},
