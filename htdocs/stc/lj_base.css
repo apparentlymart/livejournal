@@ -328,7 +328,7 @@ Must be removed after implementation of Framework! */
 .b-bubble,
 .i-bubble {
 	position:relative;
-	margin: 0 0 0 10px !important;
+	margin: 0 20px 0 10px !important;
 	padding: 8px 10px;
 	border-width: 1px;
 	border-style: solid;
@@ -341,7 +341,7 @@ Must be removed after implementation of Framework! */
 	.i-bubble-arrow-border {
 		overflow: hidden;
 		position: absolute;
-		top: 50%;
+		top: 13px;
 		height: 0;
 		width: 0;
 		border-top-color: transparent;
@@ -1042,6 +1042,7 @@ Must be removed after implementation of Framework! */
 --------------------------- */
 /* Must be removed after implementation of Framework! */
 .b-manage-smsn {
+	float: left;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -1072,15 +1073,23 @@ Must be removed after implementation of Framework! */
 		}
 	.b-manage-smsn .b-manage-smsn-status {
 		position: relative;
-		float: left;
+		overflow: hidden;
 		padding: 0 0 0 2em;
 		}
 	.b-manage-smsn-hide .b-manage-smsn-status {
 		display: none;
 		}
+		.b-manage-smsn .b-manage-smsn-status .help-icon {
+			position: absolute;
+			top: 5px;
+			right: -20px;
+			}
+			.b-manage-smsn .b-manage-smsn-status .help-icon A {
+				border: none;
+				}
 		.i-manage-smsn-icon {
 			position: absolute;
-			top: 50%;
+			top: 13px;
 			left: 0;
 			width: 16px;
 			height: 16px;

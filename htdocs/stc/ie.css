@@ -228,3 +228,9 @@ __________________________________________*/
 	width: 96px;
 	height: 96px;
 	}
+
+/* SMS Notifications
+--------------------------- */
+.b-manage-smsn-hide .b-manage-smsn-status {
+	zoom: 1;
+	}
