@@ -837,7 +837,7 @@ body<=
         my $tminfo = LJ::TextMessage->tm_info($u);
         # Check that text messaging is turned off and either
         # the provider or number have been set to null
-        if ($LJ::DISABLED{'smsru'} || !$is_remote_sup) {
+        if ($LJ::DISABLED{'smsru'} || LJ::GeoLocation->ip_country() ne 'RU') {
             if ($txtmsg_status eq "off" &&
                 (($tminfo->{'provider'} && ! $POST{'txtmsg_provider'})
                 || ($tminfo->{'number'} && ! $POST{'txtmsg_number'}))
