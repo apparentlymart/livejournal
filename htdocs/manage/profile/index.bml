@@ -540,7 +540,7 @@ body<=
             my (undef, $country) = LJ::GeoLocation->ip_class;
             $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_us'} . '</span></li>' if $country eq 'US';
             $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_ru'} . '</span></li>' if $country eq 'RU';
-            $ret .= '<li class="b-manage-smsn-status"><i class="i-manage-smsn-icon"></i><span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><span>' . $ML{'.section.textmsg.info'} . '<span class="help-icon">' . LJ::help_icon('sms_notification') . '</span>' . ' </span></span></li>';
+            $ret .= '<li class="b-manage-smsn-status"><i class="i-manage-smsn-icon"></i><span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><span>' . $ML{'.section.textmsg.info'} . ' </span> <i class="help-icon">' . LJ::help_icon('sms_notification') . '</i> </span></li>';
             $ret .= "<li class='b-manage-smsn-btn'><input type='button' name='sendsms' value='$ML{'.section.textmsg.button'}' disabled='disabled' /></li>";
             $ret .= '</ul>';
             $ret .= "</td></tr>\n";
