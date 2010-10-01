@@ -231,6 +231,7 @@ __________________________________________*/
 
 /* SMS Notifications
 --------------------------- */
-.b-manage-smsn-hide .b-manage-smsn-status {
+.b-manage-smsn .b-manage-smsn-status {
 	zoom: 1;
+	display: inline;
 	}
