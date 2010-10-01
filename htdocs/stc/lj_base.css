@@ -1099,6 +1099,7 @@ Must be removed after implementation of Framework! */
 			background-position: 0 -800px;
 			}
 		.i-manage-smsn-unsupporteddef,
+		.i-manage-smsn-already_use,
 		.i-manage-smsn-initial {
 			background-position: 0 0;
 			}
