@@ -1047,14 +1047,6 @@ Must be removed after implementation of Framework! */
 	padding: 0;
 	list-style: none;
 	}
-.b-manage-smsn:after {
-	content: "";
-	display: block;
-	clear: both;
-	visibility: hidden;
-	line-height: 0;
-	height: 0;
-	}
 .b-manage-smsn-hide {
 	}
 	.b-manage-smsn LI {
@@ -1085,7 +1077,7 @@ Must be removed after implementation of Framework! */
 		.b-manage-smsn .b-manage-smsn-status .help-icon {
 			position: absolute;
 			top: 8px;
-			right: -25px;
+			right: 0;
 			}
 			.b-manage-smsn .b-manage-smsn-status .help-icon A {
 				border: none;
