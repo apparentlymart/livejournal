@@ -562,6 +562,7 @@ body<=
 			$ret .= "initial : \"$ML{'.section.textmsg.info'}\",";
 			$ret .= "badnum : \"$ML{'.section.textmsg.info.badnum'}\",";
 			$ret .= "unsupporteddef : \"$ML{'.section.textmsg.info.unsupporteddef'}\",";
+			$ret .= "already_use : \"$ML{'.section.textmsg.info.already_use'}\",";
 			$ret .= "correctNum : \"$ML{'.section.textmsg.info.correctNum'}\",";
 			$ret .= "requestsent : \"$ML{'.section.textmsg.info.requestsent'}\",";
 			$ret .= "smssent : \"$ML{'.section.textmsg.info.smssent'}\",";
