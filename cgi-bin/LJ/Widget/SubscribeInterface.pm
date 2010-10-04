@@ -29,6 +29,10 @@ sub render_body {
     ){
         @ntypes = grep { $_ ne 'LJ::NotificationMethod::SMSru' ? 1 : 0 } @ntypes;
     }
+    ## LJSUP-7040. We are disable using SMS Notifications for Basic accounts
+    if (!$u->get_cap('paid') && !$u->in_class('plus')) {
+        @ntypes = grep { $_ ne 'LJ::NotificationMethod::SMSru' ? 1 : 0 } @ntypes;
+    }
 
     my $colnum = scalar(@ntypes) + 1;
 
