@@ -298,6 +298,10 @@ sub get_open_message {
     my $remote = LJ::get_remote();
     return unless $remote; # this feature only for logged in users
 
+    ## tiny optimization
+    $remote->preload_props(qw/country closed_sm/);
+
+    ##
     my @messages = $class->get_messages(user => $remote);
 
     my $closed = $remote->prop('closed_sm');

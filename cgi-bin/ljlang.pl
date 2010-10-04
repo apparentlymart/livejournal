@@ -710,8 +710,10 @@ sub get_lang_names {
     my @langs = @_;
     push @langs, @LJ::LANGS unless @langs;
 
-    my @list;
+    my $list = LJ::MemCache::get("langnames");
+    return $list if $list;
 
+    $list = [];
     foreach my $code (@langs) {
         my $l = LJ::Lang::get_lang($code);
         next unless $l;
@@ -724,10 +726,13 @@ sub get_lang_names {
         ## Native lang name
         my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
 
-        push @list, $code, $namenative;
+        push @$list, $code, $namenative;
     }
 
-    return \@list;
+    ## cache name on 5 min
+    LJ::MemCache::set("langnames" => $list, 3660);
+
+    return $list;
 }
 
 sub set_lang {

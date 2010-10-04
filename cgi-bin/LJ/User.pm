@@ -5078,6 +5078,7 @@ sub admin_content_flag {
 sub adult_content_calculated {
     my $u = shift;
 
+    $u->preload_props(qw/admin_content_flag adult_content/);
     return "explicit" if $u->admin_content_flag eq "explicit_adult";
     return $u->adult_content;
 }
@@ -7096,7 +7097,7 @@ sub ljuser {
     ### populate userhead data
     if ($userhead !~ /^https?:\/\//) {
         my $imgroot = $opts->{'imgroot'} || $LJ::IMGPREFIX;
-        $userhead = $imgroot . '/' . $userhead;
+        $userhead = $imgroot . '/' . $userhead . "?v=1";
     }
 
     $userhead_h ||= $userhead_w;  # make square if only one dimension given
