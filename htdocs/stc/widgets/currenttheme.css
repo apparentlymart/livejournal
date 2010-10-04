@@ -37,6 +37,6 @@
 .theme-current ul li {
     padding: 0 0 0 8px;
     margin-bottom: 2px;
-    background: url(/img/customize/arrow.gif) no-repeat 0 5px;
+    background: url(/img/customize/arrow.gif?v=1) no-repeat 0 5px;
     font-size: 11px;
 }

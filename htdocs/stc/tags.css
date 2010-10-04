@@ -10,7 +10,7 @@ legend
     border: 1px solid #cdcdcd;
     font-weight: bold;
     /* font-family: Arial; */
-    /* background: #eee url(/img/grey_gradbg.gif); */
+    /* background: #eee url(/img/grey_gradbg.gif?v=1); */
 }
 
 .tagsec
@@ -28,7 +28,7 @@ legend
 {
     color: #777;
     padding: 4px;
-    background: #eee url(/img/grey_gradbg.gif);
+    background: #eee url(/img/grey_gradbg.gif?v=1);
     border: 1px solid #cdcdcd;
 }
 
@@ -50,27 +50,27 @@ legend
 
 .tagbox .level1
 {
-    background-image: url(/img/level1.gif);
+    background-image: url(/img/level1.gif?v=1);
 }
 
 .tagbox .level2
 {
-    background-image: url(/img/level2.gif);
+    background-image: url(/img/level2.gif?v=1);
 }
 
 .tagbox .level3
 {
-    background-image: url(/img/level3.gif);
+    background-image: url(/img/level3.gif?v=1);
 }
 
 .tagbox .level4
 {
-    background-image: url(/img/level4.gif);
+    background-image: url(/img/level4.gif?v=1);
 }
 
 .tagbox .level5
 {
-    background-image: url(/img/level5.gif);
+    background-image: url(/img/level5.gif?v=1);
 }
 
 .tagfield
@@ -132,7 +132,7 @@ legend
 {
     color: #777;
     padding: 4px;
-    background: #eee url(/img/grey_gradbg.gif);
+    background: #eee url(/img/grey_gradbg.gif?v=1);
     border: 1px solid #cdcdcd;
     text-align: center;
 }

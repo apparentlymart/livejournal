@@ -51,7 +51,7 @@ A:visited:hover {
 	padding-left:20px;
 	border-bottom:1px solid #DADADA;
 	margin-top:26px;
-	background:url(../i/10y-penguins/penguins.jpg) 100% 9px no-repeat;
+	background:url(../i/10y-penguins/penguins.jpg?v=1) 100% 9px no-repeat;
 	}
 .header H1 {
 	margin-top:1.8em;
@@ -108,14 +108,14 @@ A:visited:hover {
 	}
 	.header .nav-sub .item-rss A {
 		padding:0 0 3px 21px;
-		background:url(../i/10y-penguins/icons.gif) 0 -200px no-repeat;
+		background:url(../i/10y-penguins/icons.gif?v=1) 0 -200px no-repeat;
 		}
 	.header .nav-sub .item-addfriend {
 		padding-bottom:.8em;
 		}
 	.header .nav-sub .item-addfriend A {
 		padding:0 0 3px 21px;
-		background:url(../i/10y-penguins/icons.gif) 0 0 no-repeat;
+		background:url(../i/10y-penguins/icons.gif?v=1) 0 0 no-repeat;
 		}
 
 /* Content */
@@ -199,7 +199,7 @@ A:visited:hover {
 		}
 		.content .entry .postcomment A {
 			padding:0 0 3px 20px;
-			background:url(../i/10y-penguins/icons.gif) 0 -400px no-repeat;
+			background:url(../i/10y-penguins/icons.gif?v=1) 0 -400px no-repeat;
 			}
 
 /* Sidebar */
@@ -239,7 +239,7 @@ A:visited:hover {
 		margin:0 0 .3em;
 		list-style:none;
 		line-height:1.5;
-		background:url(../i/10y-penguins/icons.gif) 0 -591px no-repeat;
+		background:url(../i/10y-penguins/icons.gif?v=1) 0 -591px no-repeat;
 		}
 		.tags-list .tags UL LI .tag-count {
 			color:#AAA;

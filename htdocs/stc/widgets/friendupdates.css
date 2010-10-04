@@ -2,7 +2,7 @@
     margin: 0 0 15px !important;
     }
     .appwidget-friendupdates H2 SPAN.w-head-in {
-        background: url(/img/icon-track-16x16.gif) no-repeat 0 50%;
+        background: url(/img/icon-track-16x16.gif?v=1) no-repeat 0 50%;
         }
     .appwidget-friendupdates .w-body {
         padding: 10px 0 0;
@@ -15,7 +15,7 @@
         .appwidget-friendupdates .statlink {
         	margin-left: 10px;
         	padding: 10px 0 0 60px;
-        	background: url(/img/ico_stat-diag.png) no-repeat 0 90%;
+        	background: url(/img/ico_stat-diag.png?v=1) no-repeat 0 90%;
         	font-size: 1.2em;
             }
 

@@ -9,7 +9,7 @@
     display: block;
     padding-top: 5px;
     padding-left: 5px;
-    background-image: url(/img/controlstrip/bg-dark.gif);
+    background-image: url(/img/controlstrip/bg-dark.gif?v=1);
     background-repeat: repeat-x;
 }
 
@@ -19,7 +19,7 @@
     display: block;
     padding-top: 5px;
     padding-left: 5px;
-    background-image: url(/img/controlstrip/bg-light.gif);
+    background-image: url(/img/controlstrip/bg-light.gif?v=1);
     background-repeat: repeat-x;
 }
 

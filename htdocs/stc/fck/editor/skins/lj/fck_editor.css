@@ -83,7 +83,7 @@ body
 
 .TB_Start
 {
-    background-image: url(images/toolbar.start.gif);
+    background-image: url(images/toolbar.start.gif?v=1);
     margin-left: 2px;
     margin-right: 2px;
     width: 3px;
@@ -99,13 +99,13 @@ body
 
 .TB_ExpandImg
 {
-	background-image: url(images/toolbar.expand.gif);
+	background-image: url(images/toolbar.expand.gif?v=1);
 	background-repeat: no-repeat;
 }
 
 .TB_CollapseImg
 {
-	background-image: url(images/toolbar.collapse.gif);
+	background-image: url(images/toolbar.collapse.gif?v=1);
 	background-repeat: no-repeat;
 }
 
@@ -161,7 +161,7 @@ body
 
 .TB_Button_Off
 {
-    /* background: #efefef url(images/toolbar.buttonbg.gif) repeat-x; */
+    /* background: #efefef url(images/toolbar.buttonbg.gif?v=1) repeat-x; */
     background: none;
 }
 
@@ -373,7 +373,7 @@ body
 .SC_ItemSelected
 {
     border: #9a9afb 1px solid;
-    background-image: url(images/toolbar.arrowright.gif);
+    background-image: url(images/toolbar.arrowright.gif?v=1);
 }
 
 .SC_ItemOver
@@ -414,7 +414,7 @@ body
 .SC_FieldButton
 {
     background-position: center center;
-    background-image: url(images/toolbar.buttonarrow.gif);
+    background-image: url(images/toolbar.buttonarrow.gif?v=1);
     border-left: #b7b7a6 1px solid;
     width: 14px;
     background-repeat: no-repeat;

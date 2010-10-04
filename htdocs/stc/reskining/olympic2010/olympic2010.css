@@ -2,7 +2,7 @@
 --------------------------------------*/
 /* Logged-in */
 .logged-in #navigation {
-	background:#000 url(/img/reskining/olympic2010/olympic2010-in-bg.jpg) 100% 0 no-repeat;
+	background:#000 url(/img/reskining/olympic2010/olympic2010-in-bg.jpg?v=1) 100% 0 no-repeat;
 	}
 .logged-in #Logo A {
 	position:relative;
@@ -12,7 +12,7 @@
 
 /* Logged-out */
 .logged-out #navigation {
-	background:#000 url(/img/reskining/olympic2010/olympic2010-out-bg.jpg) 0 0 no-repeat;
+	background:#000 url(/img/reskining/olympic2010/olympic2010-out-bg.jpg?v=1) 0 0 no-repeat;
 	}
 .logged-out #Logo A {
 	width:250px;
@@ -21,7 +21,7 @@
 /* Lanzelot
 --------------------------------------*/
 #header {
-	background:#000 url(/img/reskining/olympic2010/olympic2010-lanz-bg.jpg) 0 100% no-repeat;
+	background:#000 url(/img/reskining/olympic2010/olympic2010-lanz-bg.jpg?v=1) 0 100% no-repeat;
 	}
 	#header .logo,
 	#header .logo A,
@@ -36,13 +36,13 @@
 	background:none;
 	} 
 #header .themes .cur {
-    background-image:url(/img/reskining/olympic2010/olympic2010-l.gif);
+    background-image:url(/img/reskining/olympic2010/olympic2010-l.gif?v=1);
     }
 #header .themes .cur SPAN {
-    background-image:url(/img/reskining/olympic2010/olympic2010-r.gif);
+    background-image:url(/img/reskining/olympic2010/olympic2010-r.gif?v=1);
     }
 #header .themes .next {
-    background-image:url(/img/reskining/olympic2010/olympic2010-next.png);
+    background-image:url(/img/reskining/olympic2010/olympic2010-next.png?v=1);
     }
 * HTML #header .themes .next {
     background-image:none;

@@ -2,7 +2,7 @@
 --------------------------------------*/
 /* Logged-in */
 .logged-in #navigation {
-	background:#000 url(/img/reskining/hn2010y/hn2010y-hor-in.jpg) 100% 0 no-repeat;
+	background:#000 url(/img/reskining/hn2010y/hn2010y-hor-in.jpg?v=1) 100% 0 no-repeat;
 	min-width:840px;
 	}
 .logged-in #Logo A {
@@ -13,7 +13,7 @@
 
 /* Logged-out */
 .logged-out #navigation {
-	background:#000 url(/img/reskining/hn2010y/hn2010y-hor-out.jpg) 0 0 no-repeat;
+	background:#000 url(/img/reskining/hn2010y/hn2010y-hor-out.jpg?v=1) 0 0 no-repeat;
 	}
 .logged-out #Logo A {
 	width:250px;
@@ -22,7 +22,7 @@
 /* Lanzelot
 --------------------------------------*/
 #header {
-	background:#000 url(/img/reskining/hn2010y/hn2010y-lanz.jpg) 0 0 no-repeat;
+	background:#000 url(/img/reskining/hn2010y/hn2010y-lanz.jpg?v=1) 0 0 no-repeat;
 	}
 	#header .logo,
 	#header .logo A,

@@ -52,7 +52,7 @@ ul.doublearrows {
     margin-bottom: 15px !important;    
 }
 ul.doublearrows li a {
-    background: url('/img/arrow-double-black.gif') no-repeat 0 6px;
+    background: url('/img/arrow-double-black.gif?v=1') no-repeat 0 6px;
     padding-left: 12px;
 }
 ul#tourskip {

@@ -273,7 +273,7 @@ span.expandcollapse {
             border: 0;
         }
     .external_services td.msn_status SPAN {
-		background: url('/img/profile_icons/mlm-icons.png') no-repeat 0 -40px;
+		background: url('/img/profile_icons/mlm-icons.png?v=1') no-repeat 0 -40px;
 		display: block;
 		width: 16px;
 		height: 16px;
@@ -281,7 +281,7 @@ span.expandcollapse {
 		margin: 0 auto;
     }
 	* HTML .external_services td.msn_status SPAN {
-		background: url('/img/profile_icons/mlm-icons.gif') no-repeat 0 -6px;
+		background: url('/img/profile_icons/mlm-icons.gif?v=1') no-repeat 0 -6px;
 	}
 		.external_services .msn_status .online {
 			background-position: 0 -60px;
@@ -386,7 +386,7 @@ span.expandcollapse {
 		width:17px;
 		height:17px;
 		margin:-8px 0 0;
-		background:url(/img/user_ontd.gif) no-repeat 0 0;
+		background:url(/img/user_ontd.gif?v=1) no-repeat 0 0;
 		}
 		.details_ontd_btn[disabled="disabled"] .details_ontd_ontduser {
 			opacity:0.5;
@@ -402,7 +402,7 @@ span.expandcollapse {
 		width:17px;
 		height:17px;
 		margin:-8px 0 0;
-		background:url(/img/userinfo.gif) no-repeat 0 0;
+		background:url(/img/userinfo.gif?v=1) no-repeat 0 0;
 		}
 
 
@@ -435,7 +435,7 @@ span.expandcollapse {
 		width:17px;
 		height:17px;
 		margin:-8px 0 0;
-		background:url(/img/user_vederko.gif) no-repeat 0 0;
+		background:url(/img/user_vederko.gif?v=1) no-repeat 0 0;
 		}
 		.details_ru_vederko_btn[disabled="disabled"] .details_ru_vederko_vederkouser {
 			opacity:0.5;
@@ -451,7 +451,7 @@ span.expandcollapse {
 		width:17px;
 		height:17px;
 		margin:-8px 0 0;
-		background:url(/img/userinfo.gif) no-repeat 0 0;
+		background:url(/img/userinfo.gif?v=1) no-repeat 0 0;
 		}
 
 /* App User list

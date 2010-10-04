@@ -3,7 +3,7 @@ h2.widget-header {
     clear: left;
     font-family: Arial;
     font-weight: bold;
-    background: #ededed url(/img/corner.gif) no-repeat 0 0;
+    background: #ededed url(/img/corner.gif?v=1) no-repeat 0 0;
     margin: 0 0 8px 0 !important;
     padding: 5px 8px !important;
     color: #222;
@@ -53,7 +53,7 @@ form.theme-switcher {
 
 .beta-feedback a {
     padding-left: 35px;
-    background: url(/img/beta.gif) no-repeat 0 50%;
+    background: url(/img/beta.gif?v=1) no-repeat 0 50%;
 }
 
 .theme-titles P {

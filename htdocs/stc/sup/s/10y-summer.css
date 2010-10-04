@@ -17,7 +17,7 @@ A:link:hover, A:link:active, A:visited:hover, A:visited:active {
 	color:#7E97CE;
 	}
 .hr {
-	background:#BFBFBF url(../i/x-1-1-line.gif) 0 100% repeat-x;
+	background:#BFBFBF url(../i/x-1-1-line.gif?v=1) 0 100% repeat-x;
 	}
 
 .content .header .userpic {
@@ -41,10 +41,10 @@ A:link:hover, A:link:active, A:visited:hover, A:visited:active {
 	}
 
 #page .btn {
-	background-image:url(../i/x-1-1.png);
+	background-image:url(../i/x-1-1.png?v=1);
 	}
 #page .btn SPAN {
-	background-image:url(../i/x-1-1.png);
+	background-image:url(../i/x-1-1.png?v=1);
 	}
 
 #page .btn-add, #page .btn-rss {
@@ -64,7 +64,7 @@ A:link:hover, A:link:active, A:visited:hover, A:visited:active {
 	color:#FFF;
 	}
 BODY {
-	background:#FFF url(../i/x-1-1-bg.gif) repeat-y;
+	background:#FFF url(../i/x-1-1-bg.gif?v=1) repeat-y;
 	}
 
 .sidebar-tags A:link, .content-tags A:link, .sidebar-tags A:visited, .content-tags A:visited {
@@ -158,18 +158,18 @@ A:visited:hover, A:visited:active {
 	display:none;
 	}
 .hr {
-	background:url(../i/10y-summer/line.png) 0 50% repeat-x;
+	background:url(../i/10y-summer/line.png?v=1) 0 50% repeat-x;
 	height:15px;
 	}
 
 .layout {
-	background:url(../i/10y-summer/zipper.png) 100% -2px repeat-y;
+	background:url(../i/10y-summer/zipper.png?v=1) 100% -2px repeat-y;
 	}
 .column-left .layout {
 	background-position:363px -2px;
 	}
 .content {
-	background:url(../i/10y-summer/left.png) 0 0 no-repeat;
+	background:url(../i/10y-summer/left.png?v=1) 0 0 no-repeat;
 	}
 .column-right .content-inner {
 	margin-right:490px;
@@ -321,7 +321,7 @@ A:visited:hover, A:visited:active {
 	line-height:1;
 	}
 #page .nav .btn {
-	background-image:url(../i/10y-summer/icons.png);
+	background-image:url(../i/10y-summer/icons.png?v=1);
 	background-repeat:no-repeat;
 	}
 #page .btn-add, #page .btn-rss {
@@ -351,7 +351,7 @@ A:visited:hover, A:visited:active {
 .sidebar {
 	font-size:11px;
 	color:#000;
-	background:url(../i/10y-summer/right.jpg) 100% 0 no-repeat;
+	background:url(../i/10y-summer/right.jpg?v=1) 100% 0 no-repeat;
 	}
 .column-left .sidebar {
 	background-position:-45px 0;
@@ -362,7 +362,7 @@ A:visited:hover, A:visited:active {
 	width:310px;
 	}
 .sidebar-block {
-	background:url(../i/10y-summer/line.png) 0 100% repeat-x;
+	background:url(../i/10y-summer/line.png?v=1) 0 100% repeat-x;
 	padding-bottom:50px;
 	}
 .sidebar-block {
@@ -382,7 +382,7 @@ A:visited:hover, A:visited:active {
 
 .sidebar-block DT,
 .sidebar TABLE CAPTION {
-	background:url(../i/10y-summer/post.png) 0 100% no-repeat;
+	background:url(../i/10y-summer/post.png?v=1) 0 100% no-repeat;
 	}
 
 .sidebar TABLE CAPTION A,
@@ -423,7 +423,7 @@ A:visited:hover, A:visited:active {
 .sidebar .calendar-wrap TD A:visited {
 	text-align:center !important;
 	text-decoration:none;
-	background:url(../i/10y-summer/date.png) 50% 0 no-repeat !important;
+	background:url(../i/10y-summer/date.png?v=1) 50% 0 no-repeat !important;
 	color:#222 !important;
 	font-weight:bold;
 	}
@@ -456,7 +456,7 @@ TH DIV {
 .sidebar-links DD,
 .tags LI,
 .content-tags UL LI {
-	background:url(../i/10y-summer/bull.png) 0 8px no-repeat;
+	background:url(../i/10y-summer/bull.png?v=1) 0 8px no-repeat;
 	padding-left:8px;
 	}
 .sidebar-custom {
@@ -493,7 +493,7 @@ TH DIV {
 	text-decoration:none;
 	}
 .entry-title {
-	background:url(../i/10y-summer/post.png) 0 100% no-repeat;
+	background:url(../i/10y-summer/post.png?v=1) 0 100% no-repeat;
 	}
 .subj-link:hover {
 	color:#000 !important;
@@ -517,7 +517,7 @@ TH DIV {
 	background-color:#FFF !important;
 	}
 .comment-wrap {
-	background:url(../i/10y-summer/line.png) 0 100% repeat-x;
+	background:url(../i/10y-summer/line.png?v=1) 0 100% repeat-x;
 	padding-bottom:40px;
 	}
 
@@ -526,7 +526,7 @@ TH DIV {
 	font-size:15px;
 	margin:7px 0;
 	color:#333;
-	background:url(../i/10y-summer/post.png) 0 100% no-repeat;
+	background:url(../i/10y-summer/post.png?v=1) 0 100% no-repeat;
 	}
 
 .odd H3,
@@ -593,14 +593,14 @@ TH DIV {
 .view-archive .calendar-wrap TD A:visited {
 	text-align:center !important;
 	text-decoration:none;
-	background:url(../i/10y-summer/date.png) 50% 0 no-repeat;
+	background:url(../i/10y-summer/date.png?v=1) 50% 0 no-repeat;
 	color:#222 !important;
 	font-weight:bold;
 	}
 .view-archive .calendar-wrap TD A:link:hover,
 .view-archive .calendar-wrap TD A:visited:hover {
 	color:#555 !important;
-	background:url(../i/10y-summer/date.png) 50% 0 no-repeat !important;
+	background:url(../i/10y-summer/date.png?v=1) 50% 0 no-repeat !important;
 	}
 .view-archive .calendar-wrap TD {
 	font-weight:normal !important;

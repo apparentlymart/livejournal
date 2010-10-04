@@ -16,7 +16,7 @@
 .appwidget-createaccount #tips_box_arrow {
     display: none;
     position: absolute;
-    background: url(/img/create/tip-arrow.png) no-repeat;
+    background: url(/img/create/tip-arrow.png?v=1) no-repeat;
     width: 12px;
     height: 19px;
     z-index: 100;
@@ -69,7 +69,7 @@ span.appwidget-createaccount #username_error {
 
 .liveid {
     padding:34px 0 16px 0;
-    background:url(/img/lj_wlm/llm.png) 0 16px no-repeat;
+    background:url(/img/lj_wlm/llm.png?v=1) 0 16px no-repeat;
     }
     .liveid UL,
     .liveid UL LI {

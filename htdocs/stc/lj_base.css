@@ -22,15 +22,15 @@ form {
 	height: 25px;
 	width: 400px;
 	margin: 1em;
-	background: url(/img/progress/inactive.gif) repeat;
+	background: url(/img/progress/inactive.gif?v=1) repeat;
 }
 
 .lj_progressoverlay {
-	background: url(/img/progress/active.gif) repeat;
+	background: url(/img/progress/active.gif?v=1) repeat;
 }
 
 .lj_progressindefinite {
-	background-image: url(/img/progress/barber.gif);
+	background-image: url(/img/progress/barber.gif?v=1);
 }
 
 .lj_hourglass {
@@ -158,7 +158,7 @@ IFRAME.lj_embedcontent {
 }
 
 .warning-background {
-	background-image: url('/img/message-warning.gif');
+	background-image: url('/img/message-warning.gif?v=1');
 }
 
 .lj_invisible {
@@ -202,7 +202,7 @@ DL.current-version {
 .wlm-interstitial {
 	text-align:left;
 	padding:20px 230px 10px 10px;
-	background:url(/img/lj_wlm/interstitial-screenshot.jpg) no-repeat 274px 3px;
+	background:url(/img/lj_wlm/interstitial-screenshot.jpg?v=1) no-repeat 274px 3px;
 	}
 	.wlm-interstitial H1 {
 		font-size:2.6em;
@@ -310,7 +310,7 @@ Must be removed after implementation of Framework! */
 	margin: 0 0 24px !important;
 	border: 1px solid #F99;
 	background-color: #FEE;
-	background-image: url(/img/message-error.gif);
+	background-image: url(/img/message-error.gif?v=1);
 	background-image: -moz-linear-gradient(100% 100% 90deg, #FED4D3, #FFF2F0);
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FFF2F0), to(#FED4D3));
 	}
@@ -522,7 +522,7 @@ It must be invisible, use it only for reskining */
 	display: block;
 	width: 20px;
 	height: 15px;
-	background: url(/img/play-button.png) no-repeat;
+	background: url(/img/play-button.png?v=1) no-repeat;
 	}
 .appwidget-friendbirthdays .adnectar-play {
 	display: none;	
@@ -533,7 +533,7 @@ It must be invisible, use it only for reskining */
 .b-button-close {
 	width: 15px;
 	height: 15px;
-	background: url(/img/CloseButton2.gif) no-repeat;
+	background: url(/img/CloseButton2.gif?v=1) no-repeat;
 	position: relative;
 	top: 0;
 	margin: -25px -25px 0 10px;
@@ -591,7 +591,7 @@ SUP.i-new {
 		right:5px;
 		width:12px;
 		height:12px;
-		background:url(/img/popup-close.gif) no-repeat 0 0;
+		background:url(/img/popup-close.gif?v=1) no-repeat 0 0;
 		cursor:pointer;
 		}
 	.b-popup-messagebox .b-popup-content {
@@ -672,7 +672,7 @@ Must be removed after implementation of Framework! */
 			right: 8px;
 			width: 12px;
 			height: 12px;
-			background: url(/img/message-system-close.gif) no-repeat;
+			background: url(/img/message-system-close.gif?v=1) no-repeat;
 			cursor: pointer;
 			font-size: 0;
 			}
@@ -754,10 +754,10 @@ Must be removed after implementation of Framework! */
 			text-decoration: none;
 			}
 		.m-auth-openid A {
-			background: url(/img/icons/openid-16.gif) no-repeat 20px 50%;
+			background: url(/img/icons/openid-16.gif?v=1) no-repeat 20px 50%;
 			}
 		.m-auth-facebook A {
-			background: url(/img/icons/facebook-16.gif) no-repeat 20px 50%;
+			background: url(/img/icons/facebook-16.gif?v=1) no-repeat 20px 50%;
 			}
 			.m-auth-item A SPAN {
 				color: #000;
@@ -767,7 +767,7 @@ Must be removed after implementation of Framework! */
 				border:0;
 				}
 		.m-auth-twitter A {
-			background: url(/img/icons/twitter-16.gif) no-repeat 20px 50%;
+			background: url(/img/icons/twitter-16.gif?v=1) no-repeat 20px 50%;
 			}
 		.m-auth .current .m-auth-bl,
 		.m-auth .current .m-auth-br {
@@ -873,14 +873,14 @@ Must be removed after implementation of Framework! */
 		padding: 0 8px 0 28px;
 		border: 1px solid #32437F;
 		border-bottom-color: #24346F;
-		background: #6676AB url(/img/buttons/facebook-login-wide.gif) no-repeat 0 0;
+		background: #6676AB url(/img/buttons/facebook-login-wide.gif?v=1) no-repeat 0 0;
 		text-align: left;
 		line-height: 18px;
 		cursor: pointer;
 		}
 	.b-twitterbtn SPAN {
         background-color:#FFF;
-		background-image:url(/img/buttons/twitter-login-wide.gif);
+		background-image:url(/img/buttons/twitter-login-wide.gif?v=1);
         height:24px;
         border:none;
         line-height:22px;
@@ -893,7 +893,7 @@ Must be removed after implementation of Framework! */
 			display: none;
 			}
 		.b-twitterbtn SPAN I{
-            background:url(/img/buttons/twitter-login-wide.gif) no-repeat 100% 0;
+            background:url(/img/buttons/twitter-login-wide.gif?v=1) no-repeat 100% 0;
             position:absolute;
             right:0;
             top:0;
@@ -1033,7 +1033,7 @@ Must be removed after implementation of Framework! */
 		.b-connectbtn-twitter SPAN I {
 			width: 61px;
 			height: 23px;
-			background: url(/img/buttons/twitter-login-tiny.gif) no-repeat 0 0;
+			background: url(/img/buttons/twitter-login-tiny.gif?v=1) no-repeat 0 0;
 			}
 
 
@@ -1089,7 +1089,7 @@ Must be removed after implementation of Framework! */
 			width: 16px;
 			height: 16px;
 			margin: -9px 0 0 0;
-			background-image: url(/img/icons/smsn.gif);
+			background-image: url(/img/icons/smsn.gif?v=1);
 			background-repeat: no-repeat;
 			background-position: 0 -800px;
 			}
@@ -1229,7 +1229,7 @@ Must be removed after implementation of Framework! */
 			height: 7px;
 			margin: -3px 0 0;
 			padding: 0;
-			background: url(/img/buttons/pending-close.gif) no-repeat 0 0;
+			background: url(/img/buttons/pending-close.gif?v=1) no-repeat 0 0;
 			cursor: pointer;
 			}
 .b-pending-reason {
@@ -1282,28 +1282,28 @@ Must be removed after implementation of Framework! */
 		left: 0;
 		width: 100%;
 		height: 144px;
-		background: #FFF url(/img/repost/pics-bg.png) repeat 0 0;
+		background: #FFF url(/img/repost/pics-bg.png?v=1) repeat 0 0;
 		}
 	.b-repost-pics-l {
 		top: 0;
 		left: -9px;
 		width: 9px;
 		height: 144px;
-		background: url(/img/repost/pics-l.png) repeat 0 0;
+		background: url(/img/repost/pics-l.png?v=1) repeat 0 0;
 		}
 	.b-repost-pics-r {
 		top: 0;
 		right: -9px;
 		width: 9px;
 		height: 144px;
-		background: url(/img/repost/pics-r.png) repeat 0 0;
+		background: url(/img/repost/pics-r.png?v=1) repeat 0 0;
 		}
 	.b-repost-pics-arr {
 		top: 138px;
 		left: 160px;
 		width: 13px;
 		height: 13px;
-		background: url(/img/repost/pics-arr.png) repeat 0 0;
+		background: url(/img/repost/pics-arr.png?v=1) repeat 0 0;
 		}
 	.b-repost-pics-head,
 	#updateForm .b-repost-pics-head {
@@ -1336,7 +1336,7 @@ Must be removed after implementation of Framework! */
 			margin: 0;
 			padding: 0;
 			vertical-align: -4px;
-			background-image: url(/img/arrow-spotlight.gif);
+			background-image: url(/img/arrow-spotlight.gif?v=1);
 			background-repeat: no-repeat;
 			font: 0/0 serif;
 			cursor: pointer;
@@ -1401,7 +1401,7 @@ Must be removed after implementation of Framework! */
 			padding: 5px;
 			list-style: none;
 			text-align: center;
-			background: url(/img/repost/pics-frame.gif) no-repeat 0 0;
+			background: url(/img/repost/pics-frame.gif?v=1) no-repeat 0 0;
 			cursor: pointer;
 			}
 		.b-repost-pics-items SPAN.b-repost-pics-no,
@@ -1412,7 +1412,7 @@ Must be removed after implementation of Framework! */
 		#updateForm .b-repost-pics-items SPAN:hover,
 		.b-repost-pics-items SPAN.b-repost-pics-active,
 		#updateForm .b-repost-pics-items SPAN.b-repost-pics-active {
-			background: url(/img/repost/pics-aframe.gif) no-repeat 0 0;
+			background: url(/img/repost/pics-aframe.gif?v=1) no-repeat 0 0;
 			}
 			.b-repost-pics-no EM {
 				position: absolute;

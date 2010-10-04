@@ -2,7 +2,7 @@
 --------------------------------------*/
 /* Logged-in */
 .logged-in #navigation {
-	background:#040404 url(/img/reskining/halloween09/halloween09-hor-in.jpg) 100% 0 no-repeat;
+	background:#040404 url(/img/reskining/halloween09/halloween09-hor-in.jpg?v=1) 100% 0 no-repeat;
 	min-width:840px;
 	}
 .logged-in #Logo A {
@@ -13,7 +13,7 @@
 
 /* Logged-out */
 .logged-out #navigation {
-	background:#040404 url(/img/reskining/halloween09/halloween09-hor-out.jpg) 0 0 no-repeat;
+	background:#040404 url(/img/reskining/halloween09/halloween09-hor-out.jpg?v=1) 0 0 no-repeat;
 	}
 .logged-out #Logo A {
 	width:250px;
@@ -22,7 +22,7 @@
 /* Lanzelot
 --------------------------------------*/
 #header {
-	background:#040404 url(/img/reskining/halloween09/halloween09-lanz.jpg) 0 0 no-repeat;
+	background:#040404 url(/img/reskining/halloween09/halloween09-lanz.jpg?v=1) 0 0 no-repeat;
 	}
 	#header .logo,
 	#header .logo A,

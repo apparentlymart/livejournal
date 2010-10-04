@@ -3,7 +3,7 @@
     margin: 0 0 15px !important;
     } 
     .appwidget-search H2 SPAN.w-head-in {
-        background: url("/img/search.gif") no-repeat  0 50%;
+        background: url("/img/search.gif?v=1") no-repeat  0 50%;
         }
     .appwidget-search .w-body {
         padding: 10px; 

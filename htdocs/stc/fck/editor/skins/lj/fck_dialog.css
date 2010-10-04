@@ -175,37 +175,37 @@ body, .BackColor
 .tl, .tr, .tc, .bl, .br, .bc
 {
 	position: absolute;
-	background-image: url(images/sprites.png);
+	background-image: url(images/sprites.png?v=1);
 	background-repeat: no-repeat;
 }
 
 * html .tl, * html .tr, * html .tc, * html .bl, * html .br, * html .bc
 {
-	background-image: url(images/sprites.gif);
+	background-image: url(images/sprites.gif?v=1);
 }
 
 .ml, .mr
 {
 	position: absolute;
-	background-image: url(images/dialog.sides.png);
+	background-image: url(images/dialog.sides.png?v=1);
 	background-repeat: repeat-y;
 }
 
 * html .ml, * html .mr
 {
-	background-image: url(images/dialog.sides.gif);
+	background-image: url(images/dialog.sides.gif?v=1);
 }
 
 .rtl .ml, .rtl .mr
 {
 	position: absolute;
-	background-image: url(images/dialog.sides.rtl.png);
+	background-image: url(images/dialog.sides.rtl.png?v=1);
 	background-repeat: repeat-y;
 }
 
 * html .rtl .ml, * html .rtl .mr
 {
-	background-image: url(images/dialog.sides.gif);
+	background-image: url(images/dialog.sides.gif?v=1);
 }
 
 .tl
@@ -333,7 +333,7 @@ body, .BackColor
 	width: 20px;
 	height: 20px;
 	cursor: pointer;
-	background-image: url(images/sprites.png);
+	background-image: url(images/sprites.png?v=1);
 	background-repeat: no-repeat;
 	background-position: -16px -651px;
 }
@@ -341,7 +341,7 @@ body, .BackColor
 * html #closeButton
 {
 	cursor: hand;
-	background-image: url(images/sprites.gif);
+	background-image: url(images/sprites.gif?v=1);
 }
 
 .rtl #closeButton

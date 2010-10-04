@@ -13,7 +13,7 @@
     clear: left;
     font-family: Arial;
     font-weight: bold;
-    background: #ededed url(/img/corner.gif) no-repeat 0 0;
+    background: #ededed url(/img/corner.gif?v=1) no-repeat 0 0;
     margin: 0 0 8px 0;
     padding: 5px 8px;
     color: #222;
@@ -32,7 +32,7 @@
     padding-left: 10px;
     text-transform: lowercase;
     color: #114577 !important;
-    background: url('/img/arrow-double-blue.gif') no-repeat 0 60%;
+    background: url('/img/arrow-double-blue.gif?v=1') no-repeat 0 60%;
 }
 
 .module .header-right-link:hover {

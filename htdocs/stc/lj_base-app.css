@@ -30,7 +30,7 @@ textarea.text,
 select.select {
     margin: 0px 3px 0px 0px;
     padding: 2px 2px;
-    background: #fff url(/img/input-bg.gif) repeat-x 0 -1px;
+    background: #fff url(/img/input-bg.gif?v=1) repeat-x 0 -1px;
     border: 1px solid #bbb;
     border-top: 1px solid #999;
     border-left: 1px solid #999;
@@ -140,7 +140,7 @@ div.columns-2-r300 .columns-2-right {
     padding-left: 10px;
     text-transform: lowercase;
     color: #114577 !important;
-    background: url('/img/arrow-double-blue.gif') no-repeat 0 60%;
+    background: url('/img/arrow-double-blue.gif?v=1') no-repeat 0 60%;
 }
 *HTML .appwidget .more-link {
     right: 27px;
@@ -153,13 +153,13 @@ div.columns-2-r300 .columns-2-right {
 
 .upgrade-account {
     padding-right: 18px;
-    background: url('/horizon/upgrade-paid-icon.gif') no-repeat right 50%;
+    background: url('/horizon/upgrade-paid-icon.gif?v=1') no-repeat right 50%;
 }
 
 .arrow-link,
 .more-link {
     padding-left: 12px;
-    background: url('/img/arrow-double-black.gif') no-repeat 0 50%;
+    background: url('/img/arrow-double-black.gif?v=1') no-repeat 0 50%;
 }
 
 /* Used to encapsualte message forms like Invite and Tell a Friend */
@@ -207,7 +207,7 @@ h2.solid-neutral {
     font-size: 14px;
     font-family: Arial;
     font-weight: bold;
-    background: #ededed url(/img/corner.gif) no-repeat 0 0;
+    background: #ededed url(/img/corner.gif?v=1) no-repeat 0 0;
     margin: 0 0 8px 0;
     padding: 5px 8px;
     color: #222;
@@ -217,7 +217,7 @@ h2.solid-blue {
     font-size: 14px;
     font-family: Arial;
     font-weight: bold;
-    background: #d7e7f7 url(/img/corner.gif) no-repeat 0 0;
+    background: #d7e7f7 url(/img/corner.gif?v=1) no-repeat 0 0;
     margin: 0 0 8px 0;
     padding: 5px 8px;
     color: #222;
@@ -227,7 +227,7 @@ h2.solid-blue {
 }
 
 input.bright {
-    background: url(/img/yellow_gradient.gif) repeat;
+    background: url(/img/yellow_gradient.gif?v=1) repeat;
     border: 1px solid #b48101;
     color: #1f3368;
     font-weight: bold;

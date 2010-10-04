@@ -69,7 +69,7 @@ A:visited:hover {
 		}
 .hr {
 	margin-left:16px;
-	background:#000 url(../i/10y-georgia/grid.gif) -1px 0 repeat-x;
+	background:#000 url(../i/10y-georgia/grid.gif?v=1) -1px 0 repeat-x;
 	}
 	.header .hr {
 		clear:both;
@@ -138,7 +138,7 @@ A:visited:hover {
 #page .header .nav-sub .btn {
 	height:1.444em;
 	padding-left:18px;
-	background:url(../i/10y-georgia/icons.gif) 0 -100px no-repeat;
+	background:url(../i/10y-georgia/icons.gif?v=1) 0 -100px no-repeat;
 	}
 	#page .header .nav-sub .btn:hover {
 		word-spacing:0;
@@ -276,7 +276,7 @@ A:visited:hover {
 				margin:0 0 0 -3px;
 				font-weight:bold;
 				color:#345C81;
-				background:url(../i/10y-georgia/icons.gif) 0 -192px no-repeat;
+				background:url(../i/10y-georgia/icons.gif?v=1) 0 -192px no-repeat;
 				}
 			#page .entrymenu .btn-comments:hover {
 				color:#000;
@@ -363,7 +363,7 @@ A:visited:hover {
 			}
 .footer {
 	padding-top:1px;
-	background:#000 url(../i/10y-georgia/grid.gif) 1px 0;
+	background:#000 url(../i/10y-georgia/grid.gif?v=1) 1px 0;
 	}
 	.footer A {
 		background:#FFF;

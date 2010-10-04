@@ -16,7 +16,7 @@
     margin-top: 10px !important;
 }
 .moodtheme-links li {
-    background: url(/img/arrow-double-black.gif) no-repeat 0 50%;
+    background: url(/img/arrow-double-black.gif?v=1) no-repeat 0 50%;
     padding-left: 12px;
 }
 .moodtheme-form {

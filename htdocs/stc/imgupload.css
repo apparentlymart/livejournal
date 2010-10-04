@@ -80,7 +80,7 @@ h1 {
     width: 15px; 
     height: 15px; 
     text-indent: -9999px; 
-    background: url(/img/CloseButton.gif) no-repeat 0 0; 
+    background: url(/img/CloseButton.gif?v=1) no-repeat 0 0; 
 }
 .insobjNav { 
     background: #ccc; 

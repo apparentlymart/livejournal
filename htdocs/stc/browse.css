@@ -34,24 +34,24 @@
 }
 
 .category-summaries-top-left {
-    background: url(/img/explore/verticalsummary/top-left.gif) no-repeat;
+    background: url(/img/explore/verticalsummary/top-left.gif?v=1) no-repeat;
     width: 5px;
     height: 5px;
 }
 
 .category-summaries-top {
-    background: url(/img/explore/verticalsummary/top.gif) repeat-x;
+    background: url(/img/explore/verticalsummary/top.gif?v=1) repeat-x;
     height: 5px;
 }
 
 .category-summaries-top-right {
-    background: url(/img/explore/verticalsummary/top-right.gif) no-repeat;
+    background: url(/img/explore/verticalsummary/top-right.gif?v=1) no-repeat;
     width: 5px;
     height: 5px;
 }
 
 .category-summaries-left {
-    background: url(/img/explore/verticalsummary/left.gif) repeat-y;
+    background: url(/img/explore/verticalsummary/left.gif?v=1) repeat-y;
     width: 5px;
 }
 
@@ -60,23 +60,23 @@
 }
 
 .category-summaries-right {
-    background: url(/img/explore/verticalsummary/right.gif) repeat-y;
+    background: url(/img/explore/verticalsummary/right.gif?v=1) repeat-y;
     width: 5px;
 }
 
 .category-summaries-bottom-left {
-    background: url(/img/explore/verticalsummary/bottom-left.gif) no-repeat;
+    background: url(/img/explore/verticalsummary/bottom-left.gif?v=1) no-repeat;
     width: 5px;
     height: 5px;
 }
 
 .category-summaries-bottom {
-    background: url(/img/explore/verticalsummary/bottom.gif) repeat-x;
+    background: url(/img/explore/verticalsummary/bottom.gif?v=1) repeat-x;
     height: 5px;
 }
 
 .category-summaries-bottom-right {
-    background: url(/img/explore/verticalsummary/bottom-right.gif) no-repeat;
+    background: url(/img/explore/verticalsummary/bottom-right.gif?v=1) no-repeat;
     width: 5px;
     height: 5px;
 }

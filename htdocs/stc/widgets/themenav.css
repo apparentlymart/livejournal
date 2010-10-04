@@ -4,7 +4,7 @@
     position: relative;
 }
 .theme-nav-inner-wrapper {
-    background: url(/img/customize/bluepixel.gif) repeat-y scroll 134px 50%;
+    background: url(/img/customize/bluepixel.gif?v=1) repeat-y scroll 134px 50%;
 }
 .theme-selector-wrapper h2 {
     position: relative;
@@ -44,7 +44,7 @@
     border: 1px solid #C7E0F6;
     border-right: none;
     font-weight: bold;
-    background: #fff url(/img/customize/nav-on-arrow.gif) no-repeat right 50%;
+    background: #fff url(/img/customize/nav-on-arrow.gif?v=1) no-repeat right 50%;
 }
 .theme-nav li a:visited,
 .theme-nav-small a:visited {

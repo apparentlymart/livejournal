@@ -156,7 +156,7 @@
 /* Integration Content */
 .extension {
 	margin: 2px 0 5px;
-	/*background: url(/img/liveid.gif) 100% 2px no-repeat;*/
+	/*background: url(/img/liveid.gif?v=1) 100% 2px no-repeat;*/
 	}
 .extension table {
 	border: 0;
@@ -487,7 +487,7 @@
 	width: 100%;
 	overflow: hidden;
 	zoom: 1;
-	background: url('/img/corners/adsense-tabs.gif') repeat-x 0 100%;
+	background: url('/img/corners/adsense-tabs.gif?v=1') repeat-x 0 100%;
 	margin-bottom: 12px;
 	}
 
@@ -624,7 +624,7 @@
 		height:66px;
 		margin:0 0 6px 0;
 		overflow:hidden;
-		background:#CCC url(/img/adsense/adsense-scheme.gif) 0 0 repeat-y;
+		background:#CCC url(/img/adsense/adsense-scheme.gif?v=1) 0 0 repeat-y;
 		}
 	.adsense-scheme-alt .adsense-scheme-content {
 		margin:0 0 11px 0;
@@ -635,7 +635,7 @@
 		height:10px;
 		margin:7px 0 0;
 		overflow:hidden;
-		background:#000 url(/img/adsense/adsense-scheme.gif) -95px 0 no-repeat;
+		background:#000 url(/img/adsense/adsense-scheme.gif?v=1) -95px 0 no-repeat;
 		}
 	.adsense-scheme-b2 {
 		display:block;
@@ -644,7 +644,7 @@
 		border-right:49px solid #FFFFE7;
 		margin:22px 0 0;
 		overflow:hidden;
-		background:#000 url(/img/adsense/adsense-scheme.gif) -72px 0 no-repeat;
+		background:#000 url(/img/adsense/adsense-scheme.gif?v=1) -72px 0 no-repeat;
 		}
 	.adsense-scheme .adsense-scheme-b3 {
 		position:absolute;
@@ -653,7 +653,7 @@
 		width:11px;
 		height:54px;
 		overflow:hidden;
-		background:#000 url(/img/adsense/adsense-scheme.gif) -74px 0 repeat-y;
+		background:#000 url(/img/adsense/adsense-scheme.gif?v=1) -74px 0 repeat-y;
 		}
 	.adsense-scheme-alt .adsense-scheme-b2 {
 		position:absolute;
@@ -678,7 +678,7 @@
 		height:10px;
 		margin:0 0 0 0;
 		overflow:hidden;
-		background:#000 url(/img/adsense/adsense-scheme.gif) -95px 0 no-repeat;
+		background:#000 url(/img/adsense/adsense-scheme.gif?v=1) -95px 0 no-repeat;
 		}
 
 /* Adv types wrap */
@@ -822,7 +822,7 @@
     top: 0.4em;
     width: 9px;
     height: 9px;
-    background: url(/img/arrows-menu.gif) no-repeat;
+    background: url(/img/arrows-menu.gif?v=1) no-repeat;
     }
     .b-settings-apps-item-open .m-switch {
          background-position: 0 -10px;
@@ -918,7 +918,7 @@
     left: 37px;
     width: 11px;
     height: 6px;
-    background: url(/img/tail-top.gif) no-repeat;
+    background: url(/img/tail-top.gif?v=1) no-repeat;
     font: 0/0;
     }
 

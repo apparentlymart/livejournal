@@ -5,7 +5,7 @@ BODY {
 	padding-top:45px;
 	font:62.5%/1.5 Tahoma, Arial, sans-serif;
 	color:#4F3B1B;
-	background:#62AA45 url(../i/10y-early_morning/sprite.png) repeat-x;
+	background:#62AA45 url(../i/10y-early_morning/sprite.png?v=1) repeat-x;
 	}
 	BODY.column-left {
 		background-position:0 -416px;
@@ -93,7 +93,7 @@ A:visited:hover {
 		height:283px;
 		margin-left:-542px;
 		overflow:visible;
-		background:#62AA45 url(../i/10y-early_morning/sprite.png) -1px -131px no-repeat;
+		background:#62AA45 url(../i/10y-early_morning/sprite.png?v=1) -1px -131px no-repeat;
 		z-index:auto;
 		}
 		.column-left .header .u-wrap .userpic {
@@ -154,7 +154,7 @@ A:visited:hover {
 		.header .nav .item-rss A,
 		.header .nav .item-addfriend A {
 			padding-left:19px;
-			background:url(../i/10y-early_morning/icons.gif) 0 -48px no-repeat;
+			background:url(../i/10y-early_morning/icons.gif?v=1) 0 -48px no-repeat;
 			zoom:1;
 			}
 		.header .nav .item-addfriend A {
@@ -198,7 +198,7 @@ A:visited:hover {
 		padding:10px 20px;
 		margin-right:0;
 		font-size:1.8em;
-		background:#89C542 url(../i/10y-early_morning/sprite.png) 100% 0 no-repeat;
+		background:#89C542 url(../i/10y-early_morning/sprite.png?v=1) 100% 0 no-repeat;
 		}
 	.content .entry .entry-linkbar {
 		position:relative;
@@ -300,7 +300,7 @@ A:visited:hover {
 	line-height:40px;
 	text-decoration:none;
 	color:#FFF;
-	background:#89C543 url(../i/10y-early_morning/sprite.png) -173px -371px no-repeat;
+	background:#89C543 url(../i/10y-early_morning/sprite.png?v=1) -173px -371px no-repeat;
 	}
 #page .entry .entrymenu .comments .btn SPAN {
 	line-height:40px;
@@ -316,7 +316,7 @@ A:visited:hover {
 #page .entry .entrysubmenu .btn SPAN SPAN SPAN {
 	padding-left:15px;
 	line-height:1;
-	background:url(../i/10y-early_morning/sprite.png) -276px -247px no-repeat;
+	background:url(../i/10y-early_morning/sprite.png?v=1) -276px -247px no-repeat;
 	}
 
 /* Sidebar */
@@ -347,7 +347,7 @@ A:visited:hover {
 		margin:0 -20px 10px;
 		font-size:1.8em;
 		line-height:1.1;
-		background:#89C542 url(../i/10y-early_morning/sprite.png) 100% 0 no-repeat;
+		background:#89C542 url(../i/10y-early_morning/sprite.png?v=1) 100% 0 no-repeat;
 		}
 	#page .sidebar .sidebar-links {
 		position:relative;
@@ -368,7 +368,7 @@ A:visited:hover {
 		padding-left:13px;
 		margin:0 0 5px;
 		list-style:none;
-		background:url(../i/10y-early_morning/sprite.png) -276px -245px no-repeat;
+		background:url(../i/10y-early_morning/sprite.png?v=1) -276px -245px no-repeat;
 		zoom:1;
 		}
 		.sidebar-links DD A,
