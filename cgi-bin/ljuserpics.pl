@@ -98,6 +98,15 @@ sub load_userpics
         $idlist = [ $idlist ];
     }
 
+    ## avoid requesting upic multiple times.
+    ## otherwise memcached returns it multiple times too.
+    my %uniq = ();
+    $idlist = [ grep { 
+                        my $u = $_->[0];
+                        my $upicid = $_->[1];
+                        not $uniq{$u}->{$upicid}++ 
+                    } @$idlist ];
+
     my @load_list;
     foreach my $row (@{$idlist})
     {
