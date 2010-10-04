@@ -131,7 +131,8 @@ sub EntryPage
             }
             LJ::CleanHTML::clean_comment(\$text, { 'preformatted' => $com->{'props'}->{'opt_preformatted'},
                                                    'anon_comment' => (!$pu || $pu->{'journaltype'} eq 'I'),
-                                               });
+                                                   'nocss'        => 1,
+                                                   });
 
             # local time in mysql format to gmtime
             my $datetime = DateTime_unix($com->{'datepost_unix'});

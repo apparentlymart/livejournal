@@ -711,7 +711,8 @@ my $old_url = 0;
 
              LJ::CleanHTML::clean_comment(\$post->{'body'}, { 'preformatted' => $post->{'props'}->{'opt_preformatted'},
                                                               'anon_comment' => (!$pu || $pu->{'journaltype'} eq 'I'),
-                                                          });
+                                                              'nocss'        => 1,
+                                                              });
              BML::ebml(\$post->{'body'});
              my $event = $post->{'body'};
              if ($GET{'nohtml'}) {
