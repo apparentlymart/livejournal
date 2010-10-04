@@ -4425,9 +4425,9 @@ sub _load_friend_friendof_uids_from_db {
 sub precise_friendsof_count {
     my $u = shift;
 
-    my $ckey = [ $u->userid, "friendof:person_cnt:" . $u->userid ];
-    my $cached = LJ::MemCache::get($ckey);
-    return $cached if defined $cached;
+    my $cnt_key = "friendof:person_cnt:" . $u->userid;
+    my $counter = LJ::MemCache::get([ $u->userid, $cnt_key ]);
+    return $counter if $counter;
 
     ## arrayref with all users friends
     my $uids = $u->_load_friend_friendof_uids_from_db('friendofs');
@@ -4447,9 +4447,7 @@ sub precise_friendsof_count {
     }
 
     ## actual data
-    LJ::MemCache::set($ckey => $res);
-    LJ::MemCache::set([ $u->userid, "friendof:person_cnt:added:" . $u->userid ], time()); ## and it's age
-
+    LJ::MemCache::set([ $u->userid, $cnt_key ]  => $res, 24*3600);
 
     return $res;
 }
@@ -4473,36 +4471,23 @@ sub _incr_decr_friendsof_counter {
     ## it takes a lot of time (>5 seconds) to calculate 'friendof:person_cnt:X' counter.
     ## So update it with a bit of intellect.
     my $precise_friendsof_counter = [ $uid, "friendof:person_cnt:$uid" ];
-    my $precise_frof_cnt_added = [ $uid, "friendof:person_cnt:added:$uid" ];
-    my $vals = LJ::MemCache::get_multi($precise_friendsof_counter, $precise_frof_cnt_added);
+    my $counter = LJ::MemCache::get($precise_friendsof_counter);
 
-    my $counter = $vals->{"friendof:person_cnt:$uid"};
-    my $added   = $vals->{"friendof:person_cnt:added:$uid"};
-
-    if ($counter and $added){
-        if ($added < time - 24*3600){
-        ## flush data to avoid long-life accumulation of errors
-            LJ::MemCache::delete($precise_friendsof_counter);
-
-        } else {
-        ## just increment counter.
-        ##
-        ## Much better to use CAS operation here. But original perl Cache::Memcached client 
-        ## does not provide appropriate functionality. 
-        ## we use two memcache keys instead:
-        ##  - one as lifetime mark ('friendof:person_cnt:added:$fid')
-        ##  - other as counter value ('friendof:person_cnt:$fid')
-        ##
-            my $u = LJ::load_userid($uid);
-            if ($u->can_be_counted_as_friendof){
-                ## update memcached value
-                if ($action eq 'incr'){
-                    LJ::MemCache::incr($precise_friendsof_counter);
-                } elsif ($action eq 'decr'){
-                    LJ::MemCache::decr($precise_friendsof_counter);
-                }
+    if ($counter){
+        my $u = LJ::load_userid($uid);
+        if ($u->can_be_counted_as_friendof){
+            ## Memcached: http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt
+            ##  the item must already
+            ##  exist for incr/decr to work; these commands won't pretend that a
+            ##  non-existent key exists with value 0; instead, they will fail.
+            ##
+            ## Incr/Decr doesn't change a key expiration time, 
+            ##
+            if ($action eq 'incr'){
+                LJ::MemCache::incr($precise_friendsof_counter);
+            } elsif ($action eq 'decr'){
+                LJ::MemCache::decr($precise_friendsof_counter);
             }
-
         }
     }
 
