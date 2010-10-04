@@ -849,6 +849,7 @@ body<=
                 $dbh->do("REPLACE INTO txtmsg (userid, provider, number, security) VALUES (?, ?, ?, ?)",
                          undef, $u->{'userid'}, $POST{'txtmsg_provider'}, $POST{'txtmsg_number'}, $POST{'txtmsg_security'});
             }
+            LJ::SMS::API::RU::Phone->delete($u->userid);
         } else {
             if ($tminfo->{'number'} && ! $POST{'txtmsg_number'}) {
                 $dbh->do("DELETE FROM txtmsg WHERE userid=?", undef, $u->{'userid'});
