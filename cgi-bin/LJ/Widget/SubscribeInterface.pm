@@ -22,9 +22,10 @@ sub render_body {
 
     my @ntypes = @LJ::NOTIFY_TYPES;
     my (undef, $country) = LJ::GeoLocation->ip_class;
+    my $phone = LJ::SMS::API::RU::Phone->get_phone($u->userid);
     if ($LJ::DISABLED{smsru} or
         ($country ne 'RU'
-        and not LJ::SMS::API::RU::Phone->is_users_number_supported($u)
+        and ($phone && LJ::SMS::API::RU::Phone->get_cur_phone_statuses($phone) ne 'verified')
         )
     ){
         @ntypes = grep { $_ ne 'LJ::NotificationMethod::SMSru' ? 1 : 0 } @ntypes;
