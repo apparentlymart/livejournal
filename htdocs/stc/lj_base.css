@@ -1072,7 +1072,7 @@ Must be removed after implementation of Framework! */
 		margin-left: 110px;
 		}
 	.b-manage-smsn-hide .b-manage-smsn-status {
-		display: none;
+		display: none !important;
 		}
 		.b-manage-smsn .b-manage-smsn-status .help-icon {
 			position: absolute;
