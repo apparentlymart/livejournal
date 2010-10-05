@@ -91,7 +91,14 @@
         if ($u->is_syndicated) {
             $ret{url_userpic} = "$LJ::IMGPREFIX/feed100x100.png";
         } elsif ($u->is_identity) {
-            $ret{url_userpic} = "$LJ::IMGPREFIX/identity_100x100.png";
+            ## show OpedID placeholder for OpenID accounts, and
+            ## default placeholder for all the rest identities (Facebook, Twitter etc)
+            my $identity = $u->identity;
+            if ($identity && $identity->isa("LJ::Identity::OpenID")) {
+                $ret{url_userpic} = "$LJ::IMGPREFIX/identity_100x100.png";
+            } else {
+                $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif";
+            }
         } else {
             $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif";
         }
