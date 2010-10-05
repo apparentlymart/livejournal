@@ -1754,15 +1754,25 @@ sub journal_content
 
     $html =~ s!</body>!$before_body_close</body>!i if $before_body_close;
 
+    ## GZIP encoding
+    ## 1. should we comress response?
     my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;
-    if ($do_gzip) {
+    my $length = length($html);
+    if (LJ::Request->header_in("X-Accept-Encoding") =~ m/gzip/){
+    ## X-Accept-Encoding strictly demands gzip encoding
+    ## no other measurements
+        1;
+    } elsif ($do_gzip) {
+    ## other weighing
         my $ctbase = $opts->{'contenttype'};
         $ctbase =~ s/;.*//;
         $do_gzip = 0 unless $LJ::GZIP_OKAY{$ctbase};
         $do_gzip = 0 if LJ::Request->header_in("Accept-Encoding") !~ /gzip/;
+
+        $do_gzip = 0 if $length < 500;
     }
-    my $length = length($html);
-    $do_gzip = 0 if $length < 500;
+
+    ## 2. perform compression
     if ($do_gzip) {
         my $pre_len = $length;
         LJ::Request->notes("bytes_pregzip" => $pre_len);
