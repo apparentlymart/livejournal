@@ -556,7 +556,7 @@ body<=
             my $phone = LJ::SMS::API::RU::Phone->normalize($tminfo->{'number'});
             my $status = LJ::SMS::API::RU::Phone->get_status($u->{'userid'}, $phone);
             my $statuses = LJ::SMS::API::RU::Phone->get_cur_phone_statuses($phone);
-            $status = 'already_use' if grep { $_->[0] eq 'verified' } @$statuses;
+            $status = 'already_use' if grep { $_->[0] eq 'verified' && $_->[1] != $u->{'userid'} } @$statuses;
 			$ret .= "smsNotifyInitialState = \"".$status."\";";
 			$ret .= "var supportedDEF = [901,903,905,906,909,920,921,922,923,924,925,926,927,928,929,930,931,932,933,934,936,937,938,960,961,962,963,964,965,967,968,997];";
 			$ret .= "var smsNotifyDict = {";
