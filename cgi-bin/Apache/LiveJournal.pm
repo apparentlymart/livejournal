@@ -1780,13 +1780,18 @@ sub journal_content
         $length = length($html);
         LJ::Request->header_out('Content-Encoding', 'gzip');
     }
-    #
+    
+    # other headers
     my $html_md5 = md5_base64($html);
     LJ::Request->header_out(ETag => $html_md5);
     LJ::Request->header_out('Content-MD5' => $html_md5);
 
     # Let caches know that Accept-Encoding will change content
     LJ::Request->header_out('Vary', 'Accept-Encoding, ETag');
+
+    # add server mark
+    my ($aws_id) = $LJ::HARDWARE_SERVER_NAME =~ /\-(.+)$/;
+    LJ::Request->header_out("X-AWS-Id" => $aws_id || 'unknown');
 
     LJ::Request->header_out("Content-length", $length);
     LJ::Request->send_http_header();
