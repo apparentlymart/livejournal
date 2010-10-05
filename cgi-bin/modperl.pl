@@ -50,4 +50,12 @@ while (my ($k, $file) = each %INC) {
 use Carp();
 $SIG{'USR2'} = sub { Carp::confess("caught SIGUSR2!"); };
 
+##
+##
+##
+use Sys::Hostname;
+$LJ::HARDWARE_SERVER_NAME = hostname();
+
+
+
 1;
