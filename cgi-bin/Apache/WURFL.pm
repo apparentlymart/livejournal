@@ -149,11 +149,11 @@ sub redirect4mobile {
     my $user_agent  = $opts{'user_agent'}   = LJ::Request->header_in('User-Agent');
 
     # If we get 'fullversion=' arg, set cookie and redirect without this arg.
-    if ($args =~ /fullversion=(\w+)/) {
-        $self->set_our_cookie($1); LJ::Request->send_cookies();
-        $args =~ s/fullversion=(\w+)//;
-        $args =~ s/&$//;
-        return $uri . ($args ? "?$args" : '');
+    if ($args =~ /fullversion=(yes|no)/) {
+        my $flag = $1;
+        $self->set_our_cookie($flag); 
+        LJ::Request->send_cookies();
+        return '' if $flag eq 'yes';
     }
 
     # If we get cookie 'fullversion=yes', don't redirect.
