@@ -19,14 +19,14 @@
         	font-family: Arial;
         	color: #222;
         	}
-        .appwidget-friendbirthdays .gif?v=1t-link {
+        .appwidget-friendbirthdays .gift-link {
             float: right;
             display: block;
             padding: 0 0 0 20px;
             background: url(/img/gift.gif?v=1) no-repeat 0 50%;
             line-height: 20px;
             }
-        * html .appwidget-friendbirthdays .gif?v=1t-link {
+        * html .appwidget-friendbirthdays .gift-link {
             line-height: 14px;
             }
         .appwidget-friendbirthdays UL.b-list-options {
