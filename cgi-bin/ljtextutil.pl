@@ -460,7 +460,7 @@ sub trim_at_word
             my $semi_idx  = rindex($short_text, ';');
             my $colon_idx = rindex($short_text, ':');
             
-            my $max = (sort {$b cmp $a} $space_idx, $dot_idx, $comma_idx, $semi_idx, $colon_idx)[0];
+            my $max = (sort {$b <=> $a} $space_idx, $dot_idx, $comma_idx, $semi_idx, $colon_idx)[0];
             $short_text = substr($text, 0, $max);
 
             # attention: &#2116; must not lose ';' sign
