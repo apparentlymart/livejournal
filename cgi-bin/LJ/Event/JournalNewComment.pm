@@ -272,7 +272,11 @@ sub as_sms {
         }
     }
 
-    my $tinyurl = LJ::API::BitLy->shorten($self->comment->url);
+    warn $self->comment->url;
+    #/read/user/%username%/%post_ID%/comments/%comment_ID%#comments
+    my $url = "http://m.livejournal.com/read/user/".$self->event_journal->user."/".$self->comment->entry->ditemid."/comments/".$self->comment->dtalkid."#comments";
+    warn $url;
+    my $tinyurl = LJ::API::BitLy->shorten($url);
     return undef if $tinyurl =~ /^500/;
     return $msg . " " . $tinyurl; 
 }
