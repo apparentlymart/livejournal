@@ -13,6 +13,7 @@ use Time::HiRes qw//;
 
 use Encode qw//;
 use MIME::Base64 qw//;
+use LJ::DoSendEmail;
 
 use Class::Autouse qw(
                       IO::Socket::INET
@@ -183,48 +184,82 @@ sub send_mail
     }
 
     LJ::note_recent_action(undef, $log_action);
- 
-    my $enqueue = sub {
-        my $starttime = [Time::HiRes::gettimeofday()];
-        ## '_reuse_any_existing_connection' will return 'mass' schwartz handle 
-        ## when called from 'mass' workers and will return 'default' for the rest.
-        my $sclient = LJ::theschwartz({ 'role' => $opt->{'_schwartz_role'} }) 
-            or die "Misconfiguration in mail.  Can't go into TheSchwartz.";
-        my $host;
-        if (@rcpts == 1) {
-            $rcpts[0] =~ /(.+)@(.+)$/;
-            $host = lc($2) . '@' . lc($1);   # we store it reversed in database
+
+
+    ## Start sending process:
+    ##  1. At stage One we try to send email right now from this process 
+    ##  2. If stage one faults for some reason, at stage Two add task to TheSchwartz queue.
+    ##
+
+    ## Stage 1.
+    ##  We never should send emails online when user waits for response.
+    ##  Workers send emails too and exactly in this case 
+    ##  we spend worker's time to try to send email directly from this process.
+    ##  This approach intended to reduce TheSchwartz workload.
+    unless (LJ::is_web_context()){
+        foreach my $rcpt (@rcpts){
+            my $res = LJ::DoSendEmail->send($rcpt, {
+                        from    => $from,         ## Envelope From
+                        data    => $message_text,
+
+                        ## Optional params
+                        # sender_id => "",  ## stored in email headers. for debug.
+                        # timeout   => 300, ## Default timeout for sending email is 300 sec.
+                        });
+            ## handle result
+            if ($res eq LJ::DoSendEmail::OK){
+            ## email succeffully sent
+                $rcpt = ""; # forget about this rcpt
+            } else {
+            ## handle error 
+
+                ## 5xx errors
+                my $details = LJ::DoSendEmail->details;
+                LJ::errobj('DieString', message => "send_email to $rcpt failed: $details")->log
+                    if LJ::DoSendEmail->status eq 5;
+            }
+
         }
-        my $job = TheSchwartz::Job->new(funcname => "TheSchwartz::Worker::SendEmail",
-                                        arg      => {
-                                            env_from => $from,
-                                            rcpts    => \@rcpts,
-                                            data     => $message_text,
-                                        },
-                                        coalesce => $host,
-                                        );
-        my $h = $sclient->insert($job);
 
-        LJ::blocking_report( 'the_schwartz', 'send_mail',
-                             Time::HiRes::tv_interval($starttime));
-
-        return $h ? 1 : 0;
-    };
-
-    if ($LJ::IS_DEV_SERVER) {
-        ## SMTP or sendmail case, dev servers only. Code is loosely taken from MIME::Lite->send
-        ## Sendmail command line option -t may be used to take recipiens from message headers 
-        ## instead of specifying them in command-line
-        my $command_line = "/usr/lib/sendmail -oi -oem -f '$from' " . join(" ", map {"'$_'"} @rcpts);
-        open( my $fh, "| $command_line" ) 
-            or die "Can't run sendmail ($command_line): $!";
-        print $fh $message_text;
-        close $fh;
-        return 1;
-    } else {
-        ## TODO: if ($async_caller) { $success = send_mail_directly() }; $enqueue->() unless $success;
-        return $enqueue->();
+        ## empty rcpt means that email was successfully sent
+        @rcpts = grep {$_} @rcpts;
     }
+
+    ## Do we still have someone to notify?
+    return 1 unless @rcpts; 
+
+    ## Stage 2.
+    ##  Ok. We've tried to avoid this... But delayed sending.
+    ##  Deligate this job to SendMail worker.
+     
+    my $starttime = [Time::HiRes::gettimeofday()];
+
+    ## '_reuse_any_existing_connection' will return 'mass' schwartz handle 
+    ## when called from 'mass' workers and will return 'default' for the rest.
+    my $sclient = LJ::theschwartz({ 'role' => $opt->{'_schwartz_role'} }) 
+        or die "Misconfiguration in mail.  Can't go into TheSchwartz.";
+
+    ## coalesce param.
+    my $coalesce = '';
+    if (@rcpts == 1) {
+        $rcpts[0] =~ /(.+)@(.+)$/;
+        $coalesce = lc($2) . '@' . lc($1);   # we store it reversed in database
+    }
+
+    my $job = TheSchwartz::Job->new(funcname => "TheSchwartz::Worker::SendEmail",
+                                    arg      => {
+                                        env_from => $from,
+                                        rcpts    => \@rcpts,
+                                        data     => $message_text,
+                                    },
+                                    coalesce => $coalesce,
+                                    );
+    my $h = $sclient->insert($job);
+
+    LJ::blocking_report( 'the_schwartz', 'send_mail',
+                         Time::HiRes::tv_interval($starttime));
+    return $h ? 1 : 0;
+
 }
 
 1;
