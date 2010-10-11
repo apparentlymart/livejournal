@@ -430,6 +430,8 @@ body<=
                     # Comment Posted Notice
                     $text .= " - <b>$ML{'.posted'}</b>"
                        if $last_talkid == $dtid && $last_jid == $u->{'userid'};
+
+                    $html->{text} = $text;
                 }
             }
 
