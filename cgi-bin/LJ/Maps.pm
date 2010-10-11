@@ -21,12 +21,8 @@ sub expand_ljmap_tag {
             my $height = LJ::ehtml($attr->{'height'}) || 350;
             if ($host eq 'maps.google.com') {
                 $iframe_url = URI->new("http://maps.google.com/");
-                $iframe_url->query_form(
-                    ll      => $url_params{'ll'},
-                    spn     => $url_params{'spn'},
-                    z       => $url_params{'z'},
-                    output  => "embed"
-                );
+                $url_params{'output'} = 'embed';
+                $iframe_url->query_form(%url_params);
             } elsif ($host eq 'maps.yandex.ru') {
                 $iframe_url = 
                     "http://$LJ::EMBED_MODULE_DOMAIN?mode=lj-map&url=" . LJ::eurl($url) 
