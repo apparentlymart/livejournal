@@ -857,8 +857,8 @@ Must be removed after implementation of Framework! */
 	padding: 0;
 	border: 0;
 	background: transparent;
-	color: #FFF;
 	font: bold 11px/1 Verdana,Arial,sans-serif;
+	color: #FFF;
 	cursor: pointer;
 	}
 .b-auth .b-facebookbtn,
@@ -872,15 +872,13 @@ Must be removed after implementation of Framework! */
 		height: 20px;
 		padding: 0 8px 0 28px;
 		border: 1px solid #32437F;
-		border-bottom-color: #24346F;
-		background: #6676AB url(/img/buttons/facebook-login-wide.gif?v=1) no-repeat 0 0;
 		text-align: left;
 		line-height: 18px;
 		cursor: pointer;
+		border-bottom-color: #24346F;
+		background: #6676AB url(/img/buttons/facebook-login-wide.gif?v=1) no-repeat 0 0;
 		}
 	.b-twitterbtn SPAN {
-        background-color:#FFF;
-		background-image:url(/img/buttons/twitter-login-wide.gif?v=1);
         height:24px;
         border:none;
         line-height:22px;
@@ -888,32 +886,38 @@ Must be removed after implementation of Framework! */
         color:#293F46;
         text-shadow:1px 1px 0px #FFF;
         white-space:nowrap;
+        background-color:#FFF;
+		background-image:url(/img/buttons/twitter-login-wide.gif?v=1);
         }
 		.b-facebookbtn SPAN I{
 			display: none;
 			}
 		.b-twitterbtn SPAN I{
-            background:url(/img/buttons/twitter-login-wide.gif?v=1) no-repeat 100% 0;
             position:absolute;
             right:0;
             top:0;
             height:24px;
             width:2px;
+            background:url(/img/buttons/twitter-login-wide.gif?v=1) no-repeat 100% 0;
 			}
 
+.b-twinterstitial-question,
 .b-fbinterstitial-question {
-	margin: 0 0 10px;
+	margin:0 0 10px;
 	}
+.b-twinterstitial-form,
 .b-fbinterstitial-form {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 	}
+	.b-twinterstitial-form LI,
 	.b-fbinterstitial-form LI {
 		margin: 0 0 5px;
 		padding: 0;
 		list-style: none;
 		}
+	.b-twinterstitial-form .b-twinterstitial-submit,
 	.b-fbinterstitial-form .b-fbinterstitial-submit {
 		margin: 7px 0 0;
 		}
