@@ -153,7 +153,8 @@ function handleRadios(sel) {
 }
 
 function submitHandler() {
-    if (remote && username.value == remote && ((! radio_anon || ! radio_anon.checked) && (! radio_oidlo || ! radio_oidlo.checked) && (! radio_fblo || ! radio_fblo.checked))) {
+    if (remote && username.value == remote && ((! radio_anon || ! radio_anon.checked) && 
+        (! radio_oidlo || ! radio_oidlo.checked) && (! radio_fblo || ! radio_fblo.checked) && (! radio_twlo || ! radio_twlo.checked))) {
         // Quietly arrange for cookieuser auth instead, to avoid
         // sending cleartext password.
         password.value = "";
