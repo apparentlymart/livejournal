@@ -187,6 +187,10 @@ __________________________________________*/
 	.b-manage-smsn-status #link_2 {
 		vertical-align: 7px;
 		}
+	.b-manage-smsn .b-manage-smsn-status {
+		zoom: 1;
+		display: inline;
+		}
 
 /* Custom Userheads in Edit Profile Page
 --------------------------- */
@@ -229,9 +233,29 @@ __________________________________________*/
 	height: 96px;
 	}
 
-/* SMS Notifications
---------------------------- */
-.b-manage-smsn .b-manage-smsn-status {
+/* Photos 2 homepage widget
+-----------------------------------------------*/
+.appwidget-photos2homepage .w-body .pic-list,
+.appwidget-photos2homepage .w-body .content {
 	zoom: 1;
+	}
+*HTML .appwidget-photos2homepage .w-body .content {
+	height: 105px;
+	}
+
+/* Admin panel
+-----------------------------------------------*/
+.photos2homepage-admin,
+.photos2homepage-admin .content,
+.photos2homepage-admin .new-entry,
+.photos2homepage-admin .new-entry UL {
+	zoom: 1;
+	}
+.photos2homepage-admin .new-entry UL LI LABEL SPAN {
 	display: inline;
+	zoom: 1;
+	}
+*HTML .photos2homepage-admin .new-entry UL LI LABEL SPAN {
+	width: 140px;
+	height: 105px;
 	}
