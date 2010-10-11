@@ -879,26 +879,26 @@ Must be removed after implementation of Framework! */
 		background: #6676AB url(/img/buttons/facebook-login-wide.gif?v=1) no-repeat 0 0;
 		}
 	.b-twitterbtn SPAN {
-        height:24px;
-        border:none;
-        line-height:22px;
-        padding-left:32px;
-        color:#293F46;
-        text-shadow:1px 1px 0px #FFF;
-        white-space:nowrap;
-        background-color:#FFF;
+		height:24px;
+		border:none;
+		line-height:22px;
+		padding-left:32px;
+		color:#293F46;
+		text-shadow:1px 1px 0px #FFF;
+		white-space:nowrap;
+		background-color:#FFF;
 		background-image:url(/img/buttons/twitter-login-wide.gif?v=1);
-        }
+		}
 		.b-facebookbtn SPAN I{
 			display: none;
 			}
 		.b-twitterbtn SPAN I{
-            position:absolute;
-            right:0;
-            top:0;
-            height:24px;
-            width:2px;
-            background:url(/img/buttons/twitter-login-wide.gif?v=1) no-repeat 100% 0;
+			position:absolute;
+			right:0;
+			top:0;
+			height:24px;
+			width:2px;
+			background:url(/img/buttons/twitter-login-wide.gif?v=1) no-repeat 100% 0;
 			}
 
 .b-twinterstitial-question,
@@ -917,6 +917,15 @@ Must be removed after implementation of Framework! */
 		padding: 0;
 		list-style: none;
 		}
+	.b-twinterstitial-form LI {
+		position:relative;
+		}
+		.b-twinterstitial-form .i-bubble {
+			position:absolute;
+			top:-7px;
+			left:268px;
+			width:40%;
+			}
 	.b-twinterstitial-form .b-twinterstitial-submit,
 	.b-fbinterstitial-form .b-fbinterstitial-submit {
 		margin: 7px 0 0;
