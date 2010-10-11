@@ -1,7 +1,5 @@
-<?page
-body<=
 <?_code
-
+{
     use strict;
 
     sub A
@@ -454,22 +452,17 @@ body<=
         return $comments;
     }
 
-    use vars qw($r_head $r_title %GET %ML $r_bodyopts);
+    sub error
+    {
+        return LJ::JSON->to_json({ error => $_[0] });
+    }
 
-    # load package for formatting current music
-    use LJ::LastFM;
+    use vars qw(%GET %ML);
 
-    # make refs to both title and head, that work in cached or non-cached contexts
-    # $_[0] is a pre-request scratch area.
-    $r_head = "";
-    $r_title = "";
-    my $head = $_[0] ? \$_[0]->{'head'} : \$r_head;
-    my $title = $_[0] ? \$_[0]->{'title'} : \$r_title;
-    my $bodyopts = $_[0] ? \$_[0]->{'bodyopts'} : \$r_bodyopts;
+    # return LJ::server_down_html() if $LJ::SERVER_DOWN;
+    return error('Server is down') if $LJ::SERVER_DOWN;
 
-    return LJ::server_down_html() if $LJ::SERVER_DOWN;
-
-    ## workaround mail client bug when don't understand quoted-printable.
+    ## Workaround mail client bug when don't understand quoted-printable.
     ## Only correct 'journal' if 'itemid' was also broken, to avoid the
     ## unlikely clash with a journal name.
     if ($GET{'itemid'} =~ s/^3D//)
@@ -478,52 +471,30 @@ body<=
         $GET{'thread'} =~ s/^3D//;
     }
 
+    # LJ::Request->notes("codepath" => "bml.talkread");
 
-    LJ::Request->notes("codepath" => "bml.talkread");
+    # TODO: check $GET{journal}, $GET{itemid}
 
-    my $uri = BML::get_uri();
-    my $itemid;
-    my $old_url = 0;
-
-    if ($uri =~ m!/(\d+)\.html$!) {
-        $itemid = $1;
-        $GET{'itemid'} = $itemid;
-        $GET{'journal'} = LJ::Request->notes("_journal");
-        BML::set_language_scope("/talkread.bml");
-    } else {
-        $old_url = 1;
-    }
+    my $itemid = $GET{itemid};
 
     my $init = LJ::Talk::init(\%GET);
-    return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'};
+    return error($init->{error}) if $init->{error};
 
     my $u = $init->{'journalu'};
-    return $ML{'talk.error.nojournal'} unless $u;
+    return error($ML{'talk.error.nojournal'}) unless $u;
 
     my $ditemid = $init->{'ditemid'} + 0;
 
-    if ($old_url && $GET{'journal'}) {
-        # FIXME: add args
-        my %args = %GET;
-        delete $args{'journal'};
-        delete $args{'itemid'};
-        my $args = "";
-        if (%args) {
-            $args = "?" . join("&", map { LJ::eurl($_) . "=" . LJ::eurl($args{$_}) } keys %args);
-        }
-        return BML::redirect($u->journal_base . "/$ditemid.html$args");
-    }
+    ## Redirect if account was renamed
+    # if ($u->{'journaltype'} eq "R") {
+    #     LJ::load_user_props($u, "renamedto");
+    #     if ($u->{'renamedto'} ne "") {
+    #         return BML::redirect(LJ::journal_base($u->{'renamedto'}) . "/$ditemid.html");
+    #     }
+    # }
 
-    # redirect if account was renamed
-    if ($u->{'journaltype'} eq "R") {
-        LJ::load_user_props($u, "renamedto");
-        if ($u->{'renamedto'} ne "") {
-            return BML::redirect(LJ::journal_base($u->{'renamedto'}) . "/$ditemid.html");
-        }
-    }
-
-    # now check for init->error, since we know the account wasn't renamed
-    return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'};
+    ## Now check for init->error, since we know the account wasn't renamed
+    return error($init->{error}) if $init->{'error'};
 
     LJ::Request->notes("journalid" => $u->{'userid'});
 
@@ -544,19 +515,8 @@ body<=
 
     my $entry = LJ::Entry->new($u, ditemid => $ditemid);
 
-    $u->preload_props("opt_blockrobots", "adult_content", "admin_content_flag") if $u->is_visible;
-    if (!$u->is_visible || $u->should_block_robots || ($entry && $entry->should_block_robots)) {
-        $$head .= LJ::robot_meta_tags();
-    }
-
-    $$head .= $LJ::SHARE_THIS_URL_GEN->(journal => $u->username)
-       unless $LJ::DISABLED{'sharethis'};
-
     unless ($item && $item->{'anum'} == $init->{'anum'}) {
-        LJ::Request->pnotes ('error' => 'e404');
-        LJ::Request->pnotes ('remote' => LJ::get_remote());
-        BML::return_error_status(404);
-        return;
+        return error('Not found');
     }
 
     my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
@@ -565,20 +525,12 @@ body<=
     my ($up);  # $up = user posted journal item
     LJ::load_userids_multiple([ $item->{'posterid'} => \$up, ], [ $u ]);
 
-    LJ::text_out(\$u->{'name'});
-
     my $remote = LJ::get_remote();
 
     ### set viewall/viewsome
     my $viewall = 0;
     my $viewsome = 0;
     if ($GET{viewall} && LJ::check_priv($remote, 'canview', 'suspended')) {
-        LJ::statushistory_add(
-            $u->{'userid'},
-            $remote->{'userid'},
-            "viewall",
-            "entry: $u->{'user'}, itemid: $item->{'itemid'}, statusvis: " . $u->statusvis
-        );
         $viewall = LJ::check_priv($remote, 'canview', '*');
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
@@ -588,33 +540,24 @@ body<=
 
         # check suspended user
         if ($u->is_suspended || $up->is_suspended) {
-            LJ::Request->pnotes ('error' => 'suspended');
-            LJ::Request->pnotes ('remote' => LJ::get_remote());
-            BML::return_error_status(404);
-            return;
+            return error('Suspended');
         }
 
         # check deleted
         if ($u->is_deleted) {
-            LJ::Request->pnotes ('error' => 'deleted');
-            LJ::Request->pnotes ('remote' => LJ::get_remote());
-            BML::return_error_status(404);
-            return;
+            return error('Deleted');
         }
 
         # check suspended entry
         if ($entry && $entry->is_suspended_for($remote)) {
-            LJ::Request->pnotes ('error' => 'suspended_post');
-            LJ::Request->pnotes ('remote' => LJ::get_remote());
-            BML::return_error_status(404);
-            return;
+            return error('Suspended post');
         }
     }
 
     unless ($viewall) {
         ###  Check security before viewing this post
         my $errtxt;
-        return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
+        return error($errtxt) unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
     }
 
     my $props = $item->{'props'};
@@ -624,40 +567,9 @@ body<=
     my $comments_shown = $viewall || $entry->comments_shown;
     my $allow_commenting = $entry->posting_comments_allowed;
 
-    # See if we should inject QuickReply javascript
-    LJ::load_user_props($remote, "opt_no_quickreply");
-
     LJ::run_hooks("need_res_for_journals", $u);
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
-
-    my $ret = "";
-
-    LJ::need_res(qw(
-        js/thread_expander.js
-        js/journal.js
-    ));
-
-    if (($remote && !$remote->{'opt_no_quickreply'}) && $allow_commenting) {
-        # quickreply js libs
-        LJ::need_res(qw(
-            js/json.js
-            js/template.js
-            js/ippu.js
-            js/lj_ippu.js
-            js/userpicselect.js
-            js/hourglass.js
-            js/inputcomplete.js
-            stc/ups.css
-            stc/lj_base.css
-            js/datasource.js
-            js/selectable_table.js
-        )) unless $LJ::DISABLED{userpicselect} || !$remote->get_cap('userpicselect');
-
-        LJ::need_res(qw(
-            js/quickreply.js
-        ));
-    }
 
     my $showmultiform = $remote &&
                         ($remote->{'user'} eq $u->{'user'} ||
@@ -666,234 +578,7 @@ body<=
 
     my $multiform_selects = 0;  # are there select boxes?  don't show form if not.
 
-    my $event = $item->{'event'};
-    my $suspend_msg = $entry && $entry->should_show_suspend_msg_to($remote) ? 1 : 0;
-    LJ::CleanHTML::clean_event(
-        \$event,
-        {
-            preformatted        => $props->{'opt_preformatted'},
-            suspend_msg         => $suspend_msg,
-            unsuspend_supportid => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, 
-            cuturl              => $talkurl, 
-            expand_cut          => 1,
-        }
-    );
-    LJ::expand_embedded($u, $ditemid, $remote, \$event);
-    BML::ebml(\$event);
-
-    # make the title
-    {
-        my $subject = $item->{'subject'} || $event;
-        # yes, the 3 param to text_trim is chars, and length returns bytes, but
-        # it works, as bytes >= chars:
-        $subject = LJ::CleanHTML::clean_and_trim_subject(\$subject, length($item->{'subject'}) || 40);
-        $$title = "$u->{'user'}: $subject";
-        # prevent BML tags interpretation inside post body
-        $$title =~ s/<\?/&lt;?/g;
-        $$title =~ s/\?>/?&gt;/g;
-    }
-
-    $ret .= "<p>";
-    $ret .= "<table><tr valign='middle'>";
-
-    my $userpic = $entry->userpic;
     LJ::run_hook('notify_event_displayed', $entry);
-
-    if ($userpic) {
-        my $alt = $up->{'name'};
-        if ($props->{'picture_keyword'}) {
-            $alt .= ": $props->{'picture_keyword'}";
-        }
-        LJ::text_out(\$alt);
-        $alt = LJ::ehtml($alt);
-        my ($w, $h) = $userpic->dimensions;
-        $ret .= "<td><img src='" . $userpic->url . "' width='$w' height='$h' align='absmiddle' hspace='3' title='$alt' alt=''></td>";
-    }
-
-    $ret .= "<td>";
-    if (!LJ::u_equals($u, $up)) {
-        $ret .= BML::ml(
-            "talk.somebodywrote_comm",
-            {
-                realname => LJ::ehtml($up->{'name'}),
-                userlink => LJ::ljuser($up),
-                commlink => LJ::ljuser($u)
-            }
-        );
-    } else {
-        $ret .= BML::ml(
-            "talk.somebodywrote",
-            {
-                realname => LJ::ehtml($up->{'name'}),
-                userlink => LJ::ljuser($up)
-            }
-        );
-    }
-
-    my $etime = $item->{'eventtime'};
-    $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
-    $ret .= "<br /><font size='-1'>@ $etime</font>";
-    $ret .= "</td></tr></table>";
-
-    ## standout bar
-    $ret .= LJ::Talk::link_bar({ 'u' => $u, 'up' => $up, 'headref' => $head, 'remote' => $remote, 'itemid' => $ditemid, });
-
-    if ($u->is_locked) {
-        $ret .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.locked'}</div>";
-    } elsif ($u->is_memorial) {
-        $ret .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.memorial'}</div>";
-    } elsif ($u->is_readonly) {
-        $ret .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.readonly'}</div>";
-    }
-
-    ### dump the log entry, unless we're browsing a thread.
-    my %current;
-
-    if ($props->{'current_mood'} || $props->{'current_moodid'}) {
-        my $themeid = $up->{'moodthemeid'};
-        my $moodid = $props->{'current_moodid'};
-        my $mood = $props->{'current_mood'};
-
-        my $moodname;
-        my $moodpic;
-
-        # favor custom mood over system mood
-        if (my $val = $mood) {
-            LJ::CleanHTML::clean_subject(\$val);
-            $moodname = $val;
-        }
-
-        if (my $val = $moodid) {
-            $moodname ||= LJ::mood_name($val);
-            my %pic;
-            if (LJ::get_mood_picture($themeid, $val, \%pic)) {
-                $moodpic = "<img src=\"$pic{'pic'}\" align='absmiddle' " . 
-                           LJ::mood_size_attributes(%pic) . 
-                           " vspace='1' alt='' /> ";
-            }
-        }
-
-        $current{'Mood'} = "$moodpic$moodname";
-    }
-
-    if ($props->{'current_music'}) {
-        $current{'Music'} = $props->{'current_music'};
-        LJ::CleanHTML::clean_subject(\$current{'Music'});
-    }
-
-    if ($props->{'current_location'} || $props->{'current_coords'}) {
-        my $loc = eval {
-            LJ::Location->new(
-                coords   => $props->{'current_coords'},
-                location => $props->{'current_location'}
-            )
-        };
-        $current{'Location'} = $loc->as_html_current if $loc;
-    }
-
-    ### custom friend groups
-    my $group_names = $entry->group_names;
-    $current{'Groups'} = $group_names if $group_names;
-
-    my $logtags = LJ::Tags::get_logtags($u, $itemid);
-    if ($logtags->{$itemid} && %{$logtags->{$itemid}}) {
-        my $base = LJ::journal_base($u);
-        $current{'Tags'} = join(
-            ', ',
-            map { "<a href='$base/tag/" . LJ::eurl($_) . "'>" . LJ::ehtml($_) . "</a>" }
-            sort values %{$logtags->{$itemid}}
-        );
-    }
-
-    $ret .= "<div style='margin-left: 30px'>";
-
-    ### copyright
-    if (LJ::is_enabled('show_copyright', $u)) {
-        if ($props->{'copyright'} eq 'C' and $item->{'security'} eq "public") {
-            $ret .= '<div class="copyrighted">&Oslash; ' . BML::ml("talk.copyright") . '</div>';
-        }
-    }
-
-    if (%current)
-    {
-        $ret .= "<table border=0>\n";
-        foreach (sort keys %current) {
-            my $curkey = "talk.curname_" . $_;
-            my $curname = BML::ml($curkey);
-            $curname = "<b>Current $_:</b>" unless $curname;
-         
-            $ret .= "<tr><td align=right>$curname</td>";
-         
-            if ($_ eq 'Music') {
-                $ret .= "<td>" . LJ::LastFM::format_current_music_string($current{$_}) . "</td></tr>\n";
-            } else {
-                $ret .= "<td>$current{$_}</td></tr>\n";
-            }
-        }
-        $ret .= "</table><p>\n";
-    }
-
-    ### security indicator
-    my $sec = "";
-    if ($item->{'security'} eq "private") {
-        $sec = BML::fill_template("securityprivate");
-    } elsif ($item->{'security'} eq "usemask") {
-        if ($item->{'allowmask'} == 0) { # custom security with no group -- essentially private
-            $sec = BML::fill_template("securityprivate");
-        } elsif ($item->{'allowmask'} > 1 && $u && $u->equals($remote)) { # custom group -- only show to journal owner
-            $sec = BML::fill_template("securitygroups");
-        } else { # friends only or custom group showing to non journal owner
-            $sec = BML::fill_template("securityprotected");
-        }
-    }
-
-    $sec .= "<br />\n" unless $sec eq "" or $item->{'subject'};
-    $ret .= $sec;
-
-    ###
-    if ($item->{'subject'}) {
-        my $subject = $item->{'subject'};
-        if ($GET{'nohtml'}) {
-            # quote all non-LJ tags
-            $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
-        }
-        LJ::CleanHTML::clean_subject(\$subject);
-        BML::ebml(\$subject);
-        $ret .= "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
-    }
-
-    if ($GET{'nohtml'}) {
-        # quote all non-LJ tags
-        $event =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
-    }
-    $ret .= $event;
-    $ret .= "</div>";
-
-    $ret .= "<br style='clear: both' /><hr width='100%' size='2' align='center' />";
-
-    my $qotd = 0;
-    $qotd = $entry->prop("qotdid") if $entry;
-
-    my @verticals = $entry->verticals_list_for_ad;
-    if (@verticals) {
-        $LJ::REQ_GLOBAL{verticals_of_first_public_post} = join(",", @verticals);
-    }
- 
-    my $ad = LJ::get_ads ({
-        location        => 'bml.talkread.ebox',
-        nowrap          => 1,
-        journalu        => $u, 
-        vertical        => $LJ::REQ_GLOBAL{verticals_of_first_public_post}, 
-        interests_extra => $qotd ? { qotd => $qotd } : {},
-        s1_view         => 'entry',
-    });
- 
-    if ($ad) {
-        $ret .= $ad;
-        $ret .= "<hr width='100%' size='2' align='center' />";
-    }
-
-    # .............
 
     my $LJ_cmtinfo = {  # data structure to give to javascript for commentmanage
         form_auth => LJ::form_auth(1),
@@ -924,214 +609,20 @@ body<=
         $output
     );
 
-    return $comments unless ref $comments;
+    return error($comments) unless ref $comments;
     
-    my $page = $output->{page};
-    my $pages = $output->{pages};
-
-    ########## make the navcrap
-    my $navcrap = '';
-    if ($pages > 1) {
-        $navcrap .= "<table style='font-weight: bold'>";
-        $navcrap .= "<tr><td align='center' colspan='3'>";
-        $navcrap .= BML::ml('ljlib.pageofpages', {'page' => $page, 'total' => $pages});
-        $navcrap .= "</td></tr>";
-        my $left = "&lt;&lt;";
-        if ($page > 1) { $left = "<a href='" . BML::self_link({ 'page' => $page-1 }) . "#comments'>$left</a>"; }
-
-        my $right = "&gt;&gt;";
-        if ($page < $pages) { $right = "<a href='" . BML::self_link({ 'page' => $page+1 }) . "#comments'>$right</a>"; }
-
-        $navcrap .= "<tr><td style='font-size: 85%' align='center'>$left</td><td style='font-size: 85%' align='center'>";
-
-        for (my $i = 1; $i <= $pages; $i++) {
-            my $link = "[$i]";
-            if ($i != $page) {
-                $link = "<a href='" . BML::self_link({ 'page' => $i }) . "#comments'>$link</a>";
-            } else {
-                $link = "<span style='font-size: 130%; font-weight: bolder'>$link</span>";
-            }
-            $navcrap .= "$link ";
-            if ($i == 11)  { $navcrap .= "<br />"; }
-            elsif ($i > 10 && $i % 10 == 0) { $navcrap .= "<br />"; }
-        }
-
-        $navcrap .= "</td><td style='font-size: 85%' align='center'>$right</td></tr>";
-        $navcrap .= "</table>\n";
-        $navcrap = BML::fill_template("standout", { 'DATA' => $navcrap });
-    }
-    ####### end navcrap
-
-    if ($comments_shown)
+    unless ($comments_shown)
     {
-        $ret .= "<div id='Comments'>";
-        $ret .= "<a name='comments'></a>";
-        $ret .= "<p>$navcrap</p>" if $navcrap;
-        my $readlink;
-	    my $replycount = $entry->prop("replycount");
-	    my $readlink_text = BML::ml("talk.commentsread.counted", { replycount => $replycount });
-	    my $comments_count = BML::ml("talk.comments.counted", { replycount => $replycount });
-	
-	    if ($dthread && $pages == 1) {
-            my $readurl = LJ::Talk::talkargs($talkurl, $stylemine, $formatlight);
-            $readlink = "(<a href='$readurl#comments'>$readlink_text</a>)";
-        } elsif ($replycount > 0) {
-            $readlink = "($comments_count)";
-        }
-        $readlink .= ' - ' if $readlink && $allow_commenting;
-
-        my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine, $formatlight);
-
-        my $stylemine = $GET{'style'} eq 'mine' ? 1 : 0;
-
-        my $viewing_thread;
-        if (defined $GET{'thread'}) {
-            $viewing_thread = $GET{'thread'};
-        }
-        $ret .= LJ::create_qr_div($u, $ditemid, $stylemine, $GET{'prop_picture_keyword'}, $viewing_thread);
-
-        $ret .= "<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform' " .
-                      "onsubmit='return multiformSubmit(this, {" .
-                      "no_action: \"" . LJ::ejs($ML{'.multi.no.action'}) . "\"," .
-                      "no_comments: \"" . LJ::ejs($ML{'.multi.no.comments'}) . "\"," .
-                      "conf_delete: \"" . LJ::ejs($ML{'.confirm.action'}) . "\"" .
-                "})'>";
-
-        # Quick Reply when posting a new top level comment
-        # requires setup when logged in.
-        $ret .= "<p class='lesstop' align='center'><b>$readlink";
-        if ($allow_commenting) {
-            if ($remote) {
-                # See if we want to force them to change their password
-                my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
-                if ($bp) {
-                    $ret .= "(<a href='$bp'>" . BML::ml('talk.replytothis') . " </a>)";
-                } else {
-                    $ret .= "(" . LJ::make_qr_link('top', '', BML::ml('talk.commentpost'), $posturl) . "</a>)";
-                }
-            } else {
-                $ret .= "(<a href='$posturl'>" . BML::ml('talk.commentpost') . "</a>)";
-            }
-        }
-
-        my $rated_count = "";
-        if (LJ::is_eventrate_enable($u)) {
-            my ($we_like_this_title, $i_like_this_title) = map { $ML{$_} } qw(we_like_this_title i_like_this_title);
-
-            $rated_count = " (<a class=\"we_like_this we_like_this_".$ditemid."\" href=\"/$LJ::SITEROOT/alleventrates.bml?journal=".$u->{'user'}."&amp;itemid=$ditemid\" onclick=\"return ILikeThis.showList(event,this,'$ditemid','".$u->{'user'}."')\" title=\"$we_like_this_title\">".LJ::get_eventratescounters($u->{'userid'}, $ditemid)."</a>)";
-
-            if ($remote) {
-                $rated_count .= " (<a href=\"#\" class=\"i_like_this i_like_this_".$ditemid."\" onclick=\"return ILikeThis.rate(event,this,'$ditemid','".$u->{'user'}."')\" title=\"$i_like_this_title\">+1";
-                if (LJ::get_eventrates( 
-                       journalid => $u->{'userid'},
-                       itemid    => $ditemid,
-                       userids   => [ $remote->{'userid'} ], ))
-                {
-                    $rated_count .= "<i class=\"i_like_this_already\">/</i>";
-                }
-                $rated_count .= "</a>)";
-            } else {
-                $rated_count .= " (<a href=\"$LJ::SITEROOT/login.bml?ret=1\" class=\"i_like_this i_like_this_".$ditemid."\" title=\"$i_like_this_title\">+1</a>)";
-            }
-        }
-
-        $ret .= $rated_count;
-        $ret .= "</b></p>";
-        $ret .= "<div align='center'>" . LJ::make_qr_target('top') . "</div>" if $remote;
-
-        $ret .= LJ::html_hidden("ditemid", $ditemid);
-        $ret .= LJ::html_hidden("journal", $u->{'user'});
-
-        # Print out each comment
-        if (@$comments > 0)
-        {
-            $ret .= $_->{html}->{header} . $_->{html}->{text} . $_->{html}->{footer} foreach @$comments;
-         
-            my $do_commentmanage_js = 1;
-            if ($LJ::DISABLED{'commentmanage'}) {
-                if (ref $LJ::DISABLED{'commentmanage'} eq "CODE") {
-                    $do_commentmanage_js = $LJ::DISABLED{'commentmanage'}->($remote);
-                } else {
-                    $do_commentmanage_js = 0;
-                }
-            }
-
-            if ($do_commentmanage_js) {
-                LJ::need_res('js/commentmanage.js');
-                my $js_screen_color = "\"" . LJ::ejs(BML::get_template_def("screenedbarcolor") || BML::get_template_def("emcolor")) . "\"";
-                my $js_normal_color = "\"" . LJ::ejs(BML::get_template_def("emcolor")) . "\"";
-                $$head .= '<script type="text/javascript">var LJ_cmtinfo = ' . LJ::js_dumper($LJ_cmtinfo) . ";\n" .
-                          "function userhook_screen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_screen_color); }\n".
-                          "function userhook_unscreen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_normal_color); }\n".
-                          "</script>\n";
-            }
-
-            $ret .= "<hr /><p class='lesstop' align='center'><b>$readlink";
-            if ($allow_commenting) {
-                if ($remote) {
-                    # See if we want to force them to change their password
-                    my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
-                    if ($bp) {
-                        $ret .= "(<a href='$bp'>" . BML::ml('talk.replytothis') . " </a>)";
-                    } else {
-                        $ret .= "(" . LJ::make_qr_link('bottom', '', BML::ml('talk.commentpost'), $posturl) . "</a>)";
-                    }
-                } else {
-                    $ret .= "(<a href='$posturl'>" . BML::ml('talk.commentpost') . "</a>)";
-                }
-            }
-            $ret .= $rated_count;
-            $ret .= "</b></p>";
-            $ret .= "<div align='center'>" . LJ::make_qr_target('bottom') . "</div>" if $remote;
-
-            if ($showmultiform && $multiform_selects) {
-                $ret .= "<p>$ML{'.talkmulti.des'} ";
-                my $args = BML::get_query_string;
-                $args = '?' . $args if $args;
-                $ret .= LJ::html_hidden( returnto => $talkurl . $args );
-                $ret .= LJ::html_select(
-                    { 'name' => 'mode' },
-                    '' => $ML{'.talkmulti.please'},
-                    $ML{'.talkmulti.selected'} => [
-                        'unscreen'   => $ML{'.talkmulti.unscreen'},
-                        'screen'     => $ML{'.talkmulti.screen'},
-                        'delete'     => $ML{'.talkmulti.delete'},
-                        'deletespam' => $ML{'.talkmulti.deletespam'},
-                    ],
-                    $ML{'.talkmulti.all'} => [
-                        'all:screen'   => $ML{'.talkmulti.screen'},
-                        'all:unscreen' => $ML{'.talkmulti.unscreen'},
-                    ],
-                );
-                $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'});
-                $ret .= "</p>";
-            }
-         
-            my $ad = LJ::get_ads({ location => 'bml.talk.bottom', journalu => $u, s1_view => 'entry', });
-            if ($ad) {
-                $ret .= "<hr width='100%' size='2' align='center' />" if $showmultiform && $multiform_selects;
-                $ret .= qq[<div style='width: 768px; margin: auto;'>$ad</div>];
-            }
-        }
-
-        $ret .= "</form>";
-     
-        if ($navcrap) {
-            $ret .= "<p>$navcrap</p>";
-        }
-
-        $ret .= "</div>";
+        # TODO: think about it
+        $comments = [];
     }
 
+    BML::set_content_type('text/javascript; charset=utf-8');
+    BML::finish();
     BML::noparse();
-    return $ret;
+
+    return LJ::JSON->to_json( [ map { { thread => $_->{thread}, html => $_->{html}->{text} } } @$comments ] );
+}
 
 _code?>
-<=body
-windowtitle=><?_code return $_[0] ? $_[0]->{'title'} : $r_title _code?>
-head=><?_code return $_[0] ? $_[0]->{'head'} : $r_head _code?>
-bodyopts=><?_code return $_[0]->{'bodyopts'}; _code?>
-page?><?_c <LJDEP>
-link: htdocs/talkpost.bml, htdocs/talkread.bml, htdocs/delcomment.bml
-img: htdocs/img/dot.gif, htdocs/img/delcomment.gif
-</LJDEP> _c?>
+
