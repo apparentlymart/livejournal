@@ -1642,56 +1642,6 @@ sub get_search_term {
 }
 
 
-sub email_ads {
-    my %opts = @_;
-
-    my $channel = $opts{channel};
-    my $from_email = $opts{from_email};
-    my $to_u = $opts{to_u};
-
-    return '' unless LJ::run_hook('should_show_ad', {
-        ctx  => 'app',
-        user => $to_u,
-        remote => $to_u,
-        type => $channel,
-    });
-
-    return '' unless LJ::run_hook('should_show_email_ad', $to_u);
-
-    my $adid = get_next_ad_id();
-    my $divid = "ad_$adid";
-
-    my %adcall = (
-                  r  => rand(),
-                  p  => 'lj',
-                  channel => $channel,
-                  type => 'user',
-                  user => $to_u->id,
-                  gender => $to_u->gender_for_adcall,
-                  hR => Digest::MD5::md5_hex(lc($from_email)),
-                  hS => Digest::MD5::md5_hex(lc($to_u->email_raw)),
-                  site => "lj.email",
-                  );
-
-    my $age = $to_u->age_for_adcall;
-    $adcall{age} = $age if $age;
-
-    my $adparams = LJ::encode_url_string(\%adcall, 
-                                         [ sort { length $adcall{$a} <=> length $adcall{$b} } 
-                                           grep { length $adcall{$_} } 
-                                           keys %adcall ] );
-
-    # allow 24 bytes for escaping overhead
-    $adparams = substr($adparams, 0, 1_000);
-
-    my $image_url = $LJ::ADSERVER . '/image/?' . $adparams;
-    my $click_url = $LJ::ADSERVER . '/click/?' . $adparams;
-
-    my $adhtml = "<a href='$click_url'><img src='$image_url' /></a>";
-
-    return $adhtml;
-}
-
 # this returns ad html given a search string
 sub search_ads {
     my %opts = @_;
