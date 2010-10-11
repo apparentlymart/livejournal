@@ -180,8 +180,8 @@ EditTag =
 		});
 		
 		$list.bind(jQuery.browser.msie ?
-		    'change' : // IE support metaKey in onchange
-		    'click keyup', EditTag.select)
+			'change' : // IE support metaKey in onchange
+			'click keyup', EditTag.select);
 	},
 	
 	select: function(e)
@@ -200,7 +200,20 @@ EditTag =
 			cur_tags = tagfield.value.split(/,\s*/),
 			i, tag;
 		
-		if (e.metaKey) {
+		if (e.type === 'keyup') {
+			var index,
+				top = this.scrollTop; // jump to last element in FF 3.6
+			
+			for (i = -1; selected[++i];) {
+				cache_list[selected[i]].selected = false;
+			}
+			selected = [];
+			for (i = -1; cur_tags[++i];) {
+				cache_list[cur_tags[i]].selected = true;
+			}
+			
+			this.scrollTop = top;
+		} else if (e.metaKey) {
 			i = cur_tags.length;
 			while (i--) {
 				tag = cur_tags[i];
