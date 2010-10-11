@@ -52,7 +52,7 @@
         <input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value="<TMPL_VAR basesubject>" onKeyPress='subjectNoHTML(event);' tabindex='10' />
 
         <TMPL_IF 0> subject icon </TMPL_IF>
-            <input type='hidden' id='subjectIconField' name='subjecticon' value='$subjicon'>
+            <input type='hidden' id='subjectIconField' name='subjecticon' value='<TMPL_VAR subjicon>'>
             <script type='text/javascript' language='Javascript'>
             <!--
                 if (document.getElementById) {
