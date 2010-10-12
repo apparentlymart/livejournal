@@ -382,7 +382,7 @@ function updateLink (ae, resObj, clickTarget) {
 }
 
 var tsInProg = {}  // dict of { ditemid => 1 }
-function createModerationFunction(ae, dItemid)
+function createModerationFunction(ae, dItemid, isS1)
 {
 	return function(e)
 	{
@@ -473,11 +473,12 @@ function createModerationFunction(ae, dItemid)
 	}
 }
 
-function setupAjax (node) {
+function setupAjax (node, isS1) {
     var links = node ? node.getElementsByTagName('a') : document.links,
         rex_id = /id=(\d+)/,
         i = -1, ae;
-    
+
+    isS1 = isS1 || false;
     while (links[++i]) {
         ae = links[i];
         if (ae.href.indexOf('talkscreen.bml') != -1) {
@@ -487,7 +488,7 @@ function setupAjax (node) {
             var id = reMatch[1];
             if (!document.getElementById('ljcmt' + id)) continue;
 
-            ae.onclick = createModerationFunction(ae, id);
+            ae.onclick = createModerationFunction(ae, id, isS1);
         } else if (ae.href.indexOf('delcomment.bml') != -1) {
             if (LJ_cmtinfo && LJ_cmtinfo.disableInlineDelete) continue;
 
