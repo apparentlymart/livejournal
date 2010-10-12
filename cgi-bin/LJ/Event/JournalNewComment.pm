@@ -225,7 +225,7 @@ sub as_sms {
 
     my $msg;
 
-    my $lang = $self->comment->poster ? $self->comment->poster->prop('browselang') : $LJ::DEFAULT_LANG;
+    my $lang = $self->comment->parent->poster ? $self->comment->parent->poster->prop('browselang') : $LJ::DEFAULT_LANG;
     if ($self->event_journal->journaltype eq 'C') {
         if ($self->comment->parent) {
             if ($edited) {
