@@ -225,49 +225,51 @@ sub as_sms {
 
     my $msg;
 
-    my $lang = $self->comment->parent && $self->comment->parent->poster
-               ? $self->comment->parent->poster->prop('browselang')
+    my $parent = $self->comment->parent;
+    my $entry = $self->comment->entry;
+    my $lang = $parent && $parent->poster
+               ? $parent->poster->prop('browselang')
                : $LJ::DEFAULT_LANG;
     if ($self->event_journal->journaltype eq 'C') {
-        if ($self->comment->parent) {
+        if ($parent) {
             if ($edited) {
-                $msg = LJ::u_equals($self->comment->parent->poster, $u)
+                $msg = LJ::u_equals($parent->poster, $u)
                         ? LJ::Lang::get_text($lang, 'sms.communityentryreply.edit_reply_your_comment', undef, { user => $user, community => $self->event_journal->user } )
                         : LJ::Lang::get_text($lang, 'sms.communityentryreply.edit_reply_a_comment', undef, { user => $user, community => $self->event_journal->user } );
             } else {
-                $msg = LJ::u_equals($self->comment->parent->poster, $u)
+                $msg = LJ::u_equals($parent->poster, $u)
                         ? LJ::Lang::get_text($lang, 'sms.communityentryreply.replied_your_comment', undef, { user => $user, community => $self->event_journal->user } )
                         : LJ::Lang::get_text($lang, 'sms.communityentryreply.replied_a_comment', undef, { user => $user, community => $self->event_journal->user } );
             }
         } else {
             if ($edited) {
-                $msg = LJ::u_equals($self->comment->entry->poster, $u)
+                $msg = LJ::u_equals($entry->poster, $u)
                         ? LJ::Lang::get_text($lang, 'sms.communityentryreply.edit_reply_your_post', undef, { user => $user, community => $self->event_journal->user } )
                         : LJ::Lang::get_text($lang, 'sms.communityentryreply.edit_reply_a_post', undef, { user => $user, community => $self->event_journal->user } );
             } else {
-                $msg = LJ::u_equals($self->comment->entry->poster, $u)
+                $msg = LJ::u_equals($entry->poster, $u)
                         ? LJ::Lang::get_text($lang, 'sms.communityentryreply.replied_your_post', undef, { user => $user, community => $self->event_journal->user } )
                         : LJ::Lang::get_text($lang, 'sms.communityentryreply.replied_a_post', undef, { user => $user, community => $self->event_journal->user } );
             }
         }
     } else {
-        if ($self->comment->parent) {
+        if ($parent) {
             if ($edited) {
-                $msg = LJ::u_equals($self->comment->parent->poster, $u)
+                $msg = LJ::u_equals($parent->poster, $u)
                         ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_your_comment', undef, { user => $user } )
                         : LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_a_comment', undef, { user => $user } );
             } else {
-                $msg = LJ::u_equals($self->comment->parent->poster, $u)
+                $msg = LJ::u_equals($parent->poster, $u)
                         ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_your_comment', undef, { user => $user } )
                         : LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_a_comment', undef, { user => $user } );
             }
         } else {
             if ($edited) {
-                $msg = LJ::u_equals($self->comment->entry->poster, $u)
+                $msg = LJ::u_equals($entry->poster, $u)
                         ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_your_post', undef, { user => $user } )
                         : LJ::Lang::get_text($lang, 'sms.journalnewcomment.edit_reply_a_post', undef, { user => $user } );
             } else {
-                $msg = LJ::u_equals($self->comment->entry->poster, $u)
+                $msg = LJ::u_equals($entry->poster, $u)
                         ? LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_your_post', undef, { user => $user } )
                         : LJ::Lang::get_text($lang, 'sms.journalnewcomment.replied_a_post', undef, { user => $user } );
             }
@@ -276,7 +278,7 @@ sub as_sms {
 
     warn $self->comment->url;
     #/read/user/%username%/%post_ID%/comments/%comment_ID%#comments
-    my $url = "http://m.livejournal.com/read/user/".$self->event_journal->user."/".$self->comment->entry->ditemid."/comments/".$self->comment->dtalkid."#comments";
+    my $url = "http://m.livejournal.com/read/user/".$self->event_journal->user."/".$entry->ditemid."/comments/".$self->comment->dtalkid."#comments";
     warn $url;
     my $tinyurl = LJ::API::BitLy->shorten($url);
     return undef if $tinyurl =~ /^500/;
