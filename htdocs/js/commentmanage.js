@@ -118,7 +118,7 @@ function killPopup () {
     return true;
 }
 
-function deleteComment (ditemid) {
+function deleteComment (ditemid, isS1) {
     killPopup();
 
     var form = $('ljdelopts' + ditemid),
@@ -168,11 +168,11 @@ function deleteComment (ditemid) {
             todel.style.border = "";
             // and let timer expire
         } else if (is_deleted) {
-            removeComment(ditemid, opt_delthread);
+            removeComment(ditemid, opt_delthread, isS1);
             if (opt_delauthor) {
                 for (var item in LJ_cmtinfo) {
                     if (LJ_cmtinfo[item].u == LJ_cmtinfo[ditemid].u) {
-                        removeComment(item);
+                        removeComment(item, false, isS1);
                     }
                 }
             }
@@ -184,19 +184,34 @@ function deleteComment (ditemid) {
     window.setTimeout(flash, 5);
 }
 
-function removeComment (ditemid, killChildren) {
-    var todel = document.getElementById("ljcmt" + ditemid);
-    if (todel) {
-        todel.style.display = 'none';
+function removeComment (ditemid, killChildren, isS1) {
+    if(isS1){
+        var threadId = ditemid,
+            postid = location.href.match(/\/(\d+).html/)[1];
+            url = '/__rpc_get_thread?journal=' + Site.currentJournal +'&itemid=' + postid + '&thread=' + threadId + '&single=1';
 
-        var userhook = window["userhook_delete_comment_ARG"];
-        if (userhook)
-            userhook(ditemid);
+        jQuery.get( url, function(result) {
+            for( var i = 0; i < result.length; ++i ){
+                if( LJ_cmtinfo[ result[i].thread ].full ){
+                    jQuery("#ljcmtxt" + result[i].thread).html( result[i].html );
+                }
+            }
+        }, 'json' );
+    }
+    else {
+        var todel = document.getElementById("ljcmt" + ditemid);
+        if (todel) {
+            todel.style.display = 'none';
+
+            var userhook = window["userhook_delete_comment_ARG"];
+            if (userhook)
+                userhook(ditemid);
+        }
     }
     if (killChildren) {
         var com = LJ_cmtinfo[ditemid];
         for (var i = 0; i < com.rc.length; i++) {
-            removeComment(com.rc[i], true);
+            removeComment(com.rc[i], true, isS1);
         }
     }
 }
@@ -207,7 +222,7 @@ function docClicked () {
   // we didn't handle anything, who are we kidding
 }
 
-function createDeleteFunction (ae, dItemid) {
+function createDeleteFunction (ae, dItemid, isS1) {
     return function (e) {
 		e = jQuery.event.fix(e || window.event);
 
@@ -221,7 +236,7 @@ function createDeleteFunction (ae, dItemid) {
         // immediately delete on shift key
         if (e.shiftKey) {
             doIT = 1;
-			deleteComment(dItemid);
+			deleteComment(dItemid, isS1);
         } else {
             if (! LJ_cmtinfo)
                 return true;
@@ -287,7 +302,7 @@ function createDeleteFunction (ae, dItemid) {
                 finalHeight -= 15;
             }
 
-            inHTML += "<input type='button' value='Delete' onclick='deleteComment(" + dItemid + ");' /> <input type='button' value='Cancel' onclick='killPopup()' /></span><br /><span style='font-face: Arial; font-size: 8pt'><i>shift-click to delete without options</i></span></form>";
+            inHTML += "<input type='button' value='Delete' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /> <input type='button' value='Cancel' onclick='killPopup()' /></span><br /><span style='font-face: Arial; font-size: 8pt'><i>shift-click to delete without options</i></span></form>";
 			
 			de.html(inHTML).insertAfter(ae);
 			
@@ -434,38 +449,55 @@ function createModerationFunction(ae, dItemid, isS1)
 					}
 				}
 				
-				// modified jQuery.fn.load
-				jQuery.ajax({
-					url: location.href,
-					type: 'GET',
-					dataType: 'html',
-					complete: function(res, status) {
-						// If successful, inject the HTML into all the matched elements
-						if (status == 'success' || status == 'notmodified') {
-							// Create a dummy div to hold the results
-							var nodes = jQuery('<div/>')
-								// inject the contents of the document in, removing the scripts
-								// to avoid any 'Permission Denied' errors in IE
-								.append(res.responseText.replace(/<script(.|\s)*?\/script>/gi, ''))
-								// Locate the specified elements
-								.find(ids)
-								.each(function(){
-									var id = this.id.replace(/[^0-9]/g, '');
-									if (LJ_cmtinfo[id].expanded) {
-										var expand = this.innerHTML.match(/Expander\.make\(.+?\)/)[0];
-										(function(){
-											eval(expand);
-										}).apply(document.createElement('a'));
-									} else {
-										jQuery('#'+this.id).replaceWith(this);
-										setupAjax(this);
-									}
-								});
-							hourglass.hide();
-							poofAt(pos);
+				if(isS1){
+					var threadId = dItemid,
+						postid = location.href.match(/\/(\d+).html/)[1];
+						url = '/__rpc_get_thread?journal=' + Site.currentJournal +'&itemid=' + postid + '&thread=' + threadId;
+
+					jQuery.get( url, function(result) {
+						for( var i = 0; i < result.length; ++i ){
+							if( LJ_cmtinfo[ result[i].thread ].full ){
+								setupAjax( jQuery("#ljcmtxt" + result[i].thread).html( result[i].html )[0], isS1 );
+							}
 						}
-					}
-				});
+						hourglass.hide();
+						poofAt(pos);
+					}, 'json' );
+				}
+				else {
+					// modified jQuery.fn.load
+					jQuery.ajax({
+						url: location.href,
+						type: 'GET',
+						dataType: 'html',
+						complete: function(res, status) {
+							// If successful, inject the HTML into all the matched elements
+							if (status == 'success' || status == 'notmodified') {
+								// Create a dummy div to hold the results
+								var nodes = jQuery('<div/>')
+									// inject the contents of the document in, removing the scripts
+									// to avoid any 'Permission Denied' errors in IE
+									.append(res.responseText.replace(/<script(.|\s)*?\/script>/gi, ''))
+									// Locate the specified elements
+									.find(ids)
+									.each(function(){
+										var id = this.id.replace(/[^0-9]/g, '');
+										if (LJ_cmtinfo[id].expanded) {
+											var expand = this.innerHTML.match(/Expander\.make\(.+?\)/)[0];
+											(function(){
+												eval(expand);
+											}).apply(document.createElement('a'));
+										} else {
+											jQuery('#'+this.id).replaceWith(this);
+											setupAjax(this, isS1);
+										}
+									});
+								hourglass.hide();
+								poofAt(pos);
+							}
+						}
+					});
+				}
 			}
 		);
 		
@@ -498,14 +530,14 @@ function setupAjax (node, isS1) {
             var id = reMatch[1];
             if (!document.getElementById('ljcmt' + id)) continue;
 
-            ae.onclick = createDeleteFunction(ae, id);
+            ae.onclick = createDeleteFunction(ae, id, isS1);
         }
     }
 }
 
 
 
-jQuery(function(){setupAjax()});
+jQuery(function(){setupAjax( false, ("is_s1" in LJ_cmtinfo ) )});
 
 DOM.addEventListener(document, 'click', docClicked);
 document.write("<style> div.ljcmtmanage { color: #000; background: #e0e0e0; border: 2px solid #000; padding: 3px; }</style>");

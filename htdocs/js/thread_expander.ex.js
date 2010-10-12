@@ -90,7 +90,8 @@ ExpanderEx.prototype.collapseThread = function(){
     for( var i = 0; i < ids.length; ++i )
         this.collapseBlock( ids[ i ] );
 
-    this.updateParentState();
+    //do not call the code, because we do not know folding logic in all cases
+    //this.updateParentState();
 }
 
 ExpanderEx.prototype.updateParentState = function()
@@ -156,8 +157,8 @@ ExpanderEx.prototype.get = function(){
     }
     this.loadingStateOn();
 
-    var found = this.url.match(/\/(\d+).html/);
-    var url = '/__rpc_get_thread?journal=test&itemid=' + found[1] + '&thread=' + this.id;
+    var postid = this.url.match(/\/(\d+).html/)[1];
+    var url = '/__rpc_get_thread?journal=' + Site.currentJournal +'&itemid=' + postid + '&thread=' + this.id;
 
 
     var obj = this;
