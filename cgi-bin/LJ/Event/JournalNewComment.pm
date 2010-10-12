@@ -227,9 +227,14 @@ sub as_sms {
 
     my $parent = $self->comment->parent;
     my $entry = $self->comment->entry;
+    ## If a user commented comment to post, get lang of parent comment user
+    ## If a user commented post, get lang of entry user
     my $lang = $parent && $parent->poster
                ? $parent->poster->prop('browselang')
-               : $LJ::DEFAULT_LANG;
+               : $entry && $entry->poster
+                    ? $entry->poster->prop('browselang')
+                    : $LJ::DEFAULT_LANG;
+    warn "Send a sms with lang: $lang";
     if ($self->event_journal->journaltype eq 'C') {
         if ($parent) {
             if ($edited) {
