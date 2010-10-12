@@ -921,14 +921,21 @@ Must be removed after implementation of Framework! */
 		position:relative;
 		}
 		.b-twinterstitial-form .i-bubble {
-			position:absolute;
 			top:-7px;
-			left:268px;
+			}
+		.b-twinterstitial-form LABEL {
+			white-space:nowrap;
 			}
 	.b-twinterstitial-form .b-twinterstitial-submit,
 	.b-fbinterstitial-form .b-fbinterstitial-submit {
 		margin: 7px 0 0;
 		}
+
+.b-form-columns TD {
+	vertical-align:top;
+	padding:0;
+	border:0;
+	}
 
 .i-setting-connect-icon {
 	vertical-align: -3px;
