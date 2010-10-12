@@ -2174,7 +2174,7 @@ sub get_thread_html
     my $fmt_time_short = "%%hh%%:%%min%% %%a%%m";
     my $jarg = "journal=$u->{'user'}&";
     my $jargent ="journal=$u->{'user'}&amp;";
-    my $show_thread_expander = LJ::run_hook('show_thread_expander');
+    my $thread_expander_func = LJ::run_hook('show_thread_expander', { is_s1 => 1 });
     my $allow_commenting = $entry->posting_comments_allowed;
     my $pics = LJ::Talk::get_subjecticons();
     my $talkurl = LJ::journal_base($u) . "/" . $entry->ditemid() . ".html";
@@ -2481,31 +2481,26 @@ sub get_thread_html
                     my $dpid = $parentid * 256 + $anum;
                     $text .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid'>" . BML::ml('talk.parentlink') . "</a>)";
                 }
-    
-                my $has_expandlink = 0;
+   
+                my $thread_url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
+                my $has_closed_children = 0;
                 if ($post->{'children'} && @{$post->{'children'}}) {
-                    my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
-                    $text .= "(<a href='$url'>" . BML::ml('talk.threadlink') . "</a>)";
+                    $text .= "(<a href='$thread_url'>" . BML::ml('talk.threadlink') . "</a>)";
 
-                    if ($show_thread_expander &&
+                    if ($thread_expander_func &&
                         (grep {! $_->{_loaded} and !($_->{state} eq "D")} @{$post->{'children'}})) {
-                        $text .= "(<a href='$url' " . 
-                                 qq[onClick="Expander.make(this,'$url','$dtid',true);return false;"] .
-                                 ">" . BML::ml('talk.expandlink') . "</a>)";
-                        $has_expandlink = 1;
+                        $has_closed_children = 1;
                     }
                 }
 
-                if ($show_thread_expander &&
-                    !$has_expandlink &&
-                    $input->{show_collapselink})
-                {
-                    my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
-                    $text .= "(<a href='$url' " .
-                             qq[onClick="Expander.collapse(this,'$url','$dtid',true);return false;"] .
-                             ">" . BML::ml('talk.collapselink') . "</a>)";
-                }
-             
+                $text .= $thread_expander_func->({
+                    thread_id            => $dtid,
+                    thread_url           => $thread_url,
+                    thread_loaded        => 1,
+                    thread_show_collapse => $input->{show_collapselink},
+                    has_closed_children  => $has_closed_children,
+                }) if $thread_expander_func;
+
                 $text .= "</font></p>";
                 $text .= LJ::make_qr_target($dtid) if $remote;
                 $text .= "</div>";
@@ -2518,11 +2513,17 @@ sub get_thread_html
                 $html->{header} = $comment_header->();
                 $html->{footer} = $comment_footer->();
 
-                my $text = "<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid'>" . LJ::ehtml($post->{'subject'} || BML::ml('.nosubject')) . "</a> - $user, <i>$datepost</i>";
-                my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
-                $text .= " (<a href='$url' " .
-                         qq[onClick="Expander.make(this,'$url','$dtid',true);return false;"] .
-                         ">" . BML::ml('talk.expandlink') . "</a>)" if $show_thread_expander;
+                my $thread_url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
+                
+                my $text = "<a href='$thread_url'>" . LJ::ehtml($post->{'subject'} || BML::ml('.nosubject')) . "</a> - $user, <i>$datepost</i>";
+
+                $text .= $thread_expander_func->({
+                    thread_id            => $dtid,
+                    thread_url           => $thread_url,
+                    thread_loaded        => 0,
+                    thread_show_collapse => $input->{show_collapselink},
+                    has_closed_children  => undef,
+                }) if $thread_expander_func;
 
                 # Comment Posted Notice
                 $text .= " - <b>" . BML::ml('.posted') . "</b>"
