@@ -4,6 +4,9 @@ use strict;
 use base qw(LJ::Widget::Template);
 use Carp qw(croak);
 
+# they are not widgets, they are perl modules
+use LJ::Widget::UpdateJournal::TextBlock; # subject + body, tags and userpic group of elements
+
 #sub need_res { qw( stc/widgets/examplepostwidget.css ) }
 
 sub template_filename {
@@ -14,6 +17,9 @@ sub prepare_template_params {
     my $class = shift;
     my $template_obj = shift;
     my $opts = shift;
+
+    # put all needed parameters in common template object
+    LJ::Widget::UpdateJournal::TextBlock->prepare_template_params($template_obj, $opts);
 
     $template_obj->param(step => 1);
 
