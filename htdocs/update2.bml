@@ -11,8 +11,6 @@ body<=
     # LJ::Widget->handle_post checks LJ::did_post inside
     my %from_post = LJ::Widget->handle_post(\%POST, 'UpdateJournal', { get => \%GET });
 
-    my $ret;
-
     my $widget = LJ::Widget::UpdateJournal->new;
     $headextra .= $widget->wrapped_js;
     return $widget->render({ get => \%GET, from_post => \%from_post });
