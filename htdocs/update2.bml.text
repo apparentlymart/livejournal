@@ -1,5 +1,9 @@
 ;; -*- coding: utf-8 -*-
 
+.actions.head.edit=Customize
+
+.actions.head.title=You can have more
+
 .options.head.edit=Edit (Customize)
 
 .options.head.title=Entry options
