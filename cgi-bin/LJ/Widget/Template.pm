@@ -1,5 +1,5 @@
 package LJ::Widget::Template;
-# base class for widget of any time (post / ajax / simple(render) ), using template engine
+# base class for widget of any type (post / ajax / simple(render) ), using template engine
 
 use strict;
 use base qw(LJ::Widget);
@@ -37,11 +37,13 @@ sub render_body {
         strict => 0,
     ) or die "Can't open template '$filename': $!";
 
+    # template object already contains 'lj_siteroot' and several same parameters, look LJ/HTML/Template.pm
+    # also it contains 'ml', 'ljuser', ... functions
+
     $template->param(
         is_remote_sup => LJ::SUP->is_remote_sup ? 1 : 0,
         errors => $class->error_list,
         form_auth => LJ::form_auth(),
-        siteroot => $LJ::SITEROOT,
     );
 
     $class->prepare_template_params($template, \%opts);
