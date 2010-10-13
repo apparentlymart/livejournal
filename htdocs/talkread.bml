@@ -450,6 +450,7 @@ body<=
         journal   => $u->{user},
         canAdmin  => LJ::can_manage($remote, $u) ? 1 : 0,
         remote    => $remote ? $remote->{user} : "",
+        is_s1     => 1,
     };
 
     my $output = {};

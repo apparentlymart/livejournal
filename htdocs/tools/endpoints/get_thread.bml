@@ -3,6 +3,8 @@
     use strict;
     use LJ::Talk;
 
+    BML::set_language_scope('/talkread.bml');
+
     sub error
     {
         return LJ::JSON->to_json({ error => $_[0] });
@@ -156,6 +158,8 @@
             LJ_cmtinfo        => $LJ_cmtinfo,
             showmultiform     => $showmultiform,
             show_collapselink => 1,
+            get_root_only     => $GET{single} ? 1 : 0,
+            show_link_all     => 1,
         },
         $output
     );

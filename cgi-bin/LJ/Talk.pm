@@ -2242,7 +2242,7 @@ sub get_thread_html
         if ($post->{'state'} eq "D") ## LJSUP-6433
         {
             $html->{header} = $comment_header->();
-            $html->{text}   = BML::ml('.deletepost');
+            $html->{text}   = BML::ml('.deletedpost');
             $html->{footer} = $comment_footer->();
         }
         elsif ($post->{'state'} eq "S" && !$post->{'_loaded'} && !$post->{'_show'})
@@ -2453,7 +2453,7 @@ sub get_thread_html
                 {
                     my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine, $formatlight);
                     if ($post->{'state'} eq 'F') {
-                        $text .= "(" . BML::ml('talk.frozen') . ")";
+                        $text .= "(" . BML::ml('talk.frozen') . ") ";
                     }
                     elsif ($remote) {
                         # See if we want to force them to change their password
@@ -2479,13 +2479,13 @@ sub get_thread_html
                 my $parentid = $post->{'parenttalkid'} || $post->{'parenttalkid_actual'};
                 if ($parentid != 0) {
                     my $dpid = $parentid * 256 + $anum;
-                    $text .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid'>" . BML::ml('talk.parentlink') . "</a>)";
+                    $text .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid'>" . BML::ml('talk.parentlink') . "</a>) ";
                 }
    
                 my $thread_url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
                 my $has_closed_children = 0;
                 if ($post->{'children'} && @{$post->{'children'}}) {
-                    $text .= "(<a href='$thread_url'>" . BML::ml('talk.threadlink') . "</a>)";
+                    $text .= "(<a href='$thread_url'>" . BML::ml('talk.threadlink') . "</a>) ";
 
                     if ($thread_expander_func &&
                         (grep {! $_->{_loaded} and !($_->{state} eq "D")} @{$post->{'children'}})) {
@@ -2493,12 +2493,21 @@ sub get_thread_html
                     }
                 }
 
+                $LJci->{has_link} = ($has_closed_children ? 1 : 0);
+
+                my $link = undef;
+                if (exists $input->{show_link_all}) {
+                    $link = 'all';
+                }
+                elsif ($has_closed_children) {
+                    $link = 'expand';
+                }
+
                 $text .= $thread_expander_func->({
                     thread_id            => $dtid,
                     thread_url           => $thread_url,
                     thread_loaded        => 1,
-                    thread_show_collapse => $input->{show_collapselink},
-                    has_closed_children  => $has_closed_children,
+                    thread_show_link     => $link,
                 }) if $thread_expander_func;
 
                 $text .= "</font></p>";
@@ -2509,13 +2518,14 @@ sub get_thread_html
             }
             else {
                 # link to message
+                $LJci->{has_link} = 1;
                     
                 $html->{header} = $comment_header->();
                 $html->{footer} = $comment_footer->();
 
                 my $thread_url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
                 
-                my $text = "<a href='$thread_url'>" . LJ::ehtml($post->{'subject'} || BML::ml('.nosubject')) . "</a> - $user, <i>$datepost</i>";
+                my $text = "<a href='$thread_url'>" . LJ::ehtml($post->{'subject'} || BML::ml('.nosubject')) . "</a> - $user, <i>$datepost</i> ";
 
                 $text .= $thread_expander_func->({
                     thread_id            => $dtid,
@@ -2539,7 +2549,7 @@ sub get_thread_html
             html   => $html,
         };
 
-        if ($post->{'children'}) {
+        if (!$input->{get_root_only} && $post->{'children'}) {
             foreach my $childpost (@{$post->{'children'}}) {
                 push @{$LJci->{rc}}, $childpost->{talkid} * 256 + $anum;
                 $self->($self, $childpost, $depth + 1);
