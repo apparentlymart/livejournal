@@ -1441,7 +1441,7 @@ EOC
 register_tablecreate("ratelist", <<'EOC');
 CREATE TABLE ratelist
 (
- rlid TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+ rlid INT UNSIGNED NOT NULL AUTO_INCREMENT,
  name  varchar(50) not null,
  des varchar(255) not null,
  PRIMARY KEY (rlid),
@@ -4195,6 +4195,13 @@ register_alter(sub {
                  "ADD countries varchar(255) default NULL, " .
                  "ADD accounts smallint(5) unsigned NOT NULL default '0'");
     }
+
+    if (column_type("ratelist", "rlid") =~ /tinyint/i) {
+        do_alter("ratelist",
+                 "ALTER TABLE ratelist " .
+                 "MODIFY rlid INT UNSIGNED NOT NULL AUTO_INCREMENT");
+    }
+
 
 });
 
