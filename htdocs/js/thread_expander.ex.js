@@ -75,7 +75,7 @@ ExpanderEx.prototype.expandThread = function(json){
             continue; //this comment is already expanded
         ExpanderEx.Collection[ json[ i ].thread ] = jQuery( '#ljcmtxt' + json[ i ].thread ).html();
         jQuery( '#ljcmtxt' + json[ i ].thread )
-            .html( json[ i ].html );
+            .html( ExpanderEx.prepareCommentBlock( json[ i ].html, json[ i ].thread, false ) );
 
         this.initCommentBlock( jQuery( '#ljcmt' + json[ i ].thread )[0], json[ i ].thread );
         LJ_cmtinfo[ json[ i ].thread ].parent = this.id;
@@ -84,11 +84,13 @@ ExpanderEx.prototype.expandThread = function(json){
     return true;
 }
 
-ExpanderEx.prototype.collapseThread = function(){
-    var ids = [ this.id ].concat( LJ_cmtinfo[ this.id ].rc );
+ExpanderEx.prototype.collapseThread = function( id ){
+    var threadId = id || this.id;
+    this.collapseBlock( threadId );
 
-    for( var i = 0; i < ids.length; ++i )
-        this.collapseBlock( ids[ i ] );
+    var children = LJ_cmtinfo[ threadId ].rc;
+    for( var i = 0; i < children.length; ++i )
+        this.collapseThread( children[ i ] );
 
     //do not call the code, because we do not know folding logic in all cases
     //this.updateParentState();
@@ -115,11 +117,16 @@ ExpanderEx.prototype.updateParentState = function()
 
 ExpanderEx.prototype.collapseBlock =  function( id )
 {
-    if( id in ExpanderEx.Collection ){
+    var expander = this;
+    function updateBlock(id, html)
+    {
         var el_ =jQuery( '#ljcmtxt' + id )
-            .html( ExpanderEx.Collection[ id ] )[0];
+            .html( html )[0];
+        expander.initCommentBlock( el_, id, true );
+    }
 
-        this.initCommentBlock( el_, id, true );
+    if( id in ExpanderEx.Collection ){
+        updateBlock( id, ExpanderEx.Collection[ id ] );
         delete ExpanderEx.Collection[ id ];
     }
 }
@@ -157,14 +164,25 @@ ExpanderEx.prototype.get = function(){
     }
     this.loadingStateOn();
 
-    var postid = this.url.match(/\/(\d+).html/)[1];
-    var url = '/__rpc_get_thread?journal=' + Site.currentJournal +'&itemid=' + postid + '&thread=' + this.id;
-
-
     var obj = this;
-    jQuery.get( url, function(result) {
-            obj.expandThread(result);
-    }, 'json' );
+    getThreadJSON( this.id, function(result) {
+        obj.expandThread(result);
+    }, false, false, true );
 
     return true;
+}
+
+ExpanderEx.prepareCommentBlock = function(html, id, showExpand){
+    var block = jQuery("<div>" + html + "</div>"),
+        selector = '';
+
+    if( LJ_cmtinfo[ id ].has_link > 0 )
+        selector = '#' + ((showExpand ? 'collapse_' : 'expand_' ) + id);
+    else
+        selector = '#collapse_' + id + ', #expand_'  + id
+
+    block.find(selector)
+        .css('display', 'none');
+
+    return block.html();
 }

@@ -186,17 +186,15 @@ function deleteComment (ditemid, isS1) {
 
 function removeComment (ditemid, killChildren, isS1) {
     if(isS1){
-        var threadId = ditemid,
-            postid = location.href.match(/\/(\d+).html/)[1];
-            url = '/__rpc_get_thread?journal=' + Site.currentJournal +'&itemid=' + postid + '&thread=' + threadId + '&single=1';
+		var threadId = dItemid;
 
-        jQuery.get( url, function(result) {
-            for( var i = 0; i < result.length; ++i ){
-                if( LJ_cmtinfo[ result[i].thread ].full ){
-                    jQuery("#ljcmtxt" + result[i].thread).html( result[i].html );
-                }
-            }
-        }, 'json' );
+		getThreadJSON(threadId, function(result) {
+			for( var i = 0; i < result.length; ++i ){
+				if( LJ_cmtinfo[ result[i].thread ].full ){
+					jQuery("#ljcmtxt" + result[i].thread).html( result[i].html );
+				}
+			}
+		});
     }
     else {
         var todel = document.getElementById("ljcmt" + ditemid);
@@ -405,7 +403,7 @@ function createModerationFunction(ae, dItemid, isS1)
 			pos = { x: e.pageX, y: e.pageY },
 			postUrl = ae.href.replace(/.+talkscreen\.bml/, LiveJournal.getAjaxUrl('talkscreen')),
 			hourglass = jQuery(e).hourglass()[0];
-		
+
 		var xhr = jQuery.post(postUrl + '&jsmode=1',
 			{
 				confirm: 'Y',
@@ -448,21 +446,39 @@ function createModerationFunction(ae, dItemid, isS1)
 						return;
 					}
 				}
-				
+
 				if(isS1){
 					var threadId = dItemid,
-						postid = location.href.match(/\/(\d+).html/)[1];
-						url = '/__rpc_get_thread?journal=' + Site.currentJournal +'&itemid=' + postid + '&thread=' + threadId;
-
-					jQuery.get( url, function(result) {
-						for( var i = 0; i < result.length; ++i ){
-							if( LJ_cmtinfo[ result[i].thread ].full ){
-								setupAjax( jQuery("#ljcmtxt" + result[i].thread).html( result[i].html )[0], isS1 );
+						threadExpanded = !!(LJ_cmtinfo[ threadId ].oldvars && LJ_cmtinfo[ threadId ].full);
+						populateComments = function(result){
+							for( var i = 0; i < result.length; ++i ){
+								if( LJ_cmtinfo[ result[i].thread ].full ){
+									setupAjax(
+										jQuery("#ljcmtxt" + result[i].thread).html(
+											ExpanderEx.prepareCommentBlock(
+													result[i].html,
+													result[ i ].thread,
+													!( 'oldvars' in LJ_cmtinfo[ result[i].thread ] )
+											)
+										)[0], isS1 );
+								}
 							}
+							hourglass.hide();
+							poofAt(pos);
+						};
+
+					getThreadJSON(threadId, function(result) {
+						//if comment is expanded we need to fetch it's collapsed state additionally
+						if( threadExpanded )
+						{
+							getThreadJSON( threadId, function(result2){
+								ExpanderEx.Collection[ threadId ] = ExpanderEx.prepareCommentBlock( result2[0].html, threadId, true );
+								populateComments( result );
+							}, true, true );
 						}
-						hourglass.hide();
-						poofAt(pos);
-					}, 'json' );
+						else
+							populateComments( result );
+					}, false, !threadExpanded);
 				}
 				else {
 					// modified jQuery.fn.load
@@ -535,7 +551,20 @@ function setupAjax (node, isS1) {
     }
 }
 
+function getThreadJSON(threadId, success, getSingle)
+{
+    var postid = location.href.match(/\/(\d+).html/)[1],
+        params = [
+            'journal=' + Site.currentJournal,
+            'itemid=' + postid,
+            'thread=' + threadId
+        ];
+    if( getSingle)
+        params.push( 'single=1' );
 
+    var url = '/__rpc_get_thread?' + params.join( '&' );
+    jQuery.get( url, success, 'json' );
+}
 
 jQuery(function(){setupAjax( false, ("is_s1" in LJ_cmtinfo ) )});
 
