@@ -6,6 +6,7 @@ use Carp qw(croak);
 
 # they are not widgets, they are perl modules
 use LJ::Widget::UpdateJournal::TextBlock; # subject + body, tags and userpic group of elements
+use LJ::Widget::UpdateJournal::OptionsBlock; # all entry options (properties)
 
 #sub need_res { qw( stc/widgets/examplepostwidget.css ) }
 
@@ -20,6 +21,7 @@ sub prepare_template_params {
 
     # put all needed parameters in common template object
     LJ::Widget::UpdateJournal::TextBlock->prepare_template_params($template_obj, $opts);
+    LJ::Widget::UpdateJournal::OptionsBlock->prepare_template_params($template_obj, $opts);
 
     $template_obj->param(step => 1);
 
