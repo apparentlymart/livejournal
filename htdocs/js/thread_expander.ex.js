@@ -1,3 +1,8 @@
+/*
+ * ExpanderEx object is used in s1 style comment pages and provides
+ * ajax functionality to expand comments instead of loading iframe page as it is
+ * in old Expander
+ */
 ExpanderEx = function(){
     this.__caller__;    // <a> HTML element from where ExpanderEx was called
     this.url;           // full url of thread to be expanded
@@ -91,28 +96,6 @@ ExpanderEx.prototype.collapseThread = function( id ){
     var children = LJ_cmtinfo[ threadId ].rc;
     for( var i = 0; i < children.length; ++i )
         this.collapseThread( children[ i ] );
-
-    //do not call the code, because we do not know folding logic in all cases
-    //this.updateParentState();
-}
-
-ExpanderEx.prototype.updateParentState = function()
-{
-    //if all children were collapsed manually, then we have to change parent
-    //comment state to collapsed
-    var parentId = LJ_cmtinfo[ this.id ].parent;
-    if(!parentId)
-        return;
-
-    var allCollapsed = true,
-        children = LJ_cmtinfo[ parentId ].rc;
-    for( var i = 0; i < children.length; ++i )
-        if( LJ_cmtinfo[ children[ i ] ].expanded == 1 ){
-            allCollapsed = false;
-            break;
-        }
-
-    allCollapsed && this.collapseBlock( parentId );
 }
 
 ExpanderEx.prototype.collapseBlock =  function( id )
@@ -172,6 +155,8 @@ ExpanderEx.prototype.get = function(){
     return true;
 }
 
+//toggle visibility of expand and collapse links, if server returns
+//html with both of them ( with every ajax request)
 ExpanderEx.prepareCommentBlock = function(html, id, showExpand){
     var block = jQuery("<div>" + html + "</div>"),
         selector = '';

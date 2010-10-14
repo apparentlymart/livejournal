@@ -186,13 +186,13 @@ function deleteComment (ditemid, isS1) {
 
 function removeComment (ditemid, killChildren, isS1) {
     if(isS1){
-		var threadId = dItemid;
+		var threadId = ditemid;
 
 		getThreadJSON(threadId, function(result) {
 			for( var i = 0; i < result.length; ++i ){
-				if( LJ_cmtinfo[ result[i].thread ].full ){
-					jQuery("#ljcmtxt" + result[i].thread).html( result[i].html );
-				}
+				jQuery("#ljcmtxt" + result[i].thread).html( result[i].html );
+				if( result[i].thread in ExpanderEx.Collection)
+					ExpanderEx.Collection[ result[i].thread ] = result[i].html;
 			}
 		});
     }
@@ -557,7 +557,8 @@ function getThreadJSON(threadId, success, getSingle)
         params = [
             'journal=' + Site.currentJournal,
             'itemid=' + postid,
-            'thread=' + threadId
+            'thread=' + threadId,
+            'depth=' + LJ_cmtinfo[ threadId ].depth
         ];
     if( getSingle)
         params.push( 'single=1' );
