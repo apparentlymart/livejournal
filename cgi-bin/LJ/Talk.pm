@@ -1071,6 +1071,11 @@ sub fixup_logitem_replycount {
 #   userpicref -- hashref to load userpics into, or undef to
 #                 not load them.
 #   userref -- hashref to load users into, keyed by userid
+#   init_comobj -- init or not LJ::Comment object for every loaded raw data of a comment.
+#                  by default it is On (true), but in this case it produces a huge overhead:
+#                       LJ::Comment class stores in memory all comment instances and when load 
+#                       property for any of a comment LJ::Comment loads all properties for ALL inited comments.
+#                  (!) provide 'init_comobj => 0' wherever it is possible
 #
 # returns:
 #   array of hashrefs containing keys:
