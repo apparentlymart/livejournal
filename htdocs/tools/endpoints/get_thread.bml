@@ -160,6 +160,7 @@
             show_collapselink => 1,
             get_root_only     => $GET{single} ? 1 : 0,
             show_link_all     => 1,
+            depth             => $GET{depth} || 0,
         },
         $output
     );

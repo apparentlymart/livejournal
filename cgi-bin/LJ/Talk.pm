@@ -2109,6 +2109,35 @@ sub get_replycount {
     return $count;
 }
 
+# <LJFUNC>
+# name: LJ::Talk::get_thread_html
+# input: $u - LJ::User object of viewing journal;
+#        $up - LJ::User object of user posted journal item;
+#        $entry - LJ::Entry object of viewing post;
+#        $thread - thread id;
+#        $input - hashref of input parameters:
+#            viewsome
+#            viewall
+#            view
+#            page
+#            expand        : 'all'
+#            LJ_cmtinfo    : hashref, where to put loaded comments data;
+#            format        : 'light'
+#            style         : 'mine'
+#            showmultiform
+#            nohtml
+#            show_link_all : if true, show both (Expand) and (Collapse) links;
+#            get_root_only : retrieve only root of requested thread subtree;
+#            depth         : initial depth of requested thread (0, if not specified);
+#        $output - hashref of output parameters:
+#            error
+#            page
+#            pages
+#            multiform_selects
+#
+# returns: Arrayref of hashrefs:
+# 
+# </LJFUNC>
 sub get_thread_html
 {
     my ($u, $up, $entry, $thread, $input, $output) = @_;
@@ -2190,7 +2219,7 @@ sub get_thread_html
         
         my $tid = $post->{'talkid'};
         my $dtid = $tid * 256 + $anum;
-        my $LJci = $LJ_cmtinfo->{$dtid} = { rc => [], u => '', full => $post->{_loaded} };
+        my $LJci = $LJ_cmtinfo->{$dtid} = { rc => [], u => '', full => $post->{_loaded}, depth => $depth };
 
         my $s2_datetime = $tz_remote ?
             LJ::S2::DateTime_tz($post->{'datepost_unix'}, $tz_remote) :
@@ -2531,7 +2560,6 @@ sub get_thread_html
                     thread_id            => $dtid,
                     thread_url           => $thread_url,
                     thread_loaded        => 0,
-                    thread_show_collapse => $input->{show_collapselink},
                     has_closed_children  => undef,
                 }) if $thread_expander_func;
 
@@ -2557,7 +2585,7 @@ sub get_thread_html
         }
     };
 
-    $recurse_post->($recurse_post, $_, 0) foreach @comments;
+    $recurse_post->($recurse_post, $_, $input->{depth} || 0) foreach @comments;
 
     return $comments;
 }
