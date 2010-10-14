@@ -469,7 +469,7 @@ function createModerationFunction(ae, dItemid, isS1)
 
 					getThreadJSON(threadId, function(result) {
 						//if comment is expanded we need to fetch it's collapsed state additionally
-						if( threadExpanded )
+						if( threadExpanded && LJ_cmtinfo[ threadId ].oldvars.full )
 						{
 							getThreadJSON( threadId, function(result2){
 								ExpanderEx.Collection[ threadId ] = ExpanderEx.prepareCommentBlock( result2[0].html, threadId, true );
