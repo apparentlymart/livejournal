@@ -1461,13 +1461,10 @@ sub res_includes {
         }
     };
 
-    ## To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript. 
-    ##  (C) http://code.google.com/speed/page-speed/
-    ##
-    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
-    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>");
     $tags->("common_js", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
     $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
+    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
+    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>");
     $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>");
     $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>");
 
