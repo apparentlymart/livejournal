@@ -2162,14 +2162,15 @@ sub get_thread_html
     my %userpics;
 
     my $opts = {
-        flat       => $flat_mode,
-        thread     => $thread,
-        page       => $input->{page},
-        view       => $view_num,
-        userpicref => \%userpics,
-        userref    => \%user,
-        up         => $up,
-        viewall    => $viewall,
+        flat        => $flat_mode,
+        thread      => $thread,
+        page        => $input->{page},
+        view        => $view_num,
+        userpicref  => \%userpics,
+        userref     => \%user,
+        up          => $up,
+        viewall     => $viewall,
+        init_comobj => 0,
     };
 
     ## Expand all comments on page
