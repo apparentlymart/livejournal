@@ -9,7 +9,7 @@ use LJ::ExtBlock;
 # Keys to get data from ext_block
 my %keys = (
     'ontd_authors'      => { title => "widget.topusers.top5commenters.title",   order => 2 },
-    'ontd_commenters'   => { title => "widget.topusers.top5posters.title",      order => 2 },
+    #'ontd_commenters'   => { title => "widget.topusers.top5posters.title",      order => 2 },
 );
 
 # 0 - get data from LJ::ExtBlock
@@ -81,43 +81,25 @@ sub render_body {
     my @keys = sort { $keys{$a}->{'order'} <=> $keys{$b}->{'order'} } keys %keys;
 
     # Head of whole widget
-    $ret .= "<table><tr>";
+    $ret .= "<div class='w-topusers w-ontd'><div class='w-head'><h2><span class='w-head-in'>". $class->ml('widget.topusers.spotlight.title') ."</span></h2>
+    <i class='w-head-corner'></i></div><div class='w-content'>";
 
     foreach my $key (@keys) {
-
-        # Start a column
-        $ret .= "<td>";
-
-        # Header of widget column
-        $ret .= "<ul class=\"top-users-widget\"><dt>".$keys{$key}->{'title'}."</dt><dd>";
-
-        # Header of table columns
-        $ret .= '<li>' .
-                    BML::ml('widget.topusers.head.nr') .
-                    ' | ' .
-                    BML::ml('widget.topusers.head.users') .
-                '</li>';
+	
+		# Header of widget column
+        $ret .= "<h3>".$keys{$key}->{'title'}."</h3>";
 
         my $index = 1;
+		$ret .= "<ol>";
 
         foreach my $data (@{$keys{$key}->{'data'}}) {
 
             # Element begin
             $ret .= "<li>";
 
-            # 1. Nr
-            $ret .= "$index | ";
-
-            # 2. Userpic or paceholder
-            if ($data->{'userpic'}) {
-                $ret .= "<img src='" . $data->{'userpic'} . "' />";
-            } else {
-                $ret .= "--- No user pic ---";
-            }
-
-            # 3. User info
-            $ret .= " | ";
+            # User info
             $ret .= $data->{'display'};
+			$ret .= "<span class='num'>" . $data->{'count'} . "</span>";
 
             # Element end
             $ret .= "</li>";
@@ -126,12 +108,11 @@ sub render_body {
         }
 
         # Footer of coumn
-        $ret .= "</dd></ul>";
-        $ret .= "</td>";
+        $ret .= "</li></ol>";
     }
 
     # Footer of whole widget
-    $ret .= "</tr></table>";
+    $ret .= "</div></div>";
 
     return $ret;
 }
