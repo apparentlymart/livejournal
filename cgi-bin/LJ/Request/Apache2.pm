@@ -376,8 +376,11 @@ sub LJ::Request::content_encoding {
 sub LJ::Request::send_http_header {
     my $class = shift;
     # http://perl.apache.org/docs/2.0/user/porting/compat.html#C____r_E_gt_send_http_header___
-    # This method is not needed in 2.0,
-    1
+    # This method is not needed to be called in 2.0,
+    # 
+    # http://perl.apache.org/docs/2.0/user/coding/coding.html#Forcing_HTTP_Response_Headers_Out
+    $class->r()->rflush;
+
 }
 
 
