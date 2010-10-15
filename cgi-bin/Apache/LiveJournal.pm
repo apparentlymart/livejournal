@@ -301,6 +301,10 @@ sub trans
     LJ::procnotify_check();
     S2::set_domain('LJ');
 
+    # add server mark
+    my ($aws_id) = $LJ::HARDWARE_SERVER_NAME =~ /\-(.+)$/;
+    LJ::Request->header_out("X-AWS-Id" => $aws_id || 'unknown');
+
     my $lang = $LJ::DEFAULT_LANG || $LJ::LANGS[0];
     BML::set_language($lang, \&LJ::Lang::get_text);
 
@@ -1573,7 +1577,6 @@ sub journal_content
     my $user = $RQ{'user'};
 
     my $html = LJ::make_journal($user, $RQ{'mode'}, $remote, $opts);
-
     # Allow to add extra http-header or even modify html
     LJ::run_hooks("after_journal_content_created", $opts, \$html);
 
@@ -1790,8 +1793,8 @@ sub journal_content
     LJ::Request->header_out('Vary', 'Accept-Encoding, ETag');
 
     # add server mark
-    my ($aws_id) = $LJ::HARDWARE_SERVER_NAME =~ /\-(.+)$/;
-    LJ::Request->header_out("X-AWS-Id" => $aws_id || 'unknown');
+    #my ($aws_id) = $LJ::HARDWARE_SERVER_NAME =~ /\-(.+)$/;
+    #LJ::Request->header_out("X-AWS-Id" => $aws_id || 'unknown');
 
     LJ::Request->header_out("Content-length", $length);
     LJ::Request->send_http_header();
