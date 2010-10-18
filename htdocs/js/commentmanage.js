@@ -563,7 +563,7 @@ function getThreadJSON(threadId, success, getSingle)
     if( getSingle)
         params.push( 'single=1' );
 
-    var url = '/__rpc_get_thread?' + params.join( '&' );
+    var url = LiveJournal.getAjaxUrl('get_thread') + '?' + params.join( '&' );
     jQuery.get( url, success, 'json' );
 }
 
