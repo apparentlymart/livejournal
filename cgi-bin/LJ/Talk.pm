@@ -1076,6 +1076,8 @@ sub fixup_logitem_replycount {
 #                       LJ::Comment class stores in memory all comment instances and when load 
 #                       property for any of a comment LJ::Comment loads all properties for ALL inited comments.
 #                  (!) provide 'init_comobj => 0' wherever it is possible
+#   strict_page_size -- under some circumstances page size (defined in 'page_size' option') may be changed.
+#                       To disable this unexpected changes set this option to true value.
 #
 # returns:
 #   array of hashrefs containing keys:
@@ -1178,7 +1180,9 @@ sub load_comments
     # we let the page size initially get bigger than normal for awhile,
     # but if it passes threading_point, then everything's in page_size
     # chunks:
-    $page_size = $threading_point if $post_count < $threading_point;
+    unless ($opts->{strict_page_size}){ ## strict_page_size -- disables recalculation of the page size.
+        $page_size = $threading_point if $post_count < $threading_point;
+    }
 
     my $top_replies = $thread ? 1 : scalar(@{$children{$thread}});
     my $pages = int($top_replies / $page_size);
