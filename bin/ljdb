@@ -1,26 +1,9 @@
 #!/usr/bin/perl
-#
-#  ljdb          connects to master
-#  ljdb --help
-#  ljdb --user=bob
-#  ljdb --user=bob --slave
-#  ljdb --role=slave
-#  ljdb --role=slow
-
 use strict;
+
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljdb.pl';
-
 use Getopt::Long;
-my ($user, $role, $inactive, $help);
-usage() unless
-    GetOptions(
-	       'help' => \$help,
-	       'inactive' => \$inactive,
-	       'role=s' => \$role,
-	       'user=s' => \$user,
-	       );
-usage() if $help;
 
 sub usage {
     die "Usage:
@@ -32,44 +15,70 @@ sub usage {
    ljdb --user=bob --inactive
    ljdb --role=slave
    ljdb --role=slow
+   ljdb --cmd-out          (dumps the mysql command on STDOUT)
+   ljdb --exit             (exits.  does not execute the mysql command)
    ljdb --role=cluster3a
 ";
 
 }
 
-if (@ARGV) {
-    if ($ARGV[0] =~ /^\w{1,15}$/) {
-	$user = shift;
-	$inactive = 1;
-    } else {
-	usage();
-    }
-}
-	
-usage() if $role && ($user || $inactive);
+my %options;
+usage() unless
+    GetOptions(
+               'help'        => \($options{'help'}= 0),
+               'inactive'    => \($options{'inactive'}= 0),
+               'cmd-out'     => \($options{'cmd-out'}= 0),
+               'exit'        => \($options{'exit'}= 0),
+               'role=s'      => \($options{'role'}= ''),
+               'execute=s'   => \($options{'execute'}= ''),
+               'user=s'      => \($options{'user'}= ''),
+	       );
+my ($user, $role, $inactive)=
+    ($options{'user'}, $options{'role'}, $options{'inactive'});
 
+usage() if $options{'help'};
+
+##  check command line args and options for validity
+##  remember: ljdb bob                (implies --user=bob --inactive)
+$user= $ARGV[0] if defined($ARGV[0]);
+if (defined($ARGV[0])) {
+    $user= $ARGV[0];
+    $inactive=1;
+}
+
+if ($user &&  $user =~ /^\w{1,15}$/) {
+    print "Bogus username '$user' does not match validation regex";
+    usage();
+}
+
+##usage() if $role && ($user || $inactive);
+if $role && ($user || $inactive) {
+    print "--role option conflicts.  Cannot be specified with --user or command line user" if ($user);
+    print "--role option conflicts.  Cannot be specified with --inactive or command line user" if ($inactive);
+    usage();
+}
 print "For more usage options, see: ljdb --help\n";
 
+
+##  command line is OK.  Let's get some shit done.
 if (!$role && $user) {
-    die "Bogus username" unless $user =~ /^\w{1,15}$/;
     my $dbs = LJ::DB::dbh_by_role('slave', 'master');
     my ($userid, $cid) = $dbs->selectrow_array('SELECT userid, clusterid FROM user WHERE user = ?', undef, $user);
-    die "no such user\n" unless $userid && $cid;
+    die "no such user as '$user'\n" unless $userid && $cid;
     $role = "cluster" . $cid;
-
     print "user: $user / userid: $userid / clusterid: $cid";
 
     if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$cid}) {
-	print " / active=$ab\n";
-	if ($inactive) {
-	    $role .= "b" if $ab eq 'a';
-	    $role .= "a" if $ab eq 'b';
-	} else {
-	    $role .= $ab;
-	}
+        print " / active=$ab\n";
+        if ($inactive) {
+            $role .= "b" if $ab eq 'a';
+            $role .= "a" if $ab eq 'b';
+        } else {
+            $role .= $ab;
+        }
     } else {
-	# type must be master/slave
-	$role .= "slave" if $inactive && grep { $_->{role}{"${role}slave"} } values %LJ::DBINFO;
+        # type must be master/slave
+        $role .= "slave" if $inactive && grep { $_->{role}{"${role}slave"} } values %LJ::DBINFO;
     }
     print "\n";
 }
@@ -84,28 +93,32 @@ my $db;
 my $dbname;
 foreach my $key (keys %LJ::DBINFO) {
     my $rec = $LJ::DBINFO{$key};
-    if ($key eq "master") { $rec->{role}{master} = 1; };
+    if ($key eq "master") {
+        $rec->{role}{master} = 1;
+    }
     if ($rec->{role}{$role}) {
-	$dbname = $key;
-	$db = $rec;
-	last;
+        $dbname = $key;
+        $db = $rec;
+        last;
     }
 }
-
 die "no database record for role $role\n" unless $db;
 
 if ($db->{_fdsn}) {
     $db->{_fdsn} =~ /^DBI:mysql:(\w+):host=(.+?)\|(\w+)\|(.+)/
-	or die "Bogus _fdsn format for $dbname: $db->{_fdsn}\n";
+        or die "Bogus _fdsn format for $dbname: $db->{_fdsn}\n";
     print "found: $1, $2, $3, $4\n";
     $db->{dbname} = $1;
     $db->{host} = $2;
     $db->{user} = $3;
     $db->{pass} = $4;
 }
-
 my $database = $db->{dbname} || "livejournal";
-
 print "...connecting to $dbname, $db->{host}, db: $database, user: $db->{user}\n\n";
 
-exec("mysql", "--host=$db->{host}", "--user=$db->{user}", "--password=$db->{pass}", "-A", $database);
+my $eArg= $options{'execute'} ? "--execute='" . $options{'execute'} . "'" : '';
+my $execStr= "mysql --host=$db->{host}  --user=$db->{user} $eArg --password=$db->{pass}  -A  $database";
+print "$execStr\n" if $options{'cmd-out'};
+
+exec("$execStr") unless $options{'exit'};
+exit;
