@@ -2339,7 +2339,7 @@ sub get_thread_html
                 $html->{header} = $comment_header->("width='100%' class='talk-comment'");
                 $html->{footer} = $comment_footer->();
                     
-                my $text = "<div id='cmtbar$dtid' style='background-color:$bgcolor'>";
+                my $text = "<div id='cmtbar$dtid' class='talk-comment-head' style='background-color:$bgcolor'>";
 
                 if (my $picid = $post->{'picid'}) {
                     my $alt = $pu->{'name'};
