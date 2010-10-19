@@ -11,6 +11,7 @@ sub usage {
    ljdb                    (connects to master)
    ljdb bob                (implies --user=bob --inactive)
    ljdb --help
+   ljdb --uid=123456       (if both of user and uid are given, user takes precedence)
    ljdb --user=bob
    ljdb --user=bob --inactive
    ljdb --role=slave
@@ -31,12 +32,15 @@ usage() unless
                'exit'        => \($options{'exit'}= 0),
                'role=s'      => \($options{'role'}= ''),
                'execute=s'   => \($options{'execute'}= ''),
+               'uid=s'       => \($options{'uid'}= ''),
                'user=s'      => \($options{'user'}= ''),
 	       );
-my ($user, $role, $inactive)=
-    ($options{'user'}, $options{'role'}, $options{'inactive'});
-
 usage() if $options{'help'};
+
+my ($user, $uid, $role, $inactive)=
+    ($options{'user'}, $options{'uid'}, $options{'role'}, $options{'inactive'});
+
+$uid= '' if ($user && $uid);
 
 ##  check command line args and options for validity
 ##  remember: ljdb bob                (implies --user=bob --inactive)
@@ -46,13 +50,14 @@ if (defined($ARGV[0])) {
     $inactive=1;
 }
 
-if ($user &&  $user =~ /^\w{1,15}$/) {
+if ($user &&  $user !~ /^\w{1,15}$/) {
     print "Bogus username '$user' does not match validation regex";
     usage();
 }
 
 ##usage() if $role && ($user || $inactive);
-if $role && ($user || $inactive) {
+if ($role && ($user || $inactive)) {
+    print "--role option conflicts.  Cannot be specified with --uid" if ($uid);
     print "--role option conflicts.  Cannot be specified with --user or command line user" if ($user);
     print "--role option conflicts.  Cannot be specified with --inactive or command line user" if ($inactive);
     usage();
@@ -61,9 +66,17 @@ print "For more usage options, see: ljdb --help\n";
 
 
 ##  command line is OK.  Let's get some shit done.
-if (!$role && $user) {
+if (!$role && ($user || $uid)) {
     my $dbs = LJ::DB::dbh_by_role('slave', 'master');
-    my ($userid, $cid) = $dbs->selectrow_array('SELECT userid, clusterid FROM user WHERE user = ?', undef, $user);
+
+    my $sqlArg= $user;
+    my $whereClause= 'WHERE user= ?';
+    if ($uid) {
+        $sqlArg= $uid;
+        $whereClause= 'WHERE userid= ?';
+    }
+
+    my ($userid, $cid) = $dbs->selectrow_array("SELECT userid, clusterid FROM user $whereClause", undef, $sqlArg);
     die "no such user as '$user'\n" unless $userid && $cid;
     $role = "cluster" . $cid;
     print "user: $user / userid: $userid / clusterid: $cid";
