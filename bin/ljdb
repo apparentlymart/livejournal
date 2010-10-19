@@ -12,10 +12,12 @@ sub usage {
    ljdb bob                (implies --user=bob --inactive)
    ljdb --help
    ljdb --uid=123456       (if both of user and uid are given, user takes precedence)
+   ljdb --uid=123456 --inactive
    ljdb --user=bob
    ljdb --user=bob --inactive
    ljdb --role=slave
    ljdb --role=slow
+   ljdb --mysql-options [multiple]    extra options to be passe to mysql invocation
    ljdb --cmd-out          (dumps the mysql command on STDOUT)
    ljdb --exit             (exits.  does not execute the mysql command)
    ljdb --role=cluster3a
@@ -26,15 +28,16 @@ sub usage {
 my %options;
 usage() unless
     GetOptions(
-               'help'        => \($options{'help'}= 0),
-               'inactive'    => \($options{'inactive'}= 0),
-               'cmd-out'     => \($options{'cmd-out'}= 0),
-               'exit'        => \($options{'exit'}= 0),
-               'role=s'      => \($options{'role'}= ''),
-               'execute=s'   => \($options{'execute'}= ''),
-               'uid=s'       => \($options{'uid'}= ''),
-               'user=s'      => \($options{'user'}= ''),
-	       );
+               'help'            => \($options{'help'}= 0),
+               'inactive'        => \($options{'inactive'}= 0),
+               'cmd-out'         => \($options{'cmd-out'}= 0),
+               'exit'            => \($options{'exit'}= 0),
+               'role=s'          => \($options{'role'}= ''),
+               'mysql-options=s' =>   $options{'mysql-options'}= [],
+               'execute=s'       => \($options{'execute'}= ''),
+               'uid=s'           => \($options{'uid'}= ''),
+               'user=s'          => \($options{'user'}= ''),
+              );
 usage() if $options{'help'};
 
 my ($user, $uid, $role, $inactive)=
@@ -129,8 +132,10 @@ if ($db->{_fdsn}) {
 my $database = $db->{dbname} || "livejournal";
 print "...connecting to $dbname, $db->{host}, db: $database, user: $db->{user}\n\n";
 
-my $eArg= $options{'execute'} ? "--execute='" . $options{'execute'} . "'" : '';
-my $execStr= "mysql --host=$db->{host}  --user=$db->{user} $eArg --password=$db->{pass}  -A  $database";
+my $eArg= $options{'execute'} ? "--execute=\"" . $options{'execute'} . "\"" : '';
+my $extraOptions= '-A ' . join(' ', @{$options{'mysql-options'}});
+
+my $execStr= "mysql --host=$db->{host}  --user=$db->{user} $eArg --password=$db->{pass}  $extraOptions $database";
 print "$execStr\n" if $options{'cmd-out'};
 
 exec("$execStr") unless $options{'exit'};
