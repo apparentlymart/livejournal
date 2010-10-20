@@ -105,6 +105,7 @@ sub render_body {
             $ret .= "</li>";
 
             $index++;
+            last if $index > 5;
         }
 
         # Footer of coumn
