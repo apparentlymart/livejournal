@@ -18,7 +18,7 @@
     <TMPL_ELSE>
         <td class="b-postform-icon"><img src='<TMPL_VAR lj_imgprefix>/userinfo.gif'  onclick='handleRadios(1);' /></td>
         <TMPL_IF remote_can_comment>
-            <td class="b-postform-radio"><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> /></td>
+            <td class="b-postform-radio"><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> tabindex='9' /></td>
             <td class="b-postform-data">
                 <label for='talkpostfromremote' class="i-postform-label"><TMPL_VAR ml_loggedin></label>
 

@@ -13,7 +13,7 @@
         <TMPL_ELSE>
             <tr valign='middle' id='oidlo' name='oidlo'>
             <td class="b-postform-icon"><img src='<TMPL_VAR lj_imgprefix>/openid-profile.gif' onclick='handleRadios(3);' /></td>
-            <td class="b-postform-radio"><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo' <TMPL_IF whocheck_openid>checked='checked'</TMPL_IF> /></td>
+            <td class="b-postform-radio"><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo' <TMPL_IF whocheck_openid>checked='checked'</TMPL_IF> tabindex="9" /></td>
             <td class="b-postform-data">
                 <label for='talkpostfromoidlo' onclick='handleRadios(5);return false;' class="i-postform-label"><b>OpenID</b></label>
                 <TMPL_VAR ml_willscreen>

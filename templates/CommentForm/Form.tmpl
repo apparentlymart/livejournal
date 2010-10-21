@@ -105,7 +105,7 @@
                     var defaultpicurl="<TMPL_VAR defaultpicurl>";
                 </script>
                 <TMPL_VAR ml_picturetouse>
-                <select name="prop_picture_keyword">
+                <select name="prop_picture_keyword" tabindex="11">
                     <TMPL_LOOP userpics>
                         <option value="<TMPL_VAR userpic_keyword>" <TMPL_IF userpic_selected>selected="selected"</TMPL_IF>><TMPL_VAR userpic_title></option>
                     </TMPL_LOOP>
@@ -113,7 +113,7 @@
                 <TMPL_VAR helpicon_userpics>
             </TMPL_IF>
 
-            &nbsp;&nbsp;<input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
+            &nbsp;&nbsp;<input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="12" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
 
             <TMPL_IF show_quick_quote>
                 <script type='text/javascript' language='JavaScript'>
@@ -152,7 +152,7 @@
                 if (document.getElementById && (document.getSelection || document.selection || window.getSelection)) {
                     // Opera clears the paste buffer before mouse events, useless here
                         if (navigator.userAgent.indexOf("Opera") == -1) {
-                            document.write('&nbsp;&nbsp;<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" />');
+                            document.write('&nbsp;&nbsp;<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" tabindex="13" />');
                         }
                 }
                 //-->
@@ -205,10 +205,10 @@
         />
         &nbsp;
         <input type='submit' name='submitpreview' onclick='return checkLength() && sendForm("postform", "username")'
-            value="<TMPL_VAR expr="ml('talk.btn.preview')">" />
+            value="<TMPL_VAR expr="ml('talk.btn.preview')">" tabindex="50" />
 
         <TMPL_IF show_spellcheck>
-            <input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' />
+            <input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' tabindex='51' />
             <label for='spellcheck'><TMPL_VAR expr="ml('talk.spellcheck')"></label>
         </TMPL_IF>
 
