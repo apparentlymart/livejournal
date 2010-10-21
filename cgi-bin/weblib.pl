@@ -727,12 +727,12 @@ sub create_qr_div {
             }
             @pics = sort { lc($a) cmp lc($b) } @pics;
             $qrhtml .= LJ::html_select({'name' => 'prop_picture_keyword',
-                                        'selected' => $userpic, 'id' => 'prop_picture_keyword' },
+                                        'selected' => $userpic, 'id' => 'prop_picture_keyword', 'tabindex' => '11' },
                                        ("", BML::ml('/talkpost.bml.opt.defpic'), map { ($_, $_) } @pics));
 
             # userpic browse button
             $qrhtml .= qq {
-                <input type="button" id="lj_userpicselect" value="Browse" onclick="QuickReply.userpicSelect()"/>
+                <input type="button" id="lj_userpicselect" value="Browse" onclick="QuickReply.userpicSelect()" tabindex="12" />
                 } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
             $qrhtml .= LJ::help_icon_html("userpics", " ");
@@ -779,11 +779,11 @@ sub create_qr_div {
                                  });
 
     $qrhtml .= "&nbsp;" . LJ::html_submit('submitmoreopts', BML::ml('/talkread.bml.button.more'),
-                                          { 'id' => 'submitmoreopts',
+                                          { 'id' => 'submitmoreopts', 'tabindex' => '31',
                                             'raw' => 'onclick="if (QuickReply.more()){ QuickReply.submit() }"'
                                             });
     if ($LJ::SPELLER) {
-        $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='do_spellcheck' /> <label for='do_spellcheck'>";
+        $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='do_spellcheck' tabindex='32' /> <label for='do_spellcheck'>";
         $qrhtml .= BML::ml('/talkread.bml.qr.spellcheck');
         $qrhtml .= "</label>";
     }
