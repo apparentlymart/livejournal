@@ -25,6 +25,8 @@ var Photos2HomepageWidget = {
 			this.imageHash[ i ] = new Image();
 			this.imageHash[ i ].src = photos2homepage[ i ].src;
 		}
+
+		this._updatePageButtons();
 	},
 
 	prev: function(){
@@ -40,8 +42,7 @@ var Photos2HomepageWidget = {
 	},
 
 	_updatePager: function(){
-		this.controls.prev[(this.page == 1)?"addClass":"removeClass"]('i-potd-nav-prev-dis');
-		this.controls.next[(this.page == this.pages)?"addClass":"removeClass"]('i-potd-nav-next-dis');
+		this._updatePageButtons();
 
 		var idx = 0;
 		for( var i = 0; i < this.ppCount; ++i ){
@@ -57,5 +58,10 @@ var Photos2HomepageWidget = {
 			else
 				this.images[ i ].li.style.display = 'none';
 		}
+	},
+
+	_updatePageButtons: function(){
+		this.controls.prev[(this.page == 1)?"addClass":"removeClass"]('i-potd-nav-prev-dis');
+		this.controls.next[(this.page == this.pages || !this.pages)?"addClass":"removeClass"]('i-potd-nav-next-dis');
 	}
 }
