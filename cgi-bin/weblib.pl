@@ -727,12 +727,12 @@ sub create_qr_div {
             }
             @pics = sort { lc($a) cmp lc($b) } @pics;
             $qrhtml .= LJ::html_select({'name' => 'prop_picture_keyword',
-                                        'selected' => $userpic, 'id' => 'prop_picture_keyword', 'tabindex' => '11' },
+                                        'selected' => $userpic, 'id' => 'prop_picture_keyword', 'tabindex' => '8' },
                                        ("", BML::ml('/talkpost.bml.opt.defpic'), map { ($_, $_) } @pics));
 
             # userpic browse button
             $qrhtml .= qq {
-                <input type="button" id="lj_userpicselect" value="Browse" onclick="QuickReply.userpicSelect()" tabindex="12" />
+                <input type="button" id="lj_userpicselect" value="Browse" onclick="QuickReply.userpicSelect()" tabindex="9" />
                 } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
             $qrhtml .= LJ::help_icon_html("userpics", " ");
