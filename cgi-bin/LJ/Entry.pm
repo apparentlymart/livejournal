@@ -1327,6 +1327,18 @@ sub friends_can_comment {
     return 0;
 }
 
+# mark/unmark entry in 'compressed' field to skip/include it in LJ::get_recent_items() call
+sub mark_suspended {
+    my $self = shift;
+    my $value = shift;
+
+    my $u = $self->journal;
+    $u->do("UPDATE log2 SET compressed=? WHERE journalid=? AND jitemid=?",
+           undef, $value, $self->journalid, $self->jitemid);
+    return undef if $u->err;
+    return 1;
+}
+
 package LJ;
 
 use Class::Autouse qw (

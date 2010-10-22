@@ -980,6 +980,7 @@ sub get_friend_items
 #           -- skip: items to skip
 #           -- itemshow: items to show
 #           -- viewall: if set, no security is used.
+#           -- viewsome: if set, suspended flag is not used
 #           -- dateformat: if "S2", uses S2's 'alldatepart' format.
 #           -- itemids: optional arrayref onto which itemids should be pushed
 #           -- posterid: optional, return (community) posts made by this poster only
@@ -1063,6 +1064,11 @@ sub get_recent_items
     } else {
         # not a friend?  only see public.
         $secwhere = "AND (security='public' OR posterid=$remoteid)";
+    }
+
+    my $suspend_where = "";
+    unless ($opts->{'viewall'} || $opts->{'viewsome'}) {
+        $suspend_where = "AND (compressed != 'S' OR posterid = $remoteid)";
     }
 
     # because LJ::get_friend_items needs rlogtime for sorting.
@@ -1182,7 +1188,7 @@ sub get_recent_items
                DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
                allowmask, eventtime, logtime
         FROM log2 USE INDEX ($sort_key)
-        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere
+        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere $suspend_where
         ORDER BY journalid, $sort_key
         $sql_limit
     };

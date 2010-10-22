@@ -92,6 +92,7 @@ sub RecentPage
         'clusterid' => $u->{'clusterid'},
         'clustersource' => 'slave',
         'viewall' => $viewall,
+        'viewsome' => $viewsome,
         'userid' => $u->{'userid'},
         'remote' => $remote,
         'itemshow' => $itemshow + 1,

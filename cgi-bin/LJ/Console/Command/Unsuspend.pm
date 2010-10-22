@@ -45,6 +45,8 @@ sub execute {
         $entry->set_prop( unsuspend_supportid => 0 )
             if $entry->prop("unsuspend_supportid");
 
+        $entry->mark_suspended('N'); # return in LJ::get_recent_items() call
+
         $reason = "entry: " . $entry->url . "; reason: $reason";
         LJ::statushistory_add($journal, $remote, "unsuspend", $reason);
         LJ::statushistory_add($poster, $remote, "unsuspend", $reason)
@@ -121,6 +123,10 @@ sub execute {
         my $res = $u->$method;
 
         $u->{statusvis} = $new_status;
+
+        my $job = TheSchwartz::Job->new_from_array("LJ::Worker::MarkSuspendedEntries::unmark", { userid => $u->userid });
+        my $sclient = LJ::theschwartz();
+        $sclient->insert_jobs($job) if $sclient and $job and LJ::is_enabled('mark_suspended_accounts');
 
         LJ::statushistory_add($u, $remote, "unsuspend", $reason);
         eval { $u->fb_push };

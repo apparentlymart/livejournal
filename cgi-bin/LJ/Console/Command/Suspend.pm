@@ -51,6 +51,7 @@ sub execute {
             if $entry->is_suspended;
 
         $entry->set_prop( statusvis => "S" );
+        $entry->mark_suspended('S'); # skip in LJ::get_recent_items() call
 
         $reason = "entry: " . $entry->url . "; reason: $reason";
         LJ::statushistory_add($journal, $remote, "suspend", $reason);
@@ -104,6 +105,10 @@ sub execute {
         my $err;
         $self->error($err) 
             unless $u->set_suspended($remote, $reason, \$err);
+
+        my $job = TheSchwartz::Job->new_from_array("LJ::Worker::MarkSuspendedEntries::mark", { userid => $u->userid });
+        my $sclient = LJ::theschwartz();
+        $sclient->insert_jobs($job) if $sclient and $job and LJ::is_enabled('mark_suspended_accounts');
 
         $self->print("User '$username' suspended.");
     }
