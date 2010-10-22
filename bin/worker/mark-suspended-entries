@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+require 'ljprotocol.pl';
+require 'ljlang.pl';
+
+package LJ::NewWorker::TheSchwartz::MarkSuspendedEntries;
+use base 'LJ::NewWorker::TheSchwartz';
+sub capabilities { qw/LJ::Worker::MarkSuspendedEntries::mark LJ::Worker::MarkSuspendedEntries::unmark/ };
+
+__PACKAGE__->start;
+
+package LJ::Worker::MarkSuspendedEntries::mark;
+use base 'TheSchwartz::Worker';
+
+sub work {
+    my ($class, $job) = @_;
+    my $args = $job->arg;
+    my $userid = $args->{userid};
+
+    foreach my $cid (@LJ::CLUSTERS) {
+        my $dbh = LJ::get_cluster_master($cid);
+        return unless $dbh;
+
+        $dbh->do("UPDATE log2 SET compressed='S' WHERE posterid=?", undef, $userid);
+    }
+
+    $job->completed;
+}
+
+package LJ::Worker::MarkSuspendedEntries::unmark;
+use base 'TheSchwartz::Worker';
+
+sub work {
+    my ($class, $job) = @_;
+    my $args = $job->arg;
+    my $userid = $args->{userid};
+
+    foreach my $cid (@LJ::CLUSTERS) {
+        my $dbh = LJ::get_cluster_master($cid);
+        return unless $dbh;
+
+        $dbh->do("UPDATE log2 SET compressed='N' WHERE posterid=?", undef, $userid);
+    }
+
+    $job->completed;
+}
+
+
+1
