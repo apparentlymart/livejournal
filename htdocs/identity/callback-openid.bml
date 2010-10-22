@@ -52,7 +52,7 @@ body<=
     };
 
     my $sess_opts = {
-        'exptype' => 'short',
+        'exptype' => 'long',
         'ipfixed' => 0,
     };
 
