@@ -299,6 +299,10 @@ sub init {
     }
     ### hacks end here
 
+    ### Logged user may post comment from other one,
+    ### in this case we should not loggin them again.
+    $form->{donot_login} = 1 if LJ::get_remote();
+
     my $up;
 
     my $author_class = LJ::Talk::Author->get_handler($form->{'usertype'});

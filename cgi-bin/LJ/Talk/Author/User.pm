@@ -158,8 +158,8 @@ sub handle_user_input {
         }
     }
 
-    # unless the user came from the email form, log them in
-    if ( !$init->{'used_ecp'} && ! @$errret ) {
+    # unless the user came from the email form or alredy logged, log them in
+    if (!$form->{donot_login} && !$init->{'used_ecp'} && ! @$errret ) {
         $up->make_login_session($exptype, $ipfixed);
     } else {
         # record their login session anyway
