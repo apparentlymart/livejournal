@@ -30,23 +30,28 @@ var Photos2HomepageWidget = {
 	},
 
 	prev: function(){
-		if(this.page == 1) return;
-		this.page--;
+		if(this.page == this.pages) return;
+		this.page++;
 		this._updatePager();
 	},
 
 	next: function(){
-		if(this.page == this.pages) return;
-		this.page++;
+		if(this.page == 1) return;
+		this.page--;
 		this._updatePager();
 	},
 
 	_updatePager: function(){
 		this._updatePageButtons();
 
+		var baseIdx =  this.ppCount * this.page - 1;
+		if( baseIdx >= photos2homepage.length ) {
+			baseIdx = photos2homepage.length - 1;
+		}
+
 		var idx = 0;
 		for( var i = 0; i < this.ppCount; ++i ){
-			idx = i + this.ppCount * (this.page - 1);
+			idx = baseIdx - i;
 
 			if( idx < photos2homepage.length ){
 				this.images[ i ].img.src = this.imageHash[ idx ].src;
@@ -61,7 +66,7 @@ var Photos2HomepageWidget = {
 	},
 
 	_updatePageButtons: function(){
-		this.controls.prev[(this.page == 1)?"addClass":"removeClass"]('i-potd-nav-prev-dis');
-		this.controls.next[(this.page == this.pages || !this.pages)?"addClass":"removeClass"]('i-potd-nav-next-dis');
+		this.controls.next[(this.page == 1)?"addClass":"removeClass"]('i-potd-nav-next-dis');
+		this.controls.prev[(this.page == this.pages || !this.pages)?"addClass":"removeClass"]('i-potd-nav-prev-dis');
 	}
 }
