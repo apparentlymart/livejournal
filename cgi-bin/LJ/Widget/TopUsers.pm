@@ -21,8 +21,8 @@ my %debug_data = (
 
 sub _fetch_data {
     %keys = (
-        'ontd_authors'      => { title => "widget.topusers.top5commenters.title",   order => 2 },
-        #'ontd_commenters'   => { title => "widget.topusers.top5posters.title",      order => 2 },
+        #'ontd_authors'      => { title => "widget.topusers.top5posters.title",   order => 2 },
+        'ontd_commenters'   => { title => "widget.topusers.top5commenters.title", order => 2 },
     );
 
     foreach my $key (keys %keys) {
