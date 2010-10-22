@@ -291,7 +291,7 @@ sub RecentPage
     # unless we didn't even load as many as we were expecting on this
     # page, then there are more (unless there are exactly the number shown
     # on the page, but who cares about that)
-    unless ($itemnum != $itemshow) {
+    unless (scalar(@items) != $itemshow) {
         $nav->{'backward_count'} = $itemshow;
         if ($skip == $maxskip) {
             my $date_slashes = $lastdate;  # "yyyy mm dd";
