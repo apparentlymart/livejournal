@@ -110,7 +110,7 @@ sub render_responses {
         my $userpic_html = '';
 
         if ($userpic) {
-            my $img = $userpic->imgtag(width => 75);
+            my $img = $userpic->imgtag_nosize();
             $userpic_html = qq { <div class="lj_qotd_entry_userpic">$img</div> };
         }
 
