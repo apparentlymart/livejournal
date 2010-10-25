@@ -810,10 +810,17 @@ sub _get_upf_scaled
     # add border if desired
     $timage->Border(geometry => "1x1", color => 'black') if $border;
 
-    my $ret = undef;
+    # we are PNG here
+    # test, if we can skip compression
+    my $piccopy = $timage->Clone();
+    my $ret = $imageParams->($piccopy);
+    unless ( length(${ $ret->[0] }) < $maxfilesize ) {
+        $timage->Set(magick => 'JPG'); # need compression
+    }
+
     foreach my $qual (qw(100 90 85 75)) {
         # work off a copy of the image so we aren't recompressing it
-        my $piccopy = $timage->Clone();
+        $piccopy = $timage->Clone();
         $piccopy->Set('quality' => $qual);
         $ret = $imageParams->($piccopy);
         last if length(${ $ret->[0] }) < $maxfilesize;
