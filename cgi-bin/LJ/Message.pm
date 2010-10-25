@@ -57,7 +57,9 @@ sub send {
     # Send message by writing to DB and triggering event
     if ($self->save_to_db) {
         $self->_send_msg_event;
-        $self->_orig_u->rate_log('usermessage', $self->rate_multiple) if !$opts->{'nocheck'} and $self->rate_multiple;
+        $self->_orig_u->rate_log('usermessage', $self->rate_multiple) if !$opts->{'nocheck'}
+                                                                         and not $LJ::WHITELIST_SEND_INBOX_MESSAGES{$self->_orig_u->user}
+                                                                         and $self->rate_multiple;
         return 1;
     } else {
         return 0;
@@ -405,7 +407,8 @@ sub can_send {
     }
 
     # Will this message put sender over rate limit
-    unless ($self->rate_multiple && $ou->rate_check('usermessage', $self->rate_multiple)) {
+    unless ($LJ::WHITELIST_SEND_INBOX_MESSAGES{$ou->user}
+            || $self->rate_multiple && $ou->rate_check('usermessage', $self->rate_multiple) ) {
         my $up;
         $up = LJ::run_hook('upgrade_message', $ou, 'message');
         $up = "<br />$up" if ($up);
