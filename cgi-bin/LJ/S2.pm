@@ -3465,7 +3465,7 @@ sub Date__date_format
     $fmt ||= "short";
     my $c = \$ctx->[S2::SCRATCH]->{'_code_datefmt'}->{$fmt};
     return $$c->($this) if ref $$c eq "CODE";
-    if (++$ctx->[S2::SCRATCH]->{'_code_datefmt_count'} > 15) { return "[too_many_fmts]"; }
+    if (++$ctx->[S2::SCRATCH]->{'_code_datefmt_count'} > 50) { return "[too_many_fmts]"; }
     my $realfmt = $fmt;
     if (defined $ctx->[S2::PROPS]->{"lang_fmt_date_$fmt"}) {
         $realfmt = $ctx->[S2::PROPS]->{"lang_fmt_date_$fmt"};
