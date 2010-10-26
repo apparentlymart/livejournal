@@ -1444,7 +1444,7 @@ sub res_includes {
                 
                 if ($do_concat) {
                     my $csep = join(',', @$list);
-                    $csep .= "?v=" . $oldest{$type}{$args}{$cond};
+                    $csep .= "?v=" . $oldest{$type}{$cond}{$args};
                     my $inc = $template;
                     $inc =~ s/__+/??$csep/;
                     $inc =~ s/##/$args/;
