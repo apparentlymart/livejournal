@@ -2267,7 +2267,7 @@ sub get_thread_html
 
             my $width = $depth * 25;
 
-            return "<a name='t$dtid'></a><div id='ljcmt$dtid'><table$table_style><tr>" .
+            return "<div id='ljcmt$dtid'><a name='t$dtid'></a><table$table_style><tr>" .
                    "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='$width'></td>" .
                    "<td id='ljcmtxt$dtid' width='100%'>";
         };
