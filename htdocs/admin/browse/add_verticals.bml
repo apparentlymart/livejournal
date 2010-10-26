@@ -1,0 +1,52 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
+    $title = "Add verticals";
+    my $ret = "";
+
+    if (LJ::did_post()) {
+        my $vert_url  = $POST{'vert_url'};
+        my $vert_name = $POST{'vert_name'};
+        if ($vert_url && $vert_name) {
+            my $vert = LJ::Vertical->create (name => $vert_name, url => $vert_url);
+            $ret .= "Vertical $vert_name added" if $vert;
+        } else {
+            $ret .= "<?h1 $ML{'Error'} h1?><?p Not set url or name p?>";
+        } 
+    }
+
+    $ret .= "<form method='POST'>\n";
+    $ret .= LJ::form_auth();
+
+    $ret .= "<table border='0'>";
+    $ret .= "<tr><td>Vertical name</td><td>Vertical Url</td></tr>";
+    $ret .= "<tr><td><input type='text' name='vert_name'></td><td><input type='text' name='vert_url'></td></tr>";
+    $ret .= "</table>";
+
+    $ret .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</p>";
+
+    $ret .= "</form>";
+
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

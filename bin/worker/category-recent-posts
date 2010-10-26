@@ -1,0 +1,84 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::NewWorker::Manual;
+LJ::NewWorker::Manual::CategoryRecentPosts->start();
+
+################################################################################
+
+package LJ::NewWorker::Manual::CategoryRecentPosts;
+
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use base 'LJ::NewWorker::Manual';
+
+# how long to wait if we didn't process any at all
+my $sleep_when_idle;
+
+## how much entries are to fetch from each community
+my $max_count_post_per_comm;
+
+my $verbose;
+
+sub BEGIN {
+    $sleep_when_idle = 10;
+    $verbose = 0;
+    $max_count_post_per_comm = 30;
+}
+
+sub options {
+    my $self = shift;
+    return (
+        $self->SUPER::options(),
+    );
+}
+
+sub help {
+    my $self = shift;
+    return
+        $self->SUPER::help() .
+        "-u | --user login  work on one specific user\n";
+}
+
+sub work {
+    my $class = shift;
+    my @uids;
+
+    my $verbose = $class->verbose();
+
+    my $dbh = LJ::get_db_writer();
+
+    my $journals = $dbh->selectall_arrayref ("SELECT * FROM categoryjournals", { Slice => {} });
+    foreach my $rec (@$journals) {
+        my $journalid = $rec->{journalid};
+        my @last_jitemid = $dbh->selectrow_array ("SELECT max(jitemid) FROM category_recent_posts WHERE journalid = ?", undef, $journalid);
+
+        my $u = LJ::load_userid($journalid);
+        my @recent = LJ::get_recent_items({
+            itemshow    => $max_count_post_per_comm,
+            err         => undef,
+            userid      => $u->{userid},
+            clusterid   => $u->{clusterid},
+            remote      => undef,
+            afterid     => $last_jitemid[0],
+            order       => 'logtime',
+        });
+
+        foreach my $entry (@recent) {
+            my $sth = $dbh->prepare ("INSERT INTO category_recent_posts (jitemid, timecreate, journalid) VALUES (?, ?, ?)");
+            $sth->execute($entry->{itemid}, $entry->{logtime}, $journalid);
+        }
+    }
+
+    return 0;
+}
+
+sub on_idle {
+    return sleep $sleep_when_idle;
+}
+
+sub debug {
+    print STDERR @_, "\n" if $verbose;
+}
+
+1;
