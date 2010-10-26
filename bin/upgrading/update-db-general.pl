@@ -4214,6 +4214,11 @@ register_alter(sub {
                  "MODIFY rlid INT UNSIGNED NOT NULL AUTO_INCREMENT");
     }
 
+    unless (column_type("category", "vert_id")) {
+        do_alter("category",
+                 "ALTER TABLE category " .
+                 "ADD vert_id INT(11) NOT NULL DEFAULT NULL");
+    }
 
 });
 
