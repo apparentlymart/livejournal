@@ -3311,6 +3311,18 @@ CREATE TABLE supporttagmap (
 )
 EOC
 
+register_tablecreate('category_recent_posts', <<'EOC');
+CREATE TABLE category_recent_posts (
+  jitemid int(11) NOT NULL default '0',
+  timecreate datetime NOT NULL,
+  journalid int(10) unsigned NOT NULL,
+  is_deleted tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`journalid`,`jitemid`),
+  KEY `timecreate` (`timecreate`),
+  KEY `journalid` (`journalid`)
+)
+EOC
+
 # PingBack relations
 register_tablecreate("pingrel", <<'EOC');
 CREATE TABLE pingrel (

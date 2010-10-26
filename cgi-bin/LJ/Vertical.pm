@@ -341,7 +341,7 @@ sub create {
              undef, $self->{name}, $self->{url});
     die $dbh->errstr if $dbh->err;
 
-    return $class->new( vertid => $dbh->{mysql_insertid} );
+    return $class->new( vert_id => $dbh->{mysql_insertid} );
 }
 
 sub get_categories {
