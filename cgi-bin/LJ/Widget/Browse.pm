@@ -186,7 +186,7 @@ sub render_body {
 
     $$title = "$$windowtitle";
 
-    my @posts = LJ::Browse->recent_posts ( [ map { $_->{userid} } @comms ], '10, 10' );
+    my @posts = LJ::Browse->recent_posts ( [ map { $_->{userid} } @comms ], $post_page_size );
 
     foreach my $entry (@posts) {
         next unless $entry;
