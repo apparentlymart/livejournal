@@ -454,7 +454,7 @@ function createModerationFunction(ae, dItemid, isS1)
 							for( var i = 0; i < result.length; ++i ){
 								if( LJ_cmtinfo[ result[i].thread ].full ){
 									setupAjax(
-										jQuery("#ljcmtxt" + result[i].thread).html(
+										jQuery("#ljcmtxt" + result[i].thread).replaceWith(
 											ExpanderEx.prepareCommentBlock(
 													result[i].html,
 													result[ i ].thread,
@@ -472,7 +472,7 @@ function createModerationFunction(ae, dItemid, isS1)
 						if( threadExpanded && LJ_cmtinfo[ threadId ].oldvars.full )
 						{
 							getThreadJSON( threadId, function(result2){
-								ExpanderEx.Collection[ threadId ] = ExpanderEx.prepareCommentBlock( result2[0].html, threadId, true );
+								ExpanderEx.Collection[ threadId ] = ExpanderEx.prepareCommentBlock( result2[0].html, threadId, true ).html();
 								populateComments( result );
 							}, true, true );
 						}

@@ -2,6 +2,7 @@
  * ExpanderEx object is used in s1 style comment pages and provides
  * ajax functionality to expand comments instead of loading iframe page as it is
  * in old Expander
+ * expander object is also used in commentmanage.js
  */
 ExpanderEx = function(){
     this.__caller__;    // <a> HTML element from where ExpanderEx was called
@@ -11,6 +12,8 @@ ExpanderEx = function(){
     this.is_S1;         // bool flag, true == journal is in S1, false == in S2
 }
 ExpanderEx.Collection={};
+ExpanderEx.ReqCache = {};
+
 ExpanderEx.make = function(el,url,id,is_S1){
     var local = (new ExpanderEx).set({__caller__:el,url:url.replace(/#.*$/,''),id:id,is_S1:!!is_S1});
     local.get();
@@ -47,7 +50,31 @@ ExpanderEx.prototype.parseLJ_cmtinfo = function(context,callback){
     return map;
 }
 
+ExpanderEx.preloadImg = function(){
+    (new Image()).src = Site.imgprefix + '/preloader-s.gif';
+}
+
+ExpanderEx.prototype.addPreloader = function(){
+    this.loader = new Image();
+    this.loader.src = Site.imgprefix + '/preloader-s.gif';
+    this.loader.className = 'i-exp-preloader';
+    this.__caller__.parentNode.appendChild( this.loader );
+}
+
+ExpanderEx.prototype.removePreloader = function(){
+    if( !this.loader ){
+        return;
+    }
+
+    if( this.loader.parentNode ){
+        this.loader.parentNode.removeChild( this.loader );
+    }
+    delete this.loader;
+};
+
 ExpanderEx.prototype.loadingStateOn = function(){
+    // turn on preloader there
+    this.addPreloader();
     this.stored_caller = this.__caller__.cloneNode(true);
     this.__caller__.setAttribute('already_clicked','already_clicked');
     this.__caller__.onclick = function(){return false}
@@ -75,15 +102,41 @@ ExpanderEx.prototype.isFullComment = function(comment){
 
 ExpanderEx.prototype.expandThread = function(json){
     this.loadingStateOff();
-    for( var i = 0; i < json.length; ++i ) {
-        if( json[ i ].thread in ExpanderEx.Collection )
-            continue; //this comment is already expanded
-        ExpanderEx.Collection[ json[ i ].thread ] = jQuery( '#ljcmtxt' + json[ i ].thread ).html();
-        jQuery( '#ljcmtxt' + json[ i ].thread )
-            .html( ExpanderEx.prepareCommentBlock( json[ i ].html, json[ i ].thread, false ) );
 
-        this.initCommentBlock( jQuery( '#ljcmt' + json[ i ].thread )[0], json[ i ].thread );
-        LJ_cmtinfo[ json[ i ].thread ].parent = this.id;
+    var fragment = document.createDocumentFragment();
+    var rowClone, row, threadId, cell, next;
+    for( var i = 0; i < json.length; ++i ) {
+        threadId = json[ i ].thread;
+        if( threadId in ExpanderEx.Collection )
+            continue; //this comment is already expanded
+
+        row = jQuery('#ljcmt' + threadId );
+        rowClone = row.clone( true );
+        cell = rowClone.find( '#ljcmtxt' + threadId );
+
+        //remove preloader from cloned node
+        if( threadId == this.id ) {
+            cell.find('img.i-exp-preloader').remove();
+        }
+
+        ExpanderEx.Collection[ threadId ] = cell.html();
+        cell.replaceWith( ExpanderEx.prepareCommentBlock( json[ i ].html, threadId, false ) );
+        fragment.appendChild( rowClone[ 0 ] );
+
+        if( i == ( json.length - 1 ) ) {
+            next = row.next()[0];
+        }
+        row.remove();
+    }
+    //remove preloader if exist
+    this.removePreloader();
+    next.parentNode.insertBefore( fragment, next );
+
+    //duplicate cycle, because we do not know, that external scripts do with node
+    for( var i = 0; i < json.length; ++i ) {
+        threadId = json[ i ].thread;
+        this.initCommentBlock( jQuery( '#ljcmt' + threadId )[0] , threadId );
+        LJ_cmtinfo[ threadId ].parent = this.id;
     }
 
     return true;
@@ -103,7 +156,7 @@ ExpanderEx.prototype.collapseBlock =  function( id )
     var expander = this;
     function updateBlock(id, html)
     {
-        var el_ =jQuery( '#ljcmtxt' + id )
+        var el_ = jQuery( '#ljcmtxt' + id )
             .html( html )[0];
         expander.initCommentBlock( el_, id, true );
     }
@@ -147,10 +200,18 @@ ExpanderEx.prototype.get = function(){
     }
     this.loadingStateOn();
 
-    var obj = this;
-    getThreadJSON( this.id, function(result) {
-        obj.expandThread(result);
-    }, false, false, true );
+    if( this.id in ExpanderEx.ReqCache ) {
+        this.expandThread( ExpanderEx.ReqCache[ this.id ] );
+    } else {
+        var obj = this;
+        //set timeout to allow browser to display image before request
+        setTimeout( function(){
+            getThreadJSON( obj.id, function(result) {
+                obj.expandThread(result);
+                ExpanderEx.ReqCache[ obj.id ] = result;
+            }, false, false, true );
+        }, 0 );
+    }
 
     return true;
 }
@@ -158,8 +219,12 @@ ExpanderEx.prototype.get = function(){
 //toggle visibility of expand and collapse links, if server returns
 //html with both of them ( with every ajax request)
 ExpanderEx.prepareCommentBlock = function(html, id, showExpand){
-    var block = jQuery("<div>" + html + "</div>"),
+    var block = jQuery("<td>" + html + "</td>").attr( {
+            id: 'ljcmtxt' + id,
+            width: '100%'
+        } ),
         selector = '';
+
 
     if( LJ_cmtinfo[ id ].has_link > 0 )
         selector = '#' + ((showExpand ? 'collapse_' : 'expand_' ) + id);
@@ -169,5 +234,7 @@ ExpanderEx.prepareCommentBlock = function(html, id, showExpand){
     block.find(selector)
         .css('display', 'none');
 
-    return block.html();
+    return block;
 }
+
+ExpanderEx.preloadImg();
