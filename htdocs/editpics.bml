@@ -241,7 +241,7 @@
                 return $err->($ML{'.error.urlerror'})
                     unless $res->{content};
 
-                return $err->("You cannot upload large images from URLs. ".$res->{size}." > $MAX_UPLOAD")
+                return $err->("You cannot upload images larger than " . int($MAX_UPLOAD / 1024) . " kB from URLs.")
                     if $res->{size} > $MAX_UPLOAD;
 
                 $content = $res->{content};
