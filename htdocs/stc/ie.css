@@ -35,10 +35,36 @@ __________________________________________*/
 
 /* LJTimes
 __________________________________________*/
+* HTML BODY {
+	background-attachment: fixed;
+	}
 * HTML .b-ljtimes-wrapper {
 	position: absolute;
 	bottom: auto;
 	top: expression(eval(document.compatMode && document.compatMode=='CSS1Compat') ? documentElement.scrollTop +(documentElement.clientHeight-this.clientHeight) : document.body.scrollTop +(document.body.clientHeight-this.clientHeight));
+	}
+* HTML .b-ljtimes-update,
+* HTML .b-ljtimes-inbox {
+	position: absolute;
+	bottom: auto;
+	}
+* HTML .b-ljtimes-update {
+	top: expression(document.body.scrollTop+document.body.clientHeight-this.clientHeight+6);
+	}
+* HTML .b-ljtimes-inbox {
+	top: expression(document.body.scrollTop+document.body.clientHeight-this.clientHeight-25);
+	}
+* HTML .i-ljtimes-logged-close,
+* HTML .b-ljtimes-logged-form,
+* HTML .b-ljtimes-logged-submit,
+* HTML .b-ljtimes-success,
+* HTML .b-ljtimes-login,
+* HTML .b-ljtimes-inbox {
+	background: #000;
+	}
+* HTML .b-ljtimes-login,
+* HTML .b-ljtimes-logged-form {
+	width: 366px;
 	}
 .b-ljtimes-login .i-ljtimes-checkbox {
 	vertical-align: -3px;
@@ -47,12 +73,14 @@ __________________________________________*/
 	height: 22px;
 	padding: 1px 22px 0;
 	}
-* HTML .b-ljtimes-login-form {
+* HTML .b-ljtimes-logged-submit {
+	height: 24px;
+	}
+* HTML .b-ljtimes-bubble-content{
 	zoom: 1;
 	}
-* HTML .i-ljtimes-bl,
-* HTML .i-ljtimes-br {
-	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg : this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='scale')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
+* > HTML .b-ljtimes-bubble-content{
+	width: 292px;
 	}
 * HTML .i-ljtimes-btn,
 * HTML .i-ljtimes-drag,
@@ -60,12 +88,6 @@ __________________________________________*/
 * HTML .b-ljtimes-bubble-bg,
 * HTML .b-ljtimes-bubble-top {
 	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg : this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='crop')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
-	}
-* HTML .b-ljtimes-bubble {
-	position: absolute;
-	}
-* HTML .b-ljtimes-bubble-content{
-	zoom: 1;
 	}
 
 * HTML .b-ttiny {
