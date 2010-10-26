@@ -21,7 +21,7 @@ sub work {
 
     foreach my $cid (@LJ::CLUSTERS) {
         my $dbh = LJ::get_cluster_master($cid);
-        return unless $dbh;
+        next unless $dbh;
 
         $dbh->do("UPDATE log2 SET compressed='S' WHERE posterid=?", undef, $userid);
     }
@@ -39,7 +39,7 @@ sub work {
 
     foreach my $cid (@LJ::CLUSTERS) {
         my $dbh = LJ::get_cluster_master($cid);
-        return unless $dbh;
+        next unless $dbh;
 
         $dbh->do("UPDATE log2 SET compressed='N' WHERE posterid=?", undef, $userid);
     }
