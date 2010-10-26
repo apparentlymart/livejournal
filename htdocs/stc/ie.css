@@ -240,6 +240,24 @@ __________________________________________*/
 	height: 96px;
 	}
 
+/* Max width & max height
+-----------------------------------------------*/
+*HTML .lj_qotd_entry_userpic .userpic-img,
+*HTML .appwidget-recentcomments .userpic-img {
+	zoom:expression(
+			function(t){
+				t.runtimeStyle.zoom = 1;
+				var maxW = parseInt(t.currentStyle['max-width'], 10);
+				var maxH = parseInt(t.currentStyle['max-height'], 10);
+				if (t.scrollWidth > maxW && t.scrollWidth >= t.scrollHeight) {
+					t.style.width = maxW;
+				} else if (t.scrollHeight > maxH) {
+					t.style.height = maxH;
+				}
+			}(this)
+		);
+	}
+
 /* Photos 2 homepage widget
 -----------------------------------------------*/
 .appwidget-photos2homepage .w-body .pic-list,
@@ -266,6 +284,7 @@ __________________________________________*/
 	width: 140px;
 	height: 105px;
 	}
+
 /* S1 comments */
 .talk-comment-head {
 	zoom: 1;
