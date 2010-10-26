@@ -4217,7 +4217,7 @@ register_alter(sub {
     unless (column_type("category", "vert_id")) {
         do_alter("category",
                  "ALTER TABLE category " .
-                 "ADD vert_id INT(11) NOT NULL DEFAULT NULL");
+                 "ADD vert_id INT(11) NOT NULL");
     }
 
 });
