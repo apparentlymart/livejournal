@@ -265,7 +265,8 @@ __________________________________________*/
 /* Max width & max height
 -----------------------------------------------*/
 *HTML .lj_qotd_entry_userpic .userpic-img,
-*HTML .appwidget-recentcomments .userpic-img {
+*HTML .appwidget-recentcomments .userpic-img,
+*HTML #lj_controlstrip_userpic IMG {
 	zoom:expression(
 			function(t){
 				t.runtimeStyle.zoom = 1;

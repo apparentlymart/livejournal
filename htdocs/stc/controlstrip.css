@@ -99,11 +99,14 @@ html body
 }
 
 /* First cell */
-#lj_controlstrip_userpic
-{
-    vertical-align: top;
-    width: 43px;
-}
+#lj_controlstrip_userpic {
+	vertical-align: top;
+	width: 43px;
+	}
+	#lj_controlstrip_userpic IMG {
+		max-width: 43px;
+		max-height: 43px;
+		}
 
 /* Second cell */
 #lj_controlstrip_user
