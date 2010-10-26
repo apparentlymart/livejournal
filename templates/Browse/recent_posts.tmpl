@@ -1,0 +1,23 @@
+<tmpl_loop posts>
+    <img src="<tmpl_var userpic>"><br/>
+    <a href="<tmpl_var url_to_post>"><tmpl_var subject></a><br/>
+    <tmpl_loop tags><tmpl_unless __first__>,&nbsp;</tmpl_unless><tmpl_var tag></tmpl_loop><br/>
+    <tmpl_var mood><br/>
+    <tmpl_var music><br/>
+    <tmpl_var location><br/>
+    <tmpl_var post_text><br/>
+    <tmpl_if is_need_more>(<a href="<tmpl_var url_to_post>">Read more in original post</a>)<br/></tmpl_if>
+    <a href="<tmpl_var url_to_post>#comments"><tmpl_var comments_count> comments</a> | <a href="<tmpl_var url_to_post>?mode=reply">Leave comment</a><br/>
+    <hr/>
+</tmpl_loop>
+
+    <TMPL_IF expr="post_pages gt 1">
+    <ul>
+        <li><TMPL_IF post_page_first><a href="<TMPL_VAR post_page_first>" title="<TMPL_VAR expr="ml('widget.browse.page.first')">"><i><TMPL_VAR expr="ml('widget.browse.page.first')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.first')"></i></span></TMPL_IF></li>
+        <li><TMPL_IF post_page_prev><a href="<TMPL_VAR post_page_prev>" title="<TMPL_VAR expr="ml('widget.browse.page.previous')">"><i><TMPL_VAR expr="ml('widget.browse.page.previous')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.previous')"></i></span></TMPL_IF></li>
+        <li><TMPL_VAR post_page>/<TMPL_VAR post_pages></li>
+        <li><TMPL_IF post_page_next><a href="<TMPL_VAR post_page_next>" title="<TMPL_VAR expr="ml('widget.browse.page.next')">"><i><TMPL_VAR expr="ml('widget.browse.page.next')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.next')"></i></span></TMPL_IF></li>
+        <li><TMPL_IF post_page_last><a href="<TMPL_VAR post_page_last>" title="<TMPL_VAR expr="ml('widget.browse.page.last')">"><i><TMPL_VAR expr="ml('widget.browse.page.last')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.last')"></i></span></TMPL_IF></li>
+    </ul>
+   </TMPL_IF>     
+

@@ -1,0 +1,64 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
+    $title = "Edit verticals";
+    my $ret = "";
+
+    if (LJ::did_post()) {
+        my @keys = keys %POST;
+        foreach (@keys) {
+            next unless $_ =~ /^(\d+)-name$/;
+            my $vert_id = $1;
+            my $vert = LJ::Vertical->load_by_id ($vert_id);
+            $vert->set_name($POST{"$vert_id-name"});
+            $vert->set_uri($POST{"$vert_id-url"});
+            $vert->set_journal($POST{"$vert_id-journal"});
+        }
+    }
+
+    my @verticals = LJ::Vertical->load_all();
+
+    $ret .= "<form method='POST'>\n";
+    $ret .= LJ::form_auth();
+
+    $ret .= "<table border='1' cellspacing='0' cellpadding='2'>";
+    $ret .= "<tr><th>Vertical name</th><th>Vertical Url</th><th>Vertical Journal</th></tr>";
+    foreach my $vert (@verticals) {
+        my $vert_name    = $vert->{name};
+        my $vert_url     = $vert->{url};
+        my $vert_id      = $vert->{vert_id};
+        my $vert_journal = $vert->{journal};
+        $ret .= "<tr>
+            <td><input type='text' name='$vert_id-name' value='$vert_name'></td>
+            <td><input type='text' name='$vert_id-url' value='$vert_url'></td>
+            <td><input type='text' name='$vert_id-journal' value='$vert_journal'></td>
+        </tr>";
+    }
+    $ret .= "</table>";
+    $ret .= "<br/><input type='submit' value='Save'>";
+
+    $ret .= "</form>";
+
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

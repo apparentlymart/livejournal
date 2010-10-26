@@ -76,8 +76,9 @@ body<=
     # Get the full list of categories
     my @categories = LJ::Browse->load_all;
     # Get the unique URI for each
-    my @caturls = map { $_->uri, $_->uri } @categories;
-    @caturls = sort { $a cmp $b } @caturls;
+
+    my @caturls = map { { text => $_->{pretty_name}, value => $_->uri } } @categories;
+    #@caturls = sort { $a cmp $b } @caturls;
 
     $ret .= "<p>Add to Category:<br />";
     $ret .= LJ::html_select({

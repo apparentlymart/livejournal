@@ -19,6 +19,15 @@ body<=
     $uri .= "?$args" if $args;
 
     my $page = defined $GET{page} ? $GET{page} : 1;
+    my $post_page = defined $GET{post_page} ? $GET{post_page} : 1;
+
+    my $vertical = LJ::Vertical->load_by_url($uri);
+    unless ($vertical) {
+        LJ::Request->pnotes ('error'  => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        BML::return_error_status(LJ::Request::NOT_FOUND());
+        return;
+    }
 
     return LJ::Widget::Browse->render(
         browse      => 'new',
@@ -27,6 +36,7 @@ body<=
         remote      => $remote,
         uri         => $uri,
         page        => $page,
+        post_page   => $post_page,
     );
 }
 _code?>

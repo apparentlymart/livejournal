@@ -9,23 +9,27 @@ use vars qw(%GET %POST $headextra @errors @warnings);
 #sub need_res { qw( stc/widgets/browse.css stc/pagemodules.css ) }
 
 sub _build_tree {
-    my ($parent, $level, $test_uri, @categories) = @_;
+    my ($parent, $level, $test_uri, $vertical, @categories) = @_;
     my @tree = ();
+
     foreach my $c
         (grep { (!$parent && !$_->parent) || ($_->parent == $parent) } grep { $_ } @categories) {
+        #(grep { $_->parent == $parent } @categories) {
             my $c_uri = $c->uri;
+
             my $is_current = ($test_uri =~ m/^\Q$c_uri\E/);
+
             ++$level;
             push @tree,
                 {
                     name            => $c->display_name(),
                     title           => $c->title_html(),
-                    url             => $c->url(),
+                    url             => $c->url($vertical),
                     summary         => LJ::Widget::CategorySummary->render( category => $c ),
                     level           => $level,
                     is_expanded     => $is_current,
                     is_current      => $is_current,
-                    "level$level"   => [ _build_tree($c, $level, $test_uri, @categories) ],
+                    "level$level"   => [ _build_tree($c, $level, $test_uri, $vertical, @categories) ],
                 };
             --$level;
         }
@@ -82,7 +86,7 @@ sub render_body {
 
     return $class->render_body_old(%opts) unless exists $opts{browse};
 
-    my ($title, $windowtitle, $remote, $uri, $page) = @opts{qw(title windowtitle remote uri page)};
+    my ($title, $windowtitle, $remote, $uri, $page, $post_page) = @opts{qw(title windowtitle remote uri page post_page)};
 
     my $template = LJ::HTML::Template->new(
         { use_expr => 1 }, # force HTML::Template::Pro with Expr support
@@ -91,17 +95,19 @@ sub render_body {
         strict => 0,
     ) or die "Can't open template: $!";
 
-    $$windowtitle = $class->ml('widget.browse.windowtitle');
+    my $vertical = LJ::Vertical->load_by_url($uri);
+    
+    $$windowtitle = $vertical->name; #$class->ml('widget.browse.windowtitle');
 
     my $cat = LJ::Browse->load_by_url($uri); # Currently selected category
 
-    my @categories = sort { lc $a->display_name cmp lc $b->display_name } LJ::Browse->load_all();
+    my @categories = sort { lc $a->display_name cmp lc $b->display_name } LJ::Browse->load_all($vertical);
 
     my $test_uri = $uri;
     $test_uri =~ s/^\/browse//;
     $test_uri =~ s/\/$//;
 
-    my @tmpl_categories = _build_tree(undef, 0, $test_uri, @categories);
+    my @tmpl_categories = _build_tree(undef, 0, $test_uri, $vertical, @categories);
 
     # Spotlight categories:
     #   if it found, move it to the top, add 'suggest' link to this list and
@@ -138,17 +144,22 @@ sub render_body {
     my ($ad, $nav_line) = 2 x '';
 
     my @tmpl_communities = ();
+    my @tmpl_posts = ();
 
-    my $page_size = 10;  # const
+    my $page_size = 6;
+    my $post_page_size = 10;
 
     my $count = 0;
+    my $post_count = 0;
 
     my @comms = ();
 
     $page ||= 1;
     my $skip = ($page-1) * $page_size;
     my $last = $skip + $page_size;
-
+    $post_page ||= 1;
+    my $post_skip = ($post_page-1) * $post_page_size;
+    my $post_last = $post_skip + $post_page_size;
     if ($cat) { # we're looking at a lower-level category
 
         my @cat_title = split(/&gt;/, $cat->title_html());
@@ -175,6 +186,35 @@ sub render_body {
 
     $$title = "$$windowtitle";
 
+    my @posts = LJ::Browse->recent_posts ( [ map { $_->{userid} } @comms ], '10, 10' );
+
+    foreach my $entry (@posts) {
+        next unless $entry;
+
+        next unless 1;## This entry is inappropriate language in the subject or body
+
+        $post_count++;
+        next if $post_count <= $post_skip || $post_count > $post_last;
+
+        my $poster = $entry->poster;
+        my $userpic = $entry->userpic;
+        my @tags = $entry->tags;
+        push @tmpl_posts, {
+            subject         => $entry->subject_text,
+            userpic         => $userpic ? $userpic->url : '',
+            posted_ago      => LJ::TimeUtil->ago_text($entry->logtime_unix),
+            poster          => $poster ? LJ::ljuser($poster) : '?',
+            tags            => scalar @tags ? [ map { { tag => $_ } } @tags ] : '',
+            mood            => $entry->prop('current_mood') || LJ::mood_name($entry->prop('current_moodid')) || '',
+            music           => $entry->prop('current_music'),
+            location        => $entry->prop('current_location'),
+            post_text       => $entry->event_html,
+            url_to_post     => $entry->url,
+            comments_count  => $entry->reply_count,
+            is_need_more    => bytes::length($entry->event_text) > 800 ? 1 : 0,
+        };
+    }
+
     foreach my $comm (@comms) {
         next unless LJ::isu($comm);
 
@@ -200,6 +240,21 @@ sub render_body {
             };
     }
 
+    # post paging: first, previouse, next, last pages.
+    my ($post_page_first, $post_page_prev, $post_page_next, $post_page_last) = 4 x 0;
+    my $post_pages = int($post_count / $post_page_size) + 1;
+    $post_page = 1 unless $post_page;
+    if($post_page > 1) {
+        $post_page_first = 1;
+        $post_page_prev = $post_page - 1;
+    }
+
+    if ($post_page < $post_pages) {
+        $post_page_next = $post_page + 1;
+        $post_page_last = $post_pages;
+        $post_page_next = $post_page_last if $post_page_next > $post_page_last;
+    }
+
     # paging: first, previouse, next, last pages.
     my ($page_first, $page_prev, $page_next, $page_last) = 4 x 0;
     my $pages = int($count / $page_size) + 1;
@@ -217,7 +272,7 @@ sub render_body {
 
     my $args = '';
     ($uri, $args) = split(/\?/, $uri);
-    $args =~ s/&?page=[^&]*//;  # cut off page= parameter
+    $args =~ s/&?(post_)?page=[^&]*//g;  # cut off page= parameter
     $args =~ s/^&//;
 
     # make page_* urls
@@ -225,11 +280,17 @@ sub render_body {
         $_ ? $LJ::SITEROOT . $uri . ($args ? "?$args&page=$_" : "?page=$_") : ''
     } ($page_first, $page_prev, $page_next, $page_last);
 
+    # make post_page_* urls
+    ($post_page_first, $post_page_prev, $post_page_next, $post_page_last) = map {
+        $_ ? $LJ::SITEROOT . $uri . ($args ? "?$args&post_page=$_" : "?post_page=$_") : ''
+    } ($post_page_first, $post_page_prev, $post_page_next, $post_page_last);
+
     # merge args to uri.
     $uri .= '?' . $args if $args;
 
     $template->param(
         communities             => \@tmpl_communities,
+        posts                   => \@tmpl_posts,
         uri                     => $uri,
         page                    => $page,
         pages                   => $pages,
@@ -237,6 +298,12 @@ sub render_body {
         page_prev               => $page_prev,
         page_next               => $page_next,
         page_last               => $page_last,
+        post_page               => $post_page,
+        post_pages              => $post_pages,
+        post_page_first         => $post_page_first,
+        post_page_prev          => $post_page_prev,
+        post_page_next          => $post_page_next,
+        post_page_last          => $post_page_last,
         title                   => $$title,
         categories              => \@tmpl_categories,
         ad                      => $ad,

@@ -42,7 +42,7 @@ my $DB_ENTRY_CHUNK       = 1_000; # rows to fetch per quety
 #
 
 my %singletons = (); # vertid => singleton
-my @vert_cols = qw( vertid name createtime lastfetch );
+my @vert_cols = qw( vert_id url journal name createtime lastfetch );
 
 sub min_age_of_poster_account {
     my $class = shift;
@@ -278,7 +278,7 @@ sub new
 
     my $self = bless {
         # arguments
-        vertid     => delete $opts{vertid},
+        vert_id     => delete $opts{vert_id},
 
         # initialization
         name       => undef,
@@ -298,18 +298,18 @@ sub new
         _loaded_rules => 0,
     };
 
-    croak("need to supply vertid") unless defined $self->{vertid};
+    croak("need to supply vert_id") unless defined $self->{vert_id};
 
     croak("unknown parameters: " . join(", ", keys %opts))
         if %opts;
 
     # do we have a singleton for this vertical?
     {
-        my $vertid = $self->{vertid};
-        return $singletons{$vertid} if exists $singletons{$vertid};
+        my $vert_id = $self->{vert_id};
+        return $singletons{$vert_id} if exists $singletons{$vert_id};
 
         # save the singleton if it doesn't exist
-        $singletons{$vertid} = $self;
+        $singletons{$vert_id} = $self;
     }
 
     return $self;
@@ -327,6 +327,7 @@ sub create {
     my %opts = @_;
 
     $self->{name} = delete $opts{name};
+    $self->{url}  = delete $opts{url};
 
     croak("need to supply name") unless defined $self->{name};
 
@@ -336,17 +337,27 @@ sub create {
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create vertical";
 
-    $dbh->do("INSERT INTO vertical SET name=?, createtime=UNIX_TIMESTAMP()",
-             undef, $self->{name});
+    $dbh->do("INSERT INTO vertical2 SET name=?, createtime=UNIX_TIMESTAMP(), url = ?",
+             undef, $self->{name}, $self->{url});
     die $dbh->errstr if $dbh->err;
 
     return $class->new( vertid => $dbh->{mysql_insertid} );
 }
 
+sub get_categories {
+    my $self = shift;
+
+    my $dbh = LJ::get_db_reader();
+
+    my $cats = $dbh->selectall_arrayref("SELECT * FROM category WHERE vert_id = ?", { Slice => {} }, $self->vert_id);
+
+    return $cats;
+}
+
 sub load_by_id {
     my $class = shift;
 
-    my $v = $class->new( vertid => shift );
+    my $v = $class->new( vert_id => shift );
     $v->preload_rows;
 
     return $v;
@@ -405,13 +416,13 @@ sub load_all {
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to load vertical";
 
-    my $sth = $dbh->prepare("SELECT * FROM vertical");
+    my $sth = $dbh->prepare("SELECT * FROM vertical2");
     $sth->execute;
     die $dbh->errstr if $dbh->err;
 
     my @verticals;
     while (my $row = $sth->fetchrow_hashref) {
-        my $v = $class->new( vertid => $row->{vertid} );
+        my $v = $class->new( vert_id => $row->{vert_id} );
         $v->absorb_row($row);
         $v->set_memcache;
 
@@ -475,15 +486,50 @@ sub load_by_url {
     my $class = shift;
     my $url = shift;
 
-    $url =~ /^(?:$LJ::SITEROOT)?(\/.+)$/;
-    my $path = $1;
-    $path =~ s/\/?(?:\?.*)?$//; # remove trailing slash and any get args
+    return undef unless $url;
 
-    my $map = $class->uri_map;
-    if (my $vertname = $map->{$path}) {
-        return $class->load_by_name($vertname);
-    } elsif ($path =~ /^\/explore\/(.+)$/) {
-        return $class->load_by_name($1);
+    $url =~ s/^(?:$LJ::SITEROOT)?(\/.+)$//; ##
+    $url = $1;
+    $url =~ s#(?:\?.*)?$##; ## remove trailing slash and any get args
+    $url =~ m#^/browse(/[^/]*)#; ##
+    $url = $1;
+
+    ## Something wrong with url
+    return undef unless $url;
+
+    my $reqcache = $LJ::REQ_GLOBAL{verturl}->{$url};
+    if ($reqcache) {
+        my $v = $class->new( vert_id => $reqcache->{vert_id} );
+        $v->absorb_row($reqcache);
+
+        return $v;
+    }
+
+    # check memcache for data
+    my $memval = LJ::MemCache::get($class->memkey_verturl($url));
+    if ($memval) {
+        my $v = $class->new( vert_id => $memval->{vert_id} );
+        $v->absorb_row($memval);
+        $LJ::REQ_GLOBAL{verturl}->{$url} = $memval;
+
+        return $v;
+    }
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to load vertical";
+
+    # not in memcache; load from db
+    my $sth = $dbh->prepare("SELECT * FROM vertical2 WHERE url = ?");
+    $sth->execute($url);
+    die $dbh->errstr if $dbh->err;
+
+    if (my $row = $sth->fetchrow_hashref) {
+        my $v = $class->new( vert_id => $row->{vert_id} );
+        $v->absorb_row($row);
+        $v->set_memcache;
+        $LJ::REQ_GLOBAL{verturl}->{$url} = $row;
+
+        return $v;
     }
 
     return undef;
@@ -533,7 +579,7 @@ sub memkey_vertid {
     my $id = shift;
 
     return [ $id, "vert:$id" ] if $id;
-    return [ $self->{vertid}, "vert:$self->{vertid}" ];
+    return [ $self->{vert_id}, "vert:$self->{vert_id}" ];
 }
 
 sub memkey_vertname {
@@ -542,6 +588,14 @@ sub memkey_vertname {
 
     return "vertname:$name" if $name;
     return "vertname:$self->{name}";
+}
+
+sub memkey_verturl {
+    my $self = shift;
+    my $url = shift;
+
+    return "vertname:$url" if $url;
+    return "vertname:$self->{url}";
 }
 
 sub memkey_rules {
@@ -648,18 +702,18 @@ sub preload_rows {
     return 1 if $self->{_loaded_row};
 
     my @to_load = $self->unloaded_singletons;
-    my %need = map { $_->{vertid} => $_ } @to_load;
+    my %need = map { $_->{vert_id} => $_ } @to_load;
 
     my @mem_keys = map { $_->memkey_vertid } @to_load;
     my $memc = LJ::MemCache::get_multi(@mem_keys);
 
     # now which of the objects to load did we get a memcache key for?
     foreach my $obj (@to_load) {
-        my $row = $memc->{"vert:$obj->{vertid}"};
+        my $row = $memc->{"vert:$obj->{vert_id}"};
         next unless $row;
 
         $obj->absorb_row($row);
-        delete $need{$obj->{vertid}};
+        delete $need{$obj->{vert_id}};
     }
 
     # now hit the db for what was left
@@ -668,13 +722,13 @@ sub preload_rows {
 
     my @vals = keys %need;
     my $bind = LJ::bindstr(@vals);
-    my $sth = $dbh->prepare("SELECT * FROM vertical WHERE vertid IN ($bind)");
+    my $sth = $dbh->prepare("SELECT * FROM vertical WHERE vert_id IN ($bind)");
     $sth->execute(@vals);
 
     while (my $row = $sth->fetchrow_hashref) {
 
         # what singleton does this DB row represent?
-        my $obj = $need{$row->{vertid}};
+        my $obj = $need{$row->{vert_id}};
 
         # and update singleton (request cache)
         $obj->absorb_row($row);
@@ -683,7 +737,7 @@ sub preload_rows {
         $obj->set_memcache;
 
         # and delete from %need for error reporting
-        delete $need{$obj->{vertid}};
+        delete $need{$obj->{vert_id}};
 
     }
 
@@ -915,17 +969,20 @@ sub delete_and_purge {
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to load vertical";
 
-    foreach my $table (qw(vertical vertical_entries)) {
-        $dbh->do("DELETE FROM $table WHERE vertid=?", undef, $self->{vertid});
+    my $res = $dbh->do("SELECT vert_id FROM category WHERE vert_id = ?", undef, $self->{vert_id});
+    return $res if $res;
+
+    foreach my $table (qw(vertical2)) {# vertical_entries)) {
+        $dbh->do("DELETE FROM $table WHERE vert_id=?", undef, $self->{vert_id});
         die $dbh->errstr if $dbh->err;
     }
 
     $self->clear_memcache;
     $self->clear_entries_memcache;
 
-    delete $singletons{$self->{vertid}};
+    delete $singletons{$self->{vert_id}};
 
-    return;
+    return undef;
 }
 
 #
@@ -1200,11 +1257,7 @@ sub display_name {
 sub url {
     my $self = shift;
 
-    if ($LJ::VERTICAL_TREE{$self->name}->{url_path}) {
-        return "$LJ::SITEROOT" . $LJ::VERTICAL_TREE{$self->name}->{url_path} . "/";
-    } else {
-        return "$LJ::SITEROOT/explore/" . $self->name . "/";
-    }
+    return "$LJ::SITEROOT/browse" . $self->uri . "/";
 }
 
 # checks to see if the given URL is the canonical URL so that we can redirect if it's not
@@ -1322,8 +1375,8 @@ sub _get_set {
         my $dbh = LJ::get_db_writer()
             or die "unable to contact global db master to load vertical";
 
-        $dbh->do("UPDATE vertical SET $key=? WHERE vertid=?",
-                 undef, $self->{vertid}, $val);
+        $dbh->do("UPDATE vertical2 SET $key=? WHERE vert_id=?",
+                 undef, $val, $self->{vert_id});
         die $dbh->errstr if $dbh->err;
 
         $self->clear_memcache;
@@ -1337,12 +1390,16 @@ sub _get_set {
     return $self->{$key};
 }
 
-sub vertid         { shift->_get_set('vertid')              }
-sub name           { shift->_get_set('name')                }
-sub set_name       { shift->_get_set('name' => $_[0])       }
-sub createtime     { shift->_get_set('createtime')          }
-sub set_createtime { shift->_get_set('createtime' => $_[0]) }
-sub lastfetch      { shift->_get_set('lastfetch')           }
-sub set_lastfetch  { shift->_get_set('lastfetch' => $_[0])  }
+sub vert_id         { shift->_get_set('vert_id')                }
+sub name            { shift->_get_set('name')                   }
+sub set_name        { shift->_get_set('name' => $_[0])          }
+sub uri             { shift->_get_set('url')                    }
+sub set_uri         { shift->_get_set('url' => $_[0])           }
+sub journal         { shift->_get_set('journal')                }
+sub set_journal     { shift->_get_set('journal' => $_[0])       }
+sub createtime      { shift->_get_set('createtime')             }
+sub set_createtime  { shift->_get_set('createtime' => $_[0])    }
+sub lastfetch       { shift->_get_set('lastfetch')              }
+sub set_lastfetch   { shift->_get_set('lastfetch' => $_[0])     }
 
 1;

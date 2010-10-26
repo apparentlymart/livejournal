@@ -3036,6 +3036,18 @@ CREATE TABLE persistent_queue (
 )
 EOC
 
+# global table for verticals 2
+register_tablecreate("vertical2", <<'EOC');
+CREATE TABLE `vertical2` (
+    `vert_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `url` VARCHAR(20) NOT NULL,
+    `name` VARCHAR(50) NOT NULL,
+    `createtime` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `journal` VARCHAR(16) DEFAULT '',
+    PRIMARY KEY  (`vert_id`)
+)
+EOC
+
 # global table for verticals
 register_tablecreate("vertical", <<'EOC');
 CREATE TABLE vertical (

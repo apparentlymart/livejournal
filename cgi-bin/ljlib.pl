@@ -977,6 +977,7 @@ sub get_friend_items
 #           -- friendsview: if true, sorts by logtime, not eventtime
 #           -- notafter: upper bound inclusive for rlogtime/revttime (depending on sort mode),
 #           defaults to no limit
+#           -- afterid: upper bound inclusive for jitemid. defaults to not use
 #           -- skip: items to skip
 #           -- itemshow: items to show
 #           -- viewall: if set, no security is used.
@@ -1174,6 +1175,11 @@ sub get_recent_items
         $sql_select = "AND $sort_key <= $notafter";
     }
 
+    my $after_sql = '';
+    my $afterid = $opts->{'afterid'} + 0;
+    if ($afterid) {
+        $after_sql = "AND jitemid >= $afterid";
+    }
 
     my $posterwhere;
     if ($opts->{'posterid'} && $opts->{'posterid'} =~ /^(\d+)$/) {

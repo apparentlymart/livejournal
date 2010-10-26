@@ -7,7 +7,7 @@ use strict;
 use Carp qw/ croak cluck /;
 
 my %singletons = (); # catid => singleton
-my @cat_cols = qw( catid pretty_name url_path parentcatid );
+my @cat_cols = qw( catid pretty_name url_path parentcatid vert_id );
 my @prop_cols = qw( children top_children in_nav featured );
 
 #
@@ -238,13 +238,18 @@ sub load_by_uri {
 }
 
 sub load_all {
-    my $class = shift;
+    my $class    = shift;
+    my $vertical = shift;
 
     my $dbh = LJ::get_db_reader()
         or die "unable to contact global db slave to load categories";
 
-    my $sth = $dbh->prepare("SELECT * FROM category");
-    $sth->execute;
+    my $vert_id = $vertical ? $vertical->vert_id : undef;
+    my $where = '';
+    $where = ' WHERE vert_id = ? ' if $vert_id;
+
+    my $sth = $dbh->prepare("SELECT * FROM category" . $where);
+    $sth->execute($vert_id);
     die $dbh->errstr if $dbh->err;
 
     my @categories;
@@ -353,13 +358,23 @@ sub load_by_url {
     $path =~ s/\/?(?:\?.*)?$//; # remove trailing slash and any get args
     $path =~ s/\/index\.bml$//; # remove bml page
 
-    # 3 possibilities:
+    # 4 possibilities:
     # /browse
-    # /browse/topcategory/
-    # /browse/topcategory/subcategory/[subcategory]
-    if ($path =~ /^\/browse\/(.+)$/) {
+    # /browse/vertical/
+    # /browse/vertical/topcategory/
+    # /browse/vertical/topcategory/subcategory/[subcategory]
+    if ($path =~ /^(\/browse.+)$/) {
         my $p = $1;
         my $category;
+
+        $p =~ s#^(/browse/(?:[\w\-]|[^/])+)/?##;
+        my $v_uri = $1;
+
+        ## Vertical is not set
+        return undef unless $v_uri;
+
+        my $vertical = LJ::Vertical->load_by_url ($v_uri);
+        #return $vertical;
 
         # check cache now for full URI
         my $c = $class->load_from_uri_cache("/" . $p);
@@ -763,10 +778,12 @@ sub path {
 
 # returns full URL for a category
 sub url {
-    my $self = shift;
+    my $self     = shift;
+    my $vertical = shift;
 
-    my $base = "$LJ::SITEROOT/browse";
-    my $parent = "";
+    return undef unless $vertical;
+
+    my $base = "$LJ::SITEROOT/browse".$vertical->uri;
 
     return $base . $self->uri . "/";
 }
@@ -792,6 +809,19 @@ sub title_html {
     }
 
     return $ret;
+}
+
+sub recent_posts {
+    my $class = shift;
+    my $comms = shift;
+    my $limit = shift;
+
+    my $comm_list = join ",", @$comms;
+    my $dbh = LJ::get_db_reader();
+    my $post_ids = $dbh->selectall_arrayref ("SELECT * FROM category_recent_posts WHERE journalid IN ($comm_list) AND is_deleted = 0 ORDER BY timecreate DESC LIMIT $limit", { Slice => {} });
+    my @entries = map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) } @$post_ids;
+    return @entries;
+
 }
 
 # Return a list of communities found in a category
