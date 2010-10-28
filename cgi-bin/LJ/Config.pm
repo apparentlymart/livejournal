@@ -45,7 +45,8 @@ sub reload {
                 ( domain => $LJ::MOGILEFS_CONFIG{domain},
                   root   => $LJ::MOGILEFS_CONFIG{root},
                   hosts  => $LJ::MOGILEFS_CONFIG{hosts},
-                  readonly => $LJ::DISABLE_MEDIA_UPLOADS, );
+                  readonly => $LJ::DISABLE_MEDIA_UPLOADS,
+                  timeout => $LJ::MOGILEFS_CONFIG{timeout} || 3 );
               LJ::mogclient()->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
                   if %LJ::MOGILEFS_PREF_IP;
           }
