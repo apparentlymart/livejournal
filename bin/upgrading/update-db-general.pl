@@ -4232,6 +4232,14 @@ register_alter(sub {
                  "ADD vert_id INT(11) NOT NULL");
     }
 
+    unless (column_type("vertical2", "show_entries")) {
+        do_alter("vertical2",
+                "ALTER TABLE vertical2 
+                    ADD show_entries INT NOT NULL, 
+                    ADD not_deleted INT NOT NULL, 
+                    ADD remove_after INT NOT NULL");
+    }
+
 });
 
 register_tablecreate("eventrates", <<'EOC'); # clustered
