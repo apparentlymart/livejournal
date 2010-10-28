@@ -1,18 +1,26 @@
 <div class="l-body">
-    <div class="b-catalogue">
-        <div class="l-aside">    
-            <TMPL_INCLUDE menu.tmpl> 
-        </div>
-        <div class="l-content">
-            <TMPL_INCLUDE communities.tmpl>
-        </div>
-        <div class="l-content">
-            <TMPL_INCLUDE recent_posts.tmpl>
-        </div>
-        <div class="l-sidebar">
-            <TMPL_INCLUDE sidebar.tmpl>
-        </div>
-    </div>
+	<div class="b-catalogue">
+		<div class="l-aside">	
+			<TMPL_INCLUDE menu.tmpl> 
+		</div>
+		<div class="l-content-wide">
+			<ul class="m-tab-switcher">
+				<li<tmpl_if expr="view eq 'recent_posts'"> class="cur"</tmpl_if>><a href="?view=recent_posts">Recent posts</a></li>
+				<li<tmpl_if expr="view eq 'communities'"> class="cur"</tmpl_if>><a href="?view=communities">Communities</a></li>
+			</ul>
+		</div>
+		<div class="l-content">
+        <tmpl_if expr="view eq 'communities'">
+			<TMPL_INCLUDE communities.tmpl>
+        </tmpl_if>
+        <tmpl_if expr="view eq 'recent_posts'">
+			<TMPL_INCLUDE recent_posts.tmpl>
+        </tmpl_if>
+		</div>
+		<div class="l-sidebar">
+			<TMPL_INCLUDE sidebar.tmpl>
+		</div>
+	</div>
 </div>
 
 
