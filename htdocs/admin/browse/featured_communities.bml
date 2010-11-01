@@ -1,0 +1,99 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
+    $title = "Top Entries in communities";
+    my $ret = "";
+
+    my $vert_id = $POST{'vert_id'};
+    my $journals = $POST{'journals'};
+
+    $ret .= "<form method='POST'>\n";
+    $ret .= LJ::form_auth();
+
+    # Get the full list of categories
+    my @verticals = LJ::Vertical->load_all;
+    # Don't include the top level categories and get the unique URI for each
+
+    my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
+    @vert_ids = sort { $a cmp $b } @vert_ids;
+
+    $ret .= "<p>Select vertical:";
+    $ret .= LJ::html_select({
+                name => 'vert_id',
+                selected => $vert_id },
+                { text => 'Select Category',
+                value => '' },
+                @vert_ids
+            );
+    $ret .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</p>";
+
+    $ret .= "</form>";
+
+    my $vertical = undef;
+    if ($vert_id) {
+        $vertical = LJ::Vertical->load_by_id($vert_id);
+        $ret .= <<ADDPOST;
+<form method="post">
+<input type="hidden" name="vert_id" value="$vert_id">
+<table>
+    <caption>Enter URL for adding featured post:</caption>
+    <tr>
+        <td>URL:</td><td colspan="2"><input type="text" size="50" name="url"></td>
+        <td colspan="2"><input type="submit" name="add" value="Add"></td>
+    </tr>
+</table>
+</form>
+<br/>
+<br/>
+ADDPOST
+
+    }
+
+    if (LJ::did_post() && $POST{'add'}) {
+        $vertical->add_community ($POST{'url'});
+    }
+
+    if (LJ::did_post() && $POST{'delete_comm'}) {
+        $vertical->delete_community (comm_id => $POST{'rec_id'});
+    }
+
+    if (LJ::did_post()) {
+        $ret .= "<b><div>Added Communities</div></p>";
+        my $comms = $vertical->load_communities( count => '100', is_random => 0 );
+
+        foreach (@$comms) {
+            my $comm = LJ::load_userid($_->{journalid});
+            my $url = $comm->journal_base;
+            $ret .= "<li><a href='".$url."'>".$comm->display_name."</a>";
+            $ret .= "<form method='POST'>\n";
+            $ret .= LJ::form_auth();
+            $ret .= "<input type='hidden' name='rec_id' value='".$comm->userid."'>";
+            $ret .= "<input type='hidden' name='vert_id' value='".$vertical->vert_id."'>";
+            $ret .= "<input type='submit' name='delete_comm' value='Remove post'>";
+            $ret .= "</form>";
+        }
+    }
+
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

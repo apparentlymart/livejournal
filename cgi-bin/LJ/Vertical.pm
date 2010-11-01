@@ -586,6 +586,27 @@ sub unloaded_singletons {
 # Loaders
 #
 
+sub load_communities {
+    my $self = shift;
+    my %args = @_;
+
+    my $is_random = $args{'is_random'};
+
+    my $dbh = LJ::get_db_writer();
+    my $comms = $dbh->selectall_arrayref("SELECT * FROM vertical_comms WHERE vert_id = ?", { Slice => {} }, $self->vert_id);
+    return [] unless $comms;
+    my $max_num = scalar @$comms;
+    my $count   = $args{'count'};
+    $count = $max_num if $count > $max_num;
+    my @result = ();
+    while ($count--) {
+        my $comm = $comms->[int(rand($max_num))];
+        push @result, $comm if $comm;
+    }
+
+    return \@result;
+}
+
 ## Return a list of Top Entries in communities
 ## Arg:
 ##     - count     - for admin page - all (Inf), for widget - 5, for example
@@ -1025,6 +1046,33 @@ sub delete_and_purge {
 #
 # Accessors
 #
+
+sub delete_community {
+    my $self = shift;
+    my %args = @_;
+
+    my $journalid = $args{'comm_id'};
+
+    return undef unless $journalid;
+
+    my $dbh = LJ::get_db_writer();
+    my $res = $dbh->do("DELETE FROM vertical_comms WHERE vert_id = ? AND journalid = ?", undef, $self->vert_id, $journalid);
+    return $res;
+}
+
+sub add_community {
+    my $self = shift;
+    my $url  = shift;
+
+    my $c = LJ::User->new_from_url ($url);
+    return undef unless $c;
+
+    my $dbh = LJ::get_db_writer();
+    my $res = $dbh->do("INSERT INTO vertical_comms (vert_id, journalid, timecreate, timeadded) VALUES
+        (?, ?, ?, UNIX_TIMESTAMP())", undef, $self->vert_id, $c->userid, $c->timecreate);
+
+    return $res;
+}
 
 sub delete_post {
     my $self = shift;

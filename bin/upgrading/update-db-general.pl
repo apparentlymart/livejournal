@@ -3128,6 +3128,19 @@ CREATE TABLE vertical_posts (
 )
 EOC
 
+register_tablecreate("vertical_comms", <<'EOC');
+CREATE TABLE vertical_comms (
+  vert_id int(11) NOT NULL,
+  journalid int(11) NOT NULL,
+  timecreate datetime NOT NULL,
+  timeadded datetime NOT NULL,
+  is_deleted tinyint(1) default '0',
+  PRIMARY KEY  (vert_id),
+  KEY journalid (journalid),
+  KEY timecreate (timecreate)
+)
+EOC
+
 ## --
 ## -- embedconten previews
 ## --

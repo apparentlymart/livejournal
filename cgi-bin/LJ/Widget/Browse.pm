@@ -288,6 +288,21 @@ sub render_body {
     # merge args to uri.
     $uri .= '?' . $args if $args;
 
+    ## Prepare DATA for Featured Communities Widget
+    my $comms = $vertical->load_communities( count => $vertical->show_entries, is_random => 1 );
+    my @top_comms = ();
+    foreach my $comm (@$comms) {
+        my $c = LJ::load_userid($comm->{journalid});
+        next unless $c;
+        my $userpic = $c->userpic;
+        push @top_comms, {
+            username        => $c->display_name,
+            userpic         => $userpic ? $userpic->url : '',
+            community       => $c->user,
+            bio             => $c->bio,
+        };
+    }
+
     ## Prepare DATA for Featured Posts Widget
     my $posts = $vertical->load_vertical_posts( count => $vertical->show_entries, is_random => 1 );
     my @top_posts = ();
@@ -326,6 +341,7 @@ sub render_body {
         add_community_widget    => LJ::Widget::AddCommunity->render(),
         search_widget           => LJ::Widget::Search->render(type => 'yandex'),
         top_posts               => \@top_posts,
+        top_comms               => \@top_comms,
         view                    => $view,
     );
 
