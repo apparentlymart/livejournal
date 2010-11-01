@@ -91,7 +91,7 @@ sub render_body {
         name => 'vertid',
         id => 'vertid',
         selected => $vertid || 0,
-        list => [ "0", "(Choose one)", map { $_->vertid, $_->display_name } LJ::Vertical->load_for_editorials ],
+        list => [ "0", "(Choose one)", map { $_->vert_id, $_->display_name } LJ::Vertical->load_for_editorials ],
     ) . "</td></tr>";
 
     $ret .= "<tr><td>Start Date:</td><td>";

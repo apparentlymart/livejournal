@@ -23,6 +23,7 @@ body<=
     $ret .= "<p><a href='./remove_verticals.bml'>Remove Verticals</a></p>";
     $ret .= "<p><a href='./upload_verticals.bml'>Upload Verticals</a></p>";
     $ret .= "<p><a href='./recent_posts.bml'>Manage Recent Posts</a></p>";
+    $ret .= "<p><a href='./top_entries_vertical.bml'>Top Entries in communities</a></p>";
     $ret .= "</blockquote>";
 
     $ret .= "<h2>Manage Communities</h2><blockquote>";

@@ -246,10 +246,10 @@ sub load_all {
 
     my $vert_id = $vertical ? $vertical->vert_id : undef;
     my $where = '';
-    $where = ' WHERE vert_id = ? ' if $vert_id;
+    $where = " WHERE vert_id = $vert_id " if $vert_id;
 
     my $sth = $dbh->prepare("SELECT * FROM category" . $where);
-    $sth->execute($vert_id);
+    $sth->execute();
     die $dbh->errstr if $dbh->err;
 
     my @categories;
@@ -373,7 +373,7 @@ sub load_by_url {
         ## Vertical is not set
         return undef unless $v_uri;
 
-        my $vertical = LJ::Vertical->load_by_url ($v_uri);
+        #my $vertical = LJ::Vertical->load_by_url ($v_uri);
         #return $vertical;
 
         # check cache now for full URI
@@ -701,6 +701,7 @@ sub load_props {
 
 sub load_communities {
     my $self = shift;
+    my %args = @_;
 
     # check memcache for data
     my $memval = LJ::MemCache::get($self->memkey_catid_journals());
@@ -712,8 +713,19 @@ sub load_communities {
     my $dbh = LJ::get_db_reader()
         or die "unable to contact global db slave to load category";
 
-    my $sth = $dbh->prepare("SELECT * FROM categoryjournals WHERE catid=?");
-    $sth->execute($self->catid);
+    my @cats = ( $self->catid );
+    if ($args{'is_need_child'}) {
+        ## get communities from child category too. need for Info (Admin Page), for example
+        my $sth = $dbh->prepare("SELECT catid FROM category WHERE parentcatid = ?");
+        $sth->execute($self->catid);
+        while (my $row = $sth->fetchrow_hashref) {
+            push @cats, $row->{'catid'};
+        }
+    }
+
+    my @ph = map { '?' } @cats;
+    my $sth = $dbh->prepare("SELECT * FROM categoryjournals WHERE catid IN (".(join ",", @ph).")");
+    $sth->execute(@cats);
     my $jrow;
     while (my $row = $sth->fetchrow_hashref) {
         push @{$jrow->{communities}}, $row->{journalid};
@@ -727,6 +739,13 @@ sub load_communities {
 # Accessors
 #
 #
+
+sub vertical {
+    my $self = shift;
+
+    return LJ::Vertical->load_by_id ($self->vert_id);
+}
+
 sub children {
     my $self = shift;
     my %opts = @_;
@@ -769,11 +788,14 @@ sub parent {
 sub path {
     my $c = shift;
     my $p = '';
+    my $v = undef;
     if ($c->parent) {
         $p = $c->parent->url_path . $p;
         $p = path($c->parent) . $p;
+    } else {
+        $v = LJ::Vertical->load_by_id ($c->vert_id);
     }
-    return $p;
+    return $v ? $v->uri . $p : $p;
 }
 
 # returns full URL for a category
@@ -783,7 +805,7 @@ sub url {
 
     return undef unless $vertical;
 
-    my $base = "$LJ::SITEROOT/browse".$vertical->uri;
+    my $base = "$LJ::SITEROOT/browse";
 
     return $base . $self->uri . "/";
 }
@@ -828,7 +850,9 @@ sub recent_posts {
 # Returns User objects
 sub communities {
     my $self = shift;
-    $self->load_communities unless $self->{_loaded_journals};
+    my %args = @_;
+
+    $self->load_communities ( %args ) unless ($args{'is_need_child'} && $self->{_loaded_journals});
 
     my $comms = $self->{communities};
     my $cusers = LJ::load_userids(@$comms);
@@ -950,6 +974,7 @@ sub catid          { shift->_get_set('catid')              }
 sub display_name   { shift->_get_set('pretty_name')        }
 sub url_path       { shift->_get_set('url_path')           }
 sub parentid       { shift->_get_set('parentcatid')        }
+sub vert_id        { shift->_get_set('vert_id')            }
 
 
 # Community Moderation

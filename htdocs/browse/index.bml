@@ -20,6 +20,7 @@ body<=
 
     my $page = defined $GET{page} ? $GET{page} : 1;
     my $post_page = defined $GET{post_page} ? $GET{post_page} : 1;
+    my $view = defined $GET{'view'} ? $GET{'view'} : 'recent_posts';
 
     my $vertical = LJ::Vertical->load_by_url($uri);
     unless ($vertical) {
@@ -37,6 +38,7 @@ body<=
         uri         => $uri,
         page        => $page,
         post_page   => $post_page,
+        view        => $view,
     );
 }
 _code?>

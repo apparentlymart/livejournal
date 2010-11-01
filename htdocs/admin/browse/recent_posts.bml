@@ -43,7 +43,6 @@ body<=
     $ret .= "</form>";
 
     if (LJ::did_post()) {
-use Data::Dumper;
         my $vertical = LJ::Vertical->load_by_id($POST{'vert_id'});
         my $cats = $vertical->get_categories;
         $ret .= "<b><div>Recent Posts</div></p>";
@@ -54,9 +53,9 @@ use Data::Dumper;
             push @communities, @{$c->{communities}}
                 if $c->{communities};
         };
-warn Dumper \@communities;
+
         my @posts = LJ::Browse->recent_posts(\@communities, 5);
-warn Dumper \@posts;
+
         foreach (@posts) {
             my $url = $_->url;
             my $subject = $_->subject_text;

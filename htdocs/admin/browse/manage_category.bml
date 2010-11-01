@@ -17,38 +17,67 @@ body<=
     $title = "Move Category To Vertical";
     my $ret = "";
 
-    my ($vertid, $caturl) = ();
+    my ($vert_url, $cat_url) = ();
+
+    if (LJ::did_post() and $POST{'show'}) {
+        $cat_url = $POST{'cat_url'};
+
+        {
+            # Check for required data
+            unless ($cat_url) {
+                push @errors, "Please select a category for source";
+                next;
+            }
+
+            my $category = LJ::Browse->load_by_url("/browse" . $cat_url);
+            ## Category till is not in vertical?
+            $category = LJ::Browse->load_by_url("/browse" . "/notset" . $cat_url)
+                unless $category;
+            unless ($category) {
+                push @errors, "Invalid category" unless $category;
+                next;
+            }
+
+            $ret .= "Category '".$category->{pretty_name}."' belongs '".$category->vertical->name."' vertical<br/>";
+            $ret .= "Category contains the following communities:<br/>";
+            foreach my $comm ($category->communities( is_need_child => 1 )) {
+                $ret .= $comm->ljuser_display() . "<br/>";
+            }
+        }
+
+    }
 
     if (LJ::did_post() and $POST{'move'}) {
-        $caturl = $POST{'caturl'};
-        $vertid = $POST{'vertid'};
+        $cat_url = $POST{'cat_url'};
+        $vert_url = $POST{'vert_url'};
 
         push @errors, "Invalid form submission" unless LJ::check_form_auth();
         {
             # Check for required data
-            unless ($caturl) {
+            unless ($cat_url) {
                 push @errors, "Please select a category for source";
                 next;
             }
-            unless ($vertid) {
+            unless ($vert_url) {
                 push @errors, "Please select a vertical for destination";
                 next;
             }
 
-            # Has a valid category been chosen
-            my $category = LJ::Browse->load_by_url("/browse" . $caturl);
-            push @errors, "Invalid category" unless $category;
-
             # Has a valid vertical been chosen
-            my $vertical = LJ::Vertical->load_by_id($vertid);
+            my $vertical = LJ::Vertical->load_by_url("/browse" . $vert_url);
             push @errors, "Invalid vertical" unless $vertical;
+
+            # Has a valid category been chosen
+            my $category = LJ::Browse->load_by_url("/browse" . $vert_url . $cat_url);
+            push @errors, "Invalid category" unless $category;
 
             next if @errors;
 
             # Move category
             my $dbh = LJ::get_db_writer();
-            my $res = $dbh->do("UPDATE category SET vert_id = ? WHERE catid = ?", undef, $vertical->vert_id, $category->catid);
-            if ($res) {
+            my $res     = $dbh->do("UPDATE category SET vert_id = ? WHERE catid = ?", undef, $vertical->vert_id, $category->catid);
+            my $res_sub = $dbh->do("UPDATE category SET vert_id = ? WHERE parentcatid = ?", undef, $vertical->vert_id, $category->catid);
+            if ($res && $res_sub) {
                 $ret .= "<span class='super notice'>Category moved.</span>";
             } else {
                 $ret .= "<span class='super notice'>Category not moved.</span>";
@@ -64,16 +93,17 @@ body<=
     # Get the full list of categories
     my @categories = LJ::Browse->load_all;
     # Get the unique URI for each
-    my @caturls = map { { text => $_->{pretty_name}, value => $_->uri } } grep { $_->{parentcatid} } @categories;
+    my @caturls = map { { text => $_->{pretty_name}, value => $_->uri } } grep { !$_->{parentcatid} } @categories;
     #@caturls = sort { $a cmp $b } @caturls;
 
     my @verticals = LJ::Vertical->load_all();
-    @verticals = map { { text => $_->{name}, value => $_->{vert_id} } } @verticals;
+    @verticals = map { { text => $_->{name}, value => $_->{url} } } @verticals;
 
     $ret .= "<table border='0'>";
     $ret .= "<tr><td>Category</td><td>=></td><td>Vertical</td>";
     $ret .= "<tr><td>".LJ::html_select({
-                name => 'caturl',
+                name => 'cat_url',
+                selected => $cat_url,
                 },
                 { text => 'Select Top Category',
                 value => '',},
@@ -82,7 +112,8 @@ body<=
     $ret .= "</td>\n";
     $ret .= "<td>&nbsp;</td>";
     $ret .= "<td>".LJ::html_select({
-                name => 'vertid',
+                name => 'vert_url',
+                selected => $vert_url,
                 },
                 { text => 'Select Vertical',
                 value => '',},
@@ -93,6 +124,7 @@ body<=
     $ret .= "</table></p>\n";
 
     $ret .= "<p>" . LJ::html_submit('move', 'Move') . "</p>";
+    $ret .= "<p>" . LJ::html_submit('show', 'Show Info') . "</p>";
 
     $ret .= "</form>";
 

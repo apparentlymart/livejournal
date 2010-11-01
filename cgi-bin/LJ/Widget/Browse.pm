@@ -86,7 +86,7 @@ sub render_body {
 
     return $class->render_body_old(%opts) unless exists $opts{browse};
 
-    my ($title, $windowtitle, $remote, $uri, $page, $post_page) = @opts{qw(title windowtitle remote uri page post_page)};
+    my ($title, $windowtitle, $remote, $uri, $page, $post_page, $view) = @opts{qw(title windowtitle remote uri page post_page view)};
 
     my $template = LJ::HTML::Template->new(
         { use_expr => 1 }, # force HTML::Template::Pro with Expr support
@@ -170,14 +170,14 @@ sub render_body {
                     (pop(@cat_title) || '');
 
         # show actual communities
-        if ($cat->parent) {
+        #if ($cat->parent) {
             if ($cat->{'pretty_name'} eq 'lj_spotlight_community') {
                 # Load communities saved by spotlight admin
                 @comms = _get_spotlight_communities();  # Load communities saved by spotlight admin
             } else {
                 @comms = $cat->communities();
             }
-        }
+        #}
         $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $cat->display_name, ljadwrapper => 1 });
     } else {
         @comms = _get_spotlight_communities();  # Show spotlight communities by default
@@ -288,6 +288,20 @@ sub render_body {
     # merge args to uri.
     $uri .= '?' . $args if $args;
 
+    ## Prepare DATA for Featured Posts Widget
+    my $posts = $vertical->load_vertical_posts( count => $vertical->show_entries, is_random => 1 );
+    my @top_posts = ();
+    foreach my $post (@$posts) {
+        my $entry = LJ::Entry->new ($post->{journalid}, jitemid => $post->{jitemid});
+        my $userpic = $entry->userpic;
+        push @top_posts, {
+            subject         => $entry->subject_text,
+            userpic         => $userpic ? $userpic->url : '',
+            updated_ago     => LJ::TimeUtil->ago_text($entry->logtime_unix),
+            comments_count  => $entry->reply_count,
+        };
+    }
+
     $template->param(
         communities             => \@tmpl_communities,
         posts                   => \@tmpl_posts,
@@ -311,6 +325,8 @@ sub render_body {
         popular_interests_widget=> LJ::Widget::PopularInterests->render(),
         add_community_widget    => LJ::Widget::AddCommunity->render(),
         search_widget           => LJ::Widget::Search->render(type => 'yandex'),
+        top_posts               => \@top_posts,
+        view                    => $view,
     );
 
     return $template->output;

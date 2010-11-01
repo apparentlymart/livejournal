@@ -79,7 +79,7 @@ sub load_current_editorials_for_vertical {
     my $sth = $dbh->prepare(
         "SELECT * FROM vertical_editorials WHERE time_start <= UNIX_TIMESTAMP() AND time_end >= UNIX_TIMESTAMP() AND vertid = ?"
     );
-    $sth->execute($vertical->vertid);
+    $sth->execute($vertical->vert_id);
 
     my @rows = ();
     while (my $row = $sth->fetchrow_hashref) {
@@ -207,7 +207,7 @@ sub get_all_editorials_running_during_month {
         "(time_start <= ? AND time_end >= ?))"
     );
     $sth->execute(
-        $vertical->vertid, $time_start_epoch, $time_start_epoch, $time_end_epoch, $time_end_epoch,
+        $vertical->vert_id, $time_start_epoch, $time_start_epoch, $time_end_epoch, $time_end_epoch,
         $time_start_epoch, $time_end_epoch, $time_start_epoch, $time_end_epoch
     )
         or die "Error getting this month's editorials: " . $dbh->errstr;

@@ -42,7 +42,7 @@ my $DB_ENTRY_CHUNK       = 1_000; # rows to fetch per quety
 #
 
 my %singletons = (); # vertid => singleton
-my @vert_cols = qw( vert_id url journal name createtime lastfetch );
+my @vert_cols = qw( vert_id url journal name createtime lastfetch show_entries not_deleted remove_after );
 
 sub min_age_of_poster_account {
     my $class = shift;
@@ -373,7 +373,7 @@ sub load_by_name {
 
     my $reqcache = $LJ::REQ_GLOBAL{vertname}->{$name};
     if ($reqcache) {
-        my $v = $class->new( vertid => $reqcache->{vertid} );
+        my $v = $class->new( vert_id => $reqcache->{vert_id} );
         $v->absorb_row($reqcache);
 
         return $v;
@@ -382,7 +382,7 @@ sub load_by_name {
     # check memcache for data
     my $memval = LJ::MemCache::get($class->memkey_vertname($name));
     if ($memval) {
-        my $v = $class->new( vertid => $memval->{vertid} );
+        my $v = $class->new( vert_id => $memval->{vert_id} );
         $v->absorb_row($memval);
         $LJ::REQ_GLOBAL{vertname}->{$name} = $memval;
 
@@ -393,12 +393,12 @@ sub load_by_name {
         or die "unable to contact global db master to load vertical";
 
     # not in memcache; load from db
-    my $sth = $dbh->prepare("SELECT * FROM vertical WHERE name = ?");
+    my $sth = $dbh->prepare("SELECT * FROM vertical2 WHERE name = ?");
     $sth->execute($name);
     die $dbh->errstr if $dbh->err;
 
     if (my $row = $sth->fetchrow_hashref) {
-        my $v = $class->new( vertid => $row->{vertid} );
+        my $v = $class->new( vert_id => $row->{vert_id} );
         $v->absorb_row($row);
         $v->set_memcache;
         $LJ::REQ_GLOBAL{vertname}->{$name} = $row;
@@ -540,12 +540,24 @@ sub load_for_editorials {
     my $class = shift;
 
     my @verticals;
-    foreach my $vertname (keys %LJ::VERTICAL_TREE) {
-        next unless $LJ::VERTICAL_TREE{$vertname}->{has_editorials};
 
-        my $v = $class->load_by_name($vertname);
-        push @verticals, $v if $v;
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to load vertical";
+
+    my $sth = $dbh->prepare("SELECT * FROM vertical2");
+    $sth->execute;
+    die $dbh->errstr if $dbh->err;
+
+    my @verticals;
+    while (my $row = $sth->fetchrow_hashref) {
+        my $v = $class->new( vert_id => $row->{vert_id} );
+        $v->absorb_row($row);
+        $v->set_memcache;
+
+        push @verticals, $v;
     }
+
+        #next unless $LJ::VERTICAL_TREE{$vertname}->{has_editorials};
 
     return sort { lc $a->display_name cmp lc $b->display_name } @verticals;
 }
@@ -573,6 +585,30 @@ sub unloaded_singletons {
 #
 # Loaders
 #
+
+## Return a list of Top Entries in communities
+## Arg:
+##     - count     - for admin page - all (Inf), for widget - 5, for example
+##     - is_random - need to shuffle?
+sub load_vertical_posts {
+    my $self = shift;
+    my %args = @_;
+
+    my $is_random = $args{'is_random'};
+
+    my $dbh = LJ::get_db_writer();
+    my $posts = $dbh->selectall_arrayref("SELECT * FROM vertical_posts WHERE vert_id = ?", { Slice => {} }, $self->vert_id);
+    my $max_num = scalar @$posts;
+    my $count   = $args{'count'};
+    $count = $max_num if $count > $max_num;
+    my @result = ();
+    while ($count--) {
+        my $post = $posts->[int(rand($max_num))];
+        push @result, $post if $post;
+    }
+
+    return \@result;
+}
 
 sub memkey_vertid {
     my $self = shift;
@@ -722,7 +758,7 @@ sub preload_rows {
 
     my @vals = keys %need;
     my $bind = LJ::bindstr(@vals);
-    my $sth = $dbh->prepare("SELECT * FROM vertical WHERE vert_id IN ($bind)");
+    my $sth = $dbh->prepare("SELECT * FROM vertical2 WHERE vert_id IN ($bind)");
     $sth->execute(@vals);
 
     while (my $row = $sth->fetchrow_hashref) {
@@ -847,7 +883,7 @@ sub load_rules {
 
     # db contains storable object
     my $rules = $dbh->selectrow_array("SELECT rules FROM vertical_rules WHERE vertid=?",
-                                      undef, $self->vertid);
+                                      undef, $self->vert_id);
     die $dbh->errstr if $dbh->err;
 
     # if we got something, deserialize it
@@ -988,6 +1024,37 @@ sub delete_and_purge {
 #
 # Accessors
 #
+
+sub delete_post {
+    my $self = shift;
+    my %args = @_;
+
+    my $post_id = $args{'post_id'};
+
+    my ($jitemid, $journalid) = $post_id =~ m#^(\d+)-(\d+)$#; ## Parse key
+
+    return undef unless $journalid && $jitemid;
+
+    my $dbh = LJ::get_db_writer();
+    my $res = $dbh->do("DELETE FROM vertical_posts WHERE vert_id = ? AND journalid = ? AND jitemid = ?", undef, $self->vert_id, $journalid, $jitemid);
+    return $res;
+}
+
+sub add_post {
+    my $self = shift;
+    my $url  = shift;
+
+    my $entry = LJ::Entry->new_from_url ($url);
+
+    return undef unless $entry;
+
+    my $dbh = LJ::get_db_writer();
+    my $res = $dbh->do("INSERT INTO vertical_posts (vert_id, journalid, jitemid, timecreate, timeadded) VALUES
+        (?, ?, ?, ?, UNIX_TIMESTAMP())", undef, $self->vert_id, $entry->journalid, $entry->jitemid, $entry->logtime_unix);
+
+    return $res;
+
+}
 
 sub add_entry {
     my $self = shift;
@@ -1251,7 +1318,8 @@ sub siblings {
 sub display_name {
     my $self = shift;
 
-    return $LJ::VERTICAL_TREE{$self->name}->{display_name};
+    return $self->name;
+    #return $LJ::VERTICAL_TREE{$self->name}->{display_name};
 }
 
 sub url {
@@ -1390,16 +1458,22 @@ sub _get_set {
     return $self->{$key};
 }
 
-sub vert_id         { shift->_get_set('vert_id')                }
-sub name            { shift->_get_set('name')                   }
-sub set_name        { shift->_get_set('name' => $_[0])          }
-sub uri             { shift->_get_set('url')                    }
-sub set_uri         { shift->_get_set('url' => $_[0])           }
-sub journal         { shift->_get_set('journal')                }
-sub set_journal     { shift->_get_set('journal' => $_[0])       }
-sub createtime      { shift->_get_set('createtime')             }
-sub set_createtime  { shift->_get_set('createtime' => $_[0])    }
-sub lastfetch       { shift->_get_set('lastfetch')              }
-sub set_lastfetch   { shift->_get_set('lastfetch' => $_[0])     }
+sub vert_id          { shift->_get_set('vert_id')                }
+sub name             { shift->_get_set('name')                   }
+sub set_name         { shift->_get_set('name' => $_[0])          }
+sub uri              { shift->_get_set('url')                    }
+sub set_uri          { shift->_get_set('url' => $_[0])           }
+sub journal          { shift->_get_set('journal')                }
+sub set_journal      { shift->_get_set('journal' => $_[0])       }
+sub createtime       { shift->_get_set('createtime')             }
+sub set_createtime   { shift->_get_set('createtime' => $_[0])    }
+sub lastfetch        { shift->_get_set('lastfetch')              }
+sub set_lastfetch    { shift->_get_set('lastfetch' => $_[0])     }
+sub show_entries     { shift->_get_set('show_entries')           }
+sub set_show_entries { shift->_get_set('show_entries' => $_[0])  }
+sub not_deleted      { shift->_get_set('not_deleted')            }
+sub set_not_deleted  { shift->_get_set('not_deleted' => $_[0])   }
+sub remove_after     { shift->_get_set('remove_after')           }
+sub set_remove_after { shift->_get_set('remove_after' => $_[0])  }
 
 1;

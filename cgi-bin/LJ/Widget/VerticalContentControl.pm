@@ -32,13 +32,13 @@ sub render_body {
         if (@verticals > 1) {
             $ret .= $class->html_select(
                 name => 'verticals',
-                list => [ map { $_->vertid, $_->display_name } @verticals ],
+                list => [ map { $_->vert_id, $_->display_name } @verticals ],
                 multiple => 'multiple',
                 size => 5,
             );
         } else {
             $ret .= "<strong>" . $verticals[0]->display_name . "</strong>";
-            $ret .= $class->html_hidden( verticals => $verticals[0]->vertid );
+            $ret .= $class->html_hidden( verticals => $verticals[0]->vert_id );
         }
         $ret .= "</td></tr>";
 
@@ -147,7 +147,7 @@ sub render_body {
         $ret .= "<form method='GET'>";
         $ret .= "Define rules for vertical: ";
         if (@verticals > 1) {
-            $ret .= LJ::html_select({ name => 'vertical_name' }, map { $_->name, $_->display_name } @verticals);
+            $ret .= LJ::html_select({ name => 'vertical_name' }, map { { text => $_->name, value => $_->display_name } } @verticals);
         } else {
             $ret .= "<strong>" . $verticals[0]->display_name . "</strong>";
             $ret .= LJ::html_hidden( vertical_name => $verticals[0]->name );
@@ -231,8 +231,8 @@ sub handle_post {
 
         my @verticals = split('\0', $post->{verticals});
         my @vert_names;
-        foreach my $vertid (@verticals) {
-            my $v = LJ::Vertical->load_by_id($vertid);
+        foreach my $vert_id (@verticals) {
+            my $v = LJ::Vertical->load_by_id($vert_id);
             die "You cannot perform this action." if $action eq "add" && !$v->remote_is_moderator;
             die "You cannot perform this action." if $action eq "remove" && !$v->remote_can_remove_entry($entry);
 

@@ -1,0 +1,131 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
+    $title = "Top Entries in communities";
+    my $ret = "";
+
+    my $vert_id = $POST{'vert_id'};
+    my $journals = $POST{'journals'};
+
+    $ret .= "<form method='POST'>\n";
+    $ret .= LJ::form_auth();
+
+    # Get the full list of categories
+    my @verticals = LJ::Vertical->load_all;
+    # Don't include the top level categories and get the unique URI for each
+
+    my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
+    @vert_ids = sort { $a cmp $b } @vert_ids;
+
+    $ret .= "<p>Select vertical:";
+    $ret .= LJ::html_select({
+                name => 'vert_id',
+                selected => $vert_id },
+                { text => 'Select Category',
+                value => '' },
+                @vert_ids
+            );
+    $ret .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</p>";
+
+    $ret .= "</form>";
+
+    my $vertical = undef;
+    if ($vert_id) {
+        $vertical = LJ::Vertical->load_by_id($vert_id);
+    }
+
+    if (LJ::did_post() && $POST{'store'}) {
+        $vertical->set_show_entries ($POST{'show_entries'});
+        $vertical->set_not_deleted ($POST{'not_deleted'});
+        $vertical->set_remove_after ($POST{'remove_after'});
+    }
+
+    if ($vert_id) {
+        my ($show_entries, $not_deleted, $remove_after) = ();
+        if ($vertical) {
+            $show_entries = $vertical->show_entries;
+            $not_deleted  = $vertical->not_deleted;
+            $remove_after = $vertical->remove_after;
+        }
+        $ret .= <<ADDPOST;
+<form method="post">
+<input type="hidden" name="vert_id" value="$vert_id">
+<table>
+    <caption>Enter URL for adding featured post:</caption>
+    <tr>
+        <td>URL:</td><td colspan="2"><input type="text" size="50" name="url"></td>
+        <td colspan="2"><input type="submit" name="add" value="Add"></td>
+    </tr>
+</table>
+</form>
+<br/>
+<br/>
+<form method="post">
+<input type="hidden" name="vert_id" value="$vert_id">
+<table>
+    <tr>
+        <td>Number of shown entries: <input type="text" size="3" name="show_entries" value="$show_entries"></td>
+    </tr>
+    <tr>
+        <td>Number of entries, that can not be deleted: <input type="text" size="3" name="not_deleted" value="$not_deleted"> <input type="submit" name="store" value="Store"></td>
+    </tr>
+    <tr>
+        <td>Remove post from widget after: <input type="text" size="3" name="remove_after" value="$remove_after"></td>
+    </tr>
+</table>
+</form><br/><br/>
+ADDPOST
+
+    }
+
+    if (LJ::did_post() && $POST{'add'}) {
+        $vertical->add_post ($POST{'url'});
+    }
+
+    if (LJ::did_post() && $POST{'delete_post'}) {
+        $vertical->delete_post (post_id => $POST{'rec_id'});
+    }
+
+    if (LJ::did_post()) {
+        $ret .= "<b><div>Added Posts</div></p>";
+        my $posts = $vertical->load_vertical_posts( count => '100', is_random => 0 );
+
+        foreach (@$posts) {
+            my $entry = LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid});
+            my $url = $entry->url;
+            my $subject = $entry->subject_text;
+            my $jitemid = $entry->jitemid;
+            my $commid = $entry->journalid;
+            $ret .= "<li><a href='".$url."'>".($subject ? $subject : '...')."</a>";
+            $ret .= "<form method='POST'>\n";
+            $ret .= LJ::form_auth();
+            $ret .= "<input type='hidden' name='rec_id' value='$jitemid-$commid'>";
+            $ret .= "<input type='hidden' name='vert_id' value='".$vertical->vert_id."'>";
+            $ret .= "<input type='submit' name='delete_post' value='Remove post'>" if scalar @$posts > $vertical->not_deleted;
+            $ret .= "</form>";
+        }
+    }
+
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
