@@ -598,6 +598,7 @@ sub load_vertical_posts {
 
     my $dbh = LJ::get_db_writer();
     my $posts = $dbh->selectall_arrayref("SELECT * FROM vertical_posts WHERE vert_id = ?", { Slice => {} }, $self->vert_id);
+    return [] unless $posts;
     my $max_num = scalar @$posts;
     my $count   = $args{'count'};
     $count = $max_num if $count > $max_num;
