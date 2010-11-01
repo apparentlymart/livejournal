@@ -1924,7 +1924,7 @@ sub Entry
         $e->{'metadata'}->{'location'} = $loc->as_html_current if $loc;
     }
 
-    foreach my $key (qw/origin_url origin_author origin_date/) {
+    foreach my $key (qw/origin_url origin_author origin_date thumbnail/) {
         if ($p->{$key}) {
             $e->{'metadata'}->{$key} = $p->{$key};
             LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{$key});
@@ -1933,6 +1933,10 @@ sub Entry
 
     if ($p->{'origin_url'}) {
         $e->{'metadata'}->{'origin_url'} = "<a href='$e->{metadata}->{origin_url}'>$e->{metadata}->{origin_url}</a>";
+    }
+
+    if ($p->{'thumbnail'}) {
+        $e->{'metadata'}->{'thumbnail'} = "<img src='$p->{'thumbnail'}'>";
     }
 
     if (LJ::is_enabled('show_copyright', $u) && (LJ::Request->notes('codepath') eq 's2.entry' || LJ::Request->notes('codepath') eq 's2.reply')) {
