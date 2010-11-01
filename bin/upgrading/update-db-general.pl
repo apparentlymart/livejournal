@@ -3113,6 +3113,21 @@ CREATE TABLE vertical_editorials (
 )
 EOC
 
+register_tablecreate("vertical_posts", <<'EOC');
+CREATE TABLE vertical_posts (
+  vert_id int(10) unsigned NOT NULL,
+  journalid int(10) unsigned NOT NULL,
+  jitemid int(10) unsigned NOT NULL,
+  timecreate datetime NOT NULL,
+  timeadded datetime NOT NULL,
+  is_deleted tinyint(1) default '0',
+  PRIMARY KEY  (journalid,jitemid),
+  KEY timecreate (timecreate),
+  KEY journalid (journalid),
+  KEY vert_id (vert_id)
+)
+EOC
+
 ## --
 ## -- embedconten previews
 ## --
