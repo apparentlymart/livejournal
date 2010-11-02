@@ -666,7 +666,7 @@ sub _get_upf_scaled
 
     my @cancel_size = split /x/, $cancel_size;
     return { status => 'small' }
-        if $cancel_size and $ow <= $cancel_size[0] and $oh <= $cancel_size[1];
+        if $cancel_size[0] and $ow < $cancel_size[0] or $cancel_size[1] and $oh < $cancel_size[1];
 
     # converts an ImageMagick object to the form returned to our callers
     my $imageParams = sub {
