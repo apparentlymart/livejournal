@@ -5,7 +5,7 @@
 
 /* .pkg class wraps enclosing block element around inner floated elements */
 .pkg:after {
-    content: " ";
+    content: ".";
     display: block;
     visibility: hidden;
     clear: both;
