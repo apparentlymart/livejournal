@@ -103,34 +103,19 @@ ExpanderEx.prototype.isFullComment = function(comment){
 ExpanderEx.prototype.expandThread = function(json){
     this.loadingStateOff();
 
-    var fragment = document.createDocumentFragment();
-    var rowClone, row, threadId, cell, next;
+    var threadId, cell;
     for( var i = 0; i < json.length; ++i ) {
         threadId = json[ i ].thread;
         if( threadId in ExpanderEx.Collection )
             continue; //this comment is already expanded
 
-        row = jQuery('#ljcmt' + threadId );
-        rowClone = row.clone( true );
-        cell = rowClone.find( '#ljcmtxt' + threadId );
-
-        //remove preloader from cloned node
-        if( threadId == this.id ) {
-            cell.find('img.i-exp-preloader').remove();
-        }
+        cell = jQuery( '#ljcmtxt' + threadId );
 
         ExpanderEx.Collection[ threadId ] = cell.html();
         cell.replaceWith( ExpanderEx.prepareCommentBlock( json[ i ].html, threadId, false ) );
-        fragment.appendChild( rowClone[ 0 ] );
-
-        if( i == ( json.length - 1 ) ) {
-            next = row.next()[0];
-        }
-        row.remove();
     }
     //remove preloader if exist
     this.removePreloader();
-    next.parentNode.insertBefore( fragment, next );
 
     //duplicate cycle, because we do not know, that external scripts do with node
     for( var i = 0; i < json.length; ++i ) {
