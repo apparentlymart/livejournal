@@ -1,8 +1,32 @@
-<tmpl_loop top_posts>
-<tmpl_var subject><br/>
-<tmpl_var userpic><br/>
-<tmpl_var updated_ago><br/>
-<tmpl_var comments_count><br/>
-<hr/>
-</tmpl_loop>
+<div class="appwidget appwidget-featuredposts">
+<div class="right-mod">
+<div class="mod-tl">
+<div class="mod-tr">
+<div class="mod-br">
+<div class="mod-bl">
+	<div class="w-head">
+		<h2><span class="w-head-in">Featured posts</span></h2>
+		<i class="w-head-corner"></i>
+	</div>
+	<div class="w-content">
+		<ul class="b-posts">
+			<tmpl_loop top_posts>
+			<li<tmpl_if __last__> class="last"</tmpl_if>>
+				<dl>
+					<dt><img src="<tmpl_var userpic>"></dt>
+					<dd>
+						<h3 class="b-posts-head"><a href="<tmpl_var url_to_post>"><tmpl_var subject></a></h3>
+						<p class="b-posts-data"><i class="i-posts-time">Posted <tmpl_var updated_ago> |</i> <i class="i-posts-comments"><a href="<tmpl_var url_to_post>"><tmpl_var comments_count> comments</a></i></p>
+					</dd>
+				</dl>
+			</li>
+			</tmpl_loop>
+		</ul>
+	</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 

@@ -6,7 +6,7 @@
 		<li class="b-nav-counter-next"><TMPL_IF post_page_next><a href="<TMPL_VAR post_page_next>" title="<TMPL_VAR expr="ml('widget.browse.page.next')">"><i><TMPL_VAR expr="ml('widget.browse.page.next')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.next')"></i></span></TMPL_IF></li>
 		<li class="b-nav-counter-last"><TMPL_IF post_page_last><a href="<TMPL_VAR post_page_last>" title="<TMPL_VAR expr="ml('widget.browse.page.last')">"><i><TMPL_VAR expr="ml('widget.browse.page.last')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.last')"></i></span></TMPL_IF></li>
 	</ul>
-</TMPL_IF>	 
+</TMPL_IF>
 
 <ul class="b-catalogue-list b-recent-posts">
 <tmpl_loop posts>
@@ -22,9 +22,9 @@
 		</dl>
 		<div class="b-catalogue-item-desc">
 			<tmpl_var post_text>
-			<tmpl_if is_need_more>(<a href="<tmpl_var url_to_post>">Read more in original post</a>)<br/></tmpl_if>
+			<tmpl_if is_need_more>(<a href="<tmpl_var url_to_post>">Read more in original post</a>)</tmpl_if>
 		</div>
-		<p class="b-catalogue-item-comments"><span class="b-catalogue-comments-count"><a href="<tmpl_var url_to_post>#comments"><tmpl_var comments_count> comments</a> |<span> <a href="<tmpl_var url_to_post>?mode=reply">Leave comment</a></p>
+		<p class="b-catalogue-item-comments"><span class="b-catalogue-comments-count"><a href="<tmpl_var url_to_post>#comments"><tmpl_var comments_count> comments</a> |</span> <a href="<tmpl_var url_to_post>?mode=reply">Leave comment</a></p>
 	</li>
 </tmpl_loop>
 </ul>

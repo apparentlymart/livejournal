@@ -1,8 +1,38 @@
-<tmpl_loop top_comms>
-<tmpl_var username><br/>
-<tmpl_var community><br/>
-<tmpl_var userpic><br/>
-<tmpl_var bio><br/>
-<hr/>
-</tmpl_loop>
+<div class="appwidget appwidget-featuredcomms">
+<div class="right-mod">
+<div class="mod-tl">
+<div class="mod-tr">
+<div class="mod-br">
+<div class="mod-bl">
+	<div class="w-head">
+		<h2><span class="w-head-in">Featured communities</span></h2>
+		<i class="w-head-corner"></i>
+	</div>
+	<div class="w-content">
+		<ul class="b-posts">
+			<tmpl_loop top_comms>
+			<li<tmpl_if __last__> class="last"</tmpl_if>>
+				<dl>
+					<dt><img src="<tmpl_var userpic>"></dt>
+					<dd>
+						<p class="b-posts-head">
+							<span class="ljuser"><a href="/community/<tmpl_var community>/profile"><img width="16" height="16" alt="[info]" src="/img/community.gif" class="ContextualPopup"/></a><a href="/community/<tmpl_var community>/"><b><tmpl_var community></b></a></span>
+						</p>
+						<p class="b-posts-data"><tmpl_var bio></p>
+						<ul class="b-catalogue-item-action">
+							<li><form action="/community/join.bml" method="GET"><input type="hidden" name="comm" value="<tmpl_var username>"><input type="submit" value="<TMPL_VAR expr="ml('widget.browse.community.join')">" /></form></li>
+							<li><form action="/friends/add.bml"><input type="hidden" name="user" value="<tmpl_var username>"><input type="submit" value="<TMPL_VAR expr="ml('widget.browse.community.watch')">" /></form></li>
+						</ul>
+					</dd>
+				</dl>
+			</li>
+			</tmpl_loop>
+		</ul>
+	</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 

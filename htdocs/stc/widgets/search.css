@@ -26,3 +26,7 @@
                 width: 97%; 
                 }
                 
+.appwidget-browse .appwidget-search h2 span.w-head-in {
+	background:url(/img/icons/search-lite.png) no-repeat 0 0;
+	}
+
