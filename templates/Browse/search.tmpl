@@ -1,0 +1,12 @@
+<table width="100%" border="0" cellpadding="5">
+<caption><b>Search in <tmpl_var vertical_name></b></caption>
+<tr>
+<td>
+<input type="text" size="30" name="search_text" value="">
+<input type="submit" name="do_search" value="Go">
+</td>
+</tr>
+<tr>
+<td><tmpl_loop tags><a href="<tmpl_var search_url>/<tmpl_var tag><tmpl_if view>?view=<tmpl_var view></tmpl_if>"><tmpl_var tag></a><tmpl_unless __last__>, </tmpl_unless></tmpl_loop>
+</tr>
+</table>

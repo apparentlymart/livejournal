@@ -1,0 +1,79 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
+    $title = "Recent Entries in verticals";
+    my $ret = "";
+
+    my $vert_id = $POST{'vert_id'};
+    my $journals = $POST{'journals'};
+
+    $ret .= "<form method='POST'>\n";
+    my $form_auth = LJ::form_auth();
+    $ret .= $form_auth;
+
+    # Get the full list of categories
+    my @verticals = LJ::Vertical->load_all;
+    # Don't include the top level categories and get the unique URI for each
+
+    my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
+    @vert_ids = sort { $a cmp $b } @vert_ids;
+
+    $ret .= "<p>Select vertical:";
+    $ret .= LJ::html_select({
+                name => 'vert_id',
+                selected => $vert_id },
+                { text => 'Select Category',
+                value => '' },
+                @vert_ids
+            );
+    $ret .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</p>";
+
+    $ret .= "</form>";
+
+    my $vertical = undef;
+    if (LJ::did_post() && $vert_id) {
+        $vertical = LJ::Vertical->load_by_id($vert_id);
+    }
+
+    if (LJ::did_post() && $POST{'save'}) {
+        my $tags = $POST{'tags'};
+        $vertical->save_tags( is_seo => 1, tags => [ map { { journalid => 0, jitemid => 0, tag => $_ } } split /\r\n/, $tags ] );
+    }
+
+    if (LJ::did_post()) {
+        my $seo_tags = $vertical ? $vertical->load_tags ( is_seo => 1 ) : [];
+        $seo_tags = join "\n", map { $_->{keyword} } @$seo_tags;
+
+        $ret .= <<FORM;
+<form method="post">
+$form_auth
+<textarea cols="50" rows="20" name="tags">$seo_tags</textarea>
+<input type="hidden" name="vert_id" value="$vert_id">
+<input type="submit" name="save" value="Save search words">
+</form>
+FORM
+    }
+
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
