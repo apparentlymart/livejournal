@@ -1014,7 +1014,7 @@ sub render {
     }
     $ret .= "<br />\n" if !$opts{widget};
     $ret .= "<span style='font-family: monospace; font-weight: bold; font-size: 1.2em;'>" .
-            BML::ml('poll.isclosed') . "</span><br />\n"
+            LJ::Lang::ml('poll.isclosed') . "</span><br />\n"
         if ($self->is_closed);
 
     my $whoview = $self->whoview;
