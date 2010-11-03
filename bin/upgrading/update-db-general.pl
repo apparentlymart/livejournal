@@ -3135,7 +3135,7 @@ CREATE TABLE vertical_comms (
   timecreate datetime NOT NULL,
   timeadded datetime NOT NULL,
   is_deleted tinyint(1) default '0',
-  PRIMARY KEY  (vert_id),
+  PRIMARY KEY  (vert_id,journalid),
   KEY journalid (journalid),
   KEY timecreate (timecreate)
 )
