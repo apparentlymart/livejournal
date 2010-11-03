@@ -641,10 +641,13 @@ sub load_communities {
     return [] unless $comms;
     my $max_num = scalar @$comms;
     my $count   = $args{'count'};
-    $count = $max_num if $count > $max_num;
+    if ($count > $max_num) {
+        $count = $max_num;
+        $is_random = 0;
+    }
     my @result = ();
     while ($count--) {
-        my $comm = $comms->[int(rand($max_num))];
+        my $comm = $is_random ? $comms->[int(rand($max_num))] : $comms->[$count];
         push @result, $comm if $comm;
     }
 
