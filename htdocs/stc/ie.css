@@ -318,3 +318,39 @@ __________________________________________*/
 .search-precise .found.yalenta .yandex-ru {
 	top: 0;
 	}
+
+/* widgets on browse page
+-----------------------------------------------*/
+.appwidget-browse .w-content {
+	padding:0 0 7px;
+	}
+.appwidget-browse .w-content,
+.appwidget-browse .w-body {
+	border-width:0 1px 0;
+	}
+.appwidget-browse .b-posts DL {
+	padding:0 5px;
+	}
+	.appwidget-browse .b-posts DT {
+		_position:relative;
+		}
+		.appwidget-browse .b-posts-head {
+			_height:40px;
+			}
+
+.appwidget-browse .right-mod {
+	margin:0 2px;
+	border-bottom:1px solid #E6E6E6;
+	zoom:1;
+	}
+	.appwidget-browse .right-mod .mod-bl {
+		padding:0 0 4px;
+		background:url(/img/corners/bl-on-ffffff.gif) no-repeat 0 100%;
+		}
+	.appwidget-browse .right-mod .mod-br {
+		position:relative;
+		margin:0 -2px;
+		background:#F6F6F6 url(/img/corners/br-on-ffffff.gif) no-repeat 100% 100%;
+		zoom:1;
+		}
+
