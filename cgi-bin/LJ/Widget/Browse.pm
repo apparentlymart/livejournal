@@ -339,7 +339,7 @@ sub render_body {
         nav_line                => $nav_line,
         popular_interests_widget=> LJ::Widget::PopularInterests->render(),
         add_community_widget    => LJ::Widget::AddCommunity->render(),
-        search_widget           => LJ::Widget::Search->render(type => 'yandex'),
+        search_widget           => LJ::Widget::Search->render(type => "tags", view => $view),
         top_posts               => \@top_posts,
         top_comms               => \@top_comms,
         view                    => $view,

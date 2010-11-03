@@ -25,6 +25,7 @@ body<=
     $ret .= "<p><a href='./recent_posts.bml'>Manage Recent Posts</a></p>";
     $ret .= "<p><a href='./top_entries_vertical.bml'>Top Entries in communities</a></p>";
     $ret .= "<p><a href='./featured_communities.bml'>Featured Communities</a></p>";
+    $ret .= "<p><a href='./search_tags.bml'>Editing Search Tags</a></p>";
     $ret .= "</blockquote>";
 
     $ret .= "<h2>Manage Communities</h2><blockquote>";

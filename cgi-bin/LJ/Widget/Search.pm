@@ -68,6 +68,28 @@ return <<EOF
 EOF
     }
 
+    if ($opts{type} eq 'tags') {
+        my $template = LJ::HTML::Template->new(
+            { use_expr => 1 }, # force HTML::Template::Pro with Expr support
+            filename => "$ENV{'LJHOME'}/templates/Browse/search.tmpl",
+            die_on_bad_params => 0,
+            strict => 0,
+        ) or die "Can't open template: $!";
+
+        my $uri = BML::get_uri();
+        my $vertical = LJ::Vertical->load_by_url ($uri);
+
+        $uri .= "/" if $uri !~ m#/$#; ## add end slash if not exist
+        $template->param (
+            vertical_name   => $vertical->name,
+            search_url      => $uri."tag",
+            view            => $opts{'view'},
+            tags            => [ map { { tag => $_->{keyword} } } @{$vertical->load_tags (is_seo => 1)} ],
+        );
+
+        return $template->output;
+    }
+
     my $ret;
 
     my $single_search = $opts{single_search};

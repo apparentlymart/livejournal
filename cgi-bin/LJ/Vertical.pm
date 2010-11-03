@@ -586,6 +586,50 @@ sub unloaded_singletons {
 # Loaders
 #
 
+sub save_tags {
+    my $self = shift;
+    my %args = @_;
+
+    my $is_seo = $args{'is_seo'};
+    my $tags = $args{'tags'};
+
+    my $dbh = LJ::get_db_writer();
+
+    ## Get the diff between old and new tags list to delete that diff from DB
+    my $old_tags = $self->load_tags(%args);
+    if ($old_tags) {
+        my %new_tags = map { $_->{'tag'} => 1 } @$tags;
+        my $to_del_tags = [ grep { !$new_tags{$_} } map { $_->{keyword} } @$old_tags ];
+        ## Need to delete some tags?
+        if (@$to_del_tags) {
+            my @bind = map { '?' } @$to_del_tags;
+            my @bind_vals = map { $_ } @$to_del_tags;
+            my $del = $dbh->do("DELETE FROM vertical_keywords WHERE vert_id = ? AND keyword IN (".(join ",", @bind).")", undef, $self->vert_id, @bind_vals);
+        }
+    }
+
+    foreach my $tag (@$tags) {
+        my $kw_id = $dbh->selectall_arrayref("SELECT * FROM vertical_keywords WHERE keyword = ?", undef, $tag);
+        next if @$kw_id;
+        my $sth = $dbh->do("INSERT IGNORE INTO vertical_keywords (journalid, keyword, jitemid, vert_id, is_seo) VALUES (?, ?, ?, ?, ?)", undef , $tag->{journalid}, $tag->{tag}, $tag->{jitemid}, $self->vert_id, $is_seo);
+    }
+
+    return 1;
+}
+
+sub load_tags {
+    my $self = shift;
+    my %args = @_;
+
+    my $is_seo = $args{'is_seo'};
+
+    my $dbh = LJ::get_db_writer();
+    my $where = $is_seo ? " AND is_seo = 1 " : "";
+    my $tags = $dbh->selectall_arrayref("SELECT journalid, keyword, jitemid FROM vertical_keywords WHERE vert_id = ? $where", { Slice => {} }, $self->vert_id);
+
+    return $tags ? $tags : [];
+}
+
 sub load_communities {
     my $self = shift;
     my %args = @_;

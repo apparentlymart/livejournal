@@ -3141,6 +3141,19 @@ CREATE TABLE vertical_comms (
 )
 EOC
 
+register_tablecreate("vertical_keywords", <<'EOC');
+CREATE TABLE vertical_keywords (
+  journalid int(11) NOT NULL,
+  jitemid int(11) NOT NULL,
+  vert_id int(11) NOT NULL,
+  keyword varchar(80) NOT NULL,
+  is_seo tinyint(1) NOT NULL,
+  PRIMARY KEY  (journalid,jitemid,vert_id,keyword),
+  KEY vert_id (vert_id),
+  KEY keyword (keyword)
+)
+EOC
+
 ## --
 ## -- embedconten previews
 ## --
