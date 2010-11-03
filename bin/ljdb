@@ -17,6 +17,7 @@ sub usage {
    ljdb --user=bob --inactive
    ljdb --role=slave
    ljdb --role=slow
+   ljdb --execute=mysql-query         execute the mysql query and exit
    ljdb --mysql-options [multiple]    extra options to be passe to mysql invocation
    ljdb --cmd-out          (dumps the mysql command on STDOUT)
    ljdb --exit             (exits.  does not execute the mysql command)
