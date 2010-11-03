@@ -87,6 +87,8 @@ ExpanderEx.prototype.loadingStateOff = function(){
         // copying comment from ifame, so this code is not executed (?)
         this.__caller__.removeAttribute('already_clicked','already_clicked');
         if(this.__caller__.parentNode) this.__caller__.parentNode.replaceChild(this.stored_caller,this.__caller__);
+        //remove preloader if exist
+        this.removePreloader();
     }
     var obj = this;
     // When frame is removed immediately, IE raises an error sometimes
@@ -114,8 +116,6 @@ ExpanderEx.prototype.expandThread = function(json){
         ExpanderEx.Collection[ threadId ] = cell.html();
         cell.replaceWith( ExpanderEx.prepareCommentBlock( json[ i ].html, threadId, false ) );
     }
-    //remove preloader if exist
-    this.removePreloader();
 
     //duplicate cycle, because we do not know, that external scripts do with node
     for( var i = 0; i < json.length; ++i ) {
