@@ -20,7 +20,7 @@ sub expand_ljmap_tag {
             my $width = LJ::ehtml($attr->{'width'}) || 500;
             my $height = LJ::ehtml($attr->{'height'}) || 350;
             if ($host =~ /^maps\.google\.\w+$/) {
-                $iframe_url = URI->new("http://$host/");
+                $iframe_url = $uri->clone;
                 $url_params{'output'} = 'embed';
                 $iframe_url->query_form(%url_params);
             } elsif ($host eq 'maps.yandex.ru') {
