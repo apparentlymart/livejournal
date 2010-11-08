@@ -1641,8 +1641,8 @@ sub talkform {
         foreach my $pickw (@pics) {
             push @pics_display,
                 {
-                'userpic_keyword'  => $pickw,
-                'userpic_title'    => $pickw,
+                'userpic_keyword'  => LJ::ehtml($pickw),
+                'userpic_title'    => LJ::ehtml($pickw),
                 'userpic_selected' => $pickw eq
                     $form->{'prop_picture_keyword'},
                 };
