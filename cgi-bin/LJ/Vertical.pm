@@ -539,8 +539,6 @@ sub load_by_url {
 sub load_for_editorials {
     my $class = shift;
 
-    my @verticals;
-
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to load vertical";
 
