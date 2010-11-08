@@ -1216,7 +1216,7 @@ sub group_names {
                 next unless $self->allowmask & 1 << $groupid;
 
                 my $name = LJ::ehtml($groups->{$groupid}->{groupname});
-                my $url = LJ::eurl($poster->journal_base . "/security/group:$name");
+                my $url = $poster->journal_base . "/security/group:$name";
 
                 my $group_text = $remote->get_cap("security_filter") || $poster->get_cap("security_filter") ? "<a href='$url'>$name</a>" : $name;
                 push @friendgroups, $group_text;
