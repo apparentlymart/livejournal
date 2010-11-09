@@ -177,7 +177,14 @@
     BML::finish();
     BML::noparse();
 
-    return LJ::JSON->to_json( [ map { { thread => $_->{thread}, html => $_->{html}->{text} } } @$comments ] );
+    return LJ::JSON->to_json( [
+        map { {
+            thread => $_->{thread},
+            html   => $_->{html}->{text},
+            depth  => $_->{depth},
+            state  => $_->{state},
+        } } @$comments
+    ] );
 }
 
 _code?>

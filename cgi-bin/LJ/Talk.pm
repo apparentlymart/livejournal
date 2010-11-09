@@ -2277,21 +2277,25 @@ sub get_thread_html
         };
 
         my $html = {};
+        my $state;
 
         if ($post->{'state'} eq "D") ## LJSUP-6433
         {
+            $state = 'deleted';
             $html->{header} = $comment_header->();
             $html->{text}   = BML::ml('.deletedpost');
             $html->{footer} = $comment_footer->();
         }
         elsif ($post->{'state'} eq "S" && !$post->{'_loaded'} && !$post->{'_show'})
         {
+            $state = 'screened';
             $html->{header} = $comment_header->();
             $html->{text}   = BML::ml('.screenedpost');
             $html->{footer} = $comment_footer->();
         }
         elsif ($pu && $pu->is_suspended && !$viewsome)
         {
+            $state = 'suspended';
             $html->{header} = $comment_header->();
             $html->{footer} = $comment_footer->();
 
@@ -2322,6 +2326,7 @@ sub get_thread_html
 
             if ($post->{'_loaded'})
             {
+                $state = 'expanded';
                 my $comment = LJ::Comment->new($u, dtalkid => $dtid);
 
                 my $edittime;
@@ -2556,6 +2561,8 @@ sub get_thread_html
                 $html->{text} = $text;
             }
             else {
+                $state = 'collapsed';
+
                 # link to message
                 $LJci->{has_link} = 1;
                     
@@ -2585,6 +2592,7 @@ sub get_thread_html
             thread => $dtid,
             depth  => $depth,
             html   => $html,
+            state  => $state,
         };
 
         if (!$input->{get_root_only} && $post->{'children'}) {
