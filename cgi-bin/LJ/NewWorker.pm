@@ -28,6 +28,7 @@ sub pre_fork                { }
 sub after_fork              { }
 sub at_exit                 { }
 sub is_debug                { return 0 < $verbose }
+sub work_as_script          { 0 }
 
 sub catch_signals {
     my $self = shift;
@@ -108,6 +109,8 @@ sub start {
     my $bin  = "$ljhome/bin/worker";
     return $err->("LJHOME/bin/worker directory doesn't exist") unless -d $bin;
     return $err->("bogus app name") unless $name =~ /^[\w\-]+(\.[a-z]+)?$/i;
+
+    return if $self->work_as_script;
 
     my $rv = eval "use POSIX (); 1;";
     return $err->("couldn't load POSIX.pm") unless $rv;
