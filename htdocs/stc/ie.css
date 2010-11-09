@@ -334,8 +334,8 @@ __________________________________________*/
 	.appwidget-browse .b-posts DT {
 		_position:relative;
 		}
-		.appwidget-browse .b-posts-head {
-			_height:40px;
+		.appwidget-browse .b-posts-data {
+			_height:20px;
 			}
 
 .appwidget-browse .right-mod {

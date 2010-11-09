@@ -25,8 +25,53 @@
              .appwidget-search INPUT.type-text {
                 width: 97%; 
                 }
-                
-.appwidget-browse .appwidget-search h2 span.w-head-in {
+
+.appwidget-browse .appwidget-search H2 span.w-head-in {
 	background:url(/img/icons/search-lite.png) no-repeat 0 0;
 	}
+.appwidget-browse .appwidget-search INPUT.type-text {
+	width:230px;
+	}
+.appwidget-search P {
+	position:relative;
+	}
+	.appwidget-search LABEL {
+		position:absolute;
+		font-size:11px;
+		left:4px;
+		top:3px;
+		}
+
+.w-body .b-search-tags,
+.b-search-tags {
+	width:237px;
+	margin:.75em 0;
+	}
+	.b-search-tags LI {
+		display:inline;
+		}
+		.b-search-tags A {
+			text-decoration:none;
+			}
+		.b-search-tags A:hover {
+			border-bottom:1px dotted #4C6AA4;
+			}
+
+.b-hint-popup {
+	position:absolute;
+	width:234px;
+	top:68px;
+	left:11px;
+	border:1px solid #E6E6E6;
+	background:#FFF;
+	}
+	.b-hint-popup A,
+	.b-hint-popup SPAN {
+		display:block;
+		padding:.2em 4px;
+		text-decoration:none;
+		}
+	.b-hint-popup A:hover {
+		background:#F6F6F6;
+		}
 

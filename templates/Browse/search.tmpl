@@ -1,12 +1,36 @@
-<table width="100%" border="0" cellpadding="5">
-<caption><b>Search in <tmpl_var vertical_name></b></caption>
-<tr>
-<td>
-<input type="text" size="30" name="search_text" value="">
-<input type="submit" name="do_search" value="Go">
-</td>
-</tr>
-<tr>
-<td><tmpl_loop tags><a href="<tmpl_var search_url>/<tmpl_var tag><tmpl_if view>?view=<tmpl_var view></tmpl_if>"><tmpl_var tag></a><tmpl_unless __last__>, </tmpl_unless></tmpl_loop>
-</tr>
-</table>
+<div class="appwidget appwidget-search">
+<div class="right-mod">
+<div class="mod-tl">
+<div class="mod-tr">
+<div class="mod-br">
+<div class="mod-bl">
+	<div class="w-head">
+		<h2><span class="w-head-in">Search in <tmpl_var vertical_name></span></h2>
+		<i class="w-head-corner"></i>
+	</div>
+	<div class="w-body">
+		<form action="">
+			<fieldset>
+				<p>
+					<label for="search_text" id="search_text_label">Find</label>
+					<input class="type-text" id="search_text" name="search_text" type="text" value="" />
+					<input type="submit" id="do_search" name="do_search" value="Go"/>
+				</p>
+				<ul class="b-hint-popup" id="search_text_hint">
+					<!--<li><a href="javascript:void(0);">TAG</a></li>-->
+				</ul>
+				<ul class="b-search-tags">
+				<tmpl_loop tags>
+					<li<tmpl_if __last__> class="last"</tmpl_if>><a href="<tmpl_var search_url>/<tmpl_var tag><tmpl_if view>?view=<tmpl_var view></tmpl_if>"><tmpl_var tag></a></li>
+				</tmpl_loop>
+				</ul>
+			</fieldset>
+		</form>
+	</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
