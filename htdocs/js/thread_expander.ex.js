@@ -105,23 +105,44 @@ ExpanderEx.prototype.isFullComment = function(comment){
 ExpanderEx.prototype.expandThread = function(json){
     this.loadingStateOff();
 
+    //we show expand link if comment block has collapsed children
+    function isChildCollapsed( idx )
+    {
+        var state;
+        for( var i = idx + 1; i < json.length; ++i ) {
+            state = json[ i ].state;
+            if( state === "expanded" ) { return false; }
+            if( state === "collapsed" ) { return true; }
+        }
+
+        return  false;
+    }
+
     var threadId, cell;
     for( var i = 0; i < json.length; ++i ) {
-        threadId = json[ i ].thread;
-        if( threadId in ExpanderEx.Collection )
-            continue; //this comment is already expanded
+        //we skip comment blocks thate were not expanded
+        if( json[ i ].state && json[ i ].state !== "expanded") {
+            continue;
+        }
 
+        threadId = json[ i ].thread;
         cell = jQuery( '#ljcmtxt' + threadId );
+        if( threadId in ExpanderEx.Collection ) {
+            ExpanderEx.showExpandLink( threadId, cell, isChildCollapsed( i ) );
+            continue; //this comment is already expanded
+        }
 
         ExpanderEx.Collection[ threadId ] = cell.html();
-        cell.replaceWith( ExpanderEx.prepareCommentBlock( json[ i ].html, threadId, false ) );
+        cell.replaceWith( ExpanderEx.prepareCommentBlock( json[ i ].html, threadId, isChildCollapsed( i ) ) );
     }
 
     //duplicate cycle, because we do not know, that external scripts do with node
     for( var i = 0; i < json.length; ++i ) {
         threadId = json[ i ].thread;
-        this.initCommentBlock( jQuery( '#ljcmt' + threadId )[0] , threadId );
         LJ_cmtinfo[ threadId ].parent = this.id;
+        if( json[ i ].state && json[ i ].state === "expanded") {
+            this.initCommentBlock( jQuery( '#ljcmt' + threadId )[0] , threadId );
+        }
     }
 
     return true;
@@ -207,19 +228,33 @@ ExpanderEx.prepareCommentBlock = function(html, id, showExpand){
     var block = jQuery("<td>" + html + "</td>").attr( {
             id: 'ljcmtxt' + id,
             width: '100%'
-        } ),
-        selector = '';
+        } );
 
-
-    if( LJ_cmtinfo[ id ].has_link > 0 )
-        selector = '#' + ((showExpand ? 'collapse_' : 'expand_' ) + id);
-    else
-        selector = '#collapse_' + id + ', #expand_'  + id
-
-    block.find(selector)
-        .css('display', 'none');
-
+    this.showExpandLink( id, block, showExpand );
     return block;
+}
+
+ExpanderEx.showExpandLink = function ( id, block, showExpand ) {
+    var expandSel = "#expand_" + id,
+        collapseSel = "#collapse_" + id,
+        selector, resetSelector;
+
+    if( LJ_cmtinfo[ id ].has_link > 0 ) {
+        if( showExpand ) {
+            selector = collapseSel;
+            resetSelector = expandSel;
+        } else {
+            selector = expandSel;
+            resetSelector = collapseSel;
+        }
+        block.find( resetSelector ).css( 'display', '' );
+    }
+    else {
+        selector = collapseSel + "," + expandSel;
+    }
+
+    block.find( selector )
+        .css( 'display', 'none' );
 }
 
 ExpanderEx.preloadImg();

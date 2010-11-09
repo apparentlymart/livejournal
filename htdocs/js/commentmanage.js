@@ -448,19 +448,33 @@ function createModerationFunction(ae, dItemid, isS1)
 				}
 
 				if(isS1){
+					var newNode, showExpand, j, children;
 					var threadId = dItemid,
 						threadExpanded = !!(LJ_cmtinfo[ threadId ].oldvars && LJ_cmtinfo[ threadId ].full);
 						populateComments = function(result){
 							for( var i = 0; i < result.length; ++i ){
 								if( LJ_cmtinfo[ result[i].thread ].full ){
-									setupAjax(
-										jQuery("#ljcmtxt" + result[i].thread).replaceWith(
-											ExpanderEx.prepareCommentBlock(
-													result[i].html,
-													result[ i ].thread,
-													!( 'oldvars' in LJ_cmtinfo[ result[i].thread ] )
-											)
-										)[0], isS1 );
+									showExpand = !( 'oldvars' in LJ_cmtinfo[ result[i].thread ]);
+
+									//still show expand button if children comments are folded
+									if( !showExpand ) {
+										children  = LJ_cmtinfo[ result[i].thread ].rc;
+
+										for( j = 0; j < children.length;  ++j ) {
+											if( !( 'oldvars' in LJ_cmtinfo[ children[j] ] ) ) {
+												showExpand = true;
+											}
+										}
+									}
+
+									newNode = ExpanderEx.prepareCommentBlock(
+											result[i].html,
+											result[ i ].thread,
+											showExpand
+									);
+
+									setupAjax( newNode[0], isS1 );
+									jQuery("#ljcmtxt" + result[i].thread).replaceWith( newNode );
 								}
 							}
 							hourglass.hide();
