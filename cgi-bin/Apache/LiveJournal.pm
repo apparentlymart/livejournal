@@ -905,6 +905,10 @@ sub trans
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;  # bogus ljconfig
         } else {
+            ##
+            my $u = LJ::load_user($user);
+            LJ::set_active_journal($u) if $u;
+
             my $view = $determine_view->($user, "users", $uri);
             return $view if defined $view;
             LJ::Request->pnotes ('error' => 'e404');
@@ -1609,9 +1613,12 @@ sub journal_content
         }
 
         if ($RQ{'mode'} eq "entry" || $RQ{'mode'} eq "reply") {
-            my $filename = $RQ{'mode'} eq "entry" ?
-                "$LJ::HOME/htdocs/talkread.bml" :
-                "$LJ::HOME/htdocs/talkpost.bml";
+            my $filename = $RQ{'mode'} eq "entry" 
+                ? ( $GET{talkread2}
+                    ? "$LJ::HOME/htdocs/talkread2.bml"
+                    : "$LJ::HOME/htdocs/talkread.bml"
+                )
+                : "$LJ::HOME/htdocs/talkpost.bml";
             LJ::Request->notes("_journal" => $RQ{'user'});
             LJ::Request->notes("bml_filename" => $filename);
             return Apache::BML::handler();
