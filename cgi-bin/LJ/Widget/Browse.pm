@@ -314,6 +314,7 @@ sub render_body {
             userpic         => $userpic ? $userpic->url : '',
             updated_ago     => LJ::TimeUtil->ago_text($entry->logtime_unix),
             comments_count  => $entry->reply_count,
+            ljuser          => $entry->journal->ljuser_display,
         };
     }
 
