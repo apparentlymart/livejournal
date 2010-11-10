@@ -1016,4 +1016,13 @@ sub valid_cookie_generation {
     return 0;
 }
 
+
+sub allow_login_from_iframe {
+    # This P3P header should be set to enable login when login page is in <iframe> tag on the other site
+    my $header_name = 'P3P';
+    my $header_body = 'CP="NON DSP COR CUR ADM DEV PSA PSD OUR UNR BUS UNI COM NAV INT DEM STA"';
+    LJ::Request->set_header_out($header_name, $header_body);
+}
+
+
 1;
