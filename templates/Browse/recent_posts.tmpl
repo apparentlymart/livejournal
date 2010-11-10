@@ -24,6 +24,24 @@
 			<tmpl_var post_text>
 			<tmpl_if is_need_more>(<a href="<tmpl_var url_to_post>">Read more in original post</a>)</tmpl_if>
 		</div>
+		<ul class="b-share">
+			<li class="b-share-fb"><a href="javascript:void(0);">facebook</a></li>
+			<li class="b-share-twitter"><a href="javascript:void(0);">twitter</a></li>
+			<li class="b-share-sharethis"><a href="javascript:void(0);">sharethis</a></li>
+			<li class="b-share-email"><a href="javascript:void(0);">mail</a></li>
+			<li class="b-share-fb-like"><iframe src="http://www.facebook.com/plugins/like.php?href=<tmpl_var expr="eurl(url_to_post)">&amp;layout=button_count&amp;show_faces=true&amp;width=150&amp;action=like&amp;font=verdana&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"></iframe></li>
+		</ul>
+		<script type="text/javascript">
+		(function() {
+			var s = SHARETHIS.addEntry({url:'<tmpl_var url_to_post>', title: '<tmpl_var subject>'}, {button: false});
+			var ul = jQuery('ul:last');
+
+			s.attachButton( ul.find('.b-share-sharethis a')[0]);
+			s.attachChicklet("email", ul.find('.b-share-email a')[0]);
+			s.attachChicklet("facebook", ul.find('.b-share-fb a')[0]);
+			s.attachChicklet("twitter", ul.find('.b-share-twitter a')[0]);
+		}());
+		</script>
 		<p class="b-catalogue-item-comments"><span class="b-catalogue-comments-count"><a href="<tmpl_var url_to_post>#comments"><tmpl_var comments_count> comments</a> |</span> <a href="<tmpl_var url_to_post>?mode=reply">Leave comment</a></p>
 	</li>
 </tmpl_loop>
