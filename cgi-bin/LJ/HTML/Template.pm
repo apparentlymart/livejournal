@@ -33,6 +33,12 @@ sub new {
             },
         );
         HTML::Template::Pro->register_function(
+            eurl => sub {
+                my $string = shift;
+                return LJ::eurl($string);
+            },
+        );
+        HTML::Template::Pro->register_function(
             ejs => sub {
                 my $string = shift;
                 return LJ::ejs($string);
