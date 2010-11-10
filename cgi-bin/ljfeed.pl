@@ -373,6 +373,67 @@ sub create_view_rss
             $ret .= "  <lj:posterid>" . $poster->userid . "</lj:posterid>\n";
         }
         $ret .= "  <lj:reply-count>$it->{replycount}</lj:reply-count>\n";
+
+        if ($opts->{include_statistics}) {
+
+            my $now = DateTime->now(time_zone => 'Europe/Moscow');
+            my $yesterday = $now->clone->subtract(days => 1);
+
+            # visitors
+            my $data_v = LJ::PersonalStats::DB->fetch('post_stats', {
+                            type        => 0, # post views only in journal
+                            date        => $now->strftime("%Y-%m"),
+                            journal_id  => $u->userid,
+                            post_id     => $ditemid,
+                            });
+            # hits, today and yesterday
+            my $data_t = LJ::PersonalStats::DB->fetch('post_stats', {
+                            type        => 0, # post views only in journal
+                            date        => $now->strftime("%Y-%m-%d"),
+                            journal_id  => $u->userid,
+                            post_id     => $ditemid,
+                            });
+            my $data_y = LJ::PersonalStats::DB->fetch('post_stats', {
+                            type        => 0, # post views only in journal
+                            date        => $yesterday->strftime("%Y-%m-%d"),
+                            journal_id  => $u->userid,
+                            post_id     => $ditemid,
+                            });
+
+            # sum last 24 hours: 00 to current hour and current hour + 1 to 23 in yesterday
+            my $sum = 0;
+
+            my @today_hits;
+            foreach my $el (@$data_t) {
+                $today_hits[ $el->{time_id} ] = $el->{hits};
+            }
+
+            for (my $i = 0; $i <= $now->hour; $i++) {
+                $sum += $today_hits[$i];
+            }
+            
+            if ($now->hour < 23) {
+                my @yesterday_hits;
+                foreach my $el (@$data_y) {
+                    $yesterday_hits[ $el->{time_id} ] = $el->{hits};
+                }
+
+                for (my $i = $now->hour + 1; $i <= 23; $i++) {
+                    $sum += $yesterday_hits[$i];
+                }
+            }
+
+            $ret .= "<pageviews>$sum</pageviews>\n";
+
+            my @day_visitors;
+            foreach my $el (@$data_v) {
+                $day_visitors[ $el->{time_id} ] = $el->{visitors};
+            }
+            my $today_visitors = $day_visitors[$now->day] || 0;
+
+            $ret .= "<visitors>$today_visitors</visitors>\n";
+        }
+
         $ret .= "</item>\n";
     }
 
