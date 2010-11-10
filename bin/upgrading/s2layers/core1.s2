@@ -1369,7 +1369,7 @@ set text_share_facebook = "Post to Facebook";
 property string text_share_twitter {
     des = "Text to share this with a friend on Twitter";
 }
-set text_share_twitter = "TwitThis";
+set text_share_twitter = "Tweet this";
 
 property string text_share_email {
     des = "Text to share this with a friend by mail";
