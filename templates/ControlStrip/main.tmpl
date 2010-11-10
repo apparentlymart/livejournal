@@ -1,0 +1,159 @@
+<table id='lj_controlstrip' cellpadding='0' cellspacing='0'>
+    <tr valign='top'>
+
+<TMPL_IF remote.is_logged_in>
+
+        <td id='lj_controlstrip_userpic' style='background-image: none;'>
+            <a href='<TMPL_VAR remote.url.edit_pics>'><img src='<TMPL_VAR remote.userpic.src>' alt='<TMPL_VAR remote.userpic.alt>' title='<TMPL_VAR remote.userpic.title>' height='43' /></a>
+        </td>
+
+        <td id='lj_controlstrip_user' nowrap='nowrap'>
+            <form id='Greeting' class='nopic' action='<TMPL_VAR lj.siteroot>/logout.bml?ret=1' method='post'>
+                <div>
+                <input type='hidden' name='user' value='<TMPL_VAR remote.user>' />
+                <TMPL_IF remote.sessid><input type='hidden' name='sessid' value='<TMPL_VAR remote.sessid>' /></TMPL_IF>
+                <TMPL_VAR remote.display> <input type='submit' value='<TMPL_VAR expr="ml('web.controlstrip.btn.logout')">' id='Logout' />
+                </div>
+            </form>
+            <TMPL_VAR lj.link.home>&nbsp;&nbsp;
+            <TMPL_VAR remote.link.post_journal>&nbsp;&nbsp;
+            <TMPL_VAR remote.link.view_friends>&nbsp;&nbsp;
+            <a href='<TMPL_VAR remote.url.inbox>'>Inbox (<TMPL_VAR remote.inbox.unread_count>)</a>&nbsp;&nbsp;
+            <a href='<TMPL_VAR remote.url.tokens>'>LJ Tokens (<TMPL_VAR remote.wallet.balance>)</a>&nbsp;&nbsp;
+            <TMPL_VAR lj.link.support>
+        </td>
+
+        <td id='lj_controlstrip_actionlinks' nowrap='nowrap'>
+            <span id='lj_controlstrip_statustext'><TMPL_VAR remote.status></span><br />
+
+<TMPL_IF journal.is_own>
+    <TMPL_IF journal.view_friends>
+            <TMPL_VAR remote.link.manage_friends>&nbsp;&nbsp;
+            <TMPL_VAR expr="ml('web.controlstrip.select.friends.label')">
+            <form method='post' style='display: inline;' action='<TMPL_VAR lj.siteroot>/friends/filter.bml'>
+                <input type='hidden' name='user' value='<TMPL_VAR remote.user>' />
+                <input type='hidden' name='mode' value='view' />
+                <input type='hidden' name='type' value='allfilters' />
+                <TMPL_VAR remote.friends_group_select>
+                <input type='submit' value='<TMPL_VAR expr="ml('web.controlstrip.btn.view')">' />
+            </form>
+    <TMPL_ELSE>
+            <TMPL_VAR remote.link.recent_comments>&nbsp;&nbsp;
+            <TMPL_VAR remote.link.manage_entries>&nbsp;&nbsp;
+            <TMPL_VAR remote.link.invite_friends>
+    </TMPL_IF>
+</TMPL_IF>
+
+<TMPL_IF journal.is_personal>
+    <TMPL_IF remote.is_friend>
+            <TMPL_VAR remote.link.manage_friends>
+    <TMPL_ELSE>
+            <TMPL_VAR remote.link.add_friend>
+    </TMPL_IF>
+</TMPL_IF>
+
+<TMPL_IF journal.is_community>
+            <TMPL_IF remote.can_post><TMPL_VAR remote.link.post_to_community>&nbsp;&nbsp;</TMPL_IF>
+    <TMPL_IF remote.can_manage>
+            <TMPL_VAR remote.link.edit_community_profile>&nbsp;&nbsp;
+            <TMPL_VAR remote.link.edit_community_invites>&nbsp;&nbsp;
+            <TMPL_VAR remote.link.edit_community_members>
+    <TMPL_ELSE>
+        <TMPL_IF remote.is_memberof>
+            <TMPL_VAR remote.link.leave_community>&nbsp;&nbsp;
+        <TMPL_ELSE>
+            <TMPL_VAR remote.link.join_community>&nbsp;&nbsp;
+        </TMPL_IF>
+        <TMPL_IF remote.is_watcher>
+            <TMPL_VAR remote.link.unwatch_community>&nbsp;&nbsp;
+        <TMPL_ELSE>
+            <TMPL_VAR remote.link.watch_community>&nbsp;&nbsp;
+        </TMPL_IF>
+    </TMPL_IF>
+</TMPL_IF>
+
+<TMPL_IF journal.is_syndicated>
+            <TMPL_IF remote.is_friend><TMPL_VAR remote.link.remove_feed><TMPL_ELSE><TMPL_VAR remote.link.add_feed></TMPL_IF>&nbsp;&nbsp; <TMPL_VAR lj.link.syndicated_list>
+</TMPL_IF>
+
+<TMPL_IF journal.is_news>
+            <TMPL_IF remote.is_friend>&nbsp;<TMPL_ELSE><TMPL_VAR link.add_feed></TMPL_IF>
+</TMPL_IF>
+
+            &nbsp;
+            <TMPL_VAR remote.style_always_mine>
+            <TMPL_VAR control_strip.logo>
+
+        </td>
+
+<TMPL_ELSE>
+
+    <TMPL_IF journal.login_form.show>
+
+        <td id='lj_controlstrip_userpic'>
+            <TMPL_VAR control_strip.userpic>
+        </td>
+
+        <td id='lj_controlstrip_login' style='background-image: none;' nowrap='nowrap'>
+            <form id='login' class='lj_login_form' action='<TMPL_VAR journal.login_form.root>/login.bml?ret=1' method='post'>
+            <div>
+            <input type="hidden" name='mode' value='login' />
+            <TMPL_UNLESS journal.login_form.use_ssl>
+            <input type='hidden' name='chal' id='login_chal' class='lj_login_chal' value='<TMPL_VAR journal.login_form.challenge>' />
+            <input type='hidden' name='response' id='login_response' class='lj_login_response' value='' />";
+            </TMPL_UNLESS>
+            <table cellspacing="0" cellpadding="0" style="margin-right: 1em;">
+                <tr>
+                    <td>
+                        <label for='xc_user'><TMPL_VAR expr="ml('/login.bml.login.username')"></label>
+                        <input type='text' name='user' size='7' maxlength='17' tabindex='1' id='xc_user' value='' />
+                    </td>
+                    <td>
+                        <label style='margin-left: 3px;' for='xc_password'><TMPL_VAR expr="ml('/login.bml.login.password')"></label>
+                        <input type='password' name='password' size='7' tabindex='2' id='xc_password' class='lj_login_password' />
+                        <input type='submit' value='<TMPL_VAR expr="ml('web.controlstrip.btn.login')">' tabindex='4' />
+                    </td>
+                </tr>
+                <tr>
+                    <td valign='top'>
+                        <a href='<TMPL_VAR lj.siteroot/lostinfo.bml'><TMPL_VAR expr="ml('web.controlstrip.login.forgot')"></a>
+                    </td>
+                    <td style='font: 10px Arial, Helvetica, sans-serif;' valign='top' colspan='2' align='right'>
+                        <input type='checkbox' id='xc_remember' name='remember_me' style='height: 10px; width: 10px;' tabindex='3' />
+                        <label for='xc_remember'><TMPL_VAR expr="ml('web.controlstrip.login.remember')"></label>
+                    </td>
+                </tr>
+            </table>
+            </div>
+            </form>
+        </td>
+
+    <TMPL_ELSE>
+
+        <td id='lj_controlstrip_loggedout_userpic'>
+            <TMPL_VAR control_strip.userpic>
+        </td>
+
+    </TMPL_IF>
+
+        <td id='lj_controlstrip_actionlinks' nowrap='nowrap'>
+
+            <span id='lj_controlstrip_statustext'><TMPL_VAR remote.status></span><br />
+
+            <TMPL_UNLESS journal.login_form.show><TMPL_VAR lj.link.login>&nbsp;&nbsp; </TMPL_UNLESS>
+            <TMPL_VAR lj.link.create_account>&nbsp;&nbsp; <TMPL_VAR lj.link.learn_more>
+            <TMPL_VAR control_strip.logo>
+        </td>
+
+</TMPL_IF>
+
+        <TMPL_VAR control_strip.extra_cells>
+
+    </tr>
+    <tr>
+        <td colspan='5'>
+            <TMPL_VAR control_strip.site_messages>
+        </td>
+    </tr>
+</table>
+

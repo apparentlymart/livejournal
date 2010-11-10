@@ -20,6 +20,7 @@ use Class::Autouse qw(
                       LJ::Directory::Constraint
                       LJ::M::FriendsOf
                       );
+use LJ::ControlStrip;
 
 # <LJFUNC>
 # name: LJ::img
@@ -1824,6 +1825,18 @@ sub ad_display {
 }
 
 sub control_strip
+{   
+    return $LJ::DISABLED{control_strip_new} ? control_strip_old(@_) : control_strip_new(@_);
+}
+
+sub control_strip_new
+{
+    my %opts = @_;
+
+    return LJ::ControlStrip->render($opts{user});
+}
+
+sub control_strip_old
 {
     my %opts = @_;
     my $user = delete $opts{user};
