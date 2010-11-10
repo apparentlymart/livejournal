@@ -27,6 +27,28 @@ sub make_feed
     my $feedtype = $1;
     my $viewfunc = $feedtypes{$feedtype};
 
+    # /ya/rss -> special rss for yandex
+    if ($feedtype eq 'ya') {
+        $opts->{pathextra} =~ s!^/(\w+)!!; # cut off '/rss' part
+        $feedtype = $1;
+        $viewfunc = $feedtypes{$feedtype} if $feedtype eq 'rss';
+        $opts->{include_statistics} = 1;
+
+        my $allowed = 0;
+        my $remote_ip = LJ::get_remote_ip();
+        foreach my $block (@LJ::YANDEX_RSS_IP_BLOCKS) {
+            my $net = Net::Netmask->new($block);
+            next unless $net->match($remote_ip);
+            $allowed = 1;
+            last;
+        }
+
+        unless ($allowed) {
+            $opts->{'handler_return'} = 403;
+            return undef;
+        }
+    }
+
     unless ($viewfunc) {
         $opts->{'handler_return'} = 404;
         return undef;
