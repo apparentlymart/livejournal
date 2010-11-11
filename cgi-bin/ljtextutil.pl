@@ -541,7 +541,7 @@ sub html_trim_4gadgets
             $ret = "<$tag$added_attrs>";
             push @tags2autoclose, $tag if exists $_html_trim_4gadgets_autoclose{lc $tag};
         } else {
-            warn "broken nested tags sequence\n" if $tag ne pop @tags2autoclose;
+            pop @tags2autoclose;
             $ret = "</$tag>";
         }
 
@@ -588,7 +588,7 @@ sub html_trim_4gadgets
                 return "<$tag href=\"".$attr->{'href'}."\" target=\"_blank\">";
             }
             if ('E' eq $type) {
-                warn "broken nested tags sequence\n" if $tag ne pop @tags2autoclose;
+                pop @tags2autoclose;
                 return "</$tag>";
             }
             return '';
@@ -612,7 +612,7 @@ sub html_trim_4gadgets
                 return "<$tag cellpadding=\"5\" cellspacing=\"5\" border=\"0\">"
             }
             if ('E' eq $type) {
-                warn "broken nested tags sequence\n" if $tag ne pop @tags2autoclose;
+                pop @tags2autoclose;
                 $text_before_table = '' unless grep { /table/i } @tags2autoclose;
                 return "</$tag>";
             }
