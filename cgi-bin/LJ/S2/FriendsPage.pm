@@ -258,7 +258,22 @@ sub FriendsPage
         my $po = $posters{$posterid} || $friends{$posterid};
 
         # don't allow posts from suspended users or suspended posts
-        if ($po->{'statusvis'} eq 'S' || ($entry_obj && $entry_obj->is_suspended_for($remote))) {
+        # or posts from users who chose to delete their entries when
+        # they deleted their journals
+        my $entry_hidden = 0;
+        $entry_hidden ||= $po->is_suspended;
+        $entry_hidden ||= $entry_obj && $entry_obj->is_suspended_for($remote);
+
+        if ( $po->is_deleted
+          && !$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$po->username} )
+        {
+            my ($purge_comments, $purge_community_entries)
+                = split /:/, $po->prop("purge_external_content");
+
+            $entry_hidden ||= $purge_community_entries;
+        }
+
+        if ($entry_hidden) {
             $hiddenentries++; # Remember how many we've skipped for later
             next ENTRY;
         }

@@ -131,10 +131,20 @@ sub DayPage
         }
 
         # don't show posts from suspended users or suspended posts
-        next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S' && ! $viewsome;
+        my $pu = $apu{$posterid};
+        next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && ! $viewsome;
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
 
-        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+        if ( !$viewsome && $pu && $pu->is_deleted
+          && !$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$pu->username} )
+        {
+            my ($purge_comments, $purge_community_entries)
+                = split /:/, $pu->prop("purge_external_content");
+
+            next ENTRY if $purge_community_entries;
+        }
+
+       if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
             LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
         }
 

@@ -152,6 +152,20 @@ body<=
             return;
         }
 
+        if ( $up->is_deleted
+          && !$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$up->username} )
+        {
+            my ($purge_comments, $purge_community_entries)
+                = split /:/, $up->prop("purge_external_content");
+
+            if ($purge_community_entries) {
+                LJ::Request->pnotes ('error' => 'deleted');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                BML::return_error_status(404);
+                return;
+            }
+        }
+
         # check suspended entry
         if ($entry && $entry->is_suspended_for($remote)) {
             LJ::Request->pnotes ('error' => 'suspended_post');

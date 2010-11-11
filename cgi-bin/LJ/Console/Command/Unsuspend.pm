@@ -113,6 +113,7 @@ sub execute {
             O => 'set_readonly',
             R => 'set_renamed',
             X => 'set_expunged',
+            D => 'set_deleted',
         }->{$new_status};
 
         unless ($method) {

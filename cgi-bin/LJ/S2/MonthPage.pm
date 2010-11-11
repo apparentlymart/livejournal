@@ -111,9 +111,19 @@ sub MonthPage
         $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         # don't show posts from suspended users or suspended posts
-        next unless $pu{$posterid};
-        next ENTRY if $pu{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
+        my $pu = $pu{$posterid};
+        next unless $pu;
+        next ENTRY if $pu->is_suspended eq 'S' && !$viewsome;
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
+        if ( !$viewsome && $pu && $pu->is_deleted
+          && !$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$pu->username} )
+        {
+            my ($purge_comments, $purge_community_entries)
+                = split /:/, $pu->prop("purge_external_content");
+
+            next ENTRY if $purge_community_entries;
+        }
+
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
             my $text;

@@ -180,8 +180,18 @@ LJ::Request->notes("codepath" => "bml.view.index");
      my ($itemid, $anum, $day, $eventtime, $posterid, $replycount, $security, $allowmask) = @$it;
 
      my $entry = LJ::Entry->new($u, jitemid => $itemid);
-     next if $u{$posterid}->is_suspended && !$viewsome;
+     my $pu = $u{$posterid};
+     next if $pu->is_suspended && !$viewsome;
      next if $entry && $entry->is_suspended_for($remote);
+     if ( !$viewsome && $pu && $pu->is_deleted
+       && !$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$pu->username} )
+     {
+         my ($purge_comments, $purge_community_entries)
+             = split /:/, $pu->prop("purge_external_content");
+   
+         next if $purge_community_entries;
+     }
+
 
      my $subject = $lt->{$itemid}->[0];
      my $poster = $u{$posterid}->{user};

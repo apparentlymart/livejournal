@@ -1779,6 +1779,15 @@ sub create_view_friends
         next ENTRY if $pu && $pu->{'statusvis'} eq 'S';
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
 
+        if ( $pu->is_deleted
+          && !$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$pu->username} )
+        {
+            my ($purge_comments, $purge_community_entries)
+                = split /:/, $pu->prop("purge_external_content");
+
+            next ENTRY if $purge_community_entries;
+        }
+
         # counting excludes skipped entries
         $eventnum++;
 
@@ -2525,9 +2534,19 @@ sub create_view_day
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
         $entry_obj->handle_prefetched_props($logprops{$itemid});
 
-        next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
+        my $pu = $posteru{$posterid};
+        next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && !$viewsome;
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
-        
+
+        if ( !$viewsome && $pu && $pu->is_deleted
+          && !$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$pu->username} )
+        {
+            my ($purge_comments, $purge_community_entries)
+                = split /:/, $pu->prop("purge_external_content");
+
+            next ENTRY if $purge_community_entries;
+        }
+
         $eventnum++;
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
