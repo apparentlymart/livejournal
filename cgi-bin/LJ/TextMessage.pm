@@ -902,6 +902,14 @@ unless ($LJ::DISALBED{'smsru-notifications'}){
         'totlimit'      => 0,
         'api'           => 'LJ::SMS::API::RU',
         };
+    $providers{'mts'} = {
+        'name'          => 'MTS Russia',
+        'notes'         => 'Russia only',
+        'fromlimit'     => 0,
+        'msglimit'      => 0,
+        'totlimit'      => 0,
+        'api'           => 'LJ::SMS::API::RU',
+    };
 };
 
 sub providers

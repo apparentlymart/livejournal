@@ -62,7 +62,7 @@ body<=
     }
 
     ## Text messaging is disabled for some providers
-    if ($tminfo->{provider} eq 'megafon' or $tminfo->{provider} eq 'beeline'){
+    if ($tminfo->{provider} eq 'megafon' or $tminfo->{provider} eq 'beeline' or $tminfo->{provider} eq 'mts'){
         $ret .= "<?h1 $ML{'.error.unavailable.head'} h1?> <br />";
         add_footer();
         return $ret;
