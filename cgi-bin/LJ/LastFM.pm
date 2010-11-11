@@ -21,8 +21,7 @@ sub current {
     my $url = "$LJ::LAST_FM_API_URL&api_key=$LJ::LAST_FM_API_KEY&user=$username";
     my $response = $ua->get($url);
     unless ($response->is_success) {
-        warn "Can't get data from last.fm: " . $response->status_line;
-        return { error => "Can't retrieve data from last.fm" };
+        return { error => "Can't retrieve data from last.fm: " . $response->status_line };
     }
     
     my $content = $response->content();
