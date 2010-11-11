@@ -16,7 +16,20 @@ sub get_user_info
         my $sess = LJ::Session->session_from_fb_cookie;
         $u = $sess->owner if $sess;
     }
-    return {} unless $u && $u->{'journaltype'} =~ /[PI]/;
+
+    return {} unless $u;
+
+    if ($u->is_renamed) {
+        return {
+            'user'          => $u->username,
+            'renamedto'     => $u->prop('renamedto'),
+            'userid'        => $u->userid,
+            'statusvis'     => 'R',
+            'fb_account'    => 1,
+        };
+    }
+
+    return {} unless $u->{'journaltype'} =~ /[PI]/;
 
     my $defaultpic = $u->userpic;
 
