@@ -277,7 +277,8 @@ sub trans
     my $args = LJ::Request->args;
     my $args_wq = $args ? "?$args" : "";
     my $host = LJ::Request->header_in("Host");
-    my $hostport = ($host =~ s/:\d+$//) ? $& : "";
+    $host =~ s/(:\d+)$//;
+    my ($hostport) = $1 || "";
     $host =~ s/\.$//; ## 'www.livejournal.com.' is a valid DNS hostname
 
     $host = $LJ::DOMAIN_WEB unless LJ::Request::request->{r}->is_initial_req;

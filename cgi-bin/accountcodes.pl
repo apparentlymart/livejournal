@@ -42,8 +42,8 @@ sub acid_decode
     my $num = 0;
     my $place = 0;
     while ($acid) {
-        return 0 unless ($acid =~ s/[$digits]$//o);
-        $num += $val{$&} * (30 ** $place++);
+        return 0 unless ($acid =~ s/([$digits])$//o);
+        $num += $val{$1} * (30 ** $place++);
     }
     return $num;
 }
