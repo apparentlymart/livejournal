@@ -210,18 +210,6 @@
         my $factory_disabled = $LJ::DISABLED{'userpicfactory'} || !LJ::mogclient();
         $MAX_UPLOAD *= 10 unless $factory_disabled;
 
-        # file over 40k, return too large error
-        if ($factory_disabled && ($size > $MAX_UPLOAD + 2048)) {
-            # we have to suck in the data otherwise the browser gets upset because we're
-            # closing the connection before reading in all the data and it will sometimes
-            # refuse to show the error.
-            LJ::Request->post_params();
-        
-            # send error
-            return $err->(BML::ml('.error.filetoolarge',
-                                  { 'maxsize' => int($MAX_UPLOAD / 1024) . $ML{'.kilobytes'} }));
-        }
-
         ## User can upload image or set image's uri.
         my $userpic_raw = '';
         if ($POST{userpic} or $POST{src} eq "url"){
@@ -240,9 +228,6 @@
 
                 return $err->($ML{'.error.urlerror'})
                     unless $res->{content};
-
-                return $err->("You cannot upload images larger than " . int($MAX_UPLOAD / 1024) . " kB.")
-                    if $res->{size} > $MAX_UPLOAD;
 
                 $content = $res->{content};
                 $size    = $res->{size};
