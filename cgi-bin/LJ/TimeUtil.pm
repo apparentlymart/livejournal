@@ -61,6 +61,7 @@ sub mysqldate_to_time {
     my ($class, $string, $gmt) = @_;
     return undef unless $string =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d)(?::(\d\d))?)?$/;
     my ($y, $mon, $d, $h, $min, $s) = ($1, $2, $3, $4, $5, $6);
+    return undef unless ($d + 0) and ($mon + 0); # '00' is string and is true value
     my $calc = sub {
         $gmt ?
             Time::Local::timegm($s, $min, $h, $d, $mon-1, $y) :
