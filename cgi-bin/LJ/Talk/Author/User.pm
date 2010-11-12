@@ -102,9 +102,9 @@ sub handle_user_input {
 
     # parse inline login opts
     my ($exptype, $ipfixed);
-    if ($form->{'userpost'} =~ s/[!<]{1,2}$//) {
-        $exptype = 'long' if index($&, "!") >= 0;
-        $ipfixed = LJ::get_remote_ip() if index($&, "<") >= 0;
+    if ($form->{'userpost'} =~ s/([!<]{1,2})$//) {
+        $exptype = 'long' if index($1, "!") >= 0;
+        $ipfixed = LJ::get_remote_ip() if index($1, "<") >= 0;
     }
 
     $up = LJ::load_user($form->{'userpost'});
