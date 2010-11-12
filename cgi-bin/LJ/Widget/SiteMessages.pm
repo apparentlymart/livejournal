@@ -13,8 +13,13 @@ sub _format_one_message {
     my $class = shift;
     my $message = shift;
 
+    my $lang;
+    my $remote = LJ::get_remote();
+    $lang = $remote->prop("browselang") if $remote; # exlude s2 context language from opportunities,
+        # because S2 journal code executes BML::set_language($lang, \&LJ::Lang::get_text) with its own language
+
     my $mid = $message->{'mid'};
-    my $text = $class->ml( $class->ml_key("$mid.text") );
+    my $text = $class->ml( $class->ml_key("$mid.text"), undef, $lang );
     $text .= "<i class='close' lj-sys-message-close='1'></i>";
     ## LJ::CleanHTML::clean* will fix broken HTML and expand 
     ## <lj user> tags and lj-sys-message-close attributes
