@@ -849,10 +849,10 @@ sub event_summary {
 
     # assume the first paragraph is terminated by two <br> or a </p>
     # valid XML tags should be handled, even though it makes an uglier regex
-    if ($event =~ m!((<br\s*/?\>(</br\s*>)?\s*){2})|(</p\s*>)!i) {
+    if ($event =~ m!(.*)(((<br\s*/?\>(</br\s*>)?\s*){2})|(</p\s*>))!i) {
         # everything before the matched tag + the tag itself
         # + a link to read more
-        $event = $` . $& . $readmore;
+        $event = $1 . $2 . $readmore;
     }
     return $event;
 }
