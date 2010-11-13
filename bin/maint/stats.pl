@@ -23,6 +23,7 @@ $maint{'genstats'} = sub
         ({ 'type' => "global",
            'jobname' => "popfaq",
            'statname' => "pop_faq",
+           'cleanup' => 1,
            'handler' =>
                sub {
                    my $db_getter = shift;

@@ -63,6 +63,10 @@ sub LJ::Stats::run_stats {
             die "Error running '$jobname' handler on global reader."
                 unless $res;
 
+            if ($stat->{'cleanup'}) {
+                LJ::Stats::cleanup_stat($stat->{'statname'});
+            }
+
             # 2 cases:
             # - 'statname' is an arrayref, %res structure is ( 'statname' => { 'arg' => 'val' } )
             # - 'statname' is scalar, %res structure is ( 'arg' => 'val' )
@@ -194,6 +198,19 @@ sub LJ::Stats::save_stat {
     return 1;
 }
 
+sub cleanup_stat {
+    my ($cat) = @_;
+
+    return unless $cat;
+
+    my $dbh = LJ::Stats::get_db('dbh');
+    $dbh->{'RaiseError'} = 1;
+
+    $dbh->do("DELETE FROM stats WHERE statcat=?", undef, $cat);
+
+    return 1;
+}
+
 # note the last calctime of a given stat
 sub LJ::Stats::save_calc {
     my ($jobname, $cid) = @_;
@@ -225,6 +242,8 @@ sub LJ::Stats::save_part {
 sub LJ::Stats::need_calc {
     my ($jobname, $cid) = @_;
     return undef unless $jobname;
+
+    return 1 if $LJ::IS_DEV_SERVER;
 
     my $dbr = LJ::Stats::get_db("dbr");
     my $calctime = $dbr->selectrow_array("SELECT calctime FROM partialstats " .
