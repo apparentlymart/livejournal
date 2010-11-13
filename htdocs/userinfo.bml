@@ -1553,6 +1553,8 @@
             if ($result->{status} eq 'OK') {
                 foreach (@{$result->{activities}}) {
                     my $app = LJ::UserApps->get_application( id => $_->{application_id} );
+                    LJ::CleanHTML::clean_subject(\$_->{title});
+                    LJ::CleanHTML::clean_event(\$_->{body}, {});
                     push @activities, {
                         app_name  => $app->name,
                         app_href  => $app->href,

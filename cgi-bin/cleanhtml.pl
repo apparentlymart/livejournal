@@ -9,6 +9,7 @@ use Class::Autouse qw(
                       LJ::EmbedModule
                       LJ::Config
                       LJ::Maps
+                      LJ::UserApps
                       );
 
 LJ::Config->load;
@@ -51,6 +52,7 @@ package LJ::CleanHTML;
 #        'keepcomments' => 1,
 #        'cuturl' => 'http://www.domain.com/full_item_view.ext',
 #        'ljcut_disable' => 1, # stops the cleaner from using the lj-cut tag
+#        'ljapp_enable' => 1, # start using the lj-app tag
 #        'cleancss' => 1,
 #        'extractlinks' => 1, # remove a hrefs; implies noautolinks
 #        'noautolinks' => 1, # do not auto linkify
@@ -132,6 +134,7 @@ sub clean
     my $undefined_tags = $opts->{undefined_tags} || '';
     my $cut = $opts->{'cuturl'} || $opts->{'cutpreview'};
     my $ljcut_disable = $opts->{'ljcut_disable'};
+    my $ljapp_enable = 1 || $opts->{'ljapp_enable'};
     my $s1var = $opts->{'s1var'};
     my $extractlinks = 0 || $opts->{'extractlinks'};
     my $noautolinks = $extractlinks || $opts->{'noautolinks'};
@@ -533,6 +536,13 @@ sub clean
                 }
                 $newdata .= "\n<style>\n$style</style>\n";
                 next;
+            }
+            elsif ($tag eq "lj-app")
+            {
+                next TOKEN unless $ljapp_enable;
+
+                $newdata .= LJ::UserApps->expand_ljapp_tag($attr);
+                next TOKEN;
             }
             elsif ($tag eq "lj")
             {
