@@ -9,7 +9,7 @@
 		<i class="w-head-corner"></i>
 	</div>
 	<div class="w-body">
-		<form action="">
+		<form action="<tmpl_var search_url>" method="POST">
 			<fieldset>
 				<p>
 					<label for="search_text" id="search_text_label">Find</label>
@@ -18,7 +18,7 @@
 				</p>
 				<ul class="b-search-tags">
 				<tmpl_loop tags>
-					<li<tmpl_if __last__> class="last"</tmpl_if>><a href="<tmpl_var search_url>/<tmpl_var tag><tmpl_if view>?view=<tmpl_var view></tmpl_if>"><tmpl_var tag></a></li>
+					<li<tmpl_if __last__> class="last"</tmpl_if>><a href="<tmpl_var search_url>tag/<tmpl_var tag><tmpl_if view>?view=<tmpl_var view></tmpl_if>"><tmpl_var tag></a></li>
 				</tmpl_loop>
 				</ul>
 			</fieldset>

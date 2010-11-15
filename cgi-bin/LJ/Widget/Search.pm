@@ -83,7 +83,7 @@ EOF
         $uri .= "/" if $uri !~ m#/$#; ## add end slash if not exist
         $template->param (
             vertical_name   => $vertical->name,
-            search_url      => $uri."tag",
+            search_url      => $uri,
             view            => $opts{'view'},
             tags            => [ map { { tag => $_->{keyword} } } @{$vertical->load_tags (is_seo => 1)} ],
         );

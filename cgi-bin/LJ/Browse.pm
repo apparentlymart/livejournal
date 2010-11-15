@@ -355,7 +355,7 @@ sub load_by_url {
 
     $url =~ /^(?:$LJ::SITEROOT)?(\/.+)$/;
     my $path = $1;
-    $path =~ s/\/?(?:\?.*)?$//; # remove trailing slash and any get args
+    $path =~ s/(?:tag)?\/?.*?\/?(?:\?.*)?$//; # remove search string, trailing slash and any get args
     $path =~ s/\/index\.bml$//; # remove bml page
 
     # 4 possibilities:
@@ -831,6 +831,25 @@ sub title_html {
     }
 
     return $ret;
+}
+
+sub search_posts {
+    my $class  = shift;
+    my $search = shift;
+    my $limit = shift;
+
+    my $dbh = LJ::get_db_reader();
+    my $posts = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM vertical_keywords WHERE keyword = ? AND is_seo = 0", { Slice => {} }, $search);
+    my @found_posts = ();
+    foreach my $post (@$posts) {
+        my $post_ids = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM category_recent_posts WHERE journalid = ? AND jitemid = ? AND is_deleted = 0 ORDER BY timecreate DESC LIMIT $limit", { Slice => {} }, $post->{journalid}, $post->{jitemid});
+        push @found_posts, @$post_ids;
+    }
+    my @entries = 
+        map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) }      ## Create LJ::Entry object
+        grep { $_->{journalid} }                                                ## remove SEO posts
+        @found_posts;
+    return @entries;
 }
 
 sub recent_posts {

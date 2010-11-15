@@ -40,6 +40,7 @@ body<=
         page        => $page,
         post_page   => $post_page,
         view        => $view,
+        post_vars   => \%POST,
     );
 }
 _code?>

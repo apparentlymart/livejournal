@@ -160,6 +160,17 @@ sub render_body {
     $post_page ||= 1;
     my $post_skip = ($post_page-1) * $post_page_size;
     my $post_last = $post_skip + $post_page_size;
+
+    $$title = "$$windowtitle";
+
+    my $search_str = undef;
+    if ($opts{'post_vars'}->{'do_search'}) {
+        $search_str = $opts{'post_vars'}->{'search_text'};
+    } else {
+        ($search_str) = $uri =~ m#.*?tag/(.*)#;
+        $search_str =~ s#/?\?.*##;
+    }
+
     if ($cat) { # we're looking at a lower-level category
 
         my @cat_title = split(/&gt;/, $cat->title_html());
@@ -184,60 +195,65 @@ sub render_body {
         $ad = LJ::get_ads({ location => 'bml.explore/novertical', ljadwrapper => 1 });
     }
 
-    $$title = "$$windowtitle";
+    if ($view eq 'communities') {
+        foreach my $comm (@comms) {
+            next unless LJ::isu($comm);
 
-    my @posts = LJ::Browse->recent_posts ( [ map { $_->{userid} } @comms ], $post_page_size );
+            # paging
+            $count++;
+            next if $count <= $skip || $count > $last;
 
-    foreach my $entry (@posts) {
-        next unless $entry;
+            my $secondsold = $comm->timeupdate ? time() - $comm->timeupdate : undef;
+            my $userpic = $comm->userpic ?
+                $comm->userpic->imgtag_percentagesize(1) :
+                    LJ::run_hook('no_userpic_html', percentage => 1 );
 
-        next unless 1;## This entry is inappropriate language in the subject or body
+            push @tmpl_communities,
+                {
+                    featured            => 0,
+                    userpic             => $userpic,
+                    journal_name        => $comm->ljuser_display(),
+                    journal_user        => $comm->{user},
+                    journal_base        => $comm->journal_base(),
+                    journal_title       => $comm->{'name'} || '',
+                    journal_subtitle    => $comm->prop('comm_theme') || '',
+                    updated_ago         => LJ::TimeUtil->ago_text($secondsold),
+                };
+        }
+    } else {
+        my @posts = ();
+        if ($search_str) {
+            @posts = LJ::Browse->search_posts ( $search_str, $post_page_size );
+        } else {
+            @posts = LJ::Browse->recent_posts ( [ map { $_->{userid} } @comms ], $post_page_size );
+        }
 
-        $post_count++;
-        next if $post_count <= $post_skip || $post_count > $post_last;
+        foreach my $entry (@posts) {
+            next unless $entry;
 
-        my $poster = $entry->poster;
-        my $userpic = $entry->userpic;
-        my @tags = $entry->tags;
-        push @tmpl_posts, {
-            subject         => $entry->subject_text,
-            userpic         => $userpic ? $userpic->url : '',
-            posted_ago      => LJ::TimeUtil->ago_text($entry->logtime_unix),
-            poster          => $poster ? LJ::ljuser($poster) : '?',
-            tags            => scalar @tags ? [ map { { tag => $_ } } @tags ] : '',
-            mood            => $entry->prop('current_mood') || LJ::mood_name($entry->prop('current_moodid')) || '',
-            music           => $entry->prop('current_music'),
-            location        => $entry->prop('current_location'),
-            post_text       => $entry->event_html,
-            url_to_post     => $entry->url,
-            comments_count  => $entry->reply_count,
-            is_need_more    => bytes::length($entry->event_text) > 800 ? 1 : 0,
-        };
-    }
+            next unless 1;## This entry is inappropriate language in the subject or body
 
-    foreach my $comm (@comms) {
-        next unless LJ::isu($comm);
+            $post_count++;
+            next if $post_count <= $post_skip || $post_count > $post_last;
 
-        # paging
-        $count++;
-        next if $count <= $skip || $count > $last;
-
-        my $secondsold = $comm->timeupdate ? time() - $comm->timeupdate : undef;
-        my $userpic = $comm->userpic ?
-            $comm->userpic->imgtag_percentagesize(1) :
-                LJ::run_hook('no_userpic_html', percentage => 1 );
-
-        push @tmpl_communities,
-            {
-                featured            => 0,
-                userpic             => $userpic,
-                journal_name        => $comm->ljuser_display(),
-                journal_user        => $comm->{user},
-                journal_base        => $comm->journal_base(),
-                journal_title       => $comm->{'name'} || '',
-                journal_subtitle    => $comm->prop('comm_theme') || '',
-                updated_ago         => LJ::TimeUtil->ago_text($secondsold),
+            my $poster = $entry->poster;
+            my $userpic = $entry->userpic;
+            my @tags = $entry->tags;
+            push @tmpl_posts, {
+                subject         => $entry->subject_text,
+                userpic         => $userpic ? $userpic->url : '',
+                posted_ago      => LJ::TimeUtil->ago_text($entry->logtime_unix),
+                poster          => $poster ? LJ::ljuser($poster) : '?',
+                tags            => scalar @tags ? [ map { { tag => $_ } } @tags ] : '',
+                mood            => $entry->prop('current_mood') || LJ::mood_name($entry->prop('current_moodid')) || '',
+                music           => $entry->prop('current_music'),
+                location        => $entry->prop('current_location'),
+                post_text       => $entry->event_html,
+                url_to_post     => $entry->url,
+                comments_count  => $entry->reply_count,
+                is_need_more    => bytes::length($entry->event_text) > 800 ? 1 : 0,
             };
+        }
     }
 
     # post paging: first, previouse, next, last pages.
@@ -344,6 +360,7 @@ sub render_body {
         top_posts               => \@top_posts,
         top_comms               => \@top_comms,
         view                    => $view,
+        poll_of_the_day         => LJ::Widget::PollOfTheDay->render(vertical_account => $vertical->journal, vertical_name => $vertical->name),
     );
 
     return $template->output;
