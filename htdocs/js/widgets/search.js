@@ -1,4 +1,7 @@
 jQuery(function($) {
+	// remove for enable, see LJSUP-7052
+	return;
+	
 	var label = $( '#search_text_label' ),
 		search = $( '#search_text' );
 
