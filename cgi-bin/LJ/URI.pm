@@ -68,6 +68,10 @@ sub handle {
         return LJ::URI->bml_handler("statistics/index.bml");
     }
 
+    if ($uri =~ m!^/top/rss!) {
+        return LJ::URI->bml_handler("statistics/index.bml");
+    }
+
     return undef;
 }
 
