@@ -157,6 +157,21 @@ sub clean
     my $target = $opts->{'target'} || '';
     my $ljrepost_allowed = ($opts->{ljrepost_allowed} && ! $opts->{'textonly'}) || 0;
 
+    my $viewer_lang = $opts->{'viewer_lang'};
+    unless ($viewer_lang) {
+        # TODO: have some more reliable way to know that?
+        if (my $remote = LJ::get_remote()) {
+            $viewer_lang = $remote->prop('browselang')
+                        || $LJ::DEFAULT_LANG;
+        } else {
+            if (LJ::is_web_context()) {
+                $viewer_lang = BML::get_language();
+            } else {
+                $viewer_lang = $LJ::DEFAULT_LANG;
+            }
+        }
+    }
+
     # cuturl or entry_url tells about context and texts address,
     # Expand or close lj-cut tag should be switched directly by special flag
     # - expand_cut
@@ -263,6 +278,39 @@ sub clean
         @capture = ();
         $capturing_during_eat = undef;
     };
+
+    # this is the stack that holds information about state of parsing
+    # <lj-lang> tags; the syntax of these is as follows:
+    #
+    # <lj-lang-container>
+    #      <lj-lang include="en"> English text </lj-lang>
+    #      <lj-lang include="de"> German text </lj-lang>
+    #      <lj-lang include="en,de"> Text that displays in both
+    #                                English and German </lj-lang>
+    #      <lj-lang otherwise> In case all above failed, this is
+    #                          the text </lj-lang>
+    # </lj-lang-container>
+    #
+    # it is pretty trivial to implement the 'include' versions of
+    # tags, and for the 'otherwise' version, we have a state variable
+    # indicating that we haven't yet seen an 'include' tag that had
+    # its language matching the remote's language. so when we occur
+    # an 'otherwise' tag, we figure whether to display its body using
+    # this variable.
+    #
+    # as for the stack, it allows us to make it so that:
+    # 1). container tags may be nested
+    # 2). lj-lang doesn't actually need to be inside of a container
+    #
+    # opening <lj-lang-container> unshifts the stack
+    # closing <lj-lang-container> shifts it
+    # when we need to access a 'variable', $lj_lang_otherwise[0] will do
+    #
+    # TODO: this comment indicates that the code is less than easy to
+    # understand and it would benefit from a refactor, i.e. encapsulating
+    # handling specific tags in some set of classes, or something.
+    # - ailyin, Nov 15, 2010
+    my @lj_lang_otherwise = ( 1 );
 
   TOKEN:
     while (my $token = $p->get_token)
@@ -489,6 +537,31 @@ sub clean
                 $cutcount++;
                 $newdata .= "<a name=\"cutid$cutcount\"></a>";
                 $ljcut_div = 0;
+            }
+
+            if ( $tag eq 'lj-lang' ) {
+                # extract a "standard" type of lang here;
+                # also, it's a weird way to convert en_LJ -> en
+                my $lang = LJ::lang_to_locale($viewer_lang);
+                $lang =~ s/_.*//;
+
+                if ($attr->{'include'}) {
+                    my @include = split /[,;\s]+/, $attr->{'include'};
+                    if ( grep { $_ eq $lang } @include ) {
+                        $lj_lang_otherwise[0] = 0;
+                        next TOKEN;
+                    }
+                }
+
+                if ( $attr->{'otherwise'} || $attr->{'default'} ) {
+                    next TOKEN if ($lj_lang_otherwise[0]);
+                }
+
+                push @eatuntil, $tag;
+            }
+
+            if ( $tag eq 'lj-lang-container' ) {
+                unshift @lj_lang_otherwise, 1;
             }
 
             if (($tag eq "lj-cut" || $ljcut_div)) {
@@ -1025,6 +1098,10 @@ sub clean
                 
                 delete $opencount{$tag};
 
+            } elsif ( $tag eq 'lj-lang' ) {
+                # ignore it
+            } elsif ( $tag eq 'lj-lang-container' ) {
+                shift @lj_lang_otherwise;
             } else {
                 if ($mode eq "allow") {
                     $allow = 1;
