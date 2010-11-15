@@ -28,6 +28,10 @@
         $$body = "<?badinput?>";
         return;
     }
+    
+    ## This header is to pass page content through IE8 XSS Filter.
+    ## See also htdocs/preview/entry.bml.
+    LJ::Request->header_out("X-XSS-Protection" => 0);
 
     my $usejournalu;
     if (my $usejournal = $GET{'usejournal'} || $POST{'usejournal'}) {
