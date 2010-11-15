@@ -681,32 +681,32 @@ sub memkey_vertid {
     my $self = shift;
     my $id = shift;
 
-    return [ $id, "vert:$id" ] if $id;
-    return [ $self->{vert_id}, "vert:$self->{vert_id}" ];
+    return [ $id, "vert2:$id" ] if $id;
+    return [ $self->{vert_id}, "vert2:$self->{vert_id}" ];
 }
 
 sub memkey_vertname {
     my $self = shift;
     my $name = shift;
 
-    return "vertname:$name" if $name;
-    return "vertname:$self->{name}";
+    return "vertname2:$name" if $name;
+    return "vertname2:$self->{name}";
 }
 
 sub memkey_verturl {
     my $self = shift;
     my $url = shift;
 
-    return "vertname:$url" if $url;
-    return "vertname:$self->{url}";
+    return "vertname2:$url" if $url;
+    return "vertname2:$self->{url}";
 }
 
 sub memkey_rules {
     my $self = shift;
     my $id = shift;
 
-    return [ $id, "vertrules:$id" ] if $id;
-    return [ $self->{vertid}, "vertrules:$self->{vertid}" ];
+    return [ $id, "vertrules2:$id" ] if $id;
+    return [ $self->{vertid}, "vertrules2:$self->{vertid}" ];
 }
 
 sub set_memcache {
@@ -732,7 +732,7 @@ sub clear_memcache {
 
 sub entries_memkey {
     my $self = shift;
-    return [ $self->{vertid}, "vertentries:$self->{vertid}" ];
+    return [ $self->{vertid}, "vertentries2:$self->{vertid}" ];
 }
 
 sub clear_entries_memcache {

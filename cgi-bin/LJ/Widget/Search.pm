@@ -77,6 +77,7 @@ EOF
         ) or die "Can't open template: $!";
 
         my $uri = BML::get_uri();
+        $uri =~ s#(.*?)tag/.*#$1#;
         my $vertical = LJ::Vertical->load_by_url ($uri);
 
         $uri .= "/" if $uri !~ m#/$#; ## add end slash if not exist
