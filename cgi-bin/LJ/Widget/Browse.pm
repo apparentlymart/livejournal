@@ -221,12 +221,7 @@ sub render_body {
                 };
         }
     } else {
-        my @posts = ();
-        if ($search_str) {
-            @posts = LJ::Browse->search_posts ( $search_str, $post_page_size );
-        } else {
-            @posts = LJ::Browse->recent_posts ( [ map { $_->{userid} } @comms ], $post_page_size );
-        }
+        my @posts = LJ::Browse->search_posts ( [ map { $_->{userid} } @comms ], $post_page_size, $search_str );
 
         foreach my $entry (@posts) {
             next unless $entry;

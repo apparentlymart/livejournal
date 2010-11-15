@@ -355,7 +355,7 @@ sub load_by_url {
 
     $url =~ /^(?:$LJ::SITEROOT)?(\/.+)$/;
     my $path = $1;
-    $path =~ s/(?:tag)?\/?.*?\/?(?:\?.*)?$//; # remove search string, trailing slash and any get args
+    $path =~ s/tag?.*?\/?(?:\?.*)?$//; # remove search string, trailing slash and any get args
     $path =~ s/\/index\.bml$//; # remove bml page
 
     # 4 possibilities:
@@ -835,34 +835,29 @@ sub title_html {
 
 sub search_posts {
     my $class  = shift;
-    my $search = shift;
-    my $limit = shift;
-
-    my $dbh = LJ::get_db_reader();
-    my $posts = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM vertical_keywords WHERE keyword = ? AND is_seo = 0", { Slice => {} }, $search);
-    my @found_posts = ();
-    foreach my $post (@$posts) {
-        my $post_ids = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM category_recent_posts WHERE journalid = ? AND jitemid = ? AND is_deleted = 0 ORDER BY timecreate DESC LIMIT $limit", { Slice => {} }, $post->{journalid}, $post->{jitemid});
-        push @found_posts, @$post_ids;
-    }
-    my @entries = 
-        map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) }      ## Create LJ::Entry object
-        grep { $_->{journalid} }                                                ## remove SEO posts
-        @found_posts;
-    return @entries;
-}
-
-sub recent_posts {
-    my $class = shift;
     my $comms = shift;
     my $limit = shift;
+    my $search = shift;
 
+    my @entries = ();
     my $comm_list = join ",", @$comms;
     my $dbh = LJ::get_db_reader();
-    my $post_ids = $dbh->selectall_arrayref ("SELECT * FROM category_recent_posts WHERE journalid IN ($comm_list) AND is_deleted = 0 ORDER BY timecreate DESC LIMIT $limit", { Slice => {} });
-    my @entries = map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) } @$post_ids;
+    if (defined $search) {
+        my $posts = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM vertical_keywords WHERE keyword like ? AND is_seo = 0", { Slice => {} }, '%'.$search.'%');
+        my @found_posts = ();
+        foreach my $post (@$posts) {
+            my $post_ids = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM category_recent_posts WHERE journalid IN ($comm_list) AND journalid = ? AND jitemid = ? AND is_deleted = 0 ORDER BY timecreate DESC LIMIT $limit", { Slice => {} }, $post->{journalid}, $post->{jitemid});
+            push @found_posts, @$post_ids;
+        }
+        @entries = 
+            map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) }      ## Create LJ::Entry object
+            grep { $_->{journalid} }                                                ## remove SEO posts
+            @found_posts;
+    } else {
+        my $post_ids = $dbh->selectall_arrayref ("SELECT * FROM category_recent_posts WHERE journalid IN ($comm_list) AND is_deleted = 0 ORDER BY timecreate DESC LIMIT $limit", { Slice => {} });
+        @entries = map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) } @$post_ids;
+    }
     return @entries;
-
 }
 
 # Return a list of communities found in a category
@@ -906,24 +901,29 @@ sub top_communities {
 }
 
 # Takes a list of userids and adds them to a category
-sub add_communities {
+sub add_community {
     my $self = shift;
-    my @uids = @_;
+    my $uid  = shift;
+    my $tags = shift;
 
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create category";
 
-    foreach my $uid (@uids) {
-        $dbh->do("REPLACE INTO categoryjournals VALUES (?,?)", undef,
-                 $self->catid, $uid);
-        die $dbh->errstr if $dbh->err;
+    
+    ## Add community to category
+    $dbh->do("REPLACE INTO categoryjournals VALUES (?,?)", undef,
+             $self->catid, $uid);
+    die $dbh->errstr if $dbh->err;
 
-        LJ::Browse->add_approved_community( comm  => LJ::want_user($uid),
-                                            mod_u => LJ::get_remote(),
-                                            catid => $self->catid, );
-    }
+    LJ::Browse->add_approved_community( comm  => LJ::want_user($uid),
+                                        mod_u => LJ::get_remote(),
+                                        catid => $self->catid, );
 
     $self->clear_journals_memcache;
+
+    ## Add tags for added community
+    my $v = $self->vertical;
+    $v->save_tags (is_seo => 0, tags => [ map { { tag => $_, journalid => $uid } } @$tags ] );
 
     return 1;
 }

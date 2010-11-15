@@ -18,7 +18,8 @@ body<=
     my $ret = "";
 
     my $caturl = $POST{'caturl'};
-    my $journals = $POST{'journals'};
+    my $journal = $POST{'journal'};
+    my $tags = $POST{'tags'};
 
     if (LJ::did_post() and $POST{'add'}) {
         push @errors, "Invalid form submission" unless LJ::check_form_auth();
@@ -28,7 +29,7 @@ body<=
                 push @errors, "Please select a category";
                 next;
             }
-            unless ($journals) {
+            unless ($journal) {
                 push @errors, "Please enter journal names to add";
                 next;
             }
@@ -38,25 +39,16 @@ body<=
             push @errors, "Invalid category" unless $category;
 
             # Extract usernames and get userids
-            my @usernames = split(/\n/, $journals);
+            my @tags = split /,\s*/, $tags;
             my @baduser;
-            my %users;
-            foreach my $user (@usernames) {
-                # trim off extra whitespace characters
-                $user = LJ::trim($user);
-                my $uid = LJ::get_userid($user);
-                if ($uid) {
-                    $users{$user} = $uid;
-                } else {
-                    push @baduser, $user;
-                }
-            }
-            push @errors, "Invalid users (" . join(',', @baduser) . ")"
-                if @baduser;
+            my $uid = LJ::get_userid($journal);
+
+            push @errors, "Invalid user <b>$journal</b>"
+                unless $uid;
             next if @errors;
 
-            # Add journals to category
-            if ($category->add_communities(values %users)) {
+            # Add journal to category
+            if ($category->add_community($uid, \@tags)) {
                 $ret .= "<span class='super notice'>Communities successfully added to category.</span>";
             } else {
                 $ret .= "<span class='super notice'>Communities not added.</span>";
@@ -83,14 +75,19 @@ body<=
             );
     $ret .= "</p>\n";
 
-    $ret .= "<p>the following journals:<br />";
-    $ret .= LJ::html_textarea( {
-                name => 'journals',
-                cols => 40,
-                rows => 6,
-                value => $journals }
+    $ret .= "<p>the following journal:<br />";
+    $ret .= LJ::html_text( {
+                name => 'journal',
+                size => 40,
+                }
             );
-    $ret .= "<br /><i>One username per line.</i></p>\n";
+
+    $ret .= "<p>with tags:<br />";
+    $ret .= LJ::html_text( {
+                name => 'tags',
+                size => 60,
+                }
+            );
 
     $ret .= "<p>" . LJ::html_submit('add', 'Add') . "</p>";
 

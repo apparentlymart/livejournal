@@ -12,6 +12,8 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::Manual';
 
+use LJ::Browse;
+
 # how long to wait if we didn't process any at all
 my $sleep_when_idle;
 
@@ -48,7 +50,7 @@ sub work {
 
     my $dbh = LJ::get_db_writer();
 
-    my $journals = $dbh->selectall_arrayref ("SELECT * FROM categoryjournals", { Slice => {} });
+    my $journals = $dbh->selectall_arrayref ("SELECT catid, journalid FROM categoryjournals", { Slice => {} });
     foreach my $rec (@$journals) {
         my $journalid = $rec->{journalid};
         my @last_jitemid = $dbh->selectrow_array ("SELECT max(jitemid) FROM category_recent_posts WHERE journalid = ?", undef, $journalid);
@@ -67,7 +69,18 @@ sub work {
         foreach my $entry (@recent) {
             my $sth = $dbh->prepare ("INSERT INTO category_recent_posts (jitemid, timecreate, journalid) VALUES (?, ?, ?)");
             $sth->execute($entry->{itemid}, $entry->{logtime}, $journalid);
+
+            ## Add tags for every entry
+            my $e_obj = LJ::Entry->new ($u->{userid}, jitemid => $entry->{itemid});
+            my @tags = $e_obj->tags;
+            if (scalar @tags) {
+                my $cat = LJ::Browse->load_by_id ($rec->{catid});
+                next unless $cat;
+                my $v = $cat->vertical;
+                $v->save_tags (is_seo => 0, tags => [ map { { tag => $_, journalid => $u->{userid}, jitemid => $entry->{itemid} } } @tags ] );
+            }
         }
+
     }
 
     return 0;

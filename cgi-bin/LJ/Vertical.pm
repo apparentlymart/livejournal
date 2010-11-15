@@ -592,7 +592,6 @@ sub save_tags {
     my $tags = $args{'tags'};
 
     my $dbh = LJ::get_db_writer();
-
     ## Get the diff between old and new tags list to delete that diff from DB
     my $old_tags = $self->load_tags(%args);
     if ($old_tags) {
@@ -602,12 +601,12 @@ sub save_tags {
         if (@$to_del_tags) {
             my @bind = map { '?' } @$to_del_tags;
             my @bind_vals = map { $_ } @$to_del_tags;
-            my $del = $dbh->do("DELETE FROM vertical_keywords WHERE vert_id = ? AND keyword IN (".(join ",", @bind).")", undef, $self->vert_id, @bind_vals);
+            my $del = $dbh->do("DELETE FROM vertical_keywords WHERE vert_id = ? AND keyword IN (".(join ",", @bind).") AND is_seo = ?", undef, $self->vert_id, @bind_vals, $is_seo);
         }
     }
 
     foreach my $tag (@$tags) {
-        my $kw_id = $dbh->selectall_arrayref("SELECT * FROM vertical_keywords WHERE keyword = ?", undef, $tag);
+        my $kw_id = $dbh->selectall_arrayref("SELECT * FROM vertical_keywords WHERE keyword = ? AND is_seo = ?", undef, $tag, $is_seo);
         next if @$kw_id;
         my $sth = $dbh->do("INSERT IGNORE INTO vertical_keywords (journalid, keyword, jitemid, vert_id, is_seo) VALUES (?, ?, ?, ?, ?)", undef , $tag->{journalid}, $tag->{tag}, $tag->{jitemid}, $self->vert_id, $is_seo);
     }
