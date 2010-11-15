@@ -183,7 +183,7 @@ sub DayPage
         $comments->{show_readlink} = $entry_obj->comments_shown && ($replycount || $comments->{'screened'});
 
         my $userlite_poster = $userlite_journal;
-        my $pu = $u;
+        $pu = $u;
         if ($u->{'userid'} != $posterid) {
             $userlite_poster = $apu_lite{$posterid} or die "No apu_lite for posterid=$posterid";
             $pu = $apu{$posterid};
