@@ -1561,7 +1561,7 @@
                         app_image => $app->image,
                         title     => $_->{title},
                         body      => $_->{body},
-                        date      => substr(LJ::TimeUtil->mysql_time($_->{ts_create}), 0, 16),
+                        date      => LJ::TimeUtil->ago_text(time() - $_->{ts_create}),
                     };
                 }
             }
