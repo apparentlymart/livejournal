@@ -22,7 +22,16 @@ PotD =
 			return;
 		}
 		this.pause = true;
-		var widget_node = jQuery(node).closest('.appwidget');
+		var widget_node = jQuery(node).closest('.appwidget'),
+			widget = this;
+
+		widget_node.find('input[type=hidden]').each( function() {
+			switch( this.name ) {
+				case "vertical_account" :
+				case "vertical_name" :
+					if( this.value.length > 0 ) { widget.ajax_params[ this.name ] = this.value; }
+			};
+		} );
 
 		this.cache[skip] ?
 			this.setQuestion(this.cache[skip], widget_node) :
