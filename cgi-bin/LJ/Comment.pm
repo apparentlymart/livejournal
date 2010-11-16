@@ -1543,13 +1543,15 @@ sub format_template_text_mail {
     my $targetu = shift;           # target user, who should be notified about the comment
     my $t       = shift;           # LJ::HTML::Template object - template of the notification e-mail
 
-    my $parent  = $self->parent || $self->entry;
+    my $entry   = $self->entry;
+    my $parent  = $self->parent;
 
     $self->_format_template_mail($targetu, $t);
 
     # add specific for PLAIN-TEXT params
-    $t->param(parent_text        => $parent->body_raw);
-    $t->param(poster_text        => $self->body_raw);
+    $t->param( parent_text        => $parent ? $parent->body_raw
+                                             : $entry->event_raw );
+    $t->param( poster_text        => $self->body_raw );
 
     my $email_subject = $self->subject_raw;
     $email_subject = "Re: $email_subject" if $email_subject and $email_subject !~ /^Re:/;
