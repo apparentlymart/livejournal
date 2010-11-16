@@ -17,8 +17,7 @@ body<=
     $title = "Recent Entries in verticals";
     my $ret = "";
 
-    my $vert_id = $POST{'vert_id'};
-    my $journals = $POST{'journals'};
+    my $vert_id = $POST{'vert_id'} || $GET{'vert_id'};
 
     $ret .= "<form method='POST'>\n";
     $ret .= LJ::form_auth();
@@ -42,8 +41,17 @@ body<=
 
     $ret .= "</form>";
 
-    if (LJ::did_post()) {
+    if (LJ::did_post() && $POST{'delete_post'}) {
         my $vertical = LJ::Vertical->load_by_id($POST{'vert_id'});
+        LJ::Browse->delete_post (post_id => $POST{'rec_id'});
+    }
+
+    my $page_size = 10;
+
+    my $page = 1;
+
+    if ($vert_id) {
+        my $vertical = LJ::Vertical->load_by_id($vert_id);
         my $cats = $vertical->get_categories;
         $ret .= "<b><div>Recent Posts</div></p>";
         my @communities = ();
@@ -54,7 +62,10 @@ body<=
                 if $c->{communities};
         };
 
-        my @posts = LJ::Browse->recent_posts(\@communities, 5);
+        my $skip = ($page-1) * $page_size;
+        my $last = $skip + $page_size;
+
+        my @posts = LJ::Browse->search_posts(\@communities, "$skip,$page_size");
 
         foreach (@posts) {
             my $url = $_->url;
@@ -64,6 +75,7 @@ body<=
             $ret .= "<li><a href='".$url."'>".($subject ? $subject : '...')."</a>";
             $ret .= "<form method='POST'>\n";
             $ret .= LJ::form_auth();
+            $ret .= "<input type='hidden' name='vert_id' value='".$vertical->vert_id."'>";
             $ret .= "<input type='hidden' name='rec_id' value='$jitemid-$commid'>";
             $ret .= "<input type='submit' name='delete_post' value='Remove post'>";
             $ret .= "</form>";

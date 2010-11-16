@@ -834,6 +834,18 @@ sub title_html {
     return $ret;
 }
 
+sub delete_post {
+    my $class = shift;
+    my %args = @_;
+
+    my $post = $args{'post_id'};
+    my ($jitemid, $commid) = $post =~ m#^(\d+)-(\d+)$#; ##
+
+    my $dbh = LJ::get_db_reader ();
+    my $res = $dbh->do ("UPDATE category_recent_posts SET is_deleted = 1 WHERE journalid = ? AND jitemid = ?", undef, $commid, $jitemid);
+    return $res;
+}
+
 sub search_posts {
     my $class  = shift;
     my $comms = shift;
