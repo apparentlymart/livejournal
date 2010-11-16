@@ -346,10 +346,13 @@ sub create {
 
 sub get_categories {
     my $self = shift;
+    my $cat  = shift;
 
     my $dbh = LJ::get_db_reader();
 
-    my $cats = $dbh->selectall_arrayref("SELECT * FROM category WHERE vert_id = ?", { Slice => {} }, $self->vert_id);
+    my $where = $cat ? " AND parentcatid = " . $cat->catid : "";
+
+    my $cats = $dbh->selectall_arrayref("SELECT * FROM category WHERE vert_id = ? $where", { Slice => {} }, $self->vert_id);
 
     return $cats;
 }
@@ -1072,7 +1075,8 @@ sub delete_and_purge {
         or die "unable to contact global db master to load vertical";
 
     my $res = $dbh->do("SELECT vert_id FROM category WHERE vert_id = ?", undef, $self->{vert_id});
-    return $res if $res;
+    return $res 
+        unless $res eq '0E0'; ## 0E0 means executed ok with 0 rows fetched.
 
     foreach my $table (qw(vertical2)) {# vertical_entries)) {
         $dbh->do("DELETE FROM $table WHERE vert_id=?", undef, $self->{vert_id});
