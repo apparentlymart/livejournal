@@ -14,7 +14,7 @@ body<=
     return "You are not allowed to view this page"
         unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
 
-    $title = "Top Entries in communities";
+    $title = "Featured communities";
     my $ret = "";
 
     my $vert_id = $POST{'vert_id'};
@@ -49,7 +49,7 @@ body<=
 <form method="post">
 <input type="hidden" name="vert_id" value="$vert_id">
 <table>
-    <caption>Enter URL for adding featured post:</caption>
+    <caption>Enter community URL for adding:</caption>
     <tr>
         <td>URL:</td><td colspan="2"><input type="text" size="50" name="url"></td>
         <td colspan="2"><input type="submit" name="add" value="Add"></td>
