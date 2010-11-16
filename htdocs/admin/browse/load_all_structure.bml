@@ -1,0 +1,123 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
+    $title = "Load All Structure";
+    my $ret = "";
+
+    if (LJ::did_post() && $POST{'all_structure'}) {
+        my $csv = LJ::Request->upload('all_structure');
+        my $content = '';
+        seek $csv->fh, 0,0;
+        read $csv->fh, $content, $csv->size; # read content
+
+        my @lines = split /\r?\n/, $content;
+        shift @lines; ## remove caption from spreadsheet
+
+        my $clear_col = sub {
+            my $name = shift;
+            my ($res) = $name =~ m#^"(.*)"$#; ##
+            $res =~ s#\\"#"#;
+            return $res;
+        };
+
+        foreach my $line (@lines) {
+            my @columns = 
+                    map { 
+                        $_ =~ s/(?:^"|"$)//g;           ## remove trailing "
+                        $_ =~ s#\\"#"#;                 ## unescape "
+                        $_ 
+                    }    
+                    split /,[^\s]/, $line;              ## split line by ,
+
+            ## Community name
+            my $comm_name = $columns[0];
+
+            ## Vertical name & URL
+            my $vert_name = $columns[1];
+            my $vert_url  = $columns[2];
+
+            my $v = LJ::Vertical->load_by_url ("/browse".$vert_url)
+                || LJ::Vertical->create (name => $vert_name, url => $vert_url);
+
+            ## Category name & url
+            my $cat_name = $columns[3];
+            my $cat_url = $columns[4];
+            my $cat = LJ::Browse->load_by_url ($v->url.$cat_url);
+
+            unless ($cat) {
+                unless (grep { $_->{pretty_name} eq $cat_name } @{$v->get_categories}) {
+                    $cat = LJ::Browse->create ( pretty_name => $cat_name, url_path => $cat_url );
+                    $cat->vert_id ($v->vert_id);
+                }
+            } else {
+                $cat->vert_id ($v->vert_id);
+            }
+
+            my ($subcat_name, $subcat_url, $subcat) = ();
+
+            ## Sub-Category name & url
+            my $subcat_name = $columns[5];
+            my $subcat_url = $columns[6];
+
+            if ($subcat_name && $subcat_url) {
+                my $subcat = LJ::Browse->load_by_url ($cat->url.$subcat_url);
+                unless ($subcat) {
+                    unless (grep { $_->{pretty_name} eq $subcat_name } @{$v->get_categories}) {
+                        $subcat = LJ::Browse->create ( pretty_name => $subcat_name, url_path => $subcat_url, parentcatid => $cat->catid );
+                        $subcat->vert_id ($v->vert_id);
+                    }
+                } else {
+                    $subcat->vert_id ($v->vert_id);
+                }
+            }
+
+            ## #7 - Full path for sanity check 
+
+            ## Tags for community
+            my $comm_tags = $columns[8];
+            my @tags = split /,\s*/, $comm_tags;
+
+            my $comm_id = LJ::get_userid($comm_name);
+            
+            ## Wrong community name?
+            next unless $comm_id;
+
+            $subcat_name
+                ? $subcat->add_community($comm_id, \@tags)
+                : $cat->add_community($comm_id, \@tags);
+        }
+    }
+
+    my @verticals = LJ::Vertical->load_all();
+
+    $ret .= "<form method='POST' enctype='multipart/form-data'>\n";
+    $ret .= LJ::form_auth();
+
+    $ret .= "<input type='file' name='all_structure'>";
+    $ret .= "<br/><input type='submit' name='load' value='Yes, I want to load'>";
+
+    $ret .= "</form>";
+
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
