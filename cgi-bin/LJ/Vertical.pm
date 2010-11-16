@@ -1418,7 +1418,7 @@ sub display_name {
 sub url {
     my $self = shift;
 
-    return "$LJ::SITEROOT/browse" . $self->uri . "/";
+    return "$LJ::SITEROOT/browse" . $self->uri;
 }
 
 # checks to see if the given URL is the canonical URL so that we can redirect if it's not

@@ -21,7 +21,6 @@ body<=
     $ret .= "<p><a href='./add_verticals.bml'>Add Verticals</a></p>";
     $ret .= "<p><a href='./edit_verticals.bml'>Edit Verticals</a></p>";
     $ret .= "<p><a href='./remove_verticals.bml'>Remove Verticals</a></p>";
-    $ret .= "<p><a href='./upload_verticals.bml'>Upload Verticals</a></p>";
     $ret .= "<p><a href='./recent_posts.bml'>Manage Recent Posts</a></p>";
     $ret .= "<p><a href='./top_entries_vertical.bml'>Top Entries in communities</a></p>";
     $ret .= "<p><a href='./featured_communities.bml'>Featured Communities</a></p>";
@@ -40,6 +39,8 @@ body<=
     $ret .= "<p><a href='./manage_category.bml'>Manage Categories</a></p>";
     $ret .= "<p><a href='./remove_category.bml'>Remove Category</a></p>";
     $ret .= "</blockquote>";
+
+    $ret .= "<p><a href='./load_all_structure.bml'>Load All Structure</a></p>";
 
     return "<body>$ret</body>";
 }

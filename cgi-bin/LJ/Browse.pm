@@ -355,7 +355,8 @@ sub load_by_url {
 
     $url =~ /^(?:$LJ::SITEROOT)?(\/.+)$/;
     my $path = $1;
-    $path =~ s/tag?.*?\/?(?:\?.*)?$//; # remove search string, trailing slash and any get args
+    $path =~ s/\/?(?:\?.*)?$//; # trailing slash and any get args
+    $path =~ s/tag\/.*$//;      # remove search string
     $path =~ s/\/index\.bml$//; # remove bml page
 
     # 4 possibilities:
@@ -793,7 +794,7 @@ sub path {
         $p = $c->parent->url_path . $p;
         $p = path($c->parent) . $p;
     } else {
-        $v = LJ::Vertical->load_by_id ($c->vert_id);
+        $v = $c->vert_id ? LJ::Vertical->load_by_id ($c->vert_id) : undef;
     }
     return $v ? $v->uri . $p : $p;
 }
@@ -847,7 +848,7 @@ sub search_posts {
         my @found_posts = ();
         foreach my $post (@$posts) {
             my $post_ids = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM category_recent_posts WHERE journalid IN ($comm_list) AND journalid = ? AND jitemid = ? AND is_deleted = 0 ORDER BY timecreate DESC LIMIT $limit", { Slice => {} }, $post->{journalid}, $post->{jitemid});
-            push @found_posts, @$post_ids;
+            push @found_posts, @$post_ids if $post_ids;
         }
         @entries = 
             map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) }      ## Create LJ::Entry object
@@ -966,16 +967,17 @@ sub _get_set {
     my $self = shift;
     my $key  = shift;
 
-    if (@_) { # setter case
+    if ($_[0]) { # setter case
         # TODO enable setting values
-        return;
+        
         my $val = shift;
 
         my $dbh = LJ::get_db_writer()
             or die "unable to contact global db master to load category";
 
         $dbh->do("UPDATE category SET $key=? WHERE catid=?",
-                 undef, $self->{catid}, $val);
+                 undef, $val, $self->{catid});
+
         die $dbh->errstr if $dbh->err;
 
         $self->clear_memcache;
@@ -993,7 +995,7 @@ sub catid          { shift->_get_set('catid')              }
 sub display_name   { shift->_get_set('pretty_name')        }
 sub url_path       { shift->_get_set('url_path')           }
 sub parentid       { shift->_get_set('parentcatid')        }
-sub vert_id        { shift->_get_set('vert_id')            }
+sub vert_id        { shift->_get_set('vert_id' => $_[0] )  }
 
 
 # Community Moderation
