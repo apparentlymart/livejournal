@@ -23,7 +23,7 @@ my $max_count_post_per_comm;
 my $verbose;
 
 sub BEGIN {
-    $sleep_when_idle = 10;
+    $sleep_when_idle = 600;
     $verbose = 0;
     $max_count_post_per_comm = 30;
 }
