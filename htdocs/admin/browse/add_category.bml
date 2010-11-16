@@ -29,10 +29,12 @@ body<=
         push @errors, "Invalid form submission" unless LJ::check_form_auth();
         {
             # Check for required data
+=head
             unless ($parentcaturl) {
                 push @errors, "Please select a parent category";
                 next;
             }
+=cut
             unless ($newcat) {
                 push @errors, "Please enter new category display name";
                 next;
@@ -48,7 +50,7 @@ body<=
 
             # Has a valid parent category been chosen
             my $pcategory = LJ::Browse->load_by_url("/browse" . $parentcaturl);
-            push @errors, "Invalid category" unless $pcategory;
+#            push @errors, "Invalid category" unless $pcategory;
 
             # Does a category with the same URL path and parent already exist?
             my $existcat = LJ::Browse->load_by_url("/browse" . $parentcaturl . $newcaturl);
@@ -59,7 +61,7 @@ body<=
             # Add category
             if (LJ::Browse->create( pretty_name => $newcat,
                                     url_path => $newcaturl,
-                                    parentcatid => $pcategory->catid,
+                                    parentcatid => $pcategory ? $pcategory->catid : 0,
                                     topcat => $POST{topcat} ) ) {
                 $ret .= "<span class='super notice'>New category created.</span>";
             } else {
@@ -80,7 +82,7 @@ body<=
     my @caturls = map { { text => $_->{pretty_name}, value => $_->uri } } @categories;
     #@caturls = sort { $a cmp $b } @caturls;
 
-    $ret .= "<p>Add to Category:<br />";
+    $ret .= "<p>Add to Vertical/Category:<br />";
     $ret .= LJ::html_select({
                 name => 'parentcaturl',
                 selected => $parentcaturl },
@@ -107,13 +109,6 @@ body<=
                 value => $POST{'newcaturl'} || '/'}
             );
     $ret .= "<br /><i>example: '\/monkey_bars'</i></td></tr>\n";
-
-    $ret .= "<tr><td class='label'>Top Category:</td><td>";
-    $ret .= LJ::html_check( {
-                name => 'topcat',
-                value => $POST{'topcat'} || '/'}
-            );
-    $ret .= " <i>Display on top-level directory page, even when containing category is reduced.</i></td></tr>\n";
 
     $ret .= "</table></p>\n";
 
