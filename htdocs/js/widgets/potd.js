@@ -22,7 +22,7 @@ PotD =
 			return;
 		}
 		this.pause = true;
-		var widget_node = jQuery(node).parents('.appwidget');
+		var widget_node = jQuery(node).closest('.appwidget');
 
 		this.cache[skip] ?
 			this.setQuestion(this.cache[skip], widget_node) :
