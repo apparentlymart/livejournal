@@ -1,6 +1,6 @@
 <ul class="m-section">
 	<TMPL_LOOP categories>
-		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF>"><span><i class="m-switch"><i class="t"></i><i class="b"></i></i><TMPL_VAR name></span>
+		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF>"><a href="<tmpl_var url>"><i class="m-switch"><i class="t"></i><i class="b"></i></i><TMPL_VAR name></a>
 			<ul class="m-section-list">
 				<TMPL_LOOP level1>
 					<li<TMPL_IF is_current> class="m-section-item-open"</TMPL_IF>>
@@ -26,10 +26,10 @@
 									<li><tmpl_if is_current><strong><TMPL_VAR name></strong><tmpl_else><a href="<tmpl_var url>"><TMPL_VAR name></a></tmpl_if></li>
 								</TMPL_LOOP>
 							</ul>
-						 </TMPL_IF>
-					 </li>
-				 </TMPL_LOOP>
-			 </ul>
+						</TMPL_IF>
+					</li>
+				</TMPL_LOOP>
+			</ul>
 		</li>
 	</TMPL_LOOP>
 </ul>
