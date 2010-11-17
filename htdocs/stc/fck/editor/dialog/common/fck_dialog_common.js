@@ -99,8 +99,11 @@ function GetAttribute( element, attName, valueIfNull )
 
 function SelectField( elementId )
 {
-	var element = GetE( elementId ) ;
-	element.focus() ;
+    //added try catch because the tab can be hidden at this moment
+    try {
+        var element = GetE( elementId ) ;
+        element.focus() ;
+    } catch( e ) {};
 
 	// element.select may not be available for some fields (like <select>).
 	if ( element.select )
