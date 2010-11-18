@@ -5,8 +5,8 @@
 <TMPL_IF ad><div class="b-catalogue-ads"><TMPL_VAR ad></div></TMPL_IF>
 <TMPL_VAR search_widget>
 <TMPL_IF 0><TMPL_VAR popular_interests_widget></TMPL_IF>
-<tmpl_include top_posts.tmpl>
-<tmpl_include featured_communities.tmpl>
+<tmpl_if is_vertical_view><tmpl_include top_posts.tmpl></tmpl_if>
+<tmpl_if is_vertical_view><tmpl_include featured_communities.tmpl></tmpl_if>
 <TMPL_VAR add_community_widget>
-<tmpl_var poll_of_the_day>
+<tmpl_if is_vertical_view><tmpl_var poll_of_the_day></tmpl_if>
 

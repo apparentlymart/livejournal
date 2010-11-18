@@ -1,18 +1,22 @@
 <div class="l-body">
-	<div class="b-catalogue">
+	<div class="b-catalogue<tmpl_if is_vertical_view> vertical_view</tmpl_if>">
 		<div class="l-aside">	
 			<TMPL_INCLUDE menu.tmpl>
 		</div>
 		<div class="l-content">
 		<ul class="m-tab-switcher">
-			<li<tmpl_if expr="view eq 'recent_posts'"> class="cur"</tmpl_if>><a href="?view=recent_posts">Recent posts</a><i class="b-round-ctl"></i><i class="b-round-ctr"></i></li>
+			<tmpl_if is_vertical_view><li<tmpl_if expr="view eq 'recent_posts'"> class="cur"</tmpl_if>><a href="?view=recent_posts">Recent posts</a><i class="b-round-ctl"></i><i class="b-round-ctr"></i></li></tmpl_if>
 			<li<tmpl_if expr="view eq 'communities'"> class="cur"</tmpl_if>><a href="?view=communities">Communities</a><i class="b-round-ctl"></i><i class="b-round-ctr"></i></li>
 		</ul>
-		<tmpl_if expr="view eq 'communities'">
+		<tmpl_if is_vertical_view>
+			<tmpl_if expr="view eq 'communities'">
+				<TMPL_INCLUDE communities.tmpl>
+			</tmpl_if>
+			<tmpl_if expr="view eq 'recent_posts'">
+				<TMPL_INCLUDE recent_posts.tmpl>
+			</tmpl_if>
+		<tmpl_else>
 			<TMPL_INCLUDE communities.tmpl>
-		</tmpl_if>
-		<tmpl_if expr="view eq 'recent_posts'">
-			<TMPL_INCLUDE recent_posts.tmpl>
 		</tmpl_if>
 		</div>
 		<div class="l-sidebar">

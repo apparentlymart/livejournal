@@ -32,10 +32,10 @@
 .appwidget-browse .appwidget-search INPUT.type-text {
 	width:230px;
 	}
-.appwidget-search P {
+.appwidget-browse .appwidget-search P {
 	position:relative;
 	}
-	.appwidget-search LABEL {
+	.appwidget-browse .vertical_view .appwidget-search LABEL {
 		position:absolute;
 		font-size:11px;
 		left:4px;
