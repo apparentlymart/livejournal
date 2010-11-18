@@ -17,7 +17,7 @@ body<=
     $title = "Recent Entries in verticals";
     my $ret = "";
 
-    my $vert_id = $POST{'vert_id'};
+    my $vert_id = $POST{'vert_id'} ne '' ? $POST{'vert_id'} : undef;
     my $journals = $POST{'journals'};
 
     $ret .= "<form method='POST'>\n";
@@ -35,7 +35,7 @@ body<=
     $ret .= LJ::html_select({
                 name => 'vert_id',
                 selected => $vert_id },
-                { text => 'Select Category',
+                { text => 'Select Vertical',
                 value => '' },
                 @vert_ids
             );
@@ -48,12 +48,12 @@ body<=
         $vertical = LJ::Vertical->load_by_id($vert_id);
     }
 
-    if (LJ::did_post() && $POST{'save'}) {
+    if (LJ::did_post() && $vertical && $POST{'save'}) {
         my $tags = $POST{'tags'};
         $vertical->save_tags( is_seo => 1, tags => [ map { { journalid => 0, jitemid => 0, tag => $_ } } split /\r\n/, $tags ] );
     }
 
-    if (LJ::did_post()) {
+    if (LJ::did_post() && $vertical) {
         my $seo_tags = $vertical ? $vertical->load_tags ( is_seo => 1 ) : [];
         $seo_tags = join "\n", map { $_->{keyword} } @$seo_tags;
 

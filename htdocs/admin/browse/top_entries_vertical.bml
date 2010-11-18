@@ -17,7 +17,7 @@ body<=
     $title = "Top Entries in communities";
     my $ret = "";
 
-    my $vert_id = $POST{'vert_id'};
+    my $vert_id = $POST{'vert_id'} ne '' ? $POST{'vert_id'} : undef;
     my $journals = $POST{'journals'};
 
     $ret .= "<form method='POST'>\n";
@@ -47,7 +47,7 @@ body<=
         $vertical = LJ::Vertical->load_by_id($vert_id);
     }
 
-    if (LJ::did_post() && $POST{'store'}) {
+    if (LJ::did_post() && $vertical && $POST{'store'}) {
         $vertical->set_show_entries ($POST{'show_entries'});
         $vertical->set_not_deleted ($POST{'not_deleted'});
         $vertical->set_remove_after ($POST{'remove_after'});
@@ -91,15 +91,15 @@ ADDPOST
 
     }
 
-    if (LJ::did_post() && $POST{'add'}) {
+    if (LJ::did_post() && $vertical && $POST{'add'}) {
         $vertical->add_post ($POST{'url'});
     }
 
-    if (LJ::did_post() && $POST{'delete_post'}) {
+    if (LJ::did_post() && $vertical && $POST{'delete_post'}) {
         $vertical->delete_post (post_id => $POST{'rec_id'});
     }
 
-    if (LJ::did_post()) {
+    if (LJ::did_post() && $vertical) {
         $ret .= "<b><div>Added Posts</div></p>";
         my $posts = $vertical->load_vertical_posts( count => '100', is_random => 0 );
 
