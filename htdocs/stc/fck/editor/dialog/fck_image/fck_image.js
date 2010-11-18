@@ -52,11 +52,16 @@ if ( !FCKConfig.ImageDlgHideAdvanced )
 // Function called when a dialog tag is selected.
 function OnDialogTabChange( tabCode )
 {
-	ShowE('divInfo'		, ( tabCode == 'Info' ) ) ;
-	ShowE('divLink'		, ( tabCode == 'Link' ) ) ;
-	ShowE('divUpload'	, ( tabCode == 'Upload' ) ) ;
-  ShowE('divPhotobucket', ( tabCode == 'Photobucket' ) ) ;
-	ShowE('divAdvanced'	, ( tabCode == 'Advanced' ) ) ;
+	try {
+		ShowE('divInfo'		, ( tabCode == 'Info' ) ) ;
+		ShowE('divLink'		, ( tabCode == 'Link' ) ) ;
+		ShowE('divUpload'	, ( tabCode == 'Upload' ) ) ;
+		ShowE('divPhotobucket', ( tabCode == 'Photobucket' ) ) ;
+		ShowE('divAdvanced'	, ( tabCode == 'Advanced' ) ) ;
+	} catch( e ) {
+		//it may happen, that tabs are not loaded in dom yet, so we will wait a little and repeat
+		setTimeout( function() { OnDialogTabChange( tabCode ); }, 0 );
+	}
 }
 
 // Get the selected image (if available).
