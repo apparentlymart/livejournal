@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use strict;
 
-##   post-svn-commit script test III
+##   post-svn-commit script test IV
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljdb.pl';
 use Getopt::Long;
