@@ -120,7 +120,7 @@ body<=
                 @friends = sort { $a->{'username'} cmp $b->{'username'} } @friends;
             }
 
-            my %items = BML::paging(\@friends, $GET{'page'}, 30);
+            my %items = BML::paging(\@friends, $GET{'page'}, 50);
             my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'});
             @friends = @{$items{'items'}};
 
