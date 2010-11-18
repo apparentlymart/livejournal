@@ -4475,19 +4475,17 @@ sub _incr_decr_friendsof_counter {
 
     if ($counter){
         my $u = LJ::load_userid($uid);
-        if ($u->can_be_counted_as_friendof){
-            ## Memcached: http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt
-            ##  the item must already
-            ##  exist for incr/decr to work; these commands won't pretend that a
-            ##  non-existent key exists with value 0; instead, they will fail.
-            ##
-            ## Incr/Decr doesn't change a key expiration time, 
-            ##
-            if ($action eq 'incr'){
-                LJ::MemCache::incr($precise_friendsof_counter);
-            } elsif ($action eq 'decr'){
-                LJ::MemCache::decr($precise_friendsof_counter);
-            }
+        ## Memcached: http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt
+        ##  the item must already
+        ##  exist for incr/decr to work; these commands won't pretend that a
+        ##  non-existent key exists with value 0; instead, they will fail.
+        ##
+        ## Incr/Decr doesn't change a key expiration time, 
+        ##
+        if ($action eq 'incr'){
+            LJ::MemCache::incr($precise_friendsof_counter);
+        } elsif ($action eq 'decr'){
+            LJ::MemCache::decr($precise_friendsof_counter);
         }
     }
 
