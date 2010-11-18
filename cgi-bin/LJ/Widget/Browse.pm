@@ -97,7 +97,7 @@ sub render_body {
 
     my $vertical = LJ::Vertical->load_by_url($uri);
     
-    $$windowtitle = $vertical->name; #$class->ml('widget.browse.windowtitle');
+    $$windowtitle = $vertical ? $vertical->name : $class->ml('widget.browse.windowtitle');
 
     my $cat = LJ::Browse->load_by_url($uri); # Currently selected category
 
@@ -171,7 +171,13 @@ sub render_body {
         $search_str =~ s#/?\?.*##;
     }
 
-    if ($cat) { # we're looking at a lower-level category
+    if ($cat && $vertical) {
+        @comms = $cat->communities( is_need_child => 1 );
+        $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $vertical->name, ljadwrapper => 1 });
+    } elsif ($vertical) {
+        @comms = $vertical->get_communities( is_need_child => 1 );
+        $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $vertical->name, ljadwrapper => 1 });
+    } elsif ($cat) { # we're looking at a lower-level category
 
         my @cat_title = split(/&gt;/, $cat->title_html());
         shift @cat_title;
@@ -181,14 +187,14 @@ sub render_body {
                     (pop(@cat_title) || '');
 
         # show actual communities
-        #if ($cat->parent) {
+        if ($cat->parent) {
             if ($cat->{'pretty_name'} eq 'lj_spotlight_community') {
                 # Load communities saved by spotlight admin
                 @comms = _get_spotlight_communities();  # Load communities saved by spotlight admin
             } else {
-                @comms = $cat->communities();
+                @comms = $cat->communities;
             }
-        #}
+        }
         $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $cat->display_name, ljadwrapper => 1 });
     } else {
         @comms = _get_spotlight_communities();  # Show spotlight communities by default
@@ -300,33 +306,39 @@ sub render_body {
     $uri .= '?' . $args if $args;
 
     ## Prepare DATA for Featured Communities Widget
-    my $comms = $vertical->load_communities( count => $vertical->show_entries, is_random => 1 );
+    my $comms = undef;
     my @top_comms = ();
-    foreach my $comm (@$comms) {
-        my $c = LJ::load_userid($comm->{journalid});
-        next unless $c;
-        my $userpic = $c->userpic;
-        push @top_comms, {
-            username        => $c->display_name,
-            userpic         => $userpic ? $userpic->url : '',
-            community       => $c->user,
-            bio             => $c->bio,
-        };
+    if ($vertical) {
+        $comms = $vertical->load_communities( count => $vertical->show_entries, is_random => 1 );
+        foreach my $comm (@$comms) {
+            my $c = LJ::load_userid($comm->{journalid});
+            next unless $c;
+            my $userpic = $c->userpic;
+            push @top_comms, {
+                username        => $c->display_name,
+                userpic         => $userpic ? $userpic->url : '',
+                community       => $c->user,
+                bio             => $c->bio,
+            };
+        }
     }
 
     ## Prepare DATA for Featured Posts Widget
-    my $posts = $vertical->load_vertical_posts( count => $vertical->show_entries, is_random => 1 );
+    my $posts = undef;
     my @top_posts = ();
-    foreach my $post (@$posts) {
-        my $entry = LJ::Entry->new ($post->{journalid}, jitemid => $post->{jitemid});
-        my $userpic = $entry->userpic;
-        push @top_posts, {
-            subject         => $entry->subject_text,
-            userpic         => $userpic ? $userpic->url : '',
-            updated_ago     => LJ::TimeUtil->ago_text($entry->logtime_unix),
-            comments_count  => $entry->reply_count,
-            ljuser          => $entry->journal->ljuser_display,
-        };
+    if ($vertical) {
+        $posts = $vertical->load_vertical_posts( count => $vertical->show_entries, is_random => 1 );
+        foreach my $post (@$posts) {
+            my $entry = LJ::Entry->new ($post->{journalid}, jitemid => $post->{jitemid});
+            my $userpic = $entry->userpic;
+            push @top_posts, {
+                subject         => $entry->subject_text,
+                userpic         => $userpic ? $userpic->url : '',
+                updated_ago     => LJ::TimeUtil->ago_text($entry->logtime_unix),
+                comments_count  => $entry->reply_count,
+                ljuser          => $entry->journal->ljuser_display,
+            };
+        }
     }
 
     $template->param(
@@ -351,11 +363,15 @@ sub render_body {
         nav_line                => $nav_line,
         popular_interests_widget=> LJ::Widget::PopularInterests->render(),
         add_community_widget    => LJ::Widget::AddCommunity->render(),
-        search_widget           => LJ::Widget::Search->render(type => "tags", view => $view),
+        search_widget           => LJ::Widget::Search->render(type => $vertical ? "tags" : "yandex", view => $view),
         top_posts               => \@top_posts,
         top_comms               => \@top_comms,
         view                    => $view,
-        poll_of_the_day         => LJ::Widget::PollOfTheDay->render(vertical_account => $vertical->journal, vertical_name => $vertical->name),
+        poll_of_the_day         => LJ::Widget::PollOfTheDay->render(
+                                        vertical_account => $vertical ? $vertical->journal : undef,
+                                        vertical_name => $vertical ? $vertical->name : undef
+                                    ),
+        is_vertical_view        => $vertical ? 1 : 0,
     );
 
     return $template->output;

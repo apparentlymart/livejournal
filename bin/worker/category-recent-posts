@@ -77,7 +77,8 @@ sub work {
                 my $cat = LJ::Browse->load_by_id ($rec->{catid});
                 next unless $cat;
                 my $v = $cat->vertical;
-                $v->save_tags (is_seo => 0, tags => [ map { { tag => $_, journalid => $u->{userid}, jitemid => $entry->{itemid} } } @tags ] );
+                $v->save_tags (is_seo => 0, tags => [ map { { tag => $_, journalid => $u->{userid}, jitemid => $entry->{itemid} } } @tags ] )
+                    if $v;
             }
         }
 

@@ -344,6 +344,37 @@ sub create {
     return $class->new( vert_id => $dbh->{mysql_insertid} );
 }
 
+# Return a list of communities found in vertical's categories
+# Returns User objects
+sub get_communities {
+    my $self = shift;
+    my %args = @_;
+
+    my $cats = $self->get_categories();
+
+    my $cusers = {};
+    foreach my $c (@$cats) {
+        my $cat = LJ::Browse->load_by_id ( $c->{catid} );
+
+        $cat->load_communities ( %args ) unless ($args{'is_need_child'} && $cat->{_loaded_journals});
+
+        my $comms = $cat->{communities};
+        my $temp_users = LJ::load_userids(@$comms);
+
+        foreach my $userid (keys %$temp_users) {
+            $cusers->{$userid} = $temp_users->{$userid};
+        }
+
+    }
+
+    return                                  # 6. return result
+        map {$_->[1]}                       # 5. get a cargo from temporary containers
+            sort {$a->[0] cmp $b->[0]}      # 4. sort it by a sort-keys
+                map {[lc $_->username, $_]} # 3. create list of [ sort-key, cargo-to-sort ]
+                    grep { $_ }             # 2. remove empties from it, we don't want to die() on $_->username
+                        (values %$cusers);  # 1. get communities list
+}
+
 sub get_categories {
     my $self = shift;
     my $cat  = shift;

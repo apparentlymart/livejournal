@@ -244,9 +244,8 @@ sub load_all {
     my $dbh = LJ::get_db_reader()
         or die "unable to contact global db slave to load categories";
 
-    my $vert_id = $vertical ? $vertical->vert_id : undef;
-    my $where = '';
-    $where = " WHERE vert_id = $vert_id " if $vert_id;
+    my $vert_id = $vertical ? $vertical->vert_id : 0;
+    my $where = " WHERE vert_id = $vert_id ";
 
     my $sth = $dbh->prepare("SELECT * FROM category" . $where);
     $sth->execute();
@@ -717,7 +716,9 @@ sub load_communities {
     my @cats = ( $self->catid );
     if ($args{'is_need_child'}) {
         ## get communities from child category too. need for Info (Admin Page), for example
-        my $sth = $dbh->prepare("SELECT catid FROM category WHERE parentcatid = ?");
+        my $vertical = $args{'vertical'};
+        my $where = $vertical ? " AND vert_id = " . $vertical->vert_id : '';
+        my $sth = $dbh->prepare("SELECT catid FROM category WHERE parentcatid = ? $where");
         $sth->execute($self->catid);
         while (my $row = $sth->fetchrow_hashref) {
             push @cats, $row->{'catid'};
@@ -743,6 +744,8 @@ sub load_communities {
 
 sub vertical {
     my $self = shift;
+
+    return undef unless $self->vert_id;
 
     return LJ::Vertical->load_by_id ($self->vert_id);
 }
