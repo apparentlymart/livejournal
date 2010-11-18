@@ -3377,6 +3377,22 @@ CREATE TABLE pingrel (
 ) TYPE=InnoDB
 EOC
 
+## Queue of delayed Befriending/Defriending events
+register_tablecreate("friending_actions_q", <<'EOC');
+CREATE TABLE friending_actions_q (
+    rec_id      INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    userid      INT UNSIGNED NOT NULL,
+    friendid    INT UNSIGNED NOT NULL,
+    action      CHAR(1),
+    etime       INT,
+    jobid       BIGINT(20) UNSIGNED, -- appropriate schwartz job
+
+    PRIMARY KEY(rec_id),
+    INDEX(userid)
+
+    ) Type=InnoDB
+EOC
+
 ### changes
 
 register_alter(sub {

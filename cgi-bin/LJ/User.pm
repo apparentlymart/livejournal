@@ -7996,7 +7996,8 @@ sub add_friend
             my $friender = LJ::load_userid($userid);
             my $friendee = LJ::load_userid($fid);
             if ($notify && !$friendee->is_banned($friender)) {
-                push @jobs, LJ::Event::Befriended->new($friendee, $friender)->fire_job;
+                require LJ::Event::BefriendedDelayed;
+                LJ::Event::BefriendedDelayed->send($friendee, $friender);
             }
 
             push @jobs, TheSchwartz::Job->new(
@@ -8062,7 +8063,8 @@ sub remove_friend {
 
             # only fire event if the friender is a person and not banned and visible
             if ($notify && !$friendee->has_banned($u)) {
-                push @jobs, LJ::Event::Defriended->new($friendee, $u)->fire_job;
+                require LJ::Event::DefriendedDelayed;
+                LJ::Event::DefriendedDelayed->send($friendee, $u);
             }
 
             push @jobs, TheSchwartz::Job->new(

@@ -1,0 +1,102 @@
+#!/usr/bin/perl
+package TheSchwartz::Worker::FriendingQueue;
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use base 'LJ::NewWorker::TheSchwartz';
+require 'ljlib.pl';
+
+sub capabilities { 'LJ::Worker::HandleUserFriendingActions', "LJ::Worker::FlushUserFriendingActions" }
+
+__PACKAGE__->start;
+
+package LJ::Worker::HandleUserFriendingActions;
+use strict;
+use base 'TheSchwartz::Worker';
+use LJ::FriendQueue;
+
+sub work {
+    my ($class, $job) = @_;
+    my $args = $job->arg;
+
+    my ($uid, $time) = @$args;
+
+    my $u = LJ::load_userid($uid);
+
+    my @actions = LJ::FriendQueue->load($u->userid);
+    return $job->completed unless @actions; ## everything processed yet
+
+    my $last_jobid  = $actions[-1]->{jobid};
+    my $last_rec_id = $actions[-1]->{rec_id};
+
+    ## we should process queue only if the last record is for this job
+    $job->completed if $actions[-1]->{jobid} ne $job->jobid;
+
+    ## get rid of pair actions: friendA, defriendA... or visa versa
+    my %filtered = ();
+    ## scenario assumes that events may be added to queue not in order of their occurance.
+    foreach my $action (@actions){
+        my $friendid = $action->{friendid};
+        my $act = $action->{action}; # add | del
+        my $neg_act = $act eq 'A' ? 'D' : 'A';
+
+        if ($filtered{"$friendid-$neg_act"}){
+            my $skiped_action = shift @{ $filtered{"$friendid-$neg_act"} };
+            
+            ## do not hold empty arrays
+            delete $filtered{"$friendid-$neg_act"}
+                if @{ $filtered{"$friendid-$neg_act"} } < 1;
+
+            ## - vs + = 0;
+            $skiped_action->{skiped} = 1; ## set flag
+            $action->{skiped} = 1;
+
+            next;
+        } else {
+            push @{ $filtered{"$friendid-$act"} ||= [] } => $action;
+        }
+    }
+    @actions = grep { not $_->{skiped} } @actions;
+
+    my $sclient  = LJ::theschwartz();
+    unless ($sclient){
+        $job->failed("Can't get TheSchwartz client");
+        return;
+    }
+
+    ##
+    foreach my $action (@actions){
+        my $userid   = $action->{userid};
+        my $friendid = $action->{friendid};
+
+        my $bfjob = $action->{action} eq 'A'
+                    ? LJ::Event::Befriended->new($friendid, $userid)->fire_job
+                    : LJ::Event::Defriended->new($friendid, $userid)->fire_job;
+        $sclient->insert_jobs($bfjob);
+    }
+
+    LJ::FriendQueue->empty($u->userid, $last_rec_id);
+
+    $job->completed;
+}
+
+package LJ::Worker::FlushUserFriendingActions;
+use strict;
+use base 'TheSchwartz::Worker';
+use LJ::FriendQueue;
+
+sub work {
+    my ($class, $job) = @_;
+    my $args = $job->arg;
+
+    my ($uid, $time) = @$args;
+
+    my $u = LJ::load_userid($uid);
+    ## remove all 
+    LJ::FriendQueue->empty($u->userid);
+    #LJ::FriendQueue->log_
+
+    $job->completed;
+}
+
+
+1;

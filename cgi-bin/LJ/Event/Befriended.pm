@@ -6,11 +6,10 @@ use base 'LJ::Event';
 
 sub new {
     my ($class, $u, $fromu) = @_;
-    foreach ($u, $fromu) {
-        croak 'Not an LJ::User' unless blessed $_ && $_->isa("LJ::User");
-    }
 
-    return $class->SUPER::new($u, $fromu->{userid});
+    my $uid      = LJ::want_userid($u); ## friendid
+    my $fromuid  = LJ::want_userid($fromu);
+    return $class->SUPER::new($uid, $fromuid);
 }
 
 sub is_common { 0 }

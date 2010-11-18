@@ -6,7 +6,6 @@ no warnings 'uninitialized';
 
 use LJ::Constants;
 use Class::Autouse qw(
-                      LJ::Console
                       LJ::Event::JournalNewEntry
                       LJ::Event::UserNewEntry
                       LJ::Event::Befriended
@@ -2876,10 +2875,13 @@ sub editfriends
             LJ::memcache_kill($friendid, 'friendofs2');
 
             if ($sclient && !$currently_is_friend && !$currently_is_banned) {
+                ## delay event to accumulate users activity
+                require LJ::Event::BefriendedDelayed;
+                LJ::Event::BefriendedDelayed->new(
+                                                    LJ::load_userid($friendid), ## to user
+                                                    LJ::load_userid($userid)    ## from user
+                                                    );
                 my @jobs;
-                push @jobs, LJ::Event::Befriended->new(LJ::load_userid($friendid), LJ::load_userid($userid))->fire_job
-                    if !$LJ::DISABLED{esn};
-
                 push @jobs, TheSchwartz::Job->new(
                                                   funcname => "LJ::Worker::FriendChange",
                                                   arg      => [$userid, 'add', $friendid],
@@ -3315,6 +3317,7 @@ sub consolecommand
     };
     my $cmdout = $res->{'results'} = [];
 
+    require LJ::Console;
     foreach my $cmd (@{$req->{'commands'}}) {
         # callee can pre-parse the args, or we can do it bash-style
         my @args = ref $cmd eq "ARRAY" ? @$cmd

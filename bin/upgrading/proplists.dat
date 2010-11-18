@@ -1580,3 +1580,21 @@ ratelist.tellafriend:
 ratelist.usermessage:
   des: Logged when a users sends a message to another user
 
+userproplist.sys_base_friending_notif_delay:
+  datatype: num
+  des: Base delay of sending notification to friended/defrended user (for first action in queue).
+  cldversion: 8
+  prettyname: Base system friending notification delay
+
+userproplist.sys_friending_notif_delay:
+  datatype: num
+  des: Delay (per action per action in queue) of sending notification to friended/defrended user.
+  cldversion: 8
+  prettyname: System friending notification delay
+
+userproplist.sys_limit_friending_notif_delay:
+  datatype: num
+  des: Maximum delay of sending notifications. Flush all users action from queue when delay is exceed the limit.
+  cldversion: 8
+  prettyname: System limit of friending notification delay
+

@@ -75,7 +75,7 @@ sub new {
     confess("too many args")        if @args > 4;
 
     return bless {
-        userid => $u ? $u->id : 0,
+        userid => LJ::want_userid($u),
         args => \@args,
     }, $class;
 }

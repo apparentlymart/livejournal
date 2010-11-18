@@ -103,6 +103,7 @@ sub END { LJ::end_request(); }
                     "logprop_history",
                     "comet_history", "pingrel",
                     "eventrates", "eventratescounters",
+                    "friending_actions_q",
                     );
 
 # keep track of what db locks we have out
