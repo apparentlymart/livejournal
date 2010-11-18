@@ -288,6 +288,13 @@ sub as_html {
 # automatic type returned when something dies with a reference, but not
 # an LJ::Error
 package LJ::Error::DieObject;
+use overload '""' => \&to_string;
+sub to_string {
+    my $self = shift;
+    my $object = $self->field('object');
+    return $object ? $object->die_string : '';
+}
+
 sub fields { qw(object) }
 sub die_object { return $_[0]->field('object'); }
 
