@@ -33,6 +33,12 @@
 
 .error.updating=There was an error updating your friends list:
 
+.filter.btn=Show
+
+.filter.label=Username filter
+
+.filter.warning.no_matching_users=Warning: there are no friends matching the filter; showing all friends.
+
 .foreground=Foreground
 
 .friend=Friend

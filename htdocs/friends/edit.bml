@@ -3,6 +3,7 @@ title=><?_ml .title3 _ml?>
 body<=
 <?_code
 {
+#line 6
     use strict;
     use vars qw(%GET %POST);
     use LJ::JSON;
@@ -76,35 +77,76 @@ body<=
             }
         }
 
+        my $sort = $GET{'sort'} || 'username';
+        my $filter = $GET{'filter'} || '';
+
+        my @friends = values %friends;
+
+        if (@friends and $filter ne '') {
+            my @friends_filtered =
+                grep { $_->{'username'} =~ /\Q$filter\E/i } @friends;
+
+            if (@friends_filtered) {
+                @friends = @friends_filtered;
+            } else {
+                $ret .= '<?warningbar '
+                     .  LJ::Lang::ml('.filter.warning.no_matching_users')
+                     .  ' warningbar?>';
+            }
+        }
+
+        $ret .= "<form action=\"$LJ::SITEROOT/friends/edit.bml\" method=\"get\">";
+        $ret .= LJ::html_hidden('sort' => $sort);
+        $ret .= "<label for=\"filter\">" . LJ::Lang::ml('.filter.label')
+             .  ":</label> ";
+        $ret .= LJ::html_text({
+            'name'  => 'filter',
+            'id'    => 'filter',
+            'value' => $filter,
+        });
+        $ret .= LJ::html_submit(LJ::Lang::ml('.filter.btn'));
+        $ret .= "</form>";
+
         $ret .= "<form method='post' name='editFriends' action='edit.bml$getextra'>\n";
         $ret .= LJ::form_auth();
 
         ### edit friends. only show if they have friends/friend-ofs
-        if (%friends) {
+        if (@friends) {
+            if ($sort eq 'rel') {
+                @friends = sort { $b->{'rel'} cmp $a->{'rel'} || $a->{'username'} cmp $b->{'username'} } @friends;
+            }
+
+            if ($sort eq 'username') {
+                @friends = sort { $a->{'username'} cmp $b->{'username'} } @friends;
+            }
+
+            my %items = BML::paging(\@friends, $GET{'page'}, 30);
+            my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'});
+            @friends = @{$items{'items'}};
+
             $ret .= "<?p " . BML::ml('.editfriends.text', { 'img1' => "<img src='$LJ::IMGPREFIX/arrow-friend.gif'>",
                                                             'img2' => "<img src='$LJ::IMGPREFIX/arrow-friendof.gif'>" });
             $ret .= " p?><div align='center'>";
-            $ret .= "<table class='borderedtable b-form-changelist' id='editfriends' width='90%' cellpadding='3' cellspacing='0'><tr>";
 
-            my @friends;
+            $ret .= $navbar;
+
+            $ret .= "<br><table class='borderedtable b-form-changelist' id='editfriends' width='90%' cellpadding='3' cellspacing='0'><tr>";
 
             $ret .= "<th width='5%'>$ML{'.editfriends.friend'}</th>";
             $ret .= "<th width='3%'>";
-            if ($GET{'sort'} eq 'rel') {
+            if ($sort eq 'rel') {
                 $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif' />";
-                @friends = sort { $b->{'rel'} cmp $a->{'rel'} || $a->{'username'} cmp $b->{'username'} } values %friends;
             } else {
-                $ret .= "<a href='". BML::self_link({'sort' => 'rel'}) . "'>";
+                $ret .= "<a href='". BML::self_link({'sort' => 'rel', 'page' => 1}) . "'>";
                 $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif' border='0' /></a>";
             }
             $ret .= "</th>";
 
             $ret .= "<th width='30%' align='left'>";
-            if (!defined $GET{'sort'} || $GET{'sort'} eq 'username') {
+            if ($sort eq 'username') {
                 $ret .= "$ML{'.editfriends.username'}";
-                @friends = sort { $a->{'username'} cmp $b->{'username'} } values %friends;
             } else {
-                $ret .= "<a href='". BML::self_link({'sort' => 'username'}) . "'>$ML{'.editfriends.username'}</a>";
+                $ret .= "<a href='". BML::self_link({'sort' => 'username', 'page' => 1}) . "'>$ML{'.editfriends.username'}</a>";
             }
 
             $ret .= "</th><th width='30%' style='text-align:left;'>$ML{'.editfriends.name'}</th>";
@@ -115,7 +157,6 @@ body<=
             
             $ret .= "</tr>";
 
-            # TODO: paginate
             my $j = 11; # to uniquely distinguish 'friend-of' checkboxes, 1-10 are reserved for friend-add boxes
             foreach my $f (@friends) {
                 my $who = $f->{'username'};
@@ -180,7 +221,9 @@ body<=
                 $j++;
             }
 
-            $ret .= "</table></div><br /><br />";
+            $ret .= "</table><br>";
+            $ret .= $navbar;
+            $ret .= "</div><br /><br />";
         }
 
         ### add friends
