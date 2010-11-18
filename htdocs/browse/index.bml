@@ -24,14 +24,6 @@ body<=
     my $view = defined $GET{'view'} ? $GET{'view'} : 'recent_posts';
 
     my $vertical = LJ::Vertical->load_by_url($uri);
-=head
-    unless ($vertical) {
-        LJ::Request->pnotes ('error'  => 'e404');
-        LJ::Request->pnotes ('remote' => LJ::get_remote());
-        BML::return_error_status(LJ::Request::NOT_FOUND());
-        return;
-    }
-=cut
 
     return LJ::Widget::Browse->render(
         browse      => 'new',
