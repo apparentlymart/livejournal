@@ -4,10 +4,10 @@
 			<TMPL_INCLUDE menu.tmpl>
 		</div>
 		<div class="l-content">
-		<ul class="m-tab-switcher">
-			<tmpl_if is_vertical_view><li<tmpl_if expr="view eq 'recent_posts'"> class="cur"</tmpl_if>><a href="?view=recent_posts">Recent posts</a><i class="b-round-ctl"></i><i class="b-round-ctr"></i></li></tmpl_if>
+		<tmpl_if is_vertical_view><ul class="m-tab-switcher">
+			<li<tmpl_if expr="view eq 'recent_posts'"> class="cur"</tmpl_if>><a href="?view=recent_posts">Recent posts</a><i class="b-round-ctl"></i><i class="b-round-ctr"></i></li>
 			<li<tmpl_if expr="view eq 'communities'"> class="cur"</tmpl_if>><a href="?view=communities">Communities</a><i class="b-round-ctl"></i><i class="b-round-ctr"></i></li>
-		</ul>
+		</ul></tmpl_if>
 		<tmpl_if is_vertical_view>
 			<tmpl_if expr="view eq 'communities'">
 				<TMPL_INCLUDE communities.tmpl>
