@@ -525,7 +525,7 @@ sub load_by_url {
     $url =~ s/^(?:$LJ::SITEROOT)?(\/.+)$//; ##
     $url = $1;
     $url =~ s#(?:\?.*)?$##; ## remove trailing slash and any get args
-    $url =~ m#^/browse(/[^/]*)#; ##
+    $url =~ m#^/vertical(/[^/]*)#; ##
     $url = $1;
 
     ## Something wrong with url
@@ -535,7 +535,6 @@ sub load_by_url {
     if ($reqcache) {
         my $v = $class->new( vert_id => $reqcache->{vert_id} );
         $v->absorb_row($reqcache);
-
         return $v;
     }
 
@@ -545,7 +544,6 @@ sub load_by_url {
         my $v = $class->new( vert_id => $memval->{vert_id} );
         $v->absorb_row($memval);
         $LJ::REQ_GLOBAL{verturl}->{$url} = $memval;
-
         return $v;
     }
 
@@ -562,7 +560,6 @@ sub load_by_url {
         $v->absorb_row($row);
         $v->set_memcache;
         $LJ::REQ_GLOBAL{verturl}->{$url} = $row;
-
         return $v;
     }
 
@@ -1453,7 +1450,7 @@ sub display_name {
 sub url {
     my $self = shift;
 
-    return "$LJ::SITEROOT/browse" . $self->uri;
+    return "$LJ::SITEROOT/vertical" . $self->uri;
 }
 
 # checks to see if the given URL is the canonical URL so that we can redirect if it's not

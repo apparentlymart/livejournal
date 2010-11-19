@@ -48,19 +48,13 @@ sub handle {
     # Now we handle verticals as subproject of community directory via LJ::Browse
     #
     ########
-=head
+
     # handle vertical URLs
     if (my $v = LJ::Vertical->load_by_url($full_uri)) {
-        if ($v->is_canonical_url($full_uri)) {
-            my $args_for_redir = $args ? "?$args" : '';
-            return Apache::LiveJournal::redir($v->url . $args_for_redir);
-        } else {
-            return LJ::URI->bml_handler("explore/index.bml");
-        }
+        return LJ::URI->bml_handler("browse/index.bml");
     }
-=cut
 
-    if (my $c = LJ::Vertical->load_by_url($full_uri)) {
+    if (my $c = LJ::Browse->load_by_url($full_uri)) {
         return LJ::URI->bml_handler("browse/index.bml");
     }
 

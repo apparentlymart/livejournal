@@ -34,6 +34,7 @@ body<=
     $ret .= "<table border='0'>";
     $ret .= "<tr><td>Vertical name</td><td>Vertical Url</td></tr>";
     $ret .= "<tr><td><input type='text' name='vert_name'></td><td><input type='text' name='vert_url'></td></tr>";
+    $ret .= "<tr><td></td><td>example: '/monkey_bars'</td></tr>";
     $ret .= "</table>";
 
     $ret .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</p>";

@@ -18,6 +18,12 @@ body<=
     my $ret = "";
 
     my $caturl;
+    my $vert_url = $POST{'vert_url'};
+
+    my $vertical = undef;
+    if (LJ::did_post() && $POST{'vert_url'}) {
+        $vertical = LJ::Vertical->load_by_url("/vertical" . $vert_url);
+    }
 
     if (LJ::did_post() and $POST{'remove'}) {
         $caturl = $POST{'caturl'};
@@ -55,10 +61,26 @@ body<=
     $ret .= "<form method='POST'>\n";
     $ret .= LJ::form_auth();
 
+    my @verticals = LJ::Vertical->load_all();
+    @verticals = map { { text => $_->{name}, value => $_->{url} } } @verticals;
+
+    $ret .= "<p>".LJ::html_select({
+                name => 'vert_url',
+                selected => $vert_url,
+                },
+                { text => 'Select Vertical',
+                value => '',},
+                @verticals
+            );
+    $ret .= "&nbsp;\n";
+
+    $ret .= LJ::html_submit('selectv', 'Select Vertical') . "</p>";
+
     # Get the full list of categories
-    my @categories = LJ::Browse->load_all;
+    my @categories = LJ::Browse->load_all($vertical);
     # Get the unique URI for each
-    my @caturls = map { $_->uri, $_->uri } @categories;
+    #@categories = grep { $_->parent } @categories unless $vertical;
+    my @caturls = map { { text => $_->{pretty_name}, value => $_->url_path } } @categories;
     @caturls = sort { $a cmp $b } @caturls;
 
     $ret .= "<p>Remove Category:<br />";

@@ -20,21 +20,19 @@ body<=
     my $parentcaturl;
     my $newcat;
     my $newcaturl;
+    my $vert_url;
 
     if (LJ::did_post() and $POST{'add'}) {
         $parentcaturl = $POST{'parentcaturl'};
         $newcat = $POST{'newcat'};
         $newcaturl = $POST{'newcaturl'};
+        $vert_url = $POST{'vert_url_add'};
+
+        my $vertical = LJ::Vertical->load_by_url("/vertical" . $vert_url);
 
         push @errors, "Invalid form submission" unless LJ::check_form_auth();
         {
             # Check for required data
-=head
-            unless ($parentcaturl) {
-                push @errors, "Please select a parent category";
-                next;
-            }
-=cut
             unless ($newcat) {
                 push @errors, "Please enter new category display name";
                 next;
@@ -49,20 +47,22 @@ body<=
             }
 
             # Has a valid parent category been chosen
-            my $pcategory = LJ::Browse->load_by_url("/browse" . $parentcaturl);
-#            push @errors, "Invalid category" unless $pcategory;
+            my $pcategory = LJ::Browse->load_by_url("/browse" . ($vertical ? '' : '/community_directory') . $parentcaturl);
 
             # Does a category with the same URL path and parent already exist?
-            my $existcat = LJ::Browse->load_by_url("/browse" . $parentcaturl . $newcaturl);
+            my $existcat = LJ::Browse->load_by_url("/browse" . ($vertical ? $parentcaturl : '/community_directory' . $parentcaturl) . $newcaturl);
             push @errors, "Category already exists" if $existcat;
 
             next if @errors;
 
             # Add category
             if (LJ::Browse->create( pretty_name => $newcat,
-                                    url_path => $newcaturl,
+                                    url_path    => $newcaturl,
                                     parentcatid => $pcategory ? $pcategory->catid : 0,
-                                    topcat => $POST{topcat} ) ) {
+                                    topcat      => $POST{topcat},
+                                    vertical    => $vertical,
+                                  ) 
+            ) {
                 $ret .= "<span class='super notice'>New category created.</span>";
             } else {
                 $ret .= "<span class='super notice'>New category not created.</span>";
@@ -75,14 +75,33 @@ body<=
     $ret .= "<form method='POST'>\n";
     $ret .= LJ::form_auth();
 
+    $ret .= "<p>";
+
+    my $vertical = undef;
+    if (LJ::did_post() && $POST{'select'}) {
+        $vert_url = $POST{'vert_url'};
+        $vertical = LJ::Vertical->load_by_url("/vertical" . $vert_url);
+    }
+
+    my @verticals = LJ::Vertical->load_all();
+    @verticals = map { { text => $_->{name}, value => $_->{url} } } @verticals;
+
+    $ret .= "<p>".LJ::html_select({
+                name => 'vert_url',
+                selected => $vert_url,
+                },
+                { text => 'Select Vertical',
+                value => '',},
+                @verticals
+            );
+    $ret .= "&nbsp;\n";
+
+    $ret .= LJ::html_submit('select', 'Select Vertical') . "</p>";
+
     # Get the full list of categories
-    my @categories = LJ::Browse->load_all;
-    # Get the unique URI for each
-
+    my @categories = LJ::Browse->load_all($vertical);
     my @caturls = map { { text => $_->{pretty_name}, value => $_->uri } } @categories;
-    #@caturls = sort { $a cmp $b } @caturls;
 
-    $ret .= "<p>Add to Vertical/Category:<br />";
     $ret .= LJ::html_select({
                 name => 'parentcaturl',
                 selected => $parentcaturl },
@@ -109,11 +128,13 @@ body<=
                 value => $POST{'newcaturl'} || '/'}
             );
     $ret .= "<br /><i>example: '\/monkey_bars'</i></td></tr>\n";
+    $ret .= "<tr><td colspan='2'>On unselected vertical & category case<br/>new category will be add to 'dummy' vertical</td></tr>";
 
     $ret .= "</table></p>\n";
 
     $ret .= "<p>" . LJ::html_submit('add', 'Add') . "</p>";
 
+    $ret .= LJ::html_hidden("vert_url_add", $vertical ? $vertical->uri : '');
     $ret .= "</form>";
 
     return "<body>$ret</body>";

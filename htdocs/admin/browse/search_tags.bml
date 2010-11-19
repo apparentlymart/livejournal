@@ -31,7 +31,7 @@ body<=
     my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
     @vert_ids = sort { $a cmp $b } @vert_ids;
 
-    $ret .= "<p>Select vertical:";
+    $ret .= "<p>";
     $ret .= LJ::html_select({
                 name => 'vert_id',
                 selected => $vert_id },

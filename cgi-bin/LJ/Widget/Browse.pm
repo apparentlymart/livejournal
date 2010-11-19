@@ -24,7 +24,7 @@ sub _build_tree {
                 {
                     name            => $c->display_name(),
                     title           => $c->title_html(),
-                    url             => $c->url($vertical),
+                    url             => $c->url(),
                     summary         => LJ::Widget::CategorySummary->render( category => $c ),
                     level           => $level,
                     is_expanded     => $is_current,
@@ -96,7 +96,8 @@ sub render_body {
     ) or die "Can't open template: $!";
 
     my $vertical = LJ::Vertical->load_by_url($uri);
-    
+    $view = "communities" unless $vertical;
+
     $$windowtitle = $vertical ? $vertical->name : $class->ml('widget.browse.windowtitle');
 
     my $cat = LJ::Browse->load_by_url($uri); # Currently selected category
@@ -104,7 +105,7 @@ sub render_body {
     my @categories = sort { lc $a->display_name cmp lc $b->display_name } LJ::Browse->load_all($vertical);
 
     my $test_uri = $uri;
-    $test_uri =~ s/^\/browse//;
+    $test_uri =~ s/^\/(browse|vertical)//;
     $test_uri =~ s/\/$//;
 
     my @tmpl_categories = _build_tree(undef, 0, $test_uri, $vertical, @categories);

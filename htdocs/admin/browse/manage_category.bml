@@ -19,34 +19,6 @@ body<=
 
     my ($vert_url, $cat_url) = ();
 
-    if (LJ::did_post() and $POST{'show'}) {
-        $cat_url = $POST{'cat_url'};
-
-        {
-            # Check for required data
-            unless ($cat_url) {
-                push @errors, "Please select a category for source";
-                next;
-            }
-
-            my $category = LJ::Browse->load_by_url("/browse" . $cat_url);
-            ## Category till is not in vertical?
-            $category = LJ::Browse->load_by_url("/browse" . "/notset" . $cat_url)
-                unless $category;
-            unless ($category) {
-                push @errors, "Invalid category" unless $category;
-                next;
-            }
-
-            $ret .= "Category '".$category->{pretty_name}."' belongs '".$category->vertical->name."' vertical<br/>";
-            $ret .= "Category contains the following communities:<br/>";
-            foreach my $comm ($category->communities( is_need_child => 1 )) {
-                $ret .= $comm->ljuser_display() . "<br/>";
-            }
-        }
-
-    }
-
     if (LJ::did_post() and $POST{'move'}) {
         $cat_url = $POST{'cat_url'};
         $vert_url = $POST{'vert_url'};
@@ -64,7 +36,7 @@ body<=
             }
 
             # Has a valid vertical been chosen
-            my $vertical = LJ::Vertical->load_by_url("/browse" . $vert_url);
+            my $vertical = LJ::Vertical->load_by_url("/vertical" . $vert_url);
             push @errors, "Invalid vertical" unless $vertical;
 
             # Has a valid category been chosen
@@ -125,7 +97,6 @@ body<=
     $ret .= "</table></p>\n";
 
     $ret .= "<p>" . LJ::html_submit('move', 'Move') . "</p>";
-    $ret .= "<p>" . LJ::html_submit('show', 'Show Info') . "</p>";
 
     $ret .= "</form>";
 

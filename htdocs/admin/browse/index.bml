@@ -27,17 +27,16 @@ body<=
     $ret .= "<p><a href='./search_tags.bml'>Editing Search Tags</a></p>";
     $ret .= "</blockquote>";
 
-    $ret .= "<h2>Manage Communities</h2><blockquote>";
-    $ret .= "<p><a href='./moderate_community.bml'>Moderate Community Submissions</a></p>";
-
-    $ret .= "<p><a href='./add_community.bml'>Add Community to Category</a></p>";
-    $ret .= "<p><a href='./remove_community.bml'>Remove Community from Category</a></p>";
-    $ret .= "</blockquote>";
-
     $ret .= "<h2>Manage Categories</h2><blockquote>";
     $ret .= "<p><a href='./add_category.bml'>Add Category</a></p>";
-    $ret .= "<p><a href='./manage_category.bml'>Manage Categories</a></p>";
+    $ret .= "<p><a href='./manage_category.bml'>Move Categories</a></p>";
     $ret .= "<p><a href='./remove_category.bml'>Remove Category</a></p>";
+    $ret .= "</blockquote>";
+
+    $ret .= "<h2>Manage Communities</h2><blockquote>";
+    $ret .= "<p><a href='./moderate_community.bml'>Moderate Community Submissions</a></p>";
+    $ret .= "<p><a href='./add_community.bml'>Add Community to Category</a></p>";
+    $ret .= "<p><a href='./remove_community.bml'>Remove Community from Category</a></p>";
     $ret .= "</blockquote>";
 
     $ret .= "<p><a href='./load_all_structure.bml'>Load All Structure</a></p>";
