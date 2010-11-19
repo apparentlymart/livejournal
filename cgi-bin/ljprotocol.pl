@@ -8,7 +8,6 @@ use LJ::Constants;
 use Class::Autouse qw(
                       LJ::Event::JournalNewEntry
                       LJ::Event::UserNewEntry
-                      LJ::Event::Befriended
                       LJ::Entry
                       LJ::Poll
                       LJ::EventLogRecord::NewEntry
