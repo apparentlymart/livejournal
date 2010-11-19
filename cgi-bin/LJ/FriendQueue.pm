@@ -1,11 +1,18 @@
 package LJ::FriendQueue;
 use strict;
+use LJ::MemCache;
+## This module is an interface to queue with addfriend/delfriend user activities.
+## It's used to delay notification of the addfriend/delfriend event and 
+## send all events simultaneously.
 
 sub count {
     my $class    = shift;
     my $userid   = shift;
 
-    ## TODO: use memcached?
+    ## check cache
+    my $key = [$userid, "friend_q_cnt:$userid"];
+    my $cache = LJ::MemCache::get($key);
+    return $cache if $cache;
 
     my $u = LJ::load_userid($userid);
     my $dbcr = LJ::get_cluster_reader($u->clusterid);
@@ -17,7 +24,10 @@ sub count {
                 userid = ?
             ", undef, $u->userid)
         or warn "Can't select from friend_actions_q: " . DBI->errstr;
-    
+
+    ##
+    LJ::MemCache::set($key, $count, 3600);
+
     return $count;
 }
 
@@ -34,12 +44,18 @@ sub push {
     my $u = LJ::load_userid($userid);
     my $dbcw = LJ::get_cluster_master($u->clusterid);
     
+    ## update storage
     $dbcw->do("INSERT INTO friending_actions_q
                 (userid, friendid, action, etime, jobid)
                 VALUES
                 (?,?,?,?,?)", undef,
                 $userid, $friendid, $action, $etime, $jobid)
         or die "Can't insert into friend_actions_q: " . DBI->errstr;
+    
+    ## update cached value
+    LJ::MemCache::incr([$userid, "friend_q_cnt:$userid"]);
+
+    1;
 }
 
 sub load {
@@ -79,6 +95,8 @@ sub empty {
                      $rec_id_st
                ", undef, $userid)
         or die "Can't flush records from friending_actions_q: " . DBI->errstr;
+    
+    LJ::MemCache::delete([$userid, "friend_q_cnt:$userid"]);
 
     return 1;
 }
