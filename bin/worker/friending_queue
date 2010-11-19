@@ -93,7 +93,7 @@ sub work {
     my $u = LJ::load_userid($uid);
     ## remove all 
     LJ::FriendQueue->empty($u->userid);
-    #LJ::FriendQueue->log_
+    $u->log_event("flush_friends_activities_q");
 
     $job->completed;
 }
