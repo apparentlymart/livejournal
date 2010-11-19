@@ -49,21 +49,18 @@ body<=
             my $vert_name = $columns[1];
             my $vert_url  = $columns[2];
 
-            my $v = LJ::Vertical->load_by_url ("/browse".$vert_url)
+            my $v = LJ::Vertical->load_by_url ("/vertical" . $vert_url)
                 || LJ::Vertical->create (name => $vert_name, url => $vert_url);
 
             ## Category name & url
             my $cat_name = $columns[3];
             my $cat_url = $columns[4];
-            my $cat = LJ::Browse->load_by_url ($v->url.$cat_url);
+            my $cat = LJ::Browse->load_by_url ("/browse" . $cat_url);
 
             unless ($cat) {
-                unless (grep { $_->{pretty_name} eq $cat_name } @{$v->get_categories}) {
-                    $cat = LJ::Browse->create ( pretty_name => $cat_name, url_path => $cat_url );
-                    $cat->vert_id ($v->vert_id);
-                }
-            } else {
-                $cat->vert_id ($v->vert_id);
+                #unless (grep { $_->{pretty_name} eq $cat_name } @{$v->get_categories}) {
+                    $cat = LJ::Browse->create ( pretty_name => $cat_name, url_path => $cat_url, vertical => $v );
+                #}
             }
 
             my ($subcat_name, $subcat_url, $subcat) = ();
@@ -73,15 +70,12 @@ body<=
             my $subcat_url = $columns[6];
 
             if ($subcat_name && $subcat_url) {
-                my $subcat = LJ::Browse->load_by_url ($cat->url.$subcat_url);
+                my $subcat = LJ::Browse->load_by_url ("/browse" . $cat->url_path . $subcat_url);
                 unless ($subcat) {
-                    unless (grep { $_->{pretty_name} eq $subcat_name } @{$v->get_categories}) {
-                        $subcat = LJ::Browse->create ( pretty_name => $subcat_name, url_path => $subcat_url, parentcatid => $cat->catid );
-                        $subcat->vert_id ($v->vert_id);
+                #    unless (grep { $_->{pretty_name} eq $subcat_name } @{$v->get_categories($cat)}) {
+                        $subcat = LJ::Browse->create ( pretty_name => $subcat_name, url_path => $subcat_url, parentcatid => $cat->catid, vertical => $cat->vertical );
                     }
-                } else {
-                    $subcat->vert_id ($v->vert_id);
-                }
+                #}
             }
 
             ## #7 - Full path for sanity check 
@@ -95,7 +89,7 @@ body<=
             ## Wrong community name?
             next unless $comm_id;
 
-            $subcat_name
+            $subcat
                 ? $subcat->add_community($comm_id, \@tags)
                 : $cat->add_community($comm_id, \@tags);
         }

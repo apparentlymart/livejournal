@@ -62,15 +62,15 @@ ADDPOST
 
     }
 
-    if (LJ::did_post() && $POST{'add'}) {
+    if (LJ::did_post() && $vertical && $POST{'add'}) {
         $vertical->add_community ($POST{'url'});
     }
 
-    if (LJ::did_post() && $POST{'delete_comm'}) {
+    if (LJ::did_post() && $vertical && $POST{'delete_comm'}) {
         $vertical->delete_community (comm_id => $POST{'rec_id'});
     }
 
-    if (LJ::did_post()) {
+    if (LJ::did_post() && $vertical) {
         $ret .= "<b><div>Added Communities</div></p>";
         my $comms = $vertical->load_communities( count => '100', is_random => 0 );
 
