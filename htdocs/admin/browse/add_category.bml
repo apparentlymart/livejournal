@@ -47,10 +47,10 @@ body<=
             }
 
             # Has a valid parent category been chosen
-            my $pcategory = LJ::Browse->load_by_url("/browse" . ($vertical ? '' : '/community_directory') . $parentcaturl);
+            my $pcategory = LJ::Browse->load_by_url("/browse" . $parentcaturl);
 
             # Does a category with the same URL path and parent already exist?
-            my $existcat = LJ::Browse->load_by_url("/browse" . ($vertical ? $parentcaturl : '/community_directory' . $parentcaturl) . $newcaturl);
+            my $existcat = LJ::Browse->load_by_url("/browse" . $parentcaturl . $newcaturl);
             push @errors, "Category already exists" if $existcat;
 
             next if @errors;
@@ -100,7 +100,7 @@ body<=
 
     # Get the full list of categories
     my @categories = LJ::Browse->load_all($vertical);
-    my @caturls = map { { text => $_->{pretty_name}, value => $_->uri } } @categories;
+    my @caturls = map { { text => $_->{pretty_name}, value => $_->url_path } } @categories;
 
     $ret .= LJ::html_select({
                 name => 'parentcaturl',
