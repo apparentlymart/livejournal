@@ -60,9 +60,11 @@ sub create {
     foreach my $f (qw(url_path pretty_name parentcatid in_nav)) {
         $self->{$f} = delete $opts{$f} if exists $opts{$f};
     }
-    my $topcat = delete $opts{topcat} if exists $opts{topcat};
+    my $topcat = undef;
+    $topcat = delete $opts{topcat} if exists $opts{topcat};
 
-    my $vertical = delete $opts{'vertical'} if exists $opts{'vertical'};
+    my $vertical = undef;
+    $vertical = delete $opts{'vertical'} if exists $opts{'vertical'};
 
     croak("need to supply display name") unless defined $self->{pretty_name};
     croak("need to supply URL path") unless defined $self->{url_path};
