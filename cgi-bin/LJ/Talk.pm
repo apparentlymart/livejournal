@@ -1432,6 +1432,8 @@ sub talkform {
     # require_tos: optional toggle to include TOS requirement form
     # errors:      optional error arrayref
     # text_hint:   hint before message textarea
+    # embedable_form: use embedable template to draw form
+    #
     my $opts = shift;
     return "Invalid talkform values." unless ref $opts eq 'HASH';
 
@@ -1472,7 +1474,9 @@ sub talkform {
 
     my $template = LJ::HTML::Template->new(
         { use_expr => 1 },    # force HTML::Template::Pro with Expr support
-        filename          => "$ENV{'LJHOME'}/templates/CommentForm/Form.tmpl",
+        filename          => $opts->{embedable_form}
+                                ? "$ENV{'LJHOME'}/templates/CommentForm/FormEmbedable.tmpl"
+                                : "$ENV{'LJHOME'}/templates/CommentForm/Form.tmpl",
         die_on_bad_params => 0,
         strict            => 0,
         )
