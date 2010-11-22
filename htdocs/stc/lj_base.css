@@ -752,9 +752,13 @@ Must be removed after implementation of Framework! */
 			border: 0;
 			color: #000;
 			text-decoration: none;
+			outline:0;
 			}
 		.m-auth-openid A {
 			background: url(/img/icons/openid-16.gif?v=1) no-repeat 20px 50%;
+			}
+		.m-auth-user A {
+			background: url(/img/pencil.gif?v=1) no-repeat 20px 50%;
 			}
 		.m-auth-facebook A {
 			background: url(/img/icons/facebook-16.gif?v=1) no-repeat 20px 50%;
@@ -790,12 +794,6 @@ Must be removed after implementation of Framework! */
 			-webkit-border-top-left-radius: 10px;
 			-moz-border-radius-topleft: 10px;
 			border-top-left-radius: 10px;
-			}
-		.m-auth-openid .m-auth-bl {
-			border-width: 0 0 0 1px;
-			-webkit-border-top-left-radius: 0;
-			-moz-border-radius-topleft: 0;
-			border-top-left-radius: 0;
 			}
 		.m-auth-br {
 			bottom: -11px;
@@ -835,6 +833,26 @@ Must be removed after implementation of Framework! */
 				}
 			.b-auth-openid-input {
 				width: 300px;
+				}
+			.b-auth-input-wrapper SPAN {
+				color:#666;
+				}
+		.b-auth-user-form .b-auth-input-wrapper {
+			display:block;
+			margin:5px 0;
+			overflow:hidden;
+			}
+			.b-auth-user-form .b-auth-input-wrapper LABEL {
+				float:left;
+				width:200px;
+				font-weight:bold;
+				}
+			.b-auth-user-form .b-auth-user-input {
+				width:200px;
+				margin:0 10px;
+				}
+			.b-auth-user-form BUTTON {
+				margin:5px 0 0;
 				}
 		.b-auth-error {
 			margin: 15px 0 5px;
