@@ -1,3 +1,11 @@
-<p class="b-auth-desc"><TMPL_VAR expr="ml('.openid.desc')"></p>
-<p class="b-auth-openid-form"><label for=""><TMPL_VAR expr="ml('.openid.label.url')"></label> <input type="url" name="openid:url" id="" value="http://" class="b-auth-openid-input" /> <button type="submit"><TMPL_VAR expr="ml('.openid.btn.login')"></button></p>
+<p class="b-auth-desc"><TMPL_VAR expr="ml('/identity/login.bml.openid.desc')"></p>
+<p class="b-auth-openid-form">
+	<span class="b-auth-input-wrapper">
+		<label for="openid_url"><TMPL_VAR expr="ml('/identity/login.bml.openid.label.url')"></label>
+		<input type="url" name="openid:url" id="openid_url" value="" class="b-auth-openid-input" />
+		<span><TMPL_VAR expr="ml('/identity/login.bml.openid.label.sample')"></span>
+	</span>
+	<button type="submit"><TMPL_VAR expr="ml('/identity/login.bml.openid.btn.login')"></button>
+</p>
 <TMPL_IF errors><TMPL_LOOP errors><p class="b-auth-error"><span class="i-message i-message-error"><TMPL_VAR error></span></p></TMPL_LOOP></TMPL_IF>
+

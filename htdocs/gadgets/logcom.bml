@@ -1,0 +1,65 @@
+<?_code
+{
+    use strict;
+    use vars qw($title);
+    use LJ::Widget::LoginMulti;
+    use LJ::ExternalComments;
+
+    my $thispage = "$LJ::SITEROOT/gadgets/logcom.bml";
+    $thispage .= "?" . LJ::Request->args;
+
+    if (my $remote = LJ::get_remote() and not $GET{viewform}){
+        ## show add comment form
+
+        my $url     = $GET{url};
+        my $rskey   = $GET{rsk};
+
+        ## convert remote-site key to lj.com's community
+        my $username = LJ::ExternalComments->key_to_username($rskey);
+        return "unknown key" unless $username;
+
+        my $journal = LJ::load_user($username);
+        return "unknown user" unless $journal;
+
+        ## convert article's uri on partners site to entryid on LJ.com
+        my $jitemid = LJ::ExternalComments->url_to_jitemid($journal, $url);
+        unless ($jitemid){
+            ## create new empty entry for this url
+            $jitemid = LJ::ExternalComments->create_entry_for_url($journal, $url);
+            return "Can't create new entry" unless $jitemid;
+        }
+
+        my $entry = LJ::Entry->new($journal, jitemid => $jitemid);
+        return 
+            LJ::Talk::talkform({ 
+                remote   => $remote,
+                journalu => $journal,
+                ditemid  => $entry->ditemid,
+                embedable_form => 1,
+                #replyto  => ,
+                #ditemid  => ,
+            });
+
+    
+    } else {
+        ## display login widget
+        LJ::need_res(qw(
+          stc/lj_base.css
+          stc/partners/login.css
+        ));
+
+        my $ret = "";
+        $ret .= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
+        <html>
+        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
+        <head>
+        <title>Log in</title>
+        " . LJ::res_includes() . "
+        <body>"
+        . LJ::Widget::LoginMulti->render(thispage => $thispage)
+        ."</body></html>";
+        return $ret;
+    }
+
+}
+_code?>

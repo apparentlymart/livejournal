@@ -5,6 +5,7 @@ body<=
 #line 6
     use strict;
     use vars qw($title);
+    use LJ::Widget::LoginMulti;
 
     # logged-in users don't get to here
     if (LJ::get_remote()) {
@@ -14,57 +15,8 @@ body<=
     $title = LJ::Lang::ml('.title');
 
     my $thispage = "$LJ::SITEROOT/identity/login.bml";
-    my @errors;
+    return LJ::Widget::LoginMulti->render(thispage => $thispage);
 
-    if (LJ::Request->did_post) {
-        my $idtype = LJ::Request->post_param('type');
-        my $idclass = LJ::Identity->find_class($idtype);
-
-        if ($idclass && $idclass->enabled) {
-            $idclass->attempt_login(\@errors,
-                'returl_fail' => "$thispage?type=$idtype",
-                'forwhat' => 'login',
-            );
-            return if LJ::Request->redirected;
-        } else {
-            push @errors, 'unknown identity type';
-        }
-    }
-
-    my $template = LJ::HTML::Template->new(
-        { use_expr => 1 }, # force HTML::Template::Pro with Expr support
-        filename => "$ENV{'LJHOME'}/templates/Identity/Login.tmpl",
-        die_on_bad_params => 0,
-        strict => 0,
-    ) or die "Can't open template: $!";
-
-    my $current_type = LJ::Request->post_param('type') ||
-                       LJ::Request->get_param('type')  ||
-                       $LJ::IDENTITY_TYPES[0];
-
-    my @types;
-    foreach my $type (@LJ::IDENTITY_TYPES) {
-        my $idclass = LJ::Identity->find_class($type);
-        next unless $idclass->enabled;
-
-        my $type_display = {
-            'type' => $type,
-            'ml_tab_heading' => LJ::Lang::ml(".tab.$type"),
-        };
-
-        if ($type eq $current_type) {
-            $type_display->{'errors'} = [ map { { 'error' => $_ } } @errors ];
-        }
-
-        push @types, $type_display;
-    }
-
-    $template->param(
-        'types' => \@types,
-        'current_type' => $current_type,
-    );
-
-    return $template->output;
 }
 _code?>
 <=body
