@@ -1,6 +1,4 @@
 jQuery(function($) {
-	// remove for enable, see LJSUP-7052
-	return;
 	
 	var label = $( '#search_text_label' ),
 		search = $( '#search_text' );
@@ -33,8 +31,9 @@ jQuery(function($) {
 		search.val ( val );
 	} );
 
+	//tag autocomplete is disabled, see LJSUP-7052
 	//should feed tags array there
-	tagAutocomplete( search, [] );
+	//tagAutocomplete( search, [] );
 
 	function tagAutocomplete(node, tags)
 	{
