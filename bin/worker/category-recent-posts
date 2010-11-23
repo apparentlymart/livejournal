@@ -50,7 +50,7 @@ sub work {
 
     my $dbh = LJ::get_db_writer();
 
-    my $journals = $dbh->selectall_arrayref ("SELECT catid, journalid FROM categoryjournals", { Slice => {} });
+    my $journals = $dbh->selectall_arrayref ("SELECT cj.catid, cj.journalid FROM categoryjournals cj, category c WHERE cj.catid = c.catid AND c.vert_id <> 0", { Slice => {} });
     foreach my $rec (@$journals) {
         my $journalid = $rec->{journalid};
         my @last_jitemid = $dbh->selectrow_array ("SELECT max(jitemid) FROM category_recent_posts WHERE journalid = ?", undef, $journalid);

@@ -65,7 +65,7 @@ body<=
         my $skip = ($page-1) * $page_size;
         my $last = $skip + $page_size;
 
-        my @posts = LJ::Browse->search_posts(\@communities, "$skip,$page_size");
+        my @posts = LJ::Browse->search_posts( comms => \@communities, page_size => "$skip,$page_size", vertical => $vertical );
 
         foreach (@posts) {
             my $url = $_->url;
