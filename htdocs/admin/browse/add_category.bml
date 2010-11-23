@@ -12,7 +12,7 @@ body<=
         unless $remote;
 
     return "You are not allowed to view this page"
-        unless LJ::check_priv($remote, 'siteadmin', 'category_admin') || $LJ::IS_DEV_SERVER;
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
 
     $title = "Add New Category";
     my $ret = "";
