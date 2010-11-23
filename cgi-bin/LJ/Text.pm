@@ -219,6 +219,8 @@ sub truncate_to_word_with_ellipsis {
     my $chars = delete $opts{'chars'};
     my $remainder = '';
     my $ellipsis = delete $opts{'ellipsis'} || Encode::encode_utf8("\x{2026}");
+    my $fill_empty = delete $opts{'fill_empty'} ? 1 : 0;
+    my $punct_space = delete $opts{'punct_space'} ? 1 : 0;
 
     confess "unknown options: " . Data::Dumper(\%opts)
         if %opts;
@@ -249,7 +251,7 @@ sub truncate_to_word_with_ellipsis {
         $remainder = substr($original_string, $class->byte_len($str));
         $str .= $ellipsis;
     }
-
+	
     if ($chars && $class->char_len($str) > $chars) {
         my $chars_trunc = $chars - $class->char_len($ellipsis);
         $str = $class->truncate(
@@ -259,8 +261,20 @@ sub truncate_to_word_with_ellipsis {
 
         $str = $remove_last_word->($str);
         $remainder = substr($original_string, $class->byte_len($str));
+
+        if($punct_space && $str =~ /[,.;:!?]$/) {
+			if($class->char_len($str) >= $chars - 1) {
+		        $str = $remove_last_word->($str);
+		        $remainder = substr($original_string, $class->byte_len($str));
+			} else {
+				$str .= ' ';
+			}   	
+        }
+        
         $str .= $ellipsis;
     }
+    
+    $str ||= $ellipsis if($fill_empty);
 
     $remainder =~ s/^\s+//;
     return wantarray ? ($str, $remainder) : $str;
