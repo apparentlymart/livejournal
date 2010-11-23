@@ -1,3 +1,7 @@
+BODY {
+	filter: expression(document.execCommand("BackgroundImageCache", false, true));
+	}
+
 /* Width & Height for Moods */
 * html IMG#mood_image_preview  {
     height: auto;
@@ -82,14 +86,6 @@ __________________________________________*/
 * > HTML .b-ljtimes-bubble-content{
 	width: 292px;
 	}
-* HTML .i-ljtimes-btn,
-* HTML .i-ljtimes-drag,
-* HTML .i-ljtimes-click,
-* HTML .b-ljtimes-bubble-bg,
-* HTML .b-ljtimes-bubble-top {
-	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg : this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='crop')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
-	}
-
 * HTML .b-ttiny {
 	width: expression((document.documentElement.clientWidth || document.body.clientWidth) < 995 ? "995px" : "100%");
 	}
@@ -349,4 +345,14 @@ __________________________________________*/
 .appwidget-featuredposts .b-posts-head {
 	_height:40px;
 	}
+.appwidget-browse .vertical_view .appwidget-search LABEL {
+	top:6px;
+	}
 
+* HTML .i-ljtimes-btn,
+* HTML .i-ljtimes-drag,
+* HTML .i-ljtimes-click,
+* HTML .b-ljtimes-bubble-bg,
+* HTML .b-ljtimes-bubble-top {
+	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg : this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='crop')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
+	}
