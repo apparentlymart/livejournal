@@ -894,6 +894,9 @@ sub trans
         } elsif ($func eq "games") {
             LJ::get_remote();
             return redir(LJ::Session->setdomsess_handler()) if LJ::Request->uri eq "/__setdomsess";
+
+            return LJ::URI->bml_handler($LJ::AJAX_URI_MAP{$1}) if (LJ::Request->uri =~ /^\/__rpc_(ljapp.*)$/);
+
     	    return remote_domsess_bounce() if LJ::remote_bounce_url();
             return $bml_handler->("$LJ::HOME/htdocs/games/game.bml");
         } elsif ($func) {
