@@ -1339,6 +1339,19 @@ sub mark_suspended {
     return 1;
 }
 
+# get skip/include status for LJ::get_recent_items() call
+sub get_suspended_mark {
+    my $self = shift;
+
+    # we cannot use preload_rows() because memcache does not contain 'compressed' field
+    # and most code of LJ does not need this field,
+    # so, there are no reasons to include it into memcache
+
+    my $u = $self->journal;
+    my $compressed = $u->selectrow_array("SELECT compressed FROM log2 WHERE journalid=? AND jitemid=? ", undef, $self->journalid, $self->jitemid);
+    return $compressed;
+}
+
 package LJ;
 
 use Class::Autouse qw (

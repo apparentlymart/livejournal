@@ -53,6 +53,7 @@ body<=
     $ret .= "<strong>Server Date/Time</strong>: " . $entry->logtime_mysql . "<br />";
     $ret .= "<strong>Journal Adult Content</strong>: " . ($entry->journal->adult_content || "none")
         . " (admin setting: " . ($entry->journal->admin_content_flag || "none") . ")<br />";
+    $ret .= "<strong>Skip/iNclude in recent entries</strong>: " . $entry->get_suspended_mark . "<br />";
 
     $ret .= "<br />";
 
