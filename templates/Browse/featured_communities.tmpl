@@ -13,7 +13,7 @@
 			<tmpl_loop top_comms>
 			<li<tmpl_if __last__> class="last"</tmpl_if>>
 				<dl>
-					<dt><img src="<tmpl_var userpic>"></dt>
+					<dt><tmpl_if userpic><img src="<tmpl_var userpic>" alt="<tmpl_var community>"/><tmpl_else><img src="/img/profile_icons/comm.gif" alt="<tmpl_var community>"/></tmpl_if></dt>
 					<dd>
 						<p class="b-posts-head">
 							<span class="ljuser"><a href="/community/<tmpl_var community>/profile"><img width="16" height="16" alt="[info]" src="/img/community.gif" class="ContextualPopup"/></a><a href="/community/<tmpl_var community>/"><b><tmpl_var community></b></a></span>

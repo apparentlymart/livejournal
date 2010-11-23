@@ -13,7 +13,7 @@
 			<tmpl_loop top_posts>
 			<li<tmpl_if __last__> class="last"</tmpl_if>>
 				<dl>
-					<dt><img src="<tmpl_var userpic>"></dt>
+					<dt><tmpl_if userpic><img src="<tmpl_var userpic>" alt=""/><tmpl_else><img src="/img/profile_icons/user.gif" alt=""/></tmpl_if></dt>
 					<dd>
 						<h3 class="b-posts-head"><a href="<tmpl_var url_to_post>"><tmpl_var subject></a></h3>
 						<p class="b-posts-data"><tmpl_var ljuser><i class="i-posts-delimiter"> | </i><i class="i-posts-comments"><a href="<tmpl_var url_to_post>"><tmpl_var comments_count> comments</a></i></p>
