@@ -356,18 +356,37 @@ sub get_communities {
         or die "unable to contact global db master to create vertical";
     my $comms_search = $dbh->selectall_arrayref ("SELECT DISTINCT journalid FROM vertical_keywords w, vertical_keymap m WHERE m.jitemid <> 0 AND m.vert_id = ? AND w.kw_id = m.kw_id AND keyword like ?", { Slice => {} }, $self->vert_id, '%'.$search.'%') || [];
 
+    ## Get subcategories
     my $cats = $self->get_categories( $args{'category'} );
 
     my $cusers = {};
-    foreach my $c (@$cats) {
-        my $cat = LJ::Browse->load_by_id ( $c->{catid} );
 
-        $cat->load_communities ( %args ) unless ($args{'is_need_child'} && $cat->{_loaded_journals});
-
-        my $comms = $cat->{communities};
+    ## Load all communities from selected category
+    my $category = $args{'category'};
+    if ($category) {
+        $category->load_communities ( %args ) unless ($args{'is_need_child'} && $category->{_loaded_journals});
+        my $comms = $category->{communities};
+    
         $comms = @$comms_search
                 ? [ grep { my $s_comm_id = $_->{journalid}; grep { $s_comm_id == $_ } @$comms } @$comms_search ]
                 : [ map { { journalid => $_ } } @$comms ];
+
+        $cusers = LJ::load_userids(map { $_->{journalid} } @$comms);
+    }
+
+    foreach my $c (@$cats) {
+        my $cat = LJ::Browse->load_by_id ( $c->{catid} );
+
+        ## Load all communities from subcategory
+        $cat->load_communities ( %args ) unless ($args{'is_need_child'} && $cat->{_loaded_journals});
+        my $comms = $cat->{communities};
+
+        ## apply a user search if need
+        $comms = @$comms_search
+                ? [ grep { my $s_comm_id = $_->{journalid}; grep { $s_comm_id == $_ } @$comms } @$comms_search ]
+                : [ map { { journalid => $_ } } @$comms ];
+
+        ## join with common communities hash
         my $temp_users = LJ::load_userids(map { $_->{journalid} } @$comms);
         foreach my $userid (keys %$temp_users) {
             $cusers->{$userid} = $temp_users->{$userid};
