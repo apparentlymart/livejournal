@@ -55,7 +55,7 @@ body<=
             ## Category name & url
             my $cat_name = $columns[3];
             my $cat_url = $columns[4];
-            my $cat = LJ::Browse->load_by_url ("/browse" . $cat_url);
+            my $cat = LJ::Browse->load_by_url ("/browse" . $cat_url, $v);
 
             unless ($cat) {
                 #unless (grep { $_->{pretty_name} eq $cat_name } @{$v->get_categories}) {
@@ -70,7 +70,7 @@ body<=
             my $subcat_url = $columns[6];
 
             if ($subcat_name && $subcat_url) {
-                my $subcat = LJ::Browse->load_by_url ("/browse" . $cat->url_path . $subcat_url);
+                my $subcat = LJ::Browse->load_by_url ("/browse" . $cat->url_path . $subcat_url, $v);
                 unless ($subcat) {
                 #    unless (grep { $_->{pretty_name} eq $subcat_name } @{$v->get_categories($cat)}) {
                         $subcat = LJ::Browse->create ( pretty_name => $subcat_name, url_path => $subcat_url, parentcatid => $cat->catid, vertical => $cat->vertical );

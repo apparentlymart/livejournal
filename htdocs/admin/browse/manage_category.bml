@@ -40,8 +40,8 @@ body<=
             push @errors, "Invalid vertical" unless $vertical;
 
             # Has a valid category been chosen
-            my $category = LJ::Browse->load_by_url("/browse" . $cat_url);                   ## category already moved?
-            $category = LJ::Browse->load_by_url("/browse" . $vert_url . $cat_url) unless $category;     ## no, find without vertical
+            my $category = LJ::Browse->load_by_url("/browse" . $cat_url, $vertical);                   ## category already moved?
+            $category = LJ::Browse->load_by_url("/browse" . $vert_url . $cat_url, $vertical) unless $category;     ## no, find without vertical
             push @errors, "Invalid category" unless $category;
 
             next if @errors;

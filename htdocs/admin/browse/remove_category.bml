@@ -37,7 +37,7 @@ body<=
             }
 
             # Has a valid category been chosen
-            my $category = LJ::Browse->load_by_url("/browse" . $caturl);
+            my $category = LJ::Browse->load_by_url("/browse" . $caturl, $vertical);
             push @errors, "Invalid category" unless $category;
 
             my @children = $category->children;

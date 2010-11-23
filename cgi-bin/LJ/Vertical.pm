@@ -354,7 +354,19 @@ sub get_communities {
 
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create vertical";
-    my $comms_search = $dbh->selectall_arrayref ("SELECT DISTINCT journalid FROM vertical_keywords w, vertical_keymap m WHERE m.jitemid <> 0 AND m.vert_id = ? AND w.kw_id = m.kw_id AND keyword like ?", { Slice => {} }, $self->vert_id, '%'.$search.'%') || [];
+
+    my $comms_search = [];
+    if ($search) {
+        $comms_search = $dbh->selectall_arrayref (
+            "SELECT DISTINCT journalid 
+                FROM vertical_keywords w, vertical_keymap m 
+                WHERE m.jitemid <> 0 
+                    AND m.vert_id = ? 
+                    AND w.kw_id = m.kw_id 
+                    AND keyword like ?", 
+            { Slice => {} }, $self->vert_id, '%'.$search.'%'
+        ) || [];
+    }
 
     ## Get subcategories
     my $cats = $self->get_categories( $args{'category'} );
@@ -410,7 +422,10 @@ sub get_categories {
 
     my $where = $cat ? " AND parentcatid = " . $cat->catid : "";
 
-    my $cats = $dbh->selectall_arrayref("SELECT * FROM category WHERE vert_id = ? $where", { Slice => {} }, $self->vert_id);
+    my $cats = $dbh->selectall_arrayref(
+        "SELECT * FROM category WHERE vert_id = ? $where", 
+        { Slice => {} }, $self->vert_id
+    );
 
     return $cats;
 }
@@ -670,16 +685,37 @@ sub save_tags {
         if (@$to_del_tags) {
             my @bind = map { '?' } @$to_del_tags;
             my @bind_vals = map { $_->{kw_id} } @$to_del_tags;
-            my $del = $dbh->do("DELETE FROM vertical_keymap WHERE kw_id IN (".(join ",", @bind).")", undef, $self->vert_id, @bind_vals);
+            my $del = $dbh->do(
+                "DELETE FROM vertical_keymap 
+                WHERE kw_id IN (".(join ",", @bind).")",
+                undef, $self->vert_id, @bind_vals
+            );
         }
     }
 
     foreach my $tag (@$tags) {
-        my $res = $dbh->selectall_arrayref("SELECT journalid, keyword, jitemid, m.kw_id FROM vertical_keymap m, vertical_keywords w WHERE m.kw_id = w.kw_id AND w.keywords = ? AND m.vert_id = ?", undef, $tag, $self->vert_id) || [];
+        my $res = $dbh->selectall_arrayref(
+            "SELECT m.kw_id 
+                FROM vertical_keymap m, vertical_keywords w 
+                WHERE m.kw_id = w.kw_id 
+                    AND w.keywords = ? 
+                    AND m.vert_id = ?", 
+            undef, $tag, $self->vert_id
+        ) || [];
         next if @$res;
-        my $kw_id = $dbh->selectrow_array("SELECT kw_id FROM vertical_keywords WHERE keyword = ?", undef, $tag->{tag});
+        my $kw_id = $dbh->selectrow_array(
+            "SELECT kw_id 
+                FROM vertical_keywords 
+                WHERE keyword = ?",
+            undef, $tag->{tag}
+        );
         $kw_id = $self->create_tag ($tag->{tag}) unless $kw_id;
-        my $sth = $dbh->do("INSERT IGNORE INTO vertical_keymap (journalid, kw_id, jitemid, vert_id) VALUES (?, ?, ?, ?)", undef , $tag->{journalid}, $kw_id, $tag->{jitemid}, $self->vert_id);
+        my $sth = $dbh->do(
+            "INSERT IGNORE INTO vertical_keymap 
+            (journalid, kw_id, jitemid, vert_id) 
+            VALUES (?, ?, ?, ?)",
+            undef , $tag->{journalid}, $kw_id, $tag->{jitemid}, $self->vert_id
+        );
     }
 
     return 1;
@@ -690,7 +726,13 @@ sub load_tags {
     my %args = @_;
 
     my $dbh = LJ::get_db_writer();
-    my $tags = $dbh->selectall_arrayref("SELECT journalid, keyword, jitemid, m.kw_id FROM vertical_keymap m, vertical_keywords w WHERE m.kw_id = w.kw_id AND m.vert_id = ?", { Slice => {} }, $self->vert_id);
+    my $tags = $dbh->selectall_arrayref(
+        "SELECT journalid, keyword, jitemid, m.kw_id 
+            FROM vertical_keymap m, vertical_keywords w 
+            WHERE m.kw_id = w.kw_id 
+                AND m.vert_id = ?", 
+        { Slice => {} }, $self->vert_id
+    );
 
     return $tags ? $tags : [];
 }
@@ -702,7 +744,12 @@ sub load_communities {
     my $is_random = $args{'is_random'};
 
     my $dbh = LJ::get_db_writer();
-    my $comms = $dbh->selectall_arrayref("SELECT * FROM vertical_comms WHERE vert_id = ?", { Slice => {} }, $self->vert_id);
+    my $comms = $dbh->selectall_arrayref(
+        "SELECT * 
+            FROM vertical_comms 
+            WHERE vert_id = ?", 
+        { Slice => {} }, $self->vert_id
+    );
     return [] unless $comms;
     my $max_num = scalar @$comms;
     my $count   = $args{'count'};

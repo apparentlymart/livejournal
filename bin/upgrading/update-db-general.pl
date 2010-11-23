@@ -4328,6 +4328,9 @@ register_alter(sub {
                  "ADD UNIQUE `url_path` (url_path, parentcatid, vert_id)");
     }
 
+    if (column_null("category", "parentcatid") eq 'YES') {
+        do_alter("category", "ALTER TABLE category MODIFY parentcatid INT UNSIGNED NOT NULL");
+    }
 
 });
 

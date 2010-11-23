@@ -46,7 +46,7 @@ body<=
             }
 
             # Has a valid category been chosen
-            my $category = LJ::Browse->load_by_url("/browse" . $caturl);
+            my $category = LJ::Browse->load_by_url("/browse" . $caturl, $vertical);
             push @errors, "Invalid category" unless $category;
 
             # Extract usernames and get userids
@@ -113,7 +113,7 @@ body<=
     # Selected a category OR tried a remove and got an error
     if ( LJ::did_post() && ($POST{'select'} || ($POST{'remove'} && @errors)) ) {
         # Has a valid category been chosen
-        my $category = LJ::Browse->load_by_url("/browse" . $caturl);
+        my $category = LJ::Browse->load_by_url("/browse" . $caturl, $vertical);
         push @errors, "Invalid category" unless $category;
 
         my @comms = $category->communities;

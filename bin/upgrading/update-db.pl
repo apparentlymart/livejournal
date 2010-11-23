@@ -101,7 +101,7 @@ my %table_create;   # $table -> $create_sql
 my %table_drop;     # $table -> 1
 my %table_status;   # $table -> { SHOW TABLE STATUS ... row }
 my %post_create;    # $table -> [ [ $action, $what ]* ]
-my %coltype;        # $table -> { $col -> $type }
+my %coltype;        # $table -> { $col -> [ $type, $null ] }
 my %indexname;      # $table -> "INDEX"|"UNIQUE" . ":" . "col1-col2-col3" -> "PRIMARY" | index_name
 my @alters;
 my $dbh;
@@ -968,7 +968,8 @@ sub load_table_info
     while (my $row = $sth->fetchrow_hashref) {
         my $type = $row->{'Type'};
         $type .= " $1" if $row->{'Extra'} =~ /(auto_increment)/i;
-        $coltype{$table}->{ $row->{'Field'} } = lc($type);
+        my $null = $row->{'Null'};
+        $coltype{$table}->{ $row->{'Field'} } = [ lc($type), $null ];
     }
 
     # current physical table properties
@@ -1009,9 +1010,18 @@ sub column_type
 {
     my ($table, $col) = @_;
     load_table_info($table) unless $coltype{$table};
-    my $type = $coltype{$table}->{$col};
+    my $type = $coltype{$table}->{$col}[0];
     $type ||= "";
     return $type;
+}
+
+sub column_null
+{
+    my ($table, $col) = @_;
+    load_table_info($table) unless $coltype{$table};
+    my $null = $coltype{$table}->{$col}[1];
+    $null ||= "";
+    return $null;
 }
 
 sub table_status

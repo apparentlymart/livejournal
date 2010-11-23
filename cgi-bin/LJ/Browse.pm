@@ -82,11 +82,11 @@ sub create {
         $parent = LJ::Browse->load_by_id($self->{parentcatid});
         $parentcaturl = $parent->uri;
     }
-    my $existcat = LJ::Browse->load_by_url("/browse" . $parentcaturl . $self->{url_path});
+    my $existcat = LJ::Browse->load_by_url("/browse" . $parentcaturl . $self->{url_path}, $vertical);
     croak("Category exists already") if $existcat;
 
     $dbh->do("INSERT INTO category SET url_path=?, pretty_name=?, parentcatid=?",
-             undef, $self->{url_path}, $self->{pretty_name}, $self->{parentcatid});
+             undef, $self->{url_path}, $self->{pretty_name}, $self->{parentcatid} || 0);
     die $dbh->errstr if $dbh->err;
     my $catid = $dbh->{mysql_insertid};
 
@@ -211,10 +211,14 @@ sub load_by_uri {
     my $uri = shift;
     my $full_uri = shift;
     my $parent = shift;
+    my $vertical = shift;
 
     return undef unless ($uri && $full_uri);
     $uri = "/" . $uri unless ($uri =~ /^\/.+/);
     $full_uri = "/" . $full_uri unless ($full_uri =~ /^\/.+/);
+
+    ## Add to memkey full_uri "vertical" if category is in a vertical
+    $full_uri = "/vertical" . $full_uri if $vertical;
 
     my $c = $class->load_from_uri_cache($full_uri);
     return $c if $c;
@@ -229,7 +233,8 @@ sub load_by_uri {
     }
 
     # not in memcache; load from db
-    my $sth = $dbh->prepare("SELECT * FROM category WHERE url_path = ?" . $parent_check);
+    my $vertical_check = $vertical ? " AND vert_id = " . $vertical->vert_id : " AND vert_id = 0";
+    my $sth = $dbh->prepare("SELECT * FROM category WHERE url_path = ?" . $parent_check . $vertical_check);
     $sth->execute($uri);
     die $dbh->errstr if $dbh->err;
 
@@ -358,8 +363,9 @@ sub load_for_nav {
 # given a valid URL for a category, returns the Category object associated with it
 # valid URLs can be the special URL defined in config or just /browse/categoryname/
 sub load_by_url {
-    my $class = shift;
-    my $url = shift;
+    my $class    = shift;
+    my $url      = shift;
+    my $vertical = shift;
 
     $url =~ /^(?:$LJ::SITEROOT)?(\/.+)$/;
     my $path = $1;
@@ -384,7 +390,9 @@ sub load_by_url {
         my $category;
 
         # check cache now for full URI
-        my $c = $class->load_from_uri_cache("/" . $p);
+        my $check_uri = "/" . $p;
+        $check_uri = "/vertical" . $check_uri if $vertical;
+        my $c = $class->load_from_uri_cache($check_uri);
         return $c if $c;
 
         if ($p) {
@@ -393,7 +401,7 @@ sub load_by_url {
             my $partial_uri;
             foreach my $cat (@cats) {
                 $partial_uri .= "/" . $cat;
-                $category = $class->load_by_uri($cat, $partial_uri, $parent_id);
+                $category = $class->load_by_uri($cat, $partial_uri, $parent_id, $vertical);
                 return undef unless $category;
                 $parent_id = $category->catid;
             }
@@ -868,10 +876,23 @@ sub search_posts {
     my $dbh = LJ::get_db_reader();
     if (defined $search) {
         my $where = $vertical ? " AND m.vert_id = " . $vertical->vert_id : "";
-        my $posts = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM vertical_keywords w, vertical_keymap m WHERE w.kw_id = m.kw_id $where AND keyword like ?", { Slice => {} }, '%'.$search.'%');
+        my $posts = $dbh->selectall_arrayref (
+            "SELECT journalid, jitemid FROM vertical_keywords w, vertical_keymap m WHERE w.kw_id = m.kw_id $where AND keyword like ?", 
+            { Slice => {} }, '%'.$search.'%'
+        );
         my @found_posts = ();
         foreach my $post (@$posts) {
-            my $post_ids = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM category_recent_posts WHERE journalid IN ($comm_list) AND journalid = ? AND jitemid = ? AND is_deleted = 0 ORDER BY timecreate DESC LIMIT $limit", { Slice => {} }, $post->{journalid}, $post->{jitemid});
+            my $post_ids = $dbh->selectall_arrayref (
+                "SELECT journalid, jitemid 
+                    FROM category_recent_posts 
+                    WHERE journalid IN ($comm_list) 
+                        AND journalid = ? 
+                        AND jitemid = ? 
+                        AND is_deleted = 0 
+                    ORDER BY timecreate DESC 
+                    LIMIT $limit", 
+                { Slice => {} }, $post->{journalid}, $post->{jitemid}
+            );
             push @found_posts, @$post_ids if $post_ids;
         }
         @entries = 
@@ -879,7 +900,14 @@ sub search_posts {
             grep { $_->{journalid} }                                                ## remove SEO posts
             @found_posts;
     } else {
-        my $post_ids = $dbh->selectall_arrayref ("SELECT * FROM category_recent_posts WHERE journalid IN ($comm_list) AND is_deleted = 0 ORDER BY timecreate DESC LIMIT $limit", { Slice => {} });
+        my $post_ids = $dbh->selectall_arrayref (
+            "SELECT * FROM category_recent_posts 
+                WHERE journalid IN ($comm_list) 
+                    AND is_deleted = 0 
+                ORDER BY timecreate DESC 
+                LIMIT $limit", 
+            { Slice => {} }
+        );
         @entries = map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) } @$post_ids;
     }
     return @entries;

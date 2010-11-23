@@ -100,7 +100,7 @@ sub render_body {
 
     $$windowtitle = $vertical ? $vertical->name : $class->ml('widget.browse.windowtitle');
 
-    my $cat = LJ::Browse->load_by_url($uri); # Currently selected category
+    my $cat = LJ::Browse->load_by_url($uri, $vertical); # Currently selected category
 
     my @categories = sort { lc $a->display_name cmp lc $b->display_name } LJ::Browse->load_all($vertical);
 
