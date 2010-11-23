@@ -58,9 +58,7 @@ body<=
             my $cat = LJ::Browse->load_by_url ("/browse" . $cat_url, $v);
 
             unless ($cat) {
-                #unless (grep { $_->{pretty_name} eq $cat_name } @{$v->get_categories}) {
-                    $cat = LJ::Browse->create ( pretty_name => $cat_name, url_path => $cat_url, vertical => $v );
-                #}
+                $cat = LJ::Browse->create ( pretty_name => $cat_name, url_path => $cat_url, vertical => $v );
             }
 
             my ($subcat_name, $subcat_url, $subcat) = ();
@@ -72,10 +70,8 @@ body<=
             if ($subcat_name && $subcat_url) {
                 my $subcat = LJ::Browse->load_by_url ("/browse" . $cat->url_path . $subcat_url, $v);
                 unless ($subcat) {
-                #    unless (grep { $_->{pretty_name} eq $subcat_name } @{$v->get_categories($cat)}) {
-                        $subcat = LJ::Browse->create ( pretty_name => $subcat_name, url_path => $subcat_url, parentcatid => $cat->catid, vertical => $cat->vertical );
-                    }
-                #}
+                    $subcat = LJ::Browse->create ( pretty_name => $subcat_name, url_path => $subcat_url, parentcatid => $cat->catid, vertical => $cat->vertical );
+                }
             }
 
             ## #7 - Full path for sanity check 
