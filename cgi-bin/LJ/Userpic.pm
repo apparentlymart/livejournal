@@ -446,7 +446,8 @@ sub get_cache {
 sub memkey {
     my $class = shift;
     my $u = shift;
-    return [ $u, "userpic2:" . $u->id ];
+    my $userid = $u->id;
+    return [ $userid, "userpic2:$userid" ];
 }
 
 sub set_cache {
