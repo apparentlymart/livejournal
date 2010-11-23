@@ -3154,6 +3154,18 @@ CREATE TABLE vertical_keywords (
 )
 EOC
 
+register_tablecreate("vertical_keymap", <<'EOC');
+CREATE TABLE vertical_keymap (
+  journalid int(11) NOT NULL,
+  jitemid int(11) NOT NULL,
+  vert_id int(11) NOT NULL,
+  kw_id int(11) NOT NULL,
+  PRIMARY KEY  (journalid,jitemid,vert_id,kw_id),
+  KEY kw_id (kw_id),
+  KEY vert_id (vert_id)
+)
+EOC
+
 ## --
 ## -- embedconten previews
 ## --
@@ -4306,6 +4318,12 @@ register_alter(sub {
                     ADD show_entries INT NOT NULL, 
                     ADD not_deleted INT NOT NULL, 
                     ADD remove_after INT NOT NULL");
+    }
+
+    unless (column_type("vertical2", "kw_id")) {
+        do_alter("ALTER TABLE vertical_keywords DROP PRIMARY KEY, DROP INDEX vert_id, DROP INDEX keyword, DROP journalid, DROP jitemid, DROP vert_id, DROP is_seo, ADD kw_id INT NOT NULL");
+        do_sql("TRUNCATE vertical_keywords");
+        do_alter("ALTER TABLE vertical_keywords ADD PRIMARY KEY(kw_id), ADD UNIQUE(keyword), MODIFY kw_id INT NOT NULL AUTO_INCREMENT");
     }
 
 });

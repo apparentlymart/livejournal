@@ -172,11 +172,8 @@ sub render_body {
         $search_str =~ s#/?\?.*##;
     }
 
-    if ($cat && $vertical) {
-        @comms = $cat->communities( is_need_child => 1 );
-        $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $vertical->name, ljadwrapper => 1 });
-    } elsif ($vertical) {
-        @comms = $vertical->get_communities( is_need_child => 1 );
+    if ($vertical) {
+        @comms = $vertical->get_communities( is_need_child => 1, category => $cat, search => $search_str );
         $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $vertical->name, ljadwrapper => 1 });
     } elsif ($cat) { # we're looking at a lower-level category
 
@@ -228,7 +225,7 @@ sub render_body {
                 };
         }
     } else {
-        my @posts = LJ::Browse->search_posts ( [ map { $_->{userid} } @comms ], $post_page_size, $search_str );
+        my @posts = LJ::Browse->search_posts ( comms => [ map { $_->{userid} } @comms ], page_size => $post_page_size, search_str => $search_str );
 
         foreach my $entry (@posts) {
             next unless $entry;

@@ -367,6 +367,14 @@ sub load_by_url {
     $path =~ s/tag\/.*$//;      # remove search string
     $path =~ s/\/index\.bml$//; # remove bml page
 
+    my $v = LJ::Vertical->load_by_url ($url);
+    if ($v) {
+        ## we are in vertical
+        my $v_path = $v->uri;
+        $path =~ s/$v_path//;
+        $path =~ s/vertical/browse/;
+    }
+
     # 4 possibilities:
     # /browse
     # /browse/topcategory/
@@ -848,15 +856,19 @@ sub delete_post {
 
 sub search_posts {
     my $class  = shift;
-    my $comms = shift;
-    my $limit = shift;
-    my $search = shift;
+    my %args   = @_;
+
+    my $comms    = $args{'comms'};
+    my $limit    = $args{'page_size'};
+    my $search   = $args{'search_str'};
+    my $vertical = $args{'vertical'};
 
     my @entries = ();
     my $comm_list = join ",", @$comms;
     my $dbh = LJ::get_db_reader();
     if (defined $search) {
-        my $posts = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM vertical_keywords WHERE keyword like ? AND is_seo = 0", { Slice => {} }, '%'.$search.'%');
+        my $where = $vertical ? " AND m.vert_id = " . $vertical->vert_id : "";
+        my $posts = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM vertical_keywords w, vertical_keymap m WHERE w.kw_id = m.kw_id $where AND keyword like ?", { Slice => {} }, '%'.$search.'%');
         my @found_posts = ();
         foreach my $post (@$posts) {
             my $post_ids = $dbh->selectall_arrayref ("SELECT journalid, jitemid FROM category_recent_posts WHERE journalid IN ($comm_list) AND journalid = ? AND jitemid = ? AND is_deleted = 0 ORDER BY timecreate DESC LIMIT $limit", { Slice => {} }, $post->{journalid}, $post->{jitemid});
@@ -922,7 +934,6 @@ sub add_community {
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create category";
 
-    
     ## Add community to category
     $dbh->do("REPLACE INTO categoryjournals VALUES (?,?)", undef,
              $self->catid, $uid);

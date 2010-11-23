@@ -92,6 +92,7 @@ body<=
             $subcat
                 ? $subcat->add_community($comm_id, \@tags)
                 : $cat->add_community($comm_id, \@tags);
+
         }
     }
 

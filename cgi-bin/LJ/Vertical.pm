@@ -350,7 +350,13 @@ sub get_communities {
     my $self = shift;
     my %args = @_;
 
-    my $cats = $self->get_categories();
+    my $search = $args{'search'};
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to create vertical";
+    my $comms_search = $dbh->selectall_arrayref ("SELECT DISTINCT journalid FROM vertical_keywords w, vertical_keymap m WHERE m.jitemid <> 0 AND m.vert_id = ? AND w.kw_id = m.kw_id AND keyword like ?", { Slice => {} }, $self->vert_id, '%'.$search.'%') || [];
+
+    my $cats = $self->get_categories( $args{'category'} );
 
     my $cusers = {};
     foreach my $c (@$cats) {
@@ -359,8 +365,10 @@ sub get_communities {
         $cat->load_communities ( %args ) unless ($args{'is_need_child'} && $cat->{_loaded_journals});
 
         my $comms = $cat->{communities};
-        my $temp_users = LJ::load_userids(@$comms);
-
+        $comms = @$comms_search
+                ? [ grep { my $s_comm_id = $_->{journalid}; grep { $s_comm_id == $_ } @$comms } @$comms_search ]
+                : [ map { { journalid => $_ } } @$comms ];
+        my $temp_users = LJ::load_userids(map { $_->{journalid} } @$comms);
         foreach my $userid (keys %$temp_users) {
             $cusers->{$userid} = $temp_users->{$userid};
         }
@@ -450,7 +458,7 @@ sub load_all {
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to load vertical";
 
-    my $sth = $dbh->prepare("SELECT * FROM vertical2");
+    my $sth = $dbh->prepare("SELECT * FROM vertical2 ORDER BY name");
     $sth->execute;
     die $dbh->errstr if $dbh->err;
 
@@ -615,11 +623,22 @@ sub unloaded_singletons {
 # Loaders
 #
 
+sub create_tag {
+    my $self = shift;
+    my $keyword = shift;
+
+    return undef unless $keyword;
+
+    my $dbh = LJ::get_db_writer();
+    my $res = $dbh->do("INSERT INTO vertical_keywords (keyword) values (?)", undef, $keyword);
+    my $kw_id = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
+    return $kw_id;
+}
+
 sub save_tags {
     my $self = shift;
     my %args = @_;
 
-    my $is_seo = $args{'is_seo'};
     my $tags = $args{'tags'};
 
     my $dbh = LJ::get_db_writer();
@@ -627,19 +646,21 @@ sub save_tags {
     my $old_tags = $self->load_tags(%args);
     if ($old_tags) {
         my %new_tags = map { $_->{'tag'} => 1 } @$tags;
-        my $to_del_tags = [ grep { !$new_tags{$_} } map { $_->{keyword} } @$old_tags ];
+        my $to_del_tags = [ grep { !$new_tags{$_->{keyword}} } @$old_tags ];
         ## Need to delete some tags?
         if (@$to_del_tags) {
             my @bind = map { '?' } @$to_del_tags;
-            my @bind_vals = map { $_ } @$to_del_tags;
-            my $del = $dbh->do("DELETE FROM vertical_keywords WHERE vert_id = ? AND keyword IN (".(join ",", @bind).") AND is_seo = ?", undef, $self->vert_id, @bind_vals, $is_seo);
+            my @bind_vals = map { $_->{kw_id} } @$to_del_tags;
+            my $del = $dbh->do("DELETE FROM vertical_keymap WHERE kw_id IN (".(join ",", @bind).")", undef, $self->vert_id, @bind_vals);
         }
     }
 
     foreach my $tag (@$tags) {
-        my $kw_id = $dbh->selectall_arrayref("SELECT * FROM vertical_keywords WHERE keyword = ? AND is_seo = ?", undef, $tag, $is_seo);
-        next if @$kw_id;
-        my $sth = $dbh->do("INSERT IGNORE INTO vertical_keywords (journalid, keyword, jitemid, vert_id, is_seo) VALUES (?, ?, ?, ?, ?)", undef , $tag->{journalid}, $tag->{tag}, $tag->{jitemid}, $self->vert_id, $is_seo);
+        my $res = $dbh->selectall_arrayref("SELECT journalid, keyword, jitemid, m.kw_id FROM vertical_keymap m, vertical_keywords w WHERE m.kw_id = w.kw_id AND w.keywords = ? AND m.vert_id = ?", undef, $tag, $self->vert_id) || [];
+        next if @$res;
+        my $kw_id = $dbh->selectrow_array("SELECT kw_id FROM vertical_keywords WHERE keyword = ?", undef, $tag->{tag});
+        $kw_id = $self->create_tag ($tag->{tag}) unless $kw_id;
+        my $sth = $dbh->do("INSERT IGNORE INTO vertical_keymap (journalid, kw_id, jitemid, vert_id) VALUES (?, ?, ?, ?)", undef , $tag->{journalid}, $kw_id, $tag->{jitemid}, $self->vert_id);
     }
 
     return 1;
@@ -649,11 +670,8 @@ sub load_tags {
     my $self = shift;
     my %args = @_;
 
-    my $is_seo = $args{'is_seo'};
-
     my $dbh = LJ::get_db_writer();
-    my $where = $is_seo ? " AND is_seo = 1 " : "";
-    my $tags = $dbh->selectall_arrayref("SELECT journalid, keyword, jitemid FROM vertical_keywords WHERE vert_id = ? $where", { Slice => {} }, $self->vert_id);
+    my $tags = $dbh->selectall_arrayref("SELECT journalid, keyword, jitemid, m.kw_id FROM vertical_keymap m, vertical_keywords w WHERE m.kw_id = w.kw_id AND m.vert_id = ?", { Slice => {} }, $self->vert_id);
 
     return $tags ? $tags : [];
 }
@@ -842,7 +860,7 @@ sub preload_rows {
 
     # now which of the objects to load did we get a memcache key for?
     foreach my $obj (@to_load) {
-        my $row = $memc->{"vert:$obj->{vert_id}"};
+        my $row = $memc->{"vert2:$obj->{vert_id}"};
         next unless $row;
 
         $obj->absorb_row($row);

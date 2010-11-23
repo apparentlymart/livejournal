@@ -1,79 +1,111 @@
 <?page
 body<=
 <?_code
-{
     use strict;
-    use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Browse );
+    use vars qw(%GET %POST $title $body);
 
-    my $remote = LJ::get_remote();
+    my $remote = LJ::get_remote() or return "<?needlogin?>";
 
-    return "<?needlogin?>"
-        unless $remote;
+    # priv check
+    unless (LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER) {
+        $body = "access denied";
+        return;
+    }
 
-    return "You are not allowed to view this page"
-        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
-
-    $title = "Recent Entries in verticals";
-    my $ret = "";
+    $title = "Search words in verticals";
 
     my $vert_id = $POST{'vert_id'} ne '' ? $POST{'vert_id'} : undef;
-    my $journals = $POST{'journals'};
 
-    $ret .= "<form method='POST'>\n";
+    $body = '';
+
+    $body .= "<form method='POST'>\n";
     my $form_auth = LJ::form_auth();
-    $ret .= $form_auth;
+    $body .= $form_auth;
 
     # Get the full list of categories
     my @verticals = LJ::Vertical->load_all;
     # Don't include the top level categories and get the unique URI for each
 
     my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
-    @vert_ids = sort { $a cmp $b } @vert_ids;
+#    @vert_ids = sort { $a cmp $b } @vert_ids;
 
-    $ret .= "<p>";
-    $ret .= LJ::html_select({
+    $body .= "<p>";
+    $body .= LJ::html_select({
                 name => 'vert_id',
                 selected => $vert_id },
                 { text => 'Select Vertical',
                 value => '' },
                 @vert_ids
             );
-    $ret .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</p>";
-
-    $ret .= "</form>";
+    $body .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</p>";
+    $body .= "</form>";
 
     my $vertical = undef;
-    if (LJ::did_post() && $vert_id) {
-        $vertical = LJ::Vertical->load_by_id($vert_id);
-    }
-
-    if (LJ::did_post() && $vertical && $POST{'save'}) {
-        my $tags = $POST{'tags'};
-        $vertical->save_tags( is_seo => 1, tags => [ map { { journalid => 0, jitemid => 0, tag => $_ } } split /\r\n/, $tags ] );
+    if (LJ::did_post() && $POST{'vert_id'}) {
+        $vertical = LJ::Vertical->load_by_id ($POST{'vert_id'});
     }
 
     if (LJ::did_post() && $vertical) {
-        my $seo_tags = $vertical ? $vertical->load_tags ( is_seo => 1 ) : [];
-        $seo_tags = join "\n", map { $_->{keyword} } @$seo_tags;
+        $body .= '<div style="float:left;"><form method="POST" action="">';
 
-        $ret .= <<FORM;
-<form method="post">
-$form_auth
-<textarea cols="50" rows="20" name="tags">$seo_tags</textarea>
-<input type="hidden" name="vert_id" value="$vert_id">
-<input type="submit" name="save" value="Save search words">
-</form>
-FORM
+        my $system = LJ::load_user('system') or die "No 'system' user in DB";
+        my $keywords = $system->prop('vertical_search');
+
+        my @words = split /\$/, $keywords;
+        @words = grep { my ($id) = $_ =~ m/(.*?)#/; $id == $vert_id } @words;
+        my ($stored_words) = $words[0] =~ m/.*?#(.*)/s;
+        my $edited_words = $POST{words};
+
+        if ($POST{submit}) {
+            my @post_keywords = split /\s*\n+\s*/m, $POST{words};
+            $stored_words = join("\n", @post_keywords); # update this value, it will be used below
+            my $keywords = $system->prop('vertical_search');
+            my @words = split ":", $keywords;
+
+            my $flag = 0;
+            foreach my $v_w (@words) {
+                my ($id) = $v_w =~ m/(.*?)#/;
+                if ($id == $vert_id) {
+                    $v_w = $id . "#" . $stored_words;
+                    $flag = 1;
+                }
+            }
+            unless ($flag) {
+                push @words, $vert_id . "#" . $stored_words;
+            }
+
+            my $to_prop = join "\$", @words;
+            $system->set_prop('vertical_search', $to_prop);
+        }
+
+        my $words = $POST{preview} ? $edited_words : $stored_words;
+        $body .= LJ::html_textarea({ name => 'words', rows => 20, cols => 50, value => $words, 
+                                     disabled => ($POST{edit} || $POST{preview}) ? 0 : 1 });
+
+        $body .= '<p>';
+        $body .= '<button type="submit" name="preview" value="preview">Preview widget</button> ' if $POST{edit} or $POST{preview};
+        if ($POST{edit} or $POST{preview}) {
+            $body .= '<button type="submit" name="cancel">Cancel editing</button>';
+        } else {
+            $body .= '<button type="submit" name="edit" value="edit">Edit search words</button>';
+        }
+        $body .= '</p><p><button type="submit" name="submit" value="save">Save search words</button></p>';
+        $body .= '<input type="hidden" name="vert_id" value="'.$vertical->vert_id.'">';
+        $body .= '</form>';
+        # preview
+        $body .= '</div><div style="float:right;width:650px;">';
+
+        $body .= LJ::Widget::Search->render(vertical => $vertical, type => "tags", view => 'communities');
+        $body .= '</div>';
     }
 
+    return $body;
 
-    return "<body>$ret</body>";
-}
 _code?>
 <=body
 title=><?_code return $title; _code?>
 head<=
-<?_code return $headextra; _code?>
-<=head
+<?_code return ''; _code?>
 page?>
+

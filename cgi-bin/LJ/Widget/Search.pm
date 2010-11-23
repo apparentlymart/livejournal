@@ -78,14 +78,24 @@ EOF
 
         my $uri = BML::get_uri();
         $uri =~ s#(.*?)tag/.*#$1#;
-        my $vertical = LJ::Vertical->load_by_url ($uri);
+        my $vertical = $opts{'vertical'} || LJ::Vertical->load_by_url ($uri);
+
+        my $system = LJ::load_user('system') or die "No 'system' user in DB";
+        my $keywords = $system->prop('vertical_search');
+
+        my @words = split /\$/, $keywords;
+        @words = grep { my ($id) = $_ =~ m/(.*?)#/; $id == $vertical->vert_id } @words;
+        my ($stored_words) = $words[0] =~ m/.*?#(.*)/s;
 
         $uri .= "/" if $uri !~ m#/$#; ## add end slash if not exist
+
+        my $args = BML::get_query_string();
+        $uri .= "?$args" if $args;
         $template->param (
             vertical_name   => $vertical->name,
             search_url      => $uri,
             view            => $opts{'view'},
-            tags            => [ map { { tag => $_->{keyword} } } @{$vertical->load_tags (is_seo => 1)} ],
+            tags            => [ map { { tag => $_ } } split /\n/m, $stored_words ],
         );
 
         return $template->output;
