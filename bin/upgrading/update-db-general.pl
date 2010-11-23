@@ -4320,10 +4320,12 @@ register_alter(sub {
                     ADD remove_after INT NOT NULL");
     }
 
-    unless (column_type("vertical2", "kw_id")) {
-        do_alter("ALTER TABLE vertical_keywords DROP PRIMARY KEY, DROP INDEX vert_id, DROP INDEX keyword, DROP journalid, DROP jitemid, DROP vert_id, DROP is_seo, ADD kw_id INT NOT NULL");
+    unless (column_type("vertical_keywords", "kw_id")) {
+        do_alter("vertical_keywords",
+            "ALTER TABLE vertical_keywords DROP PRIMARY KEY, DROP INDEX vert_id, DROP INDEX keyword, DROP journalid, DROP jitemid, DROP vert_id, DROP is_seo, ADD kw_id INT NOT NULL");
         do_sql("TRUNCATE vertical_keywords");
-        do_alter("ALTER TABLE vertical_keywords ADD PRIMARY KEY(kw_id), ADD UNIQUE(keyword), MODIFY kw_id INT NOT NULL AUTO_INCREMENT");
+        do_alter("vertical_keywords",
+            "ALTER TABLE vertical_keywords ADD PRIMARY KEY(kw_id), ADD UNIQUE(keyword), MODIFY kw_id INT NOT NULL AUTO_INCREMENT");
     }
 
 });
