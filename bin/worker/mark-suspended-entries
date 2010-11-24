@@ -11,41 +11,48 @@ sub capabilities { qw/LJ::Worker::MarkSuspendedEntries::mark LJ::Worker::MarkSus
 
 __PACKAGE__->start;
 
-package LJ::Worker::MarkSuspendedEntries::mark;
+package LJ::Worker::MarkSuspendedEntries::common;
 use base 'TheSchwartz::Worker';
 
-sub work {
-    my ($class, $job) = @_;
+sub grab_for { 60 }
+sub max_retries { 10 }
+
+sub retry_delay {
+    my ($class, $fails) = @_;
+    return (10, 30, 60, 300, 600)[$fails] || 900;
+}    
+
+sub update_all {
+    my ($class, $job, $value) = @_;
     my $args = $job->arg;
     my $userid = $args->{userid};
 
     foreach my $cid (@LJ::CLUSTERS) {
         my $dbh = LJ::get_cluster_master($cid);
-        next unless $dbh;
+        die "Cannot connect to $cid cluster master" unless $dbh;
 
-        $dbh->do("UPDATE log2 SET compressed='S' WHERE posterid=?", undef, $userid);
+        $dbh->do("UPDATE log2 SET compressed=? WHERE posterid=?", undef, $value, $userid);
     }
 
     $job->completed;
+}
+
+package LJ::Worker::MarkSuspendedEntries::mark;
+use base 'LJ::Worker::MarkSuspendedEntries::common';
+
+sub work {
+    my ($class, $job) = @_;
+
+    return $class->update_all($job, 'S');
 }
 
 package LJ::Worker::MarkSuspendedEntries::unmark;
-use base 'TheSchwartz::Worker';
+use base 'LJ::Worker::MarkSuspendedEntries::common';
 
 sub work {
     my ($class, $job) = @_;
-    my $args = $job->arg;
-    my $userid = $args->{userid};
 
-    foreach my $cid (@LJ::CLUSTERS) {
-        my $dbh = LJ::get_cluster_master($cid);
-        next unless $dbh;
-
-        $dbh->do("UPDATE log2 SET compressed='N' WHERE posterid=?", undef, $userid);
-    }
-
-    $job->completed;
+    return $class->update_all($job, 'N');
 }
 
-
-1
+1;
