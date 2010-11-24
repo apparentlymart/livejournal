@@ -720,7 +720,7 @@ function Page::print () {
        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
 <head>
-   <meta http-equiv="X-UA-Compatible" content="IE=7"/>
+   <meta http-equiv="X-UA-Compatible" content="IE=IE7; IE=IE9" />
    """;
 
     $this->print_head();

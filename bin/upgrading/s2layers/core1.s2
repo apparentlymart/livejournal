@@ -2195,7 +2195,7 @@ function server_sig() {
 
 function Page::print() {
     "<html>\n<head>\n";
-    """<meta http-equiv="X-UA-Compatible" content="IE=7"/> """;
+    """<meta http-equiv="X-UA-Compatible" content="IE=IE7; IE=IE9" /> """;
     $this->print_head();
     $this->print_stylesheets();
     "<title>"+$this->title()+"</title>\n";
