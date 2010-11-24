@@ -963,7 +963,7 @@ sub add_community {
         or die "unable to contact global db master to create category";
 
     ## Add community to category
-    $dbh->do("REPLACE INTO categoryjournals VALUES (?,?)", undef,
+    my $res = $dbh->do("REPLACE INTO categoryjournals VALUES (?,?)", undef,
              $self->catid, $uid);
     die $dbh->errstr if $dbh->err;
 
