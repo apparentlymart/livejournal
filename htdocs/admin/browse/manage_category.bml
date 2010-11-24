@@ -99,6 +99,7 @@ body<=
     $ret .= "<p>" . LJ::html_submit('move', 'Move') . "</p>";
 
     $ret .= "</form>";
+    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 
     return "<body>$ret</body>";
 }

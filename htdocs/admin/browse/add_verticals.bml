@@ -33,13 +33,14 @@ body<=
 
     $ret .= "<table border='0'>";
     $ret .= "<tr><td>Vertical name</td><td>Vertical Url</td></tr>";
-    $ret .= "<tr><td><input type='text' name='vert_name'></td><td><input type='text' name='vert_url'></td></tr>";
-    $ret .= "<tr><td></td><td>example: '/monkey_bars'</td></tr>";
+    $ret .= "<tr><td><input type='text' name='vert_name' style='width:200px;'/></td><td><input type='text' name='vert_url' style='width:200px;'/></td></tr>";
+    $ret .= "<tr><td></td><td style='color:#666;font-size:.8em;'>example: '/monkey_bars'</td></tr>";
     $ret .= "</table>";
 
     $ret .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</p>";
 
     $ret .= "</form>";
+    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 
 
     return "<body>$ret</body>";

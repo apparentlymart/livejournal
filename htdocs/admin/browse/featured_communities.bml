@@ -49,15 +49,14 @@ body<=
 <form method="post">
 <input type="hidden" name="vert_id" value="$vert_id">
 <table>
-    <caption>Enter community URL for adding:</caption>
+    <th colspan='2' style='padding:5px;'>Enter community URL for adding:</caption>
     <tr>
-        <td>URL:</td><td colspan="2"><input type="text" size="50" name="url"></td>
-        <td colspan="2"><input type="submit" name="add" value="Add"></td>
+        <td style='padding:5px;'>URL:</td>
+	<td style='padding:5px;'><input type="text" size="50" name="url"></td>
+        <td style='padding:5px;'><input type="submit" name="add" value="Add"></td>
     </tr>
 </table>
 </form>
-<br/>
-<br/>
 ADDPOST
 
     }
@@ -71,21 +70,24 @@ ADDPOST
     }
 
     if (LJ::did_post() && $vertical) {
-        $ret .= "<b><div>Added Communities</div></p>";
+        $ret .= "<h2>Added Communities</h2>";
         my $comms = $vertical->load_communities( count => '100', is_random => 0 );
 
+        $ret .= "<ul style='list-style:none;line-height:1.6em;padding:0;'>";
         foreach (@$comms) {
             my $comm = LJ::load_userid($_->{journalid});
             my $url = $comm->journal_base;
             $ret .= "<li><a href='".$url."'>".$comm->display_name."</a>";
-            $ret .= "<form method='POST'>\n";
+            $ret .= "<form method='POST' style='display:inline;padding:0 0 0 10px;'>\n";
             $ret .= LJ::form_auth();
             $ret .= "<input type='hidden' name='rec_id' value='".$comm->userid."'>";
             $ret .= "<input type='hidden' name='vert_id' value='".$vertical->vert_id."'>";
-            $ret .= "<input type='submit' name='delete_comm' value='Remove post'>";
+            $ret .= "<input type='submit' name='delete_comm' value='Remove post' style='font-size:.8em;text-transform:lowercase;'>";
             $ret .= "</form>";
         }
+        $ret .= "</ul>";
     }
+    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 
 
     return "<body>$ret</body>";

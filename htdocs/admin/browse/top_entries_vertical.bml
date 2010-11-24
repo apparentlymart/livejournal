@@ -64,29 +64,30 @@ body<=
 <form method="post">
 <input type="hidden" name="vert_id" value="$vert_id">
 <table>
-    <caption>Enter URL for adding featured post:</caption>
+    <tr><th colspan="3" style='padding:5px;'>Enter URL for adding featured post</th></tr>
     <tr>
-        <td>URL:</td><td colspan="2"><input type="text" size="50" name="url"></td>
-        <td colspan="2"><input type="submit" name="add" value="Add"></td>
+        <td style='padding:5px;'>URL:</td><td colspan="2"><input type="text" name="url" style='width:288px;'></td>
+        <td colspan="2" style='padding:5px;'><input type="submit" name="add" value="Add"></td>
     </tr>
 </table>
 </form>
-<br/>
-<br/>
 <form method="post">
 <input type="hidden" name="vert_id" value="$vert_id">
 <table>
     <tr>
-        <td>Number of shown entries: <input type="text" size="3" name="show_entries" value="$show_entries"></td>
+        <td style='padding:5px;'>Number of shown entries:</td><td style='padding:5px;' colspan='2'><input type="text" size="3" name="show_entries" value="$show_entries"></td>
     </tr>
     <tr>
-        <td>Number of entries, that can not be deleted: <input type="text" size="3" name="not_deleted" value="$not_deleted"> <input type="submit" name="store" value="Store"></td>
+        <td style='padding:5px;'>Number of entries, that can not be deleted:</td><td style='padding:5px;' colspan='2'><input type="text" size="3" name="not_deleted" value="$not_deleted"> </td>
     </tr>
     <tr>
-        <td>Remove post from widget after: <input type="text" size="3" name="remove_after" value="$remove_after"></td>
+        <td style='padding:5px;'>Remove post from widget after:</td><td style='padding:5px;'><input type="text" size="3" name="remove_after" value="$remove_after"></td><td style='padding:5px;'> hours</td>
+    </tr>
+    <tr>
+    	<td style='padding:5px;' colspan='3'><input type="submit" name="store" value="Store"></td>
     </tr>
 </table>
-</form><br/><br/>
+</form>
 ADDPOST
 
     }
@@ -100,9 +101,10 @@ ADDPOST
     }
 
     if (LJ::did_post() && $vertical) {
-        $ret .= "<b><div>Added Posts</div></p>";
+        $ret .= "<h2>Added Posts</h2>";
         my $posts = $vertical->load_vertical_posts( count => '100', is_random => 0 );
 
+        $ret .= "<ul style='list-style:none;line-height:1.6em;padding:0;'>";
         foreach (@$posts) {
             my $entry = LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid});
             my $url = $entry->url;
@@ -110,14 +112,16 @@ ADDPOST
             my $jitemid = $entry->jitemid;
             my $commid = $entry->journalid;
             $ret .= "<li><a href='".$url."'>".($subject ? $subject : '...')."</a>";
-            $ret .= "<form method='POST'>\n";
+            $ret .= "<form method='POST' style='display:inline;padding:0 0 0 10px;'>\n";
             $ret .= LJ::form_auth();
             $ret .= "<input type='hidden' name='rec_id' value='$jitemid-$commid'>";
             $ret .= "<input type='hidden' name='vert_id' value='".$vertical->vert_id."'>";
-            $ret .= "<input type='submit' name='delete_post' value='Remove post'>" if scalar @$posts > $vertical->not_deleted;
+            $ret .= "<input type='submit' name='delete_post' value='Remove post' style='font-size:.8em;text-transform:lowercase;'>" if scalar @$posts > $vertical->not_deleted;
             $ret .= "</form>";
         }
+        $ret .= "</ul>";
     }
+    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 
 
     return "<body>$ret</body>";

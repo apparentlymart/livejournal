@@ -140,6 +140,7 @@ body<=
     }
 
     $ret .= "</form>";
+    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 
     return "<body>$ret</body>";
 }

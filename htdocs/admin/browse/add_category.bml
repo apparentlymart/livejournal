@@ -102,6 +102,7 @@ body<=
     my @categories = LJ::Browse->load_all($vertical);
     my @caturls = map { { text => $_->{pretty_name}, value => $_->url_path } } @categories;
 
+    $ret .= "<p>";
     $ret .= LJ::html_select({
                 name => 'parentcaturl',
                 selected => $parentcaturl },
@@ -111,7 +112,7 @@ body<=
             );
     $ret .= "</p>\n";
 
-    $ret .= "<p><b>New Category Details</b>";
+    $ret .= "<h2>New Category Details</h2>";
     $ret .= "<table>";
     $ret .= "<tr><td class='label'>*Display Name:</td><td>";
     $ret .= LJ::html_text( {
@@ -127,7 +128,7 @@ body<=
                 size => 40,
                 value => $POST{'newcaturl'} || '/'}
             );
-    $ret .= "<br /><i>example: '\/monkey_bars'</i></td></tr>\n";
+    $ret .= "<br /><i style='font-size:.8em;color:#666;'>example: '\/monkey_bars'</i></td></tr>\n";
     $ret .= "<tr><td colspan='2'>On unselected vertical & category case<br/>new category will be add to 'dummy' vertical</td></tr>";
 
     $ret .= "</table></p>\n";
@@ -136,6 +137,7 @@ body<=
 
     $ret .= LJ::html_hidden("vert_url_add", $vertical ? $vertical->uri : '');
     $ret .= "</form>";
+    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 
     return "<body>$ret</body>";
 }

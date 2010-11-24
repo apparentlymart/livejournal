@@ -29,7 +29,7 @@ body<=
     my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
     @vert_ids = sort { $a cmp $b } @vert_ids;
 
-    $ret .= "<p>Select vertical:";
+    $ret .= "<p>Select vertical: ";
     $ret .= LJ::html_select({
                 name => 'vert_id',
                 selected => $vert_id },
@@ -53,7 +53,7 @@ body<=
     if ($vert_id) {
         my $vertical = LJ::Vertical->load_by_id($vert_id);
         my $cats = $vertical->get_categories;
-        $ret .= "<b><div>Recent Posts</div></p>";
+        $ret .= "<h2>Recent Posts</h2>";
         my @communities = ();
         foreach my $cat (@$cats) {
             my $c = LJ::Browse->load_by_id($cat->{catid});
@@ -67,20 +67,23 @@ body<=
 
         my @posts = LJ::Browse->search_posts( comms => \@communities, page_size => "$skip,$page_size", vertical => $vertical );
 
+        $ret .= "<ul style='list-style:none;line-height:1.6em;padding:0;'>";
         foreach (@posts) {
             my $url = $_->url;
             my $subject = $_->subject_text;
             my $jitemid = $_->jitemid;
             my $commid = $_->journalid;
             $ret .= "<li><a href='".$url."'>".($subject ? $subject : '...')."</a>";
-            $ret .= "<form method='POST'>\n";
+            $ret .= "<form method='POST' style='display:inline;padding:0 0 0 10px;'>\n";
             $ret .= LJ::form_auth();
             $ret .= "<input type='hidden' name='vert_id' value='".$vertical->vert_id."'>";
             $ret .= "<input type='hidden' name='rec_id' value='$jitemid-$commid'>";
-            $ret .= "<input type='submit' name='delete_post' value='Remove post'>";
-            $ret .= "</form>";
+            $ret .= "<input type='submit' name='delete_post' value='Remove post' style='font-size:.8em;text-transform:lowercase;'>";
+            $ret .= "</form></li>";
         }
+        $ret .= "</ul>";
     }
+    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 
 
     return "<body>$ret</body>";
