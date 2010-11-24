@@ -167,7 +167,7 @@ sub serve_browser_request {
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
     <title>Frank Radio</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=7" />
+    <meta http-equiv="X-UA-Compatible" content="IE=IE7; IE=IE9" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link href="http://l-stat.livejournal.com/framework/error-pages.css" rel="stylesheet" type="text/css" />
     <!--[if lte IE 7]><link rel="stylesheet" href="http://l-stat.livejournal.com/framework/error-pages-ie.css"><![endif]-->
