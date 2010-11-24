@@ -257,7 +257,8 @@ sub render_body {
 
     # post paging: first, previouse, next, last pages.
     my ($post_page_first, $post_page_prev, $post_page_next, $post_page_last) = 4 x 0;
-    my $post_pages = int($post_count / $post_page_size) + 1;
+    my $post_pages = int($post_count / $post_page_size);
+    $post_pages += 1 if $post_count % $post_page_size;
     $post_page = 1 unless $post_page;
     if($post_page > 1) {
         $post_page_first = 1;
@@ -272,7 +273,8 @@ sub render_body {
 
     # paging: first, previouse, next, last pages.
     my ($page_first, $page_prev, $page_next, $page_last) = 4 x 0;
-    my $pages = int($count / $page_size) + 1;
+    my $pages = int($count / $page_size);
+    $pages += 1 if $count % $page_size;
     $page = 1 unless $page;
     if($page > 1) {
         $page_first = 1;
