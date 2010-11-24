@@ -48,13 +48,14 @@ Usage: update-db.pl [options]
                      these statements to be executed
   -b  --beta         Affects '--populate' option - only data that are safe during
                      update of beta server will be loaded into DB
+      --nobeta       to run in 'production' mode on beta server (don't do it)
 ";
 
 die $usage unless
 GetOptions("runsql"     => \$opt_sql,
            "drop"       => \$opt_drop,
            "populate"   => \$opt_pop,
-           "beta"       => \$opt_beta,
+           "beta!"      => \$opt_beta,
            "confirm=s"  => \$opt_confirm,
            "cluster=s"  => \$cluster,
            "skip=s"     => \$opt_skip,
@@ -71,7 +72,11 @@ $opt_nostyles = 1 unless LJ::is_enabled("update_styles");
 $opt_innodb = 1 if $LJ::USE_INNODB;
 
 die $usage if $opt_help;
-die "You must specify '--populate' option with '--beta'" if $opt_beta && !$opt_pop;
+die "You must specify '--populate' option with '--[no]beta'" 
+    if defined $opt_beta && !$opt_pop;
+die "You are running script on beta server without specifying '--beta' option"
+    if $opt_pop && !defined($opt_beta) && $LJ::IS_LJCOM_BETA;
+
 
 ## make sure $LJHOME is set so we can load & run everything
 unless (-d $ENV{'LJHOME'}) {
@@ -823,7 +828,8 @@ sub do_sql
         print "# Running...\n";
         $dbh->do($sql);
         if ($dbh->err) {
-            die "#  ERROR: " . $dbh->errstr . "\n";
+            use Carp;
+            confess "#  ERROR ($sql): " . $dbh->errstr . "\n";
         }
     }
 }
