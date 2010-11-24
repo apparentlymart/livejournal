@@ -335,6 +335,7 @@ sub render_body {
                 updated_ago     => LJ::TimeUtil->ago_text($entry->logtime_unix),
                 comments_count  => $entry->reply_count,
                 ljuser          => $entry->journal->ljuser_display,
+                url_to_post     => $entry->url,
             };
         }
     }
