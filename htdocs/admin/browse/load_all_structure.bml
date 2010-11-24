@@ -114,10 +114,11 @@ body<=
     $ret .= "<form method='POST' enctype='multipart/form-data'>\n";
     $ret .= LJ::form_auth();
 
-    $ret .= "<input type='file' name='all_structure'>";
-    $ret .= "<br/><input type='submit' name='load' onclick='this.disabled=true;' value='Yes, I want to load'>";
+    $ret .= "<p><input type='file' name='all_structure'></p>";
+    $ret .= "<p><br/><input type='submit' name='load' onclick='this.disabled=true;' value='Yes, I want to load'></p>";
 
     $ret .= "</form>";
+    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 
 
     return "<body>$ret</body>";
