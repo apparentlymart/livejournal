@@ -22,6 +22,7 @@ CALENDAR_EMPTY_DAYS=><td colspan="%%numempty%%">&nbsp;</td>
 CALENDAR_PAGE<=
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css" media="all">
 <!--
 body {
@@ -287,6 +288,7 @@ CALENDAR_EMPTY_DAYS=><TD COLSPAN=%%numempty%% BGCOLOR=%%color:weak_back%%>&nbsp;
 CALENDAR_PAGE<=
 <HTML>
 <HEAD>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <TITLE>%%title%% - Calendar</TITLE>
 %%head%%
 </HEAD>
@@ -395,6 +397,7 @@ CALENDAR_PAGE<=
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css">
 <!--
 body {
@@ -648,6 +651,7 @@ CALENDAR_EMPTY_DAYS=><td colspan="%%numempty%%"></td>
 CALENDAR_PAGE<=
 <!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css">
 body, td {
 font-family: verdana, sans-serif;
@@ -885,6 +889,7 @@ CALENDAR_PAGE<=
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
  <head>
+  <meta http-equiv="X-UA-Compatible" content="IE=7">
   <style type="text/css">
    <!--
     BODY { line-height: 1.3; margin: 0; background-color: %%color:stronger_back%%; color: %%color:page_text%%; }
@@ -994,6 +999,7 @@ CALENDAR_EMPTY_DAYS=><TD COLSPAN=%%numempty%%>&nbsp;</TD>
 CALENDAR_PAGE<=
 <HTML>
  <HEAD>
+  <meta http-equiv="X-UA-Compatible" content="IE=7">
   <STYLE type="text/css">
    <!--
     td,body,p,div    {color:#000000; text-decoration:none; font-family:Verdana,Arial,Helvetica; font-size:12px}
@@ -1124,6 +1130,7 @@ CALENDAR_EMPTY_DAYS=><TD COLSPAN=%%numempty%% BGCOLOR=%%color:weak_back%%>&nbsp;
 CALENDAR_PAGE<=
 <HTML>
 <HEAD>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <TITLE>%%title%% - calendar</TITLE>
 <style type="text/css">
 <!--
@@ -1268,6 +1275,7 @@ CALENDAR_EMPTY_DAYS=><TD COLSPAN=%%numempty%% BGCOLOR="#CCCC99">&nbsp;</TD>
 CALENDAR_PAGE<=
 <HTML>
 <HEAD>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <TITLE>%%title%% - Archive</TITLE>
 <style type="text/css">
 
@@ -1499,6 +1507,7 @@ CALENDAR_EMPTY_DAYS=><TD COLSPAN=%%numempty%% BGCOLOR=%%color:weak_back%%>&nbsp;
 CALENDAR_PAGE<=
 <HTML>
  <HEAD>
+ <meta http-equiv="X-UA-Compatible" content="IE=7">
   <STYLE>
    <!--
     body,td,p { color:%%color:page_text%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt }
@@ -1710,6 +1719,7 @@ DAY_CURRENT<=
 DAY_PAGE<=
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css" media="all">
 <!--
 body {
@@ -1986,6 +1996,7 @@ DAY_CURRENT=><BR><FONT FACE="Arial,Helvetica" SIZE=-1><B>Current %%what%%:</B> <
 DAY_PAGE<=
 <HTML>
 <HEAD>
+	<meta http-equiv="X-UA-Compatible" content="IE=7">
    <TITLE>%%title%%</TITLE>
 %%head%%
 </HEAD>
@@ -2189,6 +2200,7 @@ DAY_PAGE<=
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css">
 <!--
 body {
@@ -2539,6 +2551,7 @@ DAY_CURRENT<=
 DAY_PAGE<=
 <!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css">
 body, td {
 font-family: verdana, sans-serif;
@@ -2761,6 +2774,7 @@ DAY_PAGE<=
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
  <head>
+  <meta http-equiv="X-UA-Compatible" content="IE=7">
   <style type="text/css">
    <!--
     BODY { line-height: 1.3; margin: 0; background-color: %%color:stronger_back%%; color: %%color:page_text%%; }
@@ -2874,6 +2888,7 @@ DAY_CURRENT=><BR>Current %%lc:what%%: %%value%%.
 DAY_PAGE<=
 <HTML>
  <HEAD>
+ <meta http-equiv="X-UA-Compatible" content="IE=7">
   <STYLE type="text/css">
    <!--
     td,body,p,div    {color:#000000; text-decoration:none; font-family:Verdana,Arial,Helvetica; font-size:12px}
@@ -3022,6 +3037,7 @@ DAY_CURRENT=><BR><FONT FACE="Verdana,Arial,Helvetica" SIZE=-1><B>current %%lc:wh
 DAY_PAGE<=
 <HTML>
 <HEAD>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <TITLE>%%title%%</TITLE>
 %%head%%
 <style type="text/css">
@@ -3213,6 +3229,7 @@ DAY_CURRENT=><tr><td><font class="date"><b>%%what%%:</b></font></td><td><font cl
 DAY_PAGE<=
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <title>%%title%% - %%monlong%% %%dth%% %%yyyy%%</title>
 
 <style type="text/css">
@@ -3520,6 +3537,7 @@ DAY_CURRENT=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">%%what%%:</
 DAY_PAGE<=
 <HTML>
  <HEAD>
+  <meta http-equiv="X-UA-Compatible" content="IE=7">
   <STYLE>
    <!--
     body,td,p { color:%%color:page_text%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt }
@@ -3692,6 +3710,7 @@ FRIENDS_SKYSCRAPER_AD<=
 FRIENDS_PAGE<=
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css" media="all">
 <!--
 body {
@@ -4014,6 +4033,7 @@ FRIENDS_SKYSCRAPER_AD<=
 FRIENDS_PAGE<=
 <HTML>
 <HEAD>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
    <TITLE>%%title%%</TITLE>
 <style type="text/css">
 <!--
@@ -4234,6 +4254,7 @@ FRIENDS_PAGE<=
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css">
 <!--
 body {
@@ -4663,6 +4684,7 @@ summary="" style="margin-left: auto; margin-right: auto;">
 FRIENDS_PAGE<=
 <!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css">
 body, td {
 font-family: verdana, sans-serif;
@@ -4984,6 +5006,7 @@ FRIENDS_PAGE<=
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
  <head>
+ <meta http-equiv="X-UA-Compatible" content="IE=7">
   <style type="text/css">
    <!--
     BODY { line-height: 1.3; margin: 0; background-color: %%color:stronger_back%%; color: %%color:page_text%%; }
@@ -5132,6 +5155,7 @@ FRIENDS_SKYSCRAPER_AD<=
 FRIENDS_PAGE<=
 <HTML>
  <HEAD>
+  <meta http-equiv="X-UA-Compatible" content="IE=7">
   <STYLE type="text/css">
    <!--
     td,body,p,div    {color:#000000; text-decoration:none; font-family:Verdana,Arial,Helvetica; font-size:12px}
@@ -5326,6 +5350,7 @@ FRIENDS_SKYSCRAPER_AD<=
 FRIENDS_PAGE<=
 <HTML>
 <HEAD>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <TITLE>%%title%%</TITLE>
 <style type="text/css">
 <!--
@@ -5549,6 +5574,7 @@ FRIENDS_SKYSCRAPER_AD<=
 FRIENDS_PAGE<=
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <title>%%title%%</title>
 
 <style type="text/css">
@@ -5909,6 +5935,7 @@ FRIENDS_SKYSCRAPER_AD<=
 FRIENDS_PAGE<=
 <HTML>
  <HEAD>
+  <meta http-equiv="X-UA-Compatible" content="IE=7">
   <STYLE>
    <!--
     body,td,p { color:%%color:page_text%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt }
@@ -6160,6 +6187,7 @@ LASTN_OPEN_SKYSCRAPER_AD=>
 LASTN_PAGE<=
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css" media="all">
 <!--
 body {
@@ -6458,6 +6486,7 @@ LASTN_OPEN_SKYSCRAPER_AD<=
 LASTN_PAGE<=
 <HTML>
 <HEAD>
+   <meta http-equiv="X-UA-Compatible" content="IE=7">
    <TITLE>%%title%%</TITLE>
 <style type="text/css">
 <!--
@@ -6687,6 +6716,7 @@ LASTN_PAGE<=
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css">
 <!--
 body {
@@ -7099,6 +7129,7 @@ LASTN_OPEN_SKYSCRAPER_AD<=
 LASTN_PAGE<=
 <!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <style type="text/css">
 body, td {
 font-family: verdana, sans-serif;
@@ -7355,6 +7386,7 @@ LASTN_PAGE<=
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
  <head>
+  <meta http-equiv="X-UA-Compatible" content="IE=7">
   <style type="text/css">
    <!--
     BODY { line-height: 1.3; margin: 0; background-color: %%color:stronger_back%%; color: %%color:page_text%%; }
@@ -7501,6 +7533,7 @@ LASTN_OPEN_SKYSCRAPER_AD=>
 LASTN_PAGE<=
 <HTML>
  <HEAD>
+  <meta http-equiv="X-UA-Compatible" content="IE=7">
   <STYLE type="text/css">
    <!--
     td,body,p,div    {color:#000000; text-decoration:none; font-family:Verdana,Arial,Helvetica; font-size:12px}
@@ -7702,6 +7735,7 @@ LASTN_OPEN_SKYSCRAPER_AD=>
 LASTN_PAGE<=
 <HTML>
 <HEAD>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <TITLE>%%title%%</TITLE>
 <style type="text/css">
 <!--
@@ -7907,6 +7941,7 @@ LASTN_OPEN_SKYSCRAPER_AD=>
 LASTN_PAGE<=
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=7">
 <title>%%title%%</title>
 
 <style type="text/css">
@@ -8236,6 +8271,7 @@ LASTN_OPEN_SKYSCRAPER_AD<=
 LASTN_PAGE<=
 <HTML>
  <HEAD>
+  <meta http-equiv="X-UA-Compatible" content="IE=7">
   <STYLE>
    <!--
     body,td,p { color:%%color:page_text%%; font-family:Verdana, Arial, Helvetica, Sans-Serif; font-size:8pt }
@@ -8423,6 +8459,7 @@ LASTN_OPEN_SKYSCRAPER_AD<=
 LASTN_PAGE<=
 <html>
 <head>
+   <meta http-equiv="X-UA-Compatible" content="IE=7">
    <title>%%title%%</title>
 <style type="text/css">
 <!--
