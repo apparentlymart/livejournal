@@ -14,7 +14,7 @@ page<=
 {Fps}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="X-UA-Compatible" content="IE=IE7; IE=IE9" />
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9" />
 <link rel="home" title="<?_ml lynx.nav.home _ml?>" href="<?siteroot?>/" />
 <link rel="contents" title="<?_ml lynx.nav.sitemap _ml?>" href="<?siteroot?>/site/" />
 <link rel="help" title="<?_ml lynx.nav.help _ml?>" href="<?siteroot?>/support/" />
