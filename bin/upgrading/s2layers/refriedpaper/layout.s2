@@ -1400,7 +1400,7 @@ if ($*content_top_margin != "0") {
 var string title    = $this->title();
 var string subtitle = $.global_subtitle != "" and $.view != "friends" ? """<br><span class="descrip">$.global_subtitle</span>""" : "";
 """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">\n<html>\n
-    <head>\n<meta http-equiv="X-UA-Compatible" content="IE=IE7; IE=IE9" />\n""";
+    <head>\n<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9" />\n""";
 $this->print_head();
 $this->print_stylesheets();
 print safe """

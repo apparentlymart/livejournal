@@ -327,7 +327,7 @@ function Page::print()
 
     var string title = $this->title();
     """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n<html>\n
-       <head>\n<meta http-equiv="X-UA-Compatible" content="IE=IE7; IE=IE9" />\n""";
+       <head>\n<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9" />\n""";
 
     $this->print_head();
     $this->print_stylesheets();
