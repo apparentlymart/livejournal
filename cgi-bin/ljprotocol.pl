@@ -2876,7 +2876,7 @@ sub editfriends
             if ($sclient && !$currently_is_friend && !$currently_is_banned) {
                 ## delay event to accumulate users activity
                 require LJ::Event::BefriendedDelayed;
-                LJ::Event::BefriendedDelayed->new(
+                LJ::Event::BefriendedDelayed->send(
                                                     LJ::load_userid($friendid), ## to user
                                                     LJ::load_userid($userid)    ## from user
                                                     );
