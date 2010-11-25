@@ -74,7 +74,7 @@ sub load {
     $sth->execute($u->userid);
     my @actions = ();
     while (my $h = $sth->fetchrow_hashref){
-        push @actions => $h;
+        CORE::push @actions, $h;
     }
 
     return @actions;
