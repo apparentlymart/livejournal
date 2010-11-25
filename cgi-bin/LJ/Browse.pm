@@ -1057,7 +1057,7 @@ sub submit_community {
 
     my $c = delete $opts{comm} || undef;
     my $u = delete $opts{submitter} || undef;
-    my $caturl = delete $opts{caturl} || undef;
+    my $catid = delete $opts{catid} || undef;
     my $status = delete $opts{status} || 'P';
 
     # need a journal user object
@@ -1065,7 +1065,7 @@ sub submit_community {
     # need a user object for submitter
     croak "invalid user object[u]" unless LJ::isu($u);
     # need a category
-    my $cat = LJ::Browse->load_by_url("/browse" . $caturl) if (defined $caturl);
+    my $cat = LJ::Browse->load_by_id($catid) if (defined $catid);
     die "invalid category" unless $cat;
 
     return if ($class->_is_community_in_pending($c->userid, $cat->catid));

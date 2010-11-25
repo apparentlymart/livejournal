@@ -11,6 +11,59 @@ body<=
 
     my $ret;
 
+sub get_parent_path {
+    my $cat_path = shift;
+    my $c = shift;
+
+    return undef unless $c;
+
+    my $parent = $c->parent;
+
+    push @$cat_path, $c;
+
+    return 0 unless $parent;
+
+    return get_parent_path ($cat_path, $c->parent);
+}
+
+sub _build_tree {
+    my ($parent, $cats_ref, $selected_cat, $text, $i, $n) = @_;
+
+    $i ||= 0;
+
+    return $text unless $cats_ref;
+
+    my @categories = @$cats_ref;
+    @categories = grep { ($_->parent == $parent) } grep { $_ } @categories;
+
+    return $text unless scalar @categories;
+
+    my @path_ = ();
+    get_parent_path (\@path_, $selected_cat);
+    my %path = map { $_->catid => 1 } @path_;
+    my @sel_cat = grep { $path{$_->catid} } @categories;
+
+    my @caturls = map { { text => $_->{pretty_name}, value => $_->catid } } @categories;
+    @caturls = sort { $a->{text} cmp $b->{text} } @caturls;
+
+    $text .= LJ::html_select({
+                name => "catid$i\_$n",
+                selected => $sel_cat[0] ? $sel_cat[0]->catid : '' },
+                { text => $ML{'.add'},
+                value => '' },
+                @caturls
+    );
+    $text .= "&nbsp;" . LJ::html_submit('select_c', 'Select Category');
+    $text .= "<br/>";
+
+    if ($sel_cat[0]) {
+        my @children = $sel_cat[0]->children;
+        $text = _build_tree($sel_cat[0], \@children, $selected_cat, $text, ++$i, $n);
+    }
+
+    return $text;
+}
+
     # get remote
     my $remote = LJ::get_remote();
     unless ($remote) {
@@ -50,18 +103,25 @@ body<=
         return $ret;
     }
 
+    my @cat_ = ();
+    my @vert_ = ();
+
     my $limit = 2; # Max number of categories a community can appear in
-    my @caturl_;
+    my @catid_;
     my @catrem;
     # Get categories the community belongs to or is pending approval for
     my @listings = LJ::Browse->get_submitted_communities( comm => $c );
     $limit = @listings if (@listings > $limit);
 
     foreach my $i (1..$limit) {
-        push @caturl_, $POST{"caturl_$i"} if $POST{"caturl_$i"};
+        ## which category the user wants to add a community?
+        my @ids = sort { $b cmp $a } grep { $_ =~ /^catid\d+\_\Q$i\E$/ } keys %POST;
+        my $cat_id = $POST{$ids[0]};
+        push @catid_, $cat_id if $cat_id;
         push @catrem, $POST{"catremove_$i"} if $POST{"catremove_$i"};
+        push @cat_, $cat_id ? LJ::Browse->load_by_id ($cat_id) : undef;
+        push @vert_, $POST{"vert_id_$i"} ? LJ::Vertical->load_by_id ($POST{"vert_id_$i"}) : undef;
     }
-
 
     # saving a form submission
     if ($POST{'action:update'}) {
@@ -71,10 +131,10 @@ body<=
 
         my $response;
         # Handle submissions
-        foreach my $curl (@caturl_) {
+        foreach my $cid (@catid_) {
             LJ::Browse->submit_community( comm      => $c,
                                           submitter => $remote,
-                                          caturl    => $curl, );
+                                          catid     => $cid, );
             $response = "<span class='super notice'>$ML{'.listings.updated'}</span>";
         }
 
@@ -93,19 +153,13 @@ body<=
         $ret .= $response;
     }
 
-    # Get the full list of categories
-    my @categories = LJ::Browse->load_all;
-    # Don't include the top level categories and get the unique URI for each
-    my @caturls = map { $_->uri, $_->uri } grep { $_->parent } @categories;
-    @caturls = sort { $a cmp $b } @caturls;
-
     $ret .= "<form method='post' action='directory.bml?authas=$cname'>";
     $ret .= LJ::form_auth();
 
     $ret .= "<p>" . BML::ml('.update.listing', { 'user' => LJ::ljuser($c) });
     $ret .= "<table>";
     foreach my $i (1..$limit) {
-        $ret .= "<tr><td> $i.</td>";
+        $ret .= "<tr><td valign='top'> $i.</td>";
         my $j = $i - 1;
         if (@listings[$j]) {
             my $listing = @listings[$j];
@@ -126,14 +180,31 @@ body<=
                                      id => "catremove_$i",
                                      value => $listing->{pendid}, });
         } else {
-            $ret .= "<td colspan='2'>";
-            $ret .= LJ::html_select({
-                        name => "caturl_$i",
-                        selected => $caturl_[$i] },
-                        { text => $ML{'.add'},
-                        value => '' },
-                        @caturls
+            my @verticals = LJ::Vertical->load_all();
+            @verticals = map { { text => $_->{name}, value => $_->{vert_id} } } @verticals;
+
+            $ret .= "<td colspan='2'>".LJ::html_select({
+                        name => "vert_id_$i",
+                        selected => $POST{"vert_id_$i"},
+                        },
+                        { text => 'Select Vertical',
+                        value => '',},
+                        @verticals
                     );
+            $ret .= "&nbsp;\n";
+
+            $ret .= LJ::html_submit('select_v', 'Select Vertical') . "<br>";
+
+            if (LJ::did_post() && $vert_[$j]) {
+                my @children = $cat_[$j] ? $cat_[$j]->children : ();
+                # Get the full list of categories
+                my @categories = LJ::Browse->load_all($vert_[$j]);
+
+                $ret .= _build_tree (0, \@categories, $cat_[$j], undef, undef, $i);
+                if ($cat_[$j]) {
+                    $ret .= "<br/>Selected category: " . $cat_[$j]->display_name;
+                }
+            }
         }
         $ret .= "</td></tr>";
     }
