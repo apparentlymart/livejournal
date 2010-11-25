@@ -208,9 +208,7 @@ sub render_body {
             next if $count <= $skip || $count > $last;
 
             my $secondsold = $comm->timeupdate ? time() - $comm->timeupdate : undef;
-            my $userpic = $comm->userpic ?
-                $comm->userpic->imgtag_percentagesize(1) :
-                    LJ::run_hook('no_userpic_html', percentage => 1 );
+            my $userpic = $comm->userpic ? $comm->userpic->imgtag_percentagesize(1) : '';
 
             push @tmpl_communities,
                 {
