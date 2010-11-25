@@ -408,8 +408,8 @@ sub get_communities {
 
     return                                  # 6. return result
         map {$_->[1]}                       # 5. get a cargo from temporary containers
-            sort {$a->[0] cmp $b->[0]}      # 4. sort it by a sort-keys
-                map {[lc $_->username, $_]} # 3. create list of [ sort-key, cargo-to-sort ]
+            sort {$b->[0] cmp $a->[0]}      # 4. sort it by a sort-keys
+                map {[lc $_->timeupdate, $_]} # 3. create list of [ sort-key, cargo-to-sort ]
                     grep { $_ }             # 2. remove empties from it, we don't want to die() on $_->username
                         (values %$cusers);  # 1. get communities list
 }
