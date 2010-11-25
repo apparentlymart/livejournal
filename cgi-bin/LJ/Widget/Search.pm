@@ -6,7 +6,7 @@ use vars qw(%GET %POST);
 
 use Carp qw(croak);
 
-sub need_res { qw(js/jquery-ui-autocomplete.js js/widgets/search.js stc/widgets/widget-layout.css stc/widgets/search.css) }
+sub need_res { qw(stc/widgets/widget-layout.css stc/widgets/search.css) }
 
 sub render_body {
     my $class = shift;
