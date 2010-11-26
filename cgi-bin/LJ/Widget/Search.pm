@@ -91,11 +91,14 @@ EOF
 
         my $args = BML::get_query_string();
         $uri .= "?$args" if $args;
+        my $tags = $opts{'preview'}
+                ? [ map { { tag => $_ } } @{$opts{'preview'}} ]
+                : [ map { { tag => $_ } } split /\n/m, $stored_words ];
         $template->param (
             vertical_name   => $vertical->name,
             search_url      => $uri,
             view            => $opts{'view'},
-            tags            => [ map { { tag => $_ } } split /\n/m, $stored_words ],
+            tags            => $tags,
         );
 
         return $template->output;
