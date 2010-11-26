@@ -14,7 +14,7 @@ body<=
     return "You are not allowed to view this page"
         unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
 
-    $title = "Top Entries in communities";
+    $title = "Featured Posts";
     my $ret = "";
 
     my $vert_id = $POST{'vert_id'} ne '' ? $POST{'vert_id'} : undef;

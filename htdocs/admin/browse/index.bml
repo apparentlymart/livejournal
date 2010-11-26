@@ -22,7 +22,7 @@ body<=
     $ret .= "<li><a href='./edit_verticals.bml'>Edit Verticals</a></li>";
     $ret .= "<li><a href='./remove_verticals.bml'>Remove Verticals</a></li>";
     $ret .= "<li><a href='./recent_posts.bml'>Manage Recent Posts</a></li>";
-    $ret .= "<li><a href='./top_entries_vertical.bml'>Top Entries in communities</a></li>";
+    $ret .= "<li><a href='./top_entries_vertical.bml'>Featured Posts</a></li>";
     $ret .= "<li><a href='./featured_communities.bml'>Featured Communities</a></li>";
     $ret .= "<li><a href='./search_tags.bml'>Editing Search Tags</a></li>";
     $ret .= "</ul>";
