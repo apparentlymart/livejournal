@@ -233,13 +233,14 @@ sub render_body {
             $post_count++;
             next if $post_count <= $post_skip || $post_count > $post_last;
 
+            my $secondsold = $entry->logtime_unix ? time() - $entry->logtime_unix : undef;
             my $poster = $entry->poster;
             my $userpic = $entry->userpic;
             my @tags = $entry->tags;
             push @tmpl_posts, {
                 subject         => $entry->subject_text,
                 userpic         => $userpic ? $userpic->url : '',
-                posted_ago      => LJ::TimeUtil->ago_text($entry->logtime_unix),
+                posted_ago      => LJ::TimeUtil->ago_text($secondsold),
                 poster          => $poster ? LJ::ljuser($poster) : '?',
                 tags            => scalar @tags ? [ map { { tag => $_ } } @tags ] : '',
                 mood            => $entry->prop('current_mood') || LJ::mood_name($entry->prop('current_moodid')) || '',
