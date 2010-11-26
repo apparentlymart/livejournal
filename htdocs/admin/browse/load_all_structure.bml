@@ -111,11 +111,11 @@ body<=
 
     my @verticals = LJ::Vertical->load_all();
 
-    $ret .= "<form method='POST' enctype='multipart/form-data'>\n";
+    $ret .= "<form method='POST' enctype='multipart/form-data' onsubmit=' this.load.disabled=true; '>\n";
     $ret .= LJ::form_auth();
 
-    $ret .= "<p><input type='file' size='50' name='all_structure'></p>";
-    $ret .= "<p><br/><input type='submit' name='load' onclick='this.disabled=true;' value='Load'></p>";
+    $ret .= "<p><input type='file' name='all_structure'></p>";
+    $ret .= "<p><br/><input type='submit' name='load' onclick='this.parentNode.insertBefore( document.createTextNode(\" Loading...\"), this.nextSibling);' value='Yes, I want to load'></p>";
 
     $ret .= "</form>";
     $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
