@@ -223,7 +223,7 @@ sub render_body {
                 };
         }
     } else {
-        my @posts = LJ::Browse->search_posts ( comms => [ map { $_->{userid} } @comms ], page_size => $post_page_size, search_str => $search_str );
+        my @posts = LJ::Browse->search_posts ( comms => [ map { $_->{userid} } @comms ], page_size => 300, search_str => $search_str );
 
         foreach my $entry (@posts) {
             next unless $entry;
