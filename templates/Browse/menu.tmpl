@@ -1,7 +1,7 @@
 <ul class="m-section">
 	<TMPL_LOOP categories>
 		<tmpl_if is_vertical_view>
-		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF>"><a href="<tmpl_var url>"><i class="m-switch"><i class="t"></i><i class="b"></i></i><TMPL_VAR name></a>
+		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF>"><a href="<tmpl_var url>?view=<tmpl_var view>"><i class="m-switch"><i class="t"></i><i class="b"></i></i><TMPL_VAR name></a>
 		<tmpl_else>
 		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF>"><span><i class="m-switch"><i class="t"></i><i class="b"></i></i><TMPL_VAR name></span>
 		</tmpl_if>
@@ -12,22 +12,22 @@
 							<span>
 								<i class="m-switch"><i class="t"></i><i class="b"></i></i>
 								<TMPL_IF is_current>
-									<strong><a href="<tmpl_var url>"><TMPL_VAR name></a></strong>
+									<strong><a href="<tmpl_var url>?view=<tmpl_var view>"><TMPL_VAR name></a></strong>
 								<TMPL_ELSE>
-									<a href="<tmpl_var url>"><TMPL_VAR name></a>
+									<a href="<tmpl_var url>?view=<tmpl_var view>"><TMPL_VAR name></a>
 								</TMPL_IF>
 							</span>
 						<TMPL_ELSE>
 							<TMPL_IF is_current>
 								<strong><TMPL_VAR name></strong>
 							<TMPL_ELSE>
-								<a href="<tmpl_var url>"><TMPL_VAR name></a>
+								<a href="<tmpl_var url>?view=<tmpl_var view>"><TMPL_VAR name></a>
 							</TMPL_IF>
 						</TMPL_IF>
 						<TMPL_IF level2>
 							<ul class="m-section-list">
 								<TMPL_LOOP level2>
-									<li><tmpl_if is_current><strong><TMPL_VAR name></strong><tmpl_else><a href="<tmpl_var url>"><TMPL_VAR name></a></tmpl_if></li>
+									<li><tmpl_if is_current><strong><TMPL_VAR name></strong><tmpl_else><a href="<tmpl_var url>?view=<tmpl_var view>"><TMPL_VAR name></a></tmpl_if></li>
 								</TMPL_LOOP>
 							</ul>
 						</TMPL_IF>
