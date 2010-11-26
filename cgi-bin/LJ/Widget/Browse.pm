@@ -209,6 +209,8 @@ sub render_body {
 
             my $secondsold = $comm->timeupdate ? time() - $comm->timeupdate : undef;
             my $userpic = $comm->userpic ? $comm->userpic->imgtag_percentagesize(1) : '';
+            my $descr = $comm->prop('comm_theme') || '';
+            my $descr_trimmed = LJ::html_trim($descr, 50);
 
             push @tmpl_communities,
                 {
@@ -218,7 +220,8 @@ sub render_body {
                     journal_user        => $comm->{user},
                     journal_base        => $comm->journal_base(),
                     journal_title       => $comm->{'name'} || '',
-                    journal_subtitle    => $comm->prop('comm_theme') || '',
+                    journal_subtitle    => $descr_trimmed,
+                    is_subtitle_trimmed => $descr ne $descr_trimmed ? 1 : 0,
                     updated_ago         => LJ::TimeUtil->ago_text($secondsold),
                 };
         }
