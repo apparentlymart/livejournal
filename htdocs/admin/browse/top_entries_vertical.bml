@@ -66,8 +66,9 @@ body<=
 <table>
     <tr><th colspan="3" style='padding:5px;'>Enter URL for adding featured post</th></tr>
     <tr>
-        <td style='padding:5px;'>URL:</td><td colspan="2"><input type="text" name="url" style='width:288px;'></td>
-        <td colspan="2" style='padding:5px;'><input type="submit" name="add" value="Add"></td>
+        <td style='padding:5px;width:100px;'>URL:</td>
+	<td style='padding:5px;'><input type="text" name="url" style='width:300px;'></td>
+        <td style='padding:5px;'><input type="submit" name="add" value="Add"></td>
     </tr>
 </table>
 </form>
@@ -75,13 +76,13 @@ body<=
 <input type="hidden" name="vert_id" value="$vert_id">
 <table>
     <tr>
-        <td style='padding:5px;'>Number of shown entries:</td><td style='padding:5px;' colspan='2'><input type="text" size="3" name="show_entries" value="$show_entries"></td>
+        <td style='padding:5px;width:365px;'>Number of shown entries:</td><td style='padding:5px;' colspan='2'><input type="text" size="3" name="show_entries" style="width:35px;" value="$show_entries"></td>
     </tr>
     <tr>
-        <td style='padding:5px;'>Number of entries, that can not be deleted:</td><td style='padding:5px;' colspan='2'><input type="text" size="3" name="not_deleted" value="$not_deleted"> </td>
+        <td style='padding:5px;width:365px;'>Number of entries, that can not be deleted:</td><td style='padding:5px;' colspan='2'><input type="text" size="3" name="not_deleted" style="width:35px;" value="$not_deleted"> </td>
     </tr>
     <tr>
-        <td style='padding:5px;'>Remove post from widget after:</td><td style='padding:5px;'><input type="text" size="3" name="remove_after" value="$remove_after"></td><td style='padding:5px;'> hours</td>
+        <td style='padding:5px;width:365px;'>Remove post from widget after:</td><td style='padding:5px;'><input type="text" size="3" name="remove_after" style="width:35px;" value="$remove_after"></td><td style='padding:5px;'> hours</td>
     </tr>
     <tr>
     	<td style='padding:5px;' colspan='3'><input type="submit" name="store" value="Store"></td>
