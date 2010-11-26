@@ -18,7 +18,7 @@
 						<p class="b-posts-head">
 							<span class="ljuser"><a href="/community/<tmpl_var community>/profile"><img width="16" height="16" alt="[info]" src="/img/community.gif" class="ContextualPopup"/></a><a href="/community/<tmpl_var community>/"><b><tmpl_var community></b></a></span>
 						</p>
-						<p class="b-posts-data"><tmpl_var bio></p>
+						<p class="b-posts-data"><tmpl_var bio><tmpl_if is_subtitle_trimmed>&hellip;</tmpl_if></p>
 						<ul class="b-catalogue-item-action">
 							<li><form action="/community/join.bml" method="GET"><input type="hidden" name="comm" value="<tmpl_var username>"><input type="submit" value="<TMPL_VAR expr="ml('widget.browse.community.join')">" /></form></li>
 							<li><form action="/friends/add.bml"><input type="hidden" name="user" value="<tmpl_var username>"><input type="submit" value="<TMPL_VAR expr="ml('widget.browse.community.watch')">" /></form></li>
