@@ -558,7 +558,7 @@ body<=
             my $statuses = LJ::SMS::API::RU::Phone->get_cur_phone_statuses($phone);
             $status = 'already_use' if grep { $_->[0] eq 'verified' && $_->[1] != $u->{'userid'} } @$statuses;
 			$ret .= "smsNotifyInitialState = \"".$status."\";";
-			$ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{supported_DEF}}) . "];";
+			$ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{provider_by_def}}) . "];";
 			$ret .= "var smsNotifyDict = {";
 			$ret .= "";
 			$ret .= "sendsmsbut : \"$ML{'.section.textmsg.button'}\",";
