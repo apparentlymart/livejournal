@@ -239,8 +239,11 @@ sub render_body {
             my @tags = $entry->tags;
             my $event = $entry->event_html;
             my ($is_removed_video) = $event =~ s/<iframe.*?>(.*)<\/iframe>/$1/;
+            my $subject = $entry->subject_text;
+            my $trimmed_subj = LJ::html_trim ($subject, 60);
             push @tmpl_posts, {
-                subject         => $entry->subject_text,
+                subject         => $trimmed_subj,
+                is_subject_trimmed => $subject ne $trimmed_subj ? 1 : 0,
                 userpic         => $userpic ? $userpic->url : '',
                 posted_ago      => LJ::TimeUtil->ago_text($secondsold),
                 poster          => $poster ? LJ::ljuser($poster) : '?',
