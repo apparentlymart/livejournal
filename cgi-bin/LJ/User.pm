@@ -5653,6 +5653,117 @@ sub subscriptions_count {
     return $count;
 }
 
+sub reset_cache {
+    my $u = shift;
+
+    my $dbcm = LJ::get_cluster_master($u);
+    return 0 unless $dbcm;
+
+    my @keys = qw(
+        bio:#
+        cctry_uid:#
+        commsettings:#
+        dayct:#
+        fgrp:#
+        friendofs:#
+        friendofs2:#
+        friends:#
+        friends2:#
+        ident:#
+        inbox:newct:#
+        intids:#
+        invites:#
+        jablastseen:#
+        jabuser:#
+        kws:#
+        lastcomm:#
+        linkobj:#
+        log2ct:#
+        log2lt:#
+        logtag:#
+        mcrate:#
+        memct:#
+        memkwcnt:#
+        memkwid:#
+        msn:mutual_friends_wlids:uid=#
+        prtcfg:#
+        pw:#
+        rate:tracked:#
+        rcntalk:#
+        s1overr:#
+        s1uc:#
+        saui:#
+        subscriptions_count:#
+        supportpointsum:#
+        synd:#
+        tags2:#
+        talk2ct:#
+        talkleftct:#
+        tc:#
+        timeactive:#
+        timezone_guess:#
+        tu:#
+        txtmsgsecurity:#
+        uid2uniqs:#
+        upiccom:#
+        upicinf:#
+        upicquota:#
+        upicurl:#
+        userid:#
+    );
+
+    foreach my $key (@keys) {
+        $key =~ s/#/$u->{userid}/g;
+        LJ::MemCache::delete([ $u->{userid}, $key ]);
+    }
+
+    my $bio = $dbcm->selectrow_array('SELECT bio FROM userbio WHERE userid = ?', undef, $u->{userid});
+    if ($bio =~ /\S/ && $u->{has_bio} ne 'Y') {
+        LJ::update_user($u, { has_bio => 'Y' });
+    }
+
+    $u->do("UPDATE s1usercache SET override_stor = NULL WHERE userid = ?", undef, $u->{userid});
+
+    my $dbh = LJ::get_db_writer();
+    my $themeids = $dbh->selectcol_arrayref('SELECT moodthemeid FROM moodthemes WHERE ownerid = ?', undef, $u->{userid});
+    if ($themeids && @$themeids) {
+        foreach my $themeid (@$themeids) {
+            LJ::MemCache::delete([ $themeid, "moodthemedata:$themeid" ]);
+        }
+    }
+
+    my $picids = $dbcm->selectcol_arrayref('SELECT picid FROM userpic2 WHERE userid = ?', undef, $u->{userid});
+    if ($picids && @$picids) {
+        foreach my $picid (@$picids) {
+            LJ::MemCache::delete([ $picid, "mogp.up.$picid" ]);
+            LJ::MemCache::delete([ $picid, "mogp.up.$picid.alt" ]); # alt-zone (only zone at this time)
+        }
+    }
+
+    my $s2ids = $dbh->selectcol_arrayref('SELECT styleid FROM s2styles WHERE userid = ?', undef, $u->{userid});
+    if ($s2ids && @$s2ids) {
+        foreach my $s2id (@$s2ids) {
+            LJ::MemCache::delete([ $s2id, "s2s:$s2id" ]);
+            LJ::MemCache::delete([ $s2id, "s2sl:$s2id" ]);
+        }
+    }
+
+    my $s2lids = $dbcm->selectcol_arrayref('SELECT s2lid FROM s2stylelayers2 WHERE userid = ?', undef, $u->{userid});
+    if ($s2lids) {
+        # put it in a hash to remove duplicates so we don't purge one layer twice
+        my %s2lids = ( map { $_ => 1 } grep { $_ } @$s2lids );
+        if (keys %s2lids) {
+            foreach my $s2lid (keys %s2lids) {
+                LJ::MemCache::delete([ $s2lid, "s2lo:$s2lid" ]);
+                LJ::MemCache::delete([ $s2lid, "s2c:$s2lid" ]);
+            }
+        }
+    }
+
+    return 1;
+}
+
+
 package LJ;
 
 use Carp;
