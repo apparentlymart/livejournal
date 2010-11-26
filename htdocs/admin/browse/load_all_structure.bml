@@ -115,7 +115,7 @@ body<=
     $ret .= LJ::form_auth();
 
     $ret .= "<p><input type='file' name='all_structure'></p>";
-    $ret .= "<p><br/><input type='submit' name='load' onclick='this.parentNode.insertBefore( document.createTextNode(\" Loading...\"), this.nextSibling);' value='Yes, I want to load'></p>";
+    $ret .= "<p><br/><input type='submit' name='load' onclick='this.parentNode.insertBefore( document.createTextNode(\" Loading...\"), this.nextSibling);' value='Load'></p>";
 
     $ret .= "</form>";
     $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
