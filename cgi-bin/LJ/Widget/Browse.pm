@@ -237,6 +237,8 @@ sub render_body {
             my $poster = $entry->poster;
             my $userpic = $entry->userpic;
             my @tags = $entry->tags;
+            my $event = $entry->event_html;
+            my ($is_removed_video) = $event =~ s/<iframe.*?>(.*)<\/iframe>/$1/;
             push @tmpl_posts, {
                 subject         => $entry->subject_text,
                 userpic         => $userpic ? $userpic->url : '',
@@ -246,10 +248,10 @@ sub render_body {
                 mood            => $entry->prop('current_mood') || LJ::mood_name($entry->prop('current_moodid')) || '',
                 music           => $entry->prop('current_music'),
                 location        => $entry->prop('current_location'),
-                post_text       => $entry->event_html,
+                post_text       => LJ::html_trim ($event, 800),
                 url_to_post     => $entry->url,
                 comments_count  => $entry->reply_count,
-                is_need_more    => bytes::length($entry->event_text) > 800 ? 1 : 0,
+                is_need_more    => $is_removed_video || bytes::length($entry->event_text) > 800 ? 1 : 0,
             };
         }
     }
