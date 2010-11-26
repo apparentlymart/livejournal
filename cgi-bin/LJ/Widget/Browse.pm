@@ -338,12 +338,13 @@ sub render_body {
         foreach my $post (@$posts) {
             my $entry = LJ::Entry->new ($post->{journalid}, jitemid => $post->{jitemid});
             my $userpic = $entry->userpic;
+            my $poster = $entry->poster;
             push @top_posts, {
                 subject         => $entry->subject_text,
                 userpic         => $userpic ? $userpic->url : '',
                 updated_ago     => LJ::TimeUtil->ago_text($entry->logtime_unix),
                 comments_count  => $entry->reply_count,
-                ljuser          => $entry->journal->ljuser_display,
+                ljuser          => $poster ? LJ::ljuser($poster) : '?',
                 url_to_post     => $entry->url,
             };
         }
