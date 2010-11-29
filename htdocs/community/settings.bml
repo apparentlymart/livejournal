@@ -154,8 +154,8 @@ body<=
 
             my $moderated = ($POST{moderated} =~ /^[NAF]$/) ? $POST{moderated} : 'F';
 
-            LJ::set_userprop($cu, 'nonmember_posting', $nonmember_posting);
-            LJ::set_userprop($cu, 'moderated', $moderated);
+            $cu->set_prop({ 'nonmember_posting' => $nonmember_posting,
+                            'moderated'         => $moderated, });
             if ($moderated eq 'F') {
                 my $userlist = LJ::SpamFilter->get_only_user_list($cu);
                 LJ::SpamFilter->set_default_user_list($cu) unless scalar @$userlist;

@@ -261,7 +261,10 @@ sub basic_rename {
 
         if ($u->{journaltype} ne 'P' || $opts->{'opt_redir'}) {
             LJ::update_user($u_old_username, { raw => "journaltype='R', statusvis='R', statusvisdate=NOW()" });
-            LJ::set_userprop($dbh, $u_old_username, "renamedto", $to); # 'from' will point to 'to'
+
+            # 'from' will point to 'to':
+            $u_old_username->set_prop( 'renamedto' => $to );
+
             if ($u->prop('renamedto')) {
                 $u->set_prop('renamedto', undef) if $u->prop('renamedto') eq $from; # safeness against circular redirection
             }

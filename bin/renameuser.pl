@@ -96,10 +96,7 @@ unless (LJ::User::Rename::basic_rename($dummy_username, $to, $opts)) {
     LJ::load_user_props($fromu, 'renamedto');
     if ($fromu->{renamedto} && $fromu->{renamedto} ne $to) {
         print "Setting redirection: $from => $to\n";
-        unless (LJ::set_userprop($fromu, 'renamedto' => $to)) {
-            print "Error setting 'renamedto' userprop for $from\n";
-            exit 1;
-        }
+        $from_u->set_prop( 'renamedto' => $to );
     }
 
     # if the $to user had redirection, they shouldn't anymore

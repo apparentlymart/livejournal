@@ -446,8 +446,9 @@
         LJ::load_user_props($u, qw(url urlname));
         foreach my $prop (qw(url urlname)) {
             unless(LJ::is_utf8($u->{$prop})) {
-                convert(\$u->{$prop}, $encid);
-                LJ::set_userprop($u->{'userid'}, $prop, $u->{$prop});
+                my $newval = $u->{$prop};
+                convert(\$newval, $encid);
+                $u->set_prop( $prop => $newval );
                 $message .= "<?p Converted userprop: $prop . p?>";
             }
         }

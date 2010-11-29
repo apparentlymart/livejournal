@@ -1655,7 +1655,7 @@ sub postevent
         $set_userprop{"newesteventtime"} = $eventtime
             if $posterid == $ownerid and not $req->{'props'}->{'opt_backdated'} and not $time_was_faked;
 
-        LJ::set_userprop($u, \%set_userprop);
+        $u->set_prop(\%set_userprop);
     }
 
     # end duplicate locking section
@@ -1988,7 +1988,7 @@ sub editevent
         if ($u->{'userid'} == $uowner->{'userid'}) {
             LJ::load_user_props($u, { use_master => 1 }, "newesteventtime");
             if ($u->{'newesteventtime'} eq $oldevent->{'eventtime'}) {
-                LJ::set_userprop($u, "newesteventtime", undef);
+                $u->clear_prop('newesteventtime');
             }
         }
 
@@ -2012,7 +2012,7 @@ sub editevent
 
         # clear their duplicate protection, so they can later repost
         # what they just deleted.  (or something... probably rare.)
-        LJ::set_userprop($poster, "dupsig_post", undef) if $poster;
+        $poster->clear_prop('dupsig_post') if $poster;
 
         my $res = {
             'itemid' => $itemid,
@@ -2114,11 +2114,11 @@ sub editevent
             if (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) {
                 # if they set the backdated flag, then we no longer know
                 # the newesteventtime.
-                LJ::set_userprop($u, "newesteventtime", undef);
+                $u->clear_prop('newesteventtime');
             } elsif ($eventtime ne $oldevent->{eventtime}) {
                 # otherwise, if they changed time on this event,
                 # the newesteventtime is this event's new time.
-                LJ::set_userprop($u, "newesteventtime", $eventtime);
+                $u->set_prop( 'newesteventtime' => $eventtime );
             }
         }
 
@@ -2418,9 +2418,9 @@ sub getevents
                 # their client is busted.  (doesn't understand syncitems semantics)
                 return fail($err,406);
             }
-            LJ::set_userprop($u, $pname,
-                             join('/', map { $_, $reqs{$_} }
-                                  sort { $b <=> $a } keys %reqs));
+            $u->set_prop( $pname => join( '/', map { $_ => $reqs{$_} }
+                                               sort { $b <=> $a }
+                                               keys %reqs ) );
         }
 
         my %item;

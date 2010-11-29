@@ -818,12 +818,8 @@ body<=
                 if $u->gizmo_account ne $POST{'gizmo'};
 
             # set userprops
-            foreach my $uprop (@uprops) {
-                my $eff_val = $POST{$uprop};   # effective value, since 0 isn't stored
-                $eff_val = "" unless $eff_val;
-                my $mem_only = $eff_val eq $u->{$uprop};
-                LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
-            }
+            my %props_update = map { $_ => $POST{$_} } @uprops;
+            $u->set_prop(\%props_update);
 
             LJ::run_hook('save_extra_profile_fields', $u);
 

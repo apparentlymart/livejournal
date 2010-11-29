@@ -412,12 +412,12 @@ body<=
             if ($POST{$prop} && $POST{$prop} ne 'default') {
                 $POST{$prop} = undef if $prop eq 'emailpost_gallery' &&
                                         $POST{$prop} eq 'LJ_emailpost';
-                LJ::set_userprop($u, $prop, $POST{$prop});
+                $u->set_prop( $prop => $POST{$prop} );
             } else {
-                LJ::set_userprop($u, $prop, undef);
+                $u->clear_prop($prop);
             }
         }
-        LJ::set_userprop($u, "emailpost_pin", $pin);
+        $u->set_prop( 'emailpost_pin' => $pin );
 
         my $ret;
         $ret .= "<?h1 $ML{'.success.header'} h1?>";

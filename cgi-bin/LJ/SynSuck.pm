@@ -99,7 +99,7 @@ sub get_content {
         # same request
         delay($userid, 3*60, "parseerror");
 
-        LJ::set_userprop($userid, "rssparseerror", $res->status_line());
+        $syn_u->set_prop( 'rssparseerror' => $res->status_line );
         return;
     }
 
@@ -118,6 +118,8 @@ sub process_content {
     my ($res, $content) = @$resp;
     my ($user, $userid, $synurl, $lastmod, $etag, $readers) =
         map { $urow->{$_} } qw(user userid synurl lastmod etag numreaders);
+
+    my $su = LJ::load_userid($userid);
 
     my $dbh = LJ::get_db_writer();
 
@@ -157,7 +159,7 @@ sub process_content {
         delay($userid, 3*60, "parseerror");
         $error =~ s! at /.*!!;
         $error =~ s/^\n//; # cleanup of newline at the beggining of the line
-        LJ::set_userprop($userid, "rssparseerror", $error);
+        $su->set_prop( 'rssparseerror' => $error );
         return;
     }
 
@@ -173,8 +175,6 @@ sub process_content {
 
     # delete existing items older than the age which can show on a
     # friends view.
-    my $su = LJ::load_userid($userid);
-
     my $udbh = LJ::get_cluster_master($su);
     unless ($udbh) {
         return delay($userid, 15, "nodb");
@@ -404,12 +404,12 @@ sub process_content {
         if (defined $title && $title ne $su->{'name'}) {
             $title =~ s/[\n\r]//g;
             LJ::update_user($su, { name => $title });
-            LJ::set_userprop($su, "urlname", $title);
+            $su->set_prop( 'urlname' => $title );
         }
 
         my $link = $feed->{'link'};
         if ($link && $link ne $su->{'url'}) {
-            LJ::set_userprop($su, "url", $link);
+            $su->set_prop( 'url' => $link );
         }
 
         my $bio = $su->bio;
