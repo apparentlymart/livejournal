@@ -18,6 +18,7 @@
             <form action="<tmpl_var action>" method="post">
                 <TMPL_INCLUDE expr="sprintf('templates/Identity/Login-%s.tmpl', type)">
                 <input type="hidden" name="type" value="<TMPL_VAR type>" />
+                <input type="hidden" name="returnto" value="<TMPL_VAR returnto>" />
             </form>
         </li>
     </TMPL_LOOP>

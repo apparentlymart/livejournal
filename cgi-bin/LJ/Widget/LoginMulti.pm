@@ -69,6 +69,7 @@ sub render_body {
     $template->param(
         'types' => \@types,
         'current_type' => $current_type,
+        'returnto' => $thispage,
     );
     
     ## well cooked widget is here
@@ -129,12 +130,21 @@ sub do_login {
     } else {
         my $idclass = LJ::Identity->find_class($idtype);
         if ($idclass && $idclass->enabled) {
+            ## Where to go?
+            my $returnto = LJ::Request->post_param("returnto") || $thispage;
+            $returnto = "https://www.livejournal.com/login.bml"
+                unless $returnto =~ m!^https?://\Q$LJ::DOMAIN_WEB\E/!;
+
             $idclass->attempt_login($errors,
+                'returl' => $returnto,
                 'returl_fail' => "$thispage?type=$idtype",
                 'forwhat' => 'login',
             );
 
             return 1 if LJ::Request->redirected;
+
+            LJ::Request->redirect($returnto);
+
         } else {
             push @$errors, 'unknown identity type';
         }
