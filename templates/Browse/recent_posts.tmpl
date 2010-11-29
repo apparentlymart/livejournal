@@ -21,7 +21,7 @@
 			<tmpl_if location><dd class="b-catalogue-item-location">Location: <tmpl_var location></dd></tmpl_if>
 		</dl>
 		<div class="b-catalogue-item-desc">
-            <img src="<tmpl_var photo_for_post>">
+			<tmpl_if photo_for_post><img src="<tmpl_var photo_for_post>" alt="<tmpl_var subject>"></tmpl_if>
 			<tmpl_var post_text>
 			<tmpl_if is_need_more>(<a href="<tmpl_var url_to_post>">Read more in original post</a>)</tmpl_if>
 		</div>
