@@ -17,7 +17,7 @@
 					<dd class="b-catalogue-item-ago"><TMPL_VAR updated_ago></dd>
 					<dd class="b-catalogue-item-desc">
 						<h4><TMPL_VAR journal_title></h4>
-						<p><TMPL_VAR journal_subtitle></p>
+						<p><TMPL_VAR journal_subtitle><tmpl_if is_subtitle_trimmed>&hellip;</tmpl_if></p>
 						<ul class="b-catalogue-item-action">
 							<li><form action="/community/join.bml" method="GET"><input type="hidden" name="comm" value="<TMPL_VAR journal_user>"><input type="submit" value="<TMPL_VAR expr="ml('widget.browse.community.join')">" /></form></li>
 							<li><form action="/friends/add.bml"><input type="hidden" name="user" value="<TMPL_VAR journal_user>"><input type="submit" value="<TMPL_VAR expr="ml('widget.browse.community.watch')">" /></form></li>
