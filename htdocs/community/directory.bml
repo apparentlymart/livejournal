@@ -47,7 +47,7 @@ sub _build_tree {
     @caturls = sort { $a->{text} cmp $b->{text} } @caturls;
 
     $text .= "<tr><td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'>Category</td>";
-    $text .= "<td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>" . LJ::html_select({
+    $text .= "<td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;width:100%;'>" . LJ::html_select({
                 name => "catid$i\_$n",
 		style => "width:100%;",
                 selected => $sel_cat[0] ? $sel_cat[0]->catid : '' },
@@ -190,7 +190,7 @@ sub _build_tree {
                 $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->Category</td>";
                 @verticals = map { { text => $_->{name}, value => $_->{vert_id} } } @verticals;
 
-                $ret .= "<td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>".LJ::html_select({
+                $ret .= "<td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;width:100%;'>".LJ::html_select({
                             name => "vert_id_$i",
 			    style => "width:100%;",
                             selected => $vert_[$j] ? $vert_[$j]->vert_id : 0,
