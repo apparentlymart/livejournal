@@ -26,6 +26,7 @@ use URI qw//;
 use LJ::JSON;
 use HTTP::Date qw(str2time);
 use LJ::TimeUtil;
+use LJ::User::PropStorage;
 
 use Class::Autouse qw(
                       URI
@@ -1879,10 +1880,72 @@ sub country {
 # sets prop, and also updates $u's cached version
 sub set_prop {
     my ($u, $prop, $value) = @_;
-    return 0 unless LJ::set_userprop($u, $prop, $value);  # FIXME: use exceptions
-    $u->{$prop} = $value;
 
-    LJ::run_hooks("props_changed", $u, {$prop => $value});
+    my $propmap = ref $prop ? $prop : { $prop => $value };
+
+    # filter out props that do not change
+    foreach my $propname (keys %$propmap) {
+        # it's not loaded, so let's not check it
+        next unless exists $u->{$propname};
+
+        if ( (!$propmap->{$propname} && !$u->{$propname})
+          || $propmap->{$propname} eq $u->{$propname} )
+        {
+            delete $propmap->{$propname};
+        }
+    }
+
+    my @props_affected = keys %$propmap;
+    my $groups = LJ::User::PropStorage->get_handler_multi(\@props_affected);
+    my $memcache_available = @LJ::MEMCACHE_SERVERS;
+
+    my $memc_expire = time + 3600 * 24;
+
+    foreach my $handler (keys %$groups) {
+        my $propnames_handled = $groups->{$handler};
+        my %propmap_handled   = map { $_ => $propmap->{$_} }
+                                @$propnames_handled;
+
+        # first, actually save stuff to the database;
+        # then, delete it from memcache, depending on the memcache
+        # policy of the handler
+        $handler->set_props( $u, \%propmap_handled );
+
+        # if there is no memcache, or if the handler doesn't wish to use
+        # memcache, we don't need to deal with it, yay
+        if ( !$memcache_available || !defined $handler->use_memcache )
+        {
+            next;
+        }
+
+        # now let's find out what we're going to do with memcache
+        my $memcache_policy = $handler->use_memcache;
+
+        if ( $memcache_policy eq 'lite' ) {
+            # the handler loads everything from the corresponding
+            # table and uses only one memcache key to cache that
+
+            my $memkey = $handler->memcache_key($u);
+            LJ::MemCache::delete([ $u->userid, $memkey ]);
+        } elsif ( $memcache_policy eq 'blob' ) {
+            # the handler uses one memcache key for each prop,
+            # so let's delete them all
+
+            foreach my $propname (@$propnames_handled) {
+                my $memkey = $handler->memcache_key( $u, $propname );
+                LJ::MemCache::delete([ $u->userid, $memkey ]);
+            }
+        }
+    }
+
+    # now, actually reflect that we've changed the props in the
+    # user object
+    foreach my $propname (keys %$propmap) {
+        $u->{$propname} = $propmap->{$propname};
+    }
+
+    # and run the hooks, too
+    LJ::run_hooks( 'props_changed', $u, $propmap );
 
     return $value;
 }
@@ -5631,7 +5694,7 @@ sub set_custom_usericon {
     my ($u, $url) = @_;
     my $uid = $u->id;
 
-    LJ::set_userprop($u, 'custom_usericon', $url);
+    $u->set_prop( 'custom_usericon' => $url );
 }
 
 sub _subscriptions_count {
@@ -5651,6 +5714,18 @@ sub subscriptions_count {
     my $count = $u->_subscriptions_count;
     LJ::MemCache::set('subscriptions_count:'.$u->id, $count);
     return $count;
+}
+
+sub packed_props {
+    my ($u) = @_;
+    return $u->{'packed_props'};
+}
+
+sub set_packed_props {
+    my ($u, $newprops) = @_;
+
+    LJ::update_user($u, { 'packed_props' => $newprops });
+    $u->{'packed_props'} = 1;
 }
 
 sub reset_cache {
@@ -5912,8 +5987,7 @@ sub wipe_major_memcache
 # des-opts: hashref of opts.  set key 'cache' to use memcache.
 # des-propname: the name of a property from the [dbtable[userproplist]] table.
 # </LJFUNC>
-sub load_user_props
-{
+sub load_user_props {
     &nodb;
 
     my $u = shift;
@@ -5923,155 +5997,91 @@ sub load_user_props
     my $opts = ref $_[0] ? shift : {};
     my (@props) = @_;
 
-    my ($sql, $sth);
-    LJ::load_props("user");
+    my $extend_user_object = sub {
+        my ($propmap) = @_;
 
-    ## user reference
-    my $uid = $u->{'userid'}+0;
-    $uid = LJ::get_userid($u->{'user'}) unless $uid;
-
-    my $mem = {};
-    my $use_master = 0;
-    my $used_slave = 0;  # set later if we ended up using a slave
-
-    if (@LJ::MEMCACHE_SERVERS) {
-        my @keys;
-        foreach (@props) {
-            next if exists $u->{$_};
-            my $p = LJ::get_prop("user", $_);
-            die "Invalid userprop $_ passed to LJ::load_user_props." unless $p;
-            push @keys, [$uid,"uprop:$uid:$p->{'id'}"];
+        foreach my $propname ( keys %$propmap ) {
+            $u->{$propname} = $propmap->{$propname};
         }
-        $mem = LJ::MemCache::get_multi(@keys) || {};
-        $use_master = 1;
-    }
+    };
 
-    $use_master = 1 if $opts->{'use_master'};
+    my $groups = LJ::User::PropStorage->get_handler_multi(\@props);
+    my $memcache_available = @LJ::MEMCACHE_SERVERS;
+    my $use_master = $memcache_available || $opts->{'use_master'};
 
-    my @needwrite;  # [propid, propname] entries we need to save to memcache later
+    my $memc_expire = time() + 3600 * 24;
 
-    my %loadfrom;
-    my %multihomed; # ( $propid => 0/1 ) # 0 if we haven't loaded it, 1 if we have
-    unless (@props) {
-        # case 1: load all props for a given user.
-        # multihomed props are stored on userprop and userproplite2, but since they
-        # should always be in sync, it doesn't matter which gets loaded first, the
-        # net results should be the same.  see doc/server/lj.int.multihomed_userprops.html
-        # for more information.
-        $loadfrom{'userprop'} = 1;
-        $loadfrom{'userproplite'} = 1;
-        $loadfrom{'userproplite2'} = 1;
-        $loadfrom{'userpropblob'} = 1;
-    } else {
-        # case 2: load only certain things
-        foreach (@props) {
-            next if exists $u->{$_};
-            my $p = LJ::get_prop("user", $_);
-            die "Invalid userprop $_ passed to LJ::load_user_props." unless $p;
-            if (defined $mem->{"uprop:$uid:$p->{'id'}"}) {
-                $u->{$_} = $mem->{"uprop:$uid:$p->{'id'}"};
+    foreach my $handler (keys %$groups) {
+        # if there is no memcache, or if the handler doesn't wish to use
+        # memcache, hit the storage directly, update the user object,
+        # and get straight to the next handler
+        if ( !$memcache_available || !defined $handler->use_memcache )
+        {
+            my $propmap
+                = $handler->get_props( $u, $groups->{$handler},
+                                       { 'use_master' => $use_master } );
+
+            $extend_user_object->($propmap);
+
+            next;
+        }
+
+        # now let's find out what we're going to do with memcache
+        my $memcache_policy = $handler->use_memcache;
+
+        if ( $memcache_policy eq 'lite' ) {
+            # the handler loads everything from the corresponding
+            # table and uses only one memcache key to cache that
+
+            my $memkey = $handler->memcache_key($u);
+            if ( my $packed = LJ::MemCache::get([ $u->userid, $memkey ]) ) {
+                my $propmap
+                    = LJ::User::PropStorage->unpack_from_memcache($packed);
+
+                $extend_user_object->($propmap);
+
+                # we've loaded everything handled by this handler,
+                # let's get to the next one
                 next;
             }
-            push @needwrite, [ $p->{'id'}, $_ ];
-            my $source = $p->{'indexed'} ? "userprop" : "userproplite";
-            if ($p->{datatype} eq 'blobchar') {
-                $source = "userpropblob"; # clustered blob
-            }
-            elsif ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
-                $source = "userproplite2";  # clustered
-            }
-            elsif ($p->{multihomed}) {
-                $multihomed{$p->{id}} = 0;
-                $source = "userproplite2";
-            }
-            push @{$loadfrom{$source}}, $p->{'id'};
-        }
-    }
 
-    foreach my $table (qw{userproplite userproplite2 userpropblob userprop}) {
-        next unless exists $loadfrom{$table};
-        my $db;
-        if ($use_master) {
-            $db = ($table =~ m{userprop(lite2|blob)}) ?
-                LJ::get_cluster_master($u) :
-                LJ::get_db_writer();
-        }
-        unless ($db) {
-            $db = ($table =~ m{userprop(lite2|blob)}) ?
-                LJ::get_cluster_reader($u) :
-                LJ::get_db_reader();
-            $used_slave = 1;
-        }
-        $sql = "SELECT upropid, value FROM $table WHERE userid=$uid";
-        if (ref $loadfrom{$table}) {
-            $sql .= " AND upropid IN (" . join(",", @{$loadfrom{$table}}) . ")";
-        }
-        $sth = $db->prepare($sql);
-        $sth->execute;
-        while (my ($id, $v) = $sth->fetchrow_array) {
-            delete $multihomed{$id} if $table eq 'userproplite2';
-            $u->{$LJ::CACHE_PROPID{'user'}->{$id}->{'name'}} = $v;
-        }
+            # actually load everything from DB, cache it, and update
+            # the user object
+            my $propmap
+                = $handler->get_props( $u, [],
+                                       { 'use_master' => $use_master } );
 
-        # push back multihomed if necessary
-        if ($table eq 'userproplite2') {
-            push @{$loadfrom{userprop}}, $_ foreach keys %multihomed;
-        }
-    }
+            my $packed = LJ::User::PropStorage->pack_for_memcache($propmap);
+            LJ::MemCache::set( [$u->userid, $memkey],
+                               $packed, $memc_expire );
 
-    # see if we failed to get anything above and need to hit the master.
-    # this usually happens the first time a multihomed prop is hit.  this
-    # code will propagate that prop down to the cluster.
-    if (%multihomed) {
+            $extend_user_object->($propmap);
+        } elsif ( $memcache_policy eq 'blob' ) {
+            # the handler uses one memcache key for each prop
+            # hit memcache for them first, then hit db and update
+            # memcache
 
-        # verify that we got the database handle before we try propagating data
-        if ($u->writer) {
-            my @values;
-            foreach my $id (keys %multihomed) {
-                my $pname = $LJ::CACHE_PROPID{user}{$id}{name};
-                if (defined $u->{$pname} && $u->{$pname}) {
-                    push @values, "($uid, $id, " . $u->quote($u->{$pname}) . ")";
-                } else {
-                    push @values, "($uid, $id, '')";
-                }
-            }
-            $u->do("REPLACE INTO userproplite2 VALUES " . join ',', @values);
-        }
-    }
+            my $handled_props = $groups->{$handler};
 
-    # Add defaults to user object.
+            my $propmap_memc
+                = $handler->fetch_props_memcache( $u, $handled_props );
 
-    # defaults for S1 style IDs in config file are magic: really
-    # uniq strings representing style IDs, so on first use, we need
-    # to map them
-    unless ($LJ::CACHED_S1IDMAP) {
+            $extend_user_object->($propmap_memc);
 
-        my $pubsty = LJ::S1::get_public_styles();
-        foreach (values %$pubsty) {
-            my $k = "s1_$_->{'type'}_style";
-            next unless $LJ::USERPROP_DEF{$k} eq "$_->{'type'}/$_->{'styledes'}";
+            my @load_from_db = grep { !exists $propmap_memc->{$_} }
+                               @$handled_props;
 
-            $LJ::USERPROP_DEF{$k} = $_->{'styleid'};
-        }
+            # if we can avoid hitting the db, avoid it
+            next unless @load_from_db;
 
-        $LJ::CACHED_S1IDMAP = 1;
-    }
+            my $propmap_db
+                = $handler->get_props( $u, \@load_from_db,
+                                       { 'use_master' => $use_master } );
 
-    # If this was called with no @props, then the function tried
-    # to load all metadata.  but we don't know what's missing, so
-    # try to apply all defaults.
-    unless (@props) { @props = keys %LJ::USERPROP_DEF; }
+            $extend_user_object->($propmap_db);
 
-    foreach my $prop (@props) {
-        next if (defined $u->{$prop});
-        $u->{$prop} = $LJ::USERPROP_DEF{$prop};
-    }
-
-    unless ($used_slave) {
-        my $expire = time() + 3600*24;
-        foreach my $wr (@needwrite) {
-            my ($id, $name) = ($wr->[0], $wr->[1]);
-            LJ::MemCache::set([$uid,"uprop:$uid:$id"], $u->{$name} || "", $expire);
+            # now, update memcache
+            $handler->store_props_memcache( $u, $propmap_db );
         }
     }
 }
@@ -6847,117 +6857,6 @@ sub infohistory_add {
     $dbh->do("INSERT INTO infohistory (userid, what, timechange, oldvalue, other) VALUES (?, ?, ?, ?, ?)",
              undef, $uuid, $what, $gmt_now, $value, $other);
     return $dbh->err ? 0 : 1;
-}
-
-# <LJFUNC>
-# name: LJ::set_userprop
-# des: Sets/deletes a userprop by name for a user.
-# info: This adds or deletes from the
-#       [dbtable[userprop]]/[dbtable[userproplite]] tables.  One
-#       crappy thing about this interface is that it doesn't allow
-#       a batch of userprops to be updated at once, which is the
-#       common thing to do.
-# args: dbarg?, uuserid, propname, value, memonly?
-# des-uuserid: The userid of the user or a user hashref.
-# des-propname: The name of the property.  Or a hashref of propname keys and corresponding values.
-# des-value: The value to set to the property.  If undefined or the
-#            empty string, then property is deleted.
-# des-memonly: if true, only writes to memcache, and not to database.
-# </LJFUNC>
-sub set_userprop
-{
-    &nodb;
-    my ($u, $propname, $value, $memonly) = @_;
-    $u = ref $u ? $u : LJ::load_userid($u);
-    my $userid = $u->{'userid'}+0;
-
-    my $hash = ref $propname eq "HASH" ? $propname : { $propname => $value };
-
-    my %action;  # $table -> {"replace"|"delete"} -> [ "($userid, $propid, $qvalue)" | propid ]
-    my %multihomed;  # { $propid => $value }
-
-    foreach $propname (keys %$hash) {
-        LJ::run_hook("setprop", prop => $propname,
-                     u => $u, value => $value);
-
-        my $p = LJ::get_prop("user", $propname) or
-            die "Invalid userprop $propname passed to LJ::set_userprop.";
-        if ($p->{multihomed}) {
-            # collect into array for later handling
-            $multihomed{$p->{id}} = $hash->{$propname};
-            next;
-        }
-        my $table = $p->{'indexed'} ? "userprop" : "userproplite";
-        if ($p->{datatype} eq 'blobchar') {
-            $table = 'userpropblob';
-        }
-        elsif ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
-            $table = "userproplite2";
-        }
-        unless ($memonly) {
-            my $db = $action{$table}->{'db'} ||= (
-                $table !~ m{userprop(lite2|blob)}
-                    ? LJ::get_db_writer()
-                    : $u->writer );
-            return 0 unless $db;
-        }
-        $value = $hash->{$propname};
-        if (defined $value && $value) {
-            push @{$action{$table}->{"replace"}}, [ $p->{'id'}, $value ];
-        } else {
-            push @{$action{$table}->{"delete"}}, $p->{'id'};
-        }
-    }
-
-    my $expire = time() + 3600*24;
-    foreach my $table (keys %action) {
-        my $db = $action{$table}->{'db'};
-        if (my $list = $action{$table}->{"replace"}) {
-            if ($db) {
-                my $vals = join(',', map { "($userid,$_->[0]," . $db->quote($_->[1]) . ")" } @$list);
-                $db->do("REPLACE INTO $table (userid, upropid, value) VALUES $vals");
-            }
-            LJ::MemCache::set([$userid,"uprop:$userid:$_->[0]"], $_->[1], $expire) foreach (@$list);
-        }
-        if (my $list = $action{$table}->{"delete"}) {
-            if ($db) {
-                my $in = join(',', @$list);
-                $db->do("DELETE FROM $table WHERE userid=$userid AND upropid IN ($in)");
-            }
-            LJ::MemCache::set([$userid,"uprop:$userid:$_"], "", $expire) foreach (@$list);
-        }
-    }
-
-    # if we had any multihomed props, set them here
-    if (%multihomed) {
-        my $dbh = LJ::get_db_writer();
-        return 0 unless $dbh && $u->writer;
-        while (my ($propid, $pvalue) = each %multihomed) {
-            if (defined $pvalue && $pvalue) {
-                # replace data into master
-                $dbh->do("REPLACE INTO userprop VALUES (?, ?, ?)",
-                         undef, $userid, $propid, $pvalue);
-            } else {
-                # delete data from master, but keep in cluster
-                $dbh->do("DELETE FROM userprop WHERE userid = ? AND upropid = ?",
-                         undef, $userid, $propid);
-            }
-
-            # fail out?
-            return 0 if $dbh->err;
-
-            # put data in cluster
-            $pvalue ||= '';
-            $u->do("REPLACE INTO userproplite2 VALUES (?, ?, ?)",
-                   undef, $userid, $propid, $pvalue);
-            return 0 if $u->err;
-
-            # set memcache
-            LJ::MemCache::set([$userid,"uprop:$userid:$propid"], $pvalue, $expire);
-        }
-    }
-
-    return 1;
 }
 
 # <LJFUNC>

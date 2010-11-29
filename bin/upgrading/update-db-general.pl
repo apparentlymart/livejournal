@@ -653,9 +653,8 @@ register_tablecreate("user", <<'EOC');
 CREATE TABLE user (
   userid int(10) unsigned NOT NULL auto_increment,
   user char(15) default NULL,
-  caps SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-  email char(50) default NULL,
-  password char(30) default NULL,
+  caps BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  packed_props BIGINT UNSIGNED NOT NULL DEFAULT 0,
   status char(1) NOT NULL default 'N',
   statusvis char(1) NOT NULL default 'V',
   statusvisdate datetime default NULL,
@@ -681,11 +680,20 @@ CREATE TABLE user (
   lang char(2) NOT NULL default 'EN',
   PRIMARY KEY  (userid),
   UNIQUE KEY user (user),
-  KEY (email),
   KEY (status),
   KEY (statusvis)
 )  PACK_KEYS=1
 EOC
+
+if ( column_type('user', 'caps') =~ /smallint/i ) {
+    do_alter('user', qq{
+        ALTER TABLE user
+            DROP COLUMN email,
+            DROP COLUMN password,
+            MODIFY COLUMN caps BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            ADD COLUMN packed_props BIGINT UNSIGNED NOT NULL DEFAULT 0
+    });
+}
 
 register_tablecreate("userbio", <<'EOC');
 CREATE TABLE userbio (

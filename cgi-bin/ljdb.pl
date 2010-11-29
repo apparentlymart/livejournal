@@ -403,6 +403,8 @@ sub master_role {
 sub get_dbirole_dbh {
     my $dbh = $LJ::DBIRole->get_dbh( @_ ) or return undef;
 
+    $dbh->{'RaiseError'} = 1 if $LJ::IS_DEV_SERVER;
+
     if ( $LJ::DB_LOG_HOST && $LJ::HAVE_DBI_PROFILE ) {
         $LJ::DB_REPORT_HANDLES{ $dbh->{Name} } = $dbh;
 
