@@ -100,6 +100,50 @@ jQuery.fn.placeholder = function()
 	return this;
 }
 
+//this one is fields type agnostic but creates additional label elements, which need to be styled
+jQuery.fn.labeledPlaceholder = function() {
+	if ('placeholder' in document.createElement('input')) {
+		return this;
+	}
+
+	function focus_action( input, label ) {
+		label.hide();
+	}
+
+	function blur_action( input, label ) {
+		if( input.val().length === 0 ) {
+			label.show();
+		}
+	}
+
+	return this.each( function() {
+		var $this = jQuery( this ),
+			placeholder = $this.attr( 'placeholder' );
+
+		if( !placeholder || placeholder.length === 0 ) { return; }
+
+		var label = jQuery( "<label></label>")
+				.css({
+					position: "absolute",
+					cursor: "text",
+					display: "none"
+					})
+				.addClass('placeholder-label')
+				.mousedown(function( ev ) {
+					setTimeout( function() {
+						focus_action( $this, label )
+						$this.focus();
+					}, 0);
+				} )
+				.html( placeholder )
+				.insertBefore( $this );
+		$this.focus( function() { focus_action( $this, label ) } )
+			.blur( function() { blur_action( $this, label ) } );
+
+		blur_action( $this, label );
+	} );
+}
+
 jQuery.fn.input = function(fn)
 {
 	return fn ? this.bind('input keyup paste', fn) : this.trigger('input');
