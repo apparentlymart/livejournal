@@ -120,6 +120,9 @@ CLUSTER: foreach my $cluster (@clusters) {
         next CLUSTER;
     }
 
+    $dbh->{'RaiseError'} = 0;
+    $dbh->{'PrintError'} = 1 if $LJ::IS_DEV_SERVER;
+
     # reset everything
     %clustered_table = %table_exists = %table_unknown =
         %table_create = %table_drop = %post_create =
@@ -205,6 +208,9 @@ print "\n";
 if ($opt_pop) {
     $dbh = LJ::get_db_writer()
         or die "Couldn't get master handle for population.";
+    $dbh->{'RaiseError'} = 0;
+    $dbh->{'PrintError'} = 1 if $LJ::IS_DEV_SERVER;
+
     populate_database();
 }
 
@@ -503,6 +509,8 @@ sub populate_s2 {
         # therefore, let's reconnect
         LJ::end_request();
         $dbh = LJ::get_db_writer();
+        $dbh->{'RaiseError'} = 0;
+        $dbh->{'PrintError'} = 1 if $LJ::IS_DEV_SERVER;
 
     if ($LJ::IS_DEV_SERVER) {
         # now, delete any system layers that don't below (from previous imports?)
