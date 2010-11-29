@@ -726,6 +726,20 @@ sub selectall_hashref {
     return $rv;
 }
 
+sub selectall_arrayref {
+    my $u = shift;
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or croak $u->nodb_err;
+
+    my $rv = $dbcm->selectall_arrayref(@_);
+
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+
+    return $rv;
+}
+
 sub selectrow_hashref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
