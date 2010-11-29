@@ -76,6 +76,7 @@ sub _build_tree {
 
     $ret .= "<form action='directory.bml' method='GET'>\n";
     $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
+    $ret .= "<input type='hidden' name='vert_id' value='".$POST{'vert_id'}."'>" if $POST{'vert_id'};
     $ret .= "</form>\n\n";
 
     return $ret unless $cname;
@@ -122,7 +123,8 @@ sub _build_tree {
         push @catid_, $cat_id if $cat_id;
         push @catrem, $POST{"catremove_$i"} if $POST{"catremove_$i"};
         push @cat_, $cat_id ? LJ::Browse->load_by_id ($cat_id) : undef;
-        push @vert_, $POST{"vert_id_$i"} ? LJ::Vertical->load_by_id ($POST{"vert_id_$i"}) : undef;
+        my $vert_id = $POST{"vert_id_$i"} || $GET{"vert_id"};
+        push @vert_, $vert_id ? LJ::Vertical->load_by_id ($vert_id) : undef;
     }
 
     # saving a form submission
@@ -162,9 +164,9 @@ sub _build_tree {
     $ret .= "<div style='width:50%;'><div style='background:#C7E0F6;padding:5px 7px;'>&nbsp;</div>\n";
     $ret .= "<table style='width:100%;border-collapse:collapse;'>";
     foreach my $i (1..$limit) {
-        $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->Vertical</td>";
         my $j = $i - 1;
         if (@listings[$j]) {
+            $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->Category</td>";
             my $listing = @listings[$j];
             my $cat = LJ::Browse->load_by_id($listing->{catid});
             my $status = "<span style='font-weight: bold; color:";
@@ -184,22 +186,25 @@ sub _build_tree {
                                      value => $listing->{pendid}, });
         } else {
             my @verticals = LJ::Vertical->load_all();
-            @verticals = map { { text => $_->{name}, value => $_->{vert_id} } } @verticals;
+            if (!$LJ::DISABLED{'verticals_menu'}) {
+                $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->Category</td>";
+                @verticals = map { { text => $_->{name}, value => $_->{vert_id} } } @verticals;
 
-            $ret .= "<td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>".LJ::html_select({
-                        name => "vert_id_$i",
-			style => "width:100%;",
-                        selected => $POST{"vert_id_$i"},
-                        },
-                        { text => 'Select Vertical',
-                        value => '',},
-                        @verticals
-                    );
-            $ret .= "</td><td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>\n";
+                $ret .= "<td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>".LJ::html_select({
+                            name => "vert_id_$i",
+			    style => "width:100%;",
+                            selected => $vert_[$j] ? $vert_[$j]->vert_id : 0,
+                            },
+                            { text => 'Select Vertical',
+                            value => '',},
+                            @verticals
+                        );
+                $ret .= "</td><td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>\n";
 
-            $ret .= LJ::html_submit('select_v', 'Select Vertical') . "</td></tr>";
+                $ret .= LJ::html_submit('select_v', 'Select Vertical') . "</td></tr>";
+            }
 
-            if (LJ::did_post() && $vert_[$j]) {
+            if ((LJ::did_post() && $vert_[$j]) || ($LJ::DISABLED{'verticals_menu'})) {
                 my @children = $cat_[$j] ? $cat_[$j]->children : ();
                 # Get the full list of categories
                 my @categories = LJ::Browse->load_all($vert_[$j]);

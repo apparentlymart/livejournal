@@ -10,6 +10,8 @@ sub render_body {
     my $class = shift;
     my %opts = @_;
 
+    my $vertical = $opts{'vertical'};
+
     my ($caption, $form_text, $submit_caption) =
         map { BML::ml('widget.addcommunity.' . $_,
             {
@@ -17,6 +19,9 @@ sub render_body {
                 closelink   => '</a>',
             })
         } qw(caption form_text submit_button_caption);
+
+    my $vert_id = $vertical ? $vertical->vert_id : undef;
+    my $vert_input = $vert_id ? "<input type='hidden' name='vert_id' value='$vert_id'>" : '';
 
     return <<EOT;
     <div class="right-mod">
@@ -31,7 +36,7 @@ sub render_body {
                             <form action='$LJ::SITEROOT/community/directory.bml' method='post'>
                             <p>$form_text</p>
                             <fieldset>
-                                <input type="submit" value="$submit_caption" />
+                                $vert_input<input type="submit" value="$submit_caption" />
                             <fieldset>
                             </form>
                         </div>

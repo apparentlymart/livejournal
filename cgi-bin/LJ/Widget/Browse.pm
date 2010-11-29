@@ -393,7 +393,7 @@ sub render_body {
         ad                      => $ad,
         nav_line                => $nav_line,
         popular_interests_widget=> LJ::Widget::PopularInterests->render(),
-        add_community_widget    => LJ::Widget::AddCommunity->render(),
+        add_community_widget    => LJ::Widget::AddCommunity->render(vertical => $vertical),
         search_widget           => LJ::Widget::Search->render(type => $vertical ? "tags" : "yandex", view => $view),
         top_posts               => \@top_posts,
         top_comms               => \@top_comms,
