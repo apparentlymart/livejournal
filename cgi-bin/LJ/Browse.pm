@@ -859,7 +859,11 @@ sub delete_post {
 
     my $dbh = LJ::get_db_reader ();
     my $res = $dbh->do ("UPDATE category_recent_posts SET is_deleted = 1 WHERE journalid = ? AND jitemid = ?", undef, $commid, $jitemid);
-    return $res;
+
+    ## Need to delete linked keywords from key_map
+    $res = $dbh->do ("DELETE FROM vertical_keymap WHERE journalid = ? AND jitemid = ?", undef, $commid, $jitemid);
+
+    return 1;
 }
 
 sub search_posts {

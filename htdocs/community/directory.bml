@@ -144,6 +144,12 @@ sub _build_tree {
 
         # Handle removes
         foreach my $pendid (@catrem) {
+            my $dbh = LJ::get_db_writer()
+                    or die "unable to contact global db master to create category";
+            my ($catid, $journalid) = $dbh->selectrow_array("SELECT catid, jid FROM categoryjournals_pending WHERE pendid = ?", undef, $pendid);
+            $dbh->do("DELETE FROM categoryjournals WHERE catid=? AND journalid=?", undef,
+                         $catid, $journalid);
+ 
             LJ::Browse->remove_community( comm      => $c,
                                           submitter => $remote,
                                           pendid    => $pendid, );
