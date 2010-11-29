@@ -80,7 +80,7 @@ sub fetch_props_memcache {
         my $propid   = $propinfo->{'id'};
         my $memkey   = $class->memcache_key($u, $k);
 
-        $propid_map{$propid} = $k;
+        $propid_map{$k} = $propid;
         push @memkeys, [ $userid, $memkey ];
     }
 
@@ -92,7 +92,7 @@ sub fetch_props_memcache {
 
         next unless exists $from_memcache->{$memkey};
 
-        $ret{ $propid_map{$k} } = $from_memcache->{$memkey};
+        $ret{ $k } = $from_memcache->{$memkey};
     }
 
     return \%ret;
