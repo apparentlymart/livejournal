@@ -242,8 +242,26 @@ sub render_body {
             my @tags = $entry->tags;
             my $event = $entry->event_html;
             my ($is_removed_video) = $event =~ s/<iframe.*?>(.*)<\/iframe>/$1/;
+            $event =~ s#<img.*?>##gi;
             my $subject = $entry->subject_text || '***';
             my $trimmed_subj = LJ::html_trim ($subject, 60);
+
+            my @images = ();
+            my $fb_photo_big = '';
+            @images = $entry->event_raw =~ m#img\s+src="(.*?)"#gi;
+
+            if (scalar @images) {
+                my $r = LJ::crop_picture_from_web(
+                    source    => $images[0],
+                    size      => '200x200',
+                    username  => $LJ::PHOTOS_FEAT_POSTS_FB_USERNAME,
+                    password  => $LJ::PHOTOS_FEAT_POSTS_FB_PASSWORD,
+                    galleries => [ $LJ::PHOTOS_FEAT_POSTS_FB_GALLERY ],
+                );
+                $fb_photo_big = $r->{url} || '';
+#                $fb_photo_big =~ s|^http://pics\.|http://l-pics.|;
+            }
+
             push @tmpl_posts, {
                 subject         => $trimmed_subj,
                 is_subject_trimmed => $subject ne $trimmed_subj ? 1 : 0,
@@ -256,8 +274,9 @@ sub render_body {
                 location        => $entry->prop('current_location'),
                 post_text       => LJ::html_trim ($event, 800),
                 url_to_post     => $entry->url,
+                photo_for_post  => $fb_photo_big,
                 comments_count  => $entry->reply_count,
-                is_need_more    => $is_removed_video || bytes::length($entry->event_text) > 800 ? 1 : 0,
+                is_need_more    => $is_removed_video || bytes::length($entry->event_html) > 800 ? 1 : 0,
             };
         }
     }
@@ -321,11 +340,14 @@ sub render_body {
             my $c = LJ::load_userid($comm->{journalid});
             next unless $c;
             my $userpic = $c->userpic;
+            my $descr = $c->prop('comm_theme') || '';
+            my $descr_trimmed = LJ::html_trim($descr, 50);
             push @top_comms, {
                 username        => $c->display_name,
                 userpic         => $userpic ? $userpic->url : '',
                 community       => $c->user,
-                bio             => $c->bio,
+                bio             => $descr_trimmed,
+                is_subtitle_trimmed => $descr ne $descr_trimmed ? 1 : 0,
             };
         }
     }
