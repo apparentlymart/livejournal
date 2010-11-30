@@ -236,7 +236,8 @@ sub render_body {
             $post_count++;
             next if $post_count <= $post_skip || $post_count > $post_last;
 
-            my $secondsold = $entry->logtime_unix ? time() - $entry->logtime_unix : undef;
+            my $logtime = LJ::TimeUtil->mysqldate_to_time($entry->{logtime}, 0);
+            my $secondsold = $logtime ? time() - $logtime : undef;
             my $poster = $entry->poster;
             my $userpic = $entry->userpic;
             my @tags = $entry->tags;
