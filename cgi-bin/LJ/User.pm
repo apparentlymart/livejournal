@@ -5742,6 +5742,26 @@ sub set_packed_props {
     $u->{'packed_props'} = 1;
 }
 
+sub init_userprop_def {
+    my ($class) = @_;
+
+    # defaults for S1 style IDs in config file are magic: really
+    # uniq strings representing style IDs, so on first use, we need
+    # to map them
+    unless ($LJ::CACHED_S1IDMAP) {
+        my $pubsty = LJ::S1::get_public_styles();
+        foreach (values %$pubsty) {
+            my $k = "s1_$_->{'type'}_style";
+            my $needval = "$_->{'type'}/$_->{'styledes'}";
+            next unless $LJ::USERPROP_DEF{$k} eq $needval;
+
+            $LJ::USERPROP_DEF{$k} = $_->{'styleid'};
+        }
+
+        $LJ::CACHED_S1IDMAP = 1;
+    }
+}
+
 sub reset_cache {
     my $u = shift;
 
@@ -6097,6 +6117,13 @@ sub load_user_props {
             # now, update memcache
             $handler->store_props_memcache( $u, $propmap_db );
         }
+    }
+
+    LJ::User->init_userprop_def;
+    foreach my $propname (@props) {
+        next if defined $u->{$propname};
+        next unless defined $LJ::USERPROP_DEF{$propname};
+        $u->{$propname} = $LJ::USERPROP_DEF{$propname};
     }
 }
 
