@@ -7,7 +7,7 @@ my $wurfl;
 
 sub is_mobile {
     my $class = shift;
-    my $user_agent = shift;
+    my $user_agent = shift || LJ::Request->header_in('User-Agent');
 
     if ($LJ::WURFL{'ua_keys_mobile'}) {
         my @redir = grep { $user_agent =~ /\Q$_\E/i } @{$LJ::WURFL{'ua_keys_mobile'}};
