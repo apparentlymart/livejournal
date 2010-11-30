@@ -899,13 +899,16 @@ body<=
         }
 
         ## save the changed userhead
-        if ($POST{'uh_id'} eq 'default') {
-            $u->set_custom_usericon (undef);
-        } else {
-            my $uh = LJ::UserHead->get_userhead ($POST{'uh_id'});
-            $u->set_custom_usericon ($uh->get_uh_img)
-                if $uh;
-         }
+        ## userheads are only for personal journals
+        if ($u->is_personal) {
+            if ($POST{'uh_id'} eq 'default') {
+                $u->set_custom_usericon (undef);
+            } else {
+                my $uh = LJ::UserHead->get_userhead ($POST{'uh_id'});
+                $u->set_custom_usericon ($uh->get_uh_img)
+                    if $uh;
+            }
+        }
 
         # actions if email changed
         if ($email_changed) {
