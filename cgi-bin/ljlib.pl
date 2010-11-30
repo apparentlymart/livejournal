@@ -1179,7 +1179,7 @@ sub get_recent_items
     my $after_sql = '';
     my $afterid = $opts->{'afterid'} + 0;
     if ($afterid) {
-        $after_sql = "AND jitemid >= $afterid";
+        $after_sql = "AND jitemid > $afterid";
     }
 
     my $posterwhere;
@@ -1195,11 +1195,11 @@ sub get_recent_items
                DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
                allowmask, eventtime, logtime
         FROM log2 USE INDEX ($sort_key)
-        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere $suspend_where
+        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere $after_sql $suspend_where
         ORDER BY journalid, $sort_key
         $sql_limit
     };
-    
+
     unless ($logdb) {
         $$err = "nodb" if ref $err eq "SCALAR";
         return ();

@@ -27,7 +27,7 @@ body<=
     # Don't include the top level categories and get the unique URI for each
 
     my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
-    @vert_ids = sort { $a cmp $b } @vert_ids;
+    @vert_ids = sort { $a->{'text'} cmp $b->{'text'} } @vert_ids;
 
     $ret .= "<p>Select vertical: ";
     $ret .= LJ::html_select({
@@ -48,7 +48,7 @@ body<=
 
     my $page_size = 10;
 
-    my $page = 1;
+    my $page = $GET{'page'} || 1;
 
     if ($vert_id) {
         my $vertical = LJ::Vertical->load_by_id($vert_id);
@@ -62,6 +62,10 @@ body<=
                 if $c->{communities};
         };
 
+        my $posts_cnt = LJ::Browse->count_posts ( comms => \@communities, vertical => $vertical);
+
+        my $pages = $posts_cnt / $page_size;
+        $pages += 1 if $posts_cnt % $page_size;
         my $skip = ($page-1) * $page_size;
         my $last = $skip + $page_size;
 
@@ -82,7 +86,12 @@ body<=
             $ret .= "</form></li>";
         }
         $ret .= "</ul>";
+        $ret .= "<a href='?vert_id=".$vertical->vert_id."&page=".($page-1)."'>Back</a>&nbsp;"
+            if $page > 1;
+        $ret .= "<a href='?vert_id=".$vertical->vert_id."&page=".($page+1)."'>Next</a><br/>"
+            if $page < $pages - 1;
     }
+
     $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 
 

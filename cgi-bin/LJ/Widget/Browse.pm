@@ -248,7 +248,7 @@ sub render_body {
 
             my @images = ();
             my $fb_photo_big = '';
-            @images = $entry->event_raw =~ m#img\s+src="(.*?)"#gi;
+            @images = $entry->event_raw =~ m#img.*?src="(.*?)"#gi;
 
             if (scalar @images) {
                 my $r = LJ::crop_picture_from_web(
