@@ -156,7 +156,6 @@ body<=
 
      my $mod_emails = $POST{modemail} ? 1 : 0;
      $remote->set_prop( 'opt_nomodemail' => $mod_emails ? undef : 1 );
-     LJ::set_userprop($remote, 'opt_nomodemail', $mod_emails ? undef : 1);
  }
 
  my $mod_emails = $remote->prop("opt_nomodemail") ? 0 : 1;

@@ -104,10 +104,7 @@ unless (LJ::User::Rename::basic_rename($dummy_username, $to, $opts)) {
     LJ::load_user_props($tou, 'renamedto');
     if ($tou->{renamedto}) {
         print "Removing redirection for user: $to\n";
-        unless (LJ::set_userprop($tou, 'renamedto' => undef)) {
-            print "Error setting 'renamedto' userprop for $to\n";
-            exit 1;
-        }
+        $tou->clear_prop('renamedto');
     }
 }
 
