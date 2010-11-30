@@ -1,3 +1,15 @@
+jQuery(function($){
+	!document.getElementById('lj_controlstrip') &&
+	!document.getElementById('lj_controlstrip_new') &&
+		$.get(LiveJournal.getAjaxUrl('controlstrip'),
+			{ user: Site.currentJournal },
+			function(data)
+			{
+				$(data).appendTo(document.body).ljAddContextualPopup();
+			}
+		);
+});
+
 (function( $, top ) {
 
 var ControlStrip = top.ControlStrip = {};
