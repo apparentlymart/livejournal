@@ -13,7 +13,7 @@
 	<li class="b-catalogue-item">
 		<dl class="b-catalogue-item-header">
 			<dt class="b-catalogue-item-subject"><a href="<tmpl_var url_to_post>"><tmpl_var subject><tmpl_if is_subject_trimmed>&hellip;</tmpl_if></a></dt>
-			<dd class="b-catalogue-item-userpic"><tmpl_if userpic><img src="<tmpl_var userpic>"><tmpl_else><img src="/img/profile_icons/user.gif" alt=""/></tmpl_if></dd>
+			<dd class="b-catalogue-item-userpic"><tmpl_if userpic><img src="<tmpl_var userpic>" alt=""><tmpl_else><img src="/img/profile_icons/user.gif" alt=""/></tmpl_if></dd>
 			<tmpl_if poster><dd class="b-catalogue-item-author">Posted <TMPL_VAR posted_ago> by <TMPL_VAR poster> </dd></tmpl_if>
 			<tmpl_if tags><dd class="b-catalogue-item-tags">Tags: <tmpl_loop tags><tmpl_unless __first__>,&nbsp;</tmpl_unless><tmpl_var tag></tmpl_loop></dd></tmpl_if>
 			<tmpl_if mood><dd class="b-catalogue-item-mood">Mood: <tmpl_var mood></dd></tmpl_if>
