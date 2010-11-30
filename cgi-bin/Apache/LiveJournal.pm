@@ -616,6 +616,19 @@ sub trans
             return $bml_handler->("$LJ::HOME/htdocs/$file");
         }
 
+        if ($opts->{'mode'} eq "wishlist") {
+
+            if (my $u = LJ::load_user($opts->{user})) {
+                LJ::Request->notes("journalid" => $u->{userid});
+            } else {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
+
+            return $bml_handler->("$LJ::HOME/htdocs/wishlist.bml");
+        }
+
         if ($opts->{'mode'} eq "update") {
             my $u = LJ::load_user($opts->{user})
                 or return LJ::Request::NOT_FOUND;

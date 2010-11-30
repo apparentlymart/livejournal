@@ -182,6 +182,10 @@ $LJ::PROTOCOL_VER = ($LJ::UNICODE ? "1" : "0");
                      # in S2, will be a real view.
                      "des" => "Profile Page",
                  },
+                 "wishlist" => {
+                     # just a redirect to wishlist.bml.
+                     "des" => "WishList Page",
+                 },
                  "tag" => {
                      "des" => "Filtered Recent Entries View",
                  },
