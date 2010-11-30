@@ -6,6 +6,8 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Browse );
 
+    LJ::need_res ( qw( stc/widgets/widgets-layout.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) );
+
     my $remote = LJ::get_remote();
 
     return "<?needlogin?>"
@@ -28,7 +30,7 @@ body<=
     # Don't include the top level categories and get the unique URI for each
 
     my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
-    @vert_ids = sort { $a cmp $b } @vert_ids;
+    @vert_ids = sort { $a->{'text'} cmp $b->{'text'} } @vert_ids;
 
     $ret .= "<p>";
     $ret .= LJ::html_select({
@@ -60,6 +62,7 @@ body<=
             $not_deleted  = $vertical->not_deleted;
             $remove_after = $vertical->remove_after;
         }
+
         $ret .= <<ADDPOST;
 <form method="post">
 <input type="hidden" name="vert_id" value="$vert_id">
@@ -103,9 +106,10 @@ ADDPOST
 
     if (LJ::did_post() && $vertical) {
         $ret .= "<h2>Added Posts</h2>";
-        my $posts = $vertical->load_vertical_posts( count => '100', is_random => 0 );
+        my $posts = $vertical->load_vertical_posts( count => 100, is_random => 0 );
 
-        $ret .= "<ul style='list-style:none;line-height:1.6em;padding:0;'>";
+        $ret .= "<ul style='list-style:none;line-height:1.6em;padding:0;float:left;width:500px'>";
+        my @top_posts = ();
         foreach (@$posts) {
             my $entry = LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid});
             my $url = $entry->url;
@@ -120,7 +124,32 @@ ADDPOST
             $ret .= "<input type='submit' name='delete_post' value='Remove post' style='font-size:.8em;text-transform:lowercase;'>" if scalar @$posts > $vertical->not_deleted;
             $ret .= "</form>";
         }
+        my $posts = $vertical->load_vertical_posts( count => $vertical->show_entries, is_random => 1 );
+        foreach (@$posts) {
+            my $entry = LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid});
+            my $userpic = $entry->userpic;
+            my $poster = $entry->poster;
+            push @top_posts, {
+                subject         => $entry->subject_text || '***',
+                userpic         => $userpic ? $userpic->url : '',
+                updated_ago     => LJ::TimeUtil->ago_text($entry->logtime_unix),
+                comments_count  => $entry->reply_count,
+                ljuser          => $poster ? LJ::ljuser($poster) : '?',
+                url_to_post     => $entry->url,
+            };
+        }
         $ret .= "</ul>";
+        my $template = LJ::HTML::Template->new(
+            { use_expr => 1 }, # force HTML::Template::Pro with Expr support
+            filename => "$ENV{'LJHOME'}/templates/Browse/top_posts.tmpl",
+            die_on_bad_params => 0,
+            strict => 0,
+        ) or die "Can't open template: $!";
+        $template->param(
+            top_posts => \@top_posts,
+        );
+        $ret .= "<div style=\"padding:0 0 0 500px\">".$template->output."</div>";
+
     }
     $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 

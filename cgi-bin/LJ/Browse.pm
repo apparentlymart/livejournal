@@ -866,6 +866,31 @@ sub delete_post {
     return 1;
 }
 
+sub count_posts {
+    my $class  = shift;
+    my %args   = @_;
+
+    my $comms    = $args{'comms'};
+    my $limit    = $args{'page_size'};
+    my $search   = $args{'search_str'};
+    my $vertical = $args{'vertical'};
+
+    my $comm_list = join ",", @$comms;
+    my $dbh = LJ::get_db_reader();
+    if ($comm_list) {
+        my $count = $dbh->selectrow_arrayref (
+            "SELECT count(journalid) FROM category_recent_posts 
+                WHERE journalid IN ($comm_list) 
+                    AND is_deleted = 0 
+                ORDER BY timecreate DESC",
+            { Slice => {} }
+        );
+        return $count->[0];
+    }
+
+    return 0;
+}
+
 sub search_posts {
     my $class  = shift;
     my %args   = @_;
@@ -904,15 +929,17 @@ sub search_posts {
             grep { $_->{journalid} }                                                ## remove SEO posts
             @found_posts;
     } else {
-        my $post_ids = $dbh->selectall_arrayref (
-            "SELECT * FROM category_recent_posts 
-                WHERE journalid IN ($comm_list) 
-                    AND is_deleted = 0 
-                ORDER BY timecreate DESC 
-                LIMIT $limit", 
-            { Slice => {} }
-        );
-        @entries = map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) } @$post_ids;
+        if ($comm_list) {
+            my $post_ids = $dbh->selectall_arrayref (
+                "SELECT * FROM category_recent_posts 
+                    WHERE journalid IN ($comm_list) 
+                        AND is_deleted = 0 
+                    ORDER BY timecreate DESC 
+                    LIMIT $limit", 
+                { Slice => {} }
+            );
+            @entries = map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) } @$post_ids;
+        }
     }
     return @entries;
 }

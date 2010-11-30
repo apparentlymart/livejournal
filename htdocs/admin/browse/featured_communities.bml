@@ -6,6 +6,8 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Browse );
 
+    LJ::need_res ( qw( stc/widgets/widgets-layout.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) );
+
     my $remote = LJ::get_remote();
 
     return "<?needlogin?>"
@@ -28,7 +30,7 @@ body<=
     # Don't include the top level categories and get the unique URI for each
 
     my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
-    @vert_ids = sort { $a cmp $b } @vert_ids;
+    @vert_ids = sort { $a->{'text'} cmp $b->{'text'} } @vert_ids;
 
     $ret .= "<p>";
     $ret .= LJ::html_select({
@@ -73,7 +75,8 @@ ADDPOST
         $ret .= "<h2>Added Communities</h2>";
         my $comms = $vertical->load_communities( count => '100', is_random => 0 );
 
-        $ret .= "<ul style='list-style:none;line-height:1.6em;padding:0;'>";
+        $ret .= "<ul style='list-style:none;line-height:1.6em;padding:0;float:left;width:500px;'>";
+        my @top_comms = ();
         foreach (@$comms) {
             my $comm = LJ::load_userid($_->{journalid});
             my $url = $comm->journal_base;
@@ -85,7 +88,32 @@ ADDPOST
             $ret .= "<input type='submit' name='delete_comm' value='Remove post' style='font-size:.8em;text-transform:lowercase;'>";
             $ret .= "</form>";
         }
+        my $comms = $vertical->load_communities( count => $vertical->show_entries, is_random => 1 );
+        foreach my $comm (@$comms) {
+            my $c = LJ::load_userid($comm->{journalid});
+            next unless $c;
+            my $userpic = $c->userpic;
+            my $descr = $c->prop('comm_theme') || '';
+            my $descr_trimmed = LJ::html_trim($descr, 50);
+            push @top_comms, {
+                username        => $c->display_name,
+                userpic         => $userpic ? $userpic->url : '',
+                community       => $c->user,
+                bio             => $descr_trimmed,
+                is_subtitle_trimmed => $descr ne $descr_trimmed ? 1 : 0,
+            };
+        }
         $ret .= "</ul>";
+        my $template = LJ::HTML::Template->new(
+            { use_expr => 1 }, # force HTML::Template::Pro with Expr support
+            filename => "$ENV{'LJHOME'}/templates/Browse/featured_communities.tmpl",
+            die_on_bad_params => 0,
+            strict => 0,
+        ) or die "Can't open template: $!";
+        $template->param(
+            top_comms => \@top_comms,
+        );
+        $ret .= "<div style=\"padding:0 0 0 500px\">".$template->output."</div>";
     }
     $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
 

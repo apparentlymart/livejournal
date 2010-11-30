@@ -682,7 +682,7 @@ sub save_tags {
             "SELECT m.kw_id 
                 FROM vertical_keymap m, vertical_keywords w 
                 WHERE m.kw_id = w.kw_id 
-                    AND w.keywords = ? 
+                    AND w.keyword = ? 
                     AND m.vert_id = ?", 
             undef, $tag, $self->vert_id
         ) || [];
@@ -736,15 +736,19 @@ sub load_communities {
     );
     return [] unless $comms;
     my $max_num = scalar @$comms;
-    my $count   = $args{'count'};
-    if ($count > $max_num) {
-        $count = $max_num;
-        $is_random = 0;
-    }
+    my $count   = $args{'count'} || $max_num;
+    $count = $max_num if $count > $max_num;
     my @result = ();
-    while ($count--) {
-        my $comm = $is_random ? $comms->[int(rand($max_num))] : $comms->[$count];
-        push @result, $comm if $comm;
+    my %used = ();
+    my $i = 0;
+    while (scalar @result < $count) {
+        my $comm_id = $is_random ? int(rand($max_num)) : $i++;
+        next if $used{$comm_id};
+        my $comm = $comms->[$comm_id];
+        if ($comm) {
+            $used{$comm_id} = 1;
+            push @result, $comm;
+        }
     }
 
     return \@result;
@@ -761,15 +765,28 @@ sub load_vertical_posts {
     my $is_random = $args{'is_random'};
 
     my $dbh = LJ::get_db_writer();
-    my $posts = $dbh->selectall_arrayref("SELECT * FROM vertical_posts WHERE vert_id = ?", { Slice => {} }, $self->vert_id);
+    my $posts = $dbh->selectall_arrayref(
+        "SELECT * 
+            FROM vertical_posts 
+            WHERE vert_id = ? 
+            ORDER BY timeadded DESC", 
+        { Slice => {} }, $self->vert_id
+    );
     return [] unless $posts;
     my $max_num = scalar @$posts;
-    my $count   = $args{'count'};
+    my $count   = $args{'count'} || $max_num;
     $count = $max_num if $count > $max_num;
     my @result = ();
-    while ($count--) {
-        my $post = $posts->[int(rand($max_num))];
-        push @result, $post if $post;
+    my %used = ();
+    my $i = 0;
+    while (scalar @result < $count) {
+        my $post_id = $is_random ? int(rand($max_num)) : $i++;
+        next if $used{$post_id};
+        my $post = $posts->[$post_id];
+        if ($post) {
+            $used{$post_id} = 1;
+            push @result, $post;
+        }
     }
 
     return \@result;
@@ -1247,7 +1264,7 @@ sub add_post {
 
     my $dbh = LJ::get_db_writer();
     my $res = $dbh->do("INSERT INTO vertical_posts (vert_id, journalid, jitemid, timecreate, timeadded) VALUES
-        (?, ?, ?, ?, UNIX_TIMESTAMP())", undef, $self->vert_id, $entry->journalid, $entry->jitemid, $entry->logtime_unix);
+        (?, ?, ?, ?, UNIX_TIMESTAMP(NOW()))", undef, $self->vert_id, $entry->journalid, $entry->jitemid, $entry->logtime_unix);
 
     return $res;
 
