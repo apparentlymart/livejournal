@@ -220,6 +220,7 @@ sub render_body {
                 {
                     featured            => 0,
                     userpic             => $userpic,
+                    ljuser              => LJ::ljuser($comm->user),
                     journal_name        => $comm->ljuser_display(),
                     journal_user        => $comm->{user},
                     journal_base        => $comm->journal_base(),
@@ -353,6 +354,7 @@ sub render_body {
                 userpic         => $userpic ? $userpic->url : '',
                 community       => $c->user,
                 bio             => $descr_trimmed,
+                ljuser          => LJ::ljuser($c->user),
                 is_subtitle_trimmed => $descr ne $descr_trimmed ? 1 : 0,
             };
         }
@@ -365,6 +367,7 @@ sub render_body {
         $posts = $vertical->load_vertical_posts( count => $vertical->show_entries, is_random => 1 );
         foreach my $post (@$posts) {
             my $entry = LJ::Entry->new ($post->{journalid}, jitemid => $post->{jitemid});
+            next unless $entry;
             next unless $entry->valid;
             my $userpic = $entry->userpic;
             my $poster = $entry->poster;
