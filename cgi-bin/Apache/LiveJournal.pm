@@ -495,24 +495,28 @@ sub trans
 
         my $remote = LJ::get_remote();
         my $u = LJ::load_user($orig_user);
-        
+
         # do redirects:
         # -- communities to the right place
         # -- uppercase usernames
         # -- users with hyphens/underscores, except users from external domains (see table 'domains')
-        if ($u && $u->is_community && $opts->{'vhost'} =~ /^(?:users||tilde)$/ ||
-            $orig_user ne lc($orig_user) ||
-            $orig_user =~ /[_-]/ && $u && $u->journal_base !~ m!^http://$host!i && $opts->{'vhost'} !~ /^other:/) {
-
-            my $newurl = $uri;
-
-            # if we came through $opts->{vhost} eq "users" path above, then
-            # the s/// below will not match and there will be a leading /,
-            # so the s/// leaves a leading slash as well so that $newurl is
-            # consistent for the concatenation before redirect
-            $newurl =~ s!^/(users/|community/|~)\Q$orig_user\E!/!;
-            $newurl = LJ::journal_base($u) . "$newurl$args_wq";
-            return redir($newurl);
+        if ($u && $u->is_community) {
+            if ($opts->{'vhost'} =~ /^(?:users||tilde)$/ ||
+                $orig_user ne lc($orig_user) ||
+                $orig_user =~ /[_-]/ && $u && $u->journal_base !~ m!^http://$host!i && $opts->{'vhost'} !~ /^other:/) {
+    
+                my $newurl = $uri;
+    
+                # if we came through $opts->{vhost} eq "users" path above, then
+                # the s/// below will not match and there will be a leading /,
+                # so the s/// leaves a leading slash as well so that $newurl is
+                # consistent for the concatenation before redirect
+                $newurl =~ s!^/(users/|community/|~)\Q$orig_user\E!/!;
+                $newurl = LJ::journal_base($u) . "$newurl$args_wq";
+                return redir($newurl);
+            } 
+            
+            LJ::run_hook('vertical_tags', $remote, $u);
         }
 
         # check if this entry or journal contains adult content
