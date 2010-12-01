@@ -100,11 +100,14 @@ sub load_userpics
 
     ## avoid requesting upic multiple times.
     ## otherwise memcached returns it multiple times too.
+    ##
+    ## don't load (non-existent) upics with negative id
+    ## see also LJSUP-5502 and hook 'control_default_userpic'
     my %uniq = ();
     $idlist = [ grep { 
                         my $u = $_->[0];
                         my $upicid = $_->[1];
-                        not $uniq{$u}->{$upicid}++ 
+                        $upicid>0 && not $uniq{$u}->{$upicid}++ 
                     } @$idlist ];
 
     my @load_list;
