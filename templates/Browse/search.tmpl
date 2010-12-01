@@ -9,7 +9,7 @@
 		<i class="w-head-corner"></i>
 	</div>
 	<div class="w-body">
-		<form action="<tmpl_var search_url>" method="POST">
+		<form action="<tmpl_var search_url><tmpl_if view>?view=<tmpl_var view></tmpl_if>" method="POST">
 			<fieldset>
 				<p>
 					<label for="search_text" id="search_text_label">Find</label>
