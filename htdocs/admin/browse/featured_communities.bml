@@ -22,6 +22,7 @@ body<=
     my $vert_id = $POST{'vert_id'};
     my $journals = $POST{'journals'};
 
+    $ret .= "<div style='float:left;width:500px;'>\n";
     $ret .= "<form method='POST'>\n";
     $ret .= LJ::form_auth();
 
@@ -104,6 +105,7 @@ ADDPOST
             };
         }
         $ret .= "</ul>";
+        $ret .= "</div>";
         my $template = LJ::HTML::Template->new(
             { use_expr => 1 }, # force HTML::Template::Pro with Expr support
             filename => "$ENV{'LJHOME'}/templates/Browse/featured_communities.tmpl",
@@ -113,9 +115,9 @@ ADDPOST
         $template->param(
             top_comms => \@top_comms,
         );
-        $ret .= "<div style=\"padding:0 0 0 500px\">".$template->output."</div>";
+        $ret .= "<div style=\"padding:0 0 0 550px;width:300px;\">".$template->output."</div>";
     }
-    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
+    $ret .= "<p style='clear:both;'><a href='/admin/browse/'>Back to main page</a></p>";
 
 
     return "<body>$ret</body>";
