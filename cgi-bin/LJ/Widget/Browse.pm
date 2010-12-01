@@ -395,13 +395,17 @@ sub render_body {
         nav_line                => $nav_line,
         popular_interests_widget=> LJ::Widget::PopularInterests->render(),
         add_community_widget    => LJ::Widget::AddCommunity->render(vertical => $vertical),
-        search_widget           => LJ::Widget::Search->render(type => $vertical ? "tags" : "yandex", view => $view),
+        search_widget           => LJ::Widget::Search->render(
+                                        type        => $vertical ? "tags" : "yandex", 
+                                        view        => $view, 
+                                        search_text => $search_str,
+                                    ),
         top_posts               => \@top_posts,
         top_comms               => \@top_comms,
         view                    => $view,
         poll_of_the_day         => LJ::Widget::PollOfTheDay->render(
                                         vertical_account => $vertical ? $vertical->journal : undef,
-                                        vertical_name => $vertical ? $vertical->name : undef
+                                        vertical_name    => $vertical ? $vertical->name : undef,
                                     ),
         is_vertical_view        => $vertical ? 1 : 0,
     );

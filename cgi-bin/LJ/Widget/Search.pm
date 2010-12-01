@@ -90,7 +90,6 @@ EOF
         $uri .= "/" if $uri !~ m#/$#; ## add end slash if not exist
 
         my $args = BML::get_query_string();
-        $uri .= "?$args" if $args;
         my $tags = $opts{'preview'}
                 ? [ map { { tag => $_ } } @{$opts{'preview'}} ]
                 : [ map { { tag => $_ } } split /\n/m, $stored_words ];
@@ -99,6 +98,7 @@ EOF
             search_url      => $uri,
             view            => $opts{'view'},
             tags            => $tags,
+            search_text     => $opts{'search_text'},
         );
 
         return $template->output;
