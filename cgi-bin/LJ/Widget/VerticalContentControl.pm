@@ -171,6 +171,8 @@ sub verticals_remote_can_moderate {
     } else {
         foreach my $vert (keys %LJ::VERTICAL_TREE) {
             my $v = LJ::Vertical->load_by_name($vert);
+            next unless $v;
+
             if ($v->remote_is_moderator) {
                 push @verticals, $v;
             }
