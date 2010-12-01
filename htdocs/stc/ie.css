@@ -1,7 +1,3 @@
-BODY {
-	filter: expression(document.execCommand("BackgroundImageCache", false, true));
-	}
-
 /* Width & Height for Moods */
 * html IMG#mood_image_preview  {
     height: auto;
