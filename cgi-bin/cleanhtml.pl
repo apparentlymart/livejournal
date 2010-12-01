@@ -413,6 +413,16 @@ sub clean
                 next TOKEN;
             }
 
+            if ($tag eq "lj-wishlist") {
+                my $wishid = $attr->{wishid};
+                my $userid = $attr->{userid};
+                my $u = LJ::load_userid($userid);
+                next TOKEN unless $u;
+                my $wish = LJ::WishElement->load($u, $wishid);
+                next TOKEN unless $wish;
+                $newdata .= $wish->expand_entry;
+            }
+
             # Capture object and embed tags to possibly transform them into something else.
             if ($tag eq "object" || $tag eq "embed") {
                 if (LJ::are_hooks("transform_embed") && !$noexpand_embedded) {
