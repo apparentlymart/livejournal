@@ -173,7 +173,11 @@ sub render_body {
     }
 
     if ($vertical) {
-        @comms = $vertical->get_communities( is_need_child => 1, category => $cat, search => $search_str );
+        @comms = $vertical->get_communities(
+            is_need_child   => 1, 
+            category        => $cat, 
+            search          => $view eq 'communities' ? $search_str : undef
+        );
         $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $vertical->name, ljadwrapper => 1 });
     } elsif ($cat) { # we're looking at a lower-level category
 

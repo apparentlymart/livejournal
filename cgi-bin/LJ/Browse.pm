@@ -904,11 +904,27 @@ sub search_posts {
     my $comm_list = join ",", @$comms;
     my $dbh = LJ::get_db_reader();
     if (defined $search) {
-        my $where = $vertical ? " AND m.vert_id = " . $vertical->vert_id : "";
+        my $where = $vertical ? " AND km.vert_id = " . $vertical->vert_id . " AND " : "";
+        my @search_words = map { "SELECT '%".$_."%' AS cond" } split /\s+/, $search;
+        $search = join " UNION ALL ", @search_words;
         my $posts = $dbh->selectall_arrayref (
-            "SELECT journalid, jitemid FROM vertical_keywords w, vertical_keymap m WHERE w.kw_id = m.kw_id $where AND keyword like ?", 
-            { Slice => {} }, '%'.$search.'%'
-        );
+            "SELECT journalid, jitemid
+                FROM vertical_keymap km
+                WHERE 
+                $where
+                kw_id IN (
+                    SELECT kw_id
+                        FROM vertical_keywords kw
+                        WHERE EXISTS (
+                            SELECT 1 
+                                FROM (
+                                    $search
+                                ) c 
+                            WHERE kw.keyword LIKE cond
+                        )
+                    )",
+            { Slice => {} }
+        ) || [];
         my @found_posts = ();
         foreach my $post (@$posts) {
             my $post_ids = $dbh->selectall_arrayref (

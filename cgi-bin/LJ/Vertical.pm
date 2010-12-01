@@ -356,16 +356,29 @@ sub get_communities {
         or die "unable to contact global db master to create vertical";
 
     my $comms_search = [];
-    if ($search) {
+    my %finded = ();
+    if (defined $search) {
+        my @search_words = map { "SELECT '%".$_."%' AS cond" } split /\s+/, $search;
+        $search = join " UNION ALL ", @search_words;
         $comms_search = $dbh->selectall_arrayref (
-            "SELECT DISTINCT journalid 
-                FROM vertical_keywords w, vertical_keymap m 
-                WHERE m.jitemid <> 0 
-                    AND m.vert_id = ? 
-                    AND w.kw_id = m.kw_id 
-                    AND keyword like ?", 
-            { Slice => {} }, $self->vert_id, '%'.$search.'%'
+            "SELECT DISTINCT journalid
+                FROM vertical_keymap km
+                WHERE km.jitemid = 0
+                AND vert_id = ?
+                AND kw_id IN (
+                    SELECT kw_id
+                        FROM vertical_keywords kw
+                        WHERE EXISTS (
+                            SELECT 1 
+                                FROM (
+                                    $search
+                                ) c 
+                            WHERE kw.keyword LIKE cond
+                        )
+                    )",
+            { Slice => {} }, $self->vert_id
         ) || [];
+        %finded = map { $_->{journalid} => 1 } @$comms_search;
     }
 
     ## Get subcategories
@@ -378,9 +391,9 @@ sub get_communities {
     if ($category) {
         $category->load_communities ( %args ) unless ($args{'is_need_child'} && $category->{_loaded_journals});
         my $comms = $category->{communities};
-    
-        $comms = @$comms_search
-                ? [ grep { my $s_comm_id = $_->{journalid}; grep { $s_comm_id == $_ } @$comms } @$comms_search ]
+
+        $comms = defined $search
+                ? [ map { { journalid => $_ } } grep { $finded{$_} } @$comms ]
                 : [ map { { journalid => $_ } } @$comms ];
 
         $cusers = LJ::load_userids(map { $_->{journalid} } @$comms);
@@ -394,8 +407,8 @@ sub get_communities {
         my $comms = $cat->{communities};
 
         ## apply a user search if need
-        $comms = @$comms_search
-                ? [ grep { my $s_comm_id = $_->{journalid}; grep { $s_comm_id == $_ } @$comms } @$comms_search ]
+        $comms = defined $search
+                ? [ map { { journalid => $_ } } grep { $finded{$_} } @$comms ]
                 : [ map { { journalid => $_ } } @$comms ];
 
         ## join with common communities hash
