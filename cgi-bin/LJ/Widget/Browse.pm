@@ -234,6 +234,7 @@ sub render_body {
 
         foreach my $entry (@posts) {
             next unless $entry;
+            next unless $entry->valid;
 
             next unless 1;## This entry is inappropriate language in the subject or body
 
@@ -364,6 +365,7 @@ sub render_body {
         $posts = $vertical->load_vertical_posts( count => $vertical->show_entries, is_random => 1 );
         foreach my $post (@$posts) {
             my $entry = LJ::Entry->new ($post->{journalid}, jitemid => $post->{jitemid});
+            next unless $entry->valid;
             my $userpic = $entry->userpic;
             my $poster = $entry->poster;
             push @top_posts, {
