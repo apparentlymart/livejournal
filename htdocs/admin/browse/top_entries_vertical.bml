@@ -150,7 +150,7 @@ ADDPOST
         $template->param(
             top_posts => \@top_posts,
         );
-        $ret .= "<div style=\"padding:0 0 0 550px;width:300px;\">".$template->output."</div>";
+        $ret .= "<div style=\"margin:0 0 0 550px;width:300px;border:1px solid #E6E6E6;background:#F6F6F6;\">".$template->output."</div>";
 
     }
     $ret .= "<p style='clear:both;'><a href='/admin/browse/'>Back to main page</a></p>";
