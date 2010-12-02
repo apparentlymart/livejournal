@@ -16,12 +16,13 @@ sub render_body {
 
     ## Page with widget
     my $thispage = $opts{thispage} || "$LJ::SITEROOT/identity/login.bml";
-    $thispage =~ m|^http://| 
+    my $forwhat = $opts{'forwhat'} || 'login';
+    $thispage =~ m|^http://|
         or die "'thispage' param should be absolute uri";
 
     ## Handle auth params
     if (LJ::Request->did_post) {
-        do_login($thispage, \@errors);
+        do_login($thispage, $forwhat, \@errors);
         ## where to go on success?
         return if LJ::Request->redirected;
     }
@@ -46,10 +47,15 @@ sub render_body {
 
     ## Auth types.
     ## User type (LJ.com) is always enabled.
-    my @types = ({ type => 'user', 
-                   ml_tab_heading => LJ::Lang::ml("/identity/login.bml.tab.user"),
-                   action => $action_uri->as_string . "?ret=" . LJ::eurl($thispage),
-                   });
+    my @types;
+
+    if ($opts{'lj_auth'}) {
+        push @types, {
+            type => 'user',
+            ml_tab_heading => LJ::Lang::ml("/identity/login.bml.tab.user"),
+        };
+    }
+
     ## external auth
     foreach my $type (@LJ::IDENTITY_TYPES) {
         my $idclass = LJ::Identity->find_class($type);
@@ -71,18 +77,19 @@ sub render_body {
         'current_type' => $current_type,
         'returnto' => $thispage,
     );
-    
+
     ## well cooked widget is here
     return $template->output;
 }
 
 sub do_login {
     my $thispage = shift;
+    my $forwhat = shift;
     my $errors = shift;
     my $idtype = LJ::Request->post_param('type');
 
     ## Special case: perform LJ.com login.
-    if ($idtype eq 'user'){
+    if ($idtype eq 'user') {
         ## Determine user
         my $username = LJ::Request->post_param('user');
         unless ($username){
@@ -121,8 +128,11 @@ sub do_login {
 
         ## Where to go?
         my $returnto = LJ::Request->post_param("returnto") || $thispage;
-        $returnto = "https://www.livejournal.com/login.bml"
-            unless $returnto =~ m!^https?://\Q$LJ::DOMAIN_WEB\E/!;
+        unless ( $returnto =~ m!^https?://\Q$LJ::DOMAIN_WEB\E/! ) {
+            my $returl_fail;
+            ($returnto, $returl_fail)
+                = LJ::Identity->unpack_forwhat($forwhat);
+        }
         LJ::Request->redirect($returnto);
 
         return 1;
@@ -132,13 +142,16 @@ sub do_login {
         if ($idclass && $idclass->enabled) {
             ## Where to go?
             my $returnto = LJ::Request->post_param("returnto") || $thispage;
-            $returnto = "https://www.livejournal.com/login.bml"
-                unless $returnto =~ m!^https?://\Q$LJ::DOMAIN_WEB\E/!;
+            my $returl_fail = "$thispage?type=$idtype";
+            unless ( $returnto =~ m!^https?://\Q$LJ::DOMAIN_WEB\E/! ) {
+                ($returnto, $returl_fail)
+                    = LJ::Identity->unpack_forwhat($forwhat);
+            }
 
             $idclass->attempt_login($errors,
                 'returl' => $returnto,
-                'returl_fail' => "$thispage?type=$idtype",
-                'forwhat' => 'login',
+                'returl_fail' => $returl_fail,
+                'forwhat' => $forwhat,
             );
 
             return 1 if LJ::Request->redirected;

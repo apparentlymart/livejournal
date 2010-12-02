@@ -1409,7 +1409,6 @@ sub res_includes {
         }
     }
 
-
     foreach my $key (@LJ::NEEDED_RES) {
         my $path;
         my $mtime = _file_modtime($key, $now);

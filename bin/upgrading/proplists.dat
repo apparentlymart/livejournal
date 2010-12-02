@@ -1598,3 +1598,8 @@ userproplist.sys_limit_friending_notif_delay:
   cldversion: 8
   prettyname: System limit of friending notification delay
 
+logproplist.external_url:
+  datatype: char
+  des: URL of this entry on an external site
+  prettyname: External URL
+  sortorder: 107

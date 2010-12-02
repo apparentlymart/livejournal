@@ -23,6 +23,14 @@ sub want_user_input {
     return $usertype eq 'anonymous';
 }
 
+sub usertype_default {
+    my ( $class, $remote ) = @_;
+
+    return if $remote;
+
+    return 'anonymous';
+}
+
 sub handle_user_input {
     # we don't care; the poster is anonymous, which means "undef" as
     # the user posting

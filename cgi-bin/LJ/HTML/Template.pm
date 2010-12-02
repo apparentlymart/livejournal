@@ -14,6 +14,8 @@ sub new {
         'lj_sitename'   => $LJ::SITENAMESHORT,
         'lj_sslroot'    => $LJ::SSLROOT,
         'lj_jsprefix'   => $LJ::JSPREFIX,
+        'lj_res_includes_basic' => LJ::res_includes({ 'only_needed' => 1 }),
+        'lj_res_includes'       => LJ::res_includes(),
     );
 
     if ($opts->{'use_expr'}) {

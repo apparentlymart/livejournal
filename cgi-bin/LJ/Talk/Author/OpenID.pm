@@ -47,6 +47,16 @@ sub want_user_input {
     return $usertype =~ /^(?:openid|openid_cookie)$/;
 }
 
+sub usertype_default {
+    my ( $class, $remote ) = @_;
+
+    return unless $remote
+               && $remote->is_identity
+               && $remote->identity->short_code eq 'openid';
+
+    return 'openid_cookie';
+}
+
 sub handle_user_input {
     my ($class, $form, $remote, $need_captcha, $errret, $init) = @_;
 

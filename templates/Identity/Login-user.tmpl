@@ -1,12 +1,12 @@
 <p class="b-auth-desc"><TMPL_VAR expr="ml('/identity/login.bml.user.desc')"></p>
 <p class="b-auth-user-form">
 	<span class="b-auth-input-wrapper">
-		<label for=""><TMPL_VAR expr="ml('/identity/login.bml.user.label.name')"></label>
-		<input type="text" name="user" id="" value="" class="b-auth-user-input" />
+		<label for="ljusername"><TMPL_VAR expr="ml('/identity/login.bml.user.label.name')"></label>
+		<input type="text" name="user" id="ljusername" value="" class="b-auth-user-input" />
 	</span>
 	<span class="b-auth-input-wrapper">
-		<label for=""><TMPL_VAR expr="ml('/identity/login.bml.user.label.pass')"></label>
-		<input type="pass" name="password" id="" value="" class="b-auth-user-input" />
+		<label for="ljuserpassword"><TMPL_VAR expr="ml('/identity/login.bml.user.label.pass')"></label>
+		<input type="password" name="password" id="ljuserpassword" value="" class="b-auth-user-input" />
 		<a href="<TMPL_VAR expr="ml('/identity/login.bml.user.help.link')">"><TMPL_VAR expr="ml('/identity/login.bml.user.help')"></a>
 	</span>
 	<button type="submit"><TMPL_VAR expr="ml('/identity/login.bml.user.btn.login')"></button>

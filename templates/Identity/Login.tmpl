@@ -15,7 +15,7 @@
         <TMPL_ELSE>
             <li id="tab-<TMPL_VAR type>" class="b-auth-item" style="display:none">
         </TMPL_IF>
-            <form action="<tmpl_var action>" method="post">
+			<form action="<tmpl_var action>" method="post" target="_top">
                 <TMPL_INCLUDE expr="sprintf('templates/Identity/Login-%s.tmpl', type)">
                 <input type="hidden" name="type" value="<TMPL_VAR type>" />
                 <input type="hidden" name="returnto" value="<TMPL_VAR returnto>" />

@@ -101,6 +101,13 @@ Return a boolean value indicating that the provided 'usertype' form
 field value in the commenting form corresponds to this author class.
 Used by get_handler.
 
+=head3 usertype_default($remote)
+
+Return a string with the default 'usertype' field value, provided
+that the remote user corresponds to this author class and does not
+need any further authorization to comment. Return a value that evaluates
+to false otherwise.
+
 =head3 handle_user_input(...)
 
  my $up = $author_class->handle_user_input(

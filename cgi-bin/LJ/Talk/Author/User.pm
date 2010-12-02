@@ -64,6 +64,14 @@ sub want_user_input {
     return $usertype =~ /^(?:user|cookieuser)$/;
 }
 
+sub usertype_default {
+    my ( $class, $remote ) = @_;
+
+    return unless $remote && $remote->is_personal;
+
+    return 'cookieuser';
+}
+
 sub handle_user_input {
     my ($class, $form, $remote, $need_captcha, $errret, $init) = @_;
 

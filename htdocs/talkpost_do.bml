@@ -198,7 +198,10 @@ body<=
     my $stylemine = $POST{'stylemine'} ? 'style=mine' : '';
 
     my $commentlink;
-    if ($POST{'viewing_thread'} eq '') {
+    if ($POST{'is_form_embedded'}) {
+        $commentlink = $entry->prop('external_url')
+                     . '?view=' . $dtalkid . '#t' . $dtalkid;
+    } elsif ($POST{'viewing_thread'} eq '') {
         $commentlink = LJ::Talk::talkargs($talkurl, "view=$dtalkid", $stylemine) . "#t$dtalkid";
     } else {
         $commentlink = LJ::Talk::talkargs($talkurl, "thread=$POST{viewing_thread}", $stylemine) . "#t$dtalkid";

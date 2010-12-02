@@ -208,6 +208,12 @@ sub unpack_forwhat {
                   "jid=$journalid&" .
                   "pendcid=$pendcid";
         $returl_fail = $returl . '&failed=1';
+    } elsif ($forwhat =~ /^external-(\d+)-(\d+)$/) {
+        my ($journalid, $jitemid) = ($1, $2);
+        my $journal = LJ::load_userid($journalid);
+        my $entry = LJ::Entry->new($journal, 'jitemid' => $jitemid);
+
+        $returl = $returl_fail = $entry->prop('external_url');
     } else {
         # the warning will sit in error logs, and the exception
         # will be handled

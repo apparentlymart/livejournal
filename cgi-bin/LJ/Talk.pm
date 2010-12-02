@@ -1543,13 +1543,15 @@ sub talkform {
             $journalu );
     }
 
-    my @author_options;
+    my ( @author_options, $usertype_default );
     foreach my $author_class (LJ::Talk::Author->all) {
         next unless $author_class->enabled;
 
         my $params = $author_class->display_params($opts);
         $params->{'short_code'} = $author_class->short_code;
         push @author_options, $params;
+
+        $usertype_default ||= $author_class->usertype_default($remote);
     }
 
     # from registered user or anonymous?
@@ -1844,11 +1846,14 @@ sub talkform {
 
         'basesubject'           => $basesubject,
         'author_options'        => \@author_options,
+        'usertype_default'      => $usertype_default,
 
         'extra_rows'            => LJ::run_hook('extra_talkform_rows', {
             'entry'     => $entry,
             'editid'    => $editid,
-        }),
+        }) || undef,
+
+        'logout_url'            => $opts->{'logout_url'},
     );
 
     return $template->output;
