@@ -44,6 +44,9 @@ sub render_body {
         my $day = $bday->[1];
         next unless $u && $month && $day;
 
+        my $wishes = LJ::WishList->load_current($u);
+        my $wish_url = $u->journal_base . "/wishlist";
+
         # remove leading zero on day
         $day =~ s/^0//;
 
@@ -52,6 +55,7 @@ sub render_body {
         $ret .= "<td>" . $class->ml('widget.friendbirthdays.userbirthday', {'month' => LJ::Lang::month_short($month), 'day' => $day}) . "</td>";
         $ret .= "<td><a href='$LJ::SITEROOT/shop/view.bml?item=paidaccount&gift=1&for=" . $u->user . "' class='gift-link'>";
         $ret .= $class->ml('widget.friendbirthdays.gift') . "</a></td>";
+        $ret .= "<td>" . (scalar @$wishes ? "<a href='$wish_url'>wishlist img</a>" : "&nbsp;") . "</td>";
         $ret .= "</tr>";
     }
 
