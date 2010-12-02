@@ -800,10 +800,13 @@ sub event_html
     my ($self, $opts) = @_;
 
     if (! defined $opts) {
-        $self->_load_props unless $self->{_loaded_props};
-        $opts = { preformatted => $self->{props}{opt_preformatted} };
+        $opts = {};
     } elsif (! ref $opts) {
         $opts = { preformatted => $opts };
+    }
+
+    unless ( exists $opts->{'preformatted'} ) {
+        $opts->{'preformatted'} = $self->prop('opt_preformatted');
     }
 
     my $remote = LJ::get_remote();
