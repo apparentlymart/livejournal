@@ -23,7 +23,7 @@
 		<div class="b-catalogue-item-desc">
 			<tmpl_if photo_for_post><img src="<tmpl_var photo_for_post>" alt="<tmpl_var subject>"></tmpl_if>
 			<tmpl_var post_text>
-			<tmpl_if is_need_more>(<a href="<tmpl_var url_to_post>">Read more in original post</a>)</tmpl_if>
+			<tmpl_if is_need_more><p class="readmore">(<a href="<tmpl_var url_to_post>">Read more in original post</a>)</p></tmpl_if>
 		</div>
 		<ul class="b-share">
 			<li class="b-share-fb"><a href="http://facebook.com/sharer.php?u=<tmpl_var expr="eurl(url_to_post)">" target="_blank">">facebook</a></li>
