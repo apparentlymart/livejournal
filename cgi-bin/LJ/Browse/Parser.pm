@@ -94,6 +94,8 @@ sub do_parse {
             $ret .= $token->[1];
 
         } elsif ($type eq 'E') {
+            next if grep { $tag eq $_ } @$remove_tags;
+
             # end tag
             pop @open_tags;
             $ret .= "</$tag>";
