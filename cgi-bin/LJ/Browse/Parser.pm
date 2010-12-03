@@ -27,8 +27,6 @@ sub do_parse {
     my @images = ();
     my $remove_tags = $args{'remove_tags'};
 
-warn $text;
-
     while (my $token = $p->get_token) {
         my $type = $token->[0];
         my $tag  = $token->[1];
@@ -105,8 +103,6 @@ warn $text;
     $ret .= join("\n", map { "</$_>" } reverse @open_tags);
 
     _after_parse (\$ret);
-
-warn $ret;
 
     return {
         text    => $ret,
