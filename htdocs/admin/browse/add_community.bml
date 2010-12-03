@@ -54,7 +54,7 @@ body<=
             next if @errors;
 
             # Add journal to category
-            if ($category->add_community($uid, \@tags)) {
+            if ($category->add_community($uid, { tags => \@tags, not_need_approve => 1 })) {
                 $ret .= "<span class='super notice'>Communities successfully added to category.</span>";
             } else {
                 $ret .= "<span class='super notice'>Communities not added.</span>";

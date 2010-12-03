@@ -1004,7 +1004,10 @@ sub top_communities {
 sub add_community {
     my $self = shift;
     my $uid  = shift;
-    my $tags = shift;
+    my $opts = shift;
+
+    my $tags             = $opts->{'tags'};
+    my $not_need_approve = $opts->{'not_need_approve'} || 0;
 
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create category";
@@ -1016,7 +1019,8 @@ sub add_community {
 
     LJ::Browse->add_approved_community( comm  => LJ::want_user($uid),
                                         mod_u => LJ::get_remote(),
-                                        catid => $self->catid, );
+                                        catid => $self->catid, )
+        unless $not_need_approve;
 
     $self->clear_journals_memcache;
 
