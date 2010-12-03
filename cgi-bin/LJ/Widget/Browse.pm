@@ -341,7 +341,7 @@ sub render_body {
             my $c = LJ::load_userid($comm->{journalid});
             next unless $c;
             my $userpic = $c->userpic;
-            my $descr = $c->prop('comm_theme');
+            my $descr = $c->prop('comm_theme') || $c->{'name'};
             my $descr_trimmed = LJ::html_trim($descr, 50);
             push @top_comms, {
                 username        => $c->display_name,
