@@ -54,17 +54,12 @@
     if ($type eq "email") {
         my $email = lc($q);
         my $dbr = LJ::get_db_reader();
-        my $uids_ref = $dbr->selectall_arrayref("SELECT userid FROM user WHERE journaltype='P' AND statusvis='V' ".
-                                        "AND email=? LIMIT $max_users", undef, $email);
-        # try the email table
-        unless (@$uids_ref) {
-            $uids_ref = $dbr->selectall_arrayref(qq{
+        my $uids_ref = $dbr->selectall_arrayref(qq{
                 SELECT e.userid
                 FROM user u, email e
                 WHERE e.email=? AND e.userid=u.userid AND u.journaltype='P' AND u.statusvis='V'
                 LIMIT $max_users
             }, undef, $email);
-        }
 
         my %ret = ( status => 'success', result => '' );
 

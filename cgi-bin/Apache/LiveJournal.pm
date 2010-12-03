@@ -336,7 +336,7 @@ sub trans
               # apply sysban block if applicable
               if (LJ::UniqCookie->sysban_should_block) {
                   LJ::Request->handler("perl-script");
-                  LJ::Reiquest->set_handlers(PerlHandler => \&blocked_bot );
+                  LJ::Request->set_handlers(PerlHandler => \&blocked_bot );
                   return LJ::Request::OK;
               }
           }
