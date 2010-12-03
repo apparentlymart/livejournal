@@ -1631,7 +1631,7 @@ sub equals {
 }
 
 sub uri_map {
-    return \%LJ::VERTICAL_URI_MAP;
+    return undef;
 }
 
 # the name to pass to ads to identify verticals

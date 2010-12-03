@@ -164,19 +164,12 @@ sub verticals_remote_can_moderate {
     my $class = shift;
 
     my $remote = LJ::get_remote();
-    my @verticals;
+    my @verticals = ();
 
-    if (LJ::check_priv($remote, "vertical", "*") || $LJ::IS_DEV_SERVER) {
+    if (LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER) {
         @verticals = LJ::Vertical->load_all;
     } else {
-        foreach my $vert (keys %LJ::VERTICAL_TREE) {
-            my $v = LJ::Vertical->load_by_name($vert);
-            next unless $v;
-
-            if ($v->remote_is_moderator) {
-                push @verticals, $v;
-            }
-        }
+        return ();
     }
 
     return sort { $a->name cmp $b->name } @verticals;

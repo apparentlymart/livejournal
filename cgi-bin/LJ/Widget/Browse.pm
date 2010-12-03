@@ -8,6 +8,8 @@ use vars qw(%GET %POST $headextra @errors @warnings);
 
 sub need_res { qw( stc/widgets/widgets-layout.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) }
 
+use LJ::Browse::Parser;
+
 sub _build_tree {
     my ($parent, $level, $test_uri, $vertical, @categories) = @_;
     my @tree = ();
@@ -247,27 +249,18 @@ sub render_body {
             my $poster = $entry->poster;
             my $userpic = $entry->userpic;
             my @tags = $entry->tags;
-            my $event = $entry->event_html;
-            my ($is_removed_video) = $event =~ s/<iframe.*?>(.*)<\/iframe>/$1/;
-            $event =~ s#<img.*?>##gi;
             my $subject = $entry->subject_text || '***';
             my $trimmed_subj = LJ::html_trim ($subject, 60);
+            my $event = $entry->event_html;
 
-            my @images = ();
-            my $fb_photo_big = '';
-            @images = $entry->event_raw =~ m#img.*?src="(.*?)"#gi;
-
-            if (scalar @images) {
-                my $r = LJ::crop_picture_from_web(
-                    source    => $images[0],
-                    size      => '200x200',
-                    username  => $LJ::PHOTOS_FEAT_POSTS_FB_USERNAME,
-                    password  => $LJ::PHOTOS_FEAT_POSTS_FB_PASSWORD,
-                    galleries => [ $LJ::PHOTOS_FEAT_POSTS_FB_GALLERY ],
-                );
-                $fb_photo_big = $r->{url} || '';
-#                $fb_photo_big =~ s|^http://pics\.|http://l-pics.|;
-            }
+            my $parsed = LJ::Browse::Parser->do_parse (
+                text        => $event,
+                remove_tags => [ 'b', 'p', 'div', 'span', 'strong' ],
+                max_len     => 1000,
+                crop_image  => 1,
+            );
+            $event = $parsed->{'text'};
+            my $images = $parsed->{'images'};
 
             push @tmpl_posts, {
                 subject         => $trimmed_subj,
@@ -279,11 +272,12 @@ sub render_body {
                 mood            => $entry->prop('current_mood') || LJ::mood_name($entry->prop('current_moodid')) || '',
                 music           => $entry->prop('current_music'),
                 location        => $entry->prop('current_location'),
-                post_text       => LJ::html_trim ($event, 800),
+                post_text       => $event,
+                posted_to       => LJ::ljuser(LJ::get_username($entry->journalid)),
                 url_to_post     => $entry->url,
-                photo_for_post  => $fb_photo_big,
+                photo_for_post  => scalar @$images ? $images->[0] : '',
                 comments_count  => $entry->reply_count,
-                is_need_more    => $is_removed_video || bytes::length($entry->event_html) > 800 ? 1 : 0,
+                is_need_more    => $parsed->{'is_removed_video'} || bytes::length($entry->event_html) > 800 ? 1 : 0,
             };
         }
     }
