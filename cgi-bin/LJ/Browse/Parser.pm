@@ -23,9 +23,11 @@ sub do_parse {
     my $ret = '';
     my @open_tags = ();
     my $content_len = 0;
+    my $is_removed_video = 0;
     my $images_crop_cnt = $args{'crop_image'};
     my @images = ();
     my $remove_tags = $args{'remove_tags'};
+    my $is_text_trimmed = 0;
 
     while (my $token = $p->get_token) {
         my $type = $token->[0];
@@ -33,8 +35,9 @@ sub do_parse {
         my $attr = $token->[2];  # hashref
 
         if ($type eq "S") {
-            my $selfclose;
+            my $selfclose = 0;
 
+            ## resize and crop first image from post if exist
             if ($tag eq 'img') {
                 next unless $images_crop_cnt;
                 $images_crop_cnt--;
@@ -49,28 +52,49 @@ sub do_parse {
                 next;
             }
 
-            next if grep { $tag eq $_ } @$remove_tags;
-
-            # start tag
-            $ret .= "<$tag";
-
-            # assume tags are properly self-closed
-            $selfclose = 1 if lc $tag eq 'input' || lc $tag eq 'br' || lc $tag eq 'img';
-
-            # preserve order of attributes. the original order is
-            # in element 4 of $token
-            foreach my $attrname (@{$token->[3]}) {
-                if ($attrname eq '/') {
-                    $selfclose = 1;
-                    next;
-                }
-
-                # FIXME: ultra ghetto.
-                $attr->{$attrname} = LJ::no_utf8_flag($attr->{$attrname});
-                $ret .= " $attrname=\"" . LJ::ehtml($attr->{$attrname}) . "\"";
+            if (grep { $tag eq $_ } @$remove_tags) {
+                ## adding space to the text do not stick together
+                $ret .= " ";
+                next;
             }
 
-            $ret .= $selfclose ? " />" : ">";
+            if ($tag =~ /^lj-poll/) {
+                ## no need to insert poll
+                $ret .= " ";
+            } elsif ($tag =~ /^lj-embed/) {
+                ## nothing to do. remove all embed content
+                $is_removed_video = 1;
+                $ret .= " ";
+            } elsif ($tag =~ /^lj-cut/) {
+                ## remove all text from lj-cut
+                $ret .= " ";
+            } elsif ($tag eq 'lj') {
+                foreach my $attrname (keys %$attr) {
+                    if ($attrname =~ /user|comm/) {
+                        $ret .= LJ::ljuser($attr->{$attrname});
+                    }
+                }
+                $selfclose = 1;
+            } else {
+                $ret .= "<$tag";
+
+                # assume tags are properly self-closed
+                $selfclose = 1 if lc $tag eq 'input' || lc $tag eq 'br' || lc $tag eq 'img';
+
+                # preserve order of attributes. the original order is
+                # in element 4 of $token
+                foreach my $attrname (@{$token->[3]}) {
+                    if ($attrname eq '/') {
+                        next;
+                    }
+
+                    # FIXME: ultra ghetto.
+                    $attr->{$attrname} = LJ::no_utf8_flag($attr->{$attrname});
+                    $ret .= " $attrname=\"" . LJ::ehtml($attr->{$attrname}) . "\"";
+                }
+
+                $ret .= $selfclose ? " />" : ">";
+            }
 
             push @open_tags, $tag unless $selfclose;
 
@@ -80,8 +104,9 @@ sub do_parse {
             if (length($content) + $content_len > $char_max) {
 
                 # truncate and stop parsing
-                $content = LJ::text_trim($content, undef, ($char_max - $content_len));
+                $content = LJ::trim_at_word($content, ($char_max - $content_len));
                 $ret .= $content;
+                $is_text_trimmed = 1;
                 last;
             }
 
@@ -107,8 +132,10 @@ sub do_parse {
     _after_parse (\$ret);
 
     return {
-        text    => $ret,
-        images  => \@images,
+        text             => $ret,
+        images           => \@images,
+        is_removed_video => $is_removed_video,
+        is_text_trimmed  => $is_text_trimmed,
     }
 }
 
@@ -117,6 +144,9 @@ sub _after_parse {
 
     ## Remove multiple "br" tags
     $$text =~ s#(\s*<br\s*/?>\s*){2,}# #gi;
+
+    ## Remove all content of 'script' tag
+    $$text =~ s#<script.*?/script># #gis;
 }
 
 1;

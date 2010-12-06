@@ -251,12 +251,12 @@ sub render_body {
             my @tags = $entry->tags;
             my $subject = $entry->subject_text || '***';
             my $trimmed_subj = LJ::html_trim ($subject, 60);
-            my $event = $entry->event_html;
+            my $event = $entry->event_raw;
 
             my $parsed = LJ::Browse::Parser->do_parse (
                 text        => $event,
-                remove_tags => [ 'b', 'p', 'div', 'span', 'strong' ],
-                max_len     => 1000,
+                remove_tags => [ 'b', 'p', 'div', 'span', 'strong', 'font' ],
+                max_len     => 800,
                 crop_image  => 1,
             );
             $event = $parsed->{'text'};
@@ -277,7 +277,7 @@ sub render_body {
                 url_to_post     => $entry->url,
                 photo_for_post  => scalar @$images ? $images->[0] : '',
                 comments_count  => $entry->reply_count,
-                is_need_more    => $parsed->{'is_removed_video'} || bytes::length($entry->event_html) > 800 ? 1 : 0,
+                is_need_more    => $parsed->{'is_removed_video'} || $parsed->{'is_text_trimmed'},
             };
         }
     }
