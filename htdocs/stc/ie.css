@@ -256,9 +256,9 @@ __________________________________________*/
 
 /* Max width & max height
 -----------------------------------------------*/
-*HTML .lj_qotd_entry_userpic .userpic-img,
-*HTML .appwidget-recentcomments .userpic-img,
-*HTML #lj_controlstrip_userpic IMG {
+* HTML .lj_qotd_entry_userpic .userpic-img,
+* HTML .appwidget-recentcomments .userpic-img,
+* HTML .b-catalogue-item DD.b-catalogue-item-img IMG {
 	zoom:expression(
 			function(t){
 				t.runtimeStyle.zoom = 1;
@@ -345,6 +345,14 @@ __________________________________________*/
 	top:6px;
 	}
 
+/* Game list widget
+----------------------------------------------- */
+.appwidget-gamelist .w-body .gamelist {
+	display: inline;
+	zoom: 1;
+	}
+
+/* Should be at bottom of the page! */
 * HTML .i-ljtimes-btn,
 * HTML .i-ljtimes-drag,
 * HTML .i-ljtimes-click,
