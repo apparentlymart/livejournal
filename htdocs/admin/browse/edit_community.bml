@@ -71,6 +71,9 @@ sub _build_tree {
         $ret .= "<?needlogin?>";
     }
 
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
     my @cat_ = ();
     my @vert_ = ();
 
