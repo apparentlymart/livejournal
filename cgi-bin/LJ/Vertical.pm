@@ -357,7 +357,7 @@ sub get_communities {
 
     my $comms_search = [];
     my %finded = ();
-    if (defined $search) {
+    if (bytes::length($search)) {
         my @search_words = map { "SELECT '%".$_."%' AS cond" } split /\s+/, $search;
         $search = join " UNION ALL ", @search_words;
         $comms_search = $dbh->selectall_arrayref (

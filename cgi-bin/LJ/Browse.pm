@@ -903,7 +903,7 @@ sub search_posts {
     my @entries = ();
     my $comm_list = join ",", @$comms;
     my $dbh = LJ::get_db_reader();
-    if (defined $search) {
+    if (bytes::length($search)) {
         my $where = $vertical ? " AND km.vert_id = " . $vertical->vert_id . " AND " : "";
         my @search_words = map { "SELECT '%".$_."%' AS cond" } split /\s+/, $search;
         $search = join " UNION ALL ", @search_words;
