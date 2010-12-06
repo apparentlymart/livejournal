@@ -682,6 +682,56 @@ sub create_tag {
     return $kw_id;
 }
 
+## Remove tags links from vertical_keymap table.
+## Not delete tags from vertical_keywords.
+sub delete_tags_links {
+    my $class = shift;
+    my %args = @_;
+
+    my $comm_id = $args{'comm_id'} || $args{'journalid'};
+    return undef unless $comm_id;
+
+    my $vert_id = $args{'vert_id'} || 0;
+    my $jitemid = $args{'jitemid'} || 0;
+
+    my $v_sql = " AND vert_id = $vert_id ";
+    my $entry_sql = " AND jitemid = $jitemid ";
+
+    my $dbh = LJ::get_db_writer ();
+    my $res = $dbh->do ("
+        DELETE FROM vertical_keymap 
+            WHERE 
+                journalid = ?
+                $v_sql
+                $entry_sql
+    ", undef, $comm_id);
+
+    return 1;
+}
+
+sub get_tags_for_journal {
+    my $class = shift;
+    my %args  = @_;
+
+    my $comm_id = $args{'comm_id'} || $args{'journalid'};
+    return '' unless $comm_id;
+
+    my $vert_id = $args{'vert_id'} || 0;
+    my $jitemid = $args{'jitemid'} || 0;
+
+    my $dbh = LJ::get_db_reader ();
+    my $res = $dbh->selectall_arrayref ("
+        SELECT keyword 
+            FROM vertical_keymap km, vertical_keywords kw
+            WHERE km.kw_id = kw.kw_id
+                AND km.journalid = ?
+                AND km.vert_id = ?
+                AND km.jitemid = ?
+    ", { Slice => {} }, $comm_id, $vert_id, $jitemid);
+
+    return join ", ", map { $_->{keyword} } @$res;
+}
+
 sub save_tags {
     my $self = shift;
     my %args = @_;

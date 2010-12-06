@@ -73,6 +73,7 @@ body<=
 
         $ret .= "<ul style='list-style:none;line-height:1.6em;padding:0;'>";
         foreach (@posts) {
+            next unless $_->valid;
             my $url = $_->url;
             my $subject = $_->subject_text;
             my $jitemid = $_->jitemid;

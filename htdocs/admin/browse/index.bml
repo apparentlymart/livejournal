@@ -36,6 +36,7 @@ body<=
     $ret .= "<h2>Manage Communities</h2><ul style='list-style:none;line-height:1.6em;padding:0 0 0 20px;'>";
     $ret .= "<li><a href='./moderate_community.bml'>Moderate Community Submissions</a></li>";
     $ret .= "<li><a href='./add_community.bml'>Add Community to Category</a></li>";
+    $ret .= "<li><a href='./edit_community.bml'>Edit Community</a></li>";
     $ret .= "<li><a href='./remove_community.bml'>Remove Community from Category</a></li>";
     $ret .= "</ul>";
 

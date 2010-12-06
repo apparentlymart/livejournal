@@ -1,0 +1,162 @@
+<?page
+title=><?_ml .title _ml?>
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
+    use Class::Autouse qw( LJ::Browse );
+
+    return "This page is not available." unless LJ::is_enabled("browse");
+
+    my $ret;
+
+sub get_parent_path {
+    my $cat_path = shift;
+    my $c = shift;
+
+    return undef unless $c;
+
+    my $parent = $c->parent;
+
+    push @$cat_path, $c;
+
+    return 0 unless $parent;
+
+    return get_parent_path ($cat_path, $c->parent);
+}
+
+sub _build_tree {
+    my ($parent, $cats_ref, $selected_cat, $text, $i, $n) = @_;
+
+    $i ||= 0;
+
+    return $text unless $cats_ref;
+
+    my @categories = @$cats_ref;
+    @categories = grep { ($_->parent == $parent) } grep { $_ } @categories;
+
+    return $text unless scalar @categories;
+
+    my @path_ = ();
+    get_parent_path (\@path_, $selected_cat);
+    my %path = map { $_->catid => 1 } @path_;
+    my @sel_cat = grep { $path{$_->catid} } @categories;
+
+    my @caturls = map { { text => $_->{pretty_name}, value => $_->catid } } @categories;
+    @caturls = sort { $a->{text} cmp $b->{text} } @caturls;
+
+    $text .= "<tr><td>Category</td>";
+    $text .= "<td>" . LJ::html_select({
+                name => "catid$i\_$n", style => "width:100%;",
+                selected => $sel_cat[0] ? $sel_cat[0]->catid : '' },
+                { text => $ML{'.add'},
+                value => '' },
+                @caturls
+    ) . "</td>";
+    $text .= "<td>" . LJ::html_submit('select_c', 'Select Category') . "</td>";
+    $text .= "</tr>";
+
+    if ($sel_cat[0]) {
+        my @children = $sel_cat[0]->children;
+        $text = _build_tree($sel_cat[0], \@children, $selected_cat, $text, ++$i, $n);
+    }
+
+    return $text;
+}
+
+    # get remote
+    my $remote = LJ::get_remote();
+    unless ($remote) {
+        $ret .= "<?needlogin?>";
+    }
+
+    my @cat_ = ();
+    my @vert_ = ();
+
+    my $limit = 2; # Max number of categories a community can appear in
+    my @catid_;
+    my @catrem;
+
+    my $i = 1;
+    my $j = $i - 1;
+    ## which category the user wants to add a community?
+    my @ids = sort { $b cmp $a } grep { $_ =~ /^catid\d+\_\Q$i\E$/ } keys %POST;
+    my $cat_id = $POST{$ids[0]};
+    push @catid_, $cat_id if $cat_id;
+    push @catrem, $POST{"catremove_$i"} if $POST{"catremove_$i"};
+    push @cat_, $cat_id ? LJ::Browse->load_by_id ($cat_id) : undef;
+    my $vert_id = $POST{"vert_id_$i"} || $GET{"vert_id"};
+    push @vert_, $vert_id ? LJ::Vertical->load_by_id ($vert_id) : undef;
+
+    if (LJ::did_post && $POST{'action:update'}) {
+        # validate form auth
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
+
+        my @new_tags = grep { $_ =~ /^tags_\d+/ } keys %POST;
+        foreach my $tag (@new_tags) {
+            my ($cid) = $tag =~ /^tags_(\d+)/;
+            my @tags = split /,\s*/, $POST{$tag};
+            LJ::Vertical->delete_tags_links (comm_id => $cid, vert_id => $vert_[$j] ? $vert_[$j]->vert_id : 0);
+            $cat_[$j]->add_community ($cid, { tags => \@tags, not_need_approve => 1 });
+        }
+
+    }
+
+    $ret .= "<form method='post' method='post'>";
+    $ret .= LJ::form_auth();
+
+    $ret .= "<table>";
+    my @verticals = LJ::Vertical->load_all();
+    if (!$LJ::DISABLED{'verticals_menu'}) {
+        $ret .= "<tr><td valign='top'><!-- $i.-->Vertical</td>";
+        @verticals = map { { text => $_->{name}, value => $_->{vert_id} } } @verticals;
+
+        $ret .= "<td>".LJ::html_select({
+                    name => "vert_id_$i", style => "",
+                    selected => $vert_[$j] ? $vert_[$j]->vert_id : 0,
+                    },
+                    { text => 'Select Vertical',
+                    value => '',},
+                    @verticals
+                );
+        $ret .= "</td><td>\n";
+
+        $ret .= LJ::html_submit('select_v', 'Select Vertical') . "</td></tr>";
+    }
+
+    if ((LJ::did_post() && $vert_[$j]) || ($LJ::DISABLED{'verticals_menu'})) {
+        my @children = $cat_[$j] ? $cat_[$j]->children : ();
+        # Get the full list of categories
+        my @categories = LJ::Browse->load_all($vert_[$j]);
+
+        $ret .= _build_tree (0, \@categories, $cat_[$j], undef, undef, $i);
+        if ($cat_[$j]) {
+            $ret .= "<tr><td valign='top'>Communities from category:</td><tr><td colspan='3'>";
+            if ($cat_[$j]->communities) {
+                $ret .= "<table width='100%'>";
+                foreach my $comm ($cat_[$j]->communities) {
+                    $ret .= "<tr><td>".LJ::ljuser($comm->user) . "</td><td><input type='text' size='60' name='tags_".$comm->userid."' value='".LJ::Vertical->get_tags_for_journal (vert_id => $vert_[$j] ? $vert_[$j]->vert_id : 0, comm_id => $comm->userid)."'></td></tr>";
+                }
+                $ret .= "</table>";
+            }
+            $ret .= "</td></tr>";
+        }
+    }
+    $ret .= "</table>\n";
+    $ret .= "</p>\n";
+
+    $ret .= "<p>" . LJ::html_submit('action:update', $ML{'.update'}) . "</p>\n"
+        if $cat_[$j];
+    $ret .= "</div></form>\n\n";
+
+    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
+
+    return $ret;
+
+}
+_code?>
+
+<=body
+page?>

@@ -113,6 +113,7 @@ ADDPOST
         my @top_posts = ();
         foreach (@$posts) {
             my $entry = LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid});
+            next unless $entry->valid;
             my $url = $entry->url;
             my $subject = $entry->subject_text;
             my $jitemid = $entry->jitemid;
@@ -128,6 +129,7 @@ ADDPOST
         my $posts = $vertical->load_vertical_posts( count => $vertical->show_entries, is_random => 1 );
         foreach (@$posts) {
             my $entry = LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid});
+            next unless $entry->valid;
             my $userpic = $entry->userpic;
             my $poster = $entry->poster;
             push @top_posts, {
