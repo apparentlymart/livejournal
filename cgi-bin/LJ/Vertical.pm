@@ -352,6 +352,10 @@ sub get_communities {
 
     my $search = $args{'search'};
 
+    ## remove trailing spaces
+    $search =~ s/^\s+(.*?)$/$1/;
+    $search =~ s/(.*?)\s+?$/$1/;
+
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create vertical";
 

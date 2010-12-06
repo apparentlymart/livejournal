@@ -900,6 +900,10 @@ sub search_posts {
     my $search   = $args{'search_str'};
     my $vertical = $args{'vertical'};
 
+    ## remove trailing spaces
+    $search =~ s/^\s+(.*?)$/$1/;
+    $search =~ s/(.*?)\s+?$/$1/;
+
     my @entries = ();
     my $comm_list = join ",", @$comms;
     my $dbh = LJ::get_db_reader();
