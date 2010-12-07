@@ -1,361 +1,733 @@
-#
-# Wrapper around MemCachedClient
+=head1 NAME
+
+LJ::MemCache - LiveJournal-specific wrapper for various modules working
+with memcached servers
+
+=head1 NOTES AND CONVENTIONS
+
+The underlying modules are as follows:
+
+=over 2
+
+=item *
+
+Cache::Memcached
+
+=item *
+
+Cache::Memcached::Fast
+
+=back
+
+Please refer to the documentation of those for information how
+get/set/etc functions work.
+
+The methods here are not "class methods"; use LJ::MemCache::method,
+not LJ::MemCache->method.
+
+=head1 SUPPORTED METHODS
+
+=head2 READING DATA
+
+=over 2
+
+=item *
+
+get
+
+=item *
+
+gets
+
+=item *
+
+get_multi
+
+=item *
+
+gets_multi
+
+=back
+
+Note that gets and gets_multi may not be supported by the underlying module;
+call LJ::MemCached::can_gets to find out.
+
+=head2 WRITING DATA
+
+=over 2
+
+=item *
+
+add
+
+=item *
+
+set
+
+=item *
+
+replace
+
+=item *
+
+incr
+
+=item *
+
+decr
+
+=item *
+
+append
+
+=item *
+
+prepend
+
+=item *
+
+delete
+
+=item *
+
+cas
+
+=back
+
+=head1 LJ-SPECIFIC METHODS
+
+=head2 MAINTENANCE
+
+=over 2
+
+=item *
+
+init()
+
+=item *
+
+set_memcache($handler_class)
+
+=item *
+
+get_memcache()
+
+=item *
+
+reload_conf()
+
+=item *
+
+disconnect_all()
+
+=back
+
+=head2 UTILITY
+
+=over 2
+
+=item *
+
+get_or_set( $key, $coderef, $expire )
+
+=back
+
+=head2 SERIALIZATION AND DESERIALIZATION
+
+=over 2
+
+=item *
+
+array_to_hash($format, $array)
+
+=item *
+
+hash_to_array($format, $hash)
+
+=back
+
+The %LJ::MEMCACHE_ARRAYFMT variable in this modules is a table that defines
+formats; the first element of a format list is a numeric version value that
+is set when writing and checked when fetching data.
+
+=cut
 
 package LJ::MemCache;
 use strict;
-use lib "$ENV{LJHOME}/cgi-bin";
+use warnings;
 
-##
-my $use_fast = not $LJ::DISABLED{cache_memcached_fast};
+use String::CRC32 qw();
+use Carp qw();
 
-# HACK: Hardcode option for the 54 release
-$use_fast = 0; 
+### VARIABLES ###
 
-if ($use_fast){
-    require Cache::Memcached::Fast;
-} else {
-    require Cache::Memcached;
-}
+my @handlers = qw(
+    LJ::MemCache::Fast
+    LJ::MemCache::PP
+);
+my $used_handler;
 
-##
-my $keep_complex_keys = (not $use_fast # Cache::Memcache::Fast does not support composite keys.
-                            or (exists $LJ::DISABLED{complex_keys_simplification}
-                                and not $LJ::DISABLED{complex_keys_simplification})
-                                ) ? 1 : 0;
+# 'host:port' => handler
+my %connections;
 
-# HACK: Hardcode option for the 54 release
-$keep_complex_keys = 1;
-
-
-use vars qw($GET_DISABLED);
+use vars qw( $GET_DISABLED );
 $GET_DISABLED = 0;
 
 %LJ::MEMCACHE_ARRAYFMT = (
-                          'user' =>
-                          [qw[2 userid user caps clusterid dversion status statusvis statusvisdate
-                              name bdate themeid moodthemeid opt_forcemoodtheme allow_infoshow allow_contactshow
-                              allow_getljnews opt_showtalklinks opt_whocanreply opt_gettalkemail opt_htmlemail
-                              opt_mangleemail useoverrides defaultpicid has_bio txtmsg_status is_system
-                              journaltype lang oldenc packed_props]],
-                          'fgrp' => [qw[1 userid groupnum groupname sortorder is_public]],
-                          # version #101 because old userpic format in memcached was an arrayref of
-                          # [width, height, ...] and widths could have been 1 before, although unlikely
-                          'userpic' => [qw[101 width height userid fmt state picdate location flags]],
-                          'userpic2' => [qw[1 picid fmt width height state pictime md5base64 comment flags location url]],
-                          'talk2row' => [qw[1 nodetype nodeid parenttalkid posterid datepost state]],
-                          'usermsg' => [qw[1 journalid parent_msgid otherid timesent type]],
-                          'usermsgprop' => [qw[1 userpic preformated]],
-                          );
+    'user'          => [ qw( 2
+                             userid user caps clusterid dversion status
+                             statusvis statusvisdate name bdate themeid
+                             moodthemeid opt_forcemoodtheme allow_infoshow
+                             allow_contactshow allow_getljnews
+                             opt_showtalklinks opt_whocanreply
+                             opt_gettalkemail opt_htmlemail
+                             opt_mangleemail useoverrides defaultpicid
+                             has_bio txtmsg_status is_system journaltype
+                             lang oldenc packed_props ) ],
 
+    'fgrp'          => [ qw( 1
+                             userid groupnum groupname sortorder
+                             is_public ) ],
 
-my $memc;  # memcache object
+    # version #101 because old userpic format in memcached was an arrayref
+    # of [width, height, ...] and widths could have been 1 before, although
+    # unlikely
+    'userpic'       => [ qw( 101
+                             width height userid fmt state picdate location
+                             flags ) ],
 
-sub init {
+    'userpic2'      => [ qw( 1
+                             picid fmt width height state pictime md5base64
+                             comment flags location url ) ],
 
-    my $opts = _configure_opts();
-    if ($use_fast){
-        ## Init Fast (written in C) interface to Memcached
-        $memc = Cache::Memcached::Fast->new($opts);
-    
-    } else {
-        ## Init pure perl Memcached interface
+    'talk2row'      => [ qw( 1
+                             nodetype nodeid parenttalkid posterid datepost
+                             state ) ],
 
-        ##
-        my $parser_class = LJ::conf_test($LJ::MEMCACHE_USE_GETPARSERXS) ? 'Cache::Memcached::GetParserXS'
-                                                                        : 'Cache::Memcached::GetParser';
-        eval "use $parser_class";
+    'usermsg'       => [ qw( 1
+                             journalid parent_msgid otherid timesent type ) ],
 
-        # Check to see if the 'new' function/method is defined in the proper namespace, othewise don't
-        # explicitly set a parser class. Cached::Memcached may have attempted to load the XS module, and
-        # failed. This is a reasonable check to make sure it all went OK.
-        if (eval 'defined &' . $parser_class . '::new') {
-            $opts->{'parser_class'} = $parser_class;
-        }
+    'usermsgprop'   => [ qw( 1
+                             userpic preformated ) ],
+);
 
-        ## connect
-        $memc = Cache::Memcached->new($opts);
+### PRIVATE FUNCTIONS ###
 
-        ##
-        if (LJ::_using_blockwatch()) {
-           eval { LJ::Blockwatch->setup_memcache_hooks($memc) };
-
-            warn "Unable to add Blockwatch hooks to Cache::Memcached client object: $@"
-                if $@;
-        }
-
-        ##
-        if ($LJ::DB_LOG_HOST) {
-            my $stat_callback = sub {
-                my ($stime, $etime, $host, $action) = @_;
-                LJ::blocking_report($host, 'memcache', $etime - $stime, "memcache: $action");
-            };
-            $memc->set_stat_callback($stat_callback);
-        }
-
-    }
-
-    return $memc;
+sub _hashfunc {
+    my ($what) = @_;
+    return ( String::CRC32::crc32($what) >> 16 ) & 0x7fff;
 }
 
-sub set_memcache {
-    $memc = shift;
+sub _connect {
+    my ($server) = @_;
+
+    unless ( exists $connections{$server} ) {
+        init()
+            unless defined $used_handler;
+
+        $connections{$server}
+            = $used_handler->new({ 'servers' => [ $server ] });
+    }
+
+    return $connections{$server};
+}
+
+sub _get_connection {
+    my ($key) = @_;
+
+    my $hashval     = ref $key eq 'ARRAY' ? int $key->[0]
+                                          : _hashfunc($key);
+
+    my $num_server  = $hashval % scalar(@LJ::MEMCACHE_SERVERS);
+    my $server      = $LJ::MEMCACHE_SERVERS[$num_server];
+
+    return _connect($server);
+}
+
+sub _set_compression {
+    my ( $conn, $key ) = @_;
+
+    # currently, we aren't compressing the value only if we get to work
+    # with a key as follows:
+    #
+    #   1. "talk2:$journalu->{'userid'}:L:$itemid"
+    if ( $key =~ /^talk2:/ ) {
+        $conn->enable_compress(0);
+        return;
+    }
+
+    $conn->enable_compress(1);
+}
+
+if ( !$LJ::DISABLED{'memcache_profile'} ) {
+    *_profile = sub {
+        my ( $funcname, $key, $result ) = @_;
+
+        $key =~ s/\b\d+\b/?/g;
+
+        warn "[memcache-profile] $funcname($key) " .
+             ( defined $result ? '[hit]' : '[miss]' ) .
+             "\n";
+    };
+} else {
+    *_profile = sub {};
+}
+
+### MAINTENANCE METHODS ###
+
+sub init {
+    undef $used_handler;
+
+    foreach my $handler (@handlers) {
+        next unless $handler->can_use;
+
+        $used_handler = $handler;
+        last;
+    }
+
+    Carp::croak "no memcache handler"
+        unless defined $used_handler;
 }
 
 sub get_memcache {
-    init() unless $memc;
-    return $memc
+    return $used_handler;
 }
 
-sub client_stats {
-    return $memc->{'stats'} || {};
+sub set_memcache {
+    my ($new_handler) = @_;
+    $used_handler = $new_handler;
 }
 
-
-sub _configure_opts {
-    my @servers = $use_fast
-        ? map { { address => $_, weight => 1 } } @LJ::MEMCACHE_SERVERS
-        : @LJ::MEMCACHE_SERVERS;
-        
-    return {
-        servers => \@servers,
-        compress_threshold => $LJ::MEMCACHE_COMPRESS_THRESHOLD,
-        connect_timeout    => $LJ::MEMCACHE_CONNECT_TIMEOUT,
-        nowait => 1,
-        ($use_fast
-            ? () # Cache::Memcached::Fast specefic options
-            : (  
-                # Cache::Memcached specific options
-                debug           => $LJ::DEBUG{'memcached'},
-                pref_ip         => \%LJ::MEMCACHE_PREF_IP,
-                cb_connect_fail => $LJ::MEMCACHE_CB_CONNECT_FAIL,
-                readonly        => $ENV{LJ_MEMC_READONLY} ? 1 : 0,
-                )
-        ),
-    };
-}
 sub reload_conf {
-    return init();
+    %connections = ();
+    init();
 }
 
-sub forget_dead_hosts { $memc->forget_dead_hosts(); }
-sub disconnect_all    { $memc->disconnect_all();    }
-
-sub delete {
-    my $key = shift;
-    my $exp = shift;
-    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and not $keep_complex_keys;
-
-    # use delete time if specified
-    return $memc->delete($key, $exp) if defined $exp;
-
-    # else default to 4 seconds:
-    # version 1.1.7 vs. 1.1.6
-    $memc->delete($key, 1) || $memc->delete($key);
+sub disconnect_all {
+    foreach my $conn ( values %connections ) {
+        $conn->disconnect_all;
+    }
 }
 
-sub add       { 
-    my ($key, $val, $exp) = @_;
-    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and not $keep_complex_keys;
-    
-    $val = '' unless defined $val;
-    
-    $memc->enable_compress(_is_compressable($key));
-    return $memc->add($key, $val, $exp);
-}
-sub replace   { 
-    my ($key, $val) = @_;
-    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and not $keep_complex_keys;
-    $val = '' unless defined $val;
+sub list_servers {
+    my %ret = @_;
 
-    $memc->enable_compress(_is_compressable($key));
-    return $memc->replace($key, $val);
-}
-sub set       { 
-    my ($key, $val, $exp) = @_;
-    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and not $keep_complex_keys;
-    $val = '' unless defined $val;
-    
-    # disable compression for some keys.
-    # we should keep it's values in raw string format to "append" some data later.
-    $memc->enable_compress(_is_compressable($key));
+    foreach my $server ( @LJ::MEMCACHE_SERVERS ) {
+        $ret{$server} = _connect($server);
+    }
 
-    # perform action
-    my $res = $memc->set($key, $val, $exp);
+    return \%ret;
+}
+
+### READING METHODS ###
+
+sub get {
+    my ( $key, @params ) = @_;
+
+    return if $GET_DISABLED;
+
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    my $res = $conn->get( $key, @params );
+
+    _profile( 'get', $key, $res );
 
     return $res;
 }
-sub incr      {
-    my ($key, @other) = @_;
-    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-            if ref $key eq 'ARRAY' and not $keep_complex_keys;
-    $memc->incr($key, @other);
-}
-sub decr      {
-    my ($key, @other) = @_;
-    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-            if ref $key eq 'ARRAY' and not $keep_complex_keys;
-    $memc->decr($key, @other);
+
+sub can_gets {
+    return $used_handler->can_gets;
 }
 
-sub get       {
-    return undef if $GET_DISABLED;
-    my ($key, @others) = @_;
-    $key = $key->[1] 
-        if ref $key eq 'ARRAY'
-           and not $keep_complex_keys; # Cache::Memcached::Fast does not support combo [int, key] keys.
-    $memc->get($key, @others);
-}
-
-## gets supported only by ::Fast interface
-sub can_gets { return $use_fast }
-
-## @@ret: reference to an array [$cas, $value], or nothing.
-## @@doc: Cache::Memcached::Fast only method
 sub gets {
-    return if $GET_DISABLED or not $use_fast;
-    
-    my $key = shift;
-    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY'; # we have to simplify keys, because Cache::Memcached::Fast doesn't support complex keys.
-    return $memc->gets($key);
-}
-## @ret: reference to hash, where $href->{$key} holds a reference to an array [$cas, $value].
-## @@doc: Cache::Memcached::Fast only method
-sub gets_multi {
-    return if $GET_DISABLED or not $use_fast;
+    my ($key) = @_;
 
-    # Cache::Memcached::Fast does not support combo [int, key] keys.
-    my @keys = map { ref $_ eq 'ARRAY' ? $_->[1] : $_ } @_;
+    return if $GET_DISABLED;
 
-    return $memc->gets_multi(@keys);
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    my $res = $conn->get($key);
+
+    _profile( 'gets', $key, $res );
+
+    return $res;
 }
 
-##
 sub get_multi {
     return {} if $GET_DISABLED;
-    # Cache::Memcached::Fast does not support combo [int, key] keys.
-    my @keys = $keep_complex_keys
-        ? @_
-        : map { ref $_ eq 'ARRAY' ? $_->[1] : $_ } @_;
-    
-    return $memc->get_multi(@keys);
+
+    my @keys = @_;
+
+    my ( @connections, %keys_map, @keys_normal );
+
+    foreach my $key (@keys) {
+        my $conn = _get_connection($key);
+        my $cid  = int $conn;
+
+        unless ( exists $keys_map{$cid} ) {
+            $keys_map{$cid} = [];
+            push @connections, $conn;
+        }
+
+        my $key_normal = ref $key eq 'ARRAY' ? $key->[1]
+                                             : $key;
+
+        push @{ $keys_map{$cid} }, $key_normal;
+        push @keys_normal, $key_normal;
+    }
+
+    my %ret;
+
+    foreach my $conn (@connections) {
+        my $cid = int $conn;
+        my $conn_ret = $conn->get_multi( @{ $keys_map{$cid} } );
+
+        %ret = ( %ret, %$conn_ret );
+    }
+
+    _profile( 'get_multi', join(';', @keys_normal) );
+
+    return \%ret;
+}
+
+sub gets_multi {
+    return {} if $GET_DISABLED;
+
+    my @keys = @_;
+
+    my ( @connections, %keys_map, @keys_normal );
+
+    foreach my $key (@keys) {
+        my $conn = _get_connection($key);
+        my $cid  = int $conn;
+
+        unless ( exists $keys_map{$cid} ) {
+            $keys_map{$cid} = [];
+            push @connections, $conn;
+        }
+
+        my $key_normal = ref $key eq 'ARRAY' ? $key->[1]
+                                             : $key;
+
+        push @{ $keys_map{$cid} }, $key_normal;
+        push @keys_normal, $key_normal;
+    }
+
+    my %ret;
+
+    foreach my $conn (@connections) {
+        my $cid = int $conn;
+        my $conn_ret = $conn->gets_multi( @{ $keys_map{$cid} } );
+
+        %ret = ( %ret, %$conn_ret );
+    }
+
+    _profile( 'gets_multi', join(';', @keys_normal) );
+
+    return \%ret;
+}
+
+### WRITING METHODS ###
+
+sub add {
+    my ( $key, $value, $expire ) = @_;
+
+    $value = '' unless defined $value;
+
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    _profile( 'add', $key );
+
+    _set_compression( $conn, $key );
+    return $conn->add( $key, $value, $expire );
+}
+
+sub set {
+    my ( $key, $value, $expire ) = @_;
+
+    $value = '' unless defined $value;
+
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    _profile( 'set', $key );
+
+    _set_compression( $conn, $key );
+    return $conn->set( $key, $value, $expire );
+}
+
+sub replace {
+    my ( $key, $value, $expire ) = @_;
+
+    $value = '' unless defined $value;
+
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    _profile( 'replace', $key );
+
+    _set_compression( $conn, $key );
+    return $conn->replace( $key, $value, $expire );
+}
+
+sub incr {
+    my ( $key, $value ) = @_;
+
+    $value = '' unless defined $value;
+
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    _profile( 'incr', $key );
+
+    return $conn->incr( $key, $value );
+}
+
+sub decr {
+    my ( $key, $value ) = @_;
+
+    $value = '' unless defined $value;
+
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    _profile( 'decr', $key );
+
+    return $conn->decr( $key, $value );
 }
 
 sub append {
-    my ($key, $val) = @_;
-    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and not $keep_complex_keys;
-    $val = '' unless defined $val;
+    my ( $key, $value ) = @_;
 
-    ## Memcache v1.4.1 does not flush value if 'append' failed. But should!
-    ## Becouse value DO changed. Failed append means that cached key becomes invalid.
-    ## That's why we have to get result of command and delete key on if needed.
-    my $res = $use_fast
-        ? $memc->append($key, $val)
-        : _extended_set("append", $key, $val);
-    $memc->delete($key)
-        unless $res;
+    $value = '' unless defined $value;
+
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    _profile( 'append', $key );
+
+    my $res = $conn->append( $key, $value );
+
+    unless ($res) {
+        # in case memcache failed to append to the value, it doesn't
+        # remove the value that is stored; we assume that the client
+        # updates memcache because it changed the original data, so
+        # let's actually clear the old value ourselves as a fallback
+        # mechanism
+        $conn->delete($key);
+    }
+
     return $res;
 }
 
 sub prepend {
-    my ($key, $val) = @_;
-    
-    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and not $keep_complex_keys;
-    $val = '' unless defined $val;
+    my ( $key, $value ) = @_;
 
-    ## See 'append' method for description.
-    my $res = $use_fast
-        ? $memc->prepend($key, $val)
-        : _extended_set("prepend", $key, $val);
-    $memc->delete($key)
-        unless $res;
+    $value = '' unless defined $value;
+
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    _profile( 'prepend', $key );
+
+    my $res = $conn->prepend( $key, $value );
+
+    unless ($res) {
+        # in case memcache failed to prepend to the value, it doesn't
+        # remove the value that is stored; we assume that the client
+        # updates memcache because it changed the original data, so
+        # let's actually clear the old value ourselves as a fallback
+        # mechanism
+        $conn->delete($key);
+    }
+
+    return $res;
+}
+
+sub delete {
+    my ( $key, $expire ) = @_;
+
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    _profile( 'delete', $key );
+
+    my $res = $conn->delete( $key, $expire );
+
     return $res;
 }
 
 sub cas {
-    my ($key, $cas, $val) = @_;
-    $key = $key->[1]     # Cache::Memcached::Fast does not support combo [int, key] keys.
-        if ref $key eq 'ARRAY' and not $keep_complex_keys;
-    $val = '' unless defined $val;
-    return $use_fast 
-        ? $memc->cas($key, $cas, $val)
-        : _extended_set("cas", $key, $cas, $val);
-}
+    my ( $key, $cas, $value ) = @_;
 
-# Pureperl memcached interface Cache::Memcache v 1.26 does not support some memcached commands.
-# this method uses private methods of Cache::Memcache to provide new functionality
-sub _extended_set {
-    my ($cmd, @args) = @_;
-    my $append_func = ref($memc) . "::_set";
-    my $res = undef;
+    $value = '' unless defined $value;
 
-    # Cache::Memcached::Fast has usefull flag 'nowt' - no wait for response
-    no strict 'refs';
-    if (defined wantarray()){ # scalar or list context
-        $res = &$append_func("append", $memc, @args);
-    } else {
-        &$append_func("append", $memc, @args); # void context
-    }
-    use strict 'refs';
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    my $res = $conn->cas( $key, $cas, $value );
+
+    _profile( 'cas', $key, $res );
+
     return $res;
 }
 
+### UTILITY METHODS ###
 
+sub get_or_set {
+    my ( $key, $code, $expire ) = @_;
 
-sub _get_sock { $memc->get_sock(@_);   }
+    my $value = LJ::MemCache::get($key);
 
-sub run_command { $memc->run_command(@_); }
+    unless ($value) {
+        $value = $code->();
+        LJ::MemCache::set( $key, $value, $expire );
+    }
 
+    return $value;
+}
+
+### OBJECT SERIALIZATION METHODS ###
 
 sub array_to_hash {
-    my ($fmtname, $ar) = @_;
-    my $fmt = $LJ::MEMCACHE_ARRAYFMT{$fmtname};
-    return undef unless $fmt;
-    return undef unless $ar && ref $ar eq "ARRAY" && $ar->[0] == $fmt->[0];
-    my $hash = {};
-    my $ct = scalar(@$fmt);
-    for (my $i=1; $i<$ct; $i++) {
-        $hash->{$fmt->[$i]} = $ar->[$i];
+    my ( $format, $array ) = @_;
+
+    my $format_info = $LJ::MEMCACHE_ARRAYFMT{$format};
+    return unless $format_info;
+
+    my $format_version = $format_info->[0];
+    return unless $array
+              and ref $array eq "ARRAY"
+              and $array->[0] == $format_version;
+
+    my %ret;
+    foreach my $i ( 1 .. $#$format_info ) {
+        $ret{ $format_info->[$i] } = $array->[$i];
     }
-    return $hash;
+
+    return \%ret;
 }
 
 sub hash_to_array {
-    my ($fmtname, $hash) = @_;
-    my $fmt = $LJ::MEMCACHE_ARRAYFMT{$fmtname};
-    return undef unless $fmt;
-    return undef unless $hash && ref $hash;
-    my $ar = [$fmt->[0]];
-    my $ct = scalar(@$fmt);
-    for (my $i=1; $i<$ct; $i++) {
-        $ar->[$i] = $hash->{$fmt->[$i]};
+    my ( $format, $hash ) = @_;
+
+    my $format_info = $LJ::MEMCACHE_ARRAYFMT{$format};
+    return unless $format_info;
+
+    my $format_version = $format_info->[0];
+    return unless $hash
+              and ref $hash eq "HASH";
+
+    my @ret = ( $format_version );
+    foreach my $i ( 1 .. $#$format_info ) {
+        push @ret, $hash->{ $format_info->[$i] };
     }
-    return $ar;
+
+    return \@ret;
 }
 
-sub get_or_set {
-    my ($memkey, $code, $expire) = @_;
-    my $val = LJ::MemCache::get($memkey);
-    return $val if $val;
-    $val = $code->();
-    LJ::MemCache::set($memkey, $val, $expire);
-    return $val;
-}
+package LJ::MemCache::Fast;
 
-sub _is_compressable {
-    my $key = shift;
-    $key = $key->[1] if ref $key eq 'ARRAY'; # here we should handle real key
+BEGIN { our @ISA = qw( Cache::Memcached::Fast ); }
 
-    # now we have only one key whose value shouldn't be compressed:
-    #   1. "talk2:$journalu->{'userid'}:L:$itemid"
-    return 0 if $key =~ m/^talk2:/;
+sub can_use {
+    return unless LJ::is_enabled('cache_memcached_fast');
+
+    eval { require Cache::Memcached::Fast };
+    return if $@;
+
     return 1;
+}
+
+sub new {
+    my ( $class, $opts ) = @_;
+
+    return $class->SUPER::new({
+        %$opts,
+        'compress_threshold' => $LJ::MEMCACHE_COMPRESS_THRESHOLD,
+        'connect_timeout'    => $LJ::MEMCACHE_CONNECT_TIMEOUT,
+        'nowait'             => 1,
+    });
+}
+
+sub can_gets { 1 }
+
+package LJ::MemCache::PP;
+
+BEGIN { our @ISA = qw( Cache::Memcached ); }
+
+sub can_use {
+    eval { require Cache::Memcached };
+    1;
+}
+
+sub new {
+    my ( $class, $opts ) = @_;
+
+    my $conn = $class->SUPER::new({
+        %$opts,
+        'compress_threshold' => $LJ::MEMCACHE_COMPRESS_THRESHOLD,
+        'connect_timeout'    => $LJ::MEMCACHE_CONNECT_TIMEOUT,
+        'nowait'             => 1,
+
+        # Cache::Memcached specific options
+        'debug'              => $LJ::DEBUG{'memcached'},
+        'pref_ip'            => \%LJ::MEMCACHE_PREF_IP,
+        'cb_connect_fail'    => $LJ::MEMCACHE_CB_CONNECT_FAIL,
+        'readonly'           => $ENV{'LJ_MEMC_READONLY'} ? 1 : 0,
+    });
+
+    if ($LJ::DB_LOG_HOST) {
+        $conn->set_stat_callback(sub {
+            my ($stime, $etime, $host, $action) = @_;
+
+            LJ::blocking_report( $host, 'memcache', $etime - $stime,
+                                 "memcache: $action" );
+        });
+    }
+
+    return $conn;
+}
+
+sub can_gets { 0 }
+
+{
+    no strict 'refs';
+
+    # Cache::Memcached doesn't support some methods, so let's add them!
+    #
+    # this is a hacky way that uses a private method from Cache::Memcached,
+    # but oh well
+    foreach my $cmd (qw( append prepend delete )) {
+        *$cmd = sub {
+            return Cache::Memcached::_set( $cmd, @_ );
+        };
+    }
 }
 
 1;

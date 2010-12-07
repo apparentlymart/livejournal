@@ -1,174 +1,265 @@
 <?_code
 {
-#line 3
+#line 4
     use strict;
-    no strict 'refs';
     use vars qw(%GET);
     use Data::Dumper;
     use Time::HiRes ();
+    use LJ::MemCache;
 
     my $u = LJ::get_remote();
     return "You must be logged in to view this tool." unless $u;
-    return "You don't have 'siteadmin' priv." unless LJ::check_priv($u, "siteadmin", "memcacheview");
 
-    my $prev_hits = $u ? LJ::MemCache::get([$u->{'userid'},"mcrate:$u->{'userid'}"]) : undef;
+    return "You don't have the 'siteadmin:memcacheview' priv."
+        unless LJ::check_priv($u, "siteadmin", "memcacheview");
 
-    my $ret;
+    my %templates = (
+        'overview' => \qq{
+            <div class='topbar'>[<a href='memcache.bml'>Overview</a>]</div>
+            <h1>Memory Cache Overview</h1>
+            <table border='1' cellpadding='5'>
+                <tr>
+                    <th>Host</th>
+                    <th>Hit Rate</th>
+                    <th>Curr/Max Size</th>
+                    <th>Utilization %</th>
+                    <th>Uptime</th>
+                    <th>Version</th>
+                </tr>
+                <TMPL_LOOP hosts>
+                    <tr>
+                        <td>
+                            <a href="<TMPL_VAR details_link>">
+                                <TMPL_VAR host>
+                            </a>
+                        </td>
+                        <td><TMPL_VAR hit_rate></td>
+                        <td align="center"><TMPL_VAR size></td>
+                        <td><TMPL_VAR utilization></td>
+                        <td><TMPL_VAR uptime></td>
+                        <td><TMPL_VAR version></td>
+                    </tr>
+                </TMPL_LOOP>
+            </table>
+            <p>Global [<TMPL_VAR global>]</p>
+        },
 
-    my $mode = $GET{'mode'};
-    if ($GET{'host'}) {
-	$mode ||= "host";
-    }
-    $mode ||= "overview";
+        'host' => \qq{
+            <div class='topbar'>[<a href='memcache.bml'>Overview</a>]</div>
+            <h1>Details for <TMPL_VAR host></h1>
 
-    $ret .= "<div class='topbar'>[<a href='memcache.bml'>Overview</a>]\n";
+            <h2>Slab classes</h2>
+            <table border='1' cellpadding='2'>
+                <tr>
+                    <th>class</th>
+                    <th>size</th>
+                    <th>used</th>
+                    <th>total</th>
+                    <th colspan='2'>free</th>
+                    <th>pages</th>
+                    <th>max age</th>
+                </tr>
+                <TMPL_LOOP classes>
+                    <tr>
+                        <td><TMPL_VAR class></td>
+                        <td><TMPL_VAR chunk_size></td>
+                        <td><TMPL_VAR used_chunks></td>
+                        <td><TMPL_VAR total_chunks></td>
+                        <td><TMPL_VAR free_chunks></td>
+                        <td><TMPL_VAR free_chunks_end></td>
+                        <td><TMPL_VAR total_pages></td>
+                        <td><TMPL_VAR age></td>
+                    </tr>
+                </TMPL_LOOP>
+            </table>
+        },
+    );
 
-    if ($mode eq "overview") {
-	$ret .= <<"END_TOP";
-</div>
-<h1>Memory Cache Overview</h1>
-<table border='1' cellpadding='5'>
-<tr><th>Host</th><th>Hit Rate</th><th>Curr/Max Size</th><th><span title='Utilization'>Utlz %</span></th><th>Uptime</th><th>Version</th></tr>
-END_TOP
-    }
+    my $mode = $GET{'host'} ? 'host' : 'overview';
 
-    my %now_hits;
-    if ($prev_hits) { %now_hits = %$prev_hits; }
+    my $template = LJ::HTML::Template->new( scalarref => $templates{$mode} );
 
-    my ($tot_hits, $tot_misses) = ();
+    my $display_percents = sub {
+        my ($what) = @_;
+        return sprintf( '%0.02f%%', $what * 100 );
+    };
 
-    my %memc_servers = (); # ip => 1
-    foreach (@LJ::MEMCACHE_SERVERS) {
-        $memc_servers{$_}++;
-    }
+    my $display_size = sub {
+        my ($what) = @_;
 
-    foreach my $entry (sort keys %memc_servers) {
-	my $host = ref $entry ? $entry->[0] : $entry;
-	next if $mode eq "host" && $host ne $GET{'host'};
+        if ( $what > 1024 ** 3 ) {
+            return sprintf( '%0.02fG', $what / 1024 ** 3 );
+        } elsif ( $what > 1024 ** 2 ) {
+            return sprintf( '%0.02fM', $what / 1024 ** 2 );
+        } elsif ( $what > 1024 ) {
+            return sprintf( '%0.02fk', $what / 1024 );
+        } else {
+            return $what;
+        }
+    };
 
-	LJ::MemCache::forget_dead_hosts();
-	my $sock = Cache::Memcached::sock_to_host($host);
+    my $display_time = sub {
+        my ($what) = @_;
 
-        my $t1 = Time::HiRes::time();
+        if ( $what > 86400 ) {
+            return sprintf( '%0.02f days', $what / 86400 );
+        } elsif ( $what > 3600 ) {
+            return sprintf( '%0.02f hr', $what / 3600 );
+        } elsif ( $what > 60 ) {
+            return sprintf( '%0.02f min', $what / 60 );
+        } elsif ( $what > 1 ) {
+            return sprintf( '%0.02f sec', $what );
+        } else {
+            return sprintf( '%0.02f msec', $what * 1000 );
+        }
+    };
 
-	my $log;
-	my %stat;
-	my @cmds = ("", "malloc", "items", "slabs");
-	my $cmd;
-        if ($sock) {
-            while (defined($cmd = shift @cmds)) {
-                my $realcmd = "stats" . ($cmd ? " $cmd" : "");
-                $log .= "<b>$realcmd</b>\n";
-                foreach (LJ::MemCache::run_command($sock, "$realcmd\r\n")) {
-                    last if $_ eq "END\r\n";
-                    $log .= $_;
-                    next if $cmd eq "maps";
-                    if (/^STAT (\S+) (\S+)/) {
-                        $stat{$cmd}{$1} = $2;
-                    }
-                }
+    my $parse_stats = sub {
+        my ($raw) = @_;
+
+        my %ret;
+        while ( $raw =~ /^STAT (\S+) (\S+)/gm ) {
+            $ret{$1} = $2;
+        }
+        return \%ret;
+    };
+
+    my $get_stats = sub {
+        my ( $conn, $host, $statname ) = @_;
+
+        my $raw = $conn->stats($statname)->{'hosts'}->{$host}->{$statname};
+        return $parse_stats->($raw);
+    };
+
+    my $prev_hits = LJ::MemCache::get([ $u->userid, 'mcrate:' . $u->userid]);
+
+    my %now_hits  = $prev_hits ? %$prev_hits : ();
+
+    my $connections = LJ::MemCache::list_servers;
+
+    if ( $mode eq 'overview' ) {
+        my @hosts_display;
+
+        my ( $tot_hits, $tot_misses ) = qw(0 0);
+
+        foreach my $host ( sort keys %$connections ) {
+            my $conn        = $connections->{$host};
+
+            my $t1          = Time::HiRes::time();
+            my $stats       = $conn->stats->{'hosts'}->{$host}->{'misc'};
+            my $t2          = Time::HiRes::time();
+
+            my $hits        = $stats->{'get_hits'};
+            my $misses      = $stats->{'get_misses'};
+
+            my $cpu         = $stats->{'rusage_user'}
+                            + $stats->{'rusage_system'};
+
+            $now_hits{$host} = [ $hits, $misses, $cpu ];
+
+            my $requests    = $hits + $misses;
+            my $hit_rate    = $hits / ( $hits + $misses || 1 );
+
+            my $hit_rate_display = $display_percents->($hit_rate) . ' ';
+
+            if ( $prev_hits && $prev_hits->{$host} ) {
+                my ( $prev_hits, $prev_misses, $prev_cpu )
+                    = @{ $prev_hits->{$host} };
+
+                my $new_hits    = $hits     - $prev_hits;
+                my $new_misses  = $misses   - $prev_misses;
+                $tot_hits       += $new_hits;
+                $tot_misses     += $new_misses;
+
+                my $new_requests = $new_hits + $new_misses;
+                my $new_rate = $new_hits / ( $new_requests || 1 );
+
+                my $cpu = sprintf( "%0.6f", $cpu - $prev_cpu );
+
+                $hit_rate_display .= '[' .
+                                         $display_percents->($new_rate) . ' ' .
+                                         "{$new_requests} " .
+                                         $cpu .
+                                     '] ';
             }
+            $hit_rate_display .= $display_time->( $t2 - $t1 );
+
+            my $bytes_used      = $stats->{'bytes'};
+            my $bytes_avail     = $stats->{'limit_maxbytes'};
+
+            my $size_display    = $display_size->($bytes_used) . '/' .
+                                  $display_size->($bytes_avail);
+
+            my $used_ratio      = $bytes_used / ( $bytes_avail || 1 );
+            my $utilization     = $display_percents->($used_ratio);
+
+            my $uptime          = $display_time->( $stats->{'uptime'} );
+            my $version         = $stats->{'version'};
+
+            push @hosts_display, {
+                'host'          => $host,
+                'details_link'  => "$LJ::SITEROOT/admin/memcache.bml?" .
+                                   "host=$host",
+                'hit_rate'      => $hit_rate_display,
+                'size'          => $size_display,
+                'utilization'   => $utilization,
+                'uptime'        => $uptime,
+                'version'       => $version,
+            };
         }
 
-        my $t2 = Time::HiRes::time();
+        LJ::MemCache::set( [ $u->userid, 'mcrate:' . $u->userid], \%now_hits );
 
-	my $cpu = 0;
-	foreach my $key (qw(rusage_user rusage_system)) {
-	    my $sec = $stat{''}{$key};
-	    $sec =~ s/:/\./;
-	    $cpu += $sec;
-	    #$ret .= "Host $host was $stat{''}{$key} = $sec, cpu = $cpu<br />\n";
-	}
-	
-	$now_hits{$host} = [ $stat{''}{'get_hits'}, $stat{''}{'get_misses'}, $cpu ];
-	
-	my $hit_rate = sprintf("%0.02f%%", $stat{''}{'get_hits'}/($stat{''}{'get_hits'}+$stat{''}{'get_misses'}||1)*100);
+        my $tot_requests    = $tot_hits + $tot_misses;
+        my $tot_rate        = $tot_hits / ( $tot_requests || 1 );
+        my $global = $display_percents->($tot_rate) . ' ' .
+                     '{' . $tot_requests . '}';
 
-	if ($mode eq "overview") {
-	    $ret .= "<tr><td><a href='memcache.bml?host=$host'>$host</a></td>\n";
-	    $ret .= "<td>$hit_rate";
-	    if ($prev_hits && $prev_hits->{$host}) {
-		my $nh = $now_hits{$host};
-		my $ph = $prev_hits->{$host};
+        $template->param(
+            'hosts'     => \@hosts_display,
+            'global'    => $global,
+        );
+    } elsif ( $mode eq 'host' ) {
+        my $host = $GET{'host'};
+        my $conn = $connections->{$host};
 
-		my $new_hits = $now_hits{$host}[0] - $prev_hits->{$host}[0];
-		my $new_misses = $now_hits{$host}[1] - $prev_hits->{$host}[1];
-		$tot_hits += $new_hits;
-		$tot_misses += $new_misses;
-		my $new_whatev = $new_hits + $new_misses;
-		my $new_rate = $new_hits / ($new_whatev || 1);
+        die "invalid server $host"
+            unless $host and $conn;
 
-		my $cpu = sprintf("%0.6f", $nh->[2] - $ph->[2]);
-		$ret .= sprintf(" [%0.02f%% {$new_whatev} $cpu]", $new_rate * 100);
-	    }
-            $ret .= sprintf(" %0.02f", $t2-$t1);
-	    $ret .= "</td>";
-	    my $gb_used = $stat{''}{'bytes'} / (1024*1024*1024);
-	    my $gb_max = $stat{''}{'limit_maxbytes'} / (1024*1024*1024);
-	    if ($gb_used >= $gb_max) {
-		$ret .= sprintf("<td align='center'>%0.01fG</td>", $gb_max);
-	    } else {
-		$ret .= sprintf("<td>%0.02f/%0.01fG (%0.02f%%)</td>", $gb_used, $gb_max, $gb_used*100/($gb_max||1));
-	    }
+        my $stats_items = $get_stats->( $conn, $host, 'items' );
+        my $stats_slabs = $get_stats->( $conn, $host, 'slabs' );
 
-	    my $utiliz = $gb_used/($gb_max||1);
-    $ret .= sprintf("<td>%0.02f%%</td>", $utiliz*100);
-	    
-	    my $up = $stat{''}{'uptime'};
-	    my $upstring;
-	    foreach my $u ([86400,"d"],[3600,"h"],[60,"m"],[1,"s"]) {
-		if ($up / $u->[0] > 1) {
-		    my $v = int($up / $u->[0]);
-		    $upstring .= "${v}$u->[1] ";
-		    $up -= $v * $u->[0];
-		}
-	    }
-	    $ret .= "<td>$upstring</td>";
-	    $ret .= "<td>$stat{''}{'version'}</td>";
-	    $ret .= "</tr>";
-	}
+        my @classes_display;
 
-	if ($mode eq "host" && $host eq $GET{'host'}) {
-	    $ret .= "[<a href='memcache.bml?host=$host&amp;mode=raw'>Raw Data</a>]</div>";
-	    $ret .= "<h1>Details for $host</h1>";
+        foreach my $class (0..31) {
+            my $size = $stats_slabs->{"$class:chunk_size"};
+            next unless $size;
 
-	    $ret .= "<h2>Slab classes</h2>";
-	    $ret .= "<table border='1' cellpadding='2'>";
-	    $ret .= "<tr><th>class</th><th>size</th><th>used</th><th>total</th><th colspan='2'>free</th><th>pages</th><th>max age</th></tr>\n";
-	    foreach my $cls (0..31) {
-		my $size = $stat{'slabs'}{"$cls:chunk_size"};
-		next unless $size;
-		$ret .= "<tr><td>$cls</td>"
-		    . join('', map { "<td>" . $stat{'slabs'}{"$cls:$_"} . "</td>" }
-			   qw(chunk_size used_chunks total_chunks free_chunks free_chunks_end total_pages));
-		my $age = $stat{'items'}{"items:$cls:age"};
-		$ret .= "<td>$age</td>";
-		$ret .= "</tr>";
-	    }
-	    $ret .= "</table>\n";
+            my $age = $stats_items->{'items:' . $class . ':age'};
 
-	}
+            push @classes_display, {
+                'class'         => $class,
+                'chunk_size'    => $stats_slabs->{ $class . ':chunk_size' },
+                'used_chunks'   => $stats_slabs->{ $class . ':used_chunks' },
+                'total_chunks'  => $stats_slabs->{ $class . ':total_chunks' },
+                'free_chunks'   => $stats_slabs->{ $class . ':free_chunks' },
 
-	if ($mode eq "raw" && $host eq $GET{'host'}) {
-	    $ret .= "[<a href='memcache.bml?host=$host'>Host Stats</a>]</div>";
-	    $ret .= "<h1>Raw data for $host</h1>";
-	    $ret .= "<pre>$log</pre>";
-	}
-	
+                'free_chunks_end' =>
+                    $stats_slabs->{$class . ':free_chunks_end'},
+
+                'total_pages'   => $stats_slabs->{$class . ':total_pages'},
+                'age'           => $display_time->($age),
+            };
+
+        }
+
+        $template->param(
+            'classes'   => \@classes_display,
+            'host'      => $host,
+        );
     }
 
-    LJ::MemCache::set([$u->{'userid'},"mcrate:$u->{'userid'}"], \%now_hits)
-	if $u;
-
-    if ($mode eq "overview") {
-	$ret .= "</table>\n";
-
-	my $new_whatev = $tot_hits + $tot_misses;
-	my $new_rate = $tot_hits / ($new_whatev || 1);	
-	$ret .= sprintf("Global [%0.02f%% {$new_whatev}]", $new_rate * 100);
-    }
-
-    return $ret;
+    return $template->output;
 }
 _code?>
 
