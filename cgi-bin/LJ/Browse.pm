@@ -1044,13 +1044,14 @@ sub remove_communities {
         or die "unable to contact global db master to create category";
 
     foreach my $uid (@uids) {
-        $dbh->do("DELETE FROM categoryjournals WHERE catid=? AND journalid IN (?)", undef,
-                 $self->catid, @uids);
+        $dbh->do("DELETE FROM categoryjournals WHERE catid = ? AND journalid = ?", undef,
+                 $self->catid, $uid);
         die $dbh->errstr if $dbh->err;
 
         LJ::Browse->remove_community( comm  => LJ::want_user($uid),
                                       mod_u => LJ::get_remote(),
-                                      catid => $self->catid, );
+                                      catid => $self->catid,
+                                    );
     }
 
     $self->clear_journals_memcache;
