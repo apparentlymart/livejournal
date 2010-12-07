@@ -31,19 +31,19 @@
         return "Can't create new entry" unless $jitemid;
     }
 
+    my $replyto = LJ::Request->get_param('replyto');
+    
+    if ($replyto) {
+        my $parent  = LJ::Comment->new( $journal, 'dtalkid' => $replyto );
+        $replyto    = 0
+            unless $parent->valid;
+    }
+
+    my $entry = LJ::Entry->new($journal, jitemid => $jitemid);
+
     if (my $remote = LJ::get_remote() and not $GET{viewform}){
         ## show add comment form
         LJ::need_res(qw( stc/partners/login.css ));
-
-        my $replyto = LJ::Request->get_param('replyto');
-        
-        if ($replyto) {
-            my $parent  = LJ::Comment->new( $journal, 'dtalkid' => $replyto );
-            $replyto    = 0
-                unless $parent->valid;
-        }
-
-        my $entry = LJ::Entry->new($journal, jitemid => $jitemid);
 
         my $remote_sessid;
         if ($remote) {
@@ -72,7 +72,16 @@
           stc/partners/login.css
         ));
 
-        my $forwhat = 'external-' . $journal->userid . '-' . $jitemid;
+        my $forwhat = 'external-' .
+                      $journal->userid . '-' .
+                      $entry->ditemid . '-' .
+                      $replyto;
+
+        my $uri = URI->new($url);
+        if ($replyto) {
+            $uri->query_form( $uri->query_form, 'replyto' => $replyto );
+            $uri->fragment( 't' . $replyto );
+        }
 
         my $ret = "";
         $ret .= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
@@ -82,7 +91,7 @@
         <title>Log in</title>
         " . LJ::res_includes() . "
         <body>"
-        . LJ::Widget::LoginMulti->render(thispage => $url, forwhat => $forwhat, lj_auth => 1,)
+        . LJ::Widget::LoginMulti->render(thispage => $uri->as_string, forwhat => $forwhat, lj_auth => 1,)
         ."</body></html>";
         return $ret;
     }

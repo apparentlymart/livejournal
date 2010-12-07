@@ -38,6 +38,7 @@ package LJ::Identity;
 use strict;
 
 use Carp qw();
+use URI qw();
 
 # initialization code. do not touch this.
 my @CLASSES = LJ::ModuleLoader->module_subclasses('LJ::Identity');
@@ -208,12 +209,18 @@ sub unpack_forwhat {
                   "jid=$journalid&" .
                   "pendcid=$pendcid";
         $returl_fail = $returl . '&failed=1';
-    } elsif ($forwhat =~ /^external-(\d+)-(\d+)$/) {
-        my ($journalid, $jitemid) = ($1, $2);
+    } elsif ($forwhat =~ /^external-/) {
+        my (undef, $journalid, $ditemid, $dtalkid) = split /-/, $forwhat;
         my $journal = LJ::load_userid($journalid);
-        my $entry = LJ::Entry->new($journal, 'jitemid' => $jitemid);
+        my $entry = LJ::Entry->new($journal, 'ditemid' => $ditemid);
 
-        $returl = $returl_fail = $entry->prop('external_url');
+        my $uri = URI->new( $entry->prop('external_url') );
+        if ($dtalkid) {
+            $uri->query_form( $uri->query_form, 'replyto' => $dtalkid );
+            $uri->fragment( 't' . $dtalkid );
+        }
+
+        $returl = $returl_fail = $uri->as_string;
     } else {
         # the warning will sit in error logs, and the exception
         # will be handled
