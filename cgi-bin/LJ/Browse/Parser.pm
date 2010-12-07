@@ -39,17 +39,20 @@ sub do_parse {
 
             ## resize and crop first image from post if exist
             if ($tag eq 'img') {
-                next unless $images_crop_cnt;
-                $images_crop_cnt--;
                 my $r = LJ::crop_picture_from_web(
-                    source    => $attr->{'src'},
-                    size      => '200x200',
-                    username  => $LJ::PHOTOS_FEAT_POSTS_FB_USERNAME,
-                    password  => $LJ::PHOTOS_FEAT_POSTS_FB_PASSWORD,
-                    galleries => [ $LJ::PHOTOS_FEAT_POSTS_FB_GALLERY ],
+                    source      => $attr->{'src'},
+                    size        => '200x200',
+                    cancel_size => '200x0',
+                    username    => $LJ::PHOTOS_FEAT_POSTS_FB_USERNAME,
+                    password    => $LJ::PHOTOS_FEAT_POSTS_FB_PASSWORD,
+                    galleries   => [ $LJ::PHOTOS_FEAT_POSTS_FB_GALLERY ],
                 );
-                push @images, $r->{url} if $r->{url};
-                next;
+                if ($images_crop_cnt-- && $r && ($r->{'status'} ne 'small') && $r->{'url'}) {
+                    push @images, $r->{url};
+                    next;
+                } elsif ($r && $r->{'status'} ne 'small') {
+                    next;
+                }
             }
 
             if (grep { $tag eq $_ } @$remove_tags) {
@@ -143,7 +146,10 @@ sub _after_parse {
     my $text = shift;
 
     ## Remove multiple "br" tags
-    $$text =~ s#(\s*<br\s*/?>\s*){2,}# #gi;
+    $$text =~ s#(\s*<br\s*/?>\s*){2,}#<br/>#gi;
+
+    ## Remove <a><img><br>-type html (imgs had been deleted early)
+    $$text =~ s#(<a.*?></a><br\s*/?>\s*){2,}#<br/>#gi;
 
     ## Remove all content of 'script' tag
     $$text =~ s#<script.*?/script># #gis;
