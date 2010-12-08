@@ -94,7 +94,7 @@ body<=
         $body .= '<input type="hidden" name="vert_id" value="'.$vertical->vert_id.'">';
         $body .= '</form>';
         # preview
-        $body .= '</div><div style="float:right;width:650px;" class="appwidget-browse"><div class="vertical_view">';
+        $body .= '</div><div style="float:right;width:300px;" class="appwidget-browse"><div class="vertical_view">';
 
         $body .= LJ::Widget::Search->render(vertical => $vertical, type => "tags", view => 'communities', preview => [ split /\s*\n+\s*/m, $words ]);
         $body .= '</div></div>';
