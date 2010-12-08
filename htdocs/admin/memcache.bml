@@ -143,7 +143,7 @@
         my ( $tot_hits, $tot_misses ) = qw(0 0);
 
         foreach my $host ( sort keys %$connections ) {
-            my $conn        = $connections->{$host};
+            my $conn = LJ::MemCache::PP->new({ 'servers' => [ $host ] });
 
             my $t1          = Time::HiRes::time();
             my $stats       = $conn->stats->{'hosts'}->{$host}->{'misc'};
@@ -221,7 +221,7 @@
         );
     } elsif ( $mode eq 'host' ) {
         my $host = $GET{'host'};
-        my $conn = $connections->{$host};
+        my $conn = LJ::MemCache::PP->new({ 'servers' => [ $host ] });
 
         die "invalid server $host"
             unless $host and $conn;
