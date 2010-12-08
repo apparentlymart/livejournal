@@ -39,15 +39,16 @@ sub do_parse {
 
             ## resize and crop first image from post if exist
             if ($tag eq 'img') {
-                my $r = LJ::crop_picture_from_web(
+                my $r = $images_crop_cnt ? LJ::crop_picture_from_web(
                     source      => $attr->{'src'},
                     size        => '200x200',
                     cancel_size => '200x0',
                     username    => $LJ::PHOTOS_FEAT_POSTS_FB_USERNAME,
                     password    => $LJ::PHOTOS_FEAT_POSTS_FB_PASSWORD,
                     galleries   => [ $LJ::PHOTOS_FEAT_POSTS_FB_GALLERY ],
-                );
-                if ($images_crop_cnt-- && $r && ($r->{'status'} ne 'small') && $r->{'url'}) {
+                ) : {};
+                if ($images_crop_cnt && $r && ($r->{'status'} ne 'small') && $r->{'url'}) {
+                    $images_crop_cnt--;
                     push @images, $r->{url};
                     next;
                 } elsif ($r && $r->{'status'} ne 'small') {
