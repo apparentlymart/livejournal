@@ -21,7 +21,7 @@ sub render_body {
         } qw(caption form_text submit_button_caption);
 
     my $vert_id = $vertical ? $vertical->vert_id : undef;
-    my $vert_input = $vert_id ? "<input type='hidden' name='vert_id' value='$vert_id'>" : '';
+    my $vert_input = "<input type='hidden' name='vert_id' value='".($vert_id ? $vert_id : 0)."'>";
 
     return <<EOT;
     <div class="right-mod">
