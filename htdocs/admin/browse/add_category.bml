@@ -90,7 +90,7 @@ body<=
                 name => 'vert_url',
                 selected => $vert_url,
                 },
-                { text => 'Select Vertical',
+                { text => 'Community Directory',
                 value => '',},
                 @verticals
             );

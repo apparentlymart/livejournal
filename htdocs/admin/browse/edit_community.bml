@@ -120,7 +120,7 @@ sub _build_tree {
                     name => "vert_id_$i", style => "",
                     selected => $vert_[$j] ? $vert_[$j]->vert_id : 0,
                     },
-                    { text => 'Select Vertical',
+                    { text => 'Community Directory',
                     value => '',},
                     @verticals
                 );

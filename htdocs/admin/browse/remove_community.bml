@@ -85,7 +85,7 @@ body<=
                 name => 'vert_url',
                 selected => $vert_url,
                 },
-                { text => 'Select Vertical',
+                { text => 'Community Directory',
                 value => '',},
                 @verticals
             );
@@ -100,19 +100,16 @@ body<=
     my @caturls = map { { text => $_->{pretty_name}, value => $_->url_path } } @categories;
     @caturls = sort { $a cmp $b } @caturls;
 
-    if ($vertical) {
-
-        $ret .= "<p>Remove from Category:<br />";
-        $ret .= LJ::html_select({
-                    name => 'caturl',
-                    selected => $caturl },
-                    { text => 'Select Category',
-                    value => '' },
-                    @caturls
-                );
-        $ret .= "\n";
-        $ret .= LJ::html_submit('select', 'Select Category') . "</p>";
-    }
+    $ret .= "<p>Remove from Category:<br />";
+    $ret .= LJ::html_select({
+                name => 'caturl',
+                selected => $caturl },
+                { text => 'Select Category',
+                value => '' },
+                @caturls
+            );
+    $ret .= "\n";
+    $ret .= LJ::html_submit('select', 'Select Category') . "</p>";
 
     # Selected a category OR tried a remove and got an error
     if ( LJ::did_post() && $POST{'select'} ) {
