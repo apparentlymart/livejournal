@@ -509,20 +509,24 @@ sub load_all {
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to load vertical";
 
+    my $verticals = LJ::MemCache::get( $class->memkey_vertall );
+    return @$verticals if $verticals && scalar @$verticals;
+
     my $sth = $dbh->prepare("SELECT * FROM vertical2 ORDER BY name");
     $sth->execute;
     die $dbh->errstr if $dbh->err;
 
-    my @verticals;
     while (my $row = $sth->fetchrow_hashref) {
         my $v = $class->new( vert_id => $row->{vert_id} );
         $v->absorb_row($row);
         $v->set_memcache;
 
-        push @verticals, $v;
+        push @$verticals, $v;
     }
 
-    return @verticals;
+    LJ::MemCache::set( $class->memkey_vertall => $verticals );
+
+    return $verticals ? @$verticals : ();
 }
 
 sub load_top_level {
@@ -859,6 +863,12 @@ sub load_vertical_posts {
     return \@result;
 }
 
+sub memkey_vertall {
+    my $class = shift;
+
+    return "vert:all";
+}
+
 sub memkey_vertid {
     my $self = shift;
     my $id = shift;
@@ -908,6 +918,8 @@ sub clear_memcache {
 
     LJ::MemCache::delete($self->memkey_vertid);
     LJ::MemCache::delete($self->memkey_vertname);
+    LJ::MemCache::delete($self->memkey_verturl);
+    LJ::MemCache::delete($self->memkey_vertall);
 
     return;
 }
@@ -991,7 +1003,6 @@ sub preload_rows {
 
     my @mem_keys = map { $_->memkey_vertid } @to_load;
     my $memc = LJ::MemCache::get_multi(@mem_keys);
-
     # now which of the objects to load did we get a memcache key for?
     foreach my $obj (@to_load) {
         my $row = $memc->{"vert2:$obj->{vert_id}"};
@@ -1006,24 +1017,26 @@ sub preload_rows {
         or die "unable to contact global db master to load vertical";
 
     my @vals = keys %need;
-    my $bind = LJ::bindstr(@vals);
-    my $sth = $dbh->prepare("SELECT * FROM vertical2 WHERE vert_id IN ($bind)");
-    $sth->execute(@vals);
+    if (scalar @vals) {
+        my $bind = LJ::bindstr(@vals);
+        my $sth = $dbh->prepare("SELECT * FROM vertical2 WHERE vert_id IN ($bind)");
+        $sth->execute(@vals);
 
-    while (my $row = $sth->fetchrow_hashref) {
+        while (my $row = $sth->fetchrow_hashref) {
 
-        # what singleton does this DB row represent?
-        my $obj = $need{$row->{vert_id}};
+            # what singleton does this DB row represent?
+            my $obj = $need{$row->{vert_id}};
 
-        # and update singleton (request cache)
-        $obj->absorb_row($row);
+            # and update singleton (request cache)
+            $obj->absorb_row($row);
 
-        # set in memcache
-        $obj->set_memcache;
+            # set in memcache
+            $obj->set_memcache;
 
-        # and delete from %need for error reporting
-        delete $need{$obj->{vert_id}};
+            # and delete from %need for error reporting
+            delete $need{$obj->{vert_id}};
 
+        }
     }
 
     # weird, vertids that we couldn't find in memcache or db?

@@ -261,14 +261,24 @@ sub load_all {
     my $vert_id = $vertical ? $vertical->vert_id : 0;
     my $where = " WHERE vert_id = $vert_id ";
 
-    my $sth = $dbh->prepare("SELECT * FROM category" . $where);
-    $sth->execute();
-    die $dbh->errstr if $dbh->err;
+    my $cats = LJ::MemCache::get( $class->memkey_catall(vertical => $vertical) );
 
-    my @categories;
-    while (my $row = $sth->fetchrow_hashref) {
-        my $c = $class->new( catid => $row->{catid} );
-        $c->absorb_row($row);
+    unless ($cats && scalar @$cats) {
+        $cats = $dbh->selectall_arrayref(
+                "SELECT * FROM category" . $where,
+                { Slice => {} }
+        );
+        die $dbh->errstr if $dbh->err;
+
+        LJ::MemCache::set( $class->memkey_catall(vertical => $vertical) => $cats );
+    }
+
+    return () unless $cats && scalar @$cats;
+
+    my @categories = ();
+    foreach my $cat (@$cats) {
+        my $c = $class->new( catid => $cat->{catid} );
+        $c->absorb_row($cat);
         $c->set_memcache;
 
         push @categories, $c;
@@ -442,6 +452,16 @@ sub unloaded_prop_singletons {
 #
 # Loaders
 #
+
+sub memkey_catall {
+    my $class = shift;
+    my %args  = @_;
+
+    my $v = $args{'vertical'};
+
+    return [ $v, "catall:".$v->vert_id ] if $v;
+    return "cat:all";
+}
 
 sub memkey_catid {
     my $self = shift;
