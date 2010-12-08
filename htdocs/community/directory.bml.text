@@ -2,6 +2,12 @@
 .add|staleness=1
 .add=Add to Category
 
+.add_v=Select Vertical
+
+.category.title=Category
+.category.select.btn=Select Category
+.category.selected=Selected Category
+
 .error.noaccess|staleness=1
 .error.noaccess=Only community maintainers are able to submit to the Community Directory. You are not a maintainer of community [[comm]].
 
@@ -34,4 +40,7 @@
 
 .update.listing|staleness=1
 .update.listing=Update directory listing for [[user]]:
+
+.vertical.title=Vertical
+.vertical.select.btn=Select Vertical
 

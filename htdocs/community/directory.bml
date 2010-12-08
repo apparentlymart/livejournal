@@ -46,7 +46,7 @@ sub _build_tree {
     my @caturls = map { { text => $_->{pretty_name}, value => $_->catid } } @categories;
     @caturls = sort { $a->{text} cmp $b->{text} } @caturls;
 
-    $text .= "<tr><td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'>Category</td>";
+    $text .= "<tr><td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'>".$ML{'.category.title'}."</td>";
     $text .= "<td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;width:100%;'>" . LJ::html_select({
                 name => "catid$i\_$n",
 		style => "width:100%;",
@@ -55,7 +55,7 @@ sub _build_tree {
                 value => '' },
                 @caturls
     ) . "</td>";
-    $text .= "<td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>" . LJ::html_submit('select_c', 'Select Category') . "</td>";
+    $text .= "<td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>" . LJ::html_submit('select_c', $ML{'.category.select.btn'}) . "</td>";
     $text .= "</tr>";
 
     if ($sel_cat[0]) {
@@ -172,7 +172,7 @@ sub _build_tree {
     foreach my $i (1..$limit) {
         my $j = $i - 1;
         if (@listings[$j]) {
-            $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->Category</td>";
+            $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->".$ML{'.vertical.title'}."</td>";
             my $listing = @listings[$j];
             my $cat = LJ::Browse->load_by_id($listing->{catid});
             my $status = "<span style='font-weight: bold; color:";
@@ -193,7 +193,7 @@ sub _build_tree {
         } else {
             my @verticals = LJ::Vertical->load_all();
             if (!$LJ::DISABLED{'verticals_menu'}) {
-                $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->Category</td>";
+                $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->".$ML{'.vertical.title'}."</td>";
                 @verticals = map { { text => $_->{name}, value => $_->{vert_id} } } @verticals;
 
                 $ret .= "<td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;width:100%;'>".LJ::html_select({
@@ -201,13 +201,13 @@ sub _build_tree {
 			    style => "width:100%;",
                             selected => $vert_[$j] ? $vert_[$j]->vert_id : 0,
                             },
-                            { text => 'Select Vertical',
+                            { text => $ML{'.add_v'},
                             value => '',},
                             @verticals
                         );
                 $ret .= "</td><td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>\n";
 
-                $ret .= LJ::html_submit('select_v', 'Select Vertical') . "</td></tr>";
+                $ret .= LJ::html_submit('select_v', $ML{'.vertical.select.btn'}) . "</td></tr>";
             }
 
             if ((LJ::did_post() && $vert_[$j]) || ($LJ::DISABLED{'verticals_menu'})) {
@@ -217,7 +217,7 @@ sub _build_tree {
 
                 $ret .= _build_tree (0, \@categories, $cat_[$j], undef, undef, $i);
                 if ($cat_[$j]) {
-                    $ret .= "<tr><td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'>Selected category</td><td colspan='2' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>" . $cat_[$j]->display_name . "</td></tr>";
+                    $ret .= "<tr><td style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'>".$ML{'.category.selected'}."</td><td colspan='2' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;'>" . $cat_[$j]->display_name . "</td></tr>";
                 }
             }
         }
