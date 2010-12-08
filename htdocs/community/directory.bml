@@ -76,7 +76,9 @@ sub _build_tree {
 
     $ret .= "<form action='directory.bml' method='GET'>\n";
     $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
-    $ret .= "<input type='hidden' name='vert_id' value='".$POST{'vert_id'}."'>" if $POST{'vert_id'};
+    my $ref_vert_id = undef;
+    $ref_vert_id = defined $POST{'vert_id'} ? $POST{'vert_id'} : $GET{'vert_id'};
+    $ret .= "<input type='hidden' name='vert_id' value='$ref_vert_id'>" if defined $ref_vert_id;
     $ret .= "</form>\n\n";
 
     return $ret unless $cname;
@@ -165,6 +167,7 @@ sub _build_tree {
 
     $ret .= "<form method='post' action='directory.bml?authas=$cname'>";
     $ret .= LJ::form_auth();
+    $ret .= "<input type='hidden' name='vert_id' value='$ref_vert_id'>" if defined $ref_vert_id;
 
     $ret .= "<p>" . BML::ml('.update.listing', { 'user' => LJ::ljuser($c) });
     $ret .= "<div style='width:50%;'><div style='background:#C7E0F6;padding:5px 7px;'>&nbsp;</div>\n";
@@ -172,7 +175,7 @@ sub _build_tree {
     foreach my $i (1..$limit) {
         my $j = $i - 1;
         if (@listings[$j]) {
-            $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->".$ML{'.vertical.title'}."</td>";
+            $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->".$ML{'.category.title'}."</td>";
             my $listing = @listings[$j];
             my $cat = LJ::Browse->load_by_id($listing->{catid});
             my $status = "<span style='font-weight: bold; color:";
@@ -192,7 +195,7 @@ sub _build_tree {
                                      value => $listing->{pendid}, });
         } else {
             my @verticals = LJ::Vertical->load_all();
-            if (!$LJ::DISABLED{'verticals_menu'}) {
+            if (!$LJ::DISABLED{'verticals_menu'} && (!defined $ref_vert_id || $ref_vert_id != 0)) {
                 $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->".$ML{'.vertical.title'}."</td>";
                 @verticals = map { { text => $_->{name}, value => $_->{vert_id} } } @verticals;
 
@@ -210,7 +213,7 @@ sub _build_tree {
                 $ret .= LJ::html_submit('select_v', $ML{'.vertical.select.btn'}) . "</td></tr>";
             }
 
-            if ((LJ::did_post() && $vert_[$j]) || ($LJ::DISABLED{'verticals_menu'})) {
+            if (($vert_[$j] || ($ref_vert_id > 0)) || (defined $ref_vert_id && $ref_vert_id == 0)) {
                 my @children = $cat_[$j] ? $cat_[$j]->children : ();
                 # Get the full list of categories
                 my @categories = LJ::Browse->load_all($vert_[$j]);
