@@ -723,7 +723,7 @@ sub can_gets { 0 }
     #
     # this is a hacky way that uses a private method from Cache::Memcached,
     # but oh well
-    foreach my $cmd (qw( append prepend delete )) {
+    foreach my $cmd (qw( append prepend cas )) {
         *$cmd = sub {
             return Cache::Memcached::_set( $cmd, @_ );
         };
