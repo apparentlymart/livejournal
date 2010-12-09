@@ -150,9 +150,15 @@ my $check = sub {
         return 0;
     }
 
-    my $tzone;
-    #(undef, $tzone) = $db->selectrow_array("show variables like 'timezone'");
+    my ($tzone, $dtg);
+    (undef, $tzone) = $db->selectrow_array("show variables like 'time_zone'");
+    if (lc($tzone) eq 'system') {
+        (undef, $tzone) = $db->selectrow_array("show variables like 'system_time_zone'");
+    }
     $tzone ||= "???";
+
+    ($dtg)= $db->selectrow_array("select date_format(now(), '%H:%i')");
+    $dtg ||= 'xxx xxxxxxxxx hh:mm:ss';
 
     $sth = $db->prepare("SHOW PROCESSLIST");
     $sth->execute;
@@ -219,7 +225,7 @@ my $check = sub {
     }
 
     #print "$dbid of $d->{masterid}: $d->{name} ($roles)\n";
-    printf("%4d %-18s %4s repl:%7s %4s conn:%4d/%4d  $tzone \%s ($roles)\n",
+    printf("%4d %-18s %4s repl:%7s %4s conn:%4d/%4d  $dtg $tzone \%s ($roles)\n",
            $dbid,
            $d->{name},
            $d->{masterid} ? $d->{masterid} : "",
