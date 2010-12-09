@@ -5,6 +5,9 @@
     use LJ::Widget::LoginMulti;
     use LJ::ExternalComments;
 
+    return 'This feature is disabled'
+        unless LJ::is_enabled('external_comments');
+
     LJ::need_res(qw( js/partners/placeholder.js
                      js/jquery.js
                      stc/lj_base.css
