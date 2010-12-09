@@ -117,16 +117,18 @@ body<=
     $ret .= '';
     $ret .= "</table><br />\n";
 
-    $ret .= "<h3>Added Posts</h3><ul>";
-    foreach my $post ($top_entries->get_featured_posts(raw => 1)) {
-        $ret .= '<li><a href="'.$post->{url}.'">';
-        my $subj = $post->{subj};
-        if ($subj eq '') {$ret .= '(no subject)';} else {$ret .= $subj;}
-        $ret .= '</a> ';
-        $ret .= '<button type="submit" name="delete-'.$post->{"key"}.'" value="1">Remove post</button></li>';
+    if (my @posts = $top_entries->get_featured_posts(raw => 1)){
+        $ret .= qq|<h3>Added Posts</h3><ul>|;
+        foreach my $post (@posts) {
+            $ret .= 
+                qq|<li>
+                    <input type="checkbox" name="delete-| . $post->{key} . qq|"> - 
+                    <a href="$post->{url}">| . ($post->{subj} || '(no subject)') . qq|</a> 
+                  </li>|;
+        }
+        $ret .= "</ul>\n";
+        $ret .= qq|<input type="submit" value="delete selected">|;
     }
-    $ret .= "</ul>\n";
-
     $ret .= "</form>\n</div>\n</div>";
 
     return $ret;
