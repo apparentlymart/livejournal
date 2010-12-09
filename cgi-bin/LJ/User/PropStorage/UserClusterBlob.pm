@@ -23,7 +23,6 @@ sub can_handle {
     return 0 if $propinfo->{'datatype'} =~ /^bit/;
 
     return 0 if $propinfo->{'multihomed'};
-    return 0 if $propinfo->{'indexed'};
 
     return 0 unless $propinfo->{'cldversion'};
     return 0 unless $propinfo->{'datatype'} eq 'blobchar';
