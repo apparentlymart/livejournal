@@ -17,7 +17,7 @@ sub can_handle {
     return 0 unless $propinfo;
 
     return 0 if $propinfo->{'datatype'} =~ /^bit/;
-    return 0 if $propinfo->{'cldversion'};
+    return 0 if $propinfo->{'cldversion'} && !$propinfo->{'multihomed'};
 
     return 0 unless $propinfo->{'multihomed'} || $propinfo->{'indexed'};
 
