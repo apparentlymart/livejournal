@@ -1361,6 +1361,10 @@ sub render_body {
 
     $out .= $self->render_htmltools_block;
 
+    ## https://jira.sup.com/browse/LJSUP-7534
+    ## TODO: after production push, add description of fixed vulnerability here
+    LJ::CleanHTML::pre_clean_event_for_entryform(\$opts->{'event'});
+
     # Main Textarea, with a draft container
     $out .= "<div id='draft-container' class='pkg'>";
     $out .= LJ::html_textarea({

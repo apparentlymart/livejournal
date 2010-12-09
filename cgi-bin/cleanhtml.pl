@@ -1582,6 +1582,19 @@ sub clean_event
     });
 }
 
+sub pre_clean_event_for_entryform
+{
+    my $ref = shift;
+
+    # fast path: no markup 
+    return unless $$ref =~ /</;
+
+    # slow path: need to be run it through the cleaner
+    # allow everything except JavaScript
+    clean($ref, {'mode' => 'allow'}); 
+}
+
+
 sub get_okay_comment_tags
 {
     return @comment_all;
