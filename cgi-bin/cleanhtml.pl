@@ -420,7 +420,7 @@ sub clean
                 next TOKEN unless $u;
                 my $wish = LJ::WishElement->load($u, $wishid);
                 next TOKEN unless $wish;
-                $newdata .= $wish->expand_entry;
+                $newdata .= Encode::decode_utf8($wish->expand_entry);
             }
 
             # Capture object and embed tags to possibly transform them into something else.
