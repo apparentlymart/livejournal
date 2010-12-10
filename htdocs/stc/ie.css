@@ -258,7 +258,11 @@ __________________________________________*/
 -----------------------------------------------*/
 * HTML .lj_qotd_entry_userpic .userpic-img,
 * HTML .appwidget-recentcomments .userpic-img,
-* HTML .b-catalogue-item DD.b-catalogue-item-img IMG {
+* HTML .b-catalogue-item DD.b-catalogue-item-img IMG,
+* HTML #lj_controlstrip_userpic IMG,
+* HTML .appwidget-gamefriendsplaying .w-body .friends-playing-list LI IMG,
+* HTML .appwidget-gamefriendsactivity .w-body .friends-activity-list LI IMG,
+* HTML .appwidget-gamewhoplaying .w-body .who-playing-list LI IMG, {
 	zoom:expression(
 			function(t){
 				t.runtimeStyle.zoom = 1;
@@ -345,9 +349,45 @@ __________________________________________*/
 	top:6px;
 	}
 
+/* Game friends playing widget
+----------------------------------------------- */
+.appwidget-gamefriendsplaying .w-body,
+.appwidget-gamefriendsplaying .w-body .friends-playing-list,
+.appwidget-gamefriendsplaying .w-body .friends-playing-list LI,
+.appwidget-gamefriendsplaying .w-body .friends-playing-list LI .inner,
+.appwidget-gamefriendsplaying .w-body .friends-playing-list LI .ljuser {
+	zoom: 1;
+	}
+
+/* Game friends activity widget
+----------------------------------------------- */
+.appwidget-gamefriendsactivity .w-body,
+.appwidget-gamefriendsactivity .w-body .friends-activity-list,
+.appwidget-gamefriendsactivity .w-body .friends-activity-list LI,
+.appwidget-gamefriendsactivity .w-body .friends-activity-list LI .inner,
+.appwidget-gamefriendsactivity .w-body .friends-activity-list LI .ljuser {
+	zoom: 1;
+	}
+
+/* Game who playing widget
+----------------------------------------------- */
+.appwidget-gamewhoplaying .w-body,
+.appwidget-gamewhoplaying .w-body .who-playing-list,
+.appwidget-gamewhoplaying .w-body .who-playing-list LI,
+.appwidget-gamewhoplaying .w-body .who-playing-list LI .inner,
+.appwidget-gamewhoplaying .w-body .who-playing-list LI .ljuser {
+	zoom: 1;
+	}
+
+/* Game big point widget
+----------------------------------------------- */
+.b-catalogue-app .appwidget-gamebigpoint .w-body {
+	zoom: 1;
+	}
+
 /* Game list widget
 ----------------------------------------------- */
-.appwidget-gamelist .w-body .gamelist {
+.appwidget-gamelist .w-body .gamelist LI {
 	display: inline;
 	zoom: 1;
 	}

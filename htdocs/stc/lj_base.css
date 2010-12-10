@@ -1237,7 +1237,6 @@ Must be removed after implementation of Framework! */
 		position: relative;
 		float: left;
 		padding: 0 5px 0 0;
-		z-index: 1;
 		}
 	.b-pending-users LI:hover,
 	.b-pending-users LI.hover {
@@ -1252,6 +1251,10 @@ Must be removed after implementation of Framework! */
 			float: left;
 			margin: 0;
 			}
+			.b-pending-users LI SPAN I.i-pending-users-delim {
+				position: relative;
+				z-index: -1;
+				}
 		.b-pending-users LI:hover SPAN,
 		.b-pending-users LI.hover SPAN {
 			margin: -3px -18px -4px -8px;
@@ -1481,3 +1484,194 @@ Must be removed after implementation of Framework! */
 .i-exp-preloader {
 	margin: 0 0 0 5px;
 	}
+
+/* Open social popups
+----------------------------------------------- */
+DIV.lj_ippu_app {
+	padding: 20px 30px;
+	border: 1px solid #EBEBEB;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	}
+	DIV.lj_ippu_app .ljappippu_inner:after
+	DIV.lj_ippu_app .ljappippu_share_content:after,
+	DIV.lj_ippu_app .ljappippu_share_buttons:after {
+		clear: both;
+		display: block;
+		visibility: hidden;
+		overflow: hidden;
+		width: 0;
+		height: 0;
+		content: ".";
+		}
+	DIV.lj_ippu_app DIV.lj_ippu_titlebar {
+		height: auto;
+		padding: 0;
+		margin: 0 0 8px 0;
+		background: none;
+		line-height: 16px;
+		font-size: 12px;
+		color: #000;
+		}
+		DIV.lj_ippu_app DIV.lj_ippu_titlebar .ljappippu_button {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			width: 12px;
+			height: 12px;
+			background: url(/img/CloseButton_gray.gif?ver=1) no-repeat;
+			cursor: pointer;
+			}
+	DIV.lj_ippu_app .ljappippu_share_content {
+		clear: both;
+		}
+	DIV.lj_ippu_app H3 {
+		clear: both;
+		margin-bottom: 8px;
+		line-height: 16px;
+		font-style: normal;
+		font-size: 12px;
+		color: #000;
+		}
+	DIV.lj_ippu_app P {
+		padding: 0;
+		margin: 0 0 10px 0;
+		line-height: 18px;
+		font-size: 12px;
+		}
+	DIV.lj_ippu_app P.i-bubble {
+		padding: 6px 10px 8px 10px;
+		margin: 0 0 10px 0 !important;
+		line-height: 11px;
+		font-size: 11px;
+		}
+	DIV.lj_ippu_app .ljappippu_share_buttons {
+		clear: both;
+		overflow: hidden;
+		}
+		DIV.lj_ippu_app .ljappippu_share_buttons INPUT.submit {
+			float: right;
+			margin-top: 5px;
+			}
+	DIV.lj_ippu_app .i-qotd-nav {
+		float: right;
+		margin-top: 5px;
+		font-size: 11px;
+		line-height: 11px;
+		}
+		DIV.lj_ippu_app .i-qotd-nav-first,
+		DIV.lj_ippu_app .i-qotd-nav-last,
+		DIV.lj_ippu_app .i-qotd-nav-prev,
+		DIV.lj_ippu_app .i-qotd-nav-next {
+			overflow: hidden;
+			display: inline-block;
+			width: 16px;
+			height: 16px;
+			padding: 0;
+			vertical-align: -4px;
+			background-image: url(/img/arrow-spotlight.gif?v=1);
+			background-repeat: no-repeat;
+			font: 0/0 serif;
+			cursor: pointer;
+			}
+		DIV.lj_ippu_app .i-qotd-nav-first {
+			margin: 0 5px 0 0;
+			background-position: 0 -32px;
+			}
+		DIV.lj_ippu_app .i-qotd-nav-first-dis {
+			background-position: 0 -48px;
+			cursor: default;
+			}
+		DIV.lj_ippu_app .i-qotd-nav-last {
+			margin: 0 0 0 5px;
+			background-position: -16px -32px;
+			}
+		DIV.lj_ippu_app .i-qotd-nav-last-dis {
+			background-position: -16px -48px;
+			cursor: default;
+			}
+		DIV.lj_ippu_app .i-qotd-nav-prev {
+			margin: 0 10px 0 0;
+			background-position: 0 0;
+			}
+		DIV.lj_ippu_app .i-qotd-nav-prev-dis {
+			background-position:0 -16px;
+			cursor:default;
+			}
+		DIV.lj_ippu_app .i-qotd-nav-next {
+			margin:0 0 0 10px;
+			background-position: -16px 0;
+			}
+		DIV.lj_ippu_app .i-qotd-nav-next-dis {
+			background-position: -16px -16px;
+			cursor: default;
+			}
+		DIV.lj_ippu_app .qotd-counter I {
+			font-style: normal;
+			}
+	DIV.lj_ippu_app .b-pending-users {
+		float: none;
+		}
+	DIV.lj_ippu_app .b-pending-users:after {
+		clear: both;
+		display: block;
+		visibility: hidden;
+		overflow: hidden;
+		width: 0;
+		height: 0;
+		content: ".";
+		}
+		DIV.lj_ippu_app .b-pending-users LI {
+			line-height: 15px;
+			font-size: 12px;
+			}
+			DIV.lj_ippu_app .ljappippu_share_persons LI:hover SPAN {
+				padding-right: 8px;
+				margin-right: -9px;
+				}
+	DIV.lj_ippu_app .hr {
+		clear: both;
+		overflow: hidden;
+		margin-bottom: 10px;
+		}
+	DIV.lj_ippu_app TEXTAREA {
+		width: 100%;
+		padding: 0;
+		margin-bottom: 5px;
+		border: 1px solid #737373;
+		line-height: 16px;
+		font-size: 12px;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
