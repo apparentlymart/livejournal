@@ -1,0 +1,35 @@
+<?_code
+{
+    use strict;
+    use LJ::Talk;
+
+    sub error
+    {
+        return LJ::JSON->to_json({ error => $_[0] });
+    }
+
+    use vars qw(%GET %ML);
+
+    return error('Server is down') if $LJ::SERVER_DOWN;
+
+    $GET{journal} =~ s/^3D//;
+    $GET{journal} ||= '';
+    my $u = LJ::load_user($GET{journal}) or return error("Invalid journal: '$GET{journal}'");
+
+    my $counts = {};
+    my $remote = LJ::get_remote();
+    my $days = LJ::get_daycounts($u, $remote);
+    foreach my $day (@$days) {
+        # $day->[3] - count
+        push @{$counts->{$day->[0]}->{$day->[1]}}, $day->[2];
+    }
+
+    BML::set_content_type('text/javascript; charset=utf-8');
+    BML::finish();
+    BML::noparse();
+
+    return LJ::JSON->to_json($counts);
+}
+
+_code?>
+
