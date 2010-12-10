@@ -777,6 +777,12 @@ Must be removed after implementation of Framework! */
 		.m-auth .current .m-auth-br {
 			display: block;
 			}
+		.m-auth .m-auth-openid .m-auth-bl {
+			border-radius:0;
+			-moz-border-radius:0;
+			-webkit-border-radius:0;
+			border-width:0 0 0 1px;
+			}
 		.m-auth-bl,
 		.m-auth-br {
 			overflow: hidden;
