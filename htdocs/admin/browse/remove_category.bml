@@ -18,26 +18,31 @@ body<=
     my $ret = "";
 
     my $caturl;
-    my $vert_url = $POST{'vert_url'};
+    my $vert_id = $POST{'vert_id'};
+
+    my @ids = sort { $b cmp $a } grep { $_ =~ /^catid\d+\_0$/ } keys %POST;
+    my $cat_id = $POST{$ids[0]};
+    my $category = $cat_id ? LJ::Browse->load_by_id ($cat_id) : undef;
 
     my $vertical = undef;
-    if (LJ::did_post() && $POST{'vert_url'}) {
-        $vertical = LJ::Vertical->load_by_url("/vertical" . $vert_url);
+    if (LJ::did_post() && $POST{'vert_id'}) {
+        $vertical = LJ::Vertical->load_by_id($vert_id);
     }
 
     if (LJ::did_post() and $POST{'remove'}) {
-        $caturl = $POST{'caturl'};
+        my @ids = sort { $b cmp $a } grep { $_ =~ /^catid\d+\_0$/ && $POST{$_} } keys %POST;
+        my $cat_id = $POST{$ids[0]};
 
         push @errors, "Invalid form submission" unless LJ::check_form_auth();
         {
             # Check for required data
-            unless ($caturl) {
+            unless ($cat_id) {
                 push @errors, "Please select a category to remove";
                 next;
             }
 
             # Has a valid category been chosen
-            my $category = LJ::Browse->load_by_url("/browse" . $caturl, $vertical);
+            my $category = LJ::Browse->load_by_id($cat_id);
             push @errors, "Invalid category" unless $category;
 
             my @children = $category->children;
@@ -64,36 +69,36 @@ body<=
     my @verticals = LJ::Vertical->load_all();
     @verticals = map { { text => $_->{name}, value => $_->{url} } } @verticals;
 
-    $ret .= "<p>".LJ::html_select({
-                name => 'vert_url',
-                selected => $vert_url,
-                },
-                { text => 'Community Directory',
-                value => '',},
-                @verticals
-            );
-    $ret .= "&nbsp;\n";
+    $ret .= "<p>";
+    $ret .= "<table>";
+    my @verticals = LJ::Vertical->load_all();
+    if (!$LJ::DISABLED{'verticals_menu'}) {
+        $ret .= "<tr><td valign='top'><!-- -->Vertical</td>";
+        @verticals = map { { text => $_->{name}, value => $_->{vert_id} } } @verticals;
 
-    $ret .= LJ::html_submit('selectv', 'Select Vertical') . "</p>";
+        $ret .= "<td>".LJ::html_select({
+                    name => "vert_id", style => "",
+                    selected => $vertical ? $vertical->vert_id : 0,
+                    },
+                    { text => 'Community Directory',
+                    value => '',},
+                    @verticals
+                );
+        $ret .= "</td><td>\n";
 
+        $ret .= LJ::html_submit('select', 'Select Vertical') . "</td></tr>";
+    }
+
+    my @children = $category ? $category->children : ();
     # Get the full list of categories
     my @categories = LJ::Browse->load_all($vertical);
-    # Get the unique URI for each
-    #@categories = grep { $_->parent } @categories unless $vertical;
-    my @caturls = map { { text => $_->{pretty_name}, value => $_->url_path } } @categories;
-    @caturls = sort { $a cmp $b } @caturls;
 
-    $ret .= "<p>Remove Category:<br />";
-    $ret .= LJ::html_select({
-                name => 'caturl',
-                selected => $caturl },
-                { text => 'Select Category',
-                value => '' },
-                @caturls
-            );
+    $ret .= LJ::Browse->build_select_tree (0, \@categories, $category, undef, undef, 0);
+    if ($category) {
+        $ret .= "<tr><td colspan='2'>Selected category: ".$category->display_name."</td></tr>";
+    }
+    $ret .= "</table>\n";
     $ret .= "</p>\n";
-
-    $ret .= "</table></p>\n";
 
     $ret .= "<p>" . LJ::html_submit('remove', 'Remove') . "</p>";
 

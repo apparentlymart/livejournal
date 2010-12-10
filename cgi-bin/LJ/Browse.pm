@@ -127,6 +127,7 @@ sub create {
     }
 
     $self = $class->new( catid => $catid );
+    $self->clear_memcache;
     return $self;
 }
 
@@ -535,6 +536,7 @@ sub clear_memcache {
 
     LJ::MemCache::delete($self->memkey_catid);
     LJ::MemCache::delete($self->memkey_caturi($uri));
+    LJ::MemCache::delete($self->memkey_catall(vertical => $self->vertical ? $self->vertical : undef));
 
     return;
 }
@@ -1077,6 +1079,61 @@ sub remove_communities {
     $self->clear_journals_memcache;
 
     return 1;
+}
+
+## Return "path" for selected category
+## catobj -> par_catobj -> par_par_catobj -> etc... (array)
+## Param: arrayref to save "path"
+sub get_parent_path {
+    my $c = shift;
+    my $cat_path = shift;
+
+    my $parent = $c->parent;
+
+    push @$cat_path, $c;
+
+    return 0 unless $parent;
+
+    return $parent->get_parent_path ($cat_path);
+}
+
+sub build_select_tree {
+    my ($class, $parent, $cats_ref, $selected_cat, $text, $i, $n) = @_;
+
+    $i ||= 0;
+
+    return $text unless $cats_ref;
+
+    my @categories = @$cats_ref;
+    @categories = grep { ($_->parent == $parent) } grep { $_ } @categories;
+
+    return $text unless scalar @categories;
+
+    my @path_ = ();
+    $selected_cat->get_parent_path (\@path_) if $selected_cat;
+    my %path = map { $_->catid => 1 } @path_;
+    my @sel_cat = grep { $path{$_->catid} } @categories;
+
+    my @caturls = map { { text => $_->{pretty_name}, value => $_->catid } } @categories;
+    @caturls = sort { $a->{text} cmp $b->{text} } @caturls;
+
+    $text .= "<tr><td>Category</td>";
+    $text .= "<td>" . LJ::html_select({
+                name => "catid$i\_$n", style => "width:100%;",
+                selected => $sel_cat[0] ? $sel_cat[0]->catid : '' },
+                { text => LJ::Lang::ml('vertical.admin.add_category.btn'),
+                value => '' },
+                @caturls
+    ) . "</td>";
+    $text .= "<td>" . LJ::html_submit('select_c', 'Select Category') . "</td>";
+    $text .= "</tr>";
+
+    if ($sel_cat[0]) {
+        my @children = $sel_cat[0]->children;
+        $text = $class->build_select_tree($sel_cat[0], \@children, $selected_cat, $text, ++$i, $n);
+    }
+
+    return $text;
 }
 
 # get the typemap for categoryprop

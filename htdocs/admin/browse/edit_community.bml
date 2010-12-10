@@ -9,61 +9,7 @@ body<=
 
     return "This page is not available." unless LJ::is_enabled("browse");
 
-    my $ret;
-
-sub get_parent_path {
-    my $cat_path = shift;
-    my $c = shift;
-
-    return undef unless $c;
-
-    my $parent = $c->parent;
-
-    push @$cat_path, $c;
-
-    return 0 unless $parent;
-
-    return get_parent_path ($cat_path, $c->parent);
-}
-
-sub _build_tree {
-    my ($parent, $cats_ref, $selected_cat, $text, $i, $n) = @_;
-
-    $i ||= 0;
-
-    return $text unless $cats_ref;
-
-    my @categories = @$cats_ref;
-    @categories = grep { ($_->parent == $parent) } grep { $_ } @categories;
-
-    return $text unless scalar @categories;
-
-    my @path_ = ();
-    get_parent_path (\@path_, $selected_cat);
-    my %path = map { $_->catid => 1 } @path_;
-    my @sel_cat = grep { $path{$_->catid} } @categories;
-
-    my @caturls = map { { text => $_->{pretty_name}, value => $_->catid } } @categories;
-    @caturls = sort { $a->{text} cmp $b->{text} } @caturls;
-
-    $text .= "<tr><td>Category</td>";
-    $text .= "<td>" . LJ::html_select({
-                name => "catid$i\_$n", style => "width:100%;",
-                selected => $sel_cat[0] ? $sel_cat[0]->catid : '' },
-                { text => $ML{'.add'},
-                value => '' },
-                @caturls
-    ) . "</td>";
-    $text .= "<td>" . LJ::html_submit('select_c', 'Select Category') . "</td>";
-    $text .= "</tr>";
-
-    if ($sel_cat[0]) {
-        my @children = $sel_cat[0]->children;
-        $text = _build_tree($sel_cat[0], \@children, $selected_cat, $text, ++$i, $n);
-    }
-
-    return $text;
-}
+    my $ret = '';
 
     # get remote
     my $remote = LJ::get_remote();
@@ -134,7 +80,7 @@ sub _build_tree {
         # Get the full list of categories
         my @categories = LJ::Browse->load_all($vert_[$j]);
 
-        $ret .= _build_tree (0, \@categories, $cat_[$j], undef, undef, $i);
+        $ret .= LJ::Browse->build_select_tree (0, \@categories, $cat_[$j], undef, undef, $i);
         if ($cat_[$j]) {
             $ret .= "<tr><td valign='top'>Communities from category:</td><tr><td colspan='3'>";
             if ($cat_[$j]->communities) {

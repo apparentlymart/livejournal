@@ -453,7 +453,7 @@ sub load_by_id {
     my $v = $class->new( vert_id => shift );
     $v->preload_rows;
 
-    return $v;
+    return $v->vert_id ? $v : undef;
 }
 
 # returns a vertical object of the vertical with the given name,
