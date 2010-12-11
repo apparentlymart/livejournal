@@ -357,6 +357,99 @@ span.expandcollapse {
 				margin: 0 auto;
 				}
 
+
+/* Wishes list on profile page */
+#wishes_body {
+    position: relative;
+    }
+    .b-wishes-profile {
+        overflow: hidden;  
+        width: 100%;  
+        }
+        .b-wishes-list {
+            width: 150%;
+        	padding:0;
+        	margin:0 -10px;
+        	list-style:none;
+        	zoom:1;
+        	}
+        	.b-wishes-list:after {
+        	    content: " ";
+        	    display: block;
+        	    visibility: hidden;
+        	    clear: both;
+        	    height: 0;
+        	    font-size: 0;
+        	    line-height: 0;
+        		}
+        		.b-wishes-list LI {
+        			float:left;
+        			display: inline;
+        			width:120px;
+        			margin:10px;
+        			padding:0;
+        			text-align:center;
+        			}
+        		.b-wishes-list DIV {
+        			position: relative;
+        		    width: 100px;
+        		    height: 100px;
+        			margin: 0 auto 5px;
+        			zoom:1;
+        			}
+        			.b-wishes-list DIV IMG {
+        				display:block;
+            			max-height:100px;
+            			max-width:100px;
+        				margin: 0 auto;
+        				border 0;
+        				}
+        			.b-wishes-list DIV A,
+        			.b-wishes-list DIV A IMG {
+        			    border: 0;
+        			    }
+/* Pager for wishes */
+#wishes_body .i-nav {
+	position: absolute;
+	right: 10px;
+	top: -28px;
+	margin: 0;
+	padding: 0;
+	text-align: right;
+	font-size: 11px;
+	line-height: 11px;
+	}
+    #wishes_body .i-nav-prev,
+    #wishes_body .i-nav-next {
+    		overflow: hidden;
+    		display: inline-block;
+    		width: 16px;
+    		height: 16px;
+    		padding: 0;
+    		vertical-align: -4px;
+    		background-image: url(/img/arrow-spotlight.gif?v=1);
+    		background-repeat: no-repeat;
+    		font: 0/0 serif;
+    		cursor: pointer;
+    		}
+    #wishes_body .i-nav-prev {
+    		margin: 0;
+    		background-position: 0 0;
+    		}
+    #wishes_body .i-nav-prev-dis {
+    		background-position: 0 -16px;
+    		cursor: default;
+    		}
+    #wishes_body .i-nav-next {
+    		margin: 0 0 0 5px;
+    		background-position: -16px 0;
+    		}
+    #wishes_body .i-nav-next-dis {
+    		background-position: -16px -16px;
+    		cursor: default;
+    		}
+
+
 /* ONTD-Button */
 .details_ontd {
 	padding:0 0 10px;
