@@ -1585,15 +1585,80 @@ sub clean_event
 sub pre_clean_event_for_entryform
 {
     my $ref = shift;
-
-    # fast path: no markup 
+    
+    ## fast path - no html tags
     return unless $$ref =~ /</;
 
-    # slow path: need to be run it through the cleaner
-    # allow everything except JavaScript
-    clean($ref, {'mode' => 'allow'}); 
-}
+    ## slow path
+    my $data = Encode::decode_utf8($$ref);
+    my $p = HTML::TokeParser->new(\$data);
+    my $newdata = '';
 
+    TOKEN:
+    while (my $token = $p->get_token) {
+        my $type = $token->[0];
+        if ($type eq 'S') {
+            ## start tag
+            my $tag  = $token->[1];
+            my $hash = $token->[2];  # attributes
+            my $attrs = $token->[3]; # attribute names, in original order
+ 
+            ## check the tag
+            if ($tag eq 'script') {
+                $p->get_tag('/script');
+                next TOKEN;
+            }
+            if ($tag =~ /:set$/) {
+                next TOKEN;
+            }
+            unless ($tag =~ /^\w([\w\-:_]*\w)?\/?$/) {
+                next TOKEN;
+            }
+ 
+            ## check attributes
+            my $autoclose = delete $hash->{'/'};
+            foreach my $attr (keys %$hash) {
+                if ($attr =~ /^(?:on|dynsrc)/) {
+                    delete $hash->{$attr};
+                } elsif ($attr eq 'href' || $attr eq 'src') {
+                    delete $hash->{$attr} if $hash->{$attr} =~ /^data/;
+                }
+
+                if ($attr =~ /(?:^=)|[\x0b\x0d]/) {
+                    next TOKEN;
+                }
+                unless ($attr =~ /^[\w_:-]+$/) {
+                    next TOKEN;
+                }
+                
+                my $tmp = $hash->{$attr};
+                $tmp =~ s/[\t\n\x0]//g;
+                if ($tmp =~ /(?:jscript|livescript|javascript|vbscript|about):/ix) {
+                    delete $hash->{$attr};
+                    next;
+                }
+                ## TODO: css & xslt js expressions 
+            }
+            
+            ## reconstruct the tag
+            $newdata .= "<$tag";
+            foreach (@$attrs) {
+                $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\"" if exists $hash->{$_};
+            }
+            $newdata .= ($autoclose) ? " />" : ">";
+        } elsif ($type eq 'E' or $type eq 'PI') {
+            ## close (end) tags and processing instructions
+            $newdata .= $token->[2];
+        } else {
+            $newdata .= $token->[1];
+        }
+    } 
+
+    # extra-paranoid check
+    1 while $newdata =~ s/<script\b//ig;
+    
+    $$ref = Encode::encode_utf8($newdata);
+}
 
 sub get_okay_comment_tags
 {
