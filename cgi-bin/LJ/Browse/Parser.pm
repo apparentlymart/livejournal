@@ -147,10 +147,10 @@ sub _after_parse {
     my $text = shift;
 
     ## Remove multiple "br" tags
-    $$text =~ s#(\s*<br\s*/?>\s*){2,}#<br/>#gi;
+    $$text =~ s#(\s*</?br\s*/?>\s*){2,}#<br/>#gi;
 
     ## Remove <a><img><br>-type html (imgs had been deleted early)
-    $$text =~ s#(<a[^>]*?></a><br\s*/?>\s*){2,}#<br/>#gi;
+    $$text =~ s#(<a[^>]*?></a></?br\s*/?>\s*){2,}#<br/>#gi;
 
     ## Remove all content of 'script' tag
     $$text =~ s#<script.*?/script># #gis;
