@@ -92,9 +92,9 @@ jQuery.fn.placeholder = function()
 					$this.hasClass('placeholder') && $this.removeClass('placeholder').val('');
 				});
 				
-				if (this.value !== this.getAttribute('placeholder')) {
-					$this.removeClass('placeholder');
-				}
+				this.value !== this.getAttribute('placeholder')
+					? $this.removeClass('placeholder')
+					: $this.addClass('placeholder');
 			});
 			return this;
 		}
@@ -524,6 +524,8 @@ jQuery.fn.calendar = function( o ) {
 		this.cellSeleted = function( date ){
 			if( o.onDaySelected && view.isActiveDate( date, model.monthDate ) ) {
 				o.onDaySelected( date );
+				// regenerate, TODO: it is hack
+				model.switchMonth(0);
 			}
 		};
 
