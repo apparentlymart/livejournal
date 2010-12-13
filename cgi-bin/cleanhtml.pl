@@ -1632,7 +1632,7 @@ sub pre_clean_event_for_entryform
                 }
                 
                 my $tmp = $hash->{$attr};
-                $tmp =~ s/[\t\n\x0]//g;
+                $tmp =~ s/[\t\n\0]//g;
                 if ($tmp =~ /(?:jscript|livescript|javascript|vbscript|about):/ix) {
                     delete $hash->{$attr};
                     next;
