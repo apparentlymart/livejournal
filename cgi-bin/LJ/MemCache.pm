@@ -158,6 +158,7 @@ use warnings;
 
 use String::CRC32 qw();
 use Carp qw();
+use IO::Handle qw();
 
 ### VARIABLES ###
 
@@ -211,6 +212,8 @@ $GET_DISABLED = 0;
                              userpic preformated ) ],
 );
 
+my $logfile = undef;
+
 ### PRIVATE FUNCTIONS ###
 
 sub _hashfunc {
@@ -263,11 +266,18 @@ if ( !$LJ::DISABLED{'memcache_profile'} ) {
     *_profile = sub {
         my ( $funcname, $key, $result ) = @_;
 
+        unless ( defined $logfile ) {
+            open $logfile, ">>$ENV{LJHOME}/var/memcache-profile/$$.log"
+                or die "cannot open log: $!";
+
+            $logfile->autoflush;
+        }
+
         $key =~ s/\b\d+\b/?/g;
 
-        warn "[memcache-profile] $funcname($key) " .
-             ( defined $result ? '[hit]' : '[miss]' ) .
-             "\n";
+        print $logfile "[memcache-profile] $funcname($key) " .
+                       ( defined $result ? '[hit]' : '[miss]' ) .
+                       "\n";
     };
 } else {
     *_profile = sub {};
@@ -486,7 +496,7 @@ sub replace {
 sub incr {
     my ( $key, $value ) = @_;
 
-    $value = '' unless defined $value;
+    $value = 1 unless defined $value;
 
     my $conn = _get_connection($key);
 
@@ -501,7 +511,7 @@ sub incr {
 sub decr {
     my ( $key, $value ) = @_;
 
-    $value = '' unless defined $value;
+    $value = 1 unless defined $value;
 
     my $conn = _get_connection($key);
 
