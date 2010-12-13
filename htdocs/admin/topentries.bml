@@ -9,7 +9,7 @@ body<=
     use LJ::Widget::TopEntries;
     use LJ::TopEntries;
 
-    LJ::need_res('stc/framework/modules.css');
+    LJ::need_res('js/admin/topentries.js', 'stc/framework/modules.css');
 
     my $remote = LJ::get_remote();
     my $domain = $POST{domain} || $GET{domain} || 'hmp_ontd'; # widgets domain
@@ -118,7 +118,8 @@ body<=
     $ret .= "</table><br />\n";
 
     if (my @posts = $top_entries->get_featured_posts(raw => 1)){
-        $ret .= qq|<h3>Added Posts</h3><ul>|;
+        $ret .= qq|<h3>Added Posts</h3><ul id="delete-posts">|;
+        $ret .= "<li><input type=\"checkbox\" name==\"selectall\" /> - Select all</li>";
         foreach my $post (@posts) {
             $ret .= 
                 qq|<li>
