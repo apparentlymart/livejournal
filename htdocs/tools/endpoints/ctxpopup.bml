@@ -134,6 +134,7 @@
         report send_gift buy_same_userhead send_message stop_community subscribe_feed
         this_is_you unban unsubscribe_feed updating view watch_community
         your_friend you_member you_subscribed you_watching
+        view_wishlist
     /;
     ## optimization: load all ML strings into local cache at once
     LJ::Lang::get_text_multi(BML::get_language(), undef, [map { "$language_scope.$_" } @ml_keys]);
@@ -170,7 +171,8 @@
         }
     }
 
-    $ret{wishlist_url} = $u->journal_base . "/wishlist";
+    $ret{wishlist_url} = $u->journal_base . "/wishlist"
+        if LJ::WishList->may_edit($u);
 
     sleep(1.5) if $LJ::IS_DEV_SERVER;
     my %extrainfo = LJ::run_hook("ctxpopup_extra_info", $u);
