@@ -312,6 +312,8 @@ sub new
         $singletons{$vert_id} = $self;
     }
 
+    LJ::MemCache::delete($self->memkey_vertall);
+
     return $self;
 }
 *instance = \&new;
