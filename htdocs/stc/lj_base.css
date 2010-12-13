@@ -1508,10 +1508,10 @@ DIV.lj_ippu_app {
 	DIV.lj_ippu_app DIV.lj_ippu_titlebar {
 		height: auto;
 		padding: 0;
-		margin: 0 0 8px 0;
+		margin: 0 0 10px 0;
 		background: none;
 		line-height: 16px;
-		font-size: 12px;
+		font-size: 16px;
 		color: #000;
 		}
 		DIV.lj_ippu_app DIV.lj_ippu_titlebar .ljappippu_button {
@@ -1643,35 +1643,3 @@ DIV.lj_ippu_app {
 		line-height: 16px;
 		font-size: 12px;
 		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
