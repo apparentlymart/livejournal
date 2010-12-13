@@ -1175,11 +1175,11 @@ sub _get_set {
     return $self->{$key};
 }
 
-sub catid          { shift->_get_set('catid')              }
-sub display_name   { shift->_get_set('pretty_name')        }
-sub url_path       { shift->_get_set('url_path')           }
-sub parentid       { shift->_get_set('parentcatid')        }
-sub vert_id        { shift->_get_set('vert_id' => $_[0] )  }
+sub catid          { shift->_get_set('catid')                 }
+sub display_name   { shift->_get_set('pretty_name')           }
+sub url_path       { shift->_get_set('url_path')              }
+sub parentid       { shift->_get_set('parentcatid' => $_[0] ) }
+sub vert_id        { shift->_get_set('vert_id' => $_[0] )     }
 
 
 # Community Moderation

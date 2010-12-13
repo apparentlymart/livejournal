@@ -4572,6 +4572,12 @@ vertical.nav.explore.technology=Technology
 
 vertical.admin.add_category.btn=Add Category
 
+vertical.admin.select_vertical=Community Directory
+
+vertical.admin.select_vertical.btn=Select Vertical
+
+vertical.admin.move_category.btn=Move
+
 vgift..anon=
 
 vgift..fromuser=
