@@ -623,7 +623,7 @@ sub clean
         	next TOKEN if $LJ::DISABLED{'userapps'};
         	my $app = LJ::UserApps->get_application( %$attr );
         	next TOKEN unless $app && $app->can_show_restricted;
-        	$newdata .= $app->ljapp_display($attr->{extra});
+        	$newdata .= $app->ljapp_display($attr->{extra}, $attr->{title});
         	next TOKEN;
             }
             elsif ($tag eq "lj")
