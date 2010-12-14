@@ -56,53 +56,48 @@ jQuery.fn.hourglass = function(xhr)
 }
 
 // not work for password
-jQuery.fn.placeholder = function()
+jQuery.fn.placeholder = (function()
 {
-	if ('placeholder' in document.createElement('input')) {
-		arguments.callee = function() { return this; }
-	} else {
-		arguments.callee = function()
-		{
-			var check_focus = function()
-				{
-					if (this.value === this.getAttribute('placeholder')) {
-						jQuery(this)
-							.val('')
-							.removeClass('placeholder');
-					}
-				},
-				check_blur = function()
-				{
-					if (!this.value) {
-						jQuery(this)
-							.val(this.getAttribute('placeholder'))
-							.addClass('placeholder');
-					}
-				};
-				
-			this.each(function()
-			{
-				var $this = jQuery(this);
-				
-				$this.focus(check_focus).blur(check_blur);
-				
-				check_blur.apply(this);
-				jQuery(this.form).submit(function()
-				{
-					$this.hasClass('placeholder') && $this.removeClass('placeholder').val('');
-				});
-				
-				this.value !== this.getAttribute('placeholder')
-					? $this.removeClass('placeholder')
-					: $this.addClass('placeholder');
-			});
+	var check_focus = function() {
+			if (this.value === this.getAttribute("placeholder")) {
+				jQuery(this)
+					.val("")
+					.removeClass("placeholder");
+			}
+		},
+		check_blur = function() {
+			if (!this.value) {
+				jQuery(this)
+					.val(this.getAttribute("placeholder"))
+					.addClass("placeholder");
+			}
+		},
+		support;
+
+	return function() {
+		if (support === undefined) {
+			support = "placeholder" in document.createElement("input");
+		}
+		if (support === true) {
 			return this;
+		} else {
+			return this.each(function() {
+				var $this = jQuery(this);
+
+				$this.focus(check_focus).blur(check_blur);
+
+				jQuery(this.form)
+					.submit(function() {
+						$this.hasClass("placeholder") && $this.removeClass("placeholder").val("");
+					});
+
+				this.value === this.getAttribute("placeholder") || !this.value
+					? $this.val(this.getAttribute("placeholder")).addClass("placeholder")
+					: $this.removeClass("placeholder");
+			});
 		}
 	}
-	
-	arguments.callee.apply(this, arguments);
-	return this;
-}
+})();
 
 //this one is fields type agnostic but creates additional label elements, which need to be styled
 jQuery.fn.labeledPlaceholder = function() {
@@ -327,6 +322,15 @@ jQuery.fn.calendar = function( o ) {
 		return ( year % 4 === 0 && (year % 100 != 0 ) ) || ( year % 400 == 0);
 	}
 
+	function addPadding( str, length, chr ) {
+		str = str.toString(); //cast any type to string
+		while( str.length < length ) {
+			str = chr + str;
+		}
+
+		return str;
+	}
+
 	var View = function (nodes, styles, o)
 	{
 		this.initialize = function (monthDate, events, switcherStates)
@@ -337,13 +341,24 @@ jQuery.fn.calendar = function( o ) {
 			this.bindEvents();
 		}
 
-		this.modelChanged = function (monthDate, events, switcherStates)
+		this.modelChanged = function (monthDate, selectedDay, events, switcherStates)
 		{
 			//we have a 30% speedup when we temporary remove tbody from dom
 			this.tbody.detach();
-			this.fillDates(monthDate, events)
+			this.fillDates(monthDate, selectedDay, events)
 			this.fillLabels(monthDate, switcherStates)
 			this.tbody.appendTo( nodes.table );
+		}
+
+		this.dateSelected = function( date )
+		{
+			for( var i = 0; i < nodes.daysCells.length; ++i ) {
+				if( getDateNumber( date ) == getDateNumber( nodes.daysCells[ i ].data( 'day' ) ) ) {
+					nodes.daysCells[ i ].addClass( styles.current );
+				} else {
+					nodes.daysCells[ i ].removeClass( styles.current );
+				}
+			}
 		}
 
 		this.catchTableStructure = function() {
@@ -361,7 +376,7 @@ jQuery.fn.calendar = function( o ) {
 			return jQuery( tbody );
 		}
 
-		this.fillDates = function (monthDate, events)
+		this.fillDates = function (monthDate, selectedDay, events)
 		{
 			var firstDay = new Date(monthDate);
 			firstDay.setDate(1);
@@ -387,7 +402,7 @@ jQuery.fn.calendar = function( o ) {
 				var iDate = new Date(prevMonth);
 				iDate.setDate(l--);
 
-				this.formDayString( iDate, nodes.daysCells[ h ], null, this.isActiveDate(iDate, monthDate ) );
+				this.formDayString( iDate, nodes.daysCells[ h ], null, this.isActiveDate(iDate, monthDate ), selectedDay );
 			}
 
 			for (var i = 1; i <= length; i++)
@@ -395,7 +410,7 @@ jQuery.fn.calendar = function( o ) {
 				var iDate = new Date(monthDate);
 				iDate.setDate(i);
 
-				this.formDayString( iDate, nodes.daysCells[ i + offset ], events, this.isActiveDate(iDate, monthDate ) );
+				this.formDayString( iDate, nodes.daysCells[ i + offset ], events, this.isActiveDate(iDate, monthDate ), selectedDay );
 			}
 
 			for (var j = i + offset, k = 1; j < nodes.daysCells.length; j++)
@@ -403,7 +418,7 @@ jQuery.fn.calendar = function( o ) {
 				var iDate = new Date(nextMonth);
 				iDate.setDate(k);
 
-				this.formDayString( iDate, nodes.daysCells[j], null, this.isActiveDate(iDate, monthDate ) );
+				this.formDayString( iDate, nodes.daysCells[j], null, this.isActiveDate(iDate, monthDate ), selectedDay );
 				++k;
 			}
 
@@ -428,14 +443,14 @@ jQuery.fn.calendar = function( o ) {
 			return isActive;
 		}
 
-		this.formDayString = function( d, label, events, isActive )
+		this.formDayString = function( d, label, events, isActive, selectedDay )
 		{
 			events = events || [];
 			label.data( 'day', d );
 			label.data( 'isActive', isActive );
 
 			var today = new Date(),
-				isCurrentDay = ( getDateNumber( d ) == getDateNumber( o.currentDate ) ),
+				isCurrentDay = ( getDateNumber( d ) == getDateNumber( selectedDay ) ),
 				hasEvents = ( jQuery.inArray( d.getDate(), events ) > -1 );
 
 			label[isCurrentDay ? 'addClass' : 'removeClass']( styles.current );
@@ -445,7 +460,7 @@ jQuery.fn.calendar = function( o ) {
 			} else if( hasEvents ) {
 
 				var ref = o.dayRef,
-					subs = [ [ '%Y', d.getFullYear()], [ '%M', d.getMonth() + 1], [ '%D', d.getDate()] ];
+					subs = [ [ '%Y', d.getFullYear()], [ '%M', addPadding( d.getMonth() + 1, 2, "0" ) ], [ '%D', addPadding( d.getDate(), 2, "0" ) ] ];
 				for( var i = 0; i < subs.length; ++i ) {
 					ref = ref.replace( subs[i][0], subs[i][1] );
 				}
@@ -524,8 +539,7 @@ jQuery.fn.calendar = function( o ) {
 		this.cellSeleted = function( date ){
 			if( o.onDaySelected && view.isActiveDate( date, model.monthDate ) ) {
 				o.onDaySelected( date );
-				// regenerate, TODO: it is hack
-				model.switchMonth(0);
+				model.selectDate( date );
 			}
 		};
 
@@ -536,7 +550,7 @@ jQuery.fn.calendar = function( o ) {
 	var Model = function ( selectedDay, view, options )
 	{
 		this.enabledMonthsRange = [];
-		this.datesCache = {};
+		this.datesCache = null;
 		//if ajax request is already sent, we do not change the model before the answer
 		this.ajaxPending = false;
 
@@ -546,6 +560,7 @@ jQuery.fn.calendar = function( o ) {
 				endMonth = options.endMonth || new Date( 2050, 0, 1 );
 			this.enabledMonthsRange = [ startMonth, endMonth ];
 			this.monthDate = new Date( selectedDay );
+			this.selectedDay = new Date( selectedDay );
 			view.initialize(this.monthDate, null, this.getSwitcherStates(this.monthDate));
 
 			this.switchMonth( 0 );
@@ -555,7 +570,7 @@ jQuery.fn.calendar = function( o ) {
 		{
 			var date = new Date( this.monthDate );
 			date.setMonth(date.getMonth() + go);
-			this.switchDate( date );
+			this.switchDate( date, go );
 		}
 
 		this.switchYear = function (go)
@@ -568,10 +583,11 @@ jQuery.fn.calendar = function( o ) {
 					date.setMonth( date.getMonth() + add );
 				}
 			}
-			this.switchDate( date );
+			this.switchDate( date, go );
 		}
 
-		this.switchDate = function( date ) {
+		this.switchDate = function( date, dir ) {
+			dir = dir || -1;
 			if( this.ajaxPending ) {
 				return;
 			}
@@ -579,8 +595,16 @@ jQuery.fn.calendar = function( o ) {
 
 			var self = this;
 			this.fetchMonthEvents( this.monthDate, function( events ) {
-				view.modelChanged(self.monthDate, events, self.getSwitcherStates( self.monthDate ) );
-			} )
+				if( typeof events === "boolean" && events === false ) {
+				} else {
+					view.modelChanged(self.monthDate, self.selectedDay, events, self.getSwitcherStates( self.monthDate ) );
+				}
+			}, dir );
+		}
+
+		this.selectDate = function( date ) {
+			this.selectedDay = new Date( date );
+			view.dateSelected( this.selectedDay );
 		}
 
 		this.fetchMonthEvents = function( date, onFetch ) {
@@ -598,6 +622,11 @@ jQuery.fn.calendar = function( o ) {
 				} );
 			}
 		}
+
+		/*
+		
+		check
+		 */
 
 		this.getSwitcherStates = function (monthDate)
 		{
@@ -620,7 +649,10 @@ jQuery.fn.calendar = function( o ) {
 			return { prevMonth: pm, nextMonth: nm, prevYear: py, nextYear: ny };
 		}
 
-		this.insideRange = function (range, iDate) { return iDate >= range[0] && iDate <= range[1] };
+		this.insideRange = function (range, iDate) {
+			return getDateNumber( iDate ) >= getDateNumber( range[0] )
+					&& getDateNumber( iDate ) <= getDateNumber( range[1] )
+		};
 	}
 
 	return this.each( function() {
