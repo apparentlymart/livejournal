@@ -15,6 +15,10 @@ sub from_json {
     return $wrap->decode($dump);
 }
 
+sub class {
+    return ref $wrap;
+}
+
 sub true  { $wrap->true  };
 sub false { $wrap->false };
 
