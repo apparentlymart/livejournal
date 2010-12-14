@@ -21,7 +21,9 @@ sub render
     $uri = LJ::eurl($uri);
 
     my $data_remote = {};
-    my $data_journal = {};
+    my $data_journal = {
+        page => "http://" . LJ::Request->header_in("Host") . LJ::Request->uri,
+    };
     my $data_control_strip = {};
 
     my $data_lj = {
@@ -68,6 +70,7 @@ sub render
     $data_journal->{view} = LJ::Request->notes('view');
     $data_journal->{view_friends} = $data_journal->{view} eq 'friends';
     $data_journal->{view_friendsfriends} = $data_journal->{view} eq 'friendsfriends';
+    $data_journal->{view_tag} = $data_journal->{view} eq 'tag';
     $data_journal->{view_entry} = $data_journal->{view} eq 'entry';
     $data_journal->{display} = LJ::ljuser($journal);
 
@@ -185,6 +188,10 @@ sub render
 
                 foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
                     push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
+                    push @{$data_remote->{friend_groups}}, {
+                        name  => lc($group{$g}->{name}),
+                        value => $group{$g}->{name},
+                    };
                 }
 
                 my $selected = "all";
@@ -267,26 +274,13 @@ sub render
     {
         $data_remote->{is_logged_in} = 0;
 
-        my $show_login_form = LJ::run_hook("show_control_strip_login_form", $journal);
-        $show_login_form = 1 if !defined $show_login_form;
+        $data_journal->{login_form}->{use_ssl} = $LJ::USE_SSL_LOGIN;
 
-        $data_journal->{login_form}->{show} = $show_login_form;
-
-        if ($show_login_form) {
-
-            $data_journal->{login_form}->{use_ssl} = $LJ::USE_SSL_LOGIN;
-
-            if ($LJ::USE_SSL_LOGIN) {
-                $data_journal->{login_form}->{root} = $LJ::SSLROOT;
-            } else {
-                $data_journal->{login_form}->{root} = $LJ::SITEROOT;
-                $data_journal->{login_form}->{challenge} = LJ::challenge_generate(300);
-            }
-
-            $data_control_strip->{userpic} = LJ::run_hook('control_strip_userpic_contents', $uri) || "&nbsp;";
-
+        if ($LJ::USE_SSL_LOGIN) {
+            $data_journal->{login_form}->{root} = $LJ::SSLROOT;
         } else {
-            $data_control_strip->{userpic} = LJ::run_hook('control_strip_loggedout_userpic_contents', $uri) || "&nbsp;";
+            $data_journal->{login_form}->{root} = $LJ::SITEROOT;
+            $data_journal->{login_form}->{challenge} = LJ::challenge_generate(300);
         }
     }
     
@@ -418,7 +412,7 @@ sub flatten_hashref
 
     while (my ($key, $value) = each %$hashref) {
         if (ref($value) eq 'HASH') {
-            flatten_hashref($value, $prefix . $key . '.', $out);
+            flatten_hashref($value, $prefix . $key . '_', $out);
         } else {
             $out->{$prefix . $key} = $value;
         }
