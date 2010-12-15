@@ -143,9 +143,19 @@ jQuery.fn.labeledPlaceholder = function() {
 	} );
 }
 
-jQuery.fn.input = function(fn)
-{
-	return fn ? this.bind('input keyup paste', fn) : this.trigger('input');
+jQuery.fn.input = function(fn) {
+	return fn
+		? this.each(function() {
+			var last_value = this.value;
+			jQuery(this).bind("input keyup paste", function(e) {
+				// e.originalEvent use from trigger
+				if (!e.originalEvent || this.value !== last_value) {
+					last_value = this.value;
+					fn.apply(this, arguments);
+				}
+			})
+		})
+		: this.trigger("input");
 }
 
 /* function based on markup:
@@ -562,8 +572,21 @@ jQuery.fn.calendar = function( o ) {
 			this.monthDate = new Date( selectedDay );
 			this.selectedDay = new Date( selectedDay );
 			view.initialize(this.monthDate, null, this.getSwitcherStates(this.monthDate));
-
 			this.switchMonth( 0 );
+
+			/*
+			if( !options.onFetch ) {
+				view.initialize(this.monthDate, null, this.getSwitcherStates(this.monthDate));
+				this.switchMonth( 0 );
+			} else {
+				var self = this;
+				this.fetchEvents( function( events ) {
+					self.initEvents( events );
+					view.initialize(this.monthDate, null, this.getSwitcherStates(this.monthDate));
+					self.switchMonth( 0 );
+				} );
+			}
+			*/
 		}
 
 		this.switchMonth = function (go)
@@ -594,7 +617,7 @@ jQuery.fn.calendar = function( o ) {
 			this.monthDate = date;
 
 			var self = this;
-			this.fetchMonthEvents( this.monthDate, function( events ) {
+			this.fetchMonthEvents( this.monthDate, function( events, date ) {
 				if( typeof events === "boolean" && events === false ) {
 				} else {
 					view.modelChanged(self.monthDate, self.selectedDay, events, self.getSwitcherStates( self.monthDate ) );
@@ -622,11 +645,6 @@ jQuery.fn.calendar = function( o ) {
 				} );
 			}
 		}
-
-		/*
-		
-		check
-		 */
 
 		this.getSwitcherStates = function (monthDate)
 		{
