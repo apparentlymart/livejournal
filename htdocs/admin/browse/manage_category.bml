@@ -50,12 +50,20 @@ body<=
                 $cat_[0]->parentid ($cat_[1]->catid);
                 $cat_[0]->vert_id ($cat_[1]->vertical->vert_id)
                     if $cat_[1]->vertical;
-                LJ::MemCache::delete($cat_[1]->memkey_catall(vertical => $cat_[1]->vertical ? $cat_[1]->vertical : undef));
+
+                ## reset caches
+                $cat_[1]->clear_memcache;
+                $cat_[1]->{_loaded_row} = 0;
             } else {
                 ## Move to Vertical
                 $cat_[0]->parentid (0);
                 $cat_[0]->vert_id ($vert_[1]->vert_id);
             }
+            LJ::Browse->reset_singletons();
+            $cat_[0]->clear_memcache;
+            $cat_[0]->{_loaded_row} = 0;
+            $cat_[0]->preload_rows;
+            $cat_[1]->preload_rows if $cat_[1];
             LJ::MemCache::delete($cat_[0]->memkey_catall(vertical => $cat_[0]->vertical ? $cat_[0]->vertical : undef));
             LJ::MemCache::delete($cat_[0]->memkey_catall(vertical => $vert_[1] ? $vert_[1] : undef));
             $ret .= "<span class='super notice'>Category successfully moved.</span>";

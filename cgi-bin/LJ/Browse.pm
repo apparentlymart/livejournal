@@ -175,6 +175,7 @@ sub load_by_id {
     my $catid = shift;
 
     my $c = $class->new( catid => $catid );
+    $c->preload_rows;
 
     return $c;
 }
@@ -632,6 +633,8 @@ sub preload_rows {
         # and delete from %need for error reporting
         delete $need{$obj->{catid}};
 
+        $obj->preload_children;
+
     }
 
     # weird, catids that we couldn't find in memcache or db?
@@ -639,6 +642,21 @@ sub preload_rows {
 
     # now memcache and request cache are both updated, we're done
     return 1;
+}
+
+sub preload_children {
+    my $self = shift;
+
+    my $dbh = LJ::get_db_reader ();
+
+    my $sth = $dbh->prepare ("SELECT * FROM category WHERE parentcatid = ?");
+    $sth->execute($self->catid);
+
+    my @children = ();
+    while (my $row = $sth->fetchrow_hashref) {
+        push @children, $row->{catid};
+    }
+    $self->{children} = \@children;
 }
 
 sub preload_props {
@@ -792,7 +810,7 @@ sub children {
     my %opts = @_;
     my $just_top = $opts{top_children};
 
-    $self->load_props unless $self->{_loaded_props};
+    $self->preload_rows unless $self->{_loaded_row};
 
     # If top_children flag is set, just return the top sub-categories
     my $children = $just_top ?
