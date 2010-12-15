@@ -192,6 +192,8 @@ jQuery.fn.tabsChanger = function(container)
 			e.preventDefault();
 		}
 	});
+
+    return this;
 }
 
 /** jQuery overlay plugin
