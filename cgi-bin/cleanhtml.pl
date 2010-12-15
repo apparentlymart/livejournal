@@ -416,11 +416,7 @@ sub clean
             if ($tag eq "lj-wishlist") {
                 my $wishid = $attr->{wishid};
                 my $userid = $attr->{userid};
-                my $u = LJ::load_userid($userid);
-                next TOKEN unless $u;
-                my $wish = LJ::WishElement->load($u, $wishid);
-                next TOKEN unless $wish;
-                $newdata .= Encode::decode_utf8($wish->expand_entry);
+                $newdata .= Encode::decode_utf8(LJ::WishElement->check_and_expand_entry($userid, $wishid));
             }
 
             # Capture object and embed tags to possibly transform them into something else.
