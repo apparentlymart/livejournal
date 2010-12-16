@@ -262,7 +262,7 @@ sub _set_compression {
     $conn->enable_compress(1);
 }
 
-if ( !$LJ::DISABLED{'memcache_profile'} ) {
+if ( $ENV{'LJ_MEMCACHE_PROFILE'} ) {
     *_profile = sub {
         my ( $funcname, $key, $result ) = @_;
 

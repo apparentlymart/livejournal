@@ -450,6 +450,7 @@ FCK.DataProcessor.ConvertToHtml = function(data)
 			.replace(/<lj-cut([^>]*)>/g, '<lj:cut$1>')
 			.replace(/<\/lj-cut>/g, '</lj:cut>')
 			.replace(/<([\/])?lj-raw>/g, '<$1lj:raw>')
+			.replace(/<([\/])?lj-wishlist>/g, '<$1lj:wishlist>')
 			.replace(/(<lj [^>]*)> /g, '$1> '); // IE merge spaces
 	}
 	else
@@ -517,6 +518,7 @@ FCK.DataProcessor.ConvertToDataFormat = function(body)
 		html = html
 			.replace(/<lj:cut([^>]*)>/g, '<lj-cut$1>')
 			.replace(/<\/lj:cut>/g, '</lj-cut>')
+			.replace(/<([\/])?lj:wishlist>/g, '<$1lj-wishlist>')
 			.replace(/<([\/])?lj:raw>/g, '<$1lj-raw>');
 	}
 	

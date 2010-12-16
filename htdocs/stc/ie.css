@@ -258,7 +258,12 @@ __________________________________________*/
 -----------------------------------------------*/
 * HTML .lj_qotd_entry_userpic .userpic-img,
 * HTML .appwidget-recentcomments .userpic-img,
-* HTML .b-catalogue-item DD.b-catalogue-item-img IMG {
+* HTML .b-catalogue-item DD.b-catalogue-item-img IMG,
+* HTML #lj_controlstrip_userpic IMG,
+* HTML .appwidget-gamefriendsplaying .w-body .friends-playing-list LI IMG,
+* HTML .appwidget-gamefriendsactivity .w-body .friends-activity-list LI IMG,
+* HTML .appwidget-gamewhoplaying .w-body .who-playing-list LI IMG,
+* HTML .b-wishes-list DIV IMG {
 	zoom:expression(
 			function(t){
 				t.runtimeStyle.zoom = 1;
@@ -360,3 +365,18 @@ __________________________________________*/
 * HTML .b-ljtimes-bubble-top {
 	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg : this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='crop')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

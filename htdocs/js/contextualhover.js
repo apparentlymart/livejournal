@@ -506,11 +506,21 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 		content.appendChild(document.createElement('br'));
 	}
 	
-	// vgift;
+	// vgift
 	if ((data.is_person || data.is_comm) && !data.is_requester && data.can_receive_vgifts) {
 		jQuery('<a/>', {
 			href: Site.siteroot + '/shop/vgift.bml?to=' + data.username,
 			text: data.ml_send_gift
+		})
+		.appendTo(content);
+		content.appendChild(document.createElement('br'));
+	}
+	
+	// wishlist
+	if (data.is_person && !data.is_requester && data.wishlist_url) {
+		jQuery('<a/>', {
+			href:data.wishlist_url,
+			text: data.ml_view_wishlist
 		})
 		.appendTo(content);
 		content.appendChild(document.createElement('br'));

@@ -22,10 +22,31 @@
         .appwidget-friendbirthdays .gift-link {
             float: right;
             display: block;
-            padding: 0 0 0 20px;
+            width: 16px;
+            height: 20px;
             background: url(/img/gift.gif?v=1) no-repeat 0 50%;
             line-height: 20px;
             }
+             .appwidget-friendbirthdays .gift-link SPAN {
+                display: block;
+                height: 100%;
+                overflow: hidden;
+                text-indent: -3000px; 
+                }
+        .appwidget-friendbirthdays .wish-link {
+            float: right;
+            display: block;
+            width: 16px;
+            height: 20px;
+            background: url(/img/icons/wishlist.gif?v=1) no-repeat 0 50%;
+            line-height: 20px;
+            }
+             .appwidget-friendbirthdays .wish-link SPAN {
+                display: block;
+                height: 100%;
+                overflow: hidden;
+                text-indent: -3000px; 
+                }
         * html .appwidget-friendbirthdays .gift-link {
             line-height: 14px;
             }

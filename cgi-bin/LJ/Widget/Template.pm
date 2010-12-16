@@ -47,6 +47,7 @@ sub render_body {
     );
 
     $class->prepare_template_params($template, \%opts);
+    return if LJ::Request->redirected;
 
     return $template->output;
 }

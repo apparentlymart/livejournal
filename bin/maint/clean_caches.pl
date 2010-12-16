@@ -164,6 +164,23 @@ $maint{'clean_caches'} = sub
         print "    rows remaining: " . ($xfp_count - $row_ct) . "\n";
     }
 
+    # removing old posts from landing page
+    print "-I- Removing old posts from landing page.\n";
+
+    my $cats = $dbh->selectall_arrayref ("SELECT catid FROM category WHERE vert_id > 0", { Slice => {} });
+    my $for_in = join ",", map { $_->{catid} } @$cats;
+    my $comms = $for_in ? $dbh->selectall_arrayref ("SELECT journalid FROM categoryjournals WHERE catid IN($for_in)", { Slice => {} }) : [];
+    my $cnt_delete = 0;
+    foreach my $comm (@$comms) {
+        my $posts = $dbh->selectall_arrayref ("SELECT jitemid FROM category_recent_posts WHERE journalid = ? ORDER BY timecreate ASC", { Slice => {} }, $comm->{'journalid'});
+        splice @$posts, 0, 30;
+        $cnt_delete += @#{$posts};
+        my $in_to_delete = join ',', map { $_->{jitemid} } @$posts;
+        $dbh->do ("DELETE FROM category_recent_posts WHERE journalid = ? AND jitemid IN ($in_to_delete)", undef, $comm->{'journalid'})
+            if $in_to_delete;
+    }
+    print "    deleted $cnt_delete\n";
+
     LJ::run_hooks('extra_cache_clean');
 };
 

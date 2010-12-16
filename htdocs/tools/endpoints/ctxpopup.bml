@@ -170,11 +170,11 @@
         }
     }
 
-    $ret{wishlist_url} = $u->journal_base . "/wishlist";
-
     sleep(1.5) if $LJ::IS_DEV_SERVER;
-    my %extrainfo = LJ::run_hook("ctxpopup_extra_info", $u);
-    %ret = (%ret, %extrainfo);
+    my @hooked = LJ::run_hooks("ctxpopup_extra_info", $u);
+    foreach my $result (@hooked) {
+        %ret = (%ret, @$result);
+    }
 
     if ($remote && $u) {
         $ret{is_banned} = LJ::is_banned($u,$remote) ? 1 : 0;
