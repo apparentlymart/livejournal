@@ -182,6 +182,22 @@ $maint{'clean_caches'} = sub
     print "    deleted $cnt_delete\n";
 
     LJ::run_hooks('extra_cache_clean');
+    LJ::disconnect_dbs();
+
+    print "-I- Cleaning friendstimes.\n";
+    foreach my $c (@LJ::CLUSTERS) {
+        my $dbcm = LJ::get_cluster_master($c);
+        $dbcm->do("DELETE FROM friendstimes WHERE added < UNIX_TIMESTAMP() - 86400*7 LIMIT 100000");
+    }
+    LJ::disconnect_dbs();
+
+    print "-I- Cleaning comet_history.\n";
+    foreach my $c (@LJ::CLUSTERS) {
+        my $dbcm = LJ::get_cluster_master($c);
+        $dbcm->do("DELETE FROM comet_history WHERE added < UNIX_TIMESTAMP() - 86400*10 LIMIT 100000");
+    }
+    LJ::disconnect_dbs();
+
 };
 
 1;
