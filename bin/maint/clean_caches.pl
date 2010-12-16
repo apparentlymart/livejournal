@@ -25,6 +25,18 @@ $maint{'clean_caches'} = sub
         $dbh->do("DELETE FROM underage WHERE timeof < (UNIX_TIMESTAMP() - 86400*90) LIMIT 2000");
     }
 
+    print "-I- Cleaning friendstimes.\n";
+    foreach my $c (@LJ::CLUSTERS) {
+        my $dbcm = LJ::get_cluster_master($c);
+        $dbcm->do("DELETE FROM friendstimes WHERE added < UNIX_TIMESTAMP() - 86400*7 LIMIT 100000");
+    }
+
+    print "-I- Cleaning comet_history.\n";
+    foreach my $c (@LJ::CLUSTERS) {
+        my $dbcm = LJ::get_cluster_master($c);
+        $dbcm->do("DELETE FROM comet_history WHERE added < UNIX_TIMESTAMP() - 86400*10 LIMIT 100000");
+    }
+
     print "-I- Cleaning captcha sessions.\n";
     foreach my $c (@LJ::CLUSTERS) {
         my $dbcm = LJ::get_cluster_master($c);
