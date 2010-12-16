@@ -617,6 +617,7 @@ sub clean
             elsif ($tag eq "lj-app")
             {
         	next TOKEN if $LJ::DISABLED{'userapps'};
+         	map { $attr->{$_} = Encode::encode_utf8($attr->{$_}) } keys %$attr; 
         	my $app = LJ::UserApps->get_application( %$attr );
         	next TOKEN unless $app && $app->can_show_restricted;
             $newdata .= Encode::decode_utf8($app->ljapp_display($attr->{extra}, $attr->{title}), Encode::FB_QUIET);
