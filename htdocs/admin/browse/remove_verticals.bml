@@ -18,12 +18,68 @@ body<=
     my $ret = "";
 
     if (LJ::did_post()) {
-        my @keys = keys %POST;
-        foreach (@keys) {
-            next unless $_ =~ /delete_vert_(\d+)/;
-            my $vert = LJ::Vertical->load_by_id ($1);
-            return "Vertical is not empty"
-                if $vert->delete_and_purge();
+        # validate form auth
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
+
+        if ($POST{'to_delete'}) {
+            ## Delete vertical, categories and communities.
+            my $vert = LJ::Vertical->load_by_id ($POST{'vert_id'});
+            my $vert_name = $vert->name;
+            my @cats = LJ::Browse->load_all ($vert);
+            foreach my $cat (@cats) {
+                my @comms = $cat->communities ();
+                $cat->remove_communities (@comms) if @comms;
+                $cat->delete;
+            }
+            $vert->delete_and_purge();
+
+            $ret .= "Vertical '".$vert_name."' has been deleted.<br/><br/>";
+        }
+        {
+            next if $POST{'to_delete'} || $POST{'cancel'};
+            my @keys = keys %POST;
+            foreach (@keys) {
+                next unless $_ =~ /delete_vert_(\d+)/;
+                my $vert = LJ::Vertical->load_by_id ($1);
+                my $res = $vert->delete_and_purge();
+                if ($res) {
+                    ## Not empty. Ask for confirmation
+                    $ret .= "<h2>Vertical '".$vert->name."' is not empty.</h2><br/>";
+                    my @cats = LJ::Browse->load_all ($vert);
+                    $ret .= "<table border='1'>";
+                    $ret .= "<caption><b>Content:</b></caption>";
+                    $ret .= "<tr><th>Categories</th><th>Communities</th></tr>";
+                    foreach my $cat (@cats) {
+                        $ret .= "<tr><td valign='top'>" . $cat->display_name . "</td>";
+                        my @comms = $cat->communities ();
+                        if (@comms) {
+                            $ret .= "<td><table>";
+                            foreach my $c (@comms) {
+                                $ret .= "<tr><td>".$c->user."</td></tr>";
+                            }
+                            $ret .= "</table></td>";
+                        } else {
+                            $ret .= "<td>&nbsp;</td>";
+                        }
+                        $ret .= "</tr>";
+                    }
+                    $ret .= "</table>";
+                    $ret .= "<h4>Are you really want to delete vertical '".$vert->name."' (#".$vert->vert_id.")</h4>";
+                    my $vert_id = $vert->vert_id;
+                    my $form_auth = LJ::form_auth();
+                    $ret .= <<FORM_DELETE;
+<form method="post">
+$form_auth
+<input type="hidden" name="vert_id" value="$vert_id">
+<input type="submit" name="to_delete" value="Yes, Delete">
+<input type="submit" name="cancel" value="No, Cancel">
+</form>
+FORM_DELETE
+                }
+            }
+            $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
+            return $ret;
         }
     }
 
