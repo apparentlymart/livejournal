@@ -1875,11 +1875,16 @@ sub editevent
     return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
+
+    # Ownerid - community/blog id
     my $ownerid = $flags->{'ownerid'};
     my $uowner = $flags->{'u_owner'} || $u;
+    
     # Make sure we have a user object here
     $uowner = LJ::want_user($uowner) unless LJ::isu($uowner);
     my $clusterid = $uowner->{'clusterid'};
+
+    # Posterid - the id of the author of the entry
     my $posterid = $u->{'userid'};
     my $qallowmask = $req->{'allowmask'}+0;
     my $sth;
@@ -1907,6 +1912,12 @@ sub editevent
         if ($ownerid != $posterid && # community post
             ($req->{'security'} eq "private" ||
             ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
+
+    # make sure user can't change post in a certain community without being its member 
+    return fail($err,102)
+        if ($LJ::MEMBERSHIP_SENSITIVE_COMMUNITIES{ $uowner->{user} } &&
+            !LJ::is_friend($uowner, $u));
+        
 
     # make sure the new entry's under the char limit
     # NOTE: as in postevent, this requires $req->{event} to be binary data
