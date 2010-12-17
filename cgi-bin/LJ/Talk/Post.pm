@@ -294,7 +294,7 @@ sub init {
 
     # anonymous/cookie users cannot authenticate with ecphash
     if ($form->{'ecphash'} && $form->{'usertype'} ne "user") {
-        $err->(BML::ml("$SC.error.badusername2", {'sitename' => $LJ::SITENAMESHORT, 'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'"}));
+        $err->(LJ::Lang::ml("$SC.error.badusername2", {'sitename' => $LJ::SITENAMESHORT, 'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'"}));
         return undef;
     }
     ### hacks end here
@@ -416,12 +416,12 @@ sub init {
             if ($up->{'userid'} != $journalu->{'userid'}) {
                 unless (LJ::is_friend($journalu, $up)) {
                     my $msg = $journalu->is_comm ? "notamember" : "notafriend";
-                    $err->(BML::ml("$SC.error.$msg", {'user'=>$journalu->{'user'}}));
+                    $err->(LJ::Lang::ml("$SC.error.$msg", {'user'=>$journalu->{'user'}}));
                 }
             }
         } else {
             my $msg = $journalu->is_comm ? "membersonly" : "friendsonly";
-            $err->(BML::ml("$SC.error.$msg", {'user'=>$journalu->{'user'}}));
+            $err->(LJ::Lang::ml("$SC.error.$msg", {'user'=>$journalu->{'user'}}));
         }
     }
 
@@ -454,9 +454,9 @@ sub init {
 
     my ($bl, $cl) = LJ::text_length($form->{'body'});
     if ($cl > LJ::CMAX_COMMENT) {
-        $err->(BML::ml("$SC.error.manychars", {'current'=>$cl, 'limit'=>LJ::CMAX_COMMENT}));
+        $err->(LJ::Lang::ml("$SC.error.manychars", {'current'=>$cl, 'limit'=>LJ::CMAX_COMMENT}));
     } elsif ($bl > LJ::BMAX_COMMENT) {
-        $err->(BML::ml("$SC.error.manybytes", {'current'=>$bl, 'limit'=>LJ::BMAX_COMMENT}));
+        $err->(LJ::Lang::ml("$SC.error.manybytes", {'current'=>$bl, 'limit'=>LJ::BMAX_COMMENT}));
     }
     # the Subject can be silently shortened, no need to reject the whole comment
     $form->{'subject'} = LJ::text_trim($form->{'subject'}, 100, 100);
