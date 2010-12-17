@@ -172,7 +172,7 @@ $maint{'clean_caches'} = sub
     my $comms = $for_in ? $dbh->selectall_arrayref ("SELECT journalid FROM categoryjournals WHERE catid IN($for_in)", { Slice => {} }) : [];
     my $cnt_delete = 0;
     foreach my $comm (@$comms) {
-        my $posts = $dbh->selectall_arrayref ("SELECT jitemid FROM category_recent_posts WHERE journalid = ? ORDER BY timecreate ASC", { Slice => {} }, $comm->{'journalid'});
+        my $posts = $dbh->selectall_arrayref ("SELECT jitemid FROM category_recent_posts WHERE journalid = ? ORDER BY timecreate DESC", { Slice => {} }, $comm->{'journalid'});
         splice @$posts, 0, 30;
         $cnt_delete += @#{$posts};
         my $in_to_delete = join ',', map { $_->{jitemid} } @$posts;
