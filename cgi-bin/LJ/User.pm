@@ -3495,7 +3495,7 @@ sub posting_access_list {
 # can $u post to $targetu?
 sub can_post_to {
     my ($u, $targetu) = @_;
-
+    return unless $u && $targetu;
     return LJ::can_use_journal($u->id, $targetu->user);
 }
 
