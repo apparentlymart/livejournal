@@ -45,6 +45,7 @@ use Encode qw(encode_utf8 decode_utf8);
 use Carp qw(confess cluck);
 use UNIVERSAL qw(isa);
 use strict;
+use Data::Dumper;
 
 # given a string, returns its length in bytes (that is, actual octets needed to
 # represent all characters in that string)
@@ -135,7 +136,7 @@ sub truncate {
     my $bytes = delete $opts{'bytes'};
     my $chars = delete $opts{'chars'};
 
-    confess "unknown options: " . Data::Dumper(\%opts)
+    cluck "unknown options: " . Dumper(\%opts)
         if %opts;
 
     cluck "not actually truncating"
@@ -177,7 +178,7 @@ sub truncate_with_ellipsis {
     my $chars = delete $opts{'chars'};
     my $ellipsis = delete $opts{'ellipsis'} || Encode::encode_utf8("\x{2026}");
 
-    confess "unknown options: " . Data::Dumper(\%opts)
+    cluck "unknown options: " . Dumper(\%opts)
         if %opts;
 
     cluck "not actually truncating"
@@ -222,7 +223,7 @@ sub truncate_to_word_with_ellipsis {
     my $fill_empty = delete $opts{'fill_empty'} ? 1 : 0;
     my $punct_space = delete $opts{'punct_space'} ? 1 : 0;
 
-    confess "unknown options: " . Data::Dumper(\%opts)
+    cluck "unknown options: " . Dumper(\%opts)
         if %opts;
 
     cluck "not actually truncating"

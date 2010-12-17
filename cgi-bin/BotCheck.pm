@@ -122,7 +122,7 @@ my $crawler_agents = qr{
 sub is_bot {
 	my ($class, $useragent) = @_;
 		
-	return $useragent =~ $crawler_agents;
+	return defined $useragent ? $useragent =~ $crawler_agents ne "" : 0;
 }
 
 1;

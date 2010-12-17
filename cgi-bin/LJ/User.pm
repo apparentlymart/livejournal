@@ -388,8 +388,8 @@ sub readonly {
 # user is writable, else 0
 sub writer {
     my $u = shift;
-    return $u if $u->{'_dbcm'} ||= LJ::get_cluster_master($u);
-    return 0;
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u);
+    return $dbcm || 0;
 }
 
 sub userpic {
@@ -586,7 +586,7 @@ sub is_innodb {
     return $LJ::CACHE_CLUSTER_IS_INNO{$u->{clusterid}}
     if defined $LJ::CACHE_CLUSTER_IS_INNO{$u->{clusterid}};
 
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
     my (undef, $ctable) = $dbcm->selectrow_array("SHOW CREATE TABLE log2");
     die "Failed to auto-discover database type for cluster \#$u->{clusterid}: [$ctable]"
@@ -600,7 +600,7 @@ sub begin_work {
     my $u = shift;
     return 1 unless $u->is_innodb;
 
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     my $rv = $dbcm->begin_work;
@@ -614,7 +614,7 @@ sub commit {
     my $u = shift;
     return 1 unless $u->is_innodb;
 
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     my $rv = $dbcm->commit;
@@ -628,7 +628,7 @@ sub rollback {
     my $u = shift;
     return 1 unless $u->is_innodb;
 
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     my $rv = $dbcm->rollback;
@@ -642,7 +642,7 @@ sub rollback {
 sub prepare {
     my $u = shift;
 
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     my $rv = $dbcm->prepare(@_);
@@ -660,7 +660,7 @@ sub do {
     my $uid = $u->{userid}+0
         or croak "Database update called on null user object";
 
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     $query =~ s!^(\s*\w+\s+)!$1/* uid=$uid */ !;
@@ -677,7 +677,7 @@ sub do {
 
 sub selectrow_array {
     my $u = shift;
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     my $set_err = sub {
@@ -699,7 +699,7 @@ sub selectrow_array {
 
 sub selectcol_arrayref {
     my $u = shift;
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     my $rv = $dbcm->selectcol_arrayref(@_);
@@ -714,7 +714,7 @@ sub selectcol_arrayref {
 
 sub selectall_hashref {
     my $u = shift;
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     my $rv = $dbcm->selectall_hashref(@_);
@@ -728,7 +728,7 @@ sub selectall_hashref {
 
 sub selectall_arrayref {
     my $u = shift;
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     my $rv = $dbcm->selectall_arrayref(@_);
@@ -742,7 +742,7 @@ sub selectall_arrayref {
 
 sub selectrow_hashref {
     my $u = shift;
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     my $rv = $dbcm->selectrow_hashref(@_);
@@ -768,7 +768,7 @@ sub quote {
     my $u = shift;
     my $text = shift;
 
-    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} || LJ::get_cluster_master($u)
         or croak $u->nodb_err;
 
     return $dbcm->quote($text);
@@ -1186,7 +1186,7 @@ sub talk2_do {
     return undef unless $nodeid =~ /^\d+$/;
     return undef unless $u->writer;
 
-    my $dbcm = $u->{_dbcm};
+    my $dbcm = $u->writer;
 
     my $memkey = [$u->{'userid'}, "talk2:$u->{'userid'}:$nodetype:$nodeid"];
     my $lockkey = $memkey->[1];
@@ -1212,7 +1212,7 @@ sub log2_do {
     my ($u, $errref, $sql, @args) = @_;
     return undef unless $u->writer;
 
-    my $dbcm = $u->{_dbcm};
+    my $dbcm = $u->writer;
 
     my $memkey = [$u->{'userid'}, "log2lt:$u->{'userid'}"];
     my $lockkey = $memkey->[1];
@@ -3495,7 +3495,7 @@ sub posting_access_list {
 # can $u post to $targetu?
 sub can_post_to {
     my ($u, $targetu) = @_;
-
+    return unless $u && $targetu;
     return LJ::can_use_journal($u->id, $targetu->user);
 }
 

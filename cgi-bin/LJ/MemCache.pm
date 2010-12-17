@@ -651,7 +651,8 @@ sub hash_to_array {
 
     my $format_version = $format_info->[0];
     return unless $hash
-              and ref $hash eq "HASH";
+              and (ref $hash eq "HASH" 
+                   or ref $hash eq 'LJ::User');
 
     my @ret = ( $format_version );
     foreach my $i ( 1 .. $#$format_info ) {
