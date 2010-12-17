@@ -242,7 +242,6 @@ sub basic_rename {
         LJ::MemCache::delete([ $u->{userid}, "friendofs:$u->{userid}" ]);
     }
     
-    my $u_old_username;
     if ($opts->{preserve_old_username}) {
         # we need to create an account even in case the user chose to disconnect
         # the old username; the older username is kept deleted for a while
