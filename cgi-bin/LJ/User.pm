@@ -388,8 +388,7 @@ sub readonly {
 # user is writable, else 0
 sub writer {
     my $u = shift;
-    return $u if $u->{'_dbcm'} ||= LJ::get_cluster_master($u);
-    return 0;
+    return LJ::get_cluster_master($u) || 0;
 }
 
 sub userpic {
