@@ -256,7 +256,7 @@ sub render_body {
             my $parsed = LJ::Browse::Parser->do_parse (
                 text        => $event,
                 remove_tags => [ 'b', 'p', 'div', 'span', 'strong', 'font' ],
-                max_len     => 800,
+                max_len     => 400,
                 crop_image  => 1,
             );
             $event = $parsed->{'text'};
