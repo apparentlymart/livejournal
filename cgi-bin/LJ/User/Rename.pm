@@ -250,11 +250,13 @@ sub basic_rename {
         # is complete, and 2) to allow the Billing team to fix it if the user
         # has made a mistake; the Billing team uses rename_redir console command,
         # see /admin/console and cgi-bin/LJ/Console/Command/RenameRedir.pm
-        $u_old_username = LJ::create_account({
+        my $u_old_userid = LJ::create_account({
             'user' => $from,
             'password' => '',
             'name' => '[renamed acct]',
         });
+        my $u_old_username = LJ::load_userid($u_old_userid);
+
         my $alias_changed = $dbh->do("UPDATE email_aliases SET alias=? WHERE alias=?",
                                      undef, "$to\@$LJ::USER_DOMAIN",
                                      "$from\@$LJ::USER_DOMAIN");
