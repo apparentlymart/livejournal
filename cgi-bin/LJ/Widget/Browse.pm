@@ -164,7 +164,7 @@ sub render_body {
     my $post_skip = ($post_page-1) * $post_page_size;
     my $post_last = $post_skip + $post_page_size;
 
-    $$title = "$$windowtitle";
+    $$title = $vertical ? "<a class=\"appwidget-browse-header\" href='".$vertical->url."'>".$vertical->name."</a>" : $class->ml('widget.browse.windowtitle');
 
     my $search_str = undef;
     if ($opts{'post_vars'}->{'do_search'}) {
