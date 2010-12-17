@@ -193,7 +193,7 @@ jQuery.fn.tabsChanger = function(container)
 		}
 	});
 
-    return this;
+	return this;
 }
 
 /** jQuery overlay plugin
@@ -264,7 +264,6 @@ jQuery.fn.overlay = function( opts ) {
 		}
 	});
 }
-
 jQuery.fn.calendar = function( o ) {
 	//global variables for all instances
 	var defaultOptions = {
@@ -315,9 +314,13 @@ jQuery.fn.calendar = function( o ) {
 		var controller = new Controller(view, model, options);
 	}
 
-	function getDateNumber( d ) {
+	function getDateNumber( d, dropDays ) {
+		dropDays = dropDays || false;
 		var day = d.getDate().toString();
 		if( day.length == 1 ) { day = "0" + day; }
+		if( dropDays ) {
+			day = "";
+		}
 
 		var month = d.getMonth().toString();
 		if( month.length == 1 ) { month = "0" + month; }
@@ -559,72 +562,124 @@ jQuery.fn.calendar = function( o ) {
 		model.initialize();
 	}
 
-	var Model = function ( selectedDay, view, options )
+	var Model = function( selectedDay, view, options )
 	{
-		this.enabledMonthsRange = [];
-		this.datesCache = null;
-		//if ajax request is already sent, we do not change the model before the answer
-		this.ajaxPending = false;
+		this.events = null;
 
 		this.initialize = function ()
 		{
+			var self = this;
 			var startMonth = options.startMonth || new Date( 1900, 0, 1 ),
 				endMonth = options.endMonth || new Date( 2050, 0, 1 );
+			startMonth.setDate( 1 );
 			this.enabledMonthsRange = [ startMonth, endMonth ];
 			this.monthDate = new Date( selectedDay );
 			this.selectedDay = new Date( selectedDay );
-			view.initialize(this.monthDate, null, this.getSwitcherStates(this.monthDate));
-			this.switchMonth( 0 );
 
-			/*
+			function bootstrapView() {
+				view.initialize( self.monthDate, null, self.getSwitcherStates( self.monthDate ) );
+				self.switchMonth( 0 );
+			}
+
 			if( !options.onFetch ) {
-				view.initialize(this.monthDate, null, this.getSwitcherStates(this.monthDate));
-				this.switchMonth( 0 );
+				bootstrapView();
 			} else {
-				var self = this;
-				this.fetchEvents( function( events ) {
-					self.initEvents( events );
-					view.initialize(this.monthDate, null, this.getSwitcherStates(this.monthDate));
-					self.switchMonth( 0 );
+				options.onFetch( function( events ) {
+					self.events = self.initEvents( events );
+					bootstrapView();
 				} );
 			}
-			*/
 		}
 
 		this.switchMonth = function (go)
 		{
+			var dir = go || -1;
 			var date = new Date( this.monthDate );
 			date.setMonth(date.getMonth() + go);
-			this.switchDate( date, go );
+			this.switchDate( date, dir );
 		}
 
 		this.switchYear = function (go)
 		{
-			var date = new Date( this.monthDate );
-			date.setFullYear(date.getFullYear() + go, date.getMonth(), date.getDate());
-			if( !this.insideRange( this.enabledMonthsRange, date ) ) {
-				var add = getDateNumber( date ) < getDateNumber( this.enabledMonthsRange[ 0 ] ) ? 1 : -1;
-				while( !this.insideRange( this.enabledMonthsRange, date ) ) {
-					date.setMonth( date.getMonth() + add );
+			var sgn = ( go > 0 ) ? 1 : ( go < 0 ) ? - 1 : 0,
+				count = sgn * ( ( Math.abs( go )  ) * 12 );
+			this.switchMonth( count );
+		}
+
+		this.initEvents = function( data ) {
+			return function() {
+				var datesArr = [];
+				var datesCache = [];
+
+				if( typeof data === "object" ) {
+					var id = "";
+					for( var year in data ) {
+						for( var month in data[ year ] ) {
+							id = makeHash( year, month );
+							datesCache[ id ] = jQuery.map( data[ year ][ month ], function( item ) { return parseInt( item, 10 ); } );
+							datesArr.push( id );
+						}
+					}
 				}
-			}
-			this.switchDate( date, go );
+				datesArr.sort();
+
+				function outOfBounds( date ) {
+					return ( datesArr.length === 0 || date < datesArr[ 0 ] || date > datesArr[ datesArr.length - 1 ] );
+				}
+
+				function makeHash( year, month ) {
+					year = year.toString(); month = month.toString();
+					return parseInt( year + ( (month.length == 1) ? "0" : "" ) + month, 10 );
+				}
+
+				return {
+					getPrev: function( date ) {
+						if( outOfBounds( date ) ) { return false; }
+						for( var i = datesArr.length - 1; i >= 0 ; --i ) {
+							if( datesArr[ i ] < date ) {
+								return datesCache[ i ];
+							}
+						}
+						return false;
+					},
+
+					getNext: function( date ) {
+						if( outOfBounds( date ) ) { return false; }
+						for( var i = 0; i < datesArr.length; ++i ) {
+							if( datesArr[ i ] > date ) {
+								return datesCache[ i ];
+							}
+						}
+						return false;
+					},
+
+					hasEventsAfter: function( date, dir ) {
+						var hash = makeHash( date.getFullYear(), date.getMonth() + 1 );
+						var arr = jQuery.grep( datesArr, function( n, i ) {
+							return ( dir > 0 ) ? n > hash : n < hash;
+						} );
+
+						return arr.length > 0;
+					},
+
+					getEvents: function( date ) {
+						var hash = makeHash( date.getFullYear(), date.getMonth() + 1 );
+						return ( hash in datesCache ) ? datesCache[ hash ] : false;
+					}
+				}
+			}();
 		}
 
 		this.switchDate = function( date, dir ) {
 			dir = dir || -1;
-			if( this.ajaxPending ) {
-				return;
-			}
-			this.monthDate = date;
+			date = this.fitDate( date, this.monthDate, dir );
 
-			var self = this;
-			this.fetchMonthEvents( this.monthDate, function( events, date ) {
-				if( typeof events === "boolean" && events === false ) {
-				} else {
-					view.modelChanged(self.monthDate, self.selectedDay, events, self.getSwitcherStates( self.monthDate ) );
-				}
-			}, dir );
+			if( date !== false ) {
+				this.monthDate = date;
+
+				var events = ( this.events ) ? this.events.getEvents( date ) : null;
+				view.modelChanged( date, this.selectedDay, events, this.getSwitcherStates( date ) );
+			}
 		}
 
 		this.selectDate = function( date ) {
@@ -632,46 +687,68 @@ jQuery.fn.calendar = function( o ) {
 			view.dateSelected( this.selectedDay );
 		}
 
-		this.fetchMonthEvents = function( date, onFetch ) {
-			this.ajaxPending = true;
-
-			//if there is no resource to fetch data, we think, that every month has events
-			if( !options.onFetchMonth ) {
-				onFetch( [] );
-				this.ajaxPending = false;
-			} else {
-				var self = this;
-				options.onFetchMonth( date, function( data ) {
-					self.ajaxPending = false;
-					onFetch( data );
-				} );
-			}
-		}
-
 		this.getSwitcherStates = function (monthDate)
 		{
-			var prevMonth = new Date(monthDate);
-			prevMonth.setMonth(prevMonth.getMonth() - 1);
-			var pm = this.insideRange(this.enabledMonthsRange, prevMonth);
+			var yearStart = new Date( monthDate.getFullYear(), 0, 1 ),
+				yearEnd = new Date( monthDate.getFullYear(), 11, 1 );
 
-			var nextMonth = new Date(monthDate)
-			nextMonth.setMonth(nextMonth.getMonth() + 1);
-			var nm = this.insideRange(this.enabledMonthsRange, nextMonth);
+			return {
+				prevMonth: this.isActivePrev( monthDate ) !== false,
+				prevYear: this.isActivePrev( yearStart ) !== false,
+				nextMonth: this.isActiveNext( monthDate ) !== false,
+				nextYear: this.isActiveNext( yearEnd ) !== false
+			};
+		}
 
-			var prevYear = new Date(monthDate);
-			prevYear.setFullYear(monthDate.getFullYear() - 1, 11, 31 );
-			var py = this.insideRange(this.enabledMonthsRange, prevYear);
+		this.isActiveNext = function( date ) { return this.isActiveDate( date, 1 ); };
+		this.isActivePrev = function( date ) { return this.isActiveDate( date, -1 ); };
+		this.isActiveDate = function( date, dir ) {
+			var checkEvents = !!( this.events !== null );
+			var d = new Date( date );
+			d.setMonth( d.getMonth() + dir );
 
-			var nextYear = new Date(monthDate);
-			nextYear.setFullYear(monthDate.getFullYear() + 1, 0, 1 );
-			var ny = this.insideRange(this.enabledMonthsRange, nextYear);
+			return this.insideRange( this.enabledMonthsRange, d ) && ( !checkEvents || this.events.hasEventsAfter( d, dir ) );
+		}
 
-			return { prevMonth: pm, nextMonth: nm, prevYear: py, nextYear: ny };
+		this.fitDate = function( date, currentDate,  dir ) {
+			date = new Date( date );
+			var checkEvents = !!( this.events !== null );
+			if( !this.insideRange( this.enabledMonthsRange, date ) ) {
+				if( getDateNumber( date, true ) < getDateNumber( this.enabledMonthsRange[ 0 ], true ) ) {
+					date = new Date( this.enabledMonthsRange[ 0 ] );
+				} else {
+					date = new Date( this.enabledMonthsRange[ 1 ] );
+				}
+			}
+
+			if( !checkEvents || this.events.getEvents( date ) ) {
+				return date;
+			}
+
+			saveDate = new Date( date );
+
+			var sgn = ( dir > 0 ) ? 1 : -1;
+			while( this.insideRange( this.enabledMonthsRange, date ) && !this.events.getEvents( date ) ) {
+				date.setMonth( date.getMonth() + sgn );
+				if( this.events.getEvents( date ) ) {
+					return date;
+				}
+			}
+
+			date = saveDate;
+			while( ( getDateNumber( date, true ) !== getDateNumber( currentDate, true ) ) ) {
+				if( this.events.getEvents( date ) ) {
+					return date;
+				}
+				date.setMonth( date.getMonth() - sgn );
+			}
+
+			return false;
 		}
 
 		this.insideRange = function (range, iDate) {
-			return getDateNumber( iDate ) >= getDateNumber( range[0] )
-					&& getDateNumber( iDate ) <= getDateNumber( range[1] )
+			return getDateNumber( iDate, true ) >= getDateNumber( range[0], true )
+					&& getDateNumber( iDate, true ) <= getDateNumber( range[1], true );
 		};
 	}
 
