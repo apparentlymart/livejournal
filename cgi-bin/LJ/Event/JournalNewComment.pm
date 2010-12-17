@@ -621,7 +621,7 @@ sub available_for_user  {
 
     # user can track all comments to their community journal, provided
     # that the community is paid
-    if (LJ::can_manage($u, $journal)) {
+    if ($u && $u->can_manage($journal)) {
         return $journal->get_cap('maintainer_track_comments') ? 1 : 0;
     }
 

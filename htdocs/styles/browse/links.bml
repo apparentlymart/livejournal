@@ -33,10 +33,10 @@
     foreach my $sty (sort { $a->{'type'} cmp $b->{'type'} || $a->{'styledes'} cmp $b->{'styledes'} }
                      values %$styles) {
 
-        next STY unless $sty->{is_public} eq 'Y' ||      # public is always visible
-                        LJ::u_equals($remote, $styu) ||  # yours are visible to you
-                        LJ::can_manage($remote, $styu) ||# you can view things you manage
-                        $admin;                          # you have appropriate canview
+        next STY unless $sty->{is_public} eq 'Y'                ||  # public is always visible
+                        LJ::u_equals($remote, $styu)            ||  # yours are visible to you
+                        ($remote && $remote->can_manage($styu)) ||  # you can view things you manage
+                        $admin;                                     # you have appropriate canview
 
         if ($last ne $LJ::viewinfo{$sty->{'type'}}->{'des'}) {
             $last = $LJ::viewinfo{$sty->{'type'}}->{'des'};

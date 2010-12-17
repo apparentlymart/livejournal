@@ -1367,7 +1367,7 @@ sub get_authas_user {
     return undef unless $u->{clusterid};
 
     # does $u have admin access?
-    return undef unless LJ::can_manage($remote, $u);
+    return undef unless $remote->can_manage($u);
 
     # passed all checks, return $u
     return $u;
@@ -2530,7 +2530,8 @@ sub can_use_journal
     }
 
     # is the poster an admin for this community?
-    return 1 if LJ::can_manage($posterid, $uowner);
+    my $poster = LJ::want_user($posterid);
+    return 1 if $poster && $poster->can_manage($uowner);
 
     $res->{'errmsg'} = "You do not have access to post to this journal.";
     return 0;

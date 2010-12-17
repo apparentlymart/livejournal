@@ -7,11 +7,11 @@
  my $styu = $sty ? LJ::load_user($sty->{user}) : undef; # if $sty so we don't auto-vivify!
  return "Style $styleid does not exist or is not public."
     unless $sty && 
-          ($sty->{is_public} eq 'Y' ||       # straight up public
-           LJ::u_equals($remote, $styu) ||   # is this your account?
-           LJ::can_manage($remote, $styu) || # how about your community?
-           LJ::check_priv($remote, 'canview', 'styles') || # can you see private styles?
-           LJ::check_priv($remote, 'canview', '*'));       # or maybe you can see everything
+          ($sty->{is_public} eq 'Y'                     ||  # straight up public
+           LJ::u_equals($remote, $styu)                 ||  # is this your account?
+           ($remote && $remote->can_manage($styu))      ||  # how about your community?
+           LJ::check_priv($remote, 'canview', 'styles') ||  # can you see private styles?
+           LJ::check_priv($remote, 'canview', '*'));        # or maybe you can see everything
 
  my $ret = "";
  $ret .= "<H1>Style Info</H1>\n";

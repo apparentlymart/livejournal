@@ -5166,9 +5166,31 @@ sub should_show_graphic_previews {
     return $u->show_graphic_previews eq "on" ? 1 : 0;
 }
 
+# name: can_manage
+# des: Given a target user and determines that the user is an admin for the taget  user
+# returns: bool: true if authorized, otherwise fail
+# args: u
+# des-u: user object or userid of target user
 sub can_manage {
-    my ($u, $target) = @_;
-    return LJ::can_manage($u, $target);
+    my $remote  = shift;
+    my $u       = LJ::want_user(shift);
+
+    return undef unless $remote && $u;
+
+    # is same user?
+    return 1 if LJ::u_equals($u, $remote);
+
+    # do not allow suspended users manage other accounts
+    return 0 if $remote->is_suspended;
+
+    # people/syn/rename accounts can only be managed by the one account
+    return undef if $u->{journaltype} =~ /^[PYR]$/;
+
+    # check for admin access
+    return undef unless LJ::check_rel($u, $remote, 'A');
+
+    # passed checks, return true
+    return 1;
 }
 
 sub hide_adult_content {
@@ -5884,6 +5906,7 @@ use Carp;
 # args: u, opts?
 # des-opts: Optional hashref.  keys are:
 #           - type: 'P' to only return users of journaltype 'P'.
+#                   'S' return users of Supermaintainer type instead Maintainer type.
 #           - cap:  cap to filter users on.
 # </LJFUNC>
 sub get_authas_list {
@@ -5893,9 +5916,9 @@ sub get_authas_list {
     $opts = { 'type' => $opts } unless ref $opts;
 
     # Two valid types, Personal or Community
-    $opts->{'type'} = undef unless $opts->{'type'} =~ m/^(P|C)$/;
+    $opts->{'type'} = undef unless $opts->{'type'} =~ m/^(P|C|S)$/;
 
-    my $ids = LJ::load_rel_target($u, 'A');
+    my $ids = LJ::load_rel_target($u, $opts->{'type'} eq 'S' ? 'S' : 'A');
     return undef unless $ids;
 
     # load_userids_multiple
@@ -5904,7 +5927,7 @@ sub get_authas_list {
 
     return map { $_->{'user'} }
                grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
-               grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
+               grep { ! ($opts->{'type'} && $opts->{'type'} ne 'S') || $opts->{'type'} eq $_->{'journaltype'} }
 
                # unless overridden, hide non-visible/non-read-only journals. always display the user's acct
                grep { $opts->{'showall'} || $_->is_visible || $_->is_readonly || LJ::u_equals($_, $u) }
@@ -9569,36 +9592,6 @@ sub get_username
 }
 
 # <LJFUNC>
-# name: LJ::can_manage
-# des: Given a user and a target user, will determine if the first user is an
-#      admin for the target user.
-# returns: bool: true if authorized, otherwise fail
-# args: remote, u
-# des-remote: user object or userid of user to try and authenticate
-# des-u: user object or userid of target user
-# </LJFUNC>
-sub can_manage {
-    my $remote = LJ::want_user(shift);
-    my $u = LJ::want_user(shift);
-    return undef unless $remote && $u;
-
-    # is same user?
-    return 1 if LJ::u_equals($u, $remote);
-
-    # do not allow suspended users manage other accounts
-    return 0 if $remote->is_suspended;
-
-    # people/syn/rename accounts can only be managed by the one account
-    return undef if $u->{journaltype} =~ /^[PYR]$/;
-
-    # check for admin access
-    return undef unless LJ::check_rel($u, $remote, 'A');
-
-    # passed checks, return true
-    return 1;
-}
-
-# <LJFUNC>
 # name: LJ::can_manage_other
 # des: Given a user and a target user, will determine if the first user is an
 #      admin for the target user, but not if the two are the same.
@@ -9610,11 +9603,14 @@ sub can_manage {
 sub can_manage_other {
     my ($remote, $u) = @_;
     return 0 if LJ::want_userid($remote) == LJ::want_userid($u);
-    return LJ::can_manage($remote, $u);
+    $remote = LJ::want_user($remote);
+    return $remote && $remote->can_manage($u);
 }
 
 sub can_delete_journal_item {
-    return LJ::can_manage(@_);
+    my ($remote, $u) = @_;
+    $remote = LJ::want_user($remote);
+    return $remote && $remote->can_manage($u);
 }
 
 

@@ -35,7 +35,7 @@ body<=
     my $cid = $c->{'userid'};
 
     # is $remote an admin?
-    unless (LJ::can_manage($remote, $c)) {
+    unless ($remote && $remote->can_manage($c)) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p ";
         $ret .= BML::ml('/community/members.bml.error.noaccess', 
                         { comm => LJ::ljuser($cname, { type => 'C' }) });

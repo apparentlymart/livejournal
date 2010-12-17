@@ -281,7 +281,8 @@ sub get_usertags {
     # remote may be undef so we have to check exists
     if (exists $opts->{remote}) {
         # never going to cull anything if you control it, so just return
-        return $res if LJ::can_manage($opts->{remote}, $u);
+        my $remote = $opts->{remote};
+        return $res if $remote && $remote->can_manage($u);
 
         # setup helper variables from u to remote
         my ($is_friend, $grpmask) = (0, 0);
@@ -497,7 +498,7 @@ sub can_add_entry_tags {
     my $perms = LJ::Tags::get_permission_levels($journal);
     if ($perms->{add} eq 'author_moder'){
         return 1 if $remote==$entry->poster; # check author
-        return LJ::can_manage($remote, $entry->journal);  # check moder
+        return $remote->can_manage($entry->journal);  # check moder
     }
     
     ## generic case: if $remote can add tags to the entire journal of the entry
@@ -537,7 +538,7 @@ sub _remote_satisfies_permission {
     return undef unless $u && $remote && $perm;
 
     # allow if they can manage it (own, or 'A' edge)
-    return 1 if LJ::can_manage($remote, $u);
+    return 1 if $remote->can_manage($u);
 
     # permission checks
     if ($perm eq 'public') {
@@ -547,9 +548,9 @@ sub _remote_satisfies_permission {
     } elsif ($perm eq 'friends') {
         return LJ::is_friend($u, $remote);
     } elsif ($perm eq 'private') {
-        return LJ::can_manage($remote, $u);
+        return $remote->can_manage($u);
     } elsif ($perm eq 'author_moder'){
-        return (LJ::can_manage($remote, $u) || LJ::is_friend($u, $remote));
+        return ($remote->can_manage($u) || LJ::is_friend($u, $remote));
     } elsif ($perm =~ /^group:(\d+)$/) {
         my $grpid = $1+0;
         return undef unless $grpid >= 1 && $grpid <= 30;

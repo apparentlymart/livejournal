@@ -133,7 +133,7 @@ sub link_bar
     # edit entry - if we have a remote, and that person can manage
     # the account in question, OR, they posted the entry, and have
     # access to the community in question
-    if (defined $remote && (LJ::can_manage($remote, $u) ||
+    if (defined $remote && ($remote && $remote->can_manage($u) ||
                             (LJ::u_equals($remote, $up) && LJ::can_use_journal($up->{userid}, $u->{user}, {}))))
     {
         push @linkele, $mlink->("$LJ::SITEROOT/editjournal.bml?${jargent}itemid=$itemid", "editentry");
@@ -339,7 +339,7 @@ sub can_delete {
     return 1 if $remote->{'user'} eq $userpost ||
                 $remote->{'user'} eq (ref $u ? $u->{'user'} : $u) ||
                 $remote->{'user'} eq (ref $up ? $up->{'user'} : $up) ||
-                LJ::can_manage($remote, $u);
+                $remote->can_manage($u);
     return 0;
 }
 
@@ -348,7 +348,7 @@ sub can_screen {
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $u->{'user'} ||
                 $remote->{'user'} eq (ref $up ? $up->{'user'} : $up) ||
-                LJ::can_manage($remote, $u);
+                $remote->can_manage($u);
     return 0;
 }
 
@@ -1135,7 +1135,7 @@ sub load_comments
                     $post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
                                                               $remote->{'userid'} == $uposterid ||
                                                               $remote->{'userid'} == $post->{'posterid'} ||
-                                                              LJ::can_manage($remote, $u) ));
+                                                              $remote->can_manage($u) ));
             }
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
@@ -2369,7 +2369,7 @@ sub get_thread_html
                 $text .= "<br />$user\n";
                 $text .= "<br /><font size='-1'>$datepost</font>\n";
                 if ($post->{'props'}->{'poster_ip'} &&
-                    $remote && ($remote->{'user'} eq $up->{'user'} || LJ::can_manage($remote, $u) || $viewall))
+                    $remote && ($remote->{'user'} eq $up->{'user'} || $remote->can_manage($u) || $viewall))
                 {
                     $text .= BML::ml('.fromip', { 'ip' => $post->{'props'}->{'poster_ip'} });
                 }

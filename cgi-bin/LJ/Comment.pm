@@ -873,7 +873,7 @@ sub visible_to {
 
     # screened comment
     return 0 if $self->is_screened &&
-                !( LJ::can_manage($u, $self->journal)           # owns the journal
+                !( ($u && $u->can_manage($self->journal))           # owns the journal
                    || LJ::u_equals($u, $self->poster)           # posted the comment
                    || LJ::u_equals($u, $self->entry->poster )); # posted the entry
 
@@ -1040,7 +1040,7 @@ sub info {
     my $remote = LJ::get_remote() or return;
 
     my %LJ_cmtinfo;
-    $LJ_cmtinfo{'canAdmin'} = LJ::can_manage($remote, $self->journal);
+    $LJ_cmtinfo{'canAdmin'} = $remote->can_manage($self->journal);
     $LJ_cmtinfo{'journal'} = $self->journal->{user};
     $LJ_cmtinfo{'remote'} = $remote->{user};
 

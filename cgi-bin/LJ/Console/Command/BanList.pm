@@ -35,7 +35,7 @@ sub execute {
             unless $journal;
 
         return $self->error("You are not a maintainer of this account")
-            unless LJ::can_manage($remote, $journal) || LJ::check_priv($remote, "finduser");
+            unless ($remote && $remote->can_manage($journal)) || LJ::check_priv($remote, "finduser");
     }
 
     my $banids = LJ::load_rel_user($journal, 'B') || [];

@@ -151,7 +151,7 @@ sub MonthPage
             'enabled' => $entry_obj->comments_shown,
             'locked' => !$entry_obj->posting_comments_allowed,
             'screened' => ($logprops{$itemid}->{'hasscreened'} && $remote &&
-                           ($remote->{'user'} eq $u->{'user'} || LJ::can_manage($remote, $u))) ? 1 : 0,
+                           ($remote->{'user'} eq $u->{'user'} || $remote->can_manage($u))) ? 1 : 0,
         });
 
         my $userlite_poster = $userlite_journal;

@@ -64,7 +64,7 @@
 
     my ($can_manage, $getextra);
     if ($remote) {
-        $can_manage = LJ::can_manage($remote, $u->{'userid'});
+        $can_manage = $remote->can_manage($u->{'userid'});
         $getextra = $can_manage && $remote->{'user'} ne $u->{'user'} ? "?authas=$u->{'user'}" : '';
     }
 

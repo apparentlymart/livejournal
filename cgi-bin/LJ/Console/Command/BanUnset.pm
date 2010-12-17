@@ -35,7 +35,7 @@ sub execute {
             unless $journal;
 
         return $self->error("You are not a maintainer of this account")
-            unless LJ::can_manage($remote, $journal);
+            unless $remote && $remote->can_manage($journal);
     }
 
     my $banuser = LJ::load_user($user);

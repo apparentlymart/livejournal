@@ -314,7 +314,7 @@ sub FriendsPage
             'enabled' => $eobj->comments_shown,
             'locked' => !$eobj->posting_comments_allowed,
             'screened' => ($logprops{$datakey}->{'hasscreened'} && $remote &&
-                           ($remote->{'user'} eq $fr->{'user'} || LJ::can_manage($remote, $fr))) ? 1 : 0,
+                           ($remote->{'user'} eq $fr->{'user'} || $remote->can_manage($fr))) ? 1 : 0,
         });
         $comments->{show_postlink} = $eobj->posting_comments_allowed;
         $comments->{show_readlink} = $eobj->comments_shown && ($replycount || $comments->{'screened'});

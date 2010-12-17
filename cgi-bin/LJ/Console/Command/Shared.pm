@@ -35,7 +35,7 @@ sub execute {
 
     my $remote = LJ::get_remote();
     return $self->error("You don't have access to manage this shared journal.")
-        unless LJ::can_manage($remote, $shared) || LJ::check_priv($remote, "sharedjournal", "*");
+        unless ($remote && $remote->can_manage($shared)) || LJ::check_priv($remote, "sharedjournal", "*");
 
     if ($action eq "add") {
         return $self->error("User $target_user already has posting access to this shared journal.")

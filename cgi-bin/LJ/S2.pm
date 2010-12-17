@@ -3634,9 +3634,11 @@ sub _Entry__get_link
     my $entry = LJ::Entry->new($journalu, ditemid => $this->{itemid});
 
     if ($key eq "edit_entry") {
-        return $null_link unless $remote && ($remote->{'user'} eq $journal ||
-                                        $remote->{'user'} eq $poster ||
-                                        LJ::can_manage($remote, LJ::load_user($journal)));
+        return $null_link unless $remote && 
+                                    ($remote->{'user'} eq $journal ||
+                                     $remote->{'user'} eq $poster ||
+                                     $remote->can_manage(LJ::load_user($journal))
+                                    );
         return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_edit_entry"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 24, 24));

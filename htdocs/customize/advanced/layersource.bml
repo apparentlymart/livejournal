@@ -32,7 +32,7 @@
     return $err->($ML{'/customize/advanced/layerbrowse.bml.error.cantviewlayer'})
         unless defined $pub->{$id} && (! defined $srcview || $srcview != 0) ||
                $srcview == 1 ||
-               LJ::can_manage($remote, $lay->{'userid'}) ||
+               ($remote && $remote->can_manage($lay->{'userid'})) ||
                $isadmin;
 
     my $s2code = LJ::S2::load_layer_source($id);

@@ -115,13 +115,13 @@ body<=
     ];
 
     push @$groups, { event => "JournalNewComment", 'journalid' => $journal->id }
-        if LJ::can_manage($u, $journal);
+        if $u && $u->can_manage($journal);
 
     push @$groups, { event => "UserExpunged", 'journalid' => $journal->id }
         unless LJ::User->is_protected_username($journal->user);
 
     push @$groups, { event => "CommunityJoinReject", 'journalid' => $journal->id }
-        if LJ::can_manage($u, $journal); 
+        if $u && $u->can_manage($journal); 
 
     $ret .= $widget->render({
         'title' => BML::ml('subscribe_interface.category.this-journal', { 'journal' => $journal->ljuser_display }),

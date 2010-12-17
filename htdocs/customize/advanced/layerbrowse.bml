@@ -122,7 +122,7 @@
                    LJ::check_priv($remote, 'canview', '*'));       # in case they're private styles
     return $err->($ML{'.error.cantviewlayer'})
         unless defined $pub->{$id} || $srcview == 1 ||
-               LJ::can_manage($remote, $layer->{'userid'}) ||
+               ($remote && $remote->can_manage($layer->{'userid'})) ||
                $isadmin;
 
     LJ::S2::load_layers($id);
@@ -157,7 +157,7 @@
     }
     if (defined $pub->{$id} && (! defined $srcview || $srcview != 0) ||
             $srcview == 1 ||
-            LJ::can_manage($remote, $layer->{'userid'}) ||
+            ($remote && $remote->can_manage($layer->{'userid'})) ||
             $isadmin) {
 
         $body .= BML::ml('Actionlink', { 'link' => "$ML{'.nav.viewsource'} <a href=\"$LJ::SITEROOT/customize/advanced/layersource.bml?id=$id\">$ML{'.nav.viewsource.raw'}</a> | <a href=\"$LJ::SITEROOT/customize/advanced/layersource.bml?id=$id&fmt=html\">$ML{'.nav.viewsource.highlighted'}</a>" }) . "\n";

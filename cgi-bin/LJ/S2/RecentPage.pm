@@ -208,7 +208,7 @@ sub RecentPage
         $readurl .= "?$nc" if $nc;
         my $posturl = $permalink . "?mode=reply";
 
-        my $has_screened = ($logprops{$itemid}->{'hasscreened'} && LJ::can_manage($remote, $u)) ? 1 : 0;
+        my $has_screened = ($logprops{$itemid}->{'hasscreened'} && $remote && $remote->can_manage($u)) ? 1 : 0;
 
         my $comments = CommentInfo({
             'read_url' => $readurl,

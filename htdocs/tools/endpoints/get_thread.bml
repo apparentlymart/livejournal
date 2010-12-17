@@ -127,7 +127,7 @@
     my $showmultiform = $remote &&
                         ($remote->{'user'} eq $u->{'user'} ||
                          $remote->{'user'} eq $up->{'user'} ||
-                         LJ::can_manage($remote, $u));
+                         $remote->can_manage($u));
 
     my $multiform_selects = 0;  # are there select boxes?  don't show form if not.
 
@@ -136,7 +136,7 @@
     my $LJ_cmtinfo = {  # data structure to give to javascript for commentmanage
         form_auth => LJ::form_auth(1),
         journal   => $u->{user},
-        canAdmin  => LJ::can_manage($remote, $u) ? 1 : 0,
+        canAdmin  => ($remote && $remote->can_manage($u)) ? 1 : 0,
         remote    => $remote ? $remote->{user} : "",
     };
 

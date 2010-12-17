@@ -37,7 +37,7 @@
 
     # is authorized admin for this layer?
     return $err->('You are not authorized to edit this layer.')
-        unless LJ::can_manage($remote, $lay->{'userid'});
+        unless $remote && $remote->can_manage($lay->{'userid'});
 
     # get u of user they are acting as
     my $u = $lay->{'userid'} == $remote->{'userid'} ? $remote : LJ::load_userid($lay->{'userid'});

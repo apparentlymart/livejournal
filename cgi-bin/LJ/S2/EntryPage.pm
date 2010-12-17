@@ -270,7 +270,7 @@ sub EntryPage
             $s2com->{'metadata'}->{'poster_ip'} = $com->{'props'}->{'poster_ip'} if
                 ($com->{'props'}->{'poster_ip'} && $remote &&
                  ($remote->{'userid'} == $entry->posterid ||
-                  LJ::can_manage($remote, $u) || $viewall));
+                  ($remote && $remote->can_manage($u)) || $viewall));
 
             push @$destlist, $s2com;
 
@@ -293,7 +293,7 @@ sub EntryPage
 
     # print comment info
     {
-        my $canAdmin = LJ::can_manage($remote, $u) ? 1 : 0;
+        my $canAdmin = ($remote && $remote->can_manage($u)) ? 1 : 0;
         my $formauth = LJ::ejs(LJ::eurl(LJ::form_auth(1)));
 
         my $cmtinfo = {
@@ -466,7 +466,7 @@ sub EntryPage_entry
         'enabled' => $entry->comments_shown,
         'locked' => !$entry->posting_comments_allowed,
         'screened' => ($entry->prop("hasscreened") && $remote &&
-                       ($remote->{'user'} eq $u->{'user'} || LJ::can_manage($remote, $u))) ? 1 : 0,
+                       ($remote->{'user'} eq $u->{'user'} || $remote->can_manage($u))) ? 1 : 0,
     });
     $comments->{show_postlink} = $entry->posting_comments_allowed;
     $comments->{show_readlink} = $entry->comments_shown && ($replycount || $comments->{'screened'});
