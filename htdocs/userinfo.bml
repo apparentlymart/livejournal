@@ -1577,7 +1577,7 @@
         foreach (@activities) {
             $apps .= '<li>';
             if ($_->{app_image}) {
-                $apps .= '<img src="'.$_->{app_image}.'" width="60" height="60" alt="' . $_->{app_name} . '" /> ';
+                $apps .= '<img src="'.$_->{app_image}.'" width="60" height="60" alt="' . $_->{app_name} . '" class="pic" /> ';
             }
             $apps .= '<p class="date">'. $_->{date}.'</p><p><a href="'.$_->{app_href}.'">'.$_->{app_name}.'</a>: '.$_->{title};
             $apps .= $_->{body} ? "<br/>$_->{body}" : '';
