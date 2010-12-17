@@ -123,8 +123,10 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
 
 # if this is a dev server, alias LJ::D to Data::Dumper::Dumper
 if ($LJ::IS_DEV_SERVER) {
-    eval "use Data::Dumper ();";
+    require "Data/Dumper.pm";
     *LJ::D = \&Data::Dumper::Dumper;
+} else {
+    *LJ::D = sub { };
 }
 
 LJ::MemCache::init();
