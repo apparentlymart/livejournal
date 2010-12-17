@@ -582,7 +582,7 @@ span.expandcollapse {
 		padding: 0;
 		margin: 0 0 13px 0;
 		}
-		.b-app-activity-list LI IMG {
+		.b-app-activity-list LI .pic {
 			float: left;
 			padding: 0;
 			margin: 0 17px 0 0;
