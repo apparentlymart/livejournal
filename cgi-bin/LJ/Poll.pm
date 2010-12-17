@@ -230,33 +230,8 @@ sub new_from_html {
 
     my $p = HTML::TokeParser->new($postref);
 
-    # if we're being called from mailgated, then we're not in web context and therefore
-    # do not have any BML::ml functionality.  detect this now and report errors in a
-    # plaintext, non-translated form to be bounced via email.
-
-    # FIXME: the above comment is obsolete, we now have LJ::Lang::ml
-    # which will do the right thing
-    my $have_bml = eval { LJ::Lang::ml() } || ! $@;
-
     my $err = sub {
-        # more than one element, either make a call to LJ::Lang::ml
-        # or build up a semi-useful error string from it
-        if (@_ > 1) {
-            if ($have_bml) {
-                $$error = LJ::Lang::ml(@_);
-                return 0;
-            }
-
-            $$error = shift() . ": ";
-            while (my ($k, $v) = each %{$_[0]}) {
-                $$error .= "$k=$v,";
-            }
-            chop $$error;
-            return 0;
-        }
-
-        # single element, either look up in %BML::ML or return verbatim
-        $$error = $have_bml ? LJ::Lang::ml($_[0]) : $_[0];
+        $$error = LJ::Lang::ml(@_);
         return 0;
     };
 
@@ -596,6 +571,7 @@ sub _load {
     } else {
         my $u = LJ::load_userid($journalid)
             or die "Invalid journalid $journalid";
+        return unless $u->is_visible; ## expunged and suspended journals
 
         # double-check to make sure we are consulting the right table
         if ($u->polls_clustered) {
