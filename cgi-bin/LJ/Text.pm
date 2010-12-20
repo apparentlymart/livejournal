@@ -222,12 +222,19 @@ sub truncate_to_word_with_ellipsis {
     my $ellipsis = delete $opts{'ellipsis'} || Encode::encode_utf8("\x{2026}");
     my $fill_empty = delete $opts{'fill_empty'} ? 1 : 0;
     my $punct_space = delete $opts{'punct_space'} ? 1 : 0;
+    my $strip_html = delete $opts{'strip_html'} ? 1 : 0;
+    my $force_ellipsis;
 
     cluck "unknown options: " . Dumper(\%opts)
         if %opts;
 
     cluck "not actually truncating"
         unless $bytes || $chars;
+        
+    if($strip_html) {
+        $force_ellipsis = ($str =~ /<img/i) ? 1 : 0;
+        $str = LJ::strip_html($str, { use_space => 1 });
+    }
 
     my $remove_last_word = sub {
         my ($str) = @_;
@@ -272,6 +279,8 @@ sub truncate_to_word_with_ellipsis {
 			}   	
         }
         
+        $str .= $ellipsis;
+    } elsif($force_ellipsis) {
         $str .= $ellipsis;
     }
     
