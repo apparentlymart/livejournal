@@ -26,6 +26,36 @@
     my $journal = LJ::load_user($username);
     return "unknown user" unless $journal;
 
+    return 'rate limit exceeded'
+        unless LJ::RateLimit->check( $journal,
+                                     $LJ::PARTNER_RATE_LIMITS{$username} );
+
+    my $domains = $LJ::PARTNER_DOMAINS{$username};
+    my $domains_out = LJ::JSON->to_json($domains);
+    my $js_check_domain = qq[
+        <script type="text/javascript">
+        var trustedDomains = $domains_out;
+            
+        var domainMatch = checkDomain(window.location.href, trustedDomains);
+
+        if (!domainMatch) {
+            window.location.href = 'about:blank';
+        }
+
+        function checkDomain(href, trustedDomains) {
+            var currentDomain = href.match(] .q{/(http\:\/\/)(?:www\.)?([^\/]*)/} . qq[)[2];
+            
+            for (var i = 0, l = trustedDomains.length; i < l; i++) {
+                if (trustedDomains[i] == currentDomain) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        </script>
+    ];
+
     ## convert article's uri on partners site to entryid on LJ.com
     my $jitemid = LJ::ExternalComments->url_to_jitemid($journal, $url);
     unless ($jitemid){
