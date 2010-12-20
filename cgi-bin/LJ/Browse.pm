@@ -279,8 +279,7 @@ sub load_all {
 
     my @categories = ();
     foreach my $cat (@$cats) {
-        my $c = $class->new( catid => $cat->{catid} );
-        $c->absorb_row($cat);
+        my $c = $class->load_by_id($cat->{catid});
         $c->set_memcache;
 
         push @categories, $c;
