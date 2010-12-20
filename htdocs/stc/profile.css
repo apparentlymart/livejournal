@@ -434,7 +434,7 @@ span.expandcollapse {
     		font: 0/0 serif;
     		}
     #wishes_body .i-nav-prev {
-    		margin: 0;
+    		margin: 0 5px 0 0;
     		background-position: 0 0;
     		}
     #wishes_body .i-nav-prev-dis {
