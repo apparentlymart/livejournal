@@ -2,8 +2,13 @@ Profile =
 {
 	init: function ($)
 	{
-		Profile.wishInit();
-		
+		var wishes_container = window.$("wishes_body"),
+			wishes_list = window.$("wishes_list");
+		if (wishes_container && wishes_list) {
+			var nav = Profile.wishInit(wishes_container, wishes_list);
+			Profile.navRecalculate = nav.recalculate;
+		}
+
 		// login user
 		if (Site.has_remote) {
 			// collapse any section that the user has set to collapse
@@ -20,9 +25,6 @@ Profile =
 				}
 			);
 		}
-		
-		// add event listeners to all of the headers
-		$('.expandcollapse').click(function(){ Profile.expandCollapse(this.id.replace('_header', ''), Site.has_remote) });
 	},
 	
 	expandCollapse: function (id, should_save)
@@ -51,70 +53,115 @@ Profile =
 		}
 	},
 	
-	wishInit: function ()
-	{
-		var wishes_list = $('wishes_list'),
-			viewport_width = wishes_list.parentNode.offsetWidth,
-			container_width = wishes_list.lastChild.previousSibling.offsetLeft + wishes_list.lastChild.previousSibling.offsetWidth;
-		if (container_width >= viewport_width) {
-			var items = wishes_list.getElementsByTagName('li'),
-				pages = [];
-			for (var i=0; i < items.length; i++) {
-				var left_widht = items[i].offsetLeft + items[i].offsetWidth;
-				if (left_widht > viewport_width) {
-					items[i].style.display = 'none';
-				}
-				var num_page = Math.floor(left_widht/viewport_width);
-				if (!pages[num_page]) {
-					pages[num_page] = [];
-				}
-				pages[num_page].push(items[i])
-			}
+	navRecalculate: jQuery.noop,
+	
+	wishInit: function(nav_container, list) {
+		// structure: <p class="i-nav"><i class="i-nav-prev i-nav-prev-dis"></i><span class="i-nav-counter"></span><i class="i-nav-next"></i></p>
+		var current = 0,
+			ITEM_WIDTH = 140,
+			pages = [],
+		
+			nav = jQuery("<p/>", {
+				"class": "i-nav"
+			}),
 			
-			var nav = jQuery('#wishes_body .i-nav'),
-				next = nav.find('.i-nav-next'),
-				prev = nav.find('.i-nav-prev'),
-				current = 0,
-				go_next = function ()
-				{
-					if (pages[current + 1]) {
-						prev.removeClass('i-nav-prev-dis');
-						jQuery(pages[current]).hide();
-						jQuery(pages[++current]).show();
-						!pages[current + 1] && next.addClass('i-nav-next-dis');
-					}
-				},
-				go_prev = function ()
-				{
+			prev = jQuery("<i/>", {
+				"class": "i-nav-prev i-nav-prev-dis",
+				click: function() {
 					if (pages[current - 1]) {
-						next.removeClass('i-nav-next-dis');
+						next.removeClass("i-nav-next-dis");
 						jQuery(pages[current]).hide();
 						jQuery(pages[--current]).show();
-						!pages[current - 1] && prev.addClass('i-nav-prev-dis');
+						!pages[current - 1] && prev.addClass("i-nav-prev-dis");
+						pager.text((current + 1) + "/" + pages.length);
 					}
-				};
-			next.click(go_next)
-			prev.click(go_prev)
-			nav.show();
+				}
+			}).appendTo(nav),
+			
+			pager = jQuery("<span/>", {
+				"class": "i-nav-counter"
+			}, jQuery("div")).appendTo(nav),
+			
+			next = jQuery("<i/>", {
+				"class": "i-nav-next",
+				click: function() {
+					if (pages[current + 1]) {
+						prev.removeClass("i-nav-prev-dis");
+						jQuery(pages[current]).hide();
+						jQuery(pages[++current]).show();
+						!pages[current + 1] && next.addClass("i-nav-next-dis");
+						pager.text((current + 1) + "/" + pages.length);
+					}
+				}
+			}).appendTo(nav);
+
+		nav.appendTo(nav_container);
+
+		function calculate() {
+			var items = list.getElementsByTagName("li");
+			if (items.length < 2) {
+				return;
+			}
+
+			var viewport_width = list.parentNode.offsetWidth,
+				container_width = items[items.length-1].offsetLeft + items[items.length-1].offsetWidth;
+
+			if (container_width >= viewport_width) {
+				var count_on_page = Math.floor(viewport_width/ITEM_WIDTH) || 1;
+				for (var i=-1, item; item = items[++i]; ) {
+					var num_page = Math.floor(i/count_on_page);
+
+					if (num_page !== 0) {
+						item.style.display = "none";
+					}
+
+					if (!pages[num_page]) {
+						pages[num_page] = [];
+					}
+					pages[num_page].push(item);
+				}
+
+				pager.text(1 + "/" + pages.length);
+				nav.show();
+			}
 		}
-		
+
+		function recalculate() {
+			// restore to default state
+			jQuery(list.getElementsByTagName("li")).css("display", "block");
+			nav.hide();
+			current = 0;
+			pages = [];
+			next.removeClass("i-nav-next-dis");
+			prev.addClass("i-nav-prev-dis");
+
+			calculate();
+		}
+
+		calculate();
+
 		// recalc wish list on resize
 		var timeout;
-		jQuery(window).resize(function()
-		{
+		function resize() {
 			clearTimeout(timeout);
-			timeout = setTimeout(function()
-			{
-				// restore to default state
-				var nav = jQuery('#wishes_body .i-nav').hide();
-				nav.find('.i-nav-next').unbind().removeClass('i-nav-next-dis');
-				nav.find('.i-nav-prev').unbind().addClass('i-nav-prev-dis');
-				jQuery("#wishes_list li").css('display', 'block');
+			timeout = setTimeout(recalculate, 200);
+		}
 
-				Profile.wishInit();
-			}, 200);
-		});
+		jQuery(window).resize(resize);
+
+		return {
+			recalculate: recalculate
+		};
 	}
-}
+};
 
 jQuery(Profile.init);
+
+// add event listeners to all of the headers
+jQuery(document).delegate(".expandcollapse", "click", function() {
+	Profile.expandCollapse(this.id.replace("_header", ""), Site.has_remote);
+
+	if (this.id === "wishes_header" && / on$/.test(this.className)) {
+		Profile.navRecalculate();
+	}
+});
