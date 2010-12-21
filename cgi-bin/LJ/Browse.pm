@@ -603,6 +603,13 @@ sub preload_rows {
         next unless $row;
 
         $obj->absorb_row($row);
+
+        $obj->preload_children;
+
+        $obj->set_memcache;
+
+        $singletons{$obj->{catid}} = $obj;
+
         delete $need{$obj->{catid}};
     }
 
@@ -626,13 +633,16 @@ sub preload_rows {
         # and update singleton (request cache)
         $obj->absorb_row($row);
 
+        $obj->preload_children;
+
         # set in memcache
         $obj->set_memcache;
 
+        # update request cache
+        $singletons{$row->{catid}} = $obj;
+
         # and delete from %need for error reporting
         delete $need{$obj->{catid}};
-
-        $obj->preload_children;
 
     }
 
