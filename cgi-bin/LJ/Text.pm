@@ -242,7 +242,7 @@ sub truncate_to_word_with_ellipsis {
         if ($str =~ /\s+$/) {
             $str =~ s/\s+$//;
         } else {
-            $str =~ s/\s*\S+$//;
+            $str =~ s/(?<=\S\s)\s*\S+$//;
         }
 
         return $str;
@@ -257,6 +257,7 @@ sub truncate_to_word_with_ellipsis {
 
         $str = $remove_last_word->($str);
         $remainder = substr($original_string, $class->byte_len($str));
+        
         $str .= $ellipsis;
     }
 	
@@ -266,18 +267,30 @@ sub truncate_to_word_with_ellipsis {
             'str' => $str,
             'chars' => $chars_trunc + 1
         );
+       
+        my $add_space = (substr($str, $chars_trunc, 1) =~ /\s/);
 
         $str = $remove_last_word->($str);
-        $remainder = substr($original_string, $class->byte_len($str));
-
-        if($punct_space && $str =~ /[,.;:!?]$/) {
+ 
+        # What kind af moron one has to be to come up with this kind of logic to be implemented? 
+        if($add_space) {
+            $str .= ' ';
+        } elsif($punct_space && $str =~ /[,.;:!?]$/) {
 			if($class->char_len($str) >= $chars - 1) {
 		        $str = $remove_last_word->($str);
-		        $remainder = substr($original_string, $class->byte_len($str));
+		        
+		        if($class->char_len($str) >= $chars - 1) {
+                    $str = $class->truncate(
+                        'str' => $str,
+                        'bytes' => $class->char_len($str) - 2
+                    );
+		        }
 			} else {
 				$str .= ' ';
 			}   	
         }
+        
+        $remainder = substr($original_string, $class->byte_len($str));
         
         $str .= $ellipsis;
     } elsif($force_ellipsis) {
