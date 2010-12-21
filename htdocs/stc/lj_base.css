@@ -1546,6 +1546,10 @@ DIV.lj_ippu_app {
 		line-height: 11px;
 		font-size: 11px;
 		}
+	DIV.lj_ippu_app P.name {
+		margin-bottom: 0;
+		font-weight: bold;
+		}
 	DIV.lj_ippu_app .ljappippu_share_buttons {
 		clear: both;
 		overflow: hidden;
