@@ -499,6 +499,24 @@ sub clean
                 next;
             }
 
+            if ($tag eq 'iframe') {
+                ## Allow some iframes from trusted sources (if they are not eaten already)
+                ## TODO: add more trusted sites besides YouTube
+                ## YouTube (http://apiblog.youtube.com/2010/07/new-way-to-embed-youtube-videos.html)
+                my $src = $attr->{'src'};
+                if ($src && $src =~ m!^http://www\.youtube\.com/embed/!) {
+                    ## allow 
+                } else {
+                    ## eat this tag
+                    if (!$attr->{'/'}) {
+                        ## if not autoclosed tag (<iframe />), 
+                        ## then skip everything till the closing tag
+                        $p->get_tag("/iframe");
+                    }
+                    next TOKEN;
+                }
+            }
+
             # try to call HTMLCleaner's element-specific cleaner on this open tag
             my $clean_res = eval {
                 my $cleantag = $tag;
@@ -1524,7 +1542,7 @@ sub clean_and_trim_subject {
     $$ref = LJ::text_trim($$ref, 0, $length);
 }
 
-my $event_eat = [qw[head title style layer iframe applet object xml param]];
+my $event_eat = [qw[head title style layer applet object xml param]];
 my $event_remove = [qw[bgsound embed object link body meta noscript plaintext noframes]];
 
 my @comment_close = qw(
