@@ -1365,6 +1365,8 @@ sub res_includes {
     $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
     $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
 
+    $site{inbox_unread_count} = $remote->notification_inbox->unread_count if $remote and LJ::is_enabled('inbox_unread_count_in_head');
+
     my $site_params = LJ::js_dumper(\%site);
 
     # include standard JS info
