@@ -6,7 +6,7 @@ use Carp qw(croak);
 
 use vars qw(%GET %POST $headextra @errors @warnings);
 
-sub need_res { qw( stc/widgets/widgets-layout.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) }
+sub need_res { qw( stc/widgets/widget-layout.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) }
 
 use LJ::Browse::Parser;
 

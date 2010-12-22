@@ -6,7 +6,7 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Browse );
 
-    LJ::need_res ( qw( stc/widgets/widgets-layout.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) );
+    LJ::need_res ( qw( stc/widgets/widget-layout.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) );
 
     my $remote = LJ::get_remote();
 
