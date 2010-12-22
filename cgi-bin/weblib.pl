@@ -1359,6 +1359,8 @@ sub res_includes {
                 media_embed_enabled => $embeds_enabled,
                 esn_async => $esn_async,
                 server_time => time(),
+                remoteJournalBase => $remote && $remote->journal_base,
+                remoteUser => $remote && $remote->user,
                 );
     $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
     $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
