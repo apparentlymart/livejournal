@@ -200,7 +200,7 @@ body<=
     return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%FORM, \$errtxt);
 
     my $event = !$FORM{'replyto'} ? $item->{'event'} : $parpost->{'body'};
-    my $preformatted = $FORM{'replyto'} eq "" ? $props->{'opt_preformatted'} : $parpost->{'opt_preformatted'};
+    my $preformatted = ($FORM{'replyto'}) ? $parpost->{'opt_preformatted'} : $props->{'opt_preformatted'};
 
     my $suspend_msg = $entry && $entry->should_show_suspend_msg_to($remote) ? 1 : 0;
     LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $preformatted,
