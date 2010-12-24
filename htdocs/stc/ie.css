@@ -49,32 +49,29 @@ __________________________________________*/
 	bottom: auto;
 	}
 * HTML .b-ljtimes-update {
-	top: expression(document.body.scrollTop+document.body.clientHeight-this.clientHeight+6);
+	top: expression( ( -33 - this.offsetHeight + ( document.documentElement.clientHeight ? document.documentElement.clientHeight : document.body.clientHeight ) + ( ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop ) ) + 'px' );
 	}
 * HTML .b-ljtimes-inbox {
-	top: expression(document.body.scrollTop+document.body.clientHeight-this.clientHeight-25);
+	top: expression( ( -33 - this.offsetHeight + ( document.documentElement.clientHeight ? document.documentElement.clientHeight : document.body.clientHeight ) + ( ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop ) ) + 'px' );
 	}
-* HTML .i-ljtimes-logged-close,
-* HTML .b-ljtimes-logged-form,
-* HTML .b-ljtimes-logged-submit,
-* HTML .b-ljtimes-success,
-* HTML .b-ljtimes-login,
-* HTML .b-ljtimes-inbox {
-	background: #000;
+* HTML .b-ljtimes-login-form,
+* HTML .b-ljtimes-logged-input {
+	zoom: 1;
 	}
-* HTML .b-ljtimes-login,
+/** HTML .b-ljtimes-login,
 * HTML .b-ljtimes-logged-form {
 	width: 366px;
-	}
+	}*/
 .b-ljtimes-login .i-ljtimes-checkbox {
 	vertical-align: -3px;
 	}
 .b-ljtimes-logged-submit {
-	height: 22px;
-	padding: 1px 22px 0;
+	overflow: visible;
+/*	height: 22px;
+	padding: 1px 22px 0;*/
 	}
 * HTML .b-ljtimes-logged-submit {
-	height: 24px;
+/*	height: 24px;*/
 	}
 * HTML .b-ljtimes-bubble-content{
 	zoom: 1;
