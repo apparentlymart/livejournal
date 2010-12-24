@@ -680,6 +680,7 @@ Must be removed after implementation of Framework! */
 	top: 44px;
 	z-index: 9999;
 	}
+
 #content-wrapper .appwidget-sitemessages {
 	position: static;
 	margin-top: 20px;
@@ -691,10 +692,6 @@ Must be removed after implementation of Framework! */
 .scheme-lynx .appwidget-sitemessages {
 	top: 0;
 	}
-
-
-
-
 
 /* Facebook & Twitter authorization
 --------------------------- */
@@ -1546,10 +1543,6 @@ DIV.lj_ippu_app {
 		line-height: 11px;
 		font-size: 11px;
 		}
-	DIV.lj_ippu_app P.name {
-		margin-bottom: 0;
-		font-weight: bold;
-		}
 	DIV.lj_ippu_app .ljappippu_share_buttons {
 		clear: both;
 		overflow: hidden;
@@ -1647,3 +1640,88 @@ DIV.lj_ippu_app {
 		line-height: 16px;
 		font-size: 12px;
 		}
+
+
+/* Popups with arrows
+--------------------------- */
+/* Must be removed after implementation of Framework! */
+.b-popup {
+	position: relative;
+	z-index: 99;
+	}
+	.b-popup-outer {
+		position: relative;
+		padding: 1px;
+		background: #FFF;
+		border: 1px solid #CCC;
+		-webkit-border-radius: 7px;
+		-moz-border-radius: 7px;
+		border-radius: 7px;
+		z-index: 100;
+		}
+	.b-popup-inner {
+		padding: 10px 15px;
+		border: 2px solid #E7E7E7;
+		-webkit-border-radius: 7px;
+		-moz-border-radius: 7px;
+		border-radius: 7px;
+		}
+	.i-popup-arr {
+		overflow: hidden;
+		display: block;
+		position: absolute;
+		font: 0/0 serif;
+		background-image: url(/img/popup-arr.gif?v=1);
+		background-repeat: no-repeat;
+		background-pos:;
+		}
+	.i-popup-arrt {
+		top: -7px;
+		left: 50%;
+		width: 13px;
+		height: 11px;
+		margin: 0 0 0 -6px;
+		padding: 0;
+		background-position: 0 0;
+		}
+	.i-popup-arrr {
+		top: -7px;
+		left: 14px;
+		width: 11px;
+		height: 13px;
+		margin: 0;
+		padding: 0;
+		background-position: -13px -11px;
+		}
+	.i-popup-arrb {
+		bottom: -7px;
+		left: 50%;
+		width: 13px;
+		height: 11px;
+		margin: 0 0 0 -6px;
+		padding: 0;
+		background-position: -13px 0;
+		}
+	.i-popup-arrl {
+		top: 50%;
+		left: -7px;
+		width: 11px;
+		height: 13px;
+		margin: -6px 0 0;
+		padding: 0;
+		background-position: 0 -11px;
+		}
+	.i-popup-close {
+		overflow: hidden;
+		display: block;
+		position: absolute;
+		top: 12px;
+		right: 12px;
+		width: 12px;
+		height: 12px;
+		background: url(/img/popup-cls.gif?v=1) no-repeat 0 0;
+		font: 0/0 serif;
+		cursor: pointer;
+		}
+
+
