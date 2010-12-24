@@ -899,13 +899,20 @@ sub render {
     my ($self, %opts) = @_;
 
     my $remote = LJ::get_remote();
-    my $ditemid = $self->ditemid;
-    my $pollid = $self->pollid;
+
+    my $ditemid   = $self->ditemid;
+    my $pollid    = $self->pollid;
+    my $journalid = $self->journalid;
 
     my $mode     = delete $opts{mode};
     my $qid      = delete $opts{qid};
     my $page     = delete $opts{page};
     my $pagesize = delete $opts{pagesize};
+
+    my $is_super = $self->prop ('supermaintainer');
+    ## Only maintainers can view, vote and see results for election polls.
+    return "<b>[" . LJ::Lang::ml('poll.error.not_enougth_rights') . "]</b>"
+        if $is_super && !$remote->can_manage($journalid);
 
     # Default pagesize.
     $pagesize = 2000 unless $pagesize;
@@ -924,6 +931,10 @@ sub render {
         my $time = $self->get_time_user_submitted($remote);
         $mode = $time ? 'results' : $can_vote ? 'enter' : 'results';
     }
+
+    ## Supermaintainer election has only one mode - voting
+    $mode = "enter"
+        if ($is_super && !$self->is_closed);
 
     my $sth;
     my $ret = '';
@@ -975,20 +986,26 @@ sub render {
         $ret .= LJ::html_hidden('pollid', $pollid);
     }
 
+    if ($is_super) {
+        $ret .= LJ::Lang::ml('poll.election.description', { enddate => LJ::TimeUtil->fancy_time_format(LJ::TimeUtil->mysqldate_to_time($self->prop('createdate')) + 1814400, 'day') });
+    }
+
     $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> "
-            unless $opts{widget};
+            unless $opts{widget} || $is_super;
     $ret .= $opts{scroll_links} if $opts{widget};
     if ($self->name) {
         my $name = $self->name;
         LJ::Poll->clean_poll(\$name);
-        if ($opts{widget}) {
-            $name = LJ::trim_at_word($name, 70);
-            $ret .= "<h3>$name</h3>";
-        } else {
-            $ret .= "<i>$name</i>";
+        unless ($is_super) {
+            if ($opts{widget}) {
+                $name = LJ::trim_at_word($name, 70);
+                $ret .= "<h3>$name</h3>";
+            } else {
+                $ret .= "<i>$name</i>";
+            }
         }
     }
-    $ret .= "<br />\n" if !$opts{widget};
+    $ret .= "<br />\n" unless $opts{widget} || $is_super;
     $ret .= "<span style='font-family: monospace; font-weight: bold; font-size: 1.2em;'>" .
             LJ::Lang::ml('poll.isclosed') . "</span><br />\n"
         if ($self->is_closed);
@@ -999,7 +1016,7 @@ sub render {
     }
     $ret .= LJ::Lang::ml('poll.security2', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote),
                                        'whoview' => LJ::Lang::ml('poll.security.'.$whoview) })
-            unless $opts{widget};
+            unless $opts{widget} || $is_super;
 
     my %aggr_results;
     my $aggr_users;
@@ -1029,10 +1046,14 @@ sub render {
         my $text = $q->text;
         $text = LJ::trim_at_word($text, 150) if $opts{widget};
         LJ::Poll->clean_poll(\$text);
-        if ($opts{widget}) {
-            $results_table .= "<p class='b-post-question'>$opts{poll_pic}$text$posted</p><div id='LJ_Poll_${pollid}_$qid' class='b-potd-poll'>";
+        unless ($is_super) {
+            if ($opts{widget}) {
+                $results_table .= "<p class='b-post-question'>$opts{poll_pic}$text$posted</p><div id='LJ_Poll_${pollid}_$qid' class='b-potd-poll'>";
+            } else {
+                $results_table .= "<p>$text</p><div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0pt 10px 40px;'>";
+            }
         } else {
-            $results_table .= "<p>$text</p><div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0pt 10px 40px;'>";
+            $results_table .= "<p>".LJ::Lang::ml('poll.election.subject')."</p><div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0pt 10px 40px;'>";
         }
         $posted = '';
         
@@ -1258,7 +1279,8 @@ sub render {
                     $results_table .= LJ::html_check({ 'type' => $q->type, 'name' => "pollq-$qid",
                                              'value' => $itid, 'id' => "pollq-$pollid-$qid-$itid",
                                              'selected' => ($preval{$qid} =~ /\b$itid\b/) });
-                    $results_table .= " <label for='pollq-$pollid-$qid-$itid'>$item</label><br class=\"i-potd-br\" />";
+                    my $received = ($is_super && $itvotes{$itid}) ? LJ::Lang::ml ("poll.election.received.votes", { cnt => $itvotes{$itid} }) : '';
+                    $results_table .= " <label for='pollq-$pollid-$qid-$itid'>$item $received</label><br class=\"i-potd-br\" />";
                     next;
                 }
                 
@@ -1315,7 +1337,7 @@ sub render {
     if ($do_form) {
         $ret .= LJ::html_submit(
                                 'poll-submit',
-                                LJ::Lang::ml('poll.submit'),
+                                $is_super ? LJ::Lang::ml('poll.vote') : LJ::Lang::ml('poll.submit'),
                                 {class => 'LJ_PollSubmit'}) . "</form>\n";;
     }
 

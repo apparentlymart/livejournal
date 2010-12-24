@@ -3380,6 +3380,12 @@ poll.dberror.items=Database error inserting items: [[errmsg]]
 
 poll.dberror.questions=Database error inserting questions: [[errmsg]]
 
+poll.election.description=Election will be opened <b>untill all maintainers will make their choices</b><br/> but no longer than [[enddate]].<br/> If winner will not be found (in case of number of candidates will get similar<br /> number of votes) election may be extended up to another 3 weeks.
+
+poll.election.received.votes=([[cnt]] vote received)
+
+poll.election.subject=Choose your candidate:
+
 poll.error.alreadyvoted|staleness=1
 poll.error.alreadyvoted=Sorry, you have already voted in this poll under the account [[user]].
 
@@ -3408,6 +3414,8 @@ poll.error.noitemstext=lj-pq tags of type 'text' cannot have poll items in them.
 poll.error.nopollid=pollid parameter is missing.
 
 poll.error.noquestions=You must have at least one question in a poll.
+
+poll.error.not_enougth_rights=You are not have enougth rights for view this poll.
 
 poll.error.notext=Need text inside an lj-pq tag to say what the question is about.
 
@@ -3478,6 +3486,8 @@ poll.security2=Open to: <b>[[whovote]]</b>, detailed results viewable to: <b>[[w
 poll.submit=Submit Poll
 
 poll.viewanswers=View Answers
+
+poll.vote=Vote!
 
 poll.warning.cutoff|staleness=1
 poll.warning.cutoff=Because your "[[oldval]]" answer exceeded the maximum length of 255 bytes, it has been cut off and now reads as "[[newval]]".

@@ -1444,6 +1444,9 @@ pollproplist2.unique:
 pollproplist2.createdate:
   des: The voter must have created their account by the date specified (Pacific time) in order to vote.  Must be in format YYYY-MM-DD, otherwise there will be no restriction.
 
+pollproplist2.supermaintainer:
+  des: Is set to 1, only maintainers can see, vote and view results for this poll.
+
 logproplist.copyright:
   datatype: char
   des: Copyrighted status: 'C' - copyrighted, 'P' - public, full cite allowed.
@@ -1598,8 +1601,15 @@ userproplist.sys_limit_friending_notif_delay:
   cldversion: 8
   prettyname: System limit of friending notification delay
 
+userproplist.election_poll_id:
+  datatype: num
+  des: Supermaintainer election poll id
+  cldversion: 8
+  prettyname: Supermaintainer election poll id
+
 logproplist.external_url:
   datatype: char
   des: URL of this entry on an external site
   prettyname: External URL
   sortorder: 107
+

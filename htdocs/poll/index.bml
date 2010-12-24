@@ -28,6 +28,7 @@
     }
 
     my $poll = LJ::Poll->new($pollid);
+    my $is_super = $poll->prop ('supermaintainer');
 
     unless ($poll && $poll->valid) {
         $title = $ML{'Error'};
@@ -41,6 +42,9 @@
 
     my $mode = "";
     $mode = $FORM{'mode'} if ($FORM{'mode'} =~ /(enter|results|ans)/);
+
+    ## Supermaintainer election has only one mode - voting
+    $mode = "enter" if $is_super;
 
     # Handle opening and closing of polls
     # We do this first because a closed poll will alter how a poll is displayed
@@ -116,6 +120,10 @@
             });
             $body .= join('', map { "<p>$_</p>" } @warnings);
             return;
+        }
+        if ($is_super) {
+            my $journal = LJ::want_user($poll->journalid);
+            return BML::redirect($LJ::SITEROOR."/community/election.bml?authas=".$journal->user);
         }
         return BML::redirect($entry->url);
     }

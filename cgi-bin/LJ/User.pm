@@ -200,6 +200,7 @@ sub create_community {
 
     my $remote = LJ::get_remote();
     LJ::set_rel($u, $remote, "A");  # maintainer
+    LJ::set_rel($u, $remote, "S");  # supermaintainer
     LJ::set_rel($u, $remote, "M") if $opts{moderated} =~ /^[AF]$/; # moderator if moderated
     LJ::join_community($remote, $u, 1, 1); # member
 
@@ -5164,6 +5165,33 @@ sub should_show_graphic_previews {
     my $u = shift;
 
     return $u->show_graphic_previews eq "on" ? 1 : 0;
+}
+
+# name: can_super_manage
+# des: Given a target user and determines that the user is an supermaintainer of community
+# returns: bool: true if supermaitainer, otherwise fail
+# args: u
+# des-u: user object or userid of community
+sub can_super_manage {
+    my $remote  = shift;
+    my $u       = LJ::want_user(shift);
+
+    return undef unless $remote && $u;
+
+    # is same user?
+    return 1 if LJ::u_equals($u, $remote);
+
+    # do not allow suspended users manage other accounts
+    return 0 if $remote->is_suspended;
+
+    # people/syn/rename accounts can only be managed by the one account
+    return undef if $u->{journaltype} =~ /^[PYR]$/;
+
+    # check for supermaintainer access
+    return undef unless LJ::check_rel($u, $remote, 'S');
+
+    # passed checks, return true
+    return 1;
 }
 
 # name: can_manage

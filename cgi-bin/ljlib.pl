@@ -1352,7 +1352,11 @@ sub make_link
 # </LJFUNC>
 sub get_authas_user {
     my $user = shift;
+    my $opts = shift;
+
     return undef unless $user;
+
+    $opts = { type => $opts } unless ref $opts;
 
     # get a remote
     my $remote = LJ::get_remote();
@@ -1367,7 +1371,11 @@ sub get_authas_user {
     return undef unless $u->{clusterid};
 
     # does $u have admin access?
-    return undef unless $remote->can_manage($u);
+    if ($opts->{'type'} eq 'S') {
+        return undef unless $remote->can_super_manage($u);
+    } else {
+        return undef unless $remote->can_manage($u);
+    }
 
     # passed all checks, return $u
     return $u;

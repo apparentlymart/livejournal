@@ -1,0 +1,65 @@
+<?page
+body<=
+<?_code
+    use strict;
+    use vars qw(%GET %POST $title);
+
+    # TODO set crumb
+    #LJ::set_active_crumb('commaccount');
+
+    $title = $ML{'.title'};
+    my $body;
+
+    my $remote = LJ::get_remote();
+    unless ($remote) {
+        $body = "<?needlogin?>";
+        return $body;
+    }
+
+    $body .= "<form method='GET'>\n";
+    $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'}, 'type' => 'C' });
+    $body .= "</form>\n\n";
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input($ML{'error.invalidauth'})
+        unless $u;
+
+    unless ($remote->can_manage ($u)) {
+        return "You can't vote for supermaintainer";
+    }
+
+    # Must be working with a community
+    unless ($u->{journaltype} eq 'C') {
+        $body .= "<br />$ML{'.choose'}";
+        return $body;
+    }
+
+    my $warning;
+
+    $body .= "<?errorbar <strong>$ML{'.error.ineligible'}</strong> errorbar?>"
+        unless $u->{statusvis} eq 'V' || $u->is_readonly;
+
+    # Upgrade successful
+    $body .= "<?warningbar $warning  warningbar?><br />" if $warning;
+    
+    my $poll_id = $u->prop ('election_poll_id');
+    return $body . '<br/>Net polla' unless $poll_id;
+
+    $body .= "<hr width='30%'>";
+
+    my $poll = LJ::Poll->new($poll_id);
+    $body .= $poll->render;
+
+
+    return $body;
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code
+    LJ::need_res('stc/pay.css');
+    return $head;
+_code?>
+<=head
+page?>

@@ -6,8 +6,9 @@ use warnings;
 sub should_render {
     my ($class, $u) = @_;
 
+    my $remote = LJ::get_remote();
     return 0 if $class eq __PACKAGE__; # this is an abstract class
-    return $u && $u->is_personal;
+    return ($u && $u->is_personal) || ($remote && $remote->can_super_manage($u)) ? 1 : 0; 
 }
 
 sub code {
