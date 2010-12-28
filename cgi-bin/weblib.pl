@@ -1293,7 +1293,7 @@ sub res_includes {
 
     # all conditions must be complete here
     # example: cyr/non-cyr flag changed at settings page
-    LJ::run_hooks('sitewide_resources');
+    LJ::run_hooks('sitewide_resources') unless $only_needed;
 
     # use correct root and prefixes for SSL pages
     my ($siteroot, $imgprefix, $statprefix, $jsprefix, $wstatprefix);
