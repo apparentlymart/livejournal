@@ -22,15 +22,17 @@ sub render_body {
 
     ## Handle auth params
     if (LJ::Request->did_post) {
-        do_login($thispage, $forwhat, \@errors);
+        do_login($thispage, $forwhat, \@errors, \%opts);
         ## where to go on success?
         return if LJ::Request->redirected;
     }
 
+    my $filename = $opts{'embedded'} ? 'ExternalLogin' : 'Login';
+
     ## Draw widget
     my $template = LJ::HTML::Template->new(
         { use_expr => 1 }, # force HTML::Template::Pro with Expr support
-        filename => "$ENV{'LJHOME'}/templates/Identity/Login.tmpl",
+        filename => "$ENV{'LJHOME'}/templates/Identity/$filename.tmpl",
         die_on_bad_params => 0,
         strict => 0,
     ) or die "Can't open template: $!";
@@ -50,10 +52,17 @@ sub render_body {
     my @types;
 
     if ($opts{'lj_auth'}) {
-        push @types, {
-            type => 'user',
-            ml_tab_heading => LJ::Lang::ml("/identity/login.bml.tab.user"),
+        my $type_display = {
+            'type'            => 'user',
+            'ml_tab_heading'  => LJ::Lang::ml("/identity/login.bml.tab.user"),
+            'user_returnto'   => $opts{'user_returnto'},
         };
+
+        if ( $opts{'embedded'} ) {
+            $template->param( 'type_user' => [ $type_display ] );
+        }
+
+        push @types, $type_display;
     }
 
     ## external auth
@@ -69,13 +78,21 @@ sub render_body {
         if ($type eq $current_type) {
             $type_display->{'errors'} = [ map { { 'error' => $_ } } @errors ];
         }
+
+        if ( $opts{'embedded'} ) {
+            $template->param( 'type_' . $type => [ $type_display ] );
+        }
         push @types, $type_display;
     }
 
+    unless ( $opts{'embedded'} ) {
+        $template->param( 'types' => \@types );
+    }
+
     $template->param(
-        'types' => \@types,
-        'current_type' => $current_type,
-        'returnto' => $thispage,
+        'current_type'      => $current_type,
+        'returnto'          => $thispage,
+        'js_check_domain'   => $opts{'js_check_domain'},
     );
 
     ## well cooked widget is here
@@ -83,9 +100,7 @@ sub render_body {
 }
 
 sub do_login {
-    my $thispage = shift;
-    my $forwhat = shift;
-    my $errors = shift;
+    my ( $thispage, $forwhat, $errors, $opts ) = @_;
     my $idtype = LJ::Request->post_param('type');
 
     ## Special case: perform LJ.com login.
@@ -143,7 +158,9 @@ sub do_login {
             ## Where to go?
             my $returnto = LJ::Request->post_param("returnto") || $thispage;
             my $returl_fail = "$thispage?type=$idtype";
-            unless ( $returnto =~ m!^https?://\Q$LJ::DOMAIN_WEB\E/! ) {
+            if ( $opts->{'embedded'}
+              || $returnto !~ m!^https?://\Q$LJ::DOMAIN_WEB\E/! )
+            {
                 ($returnto, $returl_fail)
                     = LJ::Identity->unpack_forwhat($forwhat);
             }

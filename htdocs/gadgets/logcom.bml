@@ -8,61 +8,28 @@
     return 'This feature is disabled'
         unless LJ::is_enabled('external_comments');
 
-    LJ::need_res(qw( js/partners/placeholder.js
-                     js/jquery.js
-                     stc/lj_base.css
-                     stc/partners/login.css ));
-
     my $thispage = "$LJ::SITEROOT/gadgets/logcom.bml";
     $thispage .= "?" . LJ::Request->args;
 
-    my $url     = $GET{url};
-    my $rskey   = $GET{rsk};
+    my $docid   = LJ::Request->get_param('docid');
+    my $api_key = LJ::Request->get_param('rsk');
 
     ## convert remote-site key to lj.com's community
-    my $username = LJ::ExternalComments->key_to_username($rskey);
-    return "unknown key" unless $username;
+    my $partner = LJ::PartnerSite->find_by_api_key($api_key);
+    return 'unknown key'
+        unless $partner;
 
-    my $journal = LJ::load_user($username);
-    return "unknown user" unless $journal;
+    $partner->request_logcom_resources;
+
+    my $journal = $partner->journal;
 
     return 'rate limit exceeded'
-        unless LJ::RateLimit->check( $journal,
-                                     $LJ::PARTNER_RATE_LIMITS{$username} );
+        unless LJ::RateLimit->check( $journal, $partner->rate_limits );
 
-    my $domains = $LJ::PARTNER_DOMAINS{$username};
-    my $domains_out = LJ::JSON->to_json($domains);
-    my $js_check_domain = qq[
-        <script type="text/javascript">
-        var trustedDomains = $domains_out;
-            
-        var domainMatch = checkDomain(window.location.href, trustedDomains);
+    my $js_check_domain = $partner->domain_check_js( { 'mode' => 'logcom' } );
 
-        if (!domainMatch) {
-            window.location.href = 'about:blank';
-        }
-
-        function checkDomain(href, trustedDomains) {
-            var currentDomain = href.match(] .q{/(http\:\/\/)(?:www\.)?([^\/]*)/} . qq[)[2];
-            
-            for (var i = 0, l = trustedDomains.length; i < l; i++) {
-                if (trustedDomains[i] == currentDomain) {
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-        </script>
-    ];
-
-    ## convert article's uri on partners site to entryid on LJ.com
-    my $jitemid = LJ::ExternalComments->url_to_jitemid($journal, $url);
-    unless ($jitemid){
-        ## create new empty entry for this url
-        $jitemid = LJ::ExternalComments->create_entry_for_url($journal, $url);
-        return "Can't create new entry" unless $jitemid;
-    }
+    my $entry = $partner->find_entry_by_docid($docid);
+    my $jitemid = $entry->jitemid;
 
     my $replyto = LJ::Request->get_param('replyto');
     
@@ -72,9 +39,7 @@
             unless $parent->valid;
     }
 
-    my $entry = LJ::Entry->new($journal, jitemid => $jitemid);
-
-    if (my $remote = LJ::get_remote() and not $GET{viewform}){
+    if (my $remote = LJ::get_remote() and not LJ::Request->get_param('viewform')) {
         ## show add comment form
         LJ::need_res(qw( stc/partners/login.css ));
 
@@ -89,15 +54,15 @@
 
         return
             LJ::Talk::talkform({
-                remote   => $remote,
-                journalu => $journal,
-                ditemid  => $entry->ditemid,
-                embedable_form => 1,
-                replyto  => int ($replyto / 256),
-                logout_url => $logout_url,
+                'embedable_form'    => 1,
+                'logout_url'        => $logout_url,
+                'js_check_domain'   => $js_check_domain,
+
+                'remote'            => $remote,
+                'journalu'          => $journal,
+                'ditemid'           => $entry->ditemid,
+                'replyto'           => int ($replyto / 256),
             });
-
-
     } else {
         ## display login widget
         LJ::need_res(qw(
@@ -105,28 +70,17 @@
           stc/partners/login.css
         ));
 
-        my $forwhat = 'external-' .
-                      $journal->userid . '-' .
-                      $entry->ditemid . '-' .
-                      $replyto;
+        my $w = LJ::Widget::LoginMulti->new;
+        $w->{'no_container_div'} = 1;
 
-        my $uri = URI->new($url);
-        if ($replyto) {
-            $uri->query_form( $uri->query_form, 'replyto' => $replyto );
-            $uri->fragment( 't' . $replyto );
-        }
+        return $w->render(
+            'embedded'          => 1,
+            'js_check_domain'   => $js_check_domain,
 
-        my $ret = "";
-        $ret .= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
-        <html>
-        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
-        <head>
-        <title>Log in</title>
-        " . LJ::res_includes() . "
-        <body>"
-        . LJ::Widget::LoginMulti->render(thispage => $uri->as_string, forwhat => $forwhat, lj_auth => 1,)
-        ."</body></html>";
-        return $ret;
+            'forwhat'           => 'external',
+            'thispage'          => $thispage,
+            'lj_auth'           => 1,
+        );
     }
 
 }

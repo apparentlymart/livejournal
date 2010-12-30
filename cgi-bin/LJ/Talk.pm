@@ -1852,6 +1852,7 @@ sub talkform {
         }) || undef,
 
         'logout_url'            => $opts->{'logout_url'},
+        'js_check_domain'       => $opts->{'js_check_domain'},
     );
 
     return $template->output;

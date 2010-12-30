@@ -1,12 +1,19 @@
-<?page
-body<=
 <?_code
 {
+#line 3
     use strict;
-    use vars qw(%POST %ML %GET $title);
+
+    our ( %ML, %GET, %POST, $title, $body );
 
     my @errors;
     my $skip_form_auth = 0;
+
+    my $external_site_case = $POST{'is_form_embedded'};
+    my $site_scheme_wrap = ! $external_site_case;
+
+    # indentation inside this subroutine is intentionally screwed
+    # to reduce the diff size ;-)
+    my $render_body = sub {
 
     # stupid hack to allow hotmail people to post, since hotmail changes
     # POST forms to GET.  this isn't a security problem (GET -> POST escalation)
@@ -114,6 +121,8 @@ body<=
         $require_tos = 1;
     }
 
+    my $entry = LJ::Entry->new( $journalu, ditemid => $POST{'itemid'} );
+
     if (! $init || $require_tos) {
         my ($sth, $parpost);
         my $dbcr = LJ::get_cluster_def_reader($journalu);
@@ -128,16 +137,55 @@ body<=
 
         $POST{replyto} = $POST{parenttalkid}+0 unless exists $POST{replyto};
         $POST{edit} = $POST{editid}; # talkform expects the editid to be in "edit"
-        return LJ::Talk::talkform({ 'remote'      => $remote,
-                                    'journalu'    => $journalu,
-                                    'parpost'     => $parpost,
-                                    'replyto'     => $POST{replyto},
-                                    'ditemid'     => $POST{itemid},
-                                    'require_tos' => $require_tos,
-                                    'do_captcha'  => $need_captcha,
-                                    'stylemine'   => $GET{'style'} eq "mine",
-                                    'errors'      => \@errors,
-                                    'form'        => \%POST });
+
+        my $talkform_opts = {
+            'remote'            => $remote,
+            'journalu'          => $journalu,
+            'parpost'           => $parpost,
+            'replyto'           => $POST{replyto},
+            'ditemid'           => $POST{itemid},
+            'require_tos'       => $require_tos,
+            'do_captcha'        => $need_captcha,
+            'stylemine'         => $GET{'style'} eq "mine",
+            'errors'            => \@errors,
+            'form'              => \%POST,
+        };
+
+        if ( $external_site_case ) {
+            $talkform_opts->{'embedable_form'} = 1;
+
+            my $remote_sessid;
+            if ($remote) {
+                $remote_sessid = $remote->session->id;
+            }
+
+            my $partner
+                = LJ::PartnerSite->find_by_journal_username(
+                    $journalu->username );
+
+            my $docid = $partner->docid_from_entry($entry);
+
+            my $replyto = $POST{'replyto'}
+                ? int ( $POST{'replyto'} ) * 256 + $entry->anum
+                : 0;
+
+            my $logcom_page = "$LJ::SITEROOT/gadgets/logcom.bml?" .
+                              'docid=' . $docid . '&' .
+                              'rsk=' . $partner->api_key . '&' .
+                              'replyto=' . $replyto;
+
+            my $logout_url = "$LJ::SITEROOT/gadgets/logout.bml?" .
+                             'returnto=' . LJ::eurl($logcom_page) . '&' .
+                             'sessid=' . $remote_sessid;
+
+            $talkform_opts->{'logout_url'} = $logout_url;
+            $talkform_opts->{'js_check_domain'}
+                = $partner->domain_check_js( { 'mode' => 'logcom' } );
+
+            $partner->request_logcom_resources;
+        }
+
+        return LJ::Talk::talkform($talkform_opts);
     }
 
     # checked $POST{agree_tos} was checked above if it was necessary,
@@ -152,7 +200,6 @@ body<=
     my $talkurl = $init->{talkurl};
 
     my $entryu   = $init->{entryu};
-    my $journalu = $init->{journalu};
     my $parent   = $init->{parent};
     my $comment  = $init->{comment};
     my $item     = $init->{item};
@@ -168,7 +215,6 @@ body<=
         if $parent->{state} eq 'F';
 
     # no replying to suspended entries, even by entry poster
-    my $entry = LJ::Entry->new($journalu, jitemid => $item->{jitemid});
     return LJ::bad_input($ML{'/talkpost.bml.error.noreply_suspended'})
         if $entry && $entry->is_suspended;
 
@@ -198,9 +244,21 @@ body<=
     my $stylemine = $POST{'stylemine'} ? 'style=mine' : '';
 
     my $commentlink;
-    if ($POST{'is_form_embedded'}) {
-        $commentlink = $entry->prop('external_url')
-                     . '?view=' . $dtalkid . '#t' . $dtalkid;
+    if ($external_site_case) {
+        my $partner
+            = LJ::PartnerSite->find_by_journal_username($journalu->username);
+
+        my $uri = URI->new( $partner->xdreceiver_url );
+
+        my $parentid = $parent->{'talkid'}
+            ? $parent->{'talkid'} * 256 + $entry->anum
+            : 0;
+
+        $uri->query_form( $uri->query_form,
+                          'comment_id' => $dtalkid,
+                          'replyto'    => $parentid, );
+
+        $commentlink = $uri->as_string;
     } elsif ($POST{'viewing_thread'} eq '') {
         $commentlink = LJ::Talk::talkargs($talkurl, "view=$dtalkid", $stylemine) . "#t$dtalkid";
     } else {
@@ -244,16 +302,27 @@ body<=
 
     # Sucessful!
     $title = $ML{'.title'};
-    return $ret;
-}
-_code?>
 
-<=body
-title=><?_code return $title _code?>
-head<=
-<?_code return (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : ""; _code?>
-<=head
-page?><?_c <LJDEP>
+    }; # end $render_body
+
+    my $body = $render_body->();
+
+    my $head
+        = ! $LJ::REQ_HEAD_HAS{'chalresp_js'}++
+            ? $LJ::COMMON_CODE{'chalresp_js'}
+            : "";
+
+    if ($site_scheme_wrap) {
+        return BML::render_page({
+            'body'  => $body,
+            'title' => $title,
+            'head'  => $head,
+        });
+    } else {
+        return $body;
+    }
+}
+_code?><?_c <LJDEP>
 lib: LJ::SpellCheck
 link: htdocs/lostinfo.bml, htdocs/userinfo.bml, htdocs/talkread.bml
 post: htdocs/talkpost_do.bml

@@ -209,18 +209,9 @@ sub unpack_forwhat {
                   "jid=$journalid&" .
                   "pendcid=$pendcid";
         $returl_fail = $returl . '&failed=1';
-    } elsif ($forwhat =~ /^external-/) {
-        my (undef, $journalid, $ditemid, $dtalkid) = split /-/, $forwhat;
-        my $journal = LJ::load_userid($journalid);
-        my $entry = LJ::Entry->new($journal, 'ditemid' => $ditemid);
-
-        my $uri = URI->new( $entry->prop('external_url') );
-        if ($dtalkid) {
-            $uri->query_form( $uri->query_form, 'replyto' => $dtalkid );
-            $uri->fragment( 't' . $dtalkid );
-        }
-
-        $returl = $returl_fail = $uri->as_string;
+    } elsif ($forwhat eq 'external') {
+        $returl      = "$LJ::SITEROOT/gadgets/external-landing.bml?success";
+        $returl_fail = "$LJ::SITEROOT/gadgets/external-landing.bml?fail";
     } else {
         # the warning will sit in error logs, and the exception
         # will be handled

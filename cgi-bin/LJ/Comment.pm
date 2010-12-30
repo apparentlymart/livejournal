@@ -17,6 +17,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require "htmlcontrols.pl";
 require "talklib.pl";
 use LJ::TimeUtil;
+use LJ::PartnerSite;
 
 use Encode();
 
@@ -1463,6 +1464,7 @@ sub _format_template_mail {
 
     my $parent  = $self->parent || $self->entry;
     my $entry   = $self->entry;
+    my $journal = $entry->journal;
     my $posteru = $self->poster;
 
     my $encoding     = $targetu->mailencoding || 'UTF-8';
@@ -1511,6 +1513,20 @@ sub _format_template_mail {
       $t->param(parent_dtalkid         => $self->parent->dtalkid);
     }
 
+    my $partner
+        = LJ::PartnerSite->find_by_journal_username($journal->username);
+
+    if ( defined $partner ) {
+        my $docid = $partner->docid_from_entry($entry);
+        my $article_link = $partner->article_link($docid);
+        my $comment_link
+            = $partner->article_link( $docid,
+                                      { 'thread' => $self->dtalkid } );
+
+        $t->param( 'article_link' => $article_link,
+                   'comment_link' => $comment_link, );
+
+    }
 }
 
 # Processes template for HTML e-mail notifications
@@ -1520,12 +1536,14 @@ sub format_template_html_mail {
     my $targetu = shift;           # target user, who should be notified about the comment
     my $t       = shift;           # LJ::HTML::Template object - template of the notification e-mail
 
-    my $parent  = $self->parent || $self->entry;
+    my $entry   = $self->entry;
+    my $parent  = $self->parent;
 
     $self->_format_template_mail($targetu, $t);
 
     # add specific for HTML params
-    $t->param(parent_text        => LJ::Talk::Post::blockquote($parent->body_html));
+    $t->param(parent_text        => LJ::Talk::Post::blockquote($parent ? $parent->body_html
+                                                                       : $entry->event_html ));
     $t->param(poster_text        => LJ::Talk::Post::blockquote($self->body_html));
 
     my $email_subject = $self->subject_html;

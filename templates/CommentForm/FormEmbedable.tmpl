@@ -7,8 +7,14 @@
     <TMPL_VAR lj_res_includes>
 </head>
 <body>
-	<div class="lj3-form-wrapper">
-		<form class="lj3-form lj3-post-comment lj3-active" id="postform" method="post" action="/talkpost_do.bml" target="_top">
+    <TMPL_IF errors>
+        <TMPL_LOOP errors>
+            <TMPL_VAR error><br>
+        </TMPL_LOOP>
+    </TMPL_IF>
+
+    <div class="lj3-form-wrapper">
+		<form class="lj3-form lj3-post-comment lj3-active" id="postform" method="post" action="/talkpost_do.bml" target="">
             <TMPL_VAR form_intro>
             <input type="hidden" name="usertype" value="<TMPL_VAR usertype_default>">
             <input type="hidden" name="is_form_embedded" value="1">

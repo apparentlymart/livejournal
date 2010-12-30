@@ -1278,7 +1278,10 @@ sub need_res {
 sub include_raw  {
     my $type = shift;
     my $code = shift;
-    die "Bogus include type: $type" unless $type =~ m!^(js|css)$!;
+
+    die "Bogus include type: $type"
+        unless $type =~ m!^(js|css|js_link|css_link)$!;
+
     push @LJ::INCLUDE_RAW => [$type, $code];
 }
 
@@ -1478,11 +1481,17 @@ sub res_includes {
     return $ret if $only_needed;
 
     # add raw js/css
-    foreach my $inc (@LJ::INCLUDE_RAW){
-        if ($inc->[0] eq 'js'){
-            $ret .= qq|<script type="text/javascript">\r\n| . $inc->[1] . "</script>\r\n";
-        } elsif ($inc->[0] eq 'css'){
-            $ret .= qq|<style>\r\n| . $inc->[1] . "</style>\n";
+    foreach my $inc (@LJ::INCLUDE_RAW) {
+        my ( $type, $code ) = @$inc;
+
+        if ($type eq 'js'){
+            $ret .= qq|<script type="text/javascript">\r\n$code</script>\r\n|;
+        } elsif ($type eq 'css'){
+            $ret .= qq|<style>\r\n$code</style>\n|;
+        } elsif ( $type eq 'js_link' ) {
+            $ret .= qq{<script type="text/javascript" src="$code"></script>\r\n};
+        } elsif ( $type eq 'css_link' ) {
+            $ret .= qq{<link rel="stylesheet" type="text/css" href="$code" />};
         }
     }
 

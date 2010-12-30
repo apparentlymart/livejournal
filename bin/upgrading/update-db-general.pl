@@ -3414,17 +3414,6 @@ CREATE TABLE friending_actions_q (
     ) Type=InnoDB
 EOC
 
-register_tablecreate("exturl2entry_map", <<'EOC');
-CREATE TABLE exturl2entry_map (
-    userid      int(11) NOT NULL,
-    url_md5     varchar(22) default NULL,
-    jitemid     int(11) NOT NULL,
-
-    KEY userid (userid,url_md5)
-
-    ) ENGINE=InnoDB
-EOC
-
 ### changes
 
 register_alter(sub {
