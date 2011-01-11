@@ -289,12 +289,13 @@ sub truncate_to_word_with_ellipsis {
 				$str .= ' ';
 			}   	
         }
-        
+
         $remainder = substr($original_string, $class->byte_len($str));
-        
+
         $str .= $ellipsis;
     } elsif($force_ellipsis) {
-        $str .= ' ' . $ellipsis;
+        $str .= ' ' if($str !~ /\s$/);
+        $str .= $ellipsis;
     }
     
     $str ||= $ellipsis if($fill_empty);
