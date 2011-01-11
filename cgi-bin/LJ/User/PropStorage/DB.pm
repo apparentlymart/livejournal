@@ -47,6 +47,13 @@ sub fetch_props_db {
 
     foreach my $row (@$res) {
         my $propname = $propid_map{ $row->{'upropid'} }->{'name'};
+
+        # filter out spurious data; we need this because multihomed
+        # userprops used to be stored on user clusters as well, but we
+        # don't store them on user clusters anymore, and the data
+        # that still sits there got outdated.
+        next unless $class->get_handler($propname) eq $class;
+
         $ret{$propname} = $row->{'value'};
     }
 

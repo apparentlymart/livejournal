@@ -13,12 +13,16 @@ foreach my $class (@SUBCLASSES) {
     Carp::confess "Error loading module '$class': $@" if $@;
 }
 
+my %handlers_map;
+
 sub get_handler {
     my ($class, $propname) = @_;
 
+    return $handlers_map{$propname} if $handlers_map{$propname};
+
     foreach my $class (@SUBCLASSES) {
         next unless $class->can_handle($propname);
-        return $class;
+        return ( $handlers_map{$propname} = $class );
     }
 
     Carp::croak 'cannot get a handler for prop=' . $propname;
