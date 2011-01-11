@@ -294,7 +294,7 @@ sub truncate_to_word_with_ellipsis {
         
         $str .= $ellipsis;
     } elsif($force_ellipsis) {
-        $str .= $ellipsis;
+        $str .= ' ' . $ellipsis;
     }
     
     $str ||= $ellipsis if($fill_empty);
