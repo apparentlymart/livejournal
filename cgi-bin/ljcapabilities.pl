@@ -3,7 +3,7 @@ use strict;
 
 sub class_bit {
     my ($class) = @_;
-    foreach my $bit (0..15) {
+    foreach my $bit (0..65) {
         my $def = $LJ::CAP{$bit};
         next unless $def->{_key} && $def->{_key} eq $class;
         return $bit;

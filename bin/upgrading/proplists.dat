@@ -1613,3 +1613,10 @@ logproplist.external_url:
   prettyname: External URL
   sortorder: 107
 
+userproplist.trynbuy_enabled_at:
+  datatype: num
+  des: The moment when user enabled trynbuy feature
+  cldversion: 8
+  prettyname: The moment when user enabled trynbuy feature
+
+
