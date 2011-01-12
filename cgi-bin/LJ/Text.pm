@@ -257,21 +257,22 @@ sub truncate_to_word_with_ellipsis {
 
         $str = $remove_last_word->($str);
         $remainder = substr($original_string, $class->byte_len($str));
-        
+
         $str .= $ellipsis;
     }
-	
+
     if ($chars && $class->char_len($str) > $chars) {
         my $chars_trunc = $chars - $class->char_len($ellipsis);
+
         $str = $class->truncate(
             'str' => $str,
             'chars' => $chars_trunc + 1
         );
-       
-        my $add_space = (substr($str, $chars_trunc, 1) =~ /\s/);
+
+        my $add_space = (substr(decode_utf8($str), $chars_trunc, 1) =~ /\s/);
 
         $str = $remove_last_word->($str);
- 
+
         # What kind af moron one has to be to come up with this kind of logic to be implemented? 
         if($add_space) {
             $str .= ' ';
@@ -291,7 +292,8 @@ sub truncate_to_word_with_ellipsis {
         }
 
         $remainder = substr($original_string, $class->byte_len($str));
-
+        
+        $str .= ' ' if($add_space && $str =~ /\S$/);
         $str .= $ellipsis;
     } elsif($force_ellipsis) {
         $str .= ' ' if($str =~ /\S$/);
