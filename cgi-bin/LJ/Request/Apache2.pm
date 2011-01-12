@@ -389,6 +389,10 @@ sub LJ::Request::err_headers_out {
     $class->r()->err_headers_out (@_)
 }
 
+sub LJ::Request::allowed {
+    my $class = shift;
+    return $class->r()->allowed(@_);
+}
 
 
 ## Returns Array (Key, Value, Key, Value) which can be converted to HASH.

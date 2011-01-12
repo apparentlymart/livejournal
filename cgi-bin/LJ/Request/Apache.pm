@@ -347,7 +347,10 @@ sub LJ::Request::err_headers_out {
     $class->apr()->err_headers_out (@_)
 }
 
-
+sub LJ::Request::allowed {
+    my $class = shift;
+    return $class->r()->allowed(@_);
+}
 
 ## Returns Array (Key, Value, Key, Value) which can be converted to HASH.
 ## But there can be some params with the same name!
