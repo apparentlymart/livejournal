@@ -876,8 +876,15 @@ sub trans
             return LJ::Request::DECLINED
 
         } elsif ($func eq "journal") {
-
-            unless ($uri =~ m!^/(\w{1,15})(/.*)?$!) {
+            
+# Temporary block. Just for one-time verification. LJSUP-7700
+            if ($uri eq '/yandex_58d720848324d318.txt') {
+                LJ::Request->handler("perl-script");
+                LJ::Request->set_handlers(PerlHandler => sub{ return LJ::Request::OK; });
+                return LJ::Request::OK;
+            } 
+# end of temporary block            
+            elsif ($uri !~ m!^/(\w{1,15})(/.*)?$!) {
                 return LJ::Request::DECLINED if $uri eq "/favicon.ico";
                 my $redir = LJ::run_hook("journal_subdomain_redirect_url",
                                          $host, $uri);
