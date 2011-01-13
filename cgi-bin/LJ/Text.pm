@@ -232,7 +232,7 @@ sub truncate_to_word_with_ellipsis {
         unless $bytes || $chars;
         
     if($strip_html) {
-        $force_ellipsis = ($str =~ /<img/i) ? 1 : 0;
+        $force_ellipsis = ($str =~ /<(img|embed|object)/i) ? 1 : 0;
         $str = LJ::strip_html($str, { use_space => 1 });
     }
 
