@@ -1348,12 +1348,14 @@ sub res_includes {
 
     my $default_copyright = $remote ? ($remote->prop("default_copyright") || 'P') : 'P';
 
+    my $ljentry = LJ::Request->notes('ljentry');
     my %site = (
                 imgprefix => "$imgprefix",
                 siteroot => "$siteroot",
                 statprefix => "$statprefix",
                 currentJournalBase => "$journal_base",
                 currentJournal => "$journal",
+                currentEntry => ($ljentry ? $ljentry->url : ''),
                 has_remote => $hasremote,
                 remote_can_track_threads => $remote && $remote->get_cap('track_thread'),
                 remote_is_suspended => $remote_is_suspended,
