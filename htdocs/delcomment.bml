@@ -1,205 +1,289 @@
 <?_info
 nocache=>1
 _info?><?_code
-{
+#line 4
     use strict;
-    use vars qw(%GET %POST);
-    use vars qw($body);
+    use warnings;
+
+    use LJ::Auth;
 
     # because this BML may be called as __rpc_delcomment too
     BML::set_language_scope('/delcomment.bml');
 
-    my $jsmode = $GET{mode} eq "js";
-    $body = "";
+    my $mode = LJ::Request->get_param('mode') || 'html';
+    $mode = 'html' unless $mode =~ /^(?:html|js|jsonp)$/;
+
+    # helper subroutines
+
+    my $site_scheme_wrap = sub {
+        my ($body) = @_;
+
+        LJ::set_active_crumb('delcomment');
+
+        return BML::render_page({
+            'title' => LJ::Lang::ml('/delcomment.bml.title'),
+            'body' => $body,
+        });
+    };
+
+    my $jsonp_wrap = sub {
+        my ($struct) = @_;
+        my $struct_out = LJ::JSON->to_json($struct);
+
+        my $callback = LJ::Request->get_param('callback') || 'JSONP';
+
+        return "$callback($struct_out);";
+    };
 
     my $error = sub {
-        if ($jsmode) {
-            BML::finish();
-            return "alert('" . LJ::ejs($_[0]) . "'); 0;";
+        my ($why) = @_;
+
+        if ( $mode eq 'html' ) {
+            my $ml_error = LJ::Lang::ml('Error');
+
+            return $site_scheme_wrap->( qq{<h1>$ml_error</h1><p>$why</p>} );
+        } elsif ( $mode eq 'js' ) {
+            return "alert('" . LJ::ejs($why) . "'); 0;";
+        } elsif ( $mode eq 'jsonp' ) {
+            return $jsonp_wrap->({
+                'success'   => 0,
+                'error'     => $why,
+            });
         }
-        $body = "<?h1 $ML{'Error'} h1?><?p $_[0] p?>";
-        return;
-    };
-    my $bad_input = sub {
-        return $error->("Bad input: $_[0]") if $jsmode;
-        $body = LJ::bad_input($_[0]);
-        return;
     };
 
-    LJ::set_active_crumb('delcomment');
+    my $bad_input = sub {
+        my ($why) = @_;
+
+        if ( $mode eq 'html' ) {
+            return $site_scheme_wrap( LJ::bad_input($why) );
+        } else {
+            return $error->("Bad input: $why");
+        }
+    };
+
+    # basic initialization: who is working with us, and which comment
+    # they are working with
+    my $dtalkid             = LJ::Request->get_param('id');
+    my $journal_username    = LJ::Request->get_param('journal');
+    return $error->('Missing parameters.')
+        unless $dtalkid and $journal_username ne '';
+
+    my $journal = LJ::load_user( $journal_username );
+    return $bad_input->( LJ::Lang::ml('error.nojournal') )
+        unless $journal;
+
+    my $comment = LJ::Comment->new( $journal, 'dtalkid' => $dtalkid );
+    return $bad_input->( LJ::Lang::ml('/delcomment.bml.error.nocomment') )
+        unless $comment and $comment->valid;
+
+    my $poster = $comment->poster;
+    my $entry  = $comment->entry;
 
     my $remote = LJ::get_remote();
-    return $error->(LJ::error_noremote()) unless $remote;
+    return LJ::needlogin_redirect()
+        unless $remote;
 
-    return $error->("Missing parameters.") unless $GET{'journal'} ne "" && $GET{'id'};
+    # what are we supposed to do? we can show form, or we can delete
+    # the comment, depending on the form parameters
+    my $method = 'form';
 
-    # $u is user object of journal that owns the talkpost
-    my $u = LJ::load_user($GET{'journal'});
-    return $bad_input->($ML{'error.nojournal'})
-        unless $u;
+    if ( LJ::Request->did_post && LJ::Request->post_param('confirm') ) {
+        return $error->( LJ::Lang::ml('error.invalidform') )
+            unless LJ::check_form_auth();
 
-    # if we're on a user vhost, our remote was authed using that vhost,
-    # so let's let them only modify the journal that their session
-    # was authed against.  if they're on www., then their javascript is
-    # off/old, and they get a confirmation page, and we're using their
-    # mastersesion cookie anyway.
-    my $domain_owner = LJ::Session->url_owner;
-    if ($LJ::ONLY_USER_VHOSTS && $domain_owner) {
-        return $bad_input->("URL doesn't match journal owner)")
-            unless $domain_owner eq $u->{user};
+        $method = 'delete';
+    } elsif ( $mode eq 'jsonp' && LJ::Request->get_param('confirm') ) {
+        my %vars = (
+            'auth_token' => LJ::Request->get_param('auth_token'),
+            'journal'    => $journal->username,
+            'jitemid'    => $entry->jitemid,
+        );
+
+        return $error->( LJ::Lang::ml('error.invalidform') )
+            unless LJ::Auth->check_ajax_auth_token(
+                $remote, '/delcomment.bml', %vars
+            );
+
+        $method = 'delete';
     }
 
-    # can't delete if you're suspended
-    return $bad_input->($ML{'.error.suspended'})
-        if $remote->{statusvis} eq 'S';
+    # additional error checking: comment already deleted, something is
+    # suspended or read-only, they are trying to delete something
+    # they cannot, etc.
 
-    return $error->($LJ::MSG_READONLY_USER) if LJ::get_cap($u, "readonly");
+    return $bad_input->( LJ::Lang::ml('/delcomment.bml.error.suspended') )
+        if $remote->is_suspended;
 
-    my $dbcr = LJ::get_cluster_def_reader($u);
-    return $error->($ML{'error.nodb'})
-        unless $dbcr;
+    return $error->( $LJ::MSG_READONLY_USER )
+        if LJ::get_cap( $journal, "readonly" );
 
-    # $tp is a hashref of info about this individual talkpost row
-    my $tpid = int($GET{'id'} / 256);
-    my $tp = $dbcr->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, " .
-                                      "nodeid AS 'itemid', parenttalkid, journalid, posterid " .
-                                      "FROM talk2 ".
-                                      "WHERE journalid=? AND jtalkid=?",
-                                      undef, $u->{'userid'}, $tpid);
+    return $bad_input->( LJ::Lang::ml('/delcomment.bml.error.invalidtype') )
+        unless $comment->nodetype eq 'L';
 
-    return $bad_input->($ML{'.error.nocomment'})
-        unless $tp;
+    return $bad_input->( LJ::Lang::ml('/delcomment.bml.error.alreadydeleted') )
+        if $comment->is_deleted;
 
-    return $bad_input->($ML{'.error.invalidtype'})
-        unless $tp->{'nodetype'} eq 'L';
+    unless ( $comment->user_can_delete($remote) ) {
+        my $ml_var = $journal->is_community ? '.error.cantdelete.comm'
+                                            : '.error.cantdelete';
 
-    return $bad_input->($ML{'.error.alreadydeleted'})
-        if $tp->{'state'} eq "D";
-
-    # get username of poster
-    $tp->{'userpost'} = LJ::get_username($tp->{'posterid'});
-
-    # userid of user who posted journal entry
-    my $jposterid = $dbcr->selectrow_array("SELECT posterid FROM log2 WHERE " .
-                                           "journalid=? AND jitemid=?",
-                                           undef, $u->{'userid'}, $tp->{'itemid'});
-    my $jposter = LJ::load_userid($jposterid);
-
-    # can $remote delete this comment?
-    unless (LJ::Talk::can_delete($remote, $u, $jposter, $tp->{'userpost'})) {
-        my $err = $u->{'journaltype'} eq 'C' ? $ML{'.error.cantdelete.comm'} : $ML{'.error.cantdelete'};
-        return $error->($err);
+        return $error->( LJ::Lang::ml( '/delcomment.bml' . $ml_var ) );
     }
 
-    my $can_manage = $remote->can_manage($u);
+    # now, let's find out what remote can actually do with the comment
+    my $can_manage = $remote->can_manage($journal);
+    my %can = (
+        'manage_journal' => $can_manage,
 
-    # can ban if can manage and the comment is by someone else and not anon
-    my $can_ban = $can_manage && $tp->{'posterid'}
-                  && $remote && $remote->{'userid'} != $tp->{'posterid'};
-    my $can_delthread = $can_manage || $jposterid == $remote->{userid};
-    if ($can_delthread) {
-        # get all comment in thread, including top
-        my $ids = LJ::Talk::get_comments_in_thread($u, $tp->{'itemid'}, $tpid, undef, undef);
-        $can_delthread = 0 unless scalar @$ids > 1; # no thread => no checkbox
+        # they cannot delete the thread if there is no thread
+        'delete_thread'  => $comment->has_children,
+
+        # they can ban the comment author if they are the journal owner
+        # and there is an author; also, they will not be able to ban
+        # themselves
+        'ban'            => $can_manage and $poster and ( $remote != $poster ),
+
+        # they can mark as spam unless the comment is their own;
+        # they don't need to be the community maintainer to do that
+        'mark_spam'      => ( $remote != $poster ),
+
+        # they can delete all comments posted by the same author
+        # if they are the entry author
+        'delete_author'  => ( $remote == $entry->poster ),
+    );
+
+    # so now that we have prepared everything, let's actually
+    # do something
+
+    if ( $method eq 'form' ) {
+        my $template = LJ::HTML::Template->new(
+            { 'use_expr' => 1 }, # force HTML::Template::Pro with Expr support
+            'filename' => "$ENV{'LJHOME'}/templates/Comments/Delete.tmpl",
+        );
+
+        $template->param(
+            'form_action' => "$LJ::SITEROOT/delcomment.bml?" .
+                             'journal=' . LJ::eurl($journal_username) . '&' .
+                             'id=' . int($dtalkid),
+            'form_auth'   => LJ::form_auth(),
+        );
+
+        if ( $can{'ban'} ) {
+            $template->param(
+                'ml_confirm_ban' => LJ::Lang::ml(
+                    '/delcomment.bml.confirm.banuser',
+                    { 'user' => $poster->ljuser_display }
+                ),
+            );
+        }
+
+        if ( $can{'delete_author'} ) {
+            my $ml_var = ( $poster == $remote ) ? '.confirm.delauthor.my'
+                                                : '.confirm.delauthor';
+
+            $template->param(
+                'ml_confirm_delauthor' => LJ::Lang::ml(
+                    '/delcomment.bml' . $ml_var,
+                    { 'user' => $poster->ljuser_display }
+                ),
+            );
+        }
+
+        if ( $can_manage ) {
+            my $link_title = LJ::Lang::ml('/manage/comments/index.bml.title');
+            my $link_addr = "$LJ::SITEROOT/manage/comments/?" .
+                            'authas=' . $remote->username;
+
+            $template->param(
+                'ml_changeoptions' => LJ::Lang::ml(
+                    '/delcomment.bml.changeoptions',
+                    { 'link' => qq{<a href="$link_addr">$link_title</a>} }
+                ),
+            );
+        }
+
+        $template->param( "can_$_" => $can{$_} )
+            foreach keys %can;
+
+        return $site_scheme_wrap->( $template->output );
     }
 
-    # can mark as spam if they're not the comment poster
-    my $can_spam = $remote && $remote->id != $tp->{'posterid'};
+    if ( $method eq 'delete' ) {
+        my %actions;
 
-    my $can_author = $tp->{'posterid'} && $remote->id == $jposterid; # all comments except anonymous on my journal entries
-
-    ### perform actions
-    if (LJ::did_post() && $POST{'confirm'}) {
-        return $error->($ML{'error.invalidform'}) unless LJ::check_form_auth();
-
-        # mark this as spam?
-        LJ::Talk::mark_comment_as_spam($u, $tp->{talkid})
-            if $POST{spam} && $can_spam;
-
-        # delete entire thread? or just the one comment?
-        if ($POST{delthread} && $can_delthread) {
-            # delete entire thread ...
-            LJ::Talk::delete_thread($u, $tp->{'itemid'}, $tpid);
-        } 
-        if ($POST{delauthor} && $can_author) { # after thread, if both
-            # delete all comments of one author...
-            LJ::Talk::delete_author($u, $tp->{'itemid'}, $tp->{'posterid'});
-        }
-        unless ($POST{delthread} && $can_delthread || $POST{delauthor} && $can_author) {
-            # delete single comment...
-            LJ::Talk::delete_comment($u, $tp->{'itemid'}, $tpid, $tp->{'state'});
+        # mark as spam before this comment gets deleted
+        if ( $can{'mark_spam'} and LJ::Request->post_param('spam') ) {
+            LJ::Talk::mark_comment_as_spam( $journal, $comment->jtalkid );
+            $actions{'marked_spam'} = 1;
         }
 
-        # ban the user, if selected
-        my $msg;
-        if ($POST{'ban'} && $can_ban) {
-            my $ban_u = LJ::load_userid($tp->{'posterid'});
-            LJ::User::ban_user($u, $ban_u) if $ban_u;
-
-            $msg = BML::ml('.success.andban', { 'user' => LJ::ljuser($tp->{'userpost'}) });
+        # then, delete the thread if requested
+        if ( $can{'delete_thread'} and LJ::Request->post_param('delthread') )
+        {
+            LJ::Talk::delete_thread( $journal,
+                                     $entry->jitemid,
+                                     $comment->jtalkid );
+            $actions{'thread_deleted'} = 1;
         }
-        $msg ||= $ML{'.success.noban'};
-        $msg .= "<?p $ML{'.success.spam'} p?>" if $POST{spam};
 
-        if ($jsmode) {
-            BML::finish();
+        # then, delete all the comments by the author if requested
+        if ( $can{'delete_author'} and LJ::Request->post_param('delauthor') )
+        {
+            LJ::Talk::delete_author( $journal,
+                                     $entry->jitemid,
+                                     $poster->userid );
+
+            $actions{'author_deleted'} = 1;
+        }
+
+        # now, if we haven't deleted the comment in question as a part
+        # of the thread or along with the other comments by the same
+        # author, let's actually delete it
+        unless ( $actions{'thread_deleted'} || $actions{'author_deleted'} ) {
+            LJ::Talk::delete_comment( $journal,
+                                      $entry->jitemid,
+                                      $comment->jtalkid,
+                                      $comment->state );
+        }
+
+        # now, ban the user if requested
+        if ( $can{'ban'} and LJ::Request->post_param('ban') ) {
+            $journal->ban_user($poster);
+            $actions{'banned'} = 1;
+        }
+
+        # finally, let's return something to the caller
+        if ( $mode eq 'html' ) {
+            my @messages;
+
+            if ( $actions{'banned'} ) {
+                push @messages, LJ::Lang::ml(
+                    '/delcomment.bml.success.andban',
+                    { 'user' => $poster->ljuser_display }
+                );
+            } else {
+                push @messages, LJ::Lang::ml('/delcomment.bml.success.noban');
+            }
+
+            if ( $actions{'marked_spam'} ) {
+                push @messages, LJ::Lang::ml('/delcomment.bml.success.spam');
+            }
+
+            my $ml_header = LJ::Lang::ml('/delcomment.bml.success.head');
+
+            my $messages = join( '', map { "<p>$_</p>" } @messages );
+
+            my $body = qq{
+                <h1>$ml_header</h1>
+                $messages
+            };
+
+            return $site_scheme_wrap->($body);
+        } elsif ( $mode eq 'js' ) {
             return "1;";
-        } else {
-            $body = "<?h1 $ML{'.success.head'} h1?><?p $msg p?>";
-            return;
+        } elsif ( $mode eq 'jsonp' ) {
+            return $jsonp_wrap->({ 'success' => 1 });
         }
     }
-
-    ### show confirmation form
-
-#    $body .= "<?h1 $ML{'.confirm.head'} h1?>";
-#    $body .= "<?p $ML{'.confirm.body'} p?>";
-    $body .= "<form method='post' action='delcomment.bml?";
-    $body .= "journal=$u->{'user'}&id=$GET{'id'}'>\n";
-    $body .= LJ::form_auth();
-    $body .= "<?standout ";
-
-    $body .= "<div align='center' style='margin: 8px'>" . LJ::html_submit('confirm', $ML{'.confirm.submit'}) . "</div>\n";
-
-    if ($can_ban) {
-        $body .= "<div>" . LJ::html_check({ 'type' => 'check', 'name' => 'ban', 'id' => 'ban' });
-        $body .= "<label for='ban'>";
-        $body .= BML::ml('.confirm.banuser', { 'user' => LJ::ljuser($tp->{'userpost'}) });
-        $body .= "</label></div>";
-    }
-
-    if ($tp->{'posterid'} != $remote->{'userid'}) { # Despite the idea of natural selection, don't let users report their own comments as spam
-        $body .= "<div>" . LJ::html_check({name => 'spam', id => 'spam'});
-        $body .= "<label for='spam'>$ML{'.confirm.spam'}</label></div>";
-    }
-
-    if ($can_delthread) {
-        $body .= "<div>" . LJ::html_check({name => 'delthread', id => 'delthread'});
-        $body .= "<label for='delthread'>$ML{'.confirm.delthread'}</label></div>";
-    }
-
-    if ($can_author) {
-        $body .= "<div>" . LJ::html_check({name => 'delauthor', id => 'delauthor'});
-        $body .= "<label for='delauthor'>";
-        $body .= $remote && $remote->id == $tp->{'posterid'} ? $ML{'.confirm.delauthor.my'} : BML::ml('.confirm.delauthor', { user => LJ::ljuser($tp->{'userpost'}) });
-        $body .= "</label></div>";
-    }
-
-    $body .= " standout?>";
-
-    if ($can_manage) {
-        my $msg = BML::ml('.changeoptions', { 'link' =>
-            "<a href='/manage/comments/?authas=$u->{'user'}'>$ML{'/manage/comments/index.bml.title'}</a>" });
-        $body .= "<?p $msg p?>";
-    }
-
-    $body .= "</form>\n";
-    return;
-}
-_code?><?page
-title=><?_ml .title _ml?>
-body=><?_code return $body; _code?>
-page?><?_c <LJDEP>
-link: htdocs/manage/comments/index.bml
-post: htdocs/delcomment.bml
-</LJDEP> _c?>
+_code?>
