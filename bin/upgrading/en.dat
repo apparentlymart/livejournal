@@ -4554,6 +4554,19 @@ tos.haveread=I have read and agree to the Terms of Service.
 
 tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
 
+twitter.disconnect_letter.subject=You are disconnected from twitter account
+
+twitter.disconnect_letter.body<<
+Dear [[user]],
+
+In order to ensure the safety and security of all of our users, we disabled your Twitter Connect accounts after receiving error report in connection with your use of this feature. If we disconnected in error, please feel free to reconnect your account. 
+
+We apologize for any inconvenience this may have caused and thank you for using LiveJournal. 
+
+Truly, 
+LiveJournal Team 
+.
+
 Username=Username
 
 userpic.inactive=Inactive
