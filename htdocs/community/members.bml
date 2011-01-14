@@ -70,6 +70,15 @@ body<=
     my %attrshort_r = ( map { $attrshort{$_} => $_ } keys %attrshort ); # reversed
 
     # saving a form submission
+    if ($POST{'select_as_sm'}) {
+        my $new_sm = $POST{'uid_to_sm'};
+        my $new_sm_u = LJ::load_userid($new_sm);
+        ## Is user exist, active and maintainer?
+        if ($new_sm_u && $new_sm_u->is_visible && $new_sm_u->can_manage($c)) {
+            LJ::clear_rel($c->{userid}, $remote->{userid}, 'S');
+            LJ::set_rel($c->{userid}, $new_sm_u->{userid}, 'S');
+        }
+    }
     if ($POST{'action:update'}) {
         # validate form auth
         return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>")
@@ -589,6 +598,31 @@ $LJ::SITEROOT
     $ret .= "<form method='post' action='members.bml?authas=$cname'>";
     $ret .= LJ::form_auth();
 
+    ## SuperMaintainer
+    if ($remote->can_super_manage($c)) {
+        $ret .= BML::ml('.you.supermaintainer', { comm => LJ::ljuser($c->user) });
+        my $ids = LJ::load_rel_user($c->userid, 'A');
+        
+        my @users = map { 
+                            my $u = LJ::load_userid($_);
+                            {
+                                text => $u->user,
+                                value => $_,
+                            }
+                        } @$ids;
+
+        $ret .= LJ::html_select({
+                    name => "uid_to_sm", style => "",
+                    selected => 0,
+                    },
+                    { text => '',
+                    value => '',},
+                    @users
+                );
+
+        $ret .= LJ::html_submit('select_as_sm', BML::ml('.set.user_to_supermaintainer')) . "<br/>";
+    }
+
     # jump to user
     if ($items{'pages'} > 1) {
         $ret .= "<div style='margin-left: 30px;'>$ML{'.jump'}: ";
@@ -608,6 +642,17 @@ $LJ::SITEROOT
     # rows for existing users
     my $rc = 0;
     my @wstrs;
+    my %disabled = ();
+    my $elect_poll_id = $c->prop('election_poll_id');
+    my $elect_poll = undef;
+    if ($elect_poll_id) {
+        $elect_poll = LJ::Poll->new($elect_poll_id);
+    }
+    if (not can_super_manage $remote ($c) 
+        or ($elect_poll && !$elect_poll->is_closed)
+    ){
+        %disabled = ( disabled => 'disabled' );
+    }
     foreach(@users) {
         my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
         $ret .= "<tr class='$rstyle'><td>" . LJ::ljuser($_->{'name'}) . "</td>";
@@ -615,7 +660,7 @@ $LJ::SITEROOT
         foreach my $key (@attribs) {
             $ret .= "<td style='text-align: center;'>";
             $ret .= LJ::html_check({ 'name' => "edit_$_->{'userid'}_$key",
-                                     'selected' => $_->{$key} });
+                                     'selected' => $_->{$key}, $key =~ /moderate|admin/ ? %disabled : () });
             $wstr .= $attrshort_r{$key} if $_->{$key};
             $ret .= "</td>";
         }

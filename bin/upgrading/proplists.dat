@@ -1445,7 +1445,7 @@ pollproplist2.createdate:
   des: The voter must have created their account by the date specified (Pacific time) in order to vote.  Must be in format YYYY-MM-DD, otherwise there will be no restriction.
 
 pollproplist2.supermaintainer:
-  des: Is set to 1, only maintainers can see, vote and view results for this poll.
+  des: If set to !0, only maintainers can see, vote and view results for this poll. Has value as UserID - SuperMaintainer.
 
 logproplist.copyright:
   datatype: char

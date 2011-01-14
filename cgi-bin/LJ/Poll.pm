@@ -739,7 +739,112 @@ sub is_clustered {
 sub is_closed {
     my $self = shift;
     $self->_load;
-    return $self->{status} eq 'X' ? 1 : 0;
+
+    return 1 if $self->{status} eq 'X';
+
+    ## Is this poll is an election poll?
+    my $is_super = $self->prop('supermaintainer');
+    return 0 unless $is_super;
+
+    my $comm = LJ::load_userid($is_super);
+    return 0 unless $comm;
+
+    ## Check for all maintainers have already voted
+    my $dbr = LJ::get_db_reader();
+    my $sth;
+    my @questions = $self->questions;
+
+    ## SuperMaintainer election poll have only one question
+    my $qid = $questions[0]->pollqid;
+    my @items = $questions[0]->items;
+
+    ## Drop unvisible, non-maintainers and not active users
+    @items = grep {
+        my $user = $_->{item};
+        $user =~ s/<lj user='(.*?)'>/$1/;
+        my $u = LJ::load_user($user);
+        ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90)) ? 1 : 0;
+    } @items;
+
+    ## Fetch poll results
+    if ($self->is_clustered) {
+        $sth = $self->journal->prepare("SELECT value, userid FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=?");
+        $sth->execute($self->pollid, $qid, $self->journalid);
+    } else {
+        $sth = $dbr->prepare("SELECT value, userid FROM pollresult WHERE pollid=? AND pollqid=?");
+        $sth->execute($self->pollid, $qid);
+    }
+
+    ## We are not calculate results from unvisible, non-maintainers and not active users
+    my %results = ();
+    my $cnt = 0;
+    while (my @res = $sth->fetchrow_array) {
+        my $uid = $res[1];
+        my $u = LJ::load_userid($uid);
+        next unless ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90));
+        $results{$res[0]}++;
+        $cnt++;
+    }
+
+    ## Not all maintainers have voted
+    return 0
+        if @items != $cnt;
+
+    my @cnts = sort { $b <=> $a } values %results;
+    my $max_votes_for = 0;
+    ## Max votes
+    my $max_votes = $cnts[0];
+    ## Check for duplicate of votes count
+    foreach my $it (keys %results) {
+        if (
+            $max_votes == $results{$it}     ## Found max votes count
+            && $max_votes_for               ## User have selected already
+            && $max_votes_for != $it        ## Ooops, it's another user
+        ) {
+            ## We have two equal votes count for diff users
+            $max_votes_for = undef;
+            last;
+        }
+        $max_votes_for = $it;
+    }
+
+    ## We found election winner. Set this user as supermaintainer and close election.
+    if ($max_votes_for && $items[$max_votes_for - 1]) {
+        my $winner = $items[$max_votes_for - 1]->{item};
+        $winner =~ s/<lj user='(.*?)'>/$1/;
+        $winner = LJ::load_user($winner);
+        if ($winner && $winner->can_manage($is_super) && $winner->is_visible) {
+            LJ::set_rel($is_super, $winner->{userid}, 'S');
+            $self->close_poll;
+
+            ## Poll is closed. Emailing to all maintainers about it.
+            my $subject = LJ::Lang::ml('Supermaintainer election is closed');
+            my $maintainers = LJ::load_rel_user($comm->userid, 'A');
+            foreach my $maint_id (@$maintainers) {
+                my $u = LJ::load_userid ($maint_id);
+                LJ::send_mail({ 'to'        => $u->email_raw,
+                                'from'      => $LJ::ACCOUNTS_EMAIL,
+                                'fromname'  => $LJ::SITENAMESHORT,
+                                'wrap'      => 1,
+                                'charset'   => $u->mailencoding || 'utf-8',
+                                'subject'   => $subject,
+                                'body'      => (LJ::Lang::ml('poll.election.end.email', {
+                                                        username        => LJ::ljuser($u),
+                                                        communityname   => LJ::ljuser($comm),
+                                                        winner          => LJ::ljuser($winner),
+                                                        faqlink         => '#',
+                                                        shortsite       => $LJ::SITENAMESHORT,
+                                                    })
+                                                ),
+                            });
+            }
+
+            return 1;
+        }
+    }
+
+    ## Can't set a supermaintainer
+    return 0;
 }
 
 # return true if remote is also the owner
@@ -912,7 +1017,7 @@ sub render {
     my $is_super = $self->prop ('supermaintainer');
     ## Only maintainers can view, vote and see results for election polls.
     return "<b>[" . LJ::Lang::ml('poll.error.not_enougth_rights') . "]</b>"
-        if $is_super && !$remote->can_manage($journalid);
+        if $is_super && $remote && !$remote->can_manage($is_super);
 
     # Default pagesize.
     $pagesize = 2000 unless $pagesize;
@@ -986,7 +1091,7 @@ sub render {
         $ret .= LJ::html_hidden('pollid', $pollid);
     }
 
-    if ($is_super) {
+    if ($is_super && !$self->is_closed) {
         $ret .= LJ::Lang::ml('poll.election.description', { enddate => LJ::TimeUtil->fancy_time_format(LJ::TimeUtil->mysqldate_to_time($self->prop('createdate')) + 1814400, 'day') });
     }
 
@@ -1008,7 +1113,7 @@ sub render {
     $ret .= "<br />\n" unless $opts{widget} || $is_super;
     $ret .= "<span style='font-family: monospace; font-weight: bold; font-size: 1.2em;'>" .
             LJ::Lang::ml('poll.isclosed') . "</span><br />\n"
-        if ($self->is_closed);
+        if ($self->is_closed && !$is_super);
 
     my $whoview = $self->whoview;
     if ($whoview eq "none") {
@@ -1040,6 +1145,31 @@ sub render {
         #$posted .= " ($ago; " . LJ::TimeUtil->mysqldate_to_time($self->entry->logtime_mysql, 0) . ")";
         #$posted .= " (" . localtime . " - '" . $self->entry->logtime_mysql . "')";
     }
+
+    if ($is_super && !$self->is_closed) {
+        my $sth;
+        ## Election poll has a only one question
+        my $q = $qs[0];
+        if ($self->is_clustered) {
+            $sth = $self->journal->prepare("SELECT value FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=? AND userid=?");
+            $sth->execute($self->pollid, $q->pollqid, $self->journalid, $remote->userid);
+        } else {
+            $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=? AND userid=?");
+            $sth->execute($self->pollid, $q->pollqid, $remote->userid);
+        }
+
+        if (my @row = $sth->fetchrow_array) {
+            my @items = $self->question($q->pollqid)->items;
+            my $user = $row[0] ? $items[$row[0] - 1] : undef;
+            if ($user) {
+                $user = $user->{item};
+                LJ::Poll->clean_poll(\$user);
+                $ret .= LJ::Lang::ml('poll.election.selected', { choice => $user });
+            }
+        }
+
+    }
+
     ## go through all questions, adding to buffer to return
     foreach my $q (@qs) {
         my $qid = $q->pollqid;
@@ -1316,7 +1446,7 @@ sub render {
     }
 
     ## calc amount of participants.
-    if ($mode eq "results" and not $opts{widget}){
+    if ($mode eq "results" and not $opts{widget} and !$is_super){
         my $sth = "";
         my $participants;
         if ($have_aggr_results) {
@@ -1331,8 +1461,21 @@ sub render {
         ($participants) = $sth->fetchrow_array if $sth;
         $ret .= LJ::Lang::ml('poll.participants', { 'total' => $participants });
     }
-    
-    $ret .= $results_table;
+
+    if ($is_super && $self->is_closed) {
+        $ret .= LJ::Lang::ml('poll.election.closed');
+        my $comm = LJ::load_userid($self->prop('supermaintainer'));
+        my $res = LJ::load_rel_user($comm->{userid}, 'S');
+        my $user = '';
+        if (@$res) {
+            $user = LJ::ljuser(LJ::load_userid($res->[0]));
+        } else {
+            $user = LJ::Lang::ml('poll.supermaintainer.not_selected');
+        }
+        $ret .= LJ::Lang::ml('poll.supermaintainer.is', { user => $user });
+    } else {
+        $ret .= $results_table;
+    }
 
     if ($do_form) {
         $ret .= LJ::html_submit(

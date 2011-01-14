@@ -5922,6 +5922,28 @@ sub reset_cache {
     return 1;
 }
 
+## Check for activity user at last N days
+## args: days - how many days to check
+## return:
+##      1 - user logs in the last 'days' days
+##      0 - user NOT logs in the last 'days' days
+sub check_activity {
+    my $u    = shift;
+    my $days = shift;
+
+    return 0 unless $days;
+
+    my $sth = $u->prepare ("SELECT logintime FROM loginlog WHERE userid=? ORDER BY logintime DESC");
+    $sth->execute ($u->userid);
+
+    if (my @row = $sth->fetchrow_array) {
+        my $logintime = $row[0];
+        return 1 if time - $logintime < $days * 86400;
+    }
+
+    return 0;
+}
+
 
 package LJ;
 

@@ -65,6 +65,8 @@
 
 .settings2=Settings
 
+.set.user_to_supermaintainer=Proceed...
+
 .success.added=added: [[list]]
 
 .success.deleted=removed: [[list]]
@@ -92,4 +94,6 @@
 .title=Community Members
 
 .update=Update settings
+
+.you.supermaintainer=<br/><br/>Currently, you are <b>"SuperMaintainer"</b> for this community [[comm]].<br/><br/>You can abdicate and appoint another maintainer for this role:
 

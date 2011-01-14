@@ -3380,11 +3380,47 @@ poll.dberror.items=Database error inserting items: [[errmsg]]
 
 poll.dberror.questions=Database error inserting questions: [[errmsg]]
 
+poll.election.closed=No Active election for this community now.
+
 poll.election.description=Election will be opened <b>untill all maintainers will make their choices</b><br/> but no longer than [[enddate]].<br/> If winner will not be found (in case of number of candidates will get similar<br /> number of votes) election may be extended up to another 3 weeks.
 
 poll.election.received.votes=([[cnt]] vote received)
 
-poll.election.subject=Choose your candidate:
+poll.election.start.email<<
+Dear [[username]],
+
+You are receiving this email because you are a maintainer of the community [[communityname]]. LiveJournal has recently implemented a new role of community management, known as the 'Owner' of the community. The Owner of a community will be the only person who will be able to perform tasks such as deleting maintainers or deleting the community itself. You can read more about the Owner role here:  [[faqlink]]
+
+Since [[communityname]] is an existing community with multiple maintainers, it is now up to you and the other maintainers of the community to select which of you will be granted the Owner status. A poll has been created for your community at this page [link to poll page]. You simply need to visit this page and cast your vote for which current maintainer you believe should be made Owner of the community. More information on how the election process works can be found at the page above.
+
+Regards,
+[[shortsite]] Team
+.
+
+poll.election.end.email<<
+Dear [[username]],
+
+You are receiving this email because you are a maintainer of the community [[communityname]]. 
+
+According to result of the Supermaintainer Election [[winner]] appointet to this role.
+
+You can read more about this role here:  [[faqlink]]
+
+Regards,
+[[shortsite]] Team
+.
+
+poll.election.subject=<b>Choose your candidate:</b>
+
+poll.election.post_subject=Election Post
+
+poll.election.post_body=Election Post for community [[comm]]
+
+poll.election.selected=<br/><br/>Your candidate: [[choice]].<br/>You can change your choice while election is open.
+
+poll.supermaintainer.not_selected=Not selected
+
+poll.supermaintainer.is=<br/><br/>Current supermaintainer:&nbsp;[[user]]
 
 poll.error.alreadyvoted|staleness=1
 poll.error.alreadyvoted=Sorry, you have already voted in this poll under the account [[user]].
