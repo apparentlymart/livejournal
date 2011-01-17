@@ -8867,7 +8867,7 @@ sub make_journal
         return "<h1>Error</h1>No such user <b>$user</b>";
     }
     LJ::set_active_journal($u);
-    LJ::Request->notes('ljentry' => $opts->{'ljentry'});
+    LJ::Request->notes('ljentry' => $opts->{'ljentry'}->url) if $opts->{'ljentry'};
 
     # S1 style hashref.  won't be loaded now necessarily,
     # only if via customview.
