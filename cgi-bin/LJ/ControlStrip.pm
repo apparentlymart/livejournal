@@ -22,6 +22,9 @@ sub render
 
     my $data_remote = {};
     my $data_journal = {
+        url => {
+            base => $journal->journal_base,
+        },
         page => "http://" . LJ::Request->header_in("Host") . LJ::Request->uri,
     };
     my $data_control_strip = {};
