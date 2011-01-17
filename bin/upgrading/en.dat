@@ -5791,9 +5791,13 @@ web.controlstrip.btn.logout=Log out
 
 web.controlstrip.btn.view=View
 
+web.controlstrip.btn.searchall=Search at LiveJournal
+
+web.controlstrip.links.viewownstyle=View in own style
+
 web.controlstrip.links.addfeed=Add it to your Friends Page
 
-web.controlstrip.links.addfriend=Add them as a friend
+web.controlstrip.links.addfriend=Add Friend
 
 web.controlstrip.links.changecommsettings=Change Settings
 
@@ -5811,13 +5815,49 @@ web.controlstrip.links.flag=Flag Journal
 
 web.controlstrip.links.home=Home
 
+web.controlstrip.links.filter=Filter
+
+web.controlstrip.links.friendsoffriends=Friends of Friends
+
+web.controlstrip.links.managetags=Manage Tags
+
+web.controlstrip.links.community.directory=Community Directory
+
+web.controlstrip.links.community.addcatalogue=Add to catalogue
+
+web.controlstrip.links.messagefriend=Send message
+
+web.controlstrip.links.customgroups=Custom groups
+
+web.controlstrip.links.vgift=Send vgift
+
+web.controlstrip.links.calendar=Calendar
+
+web.controlstrip.view.calendar=Friends page calendar
+
+web.controlstrip.links.viewaccount=Account
+
+web.controlstrip.links.viewhelp=FAQ
+
+web.controlstrip.view.calendar-s=S
+
+web.controlstrip.view.calendar-m=M
+
+web.controlstrip.view.calendar-t=T
+
+web.controlstrip.view.calendar-w=W
+
+web.controlstrip.view.calendar-f=F
+
+web.controlstrip.links.like=Like?
+
 web.controlstrip.links.invitefriends=Invite Friends
 
-web.controlstrip.links.joincomm=Join this community
+web.controlstrip.links.joincomm=Join Community
 
 web.controlstrip.links.learnmore=Learn more
 
-web.controlstrip.links.leavecomm=Leave this community
+web.controlstrip.links.leavecomm=Leave Community
 
 web.controlstrip.links.login|staleness=1
 web.controlstrip.links.login=Log in
@@ -5845,7 +5885,7 @@ web.controlstrip.links.postcomm=Post to this community
 web.controlstrip.links.random|staleness=1
 web.controlstrip.links.random=Random Journal
 
-web.controlstrip.links.recentcomments=View Recent Comments
+web.controlstrip.links.recentcomments=Recent Comments
 
 web.controlstrip.links.removecomm=Stop watching this community
 
