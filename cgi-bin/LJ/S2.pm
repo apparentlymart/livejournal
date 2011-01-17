@@ -4421,5 +4421,10 @@ sub string__css_keyword_list
     return join(' ', @out);
 }
 
+sub get_effective_lang
+{
+    return LJ::Lang::get_effective_lang();
+}
+
 
 1;

@@ -74,7 +74,6 @@ class string
 
     function builtin css_url_value : string
     "If the string contains a valid HTTP or HTTPS URL it is returned. Otherwise, an empty string is returned.";
-
 }
 
 class Color
@@ -1966,6 +1965,9 @@ function lang_viewname(string viewid) [notags] : string
     if ($viewid == "tags") { return "Tags"; }
     return "Unknown View";
 }
+
+function builtin get_effective_lang() : string
+"Returns remote's language";
 
 function lang_metadata_title(string which) [fixed] : string
 "Get a human-readable caption for a metadata key. Layers shouldn't override this, but should instead set the relevant string properties."
