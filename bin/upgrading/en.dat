@@ -3382,7 +3382,9 @@ poll.dberror.questions=Database error inserting questions: [[errmsg]]
 
 poll.election.closed=No Active election for this community now.
 
-poll.election.description=Election will be opened <b>untill all maintainers will make their choices</b><br/> but no longer than [[enddate]].<br/> If winner will not be found (in case of number of candidates will get similar<br /> number of votes) election may be extended up to another 3 weeks.
+poll.election.description=Election will be opened <b>untill all maintainers will make their choices</b><br/> but no longer than [[enddate]].
+
+poll.election.description.extend=If winner will not be found (in case of number of candidates will get similar number of votes) election may be extended up to another 3 weeks.
 
 poll.election.received.votes=([[cnt]] vote received)
 
@@ -3416,7 +3418,8 @@ poll.election.post_subject=Election Post
 
 poll.election.post_body=Election Post for community [[comm]]
 
-poll.election.selected=<br/><br/>Your candidate: [[choice]].<br/>You can change your choice while election is open.
+poll.election.selected=<b>Your candidate:</b> [[choice]].
+poll.election.selected.tip=You can change your choice while election is open.
 
 poll.supermaintainer.not_selected=Not selected
 

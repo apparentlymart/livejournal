@@ -146,11 +146,7 @@ __________________________________________*/
 	}
 * HTML .i-bubble-arrow,
 * HTML .i-bubble-arrow-border {
-	zoom: 1;
-	filter: chroma(color=pink);
-	border-top-color: pink;
-	border-bottom-color: pink;
-	border-left-color: pink;
+	display:none;
 	}
 
 
