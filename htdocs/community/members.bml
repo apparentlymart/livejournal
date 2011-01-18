@@ -595,7 +595,7 @@ $LJ::SITEROOT
     $ret .= BML::ml('.intro', { aopts1 => "href='$LJ::HELPURL{maintainership}'", aopts2 => "href='$LJ::HELPURL{add_to_comm}'" }) . "<br /><br />";
     $ret .= $ML{'.intro.invite'};
 
-    $ret .= "<form method='post' action='members.bml?authas=$cname'>";
+    $ret .= "<form method='post' action='members.bml?authas=$cname' onsubmit='return confirm(\"" . BML::ml('.abdicate.supermaintainer') . "\")'>";
     $ret .= LJ::form_auth();
 
     ## SuperMaintainer
