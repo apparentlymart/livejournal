@@ -648,9 +648,7 @@ $LJ::SITEROOT
     if ($elect_poll_id) {
         $elect_poll = LJ::Poll->new($elect_poll_id);
     }
-    if (not can_super_manage $remote ($c) 
-        or ($elect_poll && !$elect_poll->is_closed)
-    ){
+    if ($elect_poll && !$elect_poll->is_closed) {
         %disabled = ( disabled => 'disabled' );
     }
     foreach(@users) {
