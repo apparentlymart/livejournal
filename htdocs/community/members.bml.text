@@ -97,3 +97,5 @@
 
 .you.supermaintainer=<br/><br/>Currently, you are <b>"SuperMaintainer"</b> for this community [[comm]].<br/><br/>You can abdicate and appoint another maintainer for this role:
 
+.abdicate.supermaintainer=Do you really want to do it?
+
