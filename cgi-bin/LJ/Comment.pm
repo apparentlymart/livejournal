@@ -1049,13 +1049,13 @@ sub info {
 }
 
 sub indent {
-    my $str = shift;
-    return Encode::encode_utf8( LJ::Talk::Post::indent( Encode::decode_utf8($str), @_) );
+    my @args = map { Encode::decode_utf8($_) } @_;
+    return Encode::encode_utf8( LJ::Talk::Post::indent( @args ) );
 }
 
 sub wrap {
-    my $str = pop;
-    return Encode::encode_utf8( Text::Wrap::wrap( @_, Encode::decode_utf8($str) ) );
+    my @args = map { Encode::decode_utf8($_) } @_;
+    return Encode::encode_utf8( Text::Wrap::wrap( @args ) );
 }
 
 sub blockquote {
