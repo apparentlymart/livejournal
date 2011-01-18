@@ -35,7 +35,7 @@ body<=
     return BML::redirect("$LJ::SITEROOT/community/manage.bml") unless $cname;
 
     $ret .= "<form action='members.bml' method='GET'>\n";
-    $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
+    $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'S' });
     $ret .= "</form>\n\n";
 
     # get $c object

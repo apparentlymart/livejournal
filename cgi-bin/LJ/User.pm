@@ -5214,6 +5214,9 @@ sub can_manage {
     # people/syn/rename accounts can only be managed by the one account
     return undef if $u->{journaltype} =~ /^[PYR]$/;
 
+    # check for supermaintainer
+    return 1 if $remote->can_super_manage($u);
+
     # check for admin access
     return undef unless LJ::check_rel($u, $remote, 'A');
 

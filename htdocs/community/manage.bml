@@ -37,6 +37,11 @@ body<=
  my %mods; 
  if ($mods) { foreach (@$mods) { $mods{$_} = $show{$_} = 1; } }
 
+ # keep track of what communities remote supermaintainer
+ my $smods = LJ::load_rel_target($remote, 'S');
+ my %smods; 
+ if ($smods) { foreach (@$smods) { $admin{$_} = $smods{$_} = $show{$_} = 1; } }
+
  my %names = ();
  my %pending = ();
  if (%show) {
