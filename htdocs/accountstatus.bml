@@ -12,7 +12,11 @@ body<=
     return "<?needlogin?>" unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
+    my %type = ();
     my $u = LJ::get_authas_user($authas);
+    %type = ( type => 'S' ) if $u->is_community;
+    # Need to check supermaintainer rights for community
+    $u = LJ::get_authas_user($authas, \%type);
     return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
 
