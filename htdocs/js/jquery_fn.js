@@ -82,18 +82,20 @@ jQuery.fn.placeholder = (function()
 			return this;
 		} else {
 			return this.each(function() {
-				var $this = jQuery(this);
+				if (this.getAttribute("placeholder")) {
+					var $this = jQuery(this);
 
-				$this.focus(check_focus).blur(check_blur);
+					$this.focus(check_focus).blur(check_blur);
 
-				jQuery(this.form)
-					.submit(function() {
-						$this.hasClass("placeholder") && $this.removeClass("placeholder").val("");
-					});
+					jQuery(this.form)
+						.submit(function() {
+							$this.hasClass("placeholder") && $this.removeClass("placeholder").val("");
+						});
 
-				this.value === this.getAttribute("placeholder") || !this.value
-					? $this.val(this.getAttribute("placeholder")).addClass("placeholder")
-					: $this.removeClass("placeholder");
+					this.value === this.getAttribute("placeholder") || !this.value
+						? $this.val(this.getAttribute("placeholder")).addClass("placeholder")
+						: $this.removeClass("placeholder");
+				}
 			});
 		}
 	}
