@@ -1,0 +1,117 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+
+    use POSIX qw/strftime/;
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'elections') || $LJ::IS_DEV_SERVER;
+
+    my $ret = "";
+    $title = 'Supermaintainer elections';
+
+    $ret .= "<form method='POST'>\n";
+    $ret .= LJ::form_auth();
+
+    $ret .= "Find election: ";
+    my $comm_name = $POST{'comm_name'} ? $POST{'comm_name'} : '';
+    $ret .= "<input type='text' name='comm_name' value='$comm_name'>";
+
+    $ret .= "&nbsp;" . LJ::html_submit('search', 'Search') . "</p>";
+
+    $ret .= "</form>";
+
+    if (LJ::did_post()) {
+        push @errors, "Invalid form submission" unless LJ::check_form_auth();
+
+        {
+            my $comm = LJ::load_user($POST{'comm_name'});
+            unless ($comm) {
+                push @errors, $POST{'comm_name'}." user is not exist";
+                next;
+            }
+
+            my $poll_id = $comm->prop('election_poll_id');
+            unless ($poll_id) {
+                push @errors, "No election poll for ".LJ::ljuser($comm->user)." community";
+                next;
+            }
+
+            my $poll = LJ::Poll->new ($poll_id);
+
+            unless ($poll->is_closed) {
+                my $create = LJ::TimeUtil->mysqldate_to_time($poll->prop('createdate'));
+                my $delta = time - $create;
+                my $create_time = strftime "%B %e %Y", localtime ($create);
+                my $close_time = strftime "%B %e %Y", localtime (int(($delta / (21 * 86400)) + 1) * (21 * 86400) + $create);
+
+                my @qs = $poll->questions;
+                my @items = $qs[0]->items;
+
+                $ret .= "Active election:<br/>";
+                $ret .= "Election period: from $create_time to $close_time<br/><br/>";
+
+                my $maintainers = LJ::load_rel_user($comm->{userid}, 'A');
+                my $users = LJ::load_userids(@$maintainers);
+                my @alive_mainteiners;
+                foreach my $u (values %$users) {
+                    if ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90)) {
+                        push @alive_mainteiners, $u;
+                    }
+                }
+
+                $ret .= "Maintainers (participants of the election): " . @alive_mainteiners . "<br/>";
+
+                my $sth;
+                my $dbr = LJ::get_db_reader();
+                if ($poll->is_clustered) {
+                    $sth = $poll->journal->prepare("SELECT value, userid FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=?");
+                    $sth->execute($poll->pollid, 1, $poll->journalid);
+                } else {
+                    $sth = $dbr->prepare("SELECT value, userid FROM pollresult WHERE pollid=? AND pollqid=?");
+                    $sth->execute($poll->pollid, 1);
+                }
+
+                my %result = ();
+                my %result_users = ();
+                my $i = 0;
+                while (my @row = $sth->fetchrow_array) {
+                    $result{$row[0]}++;
+                    $result_users{$row[1]} = $row[0];
+                    $i++;
+                }
+
+                $ret .= "Maintainers (voted already): " . $i . "<br/>";
+
+                $ret .= "<br/>Current state of election: <br/>";
+                foreach my $u (values %$users) {
+                    my $vote_for = $items[$result_users{$u->userid} - 1]->{item};
+                    LJ::Poll->clean_poll(\$vote_for);
+                    $ret .= LJ::ljuser($u) . " - " . ( $result_users{$u->userid} ? " voted for " . $vote_for : " not voted yet ") . "<br/>";
+                }
+
+                $ret .= "";
+
+            }
+
+            next if @errors;
+        }
+    }
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
