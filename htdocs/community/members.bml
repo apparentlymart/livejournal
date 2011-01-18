@@ -661,6 +661,7 @@ $LJ::SITEROOT
             $ret .= "<td style='text-align: center;'>";
             $ret .= LJ::html_check({ 'name' => "edit_$_->{'userid'}_$key",
                                      'selected' => $_->{$key}, $key =~ /moderate|admin/ ? %disabled : () });
+            $ret .= LJ::html_hidden({ 'name' => "edit_$_->{'userid'}_$key", value => $_->{$key} ? 'on' : '' }) if %disabled;
             $wstr .= $attrshort_r{$key} if $_->{$key};
             $ret .= "</td>";
         }
@@ -679,7 +680,7 @@ $LJ::SITEROOT
                 if ($key eq 'member' || $key eq 'post') {
                     $ret .= LJ::html_check({ name => "add_${_}_$key", selected => 1, });
                 } else {
-                    $ret .= LJ::html_check({ name => "add_${_}_$key" });
+                    $ret .= LJ::html_check({ name => "add_${_}_$key", %disabled });
                 }
                 $ret .= "</td>";
             }
