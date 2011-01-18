@@ -717,8 +717,8 @@ sub post_comment {
 
 # returns 1 on success.  0 on fail (with $$errref set)
 sub edit_comment {
-    my ($entryu, $journalu, $comment, $parent, $item, $errref) = @_;
-
+    my ($entryu, $journalu, $comment, $parent, $item, $errref, $remote) = @_;
+    
     my $err = sub {
         $$errref = join(": ", @_);
         return 0;
@@ -726,8 +726,8 @@ sub edit_comment {
 
     my $comment_obj = LJ::Comment->new($journalu, dtalkid => $comment->{editid});
 
-    my $remote = LJ::get_remote();
-    return 0 unless $comment_obj->remote_can_edit($errref);
+    $remote ||= LJ::get_remote();
+    return 0 unless $comment_obj->user_can_edit($remote, $errref);
 
     my %props = (
         subjecticon => $comment->{subjecticon},

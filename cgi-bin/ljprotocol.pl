@@ -151,7 +151,13 @@ my %HANDLERS = (
     setmessageread    => \&setmessageread,
     addcomment        => \&addcomment,
     checksession      => \&checksession,
-    getrecentcomments => \&getrecentcomments
+    getrecentcomments => \&getrecentcomments,
+    getcomments       => \&getcomments,
+    delcomments       => \&delcomments,
+    screencomments    => \&screencomments,
+    unscreencomments  => \&unscreencomments,
+    freezecomments    => \&unfreezecomments,
+    editcomment       => \&editcomment,
 );
 
 sub translate
@@ -324,6 +330,312 @@ sub addcomment
             comment => {
                 toplevel => ($comment->parenttalkid == 0 ? 1 : 0),
             }
+        }
+    };
+}
+
+sub getcomments {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+
+    my $itemid = int($req->{ditemid} / 256);
+    my $output = {};
+    my $journal = $req->{journal} ? LJ::load_user($req->{journal}) : LJ::load_userid($req->{journalid});
+    
+    my $jitem = LJ::Talk::get_journal_item($journal, $itemid);
+    my $up = LJ::load_userid( $jitem->{'posterid'} );
+
+    my $errtxt;
+    return {
+        status => 'OK',
+        error => $errtxt,
+    } unless LJ::Talk::check_viewable($flags->{'u'}, $jitem, undef, \$errtxt);
+    
+    my $itemshow = $req->{itemshow} + 0;
+    my $skip = $req->{skip} + 0;
+    
+    my $mobile_thread = 0;
+    if( $req->{expand_strategy} eq 'mobile_thread' ){
+        undef $req->{expand_strategy};
+        $mobile_thread = 1;
+        $itemshow = 100 if !$itemshow;
+    }
+    $itemshow = 100 if $itemshow > 100 || $itemshow < 0;
+    
+    my %extra;
+    my $opts = {
+        thread          => int($req->{thread} / 256),
+        page            => $req->{page},
+        view            => $req->{view},
+        expand_strategy => $req->{expand_strategy},
+        expand_level    => $req->{expand_level},
+        expand_child    => $req->{expand_child},
+        expand_all      => $mobile_thread,
+        init_comobj     => 0,
+        up              => $up,
+        out_error       => \$extra{error},
+        out_pages       => \$extra{pages},
+        out_page        => \$extra{page},
+        out_itemfirst   => \$extra{itemfirst},
+        out_itemlast    => \$extra{itemlast},
+        out_pagesize    => \$extra{pagesize},
+        out_items       => \$extra{items},
+    };
+    
+    my @com = LJ::Talk::load_comments($journal, $flags->{'u'}, "L", int($req->{ditemid} / 256), $opts);
+    my @comments;
+    my @parent = ( \{ level => -1, children => \@comments } );
+    
+    while (my $item = shift @com){        
+        $item->{indent} ||= 0;
+        shift( @parent ) while $item->{indent} <= ${$parent[0]}->{level};
+        
+        my $item_data = {
+            parentdtalkid   => $item->{parenttalkid}?($item->{parenttalkid} * 256 + $jitem->{anum}):0,
+            user            => $item->{userpost},
+            level           => $item->{indent},
+            userid          => $item->{posterid},
+            datepost_unix   => $item->{datepost_unix},
+            datepost        => $item->{datepost},
+            dtalkid         => $item->{talkid} * 256 + $jitem->{anum},
+            state           => $item->{state},
+            '_show'         => $item->{_show},
+            subject         => $item->{subject},
+            body            => $item->{body},
+            '_loaded'       => $item->{_loaded},
+
+        };
+
+        if ($item->{'_loaded'} && $req->{extra}) {
+            my $comment = LJ::Comment->new($journal, dtalkid => $item_data->{dtalkid});
+
+            my $userpic = $comment->userpic;
+            $item_data->{userpic} = $userpic && $userpic->url;
+            
+            $item_data->{props} = { map {$item->{props}->{$_} ? ($_ => $item->{props}->{$_}) : ()}
+                     qw(edit_time deleted_poster picture_keyword opt_preformatted) };
+            
+            $item_data->{props}->{'poster_ip'} = $item->{'props'}->{'poster_ip'}
+                if $item->{'props'}->{'poster_ip'} && ( $flags->{'u'}->{'user'} eq $up->{'user'} || LJ::can_manage($flags->{'u'}, $journal) );
+            
+            $item_data->{privileges} = {};
+            $item_data->{privileges}->{delete}   = $comment->user_can_delete($flags->{'u'});
+            $item_data->{privileges}->{edit}     = $comment->user_can_edit($flags->{'u'});
+            $item_data->{privileges}->{freeze}   = (!$comment->is_frozen && LJ::Talk::can_freeze($flags->{'u'}, $journal, $up, $item->{userpost}));
+            $item_data->{privileges}->{unfreeze} = ($comment->is_frozen && LJ::Talk::can_unfreeze($flags->{'u'}, $journal, $up, $item->{userpost}));
+            my $pu = $comment->poster;
+            unless ($pu && $pu->is_suspended){
+                $item_data->{privileges}->{screen}   = (!$comment->is_screened && LJ::Talk::can_screen($flags->{'u'}, $journal, $up, $item->{userpost}));
+                $item_data->{privileges}->{unscreen} = ($comment->is_screened && LJ::Talk::can_unscreen($flags->{'u'}, $journal, $up, $item->{userpost})); 
+            }
+        }
+        
+        if ( $req->{calculate_count} ){
+            $item_data->{thread_count} = 0;
+            $$_->{thread_count}++ for @parent;
+        }
+        
+        if( $req->{only_loaded} && !$item->{_loaded} ){
+            my $hc = \${$parent[0]}->{has_children};
+            $$hc = $$hc?$$hc+1:1;
+            next unless $req->{calculate_count};
+        }elsif( $req->{format} eq 'list' ){ # list or thread
+            push @comments, $item_data;
+        }else{
+            ${$parent[0]}->{children} = [] unless ${$parent[0]}->{children};
+            push @{${$parent[0]}->{children}}, $item_data;
+        }
+
+        my $children = $item->{children};
+        if($children && @$children){
+            $_->{indent} = $item->{indent} + 1 for @$children;
+            unshift @com, @$children;
+            unshift @parent, \$item_data;
+            undef $item->{children};
+        }
+    }
+    
+    if( $itemshow || $skip ){
+        @comments = splice(@comments, $skip, $itemshow);
+    }
+
+    return {
+        status => 'OK',
+        comments => \@comments,
+        %extra,
+        xc3 => {
+            u => $flags->{'u'}
+        }
+    };
+}
+
+sub delcomments {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    
+    my $comment = LJ::Comment->new( $req->{journalid} || $flags->{'u'} , dtalkid => $req->{dtalkid} );
+    return fail($err, 300) unless $comment->user_can_delete($flags->{'u'});
+    
+    my @to_delete;
+    
+    if( !$req->{recursive}){
+        push @to_delete, $comment;
+    }else{
+        my @comment_tree = $comment->entry->comment_list;
+        my @children = ($comment);
+        while(my $item = shift @children){
+            return fail($err, 300) unless $item->user_can_delete($flags->{'u'});
+            push @to_delete, $item;
+            push @children, grep { $_->{parenttalkid} == $item->{jtalkid} } @comment_tree;
+        }
+    }
+    $_->delete for @to_delete;
+    
+    return {
+        status => 'OK',
+        result => @to_delete + 0,
+        xc3 => {
+            u => $flags->{'u'}
+        }
+    };
+}
+
+sub screencomments {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    
+    my $journal = $req->{journalid}?LJ::load_userid($req->{journalid}):$flags->{'u'};
+    my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
+    my $up = $comment->entry->poster;
+    return fail($err, 300) unless LJ::Talk::can_screen($flags->{'u'}, $journal, $up, $comment->poster);
+    
+    my @to_screen;
+    
+    if( !$req->{recursive}){
+        push @to_screen, $comment;
+    }else{
+        my @comment_tree = $comment->entry->comment_list;
+        my @children = ($comment);
+        while(my $item = shift @children){
+            return fail($err, 300) unless LJ::Talk::can_screen($flags->{'u'}, $journal, $up, $item->poster);
+            push @to_screen, $item;
+            push @children, grep { $_->{parenttalkid} == $item->{jtalkid} } @comment_tree;
+        }
+    }
+    LJ::Talk::screen_comment($journal, $comment->entry->jitemid, $_->{jtalkid}) for @to_screen;
+    
+    return {
+        status => 'OK',
+        result => @to_screen + 0,
+        xc3 => {
+            u => $flags->{'u'}
+        }
+    };
+}
+
+sub unscreencomments {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    
+    my $journal = $req->{journalid}?LJ::load_userid($req->{journalid}):$flags->{'u'};
+    my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
+    my $up = $comment->entry->poster;
+    return fail($err, 300) unless LJ::Talk::can_unscreen($flags->{'u'}, $journal, $up, $comment->poster);
+    
+    my @to_screen;
+    
+    if( !$req->{recursive}){
+        push @to_screen, $comment;
+    }else{
+        my @comment_tree = $comment->entry->comment_list;
+        my @children = ($comment);
+        while(my $item = shift @children){
+            return fail($err, 300) unless LJ::Talk::can_unscreen($flags->{'u'}, $journal, $up, $item->poster);
+            push @to_screen, $item;
+            push @children, grep { $_->{parenttalkid} == $item->{jtalkid} } @comment_tree;
+        }
+    }
+    LJ::Talk::unscreen_comment($journal, $comment->entry->jitemid, $_->{jtalkid}) for @to_screen;
+    
+    return {
+        status => 'OK',
+        result => @to_screen + 0,
+        xc3 => {
+            u => $flags->{'u'}
+        }
+    };
+}
+
+sub freezecomments {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    
+    my $journal = $req->{journalid}?LJ::load_userid($req->{journalid}):$flags->{'u'};
+    my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
+    my $up = $comment->entry->poster;
+    return fail($err, 300) unless LJ::Talk::can_freeze($flags->{'u'}, $journal, $up, $comment->poster);
+      
+    LJ::Talk::freeze_thread($journal, $comment->entry->jitemid, $comment->{jtalkid});
+             
+    return {
+        status => 'OK',
+        result => 1,
+        xc3 => {
+            u => $flags->{'u'}
+        }
+    };
+}
+
+
+sub unfreezecomments {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    
+    my $journal = $req->{journalid}?LJ::load_userid($req->{journalid}):$flags->{'u'};
+    my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
+    my $up = $comment->entry->poster;
+    return fail($err, 300) unless LJ::Talk::can_unfreeze($flags->{'u'}, $journal, $up, $comment->poster);
+      
+    LJ::Talk::unfreeze_thread($journal, $comment->entry->jitemid, $comment->{jtalkid});
+             
+    return {
+        status => 'OK',
+        result => 1,
+        xc3 => {
+            u => $flags->{'u'}
+        }
+    };
+}
+
+sub editcomment {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+
+    my $remote = $flags->{'u'};
+    return fail($err, 300) if $remote && $remote->is_readonly;
+
+    my $journal = $req->{journalid}?LJ::load_userid($req->{journalid}):$remote;
+    return fail($err, 300) if $journal && $journal->is_readonly;
+
+    my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
+    my $entry = $comment->entry;
+    return fail($err, 300) if $entry && $entry->is_suspended;
+    my $up = $comment->entry->poster;
+    my $parent = $comment->parent;
+    return fail($err, 300) if $parent->{state} eq 'F';
+
+    my $new_comment = { map {$_ => $req->{$_}} qw( picture_keyword preformat subject body) };
+    $new_comment->{editid} = $req->{dtalkid};
+    
+    my $errref;
+    return fail($err, 300, $errref) 
+        unless LJ::Talk::Post::edit_comment(
+            $up, $journal, $new_comment, $parent, {itemid => $entry->jitemid}, \$errref, $remote);
+
+    return {
+        status => 'OK',
+        xc3 => {
+            u => $flags->{'u'}
         }
     };
 }
@@ -2335,15 +2647,6 @@ sub getevents
     # other cases, slave is pretty sure to have it.
     my $use_master = 0;
 
-    # the benefit of this mode over actually doing 'lastn/1' is
-    # the $use_master usage.
-    if ($req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1") {
-        $req->{'selecttype'} = "lastn";
-        $req->{'howmany'} = 1;
-        undef $req->{'itemid'};
-        $use_master = 1;  # see note above.
-    }
-
     # just synonym
     if ($req->{'itemshow'}){
         $req->{'selecttype'} = 'lastn' unless $req->{'selecttype'};
@@ -2401,12 +2704,18 @@ sub getevents
         $where .= "AND $rtime_what > $rtime_after ";
         $orderby = "ORDER BY $rtime_what";
     }
+    elsif ($req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1") 
+    {
+        $use_master = 1;  # see note above.
+        $limit = "LIMIT 1";
+        $orderby = "ORDER BY rlogtime";
+    } 
     elsif ($req->{'selecttype'} eq "one")
     {
         my $id = $req->{'itemid'} + 0;
         $where = "AND jitemid=$id";
     }
-    elsif ($req->{'selecttype'} eq "syncitems")
+    elsif ($req->{'selecttype'} eq "syncitems") 
     {
         return fail($err,506) if $LJ::DISABLED{'syncitems'};
         my $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
