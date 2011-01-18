@@ -17,7 +17,7 @@ body<=
     }
 
     $body .= "<form method='GET'>\n";
-    $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'}, 'type' => 'C' });
+    $body .= "<p>" . LJ::make_authas_select($remote, { 'authas' => $GET{'authas'}, 'type' => 'C' }) . "</p>";
     $body .= "</form>\n\n";
 
     my $authas = $GET{'authas'} || $remote->{'user'};
@@ -44,9 +44,7 @@ body<=
     $body .= "<?warningbar $warning  warningbar?><br />" if $warning;
     
     my $poll_id = $u->prop ('election_poll_id');
-    return $body . '<br/>Net polla' unless $poll_id;
-
-    $body .= "<hr width='30%'>";
+    return $body . '<p>Poll not found</p>' unless $poll_id;
 
     my $poll = LJ::Poll->new($poll_id);
     $body .= $poll->render;
@@ -57,7 +55,7 @@ _code?>
 title=><?_code return $title; _code?>
 head<=
 <?_code
-    LJ::need_res('stc/pay.css');
+    LJ::need_res('stc/elections.css');
     return $head;
 _code?>
 <=head

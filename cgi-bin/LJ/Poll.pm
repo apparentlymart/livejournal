@@ -950,6 +950,7 @@ sub preview {
     my $self = shift;
 
     my $ret = '';
+    my $ret_side = '';
 
     $ret .= "<form action='#'>\n";
     $ret .= "<b>" . LJ::Lang::ml('poll.pollnum', { 'num' => 'xxxx' }) . "</b>";
@@ -1043,6 +1044,7 @@ sub render {
 
     my $sth;
     my $ret = '';
+    my $ret_side = '';
 
     ### load all the questions
     my @qs = $self->questions;
@@ -1091,8 +1093,8 @@ sub render {
         $ret .= LJ::html_hidden('pollid', $pollid);
     }
 
-    if ($is_super && !$self->is_closed) {
-        $ret .= LJ::Lang::ml('poll.election.description', { enddate => LJ::TimeUtil->fancy_time_format(LJ::TimeUtil->mysqldate_to_time($self->prop('createdate')) + 1814400, 'day') });
+    if ($is_super) {
+        $ret = "<div class='poll-main'>";
     }
 
     $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> "
@@ -1164,10 +1166,20 @@ sub render {
             if ($user) {
                 $user = $user->{item};
                 LJ::Poll->clean_poll(\$user);
-                $ret .= LJ::Lang::ml('poll.election.selected', { choice => $user });
+                $ret .=  "<p>" . LJ::Lang::ml('poll.election.selected', { choice => $user }) . "</p>";
+                $ret_side .=  "<p class='b-bubble b-bubble-alert'>" . LJ::Lang::ml('poll.election.selected.tip') . "<i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i></p>";
             }
         }
 
+    }
+
+    if ($is_super && !$self->is_closed) {
+        use POSIX qw/strftime/;
+        my $create = LJ::TimeUtil->mysqldate_to_time($self->prop('createdate'));
+        my $delta = time - $create;
+        my $close_time = strftime "%B %e %Y", localtime (int(($delta / (21 * 86400)) + 1) * (21 * 86400) + $create);
+        $ret_side .= "<p class='b-bubble b-bubble-lite'>" . LJ::Lang::ml('poll.election.description', { enddate => $close_time }) . "<i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i></p>";
+        $ret_side .= "<p class='b-bubble b-bubble-alert'>" . LJ::Lang::ml('poll.election.description.extend') . "</p>";
     }
 
     ## go through all questions, adding to buffer to return
@@ -1183,7 +1195,7 @@ sub render {
                 $results_table .= "<p>$text</p><div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0pt 10px 40px;'>";
             }
         } else {
-            $results_table .= "<p>".LJ::Lang::ml('poll.election.subject')."</p><div id='LJ_Poll_${pollid}_$qid' style='margin: 10px 0pt 10px 40px;'>";
+            $results_table .= "<p>".LJ::Lang::ml('poll.election.subject')."</p><div class='i-bubble b-bubble-lite' id='LJ_Poll_${pollid}_$qid'><table><tr><th>Candidates</th><th class=\"count-recevied\">Votes</th></tr>";
         }
         $posted = '';
         
@@ -1404,13 +1416,18 @@ sub render {
 
                 LJ::Poll->clean_poll(\$item);
 
+                if ($is_super) { $results_table .= "<tr><td>"}
                 # displaying a radio or checkbox
                 if ($do_form) {
                     $results_table .= LJ::html_check({ 'type' => $q->type, 'name' => "pollq-$qid",
                                              'value' => $itid, 'id' => "pollq-$pollid-$qid-$itid",
                                              'selected' => ($preval{$qid} =~ /\b$itid\b/) });
                     my $received = ($is_super && $itvotes{$itid}) ? LJ::Lang::ml ("poll.election.received.votes", { cnt => $itvotes{$itid} }) : '';
-                    $results_table .= " <label for='pollq-$pollid-$qid-$itid'>$item $received</label><br class=\"i-potd-br\" />";
+                    if ($is_super) {
+                        $results_table .= "<label for='pollq-$pollid-$qid-$itid'>$item</label><br class=\"i-potd-br\" /></td><td class=\"count-recevied\">$received</td>";
+                    } else {
+                        $results_table .= " <label for='pollq-$pollid-$qid-$itid'>$item $received</label><br class=\"i-potd-br\" />";
+                    }
                     next;
                 }
                 
@@ -1421,6 +1438,7 @@ sub render {
                 if ($opts{widget}) {
                     $width = $width -250;
                 }
+                if ($is_super) { $results_table .= "</td></tr>"}
 
                 if ($do_table) {
                     $results_table .= "<tr valign='middle'><td align='right'>$item</td>";
@@ -1442,7 +1460,7 @@ sub render {
             }
 
         }
-        $results_table .= "</div>";
+        unless ($is_super) {$results_table .= "</div>";}
     }
 
     ## calc amount of participants.
@@ -1477,12 +1495,20 @@ sub render {
         $ret .= $results_table;
     }
 
+    if ($is_super) {
+        $ret .= "<tr><td colspan=\"2\">";
+    }
+
     if ($do_form) {
         $ret .= LJ::html_submit(
                                 'poll-submit',
                                 $is_super ? LJ::Lang::ml('poll.vote') : LJ::Lang::ml('poll.submit'),
                                 {class => 'LJ_PollSubmit'}) . "</form>\n";;
     }
+    if ($is_super) {
+        $ret .= "</td></tr></table></div></div>" . "<div class='poll-side'>" . $ret_side . "</div>";
+    }
+        $ret .= "</div>";
 
     return $ret;
 }
