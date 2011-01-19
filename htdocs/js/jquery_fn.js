@@ -84,17 +84,21 @@ jQuery.fn.placeholder = (function()
 			return this.each(function() {
 				if (this.getAttribute("placeholder")) {
 					var $this = jQuery(this);
+					
+					if (!$this.data('jQuery-has-placeholder')) {
+						$this.focus(check_focus).blur(check_blur);
 
-					$this.focus(check_focus).blur(check_blur);
-
-					jQuery(this.form)
-						.submit(function() {
-							$this.hasClass("placeholder") && $this.removeClass("placeholder").val("");
-						});
+						jQuery(this.form)
+							.submit(function() {
+								$this.hasClass("placeholder") && $this.removeClass("placeholder").val("");
+							});
+					}
 
 					this.value === this.getAttribute("placeholder") || !this.value
 						? $this.val(this.getAttribute("placeholder")).addClass("placeholder")
 						: $this.removeClass("placeholder");
+
+					$this.data('jQuery-has-placeholder', true)
 				}
 			});
 		}
