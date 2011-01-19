@@ -1629,23 +1629,25 @@ sub pre_clean_event_for_entryform
             unless ($tag =~ /^\w([\w\-:_]*\w)?\/?$/) {
                 next TOKEN;
             }
- 
             ## check attributes
             my $autoclose = delete $hash->{'/'};
             foreach my $attr (keys %$hash) {
                 if ($attr =~ /^(?:on|dynsrc)/) {
                     delete $hash->{$attr};
+                    next;
                 } elsif ($attr eq 'href' || $attr eq 'src') {
-                    delete $hash->{$attr} if $hash->{$attr} =~ /^data/;
+                    if ($hash->{$attr} =~ /^data/) {
+                        delete $hash->{$attr};
+                        next;
+                    }
                 }
-
                 if ($attr =~ /(?:^=)|[\x0b\x0d]/) {
                     next TOKEN;
                 }
                 unless ($attr =~ /^[\w_:-]+$/) {
-                    next TOKEN;
+                    delete $hash->{$attr};
+                    next;
                 }
-                
                 my $tmp = $hash->{$attr};
                 $tmp =~ s/[\t\n\0]//g;
                 if ($tmp =~ /(?:jscript|livescript|javascript|vbscript|about):/ix) {
@@ -1654,7 +1656,6 @@ sub pre_clean_event_for_entryform
                 }
                 ## TODO: css & xslt js expressions 
             }
-            
             ## reconstruct the tag
             $newdata .= "<$tag";
             foreach (@$attrs) {
