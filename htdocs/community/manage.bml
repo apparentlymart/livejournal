@@ -136,6 +136,11 @@ body<=
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/community/members.bml?authas=$user'>$ML{'.commlist.actmembers2'}</a>$pend"}) . "&nbsp;&nbsp;";
         }
+        if ($mods{$id}) {
+            my $pend = $pending{$id} ? BML::ml('.commlist.actpending', { num => $pending{$id},
+                                               aopts => "href=\"/community/pending.bml?authas=$user\"" }) : '';
+            $ret .= BML::ml('Actionlink', {'link'=>$ML{'.commlist.actmembers2'}.$pend}) . "&nbsp;&nbsp;" if $pend;
+        }
         $ret .= "</td><td align='center'>";
         if ($mods{$id}) {
             my $num = $names{$id}->{'count'} || "0"; # relying on this to be <b>-wrapped

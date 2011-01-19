@@ -42,7 +42,7 @@ body<=
 
     # Upgrade successful
     $body .= "<?warningbar $warning  warningbar?><br />" if $warning;
-    
+
     my $poll_id = $u->prop ('election_poll_id');
     return $body . '<p>Poll not found</p>' unless $poll_id;
 

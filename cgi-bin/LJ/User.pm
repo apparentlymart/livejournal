@@ -5188,10 +5188,37 @@ sub can_super_manage {
     return undef if $u->{journaltype} =~ /^[PYR]$/;
 
     # check for supermaintainer access
-    return undef unless LJ::check_rel($u, $remote, 'S');
+    return 1 if LJ::check_rel($u, $remote, 'S');
 
-    # passed checks, return true
-    return 1;
+    # not passed checks, return false
+    return undef;
+}
+
+# name: can_moderate
+# des: Given a target user and determines that the user is an moderator for the target user
+# returns: bool: true if authorized, otherwise fail
+# args: u
+# des-u: user object or userid of target user
+sub can_moderate {
+    my $remote  = shift;
+    my $u       = LJ::want_user(shift);
+
+    return undef unless $remote && $u;
+
+    # can moderate only community
+    return undef unless $u->is_community;
+
+    # do not allow suspended users manage other accounts
+    return 0 if $remote->is_suspended;
+
+    # people/syn/rename accounts can only be managed by the one account
+    return undef if $u->{journaltype} =~ /^[PYR]$/;
+
+    # check for moderate access
+    return 1 if LJ::check_rel($u, $remote, 'M');
+
+    # passed not checks, return false
+    return undef;
 }
 
 # name: can_manage
