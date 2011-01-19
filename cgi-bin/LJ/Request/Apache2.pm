@@ -39,6 +39,7 @@ sub LJ::Request::SERVER_ERROR              { return Apache2::Const::SERVER_ERROR
 sub LJ::Request::BAD_REQUEST               { return Apache2::Const::HTTP_BAD_REQUEST }
 sub LJ::Request::HTTP_GONE                 { return Apache2::Const::HTTP_GONE }
 sub LJ::Request::AUTH_REQUIRED             { return Apache2::Const::AUTH_REQUIRED }
+sub LJ::Request::HTTP_PRECONDITION_FAILED  { return Apache2::Const::HTTP_PRECONDITION_FAILED }
 
 my $instance = '';
 

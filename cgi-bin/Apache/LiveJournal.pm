@@ -240,7 +240,7 @@ sub totally_down_content
 
 sub blocked_bot
 {
-    LJ::Request->status_line("403 Denied");
+    LJ::Request->status(LJ::Request::HTTP_PRECONDITION_FAILED);
     LJ::Request->content_type("text/html");
     LJ::Request->send_http_header();
 
@@ -259,7 +259,7 @@ sub blocked_bot
     }
 
     LJ::Request->print("<h1>$subject</h1>$message");
-    return LJ::Request::OK;
+    return LJ::Request::HTTP_PRECONDITION_FAILED;
 }
 
 sub trans
