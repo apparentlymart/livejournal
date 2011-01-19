@@ -367,6 +367,7 @@ sub can_freeze {
 }
 
 sub can_unfreeze {
+    return 1 if $_[0]->can_moderate($_[1]);
     return LJ::Talk::can_unscreen(@_);
 }
 
