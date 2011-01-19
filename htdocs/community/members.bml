@@ -652,14 +652,18 @@ $LJ::SITEROOT
         %disabled = ( disabled => 'disabled' );
     }
     foreach(@users) {
+        my %disabled_maint = ();
+        if ($_->{'admin'} && !$remote->can_super_manage($c)) {
+            %disabled_maint = %disabled ? () : ( disabled => 'disabled' );
+        }
         my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
         $ret .= "<tr class='$rstyle'><td>" . LJ::ljuser($_->{'name'}) . "</td>";
         my $wstr;
         foreach my $key (@attribs) {
             $ret .= "<td style='text-align: center;'>";
             $ret .= LJ::html_check({ 'name' => "edit_$_->{'userid'}_$key",
-                                     'selected' => $_->{$key}, $key =~ /moderate|admin/ ? %disabled : () });
-            $ret .= LJ::html_hidden({ 'name' => "edit_$_->{'userid'}_$key", value => $_->{$key} ? 'on' : '' }) if %disabled;
+                                     'selected' => $_->{$key}, $key =~ /admin/ ? (%disabled, %disabled_maint) : () });
+            $ret .= LJ::html_hidden({ 'name' => "edit_$_->{'userid'}_$key", value => $_->{$key} ? 'on' : '' }) if %disabled || %disabled_maint;
             $wstr .= $attrshort_r{$key} if $_->{$key};
             $ret .= "</td>";
         }
