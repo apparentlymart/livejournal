@@ -2542,6 +2542,68 @@ sub emails_unique {
     return sort keys %ret;
 }
 
+# read emails and calculate primitives:
+# date of last leaving
+# date of chain start
+# returns data of emails_info function with additional keys ('leaving', may be undef, and 'starting')
+# skips internal steps of chains
+# skips deleted emails
+# cleans out all chains, which are unusable for password restoring, i.e. 'leaving' is newer than 6 month old
+# must return array for printing on tools/emailmanage.bml
+sub emails_chained_info {
+    my $u = shift;
+
+    return $u->{'_emails_chained'} if defined $u->{'_emails_chained'};
+
+    my $emails = $u->emails_info;
+    my @email_addresses = $u->emails_unique;
+
+    my @chains;
+
+    # process all elements
+    foreach my $addr (@email_addresses) {
+        # find all information about this element
+        my ($starting, $leaving);
+        my $lc_addr = lc $addr;
+
+        my @relevant = grep { lc($_->{email}) eq $lc_addr } @$emails;
+            # already sorted by MySQL
+
+        my $step;
+        foreach $step (@relevant) {
+
+            next unless $step->{status} eq 'A'; # restoring can be done only by validated addressed
+
+            if ($step->{deleted}) {
+                undef $starting;
+                undef $leaving;
+                next;
+            }
+
+            if (defined $leaving and $step->{set} - $leaving > $LJ::EMAIL_FORGET_AGE) {
+                # forget old chain - because it is unusable for password restoring
+                undef $starting; # start new chain
+                undef $leaving;
+            }
+
+            # most early starting
+            $starting = $step->{set} unless defined $starting and $starting < $step->{set};
+
+            # most late leaving
+            $leaving = $step->{changed} unless defined $leaving and defined $step->{changed} and $step->{changed} < $leaving;
+        }
+
+        if ($starting and time - $leaving < $LJ::EMAIL_FORGET_AGE) {
+            push @chains, { email => $step->{email}, leaving => $leaving, starting => $starting }; # fix this chain
+                # we store address with upper case letters possibly,
+                # to make it more comfort for user when he/she reads address
+        }
+    }
+
+    $u->{'_emails_chained'} = \@chains;
+    return \@chains;
+}
+
 # returns time when the user has last stopped using the given email
 # (that is, switched their current address to a different one)
 # this ASSUMES that the address is not a current one, but that it was
@@ -2573,10 +2635,18 @@ sub email_lastchange {
 sub can_delete_email {
     my ($u, $addr) = @_;
 
-    my $lastchange = $u->email_lastchange($addr);
+    my $chains = $u->emails_chained_info;
 
-    return 0 unless defined $lastchange;
-    return $lastchange < time - 86400 * 180; # this is six months
+    # reformat as email => parameters hash
+    my %chains = map { lc($_->{email}) => $_ } @$chains;
+
+    my $current = lc $u->email_raw;
+    my $edge_age = $chains{$current}->{starting};
+
+    my $aim_value = $chains{lc $addr}->{starting};
+
+    return 0 unless defined $edge_age and $aim_value;
+    return $aim_value > $edge_age;
 }
 
 # delete the given email from user's history, disabling the user from sending
@@ -2636,12 +2706,22 @@ sub is_email_validated {
 sub can_reset_password_using_email {
     my ($u, $addr) = @_;
 
-    return 1 if lc($addr) eq lc($u->email_raw);
-
     return 0 unless $LJ::DISABLED{'limit_password_reset'};
-    return
-        $u->is_email_validated($addr) && # validated
-        $u->email_lastchange($addr) > time - 86400 * 180; # six months
+
+    my $current = lc $u->email_raw;
+    return 1 if lc($addr) eq $current;
+
+    return 0 unless $u->is_email_validated($addr);
+
+    my $chains = $u->emails_chained_info;
+
+    # reformat as email => parameters hash
+    my %chains = map { lc($_->{email}) => $_ } @$chains;
+
+    my $aim_value = $chains{lc $addr}->{leaving};
+
+    return 0 unless defined $aim_value;
+    return time - $aim_value < $LJ::EMAIL_FORGET_AGE;
 }
 
 # returns date when the user has last changed their email

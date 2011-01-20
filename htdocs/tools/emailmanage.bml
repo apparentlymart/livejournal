@@ -20,8 +20,8 @@ body<=
     return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
 
-    my $emails = $u->emails_info;
-    my @emails_unique = $u->emails_unique;
+    my $emails = $u->emails_chained_info;
+    my @emails_unique = map { lc $_->{email} } @$emails;
     my $email_current = $u->email_raw;
     my @delete_log;
 
@@ -77,17 +77,19 @@ body<=
     $ret .= "<table border='1' cellpadding='2' style='margin-bottom: 3px;'>\n";
 
     my $can_delete = 0;
-    foreach my $addr (@emails_unique) {
-        next if lc($addr) eq lc($email_current);
+    foreach my $addr (@$emails) {
+        next if lc($addr->{email}) eq lc($email_current);
 
-        next unless $u->is_email_validated($addr);
-        my $time = $dump_time->($u->email_lastchange($addr));
+        next unless $u->is_email_validated($addr->{email});
+        my $time = $dump_time->($addr->{leaving});
         my $can_delete_this = $u->can_delete_email($addr);
         $can_delete ||= $can_delete_this;
 
-        $ret .= "<tr><td>" . LJ::html_check({ 'type' => 'check', 'name' => "$addr",
+        my $starting = $GET{debug} ? "<td>$addr->{starting}</td>" : "";
+
+        $ret .= "<tr><td>" . LJ::html_check({ 'type' => 'check', 'name' => "$addr->{email}",
                                               'disabled' => !$can_delete_this } ) . "</td>";
-        $ret .= "<td>$addr</td><td>$time</td></tr>\n";
+        $ret .= "<td>$addr->{email}</td><td>$time</td>$starting</tr>\n";
     }
 
     $ret .= "</table>\n";
