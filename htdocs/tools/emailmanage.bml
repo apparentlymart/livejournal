@@ -85,7 +85,7 @@ body<=
         my $can_delete_this = $u->can_delete_email($addr);
         $can_delete ||= $can_delete_this;
 
-        my $starting = $GET{debug} ? "<td>$addr->{starting}</td>" : "";
+        my $starting = $GET{debug} ? "<td>started: " . $dump_time->($addr->{starting}) . "</td>" : "";
 
         $ret .= "<tr><td>" . LJ::html_check({ 'type' => 'check', 'name' => "$addr->{email}",
                                               'disabled' => !$can_delete_this } ) . "</td>";

@@ -2569,8 +2569,10 @@ sub emails_chained_info {
         my @relevant = grep { lc($_->{email}) eq $lc_addr } @$emails;
             # already sorted by MySQL
 
-        my $step;
-        foreach $step (@relevant) {
+        my $written_addr;
+        foreach my $step (@relevant) {
+
+            $written_addr = $step->{email};
 
             next unless $step->{status} eq 'A'; # restoring can be done only by validated addressed
 
@@ -2593,8 +2595,8 @@ sub emails_chained_info {
             $leaving = $step->{changed} unless defined $leaving and defined $step->{changed} and $step->{changed} < $leaving;
         }
 
-        if ($starting and time - $leaving < $LJ::EMAIL_FORGET_AGE) {
-            push @chains, { email => $step->{email}, leaving => $leaving, starting => $starting }; # fix this chain
+        if ($starting and time - $leaving < $LJ::EMAIL_FORGET_AGE or not defined $leaving) {
+            push @chains, { email => $written_addr, leaving => $leaving, starting => $starting }; # fix this chain
                 # we store address with upper case letters possibly,
                 # to make it more comfort for user when he/she reads address
         }
