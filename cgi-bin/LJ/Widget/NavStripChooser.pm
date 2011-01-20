@@ -7,9 +7,21 @@ use Class::Autouse qw( LJ::Customize );
 
 sub ajax { 1 }
 sub authas { 1 }
-sub need_res { qw( stc/widgets/navstripchooser.css js/colorpicker.js ) }
+# sub need_res { qw( stc/widgets/navstripchooser.css js/colorpicker.js ) }
+sub need_res { qw() }
 
 sub render_body {
+    my $class = shift;
+    my %opts = @_;
+
+    if ($LJ::DISABLED{control_strip_new}) {
+        return $class->old_render_body(%opts);
+    } else {
+        return $class->new_render_body(%opts);
+    }
+}
+
+sub old_render_body {
     my $class = shift;
     my %opts = @_;
 
@@ -200,7 +212,69 @@ sub render_body {
     return $ret;
 }
 
+sub new_render_body {
+    my $class = shift;
+    my %opts = @_;
+
+    my $u = $class->get_effective_remote();
+    die "Invalid user." unless LJ::isu($u);
+
+    my $ret = "<fieldset><legend>" . $class->ml('widget.navstripchooser.title') . "</legend>";
+    $ret .= "<p class='detail'>" . $class->ml('widget.navstripchooser.desc') . " " . LJ::help_icon('navstrip') . "</p>";
+
+    # choose where to display/see it
+
+    my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
+    
+    # If user cannot modify navstrip, the following two checkboxes should be disabled
+    my $show_disabled = LJ::run_hook('user_cannot_modify_navstrip', $u);
+
+    $ret .= "<p>" . $class->html_check(
+        name => "show_control_strip",
+        id => "show_control_strip",
+        selected => $show_checked,
+        disabled => defined $show_disabled ? $show_disabled : 0,
+    );
+    $ret .= " <label for='show_control_strip'>" . $class->ml('widget.navstripchooser.option.visible') . "</label></p>";
+
+    # if checkbox disabled, it cannot submit it's value, even if it's checked.
+    # if we want this data in submit, we must to use hidden input in this case.
+    if ($show_disabled) {
+        if ($show_checked) {
+            $ret .= LJ::html_hidden({
+                'name' => 'Widget[NavStripChooser]_show_control_strip',
+                value => "1",
+                'id' => "show_control_strip" });
+        }
+    }
+
+    $ret .= LJ::html_hidden( {
+        'name' => 'Widget[NavStripChooser]_control_strip_dummy',
+        'value' => "1",
+        'id' => "control_strip_dummy"
+    } );
+
+    if ($u->prop('stylesys') != 2) {
+        $ret .= "<p>" . $class->ml('widget.navstripchooser.upgradetos2', {'aopts' => "href='$LJ::SITEROOT/customize/switch_system.bml'"}) . "</p>";
+    }
+
+    $ret .= "</fieldset>";
+    return $ret;
+}
+
 sub handle_post {
+    my $class = shift;
+    my $post = shift;
+    my %opts = @_;
+
+    if ($LJ::DISABLED{control_strip_new}) {
+        return $class->old_handle_post($post, %opts);
+    } else {
+        return $class->new_handle_post($post, %opts);
+    }
+}
+
+sub old_handle_post {
     my $class = shift;
     my $post = shift;
     my %opts = @_;
@@ -280,6 +354,41 @@ sub handle_post {
     return;
 }
 
+sub new_handle_post {
+    my $class = shift;
+    my $post = shift;
+    my %opts = @_;
+
+    my $u = $class->get_effective_remote();
+    die "Invalid user." unless LJ::isu($u);
+
+    my $post_fields_of_parent = LJ::Widget->post_fields_of_widget("CustomizeTheme");
+
+    my ($given_show_control_strip);
+    if ($post_fields_of_parent->{reset}) {
+        $given_show_control_strip = 1;
+    } else {
+        $given_show_control_strip = $post->{show_control_strip};
+    }
+
+    my $props;
+
+    ## if user can't hide control strip, then value 'off_explicit' is forbidden
+    if (LJ::run_hook("user_cannot_modify_navstrip", $u)) {
+        $props->{show_control_strip} = 'on_explicit';
+    } else {
+        $props->{show_control_strip} = $given_show_control_strip ? 'on_explicit' : 'off_explicit';
+    }
+
+    foreach my $uprop (qw/show_control_strip/) {
+        my $eff_val = $props->{$uprop}; # effective value, since 0 isn't stored
+        $eff_val = "" unless $eff_val;
+        $u->set_prop($uprop, $eff_val);
+    }
+
+    return;
+}
+
 sub should_render {
     my $class = shift;
 
@@ -288,6 +397,14 @@ sub should_render {
 }
 
 sub js {
+    if ($LJ::DISABLED{control_strip_new}) {
+        return old_js();
+    } else {
+        return new_js();
+    }
+}
+
+sub old_js {
     q [
         initWidget: function () {
             var self = this;
@@ -310,6 +427,17 @@ sub js {
         showSubDiv: function (div) {
             this.hideSubDivs();
             $(div).style.display = "block";
+        },
+        onRefresh: function (data) {
+            this.initWidget();
+        }
+    ];
+}
+
+sub new_js {
+    q [
+        initWidget: function () {
+            var self = this;
         },
         onRefresh: function (data) {
             this.initWidget();

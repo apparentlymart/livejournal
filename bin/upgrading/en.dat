@@ -6657,6 +6657,9 @@ widget.navstripchooser.option.color.light=Light gray gradient
 widget.navstripchooser.option.color.no_gradient|staleness=1
 widget.navstripchooser.option.color.no_gradient=without background gradient
 
+widget.navstripchooser.option.visible|staleness=1
+widget.navstripchooser.option.visible=Show navigation strip on journal (including my own) and communities page
+
 widget.navstripchooser.option.onjournal|staleness=1
 widget.navstripchooser.option.onjournal=Always show on my journal/community
 
