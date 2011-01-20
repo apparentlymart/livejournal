@@ -612,11 +612,9 @@ $LJ::SITEROOT
                         } @$ids;
 
         $ret .= LJ::html_select({
-                    name => "uid_to_sm", style => "",
+                    name => "uid_to_sm", style => "margin:0 5px",
                     selected => 0,
                     },
-                    { text => '',
-                    value => '',},
                     @users
                 );
 
