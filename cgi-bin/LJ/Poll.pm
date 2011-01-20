@@ -1508,7 +1508,6 @@ sub render {
     if ($is_super) {
         $ret .= "</td></tr></table></div></div>" . "<div class='poll-side'>" . $ret_side . "</div>";
     }
-        $ret .= "</div>";
 
     return $ret;
 }
