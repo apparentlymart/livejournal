@@ -56,7 +56,7 @@ body<=
         my $cu = $us->{$uid};
         next unless $cu && $cu->{statusvis} eq "V" || $cu->is_readonly;
         $names{$uid} = { user => $cu->{user}, name => $cu->{name}, count => 0 };
-        if ($mods{$uid}) {
+        if ($mods{$uid} || $smods{$uid}) {
                 $udbr = LJ::get_cluster_reader($cu);
                 my $sql = "SELECT COUNT(*), posterid" .
                             " FROM modlog WHERE journalid=$uid GROUP BY posterid";
