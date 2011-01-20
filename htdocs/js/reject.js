@@ -9,16 +9,20 @@
 			removeControlsSelector : '.i-pending-close',
 			textareaSelector : '.b-pending-reason',
 			hiddenWithIdsSelector : 'input[name=ids]',
-			userListSelector : '.b-pending-users'
+			userListSelector : '.b-pending-users',
+			submitButtonSelector : '.i-pending-reject',
+			returnLinkSelector : '.i-pending-returnlink'
 		};
 		
-		var _containter, _hiddenWithIds, _removeControls, _userList;
+		var _container, _hiddenWithIds, _removeControls, _userList;
 		
 		function findElems () {
 			_container = $(CONFIG.containerSelector);
 			_hiddenWithIds = _container.find(CONFIG.hiddenWithIdsSelector);
 			_userList = _container.find(CONFIG.userListSelector);
 			_removeControls = _userList.find(CONFIG.removeControlsSelector);
+			_submitButton = _container.find(CONFIG.submitButtonSelector);
+			_returnLink = _container.find(CONFIG.returnLinkSelector);
 		}
 		
 		function bindRemoveUser () {
@@ -33,15 +37,22 @@
 				userId = currentControl.attr('id').replace(/\D+/g, ''),
 				userListLength = _userList.find('li').length;
 				
+            /*
 			if (userListLength === 1) {
 				return false;
 			}
+            */
 				
 			removeUserIdFromHidden(userId);
 			
 			elemToRemove.remove();
-			
-			removeUnwantedCommas();
+
+			if (userListLength === 1) {
+				_returnLink.removeAttr('style');
+				_submitButton.attr('disabled', true);
+			} else {
+				removeUnwantedCommas();
+			}
 		}
 		
 		function removeUnwantedCommas () {
