@@ -157,17 +157,7 @@ sub clean
 
     my $viewer_lang = $opts->{'viewer_lang'};
     unless ($viewer_lang) {
-        # TODO: have some more reliable way to know that?
-        if (my $remote = LJ::get_remote()) {
-            $viewer_lang = $remote->prop('browselang')
-                        || $LJ::DEFAULT_LANG;
-        } else {
-            if (LJ::is_web_context()) {
-                $viewer_lang = BML::get_language();
-            } else {
-                $viewer_lang = $LJ::DEFAULT_LANG;
-            }
-        }
+        $viewer_lang = LJ::Lang::get_remote_lang();
     }
 
     # cuturl or entry_url tells about context and texts address,

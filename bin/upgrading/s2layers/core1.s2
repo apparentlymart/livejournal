@@ -1966,7 +1966,7 @@ function lang_viewname(string viewid) [notags] : string
     return "Unknown View";
 }
 
-function builtin get_effective_lang() : string
+function builtin get_remote_lang() : string
 "Returns remote's language";
 
 function lang_metadata_title(string which) [fixed] : string

@@ -4421,9 +4421,13 @@ sub string__css_keyword_list
     return join(' ', @out);
 }
 
-sub get_effective_lang
-{
-    return LJ::Lang::get_effective_lang();
+sub get_remote_lang {
+    # extract a "standard" type of lang here;
+    # also, it's a weird way to convert en_LJ -> en
+    my $lang = LJ::lang_to_locale( LJ::Lang::get_remote_lang() );
+    $lang =~ s/_.*//;
+
+    return $lang;
 }
 
 

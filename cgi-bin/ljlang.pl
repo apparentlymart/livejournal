@@ -495,6 +495,19 @@ sub get_effective_lang {
     return $LJ::DEFAULT_LANG;
 }
 
+sub get_remote_lang {
+    if ( my $remote = LJ::get_remote() ) {
+        return $remote->prop('browselang')
+            || $LJ::DEFAULT_LANG;
+    }
+
+    if ( LJ::is_web_context() ) {
+        return BML::get_language();
+    }
+
+    return $LJ::DEFAULT_LANG;
+}
+
 sub ml {
     my ($code, $vars) = @_;
 
