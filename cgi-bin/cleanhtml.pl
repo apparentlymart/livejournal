@@ -494,7 +494,7 @@ sub clean
                 ## TODO: add more trusted sites besides YouTube
                 ## YouTube (http://apiblog.youtube.com/2010/07/new-way-to-embed-youtube-videos.html)
                 my $src = $attr->{'src'};
-                if ($src && $src =~ m!^http://www\.youtube\.com/embed/!) {
+                if ($src && $src =~ m!^https?://(?:[\w.-]*\.)?youtube\.com/embed/[-_a-zA-Z0-9]{11,}(?:\?.*)?$!) {
                     ## allow 
                 } else {
                     ## eat this tag
