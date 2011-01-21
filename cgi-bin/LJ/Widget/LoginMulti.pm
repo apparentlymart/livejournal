@@ -58,6 +58,10 @@ sub render_body {
             'user_returnto'   => $opts{'user_returnto'},
         };
 
+        if ($current_type eq 'user') {
+            $type_display->{'errors'} = [ map { { 'error' => $_ } } @errors ];
+        }
+
         if ( $opts{'embedded'} ) {
             $template->param( 'type_user' => [ $type_display ] );
         }
@@ -108,13 +112,13 @@ sub do_login {
         ## Determine user
         my $username = LJ::Request->post_param('user');
         unless ($username){
-            push @$errors => LJ::Lang::ml("/htdocs/talkpost_do.bml.error.nousername");
+            push @$errors => LJ::Lang::ml("/talkpost_do.bml.error.nousername");
             return;
         }
         ##
         my $u = LJ::load_user($username);
         unless ($u){
-            push @$errors => LJ::Lang::ml("/htdocs/talkpost_do.bml.error.badusername2", {
+            push @$errors => LJ::Lang::ml("/talkpost_do.bml.error.badusername2", {
                                 'sitename' => $LJ::SITENAMESHORT,
                                 'aopts'    => "href='$LJ::SITEROOT/lostinfo.bml'",
                                 });
@@ -130,7 +134,7 @@ sub do_login {
         ## Verify
         my $ok = LJ::auth_okay($u, LJ::Request->post_param('password'));
         unless ($ok){
-            push @$errors => LJ::Lang::ml("/htdocs/talkpost_do.bml.error.badpassword2", {
+            push @$errors => LJ::Lang::ml("/talkpost_do.bml.error.badpassword2", {
                                             'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'",
                                             });
             return;
