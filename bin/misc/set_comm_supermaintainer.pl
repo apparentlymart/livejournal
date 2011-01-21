@@ -283,7 +283,7 @@ sub _create_poll {
                         'wrap'      => 1,
                         'charset'   => $u->mailencoding || 'utf-8',
                         'subject'   => $subject,
-                        'body'      => (LJ::Lang::ml('poll.election.start.email', {
+                        'html'      => (LJ::Lang::ml('poll.election.start.email', {
                                                 username        => LJ::ljuser($u),
                                                 communityname   => LJ::ljuser($comm),
                                                 faqlink         => '#',
