@@ -245,6 +245,7 @@ sub _create_poll {
     my $maintainers = LJ::load_rel_user($comm_id, 'A');
     foreach my $u_id (@$maintainers) {
         my $u = LJ::load_userid($u_id);
+        _log "\tAdd ".$u->user." as item to poll\n";
         push @items, {
             item    => "<lj user='".$u->user."'>",
         };
@@ -272,8 +273,10 @@ sub _create_poll {
 
     ## All are ok. Emailing to all maintainers about election.
     my $subject = LJ::Lang::ml('Supermaintainer election');
+    _log "Sending emails to all maintainers for community " . $comm->user . "\n";
     foreach my $maint_id (@$maintainers) {
         my $u = LJ::load_userid ($maint_id);
+        _log "\tSend email to maintainer ".$u->user."\n";
         LJ::send_mail({ 'to'        => $u->email_raw,
                         'from'      => $LJ::ACCOUNTS_EMAIL,
                         'fromname'  => $LJ::SITENAMESHORT,
