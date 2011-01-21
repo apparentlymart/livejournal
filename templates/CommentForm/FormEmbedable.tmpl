@@ -1,29 +1,28 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>index :: Дерево комментариев</title>
+	<meta charset="UTF-8">
+	<title>index :: Дерево комментариев</title>
 
-    <TMPL_VAR lj_res_includes>
+	<TMPL_VAR lj_res_includes>
 </head>
 <body>
-    <TMPL_IF errors>
-        <TMPL_LOOP errors>
-            <p class="b-auth-error"><TMPL_VAR error></p>
-        </TMPL_LOOP>
-    </TMPL_IF>
-
-    <div class="lj3-form-wrapper">
+	<div class="lj3-form-wrapper">
 		<form class="lj3-form lj3-post-comment lj3-active" id="postform" method="post" action="/talkpost_do.bml" target="">
-            <TMPL_VAR form_intro>
-            <input type="hidden" name="usertype" value="<TMPL_VAR usertype_default>">
-            <input type="hidden" name="is_form_embedded" value="1">
-            <input type="hidden" name="cookieuser" value="<TMPL_VAR remote_username>">
+			<TMPL_IF errors>
+				<TMPL_LOOP errors>
+					<p class="b-auth-error"><span class="i-message i-message-error"><TMPL_VAR error></span><i class="i-close"></i></p>
+				</TMPL_LOOP>
+			</TMPL_IF>
+			<TMPL_VAR form_intro>
+			<input type="hidden" name="usertype" value="<TMPL_VAR usertype_default>">
+			<input type="hidden" name="is_form_embedded" value="1">
+			<input type="hidden" name="cookieuser" value="<TMPL_VAR remote_username>">
 			<fieldset>
 				<p class="lj3-identity">
-                    От <strong><a href="javascript:void(0);"><TMPL_VAR remote_display_name></a></strong>
-                    <span class="lj3-logout">(<a href="<TMPL_VAR logout_url>">Выйти</a>)</span>
-                </p>
+					От <strong><a href="javascript:void(0);"><TMPL_VAR remote_display_name></a></strong>
+					<span class="lj3-logout">(<a href="<TMPL_VAR logout_url>">Выйти</a>)</span>
+				</p>
 				<p class="lj3-input-wrapper">
 					<label for="subject"><TMPL_VAR expr="ml('/talkpost.bml.opt.subject')"></label>
 					<input type="text" class="lj3-input-subject" id="subject" name="subject">
