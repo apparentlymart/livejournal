@@ -1094,7 +1094,7 @@ sub render {
     }
 
     if ($is_super) {
-        $ret = "<div class='poll-main'>";
+        $ret .= "<div class='poll-main'>";
     }
 
     $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> "
