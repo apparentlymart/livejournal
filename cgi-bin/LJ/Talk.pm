@@ -348,17 +348,15 @@ sub can_screen {
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $u->{'user'} ||
                 $remote->{'user'} eq (ref $up ? $up->{'user'} : $up) ||
-                $remote->can_manage($u) || $remote->can_moderate($u);
+                $remote->can_manage($u);
     return 0;
 }
 
 sub can_unscreen {
-    return 0 if $_[0]->can_moderate($_[1]);
     return LJ::Talk::can_screen(@_);
 }
 
 sub can_view_screened {
-    return 0 if $_[0]->can_moderate($_[1]);
     return LJ::Talk::can_delete(@_);
 }
 
@@ -367,7 +365,6 @@ sub can_freeze {
 }
 
 sub can_unfreeze {
-    return 1 if $_[0]->can_moderate($_[1]);
     return LJ::Talk::can_unscreen(@_);
 }
 
@@ -399,7 +396,7 @@ sub screening_level {
     # now return userprop, as it's our last chance
     LJ::load_user_props($journalu, 'opt_whoscreened');
     return if $journalu->{opt_whoscreened} eq 'N';
-    return $journalu->{opt_whoscreened};
+    return $journalu->{opt_whoscreened} || 'L';
 }
 
 sub update_commentalter {
@@ -1285,26 +1282,6 @@ sub load_comments
         }
     }
 
-    # load first level and 3 first replies(or replies to replies)
-    if ($opts->{'expand_strategy'} eq 'mobile') {
-        undef @check_for_children;
-        foreach my $first_itemid (@top_replies) {
-            next unless $children{$first_itemid};
-            my @childrens = @{ $children{$first_itemid} };
-            my $load = $opts->{'expand_child'} || 3;
-            while( @childrens && $load > 0 ){
-                if ( @childrens >= $load ){
-                    push @posts_to_load, splice(@childrens, 0, $load);
-                    last;
-                }else{
-                    push @posts_to_load, @childrens;
-                    $load -= @childrens;
-                    @childrens = map {$children{$_}?@{$children{$_}}:()} @childrens;
-                }
-            }
-        }        
-    }
-    
     my (@subjects_to_load, @subjects_ignored);
     while (@check_for_children) {
         my $cfc = shift @check_for_children;

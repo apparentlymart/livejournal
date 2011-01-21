@@ -48,7 +48,7 @@ sub save {
     my ($class, $u, $args) = @_;
 
     my $val = $class->get_arg($args, "commentscreening");
-    $val = "N" unless $val =~ /^[NRFLA]$/;
+    $val = "L" unless $val =~ /^[NRFLA]$/;
 
     $u->set_prop( opt_whoscreened => $val );
 

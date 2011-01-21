@@ -284,7 +284,6 @@ EMBED
         if ($remote) {
             $entry->{prop_opt_default_noemail} = $remote->prop('opt_gettalkemail');
             $entry->{prop_opt_default_nocomments} = $remote->prop('opt_showtalklinks');
-            $entry->{prop_opt_default_screening} = $remote->prop('opt_whoscreened');
             $entry->{prop_last_fm_user} = $remote->prop('last_fm_user');
         }
         
