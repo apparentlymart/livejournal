@@ -1,0 +1,43 @@
+<form method='post' action="<TMPL_VAR form_action>">
+<TMPL_VAR form_auth>
+
+<div class="standout"><table class="container"><tr><td>
+    <div align='center' style='margin: 8px'>
+        <input type="submit" name="confirm" value="<TMPL_VAR expr="ml('/delcomment.bml.confirm.submit')">">
+    </div>
+
+    <TMPL_IF can_ban>
+        <div>
+            <input type="checkbox" name="ban" id="ban">
+            <label for="ban"><TMPL_VAR ml_confirm_ban></label>
+        </div>
+    </TMPL_IF>
+
+    <TMPL_IF can_mark_spam>
+        <div>
+            <input type="checkbox" name="spam" id="spam">
+            <label for="spam"><TMPL_VAR expr="ml('/delcomment.bml.confirm.spam')"></label>
+        </div>
+    </TMPL_IF>
+
+    <TMPL_IF can_delete_thread>
+        <div>
+            <input type="checkbox" name="delthread" id="delthread">
+            <label for="delthread"><TMPL_VAR expr="ml('/delcomment.bml.confirm.delthread')"></label>
+        </div>
+    </TMPL_IF>
+
+    <TMPL_IF can_delete_author>
+        <div>
+            <input type="checkbox" name="delauthor" id="delauthor">
+            <label for="delauthor"><TMPL_VAR ml_confirm_delauthor></label>
+        </div>
+    </TMPL_IF>
+
+</td></tr></table></div>
+
+<TMPL_IF can_manage>
+    <p><TMPL_VAR ml_changeoptions></p>
+</TMPL_IF>
+
+</form>
