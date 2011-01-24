@@ -169,8 +169,18 @@ sub accept_comm_invite {
         moderate => 'M',
         admin => 'A',
     );
+    my ($is_super, $poll) = (undef, undef);
+    my $poll_id = $cu->prop('election_poll_id');
+    if ($poll_id) {
+        my $poll = LJ::Poll->new ($poll_id);
+        $is_super = $poll->prop('supermaintainer');
+    }
     foreach (keys %edgelist) {
-        LJ::set_rel($cu->{userid}, $u->{userid}, $edgelist{$_}) if $args->{$_};
+        unless ($is_super && $poll && !$poll->is_closed && $args->{$_} eq 'A') {
+            LJ::set_rel($cu->{userid}, $u->{userid}, $edgelist{$_}) if $args->{$_};
+        } else {
+            return LJ::error("Can't set user $u->{user} as maintainer for $cu->{user}");
+        }
     }
 
     # now we can delete the invite and update the status on the other side
