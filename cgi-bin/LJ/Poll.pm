@@ -818,7 +818,7 @@ sub is_closed {
             $self->close_poll;
 
             ## Poll is closed. Emailing to all maintainers about it.
-            my $subject = LJ::Lang::ml('Supermaintainer election is closed');
+            my $subject = LJ::Lang::ml('poll.election.email.subject.closed');
             my $maintainers = LJ::load_rel_user($comm->userid, 'A');
             foreach my $maint_id (@$maintainers) {
                 my $u = LJ::load_userid ($maint_id);
