@@ -38,7 +38,7 @@ sub option {
     my $select = LJ::html_select({
         name => "${key}commentscreening",
         id => "${key}commentscreening",
-        selected => $commentscreening,
+        selected => $commentscreening || 'L',
     }, @options);
 
     return "<label for='${key}commentscreening'>" . $class->ml('setting.commentscreening.option', { options => $select }) . "</label>";
