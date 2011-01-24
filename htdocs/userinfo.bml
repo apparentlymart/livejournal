@@ -1534,7 +1534,6 @@
     unless ($LJ::DISABLED{'userapps'}) {
         my $apps_list = LJ::JSON->from_json($u->prop('userapps_authorized')||'{}');
         my @userapps;
-        my $apps = "<div class='inner_section_header first'><div class='expandcollapse on' id='apps_header'>".$arrowimg->("apps")." $text (".scalar(@userapps).")";
 
         foreach (sort keys %$apps_list) {
             my $app = LJ::UserApps->get_application( id => $_ );
@@ -1567,7 +1566,7 @@
         }
 
         my $text = $ML{'.apps.installed'};
-        my $apps = "<div class='inner_section_header first'><div class='expandcollapse on' id='apps_header'>".$arrowimg->("apps")." $text (".scalar(@userapps).")";
+        my $apps = "<div class='section_body'><p class='inner_section_header first'><span class='expandcollapse on' id='apps_header'>".$arrowimg->("apps")." $text (".scalar(@userapps).")</span></p>";
         $apps .= '<div id="apps_body" class="inner_section_body">';
         $apps .= '<ul class="b-app-user-list">';
         $apps .= join("", @userapps);
@@ -1587,7 +1586,7 @@
             $apps .= '</ul>';
         }
         $apps .= '</div>';
-        $apps .= '</div></div>';
+        $apps .= '</div>';
 
         $body .= "<div class='ljclear'></div>";
         $body .= "<div class='section'><img src='$LJ::IMGPREFIX/application.gif' alt='' /> $ML{'.apps.header'} ";
