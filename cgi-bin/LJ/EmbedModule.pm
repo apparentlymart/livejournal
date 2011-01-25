@@ -143,7 +143,7 @@ sub parse_module_embed {
     return if LJ::conf_test($LJ::DISABLED{embed_module});
 
     # fast track out if we don't have to expand anything
-    return unless $$postref =~ /lj\-embed|embed|object/i;
+    return unless $$postref =~ /lj\-embed|embed|object|iframe/i;
 
     # do we want to replace with the lj-embed tags or iframes?
     my $expand = $opts{expand};
@@ -186,7 +186,7 @@ sub parse_module_embed {
                 $embed_attrs{id} = $attr->{id} if $attr->{id};
                 $embed_attrs{width} = ($attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width}) if $attr->{width};
                 $embed_attrs{height} = ($attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height}) if $attr->{height};
-            } elsif (($tag eq 'object' || $tag eq 'embed') && $type eq 'S') {
+            } elsif (($tag eq 'object' || $tag eq 'embed' || $tag eq 'iframe') && $type eq 'S') {
                 # <object> or <embed>
                 # switch to IMPLICIT state unless it is a self-closed tag
                 unless ($attr->{'/'}) {
@@ -201,7 +201,7 @@ sub parse_module_embed {
                 $newtxt .= $reconstructed;
             }
         } elsif ($state == IMPLICIT) {
-            if ($tag eq 'object' || $tag eq 'embed') {
+            if ($tag eq 'object' || $tag eq 'embed' || $tag eq 'iframe') {
                 if ($type eq 'E') {
                     # </object> or </embed>
                     # update tag balance, but only if we have a valid balance up to this moment
