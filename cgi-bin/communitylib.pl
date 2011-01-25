@@ -145,7 +145,7 @@ sub accept_comm_invite {
     # get their invite to make sure they have one
     my $dbcr = LJ::get_cluster_def_reader($u);
     return LJ::error('db') unless $dbcr;
-    my $argstr = $dbcr->selectrow_array('SELECT args FROM inviterecv WHERE userid = ? AND commid = ? ' .
+    my ($argstr, $maintid) = $dbcr->selectrow_array('SELECT args, maintid FROM inviterecv WHERE userid = ? AND commid = ? ' .
                                         'AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
                                         undef, $u->{userid}, $cu->{userid});
     return undef unless $argstr;
@@ -172,14 +172,15 @@ sub accept_comm_invite {
     my ($is_super, $poll) = (undef, undef);
     my $poll_id = $cu->prop('election_poll_id');
     if ($poll_id) {
-        my $poll = LJ::Poll->new ($poll_id);
+        $poll = LJ::Poll->new ($poll_id);
         $is_super = $poll->prop('supermaintainer');
     }
+    my $flag_set_owner_error = 0;
     foreach (keys %edgelist) {
-        unless ($is_super && $poll && !$poll->is_closed && $args->{$_} eq 'A') {
+        unless (not ($is_super && $poll && !$poll->is_closed && $args->{$_} eq 'A')) {
             LJ::set_rel($cu->{userid}, $u->{userid}, $edgelist{$_}) if $args->{$_};
         } else {
-            return LJ::error("Can't set user $u->{user} as maintainer for $cu->{user}");
+            $flag_set_owner_error = 1;
         }
     }
 
@@ -191,6 +192,15 @@ sub accept_comm_invite {
     return LJ::error('db') unless $cu->writer;
     $cu->do("UPDATE invitesent SET status = 'accepted' WHERE commid = ? AND userid = ?",
             undef, $cu->{userid}, $u->{userid});
+
+    if ($flag_set_owner_error) {
+        ## Save for later acceptance after the elections will be closed
+        $u->do("INSERT INTO inviterecv VALUES (?, ?, ?, UNIX_TIMESTAMP(), ?)",
+                undef, $u->{userid}, $cu->{userid}, $maintid, 'A');
+        $cu->do("REPLACE INTO invitesent VALUES (?, ?, ?, UNIX_TIMESTAMP(), 'outstanding', ?)",
+                undef, $cu->{userid}, $u->{userid}, $maintid, 'A');
+        return LJ::error("Can't set user $u->{user} as maintainer for $cu->{user}")
+    }
 
     # done
     return 1;
