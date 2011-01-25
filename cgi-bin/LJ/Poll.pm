@@ -795,7 +795,7 @@ sub is_closed {
     ## Max votes
     my $max_votes = $cnts[0];
     ## Check for duplicate of votes count
-    foreach my $it (keys %results) {
+    foreach my $it (sort { $b <=> $a } keys %results) {
         if (
             $max_votes == $results{$it}     ## Found max votes count
             && $max_votes_for               ## User have selected already
@@ -804,8 +804,9 @@ sub is_closed {
             ## We have two equal votes count for diff users
             $max_votes_for = undef;
             last;
+        } elsif ($max_votes == $results{$it}) {
+            $max_votes_for = $it;
         }
-        $max_votes_for = $it;
     }
 
     ## We found election winner. Set this user as supermaintainer and close election.
@@ -816,6 +817,9 @@ sub is_closed {
         if ($winner && $winner->can_manage($is_super) && $winner->is_visible) {
             LJ::set_rel($is_super, $winner->{userid}, 'S');
             $self->close_poll;
+
+            my $system = LJ::load_user('system');
+            $comm->log_event('set_owner', { actiontarget => $winner->{userid}, remote => $system });
 
             ## Poll is closed. Emailing to all maintainers about it.
             my $subject = LJ::Lang::ml('poll.election.email.subject.closed');
