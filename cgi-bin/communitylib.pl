@@ -177,10 +177,10 @@ sub accept_comm_invite {
     }
     my $flag_set_owner_error = 0;
     foreach (keys %edgelist) {
-        unless (not ($is_super && $poll && !$poll->is_closed && $args->{$_} eq 'A')) {
-            LJ::set_rel($cu->{userid}, $u->{userid}, $edgelist{$_}) if $args->{$_};
-        } else {
+        if ($poll && $is_super && !$poll->is_closed && $args->{$_} eq 'A') {
             $flag_set_owner_error = 1;
+        } else {
+            LJ::set_rel($cu->{userid}, $u->{userid}, $edgelist{$_}) if $args->{$_};
         }
     }
 
