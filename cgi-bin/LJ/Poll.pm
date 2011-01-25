@@ -786,10 +786,6 @@ sub is_closed {
         $cnt++;
     }
 
-    ## Not all maintainers have voted
-    return 0
-        if @items != $cnt;
-
     my @cnts = sort { $b <=> $a } values %results;
     my $max_votes_for = 0;
     ## Max votes
@@ -807,6 +803,19 @@ sub is_closed {
         } elsif ($max_votes == $results{$it}) {
             $max_votes_for = $it;
         }
+    }
+
+    ## We are on close date?
+    my $create = LJ::TimeUtil->mysqldate_to_time($self->prop('createdate'));
+    my $delta = time - $create;
+    ## Check for selected winner in a 3-week-end day
+    if (($delta % (21 * 86400) < 86400) && !$max_votes_for) {
+        return 0;
+    }
+    
+    ## Not all maintainers have voted and poll was prolonged
+    if ((@items != $cnt) && ($delta % (21 * 86400) > 86400)) {
+        return 0;
     }
 
     ## We found election winner. Set this user as supermaintainer and close election.
