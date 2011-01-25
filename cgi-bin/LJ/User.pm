@@ -6080,8 +6080,17 @@ sub get_authas_list {
     # Two valid types, Personal or Community
     $opts->{'type'} = undef unless $opts->{'type'} =~ m/^(P|C|S)$/;
 
-    my $ids = LJ::load_rel_target($u, $opts->{'type'} eq 'S' ? 'S' : 'A');
+    my $ids = [];
+    my $a_ids = LJ::load_rel_target($u, 'A');
+    my $s_ids = LJ::load_rel_target($u, 'S');
+    if ($opts->{'type'} eq 'S') {
+        push @$ids, @$s_ids;
+    } else {
+        push @$ids, @$s_ids;
+        push @$ids, @$a_ids;
+    }
     return undef unless $ids;
+    $opts->{'type'} = 'C' if $opts->{'type'} eq 'S';
 
     # load_userids_multiple
     my %users;
@@ -6089,7 +6098,7 @@ sub get_authas_list {
 
     return map { $_->{'user'} }
                grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
-               grep { ! ($opts->{'type'} && $opts->{'type'} ne 'S') || $opts->{'type'} eq $_->{'journaltype'} }
+               grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
 
                # unless overridden, hide non-visible/non-read-only journals. always display the user's acct
                grep { $opts->{'showall'} || $_->is_visible || $_->is_readonly || LJ::u_equals($_, $u) }

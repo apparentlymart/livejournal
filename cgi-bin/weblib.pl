@@ -178,7 +178,6 @@ sub make_authas_select {
     die "make_authas_select called outside of web context"
         unless LJ::is_web_context();
 
-    $opts->{type} = 'S' unless $opts->{type};
     my @list = LJ::get_authas_list($u, $opts);
 
     # only do most of form if there are options to select from
