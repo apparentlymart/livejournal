@@ -423,7 +423,7 @@ sub module_content {
             mode => 'allow',
             allow => [qw(object embed)],
             deny => [qw(script)],
-            remove => [qw(scriptiframe)],
+            remove => [qw(script)],
             ljcut_disable => 1,
             cleancss => 0,
             extractlinks => 0,
