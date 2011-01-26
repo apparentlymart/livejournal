@@ -6074,22 +6074,20 @@ use Carp;
 sub get_authas_list {
     my ($u, $opts) = @_;
 
+    return unless $u;
+
     # used to accept a user type, now accept an opts hash
     $opts = { 'type' => $opts } unless ref $opts;
 
     # Two valid types, Personal or Community
     $opts->{'type'} = undef unless $opts->{'type'} =~ m/^(P|C|S)$/;
 
-    my $ids = [];
-    my $a_ids = LJ::load_rel_target($u, 'A') || [];
-    my $s_ids = LJ::load_rel_target($u, 'S') || [];
-    if ($opts->{'type'} eq 'S') {
-        push @$ids, @$s_ids;
-    } else {
-        push @$ids, @$s_ids;
+    my $ids = LJ::load_rel_target($u, 'S') || [];
+    if ($opts->{'type'} ne 'S') {
+        my $a_ids = LJ::load_rel_target($u, 'A') || [];
         push @$ids, @$a_ids;
     }
-    return undef unless $ids;
+    return unless $ids && @$ids;
     $opts->{'type'} = 'C' if $opts->{'type'} eq 'S';
 
     # load_userids_multiple
@@ -6104,7 +6102,7 @@ sub get_authas_list {
                grep { $opts->{'showall'} || $_->is_visible || $_->is_readonly || LJ::u_equals($_, $u) }
 
                # can't work as an expunged account
-               grep { !$_->is_expunged && $_->{clusterid} > 0 }
+               grep { $_ && !$_->is_expunged && $_->{clusterid} > 0 }
                $u,  sort { $a->{'user'} cmp $b->{'user'} } values %users;
 }
 
