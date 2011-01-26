@@ -6081,8 +6081,8 @@ sub get_authas_list {
     $opts->{'type'} = undef unless $opts->{'type'} =~ m/^(P|C|S)$/;
 
     my $ids = [];
-    my $a_ids = LJ::load_rel_target($u, 'A');
-    my $s_ids = LJ::load_rel_target($u, 'S');
+    my $a_ids = LJ::load_rel_target($u, 'A') || [];
+    my $s_ids = LJ::load_rel_target($u, 'S') || [];
     if ($opts->{'type'} eq 'S') {
         push @$ids, @$s_ids;
     } else {
