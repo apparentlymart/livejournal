@@ -25,15 +25,17 @@ my $help = <<"HELP";
 
     Options: 
         --verbose       Show progress
+        --all           Process all communities
         --help          Show this text and exit
 HELP
 
-my ($need_help, $verbose);
+my ($need_help, $verbose, $all);
 GetOptions(
     "help"          => \$need_help, 
     "verbose"       => \$verbose,
+    "all"           => \$all,
 ) or die $help;
-if ($need_help) {
+if ($need_help || (!@ARGV && !$all)) {
     print $help;
     exit(1);
 }
