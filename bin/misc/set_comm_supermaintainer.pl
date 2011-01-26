@@ -291,6 +291,8 @@ sub _create_poll {
                                             })
                                         ),
                     });
+        ## We need a pause to change sender-id in mail headers
+        sleep 1;
     }
 
     return $poll->pollid;
