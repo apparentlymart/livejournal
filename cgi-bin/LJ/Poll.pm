@@ -809,12 +809,12 @@ sub is_closed {
     my $create = LJ::TimeUtil->mysqldate_to_time($self->prop('createdate'));
     my $delta = time - $create;
     ## Check for selected winner in a 3-week-end day
-    if (($delta % (21 * 86400) < 86400) && !$max_votes_for) {
+    if (($delta % (21 * 86400) < 86400) && $delta > 86400 && !$max_votes_for) {
         return 0;
     }
     
     ## Not all maintainers have voted and poll was prolonged
-    if ((@items != $cnt) && ($delta % (21 * 86400) > 86400)) {
+    if ((@items != $cnt) && ($delta < 86400 || ($delta % (21 * 86400) > 86400))) {
         return 0;
     }
 
