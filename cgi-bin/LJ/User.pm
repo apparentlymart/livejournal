@@ -6087,8 +6087,9 @@ sub get_authas_list {
         my $a_ids = LJ::load_rel_target($u, 'A') || [];
         push @$ids, @$a_ids;
     }
-    return unless $ids && @$ids;
-    $opts->{'type'} = 'C' if $opts->{'type'} eq 'S';
+    return $u->{'user'} unless $ids && @$ids;
+
+    $opts->{'type'} = '' if $opts->{'type'} eq 'S';
 
     # load_userids_multiple
     my %users;
