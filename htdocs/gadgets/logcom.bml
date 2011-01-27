@@ -13,11 +13,16 @@
 
     my $docid   = LJ::Request->get_param('docid');
     my $api_key = LJ::Request->get_param('rsk');
+    my $domain  = LJ::Request->get_param('domain');
 
     ## convert remote-site key to lj.com's community
     my $partner = LJ::PartnerSite->find_by_api_key($api_key);
     return 'unknown key'
         unless $partner;
+
+    unless ( $partner->is_domain_trusted($domain) ) {
+        return 'this domain doesn\'t belong to this partner';
+    }
 
     $partner->request_logcom_resources;
 
@@ -26,7 +31,12 @@
     return 'rate limit exceeded'
         unless LJ::RateLimit->check( $journal, $partner->rate_limits );
 
-    my $js_check_domain = $partner->domain_check_js( { 'mode' => 'logcom' } );
+    my $js_check_domain = $partner->domain_check_js(
+        {
+            'mode'           => 'logcom',
+            'partner_domain' => $domain,
+        }
+    );
 
     my $entry = $partner->find_entry_by_docid($docid);
     my $jitemid = $entry->jitemid;
@@ -57,6 +67,7 @@
                 'embedable_form'    => 1,
                 'logout_url'        => $logout_url,
                 'js_check_domain'   => $js_check_domain,
+                'partner_domain'    => $domain,
 
                 'remote'            => $remote,
                 'journalu'          => $journal,

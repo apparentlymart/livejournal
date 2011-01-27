@@ -183,6 +183,8 @@
                 = $partner->domain_check_js( { 'mode' => 'logcom' } );
 
             $partner->request_logcom_resources;
+
+            $talkform_opts->{'partner_domain'} = $POST{'partner_domain'};
         }
 
         return LJ::Talk::talkform($talkform_opts);
@@ -248,13 +250,15 @@
         my $partner
             = LJ::PartnerSite->find_by_journal_username($journalu->username);
 
-        my $uri = URI->new( $partner->xdreceiver_url );
+        my $uri
+            = URI->new( $partner->xdreceiver_url( $POST{'partner_domain'} ) );
 
         my $parentid = $parent->{'talkid'}
             ? $parent->{'talkid'} * 256 + $entry->anum
             : 0;
 
         $uri->query_form( $uri->query_form,
+                          'mode'       => 'addcomment',
                           'comment_id' => $dtalkid,
                           'replyto'    => $parentid, );
 
