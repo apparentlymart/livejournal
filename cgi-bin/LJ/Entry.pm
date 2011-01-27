@@ -1355,6 +1355,16 @@ sub get_suspended_mark {
     return $compressed;
 }
 
+sub check_for_negative_terms {
+    my $self = shift;
+    
+    my $tags = $self->prop('personifi_tags');
+    return $1 if $tags =~ /nterms:(\w+)/;
+    my $nterms = ( $self->event_raw =~ /($LJ::NEGATIVE_TERMS)/)?'no':'yes';
+    $self->set_prop(personifi_tags => ($tags?"$tags,":'') . "nterms:$nterms");
+    return $nterms;
+}
+
 package LJ;
 
 use Class::Autouse qw (
