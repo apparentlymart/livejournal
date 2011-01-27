@@ -2353,6 +2353,9 @@ sub replycount_do {
             ? sub { LJ::MemCache::decr($memkey, $value) }
             : sub { LJ::MemCache::incr($memkey, $value) };
     
+    my $entry = LJ::Entry->new( $u, 'jitemid' => $jitemid );
+    LJ::run_hooks( 'replycount_change', $entry );
+
     ##
     my $sql_sign = $action eq 'decr' ? '-' : '+';
     my $sql = "UPDATE log2 SET replycount=LAST_INSERT_ID(replycount $sql_sign $value) WHERE journalid=? AND jitemid=?";
