@@ -33,6 +33,8 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 
 .error.nocomment=The specified comment does not exist.
 
+.error.notloggedin=You need to log in in order to delete this comment.
+
 .error.suspended=You are not allowed to delete comments while your account is suspended.
 
 .success.andban=The comment has been deleted, and user [[user]] has been banned from commenting in your journal.

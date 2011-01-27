@@ -81,8 +81,14 @@ _info?><?_code
     my $entry  = $comment->entry;
 
     my $remote = LJ::get_remote();
-    return LJ::needlogin_redirect()
-        unless $remote;
+    unless ($remote) {
+        if ( $mode eq 'html' ) {
+            return LJ::needlogin_redirect();
+        } else {
+            my $ml_var = '/delcomment.bml.error.notloggedin';
+            return $error->( LJ::Lang::ml($ml_var) );
+        }
+    }
 
     # what are we supposed to do? we can show form, or we can delete
     # the comment, depending on the form parameters
