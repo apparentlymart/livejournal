@@ -81,13 +81,23 @@ jQuery(document).ready(function() {
 			timer_reached = true;
 			checkStatus();
 		}, 1000);
-		jQuery.post(form.attr('action'), form.serialize() + '&poll-submit=submit', function() {
+
+		function formSent() {
 			var skip = form.prev('input[name="skip"]').val();
 			PotD.cache[skip] = null;
 			PotD.getQuestion(form, skip);
 			response_received = true;
 			checkStatus();
-		});
+		}
+
+		jQuery.ajax( {
+			url: form.attr( 'action' ),
+			data: form.serialize() + '&poll-submit=submit',
+			type: "POST",
+			success: formSent,
+			//server returns 302 status and in this case xhr.status === 0, => error. We handle this
+			error: formSent
+		} );
 		return false;
 	});
 });
