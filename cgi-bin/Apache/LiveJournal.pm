@@ -127,6 +127,9 @@ sub handler
                     push @hosts, $_;
                     push @req_hosts, $_;
                 }
+
+                LJ::run_hook('modify_forward_list', \@hosts, \@req_hosts);
+
                 if (@hosts) {
                     my $real = shift @hosts;
                     LJ::Request->remote_ip($real);
@@ -134,14 +137,6 @@ sub handler
                 LJ::Request->header_in('X-Forwarded-For', join(", ", @hosts));
             }
             
-            ## Moscow dev server through nginx proxy
-            if ($LJ::IS_DEV_SERVER) {
-                if (my $real_ip = LJ::Request->header_in('X-Real-IP')) {
-                    push @req_hosts, $real_ip;
-                    LJ::Request->remote_ip($real_ip);
-                }
-            }
-
             # and now, deal with getting the right Host header
             if ($_ = LJ::Request->header_in('X-Host')) {
                 LJ::Request->header_in('Host', $_);
