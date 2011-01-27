@@ -647,7 +647,7 @@ sub preload_rows {
     }
 
     # weird, catids that we couldn't find in memcache or db?
-    warn "unknown category: " . join(",", keys %need) if %need;
+    #warn "unknown category: " . join(",", keys %need) if %need;
 
     # now memcache and request cache are both updated, we're done
     return 1;
