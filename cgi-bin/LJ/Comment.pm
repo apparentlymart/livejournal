@@ -1518,13 +1518,15 @@ sub _format_template_mail {
 
     if ( defined $partner ) {
         my $docid = $partner->docid_from_entry($entry);
-        my $article_link = $partner->article_link($docid);
-        my $comment_link
-            = $partner->article_link( $docid,
-                                      { 'thread' => $self->dtalkid } );
+        if ($docid) {
+            my $article_link = $partner->article_link($docid);
+            my $comment_link
+                = $partner->article_link( $docid,
+                                          { 'thread' => $self->dtalkid } );
 
-        $t->param( 'article_link' => $article_link,
-                   'comment_link' => $comment_link, );
+            $t->param( 'article_link' => $article_link,
+                       'comment_link' => $comment_link, );
+        }
 
     }
 }

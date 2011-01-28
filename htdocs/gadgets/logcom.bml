@@ -29,7 +29,8 @@
     my $journal = $partner->journal;
 
     return 'rate limit exceeded'
-        unless LJ::RateLimit->check( $journal, $partner->rate_limits );
+        unless ! $partner->rate_limits
+            || LJ::RateLimit->check( $journal, $partner->rate_limits );
 
     my $js_check_domain = $partner->domain_check_js(
         {
