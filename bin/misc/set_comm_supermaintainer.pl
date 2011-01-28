@@ -11,8 +11,23 @@ require 'ljprotocol.pl';
 use Getopt::Long;
 use LJ::DBUtil;
 
-my $to_journal = LJ::load_user("lj_elections")
-    or die "No user 'lj_elections' on this server";
+my $to_journal = LJ::load_user("lj_elections");
+
+if (($to_journal && $to_journal->is_expunged) || !$to_journal) {
+    warn "Try to create journal 'lj_elections'\n";
+    $to_journal = LJ::User->create_personal (
+        ofage => 1,
+        status => 'A',
+        user => 'lj_elections',
+        bdate => '1989-04-15',
+        email => 'cc@livejournalinc.com',
+        password => LJ::rand_chars(10),
+    );
+    warn "Created user 'lj_elections'\n" if $to_journal;
+}
+
+die "No user 'lj_elections' on this server" unless $to_journal;
+
 my $poster = LJ::load_user("system") 
     or die "No user 'system' on this server";
 
@@ -247,6 +262,7 @@ sub _create_poll {
     my $maintainers = LJ::load_rel_user($comm_id, 'A');
     foreach my $u_id (@$maintainers) {
         my $u = LJ::load_userid($u_id);
+        next unless $u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90);
         _log "\tAdd ".$u->user." as item to poll\n";
         push @items, {
             item    => "<lj user='".$u->user."'>",
