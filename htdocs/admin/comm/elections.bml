@@ -62,10 +62,12 @@ body<=
                 my $maintainers = LJ::load_rel_user($comm->{userid}, 'A');
                 my $users = LJ::load_userids(@$maintainers);
                 my @alive_mainteiners;
+                my $total = 0;
                 foreach my $u (values %$users) {
                     if ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90)) {
                         push @alive_mainteiners, $u;
                     }
+                    $total++ if $u;
                 }
 
                 $ret .= "<p>Maintainers (participants of the election): " . @alive_mainteiners . "</p>";
@@ -96,10 +98,11 @@ body<=
                 while (my @row = $sth->fetchrow_array) {
                     my $args = $row[1];
                     next unless $args =~ m#admin=1#;
-                    push @alive_mainteiners, $row[0];
+                    my $u = LJ::load_userid($row[0]);
+                    $total++ if $u;
                 }
 
-                $ret .= "<p>Maintainers (total, including non-participants of the election): " . @alive_mainteiners . "</p>";
+                $ret .= "<p>Maintainers (total, including non-participants of the election): " . $total . "</p>";
 
                 $ret .= "<br/><h3>Current state of election:</h3>";
 		        $ret .= "<ul style='padding:0;list-style:none;'>";
