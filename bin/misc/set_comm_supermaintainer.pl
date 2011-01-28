@@ -306,6 +306,8 @@ sub _create_poll {
                                                 communityname   => LJ::ljuser($comm),
                                                 faqlink         => '#',
                                                 shortsite       => $LJ::SITENAMESHORT,
+                                                authas          => $comm->{user},
+                                                siteroot        => $LJ::SITEROOT,
                                             })
                                         ),
                     });

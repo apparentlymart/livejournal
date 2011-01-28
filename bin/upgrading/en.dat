@@ -3397,7 +3397,7 @@ Dear [[username]],
 
 You are receiving this email because you are a maintainer of the community [[communityname]]. LiveJournal has recently implemented a new role of community management, known as the 'Owner' of the community. The Owner of a community will be the only person who will be able to perform tasks such as deleting maintainers or deleting the community itself. You can read more about the Owner role here:  [[faqlink]]
 
-Since [[communityname]] is an existing community with multiple maintainers, it is now up to you and the other maintainers of the community to select which of you will be granted the Owner status. A poll has been created for your community at this page [link to poll page]. You simply need to visit this page and cast your vote for which current maintainer you believe should be made Owner of the community. More information on how the election process works can be found at the page above.
+Since [[communityname]] is an existing community with multiple maintainers, it is now up to you and the other maintainers of the community to select which of you will be granted the Owner status. A poll has been created for your community <a href="[[siteroot]]/community/election.bml?authas=[[authas]]">at this page</a>. You simply need to visit this page and cast your vote for which current maintainer you believe should be made Owner of the community. More information on how the election process works can be found at the page above.
 
 Regards,
 [[shortsite]] Team
