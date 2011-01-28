@@ -11,12 +11,11 @@ sub need_res { qw( stc/widgets/widget-layout.css stc/widgets/search.css stc/widg
 use LJ::Browse::Parser;
 
 sub _build_tree {
-    my ($parent, $level, $test_uri, $vertical, @categories) = @_;
+    my ($parentid, $level, $test_uri, $vertical, @categories) = @_;
     my @tree = ();
 
     foreach my $c
-        (grep { (!$parent && !$_->parent) || ($_->parent == $parent) } grep { $_ } @categories) {
-        #(grep { $_->parent == $parent } @categories) {
+        (grep { (!$parentid && !$_->parentid) || ($_->parentid == $parentid) } grep { $_ } @categories) {
             my $c_uri = $c->uri;
 
             my $is_current = ($test_uri =~ m/^\Q$c_uri\E/);
@@ -31,7 +30,7 @@ sub _build_tree {
                     level           => $level,
                     is_expanded     => $is_current,
                     is_current      => $is_current,
-                    "level$level"   => [ _build_tree($c, $level, $test_uri, $vertical, @categories) ],
+                    "level$level"   => [ _build_tree($c->catid, $level, $test_uri, $vertical, @categories) ],
                 };
             --$level;
         }
