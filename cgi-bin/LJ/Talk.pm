@@ -353,7 +353,7 @@ sub can_screen {
 }
 
 sub can_unscreen {
-    return 0 if $_[0]->can_moderate($_[1]);
+    return 0 if !($_[0]->can_manage($_[1]) || $_[0]->can_moderate($_[1])) && $_[0]->can_moderate($_[1]);
     return LJ::Talk::can_screen(@_);
 }
 
