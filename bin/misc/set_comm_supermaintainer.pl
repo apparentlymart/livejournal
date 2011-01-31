@@ -294,6 +294,7 @@ sub _create_poll {
     _log "Sending emails to all maintainers for community " . $comm->user . "\n";
     foreach my $maint_id (@$maintainers) {
         my $u = LJ::load_userid ($maint_id);
+        next unless $u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90);
         _log "\tSend email to maintainer ".$u->user."\n";
         LJ::send_mail({ 'to'        => $u->email_raw,
                         'from'      => $LJ::ACCOUNTS_EMAIL,
