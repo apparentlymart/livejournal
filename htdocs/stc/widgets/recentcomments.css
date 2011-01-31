@@ -1,5 +1,12 @@
 /* Recent comments widget
 -----------------------------------------------*/
+.appwidget-recentcomments .w-head H2 {
+	padding:5px 8px;
+	}
+.appwidget-recentcomments .w-head H2 span.w-head-in {
+	background: url("/img/interests.gif?v=1") no-repeat scroll 0 50% transparent;
+	padding-left: 20px!important;
+	}
 .appwidget-recentcomments .userpic-img {
 	float: left;
 	max-width: 60px;
@@ -7,11 +14,14 @@
 	margin-right: 8px;
 	border: none;
 	}
-.appwidget-recentcomments P.pkg {
+.appwidget-recentcomments .w-body LI {
 	border-bottom: 1px solid #ddd;
 	padding: 0 0 10px 0;
+	margin: 0.75em 0;
+	overflow:hidden;
 	}
-.appwidget-recentcomments P.pkg.last {
+.appwidget-recentcomments .w-body LI.last {
 	border-bottom: none;
 	padding-bottom: 0;
 	}
+
