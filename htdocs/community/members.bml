@@ -77,7 +77,7 @@ body<=
         if ($new_sm_u && $new_sm_u->is_visible && $new_sm_u->can_manage($c)) {
             LJ::clear_rel($c->{userid}, $remote->{userid}, 'S');
             LJ::set_rel($c->{userid}, $new_sm_u->{userid}, 'S');
-            LJ::statushistory_add($comm, $remote, 'set_owner', $new_sm_u->{user} . " set as owner by " . $remote->{user});
+            LJ::statushistory_add($c, $remote, 'set_owner', $new_sm_u->{user} . " set as owner by " . $remote->{user});
         }
     }
 
