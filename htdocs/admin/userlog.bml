@@ -102,6 +102,10 @@ FORM
             $action = "Removed maintainer " . LJ::ljuser($u) if $u;
         } elsif ($row->{action} eq 'emailpost') {
             $action = "User posted via email gateway";
+        } elsif ($row->{action} eq 'set_owner') {
+            my $userid = $row->{actiontarget};
+            my $u = LJ::load_userid ($userid);
+            $action = "User ".LJ::ljuser($u)." set as supermaintainer";
         } elsif ($row->{action} eq 'accountstatus') {
             my $path = "$extra->{old} -> $extra->{new}";
             $action = {
