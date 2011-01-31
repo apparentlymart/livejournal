@@ -922,6 +922,80 @@
     font: 0/0;
     }
 
+.b-accstats {
+	margin: 0;
+	color: #222;
+	}
+	.b-accstats-wrapper {
+		padding: 4px 15px;
+		border: 1px solid #EAE8AC;
+		-webkit-border-radius: 10px;
+		-moz-border-radius: 10px;
+		border-radius: 10px;
+		background: #FFFFD5;
+		}
+		.b-accstats-table {
+			border-collapse: collapse;
+			border-spacing: 0;
+			}
+			.b-accstats-head {
+				width: 30%;
+				font-size: 1.154em;
+				font-weight: bold;
+				text-align: left;
+				}
+			.account .b-accstats-table TD {
+				padding: 10px 10px 10px 20px;
+				border: 0;
+				font-size: 0.923em;
+				vertical-align: top;
+				text-align: left;
+				}
+			.account .b-accstats-table .b-accstats-border {
+				border-bottom: 1px solid #EAE8AC;
+				}
+			.account .b-accstats-table TH.b-accstats-subhead {
+				padding: 0;
+				text-align: left;
+				}
+			.account .b-accstats-table TD.b-accstats-subhead {
+				width: 13%;
+				padding: 10px 1px 10px 0;
+				}
+				.b-accstats-subhead SPAN {
+					padding: 1px 0 2px 20px;
+					background-image: url(/img/widget/trynbuy/subhead.gif?v=1);
+					background-repeat: no-repeat;
+					}
+				.b-accstats-userpics SPAN {
+					background-position: 0 0;
+					}
+				.b-accstats-storage SPAN {
+					background-position: 0 -48px;
+					}
+				.b-accstats-subs SPAN {
+					background-position: 0 -94px;
+					}
+				.b-accstats-voice SPAN {
+					background-position: 0 -144px;
+					}
+			.account .b-accstats-table .b-accstats-button {
+				padding: 10px 0 0 10px;
+				border: 0;
+				vertical-align: top;
+				text-align: center;
+				}
+				.b-accstats-button .b-accstats-trynbuy {
+					display: block;
+					padding: 40px 0 0;
+					background: url(/img/widget/trynbuy/trynbuy.gif?v=1) no-repeat 50% 0;
+					}
+				.b-accstats-button .b-accstats-upgrade {
+					display: block;
+					padding: 40px 0 0;
+					background: url(/img/widget/trynbuy/upgrade.gif?v=1) no-repeat 50% 0;
+					}
+
 
 
 
