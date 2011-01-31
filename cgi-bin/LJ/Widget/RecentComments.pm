@@ -24,8 +24,10 @@ sub render_body {
 
     my $ret;
 
-    $ret .= "<h2><span>" . $class->ml('widget.recentcomments.title') . "</span></h2>";
+    $ret .= "<div class='w-head'>";
+    $ret .= "<h2><span class='w-head-in'>" . $class->ml('widget.recentcomments.title') . "</span></h2>";
     $ret .= "<a href='$LJ::SITEROOT/tools/recent_comments.bml' class='more-link'>" . $class->ml('widget.recentcomments.viewall') . "</a>";
+    $ret .= "<i class='w-head-corner'></i></div>";
 
     # return if no comments
     return "<h2><span>" . $class->ml('widget.recentcomments.title') . "</span></h2><?warningbar " . $class->ml('widget.recentcomments.nocomments', {'aopts' => "href='$LJ::SITEROOT/update.bml'"}) . " warningbar?>"
@@ -33,7 +35,8 @@ sub render_body {
 
     # there are comments, print them
     @comments = reverse @comments; # reverse the comments so newest is printed first
-    $ret .= "<div class='appwidget-recentcomments-content'>";
+    $ret .= "<div class='w-body'>";
+    $ret .= "<ul>";
     my $ct = 0;
     foreach my $row (@comments) {
         next unless $row->{nodetype} eq 'L';
@@ -61,7 +64,7 @@ sub render_body {
         $body_part =~ s/\?>/?&gt;/g;
 
         # print the comment
-        $ret .= "<p class='pkg $class_name'>";
+        $ret .= "<li class='$class_name'>";
         $ret .= $comment->poster_userpic;
         $ret .= $class->ml('widget.recentcomments.commentheading', {'poster' => $poster, 'entry' => "<a href='" . $entry->url . "'>"});
         $ret .= $subject;
@@ -69,9 +72,10 @@ sub render_body {
         $ret .= $body_part;
         $ret .= "<span class='detail'>(<a href='" . $comment->url . "'>" . $class->ml('widget.recentcomments.link') . "</a>)</span> ";
         $ret .= "<span class='detail'>(<a href='" . $comment->reply_url . "'>" . $class->ml('widget.recentcomments.reply') . "</a>)</span> ";
-        $ret .= "</p>";
+        $ret .= "</li>";
         $ct++;
     }
+    $ret .= "</ul>";
     $ret .= "</div>";
 
     return $ret;
