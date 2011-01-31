@@ -181,6 +181,7 @@ sub accept_comm_invite {
             $flag_set_owner_error = 1;
         } else {
             LJ::set_rel($cu->{userid}, $u->{userid}, $edgelist{$_}) if $args->{$_};
+            $cu->log_event('maintainer_add', { actiontarget => $u->{userid}, remote => $u }) if $_ eq 'admin' && $args->{$_};
         }
     }
 
