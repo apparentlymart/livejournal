@@ -3,14 +3,15 @@ use strict;
 use Carp qw(croak);
 
 use constant AccountMask => { 
-    Permanent => 1,
-    Sponsored => 2,
-    Paid      => 4,
-    Plus      => 8,
-    Basic     => 16,
-    SUP       => 32,
-    NonSUP    => 64,
-    OfficeOnly => 128,
+    Permanent   => 1,
+    Sponsored   => 2,
+    Paid        => 4,
+    Plus        => 8,
+    Basic       => 16,
+    SUP         => 32,
+    NonSUP      => 64,
+    OfficeOnly  => 128,
+    TryNBuy     => 256,
 };
 
 sub get_user_class {
@@ -19,6 +20,7 @@ sub get_user_class {
 
     return AccountMask->{Permanent} if $u->in_class('perm');
     return AccountMask->{Sponsored} if $u->in_class('sponsored');
+    return AccountMask->{TryNBuy} if $u->get_cap('trynbuy');    # TryNBuy should go before Paid
     return AccountMask->{Paid} if $u->get_cap('paid');
     return AccountMask->{Plus} if $u->in_class('plus');
     return AccountMask->{Basic};
