@@ -275,7 +275,7 @@ if ( $ENV{'LJ_MEMCACHE_PROFILE'} ) {
 
         $key =~ s/\b\d+\b/?/g;
 
-        print $logfile "[memcache-profile] $funcname($key) " .
+        print $logfile "$funcname($key) " .
                        ( defined $result ? '[hit]' : '[miss]' ) .
                        "\n";
     };
