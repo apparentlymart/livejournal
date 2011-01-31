@@ -353,8 +353,6 @@ sub can_screen {
 }
 
 sub can_unscreen {
-warn "Unscreen: " . $_[0]->{user};
-warn "CAN" if $_[0]->can_moderate($_[1]);
     return 0 if $_[0]->can_moderate($_[1]);
     return LJ::Talk::can_screen(@_);
 }
@@ -1140,8 +1138,7 @@ sub load_comments
                     $post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
                                                               $remote->{'userid'} == $uposterid ||
                                                               $remote->{'userid'} == $post->{'posterid'} ||
-                                                              $remote->can_manage($u) ||
-                                                              $remote->can_moderate($u) ));
+                                                              $remote->can_manage($u) ));
             }
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
