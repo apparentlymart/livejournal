@@ -4597,6 +4597,34 @@ tos.haveread=I have read and agree to the Terms of Service.
 
 tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
 
+trynbuy.expiring.notify_subject=LiveJournal paid account free trial
+
+trynbuy.expiring.notify_html<<
+Dear [[username]],<br>
+<br>
+We hope you enjoyed your free trial of LiveJournal Paid account. If you decide to upgrade to a Paid account, all of the settings and userpics you uploaded during your trial will be restored. . Just so you know, we have lots of flexible payment options. You can make a one-time manual payment of $5 for two months of Paid account service or sign up for automatic payments and get a full-year of LiveJournal Paid account time for $19.95.<br>
+<br>
+Thanks again!<br>
+<br>
+Regards,
+[[shortsite]] Team
+
+.
+
+trynbuy.expiring.notify_plain<<
+Dear [[username]],
+
+We hope you enjoyed your free trial of LiveJournal Paid account. If you decide to upgrade to a Paid account, all of the settings and userpics you uploaded during your trial will be restored. . Just so you know, we have lots of flexible payment options. You can make a one-time manual payment of $5 for two months of Paid account service or sign up for automatic payments and get a full-year of LiveJournal Paid account time for $19.95.
+
+Thanks again!
+
+Regards,
+[[shortsite]] Team
+
+.
+
+trynbuy.expiring.daysleft=You only have [[num]] [[?num|day|days]] left before your trial period ends
+
 twitter.disconnect_letter.subject=You are disconnected from twitter account
 
 twitter.disconnect_letter.body<<
@@ -7151,29 +7179,3 @@ widget.vgifts.title=Virtual Gifts
 
 widget.vgifts.viewall|staleness=1
 widget.vgifts.viewall=more
-
-trynbuy.expiring.notify_subject=LiveJournal paid account free trial
-
-trynbuy.expiring.notify_html<<
-Dear [[username]],<br>
-<br>
-We hope you enjoyed your free trial of LiveJournal Paid account. If you decide to upgrade to a Paid account, all of the settings and userpics you uploaded during your trial will be restored. . Just so you know, we have lots of flexible payment options. You can make a one-time manual payment of $5 for two months of Paid account service or sign up for automatic payments and get a full-year of LiveJournal Paid account time for $19.95.<br>
-<br>
-Thanks again!<br>
-<br>
-Regards,
-[[shortsite]] Team
-
-.
-
-trynbuy.expiring.notify_plain<<
-Dear [[username]],
-
-We hope you enjoyed your free trial of LiveJournal Paid account. If you decide to upgrade to a Paid account, all of the settings and userpics you uploaded during your trial will be restored. . Just so you know, we have lots of flexible payment options. You can make a one-time manual payment of $5 for two months of Paid account service or sign up for automatic payments and get a full-year of LiveJournal Paid account time for $19.95.
-
-Thanks again!
-
-Regards,
-[[shortsite]] Team
-
-.

@@ -472,7 +472,7 @@ body<=
     if ($given_cat eq "account") {
         my $account_stats = LJ::run_hook("settings_account_stats", $u);
         if ($account_stats) {
-            $ret .= "<div class='account_stats'>";
+            $ret .= "<div class='b-accstats'>";
             $ret .= $account_stats;
             $ret .= "</div>";
         }
