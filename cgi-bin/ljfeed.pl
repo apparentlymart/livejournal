@@ -527,6 +527,9 @@ sub create_view_atom
     unless ($opts->{'single_entry'}) {
         $feed = XML::Atom::Feed->new( Version => 1 );
         $xml  = $feed->{doc};
+        unless ($xml){
+            die "Error: XML-LibXML is required"; ## sudo yum install perl-XML-LibXML
+        }
 
         if ($u->should_block_robots) {
             $xml->getDocumentElement->setAttribute( "xmlns:idx", "urn:atom-extension:indexing" );
