@@ -830,6 +830,8 @@ sub is_closed {
             my $system = LJ::load_user('system');
             $comm->log_event('set_owner', { actiontarget => $winner->{userid}, remote => $system });
 
+            LJ::statushistory_add($comm, $system, 'set_owner', "Poll set owner as ".$winner->{user});
+
             ## Poll is closed. Emailing to all maintainers about it.
             my $subject = LJ::Lang::ml('poll.election.email.subject.closed');
             my $maintainers = LJ::load_rel_user($comm->userid, 'A');
