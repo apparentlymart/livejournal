@@ -141,7 +141,7 @@
         ## currently, the URL is for YouTube only.
         ## in future support for other quick embeds will be added.
         ## TODO: use oEmbed for YouTube (http://apiblog.youtube.com/2009/10/oembed-support.html)
-        if ($url =~ m!http://www.youtube.com/watch\?v=(\w+)! || $url =~ m!http://www.youtube.com/v/(\w+)!) {
+        if ($url =~ m!http://www.youtube.com/watch\?v=([\w\-]+)! || $url =~ m!http://www.youtube.com/v/([\w\-]+)!) {
             $event .= <<"EMBED";
 <object width="640" height="385"><param name="movie" value="http://www.youtube.com/v/$1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/$1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
 EMBED
