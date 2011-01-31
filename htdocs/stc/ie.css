@@ -245,9 +245,6 @@ __________________________________________*/
 * HTML .appwidget-recentcomments .userpic-img,
 * HTML .b-catalogue-item DD.b-catalogue-item-img IMG,
 * HTML #lj_controlstrip_userpic IMG,
-* HTML .appwidget-gamefriendsplaying .w-body .friends-playing-list LI .pic,
-* HTML .appwidget-gamefriendsactivity .w-body .friends-activity-list LI .pic,
-* HTML .appwidget-gamewhoplaying .w-body .who-playing-list LI .pic,
 * HTML .b-wishes-list DIV IMG,
 * HTML .whl-autocomplete-list .whl-autocomplete-img {
 	zoom:expression(
