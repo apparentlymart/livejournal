@@ -26,6 +26,16 @@ sub render_body {
         return "$pre $msg $post";
     };
     
+    if ($LJ::COPPA_CHECK && $error_msg->('underage')) {
+        return '<h1>' . $class->ml('widget.createaccount.error.underage.title') . '</h1>'
+               . $class->ml('widget.createaccount.error.underage.title') . '</h1>'
+               . $class->ml('widget.createaccount.error.underage.message')
+               . '<strong>' . $class->ml('widget.createaccount.error.underage.links') . '</strong>'
+               . $class->ml('widget.createaccount.error.underage.faq', { faq => $LJ::SITE_ROOT . '/support/faq.bml' })
+               . $class->ml('widget.createaccount.error.underage.ljhome', { ljhome =>  $LJ::SITE_ROOT } );
+        ;
+    }
+    
     # hooks
     LJ::run_hook('partners_registration_visited', $get->{from});
 
@@ -492,36 +502,35 @@ sub handle_post {
     ### start COPPA_CHECK
     # age checking to determine how old they are
     if ($LJ::COPPA_CHECK) {
-        my $uniq;
-        if ($LJ::UNIQ_COOKIES) {
-            $uniq = LJ::Request->notes('uniq');
-            if ($uniq) {
-                my $timeof = $dbh->selectrow_array('SELECT timeof FROM underage WHERE uniq = ?', undef, $uniq);
-                $is_underage = 1 if $timeof && $timeof > 0;
+        if (LJ::Request->cookie('undeage')){
+            $is_underage = 1;
+        }else{
+        
+            my ($year, $mon, $day) = ( $post->{bday_yyyy}+0, $post->{bday_mm}+0, $post->{bday_dd}+0 );
+            if ($year < 100 && $year > 0) {
+                $post->{bday_yyyy} += 1900;
+                $year += 1900;
             }
+    
+            my $nyear = (gmtime())[5] + 1900;
+    
+            # require dates in the 1900s (or beyond)
+            if ($year && $mon && $day && $year >= 1900 && $year < $nyear) {
+                my $age = LJ::TimeUtil->calc_age($year, $mon, $day);
+                if ($age < 13){
+                    $is_underage = 1;
+                    LJ::Request->set_cookie('undeage' => 1);
+                }else{
+                    $ofage = 1;
+                }
+            } else {
+                $from_post{errors}->{bday} = $class->ml('widget.createaccount.error.birthdate.invalid');
+            }
+            
         }
-
-        my ($year, $mon, $day) = ( $post->{bday_yyyy}+0, $post->{bday_mm}+0, $post->{bday_dd}+0 );
-        if ($year < 100 && $year > 0) {
-            $post->{bday_yyyy} += 1900;
-            $year += 1900;
-        }
-
-        my $nyear = (gmtime())[5] + 1900;
-
-        # require dates in the 1900s (or beyond)
-        if ($year && $mon && $day && $year >= 1900 && $year < $nyear) {
-            my $age = LJ::TimeUtil->calc_age($year, $mon, $day);
-            $is_underage = 1 if $age < 13;
-            $ofage = 1 if $age >= 13;
-        } else {
-            $from_post{errors}->{bday} = $class->ml('widget.createaccount.error.birthdate.invalid');
-        }
-
-        # note this unique cookie as underage (if we have a unique cookie)
-        if ($is_underage && $uniq) {
-            $dbh->do("REPLACE INTO underage (uniq, timeof) VALUES (?, UNIX_TIMESTAMP())", undef, $uniq);
-        }
+        
+        $from_post{errors}->{underage} = 1 
+            if $is_underage;
     }
     ### end COPPA_CHECK
 
