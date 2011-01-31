@@ -41,13 +41,15 @@ sub execute {
         next;
     }
 
-    #LJ::statushistory_add($u, $remote, "suspend", $reason);
     my $s_maints = LJ::load_rel_user($c->{userid}, 'S');
     my $s_maint_u = @$s_maints ? LJ::load_userid($s_maints->[0]) : undef;
     if ($s_maint_u) {
         LJ::clear_rel($c->{userid}, $s_maint_u->{userid}, 'S');
     }
 
+    $c->log_event('set_owner', { actiontarget => $u->{userid}, remote => $remote });
+
+    LJ::statushistory_add($c, $remote, 'set_owner', "Console set owner as ".$u->{user});
     LJ::set_rel($c->{userid}, $u->{userid}, 'S');
 
     $self->print("User '$user' setted as supermaintainer for '$comm'.");

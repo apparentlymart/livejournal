@@ -200,7 +200,11 @@ sub create_community {
 
     my $remote = LJ::get_remote();
     LJ::set_rel($u, $remote, "A");  # maintainer
+
     LJ::set_rel($u, $remote, "S");  # supermaintainer
+    $u->log_event('set_owner', { actiontarget => $remote->{userid}, remote => $remote });
+    LJ::statushistory_add($u, $remote, 'set_owner', "Set supermaintainer on created time as " . $remote->{user});
+
     LJ::set_rel($u, $remote, "M") if $opts{moderated} =~ /^[AF]$/; # moderator if moderated
     LJ::join_community($remote, $u, 1, 1); # member
 
