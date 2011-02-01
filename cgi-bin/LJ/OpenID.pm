@@ -3,6 +3,7 @@ package LJ::OpenID;
 use strict;
 use Digest::SHA1 qw(sha1 sha1_hex);
 use LWPx::ParanoidAgent;
+use Net::OpenID::Server;
 
 BEGIN {
     $LJ::OPTMOD_OPENID_CONSUMER = $LJ::OPENID_CONSUMER ? eval "use Net::OpenID::Consumer; 1;" : 0;
