@@ -2649,7 +2649,7 @@ sub can_delete_email {
     my $current = lc $u->email_raw;
     my $edge_age = $chains{$current}->{starting};
 
-    my $aim_value = $chains{lc $addr}->{starting};
+    my $aim_value = $chains{lc $addr->{email} }->{starting};
 
     return 0 unless defined $edge_age and $aim_value;
     return $aim_value > $edge_age;
