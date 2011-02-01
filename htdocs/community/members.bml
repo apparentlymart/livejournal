@@ -649,9 +649,14 @@ $LJ::SITEROOT
     if ($elect_poll_id) {
         $elect_poll = LJ::Poll->new($elect_poll_id);
     }
-    if ($elect_poll && !$elect_poll->is_closed) {
+    my $super_maintainer = LJ::load_rel_user_cache($c->{userid}, 'S') || [];
+    if (($elect_poll && !$elect_poll->is_closed) || not scalar @$super_maintainer) {
         %disabled = ( disabled => 'disabled' );
     }
+    if (not scalar @$super_maintainer && $LJ::DISABLED{'add_new_maintainers'}) {
+        %disabled = ( disabled => 'disabled' );
+    }
+    %disabled = () unless $LJ::DISABLED{'add_new_maintainers'};
     foreach(@users) {
         my %disabled_maint = ();
         if ($_->{'admin'} && !$remote->can_super_manage($c)) {
