@@ -162,6 +162,9 @@ sub _check_maintainers {
         my $u_id = $row->{'remoteid'};
         my $u = LJ::load_userid ($u_id);
         return $u if $u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90);
+    } else {
+        ## No "account_create" record. Start the election.
+        return undef;
     }
 
     $sth->execute($comm->{userid}, 'maintainer_add');
