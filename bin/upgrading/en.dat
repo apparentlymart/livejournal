@@ -4623,7 +4623,7 @@ Regards,
 
 .
 
-trynbuy.expiring.daysleft=You only have [[num]] [[?num|day|days]] left before your trial period ends
+trynbuy.expiring.daysleft=You only have <strong>[[num]]&nbsp;[[?num|day|days]]</strong> left before <em>your trial period ends</em>.
 
 twitter.disconnect_letter.subject=You are disconnected from twitter account
 
