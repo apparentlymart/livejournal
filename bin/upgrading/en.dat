@@ -6239,6 +6239,16 @@ widget.createaccount.tip.username=Your username is used in your journal URL. Use
 widget.createaccount.yearcheck|staleness=1
 widget.createaccount.yearcheck=The birth date you entered shows that you are under the age of 13. If this date is correct, then please proceed. But if it is not your actual date of birth, we suggest that you update the form with your real birth date. Some LiveJournal functionality is inaccessible for users under the age of 13 and you will need to complete one of the age verification processes described in this <a [[aopts]]>FAQ</a>
 
+widget.createaccount.error.underage.title=Age Verification
+
+widget.createaccount.error.underage.message=We no longer allow users under 13 to register for LiveJournal
+
+widget.createaccount.error.underage.links=Use the links to access more options
+
+widget.createaccount.error.underage.faq=You can read about it in <a href="[[faq]]">Faq</a>
+
+widget.createaccount.error.underage.ljhome=<a href="[[ljhome]]">LJ Home</a>
+
 widget.createaccountnextsteps.steps|staleness=1
 widget.createaccountnextsteps.steps=Now that your account is set up, you're ready to explore the rest of [[sitename]]. Here are some things to get you started:
 
