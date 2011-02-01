@@ -353,11 +353,13 @@ sub can_screen {
 }
 
 sub can_unscreen {
+    return 0 unless $_[0];
     return 0 if !($_[0]->can_manage($_[1]) || $_[0]->can_moderate($_[1])) && $_[0]->can_moderate($_[1]);
     return LJ::Talk::can_screen(@_);
 }
 
 sub can_view_screened {
+    return 0 unless $_[0];
     return 0 if $_[0]->can_moderate($_[1]);
     return LJ::Talk::can_delete(@_);
 }
@@ -367,6 +369,7 @@ sub can_freeze {
 }
 
 sub can_unfreeze {
+    return 0 unless $_[0];
     return 1 if $_[0]->can_moderate($_[1]);
     return LJ::Talk::can_unscreen(@_);
 }
