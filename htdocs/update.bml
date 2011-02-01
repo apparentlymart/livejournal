@@ -539,6 +539,7 @@ EMBED
                         "</ul>";
 
                     $$body .= LJ::Widget::GettingStarted->render;
+                    $$body .= LJ::Widget::Trynbuy->render(stage => 'simple');
                 }
 
                 $$body .= "</td><td style=\"padding-left: 2em;\">";
@@ -567,10 +568,11 @@ EMBED
     {
         my $ad_details;
         my $ad = LJ::get_ads({ location => 'bml.update/main', get_slots_params => \$ad_details, interests_extra => $qid ? { qotd => $qotd } : {} });
+        my $trynbuy = LJ::Widget::Trynbuy->render(stage => 'simple');
         if ($ad) {
             my $width = $ad_details->[-1]->{width};
             my $adunit = $ad_details->[-1]->{adunit};
-            $$body .= "<td class='$adunit' style='width: ${width}px; padding-left: 1em;'>$ad";
+            $$body .= "<td class='$adunit' style='width: ${width}px; padding-left: 1em;'>$ad $trynbuy";
         } else {
             $$body .= "<td>";
         }
