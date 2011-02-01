@@ -952,7 +952,7 @@ sub create_view_yadis {
         # Only people (not communities, etc) can be OpenID authenticated
         if ($person && LJ::OpenID->server_enabled) {
             $println->('    <Service priority="0">');
-            $println->('        <Type>http://specs.openid.net/auth/2.0/signon</Type>');
+            $println->('        <Type>http://specs.openid.net/auth/2.0</Type>');
             $println->('        <URI>'.LJ::ehtml($LJ::OPENID_SERVER).'</URI>');
             $println->('        <LocalID>'.LJ::ehtml($u->journal_base) . '/' .'</LocalID>');
             $println->('    </Service>');
