@@ -24,24 +24,23 @@ sub new
 
     my %opts = @_;
 
-    my $self = bless {
-        # arguments
-        catid     => delete $opts{catid},
-    };
-
-    croak("need to supply catid") unless defined $self->{catid};
+    my $catid = delete $opts{catid};
+    croak("need to supply catid") unless defined $catid;
 
     croak("unknown parameters: " . join(", ", keys %opts))
         if %opts;
 
     # do we have a singleton for this category?
     {
-        my $catid = $self->{catid};
-        return $singletons{$catid} if exists $singletons{$catid};
-
-        # save the singleton if it doesn't exist
-        $singletons{$catid} = $self;
+        my $cached = $singletons{$catid};
+        return $cached if $cached;
     }
+
+    my $self = bless {} => $class;
+    $self->{catid} = $catid;
+
+    # save the singleton if it doesn't exist
+    $singletons{$catid} = $self;
 
     return $self;
 }
@@ -647,6 +646,7 @@ sub preload_rows {
     }
 
     # weird, catids that we couldn't find in memcache or db?
+    $_->{_loaded_row} = 1 foreach values %need;
     #warn "unknown category: " . join(",", keys %need) if %need;
 
     # now memcache and request cache are both updated, we're done
