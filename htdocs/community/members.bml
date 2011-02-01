@@ -618,6 +618,8 @@ $LJ::SITEROOT
                     name => "uid_to_sm", style => "margin:0 5px",
                     selected => 0,
                     },
+                    { text => '',
+                    value => '',},
                     @users
                 );
 
