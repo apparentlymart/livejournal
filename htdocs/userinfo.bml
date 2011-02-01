@@ -1,3 +1,4 @@
+
 <?_code
 {
     use strict;
@@ -1166,7 +1167,7 @@
                 $body .= "<div class='inner_section_body' id='smaints_body'>" . $listusers->([map { $userhash{$_} } @$super_maintainers], 'smaint') . "</div>";
             }
 
-            $body .= "<p class='inner_section_header first'><span class='expandcollapse on' id='maints_header'>" . $arrowimg->("maints") .
+            $body .= "<p class='inner_section_header'><span class='expandcollapse on' id='maints_header'>" . $arrowimg->("maints") .
                      " $ML{'.label.maintainers'} (" . scalar @maintlist .
                      "):</span></p>";
             $body .= "<div class='inner_section_body' id='maints_body'>" . $listusers->(\@maintlist, 'maint') . "</div>";
