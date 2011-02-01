@@ -688,7 +688,7 @@ $LJ::SITEROOT
                 if ($key eq 'member' || $key eq 'post') {
                     $ret .= LJ::html_check({ name => "add_${_}_$key", selected => 1, });
                 } else {
-                    $ret .= LJ::html_check({ name => "add_${_}_$key", %disabled });
+                    $ret .= LJ::html_check({ name => "add_${_}_$key", $key =~ /admin/ ? %disabled : () });
                 }
                 $ret .= "</td>";
             }
