@@ -364,6 +364,8 @@
 
 .label.maintainers=Maintainers
 
+.label.super_maintainers=Owner
+
 .label.manageschools=Manage Schools
 
 .label.memberof=Member of
