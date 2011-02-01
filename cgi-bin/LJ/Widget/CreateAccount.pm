@@ -28,11 +28,10 @@ sub render_body {
     
     if ($LJ::COPPA_CHECK && $error_msg->('underage')) {
         return '<h1>' . $class->ml('widget.createaccount.error.underage.title') . '</h1>'
-               . $class->ml('widget.createaccount.error.underage.title') . '</h1>'
-               . $class->ml('widget.createaccount.error.underage.message')
-               . '<strong>' . $class->ml('widget.createaccount.error.underage.links') . '</strong>'
-               . $class->ml('widget.createaccount.error.underage.faq', { faq => $LJ::SITE_ROOT . '/support/faq.bml' })
-               . $class->ml('widget.createaccount.error.underage.ljhome', { ljhome =>  $LJ::SITE_ROOT } );
+               . '<p>' . $class->ml('widget.createaccount.error.underage.message') . '</p>'
+               . '<p><strong>' . $class->ml('widget.createaccount.error.underage.links') . '</strong></p>'
+               . '<p>' . $class->ml('widget.createaccount.error.underage.faq', { faq => $LJ::SITE_ROOT . '/support/faq.bml' }) . '</p>'
+               . '<p>' . $class->ml('widget.createaccount.error.underage.ljhome', { ljhome =>  $LJ::SITE_ROOT } ) . '</p>';
         ;
     }
     
