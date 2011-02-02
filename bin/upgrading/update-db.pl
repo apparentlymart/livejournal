@@ -622,6 +622,16 @@ sub populate_proplist_file {
               'ratelist' => 'name',
               );
 
+    my %propid_field = (
+        'categoryproplist'  => 'propid',
+        'logproplist'       => 'propid',
+        'pollproplist2'     => 'propid',
+        'ratelist'          => 'rlid',
+        'talkproplist'      => 'tpropid',
+        'usermsgproplist'   => 'propid',
+        'userproplist'      => 'upropid',
+    );
+
     my %noscope = (
         'ratelist' => 1,
     );
@@ -632,21 +642,45 @@ sub populate_proplist_file {
     my %vals;   # hash of column -> value, including primary key
     my $insert = sub {
         return unless %vals;
+
         my $sets = join(", ", map { "$_=" . $dbh->quote($vals{$_}) } keys %vals);
 
-        my $rv = $dbh->do("INSERT IGNORE INTO $table SET $sets");
-        die $dbh->errstr if $dbh->err;
+        my $row = $dbh->selectrow_hashref(qq{
+            SELECT * FROM $table WHERE $pk = ?
+        }, undef, $pkv);
 
-        # zero-but-true:  see if row didn't exist before, so above did nothing.
-        # in that case, update it.
-        if ($rv < 1) {
-            $rv = $dbh->do("UPDATE $table SET $sets WHERE $pk=?", undef, $pkv);
+        if ( defined $row ) {
+            # the row exists, let's update it
+            $dbh->do("UPDATE $table SET $sets WHERE $pk=?", undef, $pkv);
+            die $dbh->errstr if $dbh->err;
+        } else {
+            # find a propid for the row and then insert it
+
+            my $propid_field = $propid_field{$table};
+
+            my $existing_propids = $dbh->selectcol_arrayref(qq{
+                SELECT $propid_field FROM $table
+            });
+            die $dbh->errstr if $dbh->err;
+
+            my %existing_propids = map { $_ => 1 } @$existing_propids;
+
+            # find a "hole" in the set of propids, because
+            # we don't trust auto_increment enough
+            my $propid = 1;
+            $propid++ while exists $existing_propids{$propid};
+
+            # finally, insert
+            $dbh->do(qq{
+                INSERT INTO $table SET $propid_field = ?, $sets
+            }, undef, $propid);
             die $dbh->errstr if $dbh->err;
         }
 
         $table = undef;
         %vals = ();
     };
+
     while (<$fh>) {
         next if /^\#/;
 
