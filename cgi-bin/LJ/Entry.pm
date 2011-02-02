@@ -814,9 +814,12 @@ sub event_html
     $opts->{suspend_msg} = $suspend_msg;
     $opts->{unsuspend_supportid} = $suspend_msg ? $self->prop("unsuspend_supportid") : 0;
 
-    unless ($opts->{cuturl}){
-        $opts->{cuturl}     = $self->url;
+    if($opts->{no_cut_expand}) {
+        $opts->{expand_cut} = 0;
+        $opts->{cuturl} = $self->url . '?page=' . $opts->{page} . '&cut_expand=1';
+    } elsif (!$opts->{cuturl}) {
         $opts->{expand_cut} = 1;
+        $opts->{cuturl}     = $self->url;
     }
 
     $self->_load_text unless $self->{_loaded_text};

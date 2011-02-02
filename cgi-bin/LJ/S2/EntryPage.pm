@@ -483,7 +483,14 @@ sub EntryPage_entry
     }
 
     my $subject = $entry->subject_html;
-    my $event = $entry->event_html;
+    
+    my $no_cut_expand = !$get->{cut_expand} && $get->{page} && $get->{page} > 1 ? 1 : 0; 
+
+    my $event = $entry->event_html({
+        no_cut_expand   => $no_cut_expand,
+        page            => $get->{page},
+    });
+    
     if ($get->{'nohtml'}) {
         # quote all non-LJ tags
         $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;

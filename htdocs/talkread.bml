@@ -232,6 +232,12 @@ body<=
 
     my $event = $item->{'event'};
     my $suspend_msg = $entry && $entry->should_show_suspend_msg_to($remote) ? 1 : 0;
+    my $no_cut_expand = !$GET{cut_expand} && $GET{page} && $GET{page} > 1 ? 1 : 0;
+    
+    if($no_cut_expand) {
+    	$talkurl .= '?page=' . $GET{page} . '&cut_expand=1';
+    }
+     
     LJ::CleanHTML::clean_event(
         \$event,
         {
@@ -239,7 +245,7 @@ body<=
             suspend_msg         => $suspend_msg,
             unsuspend_supportid => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, 
             cuturl              => $talkurl, 
-            expand_cut          => 1,
+            expand_cut          => !$no_cut_expand,
         }
     );
     LJ::expand_embedded($u, $ditemid, $remote, \$event);
