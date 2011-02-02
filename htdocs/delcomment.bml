@@ -156,8 +156,9 @@ _info?><?_code
         'mark_spam'      => ( $remote != $poster ),
 
         # they can delete all comments posted by the same author
-        # if they are the entry author
-        'delete_author'  => ( $remote == $entry->poster ),
+        # if they are the entry author, and the comment being deleted
+        # has not been posted anonymously
+        'delete_author'  => $poster && ( $remote == $entry->poster ),
     );
 
     # so now that we have prepared everything, let's actually
