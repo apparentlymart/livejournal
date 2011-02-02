@@ -568,6 +568,11 @@ sub init {
 sub require_captcha_test {
     my ($commenter, $journal, $body, $ditemid, $nowrite) = @_;
 
+    ## LJSUP-7832: If user is a member of "http://community.livejournal.com/notaspammers/" 
+    ##             we shouldn't display captcha for him
+            
+    return if $commenter && LJ::check_rel($LJ::NOTASPAMMERS_COMM_UID, $commenter, 'P');
+
     ## allow some users (our bots) to post without captchas in any rate
     return if $commenter and 
               grep { $commenter->username eq $_ } @LJ::NO_RATE_CHECK_USERS;
