@@ -897,10 +897,14 @@ sub user_can_delete {
     return 0 unless LJ::isu($targetu);
 
     my $journalu = $self->journal;
-    my $posteru  = $self->poster;
-    my $poster   = $posteru ? $posteru->{user} : undef;
+    my $up       = $self->entry->poster; # "posting user"
+    my $userpost = $self->poster;        # "commenting user"
 
-    return LJ::Talk::can_delete($targetu, $journalu, $posteru, $poster);
+    if ( $userpost ) {
+        $userpost = $userpost->username;
+    }
+
+    return LJ::Talk::can_delete($targetu, $journalu, $up, $userpost);
 }
 
 sub remote_can_edit {
