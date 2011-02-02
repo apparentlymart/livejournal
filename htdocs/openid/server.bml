@@ -6,7 +6,7 @@ _info?><?_code
 
     use strict;
     use vars qw(%GET %POST);
-    
+
     my $remote = LJ::get_remote();
     
     ## Non-OpenID-compliant section: let trusted sites query remote user,
@@ -26,7 +26,10 @@ _info?><?_code
         }
     }
 
-    my $nos = LJ::OpenID::server(\%GET, \%POST);
+    ## OpenID 1.1 specs checkid_setup as a GET request, 
+    ## but there's nothing said about it in the OpenID 2.0 spec, 
+    ## other than that if sending a POST, all params must be in the POST body.
+    my $nos = LJ::OpenID::server({ %GET, %POST }, { %GET, %POST });
 
     my ($type, $data) = $nos->handle_page(redirect_for_setup => 1);
     if ($type eq "redirect") {
