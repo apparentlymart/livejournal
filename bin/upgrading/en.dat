@@ -3403,6 +3403,21 @@ Regards,
 [[shortsite]] Team
 .
 
+poll.election.not.need.subject=Supermaintainer choosen
+
+poll.election.not.need.html<<
+Dear [[username]],<br><br> 
+
+You are receiving this email because you are a maintainer of the community [[communityname]]. <br><br> 
+
+According to the history for this community, you has been designated as the owner of this community.<br><br> 
+
+You can read more about this role here: [[faqlink]]<br><br> 
+
+Regards,<br> 
+[[shortsite]] Team
+.
+
 poll.election.end.email<<
 Dear [[username]],
 

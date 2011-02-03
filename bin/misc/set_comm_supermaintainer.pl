@@ -121,6 +121,7 @@ foreach my $c (@$communities) {
         $comm->log_event('set_owner', { actiontarget => $user->{userid}, remote => $system });
         LJ::statushistory_add($comm, $system, 'set_owner', "LJ script set owner as ".$user->{user});
         LJ::set_rel($c->{userid}, $user->{userid}, 'S');
+        _send_email_to_sm ($comm, $user->{userid});
     } else {
         ## Search for maintainer via userlog
         _log "Search in userlog for creator or first alive maintainer\n";
@@ -130,6 +131,7 @@ foreach my $c (@$communities) {
             my $system = LJ::load_user('system');
             $comm->log_event('set_owner', { actiontarget => $u->{userid}, remote => $system });
             LJ::set_rel($c->{userid}, $u->{userid}, 'S');
+            _send_email_to_sm ($comm, $u->{userid});
             LJ::statushistory_add($comm, $system, 'set_owner', "LJ script set owner as ".$u->{user});
         } else {
             _log "Create poll for supermaintainer election\n";
@@ -145,6 +147,34 @@ foreach my $c (@$communities) {
         sleep 1;
         $i = 0;
     }
+}
+
+sub _send_email_to_sm {
+    my $comm = shift;
+    my $maint_id = shift;
+
+    my $subject = LJ::Lang::ml('poll.election.not.need.subject');
+    my $u = LJ::load_userid ($maint_id);
+    next unless $u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90);
+    _log "\tSend email to maintainer ".$u->user."\n";
+    LJ::send_mail({ 'to'        => $u->email_raw,
+                    'from'      => $LJ::ACCOUNTS_EMAIL,
+                    'fromname'  => $LJ::SITENAMESHORT,
+                    'wrap'      => 1,
+                    'charset'   => $u->mailencoding || 'utf-8',
+                    'subject'   => $subject,
+                    'html'      => (LJ::Lang::ml('poll.election.not.need.html', {
+                                            username        => LJ::ljuser($u),
+                                            communityname   => LJ::ljuser($comm),
+                                            faqlink         => '#',
+                                            shortsite       => $LJ::SITENAMESHORT,
+                                            authas          => $comm->{user},
+                                            siteroot        => $LJ::SITEROOT,
+                                        })
+                                    ),
+                });
+    ## We need a pause to change sender-id in mail headers
+    sleep 1;
 }
 
 sub _check_maintainers {
