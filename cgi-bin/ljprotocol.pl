@@ -196,7 +196,7 @@ sub error_message
     my $error =
       $e{$code} && ref $e{$code}
       ? ( ref $e{$code}->[1] eq 'CODE' ? $e{$code}->[1]->() : $e{$code}->[1] )
-      : "BUG: Unknown error code!";
+      : "BUG: Unknown error code ($code)!";
     $prefix = "Client error: " if $code >= 200;
     $prefix = "Server error: " if $code >= 500;
     my $totalerror = "$prefix$error";
@@ -1159,7 +1159,7 @@ sub login
             $sth->execute;
         }
     }
-    
+
     return $res;
 }
 
