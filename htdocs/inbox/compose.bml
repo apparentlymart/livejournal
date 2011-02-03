@@ -130,7 +130,7 @@ body<=
                 }
 
                 unless (@errors) {
-                    $body .= $ML{'.sent.title'}; #"Your message has been sent successfully.";
+                    $body .= $ML{'.sent.title'};
                     $body .= "<?p " . $ML{'.sent.nowyoucan'} . " <ul>";
                     $body .= "<li><a href='$LJ::SITEROOT/inbox/compose.bml'>" . $ML{'.sent.new'} . "</a></li>";
                     $body .= "<li><a href='$LJ::SITEROOT/inbox/'>" . $ML{'.sent.return'} . "</a></li>";
@@ -141,6 +141,8 @@ body<=
             }
         }
     }
+    
+    LJ::add_js_ml( userpic_title => $ML{'.userpic.title'} );
 
     # Display errors
     $body .= LJ::error_list(@errors) if (@errors);

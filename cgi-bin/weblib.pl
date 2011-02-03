@@ -1378,8 +1378,9 @@ sub res_includes {
     $ret .= qq {
         <script type="text/javascript">
             Site = window.Site || {};
-
-            (function(){
+    };
+    $ret .= '        Site.ml_text = ' .  LJ::JSON->to_json(\%LJ::JSML) . ";\n" if(%LJ::JSML);
+    $ret .= qq {            (function(){
                 var p = $site_params, i;
                 for (i in p) Site[i] = p[i];
             })();
@@ -2471,6 +2472,15 @@ sub get_body_class_for_service_pages {
         push @classes, 'framework-page';    
     } 
     return join(" ", @classes);
+}
+
+# Add some javascript language strings
+sub add_js_ml {
+    my %data = @_;
+    
+    for (keys %data) {
+        $LJ::JSML{$_} = $data{$_};
+    }
 }
 
 1;
