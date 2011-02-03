@@ -1235,6 +1235,9 @@ sub crossdomain_content
     <allow-access-from domain="*.livejournal.com"/>
     <allow-access-from domain="*.livejournal.ru"/>
     <allow-access-from domain="*.i-jet.ru"/>
+    <allow-access-from domain="*.i-jet-media.com"/>
+    <allow-access-from domain="*.bigfootgames.com.ua"/>
+    <allow-access-from domain="*.redspell.ru"/>
 </cross-domain-policy>';
     my $r = LJ::Request->request;
     $r->content_type('application/xml');
