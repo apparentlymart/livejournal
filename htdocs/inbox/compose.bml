@@ -200,7 +200,7 @@ body<=
     $body .= $pic;
 
     $body .= "<div id='metainfo'>";
-    $body .= '<p class="pkg"><label class="left">To:</label> ';
+    $body .= '<p class="pkg"><label class="left">' . $ML{'.title.to'} . '</label> ';
 
     if ($disabled_to) {
         $body .= "$reply_to";
@@ -239,7 +239,7 @@ body<=
     $body .= "<textarea name='msg_body' rows=6 cols=55 wrap=soft>";
     $body .= LJ::strip_html($POST{'msg_body'} || $msg_body);
     $body .= "</textarea><br />";
-    $body .= "<span class='helper'>Up to " . LJ::commafy($msg_limit) . " characters. Plain text, no HTML.";
+    $body .= "<span class='helper'>" . $ML{'.title.textlimit'};
     $body .= "</span></div>\n";
 
     $body .= $msg_parent;
