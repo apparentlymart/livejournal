@@ -248,7 +248,8 @@ __________________________________________*/
 * HTML .b-catalogue-item DD.b-catalogue-item-img IMG,
 * HTML #lj_controlstrip_userpic IMG,
 * HTML .b-wishes-list DIV IMG,
-* HTML .whl-autocomplete-list .whl-autocomplete-img {
+* HTML .whl-autocomplete-list .whl-autocomplete-img,
+* HTML .appwidget-wishrecommendations .whl-rec-img {
 	zoom:expression(
 			function(t){
 				t.runtimeStyle.zoom = 1;
@@ -387,14 +388,15 @@ __________________________________________*/
 .whl-bar,
 .whl-items,
 .whl-item,
-.whl-item-def {
+.whl-item-def,
+.appwidget-wishrecommendations .whl-rec-item {
 	zoom: 1;
 	}
 * HTML .whl-edit-want .whl-select {
-	left: 649px;
+	left: 630px;
 	}
 * HTML .whl-edit-privacy .whl-select {
-	left: 646px;
+	left: 627px;
 	}
 * HTML .whl-edit-options .whl-popup-close {
 	right: 10px;
