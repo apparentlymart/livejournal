@@ -2618,8 +2618,8 @@ sub getevents
 
     ### shared-journal support
     my $posterid = $u->{'userid'};
-    my $ownerid = $flags->{'ownerid'};
-
+    my $ownerid = $req->{journalid} || $flags->{'ownerid'};
+    
     my $dbr = LJ::get_db_reader();
     my $sth;
 
@@ -2633,6 +2633,24 @@ sub getevents
     if (ref $reject_code eq "CODE") {
         my $errmsg = $reject_code->($req, $flags, eval { LJ::request->request });
         if ($errmsg) { return fail($err, "311", $errmsg); }
+    }
+
+    my $secmask = 0;
+    if ($u && ($u->{'journaltype'} eq "P" || $u->{'journaltype'} eq "I") && $posterid != $ownerid) {
+        $secmask = LJ::get_groupmask($ownerid, $posterid);
+    }
+
+    # decide what level of security the remote user can see
+    # 'getevents' used in small count of places and we will not pass 'viewall' through their call chain
+    my $secwhere = "";
+    if ($posterid == $ownerid) {
+        # no extra where restrictions... user can see all their own stuff
+    } elsif ($secmask) {
+        # can see public or things with them in the mask
+        $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $secmask != 0) OR posterid=$posterid)";
+    } else {
+        # not a friend?  only see public.
+        $secwhere = "AND (security='public' OR posterid=$posterid)";
     }
 
     # if this is on, we sort things different (logtime vs. posttime)
@@ -2745,7 +2763,7 @@ sub getevents
 
         my %item;
         $sth = $dbcr->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
-                              "journalid=? and logtime > ?");
+                              "journalid=? and logtime > ? $secwhere");
         $sth->execute($ownerid, $date);
         while (my ($id, $dt) = $sth->fetchrow_array) {
             $item{$id} = $dt;
@@ -2788,7 +2806,7 @@ sub getevents
 
         my %item;
         $sth = $dbcr->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
-                              "journalid=? and logtime < ? LIMIT $itemselect");
+                              "journalid=? AND logtime < ? $secwhere LIMIT $itemselect");
         $sth->execute($ownerid, $before);
         while (my ($id, $dt) = $sth->fetchrow_array) {
             $item{$id} = $dt;
@@ -2820,24 +2838,6 @@ sub getevents
     else
     {
         return fail($err,200,"Invalid selecttype.");
-    }
-
-    my $secmask = 0;
-    if ($u && ($u->{'journaltype'} eq "P" || $u->{'journaltype'} eq "I") && $posterid != $ownerid) {
-        $secmask = LJ::get_groupmask($ownerid, $posterid);
-    }
-
-    # decide what level of security the remote user can see
-    # 'getevents' used in small count of places and we will not pass 'viewall' through their call chain
-    my $secwhere = "";
-    if ($posterid == $ownerid) {
-        # no extra where restrictions... user can see all their own stuff
-    } elsif ($secmask) {
-        # can see public or things with them in the mask
-        $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $secmask != 0) OR posterid=$posterid)";
-    } else {
-        # not a friend?  only see public.
-        $secwhere = "AND (security='public' OR posterid=$posterid)";
     }
 
     # common SQL template:
