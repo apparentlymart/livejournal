@@ -142,7 +142,7 @@ body<=
         }
     }
     
-    LJ::add_js_ml( userpic_title => $ML{'.userpic.title'} );
+    LJ::need_string(['.userpic.title', 'userpic_title']);
 
     # Display errors
     $body .= LJ::error_list(@errors) if (@errors);

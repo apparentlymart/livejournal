@@ -2475,11 +2475,22 @@ sub get_body_class_for_service_pages {
 }
 
 # Add some javascript language strings
-sub add_js_ml {
-    my %data = @_;
-    
-    for (keys %data) {
-        $LJ::JSML{$_} = $data{$_};
+sub need_string {
+    my @strings = @_;
+  
+    for my $item (@strings) {
+        # When comes as a hash should be treated as key => value
+        if(ref $item eq 'HASH') {
+            for my $key (keys %$item) {
+                $LJ::JSML{$key} = $item->{$key};
+            }
+        # When handling array, name the ml by the value of the second element
+        } elsif(ref $item eq 'ARRAY') {
+            $LJ::JSML{$$item[1]} = LJ::Lang::ml($$item[0]);
+        # If scalar - use the ml named this way
+        } else {
+            $LJ::JSML{$item} = LJ::Lang::ml($item);
+        }
     }
 }
 
