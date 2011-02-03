@@ -60,6 +60,11 @@ body<=
         $sess_opts->{'exptype'} = "long";
     }
 
+    # send out a P3P header thing so as to work around IE's
+    # unwillingness to receive our cookies while we're in an iframe
+    # affects the partner sites authorization
+    LJ::Session->allow_login_from_iframe;
+
     $u->make_login_session($sess_opts->{'exptype'}, $sess_opts->{'ipfixed'});
     LJ::set_remote($u);
 
