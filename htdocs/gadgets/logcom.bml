@@ -82,6 +82,10 @@
           stc/partners/login.css
         ));
 
+        # send out a P3P header thing so as to work around IE's
+        # unwillingness to receive our cookies while we're in an iframe
+        LJ::Session->allow_login_from_iframe;
+
         my $w = LJ::Widget::LoginMulti->new;
         $w->{'no_container_div'} = 1;
 
