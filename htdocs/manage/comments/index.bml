@@ -227,7 +227,7 @@ _code?>
         {
             # opts
             $POST{'opt_getselfemail'} = $POST{'opt_getselfemail'} ? 1 : 0;
-            $POST{'opt_whoscreened'}    = "N" unless $POST{'opt_whoscreened'}    =~ /^[NRFA]$/;
+            $POST{'opt_whoscreened'}    = "L" unless $POST{'opt_whoscreened'}    =~ /^[NRFAL]$/;
             $POST{'opt_show_captcha_to'}= "N" unless $POST{'opt_show_captcha_to'}=~ /^[NRFA]$/;
             $POST{'opt_logcommentips'}  = "N" unless $POST{'opt_logcommentips'}  =~ /^[NSA]$/;
 
