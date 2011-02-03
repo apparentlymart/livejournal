@@ -2479,12 +2479,12 @@ sub need_string {
     my @strings = @_;
   
     for my $item (@strings) {
-        # When comes as a hash should be treated as key => value
+        # When comes as a hash ref, should be treated as name => value
         if(ref $item eq 'HASH') {
             for my $key (keys %$item) {
                 $LJ::JSML{$key} = $item->{$key};
             }
-        # When handling array, name the ml by the value of the second element
+        # When handling array ref, name the ml by the value of the second element
         } elsif(ref $item eq 'ARRAY') {
             $LJ::JSML{$$item[1]} = LJ::Lang::ml($$item[0]);
         # If scalar - use the ml named this way
