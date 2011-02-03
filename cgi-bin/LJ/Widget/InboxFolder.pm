@@ -86,12 +86,12 @@ sub render_body {
                     <td class="actions" colspan="2">
                         <span class="Pages">
                             Page $page of $last_page
-                            <input type="button" id="Page_Prev_$sfx" value="Previous" $prev_disabled />
-                            <input type="button" id="Page_Next_$sfx" value="Next" $next_disabled />
+                            <input type="button" id="Page_Prev_$sfx" value="$BML::ML{'.btn.prev'}" $prev_disabled />
+                            <input type="button" id="Page_Next_$sfx" value="$BML::ML{'.btn.prev'}" $next_disabled />
                         </span>
-                        <input type="submit" name="markRead_$sfx" value="Read" $disabled id="${name}_MarkRead_$sfx" />
-                        <input type="submit" name="markUnread_$sfx" value="Unread" id="${name}_MarkUnread_$sfx" />
-                        <input type="submit" name="delete_$sfx" value="Delete" id="${name}_Delete_$sfx" />
+                        <input type="submit" name="markRead_$sfx" value="$BML::ML{'.btn.read'}" $disabled id="${name}_MarkRead_$sfx" />
+                        <input type="submit" name="markUnread_$sfx" value="$BML::ML{'.btn.unread'}" id="${name}_MarkUnread_$sfx" />
+                        <input type="submit" name="delete_$sfx" value="$BML::ML{'.btn.delete'}" id="${name}_Delete_$sfx" />
                     </td>
             </tr>
         };

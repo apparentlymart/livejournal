@@ -2,3 +2,11 @@
 .suspended.cannot.send|staleness=1
 .suspended.cannot.send=Suspended accounts are not allowed to send private messages
 
+.title.subject=Subject:
+.title.send=Send
+
+.sent.title=Your message has been sent successfully.
+.sent.nowyoucan=From here you can
+.sent.new=Send a new message
+.sent.return=Return to Inbox
+.sent.returnhome=Return Home

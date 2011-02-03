@@ -50,3 +50,8 @@
 .title|staleness=1
 .title=Inbox
 
+.btn.read=read
+.btn.unread=unread
+.btn.delete=delete
+.btn.prev=Previous
+.btn.next=Next

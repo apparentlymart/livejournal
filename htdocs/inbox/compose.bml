@@ -130,11 +130,11 @@ body<=
                 }
 
                 unless (@errors) {
-                    $body .= "Your message has been sent successfully.";
-                    $body .= "<?p From here you can:<ul>";
-                    $body .= "<li><a href='$LJ::SITEROOT/inbox/compose.bml'>Send a new message</a></li>";
-                    $body .= "<li><a href='$LJ::SITEROOT/inbox/'>Return to Inbox</a></li>";
-                    $body .= "<li><a href='$LJ::SITEROOT/'>Return Home</a></li>";
+                    $body .= $ML{'.sent.title'}; #"Your message has been sent successfully.";
+                    $body .= "<?p " . $ML{'.sent.nowyoucan'} . " <ul>";
+                    $body .= "<li><a href='$LJ::SITEROOT/inbox/compose.bml'>" . $ML{'.sent.new'} . "</a></li>";
+                    $body .= "<li><a href='$LJ::SITEROOT/inbox/'>" . $ML{'.sent.return'} . "</a></li>";
+                    $body .= "<li><a href='$LJ::SITEROOT/'>" . $ML{'.sent.returnhome'} . "</a></li>";
                     $body .= "</ul> p?>\n";
                     return $body;
                 }
@@ -227,7 +227,7 @@ body<=
     # The drop-down userpic menu
     $body .= $picform . "</div>";
 
-    $body .= "<div class='inbox_formmes'><p><label class='subj-l'>Subject:</label> ";
+    $body .= "<div class='inbox_formmes'><p><label class='subj-l'>" . $ML{'.title.subject'} . "</label> ";
     $body .= LJ::html_text({
                 name    => 'msg_subject',
                 size    => '50',
@@ -248,7 +248,7 @@ body<=
                 value => 'send',
              });
 
-    $body .= LJ::html_submit("Send");
+    $body .= LJ::html_submit($ML{'.title.send'});
     $body .= "</form></div>";
     $body .= qq{
         </td></tr></table>
