@@ -1375,17 +1375,19 @@ sub res_includes {
     my $site_params = LJ::js_dumper(\%site);
 
     # include standard JS info
-    $ret .= qq {
-        <script type="text/javascript">
-            Site = window.Site || {};
-    };
-    $ret .= '        Site.ml_text = ' .  LJ::JSON->to_json(\%LJ::JSML) . ";\n" if(%LJ::JSML);
-    $ret .= qq {            (function(){
-                var p = $site_params, i;
-                for (i in p) Site[i] = p[i];
-            })();
-       </script>
-    } unless $only_needed;
+    unless ( $only_needed ) {
+        my $jsml_out = LJ::JSON->to_json(\%LJ::JSML);
+        $ret .= qq {
+            <script type="text/javascript">
+                Site = window.Site || {};
+                Site.ml_text = $jsml_out;
+                (function(){
+                    var p = $site_params, i;
+                    for (i in p) Site[i] = p[i];
+                })();
+           </script>
+        };
+    }
 
     my $now = time();
     my %list;   # type -> condition -> args -> [list of files];
