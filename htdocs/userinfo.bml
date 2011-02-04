@@ -1539,7 +1539,7 @@
         }
     }
 
-    unless ($LJ::DISABLED{'userapps'}) {
+    if (LJ::is_enabled('userapps') && ($u->is_personal || $u->is_identity)) {
         my $apps_list = LJ::JSON->from_json($u->prop('userapps_authorized')||'{}');
         my @userapps;
 
