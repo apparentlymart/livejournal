@@ -2592,9 +2592,13 @@ img.btn_freeze=Freeze
 
 img.btn_scr=Screen
 
+img.btn_spam=Spam
+
 img.btn_unfreeze=Unfreeze
 
 img.btn_unscr=Unscreen
+
+img.btn_unspam=Not Spam
 
 img.btn_up=Up
 
@@ -3737,7 +3741,7 @@ setting.birthdaydisplay.error.invalid=Invalid option
 setting.birthdaydisplay.question=Birthday display options:
 
 setting.commentcaptcha.label|staleness=1
-setting.commentcaptcha.label=Anti-Spam
+setting.commentcaptcha.label=CAPTCHA
 
 setting.commentcaptcha.option|staleness=1
 setting.commentcaptcha.option=Show CAPTCHA to

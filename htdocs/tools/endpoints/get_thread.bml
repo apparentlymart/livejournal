@@ -161,6 +161,8 @@
             get_root_only     => $GET{single} ? 1 : 0,
             show_link_all     => 1,
             depth             => $GET{depth} || 0,
+            mode              => $GET{mode},
+            from_rpc          => 1,
         },
         $output
     );

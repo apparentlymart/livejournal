@@ -390,6 +390,7 @@
     my %ajaxmapping = (
                        delcomment     => "delcomment.bml",
                        talkscreen     => "talkscreen.bml",
+                       spamcomment    => "spamcomment.bml",
                        controlstrip   => "tools/endpoints/controlstrip.bml",
                        ctxpopup       => "tools/endpoints/ctxpopup.bml",
                        changerelation => "tools/endpoints/changerelation.bml",

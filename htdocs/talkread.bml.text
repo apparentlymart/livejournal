@@ -39,6 +39,8 @@
 
 .select=Select
 
+.spamedpost=<b>(Spam)</b>
+
 .subjectdeleted=[deleted]
 
 .talkmulti.all|staleness=1

@@ -33,6 +33,20 @@ $img{'btn_del'} = {
     'alt' => 'img.btn_del',
 };
 
+$img{'btn_spam'} = {
+    'src' => '/btn_spam.gif?v=1',
+    'width' => 24,
+    'height' => 24,
+    'alt' => 'img.btn_spam',
+};
+
+$img{'btn_unspam'} = {
+    'src' => '/btn_unspam.gif?v=1',
+    'width' => 24,
+    'height' => 24,
+    'alt' => 'img.btn_unspam',
+};
+
 $img{'btn_freeze'} = {
     'src' => '/btn_freeze.gif?v=1',
     'width' => 24,

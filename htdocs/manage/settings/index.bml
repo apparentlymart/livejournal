@@ -108,6 +108,7 @@ body<=
                 LJ::Setting::NotifyWeblogs
                 LJ::Setting::EnableComments
                 LJ::Setting::CommentScreening
+                LJ::Setting::SpamProtection
                 LJ::Setting::CommentCaptcha
                 LJ::Setting::CommentIP
                 LJ::Setting::Display::BanUsers
