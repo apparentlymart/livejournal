@@ -393,6 +393,7 @@ sub ensure_cookie_value {
     my $domain = LJ::Request->header_in("Host");
     my ($subdomain) = $domain =~ m|^(.+?)\.\Q$LJ::DOMAIN\E|;
     return if $subdomain and $LJ::COOKIE_FREE_DOMAINS{$subdomain};
+    return if LJ::Request->uri() =~ m|^/robots.txt|;
 
     my ($uniq, $uniq_time, $uniq_extra) = $class->parts_from_cookie;
 
