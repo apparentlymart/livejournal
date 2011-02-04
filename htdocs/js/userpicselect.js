@@ -449,6 +449,6 @@ UserpicSelect.userpics = "\
 // Copied here from entry.js
 function insertViewThumbs() {
     var lj_userpicselect = $('lj_userpicselect');
-    lj_userpicselect.innerHTML = 'View Thumbnails';
+    lj_userpicselect.innerHTML = Site.ml_text.userpic_title;
 }
 
