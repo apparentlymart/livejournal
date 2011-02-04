@@ -72,6 +72,17 @@ sub EntryPage
                     js/thread_expander.js
                     ));
 
+    if($remote) {
+        LJ::need_string(qw/ comment.delete.q
+                            comment.cancel
+                            comment.delete
+                            comment.delete.all
+                            comment.delete.all.sub
+                            comment.ban.user
+                            comment.mark.spam
+                            comment.delete/);
+    }
+
     $p->{'entry'} = $s2entry;
     LJ::run_hook('notify_event_displayed', $entry);
 

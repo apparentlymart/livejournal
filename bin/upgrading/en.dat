@@ -38,6 +38,15 @@ cleanhtml.suspend_msg=This is a suspended entry.
 cleanhtml.suspend_msg_with_supportid|staleness=1
 cleanhtml.suspend_msg_with_supportid=This is a suspended entry. <a [[aopts]]>An unsuspension request</a> has been opened, and your entry will be reviewed soon.
 
+comment.delete.q=Delete comment?
+comment.cancel=Delete
+comment.delete=Delete
+comment.delete.all=Delete all %username% comments in this post
+comment.delete.all.sub=Delete thread (all subcomments)
+comment.ban.user=Ban %username% from commenting
+comment.mark.spam=Mark this comment as spam
+comment.delete=Delete comment? 
+
 contentflag.viewingconcepts|staleness=1
 contentflag.viewingconcepts=You are about to view content that may not be appropriate for minors.
 

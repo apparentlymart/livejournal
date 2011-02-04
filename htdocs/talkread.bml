@@ -1,7 +1,6 @@
 <?page
 body<=
 <?_code
-
     use strict;
     use vars qw($r_head $r_title %GET %ML $r_bodyopts);
 
@@ -221,6 +220,17 @@ body<=
         LJ::need_res(qw(
             js/quickreply.js
         ));
+    }
+    
+    if($remote) {
+        LJ::need_string(qw/ comment.delete.q
+                            comment.cancel
+                            comment.delete
+                            comment.delete.all
+                            comment.delete.all.sub
+                            comment.ban.user
+                            comment.mark.spam
+                            comment.delete/);
     }
 
     my $showmultiform = $remote &&
