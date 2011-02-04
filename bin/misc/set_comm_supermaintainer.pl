@@ -61,7 +61,7 @@ $dbr->{ShowErrorStatement} = 1;
 
 my $where = @ARGV ? " AND user IN('".join("','",@ARGV)."') " : '';
 $verbose = 1 if @ARGV;
-my $communities = $dbr->selectall_arrayref ("SELECT userid, user FROM user WHERE status <> 'X' AND journaltype = 'C'$where", { Slice => {} });
+my $communities = $dbr->selectall_arrayref ("SELECT userid, user FROM user WHERE statusvis <> 'X' AND clusterid != 0 AND journaltype = 'C'$where", { Slice => {} });
 
 sub _log {
     print @_ if $verbose;
