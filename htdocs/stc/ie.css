@@ -393,10 +393,10 @@ __________________________________________*/
 	zoom: 1;
 	}
 * HTML .whl-edit-want .whl-select {
-	left: 630px;
+	left: 631px;
 	}
 * HTML .whl-edit-privacy .whl-select {
-	left: 627px;
+	left: 628px;
 	}
 * HTML .whl-edit-options .whl-popup-close {
 	right: 10px;
@@ -420,6 +420,10 @@ __________________________________________*/
 	}
 * HTML .whl-autocomplete {
 	left: 157px;
+	}
+.whl-autocomplete-list .whl-autocomplete-item {
+	zoom: 1;
+	display: inline;
 	}
 
 /* New controlstrip
