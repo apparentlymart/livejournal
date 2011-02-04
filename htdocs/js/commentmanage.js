@@ -300,7 +300,7 @@ function createDeleteFunction (ae, dItemid, isS1) {
                 finalHeight -= 15;
             }
 
-            inHTML += "<input type='button' value='Delete' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /> <input type='button' value='Cancel' onclick='killPopup()' /></span><br /><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>Shift+click to delete without options</div></form>";
+            inHTML += "<input type='button' value='Delete' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /></span><br /><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>Shift+click to delete without options</div></form>";
 			
 			de.find('.ljcmtmanage-content').html(inHTML).end().insertAfter(ae);
 			
@@ -311,8 +311,7 @@ function createDeleteFunction (ae, dItemid, isS1) {
 				left: left,
 				top: top,
 				height: 10,
-				visibility: 'visible',
-				overflow: 'hidden'
+				visibility: 'visible'
 			});
 			
 			curPopup = de[0];
