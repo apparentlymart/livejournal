@@ -437,6 +437,7 @@ sub text_trim
 }
 
 # trim string, but not truncate in middle of the word
+# Deprecated. Use LJ::Text->truncate_to_word_with_ellipsis
 sub trim_at_word
 {
     my ($text, $char_max) = @_;

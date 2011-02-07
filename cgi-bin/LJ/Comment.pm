@@ -862,6 +862,11 @@ sub is_deleted {
     return $self->state eq 'D' ? 1 : 0;
 }
 
+sub is_spam {
+    my $self = shift;
+    return $self->state eq 'B' ? 1 : 0;
+}
+
 sub is_frozen {
     my $self = shift;
     return $self->state eq 'F' ? 1 : 0;

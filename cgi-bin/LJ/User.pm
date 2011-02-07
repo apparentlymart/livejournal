@@ -2212,7 +2212,7 @@ sub get_recent_talkitems {
             "SELECT jtalkid, nodetype, nodeid, parenttalkid, ".
             "       posterid, UNIX_TIMESTAMP(datepost) as 'datepostunix', state ".
             "FROM talk2 ".
-            "WHERE journalid=? AND state <> 'D' " .
+            "WHERE journalid=? AND (state <> 'D' AND state <> 'B') " .
             "ORDER BY jtalkid DESC ".
             "LIMIT $max_fetch"
         ); 

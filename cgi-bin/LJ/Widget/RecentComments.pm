@@ -3,6 +3,7 @@ package LJ::Widget::RecentComments;
 use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
+use LJ::Text;
 
 sub need_res {
     return qw( stc/widgets/recentcomments.css );
@@ -43,7 +44,7 @@ sub render_body {
 
         # load the comment
         my $comment = LJ::Comment->new($u, jtalkid => $row->{jtalkid});
-        next if $comment->is_deleted;
+        next if $comment->is_deleted || $comment->is_spam;
 
         # load the comment poster
         my $posteru = $comment->poster;
@@ -55,7 +56,7 @@ sub render_body {
         my $class_name = ($ct == scalar(@comments) - 1) ? "last" : "";
 
         my $subject = $entry->subject_text ? $entry->subject_text : $class->ml('widget.recentcomments.nosubject');
-        my $body_part = substr($comment->body_text, 0, 250) . "&nbsp;";
+        my $body_part = LJ::Text->truncate_to_word_with_ellipsis( 'str'=>$comment->body_text, 'chars'=>150 ) . "&nbsp;";
 
         # prevent BML tags interpretation inside comment subject/body
         $subject =~ s/<\?/&lt;?/g;
