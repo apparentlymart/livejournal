@@ -796,7 +796,10 @@ sub make_preview {
     my $cleansubject = $form->{'subject'};
     LJ::CleanHTML::clean_subject(\$cleansubject);
 
-    $ret .= "<?h1 $BML::ML{'/talkpost_do.bml.preview.title'} h1?><?p $BML::ML{'/talkpost_do.bml.preview'} p?><?hr?>";
+    $ret .= '<h1>' . LJ::Lang::ml('/talkpost_do.bml.preview.title') . '</h1>' .
+            '<p>'  . LJ::Lang::ml('/talkpost_do.bml.preview')       . '</p>' .
+            '<hr/>';
+
     $ret .= "<div align=\"center\"><b>(<a href=\"$talkurl\">$BML::ML{'talk.commentsread'}</a>)</b></div>";
 
     my $event = $form->{'body'};
@@ -806,7 +809,7 @@ sub make_preview {
     my $cleanok = LJ::CleanHTML::clean_comment(\$event, $form->{'prop_opt_preformatted'});
     if (defined($cleanok) && $LJ::SPELLER && $form->{'do_spellcheck'}) {
         my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
-                                     'color' => '<?hotcolor?>', };
+                                     'color' => '#ff0000', };
         $spellcheck_html = $s->check_html(\$event);
     }
 
@@ -853,11 +856,11 @@ sub make_preview {
     $ret .= LJ::help_icon_html("noautoformat", " ");
     $ret .= "</p>";
 
-    $ret .= "<p> <?de $BML::ML{'/talkpost.bml.allowedhtml'}: ";
+    $ret .= "<p> <span class='de'> $BML::ML{'/talkpost.bml.allowedhtml'}: ";
     foreach (sort &LJ::CleanHTML::get_okay_comment_tags()) {
         $ret .= "&lt;$_&gt; ";
     }
-    $ret .= "de?> </p>";
+    $ret .= "</span> </p>";
 
     $ret .= "</form></div>";
     return $ret;
