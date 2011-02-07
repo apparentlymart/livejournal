@@ -2006,6 +2006,13 @@ sub friendsfriends_url {
     return $u->journal_base . "/friendsfriends";
 }
 
+sub wishlist_url {
+    my $u = shift;
+    croak "invalid user object passed" unless LJ::isu($u);
+
+    return $u->journal_base . "/wishlist";
+}
+
 sub profile_url {
     my ($u, %opts) = @_;
 
