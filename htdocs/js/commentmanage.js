@@ -60,6 +60,16 @@ function multiformSubmit (form, txt) {
     }
 }
 
+function getLocalizedStr( key, username ) {
+    var str = "";
+    if( key in Site.ml_text ) {
+        str = Site.ml_text[ key ];
+        str = str.replace( '%username%', username );
+    }
+
+    return str;
+}
+
 // hsv to rgb
 // h, s, v = [0, 1), [0, 1], [0, 1]
 // r, g, b = [0, 255], [0, 255], [0, 255]
@@ -271,36 +281,36 @@ function createDeleteFunction (ae, dItemid, isS1) {
 							e.stopPropagation()
 						});
 			
-            var inHTML = "<form style='display: inline' id='ljdelopts" + dItemid + "'><span style='font-face: Arial; font-size: 8pt'><strong>Delete comment?</strong><br />";
+            var inHTML = "<form style='display: inline' id='ljdelopts" + dItemid + "'><span style='font-face: Arial; font-size: 8pt'><strong>" + getLocalizedStr( 'comment.delete.q', com.u ) + "</strong><br />";
             var lbl;
             if (com.username != "" && com.username != remoteUser && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "ban";
-                inHTML += "<input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>Ban <b>" + com.u + "</b> from commenting</label><br />";
+                inHTML += "<input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.ban.user', com.u ) + "</label><br />";
             } else {
                 finalHeight -= 15;
             }
 
             if (remoteUser != com.username) {
                 lbl = "ljpopdel" + dItemid + "spam";
-                inHTML += "<input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>Mark this comment as spam</label><br />";
+                inHTML += "<input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.mark.spam', com.u ) + "</label><br />";
             } else {
                 finalHeight -= 15;
             }
 
             if (com.rc && com.rc.length && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "thread";
-                inHTML += "<input type='checkbox' name='delthread' id='" + lbl + "'> <label for='" + lbl + "'>Delete thread (all subcomments)</label><br />";
+                inHTML += "<input type='checkbox' name='delthread' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all.sub', com.u ) + "</label><br />";
             } else {
                 finalHeight -= 15;
             }
             if (canAdmin&&com.username) {
                 lbl = "ljpopdel" + dItemid + "author";
-                inHTML += "<input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>Delete all <b>" + (com.username == remoteUser ? 'my' : com.u) + "</b> comments in this post</label><br />";
+                inHTML += "<input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all.sub', "<b>" + ( (com.username == remoteUser ? 'my' : com.u) ) + "</b>" ) + "</label><br />";
             } else {
                 finalHeight -= 15;
             }
 
-            inHTML += "<input type='button' value='Delete' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /></span><br /><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>Shift+click to delete without options</div></form>";
+            inHTML += "<input type='button' value='" + getLocalizedStr( 'comment.delete', com.u ) + "' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /></span><br /><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', com.u ) + "</div></form>";
 			
 			de.find('.ljcmtmanage-content').html(inHTML).end().insertAfter(ae);
 			
@@ -402,7 +412,7 @@ function createModerationFunction(ae, dItemid, isS1)
 			pos = { x: e.pageX, y: e.pageY },
 			postUrl = ae.href.replace(/.+talkscreen\.bml/, LiveJournal.getAjaxUrl('talkscreen')),
 			hourglass = jQuery(e).hourglass()[0];
-
+			
 		var xhr = jQuery.post(postUrl + '&jsmode=1',
 			{
 				confirm: 'Y',
