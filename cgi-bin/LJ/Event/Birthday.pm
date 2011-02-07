@@ -2,6 +2,7 @@ package LJ::Event::Birthday;
 
 use strict;
 use base 'LJ::Event';
+use LJ::WishList;
 use Carp qw(croak);
 
 sub new {
@@ -68,6 +69,9 @@ sub as_html_actions {
     my $gifturl = $self->bdayuser->gift_url({ item => 'vgift' });
     my $ret .= "<div class='actions'>";
     $ret .= " <a href='$gifturl'>Send a Gift</a>";
+    if (LJ::WishList->have_current($self->bdayuser)) {
+        $ret .= " View user's <a href='".$self->bdayuser->wishlist_url."'>Wishlist</a>";
+    }
     $ret .= "</div>";
 
     return $ret;
