@@ -41,13 +41,15 @@ my $help = <<"HELP";
     Options: 
         --verbose       Show progress
         --all           Process all communities
+        --do-nothing    Do nothing. Only logging.
         --help          Show this text and exit
 HELP
 
-my ($need_help, $verbose, $all);
+my ($need_help, $verbose, $no_job, $all);
 GetOptions(
     "help"          => \$need_help, 
     "verbose"       => \$verbose,
+    "do-nothing"    => \$no_job,
     "all"           => \$all,
 ) or die $help;
 if ($need_help || (!@ARGV && !$all)) {
@@ -61,7 +63,7 @@ $dbr->{ShowErrorStatement} = 1;
 
 my $where = @ARGV ? " AND user IN('".join("','",@ARGV)."') " : '';
 $verbose = 1 if @ARGV;
-my $communities = $dbr->selectall_arrayref ("SELECT userid, user FROM user WHERE statusvis <> 'X' AND clusterid != 0 AND journaltype = 'C'$where", { Slice => {} });
+my $communities = $dbr->selectall_arrayref ("SELECT userid, user FROM user WHERE statusvis <> 'X' AND clusterid != 0 AND journaltype = 'C' $where", { Slice => {} });
 
 sub _log {
     print @_ if $verbose;
@@ -105,7 +107,18 @@ foreach my $c (@$communities) {
     my @alive_mainteiners;
     foreach my $u (values %$users) {
         if ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90)) {
+            _log "\tAdd maintainer ".$u->{user}." to election list\n";
             push @alive_mainteiners, $u;
+        } else {
+            _log "\tDrop user ".$u->{user}. " from list because:\n";
+            if ($u) {
+                unless ($u->is_visible) {
+                    _log "\t\tuser is not visible\n" unless $u->is_visible;
+                    next;
+                }
+                _log "\t\tuser can not manage community\n" unless $u->can_manage ($comm);
+                _log "\t\tuser is not active at last 90 days\n" unless $u->check_activity(90);
+            }
         }
     }
     unless (@alive_mainteiners) {
@@ -118,10 +131,12 @@ foreach my $c (@$communities) {
         my $user = $alive_mainteiners[0];
         _log "Set user ".$user->user." as supermaintainer for ".$comm->user."\n";
         my $system = LJ::load_user('system');
-        $comm->log_event('set_owner', { actiontarget => $user->{userid}, remote => $system });
-        LJ::statushistory_add($comm, $system, 'set_owner', "LJ script set owner as ".$user->{user});
-        LJ::set_rel($c->{userid}, $user->{userid}, 'S');
-        _send_email_to_sm ($comm, $user->{userid});
+        unless ($no_job) {
+            $comm->log_event('set_owner', { actiontarget => $user->{userid}, remote => $system });
+            LJ::statushistory_add($comm, $system, 'set_owner', "LJ script set owner as ".$user->{user});
+            LJ::set_rel($c->{userid}, $user->{userid}, 'S');
+            _send_email_to_sm ($comm, $user->{userid});
+        }
     } else {
         ## Search for maintainer via userlog
         _log "Search in userlog for creator or first alive maintainer\n";
@@ -129,15 +144,19 @@ foreach my $c (@$communities) {
         if ($u) {
             _log "Set user ".$u->user." as supermaintainer for ".$comm->user."\n";
             my $system = LJ::load_user('system');
-            $comm->log_event('set_owner', { actiontarget => $u->{userid}, remote => $system });
-            LJ::set_rel($c->{userid}, $u->{userid}, 'S');
-            _send_email_to_sm ($comm, $u->{userid});
-            LJ::statushistory_add($comm, $system, 'set_owner', "LJ script set owner as ".$u->{user});
+            unless ($no_job) {
+                $comm->log_event('set_owner', { actiontarget => $u->{userid}, remote => $system });
+                LJ::set_rel($c->{userid}, $u->{userid}, 'S');
+                _send_email_to_sm ($comm, $u->{userid});
+                LJ::statushistory_add($comm, $system, 'set_owner', "LJ script set owner as ".$u->{user});
+            }
         } else {
             _log "Create poll for supermaintainer election\n";
             my $poll_id = _create_poll ($c->{userid});
-            $comm->set_prop ('election_poll_id' => $poll_id)
-                or die "Can't set prop 'election_poll_id'";
+            unless ($no_job) {
+                $comm->set_prop ('election_poll_id' => $poll_id)
+                    or die "Can't set prop 'election_poll_id'";
+            }
         }
     } 
 
@@ -191,7 +210,10 @@ sub _check_maintainers {
     if ($row) {
         my $u_id = $row->{'remoteid'};
         my $u = LJ::load_userid ($u_id);
-        return $u if $u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90);
+        if ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90)) {
+            _log "\tuser " . $u->{'user'} . " is the person who created the community\n";
+            return $u;
+        }
     } else {
         ## No "account_create" record. Start the election.
         return undef;
@@ -201,7 +223,10 @@ sub _check_maintainers {
     while (my $row = $sth->fetchrow_hashref) {
         my $u_id = $row->{'actiontarget'};
         my $u = LJ::load_userid ($u_id);
-        return $u if $u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90);
+        if ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90)) {
+            _log "\tuser " . $u->{'user'} . " is the oldest active maintainer in the community\n";
+            return $u;
+        }
     }
 
     ## Can't find active maintainer
@@ -301,7 +326,15 @@ sub _create_poll {
     my $maintainers = LJ::load_rel_user($comm_id, 'A');
     foreach my $u_id (@$maintainers) {
         my $u = LJ::load_userid($u_id);
-        next unless $u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90);
+        unless ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90)) {
+            _log "\tDrop user ".$u->{user}. " from list because:\n";
+            if ($u) {
+                _log "\t\tuser is not visible\n" unless $u->is_visible;
+                _log "\t\tuser can not manage community\n" unless $u->can_manage ($comm);
+                _log "\t\tuser is not active at last 90 days\n" unless $u->check_activity(90);
+            }
+            next;
+        }
         _log "\tAdd ".$u->user." as item to poll\n";
         push @items, {
             item    => "<lj user='".$u->user."'>",
@@ -316,17 +349,20 @@ sub _create_poll {
         }
     );
 
-    my $poll = LJ::Poll->create (entry => $entry, whovote => 'all', whoview => 'all', questions => \@q)
-        or die "Poll was not created";
+    my $poll = undef;
+    unless ($no_job) {
+        $poll = LJ::Poll->create (entry => $entry, whovote => 'all', whoview => 'all', questions => \@q)
+            or die "Poll was not created";
 
-    $poll->set_prop ('createdate' => $entry->eventtime_mysql)
-        or die "Can't set prop 'createdate'";
+        $poll->set_prop ('createdate' => $entry->eventtime_mysql)
+            or die "Can't set prop 'createdate'";
 
-    $poll->set_prop ('supermaintainer' => $comm->userid)
-        or die "Can't set prop 'supermaintainer'";
+        $poll->set_prop ('supermaintainer' => $comm->userid)
+            or die "Can't set prop 'supermaintainer'";
 
-    _edit_post (to => $to_journal, comm => $comm, entry => $entry, poll => $poll) 
-        or die "Can't edit post";
+        _edit_post (to => $to_journal, comm => $comm, entry => $entry, poll => $poll) 
+            or die "Can't edit post";
+    }
 
     ## All are ok. Emailing to all maintainers about election.
     my $subject = LJ::Lang::ml('poll.election.email.subject');
@@ -350,12 +386,12 @@ sub _create_poll {
                                                 siteroot        => $LJ::SITEROOT,
                                             })
                                         ),
-                    });
+                    }) unless ($no_job);
         ## We need a pause to change sender-id in mail headers
-        sleep 1;
+        sleep 2;
     }
 
-    return $poll->pollid;
+    return $no_job ? undef : $poll->pollid;
 }
 
 
