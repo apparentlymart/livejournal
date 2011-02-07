@@ -73,14 +73,16 @@ sub EntryPage
                     ));
 
     if($remote) {
-        LJ::need_string(qw/ comment.delete.q
+        LJ::need_string(qw/ 
                             comment.cancel
                             comment.delete
+                            comment.delete.q
                             comment.delete.all
                             comment.delete.all.sub
+                            comment.delete.no.options
                             comment.ban.user
                             comment.mark.spam
-                            comment.delete/);
+                            comment.delete/)
     }
 
     $p->{'entry'} = $s2entry;

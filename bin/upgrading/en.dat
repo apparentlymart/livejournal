@@ -39,13 +39,14 @@ cleanhtml.suspend_msg_with_supportid|staleness=1
 cleanhtml.suspend_msg_with_supportid=This is a suspended entry. <a [[aopts]]>An unsuspension request</a> has been opened, and your entry will be reviewed soon.
 
 comment.delete.q=Delete comment?
-comment.cancel=Delete
 comment.delete=Delete
 comment.delete.all=Delete all %username% comments in this post
 comment.delete.all.sub=Delete thread (all subcomments)
+comment.delete.no.options=Shift+click to delete without options
+comment.cancel=Cancel
 comment.ban.user=Ban %username% from commenting
 comment.mark.spam=Mark this comment as spam
-comment.delete=Delete comment? 
+ 
 
 contentflag.viewingconcepts|staleness=1
 contentflag.viewingconcepts=You are about to view content that may not be appropriate for minors.
@@ -3413,21 +3414,6 @@ You are receiving this email because you are a maintainer of the community [[com
 Since [[communityname]] is an existing community with multiple maintainers, it is now up to you and the other maintainers of the community to select which of you will be granted the Owner status. A poll has been created for your community <a href="[[siteroot]]/community/election.bml?authas=[[authas]]">at this page</a>. You simply need to visit this page and cast your vote for which current maintainer you believe should be made Owner of the community. More information on how the election process works can be found at the page above.
 
 Regards,
-[[shortsite]] Team
-.
-
-poll.election.not.need.subject=Supermaintainer choosen
-
-poll.election.not.need.html<<
-Dear [[username]],<br><br> 
-
-You are receiving this email because you are a maintainer of the community [[communityname]]. <br><br> 
-
-According to the history for this community, you has been designated as the owner of this community.<br><br> 
-
-You can read more about this role here: [[faqlink]]<br><br> 
-
-Regards,<br> 
 [[shortsite]] Team
 .
 
