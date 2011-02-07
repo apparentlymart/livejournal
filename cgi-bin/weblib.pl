@@ -1372,6 +1372,8 @@ sub res_includes {
 
     $site{inbox_unread_count} = $remote->notification_inbox->unread_count if $remote and LJ::is_enabled('inbox_unread_count_in_head');
 
+    LJ::run_hooks('add_to_site_js', \%site);
+
     my $site_params = LJ::js_dumper(\%site);
 
     # include standard JS info
