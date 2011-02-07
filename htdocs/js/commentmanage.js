@@ -306,7 +306,7 @@ function createDeleteFunction(ae, dItemid, isS1) {
             }
             if (canAdmin&&com.username) {
                 lbl = "ljpopdel" + dItemid + "author";
-                inHTML += "<input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all.sub', "<b>" + ( (com.username == remoteUser ? 'my' : com.u) ) + "</b>" ) + "</label><br />";
+                inHTML += "<input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all', "<b>" + ( (com.username == remoteUser ? 'my' : com.u) ) + "</b>" ) + "</label><br />";
             } else {
                 finalHeight -= 15;
             }
