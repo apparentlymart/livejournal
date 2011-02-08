@@ -3562,7 +3562,7 @@ sub delete_all_subscriptions {
     my $u = shift;
 
     ## Logging for delete all subscriptions
-    LJ::statushistory_add ( $u, $u, 'remove_subs', join (", ", map { $_->id } $u->subscriptions ) );
+    LJ::statushistory_add ( $u, $u, 'remove_subs', scalar $u->subscriptions );
 
     return LJ::Subscription->delete_all_subs($u);
 }
