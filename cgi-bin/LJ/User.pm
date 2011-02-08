@@ -3562,7 +3562,9 @@ sub delete_all_subscriptions {
     my $u = shift;
 
     ## Logging for delete all subscriptions
-    LJ::statushistory_add ( $u, $u, 'remove_subs', scalar $u->subscriptions );
+    my $remote = LJ::get_remote();
+    my $admin = $remote || LJ::load_user('system');
+    LJ::statushistory_add ( $u, $admin, 'remove_subs', scalar $u->subscriptions );
 
     return LJ::Subscription->delete_all_subs($u);
 }
