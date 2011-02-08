@@ -152,7 +152,9 @@ sub send {
 
     # unless they specified a message ID, let's prepend our own:
     unless ($headers =~ m!^message-id:.+!mi) {
-        $headers = "Message-ID: <sch-$sender_id\@$this_domain>\r\n" . $headers;
+        my $rand = LJ::rand_chars(8);
+        my $message_id = qq|<sch-$sender_id-$rand\@$this_domain>|;
+        $headers = "Message-ID: $message_id\r\n" . $headers;
     }
 
     ## _do_send returns nothing on success or failed command on error.
