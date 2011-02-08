@@ -10,6 +10,171 @@ use Class::Autouse qw(
                       LJ::Event::CommunityJoinReject
                       );
 
+## Create supermaintainer poll
+## Args:
+##      comm_id           = community id
+##      alive_maintainers = array ref of alive maintainers (visible, active, is maintainers, etc)
+##      no_job            = nothing to do. only logging.
+##      textref           = where save log info
+##      to_journal        = which journal save polls to?
+## Return:
+##      pollid            = id of new created poll
+sub create_supermaintainer_election_poll {
+    my %args = @_;
+    my $comm_id = $args{'comm_id'};
+    my $alive_maintainers = $args{'maint_list'};
+    my $textref = $args{'log'};
+    my $no_job = $args{'no_job'} || 0;
+    my $to_journal = $args{'to_journal'} || LJ::load_user('lj_elections');
+
+    my $comm = LJ::load_userid($comm_id);
+    my $entry = undef;
+    unless ($no_job) {
+        $entry = _create_post (to => $to_journal, comm => $comm);
+        die "Entry for Poll does not created\n" unless $entry;
+    }
+
+    my @items = ();
+    foreach my $u (@$alive_maintainers) {
+        $$textref .= "\tAdd ".$u->user." as item to poll\n";
+        push @items, {
+            item    => "<lj user='".$u->user."'>",
+        };
+    }
+
+
+    my @q = (
+        {
+            qtext   => LJ::Lang::ml('poll.election.subject'),
+            type    => 'radio',
+            items   => \@items,
+        }
+    );
+
+    my $poll = undef;
+    unless ($no_job) {
+        $poll = LJ::Poll->create (entry => $entry, whovote => 'all', whoview => 'all', questions => \@q)
+            or die "Poll was not created";
+
+        $poll->set_prop ('createdate' => $entry->eventtime_mysql)
+            or die "Can't set prop 'createdate'";
+
+        $poll->set_prop ('supermaintainer' => $comm->userid)
+            or die "Can't set prop 'supermaintainer'";
+
+        _edit_post (to => $to_journal, comm => $comm, entry => $entry, poll => $poll) 
+            or die "Can't edit post";
+    }
+
+    ## All are ok. Emailing to all maintainers about election.
+    my $subject = LJ::Lang::ml('poll.election.email.subject');
+    $textref .= "Sending emails to all maintainers for community " . $comm->user . "\n";
+    foreach my $maint_id (@$alive_maintainers) {
+        my $u = LJ::load_userid ($maint_id);
+        next unless $u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90);
+        $textref .= "\tSend email to maintainer ".$u->user."\n";
+        LJ::send_mail({ 'to'        => $u->email_raw,
+                        'from'      => $LJ::ACCOUNTS_EMAIL,
+                        'fromname'  => $LJ::SITENAMESHORT,
+                        'wrap'      => 1,
+                        'charset'   => $u->mailencoding || 'utf-8',
+                        'subject'   => $subject,
+                        'html'      => (LJ::Lang::ml('poll.election.start.email', {
+                                                username        => LJ::ljuser($u),
+                                                communityname   => LJ::ljuser($comm),
+                                                faqlink         => '#',
+                                                shortsite       => $LJ::SITENAMESHORT,
+                                                authas          => $comm->{user},
+                                                siteroot        => $LJ::SITEROOT,
+                                            })
+                                        ),
+                    }) unless ($no_job);
+    }
+
+    return $no_job ? undef : $poll->pollid;
+}
+
+sub _edit_post {
+    my %opts = @_;
+
+    my $u = $opts{to};
+    my $comm = $opts{comm};
+    my $entry = $opts{entry};
+    my $poll = $opts{poll};
+
+    my $security = delete $opts{security} || 'private';
+    my $proto_sec = $security;
+    if ($security eq "friends") {
+        $proto_sec = "usemask";
+    }
+
+    my $subject = delete $opts{subject} || LJ::Lang::ml('poll.election.post_subject');
+    my $body    = delete $opts{body}    || LJ::Lang::ml('poll.election.post_body', { comm => $comm->user });
+
+    my %req = (
+               mode     => 'editevent',
+               ver      => $LJ::PROTOCOL_VER,
+               user     => $u->{user},
+               password => '',
+               event    => $body . "<br/>" . "<lj-poll-".$poll->pollid.">",
+               subject  => $subject,
+               tz       => 'guess',
+               security => $proto_sec,
+               itemid   => $entry->jitemid,
+               );
+
+    $req{allowmask} = 1 if $security eq 'friends';
+
+    my %res;
+    my $flags = { noauth => 1, nomod => 1 };
+
+    LJ::do_request(\%req, \%res, $flags);
+
+    die "Error posting: $res{errmsg}" unless $res{'success'} eq "OK";
+    my $jitemid = $res{itemid} or die "No itemid";
+
+    return LJ::Entry->new($u, jitemid => $jitemid);
+}
+
+sub _create_post {
+    my %opts = @_;
+
+    my $u = $opts{to};
+    my $comm = $opts{comm};
+
+    my $security = delete $opts{security} || 'private';
+    my $proto_sec = $security;
+    if ($security eq "friends") {
+        $proto_sec = "usemask";
+    }
+
+    my $subject = delete $opts{subject} || LJ::Lang::ml('poll.election.post_subject');
+    my $body    = delete $opts{body}    || LJ::Lang::ml('poll.election.post_body', { comm => $comm->user });
+
+    my %req = (
+               mode => 'postevent',
+               ver => $LJ::PROTOCOL_VER,
+               user => $u->{user},
+               password => '',
+               event => $body,
+               subject => $subject,
+               tz => 'guess',
+               security => $proto_sec,
+               );
+
+    $req{allowmask} = 1 if $security eq 'friends';
+
+    my %res;
+    my $flags = { noauth => 1, nomod => 1 };
+
+    LJ::do_request(\%req, \%res, $flags);
+
+    die "Error posting: $res{errmsg}" unless $res{'success'} eq "OK";
+    my $jitemid = $res{itemid} or die "No itemid";
+
+    return LJ::Entry->new($u, jitemid => $jitemid);
+}
+
 # <LJFUNC>
 # name: LJ::get_sent_invites
 # des: Get a list of sent invitations from the past 30 days.
