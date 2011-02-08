@@ -3577,7 +3577,9 @@ sub delete_all_inactive_subscriptions {
     ## Logging for delete all subscriptions
     my $remote = LJ::get_remote();
     my $admin = $remote || LJ::load_user('system');
-    LJ::statushistory_add ( $u, $admin, 'remove_subs', scalar $u->subscriptions );
+    my $set = LJ::Subscription::GroupSet->fetch_for_user($u);
+    my @inactive_groups = grep { !$_->active } $set->groups;
+    LJ::statushistory_add ( $u, $admin, 'remove_subs', scalar @inactive_groups );
 
     return LJ::Subscription->delete_all_inactive_subs($u, $dryrun);
 }
