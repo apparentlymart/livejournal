@@ -86,6 +86,8 @@
 
 .error.notvalidated=Your account is not validated.
 
+.error.validation.cancelled=Your email address is no longer validated, because we received error messages from the mail server for one week. To receive email notifications again, please validate your address <a href="http://www.livejournal.com/manage/settings/">here</a>.
+
 .finished.save_button=Save Changes
 
 .fn.adultcontentflag|staleness=1

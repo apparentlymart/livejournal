@@ -307,9 +307,14 @@ body<=
     $ret .= $submit_msg;
 
     # Warn them if logged in and not validated
-    if ($given_cat eq 'notifications' && $u && !$u->is_identity && $u->email_raw && $u->email_status ne 'A') {
-        $ret .= "<?warningbar <b>$ML{'label.warning'}</b> $ML{'.error.notvalidated'} warningbar?>";
-        $ret .= "<br />";
+    if ($given_cat eq 'notifications' && $u && !$u->is_identity && $u->email_raw) {
+        if ($u->email_status eq 'N' or $u->email_status eq 'T') {
+            $ret .= "<?warningbar <b>$ML{'label.warning'}</b> $ML{'.error.notvalidated'} warningbar?>";
+            $ret .= "<br />";
+        } elsif ($u->email_status ne 'A') {
+            $ret .= "<?warningbar <b>$ML{'label.warning'}</b> $ML{'.error.validation.cancelled'} warningbar?>";
+            $ret .= "<br />";
+        } # else 'A' - no message needed
     }
 
     $ret .= "<div id='settings_left'>";
