@@ -72,9 +72,9 @@
         $body = $ML{'.error.postdeleted'};
         return;
     }
-
+    
     my $sm_u = LJ::load_userid($is_super);
-    unless (($sm_u && $remote->can_manage($sm_u)) || $entry->visible_to($remote)) {
+    unless (($sm_u && $remote && $remote->can_manage($sm_u)) || $entry->visible_to($remote)) {
         $body = $ML{'.error.cantview'};
         return;
     }

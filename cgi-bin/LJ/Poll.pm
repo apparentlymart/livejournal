@@ -1032,8 +1032,11 @@ sub render {
 
     my $is_super = $self->prop ('supermaintainer');
     ## Only maintainers can view, vote and see results for election polls.
-    return "<b>[" . LJ::Lang::ml('poll.error.not_enougth_rights') . "]</b>"
-        if $is_super && $remote && !$remote->can_manage($is_super);
+    if ($is_super) {
+        if (!$remote || !($remote->can_manage($is_super) || LJ::u_equals($remote, $self->journal))) {
+            return "<b>[" . LJ::Lang::ml('poll.error.not_enougth_rights') . "]</b>";
+        }
+    }
 
     # Default pagesize.
     $pagesize = 2000 unless $pagesize;
@@ -1515,10 +1518,18 @@ sub render {
     }
 
     if ($do_form) {
-        $ret .= LJ::html_submit(
-                                'poll-submit',
-                                $is_super ? LJ::Lang::ml('poll.vote') : LJ::Lang::ml('poll.submit'),
-                                {class => 'LJ_PollSubmit'}) . "</form>\n";;
+        unless ($is_super) {
+            $ret .= LJ::html_submit(
+                                    'poll-submit',
+                                    $is_super ? LJ::Lang::ml('poll.vote') : LJ::Lang::ml('poll.submit'),
+                                    {class => 'LJ_PollSubmit'}) . "</form>\n";;
+        }
+        if ($is_super && $remote && $remote->can_manage($is_super) && !LJ::u_equals($remote, $self->journal)) {
+            $ret .= LJ::html_submit(
+                                    'poll-submit',
+                                    $is_super ? LJ::Lang::ml('poll.vote') : LJ::Lang::ml('poll.submit'),
+                                    {class => 'LJ_PollSubmit'}) . "</form>\n";;
+        }
     }
     if ($is_super) {
         $ret .= "</td></tr></table></div></div>" . "<div class='poll-side'>" . $ret_side . "</div>";
