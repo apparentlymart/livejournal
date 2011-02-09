@@ -194,9 +194,8 @@ foreach my $c_id (@$communities) {
         }
     } 
 
-    if ($i++ % 1000) {
+    if ($i++ % 20) {
         LJ::start_request();
-        sleep 1;
     }
 }
 
