@@ -35,11 +35,19 @@ sub execute {
     my $confirm = undef;
     if ($maint_list eq 'confirm') {
         $confirm = 'confirm';
-        my $m_list = LJ::load_rel_user($c->userid, 'A');
-        $maint_list = join ',', map { $_->{user} } values %{LJ::load_userids(@$m_list)};
+        $maint_list = undef;
     } else {
         $confirm = shift @args;
     }
+
+    ## If we not got maint_list
+    unless ($maint_list) {
+        my $m_list = LJ::load_rel_user($c->userid, 'A');
+        $maint_list = join ',', map { $_->{user} } values %{LJ::load_userids(@$m_list)};
+    }
+
+    return $self->error("Community has not have maintainers")
+        unless $maint_list;
 
     my @maintainers = split /,/, $maint_list;
 
