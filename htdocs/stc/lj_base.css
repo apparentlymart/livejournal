@@ -1683,14 +1683,50 @@ DIV.lj_ippu_app {
 		padding: 0;
 		background-position: 0 0;
 		}
-	.i-popup-arrr {
+	.i-popup-arrtl {
 		top: -7px;
-		left: 14px;
+		left: 30px;
+		width: 13px;
+		height: 11px;
+		margin: 0;
+		padding: 0;
+		background-position: 0 0;
+		}
+	.i-popup-arrtr {
+		top: -7px;
+		right: 30px;
+		width: 13px;
+		height: 11px;
+		margin: 0;
+		padding: 0;
+		background-position: 0 0;
+		}
+	.i-popup-arrr {
+		top: 50%;
+		right: -7px;
+		width: 11px;
+		height: 13px;
+		margin: -6px 0 0;
+		padding: 0;
+		background-position: -11px -11px;
+		}
+	.i-popup-arrrt {
+		top: 15px;
+		right: -7px;
 		width: 11px;
 		height: 13px;
 		margin: 0;
 		padding: 0;
-		background-position: -13px -11px;
+		background-position: -11px -11px;
+		}
+	.i-popup-arrrb {
+		bottom: 15px;
+		right: -7px;
+		width: 11px;
+		height: 13px;
+		margin: 0;
+		padding: 0;
+		background-position: -11px -11px;
 		}
 	.i-popup-arrb {
 		bottom: -7px;
@@ -1701,12 +1737,48 @@ DIV.lj_ippu_app {
 		padding: 0;
 		background-position: -13px 0;
 		}
+	.i-popup-arrbl {
+		bottom: -7px;
+		left: 30px;
+		width: 13px;
+		height: 11px;
+		margin: 0;
+		padding: 0;
+		background-position: -13px 0;
+		}
+	.i-popup-arrbr {
+		bottom: -7px;
+		right: 30px;
+		width: 13px;
+		height: 11px;
+		margin: 0;
+		padding: 0;
+		background-position: -13px 0;
+		}
 	.i-popup-arrl {
 		top: 50%;
 		left: -7px;
 		width: 11px;
 		height: 13px;
 		margin: -6px 0 0;
+		padding: 0;
+		background-position: 0 -11px;
+		}
+	.i-popup-arrlt {
+		top: 15px;
+		left: -7px;
+		width: 11px;
+		height: 13px;
+		margin: 0;
+		padding: 0;
+		background-position: 0 -11px;
+		}
+	.i-popup-arrlb {
+		bottom: 15px;
+		left: -7px;
+		width: 11px;
+		height: 13px;
+		margin: 0;
 		padding: 0;
 		background-position: 0 -11px;
 		}
@@ -1721,9 +1793,5 @@ DIV.lj_ippu_app {
 		background: url(/img/popup-cls.gif?v=1) no-repeat 0 0;
 		font: 0/0 serif;
 		cursor: pointer;
-		}
-	.ljcmtmanage .i-popup-arrt {
-		left: 30px;
-		margin: 0;
 		}
 
