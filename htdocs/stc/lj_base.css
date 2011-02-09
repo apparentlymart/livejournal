@@ -951,6 +951,42 @@ Must be removed after implementation of Framework! */
 	.b-fbinterstitial-form .b-fbinterstitial-submit {
 		margin: 7px 0 0;
 		}
+.b-twinterstitial-form-compact {
+	width: 460px;
+	margin: 150px auto 0;
+	text-align: center;
+	font-family: Arial,sans-serif;
+	}
+	.b-twinterstitial-form-compact H4 {
+		font-size: 24px;
+		font-weight: normal;
+		}
+	.b-twinterstitial-form-compact .ljuser IMG {
+		vertical-align: middle!important;
+		}
+	.b-twinterstitial-form-compact H5,
+	.b-twinterstitial-form-compact P,
+	.b-twinterstitial-form-compact UL {
+		margin: 0;
+		padding: 10px 0;
+		font-weight: normal;
+		font-size: 12px;
+		}
+	.b-twinterstitial-form-compact H5 {
+		border-top: 1px solid #CCC;
+		}
+	.b-twinterstitial-form-compact TABLE {
+		margin: 10px 0 0;
+		border-bottom: 1px solid #CCC;
+		}
+	.b-twinterstitial-form-compact LABEL STRONG {
+		font-weight: normal;
+		font-size: 12px;
+		}
+	.b-twinterstitial-form-compact .checkboxes,
+	.b-twinterstitial-form-compact .checkboxes LI {
+		display: inline;
+		}
 
 .b-form-columns TD {
 	vertical-align:top;
