@@ -226,6 +226,15 @@ sub _send_email_to_sm {
                                             siteroot        => $LJ::SITEROOT,
                                         })
                                     ),
+                    'body'      => (LJ::Lang::ml('poll.election.not.need.html.plain', {
+                                            username        => LJ::ljuser($u),
+                                            communityname   => LJ::ljuser($comm),
+                                            faqlink         => '#',
+                                            shortsite       => $LJ::SITENAMESHORT,
+                                            authas          => $comm->{user},
+                                            siteroot        => $LJ::SITEROOT,
+                                        })
+                                    ),
                 });
 }
 

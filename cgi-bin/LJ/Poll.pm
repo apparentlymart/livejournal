@@ -851,6 +851,14 @@ sub is_closed {
                                                         shortsite       => $LJ::SITENAMESHORT,
                                                     })
                                                 ),
+                                'body'      => (LJ::Lang::ml('poll.election.end.email.plain', {
+                                                        username        => LJ::ljuser($u),
+                                                        communityname   => LJ::ljuser($comm),
+                                                        winner          => LJ::ljuser($winner),
+                                                        faqlink         => '#',
+                                                        shortsite       => $LJ::SITENAMESHORT,
+                                                    })
+                                                ),
                             });
             }
 

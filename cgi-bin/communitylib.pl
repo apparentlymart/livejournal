@@ -88,6 +88,15 @@ sub create_supermaintainer_election_poll {
                                                 siteroot        => $LJ::SITEROOT,
                                             })
                                         ),
+                        'body'      => (LJ::Lang::ml('poll.election.start.email.plain', {
+                                                username        => LJ::ljuser($u),
+                                                communityname   => LJ::ljuser($comm),
+                                                faqlink         => '#',
+                                                shortsite       => $LJ::SITENAMESHORT,
+                                                authas          => $comm->{user},
+                                                siteroot        => $LJ::SITEROOT,
+                                            })
+                                        ),
                     }) unless ($no_job);
     }
 
