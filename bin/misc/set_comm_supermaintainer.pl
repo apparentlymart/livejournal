@@ -11,26 +11,6 @@ require 'ljprotocol.pl';
 use Getopt::Long;
 use LJ::DBUtil;
 
-my $to_journal = LJ::load_user("lj_elections");
-
-if (($to_journal && $to_journal->is_expunged) || !$to_journal) {
-    warn "Try to create journal 'lj_elections'\n";
-    $to_journal = LJ::User->create_personal (
-        ofage => 1,
-        status => 'A',
-        user => 'lj_elections',
-        bdate => '1989-04-15',
-        email => 'cc@livejournalinc.com',
-        password => LJ::rand_chars(10),
-    );
-    warn "Created user 'lj_elections'\n" if $to_journal;
-}
-
-die "No user 'lj_elections' on this server" unless $to_journal;
-
-my $poster = LJ::load_user("system") 
-    or die "No user 'system' on this server";
-
 my $help = <<"HELP";
     This script set the supermaintainer role for all or selected communities. 
     If no supermaintainer can be set, then poll is created for the community.
@@ -56,6 +36,26 @@ if ($need_help || (!@ARGV && !$all)) {
     print $help;
     exit(1);
 }
+
+my $to_journal = LJ::load_user("lj_elections");
+if (!$to_journal) {
+    warn "Try to create journal 'lj_elections'\n";
+    $to_journal = LJ::User->create_personal (
+        ofage => 1,
+        status => 'A',
+        user => 'lj_elections',
+        bdate => '1989-04-15',
+        email => 'cc@livejournalinc.com',
+        password => LJ::rand_chars(10),
+    );
+    warn "Created user 'lj_elections'\n" if $to_journal;
+}
+
+die "No user 'lj_elections' on this server" unless $to_journal;
+
+my $poster = LJ::load_user("system") 
+    or die "No user 'system' on this server";
+
 
 my $dbr = LJ::get_dbh("slow") or die "Can't get slow DB connection";
 $dbr->{RaiseError} = 1;
@@ -86,11 +86,11 @@ foreach my $c_id (@$communities) {
 
     my $comm = LJ::load_userid ($c_id);
     unless ($comm) {
-        _log "Error while loading community (Id: " . $c_id . ")\n";
+        _log "Error while loading community (Id: $c_id)\n";
         next;
     }
 
-    _log "Start work with community '" . $comm->{'user'} . "'\n";
+    _log "Start work with community '$comm->{'user'}'\n";
 
     ## skip if community has supermaintainer already
     my $s_maints = LJ::load_rel_user($c_id, 'S');
@@ -118,27 +118,29 @@ foreach my $c_id (@$communities) {
     }
 
     my $maintainers = LJ::load_rel_user($c_id, 'A');
+    _log "List of maintainers (uids): " . join(", ", @$maintainers) . "\n";
     ## Check for all maintainers are alive
     my $users = LJ::load_userids(@$maintainers);
     my @alive_maintainers;
-    foreach my $u (values %$users) {
+    while (my ($uid, $u) = each %$users) {
         unless ($u) {
-            _log "\t\tCan't load maintainer\n";
+            _log "\t\tCan't load maintainer ($uid)\n";
             next;
         }
+        my $username = $u->{user};
         unless ($u->is_visible) {
-            _log "\t\tuser is not visible\n";
+            _log "\t\tuser ($username/$uid) is not visible\n";
             next;
         }
         unless ($u->can_manage($comm)) {
-            _log "\t\tuser can not manage community\n";
+            _log "\t\tuser ($username/$uid) can not manage community\n";
             next;
         }
         unless ($u->check_activity(90)) {
-            _log "\t\tuser is not active at last 90 days\n";
+            _log "\t\tuser ($username/$uid) is not active at last 90 days\n";
             next;
         }
-        _log "\tAdd maintainer ".$u->{user}." to election list\n";
+        _log "\tAdd maintainer $username to election list\n";
         push @alive_maintainers, $u;
     }
 
@@ -242,15 +244,15 @@ sub _check_maintainers {
         my $u_id = $row->{'remoteid'};
         my $u = LJ::load_userid ($u_id);
         if (!$u) {
-            _log "\t\tCan't load maintainer\n";
+            _log "\t\tCan't load maintainer ($u_id)\n";
         } elsif (!$u->is_visible) {
-            _log "\t\tuser is not visible\n";
+            _log "\t\tuser ($u->{user}) is not visible\n";
         } elsif (!$u->can_manage($comm)) {
-            _log "\t\tuser can not manage community\n";
+            _log "\t\tuser ($u->{user}) can not manage community\n";
         } elsif (!$u->check_activity(90)) {
-            _log "\t\tuser is not active at last 90 days\n";
+            _log "\t\tuser ($u->{user}) is not active at last 90 days\n";
         } else {
-            _log "\tuser " . $u->{'user'} . " is the person who created the community\n";
+            _log "\tuser ($u->{user}) is the person who created the community\n";
             return $u;
         }
     } else {
@@ -265,15 +267,15 @@ sub _check_maintainers {
         my $u_id = $row->{'actiontarget'};
         my $u = LJ::load_userid ($u_id);
         if (!$u) {
-            _log "\t\tCan't load maintainer\n";
+            _log "\t\tCan't load maintainer ($u_id)\n";
         } elsif (!$u->is_visible) {
-            _log "\t\tuser is not visible\n";
+            _log "\t\tuser ($u->{user}) is not visible\n";
         } elsif (!$u->can_manage($comm)) {
-            _log "\t\tuser can not manage community\n";
+            _log "\t\tuser ($u->{user}) can not manage community\n";
         } elsif (!$u->check_activity(90)) {
-            _log "\t\tuser is not active at last 90 days\n";
+            _log "\t\tuser ($u->{user}) is not active at last 90 days\n";
         } else {
-            _log "\tuser " . $u->{'user'} . " is the oldest active maintainer in the community\n";
+            _log "\tuser ($u->{'user'}) is the oldest active maintainer in the community\n";
             return $u;
         }
     }
