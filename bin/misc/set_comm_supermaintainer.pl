@@ -21,15 +21,17 @@ my $help = <<"HELP";
     Options: 
         --verbose       Show progress
         --all           Process all communities
+        --cluster-id    Cluster ID
         --do-nothing    Do nothing. Only logging.
         --help          Show this text and exit
 HELP
 
-my ($need_help, $verbose, $no_job, $all);
+my ($need_help, $verbose, $no_job, $cluster_id, $all);
 GetOptions(
     "help"          => \$need_help, 
     "verbose"       => \$verbose,
     "do-nothing"    => \$no_job,
+    "cluster-id=i"  => \$cluster_id,
     "all"           => \$all,
 ) or die $help;
 if ($need_help || (!@ARGV && !$all)) {
@@ -62,22 +64,28 @@ $dbr->{RaiseError} = 1;
 $dbr->{ShowErrorStatement} = 1;
 
 my $where = @ARGV ? " AND user IN('".join("','",@ARGV)."') " : '';
+my $where_cluster = $cluster_id ? " AND clusterid = $cluster_id " : " AND clusterid != 0 ";
 $verbose = 1 if @ARGV;
+
+sub _log {
+    print @_ if $verbose;
+}
+
+$cluster_id
+    ? _log "Using cluster $cluster_id\n"
+    : _log "Using all clusters\n";
+
 my $communities = $dbr->selectcol_arrayref ("
                         SELECT userid 
                         FROM user 
                         WHERE 
                             statusvis <> 'X' 
-                            AND clusterid != 0 
+                            $where_cluster
                             AND journaltype = 'C' 
-                        $where
+                            $where
                     ");
 
 die "Can't fetch communities list\n" unless $communities;
-
-sub _log {
-    print @_ if $verbose;
-}
 
 my $i = 0;
 LJ::start_request();
