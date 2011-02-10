@@ -336,10 +336,6 @@ P.tags A {
 	.controlstrip {
 		overflow:hidden;
 		}
-	#lj_controlstrip {
-		position:relative !important;
-		}
-
 /* width/min-width */
 .lay .l-fix #Page {
 	margin:0 auto;
