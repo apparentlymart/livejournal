@@ -1580,6 +1580,17 @@ sub can_vote {
     my $can_vote_override = LJ::run_hook("can_vote_poll_override", $self);
     return 0 unless !defined $can_vote_override || $can_vote_override;
 
+    ## Only selected maintainers can vote for Supermaintainer election
+    my $is_super = $self->prop ("supermaintainer");
+    if ($is_super) {
+        my @q = $self->questions;
+        my @items = $q[0]->items;
+
+        my @is_can = grep { $_->{item} =~ /\Q$remote->{user}\E/ } @items;
+
+        return @is_can ? 1 : 0;
+    }
+
     return 1;
 }
 
