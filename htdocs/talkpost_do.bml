@@ -179,8 +179,11 @@
                              'sessid=' . $remote_sessid;
 
             $talkform_opts->{'logout_url'} = $logout_url;
-            $talkform_opts->{'js_check_domain'}
-                = $partner->domain_check_js( { 'mode' => 'logcom' } );
+
+            $talkform_opts->{'js_check_domain'} = $partner->domain_check_js({
+                'mode' => 'logcom',
+                'partner_domain' => $POST{'partner_domain'},
+            });
 
             $partner->request_logcom_resources;
 
