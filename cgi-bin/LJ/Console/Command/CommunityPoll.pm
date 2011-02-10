@@ -48,22 +48,19 @@ sub execute {
     return $self->error("Community has not have maintainers")
         unless $maint_list;
 
-    my @got_maintainers = split /,/, $maint_list;
+    my @maintainers = split /,/, $maint_list;
 
     return $self->error("Election poll exists already")
         if ($c->prop("election_poll_id") && $confirm ne 'confirm');
 
     ## Check for maintainers alive
-    my @maintainers = map {
+    @maintainers = map {
         my $u = LJ::load_user($_);
         $u;
     } grep {
         my $u = LJ::load_user($_);
         $u && $u->is_visible && !$u->is_expunged && $u->can_manage($c) ? 1 : 0;
-    } @got_maintainers;
-
-    return $self->error("Can't create poll. At least one user is not maintainer of community $comm_name")
-        unless @maintainers == @got_maintainers;
+    } @maintainers;
 
     return $self->error("Can't create poll. No maintainers given or they are not maintainers.")
         unless @maintainers;
