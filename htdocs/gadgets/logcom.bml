@@ -63,12 +63,15 @@
                          'returnto=' . LJ::eurl($thispage) . '&' .
                          'sessid=' . $remote_sessid;
 
+        my $ljuser_html = $partner->ljuser_html($remote);
+
         return
             LJ::Talk::talkform({
                 'embedable_form'    => 1,
                 'logout_url'        => $logout_url,
                 'js_check_domain'   => $js_check_domain,
                 'partner_domain'    => $domain,
+                'partner_remote_ljuser' => $ljuser_html,
 
                 'remote'            => $remote,
                 'journalu'          => $journal,
