@@ -108,6 +108,7 @@ sub render
                     }
                 }
             }
+	    warn $data_journal->{login_form}->{root};
 
             $data_remote->{userpic} = {
                 src   => $tinted_nouserpic_img || "$LJ::IMGPREFIX/controlstrip/nouserpic.gif",
@@ -308,6 +309,9 @@ sub render
     };
 
     $data->{remote}->{status} = get_status($data);
+
+    use Data::Dumper;
+    # warn Dumper( { flatten($data) } ), "\n";
 
     my $tmpl = LJ::HTML::Template->new(
         {
