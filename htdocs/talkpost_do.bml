@@ -185,6 +185,9 @@
                 'partner_domain' => $POST{'partner_domain'},
             });
 
+            $talkform_opts->{'partner_remote_ljuser'}
+                = $partner->ljuser_html($remote);
+
             $partner->request_logcom_resources;
 
             $talkform_opts->{'partner_domain'} = $POST{'partner_domain'};
