@@ -21,6 +21,7 @@ use Class::Autouse qw(
                       LJ::M::FriendsOf
                       );
 use LJ::ControlStrip;
+use Apache::WURFL;
 
 # <LJFUNC>
 # name: LJ::img
@@ -2188,7 +2189,18 @@ LOGIN_BAR
     my $message;
     $message = LJ::Widget::SiteMessages->render if LJ::Widget::SiteMessages->should_render;
 
-    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr><tr><td colspan='5'>$message</td></tr></table>";
+    my $mobile_link = '';
+    if (Apache::WURFL->is_mobile()) {
+        my $uri = LJ::Request->uri;
+        my $hostname = LJ::Request->hostname;
+        my $args = LJ::Request->args;
+        my $args_wq = $args ? "?$args" : "";
+        my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check");
+        my $proto = $is_ssl ? "https://" : "http://";
+        my $url = LJ::eurl ($proto.$hostname.$uri.$args_wq);
+        $mobile_link = "<table><tr><td style='color:#FFFFFF'>".LJ::Lang::ml('link.mobile', { url => $url })."</td></tr></table>";
+    }
+    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr><td colspan='5'>$mobile_link</td></tr><tr valign='top'>$ret</tr><tr><td colspan='5'>$message</td></tr></table>";
 }
 
 sub control_strip_js_inject

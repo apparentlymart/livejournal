@@ -317,8 +317,20 @@ sub render
         die_on_bad_params => 1,
         strict => 0,
     ) or die "Can't open template: $!";
-        
-    $tmpl->param(flatten($data));
+
+    my $mobile_link = '';
+    if (Apache::WURFL->is_mobile()) {
+        my $uri = LJ::Request->uri;
+        my $hostname = LJ::Request->hostname;
+        my $args = LJ::Request->args;
+        my $args_wq = $args ? "?$args" : "";
+        my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check");
+        my $proto = $is_ssl ? "https://" : "http://";
+        my $url = LJ::eurl ($proto.$hostname.$uri.$args_wq);
+        $mobile_link = LJ::Lang::ml('link.mobile', { url => $url });
+    }
+
+    $tmpl->param(flatten($data), link_mobile => $mobile_link );
 
     # use Data::Dumper;
     # warn Dumper({flatten($data)}), "\n";

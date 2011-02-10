@@ -2740,6 +2740,8 @@ label.warning=Warning:
 
 langname.en=English
 
+link.mobile=<a href="http://m.livejournal.com/?from_url=[[url]]">Go to mobile version</a>
+
 ljfeedback.text=Like to vote?  Join [[journal]] where we post polls and surveys that help influence and improve LJ.
 
 ljlib.pageofpages=Page [[page]] of [[total]]
