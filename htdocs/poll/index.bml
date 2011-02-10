@@ -51,8 +51,8 @@
     if ($poll->is_owner($remote)) {
         if ($FORM{'mode'} =~ /(close|open)/) {
             $mode = $FORM{'mode'};
-            $poll->close_poll if ($mode eq 'close');
-            $poll->open_poll if ($mode eq 'open');
+            $poll->close_poll if ($mode eq 'close' && !$is_super);
+            $poll->open_poll if ($mode eq 'open' && !$is_super);
             $mode = 'results' ;
         }
     }
