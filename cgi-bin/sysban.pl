@@ -54,10 +54,10 @@ sub sysban_check {
 
         # return value to user
         return $LJ::IP_BANNED{$value};
+    
     }
-
     # cache if uniq ban
-    if ($what eq 'uniq') {
+    elsif ($what eq 'uniq') {
 
         # check memcache first if not loaded
         unless ($LJ::UNIQ_BANNED_LOADED) {
@@ -88,9 +88,8 @@ sub sysban_check {
         # return value to user
         return $LJ::UNIQ_BANNED{$value};
     }
-
     # cache if contentflag ban
-    if ($what eq 'contentflag') {
+    elsif ($what eq 'contentflag') {
 
         # check memcache first if not loaded
         unless ($LJ::CONTENTFLAG_BANNED_LOADED) {
@@ -122,6 +121,43 @@ sub sysban_check {
         return (defined $LJ::CONTENTFLAG_BANNED{$value} &&
                 ($LJ::CONTENTFLAG_BANNED{$value} == 0 ||     # forever
                  $LJ::CONTENTFLAG_BANNED{$value} > time())); # not-expired
+    }
+    # cache if email_domain
+    elsif ($what eq 'email_domain'){
+        
+        $value =~ s/^.*@//; ## in case $value is a full email address.
+
+        # check memcache first if not loaded
+        unless ($LJ::EMAIL_DOMAIN_BANNED_LOADED) {
+            my $memval = LJ::MemCache::get("sysban:email_domain");
+            if ($memval) {
+                $LJ::EMAIL_DOMAIN_BANNED = $memval;
+                $LJ::EMAIL_DOMAIN_BANNED_LOADED++;
+            }
+        }
+
+        # is it already cached in memory?
+        if ($LJ::EMAIL_DOMAIN_BANNED_LOADED) {
+            return (defined $LJ::EMAIL_DOMAIN_BANNED{$value} &&
+                    ($LJ::EMAIL_DOMAIN_BANNED{$value} == 0 ||     # forever
+                     $LJ::EMAIL_DOMAIN_BANNED{$value} > time())); # not-expired
+        }
+
+        # set this now before the query
+        $LJ::EMAIL_DOMAIN_BANNED_LOADED++;
+
+        LJ::sysban_populate(\%LJ::EMAIL_DOMAIN_BANNED, "email_domain")
+            or return undef $LJ::EMAIL_DOMAIN_BANNED_LOADED;
+
+        # set in memcache
+        my $exp = 60*15; # 15 minutes
+        LJ::MemCache::set("sysban:email_domain", \%LJ::EMAIL_DOMAIN_BANNED, $exp);
+
+        # return value to user
+        return (defined $LJ::EMAIL_DOMAIN_BANNED{$value} &&
+                ($LJ::EMAIL_DOMAIN_BANNED{$value} == 0 ||     # forever
+                 $LJ::EMAIL_DOMAIN_BANNED{$value} > time())); # not-expired
+       
     }
 
     # need the db below here
@@ -180,9 +216,12 @@ sub sysban_populate {
     my ($where, $what) = @_;
 
     # call normally if no gearman/not wanted
+    return LJ::_db_sysban_populate($where, $what) 
+        unless LJ::conf_test($LJ::LOADSYSBAN_USING_GEARMAN);
+    
     my $gc = LJ::gearman_client();
-    return LJ::_db_sysban_populate($where, $what)
-        unless $gc && LJ::conf_test($LJ::LOADSYSBAN_USING_GEARMAN);
+    return LJ::_db_sysban_populate($where, $what) 
+        unless $gc;
 
     # invoke gearman
     my $args = Storable::nfreeze({what => $what});

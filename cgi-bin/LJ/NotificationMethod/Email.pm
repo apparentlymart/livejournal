@@ -61,6 +61,11 @@ sub notify {
         unless ref $self eq __PACKAGE__;
 
     my $u = $self->u;
+    
+    if (LJ::sysban_check('email_domain', $u->email_raw)){
+        warn "Not issuing job for " . $u->email_raw . " [banned]";
+        return 1;
+    }
 
     my $lang = $u->prop('browselang');
     my $vars = { sitenameshort => $LJ::SITENAMESHORT, sitename => $LJ::SITENAME, siteroot => $LJ::SITEROOT };
