@@ -25,6 +25,7 @@ sub create_supermaintainer_election_poll {
     my $alive_maintainers = $args{'maint_list'};
     my $textref = $args{'log'};
     my $no_job = $args{'no_job'} || 0;
+    my $check_active = $args{'check_active'} || 0;
     my $to_journal = $args{'to_journal'} || LJ::load_user('lj_elections');
 
     my $comm = LJ::load_userid($comm_id);
@@ -68,11 +69,11 @@ sub create_supermaintainer_election_poll {
 
     ## All are ok. Emailing to all maintainers about election.
     my $subject = LJ::Lang::ml('poll.election.email.subject');
-    $textref .= "Sending emails to all maintainers for community " . $comm->user . "\n";
-    foreach my $maint_id (@$alive_maintainers) {
-        my $u = LJ::load_userid ($maint_id);
-        next unless $u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90);
-        $textref .= "\tSend email to maintainer ".$u->user."\n";
+    $$textref .= "Sending emails to all maintainers for community " . $comm->user . "\n";
+    foreach my $u (@$alive_maintainers) {
+        next unless $u && $u->is_visible && $u->can_manage($comm);
+        next if !$check_active && $u->check_activity(90);
+        $$textref .= "\tSend email to maintainer ".$u->user."\n";
         LJ::send_mail({ 'to'        => $u->email_raw,
                         'from'      => $LJ::ACCOUNTS_EMAIL,
                         'fromname'  => $LJ::SITENAMESHORT,

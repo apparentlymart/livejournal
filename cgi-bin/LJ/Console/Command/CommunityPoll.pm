@@ -62,12 +62,16 @@ sub execute {
         $u && $u->is_visible && !$u->is_expunged && $u->can_manage($c) ? 1 : 0;
     } @maintainers;
 
+    return $self->error("Can't create poll. No maintainers given or they are not maintainers.")
+        unless @maintainers;
+
     my $log = '';
     my $poll_id = LJ::create_supermaintainer_election_poll (
-            comm_id     => $c->userid, 
-            maint_list  => \@maintainers, 
-            log         => \$log,
-            no_job      => 0,
+            comm_id      => $c->userid, 
+            maint_list   => \@maintainers, 
+            log          => \$log,
+            no_job       => 0,
+            check_active => 1,
     );
 
     return $self->error("Can't create poll")
