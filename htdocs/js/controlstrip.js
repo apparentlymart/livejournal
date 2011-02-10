@@ -16,9 +16,9 @@ var ControlStrip = top.ControlStrip = {};
 
 var CONFIG = {
 	rootSelector: ".w-cs",
-	overlaysSelectors: [".w-cs-share", ".w-cs-filter", ".i-calendar"],
+	overlaysSelectors: [".w-cs-share", ".w-cs-filter", ".w-cs-i-calendar", ".w-cs-i-like"],
 	showOverlayClass: "w-cs-hover",
-	calendarSelector: ".i-calendar"
+	calendarSelector: ".w-cs-i-calendar"
 }
 
 var options, elements;
@@ -60,6 +60,21 @@ ControlStrip.initOverlays = function( nodes ) {
 				$this.removeClass( options.showOverlayClass );
 			}, 600 );
 		} );
+
+		$this.mousedown( function( ev ) {
+			ev.stopPropagation();
+		} );
+
+		$this.children( 'a' ).click( function( ev ) {
+			ev.stopPropagation();
+			ev.preventDefault();
+		} );
+
+	} );
+
+	jQuery( document ).mousedown(function( ev ) {
+		nodes.removeClass( options.showOverlayClass );
+		ev.stopPropagation();
 	} );
 };
 
@@ -74,13 +89,16 @@ ControlStrip.Calendar = function( o ) {
 		o.startAtSunday = ControlStrip.Calendar.StartAtSunday;
 	}
 
+	/*
 	var onFetch = function( onload ) {
 		jQuery.getJSON( LiveJournal.getAjaxUrl('get_posting_days'),
 			{ journal: Site.currentJournal }, onload );
 	}
-
+	*/
 	this.calendar( {
-		onFetch: onFetch,
+		//onFetch: onFetch,
+		dayRef: Site.remoteJournalBase + "/friends/?date=%Y-%M-%D",
+		allRefs: true,
 		activeUntil: new Date(),
 		startMonth: new Date( 1999, 3, 1 ),
 		endMonth: new Date()
