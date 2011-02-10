@@ -26,20 +26,19 @@ sub execute {
     return $self->error("This command takes at least one argument. Consult the reference.")
         if scalar(@args) < 1;
 
+    ## Removing 'confirm' from args
+    my $confirm = 0;
+    @args = grep {
+        $confirm = 'confirm' if $_ eq 'confirm';
+        $_ ne 'confirm' ? 1 : 0;
+    } @args;
+
     my $comm_name = shift @args;
     my $c = LJ::load_user($comm_name);
     return $self->error("Community must be undeleted")
         if $c->is_expunged;
 
     my $maint_list = shift @args;
-    my $confirm = undef;
-    if ($maint_list eq 'confirm') {
-        $confirm = 'confirm';
-        $maint_list = undef;
-    } else {
-        $confirm = shift @args;
-    }
-
     ## If we not got maint_list
     unless ($maint_list) {
         my $m_list = LJ::load_rel_user($c->userid, 'A');
