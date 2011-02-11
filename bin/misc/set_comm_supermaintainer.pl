@@ -97,6 +97,7 @@ foreach my $c_id (@$communities) {
         _log "Error while loading community (Id: $c_id)\n";
         next;
     }
+    next if $comm->{user} eq 'cheaptrip';
 
     _log "Start work with community '$comm->{'user'}'\n";
 
