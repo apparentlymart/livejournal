@@ -693,6 +693,43 @@ Must be removed after implementation of Framework! */
 	top: 0;
 	}
 
+/* Mobile version message */
+.b-message-mobile {
+	position: absolute;
+	top: 45px;
+	left: 0;
+	width: 100%;
+	height: 23px;
+	padding: 0;
+	margin: 0;
+	background: #1C2F5D;
+	font: 11px/13px 'Arial', 'Helvetica', sans-serif;
+	color: #FFF;
+	}
+	.b-message-mobile .b-message-mobile-wrapper {
+		padding: 5px 15px;
+		margin: 0;
+		}
+	.b-message-mobile A:link,
+	.b-message-mobile A:visited,
+	.b-message-mobile A:hover,
+	.b-message-mobile A:active {
+		padding: 0 0 0 12px;
+		margin: 0;
+		background: url(/img/message-mobile-pic.gif?ver) no-repeat;
+		border: 0;
+		text-decoration: none !important;
+		font: 11px/13px 'Arial', 'Helvetica', sans-serif !important;
+		color: #FFF !important;
+		}
+.b-message-mobile-theme {
+	top: 0;
+	}
+	.mobile-msg #navigation,
+	.mobile-msg #header {
+		top: 23px;
+		}
+
 /* Facebook & Twitter authorization
 --------------------------- */
 /* Must be removed after implementation of Framework! */

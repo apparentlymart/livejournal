@@ -1,4 +1,4 @@
-<TMPL_VAR link_mobile>
+<TMPL_IF link_mobile><div class="b-message-mobile"><div class="b-message-mobile-wrapper"><TMPL_VAR link_mobile></div></div></TMPL_IF>
 <TMPL_IF remote_is_logged_in>
 <TMPL_INCLUDE name="user.tmpl">
 <TMPL_ELSE>
