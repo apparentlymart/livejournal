@@ -246,6 +246,8 @@ class CommentInfo
     "Print the formatted link to the 'Read Comments' view";
     function print_postlink
     "Print the formatted link to the 'Post Comments' view";
+    function print_spamlink
+    "Print the formatted link to the 'Show spam' view";
 }
 
 class UserLink
@@ -388,6 +390,7 @@ class Comment extends EntryLite
     var readonly string anchor "Direct link to comment, via HTML name anchors";
     var readonly bool comment_posted "True if comment was just posted by the current user.";
     var readonly bool edited "True if the comment has been edited.";
+    var readonly bool spam "This is spam message.";
 
     var readonly DateTime time_remote "The local time the comment appeared, in the remote user's (reader's) timezone.  Or undef if no remote user, or remote user hasn't set their timezone.";
     var readonly DateTime time_poster "The local time the comment appeared, in the commenter's timezone.  Or undef if anonymous comment, or commenter's timezone is unknown.";
@@ -493,6 +496,9 @@ class Page
     var Link{} data_link "Links to various machine-readable data sources relating to this page";
     var string[] data_links_order "An array of data views which can be used to order the data_link hash";
 
+    var bool showspam
+    "Set to true if need show only spam messages.";
+
     function print
     "The main entry point that LiveJournal calls. Layouts should override this to create HTML that's the
     same for all view types, and use \$this->title, \$this->head and \$this->body to include view-specific
@@ -556,6 +562,9 @@ class Page
     function builtin print_reply_link(string{} opts) "Prints a link to reply to the comment. You may specify the link text in the 'linktext' option, the link CSS class in 'class', and the target container in the 'target' option. You may also specify the url of an image to use as a button in 'img_url'.";
 
     function builtin print_reply_container(string{} opts) "Prints the area in which the quickreply box will go. Options you may specify are 'target' which will be the target id, and 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.";
+
+    function builtin print_show_spam_button()
+    "Show Spam Button.";
 
     function print_stylesheets
     "Prints all defined stylesheets, including default and user-defined ones.";
@@ -758,6 +767,7 @@ class EntryPage extends Page
     function builtin print_multiform_start "Prints start of form tag and hidden elements to do a multi-comment action (multiple delete, screen, unscreen, etc...)";
     function builtin print_multiform_end "Prints end of form tag to do a multi-comment action.";
     function builtin print_multiform_actionline "Prints the line of the multiform giving instructions, options, and the submit button, using the text of the different \$*text_multiform_ properties.";
+    
 }
 
 class ReplyForm
@@ -1166,6 +1176,17 @@ property string text_read_comments_friends {
 }
 set text_post_comment_friends = "Leave a comment";
 set text_read_comments_friends = "1 comment // # comments";
+
+property string text_showspam {
+    des = "Show spam messages";
+    example = "Show spam";
+}
+property string text_hidespam {
+    des = "Hide spam messages";
+    example = "Hide  spam";
+}
+set text_showspam = "Show spam";
+set text_hidespam = "Hide spam";
 
 property string text_tags_page_header {
     des = "Text for the header of the Tags page";
@@ -2728,16 +2749,29 @@ function Redirector::end_form ()
 
 function EntryPage::print_comments (Comment[] cs) {
     if (size $cs == 0) { return; }
+    var Page p = get_page();
     foreach var Comment c ($cs) {
-        var int indent = ($c.depth - 1) * 25;
-        "<div id='$c.dom_id' style='margin-left: ${indent}px; margin-top: 5px'>\n";
-        if ($c.full) {
-            $this->print_comment($c);
+        if ($p.showspam) {
+            if ($c.spam) {
+                "<div id='$c.dom_id' style='margin-left: 0px; margin-top: 5px'>\n";
+                $this->print_comment($c);
+                "</div>";
+            }
         } else {
-            $this->print_comment_partial($c);
+            var int indent = ($c.depth - 1) * 25;
+            "<div id='$c.dom_id' style='margin-left: ${indent}px; margin-top: 5px'>\n";
+            if ($c.spam) {
+                if (size $c.replies > 0) {
+                    "(SPAM)";
+                }
+            } elseif ($c.full) {
+                $this->print_comment($c);
+            } else {
+                $this->print_comment_partial($c);
+            }
+            "</div>";
+            $this->print_comments($c.replies);
         }
-        "</div>";
-        $this->print_comments($c.replies);
     }
 }
 

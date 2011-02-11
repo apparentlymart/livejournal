@@ -2000,6 +2000,8 @@ sub Page
     my $linkobj = LJ::Links::load_linkobj($u);
     my $linklist = [ map { UserLink($_) } @$linkobj ];
 
+    my $remote = LJ::get_remote();
+
     my $p = {
         '_type' => 'Page',
         '_u' => $u,
@@ -2025,13 +2027,14 @@ sub Page
         'head_content' => '',
         'data_link' => {},
         'data_links_order' => [],
+        'showspam' => $remote && ($remote->can_manage($u) || $remote->can_moderate($u)) && 
+                      LJ::is_enabled('spam_button') && $get->{mode} eq 'showspam',
     };
 
     if ($LJ::UNICODE && $opts && $opts->{'saycharset'}) {
         $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset=' . $opts->{'saycharset'} . "\" />\n";
     }
 
-    my $remote = LJ::get_remote();
     if (LJ::are_hooks('s2_head_content_extra')) {
         LJ::run_hooks('s2_head_content_extra', \$p->{head_content}, $remote, $opts->{r});
     }
@@ -3026,28 +3029,42 @@ sub _Comment__get_link
                             $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 24, 24));
     }
-    if ($key eq "freeze_thread") {
+    if ($key eq "spam_comment") {
+        return $null_link if $LJ::DISABLED{'spam_button'};
+        return $null_link unless LJ::Talk::can_mark_spam($remote, $u, $post_user, $com_user);
+        return LJ::S2::Link("$LJ::SITEROOT/spamcomment.bml?mode=spam&amp;journal=$u->{'user'}&amp;id=$this->{'talkid'}",
+                            $ctx->[S2::PROPS]->{"text_multiform_opt_spam"},
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_spam.gif", 24, 24));
+    }
+    if ($key eq "unspam_comment") {
+        return $null_link if $LJ::DISABLED{'spam_button'};
+        return $null_link unless LJ::Talk::can_mark_spam($remote, $u, $post_user, $com_user);
+        return LJ::S2::Link("$LJ::SITEROOT/spamcomment.bml?mode=unspam&amp;journal=$u->{'user'}&amp;id=$this->{'talkid'}",
+                            $ctx->[S2::PROPS]->{"text_multiform_opt_unspam"},
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_unspam.gif", 24, 24));
+    }
+    if ($key eq "freeze_thread" && ($LJ::DISABLED{'spam_button'} || $comment->{state} ne 'B')) {
         return $null_link if $this->{'frozen'};
         return $null_link unless LJ::Talk::can_freeze($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_freeze"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 24, 24));
     }
-    if ($key eq "unfreeze_thread") {
+    if ($key eq "unfreeze_thread" && ($LJ::DISABLED{'spam_button'} || $comment->{state} ne 'B')) {
         return $null_link unless $this->{'frozen'};
         return $null_link unless LJ::Talk::can_unfreeze($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unfreeze"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 24, 24));
     }
-    if ($key eq "screen_comment") {
+    if ($key eq "screen_comment" && ($LJ::DISABLED{'spam_button'} || $comment->{state} ne 'B')) {
         return $null_link if $this->{'screened'};
         return $null_link unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_screen"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 24, 24));
     }
-    if ($key eq "unscreen_comment") {
+    if ($key eq "unscreen_comment" && ($LJ::DISABLED{'spam_button'} || $comment->{state} ne 'B')) {
         return $null_link unless $this->{'screened'};
         return $null_link unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
@@ -3065,7 +3082,7 @@ sub _Comment__get_link
     }
 
     
-    if ($key eq "watch_thread" || $key eq "unwatch_thread" || $key eq "watching_parent") {
+    if (($key eq "watch_thread" || $key eq "unwatch_thread" || $key eq "watching_parent") && ($LJ::DISABLED{'spam_button'} || $comment->{state} ne 'B')) {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
 
@@ -3342,6 +3359,25 @@ sub _print_reply_container
 *Comment__print_reply_container = \&_print_reply_container;
 *EntryPage__print_reply_container = \&_print_reply_container;
 *Page__print_reply_container = \&_print_reply_container;
+
+sub _print_show_spam_button
+{
+    my ($ctx, $this, $opts) = @_;
+
+    my $page = get_page();
+    return unless $page->{'_type'} eq 'EntryPage';
+
+    return unless LJ::is_enabled('spam_button');
+
+    # set target to the dtalkid if no target specified (link will be same)
+    my $dtalkid = $this->{'talkid'} || undef;
+    return unless $dtalkid;
+
+    $S2::pout->("<p>SPAM BUTTON</p>");
+}
+
+*EntryPage__print_show_spam_button = \&_print_show_spam_button;
+*Page__print_show_spam_button = \&_print_show_spam_button;
 
 sub Comment__expand_link
 {

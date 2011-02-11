@@ -2520,11 +2520,13 @@ sub get_thread_html
                     $text .= BML::ml('.fromip', { 'ip' => $post->{'props'}->{'poster_ip'} });
                 }
 
-                $text .= " <font size='-1'>(<a href='" .
-                         LJ::Talk::talkargs($talkurl, "thread=$dtid", $formatlight) .
-                         "#t$dtid'>" .
-                         BML::ml('talk.commentpermlink') . "</a>)</font> ";
-
+                if ($post->{'state'} ne 'B') {
+                    $text .= " <font size='-1'>(<a href='" .
+                             LJ::Talk::talkargs($talkurl, "thread=$dtid", $formatlight) .
+                             "#t$dtid'>" .
+                             BML::ml('talk.commentpermlink') . "</a>)</font> ";
+                }
+                
                 if ($comment->remote_can_edit) {
                     $text .= "<a href='" .
                              LJ::Talk::talkargs($comment->edit_url, $stylemine, $formatlight) .
@@ -2618,7 +2620,7 @@ sub get_thread_html
                     $text .= "<a href='$track_url'>" . LJ::img($track_img, '', {'align' => 'absmiddle'}) . "</a>";
                 }
 
-                if ($showmultiform && ($LJ::DISABLED{'spam_button'} || $post->{'state'} ne 'B')) {
+                if ($showmultiform) {
                     $text .= " <nobr><input type='checkbox' name='selected_$tid' id='s$tid' />";
                     $text .= " <label for='s$tid'>" . BML::ml('.select') . "</label></nobr>";
                     $output->{multiform_selects} = 1;

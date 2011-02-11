@@ -229,6 +229,8 @@ propgroup text {
   property string date_daypage_skip_format {
         des = "Date format for the skip links on the day page";
   }
+  property use text_showspam;
+  property use text_hidespam;
 }
 set text_left_comments = "(";
 set text_btwn_comments = " | ";
@@ -728,6 +730,14 @@ function CommentInfo::print_postlink() {
      }
 }
 
+function CommentInfo::print_spamlink() {
+    var Page p = get_page();
+    if ($p.showspam) {
+        print safe "<a href=\"$.read_url\">$*text_hidespam</a>";
+    } else {
+        print safe "<a href=\"$.read_url?mode=showspam\">$*text_showspam</a>";
+    }
+}
 
 function CommentInfo::print ()
 {
@@ -740,12 +750,14 @@ function CommentInfo::print ()
             if (clean_url($*img_btwn_comments) != "") {
                 """ <img src="$*img_btwn_comments" alt="" /> """;
             } else {
-                print safe "$*text_btwn_comments";
             }
         }
+        print safe "$*text_btwn_comments";
         if ($.show_postlink) {
             $this->print_postlink();
         }
+        print safe "$*text_btwn_comments";
+        $this->print_spamlink();
         print safe "$*text_right_comments</p>";
     }
 }
@@ -975,6 +987,12 @@ function EntryPage::print_comment (Comment c) {
     print "<div style='margin-top: 3px; font-size: smaller'>";
     if ($c.frozen) {
         print "(Replies frozen) ";
+    } elseif ($c.spam) {
+        # print "(";
+        # var Link link;
+        # $link = $c->get_link("unspam_comment");
+        # """<a href="$link.url" title="$link.caption">$link.caption</a>""";
+        # print ") ";
     } else {
         print "(";
         
@@ -991,7 +1009,7 @@ function EntryPage::print_comment (Comment c) {
         print ") ";
     }
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
-    if ($c.thread_url != "") {
+    if ($c.thread_url != "" and $c.spam == false) {
         "(<a href='$c.thread_url'>Thread</a>) ";
         var Link expand_link = $c->get_link("expand_comments");
         if (defined $expand_link) {

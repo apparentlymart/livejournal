@@ -690,20 +690,35 @@ body<=
                 my $args = BML::get_query_string;
                 $args = '?' . $args if $args;
                 $ret .= LJ::html_hidden( returnto => $talkurl . $args );
-                $ret .= LJ::html_select(
-                    { 'name' => 'mode' },
-                    '' => $ML{'.talkmulti.please'},
-                    $ML{'.talkmulti.selected'} => [
-                        'unscreen'   => $ML{'.talkmulti.unscreen'},
-                        'screen'     => $ML{'.talkmulti.screen'},
-                        'delete'     => $ML{'.talkmulti.delete'},
-                        'deletespam' => $ML{'.talkmulti.deletespam'},
-                    ],
-                    $ML{'.talkmulti.all'} => [
-                        'all:screen'   => $ML{'.talkmulti.screen'},
-                        'all:unscreen' => $ML{'.talkmulti.unscreen'},
-                    ],
-                );
+                if (LJ::is_enabled('spam_button') && $GET{mode} eq 'showspam') {
+                    $ret .= LJ::html_select(
+                        { 'name' => 'mode' },
+                        '' => $ML{'.talkmulti.please'},
+                        $ML{'.talkmulti.selected'} => [
+                            'unspam' => $ML{'.talkmulti.unspam'},
+                            'delete' => $ML{'.talkmulti.delete'},
+                        ],
+                        $ML{'.talkmulti.all'} => [
+                            'all:unspam' => $ML{'.talkmulti.unspam'},
+                            'all:delete' => $ML{'.talkmulti.delete'},
+                        ],
+                    );
+                } else {
+                    $ret .= LJ::html_select(
+                        { 'name' => 'mode' },
+                        '' => $ML{'.talkmulti.please'},
+                        $ML{'.talkmulti.selected'} => [
+                            'unscreen'   => $ML{'.talkmulti.unscreen'},
+                            'screen'     => $ML{'.talkmulti.screen'},
+                            'delete'     => $ML{'.talkmulti.delete'},
+                            'deletespam' => $ML{'.talkmulti.deletespam'},
+                        ],
+                        $ML{'.talkmulti.all'} => [
+                            'all:screen'   => $ML{'.talkmulti.screen'},
+                            'all:unscreen' => $ML{'.talkmulti.unscreen'},
+                        ],
+                    );
+                }
                 $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'});
                 $ret .= "</p>";
             }

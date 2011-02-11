@@ -1619,4 +1619,9 @@ userproplist.trynbuy_enabled_at:
   cldversion: 8
   prettyname: The moment when user enabled trynbuy feature
 
+logproplist.spam_counter:
+  datatype: num
+  des: Counter of spam comments in this entry
+  prettyname: Spam counter
+  sortorder: 108
 

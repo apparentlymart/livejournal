@@ -36,7 +36,7 @@ sub EntryPage
     return if $opts->{'redir'};
 
     $p->{'multiform_on'} = $entry->comments_manageable_by($remote);
-
+    
     my $itemid = $entry->jitemid;
     my $permalink = $entry->url;
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
@@ -107,6 +107,7 @@ sub EntryPage
         'viewall' => $viewall,
         'expand_all' => $opts->{expand_all},
         'init_comobj' => 0,
+        'showspam'    => $p->{'showspam'} && !$get->{from_rpc},
     };
 
     ## Expand all comments on page
@@ -227,6 +228,7 @@ sub EntryPage
                 'full' => $com->{'_loaded'} ? 1 : 0,
                 'depth' => $depth,
                 'parent_url' => $par_url,
+                'spam' => $com->{'state'} eq "B" ? 1 : 0,
                 'screened' => $com->{'state'} eq "S" ? 1 : 0,
                 'frozen' => $com->{'state'} eq "F" || !$entry->posting_comments_allowed ? 1 : 0,
                 'deleted' => $com->{'state'} eq "D" ? 1 : 0,
@@ -267,6 +269,7 @@ sub EntryPage
 
             # Conditionally add more links to the keyseq
             my $link_keyseq = $s2com->{'link_keyseq'};
+            push @$link_keyseq, $s2com->{'spam'} ? 'unspam_comment' : 'spam_comment';
             push @$link_keyseq, $s2com->{'screened'} ? 'unscreen_comment' : 'screen_comment';
             if ($entry->posting_comments_allowed) {
                 push @$link_keyseq, $s2com->{'frozen'} ? 'unfreeze_thread' : 'freeze_thread';
