@@ -571,7 +571,7 @@ sub require_captcha_test {
     ## LJSUP-7832: If user is a member of "http://community.livejournal.com/notaspammers/" 
     ##             we shouldn't display captcha for him
             
-    return if $commenter && LJ::check_rel($LJ::NOTASPAMMERS_COMM_UID, $commenter, 'P');
+    return if $commenter && LJ::is_friend($LJ::NOTASPAMMERS_COMM_UID, $commenter);
 
     ## allow some users (our bots) to post without captchas in any rate
     return if $commenter and 
