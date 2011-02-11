@@ -2198,9 +2198,11 @@ LOGIN_BAR
         my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check");
         my $proto = $is_ssl ? "https://" : "http://";
         my $url = LJ::eurl ($proto.$hostname.$uri.$args_wq);
-        $mobile_link = "<table><tr><td style='color:#FFFFFF'>".LJ::Lang::ml('link.mobile', { url => $url })."</td></tr></table>";
+        $mobile_link .= "<div class='b-message-mobile'><div class='b-message-mobile-wrapper'>";
+	    $mobile_link .= LJ::Lang::ml('link.mobile', { url => $url });
+	    $mobile_link .="</div></div>";
     }
-    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr><td colspan='5'>$mobile_link</td></tr><tr valign='top'>$ret</tr><tr><td colspan='5'>$message</td></tr></table>";
+    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr><tr><td colspan='5'>$message</td></tr></table> $mobile_link";
 }
 
 sub control_strip_js_inject
