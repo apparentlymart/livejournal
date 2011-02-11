@@ -271,33 +271,11 @@ sub _check_maintainers {
             _log "\tuser ($u->{user}) is the person who created the community\n";
             return $u;
         }
-    } else {
-        _log "No 'account_create' record. Start the election.\n";
-        return undef;
     }
 
-    _log "Record 'account_create' found. Try to find the oldest active maintainer\n";
-
-    $sth->execute($comm->{userid}, 'maintainer_add');
-    while (my $row = $sth->fetchrow_hashref) {
-        my $u_id = $row->{'actiontarget'};
-        my $u = LJ::load_userid ($u_id);
-        if (!$u) {
-            _log "\t\tCan't load maintainer ($u_id)\n";
-        } elsif (!$u->is_visible) {
-            _log "\t\tuser ($u->{user}) is not visible\n";
-        } elsif (!$u->can_manage($comm)) {
-            _log "\t\tuser ($u->{user}) can not manage community\n";
-        } elsif (!$u->check_activity(90)) {
-            _log "\t\tuser ($u->{user}) is not active at last 90 days\n";
-        } else {
-            _log "\tuser ($u->{'user'}) is the oldest active maintainer in the community\n";
-            return $u;
-        }
-    }
-
-    _log "Can't find active maintainer\n";
+    _log "No 'account_create' record. Start the election.\n";
     return undef;
+
 }
 
 
