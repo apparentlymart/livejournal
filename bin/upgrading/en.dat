@@ -32,6 +32,8 @@ btn.add=Add
 
 btn.search=Search
 
+cart.add.vgift.success=Virtual gift added to your cart.
+
 cleanhtml.suspend_msg|staleness=1
 cleanhtml.suspend_msg=This is a suspended entry.
 
