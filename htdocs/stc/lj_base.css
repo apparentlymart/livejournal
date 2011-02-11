@@ -1136,20 +1136,27 @@ Must be removed after implementation of Framework! */
 		padding: 0.3em 0 0;
 		line-height: 1.5;
 		}
-		.b-manage-smsn .b-manage-smsn-sms INPUT {
-			width: 95px;
+		.b-manage-smsn .b-manage-smsn-sms INPUT.b-manage-smsn-code {
+			width: 2.5em;
+			}
+		.b-manage-smsn .b-manage-smsn-sms INPUT.b-manage-smsn-phone {
+			width: 10em;
 			}
 	.b-manage-smsn-hide .b-manage-smsn-sms {
 		padding: 0;
 		}
 	.b-manage-smsn .b-manage-smsn-status {
 		position: relative;
-		padding: 0 0 0 2em;
-		margin-left: 110px;
+		float: left;
+		padding: 0 0 0 20px;
+		margin: 0 0 0 .5em;
 		}
 	.b-manage-smsn-hide .b-manage-smsn-status {
 		display: none !important;
 		}
+		.b-manage-smsn .b-manage-smsn-status .i-bubble {
+			margin: 0 30px 0 10px !important;
+			}
 		.b-manage-smsn .b-manage-smsn-status .help-icon {
 			position: absolute;
 			top: 8px;
