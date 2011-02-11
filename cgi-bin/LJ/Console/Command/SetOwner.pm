@@ -49,8 +49,11 @@ sub execute {
 
     $c->log_event('set_owner', { actiontarget => $u->{userid}, remote => $remote });
 
-    LJ::statushistory_add($c, $remote, 'set_owner', "Console set owner as ".$u->{user});
+    LJ::statushistory_add($c, $remote, 'set_owner', "Console set owner and new maintainer as ".$u->{user});
     LJ::set_rel($c->{userid}, $u->{userid}, 'S');
+    ## Set a new supermaintainer as maintainer too.
+    LJ::set_rel($c->{userid}, $u->{userid}, 'A');
+    $c->log_event('maintainer_add', { actiontarget => $u->{userid}, remote => $remote })
 
     $self->print("User '$user' setted as supermaintainer for '$comm'.");
 
