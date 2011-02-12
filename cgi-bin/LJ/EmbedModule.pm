@@ -125,6 +125,19 @@ sub _expand_tag {
                 (" target=\"" . $opts{expand_to_link}->{target} . "\"") : ''
             ) .
             ">" . $opts{expand_to_link}->{caption} . "</a>";
+    } elsif ($opts{get_youtube_id}) {
+        my $code = $class->module_content(moduleid  => $attrs{id}, journalid => $journal->id);        
+
+        my $out=  '<lj-embed id="'. $attrs{id} .'" ';
+
+        if($code =~ m!src="http://www\.youtube\.com/embed/([\w\d\_\-]+)"!) {
+            $out .= 'vid="'.$1.'" ';
+        }
+
+        $out .= ' />';
+
+        return $out;
+        
     } else {
         @opts{qw /width height/} = @attrs{qw/width height/};
         return $class->module_iframe_tag($journal, $attrs{id}, %opts)
