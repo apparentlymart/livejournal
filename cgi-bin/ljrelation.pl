@@ -1,6 +1,18 @@
 package LJ;
 use strict;
 
+#########################
+# Types of relations:
+# P - poster
+# A - maintainer
+# B - ban
+# N - pre-approved
+# M - moderator
+# S - supermaintainer
+# I - inviter
+# D - spammer
+#########################
+
 # <LJFUNC>
 # name: LJ::is_friend
 # des: Checks to see if a user is a friend of another user.

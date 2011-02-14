@@ -28,6 +28,8 @@ if you would like to screen, unscreen, or delete the comments.
 
 .screened.title=Comments screened
 
+.title.all.delete=Delete All Comments
+
 .title.all.screen|staleness=1
 .title.all.screen=Screen All Comments
 

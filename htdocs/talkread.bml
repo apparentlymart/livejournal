@@ -696,11 +696,11 @@ body<=
                         '' => $ML{'.talkmulti.please'},
                         $ML{'.talkmulti.selected'} => [
                             'unspam' => $ML{'.talkmulti.unspam'},
-                            'delete' => $ML{'.talkmulti.delete'},
+                            'deletespam' => $ML{'.talkmulti.deletespam'},
                         ],
                         $ML{'.talkmulti.all'} => [
                             'all:unspam' => $ML{'.talkmulti.unspam'},
-                            'all:delete' => $ML{'.talkmulti.delete'},
+                            'all:deletespam' => $ML{'.talkmulti.deletespam'},
                         ],
                     );
                 } else {

@@ -24,6 +24,12 @@
         $title = $ML{'.title.all.unscreen'};
     } elsif ($mode eq 'delete' || $mode eq 'deletespam') {
         $title = $ML{'.title.delete'};
+    } elsif ($mode eq 'all:deletespam') {
+        $title = $ML{'.title.all.delete'};
+    } elsif ($mode eq 'unspam') {
+        $title = $ML{'.title.unspam'};
+    } elsif ($mode eq 'all:unspam') {
+        $title = $ML{'.title.all.unspam'};
     } else {
         $title = $ML{'Error'};
         return $err->($ML{'.error.invalid_mode'});
@@ -46,7 +52,7 @@
     my $itemid = int($ditemid / 256);
 
     my @talkids;
-    if ($mode eq 'all:screen' or $mode eq 'all:unscreen') {
+    if ($mode eq 'all:screen' or $mode eq 'all:unscreen' or $mode eq 'all:unspam') {
         my $comments = LJ::Talk::get_talk_data($u, 'L', $itemid);
         @talkids = keys %$comments;
     } else {
@@ -59,6 +65,8 @@
     # here 'all' cases are same as 'selected'
     $mode = 'screen' if $mode eq 'all:screen';
     $mode = 'unscreen' if $mode eq 'all:unscreen';
+    $mode = 'unspam' if $mode eq 'all:unspam';
+    $mode = 'deletespam' if $mode eq 'all:deletespam';
 
     my $log = $dbcr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=?",
                                        undef, $jid, $itemid);
@@ -71,7 +79,9 @@
     return $err->($ML{'.error.privs.unscreen'})
         if $mode eq "unscreen" && ! LJ::Talk::can_unscreen($remote, $u, $up);
     return $err->($ML{'.error.privs.delete'})
-        if ($mode eq "delete" || $mode eq 'deletespam') && ! LJ::Talk::can_delete($remote, $u, $up);
+        if $mode eq "delete" && ! LJ::Talk::can_delete($remote, $u, $up);
+    return $err->($ML{'.error.privs.delete'})
+        if $mode eq 'deletespam' && ! LJ::Talk::can_mark_spam($remote, $u, $up);
 
     # filter our talkids down to those that are actually attached to the log2
     # specified.  also, learn the state and poster of all the items.
@@ -99,6 +109,7 @@
             # don't let $remote mark their own comments as spam
             foreach (grep { $talkinfo{$_}->[1] != $remote->id } @talkids) {
                 my $s = LJ::Talk::mark_comment_as_spam($u, $_);
+                LJ::set_rel($talkinfo{$_}->[1], $remote, 'D');
             }
         }
 
@@ -111,6 +122,8 @@
 
     } elsif ($mode eq "screen") {
         LJ::Talk::screen_comment($u, $itemid, @talkids);
+    } elsif ($mode eq "unspam") {
+         LJ::Talk::unspam_comment($u, $itemid, @talkids);
     }
 
     return BML::redirect($POST{returnto});
