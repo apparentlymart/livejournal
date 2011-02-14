@@ -995,4 +995,14 @@
 					padding: 40px 0 0;
 					background: url(/img/widget/trynbuy/upgrade.gif?v=1) no-repeat 50% 0;
 					}
+				.b-accstats-button .b-accstats-trynbuy:link,
+				.b-accstats-button .b-accstats-trynbuy:visited,
+				.b-accstats-button .b-accstats-trynbuy:hover,
+				.b-accstats-button .b-accstats-trynbuy:active,
+				.b-accstats-button .b-accstats-upgrade:link,
+				.b-accstats-button .b-accstats-upgrade:visited,
+				.b-accstats-button .b-accstats-upgrade:hover,
+				.b-accstats-button .b-accstats-upgrade:active {
+					border-bottom: 0;
+					}
 
