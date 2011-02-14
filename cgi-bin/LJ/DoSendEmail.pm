@@ -1,6 +1,7 @@
 package LJ::DoSendEmail;
 use Net::DNS qw(mx);
 use LJ::User::Email;
+require 'sysban.pl';
 
 ## Class prop
 my $resolver;
