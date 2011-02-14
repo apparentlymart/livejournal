@@ -1,9 +1,11 @@
-html body
-{
-    padding: 78px 0 0 0;
+HTML BODY {
+    padding: 55px 0 0 0;
     margin-right: 0;
     margin-left: 0;
-}
+	}
+HTML BODY.mobile-msg {
+	padding-top: 78px;
+	}
 
 #lj_controlstrip
 {
