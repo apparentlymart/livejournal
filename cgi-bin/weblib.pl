@@ -2190,7 +2190,7 @@ LOGIN_BAR
     $message = LJ::Widget::SiteMessages->render if LJ::Widget::SiteMessages->should_render;
 
     my $mobile_link = '';
-    if (Apache::WURFL->is_mobile()) {
+    if ($LJ::DISABLED{'view_mobile_link_always'} || Apache::WURFL->is_mobile()) {
         my $uri = LJ::Request->uri;
         my $hostname = LJ::Request->hostname;
         my $args = LJ::Request->args;

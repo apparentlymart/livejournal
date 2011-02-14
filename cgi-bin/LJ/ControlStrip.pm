@@ -323,7 +323,7 @@ sub render
     ) or die "Can't open template: $!";
 
     my $mobile_link = '';
-    if (Apache::WURFL->is_mobile()) {
+    if ($LJ::DISABLED{'view_mobile_link_always'} || Apache::WURFL->is_mobile()) {
         my $uri = LJ::Request->uri;
         my $hostname = LJ::Request->hostname;
         my $args = LJ::Request->args;
