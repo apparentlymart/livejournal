@@ -57,14 +57,25 @@ sub create_supermaintainer_election_poll {
         $poll = LJ::Poll->create (entry => $entry, whovote => 'all', whoview => 'all', questions => \@q)
             or die "Poll was not created";
 
-        $poll->set_prop ('createdate' => $entry->eventtime_mysql)
-            or die "Can't set prop 'createdate'";
+        eval {
+            $poll->set_prop ('createdate' => $entry->eventtime_mysql)
+                or die "Can't set prop 'createdate'";
 
-        $poll->set_prop ('supermaintainer' => $comm->userid)
-            or die "Can't set prop 'supermaintainer'";
+            $poll->set_prop ('supermaintainer' => $comm->userid)
+                or die "Can't set prop 'supermaintainer'";
 
-        _edit_post (to => $to_journal, comm => $comm, entry => $entry, poll => $poll) 
-            or die "Can't edit post";
+            _edit_post (to => $to_journal, comm => $comm, entry => $entry, poll => $poll) 
+                or die "Can't edit post";
+        };
+
+        ## ugly, but reliable
+        if ($@) {
+            print $$textref;
+            use Data::Dumper;
+            warn Dumper($poll);
+            warn Dumper($to_journal);
+            die $@;
+        }
     }
 
     ## All are ok. Emailing to all maintainers about election.

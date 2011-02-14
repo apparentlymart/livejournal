@@ -88,8 +88,10 @@ my $communities = $dbr->selectcol_arrayref ("
 die "Can't fetch communities list\n" unless $communities;
 
 my $i = 0;
-LJ::start_request();
 foreach my $c_id (@$communities) {
+    LJ::start_request();
+    $i++;
+
     _log '-' x 30, "\n";
 
     my $comm = LJ::load_userid ($c_id);
@@ -202,10 +204,6 @@ foreach my $c_id (@$communities) {
             }
         }
     } 
-
-    if ($i++ % 20) {
-        LJ::start_request();
-    }
 }
 
 _log '-' x 30, "\n";
