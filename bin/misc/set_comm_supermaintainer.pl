@@ -10,6 +10,13 @@ require "ljlang.pl";
 require 'ljprotocol.pl';
 use Getopt::Long;
 use LJ::DBUtil;
+use Data::Dumper;
+use IO::Handle;
+
+STDOUT->autoflush(1);
+STDERR->autoflush(1);
+
+
 
 my $help = <<"HELP";
     This script set the supermaintainer role for all or selected communities. 
@@ -259,7 +266,9 @@ sub _check_maintainers {
         my $u_id = $row->{'remoteid'};
         my $u = LJ::load_userid ($u_id);
         if (!$u) {
+            $u_id = "[undefined]" unless defined $u_id;
             _log "\t\tCan't load maintainer ($u_id)\n";
+            _log Dumper($row);
         } elsif (!$u->is_visible) {
             _log "\t\tuser ($u->{user}) is not visible\n";
         } elsif (!$u->can_manage($comm)) {
