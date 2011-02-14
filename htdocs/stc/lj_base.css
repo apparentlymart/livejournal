@@ -705,6 +705,7 @@ Must be removed after implementation of Framework! */
 	background: #1C2F5D;
 	font: 11px/13px 'Arial', 'Helvetica', sans-serif;
 	color: #FFF;
+	z-index: 1000;
 	}
 	.b-message-mobile .b-message-mobile-wrapper {
 		padding: 5px 15px;
@@ -728,6 +729,9 @@ Must be removed after implementation of Framework! */
 	.mobile-msg #navigation,
 	.mobile-msg #header {
 		top: 23px;
+		}
+	.mobile-msg #content {
+		top: 133px !important;
 		}
 
 /* Facebook & Twitter authorization
