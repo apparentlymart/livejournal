@@ -144,12 +144,20 @@ LiveJournal.pollAnswersReceived = function(answers)
 }
 
 // gets a url for doing ajax requests
-LiveJournal.getAjaxUrl = function (action) {
-    // if we are on a journal subdomain then our url will be
-    // /journalname/__rpc_action instead of /__rpc_action
-    return Site.currentJournal
-        ? "/" + Site.currentJournal + "/__rpc_" + action
-        : "/__rpc_" + action;
+LiveJournal.getAjaxUrl = function(action, params) {
+	// if we are on a journal subdomain then our url will be
+	// /journalname/__rpc_action instead of /__rpc_action
+	var uselang = LiveJournal.parseGetArgs(location.search).uselang;
+	if (uselang) {
+		action += "?uselang=" + uselang;
+	}
+	if (params) {
+		action += (uselang ? "&" : "?") + jQuery.param(params);
+	}
+
+	return Site.currentJournal
+		? "/" + Site.currentJournal + "/__rpc_" + action
+		: "/__rpc_" + action;
 };
 
 // generic handler for ajax errors
