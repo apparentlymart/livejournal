@@ -416,6 +416,7 @@ body<=
                     'NewUserpic',
                     'Birthday',
                     'NewVGift',
+                    'WishList',
                 ]
                 : [
                     'InvitedFriendJoins-u',
@@ -424,6 +425,7 @@ body<=
                     'NewUserpic',
                     'Birthday',
                     'NewVGift',
+                    'WishList',
                 ]),
             'u' => $u,
             'css_class' => 'friends_and_communities',
