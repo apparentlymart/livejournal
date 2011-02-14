@@ -9190,7 +9190,11 @@ sub make_journal
             return (1, $get_s1_styleid->());
         };
 
-        ($stylesys, $styleid) = $get_styleinfo->();
+        if ($LJ::JOURNALS_WITH_FIXED_STYLE{$u->user}) {
+            ($stylesys, $styleid) = (2, $u->{'s2_style'}); 
+        } else {
+            ($stylesys, $styleid) = $get_styleinfo->();
+        }
     }
 
     # transcode the tag filtering information into the tag getarg; this has to
