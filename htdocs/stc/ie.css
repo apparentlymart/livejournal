@@ -249,7 +249,10 @@ __________________________________________*/
 * HTML #lj_controlstrip_userpic IMG,
 * HTML .b-wishes-list DIV IMG,
 * HTML .whl-autocomplete-list .whl-autocomplete-img,
-* HTML .appwidget-wishrecommendations .whl-rec-img {
+* HTML .appwidget-wishrecommendations .whl-rec-img,
+* HTML .appwidget-gamefriendsplaying .w-body .friends-playing-list LI .pic IMG,
+* HTML .appwidget-gamefriendsactivity .w-body .friends-activity-list LI .pic IMG,
+* HTML .appwidget-gamewhoplaying .w-body .who-playing-list LI .pic IMG {
 	zoom:expression(
 			function(t){
 				t.runtimeStyle.zoom = 1;
