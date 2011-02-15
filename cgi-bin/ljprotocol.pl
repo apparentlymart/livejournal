@@ -2618,7 +2618,11 @@ sub getevents
 
     ### shared-journal support
     my $posterid = $u->{'userid'};
-    my $ownerid = $req->{journalid} || $flags->{'ownerid'};
+    my $ownerid = $flags->{'ownerid'};
+    if( $req->{journalid} ){
+        $ownerid = $req->{journalid};
+        $uowner = LJ::load_userid( $req->{journalid} );
+    }
     
     my $dbr = LJ::get_db_reader();
     my $sth;
