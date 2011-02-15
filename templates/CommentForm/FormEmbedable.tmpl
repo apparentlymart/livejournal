@@ -23,7 +23,7 @@
 			<fieldset>
 				<p class="lj3-identity">
 					От <TMPL_VAR partner_remote_ljuser>
-					<span class="lj3-logout">(<a href="<TMPL_VAR logout_url>">Выйти</a>)</span>
+					<span class="lj3-logout">(<a href="<TMPL_VAR logout_url>"><TMPL_VAR expr="ml('/logout.bml.logout.head')"></a>)</span>
 				</p>
 				<p class="lj3-input-wrapper">
 					<label for="subject"><TMPL_VAR expr="ml('/talkpost.bml.opt.subject')"></label>
