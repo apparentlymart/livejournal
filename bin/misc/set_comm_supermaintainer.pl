@@ -62,10 +62,6 @@ if (!$to_journal) {
 
 die "No user 'lj_elections' on this server" unless $to_journal;
 
-my $poster = LJ::load_user("system") 
-    or die "No user 'system' on this server";
-
-
 my $dbr = LJ::get_dbh("slow") or die "Can't get slow DB connection";
 $dbr->{RaiseError} = 1;
 $dbr->{ShowErrorStatement} = 1;
@@ -100,6 +96,7 @@ foreach my $c_id (@$communities) {
     $i++;
 
     _log '-' x 30, "\n";
+    _log "Timestamp: " . time . "\n";
 
     my $comm = LJ::load_userid ($c_id);
     unless ($comm) {

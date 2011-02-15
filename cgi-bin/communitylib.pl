@@ -33,6 +33,7 @@ sub create_supermaintainer_election_poll {
     unless ($no_job) {
         $entry = _create_post (to => $to_journal, comm => $comm);
         die "Entry for Poll does not created\n" unless $entry;
+        $$textref .= "Entry url: " . $entry->url . "\n";
     }
 
     my @items = ();

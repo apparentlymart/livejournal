@@ -555,19 +555,19 @@ sub _load {
     return $self if $self->_load_from_memcache;
 
     # Load object from MySQL database
-    my $dbr = LJ::get_db_reader();
+    my $dbw = LJ::get_db_writer();
 
-    my $journalid = $dbr->selectrow_array("SELECT journalid FROM pollowner WHERE pollid=?", undef, $self->pollid);
-    die $dbr->errstr if $dbr->err;
+    my $journalid = $dbw->selectrow_array("SELECT journalid FROM pollowner WHERE pollid=?", undef, $self->pollid);
+    die $dbw->errstr if $dbw->err;
 
     my $row = '';
 
     unless ($journalid) {
         # this is probably not clustered, check global
-        $row = $dbr->selectrow_hashref("SELECT pollid, itemid, journalid, " .
+        $row = $dbw->selectrow_hashref("SELECT pollid, itemid, journalid, " .
                                        "posterid, whovote, whoview, name, status " .
                                        "FROM poll WHERE pollid=?", undef, $self->pollid);
-        die $dbr->errstr if $dbr->err;
+        die $dbw->errstr if $dbw->err;
     } else {
         my $u = LJ::load_userid($journalid)
             or die "Invalid journalid $journalid";
@@ -583,10 +583,10 @@ sub _load {
             die $u->errstr if $u->err;
         } else {
             # unclustered poll
-            $row = $dbr->selectrow_hashref("SELECT pollid, itemid, journalid, " .
+            $row = $dbw->selectrow_hashref("SELECT pollid, itemid, journalid, " .
                                            "posterid, whovote, whoview, name, status " .
                                            "FROM poll WHERE pollid=?", undef, $self->pollid);
-            die $dbr->errstr if $dbr->err;
+            die $dbw->errstr if $dbw->err;
         }
     }
 
