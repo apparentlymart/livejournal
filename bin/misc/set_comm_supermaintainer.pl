@@ -16,8 +16,6 @@ use IO::Handle;
 STDOUT->autoflush(1);
 STDERR->autoflush(1);
 
-
-
 my $help = <<"HELP";
     This script set the supermaintainer role for all or selected communities. 
     If no supermaintainer can be set, then poll is created for the community.
@@ -103,7 +101,13 @@ foreach my $c_id (@$communities) {
         _log "Error while loading community (Id: $c_id)\n";
         next;
     }
-    next if $comm->{user} eq 'cheaptrip';
+
+    if (    $comm->{user} eq 'cheaptrip' ||
+            $comm->{user} eq 'cheaptrip_spb' ||
+            $comm->{user} eq 'cheaptrip_ua')
+    {
+        next; ## these communities don't participate in voting        
+    }
 
     _log "Start work with community '$comm->{'user'}'\n";
 
