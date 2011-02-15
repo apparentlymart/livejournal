@@ -142,7 +142,7 @@ function killPopup () {
 function createPopup(contentHtml, targetControl, e, id) {
 	targetControl = jQuery(targetControl).find('img');
 	
-	var popupElem = jQuery('<div class="ljcmtmanage b-popup" style="text-align:left;position:absolute;visibility:hidden;width:250px;left:0;top:0;z-index:3"><div class="b-popup-outer"><div class="b-popup-inner"><div class="ljcmtmanage-content"></div><i class="i-popup-arr"></i><i class="i-popup-close"></i></div></div></div>'),
+	var popupElem = jQuery('<div class="ljcmtmanage b-popup" style="text-align:left;position:absolute;visibility:hidden;width:250px;left:0;top:0;z-index:3"><div class="b-popup-outer"><div class="b-popup-inner"><div class="ljcmtmanage-content"></div><i class="i-popup-arr i-popup-arrtl"></i><i class="i-popup-close"></i></div></div></div>'),
 		
 		popupCloseControlSelector = '.i-popup-close',
 		popupArrowSelector = '.i-popup-arr',
@@ -180,8 +180,6 @@ function createPopup(contentHtml, targetControl, e, id) {
 	placeElemNear(popupElem, targetControl);	
 		
 	popupElem.fadeIn('fast');
-		
-	//animateGrow(popupElem);
 
 	window.curPopup = popupElem[0];
 	window.curPopup_id = id;
@@ -238,25 +236,37 @@ function createPopup(contentHtml, targetControl, e, id) {
 						x: targetOffset.left - popupArrow.position().left - (popupArrow.width() / 2) + (targetControl.width() / 2),
 						y: targetOffset.top + popupArrow.height() - popupArrow.position().top + (targetControl.height() / 2)
 					};
+				},
+				'bl': function () {
+					return {
+						x: targetOffset.left - popupArrow.position().left - (popupArrow.width() / 2) + (targetControl.width() / 2),
+						y: targetOffset.top - popupArrow.height() - elemHeight
+					};
+				},
+				'br': function () {
+					return {
+						x: targetOffset.left - popupArrow.position().left - (popupArrow.width() / 2) + (targetControl.width() / 2),
+						y: targetOffset.top - popupArrow.height() - elemHeight
+					};
 				}
 			},
 			position,
 			
 			checkAngle = {
-				x: targetOffset.left + (targetControl.width() / 2) + (elemWidth + popupArrow.position().left - popupArrow.width() / 2),
-				y: targetOffset.top + targetControl.height() + popupArrow.height() + elemHeight
-			};
+				x: positionTypes.tl().x + elemWidth,
+				y: positionTypes.tl().y + elemHeight
+			};			
 			
 		if (checkAngle.x > viewportWidth) {
 			positionType.x = 'r'; // right
 		}
 		
-		if (checkAngle.y > viewportHeight) {
+		if (checkAngle.y > viewportHeight + viewport.scrollTop()) {
 			positionType.y = 'b'; // bottom
 		}
 		
 		positionType = positionType.y + positionType.x;
-		popupArrow.addClass(classNamePrefix + positionType);
+		popupArrow.removeClass('i-popup-arrtl').addClass(classNamePrefix + positionType);
 		position = positionTypes[positionType](); 
 		
 		elem.css({
@@ -266,40 +276,6 @@ function createPopup(contentHtml, targetControl, e, id) {
 	}
 	
 	return popupElem;
-}
-
-/**
- * Animate "grow" effect (in old-school, no-jQuery way)
- * 
- * @param {jQuery} elem
- */
-function animateGrow(elem) {
-	var currentHeight = 0,
-		finalHeight = elem.height();
-	
-	elem.css({
-		height: currentHeight,
-		visibility: 'visible'
-	});
-	
-	grow();
-	
-	function grow() {
-		currentHeight += 7;
-		
-		if (currentHeight > finalHeight) {
-			elem.css({
-				height: 'auto',
-				overflow: 'visible'
-			});
-			
-		} else {
-			elem.height(currentHeight);
-			setTimeout(grow, 20);
-		}
-		
-		elem.height(currentHeight);
-	}
 }
 
 function deleteComment (ditemid, isS1) {
