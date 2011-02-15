@@ -100,15 +100,16 @@ function hsv_to_rgb (h, s, v)
     return [v,p,q];
 }
 
-var curPopup = null;
-var curPopup_id = 0;
+window.curPopup = null;
+window.curPopup_id = 0;
 
 function killPopup () {
-    if (!curPopup)
-        return true;
+	if (!window.curPopup) {
+		return true;
+	}
 
-    var popup = curPopup;
-    curPopup = null;
+    var popup = window.curPopup;
+    window.curPopup = null;
 
     var opp = 1.0;
 
@@ -124,8 +125,181 @@ function killPopup () {
         }
     };
     fade();
+	
+	jQuery(document).unbind('.commentManagePopup');
 
     return true;
+}
+
+/**
+ * Create popup element, insert content and show it with animation
+ * 
+ * @param {String} contentHtml
+ * @param {DOM} targetControl
+ * @param {Object} e
+ * @param {String} id
+ */
+function createPopup(contentHtml, targetControl, e, id) {
+	targetControl = jQuery(targetControl).find('img');
+	
+	var popupElem = jQuery('<div class="ljcmtmanage b-popup" style="text-align:left;position:absolute;visibility:hidden;width:250px;left:0;top:0;z-index:3"><div class="b-popup-outer"><div class="b-popup-inner"><div class="ljcmtmanage-content"></div><i class="i-popup-arr"></i><i class="i-popup-close"></i></div></div></div>'),
+		
+		popupCloseControlSelector = '.i-popup-close',
+		popupArrowSelector = '.i-popup-arr',
+		popupContentSelector = '.ljcmtmanage-content',
+		
+		popupContent = popupElem.find(popupContentSelector), 
+		popupArrow = popupElem.find(popupArrowSelector),
+		
+		targetOffset = targetControl.offset();
+		
+	// popup already exist
+	if (window.curPopup) {
+		if (window.curPopup_id == id) {
+			e.stopPropagation();
+			return false;
+		}
+		
+		killPopup();
+	}
+	
+	popupContent.html(contentHtml);
+
+	popupElem
+		.delegate(popupCloseControlSelector, 'click', killPopup)
+		.click(function (e) { e.stopPropagation(); })
+
+		.appendTo('body')
+
+		.css({
+			visibility: 'visible',
+			display: 'block'
+		});
+		
+		
+	placeElemNear(popupElem, targetControl);	
+		
+	popupElem.fadeIn('fast');
+		
+	//animateGrow(popupElem);
+
+	window.curPopup = popupElem[0];
+	window.curPopup_id = id;
+	
+	jQuery(document).bind('click.commentManagePopup keydown.commentManagePopup', function (e) {		
+		if ((e.type == 'keydown' && e.keyCode == 27) || e.type != 'keydown') {
+			killPopup();
+		}
+	});
+	
+	function placeElemNear(elem, target) {
+		/**
+		 * Popup types
+		 * 
+		 * 		* -^--- *
+		 * tl 	|       |
+		 * 		* ----- *
+		 * 
+		 * 		* ---^- *
+		 * tr 	|       |
+		 * 		* ----- *
+		 * 
+		 * 		* ----- *
+		 * bl 	|       |
+		 * 		* -V--- *
+		 * 
+		 * 		* ----- *
+		 * br 	|       |
+		 * 		* ---V- *
+		 */
+
+		var classNamePrefix = 'i-popup-arr',
+			
+			viewport = jQuery(window),
+			viewportWidth = viewport.width(),
+			viewportHeight = viewport.height(),
+			
+			elemWidth = elem.width(),
+			elemHeight = elem.height(),
+			
+			positionType = {
+				x: 'l', // left
+				y: 't' // top
+			},
+			positionTypes = {
+				'tl': function () {
+					return {
+						x: targetOffset.left - popupArrow.position().left - (popupArrow.width() / 2) + (targetControl.width() / 2),
+						y: targetOffset.top + popupArrow.height() - popupArrow.position().top + (targetControl.height() / 2)
+					};
+				},
+				'tr': function () {
+					return {
+						x: targetOffset.left - popupArrow.position().left - (popupArrow.width() / 2) + (targetControl.width() / 2),
+						y: targetOffset.top + popupArrow.height() - popupArrow.position().top + (targetControl.height() / 2)
+					};
+				}
+			},
+			position,
+			
+			checkAngle = {
+				x: targetOffset.left + (targetControl.width() / 2) + (elemWidth + popupArrow.position().left - popupArrow.width() / 2),
+				y: targetOffset.top + targetControl.height() + popupArrow.height() + elemHeight
+			};
+			
+		if (checkAngle.x > viewportWidth) {
+			positionType.x = 'r'; // right
+		}
+		
+		if (checkAngle.y > viewportHeight) {
+			positionType.y = 'b'; // bottom
+		}
+		
+		positionType = positionType.y + positionType.x;
+		popupArrow.addClass(classNamePrefix + positionType);
+		position = positionTypes[positionType](); 
+		
+		elem.css({
+			'left': Math.floor(position.x) + 'px',
+			'top': Math.floor(position.y) + 'px'
+		});
+	}
+	
+	return popupElem;
+}
+
+/**
+ * Animate "grow" effect (in old-school, no-jQuery way)
+ * 
+ * @param {jQuery} elem
+ */
+function animateGrow(elem) {
+	var currentHeight = 0,
+		finalHeight = elem.height();
+	
+	elem.css({
+		height: currentHeight,
+		visibility: 'visible'
+	});
+	
+	grow();
+	
+	function grow() {
+		currentHeight += 7;
+		
+		if (currentHeight > finalHeight) {
+			elem.css({
+				height: 'auto',
+				overflow: 'visible'
+			});
+			
+		} else {
+			elem.height(currentHeight);
+			setTimeout(grow, 20);
+		}
+		
+		elem.height(currentHeight);
+	}
 }
 
 function deleteComment (ditemid, isS1) {
@@ -224,19 +398,11 @@ function removeComment (ditemid, killChildren, isS1) {
     }
 }
 
-function docClicked () {
-    killPopup();
-
-  // we didn't handle anything, who are we kidding
-}
-
 function createDeleteFunction(ae, dItemid, isS1) {
     return function (e) {
 		e = jQuery.event.fix(e || window.event);
 
-        var finalHeight = 115;
-
-        if (e.shiftKey || (curPopup && curPopup_id != dItemid)) {
+        if (e.shiftKey || (window.curPopup && window.curPopup_id != dItemid)) {
             killPopup();
         }
 
@@ -246,7 +412,7 @@ function createDeleteFunction(ae, dItemid, isS1) {
             doIT = 1;
 			deleteComment(dItemid, isS1);
         } else {
-            if (! LJ_cmtinfo)
+            if (!LJ_cmtinfo)
                 return true;
 
             var com = LJ_cmtinfo[dItemid];
@@ -255,91 +421,30 @@ function createDeleteFunction(ae, dItemid, isS1) {
                 return true;
             var canAdmin = LJ_cmtinfo["canAdmin"];
 			
-			var pos_offset = jQuery(ae).position(),
-				offset = jQuery(ae).offset(),
-				pos_x = e.pageX + pos_offset.left - offset.left,
-				top = e.pageY + pos_offset.top - offset.top + 5,
-				left = Math.max(pos_x + 5 - 250, 5),
-				$window = jQuery(window);
-			
-			//calc with viewport
-			if ($window.scrollLeft() > left + offset.left - pos_offset.left) {
-				left = $window.scrollLeft() + pos_offset.left - offset.left;
-			}
-			
-			if (curPopup && curPopup_id == dItemid) {
-				//calc with viewport
-				top = Math.min(top, $window.height() + $window.scrollTop() - jQuery(curPopup).outerHeight() + pos_offset.top - offset.top);
-				curPopup.style.left = left + 'px';
-				curPopup.style.top = top + 'px';
-				
-				return Event.stop(e);
-			}
-			
-			var de = jQuery('<div class="ljcmtmanage b-popup" style="text-align:left;position:absolute;visibility:hidden;width:250px;left:0;top:0;z-index:3"><div class="b-popup-outer"><div class="b-popup-inner"><div class="ljcmtmanage-content"></div><i class="i-popup-arr i-popup-arrt"></i><i class="i-popup-close"></i></div></div></div>')
-						.click(function(e){
-							e.stopPropagation()
-						})
-						.delegate('.i-popup-close', 'click', killPopup);
-			
-            var inHTML = "<form style='display: inline' id='ljdelopts" + dItemid + "'><span style='font-face: Arial; font-size: 8pt'><strong>" + getLocalizedStr( 'comment.delete.q', com.u ) + "</strong><br />";
+            var inHTML = [ "<form style='display: inline' id='ljdelopts" + dItemid + "'><span style='font-face: Arial; font-size: 8pt'><strong>" + getLocalizedStr( 'comment.delete.q', com.u ) + "</strong><br />" ];
             var lbl;
             if (com.username != "" && com.username != remoteUser && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "ban";
-                inHTML += "<input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.ban.user', com.u ) + "</label><br />";
-            } else {
-                finalHeight -= 15;
+                inHTML.push("<input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.ban.user', com.u ) + "</label><br />");
             }
 
             if (remoteUser != com.username) {
                 lbl = "ljpopdel" + dItemid + "spam";
-                inHTML += "<input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.mark.spam', com.u ) + "</label><br />";
-            } else {
-                finalHeight -= 15;
+                inHTML.push("<input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.mark.spam', com.u ) + "</label><br />");
             }
 
             if (com.rc && com.rc.length && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "thread";
-                inHTML += "<input type='checkbox' name='delthread' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all.sub', com.u ) + "</label><br />";
-            } else {
-                finalHeight -= 15;
+                inHTML.push("<input type='checkbox' name='delthread' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all.sub', com.u ) + "</label><br />");
             }
             if (canAdmin&&com.username) {
                 lbl = "ljpopdel" + dItemid + "author";
-                inHTML += "<input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all', "<b>" + ( (com.username == remoteUser ? 'my' : com.u) ) + "</b>" ) + "</label><br />";
-            } else {
-                finalHeight -= 15;
+                inHTML.push("<input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all', "<b>" + ( (com.username == remoteUser ? 'my' : com.u) ) + "</b>" ) + "</label><br />");
             }
 
-            inHTML += "<input type='button' value='" + getLocalizedStr( 'comment.delete', com.u ) + "' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /></span><br /><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', com.u ) + "</div></form>";
+            inHTML.push("<input type='button' value='" + getLocalizedStr( 'comment.delete', com.u ) + "' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /></span><br /><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', com.u ) + "</div></form>");
 			
-			de.find('.ljcmtmanage-content').html(inHTML).end().insertAfter(ae);
-			
-			//calc with viewport
-			top = Math.min(top, $window.height() + $window.scrollTop() - de.outerHeight() + pos_offset.top - offset.top);
-			
-			de.css({
-				left: left,
-				top: top,
-				height: 10,
-				visibility: 'visible',
-				overflow: 'hidden'
-			});
-			
-			curPopup = de[0];
-			curPopup_id = dItemid;
-			
-			var height = 10;
-			var grow = function () {
-				height += 7;
-				if (height > finalHeight) {
-					de.height('auto');
-				} else {
-					de.height(height);
-					window.setTimeout(grow, 20);
-				}
-			}
-			grow();
+			createPopup(inHTML.join(' '), ae, e, 'deletePopup' + dItemid);
 		}
 		Event.stop(e);
 	}
@@ -406,148 +511,193 @@ function updateLink (ae, resObj, clickTarget) {
 }
 
 var tsInProg = {}  // dict of { ditemid => 1 }
-function createModerationFunction(ae, dItemid, isS1, action)
-{
-	var action = action || 'screen'; // "screen" action by default
+function createModerationFunction(control, dItemid, isS1, action) {
+	var action = action || 'screen'; // "screen" action by default	
 	
-	return function(e)
-	{
-		var e = jQuery.event.fix(e || window.event);
+	return function (e) {
+		var	e = jQuery.event.fix(e || window.event),
 			pos = { x: e.pageX, y: e.pageY },
-			bmlName = { 'screen' : 'talkscreen', 'spam' : 'spamcomment' }[action],
-			postUrl = ae.href.replace(new RegExp('.+' + bmlName + '\.bml'), LiveJournal.getAjaxUrl(bmlName)),
+			modeParam = LiveJournal.parseGetArgs(location.href).mode,
+			hourglass;
+			
+		e.stopPropagation();
+		e.preventDefault();
+			
+		if (action == 'spam' && !modeParam) {
+			showDialogPopup();
+		} else {
+			sendModerateRequest();
+		}
+			
+
+		function showDialogPopup() {
+			var popupElem = createPopup('Do you really want to mark comment as a spam? All comments of this author will be deleted and we will ban author.<button class="spam-comment-control">OK</button>', control, e, 'spamComment' + dItemid);
+			
+			if (popupElem) {
+				popupElem.delegate('.spam-comment-control', 'click', function (e) {
+						e.preventDefault();
+						sendModerateRequest();
+						killPopup(); 
+					});
+			}					
+		}
+		
+		function sendModerateRequest() {
+			var	bmlName = { 'screen': 'talkscreen', 'spam': 'spamcomment' }[action],
+				postUrl = control.href.replace(new RegExp('.+' + bmlName + '\.bml'), LiveJournal.getAjaxUrl(bmlName)) + '&jsmode=1',
+				postParams = { 'confirm': 'Y', lj_form_auth: LJ_cmtinfo.form_auth };
+				
 			hourglass = jQuery(e).hourglass()[0];
 			
-		var xhr = jQuery.post(postUrl + '&jsmode=1',
-			{
-				confirm: 'Y',
-				lj_form_auth: LJ_cmtinfo.form_auth
-			},
-			function(json)
-			{
+			if (!isS1 && action == 'spam') {
+				postUrl = postUrl.replace('id', 'talkid');
+			}
+								
+			jQuery.post(postUrl, postParams, function (json) {
 				tsInProg[dItemid] = 0;
-				var comms_ary = [dItemid]
-				var map_comms = function(id)
-				{
-					var i = -1, new_id;
-					while(new_id = LJ_cmtinfo[id].rc[++i])
-					{
-						if (LJ_cmtinfo[new_id].full) {
-							comms_ary.push(new_id);
-							map_comms(String(new_id));
-						}
-					}
-				}
 				
-				// check rc for no comments page
-				if (LJ_cmtinfo[dItemid].rc) {
-					if (/mode=(un)?freeze/.test(ae.href)) {
-						map_comms(dItemid);
-					}
-					var ids = '#ljcmt' + comms_ary.join(',#ljcmt');
+				if (isS1) {
+					handleS1();
 				} else {
-					var rpcRes;
-					eval(json);
-					updateLink(ae, rpcRes, ae.getElementsByTagName('img')[0]);
-					// /tools/recent_comments.bml
-					if (document.getElementById('ljcmtbar'+dItemid)) {
-						var ids = '#ljcmtbar'+dItemid;
-					}
-					// ex.: portal/
-					else {
-						hourglass.hide();
-						poofAt(pos);
-						return;
-					}
+					var ids = checkRcForNoCommentsPage(json);
+					handleS2(ids);
 				}
-
-				if(isS1){
-					var newNode, showExpand, j, children;
-					var threadId = dItemid,
-						threadExpanded = !!(LJ_cmtinfo[ threadId ].oldvars && LJ_cmtinfo[ threadId ].full);
-						populateComments = function(result){
-							for( var i = 0; i < result.length; ++i ){
-								if( LJ_cmtinfo[ result[i].thread ].full ){
-									showExpand = !( 'oldvars' in LJ_cmtinfo[ result[i].thread ]);
-
-									//still show expand button if children comments are folded
-									if( !showExpand ) {
-										children  = LJ_cmtinfo[ result[i].thread ].rc;
-
-										for( j = 0; j < children.length;  ++j ) {
-											if( !( 'oldvars' in LJ_cmtinfo[ children[j] ] ) ) {
-												showExpand = true;
-											}
-										}
+			});		
+		}
+		
+		function handleS1() {
+			var newNode, showExpand, j, children,
+				threadId = dItemid,
+				threadExpanded = !!(LJ_cmtinfo[ threadId ].oldvars && LJ_cmtinfo[ threadId ].full);
+				populateComments = function (result) {
+					for( var i = 0; i < result.length; ++i ){
+						if( LJ_cmtinfo[ result[i].thread ].full ){
+							showExpand = !( 'oldvars' in LJ_cmtinfo[ result[i].thread ]);
+	
+							//still show expand button if children comments are folded
+							if( !showExpand ) {
+								children  = LJ_cmtinfo[ result[i].thread ].rc;
+	
+								for( j = 0; j < children.length;  ++j ) {
+									if( !( 'oldvars' in LJ_cmtinfo[ children[j] ] ) ) {
+										showExpand = true;
 									}
-
-									newNode = ExpanderEx.prepareCommentBlock(
-											result[i].html || '',
-											result[i].thread || '',
-											showExpand
-									);
-
-									setupAjax( newNode[0], isS1 );
-									
-									jQuery("#ljcmtxt" + result[i].thread).replaceWith( newNode );
 								}
 							}
-							hourglass.hide();
-							poofAt(pos);
-						};
-
-					getThreadJSON(threadId, function(result) {
-						//if comment is expanded we need to fetch it's collapsed state additionally
-						if( threadExpanded && LJ_cmtinfo[ threadId ].oldvars.full )
-						{
-							getThreadJSON( threadId, function(result2){
-								ExpanderEx.Collection[ threadId ] = ExpanderEx.prepareCommentBlock( result2[0].html, threadId, true ).html();
-								populateComments( result );
-							}, true, true );
-						}
-						else
-							populateComments( result );
-					}, false, !threadExpanded);
-				}
-				else {
-					// modified jQuery.fn.load
-					jQuery.ajax({
-						url: location.href,
-						type: 'GET',
-						dataType: 'html',
-						complete: function(res, status) {
-							// If successful, inject the HTML into all the matched elements
-							if (status == 'success' || status == 'notmodified') {
-								// Create a dummy div to hold the results
-								var nodes = jQuery('<div/>')
-									// inject the contents of the document in, removing the scripts
-									// to avoid any 'Permission Denied' errors in IE
-									.append(res.responseText.replace(/<script(.|\s)*?\/script>/gi, ''))
-									// Locate the specified elements
-									.find(ids)
-									.each(function(){
-										var id = this.id.replace(/[^0-9]/g, '');
-										if (LJ_cmtinfo[id].expanded) {
-											var expand = this.innerHTML.match(/Expander\.make\(.+?\)/)[0];
-											(function(){
-												eval(expand);
-											}).apply(document.createElement('a'));
-										} else {
-											jQuery('#'+this.id).replaceWith(this);
-											setupAjax(this, isS1);
-										}
-									});
-								hourglass.hide();
-								poofAt(pos);
+							
+							if (!result[i].html) {
+								removeEmptyMarkup(result[i].thread);
 							}
+	
+							newNode = ExpanderEx.prepareCommentBlock(
+									result[i].html || '',
+									result[i].thread || '',
+									showExpand
+							);
+	
+							setupAjax( newNode[0], isS1 );
+							
+							jQuery("#ljcmtxt" + result[i].thread).replaceWith( newNode );
 						}
-					});
+					}
+					hourglass.hide();
+					poofAt(pos);
+				};
+	
+			getThreadJSON(threadId, function (result) {
+				//if comment is expanded we need to fetch it's collapsed state additionally
+				if( threadExpanded && LJ_cmtinfo[ threadId ].oldvars.full )
+				{
+					getThreadJSON( threadId, function (result2) {
+						ExpanderEx.Collection[ threadId ] = ExpanderEx.prepareCommentBlock( result2[0].html, threadId, true ).html();
+						populateComments( result );
+					}, true, true );
+				}
+				else
+					populateComments( result );
+			}, false, !threadExpanded);			
+		}
+
+		function handleS2(ids) {
+			// modified jQuery.fn.load
+			jQuery.ajax({
+				url: location.href,
+				type: 'GET',
+				dataType: 'html',
+				complete: function (res, status) {
+					// If successful, inject the HTML into all the matched elements
+					if (status == 'success' || status == 'notmodified') {
+						// Create a dummy div to hold the results
+						var nodes = jQuery('<div/>')
+							// inject the contents of the document in, removing the scripts
+							// to avoid any 'Permission Denied' errors in IE
+							.append(res.responseText.replace(/<script(.|\s)*?\/script>/gi, ''))
+							// Locate the specified elements
+							.find(ids)
+							.each(function () {
+								var id = this.id.replace(/[^0-9]/g, '');
+								if (LJ_cmtinfo[id].expanded) {
+									var expand = this.innerHTML.match(/Expander\.make\(.+?\)/)[0];
+									(function(){
+										eval(expand);
+									}).apply(document.createElement('a'));
+								} else {
+									jQuery('#' + this.id).replaceWith(this);
+									setupAjax(this, isS1);
+								}
+							});
+						hourglass.hide();
+						poofAt(pos);
+					}
+				}
+			});			
+		}
+		
+		function checkRcForNoCommentsPage() {
+			var commsArray = [ dItemid ], ids;
+			
+			// check rc for no comments page
+			if (LJ_cmtinfo[dItemid].rc) {
+				if (/mode=(un)?freeze/.test(control.href)) {
+					mapComms(dItemid);
+				}
+				ids = '#ljcmt' + commsArray.join(',#ljcmt');
+			} else {
+				var rpcRes;
+				eval(json);
+				updateLink(control, rpcRes, control.getElementsByTagName('img')[0]);
+				// /tools/recent_comments.bml
+				if (document.getElementById('ljcmtbar'+dItemid)) {
+					ids = '#ljcmtbar' + dItemid;
+				}
+				// ex.: portal/
+				else {
+					hourglass.hide();
+					poofAt(pos);
+					return;
 				}
 			}
-		);
+			
+			return ids;
+			
+			function mapComms(id) {
+				var i = -1, newId;
+				
+				while (newId = LJ_cmtinfo[id].rc[++i]) {
+					if (LJ_cmtinfo[newId].full) {
+						commsArray.push(newId);
+						mapComms(String(newId));
+					}
+				}
+			}
+		}
 		
 		return false;
 	}
+}
+
+function removeEmptyMarkup(threadId) {
+	jQuery('#ljcmt' + threadId).remove();	
 }
 
 function setupAjax (node, isS1) {
@@ -610,6 +760,3 @@ function getThreadJSON(threadId, success, getSingle)
 }
 
 jQuery(function(){setupAjax( false, ("is_s1" in LJ_cmtinfo ) )});
-
-DOM.addEventListener(document, 'click', docClicked);
-document.write("<style> div.ljcmtmanage { color: #000; background: #e0e0e0; border: 2px solid #000; padding: 3px; }</style>");
