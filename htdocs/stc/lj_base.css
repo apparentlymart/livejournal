@@ -703,6 +703,7 @@ Must be removed after implementation of Framework! */
 	padding: 0;
 	margin: 0;
 	background: #1C2F5D;
+	text-align: left;
 	font: 11px/13px 'Arial', 'Helvetica', sans-serif;
 	color: #FFF;
 	z-index: 1000;
