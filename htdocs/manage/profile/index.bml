@@ -485,11 +485,12 @@ body<=
         } # end is_person check
 
         $ret .= "</table>\n";
-
+                
         ## TEXT MESSAGING
         my $country = LJ::country_of_remote_ip();
+        my $text_messaging_country = ($country eq 'RU') || ($country eq 'KZ');
         $ret .= "<a name='txtmsg'></a><div class='section_head'>" . 
-            ($country eq 'RU' ? $ML{'.section.phone'} : $ML{'.section.textmsg'}) . "\n";
+            ($text_messaging_country ? $ML{'.section.phone'} : $ML{'.section.textmsg'}) . "\n";
         unless (LJ::get_cap($u, "textmessaging")) {
             my $inline;
             if ($inline .= LJ::run_hook("cprod_inline", $u, 'TextMessaging')) {
@@ -503,7 +504,7 @@ body<=
             foreach (values %$tminfo) { LJ::text_out(\$_); }
             $tminfo->{'security'} = "N" if ($u->{'txtmsg_status'} eq 'off' || $u->{'txtmsg_status'} eq 'none');
 
-            if ($LJ::DISABLED{smsru} || $country ne 'RU') {
+            if ($LJ::DISABLED{smsru} || $text_messaging_country) {
                 $ret .= "<span id='phone_view_options' class='view_options'>$ML{'.fn.txtmsg'}&nbsp;";
                 $ret .= LJ::html_select({ 'name' => 'txtmsg_security', 'selected' => $tminfo->{'security'} },
                                           "all" => BML::ml(".security.visibility.everybody"),
@@ -516,9 +517,9 @@ body<=
             }
 
             my $block_id = 'phone_verification';
-               $block_id = '' if $LJ::DISABLED{smsru} || $country ne 'RU'; ## empty block_id disables JS script
+               $block_id = '' if $LJ::DISABLED{smsru} || $text_messaging_country; ## empty block_id disables JS script
             $ret .= "<table class='field_block' id='$block_id'>\n";
-            if ($LJ::DISABLED{smsru} || $country ne 'RU') {
+            if ($LJ::DISABLED{smsru} || $text_messaging_country) {
                 foreach (values %$tminfo) { LJ::text_out(\$_); }
                 ##
                 $ret .= "<tr><td class='field_name'>$ML{'.fn.servprov'}</td><td>";
@@ -559,6 +560,7 @@ body<=
             $status = 'already_use' if grep { $_->[0] eq 'verified' && $_->[1] != $u->{'userid'} } @$statuses;
 			$ret .= "smsNotifyInitialState = \"".$status."\";";
 			$ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{provider_by_def}}) . "];";
+			$ret .= "var smsCountry = '$country';";
 			$ret .= "var smsNotifyDict = {";
 			$ret .= "";
 			$ret .= "sendsmsbut : \"$ML{'.section.textmsg.button'}\",";
