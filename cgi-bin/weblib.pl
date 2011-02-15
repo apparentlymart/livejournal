@@ -2199,7 +2199,7 @@ LOGIN_BAR
         my $proto = $is_ssl ? "https://" : "http://";
         my $url = LJ::eurl ($proto.$hostname.$uri.$args_wq);
         $mobile_link .= "<div class='b-message-mobile'><div class='b-message-mobile-wrapper'>";
-	    $mobile_link .= LJ::Lang::ml('link.mobile', { url => $url });
+        $mobile_link .= LJ::Lang::ml('link.mobile', { href => "href='http://m.livejournal.com/redirect?from=$url'" });
 	    $mobile_link .="</div></div>";
     }
     return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr><tr><td colspan='5'>$message</td></tr></table> $mobile_link";

@@ -331,7 +331,7 @@ sub render
         my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check");
         my $proto = $is_ssl ? "https://" : "http://";
         my $url = LJ::eurl ($proto.$hostname.$uri.$args_wq);
-        $mobile_link = LJ::Lang::ml('link.mobile', { url => $url });
+        $mobile_link = LJ::Lang::ml('link.mobile', { href => "href='http://m.livejournal.com/redirect?from=$url'" });
     }
 
     $tmpl->param(flatten($data), link_mobile => $mobile_link );
