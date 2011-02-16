@@ -562,51 +562,6 @@ SUP.i-new {
 	}
 
 
-/* Popup Messages */
-.b-popup {
-	}
-.b-popup-messagebox {
-	position:absolute;
-	width:311px;
-	background:#FFF;
-	border:2px solid #8CB7DA;
-	font-size:12px;
-	z-index:9999;
-	}
-	.b-popup-messagebox .b-popup-head {
-		position:relative;
-		margin:0;
-		padding:5px;
-		border:1px solid #DBECFB;
-		border-width:1px 1px 0;
-		background:#C7E0F6;
-		font-size:15px;
-		}
-		.b-popup-messagebox .b-popup-head H4 {
-			margin:0;
-			}
-	.b-popup-messagebox .i-popup-close {
-		position:absolute;
-		top:9px;
-		right:5px;
-		width:12px;
-		height:12px;
-		background:url(/img/popup-close.gif?v=1) no-repeat 0 0;
-		cursor:pointer;
-		}
-	.b-popup-messagebox .b-popup-content {
-		margin:0;;
-		padding:5px;
-		font-size:13px;
-		}
-	.b-popup-messagebox .b-popup-footer {
-		margin:0;
-		padding:5px;
-		background:#ECF6FF;
-		text-align:center;
-		font-size:13px;
-		}
-
 /* Styles for messagers,
 Must be removed after implementation of Framework! */
 .appwidget-sitemessages {
@@ -1878,6 +1833,87 @@ DIV.lj_ippu_app {
 		font: 0/0 serif;
 		cursor: pointer;
 		}
+	.b-popup-group {
+		position: static;
+		top: auto;
+		right: auto;
+		bottom: auto;
+		left: auto;
+		width: auto;
+		height: auto;
+		margin: 0 0 8px;
+		padding: 0;
+		text-align: left;
+		}
+	.b-popup-row {
+		position: static;
+		top: auto;
+		right: auto;
+		bottom: auto;
+		left: auto;
+		width: auto;
+		height: auto;
+		margin: 0 0 3px;
+		padding: 0;
+		}
+	.b-popup-row-head {	
+		margin: 0 0 5px;
+		font-weight: bold;
+		}
+
+/* Popup Messages */
+.b-popup-messagebox {
+	position:absolute;
+	width:311px;
+	background:#FFF;
+	border:2px solid #8CB7DA;
+	font-size:12px;
+	z-index:9999;
+	}
+	.b-popup-messagebox .b-popup-head {
+		position:relative;
+		margin:0;
+		padding:5px;
+		border:1px solid #DBECFB;
+		border-width:1px 1px 0;
+		background:#C7E0F6;
+		font-size:15px;
+		}
+		.b-popup-messagebox .b-popup-head H4 {
+			margin:0;
+			}
+	.b-popup-messagebox .i-popup-close {
+		position:absolute;
+		top:9px;
+		right:5px;
+		width:12px;
+		height:12px;
+		background:url(/img/popup-close.gif?v=1) no-repeat 0 0;
+		cursor:pointer;
+		}
+	.b-popup-messagebox .b-popup-content {
+		margin:0;;
+		padding:5px;
+		font-size:13px;
+		}
+	.b-popup-messagebox .b-popup-footer {
+		margin:0;
+		padding:5px;
+		background:#ECF6FF;
+		text-align:center;
+		font-size:13px;
+		}
+
+/* Delete bubble */
+.ljcmtmanage {
+	position: absolute;
+	visibility: hidden;
+	display: block;
+	width: 250px;
+	text-align: left;
+	z-index: 3;
+	}
+
 
 /* Fader
 --------------------------- */
