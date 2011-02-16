@@ -447,6 +447,13 @@ sub sysban_validate {
                         $matched_wl = $wl;
                         last;
                     }
+                } elsif ($mask =~ /^(\d+\.){1,3}\*$/) {
+                    $mask =~ s/\./\\./g;
+                    $mask =~ s/\*/\.\*/;
+                    if ($ip =~ /^$mask$/) {
+                        $matched_wl = $wl;
+                        last;
+                    }
                 } else {
                     # hm...
                 }
@@ -502,11 +509,18 @@ sub sysban_validate {
             my $mask = shift;
             $mask =~ s/\s+//g;
             
-            ## allowed formats: exact IP address, range IP1-IP2, subnet: IP/num
-            if ($mask =~ /^$ip_regexp$/ || $mask =~ /^$ip_regexp-$ip_regexp$/ || $mask =~ m!^$ip_regexp/\d+$!) {
+            ## allowed formats: exact IP address, range IP1-IP2, subnet: IP/num, mask: 123.456.*
+            if (    $mask =~ /^$ip_regexp$/ || 
+                    $mask =~ /^$ip_regexp-$ip_regexp$/ || 
+                    $mask =~ m!^$ip_regexp/\d+$! ||
+                    $mask =~ /^(\d+\.){1,3}\*$/ ) 
+            {
                 return 0;
             } else {
-                return "Format: xxx.xxx.xxx.xxx (exact IP address), or xxx.xxx.xxx.xxx-yyy.yyy.yyy.yyy (IP range) or xxx.xxx.xxx.xxx/yyy (subnet)";
+                return "Format: xxx.xxx.xxx.xxx (exact IP address), " .
+                        "xxx.xxx.xxx.xxx-yyy.yyy.yyy.yyy (IP range),  " .
+                        "xxx.xxx.xxx.xxx/yyy (subnet) or " .
+                        "xxx.xxx.* (mask)";
             }
         }, 
     };
