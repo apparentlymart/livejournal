@@ -727,8 +727,7 @@ Must be removed after implementation of Framework! */
 .b-message-mobile-theme {
 	top: 0;
 	}
-	.mobile-msg #navigation,
-	.mobile-msg #header {
+	.mobile-msg #navigation {
 		top: 23px;
 		}
 	.mobile-msg #content {
