@@ -69,8 +69,10 @@ sub as_html_actions {
     my $gifturl = $self->bdayuser->gift_url({ item => 'vgift' });
     my $ret .= "<div class='actions'>";
     $ret .= " <a href='$gifturl'>Send a Gift</a>";
+    unless ($LJ::DISABLED{wishlist_v2}) {
     if (LJ::WishList->have_current($self->bdayuser)) {
         $ret .= " View user's <a href='".$self->bdayuser->wishlist_url."'>Wishlist</a>";
+    }
     }
     $ret .= "</div>";
 
