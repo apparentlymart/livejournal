@@ -47,9 +47,7 @@
     my $remote = LJ::get_remote();
     
     # Should we show try and buy
-    my $show_trynbuy = !$remote
-                        || !(!LJ::TryNBuy->active($remote) && $remote->get_cap('paid')) && !LJ::TryNBuy->already_used($remote)
-                        || !LJ::TryNBuy->active($remote) && !LJ::TryNBuy->already_used($remote);
+    my $show_trynbuy = LJ::TryNBuy->can_enable($remote);
 
     # Errors that are unlikely to change between starting
     # to compose an entry and submitting it.
