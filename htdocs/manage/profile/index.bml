@@ -504,7 +504,7 @@ body<=
             foreach (values %$tminfo) { LJ::text_out(\$_); }
             $tminfo->{'security'} = "N" if ($u->{'txtmsg_status'} eq 'off' || $u->{'txtmsg_status'} eq 'none');
 
-            if ($LJ::DISABLED{smsru} || $text_messaging_country) {
+            if ($LJ::DISABLED{smsru} || !$text_messaging_country) {
                 $ret .= "<span id='phone_view_options' class='view_options'>$ML{'.fn.txtmsg'}&nbsp;";
                 $ret .= LJ::html_select({ 'name' => 'txtmsg_security', 'selected' => $tminfo->{'security'} },
                                           "all" => BML::ml(".security.visibility.everybody"),
@@ -517,9 +517,9 @@ body<=
             }
 
             my $block_id = 'phone_verification';
-               $block_id = '' if $LJ::DISABLED{smsru} || $text_messaging_country; ## empty block_id disables JS script
+               $block_id = '' if $LJ::DISABLED{smsru} || !$text_messaging_country; ## empty block_id disables JS script
             $ret .= "<table class='field_block' id='$block_id'>\n";
-            if ($LJ::DISABLED{smsru} || $text_messaging_country) {
+            if ($LJ::DISABLED{smsru} || !$text_messaging_country) {
                 foreach (values %$tminfo) { LJ::text_out(\$_); }
                 ##
                 $ret .= "<tr><td class='field_name'>$ML{'.fn.servprov'}</td><td>";
@@ -538,7 +538,9 @@ body<=
             }
             $ret .= "<tr><td class='field_name'>$ML{'.fn.txtnum'}</td><td>";
             $ret .= '<ul class="b-manage-smsn b-manage-smsn-hide">';
-            $ret .= '<li class="b-manage-smsn-sms"><select name="txtmsg_number_code" class="b-manage-smsn-code" disabled="disabled"><option value="+7">+7</option></select>' . ' ' . LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '16', 'maxlength' => '16', 'class' => 'b-manage-smsn-phone' });
+            $ret .= '<li class="b-manage-smsn-sms">';
+            #$ret .= '<select name="txtmsg_number_code" class="b-manage-smsn-code" disabled="disabled"><option value="+7">+7</option></select>' . ' ';
+            $ret .= LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '16', 'maxlength' => '16', 'class' => 'b-manage-smsn-phone' });
             $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_us'} . '</span></li>' if $country eq 'US';
             $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_ru'} . '</span></li>' if $country eq 'RU';
             $ret .= '<li class="b-manage-smsn-status"><i class="i-manage-smsn-icon"></i><i class="help-icon">' . LJ::help_icon('sms_notification') . '</i><span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><span>' . $ML{'.section.textmsg.info'} . ' </span></span></li>';
@@ -566,7 +568,11 @@ body<=
 			$ret .= "sendsmsbut : \"$ML{'.section.textmsg.button'}\",";
 			$ret .= "resendsmsbut : \"$ML{'.section.textmsg.button.resend'}\",";
 			$ret .= "initial : \"$ML{'.section.textmsg.info'}\",";
-			$ret .= "badNum : \"$ML{'.section.textmsg.info.badnum'}\",";
+            if ( $country eq 'RU' ) {
+			    $ret .= "badNum : \"$ML{'.section.textmsg.info.badnum'}\",";
+            } else {
+			    $ret .= "badNum : \"$ML{'.section.textmsg.info.badnum.kz'}\",";
+            }
 			$ret .= "unsupporteddef : \"$ML{'.section.textmsg.info.unsupporteddef'}\",";
 			$ret .= "already_use : \"$ML{'.section.textmsg.info.already_use'}\",";
 			$ret .= "correctNum : \"$ML{'.section.textmsg.info.correctNum'}\",";
