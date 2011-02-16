@@ -41,13 +41,24 @@ cleanhtml.suspend_msg_with_supportid|staleness=1
 cleanhtml.suspend_msg_with_supportid=This is a suspended entry. <a [[aopts]]>An unsuspension request</a> has been opened, and your entry will be reviewed soon.
 
 comment.delete.q=Delete comment?
+
 comment.delete=Delete
+
 comment.delete.all=Delete all %username% comments in this post
+
 comment.delete.all.sub=Delete thread (all subcomments)
+
 comment.delete.no.options=Shift+click to delete without options
+
 comment.cancel=Cancel
+
 comment.ban.user=Ban %username% from commenting
+
 comment.mark.spam=Mark this comment as spam
+
+comment.mark.spam.title=Do you really want to mark comment as a spam?
+
+comment.mark.spam.subject=All comments of this author will be deleted and we will ban author.
  
 community.election.owner.election.link=The owner of the [[community]] community is not selected yet. You can <a [[href]]>vote for owner here</a>.
 
