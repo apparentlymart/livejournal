@@ -2646,9 +2646,11 @@ sub email_lastchange {
 # checks whether user is allowed to remove the given email from their history
 # and this way, disable themselves from sending a password reset to that address
 sub can_delete_email {
-    my ($u, $addr) = @_;
+    my ($u, $email) = @_;
 
     my $chains = $u->emails_chained_info;
+    my $addr = ref $email ? $email->{email} : $email;
+    $addr = lc $addr;
 
     # reformat as email => parameters hash
     my %chains = map { lc($_->{email}) => $_ } @$chains;
@@ -2656,7 +2658,7 @@ sub can_delete_email {
     my $current = lc $u->email_raw;
     my $edge_age = $chains{$current}->{starting};
 
-    my $aim_value = $chains{lc $addr->{email} }->{starting};
+    my $aim_value = $chains{$addr}->{starting};
 
     return 0 unless defined $edge_age and $aim_value;
     return $aim_value > $edge_age;
