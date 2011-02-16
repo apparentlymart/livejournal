@@ -983,17 +983,31 @@
 				padding: 10px 0 0 10px;
 				border: 0;
 				vertical-align: top;
-				text-align: center;
+				}
+			.account .b-accstats-community .b-accstats-table .b-accstats-button-tnb {
+				width: 100px;
 				}
 				.b-accstats-button .b-accstats-trynbuy {
 					display: block;
+					width: 100px;
+					margin: 0 auto;
 					padding: 40px 0 0;
 					background: url(/img/widget/trynbuy/trynbuy.gif?v=1) no-repeat 50% 0;
+					text-align: center;
+					}
+				.b-accstats-community .b-accstats-button .b-accstats-trynbuy {
+					margin: 0 auto 0 0;
 					}
 				.b-accstats-button .b-accstats-upgrade {
 					display: block;
+					width: 100px;
+					margin: 0 auto;
 					padding: 40px 0 0;
 					background: url(/img/widget/trynbuy/upgrade.gif?v=1) no-repeat 50% 0;
+					text-align: center;
+					}
+				.b-accstats-community .b-accstats-button .b-accstats-upgrade {
+					margin: 0 auto 0 0;
 					}
 				.b-accstats-button .b-accstats-trynbuy:link,
 				.b-accstats-button .b-accstats-trynbuy:visited,
