@@ -393,18 +393,71 @@ sub sysban_validate {
     # bail early if the ban already exists
     return "This is already banned"
         if !$opts->{skipexisting} && LJ::sysban_check($what, $value);
+    
+    my $ip_regexp = qr/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
+    my $ip_to_str = sub { return pack("C4",split(/\./, $_[0])); }; 
 
     my $validate = {
         'ip' => sub {
             my $ip = shift;
 
+            return "Format: xxx.xxx.xxx.xxx (ip address)" 
+                unless $ip =~ /^$ip_regexp$/;
+
             while (my ($ip_re, $reason) = each %LJ::UNBANNABLE_IPS) {
                 next unless $ip =~ $ip_re;
                 return "Cannot ban IP $ip: " . LJ::ehtml($reason);
             }
+            
+            ## LJ::sysban_populate() doesn't return notes, so select them from DB
+            my $dbh = LJ::get_db_reader()
+                or die "Can't connect to db reader";
+            my $whitelist = $dbh->selectall_arrayref(
+                "
+                    SELECT * 
+                    FROM sysban 
+                    WHERE what = 'ip_whitelist' 
+                        AND status = 'active'
+                        AND NOW() > bandate
+                        AND (NOW() < banuntil
+                           OR banuntil = 0
+                           OR banuntil IS NULL)
+                ",
+                {Slice => {}}
+            );
+            
+            my $matched_wl;
+            foreach my $wl (@$whitelist) {
+                my $mask = $wl->{value}; ## see ip_whitelist below for possible formats
+                if ($mask =~ /^$ip_regexp$/) {
+                    if ($mask eq $ip) {
+                        $matched_wl = $wl;
+                        last;
+                    } 
+                } elsif (my ($start_ip, $end_ip) = $mask =~ /^($ip_regexp)-($ip_regexp)$/) {
+                    if (    $ip_to_str->($start_ip) le $ip_to_str->($ip) && 
+                            $ip_to_str->($ip) le $ip_to_str->($end_ip)) 
+                    {
+                        $matched_wl = $wl;
+                        last;
+                    }
+                } elsif ($mask =~ m!^$ip_regexp/(\d+)!) {
+                    my $netmask = Net::Netmask->new($mask);
+                    if ($netmask->match($ip)) {
+                        $matched_wl = $wl;
+                        last;
+                    }
+                } else {
+                    # hm...
+                }
+            }
 
-            return $ip =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ ?
-                0 : "Format: xxx.xxx.xxx.xxx (ip address)";
+            if ($matched_wl) {
+                return "Can't bap ip address $ip: ip_whitelist #$matched_wl->{banid} matched ($matched_wl->{note})";
+            }     
+            
+            ## everything is ok
+            return 0;
         },
         'uniq' => sub {
             my $uniq = shift;
@@ -444,6 +497,18 @@ sub sysban_validate {
             my $num = shift;
             return $num =~ /\d{10}/ ? 0 : 'Format: 10 digit MSISDN';
         },
+
+        'ip_whitelist' => sub {
+            my $mask = shift;
+            $mask =~ s/\s+//g;
+            
+            ## allowed formats: exact IP address, range IP1-IP2, subnet: IP/num
+            if ($mask =~ /^$ip_regexp$/ || $mask =~ /^$ip_regexp-$ip_regexp$/ || $mask =~ m!^$ip_regexp/\d+$!) {
+                return 0;
+            } else {
+                return "Format: xxx.xxx.xxx.xxx (exact IP address), or xxx.xxx.xxx.xxx-yyy.yyy.yyy.yyy (IP range) or xxx.xxx.xxx.xxx/yyy (subnet)";
+            }
+        }, 
     };
 
     # aliases to handlers above
