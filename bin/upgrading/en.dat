@@ -51,6 +51,43 @@ comment.mark.spam=Mark this comment as spam
  
 community.election.owner.election.link=The owner of the [[community]] community is not selected yet. You can <a [[href]]>vote for owner here</a>.
 
+community.members.maintainer.remove.email_html<<
+<p>Dear [[sitenameshort]] user [[user]],</p>
+<p>[[remote]] has removed you as a maintainer of the community <a [[mailclink]]>[[usercname]].</a></p>
+<p>Regards,<br/>
+[[sitename]] Team<br/>[[siteroot]]</p>
+.
+
+community.members.maintainer.remove.email_plain<<
+Dear [[sitenameshort]] user [[user]],
+[[remote]] has removed you as a maintainer of the community [[usercname]].
+Regards,
+[[sitename]] Team
+[[siteroot]]
+.
+
+community.members.maintainer.add.email_html<<
+<p>Dear [[sitenameshort]] user [[user]],</p>
+<p>You have just been added as a maintainer of the community <a [[mailclink]]>[[usercname]]</a> by one of the current maintainers. As the maintainer, you have the ability to control and manage the community. If you do not wish to take on this responsibility, you can remove your maintainership or transfer your community to another user.</p>
+<p>To manage your communities please visit <a href="[[mailcommanlink]]">your community management page.</a></p>
+<p>Regards,<br/>
+[[sitename]] Team<br/>[[siteroot]]</p>
+.
+
+community.members.maintainer.add.email_plain<<
+Dear [[sitenameshort]] user [[user]],
+
+You have just been added as a maintainer of the community [[usercname]] by one of the current maintainers. As the maintainer, you have the ability to control and manage the community. If you do not wish to take on this responsibility, you can remove your maintainership or transfer your community to another user.
+
+To manage your communities please visit the following URL:
+
+[[mailcommanlink]]
+
+Regards,
+[[sitename]] Team
+[[siteroot]]
+.
+
 contentflag.viewingconcepts|staleness=1
 contentflag.viewingconcepts=You are about to view content that may not be appropriate for minors.
 

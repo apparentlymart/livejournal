@@ -342,22 +342,25 @@ body<=
             my $mailusercname = $c->{name};
             my $mailclink = LJ::journal_base($c, ['community']);
 
-            my $html = qq(
-<p>Dear $LJ::SITENAMESHORT user $mailusername,</p>
-<p>$remote->{user} has removed you as a maintainer of the community <a href="$mailclink">$mailusercname.</a></p>
-<p>Regards,<br/>
-$LJ::SITENAME Team<br/>$LJ::SITEROOT</p>
-                          );
+            my $html = LJ::Lang::ml('community.members.maintainer.remove.email_html', {
+                            sitenameshort   => $LJ::SITENAMESHORT,
+                            user            => $mailusername,
+                            usercname       => $mailusercname,
+                            mailclink       => "href='$mailclink'",
+                            remote          => $remote->{user},
+                            sitename        => $LJ::SITENAME,
+                            siteroot        => $LJ::SITEROOT,
+                        });
+            my $plain = LJ::Lang::ml('community.members.maintainer.remove.email_plain', {
+                            sitenameshort   => $LJ::SITENAMESHORT,
+                            user            => $mailusername,
+                            usercname       => $mailusercname,
+                            mailclink       => $mailclink,
+                            remote          => $remote->{user},
+                            sitename        => $LJ::SITENAME,
+                            siteroot        => $LJ::SITEROOT,
+                        });
 
-            my $plain = qq(
-Dear $LJ::SITENAMESHORT user $mailusername,
-
-$remote->{user} has removed you as a maintainer of the community $mailusercname.
-
-Regards,
-$LJ::SITENAME Team
-$LJ::SITEROOT
-                           );
             my $subject = "Maintainership removal: $mailusercname";
             $sendmail->($delmaintu, $html, $plain, $subject);
         }
@@ -413,26 +416,26 @@ $LJ::SITEROOT
             my $mailclink = LJ::journal_base($c, ['community']);
             my $mailcommanlink = "$LJ::SITEROOT/community/manage.bml";
 
-            my $html = qq(
-<p>Dear $LJ::SITENAMESHORT user $mailusername,</p>
-<p>You have just been added as a maintainer of the community <a href="$mailclink">$mailusercname</a> by one of the current maintainers. As the maintainer, you have the ability to control and manage the community. If you do not wish to take on this responsibility, you can remove your maintainership or transfer your community to another user.</p>
-<p>To manage your communities please visit <a href="$mailcommanlink">your community management page.</a></p>
-<p>Regards,<br/>
-$LJ::SITENAME Team<br/>$LJ::SITEROOT</p>
-                          );
+            my $html = LJ::Lang::ml('community.members.maintainer.add.email_html', {
+                            sitenameshort   => $LJ::SITENAMESHORT,
+                            user            => $mailusername,
+                            usercname       => $mailusercname,
+                            mailclink       => "href='$mailclink'",
+                            mailcommanlink  => $mailcommanlink,
+                            sitename        => $LJ::SITENAME,
+                            siteroot        => $LJ::SITEROOT,
+                        });
 
-            my $plain = qq(
-Dear $LJ::SITENAMESHORT user $mailusername,
-You have just been added as a maintainer of the community $mailusercname by one of the current maintainers. As the maintainer, you have the ability to control and manage the community. If you do not wish to take on this responsibility, you can remove your maintainership or transfer your community to another user.
+            my $plain = LJ::Lang::ml('community.members.maintainer.add.email_plain', {
+                            sitenameshort   => $LJ::SITENAMESHORT,
+                            user            => $mailusername,
+                            usercname       => $mailusercname,
+                            mailclink       => $mailclink,
+                            mailcommanlink  => $mailcommanlink,
+                            sitename        => $LJ::SITENAME,
+                            siteroot        => $LJ::SITEROOT,
+                        });
 
-To manage your communities please visit the following URL:
-
-$mailcommanlink
-
-Regards,
-$LJ::SITENAME Team
-$LJ::SITEROOT
-                           );
             my $subject = "You have been added as a maintainer of $mailusercname";
             $sendmail->($newmaintu, $html, $plain, $subject);
         }
