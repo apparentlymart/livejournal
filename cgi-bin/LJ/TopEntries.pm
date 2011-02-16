@@ -149,7 +149,12 @@ sub _hash_from_key {
             url         => $entry->url(),
             time        => $entry->logtime_unix(),
             userpic     => $userpic->url(),
-            poster      => $poster->ljuser_display(),
+
+            ## Do not store results of ljuser_display() anywhere
+            ## becouse they depend on $remote user.
+            ## this field should be generated on fly.
+            #  poster      => $poster->ljuser_display(),
+
             timestamp   => $timestamp,
 
             comments    => $entry->reply_count,
@@ -263,12 +268,22 @@ sub _load_featured_posts {
         $self->{featured_posts} = $struct->{spots} || [];
         $self->{timelimit}      = $struct->{timelimit};
 
+        my $users = {};
+        $users = LJ::load_userids( map {$_->{posterid} } @{ $self->{featured_posts} } )
+            if ref $self->{featured_posts} eq 'ARRAY';
+
         ## Update comments couter
         foreach my $spot (@{ $self->{featured_posts} }){
             my $entry = LJ::Entry->new($spot->{journalid}, jitemid => $spot->{jitemid});
             next unless $entry;
+            
+            my $u = $users->{$spot->{posterid}};
+            next unless $u;
+
             $spot->{comments} = $entry->reply_count();
             $spot->{logtime}  = $spot->{time} = $entry->logtime_unix();
+
+            $spot->{poster}   = $u->ljuser_display();
         }
     }
     $self->{min_entries} ||= 3;
