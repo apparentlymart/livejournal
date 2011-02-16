@@ -196,7 +196,7 @@ sub send_mail
     ##  Workers send emails too and exactly in this case 
     ##  we spend worker's time to try to send email directly from this process.
     ##  This approach intended to reduce TheSchwartz workload.
-    unless (LJ::is_web_context()){
+    unless ($opt->{'force_schwartz'} && LJ::is_web_context()){
         foreach my $rcpt (@rcpts){
             my $res = LJ::DoSendEmail->send($rcpt, {
                         from    => $from,         ## Envelope From
