@@ -49,6 +49,7 @@ comment.cancel=Cancel
 comment.ban.user=Ban %username% from commenting
 comment.mark.spam=Mark this comment as spam
  
+community.election.owner.election.link=The owner of the [[community]] community is not selected yet. You can <a [[href]]>vote for owner here</a>.
 
 contentflag.viewingconcepts|staleness=1
 contentflag.viewingconcepts=You are about to view content that may not be appropriate for minors.
@@ -4715,6 +4716,8 @@ userpic.inactive=Inactive
 userpic.link=userpic
 
 userpic.text=[[user]], this is what you currently look like to your friends: [[empty]]<br />Boooring. Be classy and upload a [[link]].
+
+userinfo.admins.owner.election.link=Not appointed yet. You can <a [[href]]>vote for owner here</a>.
 
 vertical.nav.explore.culture|staleness=1
 vertical.nav.explore.culture=Culture

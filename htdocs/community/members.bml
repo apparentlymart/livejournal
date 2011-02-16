@@ -624,6 +624,24 @@ $LJ::SITEROOT
                 );
 
         $ret .= LJ::html_submit('select_as_sm', BML::ml('.set.user_to_supermaintainer')) . "<br/>";
+    } else {
+        my $poll_id = $c->prop('election_poll_id');
+        my $super_maintainers = LJ::load_rel_user_cache($c->userid, 'S') || [];
+        if ($poll_id && !scalar @$super_maintainers) {
+            my $show_owner = 0;
+            if ($poll_id) {
+                my $poll = LJ::Poll->new ($poll_id);
+                my @q = $poll->questions;
+                my @items = @q ? $q[0]->items : ();
+                foreach my $item (@items) {
+                    $show_owner = 1 if $item->{item} =~ m#<lj user='$remote->{user}'>#;
+                }
+            }
+            $ret .= "<br>" . LJ::Lang::ml('community.election.owner.election.link', { 
+                                    community   => LJ::ljuser($c), 
+                                    href        => "href='$LJ::SITEROOT/community/election.bml?authas=$c->{user}'"
+                            }) . "<br>";
+        }
     }
 
     # jump to user
