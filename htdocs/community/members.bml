@@ -361,7 +361,9 @@ body<=
                             siteroot        => $LJ::SITEROOT,
                         });
 
-            my $subject = "Maintainership removal: $mailusercname";
+            my $subject = LJ::Lang::ml('community.members.maintainer.remove.email_subject', 
+                            { mailusercname => $mailusercname }
+                        );
             $sendmail->($delmaintu, $html, $plain, $subject);
         }
 
@@ -436,7 +438,9 @@ body<=
                             siteroot        => $LJ::SITEROOT,
                         });
 
-            my $subject = "You have been added as a maintainer of $mailusercname";
+            my $subject = LJ::Lang::ml('community.members.maintainer.add.email_subject',
+                            { mailusercname => $mailusercname }
+                        );
             $sendmail->($newmaintu, $html, $plain, $subject);
         }
 

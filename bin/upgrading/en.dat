@@ -88,6 +88,11 @@ Regards,
 [[siteroot]]
 .
 
+
+community.members.maintainer.remove.email_subject=Maintainership removal: [[mailusercname]]
+
+community.members.maintainer.add.email_subject=You have been added as a maintainer of [[mailusercname]]
+
 contentflag.viewingconcepts|staleness=1
 contentflag.viewingconcepts=You are about to view content that may not be appropriate for minors.
 
