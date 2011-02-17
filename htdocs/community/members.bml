@@ -641,13 +641,13 @@ body<=
                 my @q = $poll->questions;
                 my @items = @q ? $q[0]->items : ();
                 foreach my $item (@items) {
-                    $show_owner = 1 if $item->{item} =~ m#<lj user='$remote->{user}'>#;
+                    $show_owner = 1 if $remote && ($item->{item} =~ m#<lj user='$remote->{user}'>#);
                 }
             }
             $ret .= "<br>" . LJ::Lang::ml('community.election.owner.election.link', { 
                                     community   => LJ::ljuser($c), 
                                     href        => "href='$LJ::SITEROOT/community/election.bml?authas=$c->{user}'"
-                            }) . "<br>";
+                            }) . "<br>" if $show_owner;
         }
     }
 
