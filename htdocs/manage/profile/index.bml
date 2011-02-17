@@ -561,31 +561,18 @@ body<=
             my $statuses = LJ::SMS::API::RU::Phone->get_cur_phone_statuses($phone);
             $status = 'already_use' if grep { $_->[0] eq 'verified' && $_->[1] != $u->{'userid'} } @$statuses;
 			$ret .= "smsNotifyInitialState = \"".$status."\";";
-			$ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{provider_by_def}}) . "];";
+			$ret .= "var supportedDEF = [" . join(',', @{$LJ::SMSRU{defs_by_country}->{$country}}) . "];";
 			$ret .= "var smsCountry = '$country';";
 			$ret .= "var smsNotifyDict = {";
 			$ret .= "";
 			$ret .= "sendsmsbut : \"$ML{'.section.textmsg.button'}\",";
 			$ret .= "resendsmsbut : \"$ML{'.section.textmsg.button.resend'}\",";
-			$ret .= "initial : \"$ML{'.section.textmsg.info'}\",";
-            if ( $country eq 'RU' ) {
-			    $ret .= "badNum : \"$ML{'.section.textmsg.info.badnum'}\",";
-            } else {
-			    $ret .= "badNum : \"$ML{'.section.textmsg.info.badnum.kz'}\",";
-            }
-			$ret .= "unsupporteddef : \"$ML{'.section.textmsg.info.unsupporteddef'}\",";
-			$ret .= "already_use : \"$ML{'.section.textmsg.info.already_use'}\",";
-			$ret .= "correctNum : \"$ML{'.section.textmsg.info.correctNum'}\",";
-			$ret .= "requestsent : \"$ML{'.section.textmsg.info.requestsent'}\",";
-			$ret .= "smssent : \"$ML{'.section.textmsg.info.smssent'}\",";
-			$ret .= "badtrans : \"$ML{'.section.textmsg.info.badtrans'}\",";
-			$ret .= "notasubscriber : \"$ML{'.section.textmsg.info.notasubscriber'}\",";
-			$ret .= "singlelimitexceeded : \"$ML{'.section.textmsg.info.singlelimitexceeded'}\",";
-			$ret .= "totallimitexceeded : \"$ML{'.section.textmsg.info.totallimitexceeded'}\",";
-			$ret .= "verified : \"$ML{'.section.textmsg.info.verified'}\",";
-			$ret .= "wrongcode : \"$ML{'.section.textmsg.info.wrongcode'}\",";
-			$ret .= "linkexpired : \"$ML{'.section.textmsg.info.linkexpired'}\",";
-			$ret .= "techerror : \"$ML{'.section.textmsg.info.techerror'}\"";
+			$ret .= 'initial : "' . $ML{'.section.textmsg.info' . ($country eq 'KZ' ? '.kz':'')} . '",';
+			$ret .= 'badNum : "' . $ML{'.section.textmsg.info.badnum' . ($country eq 'KZ' ? '.kz':'')} . '",';
+			$ret .= 'unsupporteddef : "' . $ML{'.section.textmsg.info.unsupporteddef' . ($country eq 'KZ' ? '.kz':'')} . '",';
+			$ret .= "$_ : \"" . $ML{".section.textmsg.info.$_"} . '",' 
+			     for qw(already_use correctNum requestsent smssent badtrans notasubscriber
+			            singlelimitexceeded totallimitexceeded verified wrongcode linkexpired techerror);
 			$ret .= "}</script>\n";
         }
 
