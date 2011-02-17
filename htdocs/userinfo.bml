@@ -1168,17 +1168,16 @@
                 my @q = $poll->questions;
                 my @items = @q ? $q[0]->items : ();
                 foreach my $item (@items) {
-                    $show_owner = 1 if $item->{item} =~ m#<lj user='$remote->{user}'>#;
+                    $show_owner = 1 if $remote && ($item->{item} =~ m#<lj user='$remote->{user}'>#);
                 }
             }
-            $show_owner &&= $poll_id || scalar @$super_maintainers;
-            if ($show_owner) {
+            if (($poll_id && $show_owner ) || scalar @$super_maintainers) {
                 $body .= "<p class='inner_section_header first'><span class='expandcollapse on' id='smaints_header'>" . $arrowimg->("smaints") .
                          " $ML{'.label.super_maintainers'}:</span></p>";
                 $body .= "<div class='inner_section_body' id='smaints_body'>";
                 if (scalar @$super_maintainers) {
                     $body .= $listusers->([map { $userhash{$_} } @$super_maintainers], 'smaint')
-                } else {
+                } elsif ($show_owner) {
                     $body .= LJ::Lang::ml('userinfo.admins.owner.election.link', {
                                     href => "href='$LJ::SITEROOT/community/election.bml?authas=$u->{user}'" 
                             });
