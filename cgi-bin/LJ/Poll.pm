@@ -824,6 +824,13 @@ sub is_closed {
         $winner =~ s/<lj user='(.*?)'>/$1/;
         $winner = LJ::load_user($winner);
         if ($winner && $winner->can_manage($is_super) && $winner->is_visible) {
+            ## Poll can be created by console command, and community may have supermaintainer already.
+            ## Clean all existing SM first.
+            my $s_maints = LJ::load_rel_user($is_super, 'S');
+            foreach my $user_id (@$s_maints) {
+                LJ::clear_rel($is_super, $user_id, 'S');
+            }
+
             LJ::set_rel($is_super, $winner->{userid}, 'S');
             $self->close_poll;
 
