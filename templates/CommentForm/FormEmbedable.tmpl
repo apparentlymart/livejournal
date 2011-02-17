@@ -7,7 +7,7 @@
 	<TMPL_VAR lj_res_includes>
 </head>
 <body>
-    <TMPL_VAR js_check_domain>
+	<TMPL_VAR js_check_domain>
 	<div class="lj3-form-wrapper">
 		<form class="lj3-form lj3-post-comment lj3-active" id="postform" method="post" action="/talkpost_do.bml" target="">
 			<TMPL_IF errors>
@@ -19,7 +19,7 @@
 			<input type="hidden" name="usertype" value="<TMPL_VAR usertype_default>">
 			<input type="hidden" name="is_form_embedded" value="1">
 			<input type="hidden" name="cookieuser" value="<TMPL_VAR remote_username>">
-            <input type="hidden" name="partner_domain" value="<TMPL_VAR expr="ehtml(partner_domain)">" >
+			<input type="hidden" name="partner_domain" value="<TMPL_VAR expr="ehtml(partner_domain)">" >
 			<fieldset>
 				<p class="lj3-identity">
 					От <TMPL_VAR partner_remote_ljuser>
@@ -35,6 +35,9 @@
 				</p>
 				<p class="lj3-submit-wrapper">
 					<input type="submit" value="<TMPL_VAR expr="ml('/talkpost.bml.opt.submit')">" class="lj3-submit" name="submitpost">
+				</p>
+				<p class="lj3-close">
+					<a href="javascript:void(0);"></a>
 				</p>
 			</fieldset>
 		</form>
