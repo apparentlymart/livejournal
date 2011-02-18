@@ -53,7 +53,7 @@ sub execute {
     LJ::set_rel($c->{userid}, $u->{userid}, 'S');
     ## Set a new supermaintainer as maintainer too.
     LJ::set_rel($c->{userid}, $u->{userid}, 'A');
-    $c->log_event('maintainer_add', { actiontarget => $u->{userid}, remote => $remote })
+    $c->log_event('maintainer_add', { actiontarget => $u->{userid}, remote => $remote });
 
     $self->print("User '$user' setted as supermaintainer for '$comm'.");
 
