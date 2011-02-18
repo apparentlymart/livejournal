@@ -963,7 +963,8 @@
 				padding: 10px 1px 10px 0;
 				}
 				.b-accstats-subhead SPAN {
-					padding: 1px 0 2px 20px;
+					display: inline-block;
+					padding: 0 0 2px 20px;
 					background-image: url(/img/widget/trynbuy/subhead.gif?v=1);
 					background-repeat: no-repeat;
 					}
