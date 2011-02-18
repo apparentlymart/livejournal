@@ -82,8 +82,8 @@ sub EntryPage
                             comment.delete.no.options
                             comment.ban.user
                             comment.mark.spam
-							comment.mark.spam.title
-							comment.mark.spam.subject
+                            comment.mark.spam.title
+			    comment.mark.spam.subject
                             comment.delete/)
     }
 
