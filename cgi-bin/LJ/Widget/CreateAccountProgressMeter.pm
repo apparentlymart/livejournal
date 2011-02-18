@@ -11,7 +11,7 @@ sub render_body {
     my %opts = @_;
 
     my $given_step = $opts{step} || 1;
-    my @steps_to_show = LJ::ab_testing_value() == 0 ? (1, 2, 4) : (1..4);
+    my @steps_to_show = (1, 2, 4); #LJ::ab_testing_value() == 0 ? (1, 2, 4) : (1..4);
 
     my $ret;
 

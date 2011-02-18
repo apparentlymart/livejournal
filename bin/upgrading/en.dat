@@ -4721,6 +4721,7 @@ tos.haveread=I have read and agree to the Terms of Service.
 
 tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
 
+trynbuy.account.title=Try and Buy account, expiring on [[expdate]]
 trynbuy.expiring.notify_subject=LiveJournal paid account free trial
 
 trynbuy.expiring.notify_html<<
