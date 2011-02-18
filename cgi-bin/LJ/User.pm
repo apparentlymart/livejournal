@@ -7045,7 +7045,7 @@ sub alloc_user_counter
                                          undef, $uid);
         $newmax = ($ppemax > $userblobmax) ? $ppemax : $userblobmax;
     } elsif ($dom eq "C") {
-        $newmax = $u->selectrow_array("SELECT MAX(pendid) FROM pendcomments WHERE jid=?",
+        $newmax = $u->selectrow_array("SELECT MAX(pendcid) FROM pendcomments WHERE jid=?",
                                       undef, $uid);
     } elsif ($dom eq "O") {
         $newmax = $u->selectrow_array("SELECT MAX(pboxid) FROM portal_config WHERE userid=?",
