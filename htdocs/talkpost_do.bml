@@ -104,6 +104,39 @@
         return LJ::Talk::Post::make_preview($talkurl, $cookie_auth, \%POST);
     }
 
+    my $entry = LJ::Entry->new( $journalu, ditemid => $POST{'itemid'} );
+
+    # various variables for the external site case
+    my ( $partner, $docid, $logcom_page );
+    if ( $external_site_case ) {
+        $partner
+            = LJ::PartnerSite->find_by_journal_username(
+                $journalu->username );
+
+        $docid = $partner->docid_from_entry($entry);
+
+        my $replyto = $POST{'replyto'}
+            ? int ( $POST{'replyto'} ) * 256 + $entry->anum
+            : 0;
+
+        $logcom_page =
+            "$LJ::SITEROOT/gadgets/logcom.bml?" .
+            'rsk=' . LJ::eurl($partner->api_key) . '&' .
+            'docid=' . LJ::eurl($docid) . '&' .
+            'domain=' . LJ::eurl( $POST{'partner_domain'} ) . '&' .
+            'replyto=' . $replyto;
+    }
+
+    # special case here (LJINT-408), only applies to the partners case:
+    #
+    # if the user got logged out after they opened the form, disabling them
+    # from commenting, we are going to redirect them back to the login form
+    {
+        if ( $external_site_case && !$remote ) {
+            return LJ::Request->redirect( $logcom_page );
+        }
+    }
+
     ## init.  this handles all the error-checking, as well.
     my $need_captcha = 0;
     my $init = LJ::Talk::Post::init(\%POST, $remote, \$need_captcha, \@errors);
@@ -120,8 +153,6 @@
     if ($init && ! $POST{agree_tos} && $commentu && ! $commentu->tosagree_verify) {
         $require_tos = 1;
     }
-
-    my $entry = LJ::Entry->new( $journalu, ditemid => $POST{'itemid'} );
 
     if (! $init || $require_tos) {
         my ($sth, $parpost);
@@ -158,21 +189,6 @@
             if ($remote) {
                 $remote_sessid = $remote->session->id;
             }
-
-            my $partner
-                = LJ::PartnerSite->find_by_journal_username(
-                    $journalu->username );
-
-            my $docid = $partner->docid_from_entry($entry);
-
-            my $replyto = $POST{'replyto'}
-                ? int ( $POST{'replyto'} ) * 256 + $entry->anum
-                : 0;
-
-            my $logcom_page = "$LJ::SITEROOT/gadgets/logcom.bml?" .
-                              'docid=' . $docid . '&' .
-                              'rsk=' . $partner->api_key . '&' .
-                              'replyto=' . $replyto;
 
             my $logout_url = "$LJ::SITEROOT/gadgets/logout.bml?" .
                              'returnto=' . LJ::eurl($logcom_page) . '&' .
