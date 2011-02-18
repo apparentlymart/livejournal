@@ -1007,7 +1007,8 @@
 					background: url(/img/widget/trynbuy/upgrade.gif?v=1) no-repeat 50% 0;
 					text-align: center;
 					}
-				.b-accstats-community .b-accstats-button .b-accstats-upgrade {
+				.b-accstats-community .b-accstats-button .b-accstats-upgrade,
+				.b-accstats-identity .b-accstats-button .b-accstats-upgrade {
 					margin: 0 auto 0 0;
 					}
 				.b-accstats-button .b-accstats-trynbuy:link,
