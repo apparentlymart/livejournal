@@ -290,40 +290,53 @@ body<=
 
             #todo: check if user wants to receive emails?
             if ($targetu->email_raw) {
-                  # send an email to this user:
-                  # send an email with both plain and html content
-                  my $msg =  new MIME::Lite (
+                # send an email to this user:
+                # send an email with both plain and html content
+                my $msg = '';
+                my $encoding = $targetu->{'mailencoding'} ?
+                    $LJ::CACHE_ENCODINGS{$targetu->{'mailencoding'}} :
+                    "UTF-8";
+                if ($targetu->{opt_htmlemail} eq 'Y') {
+                    $msg =  new MIME::Lite (
                                              'From'    => "\"$LJ::SITENAME\" <$LJ::BOGUS_EMAIL>",
                                              'To'      => $targetu->email_raw,
                                              'Subject' => $subject,
                                              'Type'    => 'multipart/alternative',
                                              );
 
-                  my $encoding = $targetu->{'mailencoding'} ?
-                      $LJ::CACHE_ENCODINGS{$targetu->{'mailencoding'}} :
-                      "UTF-8";
-
-                  # add the plaintext version
-                  my $plainpart = $msg->attach(
+                    # add the plaintext version
+                    my $plainpart = $msg->attach(
                                                'Type'     => 'TEXT',
                                                'Data'     => $plain,
                                                'Encoding' => 'quoted-printable',
                                                );
 
-                  $plainpart->attr("content-type.charset" => $encoding)
-                      if $LJ::UNICODE;
+                    $plainpart->attr("content-type.charset" => $encoding)
+                        if $LJ::UNICODE;
 
-                  # add the html version
-                  my $htmlpart = $msg->attach(
+                    # add the html version
+                    my $htmlpart = $msg->attach(
                                               'Type'     => 'text/html',
                                               'Data'     => $html,
                                               'Encoding' => 'quoted-printable'
                                               );
 
-                  $htmlpart->attr("content-type.charset" => $encoding)
-                      if $LJ::UNICODE;
+                    $htmlpart->attr("content-type.charset" => $encoding)
+                        if $LJ::UNICODE;
 
-                  LJ::send_mail($msg);
+                } else {
+                    # no html version, do simple email
+                    $msg = new MIME::Lite ( 'From'    => "\"$LJ::SITENAME\" <$LJ::BOGUS_EMAIL>",
+                                            'To'      => $targetu->email_raw,
+                                            'Subject' => $subject,
+                                            'Type'    => 'text/plain',
+                                            'Data'    => $plain
+                                        );
+                    
+                    $msg->attr("content-type.charset" => $encoding);
+                }
+
+                LJ::send_mail($msg);
             }
         };
 
@@ -342,7 +355,8 @@ body<=
             my $mailusercname = $c->{name};
             my $mailclink = LJ::journal_base($c, ['community']);
 
-            my $html = LJ::Lang::ml('community.members.maintainer.remove.email_html', {
+            my $lang = $delmaintu->prop('browselang') || $LJ::DEFAULT_LANG;
+            my $html = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_html', undef, {
                             sitenameshort   => $LJ::SITENAMESHORT,
                             user            => $mailusername,
                             usercname       => $mailusercname,
@@ -351,7 +365,7 @@ body<=
                             sitename        => $LJ::SITENAME,
                             siteroot        => $LJ::SITEROOT,
                         });
-            my $plain = LJ::Lang::ml('community.members.maintainer.remove.email_plain', {
+            my $plain = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_plain', undef, {
                             sitenameshort   => $LJ::SITENAMESHORT,
                             user            => $mailusername,
                             usercname       => $mailusercname,
@@ -361,7 +375,7 @@ body<=
                             siteroot        => $LJ::SITEROOT,
                         });
 
-            my $subject = LJ::Lang::ml('community.members.maintainer.remove.email_subject', 
+            my $subject = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_subject', undef,
                             { mailusercname => $mailusercname }
                         );
             $sendmail->($delmaintu, $html, $plain, $subject);
@@ -418,7 +432,8 @@ body<=
             my $mailclink = LJ::journal_base($c, ['community']);
             my $mailcommanlink = "$LJ::SITEROOT/community/manage.bml";
 
-            my $html = LJ::Lang::ml('community.members.maintainer.add.email_html', {
+            my $lang = $newmaintu->prop('browselang') || $LJ::DEFAULT_LANG;
+            my $html = LJ::Lang::get_text($lang, 'community.members.maintainer.add.email_html', undef, {
                             sitenameshort   => $LJ::SITENAMESHORT,
                             user            => $mailusername,
                             usercname       => $mailusercname,
@@ -428,7 +443,7 @@ body<=
                             siteroot        => $LJ::SITEROOT,
                         });
 
-            my $plain = LJ::Lang::ml('community.members.maintainer.add.email_plain', {
+            my $plain = LJ::Lang::get_text($lang, 'community.members.maintainer.add.email_plain', undef, {
                             sitenameshort   => $LJ::SITENAMESHORT,
                             user            => $mailusername,
                             usercname       => $mailusercname,
@@ -438,7 +453,7 @@ body<=
                             siteroot        => $LJ::SITEROOT,
                         });
 
-            my $subject = LJ::Lang::ml('community.members.maintainer.add.email_subject',
+            my $subject = LJ::Lang::get_text($lang, 'community.members.maintainer.add.email_subject', undef,
                             { mailusercname => $mailusercname }
                         );
             $sendmail->($newmaintu, $html, $plain, $subject);
