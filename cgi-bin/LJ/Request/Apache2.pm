@@ -448,8 +448,10 @@ sub LJ::Request::add_header_out {
     my $value  = shift;
 
     my $r = $class->r();
+    ## The difference between headers_out and err_headers_out, is that 
+    ## the latter are printed even on error, and persist across internal redirects 
+    ## (so the headers printed for ErrorDocument handlers will have them).
     $r->err_headers_out->add($header, $value);
-    $r->headers_out->add($header, $value);
 
     return 1;
 }
@@ -461,8 +463,10 @@ sub LJ::Request::set_header_out {
     my $value  = shift;
 
     my $r = $class->r();
+    ## The difference between headers_out and err_headers_out, is that 
+    ## the latter are printed even on error, and persist across internal redirects 
+    ## (so the headers printed for ErrorDocument handlers will have them).
     $r->err_headers_out->set($header, $value);
-    $r->headers_out->set($header, $value);
 
     return 1;
 }

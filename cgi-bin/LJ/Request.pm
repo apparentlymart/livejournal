@@ -235,6 +235,9 @@ sub set_cookie {
     $header .= "; domain=$opts{'domain'}" if $opts{'domain'};
     $header .= "; HttpOnly" if $opts{'http_only'};
 
+    ## Only one cookie with same name
+    @cookie_set = grep { $_->{name} ne $key } @cookie_set;
+
     push @cookie_set, {
         'name' => $key,
         'value' => $value,
@@ -247,6 +250,7 @@ sub set_cookie {
     };
 
     push @{$cookie{$key}}, $value;
+
 }
 
 sub delete_cookie {
