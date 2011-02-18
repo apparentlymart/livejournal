@@ -7,6 +7,8 @@
 
 .connect.facebook=Login with Facebook
 
+.connect.mailru=Login with Mail.ru
+
 .connect.openid=Login with Openid
 
 .connect.twitter=Login with Twitter
