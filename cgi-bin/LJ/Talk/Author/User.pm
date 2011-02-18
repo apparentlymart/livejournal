@@ -81,7 +81,7 @@ sub handle_user_input {
     if ($form->{'usertype'} eq "cookieuser") {
         unless ($remote && $remote->username eq $form->{'cookieuser'}) {
             push @$errret,
-                LJ::Lang::ml("/htdocs/talkpost_do.bml.error.lostcookie");
+                LJ::Lang::ml("/talkpost_do.bml.error.lostcookie");
             return;
         }
 
@@ -98,13 +98,13 @@ sub handle_user_input {
          && !$LJ::IS_DEV_SERVER )
     {
         push @$errret,
-            LJ::Lang::ml("/htdocs/talkpost_do.bml.error.testacct");
+            LJ::Lang::ml("/talkpost_do.bml.error.testacct");
         return;
     }
 
     unless ($form->{'userpost'}) {
         push @$errret,
-            LJ::Lang::ml("/htdocs/talkpost_do.bml.error.nousername");
+            LJ::Lang::ml("/talkpost_do.bml.error.nousername");
         return;
     }
 
@@ -118,7 +118,7 @@ sub handle_user_input {
     $up = LJ::load_user($form->{'userpost'});
     unless ($up) {
         push @$errret,
-            LJ::Lang::ml("/htdocs/talkpost_do.bml.error.badusername2", {
+            LJ::Lang::ml("/talkpost_do.bml.error.badusername2", {
                 'sitename' => $LJ::SITENAMESHORT,
                 'aopts'    => "href='$LJ::SITEROOT/lostinfo.bml'",
             });
@@ -127,7 +127,7 @@ sub handle_user_input {
 
     unless ($up->is_person) {
         push @$errret,
-            LJ::Lang::ml("/htdocs/talkpost_do.bml.error.postshared");
+            LJ::Lang::ml("/talkpost_do.bml.error.postshared");
         return;
     }
 
@@ -140,7 +140,7 @@ sub handle_user_input {
             $init->{'used_ecp'} = 1;
         } else {
             push @$errret,
-                LJ::Lang::ml("/htdocs/talkpost_do.bml.error.badpassword2", {
+                LJ::Lang::ml("/talkpost_do.bml.error.badpassword2", {
                     'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'",
                 });
             return;
@@ -159,7 +159,7 @@ sub handle_user_input {
 
         unless ($ok) {
             push @$errret,
-                LJ::Lang::ml("/htdocs/talkpost_do.bml.error.badpassword2", {
+                LJ::Lang::ml("/talkpost_do.bml.error.badpassword2", {
                     'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'",
                 });
             return;

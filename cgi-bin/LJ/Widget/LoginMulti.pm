@@ -118,10 +118,11 @@ sub do_login {
         ##
         my $u = LJ::load_user($username);
         unless ($u){
-            push @$errors => LJ::Lang::ml("/talkpost_do.bml.error.badusername2", {
-                                'sitename' => $LJ::SITENAMESHORT,
-                                'aopts'    => "href='$LJ::SITEROOT/lostinfo.bml'",
-                                });
+            push @$errors,
+                LJ::Lang::ml( '/identity/login.bml.user.error.badusername', {
+                    'sitename' => $LJ::SITENAMESHORT,
+                    'aopts'    => "href='$LJ::SITEROOT/lostinfo.bml'",
+                } );
             return;
         }
         ##
