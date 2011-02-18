@@ -1486,10 +1486,10 @@ sub _format_template_mail {
     #   comment data
     $t->param(parent_userpic     => ($parent->userpic) ? $parent->userpic->imgtag : '');
     $t->param(parent_profile_url => $parent->poster->profile_url);
-    $t->param(parent_username    => $parent->poster->username);
+    $t->param(parent_username    => $parent->poster->display_name);
     $t->param(poster_userpic     => ($self->userpic) ? $self->userpic->imgtag : '' );
     $t->param(poster_profile_url => $self->poster->profile_url);
-    $t->param(poster_username    => $self->poster->username);
+    $t->param(poster_username    => $self->poster->display_name);
 
     #   manage comment
     $t->param(thread_url    => $self->thread_url);
