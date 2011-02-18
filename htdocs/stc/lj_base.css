@@ -1903,6 +1903,12 @@ DIV.lj_ippu_app {
 		text-align:center;
 		font-size:13px;
 		}
+	.b-popup-messagebox A:link,
+	.b-popup-messagebox A:visited,
+	.b-popup-messagebox A:hover,
+	.b-popup-messagebox A:active {
+	    color: #00C;
+	    }
 
 /* Delete bubble */
 .ljcmtmanage {
