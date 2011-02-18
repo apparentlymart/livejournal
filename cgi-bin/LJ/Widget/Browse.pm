@@ -14,24 +14,43 @@ sub _build_tree {
     my ($parentid, $level, $test_uri, $vertical, @categories) = @_;
     my @tree = ();
 
-    foreach my $c
-        (grep { (!$parentid && !$_->parentid) || ($_->parentid == $parentid) } grep { $_ } @categories) {
+    my @all_categories = !$level
+        ? grep { (!$parentid && !$_->parentid) || ($_->vert_id == $parentid) } grep { $_ } @categories
+        : grep { (!$parentid && !$_->parentid) || ($_->parentid == $parentid) } grep { $_ } @categories;
+
+    foreach my $c ( @all_categories ) {
             my $c_uri = $c->uri;
 
             my $is_current = ($test_uri =~ m/^\Q$c_uri\E/);
 
             ++$level;
-            push @tree,
-                {
-                    name            => $c->display_name(),
-                    title           => $c->title_html(),
-                    url             => $c->url(),
-                    summary         => LJ::Widget::CategorySummary->render( category => $c ),
-                    level           => $level,
-                    is_expanded     => $is_current,
-                    is_current      => $is_current,
-                    "level$level"   => [ _build_tree($c->catid, $level, $test_uri, $vertical, @categories) ],
-                };
+
+            if ($c->isa('LJ::Vertical')) {
+                @categories = LJ::Browse->load_all($c);
+                push @tree,
+                    {
+                        name            => $c->display_name(),
+                        title           => '',#$c->title_html(),
+                        url             => '',#$c->url(),
+                        summary         => '',#LJ::Widget::CategorySummary->render( category => $c ),
+                        level           => $level,
+                        is_expanded     => $is_current,
+                        is_current      => $is_current,
+                        "level$level"   => [ _build_tree(0, $level, $test_uri, $c, @categories) ],
+                    };
+            } else {
+                push @tree,
+                    {
+                        name            => $c->display_name(),
+                        title           => $c->title_html(),
+                        url             => $c->url(),
+                        summary         => LJ::Widget::CategorySummary->render( category => $c ),
+                        level           => $level,
+                        is_expanded     => $is_current,
+                        is_current      => $is_current,
+                        "level$level"   => [ _build_tree($c->catid, $level, $test_uri, $vertical, @categories) ],
+                    };
+            }
             --$level;
         }
     return @tree;
@@ -103,7 +122,7 @@ sub render_body {
 
     my $cat = LJ::Browse->load_by_url($uri, $vertical); # Currently selected category
 
-    my @categories = sort { lc $a->display_name cmp lc $b->display_name } LJ::Browse->load_all($vertical);
+    my @categories = $vertical ? sort { lc $a->display_name cmp lc $b->display_name } LJ::Browse->load_all($vertical) : LJ::Vertical->load_all;
 
     my $test_uri = $uri;
     $test_uri =~ s/^\/(browse|vertical)//;
@@ -163,7 +182,9 @@ sub render_body {
     my $post_skip = ($post_page-1) * $post_page_size;
     my $post_last = $post_skip + $post_page_size;
 
-    $$title = $vertical ? "<a class=\"appwidget-browse-header\" href='".$vertical->url."'>".$vertical->name."</a>" : $class->ml('widget.browse.windowtitle');
+    $$title = $vertical
+        ? "<div class=\"appwidget-browse-header-wrapper\"><a class=\"appwidget-browse-header\" href='".$vertical->url."'>".$vertical->name."</a> <a href='/browse' class=\"appwidget-browse-back\">Return to Community Directory</a></div>"
+        : $class->ml('widget.browse.windowtitle');
 
     my $search_str = undef;
     if ($opts{'post_vars'}->{'do_search'}) {

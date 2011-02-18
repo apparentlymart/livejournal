@@ -37,10 +37,10 @@ body<=
             my @columns = 
                     map { 
                         $_ =~ s/(?:^"|"$)//g;           ## remove trailing "
-                        $_ =~ s#\\"#"#;                 ## unescape "
+                        $_ =~ s#""#"#;                 ## unescape "
                         $_ 
                     }    
-                    split /,[^\s]/, $line;              ## split line by ,
+                    split /;[\s]?/, $line;              ## split line by ,
 
             ## Community name
             my $comm_name = $columns[0];
@@ -48,6 +48,8 @@ body<=
             ## Vertical name & URL
             my $vert_name = $columns[1];
             my $vert_url  = $columns[2];
+
+            $ret .= "Ups. May be something wrong in file?" unless $vert_name;
 
             my $v = LJ::Vertical->load_by_url ("/vertical" . $vert_url)
                 || LJ::Vertical->create (name => $vert_name, url => $vert_url);
