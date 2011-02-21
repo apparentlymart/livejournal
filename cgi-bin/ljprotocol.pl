@@ -416,7 +416,7 @@ sub getcomments {
                      qw(edit_time deleted_poster picture_keyword opt_preformatted) };
             
             $item_data->{props}->{'poster_ip'} = $item->{'props'}->{'poster_ip'}
-                if $item->{'props'}->{'poster_ip'} && ( $flags->{'u'}->{'user'} eq $up->{'user'} || LJ::can_manage($flags->{'u'}, $journal) );
+                if $item->{'props'}->{'poster_ip'} && ( $flags->{'u'}->{'user'} eq $up->{'user'} || $flags->{'u'}->can_manage($journal) );
             
             $item_data->{privileges} = {};
             $item_data->{privileges}->{delete}   = $comment->user_can_delete($flags->{'u'});
