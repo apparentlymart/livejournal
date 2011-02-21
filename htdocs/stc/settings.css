@@ -962,6 +962,9 @@
 				width: 13%;
 				padding: 10px 1px 10px 0;
 				}
+			.account .b-accstats-commtnb .b-accstats-table TD.b-accstats-userpics {
+				width: 70%;
+				}
 				.b-accstats-subhead SPAN {
 					display: inline-block;
 					padding: 0 0 2px 20px;
