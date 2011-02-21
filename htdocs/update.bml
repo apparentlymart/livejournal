@@ -576,9 +576,9 @@ EMBED
         if ($ad) {
             my $width = $ad_details->[-1]->{width};
             my $adunit = $ad_details->[-1]->{adunit};
-            $$body .= "<td class='$adunit' style='width: ${width}px; padding-left: 1em;'>$ad $trynbuy";
+            $$body .= "<td class='$adunit' style='width: ${width}px; padding-left: 1em;'>$ad";
         } else {
-            $$body .= "<td>$trynbuy";
+            $$body .= "<td>";
         }
     }
 
