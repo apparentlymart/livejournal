@@ -570,6 +570,7 @@ body<=
         my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine, $formatlight);
         my $showspamurl = LJ::Talk::talkargs($talkurl, "mode=showspam", $stylemine, $formatlight);
         my $hidespamurl = LJ::Talk::talkargs($talkurl, "", $stylemine, $formatlight);
+        my $spam_counter = $entry->prop('spam_counter') || 0;
 
         my $stylemine = $GET{'style'} eq 'mine' ? 1 : 0;
 
@@ -589,6 +590,13 @@ body<=
         # Quick Reply when posting a new top level comment
         # requires setup when logged in.
         $ret .= "<p class='lesstop' align='center'><b>$readlink";
+        if ($remote && ($remote->can_manage($u) || $remote->can_moderate($u))) {
+            if ($GET{mode} eq 'showspam') {
+                $ret .= "(<a href='$hidespamurl'>" . BML::ml('talk.hidespam', { spam_counter => $spam_counter }) . "</a>) - ";
+            } else {
+                $ret .= "(<a href='$showspamurl'>" . BML::ml('talk.showspam', { spam_counter => $spam_counter }) . "</a>) - ";
+            }
+        }
         if ($allow_commenting) {
             if ($remote) {
                 # See if we want to force them to change their password
@@ -600,13 +608,6 @@ body<=
                 }
             } else {
                 $ret .= "(<a href='$posturl'>" . BML::ml('talk.commentpost') . "</a>)";
-            }
-        }
-        if ($remote && ($remote->can_manage($u) || $remote->can_moderate($u))) {
-            if ($GET{mode} eq 'showspam') {
-                $ret .= " - (<a href='$hidespamurl'>" . BML::ml('talk.hidespam') . "</a>)";
-            } else {
-                $ret .= " - (<a href='$showspamurl'>" . BML::ml('talk.showspam') . "</a>)";
             }
         }
 
@@ -663,6 +664,13 @@ body<=
             }
 
             $ret .= "<hr /><p class='lesstop' align='center'><b>$readlink";
+            if ($remote && ($remote->can_manage($u) || $remote->can_moderate($u))) {
+                if ($GET{mode} eq 'showspam') {
+                    $ret .= "(<a href='$hidespamurl'>" . BML::ml('talk.hidespam', { spam_counter => $spam_counter }) . "</a>) - ";
+                } else {
+                    $ret .= "(<a href='$showspamurl'>" . BML::ml('talk.showspam', { spam_counter => $spam_counter }) . "</a>) - ";
+                }
+            }
             if ($allow_commenting) {
                 if ($remote) {
                     # See if we want to force them to change their password
@@ -674,13 +682,6 @@ body<=
                     }
                 } else {
                     $ret .= "(<a href='$posturl'>" . BML::ml('talk.commentpost') . "</a>)";
-                }
-                if ($remote && ($remote->can_manage($u) || $remote->can_moderate($u))) {
-                    if ($GET{mode} eq 'showspam') {
-                        $ret .= " - (<a href='$hidespamurl'>" . BML::ml('talk.hidespam') . "</a>)";
-                    } else {
-                        $ret .= " - (<a href='$showspamurl'>" . BML::ml('talk.showspam') . "</a>)";
-                    }
                 }
             }
             $ret .= $rated_count;

@@ -6089,7 +6089,7 @@ sub check_activity {
 
 sub is_spamprotection_enabled {
     my $u = shift;
-    return 0 if $LJ::DISABLED{'spamprotection'};
+    return 0 if $LJ::DISABLED{'spam_button'};
     my $spamprotection = $u->prop('spamprotection');
     $spamprotection = 1 unless defined $spamprotection;
     return $spamprotection;

@@ -1446,6 +1446,16 @@ property string text_multiform_btn {
 }
 set text_multiform_btn = "Perform Action";
 
+property string text_multiform_opt_spam {
+    des = "Text for the comment mark as spam action";
+}
+set text_multiform_opt_spam = "Spam";
+
+property string text_multiform_opt_unspam {
+    des = "Text for the comment mark as unspam action";
+}
+set text_multiform_opt_unspam = "Unspam";
+
 property string text_multiform_opt_unscreen {
     des = "Text for the comment unscreening action";
 }

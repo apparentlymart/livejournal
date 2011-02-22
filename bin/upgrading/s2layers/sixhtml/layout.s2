@@ -968,9 +968,9 @@ function Comment::print_linkbar() {
     var string text = "";
     foreach var string link_key ($.link_keyseq) {
         $link = $this->get_link($link_key);
-        $url = $link.url;
-        $text = $link.caption;
         if (defined $link) {
+            $url = $link.url;
+            $text = $link.caption;
             """ $sep <a href="$url">$text</a>""";
         }
     }

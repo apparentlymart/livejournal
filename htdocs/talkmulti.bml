@@ -109,7 +109,7 @@
             # don't let $remote mark their own comments as spam
             foreach (grep { $talkinfo{$_}->[1] != $remote->id } @talkids) {
                 my $s = LJ::Talk::mark_comment_as_spam($u, $_);
-                LJ::set_rel($talkinfo{$_}->[1], $remote, 'D');
+                LJ::set_rel($remote, $talkinfo{$_}->[1], 'D');
             }
         }
 

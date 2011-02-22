@@ -602,7 +602,7 @@ sub available_for_user  {
 
     my $journal = $self->event_journal;
     my ($arg1, $arg2) = ($self->arg1, $self->arg2);
-
+    
     # user can always track all comments to their own journal
     if (LJ::u_equals($journal, $u) && !$arg1 && !$arg2) {
         return 1;
@@ -687,18 +687,6 @@ sub subscriptions {
     my $limit = int delete $args{'limit'};    # optional
     my $original_limit = int $limit;
 
-    my $acquire_sub_slot = sub {
-        my ($how_much) = @_;
-        $how_much ||= 1;
-
-        return $how_much unless $original_limit;
-
-        $how_much = $limit if $limit < $how_much;
-
-        $limit -= $how_much;
-        return $how_much;
-    };
-
     croak("Unknown options: " . join(', ', keys %args)) if %args;
     croak("Can't call in web context") if LJ::is_web_context();
 
@@ -719,6 +707,51 @@ sub subscriptions {
     my $entry_journal = $entry->journal;
 
     my @subs;
+
+    if ($comment->state eq 'B' && $entry_journal->is_personal && $entry_journal->in_class('paid')) {
+        
+        ## Get 
+        my @ids = $entry_journal->friend_uids;
+        my %is_friend = map { $_ => 1 } @ids; # uid -> 1
+        my $us = LJ::load_userids(@ids);
+
+        require LJ::M::ProfilePage;
+        my $pm = LJ::M::ProfilePage->new($entry_journal);
+        require LJ::M::FriendsOf;
+        my $fro_m = LJ::M::FriendsOf->new($entry_journal,
+                                          sloppy => 1, # approximate if no summary info
+                                          mutuals_separate => 0,
+                                          # TODO: lame that we have to pass this in, but currently
+                                          # it's not cached on the $u singleton
+                                          friends => \%is_friend,
+                                          hide_test_cb => sub {
+                                              return $pm->should_hide_friendof($_[0]);
+                                          },
+                                         );
+        my $friend_ofs_count = $fro_m->friend_ofs;
+        
+        return 0 if $friend_ofs_count <= $LJ::SPAM_MAX_FRIEND_OFS &&
+                    (time() - $comment_author->timecreate) / 86400 <= $LJ::SPAM_MAX_DAYS_CREATED;
+
+        my $spam = 0;
+        LJ::run_hook('spam_in_friends_journals', \$spam, $entry_journal, $comment_author);
+        return 0 if $spam;
+    }
+
+    my $acquire_sub_slot = sub {
+        my ($how_much) = @_;
+        $how_much ||= 1;
+
+        return $how_much unless $original_limit;
+
+        $how_much = $limit if $limit < $how_much;
+
+        $limit -= $how_much;
+        return $how_much;
+    };
+
+    croak("Unknown options: " . join(', ', keys %args)) if %args;
+    croak("Can't call in web context") if LJ::is_web_context();
 
     my $email_ntypeid = LJ::NotificationMethod::Email->ntypeid;
 

@@ -375,6 +375,8 @@ sub can_unfreeze {
 }
 
 sub can_mark_spam {
+    return 0 unless $_[0];
+    return 1 if $_[0]->can_moderate($_[1]);
     return LJ::Talk::can_screen(@_);
 }
 
@@ -1194,7 +1196,8 @@ sub load_comments
 
     my $gtd_opts = {init_comobj => $opts->{init_comobj}};
     my $posts = get_talk_data($u, $nodetype, $nodeid, $gtd_opts);  # hashref, talkid -> talk2 row, or undef
-    if ($opts->{showspam}) {
+
+    if (LJ::is_enabled('spam_button') && $opts->{showspam}) {
         while ( my ($commentid, $comment) = each %$posts ) {
             if ( $comment->{state} eq 'B' ) {
                 $comment->{parenttalkid} = 0;
@@ -1203,6 +1206,7 @@ sub load_comments
             delete $posts->{$commentid};
         }
     }
+    
     unless ($posts) {
         $opts->{'out_error'} = "nodb";
         return;
@@ -1235,6 +1239,7 @@ sub load_comments
                                                               $remote->{'userid'} == $post->{'posterid'} ||
                                                               $remote->can_manage($u) ));
             }
+            $should_show = $post->{'state'} eq 'B' ? 0 : 1;
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
 
@@ -2542,7 +2547,7 @@ sub get_thread_html
                 }
 
                 if ($post->{'state'} ne 'B' && LJ::is_enabled('spam_button') && LJ::Talk::can_mark_spam($remote, $u, $up, $userpost)) {
-                    $text .= "<a href='$LJ::SITEROOT/spamcomment.bml?mode=spam&amp;${jargent}talkid=$dtid'>" .
+                    $text .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid&spam=1'>" .
                              LJ::img("btn_spam", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
                 }
@@ -2680,7 +2685,7 @@ sub get_thread_html
                             }
                             elsif ($post->{state} eq 'B') {
                                 # show unspam to reply link id comment spamed
-                                $text .= "(<a href='$LJ::SITEROOT/spamcomment.bml?mode=unspam&amp;${jargent}talkid=$dtid'>" . BML::ml('talk.unspamtoreply') . "</a>) ";
+                                #$text .= "(<a href='$LJ::SITEROOT/spamcomment.bml?mode=unspam&amp;${jargent}talkid=$dtid'>" . BML::ml('talk.unspamtoreply') . "</a>) ";
                             }
                             else {
                                 $text .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, BML::ml('talk.replytothis'), $replyurl) .  ") ";

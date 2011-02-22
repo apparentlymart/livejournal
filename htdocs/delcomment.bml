@@ -139,6 +139,8 @@ _info?><?_code
 
     # now, let's find out what remote can actually do with the comment
     my $can_manage = $remote->can_manage($journal);
+    my $can_mark_spam = LJ::is_enabled('spam_button') && 
+                        LJ::Talk::can_mark_spam($remote, $journal, $poster, $comment);
 
     my %can = (
         'manage_journal' => $can_manage,
@@ -153,7 +155,7 @@ _info?><?_code
 
         # they can mark as spam unless the comment is their own;
         # they don't need to be the community maintainer to do that
-        'mark_spam'      => ( $remote != $poster ),
+        'mark_spam'      => $can_mark_spam && $poster && ( $remote != $poster ),
 
         # they can delete all comments posted by the same author
         # if they are the entry author, and the comment being deleted
@@ -221,8 +223,11 @@ _info?><?_code
         my %actions;
 
         # mark as spam before this comment gets deleted
-        if ( $can{'mark_spam'} and LJ::Request->post_param('spam') ) {
+        my $mark_as_spam = LJ::Request->get_param('spam') || 
+                           LJ::Request->post_param('spam');
+        if ( $can{'mark_spam'} and $mark_as_spam ) {
             LJ::Talk::mark_comment_as_spam( $journal, $comment->jtalkid );
+            LJ::set_rel($remote, $poster, 'D');
             $actions{'marked_spam'} = 1;
         }
 
