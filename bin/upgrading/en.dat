@@ -4739,9 +4739,55 @@ Regards,
 trynbuy.expiring.notify_plain<<
 Dear [[username]],
 
-We hope you enjoyed your free trial of LiveJournal Paid account. If you decide to upgrade to a Paid account, all of the settings and userpics you uploaded during your trial will be restored. . Just so you know, we have lots of flexible payment options. You can make a one-time manual payment of $5 for two months of Paid account service or sign up for automatic payments and get a full-year of LiveJournal Paid account time for $19.95.
+We hope you enjoyed your free trial of LiveJournal Paid account. If you decide to upgrade to a Paid account, all of the settings and userpics you uploaded during your trial will be restored. Just so you know, we have lots of flexible payment options. You can make a one-time manual payment of $5 for two months of Paid account service or sign up for automatic payments and get a full-year of LiveJournal Paid account time for $19.95.
 
 Thanks again!
+
+Regards,
+[[shortsite]] Team
+
+.
+
+trynbuy.expired.notify_subject=We hope you enjoyed your LiveJournal Paid Account trial!
+
+trynbuy.expired.notify_html<<
+Dear [[username]],<br>
+<br>
+We're so thrilled that you decided to give our Paid Account a test drive.<br>
+<br>
+We happen to think our Paid accounts are pretty awesome. You can:<br>
+Enjoy an ad-free environment<br>
+Spice up your posts with 30 userpics<br>
+Dress up your journal in hundreds of premium styles<br>
+Edit comments, create personal notes, and post polls<br>
+Get more storage, stats by Google, voice posting, and more!<br>
+Rest easy: No obligation or credit card required<br>
+<br>
+We've kept all of your settings, so you can extend the fun for just a couple of dollars per month. We have lots of flexible payment plans, so you can choose the plan that's right for you!<br>
+<br>
+If you'd like to upgrade now, click here! We thank you, again, for making LiveJournal your home.<br> 
+<br>
+Regards,
+[[shortsite]] Team
+
+.
+
+trynbuy.expired.notify_plain<<
+Dear [[username]],
+
+We're so thrilled that you decided to give our Paid Account a test drive.
+
+We happen to think our Paid accounts are pretty awesome. You can:
+Enjoy an ad-free environment
+Spice up your posts with 30 userpics
+Dress up your journal in hundreds of premium styles
+Edit comments, create personal notes, and post polls
+Get more storage, stats by Google, voice posting, and more!
+Rest easy: No obligation or credit card required
+
+We've kept all of your settings, so you can extend the fun for just a couple of dollars per month. We have lots of flexible payment plans, so you can choose the plan that's right for you!
+
+If you'd like to upgrade now, click here! We thank you, again, for making LiveJournal your home.
 
 Regards,
 [[shortsite]] Team
