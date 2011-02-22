@@ -83,7 +83,7 @@ jQuery(document).ready(function() {
 		}, 1000);
 
 		function formSent() {
-			var skip = form.prev('input[name="skip"]').val();
+			var skip = form.prevAll('input[name="skip"]').val();
 			PotD.cache[skip] = null;
 			PotD.getQuestion(form, skip);
 			response_received = true;
