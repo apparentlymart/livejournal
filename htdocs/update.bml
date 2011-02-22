@@ -541,9 +541,9 @@ EMBED
                         $after_entry_post_extra_options .
                         "</ul>";
 
+                    $$body .= '<div class="b-tnb-getstart">' . LJ::Widget::Trynbuy->render(stage => 'simple') if ($show_trynbuy);
                     $$body .= LJ::Widget::GettingStarted->render;
-                    
-                    $$body .= LJ::Widget::Trynbuy->render(stage => 'simple') if($show_trynbuy);
+                    $$body .= '</div>' if ($show_trynbuy);
                 }
 
                 $$body .= "</td><td style=\"padding-left: 2em;\">";
