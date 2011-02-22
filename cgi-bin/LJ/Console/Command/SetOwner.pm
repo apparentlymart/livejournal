@@ -49,6 +49,16 @@ sub execute {
 
     $c->log_event('set_owner', { actiontarget => $u->{userid}, remote => $remote });
 
+    ## Close election poll if exist and open
+    my $poll_id = $c->prop("election_poll_id");
+    if ($poll_id) {
+        my $poll = LJ::Poll->new ($poll_id);
+        if ($poll && !$poll->is_closed) {
+            $self->print("Election poll with ID: $poll_id closed.");
+            $poll->close_poll;
+        }
+    }
+
     LJ::statushistory_add($c, $remote, 'set_owner', "Console set owner and new maintainer as ".$u->{user});
     LJ::set_rel($c->{userid}, $u->{userid}, 'S');
     ## Set a new supermaintainer as maintainer too.
