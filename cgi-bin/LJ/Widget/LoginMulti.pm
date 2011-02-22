@@ -97,6 +97,7 @@ sub render_body {
         'current_type'      => $current_type,
         'returnto'          => $thispage,
         'js_check_domain'   => $opts{'js_check_domain'},
+        'resources_html'    => $opts{'resources_html'},
     );
 
     ## well cooked widget is here

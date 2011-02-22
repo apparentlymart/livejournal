@@ -1971,6 +1971,7 @@ sub talkform {
 
         'logout_url'            => $opts->{'logout_url'},
         'js_check_domain'       => $opts->{'js_check_domain'},
+        'resources_html'        => $opts->{'resources_html'},
         'partner_domain'        => $opts->{'partner_domain'},
         'partner_remote_ljuser' => $opts->{'partner_remote_ljuser'},
     );

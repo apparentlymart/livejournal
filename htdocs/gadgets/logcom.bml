@@ -77,6 +77,9 @@
                 'journalu'          => $journal,
                 'ditemid'           => $entry->ditemid,
                 'replyto'           => int ($replyto / 256),
+
+                'resources_html'    => $partner->resources_html
+                                    || LJ::res_includes(),
             });
     } else {
         ## display login widget
@@ -95,6 +98,8 @@
         return $w->render(
             'embedded'          => 1,
             'js_check_domain'   => $js_check_domain,
+            'resources_html'    => $partner->resources_html
+                                || LJ::res_includes(),
 
             'forwhat'           => 'external',
             'thispage'          => $thispage,
