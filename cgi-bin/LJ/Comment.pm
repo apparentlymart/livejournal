@@ -1709,6 +1709,7 @@ sub is_edited {
 # * entry (optional)
 # * before/after (jtalkids)
 # * limit (defaults to 1000)
+# * order: ASC/DESC (always orders by jtalkid, defaults to desc)
 #
 # returns: arrayref containing LJ::Comment objects
 sub select {
@@ -1717,6 +1718,7 @@ sub select {
     $params ||= {};
 
     my $limit = int ( delete $params->{'limit'} || 1000 );
+    my $order = delete $params->{'order'} || 'DESC';
 
     my ( @where_sql, @where_binds );
 
@@ -1750,7 +1752,13 @@ sub select {
     $udbr->{'RaiseError'} = 1;
 
     my $jtalkids = $udbr->selectcol_arrayref(
-        "SELECT jtalkid FROM talk2 WHERE $where_sql LIMIT $limit",
+        qq{
+            SELECT jtalkid
+            FROM talk2
+            WHERE $where_sql
+            ORDER BY jtalkid $order
+            LIMIT $limit
+        },
         undef, @where_binds
     );
 
