@@ -56,7 +56,7 @@ _info?><?_code
         my ($why) = @_;
 
         if ( $mode eq 'html' ) {
-            return $site_scheme_wrap( LJ::bad_input($why) );
+            return $site_scheme_wrap->( LJ::bad_input($why) );
         } else {
             return $error->("Bad input: $why");
         }
