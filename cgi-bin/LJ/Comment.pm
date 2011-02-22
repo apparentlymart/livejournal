@@ -770,7 +770,9 @@ sub body_raw {
     $self->_load_text unless $self->{_loaded_text};
 
     # die if we didn't load any body text
-    die "Couldn't load body text" unless $self->{_loaded_text};
+    die "Couldn't load body text "
+      . "(journal=$self->{journalid}, jtalkid=$self->{jtalkid})"
+        unless $self->{_loaded_text};
 
     return $self->{body};
 }
@@ -1702,6 +1704,62 @@ sub is_edited {
     return $self->edit_time ? 1 : 0;
 }
 
+# supported params:
+#
+# * entry (optional)
+# * before/after (jtalkids)
+# * limit (defaults to 1000)
+#
+# returns: arrayref containing LJ::Comment objects
+sub select {
+    my ( $class, $journal, $params ) = @_;
 
+    $params ||= {};
+
+    my $limit = int ( delete $params->{'limit'} || 1000 );
+
+    my ( @where_sql, @where_binds );
+
+    {
+        push @where_sql, 'journalid=?';
+        push @where_binds, $journal->userid;
+    }
+
+    if ( my $entry = delete $params->{'entry'} ) {
+        push @where_sql, 'nodeid=?';
+        push @where_binds, $entry->jitemid;
+    }
+
+    if ( my $before = delete $params->{'before'} ) {
+        push @where_sql, 'jtalkid<?';
+        push @where_binds, $before;
+    }
+
+    if ( my $after = delete $params->{'after'} ) {
+        push @where_sql, 'jtalkid>?';
+        push @where_binds, $after;
+    }
+
+    if ( keys %$params ) {
+        Carp::cluck( "unknown params: " . join( ' ', sort keys %$params ) );
+    }
+
+    my $where_sql = join( ' AND ', @where_sql );
+
+    my $udbr = LJ::get_cluster_reader($journal);
+    $udbr->{'RaiseError'} = 1;
+
+    my $jtalkids = $udbr->selectcol_arrayref(
+        "SELECT jtalkid FROM talk2 WHERE $where_sql LIMIT $limit",
+        undef, @where_binds
+    );
+
+    my @ret;
+    foreach my $jtalkid ( sort { $a <=> $b } @$jtalkids ) {
+        push @ret, $class->new( $journal, 'jtalkid' => $jtalkid );
+    }
+
+    return \@ret;
+}
 
 1;
