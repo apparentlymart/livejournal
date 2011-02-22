@@ -12,18 +12,25 @@ use constant AccountMask => {
     NonSUP      => 64,
     OfficeOnly  => 128,
     TryNBuy     => 256,
+    AlreadyTryNBuy => 512,
+    NeverTryNBuy   => 1024,
 };
 
 sub get_user_class {
     my $class = shift;
     my $u = shift;
 
-    return AccountMask->{Permanent} if $u->in_class('perm');
-    return AccountMask->{Sponsored} if $u->in_class('sponsored');
-    return AccountMask->{TryNBuy} if $u->get_cap('trynbuy');    # TryNBuy should go before Paid
-    return AccountMask->{Paid} if $u->get_cap('paid');
-    return AccountMask->{Plus} if $u->in_class('plus');
-    return AccountMask->{Basic};
+    my $add = 0;
+    my $already_tb = LJ::TryNBuy->already_used($u);
+    $add += AccountMask->{AlreadyTryNBuy} if $already_tb;
+    $add += AccountMask->{NeverTryNBuy} unless $u->get_cap('trynbuy') or $already_tb;
+
+    return $add + AccountMask->{Permanent} if $u->in_class('perm');
+    return $add + AccountMask->{Sponsored} if $u->in_class('sponsored');
+    return $add + AccountMask->{TryNBuy} if $u->get_cap('trynbuy');    # TryNBuy should go before Paid
+    return $add + AccountMask->{Paid} if $u->get_cap('paid');
+    return $add + AccountMask->{Plus} if $u->in_class('plus');
+    return $add + AccountMask->{Basic};
 }
 
 sub get_class_string {

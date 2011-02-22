@@ -37,6 +37,9 @@ sub render_body {
         $end_year = $end_date->year;
         $end_hour = $end_date->hour;
         $end_min = $end_date->minute;
+    } else { # default
+        $accounts = LJ::SiteMessages::AccountMask->{SUP} + LJ::SiteMessages::AccountMask->{NonSUP}
+                  + LJ::SiteMessages::AccountMask->{NeverTryNBuy} + LJ::SiteMessages::AccountMask->{AlreadyTryNBuy} + LJ::SiteMessages::AccountMask->{TryNBuy};
     }
 
     # default values for year/month/day = today's date
@@ -142,7 +145,7 @@ sub render_body {
           value => $countries ) . "</td></tr>";
     $ret .= "<tr><td>&nbsp;</td><td>(if left blank, a user's country will be ignored)</td></tr>";
 
-    $ret .= "<tr><td valign='top'>Show this question to:</td><td>";
+    $ret .= "<tr><td valign='top'>Show this question to:<br>ATTENTION!<br>Check SUP or NonSUP or both!<br>Same for TryNBuy applies.</td><td>";
     foreach my $type (sort { LJ::SiteMessages::AccountMask()->{$b} <=> LJ::SiteMessages::AccountMask()->{$a} } keys %{&LJ::SiteMessages::AccountMask()}) {
         my $ltype = lc $type;
         $ret .= $class->html_check
