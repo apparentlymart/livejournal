@@ -1239,7 +1239,9 @@ sub load_comments
                                                               $remote->{'userid'} == $post->{'posterid'} ||
                                                               $remote->can_manage($u) ));
             }
-            $should_show = $post->{'state'} eq 'B' ? 0 : 1;
+            if (LJ::is_enabled('spam_button') && !$opts->{showspam}) {
+                $should_show = $post->{'state'} eq 'B' ? 0 : 1;
+            }
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
 
