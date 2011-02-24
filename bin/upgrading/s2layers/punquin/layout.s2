@@ -216,6 +216,9 @@ propgroup text {
   property string datetime_comments_format {
         des = "Date and time format for comments";
   }
+  property use text_showspam;
+  property use text_hidespam;
+  property use text_spam_comment;
 }
 set text_gotop = "Go to Top";
 set text_left_comments = "(";
@@ -664,6 +667,18 @@ function CommentInfo::print() {
         print safe "$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
+            if ($p.view == "entry") {
+                if (clean_url($*img_btwn_comments) != "") {
+                    """ <img src="$*img_btwn_comments" alt="" /> """;
+                } else {
+                    print safe "$*text_btwn_comments";
+                }
+                if ($p.showspam) {
+                    print safe """<a href=\"$.read_spam_url\">$*text_hidespam</a> """;
+                } else {
+                    print safe """<a href=\"$.read_spam_url\">$*text_showspam</a>""";
+                }
+            }
         }
         if ($.show_postlink and $.show_readlink) {
             if (clean_url($*img_btwn_comments) != "") {
