@@ -221,6 +221,8 @@ propgroup text {
   property string date_monthpage_format {
         des = "Month format for the month page";
   }
+  property use text_showspam;
+  property use text_hidespam;
 }
 set text_left_comments = "comments: ";
 set text_btwn_comments = " or ";
@@ -918,6 +920,7 @@ function MonthPage::print_body {
 }
 
 function EntryPage::print_body () {
+    var Page p = get_page();
         set_handler("unscreen_comment_#", [
                                            [ "style_bgcolor", "cmtbar#", "$*comment_bar_one_bgcolor", ],
                                            [ "style_color", "cmtbar#", "$*comment_bar_one_fgcolor", ],
@@ -934,6 +937,11 @@ function EntryPage::print_body () {
         $this->print_multiform_start();
 
         print_header("Comments:");
+        if ($p.showspam) {
+            print """<p width='95%' style='text-align:center;'><a href=\"$.entry.permalink_url\">$*text_hidespam</a></p>""";
+        } else {
+            print """<p width='95%' style='text-align:center;'><a href=\"$.entry.permalink_url?mode=showspam\">$*text_showspam</a></p>""";
+        }
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();
             $this->print_comments($.comments);
