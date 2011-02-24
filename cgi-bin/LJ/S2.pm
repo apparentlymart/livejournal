@@ -3032,7 +3032,7 @@ sub _Comment__get_link
     if ($key eq "spam_comment") {
         return $null_link if $LJ::DISABLED{'spam_button'};
         return $null_link unless LJ::Talk::can_mark_spam($remote, $u, $post_user, $com_user);
-        return LJ::S2::Link("$LJ::SITEROOT/spamcomment.bml?mode=spam&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+        return LJ::S2::Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}&amp;spam=1",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_spam"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_spam.gif", 24, 24));
     }
