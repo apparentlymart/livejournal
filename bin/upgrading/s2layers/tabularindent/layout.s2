@@ -921,6 +921,7 @@ function MonthPage::print_body {
 
 function EntryPage::print_body () {
     var Page p = get_page();
+    var Entry e = $.entry;
         set_handler("unscreen_comment_#", [
                                            [ "style_bgcolor", "cmtbar#", "$*comment_bar_one_bgcolor", ],
                                            [ "style_color", "cmtbar#", "$*comment_bar_one_fgcolor", ],
@@ -938,9 +939,9 @@ function EntryPage::print_body () {
 
         print_header("Comments:");
         if ($p.showspam) {
-            print """<p width='95%' style='text-align:center;'><a href=\"$.entry.permalink_url\">$*text_hidespam</a></p>""";
+            print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url\">$*text_hidespam</a></p>""";
         } else {
-            print """<p width='95%' style='text-align:center;'><a href=\"$.entry.permalink_url?mode=showspam\">$*text_showspam</a></p>""";
+            print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url\">$*text_showspam</a></p>""";
         }
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();
