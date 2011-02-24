@@ -469,15 +469,18 @@ sub EntryPage_entry
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
     my $style_set = defined $get->{'s2id'} ? "s2id=" . int( $get->{'s2id'} ) : "";
     my $style_arg = ($stylemine ne '' and $style_set ne '') ? ($stylemine . '&' . $style_set) : ($stylemine . $style_set);
+    my $show_spam_arg = ($get->{'mode'} ne "showspam" and LJ::is_enabled('spam_button')) ? "mode=showspam" : "";
 
     my $userpic = Image_userpic($pu, $entry->userpic ? $entry->userpic->picid : 0);
 
     my $permalink = $entry->url;
     my $readurl = LJ::Talk::talkargs($permalink, $nc, $style_arg);
+    my $readspamurl = LJ::Talk::talkargs($permalink, $nc, $style_arg, $show_spam_arg);
     my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $style_arg);
 
     my $comments = CommentInfo({
         'read_url' => $readurl,
+        'read_spam_url' => $readspamurl,
         'post_url' => $posturl,
         'count' => $replycount,
         'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,

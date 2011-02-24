@@ -231,6 +231,7 @@ class CommentInfo
 "Information about comments attached to something."
 {
     var readonly string read_url "URL pointer to the 'Read Comments' view.";
+    var readonly string read_spam_url "URL pointer to the 'Show/Hide Spam' view.";
     var readonly string post_url "URL pointer to the 'Post Comments' view.";
     var int count "Current number of comments available to be read by the viewer.";
     var bool screened "Set to true if there are screened comments and remote user can unscreen them.";
