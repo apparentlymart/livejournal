@@ -638,7 +638,7 @@ sub render_subject_block {
                 $BML::ML{'entryform.subject'}
             </label>
             $subject_field
-            <ul id='entry-tabs' style='display: none;'>
+            <ul id='entry-tabs' style='visibility:hidden'>
                 $switch_rte_tab
                 $switch_plaintext_tab
             </ul>
@@ -1417,11 +1417,17 @@ sub render_body {
 
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
         $out .= $self->wrap_js(qq{
-            if (FCKeditor_IsCompatibleBrowser()) {
-                if (!window.FCKLang) FCKLang = {};
-                Object.extend(window.FCKLang, $langmap);
-            } else {
-                document.getElementById('entry-tabs').style.visibility = 'hidden';
+            FCKeditor_IsCompatibleBrowser = (function(FCKeditor_IsCompatibleBrowser) {
+                return function() {
+                    if (~navigator.userAgent.indexOf('iPhone')) {
+                        return false;
+                    }
+                    return FCKeditor_IsCompatibleBrowser();
+                };
+            }(FCKeditor_IsCompatibleBrowser));
+            var FCKLang = FCKLang || {};
+            jQuery.extend(FCKLang, $langmap);
+            if (!FCKeditor_IsCompatibleBrowser()) {
                 document.getElementById('htmltools').style.display = 'block';
                 document.write("$jnorich");
                 usePlainText('draft');
