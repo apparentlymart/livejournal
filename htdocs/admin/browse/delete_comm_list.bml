@@ -1,0 +1,136 @@
+<?page
+body<=
+<?_code
+{
+#line 5
+
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::Browse );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
+
+    $title = "Delete community by list";
+    my $ret = "";
+
+    sub _delete_comms {
+        my $comm_list = shift;
+
+        ## Ups. List is empty. Exit.
+        return undef unless @$comm_list;
+
+        my $dbh = LJ::get_db_writer()
+            or die "unable to contact global db master to create category";
+
+        my @comms_to_delete = @$comm_list;
+
+        $ret .= "<hr>Try to delete the next communities: <br/>";
+        foreach my $comm_name (@comms_to_delete) {
+            $ret .= LJ::ljuser($comm_name) . "<br/>";
+        }
+        $ret .= "<br/>";
+
+        $ret .= "<hr>";
+
+        ## Get community ids for delete.
+        my $journals = $dbh->selectall_hashref("SELECT userid, user FROM user WHERE user IN ('".join("','", @comms_to_delete)."')", "user") || [];
+
+        ## List of error communities names
+        my @error_comms = grep { $_ ne $journals->{$_}->{user} } @comms_to_delete;
+
+        ## Journal IDs to delete from community directory
+
+        my @journal_ids = ();
+        while (my ($user, $u_hash) = each %$journals) {
+            next unless values %$u_hash;
+            push @journal_ids, $u_hash->{userid};
+        }
+
+        $ret .= "Community listed below will not be processed: <br/>";
+        foreach my $c_name (@error_comms) {
+            $ret .= $c_name . "<br/>";
+        }
+        $ret .= "<br/>";
+
+        ## Get categories for deleting communities for clear cateories cache
+        my $cat_ids = $dbh->selectcol_arrayref("SELECT DISTINCT catid FROM categoryjournals WHERE journalid IN (".join(',', @journal_ids).")");
+
+        ## Delete all choosen communities.
+        $dbh->do("DELETE FROM categoryjournals WHERE journalid IN (".join(',', @journal_ids).")");
+
+        ## Enable users to add their community again
+        $dbh->do("UPDATE categoryjournals_pending SET status=?, " .
+                     "submitid=NULL, modid=?, lastupdate=UNIX_TIMESTAMP() " .
+                     "WHERE jid IN (".join(',', @journal_ids).") AND status IN ('P','A')", undef,
+                     'R', $remote->userid);
+
+        ## Clearing cache for all affected categories
+        foreach my $catid (@$cat_ids) {
+            my $cat = LJ::Browse->load_by_id ($catid);
+            $cat->clear_journals_memcache;
+        }
+
+        ## All ok. Enable to get next packet.
+        return 1;
+
+    }
+
+    if (LJ::did_post() && $POST{'all_structure'}) {
+        my $csv = LJ::Request->upload('all_structure');
+        my $content = '';
+        seek $csv->fh, 0,0;
+        read $csv->fh, $content, $csv->size; # read content
+
+        my @lines = split /\r?\n/, $content;
+
+        my @comms_to_delete = ();
+        foreach my $line (@lines) {
+            my @columns = split /;/, $line;
+            next if @columns > 1;
+            @columns = 
+                    map { 
+                        $_ =~ s/(?:^"|"$)//g;           ## remove trailing "
+                        $_ =~ s#""#"#;                 ## unescape "
+                        $_ 
+                    } @columns;
+            push @comms_to_delete, @columns;
+        }
+
+        my $i = 0;
+        my $items_per_time = 100;
+        while (1) {
+            last unless _delete_comms ( [ splice @comms_to_delete, $i, $items_per_time ] );
+            $i += $items_per_time;
+        }
+
+        $ret .= "<hr> Communities has been successfully deleted.<br/>";
+
+    }
+
+    my @verticals = LJ::Vertical->load_all();
+
+    $ret .= "<form method='POST' enctype='multipart/form-data' onsubmit=' this.load.disabled=true; '>\n";
+    $ret .= LJ::form_auth();
+
+    $ret .= "<p><input type='file' name='all_structure'></p>";
+    $ret .= "<p><br/><input type='submit' name='load' onclick='this.parentNode.insertBefore( document.createTextNode(\" Deleting...\"), this.nextSibling);' value='Delete'></p>";
+
+    $ret .= "</form>";
+    $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
+
+
+    return "<body>$ret</body>";
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
