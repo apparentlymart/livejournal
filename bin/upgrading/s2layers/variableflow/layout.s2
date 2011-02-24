@@ -281,6 +281,9 @@ propgroup text {
     property use text_read_comments;
     property use text_post_comment_friends;
     property use text_read_comments_friends;
+    property use text_showspam;
+    property use text_hidespam;
+    property use text_spam_comment;
 }
 
 propgroup customcss {
@@ -709,12 +712,20 @@ function Page::print_linklist() {
 }
 
 function CommentInfo::print() {
+    var Page p = get_page();
     if ($.show_readlink or $.show_postlink) {
         """<ul class="entryextra">""";
         if ($.show_readlink) {
             print """<li class="entryreadlink">""";
             $this->print_readlink();
             println "</li>";
+            if ($p.view == "entry") {
+                if ($p.showspam) {
+                    """<li class="comments-hidespam"><a href=\"$.read_url\">$*text_hidespam</a></li>""";
+                } else {
+                    """<li class="comments-showspam"><a href=\"$.read_url?mode=showspam\">$*text_showspam</a></li>""";
+                }
+            }
         }
         if ($.show_postlink) {
             print """<li class="entrypostlink">""";
@@ -726,7 +737,13 @@ function CommentInfo::print() {
 }
 
 function print_comment(Comment e) {
+var Page p = get_page();
+
 """<div class="entry" id="$e.dom_id">""";
+
+if ($e.spam and not $p.showspam) {
+    """$*text_spam_comment""";
+} else {
 
     if ($*adv_horrible_userpic_markup) {
         """<table cellpadding="0" border="0" cellspacing="0" style="margin: 0;" class="uglykludgeuserpic">
@@ -778,7 +795,8 @@ function print_comment(Comment e) {
         "</td></tr></table>";
     }
 
-    println "</div>";
+}
+println "</div>";
 
 }
 
