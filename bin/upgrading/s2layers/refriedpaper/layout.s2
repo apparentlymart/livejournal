@@ -343,6 +343,9 @@ propgroup text {
   set text_tagspage_header       = "Visible Tags";
   set datetime_format            = "%%yyyy%%-%%mm%%-%%dd%% %%HH%%:%%min%%";
   set date_daypage_skip_format   = "%%month%% %%dayord%%, %%yyyy%%";
+  property use text_showspam;
+  property use text_hidespam;
+  property use text_spam_comment;
 
 }
 
@@ -798,6 +801,13 @@ function EntryLite::print_linkbar() {
           $linkbar = $linkbar + """ $text""";
         }
         $linkbar = $linkbar + """</a>$btwn_comments""";
+        if ($p.view == "entry") {
+            if ($p.showspam) {
+                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url\">$*text_hidespam</a>$btwn_comments""";
+            } else {
+                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url\">$*text_showspam</a>$btwn_comments""";
+            }
+        }
       }
 
       if ($en.comments.maxcomments) {
@@ -1364,11 +1374,16 @@ function EntryPage::print_comment(Comment c) {
 }
 
 function EntryPage::print_comments (Comment[] cs) {
+  var Page p = get_page();
   if (size $cs == 0) { return; }
   foreach var Comment c ($cs) {
     var int indent = ($c.depth - 1) * 25;
     "<div id=\"$c.dom_id\" style='margin-left: ${indent}px; margin-top: 5px'>\n";
-    if ($c.full) {
+    if (($c.spam) and (not $p.showspam) and (size($c.replies) > 0)) {
+      """$*text_spam_comment""";
+    } elseif (($c.spam) and (not $p.showspam)) {
+      """&nsbp;""";
+    } elseif ($c.full) {
       $this->print_comment($c);
     } else {
       $this->print_comment_partial($c);
