@@ -16,10 +16,9 @@ function editdate() {
 }
 
 function showEntryTabs() {
-    if (document.getElementById) {
-        var entryTabs = document.getElementById('entry-tabs');
-        entryTabs.style.display = 'block';
-    }
+	if (FCKeditor_IsCompatibleBrowser()) {
+		document.getElementById('entry-tabs').style.visibility = 'visible';
+	}
 }
 
 function changeSubmit(prefix, defaultjournal) {
@@ -537,32 +536,8 @@ function settime() {
 
 function tagAutocomplete(node, tags)
 {
-	var searched,
-		suppressKeypress = false;
+	var searched;
 	
-	if(jQuery.browser.opera) {
-		jQuery(node)
-		.keydown(function(event){ //fix form submit bug in opera
-			var self = jQuery(this).data('autocomplete');
-			var keyCode = jQuery.ui.keyCode;
-			suppressKeypress = false;
-
-			if ( self.options.disabled  || !self.menu.element.is( ":visible" ) ) {
-				return;
-			}
-			if ( event.keyCode == keyCode.ENTER || event.keyCode == keyCode.NUMPAD_ENTER) {
-				suppressKeypress = true;
-			}
-		})
-		.keypress(function(event){
-			if ( suppressKeypress ) {
-				suppressKeypress = false;
-				event.preventDefault();
-			}
-		});
-	}
-
-
 	jQuery(node).autocomplete({
 		minLength: 1,
 		source: function(request, response) {
