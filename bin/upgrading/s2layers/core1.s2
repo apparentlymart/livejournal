@@ -1188,6 +1188,12 @@ property string text_hidespam {
 set text_showspam = "Show spam";
 set text_hidespam = "Hide spam";
 
+property string text_spam_comment {
+    des = "Spam comment messages";
+    example = "Spam comment";
+}
+set text_spam_comment = "(Spam comment)";
+
 property string text_tags_page_header {
     des = "Text for the header of the Tags page";
     example = "Visible Tags";
