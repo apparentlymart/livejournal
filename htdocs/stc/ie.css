@@ -397,8 +397,23 @@ __________________________________________*/
 .whl-bar,
 .whl-items,
 .whl-item,
-.whl-item-def,
 .appwidget-wishrecommendations .whl-rec-item {
+	zoom: 1;
+	}
+* HTML .whl-fadeout {
+	background: none;
+	}
+.whl-item-def {
+	float: left;
+	width: 458px;
+	}
+.whl-item-meta .whl-external {
+	width: 458px;
+	overflow: hidden;
+	}
+.whl-item-head .whl-controls,
+.whl-item-meta .whl-status {
+	display: inline;
 	zoom: 1;
 	}
 * HTML .whl-edit-want .whl-select {
@@ -433,6 +448,19 @@ __________________________________________*/
 .whl-autocomplete-list .whl-autocomplete-item {
 	zoom: 1;
 	display: inline;
+	}
+.b-fader {
+    filter: alpha(opacity = 60);
+    }
+* HTML .b-fader {
+	stretch:expression(
+		function(t){
+			var h = t.parentNode.offsetHeight;
+			if (t.h != h) {
+				t.style.height = t.h = h;
+			}
+		}(this)
+	);
 	}
 
 /* Calendar
