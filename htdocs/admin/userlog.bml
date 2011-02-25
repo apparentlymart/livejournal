@@ -31,11 +31,12 @@ body<=
     my $err = sub {
         return "<?h1 Error h1?><?p $_[0] p?>";
     };
-
+    my $can_view =  LJ::check_priv($remote, 'canview', '*') || 
+                    LJ::check_priv($remote, 'canview', 'userlog');
     return $err->("You do not have the necessary privilege to view this page.")
-        unless LJ::check_priv($remote, 'canview', 'userlog') ||
-               LJ::check_priv($remote, 'canview', '*') ||
-               $LJ::IS_DEV_SERVER;
+        unless $can_view || 
+                LJ::check_priv($remote, 'canview', 'userloglight') ||
+                $LJ::IS_DEV_SERVER;
 
     my $user = LJ::canonical_username($POST{user} || $GET{user});
 
@@ -149,13 +150,17 @@ FORM
         } else {
             $actor = "<em>not recorded</em>";
         }
-
-        my $ip = $row->{ip} || "<em>not recorded</em>";
-        my $uniq = $row->{uniq} ? qq{
-            <a href="$LJ::SITEROOT/admin/uniq.bml?what=$row->{uniq}">
-                $row->{uniq}
-            </a>
-        } : "<em>not recorded</em>";
+        
+        my ($ip, $uniq);
+        if (!$can_view) {
+            $ip = '***';
+            $uniq = '***';
+        } else {
+            $ip = $row->{ip} || "<em>not recorded</em>";
+            $uniq = ($row->{uniq}) 
+                ? qq{<a href='$LJ::SITEROOT/admin/uniq.bml?what=$row->{uniq}'> $row->{uniq} </a>} 
+                : "<em>not recorded</em>";
+        }
 
         $ret .= "<tr>" . join('', map { "<td class='logrow'>$_</td>" } ($time, $action, $actor, $ip, $uniq)) . "</tr>\n";
     }
