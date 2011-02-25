@@ -643,6 +643,12 @@ head<=
     BML::noparse();
     $ret .= qq^
     <script type="text/javascript">
+        // ensure that we're not being displayed in an iframe;
+        // prevents clickjacking in some browsers
+        if (top.location != location) {
+            top.location.href = document.location.href;
+        }
+
         var restoredDraft = $draft;
 
         function init_update_bml() {
