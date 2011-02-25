@@ -33,6 +33,9 @@
     ## See also htdocs/preview/entry.bml.
     LJ::Request->header_out("X-XSS-Protection" => 0);
 
+    ## And this header is to prevent Clickjacking attacks
+    LJ::Request->header_out("X-Frame-Options" => 'deny');
+
     my $usejournalu;
     if (my $usejournal = $GET{'usejournal'} || $POST{'usejournal'}) {
         $usejournalu = LJ::load_user($usejournal);
