@@ -481,6 +481,7 @@ sub EntryPage_entry
     my $comments = CommentInfo({
         'read_url' => $readurl,
         'read_spam_url' => $readspamurl,
+        'spam_counter' => $entry->prop('spam_counter') || 0,
         'post_url' => $posturl,
         'count' => $replycount,
         'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,

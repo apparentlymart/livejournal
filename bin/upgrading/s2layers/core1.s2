@@ -234,6 +234,7 @@ class CommentInfo
     var readonly string read_spam_url "URL pointer to the 'Show/Hide Spam' view.";
     var readonly string post_url "URL pointer to the 'Post Comments' view.";
     var int count "Current number of comments available to be read by the viewer.";
+    var int spam_counter "Current number of spam comments.";
     var bool screened "Set to true if there are screened comments and remote user can unscreen them.";
     var bool enabled "Set to false if comments disabled journal-wide or just on this item.";
     var bool locked "Set to true if no further comments can be left on this entry.";

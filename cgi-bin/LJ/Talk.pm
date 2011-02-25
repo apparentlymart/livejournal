@@ -776,6 +776,10 @@ sub spam_comment {
                                         "AND nodetype='L' AND nodeid=$itemid ".
                                         "AND state NOT IN ('B','D')");
     return undef unless $updated;
+    
+    my $entry = LJ::Entry->new($u, jitemid => $itemid);
+    my $spam_counter = $entry->prop('spam_counter') || 0;
+    $entry->set_prop('spam_counter', $spam_counter + 1);
 
     # invalidate memcache for this comment
     LJ::Talk::invalidate_comment_cache($u->id, $itemid, @jtalkids);
@@ -812,6 +816,12 @@ sub unspam_comment {
                                         "AND nodetype='L' AND nodeid=$itemid ".
                                         "AND state='B'");
     return undef unless $updated;
+    
+    my $entry = LJ::Entry->new($u, jitemid => $itemid);
+    my $spam_counter = $entry->prop('spam_counter') || 0;
+    if ($spam_counter > 0) {
+        $entry->set_prop('spam_counter', $spam_counter - 1);
+    }
 
     # invalidate memcache for this comment
     LJ::Talk::invalidate_comment_cache($u->id, $itemid, @jtalkids);
