@@ -291,9 +291,10 @@ function deleteComment (ditemid, isS1) {
 
     var form = $('ljdelopts' + ditemid),
         todel = $('ljcmt' + ditemid),
-        opt_delthread = opt_delauthor =
-        is_deleted = is_error = false,
+        opt_delthread, opt_delauthor, is_deleted, is_error,
         pulse = 0;
+		
+	opt_delthread = opt_delauthor = is_deleted = is_error = false;		
 
     var postdata = 'confirm=1';
     if (form){ 
@@ -309,7 +310,7 @@ function deleteComment (ditemid, isS1) {
     	}
     }
     postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
-    var curJournal=(Site.currentJournal!="")?(Site.currentJournal):(LJ_cmtinfo.journal);
+    var curJournal = (Site.currentJournal !== "") ? (Site.currentJournal) : (LJ_cmtinfo.journal);
     var opts = {
         url: LiveJournal.getAjaxUrl('delcomment')+'?mode=js&journal=' + curJournal + '&id=' + ditemid,
         data: postdata,
@@ -537,6 +538,7 @@ function createModerationFunction(control, dItemid, isS1, action) {
 			if (action == 'spam') {
 				postUrl = (!isS1) ? postUrl.replace('id', 'talkid') : postUrl;
 				postParams.spam = 1;
+				postParams.delauthor = 1;
 			}
 			
 			jQuery.post(postUrl, postParams, function (json) {
@@ -548,6 +550,14 @@ function createModerationFunction(control, dItemid, isS1, action) {
 					var ids = checkRcForNoCommentsPage(json);
 					handleS2(ids);
 				}
+				
+				if (action == 'spam') {
+	                for (var item in LJ_cmtinfo) {
+	                    if (LJ_cmtinfo[item].u == LJ_cmtinfo[dItemid].u) {
+	                        removeComment(item, false, isS1);
+	                    }
+	                }					
+				}				
 			});		
 		}
 		
@@ -664,7 +674,6 @@ function createModerationFunction(control, dItemid, isS1, action) {
 				}
 			}
 			
-			return ids;
 			
 			function mapComms(id) {
 				var i = -1, newId;
@@ -676,6 +685,8 @@ function createModerationFunction(control, dItemid, isS1, action) {
 					}
 				}
 			}
+			
+			return ids;
 		}
 		
 		return false;
