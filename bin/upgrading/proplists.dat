@@ -1094,6 +1094,14 @@ userproplist.sms_yes_means:
   multihomed: 0
   prettyname: What "yes" SMS message means
 
+userproplist.smsru_interval:
+  cldversion: 4
+  datatype: char
+  des: Interval for SMSru notifications. fortmat start_hour-end_hour
+  indexed: 0
+  multihomed: 0
+  prettyname: Interval for SMSru notifications
+
 userproplist.state:
   cldversion: 4
   datatype: char

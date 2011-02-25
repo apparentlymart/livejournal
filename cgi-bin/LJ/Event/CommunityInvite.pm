@@ -127,11 +127,18 @@ sub as_string {
 }
 
 sub as_sms {
-    my $self = shift;
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
-    return sprintf("%s sent you an invitation to join the community %s. Visit the invitation page to accept",
-                   $self->inviter->display_username,
-                   $self->comm->display_username);
+# [[inviter]] sent you an invitation to join the community [[comm]]. Visit the invitation page to accept
+    return LJ::Lang::get_text($lang, 'notification.sms.communityinvite', undef, {
+        inviter => $self->inviter->display_username,
+        comm    => $self->comm->display_username,
+    });
+
+#    return sprintf("%s sent you an invitation to join the community %s. Visit the invitation page to accept",
+#                   $self->inviter->display_username,
+#                   $self->comm->display_username);
 }
 
 sub as_alert {

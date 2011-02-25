@@ -54,9 +54,15 @@ sub pollname {
 ## notification methods
 
 sub as_string {
-    my $self = shift;
-    return sprintf("%s has voted in %s at %s",
-                   $self->voter->display_username, $self->pollname, $self->entry->url);
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
+
+# [[voter]] has voted in [[pollname]] at [[entry_url]]
+    return LJ::Lang::get_text($lang, 'notification.sms.pollvote', undef, {
+        voter     => $self->voter->display_username, 
+        pollname  => $self->pollname, 
+        entry_url => $self->entry->url
+    });    
 }
 
 sub as_html {

@@ -108,9 +108,20 @@ sub as_html_actions {
 }
 
 sub as_string {
-    my $self = shift;
-    return sprintf("%s has removed you from their Friends list.",
-                   $self->friend->{user});
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
+
+    my $tinyurl = LJ::API::BitLy->shorten( "http://m.livejournal.com/read/user/".$self->friend->{user} );
+    undef $tinyurl if $tinyurl =~ /^500/;
+
+# [[friend]] has removed you from their Friends list.
+    return LJ::Lang::get_text($lang, 'notification.sms.defriended', undef, {
+        friend     => $self->friend->{user},
+        mobile_url => $tinyurl,
+    });
+
+#    return sprintf("%s has removed you from their Friends list.",
+#                   $self->friend->{user});
 }
 
 sub as_alert {

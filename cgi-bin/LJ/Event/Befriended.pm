@@ -125,10 +125,18 @@ sub as_string {
 }
 
 sub as_sms {
-    my $self = shift;
-    return sprintf("%s has added you to their friends list. Reply with ADD %s to add them " .
-                   "to your friends list. $LJ::SMS_DISCLAIMER",
-                   $self->friend->user, $self->friend->user);
+    my ($self, $u) = @_;
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+    
+    my $tinyurl = LJ::API::BitLy->shorten( "http://m.livejournal.com/read/user/".$self->friend->user );
+    undef $tinyurl if $tinyurl =~ /^500/;
+
+# [[friend]] has added you to their friends list. Reply with ADD [[friend]] to add them [[disclaimer]]
+    return LJ::Lang::get_text($lang, 'notification.sms.befriended', undef, { 
+        friend     => $self->friend->user,
+        disclaimer => $LJ::SMS_DISCLAIMER,
+        mobile_url => $tinyurl,
+    });
 }
 
 sub as_alert {

@@ -36,11 +36,18 @@ sub matches_filter {
 }
 
 sub as_string {
-    my $self = shift;
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
-    return sprintf("%s's birthday is on %s!",
-                   $self->bdayuser->display_username,
-                   $self->bday);
+# [[user]]'s birthday is on [[bday]]!
+    return LJ::Lang::get_text($lang, 'notification.sms.birthday', undef, {
+        user     => $self->bdayuser->display_username,
+        bday     => $self->bday,
+    });
+
+#    return sprintf("%s's birthday is on %s!",
+#                   $self->bdayuser->display_username,
+#                   $self->bday);
 }
 
 sub as_alert {

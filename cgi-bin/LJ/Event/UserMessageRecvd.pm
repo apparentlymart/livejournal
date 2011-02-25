@@ -128,12 +128,17 @@ sub as_string {
 }
 
 sub as_sms {
-    my $self = shift;
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
     my $subject = $self->load_message->subject;
     my $other_u = $self->load_message->other_u;
-    return sprintf("You've received a new message \"%s\" from %s",
-                   $subject, $other_u->user);
+
+# You've received a new message "[[subject]]" from [[user]]
+    return LJ::Lang::get_text($lang, 'notification.sms.usermessagerecvd', undef, {
+        subject => $subject,
+        user    => $other_u->user,
+    });    
 }
 
 sub as_alert {

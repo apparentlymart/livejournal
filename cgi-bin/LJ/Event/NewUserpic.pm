@@ -26,10 +26,14 @@ sub as_html {
 }
 
 sub as_sms {
-    my $self = shift;
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
-    return $self->event_journal->display_username . " has uploaded a new userpic. You can view it at: " .
-        $self->userpic->url;
+# [[journal]] has uploaded a new userpic. You can view it at: [[pic_url]]
+    return LJ::Lang::get_text($lang, 'notification.sms.newuserpic', undef, {
+        journal => $self->event_journal->display_username,
+        pic_url => $self->userpic->url,
+    });
 }
 
 # esn.new_userpic.alert=[[who]] has uploaded a new userpic. You can view it at: [[userpic]].

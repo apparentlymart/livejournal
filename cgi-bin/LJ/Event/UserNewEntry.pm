@@ -100,16 +100,22 @@ sub as_string {
 }
 
 sub as_sms {
-    my $self = shift;
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
     my $entry = $self->entry;
-    my $where = "in their journal";
-    unless ($entry->posterid == $entry->journalid) {
-        $where = "in '" . $entry->journal->{user} . "'";
-    }
-
-    return sprintf("User '%s' posted $where", $self->poster->{user});
-
+    my $mlstring = ($entry->posterid == $entry->journalid)? 'notification.sms.usernewentry':'notification.sms.usernewentry_comm';
+    my $tinyurl = LJ::API::BitLy->shorten( 'http://m.livejournal.com/read/user/'
+         . $entry->journal->user . '/' . $entry->ditemid . '/' );
+    undef $tinyurl if $tinyurl =~ /^500/;
+        
+# User '[[user]]' posted in their journal
+# User '[[user]]' posted '[[journal]]'
+    return LJ::Lang::get_text($lang, '.string', undef, {
+        user       => $self->poster->{user},
+        journal    => $entry->journal->{user},
+        mobile_url => $tinyurl,
+    });    
 }
 
 # esn.user_new_entry.in_their_journal.alert=User '[[user]]' posted in their journal

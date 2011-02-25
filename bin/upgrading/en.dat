@@ -2851,6 +2851,48 @@ notification_method.sms.title=TxtLJ
 
 notification_method.sms-ru.title=SMS
 
+notification.sms.befriended=[[friend]] has added you to their friends list. Reply with ADD [[friend]] to add them [[disclaimer]]
+
+notification.sms.birthday=[[user]]'s birthday is on [[bday]]!
+
+notification.sms.communityinvite=[[inviter]] sent you an invitation to join the community [[comm]]. Visit the invitation page to accept
+
+notification.sms.communityjoinrequest=[[requestor]] requests membership in [[comm]]. Visit community settings to approve.
+
+notification.sms.defriended=[[friend]] has removed you from their Friends list.
+
+notification.sms.invitedfriendjoins=A friend you invited has created the journal [[friend]]
+
+notification.sms.invitedfriendjoins_uknown=A friend you invited has created a journal.
+
+notification.sms.journalnewentry=[[poster]] has posted with a new entry. To view, send READ [[journal]] to read it. [[disclaimer]]
+
+notification.sms.journalnewentry_comm=[[poster]] has posted with a new entry in [[journal]]. To view, send READ [[journal]] to read it. [[disclaimer]]
+
+notification.sms.newuserpic=[[journal]] has uploaded a new userpic. You can view it at: [[pic_url]]
+
+notification.sms.newvgift=[[journal]] has received a new virtual gift.
+
+notification.sms.officialpost=There is a new [[abbrev]] announcement in [[journal]]. Reply with READ [[journal]] to read it. [[disclaimer]]
+
+notification.sms.pollvote=[[voter]] has voted in [[pollname]] at [[entry_url]]
+
+notification.sms.userexpunged=[[journal]] has been purged.
+
+notification.sms.usermessagerecvd=You've received a new message "[[subject]]" from [[user]]
+
+notification.sms.usermessagesent=message sent to [[user]].
+
+notification.sms.usernewentry=User '[[user]]' posted in their journal
+
+notification.sms.usernewentry_comm=User '[[user]]' posted '[[journal]]'
+
+sms.numbernotverified=Number not verified.
+
+sms.uknowncommand=Incorrect request.
+
+sms.unsubscribesuccesseful=You have successful unsubscribed from LiveJournal sms notification.
+
 number.million|staleness=1
 number.million=[[number]] million
 

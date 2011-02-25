@@ -135,11 +135,14 @@ sub as_email_html {
 }
 
 sub as_sms {
-    my $self = shift;
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
-    return sprintf("%s requests membership in %s. Visit community settings to approve.",
-                   $self->requestor->display_username,
-                   $self->comm->display_username);
+# [[requestor]] requests membership in [[comm]]. Visit community settings to approve.
+    return LJ::Lang::get_text($lang, 'notification.sms.communityjoinrequest', undef, {
+        requestor => $self->requestor->display_username,
+        comm      => $self->comm->display_username,
+    });
 }
 
 sub as_alert {

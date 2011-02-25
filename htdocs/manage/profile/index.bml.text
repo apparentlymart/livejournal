@@ -169,6 +169,18 @@
 
 .fn.vernum=Verification number
 
+.fn.smsinterval=SMS Interval
+
+.fn.smsinterval.info=You can manage your subscriptions <a href="[[url]]">here</a>
+
+.fn.smsinterval.limitrange=Limit range
+
+.fn.smsinterval.start=Send from
+
+.fn.smsinterval.end=till
+
+.fn.smsinterval.localtime=you local timezone.
+
 .fn.zip=ZIP Code
 
 .friendof=Show other users who have friended you, but you have not friended

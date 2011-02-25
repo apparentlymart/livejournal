@@ -45,11 +45,15 @@ sub as_html {
 }
 
 sub as_string {
-    my $self = shift;
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
     my $other_u = $self->load_message->other_u;
-    return sprintf("message sent to %s.",
-                   $other_u->{user});
+
+# message sent to [[user]].
+    return LJ::Lang::get_text($lang, 'notification.sms.usermessagesent', undef, {
+        user    => $other_u->{user},
+    });    
 }
 
 sub subscription_as_html {''}

@@ -101,12 +101,23 @@ sub as_html_actions {
 }
 
 sub as_string {
-    my $self = shift;
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
+    
+    my $tinyurl;
+    if( $self->friend->user ){
+        $tinyurl = LJ::API::BitLy->shorten( "http://m.livejournal.com/read/user/".$self->friend->user );
+        undef $tinyurl if $tinyurl =~ /^500/;
+    }
+    
+    my $mlstring = $self->friend ? 'notification.sms.invitedfriendjoins' : 'notification.sms.invitedfriendjoins_uknown';
+# A friend you invited has created a journal.
+# A friend you invited has created the journal [[friend]]
+    return LJ::Lang::get_text($lang, $mlstring, undef, {
+        friend     => $self->friend->user,
+        mobile_url => $tinyurl,
+    });
 
-    return 'A friend you invited has created a journal.'
-        unless $self->friend;
-
-    return sprintf "A friend you invited has created the journal %s", $self->friend->user;
 }
 
 sub as_alert {

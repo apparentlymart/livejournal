@@ -491,15 +491,8 @@ body<=
         my $text_messaging_country = ($country eq 'RU') || ($country eq 'KZ');
         $ret .= "<a name='txtmsg'></a><div class='section_head'>" . 
             ($text_messaging_country ? $ML{'.section.phone'} : $ML{'.section.textmsg'}) . "\n";
-        unless (LJ::get_cap($u, "textmessaging")) {
-            my $inline;
-            if ($inline .= LJ::run_hook("cprod_inline", $u, 'TextMessaging')) {
-                $ret .= "</div>$inline";
-            } else {
-                $ret .= "</div>".BML::ml('cprod.textmessaging.text3.v1');
-            }
-        }
-        if (LJ::get_cap($u, "textmessaging")) {
+            
+        if ($text_messaging_country || LJ::get_cap($u, "textmessaging")) {
             my $tminfo = LJ::TextMessage->tm_info($u, remap_result => 1);
             foreach (values %$tminfo) { LJ::text_out(\$_); }
             $tminfo->{'security'} = "N" if ($u->{'txtmsg_status'} eq 'off' || $u->{'txtmsg_status'} eq 'none');
@@ -541,8 +534,7 @@ body<=
             $ret .= '<li class="b-manage-smsn-sms">';
             #$ret .= '<select name="txtmsg_number_code" class="b-manage-smsn-code" disabled="disabled"><option value="+7">+7</option></select>' . ' ';
             $ret .= LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '16', 'maxlength' => '16', 'class' => 'b-manage-smsn-phone' });
-            $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_us'} . '</span></li>' if $country eq 'US';
-            $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_ru'} . '</span></li>' if $country eq 'RU';
+            $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_' . ($text_messaging_country?'ru':'us')} . '</span></li>';
             $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_kz'} . '</span></li>' if $country eq 'KZ';
             $ret .= '<li class="b-manage-smsn-status"><i class="i-manage-smsn-icon"></i><i class="help-icon">' . LJ::help_icon('sms_notification') . '</i><span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><span>' . $ML{'.section.textmsg.info'} . ' </span></span></li>';
             $ret .= "<li class='b-manage-smsn-btn'><input type='button' name='sendsms' value='$ML{'.section.textmsg.button'}' disabled='disabled' /></li>";
@@ -554,6 +546,29 @@ body<=
                 $ret .= '<div class="helper">' . $ML{'.section.textmsg.adv'} . '</div>';
             }
 			$ret .= "</td></tr>\n";
+			
+            if( $text_messaging_country && LJ::NotificationMethod::SMSru->configured_for_user($u) ){
+                my($start, $end) = split /-/, $u->prop( 'smsru_interval' );
+                $ret .= "<tr id=\"sms_time\"><td class='field_name'>$ML{'.fn.smsinterval'}</td><td>";
+                $ret .= BML::ml(".fn.smsinterval.info", {url=>'manage'}) . "<br />";
+         
+                $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'sms_interval', 'id' => 'sms_interval',
+                    'selected' =>  defined $start });
+                $ret .= "<label for='sms_interval'>$ML{'.fn.smsinterval.limitrange'}</label><br/>";
+            
+                my @sms_time = map {$_ =>  sprintf("%02d:00", $_)} (0 .. 23);
+                $ret .= "<label for='sms_interval_start'>$ML{'.fn.smsinterval.start'}</label>";
+                $ret .= LJ::html_select({ 'name' => 'sms_interval_start',
+                                                  'selected' => $start || 9, },
+                                                  @sms_time);
+                $ret .= "<label for='sms_interval_end'>$ML{'.fn.smsinterval.end'}</label>";
+                $ret .= LJ::html_select({ 'name' => 'sms_interval_end',
+                                                  'selected' => $end || 1, },
+                                                  @sms_time);
+                $ret .= BML::ml(".fn.smsinterval.localtime") . "<br />";
+    			$ret .= "</td></tr>\n";
+            }
+            
             $ret .= "</table>\n";
 
 			$ret .= "<script type='text/javascript'>";
@@ -575,8 +590,15 @@ body<=
 			     for qw(already_use correctNum requestsent smssent badtrans notasubscriber
 			            singlelimitexceeded totallimitexceeded verified wrongcode linkexpired techerror);
 			$ret .= "}</script>\n";
+        }else{
+            my $inline;
+            if ($inline .= LJ::run_hook("cprod_inline", $u, 'TextMessaging')) {
+                $ret .= "</div>$inline";
+            } else {
+                $ret .= "</div>".BML::ml('cprod.textmessaging.text3.v1');
+            }
         }
-
+    
         ## FRIENDS
         $ret .= "<div class='section_head'>$ML{'.section.friends'}</div>\n";
 
@@ -698,7 +720,21 @@ body<=
                 }
             }
         }
+        
+        if( defined $POST{sms_interval} || defined $POST{sms_interval_start} 
+            || defined $POST{sms_interval_end}){
+            if( $POST{sms_interval} ){
+                my $start = $POST{sms_interval_start}+0;
+                my $end = $POST{sms_interval_end}+0;
+                $start = 9 unless ($start >= 0) && ($start <= 23);
+                $end = 1 unless ($end >= 0) && ($end <= 23);
+                $u->set_prop( smsru_interval => "$start-$end" );
 
+            }else{
+                $u->set_prop( smsru_interval => undef ); 
+            }
+        }
+        
         # FIXME: validation AND POSTING are handled by widgets' handle_post() methods
         # (introduce validate_post() ?)
         my $save_search_index = $POST{'opt_showlocation'} =~ /^[YR]$/;

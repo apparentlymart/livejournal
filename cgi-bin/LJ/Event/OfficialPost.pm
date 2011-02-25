@@ -124,11 +124,21 @@ sub as_string {
 }
 
 sub as_sms {
-    my $self = shift;
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
     my $entry = $self->entry or return "(Invalid entry)";
-    return sprintf("There is a new $LJ::SITENAMEABBREV announcement in %s. " .
-                   "Reply with READ %s to read it. $LJ::SMS_DISCLAIMER",
-                   $entry->journal->display_username, $entry->journal->display_username);
+
+    my $tinyurl = LJ::API::BitLy->shorten( 'http://m.livejournal.com/read/user/'
+         . $entry->journal->user . '/' . $entry->ditemid . '/' );
+    undef $tinyurl if $tinyurl =~ /^500/;
+    
+# There is a new [[abbrev]] announcement in [[journal]]. Reply with READ [[journal]] to read it. [[disclaimer]]
+    return LJ::Lang::get_text($lang, 'notification.sms.officialpost', undef, {
+        abbrev     => $LJ::SITENAMEABBREV,
+        journal    => $entry->journal->display_username,
+        disclaimer => $LJ::SMS_DISCLAIMER,
+        mobile_url => $tinyurl,
+    });    
 }
 
 # esn.officialpost.alert=There is a new [[sitenameabbrev]] announcement in [[username]]. Reply with READ [[username]] to read it. Standard rates apply.

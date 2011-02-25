@@ -11,8 +11,13 @@ sub new {
 }
 
 sub as_string {
-    my $self = shift;
-    return $self->event_journal->display_username . " has been purged.";
+    my ($self, $u) = @_;
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
+
+# [[journal]] has been purged.
+    return LJ::Lang::get_text($lang, 'notification.sms.userexpunged', undef, {
+        journal => $self->event_journal->display_username,
+    });    
 }
 
 sub as_alert {
