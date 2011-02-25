@@ -535,7 +535,13 @@ body<=
             #$ret .= '<select name="txtmsg_number_code" class="b-manage-smsn-code" disabled="disabled"><option value="+7">+7</option></select>' . ' ';
             $ret .= LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '16', 'maxlength' => '16', 'class' => 'b-manage-smsn-phone' });
             $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_' . ($text_messaging_country?'ru':'us')} . '</span></li>';
-            $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_kz'} . '</span></li>' if $country eq 'KZ';
+            if($country eq 'KZ'){
+                $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_kz'} . '</span></li>';                
+            }elsif($country eq 'RU'){
+                $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_ru'} . '</span></li>';                
+            }else{
+                $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_us'} . '</span></li>';                
+            }
             $ret .= '<li class="b-manage-smsn-status"><i class="i-manage-smsn-icon"></i><i class="help-icon">' . LJ::help_icon('sms_notification') . '</i><span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><span>' . $ML{'.section.textmsg.info'} . ' </span></span></li>';
             $ret .= "<li class='b-manage-smsn-btn'><input type='button' name='sendsms' value='$ML{'.section.textmsg.button'}' disabled='disabled' /></li>";
             $ret .= '</ul>';
