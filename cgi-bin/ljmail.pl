@@ -196,33 +196,8 @@ sub send_mail
     ##  Workers send emails too and exactly in this case 
     ##  we spend worker's time to try to send email directly from this process.
     ##  This approach intended to reduce TheSchwartz workload.
-    unless ($opt->{'force_schwartz'} && LJ::is_web_context()){
-        foreach my $rcpt (@rcpts){
-            my $res = LJ::DoSendEmail->send($rcpt, {
-                        from    => $from,         ## Envelope From
-                        data    => $message_text,
-
-                        ## Optional params
-                        # sender_id => "",  ## stored in email headers. for debug.
-                        # timeout   => 300, ## Default timeout for sending email is 300 sec.
-                        });
-            ## handle result
-            if ($res eq LJ::DoSendEmail::OK){
-            ## email succeffully sent
-                $rcpt = ""; # forget about this rcpt
-            } else {
-            ## handle error 
-
-                ## 5xx errors
-                my $details = LJ::DoSendEmail->details;
-                LJ::errobj('DieString', message => "send_email to $rcpt failed: $details")->log
-                    if LJ::DoSendEmail->status eq 5;
-            }
-
-        }
-
-        ## empty rcpt means that email was successfully sent
-        @rcpts = grep {$_} @rcpts;
+    if (!$opt->{'force_schwartz'} && !LJ::is_web_context()) {
+        @rcpts = _send_now( from => $from, rcpts => \@rcpts, text => $message_text );
     }
 
     ## Do we still have someone to notify?
@@ -230,8 +205,23 @@ sub send_mail
 
     ## Stage 2.
     ##  Ok. We've tried to avoid this... But delayed sending.
-    ##  Deligate this job to SendMail worker.
+    ##  Deligate this job to SendMail worker.   
+    if ($opt->{'force_schwartz'} || LJ::is_web_context()) {
+        _send_via_schwartz( from => $from, rcpts => \@rcpts, text => $message_text, opt => $opt );
+    }
+ 
      
+
+}
+
+sub _send_via_schwartz {
+    my %args = @_;
+
+    my $from    = $args{'from'};
+    my $rcpts   = $args{'rcpts'};
+    my $text    = $args{'text'};
+    my $opt     = $args{'opt'};
+
     my $starttime = [Time::HiRes::gettimeofday()];
 
     ## '_reuse_any_existing_connection' will return 'mass' schwartz handle 
@@ -241,16 +231,16 @@ sub send_mail
 
     ## coalesce param.
     my $coalesce = '';
-    if (@rcpts == 1) {
-        $rcpts[0] =~ /(.+)@(.+)$/;
+    if (@$rcpts == 1) {
+        $rcpts->[0] =~ /(.+)@(.+)$/;
         $coalesce = lc($2) . '@' . lc($1);   # we store it reversed in database
     }
 
     my $job = TheSchwartz::Job->new(funcname => "TheSchwartz::Worker::SendEmail",
                                     arg      => {
                                         env_from => $from,
-                                        rcpts    => \@rcpts,
-                                        data     => $message_text,
+                                        rcpts    => $rcpts,
+                                        data     => $text,
                                     },
                                     coalesce => $coalesce,
                                     );
@@ -258,8 +248,44 @@ sub send_mail
 
     LJ::blocking_report( 'the_schwartz', 'send_mail',
                          Time::HiRes::tv_interval($starttime));
-    return $h ? 1 : 0;
 
+    return $h ? 1 : 0;
+}
+
+sub _send_now {
+    my %args = @_;
+
+    my $from    = $args{'from'};
+    my $rcpts   = $args{'rcpts'};
+    my $text    = $args{'text'};
+
+    foreach my $rcpt (@$rcpts){
+        my $res = LJ::DoSendEmail->send($rcpt, {
+                    from    => $from,         ## Envelope From
+                    data    => $text,
+
+                    ## Optional params
+                    # sender_id => "",  ## stored in email headers. for debug.
+                    # timeout   => 300, ## Default timeout for sending email is 300 sec.
+                    });
+
+        ## handle result
+        if ($res eq LJ::DoSendEmail::OK){
+            ## email succeffully sent
+            $rcpt = ""; # forget about this rcpt
+        } else {
+            ## handle error 
+
+            ## 5xx errors
+            my $details = LJ::DoSendEmail->details;
+            LJ::errobj('DieString', message => "send_email to $rcpt failed: $details")->log
+                if LJ::DoSendEmail->status eq 5;
+        }
+
+    }
+
+    ## empty rcpt means that email was successfully sent
+    return grep {$_} @$rcpts;
 }
 
 1;
