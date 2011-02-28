@@ -4013,7 +4013,7 @@ sub Page__print_ad_box {
     $S2::pout->($ad_html) if $ad_html;
 }
 
-my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers FaceBookILike);
+my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers FaceBookILike PublicStats);
 
 sub Page__widget
 {
@@ -4034,7 +4034,6 @@ sub Page__widget
         warn "Error when Page::widget() try to call LJ::Widget::$class->render() from LJ::S2:\n$@\n";
         return '';
     }
-
     return $ret;
 }
 
