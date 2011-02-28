@@ -803,9 +803,9 @@ function EntryLite::print_linkbar() {
         $linkbar = $linkbar + """</a>$btwn_comments""";
         if ($p.view == "entry") {
             if ($p.showspam) {
-                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url\">$*text_hidespam</a>$btwn_comments""";
+                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url\">$*text_hidespam ($en.comments.spam_counter)</a>$btwn_comments""";
             } else {
-                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url\">$*text_showspam</a>$btwn_comments""";
+                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url\">$*text_showspam ($en.comments.spam_counter)</a>$btwn_comments""";
             }
         }
       }

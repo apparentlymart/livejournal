@@ -939,9 +939,9 @@ function EntryPage::print_body () {
 
         print_header("Comments:");
         if ($p.showspam) {
-            print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url\">$*text_hidespam</a></p>""";
+            print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url\">$*text_hidespam ($e.comments.spam_counter)</a></p>""";
         } else {
-            print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url\">$*text_showspam</a></p>""";
+            print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url\">$*text_showspam ($e.comments.spam_counter)</a></p>""";
         }
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();

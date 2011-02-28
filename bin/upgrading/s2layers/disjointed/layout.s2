@@ -305,6 +305,8 @@ propgroup text {
     set datetime_format            = "%%hh%%:%%min%%%%a%%m %%dd%%/%%mm%%/%%yyyy%%";
     set time_monthpage_format      = "%%hh%%:%%min%% %%a%%m";
     set date_daypage_format        = "%%month%% %%dayord%%, %%yyyy%%";
+    property use text_showspam;
+    property use text_hidespam;
 }
 
 propgroup customcss {
@@ -1137,6 +1139,17 @@ if (not $c.frozen) {
         $linkbar = $linkbar + """</a>$btwn_comments""";
       }
     }
+
+
+    var string comments_showspam = "";
+    if ($en.comments.count > 0 and not $en.comments.locked) {
+        if ($p.showspam) {
+            $comments_showspam = """<a href=\"$en.comments.read_spam_url\">$*text_hidespam ($en.comments.spam_counter)</a> """;
+        } else {
+            $comments_showspam = """<a href=\"$en.comments.read_spam_url\">$*text_showspam ($en.comments.spam_counter)</a> """;
+        }
+    }
+    if ($p.view == "entry") { $linkbar = $linkbar + $comments_showspam + " &ndash "; }
 
     if ($en.comments.maxcomments) {
       $linkbar = $linkbar + "$*text_max_comments$btwn_comments";

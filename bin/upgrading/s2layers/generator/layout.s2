@@ -262,6 +262,8 @@ propgroup text {
     property string date_daypage_format {
         des = "Date format for the day page";
     }
+    property use text_showspam;
+    property use text_hidespam;
 }
 propgroup customcss {
     property use include_default_stylesheet;
@@ -890,16 +892,26 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     }
     $p->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
 
+    var string comments_showspam = "";
+    if ($e.comments.count > 0 and not $e.comments.locked) {
+        if ($p.showspam) {
+            $comments_showspam = """<a href=\"$e.comments.read_spam_url\">$*text_hidespam ($e.comments.spam_counter)</a></span> """;
+        } else {
+            $comments_showspam = """<a href=\"$e.comments.read_spam_url\">$*text_showspam ($e.comments.spam_counter)</a></span> """;
+        }
+    }
 """</td></tr>
 <tr bgcolor="$*weak_back"><td align='left' class='comments' valign='top'>
-<a href="$e.permalink_url">$*text_permalink</a></td>""";
+    <a href="$e.permalink_url">$*text_permalink</a>""";
+    if ($p.view == "entry") { print " | $comments_showspam";}
+"""</td>""";
     if ($p.view != "entry" and $p.view != "reply") {
         "<td align='right' class='comments'>"; $e.comments->print();
     } elseif ($e.comments.enabled) {
         "<td align='right' class='comments'>";
-if (not $e.comments.locked) {
-		$p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment"});
-}
+        if (not $e.comments.locked) {
+            $p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment"});
+        }
     } else {
         "<td>";
     }

@@ -674,9 +674,9 @@ function CommentInfo::print() {
                     print safe "$*text_btwn_comments";
                 }
                 if ($p.showspam) {
-                    print safe """<a href=\"$.read_spam_url\">$*text_hidespam</a> """;
+                    print safe """<a href=\"$.read_spam_url\">$*text_hidespam ($.spam_counter)</a> """;
                 } else {
-                    print safe """<a href=\"$.read_spam_url\">$*text_showspam</a>""";
+                    print safe """<a href=\"$.read_spam_url\">$*text_showspam ($.spam_counter)</a>""";
                 }
             }
         }

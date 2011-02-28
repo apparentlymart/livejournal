@@ -1,5 +1,3 @@
-
-
 layerinfo "type" = "layout";
 layerinfo "name" = "Variable Flow";
 layerinfo "author_name" = "Martin Atkins";
@@ -721,9 +719,9 @@ function CommentInfo::print() {
             println "</li>";
             if ($p.view == "entry") {
                 if ($p.showspam) {
-                    """<li class="comments-hidespam"><a href=\"$.read_spam_url\">$*text_hidespam</a></li>""";
+                    """<li class="comments-hidespam"><a href=\"$.read_spam_url\">$*text_hidespam ($.spam_counter)</a></li>""";
                 } else {
-                    """<li class="comments-showspam"><a href=\"$.read_spam_url\">$*text_showspam</a></li>""";
+                    """<li class="comments-showspam"><a href=\"$.read_spam_url\">$*text_showspam ($.spam_counter)</a></li>""";
                 }
             }
         }

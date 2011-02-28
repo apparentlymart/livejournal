@@ -1180,9 +1180,9 @@ function Page::print_entry(Entry e) {
             " $sep "; $e.comments->print_readlink();
             if ($p.view == "entry") {
                 if ($p.showspam) {
-                    print safe """ $sep <a href=\"$e.comments.read_spam_url\">$*text_hidespam</a>""";
+                    print safe """ $sep <a href=\"$e.comments.read_spam_url\">$*text_hidespam ($e.comments.spam_counter)</a>""";
                 } else {
-                    print safe """ $sep <a href=\"$e.comments.read_spam_url\">$*text_showspam</a>""";
+                    print safe """ $sep <a href=\"$e.comments.read_spam_url\">$*text_showspam ($e.comments.spam_counter)</a>""";
                 }
             }
          }

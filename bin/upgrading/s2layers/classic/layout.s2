@@ -733,14 +733,14 @@ function CommentInfo::print_postlink() {
 function CommentInfo::print_spamlink() {
     var Page p = get_page();
     if ($p.showspam) {
-        print safe "<a href=\"$.read_url\">$*text_hidespam</a>";
+        print safe "<a href=\"$.read_spam_url\">$*text_hidespam ($.spam_counter)</a>";
     } else {
-        print safe "<a href=\"$.read_url?mode=showspam\">$*text_showspam</a>";
+        print safe "<a href=\"$.read_spam_url\">$*text_showspam ($.spam_counter)</a>";
     }
 }
 
-function CommentInfo::print ()
-{
+function CommentInfo::print () {
+    var Page p = get_page();
     if ($.show_readlink or $.show_postlink) {
         print safe "<p class='comments'>$*text_left_comments";
         if ($.show_readlink) {
@@ -756,8 +756,10 @@ function CommentInfo::print ()
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        print safe "$*text_btwn_comments";
-        $this->print_spamlink();
+        if ($p.view == "entry") {
+            print safe "$*text_btwn_comments";
+            $this->print_spamlink();
+        }
         print safe "$*text_right_comments</p>";
     }
 }

@@ -320,6 +320,8 @@ propgroup text
     set text_sidebar_blurb = "Blurb";
     set text_sidebar_links = "Links";
     set text_sidebar_summary = "Page Summary";
+    property use text_showspam;
+    property use text_hidespam;
 }
 propgroup sidebar
 {
@@ -1211,6 +1213,16 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
     } else {
         println "&nbsp;";
     }
+    var string comments_showspam = "";
+    if ($e.comments.count > 0 and not $e.comments.locked) {
+        if ($p.showspam) {
+            $comments_showspam = """<a href=\"$e.comments.read_spam_url\">$*text_hidespam ($e.comments.spam_counter)</a></span> """;
+        } else {
+            $comments_showspam = """<a href=\"$e.comments.read_spam_url\">$*text_showspam ($e.comments.spam_counter)</a></span> """;
+        }
+    }
+    if ($p.view == "entry") {print safe "$comments_showspam | ";}
+
     println "</div></div>";
 }
 
