@@ -278,6 +278,8 @@ propgroup text {
     set text_sidebar_blurb = "Blurb";
     set text_sidebar_navigation = "Navigation";
     set text_sidebar_summary = "Page Summary";
+    property use text_showspam;
+    property use text_hidespam;
 }
 propgroup sidebar {
     property string sidebar_width {
@@ -1142,6 +1144,7 @@ function EntryPage::lay_sidebar_view_userpic() : string {
 }
 
 function EntryPage::print_body () {
+        var Page p = get_page();
         set_handler("unscreen_comment_#", [
                                            [ "style_bgcolor", "cmtbar#", "$*comment_bar_one_bgcolor", ],
                                            [ "style_color", "cmtbar#", "$*comment_bar_one_fgcolor", ],
@@ -1159,13 +1162,22 @@ function EntryPage::print_body () {
     if ($.entry.comments.enabled)
     {
         var string pages;
+        var string comments_showspam = "";
+        if ($.entry.comments.count > 0 and not $.entry.comments.locked) {
+            if ($p.showspam) {
+                $comments_showspam = """ &mdash  <a href=\"$.entry.comments.read_spam_url\">$*text_hidespam ($.entry.comments.spam_counter)</a> """;
+            } else {
+                $comments_showspam = """ &mdash  <a href=\"$.entry.comments.read_spam_url\">$*text_showspam ($.entry.comments.spam_counter)</a> """;
+            }
+        }
         if ($.comment_pages.all_subitems_displayed) {
-if (not $.entry.comments.locked) {
-            print_heading_bar_begin();
-            $this->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
-            $this->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
-            print_heading_bar_end();
-}
+            if (not $.entry.comments.locked) {
+                print_heading_bar_begin();
+                $this->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
+                $this->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
+                if ($p.view == "entry") { print $comments_showspam; }
+                print_heading_bar_end();
+            }
         } else {
             $pages = lang_page_of_pages($.comment_pages.current, $.comment_pages.total) + " - ";
             foreach var int i (1 .. $.comment_pages.total) {
@@ -1176,8 +1188,10 @@ if (not $.entry.comments.locked) {
                     $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
                 }
             }
-            print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)""", $pages);
+            if ($p.view != "entry") { $comments_showspam == ""; }
+            print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)  $comments_showspam""", $pages);
         }
+
         if ($.comment_pages.total_subitems > 0) {
             if ($this.multiform_on) { $this->print_multiform_start(); }
             $this->print_comments($.comments);
