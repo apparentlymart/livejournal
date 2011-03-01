@@ -32,7 +32,7 @@ sub strip_bad_code
 {
     my $data = shift;
     LJ::CleanHTML::clean($data, {
-        'eat' => [qw[layer iframe script object embed]],
+        'eat' => [qw[layer script object embed]],
         'mode' => 'allow',
         'keepcomments' => 1, # Allows CSS to work
     });
@@ -116,7 +116,7 @@ sub clean
     my $data = shift;
     my $opts = shift;
     my $newdata;
-    
+
     # remove the auth portion of any see_request.bml links
     $$data =~ s/(see_request\.bml\S+?)auth=\w+/$1/ig;
 
@@ -143,13 +143,13 @@ sub clean
     my $remove_sizes = $opts->{'remove_sizes'} || 0;
     my $remove_fonts = $opts->{'remove_fonts'} || 0;
     my $blocked_links = (exists $opts->{'blocked_links'}) ? $opts->{'blocked_links'} : \@LJ::BLOCKED_LINKS;
-    my $blocked_link_substitute = 
+    my $blocked_link_substitute =
         (exists $opts->{'blocked_link_substitute'}) ? $opts->{'blocked_link_substitute'} :
         ($LJ::BLOCKED_LINK_SUBSTITUTE) ? $LJ::BLOCKED_LINK_SUBSTITUTE : '#';
     my $suspend_msg = $opts->{'suspend_msg'} || 0;
     my $unsuspend_supportid = $opts->{'unsuspend_supportid'} || 0;
     my $remove_all_attribs = $opts->{'remove_all_attribs'} || 0;
-    my %remove_attribs = ($opts->{'remove_attribs'}) ? 
+    my %remove_attribs = ($opts->{'remove_attribs'}) ?
         (map {$_ => 1} @{ $opts->{'remove_attribs'} }) : ();
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
     my $target = $opts->{'target'} || '';
@@ -163,7 +163,7 @@ sub clean
     # cuturl or entry_url tells about context and texts address,
     # Expand or close lj-cut tag should be switched directly by special flag
     # - expand_cut
-    $cut = '' if $opts->{expand_cut}; 
+    $cut = '' if $opts->{expand_cut};
 
     my @canonical_urls; # extracted links
     my %action = ();
@@ -237,7 +237,11 @@ sub clean
                       '<div style="width: 95%; overflow: auto">' . $edata . '</div></div>';
     };
 
-    my $htmlcleaner = HTMLCleaner->new(valid_stylesheet => \&LJ::valid_stylesheet_url);
+    ## We do not need to eat a tag 'iframe' if it enabled here.
+    my $htmlcleaner = HTMLCleaner->new(
+                                valid_stylesheet => \&LJ::valid_stylesheet_url,
+                                enable_iframe    => (grep { $_ eq 'iframe' && $action{$_} == "allow" ? 1 : 0 } keys %action) ? 1 : 0
+                      );
 
     my $eating_ljuser_span = 0;  # bool, if we're eating an ljuser span
     my $ljuser_text_node   = ""; # the last text node we saw while eating ljuser tags
@@ -316,9 +320,9 @@ sub clean
             my $attr = $token->[2];  # hashref
 
             $good_until = length $newdata;
-            
+
             if (LJ::is_enabled('remove_allowscriptaccess')) {
-                ## TODO: remove closing </param> tag, 
+                ## TODO: remove closing </param> tag,
                 ## don't strip 'allowscriptaccess' from YouTube and other trusted sites
                 if ($tag eq 'param' && $attr->{name} eq 'allowscriptaccess') {
                     next TOKEN;
@@ -327,7 +331,7 @@ sub clean
                     delete $attr->{allowscriptaccess};
                 }
             }
-            
+
             if (@eatuntil) {
                 push @capture, $token if $capturing_during_eat;
                 if ($tag eq $eatuntil[-1]) {
@@ -367,7 +371,7 @@ sub clean
 
                 next TOKEN;
             }
-            
+
             if ($tag eq 'lj-map') {
                 $newdata .= LJ::Maps->expand_ljmap_tag($attr);
                 next TOKEN;
@@ -394,8 +398,8 @@ sub clean
                              .  qq(<input type="submit" value="$button" /> )
                              .  qq[</form>];
                 } else {
-                    $opencount{$tag} = { 
-                        button  => $button, 
+                    $opencount{$tag} = {
+                        button  => $button,
                         subject => $attr->{subject},
                         offset  => length $newdata,
                     };
@@ -490,16 +494,25 @@ sub clean
             }
 
             if ($tag eq 'iframe') {
+
                 ## Allow some iframes from trusted sources (if they are not eaten already)
-                ## TODO: add more trusted sites besides YouTube
-                ## YouTube (http://apiblog.youtube.com/2010/07/new-way-to-embed-youtube-videos.html)
+                ## YouTube (http://apiblog.youtube.com/2010/07/new-way-to-embed-youtube-videos.html),
+                ## Vimeo, VKontakte, Google Calendar, Google Docs
                 my $src = $attr->{'src'};
-                if ($src && $src =~ m!^https?://(?:[\w.-]*\.)?youtube\.com/embed/[-_a-zA-Z0-9]{11,}(?:\?.*)?$!) {
-                    ## allow 
+                if ($src &&
+                    (
+                        $src =~ m!^https?://(?:[\w.-]*\.)?youtube\.com/embed/[-_a-zA-Z0-9]{11,}(?:\?.*)?$!
+                        || $src =~ m!^http://player\.vimeo\.com/video/(?:\d+)!
+                        || $src =~ m!^http://vkontakte\.ru/video_ext\.php\?oid=(?:\d+)&id=(?:\d+)&hash=[a-zA-Z0-9]+$!
+                        || $src =~ m!^http://www\.google\.com/calendar/embed\?src=!
+                        || $src =~ m!^https://docs\.google.com/document/pub\?id=!
+                    )
+                ) {
+                    ## allow
                 } else {
                     ## eat this tag
                     if (!$attr->{'/'}) {
-                        ## if not autoclosed tag (<iframe />), 
+                        ## if not autoclosed tag (<iframe />),
                         ## then skip everything till the closing tag
                         $p->get_tag("/iframe");
                     }
@@ -524,18 +537,18 @@ sub clean
             # this is so the rte converts its source to the standard ljuser html
             my $ljuser_div = $tag eq "div" && $attr->{class} eq "ljuser";
             if ($ljuser_div) {
-                
+
                 my $href = $p->get_tag("a");
                 my $href_attr = $href->[1]->{"href"};
                 my $username = LJ::get_user_by_url ( $href_attr );
                 $attr->{'user'} = $username ? $username : '';
-                
+
                 my $ljuser_text = $p->get_text("/b");
                 $p->get_tag("/div");
                 $ljuser_text =~ s/\[info\]//;
                 $tag = "lj";
                 $attr->{'title'} = $ljuser_text;
-                                                                    
+
             }
             # stupid hack to remove the class='ljcut' from divs when we're
             # disabling them, so we account for the open div normally later.
@@ -715,7 +728,7 @@ sub clean
                         delete $hash->{$attr} unless $tag eq "object";
                         next;
                     }
-                    
+
                     ## warning: in commets left by anonymous users, <img src="something">
                     ## is replaced by <a href="something"> (see 'extractimages' param)
                     ## If "something" is "data:<script ...", we'll get a vulnerability
@@ -766,7 +779,7 @@ sub clean
                                     next ATTR;
                                 }
                             }
-                            
+
                             if ($opts->{'strongcleancss'}) {
                                 if ($hash->{style} =~ /-moz-|absolute|relative|outline|z-index|(?<!-)(?:top|left|right|bottom)\s*:|filter|-webkit-/io) {
                                     delete $hash->{style};
@@ -803,7 +816,7 @@ sub clean
                         delete $hash->{$attr};
                         next;
                     }
-            
+
                     # reserve ljs_* ids for divs, etc so users can't override them to replace content
                     if ($attr eq 'id' && $hash->{$attr} =~ /^ljs_/i) {
                         delete $hash->{$attr};
@@ -871,7 +884,7 @@ sub clean
                             }
                         }
                     }
-                    
+
                     unless ($hash->{href} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei) {
                         $hash->{href} = canonical_url($hash->{href}, 1);
                     }
@@ -892,27 +905,27 @@ sub clean
                              $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
                     }
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
-                    
+
                     ## TODO: a better check of $hash->{src} is needed,
-                    ## known (fixed) vulnerability is src="data:..." 
-                    $hash->{src} = canonical_url($hash->{src}, 1);  
-                    
-                    ## Ratings can be cheated by commenting a popular post with 
-                    ## <img src="http://my-journal.livejournal.com/12345.html"> 
+                    ## known (fixed) vulnerability is src="data:..."
+                    $hash->{src} = canonical_url($hash->{src}, 1);
+
+                    ## Ratings can be cheated by commenting a popular post with
+                    ## <img src="http://my-journal.livejournal.com/12345.html">
                     if ($hash->{src} =~ m!/\d+\.html$!) {
-                        next TOKEN;    
+                        next TOKEN;
                     }
-                   
+
                     ## CDN:
                     ##  http://pics.livejournal.com/<certain-journal>/pic/000fbt9x* -> l-pics.livejournal.com
                     ##  TODO: make it work for communities too
                     if ($hash->{'src'} =~ m!^http://(?:l-)?pics.livejournal.com/(\w+)/pic/(.*)$!i) {
                         my ($journal, $rest) = ($1, $2);
-                        my $host = (!$LJ::DISABLED{'pics_via_cdn'} && $LJ::USE_CDN_FOR_PICS{$journal}) 
+                        my $host = (!$LJ::DISABLED{'pics_via_cdn'} && $LJ::USE_CDN_FOR_PICS{$journal})
                                 ? "l-pics.livejournal.com" : "pics.livejournal.com";
                         $hash->{'src'} = "http://$host/$journal/pic/$rest";
                     }
-            
+
                     if ($img_bad) {
                         $newdata .= "<a class=\"ljimgplaceholder\" href=\"" .
                             LJ::ehtml($hash->{'src'}) . "\">" .
@@ -1035,7 +1048,6 @@ sub clean
         {
             my $tag = $token->[1];
             next TOKEN if $tag =~ /[^\w\-:]/;
-
             if (@eatuntil) {
                 push @capture, $token if $capturing_during_eat;
 
@@ -1078,14 +1090,14 @@ sub clean
                 my $captured = substr $newdata => $opencount{$tag}->{offset};
 
                 if ($captured and my $entry = LJ::Entry->new_from_url($opts->{cuturl})){
-                    # !!! avoid calling any 'text' methods on $entry, 
+                    # !!! avoid calling any 'text' methods on $entry,
                     #     it can produce inifinite loop of cleanhtml calls.
 
                     unless ($subject){
                         $subject = LJ::ehtml($entry->subject_raw || LJ::Lang::ml("repost.default_subject"));
                         $subject = Encode::decode_utf8($subject) if $subject;
                     }
-                    $captured = LJ::Lang::ml("repost.wrapper", { 
+                    $captured = LJ::Lang::ml("repost.wrapper", {
                                                 username => $entry->poster->username,
                                                 url      => $entry->url,
                                                 subject  => $subject,
@@ -1109,7 +1121,7 @@ sub clean
                              .  qq(<input type="submit" value="$button" /> )
                              .  qq[</form>];
                 }
-                
+
                 delete $opencount{$tag};
 
             } elsif ( $tag eq 'lj-lang' ) {
@@ -1544,7 +1556,7 @@ my @comment_close = qw(
     table tr td th tbody tfoot thead colgroup caption
     area map form textarea blink
 );
-my @comment_all = (@comment_close, "img", "br", "hr", "p", "col");
+my @comment_all = (@comment_close, "img", "br", "hr", "p", "col", "iframe");
 
 my $userbio_eat = $event_eat;
 my $userbio_remove = $event_remove;
@@ -1590,7 +1602,7 @@ sub clean_event
 sub pre_clean_event_for_entryform
 {
     my $ref = shift;
-    
+
     ## fast path - no html tags
     return unless $$ref =~ /</;
 
@@ -1607,7 +1619,7 @@ sub pre_clean_event_for_entryform
             my $tag  = $token->[1];
             my $hash = $token->[2];  # attributes
             my $attrs = $token->[3]; # attribute names, in original order
- 
+
             ## check the tag
             if ($tag eq 'script') {
                 $p->get_tag('/script');
@@ -1644,7 +1656,7 @@ sub pre_clean_event_for_entryform
                     delete $hash->{$attr};
                     next;
                 }
-                ## TODO: css & xslt js expressions 
+                ## TODO: css & xslt js expressions
             }
             ## reconstruct the tag
             $newdata .= "<$tag";
@@ -1658,11 +1670,11 @@ sub pre_clean_event_for_entryform
         } else {
             $newdata .= $token->[1];
         }
-    } 
+    }
 
     # extra-paranoid check
     1 while $newdata =~ s/<script\b//ig;
-    
+
     $$ref = Encode::encode_utf8($newdata);
 }
 
@@ -1697,7 +1709,7 @@ sub clean_comment
         'linkify' => 1,
         'wordlength' => 40,
         'addbreaks' => $opts->{preformatted} ? 0 : 1,
-        'eat' => [qw[head title style layer iframe applet object]],
+        'eat' => [qw[head title style layer applet object]],
         'mode' => 'deny',
         'allow' => \@comment_all,
         'autoclose' => \@comment_close,
@@ -1723,7 +1735,7 @@ sub clean_message
         'linkify' => 1,
         'wordlength' => 40,
         'addbreaks' => 0,
-        'eat' => [qw[head title style layer iframe applet object]],
+        'eat' => [qw[head title style layer applet object]],
         'mode' => 'deny',
         'allow' => \@comment_all,
         'autoclose' => \@comment_close,
@@ -1764,7 +1776,7 @@ sub clean_s1_style
     LJ::parse_vars(\$s1, \%tmpl);
     foreach my $v (keys %tmpl) {
         clean(\$tmpl{$v}, {
-            'eat' => [qw[layer iframe script object embed applet]],
+            'eat' => [qw[layer script object embed applet]],
             'mode' => 'allow',
             'keepcomments' => 1, # allows CSS to work
             'clean_js_css' => 1,
