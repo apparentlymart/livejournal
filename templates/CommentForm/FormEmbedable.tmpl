@@ -26,15 +26,15 @@
 					<span class="lj3-logout">(<a href="<TMPL_VAR logout_url>"><TMPL_VAR expr="ml('/logout.bml.logout.head')"></a>)</span>
 				</p>
 				<p class="lj3-input-wrapper">
-					<label for="subject"><TMPL_VAR expr="ml('/talkpost.bml.opt.subject')"></label>
-					<input type="text" class="lj3-input-subject" id="subject" name="subject">
+					<label style="display:none;" for="subject"><TMPL_VAR expr="ml('/talkpost.bml.opt.subject')"></label>
+					<input type="text" class="lj3-input-subject" id="subject" name="subject" placeholder="<TMPL_VAR expr="ml('/talkpost.bml.opt.subject')">">
 				</p>
 				<p class="lj3-input-wrapper">
-					<label for="commenttext"><TMPL_VAR expr="ml('/talkpost.bml.opt.message')"></label>
-					<textarea name="body" id="commenttext" class="lj3-input-message" wrap="soft"></textarea>
+					<label style="display:none;" for="commenttext"><TMPL_VAR expr="ml('/talkpost.bml.opt.message')"></label>
+					<textarea name="body" id="commenttext" class="lj3-input-message" wrap="soft" placeholder="<TMPL_VAR expr="ml('/talkpost.bml.opt.message')">"></textarea>
 				</p>
 				<p class="lj3-submit-wrapper">
-					<input type="submit" value="<TMPL_VAR expr="ml('/talkpost.bml.opt.submit')">" class="lj3-submit" name="submitpost">
+					<input type="submit" value="<TMPL_VAR expr="ml('/talkpost.bml.opt.submit')">" class="lj3-submit" name="submitpost" disabled="disabled">
 				</p>
 				<p class="lj3-close">
 					<a href="javascript:void(0);" id="close-button"></a>
