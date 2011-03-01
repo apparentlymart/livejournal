@@ -51,7 +51,7 @@ sub render_body {
     }
 
     $ret .= "</div>";
-    $ret .= "<p class='account-controls'><strong>" . LJ::name_caps($remote->{caps}) . "</strong>";
+    $ret .= "<p class='account-controls'><strong>" . LJ::LJcom::acct_name($remote->{caps}, undef, u => $remote) . "</strong>";
     if ($remote->in_class('paid') && !$remote->in_class('perm')) {
         my $exp_epoch = LJ::Pay::Payment::PayItem::PaidAccount->get_expire_time($remote);
         my $exp = $date_format->($exp_epoch);
