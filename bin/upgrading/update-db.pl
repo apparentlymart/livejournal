@@ -210,6 +210,7 @@ if ($opt_pop) {
         or die "Couldn't get master handle for population.";
     $dbh->{'RaiseError'} = 0;
     $dbh->{'PrintError'} = 1 if $LJ::IS_DEV_SERVER;
+    $dbh->{'mysql_auto_reconnect'} = 1;
 
     populate_database();
 }
