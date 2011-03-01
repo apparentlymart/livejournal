@@ -38,7 +38,7 @@ sub execute {
     return $self->error("Community must be undeleted")
         if $c->is_expunged;
 
-    my $maint_list = shift @args;
+    my $maint_list = join ',', @args;
     ## If we not got maint_list
     unless ($maint_list) {
         my $m_list = LJ::load_rel_user($c->userid, 'A');
