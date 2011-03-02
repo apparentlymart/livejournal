@@ -130,7 +130,6 @@ __________________________________________*/
 	_filter: chroma(color=pink);
 	}
 
-
 /* Styles for bubbles
 --------------------------- */
 /*Must be removed after implementation of Framework! */
@@ -140,14 +139,22 @@ __________________________________________*/
 	}
 * HTML .i-bubble-arrow,
 * HTML .i-bubble-arrow-border {
-	display:none;
+	_border-top-color: pink;
+	_border-bottom-color: pink;
+	_border-left-color: pink;
+	_filter: chroma(color=pink);
 	}
-
 
 #postform TABLE TD.b-postform-active .i-postform-label {
 	vertical-align: 1em !important;
 	}
 
+/* Credit card form
+-----------------------------------------------*/
+.b-ccform LI,
+.b-ccform LI DL {
+	zoom: 1;
+	}
 
 /* Facebook & Openid
 --------------------------- */
