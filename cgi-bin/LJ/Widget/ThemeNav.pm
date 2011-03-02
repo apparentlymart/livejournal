@@ -256,6 +256,7 @@ sub handle_post {
 }
 
 sub js {
+    my $please_wait = LJ::Lang::ml('widget.themenav.please_wait');
     q [
         initWidget: function () {
             var self = this;
@@ -357,8 +358,8 @@ sub js {
             if (key == "search") {
                 $("search_btn").disabled = true;
             } else if (key == "page" || key == "show") {
-                $("paging_msg_area_top").innerHTML = "<em>Please wait...</em>";
-                $("paging_msg_area_bottom").innerHTML = "<em>Please wait...</em>";
+                $("paging_msg_area_top").innerHTML = "<em>].$please_wait.q[</em>";
+                $("paging_msg_area_bottom").innerHTML = "<em>].$please_wait.q[</em>";
             } else {
                 Customize.cursorHourglass(evt);
             }

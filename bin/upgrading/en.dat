@@ -7317,6 +7317,8 @@ widget.themenav.developer=Developer Area
 widget.themenav.filteravailable|staleness=1
 widget.themenav.filteravailable=Only show themes available to me
 
+widget.themenav.please_wait=Please wait...
+
 widget.themenav.switchtos1|staleness=1
 widget.themenav.switchtos1=Switch to old style system (S1)
 
