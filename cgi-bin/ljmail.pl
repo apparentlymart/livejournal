@@ -196,22 +196,21 @@ sub send_mail
     ##  Workers send emails too and exactly in this case 
     ##  we spend worker's time to try to send email directly from this process.
     ##  This approach intended to reduce TheSchwartz workload.
-    if (!$opt->{'force_schwartz'} && !LJ::is_web_context()) {
-        @rcpts = _send_now( from => $from, rcpts => \@rcpts, text => $message_text );
-    }
-
-    ## Do we still have someone to notify?
-    return 1 unless @rcpts; 
 
     ## Stage 2.
     ##  Ok. We've tried to avoid this... But delayed sending.
     ##  Deligate this job to SendMail worker.   
-    if ($opt->{'force_schwartz'} || LJ::is_web_context()) {
-        _send_via_schwartz( from => $from, rcpts => \@rcpts, text => $message_text, opt => $opt );
-    }
- 
-     
 
+    return _send_via_schwartz( from => $from, rcpts => \@rcpts, text => $message_text, opt => $opt )
+        if $opt->{'force_schwartz'};
+
+    @rcpts = _send_now( from => $from, rcpts => \@rcpts, text => $message_text )
+        if !LJ::is_web_context();
+
+    ## Do we still have someone to notify?
+    return 1 unless @rcpts;
+
+    return _send_via_schwartz( from => $from, rcpts => \@rcpts, text => $message_text, opt => $opt );
 }
 
 sub _send_via_schwartz {
