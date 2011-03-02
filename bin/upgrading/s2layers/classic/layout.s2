@@ -510,7 +510,7 @@ print safe """
 """<tr><td>""";
     var string games;
     if ($.view_my_games) {
-        $games = "[<a href=\"$.journal.website_url/profile#apps\" class=\"nav\">$*text_view_games</a>]";
+        $games = "[<a href=\"$.journal.website_url/profile#apps\">$*text_view_games</a>]";
     }
  
 print safe """<table class="main" width="100%"><tr><td>

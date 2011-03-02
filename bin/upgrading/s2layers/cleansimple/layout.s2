@@ -245,6 +245,8 @@ propgroup text {
   }
   property use text_showspam;
   property use text_hidespam;
+  property use text_view_games;
+ 
 }
 set opt_text_left_comments = "";
 set opt_text_btwn_comments = " | ";
@@ -638,9 +640,14 @@ foreach var string v ($.views_order) {
         """</a></li>""";
     }
 }
+var string games;
+if ($.view_my_games) {
+    $games = "<li><a href=\"$.journal.website_url/profile#apps\">$*text_view_games</a></li>";
+}
 
 """
 $website
+$games
 </ul>
 """;
     $this->lay_viewspec_nav();
