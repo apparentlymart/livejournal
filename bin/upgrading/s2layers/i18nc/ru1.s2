@@ -113,6 +113,7 @@ set text_icon_alt_protected = "[защищённая запись]";
 set text_icon_alt_private = "[личная запись]";
 set text_copyr_agree = "Разрешаю воспроизводить в любой форме";
 set text_copyr_disagree = "Запрещаю воспроизводить в какой-либо форме";
+set text_share_this = "Поделиться";
 
 # Three forms, special cases for numbers ending in 1 and 2, 3, 4, except those ending in 1[1-4]
 function lang_map_plural (int n) : int {

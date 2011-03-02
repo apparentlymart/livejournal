@@ -173,6 +173,13 @@ $img{'sharethis'} = {
     'alt' => 'img.sharethis',
 };
 
+$img{'share'} = {
+    'src' => '/btn_share.gif?v=1',
+    'width' => 24,
+    'height' => 24,
+    'alt' => 'img.share',
+};
+
 # load the site-local version, if it's around.
 if (-e "$LJ::HOME/cgi-bin/imageconf-local.pl") {
     require "$LJ::HOME/cgi-bin/imageconf-local.pl";

@@ -1389,6 +1389,11 @@ property string text_share_this {
 }
 set text_share_this = "Share this!";
 
+property string text_share {
+    des = "Text to share this with a friend";
+}
+set text_share = "Share";
+
 property string text_share_facebook {
     des = "Text to share this with a friend on Facebook";
 }

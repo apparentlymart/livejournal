@@ -29,19 +29,26 @@
 		<ul class="b-share">
 			<li class="b-share-fb"><a href="http://facebook.com/sharer.php?u=<tmpl_var expr="eurl(url_to_post)">" target="_blank">">facebook</a></li>
 			<li class="b-share-twitter"><a href="http://twitter.com/share?url=<tmpl_var expr="eurl(url_to_post)">&text=<tmpl_var expr="eurl(subject)">" target="_blank">twitter</a></li>
-			<li class="b-share-sharethis"><a href="javascript:void(0);">sharethis</a></li>
+            <tmpl_if expr="lj_enabled('sharethis')">
+                <li class="b-share-sharethis"><a href="javascript:void(0);">sharethis</a></li>
+            </tmpl_if>
+            <tmpl_if expr="lj_enabled('sharing')">
+                <li class="b-share-sharethis"><a href="#">share</a><tmpl_var sharing_js></li>
+            </tmpl_if>
 			<li class="b-share-email"><a href="javascript:void(0);">mail</a></li>
 			<li class="b-share-fb-like"><iframe src="http://www.facebook.com/plugins/like.php?href=<tmpl_var expr="eurl(url_to_post)">&amp;layout=button_count&amp;show_faces=true&amp;width=150&amp;action=like&amp;font=verdana&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"></iframe></li>
 		</ul>
-		<script type="text/javascript">
-		(function() {
-			var s = SHARETHIS.addEntry({url:'<tmpl_var url_to_post>', title: '<tmpl_var expr="ejs(subject)">'}, {button: false});
-			var ul = jQuery('ul:last');
+        <tmpl_if expr="lj_enabled('sharethis')">
+            <script type="text/javascript">
+            (function() {
+                var s = SHARETHIS.addEntry({url:'<tmpl_var url_to_post>', title: '<tmpl_var expr="ejs(subject)">'}, {button: false});
+                var ul = jQuery('ul:last');
 
-			s.attachButton( ul.find('.b-share-sharethis a')[0]);
-			s.attachChicklet("email", ul.find('.b-share-email a')[0]);
-		}());
-		</script>
+                s.attachButton( ul.find('.b-share-sharethis a')[0]);
+                s.attachChicklet("email", ul.find('.b-share-email a')[0]);
+            }());
+            </script>
+        </tmpl_if>
 		<p class="b-catalogue-item-comments"><span class="b-catalogue-comments-count"><a href="<tmpl_var url_to_post>#comments"><tmpl_var comments_count> comments</a> |</span> <a href="<tmpl_var url_to_post>?mode=reply">Leave comment</a></p>
 	</li>
 </tmpl_loop>

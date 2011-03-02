@@ -326,4 +326,23 @@ sub eurl {
     return $str;
 }
 
+# runs HTML cleaner on the passed string (to ensure that
+# <lj user="exampleusername"> is expanded), and then actually removes
+# all HTML tags in the result
+#
+# TODO: save some hassle running clean_comment, and/or make this an option
+# for the HTML cleaner itself
+sub drop_html {
+    my ( $class, $what ) = @_;
+
+    LJ::CleanHTML::clean_comment(\$what);
+
+    $what =~ s/<.*?>/ /g;
+    $what =~ s/\s+/ /g;
+    $what =~ s/^\s+//;
+    $what =~ s/\s+$//;
+
+    return $what;
+}
+
 1;

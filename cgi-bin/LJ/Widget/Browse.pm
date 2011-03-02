@@ -9,6 +9,7 @@ use vars qw(%GET %POST $headextra @errors @warnings);
 sub need_res { qw( stc/widgets/widget-layout.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) }
 
 use LJ::Browse::Parser;
+use LJ::Share;
 
 sub _build_tree {
     my ($parentid, $level, $test_uri, $vertical, @categories) = @_;
@@ -282,6 +283,12 @@ sub render_body {
             $event = $parsed->{'text'};
             my $images = $parsed->{'images'};
 
+            my $sharing_js = '';
+            if ( LJ::is_enabled('sharing') ) {
+                LJ::Share->request_resources;
+                $sharing_js = LJ::Share->render_js({ 'entry' => $entry });
+            }
+
             push @tmpl_posts, {
                 subject         => $trimmed_subj,
                 is_subject_trimmed => $subject ne $trimmed_subj ? 1 : 0,
@@ -298,6 +305,7 @@ sub render_body {
                 photo_for_post  => scalar @$images ? $images->[0] : '',
                 comments_count  => $entry->reply_count,
                 is_need_more    => $parsed->{'is_removed_video'} || $parsed->{'is_text_trimmed'},
+                sharing_js      => $sharing_js,
             };
         }
     }

@@ -66,6 +66,14 @@ sub new {
             },
         );
 
+        HTML::Template::Pro->register_function(
+            'lj_enabled' => sub {
+                my ($what) = @_;
+                my $remote = LJ::get_remote();
+                return LJ::is_enabled( $what, $remote );
+            },
+        );
+
         my $template = HTML::Template::Pro->new(
             global_vars => 1, # normally variables declared outside a loop are not available inside
                               # a loop.  This option makes <TMPL_VAR>s like global variables in Perl
