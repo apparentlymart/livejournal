@@ -4510,6 +4510,10 @@ settings.yearofbirth=Year of Birth
 
 settings.zipcode=ZIP Code
 
+sharing.popup.title=Share
+
+sharing.popup.close=Close
+
 sms.journalnewcomment.edit_reply_your_comment=[[user]] edited a reply to your comment
 
 sms.journalnewcomment.edit_reply_a_comment=[[user]] edited a reply to a comment

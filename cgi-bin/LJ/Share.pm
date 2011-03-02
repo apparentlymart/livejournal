@@ -13,7 +13,7 @@ sub request_resources {
     my $services = {
         'livejournal' => {
 			'title' => 'LiveJournal',
-            'bindLink' => 'http://www.livejournal.com/update.bml?repost={url}'
+            'bindLink' => $LJ::SITEROOT . '/update.bml?repost={url}'
 		},
 		'facebook' => {
 			'title' => 'Facebook',
@@ -56,6 +56,10 @@ sub request_resources {
     my $params = {
         'services' => $services,
         'links' => [ sort keys %$services ],
+        'ml' => {
+            'title' => LJ::Lang::ml('sharing.popup.title'),
+            'close' => LJ::Lang::ml('sharing.popup.close'),
+        },
     };
 
     LJ::run_hooks( 'alter_sharing_params', $params );
