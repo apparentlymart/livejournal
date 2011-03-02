@@ -206,6 +206,10 @@
 
             $partner->request_logcom_resources;
 
+
+            $talkform_opts->{'resources_html'} = $partner->resources_html
+                                              || LJ::res_includes();
+
             $talkform_opts->{'partner_domain'} = $POST{'partner_domain'};
         }
 
