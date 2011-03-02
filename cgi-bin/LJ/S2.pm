@@ -1,32 +1,32 @@
-#!/usr/bin/perl
-#
-
+package LJ::S2;
 use strict;
-use lib "$ENV{'LJHOME'}/src/s2";
-use S2;
-use S2::Color;
-use Class::Autouse qw(
-                      S2::Checker
-                      S2::Compiler
-                      HTMLCleaner
-                      LJ::CSS::Cleaner
-                      LJ::S2::RecentPage
-                      LJ::S2::YearPage
-                      LJ::S2::DayPage
-                      LJ::S2::FriendsPage
-                      LJ::S2::MonthPage
-                      LJ::S2::EntryPage
-                      LJ::S2::ReplyPage
-                      LJ::S2::TagsPage
-                      LJ::LastFM
-                      );
+
 use Storable;
-use LJ::Request;
-use LJ::TimeUtil;
 use POSIX ();
 use Encode;
 
-package LJ::S2;
+use lib "$ENV{'LJHOME'}/src/s2";
+use S2;
+use S2::Color;
+use S2::Checker;
+use S2::Compiler;
+
+use LJ::S2::RecentPage;
+use LJ::S2::YearPage;
+use LJ::S2::DayPage;
+use LJ::S2::FriendsPage;
+use LJ::S2::MonthPage;
+use LJ::S2::EntryPage;
+use LJ::S2::ReplyPage;
+use LJ::S2::TagsPage;
+
+use HTMLCleaner;
+
+use LJ::CSS::Cleaner;
+use LJ::LastFM;
+use LJ::Request;
+use LJ::Share;
+use LJ::TimeUtil;
 
 # TEMP HACK
 sub get_s2_reader {
@@ -147,8 +147,13 @@ sub make_journal
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
     my $extra_js = LJ::statusvis_message_js($u);
+
+    if ( LJ::is_enabled('sharing') ) {
+        LJ::Share->request_resources;
+    }
+
     $page->{head_content} .= LJ::res_includes() . $extra_js;
-    if (not $LJ::DISABLED{'sharethis'}){
+    if ( LJ::is_enabled('sharethis') ) {
         ## generate <script src ..> to load ShareThis script with needed for journal set of services
         $page->{head_content} .= $LJ::SHARE_THIS_URL_GEN->(journal => $u->username);
     }
@@ -1862,11 +1867,12 @@ sub Entry
     $e->{'depth'} = 0;  # Entries are always depth 0.  Comments are 1+.
 
     my $link_keyseq = $e->{'link_keyseq'};
-    push @$link_keyseq, 'mem_add' unless $LJ::DISABLED{'memories'};
-    push @$link_keyseq, 'tell_friend' unless $LJ::DISABLED{'tellafriend'};
-    push @$link_keyseq, 'watch_comments' unless $LJ::DISABLED{'esn'};
-    push @$link_keyseq, 'unwatch_comments' unless $LJ::DISABLED{'esn'};
-    push @$link_keyseq, 'flag' unless LJ::conf_test($LJ::DISABLED{content_flag});
+    push @$link_keyseq, 'mem_add'           if LJ::is_enabled('memories');
+    push @$link_keyseq, 'tell_friend'       if LJ::is_enabled('tellafriend');
+    push @$link_keyseq, 'share'             if LJ::is_enabled('sharing');
+    push @$link_keyseq, 'watch_comments'    if LJ::is_enabled('esn');
+    push @$link_keyseq, 'unwatch_comments'  if LJ::is_enabled('esn');
+    push @$link_keyseq, 'flag'              if LJ::is_enabled('content_flag');
 
     # Note: nav_prev and nav_next are not included in the keyseq anticipating
     #      that their placement relative to the others will vary depending on
@@ -2239,10 +2245,10 @@ sub UserLite
         'link_keyseq' => [ ],
     };
     my $lks = $o->{link_keyseq};
-    push @$lks, qw(add_friend post_entry todo memories);
-    push @$lks, "tell_friend"  unless $LJ::DISABLED{'tellafriend'};
-    push @$lks, "search"  unless $LJ::DISABLED{'offsite_journal_search'};
-    push @$lks, "nudge"  unless $LJ::DISABLED{'nudge'};
+    push @$lks, qw( add_friend post_entry todo memories );
+    push @$lks, "tell_friend"   if LJ::is_enabled('tellafriend');
+    push @$lks, "search"        if LJ::is_enabled('offsite_journal_search');
+    push @$lks, "nudge"         if LJ::is_enabled('nudge');
 
     # TODO: Figure out some way to use the userinfo_linkele hook here?
 
@@ -3683,19 +3689,20 @@ sub _Entry__get_link
                             $ctx->[S2::PROPS]->{"text_edit_entry"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 24, 24));
     }
+
     if ($key eq "edit_tags") {
         return $null_link unless $remote && LJ::Tags::can_add_entry_tags($remote, $entry);
         return LJ::S2::Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_edit_tags"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 24, 24));
     }
+
     if ($key eq "tell_friend") {
         return $null_link if $LJ::DISABLED{'sharethis'};
-        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
         my $entry_url = $entry->url;
         my $entry_title = LJ::ejs($entry->subject_html);
-        my $link = LJ::S2::Link("#", $ctx->[S2::PROPS]->{"text_share_this"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_sharethis.gif", 24, 24));
+        my $link = LJ::S2::Link("#", $ctx->[S2::PROPS]->{"text_share_this"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_share.gif", 24, 24));
         $link->{_raw} = qq|<script type="text/javascript">
             var stLink = jQuery('a:last')[0];
             stLink.href = 'javascript:void(0)';
@@ -3705,6 +3712,21 @@ sub _Entry__get_link
             </script>|;
         return $link;
     }
+
+    if ( $key eq 'share' ) {
+        return $null_link
+            unless LJ::is_enabled('sharing') && $entry->is_public;
+
+        my $link_text = $ctx->[S2::PROPS]->{'text_share'};
+        my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif",
+                                        24, 24 );
+
+        my $link = LJ::S2::Link('#', $link_text, $link_image);
+        $link->{'_raw'} = LJ::Share->render_js( { 'entry' => $entry } );
+
+        return $link;
+    }
+
     if ($key eq "share_facebook") {
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
@@ -3714,14 +3736,16 @@ sub _Entry__get_link
         my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_facebook"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_facebook.gif", 24, 24));
         return $link;
     }
+
     if ($key eq "share_twitter") {
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
         my $post_id = $entry->journalid . ':' . $entry->ditemid;
         my $entry_url = LJ::eurl($entry->url); # for js
-        my $link = LJ::S2::Link("$LJ::SITEROOT/share/twitter.bml?post_id=$post_id&amp;u=$entry_url", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
+        my $link = LJ::S2::Link("http://twitter.com/share?url=$entry_url", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
         return $link;
     }
+
     if ($key eq "share_email") {
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
@@ -3730,6 +3754,7 @@ sub _Entry__get_link
         my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_email"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_email.gif", 24, 24));
         return $link;
     }
+
     if ($key eq "facebook_like") {
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
@@ -3739,22 +3764,26 @@ sub _Entry__get_link
         $link->{_raw} = qq|<iframe src="$url" scrolling="no" frameborder="0" style="border:none;overflow:hidden;width:150px;height:21px;" allowTransparency="true"></iframe>|;
         return $link;
     }
+
     if ($key eq "mem_add") {
         return $null_link if $LJ::DISABLED{'memories'};
         return LJ::S2::Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_mem_add"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 24, 24));
     }
+
     if ($key eq "nav_prev") {
         return LJ::S2::Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=prev",
                             $ctx->[S2::PROPS]->{"text_entry_prev"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 24, 24));
     }
+
     if ($key eq "nav_next") {
         return LJ::S2::Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=next",
                             $ctx->[S2::PROPS]->{"text_entry_next"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 24, 24));
     }
+
     if ($key eq "flag") {
         return $null_link unless LJ::is_enabled("content_flag");
 
