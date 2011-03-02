@@ -280,6 +280,7 @@ propgroup text {
     set text_sidebar_summary = "Page Summary";
     property use text_showspam;
     property use text_hidespam;
+    property use text_view_games;
 }
 propgroup sidebar {
     property string sidebar_width {
@@ -411,7 +412,11 @@ function print_sidebar_navigation() {
             $navigation = """$navigation<tr><td width="100%">$*text_sidebar_link_separator<a href="$page.view_url{$v}">""" +  lang_viewname($v) + "</a></td></tr>";
         }
     }
-    $navigation = $navigation + $website;
+    var string games;
+    if ($page.view_my_games) {
+        $games = """<tr><td>$*text_sidebar_link_separator<a href="$page.journal.website_url/profile#apps">$*text_view_games</a></td></tr>""";
+    }
+    $navigation = $navigation + $website + $games;
     if ($page->lay_sidebar_view_navigation() != "") {
         $navigation = $navigation + "<tr><td>&nbsp;</td></tr>";
         $navigation = $navigation + $page->lay_sidebar_view_navigation();
