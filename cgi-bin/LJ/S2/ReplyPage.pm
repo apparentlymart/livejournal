@@ -4,6 +4,7 @@
 use strict;
 package LJ::S2;
 use LJ::TimeUtil;
+use LJ::UserApps;
 
 sub ReplyPage
 {
@@ -16,6 +17,8 @@ sub ReplyPage
     my $p = Page($u, $opts);
     $p->{'_type'} = "ReplyPage";
     $p->{'view'} = "reply";
+
+    $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote); 
 
     my $get = $opts->{'getargs'};
 

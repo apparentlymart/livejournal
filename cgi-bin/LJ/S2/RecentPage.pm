@@ -1,6 +1,8 @@
 use strict;
 package LJ::S2;
 
+use LJ::UserApps;
+
 sub RecentPage
 {
     my ($u, $remote, $opts) = @_;
@@ -27,6 +29,8 @@ sub RecentPage
         my $friendsurl = $u->journal_base."/friends"; # We want the canonical form here, not the vhost form
         $p->{head_content} .= '<link rel="'.$rel.'" title="'.LJ::ehtml($friendstitle).'" href="'.LJ::ehtml($friendsurl)."\" />\n";
     }
+    
+    $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote); 
 
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});

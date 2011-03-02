@@ -5,6 +5,7 @@ use strict;
 package LJ::S2;
 
 use LJ::TimeUtil;
+use LJ::UserApps;
 
 sub DayPage
 {
@@ -14,6 +15,8 @@ sub DayPage
     $p->{'_type'} = "DayPage";
     $p->{'view'} = "day";
     $p->{'entries'} = [];
+
+    $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote);
 
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});

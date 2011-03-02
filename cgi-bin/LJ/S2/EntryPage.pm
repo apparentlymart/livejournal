@@ -5,6 +5,7 @@ use strict;
 package LJ::S2;
 
 use LJ::TimeUtil;
+use LJ::UserApps;
 
 sub EntryPage
 {
@@ -17,6 +18,8 @@ sub EntryPage
     $p->{'comment_pages'} = undef;
     $p->{'comments'} = [];
     $p->{'comment_pages'} = undef;
+
+    $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote);
 
     # setup viewall options
     my ($viewall, $viewsome) = (0, 0);

@@ -5,6 +5,7 @@ use strict;
 package LJ::S2;
 
 use LJ::TimeUtil;
+use LJ::UserApps;
 
 sub MonthPage
 {
@@ -16,6 +17,8 @@ sub MonthPage
     $p->{'_type'} = "MonthPage";
     $p->{'view'} = "month";
     $p->{'days'} = [];
+
+    $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote);
 
     my $ctx = $opts->{'ctx'};
 

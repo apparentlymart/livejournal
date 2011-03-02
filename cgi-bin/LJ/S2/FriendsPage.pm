@@ -6,6 +6,7 @@ package LJ::S2;
 use Class::Autouse qw/LJ::ContentFlag/;
 use LJ::Request;
 use LJ::TimeUtil;
+use LJ::UserApps;
 
 sub FriendsPage
 {
@@ -23,6 +24,8 @@ sub FriendsPage
     $p->{'friends_title'} = LJ::ehtml($u->{'friendspagetitle'});
     $p->{'filter_active'} = 0;
     $p->{'filter_name'} = "";
+
+    $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote);
 
     # Add a friends-specific XRDS reference
     $p->{'head_content'} .= qq{<meta http-equiv="X-XRDS-Location" content="}.LJ::ehtml($u->journal_base).qq{/data/yadis/friends" />\n};
