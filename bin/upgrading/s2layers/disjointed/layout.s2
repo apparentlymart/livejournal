@@ -307,6 +307,7 @@ propgroup text {
     set date_daypage_format        = "%%month%% %%dayord%%, %%yyyy%%";
     property use text_showspam;
     property use text_hidespam;
+    property use text_view_games;
 }
 
 propgroup customcss {
@@ -1428,6 +1429,9 @@ function print_sidebar_profile() {
     $url  = $p.journal.website_url;
     $text = $p.journal.website_name != "" ? $p.journal.website_name : $*text_website_default_name;
     print safe """<a href="$url">$text</a><br />\n""";
+  }
+  if ($p.view_my_games) {
+    print "<a href=\"$p.journal.website_url/profile#apps\">$*text_view_games</a><br/>";
   }
   if($p isa YearPage) {
     var YearPage yp = $p as YearPage;
