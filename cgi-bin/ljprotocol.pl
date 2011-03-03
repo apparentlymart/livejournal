@@ -1618,7 +1618,7 @@ sub postevent
     # user must have a validated email address to post to any journal - including its own,
     # except syndicated (rss, 'Y') journals
     # unless this is approved from the mod queue (we'll error out initially, but in case they change later)
-    return fail($err, 155, "You must have an authenticated email address in order to post to another account")
+    return fail($err, 155, LJ::Lang::ml('event.post.error.not_validated_email'))
         unless $flags->{'noauth'} || $u->{'status'} eq 'A' || $u->{'journaltype'} eq 'Y';
 
     $req->{'event'} =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit

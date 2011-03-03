@@ -2470,6 +2470,8 @@ event.poll_vote.id=Someone votes in poll #[[pollid]]
 event.poll_vote.me|staleness=1
 event.poll_vote.me=Someone votes in a poll I posted
 
+event.post.error.not_validated_email=You must have an authenticated email address in order to post to another account
+
 event.userpic_upload.me|staleness=1
 event.userpic_upload.me=One of my friends uploads a new userpic
 
