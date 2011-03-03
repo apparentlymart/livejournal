@@ -215,15 +215,15 @@ window.LJShare.link = function( opts ) {
 		var lowerSpace = $( window ).height() - upperSpace - linkH;
 		var domH = dom.height(), domW = dom.width();
 
-		var linkTop = linkPos.top, linkLeft = linkPos.left;
+		var linkTop = Math.floor( linkPos.top ), linkLeft = Math.floor( linkPos.left );
 
 
 		//we decide whether the popup should be shown under or above the link
 		if( lowerSpace < domH && upperSpace > domH ) {
-			linkTop -= domH + 5;
+			linkTop -= domH + 9;
 			arrPos += "b";
 		} else {
-			linkTop += linkH + 5;
+			linkTop += linkH + 9;
 			arrPos += "t";
 		}
 
@@ -234,7 +234,7 @@ window.LJShare.link = function( opts ) {
 			arrPos += "r";
 		} else {
 			arrPos += "l";
-			linkLeft -= 30;
+			linkLeft -= 24;
 		}
 
 		arrow.removeClass().addClass( arrow_opts.className ).addClass( arrow_opts.position[ arrPos ] ); 
