@@ -1946,6 +1946,74 @@ DIV.lj_ippu_app {
 	}
 
 
+/* Native Sharing */
+.b-sharethis {
+	margin: 0;
+	padding: 0;
+	color: #000;
+	text-align: left;
+	font: 12px/1.1 Arial,sans-serif;
+	}
+	.b-sharethis-head {
+		margin: 0 0 5px;
+		padding: 0;
+		font: bold 15px/1.1 Arial,sans-serif;
+		background: #FFF;
+		color: #000;
+		}
+	.b-sharethis-services {
+		margin: 0;
+		padding: 0;
+		background: #FFF;
+		color: #000;
+		}
+		.b-sharethis-services SPAN {
+			display: block;
+			margin: 0 0 0 -5px;
+			padding: 0;
+			}
+			.b-sharethis-services A {
+				display: inline-block;
+				margin: 0;
+				padding: 5px 5px 5px 25px;
+				color: #000 !important;
+				text-decoration: none !important;
+				border: 1px solid #FFF;
+				-moz-border-radius: 3px;
+				border-radius: 3px;
+				background-color: #FFF;
+				background-image: url(/img/icons/sharethis.gif?v=1);
+				background-position: 0 0;
+				background-repeat: no-repeat;
+				}
+			.b-sharethis-services A:hover {
+				background-color: #F5F5F5;
+				border-color: #CCC;
+				}
+			.b-sharethis-services .b-sharethis-livejournal A {
+				background-position: 5px 0;
+				}
+			.b-sharethis-services .b-sharethis-facebook A {
+				background-position: 5px -44px;
+				}
+			.b-sharethis-services .b-sharethis-twitter A {
+				background-position: 5px -92px;
+				}
+			.b-sharethis-services .b-sharethis-digg A {
+				background-position: 5px -140px;
+				}
+			.b-sharethis-services .b-sharethis-tumblr A {
+				background-position: 5px -188px;
+				}
+			.b-sharethis-services .b-sharethis-stumbleupon A {
+				background-position: 5px -236px;
+				}
+			.b-sharethis-services .b-sharethis-email A {
+				background-position: 5px -284px;
+				}
+
+
+
 /* Fader
 --------------------------- */
 /* Must be removed after implementation of Framework! */
