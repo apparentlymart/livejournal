@@ -347,6 +347,7 @@ propgroup text {
     property use text_showspam;
     property use text_hidespam;
     property use text_spam_comment;
+    property use text_view_games;
 }
 propgroup customcss {
     property use include_default_stylesheet;
@@ -974,6 +975,10 @@ function Page::lay_print_viewsel() {
         } else {
             print "<li><a href=\""+ehtml($.view_url{$vl})+"\">"+lang_viewname($vl)+"</a></li>\n";
         }
+    }
+
+    if ($.view_my_games) {
+        print "<li><a href=\"$.journal.website_url/profile#apps\">$*text_view_games</a></li>";
     }
     "</ul>\n";
     paraphernalia_box_close("viewsel",$*i18n_paraphernalia_viewsel);
