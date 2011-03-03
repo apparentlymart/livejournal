@@ -555,7 +555,7 @@ body<=
             if( $ru_text_messaging && LJ::NotificationMethod::SMSru->configured_for_user($u) ){
                 my($start, $end) = split /-/, $u->prop( 'smsru_interval' );
                 $ret .= "<tr id=\"sms_time\"><td class='field_name'>$ML{'.fn.smsinterval'}</td><td>";
-                $ret .= BML::ml(".fn.smsinterval.info", {url=>'manage'}) . "<br />";
+                $ret .= BML::ml(".fn.smsinterval.info", { url => "$LJ::SITEROOT/manage/settings/?cat=notifications" }) . "<br />";
          
                 $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'sms_interval', 'id' => 'sms_interval',
                     'selected' =>  defined $start });
