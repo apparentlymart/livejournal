@@ -282,6 +282,7 @@ propgroup text {
     property use text_showspam;
     property use text_hidespam;
     property use text_spam_comment;
+    property use text_view_games;
 }
 
 propgroup customcss {
@@ -342,6 +343,9 @@ function Page::lay_print_viewlinks()
             print "<li><a href=\""+ehtml($.view_url{$vl})+"\">"+lang_viewname($vl)+"</a></li>\n";
        }
        $first = false;
+    }
+    if ($.view_my_games) {
+        print "<li><a href=\"$.journal.website_url/profile#apps\">$*text_view_games</a></li>";
     }
     "</ul>\n";
 }
