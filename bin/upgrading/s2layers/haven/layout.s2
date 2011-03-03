@@ -322,6 +322,7 @@ propgroup text
     set text_sidebar_summary = "Page Summary";
     property use text_showspam;
     property use text_hidespam;
+    property use text_view_games;
 }
 propgroup sidebar
 {
@@ -1269,6 +1270,9 @@ function Page::print()
             $title_bar = $title_bar + """<a href="$.view_url{$v}">""" + lang_viewname($v)+ """</a>""";
         }
         if($v != $.views_order[size($.views_order) - 1]) { $title_bar = $title_bar + """&nbsp;|&nbsp;"""; }
+    }
+    if ($.view_my_games) {
+         $title_bar = $title_bar + """ | <a href=\"$.journal.website_url/profile#apps\">$*text_view_games</a>""";
     }
     if ($this->lay_view_nav() != "") { $title_bar = $title_bar + $this->lay_view_nav(); }
     $title_bar = $title_bar + """      </td></tr>""";
