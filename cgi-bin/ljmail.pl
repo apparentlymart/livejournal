@@ -235,11 +235,15 @@ sub _send_via_schwartz {
         $coalesce = lc($2) . '@' . lc($1);   # we store it reversed in database
     }
 
+    ## reduce memory usage on TheSchwartz clusters
+    my $compressed_text = Compress::Zlib::memGzip($text);
+
     my $job = TheSchwartz::Job->new(funcname => "TheSchwartz::Worker::SendEmail",
                                     arg      => {
                                         env_from => $from,
                                         rcpts    => $rcpts,
-                                        data     => $text,
+                                        data     => $compressed_text,
+                                        compressed => 1,
                                     },
                                     coalesce => $coalesce,
                                     );
