@@ -131,7 +131,7 @@ sub sysban_check {
         unless ($LJ::EMAIL_DOMAIN_BANNED_LOADED) {
             my $memval = LJ::MemCache::get("sysban:email_domain");
             if ($memval) {
-                $LJ::EMAIL_DOMAIN_BANNED = $memval;
+                %LJ::EMAIL_DOMAIN_BANNED = %$memval;
                 $LJ::EMAIL_DOMAIN_BANNED_LOADED++;
             }
         }
