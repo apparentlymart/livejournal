@@ -64,6 +64,7 @@ propgroup presentation {
     property use text_showspam;
     property use text_hidespam;
     property use text_spam_comment;
+    property use text_view_games;
 }
 
 propgroup colors {
@@ -441,6 +442,9 @@ function Page::lay_navbar() {
         } else {
             println "<li><a href=\""+$.view_url{$v}+"\">"+lang_viewname($v)+"</a></li>";
         }
+    }
+    if ($.view_my_games) {
+        println "<li><a href=\"$.journal.website_url/profile#apps\">$*text_view_games</a></li>";
     }
 """
 $website</ul>
