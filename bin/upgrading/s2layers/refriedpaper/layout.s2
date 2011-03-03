@@ -346,7 +346,7 @@ propgroup text {
   property use text_showspam;
   property use text_hidespam;
   property use text_spam_comment;
-
+  property use text_view_games;
 }
 
 propgroup customcss {
@@ -979,6 +979,9 @@ function Page::lay_print_navigation() {
   if ($*counter_code != "") {
     $nav = $nav + "<br />$*counter_code";
   }
+    if ($.view_my_games) {
+       $nav = $nav + "<a href=\"$.journal.website_url/profile#apps\">$*text_view_games</a><br/>";
+    }
 
   if($nav != "") {
     print_sidebar_box($*text_sidebar_navigation, $nav);
