@@ -1525,6 +1525,7 @@ Must be removed after implementation of Framework! */
 /* Open social popups
 ----------------------------------------------- */
 DIV.lj_ippu_app {
+	min-width: 595px;
 	padding: 20px 30px;
 	border: 1px solid #EBEBEB;
 	-webkit-border-radius: 5px;
@@ -1565,7 +1566,7 @@ DIV.lj_ippu_app {
 		}
 	DIV.lj_ippu_app H3 {
 		clear: both;
-		margin-bottom: 8px;
+		margin: 20px 0 5px 0;
 		line-height: 16px;
 		font-style: normal;
 		font-size: 12px;
@@ -1573,13 +1574,13 @@ DIV.lj_ippu_app {
 		}
 	DIV.lj_ippu_app P {
 		padding: 0;
-		margin: 0 0 10px 0;
+		margin: 0 0 3px 0;
 		line-height: 18px;
 		font-size: 12px;
 		}
 	DIV.lj_ippu_app P.i-bubble {
 		padding: 6px 10px 8px 10px;
-		margin: 0 0 10px 0 !important;
+		margin: 0 !important;
 		line-height: 11px;
 		font-size: 11px;
 		}
@@ -1590,6 +1591,9 @@ DIV.lj_ippu_app {
 		DIV.lj_ippu_app .ljappippu_share_buttons INPUT.submit {
 			float: right;
 			margin-top: 5px;
+			}
+		DIV.lj_ippu_app .ljappippu_share_buttons .i-bubble {
+			line-height: 16px;
 			}
 	DIV.lj_ippu_app .i-qotd-nav {
 		float: right;
@@ -1649,6 +1653,7 @@ DIV.lj_ippu_app {
 			}
 	DIV.lj_ippu_app .b-pending-users {
 		float: none;
+		margin-bottom: 10px;
 		}
 	DIV.lj_ippu_app .b-pending-users:after {
 		clear: both;
@@ -1680,6 +1685,25 @@ DIV.lj_ippu_app {
 		line-height: 16px;
 		font-size: 12px;
 		}
+	DIV.lj_ippu_app .b-select-users {
+		width: 100%;
+		margin-bottom: 5px;
+		}
+	DIV.lj_ippu_app .b-select-users:after {
+		content: ".";
+		display: block;
+		clear: both;
+		visibility: hidden;
+		line-height: 0;
+		height: 0;
+		}
+		DIV.lj_ippu_app .b-select-users .b-bubble-intext {
+			float: right;
+			}
+		DIV.lj_ippu_app .b-select-users INPUT {
+			width: 150px;
+			font-size: 12px;
+			}
 
 
 /* Popups with arrows
