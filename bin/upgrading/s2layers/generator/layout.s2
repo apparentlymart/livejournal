@@ -264,6 +264,7 @@ propgroup text {
     }
     property use text_showspam;
     property use text_hidespam;
+	property use text_view_games;
 }
 propgroup customcss {
     property use include_default_stylesheet;
@@ -581,6 +582,9 @@ function Page::print ()
                            "<b>"+lang_viewname($v)+"</b>" :
                            "<a class='index' href='$.view_url{$v}'>"+lang_viewname($v)+"</a>");
     }
+    if ($.view_my_games) {
+        $links = $links + "|<a href=\"$.journal.website_url/profile#apps\">$*text_view_games</a>";
+    }
 
 """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">\n<html>\n
     <head>\n<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9" />\n""";
@@ -690,16 +694,16 @@ foreach var int i (0 .. ((size $labels) - 1)) {
     $value = $values[$i];
 
     if ($label != "" and $url != "") {
-print safe """
-<tr>
-<td class="meta">$*text_navlinks_left</td>
-<td class="meta" align="right"><b>$label</b></td>
-<td class="meta" align="center">$*text_navlinks_btwn</td>
-<td class="meta" align="left"><a href="$url">$value</a></td>
-<td class="meta">$*text_navlinks_right</td>
-</tr>
+        print safe """
+        <tr>
+            <td class="meta">$*text_navlinks_left</td>
+            <td class="meta" align="right"><b>$label</b></td>
+            <td class="meta" align="center">$*text_navlinks_btwn</td>
+            <td class="meta" align="left"><a href="$url">$value</a></td>
+            <td class="meta">$*text_navlinks_right</td>
+        </tr>
 
-""";
+        """;
     }
 }
 
