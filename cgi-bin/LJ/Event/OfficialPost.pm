@@ -124,14 +124,18 @@ sub as_string {
 }
 
 sub as_sms {
-    my ($self, $u) = @_;
+    my ($self, $u, $opt) = @_;
+
     my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
     my $entry = $self->entry or return "(Invalid entry)";
 
-    my $tinyurl = LJ::API::BitLy->shorten( 'http://m.livejournal.com/read/user/'
-         . $entry->journal->user . '/' . $entry->ditemid . '/' );
+    my $tinyurl = 'http://m.livejournal.com/read/user/'
+         . $entry->journal->user . '/' . $entry->ditemid . '/';
+    my $mparms = $opt->{mobile_url_extra_params};
+    $tinyurl .= '?' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms) if $mparms;
+    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
     undef $tinyurl if $tinyurl =~ /^500/;
-    
+        
 # There is a new [[abbrev]] announcement in [[journal]]. Reply with READ [[journal]] to read it. [[disclaimer]]
     return LJ::Lang::get_text($lang, 'notification.sms.officialpost', undef, {
         abbrev     => $LJ::SITENAMEABBREV,

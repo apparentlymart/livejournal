@@ -481,9 +481,9 @@ sub need_standard_footer { 1 }
 #
 # $txtlj->send($u, $event->as_sms($u));
 sub as_sms {
-    my ($self, $u) = @_;
+    my ($self, $u, $opt) = @_;
     return LJ::Text->truncate_with_ellipsis(
-        'str' => $self->as_string($u),
+        'str' => $self->as_string($u, $opt),
         'bytes' => 160,
         'ellipsis' => '...',
     );

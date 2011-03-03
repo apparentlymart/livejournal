@@ -78,14 +78,17 @@ sub as_string {
 }
 
 sub as_sms {
-    my ($self, $u) = @_;
+    my ($self, $u, $opt) = @_;
     my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
     
     my $tinyurl;
-    $tinyurl = LJ::API::BitLy->shorten( "http://m.livejournal.com/read/user/" 
-        . $self->entry->journal->user . '/' . $self->entry->ditemid . '/' );
+    $tinyurl = "http://m.livejournal.com/read/user/" 
+        . $self->entry->journal->user . '/' . $self->entry->ditemid . '/';
+    my $mparms = $opt->{mobile_url_extra_params};
+    $tinyurl .= '?' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms) if $mparms;
+    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
     undef $tinyurl if $tinyurl =~ /^500/;
-
+    
     my $mlstrng = $self->entry->journal->is_comm ? 'notification.sms.journalnewentry_comm' : 'notification.sms.journalnewentry';
 # [[poster]] has posted with a new entry. To view, send READ [[journal]] to read it. [[disclaimer]]
 # [[poster]] has posted with a new entry in [[journal]]. To view, send READ [[journal]] to read it. [[disclaimer]]

@@ -218,7 +218,7 @@ sub as_alert {
 }
 
 sub as_sms {
-    my ($self, $u) = @_;
+    my ($self, $u, $opt) = @_;
 
     my $user = $self->comment->poster ? $self->comment->poster->display_username : '(Anonymous user)';
     my $edited = $self->comment->is_edited;
@@ -270,9 +270,12 @@ sub as_sms {
 
     my $msg = LJ::Lang::get_text($lang, $ml_key, undef, $ml_params);
     #/read/user/%username%/%post_ID%/comments/%comment_ID%#comments
-    my $url = "http://m.livejournal.com/read/user/".$self->event_journal->user."/".$entry->ditemid."/comments/".$self->comment->dtalkid."#comments";
-    my $tinyurl = LJ::API::BitLy->shorten($url);
-    return undef if $tinyurl =~ /^500/;
+    my $tinyurl = "http://m.livejournal.com/read/user/".$self->event_journal->user."/".$entry->ditemid."/comments/".$self->comment->dtalkid;
+    my $mparms = $opt->{mobile_url_extra_params};
+    $tinyurl .= '?' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms) if $mparms;
+    $tinyurl .= "#comments";
+    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
+    undef $tinyurl if $tinyurl =~ /^500/;
     return $msg . " " . $tinyurl; 
 }
 

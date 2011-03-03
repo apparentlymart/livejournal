@@ -212,13 +212,13 @@ sub absorb_row {
 }
 
 sub url {
-    my $self    = shift;
+    my ($self, $extra)    = @_;
 
     my $dtalkid = $self->dtalkid;
     my $entry   = $self->entry;
     my $url     = $entry->url;
 
-    return "$url?thread=$dtalkid#t$dtalkid";
+    return "$url?thread=$dtalkid$extra#t$dtalkid";
 }
 
 sub reply_url {

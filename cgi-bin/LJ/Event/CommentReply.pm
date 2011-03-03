@@ -15,7 +15,7 @@ sub is_subscription_visible_to { 1 }
 sub is_tracking { 0 }
 
 sub as_sms {
-    my ($self, $u) = @_;
+    my ($self, $u, $opt) = @_;
 
     my $user = $self->comment->poster ? $self->comment->poster->display_username : '(Anonymous user)';
     my $edited = $self->comment->is_edited;
@@ -40,8 +40,12 @@ sub as_sms {
         }
     }
     my $msg = LJ::Lang::get_text($lang, $ml_key, undef, { user => $user } );
-    my $tinyurl = LJ::API::BitLy->shorten($self->comment->url);
-    return undef if $tinyurl =~ /^500/;
+    my $mparms = $opt->{mobile_url_extra_params};
+    my $tinyurl = $mparms?$self->comment->url( '&' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms))
+        : $self->comment->url;
+    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
+    undef $tinyurl if $tinyurl =~ /^500/;
+
     return $msg . " " . $tinyurl; 
 }
 

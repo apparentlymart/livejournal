@@ -100,15 +100,18 @@ sub as_string {
 }
 
 sub as_sms {
-    my ($self, $u) = @_;
+    my ($self, $u, $opt) = @_;
     my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
     my $entry = $self->entry;
     my $mlstring = ($entry->posterid == $entry->journalid)? 'notification.sms.usernewentry':'notification.sms.usernewentry_comm';
-    my $tinyurl = LJ::API::BitLy->shorten( 'http://m.livejournal.com/read/user/'
-         . $entry->journal->user . '/' . $entry->ditemid . '/' );
+    my $tinyurl = 'http://m.livejournal.com/read/user/'
+         . $entry->journal->user . '/' . $entry->ditemid . '/';
+    my $mparms = $opt->{mobile_url_extra_params};
+    $tinyurl .= '?' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms) if $mparms;
+    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
     undef $tinyurl if $tinyurl =~ /^500/;
-        
+            
 # User '[[user]]' posted in their journal
 # User '[[user]]' posted '[[journal]]'
     return LJ::Lang::get_text($lang, '.string', undef, {
