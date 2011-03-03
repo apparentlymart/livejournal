@@ -818,9 +818,12 @@ sub is_closed {
         return 0;
     }
 
+    ## Search answer item for election winner.
+    @items = grep { $_->{'pollitid'} == $max_votes_for } @items;
+
     ## We found election winner. Set this user as supermaintainer and close election.
-    if ($max_votes_for && $items[$max_votes_for - 1]) {
-        my $winner = $items[$max_votes_for - 1]->{item};
+    if ($max_votes_for && @items) {
+        my $winner = $items[0]->{'item'};
         $winner =~ s/<lj user='(.*?)'>/$1/;
         $winner = LJ::load_user($winner);
         if ($winner && $winner->can_manage($is_super) && $winner->is_visible) {
