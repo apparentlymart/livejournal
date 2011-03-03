@@ -81,10 +81,6 @@ sub send {
     my $class = shift;
     my ($rcpt, $opts) = @_;
 
-    ## temp hack, I Gariev, 17.01.2011
-    return CONNECTION_FAILED if $rcpt =~ /xrock\.co\.cc$/;
-    return CONNECTION_FAILED if $rcpt =~ /egor\.mail\.ua$/;
-
     ## do not issuing banned emails
     return NO_SUPPORTED_RCPT if LJ::sysban_check('email_domain', $rcpt);
 
