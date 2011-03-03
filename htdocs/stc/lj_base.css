@@ -747,6 +747,13 @@ Must be removed after implementation of Framework! */
 			text-decoration: none;
 			outline:0;
 			}
+			.m-auth-item A SPAN {
+				color: #000;
+				border-bottom: 1px dotted #000;
+				}
+			.m-auth .current A SPAN {
+				border:0;
+				}
 		.m-auth-openid A {
 			background: url(/img/icons/openid-16.gif?v=1) no-repeat 20px 50%;
 			}
@@ -756,15 +763,11 @@ Must be removed after implementation of Framework! */
 		.m-auth-facebook A {
 			background: url(/img/icons/facebook-16.gif?v=1) no-repeat 20px 50%;
 			}
-			.m-auth-item A SPAN {
-				color: #000;
-				border-bottom: 1px dotted #000;
-				}
-			.m-auth .current A SPAN {
-				border:0;
-				}
 		.m-auth-twitter A {
 			background: url(/img/icons/twitter-16.gif?v=1) no-repeat 20px 50%;
+			}
+		.m-auth-mailru A {
+			background: url(/img/icons/mailru-16.gif?v=1) no-repeat 20px 50%;
 			}
 		.m-auth .current .m-auth-bl,
 		.m-auth .current .m-auth-br {
@@ -867,9 +870,9 @@ Must be removed after implementation of Framework! */
 			}
 
 .b-facebookbtn,
-.b-twitterbtn {
+.b-twitterbtn,
+.b-mailrubtn {
 	position: relative;
-	height: 22px;
 	margin: 0 20px 0 0;
 	padding: 0;
 	border: 0;
@@ -879,11 +882,13 @@ Must be removed after implementation of Framework! */
 	cursor: pointer;
 	}
 .b-auth .b-facebookbtn,
-.b-auth .b-twitterbtn {
+.b-auth .b-twitterbtn,
+.b-auth .b-mailrubtn {
 	float: left;
 	}
 	.b-facebookbtn SPAN,
-	.b-twitterbtn SPAN {
+	.b-twitterbtn SPAN,
+	.b-mailrubtn SPAN {
 		position: relative;
 		display: block;
 		height: 20px;
@@ -896,26 +901,43 @@ Must be removed after implementation of Framework! */
 		background: #6676AB url(/img/buttons/facebook-login-wide.gif?v=1) no-repeat 0 0;
 		}
 	.b-twitterbtn SPAN {
-		height:24px;
-		border:none;
-		line-height:22px;
-		padding-left:32px;
-		color:#293F46;
-		text-shadow:1px 1px 0px #FFF;
-		white-space:nowrap;
-		background-color:#FFF;
-		background-image:url(/img/buttons/twitter-login-wide.gif?v=1);
+		height: 24px;
+		border: none;
+		line-height: 22px;
+		padding: 0 8px 0 32px;
+		color: #293F46;
+		text-shadow: 1px 1px 0px #FFF;
+		white-space: nowrap;
+		background: #FFF url(/img/buttons/twitter-login-wide.gif?v=1) no-repeat 0 0;
+		}
+	.b-mailrubtn SPAN {
+		height: 18px;
+		padding: 0 65px 0 8px;
+		border: none;
+		line-height: 16px;
+		color: #FFF;
+		font-weight: normal;
+		white-space: nowrap;
+		background: #004584 url(/img/buttons/mailru-login-wide.gif?v=1) no-repeat 100% 0;
 		}
 		.b-facebookbtn SPAN I{
 			display: none;
 			}
 		.b-twitterbtn SPAN I{
-			position:absolute;
-			right:0;
-			top:0;
-			height:24px;
-			width:2px;
-			background:url(/img/buttons/twitter-login-wide.gif?v=1) no-repeat 100% 0;
+			position: absolute;
+			right: 0;
+			top: 0;
+			height: 24px;
+			width: 2px;
+			background: url(/img/buttons/twitter-login-wide.gif?v=1) no-repeat 100% 0;
+			}
+		.b-mailrubtn SPAN I{
+			position: absolute;
+			left: 0;
+			top: 0;
+			height: 18px;
+			width: 2px;
+			background: url(/img/buttons/mailru-login-wide.gif?v=1) no-repeat 0 0;
 			}
 
 .b-twinterstitial-question,
