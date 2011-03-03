@@ -212,6 +212,7 @@ propgroup text {
   }
   property use text_showspam;
   property use text_hidespam;
+  property use text_view_games;
 }
 set text_left_comments = "(";
 set text_btwn_comments = " | ";
@@ -509,8 +510,12 @@ function Page::print () {
                            "<span class='Active'>"+lang_viewname($v)+"</span>" :
                            "<a href='$.view_url{$v}'>"+lang_viewname($v)+"</a>") + ")</span>\n";
     }
+    var string games;
+    if ($.view_my_games) {
+        $games = "(<span style='white-space: nowrap;'><a href=\"$.journal.website_url/profile#apps\">$*text_view_games</a>)</span>";
+    }
 
-    """<p class="Navigation">$links $website<br />""";
+    """<p class="Navigation">$links $website $games<br />""";
     $this->lay_skip_navigation();
     if ($*counter_code != "") {
         """<p class="Navigation">$*counter_code</p>""";
