@@ -1972,13 +1972,14 @@ DIV.lj_ippu_app {
 			margin: 0 0 0 -5px;
 			padding: 0;
 			}
-			.b-sharethis-services A {
+			.b-sharethis-services A:link,
+			.b-sharethis-services A:visited {
 				display: inline-block;
 				margin: 0;
 				padding: 5px 5px 5px 25px;
 				color: #000 !important;
 				text-decoration: none !important;
-				border: 1px solid #FFF;
+				border: 1px solid #FFF !important;
 				-moz-border-radius: 3px;
 				border-radius: 3px;
 				background-color: #FFF;
@@ -1986,12 +1987,13 @@ DIV.lj_ippu_app {
 				background-position: 0 0;
 				background-repeat: no-repeat;
 				}
-			.b-sharethis-services A:hover {
+			.b-sharethis-services A:hover,
+			.b-sharethis-services A:active {
 				background-color: #F5F5F5;
-				border-color: #CCC;
+				border: 1px solid #CCC !important;
 				}
 			.b-sharethis-services .b-sharethis-livejournal A {
-				background-position: 5px 0;
+				background-position: 5px 4px;
 				}
 			.b-sharethis-services .b-sharethis-facebook A {
 				background-position: 5px -44px;
@@ -2010,6 +2012,15 @@ DIV.lj_ippu_app {
 				}
 			.b-sharethis-services .b-sharethis-email A {
 				background-position: 5px -284px;
+				}
+			.b-sharethis-services .b-sharethis-vkontakte A {
+				background-position: 5px -332px;
+				}
+			.b-sharethis-services .b-sharethis-odnoklassniki A {
+				background-position: 5px -380px;
+				}
+			.b-sharethis-services .b-sharethis-moimir A {
+				background-position: 5px -428px;
 				}
 
 
