@@ -183,6 +183,7 @@ propgroup text {
   property use text_showspam;
   property use text_hidespam;
   property use text_spam_comment;
+  property use text_view_games;
 }
 set text_left_comments = "";
 set text_btwn_comments = " - ";
@@ -388,9 +389,16 @@ function Page::print()
        <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
          <a href="$*SITEROOT/tools/memories.bml?user=$.journal.username">Memories</a>
        </td>
-       $website
+       $website """;
+       if ($.view_my_games) {
+       """
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="$.base_url/profile#apps">$*text_view_games</a>
+       </td>
       </tr>
-     </table>
+       """;
+      }
+     """</table>
     </td>
    </tr>
    <tr>
