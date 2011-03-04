@@ -44,6 +44,8 @@
 
 .setting.maintainers=Only maintainers
 
+.setting.moderators=Maintainers and moderators
+
 .setting.members=Members only
 
 .setting.private=Only you

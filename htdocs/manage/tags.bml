@@ -293,7 +293,6 @@ body<=
         push @groups, ("private", $ML{'.setting.private'});
     } else {
         push @groups, ("friends", $ML{'.setting.members'});
-        push @groups, ("private", $ML{'.setting.maintainers'});
     }
 
     my $grouplist = LJ::get_friend_group($u);
@@ -305,7 +304,9 @@ body<=
     my $security = LJ::Tags::get_permission_levels($u);
 
     $ret .= "<div class='tagsec'> "
-        . LJ::html_select({ name => 'control_level', selected => $security->{control} }, @groups)
+        . LJ::html_select(
+                        { name => 'control_level', selected => $security->{control} }, 
+                        @groups, $u->is_community ? ("private", $ML{'.setting.maintainers'}) : ())
         . " $ML{'.setting.desc.control'} </div>";
 
 
@@ -313,6 +314,7 @@ body<=
     ## by moderator or a community can be applied to communities only
     if ($u->is_community) {
         # insert after (public, friends, private)
+        push @groups, ("private", $ML{'.setting.moderators'});
         splice @groups, 3*2, 0, ("author_moder", $ML{'.setting.author'});
     }
     
