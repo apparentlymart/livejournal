@@ -79,6 +79,12 @@ sub create_supermaintainer_election_poll {
         }
     }
 
+    ## We need to remove all previous owners from community because election poll is started.
+    my $s_maints = LJ::load_rel_user($comm_id, 'S');
+    foreach my $user_id (@$s_maints) {
+        LJ::clear_rel($comm_id, $user_id, 'S');
+    }
+
     ## All are ok. Emailing to all maintainers about election.
     my $subject = LJ::Lang::ml('poll.election.email.subject');
     $$textref .= "Sending emails to all maintainers for community " . $comm->user . "\n";
