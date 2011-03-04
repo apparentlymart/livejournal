@@ -633,7 +633,9 @@ sub handle_post {
         $redirect = LJ::run_hook('rewrite_redirect_after_create', $nu);
         return BML::redirect($redirect) if $redirect;
 
-        my $url = LJ::ab_testing_value() == 0 ? "step2a.bml" : "step2b.bml";
+        #my $url = LJ::ab_testing_value() == 0 ? "step2a.bml" : "step2b.bml";
+        my $url = "step2a.bml";
+        
         return BML::redirect("$LJ::SITEROOT/create/$url$opts{getextra}");
     }
 
