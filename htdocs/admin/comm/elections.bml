@@ -47,73 +47,85 @@ body<=
 
             my $poll = LJ::Poll->new ($poll_id);
 
-            unless ($poll->is_closed) {
-                my $create = LJ::TimeUtil->mysqldate_to_time($poll->prop('createdate'));
-                my $delta = time - $create;
-                my $create_time = strftime "%B %e %Y", localtime ($create);
-                my $close_time = strftime "%B %e %Y", localtime (int(($delta / (21 * 86400)) + 1) * (21 * 86400) + $create);
+            my $create = LJ::TimeUtil->mysqldate_to_time($poll->prop('createdate'));
+            my $delta = time - $create;
+            my $create_time = strftime "%B %e %Y", localtime ($create);
+            my $close_time = strftime "%B %e %Y", localtime (int(($delta / (21 * 86400)) + 1) * (21 * 86400) + $create);
 
-                my @qs = $poll->questions;
-                my @items = $qs[0]->items;
+            my @qs = $poll->questions;
+            my @items = $qs[0]->items;
 
-                $ret .= "<br/><h3>Active election:</h3>";
-                $ret .= "<p>Election period: from $create_time to $close_time</p>";
+            $ret .= $poll->is_closed
+            ? "<br/><h3>Closed election:</h3>"
+            : "<br/><h3>Active election:</h3>";
 
-                my $maintainers = LJ::load_rel_user($comm->{userid}, 'A');
-                my $users = LJ::load_userids(@$maintainers);
-                my @alive_mainteiners;
-                my $total = 0;
-                foreach my $u (values %$users) {
-                    if ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90)) {
-                        push @alive_mainteiners, $u;
-                    }
-                    $total++ if $u;
+            $ret .= "<p>Election period: from $create_time";
+            $ret .= $poll->is_closed ? "</p>" : " to $close_time</p>";
+
+            my $maintainers = LJ::load_rel_user($comm->{userid}, 'A');
+            my $users = LJ::load_userids(@$maintainers);
+            my @alive_mainteiners;
+            my $total = 0;
+            foreach my $u (values %$users) {
+                if ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90)) {
+                    push @alive_mainteiners, $u;
                 }
+                $total++ if $u;
+            }
 
-                $ret .= "<p>Maintainers (participants of the election): " . @alive_mainteiners . "</p>";
+            $ret .= "<p>Maintainers (participants of the election): " . @alive_mainteiners . "</p>";
 
-                my $sth;
-                my $dbr = LJ::get_db_reader();
-                if ($poll->is_clustered) {
-                    $sth = $poll->journal->prepare("SELECT value, userid FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=?");
-                    $sth->execute($poll->pollid, 1, $poll->journalid);
+            my $sth;
+            my $dbr = LJ::get_db_reader();
+            if ($poll->is_clustered) {
+                $sth = $poll->journal->prepare("SELECT value, userid FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=?");
+                $sth->execute($poll->pollid, 1, $poll->journalid);
+            } else {
+                $sth = $dbr->prepare("SELECT value, userid FROM pollresult WHERE pollid=? AND pollqid=?");
+                $sth->execute($poll->pollid, 1);
+            }
+
+            my %result = ();
+            my %result_users = ();
+            my $i = 0;
+            while (my @row = $sth->fetchrow_array) {
+                $result{$row[0]}++;
+                $result_users{$row[1]} = $row[0];
+                $i++;
+            }
+
+            $ret .= "<p>Maintainers (voted already): " . $i . "</p>";
+
+            $sth = $poll->journal->prepare ("SELECT userid, args FROM inviterecv WHERE commid = ?");
+            $sth->execute ($poll->journalid);
+            while (my @row = $sth->fetchrow_array) {
+                my $args = $row[1];
+                next unless $args =~ m#admin=1#;
+                my $u = LJ::load_userid($row[0]);
+                $total++ if $u;
+            }
+
+            $ret .= "<p>Maintainers (total, including non-participants of the election): " . $total . "</p>";
+
+            $ret .= "<br/><h3>Current state of election:</h3>";
+            $ret .= "<ul style='padding:0;list-style:none;'>";
+            foreach my $u (values %$users) {
+                my $vote_for = $items[$result_users{$u->userid} - 1]->{item};
+                LJ::Poll->clean_poll(\$vote_for);
+                $ret .= "<li>" . LJ::ljuser($u) . " &mdash; " . ( $result_users{$u->userid} ? " voted for " . $vote_for : " not voted yet ") . "</li>";
+            }
+
+            $ret .= "</ul>";
+
+            if ($poll->is_closed) {
+                ## Election poll is closed. Show current owner.
+                my $sm = LJ::load_rel_user($comm->{userid}, 'S') || [];
+                if (@$sm) {
+                    my $user = LJ::load_userid($sm->[0]);
+                    $ret .= "<b>The winner is ".$user->ljuser_display."</b>" if $user;
                 } else {
-                    $sth = $dbr->prepare("SELECT value, userid FROM pollresult WHERE pollid=? AND pollqid=?");
-                    $sth->execute($poll->pollid, 1);
+                    $ret .= "<b>The owner was not set.</b>";
                 }
-
-                my %result = ();
-                my %result_users = ();
-                my $i = 0;
-                while (my @row = $sth->fetchrow_array) {
-                    $result{$row[0]}++;
-                    $result_users{$row[1]} = $row[0];
-                    $i++;
-                }
-
-                $ret .= "<p>Maintainers (voted already): " . $i . "</p>";
-
-                $sth = $poll->journal->prepare ("SELECT userid, args FROM inviterecv WHERE commid = ?");
-                $sth->execute ($poll->journalid);
-                while (my @row = $sth->fetchrow_array) {
-                    my $args = $row[1];
-                    next unless $args =~ m#admin=1#;
-                    my $u = LJ::load_userid($row[0]);
-                    $total++ if $u;
-                }
-
-                $ret .= "<p>Maintainers (total, including non-participants of the election): " . $total . "</p>";
-
-                $ret .= "<br/><h3>Current state of election:</h3>";
-		        $ret .= "<ul style='padding:0;list-style:none;'>";
-                foreach my $u (values %$users) {
-                    my $vote_for = $items[$result_users{$u->userid} - 1]->{item};
-                    LJ::Poll->clean_poll(\$vote_for);
-                    $ret .= "<li>" . LJ::ljuser($u) . " &mdash; " . ( $result_users{$u->userid} ? " voted for " . $vote_for : " not voted yet ") . "</li>";
-                }
-
-                $ret .= "</ul>";
-
             }
 
             next if @errors;
