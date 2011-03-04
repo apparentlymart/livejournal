@@ -704,14 +704,21 @@ body<=
         if ($_->{'admin'} && !$remote->can_super_manage($c)) {
             %disabled_maint = %disabled ? () : ( disabled => 'disabled' );
         }
+        my $username = $_->{'name'};
         my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
-        $ret .= "<tr class='$rstyle'><td>" . LJ::ljuser($_->{'name'}) . "</td>";
+        $ret .= "<tr class='$rstyle'><td>" . LJ::ljuser($username) . "</td>";
         my $wstr;
         foreach my $key (@attribs) {
             $ret .= "<td style='text-align: center;'>";
             $ret .= LJ::html_check({ 'name' => "edit_$_->{'userid'}_$key",
-                                     'selected' => $_->{$key}, $key =~ /admin/ ? (%disabled, %disabled_maint) : () });
-            $ret .= LJ::html_hidden({ 'name' => "edit_$_->{'userid'}_$key", value => $_->{$key} ? 'on' : '' }) if $key =~ /admin/ && (%disabled || %disabled_maint);
+                                     'selected' => $_->{$key},
+                                     ($username ne $remote->user && ($key =~ /admin/))
+                                        ? (%disabled, %disabled_maint)
+                                        : (),
+                                   });
+            $ret .= LJ::html_hidden({ 'name' => "edit_$_->{'userid'}_$key",
+                                      value => $_->{$key} ? 'on' : '' 
+                                    }) if ($username ne $remote->user) && ($key =~ /admin/) && (%disabled || %disabled_maint);
             $wstr .= $attrshort_r{$key} if $_->{$key};
             $ret .= "</td>";
         }
