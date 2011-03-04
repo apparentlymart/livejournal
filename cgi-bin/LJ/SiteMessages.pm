@@ -173,6 +173,14 @@ sub filter_by_sup_flag {
     return grep { $_->{accounts} & $coded } @questions;
 }
 
+sub is_office_only {
+    my $class = shift;
+    my $message = shift;
+
+    # +0 is important for doing integer bitwise operation, opposite to string operation
+    return ($message->{accounts}+0) & AccountMask->{OfficeOnly};
+}
+
 sub get_messages {
     my $class = shift;
     my %opts = @_;

@@ -25,11 +25,13 @@ sub _format_one_message {
     ## <lj user> tags and lj-sys-message-close attributes
     LJ::CleanHTML::clean_event(\$text, { 'lj_sys_message_id' => $mid });
 
+    my $is_office = LJ::SiteMessages->is_office_only($message) ? '<b>[Only for office]</b> ' : '';
+
     return 
         "<p class='b-message b-message-suggestion b-message-system'>" .
         "<span class='b-message-wrap'>" .
         "<img width='16' height='14' alt='' src='$LJ::IMGPREFIX/message-system-alert.gif' />" .
-        $text .
+        $is_office . $text .
         "</span></p>";
 }
 
