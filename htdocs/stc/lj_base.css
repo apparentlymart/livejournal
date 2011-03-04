@@ -2046,6 +2046,60 @@ DIV.lj_ippu_app {
 				}
 
 
+/* Login More Popup */
+.b-loginpopup {
+	display: none;
+	margin: 0;
+	padding: 0;
+	}
+	.b-loginpopup .b-popup-inner {
+		padding: 5px 10px;
+		}
+	.b-loginpopup-items {
+		margin: 0 0 0 -5px;
+		padding: 0;
+		list-style: none;
+		}
+		.b-loginpopup-item {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			}
+			BODY .b-loginpopup-item A:link,
+			BODY .b-loginpopup-item A:visited,
+			BODY #header table.login-form .b-loginpopup-item A:link,
+			BODY #header table.login-form .b-loginpopup-item A:visited {
+				display: block;
+				margin: 0;
+				padding: 3px 5px;
+				-moz-border-radius: 3px;
+				border-radius: 3px;
+				border: 0;
+				background: #FFF;
+				color: #222 !important;
+				text-decoration: none;
+				}
+			BODY .b-loginpopup-item A:hover,
+			BODY .b-loginpopup-item A:active,
+			BODY #header table.login-form .b-loginpopup-item A:hover,
+			BODY #header table.login-form .b-loginpopup-item A:active {
+				display: block;
+				margin: 0;
+				padding: 3px 5px;
+				-moz-border-radius: 3px;
+				border-radius: 3px;
+				border: 0;
+				background: #C5E1F7;
+				color: #222 !important;
+				text-decoration: none;
+				}
+			.b-loginpopup-item IMG,
+			#header .b-loginpopup-item IMG {
+				margin: 0 5px 0 0;
+				vertical-align: -4px;
+				border: 0;
+				}
+
 
 /* Fader
 --------------------------- */
