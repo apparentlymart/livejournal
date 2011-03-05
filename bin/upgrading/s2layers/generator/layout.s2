@@ -728,8 +728,17 @@ $this->print_linklist();
     $this->print_body();
 
 if (viewer_sees_hbox_bottom()) {
+var Page p = get_page();
     """
     <table cellpadding="2" cellspacing="0" border="0" summary="" style="margin-top: 10px;" class="box">
+    <tr> """;
+        if (viewer_sees_ad_box("s2.box.yandex")) {
+            """<div style="width: 744px; margin: 0 auto;">""";
+            $p->print_ad_box("s2.box.yandex");
+            """</div>""";
+        }
+        """
+    </tr>
     <tr><td bgcolor="$*stronger_back" align="center">
     <table width="100%" cellpadding="3" cellspacing="0"
     border="0"

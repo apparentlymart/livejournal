@@ -547,6 +547,7 @@ function print_module_ads(string title) {
 }
 
 function handle_sidebar_array(string[][] list) {
+var Page p = get_page();
     foreach var string[] item ($list) {
         var string module = $item[0];
         var string title = $item[1];
@@ -586,6 +587,11 @@ function handle_sidebar_array(string[][] list) {
             print_module_ads($title);
         }
     }
+     if (viewer_sees_ad_box("s2.box.yandex")) {
+            """<div class="box-yandex">""";
+            $p->print_ad_box("s2.box.yandex");
+            """</div>""";
+        }
 }
 
 function Page::lay_sidebar_primary() {

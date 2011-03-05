@@ -482,6 +482,7 @@ function Page::print ()
 
     $this->print_head();
     $this->print_stylesheets();
+    var Page p = get_page();
 
 print safe """
   <title>$title</title>
@@ -536,6 +537,11 @@ $this->print_linklist();
     print safe $website; "<td>"; server_sig(); "</td></tr>";
 
     "</table></td></tr></table>";
+    if (viewer_sees_ad_box("s2.box.yandex")) {
+        """<div class="box-yandex">""";
+        $p->print_ad_box("s2.box.yandex");
+        """</div>""";
+    }
     if (viewer_sees_hbox_bottom()) {
         """<div style="text-align: center; margin-top: 50px; clear: both;">""";
         $this->print_hbox_bottom();
