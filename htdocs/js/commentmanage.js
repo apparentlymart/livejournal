@@ -432,7 +432,7 @@ function createDeleteFunction(ae, dItemid, isS1) {
 			createPopup(inHTML.join(' '), ae, e, 'deletePopup' + dItemid);
 		}
 		Event.stop(e);
-	}
+	};
 }
 
 function poofAt (pos) {
@@ -530,13 +530,12 @@ function createModerationFunction(control, dItemid, isS1, action) {
 		
 		function sendModerateRequest() {
 			var	bmlName = { 'screen': 'talkscreen', 'spam': 'delcomment' }[action],
-				postUrl = control.href.replace(new RegExp('.+' + bmlName + '\.bml'), LiveJournal.getAjaxUrl(bmlName)) + '&jsmode=1',
+				postUrl = control.href.replace(new RegExp('.+' + bmlName + '\.bml'), LiveJournal.getAjaxUrl(bmlName)) + '&mode=js',
 				postParams = { 'confirm': 'Y', lj_form_auth: LJ_cmtinfo.form_auth };
 				
 			hourglass = jQuery(e).hourglass()[0];
 			
 			if (action == 'spam') {
-				postUrl = (!isS1) ? postUrl.replace('id', 'talkid') : postUrl;
 				postParams.spam = 1;
 				postParams.delauthor = 1;
 			}
