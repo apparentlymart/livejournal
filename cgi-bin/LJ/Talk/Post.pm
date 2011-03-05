@@ -485,7 +485,7 @@ sub init {
     my $spam = 0;
     my $with_links = 0;
     my $up_is_friend = $up && LJ::is_friend($journalu, $up);
-    LJ::run_hook('spam_comment_detector', $form, \$spam, \$with_links) 
+    LJ::run_hook('spam_comment_detector', $form, \$spam, \$with_links, $journalu, $up) 
         if $state eq 'A' && $journalu->is_spamprotection_enabled && ( $journalu->is_community || !$up_is_friend);
     LJ::run_hook('spam_in_friends_journals', \$spam, $journalu, $up)
         if !$spam && $with_links && $journalu->is_person && $journalu->in_class('paid');
