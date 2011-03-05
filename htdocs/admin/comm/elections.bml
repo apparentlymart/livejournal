@@ -62,14 +62,16 @@ body<=
             $ret .= "<p>Election period: from $create_time";
             $ret .= $poll->is_closed ? "</p>" : " to $close_time</p>";
 
-            my $maintainers = LJ::load_rel_user($comm->{userid}, 'A');
-            my $users = LJ::load_userids(@$maintainers);
+            my @q = $poll->questions;
+            my @items = $q[0]->items;
+
             my @alive_mainteiners;
             my $total = 0;
-            foreach my $u (values %$users) {
-                if ($u && $u->is_visible && $u->can_manage($comm) && $u->check_activity(90)) {
-                    push @alive_mainteiners, $u;
-                }
+            foreach my $item (@items) {
+                my $user = $item->{item};
+                $user =~ s/<lj user='(.*?)'>/$1/;
+                my $u = LJ::load_user($user);
+                push @alive_mainteiners, $u;
                 $total++ if $u;
             }
 
@@ -109,8 +111,12 @@ body<=
 
             $ret .= "<br/><h3>Current state of election:</h3>";
             $ret .= "<ul style='padding:0;list-style:none;'>";
-            foreach my $u (values %$users) {
-                my $vote_for = $items[$result_users{$u->userid} - 1]->{item};
+            foreach my $item (@items) {
+                my $user = $item->{item};
+                $user =~ s/<lj user='(.*?)'>/$1/;
+                my $u = LJ::load_user($user);
+                my ($vote_for) = grep { $result_users{$u->userid} == $_->{pollitid} } @items;
+                $vote_for = $vote_for ? $vote_for->{item} : '';
                 LJ::Poll->clean_poll(\$vote_for);
                 $ret .= "<li>" . LJ::ljuser($u) . " &mdash; " . ( $result_users{$u->userid} ? " voted for " . $vote_for : " not voted yet ") . "</li>";
             }
