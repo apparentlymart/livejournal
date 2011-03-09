@@ -354,6 +354,16 @@ sub EntryPage
         $p->{'head_content'} .= $js;
     }
 
+    my %meta = (
+        'title'       => LJ::Text->drop_html($entry->subject_raw),
+        'description' => LJ::Text->drop_html($entry->event_raw),
+    );
+
+    $p->{'head_content'} .= qq[
+        <meta name="title" value="$meta{'title'}"/>
+        <meta name="description" value="$meta{'description'}"/>
+    ];
+
     LJ::need_res(qw(
                     js/commentmanage.js
                     ));
