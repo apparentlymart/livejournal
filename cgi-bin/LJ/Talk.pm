@@ -9,7 +9,7 @@ use LJ::Comment;
 use LJ::Constants;
 use LJ::Event::JournalNewComment;
 use LJ::EventLogRecord::NewComment;
-use LJ::OpenID
+use LJ::OpenID;
 use LJ::RateLimit qw//;
 use LJ::Share;
 use LJ::Talk::Author;
