@@ -1,20 +1,19 @@
 package LJ::Talk;
 use strict;
 
-use LJ::Constants;
-use LJ::RateLimit qw//;
-use Class::Autouse qw(
-                      LJ::Event::JournalNewComment
-                      LJ::Event::UserNewComment
-                      LJ::Comment
-                      LJ::EventLogRecord::NewComment
-                      Captcha::reCAPTCHA
-                      LJ::OpenID
-                      );
-use MIME::Words;
+use Captcha::reCAPTCHA;
 use Carp qw(croak);
-use LJ::TimeUtil;
+use MIME::Words;
+
+use LJ::Comment;
+use LJ::Constants;
+use LJ::Event::JournalNewComment;
+use LJ::EventLogRecord::NewComment;
+use LJ::OpenID
+use LJ::RateLimit qw//;
+use LJ::Share;
 use LJ::Talk::Author;
+use LJ::TimeUtil;
 
 use constant PACK_FORMAT => "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state 
 
@@ -154,7 +153,13 @@ sub link_bar
                 .attachButton(jQuery('a:last')[0]);
             </script>|
             if $entry->security eq 'public';
-     }
+    }
+
+    if ( LJ::is_enabled('sharing') && $entry->is_public ) {
+        LJ::Share->request_resources;
+        push @linkele, $mlink->( '#', 'share' )
+                     . LJ::Share->render_js( { 'entry' => $entry } );
+    }
 
     if ($remote && $remote->can_use_esn) {
         my $img_key = $remote->has_subscription(journal => $u, event => "JournalNewComment", arg1 => $itemid, require_active => 1) ?
