@@ -1,10 +1,13 @@
 <ul class="m-section">
 	<TMPL_LOOP categories>
 		<tmpl_if is_vertical_view>
-		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF>"><a href="<tmpl_var url>?view=<tmpl_var view>"><i class="m-switch"><i class="t"></i><i class="b"></i></i><TMPL_VAR name></a>
+		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF>">
+			<a href="<tmpl_var url>?view=<tmpl_var view>"><TMPL_IF level1><i class="m-switch"><i class="t"></i><i class="b"></i></i></TMPL_IF><TMPL_VAR name></a>
 		<tmpl_else>
-		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF>"><span><i class="m-switch"><i class="t"></i><i class="b"></i></i><TMPL_VAR name></span>
+		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF>">
+			<span><TMPL_IF level1><i class="m-switch"><i class="t"></i><i class="b"></i></i></TMPL_IF><TMPL_VAR name></span>
 		</tmpl_if>
+			<TMPL_IF level1>
 			<ul class="m-section-list">
 				<TMPL_LOOP level1>
 					<li<TMPL_IF is_current> class="m-section-item-open"</TMPL_IF>>
@@ -34,6 +37,7 @@
 					</li>
 				</TMPL_LOOP>
 			</ul>
+			</TMPL_IF>
 		</li>
 	</TMPL_LOOP>
 </ul>
