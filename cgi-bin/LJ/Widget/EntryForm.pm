@@ -1419,7 +1419,7 @@ sub render_body {
         $out .= $self->wrap_js(qq{
             FCKeditor_IsCompatibleBrowser = (function(FCKeditor_IsCompatibleBrowser) {
                 return function() {
-                    if (~navigator.userAgent.indexOf('iPhone')) {
+                    if (/iPad|iPhone/.test(navigator.userAgent)) {
                         return false;
                     }
                     return FCKeditor_IsCompatibleBrowser();
