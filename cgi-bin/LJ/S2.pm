@@ -3718,7 +3718,7 @@ sub _Entry__get_link
             unless LJ::is_enabled('sharing') && $entry->is_public;
 
         my $link_text = $ctx->[S2::PROPS]->{'text_share'};
-        my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif",
+        my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=2",
                                         24, 24 );
 
         my $link = LJ::S2::Link('#', $link_text, $link_image);

@@ -167,7 +167,7 @@ $img{'editcomment'} = {
 };
 
 $img{'sharethis'} = {
-    'src' => '/btn_sharethis.gif?v=1',
+    'src' => '/btn_sharethis.gif?v=2',
     'width' => 24,
     'height' => 24,
     'alt' => 'img.sharethis',
