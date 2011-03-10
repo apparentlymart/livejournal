@@ -28,12 +28,14 @@
                     <div class="b-postform-login-item b-postform-login-ljedit">
                         <TMPL_IF remote_banned>
                             <div class="b-postform-login-opts">
+                                <img src="<TMPL_VAR lj_imgprefix>/userinfo.gif" class="b-postform-login-img" />
                                 <TMPL_VAR ml_loggedin>
                                 <TMPL_VAR ml_banned>
                             </div>
                         <TMPL_ELSE>
                             <span class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></span>
                             <div class="b-postform-login-opts">
+                                <img src="<TMPL_VAR lj_imgprefix>/userinfo.gif" class="b-postform-login-img" />
                                 <TMPL_VAR ml_loggedin>
                                 <input type="hidden" name="usertype" value="cookieuser" />
                                 <input type="hidden" name="cookieuser" value="<TMPL_VAR remote_username>" id="cookieuser" />
@@ -42,7 +44,7 @@
                 </div>
             </div>
         <TMPL_ELSE>
-            <div class="b-postform-login b-postform-livejournal">
+            <div class='b-postform-login b-postform-<TMPL_IF expr="usertype_default eq 'anonymous'">anonymous b-postform-anonymous-cookie<TMPL_ELSIF expr="usertype_default eq 'cookieuser'">user b-postform-user-cookie<TMPL_ELSIF expr="usertype_default eq 'facebook_cookie'">facebook b-postform-facebook-cookie<TMPL_ELSIF expr="usertype_default eq 'twitter_cookie'">twitter b-postform-twitter-cookie<TMPL_ELSIF expr="usertype_default eq 'openid_cookie'">openid b-postform-openid-cookie<TMPL_ELSIF expr="usertype_default eq 'mailru_cookie'">mailru b-postform-mailru-cookie</TMPL_IF>'>
                 <div class="b-postform-login-services">
                     <div class="b-postform-login-services-items">
                         <span class="b-postform-login-services-item b-postform-login-services-anonymous"><a href="#"><img src="<TMPL_VAR lj_imgprefix>/anonymous.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span></a></span>

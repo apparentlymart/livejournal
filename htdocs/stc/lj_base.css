@@ -1061,7 +1061,10 @@ Must be removed after implementation of Framework! */
 	overflow: visible;
 	position: static;
 	display: block;
-	margin: 0 0 10px;
+	width: auto;
+	height: auto;
+	margin: 0 0 5px;
+	padding: 0;
 	zoom: 1;
 	}
 .b-postform-login:before,
@@ -1102,6 +1105,8 @@ Must be removed after implementation of Framework! */
 			top: 26px;
 			left: 0;
 			display: block;
+			width: auto;
+			height: auto;
 			margin: 0;
 			padding: 0;
 			border: 0;
@@ -1116,6 +1121,8 @@ Must be removed after implementation of Framework! */
 			top: 25px;
 			left: -1px;
 			display: block;
+			width: auto;
+			height: auto;
 			margin: 0;
 			padding: 3px 5px;
 			border: 1px solid #CCC;
@@ -1132,7 +1139,10 @@ Must be removed after implementation of Framework! */
 			.b-postform-login-services-item {
 				position: static;
 				display: none;
+				width: auto;
+				height: auto;
 				margin: 0;
+				padding: 0;
 				}
 			.b-postform-login-services:hover .b-postform-login-services-item {
 				display: block;
@@ -1140,6 +1150,8 @@ Must be removed after implementation of Framework! */
 				BODY .b-postform-login-services-item A:link,
 				BODY .b-postform-login-services-item A:visited {
 					display: block;
+					width: auto;
+					height: auto;
 					margin: 0;
 					padding: 3px 7px 3px 3px;
 					-moz-border-radius: 3px;
@@ -1152,6 +1164,8 @@ Must be removed after implementation of Framework! */
 				BODY .b-postform-login-services-item A:hover,
 				BODY .b-postform-login-services-item A:active {
 					display: block;
+					width: auto;
+					height: auto;
 					margin: 0;
 					padding: 3px 7px 3px 3px;
 					-moz-border-radius: 3px;
@@ -1174,7 +1188,11 @@ Must be removed after implementation of Framework! */
 					cursor: default;
 					}
 					.b-postform-login-services-item IMG {
+						position: static;
+						width: auto;
+						height: auto;
 						margin: 0 5px 0 0;
+						padding: 0;
 						vertical-align: -4px;
 						border: 0;
 						}
@@ -1232,13 +1250,16 @@ Must be removed after implementation of Framework! */
 				BODY .b-postform-mailru .b-postform-login-services-mailru A:visited,
 				BODY .b-postform-mailru .b-postform-login-services-mailru A:hover,
 				BODY .b-postform-mailru .b-postform-login-services-mailru A:active {
+					position: static;
 					display: block;
+					width: auto;
+					height: auto;
 					margin: 0;
 					padding: 0;
 					-moz-border-radius: 0;
 					border-radius: 0;
 					border: 0;
-					background: #FFF !important;
+					background: transparent !important;
 					color: #222 !important;
 					text-decoration: none;
 					}
@@ -1249,6 +1270,7 @@ Must be removed after implementation of Framework! */
 					.b-postform-twitter .b-postform-login-services-twitter IMG,
 					.b-postform-openid .b-postform-login-services-openid IMG,
 					.b-postform-mailru .b-postform-login-services-mailru IMG {
+						position: static;
 						display: block;
 						width: 17px;
 						height: 16px;
@@ -1275,6 +1297,8 @@ Must be removed after implementation of Framework! */
 		position: static;
 		float: none;
 		display: block;
+		width: auto;
+		height: auto;
 		margin: 0 0 0 55px;
 		padding: 0;
 		font: 12px/1.1 Arial,sans-serif;
@@ -1310,30 +1334,38 @@ Must be removed after implementation of Framework! */
 				.b-postform-login-item .i-bubble-arrow-border {
 					margin: -6px 0 0;
 					}
-			.b-postform-login-anonymous .b-postform-login-opts {
+			.b-postform-login-anonymous .b-postform-login-opts,
+			.b-postform-user-cookie .b-postform-login-user .b-postform-login-opts,
+			.b-postform-facebook-cookie .b-postform-login-facebook .b-postform-login-opts,
+			.b-postform-twitter-cookie .b-postform-login-twitter .b-postform-login-opts,
+			.b-postform-openid-cookie .b-postform-login-openid .b-postform-login-opts,
+			.b-postform-mailru-cookie .b-postform-login-mailru .b-postform-login-opts {
 				position: static;
 				display: block;
-				margin: 0;
-				padding: 8px 0;
-				}
-			.b-postform-login-user .b-postform-login-opts {
-				position: static;
-				display: block;
+				width: auto;
+				height: auto;
 				margin: 0;
 				padding: 8px 0;
 				}
 			.b-postform-login-livejournal .b-postform-login-opts {
 				position: static;
 				display: block;
+				width: auto;
+				height: auto;
 				margin: 0;
 				padding: 4px 2px;
 				}
 			.b-postform-login-ljedit .b-postform-login-opts {
 				position: static;
 				display: block;
+				width: auto;
+				height: auto;
 				margin: 0;
 				padding: 5px 0;
 				}
+				.b-postform-login-ljedit .b-postform-login-opts .b-postform-login-img {
+					vertical-align: -4px;
+					}
 
 
 
