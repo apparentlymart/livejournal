@@ -286,29 +286,36 @@ function showSmooth(elem) {
 	}, 'fast');	
 }
 
-function deleteComment (ditemid, isS1) {
+function deleteComment (ditemid, isS1, action) {
+	action = action || 'delete';
+	
     killPopup();
 
     var form = $('ljdelopts' + ditemid),
         todel = $('ljcmt' + ditemid),
         opt_delthread, opt_delauthor, is_deleted, is_error,
         pulse = 0;
-		
-	opt_delthread = opt_delauthor = is_deleted = is_error = false;		
 
     var postdata = 'confirm=1';
-    if (form){ 
-    	if (form.ban && form.ban.checked) postdata += '&ban=1';
-    	if (form.spam && form.spam.checked) postdata += '&spam=1';
+    if (form && action == 'delete') { 
+    	if (form.ban && form.ban.checked) {
+			postdata += '&ban=1';
+		}
+    	if (form.spam && form.spam.checked) {
+			postdata += '&spam=1';
+		}
     	if (form.delthread && form.delthread.checked) {
-        	postdata += '&delthread=1';
-        	opt_delthread = true;
-   	 }
+			postdata += '&delthread=1';
+			opt_delthread = true;
+		}
     	if (form.delauthor && form.delauthor.checked) {
         	postdata += '&delauthor=1';
         	opt_delauthor = true;
     	}
-    }
+    } else if (action == 'markAsSpam') {
+		opt_delauthor = opt_delthread = true;
+		postdata += '&ban=1&spam=1&delthread=1&delauthor=1';
+	}
     postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
     var curJournal = (Site.currentJournal !== "") ? (Site.currentJournal) : (LJ_cmtinfo.journal);
     var opts = {
@@ -323,7 +330,7 @@ function deleteComment (ditemid, isS1) {
           alert('Error deleting ' + ditemid);
           is_error = true;
         }
-    }
+    };
 
     HTTPReq.getJSON(opts);
 
@@ -383,9 +390,14 @@ function removeComment (ditemid, killChildren, isS1) {
     }
 }
 
-function createDeleteFunction(ae, dItemid, isS1) {
+function createDeleteFunction(ae, dItemid, isS1, action) {
+	action = action || 'delete';
+	
     return function (e) {
 		e = jQuery.event.fix(e || window.event);
+		
+		e.stopPropagation();
+		e.preventDefault();
 
         if (e.shiftKey || (window.curPopup && window.curPopup_id != dItemid)) {
             killPopup();
@@ -394,44 +406,61 @@ function createDeleteFunction(ae, dItemid, isS1) {
         var doIT = 0;
         // immediately delete on shift key
         if (e.shiftKey) {
-            doIT = 1;
-			deleteComment(dItemid, isS1);
-        } else {
-            if (!LJ_cmtinfo)
-                return true;
+			doIT = 1;
+			deleteComment(dItemid, isS1, action);
+			return true;
+		}
+		
+		if (!LJ_cmtinfo) {
+			return true;
+		}
 
-            var com = LJ_cmtinfo[dItemid];
-            var remoteUser = LJ_cmtinfo["remote"];
-            if (!com || !remoteUser)
-                return true;
-            var canAdmin = LJ_cmtinfo["canAdmin"];
+        var com = LJ_cmtinfo[dItemid],
+			comUser = LJ_cmtinfo[dItemid].u,
+			remoteUser = LJ_cmtinfo.remote;
+        if (!com || !remoteUser) {
+			return true;
+		}
+        var canAdmin = LJ_cmtinfo.canAdmin;
+		
+		if (action == 'markAsSpam') {
+			var popupElem = createPopup('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr('comment.mark.spam.title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr('comment.mark.spam.subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" value="OK"></div><div>', ae, e, 'spamComment' + dItemid);
 			
-            var inHTML = [ "<form id='ljdelopts" + dItemid + "'><div class='b-popup-group'><div class='b-popup-row b-popup-row-head'><strong>" + getLocalizedStr( 'comment.delete.q', com.u ) + "</strong></div>" ];
-            var lbl;
-            if (com.username != "" && com.username != remoteUser && canAdmin) {
-                lbl = "ljpopdel" + dItemid + "ban";
-                inHTML.push("<div class='b-popup-row'><input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.ban.user', com.u ) + "</label></div>");
-            }
-
-            if (remoteUser != com.username) {
-                lbl = "ljpopdel" + dItemid + "spam";
-                inHTML.push("<div class='b-popup-row'><input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.mark.spam', com.u ) + "</label></div>");
-            }
-
-            if (com.rc && com.rc.length && canAdmin) {
-                lbl = "ljpopdel" + dItemid + "thread";
-                inHTML.push("<div class='b-popup-row'><input type='checkbox' name='delthread' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all.sub', com.u ) + "</label></div>");
-            }
-            if (canAdmin&&com.username) {
-                lbl = "ljpopdel" + dItemid + "author";
-                inHTML.push("<div class='b-popup-row'><input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all', "<b>" + ( (com.username == remoteUser ? 'my' : com.u) ) + "</b>" ) + "</label></div>");
-            }
-
-            inHTML.push("<div class='b-popup-row'><input type='button' value='" + getLocalizedStr( 'comment.delete', com.u ) + "' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /></div></div><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', com.u ) + "</div></form>");
+			if (popupElem) {
+				popupElem.delegate('.spam-comment-button', 'click', function (e) {
+					e.preventDefault();
+					deleteComment(dItemid, isS1, action); 
+					killPopup();
+				});
+			}					
+			
+			return true;
+		} else if (action == 'delete') {
+	        var inHTML = [ "<form id='ljdelopts" + dItemid + "'><div class='b-popup-group'><div class='b-popup-row b-popup-row-head'><strong>" + getLocalizedStr( 'comment.delete.q', comUser ) + "</strong></div>" ];
+	        var lbl;
+	        if (com.username !== "" && com.username != remoteUser && canAdmin) {
+	            lbl = "ljpopdel" + dItemid + "ban";
+	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.ban.user', comUser ) + "</label></div>");
+	        }
+	
+	        if (remoteUser != com.username) {
+	            lbl = "ljpopdel" + dItemid + "spam";
+	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.mark.spam', comUser ) + "</label></div>");
+	        }
+	
+	        if (com.rc && com.rc.length && canAdmin) {
+	            lbl = "ljpopdel" + dItemid + "thread";
+	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='delthread' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all.sub', comUser ) + "</label></div>");
+	        }
+	        if (canAdmin&&com.username) {
+	            lbl = "ljpopdel" + dItemid + "author";
+	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all', "<b>" + ( (com.username == remoteUser ? 'my' : comUser) ) + "</b>" ) + "</label></div>");
+	        }
+	
+	        inHTML.push("<div class='b-popup-row'><input type='button' value='" + getLocalizedStr( 'comment.delete', comUser ) + "' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /></div></div><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', comUser ) + "</div></form>");
 			
 			createPopup(inHTML.join(' '), ae, e, 'deletePopup' + dItemid);
 		}
-		Event.stop(e);
 	};
 }
 
@@ -496,9 +525,8 @@ function updateLink (ae, resObj, clickTarget) {
 }
 
 var tsInProg = {}  // dict of { ditemid => 1 }
-function createModerationFunction(control, dItemid, isS1, action) {
-	var action = action || 'screen', // "screen" action by default
-		comUser = LJ_cmtinfo[dItemid].u;	
+function createModerationFunction(control, dItemid, isS1) {
+	var comUser = LJ_cmtinfo[dItemid].u;	
 	
 	return function (e) {
 		var	e = jQuery.event.fix(e || window.event),
@@ -509,36 +537,14 @@ function createModerationFunction(control, dItemid, isS1, action) {
 		e.stopPropagation();
 		e.preventDefault();
 			
-		if (action == 'spam' && !modeParam) {
-			showDialogPopup();
-		} else {
-			sendModerateRequest();
-		}
-			
+		sendModerateRequest();
 
-		function showDialogPopup() {
-			var popupElem = createPopup('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr('comment.mark.spam.title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr('comment.mark.spam.subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" value="OK"></div><div>', control, e, 'spamComment' + dItemid);			
-			
-			if (popupElem) {
-				popupElem.delegate('.spam-comment-button', 'click', function (e) {
-						e.preventDefault();
-						sendModerateRequest();
-						killPopup(); 
-					});
-			}					
-		}
-		
 		function sendModerateRequest() {
-			var	bmlName = { 'screen': 'talkscreen', 'spam': 'delcomment' }[action],
-				postUrl = control.href.replace(new RegExp('.+' + bmlName + '\.bml'), LiveJournal.getAjaxUrl(bmlName)) + '&mode=js',
+			var	bmlName = 'talkscreen.bml',
+				postUrl = control.href.replace(bmlName, LiveJournal.getAjaxUrl(bmlName)) + '&mode=js',
 				postParams = { 'confirm': 'Y', lj_form_auth: LJ_cmtinfo.form_auth };
 				
 			hourglass = jQuery(e).hourglass()[0];
-			
-			if (action == 'spam') {
-				postParams.spam = 1;
-				postParams.delauthor = 1;
-			}
 			
 			jQuery.post(postUrl, postParams, function (json) {
 				tsInProg[dItemid] = 0;
@@ -548,14 +554,6 @@ function createModerationFunction(control, dItemid, isS1, action) {
 				} else {
 					var ids = checkRcForNoCommentsPage(json);
 					handleS2(ids);
-				}
-				
-				if (action == 'spam') {
-	                for (var item in LJ_cmtinfo) {
-	                    if (LJ_cmtinfo[item].u == LJ_cmtinfo[dItemid].u) {
-	                        removeComment(item, false, isS1);
-	                    }
-	                }					
 				}				
 			});		
 		}
@@ -677,7 +675,7 @@ function createModerationFunction(control, dItemid, isS1, action) {
 			function mapComms(id) {
 				var i = -1, newId;
 				
-				while (newId = LJ_cmtinfo[id].rc[++i]) {
+				while (newId == LJ_cmtinfo[id].rc[++i]) {
 					if (LJ_cmtinfo[newId].full) {
 						commsArray.push(newId);
 						mapComms(String(newId));
@@ -711,7 +709,7 @@ function setupAjax (node, isS1) {
             var id = reMatch[1];
             if (!document.getElementById('ljcmt' + id)) continue;
 
-            ae.onclick = createModerationFunction(ae, id, isS1, 'screen');
+            ae.onclick = createModerationFunction(ae, id, isS1);
         } else if (ae.href.indexOf('delcomment.bml') != -1) {
             if (LJ_cmtinfo && LJ_cmtinfo.disableInlineDelete) continue;
 
@@ -720,12 +718,10 @@ function setupAjax (node, isS1) {
 
             var id = reMatch[1];
             if (!document.getElementById('ljcmt' + id)) continue;
+			
+			var action = (ae.href.indexOf('spam=1') != -1) ? 'markAsSpam' : 'delete';
 
-			if (ae.href.indexOf('spam=1') != -1) {
-				ae.onclick = createModerationFunction(ae, id, isS1, 'spam');
-			} else {
-				ae.onclick = createDeleteFunction(ae, id, isS1);
-			}
+			ae.onclick = createDeleteFunction(ae, id, isS1, action);
 		}
     }
 }
