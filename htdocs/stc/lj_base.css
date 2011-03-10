@@ -561,7 +561,6 @@ SUP.i-new {
 	color: #C00;
 	}
 
-
 /* Styles for messagers,
 Must be removed after implementation of Framework! */
 .appwidget-sitemessages {
@@ -572,6 +571,9 @@ Must be removed after implementation of Framework! */
 	width: 100%;
 	padding: 0;
 	margin: 0;
+	}
+.mobile-msg .appwidget-sitemessages {
+	top: 130px;
 	}
 	.appwidget-sitemessages .b-message-system {
 		padding: 0;
@@ -616,7 +618,7 @@ Must be removed after implementation of Framework! */
 			.appwidget-sitemessages .b-message-system .ljuser A:link,
 			.appwidget-sitemessages .b-message-system .ljuser A:visited	{
 				text-decoration: none;
-				}		
+				}
 			.appwidget-sitemessages .b-message-system .ljuser A:hover,
 			.appwidget-sitemessages .b-message-system .ljuser A:active {
 				text-decoration: underline;
@@ -635,7 +637,6 @@ Must be removed after implementation of Framework! */
 	top: 44px;
 	z-index: 9999;
 	}
-
 #content-wrapper .appwidget-sitemessages {
 	position: static;
 	margin-top: 20px;
@@ -643,7 +644,6 @@ Must be removed after implementation of Framework! */
 	#content-wrapper .appwidget-sitemessages .b-message-system {
 		margin: 0 0 10px;
 		}
-	
 .scheme-lynx .appwidget-sitemessages {
 	top: 0;
 	}
