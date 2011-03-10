@@ -84,15 +84,10 @@ sub create {
     my $existcat = LJ::Browse->load_by_url("/browse" . $parentcaturl . $self->{url_path}, $vertical);
     croak("Category exists already") if $existcat;
 
-    $dbh->do("INSERT INTO category SET url_path=?, pretty_name=?, parentcatid=?",
-             undef, $self->{url_path}, $self->{pretty_name}, $self->{parentcatid} || 0);
+    $dbh->do("INSERT INTO category SET url_path=?, pretty_name=?, parentcatid=?, vert_id=?",
+             undef, $self->{url_path}, $self->{pretty_name}, $self->{parentcatid} || 0, $vertical ? $vertical->vert_id : 0);
     die $dbh->errstr if $dbh->err;
     my $catid = $dbh->{mysql_insertid};
-
-    ## Added for Landing Page
-    if ($vertical) {
-        $dbh->do("UPDATE category SET vert_id = ? WHERE catid = ?", undef, $vertical->vert_id, $catid);
-    }
 
     my $tm = $self->typemap;
     # Handle children prop

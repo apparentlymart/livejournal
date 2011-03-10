@@ -40,7 +40,7 @@ body<=
                         $_ =~ s#""#"#;                 ## unescape "
                         $_ 
                     }    
-                    split /;[\s]?/, $line;              ## split line by ,
+                    split /;/, $line;              ## split line by ';'
 
             ## Community name
             my $comm_name = $columns[0];
@@ -49,7 +49,15 @@ body<=
             my $vert_name = $columns[1];
             my $vert_url  = $columns[2];
 
-            $ret .= "Ups. May be something wrong in file?" unless $vert_name;
+            unless ($vert_name) {
+                $ret .= "Ups. May be something wrong in file?";
+                last;
+            }
+
+            unless ($vert_url =~ m#^/#) {
+                $ret .= "Url must be started by '/'";
+                last;
+            }
 
             my $v = LJ::Vertical->load_by_url ("/vertical" . $vert_url)
                 || LJ::Vertical->create (name => $vert_name, url => $vert_url);
@@ -62,8 +70,8 @@ body<=
             ## Category name & url
             my $cat_name = $columns[3];
             my $cat_url = $columns[4];
-            my $cat = LJ::Browse->load_by_url ("/browse" . $cat_url, $v);
 
+            my $cat = LJ::Browse->load_by_url ("/browse" . $cat_url, $v);
             unless ($cat) {
                 $cat = LJ::Browse->create ( pretty_name => $cat_name, url_path => $cat_url, vertical => $v );
             }
