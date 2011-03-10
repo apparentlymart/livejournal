@@ -76,22 +76,17 @@
         <TMPL_ELSE>
             <img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_current_img>' border='0' width='<TMPL_VAR subjicon_current_w>' height='<TMPL_VAR subjicon_current_h>' valign='middle' id='subjectIconImage' onclick='subjectIconListToggle();' style='cursor:pointer;cursor:hand' />
         </TMPL_IF>
-        <div class="b-popup b-subjecticons">
-            <div class="b-popup-outer">
-                <div class="b-popup-inner">
-                    <ul class="b-subjecticons-items">
-                        <TMPL_LOOP subjicon_types>
-                            <TMPL_IF __first__>
-                                <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/none.gif' border='0' width='15' height='15' id='none' title='No subject icon' /></li>
-                            </TMPL_IF>
-                            <TMPL_LOOP subjicons>
-                                <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_img>' border='0' width='<TMPL_VAR subjicon_w>' height='<TMPL_VAR subjicon_h>' id='<TMPL_VAR subjicon_id>' /></li>
-                            </TMPL_LOOP>
-                        </TMPL_LOOP>
-                    </ul>
-                </div>
-                <i class="i-popup-arr i-popup-arrtr"></i><i class="i-popup-close"></i>
-            </div>
+        <div class="b-subjecticons">
+            <ul class="b-subjecticons-items">
+                <TMPL_LOOP subjicon_types>
+                    <TMPL_IF __first__>
+                        <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/none.gif' border='0' width='15' height='15' id='none' title='No subject icon' /></li>
+                    </TMPL_IF>
+                    <TMPL_LOOP subjicons>
+                        <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_img>' border='0' width='<TMPL_VAR subjicon_w>' height='<TMPL_VAR subjicon_h>' id='<TMPL_VAR subjicon_id>' /></li>
+                    </TMPL_LOOP>
+                </TMPL_LOOP>
+            </ul>
         </div>
         <TMPL_IF 0> end subject icon </TMPL_IF>
 

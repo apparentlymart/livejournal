@@ -1081,6 +1081,9 @@ Must be removed after implementation of Framework! */
 	margin: 0;
 	}
 	.b-postform-login-services {
+		display: none;
+		}
+	#js .b-postform-login-services {
 		position: relative;
 		float: left;
 		display: block;
@@ -1096,11 +1099,11 @@ Must be removed after implementation of Framework! */
 		border-top-right-radius: 5px;
 		background: transparent;
 		}
-	.b-postform-login-services:hover {
+	#js .b-postform-login-services:hover {
 		border-color: #CCC;
 		background: #FFF;
 		}
-		.b-postform-login-services-items {
+		#js .b-postform-login-services-items {
 			position: absolute;
 			top: 26px;
 			left: 0;
@@ -1116,7 +1119,7 @@ Must be removed after implementation of Framework! */
 			white-space: nowrap;
 			z-index: 998;
 			}
-		.b-postform-login-services:hover .b-postform-login-services-items {
+		#js .b-postform-login-services:hover .b-postform-login-services-items {
 			position: absolute;
 			top: 25px;
 			left: -1px;
@@ -1136,7 +1139,7 @@ Must be removed after implementation of Framework! */
 			white-space: nowrap;
 			z-index: 998;
 			}
-			.b-postform-login-services-item {
+			#js .b-postform-login-services-item {
 				position: static;
 				display: none;
 				width: auto;
@@ -1144,11 +1147,11 @@ Must be removed after implementation of Framework! */
 				margin: 0;
 				padding: 0;
 				}
-			.b-postform-login-services:hover .b-postform-login-services-item {
+			#js .b-postform-login-services:hover .b-postform-login-services-item {
 				display: block;
 				}
-				BODY .b-postform-login-services-item A:link,
-				BODY .b-postform-login-services-item A:visited {
+				#js BODY .b-postform-login-services-item A:link,
+				#js BODY .b-postform-login-services-item A:visited {
 					display: block;
 					width: auto;
 					height: auto;
@@ -1161,8 +1164,8 @@ Must be removed after implementation of Framework! */
 					color: #222 !important;
 					text-decoration: none;
 					}
-				BODY .b-postform-login-services-item A:hover,
-				BODY .b-postform-login-services-item A:active {
+				#js BODY .b-postform-login-services-item A:hover,
+				#js BODY .b-postform-login-services-item A:active {
 					display: block;
 					width: auto;
 					height: auto;
@@ -1175,10 +1178,10 @@ Must be removed after implementation of Framework! */
 					color: #222 !important;
 					text-decoration: none;
 					}
-				BODY .b-postform-login-services-disabled A:link,
-				BODY .b-postform-login-services-disabled A:visited,
-				BODY .b-postform-login-services-disabled A:hover,
-				BODY .b-postform-login-services-disabled A:active {
+				#js BODY .b-postform-login-services-disabled A:link,
+				#js BODY .b-postform-login-services-disabled A:visited,
+				#js BODY .b-postform-login-services-disabled A:hover,
+				#js BODY .b-postform-login-services-disabled A:active {
 					background: #FFF;
 					-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
 					filter: alpha(opacity=50);
@@ -1187,7 +1190,7 @@ Must be removed after implementation of Framework! */
 					opacity: 0.5;
 					cursor: default;
 					}
-					.b-postform-login-services-item IMG {
+					#js .b-postform-login-services-item IMG {
 						position: static;
 						width: auto;
 						height: auto;
@@ -1196,13 +1199,13 @@ Must be removed after implementation of Framework! */
 						vertical-align: -4px;
 						border: 0;
 						}
-			.b-postform-anonymous .b-postform-login-services-anonymous,
-			.b-postform-livejournal .b-postform-login-services-livejournal,
-			.b-postform-user .b-postform-login-services-livejournal,
-			.b-postform-facebook .b-postform-login-services-facebook,
-			.b-postform-twitter .b-postform-login-services-twitter,
-			.b-postform-openid .b-postform-login-services-openid,
-			.b-postform-mailru .b-postform-login-services-mailru {
+			#js .b-postform-anonymous .b-postform-login-services-anonymous,
+			#js .b-postform-livejournal .b-postform-login-services-livejournal,
+			#js .b-postform-user .b-postform-login-services-livejournal,
+			#js .b-postform-facebook .b-postform-login-services-facebook,
+			#js .b-postform-twitter .b-postform-login-services-twitter,
+			#js .b-postform-openid .b-postform-login-services-openid,
+			#js .b-postform-mailru .b-postform-login-services-mailru {
 				position: absolute;
 				top: -25px;
 				left: 0;
@@ -1213,43 +1216,43 @@ Must be removed after implementation of Framework! */
 				padding: 0 1px;
 				background: transparent;
 				}
-			.b-postform-anonymous .b-postform-login-services:hover .b-postform-login-services-anonymous,
-			.b-postform-livejournal .b-postform-login-services:hover .b-postform-login-services-livejournal,
-			.b-postform-user .b-postform-login-services:hover .b-postform-login-services-livejournal,
-			.b-postform-facebook .b-postform-login-services:hover .b-postform-login-services-facebook,
-			.b-postform-twitter .b-postform-login-services:hover .b-postform-login-services-twitter,
-			.b-postform-openid .b-postform-login-services:hover .b-postform-login-services-openid,
-			.b-postform-mailru .b-postform-login-services:hover .b-postform-login-services-mailru {
+			#js .b-postform-anonymous .b-postform-login-services:hover .b-postform-login-services-anonymous,
+			#js .b-postform-livejournal .b-postform-login-services:hover .b-postform-login-services-livejournal,
+			#js .b-postform-user .b-postform-login-services:hover .b-postform-login-services-livejournal,
+			#js .b-postform-facebook .b-postform-login-services:hover .b-postform-login-services-facebook,
+			#js .b-postform-twitter .b-postform-login-services:hover .b-postform-login-services-twitter,
+			#js .b-postform-openid .b-postform-login-services:hover .b-postform-login-services-openid,
+			#js .b-postform-mailru .b-postform-login-services:hover .b-postform-login-services-mailru {
 				background: #FFF;
 				}
-				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:link,
-				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:visited,
-				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:hover,
-				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:active,
-				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:link,
-				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:visited,
-				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:hover,
-				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:active,
-				BODY .b-postform-user .b-postform-login-services-livejournal A:link,
-				BODY .b-postform-user .b-postform-login-services-livejournal A:visited,
-				BODY .b-postform-user .b-postform-login-services-livejournal A:hover,
-				BODY .b-postform-user .b-postform-login-services-livejournal A:active,
-				BODY .b-postform-facebook .b-postform-login-services-facebook A:link,
-				BODY .b-postform-facebook .b-postform-login-services-facebook A:visited,
-				BODY .b-postform-facebook .b-postform-login-services-facebook A:hover,
-				BODY .b-postform-facebook .b-postform-login-services-facebook A:active,
-				BODY .b-postform-twitter .b-postform-login-services-twitter A:link,
-				BODY .b-postform-twitter .b-postform-login-services-twitter A:visited,
-				BODY .b-postform-twitter .b-postform-login-services-twitter A:hover,
-				BODY .b-postform-twitter .b-postform-login-services-twitter A:active,
-				BODY .b-postform-openid .b-postform-login-services-openid A:link,
-				BODY .b-postform-openid .b-postform-login-services-openid A:visited,
-				BODY .b-postform-openid .b-postform-login-services-openid A:hover,
-				BODY .b-postform-openid .b-postform-login-services-openid A:active,
-				BODY .b-postform-mailru .b-postform-login-services-mailru A:link,
-				BODY .b-postform-mailru .b-postform-login-services-mailru A:visited,
-				BODY .b-postform-mailru .b-postform-login-services-mailru A:hover,
-				BODY .b-postform-mailru .b-postform-login-services-mailru A:active {
+				#js BODY .b-postform-anonymous .b-postform-login-services-anonymous A:link,
+				#js BODY .b-postform-anonymous .b-postform-login-services-anonymous A:visited,
+				#js BODY .b-postform-anonymous .b-postform-login-services-anonymous A:hover,
+				#js BODY .b-postform-anonymous .b-postform-login-services-anonymous A:active,
+				#js BODY .b-postform-livejournal .b-postform-login-services-livejournal A:link,
+				#js BODY .b-postform-livejournal .b-postform-login-services-livejournal A:visited,
+				#js BODY .b-postform-livejournal .b-postform-login-services-livejournal A:hover,
+				#js BODY .b-postform-livejournal .b-postform-login-services-livejournal A:active,
+				#js BODY .b-postform-user .b-postform-login-services-livejournal A:link,
+				#js BODY .b-postform-user .b-postform-login-services-livejournal A:visited,
+				#js BODY .b-postform-user .b-postform-login-services-livejournal A:hover,
+				#js BODY .b-postform-user .b-postform-login-services-livejournal A:active,
+				#js BODY .b-postform-facebook .b-postform-login-services-facebook A:link,
+				#js BODY .b-postform-facebook .b-postform-login-services-facebook A:visited,
+				#js BODY .b-postform-facebook .b-postform-login-services-facebook A:hover,
+				#js BODY .b-postform-facebook .b-postform-login-services-facebook A:active,
+				#js BODY .b-postform-twitter .b-postform-login-services-twitter A:link,
+				#js BODY .b-postform-twitter .b-postform-login-services-twitter A:visited,
+				#js BODY .b-postform-twitter .b-postform-login-services-twitter A:hover,
+				#js BODY .b-postform-twitter .b-postform-login-services-twitter A:active,
+				#js BODY .b-postform-openid .b-postform-login-services-openid A:link,
+				#js BODY .b-postform-openid .b-postform-login-services-openid A:visited,
+				#js BODY .b-postform-openid .b-postform-login-services-openid A:hover,
+				#js BODY .b-postform-openid .b-postform-login-services-openid A:active,
+				#js BODY .b-postform-mailru .b-postform-login-services-mailru A:link,
+				#js BODY .b-postform-mailru .b-postform-login-services-mailru A:visited,
+				#js BODY .b-postform-mailru .b-postform-login-services-mailru A:hover,
+				#js BODY .b-postform-mailru .b-postform-login-services-mailru A:active {
 					position: static;
 					display: block;
 					width: auto;
@@ -1263,13 +1266,13 @@ Must be removed after implementation of Framework! */
 					color: #222 !important;
 					text-decoration: none;
 					}
-					.b-postform-anonymous .b-postform-login-services-anonymous IMG,
-					.b-postform-livejournal .b-postform-login-services-livejournal IMG,
-					.b-postform-user .b-postform-login-services-livejournal IMG,
-					.b-postform-facebook .b-postform-login-services-facebook IMG,
-					.b-postform-twitter .b-postform-login-services-twitter IMG,
-					.b-postform-openid .b-postform-login-services-openid IMG,
-					.b-postform-mailru .b-postform-login-services-mailru IMG {
+					#js .b-postform-anonymous .b-postform-login-services-anonymous IMG,
+					#js .b-postform-livejournal .b-postform-login-services-livejournal IMG,
+					#js .b-postform-user .b-postform-login-services-livejournal IMG,
+					#js .b-postform-facebook .b-postform-login-services-facebook IMG,
+					#js .b-postform-twitter .b-postform-login-services-twitter IMG,
+					#js .b-postform-openid .b-postform-login-services-openid IMG,
+					#js .b-postform-mailru .b-postform-login-services-mailru IMG {
 						position: static;
 						display: block;
 						width: 17px;
@@ -1283,13 +1286,13 @@ Must be removed after implementation of Framework! */
 						cursor: pointer;
 						text-align: left;
 						}
-					.b-postform-anonymous .b-postform-login-services-anonymous .b-postform-login-services-name,
-					.b-postform-livejournal .b-postform-login-services-livejournal .b-postform-login-services-name,
-					.b-postform-user .b-postform-login-services-livejournal .b-postform-login-services-name,
-					.b-postform-facebook .b-postform-login-services-facebook .b-postform-login-services-name,
-					.b-postform-twitter .b-postform-login-services-twitter .b-postform-login-services-name,
-					.b-postform-openid .b-postform-login-services-openid .b-postform-login-services-name,
-					.b-postform-mailru .b-postform-login-services-mailru .b-postform-login-services-name {
+					#js .b-postform-anonymous .b-postform-login-services-anonymous .b-postform-login-services-name,
+					#js .b-postform-livejournal .b-postform-login-services-livejournal .b-postform-login-services-name,
+					#js .b-postform-user .b-postform-login-services-livejournal .b-postform-login-services-name,
+					#js .b-postform-facebook .b-postform-login-services-facebook .b-postform-login-services-name,
+					#js .b-postform-twitter .b-postform-login-services-twitter .b-postform-login-services-name,
+					#js .b-postform-openid .b-postform-login-services-openid .b-postform-login-services-name,
+					#js .b-postform-mailru .b-postform-login-services-mailru .b-postform-login-services-name {
 						display: none;
 						}
 	.b-postform-login-details {
@@ -1299,11 +1302,14 @@ Must be removed after implementation of Framework! */
 		display: block;
 		width: auto;
 		height: auto;
-		margin: 0 0 0 55px;
+		margin: 0;
 		padding: 0;
 		font: 12px/1.1 Arial,sans-serif;
 		}
-		.b-postform-login-item {
+	#js .b-postform-login-details {	
+		margin: 0 0 0 55px;
+		}
+		#js .b-postform-login-item {
 			display: none;
 			position: static;
 			width: auto;
@@ -1311,18 +1317,18 @@ Must be removed after implementation of Framework! */
 			margin: 0;
 			padding: 0;
 			}
-		.b-postform-anonymous .b-postform-login-anonymous,
-		.b-postform-livejournal .b-postform-login-livejournal,
-		.b-postform-user .b-postform-login-user,
-		.b-postform-facebook .b-postform-login-facebook,
-		.b-postform-twitter .b-postform-login-twitter,
-		.b-postform-openid .b-postform-login-openid,
-		.b-postform-mailru .b-postform-login-mailru,
-		.b-postform-ljedit .b-postform-login-ljedit {
+		#js .b-postform-anonymous .b-postform-login-anonymous,
+		#js .b-postform-livejournal .b-postform-login-livejournal,
+		#js .b-postform-user .b-postform-login-user,
+		#js .b-postform-facebook .b-postform-login-facebook,
+		#js .b-postform-twitter .b-postform-login-twitter,
+		#js .b-postform-openid .b-postform-login-openid,
+		#js .b-postform-mailru .b-postform-login-mailru,
+		#js .b-postform-ljedit .b-postform-login-ljedit {
 			display: block;
 			}
-			.b-postform-login-item .b-postform-login-radio,
-			.b-postform-login-item .b-postform-login-service {
+			#js .b-postform-login-item .b-postform-login-radio,
+			#js .b-postform-login-item .b-postform-login-service {
 				display: none;
 				}
 			.b-postform-login-item .i-bubble {
@@ -1334,7 +1340,7 @@ Must be removed after implementation of Framework! */
 				.b-postform-login-item .i-bubble-arrow-border {
 					margin: -6px 0 0;
 					}
-			.b-postform-login-anonymous .b-postform-login-opts,
+			.b-postform-anonymous-cookie .b-postform-login-anonymous .b-postform-login-opts-anonymous,
 			.b-postform-user-cookie .b-postform-login-user .b-postform-login-opts,
 			.b-postform-facebook-cookie .b-postform-login-facebook .b-postform-login-opts,
 			.b-postform-twitter-cookie .b-postform-login-twitter .b-postform-login-opts,
