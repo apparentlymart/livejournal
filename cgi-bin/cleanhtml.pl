@@ -503,10 +503,10 @@ sub clean
                     (
                         $src =~ m!^https?://(?:[\w.-]*\.)?youtube\.com/embed/[-_a-zA-Z0-9]{11,}(?:\?.*)?$!
                         || $src =~ m!^http://player\.vimeo\.com/video/(?:\d+)!
-                        || $src =~ m!^http://vkontakte\.ru/video_ext\.php\?oid=(?:\d+)&id=(?:\d+)&hash=[a-zA-Z0-9]+$!
+                        || $src =~ m!^http://vkontakte\.ru/video_ext\.php\?oid=(?:\d+)&id=(?:\d+)&hash=[a-zA-Z0-9]+!
                         || $src =~ m!^http://www\.google\.com/calendar/embed\?src=!
                         || $src =~ m!^https://docs\.google.com/document/pub\?id=!
-                        || $src =~ m!^http://vk.com/video_ext\.php\?oid=(?:\d+)&id=(?:\d+)&hash=[a-zA-Z0-9]+$!
+                        || $src =~ m!^http://vk.com/video_ext\.php\?oid=(?:\d+)&id=(?:\d+)&hash=[a-zA-Z0-9]+!
                     )
                 ) {
                     ## allow
