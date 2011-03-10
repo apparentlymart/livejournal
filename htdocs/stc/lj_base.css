@@ -654,39 +654,39 @@ Must be removed after implementation of Framework! */
 	top: 45px;
 	left: 0;
 	width: 100%;
-	height: 23px;
+	height: 30px;
 	padding: 0;
 	margin: 0;
-	background: #1C2F5D;
+	background: #5A91D9;
+	border-bottom: 1px solid #FFF;
 	text-align: left;
 	font: 11px/13px 'Arial', 'Helvetica', sans-serif;
 	color: #FFF;
 	z-index: 1000;
 	}
 	.b-message-mobile .b-message-mobile-wrapper {
-		padding: 5px 15px;
+		padding: 8px 13px;
 		margin: 0;
 		}
 	.b-message-mobile A:link,
 	.b-message-mobile A:visited,
 	.b-message-mobile A:hover,
 	.b-message-mobile A:active {
-		padding: 0 0 0 12px;
+		padding: 0;
 		margin: 0;
-		background: url(/img/message-mobile-pic.gif?ver) no-repeat;
 		border: 0;
 		text-decoration: none !important;
-		font: 11px/13px 'Arial', 'Helvetica', sans-serif !important;
+		font: 12px/14px 'Arial', 'Helvetica', sans-serif !important;
 		color: #FFF !important;
 		}
 .b-message-mobile-theme {
 	top: 0;
 	}
 	.mobile-msg #navigation {
-		top: 23px;
+		top: 30px;
 		}
 	.mobile-msg #content {
-		top: 133px !important;
+		top: 140px !important;
 		}
 
 /* Facebook & Twitter authorization
