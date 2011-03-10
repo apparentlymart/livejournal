@@ -20,29 +20,46 @@
 
 <table>
 <tr>
-    <td align='right' valign='top'><TMPL_VAR expr="ml('/talkpost.bml.opt.from')"></td>
-    <td> <TMPL_IF 0> Internal for "From" options </TMPL_IF>
-        <table class="b-postform-from">
-            <TMPL_IF editid>
-                <tr valign='middle' id='ljuser_row'>
-                    <TMPL_IF remote_banned>
-                        <td align='center'><img src='<TMPL_VAR lj_imgprefix>/userinfo.gif' /></td>
-                        <td align='center'>( )</td>
-                        <td align='left'><span class='ljdeem'><TMPL_VAR ml_loggedin></font><TMPL_VAR ml_banned></td>
-                    <TMPL_ELSE>
-                        <td align='center'><img src='<TMPL_VAR lj_imgprefix>/userinfo.gif'  onclick='handleRadios(1);' /></td>
-                        <td align='left'><label for='talkpostfromremote'><TMPL_VAR ml_loggedin></label>
-                        <input type='hidden' name='usertype' value='cookieuser' />
-                        <input type='hidden' name='cookieuser' value='<TMPL_VAR remote_username>' id='cookieuser' />
-                        </td>
-                    </TMPL_IF>
-                </tr>
-            <TMPL_ELSE>
-                <TMPL_LOOP author_options>
-                    <TMPL_INCLUDE expr="sprintf('templates/CommentForm/Author-%s.tmpl', short_code)">
-                </TMPL_LOOP>
-            </TMPL_IF>
-        </table>
+    <td align='right' valign='top' class="b-postform-login-label"><TMPL_VAR expr="ml('/talkpost.bml.opt.from')"></td>
+    <td class="b-postform-login-wrapper">
+        <TMPL_IF 0> Internal for "From" options </TMPL_IF>
+        <TMPL_IF editid>
+            <div class="b-postform-login b-postform-ljedit">
+                    <div class="b-postform-login-item b-postform-login-ljedit">
+                        <TMPL_IF remote_banned>
+                            <div class="b-postform-login-opts">
+                                <TMPL_VAR ml_loggedin>
+                                <TMPL_VAR ml_banned>
+                            </div>
+                        <TMPL_ELSE>
+                            <span class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></span>
+                            <div class="b-postform-login-opts">
+                                <TMPL_VAR ml_loggedin>
+                                <input type="hidden" name="usertype" value="cookieuser" />
+                                <input type="hidden" name="cookieuser" value="<TMPL_VAR remote_username>" id="cookieuser" />
+                            </div>
+                        </TMPL_IF>
+                </div>
+            </div>
+        <TMPL_ELSE>
+            <div class="b-postform-login b-postform-livejournal">
+                <div class="b-postform-login-services">
+                    <div class="b-postform-login-services-items">
+                        <span class="b-postform-login-services-item b-postform-login-services-anonymous"><a href="#"><img src="<TMPL_VAR lj_imgprefix>/anonymous.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span></a></span>
+                        <span class="b-postform-login-services-item b-postform-login-services-livejournal"><a href="#"><img src="<TMPL_VAR lj_imgprefix>/userinfo.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></span></a></span>
+                        <span class="b-postform-login-services-item b-postform-login-services-facebook"><a href="#"><img src="<TMPL_VAR lj_imgprefix>/icons/facebook-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.facebook')"></span></a></span>
+                        <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></span></a></span>
+                        <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
+                        <span class="b-postform-login-services-item b-postform-login-services-mailru"><a href="#"><img src="<TMPL_VAR lj_imgprefix>/icons/mailru-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.mailru')"></span></a></span>
+                    </div>
+                </div>
+                <div class="b-postform-login-details">
+                    <TMPL_LOOP author_options>
+                        <TMPL_INCLUDE expr="sprintf('templates/CommentForm/Author-%s.tmpl', short_code)">
+                    </TMPL_LOOP>
+                </div>
+            </div>
+        </TMPL_IF>
     </td>
 </tr>
 
@@ -50,46 +67,30 @@
     <td align='right'><TMPL_VAR expr="ml('/talkpost.bml.opt.subject')"></td>
     <td>
         <input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value="<TMPL_VAR basesubject>" onKeyPress='subjectNoHTML(event);' tabindex='10' />
-
         <TMPL_IF 0> subject icon </TMPL_IF>
-            <input type='hidden' id='subjectIconField' name='subjecticon' value='<TMPL_VAR subjicon>'>
-            <script type='text/javascript' language='Javascript'>
-            <!--
-                if (document.getElementById) {
-                    <TMPL_IF subjicon_none>
-                        document.write("<img src='<TMPL_VAR lj_imgprefix>/talk/none.gif' border='0' width='15' height='15' valign='middle' id='subjectIconImage' style='cursor:pointer;cursor:hand' align='absmiddle' onclick='subjectIconListToggle();' title='Click to change the subject icon' />");
-                    <TMPL_ELSE>
-                        document.write("<img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_current_img>' border='0' width='<TMPL_VAR subjicon_current_w>' height='<TMPL_VAR subjicon_current_h>' valign='middle' id='subjectIconImage' onclick='subjectIconListToggle();' style='cursor:pointer;cursor:hand' />");
-                    </TMPL_IF>
-
-                    <TMPL_IF 0> spit out a pretty table of all the possible subjecticons </TMPL_IF>
-                    document.write("<blockquote style='display:none;' id='subjectIconList'>");
-                    document.write("<table border='0' cellspacing='5' cellpadding='0' style='border: 1px solid #AAAAAA'>");
-
-                    <TMPL_LOOP subjicon_types>
-                        document.write("<tr>");
-
-                        <TMPL_IF __first__> <TMPL_IF 0> make an option if they don't want an image </TMPL_IF>
-                            document.write("<td valign='middle' align='center'>");
-                            document.write("<img src='<TMPL_VAR lj_imgprefix>/talk/none.gif' border='0' width='15' height='15' valign='middle' id='none' onclick='subjectIconChange(this);' style='cursor:pointer;cursor:hand' title='No subject icon' />")
-                            document.write("</td>");
-                        </TMPL_IF>
-
-                        <TMPL_LOOP subjicons>
-                            document.write("<td valign='middle' align='center'>");
-                            document.write("<img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_img>' border='0' width='<TMPL_VAR subjicon_w>' height='<TMPL_VAR subjicon_h>' valign='middle' id='<TMPL_VAR subjicon_id>' onclick='subjectIconChange(this);' style='cursor:pointer;cursor:hand' />");
-                            document.write("</td>");
+        <input type='hidden' id='subjectIconField' name='subjecticon' value='<TMPL_VAR subjicon>'>
+        <TMPL_IF subjicon_none>
+            <img src='<TMPL_VAR lj_imgprefix>/talk/none.gif' border='0' width='15' height='15' valign='middle' id='subjectIconImage' style='cursor:pointer;cursor:hand' align='absmiddle' onclick='subjectIconListToggle();' title='Click to change the subject icon' />
+        <TMPL_ELSE>
+            <img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_current_img>' border='0' width='<TMPL_VAR subjicon_current_w>' height='<TMPL_VAR subjicon_current_h>' valign='middle' id='subjectIconImage' onclick='subjectIconListToggle();' style='cursor:pointer;cursor:hand' />
+        </TMPL_IF>
+        <div class="b-popup b-subjecticons">
+            <div class="b-popup-outer">
+                <div class="b-popup-inner">
+                    <ul class="b-subjecticons-items">
+                        <TMPL_LOOP subjicon_types>
+                            <TMPL_IF __first__>
+                                <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/none.gif' border='0' width='15' height='15' id='none' title='No subject icon' /></li>
+                            </TMPL_IF>
+                            <TMPL_LOOP subjicons>
+                                <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_img>' border='0' width='<TMPL_VAR subjicon_w>' height='<TMPL_VAR subjicon_h>' id='<TMPL_VAR subjicon_id>' /></li>
+                            </TMPL_LOOP>
                         </TMPL_LOOP>
-
-                        document.write("</tr>");
-                    </TMPL_LOOP>
-
-                    <TMPL_IF 0> end that table, bar! </TMPL_IF>
-                    document.write("</table>");
-                    document.write("</blockquote>");
-                }
-            //-->
-            </script>
+                    </ul>
+                </div>
+                <i class="i-popup-arr i-popup-arrtr"></i><i class="i-popup-close"></i>
+            </div>
+        </div>
         <TMPL_IF 0> end subject icon </TMPL_IF>
 
         <div id='ljnohtmlsubj' class='ljdeem'><span style='font-size: 8pt; font-style: italic;'><TMPL_VAR expr="ml('/talkpost.bml.nosubjecthtml')"></span></div>

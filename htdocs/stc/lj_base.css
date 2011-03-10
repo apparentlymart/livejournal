@@ -1043,27 +1043,303 @@ Must be removed after implementation of Framework! */
 			}
 
 
-.replyform TABLE.b-postform-from {
-	margin: 0 0 0.5em;
+/* Comment Form
+--------------------------- */
+.b-postform-login-label {
+	margin: 0;
+	padding: 5px 0;
+	text-align: right;
+	vertical-align: top;
 	}
-.replyform TABLE TD.b-postform-icon,
-.replyform TABLE TD.b-postform-radio {
-	vertical-align: middle !important;
-	text-align: center;
-	}
-	.replyform TABLE TD.b-postform-radio INPUT {
-		margin: 0;
-		}
-.replyform TABLE TD.b-postform-data {
+.b-postform-login-wrapper {
+	margin: 0;
+	padding: 0;
 	text-align: left;
-	white-space: nowrap;
+	vertical-align: top;
 	}
-	.replyform TABLE TD.b-postform-data .i-postform-label {
-		display: inline-block;
+.b-postform-login {
+	overflow: visible;
+	position: static;
+	display: block;
+	margin: 0 0 10px;
+	zoom: 1;
+	}
+.b-postform-login:before,
+.b-postform-login:after {
+	content: ".";
+	display: block;
+	height: 0;
+	overflow: hidden;
+	}
+.b-postform-login:after {
+	clear: both;
+	}
+.b-postform-ljedit {
+	margin: 0;
+	}
+	.b-postform-login-services {
+		position: relative;
+		float: left;
+		display: block;
+		width: 47px;
+		height: 26px;
+		margin: 2px 0 0;
+		padding: 0;
+		border: 1px solid transparent;
+		border-width: 1px 1px 0;
+		-moz-border-radius-topleft: 5px;
+		-moz-border-radius-topright: 5px;
+		border-top-left-radius: 5px;
+		border-top-right-radius: 5px;
+		background: transparent;
 		}
-	.i-postform-disabled {
-		color: #C0C0C0;
+	.b-postform-login-services:hover {
+		border-color: #CCC;
+		background: #FFF;
 		}
+		.b-postform-login-services-items {
+			position: absolute;
+			top: 26px;
+			left: 0;
+			display: block;
+			margin: 0;
+			padding: 0;
+			border: 0;
+			-moz-border-radius: 0;
+			border-radius: 0;
+			font: 11px Arial,sans-serif;
+			white-space: nowrap;
+			z-index: 998;
+			}
+		.b-postform-login-services:hover .b-postform-login-services-items {
+			position: absolute;
+			top: 25px;
+			left: -1px;
+			display: block;
+			margin: 0;
+			padding: 3px 5px;
+			border: 1px solid #CCC;
+			-moz-border-radius: 5px;
+			-moz-border-radius-topleft: 0;
+			border-radius: 5px;
+			border-top-left-radius: 0;
+			background: #FFF !important;
+			color: #222 !important;
+			font: 11px Arial,sans-serif;
+			white-space: nowrap;
+			z-index: 998;
+			}
+			.b-postform-login-services-item {
+				position: static;
+				display: none;
+				margin: 0;
+				}
+			.b-postform-login-services:hover .b-postform-login-services-item {
+				display: block;
+				}
+				BODY .b-postform-login-services-item A:link,
+				BODY .b-postform-login-services-item A:visited {
+					display: block;
+					margin: 0;
+					padding: 3px 7px 3px 3px;
+					-moz-border-radius: 3px;
+					border-radius: 3px;
+					border: 0;
+					background: #FFF;
+					color: #222 !important;
+					text-decoration: none;
+					}
+				BODY .b-postform-login-services-item A:hover,
+				BODY .b-postform-login-services-item A:active {
+					display: block;
+					margin: 0;
+					padding: 3px 7px 3px 3px;
+					-moz-border-radius: 3px;
+					border-radius: 3px;
+					border: 0;
+					background: #C5E1F7;
+					color: #222 !important;
+					text-decoration: none;
+					}
+				BODY .b-postform-login-services-disabled A:link,
+				BODY .b-postform-login-services-disabled A:visited,
+				BODY .b-postform-login-services-disabled A:hover,
+				BODY .b-postform-login-services-disabled A:active {
+					background: #FFF;
+					-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+					filter: alpha(opacity=50);
+					-moz-opacity: 0.5;
+					-khtml-opacity: 0.5;
+					opacity: 0.5;
+					cursor: default;
+					}
+					.b-postform-login-services-item IMG {
+						margin: 0 5px 0 0;
+						vertical-align: -4px;
+						border: 0;
+						}
+			.b-postform-anonymous .b-postform-login-services-anonymous,
+			.b-postform-livejournal .b-postform-login-services-livejournal,
+			.b-postform-user .b-postform-login-services-livejournal,
+			.b-postform-facebook .b-postform-login-services-facebook,
+			.b-postform-twitter .b-postform-login-services-twitter,
+			.b-postform-openid .b-postform-login-services-openid,
+			.b-postform-mailru .b-postform-login-services-mailru {
+				position: absolute;
+				top: -25px;
+				left: 0;
+				display: block;
+				width: 45px;
+				height: 26px;
+				margin: 0;
+				padding: 0 1px;
+				background: transparent;
+				}
+			.b-postform-anonymous .b-postform-login-services:hover .b-postform-login-services-anonymous,
+			.b-postform-livejournal .b-postform-login-services:hover .b-postform-login-services-livejournal,
+			.b-postform-user .b-postform-login-services:hover .b-postform-login-services-livejournal,
+			.b-postform-facebook .b-postform-login-services:hover .b-postform-login-services-facebook,
+			.b-postform-twitter .b-postform-login-services:hover .b-postform-login-services-twitter,
+			.b-postform-openid .b-postform-login-services:hover .b-postform-login-services-openid,
+			.b-postform-mailru .b-postform-login-services:hover .b-postform-login-services-mailru {
+				background: #FFF;
+				}
+				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:link,
+				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:visited,
+				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:hover,
+				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:active,
+				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:link,
+				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:visited,
+				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:hover,
+				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:active,
+				BODY .b-postform-user .b-postform-login-services-livejournal A:link,
+				BODY .b-postform-user .b-postform-login-services-livejournal A:visited,
+				BODY .b-postform-user .b-postform-login-services-livejournal A:hover,
+				BODY .b-postform-user .b-postform-login-services-livejournal A:active,
+				BODY .b-postform-facebook .b-postform-login-services-facebook A:link,
+				BODY .b-postform-facebook .b-postform-login-services-facebook A:visited,
+				BODY .b-postform-facebook .b-postform-login-services-facebook A:hover,
+				BODY .b-postform-facebook .b-postform-login-services-facebook A:active,
+				BODY .b-postform-twitter .b-postform-login-services-twitter A:link,
+				BODY .b-postform-twitter .b-postform-login-services-twitter A:visited,
+				BODY .b-postform-twitter .b-postform-login-services-twitter A:hover,
+				BODY .b-postform-twitter .b-postform-login-services-twitter A:active,
+				BODY .b-postform-openid .b-postform-login-services-openid A:link,
+				BODY .b-postform-openid .b-postform-login-services-openid A:visited,
+				BODY .b-postform-openid .b-postform-login-services-openid A:hover,
+				BODY .b-postform-openid .b-postform-login-services-openid A:active,
+				BODY .b-postform-mailru .b-postform-login-services-mailru A:link,
+				BODY .b-postform-mailru .b-postform-login-services-mailru A:visited,
+				BODY .b-postform-mailru .b-postform-login-services-mailru A:hover,
+				BODY .b-postform-mailru .b-postform-login-services-mailru A:active {
+					display: block;
+					margin: 0;
+					padding: 0;
+					-moz-border-radius: 0;
+					border-radius: 0;
+					border: 0;
+					background: #FFF !important;
+					color: #222 !important;
+					text-decoration: none;
+					}
+					.b-postform-anonymous .b-postform-login-services-anonymous IMG,
+					.b-postform-livejournal .b-postform-login-services-livejournal IMG,
+					.b-postform-user .b-postform-login-services-livejournal IMG,
+					.b-postform-facebook .b-postform-login-services-facebook IMG,
+					.b-postform-twitter .b-postform-login-services-twitter IMG,
+					.b-postform-openid .b-postform-login-services-openid IMG,
+					.b-postform-mailru .b-postform-login-services-mailru IMG {
+						display: block;
+						width: 17px;
+						height: 16px;
+						margin: 0;
+						padding: 1px 20px 1px 6px;
+						border: 1px solid #8A8A8A;
+						-moz-border-radius: 3px;
+						border-radius: 3px;
+						background: #FFF url(/img/showmore-login.gif) no-repeat 26px 1px;
+						cursor: pointer;
+						text-align: left;
+						}
+					.b-postform-anonymous .b-postform-login-services-anonymous .b-postform-login-services-name,
+					.b-postform-livejournal .b-postform-login-services-livejournal .b-postform-login-services-name,
+					.b-postform-user .b-postform-login-services-livejournal .b-postform-login-services-name,
+					.b-postform-facebook .b-postform-login-services-facebook .b-postform-login-services-name,
+					.b-postform-twitter .b-postform-login-services-twitter .b-postform-login-services-name,
+					.b-postform-openid .b-postform-login-services-openid .b-postform-login-services-name,
+					.b-postform-mailru .b-postform-login-services-mailru .b-postform-login-services-name {
+						display: none;
+						}
+	.b-postform-login-details {
+		overflow: auto;
+		position: static;
+		float: none;
+		display: block;
+		margin: 0 0 0 55px;
+		padding: 0;
+		font: 12px/1.1 Arial,sans-serif;
+		}
+		.b-postform-login-item {
+			display: none;
+			position: static;
+			width: auto;
+			height: auto;
+			margin: 0;
+			padding: 0;
+			}
+		.b-postform-anonymous .b-postform-login-anonymous,
+		.b-postform-livejournal .b-postform-login-livejournal,
+		.b-postform-user .b-postform-login-user,
+		.b-postform-facebook .b-postform-login-facebook,
+		.b-postform-twitter .b-postform-login-twitter,
+		.b-postform-openid .b-postform-login-openid,
+		.b-postform-mailru .b-postform-login-mailru,
+		.b-postform-ljedit .b-postform-login-ljedit {
+			display: block;
+			}
+			.b-postform-login-item .b-postform-login-radio,
+			.b-postform-login-item .b-postform-login-service {
+				display: none;
+				}
+			.b-postform-login-item .i-bubble {
+				padding: 6px 8px;
+				font: 11px/1.1 Arial,sans-serif;
+				color: #222;
+				}
+				.b-postform-login-item .i-bubble-arrow,
+				.b-postform-login-item .i-bubble-arrow-border {
+					margin: -6px 0 0;
+					}
+			.b-postform-login-anonymous .b-postform-login-opts {
+				position: static;
+				display: block;
+				margin: 0;
+				padding: 8px 0;
+				}
+			.b-postform-login-user .b-postform-login-opts {
+				position: static;
+				display: block;
+				margin: 0;
+				padding: 8px 0;
+				}
+			.b-postform-login-livejournal .b-postform-login-opts {
+				position: static;
+				display: block;
+				margin: 0;
+				padding: 4px 2px;
+				}
+			.b-postform-login-ljedit .b-postform-login-opts {
+				position: static;
+				display: block;
+				margin: 0;
+				padding: 5px 0;
+				}
+
+
+
+
+
+
 
 .b-loginpage-btns {
 	}
@@ -2115,6 +2391,37 @@ DIV.lj_ippu_app {
 				vertical-align: -4px;
 				border: 0;
 				}
+
+
+/* Subject Picture Popup */
+.b-subjecticons {
+	display: none;
+	position: absolute;
+	width: 300px;
+	margin: 0;
+	padding: 0;
+	}
+	.b-subjecticons-items {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		}
+		.b-subjecticons-item {
+			display: inline-block;
+			width: 32px;
+			min-height: 32px;
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			vertical-align: top;
+			zoom: 1;
+			*display: inline;
+			text-align: center;
+			}
+			.b-subjecticons-item IMG {
+				cursor: pointer;
+				}
+	
 
 
 /* Fader
