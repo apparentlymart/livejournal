@@ -497,7 +497,7 @@ sub clean
 
                 ## Allow some iframes from trusted sources (if they are not eaten already)
                 ## YouTube (http://apiblog.youtube.com/2010/07/new-way-to-embed-youtube-videos.html),
-                ## Vimeo, VKontakte, Google Calendar, Google Docs
+                ## Vimeo, VKontakte, Google Calendar, Google Docs, VK.com
                 my $src = $attr->{'src'};
                 if ($src &&
                     (
@@ -506,6 +506,7 @@ sub clean
                         || $src =~ m!^http://vkontakte\.ru/video_ext\.php\?oid=(?:\d+)&id=(?:\d+)&hash=[a-zA-Z0-9]+$!
                         || $src =~ m!^http://www\.google\.com/calendar/embed\?src=!
                         || $src =~ m!^https://docs\.google.com/document/pub\?id=!
+                        || $src =~ m!^http://vk.com/video_ext\.php\?oid=(?:\d+)&id=(?:\d+)&hash=[a-zA-Z0-9]+$!
                     )
                 ) {
                     ## allow
