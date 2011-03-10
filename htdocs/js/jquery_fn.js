@@ -107,10 +107,6 @@ jQuery.fn.placeholder = (function()
 
 //this one is fields type agnostic but creates additional label elements, which need to be styled
 jQuery.fn.labeledPlaceholder = function() {
-	if ('placeholder' in document.createElement('input')) {
-		return this;
-	}
-
 	function focus_action( input, label ) {
 		label.hide();
 	}
@@ -122,6 +118,14 @@ jQuery.fn.labeledPlaceholder = function() {
 	}
 
 	return this.each( function() {
+
+		if ('placeholder' in document.createElement('input') && this.tagName.toLowerCase() === "input" ) {
+			return;
+		}
+		if ('placeholder' in document.createElement('textarea') && this.tagName.toLowerCase() === "textarea" ) {
+			return;
+		}
+
 		var $this = jQuery( this ),
 			placeholder = $this.attr( 'placeholder' );
 
