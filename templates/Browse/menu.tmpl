@@ -2,7 +2,7 @@
 	<TMPL_LOOP categories>
 		<tmpl_if is_vertical_view>
 		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF>">
-			<a href="<tmpl_var url>?view=<tmpl_var view>"><TMPL_IF level1><i class="m-switch"><i class="t"></i><i class="b"></i></i></TMPL_IF><TMPL_VAR name></a>
+			<span><TMPL_IF level1><i class="m-switch"><i class="t"></i><i class="b"></i></i></TMPL_IF><a href="<tmpl_var url>?view=<tmpl_var view>"><TMPL_VAR name></a></span>
 		<tmpl_else>
 		<li class="m-section-item <TMPL_IF expr="is_current || is_expanded"> m-section-item-open</TMPL_IF><TMPL_UNLESS level1> m-section-item-deadlock</TMPL_UNLESS>">
 			<span><TMPL_IF level1><i class="m-switch"><i class="t"></i><i class="b"></i></i></TMPL_IF><a href="<tmpl_var url>?view=<tmpl_var view>"><TMPL_VAR name></a></span>
@@ -41,6 +41,4 @@
 		</li>
 	</TMPL_LOOP>
 </ul>
-
-
 
