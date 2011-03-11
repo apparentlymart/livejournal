@@ -423,7 +423,11 @@ sub clean
                 }
 
                 my $upic = ref $u ? $u->userpic : '';
-                $newdata .= $upic->imgtag if $upic;
+                if ($upic){
+                    $newdata .= $upic->imgtag;
+                } else {
+                    $newdata .= qq|<img src="http://wh.livejournal.ru/icons/nouserpic.png" width="100" height="100">|;
+                }
             }
 
             if ($tag eq "lj-wishlist") {
