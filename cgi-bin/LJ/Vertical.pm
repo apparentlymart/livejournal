@@ -1345,7 +1345,12 @@ sub add_post {
     return undef unless $entry;
 
     my $dbh = LJ::get_db_writer();
-    my $res = $dbh->do("INSERT INTO vertical_posts (vert_id, journalid, jitemid, timecreate, timeadded) VALUES
+    my $res = $dbh->selectall_arrayref("SELECT 1 FROM vertical_posts WHERE journalid = ? AND jitemid = ?", undef, $entry->journalid, $entry->jitemid) || [];
+
+    ## Record already exist. Return error.
+    return undef if $res && @$res;
+
+    $res = $dbh->do("INSERT INTO vertical_posts (vert_id, journalid, jitemid, timecreate, timeadded) VALUES
         (?, ?, ?, ?, UNIX_TIMESTAMP(NOW()))", undef, $self->vert_id, $entry->journalid, $entry->jitemid, $entry->logtime_unix);
 
     return $res;

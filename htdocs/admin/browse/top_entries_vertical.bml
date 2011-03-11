@@ -56,6 +56,12 @@ body<=
         $vertical->set_remove_after ($POST{'remove_after'});
     }
 
+    if (LJ::did_post() && $vertical && $POST{'add'}) {
+        my $res = $vertical->add_post ($POST{'url'});
+        $ret .= "<?errorbar $ML{'.already.added.error'} errorbar?>"
+            unless $res;
+    }
+
     if ($vert_id) {
         my ($show_entries, $not_deleted, $remove_after) = ();
         if ($vertical) {
@@ -95,10 +101,6 @@ body<=
 </form>
 ADDPOST
 
-    }
-
-    if (LJ::did_post() && $vertical && $POST{'add'}) {
-        $vertical->add_post ($POST{'url'});
     }
 
     if (LJ::did_post() && $vertical && $POST{'delete_post'}) {
