@@ -2202,7 +2202,7 @@ LOGIN_BAR
         $mobile_link .= LJ::Lang::ml('link.mobile', { href => "href='http://m.livejournal.com/redirect?from=$url'" });
 	    $mobile_link .="</div></div>";
     }
-    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr><tr><td colspan='5'>$message</td></tr></table> $mobile_link";
+    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr></table> $message $mobile_link";
 }
 
 sub control_strip_js_inject
