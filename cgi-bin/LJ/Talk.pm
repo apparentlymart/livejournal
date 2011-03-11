@@ -419,7 +419,11 @@ sub screening_level {
     # now return userprop, as it's our last chance
     LJ::load_user_props($journalu, 'opt_whoscreened');
     return if $journalu->{opt_whoscreened} eq 'N';
-    return $journalu->{opt_whoscreened} || 'L';
+    if ($journalu->{opt_whoscreened} eq 'L') {
+        $journalu->set_prop( opt_whoscreened => 'R' );
+        $journalu->{opt_whoscreened} = 'R';
+    }
+    return $journalu->{opt_whoscreened} || 'R';
 }
 
 sub update_commentalter {
