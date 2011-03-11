@@ -167,7 +167,7 @@ body<=
             my $disabled_delete = 0;
             my $disabled_spamdelete = 0;
             if ($usejournal && $res{'events_1_poster'} ne $u->{'user'}) {
-                $disabled_delete = ! LJ::can_delete_journal_item($u, $usejournal_u);
+                $disabled_delete = ! LJ::can_delete_journal_item($u, $usejournal_u, $itemid);
                 $disabled_save++;
             }
             $disabled_spamdelete = $disabled_delete || !$usejournal || ($res{'events_1_poster'} eq $u->{'user'});

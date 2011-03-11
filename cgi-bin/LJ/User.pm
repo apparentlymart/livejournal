@@ -6200,13 +6200,15 @@ sub can_view
     return 0 unless $remote;
 
     my $userid = int($item->{'ownerid'} || $item->{'journalid'});
+    my $u = LJ::load_userid($userid);
+    my $journal_name = $u ? $u->user : '';
     my $remoteid = int($remote->{'userid'});
 
     # owners can always see their own.
     return 1 if ($userid == $remoteid);
 
     # author in community can always see their post
-    return 1 if $remoteid == $item->{'posterid'};
+    return 1 if $remoteid == $item->{'posterid'} and not $LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $journal_name };;
 
     # other people can't read private
     return 0 if ($item->{'security'} eq "private");
@@ -9821,9 +9823,17 @@ sub can_manage_other {
 }
 
 sub can_delete_journal_item {
-    my ($remote, $u) = @_;
+    my ($remote, $u, $itemid) = @_;
     $remote = LJ::want_user($remote);
-    return $remote && $remote->can_manage($u);
+
+    return 0 unless $remote;
+
+    return 0 unless $remote->can_manage($u);
+
+    return 0 if $LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $u->{user} } and !LJ::is_friend($u, $remote);
+
+    my $entry = LJ::Entry->new($u, jitemid => $itemid);
+    return $entry->posterid == $remote->userid;
 }
 
 

@@ -2227,7 +2227,7 @@ sub editevent
 
     # make sure user can't change post in a certain community without being its member 
     return fail($err,102)
-        if ($LJ::MEMBERSHIP_SENSITIVE_COMMUNITIES{ $uowner->{user} } &&
+        if ($LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $uowner->{user} } &&
             !LJ::is_friend($uowner, $u));
         
 
@@ -2651,10 +2651,21 @@ sub getevents
         # no extra where restrictions... user can see all their own stuff
     } elsif ($secmask) {
         # can see public or things with them in the mask
-        $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $secmask != 0) OR posterid=$posterid)";
+        # and own posts in non-sensitive communities
+        if ($LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $uowner->{user} }) {
+            $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $secmask != 0))";
+        } else {
+            $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $secmask != 0) OR posterid=$posterid)";
+        }
     } else {
         # not a friend?  only see public.
-        $secwhere = "AND (security='public' OR posterid=$posterid)";
+        # and own posts in non-sensitive communities
+
+        if ($LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $uowner->{user} }) {
+            $secwhere = "AND (security='public')";
+        } else {
+            $secwhere = "AND (security='public' OR posterid=$posterid)";
+        }
     }
 
     # if this is on, we sort things different (logtime vs. posttime)

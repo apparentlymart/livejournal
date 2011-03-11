@@ -922,7 +922,7 @@ sub visible_to
     return 1 if $userid == $remoteid;
 
     # author in community can always see their post
-    return 1 if $remoteid == $self->posterid;
+    return 1 if $remoteid == $self->posterid and not $LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $self->journal->{user} };
 
     # other people can't read private
     return 0 if $self->{'security'} eq "private";
