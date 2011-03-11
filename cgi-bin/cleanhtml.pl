@@ -407,6 +407,25 @@ sub clean
                 next TOKEN;
             }
 
+            ## lj-userpic:
+            ##      <lj-userpic> - current journal's default userpic
+            ##      <lj-userpic remote> - remote user's default userpic
+            ##      <lj-userpic user="test"> - test's default userpic
+            if ($tag eq "lj-userpic"){
+                my $u = '';
+                if ($attr->{user}){
+                    $u = LJ::load_user($attr->{user});
+                } elsif ($attr->{remote}){
+                    $u = LJ::get_remote();
+                } else {
+                    my $cur_journal = LJ::Session->domain_journal;
+                    $u = LJ::load_user($cur_journal) if $cur_journal;
+                }
+
+                my $upic = ref $u ? $u->userpic : '';
+                $newdata .= $upic->imgtag if $upic;
+            }
+
             if ($tag eq "lj-wishlist") {
                 my $wishid = $attr->{wishid};
                 my $userid = $attr->{userid};
