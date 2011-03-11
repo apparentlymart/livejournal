@@ -540,8 +540,8 @@ function createModerationFunction(control, dItemid, isS1) {
 		sendModerateRequest();
 
 		function sendModerateRequest() {
-			var	bmlName = 'talkscreen.bml',
-				postUrl = control.href.replace(bmlName, LiveJournal.getAjaxUrl(bmlName)) + '&mode=js',
+			var	bmlName = 'talkscreen',
+				postUrl = control.href.replace(new RegExp('.+' + bmlName + '\.bml'), LiveJournal.getAjaxUrl(bmlName)),
 				postParams = { 'confirm': 'Y', lj_form_auth: LJ_cmtinfo.form_auth };
 				
 			hourglass = jQuery(e).hourglass()[0];
