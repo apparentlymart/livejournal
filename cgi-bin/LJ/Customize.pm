@@ -222,6 +222,9 @@ sub save_language {
         }
         $style{'i18nc'} = $i18nc;
         $style{'i18n'} = $i18n;
+        
+        return \%style if($opts{return});
+        
         $class->implicit_style_create($u, %style);
     }
 

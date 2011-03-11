@@ -676,6 +676,8 @@ sub s2_context
     my $opts = shift || {};
 
     my $u = $opts->{u} || LJ::get_active_journal();
+    my $remote = LJ::get_remote();
+    
     my $style_u = $opts->{style_u} || $u;
 
     # but it doesn't matter if we're using the minimal style ...
@@ -705,6 +707,17 @@ sub s2_context
     # fall back to the standard call to get a user's styles
     unless (%style) {
         %style = $u ? get_style($styleid, { 'u' => $style_u }) : get_style($styleid);
+    }
+
+    if($remote) {
+        my $bl = $remote->prop('browselang');
+        
+        if($bl) {
+            my $style = LJ::Customize->save_language($u, $bl, 'return' => 1);
+
+            $style{i18nc} = $style->{i18nc} if ($style->{i18nc});
+            $style{i18n} = $style->{i18n}   if ($style->{i18n});
+        }   
     }
 
     my @layers;
@@ -764,6 +777,7 @@ sub s2_context
         $ctx->[S2::SCRATCH] ||= {};
 
         LJ::S2::populate_system_props($ctx);
+
         S2::set_output(sub {});  # printing suppressed
         S2::set_output_safe(sub {});
         eval { S2::run_code($ctx, "prop_init()"); };
