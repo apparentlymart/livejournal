@@ -26,6 +26,10 @@ sub option {
     my $key = $class->pkgkey;
 
     my $commentscreening = $class->get_arg($args, "commentscreening") || $u->prop("opt_whoscreened");
+    if ($commentscreening eq 'L') {
+        $u->set_prop( opt_whoscreened => 'R' );
+        $commentscreening = 'R';
+    }
 
     my @options = (
         N => $class->ml('setting.commentscreening.option.select.none'),
