@@ -32,7 +32,7 @@ sub _build_tree {
                     {
                         name            => $c->display_name(),
                         title           => '',#$c->title_html(),
-                        url             => '',#$c->url(),
+                        url             => $c->url(),
                         summary         => '',#LJ::Widget::CategorySummary->render( category => $c ),
                         level           => $level,
                         is_expanded     => $is_current,
