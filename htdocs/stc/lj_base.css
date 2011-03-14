@@ -575,6 +575,10 @@ Must be removed after implementation of Framework! */
 .mobile-msg .appwidget-sitemessages {
 	top: 130px;
 	}
+HTML BODY.logged-in,
+HTML BODY.logged-out {
+	padding-top: 0 !important;
+	}
 	.appwidget-sitemessages .b-message-system {
 		padding: 0;
 		margin: 0;
