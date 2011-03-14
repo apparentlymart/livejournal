@@ -208,6 +208,18 @@ window.LJShare.link = function( opts ) {
 			linkH = link.height(), linkW = link.width(),
 			arrPos = "";
 
+		//we check if child elements of the link have bigger dimensions.
+		link.find( '*' ).each( function() {
+			var $this = $( this ),
+				position = $this.css( 'position' ),
+				height = $( this ).outerHeight();
+
+			if( $this.is( ':visible' ) && position != 'absolute'
+				&& position != 'fixed' && height > linkH ) {
+				linkH = height;
+			}
+		} );
+
 		dom.css( { left: "0px", top: "0px" } );
 
 		var scrollOffset = $( window ).scrollTop();
@@ -223,7 +235,7 @@ window.LJShare.link = function( opts ) {
 			linkTop -= domH + 9;
 			arrPos += "b";
 		} else {
-			linkTop += linkH + 9;
+			linkTop += linkH + 7;
 			arrPos += "t";
 		}
 
