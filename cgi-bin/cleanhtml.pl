@@ -426,7 +426,7 @@ sub clean
                 if ($upic){
                     $newdata .= $upic->imgtag;
                 } else {
-                    $newdata .= qq|<img src="http://wh.livejournal.ru/icons/nouserpic.png" width="100" height="100">|;
+                    $newdata .= qq|<img src="http://wh.livejournal.ru/icons/nouserpic.png" width="100" height="100" class="userpic-img" />|;
                 }
             }
 
