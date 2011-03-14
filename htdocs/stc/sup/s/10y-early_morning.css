@@ -309,6 +309,7 @@ A:visited:hover {
 #page .entrysubmenu {
 	position:relative;
 	left:10px;
+	z-index: 1;
 	vertical-align:top;
 	font-size:1.3em;
 	line-height:1.1;
