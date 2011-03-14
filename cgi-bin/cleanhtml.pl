@@ -411,7 +411,7 @@ sub clean
             ##      <lj-userpic> - current journal's default userpic
             ##      <lj-userpic remote> - remote user's default userpic
             ##      <lj-userpic user="test"> - test's default userpic
-            if ($tag eq "lj-userpic" and $action{$tag} ne 'deny'){
+            if ($tag eq "lj-userpic" and !$opts->{'textonly'} and $action{$tag} ne 'deny'){
                 my $u = '';
                 if ($attr->{user}){
                     $u = LJ::load_user($attr->{user});
