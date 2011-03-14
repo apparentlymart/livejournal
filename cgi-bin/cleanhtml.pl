@@ -428,6 +428,7 @@ sub clean
                 } else {
                     $newdata .= qq|<img src="http://wh.livejournal.ru/icons/nouserpic.png" width="100" height="100" class="userpic-img" />|;
                 }
+                next TOKEN;
             }
 
             if ($tag eq "lj-wishlist") {
