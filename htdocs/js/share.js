@@ -159,7 +159,7 @@ window.LJShare.link = function( opts ) {
 	var link = jQuery( 'a:last' ),
 		url = link.attr( 'href' ),
 		options = jQuery.extend( {}, defaults, { url: url } , opts ),
-		dom, arrow;
+		dom, arrow, skipCloseEvent;
 
 	var links = ( opts.links ) ? opts.links : global_options.links;
 
@@ -197,9 +197,16 @@ window.LJShare.link = function( opts ) {
 			ev.stopPropagation();
 		} );
 
+		function checkClose( e ) {
+			if( !skipCloseEvent ) {
+				togglePopup( false );
+			}
+			skipCloseEvent = false;
+		}
+
 		dom.find( selectors.close ).bind( 'click', function( ev ) {	togglePopup( false ); } );
-		$( document ).bind( 'click', function( ev ) { togglePopup( false ); } );
-		$( window ).bind( 'resize', function( ev ) { togglePopup( false ); } );
+		$( document ).bind( 'click', checkClose );
+		$( window ).bind( 'resize', checkClose );
 		dom.find( selectors.links ).click( function() { togglePopup( false ); } );
 	}
 
@@ -272,8 +279,8 @@ window.LJShare.link = function( opts ) {
 			}
 
 			togglePopup( true );
+			skipCloseEvent = true;
 			ev.preventDefault();
-			ev.stopPropagation();
 		} );
 }
 
