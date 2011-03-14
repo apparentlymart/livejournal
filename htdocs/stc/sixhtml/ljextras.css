@@ -69,13 +69,17 @@ div.comment-userpic img,
     height: auto;
 }
 
-body.layout-three-column #beta img,
-body.layout-two-column-left #beta img,
-body.layout-one-column #alpha img,
-body.layout-two-column-right #alpha img {
+body.layout-three-column img,
+body.layout-two-column-left img,
+body.layout-one-column img,
+body.layout-two-column-right img {
     margin: 0;
     padding: 0;
     border: none;
     float: none;
     background: none;
 }
+body .b-postform-login-services-item img {
+    margin: 0 5px 0 0;
+}
+
