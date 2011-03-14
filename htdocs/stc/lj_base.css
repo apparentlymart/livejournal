@@ -764,7 +764,7 @@ Must be removed after implementation of Framework! */
 			background: url(/img/icons/facebook-16.gif?v=1) no-repeat 20px 50%;
 			}
 		.m-auth-twitter A {
-			background: url(/img/icons/twitter-16.gif?v=2) no-repeat 20px 50%;
+			background: url(/img/icons/twitter-16.gif?v=3) no-repeat 20px 50%;
 			}
 		.m-auth-mailru A {
 			background: url(/img/icons/mailru-16.gif?v=1) no-repeat 20px 50%;
@@ -901,14 +901,14 @@ Must be removed after implementation of Framework! */
 		background: #6676AB url(/img/buttons/facebook-login-wide.gif?v=1) no-repeat 0 0;
 		}
 	.b-twitterbtn SPAN {
-		height: 24px;
+		height: 23px;
 		border: none;
 		line-height: 22px;
 		padding: 0 8px 0 32px;
 		color: #293F46;
 		text-shadow: 1px 1px 0px #FFF;
 		white-space: nowrap;
-		background: #FFF url(/img/buttons/twitter-login-wide.gif?v=1) no-repeat 0 0;
+		background: #FFF url(/img/buttons/twitter-login-wide.gif?v=2) no-repeat 0 0;
 		}
 	.b-mailrubtn SPAN {
 		height: 18px;
@@ -929,7 +929,7 @@ Must be removed after implementation of Framework! */
 			top: 0;
 			height: 24px;
 			width: 2px;
-			background: url(/img/buttons/twitter-login-wide.gif?v=1) no-repeat 100% 0;
+			background: url(/img/buttons/twitter-login-wide.gif?v=2) no-repeat 100% 0;
 			}
 		.b-mailrubtn SPAN I{
 			position: absolute;
@@ -2335,7 +2335,7 @@ DIV.lj_ippu_app {
 				-moz-border-radius: 3px;
 				border-radius: 3px;
 				background-color: #FFF;
-				background-image: url(/img/icons/sharethis.gif?v=2);
+				background-image: url(/img/icons/sharethis.gif?v=3);
 				background-position: 0 0;
 				background-repeat: no-repeat;
 				}
