@@ -1,3 +1,13 @@
+<tmpl_if headerurl>
+<h1>
+	<div class="appwidget-browse-header-wrapper">
+		<a class="appwidget-browse-header" href="<tmpl_var headerurl>"><tmpl_var headername></a>
+		<a href='/browse' class="appwidget-browse-back">Return to Community Directory</a>
+	</div>
+</h1>
+<tmpl_else>
+<h1><tmpl_var headername></h1>
+</tmpl_if>
 <div class="l-body">
 	<div class="b-catalogue">
 		<div class="l-aside">	
