@@ -1259,7 +1259,7 @@ sub load_comments
                                                               $remote->can_manage($u) ));
             }
             if (LJ::is_enabled('spam_button') && !$opts->{showspam}) {
-                $should_show = $post->{'state'} eq 'B' ? 0 : 1;
+                $should_show = 0 if $post->{'state'} eq 'B';
             }
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
