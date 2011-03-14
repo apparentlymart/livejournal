@@ -411,7 +411,7 @@ sub clean
             ##      <lj-userpic> - current journal's default userpic
             ##      <lj-userpic remote> - remote user's default userpic
             ##      <lj-userpic user="test"> - test's default userpic
-            if ($tag eq "lj-userpic"){
+            if ($tag eq "lj-userpic" and $action{$tag} ne 'deny'){
                 my $u = '';
                 if ($attr->{user}){
                     $u = LJ::load_user($attr->{user});
@@ -1520,7 +1520,7 @@ sub ExpandLJURL
 
 my $subject_eat = [qw[head title style layer iframe applet object param]];
 my $subject_allow = [qw[a b i u em strong cite]];
-my $subject_remove = [qw[bgsound embed object caption link font noscript]];
+my $subject_remove = [qw[bgsound embed object caption link font noscript lj-userpic]];
 sub clean_subject
 {
     my $ref = shift;
