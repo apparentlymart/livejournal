@@ -565,7 +565,7 @@ SUP.i-new {
 Must be removed after implementation of Framework! */
 .appwidget-sitemessages {
 	position: absolute;
-	top: 100px;
+	top: 45px;
 	left: 0;
 	z-index: 10;
 	width: 100%;
