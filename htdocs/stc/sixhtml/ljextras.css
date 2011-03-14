@@ -69,17 +69,37 @@ div.comment-userpic img,
     height: auto;
 }
 
-body.layout-three-column img,
-body.layout-two-column-left img,
-body.layout-one-column img,
-body.layout-two-column-right img {
+body.layout-three-column #beta img,
+body.layout-two-column-left #beta img,
+body.layout-one-column #alpha img,
+body.layout-two-column-right #alpha img {
     margin: 0;
     padding: 0;
     border: none;
     float: none;
     background: none;
 }
-body .b-postform-login-services-item img {
+body #alpha .b-postform-login-services-item img,
+body #beta .b-postform-login-services-item img {
     margin: 0 5px 0 0;
+}
+body #alpha .b-postform-anonymous .b-postform-login-services-anonymous img,
+body #alpha .b-postform-livejournal .b-postform-login-services-livejournal img,
+body #alpha .b-postform-user .b-postform-login-services-livejournal img,
+body #alpha .b-postform-facebook .b-postform-login-services-facebook img,
+body #alpha .b-postform-twitter .b-postform-login-services-twitter img,
+body #alpha .b-postform-openid .b-postform-login-services-openid img,
+body #alpha .b-postform-mailru .b-poervices-mailru img,
+body #beta .b-postform-anonymous .b-postform-login-services-anonymous img,
+body #beta .b-postform-livejournal .b-postform-login-services-livejournal img,
+body #beta .b-postform-user .b-postform-login-services-livejournal img,
+body #beta .b-postform-facebook .b-postform-login-services-facebook img,
+body #beta .b-postform-twitter .b-postform-login-services-twitter img,
+body #beta .b-postform-openid .b-postform-login-services-openid img,
+body #beta .b-postform-mailru .b-poervices-mailru img {
+    padding: 1px 20px 1px 6px;
+    border: 1px solid #8A8A8A;
+    -moz-border-radius: 3px 3px 3px 3px;
+    background: url("/img/showmore-login.gif") no-repeat scroll 26px 1px #FFFFFF;
 }
 
