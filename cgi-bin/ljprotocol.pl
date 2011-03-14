@@ -2180,10 +2180,7 @@ sub editevent
     return undef unless LJ::run_hook('spam_detector', $req, \$spam);
     return fail($err,320) if $spam;
 
-    # we check later that user owns entry they're modifying, so all
-    # we care about for check_altusage is that the target journal
-    # exists, and we want it to setup some data in $flags.
-    $flags->{'ignorecanuse'} = 1;
+    # new rule from 14 march 2011: user is allowed to edit only if he is allowed to do new post
     return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
