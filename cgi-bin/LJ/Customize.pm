@@ -654,22 +654,27 @@ sub get_cats {
         all => {
             text => LJ::Lang::ml('customize.cats.all'),
             main => 1,
-            order => 2,
+            order => 3,
         },
         featured => {
             text => LJ::Lang::ml('customize.cats.featured'),
             main => 1,
             order => 1,
         },
+        premium => {
+            text => LJ::Lang::ml('customize.cats.premium'),
+            main => 1,
+            order => 2,
+        },
         special => {
             text => LJ::Lang::ml('customize.cats.special'),
             main => 1,
-            order => 3,
+            order => 4,
         },
         custom => {
             text => LJ::Lang::ml('customize.cats.custom'),
             main => 1,
-            order => 4,
+            order => 5,
         },
         sup => {
             text => LJ::Lang::ml('customize.cats.sup'),

@@ -9,12 +9,12 @@ sub designer { "" }
 
 package LJ::S2Theme::stylecontest::bamboo_dream;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( illustrated modern nature ) }
+sub cats { qw( illustrated modern nature premium ) }
 sub designer { "Parker Torrence" }
 
 package LJ::S2Theme::stylecontest::cartoon;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cute illustrated ) }
+sub cats { qw( cute illustrated premium ) }
 sub designer { "Agus Riady" }
 
 package LJ::S2Theme::stylecontest::clean_cut;
@@ -24,12 +24,12 @@ sub designer { "Li'ao Wang" }
 
 package LJ::S2Theme::stylecontest::cleanstyle_black_and_white;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( illustrated ) }
+sub cats { qw( illustrated premium ) }
 sub designer { "James Bow" }
 
 package LJ::S2Theme::stylecontest::cleanstyle_blue_and_yellow;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( illustrated ) }
+sub cats { qw( illustrated premium ) }
 sub designer { "James Bow" }
 
 package LJ::S2Theme::stylecontest::espresso_at_midnight;
@@ -39,7 +39,7 @@ sub designer { "Parker Torrence" }
 
 package LJ::S2Theme::stylecontest::feminism;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( warm illustrated ) }
+sub cats { qw( warm illustrated premium ) }
 sub designer { "Carolyn Smith" }
 
 package LJ::S2Theme::stylecontest::fleur;
@@ -69,7 +69,7 @@ sub designer { "Kamal JK" }
 
 package LJ::S2Theme::stylecontest::hot_springs;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( hobbies illustrated nature ) }
+sub cats { qw( hobbies illustrated nature premium ) }
 sub designer { "Parker Torrence" }
 
 package LJ::S2Theme::stylecontest::kinda_canoe;
@@ -94,12 +94,12 @@ sub designer { "Caroline Cano Morant" }
 
 package LJ::S2Theme::stylecontest::makeup;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( warm illustrated ) }
+sub cats { qw( warm illustrated premium ) }
 sub designer { "Denisa Furnica" }
 
 package LJ::S2Theme::stylecontest::mango;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cool food illustrated ) }
+sub cats { qw( cool food illustrated premium ) }
 sub designer { "Lorraine Barte" }
 
 package LJ::S2Theme::stylecontest::miniml;
@@ -129,7 +129,7 @@ sub designer { "Carrie Petri" }
 
 package LJ::S2Theme::stylecontest::note_taking;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( hobbies illustrated ) }
+sub cats { qw( hobbies illustrated premium ) }
 sub designer { "Bess Fernandez" }
 
 package LJ::S2Theme::stylecontest::painterly;
@@ -139,7 +139,7 @@ sub designer { "Anne Katherine Halsall" }
 
 package LJ::S2Theme::stylecontest::scarf;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( illustrated ) }
+sub cats { qw( illustrated premium ) }
 sub designer { "Thuan Huynh" }
 
 package LJ::S2Theme::stylecontest::shadow_dancers;
