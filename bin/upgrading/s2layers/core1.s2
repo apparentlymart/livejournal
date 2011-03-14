@@ -1170,6 +1170,19 @@ set text_max_comments = "Maximum comments reached";
 set text_read_comments = "1 comment // # comments";
 set text_read_all_comments = "Read 1 comment // Read # comments";
 
+property string text_read_spam_comments {
+    des = "Link text to read spam comments";
+    format = "plurals";
+    example = "1 spam comment // # spam comments";
+}
+property string text_read_all_spam_comments {
+    des = "Link text to read all spam comments";
+    format = "plurals";
+    example = "Read 1 spam comment // Read # spam comments";
+}
+set text_read_spam_comments = "1 spam comment // # spam comments";
+set text_read_all_spam_comments = "Read 1 spam comment // Read # spam comments";
+
 property string text_post_comment_friends {
     des = "Link text to leave a comment on friends view entry";
     example = "Leave a comment";
