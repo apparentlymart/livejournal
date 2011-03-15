@@ -4518,6 +4518,26 @@ sharing.popup.title=Share
 
 sharing.popup.close=Close
 
+sharing.service.livejournal=LiveJournal
+
+sharing.service.facebook=Facebook
+
+sharing.service.twitter=Twitter
+
+sharing.service.vkontakte=Vkontakte
+
+sharing.service.moimir=Moi mir
+
+sharing.service.stumbleupon=StumbleUpon
+
+sharing.service.digg=Digg
+
+sharing.service.email=E-mail
+
+sharing.service.tumblr=Tumblr
+
+sharing.service.odnoklassniki=Odnoklassniki
+
 sms.journalnewcomment.edit_reply_your_comment=[[user]] edited a reply to your comment
 
 sms.journalnewcomment.edit_reply_a_comment=[[user]] edited a reply to a comment

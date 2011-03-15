@@ -12,46 +12,40 @@ sub request_resources {
 
     my $services = {
         'livejournal' => {
-			'title' => 'LiveJournal',
             'bindLink' => $LJ::SITEROOT . '/update.bml?repost={url}'
-		},
-		'facebook' => {
-			'title' => 'Facebook',
+        },
+        'facebook' => {
             'bindLink' => 'http://www.facebook.com/sharer.php?u={url}'
-		},
-		'twitter' => {
-			'title' => 'Twitter',
+        },
+        'twitter' => {
             'bindLink' => 'http://twitter.com/share?url={url}&text={title}'
-		},
-		'vkontakte' => {
-			'title' => 'Vkontakte',
+        },
+        'vkontakte' => {
             'bindLink' => 'http://vkontakte.ru/share.php?url={url}'
-		},
-		'moimir' => {
-			'title' => 'Moi Mir',
+        },
+        'moimir' => {
             'bindLink' => 'http://connect.mail.ru/share?url={url}'
-		},
-		'stumbleupon' => {
-			'title' => 'Stumbleupon',
+        },
+        'stumbleupon' => {
             'bindLink' => 'http://www.stumbleupon.com/submit?url={url}'
-		},
-		'digg' => {
-			'title' => 'Digg',
+        },
+        'digg' => {
             'bindLink' => 'http://digg.com/submit?url={url}'
-		},
-		'email' => {
-			'title' => 'E-mail',
+        },
+        'email' => {
             'bindLink' => 'http://api.addthis.com/oexchange/0.8/forward/email/offer?username=internal&url={url}'
-		},
-		'tumblr' => {
-			'title' => 'Tumblr',
+        },
+        'tumblr' => {
             'bindLink' => 'http://www.tumblr.com/share?v=3&u={url}'
-		},
-		'odnoklassniki' => {
-			'title' => 'Odnoklassniki',
+        },
+        'odnoklassniki' => {
             'bindLink' => 'http://www.odnoklassniki.ru/dk?st.cmd=addShare&st.s=1&st._surl={url}'
-		}
+        }
     };
+
+    while ( my ( $name, $service ) = each %$services ) {
+        $service->{'title'} ||= LJ::Lang::ml("sharing.service.$name");
+    }
 
     my $params = {
         'services' => $services,
