@@ -48,7 +48,7 @@ sub ReplyPage
     my $ditemid = $entry->ditemid;
     $p->{'head_content'} .= $LJ::COMMON_CODE{'chalresp_js'};
 
-    LJ::need_res('stc/display_none.css');
+    LJ::Talk::resources_for_talkform();    
 
     if ($u->should_block_robots || $entry->should_block_robots) {
         $p->{'head_content'} .= LJ::robot_meta_tags();

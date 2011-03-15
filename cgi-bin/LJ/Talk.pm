@@ -1569,6 +1569,11 @@ sub load_comments
 # to retranslate.  so for now we're just gonna put it off.
 my $SC = '/talkpost_do.bml';
 
+sub resources_for_talkform {
+    LJ::need_res('stc/display_none.css');
+    LJ::need_res('js/jquery/jquery.lj.authtype.js');
+}
+
 sub talkform {
 
     # Takes a hashref with the following keys / values:

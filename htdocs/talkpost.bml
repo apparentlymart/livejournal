@@ -11,7 +11,7 @@ body<=
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-    LJ::need_res('stc/display_none.css');
+    LJ::Talk::resources_for_talkform();
 
     my $remote = LJ::get_remote();
     my $errtxt;
