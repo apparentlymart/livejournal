@@ -1103,7 +1103,7 @@ HTML BODY.logged-out {
 		border-top-right-radius: 5px;
 		background: transparent;
 		}
-	#js .b-postform-login-services:hover {
+	#js .b-postform-login-services-show {
 		border-color: #CCC;
 		background: #FFF;
 		}
@@ -1123,7 +1123,7 @@ HTML BODY.logged-out {
 			white-space: nowrap;
 			z-index: 998;
 			}
-		.b-postform-login-services:hover .b-postform-login-services-items {
+		.b-postform-login-services-show .b-postform-login-services-items {
 			position: absolute;
 			top: 25px;
 			left: -1px;
@@ -1151,7 +1151,16 @@ HTML BODY.logged-out {
 				margin: 0;
 				padding: 0;
 				}
-			.b-postform-login-services:hover .b-postform-login-services-item {
+			.b-postform-login-services-show .b-postform-login-services-item {
+				display: block;
+				}
+			.b-postform-login-services-show .b-postform-login-services-user,
+			.b-postform-user-cookie .b-postform-login-services-show .b-postform-login-services-livejournal,
+			.b-postform-user-cookie.b-postform-authtype-livejournal .b-postform-login-services-show .b-postform-login-services-user {
+				display: none;
+				}
+			.b-postform-user-cookie .b-postform-login-services-show .b-postform-login-services-user,
+			.b-postform-user-cookie.b-postform-authtype-livejournal .b-postform-login-services-show .b-postform-login-services-livejournal {
 				display: block;
 				}
 				BODY .b-postform-login-services-item A:link,
@@ -1203,13 +1212,13 @@ HTML BODY.logged-out {
 						vertical-align: -4px;
 						border: 0;
 						}
-			.b-postform-anonymous .b-postform-login-services-anonymous,
-			.b-postform-livejournal .b-postform-login-services-livejournal,
-			.b-postform-user .b-postform-login-services-livejournal,
-			.b-postform-facebook .b-postform-login-services-facebook,
-			.b-postform-twitter .b-postform-login-services-twitter,
-			.b-postform-openid .b-postform-login-services-openid,
-			.b-postform-mailru .b-postform-login-services-mailru {
+			.b-postform-authtype-anonymous .b-postform-login-services-anonymous,
+			.b-postform-authtype-livejournal .b-postform-login-services-livejournal,
+			.b-postform-authtype-user .b-postform-login-services-user,
+			.b-postform-authtype-facebook .b-postform-login-services-facebook,
+			.b-postform-authtype-twitter .b-postform-login-services-twitter,
+			.b-postform-authtype-openid .b-postform-login-services-openid,
+			.b-postform-authtype-mailru .b-postform-login-services-mailru {
 				position: absolute;
 				top: -25px;
 				left: 0;
@@ -1220,43 +1229,43 @@ HTML BODY.logged-out {
 				padding: 0 1px;
 				background: transparent;
 				}
-			.b-postform-anonymous .b-postform-login-services:hover .b-postform-login-services-anonymous,
-			.b-postform-livejournal .b-postform-login-services:hover .b-postform-login-services-livejournal,
-			.b-postform-user .b-postform-login-services:hover .b-postform-login-services-livejournal,
-			.b-postform-facebook .b-postform-login-services:hover .b-postform-login-services-facebook,
-			.b-postform-twitter .b-postform-login-services:hover .b-postform-login-services-twitter,
-			.b-postform-openid .b-postform-login-services:hover .b-postform-login-services-openid,
-			.b-postform-mailru .b-postform-login-services:hover .b-postform-login-services-mailru {
+			.b-postform-authtype-anonymous .b-postform-login-services-show .b-postform-login-services-anonymous,
+			.b-postform-authtype-livejournal .b-postform-login-services-show .b-postform-login-services-livejournal,
+			.b-postform-authtype-user .b-postform-login-services-show .b-postform-login-services-user,
+			.b-postform-authtype-facebook .b-postform-login-services-show .b-postform-login-services-facebook,
+			.b-postform-authtype-twitter .b-postform-login-services-show .b-postform-login-services-twitter,
+			.b-postform-authtype-openid .b-postform-login-services-show .b-postform-login-services-openid,
+			.b-postform-authtype-mailru .b-postform-login-services-show .b-postform-login-services-mailru {
 				background: #FFF;
 				}
-				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:link,
-				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:visited,
-				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:hover,
-				BODY .b-postform-anonymous .b-postform-login-services-anonymous A:active,
-				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:link,
-				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:visited,
-				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:hover,
-				BODY .b-postform-livejournal .b-postform-login-services-livejournal A:active,
-				BODY .b-postform-user .b-postform-login-services-livejournal A:link,
-				BODY .b-postform-user .b-postform-login-services-livejournal A:visited,
-				BODY .b-postform-user .b-postform-login-services-livejournal A:hover,
-				BODY .b-postform-user .b-postform-login-services-livejournal A:active,
-				BODY .b-postform-facebook .b-postform-login-services-facebook A:link,
-				BODY .b-postform-facebook .b-postform-login-services-facebook A:visited,
-				BODY .b-postform-facebook .b-postform-login-services-facebook A:hover,
-				BODY .b-postform-facebook .b-postform-login-services-facebook A:active,
-				BODY .b-postform-twitter .b-postform-login-services-twitter A:link,
-				BODY .b-postform-twitter .b-postform-login-services-twitter A:visited,
-				BODY .b-postform-twitter .b-postform-login-services-twitter A:hover,
-				BODY .b-postform-twitter .b-postform-login-services-twitter A:active,
-				BODY .b-postform-openid .b-postform-login-services-openid A:link,
-				BODY .b-postform-openid .b-postform-login-services-openid A:visited,
-				BODY .b-postform-openid .b-postform-login-services-openid A:hover,
-				BODY .b-postform-openid .b-postform-login-services-openid A:active,
-				BODY .b-postform-mailru .b-postform-login-services-mailru A:link,
-				BODY .b-postform-mailru .b-postform-login-services-mailru A:visited,
-				BODY .b-postform-mailru .b-postform-login-services-mailru A:hover,
-				BODY .b-postform-mailru .b-postform-login-services-mailru A:active {
+				BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous A:link,
+				BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous A:visited,
+				BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous A:hover,
+				BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous A:active,
+				BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal A:link,
+				BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal A:visited,
+				BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal A:hover,
+				BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal A:active,
+				BODY .b-postform-authtype-user .b-postform-login-services-user A:link,
+				BODY .b-postform-authtype-user .b-postform-login-services-user A:visited,
+				BODY .b-postform-authtype-user .b-postform-login-services-user A:hover,
+				BODY .b-postform-authtype-user .b-postform-login-services-user A:active,
+				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:link,
+				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:visited,
+				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:hover,
+				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:active,
+				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:link,
+				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:visited,
+				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:hover,
+				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:active,
+				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:link,
+				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:visited,
+				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:hover,
+				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:active,
+				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:link,
+				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:visited,
+				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:hover,
+				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:active {
 					position: static;
 					display: block;
 					width: auto;
@@ -1270,13 +1279,13 @@ HTML BODY.logged-out {
 					color: #222 !important;
 					text-decoration: none;
 					}
-					.b-postform-anonymous .b-postform-login-services-anonymous IMG,
-					.b-postform-livejournal .b-postform-login-services-livejournal IMG,
-					.b-postform-user .b-postform-login-services-livejournal IMG,
-					.b-postform-facebook .b-postform-login-services-facebook IMG,
-					.b-postform-twitter .b-postform-login-services-twitter IMG,
-					.b-postform-openid .b-postform-login-services-openid IMG,
-					.b-postform-mailru .b-postform-login-services-mailru IMG {
+					.b-postform-authtype-anonymous .b-postform-login-services-anonymous IMG,
+					.b-postform-authtype-livejournal .b-postform-login-services-livejournal IMG,
+					.b-postform-authtype-user .b-postform-login-services-user IMG,
+					.b-postform-authtype-facebook .b-postform-login-services-facebook IMG,
+					.b-postform-authtype-twitter .b-postform-login-services-twitter IMG,
+					.b-postform-authtype-openid .b-postform-login-services-openid IMG,
+					.b-postform-authtype-mailru .b-postform-login-services-mailru IMG {
 						position: static;
 						display: block;
 						width: 17px;
@@ -1290,13 +1299,13 @@ HTML BODY.logged-out {
 						cursor: pointer;
 						text-align: left;
 						}
-					.b-postform-anonymous .b-postform-login-services-anonymous .b-postform-login-services-name,
-					.b-postform-livejournal .b-postform-login-services-livejournal .b-postform-login-services-name,
-					.b-postform-user .b-postform-login-services-livejournal .b-postform-login-services-name,
-					.b-postform-facebook .b-postform-login-services-facebook .b-postform-login-services-name,
-					.b-postform-twitter .b-postform-login-services-twitter .b-postform-login-services-name,
-					.b-postform-openid .b-postform-login-services-openid .b-postform-login-services-name,
-					.b-postform-mailru .b-postform-login-services-mailru .b-postform-login-services-name {
+					.b-postform-authtype-anonymous .b-postform-login-services-anonymous .b-postform-login-services-name,
+					.b-postform-authtype-livejournal .b-postform-login-services-livejournal .b-postform-login-services-name,
+					.b-postform-authtype-user .b-postform-login-services-user .b-postform-login-services-name,
+					.b-postform-authtype-facebook .b-postform-login-services-facebook .b-postform-login-services-name,
+					.b-postform-authtype-twitter .b-postform-login-services-twitter .b-postform-login-services-name,
+					.b-postform-authtype-openid .b-postform-login-services-openid .b-postform-login-services-name,
+					.b-postform-authtype-mailru .b-postform-login-services-mailru .b-postform-login-services-name {
 						display: none;
 						}
 	.b-postform-login-details {
@@ -1321,14 +1330,14 @@ HTML BODY.logged-out {
 			margin: 0;
 			padding: 0;
 			}
-		#js .b-postform-anonymous .b-postform-login-anonymous,
-		#js .b-postform-livejournal .b-postform-login-livejournal,
-		#js .b-postform-user .b-postform-login-user,
-		#js .b-postform-facebook .b-postform-login-facebook,
-		#js .b-postform-twitter .b-postform-login-twitter,
-		#js .b-postform-openid .b-postform-login-openid,
-		#js .b-postform-mailru .b-postform-login-mailru,
-		#js .b-postform-ljedit .b-postform-login-ljedit {
+		#js .b-postform-authtype-anonymous .b-postform-login-anonymous,
+		#js .b-postform-authtype-livejournal .b-postform-login-livejournal,
+		#js .b-postform-authtype-user .b-postform-login-user,
+		#js .b-postform-authtype-facebook .b-postform-login-facebook,
+		#js .b-postform-authtype-twitter .b-postform-login-twitter,
+		#js .b-postform-authtype-openid .b-postform-login-openid,
+		#js .b-postform-authtype-mailru .b-postform-login-mailru,
+		#js .b-postform-authtype-ljedit .b-postform-login-ljedit {
 			display: block;
 			}
 			#js .b-postform-login-item .b-postform-login-radio,
@@ -1344,7 +1353,7 @@ HTML BODY.logged-out {
 				.b-postform-login-item .i-bubble-arrow-border {
 					margin: -6px 0 0;
 					}
-			.b-postform-anonymous-cookie .b-postform-login-anonymous .b-postform-login-opts-anonymous,
+			.b-postform-login-anonymous .b-postform-login-opts-anonymous,
 			.b-postform-user-cookie .b-postform-login-user .b-postform-login-opts,
 			.b-postform-facebook-cookie .b-postform-login-facebook .b-postform-login-opts,
 			.b-postform-twitter-cookie .b-postform-login-twitter .b-postform-login-opts,
@@ -1356,6 +1365,10 @@ HTML BODY.logged-out {
 				height: auto;
 				margin: 0;
 				padding: 8px 0;
+				}
+			.b-postform-user-cookie .b-postform-login-user .b-postform-login-opts,
+			.b-postform-login-anonymous .b-postform-login-opts-anonymous {
+				padding: 6px 0;
 				}
 			.b-postform-login-livejournal .b-postform-login-opts {
 				position: static;
@@ -2066,8 +2079,8 @@ DIV.lj_ippu_app {
 --------------------------- */
 /* Must be removed after implementation of Framework! */
 .b-popup {
-	position: relative;
-	z-index: 99;
+	position: absolute;
+	z-index: 200;
 	}
 	.b-popup-outer {
 		position: relative;
@@ -2213,6 +2226,9 @@ DIV.lj_ippu_app {
 		background: url(/img/popup-cls.gif?v=1) no-repeat 0 0;
 		font: 0/0 serif;
 		cursor: pointer;
+		}
+	.b-popup-noclosecontrol .i-popup-close {
+		display: none;
 		}
 	.b-popup-group {
 		position: static;
@@ -2386,9 +2402,6 @@ DIV.lj_ippu_app {
 	margin: 0;
 	padding: 0;
 	}
-	.b-loginpopup .b-popup-inner {
-		padding: 5px 10px;
-		}
 	.b-loginpopup-items {
 		margin: 0 0 0 -5px;
 		padding: 0;
@@ -2412,6 +2425,7 @@ DIV.lj_ippu_app {
 				background: #FFF;
 				color: #222 !important;
 				text-decoration: none;
+				font-size: 11px;
 				}
 			BODY .b-loginpopup-item A:hover,
 			BODY .b-loginpopup-item A:active,
@@ -2426,6 +2440,7 @@ DIV.lj_ippu_app {
 				background: #C5E1F7;
 				color: #222 !important;
 				text-decoration: none;
+				font-size: 11px;
 				}
 			.b-loginpopup-item IMG,
 			#header .b-loginpopup-item IMG {
@@ -2438,7 +2453,6 @@ DIV.lj_ippu_app {
 /* Subject Picture Popup */
 .b-subjecticons {
 	display: none;
-	position: absolute;
 	width: 300px;
 	margin: 0;
 	padding: 0;
