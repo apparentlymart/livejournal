@@ -579,8 +579,6 @@ body<=
 			$ret .= "<script type='text/javascript'>";
             my $phone = LJ::SMS::API::RU::Phone->normalize($tminfo->{'number'});
             my $status = LJ::SMS::API::RU::Phone->get_status($u->{'userid'}, $phone);
-            my $statuses = LJ::SMS::API::RU::Phone->get_cur_phone_statuses($phone);
-            $status = 'already_use' if grep { $_->[0] eq 'verified' && $_->[1] != $u->{'userid'} } @$statuses;
 			$ret .= "smsNotifyInitialState = \"".$status."\";";
 			$ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{provider_by_def}}) . "];";
 			$ret .= "var smsCountry = '$country';";

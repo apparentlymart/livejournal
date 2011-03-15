@@ -25,7 +25,7 @@ sub render_body {
     my $phone = LJ::SMS::API::RU::Phone->get_phone($u->userid);
     if ($LJ::DISABLED{smsru} or
         ($country ne 'RU'
-        and not ($phone && LJ::SMS::API::RU::Phone->get_cur_phone_statuses($phone) ne 'verified')
+        and not ($phone && LJ::SMS::API::RU::Phone->get_status($u->userid, $phone) ne 'verified')
         )
     ){
         @ntypes = grep { $_ ne 'LJ::NotificationMethod::SMSru' ? 1 : 0 } @ntypes;
