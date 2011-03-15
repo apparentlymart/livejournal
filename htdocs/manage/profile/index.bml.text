@@ -175,6 +175,8 @@
 
 .fn.smsinterval.limitrange=Limit range
 
+.fn.smsinterval.limitrange.timezone_required=(disabled because you didn't specify time zone)
+
 .fn.smsinterval.start=Send from
 
 .fn.smsinterval.end=till

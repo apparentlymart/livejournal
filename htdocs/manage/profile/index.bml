@@ -552,15 +552,42 @@ body<=
             }
 			$ret .= "</td></tr>\n";
 			
-            if( $ru_text_messaging && LJ::NotificationMethod::SMSru->configured_for_user($u) ){
+            if( $ru_text_messaging ){
                 my($start, $end) = split /-/, $u->prop( 'smsru_interval' );
-                $ret .= "<tr id=\"sms_time\"><td class='field_name'>$ML{'.fn.smsinterval'}</td><td>";
+
+                my $row_style = '';
+                unless ( LJ::NotificationMethod::SMSru->configured_for_user($u) ) {
+                    $row_style = 'display: none;';
+                }
+
+                $ret .= "<tr id=\"sms_time\" style=\"$row_style\"><td class='field_name'>$ML{'.fn.smsinterval'}</td><td>";
                 $ret .= BML::ml(".fn.smsinterval.info", { url => "$LJ::SITEROOT/manage/settings/?cat=notifications" }) . "<br />";
-         
-                $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'sms_interval', 'id' => 'sms_interval',
-                    'selected' =>  defined $start });
-                $ret .= "<label for='sms_interval'>$ML{'.fn.smsinterval.limitrange'}</label><br/>";
-            
+
+                my $timezone = $u->prop('timezone');
+                my $selected = $timezone && ( defined $start );
+
+                $ret .= LJ::html_check({
+                    'type'      => 'check',
+                    'name'      => 'sms_interval',
+                    'id'        => 'sms_interval',
+                    'selected'  => $selected,
+                    'disabled'  => !$timezone,
+                });
+
+                my $label = LJ::Lang::ml('/manage/profile/index.bml.fn.smsinterval.limitrange');
+                unless ( $timezone ) {
+                    $label .= ' ' . LJ::Lang::ml('/manage/profile/index.bml.fn.smsinterval.limitrange.timezone_required');
+                }
+
+                $ret .= "<label for='sms_interval'>$label</label><br/>";
+
+                my $values_style;
+                unless ( $selected ) {
+                    $values_style = 'display: none;';
+                }
+
+                $ret .= qq{<div id="sms_interval_values" style="$values_style">};
+
                 my @sms_time = map {$_ =>  sprintf("%02d:00", $_)} (0 .. 23);
                 $ret .= "<label for='sms_interval_start'>$ML{'.fn.smsinterval.start'}</label>";
                 $ret .= LJ::html_select({ 'name' => 'sms_interval_start',
@@ -571,6 +598,9 @@ body<=
                                                   'selected' => $end || 1, },
                                                   @sms_time);
                 $ret .= BML::ml(".fn.smsinterval.localtime") . "<br />";
+
+                $ret .= '</div>';
+
     			$ret .= "</td></tr>\n";
             }
             
