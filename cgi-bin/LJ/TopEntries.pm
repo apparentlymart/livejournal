@@ -31,6 +31,8 @@ use Storable qw//;
 my %domains = (
     hmp_ontd        => 'Homepage/ONTD',
     hmp_spotlight   => 'Homepage/Spotlight',
+);
+=head
     culture         => 'Arts & Culture',
     entertainment   => 'Entertainment',
     books           => 'Books & Writing',
@@ -48,10 +50,13 @@ my %domains = (
     society         => 'Society & Culture',
     spirit          => 'Spirituality & Beliefs',
     );
+=cut
 
 my @order = qw/
     hmp_ontd
     hmp_spotlight
+/;
+=head
     culture
     entertainment
     books
@@ -69,6 +74,7 @@ my @order = qw/
     society
     spirit
 /;
+=cut
 
 
 sub domains { @order }
@@ -262,7 +268,7 @@ sub _load_featured_posts {
     $self->{'featured_posts'}   = [ map { $self->_hash_from_key($_) } @entities ];
 =cut
     if ($prop_val){
-        my $struct = Storable::thaw($prop_val);
+        my $struct = eval { Storable::thaw($prop_val) };
         $self->{min_entries}    = $struct->{min_entries};
         $self->{max_entries}    = $struct->{max_entries};
         $self->{featured_posts} = $struct->{spots} || [];
