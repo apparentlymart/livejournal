@@ -296,7 +296,7 @@
     }
 
     my $ret = "";
-    $ret .= "<?h1 $ML{'.success.title'} h1?>";
+    $ret .= "<h1>$ML{'.success.title'}</h1>";
 
     my $mlcode;
     if ($comment->{state} eq 'A') {
@@ -319,19 +319,20 @@
         }
     }
 
-    $ret .= "<?p " . BML::ml($mlcode, {'aopts' => "href='$commentlink'"}) . " p?>";
+    $ret .= "<p> " . BML::ml($mlcode, {'aopts' => "href='$commentlink'"}) . " </p>";
 
     # did this comment unscreen its parent?
     if ($wasscreened and $parent->{state} ne 'S') {
-        $ret .= "<?p $ML{'.success.unscreened'} p?>";
+        $ret .= "<p> $ML{'.success.unscreened'} </p>";
     }
 
     if ($init->{didlogin}) {
-        $ret .= "<?p $ML{'.success.loggedin'} p?>";
+        $ret .= "<p> $ML{'.success.loggedin'} </p>";
     }
 
     # Sucessful!
     $title = $ML{'.title'};
+    return $ret;
 
     }; # end $render_body
 
