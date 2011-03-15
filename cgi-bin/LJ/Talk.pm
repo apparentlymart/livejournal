@@ -344,7 +344,8 @@ sub can_delete {
     return 1 if $remote->{'user'} eq $userpost ||
                 $remote->{'user'} eq (ref $u ? $u->{'user'} : $u) ||
                 $remote->{'user'} eq (ref $up ? $up->{'user'} : $up) ||
-                $remote->can_manage($u);
+                $remote->can_manage($u) ||
+                $remote->can_sweep($u);
     return 0;
 }
 
@@ -382,6 +383,7 @@ sub can_unfreeze {
 sub can_mark_spam {
     return 0 unless $_[0];
     return 1 if $_[0]->can_moderate($_[1]);
+    return 1 if $_[0]->can_sweep($_[1]);
     return LJ::Talk::can_screen(@_);
 }
 
@@ -856,10 +858,15 @@ sub get_talk_data {
     return undef unless $nodeid =~ /^\d+$/;
     my $uid = $u->id;
 
-    # call normally if no gearman/not wanted
+    ## call normally if no gearman/not wanted
+    
+    ## Do no try to connect to Gearman if there is no need.
+    return get_talk_data_do($uid, $nodetype, $nodeid, $opts)
+        unless LJ::conf_test($LJ::LOADCOMMENTS_USING_GEARMAN, $u->id);
+
     my $gc = LJ::gearman_client();
     return get_talk_data_do($uid, $nodetype, $nodeid, $opts)
-        unless $gc && LJ::conf_test($LJ::LOADCOMMENTS_USING_GEARMAN, $u->id);
+        unless $gc;
 
     # invoke gearman
     my $result;
@@ -885,6 +892,9 @@ sub get_talk_data {
 # retrieves data from the talk2 table (but preferably memcache)
 # returns a hashref (key -> { 'talkid', 'posterid', 'datepost', 'datepost_unix',
 #                             'parenttalkid', 'state' } , or undef on failure
+# opts -> {
+#           init_comobject    => [1|0], # by default 0, init or not comment objects
+#           }
 sub get_talk_data_do
 {
     my ($uid, $nodetype, $nodeid, $opts) = @_;
@@ -895,7 +905,7 @@ sub get_talk_data_do
 
     my $init_comobj = 1;
        $init_comobj = $opts->{init_comobj} if exists $opts->{init_comobj};
-
+    
     my $ret = {};
 
     # check for data in memcache
@@ -924,8 +934,7 @@ sub get_talk_data_do
         return unless @LJ::MEMCACHE_SERVERS;
         return unless $u->writer;
 
-        my $gc = LJ::gearman_client();
-        if ($gc && LJ::conf_test($LJ::FIXUP_USING_GEARMAN, $u)) {
+        if (LJ::conf_test($LJ::FIXUP_USING_GEARMAN, $u) and my $gc = LJ::gearman_client()) {
             $gc->dispatch_background("fixup_logitem_replycount",
                                      Storable::nfreeze([ $u->id, $nodeid ]), {
                                          uniq => "-",

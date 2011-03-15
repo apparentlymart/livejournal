@@ -11,6 +11,7 @@ use strict;
 # S - supermaintainer
 # I - inviter
 # D - spammer
+# W - journal sweeper
 #########################
 
 # <LJFUNC>

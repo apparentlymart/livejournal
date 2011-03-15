@@ -141,6 +141,7 @@ _info?><?_code
     my $can_manage = $remote->can_manage($journal);
     my $can_mark_spam = LJ::is_enabled('spam_button') && 
                         LJ::Talk::can_mark_spam($remote, $journal, $poster, $comment);
+    my $can_sweep     = ($remote && $poster && $remote->can_sweep($poster));
 
     my %can = (
         'manage_journal' => $can_manage,
@@ -151,7 +152,7 @@ _info?><?_code
         # they can ban the comment author if they are the journal owner
         # and there is an author; also, they will not be able to ban
         # themselves
-        'ban'            => $can_manage && $poster && ( $remote != $poster ),
+        'ban'            => ($can_manage || $can_sweep) && $poster && ( $remote != $poster ),
 
         # they can mark as spam unless the comment is their own;
         # they don't need to be the community maintainer to do that

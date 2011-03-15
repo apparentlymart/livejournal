@@ -34,8 +34,14 @@ sub execute {
         return $self->error("Unknown account: $comm")
             unless $journal;
 
-        return $self->error("You are not a maintainer of this account")
-            unless $remote && $remote->can_manage($journal);
+        ## Access controll
+        if ($journal->is_person){
+            return $self->error("You are not a watcher of this account")
+                unless $remote and $remote->can_sweep($journal);
+        } else {
+            return $self->error("You are not a maintainer of this account")
+                unless $remote && $remote->can_manage($journal);
+        }
     }
 
     my $banuser = LJ::load_user($user);

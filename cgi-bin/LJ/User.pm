@@ -5364,6 +5364,27 @@ sub can_manage {
     return 1;
 }
 
+sub can_sweep {
+    my $remote  = shift;
+    my $u       = LJ::want_user(shift);
+
+    return undef unless $remote && $u;
+
+    # is same user?
+    return 1 if LJ::u_equals($u, $remote);
+
+    # do not allow suspended users to be watchers of other accounts.
+    return 0 if $remote->is_suspended;
+
+    # only personal journals can have watchers
+    return undef unless $u->journaltype eq 'P';
+
+    # check for admin access
+    return undef unless LJ::check_rel($u, $remote, 'W');
+
+    return 1;
+}
+
 sub hide_adult_content {
     my $u = shift;
 
