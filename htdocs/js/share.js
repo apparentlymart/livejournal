@@ -1,4 +1,4 @@
-;(function( window, $ ) {
+(function( window, $ ) {
 
 /**
 * 
@@ -44,7 +44,7 @@ function supplant(str, o) {
 			return typeof r === 'string' || typeof r === 'number' ? r : a;
 		}
 	);
-};
+}
 
 var selectors = {
 	close: ".i-popup-close",
@@ -182,9 +182,8 @@ window.LJShare.link = function( opts ) {
 		str += supplant( template.end, global_options.ml );
 
 		dom = $( str ).css( {
-			position: 'absolute',
-			visibility: 'hidden'
-		} );
+			position: 'absolute'
+		} ).hide();
 	}
 
 	function injectDom() {
@@ -253,7 +252,11 @@ window.LJShare.link = function( opts ) {
 			arrPos += "r";
 		} else {
 			arrPos += "l";
-			linkLeft -= 24;
+			linkLeft -= 25;
+			if( linkW == 16 ) {
+				linkLeft -= 4;
+			}
+
 		}
 
 		arrow.removeClass().addClass( arrow_opts.className ).addClass( arrow_opts.position[ arrPos ] ); 
@@ -267,7 +270,7 @@ window.LJShare.link = function( opts ) {
 			updatePopupPosition();
 		}
 
-		dom.css( 'visibility', ( show ) ? 'visible' : 'hidden' );
+		dom[ ( show ) ? 'show' : 'hide' ]();
 	}
 
 	link.attr( 'href', 'javascript:void(0)' )
