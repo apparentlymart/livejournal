@@ -62,6 +62,8 @@ if (! sel_pickw) {
 }
 
 function handleRadios(sel) {
+	return false;
+	
 	var currentRadio;
 	
     password.disabled = check_login.disabled = (sel != 2);
@@ -147,7 +149,7 @@ function handleRadios(sel) {
         }
     }
 
-    if (sel_pickw.disabled = (sel != 1)) {
+    if (sel_pickw.disabled == (sel != 1)) {
 		sel_pickw.value = '';
 	}
 }
@@ -330,3 +332,48 @@ function toggleTextHighlight(e, show) {
 		elem.removeClass(highlightClass);
 	}
 }
+
+(function (window, $) {
+	var identityTypeSelect = (function () {
+		var settings = {
+			selectors: {
+				fakeRadios: 'input',
+				select: 'select',
+				identityControl: 'a.identity'
+			},
+			classNames: {
+				selectExpanded: 'expanded',
+				selectCollapsed: 'collapsed'
+			},
+			identityIdPrefix: 'identity-tg-'
+		};
+		
+		var _identitiesList = [], _container;
+		
+		function toggleIdentity(event) {
+			var identityName = $(this).attr('name');
+			
+			_container.attr('id', setting.identityIdPrefix + identityName);
+		}
+		
+		function collapseSelect() {}
+		
+		function expandSelect() {}
+		
+		return {
+			init: function (container, options) {
+				$.extend(true, settings, options);
+				
+				_container = $(container)
+					.delegate(settings.selectors.identityControl, 'click', toggleIdentity);
+			}
+		};
+	})();
+	
+	$.fn.identityTypeSelect = function (options) {
+		return this.each(function () {
+			identityTypeSelect.init(this, options);
+		});
+	};
+	
+})(this, jQuery);
