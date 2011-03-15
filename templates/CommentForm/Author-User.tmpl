@@ -3,7 +3,7 @@
         <div class="b-postform-login-item b-postform-login-user">
             <div class="b-postform-login-opts">
                 <TMPL_VAR ml_loggedin>
-                <span class="b-postform-login-opts-lj"><a href="#"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
+                <span class="b-postform-login-opts-lj"><a href="#livejournal" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
                 <TMPL_VAR ml_banned>
             </div>
         </div>
@@ -14,7 +14,7 @@
                 <label for="talkpostfromremote" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></label>
                 <div class="b-postform-login-opts">
                     <TMPL_VAR ml_loggedin>
-                    <span class="b-postform-login-opts-lj"><a href="#"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
+                    <span class="b-postform-login-opts-lj"><a href="#livejournal" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
                     <input type='hidden' name='cookieuser' value='<TMPL_VAR remote_username>' id='cookieuser' />
                     <TMPL_VAR ml_willscreen>
                 </div>
@@ -24,7 +24,7 @@
                 <span class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></span>
                 <div class="b-postform-login-opts">
                     <TMPL_VAR ml_loggedin>
-                    <span class="b-postform-login-opts-lj"><a href="#"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
+                    <span class="b-postform-login-opts-lj"><a href="#livejournal" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
                     <TMPL_VAR ml_notafriend>
                     <input type="hidden" name="cookieuser" value="<TMPL_VAR remote_username>" id="cookieuser" />
                     <TMPL_VAR ml_willscreen>
@@ -39,7 +39,7 @@
     <div class="b-postform-login-opts">
         <input class="textbox" name="userpost" size="13" maxlength="15" id="username" value="<TMPL_VAR username_default>" placeholder="<TMPL_VAR expr="ml('Username')">" />
         <input class="textbox" name="password" type="password" maxlength="30" size="18" id="password" placeholder="<TMPL_VAR expr="ml('Password')">" />
-        <TMPL_IF is_person><span class="b-postform-login-opts-lj"><a href="#"><TMPL_VAR expr="ml('/talkpost.bml.back.to')">&nbsp;<em><TMPL_VAR username_default></em></a></span></TMPL_IF>
+        <TMPL_IF is_person><span class="b-postform-login-opts-lj"><a href="#user" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.back.to')">&nbsp;<em><TMPL_VAR username_default></em></a></span></TMPL_IF>
         <TMPL_VAR ml_willscreen>
         <TMPL_VAR ml_willscreenfriend>
         <input type="hidden" name="do_login" id="logincheck" />

@@ -19,11 +19,15 @@
 <TMPL_ELSIF registered_can_comment>
     <div class="b-postform-login-item b-postform-login-anonymous b-postform-login-disabled">
         <span class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span>
-        <TMPL_UNLESS remote_username>
+        <TMPL_IF remote_username>
+        	<div class="b-postform-login-opts b-postform-login-opts-anonymous">
+                <strong><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></strong>
+            </div>
+		<TMPL_ELSE>
             <div class="b-postform-login-opts">
                 <span class="i-bubble b-bubble-alert"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></span>
             </div>
-        </TMPL_UNLESS>
+        </TMPL_IF>
     </div>
 <TMPL_ELSIF friends_can_comment>
     <div class="b-postform-login-item b-postform-login-anonymous b-postform-login-disabled">
