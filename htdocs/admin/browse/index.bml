@@ -41,7 +41,7 @@ body<=
     $ret .= "</ul>";
 
     $ret .= "<p><a href='./load_all_structure.bml'>Load All Structure</a></p>";
-    $ret .= "<p><a href='./delete_comm_list.bml'>Delete category by list</a></p>";
+    $ret .= "<p><a href='./delete_comm_list.bml'>Delete community by list</a></p>";
 
     return "<body>$ret</body>";
 }
