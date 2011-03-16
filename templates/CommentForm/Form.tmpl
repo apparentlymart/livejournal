@@ -44,16 +44,15 @@
                 </div>
             </div>
         <TMPL_ELSE>
-            <div class='b-postform-login b-postform-authtype-<TMPL_IF expr="usertype_default eq 'anonymous'">anonymous b-postform-anonymous-cookie<TMPL_ELSIF expr="usertype_default eq 'cookieuser'">user b-postform-user-cookie<TMPL_ELSIF expr="usertype_default eq 'facebook_cookie'">facebook b-postform-facebook-cookie<TMPL_ELSIF expr="usertype_default eq 'twitter_cookie'">twitter b-postform-twitter-cookie<TMPL_ELSIF expr="usertype_default eq 'openid_cookie'">openid b-postform-openid-cookie<TMPL_ELSIF expr="usertype_default eq 'mailru_cookie'">mailru b-postform-mailru-cookie</TMPL_IF>'>
+            <div class='b-postform-login b-postform-authtype-<TMPL_IF expr="usertype_default eq 'anonymous'">anonymous b-postform-anonymous-cookie<TMPL_ELSIF expr="usertype_default eq 'cookieuser'">user b-postform-user-cookie<TMPL_ELSIF expr="usertype_default eq 'facebook_cookie'">facebook b-postform-facebook-cookie<TMPL_ELSIF expr="usertype_default eq 'twitter_cookie'">twitter b-postform-twitter-cookie<TMPL_ELSIF expr="usertype_default eq 'openid_cookie'">openid b-postform-openid-cookie<TMPL_ELSIF expr="usertype_default eq 'mailru_cookie'">mailru b-postform-mailru-cookie</TMPL_IF>
+                <TMPL_LOOP author_options>
+                    <TMPL_INCLUDE expr="sprintf('templates/CommentForm/AuthorDisabled-%s.tmpl', short_code)">
+                </TMPL_LOOP>'>
                 <div class="b-postform-login-services">
                     <div class="b-postform-login-services-items">
-                        <span class="b-postform-login-services-item b-postform-login-services-anonymous"><a href="#anonymous"><img src="<TMPL_VAR lj_imgprefix>/anonymous.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span></a></span>
-                        <span class="b-postform-login-services-item b-postform-login-services-user"><a href="#user"><img src="<TMPL_VAR lj_imgprefix>/userinfo.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></span></a></span>
-                        <span class="b-postform-login-services-item b-postform-login-services-livejournal"><a href="#livejournal"><img src="<TMPL_VAR lj_imgprefix>/pencil.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></span></a></span>
-                        <span class="b-postform-login-services-item b-postform-login-services-facebook"><a href="#facebook"><img src="<TMPL_VAR lj_imgprefix>/icons/facebook-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.facebook')"></span></a></span>
-                        <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></span></a></span>
-                        <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
-                        <span class="b-postform-login-services-item b-postform-login-services-mailru"><a href="#mailru"><img src="<TMPL_VAR lj_imgprefix>/icons/mailru-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.mailru')"></span></a></span>
+                        <TMPL_LOOP author_options>
+                            <TMPL_INCLUDE expr="sprintf('templates/CommentForm/AuthorTitle-%s.tmpl', short_code)">
+                        </TMPL_LOOP>
                     </div>
                 </div>
                 <div class="b-postform-login-details">
