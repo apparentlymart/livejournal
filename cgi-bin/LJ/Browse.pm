@@ -188,7 +188,7 @@ sub load_from_uri_cache {
     }
 
    # check memcache for data
-   my $memval = LJ::MemCache::get($class->memkey_caturi($uri));
+   my $memval = $LJ::VERTICALS_FORCE_USE_MASTER ? undef : LJ::MemCache::get($class->memkey_caturi($uri));
    if ($memval) {
        my $c = $class->new( catid => $memval->{catid} );
        $c->absorb_row($memval);
@@ -260,7 +260,7 @@ sub load_all {
     my $vert_id = $vertical ? $vertical->vert_id : 0;
     my $where = " WHERE vert_id = $vert_id ";
 
-    my $cats = LJ::MemCache::get( $class->memkey_catall(vertical => $vertical) );
+    my $cats = $LJ::VERTICALS_FORCE_USE_MASTER ? undef : LJ::MemCache::get( $class->memkey_catall(vertical => $vertical) );
 
     unless ($cats && scalar @$cats) {
         $cats = $dbh->selectall_arrayref(
@@ -269,7 +269,7 @@ sub load_all {
         );
         die $dbh->errstr if $dbh->err;
 
-        LJ::MemCache::set( $class->memkey_catall(vertical => $vertical) => $cats );
+        LJ::MemCache::set( $class->memkey_catall(vertical => $vertical) => $cats, 3600 );
     }
 
     return () unless $cats && scalar @$cats;
@@ -290,7 +290,7 @@ sub load_top_level {
 
     my @cats;
     # check memcache for data
-    my $memval = LJ::MemCache::get("category_top2");
+    my $memval = $LJ::VERTICALS_FORCE_USE_MASTER ? undef : LJ::MemCache::get("category_top2");
     if ($memval) {
         foreach my $id (@$memval) {
             my $c = $class->new( catid => $id );
@@ -318,7 +318,7 @@ sub load_top_level {
         push @{$catids}, $row->{catid};
         push @cats, $c if $c;
     }
-    LJ::MemCache::set("category_top2", $catids);
+    LJ::MemCache::set("category_top2", $catids, 3600);
 
     # Subcategories
     #
@@ -458,7 +458,7 @@ sub memkey_catall {
 
     my $v = $args{'vertical'};
 
-    return [ $v, "catall2:".$v->vert_id ] if $v;
+    return [ $v, "catall3:".$v->vert_id ] if $v;
     return "cat:all2";
 }
 
@@ -466,31 +466,31 @@ sub memkey_catid {
     my $self = shift;
     my $id = shift;
 
-    return [ $id, "cat2:$id" ] if $id;
-    return [ $self->{catid}, "cat2:$self->{catid}" ];
+    return [ $id, "cat3:$id" ] if $id;
+    return [ $self->{catid}, "cat3:$self->{catid}" ];
 }
 
 sub memkey_catid_props {
     my $self = shift;
     my $id = shift;
 
-    return [ $id, "cat2:props:$id" ] if $id;
-    return [ $self->{catid}, "cat2:props:$self->{catid}" ];
+    return [ $id, "cat3:props:$id" ] if $id;
+    return [ $self->{catid}, "cat3:props:$self->{catid}" ];
 }
 
 sub memkey_catid_journals {
     my $self = shift;
     my $id = shift;
 
-    return [ $id, "cat2:journals:$id" ] if $id;
-    return [ $self->{catid}, "cat2:journals:$self->{catid}" ];
+    return [ $id, "cat3:journals:$id" ] if $id;
+    return [ $self->{catid}, "cat3:journals:$self->{catid}" ];
 }
 
 sub memkey_caturi {
     my $self = shift;
     my $uri = shift;
 
-    return "caturi2:$uri";
+    return "caturi3:$uri";
 }
 
 sub set_memcache {
@@ -500,8 +500,8 @@ sub set_memcache {
     return unless $self->{_loaded_row};
 
     my $val = { map { $_ => $self->{$_} } @cat_cols };
-    LJ::MemCache::set( $self->memkey_catid => $val );
-    LJ::MemCache::set( $self->memkey_caturi($uri) => $val ) if $uri;
+    LJ::MemCache::set( $self->memkey_catid() => $val, 3600 );
+    LJ::MemCache::set( $self->memkey_caturi($uri) => $val, 3600 ) if $uri;
 
     return;
 }
@@ -512,7 +512,7 @@ sub set_prop_memcache {
     return unless $self->{_loaded_props};
 
     my $val = { map { $_ => $self->{$_} } @prop_cols };
-    LJ::MemCache::set( $self->memkey_catid_props => $val );
+    LJ::MemCache::set( $self->memkey_catid_props => $val, 3600 );
 
     return;
 }
@@ -523,7 +523,7 @@ sub set_journals_memcache {
     return unless $self->{_loaded_journals};
 
     my $val = { communities => $self->{communities} };
-    LJ::MemCache::set( $self->memkey_catid_journals => $val );
+    LJ::MemCache::set( $self->memkey_catid_journals => $val, 3600 );
 
     return;
 }
@@ -593,11 +593,11 @@ sub preload_rows {
     my %need = map { $_->{catid} => $_ } @to_load;
 
     my @mem_keys = map { $_->memkey_catid } @to_load;
-    my $memc = LJ::MemCache::get_multi(@mem_keys);
+    my $memc = $LJ::VERTICALS_FORCE_USE_MASTER ? undef : LJ::MemCache::get_multi(@mem_keys);
 
     # now which of the objects to load did we get a memcache key for?
     foreach my $obj (@to_load) {
-        my $row = $memc->{"cat2:$obj->{catid}"};
+        my $row = $memc->{"cat3:$obj->{catid}"};
         next unless $row;
 
         $obj->absorb_row($row);
@@ -675,11 +675,11 @@ sub preload_props {
     my %need = map { $_->{catid} => $_ } @to_load;
 
     my @mem_keys = map { $_->memkey_catid_props } @to_load;
-    my $memc = LJ::MemCache::get_multi(@mem_keys);
+    my $memc = $LJ::VERTICALS_FORCE_USE_MASTER ? undef : LJ::MemCache::get_multi(@mem_keys);
 
     # now which of the objects to load did we get a memcache key for?
     foreach my $obj (@to_load) {
-        my $row = $memc->{"cat2:props:$obj->{catid}"};
+        my $row = $memc->{"cat3:props:$obj->{catid}"};
         next unless $row;
 
         $obj->absorb_prop_row($row);
@@ -733,7 +733,7 @@ sub load_props {
     $self->preload_props unless $self->{_loaded_props};
 
     # check memcache for data
-    my $memval = LJ::MemCache::get($self->memkey_catid_props());
+    my $memval = $LJ::VERTICALS_FORCE_USE_MASTER ? undef : LJ::MemCache::get($self->memkey_catid_props());
     if ($memval) {
         $self->absorb_prop_row($memval);
         return;
@@ -768,7 +768,7 @@ sub load_communities {
     my %args = @_;
 
     # check memcache for data
-    my $memval = LJ::MemCache::get($self->memkey_catid_journals());
+    my $memval = $LJ::VERTICALS_FORCE_USE_MASTER ? undef : LJ::MemCache::get($self->memkey_catid_journals());
     if ($memval) {
         $self->absorb_journals_row($memval);
         return;

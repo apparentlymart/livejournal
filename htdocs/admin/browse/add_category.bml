@@ -22,6 +22,8 @@ body<=
     my $newcaturl;
     my $vert_id;
 
+    $LJ::VERTICALS_FORCE_USE_MASTER = 1;
+
     my @ids = sort { $b cmp $a } grep { $_ =~ /^catid\d+\_0$/ } keys %POST;
     my $cat_id = $POST{$ids[0]} ? $POST{$ids[0]} : $POST{$ids[1]};
     my $category = $cat_id ? LJ::Browse->load_by_id ($cat_id) : undef;
