@@ -353,15 +353,15 @@ body<=
                                 "N" => BML::ml(".security.visibility.nobody"));
         $ret .= "</span></div>";
 
-		# geo-location
+        # geo-location
         $ret .= LJ::Widget::Location->render( skip_timezone => 1 );
 
-		if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location_profile'}) {
-			$ret .= "<div class='lc_detect'><span>$ML{'.section.location.detect'}</span>";
-			$ret .= "<input type='button' name='detect' value='$ML{'.location.detect.btn'}' id='detect' onClick='countryregions.autoDetect()'> ";
-			$ret .= " " . LJ::help_icon('location');
-			$ret .= "</div>";
-		}
+        if ($IpMap::VERSION ge "1.1.0" and not $LJ::DISABLED{'geo_location_profile'}) {
+            $ret .= "<div class='lc_detect'><span>$ML{'.section.location.detect'}</span>";
+            $ret .= "<input type='button' name='detect' value='$ML{'.location.detect.btn'}' id='detect' onClick='countryregions.autoDetect()'> ";
+            $ret .= " " . LJ::help_icon('location');
+            $ret .= "</div>";
+        }
 
 
         ## CONTACT INFO
@@ -550,8 +550,8 @@ body<=
             if( $u->in_class("paid") || $u->in_class("sponsored") || $u->in_class("perm") ) {
                 $ret .= '<div class="helper">' . $ML{'.section.textmsg.adv'} . '</div>';
             }
-			$ret .= "</td></tr>\n";
-			
+            $ret .= "</td></tr>\n";
+            
             if( $ru_text_messaging ){
                 my($start, $end) = split /-/, $u->prop( 'smsru_interval' );
 
@@ -601,17 +601,17 @@ body<=
 
                 $ret .= '</div>';
 
-    			$ret .= "</td></tr>\n";
+                $ret .= "</td></tr>\n";
             }
             
             $ret .= "</table>\n";
 
-			$ret .= "<script type='text/javascript'>";
+            $ret .= "<script type='text/javascript'>";
             my $phone = LJ::SMS::API::RU::Phone->normalize($tminfo->{'number'});
             my $status = LJ::SMS::API::RU::Phone->get_status($u->{'userid'}, $phone);
-			$ret .= "smsNotifyInitialState = \"".$status."\";";
-			$ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{provider_by_def}}) . "];";
-			$ret .= "var smsCountry = '$country';";
+            $ret .= "smsNotifyInitialState = \"".$status."\";";
+            $ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{provider_by_def}}) . "];";
+            $ret .= "var smsCountry = '$country';";
 
             my $dict_out = LJ::JSON->to_json({
                 'sendsmsbut'        => $ML{'.section.textmsg.button'},
@@ -627,7 +627,7 @@ body<=
                         techerror ),
             });
 
-			$ret .= "var smsNotifyDict = $dict_out;</script>\n";
+            $ret .= "var smsNotifyDict = $dict_out;</script>\n";
         }else{
             my $inline;
             if ($inline .= LJ::run_hook("cprod_inline", $u, 'TextMessaging')) {
