@@ -1,0 +1,9 @@
+<TMPL_IF everyone_can_comment>
+    <TMPL_UNLESS is_public>
+        b-postform-ability-disabled-anonymous
+    </TMPL_UNLESS>
+<TMPL_ELSIF registered_can_comment>
+    b-postform-ability-disabled-anonymous
+<TMPL_ELSIF friends_can_comment>
+    b-postform-ability-disabled-anonymous
+</TMPL_IF>

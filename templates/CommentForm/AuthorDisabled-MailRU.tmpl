@@ -1,0 +1,9 @@
+<TMPL_IF everyone_can_comment>
+<TMPL_ELSIF registered_can_comment>
+<TMPL_ELSIF friends_can_comment>
+    <TMPL_IF is_identity>
+        <TMPL_UNLESS remote_can_comment>
+            b-postform-ability-disabled-mailru
+        </TMPL_UNLESS>
+    </TMPL_IF>
+</TMPL_IF>

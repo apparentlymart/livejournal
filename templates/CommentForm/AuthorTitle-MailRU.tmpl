@@ -1,0 +1,15 @@
+<TMPL_IF everyone_can_comment>
+    <span class="b-postform-login-services-item b-postform-login-services-mailru"><a href="#mailru"><img src="<TMPL_VAR lj_imgprefix>/icons/mailru-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.mailru')"></span></a></span>
+<TMPL_ELSIF registered_can_comment>
+    <span class="b-postform-login-services-item b-postform-login-services-mailru"><a href="#mailru"><img src="<TMPL_VAR lj_imgprefix>/icons/mailru-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.mailru')"></span></a></span>
+<TMPL_ELSIF friends_can_comment>
+    <TMPL_IF is_identity>
+        <TMPL_IF remote_can_comment>
+            <span class="b-postform-login-services-item b-postform-login-services-mailru"><a href="#mailru"><img src="<TMPL_VAR lj_imgprefix>/icons/mailru-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.mailru')"></span></a></span>
+        <TMPL_ELSE>
+            <span class="b-postform-login-services-item b-postform-login-services-mailru"><a href="#mailru" title="<TMPL_VAR remote_display_name> <TMPL_VAR ml_notafriend> <TMPL_VAR ml_willscreen>"><img src="<TMPL_VAR lj_imgprefix>/icons/mailru-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.mailru')"></span></a></span>
+        </TMPL_IF>
+    <TMPL_ELSE>
+        <span class="b-postform-login-services-item b-postform-login-services-mailru"><a href="#mailru"><img src="<TMPL_VAR lj_imgprefix>/icons/mailru-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.mailru')"></span></a></span>
+    </TMPL_IF>
+</TMPL_IF>
