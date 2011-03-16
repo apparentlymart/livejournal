@@ -612,17 +612,22 @@ body<=
 			$ret .= "smsNotifyInitialState = \"".$status."\";";
 			$ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{provider_by_def}}) . "];";
 			$ret .= "var smsCountry = '$country';";
-			$ret .= "var smsNotifyDict = {";
-			$ret .= "";
-			$ret .= "sendsmsbut : \"$ML{'.section.textmsg.button'}\",";
-			$ret .= "resendsmsbut : \"$ML{'.section.textmsg.button.resend'}\",";
-			$ret .= 'initial : "' . $ML{'.section.textmsg.info' . ($country eq 'KZ' ? '.kz':'')} . '",';
-			$ret .= 'badNum : "' . $ML{'.section.textmsg.info.badnum' . ($country eq 'KZ' ? '.kz':'')} . '",';
-			$ret .= 'unsupporteddef : "' . $ML{'.section.textmsg.info.unsupporteddef' . ($country eq 'KZ' ? '.kz':'')} . '",';
-			$ret .= "$_ : \"" . $ML{".section.textmsg.info.$_"} . '",' 
-			     for qw(already_use correctNum requestsent smssent badtrans notasubscriber
-			            singlelimitexceeded totallimitexceeded verified wrongcode linkexpired techerror);
-			$ret .= "}</script>\n";
+
+            my $dict_out = LJ::JSON->to_json({
+                'sendsmsbut'        => $ML{'.section.textmsg.button'},
+                'resendsmsbut'      => $ML{'.section.textmsg.button.resend'},
+                'initial'           => $ML{'.section.textmsg.info' . ($country eq 'KZ' ? '.kz':'')},
+                'badNum'            => $ML{'.section.textmsg.info.badnum' . ($country eq 'KZ' ? '.kz':'')},
+                'unsupporteddef'    => $ML{'.section.textmsg.info.unsupporteddef' . ($country eq 'KZ' ? '.kz':'')},
+
+                map { $_ => $ML{".section.textmsg.info.$_"} }
+                    qw( already_use correctNum requestsent smssent
+                        badtrans notasubscriber singlelimitexceeded
+                        totallimitexceeded verified wrongcode linkexpired
+                        techerror ),
+            });
+
+			$ret .= "var smsNotifyDict = $dict_out;</script>\n";
         }else{
             my $inline;
             if ($inline .= LJ::run_hook("cprod_inline", $u, 'TextMessaging')) {
