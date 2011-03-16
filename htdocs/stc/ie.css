@@ -407,16 +407,23 @@ __________________________________________*/
 * HTML .whl-fadeout {
 	background: none;
 	}
+.whl-wishes LI.current {
+	position: relative;
+	}
+.whl-wishes LI.first .tl {
+	display: none;
+	}
 .whl-item-def {
 	float: left;
-	width: 458px;
+	width: 440px;
 	}
 .whl-item-meta .whl-external {
-	width: 458px;
+	width: 440px;
 	overflow: hidden;
 	}
-.whl-item-head .whl-controls,
+.whl-controls,
 .whl-item-meta .whl-status {
+	position: relative;
 	display: inline;
 	zoom: 1;
 	}
@@ -465,6 +472,9 @@ __________________________________________*/
 			}
 		}(this)
 	);
+	}
+.whl-5comments .whl-bar {
+	margin-bottom: -20px;
 	}
 
 /* Calendar
