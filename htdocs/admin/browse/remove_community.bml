@@ -28,7 +28,7 @@ body<=
     my $journals = $POST{'journals'};
 
     my @ids = sort { $b cmp $a } grep { $_ =~ /^catid\d+\_0$/ } keys %POST;
-    my $cat_id = $POST{$ids[0]};
+    my $cat_id = $POST{$ids[0]} ? $POST{$ids[0]} : $POST{$ids[1]};
     my $category = $cat_id ? LJ::Browse->load_by_id ($cat_id) : undef;
 
     my $vertical = undef;

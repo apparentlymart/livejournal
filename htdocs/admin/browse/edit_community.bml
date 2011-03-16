@@ -31,7 +31,7 @@ body<=
     my $j = $i - 1;
     ## which category the user wants to add a community?
     my @ids = sort { $b cmp $a } grep { $_ =~ /^catid\d+\_\Q$i\E$/ } keys %POST;
-    my $cat_id = $POST{$ids[0]};
+    my $cat_id = $POST{$ids[0]} ? $POST{$ids[0]} : $POST{$ids[1]};
     push @catid_, $cat_id if $cat_id;
     push @catrem, $POST{"catremove_$i"} if $POST{"catremove_$i"};
     push @cat_, $cat_id ? LJ::Browse->load_by_id ($cat_id) : undef;
