@@ -1143,14 +1143,14 @@ if (not $c.frozen) {
 
 
     var string comments_showspam = "";
-    if ($en.comments.count > 0 and not $en.comments.locked) {
+    if ($en.comments.count > 0 and $en.comments.read_spam_url != "") {
         if ($p.showspam) {
-            $comments_showspam = """<a href=\"$en.comments.read_spam_url\">$*text_hidespam ($en.comments.spam_counter)</a> """;
+            $comments_showspam = get_plural_phrase($en.comments.spam_counter, "text_read_spam_comments") + "&ndash;";
         } else {
-            $comments_showspam = """<a href=\"$en.comments.read_spam_url\">$*text_showspam ($en.comments.spam_counter)</a> """;
+            $comments_showspam = """<a href=\"$en.comments.read_spam_url\">""" + get_plural_phrase($en.comments.spam_counter, "text_read_all_spam_comments") + """</a> &ndash """;
         }
     }
-    if ($p.view == "entry") { $linkbar = $linkbar + $comments_showspam + " &ndash "; }
+    if ($p.view == "entry") { $linkbar = $linkbar + $comments_showspam; }
 
     if ($en.comments.maxcomments) {
       $linkbar = $linkbar + "$*text_max_comments$btwn_comments";

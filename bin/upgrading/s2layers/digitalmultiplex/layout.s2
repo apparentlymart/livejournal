@@ -1168,11 +1168,11 @@ function EntryPage::print_body () {
     {
         var string pages;
         var string comments_showspam = "";
-        if ($.entry.comments.count > 0 and not $.entry.comments.locked) {
+        if ($.entry.comments.count > 0 and $.entry.comments.read_spam_url != "") {
             if ($p.showspam) {
-                $comments_showspam = """ &mdash  <a href=\"$.entry.comments.read_spam_url\">$*text_hidespam ($.entry.comments.spam_counter)</a> """;
+                $comments_showspam = """ &mdash; """ + get_plural_phrase($.entry.comments.spam_counter, "text_read_spam_comments");
             } else {
-                $comments_showspam = """ &mdash  <a href=\"$.entry.comments.read_spam_url\">$*text_showspam ($.entry.comments.spam_counter)</a> """;
+                $comments_showspam = """ &mdash; <a href=\"$.entry.comments.read_spam_url\">""" + get_plural_phrase($.entry.comments.spam_counter, "text_read_all_spam_comments") + """</a> """;
             }
         }
         if ($.comment_pages.all_subitems_displayed) {

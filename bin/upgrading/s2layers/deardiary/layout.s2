@@ -841,18 +841,18 @@ function Entry::lay_print_cmdlinks() {
             "<li>"; $.comments->print_postlink(); "</li>";
         }
         var string comments_showspam = "";
-        if ($.comments.count > 0 and not $.comments.locked) {
+        if ($.comments.count > 0 and $.comments.read_spam_url != "") {
             if ($p.showspam) {
-                $comments_showspam = """<a href="$.comments.read_spam_url">$*text_hidespam ($.comments.spam_counter)</a>""";
+                $comments_showspam = """<li>""" + get_plural_phrase($.comments.spam_counter, "text_read_spam_comments") + """</li>""";
             } else {
-                $comments_showspam = """<a href="$.comments.read_spam_url">$*text_showspam ($.comments.spam_counter)</a>""";
+                $comments_showspam = """<li><a href="$.comments.read_spam_url">""" + get_plural_phrase($.comments.spam_counter, "text_read_all_spam_comments") + """</a></li>""";
             }
         } else {
             $comments_showspam = "";
         }
 
         if ($p.view == "entry") {
-            print safe " <li> $comments_showspam </li>";
+            print safe "$comments_showspam";
         }
         println """</ul>""";
     }
