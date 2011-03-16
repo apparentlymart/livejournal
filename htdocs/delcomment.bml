@@ -141,7 +141,7 @@ _info?><?_code
     my $can_manage = $remote->can_manage($journal);
     my $can_mark_spam = LJ::is_enabled('spam_button') && 
                         LJ::Talk::can_mark_spam($remote, $journal, $poster, $comment);
-    my $can_sweep     = ($remote && $poster && $remote->can_sweep($poster));
+    my $can_sweep     = ($remote && $poster && $remote->can_sweep($journal));
 
     my %can = (
         'manage_journal' => $can_manage,
