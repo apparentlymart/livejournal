@@ -314,7 +314,7 @@ sub EntryPage
 
     # print comment info
     {
-        my $canAdmin = ($remote && $remote->can_manage($u)) ? 1 : 0;
+        my $canAdmin = ($remote && ($remote->can_manage($u) || $remote->can_sweep($u))) ? 1 : 0;
         my $formauth = LJ::ejs(LJ::eurl(LJ::form_auth(1)));
 
         my $cmtinfo = {

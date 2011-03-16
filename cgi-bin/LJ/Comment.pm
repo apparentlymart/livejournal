@@ -1051,8 +1051,8 @@ sub info {
     my $self = shift;
     my $remote = LJ::get_remote() or return;
 
-    my %LJ_cmtinfo;
-    $LJ_cmtinfo{'canAdmin'} = $remote->can_manage($self->journal);
+    my %LJ_cmtinfo = ();
+    $LJ_cmtinfo{'canAdmin'} = ($remote->can_manage($self->journal) || $remote->can_sweep($self->journal));
     $LJ_cmtinfo{'journal'} = $self->journal->{user};
     $LJ_cmtinfo{'remote'} = $remote->{user};
 
