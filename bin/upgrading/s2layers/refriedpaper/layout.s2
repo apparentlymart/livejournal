@@ -801,11 +801,11 @@ function EntryLite::print_linkbar() {
           $linkbar = $linkbar + """ $text""";
         }
         $linkbar = $linkbar + """</a>$btwn_comments""";
-        if ($p.view == "entry") {
+        if ($p.view == "entry" and $en.comments.read_spam_url != "") {
             if ($p.showspam) {
-                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url\">$*text_hidespam ($en.comments.spam_counter)</a>$btwn_comments""";
+                $linkbar = $linkbar + get_plural_phrase($en.comments.spam_counter, "text_read_spam_comments") + """$btwn_comments""";
             } else {
-                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url\">$*text_showspam ($en.comments.spam_counter)</a>$btwn_comments""";
+                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url\">""" + get_plural_phrase($en.comments.spam_counter, "text_read_all_spam_comments") + """</a>$btwn_comments""";
             }
         }
       }

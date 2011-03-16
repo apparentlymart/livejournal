@@ -672,16 +672,16 @@ function CommentInfo::print() {
         print safe "$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
-            if ($p.view == "entry") {
+            if ($p.view == "entry" and $.read_spam_url != "") {
                 if (clean_url($*img_btwn_comments) != "") {
                     """ <img src="$*img_btwn_comments" alt="" /> """;
                 } else {
                     print safe "$*text_btwn_comments";
                 }
                 if ($p.showspam) {
-                    print safe """<a href=\"$.read_spam_url\">$*text_hidespam ($.spam_counter)</a> """;
+                    print safe get_plural_phrase($.spam_counter, "text_read_spam_comments");
                 } else {
-                    print safe """<a href=\"$.read_spam_url\">$*text_showspam ($.spam_counter)</a>""";
+                    print safe """<a href=\"$.read_spam_url\">""" + get_plural_phrase($.spam_counter, "text_read_all_spam_comments") + """</a>""";
                 }
             }
         }
