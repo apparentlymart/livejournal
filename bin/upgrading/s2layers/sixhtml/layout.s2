@@ -1184,11 +1184,11 @@ function Page::print_entry(Entry e) {
          if ($e.comments.show_postlink) { " $sep "; $e.comments->print_postlink(); }
          if ($e.comments.show_readlink)   {
             " $sep "; $e.comments->print_readlink();
-            if ($p.view == "entry") {
+            if ($p.view == "entry" and $e.comments.read_spam_url != "") {
                 if ($p.showspam) {
-                    print safe """ $sep <a href=\"$e.comments.read_spam_url\">$*text_hidespam ($e.comments.spam_counter)</a>""";
+                    print safe """ $sep """ + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments");
                 } else {
-                    print safe """ $sep <a href=\"$e.comments.read_spam_url\">$*text_showspam ($e.comments.spam_counter)</a>""";
+                    print safe """ $sep <a href=\"$e.comments.read_spam_url\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a>""";
                 }
             }
          }
