@@ -1215,11 +1215,11 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
         println "&nbsp;";
     }
     var string comments_showspam = "";
-    if ($e.comments.count > 0 and not $e.comments.locked) {
+    if ($e.comments.count > 0 and $e.comments.read_spam_url != "") {
         if ($p.showspam) {
-            $comments_showspam = """<a href=\"$e.comments.read_spam_url\">$*text_hidespam ($e.comments.spam_counter)</a></span> """;
+            $comments_showspam = get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</span> """;
         } else {
-            $comments_showspam = """<a href=\"$e.comments.read_spam_url\">$*text_showspam ($e.comments.spam_counter)</a></span> """;
+            $comments_showspam = """<a href=\"$e.comments.read_spam_url\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></span> """;
         }
     }
     if ($p.view == "entry") {print safe "$comments_showspam | ";}
