@@ -2225,8 +2225,15 @@ DIV.lj_ippu_app {
 /* Must be removed after implementation of Framework! */
 .b-popup {
 	position: absolute;
+	font-size:12px;
 	z-index: 200;
 	}
+	.b-popup input,
+	.b-popup div,
+	.b-popup strong,
+	.b-popup label {
+		color:#000;
+		}
 	.b-popup-outer {
 		position: relative;
 		padding: 1px;
