@@ -1011,15 +1011,20 @@ sub preload_rows {
         next unless $row;
 
         $obj->absorb_row($row);
+
+        $obj->set_memcache;
+
+        $singletons{$obj->{vert_id}} = $obj;
+
         delete $need{$obj->{vert_id}};
     }
 
-    # now hit the db for what was left
-    my $dbh = LJ::get_db_writer()
-        or die "unable to contact global db master to load vertical";
-
     my @vals = keys %need;
     if (scalar @vals) {
+        # now hit the db for what was left
+        my $dbh = LJ::get_db_writer()
+            or die "unable to contact global db master to load vertical";
+
         my $bind = LJ::bindstr(@vals);
         my $sth = $dbh->prepare("SELECT * FROM vertical2 WHERE vert_id IN ($bind)");
         $sth->execute(@vals);
@@ -1028,12 +1033,16 @@ sub preload_rows {
 
             # what singleton does this DB row represent?
             my $obj = $need{$row->{vert_id}};
+            $obj = __PACKAGE__->new (vert_id => $row->{vert_id}) unless $obj;
 
             # and update singleton (request cache)
             $obj->absorb_row($row);
 
             # set in memcache
             $obj->set_memcache;
+
+            # update request cache
+            $singletons{$row->{vert_id}} = $obj;
 
             # and delete from %need for error reporting
             delete $need{$obj->{vert_id}};
@@ -1042,6 +1051,7 @@ sub preload_rows {
     }
 
     # weird, vertids that we couldn't find in memcache or db?
+    $_->{_loaded_row} = 1 foreach values %need;
     warn "unknown vertical(s): " . join(",", keys %need) if %need;
 
     # now memcache and request cache are both updated, we're done

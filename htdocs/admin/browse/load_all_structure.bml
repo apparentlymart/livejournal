@@ -17,6 +17,8 @@ body<=
     $title = "Load All Structure";
     my $ret = "";
 
+    $LJ::VERTICALS_FORCE_USE_MASTER = 1;
+
     if (LJ::did_post() && $POST{'all_structure'}) {
         my $csv = LJ::Request->upload('all_structure');
         my $content = '';

@@ -150,6 +150,7 @@ sub delete {
             undef, $self->{catid}, $tm->class_to_typeid('children'),
             $tm->class_to_typeid('top_children'));
         $parent->clear_props_memcache;
+        $parent->clear_memcache;
     # if top-level category clear top-level category cache
     } else {
         LJ::MemCache::delete("category_top2");
@@ -220,8 +221,9 @@ sub load_by_uri {
     return $c if $c;
 
     # For now use Hash in Config file
-    my $dbh = LJ::get_db_reader()
-        or die "unable to contact global db slave to load category";
+    my $dbh = $LJ::VERTICALS_FORCE_USE_MASTER ? LJ::get_db_writer() : LJ::get_db_reader();
+    die "unable to contact global db slave to load category"
+        unless $dbh;
 
     my $parent_check = '';
     if ($parent) {
@@ -251,8 +253,9 @@ sub load_all {
     my $class    = shift;
     my $vertical = shift;
 
-    my $dbh = LJ::get_db_reader()
-        or die "unable to contact global db slave to load categories";
+    my $dbh = $LJ::VERTICALS_FORCE_USE_MASTER ? LJ::get_db_writer() : LJ::get_db_reader();
+    die "unable to contact global db slave to load categories"
+        unless $dbh;
 
     my $vert_id = $vertical ? $vertical->vert_id : 0;
     my $where = " WHERE vert_id = $vert_id ";
@@ -298,8 +301,9 @@ sub load_top_level {
         return sort { lc $a->display_name cmp lc $b->display_name } @cats;
     }
 
-    my $dbh = LJ::get_db_reader()
-        or die "unable to contact global db slave to load categories";
+    my $dbh = $LJ::VERTICALS_FORCE_USE_MASTER ? LJ::get_db_writer() : LJ::get_db_reader();
+    die "unable to contact global db slave to load categories"
+        unless $dbh;
 
     my $sth = $dbh->prepare("SELECT * FROM category WHERE parentcatid IS NULL");
     $sth->execute;
@@ -611,8 +615,9 @@ sub preload_rows {
     return 1 unless @vals;
 
     # now hit the db for what was left
-    my $dbh = LJ::get_db_reader()
-        or die "unable to contact global db slave to load category";
+    my $dbh = $LJ::VERTICALS_FORCE_USE_MASTER ? LJ::get_db_writer() : LJ::get_db_reader();
+    die "unable to contact global db slave to load category"
+        unless $dbh;
 
     my $bind = LJ::bindstr(@vals);
     my $sth = $dbh->prepare("SELECT * FROM category WHERE catid IN ($bind)");
@@ -651,7 +656,7 @@ sub preload_rows {
 sub preload_children {
     my $self = shift;
 
-    my $dbh = LJ::get_db_reader ();
+    my $dbh = $LJ::VERTICALS_FORCE_USE_MASTER ? LJ::get_db_writer() : LJ::get_db_reader ();
 
     my $sth = $dbh->prepare ("SELECT * FROM category WHERE parentcatid = ?");
     $sth->execute($self->catid);
@@ -769,8 +774,9 @@ sub load_communities {
         return;
     }
 
-    my $dbh = LJ::get_db_reader()
-        or die "unable to contact global db slave to load category";
+    my $dbh = $LJ::VERTICALS_FORCE_USE_MASTER ? LJ::get_db_writer() : LJ::get_db_reader();
+    die "unable to contact global db slave to load category"
+        unless $dbh;
 
     my @cats = ( $self->catid );
     if ($args{'is_need_child'}) {
