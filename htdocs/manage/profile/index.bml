@@ -488,12 +488,22 @@ body<=
                 
         ## TEXT MESSAGING
         my $country = LJ::country_of_remote_ip();
-        my $ru_text_messaging = (($country eq 'RU') || ($country eq 'KZ')) & !$u->is_community;
+        my $tminfo = LJ::TextMessage->tm_info($u, remap_result => 1);
+
+        my $ru_text_messaging;
+
+        {
+            my $phone = LJ::SMS::API::RU::Phone->normalize($tminfo->{'number'});
+            my $status = LJ::SMS::API::RU::Phone->get_status($u->{'userid'}, $phone);
+            $ru_text_messaging = $status eq 'verified'
+                              || ( $country =~ /^(?:RU|KZ)$/o
+                                && !$u->is_community );
+        }
+
         $ret .= "<a name='txtmsg'></a><div class='section_head'>" . 
             ($ru_text_messaging ? $ML{'.section.phone'} : $ML{'.section.textmsg'}) . "\n";
             
         if ($ru_text_messaging || LJ::get_cap($u, "textmessaging")) {
-            my $tminfo = LJ::TextMessage->tm_info($u, remap_result => 1);
             foreach (values %$tminfo) { LJ::text_out(\$_); }
             $tminfo->{'security'} = "N" if ($u->{'txtmsg_status'} eq 'off' || $u->{'txtmsg_status'} eq 'none');
 
