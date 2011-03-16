@@ -871,7 +871,8 @@ sub comments_manageable_by {
     return
         $remote->{userid} == $u->{userid} ||
         $remote->{userid} == $self->posterid ||
-        $remote->can_manage($u);
+        $remote->can_manage($u) ||
+        $remote->can_sweep($u);
 }
 
 # instance method:  returns bool, if remote user can view this entry
