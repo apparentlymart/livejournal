@@ -868,39 +868,39 @@ sub load_vertical_posts {
 sub memkey_vertall {
     my $class = shift;
 
-    return "vert:all";
+    return "vert3:all";
 }
 
 sub memkey_vertid {
     my $self = shift;
     my $id = shift;
 
-    return [ $id, "vert2:$id" ] if $id;
-    return [ $self->{vert_id}, "vert2:$self->{vert_id}" ];
+    return [ $id, "vert3:$id" ] if $id;
+    return [ $self->{vert_id}, "vert3:$self->{vert_id}" ];
 }
 
 sub memkey_vertname {
     my $self = shift;
     my $name = shift;
 
-    return "vertname2:$name" if $name;
-    return "vertname2:$self->{name}";
+    return "vertname3:$name" if $name;
+    return "vertname3:$self->{name}";
 }
 
 sub memkey_verturl {
     my $self = shift;
     my $url = shift;
 
-    return "vertname2:$url" if $url;
-    return "vertname2:$self->{url}";
+    return "vertname3:$url" if $url;
+    return "vertname3:$self->{url}";
 }
 
 sub memkey_rules {
     my $self = shift;
     my $id = shift;
 
-    return [ $id, "vertrules2:$id" ] if $id;
-    return [ $self->{vertid}, "vertrules2:$self->{vertid}" ];
+    return [ $id, "vertrules3:$id" ] if $id;
+    return [ $self->{vertid}, "vertrules3:$self->{vertid}" ];
 }
 
 sub set_memcache {
@@ -928,7 +928,7 @@ sub clear_memcache {
 
 sub entries_memkey {
     my $self = shift;
-    return [ $self->{vertid}, "vertentries2:$self->{vertid}" ];
+    return [ $self->{vertid}, "vertentries3:$self->{vertid}" ];
 }
 
 sub clear_entries_memcache {
@@ -1007,7 +1007,7 @@ sub preload_rows {
     my $memc = LJ::MemCache::get_multi(@mem_keys);
     # now which of the objects to load did we get a memcache key for?
     foreach my $obj (@to_load) {
-        my $row = $memc->{"vert2:$obj->{vert_id}"};
+        my $row = $memc->{"vert3:$obj->{vert_id}"};
         next unless $row;
 
         $obj->absorb_row($row);

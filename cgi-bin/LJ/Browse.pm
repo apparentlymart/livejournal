@@ -117,7 +117,7 @@ sub create {
     if ($parent) {
         $parent->clear_props_memcache;
     } else {
-        LJ::MemCache::delete("category_top");
+        LJ::MemCache::delete("category_top2");
     }
 
     $self = $class->new( catid => $catid );
@@ -152,7 +152,7 @@ sub delete {
         $parent->clear_props_memcache;
     # if top-level category clear top-level category cache
     } else {
-        LJ::MemCache::delete("category_top");
+        LJ::MemCache::delete("category_top2");
     }
 
     # clear memcache of the category and its props
@@ -287,7 +287,7 @@ sub load_top_level {
 
     my @cats;
     # check memcache for data
-    my $memval = LJ::MemCache::get("category_top");
+    my $memval = LJ::MemCache::get("category_top2");
     if ($memval) {
         foreach my $id (@$memval) {
             my $c = $class->new( catid => $id );
@@ -314,7 +314,7 @@ sub load_top_level {
         push @{$catids}, $row->{catid};
         push @cats, $c if $c;
     }
-    LJ::MemCache::set("category_top", $catids);
+    LJ::MemCache::set("category_top2", $catids);
 
     # Subcategories
     #
@@ -454,39 +454,39 @@ sub memkey_catall {
 
     my $v = $args{'vertical'};
 
-    return [ $v, "catall:".$v->vert_id ] if $v;
-    return "cat:all";
+    return [ $v, "catall2:".$v->vert_id ] if $v;
+    return "cat:all2";
 }
 
 sub memkey_catid {
     my $self = shift;
     my $id = shift;
 
-    return [ $id, "cat:$id" ] if $id;
-    return [ $self->{catid}, "cat:$self->{catid}" ];
+    return [ $id, "cat2:$id" ] if $id;
+    return [ $self->{catid}, "cat2:$self->{catid}" ];
 }
 
 sub memkey_catid_props {
     my $self = shift;
     my $id = shift;
 
-    return [ $id, "cat:props:$id" ] if $id;
-    return [ $self->{catid}, "cat:props:$self->{catid}" ];
+    return [ $id, "cat2:props:$id" ] if $id;
+    return [ $self->{catid}, "cat2:props:$self->{catid}" ];
 }
 
 sub memkey_catid_journals {
     my $self = shift;
     my $id = shift;
 
-    return [ $id, "cat:journals:$id" ] if $id;
-    return [ $self->{catid}, "cat:journals:$self->{catid}" ];
+    return [ $id, "cat2:journals:$id" ] if $id;
+    return [ $self->{catid}, "cat2:journals:$self->{catid}" ];
 }
 
 sub memkey_caturi {
     my $self = shift;
     my $uri = shift;
 
-    return "caturi:$uri";
+    return "caturi2:$uri";
 }
 
 sub set_memcache {
@@ -593,7 +593,7 @@ sub preload_rows {
 
     # now which of the objects to load did we get a memcache key for?
     foreach my $obj (@to_load) {
-        my $row = $memc->{"cat:$obj->{catid}"};
+        my $row = $memc->{"cat2:$obj->{catid}"};
         next unless $row;
 
         $obj->absorb_row($row);
@@ -674,7 +674,7 @@ sub preload_props {
 
     # now which of the objects to load did we get a memcache key for?
     foreach my $obj (@to_load) {
-        my $row = $memc->{"cat:props:$obj->{catid}"};
+        my $row = $memc->{"cat2:props:$obj->{catid}"};
         next unless $row;
 
         $obj->absorb_prop_row($row);
