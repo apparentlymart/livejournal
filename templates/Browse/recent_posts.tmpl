@@ -49,6 +49,17 @@
             }());
             </script>
         </tmpl_if>
+        <tmpl_if expr="lj_enabled('sharing')">
+            <script type="text/javascript">
+            (function() {
+                var ul = jQuery('ul:last');
+                LJShare.entry( {url:'<tmpl_var url_to_post>', title: '<tmpl_var expr="ejs(subject)">'} )
+                    .attach( ul.find('.b-share-email a'), 'email' )
+                    .attach( ul.find('.b-share-fb a'), 'facebook' )
+                    .attach( ul.find('.b-share-twitter a'), 'twitter' );
+            }());
+            </script>
+        </tmpl_if>
 		<p class="b-catalogue-item-comments"><span class="b-catalogue-comments-count"><a href="<tmpl_var url_to_post>#comments"><tmpl_var comments_count> comments</a> |</span> <a href="<tmpl_var url_to_post>?mode=reply">Leave comment</a></p>
 	</li>
 </tmpl_loop>

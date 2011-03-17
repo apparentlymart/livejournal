@@ -22,7 +22,12 @@
 * 		"links": [ "twitter", "vkontakte", "moimir" ] //we want custom buttons there
 * 	});
 * </script>
-* 
+*
+* You can attach single links:
+* LJShare.entry( { url: "http://some.url.com/", title: "Post title", description: "Post description" } )
+*		.attach( '#link_selector', 'service_name' )
+*		.attach( jQuery( '#another_selector' ), 'service_name2' ) //we can pass nodes or jquery collections
+*		.link( '#selector', [ "twtter", "vkontakte", "moimir"] ); //also we can attach popup
 * 
 */
 
@@ -148,15 +153,16 @@ window.LJShare.init = function( opts ) {
 * @param Object opts Options object, may contain the following fields:
 *    title, description, url - parameters of the page you want to share;
 *    links - array of links that will be shown to the user in popup.
+* @param String|Node|Jquery collection Node the popup has to be attached to. Default id a:last
 */
-window.LJShare.link = function( opts ) {
+window.LJShare.link = function( opts, node ) {
 	var defaults = {
 		title: '',
 		description: '',
 		url: ''
 	}
 
-	var link = jQuery( 'a:last' ),
+	var link = node || jQuery( 'a:last' ),
 		url = link.attr( 'href' ),
 		options = jQuery.extend( {}, defaults, { url: url } , opts ),
 		dom, arrow, skipCloseEvent;
@@ -285,6 +291,49 @@ window.LJShare.link = function( opts ) {
 			skipCloseEvent = true;
 			ev.preventDefault();
 		} );
+
+	return this;
+}
+
+window.LJShare.entry = function( opts ) {
+	var defaults = {
+		title: '',
+		description: '',
+		url: ''
+	}
+
+	var options = jQuery.extend( {}, defaults, opts );
+
+	return {
+		attach: function( node, service ) {
+			var link = jQuery( node ),
+				serviceObj = global_options.services[ service ];
+
+			if( service in global_options.services ) {
+				link.each( function() {
+					var url = supplant( serviceObj.bindLink, options );
+					if( this.tagName.toLowerCase() === 'a' ) {
+						this.href = url;
+						this.target = "_blank";
+					} else {
+						$( this ).click( function() {
+							window.open( url );
+						} );
+					}
+				} );
+			}
+
+			return this;
+		},
+
+		link: function( node, links ) {
+			var opts = jQuery.extend( {}, options, links ? { links: links } : null );
+			LJShare.link( opts, ( node ) ? jQuery( node ) : null );
+
+			return this;
+		}
+	}
+
 }
 
 } )( window, jQuery );
