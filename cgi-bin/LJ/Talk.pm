@@ -382,6 +382,7 @@ sub can_unfreeze {
 
 sub can_mark_spam {
     return 0 unless $_[0];
+    return 0 if $_[3] && $_[0]->{'user'} eq $_[3];
     return 1 if $_[0]->can_moderate($_[1]);
     return 1 if $_[0]->can_sweep($_[1]);
     return LJ::Talk::can_screen(@_);
@@ -2469,22 +2470,19 @@ sub get_thread_html
             $html->{text}   = BML::ml('.screenedpost');
             $html->{footer} = $comment_footer->();
         }
-        elsif (LJ::is_enabled('spam_button') && $post->{'state'} eq 'A' && $input->{mode} eq 'showspam')
-        {
-            $html->{text} = undef;
-        }
-        elsif (
-            $post->{'state'} eq "B" && LJ::is_enabled('spam_button') && 
-            !(LJ::Talk::can_unmark_spam($remote, $u, $up, $userpost) && $input->{mode} eq 'showspam')
-        )
-        {
-            $state = 'spamed';
-            if ( grep { $_->{state} ne "B" } @{$post->{'children'}} ) { 
-                $html->{header} = $comment_header->();
-                $html->{text}   = BML::ml('.spamedpost');
-                $html->{footer} = $comment_footer->();
-            } else {
+        elsif (LJ::is_enabled('spam_button') && $input->{mode} eq 'showspam') {
+            if ($post->{'state'} ne 'B') {
                 $html->{text} = undef;
+            }
+            elsif (!LJ::Talk::can_unmark_spam($remote, $u, $up, $userpost)) {
+                $state = 'spamed';
+                if ($post->{'_show'}) { 
+                    $html->{header} = $comment_header->();
+                    $html->{text}   = BML::ml('.spamedpost');
+                    $html->{footer} = $comment_footer->();
+                } else {
+                    $html->{text} = undef;
+                }
             }
         }
         elsif ($pu && $pu->is_suspended && !$viewsome)
