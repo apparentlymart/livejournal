@@ -994,7 +994,11 @@ sub search_posts {
             );
             push @found_posts, @$post_ids if $post_ids;
         }
-        @entries = 
+        @entries =
+            grep {
+                my $poster = $_->poster;
+                $_->is_suspended || $poster->is_suspended ? 0 : 1;
+            }
             map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) }      ## Create LJ::Entry object
             grep { $_->{journalid} }                                                ## remove SEO posts
             @found_posts;
@@ -1008,7 +1012,13 @@ sub search_posts {
                     LIMIT $limit", 
                 { Slice => {} }
             );
-            @entries = map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) } @$post_ids;
+            @entries =
+                grep {
+                    my $poster = $_->poster;
+                    $_->is_suspended || $poster->is_suspended ? 0 : 1;
+                }
+                map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) }
+                @$post_ids;
         }
     }
     return @entries;

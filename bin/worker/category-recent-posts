@@ -74,6 +74,7 @@ sub work {
             my $e_obj = LJ::Entry->new ($u->{userid}, jitemid => $entry->{itemid});
             my $poster = $e_obj->poster;
             next if $poster->is_suspended;
+            next if $e_obj->is_suspended;
             my @tags = $e_obj->tags;
             if (scalar @tags) {
                 my $cat = LJ::Browse->load_by_id ($rec->{catid});
