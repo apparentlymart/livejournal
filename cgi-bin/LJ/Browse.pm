@@ -997,7 +997,9 @@ sub search_posts {
         @entries =
             grep {
                 ## Filter off suspended entries, deleted communities, suspended posters
-                $_->is_suspended || $_->journal->is_deleted || $_->poster->is_suspended ? 0 : 1;
+                return 0 unless $_ && $_->valid;
+                my $poster = $_->poster;
+                $_->is_suspended || $_->journal->is_deleted || ($poster && $poster->is_suspended) ? 0 : 1;
             }
             map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) }      ## Create LJ::Entry object
             grep { $_->{journalid} }                                                ## remove SEO posts
@@ -1015,7 +1017,9 @@ sub search_posts {
             @entries =
                 grep {
                     ## Filter off suspended entries, deleted communities, suspended posters
-                    $_->is_suspended || $_->journal->is_deleted || $_->poster->is_suspended ? 0 : 1;
+                    return 0 unless $_ && $_->valid;
+                    my $poster = $_->poster;
+                    $_->is_suspended || $_->journal->is_deleted || ($poster && $poster->is_suspended) ? 0 : 1;
                 }
                 map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) }
                 @$post_ids;
