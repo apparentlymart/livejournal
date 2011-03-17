@@ -1355,7 +1355,12 @@ HTML BODY.logged-out {
 				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:focus,
 				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:focus,
 				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:focus,
-				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:focus {
+				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:focus,
+				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal A:focus,
+				BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal A:focus,
+				BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal A:focus,
+				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal A:focus,
+				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal A:focus {
 					outline: 1px dotted #000;
 					}
 				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:link,
