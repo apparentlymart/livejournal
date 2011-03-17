@@ -14,6 +14,8 @@ body<=
     return "You are not allowed to view this page"
         unless LJ::check_priv($remote, 'siteadmin', 'community_directory') || $LJ::IS_DEV_SERVER;
 
+    $LJ::VERTICALS_FORCE_USE_MASTER = 1;
+
     $title = "Remove Category";
     my $ret = "";
 
