@@ -456,7 +456,11 @@ __________________________________________*/
 * HTML .whl-autocomplete {
 	left: 157px;
 	}
-.whl-autocomplete-list .whl-autocomplete-item {
+.whl-autocomplete-list .whl-autocomplete-item,
+.b-paging-nav-first,
+.b-paging-nav-last,
+.b-paging-nav-prev,
+.b-paging-nav-next {
 	zoom: 1;
 	display: inline;
 	}
