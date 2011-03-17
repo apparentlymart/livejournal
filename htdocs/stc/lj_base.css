@@ -1364,10 +1364,10 @@ HTML BODY.logged-out {
 				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-openid A:visited,
 				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-openid A:hover,
 				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-openid A:active,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-anonymous .b-postform-login-services-mailru A:link,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-anonymous .b-postform-login-services-mailru A:visited,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-anonymous .b-postform-login-services-mailru A:hover,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-anonymous .b-postform-login-services-mailru A:active {
+				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:link,
+				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:visited,
+				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:hover,
+				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:active {
 					display: block;
 					width: auto;
 					height: auto;
