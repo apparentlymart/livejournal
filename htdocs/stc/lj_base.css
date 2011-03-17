@@ -1421,11 +1421,11 @@ HTML BODY.logged-out {
 						cursor: pointer !important;
 						text-align: left !important;
 						}
-					.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-show .b-postform-login-services-anonymous IMG,
-					.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-show .b-postform-login-services-facebook IMG,
-					.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-show .b-postform-login-services-twitter IMG,
-					.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-show .b-postform-login-services-openid IMG,
-					.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-show .b-postform-login-services-mailru IMG {
+					BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-show .b-postform-login-services-anonymous IMG,
+					BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-show .b-postform-login-services-facebook IMG,
+					BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-show .b-postform-login-services-twitter IMG,
+					BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-show .b-postform-login-services-openid IMG,
+					BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-show .b-postform-login-services-mailru IMG {
 						position: static !important;
 						display: inline !important;
 						width: auto !important;
