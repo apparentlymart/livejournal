@@ -1178,7 +1178,8 @@ HTML BODY.logged-out {
 					text-decoration: none;
 					}
 				BODY .b-postform-login-services-item A:hover,
-				BODY .b-postform-login-services-item A:active {
+				BODY .b-postform-login-services-item A:active,
+				BODY .b-postform-login-services-item A:focus {
 					display: block;
 					width: auto;
 					height: auto;
@@ -1351,7 +1352,7 @@ HTML BODY.logged-out {
 				BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous A:focus,
 				BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal A:focus,
 				BODY .b-postform-authtype-user .b-postform-login-services-user A:focus,
-				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:focus
+				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:focus,
 				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:focus,
 				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:focus,
 				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:focus {
