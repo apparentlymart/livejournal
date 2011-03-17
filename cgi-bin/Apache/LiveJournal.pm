@@ -905,8 +905,9 @@ sub trans
                 unless ($canon_url =~ m!^http://$host!i || $LJ::DEBUG{'user_vhosts_no_wronghost_redirect'}) {
                     return redir("$canon_url$uri$args_wq");
                 }
+                LJ::set_active_journal($u); #for Wishlist2, communities
             }
-
+            
             my $view = $determine_view->($user, "safevhost", $uri);
             return $view if defined $view;
         } elsif ($func eq 'api') {
@@ -2171,6 +2172,7 @@ sub AUTOLOAD {
     ## since XMLRPC::Transport::HTTP::Apache will send the error to client.
     my $res = eval { LJ::Protocol::xmlrpc_method($method, @_) };
     if ($@) { warn "LJ::XMLRPC::$method died: $@"; die $@; }
+
     return $res;
 }
 
