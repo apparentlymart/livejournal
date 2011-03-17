@@ -359,39 +359,45 @@ sub can_screen {
 }
 
 sub can_unscreen {
-    return 0 unless $_[0];
-    return 0 if !($_[0]->can_manage($_[1]) || $_[0]->can_moderate($_[1])) && $_[0]->can_moderate($_[1]);
-    return LJ::Talk::can_screen(@_);
+    my ($remote, $u, $up, $userpost) = @_;
+    return 0 unless $remote;
+    return 0 if !($remote->can_manage($u) || $remote->can_moderate($u)) && $remote->can_moderate($u);
+    return LJ::Talk::can_screen($remote, $u, $up, $userpost);
 }
 
 sub can_view_screened {
-    return 0 unless $_[0];
-    return 0 if $_[0]->can_moderate($_[1]);
-    return LJ::Talk::can_delete(@_);
+    my ($remote, $u, $up, $userpost) = @_;
+    return 0 unless $remote;
+    return 0 if $remote->can_moderate($u);
+    return LJ::Talk::can_delete($remote, $u, $up, $userpost);
 }
 
 sub can_freeze {
-    return LJ::Talk::can_screen(@_);
+    my ($remote, $u, $up, $userpost) = @_;
+    return LJ::Talk::can_screen($remote, $u, $up, $userpost);
 }
 
 sub can_unfreeze {
-    return 0 unless $_[0];
-    return 1 if $_[0]->can_moderate($_[1]);
-    return LJ::Talk::can_unscreen(@_);
+    my ($remote, $u, $up, $userpost) = @_;
+    return 0 unless $remote;
+    return 1 if $remote->can_moderate($u);
+    return LJ::Talk::can_unscreen($remote, $u, $up, $userpost);
 }
 
 sub can_mark_spam {
-    return 0 unless $_[0];
-    return 0 if $_[3] && $_[0]->{'user'} eq $_[3];
-    return 1 if $_[0]->can_moderate($_[1]);
-    return 1 if $_[0]->can_sweep($_[1]);
-    return LJ::Talk::can_screen(@_);
+    my ($remote, $u, $up, $userpost) = @_;
+    return 0 unless $remote;
+    return 0 if $userpost && $remote->{'user'} eq (ref $userpost ? $userpost->{'user'} : $userpost);
+    return 1 if $remote->can_moderate($u);
+    return 1 if $remote->can_sweep($u);
+    return LJ::Talk::can_screen($remote, $u, $up, $userpost);
 }
 
 sub can_unmark_spam {
-    return 0 unless $_[0];
-    return 1 if $_[0]->can_moderate($_[1]);
-    return LJ::Talk::can_unscreen(@_);
+    my ($remote, $u, $up, $userpost) = @_;
+    return 0 unless $remote;
+    return 1 if $remote->can_moderate($u);
+    return LJ::Talk::can_unscreen($remote, $u, $up, $userpost);
 }
 
 # <LJFUNC>
