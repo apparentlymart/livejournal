@@ -753,6 +753,12 @@ sub clean
                         delete $hash->{$attr} unless $tag eq "object";
                         next;
                     }
+                    
+                    if ($attr eq 'width' || $attr eq 'height' ) {
+                        if ($hash->{$attr} > 1024*2) {
+                            $hash->{$attr} = 1024*2;
+                        }
+                    }
 
                     ## warning: in commets left by anonymous users, <img src="something">
                     ## is replaced by <a href="something"> (see 'extractimages' param)
@@ -1519,7 +1525,7 @@ sub ExpandLJURL
     return "$LJ::SITEROOT/$uri";
 }
 
-my $subject_eat = [qw[head title style layer iframe applet object param]];
+my $subject_eat = [qw[head title style layer iframe applet object param base]];
 my $subject_allow = [qw[a b i u em strong cite]];
 my $subject_remove = [qw[bgsound embed object caption link font noscript lj-userpic]];
 sub clean_subject
@@ -1569,7 +1575,7 @@ sub clean_and_trim_subject {
     $$ref = LJ::text_trim($$ref, 0, $length);
 }
 
-my $event_eat = [qw[head title style layer applet object xml param]];
+my $event_eat = [qw[head title style layer applet object xml param base]];
 my $event_remove = [qw[bgsound embed object link body meta noscript plaintext noframes]];
 
 my @comment_close = qw(
