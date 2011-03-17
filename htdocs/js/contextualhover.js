@@ -517,7 +517,7 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 	}
 	
 	// wishlist
-	if (data.is_person && !data.is_requester && data.wishlist_url) {
+	if ((data.is_person || data.is_comm) && !data.is_requester && data.wishlist_url) {
 		jQuery('<a/>', {
 			href:data.wishlist_url,
 			text: data.ml_view_wishlist
