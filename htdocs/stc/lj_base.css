@@ -1395,46 +1395,47 @@ HTML BODY.logged-out {
 					color: #222 !important;
 					text-decoration: none;
 					}
-					.b-postform-authtype-anonymous .b-postform-login-services-anonymous IMG,
-					.b-postform-authtype-livejournal .b-postform-login-services-livejournal IMG,
-					.b-postform-authtype-user .b-postform-login-services-user IMG,
-					.b-postform-authtype-facebook .b-postform-login-services-facebook IMG,
-					.b-postform-authtype-twitter .b-postform-login-services-twitter IMG,
-					.b-postform-authtype-openid .b-postform-login-services-openid IMG,
-					.b-postform-authtype-mailru .b-postform-login-services-mailru IMG,
-					.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal IMG,
-					.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal IMG,
-					.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal IMG,
-					.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal IMG,
-					.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal IMG {
-						position: static;
-						display: block;
-						width: 17px;
-						height: 16px;
-						margin: 0;
-						padding: 1px 20px 1px 6px;
-						border: 1px solid #8A8A8A;
-						-moz-border-radius: 3px;
-						border-radius: 3px;
-						background: #FFF url(/img/showmore-login.gif) no-repeat 26px 1px;
-						cursor: pointer;
-						text-align: left;
+					BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous IMG,
+					BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal IMG,
+					BODY .b-postform-authtype-user .b-postform-login-services-user IMG,
+					BODY .b-postform-authtype-facebook .b-postform-login-services-facebook IMG,
+					BODY .b-postform-authtype-twitter .b-postform-login-services-twitter IMG,
+					BODY .b-postform-authtype-openid .b-postform-login-services-openid IMG,
+					BODY .b-postform-authtype-mailru .b-postform-login-services-mailru IMG,
+					BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal IMG,
+					BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal IMG,
+					BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal IMG,
+					BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal IMG,
+					BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal IMG {
+						position: static !important;
+						display: block !important;
+						float: none !important;
+						width: 17px !important;
+						height: 16px !important;
+						margin: 0 !important;
+						padding: 1px 20px 1px 6px !important;
+						border: 1px solid #8A8A8A !important;
+						-moz-border-radius: 3px !important;
+						border-radius: 3px !important;
+						background: #FFF url(/img/showmore-login.gif) no-repeat 26px 1px !important;
+						cursor: pointer !important;
+						text-align: left !important;
 						}
 					.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-show .b-postform-login-services-anonymous IMG,
 					.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-show .b-postform-login-services-facebook IMG,
 					.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-show .b-postform-login-services-twitter IMG,
 					.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-show .b-postform-login-services-openid IMG,
 					.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-show .b-postform-login-services-mailru IMG {
-						position: static;
-						display: inline;
-						width: auto;
-						height: auto;
-						margin: 0 5px 0 0;
-						padding: 0;
-						vertical-align: -4px;
-						border: 0;
-						background: transparent;
-						cursor: default;
+						position: static !important;
+						display: inline !important;
+						width: auto !important;
+						height: auto !important;
+						margin: 0 5px 0 0 !important;
+						padding: 0 !important;
+						vertical-align: -4px !important;
+						border: 0 !important;
+						background: transparent !important;
+						cursor: default !important;
 						}
 					.b-postform-authtype-anonymous .b-postform-login-services-anonymous .b-postform-login-services-name,
 					.b-postform-authtype-livejournal .b-postform-login-services-livejournal .b-postform-login-services-name,
