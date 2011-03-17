@@ -2226,7 +2226,7 @@ DIV.lj_ippu_app {
 .b-popup {
 	position: absolute;
 	font-size:12px;
-	z-index: 200;
+	z-index: 4000;
 	}
 	.b-popup input,
 	.b-popup div,
