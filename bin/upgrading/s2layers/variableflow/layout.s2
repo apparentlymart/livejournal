@@ -721,7 +721,7 @@ function CommentInfo::print() {
             print """<li class="entryreadlink">""";
             $this->print_readlink();
             println "</li>";
-            if ($p.view == "entry") {
+            if ($p.view == "entry" and $.spam_counter > 0) {
                 if ($p.showspam) {
                     """<li class="comments-hidespam">""" + get_plural_phrase($.spam_counter, "text_read_spam_comments") + """</li>""";
                 } else {
