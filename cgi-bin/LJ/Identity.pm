@@ -201,7 +201,7 @@ sub unpack_forwhat {
     my ($returl, $returl_fail);
     if ($forwhat eq 'login') {
         $returl = $LJ::SITEROOT;
-        $returl_fail = "$LJ::SITEROOT/identity/login.bml?type=facebook"
+        $returl_fail = "$LJ::SITEROOT/identity/login.bml?type=" . $class->short_code;
     } elsif ($forwhat =~ /^comment-(\d+)-(\d+)$/) {
         my ($journalid, $pendcid) = ($1, $2);
 
