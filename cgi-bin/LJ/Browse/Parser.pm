@@ -2,6 +2,8 @@ package LJ::Browse::Parser;
 
 use strict;
 
+use URI;
+
 ## Parsing text for Landing Page
 ## args:
 ##      text => Text to parse
@@ -39,6 +41,15 @@ sub do_parse {
 
             ## resize and crop first image from post if exist
             if ($tag eq 'img') {
+                my $src = $attr->{'src'};
+                ## SRC must be exist
+                next unless $src;
+
+                my $uri = URI->new($src);
+                my $host = eval { $uri->host };
+                ## Img URL must be valid
+                next if $@;
+
                 my $r = $images_crop_cnt ? LJ::crop_picture_from_web(
                     source      => $attr->{'src'},
                     size        => '200x200',
