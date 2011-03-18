@@ -5,8 +5,8 @@
 		</div>
 		<div class="l-content">
 		<tmpl_if is_vertical_view><ul class="m-tab-switcher">
-			<li<tmpl_if expr="view eq 'recent_posts'"> class="cur"</tmpl_if>><a href="?view=recent_posts">Recent posts</a><i class="b-round-ctl"></i><i class="b-round-ctr"></i></li>
-			<li<tmpl_if expr="view eq 'communities'"> class="cur"</tmpl_if>><a href="?view=communities">Communities</a><i class="b-round-ctl"></i><i class="b-round-ctr"></i></li>
+			<li<tmpl_if expr="view eq 'recent_posts'"> class="cur"</tmpl_if>><a href="<tmpl_var search_url><tmpl_if tag>tag/<tmpl_var tag></tmpl_if>?view=recent_posts">Recent posts</a><i class="b-round-ctl"></i><i class="b-round-ctr"></i></li>
+			<li<tmpl_if expr="view eq 'communities'"> class="cur"</tmpl_if>><a href="<tmpl_var search_url><tmpl_if tag>tag/<tmpl_var tag></tmpl_if>?view=communities">Communities</a><i class="b-round-ctl"></i><i class="b-round-ctr"></i></li>
 		</ul></tmpl_if>
 		<tmpl_if is_vertical_view>
 			<tmpl_if expr="view eq 'communities'">

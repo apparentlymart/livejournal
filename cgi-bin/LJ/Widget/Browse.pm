@@ -405,6 +405,10 @@ sub render_body {
         }
     }
 
+    my $search_uri = BML::get_uri();
+    $search_uri =~ s#(.*?)tag/.*#$1#;
+    $search_uri .= "/" if $search_uri !~ m#/$#; ## add end slash if not exist
+
     $template->param(
         communities             => \@tmpl_communities,
         posts                   => \@tmpl_posts,
@@ -434,6 +438,8 @@ sub render_body {
                                     ),
         top_posts               => \@top_posts,
         top_comms               => \@top_comms,
+        search_url              => $search_uri,
+        tag                     => $search_str,
         view                    => $view,
         poll_of_the_day         => LJ::Widget::PollOfTheDay->render(
                                         vertical_account => $vertical ? $vertical->journal : undef,
