@@ -906,7 +906,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     $p->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
 
     var string comments_showspam = "";
-    if ($e.comments.count > 0 and $e.comments.read_spam_url != "") {
+    if ($e.comments.spam_counter > 0 and $e.comments.read_spam_url != "") {
         if ($p.showspam) {
             $comments_showspam = """ | <span>""" + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</span> """;
 

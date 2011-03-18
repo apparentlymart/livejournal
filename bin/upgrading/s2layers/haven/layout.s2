@@ -1215,7 +1215,7 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
         println "&nbsp;";
     }
     var string comments_showspam = "";
-    if ($e.comments.count > 0 and $e.comments.read_spam_url != "") {
+    if ($e.comments.spam_counter > 0 and $e.comments.read_spam_url != "") {
         if ($p.showspam) {
             $comments_showspam = get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</span> """;
         } else {

@@ -1116,7 +1116,7 @@ function Entry::lay_print_cmdlinks() {
             "<li>"; $.comments->print_postlink(); "</li>";
         }
         var string comments_showspam = "";
-        if ($.comments.count > 0 and $.comments.read_spam_url != "") {
+        if ($.comments.spam_counter > 0 and $.comments.read_spam_url != "") {
             if ($p.showspam) {
                 $comments_showspam = """<li>""" + get_plural_phrase($.comments.spam_counter, "text_read_spam_comments") + """</li>""";
             } else {
