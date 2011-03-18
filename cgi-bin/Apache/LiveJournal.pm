@@ -498,7 +498,7 @@ sub trans
 
         my $remote = LJ::get_remote();
         my $u = LJ::load_user($orig_user);
-
+=comment Do not need it anymore: LJSUP-8259
         # do redirects:
         # -- communities to the right place
         # -- uppercase usernames
@@ -521,7 +521,7 @@ sub trans
             
             LJ::run_hook('vertical_tags', $remote, $u);
         }
-
+=cut
         # check if this entry or journal contains adult content
         if (LJ::is_enabled('content_flag')) {
             # force remote to be checked

@@ -6820,8 +6820,6 @@ sub journal_base
                 $vhost = "front";
             } elsif ($u->{'journaltype'} eq "P") {
                 $vhost = "";
-            } elsif ($u->{'journaltype'} eq "C") {
-                $vhost = "community";
             }
 
         }
