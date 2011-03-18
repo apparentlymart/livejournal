@@ -12,6 +12,8 @@ if (document.getElementById) {
     var radio_twli = document.getElementById("talkpostfromtwli");
     var radio_oidlo = document.getElementById("talkpostfromoidlo");
     var radio_oidli = document.getElementById("talkpostfromoidli");
+    var radio_mrlo = document.getElementById("talkpostfrommrlo");
+    var radio_mrli = document.getElementById("talkpostfrommrli");	
 
     var check_login = document.getElementById("logincheck");
     var sel_pickw = document.getElementById("prop_picture_keyword");
@@ -156,7 +158,7 @@ function handleRadios(sel) {
 
 function submitHandler() {
     if (remote && username.value == remote && ((! radio_anon || ! radio_anon.checked) && 
-        (! radio_oidlo || ! radio_oidlo.checked) && (! radio_fblo || ! radio_fblo.checked) && (! radio_twlo || ! radio_twlo.checked))) {
+        (! radio_oidlo || ! radio_oidlo.checked) && (! radio_fblo || ! radio_fblo.checked) && (! radio_twlo || ! radio_twlo.checked) && (! radio_mrlo || ! radio_mrlo.checked))) {
         // Quietly arrange for cookieuser auth instead, to avoid
         // sending cleartext password.
         password.value = "";
