@@ -103,7 +103,7 @@ body<=
             ## #7 - Full path for sanity check 
 
             ## Tags for community
-            my $comm_tags = $subcat_name ? $columns[8] : $columns[7];
+            my $comm_tags = $columns[8];
             my @tags = split /,\s*/, $comm_tags;
 
             my $comm_id = LJ::get_userid($comm_name);
