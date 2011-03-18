@@ -354,7 +354,7 @@ sub can_screen {
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $u->{'user'} ||
                 $remote->{'user'} eq (ref $up ? $up->{'user'} : $up) ||
-                $remote->can_manage($u) || $remote->can_moderate($u);
+                $remote->can_manage($u) || $remote->can_moderate($u) || $remote->can_sweep($u);
     return 0;
 }
 
@@ -362,6 +362,7 @@ sub can_unscreen {
     my ($remote, $u, $up, $userpost) = @_;
     return 0 unless $remote;
     return 0 if !($remote->can_manage($u) || $remote->can_moderate($u)) && $remote->can_moderate($u);
+    return 1 if $remote->can_sweep($u);
     return LJ::Talk::can_screen($remote, $u, $up, $userpost);
 }
 
