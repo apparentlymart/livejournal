@@ -1143,7 +1143,7 @@ if (not $c.frozen) {
 
 
     var string comments_showspam = "";
-    if ($en.comments.count > 0 and $en.comments.read_spam_url != "") {
+    if ($en.comments.spam_counter > 0 and $en.comments.read_spam_url != "") {
         if ($p.showspam) {
             $comments_showspam = get_plural_phrase($en.comments.spam_counter, "text_read_spam_comments") + "&ndash;";
         } else {

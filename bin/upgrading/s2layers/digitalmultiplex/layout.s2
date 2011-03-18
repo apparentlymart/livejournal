@@ -1168,7 +1168,7 @@ function EntryPage::print_body () {
     {
         var string pages;
         var string comments_showspam = "";
-        if ($.entry.comments.count > 0 and $.entry.comments.read_spam_url != "") {
+        if ($.entry.comments.spam_counter > 0 and $.entry.comments.read_spam_url != "") {
             if ($p.showspam) {
                 $comments_showspam = """ &mdash; """ + get_plural_phrase($.entry.comments.spam_counter, "text_read_spam_comments");
             } else {
