@@ -1107,6 +1107,85 @@ HTML BODY.logged-out {
 		border-color: #CCC;
 		background: #FFF;
 		}
+		BODY .b-postform-login-services-current:link,
+		BODY .b-postform-login-services-current:visited,
+		BODY .b-postform-login-services-current:hover,
+		BODY .b-postform-login-services-current:active {
+			position: absolute !important;
+			top: 1px !important;
+			left: 2px !important;
+			display: block !important;
+			float: none !important;
+			width: 43px !important;
+			height: 20px !important;
+			margin: 0 !important;
+			padding: 0 !important;
+			border: 0 !important;
+			background: #FFF url(/img/showmore-login.gif) no-repeat 26px 2px !important;
+			cursor: pointer !important;
+			text-align: left !important;
+			text-decoration: none !important;
+			z-index: 999;
+			}
+		.b-postform-login-services-current:focus {
+			outline: 1px dotted #000;
+			}
+		BODY .b-postform-login-services-show .b-postform-login-services-current:link,
+		BODY .b-postform-login-services-show .b-postform-login-services-current:visited,
+		BODY .b-postform-login-services-show .b-postform-login-services-current:hover,
+		BODY .b-postform-login-services-show .b-postform-login-services-current:active {
+			left: 0 !important;
+			width: 47px !important;
+			height: 26px !important;
+			background: #FFF url(/img/showmore-login.gif) no-repeat 28px 2px !important;
+			outline: 0;
+			}
+			.b-postform-login-services-current-pic {
+				position: absolute !important;
+				top: 0;
+				left: -1px;
+				display: block !important;
+				float: none !important;
+				width: 17px !important;
+				height: 16px !important;
+				padding: 1px 20px 1px 6px !important;
+				border: 1px solid #8A8A8A !important;
+				-moz-border-radius: 3px !important;
+				border-radius: 3px !important;
+				background-color: transparent;
+				background-image: url(/img/pencil.gif);
+				background-repeat: no-repeat;
+				background-position: 6px 1px;
+				}
+			.b-postform-login-services-show .b-postform-login-services-current-pic {
+				left: 1px;
+				}
+			.b-postform-authtype-anonymous .b-postform-login-services-current-pic {
+				background-image: url(/img/anonymous.gif);
+				}
+			.b-postform-authtype-livejournal .b-postform-login-services-current-pic,
+			.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-current-pic,
+			.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-current-pic,
+			.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-current-pic,
+			.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-current-pic,
+			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-current-pic {
+				background-image: url(/img/pencil.gif);
+				}
+			.b-postform-authtype-user .b-postform-login-services-current-pic {
+				background-image: url(/img/userinfo.gif);
+				}
+			.b-postform-authtype-facebook .b-postform-login-services-current-pic {
+				background-image: url(/img/icons/facebook-16.gif);
+				}
+			.b-postform-authtype-twitter .b-postform-login-services-current-pic {
+				background-image: url(/img/icons/twitter-16.gif);
+				}
+			.b-postform-authtype-openid .b-postform-login-services-current-pic {
+				background-image: url(/img/icons/openid-16.gif);
+				}
+			.b-postform-authtype-mailru .b-postform-login-services-current-pic {
+				background-image: url(/img/icons/mailru-16.gif);
+				}
 		.b-postform-login-services-items {
 			position: absolute;
 			top: 26px;
@@ -1154,14 +1233,9 @@ HTML BODY.logged-out {
 			.b-postform-login-services-show .b-postform-login-services-item {
 				display: block;
 				}
-			.b-postform-login-services-show .b-postform-login-services-user,
 			.b-postform-user-cookie .b-postform-login-services-show .b-postform-login-services-livejournal,
-			.b-postform-user-cookie.b-postform-authtype-livejournal .b-postform-login-services-show .b-postform-login-services-user {
+			.b-postform-anonymous-cookie .b-postform-login-services-show .b-postform-login-services-user {
 				display: none;
-				}
-			.b-postform-user-cookie .b-postform-login-services-show .b-postform-login-services-user,
-			.b-postform-user-cookie.b-postform-authtype-livejournal .b-postform-login-services-show .b-postform-login-services-livejournal {
-				display: block;
 				}
 				BODY .b-postform-login-services-item A:link,
 				BODY .b-postform-login-services-item A:visited {
@@ -1233,231 +1307,6 @@ HTML BODY.logged-out {
 					opacity: 0.5;
 					cursor: default;
 					}
-			.b-postform-authtype-anonymous .b-postform-login-services-anonymous,
-			.b-postform-authtype-livejournal .b-postform-login-services-livejournal,
-			.b-postform-authtype-user .b-postform-login-services-user,
-			.b-postform-authtype-facebook .b-postform-login-services-facebook,
-			.b-postform-authtype-twitter .b-postform-login-services-twitter,
-			.b-postform-authtype-openid .b-postform-login-services-openid,
-			.b-postform-authtype-mailru .b-postform-login-services-mailru,
-			.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal,
-			.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal,
-			.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal,
-			.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal,
-			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal {
-				position: absolute;
-				top: -25px;
-				left: 0;
-				display: block;
-				width: 45px;
-				height: 26px;
-				margin: 0;
-				padding: 0 1px;
-				background: transparent;
-				}
-			.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous,
-			.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-facebook,
-			.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-twitter,
-			.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-openid,
-			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-mailru {
-				display: none;
-				}
-			.b-postform-authtype-anonymous .b-postform-login-services-show .b-postform-login-services-anonymous,
-			.b-postform-authtype-livejournal .b-postform-login-services-show .b-postform-login-services-livejournal,
-			.b-postform-authtype-user .b-postform-login-services-show .b-postform-login-services-user,
-			.b-postform-authtype-facebook .b-postform-login-services-show .b-postform-login-services-facebook,
-			.b-postform-authtype-twitter .b-postform-login-services-show .b-postform-login-services-twitter,
-			.b-postform-authtype-openid .b-postform-login-services-show .b-postform-login-services-openid,
-			.b-postform-authtype-mailru .b-postform-login-services-show .b-postform-login-services-mailru,
-			.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-show .b-postform-login-services-livejournal,
-			.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-show .b-postform-login-services-livejournal,
-			.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-show .b-postform-login-services-livejournal,
-			.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-show .b-postform-login-services-livejournal,
-			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-show .b-postform-login-services-livejournal {
-				background: #FFF;
-				}
-			.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-show .b-postform-login-services-anonymous,
-			.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-show .b-postform-login-services-facebook,
-			.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-show .b-postform-login-services-twitter,
-			.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-show .b-postform-login-services-openid,
-			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-show .b-postform-login-services-mailru {
-				display: block;
-				position: static;
-				width: auto;
-				height: auto;
-				margin: 0;
-				padding: 0;
-				}
-				BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous A:link,
-				BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous A:visited,
-				BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous A:hover,
-				BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous A:active,
-				BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal A:link,
-				BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal A:visited,
-				BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal A:hover,
-				BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal A:active,
-				BODY .b-postform-authtype-user .b-postform-login-services-user A:link,
-				BODY .b-postform-authtype-user .b-postform-login-services-user A:visited,
-				BODY .b-postform-authtype-user .b-postform-login-services-user A:hover,
-				BODY .b-postform-authtype-user .b-postform-login-services-user A:active,
-				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:link,
-				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:visited,
-				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:hover,
-				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:active,
-				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:link,
-				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:visited,
-				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:hover,
-				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:active,
-				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:link,
-				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:visited,
-				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:hover,
-				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:active,
-				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:link,
-				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:visited,
-				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:hover,
-				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:active,
-				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal A:link,
-				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal A:visited,
-				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal A:hover,
-				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal A:active,
-				BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal A:link,
-				BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal A:visited,
-				BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal A:hover,
-				BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal A:active,
-				BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal A:link,
-				BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal A:visited,
-				BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal A:hover,
-				BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal A:active,
-				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal A:link,
-				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal A:visited,
-				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal A:hover,
-				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal A:active,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal A:link,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal A:visited,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal A:hover,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal A:active {
-					position: static;
-					display: block;
-					width: auto;
-					height: auto;
-					margin: 0;
-					padding: 0;
-					-moz-border-radius: 0;
-					border-radius: 0;
-					border: 0;
-					background: transparent !important;
-					color: #222 !important;
-					text-decoration: none;
-					}
-				BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous A:focus,
-				BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal A:focus,
-				BODY .b-postform-authtype-user .b-postform-login-services-user A:focus,
-				BODY .b-postform-authtype-facebook .b-postform-login-services-facebook A:focus,
-				BODY .b-postform-authtype-twitter .b-postform-login-services-twitter A:focus,
-				BODY .b-postform-authtype-openid .b-postform-login-services-openid A:focus,
-				BODY .b-postform-authtype-mailru .b-postform-login-services-mailru A:focus,
-				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal A:focus,
-				BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal A:focus,
-				BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal A:focus,
-				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal A:focus,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal A:focus {
-					outline: 1px dotted #000;
-					}
-				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:link,
-				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:visited,
-				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:hover,
-				BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:active,
-				BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-facebook A:link,
-				BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-facebook A:visited,
-				BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-facebook A:hover,
-				BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-facebook A:active,
-				BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:link,
-				BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:visited,
-				BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:hover,
-				BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:active,
-				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-openid A:link,
-				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-openid A:visited,
-				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-openid A:hover,
-				BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-openid A:active,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:link,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:visited,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:hover,
-				BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:active {
-					display: block;
-					width: auto;
-					height: auto;
-					margin: 0;
-					padding: 3px 7px 3px 3px;
-					-moz-border-radius: 3px;
-					border-radius: 3px;
-					border: 0;
-					background: #FFF;
-					color: #222 !important;
-					text-decoration: none;
-					}
-					BODY .b-postform-authtype-anonymous .b-postform-login-services-anonymous IMG,
-					BODY .b-postform-authtype-livejournal .b-postform-login-services-livejournal IMG,
-					BODY .b-postform-authtype-user .b-postform-login-services-user IMG,
-					BODY .b-postform-authtype-facebook .b-postform-login-services-facebook IMG,
-					BODY .b-postform-authtype-twitter .b-postform-login-services-twitter IMG,
-					BODY .b-postform-authtype-openid .b-postform-login-services-openid IMG,
-					BODY .b-postform-authtype-mailru .b-postform-login-services-mailru IMG,
-					BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal IMG,
-					BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal IMG,
-					BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal IMG,
-					BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal IMG,
-					BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal IMG {
-						position: static !important;
-						display: block !important;
-						float: none !important;
-						width: 17px !important;
-						height: 16px !important;
-						margin: 0 !important;
-						padding: 1px 20px 1px 6px !important;
-						border: 1px solid #8A8A8A !important;
-						-moz-border-radius: 3px !important;
-						border-radius: 3px !important;
-						background: #FFF url(/img/showmore-login.gif) no-repeat 26px 1px !important;
-						cursor: pointer !important;
-						text-align: left !important;
-						}
-					BODY .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-show .b-postform-login-services-anonymous IMG,
-					BODY .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-show .b-postform-login-services-facebook IMG,
-					BODY .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-show .b-postform-login-services-twitter IMG,
-					BODY .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-show .b-postform-login-services-openid IMG,
-					BODY .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-show .b-postform-login-services-mailru IMG {
-						position: static !important;
-						display: inline !important;
-						width: auto !important;
-						height: auto !important;
-						margin: 0 5px 0 0 !important;
-						padding: 0 !important;
-						vertical-align: -4px !important;
-						border: 0 !important;
-						background: transparent !important;
-						cursor: default !important;
-						}
-					.b-postform-authtype-anonymous .b-postform-login-services-anonymous .b-postform-login-services-name,
-					.b-postform-authtype-livejournal .b-postform-login-services-livejournal .b-postform-login-services-name,
-					.b-postform-authtype-user .b-postform-login-services-user .b-postform-login-services-name,
-					.b-postform-authtype-facebook .b-postform-login-services-facebook .b-postform-login-services-name,
-					.b-postform-authtype-twitter .b-postform-login-services-twitter .b-postform-login-services-name,
-					.b-postform-authtype-openid .b-postform-login-services-openid .b-postform-login-services-name,
-					.b-postform-authtype-mailru .b-postform-login-services-mailru .b-postform-login-services-name,
-					.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-livejournal .b-postform-login-services-name,
-					.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-livejournal .b-postform-login-services-name,
-					.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-livejournal .b-postform-login-services-name,
-					.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-livejournal .b-postform-login-services-name,
-					.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-livejournal .b-postform-login-services-name {
-						display: none;
-						}
-					.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-show .b-postform-login-services-anonymous .b-postform-login-services-name,
-					.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-show .b-postform-login-services-facebook .b-postform-login-services-name,
-					.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-show .b-postform-login-services-twitter .b-postform-login-services-name,
-					.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-show .b-postform-login-services-openid .b-postform-login-services-name,
-					.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-show .b-postform-login-services-mailru .b-postform-login-services-name {
-						display: inline;
-						}
 	.b-postform-login-details {
 		overflow: auto;
 		position: static;
