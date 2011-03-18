@@ -944,7 +944,7 @@ function EntryPage::print_body () {
         $this->print_multiform_start();
 
         print_header("Comments:");
-	if ($e.comments.read_spam_url != "") {
+	if ($e.comments.spam_counter > 0 and $e.comments.read_spam_url != "") {
 		if ($p.showspam) {
 		    print """<p width='95%' style='text-align:center;'>""" + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</p>""";
 		} else {

@@ -723,7 +723,7 @@ function CommentInfo::print() {
             " | ";
         }
         if ($.show_readlink) {
-            if ($p.view == "entry" and $.read_spam_url != "") {
+            if ($p.view == "entry" and $.spam_counter > 0 and $.read_spam_url != "") {
                 if ($p.showspam) {
                     print safe get_plural_phrase($.spam_counter, "text_read_spam_comments") + """ | """;
                 } else {
