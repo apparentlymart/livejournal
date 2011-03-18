@@ -672,7 +672,7 @@ function CommentInfo::print() {
         print safe "$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
-            if ($p.view == "entry" and $.read_spam_url != "") {
+            if ($p.view == "entry" and $.spam_counter > 0 and $.read_spam_url != "") {
                 if (clean_url($*img_btwn_comments) != "") {
                     """ <img src="$*img_btwn_comments" alt="" /> """;
                 } else {
