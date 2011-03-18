@@ -768,7 +768,7 @@ function CommentInfo::print () {
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        if ($p.view == "entry" and $.read_spam_url != "") {
+        if ($p.view == "entry" and $.spam_counter > 0 and $.read_spam_url != "") {
             print safe "$*text_btwn_comments";
             $this->print_spamlink();
         }
