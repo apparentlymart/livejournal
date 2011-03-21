@@ -2,7 +2,7 @@
     <TMPL_IF everyone_can_comment>
         <TMPL_IF is_identity>
             <div class="b-postform-login-item b-postform-login-openid">
-                <input type="radio" name="usertype" value="openid_cookie" id="talkpostfromoidli" class="b-postform-login-radio" <TMPL_IF whocheck_openid_cookie>checked="checked"</TMPL_IF> />
+                <input type="radio" name="usertype" value="openid_cookie" id="talkpostfromoidli" class="b-postform-login-radio" tabindex="7" <TMPL_IF whocheck_openid_cookie>checked="checked"</TMPL_IF> />
                 <label for="talkpostfromoid" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></label>
                 <div class="b-postform-login-opts">
                     <strong><TMPL_VAR remote_display_name></strong>
@@ -11,10 +11,10 @@
             </div>
         <TMPL_ELSE>
             <div class="b-postform-login-item b-postform-login-openid">
-                <input type="radio" name="usertype" value="openid" id="talkpostfromoidlo" class="b-postform-login-radio" <TMPL_IF whocheck_openid>checked="checked"</TMPL_IF> />
+                <input type="radio" name="usertype" value="openid" id="talkpostfromoidlo" class="b-postform-login-radio" tabindex="7" <TMPL_IF whocheck_openid>checked="checked"</TMPL_IF> />
                 <label for="talkpostfromoidlo" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></label>
                 <div class="b-postform-login-opts">
-                    <span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><label for="openid:url"><TMPL_VAR expr="ml('/talkpost.bml.openid.identity.url')">&nbsp;</label><input class="textbox" name="openid:url" maxlength="60" size="42" id="openid:url" value="<TMPL_VAR openid_url_default>" tabindex="6" /><TMPL_VAR helpicon_openid><input type="hidden" name="oiddo_login" id="oidlogincheck" <TMPL_VAR oiddo_login_checked> /></span>
+                    <span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><label for="openid:url"><TMPL_VAR expr="ml('/talkpost.bml.openid.identity.url')">&nbsp;</label><input class="textbox" name="openid:url" maxlength="60" size="42" id="openid:url" value="<TMPL_VAR openid_url_default>" tabindex="8" /><TMPL_VAR helpicon_openid><input type="hidden" name="oiddo_login" id="oidlogincheck" <TMPL_VAR oiddo_login_checked> /></span>
                     <TMPL_VAR ml_willscreen>
                 </div>
             </div>
@@ -28,7 +28,7 @@
                         <TMPL_VAR ml_banned>
                     </div>
                 <TMPL_ELSE>
-                    <input type="radio" name="usertype" value="openid_cookie" id="talkpostfromoidli" class="b-postform-login-radio" <TMPL_IF whocheck_openid_cookie>checked='checked'</TMPL_IF> />
+                    <input type="radio" name="usertype" value="openid_cookie" id="talkpostfromoidli" class="b-postform-login-radio" tabindex="7" <TMPL_IF whocheck_openid_cookie>checked='checked'</TMPL_IF> />
                     <label for="talkpostfromoidli" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></label>
                     <div class="b-postform-login-opts">
                         <strong><TMPL_VAR remote_display_name></strong>
@@ -46,10 +46,10 @@
             </div>
         <TMPL_ELSE>
             <div class="b-postform-login-item b-postform-login-openid">
-                <input type="radio" name="usertype" value="openid" id="talkpostfromoidlo" class="b-postform-login-radio" <TMPL_IF whocheck_openid>checked="checked"</TMPL_IF> />
+                <input type="radio" name="usertype" value="openid" id="talkpostfromoidlo" class="b-postform-login-radio" tabindex="7" <TMPL_IF whocheck_openid>checked="checked"</TMPL_IF> />
                 <label for="talkpostfromoidlo" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></label>
                 <div class="b-postform-login-opts">
-                    <span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><label for="openid:url"><TMPL_VAR expr="ml('/talkpost.bml.openid.identity.url')">&nbsp;</label><input class="textbox" name="openid:url" maxlength="60" size="42" id="openid:url" value="<TMPL_VAR openid_url_default>" tabindex="6" /><TMPL_VAR helpicon_openid><input type="hidden" name="oiddo_login" id="oidlogincheck" <TMPL_VAR oiddo_login_checked> /></span>
+                    <span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><label for="openid:url"><TMPL_VAR expr="ml('/talkpost.bml.openid.identity.url')">&nbsp;</label><input class="textbox" name="openid:url" maxlength="60" size="42" id="openid:url" value="<TMPL_VAR openid_url_default>" tabindex="8" /><TMPL_VAR helpicon_openid><input type="hidden" name="oiddo_login" id="oidlogincheck" <TMPL_VAR oiddo_login_checked> /></span>
                     <TMPL_VAR ml_willscreen>
                 </div>
             </div>
@@ -58,7 +58,7 @@
         <TMPL_IF is_identity>
             <TMPL_IF remote_can_comment>
                 <div class="b-postform-login-item b-postform-login-openid">
-                    <input type="radio" name="usertype" value="openid_cookie" id="talkpostfromoidli" class="b-postform-login-radio" <TMPL_IF whocheck_openid_cookie>checked="checked"</TMPL_IF> />
+                    <input type="radio" name="usertype" value="openid_cookie" id="talkpostfromoidli" class="b-postform-login-radio" tabindex="7" <TMPL_IF whocheck_openid_cookie>checked="checked"</TMPL_IF> />
                     <label for="talkpostfromoidli" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></label>
                     <div class="b-postform-login-opts">
                         <strong><TMPL_VAR remote_display_name></strong>
@@ -77,10 +77,10 @@
             </TMPL_IF>
         <TMPL_ELSE>
             <div class="b-postform-login-item b-postform-login-openid">
-                <input type="radio" name="usertype" value="openid" id="talkpostfromoidlo" class="b-postform-login-radio" <TMPL_IF whocheck_openid>checked="checked"</TMPL_IF> />
+                <input type="radio" name="usertype" value="openid" id="talkpostfromoidlo" class="b-postform-login-radio" tabindex="7" <TMPL_IF whocheck_openid>checked="checked"</TMPL_IF> />
                 <label for="talkpostfromoidlo" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></label>
                 <div class="b-postform-login-opts">
-                    <span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><label for="openid:url"><TMPL_VAR expr="ml('/talkpost.bml.openid.identity.url')">&nbsp;</label><input class="textbox" name="openid:url" maxlength="60" size="42" id="openid:url" value="<TMPL_VAR openid_url_default>" tabindex="6" /><TMPL_VAR helpicon_openid><input type="hidden" name="oiddo_login" id="oidlogincheck" <TMPL_VAR oiddo_login_checked> /></span>
+                    <span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><label for="openid:url"><TMPL_VAR expr="ml('/talkpost.bml.openid.identity.url')">&nbsp;</label><input class="textbox" name="openid:url" maxlength="60" size="42" id="openid:url" value="<TMPL_VAR openid_url_default>" tabindex="8" /><TMPL_VAR helpicon_openid><input type="hidden" name="oiddo_login" id="oidlogincheck" <TMPL_VAR oiddo_login_checked> /></span>
                     <TMPL_VAR ml_willscreen>
                 </div>
             </div>
