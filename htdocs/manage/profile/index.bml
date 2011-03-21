@@ -571,8 +571,9 @@ body<=
                 }
 
                 $ret .= "<tr id=\"sms_time\" style=\"$row_style\"><td class='field_name'>$ML{'.fn.smsinterval'}</td><td>";
-                $ret .= BML::ml(".fn.smsinterval.info", { url => "$LJ::SITEROOT/manage/settings/?cat=notifications" }) . "<br />";
-
+                $ret .= BML::ml(".fn.smsinterval.info", { url => "$LJ::SITEROOT/manage/settings/?cat=notifications" });
+                $ret .= "<p>";
+                
                 my $timezone = $u->prop('timezone');
                 my $selected = $timezone && ( defined $start );
 
@@ -589,7 +590,7 @@ body<=
                     $label .= ' ' . LJ::Lang::ml('/manage/profile/index.bml.fn.smsinterval.limitrange.timezone_required');
                 }
 
-                $ret .= "<label for='sms_interval'>$label</label><br/>";
+                $ret .= "<label for='sms_interval'> $label</label></p>";
 
                 my $values_style;
                 unless ( $selected ) {
@@ -599,15 +600,15 @@ body<=
                 $ret .= qq{<div id="sms_interval_values" style="$values_style">};
 
                 my @sms_time = map {$_ =>  sprintf("%02d:00", $_)} (0 .. 23);
-                $ret .= "<label for='sms_interval_start'>$ML{'.fn.smsinterval.start'}</label>";
+                $ret .= "<label for='sms_interval_start'>$ML{'.fn.smsinterval.start'} </label>";
                 $ret .= LJ::html_select({ 'name' => 'sms_interval_start',
                                                   'selected' => $start || 9, },
                                                   @sms_time);
-                $ret .= "<label for='sms_interval_end'>$ML{'.fn.smsinterval.end'}</label>";
+                $ret .= "<label for='sms_interval_end'> $ML{'.fn.smsinterval.end'} </label>";
                 $ret .= LJ::html_select({ 'name' => 'sms_interval_end',
                                                   'selected' => $end || 1, },
                                                   @sms_time);
-                $ret .= BML::ml(".fn.smsinterval.localtime") . "<br />";
+                $ret .= " " . BML::ml(".fn.smsinterval.localtime");
 
                 $ret .= '</div>';
 
