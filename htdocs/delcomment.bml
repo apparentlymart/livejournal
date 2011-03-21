@@ -228,7 +228,7 @@ _info?><?_code
                            LJ::Request->post_param('spam');
         if ( $can{'mark_spam'} and $mark_as_spam ) {
             LJ::Talk::mark_comment_as_spam( $journal, $comment->jtalkid );
-            LJ::set_rel($remote, $poster, 'D');
+            LJ::set_rel($journal, $poster, 'D');
             $actions{'marked_spam'} = 1;
         }
 

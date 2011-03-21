@@ -493,7 +493,7 @@ sub EntryPage_entry
 
     my $comments = CommentInfo({
         'read_url' => $readurl,
-        'read_spam_url' => LJ::Talk::can_mark_spam($remote, $u, $pu) ? $readspamurl : '',
+        'read_spam_url' => LJ::Talk::can_unmark_spam($remote, $u, $pu) ? $readspamurl : '',
         'spam_counter' => $entry->prop('spam_counter') || 0,
         'post_url' => $posturl,
         'count' => $replycount,

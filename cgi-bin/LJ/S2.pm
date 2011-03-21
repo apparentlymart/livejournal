@@ -3044,8 +3044,9 @@ sub _Comment__get_link
     my $comment = LJ::Comment->new($u, dtalkid => $dtalkid);
 
     if ($key eq "delete_comment") {
+        my $del_spam = (LJ::is_enabled('spam_button') && $comment->{state} eq 'B') ? '&amp;spam=1' : '';
         return $null_link unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
-        return LJ::S2::Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
+        return LJ::S2::Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}$del_spam",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 24, 24));
     }
@@ -3058,7 +3059,7 @@ sub _Comment__get_link
     }
     if ($key eq "unspam_comment") {
         return $null_link if $LJ::DISABLED{'spam_button'};
-        return $null_link unless LJ::Talk::can_mark_spam($remote, $u, $post_user, $com_user);
+        return $null_link unless LJ::Talk::can_unmark_spam($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/spamcomment.bml?mode=unspam&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unspam"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_unspam.gif", 24, 24));

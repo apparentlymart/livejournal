@@ -482,17 +482,22 @@ sub init {
         $state = 'A' if LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{user});
     }
 
-    my $spam = 0;
-    my $with_links = 0;
     my $up_is_friend = $up && LJ::is_friend($journalu, $up);
-    LJ::run_hook('spam_comment_detector', $form, \$spam, \$with_links, $journalu, $up) 
-        if $state eq 'A' && $journalu->is_spamprotection_enabled && ( $journalu->is_community || !$up_is_friend);
-    LJ::run_hook('spam_in_friends_journals', \$spam, $journalu, $up)
-        if !$spam && $with_links && $journalu->is_person && $journalu->in_class('paid');
-    if ($spam) {
-        $state = 'B';
-        my $spam_counter = $entry->prop('spam_counter') || 0;
-        $entry->set_prop('spam_counter', $spam_counter + 1);
+    if ( LJ::is_enabled('spam_button') &&
+         !$up->prop('in_whitelist_for_spam') && 
+         ($journalu->is_community || !$up_is_friend) && 
+         !LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user})) {
+
+        my $spam = 0;
+        LJ::run_hook('spam_comment_detector', $form, \$spam, $journalu, $up) 
+            if $state eq 'A' && $journalu->is_spamprotection_enabled;
+        LJ::run_hook('spam_in_all_journals', \$spam, $journalu, $up) 
+            unless $spam;
+        if ($spam) {
+            $state = 'B';
+            my $spam_counter = $entry->prop('spam_counter') || 0;
+            $entry->set_prop('spam_counter', $spam_counter + 1);
+        }
     }
     
     my $parent = {

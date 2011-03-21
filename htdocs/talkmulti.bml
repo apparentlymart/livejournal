@@ -108,9 +108,9 @@
         if ($mode eq 'deletespam') {
             # don't let $remote mark their own comments as spam
             foreach (grep { $talkinfo{$_}->[1] != $remote->id } @talkids) {
-                my $s = LJ::Talk::mark_comment_as_spam($u, $_);
-                LJ::set_rel($remote, $talkinfo{$_}->[1], 'D');
+                LJ::Talk::mark_comment_as_spam($u, $_);
             }
+            LJ::set_rel($u, $talkinfo{$_}->[1], 'D');
         }
 
         my $num = LJ::delete_comments($u, "L", $itemid, @talkids);
