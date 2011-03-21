@@ -77,7 +77,7 @@ sub _build_tree {
     $ret .= "<form action='directory.bml' method='GET'>\n";
     $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
     my $ref_vert_id = undef;
-    $ref_vert_id = defined $POST{'vert_id'} ? $POST{'vert_id'} : $GET{'vert_id'};
+    $ref_vert_id = $POST{'vert_id'} ? $POST{'vert_id'} : $GET{'vert_id'};
     $ret .= "<input type='hidden' name='vert_id' value='$ref_vert_id'>" if defined $ref_vert_id;
     $ret .= "</form>\n\n";
 
@@ -195,7 +195,7 @@ sub _build_tree {
                                      value => $listing->{pendid}, });
         } else {
             my @verticals = LJ::Vertical->load_all();
-            if (!$LJ::DISABLED{'verticals_menu'} && (!defined $ref_vert_id || $ref_vert_id != 0)) {
+            if (!$LJ::DISABLED{'verticals_menu'}) {
                 $ret .= "<tr><td valign='top' style='border-bottom:1px solid #CCC;padding:10px 10px 10px 5px;font-weight:bold;'><!-- $i.-->".$ML{'.vertical.title'}."</td>";
                 @verticals = map { { text => $_->{name}, value => $_->{vert_id} } } @verticals;
 
@@ -213,7 +213,7 @@ sub _build_tree {
                 $ret .= LJ::html_submit('select_v', $ML{'.vertical.select.btn'}) . "</td></tr>";
             }
 
-            if (($vert_[$j] || ($ref_vert_id > 0)) || (defined $ref_vert_id && $ref_vert_id == 0)) {
+            if (($vert_[$j] || (defined $ref_vert_id && $ref_vert_id > 0))) {
                 my @children = $cat_[$j] ? $cat_[$j]->children : ();
                 # Get the full list of categories
                 my @categories = LJ::Browse->load_all($vert_[$j]);
