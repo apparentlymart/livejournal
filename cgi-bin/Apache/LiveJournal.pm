@@ -1548,6 +1548,14 @@ sub journal_content
             LJ::Request->print("Disallow: /\n");
         } else {
             LJ::Request->print("Disallow: /data/foaf/\n");
+            LJ::Request->print("Disallow: /tag/\n");
+            LJ::Request->print("Disallow: /calendar\n"); # no trailing slash to process not only directory, but file too
+
+            my $year = (localtime(time))[5] + 1900;
+            for (my $i = 1999; $i <= $year; $i++) {
+                LJ::Request->print("Disallow: /" . $i . "/\n");
+            }
+
         }
         return LJ::Request::OK
     }
