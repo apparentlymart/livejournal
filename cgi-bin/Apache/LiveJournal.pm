@@ -1546,6 +1546,8 @@ sub journal_content
         LJ::Request->print("User-Agent: *\n");
         if ($u->should_block_robots) {
             LJ::Request->print("Disallow: /\n");
+        } else {
+            LJ::Request->print("Disallow: /data/foaf/\n");
         }
         return LJ::Request::OK
     }
