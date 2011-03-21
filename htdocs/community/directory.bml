@@ -116,7 +116,13 @@ sub _build_tree {
     my @catrem;
     # Get categories the community belongs to or is pending approval for
     my @listings = LJ::Browse->get_submitted_communities( comm => $c );
-    $limit = @listings if (@listings > $limit);
+    if (@listings > 2) {
+        $limit = @listings;
+    } elsif ($ref_vert_id && @listings < 2) {
+        $limit = @listings + 1;
+    } else {
+        $limit = 2;
+    }
 
     foreach my $i (1..$limit) {
         ## which category the user wants to add a community?
