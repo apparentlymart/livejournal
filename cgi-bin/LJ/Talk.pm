@@ -2475,19 +2475,17 @@ sub get_thread_html
             $html->{text}   = BML::ml('.screenedpost');
             $html->{footer} = $comment_footer->();
         }
-        elsif (LJ::is_enabled('spam_button') && $input->{mode} eq 'showspam') {
-            if ($post->{'state'} ne 'B') {
+        elsif ($post->{'state'} ne 'B' && $opts->{'showspam'}) {
+            $html->{text} = undef;
+        }
+        elsif ($post->{'state'} eq 'B' && !$opts->{'showspam'}) {
+            $state = 'spamed';
+            if ($post->{'_show'}) { 
+                $html->{header} = $comment_header->();
+                $html->{text}   = BML::ml('.spamedpost');
+                $html->{footer} = $comment_footer->();
+            } else {
                 $html->{text} = undef;
-            }
-            elsif (!LJ::Talk::can_unmark_spam($remote, $u, $up, $userpost)) {
-                $state = 'spamed';
-                if ($post->{'_show'}) { 
-                    $html->{header} = $comment_header->();
-                    $html->{text}   = BML::ml('.spamedpost');
-                    $html->{footer} = $comment_footer->();
-                } else {
-                    $html->{text} = undef;
-                }
             }
         }
         elsif ($pu && $pu->is_suspended && !$viewsome)
