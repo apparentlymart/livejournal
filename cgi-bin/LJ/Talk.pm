@@ -370,6 +370,7 @@ sub can_view_screened {
     my ($remote, $u, $up, $userpost) = @_;
     return 0 unless $remote;
     return 0 if $remote->can_moderate($u);
+    return 1 if $remote->can_sweep($u);
     return LJ::Talk::can_delete($remote, $u, $up, $userpost);
 }
 
@@ -1273,7 +1274,7 @@ sub load_comments
                     $post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
                                                               $remote->{'userid'} == $uposterid ||
                                                               $remote->{'userid'} == $post->{'posterid'} ||
-                                                              $remote->can_manage($u) ));
+                                                              $remote->can_manage($u) ) || $remote->can_sweep($u));
             }
             if (LJ::is_enabled('spam_button') && !$opts->{showspam}) {
                 $should_show = 0 if $post->{'state'} eq 'B';

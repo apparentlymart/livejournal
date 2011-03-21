@@ -500,9 +500,9 @@ sub EntryPage_entry
         'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
         'enabled' => $entry->comments_shown,
         'locked' => !$entry->posting_comments_allowed,
-        'screened' => ($entry->prop("hasscreened") && $remote &&
-                       ($remote->{'user'} eq $u->{'user'} || $remote->can_manage($u))) ? 1 : 0,
+        'screened' => ($entry->prop("hasscreened") and $remote && LJ::Talk::can_view_screened($remote, $u)),
     });
+
     $comments->{show_postlink} = $entry->posting_comments_allowed;
     $comments->{show_readlink} = $entry->comments_shown && ($replycount || $comments->{'screened'});
 
