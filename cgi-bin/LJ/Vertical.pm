@@ -346,6 +346,33 @@ sub create {
     return $class->new( vert_id => $dbh->{mysql_insertid} );
 }
 
+sub get_communities_by_interests {
+    my $class = shift;
+    my $interests = shift;
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master to create vertical";
+
+    my $comms = [];
+
+    my $comm_interests = $dbh->selectcol_arrayref (
+        "SELECT intid 
+            FROM interests
+            WHERE interest
+            IN ('" . $interests . "')",
+    );
+
+    return $comms unless $comm_interests && @$comm_interests;
+
+    my $comms = $dbh->selectcol_arrayref (
+        "SELECT userid
+            FROM comminterests
+            WHERE intid in (" . join (",", @$comm_interests) . ")",
+    );
+
+    return $comms;
+}
+
 # Return a list of communities found in vertical's categories
 # Returns User objects
 sub get_communities {
@@ -363,9 +390,12 @@ sub get_communities {
 
     my $comms_search = [];
     my %finded = ();
+    my $join_search_words = join "','", split /\s+/, $search;
     if (bytes::length($search)) {
         my @search_words = map { "SELECT '%".$_."%' AS cond" } split /\s+/, $search;
         $search = join " UNION ALL ", @search_words;
+
+        ## Fetch suitable communities from community directory
         $comms_search = $dbh->selectall_arrayref (
             "SELECT DISTINCT journalid
                 FROM vertical_keymap km
@@ -385,6 +415,23 @@ sub get_communities {
             { Slice => {} }, $self->vert_id
         ) || [];
         %finded = map { $_->{journalid} => 1 } @$comms_search;
+
+        ## Search communities by interests
+        my $comms = LJ::Vertical->get_communities_by_interests ($join_search_words);
+        my $comms_search = [];
+
+        if ($comms && @$comms) {
+            $comms_search = $dbh->selectcol_arrayref (
+                "SELECT journalid
+                    FROM categoryjournals cj, category c
+                    WHERE cj.journalid IN (" . (join ",", @$comms) . ")
+                        AND c.vert_id = ?
+                        AND cj.catid = c.catid",
+                undef, $self->vert_id
+            );
+            %finded = map { $_ => 1 } @$comms_search
+                if $comms_search && @$comms_search;
+        }
     }
 
     ## Get subcategories
