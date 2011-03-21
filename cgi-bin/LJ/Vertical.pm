@@ -348,7 +348,7 @@ sub create {
 
 sub get_communities_by_interests {
     my $class = shift;
-    my $interests = shift;
+    my $search = shift;
 
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master to create vertical";
@@ -356,10 +356,15 @@ sub get_communities_by_interests {
     my $comms = [];
 
     my $comm_interests = $dbh->selectcol_arrayref (
-        "SELECT intid 
-            FROM interests
-            WHERE interest
-            IN ('" . $interests . "')",
+        "SELECT intid
+            FROM interests i
+            WHERE EXISTS (
+                SELECT 1 
+                    FROM (
+                        $search
+                    ) c 
+                WHERE i.interest LIKE cond
+            )"
     );
 
     return $comms unless $comm_interests && @$comm_interests;
@@ -390,7 +395,6 @@ sub get_communities {
 
     my $comms_search = [];
     my %finded = ();
-    my $join_search_words = join "','", split /\s+/, $search;
     if (bytes::length($search)) {
         my @search_words = map { "SELECT '%".$_."%' AS cond" } split /\s+/, $search;
         $search = join " UNION ALL ", @search_words;
@@ -417,7 +421,7 @@ sub get_communities {
         %finded = map { $_->{journalid} => 1 } @$comms_search;
 
         ## Search communities by interests
-        my $comms = LJ::Vertical->get_communities_by_interests ($join_search_words);
+        my $comms = LJ::Vertical->get_communities_by_interests ($search);
         my $comms_search = [];
 
         if ($comms && @$comms) {
