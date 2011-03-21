@@ -3414,6 +3414,18 @@ CREATE TABLE friending_actions_q (
     ) Type=InnoDB
 EOC
 
+register_tablecreate("email_status", <<'EOC');
+CREATE TABLE `email_status` (
+    `email` 		varchar(50) NOT NULL default '',
+    `first_error_time` 	int(10) unsigned NOT NULL,
+    `last_error_time` 	int(10) unsigned NOT NULL,
+    `error_count` 	tinyint(3) unsigned NOT NULL,
+    `disabled` 		tinyint(3) unsigned NOT NULL,
+    PRIMARY KEY  (`email`),
+    KEY `first_error_time` (`first_error_time`)
+    ) TYPE=InnoDB 
+EOC
+
 ### changes
 
 register_alter(sub {
