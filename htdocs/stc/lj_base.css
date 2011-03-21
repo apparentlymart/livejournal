@@ -1267,13 +1267,13 @@ HTML BODY.logged-out {
 					text-decoration: none;
 					}
 					.b-postform-login-services-item IMG {
-						position: static;
+						position: static !important;
 						width: auto;
 						height: auto;
-						margin: 0 5px 0 0;
-						padding: 0;
+						margin: 0 5px 0 0 !important;
+						padding: 0 !important;
 						vertical-align: -4px;
-						border: 0;
+						border: 0 !important;
 						}
 				BODY .b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:link,
 				BODY .b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:visited,
