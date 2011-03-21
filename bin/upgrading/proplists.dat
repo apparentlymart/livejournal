@@ -1632,4 +1632,11 @@ logproplist.spam_counter:
   des: Counter of spam comments in this entry
   prettyname: Spam counter
   sortorder: 108
+  
+userproplist.email_faulty:
+  datatype: bool
+  des: True if user email was set as unconfirmed due to delivery related problems
+  cldversion: 8
+  prettyname: Email is faulty
+
 

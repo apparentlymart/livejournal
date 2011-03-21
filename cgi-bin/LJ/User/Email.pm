@@ -1,6 +1,10 @@
 package LJ::User::Email;
 use strict;
 
+#
+#   THIS PACKAGE IS OBSOLETE DO NOT USE
+#
+
 # status_code:
 #   undef   - OK: forget about problems with this address
 #   0       - cannot connect to MX-host or email domain.
@@ -12,6 +16,7 @@ sub mark {
     my $emails      = shift;    # One email if scalar or list of emails if array ref.
     my $message     = shift;
 
+    return;
     return if $LJ::DISABLED{'revoke_validation_on_errors'};
 
     if ('ARRAY' eq ref $emails) {

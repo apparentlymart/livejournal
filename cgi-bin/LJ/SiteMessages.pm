@@ -14,6 +14,7 @@ use constant AccountMask => {
     TryNBuy     => 256,
     AlreadyTryNBuy => 512,
     NeverTryNBuy   => 1024,
+    EmailFaulty    => 2048,
 };
 
 sub get_user_class {
@@ -24,6 +25,7 @@ sub get_user_class {
     my $already_tb = LJ::TryNBuy->already_used($u);
     $add += AccountMask->{AlreadyTryNBuy} if $already_tb;
     $add += AccountMask->{NeverTryNBuy} unless $u->get_cap('trynbuy') or $already_tb;
+    $add += AccountMask->{EmailFaulty} if $u->prop('email_faulty');
 
     return $add + AccountMask->{Permanent} if $u->in_class('perm');
     return $add + AccountMask->{Sponsored} if $u->in_class('sponsored');

@@ -123,7 +123,8 @@ sub send {
                                                 );
     unless ($smtp) {
         $class->error("Connection failed to domain '$host', MXes: [@ex]");
-        LJ::User::Email->mark(0, $rcpt, $class->error);
+        LJ::User::EmailStatus->handle_code(0, email => $rcpt);
+        #LJ::User::Email->mark(0, $rcpt, $class->error);
         return CONNECTION_FAILED;
     }
 
@@ -177,7 +178,7 @@ sub send {
         $class->error("Permanent failure during $failed_phase phase to [$rcpt]: $details \n");
 
         ## log error
-        LJ::User::Email->mark(5, $rcpts, $err_msg);
+        LJ::User::EmailStatus->handle_code(5, email => $rcpt);
 
         ## handle other errors
         if ($failed_phase eq "TO"){
@@ -195,7 +196,7 @@ sub send {
 
 
     ## flush errors if they are.
-    LJ::User::Email->mark(undef, $rcpt, "OK");
+    LJ::User::EmailStatus->handle_code(0, email => $rcpt);
 
     ##
     return OK;

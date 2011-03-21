@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::TryNBuy;
+use LJ::User::EmailStatus;
+
+require 'ljlib.pl';
+require 'ljprotocol.pl';
+require 'ljlang.pl';
+
+package LJ::NewWorker::TheSchwartz::EmailStatus;
+use base 'LJ::NewWorker::TheSchwartz';
+sub capabilities { qw/TheSchwartz::Worker::EmailStatus/ };
+
+__PACKAGE__->start;
+
+package TheSchwartz::Worker::EmailStatus;
+use base 'TheSchwartz::Worker';
+
+sub work {
+    my ($class, $job) = @_;
+    my $args = $job->arg;
+
+	warn "GOT A JOB";
+	
+	if(!$args->{email}) {
+		warn "TheSchwartz::Worker::EmailStatus: No Email";
+		
+		$job->completed;
+		return;
+	}
+	
+	LJ::User::EmailStatus->change_email_users_status(email => $args->{email}, disabled => $args->{disabled});
+		
+	$job->completed;
+    return;
+}
+
+1

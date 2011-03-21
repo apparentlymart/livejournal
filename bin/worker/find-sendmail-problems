@@ -1,4 +1,9 @@
 #!/usr/bin/perl
+
+#
+#	THIS CODE IS OBSOLETE NOW REPLACED BY email-status
+#
+
 use strict;
 
 use lib "$ENV{LJHOME}/cgi-bin";
@@ -12,6 +17,8 @@ use base 'LJ::NewWorker::Manual';
 use LJ::User::Email;
 
 sub work {
+	return 0;
+
     my $emails = LJ::User::Email->get_marked_with_uids();
     foreach my $email (keys %$emails) {
         my $complete = 1; # reset this in case of any error with one of user for this email
