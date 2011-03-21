@@ -429,7 +429,8 @@ sub get_communities {
                         AND cj.catid = c.catid",
                 undef, $self->vert_id
             );
-            %finded = map { $_ => 1 } @$comms_search
+            ## Add a new results
+            %finded = map { $_ => 1 } (@$comms_search, keys %finded)
                 if $comms_search && @$comms_search;
         }
     }
