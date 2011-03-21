@@ -1102,6 +1102,7 @@ HTML BODY.logged-out {
 		border-top-left-radius: 5px;
 		border-top-right-radius: 5px;
 		background: transparent;
+		z-index: 99;
 		}
 	#js .b-postform-login-services-show {
 		border-color: #CCC;
@@ -1275,30 +1276,18 @@ HTML BODY.logged-out {
 						vertical-align: -4px;
 						border: 0 !important;
 						}
-				BODY .b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:link,
-				BODY .b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:visited,
-				BODY .b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:hover,
-				BODY .b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous A:active,
-				BODY .b-postform-ability-disabled-user .b-postform-login-services-user A:link,
-				BODY .b-postform-ability-disabled-user .b-postform-login-services-user A:visited,
-				BODY .b-postform-ability-disabled-user .b-postform-login-services-user A:hover,
-				BODY .b-postform-ability-disabled-user .b-postform-login-services-user A:active,
-				BODY .b-postform-ability-disabled-facebook .b-postform-login-services-facebook A:link,
-				BODY .b-postform-ability-disabled-facebook .b-postform-login-services-facebook A:visited,
-				BODY .b-postform-ability-disabled-facebook .b-postform-login-services-facebook A:hover,
-				BODY .b-postform-ability-disabled-facebook .b-postform-login-services-facebook A:active,
-				BODY .b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:link,
-				BODY .b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:visited,
-				BODY .b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:hover,
-				BODY .b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:active,
-				BODY .b-postform-ability-disabled-openid .b-postform-login-services-openid A:link,
-				BODY .b-postform-ability-disabled-openid .b-postform-login-services-openid A:visited,
-				BODY .b-postform-ability-disabled-openid .b-postform-login-services-openid A:hover,
-				BODY .b-postform-ability-disabled-openid .b-postform-login-services-openid A:active,
-				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:link,
-				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:visited,
-				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:hover,
-				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:active {
+				BODY .b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous IMG,
+				BODY .b-postform-ability-disabled-anonymous .b-postform-login-services-anonymous .b-postform-login-services-name,
+				BODY .b-postform-ability-disabled-user .b-postform-login-services-user IMG,
+				BODY .b-postform-ability-disabled-user .b-postform-login-services-user .b-postform-login-services-name,
+				BODY .b-postform-ability-disabled-facebook .b-postform-login-services-facebook IMG,
+				BODY .b-postform-ability-disabled-facebook .b-postform-login-services-facebook .b-postform-login-services-name,
+				BODY .b-postform-ability-disabled-twitter .b-postform-login-services-twitter IMG,
+				BODY .b-postform-ability-disabled-twitter .b-postform-login-services-twitter .b-postform-login-services-name,
+				BODY .b-postform-ability-disabled-openid .b-postform-login-services-openid IMG,
+				BODY .b-postform-ability-disabled-openid .b-postform-login-services-openid .b-postform-login-services-name,
+				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru IMG,
+				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru .b-postform-login-services-name {
 					background: #FFF;
 					-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
 					filter: alpha(opacity=50);
@@ -1317,6 +1306,7 @@ HTML BODY.logged-out {
 		margin: 0;
 		padding: 0;
 		font: 12px/1.1 Arial,sans-serif;
+		z-index: 98;
 		}
 	#js .b-postform-login-details {
 		margin: 0 0 0 55px;
