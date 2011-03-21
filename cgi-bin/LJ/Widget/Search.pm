@@ -83,7 +83,7 @@ EOF
         my $system = LJ::load_user('system') or die "No 'system' user in DB";
         my $keywords = $system->prop('vertical_search');
 
-        my @words = split /\$/, $keywords;
+        my @words = split '\$', $keywords;
         @words = grep { my ($id) = $_ =~ m/(.*?)#/; $id == $vertical->vert_id } @words;
         my ($stored_words) = $words[0] =~ m/.*?#(.*)/s;
 

@@ -61,7 +61,7 @@ body<=
             my @post_keywords = split /\s*\n+\s*/m, $POST{words};
             $stored_words = join("\n", @post_keywords); # update this value, it will be used below
             my $keywords = $system->prop('vertical_search');
-            my @words = split ":", $keywords;
+            my @words = split '\$', $keywords;
 
             my $flag = 0;
             foreach my $v_w (@words) {
@@ -71,11 +71,12 @@ body<=
                     $flag = 1;
                 }
             }
+
             unless ($flag) {
                 push @words, $vert_id . "#" . $stored_words;
             }
 
-            my $to_prop = join "\$", @words;
+            my $to_prop = join '$', @words;
             $system->set_prop('vertical_search', $to_prop);
         }
 
