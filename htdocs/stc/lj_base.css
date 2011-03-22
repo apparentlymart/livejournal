@@ -1093,7 +1093,7 @@ HTML BODY.logged-out {
 		display: block;
 		width: 47px;
 		height: 26px;
-		margin: 2px 0 0;
+		margin: 1px 0 0;
 		padding: 0;
 		border: 1px solid transparent;
 		border-width: 1px 1px 0;
@@ -1249,6 +1249,7 @@ HTML BODY.logged-out {
 					border-radius: 3px;
 					border: 0;
 					background: #FFF;
+					font-weight: normal;
 					color: #222 !important;
 					text-decoration: none;
 					}
@@ -1264,6 +1265,7 @@ HTML BODY.logged-out {
 					border-radius: 3px;
 					border: 0;
 					background: #C5E1F7;
+					font-weight: normal;
 					color: #222 !important;
 					text-decoration: none;
 					}
@@ -1310,9 +1312,8 @@ HTML BODY.logged-out {
 					zoom:1;
 					}
 	.b-postform-login-details {
-		overflow: auto;
 		position: static;
-		float: none;
+		float: left;
 		display: block;
 		width: auto;
 		height: auto;
@@ -1322,7 +1323,7 @@ HTML BODY.logged-out {
 		z-index: 98;
 		}
 	#js .b-postform-login-details {
-		margin: 0 0 0 55px;
+		margin: 0 0 0 10px;
 		}
 		#js .b-postform-login-item {
 			display: none;
