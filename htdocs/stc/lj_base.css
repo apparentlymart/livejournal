@@ -1313,7 +1313,7 @@ HTML BODY.logged-out {
 					}
 	.b-postform-login-details {
 		position: static;
-		float: left;
+		float: none;
 		display: block;
 		width: auto;
 		height: auto;
@@ -1323,7 +1323,7 @@ HTML BODY.logged-out {
 		z-index: 98;
 		}
 	#js .b-postform-login-details {
-		margin: 0 0 0 10px;
+		margin: 0 0 0 55px;
 		}
 		#js .b-postform-login-item {
 			display: none;
