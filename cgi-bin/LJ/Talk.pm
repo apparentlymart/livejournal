@@ -2577,7 +2577,8 @@ sub get_thread_html
                 }
 
                 if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
-                    $text .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid'>" .
+                    $text .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid" .
+                             ($opts->{'showspam'} ? '&spam=1' : '') . "'>" .
                              LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
                 }
