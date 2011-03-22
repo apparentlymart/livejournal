@@ -154,6 +154,7 @@ sub clean
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
     my $target = $opts->{'target'} || '';
     my $ljrepost_allowed = ($opts->{ljrepost_allowed} && ! $opts->{'textonly'}) || 0;
+    my $opt_no_img_wh = $opts->{img_no_wh};
 
     my $viewer_lang = $opts->{'viewer_lang'};
     unless ($viewer_lang) {
@@ -758,6 +759,11 @@ sub clean
                         if ($hash->{$attr} > 1024*2) {
                             $hash->{$attr} = 1024*2;
                         }
+                    }
+
+                    if ($tag eq 'img' and $opt_no_img_wh and $attr =~ /^width|height$/){
+                    ## remove width and height attributes from img tag
+                        delete $hash->{$attr};
                     }
 
                     ## warning: in commets left by anonymous users, <img src="something">
