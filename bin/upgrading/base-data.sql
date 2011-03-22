@@ -590,6 +590,8 @@ INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES 
 UPDATE priv_list SET des='Allows a user to edit site text in a given language. arg=Unique language code, optionally appended by |domainid.domaincode',is_public='1',privname='Translate/Update Text',scope='general' WHERE privcode='translate';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to add and remove entries from a vertical. arg=The vertical name, or \"*\" for all verticals', '0', 'vertical', 'Moderate Vertical', 'general');
 UPDATE priv_list SET des='Allows a user to add and remove entries from a vertical. arg=The vertical name, or \"*\" for all verticals',is_public='0',privname='Moderate Vertical',scope='general' WHERE privcode='vertical';
+INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to view entries that aren\'t otherwise available.  No argument means the user can view all entries, regardless of security.  Arg=\"suspended\" means the user can view public posts in a suspended journal.  All use is logged.', '0', 'viewall', 'View All Entries', 'general');
+UPDATE priv_list SET des='Allows a user to view entries that aren\'t otherwise available.  No argument means the user can view all entries, regardless of security.  Arg=\"suspended\" means the user can view public posts in a suspended journal.  All use is logged.',is_public='0',privname='View All Entries',scope='general' WHERE privcode='viewall';
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('FIPS', 'U.S. Census Bureau assigned two-digit FIPS (Federal Information Processing Standards) code for geographic sequence of each State within each census division.', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('Name', 'Name of city.', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('State', 'State.', 'zips');
@@ -603,6 +605,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('action', 'The action 
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('actiontarget', 'Optional, but is likely some numeric value.', 'userlog');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('alloc', 'Allocation Factor (decimal portion of state within zipcode).', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('allowmask', 'A bitmask to specify who can read the (non-public/non-private) entry. Bit 0 is for all friends (i.e., any defined friend can read it). Bits 1-30 are used for [dbtable[friendgroup2]]/[dbtable[friendgroup]]s. Bit 31 is reserved.', 'log2');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('anon', 'Whether the gift was sent anonymously', 'vgifts');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('answer', 'The answer text, in plaintext.', 'faq');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('anum', 'The access number. A random number between 0 and 255 associated with the entry to form the jitemid.', 'log2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('area', 'The type of usage: \"L\" for log, \"T\" for talk, \"B\" for bio, \"P\" for pic.', 'dudata');
@@ -635,6 +638,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateadd', 'Date and t
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateadd', 'Date code was create.', 'acctinvite');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('datecreate', 'Date the auth code was created.', 'authactions');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateins', 'The date the search was made.', 'dirsearchres2');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('daterecv', 'Date/time when the dift was received', 'vgifts');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateview', 'The time of the viewing.', 'faquses');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('day', 'The day of the eventtime. Duplicated for an index.', 'log2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('dbid', 'The dbid from [dbtable[dbinfo]].', 'dbweights');
@@ -651,6 +655,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('etag', 'ETag (entity 
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('event', 'Journal entry text.', 'logtext2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('eventtime', 'The time of the entry, supplied by the user / according to the user\'s system clock.', 'log2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('expiretime', 'Unixtime. Can be 0, to mean \"never\".', 'subs');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('exptime', 'Date/time when the gift expires', 'vgifts');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('exptype', 'Session expiration type, the length a specific session should be defined for. \'short\' is 36 hours, \'long\' is 60 days,  \'once\' defaults to same length as \'short\'; just doesn\'t renew.', 'sessions');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('faqcat', 'The name of the main category the FAQ item belongs to. Is the index to [dbtable[faqcat]]', 'faq');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('faqid', 'The faqid of the [dbtable[faq]] item which was viewed.', 'faquses');
@@ -660,6 +665,9 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('fgcolor', 'The foregr
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('firstshowtime', 'The time when it was first highlighted to them (not at the show everything page).', 'cprod');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('fmt', 'Format of the uploaded image file. One of \'G\', \'J\', or \'P\', for GIF, JPEG, or PNG formats respectively.', 'userpic2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('friendid', 'The [dbtable[user]].userid of the friend to watch/trust.', 'friends');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('giftid', 'The identifer of the vgift', 'vgifts');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('gifttype', 'Vgift type', 'vgifts');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('giverid', 'The user who sent the gift', 'vgifts');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('groupmask', 'A bitmask of 1 (1 << 0) OR\'ed with (1 << [dbtable[friendgroup]].groupnum) for each friendgroup this friend belongs to.', 'friends');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('groupname', 'Name given to the friend group.', 'friendgroup');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('groupnum', 'The group number. Can be 1-30.', 'friendgroup');
@@ -709,6 +717,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('name', 'System name o
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('nodeid', 'The thread nodeid for the given nodetype to which this comment applies (probably the jitemid from the [dbtable[log2]] row).', 'talk2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('nodetype', 'This field defines what type of thing in comment is in reply to. The value can be \"L\" = log item (journal entry), \"T\" = todo item.', 'talk2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('norm', 'The normal weighting value for this dbid+role.', 'dbweights');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('note', 'Attached note displayed to the user', 'vgifts');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('nothankstime', 'Also a boolean: time/if user does not want to see it again.', 'cprod');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('ntypeid', 'The notification type from the [dbtable[notifytypelist]] table.', 'subs');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('numreaders', 'Stores syndicated feed account readership (number of users (watchers) who list account as a friend), assuming feed isn\'t stale, so we can get to it quicker for other things. Lets us know which feeds are unwatched - so we poll them less.', 'syndicated');
@@ -762,12 +771,14 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('timeupdate', 'When th
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('tpropid', 'Corresponds to unique tpropid in [dbtable[talkproplist]] of an individual comment property. Example: 10 (which might map to subjecticon in [dbtable[talkproplist]].', 'talkprop2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('tpropid', 'Unique id of a comment property.', 'talkproplist');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('track', 'If the police or a court has contact us to track a user, we turn this on and activities are logged to the [dbtable[tracking]] table.', 'user');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('type', 'S - Owner, A - Maintainer, M - Moderator, P - member with posting access, N - unmoderated, B - banned, I - inviter.', 'reluser');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('ubefore', 'Units before (unit = 10 seconds).', 'weekuserusage');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('uniq', 'Value of the unique cookie.', 'uniqmap');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('updatetime', 'The date it was last updated.', 'includetext');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('upropid', 'Unique id for this meta-data property.', 'userproplist');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'Community\'s userid from the [dbtable[user]] table.', 'community');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The owner of the subscription.', 'subs');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The user who received the gift', 'vgifts');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid doing the action, or 0 if user is unknown (as in support realm)', 'duplock');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid of the [dbtable[user]] making the change.', 'infohistory');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid of the [dbtable[user]] who added the friend.', 'friends');
@@ -931,6 +942,7 @@ REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tab
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Global. Stores data of which users someone has listed as a \"friend\". Also stores the preferences on the friend item.', '0', 'off', NULL, 'friends');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Global. Stores data on a user\'s custom friends groups. Friends groups are used to restrict who can see an individual entry, or to filter the friends view. Please see also [dbtable[friendgroup2]].', '0', 'off', NULL, 'friendgroup');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Global. Stores database connection and replication info, instead of in the %LJ::DBINFO hash, for easier (web-based) management of LiveJournal installations with many databases.', '0', 'off', NULL, 'dbinfo');
+REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Global. Stores domains of translation system', '0', 'off', NULL, 'ml_domains');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Global. Stores each database\'s roles and weights. The [dbtable[dbinfo]] table keeps track of which databases exist.', '0', 'off', NULL, 'dbweights');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Global. Stores external user mappings. Note: extuser/extuserid are expected to sometimes be NULL, even though they are keyed. (Null values are not taken into account when using indexes).', '0', 'off', NULL, 'extuser');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Global. Stores flagged content metadata. Content can be flagged as adult content, etc.', '0', 'off', NULL, 'content_flag');
@@ -993,6 +1005,7 @@ REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tab
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Stores per-user counters on the global (contrary to the name). These are allocated by the LJ::alloc_user_counter function. Please see also [dbtable[counter]].', '0', 'off', NULL, 'usercounter');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Stores the documentation for the database tables.', '0', 'replace', NULL, 'schematables');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Stores the documentation for the individual columns of the database tables.', '0', 'replace', NULL, 'schemacols');
+REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Stores the history of vgifts sent', '0', 'off', NULL, 'vgifts');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Unused. Designed for the \"Adopt-a-newbie\" system, but never fully implemented.', '0', 'off', NULL, 'adopt');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Unused. Designed for the \"Adopt-a-newbie\" system, but never fully implemented.', '0', 'off', NULL, 'adoptlast');
 INSERT IGNORE INTO supportcat (allow_screened, basepoints, catkey, catname, hide_helpers, is_selectable, no_autoreply, public_help, public_read, replyaddress, scope, sortorder, user_closeable) VALUES ('1', '1', 'general', 'General/Unknown', '0', '1', '0', '0', '1', NULL, 'general', '2', '1');
