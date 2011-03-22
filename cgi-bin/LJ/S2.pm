@@ -3967,17 +3967,30 @@ sub EntryPage__print_multiform_actionline
     $args = '?' . $args if $args;
     $S2::pout->($pr->{'text_multiform_des'} . "\n" .
                 LJ::html_hidden( returnto => $this->{'entry'}->{'permalink_url'} . $args ) . "\n" .
-                LJ::html_select({'name' => 'mode' },
-                                "" => $pr->{"text_multiform_opt_please"},
-                                $pr->{"text_multiform_opt_selected"} => [
-                                    map { $_ => $pr->{"text_multiform_opt_$_"} }
-                                    qw(unscreen screen delete deletespam)
-                                ],
-                                $pr->{"text_multiform_opt_all"} => [
-                                    'all:screen' => $pr->{"text_multiform_opt_screen"},
-                                    'all:unscreen' => $pr->{"text_multiform_opt_unscreen"},
-                                ],
-                               ) . "\n" .
+                ( $this->{'showspam'} ?
+                    LJ::html_select({'name' => 'mode' },
+                                    "" => $pr->{"text_multiform_opt_please"},
+                                    $pr->{"text_multiform_opt_selected"} => [
+                                        map { $_ => $pr->{"text_multiform_opt_$_"} }
+                                        qw(unspam deletespam)
+                                    ],
+                                    $pr->{"text_multiform_opt_all"} => [
+                                        'all:unspam' => $pr->{"text_multiform_opt_unspam"},
+                                        'all:deletespam' => $pr->{"text_multiform_opt_deletespam"},
+                                    ],
+                                   ) :
+                    LJ::html_select({'name' => 'mode' },
+                                    "" => $pr->{"text_multiform_opt_please"},
+                                    $pr->{"text_multiform_opt_selected"} => [
+                                        map { $_ => $pr->{"text_multiform_opt_$_"} }
+                                        qw(unscreen screen delete deletespam)
+                                    ],
+                                    $pr->{"text_multiform_opt_all"} => [
+                                        'all:screen' => $pr->{"text_multiform_opt_screen"},
+                                        'all:unscreen' => $pr->{"text_multiform_opt_unscreen"},
+                                    ],
+                                   )
+                ) . "\n" .
                 LJ::html_submit('', $pr->{'text_multiform_btn'}));
 }
 
