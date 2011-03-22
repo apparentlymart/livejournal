@@ -2488,7 +2488,9 @@ sub get_body_class_for_service_pages {
         push @classes, "catalogue-page";
     } elsif ($uri =~ m!^/games(/.*)?$! || LJ::Request->header_in("Host") eq "$LJ::USERAPPS_SUBDOMAIN.$LJ::DOMAIN") {
         push @classes, 'framework-page';    
-    } 
+    } elsif ($uri =~ m|^/friendstimes|){
+        push @classes, "p-friendstimes";
+    }
     return join(" ", @classes);
 }
 

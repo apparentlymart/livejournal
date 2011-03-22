@@ -207,7 +207,7 @@ sub create {
 sub absorb_row {
     my ($self, $row) = @_;
 
-    $self->{$_} = $row->{$_} foreach (qw(nodetype nodeid parenttalkid posterid datepost state));
+    $self->{$_} = $row->{$_} foreach (qw(nodetype nodeid parenttalkid posterid datepost datepost_unix state));
     $self->{_loaded_row} = 1;
 }
 
@@ -402,6 +402,7 @@ sub valid {
 sub unixtime {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
+    return $self->{datepost_unix} if $self->{datepost_unix};
     return LJ::TimeUtil->mysqldate_to_time($self->{datepost}, 0);
 }
 
