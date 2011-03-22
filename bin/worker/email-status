@@ -21,18 +21,13 @@ sub work {
     my ($class, $job) = @_;
     my $args = $job->arg;
 
-	warn "GOT A JOB";
+    if(!$args->{email}) {
+	die("TheSchwartz::Worker::EmailStatus: No Email");		
+    }
 	
-	if(!$args->{email}) {
-		warn "TheSchwartz::Worker::EmailStatus: No Email";
+    LJ::User::EmailStatus->change_email_users_status(email => $args->{email}, disabled => $args->{disabled});
 		
-		$job->completed;
-		return;
-	}
-	
-	LJ::User::EmailStatus->change_email_users_status(email => $args->{email}, disabled => $args->{disabled});
-		
-	$job->completed;
+    $job->completed;
     return;
 }
 

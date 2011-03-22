@@ -1,11 +1,6 @@
 package LJ::User::EmailStatus;
 use strict;
 
-my $max_error_count     = 3;                    # After this amount of smtp errors, occured within the faulty_period, the email status will be changed
-my $cache_time          = 86400;                # Memcached storage time
-my $faulty_period       = 86400 * 7;            # Minimal period, within the max_error_count should occur to cause the email status change
-my $max_faulty_period   = 86400 * 30;           # Maximal statistics storage time for the email
-
 #
 #   Handles SMTP code for some recipient email
 #
@@ -21,7 +16,7 @@ sub handle_code {
     my $cache_key = $class->get_cache_key($params{email});
     
     my $dbh;
-    my $data = undef; #'LJ::MemCache::get($cache_key);
+    my $data = LJ::MemCache::get($cache_key);
     
     unless (defined $data) {
         $dbh = LJ::get_db_writer() or die ('Failed to get db connection');
@@ -36,9 +31,9 @@ sub handle_code {
 
     # Address error count is increasing
     if ($params{code} == 5) {
-        $dbh = LJ::get_db_writer() or die ('Failed to get db connection') if(!$dbh);
+        $dbh ||= LJ::get_db_writer() or die ('Failed to get db connection');
              
-        if (!$data->{error_count} || time() - $data->{last_error_time} > $max_faulty_period) {
+        if (!$data->{error_count} || time() - $data->{last_error_time} > $LJ::EMAIL_MAX_FAULTY_PERIOD) {
             $data->{error_count}        = 1;
             $data->{first_error_time}   = time();
             $data->{last_error_time}    = time();
@@ -52,7 +47,7 @@ sub handle_code {
             $data->{last_error_time}  = time();
 
             # Should put down this email if it is too faulty within minimum period of time
-            if ($data->{error_count} >= $max_error_count && ($data->{last_error_time} - $data->{first_error_time} > $faulty_period)) {
+            if ($data->{error_count} >= $LJ::EMAIL_MAX_ERROR_COUNT && ($data->{last_error_time} - $data->{first_error_time} > $LJ::EMAIL_FAULTY_PERIOD)) {
                 $data->{disabled}         = 1;
                 $class->process_disabled_status(%params, disabled => 1);
             }
@@ -63,7 +58,7 @@ sub handle_code {
                     ) or die('Failed to update record');
         }
         
-        LJ::MemCache::set($cache_key, $data, $cache_time);
+        LJ::MemCache::set($cache_key, $data, $LJ::EMAIL_STATUS_CACHE_TIME);
     # Address became OK, being faulty before
     } elsif ($data->{error_count}) {
         $dbh = LJ::get_db_writer() or die ('Failed to get db connection') if(!$dbh);
@@ -75,7 +70,10 @@ sub handle_code {
 
         $data->{error_count} = 0;
         
-        LJ::MemCache::set($cache_key, $data, $cache_time);
+        LJ::MemCache::set($cache_key, $data, $LJ::EMAIL_STATUS_CACHE_TIME);
+    # Address is just OK
+    } else {
+        LJ::MemCache::set($cache_key, {error_count => 0}, $LJ::EMAIL_STATUS_CACHE_TIME);
     }
 }
 
@@ -105,7 +103,7 @@ sub process_disabled_status {
 }
 
 #
-#   Change email users status
+#   Perfom some operations on the accounts, using affected addresses
 #
 sub change_email_users_status {
     my ($class, %params) = @_;
@@ -142,7 +140,7 @@ sub change_email_users_status {
 }
 
 #
-#   Get Cache key
+#   Get Memcached cache key based on email address
 #
 sub get_cache_key {
     my ($class, $email) = @_;
@@ -156,9 +154,9 @@ sub get_cache_key {
 sub cleanup {
     my $dbh = LJ::get_db_writer() or die ('Failed to get db connection');
     
-    $dbh->do("DELETE FROM email_status WHERE unix_timestamp() - first_error_time > ?",
+    $dbh->do("DELETE FROM email_status WHERE unix_timestamp() - first_error_time > ? LIMIT 5000",
                 undef,
-                $max_faulty_period
+                $LJ::EMAIL_MAX_FAULTY_PERIOD
              );  
 }
 
