@@ -483,14 +483,14 @@ sub init {
     }
 
     my $up_is_friend = $up && LJ::is_friend($journalu, $up);
-    if ( LJ::is_enabled('spam_button') &&
+    if ( $journalu->is_spamprotection_enabled &&
          !$up->prop('in_whitelist_for_spam') && 
          ($journalu->is_community || !$up_is_friend) && 
          !LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user})) {
 
         my $spam = 0;
         LJ::run_hook('spam_comment_detector', $form, \$spam, $journalu, $up) 
-            if $state eq 'A' && $journalu->is_spamprotection_enabled;
+            if $state eq 'A';
         LJ::run_hook('spam_in_all_journals', \$spam, $journalu, $up) 
             unless $spam;
         if ($spam) {
