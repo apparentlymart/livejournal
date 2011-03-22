@@ -1051,7 +1051,7 @@ HTML BODY.logged-out {
 --------------------------- */
 .b-postform-login-label {
 	margin: 0;
-	padding: 5px 0;
+	padding: 2px 0;
 	text-align: right;
 	vertical-align: top;
 	}
@@ -1393,7 +1393,7 @@ HTML BODY.logged-out {
 				width: auto;
 				height: auto;
 				margin: 0;
-				padding: 0 2px;
+				padding: 1px 2px 0;
 				}
 			.b-postform-login-ljedit .b-postform-login-opts {
 				position: static;
