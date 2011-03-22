@@ -363,6 +363,12 @@ __________________________________________*/
 	zoom: 1;
 	}
 
+/* FriendsTimes
+----------------------------------------------- */
+.b-friendstimes-comments {
+	margin-top: -3px;
+	}
+
 /* Game who playing widget
 ----------------------------------------------- */
 .appwidget-gamewhoplaying .w-body,
