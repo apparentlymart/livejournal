@@ -2181,7 +2181,8 @@ sub editevent
     return fail($err,320) if $spam;
 
     # new rule from 14 march 2011: user is allowed to edit only if he is allowed to do new post
-    return undef unless check_altusage($req, $err, $flags);
+    # but is allowed to delete its own post
+    return undef unless check_altusage($req, $err, $flags) or $req->{'event'} !~ /\S/;
 
     my $u = $flags->{'u'};
 
