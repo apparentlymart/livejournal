@@ -18,7 +18,8 @@ sub usage { '[--unmark] <username or email address or entry url> <reason>' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
-    return LJ::check_priv($remote, "suspend");
+    return      LJ::check_priv($remote, "suspend")
+            ||  LJ::check_priv($remote, "unsuspend");
 }
 
 sub execute {
