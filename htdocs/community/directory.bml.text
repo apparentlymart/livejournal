@@ -11,6 +11,8 @@
 .error.noaccess|staleness=1
 .error.noaccess=Only community maintainers are able to submit to the Community Directory. You are not a maintainer of community [[comm]].
 
+.error.havent.comm=You do not have a community to manage.
+
 .error.nocomm|staleness=1
 .error.nocomm=Community not found.
 

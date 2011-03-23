@@ -1,10 +1,9 @@
 <?page
-title=><?_ml .title _ml?>
 body<=
 <?_code
 {
     use strict;
-    use vars qw(%GET %POST);
+    use vars qw(%GET %POST $title $windowtitle);
     use Class::Autouse qw( LJ::Browse );
 
     return "This page is not available." unless LJ::is_enabled("browse");
@@ -74,8 +73,14 @@ sub _build_tree {
 
     my $cname = $GET{authas};
 
+    $title = "";
+    $windowtitle = $ML{'.title'};
+
     $ret .= "<form action='directory.bml' method='GET'>\n";
-    $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
+    my $authas_select = LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.havent.comm'} p?>" unless $authas_select =~ "<option";
+    $title = $ML{'.title'};
+    $ret .= $authas_select;
     my $ref_vert_id = undef;
     $ref_vert_id = $POST{'vert_id'} ? $POST{'vert_id'} : $GET{'vert_id'};
     $ret .= "<input type='hidden' name='vert_id' value='$ref_vert_id'>" if defined $ref_vert_id;
@@ -244,4 +249,6 @@ sub _build_tree {
 _code?>
 
 <=body
+title=><?_code return $title; _code?>
+windowtitle=><?_code return $windowtitle; _code?>
 page?>
