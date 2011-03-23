@@ -77,8 +77,12 @@ sub render_body {
 
     my @keys = sort { $keys{$a}->{'order'} <=> $keys{$b}->{'order'} } keys %keys;
 
-    # Head of whole widget
-    $ret .= "<img src='http://localhostr.com/files/yRmFCoW/topcommenters.gif' alt='Top commenters' /><div id='topcommentersbox'>";
+    $ret .= "<div class='w-topcommenters w-ontd'>";
+    $ret .= "<div class='w-head'>";
+    $ret .= "<h2><span class='w-head-in'>Top commenters</span></h2>";
+    $ret .= "<i class='w-head-corner'></i>";
+    $ret .= "</div>";
+    $ret .= "<div class='w-content' id='topcommentersbox'>";
 
     foreach my $key (@keys) {
 
@@ -101,9 +105,10 @@ sub render_body {
         }
 
         # Footer of coumn
-        $ret .= "</ol><br style='clear: both;' />";
+        $ret .= "</ol>";
     }
 
+    $ret .= "</div>";
     # Footer of whole widget
     $ret .= "</div>";
 
