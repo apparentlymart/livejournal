@@ -100,160 +100,6 @@ function hsv_to_rgb (h, s, v)
     return [v,p,q];
 }
 
-window.curPopup = null;
-window.curPopup_id = 0;
-
-/**
- * Create popup element, insert content and show it with animation
- * 
- * @param {String} contentHtml
- * @param {DOM} targetControl
- * @param {Object} e
- * @param {String} id
- */
-function createPopup(contentHtml, targetControl, e, id) {
-	targetControl = jQuery(targetControl).find('img');
-	
-	var popupElem = jQuery('<div class="ljcmtmanage b-popup"><div class="b-popup-outer"><div class="b-popup-inner"><div class="ljcmtmanage-content"></div><i class="i-popup-arr i-popup-arrtl"></i><i class="i-popup-close"></i></div></div></div>'),
-		
-		popupCloseControlSelector = '.i-popup-close',
-		popupArrowSelector = '.i-popup-arr',
-		popupContentSelector = '.ljcmtmanage-content',
-		
-		popupContent = popupElem.find(popupContentSelector), 
-		popupArrow = popupElem.find(popupArrowSelector),
-		
-		targetOffset = targetControl.offset();
-		
-	// popup already exist
-	if (window.curPopup) {
-		if (window.curPopup_id == id) {
-			e.stopPropagation();
-			return false;
-		}
-	}
-	
-	popupContent.html(contentHtml);
-
-	popupElem
-		.click(function (e) { e.stopPropagation(); })
-
-		.appendTo('body')
-
-		.css({
-			visibility: 'visible',
-			opacity: 0
-		});
-		
-		
-	placeElemNear(popupElem, targetControl);
-	showSmooth(popupElem);
-
-	window.curPopup = popupElem[0];
-	window.curPopup_id = id;
-	
-	jQuery(document).bind('click.commentManagePopup keydown.commentManagePopup', function (e) {		
-		if ((e.type == 'keydown' && e.keyCode == 27) || e.type != 'keydown') {
-		}
-	});
-	
-	function placeElemNear(elem, target) {
-		/**
-		 * Popup types
-		 * 
-		 * 		* -^--- *
-		 * tl 	|       |
-		 * 		* ----- *
-		 * 
-		 * 		* ---^- *
-		 * tr 	|       |
-		 * 		* ----- *
-		 * 
-		 * 		* ----- *
-		 * bl 	|       |
-		 * 		* -V--- *
-		 * 
-		 * 		* ----- *
-		 * br 	|       |
-		 * 		* ---V- *
-		 */
-
-		var classNamePrefix = 'i-popup-arr',
-			
-			viewport = jQuery(window),
-			viewportWidth = viewport.width(),
-			viewportHeight = viewport.height(),
-			
-			elemWidth = elem.width(),
-			elemHeight = elem.height(),
-			
-			positionType = {
-				x: 'l', // left
-				y: 't' // top
-			},
-			positionTypes = {
-				'tl': function () {
-					return {
-						x: targetOffset.left - popupArrow.position().left - (popupArrow.width() / 2) + (targetControl.width() / 2),
-						y: targetOffset.top + popupArrow.height() - popupArrow.position().top + (targetControl.height() / 2)
-					};
-				},
-				'tr': function () {
-					return {
-						x: targetOffset.left - popupArrow.position().left - (popupArrow.width() / 2) + (targetControl.width() / 2),
-						y: targetOffset.top + popupArrow.height() - popupArrow.position().top + (targetControl.height() / 2)
-					};
-				},
-				'bl': function () {
-					return {
-						x: targetOffset.left - popupArrow.position().left - (popupArrow.width() / 2) + (targetControl.width() / 2),
-						y: targetOffset.top - popupArrow.height() - elemHeight
-					};
-				},
-				'br': function () {
-					return {
-						x: targetOffset.left - popupArrow.position().left - (popupArrow.width() / 2) + (targetControl.width() / 2),
-						y: targetOffset.top - popupArrow.height() - elemHeight
-					};
-				}
-			},
-			position,
-			
-			checkAngle = {
-				x: positionTypes.tl().x + elemWidth,
-				y: positionTypes.tl().y + elemHeight
-			};			
-			
-		if (checkAngle.x > viewportWidth) {
-			positionType.x = 'r'; // right
-		}
-		
-		if (checkAngle.y > viewportHeight + viewport.scrollTop()) {
-			positionType.y = 'b'; // bottom
-		}
-		
-		positionType = positionType.y + positionType.x;
-		popupArrow.removeClass('i-popup-arrtl').addClass(classNamePrefix + positionType);
-		position = positionTypes[positionType](); 
-		
-		elem.css({
-			'left': Math.floor(position.x) + 'px',
-			'top': Math.floor(position.y) + 'px'
-		});
-	}
-	
-	return popupElem;
-}
-
-function showSmooth(elem) {
-	var finalTop = parseInt(elem.css('top'), 10);
-	elem.css('top', finalTop - 20);	
-	elem.animate({
-		opacity: 1,
-		top: finalTop
-	}, 'fast');	
-}
-
 function deleteComment (ditemid, isS1, action) {
 	action = action || 'delete';
 	
@@ -371,9 +217,6 @@ function createDeleteFunction(ae, dItemid, isS1, action) {
 		e.stopPropagation();
 		e.preventDefault();
 
-        if (e.shiftKey || (window.curPopup && window.curPopup_id != dItemid)) {
-        }
-
         var doIT = 0;
         // immediately delete on shift key
         if (e.shiftKey) {
@@ -397,20 +240,17 @@ function createDeleteFunction(ae, dItemid, isS1, action) {
 		if (action == 'markAsSpam') {
 			if (!window.delPopup) {
 				window.delPopup = jQuery('<div />')
-					.delegate('.spam-comment-button', 'click', function (e) {
-						e.preventDefault();
-						deleteComment(dItemid, isS1, action);
-						window.curPopup.bubble('hide');
+					.delegate('input.spam-comment-button', 'click', function () {
+						window.delPopup.bubble('hide');
 					});
 			}			
 			
 			window.delPopup
-				.html('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr('comment.mark.spam.title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr('comment.mark.spam.subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" value="' + getLocalizedStr('comment.mark.spam.button', comUser) + '"></div><div>', ae, e, 'spamComment' + dItemid)
+				.html('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr('comment.mark.spam.title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr('comment.mark.spam.subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" onclick="deleteComment(' + dItemid + ', ' + isS1 + ', \'' + action + '\');" value="' + getLocalizedStr('comment.mark.spam.button', comUser) + '"></div><div>', ae, e, 'spamComment' + dItemid)
 				.bubble({
-					target: ae,
 					toggleOnTargetClick: false
 				})
-				.bubble('show');
+				.bubble('show', ae);
 			
 			return true;
 		} else if (action == 'delete') {
@@ -421,13 +261,6 @@ function createDeleteFunction(ae, dItemid, isS1, action) {
 	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.ban.user', comUser ) + "</label></div>");
 	        }
 	
-			/*
-	        if (remoteUser != com.username) {
-	            lbl = "ljpopdel" + dItemid + "spam";
-	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.mark.spam', comUser ) + "</label></div>");
-	        }
-	        */
-	
 	        if (com.rc && com.rc.length && canAdmin) {
 	            lbl = "ljpopdel" + dItemid + "thread";
 	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='delthread' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all.sub', comUser ) + "</label></div>");
@@ -437,9 +270,21 @@ function createDeleteFunction(ae, dItemid, isS1, action) {
 	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all', "<b>" + ( (com.username == remoteUser ? 'my' : comUser) ) + "</b>" ) + "</label></div>");
 	        }
 	
-	        inHTML.push("<div class='b-popup-row'><input type='button' value='" + getLocalizedStr( 'comment.delete', comUser ) + "' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /></div></div><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', comUser ) + "</div></form>");
+	        inHTML.push("<div class='b-popup-row'><input class='delete-comment-button' type='button' value='" + getLocalizedStr( 'comment.delete', comUser ) + "' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /></div></div><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', comUser ) + "</div></form>");
 			
-			createPopup(inHTML.join(' '), ae, e, 'deletePopup' + dItemid);
+			if (!window.modPopup) {
+				window.modPopup = jQuery('<div />')
+					.delegate('input.delete-comment-button', 'click', function () {
+						window.modPopup.bubble('hide');
+					});
+			}
+			
+			window.modPopup
+				.html(inHTML.join(' '))
+				.bubble({
+					toggleOnTargetClick: false
+				})
+				.bubble('show', ae);
 		} else if (action == 'unspam') {
 			deleteComment(dItemid, isS1, action);
 		}
