@@ -408,7 +408,7 @@ span.expandcollapse {
         			.b-wishes-list DIV A IMG {
         			    border: 0;
         			    }
-				.b-wishes-list DIV.whl-item-nopic {
+				.b-wishes-list .whl-item-nopic {
 					overflow: hidden;
 					display: block;
 					width: 100px;
@@ -420,6 +420,8 @@ span.expandcollapse {
 					color: #999;
 					font-size: 11px;
 					text-align: center;
+					text-decoration: none !important;
+					color: #999 !important;
 					}
 /* Pager for wishes */
 #wishes_body .i-nav {
