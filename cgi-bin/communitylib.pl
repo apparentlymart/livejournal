@@ -351,7 +351,8 @@ sub accept_comm_invite {
     # 1, 0 means add comm to user's friends list, but don't auto-add P edge.
     if ($args->{'member'}) {
         if (!LJ::join_community($u, $cu, 1, 0)) {
-            return LJ::error("Can't call LJ::join_community($u->{user}, $cu->{user})");
+            my $last_error = LJ::last_error();
+            return LJ::error("Can't call LJ::join_community($u->{user}, $cu->{user}): $last_error");
         }
     }
 
