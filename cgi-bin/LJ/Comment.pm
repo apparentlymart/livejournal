@@ -788,8 +788,8 @@ sub body_orig {
 # comment body, cleaned
 sub body_html {
     my $self = shift;
+    my $opts = shift;
 
-    my $opts;
     $opts->{preformatted} = $self->prop("opt_preformatted");
     $opts->{anon_comment} = $self->poster ? 0 : 1;
 
