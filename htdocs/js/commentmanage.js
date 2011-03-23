@@ -103,34 +103,6 @@ function hsv_to_rgb (h, s, v)
 window.curPopup = null;
 window.curPopup_id = 0;
 
-function killPopup () {
-	if (!window.curPopup) {
-		return true;
-	}
-
-    var popup = window.curPopup;
-    window.curPopup = null;
-
-    var opp = 1.0;
-
-    var fade = function () {
-        opp -= 0.15;
-
-        if (opp <= 0.1) {
-            popup.parentNode.removeChild(popup);
-        } else {
-            popup.style.filter = "alpha(opacity=" + Math.floor(opp * 100) + ")";
-            popup.style.opacity = opp;
-            window.setTimeout(fade, 20);
-        }
-    };
-    fade();
-	
-	jQuery(document).unbind('.commentManagePopup');
-
-    return true;
-}
-
 /**
  * Create popup element, insert content and show it with animation
  * 
@@ -159,14 +131,11 @@ function createPopup(contentHtml, targetControl, e, id) {
 			e.stopPropagation();
 			return false;
 		}
-		
-		killPopup();
 	}
 	
 	popupContent.html(contentHtml);
 
 	popupElem
-		.delegate(popupCloseControlSelector, 'click', killPopup)
 		.click(function (e) { e.stopPropagation(); })
 
 		.appendTo('body')
@@ -185,7 +154,6 @@ function createPopup(contentHtml, targetControl, e, id) {
 	
 	jQuery(document).bind('click.commentManagePopup keydown.commentManagePopup', function (e) {		
 		if ((e.type == 'keydown' && e.keyCode == 27) || e.type != 'keydown') {
-			killPopup();
 		}
 	});
 	
@@ -289,8 +257,6 @@ function showSmooth(elem) {
 function deleteComment (ditemid, isS1, action) {
 	action = action || 'delete';
 	
-    killPopup();
-	
 	var curJournal = (Site.currentJournal !== "") ? (Site.currentJournal) : (LJ_cmtinfo.journal);
 
     var form = $('ljdelopts' + ditemid),
@@ -319,8 +285,7 @@ function deleteComment (ditemid, isS1, action) {
 		opt_delauthor = opt_delthread = true;
 		postdata += '&ban=1&spam=1&delthread=1&delauthor=1';
 	} else if (action == 'unspam') {
-		postdata += '&unspam=1';
-		url = LiveJournal.getAjaxUrl('spamcomment')+'?mode=js&journal=' + curJournal + '&id=' + ditemid;
+		url = LiveJournal.getAjaxUrl('spamcomment')+'?mode=unspam&journal=' + curJournal + '&talkid=' + ditemid;
 	}
 	
     postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
@@ -407,7 +372,6 @@ function createDeleteFunction(ae, dItemid, isS1, action) {
 		e.preventDefault();
 
         if (e.shiftKey || (window.curPopup && window.curPopup_id != dItemid)) {
-            killPopup();
         }
 
         var doIT = 0;
@@ -431,15 +395,22 @@ function createDeleteFunction(ae, dItemid, isS1, action) {
         var canAdmin = LJ_cmtinfo.canAdmin;
 		
 		if (action == 'markAsSpam') {
-			var popupElem = createPopup('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr('comment.mark.spam.title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr('comment.mark.spam.subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" value="' + getLocalizedStr('comment.mark.spam.button', comUser) + '"></div><div>', ae, e, 'spamComment' + dItemid);
+			if (!window.delPopup) {
+				window.delPopup = jQuery('<div />')
+					.delegate('.spam-comment-button', 'click', function (e) {
+						e.preventDefault();
+						deleteComment(dItemid, isS1, action);
+						window.curPopup.bubble('hide');
+					});
+			}			
 			
-			if (popupElem) {
-				popupElem.delegate('.spam-comment-button', 'click', function (e) {
-					e.preventDefault();
-					deleteComment(dItemid, isS1, action); 
-					killPopup();
-				});
-			}					
+			window.delPopup
+				.html('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr('comment.mark.spam.title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr('comment.mark.spam.subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" value="' + getLocalizedStr('comment.mark.spam.button', comUser) + '"></div><div>', ae, e, 'spamComment' + dItemid)
+				.bubble({
+					target: ae,
+					toggleOnTargetClick: false
+				})
+				.bubble('show');
 			
 			return true;
 		} else if (action == 'delete') {
