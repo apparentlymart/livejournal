@@ -290,13 +290,16 @@ function deleteComment (ditemid, isS1, action) {
 	action = action || 'delete';
 	
     killPopup();
+	
+	var curJournal = (Site.currentJournal !== "") ? (Site.currentJournal) : (LJ_cmtinfo.journal);
 
     var form = $('ljdelopts' + ditemid),
         todel = $('ljcmt' + ditemid),
         opt_delthread, opt_delauthor, is_deleted, is_error,
-        pulse = 0;
-
-    var postdata = 'confirm=1';
+        pulse = 0,
+		url = LiveJournal.getAjaxUrl('delcomment')+'?mode=js&journal=' + curJournal + '&id=' + ditemid;
+    
+	var postdata = 'confirm=1';
     if (form && action == 'delete') { 
     	if (form.ban && form.ban.checked) {
 			postdata += '&ban=1';
@@ -315,11 +318,15 @@ function deleteComment (ditemid, isS1, action) {
     } else if (action == 'markAsSpam') {
 		opt_delauthor = opt_delthread = true;
 		postdata += '&ban=1&spam=1&delthread=1&delauthor=1';
+	} else if (action == 'unspam') {
+		postdata += '&unspam=1';
+		url = LiveJournal.getAjaxUrl('spamcomment')+'?mode=js&journal=' + curJournal + '&id=' + ditemid;
 	}
+	
     postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
-    var curJournal = (Site.currentJournal !== "") ? (Site.currentJournal) : (LJ_cmtinfo.journal);
+
     var opts = {
-        url: LiveJournal.getAjaxUrl('delcomment')+'?mode=js&journal=' + curJournal + '&id=' + ditemid,
+        url: url,
         data: postdata,
         method: 'POST',
         onData: function(data) {
@@ -462,6 +469,8 @@ function createDeleteFunction(ae, dItemid, isS1, action) {
 	        inHTML.push("<div class='b-popup-row'><input type='button' value='" + getLocalizedStr( 'comment.delete', comUser ) + "' onclick='deleteComment(" + dItemid + ", " + isS1.toString() + ");' /></div></div><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', comUser ) + "</div></form>");
 			
 			createPopup(inHTML.join(' '), ae, e, 'deletePopup' + dItemid);
+		} else if (action == 'unspam') {
+			deleteComment(dItemid, isS1, action);
 		}
 	};
 }
@@ -724,6 +733,15 @@ function setupAjax (node, isS1) {
 			var action = (ae.href.indexOf('spam=1') != -1) ? 'markAsSpam' : 'delete';
 
 			ae.onclick = createDeleteFunction(ae, id, isS1, action);
+		// unspam
+		} else if (ae.href.indexOf('spamcomment.bml') != -1) {
+            var reMatch = rex_id.exec(ae.href);
+            if (!reMatch) continue;
+
+            var id = reMatch[1];
+            if (!document.getElementById('ljcmt' + id)) continue;
+			
+			ae.onclick = createDeleteFunction(ae, id, isS1, 'unspam');
 		}
     }
 }
