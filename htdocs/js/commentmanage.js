@@ -424,7 +424,7 @@ function createDeleteFunction(ae, dItemid, isS1, action) {
         var canAdmin = LJ_cmtinfo.canAdmin;
 		
 		if (action == 'markAsSpam') {
-			var popupElem = createPopup('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr('comment.mark.spam.title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr('comment.mark.spam.subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" value="OK"></div><div>', ae, e, 'spamComment' + dItemid);
+			var popupElem = createPopup('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr('comment.mark.spam.title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr('comment.mark.spam.subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" value="' + getLocalizedStr('comment.mark.spam.button', comUser) + '"></div><div>', ae, e, 'spamComment' + dItemid);
 			
 			if (popupElem) {
 				popupElem.delegate('.spam-comment-button', 'click', function (e) {
@@ -443,10 +443,12 @@ function createDeleteFunction(ae, dItemid, isS1, action) {
 	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.ban.user', comUser ) + "</label></div>");
 	        }
 	
+			/*
 	        if (remoteUser != com.username) {
 	            lbl = "ljpopdel" + dItemid + "spam";
 	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='spam' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.mark.spam', comUser ) + "</label></div>");
 	        }
+	        */
 	
 	        if (com.rc && com.rc.length && canAdmin) {
 	            lbl = "ljpopdel" + dItemid + "thread";

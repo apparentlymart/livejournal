@@ -59,6 +59,8 @@ comment.mark.spam=Mark this comment as spam
 comment.mark.spam.title=Do you really want to mark comment as a spam?
 
 comment.mark.spam.subject=All comments of this author will be deleted and we will ban author.
+
+comment.mark.spam.button=OK
  
 community.election.owner.election.link=The owner of the [[community]] community is not selected yet. You can <a [[href]]>vote for owner here</a>.
 
