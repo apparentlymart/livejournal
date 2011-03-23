@@ -1,6 +1,6 @@
 package LJ::DoSendEmail;
 use Net::DNS qw(mx);
-use LJ::User::Email;
+use LJ::User::EmailStatus;
 require 'sysban.pl';
 
 ## Class prop
@@ -121,10 +121,13 @@ sub send {
                                                 PeerPort       => 25,
                                                 ConnectTimeout => 4,
                                                 );
+                                                
+    # TODO: Need to handle the exact reason why we have no smtp connection here. In case of DNS related problems,
+    #       or target host connection failure we need to handle a error here. It should make sense when we
+    #       have some global problems on our side
     unless ($smtp) {
         $class->error("Connection failed to domain '$host', MXes: [@ex]");
-        LJ::User::EmailStatus->handle_code(0, email => $rcpt);
-        #LJ::User::Email->mark(0, $rcpt, $class->error);
+        
         return CONNECTION_FAILED;
     }
 
@@ -178,7 +181,7 @@ sub send {
         $class->error("Permanent failure during $failed_phase phase to [$rcpt]: $details \n");
 
         ## log error
-        LJ::User::EmailStatus->handle_code(5, email => $rcpt);
+        LJ::User::EmailStatus->handle_code(code => 5, email => $rcpt);
 
         ## handle other errors
         if ($failed_phase eq "TO"){
@@ -196,7 +199,7 @@ sub send {
 
 
     ## flush errors if they are.
-    LJ::User::EmailStatus->handle_code(0, email => $rcpt);
+    LJ::User::EmailStatus->handle_code(code => 0, email => $rcpt);
 
     ##
     return OK;
