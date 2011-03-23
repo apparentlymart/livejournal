@@ -147,6 +147,7 @@ body<=
                 LJ::Setting::GoogleAnalytics
                 LJ::Setting::FacebookBeacon
                 LJ::Setting::TwitterConnect
+                LJ::Setting::VkontakteConnect
                 LJ::Setting::WebmasterTools::Google
                 LJ::Setting::WebmasterTools::Yandex
                 LJ::Setting::LJTimes
