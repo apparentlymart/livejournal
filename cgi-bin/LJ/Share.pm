@@ -1,3 +1,14 @@
+=head1 HOW TO USE
+
+ # somewhere near to your need_res calls:
+ LJ::Share->request_resources;
+ 
+ # when printing HTML
+ print '<a href="#">Share</a>'
+     . LJ::Share->render_js({ 'entry' => $entry });
+
+=cut
+
 package LJ::Share;
 use strict;
 use warnings;
