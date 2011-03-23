@@ -427,10 +427,8 @@ sub screening_level {
     # now return userprop, as it's our last chance
     LJ::load_user_props($journalu, 'opt_whoscreened');
     return if $journalu->{opt_whoscreened} eq 'N';
-    if ($journalu->{opt_whoscreened} eq 'L') {
-        $journalu->set_prop( opt_whoscreened => 'R' );
-        $journalu->{opt_whoscreened} = 'R';
-    }
+    $journalu->{opt_whoscreened} = 'R' 
+        if $journalu->{opt_whoscreened} eq 'L';
     return $journalu->{opt_whoscreened} || 'R';
 }
 
@@ -837,7 +835,8 @@ sub unspam_comment {
     my $entry = LJ::Entry->new($u, jitemid => $itemid);
     my $spam_counter = $entry->prop('spam_counter') || 0;
     if ($spam_counter > 0) {
-        $entry->set_prop('spam_counter', $spam_counter - 1);
+        $spam_counter--;
+        $entry->set_prop('spam_counter', $spam_counter);
     }
 
     # invalidate memcache for this comment
@@ -854,7 +853,7 @@ sub unspam_comment {
     LJ::Talk::update_commentalter($u, $itemid);
     LJ::Talk::update_journals_commentalter($u);
 
-    return;
+    return $spam_counter;
 }
 
 sub get_talk_data {
@@ -1271,7 +1270,8 @@ sub load_comments
                     $post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
                                                               $remote->{'userid'} == $uposterid ||
                                                               $remote->{'userid'} == $post->{'posterid'} ||
-                                                              $remote->can_manage($u) ) || $remote->can_sweep($u));
+                                                              $remote->can_manage($u) || 
+                                                              $remote->can_sweep($u)));
             }
             if (LJ::is_enabled('spam_button') && !$opts->{showspam}) {
                 $should_show = 0 if $post->{'state'} eq 'B';
