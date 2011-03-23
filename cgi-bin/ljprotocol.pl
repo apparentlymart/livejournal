@@ -2400,6 +2400,8 @@ sub editevent
         if $req->{security} &&
            $req->{security} =~ /^(?:public|private|usemask)$/;
 
+    $qallowmask = $oldevent->{allowmask} unless defined $req->{'allowmask'};
+
     my $do_tags = $req->{props} && defined $req->{props}->{taglist};
     if ($oldevent->{security} ne $security || $qallowmask != $oldevent->{allowmask}) {
         # FIXME: this is a hopefully temporary hack which deletes tags from the entry
