@@ -130,8 +130,6 @@ function deleteComment (ditemid, isS1, action) {
     } else if (action == 'markAsSpam') {
 		opt_delauthor = opt_delthread = true;
 		postdata += '&ban=1&spam=1&delthread=1&delauthor=1';
-	} else if (action == 'unspam') {
-		url = LiveJournal.getAjaxUrl('spamcomment')+'?mode=unspam&journal=' + curJournal + '&talkid=' + ditemid;
 	}
 	
     postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
@@ -352,8 +350,9 @@ function updateLink (ae, resObj, clickTarget) {
 }
 
 var tsInProg = {}  // dict of { ditemid => 1 }
-function createModerationFunction(control, dItemid, isS1) {
-	var comUser = LJ_cmtinfo[dItemid].u;	
+function createModerationFunction(control, dItemid, isS1, action) {
+	var action = action || 'screen',
+		comUser = LJ_cmtinfo[dItemid].u;	
 	
 	return function (e) {
 		var	e = jQuery.event.fix(e || window.event),
@@ -367,14 +366,30 @@ function createModerationFunction(control, dItemid, isS1) {
 		sendModerateRequest();
 
 		function sendModerateRequest() {
-			var	bmlName = 'talkscreen',
+			var	bmlName = (action == 'unspam') ? 'spamcomment' : 'talkscreen',
 				postUrl = control.href.replace(new RegExp('.+' + bmlName + '\.bml'), LiveJournal.getAjaxUrl(bmlName)),
 				postParams = { 'confirm': 'Y', lj_form_auth: LJ_cmtinfo.form_auth };
+				
+			if (action == 'unspam') {
+				postUrl += '&jsmode=1';
+			}
 				
 			hourglass = jQuery(e).hourglass()[0];
 			
 			jQuery.post(postUrl, postParams, function (json) {
 				tsInProg[dItemid] = 0;
+				
+				if (action == 'unspam') {
+					json = jQuery.parseJSON(json); 
+					
+					if (json.result) {
+						removeEmptyMarkup(dItemid);
+						hourglass.hide();
+						return true;
+					} else {
+						alert(json.errormsg);
+					}
+				}
 				
 				if (isS1) {
 					handleS1();
@@ -454,18 +469,18 @@ function createModerationFunction(control, dItemid, isS1) {
 							.append(res.responseText.replace(/<script(.|\s)*?\/script>/gi, ''))
 							// Locate the specified elements
 							.find(ids)
-							.each(function () {
-								var id = this.id.replace(/[^0-9]/g, '');
-								if (LJ_cmtinfo[id].expanded) {
-									var expand = this.innerHTML.match(/Expander\.make\(.+?\)/)[0];
-									(function(){
-										eval(expand);
-									}).apply(document.createElement('a'));
-								} else {
-									jQuery('#' + this.id).replaceWith(this);
-									setupAjax(this, isS1);
-								}
-							});
+								.each(function () {
+									var id = this.id.replace(/[^0-9]/g, '');
+									if (LJ_cmtinfo[id].expanded) {
+										var expand = this.innerHTML.match(/Expander\.make\(.+?\)/)[0];
+										(function(){
+											eval(expand);
+										}).apply(document.createElement('a'));
+									} else {
+										jQuery('#' + this.id).replaceWith(this);
+										setupAjax(this, isS1);
+									}
+								});
 						hourglass.hide();
 						poofAt(pos);
 					}
@@ -557,7 +572,7 @@ function setupAjax (node, isS1) {
             var id = reMatch[1];
             if (!document.getElementById('ljcmt' + id)) continue;
 			
-			ae.onclick = createDeleteFunction(ae, id, isS1, 'unspam');
+			ae.onclick = createModerationFunction(ae, id, isS1, 'unspam');
 		}
     }
 }
