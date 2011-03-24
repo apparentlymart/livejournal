@@ -87,6 +87,7 @@ sub EntryPage
                             comment.mark.spam
                             comment.mark.spam.title
                             comment.mark.spam.subject
+                            comment.mark.spam.button
                             comment.delete/)
     }
 
