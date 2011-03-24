@@ -933,11 +933,11 @@ sub maintainer_linkbar {
             "<strong>" . LJ::Lang::ml('/community/manage.bml.commlist.actmembers2') . "</strong>" :
             "<a href='$LJ::SITEROOT/community/members.bml?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.actmembers2') . "</a>",
     );
-
-    push @links, $page eq "wishlist" ?
+    if (LJ::SUP->is_sup_enabled($comm)) {
+        push @links, $page eq "wishlist" ?
             "<strong>" . LJ::Lang::ml('/community/manage.bml.commlist.wishlist') . "</strong>" :
-            "<a href='".$comm->wishlist_url."'>" . LJ::Lang::ml('/community/manage.bml.commlist.wishlist') . "</a>"
-            if LJ::SUP->is_sup_enabled($comm);
+            "<a href='".$comm->wishlist_url."'>" . LJ::Lang::ml('/community/manage.bml.commlist.wishlist') . "</a>";
+    }
 
     my $ret .= "<strong>" . LJ::Lang::ml('/community/manage.bml.managelinks', { user => $comm->ljuser_display }) . "</strong> ";
     $ret .= join(" | ", @links);
