@@ -39,6 +39,14 @@ body<=
         push @vert_, $vert_id ? LJ::Vertical->load_by_id ($vert_id) : undef;
     }
 
+    if (LJ::did_post() and $POST{'select_v1'}) {
+        $catid_[0] = $cat_[0] = undef;
+    }
+
+    if (LJ::did_post() and $POST{'select_v2'}) {
+        $catid_[1] = $cat_[1] = undef;
+    }
+
     if (LJ::did_post() && $POST{'move'}) {
         push @errors, "Invalid category FROM"
             unless $cat_[0];
@@ -87,7 +95,7 @@ body<=
                 @verticals
             );
 
-    $ret .= "</td><td>".LJ::html_submit('select_v', LJ::Lang::ml('vertical.admin.select_vertical.btn'));
+    $ret .= "</td><td>".LJ::html_submit('select_v1', LJ::Lang::ml('vertical.admin.select_vertical.btn'));
     $ret .= "</td></tr>\n";
 
     my @children = $cat_[0] ? $cat_[0]->children : ();
@@ -110,7 +118,7 @@ body<=
             );
 
     $ret .= "&nbsp;";
-    $ret .= LJ::html_submit('select_v', LJ::Lang::ml('vertical.admin.select_vertical.btn'));
+    $ret .= LJ::html_submit('select_v2', LJ::Lang::ml('vertical.admin.select_vertical.btn'));
     $ret .= "</td></tr>\n";
 
     if ($vert_[1]) {
