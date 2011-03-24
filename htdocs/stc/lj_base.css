@@ -1459,6 +1459,12 @@ HTML BODY.logged-out {
 				.b-postform-login-ljedit .b-postform-login-opts .b-postform-login-img {
 					vertical-align: -4px;
 					}
+			.b-postform-login-item .b-postform-login-opts {
+				display:inline-block;
+				}
+				#js .b-postform-login-opts {
+					display:block;
+					}
 
 
 
