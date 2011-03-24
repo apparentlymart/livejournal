@@ -410,10 +410,6 @@ sub as_html_actions {
 # 31 event.journal_new_comment.user_journal.untitled_entry.untitled_thread.me=Someone comments under <a href='[[threadurl]]'>the thread</a> by me in <a href='[[entryurl]]'>en entry</a> in [[user]]
 # 32 event.journal_new_comment.user_journal.untitled_entry.titled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by (Anonymous) in <a href='[[entryurl]]'>en entry</a> in [[user]]
 # 33 event.journal_new_comment.user_journal.untitled_entry.untitled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>the thread</a> by (Anonymous) in <a href='[[entryurl]]'>en entry</a> in [[user]]
-
-# 08 event.journal_new_comment.my_journal.titled_entry=Someone comments on <a href='[[entryurl]]'>[[entrydesc]]</a> my journal
-# 09 event.journal_new_comment.my_journal.untitled_entry=Someone comments on <a href='[[entryurl]]'>en entry</a> my journal
-
 # -- now, let's begin.
 sub subscription_as_html {
     my ($class, $subscr) = @_;
@@ -422,7 +418,7 @@ sub subscription_as_html {
     my $arg2 = $subscr->arg2;
     my $journal = $subscr->journal;
 
-    my $key = 'event.journal_new_comment.spam';
+    my $key = 'event.journal_new_comment';
 
     if (!$journal) {
 ### 01 event.journal_new_comment.friend=Someone comments in any journal on my friends page
@@ -514,7 +510,7 @@ sub subscription_as_html {
 ### 10 ... 33
     return LJ::Lang::ml($key,
     {
-        user            => $user . 'STATE: ' . $comment->state,
+        user            => $user,
         threadurl       => $threadurl,
         thread_desc     => $thread_desc,
         posteruser      => $posteruser,
