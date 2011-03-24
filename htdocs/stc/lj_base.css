@@ -773,6 +773,9 @@ HTML BODY.logged-out {
 		.m-auth-mailru A {
 			background: url(/img/icons/mailru-16.gif?v=1) no-repeat 20px 50%;
 			}
+		.m-auth-vkontakte A {
+			background: url(/img/icons/vkontakte-16.gif?v=1) no-repeat 20px 50%;
+			}
 		.m-auth .current .m-auth-bl,
 		.m-auth .current .m-auth-br {
 			display: block;
@@ -875,7 +878,8 @@ HTML BODY.logged-out {
 
 .b-facebookbtn,
 .b-twitterbtn,
-.b-mailrubtn {
+.b-mailrubtn,
+.b-vkontaktebtn {
 	position: relative;
 	margin: 0 20px 0 0;
 	padding: 0;
@@ -887,12 +891,14 @@ HTML BODY.logged-out {
 	}
 .b-auth .b-facebookbtn,
 .b-auth .b-twitterbtn,
-.b-auth .b-mailrubtn {
+.b-auth .b-mailrubtn,
+.b-auth .b-vkontaktebtn {
 	float: left;
 	}
 	.b-facebookbtn SPAN,
 	.b-twitterbtn SPAN,
-	.b-mailrubtn SPAN {
+	.b-mailrubtn SPAN,
+	.b-vkontaktebtn SPAN {
 		position: relative;
 		display: block;
 		height: 20px;
@@ -924,6 +930,17 @@ HTML BODY.logged-out {
 		white-space: nowrap;
 		background: #004584 url(/img/buttons/mailru-login-wide.gif?v=1) no-repeat 100% 0;
 		}
+	.b-vkontaktebtn SPAN {
+		height: 21px;
+		padding: 0 83px 0 8px;
+		border: none;
+		line-height: 22px;
+		color: #FFF;
+		font-size: 9px;
+		font-weight: normal;
+		white-space: nowrap;
+		background: #6189AE url(/img/buttons/vkontakte-login-wide.gif?v=1) no-repeat 100% 0;
+		}
 		.b-facebookbtn SPAN I{
 			display: none;
 			}
@@ -943,58 +960,80 @@ HTML BODY.logged-out {
 			width: 2px;
 			background: url(/img/buttons/mailru-login-wide.gif?v=1) no-repeat 0 0;
 			}
+		.b-vkontaktebtn SPAN I{
+			position: absolute;
+			left: 0;
+			top: 0;
+			height: 21px;
+			width: 2px;
+			background: url(/img/buttons/vkontakte-login-wide.gif?v=1) no-repeat 0 0;
+			}
 
 .b-twinterstitial-question,
-.b-fbinterstitial-question {
+.b-fbinterstitial-question,
+.b-vkinterstitial-question {
 	margin:0 0 10px;
 	}
 .b-twinterstitial-form,
-.b-fbinterstitial-form {
+.b-fbinterstitial-form,
+.b-vkinterstitial-form {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 	}
 	.b-twinterstitial-form LI,
-	.b-fbinterstitial-form LI {
+	.b-fbinterstitial-form LI,
+	.b-vkinterstitial-form LI {
 		margin: 0 0 5px;
 		padding: 0;
 		list-style: none;
 		}
-	.b-twinterstitial-form LI {
+	.b-twinterstitial-form LI,
+	.b-vkinterstitial-form LI {
 		position:relative;
 		}
-		.b-twinterstitial-form .i-bubble {
+		.b-twinterstitial-form .i-bubble,
+		.b-vkinterstitial-form .i-bubble {
 			top:-7px;
 			}
-		.b-twinterstitial-form LABEL {
+		.b-twinterstitial-form LABEL,
+		.b-vkinterstitial-form LABEL {
 			white-space:nowrap;
 			}
 	.b-twinterstitial-form .b-twinterstitial-submit,
-	.b-fbinterstitial-form .b-fbinterstitial-submit {
+	.b-fbinterstitial-form .b-fbinterstitial-submit,
+	.b-vkinterstitial-form .b-vkinterstitial-submit {
 		margin: 7px 0 0;
 		}
-.b-twinterstitial-form-compact {
+.b-twinterstitial-form-compact,
+.b-vkinterstitial-form-compact {
 	width: 460px;
 	margin: 150px auto 0;
 	text-align: center;
 	font-family: Arial,sans-serif;
 	}
-	.b-twinterstitial-form-compact H4 {
+	.b-twinterstitial-form-compact H4,
+	.b-vkinterstitial-form-compact H4 {
 		font-size: 24px;
 		font-weight: normal;
 		}
-	.b-twinterstitial-form-compact .ljuser IMG {
+	.b-twinterstitial-form-compact .ljuser IMG,
+	.b-vkinterstitial-form-compact .ljuser IMG {
 		vertical-align: middle!important;
 		}
 	.b-twinterstitial-form-compact H5,
 	.b-twinterstitial-form-compact P,
-	.b-twinterstitial-form-compact UL {
+	.b-twinterstitial-form-compact UL,
+	.b-vkinterstitial-form-compact H5,
+	.b-vkinterstitial-form-compact P,
+	.b-vkinterstitial-form-compact UL {
 		margin: 0;
 		padding: 10px 0;
 		font-weight: normal;
 		font-size: 12px;
 		}
-	.b-twinterstitial-form-compact H5 {
+	.b-twinterstitial-form-compact H5,
+	.b-vkinterstitial-form-compact H5 {
 		border-top: 1px solid #CCC;
 		}
 	.b-twinterstitial-form-compact TABLE {
@@ -1006,7 +1045,9 @@ HTML BODY.logged-out {
 		font-size: 12px;
 		}
 	.b-twinterstitial-form-compact .checkboxes,
-	.b-twinterstitial-form-compact .checkboxes LI {
+	.b-twinterstitial-form-compact .checkboxes LI,
+	.b-vkinterstitial-form-compact .checkboxes,
+	.b-vkinterstitial-form-compact .checkboxes LI {
 		display: inline;
 		}
 
@@ -1169,7 +1210,8 @@ HTML BODY.logged-out {
 			.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-current-pic,
 			.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-current-pic,
 			.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-current-pic,
-			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-current-pic {
+			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-current-pic,
+			.b-postform-authtype-vkontakte.b-postform-ability-disabled-vkontakte .b-postform-login-services-current-pic {
 				background-image: url(/img/pencil.gif);
 				}
 			.b-postform-authtype-user .b-postform-login-services-current-pic {
@@ -1186,6 +1228,9 @@ HTML BODY.logged-out {
 				}
 			.b-postform-authtype-mailru .b-postform-login-services-current-pic {
 				background-image: url(/img/icons/mailru-16.gif);
+				}
+			.b-postform-authtype-vkontakte .b-postform-login-services-current-pic {
+				background-image: url(/img/icons/vkontakte-16.gif);
 				}
 		.b-postform-login-services-items {
 			position: absolute;
@@ -1301,7 +1346,11 @@ HTML BODY.logged-out {
 				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:link,
 				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:visited,
 				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:hover,
-				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:active {
+				BODY .b-postform-ability-disabled-mailru .b-postform-login-services-mailru A:active,
+				BODY .b-postform-ability-disabled-vkontakte .b-postform-login-services-vkontakte A:link,
+				BODY .b-postform-ability-disabled-vkontakte .b-postform-login-services-vkontakte A:visited,
+				BODY .b-postform-ability-disabled-vkontakte .b-postform-login-services-vkontakte A:hover,
+				BODY .b-postform-ability-disabled-vkontakte .b-postform-login-services-vkontakte A:active {
 					background: #FFF;
 					-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
 					filter: alpha(opacity=50);
@@ -1340,6 +1389,7 @@ HTML BODY.logged-out {
 		#js .b-postform-authtype-twitter .b-postform-login-twitter,
 		#js .b-postform-authtype-openid .b-postform-login-openid,
 		#js .b-postform-authtype-mailru .b-postform-login-mailru,
+		#js .b-postform-authtype-vkontakte .b-postform-login-vkontakte,
 		#js .b-postform-authtype-ljedit .b-postform-login-ljedit {
 			display: block;
 			}
@@ -1348,14 +1398,16 @@ HTML BODY.logged-out {
 		#js .b-postform-ability-disabled-facebook .b-postform-login-facebook,
 		#js .b-postform-ability-disabled-twitter .b-postform-login-twitter,
 		#js .b-postform-ability-disabled-openid .b-postform-login-openid,
-		#js .b-postform-ability-disabled-mailru .b-postform-login-mailru {
+		#js .b-postform-ability-disabled-mailru .b-postform-login-mailru,
+		#js .b-postform-ability-disabled-vkontakte .b-postform-login-vkontakte {
 			display: none;
 			}
 		#js .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-livejournal,
 		#js .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-livejournal,
 		#js .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-livejournal,
 		#js .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-livejournal,
-		#js .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-livejournal {
+		#js .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-livejournal,
+		#js .b-postform-authtype-vkontakte.b-postform-ability-disabled-vkontakte .b-postform-login-livejournal {
 			display: block;
 			}
 			#js .b-postform-login-item .b-postform-login-radio,
@@ -1375,7 +1427,8 @@ HTML BODY.logged-out {
 			.b-postform-facebook-cookie .b-postform-login-facebook .b-postform-login-opts,
 			.b-postform-twitter-cookie .b-postform-login-twitter .b-postform-login-opts,
 			.b-postform-openid-cookie .b-postform-login-openid .b-postform-login-opts,
-			.b-postform-mailru-cookie .b-postform-login-mailru .b-postform-login-opts {
+			.b-postform-mailru-cookie .b-postform-login-mailru .b-postform-login-opts,
+			.b-postform-vkontakte-cookie .b-postform-login-vkontakte .b-postform-login-opts {
 				position: static;
 				display: block;
 				width: auto;

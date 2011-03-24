@@ -13,6 +13,8 @@
 
 .connect.twitter=Login with Twitter
 
+.connect.vkontakte=Login with Vkontakte
+
 .createaccount.button|staleness=1
 .createaccount.button=Create an Account
 
