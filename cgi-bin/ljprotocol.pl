@@ -2015,7 +2015,7 @@ sub postevent
                 LJ::text_compress($event));
     if ($uowner->err) {
         my $msg = $uowner->errstr;
-        LJ::delete_entry($uowner, $jitemid);   # roll-back
+        LJ::delete_entry($uowner, $jitemid, undef, $anum);   # roll-back
         return fail($err,501,"logtext:$msg");
     }
     LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$jitemid"],
@@ -2027,7 +2027,7 @@ sub postevent
                     "VALUES ($ownerid, $jitemid, $qallowmask)");
         if ($uowner->err) {
             my $msg = $uowner->errstr;
-            LJ::delete_entry($uowner, $jitemid);   # roll-back
+            LJ::delete_entry($uowner, $jitemid, undef, $anum);   # roll-back
             return fail($err,501,"logsec2:$msg");
         }
     }

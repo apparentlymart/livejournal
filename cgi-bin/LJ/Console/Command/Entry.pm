@@ -38,7 +38,7 @@ sub execute {
         unless $entry && $entry->valid;
 
     if ($action eq "delete") {
-        LJ::delete_entry($entry->journal, $entry->jitemid)
+        LJ::delete_entry($entry->journal, $entry->jitemid, undef, $entry->anum)
             or return $self->error("There was a problem deleting this entry.");
     }
 
