@@ -9848,11 +9848,11 @@ sub can_delete_journal_item {
     return 0 unless $remote;
 
     return 0 unless $remote->can_manage($u);
+    # here admin or supermaintainer
 
     return 0 if $LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $u->{user} } and !LJ::is_friend($u, $remote);
 
-    my $entry = LJ::Entry->new($u, jitemid => $itemid);
-    return $entry->posterid == $remote->userid;
+    return 1;
 }
 
 
