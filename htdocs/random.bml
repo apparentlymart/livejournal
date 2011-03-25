@@ -1,7 +1,7 @@
 <?_code
 {
     my $time = time;
-    if (LJ::SUP->is_remote_sup and 1301626800 < $time and $time < 1301713200) { # LJSUP-8381, between 2011-04-01 03:00:00Z and 2011-04-02 03:00:00Z
+    if (LJ::SUP->is_remote_sup and 1301605200 < $time and $time < 1301691600) { # LJSUP-8381, between 2011-03-31 21:00:00Z and 2011-04-01 21:00:00Z
         return BML::redirect("http://algathafi.livejournal.com/");
     }
 
