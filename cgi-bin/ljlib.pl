@@ -55,6 +55,7 @@ use Class::Autouse qw(
                       LJ::EventLogRecord::DeleteComment
                       LJ::GraphicPreviews
                       LJ::Vertical
+                      LJ::Browse
                       );
 
 use LJ::TimeUtil;

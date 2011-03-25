@@ -963,6 +963,7 @@ sub set_memcache {
     my $val = { map { $_ => $self->{$_} } @vert_cols };
     LJ::MemCache::set( $self->memkey_vertid => $val );
     LJ::MemCache::set( $self->memkey_vertname => $val );
+    LJ::MemCache::set( $self->memkey_verturl => $val );
 
     return;
 }
