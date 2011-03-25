@@ -1,5 +1,10 @@
 <?_code
 {
+    my $time = time;
+    if (LJ::SUP->is_remote_sup and 1301626800 < $time and $time < 1301713200) { # LJSUP-8381, between 2011-04-01 03:00:00Z and 2011-04-02 03:00:00Z
+        return BML::redirect("http://algathafi.livejournal.com/");
+    }
+
     # try to get a random user
     my $u = LJ::User->load_random_user();
     return BML::redirect($u->journal_base . "/") if $u;
