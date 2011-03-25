@@ -84,7 +84,7 @@ body<=
     if ((LJ::did_post() && $vert_[$j]) || ($LJ::DISABLED{'verticals_menu'})) {
         my @children = $cat_[$j] ? $cat_[$j]->children : ();
         # Get the full list of categories
-        my @categories = LJ::Browse->load_all($vert_[$j]);
+        my @categories = $vert_[$j] ? LJ::Browse->load_all($vert_[$j]) : ();
 
         $ret .= LJ::Browse->build_select_tree (0, \@categories, $cat_[$j], undef, undef, $i);
         if ($cat_[$j]) {

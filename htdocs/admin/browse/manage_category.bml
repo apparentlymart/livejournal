@@ -100,7 +100,7 @@ body<=
 
     my @children = $cat_[0] ? $cat_[0]->children : ();
     # Get the full list of categories
-    my @categories = LJ::Browse->load_all($vert_[0]);
+    my @categories = $vert_[0] ? LJ::Browse->load_all($vert_[0]) : ();
 
     $ret .= LJ::Browse->build_select_tree (0, \@categories, $cat_[0], undef, undef, 1);
     if ($cat_[0]) {
@@ -124,7 +124,7 @@ body<=
     if ($vert_[1]) {
         my @children = $cat_[1] ? $cat_[1]->children : ();
         # Get the full list of categories
-        my @categories = LJ::Browse->load_all($vert_[1]);
+        my @categories = $vert_[1] ? LJ::Browse->load_all($vert_[1]) : ();
 
         $ret .= LJ::Browse->build_select_tree (0, \@categories, $cat_[1], undef, undef, 2);
         if ($cat_[1]) {

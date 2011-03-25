@@ -116,7 +116,7 @@ body<=
 
     my @children = $category ? $category->children : ();
     # Get the full list of categories
-    my @categories = LJ::Browse->load_all($vertical);
+    my @categories = $vertical ? LJ::Browse->load_all($vertical) : ();
 
     $ret .= LJ::Browse->build_select_tree (0, \@categories, $category, undef, undef, 0);
     if ($category) {
