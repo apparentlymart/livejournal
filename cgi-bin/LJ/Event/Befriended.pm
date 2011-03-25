@@ -132,7 +132,7 @@ sub as_sms {
         . $self->friend->user;
     my $mparms = $opt->{mobile_url_extra_params};
     $tinyurl .= '?' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms) if $mparms;
-    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
+    $tinyurl = LJ::Client::BitLy->shorten($tinyurl);
     undef $tinyurl if $tinyurl =~ /^500/;
 
 # [[friend]] has added you to their friends list. Reply with ADD [[friend]] to add them [[disclaimer]]

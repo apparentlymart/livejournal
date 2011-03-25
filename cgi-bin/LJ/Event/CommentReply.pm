@@ -43,7 +43,7 @@ sub as_sms {
     my $mparms = $opt->{mobile_url_extra_params};
     my $tinyurl = $mparms?$self->comment->url( '&' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms))
         : $self->comment->url;
-    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
+    $tinyurl = LJ::Client::BitLy->shorten($tinyurl);
     undef $tinyurl if $tinyurl =~ /^500/;
 
     return $msg . " " . $tinyurl; 

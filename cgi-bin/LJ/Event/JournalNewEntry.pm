@@ -86,7 +86,7 @@ sub as_sms {
         . $self->entry->journal->user . '/' . $self->entry->ditemid . '/';
     my $mparms = $opt->{mobile_url_extra_params};
     $tinyurl .= '?' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms) if $mparms;
-    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
+    $tinyurl = LJ::Client::BitLy->shorten($tinyurl);
     undef $tinyurl if $tinyurl =~ /^500/;
     
     my $mlstrng = $self->entry->journal->is_comm ? 'notification.sms.journalnewentry_comm' : 'notification.sms.journalnewentry';

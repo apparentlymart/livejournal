@@ -133,7 +133,7 @@ sub as_sms {
          . $entry->journal->user . '/' . $entry->ditemid . '/';
     my $mparms = $opt->{mobile_url_extra_params};
     $tinyurl .= '?' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms) if $mparms;
-    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
+    $tinyurl = LJ::Client::BitLy->shorten($tinyurl);
     undef $tinyurl if $tinyurl =~ /^500/;
         
 # There is a new [[abbrev]] announcement in [[journal]]. Reply with READ [[journal]] to read it. [[disclaimer]]

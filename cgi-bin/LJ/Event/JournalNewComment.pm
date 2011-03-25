@@ -3,7 +3,7 @@ use strict;
 use Scalar::Util qw(blessed);
 use Class::Autouse qw(LJ::Comment LJ::HTML::Template);
 use Carp qw(croak);
-use LJ::API::BitLy;
+use LJ::Client::BitLy;
 use base 'LJ::Event';
 
 # we don't allow subscriptions to comments on friends' journals, so
@@ -274,7 +274,7 @@ sub as_sms {
     my $mparms = $opt->{mobile_url_extra_params};
     $tinyurl .= '?' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms) if $mparms;
     $tinyurl .= "#comments";
-    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
+    $tinyurl = LJ::Client::BitLy->shorten($tinyurl);
     undef $tinyurl if $tinyurl =~ /^500/;
     return $msg . " " . $tinyurl; 
 }

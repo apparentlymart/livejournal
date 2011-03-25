@@ -109,7 +109,7 @@ sub as_string {
         $tinyurl = "http://m.livejournal.com/read/user/".$self->friend->user;
         my $mparms = $opt->{mobile_url_extra_params};
         $tinyurl .= '?' . join('&', map {$_ . '=' . $mparms->{$_}} keys %$mparms) if $mparms;
-        $tinyurl = LJ::API::BitLy->shorten($tinyurl);
+        $tinyurl = LJ::Client::BitLy->shorten($tinyurl);
         undef $tinyurl if $tinyurl =~ /^500/;
     }
     
