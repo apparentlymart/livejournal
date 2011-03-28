@@ -838,7 +838,13 @@ sub trans
     # Akamai and other CDN networks...)
     my $skip_domain_checks = 0;
 
-    # user domains
+    ## special case:
+    ## www.test.livejournal.com --(redirect)--> test.livejournal.com
+    if ($host =~ /^w{1,4}.([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/) {
+        return redir("http://$1.$LJ::USER_DOMAIN$uri$args_wq");
+    }
+
+    # user domains:
     if (($LJ::USER_VHOSTS || $LJ::ONLY_USER_VHOSTS) &&
         $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
         $1 ne "www" &&
