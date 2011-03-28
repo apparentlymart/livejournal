@@ -3,7 +3,11 @@
 <TMPL_IF ad><div class="b-catalogue-ads"><TMPL_VAR ad></div></TMPL_IF>
 <TMPL_IF 0><TMPL_VAR popular_interests_widget></TMPL_IF>
 <tmpl_if is_vertical_view><tmpl_include top_posts.tmpl></tmpl_if>
-<tmpl_if is_vertical_view><tmpl_var poll_of_the_day></tmpl_if>
+<tmpl_if is_vertical_view>
+	<div class="right-mod"><div class="mod-tl"><div class="mod-tr"><div class="mod-br"><div class="mod-bl">
+	<tmpl_var poll_of_the_day>
+	</div></div></div></div></div>
+</tmpl_if>
 <tmpl_if is_vertical_view><tmpl_include featured_communities.tmpl></tmpl_if>
 <TMPL_VAR add_community_widget>
 
