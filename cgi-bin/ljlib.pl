@@ -2821,6 +2821,8 @@ sub delete_comments {
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 
+    my $num_spam = $u->selectrow_array("SELECT COUNT(*) FROM talk2 $where AND state='B'");
+
     LJ::run_hooks('report_cmt_delete', $jid, \@batch);
     my $num = $u->talk2_do(nodetype => $nodetype, nodeid => $nodeid,
                            sql => "UPDATE talk2 SET state='D' $where");
@@ -2844,7 +2846,7 @@ sub delete_comments {
     my $sclient = LJ::theschwartz();
     $sclient->insert_jobs(@jobs) if @jobs;
 
-    return $num;
+    return ($num, $num_spam);
 }
 
 # <LJFUNC>

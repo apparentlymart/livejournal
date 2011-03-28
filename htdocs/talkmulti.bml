@@ -113,8 +113,9 @@
             LJ::set_rel($u, $talkinfo{$_}->[1], 'D');
         }
 
-        my $num = LJ::delete_comments($u, "L", $itemid, @talkids);
+        my ($num, $numspam) = LJ::delete_comments($u, "L", $itemid, @talkids);
         LJ::replycount_do($u, $itemid, "decr", $num);
+        LJ::replyspamcount_do($u, $itemid, "decr", $numspam);
         LJ::Talk::update_commentalter($u, $itemid);
 
     } elsif ($mode eq "unscreen") {

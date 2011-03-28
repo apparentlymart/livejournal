@@ -2404,6 +2404,35 @@ sub replycount_do {
     return 1;
 }
 
+# replyspamcount_do
+# input: $u, $jitemid, $action, $value
+# action is one of: "init", "incr", "decr"
+
+sub replyspamcount_do {
+    my ($u, $jitemid, $action, $value) = @_;
+
+    # check action name
+    die "unknown action: $action" 
+        unless $action =~ /^(init)|(incr)|(decr)$/;
+    
+    return 0 unless $value;
+    
+    my $entry = LJ::Entry->new( $u, 'jitemid' => $jitemid );
+    my $spam_counter = $entry->prop('spam_counter') || 0;
+    
+    if ($action eq 'init') {
+        $entry->set_prop('spam_counter', 0);
+        return 1;
+    } elsif ($action eq 'decr') {
+        return 0 if $spam_counter - $value < 0;
+        $entry->set_prop('spam_counter', $spam_counter - $value);
+    } elsif ($action eq 'incr') {
+        $entry->set_prop('spam_counter', $spam_counter + $value);
+    }
+    
+    return 1;
+}
+
 # <LJFUNC>
 # name: LJ::get_logtext2
 # des: Efficiently retrieves a large number of journal entry text, trying first

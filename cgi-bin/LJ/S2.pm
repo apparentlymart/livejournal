@@ -3044,7 +3044,7 @@ sub _Comment__get_link
     my $comment = LJ::Comment->new($u, dtalkid => $dtalkid);
 
     if ($key eq "delete_comment") {
-        my $del_spam = (LJ::is_enabled('spam_button') && $comment->{state} eq 'B') ? '&amp;spam=1' : '';
+        my $del_spam = ($page->{showspam} && $comment->{state} eq 'B') ? '&amp;spam=1' : '';
         return $null_link unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}$del_spam",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},

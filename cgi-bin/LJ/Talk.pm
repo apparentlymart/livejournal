@@ -529,8 +529,9 @@ sub delete_thread {
     my @screened;
     my $ids = LJ::Talk::get_comments_in_thread($u, $jitemid, $jtalkid, undef, \@screened);
     LJ::Talk::unscreen_comment($u, $jitemid, @screened) if @screened; # if needed only!
-    my $num = LJ::delete_comments($u, "L", $jitemid, @$ids);
+    my ($num, $numspam) = LJ::delete_comments($u, "L", $jitemid, @$ids);
     LJ::replycount_do($u, $jitemid, "decr", $num);
+    LJ::replyspamcount_do($u, $jitemid, "decr", $numspam);
     LJ::Talk::update_commentalter($u, $jitemid);
     LJ::Talk::update_journals_commentalter($u);
     return 1;
@@ -562,8 +563,9 @@ sub delete_author {
     }
 
     LJ::Talk::unscreen_comment($u, $jitemid, @screened) if @screened; # if needed only!
-    my $num = LJ::delete_comments($u, "L", $jitemid, @ids);
+    my ($num, $numspam) = LJ::delete_comments($u, "L", $jitemid, @ids);
     LJ::replycount_do($u, $jitemid, "decr", $num);
+    LJ::replyspamcount_do($u, $jitemid, "decr", $numspam);
     LJ::Talk::update_commentalter($u, $jitemid);
     LJ::Talk::update_journals_commentalter($u);
     return 1;
@@ -598,8 +600,9 @@ sub delete_comment {
         if $state eq 'S';
 
     # now do the deletion
-    my $num = LJ::delete_comments($u, "L", $jitemid, $jtalkid);
+    my ($num, $numspam) = LJ::delete_comments($u, "L", $jitemid, $jtalkid);
     LJ::replycount_do($u, $jitemid, "decr", $num);
+    LJ::replyspamcount_do($u, $jitemid, "decr", $numspam);
     LJ::Talk::update_commentalter($u, $jitemid);
     LJ::Talk::update_journals_commentalter($u);
 
@@ -1274,7 +1277,7 @@ sub load_comments
                                                               $remote->can_sweep($u)));
             }
             if (LJ::is_enabled('spam_button') && !$opts->{showspam}) {
-                $should_show = 0 if $post->{'state'} eq 'B';
+                $should_show = 0 if $post->{'state'} eq 'B' && ! ($remote && $remote->{'userid'} == $post->{'posterid'});
             }
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
