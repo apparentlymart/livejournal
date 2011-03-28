@@ -212,7 +212,12 @@ window.LJShare.link = function( opts, node ) {
 		dom.find( selectors.close ).bind( 'click', function( ev ) {	togglePopup( false ); } );
 		$( document ).bind( 'click', checkClose );
 		$( window ).bind( 'resize', checkClose );
-		dom.find( selectors.links ).click( function() { togglePopup( false ); } );
+		dom.find( selectors.links ).click( function( ev )
+		{
+			togglePopup( false );
+			ev.preventDefault();
+			window.open(this.href, 'sharer', 'toolbar=0,status=0,width=640,height=300');
+		} );
 	}
 
 	function updatePopupPosition() {
@@ -312,14 +317,10 @@ window.LJShare.entry = function( opts ) {
 			if( service in global_options.services ) {
 				link.each( function() {
 					var url = supplant( serviceObj.bindLink, options );
-					if( this.tagName.toLowerCase() === 'a' ) {
-						this.href = url;
-						this.target = "_blank";
-					} else {
-						$( this ).click( function() {
-							window.open( url );
-						} );
-					}
+					$( this ).click( function( ev ) {
+						window.open( url, 'sharer', 'toolbar=0,status=0,width=640,height=300');
+						ev.preventDefault();
+					} );
 				} );
 			}
 
