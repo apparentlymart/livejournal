@@ -840,7 +840,7 @@ sub trans
 
     ## special case:
     ## www.test.livejournal.com --(redirect)--> test.livejournal.com
-    if ($host =~ /^w{1,4}.([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/) {
+    if ($host =~ /^w{1,4}\.([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/) {
         return redir("http://$1.$LJ::USER_DOMAIN$uri$args_wq");
     }
 
