@@ -407,7 +407,8 @@ __________________________________________*/
 .whl-bar,
 .whl-items,
 .whl-item,
-.appwidget-wishrecommendations .whl-rec-item {
+.appwidget-wishrecommendations .whl-rec-item,
+.whl-edit-functions {
 	zoom: 1;
 	}
 * HTML .whl-fadeout {
@@ -455,7 +456,9 @@ __________________________________________*/
 	width: 102px;
 	height: 102px;
 	}
-.whl-rec-def {
+.whl-rec-def,
+.whl-want-icon,
+.whl-privacy-icon {
 	display: inline;
 	zoom: 1;
 	}
