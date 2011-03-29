@@ -24,7 +24,7 @@ sub get_user_class {
     my $add = 0;
     my $already_tb = LJ::TryNBuy->already_used($u);
     $add += AccountMask->{AlreadyTryNBuy} if $already_tb;
-    $add += AccountMask->{NeverTryNBuy} unless $u->get_cap('trynbuy') or $already_tb;
+    $add += AccountMask->{NeverTryNBuy} unless $u->get_cap('trynbuy') or $already_tb or $u->get_cap('paid');
     $add += AccountMask->{EmailFaulty} if $u->prop('email_faulty');
 
     return $add + AccountMask->{Permanent} if $u->in_class('perm');
