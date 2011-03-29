@@ -318,6 +318,7 @@ __________________________________________*/
 .appwidget-browse .w-content {
 	padding:0 0 7px;
 	}
+.appwidget-browse .appwidget-featuredcomms,
 .appwidget-browse .appwidget-featuredcomms .b-posts LI {
     zoom:1;
     }
