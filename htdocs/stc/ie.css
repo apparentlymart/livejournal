@@ -318,9 +318,9 @@ __________________________________________*/
 .appwidget-browse .w-content {
 	padding:0 0 7px;
 	}
-.appwidget-browse .appwidget-featuredcomms .b-posts DL {
-	padding-top:0;
-	}
+.appwidget-browse .appwidget-featuredcomms .b-posts LI {
+    zoom:1;
+    }
 	.appwidget-browse .b-posts DT {
 		_position:relative;
 		}
