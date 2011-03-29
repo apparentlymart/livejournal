@@ -2191,12 +2191,18 @@ LOGIN_BAR
 
     my $mobile_link = '';
     if (!$LJ::DISABLED{'view_mobile_link_always'} || Apache::WURFL->is_mobile()) {
-        my $uri = LJ::Request->uri;
+        my $proto = $LJ::IS_SSL ? "https://" : "http://";
         my $hostname = LJ::Request->hostname;
+        my $uri = LJ::Request->uri;
         my $args = LJ::Request->args;
         my $args_wq = $args ? "?$args" : "";
-        my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check");
-        my $proto = $is_ssl ? "https://" : "http://";
+        
+        ## HACK: remote __rpc_ (endpoint) part and all arguments
+        ## TODO: more intelligent page address (Referer?) for AJAX requests
+        if ($uri =~ s/__rpc_.*$//) {
+            $args_wq = '';
+        }
+
         my $url = LJ::eurl ($proto.$hostname.$uri.$args_wq);
         $mobile_link .= "<div class='b-message-mobile'><div class='b-message-mobile-wrapper'>";
         $mobile_link .= LJ::Lang::ml('link.mobile', { href => "href='http://m.livejournal.com/redirect?from=$url'" });
