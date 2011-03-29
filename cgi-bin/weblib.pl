@@ -2191,22 +2191,25 @@ LOGIN_BAR
 
     my $mobile_link = '';
     if (!$LJ::DISABLED{'view_mobile_link_always'} || Apache::WURFL->is_mobile()) {
-        my $proto = $LJ::IS_SSL ? "https://" : "http://";
-        my $hostname = LJ::Request->hostname;
+        my $url;
         my $uri = LJ::Request->uri;
-        my $args = LJ::Request->args;
-        my $args_wq = $args ? "?$args" : "";
-        
-        ## HACK: remote __rpc_ (endpoint) part and all arguments
-        ## TODO: more intelligent page address (Referer?) for AJAX requests
-        if ($uri =~ s/__rpc_.*$//) {
-            $args_wq = '';
+        if ($uri =~ /\/__rpc_/) {
+            ## control strip is called from AJAX request
+            ## TODO: more secure Referer check?
+            $url = LJ::eurl( LJ::Request->header_in("Referer") );
+        } else {
+            my $hostname = LJ::Request->hostname;
+            my $args = LJ::Request->args;
+            my $args_wq = $args ? "?$args" : "";
+            $url = LJ::eurl("http://$hostname" . $uri . $args_wq);
         }
-
-        my $url = LJ::eurl ($proto.$hostname.$uri.$args_wq);
-        $mobile_link .= "<div class='b-message-mobile'><div class='b-message-mobile-wrapper'>";
-        $mobile_link .= LJ::Lang::ml('link.mobile', { href => "href='http://m.livejournal.com/redirect?from=$url'" });
-	    $mobile_link .="</div></div>";
+        
+        if ($url) {
+            $mobile_link =  
+                "<div class='b-message-mobile'><div class='b-message-mobile-wrapper'>" .
+                LJ::Lang::ml('link.mobile', { href => "href='http://m.livejournal.com/redirect?from=$url'" }) .
+	            "</div></div>";
+        }
     }
     return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr></table> $message $mobile_link";
 }
