@@ -522,20 +522,21 @@ sub clean
 
                 ## Allow some iframes from trusted sources (if they are not eaten already)
                 ## YouTube (http://apiblog.youtube.com/2010/07/new-way-to-embed-youtube-videos.html),
-                ## Vimeo, VKontakte, Google Calendar, Google Docs, VK.com
+                ## Vimeo, VKontakte, Google Calendar, Google Docs, VK.com, etc.
+                ## see @LJ::EMBED_IFRAME_WHITELIST in lj-disabled-conf
                 my $src = $attr->{'src'};
-                if ($src &&
-                    (
-                        $src =~ m!^https?://(?:[\w.-]*\.)?youtube\.com/embed/[-_a-zA-Z0-9]{11,}(?:\?.*)?$!
-                        || $src =~ m!^http://player\.vimeo\.com/video/(?:\d+)!
-                        || $src =~ m!^http://vkontakte\.ru/video_ext\.php\?oid=(?:\d+)&id=(?:\d+)&hash=[a-zA-Z0-9]+!
-                        || $src =~ m!^http://www\.google\.com/calendar/embed\?src=!
-                        || $src =~ m!^https://docs\.google.com/document/pub\?id=!
-                        || $src =~ m!^http://vk.com/video_ext\.php\?oid=(?:\d+)&id=(?:\d+)&hash=[a-zA-Z0-9]+!
-                    )
-                ) {
-                    ## allow
-                } else {
+                my $src_allowed = 0;
+
+                if ($src) {
+                    foreach my $re ( @LJ::EMBED_IFRAME_WHITELIST ) {
+                        if ( $src =~ $re ) {
+                            $src_allowed = 1;
+                            last;
+                        }
+                    }
+                }
+
+                unless ( $src && $src_allowed ) {
                     ## eat this tag
                     if (!$attr->{'/'}) {
                         ## if not autoclosed tag (<iframe />),
