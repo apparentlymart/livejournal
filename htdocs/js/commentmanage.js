@@ -539,35 +539,37 @@ function removeEmptyMarkup(threadId) {
 		$( 'body' ).delegate( 'a', 'click', function( ev ) {
 			var rex_id = /id=(\d+)/, ae = this;
 
-		if (ae.href.indexOf('talkscreen.bml') != -1) {
-			var reMatch = rex_id.exec(ae.href);
-			if (!reMatch) return;
+			if (ae.href.indexOf('talkscreen.bml') != -1) {
+				var reMatch = rex_id.exec(ae.href);
+				if (!reMatch) return;
 
-			var id = reMatch[1];
-			if (!document.getElementById('ljcmt' + id)) return;
+				var id = reMatch[1];
+				if (!document.getElementById('ljcmt' + id)) return;
 
-			createModerationFunction(ae, id)( ev );
-		} else if (ae.href.indexOf('delcomment.bml') != -1) {
-			if (LJ_cmtinfo && LJ_cmtinfo.disableInlineDelete) return;
+				createModerationFunction(ae, id)( ev );
+			} else if (ae.href.indexOf('delcomment.bml') != -1) {
+				if (LJ_cmtinfo && LJ_cmtinfo.disableInlineDelete) return;
 
-			var reMatch = rex_id.exec(ae.href);
-			if (!reMatch) return;
+				var reMatch = rex_id.exec(ae.href);
+				if (!reMatch) return;
 
-			var id = reMatch[1];
-			if (!document.getElementById('ljcmt' + id)) return;
+				var id = reMatch[1];
+				if (!document.getElementById('ljcmt' + id)) return;
 
-			var action = (ae.href.indexOf('spam=1') != -1) ? 'markAsSpam' : 'delete';
+				var action = (ae.href.indexOf('spam=1') != -1) ? 'markAsSpam' : 'delete';
 
-			createDeleteFunction(ae, id, action)( ev );
-		// unspam
-		} else if (ae.href.indexOf('spamcomment.bml') != -1) {
-			var reMatch = rex_id.exec(ae.href);
-			if (!reMatch) return;
+				createDeleteFunction(ae, id, action)( ev );
+			// unspam
+			} else if (ae.href.indexOf('spamcomment.bml') != -1) {
+				var reMatch = rex_id.exec(ae.href);
+				if (!reMatch) return;
 
-			var id = reMatch[1];
-			if (!document.getElementById('ljcmt' + id)) return;
-			createModerationFunction(ae, id, 'unspam')( ev );
-				}
+				var id = reMatch[1];
+				if (!document.getElementById('ljcmt' + id)) return;
+				createModerationFunction(ae, id, 'unspam')( ev );
+			} else {
+				return;
+			}
 
 			ev.preventDefault();
 			ev.stopPropagation();
