@@ -598,7 +598,7 @@ body<=
                                                   @sms_time);
                 $ret .= "<label for='sms_interval_end'> $ML{'.fn.smsinterval.end'} </label>";
                 $ret .= LJ::html_select({ 'name' => 'sms_interval_end',
-                                                  'selected' => $end || 1, },
+                                                  'selected' => $end || 23, },
                                                   @sms_time);
                 $ret .= " " . BML::ml(".fn.smsinterval.localtime2", {
                     'timezone' => $u->prop('timezone'),
