@@ -66,6 +66,10 @@ sub handle {
         return LJ::URI->bml_handler("statistics/index.bml");
     }
 
+    if ( $uri =~ m!^/singles(/.*|$)! ) {
+        return LJ::URI->bml_handler("singles/index.bml");
+    }
+
     return undef;
 }
 
