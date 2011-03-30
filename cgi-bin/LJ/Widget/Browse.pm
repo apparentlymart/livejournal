@@ -168,7 +168,7 @@ sub render_body {
     my @tmpl_communities = ();
     my @tmpl_posts = ();
 
-    my $page_size = 6;
+    my $page_size = 10;
     my $post_page_size = 10;
 
     my $count = 0;
