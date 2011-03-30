@@ -6,47 +6,52 @@ use constant AccountMask => {
     Permanent   => {    
                         value       => 1,
                         group       => 0,
+                        selected    => 1,
                         validate    => sub {
                                             my ($u) = @_;
                                             
                                             return $u->in_class('perm');
-                                       }
+                                       },
                     },
     
     Sponsored   => {    
                         value       => 2,
                         group       => 0,
+                        selected    => 1,
                         validate    => sub {
                                             my ($u) = @_;
                                             
                                             return $u->in_class('sponsored');
-                                       }
+                                       },
                     },
                     
     Paid        => {    
                         value       => 4,
                         group       => 0,
+                        selected    => 1,
                         validate    => sub {
                                             my ($u) = @_;
                                             
                                             return $u->get_cap('paid');
-                                       }
+                                       },
                     },
     
     Plus        => {    
                         value       => 8,
                         group       => 0,
+                        selected    => 1,
                         validate    => sub {
                                             my ($u) = @_;
                                             
                                             return $u->in_class('plus') && !$u->get_cap('paid');
-                                       }
+                                       },
                     },
     
     Basic       => {    
                         
                         value       => 16,
                         group       => 0,
+                        selected    => 1,
                         validate    => sub {
                                             my ($u) = @_;
 
@@ -57,6 +62,7 @@ use constant AccountMask => {
     SUP         => {    
                         value       => 32,
                         group       => 1,
+                        selected    => 1,
                         validate    => sub {
                                             my ($u) = @_;
                                             
@@ -67,6 +73,7 @@ use constant AccountMask => {
     NonSUP      => {    
                         value       => 64,
                         group       => 1,
+                        selected    => 1,
                         validate    => sub {
                                             my ($u) = @_;
                                             
@@ -94,6 +101,7 @@ use constant AccountMask => {
     TryNBuy     => {    
                         value       => 256,
                         group       => 3,
+                        selected    => 1,
                         validate    => sub {
                                             my ($u) = @_;
 
@@ -104,6 +112,7 @@ use constant AccountMask => {
     AlreadyTryNBuy => { 
                         value       => 512,
                         group       => 3,
+                        selected    => 1,
                         validate    => sub {
                                             my ($u) = @_;
 
@@ -114,6 +123,7 @@ use constant AccountMask => {
     NeverTryNBuy   => { 
                         value       => 1024,
                         group       => 3,
+                        selected    => 1,
                         validate    => sub {
                                             my ($u) = @_;
 
@@ -139,6 +149,19 @@ sub get_options_list {
     return sort { 
             AccountMask->{$b}->{value} <=> AccountMask->{$a}->{value}
          } keys %{&AccountMask};
+}
+
+#
+#   Get default selected masks bits together
+#
+sub get_default_masks_value {
+    my $result = 0;
+     
+    for my $name (keys %{&AccountMask}) {
+        $result += AccountMask->{$name}->{value} if ( AccountMask->{$name}->{selected});    
+    }
+    
+    return $result;
 }
 
 #

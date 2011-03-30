@@ -38,11 +38,7 @@ sub render_body {
         $end_hour = $end_date->hour;
         $end_min = $end_date->minute;
     } else { # default
-        $accounts =   LJ::SiteMessages::AccountMask->{SUP}->{value}
-                    + LJ::SiteMessages::AccountMask->{NonSUP}->{value}
-                    + LJ::SiteMessages::AccountMask->{NeverTryNBuy}->{value}
-                    + LJ::SiteMessages::AccountMask->{AlreadyTryNBuy}->{value}
-                    + LJ::SiteMessages::AccountMask->{TryNBuy}->{value};
+        $accounts = LJ::SiteMessages->get_default_masks_value();
     }
 
     # default values for year/month/day = today's date
