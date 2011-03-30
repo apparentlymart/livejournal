@@ -17,7 +17,7 @@ sub render_body {
     my ($config) = grep { $_->{setting} eq $key } @LJ::SETTING_PROD;
     my $setting_class = "LJ::Setting::$key";
     my $no_wrap = $config->{no_wrap};
-    my $remote = LJ::get_remote;
+    my $remote = LJ::get_remote();
    
    
     my $setting_class_html  = $setting_class->as_html($remote, undef, { helper => 0, faq => 1, display_null => 0} );
@@ -61,7 +61,7 @@ sub handle_post {
     my $setting = $post->{setting};
     my $setting_class = "LJ::Setting::$setting";
 
-    my $remote = LJ::get_remote;
+    my $remote = LJ::get_remote();
     my $sv = eval { $setting_class->save($remote, $post) };
     my $save_errors;
     if (my $err = $@) {

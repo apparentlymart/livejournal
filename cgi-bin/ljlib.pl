@@ -3590,4 +3590,6 @@ sub as_string {
     return "Assertion failure at " . join(', ', (@$caller)[0..2]) . ": expected=$ve, actual=$va";
 }
 
+LJ::run_hooks("startup");
+
 1;

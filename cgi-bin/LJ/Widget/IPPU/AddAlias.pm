@@ -19,7 +19,7 @@ sub render_body {
     my ($class, %opts) = @_;
 
     my $body;
-    my $remote = LJ::get_remote;
+    my $remote = LJ::get_remote();
 
     $body .= $class->start_form(
                 id => 'addalias_form',
