@@ -38,8 +38,11 @@ sub render_body {
         $end_hour = $end_date->hour;
         $end_min = $end_date->minute;
     } else { # default
-        $accounts = LJ::SiteMessages::AccountMask->{SUP} + LJ::SiteMessages::AccountMask->{NonSUP}
-                  + LJ::SiteMessages::AccountMask->{NeverTryNBuy} + LJ::SiteMessages::AccountMask->{AlreadyTryNBuy} + LJ::SiteMessages::AccountMask->{TryNBuy};
+        $accounts =   LJ::SiteMessages::AccountMask->{SUP}->{value}
+                    + LJ::SiteMessages::AccountMask->{NonSUP}->{value}
+                    + LJ::SiteMessages::AccountMask->{NeverTryNBuy}->{value}
+                    + LJ::SiteMessages::AccountMask->{AlreadyTryNBuy}->{value}
+                    + LJ::SiteMessages::AccountMask->{TryNBuy}->{value};
     }
 
     # default values for year/month/day = today's date
@@ -145,13 +148,19 @@ sub render_body {
           value => $countries ) . "</td></tr>";
     $ret .= "<tr><td>&nbsp;</td><td>(if left blank, a user's country will be ignored)</td></tr>";
 
-    $ret .= "<tr><td valign='top'>Show this question to:<br>ATTENTION!<br>Check SUP or NonSUP or both!<br>Same for TryNBuy applies.</td><td>";
-    foreach my $type (sort { LJ::SiteMessages::AccountMask()->{$b} <=> LJ::SiteMessages::AccountMask()->{$a} } keys %{&LJ::SiteMessages::AccountMask()}) {
+    $ret .= "<tr><td valign='top'>Show this question to:</td><td>";
+    my $current_group = 0;
+warn LJ::D(&LJ::SiteMessages::AccountMask());
+    foreach my $type (LJ::SiteMessages->get_options_list()) {
+        $ret .= '<br>' if($current_group != LJ::SiteMessages->get_group($type));
+        
         my $ltype = lc $type;
         $ret .= $class->html_check
             ( name => 'show_' . $ltype,
               id => 'show_' . $ltype,
-              selected => $accounts & LJ::SiteMessages::AccountMask()->{$type} ) . " <label for='show_$ltype'>$type Users</label><br />";
+              selected => LJ::SiteMessages->check_mask($type, $accounts)) . " <label for='show_$ltype'>$type Users</label><br />";
+              
+        $current_group = LJ::SiteMessages->get_group($type);
     }
 
     $ret .= $class->html_hidden
@@ -198,7 +207,7 @@ sub handle_post {
 
     my $accounts = 0;
     foreach my $type (keys %{&LJ::SiteMessages::AccountMask()}) {
-        $accounts |= LJ::SiteMessages::AccountMask()->{$type}
+        $accounts |= LJ::SiteMessages::AccountMask()->{$type}->{value}
             if $post->{'show_' . lc $type};
     }
 

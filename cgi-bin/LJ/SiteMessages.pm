@@ -2,45 +2,169 @@ package LJ::SiteMessages;
 use strict;
 use Carp qw(croak);
 
-use constant AccountMask => { 
-    Permanent   => 1,
-    Sponsored   => 2,
-    Paid        => 4,
-    Plus        => 8,
-    Basic       => 16,
-    SUP         => 32,
-    NonSUP      => 64,
-    OfficeOnly  => 128,
-    TryNBuy     => 256,
-    AlreadyTryNBuy => 512,
-    NeverTryNBuy   => 1024,
-    EmailFaulty    => 2048,
+use constant AccountMask => {
+    Permanent   => {    
+                        value       => 1,
+                        group       => 0,
+                        validate    => sub {
+                                            my ($u) = @_;
+                                            
+                                            return $u->in_class('perm');
+                                       }
+                    },
+    
+    Sponsored   => {    
+                        value       => 2,
+                        group       => 0,
+                        validate    => sub {
+                                            my ($u) = @_;
+                                            
+                                            return $u->in_class('sponsored');
+                                       }
+                    },
+                    
+    Paid        => {    
+                        value       => 4,
+                        group       => 0,
+                        validate    => sub {
+                                            my ($u) = @_;
+                                            
+                                            return $u->get_cap('paid');
+                                       }
+                    },
+    
+    Plus        => {    
+                        value       => 8,
+                        group       => 0,
+                        validate    => sub {
+                                            my ($u) = @_;
+                                            
+                                            return $u->in_class('plus') && !$u->get_cap('paid');
+                                       }
+                    },
+    
+    Basic       => {    
+                        
+                        value       => 16,
+                        group       => 0,
+                        validate    => sub {
+                                            my ($u) = @_;
+
+                                            return !($u->in_class('plus') || $u->get_cap('paid'));
+                                       }
+                    },
+    
+    SUP         => {    
+                        value       => 32,
+                        group       => 1,
+                        validate    => sub {
+                                            my ($u) = @_;
+                                            
+                                            return LJ::SUP->is_sup_enabled($u);
+                                       }
+                    },
+    
+    NonSUP      => {    
+                        value       => 64,
+                        group       => 1,
+                        validate    => sub {
+                                            my ($u) = @_;
+                                            
+                                            return !LJ::SUP->is_sup_enabled($u);
+                                       }
+                    },
+    
+    
+    OfficeOnly  => {    
+                        value       => 128,
+                        group       => 2,
+                        validate    => sub {
+                                            my ($u) = @_;
+                                            
+                                            my $country = LJ::GeoLocation->get_country_info_by_ip(
+                                                                                                    LJ::get_remote_ip(),
+                                                                                                    { allow_spec_country => 1 } 
+                                                                                                   );
+
+                                            return $country eq '1S' || $country eq '6A';
+                                       }
+                    },
+
+
+    TryNBuy     => {    
+                        value       => 256,
+                        group       => 3,
+                        validate    => sub {
+                                            my ($u) = @_;
+
+                                            return $u->get_cap('trynbuy');      
+                                       }
+                    },
+    
+    AlreadyTryNBuy => { 
+                        value       => 512,
+                        group       => 3,
+                        validate    => sub {
+                                            my ($u) = @_;
+
+                                            return LJ::TryNBuy->already_used($u);
+                                       }
+                    },
+    
+    NeverTryNBuy   => { 
+                        value       => 1024,
+                        group       => 3,
+                        validate    => sub {
+                                            my ($u) = @_;
+
+                                            return !(LJ::TryNBuy->already_used($u) || $u->get_cap('trynbuy'));
+                                       }
+                    },
+    
+    EmailFaulty    => { 
+                        value       => 2048,
+                        group       => 4,
+                        validate    => sub {
+                                            my ($u) = @_;
+                                            
+                                            return $u->prop('email_faulty');
+                                       }
+                    },
 };
 
-sub get_user_class {
-    my $class = shift;
-    my $u = shift;
+#
+#   Get all options names for form output
+#
+sub get_options_list {
+    return sort { 
+            AccountMask->{$b}->{value} <=> AccountMask->{$a}->{value}
+         } keys %{&AccountMask};
+}
 
-    my $add = 0;
-    my $already_tb = LJ::TryNBuy->already_used($u);
-    $add += AccountMask->{AlreadyTryNBuy} if $already_tb;
-    $add += AccountMask->{NeverTryNBuy} unless $u->get_cap('trynbuy') or $already_tb or $u->get_cap('paid');
-    $add += AccountMask->{EmailFaulty} if $u->prop('email_faulty');
+#
+#   Get mask group number
+#
+sub get_group {
+    my ($class, $name) = @_;
 
-    return $add + AccountMask->{Permanent} if $u->in_class('perm');
-    return $add + AccountMask->{Sponsored} if $u->in_class('sponsored');
-    return $add + AccountMask->{TryNBuy} if $u->get_cap('trynbuy');    # TryNBuy should go before Paid
-    return $add + AccountMask->{Paid} if $u->get_cap('paid');
-    return $add + AccountMask->{Plus} if $u->in_class('plus');
-    return $add + AccountMask->{Basic};
+    return AccountMask->{$name}->{group};
+}
+
+#
+#   Check some value against given message type mask
+#
+sub check_mask {
+    my ($class, $mask_name, $value) = @_;
+
+    return $value & int(AccountMask->{$mask_name}->{value});
 }
 
 sub get_class_string {
     my $class = shift;
     my $mask = shift;
 
-    return join(', ', grep { $mask & AccountMask->{$_} } 
-                      sort { LJ::SiteMessages::AccountMask->{$b} <=> LJ::SiteMessages::AccountMask->{$a} } 
+    return join(', ', grep { $mask & AccountMask->{$_}->{value} } 
+                      sort { LJ::SiteMessages::AccountMask->{$b}->{value} <=> LJ::SiteMessages::AccountMask->{$a}->{value} } 
                       keys %{&AccountMask} );    
 }
 
@@ -128,6 +252,7 @@ sub filter_by_country {
     # split the list into a list of questions with countries and a list of questions without countries
     my @questions_with_countries;
     my @questions_without_countries;
+
     foreach my $question (@questions) {
         if ($question->{countries}) {
             push @questions_with_countries, $question;
@@ -154,35 +279,6 @@ sub filter_by_country {
     return (@questions_ret, @questions_without_countries);
 }
 
-sub filter_by_account {
-    my $class = shift;
-    my $u = shift;
-    my @questions = @_;
-
-    my $eff_class = $class->get_user_class($u);
-
-    return grep { $_->{accounts} & $eff_class } @questions;
-}
-
-sub filter_by_sup_flag {
-    my $class = shift;
-    my $u = shift;
-    my @questions = @_;
-
-    my $u_sup = LJ::SUP->is_sup_enabled($u);
-    my $coded = $u_sup ? AccountMask->{SUP} : AccountMask->{NonSUP};
-
-    return grep { $_->{accounts} & $coded } @questions;
-}
-
-sub is_office_only {
-    my $class = shift;
-    my $message = shift;
-
-    # +0 is important for doing integer bitwise operation, opposite to string operation
-    return ($message->{accounts}+0) & AccountMask->{OfficeOnly};
-}
-
 sub get_messages {
     my $class = shift;
     my %opts = @_;
@@ -195,17 +291,54 @@ sub get_messages {
     my @messages = $class->load_messages;
     @messages = grep { ref $_ } @messages;
 
-    my $country = LJ::GeoLocation->get_country_info_by_ip(LJ::get_remote_ip(), { allow_spec_country => 1 } );
-    my $office_only = $country eq '1S' || $country eq '6A';
-
-    # +0 is important for doing integer bitwise operation, opposite to string operation
-    @messages = grep { ~($_->{accounts}+0) & AccountMask->{OfficeOnly} or $office_only } @messages;
-
+    @messages = $class->filter_messages($u, @messages);
     @messages = $class->filter_by_country($u, @messages);
-    @messages = $class->filter_by_account($u, @messages);
-    @messages = $class->filter_by_sup_flag($u, @messages);
 
     return @messages;
+}
+
+#
+#   Filter the messages list for given remote
+#
+sub filter_messages {
+    my ($class, $u, @messages) = @_;
+    
+    return grep {
+        my $last_group = -1;
+        my $group_match = 1;
+        my $accept = 1;
+
+        for my $key ($class->get_options_list) {
+            # If entering a new group
+            if ($last_group != AccountMask->{$key}->{group}) {
+                unless ($group_match) {
+                    $accept = 0;
+                    last;
+                }
+            }
+
+            if (int($_->{accounts}) & AccountMask->{$key}->{value}) {
+                $group_match = AccountMask->{$key}->{validate}($u);
+            }
+
+            $last_group = AccountMask->{$key}->{group};
+        }
+
+        $accept;
+    } @messages;
+}
+
+#
+#   Check if mask has some certain bit set
+#
+sub has_mask {
+    my ($class, $mask_name, $mask_value) = @_;
+
+    if (defined AccountMask->{$mask_name} && defined AccountMask->{$mask_name}->{validate}) {
+        return int(AccountMask->{$mask_name}->{value}) & $mask_value;
+    } else {
+        return 0;
+    }
 }
 
 sub store_message {

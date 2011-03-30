@@ -25,7 +25,7 @@ sub _format_one_message {
     ## <lj user> tags and lj-sys-message-close attributes
     LJ::CleanHTML::clean_event(\$text, { 'lj_sys_message_id' => $mid });
 
-    my $is_office = LJ::SiteMessages->is_office_only($message) ? '<b>[Only for office]</b> ' : '';
+    my $is_office = LJ::SiteMessages->has_mask($message->{accounts}) ? '<b>[Only for office]</b> ' : '';
 
     return 
         "<p class='b-message b-message-suggestion b-message-system'>" .
