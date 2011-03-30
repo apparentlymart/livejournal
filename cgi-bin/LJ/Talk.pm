@@ -1273,7 +1273,7 @@ sub load_comments
                     $post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
                                                               $remote->{'userid'} == $uposterid ||
                                                               $remote->{'userid'} == $post->{'posterid'} ||
-                                                              $remote->can_manage($u) || 
+                                                              $remote->can_manage($u) ||
                                                               $remote->can_sweep($u)));
             }
             if (LJ::is_enabled('spam_button') && !$opts->{showspam}) {
@@ -2313,7 +2313,7 @@ sub get_replycount {
 #            style         : 'mine'
 #            showmultiform
 #            nohtml
-#            show_link_all : if true, show both (Expand) and (Collapse) links;
+#            show_collapse_link : BOOLEAN - if true, all comments have either "Expand" or "Collapse" link. Otherwise only "Expand" link, if collapsed or has collapsed children;
 #            get_root_only : retrieve only root of requested thread subtree;
 #            depth         : initial depth of requested thread (0, if not specified);
 #            talkid
@@ -2363,6 +2363,7 @@ sub get_thread_html
         init_comobj => 0,
         showspam    => LJ::is_enabled('spam_button') && $input->{mode} eq 'showspam' && !$input->{from_rpc} &&
                        $remote && ($remote->can_manage($u) || $remote->can_moderate($u)),
+        expand_all  => 0,
     };
 
     ## Expand all comments on page
@@ -2396,7 +2397,6 @@ sub get_thread_html
     my $fmt_time_short = "%%hh%%:%%min%% %%a%%m";
     my $jarg = "journal=$u->{'user'}&";
     my $jargent ="journal=$u->{'user'}&amp;";
-    my $thread_expander_func = LJ::run_hook('show_thread_expander', { is_s1 => 1 });
     my $allow_commenting = $entry->posting_comments_allowed;
     my $pics = LJ::Talk::get_subjecticons();
     my $talkurl = LJ::journal_base($u) . "/" . $entry->ditemid() . ".html";
@@ -2412,6 +2412,7 @@ sub get_thread_html
         
         my $tid = $post->{'talkid'};
         my $dtid = $tid * 256 + $anum;
+        my $thread_url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
         my $LJci = $LJ_cmtinfo->{$dtid} = { rc => [], u => '', full => $post->{_loaded}, depth => $depth };
 
         my $s2_datetime = $tz_remote ?
@@ -2463,7 +2464,7 @@ sub get_thread_html
 
         my $html = {};
         my $state;
-
+                
         if ($post->{'state'} eq "D") ## LJSUP-6433
         {
             $state = 'deleted';
@@ -2521,6 +2522,24 @@ sub get_thread_html
             $user = LJ::ljuser($upost, { side_alias => 1 }) if $upost;
                 
             my $icon = LJ::Talk::show_image($pics, $post->{'props'}->{'subjecticon'});
+
+            my $get_expand_link = sub {
+                return
+                    "<span id='expand_$dtid'>" . 
+                        "(<a href='$thread_url' onClick=\"ExpanderEx.make(this,'$thread_url','$dtid',true);return false;\">" .
+                            BML::ml('talk.expandlink') .
+                        "</a>)" .
+                    "</span>";
+            };
+
+            my $get_collapse_link = sub {
+                return
+                    "<span id='collapse_$dtid'>" .
+                        "(<a href='$thread_url' onClick=\"ExpanderEx.collapse(this,'$thread_url','$dtid',true);return false;\">" .
+                            BML::ml('talk.collapselink') .
+                        "</a>)" .
+                    "</span>";
+            };
 
             if ($post->{'_loaded'})
             {
@@ -2743,33 +2762,25 @@ sub get_thread_html
                     $text .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid'>" . BML::ml('talk.parentlink') . "</a>) ";
                 }
    
-                my $thread_url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
                 my $has_closed_children = 0;
                 if ($post->{'children'} && @{$post->{'children'}}) {
                     $text .= "(<a href='$thread_url'>" . BML::ml('talk.threadlink') . "</a>) ";
 
-                    if ($thread_expander_func &&
-                        (grep {! $_->{_loaded} and !($_->{state} eq "D")} @{$post->{'children'}})) {
+                    if (grep {! $_->{_loaded} and !($_->{state} eq "D")} @{$post->{'children'}}) {
                         $has_closed_children = 1;
                     }
                 }
 
-                $LJci->{has_link} = ($has_closed_children ? 1 : 0);
+                # $LJci->{has_link} = ($has_closed_children ? 1 : 0);
 
-                my $link = undef;
-                if (exists $input->{show_link_all}) {
-                    $link = 'all';
+                if (LJ::run_hook('show_thread_expander', { is_s1 => 1 })) {
+                    if ($has_closed_children) {
+                        $text .= ' ' . $get_expand_link->();
+                    }
+                    elsif ($input->{'show_collapse_link'}) {
+                        $text .= ' ' . $get_collapse_link->();
+                    }
                 }
-                elsif ($has_closed_children) {
-                    $link = 'expand';
-                }
-
-                $text .= $thread_expander_func->({
-                    thread_id            => $dtid,
-                    thread_url           => $thread_url,
-                    thread_loaded        => 1,
-                    thread_show_link     => $link,
-                }) if $thread_expander_func;
 
                 $text .= "</font></p>";
                 $text .= LJ::make_qr_target($dtid) if $remote;
@@ -2786,16 +2797,11 @@ sub get_thread_html
                 $html->{header} = $comment_header->();
                 $html->{footer} = $comment_footer->();
 
-                my $thread_url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
-                
                 my $text = "<a href='$thread_url'>" . LJ::ehtml($post->{'subject'} || BML::ml('.nosubject')) . "</a> - $user, <i>$datepost</i> ";
 
-                $text .= $thread_expander_func->({
-                    thread_id            => $dtid,
-                    thread_url           => $thread_url,
-                    thread_loaded        => 0,
-                    has_closed_children  => undef,
-                }) if $thread_expander_func;
+                if (LJ::run_hook('show_thread_expander', { is_s1 => 1 })) {
+                    $text .= ' ' . $get_expand_link->();
+                }
 
                 # Comment Posted Notice
                 $text .= " - <b>" . BML::ml('.posted') . "</b>"
@@ -2808,7 +2814,7 @@ sub get_thread_html
         push @$comments, {
             thread => $dtid,
             depth  => $depth,
-            html   => $html,
+            html   => $html->{header} . $html->{text} . $html->{footer},
             state  => $state,
         };
 
@@ -2826,3 +2832,4 @@ sub get_thread_html
 }
 
 1;
+

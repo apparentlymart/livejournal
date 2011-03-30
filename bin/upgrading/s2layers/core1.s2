@@ -416,6 +416,8 @@ class Comment extends EntryLite
     function builtin print_expand_link () : string "Prints a link to expand a collapsed comment. Uses the value of the 'text_comment_expand' property as the text.";
     function builtin print_expand_link (string{} opts) : string "Prints a link to expand a collapsed comment. Can pass options 'text', 'title', 'class', and 'img_url' (and other 'img_*' options).";
 
+    function builtin print_expand_collapse_links () "Prints links to expand and to collapse this comment.";
+
     function time_display (string datefmt, string timefmt, bool edittime) : string "Same as EntryLite::time_display, except can pass in if we want the edit time or not.";
     function edittime_display () : string "Show the time that this comment was edited, with most useful information for user.  Empty string if the comment hasn't been edited.";
     function edittime_display (string datefmt, string timefmt) : string "edittime_display, with customized date/time formats.";
@@ -766,13 +768,13 @@ class EntryPage extends Page
 
     function print_comments(Comment[] comments) "Prints comments";
     function print_comment(Comment comment) "Prints a full comment";
+    function print_comment_full(Comment comment) "Prints a expanded comment";
     function print_comment_partial(Comment comment) "Prints a collapsed comment";
 
     var bool multiform_on "Set to true if the multi-action is to be printed, which requires both comments and applicable permissions for the remote user.";
     function builtin print_multiform_start "Prints start of form tag and hidden elements to do a multi-comment action (multiple delete, screen, unscreen, etc...)";
     function builtin print_multiform_end "Prints end of form tag to do a multi-comment action.";
     function builtin print_multiform_actionline "Prints the line of the multiform giving instructions, options, and the submit button, using the text of the different \$*text_multiform_ properties.";
-    
 }
 
 class ReplyForm
@@ -1671,6 +1673,16 @@ property string text_comment_frozen {
     example = "Replies frozen";
     maxlength = "50";
 }
+property string text_comment_deleted {
+    des = "Text to replace comment body, if it is deleted";
+    example = "(Deleted)";
+    maxlength = "50";
+}
+property string text_comment_screened {
+    des = "Text to replace comment body, if it is screened";
+    example = "(Screened)";
+    maxlength = "50";
+}
 property string text_comment_parent {
     des = "Text to link to parent comment of current comment";
     example = "Parent";
@@ -1686,11 +1698,19 @@ property string text_comment_expand {
     example = "Expand";
     maxlength = "50";
 }
+property string text_comment_collapse {
+    des = "Text to collapse a expanded comment thread";
+    example = "Collapse";
+    maxlength = "50";
+}
 set text_comment_reply = "Reply";
 set text_comment_frozen = "Frozen";
+set text_comment_deleted = "(Deleted comment)";
+set text_comment_screened = "(Screened comment)";
 set text_comment_parent = "Parent";
 set text_comment_thread = "Thread";
 set text_comment_expand = "Expand";
+set text_comment_collapse = "Collapse";
 
 property string text_poster_anonymous {
     des = "The placeholder used when something is posted by an anonymous user";
@@ -2891,6 +2911,9 @@ function EntryPage::print_comment (Comment c) {
     }
     "</div>\n";
     $c->print_reply_container();
+}
+
+function EntryPage::print_comment_full (Comment c) {
 }
 
 function EntryPage::print_comment_partial (Comment c) {

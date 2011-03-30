@@ -100,7 +100,7 @@ function hsv_to_rgb (h, s, v)
     return [v,p,q];
 }
 
-function deleteComment (ditemid, isS1, action) {
+function deleteComment (ditemid, action) {
 	action = action || 'delete';
 	
 	var curJournal = (Site.currentJournal !== "") ? (Site.currentJournal) : (LJ_cmtinfo.journal);
@@ -160,11 +160,11 @@ function deleteComment (ditemid, isS1, action) {
             todel.style.border = "";
             // and let timer expire
         } else if (is_deleted) {
-            removeComment(ditemid, opt_delthread, isS1);
+            removeComment(ditemid, opt_delthread);
             if (opt_delauthor) {
                 for (var item in LJ_cmtinfo) {
                     if (LJ_cmtinfo[item].u == LJ_cmtinfo[ditemid].u) {
-                        removeComment(item, false, isS1);
+                        removeComment(item, false);
                     }
                 }
             }
@@ -176,37 +176,38 @@ function deleteComment (ditemid, isS1, action) {
     window.setTimeout(flash, 5);
 }
 
-function removeComment (ditemid, killChildren, isS1) {
-    if(isS1){
+function removeComment (ditemid, killChildren) {
+	if( LiveJournal.CommentManager.getState() !== 'iframe'){
 		var threadId = ditemid;
 
-		getThreadJSON(threadId, function(result) {
-			for( var i = 0; i < result.length; ++i ){
-				jQuery("#ljcmtxt" + result[i].thread).html( result[i].html );
-				if( result[i].thread in ExpanderEx.Collection)
-					ExpanderEx.Collection[ result[i].thread ] = result[i].html;
-			}
-		});
-    }
-    else {
-        var todel = document.getElementById("ljcmt" + ditemid);
-        if (todel) {
-            todel.style.display = 'none';
+		LiveJournal.CommentManager.getThreadJSON(threadId, function(result) {
+			LiveJournal.CommentManager.processThreadJSON( result, function( dtid, html, comment) {
+				LiveJournal.CommentManager.updateCell( dtid, html );
+				if( comment.is_deleted && ( dtid in ExpanderEx.Collection ) ) {
+					delete ExpanderEx.Collection[ dtid ];
+				}
+			} );
+		} );
+	}
+	else {
+		var todel = document.getElementById("ljcmt" + ditemid);
+		if (todel) {
+			todel.style.display = 'none';
 
-            var userhook = window["userhook_delete_comment_ARG"];
-            if (userhook)
-                userhook(ditemid);
-        }
-    }
-    if (killChildren) {
-        var com = LJ_cmtinfo[ditemid];
-        for (var i = 0; i < com.rc.length; i++) {
-            removeComment(com.rc[i], true, isS1);
-        }
-    }
+			var userhook = window["userhook_delete_comment_ARG"];
+			if (userhook)
+				userhook(ditemid);
+		}
+	}
+	if (killChildren) {
+		var com = LJ_cmtinfo[ditemid];
+		for (var i = 0; i < com.rc.length; i++) {
+			removeComment(com.rc[i], true);
+		}
+	}
 }
 
-function createDeleteFunction(ae, dItemid, isS1, action) {
+function createDeleteFunction(ae, dItemid, action) {
 	action = action || 'delete';
 	
     return function (e) {
@@ -219,7 +220,7 @@ function createDeleteFunction(ae, dItemid, isS1, action) {
         // immediately delete on shift key
         if (e.shiftKey) {
 			doIT = 1;
-			deleteComment(dItemid, isS1, action);
+			deleteComment(dItemid, action);
 			return true;
 		}
 		
@@ -350,7 +351,7 @@ function updateLink (ae, resObj, clickTarget) {
 }
 
 var tsInProg = {}  // dict of { ditemid => 1 }
-function createModerationFunction(control, dItemid, isS1, action) {
+function createModerationFunction(control, dItemid, action) {
 	var action = action || 'screen',
 		comUser = LJ_cmtinfo[dItemid].u;	
 	
@@ -391,27 +392,27 @@ function createModerationFunction(control, dItemid, isS1, action) {
 					}
 				}
 				
-				if (isS1) {
-					handleS1();
+				if( LiveJournal.CommentManager.getState() !== 'iframe' ) {
+					handleNew();
 				} else {
-					var ids = checkRcForNoCommentsPage(json);
-					handleS2(ids);
-				}				
-			});		
+					var ids = checkRcForNoCommentsPage();
+					handleIframe(ids);
+				}
+			});
 		}
-		
-		function handleS1() {
+
+		function handleNew() {
 			var newNode, showExpand, j, children,
 				threadId = dItemid,
 				threadExpanded = !!(LJ_cmtinfo[ threadId ].oldvars && LJ_cmtinfo[ threadId ].full);
 				populateComments = function (result) {
-					for( var i = 0; i < result.length; ++i ){
-						if( LJ_cmtinfo[ result[i].thread ].full ){
-							showExpand = !( 'oldvars' in LJ_cmtinfo[ result[i].thread ]);
+					LiveJournal.CommentManager.processThreadJSON( result, function( dtid, html ) {
+						if( LJ_cmtinfo[ dtid ].full ){
+							showExpand = !( 'oldvars' in LJ_cmtinfo[ dtid ]);
 	
 							//still show expand button if children comments are folded
 							if( !showExpand ) {
-								children  = LJ_cmtinfo[ result[i].thread ].rc;
+								children  = LJ_cmtinfo[ dtid ].rc;
 	
 								for( j = 0; j < children.length;  ++j ) {
 									if( !( 'oldvars' in LJ_cmtinfo[ children[j] ] ) ) {
@@ -420,40 +421,33 @@ function createModerationFunction(control, dItemid, isS1, action) {
 								}
 							}
 							
-							if (!result[i].html) {
+							if (!html) {
 								removeEmptyMarkup(result[i].thread);
 							}
 	
-							newNode = ExpanderEx.prepareCommentBlock(
-									result[i].html || '',
-									result[i].thread || '',
-									showExpand
-							);
-	
-							setupAjax( newNode[0], isS1 );
-							
-							jQuery("#ljcmtxt" + result[i].thread).replaceWith( newNode );
+							LiveJournal.CommentManager.updateCell( dtid, html );
 						}
-					}
+					} );
 					hourglass.hide();
 					poofAt(pos);
 				};
 	
-			getThreadJSON(threadId, function (result) {
+			LiveJournal.CommentManager.getThreadJSON(threadId, function (result) {
 				//if comment is expanded we need to fetch it's collapsed state additionally
 				if( threadExpanded && LJ_cmtinfo[ threadId ].oldvars.full )
 				{
-					getThreadJSON( threadId, function (result2) {
-						ExpanderEx.Collection[ threadId ] = ExpanderEx.prepareCommentBlock( result2[0].html, threadId, true ).html();
+					LiveJournal.CommentManager.getThreadJSON( threadId, function (result2) {
+						ExpanderEx.Collection[ threadId ] = result2[0].html;
 						populateComments( result );
 					}, true, true );
 				}
-				else
+				else {
 					populateComments( result );
-			}, false, !threadExpanded);			
+				}
+			}, false, !threadExpanded);
 		}
 
-		function handleS2(ids) {
+		function handleIframe(ids) {
 			// modified jQuery.fn.load
 			jQuery.ajax({
 				url: location.href,
@@ -469,28 +463,27 @@ function createModerationFunction(control, dItemid, isS1, action) {
 							.append(res.responseText.replace(/<script(.|\s)*?\/script>/gi, ''))
 							// Locate the specified elements
 							.find(ids)
-								.each(function () {
-									var id = this.id.replace(/[^0-9]/g, '');
-									if (LJ_cmtinfo[id].expanded) {
-										var expand = this.innerHTML.match(/Expander\.make\(.+?\)/)[0];
-										(function(){
-											eval(expand);
-										}).apply(document.createElement('a'));
-									} else {
-										jQuery('#' + this.id).replaceWith(this);
-										setupAjax(this, isS1);
-									}
-								});
+							.each(function () {
+								var id = this.id.replace(/[^0-9]/g, '');
+								if (LJ_cmtinfo[id].expanded) {
+									var expand = this.innerHTML.match(/Expander\.make\(.+?\)/)[0];
+									(function(){
+										eval(expand);
+									}).apply(document.createElement('a'));
+								} else {
+									jQuery('#' + this.id).replaceWith(this);
+								}
+							});
 						hourglass.hide();
 						poofAt(pos);
 					}
 				}
-			});			
+			});
 		}
-		
+
 		function checkRcForNoCommentsPage() {
 			var commsArray = [ dItemid ], ids;
-			
+
 			// check rc for no comments page
 			if (LJ_cmtinfo[dItemid].rc) {
 				if (/mode=(un)?freeze/.test(control.href)) {
@@ -517,7 +510,7 @@ function createModerationFunction(control, dItemid, isS1, action) {
 			function mapComms(id) {
 				var i = -1, newId;
 				
-				while (newId == LJ_cmtinfo[id].rc[++i]) {
+				while (newId = LJ_cmtinfo[id].rc[++i]) {
 					if (LJ_cmtinfo[newId].full) {
 						commsArray.push(newId);
 						mapComms(String(newId));
@@ -533,69 +526,132 @@ function createModerationFunction(control, dItemid, isS1, action) {
 }
 
 function removeEmptyMarkup(threadId) {
-	jQuery('#ljcmt' + threadId).remove();	
+	jQuery('#ljcmt' + threadId).remove();
 }
 
-function setupAjax (node, isS1) {
-    var links = node ? node.getElementsByTagName('a') : document.links,
-        rex_id = /id=(\d+)/,
-        i = -1, ae;
+(function( $, window ) {
 
-    isS1 = isS1 || false;
-    while (links[++i]) {
-        ae = links[i];
-        if (ae.href.indexOf('talkscreen.bml') != -1) {
-            var reMatch = rex_id.exec(ae.href);
-            if (!reMatch) continue;
+	window.LiveJournal.CommentManager = function() {
+		this.bindLinks();
+	}
 
-            var id = reMatch[1];
-            if (!document.getElementById('ljcmt' + id)) continue;
+	LiveJournal.CommentManager.prototype.bindLinks = function() {
+		$( 'body' ).delegate( 'a', 'click', function( ev ) {
+			var rex_id = /id=(\d+)/, ae = this;
 
-            ae.onclick = createModerationFunction(ae, id, isS1);
-        } else if (ae.href.indexOf('delcomment.bml') != -1) {
-            if (LJ_cmtinfo && LJ_cmtinfo.disableInlineDelete) continue;
+		if (ae.href.indexOf('talkscreen.bml') != -1) {
+			var reMatch = rex_id.exec(ae.href);
+			if (!reMatch) return;
 
-            var reMatch = rex_id.exec(ae.href);
-            if (!reMatch) continue;
+			var id = reMatch[1];
+			if (!document.getElementById('ljcmt' + id)) return;
 
-            var id = reMatch[1];
-            if (!document.getElementById('ljcmt' + id)) continue;
-			
+			createModerationFunction(ae, id)( ev );
+		} else if (ae.href.indexOf('delcomment.bml') != -1) {
+			if (LJ_cmtinfo && LJ_cmtinfo.disableInlineDelete) return;
+
+			var reMatch = rex_id.exec(ae.href);
+			if (!reMatch) return;
+
+			var id = reMatch[1];
+			if (!document.getElementById('ljcmt' + id)) return;
+
 			var action = (ae.href.indexOf('spam=1') != -1) ? 'markAsSpam' : 'delete';
 
-			ae.onclick = createDeleteFunction(ae, id, isS1, action);
+			createDeleteFunction(ae, id, action)( ev );
 		// unspam
 		} else if (ae.href.indexOf('spamcomment.bml') != -1) {
-            var reMatch = rex_id.exec(ae.href);
-            if (!reMatch) continue;
+			var reMatch = rex_id.exec(ae.href);
+			if (!reMatch) return;
 
-            var id = reMatch[1];
-            if (!document.getElementById('ljcmt' + id)) continue;
-			
-			ae.onclick = createModerationFunction(ae, id, isS1, 'unspam');
+			var id = reMatch[1];
+			if (!document.getElementById('ljcmt' + id)) return;
+			createModerationFunction(ae, id, 'unspam')( ev );
+				}
+
+			ev.preventDefault();
+			ev.stopPropagation();
+		} );
+	}
+
+	var manager = window.LiveJournal.CommentManager;
+
+	window.LiveJournal.CommentManager.getState = function() {
+		if( LJ_cmtinfo.use_old_thread_expander ) {
+			return "iframe";
+		} else {
+			return "old";
 		}
-    }
+	}
+
+	/**
+	 * @param {Number} threadId Id of thread to update
+	 * @param {Node} node Collection of nodes with new content
+	 *
+	 * @return {String} Returns a string containing old content of the cell;
+	 */
+	LiveJournal.CommentManager.updateCell = function( threadId, node ) {
+		var cell = $( "#ljcmt" + threadId ),
+			old_html = $( '<div></div>' ). append( cell.clone() );
+
+		cell.replaceWith( $( node ).filter( "#ljcmt" + threadId ) );
+
+		return old_html.html();
+	}
+
+	LiveJournal.CommentManager.getCell = function( threadId ) {
+		return $( "#ljcmt" + threadId );
+	}
+
+	LiveJournal.CommentManager.getThreadJSON = function(threadId, success, getSingle)
+	{
+		var postid = location.href.match(/\/(\d+).html/)[1],
+			modeParam = LiveJournal.parseGetArgs(location.href).mode,
+			params = {
+				journal: Site.currentJournal,
+				itemid: postid,
+				thread: threadId,
+				depth: LJ_cmtinfo[ threadId ].depth
+			};
+
+		if( getSingle) {
+			params.single = '1';
+		}
+
+		if (modeParam) {
+			params.mode = modeParam;
+		}
+
+		var endpoint = LiveJournal.getAjaxUrl( 'get_thread' );
+		jQuery.get( LiveJournal.constructUrl( endpoint, params ), success, 'json' );
+	}
+
+	LiveJournal.CommentManager.processThreadJSON = function( result, callback ) {
+		var comment, dom;
+		for( var i = 0; i < result.length; ++i ){
+			comment = {};
+			comment.is_deleted = ( result[i].state === "deleted" );
+			if( comment.is_deleted ) {
+				LJ_cmtinfo[ result[i].thread ].is_deleted = true;
+			}
+			dom = $( result[i].html ).filter( "#ljcmt" + result[i].thread );
+			callback( result[i].thread, dom, comment );
+		}
+	}
+
+	$( function() { new LiveJournal.CommentManager(); } );
+
+}( jQuery, window ))
+
+function LJ_Mul( a, b ) { return parseInt(a, 10) * parseInt(b, 10) }
+
+function LJ_JoinURL( url /* parts */ ) {
+	var add = [].slice.call( arguments, 1 ).join( '&' );
+
+	url += ( url.indexOf( '?' ) > -1 ) ? '&' : '?';
+	return url + add;
 }
 
-function getThreadJSON(threadId, success, getSingle)
-{
-    var postid = location.href.match(/\/(\d+).html/)[1],
-		modeParam = LiveJournal.parseGetArgs(location.href).mode,
-        params = [
-            'journal=' + Site.currentJournal,
-            'itemid=' + postid,
-            'thread=' + threadId,
-            'depth=' + LJ_cmtinfo[ threadId ].depth
-        ];
-		
-    if (getSingle)
-        params.push( 'single=1' );
-		
-	if (modeParam)
-		params.push( 'mode=' + modeParam )
-
-    var url = LiveJournal.getAjaxUrl('get_thread') + '?' + params.join( '&' );
-    jQuery.get( url, success, 'json' );
+function LJ_Concat( /* parts */ ) {
+	return [].slice.call( arguments, 0 ).join( '' );
 }
-
-jQuery(function(){setupAjax( false, ("is_s1" in LJ_cmtinfo ) )});

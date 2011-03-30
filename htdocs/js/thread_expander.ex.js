@@ -98,11 +98,11 @@ ExpanderEx.prototype.killFrame = function(){
     document.body.removeChild(this.iframe);
 }
 
-ExpanderEx.prototype.isFullComment = function(comment){
+ExpanderEx.prototype.isFullComment = function( comment ) {
     return !!Number(comment.info.full);
 }
 
-ExpanderEx.prototype.expandThread = function(json){
+ExpanderEx.prototype.expandThread = function( json ) {
     this.loadingStateOff();
 
     //we show expand link if comment block has collapsed children
@@ -126,14 +126,11 @@ ExpanderEx.prototype.expandThread = function(json){
         }
 
         threadId = json[ i ].thread;
-        cell = jQuery( '#ljcmtxt' + threadId );
-        if( threadId in ExpanderEx.Collection ) {
-            ExpanderEx.showExpandLink( threadId, cell, isChildCollapsed( i ) );
-            continue; //this comment is already expanded
-        }
 
-        ExpanderEx.Collection[ threadId ] = cell.html();
-        cell.replaceWith( ExpanderEx.prepareCommentBlock( json[ i ].html, threadId, isChildCollapsed( i ) ) );
+        var oldHtml = LiveJournal.CommentManager.updateCell( threadId, json[ i ].html );
+        if( !( threadId in ExpanderEx.Collection ) ) {
+            ExpanderEx.Collection[ threadId ] = oldHtml;
+        }
     }
 
     //duplicate cycle, because we do not know, that external scripts do with node
@@ -159,18 +156,12 @@ ExpanderEx.prototype.collapseThread = function( id ){
 
 ExpanderEx.prototype.collapseBlock =  function( id )
 {
-    var expander = this;
-    function updateBlock(id, html)
-    {
-        var el_ = jQuery( '#ljcmtxt' + id )
-            .html( html )[0];
-        expander.initCommentBlock( el_, id, true );
-    }
+	if( id in ExpanderEx.Collection ) {
+		LiveJournal.CommentManager.updateCell( id, ExpanderEx.Collection[ id ] );
 
-    if( id in ExpanderEx.Collection ){
-        updateBlock( id, ExpanderEx.Collection[ id ] );
-        delete ExpanderEx.Collection[ id ];
-    }
+		this.initCommentBlock( LiveJournal.CommentManager.getCell( id )[0], id, true );
+		delete ExpanderEx.Collection[ id ];
+	}
 }
 
 ExpanderEx.prototype.initCommentBlock = function( el_, id, restoreInitState )
@@ -189,7 +180,7 @@ ExpanderEx.prototype.initCommentBlock = function( el_, id, restoreInitState )
         delete LJ_cmtinfo[ id ].oldvars;
     }
     window.ContextualPopup && ContextualPopup.searchAndAdd(el_);
-    window.setupAjax && setupAjax(el_, true);
+    //window.setupAjax && setupAjax(el_, true);
     window.ESN && ESN.initTrackBtns(el_);
 }
 
@@ -206,55 +197,16 @@ ExpanderEx.prototype.get = function(){
     }
     this.loadingStateOn();
 
-    if( this.id in ExpanderEx.ReqCache ) {
-        this.expandThread( ExpanderEx.ReqCache[ this.id ] );
-    } else {
-        var obj = this;
-        //set timeout to allow browser to display image before request
-        setTimeout( function(){
-            getThreadJSON( obj.id, function(result) {
-                obj.expandThread(result);
-                ExpanderEx.ReqCache[ obj.id ] = result;
-            }, false, false, true );
-        }, 0 );
-    }
+    var obj = this;
+    //set timeout to allow browser to display image before request
+    setTimeout( function(){
+        LiveJournal.CommentManager.getThreadJSON( obj.id, function(result) {
+            obj.expandThread(result);
+            ExpanderEx.ReqCache[ obj.id ] = result;
+        }, false, false, true );
+    }, 0 );
 
     return true;
-}
-
-//toggle visibility of expand and collapse links, if server returns
-//html with both of them ( with every ajax request)
-ExpanderEx.prepareCommentBlock = function(html, id, showExpand){
-    var block = jQuery("<td>" + html + "</td>").attr( {
-            id: 'ljcmtxt' + id,
-            width: '100%'
-        } );
-
-    this.showExpandLink( id, block, showExpand );
-    return block;
-}
-
-ExpanderEx.showExpandLink = function ( id, block, showExpand ) {
-    var expandSel = "#expand_" + id,
-        collapseSel = "#collapse_" + id,
-        selector, resetSelector;
-
-    if( LJ_cmtinfo[ id ].has_link > 0 ) {
-        if( showExpand ) {
-            selector = collapseSel;
-            resetSelector = expandSel;
-        } else {
-            selector = expandSel;
-            resetSelector = collapseSel;
-        }
-        block.find( resetSelector ).css( 'display', '' );
-    }
-    else {
-        selector = collapseSel + "," + expandSel;
-    }
-
-    block.find( selector )
-        .css( 'display', 'none' );
 }
 
 ExpanderEx.preloadImg();

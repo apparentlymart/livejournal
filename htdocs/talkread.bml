@@ -517,6 +517,7 @@ body<=
             showmultiform => $showmultiform,
             talkid        => $GET{talkid},
             mode          => $GET{mode},
+            show_collapse_link => 0,
         },
         $output
     );
@@ -656,8 +657,8 @@ body<=
         # Print out each comment
         if (@$comments > 0)
         {
-            $ret .= $_->{html}->{header} . $_->{html}->{text} . $_->{html}->{footer} foreach @$comments;
-         
+            $ret .= $_->{html} foreach @$comments;
+
             my $do_commentmanage_js = 1;
             if ($LJ::DISABLED{'commentmanage'}) {
                 if (ref $LJ::DISABLED{'commentmanage'} eq "CODE") {

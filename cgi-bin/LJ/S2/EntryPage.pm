@@ -232,6 +232,7 @@ sub EntryPage
                 'edittime' => $edittime,
                 'tags' => [],
                 'full' => $com->{'_loaded'} ? 1 : 0,
+                'show' => $com->{'_show'} ? 1 : 0,
                 'depth' => $depth,
                 'parent_url' => $par_url,
                 'spam' => $com->{'state'} eq "B" ? 1 : 0,
@@ -300,7 +301,7 @@ sub EntryPage
         }
     };
     $p->{'comments'} = [];
-    $convert_comments->($convert_comments, $p->{'comments'}, \@comments, 1);
+    $convert_comments->($convert_comments, $p->{'comments'}, \@comments, ($get->{'depth'} || 0) + 1);
 
     # prepare the javascript data structure to put in the top of the page
     # if the remote user is a manager of the comments
@@ -326,7 +327,7 @@ sub EntryPage
         };
 
         my $recurse = sub {
-            my ($self, $array) = @_;
+            my ($self, $array, $depth) = @_;
 
             foreach my $i (@$array) {
                 my $cmt = LJ::Comment->new($u, dtalkid => $i->{talkid});
@@ -341,12 +342,13 @@ sub EntryPage
                     username => $i->{'poster'} ? $i->{'poster'}->{'_u'}->{'user'} : '',
                     parent => $parent && $parent->valid ? $parent->dtalkid : undef,
                     full   => ($i->{full}),
+                    depth  => $depth,
                 };
-                $self->($self, $i->{'replies'}) if $has_threads;
+                $self->($self, $i->{'replies'}, $depth + 1) if $has_threads;
             }
         };
 
-        $recurse->($recurse, $p->{'comments'});
+        $recurse->($recurse, $p->{'comments'}, 0);
 
         my $js = "<script>\n// don't crawl this.  read http://www.livejournal.com/developer/exporting.bml\n";
         $js .= "var LJ_cmtinfo = " . LJ::js_dumper($cmtinfo) . "\n";

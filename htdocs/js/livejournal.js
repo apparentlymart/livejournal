@@ -186,6 +186,25 @@ LiveJournal.parseGetArgs = function (url) {
     return getArgsHash;
 };
 
+
+/**
+ * Construct an url from base string and params object.
+ *
+ * @param {String} base Base string.
+ * @param {Object} args Object with arguments, that have to be passed with the url.
+ * @return {String}
+ */
+LiveJournal.constructUrl = function( base, args ) {
+	var queryStr = base + ( base.indexOf( '?' ) === -1 ? '?' : '&' ),
+		queryArr = [];
+
+	for( var i in args ) {
+		queryArr.push( i + '=' + args[i] );
+	}
+
+	return queryStr + queryArr.join( '&' );
+}
+
 LiveJournal.closeSiteMessage = function(node, e, id)
 {
 	jQuery.post(LiveJournal.getAjaxUrl('close_site_message'), {

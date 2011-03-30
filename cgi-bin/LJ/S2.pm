@@ -160,7 +160,7 @@ sub make_journal
     LJ::run_hooks('head_content', \$page->{head_content});
 
     s2_run($r, $ctx, $opts, $entry, $page);
-
+    
     if (ref $opts->{'errors'} eq "ARRAY" && @{$opts->{'errors'}}) {
         return join('',
                     "Errors occurred processing this page:<ul>",
@@ -183,7 +183,7 @@ sub make_journal
 
 sub s2_run
 {
-    my ($r, $ctx, $opts, $entry, $page) = @_;
+    my ($r, $ctx, $opts, $entry, $page, @args) = @_;
     $opts ||= {};
 
     local $LJ::S2::CURR_CTX  = $ctx;
@@ -253,7 +253,7 @@ sub s2_run
 
     S2::Builtin::LJ::start_css($ctx) if $css_mode;
     eval {
-        S2::run_code($ctx, $entry, $page);
+        S2::run_code($ctx, $entry, $page, @args);
     };
     S2::Builtin::LJ::end_css($ctx) if $css_mode;
 
@@ -3199,26 +3199,38 @@ sub _Comment__get_link
                             $ctx->[S2::PROPS]->{"text_multiform_opt_edit"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 24, 24));
     }
-    if ($key eq "expand_comments") {
+
+    if ($key eq "expand_comments" or $key eq "collapse_comments") {
         return $null_link unless LJ::run_hook('show_thread_expander');
-        ## show "Expand" link only if 
+        ## show "Expand" or "Collapse" link only if 
         ## 1) the comment is collapsed 
         ## 2) any of comment's children are collapsed
-        my $show_expand_link;
+        my $show_link;
         if (!$this->{full} and !$this->{deleted}) {
-            $show_expand_link = 1;
+            $show_link = 1;
         }
         else {
             foreach my $c (@{ $this->{replies} }) {
                 if (!$c->{full} and !$c->{deleted}) {
-                    $show_expand_link = 1;
+                    $show_link = 1;
                     last;
                 }
             }
         }
-        return $null_link unless $show_expand_link;
-        return LJ::S2::Link("#",        ## actual link is javascript: onclick='....'
-                            $ctx->[S2::PROPS]->{"text_comment_expand"});
+        return $null_link unless $show_link;
+
+        if ($key eq "expand_comments") {
+            return LJ::S2::Link(
+                "#", ## actual link is javascript: onclick='....'
+                $ctx->[S2::PROPS]->{"text_comment_expand"}
+            );
+        }
+        else { # $key eq "collapse_comments"
+            return LJ::S2::Link(
+                "#",
+                $ctx->[S2::PROPS]->{"text_comment_collapse"}
+            );
+        }
     }
 }
 
@@ -3460,6 +3472,45 @@ sub Comment__expand_link
 sub Comment__print_expand_link
 {
     $S2::pout->(Comment__expand_link(@_));
+}
+
+sub Comment__print_expand_collapse_links
+{
+    my ($ctx, $this) = @_;
+
+    my $text_expand = LJ::ehtml($ctx->[S2::PROPS]->{"text_comment_expand"});
+    my $text_collapse = LJ::ehtml($ctx->[S2::PROPS]->{"text_comment_collapse"});
+
+    my $print_expand_link = sub {
+        $S2::pout->(
+            " <span id='expand_$this->{talkid}'>" .
+                "(<a href='$this->{thread_url}' onClick=\"ExpanderEx.make(this,'$this->{thread_url}','$this->{talkid}',true);return false;\">$text_expand</a>)" . 
+            "</span>"
+        );
+    };
+
+    my $print_collapse_link = sub {
+        $S2::pout->(
+            " <span id='collapse_$this->{talkid}'>" .
+                "(<a href='$this->{thread_url}' onClick=\"ExpanderEx.collapse(this,'$this->{thread_url}','$this->{talkid}',true);return false;\">$text_collapse</a>)" . 
+            "</span>"
+        );
+    };
+
+    my $show_expand_link = sub { 
+        return 1 if !$this->{full} and !$this->{deleted};
+        foreach my $c (@{ $this->{replies} }) {
+            return 1 if !$c->{full} and !$c->{deleted};
+        }
+        return 0;
+    };
+
+    if ($show_expand_link->()) {
+        $print_expand_link->();
+    }
+    elsif ($this->{_show_collapse_link}) {
+        $print_collapse_link->();
+    }
 }
 
 sub Page__print_trusted
@@ -4526,5 +4577,4 @@ sub get_remote_lang {
     return $lang;
 }
 
-
-1;
+1; 

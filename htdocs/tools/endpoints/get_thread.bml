@@ -113,80 +113,217 @@
         return error($errtxt) unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
     }
 
-    my $props = $item->{'props'};
-    my $nocomments_old = $viewall ?
-                         0 :
-                         $u->{'opt_showtalklinks'} eq "N" ? 1 : $props->{'opt_nocomments'};
-    my $comments_shown = $viewall || $entry->comments_shown;
-    my $allow_commenting = $entry->posting_comments_allowed;
+    ### Load necessary props
+    my @needed_props = ("stylesys", "s2_style");
 
-    LJ::run_hooks("need_res_for_journals", $u);
-    my $graphicpreviews_obj = LJ::graphicpreviews_obj();
-    $graphicpreviews_obj->need_res($u);
+    LJ::load_user_props($u, @needed_props);
 
-    my $showmultiform = $remote &&
-                        ($remote->{'user'} eq $u->{'user'} ||
-                         $remote->{'user'} eq $up->{'user'} ||
-                         $remote->can_manage($u));
-
-    my $multiform_selects = 0;  # are there select boxes?  don't show form if not.
-
-    LJ::run_hook('notify_event_displayed', $entry);
-
-    my $LJ_cmtinfo = {  # data structure to give to javascript for commentmanage
-        form_auth => LJ::form_auth(1),
-        journal   => $u->{user},
-        canAdmin  => ($remote && $remote->can_manage($u)) ? 1 : 0,
-        remote    => $remote ? $remote->{user} : "",
+    ### Determine style system to preview with
+    my $get_styleinfo = sub {
+        my $forceflag = 0;
+        LJ::run_hooks("force_s1", $u, \$forceflag);
+        if ( !$forceflag && $u->{'stylesys'} == 2 ) {
+            return (2, $u->{'s2_style'});
+        }
+        # no special case and not s2, fall through to s1
+        return (1, 0);
     };
 
-    my $output = {};
-
-    my $comments = LJ::Talk::get_thread_html(
-        $u,
-        $up,
-        $entry,
-        $thread,
-        {
-            page              => $GET{page},
-            expand            => $GET{expand},
-            view              => $GET{view},
-            format            => $GET{format},
-            style             => $init->{style},
-            viewsome          => $viewsome,
-            viewall           => $viewall,
-            LJ_cmtinfo        => $LJ_cmtinfo,
-            showmultiform     => $showmultiform,
-            show_collapselink => 1,
-            get_root_only     => $GET{single} ? 1 : 0,
-            show_link_all     => 1,
-            depth             => $GET{depth} || 0,
-            mode              => $GET{mode},
-            from_rpc          => 1,
-        },
-        $output
-    );
-
-    return error($comments) unless ref $comments;
-    
-    unless ($comments_shown)
-    {
-        # TODO: think about it
-        $comments = [];
-    }
+    my ($stylesys, $styleid) = $get_styleinfo->();
 
     BML::set_content_type('text/javascript; charset=utf-8');
     BML::finish();
     BML::noparse();
 
-    return LJ::JSON->to_json( [
-        map { {
-            thread => $_->{thread},
-            html   => $_->{html}->{text},
-            depth  => $_->{depth},
-            state  => $_->{state},
-        } } @$comments
-    ] );
+    my $use_s1 = 1;
+    my $ctx = undef;
+    if ($stylesys == 2) {
+        $ctx = LJ::S2::s2_context('UNUSED', $styleid);
+        $LJ::S2::CURR_CTX = $ctx;
+
+        $use_s1 = 0 unless $ctx->[S2::PROPS]->{"view_entry_disabled"};
+    }
+
+    if ($use_s1)
+    {
+        my $props = $item->{'props'};
+        my $nocomments_old = $viewall ?
+                             0 :
+                             $u->{'opt_showtalklinks'} eq "N" ? 1 : $props->{'opt_nocomments'};
+        my $comments_shown = $viewall || $entry->comments_shown;
+        my $allow_commenting = $entry->posting_comments_allowed;
+
+        LJ::run_hooks("need_res_for_journals", $u);
+        my $graphicpreviews_obj = LJ::graphicpreviews_obj();
+        $graphicpreviews_obj->need_res($u);
+
+        my $showmultiform = $remote &&
+                            ($remote->{'user'} eq $u->{'user'} ||
+                             $remote->{'user'} eq $up->{'user'} ||
+                             $remote->can_manage($u));
+
+        my $multiform_selects = 0;  # are there select boxes?  don't show form if not.
+
+        LJ::run_hook('notify_event_displayed', $entry);
+
+        my $LJ_cmtinfo = {  # data structure to give to javascript for commentmanage
+            form_auth => LJ::form_auth(1),
+            journal   => $u->{user},
+            canAdmin  => ($remote && $remote->can_manage($u)) ? 1 : 0,
+            remote    => $remote ? $remote->{user} : "",
+        };
+
+        my $output = {};
+
+        my ($comments) = LJ::Talk::get_thread_html(
+            $u,
+            $up,
+            $entry,
+            $thread,
+            {
+                page               => $GET{page},
+                expand             => $GET{expand},
+                view               => $GET{view},
+                format             => $GET{format},
+                style              => $init->{style},
+                viewsome           => $viewsome,
+                viewall            => $viewall,
+                LJ_cmtinfo         => $LJ_cmtinfo,
+                showmultiform      => $showmultiform,
+                show_collapse_link => 1,
+                get_root_only      => $GET{single} ? 1 : 0,
+                depth              => $GET{depth} || 0,
+                mode               => $GET{mode},
+                from_rpc           => 1,
+            },
+            $output
+        );
+
+        return error($comments) unless ref $comments;
+
+        unless ($comments_shown)
+        {
+            # TODO: think about it
+            $comments = [];
+        }
+
+        return LJ::JSON->to_json( [
+            map { {
+                thread => $_->{thread},
+                html   => $_->{html},
+                depth  => $_->{depth},
+                state  => $_->{state},
+            } } @$comments
+        ] );
+    }
+    else
+    { # !$use_s1
+        my $ret = '';
+        $LJ::S2::ret_ref = \$ret;
+        
+        $u->{'_s2styleid'} = $styleid + 0;
+        $u->{'_journalbase'} = LJ::journal_base($u->{'user'});
+
+        my $opts = {
+            r       => 'UNUSED',
+            ctx     => $ctx,
+            ljentry => $entry,
+            getargs => {
+                thread => $dthread, # $thread
+                depth  => $GET{depth} || 0,
+                # viewall => ???,
+                # viewsome => ???,
+                # style => 'mine',
+                # defined $get->{'s2id'} ? "s2id=" . int( $get->{'s2id'} ) : ""
+                # $get->{'page'}
+
+                # my $view_arg = $get->{'view'} || "";
+                # my $flat_mode = ($view_arg =~ /\bflat\b/);
+                # my $view_num = ($view_arg =~ /(\d+)/) ? $1 : undef;
+                # 'view' => $view_num,
+                # 'flat' => $flat_mode,
+
+                #    'viewall' => $viewall,
+                #    'expand_all' => $opts->{expand_all},
+                #    'init_comobj' => 0,
+                #    'showspam'    => $p->{'showspam'} && !$get->{from_rpc},
+            },
+        };
+
+        # if (my $class = $view2class->{$view}) {
+        #     $entry = "${class}::print()";
+        #     no strict 'refs';
+        #     # this will fail (bogus method), but in non-apache context will bring
+        #     # in the right file because of Class::Autouse above
+        #     eval { "LJ::S2::$class"->force_class_autouse; };
+        #     my $cv = *{"LJ::S2::$class"}{CODE};
+        #     die "No LJ::S2::$class function!" unless $cv;
+        #     $page = $cv->($u, $remote, $opts);
+        # }
+
+        my $page = LJ::S2::EntryPage($u, $remote, $opts);
+
+        my $get_comment_text = sub {
+            my $comment = shift;
+            my $ret = '';
+            $LJ::S2::ret_ref = \$ret;
+
+            $comment->{_show_collapse_link} = 1; # all comments, retrieved by this endpoint should have expand or collapse link.
+
+            LJ::S2::s2_run('UNUSED', $ctx, undef, "EntryPage::print_comment(Comment)", $page, $comment);
+
+            return $ret;
+        };
+
+        my $comments = [];
+
+        my $process_comments = sub {
+            my ($self, $replies) = @_;
+
+            foreach my $c (@{$replies}) {
+                my $html = eval { $get_comment_text->($c); };
+                return error($@) if $@;
+
+                # my $state = '';
+                # if ($c->{deleted}) {
+                #     $state = 'deleted';
+                # } elsif ($c->{screened} && !$c->{full} && !$c->{show}) {
+                #     $state = 'screened';
+                # # } elsif ($post->{'state'} ne 'B' && $opts->{'showspam'}) {
+                # # } elsif ($post->{'state'} eq 'B' && !$opts->{'showspam'}) {
+                # #     $state = 'spamed';
+                # } elsif ($pu && $pu->is_suspended && !$viewsome) {
+                #     $state = 'suspended';
+                # } elsif ($c->{full}) {
+                #     $state = 'expanded';
+                # } else {
+                #     $state = 'collapsed';
+                # }
+
+                push @$comments, {
+                    thread => $c->{talkid},
+                    html   => $html,
+                    depth  => $c->{depth},
+                    state  => ($c->{full} ? 'expanded' : 'collapsed'), # $state,
+                };
+                $self->($self, $c->{replies}) if $c->{replies} && @{$c->{replies}};
+            }
+        };
+
+        $process_comments->($process_comments, $page->{comments});
+        
+        # $ret =~ s/<\?/&lt;?/g;
+        # $ret =~ s/\?>/?&gt;/g;
+
+        return LJ::JSON->to_json( [
+            map { {
+                thread => $_->{thread},
+                html   => $_->{html},
+                depth  => $_->{depth},
+                state  => $_->{state},
+            } } @$comments
+        ] );
+    }
 }
 
 _code?>
