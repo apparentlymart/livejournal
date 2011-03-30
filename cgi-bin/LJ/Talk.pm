@@ -1708,7 +1708,8 @@ sub talkform {
             $journalu );
     }
 
-    my ( @author_options, $usertype_default );
+    my @author_options;
+    my $usertype_default = $form->{'usertype'};
     foreach my $author_class (LJ::Talk::Author->all) {
         next unless $author_class->enabled;
 
