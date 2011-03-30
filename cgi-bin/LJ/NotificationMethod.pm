@@ -116,4 +116,7 @@ sub all_available_methods {
     } @LJ::NOTIFY_TYPES;
 }
 
+# indicates that remote can use this one; may be overriden in subclasses
+sub remote_eligible { 1 }
+
 1;

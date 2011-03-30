@@ -20,16 +20,7 @@ sub render_body {
     my @groups = @{$opts->{'groups'}};
     my $u = $opts->{'u'} || LJ::get_remote();
 
-    my @ntypes = @LJ::NOTIFY_TYPES;
-    my $country = LJ::country_of_remote_ip();
-    my $phone = LJ::SMS::API::RU::Phone->get_phone($u->userid);
-    if ($LJ::DISABLED{smsru} or
-        ($country ne 'RU'
-        and not ($phone && LJ::SMS::API::RU::Phone->get_status($u->userid, $phone) ne 'verified')
-        )
-    ){
-        @ntypes = grep { $_ ne 'LJ::NotificationMethod::SMSru' ? 1 : 0 } @ntypes;
-    }
+    my @ntypes = grep { $_->remote_eligible } @LJ::NOTIFY_TYPES;
 
     my $colnum = scalar(@ntypes) + 1;
 
