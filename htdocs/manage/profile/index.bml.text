@@ -183,6 +183,8 @@
 
 .fn.smsinterval.localtime=you local timezone.
 
+.fn.smsinterval.localtime2=you local timezone ([[timezone]]).
+
 .fn.zip=ZIP Code
 
 .friendof=Show other users who have friended you, but you have not friended
