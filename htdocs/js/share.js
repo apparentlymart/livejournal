@@ -216,7 +216,7 @@ window.LJShare.link = function( opts, node ) {
 		{
 			togglePopup( false );
 			ev.preventDefault();
-			window.open(this.href, 'sharer', 'toolbar=0,status=0,width=640,height=300');
+			window.open(this.href, 'sharer', 'toolbar=0,status=0,width=640,height=480,scrollbars=yes,resizable=yes');
 		} );
 	}
 
@@ -318,7 +318,7 @@ window.LJShare.entry = function( opts ) {
 				link.each( function() {
 					var url = supplant( serviceObj.bindLink, options );
 					$( this ).click( function( ev ) {
-						window.open( url, 'sharer', 'toolbar=0,status=0,width=640,height=300');
+						window.open( url, 'sharer', 'toolbar=0,status=0,width=640,height=480,scrollbars=yes,resizable=yes');
 						ev.preventDefault();
 					} );
 				} );
