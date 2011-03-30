@@ -551,8 +551,13 @@ sub matches_filter {
 
     # not a match if this user posted the comment and they don't
     # want to be notified of their own posts
+    # moreover, getselfemail only applies to email, so if it's not an email
+    # notification, it's not a match either
     if (LJ::u_equals($comment->poster, $watcher)) {
-        return 0 unless $watcher->get_cap('getselfemail') && $watcher->prop('opt_getselfemail');
+        return 0
+            unless $watcher->get_cap('getselfemail')
+                && $watcher->prop('opt_getselfemail')
+                && $subscr->ntypeid == LJ::NotificationMethod::Email->ntypeid;
     }
 
     # watching a specific journal
