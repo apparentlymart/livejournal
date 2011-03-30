@@ -45,6 +45,7 @@ unless (($list   && (($banid && ! $an_opt) || (! $banid && $an_opt)) ||
 # now load in the beast
 use lib "$ENV{'LJHOME'}/cgi-bin/";
 require "ljlib.pl";
+require "sysban.pl";
 use LJ::TimeUtil;
 
 my $dbh = LJ::get_db_writer();
@@ -95,6 +96,8 @@ if ($banlength) {
 
 # add new ban
 if ($add) {
+    my $err = LJ::sysban_validate($what, $value);
+    die $err if $err;
 
     $status = ($status eq 'expired' ? 'expired' : 'active');
 
@@ -140,6 +143,11 @@ if ($modify) {
     # load selected ban
     my $ban = $dbh->selectrow_hashref("SELECT * FROM sysban WHERE banid=?", undef, $banid);
     die $dbh->errstr if $dbh->err;
+
+    if ($what || $value) {
+        my $err = LJ::sysban_validate($what || $ban->{'what'}, $value || $ban->{'value'});
+        die $err if $err;
+    }
 
     my @set = ();
 
