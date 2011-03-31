@@ -1347,8 +1347,8 @@ sub deny_communities {
         or die "unable to contact global db master to create category";
 
     $dbh->do("UPDATE categoryjournals_pending SET status=?, " .
-             "modid=?, lastupdate=UNIX_TIMESTAMP() WHERE pendid IN(?)", undef,
-             'D', $mod_u->userid, @pendids);
+             "modid=?, lastupdate=UNIX_TIMESTAMP() WHERE pendid IN(".join(",", @pendids).")", undef,
+             'D', $mod_u->userid);
     die $dbh->errstr if $dbh->err;
 
     return;
@@ -1376,7 +1376,7 @@ sub approve_communities {
     # Update moderation table
     $dbh->do("UPDATE categoryjournals_pending SET status=?, " .
              "modid=?, lastupdate=UNIX_TIMESTAMP() WHERE pendid IN(".join(",", @pendids).")", undef,
-             'A', $mod_u->userid, @pendids);
+             'A', $mod_u->userid);
     die $dbh->errstr if $dbh->err;
 
     $self->clear_journals_memcache;
