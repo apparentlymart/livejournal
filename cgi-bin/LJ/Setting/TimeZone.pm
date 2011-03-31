@@ -21,18 +21,44 @@ sub label {
     return $class->ml('setting.timezone.label');
 }
 
+# this one returns a $key => $value list, ordered by keys this way:
+# US goes first, then Canada, then all the rest
+sub timezone_options {
+    my ($class) = @_;
+
+    my $map = DateTime::TimeZone::links();
+
+    my ( @options, %options );
+
+    foreach my $key ( sort keys %$map ) {
+        if ( $key =~ m!^US/! && $key ne 'US/Pacific-New' ) {
+            $options{ $map->{$key} } = $key;
+            push @options, $map->{$key} => $key;
+        }
+    }
+
+    foreach my $key ( sort keys %$map ) {
+        if ( $key =~ m!^Canada/! ) {
+            $options{ $map->{$key} } = $key;
+            push @options, $map->{$key} => $key;
+        }
+    }
+
+    foreach my $key ( DateTime::TimeZone::all_names() ) {
+        next if $options{$key};
+        push @options, $key => $key;
+    }
+
+    return @options;
+}
+
 sub option {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
 
     my $timezone = $class->get_arg($args, "timezone") || $u->prop("timezone");
 
-    my $map = DateTime::TimeZone::links();
-    my $usmap = { map { $_ => $map->{$_} } grep { m!^US/! && $_ ne "US/Pacific-New" } keys %$map };
-    my $camap = { map { $_ => $map->{$_} } grep { m!^Canada/! } keys %$map };
-
-    my @options = ("", $class->ml('setting.timezone.option.select'));
-    push @options, (map { $usmap->{$_}, $_ } sort keys %$usmap), (map { $camap->{$_}, $_ } sort keys %$camap), (map { $_, $_ } DateTime::TimeZone::all_names());
+    my @options = $class->timezone_options;
 
     my $ret = LJ::html_select({
         name => "${key}timezone",

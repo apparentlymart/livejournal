@@ -600,8 +600,10 @@ body<=
                 $ret .= LJ::html_select({ 'name' => 'sms_interval_end',
                                                   'selected' => $end || 23, },
                                                   @sms_time);
+
+                my %timezone_options = LJ::Setting::TimeZone->timezone_options;
                 $ret .= " " . BML::ml(".fn.smsinterval.localtime2", {
-                    'timezone' => $u->prop('timezone'),
+                    'timezone' => $timezone_options{ $u->prop('timezone') },
                 });
 
                 $ret .= '</div>';
