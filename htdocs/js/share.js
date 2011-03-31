@@ -77,7 +77,7 @@ var template = {
 					<div class="b-sharethis-head">{title}</div> \
 					<div class="b-sharethis-services">',
 	//here we take values from an object made from service object. Availible vars: name, url, title.
-	item: '<span class="b-sharethis-{name}"><a href="{url}" target="_blank">{title}</a></span>',
+	item: '<span class="b-sharethis-{name}"><a href="{url}" data-service={name} >{title}</a></span>',
 	//here we take values from global_options.ml object
 	end: '</div> \
 				</div> \
@@ -94,7 +94,7 @@ var default_options = {
 	},
 	services: {
 		livejournal: {
-			title: 'LiveJournal', bindLink: 'http://www.livejournal.com/update.bml?repost={url}'
+			title: 'LiveJournal', bindLink: 'http://www.livejournal.com/update.bml?repost={url}', openInTab: true
 		},
 		facebook: {
 			title: 'Facebook', bindLink: 'http://www.facebook.com/sharer.php?u={url}'
@@ -115,7 +115,7 @@ var default_options = {
 			title: 'Digg', bindLink: 'http://digg.com/submit?url={url}'
 		},
 		email: {
-			title: 'E-mail', bindLink: 'http://api.addthis.com/oexchange/0.8/forward/email/offer?username=internal&url={url}'
+			title: 'E-mail', bindLink: 'http://api.addthis.com/oexchange/0.8/forward/email/offer?username=internal&url={url}', height: 600
 		},
 		tumblr: {
 			title: 'Tumblr', bindLink: 'http://www.tumblr.com/share?v=3&u={url}'
@@ -180,7 +180,7 @@ window.LJShare.link = function( opts, node ) {
 
 			str+= supplant( template.item, {
 				name: serviceName,
-				title: serviceObj.title, 
+				title: serviceObj.title,
 				url: supplant( serviceObj.bindLink, options )
 			} );
 		}
@@ -209,14 +209,21 @@ window.LJShare.link = function( opts, node ) {
 			skipCloseEvent = false;
 		}
 
-		dom.find( selectors.close ).bind( 'click', function( ev ) {	togglePopup( false ); } );
+		dom.find( selectors.close ).bind( 'click', function( ev ) { togglePopup( false ); } );
 		$( document ).bind( 'click', checkClose );
 		$( window ).bind( 'resize', checkClose );
 		dom.find( selectors.links ).click( function( ev )
 		{
 			togglePopup( false );
-			ev.preventDefault();
-			window.open(this.href, 'sharer', 'toolbar=0,status=0,width=640,height=480,scrollbars=yes,resizable=yes');
+			var service = $( this ).attr( 'data-service' );
+			if( global_options.services[ service ].openInTab ) {
+				this.target = "_blank";
+			} else {
+				ev.preventDefault();
+				var width = global_options.services[ service ].width || 640;
+				var height = global_options.services[ service ].height || 480;
+				window.open(this.href, 'sharer', 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
+			}
 		} );
 	}
 
@@ -317,10 +324,17 @@ window.LJShare.entry = function( opts ) {
 			if( service in global_options.services ) {
 				link.each( function() {
 					var url = supplant( serviceObj.bindLink, options );
-					$( this ).click( function( ev ) {
-						window.open( url, 'sharer', 'toolbar=0,status=0,width=640,height=480,scrollbars=yes,resizable=yes');
-						ev.preventDefault();
-					} );
+					if ( service.openInTab ) {
+						this.url = url;
+						this.target = "_blank";
+					} else {
+						$( this ).click( function( ev ) {
+							var width = service.width || 640;
+							var height = service.height || 480;
+							window.open( url, 'sharer', 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
+							ev.preventDefault();
+						} );
+					}
 				} );
 			}
 
