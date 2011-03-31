@@ -1163,7 +1163,7 @@ HTML BODY.logged-out {
 			margin: 0 !important;
 			padding: 0 !important;
 			border: 0 !important;
-			background: #FFF url(/img/showmore-login.gif) no-repeat 26px 2px !important;
+			background: #FFF url(/img/showmore-login.gif?v=1) no-repeat 26px 2px !important;
 			cursor: pointer !important;
 			text-align: left !important;
 			text-decoration: none !important;
@@ -1179,7 +1179,7 @@ HTML BODY.logged-out {
 			left: 0 !important;
 			width: 47px !important;
 			height: 26px !important;
-			background: #FFF url(/img/showmore-login.gif) no-repeat 28px 2px !important;
+			background: #FFF url(/img/showmore-login.gif?v=1) no-repeat 28px 2px !important;
 			outline: 0;
 			}
 			.b-postform-login-services-current-pic {
@@ -1195,7 +1195,7 @@ HTML BODY.logged-out {
 				-moz-border-radius: 3px !important;
 				border-radius: 3px !important;
 				background-color: transparent;
-				background-image: url(/img/pencil.gif);
+				background-image: url(/img/pencil.gif?v=1);
 				background-repeat: no-repeat;
 				background-position: 6px 1px;
 				}
@@ -1203,7 +1203,7 @@ HTML BODY.logged-out {
 				left: 1px;
 				}
 			.b-postform-authtype-anonymous .b-postform-login-services-current-pic {
-				background-image: url(/img/anonymous.gif);
+				background-image: url(/img/anonymous.gif?v=1);
 				}
 			.b-postform-authtype-livejournal .b-postform-login-services-current-pic,
 			.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-current-pic,
@@ -1212,25 +1212,25 @@ HTML BODY.logged-out {
 			.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-current-pic,
 			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-current-pic,
 			.b-postform-authtype-vkontakte.b-postform-ability-disabled-vkontakte .b-postform-login-services-current-pic {
-				background-image: url(/img/pencil.gif);
+				background-image: url(/img/pencil.gif?v=1);
 				}
 			.b-postform-authtype-user .b-postform-login-services-current-pic {
-				background-image: url(/img/userinfo.gif);
+				background-image: url(/img/userinfo.gif?v=1);
 				}
 			.b-postform-authtype-facebook .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/facebook-16.gif);
+				background-image: url(/img/icons/facebook-16.gif?v=1);
 				}
 			.b-postform-authtype-twitter .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/twitter-16.gif);
+				background-image: url(/img/icons/twitter-16.gif?v=3);
 				}
 			.b-postform-authtype-openid .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/openid-16.gif);
+				background-image: url(/img/icons/openid-16.gif?v=1);
 				}
 			.b-postform-authtype-mailru .b-postform-login-services-current-pic {
 				background-image: url(/img/icons/mailru-16.gif?v=3);
 				}
 			.b-postform-authtype-vkontakte .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/vkontakte-16.gif);
+				background-image: url(/img/icons/vkontakte-16.gif?v=1);
 				}
 		.b-postform-login-services-items {
 			position: absolute;
