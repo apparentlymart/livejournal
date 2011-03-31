@@ -771,7 +771,7 @@ HTML BODY.logged-out {
 			background: url(/img/icons/twitter-16.gif?v=3) no-repeat 20px 50%;
 			}
 		.m-auth-mailru A {
-			background: url(/img/icons/mailru-16.gif?v=1) no-repeat 20px 50%;
+			background: url(/img/icons/mailru-16.gif?v=3) no-repeat 20px 50%;
 			}
 		.m-auth-vkontakte A {
 			background: url(/img/icons/vkontakte-16.gif?v=1) no-repeat 20px 50%;
@@ -1227,7 +1227,7 @@ HTML BODY.logged-out {
 				background-image: url(/img/icons/openid-16.gif);
 				}
 			.b-postform-authtype-mailru .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/mailru-16.gif);
+				background-image: url(/img/icons/mailru-16.gif?v=3);
 				}
 			.b-postform-authtype-vkontakte .b-postform-login-services-current-pic {
 				background-image: url(/img/icons/vkontakte-16.gif);
