@@ -1375,7 +1375,7 @@ sub approve_communities {
 
     # Update moderation table
     $dbh->do("UPDATE categoryjournals_pending SET status=?, " .
-             "modid=?, lastupdate=UNIX_TIMESTAMP() WHERE pendid IN(?)", undef,
+             "modid=?, lastupdate=UNIX_TIMESTAMP() WHERE pendid IN(".join(",", @pendids).")", undef,
              'A', $mod_u->userid, @pendids);
     die $dbh->errstr if $dbh->err;
 
