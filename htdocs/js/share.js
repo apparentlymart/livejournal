@@ -33,7 +33,7 @@
 
 function preload( srcArr ) {
 	for( var i = srcArr.length; --i;
-		( new Image() ).src = Site.imgprefix + srcArr[ i ] + '?v=1';
+		( new Image() ).src = Site.imgprefix + srcArr[ i ] + '?v=1' );
 }
 
 function prepareOptions( opts ) {
