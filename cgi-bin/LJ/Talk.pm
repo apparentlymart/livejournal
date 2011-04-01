@@ -390,13 +390,13 @@ sub can_mark_spam {
     my ($remote, $u, $up, $userpost) = @_;
     return 0 unless $remote;
     return 0 if $userpost && $remote->{'user'} eq (ref $userpost ? $userpost->{'user'} : $userpost);
-    return 1 if $remote->can_manage($u) || $remote->can_moderate($u);
+    return 1 if $remote->can_manage($u);
 }
 
 sub can_unmark_spam {
     my ($remote, $u, $up, $userpost) = @_;
     return 0 unless $remote;
-    return 1 if $remote->can_manage($u) || $remote->can_moderate($u);
+    return 1 if $remote->can_manage($u);
 }
 
 # <LJFUNC>
