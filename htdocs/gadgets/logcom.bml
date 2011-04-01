@@ -16,7 +16,7 @@
     my $domain  = LJ::Request->get_param('domain');
 
     ## convert remote-site key to lj.com's community
-    my $partner = LJ::PartnerSite->find_by_api_key($api_key);
+    my $partner = LJ::PartnerSite->find_by_journal_username('kommersant_id');#LJ::PartnerSite->find_by_api_key($api_key);
     return 'unknown key'
         unless $partner;
 
@@ -65,6 +65,14 @@
 
         my $ljuser_html = $partner->ljuser_html($remote);
 
+        my $resources_html = $partner->partner_resources;
+        
+        if ($resources_html) {
+            LJ::need_res( { clean_list => 1 } );
+            LJ::need_res( @{ $partner->{resources} } );
+        }
+        $resources_html .= LJ::res_includes();
+
         return
             LJ::Talk::talkform({
                 'embedable_form'    => 1,
@@ -78,8 +86,7 @@
                 'ditemid'           => $entry->ditemid,
                 'replyto'           => int ($replyto / 256),
 
-                'resources_html'    => $partner->resources_html
-                                    || LJ::res_includes(),
+                'resources_html'    => $resources_html,
             });
     } else {
         ## display login widget
@@ -95,12 +102,18 @@
         my $w = LJ::Widget::LoginMulti->new;
         $w->{'no_container_div'} = 1;
 
+        my $resources_html = $partner->partner_resources;
+
+        if ($resources_html) {
+            LJ::need_res( { clean_list => 1 } );
+            LJ::need_res( @{ $partner->{resources} } );
+        }
+        $resources_html .= LJ::res_includes();
+
         return $w->render(
             'embedded'          => 1,
             'js_check_domain'   => $js_check_domain,
-            'resources_html'    => $partner->resources_html
-                                || LJ::res_includes(),
-
+            'resources_html'    => $resources_html,
             'forwhat'           => 'external',
             'thispage'          => $thispage,
             'lj_auth'           => 1,
