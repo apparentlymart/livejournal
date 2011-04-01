@@ -69,9 +69,11 @@
         
         if ($resources_html) {
             LJ::need_res( { clean_list => 1 } );
-            LJ::need_res( @{ $partner->{resources} } );
+            LJ::need_res( @{ $partner->resources } );
+            $resources_html .= LJ::res_includes( {only_needed => 1} );
+        } else {
+            $resources_html .= LJ::res_includes();
         }
-        $resources_html .= LJ::res_includes();
 
         return
             LJ::Talk::talkform({
@@ -106,9 +108,11 @@
 
         if ($resources_html) {
             LJ::need_res( { clean_list => 1 } );
-            LJ::need_res( @{ $partner->{resources} } );
+            LJ::need_res( @{ $partner->resources } );
+            $resources_html .= LJ::res_includes( {only_needed => 1} );
+        } else {
+            $resources_html .= LJ::res_includes();
         }
-        $resources_html .= LJ::res_includes();
 
         return $w->render(
             'embedded'          => 1,
