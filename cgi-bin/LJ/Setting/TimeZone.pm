@@ -30,6 +30,8 @@ sub timezone_options {
 
     my ( @options, %options );
 
+    push @options, '' => $class->ml('setting.timezone.option.select');
+
     foreach my $key ( sort keys %$map ) {
         if ( $key =~ m!^US/! && $key ne 'US/Pacific-New' ) {
             $options{ $map->{$key} } = $key;
