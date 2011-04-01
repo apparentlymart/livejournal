@@ -63,18 +63,6 @@
                          'returnto=' . LJ::eurl($thispage) . '&' .
                          'sessid=' . $remote_sessid;
 
-        my $ljuser_html = $partner->ljuser_html($remote);
-
-        my $resources_html = $partner->partner_resources;
-        
-        if ($resources_html) {
-            LJ::need_res( { clean_list => 1 } );
-            LJ::need_res( @{ $partner->resources } );
-            $resources_html .= LJ::res_includes( {only_needed => 1} );
-        } else {
-            $resources_html .= LJ::res_includes();
-        }
-
         return
             LJ::Talk::talkform({
                 'embedable_form'    => 1,
@@ -87,8 +75,7 @@
                 'journalu'          => $journal,
                 'ditemid'           => $entry->ditemid,
                 'replyto'           => int ($replyto / 256),
-
-                'resources_html'    => $resources_html,
+                'resources_html'    => $partner->resources,
             });
     } else {
         ## display login widget
@@ -104,20 +91,10 @@
         my $w = LJ::Widget::LoginMulti->new;
         $w->{'no_container_div'} = 1;
 
-        my $resources_html = $partner->partner_resources;
-
-        if ($resources_html) {
-            LJ::need_res( { clean_list => 1 } );
-            LJ::need_res( @{ $partner->resources } );
-            $resources_html .= LJ::res_includes( {only_needed => 1} );
-        } else {
-            $resources_html .= LJ::res_includes();
-        }
-
         return $w->render(
             'embedded'          => 1,
             'js_check_domain'   => $js_check_domain,
-            'resources_html'    => $resources_html,
+            'resources_html'    => $partner->resources,
             'forwhat'           => 'external',
             'thispage'          => $thispage,
             'lj_auth'           => 1,
