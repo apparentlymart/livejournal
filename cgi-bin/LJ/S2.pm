@@ -618,8 +618,10 @@ sub get_style
     my $have_style = 0;
 
     if ($verify && $styleid) {
-        my $dbr = LJ::S2::get_s2_reader();
+        #my $dbr = LJ::S2::get_s2_reader();       LJSV-1375
+        my $dbr = LJ::get_db_writer();
         my $style = $dbr->selectrow_hashref("SELECT * FROM s2styles WHERE styleid=$styleid");
+        die "ERROR: " . $dbr->errstr if $dbr->err;
         if (! $style && $u) {
             delete $u->{'s2_style'};
             $styleid = 0;
