@@ -45,9 +45,10 @@ function prepareOptions( opts ) {
 
 	var options = jQuery.extend( {}, defaults, opts );
 
-	options.url = encodeURIComponent( options.url );
-	options.title = encodeURIComponent( options.title );
-	options.description = encodeURIComponent( options.description );
+	//we encode strings two times, because they are decoded once on the livejournal endpoint
+	options.url = encodeURIComponent( encodeURIComponent( options.url ) );
+	options.title = encodeURIComponent( encodeURIComponent( options.title ) );
+	options.description = encodeURIComponent( encodeURIComponent( options.description ) );
 	return options;
 }
 
