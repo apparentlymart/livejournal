@@ -33,13 +33,28 @@
 
 function preload( srcArr ) {
 	for( var i = srcArr.length; --i;
-		( new Image() ).src = srcArr[ i ] + '?' + Math.random() );
+		( new Image() ).src = Site.imgprefix + srcArr[ i ] + '?' + Math.random() );
+}
+
+function prepareOptions( opts ) {
+	var defaults = {
+		title: '',
+		description: '',
+		url: ''
+	}
+
+	var options = jQuery.extend( {}, defaults, opts );
+
+	options.url = encodeURIComponent( options.url );
+	options.title = encodeURIComponent( options.title );
+	options.description = encodeURIComponent( options.description );
+	return options;
 }
 
 preload( [
-	'/img/popup-cls.gif',
-	'/img/popup-arr.gif',
-	'/img/icons/sharethis.gif'
+	'/popup-cls.gif',
+	'/popup-arr.gif',
+	'/icons/sharethis.gif'
 ] );
 
 function supplant(str, o) {
@@ -109,10 +124,10 @@ var default_options = {
 			title: 'Moi Mir', bindLink: 'http://connect.mail.ru/share?url={url}'
 		},
 		stumbleupon: {
-			title: 'Stumbleupon', bindLink: 'http://www.stumbleupon.com/submit?url={url}'
+			title: 'Stumbleupon', bindLink: 'http://www.stumbleupon.com/submit?url={url}', openInTab: true
 		},
 		digg: {
-			title: 'Digg', bindLink: 'http://digg.com/submit?url={url}'
+			title: 'Digg', bindLink: 'http://digg.com/submit?url={url}', openInTab: true
 		},
 		email: {
 			title: 'E-mail', bindLink: 'http://api.addthis.com/oexchange/0.8/forward/email/offer?username=internal&url={url}', height: 600
@@ -156,19 +171,12 @@ window.LJShare.init = function( opts ) {
 * @param String|Node|Jquery collection Node the popup has to be attached to. Default id a:last
 */
 window.LJShare.link = function( opts, node ) {
-	var defaults = {
-		title: '',
-		description: '',
-		url: ''
-	}
-
 	var link = node || jQuery( 'a:last' ),
 		url = link.attr( 'href' ),
-		options = jQuery.extend( {}, defaults, { url: url } , opts ),
+		options = prepareOptions( jQuery.extend( {}, { url: url } , opts ) ),
 		dom, arrow, skipCloseEvent;
 
 	var links = ( opts.links ) ? opts.links : global_options.links;
-
 
 	function buildDom() {
 		var str = supplant( template.start, global_options.ml ),
@@ -217,7 +225,15 @@ window.LJShare.link = function( opts, node ) {
 			togglePopup( false );
 			var service = $( this ).attr( 'data-service' );
 			if( global_options.services[ service ].openInTab ) {
-				this.target = "_blank";
+				if( $.browser.msie ) {
+					ev.preventDefault();
+					var width = $( window ).width();
+					var height = $( window ).height();
+					window.open( this.href, null, 'toolbar=yes,menubar=yes,status=1,location=yes,scrollbars=yes,resizable=yes,width=' + width + ',height=' + height );
+				} else {
+					//other browsers just open link in new tab
+					this.target = "_blank";
+				}
 			} else {
 				ev.preventDefault();
 				var width = global_options.services[ service ].width || 640;
@@ -314,7 +330,7 @@ window.LJShare.entry = function( opts ) {
 		url: ''
 	}
 
-	var options = jQuery.extend( {}, defaults, opts );
+	var options = prepareOptions( opts );
 
 	return {
 		attach: function( node, service ) {
