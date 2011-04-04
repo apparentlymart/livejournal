@@ -498,9 +498,9 @@ sub can_add_entry_tags {
     my $perms = LJ::Tags::get_permission_levels($journal);
     if ($perms->{add} eq 'author_moder'){
         return 1 if $remote==$entry->poster; # check author
-        return $remote->can_manage($entry->journal);  # check moder
+        return $remote->can_manage($entry->journal);  # check maintainer
     }
-    
+ 
     ## generic case: if $remote can add tags to the entire journal of the entry
     return 1 if LJ::Tags::can_add_tags($journal, $remote);
     
@@ -529,16 +529,18 @@ sub can_control_tags {
 
     # get permission hashref and check it
     my $perms = LJ::Tags::get_permission_levels($u);
-    return LJ::Tags::_remote_satisfies_permission($u, $remote, $perms->{control});
+    return LJ::Tags::_remote_satisfies_permission($u, $remote, $perms->{control}, 'control');
 }
 
 # helper sub internal used by can_*_tags functions
 sub _remote_satisfies_permission {
-    my ($u, $remote, $perm) = @_;
+    my ($u, $remote, $perm, $type) = @_;
     return undef unless $u && $remote && $perm;
 
     # allow if they can manage it (own, or 'A' edge)
     return 1 if $remote->can_manage($u);
+
+    $type = "add" unless $type;
 
     # permission checks
     if ($perm eq 'public') {
@@ -547,8 +549,10 @@ sub _remote_satisfies_permission {
         return 0;
     } elsif ($perm eq 'friends') {
         return LJ::is_friend($u, $remote);
-    } elsif ($perm eq 'private') {
+    } elsif ($perm eq 'private' && $type eq 'add') {
         return $remote->can_manage($u) || $remote->can_moderate($u);
+    } elsif ($perm eq 'private' && $type eq 'control') {
+        return $remote->can_manage($u);
     } elsif ($perm eq 'author_moder'){
         return ($remote->can_manage($u) || LJ::is_friend($u, $remote));
     } elsif ($perm =~ /^group:(\d+)$/) {
