@@ -27,13 +27,14 @@
 * LJShare.entry( { url: "http://some.url.com/", title: "Post title", description: "Post description" } )
 *		.attach( '#link_selector', 'service_name' )
 *		.attach( jQuery( '#another_selector' ), 'service_name2' ) //we can pass nodes or jquery collections
-*		.link( '#selector', [ "twtter", "vkontakte", "moimir"] ); //also we can attach popup
+*		.link( '#selector', [ "twitter", "vkontakte", "moimir"] ); //also we can attach popup
 * 
 */
 
 function preload( srcArr ) {
-	for( var i = srcArr.length; --i;
-		( new Image() ).src = Site.imgprefix + srcArr[ i ] + '?v=1' );
+	for( var i = 0; i < srcArr.length; ++i ) {
+		( new Image() ).src = Site.imgprefix + srcArr[ i ] + '?v=1';
+	}
 }
 
 function prepareOptions( opts ) {
