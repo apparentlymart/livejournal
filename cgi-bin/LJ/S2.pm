@@ -2490,6 +2490,17 @@ sub pageview_unique_string {
     return LJ::pageview_unique_string();
 }
 
+sub get_remote {
+    my ($ctx) = @_;
+
+    return unless $LJ::S2_TRUSTED{ $LJ::S2::CURR_PAGE->{'_u'}->{'userid'} };
+
+    my $remote = LJ::get_remote();
+    return unless $remote;
+    
+    return LJ::S2::User($remote);
+}
+
 sub viewer_logged_in
 {
     my ($ctx) = @_;

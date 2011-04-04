@@ -824,6 +824,9 @@ function builtin rand (int low, int high) : int
 function builtin pageview_unique_string () : string
 "Returns a unique string for the remote user.";
 
+function builtin get_remote () : User
+"Returns an object of remote user in trusted styles only. See also: viewer_logged_in(), viewer_is_owner() etc.";
+
 function builtin alternate (string a, string b) : string
 "With each call, this function will alternate between the two values and return one of them.
 Useful for making tables whose rows alternate in background color.";
