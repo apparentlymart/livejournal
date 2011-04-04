@@ -168,6 +168,21 @@ jQuery.fn.input = function(fn) {
 		: this.trigger("input");
 }
 
+// ctrl+enter send form
+jQuery.fn.disableEnterSubmit = function() {
+	this.bind("keypress", function(e) {
+		// keyCode == 10 in IE with ctrlKey
+		if ((e.which === 13 || e.which === 10) && e.target && e.target.form) {
+			if (e.target.tagName === "TEXTAREA" && e.ctrlKey && !jQuery(":submit", e.target.form).attr("disabled")) {
+				e.target.form.submit();
+			} else if (e.target.type === "text" && !e.ctrlKey) { // for input:text
+				e.preventDefault();
+			}
+		}
+	});
+	return this;
+};
+
 /* function based on markup:
 	tab links: ul>li>a
 	current tab: ul>li.current
