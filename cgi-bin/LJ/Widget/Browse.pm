@@ -117,7 +117,7 @@ sub render_body {
     ) or die "Can't open template: $!";
 
     my $vertical = LJ::Vertical->load_by_url($uri);
-    $view = "communities" unless $vertical;
+    $view = "recent_posts" unless $vertical;
 
     $$windowtitle = $vertical ? $vertical->name : $class->ml('widget.browse.windowtitle');
 
