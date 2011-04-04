@@ -833,7 +833,7 @@
         }
     }
 
-    if (!$synd && $u->can_be_text_messaged_by($remote)) {
+    if (!$synd && $u->{'txtmsg_status'} eq 'on' && $u->can_be_text_messaged_by($remote)) {
         push @contacts, "<a href='$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}'>$ML{'.contact.txtmsg'}</a>";
     }
 
