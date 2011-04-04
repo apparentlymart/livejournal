@@ -484,7 +484,7 @@ sub init {
 
     my $up_is_friend = $up && LJ::is_friend($journalu, $up);
     if ( $journalu->is_spamprotection_enabled &&
-         (!$up || !$up->prop('in_whitelist_for_spam')) && 
+         (!$up || !($up->prop('in_whitelist_for_spam') || $up->in_class("paid") || $up->in_class("perm"))) && 
          ($journalu->is_community || !$up_is_friend) && 
          !LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user})) {
 
