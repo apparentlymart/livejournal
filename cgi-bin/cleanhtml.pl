@@ -1631,7 +1631,7 @@ sub clean_event
         'mode'          => 'allow',
         'remove'        => $event_remove,
         'autoclose'     => \@comment_close,
-        'cleancss'      => 1,
+        'cleancss'      => !$LJ::S2_TRUSTED{ $opts->{journalid} },
         'noearlyclose'  => 1,
         'tablecheck'    => 1,
         'ljrepost_allowed' => 1,

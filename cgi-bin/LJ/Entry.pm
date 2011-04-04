@@ -821,7 +821,8 @@ sub event_html
         $opts->{expand_cut} = 1;
         $opts->{cuturl}     = $self->url;
     }
-
+    $opts->{journalid} = $self->journalid;
+    
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};
     LJ::CleanHTML::clean_event(\$event, $opts);
@@ -840,7 +841,7 @@ sub event_text
 {
     my $self = shift;
     my $event = $self->event_raw;
-    LJ::CleanHTML::clean_event( \$event, { textonly => 1} ) if $event;
+    LJ::CleanHTML::clean_event( \$event, { textonly => 1, journalid => $self->journalid, } ) if $event;
     return $event;
 }
 

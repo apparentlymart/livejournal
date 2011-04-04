@@ -232,7 +232,11 @@ sub make_feed
             }
 
             LJ::CleanHTML::clean_event(\$event,
-                                       { 'wordlength' => 0, 'preformatted' => $logprops{$itemid}->{'opt_preformatted'} });
+                {   'wordlength'    => 0, 
+                    'preformatted'  => $logprops{$itemid}->{'opt_preformatted'},
+                    'journalid'     => $u->userid,
+                }
+            );
 
             # do this after clean so we don't have to about know whether or not
             # the event is preformatted

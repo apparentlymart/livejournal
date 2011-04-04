@@ -1336,7 +1336,8 @@ sub create_view_lastn
                                                'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}),
                                                'ljcut_disable' => ($remote) ? $remote->{'opt_ljcut_disable_lastn'} : undef,
                                                'suspend_msg' => $suspend_msg,
-                                               'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, });
+                                               'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
+                                               'journalid' =>  $entry_obj->journalid, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
 
         $event = LJ::ContentFlag->transform_post(post => $event, journal => $u,
@@ -1858,7 +1859,8 @@ sub create_view_friends
                                               'maximgheight' => $maximgheight,
                                               'ljcut_disable' => ($remote) ? $remote->{'opt_ljcut_disable_friends'} : undef,
                                               'suspend_msg' => $suspend_msg,
-                                              'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, });
+                                              'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
+                                              'journalid' =>  $entry_obj->journalid, });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$event);
 
         $event = LJ::ContentFlag->transform_post(post => $event, journal => $friends{$friendid},
@@ -2582,7 +2584,8 @@ sub create_view_day
                                               'cuturl' => LJ::item_link($u, $itemid, $anum),
                                               'ljcut_disable' => ($remote) ? $remote->{'opt_ljcut_disable_lastn'} : undef,
                                               'suspend_msg' => $suspend_msg,
-                                              'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, });
+                                              'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
+                                              'journalid' =>  $entry_obj->journalid, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
 
         $event = LJ::ContentFlag->transform_post(post => $event, journal => $u,

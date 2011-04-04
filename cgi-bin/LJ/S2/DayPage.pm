@@ -158,7 +158,8 @@ sub DayPage
                                              'cuturl' => LJ::item_link($u, $itemid, $anum),
                                              'ljcut_disable' => $remote ? $remote->{'opt_ljcut_disable_lastn'} : undef,
                                              'suspend_msg' => $suspend_msg,
-                                             'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, });
+                                             'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, 
+                                             'journalid' =>  $entry_obj->journalid, });
         LJ::expand_embedded($u, $ditemid, $remote, \$text);
 
         $text = LJ::ContentFlag->transform_post(post => $text, journal => $u,

@@ -271,6 +271,7 @@ body<=
             unsuspend_supportid => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, 
             cuturl              => $talkurl, 
             expand_cut          => !$no_cut_expand,
+            journalid           => $entry->journalid,
         }
     );
     LJ::expand_embedded($u, $ditemid, $remote, \$event);
