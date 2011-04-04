@@ -750,7 +750,6 @@ sub is_closed {
     return 0 unless $comm;
 
     ## Check for all maintainers have already voted
-    my $dbr = LJ::get_db_reader();
     my $sth;
     my @questions = $self->questions;
 
@@ -771,6 +770,7 @@ sub is_closed {
         $sth = $self->journal->prepare("SELECT value, userid FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=?");
         $sth->execute($self->pollid, $qid, $self->journalid);
     } else {
+        my $dbr = LJ::get_db_reader();
         $sth = $dbr->prepare("SELECT value, userid FROM pollresult WHERE pollid=? AND pollqid=?");
         $sth->execute($self->pollid, $qid);
     }
