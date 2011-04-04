@@ -289,17 +289,7 @@ sub new_from_url {
 
     # domains like 'http://news.independent.livejournal.com' or 'http://some.site.domain.com'
     if ($url =~ m!^http://([\w.-]+)/?$!) {
-        my $host = $1;
-        my $expire = time() + 1800;
-        my $key = "domain:$host";
-        my $userid = LJ::MemCache::get($key);
-        unless (defined $userid) {
-            my $db = LJ::get_db_reader();
-            ($userid) = $db->selectrow_array(qq{SELECT userid FROM domains WHERE domain=?}, undef, $host);
-            $userid ||= 0; ## we do cache negative results - if no user for such domain, set userid=0
-            LJ::MemCache::set($key, $userid, $expire);
-        }
-        return ($userid) ? LJ::load_userid($userid) : undef;
+        return $class->new_from_external_domain($1);
     }
 
     # subdomains that hold a bunch of users (eg, users.siteroot.com/username/)
@@ -308,6 +298,31 @@ sub new_from_url {
     }
 
     return undef;
+}
+
+## Input: domain (e.g. 'news.independent.livejournal.com' or 'some.site.domain.com')
+## Output: LJ::User object or undef
+sub new_from_external_domain {
+    my $class = shift;
+    my $host = shift;
+
+    $host = lc($host);
+    $host =~ s/^www\.//;
+
+    if (my $user = $LJ::DOMAIN_JOURNALS_REVERSE{$host}) {
+        return LJ::load_user($user);
+    }
+
+    my $key = "domain:$host";
+    my $userid = LJ::MemCache::get($key);
+    unless (defined $userid) {
+        my $db = LJ::get_db_reader();
+        ($userid) = $db->selectrow_array(qq{SELECT userid FROM domains WHERE domain=?}, undef, $host);
+        $userid ||= 0; ## we do cache negative results - if no user for such domain, set userid=0
+        my $expire = time() + 1800;
+        LJ::MemCache::set($key, $userid, $expire);
+    }
+    return ($userid) ? LJ::load_userid($userid) : undef;
 }
 
 # returns LJ::User class of a random user, undef if we couldn't get one

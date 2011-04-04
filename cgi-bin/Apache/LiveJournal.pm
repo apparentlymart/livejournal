@@ -961,23 +961,14 @@ sub trans
         $host ne $LJ::DOMAIN && $host =~ /\./ &&
         $host =~ /[^\d\.]/)
     {
-        
-        my $dbr = LJ::get_db_reader();
-        my $checkhost = lc($host);
-        $checkhost =~ s/^www\.//i;
-        $checkhost = $dbr->quote($checkhost);
-        # FIXME: memcache this?
-        my $user = $dbr->selectrow_array(qq{
-            SELECT u.user FROM useridmap u, domains d WHERE
-            u.userid=d.userid AND d.domain=$checkhost
-        });
-        unless ($user) {
+        my $u = LJ::User->new_from_external_domain($host);
+        unless ($u) {
             LJ::Request->pnotes ('error' => 'baduser');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;
         }
 
-        my $view = $determine_view->($user, "other:$host$hostport", $uri);
+        my $view = $determine_view->($u->user, "other:$host$hostport", $uri);
         return $view if defined $view;
         LJ::Request->pnotes ('error' => 'baduser');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
