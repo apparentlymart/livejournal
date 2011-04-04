@@ -253,6 +253,9 @@ body<=
     $body .= LJ::html_submit($ML{'.title.send'});
     $body .= "</form></div>";
     $body .= qq{
+        <script type="text/javascript">
+            jQuery("#compose").disableEnterSubmit();
+        </script>
         </td></tr></table>
     };
 
