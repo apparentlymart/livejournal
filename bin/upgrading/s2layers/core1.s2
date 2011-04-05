@@ -1422,7 +1422,7 @@ set text_tell_friend = "Tell a Friend";
 property string text_share_this {
     des = "Text to share this with a friend";
 }
-set text_share_this = "Share this!";
+set text_share_this = "Share";
 
 property string text_share {
     des = "Text to share this with a friend";
