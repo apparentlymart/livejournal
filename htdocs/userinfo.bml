@@ -1613,7 +1613,7 @@
         $apps .= '</div>';
 
         $body .= "<div class='ljclear'></div>";
-        $body .= "<div class='section'><img src='$LJ::IMGPREFIX/application.gif' alt='' /> $ML{'.apps.header'} ";
+        $body .= "<div class='section' id='apps'><img src='$LJ::IMGPREFIX/application.gif' alt='' /> $ML{'.apps.header'} ";
         $body .= "<span class='section_link'>[<a href='$LJ::SITEROOT/manage/settings/?cat=userapps'>$ML{'.section.edit'}</a>]</span> " if $remote && $remote->can_manage($u); 
         $body .= "<span class='section_link'>[<a href='$LJ::SITEROOT/games/info.bml?user=".$u->username."'>$ML{'.section.view_all'}</a>]</span></div>";
         $body .= $apps;
