@@ -39,10 +39,15 @@ sub as_string {
     my ($self, $u) = @_;
     my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
+    my $tinyurl = $self->bdayuser->journal_base;
+    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
+    undef $tinyurl if $tinyurl =~ /^500/;
+
 # [[user]]'s birthday is on [[bday]]!
     return LJ::Lang::get_text($lang, 'notification.sms.birthday', undef, {
-        user     => $self->bdayuser->display_username,
-        bday     => $self->bday,
+        user       => $self->bdayuser->display_username,
+        bday       => $self->bday,
+        mobile_url => $tinyurl,
     });
 
 #    return sprintf("%s's birthday is on %s!",
