@@ -715,10 +715,14 @@ sub s2_context
         my $bl = $remote->prop('browselang');
         
         if($bl) {
-            my $style = LJ::Customize->save_language($u, $bl, 'return' => 1);
+            my %journal_style = LJ::S2::get_style($u, "verify");
+            
+            unless ($journal_style{i18nc}) {
+                my $style = LJ::Customize->save_language($u, $bl, 'return' => 1);
 
-            $style{i18nc} = $style->{i18nc} if ($style->{i18nc});
-            $style{i18n} = $style->{i18n}   if ($style->{i18n});
+                $style{i18nc} = $style->{i18nc} if ($style->{i18nc});
+                $style{i18n} = $style->{i18n}   if ($style->{i18n});
+            }
         }   
     }
 
