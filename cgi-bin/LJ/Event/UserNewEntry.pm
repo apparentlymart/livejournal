@@ -114,7 +114,7 @@ sub as_sms {
             
 # User '[[user]]' posted in their journal
 # User '[[user]]' posted '[[journal]]'
-    return LJ::Lang::get_text($lang, '.string', undef, {
+    return LJ::Lang::get_text($lang, $mlstring, undef, {
         user       => $self->poster->{user},
         journal    => $entry->journal->{user},
         mobile_url => $tinyurl,
