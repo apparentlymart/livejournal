@@ -468,9 +468,9 @@ sub can_add_tags {
     # get permission hashref and check it; note that we fall back to the control
     # permission, which will allow people to add even if they can't add by default
     my $perms = LJ::Tags::get_permission_levels($u);
-    
-    return LJ::Tags::_remote_satisfies_permission($u, $remote, $perms->{add}) ||
-           LJ::Tags::_remote_satisfies_permission($u, $remote, $perms->{control});
+
+    return LJ::Tags::_remote_satisfies_permission($u, $remote, $perms->{add}, "add") ||
+           LJ::Tags::_remote_satisfies_permission($u, $remote, $perms->{control}, "add");
 }
 
 # <LJFUNC>
@@ -498,7 +498,7 @@ sub can_add_entry_tags {
     my $perms = LJ::Tags::get_permission_levels($journal);
     if ($perms->{add} eq 'author_moder'){
         return 1 if $remote==$entry->poster; # check author
-        return $remote->can_manage($entry->journal);  # check maintainer
+        return $remote->can_manage($entry->journal) || $remote->can_moderate($entry->journal);  # check maintainer
     }
  
     ## generic case: if $remote can add tags to the entire journal of the entry
