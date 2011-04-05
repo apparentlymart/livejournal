@@ -6127,8 +6127,8 @@ sub is_spamprotection_enabled {
     my $u = shift;
     return 0 if $LJ::DISABLED{'spam_button'};
     my $spamprotection = $u->prop('spamprotection');
-    $spamprotection = 1 unless defined $spamprotection;
-    return $spamprotection;
+    return 1 if (!defined($spamprotection) || $spamprotection eq 'Y');
+    return 0;
 }
 
 package LJ;
