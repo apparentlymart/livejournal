@@ -7,6 +7,7 @@ use Class::Autouse qw(
                       LJ::EventLogRecord::SessionExpired
                       );
 use LJ::TimeUtil;
+use Digest::MD5;
 
 use constant VERSION => 1;
 
@@ -131,6 +132,8 @@ sub create {
     return undef if $u->err;
     $sess->{'sessid'} = $id;
     $sess->{'userid'} = $u->{'userid'};
+
+    clear_all_ljpta();
 
     # clean up old sessions
     my $old = $udbh->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
@@ -278,6 +281,41 @@ sub fb_cookie_string {
     # FIXME: can we just use domsess's function like this?
     #        might be more differences so we need to write a new one?
     return domsess_cookie_string(@_);
+}
+
+# value for 'ljpta' cookie
+# 'ljpta' stands for LiveJournal Pass Throught Authorization
+# options:
+#     share_id - uniq value, default is to generate it
+#     host, default is to take it from request
+#     ts - timestamp for the secret, default is to use current time
+# returns array: (share_id, cookie, auth)
+sub ljpta_cookie_string {
+    my $opts = shift;
+
+    my $share_id = $opts->{share_id} || Digest::MD5::md5_hex( rand() . $$ . {} . time() );
+    my $host   = $opts->{host} || LJ::Request->header_in("Host");
+    my $ts     = $opts->{ts} || scalar(time());
+    my $secret = LJ::get_secret($ts);
+
+    my $auth = Digest::MD5::md5_hex("$share_id:$host:$ts:$secret");
+    return ($share_id, "$share_id:$ts:$auth", $auth);
+}
+
+# check validity of 'ljpta' cookie
+# returns 'share_id' field
+sub valid_ljpta_cookie {
+    my $cookie = shift;
+
+    return undef unless $cookie;
+    my ($have_share_id, $have_ts, $have_auth) = split /:/, $cookie;
+
+    my ($share_id, $calc_cookie, $calc_auth) = ljpta_cookie_string({ share_id => $have_share_id, ts => $have_ts });
+
+    return undef if $calc_cookie ne $cookie; # unused fields in $have cookie?
+    return undef if $calc_auth ne $have_auth; # may be wrong host, may be wrong cookie...
+
+    return $have_share_id; # cookie is ok
 }
 
 # sets new ljmastersession cookie given the session object
@@ -435,11 +473,54 @@ sub try_renew {
 
 # NOTE: internal function REQUIRES trusted input
 sub helper_url {
-    my ($class, $dest) = @_;
+    my ($class, $dest, $ljpta) = @_;
 
     return unless $dest;
 
     my $u = LJ::get_remote();
+
+    if ($ljpta) { # foreign domain case
+
+        my $host;
+        if ($dest =~ m!^http://([\w.-]+)/?!) {
+            $host = $1;
+        }
+        my $host_u = LJ::User->new_from_external_domain($host);
+        return unless $host_u;
+
+        my @cookies = grep { $_ } @{ $BML::COOKIE{'ljpta[]'} || [] };
+
+        my ($share_id, $cookie, $auth);
+        foreach my $try_cookie (@cookies) {
+            my $s_id = valid_ljpta_cookie($try_cookie);
+            next unless $s_id;
+
+            $share_id = $s_id;
+            $cookie = $try_cookie;
+            last;
+        }
+        ($share_id, $cookie, $auth) = ljpta_cookie_string() unless $share_id;
+
+        # here we have values for main site cookie        
+        set_cookie(ljpta     => $cookie,
+                   domain    => $LJ::DOMAIN_WEB,
+                   path      => '/',
+                   http_only => 1);
+
+        # share secret of authentication with all other host-aliases
+        my ($uid, $sessid);
+        $uid = $u->userid if $u;
+        $sessid = $u->session->{sessid} if $u and $u->session;
+        LJ::MemCache::set("pta:$share_id", ($u ? "$uid:$sessid" : 'unlogged'), 24 * 60 * 60);
+
+        # redirect to __setdomsess and put synchonized ljpta cookie
+
+        # calculate cookie for different domain
+        ($share_id, $cookie, $auth) = ljpta_cookie_string({ share_id => $share_id, host => $host });
+
+        return "http://$host/__setdomsess?dest=" . LJ::eurl($dest) . "&k=ljpta&v=" . LJ::eurl($cookie);
+    }
+
     unless ($u) {
         LJ::Session->clear_master_cookie;
         return $dest;
@@ -542,6 +623,11 @@ sub session_from_cookies {
 
     my $sessobj;
 
+    my $host = LJ::Request->header_in("Host");
+    unless ($host =~ /\.$LJ::DOMAIN$/) { # foreign domain case
+        return LJ::Session->session_from_ljpta_cookie(\%getopts, @{ $BML::COOKIE{'ljpta[]'} || [] });
+    }
+
     my $domain_cookie = LJ::Session->domain_cookie;
     if ($domain_cookie) {
         # journal domain
@@ -559,6 +645,53 @@ sub session_from_cookies {
     }
 
     return $sessobj;
+}
+
+# CLASS METHOD
+#   -- but not called directly.  usually called by LJ::Session->session_from_cookies above
+# foreign domain case
+# idea: we have synchonized (same 'share_id' field) 'ljpta' cookie on all domains
+# and store assosiated userid:sessionid pair in memcache
+# redirects work same as in journal domain case
+sub session_from_ljpta_cookie {
+    my $class = shift;
+    my $opts = ref $_[0] ? shift() : {};
+
+    my $no_session = sub {
+        my $reason = shift;
+        my $rr = $opts->{redirect_ref};
+        if ($rr) {
+            $$rr = "$LJ::SITEROOT/misc/get_domain_session.bml?ljpta=1&return=" . LJ::eurl(_current_url());
+        }
+        return undef;
+    };
+
+    my @cookies = grep { $_ } @_;
+    return $no_session->("no cookies") unless @cookies;
+
+    foreach my $cookie (@cookies) {
+        my $share_id = valid_ljpta_cookie($cookie);
+        next unless $share_id;
+
+        my $status = LJ::MemCache::get("pta:$share_id");
+        next unless $status;
+
+        return undef if $status eq 'unlogged'; # without redirect, we already know: this user is anonymous
+
+        my ($uid, $sessid) = split /:/, $status;
+
+        my $u = LJ::load_userid($uid);
+        next unless $u;
+
+        my $sess = $u->session($sessid);
+        next unless $sess;
+
+        # the master session can't be expired or ip-bound to wrong IP
+        next unless $sess->valid;
+        return $sess;
+    }
+
+    return $no_session->("no valid cookie");
 }
 
 # CLASS METHOD
@@ -729,6 +862,20 @@ sub destroy_all_sessions {
     return 1;
 }
 
+# delete all memcache values for ljpta
+# so connection will be invalid on next use
+# must be called: on login (any!) and logout
+sub clear_all_ljpta {
+    # clear logged-in/out status of pass through auth from memcache 
+    my @cookies = grep { $_ } @{ $BML::COOKIE{'ljpta[]'} || [] };
+    foreach my $try_cookie (@cookies) {
+        my $share_id = valid_ljpta_cookie($try_cookie);
+        next unless $share_id;
+
+        LJ::MemCache::delete("pta:$share_id");
+    }
+}
+
 # class method
 sub destroy_sessions {
     my ($class, $u, @sessids) = @_;
@@ -745,6 +892,9 @@ sub destroy_sessions {
         $id += 0;
         LJ::MemCache::delete(_memkey($u, $id));
     }
+
+    clear_all_ljpta();
+
     return 1;
 
 }
@@ -797,26 +947,37 @@ sub setdomsess_handler {
     my $domcook = $get{'k'};
     my $cookie  = $get{'v'};
 
-    return "$LJ::SITEROOT" unless valid_destination($dest);
-    return $dest unless valid_domain_cookie($domcook, $cookie, $BML::COOKIE{'ljloggedin'});
-
+    my $expires = $LJ::DOMSESS_EXPIRATION || 0; # session-cookie only
     my $path = '/'; # By default cookie path is root
 
-    # If it is not the master domain
+    if ($domcook eq 'ljpta') { # foreign domain case
 
-    if ($dest =~ m!^https?://(.+?)(/.*)$!) {
-        my ($host, $url_path) = (lc($1), $2);
-        my ($subdomain, $user);
+        my $share_id = valid_ljpta_cookie($cookie);
+        return $LJ::SITEROOT unless $share_id;
 
-        if (    $host =~ m!^([\w-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$!
-            && ($subdomain = lc($1))                                # undef: not on a user-subdomain
-            && ($LJ::SUBDOMAIN_FUNCTION{$subdomain} eq "journal")
-            && ($url_path =~ m!^/(\w{1,15})\b!) ) {
-                $path = '/' . lc($1) . '/' if $1;
+        my $status = LJ::MemCache::get("pta:$share_id");
+        return $LJ::SITEROOT unless $status;
+
+    } else { # livejournal domain case
+
+        return "$LJ::SITEROOT" unless valid_destination($dest);
+        return $dest unless valid_domain_cookie($domcook, $cookie, $BML::COOKIE{'ljloggedin'});
+
+        # If it is not the master domain
+
+        if ($dest =~ m!^https?://(.+?)(/.*)$!) {
+            my ($host, $url_path) = (lc($1), $2);
+            my ($subdomain, $user);
+
+            if (    $host =~ m!^([\w-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$!
+                && ($subdomain = lc($1))                                # undef: not on a user-subdomain
+                && ($LJ::SUBDOMAIN_FUNCTION{$subdomain} eq "journal")
+                && ($url_path =~ m!^/(\w{1,15})\b!) ) {
+                    $path = '/' . lc($1) . '/' if $1;
+            }
         }
     }
 
-    my $expires = $LJ::DOMSESS_EXPIRATION || 0; # session-cookie only
     set_cookie($domcook   => $cookie,
                path       => $path,
                http_only  => 1,

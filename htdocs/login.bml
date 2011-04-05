@@ -78,6 +78,11 @@
                 BML::redirect($POST{ret});
                 return 1;
             }
+    
+            if (my $u = LJ::User->new_from_external_domain($redir_host)) {
+                BML::redirect($POST{ret});
+                return 1;
+            }
         }
 
         return 0;
@@ -390,12 +395,16 @@
                 $POST{'ref'} !~ /[\n\r]/)
             {
                 return BML::redirect("$POST{'ref'}");
-            } elsif ($GET{'ret'} == 1 && $referer && $referer =~ /\Q$LJ::DOMAIN\E/) {
-                my $uniq = LJ::Request->notes('uniq');
-                if ($uniq) {
-                    LJ::MemCache::set("loginout:$uniq", 1, time() + 15);
+            } elsif ($GET{'ret'} == 1 && $referer) {
+                if (    $referer =~ /\Q$LJ::DOMAIN\E/ || 
+                        ($referer =~ m!http://([\w\.\-]+)! && LJ::User->new_from_external_domain($1))) 
+                { 
+                    my $uniq = LJ::Request->notes('uniq');
+                    if ($uniq) {
+                        LJ::MemCache::set("loginout:$uniq", 1, time() + 15);
+                    }
+                    return BML::redirect("$referer");
                 }
-                return BML::redirect("$referer");
             }
 
             LJ::set_remote($u);
