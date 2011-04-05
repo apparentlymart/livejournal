@@ -129,7 +129,7 @@ function deleteComment (ditemid, action) {
     	}
     } else if (action == 'markAsSpam') {
 		opt_delauthor = opt_delthread = true;
-		postdata += '&ban=1&spam=1&delthread=1&delauthor=1';
+		postdata += '&ban=1&spam=1&delauthor=1';
 	}
 	
     postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
