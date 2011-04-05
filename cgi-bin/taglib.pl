@@ -554,8 +554,11 @@ sub _remote_satisfies_permission {
     } elsif ($perm eq 'private' && $type eq 'control') {
         return $remote->can_manage($u);
     } elsif ($perm eq 'author_moder'){
-        return ($remote->can_manage($u) || LJ::is_friend($u, $remote));
+        return ($remote->can_manage($u) || LJ::is_friend($u, $remote)) || $remote->can_moderate($u);
     } elsif ($perm =~ /^group:(\d+)$/) {
+        ## Moderator is exists in any group
+        return 1 if $remote->can_moderate($u);
+
         my $grpid = $1+0;
         return undef unless $grpid >= 1 && $grpid <= 30;
 
