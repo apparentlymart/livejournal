@@ -130,7 +130,7 @@ sub _expand_tag {
 
         my $out=  '<lj-embed id="'. $attrs{id} .'" ';
 
-        if($code =~ m!src="http://www\.youtube\.com/embed/([\w\d\_\-]+)"!) {
+        if ($code =~ m!src=["']?http://www\.youtube\.com/embed/([\w\d\_\-]+)['"]?!) {
             $out .= 'vid="'.$1.'" ';
         }
 
@@ -444,6 +444,7 @@ sub module_content {
             extractimages => 0,
             noexpandembedded => 1,
             transform_embed_nocheck => 1,
+            journalid => $opts{journalid},
         });
     }
 

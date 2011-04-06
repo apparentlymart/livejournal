@@ -524,19 +524,23 @@ sub clean
                 ## YouTube (http://apiblog.youtube.com/2010/07/new-way-to-embed-youtube-videos.html),
                 ## Vimeo, VKontakte, Google Calendar, Google Docs, VK.com, etc.
                 ## see @LJ::EMBED_IFRAME_WHITELIST in lj-disabled-conf
-                my $src = $attr->{'src'};
                 my $src_allowed = 0;
 
-                if ($src) {
-                    foreach my $re ( @LJ::EMBED_IFRAME_WHITELIST ) {
-                        if ( $src =~ $re ) {
+                if (my $src = $attr->{'src'}) {
+                    foreach my $wl ( @LJ::EMBED_IFRAME_WHITELIST ) {
+                        if ($src =~ $wl->{re}) {
+                            if ($wl->{personal_posts_only}) {
+                                last unless $opts->{journalid};
+                                my $u = LJ::load_userid($opts->{journalid});
+                                last unless $u && $u->is_personal;
+                            } 
                             $src_allowed = 1;
                             last;
                         }
                     }
                 }
 
-                unless ( $src && $src_allowed ) {
+                unless ($src_allowed) {
                     ## eat this tag
                     if (!$attr->{'/'}) {
                         ## if not autoclosed tag (<iframe />),
