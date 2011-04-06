@@ -3068,6 +3068,7 @@ sub _Comment__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 24, 24));
     }
     if ($key eq "spam_comment") {
+        return $null_link unless $com_user;
         return $null_link if $LJ::DISABLED{'spam_button'};
         return $null_link unless LJ::Talk::can_mark_spam($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}&amp;spam=1",

@@ -2607,7 +2607,7 @@ sub get_thread_html
                              "</a>";
                 }
 
-                if ($post->{'state'} ne 'B' && LJ::is_enabled('spam_button') && LJ::Talk::can_mark_spam($remote, $u, $up, $userpost)) {
+                if ($post->{'state'} ne 'B' && LJ::is_enabled('spam_button') && $userpost && LJ::Talk::can_mark_spam($remote, $u, $up, $userpost)) {
                     $text .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid&spam=1'>" .
                              LJ::img("btn_spam", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
