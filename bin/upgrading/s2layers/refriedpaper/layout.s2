@@ -288,7 +288,7 @@ propgroup text {
   property use text_edit_entry;
   property use text_edit_tags;
   property use text_mem_add;
-  property use text_tell_friend;
+  property use text_share;
   property use text_flag;
   property use text_permalink;
   property string free_text {
@@ -735,7 +735,7 @@ function EntryLite::print_linkbar() {
     "edit_entry" => $*text_edit_entry,
     "edit_tags"  => $*text_edit_tags,
     "mem_add"    => $*text_mem_add,
-    "tell_friend"=> $*text_tell_friend,
+    "share"      => $*text_share,
     "flag"       => $*text_flag,
   };
 

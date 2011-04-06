@@ -176,6 +176,7 @@ propgroup text {
     property use text_showspam;
     property use text_hidespam;
     property use text_spam_comment;
+    property use text_share;
 }
 
 propgroup customcss {
