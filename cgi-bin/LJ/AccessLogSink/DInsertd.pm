@@ -35,6 +35,7 @@ sub log {
 
     my $hash = {
         _table => $rec->table,
+        _src   => 'apache',
     };
     $hash->{$_} = $rec->{$_} foreach $rec->keys;
 
