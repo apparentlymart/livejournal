@@ -1168,17 +1168,20 @@ if (not $en.comments.locked) {
       }
     }
   }
+  if ($linkbar) {print safe $linkbar;}
   foreach var string link_key ($.link_keyseq) {
     var Link link = $this->get_link($link_key);
     $url          = $link.url;
     $text         = $link.caption;
     if($url != "" and $link_key != "tell_friend") {
-      $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+      print safe """<a href="$url">$text</a>$btwn_comments""";
+      $link->print_raw();
       }
   }
   $url     = $.permalink_url;
   $text    = $*text_permalink;
-  print safe $linkbar + """<a href="$url">$text</a>""";
+  print safe """<a href="$url">$text</a>""";
+
   if ($expand != "") {
     print safe $btwn_comments;
     print $expand;
