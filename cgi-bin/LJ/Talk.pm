@@ -2314,7 +2314,7 @@ sub get_replycount {
 #            style         : 'mine'
 #            showmultiform
 #            nohtml
-#            show_collapse_link : BOOLEAN - if true, all comments have either "Expand" or "Collapse" link. Otherwise only "Expand" link, if collapsed or has collapsed children;
+#            show_expand_collapse : BOOLEAN - if true, all comments have "Expand" and "Collapse" link. Otherwise only "Expand" link, if collapsed or has collapsed children;
 #            get_root_only : retrieve only root of requested thread subtree;
 #            depth         : initial depth of requested thread (0, if not specified);
 #            talkid
@@ -2528,7 +2528,7 @@ sub get_thread_html
             my $get_expand_link = sub {
                 return
                     "<span id='expand_$dtid'>" . 
-                        "(<a href='$thread_url' onClick=\"ExpanderEx.make(this,'$thread_url','$dtid',true);return false;\">" .
+                        " (<a href='$thread_url' onClick=\"ExpanderEx.make(this,'$thread_url','$dtid',true);return false;\">" .
                             BML::ml('talk.expandlink') .
                         "</a>)" .
                     "</span>";
@@ -2537,7 +2537,7 @@ sub get_thread_html
             my $get_collapse_link = sub {
                 return
                     "<span id='collapse_$dtid'>" .
-                        "(<a href='$thread_url' onClick=\"ExpanderEx.collapse(this,'$thread_url','$dtid',true);return false;\">" .
+                        " (<a href='$thread_url' onClick=\"ExpanderEx.collapse(this,'$thread_url','$dtid',true);return false;\">" .
                             BML::ml('talk.collapselink') .
                         "</a>)" .
                     "</span>";
@@ -2773,14 +2773,14 @@ sub get_thread_html
                     }
                 }
 
-                # $LJci->{has_link} = ($has_closed_children ? 1 : 0);
+                $LJci->{has_link} = ($has_closed_children ? 1 : 0);
 
                 if (LJ::run_hook('show_thread_expander', { is_s1 => 1 })) {
-                    if ($has_closed_children) {
-                        $text .= ' ' . $get_expand_link->();
+                    if ($input->{'show_expand_collapse'}) {
+                        $text .= $get_expand_link->() . $get_collapse_link->();
                     }
-                    elsif ($input->{'show_collapse_link'}) {
-                        $text .= ' ' . $get_collapse_link->();
+                    elsif ($has_closed_children) {
+                        $text .= $get_expand_link->();
                     }
                 }
 

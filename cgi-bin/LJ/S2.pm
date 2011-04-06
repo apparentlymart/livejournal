@@ -2501,7 +2501,7 @@ sub get_remote {
 
     my $remote = LJ::get_remote();
     return unless $remote;
-    
+
     return LJ::S2::User($remote);
 }
 

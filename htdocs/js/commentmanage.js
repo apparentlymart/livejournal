@@ -415,7 +415,8 @@ function createModerationFunction(control, dItemid, action) {
 								children  = LJ_cmtinfo[ dtid ].rc;
 	
 								for( j = 0; j < children.length;  ++j ) {
-									if( !( 'oldvars' in LJ_cmtinfo[ children[j] ] ) ) {
+									if( !LJ_cmtinfo[ children[j] ].full && !LJ_cmtinfo[ children[j] ].is_deleted ) {
+									// if( !( 'oldvars' in LJ_cmtinfo[ children[j] ] ) ) {
 										showExpand = true;
 									}
 								}
@@ -424,8 +425,10 @@ function createModerationFunction(control, dItemid, action) {
 							if (!html) {
 								removeEmptyMarkup(result[i].thread);
 							}
+
+							var newNode = ExpanderEx.prepareCommentBlock( html, dtid, showExpand );
 	
-							LiveJournal.CommentManager.updateCell( dtid, html );
+							LiveJournal.CommentManager.updateCell( dtid, newNode );
 						}
 					} );
 					hourglass.hide();
@@ -437,7 +440,8 @@ function createModerationFunction(control, dItemid, action) {
 				if( threadExpanded && LJ_cmtinfo[ threadId ].oldvars.full )
 				{
 					LiveJournal.CommentManager.getThreadJSON( threadId, function (result2) {
-						ExpanderEx.Collection[ threadId ] = result2[0].html;
+						ExpanderEx.Collection[ threadId ] = ExpanderEx.prepareCommentBlock( jQuery( "<div>" + result2[0].html + "</div>" ), threadId, true ).html()
+						//ExpanderEx.Collection[ threadId ] = result2[0].html;
 						populateComments( result );
 					}, true, true );
 				}
@@ -539,37 +543,35 @@ function removeEmptyMarkup(threadId) {
 		$( 'body' ).delegate( 'a', 'click', function( ev ) {
 			var rex_id = /id=(\d+)/, ae = this;
 
-			if (ae.href.indexOf('talkscreen.bml') != -1) {
-				var reMatch = rex_id.exec(ae.href);
-				if (!reMatch) return;
+		if (ae.href.indexOf('talkscreen.bml') != -1) {
+			var reMatch = rex_id.exec(ae.href);
+			if (!reMatch) return;
 
-				var id = reMatch[1];
-				if (!document.getElementById('ljcmt' + id)) return;
+			var id = reMatch[1];
+			if (!document.getElementById('ljcmt' + id)) return;
 
-				createModerationFunction(ae, id)( ev );
-			} else if (ae.href.indexOf('delcomment.bml') != -1) {
-				if (LJ_cmtinfo && LJ_cmtinfo.disableInlineDelete) return;
+			createModerationFunction(ae, id)( ev );
+		} else if (ae.href.indexOf('delcomment.bml') != -1) {
+			if (LJ_cmtinfo && LJ_cmtinfo.disableInlineDelete) return;
 
-				var reMatch = rex_id.exec(ae.href);
-				if (!reMatch) return;
+			var reMatch = rex_id.exec(ae.href);
+			if (!reMatch) return;
 
-				var id = reMatch[1];
-				if (!document.getElementById('ljcmt' + id)) return;
+			var id = reMatch[1];
+			if (!document.getElementById('ljcmt' + id)) return;
 
-				var action = (ae.href.indexOf('spam=1') != -1) ? 'markAsSpam' : 'delete';
+			var action = (ae.href.indexOf('spam=1') != -1) ? 'markAsSpam' : 'delete';
 
-				createDeleteFunction(ae, id, action)( ev );
-			// unspam
-			} else if (ae.href.indexOf('spamcomment.bml') != -1) {
-				var reMatch = rex_id.exec(ae.href);
-				if (!reMatch) return;
+			createDeleteFunction(ae, id, action)( ev );
+		// unspam
+		} else if (ae.href.indexOf('spamcomment.bml') != -1) {
+			var reMatch = rex_id.exec(ae.href);
+			if (!reMatch) return;
 
-				var id = reMatch[1];
-				if (!document.getElementById('ljcmt' + id)) return;
-				createModerationFunction(ae, id, 'unspam')( ev );
-			} else {
-				return;
-			}
+			var id = reMatch[1];
+			if (!document.getElementById('ljcmt' + id)) return;
+			createModerationFunction(ae, id, 'unspam')( ev );
+		}
 
 			ev.preventDefault();
 			ev.stopPropagation();

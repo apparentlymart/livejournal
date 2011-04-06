@@ -518,7 +518,7 @@ body<=
             showmultiform => $showmultiform,
             talkid        => $GET{talkid},
             mode          => $GET{mode},
-            show_collapse_link => 0,
+            show_expand_collapse => 0,
         },
         $output
     );

@@ -337,12 +337,14 @@ sub EntryPage
                 my @child_ids = map { $_->{'talkid'} } @{$i->{'replies'}};
                 my $parent = $cmt->parent;
                 $cmtinfo->{$i->{talkid}} = {
-                    rc     => \@child_ids,
-                    u      => $poster,
+                    rc       => \@child_ids,
+                    u        => $poster,
                     username => $i->{'poster'} ? $i->{'poster'}->{'_u'}->{'user'} : '',
-                    parent => $parent && $parent->valid ? $parent->dtalkid : undef,
-                    full   => ($i->{full}),
-                    depth  => $depth,
+                    parent   => $parent && $parent->valid ? $parent->dtalkid : undef,
+                    full     => ($i->{full}),
+                    depth    => $depth,
+                    has_link => ((!$i->{full} and !$i->{deleted}) or
+                                grep { !$_->{full} and !$_->{deleted} } @{$i->{replies}}) ? 1 : 0,
                 };
                 $self->($self, $i->{'replies'}, $depth + 1) if $has_threads;
             }

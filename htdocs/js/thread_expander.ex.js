@@ -118,16 +118,20 @@ ExpanderEx.prototype.expandThread = function( json ) {
         return  false;
     }
 
-    var threadId, cell;
+    var threadId, cell, html;
     for( var i = 0; i < json.length; ++i ) {
         //we skip comment blocks thate were not expanded
+        if( json[ i ].state === 'deleted' ) {
+            LJ_cmtinfo[ json[ i ].thread ].is_deleted = true;
+        }
         if( json[ i ].state && json[ i ].state !== "expanded") {
             continue;
         }
 
         threadId = json[ i ].thread;
+        html = ExpanderEx.prepareCommentBlock( jQuery( json[ i ].html ), threadId, isChildCollapsed( i ) );
 
-        var oldHtml = LiveJournal.CommentManager.updateCell( threadId, json[ i ].html );
+        var oldHtml = LiveJournal.CommentManager.updateCell( threadId, html );
         if( !( threadId in ExpanderEx.Collection ) ) {
             ExpanderEx.Collection[ threadId ] = oldHtml;
         }
@@ -207,6 +211,36 @@ ExpanderEx.prototype.get = function(){
     }, 0 );
 
     return true;
+}
+
+//toggle visibility of expand and collapse links, if server returns
+//html with both of them ( with every ajax request)
+ExpanderEx.prepareCommentBlock = function(html, id, showExpand){
+    this.showExpandLink( id, html, showExpand );
+    return html;
+}
+
+ExpanderEx.showExpandLink = function ( id, block, showExpand ) {
+    var expandSel = "#expand_" + id,
+        collapseSel = "#collapse_" + id,
+        selector, resetSelector;
+
+    if( LJ_cmtinfo[ id ].has_link > 0 ) {
+        if( showExpand ) {
+            selector = collapseSel;
+            resetSelector = expandSel;
+        } else {
+            selector = expandSel;
+            resetSelector = collapseSel;
+        }
+        block.find( resetSelector ).css( 'display', '' );
+    }
+    else {
+        selector = collapseSel + "," + expandSel;
+    }
+
+    block.find( selector )
+        .css( 'display', 'none' );
 }
 
 ExpanderEx.preloadImg();

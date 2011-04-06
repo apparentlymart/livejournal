@@ -181,20 +181,20 @@
             $entry,
             $thread,
             {
-                page               => $GET{page},
-                expand             => $GET{expand},
-                view               => $GET{view},
-                format             => $GET{format},
-                style              => $init->{style},
-                viewsome           => $viewsome,
-                viewall            => $viewall,
-                LJ_cmtinfo         => $LJ_cmtinfo,
-                showmultiform      => $showmultiform,
-                show_collapse_link => 1,
-                get_root_only      => $GET{single} ? 1 : 0,
-                depth              => $GET{depth} || 0,
-                mode               => $GET{mode},
-                from_rpc           => 1,
+                page                 => $GET{page},
+                expand               => $GET{expand},
+                view                 => $GET{view},
+                format               => $GET{format},
+                style                => $init->{style},
+                viewsome             => $viewsome,
+                viewall              => $viewall,
+                LJ_cmtinfo           => $LJ_cmtinfo,
+                showmultiform        => $showmultiform,
+                show_expand_collapse => 1,
+                get_root_only        => $GET{single} ? 1 : 0,
+                depth                => $GET{depth} || 0,
+                mode                 => $GET{mode},
+                from_rpc             => 1,
             },
             $output
         );
@@ -268,7 +268,7 @@
             my $ret = '';
             $LJ::S2::ret_ref = \$ret;
 
-            $comment->{_show_collapse_link} = 1; # all comments, retrieved by this endpoint should have expand or collapse link.
+            $comment->{_show_expand_collapse} = 1; # all comments, retrieved by this endpoint should have expand or collapse link.
 
             LJ::S2::s2_run('UNUSED', $ctx, undef, "EntryPage::print_comment(Comment)", $page, $comment);
 
@@ -284,27 +284,30 @@
                 my $html = eval { $get_comment_text->($c); };
                 return error($@) if $@;
 
-                # my $state = '';
-                # if ($c->{deleted}) {
-                #     $state = 'deleted';
-                # } elsif ($c->{screened} && !$c->{full} && !$c->{show}) {
-                #     $state = 'screened';
-                # # } elsif ($post->{'state'} ne 'B' && $opts->{'showspam'}) {
-                # # } elsif ($post->{'state'} eq 'B' && !$opts->{'showspam'}) {
-                # #     $state = 'spamed';
-                # } elsif ($pu && $pu->is_suspended && !$viewsome) {
-                #     $state = 'suspended';
-                # } elsif ($c->{full}) {
-                #     $state = 'expanded';
-                # } else {
-                #     $state = 'collapsed';
-                # }
+                my $pu;
+                $pu = $c->{poster}->{_u} if $c->{poster};
+
+                my $state = '';
+                if ($c->{deleted}) {
+                    $state = 'deleted';
+                } elsif ($c->{screened} && !$c->{full} && !$c->{show}) {
+                    $state = 'screened';
+                # } elsif ($post->{'state'} ne 'B' && $opts->{'showspam'}) {
+                # } elsif ($post->{'state'} eq 'B' && !$opts->{'showspam'}) {
+                #     $state = 'spamed';
+                } elsif ($pu && $pu->is_suspended && !$viewsome) {
+                    $state = 'suspended';
+                } elsif ($c->{full}) {
+                    $state = 'expanded';
+                } else {
+                    $state = 'collapsed';
+                }
 
                 push @$comments, {
                     thread => $c->{talkid},
                     html   => $html,
                     depth  => $c->{depth},
-                    state  => ($c->{full} ? 'expanded' : 'collapsed'), # $state,
+                    state  => $state,
                 };
                 $self->($self, $c->{replies}) if $c->{replies} && @{$c->{replies}};
             }
