@@ -135,6 +135,12 @@ FORM
             }->{$extra->{email_state}};
             my $time = scalar(localtime($extra->{time}));
             $action = "Requested a password reset email to $email; $email_state; added on $time.";
+        } elsif ($row->{action} eq 'spam_set') {
+            my $u = LJ::load_userid($row->{actiontarget});
+            $action = "Marked as spammer " . LJ::ljuser($u) if $u;
+        } elsif ($row->{action} eq 'spam_unset') {
+            my $u = LJ::load_userid($row->{actiontarget});
+            $action = "Unmarked as spammer " . LJ::ljuser($u) if $u;
         } elsif (my $info = LJ::run_hook('userlog_rows', $row, $extra)) {
             $action = $info;
         } else {
