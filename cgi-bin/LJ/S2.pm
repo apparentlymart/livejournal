@@ -3500,16 +3500,16 @@ sub Comment__print_expand_collapse_links
 
     my $print_expand_link = sub {
         $S2::pout->(
-            " <span id='expand_$this->{talkid}'>" .
-                "(<a href='$this->{thread_url}' onClick=\"ExpanderEx.make(this,'$this->{thread_url}','$this->{talkid}',true);return false;\">$text_expand</a>)" . 
+            "<span id='expand_$this->{talkid}'>" .
+                " (<a href='$this->{thread_url}' onClick=\"ExpanderEx.make(this,'$this->{thread_url}','$this->{talkid}',true);return false;\">$text_expand</a>)" . 
             "</span>"
         );
     };
 
     my $print_collapse_link = sub {
         $S2::pout->(
-            " <span id='collapse_$this->{talkid}'>" .
-                "(<a href='$this->{thread_url}' onClick=\"ExpanderEx.collapse(this,'$this->{thread_url}','$this->{talkid}',true);return false;\">$text_collapse</a>)" . 
+            "<span id='collapse_$this->{talkid}'>" .
+                " (<a href='$this->{thread_url}' onClick=\"ExpanderEx.collapse(this,'$this->{thread_url}','$this->{talkid}',true);return false;\">$text_collapse</a>)" . 
             "</span>"
         );
     };
@@ -3522,11 +3522,12 @@ sub Comment__print_expand_collapse_links
         return 0;
     };
 
-    if ($show_expand_link->()) {
+    if ($this->{_show_expand_collapse}) {
         $print_expand_link->();
-    }
-    elsif ($this->{_show_collapse_link}) {
         $print_collapse_link->();
+    }
+    elsif ($show_expand_link->()) {
+        $print_expand_link->();
     }
 }
 
