@@ -147,7 +147,7 @@ _info?><?_code
         'manage_journal' => $can_manage,
 
         # they cannot delete the thread if there is no thread
-        'delete_thread'  => $comment->has_children,
+        'delete_thread'  => $comment->has_children && $can_manage,
 
         # they can ban the comment author if they are the journal owner
         # and there is an author; also, they will not be able to ban
