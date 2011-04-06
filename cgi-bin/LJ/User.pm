@@ -3837,6 +3837,17 @@ sub user_url_arg {
 # returns username for display
 sub display_username {
     my $u = shift;
+    my $need_cut = shift || 0;
+
+    if ($u->is_identity && $need_cut) {
+        my $name = $u->display_name;
+        my $short_name = substr ($name, 0, 16);
+        if ($name ne $short_name) {
+            $short_name .= "...";
+        }
+        return $short_name;
+    }
+
     return $u->display_name if $u->is_identity;
     return $u->{user};
 }

@@ -139,7 +139,7 @@ sub as_sms {
 # There is a new [[abbrev]] announcement in [[journal]]. Reply with READ [[journal]] to read it. [[disclaimer]]
     return LJ::Lang::get_text($lang, 'notification.sms.officialpost', undef, {
         abbrev     => $LJ::SITENAMEABBREV,
-        journal    => $entry->journal->display_username,
+        journal    => $entry->journal->display_username(1),
         disclaimer => $LJ::SMS_DISCLAIMER,
         mobile_url => $tinyurl,
     });    

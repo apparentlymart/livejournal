@@ -132,8 +132,8 @@ sub as_sms {
 
 # [[inviter]] sent you an invitation to join the community [[comm]]. Visit the invitation page to accept
     return LJ::Lang::get_text($lang, 'notification.sms.communityinvite', undef, {
-        inviter => $self->inviter->display_username,
-        comm    => $self->comm->display_username,
+        inviter => $self->inviter->display_username(1),
+        comm    => $self->comm->display_username(1),
     });
 
 #    return sprintf("%s sent you an invitation to join the community %s. Visit the invitation page to accept",

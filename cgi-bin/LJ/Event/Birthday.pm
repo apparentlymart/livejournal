@@ -45,7 +45,7 @@ sub as_string {
 
 # [[user]]'s birthday is on [[bday]]!
     return LJ::Lang::get_text($lang, 'notification.sms.birthday', undef, {
-        user       => $self->bdayuser->display_username,
+        user       => $self->bdayuser->display_username(1),
         bday       => $self->bday,
         mobile_url => $tinyurl,
     });

@@ -220,7 +220,7 @@ sub as_alert {
 sub as_sms {
     my ($self, $u, $opt) = @_;
 
-    my $user = $self->comment->poster ? $self->comment->poster->display_username : '(Anonymous user)';
+    my $user = $self->comment->poster ? $self->comment->poster->display_username(1) : '(Anonymous user)';
     my $edited = $self->comment->is_edited;
 
     my $parent = $self->comment->parent;

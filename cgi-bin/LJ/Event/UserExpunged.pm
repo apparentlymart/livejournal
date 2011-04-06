@@ -16,7 +16,7 @@ sub as_string {
 
 # [[journal]] has been purged.
     return LJ::Lang::get_text($lang, 'notification.sms.userexpunged', undef, {
-        journal => $self->event_journal->display_username,
+        journal => $self->event_journal->display_username(1),
     });    
 }
 

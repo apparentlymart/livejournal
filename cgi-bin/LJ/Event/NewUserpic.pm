@@ -31,7 +31,7 @@ sub as_sms {
 
 # [[journal]] has uploaded a new userpic. You can view it at: [[pic_url]]
     return LJ::Lang::get_text($lang, 'notification.sms.newuserpic', undef, {
-        journal => $self->event_journal->display_username,
+        journal => $self->event_journal->display_username(1),
         pic_url => $self->userpic->url,
     });
 }

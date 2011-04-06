@@ -59,7 +59,7 @@ sub as_string {
 
 # [[voter]] has voted in [[pollname]] at [[entry_url]]
     return LJ::Lang::get_text($lang, 'notification.sms.pollvote', undef, {
-        voter     => $self->voter->display_username, 
+        voter     => $self->voter->display_username(1), 
         pollname  => $self->pollname, 
         entry_url => $self->entry->url
     });    

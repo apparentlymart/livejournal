@@ -140,8 +140,8 @@ sub as_sms {
 
 # [[requestor]] requests membership in [[comm]]. Visit community settings to approve.
     return LJ::Lang::get_text($lang, 'notification.sms.communityjoinrequest', undef, {
-        requestor => $self->requestor->display_username,
-        comm      => $self->comm->display_username,
+        requestor => $self->requestor->display_username(1),
+        comm      => $self->comm->display_username(1),
     });
 }
 
