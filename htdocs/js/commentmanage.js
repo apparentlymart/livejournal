@@ -163,7 +163,7 @@ function deleteComment (ditemid, action) {
             removeComment(ditemid, opt_delthread);
             if (opt_delauthor) {
                 for (var item in LJ_cmtinfo) {
-                    if (LJ_cmtinfo[item].u == LJ_cmtinfo[ditemid].u) {
+					if (LJ_cmtinfo[item].u == LJ_cmtinfo[ditemid].u && !LJ_cmtinfo[ item ].is_deleted ) {
                         removeComment(item, false);
                     }
                 }
@@ -182,6 +182,11 @@ function removeComment (ditemid, killChildren) {
 
 		LiveJournal.CommentManager.getThreadJSON(threadId, function(result) {
 			LiveJournal.CommentManager.processThreadJSON( result, function( dtid, html, comment) {
+				if (LJ_cmtinfo[ threadId ].u !== LJ_cmtinfo[ dtid ].u) {
+					return;
+				}
+
+				html = ExpanderEx.prepareCommentBlock( html, dtid ); //, isChildCollapsed( i ) );
 				LiveJournal.CommentManager.updateCell( dtid, html );
 				if( comment.is_deleted && ( dtid in ExpanderEx.Collection ) ) {
 					delete ExpanderEx.Collection[ dtid ];
