@@ -281,6 +281,7 @@ propgroup text {
     property use text_showspam;
     property use text_hidespam;
     property use text_view_games;
+    property use text_share;
 }
 propgroup sidebar {
     property string sidebar_width {
