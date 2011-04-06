@@ -769,7 +769,7 @@ sub edit_comment {
     ## Save changes if comment is screened now and it wasn't.
     ## Don't save opposite change (screened --> unscreened), because change
     ## may be caused by that edit comment form misses 'state' field.
-    if ($comment_obj->state ne $comment->{state} && $comment->{state} eq 'S') {
+    if ($comment_obj->state ne $comment->{state} && $comment->{state} =~ /[SB]/) {
         $comment_obj->set_state($comment->{state});
     }
     
