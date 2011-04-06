@@ -6384,7 +6384,7 @@ clear: right;
 
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% Comment%%mc-plural-s%%</a> -
+LASTN_TALK_READLINK=><a href="%%urlread%%" rel="nofollow">%%messagecount%% Comment%%mc-plural-s%%</a> -
 
 LASTN_SKIP_BACKWARD<=
 <li><a href="%%url%%">Previous %%numitems%% Entries</a></li>
@@ -6393,7 +6393,7 @@ LASTN_SKIP_BACKWARD<=
 
 LASTN_SUBJECT=> <span class="subject">%%subject%%</span><br>
 
-LASTN_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%">Comment on this</a></div>
+LASTN_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%" rel="nofollow">Comment on this</a></div>
 
 
 .
@@ -6537,7 +6537,7 @@ text-align: left;
 </HTML>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><B><A HREF="%%urlread%%">%%messagecount%% Comment%%mc-plural-s%%</A></B> |
+LASTN_TALK_READLINK=><B><A HREF="%%urlread%%" rel="nofollow">%%messagecount%% Comment%%mc-plural-s%%</A></B> |
 
 LASTN_SKIP_BACKWARD=><A HREF="%%url%%">&lt;&lt; Previous %%numitems%%</A>
 
@@ -6545,7 +6545,7 @@ LASTN_SUBJECT=><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%subject
 
 LASTN_TALK_LINKS<=
 <DIV STYLE="text-align:right">
-  <FONT SIZE=-2>(%%readlink%%<A HREF="%%urlpost%%">Comment on this</A>)</FONT></DIV>
+  <FONT SIZE=-2>(%%readlink%%<A HREF="%%urlpost%%" rel="nofollow">Comment on this</A>)</FONT></DIV>
 <=LASTN_TALK_LINKS
 
 
@@ -6867,13 +6867,13 @@ color:%%color:stronger_text%%;
 </html>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><a href="%%urlread%%">Read %%messagecount%%</a>&nbsp;-&nbsp;
+LASTN_TALK_READLINK=><a href="%%urlread%%" rel="nofollow">Read %%messagecount%%</a>&nbsp;-&nbsp;
 
 LASTN_SKIP_BACKWARD=><a href="%%url%%">Backward</a>
 
 LASTN_SUBJECT=>%%subject%%
 
-LASTN_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">Post</a>
+LASTN_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%" rel="nofollow">Post</a>
 
 
 .
@@ -7258,7 +7258,7 @@ summary="">
 </html>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><a href="%%urlread%%"><b>%%messagecount%% comment%%mc-plural-s%%</b></a>|
+LASTN_TALK_READLINK=><a href="%%urlread%%" rel="nofollow"><b>%%messagecount%% comment%%mc-plural-s%%</b></a>|
 
 LASTN_SKIP_BACKWARD=><a href="%%url%%">earlier</a>
 
@@ -7267,7 +7267,7 @@ LASTN_SUBJECT=>%%subject%%
 LASTN_TALK_LINKS<=
 <tr>
 <td align="right" colspan="2" width="100%" bgcolor="%%color:weak_back%%" class="comments">
-%%readlink%%<a href="%%urlpost%%">post comment</a>
+%%readlink%%<a href="%%urlpost%%" rel="nofollow">post comment</a>
 </td>
 </tr>
 <=LASTN_TALK_LINKS
@@ -7429,14 +7429,14 @@ LASTN_PAGE<=
 </html>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><a href="%%urlread%%">%%messagecount%%&nbsp;comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+LASTN_TALK_READLINK=><a href="%%urlread%%" rel="nofollow">%%messagecount%%&nbsp;comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
 
 LASTN_SKIP_BACKWARD=><a href="%%url%%">Previous&nbsp;%%numitems%%&nbsp;entries</a>
 
 LASTN_SUBJECT=> - <em>%%subject%%</em>
 
 LASTN_TALK_LINKS<=
-    <div class="Comment">(%%readlink%%<a href="%%urlpost%%">comment&nbsp;on&nbsp;this</a>)</div>
+    <div class="Comment">(%%readlink%%<a href="%%urlpost%%" rel="nofollow">comment&nbsp;on&nbsp;this</a>)</div>
 
 <=LASTN_TALK_LINKS
 
@@ -7597,13 +7597,13 @@ text-align: left;
 </HTML>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><A HREF="%%urlread%%">Read %%messagecount%% Note%%mc-plural-s%%</A> -
+LASTN_TALK_READLINK=><A HREF="%%urlread%%" rel="nofollow">Read %%messagecount%% Note%%mc-plural-s%%</A> -
 
 LASTN_SKIP_BACKWARD=><A HREF="%%url%%">Back A Page</A>
 
 LASTN_SUBJECT=> <FONT COLOR="red">%%subject%%</FONT>
 
-LASTN_TALK_LINKS=><P>%%readlink%%<A HREF="%%urlpost%%">Make Notes</A></P>
+LASTN_TALK_LINKS=><P>%%readlink%%<A HREF="%%urlpost%%" rel="nofollow">Make Notes</A></P>
 
 
 .
@@ -7813,13 +7813,13 @@ A:active { color: %%color:page_alink%% ; }
 </HTML>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><A HREF="%%urlread%%">%%messagecount%%&nbsp;comment%%mc-plural-s%%</A>&nbsp;|&nbsp;
+LASTN_TALK_READLINK=><A HREF="%%urlread%%" rel="nofollow">%%messagecount%%&nbsp;comment%%mc-plural-s%%</A>&nbsp;|&nbsp;
 
 LASTN_SKIP_BACKWARD=><A HREF="%%url%%">&gt; previous %%numitems%% entries</A>
 
 LASTN_SUBJECT=><B> - <FONT COLOR="%%color:page_text_em%%">%%subject%%</FONT></B>
 
-LASTN_TALK_LINKS=><P ALIGN="RIGHT"><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%">comment&nbsp;on&nbsp;this</A>)</FONT></P>
+LASTN_TALK_LINKS=><P ALIGN="RIGHT"><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%" rel="nofollow">comment&nbsp;on&nbsp;this</A>)</FONT></P>
 
 
 .
@@ -8102,13 +8102,13 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 </html>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+LASTN_TALK_READLINK=><a href="%%urlread%%" rel="nofollow">%%messagecount%% comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
 
 LASTN_SKIP_BACKWARD=><a href="%%url%%">back %%lc:numitems%% entries</a>
 
 LASTN_SUBJECT=>%%subject%%
 
-LASTN_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">post a comment</a>
+LASTN_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%" rel="nofollow">post a comment</a>
 
 
 .
@@ -8334,7 +8334,7 @@ LASTN_PAGE<=
 </HTML>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><A HREF="%%urlread%%">Read %%messagecount%%</A> or 
+LASTN_TALK_READLINK=><A HREF="%%urlread%%" rel="nofollow">Read %%messagecount%%</A> or 
 
 LASTN_SKIP_BACKWARD=><A HREF="%%url%%">back %%numitems%% entries</A>
 
@@ -8345,7 +8345,7 @@ LASTN_TALK_LINKS<=
 <TD BGCOLOR="%%color:weak_back%%">
 <FONT COLOR="%%color:weak_text%%">
 <NOBR>
-Comments: %%readlink%%<A HREF="%%urlpost%%">Add Your Own</A>.
+Comments: %%readlink%%<A HREF="%%urlpost%%" rel="nofollow">Add Your Own</A>.
 </NOBR>
 </FONT>
 </TD>
@@ -8512,7 +8512,7 @@ LASTN_SKIP_BACKWARD=><a href="%%url%%">&lt;&lt; Previous %%numitems%%</a>
 LASTN_SUBJECT=><b>%%subject%%</b>
 
 LASTN_TALK_LINKS<=
-<a href="%%urlread%%">
+<a href="%%urlread%%" rel="nofollow">
 <img src="%%cons:img%%/style/webley/jwc%%readlink%%.png" border="0" /></a>
 <=LASTN_TALK_LINKS
 

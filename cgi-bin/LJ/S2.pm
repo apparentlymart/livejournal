@@ -3345,9 +3345,9 @@ sub _print_quickreply_link
     my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
 
     if ($bp) {
-        $S2::pout->("<a href='$bp'>$linktext</a>");
+        $S2::pout->("<a href='$bp' rel=\"nofollow\">$linktext</a>");
     } else {
-        $S2::pout->("<a$onclick href=\"$replyurl\"$opt_class>$linktext</a>");
+        $S2::pout->("<a$onclick href=\"$replyurl\"$opt_class rel=\"nofollow\">$linktext</a>");
     }
 }
 
@@ -3484,7 +3484,7 @@ sub Comment__expand_link
     my $expand_url = $this->{thread_url};
     $expand_url =~ s/(?=#)/&expand=$banners_off/;
     
-    return "<a href='$this->{thread_url}'$title$class onClick=\"Expander.make(this,'$expand_url','$this->{talkid}'); return false;\">$text</a>";
+    return "<a href='$this->{thread_url}'$title$class onClick=\"Expander.make(this,'$expand_url','$this->{talkid}'); return false;\" rel=\"nofollow\">$text</a>";
 }
 
 sub Comment__print_expand_link

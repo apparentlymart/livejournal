@@ -868,9 +868,9 @@ sub make_qr_link
         $ju = LJ::load_userid(LJ::Request->notes('journalid')) if LJ::Request->is_inited and LJ::Request->notes('journalid');
 
         $onclick = "" if $ju->{'opt_whocanreply'} eq 'friends' and $remote and not LJ::is_friend($ju, $remote);
-        return "<a href=\"$replyurl\" onclick=\"$onclick\">$linktext</a>";
+        return "<a href=\"$replyurl\" onclick=\"$onclick\" rel='nofollow'>$linktext</a>";
     } else { # QR Disabled
-        return "<a href=\"$replyurl\">$linktext</a>";
+        return "<a href=\"$replyurl\" rel='nofollow'>$linktext</a>";
     }
 }
 

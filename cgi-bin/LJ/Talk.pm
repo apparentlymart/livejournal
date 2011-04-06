@@ -2589,56 +2589,56 @@ sub get_thread_html
                 if ($post->{'state'} ne 'B') {
                     $text .= " <font size='-1'>(<a href='" .
                              LJ::Talk::talkargs($talkurl, "thread=$dtid", $formatlight) .
-                             "#t$dtid'>" .
+                             "#t$dtid' rel='nofollow'>" .
                              BML::ml('talk.commentpermlink') . "</a>)</font> ";
                 }
                 
                 if ($comment->remote_can_edit) {
                     $text .= "<a href='" .
                              LJ::Talk::talkargs($comment->edit_url, $stylemine, $formatlight) .
-                             "'>" .
+                             "' rel='nofollow'>" .
                              LJ::img("editcomment", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
                 }
 
                 if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
                     $text .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid" .
-                             ($opts->{'showspam'} ? '&spam=1' : '') . "'>" .
+                             ($opts->{'showspam'} ? '&spam=1' : '') . "' rel='nofollow'>" .
                              LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
                 }
 
                 if ($post->{'state'} ne 'B' && LJ::is_enabled('spam_button') && $userpost && LJ::Talk::can_mark_spam($remote, $u, $up, $userpost)) {
-                    $text .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid&spam=1'>" .
+                    $text .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid&spam=1' rel='nofollow'>" .
                              LJ::img("btn_spam", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
                 }
 
                 if ($post->{'state'} eq 'B' && LJ::is_enabled('spam_button') && LJ::Talk::can_unmark_spam($remote, $u, $up, $userpost)) {
-                    $text .= "<a href='$LJ::SITEROOT/spamcomment.bml?mode=unspam&amp;${jargent}talkid=$dtid'>" .
+                    $text .= "<a href='$LJ::SITEROOT/spamcomment.bml?mode=unspam&amp;${jargent}talkid=$dtid' rel='nofollow'>" .
                              LJ::img("btn_unspam", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
                 }
 
                 if ($post->{'state'} ne 'F' && ($LJ::DISABLED{'spam_button'} || $post->{'state'} ne 'B') && LJ::Talk::can_freeze($remote, $u, $up, $userpost)) {
-                    $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtid'>" .
+                    $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtid' rel='nofollow'>" .
                              LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) .
                              "</a>";
                 }
                     
                 if ($post->{'state'} eq 'F' && LJ::Talk::can_unfreeze($remote, $u, $up, $userpost)) {
-                    $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid'>" .
+                    $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid' rel='nofollow'>" .
                              LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) .
                              "</a>";
                 }
 
                 if ($post->{'state'} ne 'S' && ($LJ::DISABLED{'spam_button'} || $post->{'state'} ne 'B') && LJ::Talk::can_screen($remote, $u, $up, $userpost)) {
-                    $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid'>" .
+                    $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid' rel='nofollow'>" .
                              LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
                 }
                    
                 if ($post->{'state'} eq 'S' && LJ::Talk::can_unscreen($remote, $u, $up, $userpost)) {
-                    $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" .
+                    $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid' rel='nofollow'>" .
                              LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
                 }
@@ -2684,7 +2684,7 @@ sub get_thread_html
                     }
 
                     my $track_url = "$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$dtid";
-                    $text .= "<a href='$track_url'>" . LJ::img($track_img, '', {'align' => 'absmiddle'}) . "</a>";
+                    $text .= "<a href='$track_url' rel='nofollow'>" . LJ::img($track_img, '', {'align' => 'absmiddle'}) . "</a>";
                 }
 
                 if ($showmultiform) {
@@ -2737,7 +2737,7 @@ sub get_thread_html
                         # See if we want to force them to change their password
                         my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
                         if ($bp) {
-                            $text .= "(<a href='$bp'>" . BML::ml('talk.replytothis') . "</a>) ";
+                            $text .= "(<a href='$bp' rel='nofollow'>" . BML::ml('talk.replytothis') . "</a>) ";
                         }
                         else {
                             if ($post->{state} eq 'S') {
@@ -2754,19 +2754,19 @@ sub get_thread_html
                         }
                     }
                     else {
-                        $text .= "(<a href='$replyurl'>" . BML::ml('talk.replytothis') . "</a>) ";
+                        $text .= "(<a href='$replyurl' rel='nofollow'>" . BML::ml('talk.replytothis') . "</a>) ";
                     }
                 }
 
                 my $parentid = $post->{'parenttalkid'} || $post->{'parenttalkid_actual'};
                 if ($parentid != 0) {
                     my $dpid = $parentid * 256 + $anum;
-                    $text .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid'>" . BML::ml('talk.parentlink') . "</a>) ";
+                    $text .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid' rel='nofollow'>" . BML::ml('talk.parentlink') . "</a>) ";
                 }
    
                 my $has_closed_children = 0;
                 if ($post->{'children'} && @{$post->{'children'}}) {
-                    $text .= "(<a href='$thread_url'>" . BML::ml('talk.threadlink') . "</a>) ";
+                    $text .= "(<a href='$thread_url' rel='nofollow'>" . BML::ml('talk.threadlink') . "</a>) ";
 
                     if (grep {! $_->{_loaded} and !($_->{state} eq "D")} @{$post->{'children'}}) {
                         $has_closed_children = 1;
@@ -2799,7 +2799,7 @@ sub get_thread_html
                 $html->{header} = $comment_header->();
                 $html->{footer} = $comment_footer->();
 
-                my $text = "<a href='$thread_url'>" . LJ::ehtml($post->{'subject'} || BML::ml('.nosubject')) . "</a> - $user, <i>$datepost</i> ";
+                my $text = "<a href='$thread_url' rel='nofollow'>" . LJ::ehtml($post->{'subject'} || BML::ml('.nosubject')) . "</a> - $user, <i>$datepost</i> ";
 
                 if (LJ::run_hook('show_thread_expander', { is_s1 => 1 })) {
                     $text .= ' ' . $get_expand_link->();
