@@ -28,7 +28,7 @@ sub get_uptime {
     my $server = shift;
     
     my $request = HTTP::Request->new('GET' => "http://$server/uptime.bml");
-    $request->header(Host => 'www.lj-6.bulyon.local');
+    $request->header(Host => 'www.livejournal.com');
     my $ua = LWP::UserAgent->new;
     my $response = $ua->request($request);
     my $content = $response->content;
