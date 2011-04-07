@@ -309,7 +309,10 @@
                     depth  => $c->{depth},
                     state  => $state,
                 };
-                $self->($self, $c->{replies}) if $c->{replies} && @{$c->{replies}};
+
+                if (!$GET{single} && $c->{replies} && @{$c->{replies}}) {
+                    $self->($self, $c->{replies});
+                }
             }
         };
 

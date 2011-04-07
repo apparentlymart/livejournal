@@ -163,7 +163,8 @@ function deleteComment (ditemid, action) {
             removeComment(ditemid, opt_delthread);
             if (opt_delauthor) {
                 for (var item in LJ_cmtinfo) {
-					if (LJ_cmtinfo[item].u == LJ_cmtinfo[ditemid].u && !LJ_cmtinfo[ item ].is_deleted ) {
+					if ( LJ_cmtinfo[item].u == LJ_cmtinfo[ditemid].u
+						&& !LJ_cmtinfo[ item ].is_deleted ) {
                         removeComment(item, false);
                     }
                 }
@@ -192,7 +193,7 @@ function removeComment (ditemid, killChildren) {
 					delete ExpanderEx.Collection[ dtid ];
 				}
 			} );
-		} );
+		}, true );
 	}
 	else {
 		var todel = document.getElementById("ljcmt" + ditemid);
@@ -576,6 +577,8 @@ function removeEmptyMarkup(threadId) {
 			var id = reMatch[1];
 			if (!document.getElementById('ljcmt' + id)) return;
 			createModerationFunction(ae, id, 'unspam')( ev );
+		} else {
+			return;
 		}
 
 			ev.preventDefault();
