@@ -418,12 +418,25 @@ function print_sidebar_navigation() {
         $games = """<tr><td>$*text_sidebar_link_separator<a href="$page.journal.website_url/profile#apps">$*text_view_games</a></td></tr>""";
     }
     $navigation = $navigation + $website + $games;
-    if ($page->lay_sidebar_view_navigation() != "") {
-        $navigation = $navigation + "<tr><td>&nbsp;</td></tr>";
-        $navigation = $navigation + $page->lay_sidebar_view_navigation();
-    }
-    $navigation = $navigation + "</table>";
-    print_sidebar_box("navigation",$navigation,$*text_sidebar_navigation);
+    #I REMOVE THESE LINES AND REPLACE IT BY NEXT, BECAUSE I NEED TO PRINT INTO BROWSER DIRECTLY INSTEAD CONCATENATE INTO VARIABLE AND THAN PRINT ('cause link->print_raw() cannot into variables)
+    #IF YOU CAN FIX IT, DO IT
+    #if ($page->lay_sidebar_view_navigation() != "") {
+        #$navigation = $navigation + "<tr><td>&nbsp;</td></tr>";
+        # $navigation = $navigation + $page->lay_sidebar_view_navigation();
+    #}
+    #$navigation = $navigation + "</table>";
+    #print_sidebar_box("navigation",$navigation,$*text_sidebar_navigation);
+
+	    #print_sidebar_box copied here
+	    println safe """<br /><table cellspacing="0" cellpadding="0" border="0" id="sidebar_navigation" class="sidebar_box">""";
+	    println """<tr><th class="sidebar_box_header">""";
+	    print   safe $*text_sidebar_navigation;
+	    println """</th></tr><tr><td class="sidebar_box_contents">""";
+	    print   safe $navigation;
+		#this method returns empty string of print links' list
+		$page->lay_sidebar_view_navigation();
+	    println """</td></tr></table><br />""";
+    print safe "</table>";
 }
 function print_sidebar_calendar() {
     var string calendar;
@@ -1127,15 +1140,19 @@ function EntryPage::lay_sidebar_view_summary() : string {
 }
 
 function EntryPage::lay_sidebar_view_navigation() : string {
-    var string return;
+    print safe "<tr><td>&nbsp;</td></tr>";
+    #var string return;
     var Link link;
     foreach var string k ($.entry.link_keyseq) {
         $link = $.entry->get_link($k);
         if ($link.url != "" and  $k!= "tell_friend") {
-            $return = """$return<tr><td>$*text_sidebar_link_separator<a href="$link.url">$link.caption</a></td></tr>""";
+            #$return = """$return<tr><td>$*text_sidebar_link_separator<a href="$link.url">$link.caption</a></td></tr>""";
+            print safe """<tr><td>$*text_sidebar_link_separator<a href="$link.url">$link.caption</a></td></tr>""";
+	    $link->print_raw();
         }
     }
-    return $return;
+    #return $return;
+    return "";
 }
 function EntryPage::lay_sidebar_view_userpic() : string {
     var string return;
