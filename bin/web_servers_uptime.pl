@@ -21,6 +21,7 @@ use LWP::UserAgent;
     foreach my $server (@servers){
         my $uptime = get_uptime($server);
         my $str = localtime($uptime);
+        chomp $server;
         print "$server -> $uptime ($str)\n";
     }
 
