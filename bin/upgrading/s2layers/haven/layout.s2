@@ -1209,6 +1209,7 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
             $l = $e->get_link($ls);
             if (defined $l) {
                 println """<a href="$l.url">$l.caption</a> """;
+		$l->print_raw();
             }
             if($ls != $e.link_keyseq[size($e.link_keyseq) - 1]) { println """&nbsp;|&nbsp;"""; }
         }
