@@ -641,6 +641,10 @@ function removeEmptyMarkup(threadId) {
 	LiveJournal.CommentManager.processThreadJSON = function( result, callback ) {
 		var comment, dom;
 		for( var i = 0; i < result.length; ++i ){
+			if( !( result[ i ].thread in LJ_cmtinfo ) ) {
+				continue;
+			}
+	
 			comment = {};
 			comment.is_deleted = ( result[i].state === "deleted" );
 			if( comment.is_deleted ) {

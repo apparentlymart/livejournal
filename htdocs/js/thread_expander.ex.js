@@ -124,6 +124,9 @@ ExpanderEx.prototype.expandThread = function( json ) {
         if( json[ i ].state === 'deleted' ) {
             LJ_cmtinfo[ json[ i ].thread ].is_deleted = true;
         }
+		if( !( json[ i ].thread in LJ_cmtinfo ) ) {
+			continue;
+		}
         if( json[ i ].state && json[ i ].state !== "expanded") {
             continue;
         }
