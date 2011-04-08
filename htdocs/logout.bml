@@ -10,7 +10,7 @@
 
     my $u = LJ::get_remote();
     my $user = $POST{'user'} || $GET{'user'};
-    my $sessid = $POST{'sessid'} || $GET{'sessid'};
+    my $sessid = $POST{'sessid'} || $GET{'sessid'}; ## either id of session, or keyword '_current'
     my $nojs = $GET{'nojs'};
 
     # can't do challenge/response with LDAP.
@@ -43,7 +43,7 @@
 
         if ($cursess &&
             $user eq $u->{'user'} &&
-            $sessid == $cursess->id)
+            ($sessid eq '_current' || $sessid == $cursess->id))
         {
             $u->logout;
 
