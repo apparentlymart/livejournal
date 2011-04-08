@@ -1276,6 +1276,7 @@ sub populate_system_props
 {
     my $ctx = shift;
     $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
+    $ctx->[S2::PROPS]->{'SSLROOT'} = $LJ::SSLROOT;
     $ctx->[S2::PROPS]->{'PALIMGROOT'} = $LJ::PALIMGROOT;
     $ctx->[S2::PROPS]->{'SITENAME'} = $LJ::SITENAME;
     $ctx->[S2::PROPS]->{'SITENAMESHORT'} = $LJ::SITENAMESHORT;

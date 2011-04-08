@@ -1085,6 +1085,12 @@ property builtin string SITEROOT {
     des = "The base URL of the current LiveJournal site, without a trailing slash.  Example: \"http://www.livejournal.com\".";
 }
 
+property builtin string SSLROOT {
+    noui = 1;
+    doc_flags = "[sys]";
+    des = "The base URL of the secure (https://) site, without a trailing slash.  Example: \"https://www.livejournal.com\".";
+}
+
 property builtin string PALIMGROOT {
     noui = 1;
     doc_flags = "[sys]";
