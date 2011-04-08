@@ -272,6 +272,7 @@ body<=
             cuturl              => $talkurl, 
             expand_cut          => !$no_cut_expand,
             journalid           => $entry->journalid,
+            posterid            => $entry->posterid,
         }
     );
     LJ::expand_embedded($u, $ditemid, $remote, \$event);

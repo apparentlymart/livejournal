@@ -235,6 +235,7 @@ sub make_feed
                 {   'wordlength'    => 0, 
                     'preformatted'  => $logprops{$itemid}->{'opt_preformatted'},
                     'journalid'     => $u->userid,
+                    'posterid'      => $it->{'posterid'},
                 }
             );
 

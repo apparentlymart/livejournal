@@ -156,6 +156,9 @@ sub clean
     my $target = $opts->{'target'} || '';
     my $ljrepost_allowed = ($opts->{ljrepost_allowed} && ! $opts->{'textonly'}) || 0;
 
+    my $poster = LJ::load_userid($opts->{posterid});
+    my $put_nofollow = not ($poster and $poster->get_cap('paid'));
+
     my $viewer_lang = $opts->{'viewer_lang'};
     unless ($viewer_lang) {
         $viewer_lang = LJ::Lang::get_remote_lang();
@@ -981,9 +984,19 @@ sub clean
 
                 if ($tag eq "a" && $extractlinks)
                 {
-                    push @canonical_urls, canonical_url($token->[2]->{href}, 1);
+                    push @canonical_urls, canonical_url($attr->{href}, 1);
                     $newdata .= "<b>";
                     next;
+                }
+
+                if ($tag eq "a" and $hash->{href} and $put_nofollow) {
+                    if ($hash->{href} =~ m!^https?://([^/]+?)(/.*)?$!) {
+                        my $host = $1;
+                        unless ($host =~ /\Q$LJ::DOMAIN\E$/i) {
+                            $hash->{rel} = "nofollow";
+                            push @$attrs, 'rel';
+                        }
+                    }
                 }
 
                 # Through the xsl namespace in XML, it is possible to embed scripting lanaguages
@@ -1235,6 +1248,7 @@ sub clean
         }
         elsif ($type eq "T") {
             my %url = ();
+            my %nofollow;
             my $urlcount = 0;
 
             if (@eatuntil) {
@@ -1261,13 +1275,21 @@ sub clean
             if ($auto_format && ! $noautolinks && ! $opencount{'a'} && ! $opencount{'textarea'}) {
                 my $match = sub {
                     my $str = shift;
+                    my $end = '';
                     if ($str =~ /^(.*?)(&(#39|quot|lt|gt)(;.*)?)$/) {
                         $url{++$urlcount} = $1;
-                        return "&url$urlcount;$1&urlend;$2";
+                        $end = $2;
                     } else {
                         $url{++$urlcount} = $str;
-                        return "&url$urlcount;$str&urlend;";
                     }
+                    $nofollow{$urlcount} = 0;
+                    if ($put_nofollow and $url{$urlcount} =~ m!^https?://([^/]+?)(/.*)?$!) {
+                        my $host = $1;
+                        unless ($host =~ /\Q$LJ::DOMAIN\E$/i) {
+                            $nofollow{$urlcount} = 1;
+                        }
+                    }
+                    return "&url$urlcount;$url{$urlcount}&urlend;$end";
                 };
                 ## URL is http://anything-here-but-space-and-quotes/and-last-symbol-isn't-space-comma-period-etc
                 ## like this (http://example.com) and these: http://foo.bar, http://bar.baz.
@@ -1289,7 +1311,12 @@ sub clean
             if ($auto_format && !$opencount{'textarea'}) {
                 $token->[1] =~ s/\r?\n/<br \/>/g;
                 if (! $opencount{'a'}) {
-                    $token->[1] =~ s|&url(\d+);(.*?)&urlend;|<a href="$url{$1}">$2</a>|g;
+                    my $tag_a = sub {
+                        my ($key, $title) = @_;
+                        my $nofollow = $nofollow{$key} ? " rel='nofollow'" : "";
+                        return "<a href='$url{$key}'$nofollow>$title</a>";
+                    };
+                    $token->[1] =~ s|&url(\d+);(.*?)&urlend;|$tag_a->($1,$2)|ge;
                 }
             }
 
@@ -1766,6 +1793,7 @@ sub clean_comment
         'nocss' => $opts->{'nocss'},
         'textonly' => $opts->{'textonly'} ? 1 : 0,
         'remove_positioning' => 1,
+        'posterid' => $opts->{'posterid'},
     });
 }
 

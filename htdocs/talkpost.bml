@@ -209,6 +209,7 @@ body<=
                                           'cuturl' => $talkurl,
                                           'expand_cut' => 1,
                                           'journalid' =>  $entry->journalid,
+                                          'posterid' => $entry->posterid,
                                           });
     LJ::expand_embedded($u, $ditemid, $remote, \$event);
     BML::ebml(\$event);

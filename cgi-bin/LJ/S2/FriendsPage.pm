@@ -249,7 +249,9 @@ sub FriendsPage
                                              'ljcut_disable' => $remote ? $remote->{'opt_ljcut_disable_friends'} : undef,
                                              'suspend_msg' => $suspend_msg,
                                              'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
-                                             'journalid' =>  $entry_obj->journalid, });
+                                             'journalid' => $entry_obj->journalid,
+                                             'posterid' => $entry_obj->posterid,
+                                           });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$text);
 
         $text = LJ::ContentFlag->transform_post(post => $text, journal => $friends{$friendid},

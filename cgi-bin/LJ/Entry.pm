@@ -822,6 +822,7 @@ sub event_html
         $opts->{cuturl}     = $self->url;
     }
     $opts->{journalid} = $self->journalid;
+    $opts->{posterid} = $self->posterid;
     
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};
@@ -841,7 +842,7 @@ sub event_text
 {
     my $self = shift;
     my $event = $self->event_raw;
-    LJ::CleanHTML::clean_event( \$event, { textonly => 1, journalid => $self->journalid, } ) if $event;
+    LJ::CleanHTML::clean_event( \$event, { textonly => 1, journalid => $self->journalid, posterid => $self->posterid } ) if $event;
     return $event;
 }
 

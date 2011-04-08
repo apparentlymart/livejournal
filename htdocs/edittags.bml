@@ -76,6 +76,8 @@ body<=
     my (%props, %opts);
     LJ::load_log_props2($u->{userid}, [$jitemid], \%props);
     $opts{'preformatted'} = $props{$jitemid}{'opt_preformatted'};
+    $opts{'journalid'} = $u->userid;
+    $opts{'posterid'} = $logrow->{posterid};
 
     LJ::CleanHTML::clean_subject(\$subj);
     LJ::CleanHTML::clean_event(\$evt, \%opts);

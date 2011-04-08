@@ -2705,6 +2705,7 @@ sub get_thread_html
                         preformatted => $post->{'props'}->{'opt_preformatted'},
                         anon_comment => (!$pu || $pu->{'journaltype'} eq 'I'),
                         nocss        => 1,
+                        posterid     => ($pu ? $pu->userid : 0),
                     }
                 );
 

@@ -365,6 +365,8 @@ body<=
         LJ::CleanHTML::clean_event(\$event, {'preformatted' => $req->{'props'}->{'opt_preformatted'},
                                              'cutpreview' => 1,
                                              'cuturl' => '#',
+                                             'journalid' => $c->{'userid'},
+                                             'posterid' => $posterid,
                                          });
         
         # create iframe from <lj-embed> tag
