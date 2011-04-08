@@ -2827,53 +2827,10 @@ sub activate_userpics {
 
     # inactivate previously activated userpics
     if (@active > $allow) {
-        my $to_ban = @active - $allow;
 
-        # find first jitemid greater than time 2 months ago using rlogtime index
-        # ($LJ::EndOfTime - UnixTime)
-        my $jitemid = $dbcr->selectrow_array("SELECT jitemid FROM log2 USE INDEX (rlogtime) " .
-                                             "WHERE journalid=? AND rlogtime > ? LIMIT 1",
-                                             undef, $userid, $LJ::EndOfTime - time() + 86400*60);
+        my @ban = sort { $a <=> $b } @active;
+        splice(@ban, 0, $allow);
 
-        # query all pickws in logprop2 with jitemid > that value
-        my %count_kw = ();
-        my $propid = LJ::get_prop("log", "picture_keyword")->{'id'};
-        my $sth = $dbcr->prepare("SELECT value, COUNT(*) FROM logprop2 " .
-                                 "WHERE journalid=? AND jitemid > ? AND propid=?" .
-                                 "GROUP BY value");
-        $sth->execute($userid, $jitemid, $propid);
-        while (my ($value, $ct) = $sth->fetchrow_array) {
-            # keyword => count
-            $count_kw{$value} = $ct;
-        }
-
-        my $keywords_in = join(",", map { $dbh->quote($_) } keys %count_kw);
-
-        # map pickws to picids for freq hash below
-        my %count_picid = ();
-        if ($keywords_in) {
-            my $sth;
-            if ($u->{'dversion'} > 6) {
-                $sth = $dbcr->prepare("SELECT k.keyword, m.picid FROM userkeywords k, userpicmap2 m ".
-                                      "WHERE k.keyword IN ($keywords_in) AND k.kwid=m.kwid AND k.userid=m.userid " .
-                                      "AND k.userid=?");
-            } else {
-                $sth = $dbh->prepare("SELECT k.keyword, m.picid FROM keywords k, userpicmap m " .
-                                     "WHERE k.keyword IN ($keywords_in) AND k.kwid=m.kwid " .
-                                     "AND m.userid=?");
-            }
-            $sth->execute($userid);
-            while (my ($keyword, $picid) = $sth->fetchrow_array) {
-                # keyword => picid
-                $count_picid{$picid} += $count_kw{$keyword};
-            }
-        }
-
-        # we're only going to ban the least used, excluding the user's default
-        my @ban = (grep { $_ != $u->{'defaultpicid'} }
-                   sort { $count_picid{$a} <=> $count_picid{$b} } @active);
-
-        @ban = splice(@ban, 0, $to_ban) if @ban > $to_ban;
         my $ban_in = join(",", map { $dbh->quote($_) } @ban);
         if ($u->{'dversion'} > 6) {
             $u->do("UPDATE userpic2 SET state='I' WHERE userid=? AND picid IN ($ban_in)",
