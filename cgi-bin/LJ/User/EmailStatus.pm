@@ -132,10 +132,18 @@ sub change_email_users_status {
     } else {
         @users = ($params{user});
     }
+    
+    my $system_user = LJ::load_user('system');  
  
     for my $user (@users) {
-       $user->set_prop('email_faulty', $is_disabled);
-       LJ::update_user($user, { 'status' => $is_disabled ? 'T' : 'A' } );
+        $user->set_prop('email_faulty', $is_disabled);
+        
+        my $old_status = $user->{status};
+        my $new_status = $is_disabled ? 'T' : 'A';
+        
+        LJ::update_user($user, { 'status' => $new_status } );
+ 
+        LJ::statushistory_add($user->userid, $system_user->userid, 'email_status', $user->email_raw . ": $old_status -> $new_status");
     }
 }
 
