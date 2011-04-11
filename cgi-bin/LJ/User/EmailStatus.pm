@@ -113,7 +113,7 @@ sub change_email_users_status {
     my $is_disabled = $params{disabled} ? 1 : undef;
     
     LJ::MemCache::delete($class->get_cache_key($params{email})) if(!$params{disabled});
-   
+print $is_disabled;
     my $dbh = LJ::get_db_writer() or die ('Failed to get db connection');
     
     unless ($is_disabled) {
@@ -142,8 +142,7 @@ sub change_email_users_status {
         my $new_status = $is_disabled ? 'T' : 'A';
         
         LJ::update_user($user, { 'status' => $new_status } );
- 
-        LJ::statushistory_add($user->userid, $system_user->userid, 'email_status', $user->email_raw . ": $old_status -> $new_status");
+        LJ::infohistory_add($user->userid, 'email_status', $old_status, "new value: $new_status");
     }
 }
 
