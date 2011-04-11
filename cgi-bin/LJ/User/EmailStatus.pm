@@ -142,7 +142,7 @@ sub change_email_users_status {
         my $new_status = $is_disabled ? 'T' : 'A';
         
         LJ::update_user($user, { 'status' => $new_status } );
-        LJ::infohistory_add($user->userid, 'email_status', $old_status, "new value: $new_status");
+        LJ::infohistory_add($user->userid, 'email_status', $old_status, $user->email_raw);
     }
 }
 
