@@ -8,8 +8,13 @@
     $title = $ML{'.title'};
     $body = "";
 
-    my $u = LJ::get_remote();
-    my $user = $POST{'user'} || $GET{'user'};
+    my $remote = LJ::get_remote();
+    my $u;
+    if (my $username = $POST{'user'} || $GET{'user'}) {
+        $u = LJ::load_user($username);
+    } elsif (my $userid = $POST{'userid'} || $GET{'userid'}) {
+        $u = LJ::load_userd($userid);
+    }
     my $sessid = $POST{'sessid'} || $GET{'sessid'}; ## either id of session, or keyword '_current'
     my $nojs = $GET{'nojs'};
 
@@ -17,8 +22,7 @@
     $nojs = 1 if $LJ::LDAP_HOST;
 
     my $logged_out_html = sub {
-        my $username = $u ? $u->display_username : $user;
-        my $old_remote = LJ::load_user($username);
+        my $old_remote = $remote || $u;
         return BML::redirect("$LJ::SITEROOT/") unless $old_remote;
         my $html = LJ::run_hook("logout_page_html", $old_remote, get_ret => $GET{ret}, post_ret => $POST{ret}, nojs => $nojs);
 
@@ -30,22 +34,21 @@
         }
     };
 
-    if ($u) {
+    if ($remote) {
         if ($POST{'action:killall'}) {
-            $u->logout_all
+            $remote->logout_all
                 or die "Failed to log out all sessions.";
             $body = $ML{'.loggedout.killedall'};
             $logged_out_html->();
             return;
         }
 
-        my $cursess = $u ? $u->session : undef;
+        my $cursess = $remote ? $remote->session : undef;
 
-        if ($cursess &&
-            $user eq $u->{'user'} &&
+        if ($cursess && $u == $remote &&
             ($sessid eq '_current' || $sessid == $cursess->id))
         {
-            $u->logout;
+            $remote->logout;
 
             # Redirect within the site if ret=1
             my $referer = BML::get_client_header('Referer');
@@ -72,22 +75,22 @@
             }
             $body .= "<form action='logout.bml' method='post'>";
             $body .= LJ::html_hidden('ret', $GET{'ret'}) if $GET{'ret'};
-            $body .= LJ::html_hidden("user", $u->{'user'},
-                                     "sessid", $u->{'_session'}->{'sessid'});
+            $body .= LJ::html_hidden("user", $remote->{'user'},
+                                     "sessid", $remote->{'_session'}->{'sessid'});
             $body .= "<?h1 $ML{'.logout.head'} h1?><?p $ML{'.logout.text'} ";
             $body .= "<blockquote><input type='submit' value='$ML{'.logout.btn'}'></blockquote> p?></form>";
 
             # do they have any other sessions?
-            my $udbr = LJ::get_cluster_reader($u);
+            my $udbr = LJ::get_cluster_reader($remote);
             unless ($udbr) {
                 $body = "<?h1 $ML{'Error'} h1?><?p $ML{'error.nodb'} p?>";
                 return undef;
             }
 
-            my $curid = $u->{'_session'}->{'sessid'} || 0;
+            my $curid = $remote->{'_session'}->{'sessid'} || 0;
 
             my $sessions = $udbr->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
-                                                     "userid=$u->{'userid'} AND timeexpire > UNIX_TIMESTAMP() ".
+                                                     "userid=$remote->{'userid'} AND timeexpire > UNIX_TIMESTAMP() ".
                                                      "AND sessid <> $curid");
             if (@$sessions) {
                 $body .= "<form method='post' action='logout.bml'>";

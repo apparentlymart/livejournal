@@ -2260,6 +2260,7 @@ sub UserLite
         '_type' => 'UserLite',
         '_u' => $u,
         'username' => LJ::ehtml($u->display_name),
+        'userid' => $u->{'userid'},
         'name' => LJ::ehtml($u->{'name'}),
         'journal_type' => $u->{'journaltype'},
         'data_link' => {
