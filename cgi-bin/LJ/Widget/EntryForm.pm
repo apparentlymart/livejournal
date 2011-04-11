@@ -405,6 +405,17 @@ sub render_metainfo_block {
             $out .= "<label for='usejournal' class='left'>" .
                 BML::ml('entryform.postto') . "</label>\n";
 
+            my @choices;
+
+            if ( $remote->is_personal ) {
+                push @choices, '' => $remote->username;
+            } else {
+                push @choices,
+                    '[none]' => LJ::Lang::ml('entryform.postto.select');
+            }
+
+            push @choices, map { $_ => $_ } @{ $login_data->{'usejournals'} };
+
             $out .= LJ::html_select(
                 {
                     'name' => 'usejournal',
@@ -416,10 +427,7 @@ sub render_metainfo_block {
                         "getUserTags(this[this.selectedIndex].value);".
                         "changeSecurityOptions(this[this.selectedIndex].value)"
                 },
-                (
-                    "" => $remote->{'user'},
-                    map { $_, $_ } @{$login_data->{'usejournals'}}
-                )
+                @choices,
             );
             $out .= "</p>\n";
         }
@@ -1239,6 +1247,8 @@ sub render_submitbar_block {
             $$onload .= " changeSecurityOptions('$defaultjournal');";
         }
 
+        my $disabled = $remote->is_identity && !$self->usejournal;
+
         $out .= LJ::html_submit(
             'action:update',
             BML::ml('entryform.update4'),
@@ -1247,6 +1257,7 @@ sub render_submitbar_block {
                 'class' => 'submit',
                 'id' => 'formsubmit',
                 'tabindex' => $self->tabindex,
+                'disabled' => $disabled,
             }
         ) . "&nbsp;\n";
     }

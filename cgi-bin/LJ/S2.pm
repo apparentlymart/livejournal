@@ -3764,8 +3764,10 @@ sub EntryLite__get_plain_subject
 sub _Entry__get_link
 {
     my ($ctx, $this, $key) = @_;
-    my $journal = $this->{'journal'}->{'username'};
-    my $poster = $this->{'poster'}->{'username'};
+    my $journal  = $this->{'journal'}->{'username'};
+    my $journalu = $this->{'journal'}->{'_u'};
+    my $poster   = $this->{'poster'}->{'username'};
+    my $posteru  = $this->{'poster'}->{'_u'};
     my $remote = LJ::get_remote();
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
     my $journalu = LJ::load_user($journal);
@@ -3773,9 +3775,9 @@ sub _Entry__get_link
 
     if ($key eq "edit_entry") {
         return $null_link unless $remote && 
-                                    ($remote->{'user'} eq $journal ||
-                                     $remote->{'user'} eq $poster ||
-                                     $remote->can_manage(LJ::load_user($journal))
+                                    ( LJ::u_equals( $remote, $journalu ) ||
+                                      LJ::u_equals( $remote, $posteru ) ||
+                                      $remote->can_manage($journalu)
                                     );
         return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_edit_entry"},

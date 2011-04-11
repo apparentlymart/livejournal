@@ -32,8 +32,9 @@ body<=
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
+
     return LJ::bad_input("You must be authenticated as a person.")
-        unless $u->{'journaltype'} eq 'P';
+        unless $u->is_personal || $u->is_identity;
 
     # are we modify a community post?
     my $usejournal = $GET{'usejournal'} || $POST{'usejournal'} || $GET{'journal'};

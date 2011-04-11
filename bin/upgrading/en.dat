@@ -1310,6 +1310,8 @@ entryform.postas=Post as:
 
 entryform.postto=Post to:
 
+entryform.postto.select=Select a community
+
 entryform.preview=Preview
 
 entryform.public|staleness=1

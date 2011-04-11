@@ -61,7 +61,8 @@
 
         return if LJ::bad_password_redirect();
 
-        if ($remote->identity) {
+        my @posting_access = $remote->posting_access_list;
+        if ( $remote->is_identity && scalar(@posting_access) == 0 ) {
             $$title = $ML{'Sorry'};
             $$body = BML::ml('.error.nonusercantpost', {'sitename' => $LJ::SITENAME});
             return;
@@ -237,7 +238,7 @@ EMBED
         if ($altlogin_display eq 'none') {
             $auth.= "<p id='remotelogin' class='pkg'>\n";
             $auth .= "<label for='current_username' class='left'>" . BML::ml('entryform.postas') . "</label>\n";
-            $auth .= "<strong id='current_username'>" . $remote->{user} . "</strong> <a href='$LJ::SITEROOT/update.bml?altlogin=1' id='remotelogin_content' class='small'>$ML{'entryform.switchuser'}</a>\n";
+            $auth .= "<strong id='current_username'>" . $remote->display_name . "</strong> <a href='$LJ::SITEROOT/update.bml?altlogin=1' id='remotelogin_content' class='small'>$ML{'entryform.switchuser'}</a>\n";
             $auth .= "</p>\n\n";
         }
         # table with username/password fields

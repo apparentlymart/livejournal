@@ -1612,8 +1612,11 @@ sub postevent
     ##        should one day be a community journal, of some form.
     return fail($err,150) if ($u->{'journaltype'} eq "C" ||
                               $u->{'journaltype'} eq "S" ||
-                              $u->{'journaltype'} eq "I" ||
                               $u->{'journaltype'} eq "N");
+
+    # identity users can only post to communities
+    return fail( $err, 150 )
+        if $u->is_identity and LJ::u_equals( $u, $uowner );
 
     # underage users can't do this
     return fail($err,310) if $u->underage;
