@@ -1133,6 +1133,11 @@ sub create_view_lastn
     $lastn_page{'head'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atom/post" />\n};
 
     $lastn_page{'head'} .= $u->openid_tags;
+    
+    my ($userhead) = $u->userhead;
+    $userhead = $LJ::IMGPREFIX . "/" . $userhead 
+        unless $userhead =~ m|^http://|;
+    $lastn_page{'head'} .= qq{<link rel="icon" type="image/gif" href="$userhead">\n};
 
     # Link to the friends page as a "group", for use with OpenID "Group Membership Protocol"
     {
