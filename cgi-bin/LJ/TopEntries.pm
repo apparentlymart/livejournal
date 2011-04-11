@@ -31,6 +31,7 @@ use Storable qw//;
 my %domains = (
     hmp_ontd        => 'Homepage/ONTD',
     hmp_spotlight   => 'Homepage/Spotlight',
+    anythingdisney  => 'AnythingDisney',
 );
 =head
     culture         => 'Arts & Culture',
@@ -52,9 +53,14 @@ my %domains = (
     );
 =cut
 
+# if domain key is equal to community name, than no need to insert this domain here
+my %community_for_domain = (
+    hmp_ontd => 'ohnotheydidnt'
+);
+
 my @order = qw/
     hmp_ontd
-    hmp_spotlight
+    anythingdisney
 /;
 =head
     culture
@@ -77,8 +83,27 @@ my @order = qw/
 =cut
 
 
-sub domains { @order }
 sub domain2name { my $class = shift; $domains{ +shift } }
+
+sub domains { 
+    my $class = shift;
+    my $u = shift;
+
+    return @order if LJ::check_priv($u, "siteadmin", "topentries");
+
+    my @result;
+
+    foreach my $candidate (@order) {
+        my $comm_name = $community_for_domain{$candidate};
+        $comm_name = $candidate unless $comm_name;
+        my $comm = LJ::load_user($comm_name);
+        next unless $comm;
+
+        push @result, $candidate if $u->can_manage($comm);
+    }
+
+    return @result;
+}
 
 sub new {
     my $class = shift;

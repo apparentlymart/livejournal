@@ -12,11 +12,14 @@ body<=
     LJ::need_res('js/admin/topentries.js', 'stc/framework/modules.css');
 
     my $remote = LJ::get_remote();
-    my $domain = $POST{domain} || $GET{domain} || 'hmp_ontd'; # widgets domain
+
+    my @domains = LJ::TopEntries->domains($remote);
+    my %domains = map { $_ => 1 } @domains;
+
+    my $domain = $POST{domain} || $GET{domain} || $domains[0]; # widgets domain
 
     ## Access control
-    return LJ::error_list("Check your privs")
-        unless LJ::check_priv($remote, "siteadmin", "topentries") || $LJ::IS_DEV_SERVER;
+    return LJ::error_list("Check your privs") unless $domains{$domain};
 
     ## load actual data
     my $top_entries = LJ::TopEntries->new(domain => $domain);
@@ -52,7 +55,7 @@ body<=
         $top_entries->max_entries($POST{max_entries});
     }
 
-    ## 
+    ##
     if ($POST{remove_after}) {
         $top_entries->remove_after($POST{remove_after});
     }
@@ -68,7 +71,7 @@ body<=
                             my $name = LJ::TopEntries->domain2name($_);
                             my $selected = $domain eq $_ ? " selected" : "";
                             qq|<option value="$_"$selected>$name</option>|;
-                        } LJ::TopEntries->domains
+                        } @domains
                      )
                     . "</select>";
     
@@ -96,11 +99,13 @@ body<=
         <p>Enter URL for adding featured post:<br />
         <table border="0">
             <tr><td>URL: </td><td>| . LJ::html_text({name => 'url', maxlength => '100', size => '50', value => $POST{url}}) . qq|</td></tr>
+        </table>
+        </p><br />|;
+=comment
             <tr><td>Vertical Name: </td><td><input type="text" name="vertical_name"></td></tr>
             <tr><td>Vertical URI: </td><td><input type="text" name="vertical_uri"></td></tr>
             <tr><td>Tags: </td><td><input type="text" name="tags" size="45"><button type='submit'>Add</button></td></tr>
-        </table>
-        </p><br />|;
+=cut
 
     $ret .= '<table><tr><td style="width:27.2em">Number of shown entries: ';
     $ret .= LJ::html_text({name => 'max_entries', maxlength => '1', size => '1', value => $top_entries->max_entries()});

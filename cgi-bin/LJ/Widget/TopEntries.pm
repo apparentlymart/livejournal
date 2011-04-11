@@ -24,6 +24,9 @@ sub render_body {
     return $class->render_ontd_homepage($top_entries) 
         if $domain eq 'hmp_ontd' or not $domain; # hmp_ontd is default
 
+    return $class->render_anythingdisney($top_entries)
+        if $domain eq 'anythingdisney';
+
     ## TODO: Cache on 5 minutes.
     ##      !!! use lang_id in cache key.
 
@@ -105,6 +108,32 @@ sub render_ontd_homepage {
         
         ## switch classname
         $classname = $classname eq 'even' ? 'odd' : 'even';
+    }
+
+    $ret .= '</ul></div></div>';
+
+    return $ret;
+}
+
+sub render_anythingdisney {
+    my $class       = shift;
+    my $top_entries = shift;
+
+    my $ret = '<div class="w-topentries w-ontd"><div class="w-head"><h2><span class="w-head-in"><a href="http://community.livejournal.com/ohnotheydidnt/">'.$class->ml('widget.topentries.title').'</a></span></h2><i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">';
+
+    foreach my $post ($top_entries->get_featured_posts()) {
+        ##
+        my $comments = qq|,</span> <span class="i-posts-comments"><a href="$post->{comments_url}">|
+                            . BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
+                            "</a></span>"; 
+
+        ## 
+        my $subj = $post->{subj} ne '' 
+                    ? $post->{subj} 
+                    : $class->ml('widget.officialjournals.nosubject');
+
+        ## Spotlight row
+        $ret .= qq(<li><dl><dd><h3 class="b-posts-head"><a href="$post->{url}">$subj</a></h3><p class="b-posts-data"><span class="i-posts-user">$post->{poster}$comments</p></dd></dl></li>);
     }
 
     $ret .= '</ul></div></div>';
