@@ -13,7 +13,7 @@
     if (my $username = $POST{'user'} || $GET{'user'}) {
         $u = LJ::load_user($username);
     } elsif (my $userid = $POST{'userid'} || $GET{'userid'}) {
-        $u = LJ::load_userd($userid);
+        $u = LJ::load_userid($userid);
     }
     my $sessid = $POST{'sessid'} || $GET{'sessid'}; ## either id of session, or keyword '_current'
     my $nojs = $GET{'nojs'};
