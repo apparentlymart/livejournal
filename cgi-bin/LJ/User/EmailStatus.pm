@@ -113,7 +113,7 @@ sub change_email_users_status {
     my $is_disabled = $params{disabled} ? 1 : undef;
     
     LJ::MemCache::delete($class->get_cache_key($params{email})) if(!$params{disabled});
-print $is_disabled;
+
     my $dbh = LJ::get_db_writer() or die ('Failed to get db connection');
     
     unless ($is_disabled) {
