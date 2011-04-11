@@ -319,4 +319,14 @@ register_setter('ilikeit_enable', sub {
     return 1;
 });
 
+register_setter("opt_ctxpopup", sub {
+    my ($u, $key, $value, $err) = @_;
+    unless ($value =~ /^(Y|N)$/) {
+        $$err = "Illegal value. Must be 'Y' or 'N'";
+        return 0;
+    }
+    $u->set_prop("opt_ctxpopup", $value);
+    return 1;
+});
+
 1;

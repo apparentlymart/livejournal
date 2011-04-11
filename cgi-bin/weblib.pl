@@ -1336,6 +1336,7 @@ sub res_includes {
 
     # ctxpopup prop
     my $ctxpopup = 1;
+    $ctxpopup = 0 if $remote and not $remote->prop("opt_ctxpopup");
 
     # poll for esn inbox updates?
     my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 0 : 1;
