@@ -1315,12 +1315,23 @@ function EntryPage::print_body () {
 
 }
 
+function EntryPage::print_comments (Comment[] cs) {
+    if (size $cs == 0) { return; }
+    foreach var Comment c ($cs) {
+        $this->print_comment($c);
+        $this->print_comments($c.replies);
+    }
+}
+
 function EntryPage::print_comment (Comment c) {
         var Page p = get_page();
         var int indent = ($c.depth - 1) * 25;
-        if ($c.spam and not $p.showspam) {
-            """<div style='margin-left: ${indent}px;margin-top:5px;' id="$c.dom_id">\n""";
-            $this->print_comment_partial($c);
+        if ($c.screened and not $c.full and not viewer_is_owner()) {
+            """<div style='margin-left: ${indent}px;margin-top:5px;' id="$c.dom_id"><strong>$*text_comment_screened</strong>""";
+        } elseif ($c.deleted) {
+            """<div style='margin-left: ${indent}px;margin-top:5px;' id="$c.dom_id"><strong>$*text_comment_deleted</strong>""";
+        } elseif ($c.spam and not $p.showspam and ((size $c.replies) > 0)) {
+            """<div style='margin-left: ${indent}px;margin-top:5px;' id="$c.dom_id">\n<strong>$*text_spam_comment\n</strong>""";
         } elseif ($c.full) {
             """<div style='margin-left: ${indent}px;margin-top:5px;' id="$c.dom_id" class="ljcmt_full">\n""";
             $this->print_comment_full($c);
