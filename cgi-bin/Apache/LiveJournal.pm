@@ -97,6 +97,8 @@ sub handler
 
     $class = __PACKAGE__ unless $class;
 
+    @req_hosts = ();
+
     if ($LJ::SERVER_TOTALLY_DOWN) {
         LJ::Request->handler("perl-script");
         LJ::Request->set_handlers(PerlHandler => [ \&totally_down_content ]);
@@ -129,10 +131,12 @@ sub handler
                 }
 
                 LJ::run_hook('modify_forward_list', \@hosts, \@req_hosts);
-
                 if (@hosts) {
                     my $real = shift @hosts;
                     LJ::Request->remote_ip($real);
+
+                    ## check only one (reald) user IP.
+                    @req_hosts = ($real);
                 }
                 LJ::Request->header_in('X-Forwarded-For', join(", ", @hosts));
             }
@@ -243,6 +247,7 @@ sub totally_down_content
 
 sub blocked_bot
 {
+    my $reason = shift;
     LJ::Request->status(LJ::Request::HTTP_PRECONDITION_FAILED);
     LJ::Request->content_type("text/html");
     LJ::Request->send_http_header();
@@ -261,7 +266,7 @@ sub blocked_bot
         $message .= " $uniq @ $ip" if $LJ::BLOCKED_BOT_INFO;
     }
 
-    LJ::Request->print("<h1>$subject</h1>$message");
+    LJ::Request->print("<h1>$subject</h1>$message <!-- reason: $reason -->");
     return LJ::Request::HTTP_PRECONDITION_FAILED;
 }
 
@@ -339,7 +344,7 @@ sub trans
               # apply sysban block if applicable
               if (LJ::UniqCookie->sysban_should_block) {
                   LJ::Request->handler("perl-script");
-                  LJ::Request->set_handlers(PerlHandler => \&blocked_bot );
+                  LJ::Request->set_handlers(PerlHandler => sub { blocked_bot('sysban_should_block', @_) } );
                   return LJ::Request::OK;
               }
           }
@@ -359,13 +364,13 @@ sub trans
         foreach my $ip (@req_hosts) {
             if (LJ::sysban_check('ip', $ip)) {
                 LJ::Request->handler("perl-script");
-                LJ::Request->set_handlers(PerlHandler => \&blocked_bot);
+                LJ::Request->set_handlers(PerlHandler => sub { blocked_bot('sysban-ip: ' . $ip, @_) } );
                 return LJ::Request::OK;
             }
         }
         if (LJ::run_hook("forbid_request")) {
             LJ::Request->handler("perl-script");
-            LJ::Request->set_handlers(PerlHandler => \&blocked_bot);
+            LJ::Request->set_handlers(PerlHandler => sub { blocked_bot('forbid_request', @_) } );
             return LJ::Request::OK
         }
     }
