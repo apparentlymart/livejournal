@@ -115,7 +115,7 @@ sub render_responses {
         }
 
         my $entry_html = LJ::trim($entry->event_html_summary($class->entry_show_length, { noexpandembedded => 1 }));
-        my $entry_author = $journal->ljuser_display();
+        my $entry_author = $entry->poster->ljuser_display();
         my $entry_subject = $entry->subject_html;
         my $entry_url = $entry->url;
         my $entry_cmt_link = $entry->reply_url;

@@ -151,6 +151,12 @@ sub qotd_display {
                                 ? "<p>$q->{extra_text}</p>"
                                 : "";
     
+            my $usejournal_field = '';
+            if ( $remote->is_identity ) {
+                $usejournal_field
+                    = LJ::html_hidden( 'usejournal' => $LJ::QOTD_COMMUNITY );
+            }
+
             $ret .=
                 ($q->{img_url}
                     ? qq[<img src="$q->{img_url}" alt="$subject" title="$subject" class="qotd-pic" />]
@@ -161,7 +167,7 @@ sub qotd_display {
                     <p>$d->{text}<em class="i-qotd-by">$d->{from_text}</em></p>
                     $extra_text
                     <ul class="canyon">
-                        <li class="canyon-section"><form action="$LJ::SITEROOT/update.bml" method="get" target="_top"><button type="submit">$d->{answer_text}</button><input type="hidden" name="qotd" value="$q->{qid}" /></form></li>
+                        <li class="canyon-section"><form action="$LJ::SITEROOT/update.bml" method="get" target="_top"><button type="submit">$d->{answer_text}</button><input type="hidden" name="qotd" value="$q->{qid}" />$usejournal_field</form></li>
                         <li class="canyon-side">$d->{view_answers_link}</li>
                     </ul>
                 </div>];

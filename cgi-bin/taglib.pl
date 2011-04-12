@@ -462,7 +462,7 @@ sub can_add_tags {
     my $u = LJ::want_user(shift);
     my $remote = LJ::want_user(shift);
     return undef unless $u && $remote;
-    return undef unless $remote->{journaltype} eq 'P';
+    return undef unless $remote->is_personal || $remote->is_identity;
     return undef if LJ::is_banned($remote, $u);
 
     # get permission hashref and check it; note that we fall back to the control

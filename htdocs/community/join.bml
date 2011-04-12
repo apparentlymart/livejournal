@@ -3,6 +3,7 @@ title=><?_ml .title _ml?>
 body<=
 <?_code
 {
+#line 6
     use strict;
 
     LJ::set_active_crumb('joincomm');
