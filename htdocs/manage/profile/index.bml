@@ -490,7 +490,7 @@ body<=
         my $country = LJ::country_of_remote_ip();
         my $tminfo = LJ::TextMessage->tm_info($u, remap_result => 1);
 
-        my $ru_text_messaging = LJ::SMS::API::RU->remote_eligible;
+        my $ru_text_messaging = LJ::SMS::API::RU->remote_eligible ($u);
 
         $ret .= "<a name='txtmsg'></a><div class='section_head'>" . 
             ($ru_text_messaging ? $ML{'.section.phone'} : $ML{'.section.textmsg'}) . "\n";
