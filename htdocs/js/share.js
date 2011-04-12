@@ -42,7 +42,7 @@ function prepareOptions( opts ) {
 		title: '',
 		description: '',
 		url: ''
-	}
+	};
 
 	var options = jQuery.extend( {}, defaults, opts );
 
@@ -87,20 +87,14 @@ var arrow_opts = {
 
 var template = {
 	//here we take values from global_options.ml object
-	start: ' \
-		<div class="b-sharethis b-popup"> \
-			<div class="b-popup-outer"> \
-				<div class="b-popup-inner"> \
-					<div class="b-sharethis-head">{title}</div> \
-					<div class="b-sharethis-services">',
+	start: '<div class="b-sharethis">' +
+				'<div class="b-sharethis-head">{title}</div>' +
+				'<div class="b-sharethis-services">',
 	//here we take values from an object made from service object. Availible vars: name, url, title.
-	item: '<span class="b-sharethis-{name}"><a href="{url}" data-service={name} >{title}</a></span>',
+	item: 			'<span class="b-sharethis-{name}"><a href="{url}" data-service={name} >{title}</a></span>',
 	//here we take values from global_options.ml object
-	end: '</div> \
-				</div> \
-				<i class="i-popup-arr i-popup-arrtl"></i><i class="i-popup-close" title="{close}"></i> \
-			</div> \
-		</div>'
+	end: 		'</div>' +
+			'</div>'
 };
 
 //buildLink takes values passed to the url with link method ( title, post url, description )
@@ -162,7 +156,7 @@ window.LJShare.init = function( opts ) {
 		global_options = $.extend( true, {}, default_options, opts );
 		global_options.links = opts.links || global_options.links;
 	}
-}
+};
 
 /**
 * Bind share popup to the latest link found on the page
@@ -176,61 +170,64 @@ window.LJShare.link = function( opts, node ) {
 	var link = node || jQuery( 'a:last' ),
 		url = link.attr( 'href' ),
 		options = prepareOptions( jQuery.extend( {}, { url: url } , opts ) ),
-		dom, arrow, skipCloseEvent;
+		dom, bubble, skipCloseEvent;
 
 	var links = ( opts.links ) ? opts.links : global_options.links;
 
 	function buildDom() {
-		var str = supplant( template.start, global_options.ml ),
+		var str = [ supplant( template.start, global_options.ml ) ],
 			serviceName, serviceObj;
 
 		for( var i = 0; i < links.length; ++i ) {
 			serviceName = links[i];
 			serviceObj = global_options.services[ serviceName ];
 
-			str+= supplant( template.item, {
+			str.push( supplant( template.item, {
 				name: serviceName,
 				title: serviceObj.title,
 				url: supplant( serviceObj.bindLink, options )
-			} );
+			} ) );
 		}
 
-		str += supplant( template.end, global_options.ml );
+		str.push( supplant( template.end, global_options.ml ) );
 
-		dom = $( str ).css( {
-			position: 'absolute'
-		} ).hide();
-	}
-
-	function injectDom() {
-		dom.appendTo( $( document.body ) );
-		arrow = dom.find( selectors.arrow );
+		dom = $( str.join( ' ' ) )
+			.hide()
+			.bubble( { target: link } )
+			.bubble( 'show' );
 	}
 
 	function bindControls() {
+		/*
 		dom.bind( 'click', function( ev ) {
 			ev.stopPropagation();
 		} );
+		*/
 
+		
+		/*
 		function checkClose( e ) {
 			if( !skipCloseEvent ) {
 				togglePopup( false );
 			}
 			skipCloseEvent = false;
 		}
+		*/
 
-		dom.find( selectors.close ).bind( 'click', function( ev ) { togglePopup( false ); } );
-		$( document ).bind( 'click', checkClose );
-		$( window ).bind( 'resize', checkClose );
+		//dom.find( selectors.close ).bind( 'click', function( ev ) { togglePopup( false ); } );
+		//$( document ).bind( 'click', checkClose );
+		//$( window ).bind( 'resize', checkClose );
 		dom.find( selectors.links ).click( function( ev )
 		{
-			togglePopup( false );
-			var service = $( this ).attr( 'data-service' );
+			dom.bubble('hide');
+			var service = $( this ).attr( 'data-service' ),
+				width, height;
+				
 			if( global_options.services[ service ].openInTab ) {
 				if( $.browser.msie ) {
 					ev.preventDefault();
-					var width = $( window ).width();
-					var height = $( window ).height();
+					width = $( window ).width();
+					height = $( window ).height();
 					window.open( this.href, null, 'toolbar=yes,menubar=yes,status=1,location=yes,scrollbars=yes,resizable=yes,width=' + width + ',height=' + height );
 				} else {
 					//other browsers just open link in new tab
@@ -238,13 +235,14 @@ window.LJShare.link = function( opts, node ) {
 				}
 			} else {
 				ev.preventDefault();
-				var width = global_options.services[ service ].width || 640;
-				var height = global_options.services[ service ].height || 480;
+				width = global_options.services[ service ].width || 640;
+				height = global_options.services[ service ].height || 480;
 				window.open(this.href, 'sharer', 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
 			}
 		} );
 	}
 
+	/*
 	function updatePopupPosition() {
 		var linkPos = link.offset(),
 			linkH = link.height(), linkW = link.width(),
@@ -299,7 +297,9 @@ window.LJShare.link = function( opts, node ) {
 
 		dom.css( { left: linkLeft + "px",top: linkTop + "px" } );
 	}
+	*/
 
+	/*
 	function togglePopup( show ) {
 		show = show || false;
 		if( show ) {
@@ -308,29 +308,27 @@ window.LJShare.link = function( opts, node ) {
 
 		dom[ ( show ) ? 'show' : 'hide' ]();
 	}
+	*/
 
 	link.attr( 'href', 'javascript:void(0)' )
-		.click( function( ev ) {
+		.one( 'click', function( ev ) {
+			ev.stopPropagation();
+			
 			if( !dom ) {
 				buildDom();
-				injectDom();
 				bindControls();
 			}
-
-			togglePopup( true );
-			skipCloseEvent = true;
-			ev.preventDefault();
 		} );
 
 	return this;
-}
+};
 
 window.LJShare.entry = function( opts ) {
 	var defaults = {
 		title: '',
 		description: '',
 		url: ''
-	}
+	};
 
 	var options = prepareOptions( opts );
 
@@ -365,8 +363,8 @@ window.LJShare.entry = function( opts ) {
 
 			return this;
 		}
-	}
+	};
 
-}
+};
 
 } )( window, jQuery );
