@@ -2122,7 +2122,7 @@ show a contextual hover popup on the current page.
 
 sub show_contextual_hover {
     my %args = LJ::Request->args;
-    return $LJ::CTX_POPUP and !$LJ::IS_SSL;
+    return ($LJ::CTX_POPUP and !$LJ::IS_SSL and $args{ctxpp} ne 'no');
 }
 
 # <LJFUNC>
