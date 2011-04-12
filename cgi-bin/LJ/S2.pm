@@ -2066,11 +2066,6 @@ sub Page
         LJ::run_hooks('s2_head_content_extra', \$p->{head_content}, $remote, $opts->{r});
     }
 
-    my ($userhead) = $u->userhead;
-    $userhead = $LJ::IMGPREFIX . "/" . $userhead 
-        unless $userhead =~ m|^http://|;
-    $p->{'head_content'} .= qq{<link rel="icon" type="image/gif" href="$userhead">\n};
-    
     # Automatic Discovery of RSS/Atom
     if ($opts && $opts->{'addfeeds'}) {
         $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/data/rss" />\n};

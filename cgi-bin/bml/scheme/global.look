@@ -24,6 +24,17 @@ BADINPUT<=
 
 REQUIREPOST=><?_ml bml.requirepost _ml?>
 
+FAVICON<=
+<?_code
+    my $u = LJ::get_active_journal();
+    return '' unless $u && $u->is_person;
+    my ($userhead) = $u->userhead;
+    $userhead = $LJ::IMGPREFIX . "/" . $userhead 
+        unless $userhead =~ m|^http://|;
+    return '<link rel="icon" type="image/gif" href="'.$userhead.'">';
+_code?>
+<=FAVICON
+
 LOAD_PAGE_INFO<=
 <?_code
 #line 3

@@ -29,6 +29,7 @@ page<=
     }
     return $crumb_up;
 _code?>
+<?favicon?>
 <style>
     #Comments q { padding-left: 2.5em; font-style: italic; }
 </style>
