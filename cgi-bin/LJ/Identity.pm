@@ -212,6 +212,46 @@ sub unpack_forwhat {
     } elsif ($forwhat eq 'external') {
         $returl      = "$LJ::SITEROOT/gadgets/external-landing.bml?success";
         $returl_fail = "$LJ::SITEROOT/gadgets/external-landing.bml?fail";
+    } elsif ( $forwhat =~ /^journal\-([a-z_]+)(?:-(.*))?$/i ) {
+        my ( $journal, $extra ) = ( $1, $2 );
+        my $journalu = LJ::load_user($journal);
+
+        unless ($journalu) {
+            warn 'invalid journal';
+            die;
+        }
+
+        if ( !$extra ) {
+            # the journal itself
+            $returl = $returl_fail = $journalu->journal_base;
+        } elsif ( $extra =~ /^\d+$/ ) {
+            # an entry in the journal
+
+            my $entry = LJ::Entry->new( $journalu, 'ditemid' => $extra );
+
+            unless ($entry) {
+                warn 'invalid entry';
+                die;
+            }
+
+            $returl = $returl_fail = $entry->url;
+        } elsif ( $extra =~ /^tags-(or|and)-([\d\-]+)$/ ) {
+            my ( $mode, $tagspec ) = ( $1, $2 );
+
+            my @tagids = split /-/, $tagspec;
+
+            my $tags = LJ::Tags::get_usertags($journalu);
+            my @tagnames = map { LJ::eurl( $tags->{$_}->{'name'} ) } @tagids;
+
+            $returl = $journalu->journal_base . '/tag/'
+                    . join( ',', @tagnames )
+                    . '?mode=' . $mode;
+
+            $returl_fail = $returl;
+        } else {
+            warn 'invalid format ' . $extra;
+            die;
+        }
     } else {
         # the warning will sit in error logs, and the exception
         # will be handled

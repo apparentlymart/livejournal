@@ -15,7 +15,10 @@ body<=
     $title = LJ::Lang::ml('.title');
 
     my $thispage = "$LJ::SITEROOT/identity/login.bml";
-    return LJ::Widget::LoginMulti->render(thispage => $thispage);
+    return LJ::Widget::LoginMulti->render(
+        'thispage' => $thispage,
+        'forwhat'  => LJ::Request->post_param('forwhat'),
+    );
 
 }
 _code?>

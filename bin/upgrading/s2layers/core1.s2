@@ -479,6 +479,9 @@ class Page
     (if one of views == \$.view, already looking at that view)";
 
     var readonly string[] views_order "An array of view identifiers which can be used to order the views hash.";
+
+    var readonly string page_id "The page identifier- what to pass to /identity/login.bml so that it returns to this page after a successfull authorization.";
+
     var readonly string head_content
     "Extra tags supplied by the server to go in the <head> section of the output HTML document. Layouts
     should include this in the head section if they are writing HTML.";

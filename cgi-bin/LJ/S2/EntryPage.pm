@@ -31,6 +31,9 @@ sub EntryPage
     }
 
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
+
+    $p->{'page_id'} = 'journal-' . $u->username . '-' . $entry->ditemid;
+
     return if $opts->{'suspendeduser'};
     return if $opts->{'suspendedentry'};
     return if $opts->{'readonlyremote'};

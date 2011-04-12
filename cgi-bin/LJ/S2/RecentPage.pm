@@ -42,6 +42,10 @@ sub RecentPage
                     Image("$LJ::IMGPREFIX/data_$what.gif", 32, 15, $caption));
     };
 
+    if ( $opts->{'tagids'} ) {
+        $p->{'page_id'} = 'journal-' . $u->username . '-tags-' . $opts->{'tagmode'} . '-' . join( '-', @{ $opts->{'tagids'} } );
+    }
+
     $p->{'data_link'} = {
         'rss' => $datalink->('rss', 'RSS'),
         'atom' => $datalink->('atom', 'Atom'),

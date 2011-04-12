@@ -2056,6 +2056,8 @@ sub Page
         'data_links_order' => [],
         'showspam' => $remote && ($remote->can_manage($u) || $remote->can_moderate($u)) && 
                       LJ::is_enabled('spam_button') && $get->{mode} eq 'showspam',
+
+        'page_id' => 'journal-' . $u->username,
     };
 
     if ($LJ::UNICODE && $opts && $opts->{'saycharset'}) {
