@@ -1476,7 +1476,7 @@ sub send_files {
         $mime_type ||= 'image/gif' if $uri =~ m|^/userhead/\d+|; ## default for userheads
 
         LJ::Request->content_type ($mime_type);
-        LJ::Request->header_out("Content-length", $size);
+        LJ::Request->header_out("Content-length", 0); # it's true. Response body and content-length is added by proxy.
         LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http ($result->{change_time}));
         ## Add Expires and Cache-Control headers
         if ($uri =~ m|^/userhead/\d+|o){
