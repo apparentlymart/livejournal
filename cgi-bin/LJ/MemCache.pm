@@ -362,7 +362,7 @@ sub gets {
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    my $res = $conn->get($key);
+    my $res = $conn->gets($key);
 
     _profile( 'gets', $key, $res );
 
