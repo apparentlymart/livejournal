@@ -423,7 +423,7 @@ sub render_metainfo_block {
                     'selected' => $usejournal,
                     'tabindex' => $self->tabindex,
                     'class' => 'select',
-                    "onchange" => "changeSubmit('" . $submitprefix . "',this[this.selectedIndex].value);".
+                    "onchange" => "changeSubmit('" . $submitprefix . "',this[this.selectedIndex].value, '$BML::ML{'entryform.update4'}');".
                         "getUserTags(this[this.selectedIndex].value);".
                         "changeSecurityOptions(this[this.selectedIndex].value)"
                 },
@@ -1243,7 +1243,7 @@ sub render_submitbar_block {
         }
 
         if ($defaultjournal) {
-            $$onload .= " changeSubmit('$BML::ML{'entryform.update3'}', '$defaultjournal');";
+            $$onload .= " changeSubmit('$BML::ML{'entryform.update3'}', '$defaultjournal', '$BML::ML{'entryform.update4'}');";
             $$onload .= " changeSecurityOptions('$defaultjournal');";
         }
 
