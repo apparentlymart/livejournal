@@ -21,17 +21,25 @@ function showEntryTabs() {
 	}
 }
 
-function changeSubmit(prefix, defaultjournal) {
+function changeSubmit(prefix, defaultjournal, defPrefix ) {
     if (document.getElementById) {
         var usejournal = document.getElementById('usejournal');
         var formsubmit = document.getElementById('formsubmit');
+        var newvalue, commname;
         if (!defaultjournal) {
-            var newvalue = prefix;
+            newvalue = prefix;
         } else if (!usejournal || usejournal.value == '') {
-            var newvalue = prefix + ' ' + defaultjournal;
+            newvalue = prefix + ' ' + defaultjournal;
+            commname = defaultjournal;
         } else {
-            var newvalue = prefix + ' ' + usejournal.value;
+            if( usejournal.value === '[none]' ) {
+                newvalue = defPrefix;
+            } else {
+                newvalue = prefix + ' ' + usejournal.value;
+            }
+            commname = usejournal.value;
         }
+        formsubmit.disabled = ( /\[none\]/.test( commname ) || /^ext_/.test( commname ) );
         formsubmit.value = newvalue;
     }
 }
@@ -339,7 +347,7 @@ function altlogin (e) {
         if (e.stopPropagation) e.stopPropagation();
     }
 
-    changeSubmit('Post to Journal');
+    changeSubmit('Post to Journal', null, 'Post to Journal');
 
     if ($('usejournal_username')) {
         changeSecurityOptions($('usejournal_username').value);
