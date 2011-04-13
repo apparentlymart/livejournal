@@ -152,7 +152,7 @@ sub qotd_display {
                                 : "";
     
             my $usejournal_field = '';
-            if ( $remote->is_identity ) {
+            if ( $remote && $remote->is_identity ) {
                 $usejournal_field
                     = LJ::html_hidden( 'usejournal' => $LJ::QOTD_COMMUNITY );
             }
