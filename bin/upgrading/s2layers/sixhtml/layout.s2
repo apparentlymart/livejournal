@@ -847,9 +847,8 @@ function EntryPage::print_body() {
     if(not $.comment_pages.all_subitems_displayed) {
         $.comment_pages->print();
     }
-    foreach var Comment c ($.comments) {
-        $this->print_comment($c);
-    }
+
+    $this->print_comments($.comments);
     if(not $.comment_pages.all_subitems_displayed) {
         $.comment_pages->print();
     }
@@ -999,124 +998,121 @@ function CommentInfo::print_postlink() {
     }
 }
 
-
-function EntryPage::print_comment(Comment e) {
+function EntryPage::print_comments (Comment[] cs) {
     var Page p = get_page();
-    if ((not $e.full) or ($e.full and $e.spam and not $p.showspam)) {
-        # Collapsed mode
+    if (size $cs == 0) { return; }
 
-        "<div class='comment collapsed-comment'"+($e.dom_id ? " id='$e.dom_id'" : "")+">\n";
-        "<div class='comment-footer'>";
-        if ($e.spam and not $p.showspam) {
-            """$*text_spam_comment <span class='separator'>-</span> """;
-        } else {
-            var string subject = $e.subject;
-            if ($subject == "") { $subject = $*text_nosubject; }
-            "<a href='$e.permalink_url' class='collapsed-comment-link'>$subject</a> <span class='separator'>-</span> ";
-        }
-        print safe lang_posted_by($e.poster, $e.poster); " <span class='separator'>-</span> ";
-        print lang_posted_date_and_time($e, $e.time, true, true);
-        var Link expand_link = $e->get_link("expand_comments");
-        if ($e.thread_url != "" and defined $expand_link) {
-            println " " + $e->expand_link();
-        }
-        "</div>";
-
-        if (size($e.replies) > 0) {
-            println "<div class='comment-replies'>";
-
-            foreach var Comment c ($e.replies) {
-                $this->print_comment($c);
-            }
-
-            println "</div>";
-        }
-
-        "</div>";
-
-        return;
+    foreach var Comment c ($cs) {
+        $this->print_comment($c);
+        $this->print_comments($c.replies);
     }
-
-    "<div class='comment'"+($e.dom_id ? " id='$e.dom_id'" : "")+">\n";
-
-    "<div class='comment-userpic'>";
-    if ($*opt_userpic_comments and defined $e.userpic) { "$e.userpic<br />"; }
-    print safe "<p class='poster'>"+lang_posted_by($e.poster, $e.poster)+"</p>";
-    "</div>";
-
-    if ($e.subject != "") {
-        "<h3 class='comment-header'><strong>$e.subject</strong></h3>\n";
-    }
-
-    "<div class='comment-content'>";
-
-    var string ip = $e.metadata{"poster_ip"};
-    if ($ip != "") {
-        var string text = $*text_comment_ipaddr;
-        "<div class='metadata'>";
-        "<strong>$text</strong> $ip";
-        "</div>";
-    }
-
-    if (defined $e.subject_icon) {
-        """<div class="comment-subject-icon">$e.subject_icon</div>""";
-    }
-
-    $e->print_text();
-    "</div>";
-    "<div class='comment-footer'>";
-
-    var string sep = "<span class='separator'>|</span>";
-
-    print lang_posted_date_and_time($e, $e.time, true, true)+" $sep ";
-
-    "<a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
-
-    if ($e.parent_url) { print " $sep <a href='$e.parent_url'>$*text_comment_parent</a>"; }
-    if ($e.thread_url) {
-        print " $sep <a href='$e.thread_url'>$*text_comment_thread</a>";
-        var Link expand_link = $e->get_link("expand_comments");
-        if (defined $expand_link) {
-            println " $sep " + $e->expand_link();
-        }
-    }
-    if ($e.reply_url)  {
-if (not $e.frozen) {
-        print " $sep ";
 }
-        ###$e->print_reply_link({"linktext" => $*text_comment_reply}); 
 
-        if($e.screened == true) {
-            ### if comment screened - show link for unscreen
-            var Link link;
-            $link = $e->get_link("unscreen_to_reply");
-            """<a href="$link.url" title="$link.caption">$link.caption</a>""";
-        } else {
-            ### showing reply link if comment not screened
-if (not $e.frozen) {
-            $e->print_reply_link({ "linktext" => $*text_comment_reply });
-}
-        }
+function EntryPage::print_comment(Comment c) {
+    var Page p = get_page();
+    var int indent = ($c.depth - 1) * 25;
 
+    """<div id="$c.dom_id" style="margin-left:${indent}px;">""";
+    """<a name="$c.anchor"></a>""";
+
+    if ($c.screened and not $c.full and not viewer_is_owner()) {
+        """<div class="comment collapsed-comment"><div class="comment-footer"><strong>$*text_comment_screened</strong></div></div>""";
+    } elseif ($c.deleted) {
+        """<div class="comment collapsed-comment"><div class="comment-footer"><strong>$*text_comment_deleted</strong></div></div>""";
+    } elseif (($c.spam) and (not $p.showspam) and (size($c.replies) > 0)) {
+        """<div class="comment collapsed-comment"><div class="comment-footer"><strong>$*text_spam_comment</strong></div></div>""";
+    } elseif ($c.full) {
+        $this->print_comment_full($c);
+    } else {
+        $this->print_comment_partial($c);
     }
 
-    $e->print_linkbar();
     "</div>";
-   if (not $e.frozen) {
-        $e->print_reply_container({"class" => "quickreply"});
-    }
 
-    if (size($e.replies) > 0) {
-        println "<div class='comment-replies'>";
+    $c->print_reply_container();
+}
 
-        foreach var Comment c ($e.replies) {
-            $this->print_comment($c);
-        }
-
-        println "</div>";
-    }
+function EntryPage::print_comment_partial(Comment e) {
+     var Page p = get_page();
+     "<div class='comment collapsed-comment'>\n";
+     "<div class='comment-footer'>";
+     var string subject = $e.subject;
+     if ($subject == "") { $subject = $*text_nosubject; }
+     "<a href='$e.permalink_url' class='collapsed-comment-link'>$subject</a> <span class='separator'>-</span> ";
+     print safe lang_posted_by($e.poster, $e.poster); " <span class='separator'>-</span> ";
+     print lang_posted_date_and_time($e, $e.time, true, true);
+     $e->print_expand_collapse_links();
      "</div>";
+     "</div>";
+}
 
+function EntryPage::print_comment_full(Comment e) {
+     "<div class='comment'>\n";
+ 
+     "<div class='comment-userpic'>";
+     if ($*opt_userpic_comments and defined $e.userpic) { "$e.userpic<br />"; }
+     print safe "<p class='poster'>"+lang_posted_by($e.poster, $e.poster)+"</p>";
+     "</div>";
+ 
+     if ($e.subject != "") {
+         "<h3 class='comment-header'><strong>$e.subject</strong></h3>\n";
+     }
+ 
+     "<div class='comment-content'>";
+ 
+     var string ip = $e.metadata{"poster_ip"};
+     if ($ip != "") {
+         var string text = $*text_comment_ipaddr;
+         "<div class='metadata'>";
+         "<strong>$text</strong> $ip";
+         "</div>";
+     }
+ 
+     if (defined $e.subject_icon) {
+         """<div class="comment-subject-icon">$e.subject_icon</div>""";
+     }
+ 
+     $e->print_text();
+     "</div>";
+     "<div class='comment-footer'>";
+ 
+     var string sep = "<span class='separator'>|</span>";
+ 
+     print lang_posted_date_and_time($e, $e.time, true, true)+" $sep ";
+ 
+     "<a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
+ 
+     if ($e.parent_url) { print " $sep <a href='$e.parent_url'>$*text_comment_parent</a>"; }
+     if ($e.thread_url) {
+         print " $sep <a href='$e.thread_url'>$*text_comment_thread</a>";
+         $e->print_expand_collapse_links();
+     }
+     if ($e.reply_url)  {
+ if (not $e.frozen) {
+         print " $sep ";
+ }
+         ###$e->print_reply_link({"linktext" => $*text_comment_reply}); 
+ 
+         if($e.screened == true) {
+             ### if comment screened - show link for unscreen
+             var Link link;
+             $link = $e->get_link("unscreen_to_reply");
+             """<a href="$link.url" title="$link.caption">$link.caption</a>""";
+         } else {
+             ### showing reply link if comment not screened
+ if (not $e.frozen) {
+             $e->print_reply_link({ "linktext" => $*text_comment_reply });
+ }
+         }
+ 
+     }
+ 
+     $e->print_linkbar();
+     "</div>";
+    if (not $e.frozen) {
+         $e->print_reply_container({"class" => "quickreply"});
+     }
+      "</div>";
 }
 
 function Entry::print_linkbar() {
