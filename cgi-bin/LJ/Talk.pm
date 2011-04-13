@@ -927,7 +927,7 @@ sub get_talk_data_do
 
     # we check the replycount in memcache, the value we count, and then fix it up
     # if it seems necessary.
-    my $rp_memkey = $nodetype eq "L" ? [$u->{'userid'}, "rp:$u->{'userid'}:$nodeid"] : undef;
+    my $rp_memkey = $nodetype eq "L" ? LJ::Entry::reply_count_memkey($u, $nodeid) : undef;
     my $rp_count = $rp_memkey ? LJ::MemCache::get($rp_memkey) : 0;
 
     # hook for tests to count memcache gets
@@ -1119,7 +1119,7 @@ sub fixup_logitem_replycount {
     # at the same time we are
     my $nodetype = "L";  # this is only for logitem comment counts
 
-    my $rp_memkey = [$u->{'userid'}, "rp:$u->{'userid'}:$jitemid"];
+    my $rp_memkey = LJ::Entry::reply_count_memkey($u, $jitemid);
     my $rp_count = LJ::MemCache::get($rp_memkey) || 0;
     my $fix_key = "rp_fixed:$u->{userid}:$nodetype:$jitemid:$rp_count";
 
@@ -2283,7 +2283,7 @@ sub get_replycount {
     $jitemid += 0;
     return undef unless $ju && $jitemid;
 
-    my $memkey = [$ju->{'userid'}, "rp:$ju->{'userid'}:$jitemid"];
+    my $memkey = LJ::Entry::reply_count_memkey($ju, $jitemid);
     my $count = LJ::MemCache::get($memkey);
     return $count if $count;
 

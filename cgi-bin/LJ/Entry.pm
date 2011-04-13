@@ -491,6 +491,12 @@ sub set_comment_list {
     return 1;
 }
 
+sub reply_count_memkey {
+    my ($u, $nodeid) = @_;
+    my $userid = LJ::want_userid($u);
+    return [$userid, "rp:$userid:$nodeid"];
+}
+
 sub reply_count {
     my $self = shift;
     my $rc = $self->prop('replycount');
@@ -1890,7 +1896,7 @@ sub get_log2_recent_log
                       $ditemid);
 
         if ($use_cache && $itemnum++ < 50) {
-            LJ::MemCache::add([$jid, "rp:$jid:$item->{'jitemid'}"], $item->{'replycount'});
+            LJ::MemCache::add(LJ::Entry::reply_count_memkey($jid, $item->{'jitemid'}), $item->{'replycount'});
         }
     }
 
@@ -2121,7 +2127,7 @@ sub load_log_props2
         $needprops{$id} = 1;
         $needrc{$id} = 1;
         push @memkeys, [$userid, "logprop:$userid:$id"];
-        push @memkeys, [$userid, "rp:$userid:$id"];
+        push @memkeys, LJ::Entry::reply_count_memkey($userid, $id);
     }
     return unless %needprops || %needrc;
 
@@ -2171,7 +2177,7 @@ sub load_log_props2
         $sth->execute($userid);
         while (my ($jitemid, $rc) = $sth->fetchrow_array) {
             $hashref->{$jitemid}->{'replycount'} = $rc;
-            LJ::MemCache::add([$userid, "rp:$userid:$jitemid"], $rc);
+            LJ::MemCache::add(LJ::Entry::reply_count_memkey($userid, $jitemid), $rc);
         }
     }
 
@@ -2344,7 +2350,7 @@ sub replycount_do {
     
     $value = 1 unless defined $value;
     my $uid = $u->{'userid'};
-    my $memkey = "rp:$uid:$jitemid";
+    my $memkey = LJ::Entry::reply_count_memkey($uid, $jitemid);
 
     # "init" is easiest and needs no lock (called before the entry is live)
     if ($action eq 'init') {
