@@ -198,25 +198,6 @@ window.LJShare.link = function( opts, node ) {
 	}
 
 	function bindControls() {
-		/*
-		dom.bind( 'click', function( ev ) {
-			ev.stopPropagation();
-		} );
-		*/
-
-		
-		/*
-		function checkClose( e ) {
-			if( !skipCloseEvent ) {
-				togglePopup( false );
-			}
-			skipCloseEvent = false;
-		}
-		*/
-
-		//dom.find( selectors.close ).bind( 'click', function( ev ) { togglePopup( false ); } );
-		//$( document ).bind( 'click', checkClose );
-		//$( window ).bind( 'resize', checkClose );
 		dom.find( selectors.links ).click( function( ev )
 		{
 			dom.bubble('hide');
@@ -241,74 +222,6 @@ window.LJShare.link = function( opts, node ) {
 			}
 		} );
 	}
-
-	/*
-	function updatePopupPosition() {
-		var linkPos = link.offset(),
-			linkH = link.height(), linkW = link.width(),
-			arrPos = "";
-
-		//we check if child elements of the link have bigger dimensions.
-		link.find( '*' ).each( function() {
-			var $this = $( this ),
-				position = $this.css( 'position' ),
-				height = $( this ).outerHeight();
-
-			if( $this.is( ':visible' ) && position != 'absolute'
-				&& position != 'fixed' && height > linkH ) {
-				linkH = height;
-			}
-		} );
-
-		dom.css( { left: "0px", top: "0px" } );
-
-		var scrollOffset = $( window ).scrollTop();
-		var upperSpace = linkPos.top - scrollOffset;
-		var lowerSpace = $( window ).height() - upperSpace - linkH;
-		var domH = dom.height(), domW = dom.width();
-
-		var linkTop = Math.floor( linkPos.top ), linkLeft = Math.floor( linkPos.left );
-
-
-		//we decide whether the popup should be shown under or above the link
-		if( lowerSpace < domH && upperSpace > domH ) {
-			linkTop -= domH + 9;
-			arrPos += "b";
-		} else {
-			linkTop += linkH + 7;
-			arrPos += "t";
-		}
-
-		//we decide whether the popup should positioned to the left or to the right from the link
-		var windowW = $( window ).width();
-		if( linkPos.left + domW > windowW ) {
-			linkLeft = windowW - domW - 8;
-			arrPos += "r";
-		} else {
-			arrPos += "l";
-			linkLeft -= 25;
-			if( linkW == 16 ) {
-				linkLeft -= 4;
-			}
-
-		}
-
-		arrow.removeClass().addClass( arrow_opts.className ).addClass( arrow_opts.position[ arrPos ] ); 
-
-		dom.css( { left: linkLeft + "px",top: linkTop + "px" } );
-	}
-	*/
-
-	/*
-	function togglePopup( show ) {
-		show = show || false;
-		if( show ) {
-			updatePopupPosition();
-		}
-
-		dom[ ( show ) ? 'show' : 'hide' ]();
-	}
-	*/
 
 	link.attr( 'href', 'javascript:void(0)' )
 		.one( 'click', function( ev ) {
