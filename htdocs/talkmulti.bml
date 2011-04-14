@@ -107,15 +107,18 @@
         # Mark as spam
         if ($mode eq 'deletespam') {
             # don't let $remote mark their own comments as spam
+            my @new_talkids;
             foreach (grep { $talkinfo{$_}->[1] != $remote->id } @talkids) {
                 my $poster = LJ::want_user($talkinfo{$_}->[1]);
                 next if LJ::Talk::can_mark_spam($poster, $u);
+                push @new_talkids, $_;
                 LJ::Talk::mark_comment_as_spam($u, $poster);
                 LJ::Talk::delete_author( $u, $itemid, $poster->userid );
                 LJ::set_rel($u, $poster, 'D');
                 $u->ban_user($poster);
                 $u->log_event('spam_set', { actiontarget => $poster->id, remote => $remote });
             }
+            @talkids = @new_talkids;
         }
 
         my ($num, $numspam) = LJ::delete_comments($u, "L", $itemid, @talkids);

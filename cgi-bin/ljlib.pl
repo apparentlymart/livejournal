@@ -2818,7 +2818,7 @@ sub delete_comments {
     # invalidate memcache for this comment
     LJ::Talk::invalidate_comment_cache($u->id, $nodeid, @talkids);
 
-    return 1 unless $in;
+    return 0 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 
     my $num_spam = $u->selectrow_array("SELECT COUNT(*) FROM talk2 $where AND state='B'");

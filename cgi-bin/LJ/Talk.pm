@@ -389,7 +389,11 @@ sub can_unfreeze {
 sub can_mark_spam {
     my ($remote, $u, $up, $userpost) = @_;
     return 0 unless $remote;
-    return 0 if $userpost && $remote->{'user'} eq (ref $userpost ? $userpost->{'user'} : $userpost);
+    if ($userpost) {
+        my $comment_owner = LJ::load_user(ref($userpost) ? $userpost->{'user'} : $userpost);
+        return 0 if $comment_owner && $remote->{'user'} eq $comment_owner->{'user'}; ## Remote user is owner of this comment
+        return 0 if $comment_owner && $comment_owner->can_manage($u);                ## Poster is a maintainer too
+    }
     return 1 if $remote->can_manage($u);
 }
 
