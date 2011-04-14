@@ -32,8 +32,6 @@ sub EntryPage
 
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
 
-    $p->{'page_id'} = 'journal-' . $u->username . '-' . $entry->ditemid;
-
     return if $opts->{'suspendeduser'};
     return if $opts->{'suspendedentry'};
     return if $opts->{'readonlyremote'};
@@ -41,6 +39,7 @@ sub EntryPage
     return if $opts->{'handler_return'};
     return if $opts->{'redir'};
 
+    $p->{'page_id'} = 'journal-' . $u->username . '-' . $entry->ditemid;
     $p->{'multiform_on'} = $entry->comments_manageable_by($remote);
     
     my $itemid = $entry->jitemid;
