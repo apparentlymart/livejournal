@@ -1153,6 +1153,11 @@ property string text_meta_groups {
 }
 set text_meta_groups = "Custom Friends Groups";
 
+property string text_meta_origin_url {
+    des = "Text for 'Original entry at'";
+}
+set text_meta_origin_url = "Original entry at";
+
 property string text_copyr_agree {
     des = "Text for copyright post agree"; }
 set text_copyr_agree= "Hereinafter I give my permission to reproduce in any form";
@@ -2091,6 +2096,9 @@ function lang_metadata_title(string which) [fixed] : string
     }
     elseif ($which == "groups") {
         return $*text_meta_groups;
+    }
+    elseif ( $which == "origin_url" ) {
+        return $*text_meta_origin_url;
     }
     else {
         return $which;

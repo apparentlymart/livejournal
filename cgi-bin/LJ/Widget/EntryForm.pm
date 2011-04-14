@@ -1247,7 +1247,7 @@ sub render_submitbar_block {
             $$onload .= " changeSecurityOptions('$defaultjournal');";
         }
 
-        my $disabled = $remote->is_identity && !$self->usejournal;
+        my $disabled = $remote && $remote->is_identity && !$self->usejournal;
 
         $out .= LJ::html_submit(
             'action:update',
