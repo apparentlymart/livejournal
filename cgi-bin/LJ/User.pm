@@ -8045,6 +8045,8 @@ sub rate_log
 sub rate_check {
     my ($u, $ratename, $count, $opts) = @_;
 
+    return 1 if grep { $_ eq $u->username } @LJ::NO_RATE_CHECK_USERS;
+
     my $rateperiod = LJ::get_cap($u, "rateperiod-$ratename");
     return 1 unless $rateperiod;
 
