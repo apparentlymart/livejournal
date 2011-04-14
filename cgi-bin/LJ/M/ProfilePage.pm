@@ -87,7 +87,6 @@ sub remote_can_post {
     my $remote = LJ::get_remote()
         or return 0;
     return 0 unless $pm->has_journal;
-    return 0 if $remote->is_identity;
     return LJ::can_use_journal($remote->id, $pm->{u}->user);
 }
 
