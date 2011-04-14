@@ -234,7 +234,10 @@ sub basic_rename {
             if ($users && @$users) {
                 my $in = join(',', @$users);
                 $dbh->do("DELETE FROM friends WHERE friendid=$u->{'userid'} AND userid IN ($in)");
-                LJ::memcache_kill($_, "friends") foreach @$users;
+                foreach my $fofid ( @$users ) {
+                    LJ::memcache_kill( $fofid, "friends" );
+                    LJ::MemCache::delete( [ $fofid, "frgmask:$fofid:$u->{'userid'}" ] );
+                }
             }
         }
 
