@@ -2,9 +2,12 @@
 body<=
 <?_code
 {
+#line 6
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
-    use Class::Autouse qw( LJ::SiteMessages );
+    use LJ::SiteMessages;
+    use LJ::Widget::SiteMessages;
+    use LJ::Widget::AddSiteMessages;
 
     my $remote = LJ::get_remote();
 

@@ -146,7 +146,6 @@ sub render_body {
 
     $ret .= "<tr><td valign='top'>Show this question to:</td><td>";
     my $current_group = 0;
-warn LJ::D(&LJ::SiteMessages::AccountMask());
     foreach my $type (LJ::SiteMessages->get_options_list()) {
         $ret .= '<br>' if($current_group != LJ::SiteMessages->get_group($type));
         
