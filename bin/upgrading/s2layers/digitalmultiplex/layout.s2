@@ -430,11 +430,14 @@ function print_sidebar_navigation() {
 	    #print_sidebar_box copied here
 	    println safe """<br /><table cellspacing="0" cellpadding="0" border="0" id="sidebar_navigation" class="sidebar_box">""";
 	    println """<tr><th class="sidebar_box_header">""";
-	    print   safe $*text_sidebar_navigation;
+	    print safe $*text_sidebar_navigation;
 	    println """</th></tr><tr><td class="sidebar_box_contents">""";
-	    print   safe $navigation;
+	    if ($page->lay_sidebar_view_navigation() != "") {
+            $navigation = $navigation + "<tr><td>&nbsp;</td></tr>";
+            $navigation = $navigation + $page->lay_sidebar_view_navigation();
+        }
+	    print safe $navigation;
 		#this method returns empty string of print links' list
-		$page->lay_sidebar_view_navigation();
 	    println """</td></tr></table><br />""";
     print safe "</table>";
 }
