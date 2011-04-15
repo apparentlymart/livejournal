@@ -16,7 +16,7 @@
     my $domain  = LJ::Request->get_param('domain');
 
     ## convert remote-site key to lj.com's community
-    my $partner = LJ::PartnerSite->find_by_journal_username('kommersant_id');#LJ::PartnerSite->find_by_api_key($api_key);
+    my $partner = LJ::PartnerSite->find_by_api_key($api_key);
     return 'unknown key'
         unless $partner;
 
@@ -62,6 +62,8 @@
         my $logout_url = "$LJ::SITEROOT/gadgets/logout.bml?" .
                          'returnto=' . LJ::eurl($thispage) . '&' .
                          'sessid=' . $remote_sessid;
+
+        my $ljuser_html = $partner->ljuser_html($remote);
 
         return
             LJ::Talk::talkform({
