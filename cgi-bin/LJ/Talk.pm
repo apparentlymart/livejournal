@@ -394,13 +394,13 @@ sub can_mark_spam {
         return 0 if $comment_owner && $remote->{'user'} eq $comment_owner->{'user'}; ## Remote user is owner of this comment
         return 0 if $comment_owner && $comment_owner->can_manage($u);                ## Poster is a maintainer too
     }
-    return 1 if $remote->can_manage($u);
+    return $remote->can_manage($u);
 }
 
 sub can_unmark_spam {
     my ($remote, $u, $up, $userpost) = @_;
     return 0 unless $remote;
-    return 1 if $remote->can_manage($u);
+    return $remote->can_manage($u);
 }
 
 # <LJFUNC>
@@ -841,15 +841,15 @@ sub unspam_comment {
     
     my $entry = LJ::Entry->new($u, jitemid => $itemid);
     my $spam_counter = $entry->prop('spam_counter') || 0;
-    if ($spam_counter > 0) {
-        $spam_counter--;
-        $entry->set_prop('spam_counter', $spam_counter);
-    }
 
     # invalidate memcache for this comment
     LJ::Talk::invalidate_comment_cache($u->id, $itemid, @jtalkids);
 
     if ($updated > 0) {
+        if ($spam_counter >= $updated) {
+            $spam_counter = $spam_counter - $updated;
+            $entry->set_prop('spam_counter', $spam_counter);
+        }
         LJ::replycount_do($u, $itemid, "incr", $updated);
         my $dbcm = LJ::get_cluster_master($u);
         my $hasspamed = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 " .
