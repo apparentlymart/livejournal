@@ -676,13 +676,6 @@ sub post_comment {
         $parent->{state} = 'A';
     }
 
-    # update spam counter if needed
-    if ($comment->{state} eq 'B') {
-        my $entry = LJ::Entry->new($journalu, jitemid => $item->{itemid});
-        my $spam_counter = $entry->prop('spam_counter') || 0;
-        $entry->set_prop('spam_counter', $spam_counter + 1);
-    }
-
     # make sure they're not underage
     if ($comment->{u} && $comment->{u}->underage) {
         $$errref = $LJ::UNDERAGE_ERROR;
@@ -720,6 +713,13 @@ sub post_comment {
 
         # save its identifying characteristics to protect against duplicates.
         LJ::MemCache::set($memkey, $jtalkid+0, time()+60*10);
+        
+        # update spam counter if needed
+        if ($comment->{state} eq 'B') {
+            my $entry = LJ::Entry->new($journalu, jitemid => $item->{itemid});
+            my $spam_counter = $entry->prop('spam_counter') || 0;
+            $entry->set_prop('spam_counter', $spam_counter + 1);
+        }
     }
 
     # the caller wants to know the comment's talkid.
