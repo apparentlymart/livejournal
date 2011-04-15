@@ -484,20 +484,15 @@ sub init {
 
     my $up_is_friend = $up && LJ::is_friend($journalu, $up);
     if ( $journalu->is_spamprotection_enabled &&
+         $state =~ /^[AS]$/ &&
          (!$up || !($up->prop('in_whitelist_for_spam') || $up->in_class("paid") || $up->in_class("perm"))) && 
          ($journalu->is_community || !$up_is_friend) && 
          !LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user})) {
 
         my $spam = 0;
-        LJ::run_hook('spam_comment_detector', $form, \$spam, $journalu, $up) 
-            if $state eq 'A';
-        LJ::run_hook('spam_in_all_journals', \$spam, $journalu, $up) 
-            unless $spam;
-        if ($spam) {
-            $state = 'B';
-            my $spam_counter = $entry->prop('spam_counter') || 0;
-            $entry->set_prop('spam_counter', $spam_counter + 1);
-        }
+        LJ::run_hook('spam_comment_detector', $form, \$spam, $journalu, $up);
+        LJ::run_hook('spam_in_all_journals', \$spam, $journalu, $up) unless $spam;
+        $state = 'B' if $spam;
     }
     
     my $parent = {
@@ -673,6 +668,19 @@ sub post_comment {
     if ($parent->{state} eq 'S') {
         LJ::Talk::unscreen_comment($journalu, $item->{itemid}, $parent->{talkid});
         $parent->{state} = 'A';
+    }
+
+    # unban the parent comment if needed
+    if ($parent->{state} eq 'B') {
+        LJ::Talk::unspam_comment($journalu, $item->{itemid}, $parent->{talkid});
+        $parent->{state} = 'A';
+    }
+
+    # update spam counter if needed
+    if ($comment->{state} eq 'B') {
+        my $entry = LJ::Entry->new($journalu, jitemid => $item->{itemid});
+        my $spam_counter = $entry->prop('spam_counter') || 0;
+        $entry->set_prop('spam_counter', $spam_counter + 1);
     }
 
     # make sure they're not underage
