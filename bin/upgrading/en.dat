@@ -6194,6 +6194,8 @@ web.controlstrip.links.removecomm=Stop watching this community
 
 web.controlstrip.links.removefeed=Remove it from your Friends Page
 
+web.controlstrip.links.share=Share
+
 web.controlstrip.links.stylemystyle|staleness=1
 web.controlstrip.links.stylemystyle=View in my style
 

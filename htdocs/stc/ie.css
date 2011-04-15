@@ -507,20 +507,10 @@ __________________________________________*/
 	overflow: visible;
 	}
 .w-cs INPUT.checkbox {
-	margin: -4px 0 -3px -5px;
+	margin: -5px 2px -3px -5px;
 	}
 .w-cs FORM.w-cs-login .remember {
 	top: 25px;
-	}
-* HTML .w-cs .w-cs-logo A {
-	background: url(/img/controlstrip-new/w-cs-logo-ie.png) no-repeat;
-	}
-* HTML .w-cs FORM.w-cs-login .submit-wrap,
-* HTML .w-cs FORM.w-cs-login .submit-wrap INPUT.submit {
-	background-image: url(/img/controlstrip-new/submit-ie.png);
-	}
-* HTML .w-cs .w-cs-hover .w-cs-hover-outer .arr {
-	top: -7px;
 	}
 
 /* Should be at bottom of the page! */
