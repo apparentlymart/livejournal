@@ -634,6 +634,11 @@ function removeEmptyMarkup(threadId) {
 			params.mode = modeParam;
 		}
 
+		var getArgs = LiveJournal.parseGetArgs( location.href );
+		if( getArgs && !!getArgs.style && getArgs.style === "mine" ) {
+			params.style = "mine";
+		}
+
 		var endpoint = LiveJournal.getAjaxUrl( 'get_thread' );
 		jQuery.get( LiveJournal.constructUrl( endpoint, params ), success, 'json' );
 	}

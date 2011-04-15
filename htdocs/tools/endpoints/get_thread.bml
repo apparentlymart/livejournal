@@ -113,27 +113,35 @@
         return error($errtxt) unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
     }
 
-    ### Load necessary props
-    my @needed_props = ("stylesys", "s2_style");
-
-    LJ::load_user_props($u, @needed_props);
+    BML::set_content_type('text/javascript; charset=utf-8');
+    BML::finish();
+    BML::noparse();
 
     ### Determine style system to preview with
     my $get_styleinfo = sub {
+        my $journal = shift;
+
+        ### Load necessary props
+        my @needed_props = ("stylesys", "s2_style");
+        LJ::load_user_props($journal, @needed_props);
+
         my $forceflag = 0;
-        LJ::run_hooks("force_s1", $u, \$forceflag);
-        if ( !$forceflag && $u->{'stylesys'} == 2 ) {
-            return (2, $u->{'s2_style'});
+        LJ::run_hooks("force_s1", $journal, \$forceflag);
+        if ( !$forceflag && $journal->{'stylesys'} == 2 ) {
+            return (2, $journal->{'s2_style'});
         }
         # no special case and not s2, fall through to s1
         return (1, 0);
     };
 
-    my ($stylesys, $styleid) = $get_styleinfo->();
+    my $style_u;
+    if ($remote && ($stylemine || $remote->opt_stylealwaysmine)) {
+        $style_u = $remote;
+    } else {
+        $style_u = $u;
+    }
 
-    BML::set_content_type('text/javascript; charset=utf-8');
-    BML::finish();
-    BML::noparse();
+    my ($stylesys, $styleid) = $get_styleinfo->($style_u);
 
     my $use_s1 = 1;
     my $ctx = undef;
@@ -141,7 +149,8 @@
         $ctx = LJ::S2::s2_context('UNUSED', $styleid);
         $LJ::S2::CURR_CTX = $ctx;
 
-        $use_s1 = 0 unless $ctx->[S2::PROPS]->{"view_entry_disabled"};
+        $use_s1 = 0 if !$ctx->[S2::PROPS]->{'view_entry_disabled'} &&
+                       LJ::get_cap($style_u, "s2viewentry");
     }
 
     if ($use_s1)
