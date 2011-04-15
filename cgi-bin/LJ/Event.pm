@@ -57,13 +57,11 @@ use strict;
 no warnings 'uninitialized';
 
 use Carp qw(confess);
+use LJ::ESN;
 use LJ::ModuleLoader;
-use Class::Autouse qw(
-    LJ::ESN
-    LJ::Subscription
-    LJ::Typemap
-    LJ::Text
-);
+use LJ::Subscription;
+use LJ::Typemap;
+use LJ::Text;
 
 ### COMMON FUNCTIONS ###
 
