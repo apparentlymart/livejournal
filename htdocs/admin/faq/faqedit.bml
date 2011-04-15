@@ -10,9 +10,12 @@ body<=
 
 
 <?_code
+#line 14
 
- $id = $FORM{'id'} + 0;
- $ret = "";
+ use strict;
+
+ my $id = $FORM{'id'} + 0;
+ my $ret = "";
 
  my $dbh = LJ::get_db_writer();
 
@@ -200,7 +203,7 @@ body<=
  push @cats, '';push @cats, '';
  my $faqd = LJ::Lang::get_dom("faq");
 
- while (($fc, $fcname) = $sth->fetchrow_array)
+ while (my ($fc, $fcname) = $sth->fetchrow_array)
  {
      if ($id) {
          next unless ($ac_add{'*'} || $ac_add{$fc} || ($fc eq $faqcat));
