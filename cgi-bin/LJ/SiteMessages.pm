@@ -290,8 +290,6 @@ sub get_messages {
     return unless $u; # there are no messages for logged out users
 
     my @messages = $class->load_messages;
-    @messages = grep { ref $_ } @messages;
-
     @messages = $class->filter_messages($u, @messages);
     @messages = $class->filter_by_country($u, @messages);
 
@@ -302,27 +300,28 @@ sub get_messages {
 #   Filter the messages list for given remote
 #
 sub filter_messages {
-    my ($class, $u, @messages) = @_;
-    
-    return grep {
+    my $class = shift;
+    my $u = shift;
+   
+    my @messages;
+    MESSAGE:
+    foreach my $m (@_) {
         my $last_group = -1;
         my $group_is_not_empty = 0; ## group has at least 1 condition to test
         my $group_matched = 0;      ## at least 1 condition from this group was met
-        my $accept = 1;
 
         for my $key ($class->get_options_list) {
             # If entering a new group
             if ($last_group != AccountMask->{$key}->{group}) {
                 if ($group_is_not_empty && !$group_matched) {
-                    $accept = 0;
-                    last;
+                    next MESSAGE;
                 }
                 $last_group = AccountMask->{$key}->{group};
                 $group_is_not_empty = 0;
                 $group_matched = 0;
             }
 
-            if (int($_->{accounts}) & AccountMask->{$key}->{value}) {
+            if (int($m->{accounts}) & AccountMask->{$key}->{value}) {
                 $group_is_not_empty = 1;
                 if (AccountMask->{$key}->{validate}($u)) {
                     $group_matched = 1;
@@ -331,12 +330,11 @@ sub filter_messages {
         }
         ## the last group:
         if ($group_is_not_empty && !$group_matched) {
-            $accept = 0;
+            next MESSAGE;
         }
-
-        return $accept;
-
-    } @messages;
+        push @messages, $m;
+    };
+    return @messages;
 }
 
 #
