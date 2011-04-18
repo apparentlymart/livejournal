@@ -482,13 +482,10 @@ sub init {
         $state = 'A' if LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{user});
     }
 
-    my $up_is_friend = $up && LJ::is_friend($journalu, $up);
-    if ( $journalu->is_spamprotection_enabled &&
-         $state =~ /^[AS]$/ &&
-         (!$up || !($up->prop('in_whitelist_for_spam') || $up->in_class("paid") || $up->in_class("perm"))) && 
-         ($journalu->is_community || !$up_is_friend) && 
-         !LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user})) {
-
+    my $can_mark_spam = LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user});
+    my $need_spam_check = 0;
+    LJ::run_hook('need_spam_check_comment', \$need_spam_check, $entry, $state, $journalu, $up);
+    if ( $need_spam_check && !$can_mark_spam ) {
         my $spam = 0;
         LJ::run_hook('spam_comment_detector', $form, \$spam, $journalu, $up);
         LJ::run_hook('spam_in_all_journals', \$spam, $journalu, $up) unless $spam;
