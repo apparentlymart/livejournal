@@ -6,7 +6,9 @@ body<=
     use strict;
     use LJ::TimeUtil;
 
-    use vars qw($ret %POST);
+    use vars qw(%POST);
+
+    my $ret;
 
     my $remote = LJ::get_remote();
     my $is_admin = LJ::check_priv($remote, "canview", "entryprops");

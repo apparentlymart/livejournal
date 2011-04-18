@@ -5,7 +5,9 @@ title=>FAQ
 body<=
 
 <?_code
+#line 9
 
+ use strict;
  my $dbh = LJ::get_db_writer();
 
  my $remote = LJ::get_remote();
@@ -14,7 +16,7 @@ body<=
  LJ::remote_has_priv($remote, "faqadd", \%ac_add);
  LJ::remote_has_priv($remote, "faqedit", \%ac_edit);
 
- $ret = "";
+ my $ret = "";
  if (%ac_add)
  {
      $ret .= "<A HREF=\"faqedit.bml\">[Add to FAQ]</A>\n";
@@ -22,7 +24,7 @@ body<=
 
  my %faqcat;
  my %faqq;
- $sth = $dbh->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat");
+ my $sth = $dbh->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref)
  {
