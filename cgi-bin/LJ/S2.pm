@@ -4146,7 +4146,7 @@ sub Page__print_ad_box {
     $S2::pout->($ad_html) if $ad_html;
 }
 
-my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers FaceBookILike PublicStats);
+my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers FaceBookILike PublicStats OnLivejournal);
 
 sub Page__widget
 {

@@ -99,7 +99,7 @@ sub domains {
         my $comm = LJ::load_user($comm_name);
         next unless $comm;
 
-        push @result, $candidate if $u->can_manage($comm);
+        push @result, $candidate if $u and $u->can_manage($comm);
     }
 
     return @result;
