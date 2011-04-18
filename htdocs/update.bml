@@ -63,7 +63,7 @@
 
         my @posting_access = $remote->posting_access_list;
         if ( $remote->is_identity && scalar(@posting_access) == 0
-          && ! LJ::Request->get_param('usejournal') )
+          && ! $usejournalu )
         {
             $$title = $ML{'Sorry'};
             $$body = BML::ml('.error.nonusercantpost', {'sitename' => $LJ::SITENAME});
