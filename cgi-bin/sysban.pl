@@ -425,44 +425,48 @@ sub sysban_validate {
                 ",
                 {Slice => {}}
             );
-            
-            my $matched_wl;
-            foreach my $wl (@$whitelist) {
-                my $mask = $wl->{value}; ## see ip_whitelist below for possible formats
-                if ($mask =~ /^$ip_regexp$/) {
-                    if ($mask eq $ip) {
-                        $matched_wl = $wl;
-                        last;
-                    } 
-                } elsif (my ($start_ip, $end_ip) = $mask =~ /^($ip_regexp)-($ip_regexp)$/) {
-                    if (    $ip_to_str->($start_ip) le $ip_to_str->($ip) && 
-                            $ip_to_str->($ip) le $ip_to_str->($end_ip)) 
-                    {
-                        $matched_wl = $wl;
-                        last;
+           
+            ## if creting a new ban, check IP whitelist
+            ## TODO: when modifying an existing ban, give a warning
+            if (!$opts->{'skipexisting'}) { 
+                my $matched_wl;
+                foreach my $wl (@$whitelist) {
+                    my $mask = $wl->{value}; ## see ip_whitelist below for possible formats
+                    if ($mask =~ /^$ip_regexp$/) {
+                        if ($mask eq $ip) {
+                            $matched_wl = $wl;
+                            last;
+                        } 
+                    } elsif (my ($start_ip, $end_ip) = $mask =~ /^($ip_regexp)-($ip_regexp)$/) {
+                        if (    $ip_to_str->($start_ip) le $ip_to_str->($ip) && 
+                                $ip_to_str->($ip) le $ip_to_str->($end_ip)) 
+                        {
+                            $matched_wl = $wl;
+                            last;
+                        }
+                    } elsif ($mask =~ m!^$ip_regexp/(\d+)!) {
+                        my $netmask = Net::Netmask->new($mask);
+                        if ($netmask->match($ip)) {
+                            $matched_wl = $wl;
+                            last;
+                        }
+                    } elsif ($mask =~ /^(\d+\.){1,3}\*$/) {
+                        $mask =~ s/\./\\./g;
+                        $mask =~ s/\*/\.\*/;
+                        if ($ip =~ /^$mask$/) {
+                            $matched_wl = $wl;
+                            last;
+                        }
+                    } else {
+                        # hm...
                     }
-                } elsif ($mask =~ m!^$ip_regexp/(\d+)!) {
-                    my $netmask = Net::Netmask->new($mask);
-                    if ($netmask->match($ip)) {
-                        $matched_wl = $wl;
-                        last;
-                    }
-                } elsif ($mask =~ /^(\d+\.){1,3}\*$/) {
-                    $mask =~ s/\./\\./g;
-                    $mask =~ s/\*/\.\*/;
-                    if ($ip =~ /^$mask$/) {
-                        $matched_wl = $wl;
-                        last;
-                    }
-                } else {
-                    # hm...
                 }
-            }
 
-            if ($matched_wl) {
-                return "Can't bap ip address $ip: ip_whitelist #$matched_wl->{banid} matched ($matched_wl->{note})";
+                if ($matched_wl) {
+                    return "Can't ban ip address $ip: ip_whitelist #$matched_wl->{banid} matched ($matched_wl->{note})";
+                }
             }     
-            
+                
             ## everything is ok
             return 0;
         },

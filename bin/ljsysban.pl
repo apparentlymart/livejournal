@@ -145,7 +145,7 @@ if ($modify) {
     die $dbh->errstr if $dbh->err;
 
     if ($what || $value) {
-        my $err = LJ::sysban_validate($what || $ban->{'what'}, $value || $ban->{'value'});
+        my $err = LJ::sysban_validate($what || $ban->{'what'}, $value || $ban->{'value'}, {skipexisting => 1});
         die $err if $err;
     }
 
