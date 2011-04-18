@@ -77,26 +77,23 @@ sub save_linkobj
     my $caplinks = LJ::get_cap($u, "userlinks");
     $numlinks = $caplinks if $numlinks > $caplinks;
 
-    # build insert query
-    my (@bind, @vals);
-    foreach my $ct (1..$numlinks) {
-        my $it = $linkobj->[$ct-1];
-
-        # journalid, ordernum, parentnum, url, title
-        push @bind, "(?,?,?,?,?)";
-        push @vals, ($u->{'userid'}, $ct, 0, $it->{'url'}, $it->{'title'});
+    if ($numlinks) {
+        # build insert query
+        my (@bind, @vals);
+        foreach my $ct (1..$numlinks) {
+            my $it = $linkobj->[$ct-1];
+            # journalid, ordernum, parentnum, url, title
+            push @bind, "(?,?,?,?,?)";
+            push @vals, ($u->{'userid'}, $ct, 0, $it->{'url'}, $it->{'title'});
+        }
+        my $binds = join(",", @bind);
+        $u->do("INSERT INTO links (journalid, ordernum, parentnum, url, title) VALUES $binds", undef, @vals);
     }
 
     # invalidate memcache
     my $memkey = [$u->{'userid'}, "linkobj:$u->{'userid'}"];
     LJ::MemCache::delete($memkey);
 
-    # insert into database
-    {
-        local $" = ",";
-        return $u->do("INSERT INTO links (journalid, ordernum, parentnum, url, title) " .
-                      "VALUES @bind", undef, @vals);
-    }
 }
 
 sub make_linkobj_from_form
