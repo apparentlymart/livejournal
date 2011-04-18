@@ -1230,7 +1230,7 @@ property string text_spam_comment {
     des = "Spam comment messages";
     example = "Spam comment";
 }
-set text_spam_comment = "(Spam comment)";
+set text_spam_comment = "(Suspicious comment)";
 
 property string text_view_games {
     des = "Text for view games on profile page";

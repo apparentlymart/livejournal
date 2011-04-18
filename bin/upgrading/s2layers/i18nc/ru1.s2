@@ -115,6 +115,7 @@ set text_copyr_agree = "Разрешаю воспроизводить в люб�
 set text_copyr_disagree = "Запрещаю воспроизводить в какой-либо форме";
 set text_share_this = "Поделиться";
 set text_share = "Поделиться";
+set text_spam_comment = "(Подозрительный комментарий)";
 
 # Three forms, special cases for numbers ending in 1 and 2, 3, 4, except those ending in 1[1-4]
 function lang_map_plural (int n) : int {
