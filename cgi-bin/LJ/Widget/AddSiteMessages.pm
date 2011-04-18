@@ -38,7 +38,7 @@ sub render_body {
         $end_hour = $end_date->hour;
         $end_min = $end_date->minute;
     } else { # default
-        $accounts = LJ::SiteMessages->get_default_masks_value();
+        $accounts = 0;
     }
 
     # default values for year/month/day = today's date
@@ -144,10 +144,13 @@ sub render_body {
           value => $countries ) . "</td></tr>";
     $ret .= "<tr><td>&nbsp;</td><td>(if left blank, a user's country will be ignored)</td></tr>";
 
-    $ret .= "<tr><td valign='top'>Show this question to:</td><td>";
+    $ret .= "<tr><td valign='top'>Show this question to:</td><td><hr>";
     my $current_group = 0;
     foreach my $type (LJ::SiteMessages->get_options_list()) {
-        $ret .= '<br>' if($current_group != LJ::SiteMessages->get_group($type));
+        if ($current_group != LJ::SiteMessages->get_group($type)) {
+            $ret .= '<hr>'; 
+            $current_group = LJ::SiteMessages->get_group($type);
+        }
         
         my $ltype = lc $type;
         $ret .= $class->html_check
@@ -155,13 +158,14 @@ sub render_body {
               id => 'show_' . $ltype,
               selected => LJ::SiteMessages->check_mask($type, $accounts)) . " <label for='show_$ltype'>$type Users</label><br />";
               
-        $current_group = LJ::SiteMessages->get_group($type);
     }
+    $ret .= $class->html_hidden( mid => $mid );
+    $ret .= "<hr><br>Note: a message will be visible to user if, in each options group, either <ol>" .
+            "<li> user satisfies (at least) one option in the group or</li>".
+            "<li> no options in the group are selected at all</li></ol></td></tr>";
+    $ret .= '</td></tr>'; 
 
-    $ret .= $class->html_hidden
-        ( mid => $mid );
-
-    $ret .= "<tr><td colspan='2' align='center'>";
+    $ret .= "<tr><td colspan='2' align='left'>";
     $ret .= $class->html_submit('Submit') . "</td></tr>";
     $ret .= "</table>";
     $ret .= $class->end_form;
