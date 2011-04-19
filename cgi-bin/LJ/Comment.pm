@@ -218,7 +218,11 @@ sub url {
     my $entry   = $self->entry;
     my $url     = $entry->url;
 
-    return "$url?thread=$dtalkid$extra#t$dtalkid";
+    if ($self->state eq 'B') {
+        return "$url?mode=showspam&thread=$dtalkid$extra#t$dtalkid";
+    } else {
+        return "$url?thread=$dtalkid$extra#t$dtalkid";
+    }
 }
 
 sub reply_url {
@@ -228,7 +232,11 @@ sub reply_url {
     my $entry   = $self->entry;
     my $url     = $entry->url;
 
-    return "$url?replyto=$dtalkid";
+    if ($self->state eq 'B') {
+        return "$url?mode=showspam&replyto=$dtalkid";
+    } else {
+        return "$url?replyto=$dtalkid";
+    }
 }
 
 sub thread_url {
@@ -238,7 +246,11 @@ sub thread_url {
     my $entry   = $self->entry;
     my $url     = $entry->url;
 
-    return "$url?thread=$dtalkid";
+    if ($self->state eq 'B') {
+        return "$url?mode=showspam&thread=$dtalkid";
+    } else {
+        return "$url?thread=$dtalkid";
+    }
 }
 
 sub parent_url {
