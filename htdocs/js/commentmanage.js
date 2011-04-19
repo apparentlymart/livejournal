@@ -252,11 +252,9 @@ function createDeleteFunction(ae, dItemid, action) {
 			
 			window.delPopup
 				.html('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr('comment.mark.spam.title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr('comment.mark.spam.subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" onclick="deleteComment(' + dItemid + ', \'' + action + '\');" value="' + getLocalizedStr('comment.mark.spam.button', comUser) + '"></div><div>', ae, e, 'spamComment' + dItemid)
-				.bubble({
-					toggleOnTargetClick: false
-				})
+				.bubble()
 				.bubble('show', ae);
-			
+
 			return true;
 		} else if (action == 'delete') {
 	        var inHTML = [ "<form id='ljdelopts" + dItemid + "'><div class='b-popup-group'><div class='b-popup-row b-popup-row-head'><strong>" + getLocalizedStr( 'comment.delete.q', comUser ) + "</strong></div>" ];
@@ -286,10 +284,9 @@ function createDeleteFunction(ae, dItemid, action) {
 			
 			window.modPopup
 				.html(inHTML.join(' '))
-				.bubble({
-					toggleOnTargetClick: false
-				})
+				.bubble()
 				.bubble('show', ae);
+				
 		} else if (action == 'unspam') {
 			deleteComment(dItemid, action);
 		}
