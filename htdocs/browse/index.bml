@@ -10,7 +10,6 @@ body<=
 
 
     $windowtitle = "Community Directory";
-    $headextra .= $LJ::SHARE_THIS_URL_GEN->(journal => undef);
 
     my $remote = LJ::get_remote();
     return "You do not have access to this page." unless LJ::is_enabled("browse", $remote);

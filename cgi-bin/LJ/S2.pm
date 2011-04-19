@@ -153,10 +153,6 @@ sub make_journal
     }
 
     $page->{head_content} .= LJ::res_includes() . $extra_js;
-    if ( LJ::is_enabled('sharethis') ) {
-        ## generate <script src ..> to load ShareThis script with needed for journal set of services
-        $page->{head_content} .= $LJ::SHARE_THIS_URL_GEN->(journal => $u->username);
-    }
     LJ::run_hooks('head_content', \$page->{head_content});
 
     s2_run($r, $ctx, $opts, $entry, $page);
@@ -3789,19 +3785,8 @@ sub _Entry__get_link
     }
 
     if ($key eq "tell_friend") {
-        return $null_link if $LJ::DISABLED{'sharethis'};
-        return $null_link unless $entry->security eq 'public';
-        my $entry_url = $entry->url;
-        my $entry_title = LJ::ejs($entry->subject_html);
-        my $link = LJ::S2::Link("#", $ctx->[S2::PROPS]->{"text_share_this"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_share.gif", 24, 24));
-        $link->{_raw} = qq|<script type="text/javascript">
-            var stLink = jQuery('a:last')[0];
-            stLink.href = 'javascript:void(0)';
-            SHARETHIS_post = SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title'}, {button: false});
-            SHARETHIS_post.attachButton(stLink);
-            SHARETHIS_ary.push(SHARETHIS_post);
-            </script>|;
-        return $link;
+        # after share this! has been nuked, this one is gone too
+        return $null_link;
     }
 
     if ( $key eq 'share' ) {

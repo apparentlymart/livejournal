@@ -145,16 +145,6 @@ sub link_bar
         }
     }
 
-    unless ($LJ::DISABLED{'sharethis'}) {
-        my $entry_url = $entry->url;
-        my $entry_title = LJ::ejs($entry->subject_html);
-        push @linkele, $mlink->("javascript:void(0)", "sharethis") . qq|<script type="text/javascript">
-            SHARETHIS.addEntry({url:'$entry_url', title: '$entry_title'}, {button: false})
-                .attachButton(jQuery('a:last')[0]);
-            </script>|
-            if $entry->security eq 'public';
-    }
-
     if ( LJ::is_enabled('sharing') && $entry->is_public ) {
         LJ::Share->request_resources;
         push @linkele, $mlink->( '#', 'share' )

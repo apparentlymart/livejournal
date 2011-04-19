@@ -98,9 +98,6 @@ body<=
         $$head .= LJ::robot_meta_tags();
     }
 
-    $$head .= $LJ::SHARE_THIS_URL_GEN->(journal => $u->username)
-       unless $LJ::DISABLED{'sharethis'};
-
     unless ($item && $item->{'anum'} == $init->{'anum'}) {
         LJ::Request->pnotes ('error' => 'e404');
         LJ::Request->pnotes ('remote' => LJ::get_remote());

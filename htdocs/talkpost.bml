@@ -156,8 +156,6 @@ body<=
     if (!$u->is_visible || $u->should_block_robots || ($entry && $entry->should_block_robots)) {
         $head = LJ::robot_meta_tags();
     }
-    $head .= $LJ::SHARE_THIS_URL_GEN->(journal => $u->username)
-        unless $LJ::DISABLED{'sharethis'};
 
     # check suspended user
     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"

@@ -1434,8 +1434,10 @@ property string text_tell_friend {
 }
 set text_tell_friend = "Tell a Friend";
 
+# we're keeping this one for backwards compatibility
 property string text_share_this {
     des = "Text to share this with a friend";
+    noui = 1;
 }
 set text_share_this = "Share";
 
