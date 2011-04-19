@@ -77,8 +77,6 @@ sub render
     $data_journal->{view_entry} = $data_journal->{view} eq 'entry';
     $data_journal->{display} = LJ::ljuser($journal);
 
-    # warn "[", $data_journal->{view}, "]\n";
-
     if ($remote)
     {
         $data_remote->{is_logged_in} = 1;
@@ -108,7 +106,6 @@ sub render
                     }
                 }
             }
-	    warn $data_journal->{login_form}->{root};
 
             $data_remote->{userpic} = {
                 src   => $tinted_nouserpic_img || "$LJ::IMGPREFIX/controlstrip/nouserpic.gif",
@@ -310,8 +307,8 @@ sub render
 
     $data->{remote}->{status} = get_status($data);
 
-    use Data::Dumper;
-    # warn Dumper( { flatten($data) } ), "\n";
+    # my $h = { flatten($data) };
+    # warn join('', map { "$_ => $h->{$_}\n" } sort keys %$h);
 
     my $tmpl = LJ::HTML::Template->new(
         {
@@ -336,9 +333,6 @@ sub render
 
     $tmpl->param(flatten($data), link_mobile => $mobile_link );
 
-    # use Data::Dumper;
-    # warn Dumper({flatten($data)}), "\n";
- 
     return $tmpl->output;    
 }
 

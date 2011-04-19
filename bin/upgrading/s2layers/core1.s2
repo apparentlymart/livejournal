@@ -2015,6 +2015,64 @@ if ($bordercolor) {
             print control_strip_logged_out_userpic_css();
             print control_strip_logged_out_full_userpic_css();
         }
+
+        ### New control strip CSS
+
+        "/* Cleaned CSS for new ControlStrip */\n";
+
+        if ($fgcolor or $bgcolor) {
+            ".w-cs {\n";
+            if ($bgcolor) {
+                "    background: " + $*control_strip_bgcolor + ";\n";
+            }
+            if ($fgcolor) {
+                "    color: " + $*control_strip_fgcolor + ";\n";
+            }
+            if ($bgimage == "") {
+                "    background-image: none;\n";
+            } else {
+                "    background-image: url($bgimage);\n";
+            }
+            "}\n";
+        }
+
+        if ($linkcolor) {
+            ".w-cs A:link,\n";
+            ".w-cs A:visited,\n";
+            ".w-cs A:hover,\n";
+            ".w-cs A:active {\n";
+            "    color: " + $*control_strip_linkcolor + " !important;\n";
+            "}\n";
+        }
+
+        "/* User info */\n";
+        if ($bgcolor or $bordercolor) {
+            ".w-cs .w-cs-userinfo {\n";
+            if ($bgcolor) {
+                "    background: " + $*control_strip_bgcolor + ";\n";
+            }
+            if ($bordercolor) {
+                "    border-color: " + $*control_strip_bordercolor + ";\n";
+            }
+            if ($bgimage == "") {
+                "    background-image: none;\n";
+            } else {
+                "    background-image: url($bgimage);\n";
+            }
+            "}\n";
+        }
+
+        "/* Summary */\n";
+        if ($bgcolor) {
+            ".w-cs .w-cs-summary {\n";
+            "    background: " + $*control_strip_bgcolor + ";\n";
+            "}\n";
+        }
+        if ($bordercolor) {
+            ".w-cs .w-cs-summary LI.w-cs-i-tokens {\n";
+            "    border-color: " + $*control_strip_bordercolor + ";\n";
+            "}\n";
+        }
     }
 }
 
