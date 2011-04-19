@@ -363,8 +363,11 @@ sub EntryPage
     }
 
     my %meta = (
-        'title'       => LJ::Text->drop_html($entry->subject_raw),
-        'description' => LJ::Text->drop_html($entry->event_raw),
+        'title'
+            => LJ::ehtml( LJ::Text->drop_html( $entry->subject_raw ) ),
+
+        'description'
+            => LJ::ehtml( LJ::Text->drop_html( $entry->event_raw ) ),
     );
 
     $p->{'head_content'} .= qq[
