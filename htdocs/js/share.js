@@ -193,7 +193,7 @@ window.LJShare.link = function( opts, node ) {
 
 		dom = $( str.join( ' ' ) )
 			.hide()
-			.bubble( { target: link } )
+			.bubble( { target: link, showOn: 'click' } )
 			.bubble( 'show' );
 	}
 
