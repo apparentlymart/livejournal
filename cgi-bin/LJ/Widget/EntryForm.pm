@@ -926,7 +926,6 @@ sub render_options_block {
                 'N' => BML::ml('label.screening.none2'),
                 'R' => BML::ml('label.screening.anonymous2'),
                 'F' => BML::ml('label.screening.nonfriends2'),
-                'L' => BML::ml('label.screening.links2'),
                 'A' => BML::ml('label.screening.all2'),
             );
 
