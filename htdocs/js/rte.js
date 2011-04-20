@@ -283,7 +283,7 @@ function convert_user_to_ljtags(html) {
 		.replace(/<span[^>]*?class="ljuser[^>]*?><a href="http:\/\/users\.[-.\w]+\/([\w]+)\/.*?<b>([^<]+)?<\/b><\/a><\/span>/g, '<lj user="$1" title="$2"/>')
 
 		//handle ext_ nicknames
-		.replace(/<span[^>]*?class="ljuser[^>]*?lj:user="([_\d\w]+)"[^>]*?><a>?(.*?)<\/a><a[^<]*?<b>([^<]+)?<\/b><\/a><\/span>/g, '<lj user="$1" title="$3"/>')
+		.replace(/<span[^>]*?lj:user="(ext_\d+)"[^>]*?><a>?(.*?)<\/a><a[^<]*?<b>([^<]+)?<\/b><\/a><\/span>/g, '<lj user="$1" title="$3"/>')
 
 		.replace(/<span[^>]*?class="ljuser[^>]*?><a href="http:\/\/([-\w]+)\..*?<b>([^<]+)?<\/b><\/a><\/span>/g, '<lj user="$1" title="$2"/>')
 		.replace(/<\/lj>/g, '');
