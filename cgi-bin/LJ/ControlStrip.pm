@@ -1,6 +1,7 @@
 package LJ::ControlStrip;
 
 use strict;
+use LJ::Widget::Calendar;
 
 sub render
 {
@@ -299,6 +300,9 @@ sub render
     }
 
     my $data = {
+        widget        => {
+            calendar => LJ::Widget::Calendar->render(),
+        },
         lj            => $data_lj,
         remote        => $data_remote,
         journal       => $data_journal,
