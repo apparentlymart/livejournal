@@ -9,16 +9,18 @@ body<=
 </CENTER>
 
 <?_code
+#line 13
+ use strict;
 
  my $dbh = LJ::get_db_writer();
 
- $ret = "";
+ my $ret = "";
 
  my $qfaqcat = $dbh->quote($FORM{'faqcat'});
 
  my %faqcat;
  my %faqq;
- $sth = $dbh->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat WHERE faqcat=$qfaqcat");
+ my $sth = $dbh->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat WHERE faqcat=$qfaqcat");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref)
  {
