@@ -2477,7 +2477,7 @@ sub get_thread_html
         elsif ($post->{'state'} ne 'B' && $opts->{'showspam'}) {
             $html->{text} = undef;
         }
-        elsif ($post->{'state'} eq 'B' && !$opts->{'showspam'} && !($remote->{'user'} eq (ref $userpost ? $userpost->{'user'} : $userpost))) 
+        elsif ($post->{'state'} eq 'B' && !$opts->{'showspam'} && !($remote && $remote->user eq (ref $userpost ? $userpost->{'user'} : $userpost))) 
         {
             $state = 'spamed';
             if ($post->{'_show'}) { 
