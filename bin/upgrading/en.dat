@@ -6211,6 +6211,12 @@ web.controlstrip.login.forgot=Forgot your password?
 
 web.controlstrip.login.remember=Remember Me
 
+web.controlstrip.login.openid=Open ID
+
+web.controlstrip.login.mailru=Mail.ru
+
+web.controlstrip.login.vkontakte=Vkontakte
+
 web.controlstrip.nouserpic.alt=Upload Userpic
 
 web.controlstrip.nouserpic.title=Edit Userpics
