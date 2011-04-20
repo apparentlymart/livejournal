@@ -30,7 +30,6 @@ use LJ::User;
 use LJ::Request;
 use Time::Local ();
 use Storable ();
-use Compress::Zlib ();
 use HTML::Entities ();
 
 use Class::Autouse qw(
