@@ -168,9 +168,12 @@ window.LJShare.init = function( opts ) {
 */
 window.LJShare.link = function( opts, node ) {
 	var link = node || jQuery( 'a:last' ),
+		linkImg = link.find('img'),
 		url = link.attr( 'href' ),
 		options = prepareOptions( jQuery.extend( {}, { url: url } , opts ) ),
 		dom, bubble, skipCloseEvent;
+		
+	link = (linkImg.length) ? linkImg : link;		
 
 	var links = ( opts.links ) ? opts.links : global_options.links;
 
