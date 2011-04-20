@@ -568,8 +568,10 @@ function print_comment_close (string footer, Comment c) {
     "</td></tr></table></div><br />";
 }
 
-function print_entry_box_close (string footer) {
+function print_entry_box_close (string footer, Entry entry) {
     var Page p = get_page();
+    var Entry e = $entry;
+    var Link link;
     "</td></tr>";
 
     if ($footer) {
@@ -577,26 +579,72 @@ function print_entry_box_close (string footer) {
         print  "<tr><td style='white-space: nowrap'>$*text_left_comments";
         $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
         " $footer";
+        
+        if ($p.view == "entry")
+        {
+            $link = $e->get_link("nav_prev");
+            print safe " $link";
+        }
+        foreach var string link_key ($e.link_keyseq) {
+            $link = $e->get_link($link_key);
+            if(defined $link) {
+                print safe " $link";
+                $link->print_raw();
+            }
+        }
+
+        if ($p.view == "entry")
+        {
+            $link = $e->get_link("nav_next");
+            print safe " $link";
+            
+        }
+        
     $p->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
     }
    "</td></tr></table></div><br />";
 }
 
 
-function print_box_close (string footer) {
+function print_box_close (string footer, Entry entry) {
+    var Page p = get_page();
+    var Entry e = $entry;
+    var Link link;
     "</td></tr>";
 
     if ($footer) {
         #TODO - rewrite with this.save
-        print  "<tr><td style='white-space: nowrap;' align='left'>$footer</td></tr>";
+        print  "<tr><td style='white-space: nowrap;' align='left'>$footer";
+        
+        if ($p.view == "entry")
+        {
+            $link = $e->get_link("nav_prev");
+            print safe " $link";
+        }
+        foreach var string link_key ($e.link_keyseq) {
+            $link = $e->get_link($link_key);
+            if(defined $link) {
+                print safe " $link";
+                $link->print_raw();
+            }
+        }
+
+        if ($p.view == "entry")
+        {
+            $link = $e->get_link("nav_next");
+            print safe " $link";
+        }
+        
+        print "</td></tr>";
     }
 
     "</table></div><br />";
 }
 function print_box (string{} colors, string metapic, string{} meta, string content, string footer, string domid) {
+    var Entry e;
     print_box_open($colors, $metapic, $meta, $domid);
     print safe $content;
-    print_box_close($footer);
+    print_box_close($footer, $e);
 }
 
 function print_header (string header)
@@ -721,29 +769,14 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $footer = $footer + "$*text_right_comments";
     }
 
-    # Misc Links
-    var Link link;
-    if ($p.view == "entry")
-    {
-        $link = $e->get_link("nav_prev"); $footer = "$footer $link";
-    }
-    foreach var string link_key ($e.link_keyseq) {
-        $link = $e->get_link($link_key);
-        if(defined $link) {
-            $footer = "$footer $link";
-        }
-    }
-    if ($p.view == "entry")
-    {
-        $link = $e->get_link("nav_next"); $footer = "$footer $link";
-    }
+     $footer = $footer + " ";
 
     # Print
     print_box_open($colors, $metapic, $meta, "");
     if (not $hide_text) { $e->print_text(); }
     if ($p.view == "entry")
-    { print_entry_box_close($footer);
-    } else { print_box_close($footer); }
+    { print_entry_box_close($footer, $e);
+    } else { print_box_close($footer, $e); }
 }
 
 function Page::print_entry (Entry e)
@@ -1060,6 +1093,7 @@ function ReplyPage::print_body () {
         print_entry($this, $en, null Color, null Color, false);
     } else {
         var string{} meta; var string metapic;
+        var Entry e;
 
         print_header($.replyto.time->date_format($*date_format));
 
@@ -1080,7 +1114,7 @@ function ReplyPage::print_body () {
         print_box_open({ "bgcolor" => "$*accent_bgcolor", "fgcolor" => "$*accent_fgcolor" },
                   $metapic, $meta, "");
         $.replyto->print_text();
-        print_box_close("");
+        print_box_close("", $e);
     }
     print_ebox($.entry);
 
