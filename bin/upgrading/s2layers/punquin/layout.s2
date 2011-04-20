@@ -842,7 +842,50 @@ function EntryPage::print_body ()
     }
 }
 
+function EntryPage::print_comments (Comment[] cs) {
+    var Page p = get_page();
+    if (size $cs == 0) { return; }
+
+    foreach var Comment c ($cs) {
+        $this->print_comment($c);
+        $this->print_comments($c.replies);
+    }
+}
+
 function EntryPage::print_comment (Comment c) {
+    var Page p = get_page();
+    var int indent = ($c.depth - 1) * 25;
+
+    """<div id="$c.dom_id" style="margin-left:${indent}px;margin-top:10px;">""";
+    """<a name="$c.anchor"></a>""";
+
+    if ($c.screened and not $c.full and not viewer_is_owner()) {
+        """<strong>$*text_comment_screened</strong>""";
+    } elseif ($c.deleted) {
+        """<strong>$*text_comment_deleted</strong>""";
+    } elseif (($c.spam) and (not $p.showspam) and (size($c.replies) > 0)) {
+        """<strong>$*text_spam_comment</strong>""";
+    } elseif ($c.full) {
+        $this->print_comment_full($c);
+    } else {
+        $this->print_comment_partial($c);
+    }
+
+    "</div>";
+
+    $c->print_reply_container();
+}
+
+function EntryPage::print_comment_partial (Comment c) {
+    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>$*text_poster_anonymous</i>";
+    var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
+    print safe "<a href='$c.permalink_url'>$subj</a> - $poster";
+    if ($c.thread_url != "") {
+        $c->print_expand_collapse_links();
+    }
+}
+
+function EntryPage::print_comment_full (Comment c) {
     var Color background; var Color color;
     if ($c.screened) {
         $background = $*comment_bar_screened_bgcolor;
@@ -859,7 +902,8 @@ function EntryPage::print_comment (Comment c) {
     if (defined $c.subject_icon) {
         $sub_icon = $c.subject_icon->as_string();
     }
-    "<a name='$c.anchor'></a><div id='cmtbar$c.talkid' style='background-color: $background; color: $color; margin-top: 10px; width: 100%'>";
+#     "<a name='$c.anchor'></a><div id='cmtbar$c.talkid' style='background-color: $background; color: $color; margin-top: 10px; width: 100%'>";
+    "<div id='cmtbar$c.talkid' style='background-color: $background; color: $color; width: 100%'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
     if (defined $c.userpic and $*comment_userpic_style != "off") {
         var int w = $c.userpic.width;
@@ -920,17 +964,16 @@ function EntryPage::print_comment (Comment c) {
             ### showing reply link if comment not screened
             $c->print_reply_link({ "linktext" => $*text_comment_reply });
         }
-
-        
         ") ";
     }
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") {
          "(<a href='$c.thread_url'>Thread</a>) ";
-         var Link expand_link = $c->get_link("expand_comments");
-         if (defined $expand_link) {
-             "(" + $c->expand_link() + ") ";
-         }
+#          # var Link expand_link = $c->get_link("expand_comments");
+#          # if (defined $expand_link) {
+#          #     "(" + $c->expand_link() + ") ";
+#          # }
+         $c->print_expand_collapse_links();
     }
     "</div>";
     if (not $c.frozen) {
