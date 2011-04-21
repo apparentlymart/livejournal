@@ -1477,6 +1477,7 @@ function print_free_text() {
 }
 
 function print_sidebar() {
+  var Page p = get_page();
 
   # PROFILE
   print_sidebar_profile();
@@ -1500,6 +1501,12 @@ function print_sidebar() {
   # SUMMARY
   if($*show_summary){
     print_sidebar_summary();
+  }
+  
+  if (viewer_sees_ad_box("s2.vertical.2")) {
+    """<div class="box-vertical2" style="margin-top: 2em;">""";
+    $p->print_ad_box("s2.vertical.2");
+    """</div>""";
   }
 }
 
