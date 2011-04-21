@@ -442,6 +442,9 @@ text-decoration: underline;
 margin-top: 0;
 margin-bottom: 0;
 }
+.box-vertical2 {
+padding: 10px;
+}
 #mainstuff {
 """;
 if (viewer_sees_vbox()) { "width: 70%;"; } else { "width: 75%;"; }
@@ -613,6 +616,7 @@ function Page::print_linklist() {
 
 
 function Page::lay_print_navbar() {
+    var Page p = get_page();
     var string userpic;
     var Image up_img = $.journal.default_pic;
     if (defined $up_img) {
@@ -657,6 +661,12 @@ $this->print_linklist();
 
 if ($*counter_code != "") {
     """<ul><li>$*counter_code</li></ul>""";
+}
+
+if (viewer_sees_ad_box("s2.vertical.2")) {
+    """<div class="box-vertical2">""";
+    $p->print_ad_box("s2.vertical.2");
+    """</div>""";
 }
 
 "</td>";
