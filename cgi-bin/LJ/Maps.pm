@@ -55,7 +55,7 @@ sub get_iframe_source {
             my @domains = split /\./, LJ::Request->header_in("Host");
             if (@domains>=2) {
                 my $subdomain = "$domains[-2].$domains[-1]";
-                warn $subdomain;
+                # warn $subdomain;
                 $key = $LJ::YANDEX_MAPS_API_KEYS{$subdomain};
             }
         }
