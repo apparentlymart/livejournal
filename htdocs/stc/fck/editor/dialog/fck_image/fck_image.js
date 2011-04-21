@@ -71,7 +71,11 @@ if ( oImage && oImage.tagName != 'IMG' && !( oImage.tagName == 'INPUT' && oImage
 	oImage = null ;
 
 // Get the active link.
-var oLink = dialog.Selection.GetSelection().MoveToAncestorNode( 'A' ) ;
+try{
+	var oLink = dialog.Selection.GetSelection().MoveToAncestorNode('A');
+} catch(e){
+	alert(e);
+}
 
 var oImageOriginal ;
 
@@ -102,34 +106,41 @@ function UpdateOriginal( resetSize )
 
 var bPreviewInitialized ;
 
-window.onload = function()
-{
-	// Translate the dialog box texts.
-	oEditor.FCKLanguageManager.TranslatePage(document) ;
+(function(){
+	function onLoad(){
+		// Translate the dialog box texts.
+		oEditor.FCKLanguageManager.TranslatePage(document);
 
-	GetE('btnLockSizes').title = FCKLang.DlgImgLockRatio ;
-	GetE('btnResetSize').title = FCKLang.DlgBtnResetSize ;
+		GetE('btnLockSizes').title = FCKLang.DlgImgLockRatio;
+		GetE('btnResetSize').title = FCKLang.DlgBtnResetSize;
 
-	// Load the selected element information (if any).
-	LoadSelection() ;
+		// Load the selected element information (if any).
+		LoadSelection();
 
-	// Show/Hide the "Browse Server" button.
-	GetE('tdBrowse').style.display				= FCKConfig.ImageBrowser	? '' : 'none' ;
-	GetE('divLnkBrowseServer').style.display	= FCKConfig.LinkBrowser		? '' : 'none' ;
+		// Show/Hide the "Browse Server" button.
+		GetE('tdBrowse').style.display = FCKConfig.ImageBrowser ? '' : 'none';
+		GetE('divLnkBrowseServer').style.display = FCKConfig.LinkBrowser ? '' : 'none';
 
-	UpdateOriginal() ;
+		UpdateOriginal();
 
-	// Set the actual uploader URL.
-	//LJ// if ( FCKConfig.ImageUpload )
+		// Set the actual uploader URL.
+		//LJ// if ( FCKConfig.ImageUpload )
 		//LJ// GetE('frmUpload').action = FCKConfig.ImageUploadURL ;
 
-	dialog.SetAutoSize( true ) ;
+		dialog.SetAutoSize(true);
 
-	// Activate the "OK" button.
-	dialog.SetOkButton( true ) ;
+		// Activate the "OK" button.
+		dialog.SetOkButton(true);
 
-	SelectField( 'txtUrl' ) ;
-}
+		SelectField('txtUrl');
+	}
+
+	if(window.addEventListener){
+		window.addEventListener('load', onLoad, false);
+	} else {
+		window.attachEvent('onload', onLoad);
+	}
+})();
 
 function LoadSelection()
 {
