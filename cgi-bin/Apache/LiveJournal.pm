@@ -498,35 +498,34 @@ sub trans
         my $opts = shift;
         $opts ||= {};
 
-        my $orig_user = $opts->{'user'};
         $opts->{'user'} = LJ::canonical_username($opts->{'user'});
-
+        my $u = LJ::load_user($opts->{'user'});
         my $remote = LJ::get_remote();
-        my $u = LJ::load_user($orig_user);
-=comment Do not need it anymore: LJSUP-8259
-        # do redirects:
-        # -- communities to the right place
-        # -- uppercase usernames
-        # -- users with hyphens/underscores, except users from external domains (see table 'domains')
-        if ($u && $u->is_community) {
-            if ($opts->{'vhost'} =~ /^(?:users||tilde)$/ ||
-                $orig_user ne lc($orig_user) ||
-                $orig_user =~ /[_-]/ && $u && $u->journal_base !~ m!^http://$host!i && $opts->{'vhost'} !~ /^other:/) {
-    
-                my $newurl = $uri;
-    
-                # if we came through $opts->{vhost} eq "users" path above, then
-                # the s/// below will not match and there will be a leading /,
-                # so the s/// leaves a leading slash as well so that $newurl is
-                # consistent for the concatenation before redirect
-                $newurl =~ s!^/(users/|community/|~)\Q$orig_user\E!/!;
-                $newurl = LJ::journal_base($u) . "$newurl$args_wq";
-                return redir($newurl);
-            } 
-            
+        unless ($u) {
+            LJ::Request->pnotes('error' => 'baduser');
+            LJ::Request->pnotes('remote' => $remote);
+            return LJ::Request::NOT_FOUND;
+        } 
+        
+        LJ::Request->notes("journalid" => $u->{userid});
+
+        ## check that request URL is canonical (i.e. it starts with $u->journal_base)
+        ## if not, construct canonical URL and redirect there 
+        ## (redirect cases: old http://community.lj.com/name URL, upper-case URLs, hyphen/underscore in usernames etc)
+        my $current_url = "http://$host/$uri";
+        my $journal_base = $u->journal_base;
+        if (substr($current_url, 0, length($journal_base)) ne $journal_base) {
+            my $new_url = $journal_base;
+            if ($host =~ /^(?:users|community)\./) {
+                $uri =~ s!^/[^/]+/!!;
+            }
+            return redir("$journal_base$uri$args_wq");
+        }
+
+        if ($u->is_community) {
             LJ::run_hook('vertical_tags', $remote, $u);
         }
-=cut
+        
         # check if this entry or journal contains adult content
         if (LJ::is_enabled('content_flag')) {
             # force remote to be checked
@@ -537,10 +536,10 @@ sub trans
             my $poster;
 
             my $adult_content = "none";
-            if ($u && $entry) {
+            if ($entry) {
                 $adult_content = $entry->adult_content_calculated || $u->adult_content_calculated;
                 $poster = $entry->poster;
-            } elsif ($u) {
+            } else {
                 $adult_content = $u->adult_content_calculated;
             }
 
@@ -594,8 +593,6 @@ sub trans
         }
 
         if ($opts->{'mode'} eq "info") {
-            my $u = LJ::load_user($opts->{user})
-                or return LJ::Request::NOT_FOUND;
             my $mode = $GET{mode} eq 'full' ? '?mode=full' : '';
             return redir($u->profile_url . $mode);
         }
@@ -612,14 +609,7 @@ sub trans
             # its behavior of meaning "whatever the user typed" to be
             # passed to the userinfo BML page, whereas this one only
             # works if journalid exists.
-            if (my $u = LJ::load_user($opts->{user})) {
-                LJ::Request->notes("journalid" => $u->{userid});
-            } else {
-                LJ::Request->pnotes ('error' => 'baduser');
-                LJ::Request->pnotes ('remote' => LJ::get_remote());
-                return LJ::Request::NOT_FOUND;
-            }
-
+            LJ::Request->notes("journalid" => $u->{userid});
             my $file = LJ::run_hook("profile_bml_file");
             $file ||= $LJ::PROFILE_BML_FILE || "userinfo.bml";
             if ($args =~ /\bver=(\w+)\b/) {
@@ -629,22 +619,10 @@ sub trans
         }
 
         if ($opts->{'mode'} eq "wishlist") {
-
-            if (my $u = LJ::load_user($opts->{user})) {
-                LJ::Request->notes("journalid" => $u->{userid});
-            } else {
-                LJ::Request->pnotes ('error' => 'baduser');
-                LJ::Request->pnotes ('remote' => LJ::get_remote());
-                return LJ::Request::NOT_FOUND;
-            }
-
             return $bml_handler->("$LJ::HOME/htdocs/wishlist.bml");
         }
 
         if ($opts->{'mode'} eq "update") {
-            my $u = LJ::load_user($opts->{user})
-                or return LJ::Request::NOT_FOUND;
-
             return redir("$LJ::SITEROOT/update.bml?usejournal=".$u->{'user'});
         }
 
