@@ -394,7 +394,7 @@ function print_sidebar(Page p) {
 
     # Table Wrapper
     "<!-- Begin Main Sidebar -->\n<td valign='top' align='$*sidebar_position'>";
-    "<table width='150' class='standard' cellpadding='5' cellspacing='0'>\n";
+    "<table width='160' class='standard' cellpadding='5' cellspacing='0'>\n";
     "<tr valign='top'><td align='left'>";
 
     # Title
@@ -428,12 +428,18 @@ function print_sidebar(Page p) {
         "</p>";
     }
     "</td></tr></table>\n<!-- End Main Sidebar -->";
+
+    if (viewer_sees_ad_box("s2.vertical.2")) {
+        """<div class="box-vertical2">""";
+        $p->print_ad_box("s2.vertical.2");
+        """</div>""";
+    }
 }
 
 function print_gotop (Page p)
 {
     "<td valign='bottom' align='$*sidebar_position'>\n<!-- Begin Small Sidebar -->\n";
-    "<table width='150' class='standard' cellpadding='5' cellspacing='0'>\n";
+    "<table width='160' class='standard' cellpadding='5' cellspacing='0'>\n";
     "<tr valign='top'><td align='left'>\n";
     $p->lay_sidebar_navigation();
     "<br />&gt; <a href='#top'>$*text_gotop</a><br>\n</td></tr></table>\n<!-- End Small Sidebar -->";
