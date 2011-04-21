@@ -1,6 +1,20 @@
 #!/usr/bin/perl
 #
 
+#
+# Synopsis:
+#
+# LJ::send_mail({
+#     'to'        => $email,
+#     'from'      => $LJ::DONOTREPLY_EMAIL,
+#     'fromname'  => $LJ::SITENAME, # optional
+#     'charset'   => $encoding, # optional, defaults to utf8
+#     'subject'   => $subject,
+#     'body'      => $body,
+#     'html'      => $html, # optional
+# }) or die "Error: couldn't send email";
+#
+
 use strict;
 
 use lib "$ENV{LJHOME}/cgi-bin";
