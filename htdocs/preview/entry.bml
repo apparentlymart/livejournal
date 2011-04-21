@@ -289,7 +289,10 @@
             html body {
                 padding-top: 0 !important;
             }
-            #lj_controlstrip {
+            #lj_controlstrip,
+            .w-cs,
+            .b-message-mobile,
+            .appwidget-sitemessages {
                 display: none !important;
             }
             </style>
