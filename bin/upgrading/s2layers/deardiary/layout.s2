@@ -728,6 +728,13 @@ function Page::lay_print_paraphernalia() "User layers can override this to chang
     $this->lay_print_viewspec();
     $this->lay_print_custom_paraphernalia();
     $this->lay_print_userlinks();
+    if (viewer_sees_ad_box("s2.vertical.2")) {
+        paraphernalia_box_open("", "");
+        """<div class="box-vertical2" style="margin-top: 8px;">""";
+        $this->print_ad_box("s2.vertical.2");
+        """</div>""";
+        paraphernalia_box_close("", "");
+    }
     if (viewer_sees_vbox()) {
         paraphernalia_box_open("", "");
         """<div style="margin-top: 8px;">""";
