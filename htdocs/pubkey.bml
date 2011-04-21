@@ -18,7 +18,9 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%GET $user $u $ret);
+    use vars qw(%GET);
+
+    my ( $user, $u, $ret );
 
     return $ML{'.error.notconfigured'} unless $LJ::USE_PGP;
     return LJ::server_down_html() if $LJ::SERVER_DOWN;

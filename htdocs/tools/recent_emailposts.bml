@@ -39,7 +39,9 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw/ $ret %POST /;
+    use vars qw/ %POST /;
+
+    my $ret;
 
     return "Sorry, this site is not configured to use the emailgateway."
         unless $LJ::EMAIL_POST_DOMAIN;

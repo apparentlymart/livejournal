@@ -4,7 +4,7 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%GET %POST $ret $headextra @errors @warnings);
+    use vars qw(%GET %POST $headextra @errors @warnings);
 
     my $remote = LJ::get_remote();
     return BML::redirect("$LJ::SITEROOT/support/")
@@ -20,9 +20,7 @@ body<=
     $opts{catid}  = $POST{catid}  || $GET{catid};
     $opts{sort}   = $POST{sort}   || $GET{sort}   || "count";
 
-    $ret .= $widget->render(%opts);
-
-    return $ret;
+    return $widget->render(%opts);
 }
 _code?>
 <=body
