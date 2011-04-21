@@ -892,6 +892,7 @@ function EntryPage::print_comment_partial (Comment c) {
 }
 
 function EntryPage::print_comment_full (Comment c) {
+    var Page p = get_page();
     var Color background; var Color color;
     if ($c.screened) {
         $background = $*comment_bar_screened_bgcolor;
@@ -955,25 +956,27 @@ function EntryPage::print_comment_full (Comment c) {
     print "</table></td></tr></table></div>";
     print "<div style='margin-left: 5px'>"; $c->print_text(); "</div>";
     print "<div style='margin-top: 3px; font-size: smaller'>";
-    if ($c.frozen) {
-        print "(Replies frozen)";
-    } else {
-        # print "(<a href='$c.reply_url'>Reply to this</a>) ";
-        print "("; 
-        ###$c->print_reply_link({"linktext" => $*text_comment_reply}); 
-        if($c.screened == true) {
-            ### if comment screened - show link for unscreen
-            var Link link;
-            $link = $c->get_link("unscreen_to_reply");
-            """<a href="$link.url" title="$link.caption">$link.caption</a>""";
+    if ((not $c.spam) or ($p.showspam)) {
+        if ($c.frozen) {
+            print "(Replies frozen)";
         } else {
-            ### showing reply link if comment not screened
-            $c->print_reply_link({ "linktext" => $*text_comment_reply });
+            # print "(<a href='$c.reply_url'>Reply to this</a>) ";
+            print "("; 
+            ###$c->print_reply_link({"linktext" => $*text_comment_reply}); 
+            if($c.screened == true) {
+                ### if comment screened - show link for unscreen
+                var Link link;
+                $link = $c->get_link("unscreen_to_reply");
+                """<a href="$link.url" title="$link.caption">$link.caption</a>""";
+            } else {
+                ### showing reply link if comment not screened
+                $c->print_reply_link({ "linktext" => $*text_comment_reply });
+            }
+            ") ";
         }
-        ") ";
     }
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
-    if ($c.thread_url != "") {
+    if ($c.thread_url != "" and (not $c.spam)) {
          "(<a href='$c.thread_url'>Thread</a>) ";
 #          # var Link expand_link = $c->get_link("expand_comments");
 #          # if (defined $expand_link) {
