@@ -415,6 +415,7 @@ function EntryPage::lay_show_firstnav() : bool {
 }
 
 function Page::lay_navbar() {
+    var Page p = get_page();
     var string userpic;
     var Image up_img = $.journal.default_pic;
     if (defined $up_img) {
@@ -467,6 +468,12 @@ $userpic
         """<div class="box" align="center" style="padding: 0.5em 0;">""";
         $this->print_vbox();
         "</div>";
+    }
+
+    if (viewer_sees_ad_box("s2.vertical.2")) {
+        """<div class="box box-vertical2" style="padding: 0.5em;text-align:center;">""";
+        $p->print_ad_box("s2.vertical.2");
+        """</div>""";
     }
 
     "</td>";
