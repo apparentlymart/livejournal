@@ -2383,6 +2383,139 @@ DIV.lj_ippu_app {
 		bottom: 15px;
 		right: -7px;
 		}
+
+	/* MUST REMOVE WHEN UNIVERSAL POPUP WOULD BE IMPLEMENT FOR LJTIMES PANE*/
+	.b-ljtimes-update .i-popup-arr,
+	.b-ljtimes-suggest .i-popup-arr {
+		overflow: hidden;
+		display: block;
+ 		position: absolute;
+		border: 0;
+ 		font: 0/0 serif;
+		background-image: url(/img/popup-arr.gif?v=1);
+		background-repeat: no-repeat;
+ 		}
+ 	.b-ljtimes-update .i-popup-arrt,
+	.b-ljtimes-suggest .i-popup-arrt {
+ 		top: -7px;
+ 		left: 50%;
+		width: 13px;
+		height: 11px;
+ 		margin: 0 0 0 -6px;
+		padding: 0;
+		background-position: 0 0;
+ 		}
+ 	.b-ljtimes-update .i-popup-arrtl,
+	.b-ljtimes-suggest .i-popup-arrtl {
+ 		top: -7px;
+		left: 30px;
+		width: 13px;
+		height: 11px;
+		margin: 0;
+		padding: 0;
+		background-position: 0 0;
+ 		}
+ 	.b-ljtimes-update .i-popup-arrtr,
+	.b-ljtimes-suggest .i-popup-arrtr {
+ 		top: -7px;
+		right: 30px;
+		width: 13px;
+		height: 11px;
+		margin: 0;
+		padding: 0;
+		background-position: 0 0;
+ 		}
+	.b-ljtimes-update .i-popup-arrr,
+	.b-ljtimes-suggest .i-popup-arrr {
+		top: 50%;
+		right: -7px;
+		width: 11px;
+		height: 13px;
+		margin: -6px 0 0;
+		padding: 0;
+		background-position: -11px -11px;
+		}
+	.b-ljtimes-update .i-popup-arrrt,
+	.b-ljtimes-suggest .i-popup-arrrt {
+		top: 15px;
+		right: -7px;
+		width: 11px;
+		height: 13px;
+		margin: 0;
+		padding: 0;
+		background-position: -11px -11px;
+		}
+	.b-ljtimes-update .i-popup-arrrb,
+	.b-ljtimes-suggest .i-popup-arrrb {
+		bottom: 15px;
+		right: -7px;
+		width: 11px;
+		height: 13px;
+		margin: 0;
+		padding: 0;
+		background-position: -11px -11px;
+		}
+ 	.b-ljtimes-update .i-popup-arrb,
+	.b-ljtimes-suggest .i-popup-arrb {
+ 		bottom: -7px;
+ 		left: 50%;
+		width: 13px;
+		height: 11px;
+ 		margin: 0 0 0 -6px;
+		padding: 0;
+		background-position: -13px 0;
+ 		}
+ 	.b-ljtimes-update .i-popup-arrbl,
+	.b-ljtimes-suggest .i-popup-arrbl {
+ 		bottom: -7px;
+		left: 30px;
+		width: 13px;
+		height: 11px;
+		margin: 0;
+		padding: 0;
+		background-position: -13px 0;
+ 		}
+ 	.b-ljtimes-update .i-popup-arrbr,
+	.b-ljtimes-suggest .i-popup-arrbr {
+ 		bottom: -7px;
+		right: 30px;
+		width: 13px;
+		height: 11px;
+		margin: 0;
+		padding: 0;
+		background-position: -13px 0;
+ 		}
+ 	.b-ljtimes-update .i-popup-arrl,
+	.b-ljtimes-suggest .i-popup-arrl {
+ 		top: 50%;
+ 		left: -7px;
+		width: 11px;
+		height: 13px;
+ 		margin: -6px 0 0;
+		padding: 0;
+		background-position: 0 -11px;
+ 		}
+ 	.b-ljtimes-update .i-popup-arrlt,
+	.b-ljtimes-suggest .i-popup-arrlt {
+ 		top: 15px;
+ 		left: -7px;
+		width: 11px;
+		height: 13px;
+		margin: 0;
+		padding: 0;
+		background-position: 0 -11px;
+ 		}
+ 	.b-ljtimes-update .i-popup-arrlb,
+	.b-ljtimes-suggest .i-popup-arrlb {
+ 		bottom: 15px;
+ 		left: -7px;
+		width: 11px;
+		height: 13px;
+		margin: 0;
+		padding: 0;
+		background-position: 0 -11px;
+ 		}
+
 	.i-popup-close {
 		overflow: hidden;
 		display: block;
