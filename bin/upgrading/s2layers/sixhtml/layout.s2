@@ -1052,6 +1052,7 @@ function EntryPage::print_comment_partial(Comment e) {
 }
 
 function EntryPage::print_comment_full(Comment e) {
+     var Page p = get_page();
      "<div class='comment'>\n";
  
      "<div class='comment-userpic'>";
@@ -1088,11 +1089,11 @@ function EntryPage::print_comment_full(Comment e) {
      "<a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
  
      if ($e.parent_url) { print " $sep <a href='$e.parent_url'>$*text_comment_parent</a>"; }
-     if ($e.thread_url) {
+     if (($e.thread_url != "") and (not $e.spam)) {
          print " $sep <a href='$e.thread_url'>$*text_comment_thread</a>";
          $e->print_expand_collapse_links();
      }
-     if ($e.reply_url)  {
+     if (($e.reply_url != "") and ((not $e.spam) or ($p.showspam)))  {
  if (not $e.frozen) {
          print " $sep ";
  }
