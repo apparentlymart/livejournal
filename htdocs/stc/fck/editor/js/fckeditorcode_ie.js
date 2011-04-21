@@ -2894,49 +2894,72 @@ FCKXHtml._AppendNode = function(A, B){
 	if(!B){
 		return false;
 	}
-	switch(B.nodeType){case 1:if(FCKBrowserInfo.IsGecko && B.tagName.toLowerCase() == 'br' && B.parentNode.tagName.toLowerCase() == 'pre'){
-		var C = '\r';
-		if(B == B.parentNode.firstChild){
-			C += '\r';
-		}
-		return FCKXHtml._AppendNode(A, this.XML.createTextNode(C));
-	}if(B.getAttribute('_fckfakelement')){
-		return FCKXHtml._AppendNode(A, FCK.GetRealElement(B));
-	}if(FCKBrowserInfo.IsGecko && (B.hasAttribute('_moz_editor_bogus_node') || B.getAttribute('type') == '_moz')){
-		if(B.nextSibling){
-			return false;
-		} else {
-			B.removeAttribute('_moz_editor_bogus_node');
-			B.removeAttribute('type');
-		}
-	}if(B.getAttribute('_fcktemp')){
-		return false;
-	}var D = B.tagName.toLowerCase();if(FCKBrowserInfo.IsIE){
-		if(B.scopeName && B.scopeName != 'HTML' && B.scopeName != 'FCK'){
-			D = B.scopeName.toLowerCase() + ':' + D;
-		}
-	} else {
-		if(D.StartsWith('fck:')){
-			D = D.Remove(0, 4);
-		}
-	}if(!FCKRegexLib.ElementName.test(D)){
-		return false;
-	}if(B._fckxhtmljob && B._fckxhtmljob == FCKXHtml.CurrentJobNum){
-		return false;
-	}var E = this.XML.createElement(D);FCKXHtml._AppendAttributes(A, B, E, D);B._fckxhtmljob = FCKXHtml.CurrentJobNum;var F = FCKXHtml.TagProcessors[D];if(F){
-		E = F(E, B, A);
-	} else {
-		E = this._AppendChildNodes(E, B, Boolean(FCKListsLib.NonEmptyBlockElements[D]));
-	}if(!E){
-		return false;
-	}A.appendChild(E);break;case 3:if(B.parentNode && B.parentNode.nodeName.IEquals('pre')){
-		return this._AppendTextNode(A, B.nodeValue);
-	}return this._AppendTextNode(A, B.nodeValue.ReplaceNewLineChars(' '));case 8:if(FCKBrowserInfo.IsIE && !B.innerHTML){
-		break;
-	}try{
-		A.appendChild(this.XML.createComment(B.nodeValue));
-	} catch (e){
-	}break;default:A.appendChild(this.XML.createComment("Element not supported - Type: " + B.nodeType + " Name: " + B.nodeName));break;
+	switch(B.nodeType){
+		case 1:
+			if(FCKBrowserInfo.IsGecko && B.tagName.toLowerCase() == 'br' && B.parentNode.tagName.toLowerCase() == 'pre'){
+				var C = '\r';
+				if(B == B.parentNode.firstChild){
+					C += '\r';
+				}
+				return FCKXHtml._AppendNode(A, this.XML.createTextNode(C));
+			}
+			if(B.getAttribute('_fckfakelement')){
+				return FCKXHtml._AppendNode(A, FCK.GetRealElement(B));
+			}
+			if(FCKBrowserInfo.IsGecko && (B.hasAttribute('_moz_editor_bogus_node') || B.getAttribute('type') == '_moz')){
+				if(B.nextSibling){
+					return false;
+				} else {
+					B.removeAttribute('_moz_editor_bogus_node');
+					B.removeAttribute('type');
+				}
+			}
+			if(B.getAttribute('_fcktemp')){
+				return false;
+			}
+			var D = B.tagName.toLowerCase();
+			if(FCKBrowserInfo.IsIE && B.scopeName && B.scopeName.toLowerCase() != 'html' && B.scopeName.toLowerCase() != 'fck'){
+				D = B.scopeName.toLowerCase() + ':' + D;
+			} else {
+				if(D.StartsWith('fck:')){
+					D = D.Remove(0, 4);
+				}
+			}
+			if(!FCKRegexLib.ElementName.test(D)){
+				return false;
+			}
+			if(B._fckxhtmljob && B._fckxhtmljob == FCKXHtml.CurrentJobNum){
+				return false;
+			}
+			var E = this.XML.createElement(D);
+			FCKXHtml._AppendAttributes(A, B, E, D);
+			B._fckxhtmljob = FCKXHtml.CurrentJobNum;
+			var F = FCKXHtml.TagProcessors[D];
+			if(F){
+				E = F(E, B, A);
+			} else {
+				E = this._AppendChildNodes(E, B, Boolean(FCKListsLib.NonEmptyBlockElements[D]));
+			}
+			if(!E){
+				return false;
+			}A.appendChild(E);
+			break;
+		case 3:
+			if(B.parentNode && B.parentNode.nodeName.IEquals('pre')){
+				return this._AppendTextNode(A, B.nodeValue);
+			}
+			return this._AppendTextNode(A, B.nodeValue.ReplaceNewLineChars(' '));
+		case 8:
+			if(FCKBrowserInfo.IsIE && !B.innerHTML){
+				break;
+			}
+			try{
+				A.appendChild(this.XML.createComment(B.nodeValue));
+			} catch (e){}
+			break;
+		default:
+			A.appendChild(this.XML.createComment("Element not supported - Type: " + B.nodeType + " Name: " + B.nodeName));
+			break;
 	}
 	return true;
 };
