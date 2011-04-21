@@ -978,6 +978,7 @@ function print_sidebar_calendar()
 
 function print_sidebar()
 {
+    var Page p = get_page();
     print_sidebar_userpic();
     if ($*sidebar_position_one != "nothing") {
         if ($*sidebar_position_one == "summary") {
@@ -1022,6 +1023,11 @@ function print_sidebar()
         } elseif ($*sidebar_position_four == "calendar") {
             print_sidebar_calendar();
         }
+    }
+    if (viewer_sees_ad_box("s2.vertical.2")) {
+        """<div class="box-vertical2">""";
+        $p->print_ad_box("s2.vertical.2");
+        """</div>""";
     }
 }
 
