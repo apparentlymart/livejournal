@@ -588,11 +588,16 @@ var Page p = get_page();
             print_module_ads($title);
         }
     }
-     if (viewer_sees_ad_box("s2.box.yandex")) {
-            """<div class="box-yandex">""";
-            $p->print_ad_box("s2.box.yandex");
-            """</div>""";
-        }
+    if (viewer_sees_ad_box("s2.vertical.2")) {
+        """<div class="box-vertical2">""";
+        $p->print_ad_box("s2.vertical.2");
+        """</div>""";
+    }
+    if (viewer_sees_ad_box("s2.box.yandex")) {
+        """<div class="box-yandex">""";
+        $p->print_ad_box("s2.box.yandex");
+        """</div>""";
+    }
 }
 
 function Page::lay_sidebar_primary() {
