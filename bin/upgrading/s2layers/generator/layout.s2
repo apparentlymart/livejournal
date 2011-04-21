@@ -1350,6 +1350,7 @@ function EntryPage::print_comment_partial (Comment c) {
     $c->print_expand_collapse_links();
 }
 function EntryPage::print_comment_full (Comment c) {
+    var Page p = get_page();
     var Color background; var Color color;
     if ($c.screened) {
         $background = $*comment_bar_screened_bgcolor;
@@ -1413,28 +1414,30 @@ function EntryPage::print_comment_full (Comment c) {
     print "<div style='margin-left: 5px'>"; $c->print_text(); "</div>";
     print "<div style='margin-top: 3px; font-size: smaller'>";
 
-    "<span class='commentlinks'>";
-    if ($c.frozen) {
-        "(Replies frozen) ";
-    } else {
-        "("; 
-        ###$c->print_reply_link({"linktext" => "Reply to this"}); 
-        if($c.screened == true) {
-            ### if comment screened - show link for unscreen
-            var Link link;
-            $link = $c->get_link("unscreen_to_reply");
-            """<a href="$link.url" title="$link.caption">$link.caption</a>""";
-        } else {
-            ### showing reply link if comment not screened
-            $c->print_reply_link({ "linktext" => $*text_comment_reply });
-        }
+    if ((not $c.spam) or ($p.showspam)) {
+	    "<span class='commentlinks'>";
+	    if ($c.frozen) {
+		"(Replies frozen) ";
+	    } else {
+		"("; 
+		###$c->print_reply_link({"linktext" => "Reply to this"}); 
+		if($c.screened == true) {
+		    ### if comment screened - show link for unscreen
+		    var Link link;
+		    $link = $c->get_link("unscreen_to_reply");
+		    """<a href="$link.url" title="$link.caption">$link.caption</a>""";
+		} else {
+		    ### showing reply link if comment not screened
+		    $c->print_reply_link({ "linktext" => $*text_comment_reply });
+		}
 
-        ") ";
+		") ";
+	    }
+	    "</span>";
     }
-    "</span>";
 
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
-    if ($c.thread_url != "") {
+    if ($c.thread_url != "" and (not $c.spam)) {
         "(<a href='$c.thread_url'>Thread</a>) ";
         $c->print_expand_collapse_links();
     }
