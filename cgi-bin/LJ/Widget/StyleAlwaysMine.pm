@@ -20,16 +20,32 @@ sub render_body {
     if ($u->can_use_stylealwaysmine) {
         $ret .= $class->start_form( action => "$LJ::SITEROOT/tools/setstylemine.bml",
                                     name => "setstyle_form");
-        if ($u->opt_stylealwaysmine) {
-            $ret .= $class->html_hidden( feature => 'off', user => $u->user );
-            $ret .= "<a href='' onclick='document.setstyle_form.submit();return false;'>" .
-                    $class->ml("web.controlstrip.links.styleorigstyle") .
-                    "</a>";
+        if ($LJ::DISABLED{control_strip_new}) {
+            if ($u->opt_stylealwaysmine) {
+                $ret .= $class->html_hidden( feature => 'off', user => $u->user );
+                $ret .= "<a href='' onclick='document.setstyle_form.submit();return false;'>" .
+                        $class->ml("web.controlstrip.links.styleorigstyle") .
+                        "</a>";
+            } else {
+                $ret .= $class->html_hidden( feature => 'on', user => $u->user );
+                $ret .= "<a href='' onclick='document.setstyle_form.submit();return false;'>" .
+                        $class->ml("web.controlstrip.links.stylemystyle") .
+                        "</a>";
+            }
         } else {
-            $ret .= $class->html_hidden( feature => 'on', user => $u->user );
-            $ret .= "<a href='' onclick='document.setstyle_form.submit();return false;'>" .
-                    $class->ml("web.controlstrip.links.stylemystyle") .
-                    "</a>";
+            if ($u->opt_stylealwaysmine) {
+                $ret .= $class->html_hidden( feature => 'off', user => $u->user );
+                $ret .= "<div class=\"w-cs-view-style\">" .
+                        "<label for=\"view-own\"><input type=\"checkbox\" id=\"view-own\" checked=\"checked\" class=\"checkbox\" onchange='document.setstyle_form.submit();'/>" .
+                        $class->ml("web.controlstrip.links.viewownstyle") .
+                        "</label></div>";
+            } else {
+                $ret .= $class->html_hidden( feature => 'on', user => $u->user );
+                $ret .= "<div class=\"w-cs-view-style\">" .
+                        "<label for=\"view-own\"><input type=\"checkbox\" id=\"view-own\" class=\"checkbox\" onchange='document.setstyle_form.submit();'/>" .
+                        $class->ml("web.controlstrip.links.viewownstyle") .
+                        "</label></div>";
+            }
         }
         $ret .= $class->end_form;
     }
