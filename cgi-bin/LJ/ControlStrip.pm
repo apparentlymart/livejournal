@@ -23,6 +23,7 @@ sub render
 
     my $data_remote = {};
     my $data_journal = {
+        user => $journal->{user},
         url => {
             base => $journal->journal_base,
         },
