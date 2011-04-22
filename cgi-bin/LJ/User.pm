@@ -5900,7 +5900,7 @@ sub custom_usericon {
     my ($u) = @_;
 
     my $url = $u->prop('custom_usericon') || '';
-    $url =~ s#http://files.livejournal.com#$LJ::FILEPREFIX#;
+    $url =~ s#^http://files\.livejournal\.com#$LJ::FILEPREFIX#;
     return $url;
 }
 
