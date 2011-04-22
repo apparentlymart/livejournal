@@ -520,7 +520,7 @@ sub trans
             if (substr($current_url, 0, length($journal_base)) ne $journal_base) {
                 my $new_url = $journal_base;
                 if ($host =~ /^(?:users|community)\./) {
-                    $uri =~ s!^/[^/]+/!/!;
+                    $uri =~ s!^/[^/]+!!;
                 }
                 return redir("$journal_base$uri$args_wq");
             }
