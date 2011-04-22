@@ -512,14 +512,18 @@ sub trans
         ## check that request URL is canonical (i.e. it starts with $u->journal_base)
         ## if not, construct canonical URL and redirect there 
         ## (redirect cases: old http://community.lj.com/name URL, upper-case URLs, hyphen/underscore in usernames etc)
-        my $current_url = "http://$host/$uri";
-        my $journal_base = $u->journal_base;
-        if (substr($current_url, 0, length($journal_base)) ne $journal_base) {
-            my $new_url = $journal_base;
-            if ($host =~ /^(?:users|community)\./) {
-                $uri =~ s!^/[^/]+/!!;
+        {
+            ## warning: $uri from outer scope has stripped <user> part from http://users.livejournal.com/<user> URLs
+            my $uri  = LJ::Request->uri; 
+            my $current_url = "http://$host$uri";
+            my $journal_base = $u->journal_base;
+            if (substr($current_url, 0, length($journal_base)) ne $journal_base) {
+                my $new_url = $journal_base;
+                if ($host =~ /^(?:users|community)\./) {
+                    $uri =~ s!^/[^/]+/!/!;
+                }
+                return redir("$journal_base$uri$args_wq");
             }
-            return redir("$journal_base$uri$args_wq");
         }
 
         if ($u->is_community) {
@@ -876,7 +880,7 @@ sub trans
                 return LJ::Request::OK;
             } 
 # end of temporary block            
-            elsif ($uri !~ m!^/(\w{1,15})(/.*)?$!) {
+            elsif ($uri !~ m!^/([\w\-]{1,15})(/.*)?$!) {
                 return LJ::Request::DECLINED if $uri eq "/favicon.ico";
                 my $redir = LJ::run_hook("journal_subdomain_redirect_url",
                                          $host, $uri);
