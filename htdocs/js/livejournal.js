@@ -36,6 +36,9 @@ LiveJournal.initPage = function () {
     // set up various handlers for every page
     LiveJournal.initInboxUpdate();
 
+	//check ljuniq cookie and create if needed
+	LiveJournal.checkLjUniq();
+
     // run other hooks
     LiveJournal.run_hook("page_load");
 };
@@ -203,6 +206,33 @@ LiveJournal.constructUrl = function( base, args ) {
 	}
 
 	return queryStr + queryArr.join( '&' );
+}
+
+/**
+ * Generate a string for ljuniq cookie
+ *
+ * @return {String}
+ */
+LiveJournal.generateLjUniq = function() {
+	var alpha = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+		result = '',
+		i;
+
+	var len = 15
+	for( i = 0; i < len; ++i ) {
+		result += alpha.charAt( Math.floor( Math.random() * ( alpha.length - 1 ) ) );
+	}
+
+	result += ':' + Math.floor( (new Date()) / 1000 );
+	result += ':pgstats' + ( ( Math.random() < 0.05 ) ? '1' : '0' );
+
+	return result;
+}
+
+LiveJournal.checkLjUniq = function() {
+	if( !Cookie( 'ljuniq' ) ) {
+		Cookie( 'ljuniq', LiveJournal.generateLjUniq(), { domain: Site.siteroot.replace( /^https?:\/\/www\./, '' ) } );
+	}
 }
 
 LiveJournal.closeSiteMessage = function(node, e, id)
