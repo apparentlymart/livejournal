@@ -828,7 +828,7 @@ function EntryPage::print_body ()
                                          [ "style_color", "cmtbar#", "$*comment_bar_screened_fgcolor", ],
                                          ]);
 
-    print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
+    print_entry($this, $.entry, null Color, null Color, false);
     print_ebox($.entry);
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
