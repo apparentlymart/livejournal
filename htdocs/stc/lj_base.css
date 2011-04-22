@@ -834,18 +834,29 @@ HTML BODY.logged-out {
 		list-style: none;
 		}
 		.b-auth-openid-form {
-			margin: 20px 0 0;
+			margin: 20px 0 21px;
 			text-align: center;
 			}
-			.b-auth-openid-form LABEL {
-				font-weight: bold;
+			.b-auth-openid-form .b-auth-input-wrapper {
+				position: relative;
 				}
-			.b-auth-openid-input {
-				width: 300px;
-				}
-			.b-auth-input-wrapper SPAN {
-				color:#666;
-				}
+				.b-auth-openid-form LABEL {
+					font-weight: bold;
+					}
+				.b-auth-openid-input {
+					width: 300px;
+					}
+				.b-auth-input-wrapper SPAN {
+					color:#666;
+					}
+				.b-auth-openid-sample {
+					display: block;
+					position: absolute;
+					right: 7px;
+					bottom: -21px;
+					width: 300px;
+					text-align: center;
+					}
 		.b-auth-user-form .b-auth-input-wrapper {
 			display:block;
 			margin:5px 0;
