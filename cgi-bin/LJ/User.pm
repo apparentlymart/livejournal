@@ -5898,7 +5898,10 @@ sub dismissed_page_notices_remove {
 
 sub custom_usericon {
     my ($u) = @_;
-    return $u->prop('custom_usericon') || '';
+
+    my $url = $u->prop('custom_usericon') || '';
+    $url =~ s#http://files.livejournal.com#$LJ::FILEPREFIX#;
+    return $url;
 }
 
 sub set_custom_usericon {
