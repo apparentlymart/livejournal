@@ -1222,7 +1222,8 @@ HTML BODY.logged-out {
 			.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-current-pic,
 			.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-current-pic,
 			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-current-pic,
-			.b-postform-authtype-vkontakte.b-postform-ability-disabled-vkontakte .b-postform-login-services-current-pic {
+			.b-postform-authtype-vkontakte.b-postform-ability-disabled-vkontakte .b-postform-login-services-current-pic,
+			.b-postform-authtype-user.b-postform-ability-disabled-anonymous.b-postform-ability-disabled-user .b-postform-login-services-current-pic {
 				background-image: url(/img/pencil.gif?v=1);
 				}
 			.b-postform-authtype-user .b-postform-login-services-current-pic {
@@ -1293,6 +1294,9 @@ HTML BODY.logged-out {
 			.b-postform-user-cookie .b-postform-login-services-show .b-postform-login-services-livejournal,
 			.b-postform-anonymous-cookie .b-postform-login-services-show .b-postform-login-services-user {
 				display: none;
+				}
+			.b-postform-user-cookie.b-postform-ability-disabled-anonymous.b-postform-ability-disabled-user .b-postform-login-services-show .b-postform-login-services-livejournal {
+				display: block;
 				}
 				BODY .b-postform-login-services-item A:link,
 				BODY .b-postform-login-services-item A:visited {
@@ -1418,7 +1422,8 @@ HTML BODY.logged-out {
 		#js .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-livejournal,
 		#js .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-livejournal,
 		#js .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-livejournal,
-		#js .b-postform-authtype-vkontakte.b-postform-ability-disabled-vkontakte .b-postform-login-livejournal {
+		#js .b-postform-authtype-vkontakte.b-postform-ability-disabled-vkontakte .b-postform-login-livejournal,
+		#js .b-postform-authtype-user.b-postform-user-cookie.b-postform-ability-disabled-anonymous.b-postform-ability-disabled-user .b-postform-login-livejournal {
 			display: block;
 			}
 			#js .b-postform-login-item .b-postform-login-radio,
@@ -1476,6 +1481,10 @@ HTML BODY.logged-out {
 				#js .b-postform-login-opts {
 					display:block;
 					}
+			.b-postform-authtype-user.b-postform-ability-disabled-anonymous.b-postform-ability-disabled-user .b-postform-login-livejournal .b-postform-login-opts-lj,
+			.b-postform-authtype-livejournal.b-postform-ability-disabled-anonymous.b-postform-ability-disabled-user .b-postform-login-livejournal .b-postform-login-opts-lj {
+				display: none;
+				}
 
 
 
