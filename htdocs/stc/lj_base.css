@@ -336,6 +336,7 @@ Must be removed after implementation of Framework! */
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	font-size: 90%;
+	color: #000;
 	}
 	.i-bubble-arrow,
 	.i-bubble-arrow-border {
