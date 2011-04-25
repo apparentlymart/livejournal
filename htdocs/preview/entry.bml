@@ -28,6 +28,8 @@
     }
     $up = $u unless $up;
 
+    return $ML{'.error.no_user'} unless $up and $u;
+
     ### Set up preview variables
     my ($ditemid, $anum, $itemid);
     my %req = ( 'usejournal' => $POST{'usejournal'}, );
