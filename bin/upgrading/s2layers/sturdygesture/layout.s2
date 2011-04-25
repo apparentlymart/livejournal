@@ -786,28 +786,39 @@ function EntryPage::print_comments(Comment[] cs) {
     if (size $cs == 0) { return; }
     print "<div style=\"margin-left: 25px;\">";
     foreach var Comment c ($cs) {
-        var int indent = ($c.depth - 1) * 25;
-        if ($c.spam and not $p.showspam) {
-            """<a name='$c.anchor'></a><div id="$c.dom_id" class="ljcmt_full"><div class="box"><div class="entry">$*text_spam_comment</div></div>""";
-            if ((size $c.replies) > 0) {
-                $this->print_comments($c.replies);
-            }
-        } else {
-            if ($c.full) {
-                $this->print_comment($c);
-            } else {
-                $this->print_comment_partial($c);
-            }
-        }
+        $this->print_comment($c);
+        $this->print_comments($c.replies);
     }
     print "</div>";
 }
 
 function EntryPage::print_comment(Comment c) {
+    var Page p = get_page();
+    """<a name='$c.anchor'></a><div id="$c.dom_id" class="ljcmt_full"><div class="box">
+    <a name="$c.anchor"></a>""";
+
+    if ($c.screened and not $c.full and not viewer_is_owner()) {
+        """<strong>$*text_comment_screened</strong>""";
+    } elseif ($c.deleted) {
+        """<strong>$*text_comment_deleted</strong>""";
+    } elseif (($c.spam) and (not $p.showspam) and (size($c.replies) > 0)) {
+        """<strong>$*text_spam_comment</strong>""";
+    } elseif ($c.full) {
+        $this->print_comment_full($c);
+    } else {
+        $this->print_comment_partial($c);
+    }
+
+    """</div>
+    </div>""";
+}
+
+function EntryPage::print_comment_full(Comment c) {
+    var Page p = get_page();
     var string datetime;
     $datetime = $c->time_display("med_day", "");
 
-    """<a name='$c.anchor'></a><div id="$c.dom_id" class="ljcmt_full"><div class="box"><h3 style="color: $*clr_boxhead_text; background: $*clr_boxhead_back;">""";
+    """<h3 style="color: $*clr_boxhead_text; background: $*clr_boxhead_back;">""";
 
     if ($c.metadata{"poster_ip"}) { print """<div style="float: right; vertical-align: top; font-size: 0.75em;">(""" +
                                           $c.metadata{"poster_ip"} +
@@ -841,12 +852,10 @@ function EntryPage::print_comment(Comment c) {
     """<div class="permalink"><a href="$c.permalink_url">$*text_permalink</a></div>""";
 
     if ($c.parent_url != "") { """<a href="$c.parent_url">$*text_comment_parent</a> - """; }
-    if ($c.thread_url != "") {
-        """<a href="$c.thread_url">$*text_comment_thread</a> - """;
-        var Link expand_link = $c->get_link("expand_comments");
-        if (defined $expand_link) {
-            print $c->expand_link() + " - ";
-        }
+    if ($c.thread_url != "" and (not $c.spam)) {
+        """<a href="$c.thread_url">$*text_comment_thread</a> """;
+        $c->print_expand_collapse_links();
+	""" - """;
     }
     var Link l = new Link;
     foreach var string ls ($c.link_keyseq) {
@@ -864,7 +873,7 @@ function EntryPage::print_comment(Comment c) {
             var Link link;
             $link = $c->get_link("unscreen_to_reply");
             """<a href="$link.url" title="$link.caption">$link.caption</a>"""; 
-        } else {
+        } elseif ((not $c.spam) or ($p.showspam)) {
             ### showing reply link if comment not screened
             $c->print_reply_link({ "linktext" => $*text_comment_reply });
         }
@@ -881,10 +890,6 @@ function EntryPage::print_comment(Comment c) {
     if (not $c.frozen) {
         $c->print_reply_container({"class" => "quickreply"});
     }
-    "</div></div>";
-    if ((size $c.replies) > 0) {
-        $this->print_comments($c.replies);
-    }
 }
 
 function EntryPage::print_comment_partial(Comment c) {
@@ -892,11 +897,10 @@ function EntryPage::print_comment_partial(Comment c) {
     var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
     print """<div class="minicomment" id="$c.dom_id"><a href="$c.permalink_url">$subj</a> - $poster""";
     var Link expand_link = $c->get_link("expand_comments");
-    if ($c.thread_url != "" and defined $expand_link) {
-        " " + $c->expand_link();
+    if ($c.thread_url != "" and (not $c.spam)) {
+        $c->print_expand_collapse_links();
     }
     print """</div>""";
-    $this->print_comments($c.replies);
 }
 
 
