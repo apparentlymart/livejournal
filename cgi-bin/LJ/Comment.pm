@@ -891,10 +891,14 @@ sub visible_to {
     my ($self, $u) = @_;
 
     return 0 unless $self->entry && $self->entry->visible_to($u);
+    
+    # spam comment
+    return 0 if $self->is_spam 
+                && !LJ::Talk::can_unmark_spam($u, $self->journal, $self->entry->poster, $self->poster);
 
     # screened comment
     return 0 if $self->is_screened &&
-                !( ($u && $u->can_manage($self->journal))           # owns the journal
+                !( ($u && $u->can_manage($self->journal))       # owns the journal
                    || LJ::u_equals($u, $self->poster)           # posted the comment
                    || LJ::u_equals($u, $self->entry->poster )); # posted the entry
 
