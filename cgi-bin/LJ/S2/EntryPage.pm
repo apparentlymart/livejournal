@@ -90,6 +90,10 @@ sub EntryPage
                             comment.mark.spam.title
                             comment.mark.spam.subject
                             comment.mark.spam.button
+                            comment.mark.spam2
+                            comment.mark.spam2.title
+                            comment.mark.spam2.subject
+                            comment.mark.spam2.button
                             comment.delete/)
     }
 
