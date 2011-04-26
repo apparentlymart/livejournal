@@ -1330,7 +1330,7 @@ function EntryPage::print_comment (Comment c) {
             """<div style='margin-left: ${indent}px;margin-top:5px;' id="$c.dom_id"><strong>$*text_comment_screened</strong>""";
         } elseif ($c.deleted) {
             """<div style='margin-left: ${indent}px;margin-top:5px;' id="$c.dom_id"><strong>$*text_comment_deleted</strong>""";
-        } elseif ($c.spam and not $p.showspam and ((size $c.replies) > 0)) {
+        } elseif (($c.spam) and (not $p.showspam) and (not $c.can_marked_as_spam) and (size($c.replies) > 0)) {
             """<div style='margin-left: ${indent}px;margin-top:5px;' id="$c.dom_id">\n<strong>$*text_spam_comment\n</strong>""";
         } elseif ($c.full) {
             """<div style='margin-left: ${indent}px;margin-top:5px;' id="$c.dom_id" class="ljcmt_full">\n""";
