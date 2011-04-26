@@ -1024,7 +1024,7 @@ function EntryPage::print_comment(Comment c) {
         """<div class="comment collapsed-comment"><div class="comment-footer"><strong>$*text_comment_screened</strong></div></div>""";
     } elseif ($c.deleted) {
         """<div class="comment collapsed-comment"><div class="comment-footer"><strong>$*text_comment_deleted</strong></div></div>""";
-    } elseif (($c.spam) and (not $p.showspam) and (size($c.replies) > 0)) {
+    } elseif (($c.spam) and (not $p.showspam) and (not $c.can_marked_as_spam) and (size($c.replies) > 0)) {
         """<div class="comment collapsed-comment"><div class="comment-footer"><strong>$*text_spam_comment</strong></div></div>""";
     } elseif ($c.full) {
         $this->print_comment_full($c);
