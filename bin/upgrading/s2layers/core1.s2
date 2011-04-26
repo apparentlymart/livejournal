@@ -394,6 +394,7 @@ class Comment extends EntryLite
     var readonly bool comment_posted "True if comment was just posted by the current user.";
     var readonly bool edited "True if the comment has been edited.";
     var readonly bool spam "This is spam message.";
+    var readonly bool can_marked_as_spam "Comments can be marked as spam";
 
     var readonly DateTime time_remote "The local time the comment appeared, in the remote user's (reader's) timezone.  Or undef if no remote user, or remote user hasn't set their timezone.";
     var readonly DateTime time_poster "The local time the comment appeared, in the commenter's timezone.  Or undef if anonymous comment, or commenter's timezone is unknown.";

@@ -500,6 +500,9 @@ body<=
         is_s1     => 1,
     };
 
+    my $showspam = $GET{mode} eq 'showspam' && LJ::is_enabled('spam_button')
+                   && LJ::Talk::can_unmark_spam($remote, $u, $up);
+
     my $output = {};
 
     my $comments = LJ::Talk::get_thread_html(
@@ -573,7 +576,7 @@ body<=
 	    my $readlink_text = BML::ml("talk.commentsread.counted", { replycount => $replycount });
 	    my $comments_count = BML::ml("talk.comments.counted", { replycount => $replycount });
 	
-	    if (($dthread && $pages == 1) || ($GET{mode} eq 'showspam')) {
+	    if (($dthread && $pages == 1) || $showspam) {
             my $readurl = LJ::Talk::talkargs($talkurl, $stylemine, $formatlight);
             $readlink = "(<a href='$readurl#comments'>$readlink_text</a>)";
         } elsif ($replycount > 0) {
@@ -587,8 +590,8 @@ body<=
         my $spam_counter = $entry->prop('spam_counter') || 0;
         
         my $readspamlink = '';
-        if ($remote && $spam_counter > 0 && ($remote->can_manage($u) || $remote->can_moderate($u))) {
-            if ($GET{mode} eq 'showspam') {
+        if ($spam_counter > 0 && LJ::Talk::can_unmark_spam($remote, $u, $up)) {
+            if ($showspam) {
                 $readspamlink = "(" . BML::ml('talk.hidespam', { spam_counter => $spam_counter }) . ")";
             } else {
                 $readspamlink = "(<a href='$showspamurl'>" . BML::ml('talk.showspam', { spam_counter => $spam_counter }) . "</a>)";
@@ -703,7 +706,7 @@ body<=
                 my $args = BML::get_query_string;
                 $args = '?' . $args if $args;
                 $ret .= LJ::html_hidden( returnto => $talkurl . $args );
-                if (LJ::is_enabled('spam_button') && $GET{mode} eq 'showspam') {
+                if ($showspam) {
                     $ret .= LJ::html_select(
                         { 'name' => 'mode' },
                         '' => $ML{'.talkmulti.please'},

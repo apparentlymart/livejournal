@@ -239,6 +239,7 @@ sub EntryPage
                 'depth' => $depth,
                 'parent_url' => $par_url,
                 'spam' => $com->{'state'} eq "B" ? 1 : 0,
+                'can_marked_as_spam' => LJ::Talk::can_marked_as_spam($remote, $u, $entry->poster, $poster),
                 'screened' => $com->{'state'} eq "S" ? 1 : 0,
                 'frozen' => $com->{'state'} eq "F" || !$entry->posting_comments_allowed ? 1 : 0,
                 'deleted' => $com->{'state'} eq "D" ? 1 : 0,
@@ -504,7 +505,7 @@ sub EntryPage_entry
 
     my $comments = CommentInfo({
         'read_url' => $readurl,
-        'read_spam_url' => LJ::Talk::can_unmark_spam($remote, $u, $pu) ? $readspamurl : '',
+        'read_spam_url' => LJ::Talk::can_marked_as_spam($remote, $u, $pu) ? $readspamurl : '',
         'spam_counter' => $entry->prop('spam_counter') || 0,
         'post_url' => $posturl,
         'count' => $replycount,

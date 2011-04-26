@@ -378,19 +378,30 @@ sub can_unfreeze {
 
 sub can_mark_spam {
     my ($remote, $u, $up, $userpost) = @_;
+    return 0 if $LJ::DISABLED{'spam_button'};
     return 0 unless $remote;
-    if ($userpost) {
-        my $comment_owner = LJ::load_user(ref($userpost) ? $userpost->{'user'} : $userpost);
-        return 0 if $comment_owner && $remote->{'user'} eq $comment_owner->{'user'}; ## Remote user is owner of this comment
-        return 0 if $comment_owner && $comment_owner->can_manage($u);                ## Poster is a maintainer too
-    }
+    return 1 if $remote->{'user'} eq (ref $up ? $up->{'user'} : $up);
     return $remote->can_manage($u);
 }
 
 sub can_unmark_spam {
     my ($remote, $u, $up, $userpost) = @_;
+    return 0 if $LJ::DISABLED{'spam_button'};
     return 0 unless $remote;
-    return $remote->can_manage($u);
+    return 1 if $remote->can_moderate($u);
+    return LJ::Talk::can_mark_spam($remote, $u, $up, $userpost);
+}
+
+sub can_marked_as_spam {
+    my ($remote, $u, $up, $userpost) = @_;
+    return 0 if $LJ::DISABLED{'spam_button'};
+    return 0 unless $remote;    ## Viewer is anonymous
+    if ($userpost) {
+        my $comment_owner = LJ::load_user(ref($userpost) ? $userpost->{'user'} : $userpost);
+        return 0 if $comment_owner && $remote->{'user'} eq $comment_owner->{'user'}; ## Remote user is owner of this comment
+        return 0 if $comment_owner && LJ::Talk::can_unmark_spam($comment_owner, $u); ## Poster is a maintainer too
+    }
+    return LJ::Talk::can_mark_spam($remote, $u, $up);
 }
 
 # <LJFUNC>
@@ -813,6 +824,12 @@ sub unspam_comment {
     return undef unless LJ::isu($u);
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
+    
+    my $new_state = 'A';    
+    my $screening = LJ::Talk::screening_level( $u, $itemid ); 
+    if ($screening eq 'A') {
+        $new_state = 'S';
+    }
 
     my @batch = map { int $_ } @jtalkids;
     my $in = join(',', @batch);
@@ -823,7 +840,7 @@ sub unspam_comment {
 
     LJ::run_hooks('report_cmt_update', $userid, \@batch);
     my $updated = $u->talk2_do(nodetype => "L", nodeid => $itemid,
-                               sql =>   "UPDATE talk2 SET state='A' ".
+                               sql =>   "UPDATE talk2 SET state='$new_state' ".
                                         "WHERE journalid=$userid AND jtalkid IN ($in) ".
                                         "AND nodetype='L' AND nodeid=$itemid ".
                                         "AND state='B'");
@@ -840,7 +857,8 @@ sub unspam_comment {
             $spam_counter = $spam_counter - $updated;
             $entry->set_prop('spam_counter', $spam_counter);
         }
-        LJ::replycount_do($u, $itemid, "incr", $updated);
+        LJ::replycount_do($u, $itemid, "incr", $updated)
+            if $new_state eq 'A';
         my $dbcm = LJ::get_cluster_master($u);
         my $hasspamed = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 " .
                                                  "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='B'");
@@ -2356,8 +2374,8 @@ sub get_thread_html
         up          => $up,
         viewall     => $viewall,
         init_comobj => 0,
-        showspam    => LJ::is_enabled('spam_button') && $input->{mode} eq 'showspam' && !$input->{from_rpc} &&
-                       $remote && ($remote->can_manage($u) || $remote->can_moderate($u)),
+        showspam    => $input->{mode} eq 'showspam' && LJ::is_enabled('spam_button')
+                       && LJ::Talk::can_unmark_spam($remote, $u, $up) && !$input->{from_rpc},
         expand_all  => 0,
     };
 
@@ -2601,13 +2619,13 @@ sub get_thread_html
                              "</a>";
                 }
 
-                if ($post->{'state'} ne 'B' && LJ::is_enabled('spam_button') && $userpost && LJ::Talk::can_mark_spam($remote, $u, $up, $userpost)) {
+                if ($post->{'state'} ne 'B' && LJ::Talk::can_marked_as_spam($remote, $u, $up, $userpost)) {
                     $text .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid&spam=1' rel='nofollow'>" .
                              LJ::img("btn_spam", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
                 }
 
-                if ($post->{'state'} eq 'B' && LJ::is_enabled('spam_button') && LJ::Talk::can_unmark_spam($remote, $u, $up, $userpost)) {
+                if ($post->{'state'} eq 'B' && LJ::Talk::can_unmark_spam($remote, $u, $up, $userpost)) {
                     $text .= "<a href='$LJ::SITEROOT/spamcomment.bml?mode=unspam&amp;${jargent}talkid=$dtid' rel='nofollow'>" .
                              LJ::img("btn_unspam", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
@@ -2738,10 +2756,6 @@ sub get_thread_html
                             if ($post->{state} eq 'S') {
                                 # show unscreen to reply link id comment screened
                                 $text .= "(<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . BML::ml('talk.unscreentoreply') . "</a>) ";
-                            }
-                            elsif ($post->{state} eq 'B') {
-                                # show unspam to reply link id comment spamed
-                                #$text .= "(<a href='$LJ::SITEROOT/spamcomment.bml?mode=unspam&amp;${jargent}talkid=$dtid'>" . BML::ml('talk.unspamtoreply') . "</a>) ";
                             }
                             else {
                                 $text .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, BML::ml('talk.replytothis'), $replyurl) .  ") ";
