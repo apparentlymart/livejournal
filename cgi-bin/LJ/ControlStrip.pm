@@ -86,6 +86,8 @@ sub render
         $data_remote->{display}      = LJ::ljuser($remote);
         $data_remote->{sessid}       = ($remote->session ? $remote->{_session}->{sessid} : undef);
         $data_remote->{is_paid}      = $remote->in_class('paid') || $remote->in_class('sponsored');
+        $data_remote->{is_personal}  = ($remote->is_personal() ? 1 : 0); 
+        $data_remote->{is_identity}  = ($remote->is_identity() ? 1 : 0);
 
         if ($remote->{defaultpicid}) {
             $data_remote->{userpic} = {
