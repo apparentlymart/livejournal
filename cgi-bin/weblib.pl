@@ -1318,10 +1318,10 @@ sub res_includes {
     # find current journal
     my $journal_base = '';
     my $journal = '';
+    my $ju;
     if (LJ::Request->is_inited) {
         my $journalid = LJ::Request->notes('journalid');
 
-        my $ju;
         $ju = LJ::load_userid($journalid) if $journalid;
 
         if ($ju) {
@@ -1347,6 +1347,9 @@ sub res_includes {
     # esn ajax enabled?
     my $esn_async = LJ::conf_test($LJ::DISABLED{esn_ajax}) ? 0 : 1;
 
+    # remote is maintainer in current journal
+    my $remote_is_maintainer = ($remote && $remote->can_manage($ju)) ? 1 : 0;
+
     my $default_copyright = $remote ? ($remote->prop("default_copyright") || 'P') : 'P';
 
     my $ljentry = LJ::Request->notes('ljentry') || ''; # url
@@ -1360,6 +1363,7 @@ sub res_includes {
                 has_remote => $hasremote,
                 remote_can_track_threads => $remote && $remote->get_cap('track_thread'),
                 remote_is_suspended => $remote_is_suspended,
+                remote_is_maintainer => $remote_is_maintainer,
                 ctx_popup => $ctxpopup,
                 inbox_update_poll => $inbox_update_poll,
                 media_embed_enabled => $embeds_enabled,
