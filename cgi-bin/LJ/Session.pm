@@ -624,7 +624,7 @@ sub session_from_cookies {
     my $sessobj;
 
     my $host = LJ::Request->header_in("Host");
-    unless ($host =~ /\.$LJ::DOMAIN$/) { # foreign domain case
+    unless ($host =~ /\.$LJ::DOMAIN(:\d+)?$/) { # foreign domain case
         return LJ::Session->session_from_ljpta_cookie(\%getopts, @{ $BML::COOKIE{'ljpta[]'} || [] });
     }
 
