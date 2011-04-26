@@ -1227,7 +1227,7 @@ function Page::print_entry(Entry e) {
 }
 function EntryPage::print_comment(Comment c) {
     var Page p = get_page();
-    if ($c.spam and not $p.showspam and (size $c.replies) > 0) {
+    if (($c.spam) and (not $p.showspam) and (not $c.can_marked_as_spam) and (size($c.replies) > 0)) {
         """<strong>$*text_spam_comment</strong>""";
     } elseif ($c.spam and not $p.showspam and (size $c.replies) < 1) {
         # spam comment w/o children

@@ -869,7 +869,7 @@ function EntryPage::print_comment (Comment c) {
         """<strong>$*text_comment_screened</strong>""";
     } elseif ($c.deleted) {
         """<strong>$*text_comment_deleted</strong>""";
-    } elseif (($c.spam) and (not $p.showspam) and (size($c.replies) > 0)) {
+    } elseif (($c.spam) and (not $p.showspam) and (not $c.can_marked_as_spam) and (size($c.replies) > 0)) {
         """<strong>$*text_spam_comment</strong>""";
     } elseif ($c.full) {
         $this->print_comment_full($c);
