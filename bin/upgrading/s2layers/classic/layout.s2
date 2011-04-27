@@ -549,9 +549,16 @@ $this->print_linklist();
     }
     if (viewer_sees_vbox()) {
         "</td>";
-        """<td valign="top" align="right" width="20%"><div style="margin-right: 10px;">""";
+        """<td valign="top" align="right" width="20%">""";
+        """<div style="margin-right: 10px;">""";
         $this->print_vbox();
-        "</div></td></tr></table>";
+        "</div>";
+        if (viewer_sees_ad_box("s2.vertical.2")) {
+            """<div class="box-vertical2" style="margin: 10px 10px 0 0;">""";
+            $this->print_ad_box("s2.vertical.2");
+            """</div>""";
+        }
+        "</td></tr></table>";
     }
     "\n</body>\n</html>";
 }
