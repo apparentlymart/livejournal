@@ -432,12 +432,13 @@ function print_sidebar_navigation() {
 	    println """<tr><th class="sidebar_box_header">""";
 	    print safe $*text_sidebar_navigation;
 	    println """</th></tr><tr><td class="sidebar_box_contents">""";
-	    if ($page->lay_sidebar_view_navigation() != "") {
-            $navigation = $navigation + "<tr><td>&nbsp;</td></tr>";
-            $navigation = $navigation + $page->lay_sidebar_view_navigation();
-        }
+	    # if ($page->lay_sidebar_view_navigation() != "") {
+            # $navigation = $navigation + "<tr><td>&nbsp;</td></tr>";
+            # $navigation = $navigation + $page->lay_sidebar_view_navigation();
+        # }
 	    print safe $navigation;
 		#this method returns empty string of print links' list
+		$page->lay_sidebar_view_navigation();
 	    println """</td></tr></table><br />""";
     print safe "</table>";
 }
@@ -1088,6 +1089,7 @@ function RecentPage::lay_sidebar_view_navigation() : string {
             $return = $return + """<tr><td>$*text_sidebar_link_separator<a href="$.nav.backward_url">Previous Page</a></td></tr>""";
         }
     }
+    print safe "<tr><td>&nbsp;</td></tr>" + $return;
     return $return;
 }
 
@@ -1415,6 +1417,7 @@ function YearPage::lay_sidebar_view_navigation() : string {
             $return = """$return<tr><td>$*text_sidebar_link_separator<a href="$y.url">$y.year</a></td></tr>""";
         }
     }
+    print safe "<tr><td>&nbsp;</td></tr>" + $return;
     return $return;
 }
 
@@ -1467,6 +1470,7 @@ function MonthPage::lay_sidebar_view_navigation() : string {
     var string return;
     if ($.prev_url != "") { $return = """<tr><td>$*text_sidebar_link_separator<a href="$.prev_url">Previous Month</a></td></tr>"""; }
     if ($.next_url != "") { $return = """$return<tr><td>$*text_sidebar_link_separator<a href="$.next_url">Next Month</a></td></tr>"""; }
+    print safe "<tr><td>&nbsp;</td></tr>" + $return;
     return $return;
 }
 function MonthPage::print_body {
@@ -1527,6 +1531,7 @@ function DayPage::lay_sidebar_view_navigation() : string {
     if ($.next_url != "") {
         $return = """$return<tr><td>$*text_sidebar_link_separator<a href="$.next_url">$*text_day_next</a></td></tr>""";
     }
+    print safe "<tr><td>&nbsp;</td></tr>" + $return;
     return $return;
 }
 
