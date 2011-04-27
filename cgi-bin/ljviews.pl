@@ -1671,12 +1671,22 @@ sub create_view_friends
     my $group;
     my $common_filter = 1;
 
+    my $events_date = 0;
+    my $pathextra = $opts->{pathextra};
+    if ($pathextra && $pathextra =~ m/^\/(\d\d\d\d)\/(\d\d)\/(\d\d)\/?$/) {
+        $events_date = LJ::TimeUtil->mysqldate_to_time("$1-$2-$3");
+        $pathextra = '';
+    }
+    elsif ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!) {
+        $events_date = LJ::TimeUtil->mysqldate_to_time("$1-$2-$3");
+    }
+
     if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {
         $filter = $get->{'filter'};
         $common_filter = 0;
     } else {
-        if ($opts->{'pathextra'}) {
-            $group = $opts->{'pathextra'};
+        if ($pathextra) {
+            $group = $pathextra;
             $group =~ s!^/!!;
             $group =~ s!/$!!;
             if ($group) { $group = LJ::durl($group); $common_filter = 0;}
@@ -1691,10 +1701,6 @@ sub create_view_friends
             return 1;
         }
     }
-
-    my $events_date   = ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!)
-                        ? LJ::TimeUtil->mysqldate_to_time("$1-$2-$3")
-                        : 0;
 
     ## load the itemids
     my %friends;

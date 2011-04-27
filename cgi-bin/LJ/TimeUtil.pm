@@ -74,6 +74,7 @@ sub mysqldate_to_time {
 
     # then fix the day up, if so.
     my $max_day = LJ::TimeUtil->days_in_month($mon, $y);
+    return undef unless defined $max_day;
     $d = $max_day if $d > $max_day;
     return $calc->();
 }

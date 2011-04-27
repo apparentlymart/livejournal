@@ -90,9 +90,16 @@ sub FriendsPage
     my $filter;
     my $group_name    = '';
     my $common_filter = 1;
-    my $events_date   = ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!)
-                        ? LJ::TimeUtil->mysqldate_to_time("$1-$2-$3")
-                        : 0;
+
+    my $events_date = 0;
+    my $pathextra = $opts->{pathextra};
+    if ($pathextra && $pathextra =~ m/^\/(\d\d\d\d)\/(\d\d)\/(\d\d)\/?$/) {
+        $events_date = LJ::TimeUtil->mysqldate_to_time("$1-$2-$3");
+        $pathextra = '';
+    }
+    elsif ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!) {
+        $events_date = LJ::TimeUtil->mysqldate_to_time("$1-$2-$3");
+    }
 
     if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {
         $filter = $get->{'filter'};
@@ -102,8 +109,8 @@ sub FriendsPage
     } else {
 
         # Show group or day log
-        if ($opts->{'pathextra'}) {
-            $group_name = $opts->{'pathextra'};
+        if ($pathextra) {
+            $group_name = $pathextra;
             $group_name =~ s!^/!!;
             $group_name =~ s!/$!!;
 
