@@ -466,14 +466,15 @@ $userpic
 
     if (viewer_sees_vbox()) {
         """<div class="box" align="center" style="padding: 0.5em 0;">""";
+        """<div class="box-vertical1">""";
         $this->print_vbox();
-        "</div>";
-    }
-
-    if (viewer_sees_ad_box("s2.vertical.2")) {
-        """<div class="box box-vertical2" style="padding: 0.5em;text-align:center;">""";
-        $p->print_ad_box("s2.vertical.2");
         """</div>""";
+        if (viewer_sees_ad_box("s2.vertical.2")) {
+            """<div class="box-vertical2" style="margin-top: 10px;">""";
+            $this->print_ad_box("s2.vertical.2");
+            """</div>""";
+        }
+        "</div>";
     }
 
     "</td>";

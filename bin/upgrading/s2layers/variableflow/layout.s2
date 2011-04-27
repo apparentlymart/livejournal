@@ -388,8 +388,14 @@ if (viewer_sees_hbox_top()) {
 }
 if (viewer_sees_vbox()) {
     "<div style='float: right; margin-right: 10px; position: relative; z-index: 15;'>";
+    """<div class="box-vertical1">""";
     $this->print_vbox();
-    "</div>";
+    """</div>""";
+    if (viewer_sees_ad_box("s2.vertical.2")) {
+        """<div class="box-vertical2" style="margin-top: 10px;">""";
+        $this->print_ad_box("s2.vertical.2");
+        """</div>""";
+    }    "</div>";
 }
 """
 <div id="page">
@@ -1154,7 +1160,7 @@ float: right;
 """; css_rule_if_length("max-width", $*adv_entry_max_width);
 """  margin-left: auto;
   margin-right: auto;
-  clear: both;
+  clear: left;
 }
 #commentform table, #commentform textarea {
 width: 100%;
