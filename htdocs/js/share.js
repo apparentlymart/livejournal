@@ -91,7 +91,7 @@ var template = {
 				'<div class="b-sharethis-head">{title}</div>' +
 				'<div class="b-sharethis-services">',
 	//here we take values from an object made from service object. Availible vars: name, url, title.
-	item: 			'<span class="b-sharethis-{name}"><a href="{url}" data-service={name} >{title}</a></span>',
+	item: 			'<span class="b-sharethis-{name}"><a href="{url}" data-service={name}>{title}</a></span>',
 	//here we take values from global_options.ml object
 	end: 		'</div>' +
 			'</div>'
@@ -126,7 +126,7 @@ var default_options = {
 			title: 'Digg', bindLink: 'http://digg.com/submit?url={url}', openInTab: true
 		},
 		email: {
-			title: 'E-mail', bindLink: 'http://api.addthis.com/oexchange/0.8/forward/email/offer?username=internal&url={url}', height: 600
+			title: 'E-mail', bindLink: 'http://api.addthis.com/oexchange/0.8/forward/email/offer?username=internal&url={url}&title={title}', height: 600
 		},
 		tumblr: {
 			title: 'Tumblr', bindLink: 'http://www.tumblr.com/share?v=3&u={url}'

@@ -142,23 +142,33 @@ SHARETHIS_ary.findByUrl = function(url)
 
 jQuery(document).click(function(e)
 {
-	// Share in Facebook
 	var a = e.target,
-		href = a.href;
-	if (href) {
+		href = a.href,
+		args;
+	if (href && !a.shareClickIgnore) {
 		if (href.indexOf('http://www.facebook.com/sharer.php') === 0) {
-			a.setAttribute('st_dest', 'facebook.com');
-			SHARETHIS_ary.findByUrl(decodeURIComponent(LiveJournal.parseGetArgs(href).u)).chicklet(e);
-			//else? window.open(href, 'sharer', 'toolbar=0,status=0,width=626,height=436');
+			LJShare.entry({url: decodeURIComponent(LiveJournal.parseGetArgs(href).u)})
+				.attach(a, "facebook");
+			a.shareClickIgnore = true;
+			jQuery(a).click();
 			e.preventDefault();
-		} else if (href.indexOf(Site.siteroot + '/share/twitter.bml') === 0) {
-			a.setAttribute('st_dest', 'twitter.com');
-			SHARETHIS_ary.findByUrl(decodeURIComponent(LiveJournal.parseGetArgs(href).u)).chicklet(e);
-			//else? window.open(href, 'sharer', 'toolbar=0,status=0,width=430,height=220');
+		} else if (href.indexOf("http://twitter.com/share") === 0) {
+			args = LiveJournal.parseGetArgs(href);
+			LJShare.entry({
+				url: decodeURIComponent(args.url),
+				title: decodeURIComponent(args.text)
+			}).attach(a, "twitter");
+			a.shareClickIgnore = true;
+			jQuery(a).click();
 			e.preventDefault();
-		} else if (href.indexOf(Site.siteroot + '/tools/tellafriend.bml') === 0) {
-			a.setAttribute('st_page', 'send');
-			SHARETHIS_ary.findByUrl(decodeURIComponent(LiveJournal.parseGetArgs(href).u)).popup(e);
+		} else if (href.indexOf("http://api.addthis.com/oexchange/0.8/forward/email") === 0) {
+			args = LiveJournal.parseGetArgs(href);
+			LJShare.entry({
+				url: decodeURIComponent(args.url),
+				title: decodeURIComponent(args.title)
+			}).attach(a, "email");
+			a.shareClickIgnore = true;
+			jQuery(a).click();
 			e.preventDefault();
 		}
 	}
