@@ -62,14 +62,6 @@ comment.mark.spam.subject=All comments of this author will be deleted and we wil
 
 comment.mark.spam.button=OK
  
-comment.mark.spam2=Mark this comment as spam
-
-comment.mark.spam2.title=Do you really want to mark comment as a spam?
-
-comment.mark.spam2.subject=All comments of this author will be deleted.
-
-comment.mark.spam2.button=OK
-
 community.election.owner.election.link=The owner of the [[community]] community is not selected yet. You can <a [[href]]>vote for owner here</a>.
 
 community.members.maintainer.remove.email_html<<
@@ -6212,6 +6204,8 @@ web.controlstrip.links.viewfriendspage=View my Friends Page
 
 web.controlstrip.links.viewfriendspage2|staleness=1
 web.controlstrip.links.viewfriendspage2=Friends Page
+
+web.controlstrip.links.upgrade=Upgrade Account
 
 web.controlstrip.links.watchcomm=Watch this community
 
