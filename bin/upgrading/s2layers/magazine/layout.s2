@@ -495,7 +495,14 @@ function Page::print () {
 
     if (viewer_sees_vbox()) {
         """<div style="float: right;">""";
-        $this->print_vbox();
+        """<div class="box-vertical1">""";
+          $this->print_vbox();
+          """</div>""";
+          if (viewer_sees_ad_box("s2.vertical.2")) {
+              """<div class="box-vertical2" style="margin-top: 10px;">""";
+              $this->print_ad_box("s2.vertical.2");
+              """</div>""";
+          }
         "</div>";
         """<div style="width: 75%;">""";
     }

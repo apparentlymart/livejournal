@@ -455,7 +455,14 @@ print safe """
     "</td>";
     """<td valign="top" align="right" width="20%">""";
     """<div style="margin-right: 10px;">""";
-    $this->print_vbox();
+    """<div class="box-vertical1">""";
+      $this->print_vbox();
+      """</div>""";
+      if (viewer_sees_ad_box("s2.vertical.2")) {
+          """<div class="box-vertical2" style="margin-top: 10px;">""";
+          $this->print_ad_box("s2.vertical.2");
+          """</div>""";
+      }
     "</div>";
   }
   if (viewer_sees_vbox() or viewer_sees_hbox_top() or viewer_sees_hbox_bottom()) {
