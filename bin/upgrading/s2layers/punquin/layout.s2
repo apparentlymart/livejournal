@@ -423,17 +423,17 @@ function print_sidebar(Page p) {
     # End Table
 
     if (viewer_sees_vbox()) {
-        "<p>";
+        """<div class="box-vertical1">""";
         $p->print_vbox();
-        "</p>";
+        """</div>""";
+        if (viewer_sees_ad_box("s2.vertical.2")) {
+            """<div class="box-vertical2" style="margin-top: 10px;">""";
+            $p->print_ad_box("s2.vertical.2");
+            """</div>""";
+        }
     }
     "</td></tr></table>\n<!-- End Main Sidebar -->";
 
-    if (viewer_sees_ad_box("s2.vertical.2")) {
-        """<div class="box-vertical2">""";
-        $p->print_ad_box("s2.vertical.2");
-        """</div>""";
-    }
 }
 
 function print_gotop (Page p)

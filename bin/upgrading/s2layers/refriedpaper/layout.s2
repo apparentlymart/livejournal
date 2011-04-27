@@ -1467,7 +1467,7 @@ if($*sidebar_position == "left") {
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
 """;
 print_sidebar();
-if (viewer_sees_ad_box("s2.vertical.2")) {
+if (viewer_sees_vbox() and viewer_sees_ad_box("s2.vertical.2")) {
     """<tr><td><div class="box-vertical2" style="padding: 8px 0 0 8px;">""";
     $this->print_ad_box("s2.vertical.2");
     """</div></td></tr>""";
@@ -1518,7 +1518,7 @@ if($*sidebar_position == "right") {
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
 """;
 print_sidebar();
-if (viewer_sees_ad_box("s2.vertical.2")) {
+if (viewer_sees_vbox() and viewer_sees_ad_box("s2.vertical.2")) {
     """<tr><td><div class="box-vertical2" style="padding: 8px 0 0 8px;">""";
     $this->print_ad_box("s2.vertical.2");
     """</div></td></tr>""";

@@ -250,6 +250,7 @@ function prop_init() {
                     [ "calendar" ],
                     [ "links", $*text_links ],
                     [ "syndicate", $*text_syndicate ],
+                    [ "ads1", "" ],
                     [ "poweredby" ],
                 ];
             } else {
@@ -257,7 +258,8 @@ function prop_init() {
                     [ "userprofile", "", "0", "1" ],
                     [ "viewlinks", "" ],
                     [ "calendar" ],
-                    [ "ads", "" ],
+                    [ "ads1", "" ],
+                    [ "ads2", "" ],
                     [ "links", $*text_links ],
                     [ "tags", $*text_tags_section_header ],
                     [ "pagesummary", $*text_page_summary ],
@@ -269,7 +271,7 @@ function prop_init() {
 
         if (not $custom_secondary) {
             $*sidebar_secondary = [
-                [ "ads", "" ],
+                [ "ads2", "" ],
                 [ "tags", $*text_tags_section_header ],
                 [ "pagesummary", $*text_page_summary ],
             ];
@@ -540,10 +542,22 @@ function print_module_links(string title) {
         close_module();
     }
 }
-function print_module_ads(string title) {
+function print_module_ads1(string title) {
     var Page p = get_page();
     open_module("ads", $title, "");
+    """<div class="box-vertical1">""";
     $p->print_vbox();
+    """</div>""";
+    close_module();
+}
+function print_module_ads2(string title) {
+    var Page p = get_page();
+    open_module("ads", $title, "");
+    if (viewer_sees_ad_box("s2.vertical.2")) {
+        """<div class="box-vertical2" style="margin-top: 10px;">""";
+        $p->print_ad_box("s2.vertical.2");
+        """</div>""";
+    }
     close_module();
 }
 
@@ -584,14 +598,12 @@ var Page p = get_page();
         elseif ($module == "links") {
             print_module_links($title);
         }
-        elseif ($module == "ads") {
-            print_module_ads($title);
+        elseif ($module == "ads1") {
+            print_module_ads1($title);
         }
-    }
-    if (viewer_sees_ad_box("s2.vertical.2")) {
-        """<div class="box-vertical2">""";
-        $p->print_ad_box("s2.vertical.2");
-        """</div>""";
+        elseif ($module == "ads2") {
+            print_module_ads2($title);
+        }
     }
     if (viewer_sees_ad_box("s2.box.yandex")) {
         """<div class="box-yandex">""";
