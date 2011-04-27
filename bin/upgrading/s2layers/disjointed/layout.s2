@@ -1503,7 +1503,7 @@ function print_sidebar() {
     print_sidebar_summary();
   }
   
-  if (viewer_sees_ad_box("s2.vertical.2")) {
+  if (viewer_sees_vbox() and viewer_sees_ad_box("s2.vertical.2")) {
     """<div class="box-vertical2" style="margin-top: 2em;">""";
     $p->print_ad_box("s2.vertical.2");
     """</div>""";
@@ -1825,7 +1825,7 @@ server_sig();
 """;
 } else {
 if (viewer_sees_vbox()) {
-    """<td width="20%" valign="top"><div style="float: right;">""";
+    """<td width="20%" valign="top"><div class="box-vertical1" style="float: right;">""";
     $this->print_vbox();
     """</div></td>""";
 }

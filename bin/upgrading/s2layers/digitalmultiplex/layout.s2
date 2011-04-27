@@ -1029,7 +1029,14 @@ function Page::print() {
     println "</td></tr></table></td>";
     if (viewer_sees_vbox()) {
         println """<td id="adbar" valign="top">""";
+        """<div class="box-vertical1">""";
         $this->print_vbox();
+        """</div>""";
+        if (viewer_sees_ad_box("s2.vertical.2")) {
+            """<div class="box-vertical2" style="margin-top: 10px;">""";
+            $this->print_ad_box("s2.vertical.2");
+            """</div>""";
+        }
         println "</td>";
     }
     "</tr>";
