@@ -1849,7 +1849,7 @@ sub ad_display {
 }
 
 sub control_strip
-{   
+{  
     return $LJ::DISABLED{control_strip_new} ? control_strip_old(@_) : control_strip_new(@_);
 }
 
@@ -2226,6 +2226,7 @@ sub control_strip_js_inject
     LJ::need_res(qw(
                     js/livejournal.js
                     js/controlstrip.js
+                    js/jquery/jquery.lj.modal.js
                     ));
 }
 
