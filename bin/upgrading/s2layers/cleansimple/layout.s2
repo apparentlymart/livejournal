@@ -663,7 +663,7 @@ if ($*counter_code != "") {
     """<ul><li>$*counter_code</li></ul>""";
 }
 
-if (viewer_sees_ad_box("s2.vertical.2")) {
+if (viewer_sees_vbox() and viewer_sees_ad_box("s2.vertical.2")) {
     """<div class="box-vertical2">""";
     $p->print_ad_box("s2.vertical.2");
     """</div>""";
@@ -718,7 +718,7 @@ if ($*opt_navbar_pos == "left") {
     $this->lay_print_navbar();
 } else {
     if (viewer_sees_vbox()) {
-        """<td valign="top" style="background: #eeeeff; width: 10%; padding: 10px;">""";
+        """<td valign="top" style="background: #eeeeff; width: 10%; padding: 10px;" class="box-vertical1">""";
         $this->print_vbox();
         "</td>";
     }
@@ -742,7 +742,7 @@ if ($*opt_navbar_pos == "right") {
     $this->lay_print_navbar();
 } else {
     if (viewer_sees_vbox()) {
-        """<td valign="top" style="background: #eeeeff; width: 10%; padding: 10px;">""";
+        """<td valign="top" style="background: #eeeeff; width: 10%; padding: 10px;" class="box-vertical1">""";
         $this->print_vbox();
         "</td>";
     }
