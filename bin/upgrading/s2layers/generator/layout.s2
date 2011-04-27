@@ -776,11 +776,18 @@ if (viewer_sees_vbox()) {
     cellpadding="0"
     border="0"
     summary="" style="margin-left: auto; margin-right: auto;">
-    <tr><td><div align="center">
-    """;
+    <tr><td>""";
+    """<div align="center">""";
+    """<div class="box-vertical1">""";
     $this->print_vbox();
-    """
-    </div></td></tr></table>
+    """</div>""";
+    if (viewer_sees_ad_box("s2.vertical.2")) {
+        """<div class="box-vertical2" style="margin-top: 10px;">""";
+        $this->print_ad_box("s2.vertical.2");
+        """</div>""";
+    }
+    """</div>""";
+    """</td></tr></table>
     </td></tr></table>
     </td></tr></table>
     </td></tr></table>
