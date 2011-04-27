@@ -1252,8 +1252,41 @@ if (not $.entry.comments.locked) {
     }
 }
 
-function EntryPage::print_comment(Comment c)
+function EntryPage::print_comments (Comment[] cs) {
+    var Page p = get_page();
+    if (size $cs == 0) { return; }
+
+    foreach var Comment c ($cs) {
+        $this->print_comment($c);
+        $this->print_comments($c.replies);
+    }
+}
+
+function EntryPage::print_comment (Comment c) {
+    var Page p = get_page();
+    var int indent = ($c.depth - 1) * 25;
+
+    """<div id="$c.dom_id" style="margin-left:${indent}px;">""";
+    """<a name="$c.anchor"></a>""";
+
+    if ($c.screened and not $c.full and not viewer_is_owner()) {
+        """<strong>$*text_comment_screened</strong>""";
+    } elseif ($c.deleted) {
+        """<strong>$*text_comment_deleted</strong>""";
+    } elseif (($c.spam) and (not $p.showspam) and (not $c.can_marked_as_spam) and (size($c.replies) > 0)) {
+        """<strong>$*text_spam_comment</strong>""";
+    } elseif ($c.full) {
+        $this->print_comment_full($c);
+    } else {
+        $this->print_comment_partial($c);
+    }
+
+    "</div>";
+}
+
+function EntryPage::print_comment_full(Comment c)
 {
+    var Page p = get_page();
     var Color background; var Color color;
     if ($c.screened) {
         $background = $*comment_bar_screened_bgcolor;
@@ -1311,7 +1344,7 @@ function EntryPage::print_comment(Comment c)
     println """<div style="margin-top: 3px; font-size: smaller"> """;
     if ($c.frozen) {
         println """(Replies frozen) """;
-    } else {
+    } elseif ((not $c.spam) or ($p.showspam)) {
         print "("; 
         ### $c->print_reply_link({"linktext" => "Reply to this"});
         if($c.screened == true) {
@@ -1326,17 +1359,23 @@ function EntryPage::print_comment(Comment c)
         ") ";
     }
     if ($c.parent_url != "") { println """(<a href="$c.parent_url">Parent</a>) """; }
-    if ($c.thread_url != "") {
+    if ($c.thread_url != "" and (not $c.spam)) {
         println """(<a href="$c.thread_url">Thread</a>) """;
-        var Link expand_link = $c->get_link("expand_comments");
-        if (defined $expand_link) {
-            println "(" + $c->expand_link() + ") ";
-        }
+        $c->print_expand_collapse_links();
     }
     if (not $c.frozen) {
         $c->print_reply_container({"class" => "quickreply"});
     }
      println "</div>";
+}
+
+function EntryPage::print_comment_partial (Comment c) {
+    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>$*text_poster_anonymous</i>";
+    var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
+    print safe "<a href='$c.permalink_url'>$subj</a> - $poster";
+    if ($c.thread_url) {
+        $c->print_expand_collapse_links();
+    }
 }
 
 ################################################################################
