@@ -242,6 +242,10 @@ function createDeleteFunction(ae, dItemid, action) {
 		}
         var canAdmin = LJ_cmtinfo.canAdmin;
 		
+		var imageInTarget = jQuery(ae).find('img');
+		
+		var markSpamMLPrefix = (Site.remote_is_maintainer == 1) ? 'comment.mark.spam.' : 'comment.mark.spam2.';
+		
 		if (action == 'markAsSpam') {
 			if (!window.delPopup) {
 				window.delPopup = jQuery('<div />')
@@ -251,9 +255,9 @@ function createDeleteFunction(ae, dItemid, action) {
 			}			
 			
 			window.delPopup
-				.html('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr('comment.mark.spam.title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr('comment.mark.spam.subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" onclick="deleteComment(' + dItemid + ', \'' + action + '\');" value="' + getLocalizedStr('comment.mark.spam.button', comUser) + '"></div><div>', ae, e, 'spamComment' + dItemid)
+				.html('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr(markSpamMLPrefix + 'title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr(markSpamMLPrefix + 'subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" onclick="deleteComment(' + dItemid + ', \'' + action + '\');" value="' + getLocalizedStr(markSpamMLPrefix + 'button', comUser) + '"></div><div>', ae, e, 'spamComment' + dItemid)
 				.bubble()
-				.bubble('show', ae);
+				.bubble('show', (imageInTarget.length === 0) ? ae : imageInTarget);
 
 			return true;
 		} else if (action == 'delete') {
@@ -285,7 +289,7 @@ function createDeleteFunction(ae, dItemid, action) {
 			window.modPopup
 				.html(inHTML.join(' '))
 				.bubble()
-				.bubble('show', ae);
+				.bubble('show', (imageInTarget.length === 0) ? ae : imageInTarget);
 				
 		} else if (action == 'unspam') {
 			deleteComment(dItemid, action);
