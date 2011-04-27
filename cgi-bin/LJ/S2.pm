@@ -3804,8 +3804,7 @@ sub _Entry__get_link
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
         my $entry_url = LJ::eurl($entry->url);
-        my $entry_title = LJ::eurl($entry->subject_text);
-        my $url = "http://www.facebook.com/sharer.php?u=$entry_url&amp;t=$entry_title";
+        my $url = "http://www.facebook.com/sharer.php?u=$entry_url";
         my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_facebook"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_facebook.gif", 24, 24));
         return $link;
     }
@@ -3814,16 +3813,18 @@ sub _Entry__get_link
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
         my $post_id = $entry->journalid . ':' . $entry->ditemid;
-        my $entry_url = LJ::eurl($entry->url); # for js
-        my $link = LJ::S2::Link("http://twitter.com/share?url=$entry_url", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
+        my $entry_url = LJ::eurl($entry->url);
+        my $entry_title = LJ::eurl($entry->subject_text);
+        my $link = LJ::S2::Link("http://twitter.com/share?url=$entry_url&text=$entry_title", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
         return $link;
     }
 
     if ($key eq "share_email") {
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
-        my $entry_url = LJ::eurl($entry->url); # for js
-        my $url = "$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;u=$entry_url";
+        my $entry_url = LJ::eurl($entry->url);
+        my $entry_title = LJ::eurl($entry->subject_text);
+        my $url = "http://api.addthis.com/oexchange/0.8/forward/email/offer?username=internal&url=$entry_url&title=$entry_title";
         my $link = LJ::S2::Link($url, $ctx->[S2::PROPS]->{"text_share_email"}, LJ::S2::Image("$LJ::IMGPREFIX/btn_email.gif", 24, 24));
         return $link;
     }

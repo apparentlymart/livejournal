@@ -44,7 +44,7 @@ sub request_resources {
             'bindLink' => 'http://digg.com/submit?url={url}'
         },
         'email' => {
-            'bindLink' => 'http://api.addthis.com/oexchange/0.8/forward/email/offer?username=internal&url={url}'
+            'bindLink' => 'http://api.addthis.com/oexchange/0.8/forward/email/offer?username=internal&url={url}&title={title}'
         },
         'tumblr' => {
             'bindLink' => 'http://www.tumblr.com/share?v=3&u={url}'
