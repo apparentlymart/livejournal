@@ -576,6 +576,8 @@ sub require_captcha_test {
     ##             we shouldn't display captcha for him
             
     return if $commenter && LJ::is_friend($LJ::NOTASPAMMERS_COMM_UID, $commenter);
+    
+    return in $commenter && $commenter->prop('in_whitelist_for_spam');
 
     ## allow some users (our bots) to post without captchas in any rate
     return if $commenter and 
