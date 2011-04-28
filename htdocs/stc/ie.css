@@ -500,17 +500,11 @@ __________________________________________*/
 
 /* New controlstrip
 -----------------------------------------------*/
-.w-cs INPUT.text {
-	margin: 0 -3px;
-	}
 .w-cs INPUT.submit {
 	overflow: visible;
 	}
 .w-cs INPUT.checkbox {
-	margin: -5px 2px -3px -5px;
-	}
-.w-cs FORM.w-cs-login .remember {
-	top: 25px;
+	margin: -6px 2px -3px -5px;
 	}
 
 /* Should be at bottom of the page! */
