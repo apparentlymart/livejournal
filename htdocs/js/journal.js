@@ -129,17 +129,7 @@ ILikeThis = {
 	}
 }
 
-// Share
-SHARETHIS_ary = [];
-SHARETHIS_ary.findByUrl = function(url)
-{
-	for (var i = this.length - 1; i >= 0; i--) {
-		if (url === this[i].properties.url) {
-			return this[i];
-		}
-	}
-}
-
+// Share at some S2 styles
 jQuery(document).click(function(e)
 {
 	var a = e.target,
