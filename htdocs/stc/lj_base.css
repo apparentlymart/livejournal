@@ -1293,9 +1293,11 @@ HTML BODY.logged-out {
 				display: block;
 				}
 			.b-postform-user-cookie .b-postform-login-services-show .b-postform-login-services-livejournal,
+			.b-postform-useranonymous-cookie .b-postform-login-services-show .b-postform-login-services-livejournal,
 			.b-postform-anonymous-cookie .b-postform-login-services-show .b-postform-login-services-user {
 				display: none;
 				}
+			.b-postform-useranonymous-cookie .b-postform-login-services-show .b-postform-login-services-user,
 			.b-postform-user-cookie.b-postform-ability-disabled-anonymous.b-postform-ability-disabled-user .b-postform-login-services-show .b-postform-login-services-livejournal {
 				display: block;
 				}
@@ -1312,7 +1314,7 @@ HTML BODY.logged-out {
 					background: #FFF;
 					font-weight: normal;
 					color: #222 !important;
-					text-decoration: none;
+					text-decoration: none !important;
 					}
 				BODY .b-postform-login-services-item A:hover,
 				BODY .b-postform-login-services-item A:active,
@@ -1328,7 +1330,7 @@ HTML BODY.logged-out {
 					background: #C5E1F7;
 					font-weight: normal;
 					color: #222 !important;
-					text-decoration: none;
+					text-decoration: none !important;
 					}
 					.b-postform-login-services-item IMG {
 						position: static !important;
@@ -1453,7 +1455,8 @@ HTML BODY.logged-out {
 				margin: 0;
 				padding: 7px 0;
 				}
-			.b-postform-user-cookie .b-postform-login-user .b-postform-login-opts,
+			.b-postform-user-cookie .b-postform-login-user .b-postform-login-opts,	
+			.b-postform-useranonymous-cookie .b-postform-login-user .b-postform-login-opts,
 			.b-postform-login-anonymous .b-postform-login-opts-anonymous {
 				padding: 6px 0;
 				}
