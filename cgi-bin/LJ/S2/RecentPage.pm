@@ -71,7 +71,7 @@ sub RecentPage
 
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
-    elsif ($itemshow > 50) { $itemshow = 50; }
+    elsif ($itemshow > 50 && !$LJ::S2_TRUSTED{ $u->{'userid'} } ) { $itemshow = 50; }
 
     my $skip = $get->{'skip'}+0;
     my $maxskip = $LJ::MAX_SCROLLBACK_LASTN-$itemshow;
