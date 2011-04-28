@@ -1,23 +1,23 @@
 <TMPL_IF openid_enabled>
     <TMPL_IF everyone_can_comment>
-        <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" tabindex="5"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
+        <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
     <TMPL_ELSIF registered_can_comment>
         <TMPL_IF is_trusted_identity>
-            <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" tabindex="5"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
+            <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
         <TMPL_ELSIF is_identity>
             <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" title="<TMPL_IF is_identity><TMPL_VAR ml_noopenidpost></TMPL_IF>" class="b-postform-login-services-disabled"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
         <TMPL_ELSE>
-            <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" tabindex="5"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
+            <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
         </TMPL_IF>
     <TMPL_ELSIF friends_can_comment>
         <TMPL_IF is_identity>
             <TMPL_IF remote_can_comment>
-                <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" tabindex="5"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
+                <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
             <TMPL_ELSE>
                 <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" title="<TMPL_VAR remote_display_name> <TMPL_VAR ml_notafriend> <TMPL_VAR ml_willscreen>" class="b-postform-login-services-disabled"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
             </TMPL_IF>
         <TMPL_ELSE>
-            <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" tabindex="5"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
+            <span class="b-postform-login-services-item b-postform-login-services-openid"><a href="#openid" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/openid-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span></a></span>
         </TMPL_IF>
     </TMPL_IF>
 </TMPL_IF>

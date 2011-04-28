@@ -44,13 +44,12 @@
                 </div>
             </div>
         <TMPL_ELSE>
-
             <div class='b-postform-login b-postform-authtype-<TMPL_IF expr="usertype_default eq 'anonymous'">anonymous b-postform-anonymous-cookie<TMPL_IF is_person> b-postform-useranonymous-cookie</TMPL_IF><TMPL_ELSIF expr="usertype_default eq 'cookieuser'">user b-postform-user-cookie<TMPL_ELSIF expr="usertype_default eq 'facebook_cookie'">facebook b-postform-facebook-cookie<TMPL_ELSIF expr="usertype_default eq 'twitter_cookie'">twitter b-postform-twitter-cookie<TMPL_ELSIF expr="usertype_default eq 'openid_cookie'">openid b-postform-openid-cookie<TMPL_ELSIF expr="usertype_default eq 'mailru_cookie'">mailru b-postform-mailru-cookie<TMPL_ELSIF expr="usertype_default eq 'vkontakte_cookie'">vkontakte b-postform-vkontakte-cookie</TMPL_IF>
                 <TMPL_LOOP author_options>
                     <TMPL_INCLUDE expr="sprintf('templates/CommentForm/AuthorDisabled-%s.tmpl', short_code)">
                 </TMPL_LOOP>'>
                 <div class="b-postform-login-services">
-                    <a href="#" class="b-postform-login-services-current" tabindex="4"><i class="b-postform-login-services-current-pic"></i></a>
+                    <a href="#" class="b-postform-login-services-current" tabindex="10"><i class="b-postform-login-services-current-pic"></i></a>
                     <div class="b-postform-login-services-items">
                         <TMPL_LOOP author_options>
                             <TMPL_INCLUDE expr="sprintf('templates/CommentForm/AuthorTitle-%s.tmpl', short_code)">
@@ -73,7 +72,7 @@
 <tr valign='top'>
     <td align='right'><TMPL_VAR expr="ml('/talkpost.bml.opt.subject')"></td>
     <td>
-        <input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value="<TMPL_VAR basesubject>" onKeyPress='subjectNoHTML(event);' tabindex='10' />
+        <input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value="<TMPL_VAR basesubject>" onKeyPress='subjectNoHTML(event);' tabindex='20' />
         <TMPL_IF 0> subject icon </TMPL_IF>
         <input type='hidden' id='subjectIconField' name='subjecticon' value='<TMPL_VAR subjicon>'>
         <TMPL_IF subjicon_none>
@@ -112,7 +111,7 @@
                     var defaultpicurl="<TMPL_VAR defaultpicurl>";
                 </script>
                 <TMPL_VAR ml_picturetouse>
-                <select name="prop_picture_keyword" tabindex="11">
+                <select name="prop_picture_keyword" tabindex="21">
                     <TMPL_LOOP userpics>
                         <option value="<TMPL_VAR userpic_keyword>" <TMPL_IF userpic_selected>selected="selected"</TMPL_IF>><TMPL_VAR userpic_title></option>
                     </TMPL_LOOP>
@@ -120,7 +119,7 @@
                 <TMPL_VAR helpicon_userpics>
             </TMPL_IF>
 
-            &nbsp;&nbsp;<input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="12" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
+            &nbsp;&nbsp;<input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="22" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
 
             <TMPL_IF show_quick_quote>
                 <script type='text/javascript' language='JavaScript'>
@@ -159,7 +158,7 @@
                 if (document.getElementById && (document.getSelection || document.selection || window.getSelection)) {
                     // Opera clears the paste buffer before mouse events, useless here
                         if (navigator.userAgent.indexOf("Opera") == -1) {
-                            document.write('&nbsp;&nbsp;<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" tabindex="13" />');
+                            document.write('&nbsp;&nbsp;<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" tabindex="23" />');
                         }
                 }
                 //-->
@@ -173,7 +172,7 @@
 <tr valign='top'>
     <td align='right'><TMPL_VAR expr="ml('/talkpost.bml.opt.message')"></td>
     <td style='width: 90%'>
-        <textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext' tabindex='20'><TMPL_VAR comment_body></textarea>
+        <textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext' tabindex='30'><TMPL_VAR comment_body></textarea>
     </td>
 </tr>
 
@@ -203,7 +202,7 @@
             // -->
         </script>
 
-        <input type='submit' name='submitpost' onclick='return checkLength() && sendForm("postform", "username")' tabindex='30'
+        <input type='submit' name='submitpost' onclick='return checkLength() && sendForm("postform", "username")' tabindex='40'
             <TMPL_IF editid>
                 value="<TMPL_VAR expr="ml('/talkpost.bml.opt.edit')">"
             <TMPL_ELSE>
@@ -212,10 +211,10 @@
         />
         &nbsp;
         <input type='submit' name='submitpreview' onclick='return checkLength() && sendForm("postform", "username")'
-            value="<TMPL_VAR expr="ml('talk.btn.preview')">" tabindex="50" />
+            value="<TMPL_VAR expr="ml('talk.btn.preview')">" tabindex="60" />
 
         <TMPL_IF show_spellcheck>
-            <input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' tabindex='51' />
+            <input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' tabindex='61' />
             <label for='spellcheck'><TMPL_VAR expr="ml('talk.spellcheck')"></label>
         </TMPL_IF>
 
