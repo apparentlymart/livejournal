@@ -6086,13 +6086,17 @@ web.authas.label.comm=Work as community:
 web.controlstrip.btn.go|staleness=1
 web.controlstrip.btn.go=Go
 
-web.controlstrip.btn.login=Log in
+web.controlstrip.btn.login=Login
 
-web.controlstrip.btn.logout=Log out
+web.controlstrip.btn.logout=Logout
+
+web.controlstrip.btn.password=Password
 
 web.controlstrip.btn.view=View
 
 web.controlstrip.btn.searchall=Search at LiveJournal
+
+web.controlstrip.btn.username=Username
 
 web.controlstrip.links.viewownstyle=View in own style
 
