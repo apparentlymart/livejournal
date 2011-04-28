@@ -218,7 +218,7 @@ LiveJournal.generateLjUniq = function() {
 		result = '',
 		i;
 
-	var len = 15
+	var len = 15;
 	for( i = 0; i < len; ++i ) {
 		result += alpha.charAt( Math.floor( Math.random() * ( alpha.length - 1 ) ) );
 	}
@@ -231,7 +231,11 @@ LiveJournal.generateLjUniq = function() {
 
 LiveJournal.checkLjUniq = function() {
 	if( !Cookie( 'ljuniq' ) ) {
-		Cookie( 'ljuniq', LiveJournal.generateLjUniq(), { domain: Site.siteroot.replace( /^https?:\/\/www\./, '' ) } );
+		Cookie( 'ljuniq', LiveJournal.generateLjUniq(),
+		{
+			domain: Site.siteroot.replace(/^https?:\/\/www\./, ''),
+			expires: 1
+		} );
 	}
 }
 
