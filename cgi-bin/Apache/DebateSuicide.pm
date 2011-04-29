@@ -12,14 +12,26 @@ use vars qw($gtop);
 our %known_parent;
 our $ppid;
 
+$LJ::SUICIDE_MAX_VIRTUAL_SIZE = 2 * 1024*1024*1024; ## 2 Gb 
+
 # oh btw, this is totally linux-specific.  gtop didn't work, so so much for portability.
 sub handler
 {
     my $r = shift;
     LJ::Request->init($r) unless LJ::Request->is_inited;
     
+    ## TODO: why is that? shouldn't we process sub-requests as well
     return LJ::Request::OK if LJ::Request->main;
     return LJ::Request::OK unless $LJ::SUICIDE && LJ::ModuleCheck->have("GTop");
+
+    $gtop ||= GTop->new;
+    my $pm = $gtop->proc_mem($$);
+    my $size = $pm->size;
+    if ($size > $LJ::SUICIDE_MAX_VIRTUAL_SIZE) {
+        my $host = LJ::Request->header_in("Host");
+        my $uri  = LJ::Request->uri; 
+        terminate(sprintf("i'm too big (%0.3f Gb), url=http://$host/$uri", $size/1024/1024/1024));
+    } 
 
     my $meminfo;
     return LJ::Request::OK unless open (MI, "/proc/meminfo");
@@ -40,16 +52,12 @@ sub handler
     my $maxproc  = $LJ::SUICIDE_OVER{$LJ::SERVER_NAME}  || $LJ::SUICIDE_OVER  || 1_000_000;
     my $is_over  = 0;
 
-    $gtop ||= GTop->new;
 
     # if $is_under, we know we'll be exiting anyway, so no need
     # to continue to check $maxproc
     unless ($is_under) {
-
         # find out how much memory we are using
-        my $pm = $gtop->proc_mem($$);
         my $proc_size_k = ($pm->rss - $pm->share) >> 10; # config is in KB
-
         $is_over = $proc_size_k > $maxproc;
     }
     return LJ::Request::OK unless $is_over || $is_under;
@@ -77,32 +85,35 @@ sub handler
 
     if (grep { $$ == $_ } @pids[0,1]) {
         my $my_use_k = $stats{$$}[0] >> 10;
-        if ($LJ::DEBUG{'suicide'}) {
-            LJ::Request->log_error("Suicide [$$]: system memory free = ${memfree}k; " .
-                          "i'm big, using ${my_use_k}k");
-        }
-
-        # we should have logged by here, but be paranoid in any case
-        Apache::LiveJournal::db_logger() unless LJ::Request->pnotes('did_lj_logging');
-
-        # This is supposed to set MaxChildRequests to 1, then clear the
-        # KeepAlive flag so that Apache will terminate after this request,
-        # but it doesn't work.  We'll call it here just in case.
-        LJ::Request->child_terminate;
-
-        # We should call Apache::exit(Apache::Constants::DONE) here because
-        # it makes sure that the child shuts down cleanly after fulfilling
-        # its request and running logging handlers, etc.
-        #
-        # In practice Apache won't exit until the current request's KeepAlive
-        # timeout is reached, so the Apache hangs around for the configured
-        # amount of time before exiting.  Sinced we know that the request
-        # is done and we've verified that logging as happend (above), we'll
-        # just call CORE::exit(0) which works immediately.
-        CORE::exit(0);
+        terminate("system memory free = ${memfree}k; i'm big, using ${my_use_k}k");
     }
 
     return LJ::Request::OK;
+}
+
+sub terminate {
+    my $message = shift;
+
+    LJ::Request->log_error("Suicide [$$]: $message");
+
+    # we should have logged by here, but be paranoid in any case
+    Apache::LiveJournal::db_logger() unless LJ::Request->pnotes('did_lj_logging');
+
+    # This is supposed to set MaxChildRequests to 1, then clear the
+    # KeepAlive flag so that Apache will terminate after this request,
+    # but it doesn't work.  We'll call it here just in case.
+    LJ::Request->child_terminate;
+
+    # We should call Apache::exit(Apache::Constants::DONE) here because
+    # it makes sure that the child shuts down cleanly after fulfilling
+    # its request and running logging handlers, etc.
+    #
+    # In practice Apache won't exit until the current request's KeepAlive
+    # timeout is reached, so the Apache hangs around for the configured
+    # amount of time before exiting.  Sinced we know that the request
+    # is done and we've verified that logging as happend (above), we'll
+    # just call CORE::exit(0) which works immediately.
+    CORE::exit(0);
 }
 
 sub pid_info {
