@@ -3847,15 +3847,25 @@ sub _Entry__get_link
     }
 
     if ($key eq "nav_prev") {
-        return LJ::S2::Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=prev",
+        my $jumpid = LJ::get_itemid_before2($journalu, int($this->{'itemid'}/256));
+        if ($jumpid) {
+            return LJ::S2::Link($journalu->journal_base . "/$jumpid.html",
                             $ctx->[S2::PROPS]->{"text_entry_prev"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 24, 24));
+        } else {
+            return $null_link;
+        }
     }
 
     if ($key eq "nav_next") {
-        return LJ::S2::Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=next",
+        my $jumpid = LJ::get_itemid_after2($journalu, int($this->{'itemid'}/256));
+        if ($jumpid) {
+            return LJ::S2::Link($journalu->journal_base . "/$jumpid.html",,
                             $ctx->[S2::PROPS]->{"text_entry_next"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 24, 24));
+        } else {
+            return $null_link;
+        }
     }
 
     if ($key eq "flag") {
