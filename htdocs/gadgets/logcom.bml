@@ -95,6 +95,7 @@
 
         return $w->render(
             'embedded'          => 1,
+            'partner'           => $partner,
             'js_check_domain'   => $js_check_domain,
             'resources_html'    => $partner->resources,
             'forwhat'           => 'external',
