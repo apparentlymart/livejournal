@@ -26,7 +26,8 @@ function Cookie(name, value, options)
 		var path = options.path ? '; path=' + (options.path) : '',
 			domain = options.domain ? '; domain=' + (options.domain) : '',
 			secure = options.secure ? '; secure' : '';
-		document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+		value = encodeURIComponent(value).replace(/%3A/g, ':'); //LJSUP-8676 
+		document.cookie = [name, '=', value, expires, path, domain, secure].join('');
 	} else { // only name given, get cookie
 		var cookieValue = null;
 		if (document.cookie && document.cookie != '') {
