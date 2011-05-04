@@ -1248,6 +1248,7 @@ HTML BODY.logged-out {
 			.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-current-pic,
 			.b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-services-current-pic,
 			.b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-services-current-pic,
+			.b-postform-authtype-google.b-postform-ability-disabled-google .b-postform-login-services-current-pic,
 			.b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-services-current-pic,
 			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-current-pic,
 			.b-postform-authtype-vkontakte.b-postform-ability-disabled-vkontakte .b-postform-login-services-current-pic,
@@ -1262,6 +1263,9 @@ HTML BODY.logged-out {
 				}
 			.b-postform-authtype-twitter .b-postform-login-services-current-pic {
 				background-image: url(/img/icons/twitter-16.gif?v=3);
+				}
+			.b-postform-authtype-google .b-postform-login-services-current-pic {
+				background-image: url(/img/icons/google-16.png?v=1);
 				}
 			.b-postform-authtype-openid .b-postform-login-services-current-pic {
 				background-image: url(/img/icons/openid-16.gif?v=1);
@@ -1384,6 +1388,10 @@ HTML BODY.logged-out {
 				BODY .b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:visited,
 				BODY .b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:hover,
 				BODY .b-postform-ability-disabled-twitter .b-postform-login-services-twitter A:active,
+				BODY .b-postform-ability-disabled-google .b-postform-login-services-google A:link,
+				BODY .b-postform-ability-disabled-google .b-postform-login-services-google A:visited,
+				BODY .b-postform-ability-disabled-google .b-postform-login-services-google A:hover,
+				BODY .b-postform-ability-disabled-google .b-postform-login-services-google A:active,
 				BODY .b-postform-ability-disabled-openid .b-postform-login-services-openid A:link,
 				BODY .b-postform-ability-disabled-openid .b-postform-login-services-openid A:visited,
 				BODY .b-postform-ability-disabled-openid .b-postform-login-services-openid A:hover,
@@ -1432,6 +1440,7 @@ HTML BODY.logged-out {
 		#js .b-postform-authtype-user .b-postform-login-user,
 		#js .b-postform-authtype-facebook .b-postform-login-facebook,
 		#js .b-postform-authtype-twitter .b-postform-login-twitter,
+		#js .b-postform-authtype-google .b-postform-login-google,
 		#js .b-postform-authtype-openid .b-postform-login-openid,
 		#js .b-postform-authtype-mailru .b-postform-login-mailru,
 		#js .b-postform-authtype-vkontakte .b-postform-login-vkontakte,
@@ -1442,6 +1451,7 @@ HTML BODY.logged-out {
 		#js .b-postform-ability-disabled-user .b-postform-login-user,
 		#js .b-postform-ability-disabled-facebook .b-postform-login-facebook,
 		#js .b-postform-ability-disabled-twitter .b-postform-login-twitter,
+		#js .b-postform-ability-disabled-google .b-postform-login-google,
 		#js .b-postform-ability-disabled-openid .b-postform-login-openid,
 		#js .b-postform-ability-disabled-mailru .b-postform-login-mailru,
 		#js .b-postform-ability-disabled-vkontakte .b-postform-login-vkontakte {
@@ -1450,6 +1460,7 @@ HTML BODY.logged-out {
 		#js .b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-livejournal,
 		#js .b-postform-authtype-facebook.b-postform-ability-disabled-facebook .b-postform-login-livejournal,
 		#js .b-postform-authtype-twitter.b-postform-ability-disabled-twitter .b-postform-login-livejournal,
+		#js .b-postform-authtype-google.b-postform-ability-disabled-google .b-postform-login-livejournal,
 		#js .b-postform-authtype-openid.b-postform-ability-disabled-openid .b-postform-login-livejournal,
 		#js .b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-livejournal,
 		#js .b-postform-authtype-vkontakte.b-postform-ability-disabled-vkontakte .b-postform-login-livejournal,
@@ -1472,6 +1483,7 @@ HTML BODY.logged-out {
 			.b-postform-login-anonymous .b-postform-login-opts-anonymous,
 			.b-postform-facebook-cookie .b-postform-login-facebook .b-postform-login-opts,
 			.b-postform-twitter-cookie .b-postform-login-twitter .b-postform-login-opts,
+			.b-postform-google-cookie .b-postform-login-google .b-postform-login-opts,
 			.b-postform-openid-cookie .b-postform-login-openid .b-postform-login-opts,
 			.b-postform-mailru-cookie .b-postform-login-mailru .b-postform-login-opts,
 			.b-postform-vkontakte-cookie .b-postform-login-vkontakte .b-postform-login-opts {
@@ -1482,7 +1494,7 @@ HTML BODY.logged-out {
 				margin: 0;
 				padding: 7px 0;
 				}
-			.b-postform-user-cookie .b-postform-login-user .b-postform-login-opts,	
+			.b-postform-user-cookie .b-postform-login-user .b-postform-login-opts,
 			.b-postform-useranonymous-cookie .b-postform-login-user .b-postform-login-opts,
 			.b-postform-login-anonymous .b-postform-login-opts-anonymous {
 				padding: 6px 0;
