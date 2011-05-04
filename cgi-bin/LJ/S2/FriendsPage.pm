@@ -87,6 +87,8 @@ sub FriendsPage
     if ($skip < 0) { $skip = 0; }
     my $itemload = $itemshow+$skip;
 
+    my $base = "$u->{'_journalbase'}/$opts->{'view'}";
+
     my $filter;
     my $group_name    = '';
     my $common_filter = 1;
@@ -94,8 +96,10 @@ sub FriendsPage
     my $events_date = 0;
     my $pathextra = $opts->{pathextra};
     if ($pathextra && $pathextra =~ m/^\/(\d\d\d\d)\/(\d\d)\/(\d\d)\/?$/) {
+        $base .= $pathextra;
         $events_date = LJ::TimeUtil->mysqldate_to_time("$1-$2-$3");
         $pathextra = '';
+        $get->{date} = '';
     }
     elsif ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!) {
         $events_date = LJ::TimeUtil->mysqldate_to_time("$1-$2-$3");
@@ -114,12 +118,14 @@ sub FriendsPage
             $group_name =~ s!^/!!;
             $group_name =~ s!/$!!;
 
-            if ($group_name) { 
+            if ($group_name) {
                 $group_name    = LJ::durl($group_name); 
                 $common_filter = 0; 
 
                 $p->{'filter_active'} = 1;
                 $p->{'filter_name'}   = LJ::ehtml($group_name);
+
+                $base .= "/" . LJ::eurl($group_name);
             }
         }
 
@@ -425,11 +431,6 @@ sub FriendsPage
         'skip' => $skip,
         'count' => $eventnum,
     };
-
-    my $base = "$u->{'_journalbase'}/$opts->{'view'}";
-    if ($group_name) {
-        $base .= "/" . LJ::eurl($group_name);
-    }
 
     # $linkfilter is distinct from $filter: if user has a default view,
     # $filter is now set according to it but we don't want it to show in the links.

@@ -1667,6 +1667,8 @@ sub create_view_friends
     if ($skip < 0) { $skip = 0; }
     my $itemload = $itemshow+$skip;
 
+    my $base = "$journalbase/$opts->{'view'}";
+
     my $filter;
     my $group;
     my $common_filter = 1;
@@ -1675,7 +1677,9 @@ sub create_view_friends
     my $pathextra = $opts->{pathextra};
     if ($pathextra && $pathextra =~ m/^\/(\d\d\d\d)\/(\d\d)\/(\d\d)\/?$/) {
         $events_date = LJ::TimeUtil->mysqldate_to_time("$1-$2-$3");
+        $base .= $pathextra;
         $pathextra = '';
+        $get->{date} = '';
     }
     elsif ($get->{date} =~ m!^(\d{4})-(\d\d)-(\d\d)$!) {
         $events_date = LJ::TimeUtil->mysqldate_to_time("$1-$2-$3");
@@ -1689,7 +1693,11 @@ sub create_view_friends
             $group = $pathextra;
             $group =~ s!^/!!;
             $group =~ s!/$!!;
-            if ($group) { $group = LJ::durl($group); $common_filter = 0;}
+            if ($group) {
+                $group = LJ::durl($group);
+                $common_filter = 0;
+                $base .= "/" . LJ::eurl($group);
+            }
         }
         my $grp = LJ::get_friend_group($u, { 'name' => $group || "Default View" });
         my $bit = $grp ? $grp->{'groupnum'} : 0;
@@ -2016,10 +2024,6 @@ sub create_view_friends
 
     my ($skip_f, $skip_b) = (0, 0);
     my %skiplinks;
-    my $base = "$journalbase/$opts->{'view'}";
-    if ($group) {
-        $base .= "/" . LJ::eurl($group);
-    }
 
     # $linkfilter is distinct from $filter: if user has a default view,
     # $filter is now set according to it but we don't want it to show in the links.
@@ -2035,6 +2039,7 @@ sub create_view_friends
 
         $linkvars{'filter'} = $linkfilter if $incfilter;
         $linkvars{'show'} = $get->{'show'} if $get->{'show'} =~ /^\w+$/;
+        $linkvars{'date'} = $get->{'date'} if $get->{'date'};
 
         my $newskip = $skip - $itemshow;
         if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
@@ -2056,6 +2061,7 @@ sub create_view_friends
 
         $linkvars{'filter'} = $linkfilter if $incfilter;
         $linkvars{'show'} = $get->{'show'} if $get->{'show'} =~ /^\w+$/;
+        $linkvars{'date'} = $get->{'date'} if $get->{'date'};
 
         my $newskip = $skip + $itemshow;
         $linkvars{'skip'} = $newskip;
