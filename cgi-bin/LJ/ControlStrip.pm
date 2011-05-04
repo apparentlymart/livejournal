@@ -78,6 +78,7 @@ sub render
     $data_journal->{view_tag} = $data_journal->{view} eq 'tag';
     $data_journal->{view_entry} = $data_journal->{view} eq 'entry';
     $data_journal->{display} = LJ::ljuser($journal);
+    $data_journal->{has_friendspage_per_day} = ($journal->get_cap('friendspage_per_day') ? 1 : 0);
 
     if ($remote)
     {
