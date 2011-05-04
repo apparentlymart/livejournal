@@ -26,12 +26,13 @@ REQUIREPOST=><?_ml bml.requirepost _ml?>
 
 FAVICON<=
 <?_code
+    my $ie_userhead = '<link rel="shortcut icon" type="image/x-icon" href="'.$LJ::IMGPREFIX.'/userinfo.ico">';
     my $u = LJ::get_active_journal();
-    return '' unless $u && $u->is_person;
+    return $ie_userhead unless $u && $u->is_person;
     my ($userhead) = $u->userhead;
     $userhead = $LJ::IMGPREFIX . "/" . $userhead 
         unless $userhead =~ m|^http://|;
-    return '<link rel="icon" type="image/gif" href="'.$userhead.'">';
+    return "$ie_userhead\n    " . '<link rel="icon" type="image/gif" href="'.$userhead.'">';
 _code?>
 <=FAVICON
 
