@@ -235,7 +235,7 @@ sub render
                 BML::ml('web.controlstrip.links.watchcomm')
             );
             $data_remote->{link}->{unwatch_community} = html_link(
-                "$LJ::SITEROOT/community/leave.bml?comm=$journal->{user}",
+                "$LJ::SITEROOT/friends/add.bml?user=$journal->{user}",
                 BML::ml('web.controlstrip.links.removecomm')
             );
             $data_remote->{link}->{post_to_community} = html_link(
