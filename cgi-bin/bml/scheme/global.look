@@ -28,7 +28,7 @@ FAVICON<=
 <?_code
     my $ie_userhead = '<link rel="shortcut icon" type="image/x-icon" href="'.$LJ::IMGPREFIX.'/userinfo.ico">';
     my $u = LJ::get_active_journal();
-    return $ie_userhead unless $u && $u->is_person;
+    return '' unless $u && $u->is_person;
     my ($userhead) = $u->userhead;
     $userhead = $LJ::IMGPREFIX . "/" . $userhead 
         unless $userhead =~ m|^http://|;
