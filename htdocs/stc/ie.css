@@ -168,7 +168,10 @@ __________________________________________*/
 	zoom: 1;
 	}
 .b-facebookbtn,
-.b-twitterbtn {
+.b-twitterbtn,
+.b-googlebtn,
+.b-mailrubtn,
+.b-vkontaktebtn {
 	overflow: visible;
 	}
 * HTML .m-auth-item {

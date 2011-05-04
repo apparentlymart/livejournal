@@ -5,6 +5,8 @@
 
 .bindip.yes=Yes (safer)
 
+.connect.google=Login with Google
+
 .connect.facebook=Login with Facebook
 
 .connect.mailru=Login with Mail.ru

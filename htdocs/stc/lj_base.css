@@ -771,6 +771,9 @@ HTML BODY.logged-out {
 		.m-auth-twitter A {
 			background: url(/img/icons/twitter-16.gif?v=3) no-repeat 20px 50%;
 			}
+		.m-auth-google A {
+			background: url(/img/icons/google-16.png?v=1) no-repeat 20px 50%;
+			}
 		.m-auth-mailru A {
 			background: url(/img/icons/mailru-16.gif?v=3) no-repeat 20px 50%;
 			}
@@ -890,6 +893,7 @@ HTML BODY.logged-out {
 
 .b-facebookbtn,
 .b-twitterbtn,
+.b-googlebtn,
 .b-mailrubtn,
 .b-vkontaktebtn {
 	position: relative;
@@ -903,12 +907,17 @@ HTML BODY.logged-out {
 	}
 .b-auth .b-facebookbtn,
 .b-auth .b-twitterbtn,
+.b-auth .b-googlebtn,
 .b-auth .b-mailrubtn,
 .b-auth .b-vkontaktebtn {
 	float: left;
 	}
+.b-auth .b-googlebtn {
+	font: bold 13px Arial,sans-serif;
+	}
 	.b-facebookbtn SPAN,
 	.b-twitterbtn SPAN,
+	.b-googlebtn SPAN,
 	.b-mailrubtn SPAN,
 	.b-vkontaktebtn SPAN {
 		position: relative;
@@ -931,6 +940,16 @@ HTML BODY.logged-out {
 		text-shadow: 1px 1px 0px #FFF;
 		white-space: nowrap;
 		background: #FFF url(/img/buttons/twitter-login-wide.gif?v=2) no-repeat 0 0;
+		}
+	.b-googlebtn SPAN {
+		height: 21px;
+		border: none;
+		line-height: 21px;
+		padding: 0 8px 0 32px;
+		color: #FFF;
+		text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+		white-space: nowrap;
+		background: #5B98EF url(/img/buttons/google-login-wide.png?v=1) no-repeat 0 0;
 		}
 	.b-mailrubtn SPAN {
 		height: 18px;
@@ -963,6 +982,14 @@ HTML BODY.logged-out {
 			height: 24px;
 			width: 2px;
 			background: url(/img/buttons/twitter-login-wide.gif?v=2) no-repeat 100% 0;
+			}
+		.b-googlebtn SPAN I{
+			position: absolute;
+			right: 0;
+			top: 0;
+			height: 21px;
+			width: 2px;
+			background: url(/img/buttons/google-login-wide.png?v=1) no-repeat 100% 0;
 			}
 		.b-mailrubtn SPAN I{
 			position: absolute;

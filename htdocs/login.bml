@@ -223,6 +223,7 @@
             $body .= "<a href=\"<?siteroot?>/identity/login.bml?type=openid\"><img src=\"$LJ::IMGPREFIX/icons/openid-32.gif?v=1\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.openid'}\" title=\"$ML{'.connect.openid'}\" /></a>";
             $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=facebook\"><img src=\"$LJ::IMGPREFIX/icons/facebook-32.gif?v=1\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.facebook'}\" title=\"$ML{'.connect.facebook'}\" /></a>";
             $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=twitter\"><img src=\"$LJ::IMGPREFIX/icons/twitter-32.gif?v=2\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.twitter'}\" title=\"$ML{'.connect.twitter'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=google\"><img src=\"$LJ::IMGPREFIX/icons/google-32.png?v=1\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.google'}\" title=\"$ML{'.connect.google'}\" /></a>";
             $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=mailru\"><img src=\"$LJ::IMGPREFIX/icons/mailru-32.gif?v=2\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.mailru'}\" title=\"$ML{'.connect.mailru'}\" /></a>";
             $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=vkontakte\"><img src=\"$LJ::IMGPREFIX/icons/vkontakte-32.gif?v=2\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.vkontakte'}\" title=\"$ML{'.connect.vkontakte'}\" /></a>";
             $body .= "</p>\n";
