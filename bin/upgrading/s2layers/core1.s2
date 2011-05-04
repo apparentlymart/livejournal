@@ -589,6 +589,9 @@ class Page
 
     function builtin render_widget(string{} opts)
     "Prints rendered widget body.";
+
+    function builtin get_entries_by_tags( string[] taglist, string mode, int count ) : Entry[]
+    "Returns last 'count' entries with the specified tag(s); returns the entries containing all of them or any of them, depending on 'mode'; does not work in untrusted journals";
 }
 
 class TagsPage extends Page

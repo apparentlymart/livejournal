@@ -493,18 +493,21 @@ sub populate_s2 {
         }
 
         my $compile_wrapper = sub {
-            my @args = @_;
+            my @batch = @_;
 
             LJ::end_request();
             my $pid = fork;
             if ($pid) {
                 waitpid($pid, 0);
             } else {
-                exit $compile->(@args);
+                $compile->(@$_) foreach @batch;
+                exit 0;
             }
         };
 
-        $compile_wrapper->(@$_) foreach @to_compile;
+        while ( my @batch = splice( @to_compile, 0, 20 ) ) {
+            $compile_wrapper->(@batch);
+        }
 
         # it was a long operation, so we've likely lost a DB connection;
         # therefore, let's reconnect

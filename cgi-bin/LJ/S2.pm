@@ -4308,6 +4308,179 @@ sub Page__get_latest_month
 *EntryPage__get_latest_month = \&Page__get_latest_month;
 *ReplyPage__get_latest_month = \&Page__get_latest_month;
 
+# the whole procedure assumes there is no remote
+sub Page__get_entries_by_tags {
+    my ( $ctx, $this, $taglist, $mode, $count ) = @_;
+
+    my $journal = $this->{'_u'};
+
+    return []
+        unless $LJ::S2_TRUSTED{ $journal->userid };
+
+    my $tagids = [];
+
+    my $tags = LJ::Tags::get_usertags( $journal, { 'remote' => undef } ) || {};
+    my %kwref = map { $tags->{$_}->{'name'} => $_ } keys %$tags;
+    foreach (@$taglist) {
+        push @$tagids, $kwref{$_}
+            if $kwref{$_};
+    }
+
+    # unless we found a tag to search for, we aren't going to search;
+    # this is get_entries_by_tags, after all
+    return [] unless $tagids && @$tagids;
+
+    my $order
+        = $journal->is_community || $journal->is_syndicated ? 'logtime' : '';
+
+    # load items first
+    my @itemids;
+    my $err;
+    my @items = LJ::get_recent_items({
+        'clusterid'     => $journal->userid,
+        'clustersource' => 'slave',
+        'userid'        => $journal->userid,
+
+        # public entries only:
+        'viewall'       => 0,
+        'viewsome'      => 0,
+        'remote'        => undef,
+
+        'itemshow'      => $count,
+        'skip'          => 0,
+        'tagids'        => $tagids,
+        'tagmode'       => $mode,
+        'security'      => undef,
+        'dateformat'    => 'S2',
+        'order'         => $order,
+        'itemids'       => \@itemids,
+        'err'           => \$err,
+    });
+
+    # then, load their entryprops, texts, tags, and posters en masse
+    my %logprops = ();
+    LJ::load_log_props2( $journal->userid, \@itemids, \%logprops );
+
+    my $logtext = LJ::get_logtext2($journal, @itemids);
+
+    my $tags = LJ::Tags::get_logtagsmulti( {
+        $journal->clusterid => [ map { [ $journal->userid, $_ ] } @itemids ],
+    } );
+
+    my @posters_userids  = map { $_->{'posterid'} } @items;
+    my $posters_users    = LJ::load_userids( @posters_userids );
+    my %posters_userlite
+        = map { $_ => LJ::S2::UserLite( $posters_users->{$_} ) }
+          keys %$posters_users;
+
+    my $journal_userlite = LJ::S2::UserLite($journal);
+
+    my $journal_cap_maxcomments = $journal->get_cap('maxcomments');
+
+    # and convert it to the convenient output format!
+    my @ret;
+
+    foreach my $item (@items) {
+        my $entry
+            = LJ::Entry->new( $journal, 'jitemid' => $item->{'itemid'} );
+
+        # swallow whatever we preloaded, for easier OO access
+        #
+        # props go first deliberately because handle_prefetched_text depends
+        # on them
+        $entry->handle_prefetched_props( $logprops{ $entry->jitemid } );
+        $entry->handle_prefetched_text( @{ $logtext->{ $entry->jitemid } } );
+
+        # subject and text info
+        my $subject = $entry->subject_raw;
+        LJ::CleanHTML::clean_subject(\$subject);
+
+        my $text = $entry->event_raw;
+        LJ::CleanHTML::clean_event( \$text, {
+            'preformatted'          => $entry->prop('opt_preformatted'),
+            'cuturl'                => $entry->url,
+            'ljcut_disable'         => 0,
+            'journalid'             => $entry->journalid,
+            'posterid'              => $entry->posterid,
+
+            # suspended entries parts are not implemented here for now
+            'suspend_msg'           => '',
+            'unsuspend_supportid'   => 0,
+        } );
+
+        # comments info
+        my $replycount = $entry->prop('replycount');
+
+        my $comments = LJ::S2::CommentInfo({
+            'read_url'      => $entry->url,
+            'post_url'      => $entry->reply_url,
+            'count'         => $replycount,
+            'maxcomments'   =>
+                ( $replycount > $journal_cap_maxcomments ) ? 1 : 0,
+
+            'enabled'       => $entry->comments_shown,
+            'locked'        => !$entry->posting_comments_allowed,
+            'screened'      => 0,
+            'show_readlink' => $entry->comments_shown && $replycount,
+            'show_postlink' => $entry->posting_comments_allowed,
+        });
+
+        # tags
+        my @taglist;
+        my $entry_tags
+            = $tags->{ $journal->userid . ' ' . $entry->jitemid } || {};
+
+        while ( my ( $kwid, $kw ) = each %$entry_tags ) {
+            push @taglist, LJ::S2::Tag( $journal, $kwid => $kw );
+        }
+
+        LJ::run_hooks( 'augment_s2_tag_list',
+            'u'         => $journal,
+            'jitemid'   => $entry->jitemid,
+            'tag_list'  => \@taglist
+        );
+
+        @taglist = sort { $a->{'name'} cmp $b->{'name'} } @taglist;
+
+        # userpic
+        my $poster  = $posters_users->{ $entry->posterid };
+        my $pickw   = LJ::Entry->userpic_kw_from_props( $entry->props );
+        my $userpic = LJ::S2::Image_userpic( $poster, 0, $pickw );
+
+        # and now, let's compile it!
+        push @ret, LJ::S2::Entry( $journal, {
+            'subject'           => $subject,
+            'text'              => $text,
+            'dateparts'         => $item->{'alldatepart'},
+            'system_dateparts'  => $item->{'system_alldatepart'},
+            'security'          => $entry->security,
+            'allowmask'         => $entry->allowmask,
+            'props'             => $logprops{ $entry->jitemid },
+            'itemid'            => $entry->ditemid,
+            'journal'           => $journal_userlite,
+            'poster'            => $posters_userlite{ $entry->posterid },
+            'comments'          => $comments,
+
+            'tags'              => \@taglist,
+            'userpic'           => $userpic,
+            'permalink_url'     => $entry->url,
+
+            # for now, these are not implemented
+            'new_day'           => 0,
+            'end_day'           => 0,
+        } );
+    }
+
+    return \@ret;
+}
+*RecentPage__get_entries_by_tags = \&Page__get_entries_by_tags;
+*DayPage__get_entries_by_tags = \&Page__get_entries_by_tags;
+*MonthPage__get_entries_by_tags = \&Page__get_entries_by_tags;
+*YearPage__get_entries_by_tags = \&Page__get_entries_by_tags;
+*FriendsPage__get_entries_by_tags = \&Page__get_entries_by_tags;
+*EntryPage__get_entries_by_tags = \&Page__get_entries_by_tags;
+*ReplyPage__get_entries_by_tags = \&Page__get_entries_by_tags;
+
 sub palimg_modify
 {
     my ($ctx, $filename, $items) = @_;
