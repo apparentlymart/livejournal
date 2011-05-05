@@ -509,6 +509,10 @@ __________________________________________*/
 .w-cs INPUT.checkbox {
 	margin: -6px 2px -3px -5px;
 	}
+* HTML .w-cs .w-cs-userpic {
+    width: 50px;
+    height: 50px;    
+    }
 
 /* Should be at bottom of the page! */
 * HTML .i-ljtimes-btn,
