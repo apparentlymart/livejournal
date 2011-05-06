@@ -1263,11 +1263,16 @@ sub url {
     return $url;
 }
 
-# returns LJ::Identity object
-sub identity {
-    my $u = shift;
-    return $u->{_identity} if $u->{_identity};
-    return undef unless $u->{'journaltype'} eq "I";
+# there are two procedures for finding an LJ::Identity object for the given
+# user, the difference being that identity() checks for journaltype eq 'I'
+# while find_identity() does not. this is done this way for backwards
+# compatibility: some parts of LJ code use identity() to check what
+# is_identity() checks (suboptimal, yes, but it works that way)
+
+sub find_identity {
+    my ($u) = @_;
+
+    return $u->{'_identity'} if $u->{'_identity'};
 
     my $memkey = [$u->{userid}, "ident:$u->{userid}"];
     my $ident = LJ::MemCache::get($memkey);
@@ -1293,6 +1298,13 @@ sub identity {
     }
 
     return;
+}
+
+sub identity {
+    my ($u) = @_;
+
+    return unless $u->is_identity;
+    return $u->find_identity;
 }
 
 # returns a URL if account is an OpenID identity.  undef otherwise.
