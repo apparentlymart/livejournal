@@ -126,3 +126,22 @@
 #qotd_html_preview {
 	zoom:1;
 	}
+
+/* Donate button
+--------------------------- */
+.lj-button {
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#6E9DC9", endColorstr="#4E7EAD")!important;
+	}
+.lj-button.light {
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#FEFEFE", endColorstr="#E0E1E4")!important;
+	}
+.lj-button-link IMG {
+	top:2px!important;
+	}
+.lj-button,
+.lj-button-wrapper,
+.lj-button-link SPAN {
+	display: inline!important;
+	zoom: 1!important;
+	}
+

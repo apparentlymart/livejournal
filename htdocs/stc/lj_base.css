@@ -2877,3 +2877,94 @@ DIV.lj_ippu_app {
 	background: #000;
 	opacity: 0.6;
 	}
+
+/* Donate button
+--------------------------- */
+.lj-button,
+.lj-button-wrapper,
+.lj-button-link,
+.lj-button-link .lj-button-a,
+.lj-button-link .lj-button-b,
+.lj-button-link .lj-button-c {
+	display: inline-block!important;
+	margin: 0!important;
+	padding: 0!important;
+	font: 11px/21px Arial,sans-serif!important;
+	}
+.lj-button {
+	vertical-align: top!important;
+	border: 1px solid #2A5985!important;
+	border-color: #386793 #2A5985 #194874!important;
+	border-radius: 3px!important;
+	-moz-border-radius: 3px!important;
+	-webkit-border-radius: 3px!important;
+	background-color: #6E9DC9!important;
+	background: -moz-linear-gradient(100% 100% 90deg, #4E7EAD, #6E9DC9)!important;
+	background: -webkit-linear-gradient(#4E7EAD, #6E9DC9)!important;
+	background: -o-linear-gradient(#4E7EAD, #6E9DC9)!important;
+	background: linear-gradient(#4E7EAD, #6E9DC9)!important;
+	}
+.lj-button-wrapper {
+	border-top: 1px solid #9FC9E1!important;
+	border-radius: 3px 3px 0 0!important;
+	-moz-border-radius: 3px 3px 0 0!important;
+	-webkit-border-radius: 3px 3px 0 0!important;
+	}
+.lj-button-link:link,
+.lj-button-link:visited,
+.lj-button-link:hover,
+.lj-button-link:active {
+	padding: 0 3px!important;
+	text-decoration: none!important;
+	text-shadow: 1px -1px 0 #386793!important;
+	color: #E8EFF6!important;
+	cursor: pointer!important;
+	}
+.lj-button-link IMG {
+	position:relative!important;
+	top:1px!important;
+	vertical-align: baseline!important;
+	border: 0!important;
+	}
+.lj-button-link .lj-button-a {
+	padding: 0 4px 0 3px!important;
+	}
+.lj-button-link .lj-button-c {
+	padding: 0 4px 0 6px!important;
+	}
+.lj-button-link .lj-button-b {
+	padding: 0 3px 0 0!important;
+	border-right: 1px solid #43729E!important;
+	}
+.lj-button-link .lj-button-a .lj-button-c {
+	padding: 0 0 0 3px!important;
+	margin: 0 -4px 0 0!important;
+	border-left: 1px solid #A1CCE3!important;
+	}
+
+/* light button */
+.lj-button.light {
+	border-color: #C9C9C9 #BBB #AAA!important;
+	background-color: #ECEEEE!important;
+	background: -moz-linear-gradient(100% 100% 90deg, #E0E1E4, #FEFEFE)!important;
+	background: -webkit-linear-gradient(#E0E1E4, #FEFEFE)!important;
+	background: -o-linear-gradient(#E0E1E4, #FEFEFE)!important;
+	background: linear-gradient(#E0E1E4, #FEFEFE)!important;
+	}
+.light .lj-button-wrapper {
+	border-color: #FFF!important;
+	}
+.light .lj-button-link:link,
+.light .lj-button-link:visited,
+.light .lj-button-link:hover,
+.light .lj-button-link:active {
+	text-shadow: 1px 1px 0 #FFF!important;
+	color: #222!important;
+	}
+.light .lj-button-link .lj-button-b {
+	border-color: #ABABAB!important;
+	}
+.light .lj-button-link .lj-button-c {
+	border: none!important;
+	}
+
