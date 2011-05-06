@@ -1010,54 +1010,68 @@ HTML BODY.logged-out {
 
 .b-twinterstitial-question,
 .b-fbinterstitial-question,
-.b-vkinterstitial-question {
+.b-vkinterstitial-question,
+.b-mailinterstitial-question,
+.b-googinterstitial-question {
 	margin:0 0 10px;
 	}
 .b-twinterstitial-form,
 .b-fbinterstitial-form,
-.b-vkinterstitial-form {
+.b-vkinterstitial-form,
+.b-mailinterstitial-form,
+.b-googinterstitial-form {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 	}
 	.b-twinterstitial-form LI,
 	.b-fbinterstitial-form LI,
-	.b-vkinterstitial-form LI {
+	.b-vkinterstitial-form LI,
+	.b-mailinterstitial-form LI,
+	.b-googinterstitial-form LI {
 		margin: 0 0 5px;
 		padding: 0;
 		list-style: none;
 		}
 	.b-twinterstitial-form LI,
-	.b-vkinterstitial-form LI {
+	.b-vkinterstitial-form LI,
+	.b-googinterstitial-form LI {
 		position:relative;
 		}
 		.b-twinterstitial-form .i-bubble,
-		.b-vkinterstitial-form .i-bubble {
+		.b-vkinterstitial-form .i-bubble,
+		.b-googinterstitial-form .i-bubble {
 			top:-7px;
 			}
 		.b-twinterstitial-form LABEL,
-		.b-vkinterstitial-form LABEL {
+		.b-vkinterstitial-form LABEL,
+		.b-googinterstitial-form LABEL {
 			white-space:nowrap;
 			}
 	.b-twinterstitial-form .b-twinterstitial-submit,
 	.b-fbinterstitial-form .b-fbinterstitial-submit,
-	.b-vkinterstitial-form .b-vkinterstitial-submit {
+	.b-vkinterstitial-form .b-vkinterstitial-submit,
+	.b-mailinterstitial-form .b-vkinterstitial-submit,
+	.b-googinterstitial-form .b-vkinterstitial-submit {
 		margin: 7px 0 0;
 		}
 .b-twinterstitial-form-compact,
-.b-vkinterstitial-form-compact {
+.b-vkinterstitial-form-compact,
+.b-googinterstitial-form-compact {
 	width: 460px;
 	margin: 150px auto 0;
 	text-align: center;
 	font-family: Arial,sans-serif;
 	}
 	.b-twinterstitial-form-compact H4,
-	.b-vkinterstitial-form-compact H4 {
+	.b-vkinterstitial-form-compact H4,
+	.b-googinterstitial-form-compact H4 {
 		font-size: 24px;
 		font-weight: normal;
 		}
 	.b-twinterstitial-form-compact .ljuser IMG,
-	.b-vkinterstitial-form-compact .ljuser IMG {
+	.b-vkinterstitial-form-compact .ljuser IMG,
+	.b-googinterstitial-form-compact .ljuser IMG {
 		vertical-align: middle!important;
 		}
 	.b-twinterstitial-form-compact H5,
@@ -1065,14 +1079,18 @@ HTML BODY.logged-out {
 	.b-twinterstitial-form-compact UL,
 	.b-vkinterstitial-form-compact H5,
 	.b-vkinterstitial-form-compact P,
-	.b-vkinterstitial-form-compact UL {
+	.b-vkinterstitial-form-compact UL,
+	.b-googinterstitial-form-compact H5,
+	.b-googinterstitial-form-compact P,
+	.b-googinterstitial-form-compact UL {
 		margin: 0;
 		padding: 10px 0;
 		font-weight: normal;
 		font-size: 12px;
 		}
 	.b-twinterstitial-form-compact H5,
-	.b-vkinterstitial-form-compact H5 {
+	.b-vkinterstitial-form-compact H5,
+	.b-googinterstitial-form-compact H5 {
 		border-top: 1px solid #CCC;
 		}
 	.b-twinterstitial-form-compact TABLE {
@@ -1086,7 +1104,9 @@ HTML BODY.logged-out {
 	.b-twinterstitial-form-compact .checkboxes,
 	.b-twinterstitial-form-compact .checkboxes LI,
 	.b-vkinterstitial-form-compact .checkboxes,
-	.b-vkinterstitial-form-compact .checkboxes LI {
+	.b-vkinterstitial-form-compact .checkboxes LI,
+	.b-googinterstitial-form-compact .checkboxes,
+	.b-googinterstitial-form-compact .checkboxes LI {
 		display: inline;
 		}
 
