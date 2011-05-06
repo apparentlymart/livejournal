@@ -4337,7 +4337,7 @@ sub Page__get_entries_by_tags {
     my @itemids;
     my $err;
     my @items = LJ::get_recent_items({
-        'clusterid'     => $journal->userid,
+        'clusterid'     => $journal->clusterid,
         'clustersource' => 'slave',
         'userid'        => $journal->userid,
 
