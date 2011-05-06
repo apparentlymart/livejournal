@@ -167,13 +167,14 @@ window.LJShare.init = function( opts ) {
 * @param String|Node|Jquery collection Node the popup has to be attached to. Default id a:last
 */
 window.LJShare.link = function( opts, node ) {
-	var link = node || jQuery( 'a:last' ),
-		linkImg = link.find('img'),
-		url = link.attr( 'href' ),
-		options = prepareOptions( jQuery.extend( {}, { url: url } , opts ) ),
-		dom, bubble, skipCloseEvent;
-		
-	link = (linkImg.length) ? linkImg : link;		
+	var a = node || $( 'a:last' ),
+		linkImg = a.find( 'img' ),
+		link = (linkImg.length) ? linkImg : a,
+		url = a.attr( 'href' ),
+		options = prepareOptions( $.extend( {}, { url: url } , opts ) ),
+		dom;
+
+	a.attr( 'href', 'javascript:void(0)' );
 
 	var links = ( opts.links ) ? opts.links : global_options.links;
 
@@ -226,15 +227,14 @@ window.LJShare.link = function( opts, node ) {
 		} );
 	}
 
-	link.attr( 'href', 'javascript:void(0)' )
-		.one( 'click', function( ev ) {
-			ev.stopPropagation();
-			
-			if( !dom ) {
-				buildDom();
-				bindControls();
-			}
-		} );
+	link.one( 'click', function( ev ) {
+		ev.stopPropagation();
+		
+		if( !dom ) {
+			buildDom();
+			bindControls();
+		}
+	} );
 
 	return this;
 };
