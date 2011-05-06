@@ -385,18 +385,11 @@ sub tags {
     return values %$entry_taginfo;
 }
 
-# returns true if loaded, zero if not.
-# also sets _loaded_text and subject and event.
-sub _load_text {
-    my $self = shift;
-    return 1 if $self->{_loaded_text};
+sub handle_prefetched_text {
+    my ( $self, $subject, $event ) = @_;
 
-    my $ret = LJ::get_logtext2($self->{'u'}, $self->{'jitemid'});
-    my $lt = $ret->{$self->{jitemid}};
-    return 0 unless $lt;
-
-    $self->{subject}      = $lt->[0];
-    $self->{event}        = $lt->[1];
+    $self->{subject}      = $subject;
+    $self->{event}        = $event;
 
     if ($self->prop("unknown8bit")) {
         # save the old ones away, so we can get back at them if we really need to
@@ -408,6 +401,20 @@ sub _load_text {
     }
 
     $self->{_loaded_text} = 1;
+}
+
+# returns true if loaded, zero if not.
+# also sets _loaded_text and subject and event.
+sub _load_text {
+    my $self = shift;
+    return 1 if $self->{_loaded_text};
+
+    my $ret = LJ::get_logtext2($self->{'u'}, $self->{'jitemid'});
+    my $lt = $ret->{$self->{jitemid}};
+    return 0 unless $lt;
+
+    $self->handle_prefetched_text( $lt->[0], $lt->[1] );
+
     return 1;
 }
 
