@@ -2279,6 +2279,8 @@ DIV.lj_ippu_app {
 	.i-popup-arrtr.i-popup-arr {
 		border-left: 6px solid transparent;
 		border-right: 6px solid transparent;
+		border-left: 6px solid rgba(255,255,255,.01);
+		border-right: 6px solid rgba(255,255,255,.01);
 		border-bottom: 6px solid #CCC;
 		}
 	.i-popup-arrt .i-popup-arr-brdr-outer,
@@ -2288,6 +2290,8 @@ DIV.lj_ippu_app {
 		left: -6px;
 		border-left: 6px solid transparent;
 		border-right: 6px solid transparent;
+		border-left: 6px solid rgba(255,255,255,.01);
+		border-right: 6px solid rgba(255,255,255,.01);
 		border-bottom: 6px solid #FFF;
 		}
 	.i-popup-arrt .i-popup-arr-brdr-inner,
@@ -2297,6 +2301,8 @@ DIV.lj_ippu_app {
 		left: -6px;
 		border-left: 6px solid transparent;
 		border-right: 6px solid transparent;
+		border-left: 6px solid rgba(255,255,255,.01);
+		border-right: 6px solid rgba(255,255,255,.01);
 		border-bottom: 6px solid #E7E7E7;
 		}
 	.i-popup-arrt .i-popup-arr-bg,
@@ -2306,6 +2312,8 @@ DIV.lj_ippu_app {
 		left: -6px;
 		border-left: 6px solid transparent;
 		border-right: 6px solid transparent;
+		border-left: 6px solid rgba(255,255,255,.01);
+		border-right: 6px solid rgba(255,255,255,.01);
 		border-bottom: 6px solid #FFF;
 		}
 
@@ -2314,6 +2322,8 @@ DIV.lj_ippu_app {
 	.i-popup-arrbr.i-popup-arr {
 		border-left: 6px solid transparent;
 		border-right: 6px solid transparent;
+		border-left: 6px solid rgba(255,255,255,.01);
+		border-right: 6px solid rgba(255,255,255,.01);
 		border-top: 6px solid #CCC;
 		}
 	.i-popup-arrb .i-popup-arr-brdr-outer,
@@ -2323,6 +2333,8 @@ DIV.lj_ippu_app {
 		left: -6px;
 		border-left: 6px solid transparent;
 		border-right: 6px solid transparent;
+		border-left: 6px solid rgba(255,255,255,.01);
+		border-right: 6px solid rgba(255,255,255,.01);
 		border-top: 6px solid #FFF;
 		}
 	.i-popup-arrb .i-popup-arr-brdr-inner,
@@ -2332,6 +2344,8 @@ DIV.lj_ippu_app {
 		left: -6px;
 		border-left: 6px solid transparent;
 		border-right: 6px solid transparent;
+		border-left: 6px solid rgba(255,255,255,.01);
+		border-right: 6px solid rgba(255,255,255,.01);
 		border-top: 6px solid #E7E7E7;
 		}
 	.i-popup-arrb .i-popup-arr-bg,
@@ -2341,6 +2355,8 @@ DIV.lj_ippu_app {
 		left: -6px;
 		border-left: 6px solid transparent;
 		border-right: 6px solid transparent;
+		border-left: 6px solid rgba(255,255,255,.01);
+		border-right: 6px solid rgba(255,255,255,.01);
 		border-top: 6px solid #FFF;
 		}
 
@@ -2349,6 +2365,8 @@ DIV.lj_ippu_app {
 	.i-popup-arrlb.i-popup-arr {
 		border-top: 6px solid transparent;
 		border-bottom: 6px solid transparent;
+		border-top: 6px solid rgba(255,255,255,.01);
+		border-bottom: 6px solid rgba(255,255,255,.01);
 		border-right: 6px solid #CCC;
 		}
 	.i-popup-arrl .i-popup-arr-brdr-outer,
@@ -2358,6 +2376,8 @@ DIV.lj_ippu_app {
 		top: -6px;
 		border-top: 6px solid transparent;
 		border-bottom: 6px solid transparent;
+		border-top: 6px solid rgba(255,255,255,.01);
+		border-bottom: 6px solid rgba(255,255,255,.01);
 		border-right: 6px solid #FFF;
 		}
 	.i-popup-arrl .i-popup-arr-brdr-inner,
@@ -2367,6 +2387,8 @@ DIV.lj_ippu_app {
 		top: -6px;
 		border-top: 6px solid transparent;
 		border-bottom: 6px solid transparent;
+		border-top: 6px solid rgba(255,255,255,.01);
+		border-bottom: 6px solid rgba(255,255,255,.01);
 		border-right: 6px solid #E7E7E7;
 		}
 	.i-popup-arrl .i-popup-arr-bg,
@@ -2376,6 +2398,8 @@ DIV.lj_ippu_app {
 		top: -6px;
 		border-top: 6px solid transparent;
 		border-bottom: 6px solid transparent;
+		border-top: 6px solid rgba(255,255,255,.01);
+		border-bottom: 6px solid rgba(255,255,255,.01);
 		border-right: 6px solid #FFF;
 		}
 
@@ -2384,6 +2408,8 @@ DIV.lj_ippu_app {
 	.i-popup-arrrb.i-popup-arr {
 		border-top: 6px solid transparent;
 		border-bottom: 6px solid transparent;
+		border-top: 6px solid rgba(255,255,255,.01);
+		border-bottom: 6px solid rgba(255,255,255,.01);
 		border-left: 6px solid #CCC;
 		}
 	.i-popup-arrr .i-popup-arr-brdr-outer,
@@ -2393,6 +2419,8 @@ DIV.lj_ippu_app {
 		top: -6px;
 		border-top: 6px solid transparent;
 		border-bottom: 6px solid transparent;
+		border-top: 6px solid rgba(255,255,255,.01);
+		border-bottom: 6px solid rgba(255,255,255,.01);
 		border-left: 6px solid #FFF;
 		}
 	.i-popup-arrr .i-popup-arr-brdr-inner,
@@ -2402,6 +2430,8 @@ DIV.lj_ippu_app {
 		top: -6px;
 		border-top: 6px solid transparent;
 		border-bottom: 6px solid transparent;
+		border-top: 6px solid rgba(255,255,255,.01);
+		border-bottom: 6px solid rgba(255,255,255,.01);
 		border-left: 6px solid #E7E7E7;
 		}
 	.i-popup-arrr .i-popup-arr-bg,
@@ -2411,6 +2441,8 @@ DIV.lj_ippu_app {
 		top: -6px;
 		border-top: 6px solid transparent;
 		border-bottom: 6px solid transparent;
+		border-top: 6px solid rgba(255,255,255,.01);
+		border-bottom: 6px solid rgba(255,255,255,.01);
 		border-left: 6px solid #FFF;
 		}
 
