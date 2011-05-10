@@ -2795,6 +2795,7 @@ DIV.lj_ippu_app {
 			margin: 0;
 			padding: 0;
 			list-style: none;
+			text-align: left;
 			}
 			BODY .b-loginpopup-item A:link,
 			BODY .b-loginpopup-item A:visited,
