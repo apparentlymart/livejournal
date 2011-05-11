@@ -14,14 +14,16 @@ ExpanderEx = function(){
 ExpanderEx.Collection={};
 ExpanderEx.ReqCache = {};
 
-ExpanderEx.make = function(el,url,id,is_S1){
+ExpanderEx.make = function(ev,el,url,id,is_S1){
     var local = (new ExpanderEx).set({__caller__:el,url:url.replace(/#.*$/,''),id:id,is_S1:!!is_S1});
     local.get();
+    jQuery.event.fix(ev).preventDefault();
 }
 
-ExpanderEx.collapse = function(el,url,id,is_S1){
+ExpanderEx.collapse = function(ev,el,url,id,is_S1){
     var local = (new ExpanderEx).set({__caller__:el,url:url.replace(/#.*$/,''),id:id,is_S1:!!is_S1});
     local.collapseThread();
+    jQuery.event.fix(ev).preventDefault();
 }
 
 ExpanderEx.prototype.set = function(options){
