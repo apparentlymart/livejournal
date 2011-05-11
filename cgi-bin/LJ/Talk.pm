@@ -2540,7 +2540,7 @@ sub get_thread_html
             my $get_expand_link = sub {
                 return
                     "<span id='expand_$dtid'>" . 
-                        " (<a href='$thread_url' onClick=\"ExpanderEx.make(this,'$thread_url','$dtid',true);return false;\">" .
+                        " (<a href='$thread_url' onclick=\"ExpanderEx.make(event,this,'$thread_url','$dtid',true)\">" .
                             BML::ml('talk.expandlink') .
                         "</a>)" .
                     "</span>";
@@ -2549,7 +2549,7 @@ sub get_thread_html
             my $get_collapse_link = sub {
                 return
                     "<span id='collapse_$dtid'>" .
-                        " (<a href='$thread_url' onClick=\"ExpanderEx.collapse(this,'$thread_url','$dtid',true);return false;\">" .
+                        " (<a href='$thread_url' onclick=\"ExpanderEx.collapse(event,this,'$thread_url','$dtid',true)\">" .
                             BML::ml('talk.collapselink') .
                         "</a>)" .
                     "</span>";
