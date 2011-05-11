@@ -91,9 +91,11 @@ sub handler
 {
     my $class = ();
     my $r     = shift; #
-
+    
     LJ::Request->free();
     LJ::Request->init($r);
+
+    LJ::run_hooks("post_read_request");
 
     $class = __PACKAGE__ unless $class;
 
@@ -111,7 +113,8 @@ sub handler
                                                             sub { %RQ = () },
                                                             "Apache::LiveJournal::db_logger",
                                                             "LJ::end_request",
-                                                            "Apache::DebateSuicide"
+                                                            "Apache::DebateSuicide",
+                                                            sub { LJ::run_hooks("clenaup_end_request") },
                                                         ]);
 
         if ($LJ::TRUST_X_HEADERS) {
