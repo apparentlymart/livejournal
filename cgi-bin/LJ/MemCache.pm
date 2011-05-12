@@ -158,6 +158,7 @@ use warnings;
 
 use String::CRC32 qw();
 use Carp qw();
+use Data::Dumper qw();
 use IO::Handle qw();
 
 ### VARIABLES ###
@@ -631,9 +632,39 @@ sub array_to_hash {
     return unless $format_info;
 
     my $format_version = $format_info->[0];
-    return unless $array
-              and ref $array eq "ARRAY"
-              and $array->[0] == $format_version;
+
+    return unless defined $array;
+
+    unless ($array) {
+        Carp::cluck "trying to unserialize $format from memcache, "
+                  . Data::Dumper::Dumper($array) . " is not a true value; "
+                  . "stacktrace follows";
+        return;
+    }
+
+    unless ( ref $array eq 'ARRAY' ) {
+        Carp::cluck "trying to unserialize $format from memcache, "
+                  . Data::Dumper::Dumper($array) . " is not an array value; "
+                  . "stacktrace follows";
+        return;
+    }
+
+    unless ( @$array ) {
+        Carp::cluck "trying to unserialize $format from memcache, "
+                  . Data::Dumper::Dumper($array) . " is an empty arrayref; "
+                  . "stacktrace follows";
+        return;
+    }
+
+    unless ( $array->[0] =~ /^\d+$/ ) {
+        Carp::cluck "trying to unserialize $format from memcache, "
+                  . Data::Dumper::Dumper($array) . " has a non-numeric "
+                  . "'$array->[0]' as its version string; "
+                  . "stacktrace follows";
+        return;
+    }
+
+    return unless $array->[0] == $format_version;
 
     my %ret;
     foreach my $i ( 1 .. $#$format_info ) {
