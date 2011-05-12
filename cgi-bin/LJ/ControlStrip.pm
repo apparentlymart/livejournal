@@ -73,6 +73,7 @@ sub render
     $data_journal->{'is_' . $data_journal->{type}} = 1;
 
     $data_journal->{view} = LJ::Request->notes('view');
+    
     $data_journal->{view_friends} = $data_journal->{view} eq 'friends';
     $data_journal->{view_friendsfriends} = $data_journal->{view} eq 'friendsfriends';
     $data_journal->{view_tag} = $data_journal->{view} eq 'tag';
@@ -201,17 +202,12 @@ sub render
                     };
                 }
 
-                my $selected = "all";
                 if (LJ::Request->uri eq "/friends" && LJ::Request->args ne "") {
-                    $selected = "showpeople"      if LJ::Request->args eq "show=P&filter=0";
-                    $selected = "showcommunities" if LJ::Request->args eq "show=C&filter=0";
-                    $selected = "showsyndicated"  if LJ::Request->args eq "show=Y&filter=0";
-                } elsif (LJ::Request->uri =~ /^\/friends\/?(.+)?/i) {
-                    my $filter = $1 || "default view";
-                    $selected = "filter:" . LJ::durl(lc($filter));
+                    my %GET = LJ::Request->args;
+                    $data_journal->{view_friends_show} = uc(substr($GET{show}, 0, 1)) if $GET{show};
+                } elsif (LJ::Request->uri =~ /^\/friends\/([^\/]+)/i) {
+                    $data_journal->{view_friends_group} = LJ::durl($1);
                 }
-
-                $data_remote->{friends_group_select} = LJ::html_select({'name' => "view", 'selected' => $selected }, @filters);
             }
         }
         elsif ($data_journal->{is_personal})
