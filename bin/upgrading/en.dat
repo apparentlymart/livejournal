@@ -6122,6 +6122,12 @@ web.controlstrip.links.home=Home
 
 web.controlstrip.links.filter=Filter
 
+web.controlstrip.links.usersonly=View users only
+
+web.controlstrip.links.commonly=View communities only
+
+web.controlstrip.links.rssonly=View feeds only
+
 web.controlstrip.links.friendsoffriends=Friends of Friends
 
 web.controlstrip.links.managetags=Manage Tags
