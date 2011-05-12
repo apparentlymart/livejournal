@@ -194,19 +194,23 @@ sub render
                     }
                 }
 
-                foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
-                    push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
-                    push @{$data_remote->{friend_groups}}, {
-                        name  => lc($group{$g}->{name}),
-                        value => $group{$g}->{name},
-                    };
-                }
-
+                my $selected_group = undef;
                 if (LJ::Request->uri eq "/friends" && LJ::Request->args ne "") {
                     my %GET = LJ::Request->args;
                     $data_journal->{view_friends_show} = uc(substr($GET{show}, 0, 1)) if $GET{show};
                 } elsif (LJ::Request->uri =~ /^\/friends\/([^\/]+)/i) {
-                    $data_journal->{view_friends_group} = LJ::durl($1);
+                    $selected_group = LJ::durl($1);
+                    $data_journal->{view_friends_group} = $selected_group;
+                }
+
+                foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
+                    push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
+                    my $item = {
+                        name  => lc($group{$g}->{name}),
+                        value => $group{$g}->{name},
+                    };
+                    $item->{selected} = 1 if $item->{name} eq lc($selected_group);
+                    push @{$data_remote->{friend_groups}}, $item;
                 }
             }
         }
