@@ -380,7 +380,9 @@ function EntryPage::lay_page_nav() {
     println "<li>&nbsp;</li>";
     var Link l = new Link;
     $l = $.entry->get_link("nav_next");
-    $l->lay_print_li($*text_entry_links{"nav_next"});
+    if (defined $l) {
+        $l->lay_print_li($*text_entry_links{"nav_next"});
+    }
     foreach var string ls ($.entry.link_keyseq) {
         $l = $.entry->get_link($ls);
         if (defined $l) {
