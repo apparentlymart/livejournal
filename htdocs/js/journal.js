@@ -129,6 +129,55 @@ ILikeThis = {
 	}
 }
 
+// Friends Times
+jQuery(function($) {
+	$("#friendstimes").each(function() {
+		var last_unreaded = +$(".b-friendstimes-f5 b").text() || 0,
+			$window = $(window)
+		setInterval(function() {
+			$.getJSON(LiveJournal.getAjaxUrl("ft_unreaded"), {
+				after: Site.server_time
+			}, function(data) {
+				if (data.unreaded) {
+					$(".b-friendstimes-f5")
+						.show()
+						.find("b").text(data.unreaded);
+				}
+			});
+		}, 5000);
+
+		var more_node = $(".b-friendstimes-loading"),
+			skip = +LiveJournal.parseGetArgs(location.search) || 0;
+		function loading_more() {
+			if (more_node.offset().top <= ($window.scrollTop() + $window.height())) {
+				$window.unbind("scroll", loading_more);
+				jQuery.ajax({
+					url: LiveJournal.getAjaxUrl("ft_more"),
+					data: {
+						skip: skip + 20
+					},
+					dataType: 'html',
+					success: function(html) {
+						if (html) {
+							skip += 20;
+							more_node.before(html);
+							$window.scroll(loading_more);
+						} else {
+							more_node.remove();
+						}
+					},
+					error: function() {
+						// retry
+						setTimeout(loading_more, 5000);
+					}
+				});
+			}
+		}
+		
+		$window.scroll(loading_more);
+	});
+});
+
 // Share at some S2 styles
 jQuery(document).click(function(e)
 {
