@@ -129,42 +129,71 @@ ILikeThis = {
 	}
 }
 
-// Friends Times
-jQuery(function($) {
-	$("#friendstimes").each(function() {
-		var last_unreaded = +$(".b-friendstimes-f5 b").text() || 0,
-			$window = $(window)
+FriendsTimes = {
+	prev_page_start: null,
+
+	init: function() {
+		jQuery(function(){
+			FriendsTimes.checkUnreaded({
+				timeout: 5000
+			});
+			FriendsTimes.bindLoadMore({
+				max_load: 4
+			});
+		});
+	},
+
+	checkUnreaded: function(conf) {
 		setInterval(function() {
-			$.getJSON(LiveJournal.getAjaxUrl("ft_unreaded"), {
-				after: Site.server_time
-			}, function(data) {
-				if (data.unreaded) {
-					$(".b-friendstimes-f5")
-						.show()
-						.find("b").text(data.unreaded);
+			jQuery.ajax({
+				url: LiveJournal.getAjaxUrl("ft_unreaded"),
+				data: {
+					after: Site.server_time
+				},
+				dataType: "json",
+				timeout: conf.timeout - 1,
+				success: function(data) {
+					if (+data.unreaded) {
+						jQuery(".b-friendstimes-f5")
+							.show()
+							.find("b").text(data.unreaded);
+					}
 				}
 			});
-		}, 5000);
+		}, conf.timeout);
+	},
 
-		var more_node = $(".b-friendstimes-loading"),
-			skip = +LiveJournal.parseGetArgs(location.search) || 0;
+	bindLoadMore: function(conf) {
+		var $window = jQuery(window),
+			more_node = jQuery(".b-friendstimes-loading"),
+			loaded_count = 0;
 		function loading_more() {
-			if (more_node.offset().top <= ($window.scrollTop() + $window.height())) {
+			if ((more_node.offset().top + more_node.height()) <= ($window.scrollTop() + $window.height())) {
 				$window.unbind("scroll", loading_more);
+				var start_time = new Date();
 				jQuery.ajax({
 					url: LiveJournal.getAjaxUrl("ft_more"),
 					data: {
-						skip: skip + 20
+						to: FriendsTimes.prev_page_start
 					},
-					dataType: 'html',
+					dataType: "html",
 					success: function(html) {
-						if (html) {
-							skip += 20;
-							more_node.before(html);
-							$window.scroll(loading_more);
-						} else {
-							more_node.remove();
-						}
+						// slow hide text, minimum 2sec
+						setTimeout(function() {
+							if (html) {
+								loaded_count++;
+								more_node.before(html);
+								if (loaded_count < conf.max_load) {
+									jQuery(".b-friendstimes-pages").remove();
+									$window.scroll(loading_more);
+								} else {
+									jQuery(".b-friendstimes-pages").show();
+									more_node.remove();
+								}
+							} else {
+								more_node.remove();
+							}
+						}, Math.max(0, start_time - new Date() + 2000));
 					},
 					error: function() {
 						// retry
@@ -173,9 +202,15 @@ jQuery(function($) {
 				});
 			}
 		}
-		
+
 		$window.scroll(loading_more);
-	});
+	}
+};
+
+jQuery(function($) {
+	if ($("#friendstimes").length) {
+		FriendsTimes.init();
+	}
 });
 
 // Share at some S2 styles
