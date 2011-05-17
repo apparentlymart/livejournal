@@ -1011,6 +1011,34 @@ sub render_options_block {
             $out .= LJ::help_icon_html("adult_content", "", " ");
             return $out;
         },
+        'give_features' => sub {
+            my $out = '';
+
+            return unless LJ::is_enabled("give_features");
+            
+            my @give_menu = (
+                ""        => BML::ml('entryform.give.default'),
+                "enable"  => BML::ml('entryform.give.enable'),
+                "disable" => BML::ml('entryform.give.disable'),
+            );
+
+            $out .= "<label for='prop_give_features' class='left options'>" .
+                BML::ml('entryform.give') . "</label>\n";
+
+            $out .= LJ::html_select({
+                name => 'prop_give_features',
+                id => 'prop_give_features',
+                class => 'select',
+                selected => $opts->{prop_give_features} || "",
+                tabindex => $self->tabindex,
+            }, @give_menu);
+
+            $out .= LJ::help_icon_html("give", "", " ");
+            return $out;
+        },
+        'blank' => sub {
+          return '';  
+        },
         'lastfm_logo' => sub {
             return unless $self->should_show_lastfm;
             return qq{
@@ -1075,6 +1103,7 @@ sub render_options_block {
         [ 'mood', 'comment_settings' ],
         [ 'location', 'comment_screening' ],
         [ 'music', 'content_flag' ],
+        [ 'blank', 'give_features' ],
         'extra',
         [ 'lastfm_logo', 'spellcheck' ],
     );

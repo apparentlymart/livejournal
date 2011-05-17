@@ -14,6 +14,7 @@ use LJ::RateLimit qw//;
 use LJ::Share;
 use LJ::Talk::Author;
 use LJ::TimeUtil;
+use LJ::Pay::Wallet;
 
 use constant PACK_FORMAT => "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state 
 
@@ -162,6 +163,23 @@ sub link_bar
         push @linkele, $mlink->($flag_url, 'flag');
     }
 
+    ## Give features
+    if (LJ::is_enabled('give_features') && $remote && $entry->prop('give_features')) {
+        my $remote_balance = LJ::Pay::Wallet->get_user_balance($remote);
+        my $give_link = ($remote_balance < $LJ::GIVE_TOKENS) ?
+                        "$LJ::SITEROOT/shop/tokens.bml" :
+                        "$LJ::SITEROOT/give_tokens.bml?${jarg}itemid=$itemid";
+        my $give_count = $entry->prop('give_count') || 0;
+        my $give_button = '<span class="lj-button light">
+                           <span class="lj-button-wrapper">
+                           <a class="lj-button-link" href="'.$give_link.'">
+                           <span class="lj-button-a"><span class="lj-button-b">'.$LJ::GIVE_TOKENS.' <img src="'.$LJ::IMGPREFIX.'/icons/donate.png" /></span><span class="lj-button-c">'.($give_count ? BML::ml('give_features.given', {'count' => $give_count}) : BML::ml('give_features.give')).'</span></span>
+                           </a>
+                           </span>
+                           </span>';
+        
+        push @linkele, $give_button;
+    }
 
     ## Next
     push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");

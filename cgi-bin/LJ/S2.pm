@@ -1890,6 +1890,7 @@ sub Entry
     push @$link_keyseq, 'watch_comments'    if LJ::is_enabled('esn');
     push @$link_keyseq, 'unwatch_comments'  if LJ::is_enabled('esn');
     push @$link_keyseq, 'flag'              if LJ::is_enabled('content_flag');
+    push @$link_keyseq, 'give_button'       if LJ::is_enabled('give_features');
 
     # Note: nav_prev and nav_next are not included in the keyseq anticipating
     #      that their placement relative to the others will vary depending on
@@ -3876,6 +3877,10 @@ sub _Entry__get_link
                             $ctx->[S2::PROPS]->{"text_flag"},
                             LJ::S2::Image("$LJ::IMGPREFIX/button-flag.gif", 24, 24));
     }
+    
+    if ($key eq "give_button") {
+        return $null_link;
+    }
 
     my $etypeid          = 'LJ::Event::JournalNewComment'->etypeid;
     my $newentry_etypeid = 'LJ::Event::JournalNewEntry'->etypeid;
@@ -3963,6 +3968,35 @@ sub _Entry__get_link
                                           'class'               => 'TrackButton'));
     }
 }
+
+sub EntryLite__get_give_button
+{
+    my ($ctx, $this, $type) = @_;
+    $type = 'button' unless $type =~ /^(?:button|link)$/;
+    my $journal  = $this->{'journal'}->{'username'};
+    my $journalu = LJ::load_user($journal);
+    my $entry = LJ::Entry->new($journalu, ditemid => $this->{itemid});
+
+    my $remote = LJ::get_remote();
+    
+    return '' unless LJ::is_enabled('give_features') && $remote && $entry->prop('give_features');
+    
+    my $remote_balance = LJ::Pay::Wallet->get_user_balance($remote);
+    my $give_link = ($remote_balance < $LJ::GIVE_TOKENS) ?
+                    "$LJ::SITEROOT/shop/tokens.bml" :
+                    "$LJ::SITEROOT/give_tokens.bml?journal=$journal&itemid=$this->{itemid}";
+    my $give_count = $entry->prop('give_count') || 0;
+    my $give_button = '<span class="lj-button light">
+                       <span class="lj-button-wrapper">
+                       <a class="lj-button-link" href="'.$give_link.'">
+                       <span class="lj-button-a"><span class="lj-button-b">'.$LJ::GIVE_TOKENS.' <img src="'.$LJ::IMGPREFIX.'/icons/donate.png" /></span><span class="lj-button-c">'.($give_count ? BML::ml('give_features.given', {'count' => $give_count}) : BML::ml('give_features.give')).'</span></span>
+                       </a>
+                       </span>
+                       </span>';
+    return $give_button;
+}
+
+*Entry__c = \&EntryLite__get_give_button;
 
 sub Entry__plain_subject
 {

@@ -1639,4 +1639,14 @@ userproplist.email_faulty:
   cldversion: 8
   prettyname: Email is faulty
 
+logproplist.give_features:
+  datatype: char
+  des: Enable "Give" features in this entry
+  prettyname: "Give" features 
+  sortorder: 109
 
+logproplist.give_count:
+  datatype: num
+  des: Given tokens counter
+  prettyname: Given counter
+  sortorder: 110

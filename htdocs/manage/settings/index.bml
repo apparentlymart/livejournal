@@ -149,6 +149,7 @@ body<=
                 LJ::Setting::VkontakteConnect
                 LJ::Setting::WebmasterTools::Google
                 LJ::Setting::WebmasterTools::Yandex
+                LJ::Setting::GiveFeatures
                 LJ::Setting::LJTimes
             )],
         },

@@ -2097,6 +2097,13 @@ sub postevent
     } else {
         delete $req->{'props'}->{'copyright'};
     }
+    
+    ## give features
+    if (LJ::is_enabled('give_features')) {
+        $req->{'props'}->{'give_features'} = ($req->{'props'}->{'give_features'} eq 'enable') ? 1 :
+                                             ($req->{'props'}->{'give_features'} eq 'disable') ? 0 :
+                                             $uowner->prop('give_features') ? 1 : 0;
+    }
 
     # meta-data
     if (%{$req->{'props'}}) {
