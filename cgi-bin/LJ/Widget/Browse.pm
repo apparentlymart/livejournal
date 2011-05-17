@@ -280,6 +280,7 @@ sub render_body {
                 remove_tags => [ 'b', 'p', 'div', 'span', 'strong', 'font' ],
                 max_len     => 400,
                 crop_image  => 1,
+                entry       => $entry,
             );
             $event = $parsed->{'text'};
             my $images = $parsed->{'images'};

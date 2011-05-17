@@ -13,6 +13,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::Manual';
 
 use LJ::Browse;
+use LJ::Browse::Parser;
 
 # how long to wait if we didn't process any at all
 my $sleep_when_idle;
@@ -70,8 +71,18 @@ sub work {
             my $sth = $dbh->prepare ("INSERT INTO category_recent_posts (jitemid, timecreate, journalid) VALUES (?, ?, ?)");
             $sth->execute($entry->{itemid}, $entry->{logtime}, $journalid);
 
-            ## Add tags for every entry
             my $e_obj = LJ::Entry->new ($u->{userid}, jitemid => $entry->{itemid});
+            my $event = $e_obj->event_raw;
+
+            my $parsed = LJ::Browse::Parser->do_parse (
+                text        => $event,
+                remove_tags => [ 'b', 'p', 'div', 'span', 'strong', 'font' ],
+                max_len     => 400,
+                crop_image  => 1,
+                entry       => $e_obj,
+            );
+
+            ## Add tags for every entry
             my $poster = $e_obj->poster;
             next if $poster->is_suspended;
             next if $e_obj->is_suspended;
@@ -86,6 +97,25 @@ sub work {
         }
 
     }
+
+=head
+    ## Remove old posts
+    my $verticals = $dbh->selectall_arrayref ("SELECT vert_id, not_deleted, remove_after FROM vertical2", { Slice => {} });
+    foreach my $vert (@$verticals) {
+        next unless $vert->{'remove_after'} && $vert->{'not_deleted'};
+        my $cats = $dbh->selectcol_arrayref ("SELECT catid FROM category WHERE vert_id = ?", { Slice => {} }, $vert->{'vert_id'});
+        foreach my $catid (@$cats) {
+            my $comms = $dbh->selectcol_arrayref ("SELECT DISTINCT journalid FROM categoryjournals WHERE catid = ?", undef, $catid);
+            foreach my $journalid (@$comms) {
+                my $jitems = $dbh->selectcol_arrayref ("SELECT jitemid FROM category_recent_posts WHERE journalid = ? AND unix_timestamp(timecreate) < unix_timestamp() - ".$vert->{'remove_after'}." * 3600 ORDER BY timecreate DESC", undef, $journalid);
+                next unless @$jitems;
+                my @to_delete = splice @$jitems, 0, scalar @$jitems - $vert->{'not_deleted'};
+                next unless @to_delete;
+                my $res = $dbh->do ("DELETE FROM category_recent_posts WHERE jitemid in (".join (",", @to_delete).") AND journalid = ?", undef, $journalid);
+            }
+        }
+    }
+=cut
 
     return 0;
 }

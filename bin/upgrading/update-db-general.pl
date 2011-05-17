@@ -3379,6 +3379,8 @@ CREATE TABLE category_recent_posts (
   timecreate datetime NOT NULL,
   journalid int(10) unsigned NOT NULL,
   is_deleted tinyint(1) NOT NULL default '0',
+  pic_orig_url VARCHAR(255) NOT NULL DEFAULT '',
+  pic_fb_url VARCHAR(255) NOT NULL DEFAULT '',
   PRIMARY KEY  (`journalid`,`jitemid`),
   KEY `timecreate` (`timecreate`),
   KEY `journalid` (`journalid`)
@@ -4341,6 +4343,13 @@ register_alter(sub {
         do_alter("category", "ALTER TABLE category MODIFY parentcatid INT UNSIGNED NOT NULL");
     }
 
+    if (column_type("category_recent_posts", "pic_orig_url")) {
+        do_alter("category_recent_posts",
+            "ALTER TABLE category_recent_posts
+                ADD pic_orig_url VARCHAR(255) NOT NULL DEFAULT '',
+                ADD pic_fb_url VARCHAR(255) NOT NULL DEFAULT ''
+        ");
+    }
 });
 
 register_tablecreate("eventrates", <<'EOC'); # clustered

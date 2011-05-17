@@ -19,6 +19,7 @@ sub do_parse {
 
     my $text = $args{'text'};
     my $char_max = $args{'max_len'};
+    my $entry = $args{'entry'};
 
     my $p = HTML::TokeParser->new(\$text);
 
@@ -50,17 +51,48 @@ sub do_parse {
                 ## Img URL must be valid
                 next if $@;
 
-                my $r = $images_crop_cnt ? LJ::crop_picture_from_web(
-                    source      => $attr->{'src'},
-                    size        => '200x200',
-                    cancel_size => '200x0',
-                    username    => $LJ::PHOTOS_FEAT_POSTS_FB_USERNAME,
-                    password    => $LJ::PHOTOS_FEAT_POSTS_FB_PASSWORD,
-                    galleries   => [ $LJ::PHOTOS_FEAT_POSTS_FB_GALLERY ],
-                ) : {};
+                ## Hashref with resized image
+                my $r = undef;
+
+                ## Are we need to update db?
+                my $is_new_img = 0;
+
+                my $jitemid = $entry->jitemid;
+                my $journalid = $entry->journalid;
+                my $dbw = LJ::get_db_writer();
+                if ($images_crop_cnt) {
+                    my $post = $dbw->selectrow_arrayref ("
+                        SELECT pic_orig_url, pic_fb_url 
+                            FROM category_recent_posts 
+                            WHERE jitemid = ? AND journalid = ?", undef,
+                        $jitemid, $journalid
+                    );
+                    if ($post->[0] eq $attr->{'src'}) {
+                        $r = {
+                            status  => 'big',
+                            url     => $post->[1],
+                        };
+                    } else {
+                        $r = LJ::crop_picture_from_web(
+                            source      => $attr->{'src'},
+                            size        => '200x200',
+                            cancel_size => '200x0',
+                            username    => $LJ::PHOTOS_FEAT_POSTS_FB_USERNAME,
+                            password    => $LJ::PHOTOS_FEAT_POSTS_FB_PASSWORD,
+                            galleries   => [ $LJ::PHOTOS_FEAT_POSTS_FB_GALLERY ],
+                        );
+                        $is_new_img = 1;
+                    }
+                }
                 if ($images_crop_cnt && $r && ($r->{'status'} ne 'small') && $r->{'url'}) {
                     $images_crop_cnt--;
                     push @images, $r->{url};
+                    $dbw->do ("
+                        UPDATE category_recent_posts
+                            SET pic_orig_url = ?, pic_fb_url = ? 
+                            WHERE jitemid = ? AND journalid = ?", undef,
+                        $attr->{'src'}, $r->{'url'}, $jitemid, $journalid
+                    ) if $is_new_img;
                     next;
                 } elsif ($r && $r->{'status'} ne 'small') {
                     next;
