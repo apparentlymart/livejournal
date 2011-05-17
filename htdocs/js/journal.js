@@ -129,6 +129,30 @@ ILikeThis = {
 	}
 }
 
+DonateButton = {
+	ml_confirm_message: null,
+	have_tokens: null,
+	lj_form_auth: null,
+
+	donate: function(node, journal, id) {
+		if (confirm(DonateButton.ml_confirm_message)) {
+			jQuery.post(LiveJournal.getAjaxUrl('give_tokens') + '?journal=' + journal + '&id=' + id, {
+				confirm: 1
+			}, function(data) {
+				jQuery(node).find('lj-button-c').text(data.donated_text);
+			});
+		}
+	}
+};
+
+jQuery(document).delegate('a', 'click', function(e) {
+	if (this.href && this.href.indexOf(Site.siteroot + '/give_tokens.bml?journal=') === 0) {
+		var parsed_url = LiveJournal.parseGetArgs(this.href);
+		DonateButton.donate(this, parsed_url.journal, parsed_url.id);
+		e.preventDefault();
+	}
+});
+
 FriendsTimes = {
 	prev_page_start: null,
 
