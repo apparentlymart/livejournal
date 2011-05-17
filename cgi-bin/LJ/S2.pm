@@ -3996,7 +3996,7 @@ sub EntryLite__get_give_button
     return $give_button;
 }
 
-*Entry__c = \&EntryLite__get_give_button;
+*Entry__get_give_button = \&EntryLite__get_give_button;
 
 sub Entry__plain_subject
 {
