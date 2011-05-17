@@ -6722,8 +6722,9 @@ sub memcache_get_u
 {
     my @keys = @_;
     my @ret;
-    foreach my $ar (values %{LJ::MemCache::get_multi(@keys) || {}}) {
-        my $row = LJ::MemCache::array_to_hash("user", $ar)
+    my $users = LJ::MemCache::get_multi(@keys) || {};
+    while (my ($key, $ar) = each %$users) {
+        my $row = LJ::MemCache::array_to_hash("user", $ar, $key)
             or next;
         my $u = LJ::User->new_from_row($row);
         push @ret, $u;

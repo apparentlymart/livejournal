@@ -626,7 +626,7 @@ sub get_or_set {
 ### OBJECT SERIALIZATION METHODS ###
 
 sub array_to_hash {
-    my ( $format, $array ) = @_;
+    my ( $format, $array, $key ) = @_;
 
     my $format_info = $LJ::MEMCACHE_ARRAYFMT{$format};
     return unless $format_info;
@@ -637,28 +637,28 @@ sub array_to_hash {
 
     unless ($array) {
         Carp::cluck "trying to unserialize $format from memcache, "
-                  . Data::Dumper::Dumper($array) . " is not a true value; "
+                  . Data::Dumper::Dumper([$key, $array]) . " is not a true value; "
                   . "stacktrace follows";
         return;
     }
 
     unless ( ref $array eq 'ARRAY' ) {
         Carp::cluck "trying to unserialize $format from memcache, "
-                  . Data::Dumper::Dumper($array) . " is not an array value; "
+                  . Data::Dumper::Dumper([$key, $array]) . " is not an array value; "
                   . "stacktrace follows";
         return;
     }
 
     unless ( @$array ) {
         Carp::cluck "trying to unserialize $format from memcache, "
-                  . Data::Dumper::Dumper($array) . " is an empty arrayref; "
+                  . Data::Dumper::Dumper([$key, $array]) . " is an empty arrayref; "
                   . "stacktrace follows";
         return;
     }
 
     unless ( $array->[0] =~ /^\d+$/ ) {
         Carp::cluck "trying to unserialize $format from memcache, "
-                  . Data::Dumper::Dumper($array) . " has a non-numeric "
+                  . Data::Dumper::Dumper([$key, $array]) . " has a non-numeric "
                   . "'$array->[0]' as its version string; "
                   . "stacktrace follows";
         return;
