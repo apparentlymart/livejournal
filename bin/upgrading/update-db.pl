@@ -6,6 +6,7 @@
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 
+use DBI::Const::GetInfoType;
 use Getopt::Long;
 use File::Path ();
 use File::Basename ();
@@ -219,14 +220,16 @@ if ($opt_pop) {
 # Note:  now cluster 0 means expunged (as well as statuvis 'X'), so there's
 # an option to disable the warning if you're running new code and know what's up.
 # if they're running modern code (with dversion 6 users), we won't check
-unless ($dbh->selectrow_array("SELECT userid FROM user WHERE dversion >= 6 LIMIT 1")) {
-    my $cluster0 = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE clusterid=0");
-    if ($cluster0) {
-        print "\n", "* "x35, "\nWARNING: You have $cluster0 users on cluster 0.\n\n".
-            "Support for that old database schema is deprecated and will be removed soon.\n".
-            "You should stop updating from CVS until you've moved all your users to a cluster \n".
-            "(probably cluster '1', which you can run on the same database). \n".
-            "See bin/moveucluster.pl for instructions.\n" . "* "x35 . "\n\n";
+if (table_exists('user')) {
+    unless ($dbh->selectrow_array("SELECT userid FROM user WHERE dversion >= 6 LIMIT 1")) {
+        my $cluster0 = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE clusterid=0");
+        if ($cluster0) {
+            print "\n", "* "x35, "\nWARNING: You have $cluster0 users on cluster 0.\n\n".
+                "Support for that old database schema is deprecated and will be removed soon.\n".
+                "You should stop updating from CVS until you've moved all your users to a cluster \n".
+                "(probably cluster '1', which you can run on the same database). \n".
+                "See bin/moveucluster.pl for instructions.\n" . "* "x35 . "\n\n";
+        }
     }
 }
 
@@ -1009,11 +1012,27 @@ sub clear_table_info
     delete $table_status{$table};
 }
 
+sub table_exists {
+    my $table = shift;
+    my $data_source = $dbh->get_info( $GetInfoType{SQL_DATA_SOURCE_NAME} );
+    if ($data_source =~ /^dbi:mysql:(.+?)(?:;|$)/) {
+        my $result = $dbh->selectrow_array('
+            SELECT count(*) 
+            FROM information_schema.tables 
+            WHERE table_schema = ?
+              AND table_name = ?
+        ', undef, $1, $table);
+        return $result;
+    }
+}
+
 sub load_table_info
 {
     my $table = shift;
 
     clear_table_info($table);
+
+    return unless table_exists($table);
 
     my $sth = $dbh->prepare("DESCRIBE $table");
     $sth->execute;
