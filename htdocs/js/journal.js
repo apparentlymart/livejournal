@@ -192,9 +192,9 @@ FriendsTimes = {
 			more_node = jQuery(".b-friendstimes-loading"),
 			loaded_count = 0;
 		function loading_more() {
-			if ((more_node.offset().top + more_node.height()) <= ($window.scrollTop() + $window.height())) {
+			// preload
+			if ((jQuery(document).height() - 1000) <= ($window.scrollTop() + $window.height())) {
 				$window.unbind("scroll", loading_more);
-				var start_time = new Date();
 				jQuery.ajax({
 					url: LiveJournal.getAjaxUrl("ft_more"),
 					data: {
@@ -202,22 +202,19 @@ FriendsTimes = {
 					},
 					dataType: "html",
 					success: function(html) {
-						// slow hide text, minimum 2sec
-						setTimeout(function() {
-							if (html) {
-								loaded_count++;
-								more_node.before(html);
-								if (loaded_count < conf.max_load) {
-									jQuery(".b-friendstimes-pages").remove();
-									$window.scroll(loading_more);
-								} else {
-									jQuery(".b-friendstimes-pages").show();
-									more_node.remove();
-								}
+						if (html) {
+							loaded_count++;
+							more_node.before(html);
+							if (loaded_count < conf.max_load) {
+								jQuery(".b-friendstimes-pages").remove();
+								$window.scroll(loading_more);
 							} else {
+								jQuery(".b-friendstimes-pages").show();
 								more_node.remove();
 							}
-						}, Math.max(0, start_time - new Date() + 2000));
+						} else {
+							more_node.remove();
+						}
 					},
 					error: function() {
 						// retry
@@ -228,6 +225,7 @@ FriendsTimes = {
 		}
 
 		$window.scroll(loading_more);
+		loading_more();
 	}
 };
 
