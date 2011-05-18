@@ -523,7 +523,7 @@ sub helper_url {
 
     unless ($u) {
         LJ::Session->clear_master_cookie;
-        return $dest;
+        return;
     }
 
     my $domcook = LJ::Session->domain_cookie($dest) or
