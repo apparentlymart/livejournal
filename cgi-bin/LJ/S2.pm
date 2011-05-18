@@ -3986,7 +3986,14 @@ sub EntryLite__get_give_button
                     "$LJ::SITEROOT/shop/tokens.bml" :
                     "$LJ::SITEROOT/give_tokens.bml?journal=$journal&itemid=$this->{itemid}";
     my $give_count = $entry->prop('give_count') || 0;
-    my $give_button = '<span class="lj-button light">
+    my $give_button = '<script type="text/javascript">
+                        jQuery.extend(DonateButton, {
+                            ml_confirm_message: \''.BML::ml('/give_tokens.bml.confirm.submit.body', { 'give_count' => $LJ::GIVE_TOKENS, 'poster' => $entry->poster->user }).'\',
+                            have_tokens: '.(($remote_balance < $LJ::GIVE_TOKENS) ? 'false' : 'true' ).',
+                            lj_form_auth: "'.LJ::form_auth('raw').'"
+                        })
+                       </script> 
+                       <span class="lj-button light">
                        <span class="lj-button-wrapper">
                        <a class="lj-button-link" href="'.$give_link.'">
                        <span class="lj-button-a"><span class="lj-button-b">'.$LJ::GIVE_TOKENS.' <img src="'.$LJ::IMGPREFIX.'/icons/donate.png" /></span><span class="lj-button-c">'.($give_count ? BML::ml('give_features.given', {'count' => $give_count}) : BML::ml('give_features.give')).'</span></span>
