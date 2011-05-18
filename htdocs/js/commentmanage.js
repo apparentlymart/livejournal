@@ -242,9 +242,7 @@ function createDeleteFunction(ae, dItemid, action) {
 		}
         var canAdmin = LJ_cmtinfo.canAdmin;
 		
-		var imageInTarget = jQuery(ae).find('img');
-		
-		var markSpamMLPrefix = (Site.remote_is_maintainer == 1) ? 'comment.mark.spam.' : 'comment.mark.spam2.';
+		var markSpamMLPrefix = (Site.remote_is_maintainer == 1 && com.u !== '') ? 'comment.mark.spam.' : 'comment.mark.spam2.';		
 		
 		if (action == 'markAsSpam') {
 			if (!window.delPopup) {
@@ -253,11 +251,11 @@ function createDeleteFunction(ae, dItemid, action) {
 						window.delPopup.bubble('hide');
 					});
 			}			
-			
+
 			window.delPopup
 				.html('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr(markSpamMLPrefix + 'title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr(markSpamMLPrefix + 'subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" onclick="deleteComment(' + dItemid + ', \'' + action + '\');" value="' + getLocalizedStr(markSpamMLPrefix + 'button', comUser) + '"></div><div>', ae, e, 'spamComment' + dItemid)
 				.bubble()
-				.bubble('show', (imageInTarget.length === 0) ? ae : imageInTarget);
+				.bubble('show', ae);
 
 			return true;
 		} else if (action == 'delete') {
@@ -289,7 +287,7 @@ function createDeleteFunction(ae, dItemid, action) {
 			window.modPopup
 				.html(inHTML.join(' '))
 				.bubble()
-				.bubble('show', (imageInTarget.length === 0) ? ae : imageInTarget);
+				.bubble('show', ae);
 				
 		} else if (action == 'unspam') {
 			deleteComment(dItemid, action);
