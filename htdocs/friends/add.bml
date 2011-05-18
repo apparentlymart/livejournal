@@ -19,7 +19,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  my $userid = $u->{userid};
  $body = "";
 
- LJ::need_res(qw(js/core.js js/dom.js js/colorpicker.js));
+ LJ::need_res(qw(stc/addfriend.css js/core.js js/dom.js js/colorpicker.js));
 
  LJ::set_active_crumb('addfriend');
 
@@ -123,6 +123,7 @@ use vars qw($body $title $windowtitle %GET %POST);
      return;
  }
 
+ $body .= '<div class="b-addfriend-wrapper">';
  $body .= "<form method='post' name='editFriends' action='add.bml'>\n";
  $body .= LJ::form_auth();
  $body .= LJ::html_hidden(mode  => 'add',
@@ -140,9 +141,13 @@ use vars qw($body $title $windowtitle %GET %POST);
  if ($fr) {
      $title .= $ML{'.error3.title'};
      if ($u->is_visible) {
+         $body .= '<div class="b-addfriend-status">';
          $body .= "<?p " . BML::ml('.error3.text1', {'user' => LJ::ljuser($user)}) . " p?>";
+         $body .= "</div>";
      } else {
+         $body .= '<div class="b-addfriend-status">';
          $body .= "<?p " . BML::ml('.error3.text2', {'user' => LJ::ljuser($user)}) . " p?>";
+         $body .= "</div>";
      }
  } else {
      # return an error if user being added isn't visible
@@ -156,7 +161,9 @@ use vars qw($body $title $windowtitle %GET %POST);
      if ($u->{journaltype} eq 'Y') {
          $windowtitle = BML::ml('.confirm.syn.title1', {'user'=> $user });
          $title = BML::ml('.confirm.syn.title1', {'icon'=> $icon, 'user'=> $user });
+         $body .= '<div class="b-addfriend-status">';
          $body .= "<?p $ML{'.confirm.text1.feed'} p?>";
+         $body .= "</div>";
 
      # Is this account redirected?
      } elsif ($u->{'journaltype'} eq "R" && $u->prop('renamedto')) {
@@ -166,12 +173,16 @@ use vars qw($body $title $windowtitle %GET %POST);
          $windowtitle = BML::ml('.confirm.title.community', {'user'=> $user });
          $title = BML::ml('.confirm.title.community', {'icon'=> $icon, 'user'=> $user });
          unless (LJ::is_friend($userid, $remote->{userid})) {
+             $body .= '<div class="b-addfriend-status">';
              $body .= "<?p " . BML::ml('.confirm.text1.community2', {'aopts' => "href='$LJ::SITEROOT/community/join.bml?comm=$user'"}) . " p?>";
+             $body .= "</div>";
          }
      } elsif ($u->{'journaltype'} eq "N") {
          $windowtitle = BML::ml('.confirm.title.news', {'user'=> $user });
          $title = BML::ml('.confirm.title.news', {'icon'=> $icon, 'user'=> $user });
+         $body .= '<div class="b-addfriend-status">';
          $body .= "<?p " . BML::ml('.confirm.text1.news', {'user' => LJ::ljuser($user)}) . " p?>";
+         $body .= "</div>";
 
      } else {
          if ($u->{'journaltype'} eq "I") {
@@ -181,31 +192,30 @@ use vars qw($body $title $windowtitle %GET %POST);
             $windowtitle = BML::ml('.confirm.title.person', {'user'=> $user });
             $title = BML::ml('.confirm.title.person', {'icon'=> $icon, 'user'=> $user });
          }
+         $body .= '<div class="b-addfriend-status">';
          $body .= "<?p $ML{'.confirm.text1.person'}";
          $body .= "<ul><li>$ML{'.confirm.action1.person'}</li>";
          $body .= "<li>$ML{'.confirm.action2.person'}</li>" if ($u->{'journaltype'} ne "I");
          $body .= "</ul> p?>";
+         $body .= "</div>";
      }
  }
+
+ $body .= '<div class="b-addfriend-main">';
 
 # users that aren't visible can only be removed, not modified
 if ($u->is_visible) {
 
     ## Add user alias while user's friending
-    if ($remote->get_cap ('aliases')) {
-        $body .= "<dl class=\"addfriend-options\"><dt><em>" . $ML{'.optional'}. ":</em> " . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . "</dt>";
-        $body .= "<dd>";
-        $body .= LJ::html_text ( { name => 'user_note', class => 'type-text', value => LJ::ljuser_alias($u->{user}) } );
-        $body .= "</dd></dl>";
-    } else {
-        ## TODO!!! must set to gray font text
-        $body .= "<dl class=\"addfriend-options\"><dt class=\"st-disabled\"><em>" . $ML{'.optional'}. ":</em> " . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . "<span class=\"b-blocker b-blocker-white\"></span></dt>";
-        $body .= "<dd>";
-        $body .= LJ::html_text ( { class => 'type-text', 'disabled', name => 'user_note' } );
-        $body .= "</dd>";
-        $body .= "<dd>" . LJ::run_hook("upgrade_link", $u, "paid") . BML::ml('.hint.paid.text', {aopts => "href='$LJ::SITEROOT/manage/account/'" }) . "</dd>" unless $remote->get_cap ('paid');
-        $body .= "</dl>";
-    }
+        $body .= '<div class="b-addfriend-option b-addfriend-note">';
+        $body .= '<h3 class="b-addfriend-subhead">' . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . '</h3>';
+        if ($remote->get_cap ('aliases')) {
+            $body .= '<p>' . LJ::html_text ( { name => 'user_note', class => 'type-text', value => LJ::ljuser_alias($u->{user}) } ) . '</p>';
+        } else {
+            $body .= '<p>' . LJ::html_text ( { class => 'type-text', 'disabled', name => 'user_note' } ) . '<br />';
+            $body .= LJ::run_hook("upgrade_link", $u, "paid") . BML::ml('.hint.paid.text', {aopts => "href='$LJ::SITEROOT/manage/account/'" }) . '</p>' unless $remote->get_cap ('paid');
+        }
+        $body .= "</div>";
 
  ## let them pick friend groups
  my $err;
@@ -216,53 +226,73 @@ if ($u->is_visible) {
                                                         \$err, { 'noauth' => 1 });
 
  if (@{$greq->{'friendgroups'}}) {
- $body .= "<?p &nbsp;<br />";
- $body .= "$ML{'.groups.text1'} " . LJ::help_icon('customgroups', '&nbsp;') . "p?>\n";
- $body .= "<blockquote>\n";
+ $body .= '<div class="b-addfriend-option b-addfriend-groups">';
+ $body .= '<h3 class="b-addfriend-subhead">' . $ML{'.groups.addto'} . '</h3>';
+ $body .= '<p class="b-addfriend-notice">' . $ML{'.groups.text1'} . '</p>';
+ $body .= '<ul class="b-addfriend-groups-items">';
     foreach my $g (@{$greq->{'friendgroups'}}) {
          my $ck = ($fr && ($fr->{'groupmask'} & (1 << $g->{'id'}))) ||
                   # by default, newly added friends are in default view unless unchecked
                   (! $fr && $g->{'name'} eq 'Default View');
 
+         $body .= '<li>';
          $body .= LJ::html_check({ 'name'     => "bit_$g->{'id'}",
                                    'id'       => "fg:bit_$g->{'id'}",
                                    'selected' => $ck,
                                    'label' => $g->{name}});
-         $body .= "<br />\n";
+         $body .= '</li>';
      }
- $body .= "</blockquote>";
+ $body .= "</ul>";
+ $body .= '</div>';
  }
 
- ## let them pick the colors
- my $color_text = "<?p <table><tr><td valign=\"top\"><i>$ML{'.optional'}:</i> ".
-          "<input type=\"checkbox\" id=\"color_switch\" value=\"\" onClick=\"color_display(this);\"> </td><td>" .
-          BML::ml('.colors.text', {'user'=>$user}) .
-          "<br /><span style=\"font-size: 7pt;\">($ML{'.colors.disclaimer'})</span></td></tr></table> p?>";
- $body .= "<script>\n";
- $body .= "function color_display(check) {\n";
- $body .= "  if (check.checked) {\n";
- $body .= "    \$(\"color_opt\").style.display = '';\n";
- $body .= "  } else {\n";
- $body .= "    \$(\"color_opt\").style.display = 'none';\n";
- $body .= "  }\n";
- $body .= "}\n";
- $body .= "var text = '$color_text';\n";
- $body .= "document.write(text);\n";
- $body .= "</script>\n";
 
- $body .= "<noscript>\n";
- $body .= "<?p <table><tr><td valign='top'><i>$ML{'.optional'}:</i> </td><td>" .
-          BML::ml('.colors.text', {'user'=>$user}) .
-          "<br /><span style='font-size: 7pt;'>($ML{'.colors.disclaimer'})</span></td></tr></table> p?>";
- $body .= "</noscript>\n";
+ $body .= '<div class="b-addfriend-option b-addfriend-tags">';
+ $body .= '<h3 class="b-addfriend-subhead">' . $ML{'.tags.read'} . '</h3>';
+ $body .= '<p class="b-addfriend-notice">' . $ML{'.tags.text'} . '</p>';
+ $body .= '<dl class="b-addfriend-showmore">';
+ $body .= '<dt class="b-addfriend-showmore-head"><i class="i-addfriend-showmore-arr"></i>' . $ML{'.tags.select'} . '</dt>';
+ $body .= '<dd class="b-addfriend-showmore-content">';
+ $body .= '<h4>' . $ML{'.tags.selected.by.you'} . '</h4>';
+ $body .= '<ul class="b-pending-users">';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дезодорант">дезодорант</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span></li>';
+ $body .= '</ul>';
+ $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.tags.remove.tags'} . '</p>';
+ $body .= '<h4>' . $ML{'.tags.select.more'} . '</h4>';
+ $body .= '<p><input type="text" class="b-addfriend-input" placeholder="' . $ML{'.tags.input.tag'} . '" /> <input type="button" value="Select" /></p>';
+ $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.tags.find.tags'} . '</p>';
+ $body .= '<ul class="b-pending-users b-addfriend-alltags">';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
+ $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дезодорант">дезодорант</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span></li>';
+ $body .= '</ul>';
+ $body .= '</dd>';
+ $body .= '</dl>';
+ $body .= '</div>';
+ 
 
+
+
+ $body .= '<div class="b-addfriend-option b-addfriend-colors">';
+ $body .= '<h3 class="b-addfriend-subhead">' . $ML{'.colors.select.user'} . '</h3>';
+ $body .= '<p class="b-addfriend-notice">' . BML::ml('.colors.text', {'user'=>$user}) . '</p>';
+ $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.colors.disclaimer'} . '</p>';
+ $body .= '<dl class="b-addfriend-showmore b-addfriend-showmore-closed">';
+ $body .= '<dt class="b-addfriend-showmore-head"><i class="i-addfriend-showmore-arr"></i>' . $ML{'.colors.select'} . '</dt>';
+ $body .= '<dd class="b-addfriend-showmore-content">';
 
  my $ret = "";
  $ret .= "  <div id='color_opt'>\n";
- $ret .= "<script>\n";
- $ret .= "  \$(\"color_opt\").style.display = 'none'\n";
- $ret .= "  color_display(\$(\"color_switch\"));\n";
- $ret .= "</script>\n";
 
  $ret .= "<?p <script type=\"text/javascript\" language=\"JavaScript\">\n<!--\ndocument.write(\"<span style='font-size: 7pt;'>";
  $ret .= "$ML{'.colors.help.text1'}</span>\")\n// -->\n</script> p?>";
@@ -472,10 +502,13 @@ if ($u->{'journaltype'} eq "C") {
 }
 
  $body .= $ret;
+ $body .= '</dd>';
+ $body .= '</dl>';
+ $body .= '</div>';
 
 } # end is_visible if statement
 
-$body .= "<br />\n <?p ";
+$body .= "<?p ";
  # Form submit buttons
  if ($fr) {
      if ($u->is_visible) {
@@ -495,6 +528,8 @@ $body .= "<br />\n <?p ";
 
 
  $body .= "</form>";
+ $body .= '</div>';
+ $body .= '</div>';
  $body = $print_with_ad->($body);
  
  return;

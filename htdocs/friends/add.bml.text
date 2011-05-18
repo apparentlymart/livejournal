@@ -39,6 +39,10 @@
 
 .colors.text=Select the colors that will represent [[user]] in your friends list.
 
+.colors.select=Select colors
+
+.colors.select.user=Select user colors
+
 .confirm.action1.person=you can read their journal entries on your friends page
 
 .confirm.action2.person=they can read your friends-only entries
@@ -84,6 +88,8 @@
 
 .error3.title=Modify Friend
 
+.groups.addto=Add to groups
+
 .groups.header=Friends Groups
 
 .groups.nogroup=No friend groups set up.
@@ -105,4 +111,20 @@
 .remove.text2=[[ljuser]] has now been removed from your friend list.  You can view your updated  <a [[aopts]]>friends page</a> or go back to your <a [[aopts2]]>profile</a>.
 
 .remove.title=Friend Removed!
+
+.tags.input.tag=Input tag
+
+.tags.find.tags=You can find user tags or add your own
+
+.tags.read=Read entries by tags
+
+.tags.remove.tags=You can remove tags from this list by hovering ovver the username and clicking close button
+
+.tags.select=Select tags
+
+.tags.select.more=Select more
+
+.tags.selected.by.you=Selected by you
+
+.tags.text=You can read all entries by default or select entries with defe
 
