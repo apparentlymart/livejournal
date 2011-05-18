@@ -525,7 +525,7 @@ sub trans
                 if ($host =~ /^(?:users|community)\./) {
                     $uri =~ s!^/[^/]+!!;
                 }
-                return redir("$journal_base$uri$args_wq");
+                return redir("$journal_base$uri$args_wq", LJ::Request::HTTP_MOVED_PERMANENTLY());
             }
         }
 

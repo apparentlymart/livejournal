@@ -659,6 +659,14 @@ sub session_from_ljpta_cookie {
 
     my $no_session = sub {
         my $reason = shift;
+        
+        ## hack: don't redirect crawlers (yandex crawlers, actually) to get_domain_session.bml
+        ## otherwise, sites like 'omgadget.ru' are not indexed by yandex
+        my $ua = LJ::Request->header_in('User-Agent');
+        if ($ua && $ua =~ m!http://yandex\.com/bots!i) {
+            return undef;
+        } 
+
         my $rr = $opts->{redirect_ref};
         if ($rr) {
             $$rr = "$LJ::SITEROOT/misc/get_domain_session.bml?ljpta=1&return=" . LJ::eurl(_current_url());
