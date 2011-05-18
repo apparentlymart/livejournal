@@ -4343,7 +4343,7 @@ register_alter(sub {
         do_alter("category", "ALTER TABLE category MODIFY parentcatid INT UNSIGNED NOT NULL");
     }
 
-    if (column_type("category_recent_posts", "pic_orig_url")) {
+    unless (column_type("category_recent_posts", "pic_orig_url")) {
         do_alter("category_recent_posts",
             "ALTER TABLE category_recent_posts
                 ADD pic_orig_url VARCHAR(255) NOT NULL DEFAULT '',
