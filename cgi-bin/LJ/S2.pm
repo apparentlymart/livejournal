@@ -3971,8 +3971,8 @@ sub _Entry__get_link
 
 sub EntryLite__get_give_button
 {
-    my ($ctx, $this, $type) = @_;
-    $type = 'button' unless $type =~ /^(?:button|link)$/;
+    my ($ctx, $this, $type, $image) = @_;
+    $type = 'button' unless $type =~ /^(?:button|string)$/;
     my $journal  = $this->{'journal'}->{'username'};
     my $journalu = LJ::load_user($journal);
     my $entry = LJ::Entry->new($journalu, ditemid => $this->{itemid});
@@ -3992,14 +3992,23 @@ sub EntryLite__get_give_button
                             have_tokens: '.(($remote_balance < $LJ::GIVE_TOKENS) ? 'false' : 'true' ).',
                             lj_form_auth: "'.LJ::form_auth('raw').'"
                         })
-                       </script> 
-                       <span class="lj-button light">
-                       <span class="lj-button-wrapper">
-                       <a class="lj-button-link" href="'.$give_link.'">
-                       <span class="lj-button-a"><span class="lj-button-b">'.$LJ::GIVE_TOKENS.' <img src="'.$LJ::IMGPREFIX.'/icons/donate.png" /></span><span class="lj-button-c">'.($give_count ? BML::ml('give_features.given', {'count' => $give_count}) : BML::ml('give_features.give')).'</span></span>
-                       </a>
-                       </span>
-                       </span>';
+                       </script>'; 
+    if ($type eq 'button') { 
+        $give_button .= '<span class="lj-button light"><span class="lj-button-wrapper">
+                            <a class="lj-button-link" href="'.$give_link.'">
+                                <span class="lj-button-a"><span class="lj-button-b">'.$LJ::GIVE_TOKENS.' <img src="'.$LJ::IMGPREFIX.'/icons/donate.png" /></span><span class="lj-button-c">'.($give_count ? BML::ml('give_features.given', {'count' => $give_count}) : BML::ml('give_features.give')).'</span></span>
+                            </a>
+                        </span></span>';
+    } else {
+        my $give_text = BML::ml('give_features.give') . $LJ::GIVE_TOKENS . ' LJ Tokens';
+        $give_text .= " ($give_count)" if $give_count;
+            
+        if ($image) {
+            $give_button .= '<a href="'.$give_link.'" title="'.$give_text.'"><img src="'.$LJ::IMGPREFIX.$image.'"></a>';
+        } else {
+            $give_button .= '<a href="'.$give_link.'">'.$give_text.'</a>';
+        }
+    }
     return $give_button;
 }
 
