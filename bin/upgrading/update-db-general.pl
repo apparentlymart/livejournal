@@ -3664,7 +3664,7 @@ register_alter(sub {
     }
 
     # change interest.interest key to being unique, if it's not already
-    {
+    if (table_exists("interests")) {
         my $sth = $dbh->prepare("SHOW INDEX FROM interests");
         $sth->execute;
         while (my $i = $sth->fetchrow_hashref) {
