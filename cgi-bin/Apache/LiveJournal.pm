@@ -2168,7 +2168,15 @@ sub AUTOLOAD {
     ## Without eval/warn/die there will be no error message in our logs,
     ## since XMLRPC::Transport::HTTP::Apache will send the error to client.
     my $res = eval { LJ::Protocol::xmlrpc_method($method, @_) };
-    if ($@) { warn "LJ::XMLRPC::$method died: $@"; die $@; }
+    if ($@) { 
+        ## Do not log XMLRPC exceptions with exception number:
+        ##      305: Client error: Action forbidden; account is suspended. at
+        ## They are useless for Ops, but, yes, they can be useful for engineering debug.
+        ##
+        warn "LJ::XMLRPC::$method died: $@" unless $@ =~ /^\d+?\s*:/; 
+
+        die $@; 
+    }
 
     return $res;
 }
