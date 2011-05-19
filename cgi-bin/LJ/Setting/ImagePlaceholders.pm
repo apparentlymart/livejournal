@@ -35,7 +35,8 @@ sub option {
     my $is_stock = grep { $imgplaceholders eq $_ }
                     (qw/320|240 640|480 0|0/, ''); # standard sizes
 
-    my $extra = $class->ml('setting.imageplaceholders.option.select.custom', { width => $maxwidth, height => $maxheight })
+    my $extra = undef;
+    $extra = $class->ml('setting.imageplaceholders.option.select.custom', { width => $maxwidth, height => $maxheight })
         unless $is_stock;
 
     my @options = (

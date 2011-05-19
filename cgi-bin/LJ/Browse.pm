@@ -1246,7 +1246,9 @@ sub submit_community {
     # need a user object for submitter
     croak "invalid user object[u]" unless LJ::isu($u);
     # need a category
-    my $cat = LJ::Browse->load_by_id($catid) if (defined $catid);
+    my $cat = undef;
+    $cat = LJ::Browse->load_by_id($catid) if defined $catid;
+
     die "invalid category" unless $cat;
 
     return if ($class->_is_community_in_pending($c->userid, $cat->catid));
@@ -1276,8 +1278,11 @@ sub add_approved_community {
     croak "invalid user object[c]" unless LJ::isu($c);
     # need a user object for moderator
     croak "invalid user object[u]" unless LJ::isu($mod);
+
     # need a category
-    my $cat = LJ::Browse->load_by_id($catid) if (defined $catid) ;
+    my $cat = undef;
+    $cat = LJ::Browse->load_by_id($catid) if defined $catid;
+
     die "invalid category" unless $cat;
 
     my $dbh = LJ::get_db_writer()

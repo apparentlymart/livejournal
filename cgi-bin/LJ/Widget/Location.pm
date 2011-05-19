@@ -44,7 +44,8 @@ sub render_body {
     # check if specified country has regions
     my $regions_cfg = $class->country_regions_cfg($effective_country);
     # hashref of all regions for the specified country; it is initialized and used only if $regions_cfg is defined, i.e. the country has regions (states)
-    my $state_options = $class->region_options($regions_cfg)
+    my $state_options = undef;
+    $state_options = $class->region_options($regions_cfg)
         if $regions_cfg;
 
 
@@ -227,8 +228,10 @@ sub handle_post {
     $post->{zip} = "" if $post->{zip} eq $zip_inline_desc;
 
     # state and zip
-    my ($zipcity, $zipstate) = LJ::load_state_city_for_zip($post->{'zip'})
-        if $post->{'country'} eq "US" && length $post->{'zip'} > 0;
+    my ($zipcity, $zipstate);
+    if ( $post->{'country'} eq "US" && length $post->{'zip'} > 0 ) {
+        ($zipcity, $zipstate) = LJ::load_state_city_for_zip($post->{'zip'});
+    }
 
     # country
     if ($post->{'country'} ne "US" && $post->{'zip'}) {

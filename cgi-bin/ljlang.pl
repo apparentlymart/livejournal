@@ -647,7 +647,8 @@ sub get_text_multi
     my %memkeys; 
     foreach my $code (keys %lc_codes) {
         my $cache_key = "ml.${lang}.${dmid}.${code}";
-        my $text = $TXT_CACHE{$cache_key} unless $LJ::NO_ML_CACHE;
+        my $text = undef;
+        $text = $TXT_CACHE{$cache_key} unless $LJ::NO_ML_CACHE;
         
         if (defined $text) {
             $strings{ $lc_codes{$code} } = $text;

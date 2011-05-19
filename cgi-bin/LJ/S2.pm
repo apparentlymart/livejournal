@@ -2025,7 +2025,10 @@ sub Page
     my $linklist = [ map { UserLink($_) } @$linkobj ];
 
     my $remote = LJ::get_remote();
-    my $up = LJ::load_userid($opts->{ljentry}->{posterid}) if $opts->{ljentry};
+
+    my $up = undef;
+    $up = LJ::load_userid($opts->{ljentry}->{posterid})
+        if $opts->{ljentry};
 
     my $p = {
         '_type' => 'Page',

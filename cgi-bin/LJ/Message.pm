@@ -91,7 +91,9 @@ sub save_to_db {
 
     # Begin DB Transaction
     my $o_rv = $orig_u->begin_work;
-    my $r_rv = $rcpt_u->begin_work unless $same_cluster;
+
+    my $r_rv = undef;
+    $r_rv = $rcpt_u->begin_work unless $same_cluster;
 
     # Write to DB
     my $orig_write = $self->_save_sender_message;

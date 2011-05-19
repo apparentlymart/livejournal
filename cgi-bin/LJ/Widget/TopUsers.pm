@@ -44,7 +44,10 @@ sub _fetch_data {
         foreach (@$data) {
             my $count = $_->{count};
             my $user  = LJ::load_userid($_->{userid});
-            my $userpic = $user->userpic() if $user;
+
+            my $userpic = undef;
+            $userpic = $user->userpic() if $user;
+
             warn "Cannot load user with id=$_->{userid}\n" unless $user;
             warn "Cannot load userpic with id=$_->{userid}\n" unless $userpic;
 
