@@ -3590,5 +3590,9 @@ sub as_string {
 }
 
 LJ::run_hooks("startup");
+## Hook "startup" is run before apaches are forked.
+## If a connection to memcached is created in the hook code, they must be disconnected,
+## otherwise, several apache processes will share the same socket.
+LJ::MemCache->disconnect_all;
 
 1;
