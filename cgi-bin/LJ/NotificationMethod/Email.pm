@@ -63,7 +63,7 @@ sub notify {
     my $u = $self->u;
     
     if (LJ::sysban_check('email_domain', $u->email_raw)){
-        warn "Not issuing job for " . $u->email_raw . " [banned]";
+        #warn "Not issuing job for " . $u->email_raw . " [banned]";
         return 1;
     }
 
