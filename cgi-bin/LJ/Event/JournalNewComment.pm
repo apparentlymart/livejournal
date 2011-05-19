@@ -721,12 +721,11 @@ sub subscriptions {
 
     my @subs;
 
-    if ($comment->state eq 'B' && $entry_journal->is_personal && $entry_journal->in_class('paid')) {
+    if ($comment_author && $comment->state eq 'B' && $entry_journal->is_personal && $entry_journal->in_class('paid')) {
         
         ## Get 
         my @ids = $comment_author->friend_uids;
         my %is_friend = map { $_ => 1 } @ids; # uid -> 1
-        my $us = LJ::load_userids(@ids);
 
         require LJ::M::ProfilePage;
         my $pm = LJ::M::ProfilePage->new($comment_author);
