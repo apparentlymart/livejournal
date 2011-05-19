@@ -263,25 +263,25 @@ sub _set_compression {
     $conn->enable_compress(1);
 }
 
-if ( $ENV{'LJ_MEMCACHE_PROFILE'} ) {
-    *_profile = sub {
-        my ( $funcname, $key, $result ) = @_;
+my $enable_profiling = $ENV{'LJ_MEMCACHE_PROFILE'};
 
-        unless ( defined $logfile ) {
-            open $logfile, ">>$ENV{LJHOME}/var/memcache-profile/$$.log"
-                or die "cannot open log: $!";
+sub _profile {
+    my ( $funcname, $key, $result ) = @_;
 
-            $logfile->autoflush;
-        }
+    return unless $enable_profiling;
 
-        $key =~ s/\b\d+\b/?/g;
+    unless ( defined $logfile ) {
+        open $logfile, ">>$ENV{LJHOME}/var/memcache-profile/$$.log"
+            or die "cannot open log: $!";
 
-        print $logfile "$funcname($key) " .
-                       ( defined $result ? '[hit]' : '[miss]' ) .
-                       "\n";
-    };
-} else {
-    *_profile = sub {};
+        $logfile->autoflush;
+    }
+
+    $key =~ s/\b\d+\b/?/g;
+
+    print $logfile "$funcname($key) " .
+                   ( defined $result ? '[hit]' : '[miss]' ) .
+                   "\n";
 }
 
 ### MAINTENANCE METHODS ###
@@ -344,7 +344,7 @@ sub get {
 
     my $res = $conn->get( $key, @params );
 
-    _profile( 'get', $key, $res );
+    _profile( 'get', $key, $res ) if $enable_profiling;
 
     return $res;
 }
@@ -365,7 +365,7 @@ sub gets {
 
     my $res = $conn->gets($key);
 
-    _profile( 'gets', $key, $res );
+    _profile( 'gets', $key, $res ) if $enable_profiling;
 
     return $res;
 }
@@ -402,7 +402,7 @@ sub get_multi {
         %ret = ( %ret, %$conn_ret );
     }
 
-    _profile( 'get_multi', join(';', @keys_normal) );
+    _profile( 'get_multi', join(';', @keys_normal) ) if $enable_profiling;
 
     return \%ret;
 }
@@ -439,7 +439,7 @@ sub gets_multi {
         %ret = ( %ret, %$conn_ret );
     }
 
-    _profile( 'gets_multi', join(';', @keys_normal) );
+    _profile( 'gets_multi', join(';', @keys_normal) ) if $enable_profiling;
 
     return \%ret;
 }
@@ -456,7 +456,7 @@ sub add {
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    _profile( 'add', $key );
+    _profile( 'add', $key ) if $enable_profiling;
 
     _set_compression( $conn, $key );
     return $conn->add( $key, $value, $expire );
@@ -472,7 +472,7 @@ sub set {
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    _profile( 'set', $key );
+    _profile( 'set', $key ) if $enable_profiling;
 
     _set_compression( $conn, $key );
     return $conn->set( $key, $value, $expire );
@@ -488,7 +488,7 @@ sub replace {
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    _profile( 'replace', $key );
+    _profile( 'replace', $key ) if $enable_profiling;
 
     _set_compression( $conn, $key );
     return $conn->replace( $key, $value, $expire );
@@ -504,7 +504,7 @@ sub incr {
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    _profile( 'incr', $key );
+    _profile( 'incr', $key ) if $enable_profiling;
 
     return $conn->incr( $key, $value );
 }
@@ -519,7 +519,7 @@ sub decr {
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    _profile( 'decr', $key );
+    _profile( 'decr', $key ) if $enable_profiling;
 
     return $conn->decr( $key, $value );
 }
@@ -534,7 +534,7 @@ sub append {
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    _profile( 'append', $key );
+    _profile( 'append', $key ) if $enable_profiling;
 
     my $res = $conn->append( $key, $value );
 
@@ -560,7 +560,7 @@ sub prepend {
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    _profile( 'prepend', $key );
+    _profile( 'prepend', $key ) if $enable_profiling;
 
     my $res = $conn->prepend( $key, $value );
 
@@ -584,7 +584,7 @@ sub delete {
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    _profile( 'delete', $key );
+    _profile( 'delete', $key ) if $enable_profiling;
 
     my $res = $conn->delete( $key, $expire );
 
@@ -603,7 +603,7 @@ sub cas {
 
     my $res = $conn->cas( $key, $cas, $value );
 
-    _profile( 'cas', $key, $res );
+    _profile( 'cas', $key, $res ) if $enable_profiling;
 
     return $res;
 }
