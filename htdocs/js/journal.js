@@ -136,7 +136,8 @@ DonateButton = {
 
 	donate: function(node, journal, id) {
 		if (confirm(DonateButton.ml_confirm_message)) {
-			jQuery.post(LiveJournal.getAjaxUrl('give_tokens') + '?journal=' + journal + '&id=' + id, {
+			jQuery.post(LiveJournal.getAjaxUrl('give_tokens') + '?journal=' + journal + '&itemid=' + id + '&mode=jsonp', {
+				auth_token: DonateButton.lj_form_auth,
 				confirm: 1
 			}, function(data) {
 				jQuery(node).find('lj-button-c').text(data.donated_text);
@@ -148,7 +149,7 @@ DonateButton = {
 jQuery(document).delegate('a', 'click', function(e) {
 	if (this.href && this.href.indexOf(Site.siteroot + '/give_tokens.bml?journal=') === 0) {
 		var parsed_url = LiveJournal.parseGetArgs(this.href);
-		DonateButton.donate(this, parsed_url.journal, parsed_url.id);
+		DonateButton.donate(this, parsed_url.journal, parsed_url.itemid);
 		e.preventDefault();
 	}
 });
