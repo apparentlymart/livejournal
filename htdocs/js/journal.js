@@ -130,29 +130,42 @@ ILikeThis = {
 }
 
 DonateButton = {
-	ml_confirm_message: null,
-	have_tokens: null,
-	lj_form_auth: null,
-
-	donate: function(node, journal, id) {
-		if (confirm(DonateButton.ml_confirm_message)) {
-			jQuery.post(LiveJournal.getAjaxUrl('give_tokens') + '?journal=' + journal + '&itemid=' + id + '&mode=jsonp', {
-				auth_token: DonateButton.lj_form_auth,
+	donate: function(node, url_data, button_data) {
+		if (confirm(button_data.ml_message)) {
+			jQuery.post(LiveJournal.getAjaxUrl("give_tokens") + "?" + url_data + "&mode=js", {
+				lj_form_auth: button_data.lj_form_auth,
 				confirm: 1
 			}, function(data) {
-				jQuery(node).find('lj-button-c').text(data.donated_text);
-			});
+				if (node.childNodes.length === 1 && node.childNodes[0].nodeType === 3) { // text link, ex.: expressive
+					node.childNodes[0].nodeValue = node.childNodes[0].nodeValue.replace(/[0-9]+([^0-9]*)$/, data.given + "$1");
+				} else if (node.getAttribute("title")) { // ex.: 3 column
+					node.setAttributeNode("title", node.getAttribute("title"));
+				} else { // universal, ex.: minimalizm
+					var all_child = jQuery(node).find("*"), item, i;
+					for (i = all_child.length - 1; i >= 0; i--) {
+						item = all_child[i];
+						if (item.childNodes.length === 1 && item.childNodes[0].nodeType === 3) {
+							item.childNodes[0].nodeValue = item.childNodes[0].nodeValue.replace(/[0-9]+([^0-9]*)$/, data.given + "$1");
+							break;
+						}
+					}
+				}
+			}, "json");
 		}
+	},
+
+	buyMore: function(node, ml_message) {
+		var bubble = jQuery(node).data("bubble");
+		if (!bubble) {
+			bubble = jQuery("<span>" + ml_message + "</span>").bubble({
+				target: node
+			});
+			jQuery(node).data("bubble", bubble);
+		}
+
+		bubble.bubble("show");
 	}
 };
-
-jQuery(document).delegate('a', 'click', function(e) {
-	if (this.href && this.href.indexOf(Site.siteroot + '/give_tokens.bml?journal=') === 0) {
-		var parsed_url = LiveJournal.parseGetArgs(this.href);
-		DonateButton.donate(this, parsed_url.journal, parsed_url.itemid);
-		e.preventDefault();
-	}
-});
 
 FriendsTimes = {
 	prev_page_start: null,
