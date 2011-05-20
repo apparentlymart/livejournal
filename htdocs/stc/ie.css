@@ -518,6 +518,10 @@ __________________________________________*/
 .b-auth-desc {
 	zoom:0;
 	}
+.b-identity-header {
+	filter:progid:DXImageTransform.Microsoft.gradient( startColorstr='#194874', endColorstr='#6d9bc7',GradientType=0 ); /* IE6-9 */
+	zoom:1;
+	}
 
 /* Should be at bottom of the page! */
 * HTML .i-ljtimes-btn,
