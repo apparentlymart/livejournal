@@ -3983,22 +3983,21 @@ sub EntryLite__get_give_button
     my $remote = LJ::get_remote();
     
     return '' unless LJ::is_enabled('give_features') && $remote && $entry->prop('give_features');
+    return '' if $journalu->equals($remote);
     
     my $remote_balance = LJ::Pay::Wallet->get_user_balance($remote);
-    my $give_link = ($remote_balance < $LJ::GIVE_TOKENS) ?
-                    "$LJ::SITEROOT/shop/tokens.bml" :
-                    "$LJ::SITEROOT/give_tokens.bml?journal=$journal&itemid=$this->{itemid}";
+    my $can_give  = ( $remote_balance < $LJ::GIVE_TOKENS ) ? 0 : 1;
+    my $give_link = $can_give ?
+                        "$LJ::SITEROOT/give_tokens.bml?journal=$journal&itemid=$this->{itemid}" :
+                        "$LJ::SITEROOT/shop/tokens.bml";
+    my $give_onclick = $can_give ?
+                        'DonateButton.donate(this,\'journal='.$journal.'&itemid='.$this->{itemid}.'\',{ml_message:\''.LJ::ejs(BML::ml('/give_tokens.bml.confirm.submit.body', { 'give_count' => $LJ::GIVE_TOKENS, 'poster' => $entry->poster->user })).'\',lj_form_auth:\''.LJ::form_auth('raw').'\'});return false' :
+                        'DonateButton.buyMore(this,\''.LJ::ejs(BML::ml('/give_tokens.bml.confirm.submit.body', { 'give_count' => $LJ::GIVE_TOKENS, 'poster' => $entry->poster->user })).'\');return false';
     my $give_count = $entry->prop('give_count') || 0;
-    my $give_button = '<script type="text/javascript">
-                        jQuery.extend(DonateButton, {
-                            ml_confirm_message: \''.BML::ml('/give_tokens.bml.confirm.submit.body', { 'give_count' => $LJ::GIVE_TOKENS, 'poster' => $entry->poster->user }).'\',
-                            have_tokens: '.(($remote_balance < $LJ::GIVE_TOKENS) ? 'false' : 'true' ).',
-                            lj_form_auth: "'.LJ::form_auth('raw').'"
-                        })
-                       </script>'; 
+    my $give_button = ''; 
     if ($type eq 'button') { 
         $give_button .= '<span class="lj-button light"><span class="lj-button-wrapper">
-                            <a class="lj-button-link" href="'.$give_link.'">
+                            <a class="lj-button-link" href="'.$give_link.'" onClick="'.$give_onclick.'">
                                 <span class="lj-button-a"><span class="lj-button-b">'.$LJ::GIVE_TOKENS.' <img src="'.$LJ::IMGPREFIX.'/icons/donate.png" /></span><span class="lj-button-c">'.($give_count ? BML::ml('give_features.given', {'count' => $give_count}) : BML::ml('give_features.give')).'</span></span>
                             </a>
                         </span></span>';
@@ -4007,9 +4006,9 @@ sub EntryLite__get_give_button
         $give_text .= " ($give_count)" if $give_count;
             
         if ($image) {
-            $give_button .= '<a href="'.$give_link.'" title="'.$give_text.'"><img src="'.$image.'"></a>';
+            $give_button .= '<a href="'.$give_link.'" title="'.$give_text.'" onClick="'.$give_onclick.'"><img src="'.$image.'"></a>';
         } else {
-            $give_button .= '<a href="'.$give_link.'">'.$give_text.'</a>';
+            $give_button .= '<a href="'.$give_link.'" onClick="'.$give_onclick.'">'.$give_text.'</a>';
         }
     }
     return $give_button;
