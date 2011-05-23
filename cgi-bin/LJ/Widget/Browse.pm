@@ -263,6 +263,8 @@ sub render_body {
 
             next unless 1;## This entry is inappropriate language in the subject or body
 
+            next unless $entry->visible_to ($remote);
+
             $post_count++;
             next if $post_count <= $post_skip || $post_count > $post_last;
 
