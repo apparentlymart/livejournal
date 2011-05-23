@@ -117,6 +117,14 @@ sub get_conf {
     return $self->{conf};
 }
 
+sub get_plugin_conf {
+    my ($self) = @_;
+
+    my $plugin = ref $self; $plugin =~ s/^LJ::PageStats:://;
+
+    return $LJ::PAGESTATS_PLUGIN_CONF{$plugin};
+}
+
 sub filename {
     my ($self) = @_;
 
