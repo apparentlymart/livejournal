@@ -4007,7 +4007,7 @@ sub EntryLite__get_give_button
         $give_text .= " ($give_count)" if $give_count;
             
         if ($image) {
-            $give_button .= '<a href="'.$give_link.'" title="'.$give_text.'"><img src="'.$LJ::IMGPREFIX.$image.'"></a>';
+            $give_button .= '<a href="'.$give_link.'" title="'.$give_text.'"><img src="'.$image.'"></a>';
         } else {
             $give_button .= '<a href="'.$give_link.'">'.$give_text.'</a>';
         }
