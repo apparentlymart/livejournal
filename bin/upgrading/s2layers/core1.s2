@@ -335,6 +335,7 @@ class EntryLite
         "Print the entry text. Doesn't print anything in some contexts, such as on a month view or in a collapsed comment.";
     function builtin get_link (string key) : Link "Get a link to some action related to this entry or comment. You can iterate over [member[EntryLite.link_keyseq]] to get keys to pass in here to produce a 'toolbar' of links.";
     function builtin get_give_button (string type) : string "Get a button or link to Give features. Type can be 'button' or 'link'";
+    function builtin get_give_button (string type, string img_url) : string "Get a button or link to Give features. Type can be 'button' or 'link'";
     function builtin get_plain_subject () : string "For Entries that can contain HTML subjects, this returns the subject without HTML.  Comments can't have HTML in subjects, so this is equivalent to just using \$.subject.  The returned 'plain' subject may still contain HTML entities, so don't do substring chops on it either.";
     function builtin get_tags_text () : string "Returns a string containing a div of class 'ljtags' with the tags for the entry.  If there are no tags on the entry, returns a blank string.  The string is formatted according to the 'text_tags' property.";
     function print_linkbar() "Print the link bar for this entry or comment.";
