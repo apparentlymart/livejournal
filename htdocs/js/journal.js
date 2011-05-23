@@ -283,3 +283,47 @@ jQuery(document).click(function(e)
 		}
 	}
 });
+
+(function() {
+	var options = {
+		blockSelector: '.yota-contest'
+	};
+
+	function retrieveContestInfo( element ) {
+		var journal = element.attr( 'data-user' );
+		jQuery.getJSON( LiveJournal.getAjaxUrl( 'yota_widget_post' ),
+						{ json: 1, journal: journal }, function( answer ) {
+			if( 'collected' in answer ) {
+				var collected = answer.collected;
+				for( var i = 0; i < collected.length; i += 2 ) {
+					element.find( "." + collected[ i ] ).html( collected[ i + 1 ] );
+				}
+			}
+
+			if( 'rating' in answer ) {
+				i = 5;
+				var key;
+				while( --i > 0) {
+					key = "" + i;
+					if( key in answer.rating ) {
+						element.find( '.c' + i ).html( answer.rating[ key ] );
+					}
+				}
+			}
+		} );
+	}
+
+	function findElement( onload ) {
+		var element = jQuery( options.blockSelector );
+
+		if( element.length ) {
+			retrieveContestInfo( element );
+		} else if( !onload ) {
+			jQuery( function() {
+				findElement( true );
+			} );
+		}
+	}
+
+	setTimeout( findElement, 0 );
+} )();
