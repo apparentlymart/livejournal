@@ -1146,6 +1146,10 @@ function Entry::print_linkbar() {
             """ $sep <a href="$url">$text</a>""";
             $link->print_raw();
         }
+        if ($link_key == "give_button") {
+	    print """ $sep """;
+            print $this->get_give_button("string");
+        }
     }
 }
 
