@@ -1,3 +1,6 @@
+package LJ::Schools::Stats;
+use strict;
+
 =comment
 
 LJ::Schools::Stats: LJ::Schools::Log entries statistics.
@@ -36,8 +39,6 @@ Related privileges:
  * siteadmin:schools-logs: allows for viewing logs/stats
 
 =cut
-
-package LJ::Schools::Stats;
 
 use DateTime;
 

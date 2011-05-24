@@ -1,9 +1,8 @@
-#!/usr/bin/perl
-#
+package LJ;
+use strict;
+
 # Function to reject bogus email addresses
 #
-
-package LJ;
 
 # <LJFUNC>
 # name: LJ::check_email

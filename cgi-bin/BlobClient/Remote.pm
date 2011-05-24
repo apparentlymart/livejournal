@@ -1,7 +1,5 @@
-#!/usr/bin/perl
-# vim:ts=4 sw=4 et:
-
 package BlobClient::Remote;
+use strict;
 
 use BlobClient;
 use LWP::UserAgent;

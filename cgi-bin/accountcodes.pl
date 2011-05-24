@@ -1,6 +1,5 @@
-#!/usr/bin/perl
-
 package LJ;
+use strict;
 
 # <LJFUNC>
 # name: LJ::acid_encode

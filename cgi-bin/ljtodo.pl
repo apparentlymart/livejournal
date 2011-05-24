@@ -1,7 +1,5 @@
-#!/usr/bin/perl
-#
-
 package LJ::Todo;
+use strict;
 
 sub get_permissions
 {
@@ -38,7 +36,7 @@ sub get_permissions
         }
     }
         
-    return %permission;
+    return;
 }
 
 

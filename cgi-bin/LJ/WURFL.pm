@@ -1,4 +1,5 @@
 package LJ::WURFL;
+use strict;
 
 use Storable qw(retrieve);
 

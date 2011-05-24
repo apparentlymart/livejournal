@@ -1,4 +1,6 @@
 package LJ::S2Theme::tabularindent;
+use strict;
+
 use base qw(LJ::S2Theme);
 
 sub cats { qw( clean cool ) }

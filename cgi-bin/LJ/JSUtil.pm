@@ -1,4 +1,5 @@
 package LJ::JSUtil;
+use strict;
 
 #<LJFUNC>
 # name: LJ::JSUtil::autocomplete

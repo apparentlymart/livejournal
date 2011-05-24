@@ -1,4 +1,6 @@
 package LJ::S2Theme::magazine;
+use strict;
+
 use base qw(LJ::S2Theme);
 
 sub cats { qw( clean cool ) }

@@ -1,7 +1,5 @@
-#!/usr/bin/perl
-#
-
 package Apache::SendStats;
+use strict;
 
 BEGIN {
     $LJ::HAVE_AVAIL = eval "use Apache::Availability qw(count_servers); 1;";

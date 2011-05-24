@@ -1,4 +1,6 @@
 package LJ::CProd::Feeds;
+use strict;
+
 use base 'LJ::CProd';
 
 sub applicable {

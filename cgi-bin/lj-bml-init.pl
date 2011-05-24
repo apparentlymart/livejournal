@@ -1,5 +1,5 @@
-#!/usr/bin/perl
-#
+package LJ;
+use strict;
 
 use lib "$ENV{LJHOME}/cgi-bin";
 use Errno qw(ENOENT);

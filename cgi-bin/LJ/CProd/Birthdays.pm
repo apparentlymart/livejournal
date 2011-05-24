@@ -1,4 +1,6 @@
 package LJ::CProd::Birthdays;
+use strict;
+
 use base 'LJ::CProd';
 
 sub applicable {

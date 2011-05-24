@@ -1,4 +1,6 @@
 package LJ::S2Theme::sixhtml;
+use strict;
+
 use base qw(LJ::S2Theme);
 
 sub layouts { ( "1" => "1C", "2l" => "2CL", "2r" => "2CR", "3m" => "3C" ) }

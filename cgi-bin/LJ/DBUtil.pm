@@ -1,4 +1,5 @@
 package LJ::DBUtil;
+use strict;
 
 use lib "$ENV{LJHOME}/cgi-bin";
 require "ljlib.pl";

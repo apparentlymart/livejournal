@@ -1,4 +1,6 @@
 package LJ::CProd::ControlStrip;
+use strict;
+
 use base 'LJ::CProd';
 
 sub applicable {

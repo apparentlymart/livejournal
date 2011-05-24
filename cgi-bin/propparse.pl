@@ -1,10 +1,7 @@
-#!/usr/bin/perl
-#
-
 package LJ;
+use strict;
 
-$verbose = 0;
-@obs = ();
+my $verbose = 0;
 
 sub load_objects_from_file
 {

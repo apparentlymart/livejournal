@@ -1,5 +1,6 @@
-#!/usr/bin/perl
-#
+package LJ;
+use strict;
+
 # Stores all global crumbs and builds the crumbs hash
 
 use POSIX qw/ENOENT/;

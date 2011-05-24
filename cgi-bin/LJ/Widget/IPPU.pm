@@ -1,5 +1,8 @@
-# base class for in page popup widgets
 package LJ::Widget::IPPU;
+use strict;
+
+# base class for in page popup widgets
+
 use base 'LJ::Widget';
 
 # load all subclasses

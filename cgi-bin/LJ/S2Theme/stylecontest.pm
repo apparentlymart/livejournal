@@ -1,4 +1,6 @@
 package LJ::S2Theme::stylecontest;
+use strict;
+
 use base qw(LJ::S2Theme::sixhtml);
 
 sub cats { () }

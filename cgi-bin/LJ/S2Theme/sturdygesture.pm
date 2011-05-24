@@ -1,4 +1,6 @@
 package LJ::S2Theme::sturdygesture;
+use strict;
+
 use base qw(LJ::S2Theme);
 
 sub layouts { ( "2lnh" => "left", "2rnh" => "right" ) }

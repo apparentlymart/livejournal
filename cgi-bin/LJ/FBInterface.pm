@@ -1,4 +1,5 @@
 package LJ::FBInterface;
+use strict;
 
 # Is there a current LJ session?
 # If so, return info.

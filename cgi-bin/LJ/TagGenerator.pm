@@ -1,6 +1,6 @@
-#!/usr/bin/perl
-
 package LJ::TagGenerator;
+use strict;
+
 use Carp;
 
 my %_tag_groups = (
@@ -41,7 +41,9 @@ sub import {
         *{"${package}::$prefix$tag$suffix"} = \&{"__$tag"};
     }
 }
-        
+
+our $AUTOLOAD;
+
 sub AUTOLOAD {
     $AUTOLOAD =~ /::__([^:]*)$/ or croak "No such method $AUTOLOAD";
     my $tagname = lc $1;

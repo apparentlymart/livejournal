@@ -1,4 +1,6 @@
 package LJ::CProd::FriendsFriends;
+use strict;
+
 use base 'LJ::CProd';
 
 sub applicable {

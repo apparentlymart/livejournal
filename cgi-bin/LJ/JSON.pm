@@ -1,4 +1,5 @@
 package LJ::JSON;
+use strict;
 
 my $wrap;
 
@@ -94,6 +95,7 @@ sub decode_unknown_type {
 
 package LJ::JSON::XS;
 
+our @ISA;
 BEGIN { @ISA = qw(LJ::JSON::Wrapper JSON::XS); }
 
 sub can_load {
@@ -128,6 +130,7 @@ sub decode_unknown_type {
 
 package LJ::JSON::JSONv2;
 
+our @ISA;
 BEGIN { @ISA = qw(LJ::JSON::Wrapper JSON); }
 
 sub can_load {
@@ -162,6 +165,7 @@ sub decode_unknown_type {
 
 package LJ::JSON::JSONv1;
 
+our @ISA;
 BEGIN { @ISA = qw(LJ::JSON::Wrapper JSON); }
 
 sub can_load {

@@ -1,4 +1,6 @@
 package LJ::S2Theme::digitalmultiplex;
+use strict;
+
 use base qw(LJ::S2Theme);
 
 sub layouts { ( "2r" => 1 ) }

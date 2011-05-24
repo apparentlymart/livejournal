@@ -1,3 +1,6 @@
+package LJ::Schools::Log;
+use strict;
+
 =comment
 
 LJ::Schools::Log: a logger module for Schools Directory actions
@@ -31,8 +34,6 @@ Related privileges:
  * siteadmin:schools-logs: allows for viewing logs/stats
 
 =cut
-
-package LJ::Schools::Log;
 
 use LJ::Schools::Stats;
 

@@ -1,4 +1,6 @@
 package LJ::S2Theme::refriedpaper;
+use strict;
+
 use base qw(LJ::S2Theme);
 
 sub layouts { ( "2l" => "left", "2r" => "right" ) }

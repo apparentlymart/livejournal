@@ -1,4 +1,5 @@
 package LJ::WURFL::Parser;
+use strict;
 
 use XML::Parser;
 use Storable qw(nstore);
