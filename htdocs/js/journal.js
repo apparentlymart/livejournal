@@ -313,17 +313,17 @@ jQuery(document).click(function(e)
 		} );
 	}
 
-	function findElement( onload ) {
+	function findElement() {
 		var element = jQuery( options.blockSelector );
 
 		if( element.length ) {
-			retrieveContestInfo( element );
-		} else if( !onload ) {
-			jQuery( function() {
-				findElement( true );
+			element.each( function() {
+				retrieveContestInfo( jQuery( this ) );
 			} );
 		}
 	}
 
-	setTimeout( findElement, 0 );
+	jQuery( function() {
+		findElement();
+	} );
 } )();
