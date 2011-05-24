@@ -1202,12 +1202,12 @@ property string text_read_spam_comments {
     example = "1 spam comment // # spam comments";
 }
 property string text_read_all_spam_comments {
-    des = "Link text to read all spam comments";
+    des = "Link text to read all suspicious comments";
     format = "plurals";
-    example = "Read 1 spam comment // Read # spam comments";
+    example = "Read 1 suspicious comment // Read # suspicious comments";
 }
-set text_read_spam_comments = "1 spam comment // # spam comments";
-set text_read_all_spam_comments = "Read 1 spam comment // Read # spam comments";
+set text_read_spam_comments = "1 suspicious comment // # suspicious comments";
+set text_read_all_spam_comments = "Read 1 suspicious comment // Read # suspicious comments";
 
 property string text_post_comment_friends {
     des = "Link text to leave a comment on friends view entry";
