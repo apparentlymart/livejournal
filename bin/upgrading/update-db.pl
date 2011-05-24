@@ -1014,14 +1014,17 @@ sub clear_table_info
 
 sub table_exists {
     my $table = shift;
+    
+    ## TODO: use $dbh->table_info() to retrieve this info
     my $data_source = $dbh->get_info( $GetInfoType{SQL_DATA_SOURCE_NAME} );
-    if ($data_source =~ /^dbi:mysql:(.+?)(?:;|$)/) {
+    if ($data_source =~ /^dbi:mysql:(\w+)/) {
+        my $schema = $1;
         my $result = $dbh->selectrow_array('
             SELECT count(*) 
             FROM information_schema.tables 
             WHERE table_schema = ?
               AND table_name = ?
-        ', undef, $1, $table);
+        ', undef, $schema, $table);
         return $result;
     }
 }
