@@ -219,6 +219,8 @@ propgroup text {
   property use text_showspam;
   property use text_hidespam;
   property use text_spam_comment;
+  property use text_read_spam_comments;
+  property use text_read_all_spam_comments;
   property use text_view_games;
 }
 set text_gotop = "Go to Top";
