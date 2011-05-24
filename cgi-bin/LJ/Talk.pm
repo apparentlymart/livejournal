@@ -165,20 +165,10 @@ sub link_bar
 
     ## Give features
     if (LJ::is_enabled('give_features') && $remote && !$u->equals($remote) && $entry->prop('give_features')) {
-        my $remote_balance = LJ::Pay::Wallet->get_user_balance($remote);
-        my $can_give  = ( $remote_balance < $LJ::GIVE_TOKENS ) ? 0 : 1;
-        my $give_link = $can_give ?
-                            "$LJ::SITEROOT/give_tokens.bml?${jarg}itemid=$itemid" :
-                            "$LJ::SITEROOT/shop/tokens.bml";
-        my $give_onclick = $can_give ?
-                            'DonateButton.donate(this,\''.$jarg.'itemid='.$itemid.'\',{ml_message:\''.LJ::ejs(BML::ml('/give_tokens.bml.confirm.submit.body', { 'give_count' => $LJ::GIVE_TOKENS, 'poster' => $entry->poster->user })).'\',lj_form_auth:\''.LJ::form_auth('raw').'\'});return false' :
-                            'DonateButton.buyMore(this,\''.LJ::ejs(BML::ml('/give_tokens.bml.confirm.submit.body', { 'give_count' => $LJ::GIVE_TOKENS, 'poster' => $entry->poster->user })).'\');return false';
-        my $give_count = $entry->prop('give_count') || 0;
-        my $give_button = '<span class="lj-button light"><span class="lj-button-wrapper">
-                           <a class="lj-button-link" href="'.$give_link.'" onClick="'.$give_onclick.'">
-                               <span class="lj-button-a"><span class="lj-button-b">'.$LJ::GIVE_TOKENS.' <img src="'.$LJ::IMGPREFIX.'/icons/donate.png" /></span><span class="lj-button-c">'.($give_count ? BML::ml('give_features.given', {'count' => $give_count}) : BML::ml('give_features.give')).'</span></span>
-                           </a>
-                           </span></span>';
+        my $give_button = LJ::run_hook("give_button", {
+            'journal' => $u->{'user'},
+            'itemid'  => $itemid,
+        });
         push @linkele, $give_button;
     }
 
