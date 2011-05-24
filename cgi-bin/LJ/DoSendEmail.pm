@@ -1,4 +1,5 @@
 package LJ::DoSendEmail;
+use strict;
 use Net::DNS qw(mx);
 use LJ::User::EmailStatus;
 require 'sysban.pl';
@@ -178,13 +179,13 @@ sub send {
         # ...
         # #? $class->on_5xx_rcpt($job, $rcpt, $details->());
 
-        $class->error("Permanent failure during $failed_phase phase to [$rcpt]: $details \n");
+        $class->error("Permanent failure during $res phase to [$rcpt]: $details \n");
 
         ## log error
         LJ::User::EmailStatus->handle_code(code => 5, email => $rcpt);
 
         ## handle other errors
-        if ($failed_phase eq "TO"){
+        if ($res eq "TO"){
         ## Permanent error
         ## no need to retry attempts
             return SMTP_ERROR_NO_RCPT_ON_SERVER;
@@ -211,6 +212,8 @@ sub send {
 sub _do_send {
     my $class = shift;
     my ($smtp, $env_from, $rcpt, $mail_id, $headers, $body) = @_;
+
+    my ($this_domain) = $env_from =~ /\@(.+)/;
 
     ## Send command MAIL to server.
     my $res = $smtp->mail($env_from);
