@@ -253,6 +253,7 @@ if ($u->is_visible) {
  $body .= '<dl class="b-addfriend-showmore">';
  $body .= '<dt class="b-addfriend-showmore-head"><i class="i-addfriend-showmore-arr"></i>' . $ML{'.tags.select'} . '</dt>';
  $body .= '<dd class="b-addfriend-showmore-content">';
+ $body .= '<p><input type="radio" name="tags_include" id="tags_including" checked="checked" /><label for="tags_including">' . $ML{'.tags.including'} . '</label><br /><input type="radio" name="tags_include" id="tags_excluding" /><label for="tags_excluding">' . $ML{'.tags.excluding'} . '</label></p>';
  $body .= '<h4>' . $ML{'.tags.selected.by.you'} . '</h4>';
  $body .= '<ul class="b-pending-users">';
  $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';

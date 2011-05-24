@@ -114,6 +114,10 @@
 
 .tags.input.tag=Input tag
 
+.tags.including=Including selected tags
+
+.tags.excluding=Excluding selected tags
+
 .tags.find.tags=You can find user tags or add your own
 
 .tags.read=Read entries by tags
