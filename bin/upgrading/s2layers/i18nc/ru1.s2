@@ -116,8 +116,8 @@ set text_copyr_disagree = "Запрещаю воспроизводить в ка
 set text_share_this = "Поделиться";
 set text_share = "Поделиться";
 set text_spam_comment = "(Подозрительный комментарий)";
-set text_read_spam_comments = "(1 подозрительный комментарий // # подозрительных комментариев)";
-set text_read_all_spam_comments = "(Читать 1 подозрительный комментарий // Читать # подозрительных комментариев)";
+set text_read_spam_comments = "1 подозрительный комментарий // # подозрительных комментариев";
+set text_read_all_spam_comments = "Читать 1 подозрительный комментарий // Читать # подозрительных комментариев";
 
 # Three forms, special cases for numbers ending in 1 and 2, 3, 4, except those ending in 1[1-4]
 function lang_map_plural (int n) : int {
