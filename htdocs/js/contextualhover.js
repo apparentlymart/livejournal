@@ -503,6 +503,14 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 			}
 		})
 		.appendTo(content);
+		if( data.is_friend ) {
+			content.appendChild(bar.cloneNode(true));
+			jQuery('<a/>', {
+				href: data.url_addfriend,
+				text: data.ml_edit_friend_tags
+			})
+			.appendTo(content);
+		}
 		content.appendChild(document.createElement('br'));
 	}
 	
