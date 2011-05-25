@@ -252,6 +252,9 @@ A:visited {
 	#page .layout .layout-inner .btn-simple:hover {
 		text-decoration:none;
 		}
+	#page .give_button A {
+		margin-top:-.3em;
+		}
 	.content .entry .entry-text {
 		padding:.2em .3em;
 		margin-bottom:.9em;

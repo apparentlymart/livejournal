@@ -263,10 +263,12 @@ A:visited:hover {
 				#page .layout .layout-inner .entrymenu .btn SPAN {
 					line-height:1.2;
 					}
-			#page .entrymenu .btn-simple {
+			#page .entrymenu .btn-simple,
+			#page .entrymenu .give_button A {
 				color:#777;
 				}
-			#page .entrymenu .btn-simple:hover {
+			#page .entrymenu .btn-simple:hover,
+			#page .entrymenu .give_button A:hover {
 				color:#000;
 				}
 			#page .entrymenu .btn-comments {
@@ -280,6 +282,12 @@ A:visited:hover {
 				}
 			#page .entrymenu .btn-comments:hover {
 				color:#000;
+				}
+			#page .entrymenu .give_button {
+				padding:0;
+				}
+			#page .entrymenu .give_button A {
+				margin-top:-.3em;
 				}
 	.content .entry .entry-text {
 		font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;

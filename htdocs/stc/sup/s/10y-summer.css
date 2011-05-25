@@ -56,7 +56,10 @@ A:link:hover, A:link:active, A:visited:hover, A:visited:active {
 	background-color:#E6E6E6;
 	color:#666;
 	}
-#page .btn-comment:link:hover, #page .btn-comment:visited:hover, #page .btn-simple:link:hover, #page .btn-simple:visited:hover {
+#page .give_button A {
+	color:#666;
+	}
+#page .btn-comment:link:hover, #page .btn-comment:visited:hover, #page .btn-simple:link:hover, #page .btn-simple:visited:hover, #page .give_button A:hover {
 	color:#999;
 	}
 #page .btn-comments {

@@ -277,6 +277,7 @@ A:visited:hover {
 	line-height:1.1;
 	text-decoration:none;
 	}
+#page .give_button A:hover,
 #page .entry-wrap .entry .btn:link:hover SPAN SPAN SPAN,
 #page .entry-wrap .entry .btn:visited:hover SPAN SPAN SPAN {
 	text-decoration:underline;
@@ -318,6 +319,10 @@ A:visited:hover {
 	padding-left:15px;
 	line-height:1;
 	background:url(../i/10y-early_morning/sprite.png?v=1) -276px -247px no-repeat;
+	}
+#page .give_button A {
+	margin-top:-.3em;
+	line-height:1.1;
 	}
 
 /* Sidebar */
