@@ -130,31 +130,27 @@ ILikeThis = {
 }
 
 DonateButton = {
-	donate: function(node, url_data, button_data) {
+	donate: function(node, url_data, button_data, event) {
 		if (confirm(button_data.ml_message)) {
 			jQuery.post(LiveJournal.getAjaxUrl("give_tokens") + "?" + url_data + "&mode=js", {
 				lj_form_auth: button_data.lj_form_auth,
 				confirm: 1
 			}, function(data) {
-				if (node.childNodes.length === 1 && node.childNodes[0].nodeType === 3) { // text link, ex.: expressive
-					node.childNodes[0].nodeValue = node.childNodes[0].nodeValue.replace(/[0-9]+([^0-9]*)$/, data.given + "$1");
-				} else if (node.getAttribute("title")) { // ex.: 3 column
-					node.setAttributeNode("title", node.getAttribute("title"));
-				} else { // universal, ex.: minimalizm
-					var all_child = jQuery(node).find("*"), item, i;
-					for (i = all_child.length - 1; i >= 0; i--) {
-						item = all_child[i];
-						if (item.childNodes.length === 1 && item.childNodes[0].nodeType === 3) {
-							item.childNodes[0].nodeValue = item.childNodes[0].nodeValue.replace(/[0-9]+([^0-9]*)$/, data.given + "$1");
-							break;
-						}
+				if( data.html ) {
+					$node = jQuery( node );
+					if( /type=button/.test( url_data ) ) {
+						$node = $node.closest( '.lj-button' );
 					}
+					$node.replaceWith( data.html );
 				}
 			}, "json");
 		}
+
+		event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
+		return false;
 	},
 
-	buyMore: function(node, ml_message) {
+	buyMore: function(node, ml_message, event) {
 		var bubble = jQuery(node).data("bubble");
 		if (!bubble) {
 			bubble = jQuery("<span>" + ml_message + "</span>").bubble({
@@ -164,6 +160,8 @@ DonateButton = {
 		}
 
 		bubble.bubble("show");
+		event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
+		return false;
 	}
 };
 
