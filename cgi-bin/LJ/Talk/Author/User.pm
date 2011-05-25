@@ -103,8 +103,18 @@ sub handle_user_input {
     }
 
     unless ($form->{'userpost'}) {
-        push @$errret,
-            LJ::Lang::ml("/talkpost_do.bml.error.nousername");
+        my $entry = LJ::Entry->new(
+            $init->{'journalu'},
+            'jitemid' => $init->{'itemid'}
+        );
+
+        if ( $entry && $entry->everyone_can_comment ) {
+            push @$errret,
+                LJ::Lang::ml('/talkpost_do.bml.error.nousername');
+        } else {
+            push @$errret,
+                LJ::Lang::ml('/talkpost_do.bml.error.nousername.noanon');
+        }
         return;
     }
 

@@ -48,6 +48,8 @@
 
 .error.nousername=You did not enter your LiveJournal username.  You can choose to post as "Anonymous" if you don't have a LiveJournal user account.
 
+.error.nousername.noanon=You did not enter your LiveJournal username.
+
 .error.noverify2=Sorry, you aren't allowed to post comments until your email address has been validated. If you've lost the confirmation email to do this, you can <a [[aopts]]>have it re-sent</a>.
 
 .error.postshared=You can't post as a shared or community account.  Shared accounts represent groups of people, not individual people.

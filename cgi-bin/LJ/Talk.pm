@@ -1731,6 +1731,12 @@ sub talkform {
 
     my @author_options;
     my $usertype_default = $form->{'usertype'};
+
+    # LJSUP-8788; I admit this is a hack
+    if ( $usertype_default eq 'user' && !$form->{'userpost'} ) {
+        undef $usertype_default;
+    }
+
     foreach my $author_class (LJ::Talk::Author->all) {
         next unless $author_class->enabled;
 
