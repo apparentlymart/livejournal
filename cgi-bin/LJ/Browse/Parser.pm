@@ -73,15 +73,20 @@ sub do_parse {
                             url     => $post->[1],
                         };
                     } else {
-                        $r = LJ::crop_picture_from_web(
-                            source      => $attr->{'src'},
-                            size        => '200x200',
-                            cancel_size => '200x0',
-                            username    => $LJ::PHOTOS_FEAT_POSTS_FB_USERNAME,
-                            password    => $LJ::PHOTOS_FEAT_POSTS_FB_PASSWORD,
-                            galleries   => [ $LJ::PHOTOS_FEAT_POSTS_FB_GALLERY ],
-                        );
-                        $is_new_img = 1;
+                        if ($args{'need_resize'} eq 1) {
+                            $r = LJ::crop_picture_from_web(
+                                source      => $attr->{'src'},
+                                size        => '200x200',
+                                cancel_size => '200x0',
+                                username    => $LJ::PHOTOS_FEAT_POSTS_FB_USERNAME,
+                                password    => $LJ::PHOTOS_FEAT_POSTS_FB_PASSWORD,
+                                galleries   => [ $LJ::PHOTOS_FEAT_POSTS_FB_GALLERY ],
+                            );
+                            $is_new_img = 1;
+                        } else {
+                            $images_crop_cnt--;
+                            next;
+                        }
                     }
                 }
                 if ($images_crop_cnt && $r && ($r->{'status'} ne 'small') && $r->{'url'}) {

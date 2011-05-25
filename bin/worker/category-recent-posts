@@ -80,6 +80,7 @@ sub work {
                 max_len     => 400,
                 crop_image  => 1,
                 entry       => $e_obj,
+                need_resize => 1,
             );
 
             ## Add tags for every entry

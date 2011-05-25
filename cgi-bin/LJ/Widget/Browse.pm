@@ -283,6 +283,7 @@ sub render_body {
                 max_len     => 400,
                 crop_image  => 1,
                 entry       => $entry,
+                need_resize => 0,
             );
             $event = $parsed->{'text'};
             my $images = $parsed->{'images'};
