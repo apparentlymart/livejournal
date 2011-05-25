@@ -18,6 +18,7 @@ A:visited {
 	color:#AAA;
 	text-decoration:none;
 	}
+#page .give_button A:hover,
 A:link:hover,
 A:visited:hover {
 	text-decoration:underline;
