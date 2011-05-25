@@ -245,15 +245,18 @@ A:visited {
 	#page .layout .layout-inner .btn-comments:hover SPAN {
 		color:#FFF;
 		}
-	#page .layout .layout-inner .btn-simple {
+	#page .layout .layout-inner .btn-simple SPAN,
+	#page .layout .layout-inner .give_button A {
 		text-decoration:underline;
 		text-transform:lowercase;
 		}
-	#page .layout .layout-inner .btn-simple:hover {
+	#page .layout .layout-inner .give_button SPAN,
+	#page .layout .layout-inner .btn-simple:hover SPAN,
+	#page .layout .layout-inner A:hover {
 		text-decoration:none;
 		}
 	#page .give_button A {
-		margin-top:-.3em;
+		top:-2px;
 		}
 	.content .entry .entry-text {
 		padding:.2em .3em;
