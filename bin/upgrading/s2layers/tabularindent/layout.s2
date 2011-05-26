@@ -606,8 +606,10 @@ function print_entry_box_close (string footer, Entry entry) {
                 $link->print_raw();
             }
             if ($link_key == "give_button") {
-                """ """;
-                print $e->get_give_button("button");
+                var string give_button = $e->get_give_button("button");
+                if ($give_button != "") {
+                    print safe """ $give_button""";
+                }
             }
         }
 
