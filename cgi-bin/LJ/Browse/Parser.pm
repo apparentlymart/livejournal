@@ -84,7 +84,6 @@ sub do_parse {
                             );
                             $is_new_img = 1;
                         } else {
-                            $images_crop_cnt--;
                             next;
                         }
                     }
@@ -99,7 +98,7 @@ sub do_parse {
                         $attr->{'src'}, $r->{'url'}, $jitemid, $journalid
                     ) if $is_new_img;
                     next;
-                } elsif ($r && $r->{'status'} ne 'small') {
+                } else {
                     next;
                 }
             }
