@@ -260,7 +260,7 @@ if ($u->is_visible) {
      return Encode::encode('utf-8', lc(Encode::decode('utf-8', $s)));
  };
 
- my $user_tags_map = $u->tags || {};
+ my $user_tags_map = LJ::Tags::get_usertags($u, { remote => $remote }) || {};
  $user_tags_map = {
      map {
          $to_lower_case->($_->{name}) => (
@@ -269,6 +269,7 @@ if ($u->is_visible) {
                  ($_->{uses} > 999 ? '999+' : $_->{uses})
          )
      }
+     grep { $_->{display} }
      values %$user_tags_map
  };
 
