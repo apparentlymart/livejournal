@@ -360,53 +360,64 @@ sub getcomments {
     # check permission to access post
     return fail($err,300,"") unless( LJ::can_view($u, $jitem));
 
-    my $itemshow = $req->{itemshow} + 0;
-    $itemshow = 100 if $itemshow > 100 || $itemshow < 0;
+    my $talkid = int(($req->{dtalkid} + 0)/256);   # talkid to load thread
 
-    my $skip = $req->{skip} + 0;
-    
-    my $talkid = int(($req->{dtalkid} + 0)/256);   # talkid
-    
-    my $expand = $req->{expand_strategy} ? $req->{expand_strategy} : ( $req->{dtalkid} ? 'single' : 'mobile' );    
-    return fail($err, 203, 'expand_strategy') unless ($expand =~ /^single|mobile|mobile_thread|by_level|detailed|default$/);
+    my $page_size = $req->{page_size} + 0;
+    $page_size = 500 if($page_size <= 0 || $page_size > 500);
+
+    my $page = $req->{page} + 0;                # page to show  - defaut
+    my $view = $req->{view_ditemid} + 0;        # ditemid   - external comment id to show that page with it
+
+    my $expand = $req->{expand_strategy} ? $req->{expand_strategy} : 'default' ;    
+    return fail($err, 203, 'expand_strategy') unless ($expand =~ /^mobile|mobile_thread|expand_all|by_level|detailed|default$/);
 
     my $format = $req->{format} || 'thread'; # default value thread
     return fail($err, 203, 'format') unless($format =~ /^thread|list$/ );
 
-    my $mobile_thread = 0;
-    if( $expand eq 'mobile_thread' ){
+    my $expand_all = 0;
+    if( $expand eq 'mobile_thread' || $expand eq 'expand_all'){
         undef $expand;
-        $mobile_thread = 1;
+        $expand_all = 1;
     }
 
-    my %extra;
-    my $opts = {
-        thread          => $talkid,
-        page            => $req->{page},
-        view            => $req->{view},
-        expand_strategy => $expand,
-        expand_level    => $req->{expand_level},
-        expand_child    => $req->{expand_child},
-        expand_all      => $mobile_thread,
-        init_comobj     => 0,
-        up              => $up,
-        out_error       => \$extra{error},
-        out_pages       => \$extra{pages},
-        out_page        => \$extra{page},
-        out_itemfirst   => \$extra{itemfirst},
-        out_itemlast    => \$extra{itemlast},
-        out_pagesize    => \$extra{pagesize},
-        out_items       => \$extra{items},
+    my $expand_child;
+    my $expand_level;
+    if ($expand eq 'mobile') {
+        $expand_child = $req->{expand_child} + 0;
+        $expand_child = 3 if $expand_child > 500 || $expand_child <= 0
+    } elsif ($expand eq 'by_level') {
+        $expand_level = ($req->{expand_level} ? $req->{expand_level} + 0 : 1);
+        $expand_level = 1 if $expand_level > 128 || $expand_level < 0;
+    }
 
-        page_size       => 500,             # max comments returned per call !
-        strict_page_size => 1,
+    my $opts = {
+        page            => $page,               # page to get
+        view            => $view,
+        expand_level    => $expand_level+1,
+        expand_child    => $expand_child,
+        expand_all      => $expand_all,
+        init_comobj     => 0,                   # do not init LJ::Comment objects in the function
+        up              => $up,                 # author of root post
+        page_size       => $page_size,          # max comments returned per call!
+        strict_page_size => 1,                  # fix page size, do not extent it in case of less comments
     };
-    
+
+    # optional parameters
+    $opts->{thread} = $talkid if $talkid;
+    $opts->{expand_strategy} = $expand unless($expand eq 'default');
+
     my @com = LJ::Talk::load_comments($journal, $u, "L", $itemid, $opts);
+
+    my %extra;
+    $extra{top_items} = $opts->{out_items};
+    $extra{top_item_first} = $opts->{out_itemfirst};
+    $extra{top_item_last} = $opts->{out_itemlast};
+    $extra{page_size} = $opts->{out_pagesize};
+    $extra{pages} = $opts->{out_pages};
+    $extra{page} = $opts->{out_page};
+
     my @comments;
     my @parent = ( \{ level => -1, children => \@comments } );
-
-  #  return { comm => \@com , flat => $opts->{flat} };
 
     while (my $item = shift @com){        
         $item->{indent} ||= 0;
@@ -421,12 +432,12 @@ sub getcomments {
             datepost        => $item->{datepost},
             dtalkid         => $item->{talkid} * 256 + $jitem->{anum},
             state           => $item->{state},
-       #     is_show         => $item->{_show},
-            subject         => $item->{subject},
-            body            => $item->{body},
-       #     '_loaded'       => $item->{_loaded},
-
+            is_show         => $item->{_show},
+            is_loaded       => ($item->{_loaded} ? 1 : 0),
         };
+
+        $item_data->{body} = $item->{body} if($item->{body} && $item->{_loaded});
+        $item_data->{subject} = $item->{subject} if($item->{subject} && $item->{_loaded});
    
         if($item->{upost} && $item->{upost}->identity ){
             my $i = $item->{upost}->identity;
@@ -448,7 +459,7 @@ sub getcomments {
                 if $item->{'props'}->{'poster_ip'} && ( $u->{'user'} eq $up->{'user'} || $u->can_manage($journal) );
             
             $item_data->{privileges} = {};
-            $item_data->{privileges}->{delete}   = $comment->user_can_delete($u);
+            $item_data->{privileges}->{delete}   = LJ::Talk::can_delete($u, $journal, $up, $item->{userpost});
             $item_data->{privileges}->{edit}     = $comment->user_can_edit($u);
             $item_data->{privileges}->{freeze}   = (!$comment->is_frozen && LJ::Talk::can_freeze($u, $journal, $up, $item->{userpost}));
             $item_data->{privileges}->{unfreeze} = ($comment->is_frozen && LJ::Talk::can_unfreeze($u, $journal, $up, $item->{userpost}));
@@ -457,6 +468,8 @@ sub getcomments {
                 $item_data->{privileges}->{screen}   = (!$comment->is_screened && LJ::Talk::can_screen($u, $journal, $up, $item->{userpost}));
                 $item_data->{privileges}->{unscreen} = ($comment->is_screened && LJ::Talk::can_unscreen($u, $journal, $up, $item->{userpost})); 
             }
+            $item_data->{privileges}->{spam} = (!$comment->is_spam && LJ::Talk::can_marked_as_spam($u, $journal, $up, $item->{userpost}));
+            $item_data->{privileges}->{unspam} = ($comment->is_spam && LJ::Talk::can_unmark_spam($u, $journal, $up, $item->{userpost}));
         }
         
         if ( $req->{calculate_count} ){
@@ -484,15 +497,10 @@ sub getcomments {
         }
     }
     
-    if( $itemshow || $skip ){
-        @comments = splice(@comments, $skip, $itemshow);
-    }
 
     return {
-        skip => $skip,
         comments => \@comments,
-#        items => $extra{items},
-#        %extra,
+        %extra,
         xc3 => {
             u => $flags->{'u'}
         }
