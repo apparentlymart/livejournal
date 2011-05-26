@@ -136,7 +136,8 @@ var default_options = {
 		}
 	},
 	//list of links wich will be shown, when user will click on share link. Can be overriden in init and link methods.
-	links: [ 'livejournal', 'facebook', 'twitter', 'vkontakte', 'odnoklassniki', 'moimir', 'email', 'digg', 'tumblr', 'stumbleupon' ]
+	links: [ 'livejournal', 'facebook', 'twitter', 'vkontakte', 'odnoklassniki', 'moimir', 'email', 'digg', 'tumblr', 'stumbleupon' ],
+	showOn: 'click'
 };
 
 var global_options = $.extend( true, {}, default_options );
@@ -178,7 +179,8 @@ window.LJShare.link = function( opts, node ) {
 
 	var links = ( opts.links ) ? opts.links : global_options.links;
 
-	function buildDom() {
+	function buildDom( initHidden ) {
+		initHidden = initHidden || false;
 		var str = [ supplant( template.start, global_options.ml ) ],
 			serviceName, serviceObj;
 
@@ -195,10 +197,19 @@ window.LJShare.link = function( opts, node ) {
 
 		str.push( supplant( template.end, global_options.ml ) );
 
+		bubbleOptions = { target: link, showOn: options.showOn };
+		if( options.showOn === "hover" ) {
+			bubbleOptions.closeControl = false;
+		}
+
 		dom = $( str.join( ' ' ) )
 			.hide()
-			.bubble( { target: link, showOn: 'click' } )
-			.bubble( 'show' );
+			.bubble( bubbleOptions );
+
+		if( !initHidden ) {
+			dom
+				.bubble( 'show' );
+		}
 	}
 
 	function bindControls() {
@@ -225,6 +236,13 @@ window.LJShare.link = function( opts, node ) {
 				window.open(this.href, 'sharer', 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
 			}
 		} );
+	}
+
+	if( options.showOn === "hover" ) {
+		if( !dom ) {
+			buildDom( true );
+			bindControls();
+		}
 	}
 
 	link.one( 'click', function( ev ) {
