@@ -256,7 +256,7 @@ A:visited {
 		text-decoration:none;
 		}
 	#page .give_button A {
-		top:-2px;
+		float:left;
 		}
 	.content .entry .entry-text {
 		padding:.2em .3em;
