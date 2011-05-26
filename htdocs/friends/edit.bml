@@ -155,8 +155,11 @@ body<=
                 $ret .= "<th style='text-align:left;'>$ML{'.editfriends.alias'}</th>";
             }
             
+            $ret .= "<th style='text-align:left;'>$ML{'.editfriends.tagsonly'}</th>";
             $ret .= "</tr>";
 
+            my $friends_tags = LJ::FriendsTags->load($remote);
+            
             my $j = 11; # to uniquely distinguish 'friend-of' checkboxes, 1-10 are reserved for friend-add boxes
             foreach my $f (@friends) {
                 my $who = $f->{'username'};
@@ -216,6 +219,20 @@ body<=
                         
                     $ret .= "</td>";
                 }
+                
+                $ret .= "<td style='text-align: left;'>";
+                my ($friend_tags_mode, $friend_tags_list) = $friends_tags->get_tags($who_u->{userid});
+                if ($friends{$who} && $friends{$who}->{rel} ne 'FO') {
+                    if ($friend_tags_list && ref($friend_tags_list) eq 'ARRAY' && scalar(@$friend_tags_list) > 0) {
+                        my $friend_tags_str = LJ::ehtml(join(', ', @$friend_tags_list));
+                        $ret .= "<a href='/friends/add.bml?user=$who_u->{user}'>" . 
+                                $friend_tags_str .
+                                "</a>";
+                    } else {
+                        $ret .= "(<a href='/friends/add.bml?user=$who_u->{user}'>" . BML::ml('.selecttags.text') . "</a>)";
+                    }
+                }
+                $ret .= "</td>";
 
                 $ret .= "</tr>\n";
                 $j++;
@@ -309,12 +326,15 @@ body<=
             $request{$_} = $POST{$_};
         }
 
+        my %friends_page_tags;
+
         # now flip the logic and process the deletions
         foreach (grep { /^editfriend_has/} keys %POST) {
             my $who = $POST{$_};
             $request{"editfriend_delete_${who}"} = 1 unless $POST{"editfriend_keep_${who}"};
+            my $who_u = LJ::load_user($who);
         }
-
+        
         # set new aliases for friends
         if ($remote->get_cap('aliases')) {
             my (@aliases, $error);

@@ -55,6 +55,7 @@ use Class::Autouse qw(
                       LJ::GraphicPreviews
                       LJ::Vertical
                       LJ::Browse
+                      LJ::FriendsTags
                       );
 
 use LJ::TimeUtil;
@@ -916,6 +917,28 @@ sub get_friend_items
 
         if (@newitems)
         {
+            if ($opts->{'filter_by_tags'}) {
+                die "Invalid type of parameter filter_by_tags: " . ref($opts->{filter_by_tags}) . "\n"
+                    unless UNIVERSAL::isa($opts->{filter_by_tags}, 'LJ::FriendsTags');
+
+                my $filter_func = $opts->{'filter_by_tags'}->filter_func($friendid);
+                if ($filter_func) {
+                    my $idsbycluster = {};
+                    foreach (@newitems) {
+                        push @{ $idsbycluster->{$_->{clusterid}} }, [ $_->{ownerid}, $_->{itemid} ];
+                    }
+                    my $logtags = LJ::Tags::get_logtagsmulti($idsbycluster);
+                    my $get_entry_tags = sub {
+                        my ($jid, $jitemid) = @_;
+                        my $entry_tags = $logtags->{"$jid $jitemid"};
+                        return () unless $entry_tags;
+                        return values %$entry_tags;
+                    };
+
+                    @newitems = grep { $filter_func->($get_entry_tags->($_->{ownerid}, $_->{itemid})) } @newitems;
+                }
+            }
+
             push @items, @newitems;
 
             $itemsleft--; # we'll need at least one less for the next friend

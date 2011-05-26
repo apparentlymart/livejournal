@@ -78,6 +78,8 @@
 .error.too.long|staleness=1
 .error.too.long=You've reached the maximum number of the notes.
 
+.error.friendstags=Error while saving friends tags. Perhaps you've reached the maximum number of the friends tags. Please, <a [[aopts]]>retry</a> operation.
+
 .error1.title=Add Friend
 
 .error2.text2=Invalid or missing username given. To add a friend, go to the <a [[aopts]]>edit friends</a> page.
@@ -130,5 +132,5 @@
 
 .tags.selected.by.you=Selected by you
 
-.tags.text=You can read all entries by default or select entries with defe
+.tags.text=[[ljuser]] used [[tagscount]] tags.<br>You can read all entries by default or select entries with definitely tags.
 

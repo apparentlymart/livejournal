@@ -1067,6 +1067,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 
 require "ljlang.pl";
 require "cleanhtml.pl";
+use LJ::FriendsTags;
 
 # the creator for the 'lastn' view:
 sub create_view_lastn
@@ -1728,6 +1729,7 @@ sub create_view_friends
         'showtypes' => $get->{'show'},
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
         'events_date' => $events_date,
+        $get->{notags} ? () : 'filter_by_tags' => LJ::FriendsTags->load($remote),
     });
 
     while ($_ = each %friends) {

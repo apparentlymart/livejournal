@@ -1650,3 +1650,11 @@ logproplist.give_count:
   des: Given tokens counter
   prettyname: Given counter
   sortorder: 110
+
+userproplist.friends_tags:
+  datatype: blobchar
+  des: Set of tags, which filter friendspage
+  indexed: 0
+  multihomed: 0
+  prettyname: Friendspage filtrating tags 
+

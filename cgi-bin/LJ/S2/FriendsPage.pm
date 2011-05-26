@@ -166,6 +166,7 @@ sub FriendsPage
         'friendsoffriends'  => $opts->{'view'} eq "friendsfriends",
         'dateformat'        => 'S2',
         'events_date'       => $events_date,
+        $get->{notags} ? () : 'filter_by_tags' => LJ::FriendsTags->load($remote),
     });
 
     # warn "[FriendsPage=$user] Items loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";

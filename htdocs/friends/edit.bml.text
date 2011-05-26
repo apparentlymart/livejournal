@@ -22,6 +22,8 @@
 
 .editfriends.name=Name
 
+.editfriends.tagsonly=Show only entries with tags
+
 .editfriends.text=You can add or remove anyone from your Friends list at any time. The green arrows ([[img1]]) indicate that someone is on your Friends list, while the blue arrows ([[img2]]) indicate that you're on their Friends list.
 
 .editfriends.username=Username
@@ -50,6 +52,8 @@
 .mrcolor=Mr. Color Viewer
 
 .name=Name
+
+.selecttags.text=select tags
 
 .success.editfriends=Manage your Friends list
 

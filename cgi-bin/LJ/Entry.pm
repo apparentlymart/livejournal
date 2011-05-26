@@ -1925,13 +1925,13 @@ sub get_log2_recent_user
     my $log = LJ::get_log2_recent_log($opts->{'userid'}, $opts->{'clusterid'},
               $opts->{'update'}, $opts->{'notafter'}, $opts->{events_date});
 
-    my $left     = $opts->{'itemshow'};
+    ## UNUSED: my $left     = $opts->{'itemshow'};
     my $notafter = $opts->{'notafter'};
     my $remote   = $opts->{'remote'};
 
     my %mask_for_remote = (); # jid => mask for $remote
     foreach my $item (@$log) {
-        last unless $left;
+        ## UNUSED: last unless $left;
         last if $notafter and $item->{'rlogtime'} > $notafter;
         next unless $remote || $item->{'security'} eq 'public';
         next if $item->{'security'} eq 'private'

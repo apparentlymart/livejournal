@@ -19,7 +19,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  my $userid = $u->{userid};
  $body = "";
 
- LJ::need_res(qw(stc/addfriend.css js/core.js js/dom.js js/colorpicker.js));
+ LJ::need_res(qw(stc/addfriend.css stc/entry.css js/core.js js/dom.js js/colorpicker.js js/jquery/jquery.lj.itemlist.js js/jquery/jquery.dependentLists.js js/jquery-ui-autocomplete.js js/jquery.tmpl.js js/addfriend.js));
 
  LJ::set_active_crumb('addfriend');
 
@@ -69,14 +69,17 @@ use vars qw($body $title $windowtitle %GET %POST);
          "ver"  => $LJ::PROTOCOL_VER,
      };
 
+     my $friend_tags_str;
 
      if ($POST{'action:delete'}) {
          $req->{"editfriend_delete_$user"} = 1;
+         $friend_tags_str = undef;
      } else {
          $req->{"editfriend_add_1_user"} = $user;
          $req->{"editfriend_add_1_fg"} = $POST{'editfriend_add_1_fg'};
          $req->{"editfriend_add_1_bg"} = $POST{'editfriend_add_1_bg'};
          $req->{"editfriend_add_1_groupmask"} = $gmask;
+         $friend_tags_str = $POST{'friend_tags'};
      }
 
      my %res = ();
@@ -89,6 +92,12 @@ use vars qw($body $title $windowtitle %GET %POST);
             ## user has been added. setting alias for him
             LJ::set_alias($u, $POST{'user_note'});
         }
+
+         my $friends_tags = LJ::FriendsTags->load($remote);
+         $friends_tags->set($u->{userid}, $POST{friend_tags_mode} || 'A', $friend_tags_str);
+         unless ($friends_tags->save()) {
+             $body .= '<br>' . BML::ml('.error.friendstags', { aopts => "href='/friends/add.bml?user=$user'" }) . '<br><br>';
+         }
         
          $body .= LJ::get_ads({ 
             location    => 'bml.friends.add/main', 
@@ -246,44 +255,86 @@ if ($u->is_visible) {
  $body .= '</div>';
  }
 
+ my $to_lower_case = sub {
+     my $s = shift;
+     return Encode::encode('utf-8', lc(Encode::decode('utf-8', $s)));
+ };
+
+ my $user_tags_map = $u->tags || {};
+ $user_tags_map = {
+     map {
+         $to_lower_case->($_->{name}) => (
+             $_->{uses} < 2 ?
+                 '' :
+                 ($_->{uses} > 999 ? '999+' : $_->{uses})
+         )
+     }
+     values %$user_tags_map
+ };
+
+ my $friends_tags = LJ::FriendsTags->load($remote);
+ my ($friend_tags_mode, $friend_tags_list) = $friends_tags->get_tags($u->{userid});
+ my $friend_tags_map = {};
+ $friend_tags_list = [ map { $to_lower_case->($_) } @$friend_tags_list ];
 
  $body .= '<div class="b-addfriend-option b-addfriend-tags">';
  $body .= '<h3 class="b-addfriend-subhead">' . $ML{'.tags.read'} . '</h3>';
- $body .= '<p class="b-addfriend-notice">' . $ML{'.tags.text'} . '</p>';
+ $body .= '<p class="b-addfriend-notice">' . BML::ml('.tags.text', { ljuser => LJ::ljuser($u), tagscount => scalar(keys %$user_tags_map) }) . '</p>';
  $body .= '<dl class="b-addfriend-showmore">';
  $body .= '<dt class="b-addfriend-showmore-head"><i class="i-addfriend-showmore-arr"></i>' . $ML{'.tags.select'} . '</dt>';
  $body .= '<dd class="b-addfriend-showmore-content">';
- $body .= '<p><input type="radio" name="tags_include" id="tags_including" checked="checked" /><label for="tags_including">' . $ML{'.tags.including'} . '</label><br /><input type="radio" name="tags_include" id="tags_excluding" /><label for="tags_excluding">' . $ML{'.tags.excluding'} . '</label></p>';
+ $body .= '<p>';
+ $body .= '<input type="radio" name="friend_tags_mode" id="tags_including" value="A" ' . 
+          (LJ::FriendsTags->is_allow_mode($friend_tags_mode) ? 'checked="checked" ' : '') .
+          '/><label for="tags_including">' . $ML{'.tags.including'} . '</label><br />';
+ $body .= '<input type="radio" name="friend_tags_mode" id="tags_excluding" value="D" ' .
+          (LJ::FriendsTags->is_allow_mode($friend_tags_mode) ? '' : 'checked="checked" ') .
+          '/><label for="tags_excluding">' . $ML{'.tags.excluding'} . '</label>';
+ $body .= '</p>';
  $body .= '<h4>' . $ML{'.tags.selected.by.you'} . '</h4>';
- $body .= '<ul class="b-pending-users">';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дезодорант">дезодорант</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span></li>';
+ $body .= '<ul class="b-pending-users" id="selectedTagsList">';
+
+ {
+     my $not_last = scalar(@$friend_tags_list);
+     foreach (@$friend_tags_list) {
+         $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($_) . '</a> ' . ($user_tags_map->{$_} ? "($user_tags_map->{$_})" : "") . '<i title="Remove tag from list" class="i-pending-close"></i></span>' . (--$not_last ? ',' : '') . '</li>';
+         $friend_tags_map->{$_} = 1;
+     }
+ }
+
  $body .= '</ul>';
  $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.tags.remove.tags'} . '</p>';
  $body .= '<h4>' . $ML{'.tags.select.more'} . '</h4>';
- $body .= '<p><input type="text" class="b-addfriend-input" placeholder="' . $ML{'.tags.input.tag'} . '" /> <input type="button" value="Select" /></p>';
+ $body .= '<p><input type="text" class="b-addfriend-input" id="searchTag" autocomplete="off" placeholder="' . $ML{'.tags.input.tag'} . '" /> <input id="selectTag" type="button" value="Select" /></p>';
+ $body .= '<input type="hidden" id="selectedTags" name="friend_tags">';
  $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.tags.find.tags'} . '</p>';
  $body .= '<ul class="b-pending-users b-addfriend-alltags">';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дебилы">дебилы</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/девственность">девственность</a> (3)<i title="Remove tag from list" class="i-pending-close"></i></span>,</li>';
- $body .= '<li><span><a target="_blank" href="http://tema.livejournal.com/tag/дезодорант">дезодорант</a> (2)<i title="Remove tag from list" class="i-pending-close"></i></span></li>';
+
+ {
+     my @tags = sort grep { !$friend_tags_map->{$_} } keys %$user_tags_map;
+     my $not_last = scalar(@tags);
+     foreach my $tag (@tags) {
+         $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($tag) . '</a> ' . ($user_tags_map->{$tag} ? "($user_tags_map->{$tag})" : "") . '<i title="Remove tag from list" class="i-pending-close"></i></span>' . (--$not_last ? ',' : '') . '</li>';
+     }
+ }
+
  $body .= '</ul>';
  $body .= '</dd>';
  $body .= '</dl>';
  $body .= '</div>';
+
+ $body .= '<script id="tagTmpl" type="text/x-jquery-tmpl">
+       <li>
+       <span class="ljappippu_pers">
+               <a href="#">${tagName}</a>
+               (-)
+               {{if hasCloseButton }}
+               <i title="Remove tag from list" class="i-pending-close" ></i>
+               {{/if}}
+       </span>
+       </li>
+</script>';
  
-
-
-
  $body .= '<div class="b-addfriend-option b-addfriend-colors">';
  $body .= '<h3 class="b-addfriend-subhead">' . $ML{'.colors.select.user'} . '</h3>';
  $body .= '<p class="b-addfriend-notice">' . BML::ml('.colors.text', {'user'=>$user}) . '</p>';
