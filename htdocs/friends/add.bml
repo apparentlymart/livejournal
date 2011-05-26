@@ -281,7 +281,7 @@ if ($u->is_visible) {
  $body .= '<div class="b-addfriend-option b-addfriend-tags">';
  $body .= '<h3 class="b-addfriend-subhead">' . $ML{'.tags.read'} . '</h3>';
  $body .= '<p class="b-addfriend-notice">' . BML::ml('.tags.text', { ljuser => LJ::ljuser($u), tagscount => scalar(keys %$user_tags_map) }) . '</p>';
- $body .= '<dl class="b-addfriend-showmore">';
+ $body .= '<dl class="b-addfriend-showmore b-addfriend-showmore-closed">';
  $body .= '<dt class="b-addfriend-showmore-head"><i class="i-addfriend-showmore-arr"></i>' . $ML{'.tags.select'} . '</dt>';
  $body .= '<dd class="b-addfriend-showmore-content">';
  $body .= '<p>';
@@ -550,14 +550,15 @@ p?>
 
  $ret .= "</div>\n";
 
-if ($u->{'journaltype'} eq "C") {
-    $body .= "<br />$ML{'.disclaimer'}";
-}
-
  $body .= $ret;
  $body .= '</dd>';
  $body .= '</dl>';
  $body .= '</div>';
+
+
+ if ($u->{'journaltype'} eq "C") {
+     $body .= "<p>$ML{'.disclaimer'}</p>";
+ }
 
 } # end is_visible if statement
 
