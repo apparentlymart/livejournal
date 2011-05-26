@@ -1269,7 +1269,7 @@ sub load_comments
         return;
     }
     my %users_to_load;  # userid -> 1
-    my @posts_to_load;  # talkid scalars
+    my %posts_to_load;  # talkid -> 1 
     my %children;       # talkid -> [ childenids+ ]
 
     my $uposterid = $opts->{'up'} ? $opts->{'up'}->{'userid'} : 0;
@@ -1372,19 +1372,19 @@ sub load_comments
 
     @top_replies = @top_replies[$itemfirst-1 .. $itemlast-1];
 
-    push @posts_to_load, @top_replies;
+    map { $posts_to_load{$_} = 1 } @top_replies;
 
     # mark child posts of the top-level to load, deeper
     # and deeper until we've hit the page size.  if too many loaded,
     # just mark that we'll load the subjects;
-    my @check_for_children = @posts_to_load;
+    my @check_for_children = keys %posts_to_load;
 
     unless ($opts->{expand_strategy}) {
         # the default strategy is to show first replies to top-level
         # comments
         foreach my $itemid (@top_replies) {
             next unless $children{$itemid};
-            push @posts_to_load, $children{$itemid}->[0];
+            $posts_to_load{$children{$itemid}->[0]} = 1;
         }
     }
 
@@ -1396,7 +1396,7 @@ sub load_comments
             next if $cur_level >= $opts->{expand_level};
 
             foreach my $itemid (@$item_ids){
-                push @posts_to_load, $itemid;
+                $posts_to_load{$itemid} = 1;
                 next unless $children{$itemid};
 
                 ## expand next level it there are comments
@@ -1425,7 +1425,7 @@ sub load_comments
                 # we're handling a second-level comment here
 
                 # the comment itself is always shown
-                push @posts_to_load, $itemid_l2;
+                $posts_to_load{$itemid_l2} = 1;
 
                 # if it's not the first reply, children can be hidden,
                 # so we don't care
@@ -1438,7 +1438,7 @@ sub load_comments
                 # we're copying a list here deliberately, so that
                 # later on, we can splice() to modify the copy
                 my @children = @{$children{$itemid_l2}};
-                push @posts_to_load, splice(@children, 0, 5);
+                map { $posts_to_load{$_} = 1 } splice(@children, 0, 5);
 
                 $counter_l2++;
             }
@@ -1454,10 +1454,10 @@ sub load_comments
             my $load = $opts->{'expand_child'} || 3;
             while( @childrens && $load > 0 ){
                 if ( @childrens >= $load ){
-                    push @posts_to_load, splice(@childrens, 0, $load);
+                    map { $posts_to_load{$_} = 1 }  splice(@childrens, 0, $load);
                     last;
                 }else{
-                    push @posts_to_load, @childrens;
+                    map { $posts_to_load{$_} = 1 }  @childrens;
                     $load -= @childrens;
                     @childrens = map {$children{$_}?@{$children{$_}}:()} @childrens;
                 }
@@ -1470,11 +1470,11 @@ sub load_comments
         my $cfc = shift @check_for_children;
         next unless defined $children{$cfc};
         foreach my $child (@{$children{$cfc}}) {
-            if (@posts_to_load < $page_size || $opts->{expand_all}) {
-                push @posts_to_load, $child;
+            if (scalar(keys %posts_to_load) < $page_size || $opts->{expand_all}) {
+                $posts_to_load{$child} = 1;
             }
-            elsif (@posts_to_load < $page_size) {
-                push @posts_to_load, $child;
+            elsif (scalar(keys %posts_to_load) < $page_size) {
+                $posts_to_load{$child} = 1;
             } else {
                 if (@subjects_to_load < $max_subjects) {
                     push @subjects_to_load, $child;
@@ -1495,9 +1495,9 @@ sub load_comments
 
     # load text of posts
     my ($posts_loaded, $subjects_loaded);
-    $posts_loaded = LJ::get_talktext2($u, @posts_to_load);
+    $posts_loaded = LJ::get_talktext2($u, keys %posts_to_load);
     $subjects_loaded = LJ::get_talktext2($u, {'onlysubjects'=>1}, @subjects_to_load) if @subjects_to_load;
-    foreach my $talkid (@posts_to_load) {
+    foreach my $talkid (keys %posts_to_load) {
         next unless $posts->{$talkid}->{'_show'};
         $posts->{$talkid}->{'_loaded'} = 1;
         $posts->{$talkid}->{'subject'} = $posts_loaded->{$talkid}->[0];
@@ -1518,7 +1518,7 @@ sub load_comments
     # load meta-data
     {
         my %props;
-        LJ::load_talk_props2($u->{'userid'}, \@posts_to_load, \%props);
+        LJ::load_talk_props2($u->{'userid'}, [ keys %posts_to_load ] , \%props);
         foreach (keys %props) {
             next unless $posts->{$_}->{'_show'};
             $posts->{$_}->{'props'} = $props{$_};
@@ -1526,7 +1526,7 @@ sub load_comments
     }
 
     if ($LJ::UNICODE) {
-        foreach (@posts_to_load) {
+        foreach (keys %posts_to_load) {
             if ($posts->{$_}->{'props'}->{'unknown8bit'}) {
                 LJ::item_toutf8($u, \$posts->{$_}->{'subject'},
                                 \$posts->{$_}->{'body'},
@@ -1578,7 +1578,7 @@ sub load_comments
         # optionally load userpics
         if (ref($opts->{'userpicref'}) eq "HASH") {
             my @load_pic;
-            foreach my $talkid (@posts_to_load) {
+            foreach my $talkid (keys %posts_to_load) {
                 my $post = $posts->{$talkid};
                 my $kw;
                 if ($post->{'props'} && $post->{'props'}->{'picture_keyword'}) {
