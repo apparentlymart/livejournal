@@ -18,6 +18,8 @@
 .error.maintainer|staleness=1
 .error.maintainer=Unable to revoke maintainer rights for [[user]].
 
+.error.no_maintainers=Community has not have maintainers
+
 .error.noaccess=Only community maintainers are able to edit membership lists. You are not a maintainer of community [[comm]].
 
 .error.noattr=No attributes selected for user: [[user]]
@@ -29,6 +31,10 @@
 .error.notcomm=[[user]] is not a community.
 
 .error.nouser=User does not exist: <b>[[user]]</b>
+
+.error.poll_already_exists=Election poll exists already
+
+.error.cant_create_poll=Can't create poll
 
 .error.unknown=Error inviting [[user]].  Please make sure they're not already a member and try again.
 
@@ -67,6 +73,8 @@
 
 .set.user_to_supermaintainer=Proceed...
 
+.start_elections=Start election
+
 .success.added=added: [[list]]
 
 .success.deleted=removed: [[list]]
@@ -94,6 +102,8 @@
 .title=Community Members
 
 .update=Update settings
+
+.you_can_start_election=You can start a election
 
 .you.supermaintainer=<br/><br/>Currently, you are <b>"SuperMaintainer"</b> for this community [[comm]].<br/><br/>You can abdicate and appoint another maintainer for this role:
 

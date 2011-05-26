@@ -69,6 +69,38 @@ body<=
     my %attrshort = ( X => 'member', P => 'post', N => 'preapprove', M => 'moderate', A => 'admin');
     my %attrshort_r = ( map { $attrshort{$_} => $_ } keys %attrshort ); # reversed
 
+    if ($POST{'start_elections'}) {
+        return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'.error.poll_already_exists'} p?>")
+            if $c->prop("election_poll_id");
+
+        ## Check for maintainers alive
+        my $m_list = LJ::load_rel_user($c->userid, 'A');
+        my @maintainers = map {
+            my $u = LJ::load_userid($_);
+            $u;
+        } grep {
+            my $u = LJ::load_userid($_);
+            $u && $u->is_visible && !$u->is_expunged && $u->can_manage($c) ? 1 : 0;
+        } @$m_list;
+
+        return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'.error.no_maintainers'} p?>")
+            unless @maintainers;
+
+        my $log = '';
+        my $poll_id = LJ::create_supermaintainer_election_poll (
+                comm_id      => $c->userid, 
+                maint_list   => \@maintainers, 
+                log          => \$log,
+                no_job       => 0,
+                check_active => 1,
+        );
+
+        return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'.error.cant_create_poll'} p?>")
+            unless $poll_id;
+
+        $c->set_prop ('election_poll_id' => $poll_id);
+    }
+
     # saving a form submission
     if ($POST{'select_as_sm'}) {
         my $new_sm = $POST{'uid_to_sm'};
@@ -620,6 +652,19 @@ body<=
     $ret .= BML::ml('.intro', { aopts1 => "href='$LJ::HELPURL{maintainership}'", aopts2 => "href='$LJ::HELPURL{add_to_comm}'" }) . "<br /><br />";
     $ret .= $ML{'.intro.invite'};
 
+    $ret .= "<form method='post' action='members.bml?authas=$cname'>";
+    $ret .= LJ::form_auth();
+
+    ## Allow to start supermaintainer election via supermaintainer wish
+    my $super_maintainers = LJ::load_rel_user_cache($c->userid, 'S') || [];
+    my $poll_id = $c->prop('election_poll_id');
+    unless ($poll_id || scalar @$super_maintainers) {
+        $ret .= "<br/>" . LJ::Lang::ml('.you_can_start_election') . "&nbsp;";
+        $ret .= LJ::html_submit("start_elections", BML::ml('.start_elections'));
+    }
+
+    $ret .= "</form>";
+
     $ret .= "<form method='post' action='members.bml?authas=$cname' onsubmit='return confirm(\"" . BML::ml('.abdicate.supermaintainer') . "\")'>";
     $ret .= LJ::form_auth();
 
@@ -647,8 +692,6 @@ body<=
 
         $ret .= LJ::html_submit('select_as_sm', BML::ml('.set.user_to_supermaintainer')) . "<br/>";
     } else {
-        my $poll_id = $c->prop('election_poll_id');
-        my $super_maintainers = LJ::load_rel_user_cache($c->userid, 'S') || [];
         if ($poll_id && !scalar @$super_maintainers) {
             my $show_owner = 0;
             if ($poll_id) {
