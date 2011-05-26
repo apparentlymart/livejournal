@@ -133,7 +133,7 @@
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#6E9DC9", endColorstr="#4E7EAD")!important;
 	}
 .lj-button.light {
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#FEFEFE", endColorstr="#E0E1E4")!important;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e1e2e4',GradientType=0 )!important; /* IE6-9 */
 	}
 .lj-button-link IMG {
 	top:2px!important;

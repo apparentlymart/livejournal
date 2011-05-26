@@ -2978,11 +2978,13 @@ DIV.lj_ippu_app {
 /* light button */
 .lj-button.light {
 	border-color: #C9C9C9 #BBB #AAA!important;
-	background-color: #ECEEEE!important;
-	background: -moz-linear-gradient(100% 100% 90deg, #E0E1E4, #FEFEFE)!important;
-	background: -webkit-linear-gradient(#E0E1E4, #FEFEFE)!important;
-	background: -o-linear-gradient(#E0E1E4, #FEFEFE)!important;
-	background: linear-gradient(#E0E1E4, #FEFEFE)!important;
+	background: #FFFFFF!important; /* Old browsers */
+	background: -moz-linear-gradient(top, #FFFFFF 0%, #FEFEFC 13%, #FFFEFE 52%, #F2F6F1 57%, #E1E2E4 100%)!important; /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFFFFF), color-stop(13%,#FEFEFC), color-stop(52%,#FFFEFE), color-stop(57%,#F2F6F1), color-stop(100%,#E1E2E4))!important; /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #FFFFFF 0%,#FEFEFC 13%,#FFFEFE 52%,#F2F6F1 57%,#E1E2E4 100%)!important; /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #FFFFFF 0%,#FEFEFC 13%,#FFFEFE 52%,#F2F6F1 57%,#E1E2E4 100%)!important; /* Opera11.10+ */
+	background: -ms-linear-gradient(top, #FFFFFF 0%,#FEFEFC 13%,#FFFEFE 52%,#F2F6F1 57%,#E1E2E4 100%)!important; /* IE10+ */
+	background: linear-gradient(top, #FFFFFF 0%,#FEFEFC 13%,#FFFEFE 52%,#F2F6F1 57%,#E1E2E4 100%)!important; /* W3C */
 	}
 .light .lj-button-wrapper {
 	border-color: #FFF!important;
