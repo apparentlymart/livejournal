@@ -1711,11 +1711,6 @@ sub create_view_friends
         }
     }
 
-    my $friends_tags = undef;
-    if ($remote && !$get->{notags}) {
-        $friends_tags = LJ::FriendsTags->load($remote);
-    }
-
     ## load the itemids
     my %friends;
     my %friends_row;
@@ -1734,7 +1729,7 @@ sub create_view_friends
         'showtypes' => $get->{'show'},
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
         'events_date' => $events_date,
-        'filter_by_tags' => $friends_tags,
+        'filter_by_tags' => ($get->{notags} ? 0 : 1),
     });
 
     while ($_ = each %friends) {

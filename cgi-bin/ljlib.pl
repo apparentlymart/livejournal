@@ -883,6 +883,13 @@ sub get_friend_items
 
     } if $opts->{'friendsoffriends'} && ! @LJ::MEMCACHE_SERVERS;
 
+    my $friends_tags = undef;
+    if ($opts->{'filter_by_tags'} && !$opts->{'friendsoffriends'}) {
+        if ($opts->{u}) {
+            $friends_tags = LJ::FriendsTags->load($opts->{u});
+        }
+    }
+
     my $loop = 1;
     my $itemsleft = $getitems;  # even though we got a bunch, potentially, they could be old
     my $fr;
@@ -917,11 +924,8 @@ sub get_friend_items
 
         if (@newitems)
         {
-            if ($opts->{'filter_by_tags'}) {
-                die "Invalid type of parameter filter_by_tags: " . ref($opts->{filter_by_tags}) . "\n"
-                    unless UNIVERSAL::isa($opts->{filter_by_tags}, 'LJ::FriendsTags');
-
-                my $filter_func = $opts->{'filter_by_tags'}->filter_func($friendid);
+            if ($friends_tags) {
+                my $filter_func = $friends_tags->filter_func($friendid);
                 if ($filter_func) {
                     my $idsbycluster = {};
                     foreach (@newitems) {

@@ -147,11 +147,6 @@ sub FriendsPage
     # use Time::HiRes qw//;
     # my $t0 = [Time::HiRes::gettimeofday];
 
-    my $friends_tags = undef;
-    if ($remote && !$get->{notags}) {
-        $friends_tags = LJ::FriendsTags->load($remote);
-    }
-
     ## load the itemids
     my %friends;
     my %friends_row;
@@ -171,7 +166,7 @@ sub FriendsPage
         'friendsoffriends'  => $opts->{'view'} eq "friendsfriends",
         'dateformat'        => 'S2',
         'events_date'       => $events_date,
-        'filter_by_tags'    => $friends_tags,
+        'filter_by_tags'    => ($get->{notags} ? 0 : 1),
     });
 
     # warn "[FriendsPage=$user] Items loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
