@@ -89,23 +89,9 @@ sub verify_and_load_style {
     my $style = LJ::S2::load_style($u->prop('s2_style'));
 
     unless ( $style && $style->{layer}->{layout} ) {
-        # we have no layout layer for this style, which causes errors in
-        # the customization interface
-        # undef current style and force them to use the site defaults
-        $u->set_prop( s2_style => 0 );
-        $style = undef;
-    }
-
-    unless ($style && $style->{'userid'} == $u->{'userid'}) {
-        my $theme;
-        if ($LJ::DEFAULT_STYLE->{theme}) {
-            $theme = LJ::S2Theme->load_by_uniq($LJ::DEFAULT_STYLE->{theme});
-        } else {
-            $theme = LJ::S2Theme->load_default_of($LJ::DEFAULT_STYLE->{layout});
-        }
-
-        LJ::Customize->apply_theme($u, $theme);
-        $style = LJ::S2::load_style($u->prop('s2_style')); # reload style
+        # unless they have a valid style, return back an undef so that
+        # the caller can error out
+        return;
     }
 
     return $style;

@@ -1,0 +1,61 @@
+<?_code {
+#line 3
+
+use strict;
+use warnings;
+
+my $remote = LJ::get_remote();
+
+unless ($remote) {
+    return LJ::needlogin_redirect();
+}
+
+my $journal = $remote;
+if ( defined ( my $authas_username = LJ::Request->get_param('authas') ) ) {
+    $journal = LJ::get_authas_user($authas_username);
+
+    unless ($journal) {
+        return BML::render_page({
+            'title' => LJ::Lang::ml('Error'),
+            'body'  => LJ::Lang::ml('error.invalidauth'),
+        });
+    }
+}
+
+my $default_theme = $LJ::DEFAULT_STYLE->{'theme'};
+
+my $ml_params = {
+    'siteroot' => $LJ::SITEROOT,
+    'journal_ljuser' => $journal->ljuser_display,
+    'style' => $default_theme,
+    'journal' => $journal->username,
+};
+
+if ( LJ::Request->did_post ) {
+    unless ( LJ::check_form_auth() ) {
+        return BML::render_page({
+            'title' => LJ::Lang::ml('Error'),
+            'body'  => LJ::Lang::ml('error.invalidform'),
+        });
+    }
+
+    my @themes = LJ::S2Theme->load_by_uniq($default_theme);
+    LJ::Customize->apply_theme( $journal, $themes[0] );
+
+    return BML::render_page({
+        'title' => LJ::Lang::ml('.title'),
+        'body'  => LJ::Lang::ml( '.message.success', $ml_params ),
+    });
+}
+
+my $form = '<form action="" method="post">'
+         . LJ::form_auth()
+         . LJ::Lang::ml( '.form.content', $ml_params )
+         . '</form>';
+
+return BML::render_page({
+    'title' => LJ::Lang::ml('.title'),
+    'body'  => $form,
+});
+
+} _code?>

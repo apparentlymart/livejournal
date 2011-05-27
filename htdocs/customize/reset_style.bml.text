@@ -1,0 +1,13 @@
+.form.content<<
+<p>You are going to reset journal style for [[journal_ljuser]] to <strong>[[style]]</strong>. Press this button to confirm:</p>
+<p><button type="submit">Reset</button></p>
+<p><a href="[[siteroot]]/customize/?authas=[[journal]]">Go back</a></p>
+.
+
+.message.success<<
+<p>Journal style for [[journal_ljuser]] has been successfully reset to <strong>[[style]]</strong>.</p>
+<p><a href="[[siteroot]]/customize/?authas=[[journal]]">Go back</a></p>
+.
+
+.title=Reset Journal Style
+

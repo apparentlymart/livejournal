@@ -31,6 +31,17 @@ body<=
     # make sure there's a style set and load it
     my $style = LJ::Customize->verify_and_load_style($u);
 
+    unless ($style) {
+        my $ml_var = $u->get_cap('s2styles')
+                   ? '/customize/index.bml.error.invalid_style'
+                   : '/customize/index.bml.error.invalid_style.basic';
+
+        return LJ::Lang::ml( $ml_var, {
+            'siteroot' => $LJ::SITEROOT,
+            'journal'  => $u->username,
+        } );
+    }
+
     # lazy migration of style name
     LJ::Customize->migrate_current_style($u);
 

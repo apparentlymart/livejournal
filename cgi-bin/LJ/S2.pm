@@ -655,6 +655,8 @@ sub get_style
     }
 
     unless ($have_style) {
+        die "LJ::S2: style $styleid seems to be empty";
+
         my $public = get_public_layers();
         while (my ($layer, $name) = each %$LJ::DEFAULT_STYLE) {
             next unless $name ne "";
@@ -1166,30 +1168,24 @@ sub get_style_layers
 
     my %stylay;
 
-    my $fetch = sub {
-        my ($db, $qry, @args) = @_;
+    my $udbh = LJ::get_cluster_master($u);
+    local $udbh->{'RaiseError'} = 1;
 
-        my $sth = $db->prepare($qry);
-        $sth->execute(@args);
-        die "ERROR: " . $sth->errstr if $sth->err;
-        while (my ($type, $s2lid) = $sth->fetchrow_array) {
-            $stylay{$type} = $s2lid;
-        }
-        return 0 unless %stylay;
-        return 1;
-    };
+    my $rows = $udbh->selectall_arrayref( qq{
+        SELECT type, s2lid FROM s2stylelayers2
+        WHERE userid=? AND styleid=?
+    }, { 'Slice' => {} }, $u->userid, $styleid );
 
-    unless ($fetch->($u, "SELECT type, s2lid FROM s2stylelayers2 " .
-                     "WHERE userid=? AND styleid=?", $u->{userid}, $styleid)) {
-        my $dbh = LJ::get_db_writer();
-        if ($fetch->($dbh, "SELECT type, s2lid FROM s2stylelayers WHERE styleid=?",
-                     $styleid)) {
-            LJ::S2::set_style_layers_raw($u, $styleid, %stylay);
-        }
+    foreach my $row (@$rows) {
+        $stylay{ $row->{'type'} } = $row->{'s2lid'};
     }
 
-    # set in memcache
-    LJ::MemCache::set($memkey, \%stylay);
+    # set in memcache, provided that we actually have something
+    # to store (empty styles is a rare case)
+    if (%stylay) {
+        LJ::MemCache::set($memkey, \%stylay);
+    }
+
     $LJ::S2::REQ_CACHE_STYLE_ID{$styleid} = \%stylay;
     return \%stylay;
 }
