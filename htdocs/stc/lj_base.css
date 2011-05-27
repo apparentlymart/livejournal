@@ -2092,14 +2092,18 @@ DIV.lj_ippu_app {
 		line-height: 11px;
 		font-size: 11px;
 		}
+	DIV.lj_ippu_app .ljappippu_confirm_buttons,
 	DIV.lj_ippu_app .ljappippu_share_buttons {
 		clear: both;
 		overflow: hidden;
 		}
+		DIV.lj_ippu_app .ljappippu_confirm_buttons .ljappippu_payment_ok,
+		DIV.lj_ippu_app .ljappippu_confirm_buttons .ljappippu_confirm_ok,
 		DIV.lj_ippu_app .ljappippu_share_buttons INPUT.submit {
 			float: right;
 			margin-top: 5px;
 			}
+		DIV.lj_ippu_app .ljappippu_confirm_buttons .i-bubble,
 		DIV.lj_ippu_app .ljappippu_share_buttons .i-bubble {
 			line-height: 16px;
 			}
@@ -2229,6 +2233,45 @@ DIV.lj_ippu_app {
 			width: 150px;
 			font-size: 12px;
 			}
+
+/* Payment confirm/reject */
+.ljappippu_thumb {
+	float:left;
+	margin:2px 15px 15px 2px;
+	}
+.ljappippu_payment_desc {
+	padding:0 0 0 138px;
+	}
+.ljappippu_table {
+	border-collapse:collapse;
+	width:100%;
+	}
+	.ljappippu_table TH,
+	.ljappippu_table TD {
+		padding:9px 0;
+		border-bottom:1px solid #E6E6E6;
+		line-height: 18px;
+		font-size: 12px;
+		}
+	.ljappippu_table .last TH,
+	.ljappippu_table .last TD {
+		border-bottom:none;
+		}
+	.ljappippu_table TH {
+		font-weight:bold;
+		text-align:left;
+		}
+	.ljappippu_table TD {
+		text-align:right;
+		}
+	.ljappippu_table.wide TD {
+		text-align:left;
+		}
+	.lj_ippu_app .b-message {
+		-webkit-border-radius:6px;
+		-moz-border-radius:6px;
+		border-radius:6px;
+		}
 
 /* Popups with arrows
 --------------------------- */
