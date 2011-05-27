@@ -305,7 +305,7 @@ if ($u->is_visible) {
      $body .= '</ul>';
      $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.tags.remove.tags'} . '</p>';
      $body .= '<h4>' . $ML{'.tags.select.more'} . '</h4>';
-     $body .= '<p><input type="text" class="b-addfriend-input" id="searchTag" autocomplete="off" placeholder="' . $ML{'.tags.input.tag'} . '" /> <input id="selectTag" type="button" value="Select" /></p>';
+     $body .= '<p><input type="text" class="b-addfriend-input" id="searchTag" autocomplete="off" placeholder="' . $ML{'.tags.input.tag'} . '" /> <input id="selectTag" type="button" value="' . $ML{'.tags.button.select'} . '" /></p>';
      $body .= '<input type="hidden" id="selectedTags" name="friend_tags">';
      $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.tags.find.tags'} . '</p>';
      $body .= '<ul class="b-pending-users b-addfriend-alltags">';
