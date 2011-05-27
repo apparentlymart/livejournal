@@ -338,7 +338,7 @@ if ($u->is_visible) {
  
  $body .= '<div class="b-addfriend-option b-addfriend-colors">';
  $body .= '<h3 class="b-addfriend-subhead">' . $ML{'.colors.select.user'} . '</h3>';
- $body .= '<p class="b-addfriend-notice">' . BML::ml('.colors.text', {'user'=>$user}) . '</p>';
+ $body .= '<p class="b-addfriend-notice">' . BML::ml('.colors.text', {'user' => LJ::ljuser($u)}) . '</p>';
  $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.colors.disclaimer'} . '</p>';
  $body .= '<dl class="b-addfriend-showmore b-addfriend-showmore-closed">';
  $body .= '<dt class="b-addfriend-showmore-head"><i class="i-addfriend-showmore-arr"></i>' . $ML{'.colors.select'} . '</dt>';
