@@ -15,6 +15,7 @@ use LJ::Share;
 use LJ::Talk::Author;
 use LJ::TimeUtil;
 use LJ::Pay::Wallet;
+use LJ::GeoLocation;
 
 use constant PACK_FORMAT => "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state 
 
@@ -2610,7 +2611,17 @@ sub get_thread_html
                 if ($post->{'props'}->{'poster_ip'} &&
                     $remote && ($remote->{'user'} eq $up->{'user'} || $remote->can_manage($u) || $viewall))
                 {
-                    $text .= BML::ml('.fromip', { 'ip' => $post->{'props'}->{'poster_ip'} });
+                    ## resolve IP to a location
+                    my $ip   = $post->{'props'}->{'poster_ip'};
+                    my $info = LJ::GeoLocation->get_city_info_by_ip($ip);
+
+                    if ($info and my $country = $info->{country_name} and my $city = $info->{city_name}){
+                        ## Display location of an IP.
+                        $text .= LJ::Lang::ml('.fromip.extended', { ip => $ip, country => $country, city => $city });
+                    } else {
+                        ## IP location is unknown 
+                        $text .= LJ::Lang::ml('.fromip', { ip => $ip });
+                    }
                 }
 
                 if ($post->{'state'} ne 'B') {

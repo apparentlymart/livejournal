@@ -15,6 +15,7 @@
 .edittime=Edited at [[edittime]]
 
 .fromip=(from [[ip]])
+.fromip.extended=([[country]], [[city]] / [[ip]])
 
 .multi.no.action|staleness=1
 .multi.no.action=You have not selected one of the actions
