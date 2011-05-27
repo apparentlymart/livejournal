@@ -258,28 +258,24 @@ if ($u->is_visible) {
  }
 
  unless ($u->is_identity()) {
-     my $to_lower_case = sub {
-         my $s = shift;
-         return Encode::encode('utf-8', lc(Encode::decode('utf-8', $s)));
-     };
 
-     my $user_tags_map = LJ::Tags::get_usertags($u, { remote => $remote }) || {};
-     $user_tags_map = {
-         map {
-             $to_lower_case->($_->{name}) => (
-                 $_->{uses} < 2 ?
-                     '' :
-                     ($_->{uses} > 999 ? '(999+)' : "($_->{uses})")
-             )
+     my $user_tags_map = {};
+     {
+         my $tags = LJ::Tags::get_usertags($u, { remote => $remote }) || {};
+         foreach (values %$tags) { 
+             next unless $_->{display};
+             $user_tags_map->{ LJ::FriendsTags->normalize_tag($_->{name}) } += $_->{uses};
          }
-         grep { $_->{display} }
-         values %$user_tags_map
-     };
+         foreach (keys %$user_tags_map) {
+             my $uses = $user_tags_map->{$_};
+             $user_tags_map->{$_} = ($uses < 2 ? '' : ($uses > 999 ? '(999+)' : "($uses)"));
+         }
+     }
 
      my $friends_tags = LJ::FriendsTags->load($remote);
      my ($friend_tags_mode, $friend_tags_list) = $friends_tags->get_tags($u->{userid});
      my $friend_tags_map = {};
-     $friend_tags_list = [ map { $to_lower_case->($_) } @$friend_tags_list ];
+     $friend_tags_list = [ map { LJ::FriendsTags->normalize_tag($_) } @$friend_tags_list ];
 
      $body .= '<div class="b-addfriend-option b-addfriend-tags">';
      $body .= '<h3 class="b-addfriend-subhead">' . $ML{'.tags.read'} . '</h3>';
@@ -301,7 +297,7 @@ if ($u->is_visible) {
      {
          my $not_last = scalar(@$friend_tags_list);
          foreach (@$friend_tags_list) {
-             $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($_) . '</a> ' . (exists $user_tags_map->{$_} ? $user_tags_map->{$_} : '(-)') . '<i title="Remove tag from list" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
+             $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($_) . '</a> ' . (exists $user_tags_map->{$_} ? $user_tags_map->{$_} : '(-)') . '<i title="Remove tag from list" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '') . '</li>';
              $friend_tags_map->{$_} = 1;
          }
      }
@@ -318,7 +314,7 @@ if ($u->is_visible) {
          my @tags = sort grep { !$friend_tags_map->{$_} } keys %$user_tags_map;
          my $not_last = scalar(@tags);
          foreach my $tag (@tags) {
-             $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($tag) . '</a> ' . (exists $user_tags_map->{$tag} ? $user_tags_map->{$tag} : '(-)') . '<i title="Remove tag from list" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
+             $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($tag) . '</a> ' . (exists $user_tags_map->{$tag} ? $user_tags_map->{$tag} : '(-)') . '<i title="Remove tag from list" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '') . '</li>';
          }
      }
 

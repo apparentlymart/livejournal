@@ -1,5 +1,8 @@
 package LJ::FriendsTags;
 
+use strict;
+use Encode;
+
 use constant ALLOW => 'A';
 use constant DENY  => 'D';
 use constant MAX_FRIENDSTAGS_SIZE => 65535;
@@ -17,6 +20,7 @@ use constant MAX_FRIENDSTAGS_SIZE => 65535;
 sub load {
     my ($class, $remote) = @_;
 
+    return undef unless $remote;
     my $prop = $remote->prop('friends_tags');
     $prop = LJ::text_uncompress($prop);
 
@@ -99,6 +103,7 @@ sub set {
     $tags_str = '' unless defined $tags_str;
     $tags_str =~ s/^\s+//s;
     $tags_str =~ s/\s+$//s;
+    $tags_str = $self->normalize_tag($tags_str);
 
     if (length($tags_str) > 0) {
         my %tags = map { lc($_) => 1 } split /\s*,\s*/, $tags_str;
@@ -114,6 +119,11 @@ sub set {
     $self->{_data} = $data;
 }
 
+sub normalize_tag {
+    my ($class, $tag) = @_;
+    return Encode::encode('utf-8', lc(Encode::decode('utf-8', $tag)));
+};
+
 sub filter_func {
     my ($self, $friendid) = @_;
 
@@ -125,7 +135,7 @@ sub filter_func {
         return sub {
             return 1 unless @_;
             foreach (@_) {
-                return 0 if exists $tags{$_};
+                return 0 if exists $tags{$self->normalize_tag($_)};
             }
             return 1;
         };
@@ -133,7 +143,7 @@ sub filter_func {
         return sub {
             return 0 unless @_;
             foreach (@_) {
-                return 1 if exists $tags{$_};
+                return 1 if exists $tags{$self->normalize_tag($_)};
             }
             return 0;
         };
