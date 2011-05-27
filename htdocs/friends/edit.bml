@@ -224,7 +224,9 @@ body<=
                 my ($friend_tags_mode, $friend_tags_list) = $friends_tags->get_tags($who_u->{userid});
                 if ($friends{$who} && $friends{$who}->{rel} ne 'FO') {
                     if ($friend_tags_list && ref($friend_tags_list) eq 'ARRAY' && scalar(@$friend_tags_list) > 0) {
-                        my $friend_tags_str = LJ::ehtml(join(', ', @$friend_tags_list));
+                        my $friend_tags_str = LJ::FriendsTags->is_allow_mode($friend_tags_mode) ?
+                                                  LJ::ehtml(join(', ', @$friend_tags_list)) :
+                                                  join(', ', map { '<s>' . LJ::ehtml($_) . '</s>' } @$friend_tags_list );
                         $ret .= "<a href='/friends/add.bml?user=$who_u->{user}'>" . 
                                 $friend_tags_str .
                                 "</a>";
