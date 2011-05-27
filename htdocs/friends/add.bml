@@ -266,7 +266,7 @@ if ($u->is_visible) {
          $to_lower_case->($_->{name}) => (
              $_->{uses} < 2 ?
                  '' :
-                 ($_->{uses} > 999 ? '999+' : $_->{uses})
+                 ($_->{uses} > 999 ? '(999+)' : "($_->{uses})")
          )
      }
      grep { $_->{display} }
@@ -298,7 +298,7 @@ if ($u->is_visible) {
  {
      my $not_last = scalar(@$friend_tags_list);
      foreach (@$friend_tags_list) {
-         $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($_) . '</a> ' . ($user_tags_map->{$_} ? "($user_tags_map->{$_})" : "") . '<i title="Remove tag from list" class="i-pending-close"></i></span>' . (--$not_last ? ',' : '') . '</li>';
+         $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($_) . '</a> ' . (exists $user_tags_map->{$_} ? $user_tags_map->{$_} : '(-)') . '<i title="Remove tag from list" class="i-pending-close"></i></span>' . (--$not_last ? ',' : '') . '</li>';
          $friend_tags_map->{$_} = 1;
      }
  }
@@ -315,7 +315,7 @@ if ($u->is_visible) {
      my @tags = sort grep { !$friend_tags_map->{$_} } keys %$user_tags_map;
      my $not_last = scalar(@tags);
      foreach my $tag (@tags) {
-         $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($tag) . '</a> ' . ($user_tags_map->{$tag} ? "($user_tags_map->{$tag})" : "") . '<i title="Remove tag from list" class="i-pending-close"></i></span>' . (--$not_last ? ',' : '') . '</li>';
+         $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($tag) . '</a> ' . (exists $user_tags_map->{$tag} ? $user_tags_map->{$tag} : '(-)') . '<i title="Remove tag from list" class="i-pending-close"></i></span>' . (--$not_last ? ',' : '') . '</li>';
      }
  }
 
