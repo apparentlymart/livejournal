@@ -368,6 +368,9 @@ sub getcomments {
     my $page = $req->{page} + 0;                # page to show  - defaut
     my $view = $req->{view_ditemid} + 0;        # ditemid   - external comment id to show that page with it
 
+    my $skip = $req->{skip} + 0;            
+    my $itemshow = $req->{itemshow} + 0;
+
     my $expand = $req->{expand_strategy} ? $req->{expand_strategy} : 'default' ;    
     return fail($err, 203, 'expand_strategy') unless ($expand =~ /^mobile|mobile_thread|expand_all|by_level|detailed|default$/);
 
@@ -409,9 +412,9 @@ sub getcomments {
     my @com = LJ::Talk::load_comments($journal, $u, "L", $itemid, $opts);
 
     my %extra;
-    $extra{top_items} = $opts->{out_items};
-    $extra{top_item_first} = $opts->{out_itemfirst};
-    $extra{top_item_last} = $opts->{out_itemlast};
+    $extra{topitems} = $opts->{out_items};
+    $extra{topitem_first} = $opts->{out_itemfirst};
+    $extra{topitem_last} = $opts->{out_itemlast};
     $extra{page_size} = $opts->{out_pagesize};
     $extra{pages} = $opts->{out_pages};
     $extra{page} = $opts->{out_page};
@@ -496,7 +499,14 @@ sub getcomments {
             undef $item->{children};
         }
     }
-    
+        
+    if($format eq 'list') {    
+        $extra{items} = scalar(@comments);
+        $itemshow = $extra{items} unless ($itemshow && $itemshow <= $extra{items});
+        @comments = splice(@comments, $skip, $itemshow);
+        $extra{skip} = $skip;
+        $extra{itemshow} = $itemshow;
+    }
 
     return {
         comments => \@comments,
