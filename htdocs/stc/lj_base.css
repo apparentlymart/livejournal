@@ -2986,6 +2986,7 @@ DIV.lj_ippu_app {
 	-moz-border-radius: 3px 3px 0 0!important;
 	-webkit-border-radius: 3px 3px 0 0!important;
 	}
+.lj-button-link,
 .lj-button-link:link,
 .lj-button-link:visited,
 .lj-button-link:hover,
@@ -3032,6 +3033,7 @@ DIV.lj_ippu_app {
 .light .lj-button-wrapper {
 	border-color: #FFF!important;
 	}
+.light .lj-button-link,
 .light .lj-button-link:link,
 .light .lj-button-link:visited,
 .light .lj-button-link:hover,
