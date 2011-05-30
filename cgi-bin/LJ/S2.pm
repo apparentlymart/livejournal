@@ -3968,18 +3968,18 @@ sub _Entry__get_link
     }
 }
 
-sub EntryLite__get_give_button
+sub EntryLite__print_give_button
 {
     my ($ctx, $this, $type, $image) = @_;
-    return LJ::run_hook("give_button", {
+    $S2::pout->(LJ::run_hook("give_button", {
         'journal' => $this->{'journal'}->{'username'},
         'itemid'  => $this->{itemid},
         'type'    => $type,
         'image'   => $image,
-    });
+    }));
 }
 
-*Entry__get_give_button = \&EntryLite__get_give_button;
+*Entry__print_give_button = \&EntryLite__print_give_button;
 
 sub Entry__plain_subject
 {
