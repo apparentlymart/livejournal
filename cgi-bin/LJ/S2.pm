@@ -611,6 +611,22 @@ sub get_style
     }
 
     my %style;
+
+    unless ($styleid) {
+        # special case here: styleid=0 is the default style, whatever
+        # it is
+
+        my $public = get_public_layers();
+        while (my ($layer, $name) = each %$LJ::DEFAULT_STYLE) {
+            next unless $name ne "";
+            next unless $public->{$name};
+            my $id = $public->{$name}->{'s2lid'};
+            $style{$layer} = $id if $id;
+        }
+
+        return %style;
+    }
+
     my $have_style = 0;
 
     if ($verify && $styleid) {
@@ -656,14 +672,6 @@ sub get_style
 
     unless ($have_style) {
         die "LJ::S2: style $styleid seems to be empty";
-
-        my $public = get_public_layers();
-        while (my ($layer, $name) = each %$LJ::DEFAULT_STYLE) {
-            next unless $name ne "";
-            next unless $public->{$name};
-            my $id = $public->{$name}->{'s2lid'};
-            $style{$layer} = $id if $id;
-        }
     }
 
     return %style;
