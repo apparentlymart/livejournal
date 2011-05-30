@@ -763,6 +763,7 @@ sub getfriendspage
     my @entries = LJ::get_friend_items({
         %get_params,
         'skip' => $skip,
+        'filter_by_tags' => 1,
     });
 
     my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count userpic props security/;
@@ -789,6 +790,7 @@ sub getfriendspage
             push @entries, LJ::get_friend_items({
                 %get_params,
                 'skip' => $skip + ($before_count += $itemshow),
+                'filter_by_tags' => 1,
             }) unless @entries;
             next if $LJ::EndOfTime - $ei->{rlogtime} > $before;
             next if $before_skip-- > 0;
