@@ -165,12 +165,12 @@ sub link_bar
     }
 
     ## Give features
-    if (LJ::is_enabled('give_features') && $remote && !$u->equals($remote) && $entry->prop('give_features')) {
+    if (LJ::is_enabled('give_features') && $remote && $entry->prop('give_features')) {
         my $give_button = LJ::run_hook("give_button", {
             'journal' => $u->{'user'},
             'itemid'  => $itemid,
         });
-        push @linkele, $give_button;
+        push @linkele, $give_button if $give_button;
     }
 
     ## Next
