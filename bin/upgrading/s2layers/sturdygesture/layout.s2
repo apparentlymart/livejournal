@@ -391,10 +391,9 @@ function EntryPage::lay_page_nav() {
             $l->lay_print_li($*text_entry_links{$ls});
         }
         if ($ls == "give_button") {
-            var string give_button = $.entry->get_give_button("string");
-            if ($give_button != "") {
-                print safe """<li>$give_button</li>""";
-            }
+            """<li>""";
+            $.entry->print_give_button("string");
+            """</li>""";
         }
     }
     $l = $.entry->get_link("nav_prev");

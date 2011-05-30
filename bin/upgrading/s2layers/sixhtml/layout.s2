@@ -1149,10 +1149,8 @@ function Entry::print_linkbar() {
             $link->print_raw();
         }
         if ($link_key == "give_button") {
-            var string give_button = $this->get_give_button("string");
-            if ($give_button != "") {
-                print safe """ $sep $give_button""";
-            }
+            print safe """ $sep """;
+            $this->print_give_button("string");
         }
     }
 }
