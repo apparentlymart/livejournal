@@ -81,6 +81,18 @@ sub render
     $data_journal->{display} = LJ::ljuser($journal);
     $data_journal->{has_friendspage_per_day} = ($journal->get_cap('friendspage_per_day') ? 1 : 0);
 
+    $data_journal->{view_entry_is_valid} = 0;
+    if ($data_journal->{view_entry}) {
+        my $uri = LJ::Request->uri();
+        if ($uri =~ /(\d+)\.html/) {
+            my $entry = LJ::Entry->new($journal, ditemid => $1);
+            if ($entry and $entry->correct_anum) {
+                $data_journal->{view_entry_is_valid} = 1;
+                $data_journal->{view_entry_is_public} = ($entry->is_public() ? 1 : 0);
+            }
+        }
+    }
+
     if ($remote)
     {
         $data_remote->{is_logged_in} = 1;
