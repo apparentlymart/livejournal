@@ -224,12 +224,18 @@ body<=
                 my ($friend_tags_mode, $friend_tags_list) = $friends_tags->get_tags($who_u->{userid});
                 if ($friends{$who} && $friends{$who}->{rel} ne 'FO' && !$who_u->is_identity()) {
                     if ($friend_tags_list && ref($friend_tags_list) eq 'ARRAY' && scalar(@$friend_tags_list) > 0) {
-                        my $friend_tags_str = LJ::FriendsTags->is_allow_mode($friend_tags_mode) ?
-                                                  LJ::ehtml(join(', ', @$friend_tags_list)) :
-                                                  join(', ', map { '<s>' . LJ::ehtml($_) . '</s>' } @$friend_tags_list );
-                        $ret .= "<a href='/friends/add.bml?user=$who_u->{user}'>" . 
-                                $friend_tags_str .
-                                "</a>";
+                        my $stringify = sub {
+                            return LJ::FriendsTags->is_allow_mode($friend_tags_mode) ?
+                                       join(', ', map { LJ::ehtml($_) } @_) :
+                                       join(', ', map { '<s>' . LJ::ehtml($_) . '</s>' } @_);
+                        };
+                        my $friend_tags_str;
+                        if (scalar(@$friend_tags_list) > 5) {
+                            $friend_tags_str = $stringify->(@$friend_tags_list[0..4]) . ',&nbsp;...';
+                        } else {
+                            $friend_tags_str = $stringify->(@$friend_tags_list);
+                        }
+                        $ret .= "<a href='/friends/add.bml?user=$who_u->{user}'>$friend_tags_str</a>";
                     } else {
                         $ret .= "(<a href='/friends/add.bml?user=$who_u->{user}'>" . BML::ml('.selecttags.text') . "</a>)";
                     }
