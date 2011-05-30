@@ -503,7 +503,7 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 			}
 		})
 		.appendTo(content);
-		if( data.is_friend ) {
+		if( data.is_friend && !data.is_identity ) {
 			content.appendChild(bar.cloneNode(true));
 			jQuery('<a/>', {
 				href: data.url_addfriend,
