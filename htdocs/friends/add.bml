@@ -102,7 +102,7 @@ use vars qw($body $title $windowtitle %GET %POST);
          }
         
          $body .= LJ::get_ads({ 
-            location    => 'bml.friends.add/main', 
+            location    => 'bml.friends.add/done',
             ljadwrapper => 1,
             below_ad    => LJ::CProd->full_box_for($remote, width => 300) 
          });
@@ -211,6 +211,8 @@ use vars qw($body $title $windowtitle %GET %POST);
          $body .= "</div>";
      }
  }
+
+ $body .= LJ::get_ads({ location => 'bml.friends.add/main', ljadwrapper => 1, });
 
  $body .= '<div class="b-addfriend-main">';
 
@@ -584,7 +586,7 @@ $body .= "<?p ";
  $body .= "</form>";
  $body .= '</div>';
  $body .= '</div>';
- $body = $print_with_ad->($body);
+ # $body = $print_with_ad->($body);
  
  return;
 
