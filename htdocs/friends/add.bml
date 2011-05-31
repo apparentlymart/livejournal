@@ -156,12 +156,14 @@ use vars qw($body $title $windowtitle %GET %POST);
          $body .= '<div class="b-addfriend-status">';
          $body .= "<?p " . BML::ml('.error3.text1', {'user' => LJ::ljuser($user)}) . " p?>";
          $body .= "</div>";
+         $body .= LJ::get_ads({ location => 'bml.friends.add/main', ljadwrapper => 1, });
          $body .= "</div>";
      } else {
          $body .= '<div class="b-addfriend-aside">';
          $body .= '<div class="b-addfriend-status">';
          $body .= "<?p " . BML::ml('.error3.text2', {'user' => LJ::ljuser($user)}) . " p?>";
          $body .= "</div>";
+         $body .= LJ::get_ads({ location => 'bml.friends.add/main', ljadwrapper => 1, });
          $body .= "</div>";
      }
  } else {
