@@ -598,13 +598,16 @@ sub subscriptions {
         my $journal_match = $allmatch ? "" : "AND journalid=?";
 
         my $limit_sql = ($limit && $limit_remain) ? "LIMIT $limit_remain" : '';
+        my ($extra_condition, @extra_args) = $self->extra_params_for_finding_subscritions();
         my $sql = "SELECT userid, subid, is_dirty, journalid, etypeid, " .
             "arg1, arg2, ntypeid, createtime, expiretime, flags  " .
-            "FROM subs WHERE etypeid=? $journal_match $and_enabled $limit_sql";
+            "FROM subs WHERE etypeid=? $journal_match $and_enabled $extra_condition " .
+            $limit_sql;
 
         my $sth = $udbh->prepare($sql);
         my @args = ($self->etypeid);
         push @args, $self->u->id unless $allmatch;
+        push @args, @extra_args;
         $sth->execute(@args);
         if ($sth->err) {
             warn "SQL: [$sql], args=[@args]\n";
@@ -648,6 +651,10 @@ sub subscriptions {
     }
 
     return @subs;
+}
+
+sub extra_params_for_finding_subscritions {
+    return '';
 }
 
 # returns a boolean value indicating whether the given subscription matches
