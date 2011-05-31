@@ -152,12 +152,16 @@ use vars qw($body $title $windowtitle %GET %POST);
  if ($fr) {
      $title .= $ML{'.error3.title'};
      if ($u->is_visible) {
+         $body .= '<div class="b-addfriend-aside">';
          $body .= '<div class="b-addfriend-status">';
          $body .= "<?p " . BML::ml('.error3.text1', {'user' => LJ::ljuser($user)}) . " p?>";
          $body .= "</div>";
+         $body .= "</div>";
      } else {
+         $body .= '<div class="b-addfriend-aside">';
          $body .= '<div class="b-addfriend-status">';
          $body .= "<?p " . BML::ml('.error3.text2', {'user' => LJ::ljuser($user)}) . " p?>";
+         $body .= "</div>";
          $body .= "</div>";
      }
  } else {
@@ -172,8 +176,11 @@ use vars qw($body $title $windowtitle %GET %POST);
      if ($u->{journaltype} eq 'Y') {
          $windowtitle = BML::ml('.confirm.syn.title1', {'user'=> $user });
          $title = BML::ml('.confirm.syn.title1', {'icon'=> $icon, 'user'=> $user });
+         $body .= '<div class="b-addfriend-aside">';
          $body .= '<div class="b-addfriend-status">';
          $body .= "<?p $ML{'.confirm.text1.feed'} p?>";
+         $body .= "</div>";
+         $body .= LJ::get_ads({ location => 'bml.friends.add/main', ljadwrapper => 1, });
          $body .= "</div>";
 
      # Is this account redirected?
@@ -184,15 +191,21 @@ use vars qw($body $title $windowtitle %GET %POST);
          $windowtitle = BML::ml('.confirm.title.community', {'user'=> $user });
          $title = BML::ml('.confirm.title.community', {'icon'=> $icon, 'user'=> $user });
          unless (LJ::is_friend($userid, $remote->{userid})) {
+             $body .= '<div class="b-addfriend-aside">';
              $body .= '<div class="b-addfriend-status">';
              $body .= "<?p " . BML::ml('.confirm.text1.community2', {'aopts' => "href='$LJ::SITEROOT/community/join.bml?comm=$user'"}) . " p?>";
+             $body .= "</div>";
+             $body .= LJ::get_ads({ location => 'bml.friends.add/main', ljadwrapper => 1, });
              $body .= "</div>";
          }
      } elsif ($u->{'journaltype'} eq "N") {
          $windowtitle = BML::ml('.confirm.title.news', {'user'=> $user });
          $title = BML::ml('.confirm.title.news', {'icon'=> $icon, 'user'=> $user });
+         $body .= '<div class="b-addfriend-aside">';
          $body .= '<div class="b-addfriend-status">';
          $body .= "<?p " . BML::ml('.confirm.text1.news', {'user' => LJ::ljuser($user)}) . " p?>";
+         $body .= "</div>";
+         $body .= LJ::get_ads({ location => 'bml.friends.add/main', ljadwrapper => 1, });
          $body .= "</div>";
 
      } else {
@@ -203,16 +216,18 @@ use vars qw($body $title $windowtitle %GET %POST);
             $windowtitle = BML::ml('.confirm.title.person', {'user'=> $user });
             $title = BML::ml('.confirm.title.person', {'icon'=> $icon, 'user'=> $user });
          }
+         $body .= '<div class="b-addfriend-aside">';
          $body .= '<div class="b-addfriend-status">';
          $body .= "<?p $ML{'.confirm.text1.person'}";
          $body .= "<ul><li>$ML{'.confirm.action1.person'}</li>";
          $body .= "<li>$ML{'.confirm.action2.person'}</li>" if ($u->{'journaltype'} ne "I");
          $body .= "</ul> p?>";
          $body .= "</div>";
+         $body .= LJ::get_ads({ location => 'bml.friends.add/main', ljadwrapper => 1, });
+         $body .= '</div>';
      }
  }
 
- $body .= LJ::get_ads({ location => 'bml.friends.add/main', ljadwrapper => 1, });
 
  $body .= '<div class="b-addfriend-main">';
 
@@ -586,7 +601,6 @@ $body .= "<?p ";
  $body .= "</form>";
  $body .= '</div>';
  $body .= '</div>';
- # $body = $print_with_ad->($body);
  
  return;
 
