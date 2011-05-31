@@ -27,7 +27,11 @@ sub render_body {
         return if LJ::Request->redirected;
     }
 
-    my $filename = $opts{'embedded'} ? 'ExternalLogin' : 'Login';
+    my $filename = 'Login';
+    if ( $opts{'embedded'} ) {
+        my $partner = $opts->{'partner'};
+        $filename = 'ExternalLogin/v' . $partner->widget_version . '.tmpl';
+    }
 
     ## Draw widget
     my $template = LJ::HTML::Template->new(
