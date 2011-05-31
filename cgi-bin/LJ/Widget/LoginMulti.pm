@@ -29,7 +29,7 @@ sub render_body {
 
     my $filename = 'Login';
     if ( $opts{'embedded'} ) {
-        my $partner = $opts->{'partner'};
+        my $partner = $opts{'partner'};
         $filename = 'ExternalLogin/v' . $partner->widget_version . '.tmpl';
     }
 
