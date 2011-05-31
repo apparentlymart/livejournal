@@ -885,7 +885,9 @@ sub get_friend_items
 
     my $friends_tags = undef;
     if ($opts->{'filter_by_tags'} && !$opts->{'friendsoffriends'}) {
-        if ($opts->{u} && !$opts->{u}->is_identity()) {
+        if ($opts->{u} &&
+            $opts->{u}->id() == $remoteid)
+        {
             $friends_tags = LJ::FriendsTags->load($opts->{u});
         }
     }
