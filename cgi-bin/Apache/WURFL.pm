@@ -156,6 +156,10 @@ sub redirect4mobile {
         return '' if $flag eq 'yes';
     }
 
+    if ($args =~ /mobileredirect=no/) {
+        return '';
+    }
+
     # If we get cookie 'fullversion=yes', don't redirect.
     if ($cookie eq 'yes') {
         return '';
