@@ -245,14 +245,14 @@ function createDeleteFunction(ae, dItemid, action) {
 		var markSpamMLPrefix = (Site.remote_is_maintainer == 1 && com.u !== '') ? 'comment.mark.spam.' : 'comment.mark.spam2.';		
 		
 		if (action == 'markAsSpam') {
-			if (!window.delPopup) {
-				window.delPopup = jQuery('<div />')
+			if (!window.ctrlPopup) {
+				window.ctrlPopup = jQuery('<div class="b-popup-ctrlcomm" />')
 					.delegate('input.spam-comment-button', 'click', function () {
-						window.delPopup.bubble('hide');
+						window.ctrlPopup.bubble('hide');
 					});
 			}			
 
-			window.delPopup
+			window.ctrlPopup
 				.html('<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + getLocalizedStr(markSpamMLPrefix + 'title', comUser) + '</strong></div><div class="b-popup-row">' + getLocalizedStr(markSpamMLPrefix + 'subject', comUser) + '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" onclick="deleteComment(' + dItemid + ', \'' + action + '\');" value="' + getLocalizedStr(markSpamMLPrefix + 'button', comUser) + '"></div><div>', ae, e, 'spamComment' + dItemid)
 				.bubble()
 				.bubble('show', ae);
@@ -277,14 +277,14 @@ function createDeleteFunction(ae, dItemid, action) {
 	
 	        inHTML.push("<div class='b-popup-row'><input class='delete-comment-button' type='button' value='" + getLocalizedStr( 'comment.delete', comUser ) + "' onclick='deleteComment(" + dItemid + ");' /></div></div><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', comUser ) + "</div></form>");
 			
-			if (!window.modPopup) {
-				window.modPopup = jQuery('<div />')
+			if (!window.delPopup) {
+				window.delPopup = jQuery('<div class="b-popup-delcomm" />')
 					.delegate('input.delete-comment-button', 'click', function () {
-						window.modPopup.bubble('hide');
+						window.delPopup.bubble('hide');
 					});
 			}
 			
-			window.modPopup
+			window.delPopup
 				.html(inHTML.join(' '))
 				.bubble()
 				.bubble('show', ae);
