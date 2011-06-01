@@ -598,7 +598,7 @@ sub subscriptions {
         my $journal_match = $allmatch ? "" : "AND journalid=?";
 
         my $limit_sql = ($limit && $limit_remain) ? "LIMIT $limit_remain" : '';
-        my ($extra_condition, @extra_args) = $self->extra_params_for_finding_subscritions();
+        my ($extra_condition, @extra_args) = $self->extra_params_for_finding_subscriptions();
         my $sql = "SELECT userid, subid, is_dirty, journalid, etypeid, " .
             "arg1, arg2, ntypeid, createtime, expiretime, flags  " .
             "FROM subs WHERE etypeid=? $journal_match $and_enabled $extra_condition " .
@@ -653,7 +653,7 @@ sub subscriptions {
     return @subs;
 }
 
-sub extra_params_for_finding_subscritions {
+sub extra_params_for_finding_subscriptions {
     return '';
 }
 
