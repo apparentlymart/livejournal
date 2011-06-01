@@ -2775,6 +2775,10 @@ DIV.lj_ippu_app {
 	text-align: left;
 	z-index: 3;
 	}
+.b-popup-delcomm,
+.b-popup-ctrlcomm {
+	max-width: 380px;
+	}
 
 
 /* Native Sharing */
