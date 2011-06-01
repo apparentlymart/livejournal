@@ -2097,11 +2097,13 @@ DIV.lj_ippu_app {
 		clear: both;
 		overflow: hidden;
 		}
-		DIV.lj_ippu_app .ljappippu_confirm_buttons .ljappippu_payment_ok,
-		DIV.lj_ippu_app .ljappippu_confirm_buttons .ljappippu_confirm_ok,
 		DIV.lj_ippu_app .ljappippu_share_buttons INPUT.submit {
 			float: right;
 			margin-top: 5px;
+			}
+		DIV.lj_ippu_app .ljappippu_confirm_buttons .ljappippu_payment_ok,
+		DIV.lj_ippu_app .ljappippu_confirm_buttons .ljappippu_confirm_ok {
+			float: right;
 			}
 		DIV.lj_ippu_app .ljappippu_confirm_buttons .i-bubble,
 		DIV.lj_ippu_app .ljappippu_share_buttons .i-bubble {
