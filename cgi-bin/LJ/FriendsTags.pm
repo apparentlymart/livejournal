@@ -150,5 +150,71 @@ sub filter_func {
     }
 }
 
+sub get_stats {
+    my ($class, $user_id, $compressed_prop) = @_;
+
+    my $stats = {
+        json_size_gzip => length($compressed_prop),
+        friends_count  => 0,
+        mode_allow     => 0,
+        mode_deny      => 0,
+        mode_unknown   => 0,
+        tags_count     => 0,
+        tags_invalid   => 0,
+        tags_empty     => 0,
+        tags_max_per_friend => 0,
+    };
+
+    my $prop = LJ::text_uncompress($compressed_prop);
+    $stats->{json_size} = length($prop);
+
+    return $stats unless $prop;
+
+    my $data = undef;
+    eval {
+        $data = LJ::JSON->from_json($prop);
+    };
+
+    unless ($data && ref($data) eq 'HASH') {
+        $stats->{json_is_invalid} = 1;
+        return $stats;
+    }
+
+    while (my ($friendid, $arr) = each %$data) {
+        my ($mode, $tags) = @$arr;
+
+        $stats->{friends_count}++;
+
+        if ($mode eq ALLOW) {
+            $stats->{mode_allow}++;
+        }
+        elsif ($mode eq DENY) {
+            $stats->{mode_deny}++;
+        }
+        else {
+            $stats->{mode_unknown}++;
+        }
+
+        if ($tags) {
+            if (ref($tags) eq 'ARRAY') {
+                my $tags_count = scalar(@$tags);
+                $stats->{tags_count} += $tags_count;
+                $stats->{tags_max_per_friend} = $tags_count if $tags_count > $stats->{tags_max_per_friend};
+            } else {
+                $stats->{tags_invalid}++;
+            }
+        }
+        else {
+            $stats->{tags_empty}++;
+        }
+        
+        # unless (LJ::is_friend($self->{_u}, $friendid)) {
+        #     delete $self->{_data}->{$friendid};
+        # }
+    }
+
+    return $stats;
+}
+
 1;
 
