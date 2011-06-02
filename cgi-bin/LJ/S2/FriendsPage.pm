@@ -327,7 +327,7 @@ sub FriendsPage
 
         my $journalbase = LJ::journal_base($friends{$friendid});
         my $permalink = $eobj->url;
-        my $readurl = $eobj->url( %urlopts, 'mode' => 'reply' );
+        my $readurl = $eobj->url( %urlopts );
         my $posturl = $eobj->url( %urlopts, 'mode' => 'reply' );
 
         my $comments = CommentInfo({
