@@ -86,7 +86,7 @@ LiveJournal.updateWalletBalance = function () {
 			var balance = $("LJ_Wallet_Balance");
 			if( balance ) {
 				if( resp.balance ) {
-					balance.innerHTML = balance.innerHTML.replace( /\d+/, resp.balance );
+					balance.innerHTML = balance.innerHTML.replace( /\d+/, newBalance );
 				} else {
 					balance.innerHTML = "";
 				}
