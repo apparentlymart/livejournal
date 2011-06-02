@@ -142,6 +142,7 @@ DonateButton = {
 						$node = $node.closest( '.lj-button' );
 					}
 					$node.replaceWith( data.html );
+					LiveJournal.run_hook( 'update_wallet_balance' );
 				}
 			}, "json");
 		}
