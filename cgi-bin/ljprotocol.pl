@@ -2434,13 +2434,10 @@ sub editevent
     my %curprops;
     LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
 
-    ## handle meta-data (properties)
-    my %props_byname = ();
-    foreach my $key (keys %{$req->{'props'}}) {
-        ## changing to something else?
-        if ($curprops{$itemid}->{$key} ne $req->{'props'}->{$key}) {
-            $props_byname{$key} = $req->{'props'}->{$key};
-        }
+    ## give features
+    my $give_features = $req->{'props'}->{'give_features'};
+    if ($give_features) {
+        $req->{'props'}->{'give_features'} = ($give_features eq 'enable') ? 1 : 0;
     }
 
     my $event = $req->{'event'};
