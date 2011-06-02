@@ -4507,10 +4507,14 @@ sub _friend_friendof_uids {
     my $u = shift;
     my %args = @_;
 
+    ## check cache first
+    my @res = $u->_load_friend_friendof_uids_from_memcache($args{mode}, $args{limit});
+    return @res if defined @res;
+
     # call normally if no gearman/not wanted
-    my $gc = LJ::gearman_client();
-    return $u->_friend_friendof_uids_do(%args)
-        unless $gc && LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $u->id);
+    my $gc = '';
+    return $u->_friend_friendof_uids_do(skip_memcached => 1, %args) # we've already checked memcached above
+        unless 0 and LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $u->id) and $gc = LJ::gearman_client();
 
     # invoke gearman
     my @uids;
@@ -4538,9 +4542,36 @@ sub _friend_friendof_uids_do {
     my ($u, %args) = @_;
 
     my $limit = int(delete $args{limit}) || 50000;
-    my $mode = delete $args{mode};
+    my $mode  = delete $args{mode};
+    my $skip_memcached = delete $args{skip_memcached};
     Carp::croak("unknown option") if %args;
 
+    ## cache
+    unless ($skip_memcached){
+        my @res = $u->_load_friend_friendof_uids_from_memcache($mode, $limit);
+        return @res if @res;
+    }
+
+    ## db
+    my $uids = $u->_load_friend_friendof_uids_from_db($mode, $limit);
+
+    # if the list of uids is greater than 950k
+    # -- slow but this definitely works
+    my $pack = pack("N*", $limit);
+    foreach (@$uids) {
+        last if length $pack > 1024*950;
+        $pack .= pack("N*", $_);
+    }
+
+    ## memcached
+    my $memkey = $u->_friend_friendof_uids_memkey($mode);
+    LJ::MemCache::add($memkey, $pack, 3600) if $uids;
+
+    return @$uids;
+}
+
+sub _friend_friendof_uids_memkey {
+    my ($u, $mode) = @_;
     my $memkey;
 
     if ($mode eq "friends") {
@@ -4550,6 +4581,14 @@ sub _friend_friendof_uids_do {
     } else {
         Carp::croak("mode must either be 'friends' or 'friendofs'");
     }
+
+    return $memkey;
+}
+
+sub _load_friend_friendof_uids_from_memcache {
+    my ($u, $mode, $limit) = @_;
+
+    my $memkey = $u->_friend_friendof_uids_memkey($mode);
 
     if (my $pack = LJ::MemCache::get($memkey)) {
         my ($slimit, @uids) = unpack("N*", $pack);
@@ -4567,19 +4606,7 @@ sub _friend_friendof_uids_do {
         return @uids if @uids < $slimit;
     }
 
-    my $uids = $u->_load_friend_friendof_uids_from_db($mode, $limit);
-
-    # if the list of uids is greater than 950k
-    # -- slow but this definitely works
-    my $pack = pack("N*", $limit);
-    foreach (@$uids) {
-        last if length $pack > 1024*950;
-        $pack .= pack("N*", $_);
-    }
-
-    LJ::MemCache::add($memkey, $pack, 3600) if $uids;
-
-    return @$uids;
+    return undef;
 }
 
 ## Attention: if 'limit' arg is omited, this method loads all userid from friends table.
@@ -6432,7 +6459,7 @@ sub load_userids_multiple
 
     my $satisfy = sub {
         my $u = shift;
-        next unless ref $u eq "LJ::User";
+        return unless ref $u eq "LJ::User";
 
         # this could change the $u returned to an
         # existing one we already have loaded in memory,
