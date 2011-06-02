@@ -17,11 +17,7 @@ LiveJournal.run_hook = function () {
     var hookfuncs = LiveJournal.hooks[a[0]];
     if (!hookfuncs || !hookfuncs.length) return;
 
-    var hookargs = [];
-
-    for (var i = 1; i < a.length; i++) {
-        hookargs.push(a[i]);
-    }
+    var hookargs = [].slice.call( arguments, 1 );
 
     var rv = null;
 
@@ -33,6 +29,9 @@ LiveJournal.run_hook = function () {
 };
 
 LiveJournal.initPage = function () {
+	//register system hooks
+	LiveJournal.register_hook( 'update_wallet_balance', LiveJournal.updateWalletBalance );
+
     // set up various handlers for every page
     LiveJournal.initInboxUpdate();
 
@@ -60,29 +59,44 @@ LiveJournal.initInboxUpdate = function () {
 
 // Do AJAX request to find the number of unread items in the inbox
 LiveJournal.updateInbox = function () {
-    var postData = {
-        "action": "get_unread_items"
-    };
 
-    var opts = {
-        "data": HTTPReq.formEncoded(postData),
-        "method": "POST",
-        "onData": LiveJournal.gotInboxUpdate
-    };
+	jQuery.post( LiveJournal.getAjaxUrl( 'esn_inbox' ), {
+			"action": "get_unread_items"
+		}, function( resp ) {
+			if (! resp || resp.error) return;
 
-    opts.url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
-
-    HTTPReq.getJSON(opts);
+			var unread = $("LJ_Inbox_Unread_Count");
+			if( unread ) {
+				unread.innerHTML = resp.unread_count ? "  (" + resp.unread_count + ")" : "";
+			} else {
+				var unread = $("LJ_Inbox_Unread_Count_Controlstrip");
+				if( unread ) {
+					unread.innerHTML = resp.unread_count ? resp.unread_count  : "0";
+				}
+			}
+		}, 'json' );
 };
 
-// We received the number of unread inbox items from the server
-LiveJournal.gotInboxUpdate = function (resp) {
-    if (! resp || resp.error) return;
+//refresh number of tokens in the header
+LiveJournal.updateWalletBalance = function () {
+	jQuery.get( LiveJournal.getAjaxUrl( 'get_balance' ), function( resp ) {
+			if (! resp || resp.status != 'OK') return;
 
-    var unread = $("LJ_Inbox_Unread_Count");
-    if (! unread) return;
-
-    unread.innerHTML = resp.unread_count ? "  (" + resp.unread_count + ")" : "";
+			var balance = $("LJ_Wallet_Balance");
+			if( balance ) {
+				if( resp.balance ) {
+					balance.innerHTML = balance.innerHTML.replace( /\d+/, resp.balance );
+				} else {
+					balance.innerHTML = "";
+				}
+			} else {
+				var balance = $("LJ_Wallet_Balance_Controlstrip");
+				if( balance ) {
+					balance.innerHTML = resp.balance ? resp.balance  : "0";
+				}
+			}
+		}
+	);
 };
 
 // Placeholder onclick event
