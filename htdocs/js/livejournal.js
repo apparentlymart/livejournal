@@ -81,6 +81,7 @@ LiveJournal.updateInbox = function () {
 LiveJournal.updateWalletBalance = function () {
 	jQuery.get( LiveJournal.getAjaxUrl( 'get_balance' ), function( resp ) {
 			if (! resp || resp.status != 'OK') return;
+			var newBalance = resp.balance ? parseInt( resp.balance, 10 ) : 0;
 
 			var balance = $("LJ_Wallet_Balance");
 			if( balance ) {
@@ -92,11 +93,10 @@ LiveJournal.updateWalletBalance = function () {
 			} else {
 				var balance = $("LJ_Wallet_Balance_Controlstrip");
 				if( balance ) {
-					balance.innerHTML = resp.balance ? resp.balance  : "0";
+					balance.innerHTML = newBalance;
 				}
 			}
-		}
-	);
+		}, 'json' );
 };
 
 // Placeholder onclick event
