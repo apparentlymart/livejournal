@@ -210,6 +210,7 @@ sub url {
     my $view = delete $opts{view};
     my $anchor = delete $opts{anchor};
     my $mode = delete $opts{mode};
+    my $style = delete $opts{style};
 
     croak "Unknown args passed to url: " . join(",", keys %opts)
         if %opts;
@@ -836,6 +837,7 @@ sub event_html
     }
     $opts->{journalid} = $self->journalid;
     $opts->{posterid} = $self->posterid;
+    $opts->{entry_url} = $self->url;
     
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};
@@ -855,7 +857,14 @@ sub event_text
 {
     my $self = shift;
     my $event = $self->event_raw;
-    LJ::CleanHTML::clean_event( \$event, { textonly => 1, journalid => $self->journalid, posterid => $self->posterid } ) if $event;
+    if ( $event ) {
+        LJ::CleanHTML::clean_event( \$event, {
+            'textonly'  => 1,
+            'journalid' => $self->journalid,
+            'posterid'  => $self->posterid,
+            'entry_url' => $self->url,
+        } );
+    }
     return $event;
 }
 

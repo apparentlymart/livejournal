@@ -236,6 +236,7 @@ sub make_feed
                     'preformatted'  => $logprops{$itemid}->{'opt_preformatted'},
                     'journalid'     => $u->userid,
                     'posterid'      => $it->{'posterid'},
+                    'entry_url'     => $entry_obj->url,
                 }
             );
 

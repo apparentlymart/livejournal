@@ -4424,6 +4424,7 @@ sub Page__get_entries_by_tags {
         LJ::CleanHTML::clean_event( \$text, {
             'preformatted'          => $entry->prop('opt_preformatted'),
             'cuturl'                => $entry->url,
+            'entry_url'             => $entry->url,
             'ljcut_disable'         => 0,
             'journalid'             => $entry->journalid,
             'posterid'              => $entry->posterid,

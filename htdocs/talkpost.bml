@@ -205,6 +205,7 @@ body<=
                                           'suspend_msg' => $suspend_msg,
                                           'unsuspend_supportid' => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, 
                                           'cuturl' => $talkurl,
+                                          'entry_url' => $talkurl,
                                           'expand_cut' => 1,
                                           'journalid' =>  $entry->journalid,
                                           'posterid' => $entry->posterid,

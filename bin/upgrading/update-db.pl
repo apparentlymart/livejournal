@@ -508,7 +508,7 @@ sub populate_s2 {
             }
         };
 
-        while ( my @batch = splice( @to_compile, 0, 20 ) ) {
+        while ( my @batch = splice( @to_compile, 0, 50 ) ) {
             $compile_wrapper->(@batch);
         }
 

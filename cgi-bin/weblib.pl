@@ -1281,7 +1281,7 @@ sub include_raw  {
     my $code = shift;
 
     die "Bogus include type: $type"
-        unless $type =~ m!^(js|css|js_link|css_link)$!;
+        unless $type =~ m!^(js|css|js_link|css_link|html)$!;
 
     push @LJ::INCLUDE_RAW => [$type, $code];
 }
@@ -1504,6 +1504,8 @@ sub res_includes {
             $ret .= qq{<script type="text/javascript" src="$code"></script>\r\n};
         } elsif ( $type eq 'css_link' ) {
             $ret .= qq{<link rel="stylesheet" type="text/css" href="$code" />};
+        } elsif ( $type eq 'html' ) {
+            $ret .= $code;
         }
     }
 

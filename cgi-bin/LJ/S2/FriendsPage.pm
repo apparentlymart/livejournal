@@ -251,13 +251,17 @@ sub FriendsPage
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
 
-        my $stylemine = "";
-        $stylemine .= "style=mine" if $remote && $remote->{'opt_stylemine'} &&
-                                      $remote->{'userid'} != $friendid;
+        my %urlopts;
+        if (    $remote && $remote->{'opt_stylemine'}
+             && $remote->{'userid'} != $friendid )
+        {
+            $urlopts{'style'} = 'mine';
+        }
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                             'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine),
+                                             'cuturl' => $entry_obj->url(%urlopts),
+                                             'entry_url' => $entry_obj->url,
                                              'maximgwidth' => $maximgwidth,
                                              'maximgheight' => $maximgheight,
                                              'ljcut_disable' => $remote ? $remote->{'opt_ljcut_disable_friends'} : undef,
@@ -323,8 +327,8 @@ sub FriendsPage
 
         my $journalbase = LJ::journal_base($friends{$friendid});
         my $permalink = $eobj->url;
-        my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
-        my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
+        my $readurl = $eobj->url( %urlopts, 'mode' => 'reply' );
+        my $posturl = $eobj->url( %urlopts, 'mode' => 'reply' );
 
         my $comments = CommentInfo({
             'read_url' => $readurl,

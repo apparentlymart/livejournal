@@ -170,7 +170,12 @@ EMBED
             $subject ||= (LJ::ehtml($entry->subject_orig) || LJ::Lang::ml("repost.default_subject"));
             unless ($event){
                 $event = $entry->event_raw;
-                LJ::CleanHTML::clean_event(\$event, { cuturl => $entry->url, journalid => $entry->journalid, posterid => $entry->posterid });
+                LJ::CleanHTML::clean_event( \$event, {
+                    'cuturl' => $entry->url,
+                    'entry_url' => $entry->url,
+                    'journalid' => $entry->journalid,
+                    'posterid' => $entry->posterid,
+                } );
                 $event = LJ::Lang::ml("repost.wrapper", { 
                                             username => $entry->poster->username,
                                             url      => $entry->url,

@@ -49,6 +49,7 @@
         preformatted => $req{'prop_opt_preformatted'},
         journalid    => $u->userid,
         posterid     => $up->userid,
+        entry_url    => '#',
     });
     # expand the embedded content for reals
     LJ::EmbedModule->expand_entry($u, \$event, preview => 1,);

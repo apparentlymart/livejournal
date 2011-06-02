@@ -1781,6 +1781,11 @@ sub journal_content
         $cb->(\$html);
     }
 
+    # add crap right after <body>
+    my $after_body_open;
+    LJ::run_hooks('insert_html_after_body_open', \$after_body_open);
+    $html =~ s!(<body.*?>)!$1$after_body_open!i if $after_body_open;
+
     # add crap before </body>
     my $before_body_close = "";
     LJ::run_hooks("insert_html_before_body_close", \$before_body_close);

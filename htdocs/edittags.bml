@@ -78,6 +78,7 @@ body<=
     $opts{'preformatted'} = $props{$jitemid}{'opt_preformatted'};
     $opts{'journalid'} = $u->userid;
     $opts{'posterid'} = $logrow->{posterid};
+    $opts{'entry_url'} = $entry->url;
 
     LJ::CleanHTML::clean_subject(\$subj);
     LJ::CleanHTML::clean_event(\$evt, \%opts);

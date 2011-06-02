@@ -3049,3 +3049,29 @@ A.lj-button-link:active {
 	color: #222!important;
 	}
 
+
+/* LJ like buttons */
+.lj-like {
+    padding: 0 !important;
+    margin: 24px 0 !important; 
+    }
+.lj-like:after {
+	content: " ";
+	display: block;
+	visibility: hidden;
+	clear: both;
+	height: 0;
+	font-size: 0;
+	line-height: 0;
+	} 
+    .lj-like-item {
+        float: left !important;
+        margin: 0 24px 0 0 !important;
+        }
+    .lj-like-item-facebook,
+    .lj-like-item-google {
+        height: 20px !important;
+        padding: 1px 0 !important;
+        }
+
+

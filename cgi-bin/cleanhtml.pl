@@ -308,6 +308,8 @@ sub clean
     # - ailyin, Nov 15, 2010
     my @lj_lang_otherwise = ( 1 );
 
+    my %vkontakte_like_js;
+
   TOKEN:
     while (my $token = $p->get_token)
     {
@@ -710,6 +712,74 @@ sub clean
             {
                 # Strip it out, but still register it as being open
                 $opencount{$tag}++;
+            }
+
+            elsif ( $tag eq 'lj-like' ) {
+                unless ( exists $opts->{'entry_url'} && $opts->{'entry_url'} )
+                {
+                    $newdata .= '<b>[lj-like in invalid context]</b>';
+                    next TOKEN;
+                }
+
+                my $entry_url = $opts->{'entry_url'};
+                my @buttons = qw( facebook google vkontakte );
+
+                if ( exists $attr->{'buttons'} && $attr->{'buttons'} ) {
+                    my $buttons = $attr->{'buttons'};
+
+                    @buttons = ();
+                    foreach my $button ( split /,\s*/, $buttons ) {
+                        if ( $button =~ /^f/i ) {
+                            push @buttons, 'facebook';
+                        }
+                        elsif ( $button =~ /^g/i ) {
+                            push @buttons, 'google';
+                        }
+                        elsif ( $button =~ /^v/i ) {
+                            push @buttons, 'vkontakte';
+                        }
+                    }
+                }
+
+                $newdata .= '<div class="lj-like">';
+                foreach my $button (@buttons) {
+                    if ( $button eq 'facebook' ) {
+                        my $language = LJ::Lang::get_remote_lang();
+                        my $locale = LJ::lang_to_locale($language);
+                        my $entry_url_ehtml = LJ::ehtml($entry_url);
+
+                        $newdata .= qq{<div class="lj-like-item lj-like-item-facebook">}
+                                  . qq{<fb:like href="$entry_url_ehtml" send="false" layout="button_count" }
+                                  . qq{width="90" show_faces="false" font="">}
+                                  . qq{</fb:like></div>};
+                    }
+
+                    elsif ( $button eq 'google' ) {
+                        my $entry_url_ehtml = LJ::ehtml($entry_url);
+                        $newdata .= qq{<div class="lj-like-item lj-like-item-google">}
+                                  . qq{<g:plusone size="medium" href="$entry_url_ehtml">}
+                                  . qq{</g:plusone></div>};
+                    }
+
+                    elsif ( $button eq 'vkontakte' ) {
+                        unless ( $LJ::VKONTAKTE_CONF ) {
+                            $newdata .= qq{<div class="lj-like-item lj-like-item-vkontakte"><b>[vkontakte like]</b></div>}
+                            next;
+                        }
+
+                        $LJ::REQ_GLOBAL{'ljlike_vkontakte_id'} ||= 1;
+                        my $uniqid = $LJ::REQ_GLOBAL{'ljlike_vkontakte_id'}++;
+                        my $entry_url_ejs = LJ::js_dumper($entry_url);
+
+                        $vkontakte_like_js{$uniqid}
+                            = qq{<div id="vk_like_$uniqid"></div>}
+                            . qq{<script type="text/javascript">}
+                            . qq{VK.Widgets.Like("vk_like_$uniqid", {type: "mini", pageUrl: $entry_url_ejs});}
+                            . qq{</script>};
+                        $newdata .= qq{<div class="lj-like-item lj-like-item-vkontakte"><x-vk-like id="$uniqid"></div>};
+                    }
+                }
+                $newdata .= '</div>';
             }
 
             # Don't allow any tag with the "set" attribute
@@ -1374,6 +1444,8 @@ sub clean
 
     # extra-paranoid check
     1 while $newdata =~ s/<script\b//ig;
+
+    $newdata =~ s/<x-vk-like id="(\d+)">/$vkontakte_like_js{$1}/eg;
 
     $$data = $newdata;
     $$data .= $extra_text if $extra_text; # invalid markup error

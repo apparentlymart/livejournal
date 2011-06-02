@@ -365,6 +365,7 @@ body<=
         LJ::CleanHTML::clean_event(\$event, {'preformatted' => $req->{'props'}->{'opt_preformatted'},
                                              'cutpreview' => 1,
                                              'cuturl' => '#',
+                                             'entry_url' => '#',
                                              'journalid' => $c->{'userid'},
                                              'posterid' => $posterid,
                                          });
