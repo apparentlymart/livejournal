@@ -129,11 +129,8 @@
 
 /* Donate button
 --------------------------- */
-.lj-button {
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#6E9DC9", endColorstr="#4E7EAD")!important;
-	}
-.lj-button.light {
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e1e2e4',GradientType=0 )!important; /* IE6-9 */
+.light.donate-button A .lj-button-b {
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#E1E2E4',GradientType=0 );
 	}
 .lj-button-link IMG {
 	top:2px!important;

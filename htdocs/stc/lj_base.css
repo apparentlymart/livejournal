@@ -2971,86 +2971,81 @@ DIV.lj_ippu_app {
 	display: inline-block!important;
 	margin: 0!important;
 	padding: 0!important;
+	border: none!important;
+	text-decoration: none!important;
 	font: 11px/21px Arial,sans-serif!important;
+    white-space:nowrap!important;
 	}
 .lj-button {
 	vertical-align: top!important;
-	border: 1px solid #2A5985!important;
-	border-color: #386793 #2A5985 #194874!important;
 	border-radius: 3px!important;
 	-moz-border-radius: 3px!important;
 	-webkit-border-radius: 3px!important;
-	background-color: #6E9DC9!important;
-	background: -moz-linear-gradient(100% 100% 90deg, #4E7EAD, #6E9DC9)!important;
-	background: -webkit-linear-gradient(#4E7EAD, #6E9DC9)!important;
-	background: -o-linear-gradient(#4E7EAD, #6E9DC9)!important;
-	background: linear-gradient(#4E7EAD, #6E9DC9)!important;
 	}
 .lj-button-wrapper {
-	border-top: 1px solid #9FC9E1!important;
 	border-radius: 3px 3px 0 0!important;
 	-moz-border-radius: 3px 3px 0 0!important;
 	-webkit-border-radius: 3px 3px 0 0!important;
 	}
-.lj-button-link,
-.lj-button-link:link,
-.lj-button-link:visited,
-.lj-button-link:hover,
-.lj-button-link:active {
-	padding: 0 3px!important;
-	text-decoration: none!important;
-	text-shadow: 1px -1px 0 #386793!important;
-	color: #E8EFF6!important;
+A.lj-button-link,
+A.lj-button-link:link,
+A.lj-button-link:visited,
+A.lj-button-link:hover,
+A.lj-button-link:active {
 	cursor: pointer!important;
 	}
 .lj-button-link IMG {
 	position:relative!important;
 	top:1px!important;
 	vertical-align: baseline!important;
-	border: 0!important;
-	}
-.lj-button-link .lj-button-a {
-	padding: 0 4px 0 3px!important;
-	}
-.lj-button-link .lj-button-c {
-	padding: 0 4px 0 6px!important;
-	}
-.lj-button-link .lj-button-b {
-	padding: 0 3px 0 0!important;
-	border-right: 1px solid #43729E!important;
-	}
-.lj-button-link .lj-button-a .lj-button-c {
-	padding: 0 0 0 3px!important;
-	margin: 0 -4px 0 0!important;
-	border-left: 1px solid #A1CCE3!important;
+	border: none!important;
 	}
 
 /* light button */
-.lj-button.light {
-	border-color: #C9C9C9 #BBB #AAA!important;
-	background: #FFFFFF!important; /* Old browsers */
-	background: -moz-linear-gradient(top, #FFFFFF 0%, #FEFEFC 13%, #FFFEFE 52%, #F2F6F1 57%, #E1E2E4 100%)!important; /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFFFFF), color-stop(13%,#FEFEFC), color-stop(52%,#FFFEFE), color-stop(57%,#F2F6F1), color-stop(100%,#E1E2E4))!important; /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top, #FFFFFF 0%,#FEFEFC 13%,#FFFEFE 52%,#F2F6F1 57%,#E1E2E4 100%)!important; /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #FFFFFF 0%,#FEFEFC 13%,#FFFEFE 52%,#F2F6F1 57%,#E1E2E4 100%)!important; /* Opera11.10+ */
-	background: -ms-linear-gradient(top, #FFFFFF 0%,#FEFEFC 13%,#FFFEFE 52%,#F2F6F1 57%,#E1E2E4 100%)!important; /* IE10+ */
-	background: linear-gradient(top, #FFFFFF 0%,#FEFEFC 13%,#FFFEFE 52%,#F2F6F1 57%,#E1E2E4 100%)!important; /* W3C */
+.light.donate-button {
+	border: 1px solid!important;
+	border-color: #C9C9C9 #B4B4B4 #AAA!important;
+	-webkit-border-radius: 2px!important;
+	-moz-border-radius: 2px!important;
+	border-radius: 2px!important;
+	background-color: #CBCBCB!important;
 	}
-.light .lj-button-wrapper {
-	border-color: #FFF!important;
+.light.donate-button .lj-button-b {
+	padding: 0 5px!important;
+	-webkit-border-radius: 2px!important;
+	-moz-border-radius: 2px!important;
+	border-radius: 2px!important;
 	}
-.light .lj-button-link,
-.light .lj-button-link:link,
-.light .lj-button-link:visited,
-.light .lj-button-link:hover,
-.light .lj-button-link:active {
-	text-shadow: 1px 1px 0 #FFF!important;
+.light.donate-button .lj-button-b {
+	border-right: 1px solid #AAA!important;
+	}
+.light.donate-button A .lj-button-b {
+	border-right: none!important;
+	background: #FFFFFF!important;
+	background: -moz-linear-gradient(top, #FFFFFF 0%, #FEFEFC 10%, #FFFEFE 52%, #F2F6F1 57%, #EFEFF0 62%, #E7E8EA 76%, #E1E2E4 100%)!important;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFFFFF), color-stop(10%,#FEFEFC), color-stop(52%,#FFFEFE), color-stop(57%,#F2F6F1), color-stop(62%,#EFEFF0), color-stop(76%,#E7E8EA), color-stop(100%,#E1E2E4))!important;
+	background: -webkit-linear-gradient(top, #FFFFFF 0%,#FEFEFC 10%,#FFFEFE 52%,#F2F6F1 57%,#EFEFF0 62%,#E7E8EA 76%,#E1E2E4 100%)!important;
+	background: -o-linear-gradient(top, #FFFFFF 0%,#FEFEFC 10%,#FFFEFE 52%,#F2F6F1 57%,#EFEFF0 62%,#E7E8EA 76%,#E1E2E4 100%)!important;
+	background: -ms-linear-gradient(top, #FFFFFF 0%,#FEFEFC 10%,#FFFEFE 52%,#F2F6F1 57%,#EFEFF0 62%,#E7E8EA 76%,#E1E2E4 100%)!important;
+	background: linear-gradient(top, #FFFFFF 0%,#FEFEFC 10%,#FFFEFE 52%,#F2F6F1 57%,#EFEFF0 62%,#E7E8EA 76%,#E1E2E4 100%)!important;
+	}
+.light.donate-button .lj-button-c {
+	padding: 0 4px 0 6px!important;
+	border-left: 1px solid #FEFEFE!important;
+	}
+.light.donate-button A .lj-button-c {
+	border-left: 1px solid #B4B4B4!important;
+	}
+.light.donate-button .lj-button-c.empty {
+	padding: 0!important;
+	border-color: none!important;
+	}
+.light.donate-button .lj-button-link,
+.light.donate-button .lj-button-link:link,
+.light.donate-button .lj-button-link:visited,
+.light.donate-button .lj-button-link:hover,
+.light.donate-button .lj-button-link:active {
+	text-shadow: -1px 1px 0 #DDD!important;
 	color: #222!important;
-	}
-.light .lj-button-link .lj-button-b {
-	border-color: #ABABAB!important;
-	}
-.light .lj-button-link .lj-button-c {
-	border: none!important;
 	}
 
