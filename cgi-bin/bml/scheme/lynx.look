@@ -52,6 +52,7 @@ _code?>
     my $class = LJ::get_body_class_for_service_pages();
     return "<body class='scheme-lynx $class' %%bodyopts%%>";
 } _code?>
+<?_code LJ::initial_body_html(); _code?>
 
 <?_code return (LJ::Widget::SiteMessages->should_render) ? LJ::Widget::SiteMessages->render : ''; _code?>
 %%BODY%%

@@ -763,7 +763,7 @@ sub clean
 
                     elsif ( $button eq 'vkontakte' ) {
                         unless ( $LJ::VKONTAKTE_CONF ) {
-                            $newdata .= qq{<div class="lj-like-item lj-like-item-vkontakte"><b>[vkontakte like]</b></div>}
+                            $newdata .= qq{<div class="lj-like-item lj-like-item-vkontakte"><b>[vkontakte like]</b></div>};
                             next;
                         }
 

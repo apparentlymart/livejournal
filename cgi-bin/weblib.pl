@@ -2397,6 +2397,12 @@ $LJ::COMMON_CODE{'autoradio_check'} = q{
 </script>
 };
 
+sub initial_body_html {
+    my $after_body_open = '';
+    LJ::run_hooks('insert_html_after_body_open', \$after_body_open);
+    return $after_body_open;
+}
+
 # returns HTML which should appear before </body>
 sub final_body_html {
     my $before_body_close = "";
