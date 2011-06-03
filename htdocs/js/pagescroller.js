@@ -15,9 +15,19 @@ jQuery(function() {
     }
 
 	function keyCheck(e) {
-		if (!entries.length) {
+
+    	if (!entries.length) {
 			return;
 		}
+
+        // do not mess with form inputs
+        var activeElement = document.activeElement;
+        if (activeElement) {
+            var nodeName = activeElement.nodeName.toLowerCase();
+            if (nodeName=="input" || nodeName=="textarea" || nodeName=="select") {
+                return;
+            }
+        }
 
 		var pos;
 		if (e.keyCode === 78) {
@@ -40,5 +50,7 @@ jQuery(function() {
 		}
 	}
 
-	jQuery(document).keyup(keyCheck);
+    if (entries.length>1) {
+	    jQuery(document).keyup(keyCheck);
+    }
 });
