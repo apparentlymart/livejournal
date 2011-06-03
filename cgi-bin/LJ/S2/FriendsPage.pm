@@ -259,7 +259,7 @@ sub FriendsPage
         }
 
         my %urlopts_nc;
-        if ( if $replycount && $remote && $remote->{'opt_nctalklinks'} ) {
+        if ( $replycount && $remote && $remote->{'opt_nctalklinks'} ) {
             $urlopts_nc{'nc'} .= $replycount;
         }
 
