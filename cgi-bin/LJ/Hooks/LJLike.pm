@@ -2,7 +2,7 @@ package LJ::Hooks::LJLike;
 use strict;
 use warnings;
 
-LJ::register_hook( 'sitewide_resources' => sub {
+LJ::register_hook( 'insert_html_after_body_open' => sub {
     return if $LJ::REQ_GLOBAL{'sitewide_resources_ljlike_google'}++;
 
     my $language = LJ::Lang::get_remote_lang();
@@ -10,7 +10,7 @@ LJ::register_hook( 'sitewide_resources' => sub {
     my $locale = LJ::lang_to_locale($language);
     $locale =~ s/_.*//g;
 
-    LJ::include_raw( 'html' => qq{<script type="text/javascript" src="http://apis.google.com/js/plusone.js">{lang: $locale}</script>} );
+    $$after_body_open_ref .=  qq{<script type="text/javascript" src="http://apis.google.com/js/plusone.js">{lang: '$locale'}</script>};
 } );
 
 LJ::register_hook( 'insert_html_after_body_open' => sub {
