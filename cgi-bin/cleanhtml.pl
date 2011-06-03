@@ -752,7 +752,7 @@ sub clean
 
                         $newdata .= qq{<div class="lj-like-item lj-like-item-facebook">}
                                   . qq{<fb:like href="$entry_url_ehtml" send="false" layout="button_count" }
-                                  . qq{width="90" show_faces="false" font="">}
+                                  . qq{width="100" show_faces="false" font="">}
                                   . qq{</fb:like></div>};
                     }
 
