@@ -3041,6 +3041,9 @@ A.lj-button-link:active {
 	padding: 0!important;
 	border: none!important;
 	}
+.light.donate-button A .lj-button-c.empty {
+	margin-left: 0!important;
+	}
 .light.donate-button .lj-button-link,
 .light.donate-button .lj-button-link:link,
 .light.donate-button .lj-button-link:visited,
