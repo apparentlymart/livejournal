@@ -87,9 +87,16 @@ sub find_class {
 sub new {
     my ($class, %opts) = @_;
 
-    return bless {
-        'value' => $opts{'value'},
-    }, $TYPEMAP{$opts{'typeid'}};
+    if ( my $subclass = $TYPEMAP{ $opts{'typeid'} } ) {
+        return bless {
+            'value' => $opts{'value'},
+        }, $subclass;
+    } else {
+        return bless {
+            'value' => $opts{'value'},
+            'typeid' => $opts{'typeid'},
+        }, $class;
+    }
 }
 
 =head2 Getter(s)
@@ -183,15 +190,15 @@ user.
 
 =cut
 
-sub pretty_type             { Carp::confess 'Invalid identity type' }
-sub typeid                  { Carp::confess 'Invalid identity type' }
-sub short_code              { Carp::confess 'Invalid identity type' }
-sub url                     { Carp::confess 'Invalid identity type' }
+sub pretty_type             { 'unknown' }
+sub typeid                  { my ($self) = @_; return $self->{'typeid'} }
+sub short_code              { 'U' }
+sub url                     { my ( $self, $u ) = @_; return $u->journal_base; }
 sub attempt_login           { Carp::confess 'Invalid identity type' }
 sub initialize_user         { Carp::confess 'Invalid identity type' }
-sub display_name            { Carp::confess 'Invalid identity type' }
-sub ljuser_display_params   { Carp::confess 'Invalid identity type' }
-sub profile_window_title    { Carp::confess 'Invalid identity type' }
+sub display_name            { my ( $self, $u ) = @_; return $u->username; }
+sub ljuser_display_params   { return {}; }
+sub profile_window_title    { return LJ::Lang::ml('/userinfo.bml.title'); }
 
 sub enabled { 1 }
 
