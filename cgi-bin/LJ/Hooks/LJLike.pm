@@ -3,6 +3,8 @@ use strict;
 use warnings;
 
 LJ::register_hook( 'insert_html_after_body_open' => sub {
+    my ($after_body_open_ref) = @_;
+
     return if $LJ::REQ_GLOBAL{'sitewide_resources_ljlike_google'}++;
 
     my $language = LJ::Lang::get_remote_lang();
