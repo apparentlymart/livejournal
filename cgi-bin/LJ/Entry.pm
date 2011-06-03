@@ -211,6 +211,7 @@ sub url {
     my $anchor = delete $opts{anchor};
     my $mode = delete $opts{mode};
     my $style = delete $opts{style};
+    my $nc = delete $opts{nc};
 
     croak "Unknown args passed to url: " . join(",", keys %opts)
         if %opts;
