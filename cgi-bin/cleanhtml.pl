@@ -1764,8 +1764,8 @@ sub pre_clean_event_for_entryform
             my $attrs = $token->[3]; # attribute names, in original order
 
             ## check the tag
-            if ($tag eq 'script') {
-                $p->get_tag('/script');
+            if ( $tag eq 'script' || $tag =~ /^(?:g|fb):/ ) {
+                $p->get_tag("/$tag");
                 next TOKEN;
             }
             if ($tag =~ /:set$/) {
