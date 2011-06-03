@@ -335,7 +335,7 @@ sub eurl {
 sub drop_html {
     my ( $class, $what ) = @_;
 
-    LJ::CleanHTML::clean_comment(\$what);
+    LJ::CleanHTML::clean_comment( \$what, { 'textonly' => 1 });
 
     $what =~ s/<.*?>/ /g;
     $what =~ s/\s+/ /g;

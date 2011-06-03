@@ -715,6 +715,8 @@ sub clean
             }
 
             elsif ( $tag eq 'lj-like' ) {
+                next TOKEN if $opts->{'textonly'};
+
                 unless ( exists $opts->{'entry_url'} && $opts->{'entry_url'} )
                 {
                     $newdata .= '<b>[lj-like in invalid context]</b>';
