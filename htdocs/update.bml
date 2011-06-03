@@ -156,7 +156,9 @@
 EMBED
         }
     }
- 
+
+    my $reposted_from = '';
+
     # in case of repost other entry by its uri we should check its visibility
     # for remote user.
     if (my $repost = ($POST{repost} || $GET{repost})){
@@ -170,18 +172,13 @@ EMBED
             $subject ||= (LJ::ehtml($entry->subject_orig) || LJ::Lang::ml("repost.default_subject"));
             unless ($event){
                 $event = $entry->event_raw;
-                LJ::CleanHTML::clean_event( \$event, {
-                    'cuturl' => $entry->url,
-                    'entry_url' => $entry->url,
-                    'journalid' => $entry->journalid,
-                    'posterid' => $entry->posterid,
-                } );
                 $event = LJ::Lang::ml("repost.wrapper", { 
                                             username => $entry->poster->username,
                                             url      => $entry->url,
                                             subject  => $subject,
                                             text     => $event,
                                             });
+                $reposted_from = $entry->url;
             }
         }
         
@@ -337,6 +334,10 @@ EMBED
 
         $$body .= "\n\n<form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>\n\n";
         $$body .= LJ::form_auth();
+
+        if ($reposted_from) {
+            $$body .= LJ::html_hidden( 'reposted_from' => $reposted_from );
+        }
 
         if ($opts->{require_tos}){
             $$body .= LJ::tosagree_html('update', $POST{agree_tos}, $errors->{require_tos});

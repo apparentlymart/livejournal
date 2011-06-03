@@ -830,14 +830,14 @@ sub event_html
 
     if($opts->{no_cut_expand}) {
         $opts->{expand_cut} = 0;
-        $opts->{cuturl} = $self->url . '?page=' . $opts->{page} . '&cut_expand=1';
+        $opts->{cuturl} = $self->prop('reposted_from') || $self->url . '?page=' . $opts->{page} . '&cut_expand=1';
     } elsif (!$opts->{cuturl}) {
         $opts->{expand_cut} = 1;
-        $opts->{cuturl}     = $self->url;
+        $opts->{cuturl}     = $self->prop('reposted_from') || $self->url;
     }
     $opts->{journalid} = $self->journalid;
     $opts->{posterid} = $self->posterid;
-    $opts->{entry_url} = $self->url;
+    $opts->{entry_url} = $self->prop('reposted_from') || $self->url;
     
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};

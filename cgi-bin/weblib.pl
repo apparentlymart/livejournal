@@ -1138,6 +1138,15 @@ sub entry_form_decode
     $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C' if LJ::is_enabled('default_copyright', LJ::get_remote()) 
                                     && $POST->{'defined_copyright'};
 
+    if ( my $reposted_from = $POST->{'reposted_from'} ) {
+        my $reposted_entry = LJ::Entry->new_from_url($reposted_from);
+
+        #TODO: check visibility? it's not a security concern, but still
+        if ($reposted_entry) {
+            $req->{'prop_reposted_from'} = $reposted_entry->url;
+        }
+    }
+
     if (LJ::is_enabled("content_flag")) {
         $req->{prop_adult_content} = $POST->{prop_adult_content};
         $req->{prop_adult_content} = ""

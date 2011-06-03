@@ -4423,8 +4423,8 @@ sub Page__get_entries_by_tags {
         my $text = $entry->event_raw;
         LJ::CleanHTML::clean_event( \$text, {
             'preformatted'          => $entry->prop('opt_preformatted'),
-            'cuturl'                => $entry->url,
-            'entry_url'             => $entry->url,
+            'cuturl'                => $entry->prop('reposted_from') || $entry->url,
+            'entry_url'             => $entry->prop('reposted_from') || $entry->url,
             'ljcut_disable'         => 0,
             'journalid'             => $entry->journalid,
             'posterid'              => $entry->posterid,

@@ -1334,8 +1334,8 @@ sub create_view_lastn
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                               'cuturl' => $entry_obj->url,
-                                               'entry_url' => $entry_obj->url,
+                                               'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                                               'entry_url' => $entry_obj->prop('reposted_from') || $entry_obj->url,
                                                'ljcut_disable' => ($remote) ? $remote->{'opt_ljcut_disable_lastn'} : undef,
                                                'suspend_msg' => $suspend_msg,
                                                'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
@@ -1876,8 +1876,8 @@ sub create_view_friends
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                              'cuturl' => $entry_obj->url(%urlopts),
-                                              'entry_url' => $entry_obj->url,
+                                              'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts),
+                                              'entry_url' => $entry_obj->prop('reposted_from') || $entry_obj->url,
                                               'maximgwidth' => $maximgwidth,
                                               'maximgheight' => $maximgheight,
                                               'ljcut_disable' => ($remote) ? $remote->{'opt_ljcut_disable_friends'} : undef,
@@ -2604,8 +2604,8 @@ sub create_view_day
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                              'cuturl' => $entry_obj->url,
-                                              'entry_url' => $entry_obj->url,
+                                              'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                                              'entry_url' => $entry_obj->prop('reposted_from') || $entry_obj->url,
                                               'ljcut_disable' => ($remote) ? $remote->{'opt_ljcut_disable_lastn'} : undef,
                                               'suspend_msg' => $suspend_msg,
                                               'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
