@@ -351,6 +351,7 @@ if ($u->is_visible) {
                    <i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close" ></i>
                    {{/if}}
            </span>
+           <b class="i-pending-users-comma">,</b>
            </li>
     </script>';
  }
