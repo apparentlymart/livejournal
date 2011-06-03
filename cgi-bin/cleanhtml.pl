@@ -517,7 +517,7 @@ sub clean
             # Try to execute default action on undefined tags
             next if (!$action{$tag} && $undefined_tags eq "eat");
 
-            if ($action{$tag} eq "eat") {
+            if ( $action{$tag} eq "eat" || $tag =~ /^fb|g:/ ) {
                 $p->unget_token($token);
                 $p->get_tag("/$tag");
                 next;
@@ -1766,7 +1766,7 @@ sub pre_clean_event_for_entryform
             my $attrs = $token->[3]; # attribute names, in original order
 
             ## check the tag
-            if ( $tag eq 'script' || $tag =~ /^(?:g|fb):/ ) {
+            if ($tag eq 'script') {
                 $p->get_tag("/$tag");
                 next TOKEN;
             }
