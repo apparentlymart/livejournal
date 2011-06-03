@@ -3037,8 +3037,9 @@ A.lj-button-link:active {
 	border-left: 1px solid #B4B4B4!important;
 	}
 .light.donate-button .lj-button-c.empty {
+	margin-left: -1px!important;
 	padding: 0!important;
-	border-color: none!important;
+	border: none!important;
 	}
 .light.donate-button .lj-button-link,
 .light.donate-button .lj-button-link:link,
