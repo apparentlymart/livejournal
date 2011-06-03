@@ -251,16 +251,21 @@ sub FriendsPage
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
 
-        my %urlopts;
+        my %urlopts_style;
         if (    $remote && $remote->{'opt_stylemine'}
              && $remote->{'userid'} != $friendid )
         {
-            $urlopts{'style'} = 'mine';
+            $urlopts_style{'style'} = 'mine';
+        }
+
+        my %urlopts_nc;
+        if ( if $replycount && $remote && $remote->{'opt_nctalklinks'} ) {
+            $urlopts_nc{'nc'} .= $replycount;
         }
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                             'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts),
+                                             'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts_style),
                                              'entry_url' => $entry_obj->prop('reposted_from') || $entry_obj->url,
                                              'maximgwidth' => $maximgwidth,
                                              'maximgheight' => $maximgheight,
@@ -322,13 +327,10 @@ sub FriendsPage
             $picid = $eobj->userpic ? $eobj->userpic->picid : 0;
         }
 
-        my $nc = "";
-        $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-
         my $journalbase = LJ::journal_base($friends{$friendid});
         my $permalink = $eobj->url;
-        my $readurl = $eobj->url( %urlopts );
-        my $posturl = $eobj->url( %urlopts, 'mode' => 'reply' );
+        my $readurl = $eobj->url( %urlopts_style, %urlopts_nc );
+        my $posturl = $eobj->url( %urlopts_style, 'mode' => 'reply' );
 
         my $comments = CommentInfo({
             'read_url' => $readurl,

@@ -1867,16 +1867,16 @@ sub create_view_friends
         my $itemargs = "journal=$friend&amp;itemid=$ditemid";
         $friends_event{'itemargs'} = $itemargs;
 
-        my %urlopts;
+        my %urlopts_style;
         if (    $remote && $remote->{'opt_stylemine'}
              && $remote->{'userid'} != $friendid )
         {
-            $urlopts{'style'} = 'mine';
+            $urlopts_style{'style'} = 'mine';
         }
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                              'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts),
+                                              'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts_style),
                                               'entry_url' => $entry_obj->prop('reposted_from') || $entry_obj->url,
                                               'maximgwidth' => $maximgwidth,
                                               'maximgheight' => $maximgheight,
@@ -1948,11 +1948,13 @@ sub create_view_friends
             my $dispreadlink = $replycount ||
                 ($logprops{$datakey}->{'hasscreened'} && $remote && $remote->can_manage($friendid));
 
-            my $nc = "";
-            $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
+            my %urlopts_nc;
+            if ( $replycount && $remote && $remote->{'opt_nctalklinks'} ) {
+                $urlopts_nc{'nc'} = $replycount;
+            }
 
-            my $readurl = $entry_obj->url(%urlopts);
-            my $posturl = $entry_obj->url( %urlopts, 'mode' => 'reply' );
+            my $readurl = $entry_obj->url( %urlopts_style, %urlopts_nc );
+            my $posturl = $entry_obj->url( %urlopts_style, 'mode' => 'reply' );
 
             $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
                 'itemid' => $ditemid,
