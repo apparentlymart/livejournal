@@ -129,14 +129,11 @@ jQuery.fn.labeledPlaceholder = function() {
 		var $this = jQuery( this ),
 			placeholder = $this.attr( 'placeholder' );
 
+		$this.wrap( '<span class="placeholder-wrapper" />' );
+
 		if( !placeholder || placeholder.length === 0 ) { return; }
 
 		var label = jQuery( "<label></label>")
-				.css({
-					position: "absolute",
-					cursor: "text",
-					display: "none"
-					})
 				.addClass('placeholder-label')
 				.mousedown(function( ev ) {
 					setTimeout( function() {
@@ -150,6 +147,7 @@ jQuery.fn.labeledPlaceholder = function() {
 			.blur( function() { blur_action( $this, label ) } );
 
 		blur_action( $this, label );
+
 	} );
 }
 
