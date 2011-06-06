@@ -1840,6 +1840,20 @@ HTML BODY.logged-out {
 .placeholder {
 	color:#A9A9A9;
 	}
+.placeholder-wrapper {
+	position: relative;
+	display: inline-block;
+	}
+	.placeholder-label {
+		display: none;
+		position: absolute;
+		margin: 0;
+		padding: 0 5px;
+		line-height: 1.8em;
+		font-size: 90%;
+		cursor: text;
+		color: #A9A9A9;
+		}
 
 
 /* Choose Facebook Repost Pic
