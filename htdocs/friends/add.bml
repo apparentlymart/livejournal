@@ -310,11 +310,13 @@ if ($u->is_visible) {
               (LJ::FriendsTags->is_allow_mode($friend_tags_mode) ? '' : 'checked="checked" ') .
               '/><label for="tags_excluding">' . $ML{'.tags.excluding'} . '</label>';
      $body .= '</p>';
+     
+     my $not_last = scalar(@$friend_tags_list);
+     $body .= $not_last > 0 ? '<div>' : '<div class="b-addfriend-nothing">';
      $body .= '<h4>' . $ML{'.tags.selected.by.you'} . '</h4>';
      $body .= '<ul class="b-pending-users" id="selectedTagsList">';
 
      {
-         my $not_last = scalar(@$friend_tags_list);
          foreach (@$friend_tags_list) {
              $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($_) . '</a> ' . (exists $user_tags_map->{$_} ? $user_tags_map->{$_} : '(-)') . '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
              $friend_tags_map->{$_} = 1;
@@ -323,6 +325,8 @@ if ($u->is_visible) {
 
      $body .= '</ul>';
      $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.tags.remove.tags'} . '</p>';
+     $body .= '</div>';
+
      $body .= '<h4>' . $ML{'.tags.select.more'} . '</h4>';
      $body .= '<p><input type="text" class="b-addfriend-input" id="searchTag" autocomplete="off" placeholder="' . $ML{'.tags.input.tag'} . '" /> <input id="selectTag" type="button" value="' . $ML{'.tags.button.select'} . '" /></p>';
      $body .= '<input type="hidden" id="selectedTags" name="friend_tags">';
