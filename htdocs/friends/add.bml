@@ -331,7 +331,7 @@ if ($u->is_visible) {
      $body .= '<p><input type="text" class="b-addfriend-input" id="searchTag" autocomplete="off" placeholder="' . $ML{'.tags.input.tag'} . '" /> <input id="selectTag" type="button" value="' . $ML{'.tags.button.select'} . '" /></p>';
      $body .= '<input type="hidden" id="selectedTags" name="friend_tags">';
      $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.tags.find.tags'} . '</p>';
-     $body .= '<ul class="b-pending-users b-addfriend-alltags">';
+     $body .= '<ul class="b-pending-users b-addfriend-alltags" id="allTags">';
 
      {
          my @tags = sort grep { !$friend_tags_map->{$_} } keys %$user_tags_map;
@@ -347,16 +347,7 @@ if ($u->is_visible) {
      $body .= '</div>';
 
      $body .= '<script id="tagTmpl" type="text/x-jquery-tmpl">
-           <li>
-           <span class="ljappippu_pers">
-                   <a href="#">${tagName}</a>
-                   (-)
-                   {{if hasCloseButton }}
-                   <i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close" ></i>
-                   {{/if}}
-           </span>
-           <b class="i-pending-users-comma">,</b>
-           </li>
+           <li><span><a href="#" target="_blank">${tagName}</a> (-){{if hasCloseButton }}<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close" ></i>{{/if}}</span><b>,</b></li>
     </script>';
  }
  
