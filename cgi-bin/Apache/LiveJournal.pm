@@ -321,6 +321,7 @@ sub trans
     BML::set_language($lang, \&LJ::Lang::get_text);
 
     my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check");
+    $LJ::IS_BOT_USERAGENT = BotCheck->is_bot( LJ::Request->header_in('User-Agent') );
 
     my $bml_handler = sub {
         my $filename = shift;

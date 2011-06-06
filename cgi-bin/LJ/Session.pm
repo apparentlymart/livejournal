@@ -660,12 +660,10 @@ sub session_from_ljpta_cookie {
     my $no_session = sub {
         my $reason = shift;
         
-        ## hack: don't redirect crawlers (yandex crawlers, actually) to get_domain_session.bml
-        ## otherwise, sites like 'omgadget.ru' are not indexed by yandex
-        my $ua = LJ::Request->header_in('User-Agent');
-        if ($ua && $ua =~ m!http://yandex\.com/bots!i) {
-            return undef;
-        } 
+        ## Hack: don't redirect crawlers to get_domain_session.bml.
+        ## Otherwise, sites like 'omgadget.ru' are not indexed by yandex,
+        ## and many crawlers (that don't accept cookies) get into endless redirect cycle.
+        return undef if $LJ::IS_BOT_USERAGENT;
 
         my $rr = $opts->{redirect_ref};
         if ($rr) {
