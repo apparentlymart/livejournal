@@ -313,7 +313,7 @@ if ($u->is_visible) {
               '/><label for="tags_excluding">' . $ML{'.tags.excluding'} . '</label>';
      $body .= '</p>';
      
-     $body .= $not_last > 0 ? '<div>' : '<div class="b-addfriend-nothing">';
+     $body .= "<div class='b-addfriend-yourtags" . ( $not_last > 0 ? '' : ' b-addfriend-nothing') . "'>";
      $body .= '<h4>' . $ML{'.tags.selected.by.you'} . '</h4>';
      $body .= '<ul class="b-pending-users" id="selectedTagsList">';
 
