@@ -283,6 +283,7 @@ if ($u->is_visible) {
          my $tags = LJ::Tags::get_usertags($u, { remote => $remote }) || {};
          foreach (values %$tags) { 
              next unless $_->{display};
+             next unless $_->{name} =~ /\S/;
              $user_tags_map->{ LJ::FriendsTags->normalize_tag($_->{name}) } += $_->{uses};
          }
          foreach (keys %$user_tags_map) {
@@ -294,12 +295,13 @@ if ($u->is_visible) {
      my $friends_tags = LJ::FriendsTags->load($remote);
      my ($friend_tags_mode, $friend_tags_list) = $friends_tags->get_tags($u->{userid});
      my $friend_tags_map = {};
-     $friend_tags_list = [ map { LJ::FriendsTags->normalize_tag($_) } @$friend_tags_list ];
+     $friend_tags_list = [ map { LJ::FriendsTags->normalize_tag($_) } grep { /\S/ } @$friend_tags_list ];
+     my $not_last = scalar(@$friend_tags_list);
 
      $body .= '<div class="b-addfriend-option b-addfriend-tags">';
      $body .= '<h3 class="b-addfriend-subhead">' . $ML{'.tags.read'} . '</h3>';
      $body .= '<p class="b-addfriend-notice">' . BML::ml('.tags.text', { ljuser => LJ::ljuser($u), tagscount => scalar(keys %$user_tags_map) }) . '</p>';
-     $body .= '<dl class="b-addfriend-showmore b-addfriend-showmore-closed">';
+     $body .= '<dl class="b-addfriend-showmore' . ($not_last ? '' : ' b-addfriend-showmore-closed') . '">';
      $body .= '<dt class="b-addfriend-showmore-head"><i class="i-addfriend-showmore-arr"></i>' . $ML{'.tags.select'} . '</dt>';
      $body .= '<dd class="b-addfriend-showmore-content">';
      $body .= '<p>';
@@ -311,14 +313,13 @@ if ($u->is_visible) {
               '/><label for="tags_excluding">' . $ML{'.tags.excluding'} . '</label>';
      $body .= '</p>';
      
-     my $not_last = scalar(@$friend_tags_list);
      $body .= $not_last > 0 ? '<div>' : '<div class="b-addfriend-nothing">';
      $body .= '<h4>' . $ML{'.tags.selected.by.you'} . '</h4>';
      $body .= '<ul class="b-pending-users" id="selectedTagsList">';
 
      {
          foreach (@$friend_tags_list) {
-             $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($_) . '</a> ' . (exists $user_tags_map->{$_} ? $user_tags_map->{$_} : '(-)') . '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
+             $body .= '<li><span><a target="_blank" href="' . $remote->journal_base . '/tag/' . LJ::eurl($_) . '">' . LJ::ehtml($_) . '</a> ' . (exists $user_tags_map->{$_} ? $user_tags_map->{$_} : '(-)') . '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
              $friend_tags_map->{$_} = 1;
          }
      }
@@ -337,7 +338,7 @@ if ($u->is_visible) {
          my @tags = sort grep { !$friend_tags_map->{$_} } keys %$user_tags_map;
          my $not_last = scalar(@tags);
          foreach my $tag (@tags) {
-             $body .= '<li><span><a target="_blank" href="#">' . LJ::ehtml($tag) . '</a> ' . $user_tags_map->{$tag} . '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
+             $body .= '<li><span><a target="_blank" href="' . $remote->journal_base . '/tag/' . LJ::eurl($tag) . '">' . LJ::ehtml($tag) . '</a> ' . $user_tags_map->{$tag} . '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
          }
      }
 
@@ -351,11 +352,27 @@ if ($u->is_visible) {
     </script>';
  }
  
+ # retain existing fgcolor
+ my $fgvalue;
+ if ($fr) {
+     $fgvalue =  '#'.uc(sprintf("%06x", $fr->{'fgcolor'}));
+ } else {
+     $fgvalue = '#000000';
+ }
+
+ # retain existing bgcolor
+ my $bgvalue;
+ if ($fr) {
+     $bgvalue =  '#'.uc(sprintf("%06x", $fr->{'bgcolor'}));
+ } else {
+     $bgvalue = '#FFFFFF';
+ }
+
  $body .= '<div class="b-addfriend-option b-addfriend-colors">';
  $body .= '<h3 class="b-addfriend-subhead">' . $ML{'.colors.select.user'} . '</h3>';
  $body .= '<p class="b-addfriend-notice">' . BML::ml('.colors.text', {'user' => LJ::ljuser($u)}) . '</p>';
  $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.colors.disclaimer'} . '</p>';
- $body .= '<dl class="b-addfriend-showmore b-addfriend-showmore-closed">';
+ $body .= '<dl class="b-addfriend-showmore' . ($fgvalue eq '#000000' && $bgvalue eq '#FFFFFF' ? ' b-addfriend-showmore-closed' : '') . '">';
  $body .= '<dt class="b-addfriend-showmore-head"><i class="i-addfriend-showmore-arr"></i>' . $ML{'.colors.select'} . '</dt>';
  $body .= '<dd class="b-addfriend-showmore-content">';
 
@@ -370,14 +387,6 @@ if ($u->is_visible) {
  $ret .= "<table width=\"650\" cellpadding='4'><tr><td><b>$ML{'.colors.fg'}</b></td><td>";
 
  # custom color selection
-
- # retain existing fgcolor
- my $fgvalue;
- if ($fr) {
-     $fgvalue =  '#'.uc(sprintf("%06x", $fr->{'fgcolor'}));
- } else {
-     $fgvalue = '#000000';
- }
 
  # with javascript
  $ret .= qq~
@@ -464,14 +473,6 @@ border='0'></td>
 
  # background
  $ret .= "<tr><td><b>$ML{'.colors.bg'}</b></td><td>";
-
- # retain existing bgcolor
- my $bgvalue;
- if ($fr) {
-     $bgvalue =  '#'.uc(sprintf("%06x", $fr->{'bgcolor'}));
- } else {
-     $bgvalue = '#FFFFFF';
- }
 
  # custom color selection
 
