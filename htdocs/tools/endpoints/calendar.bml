@@ -1,0 +1,14 @@
+<?_code 
+{
+    use strict;
+    use vars '%GET';
+    BML::set_content_type('text/javascript; charset=utf-8');
+    BML::finish();
+    
+    my $journalu = LJ::get_active_journal() 
+        or die "This endpoint must be called from journal pages";
+    my $remote = LJ::get_remote();
+    return LJ::JSON->to_json( LJ::get_calendar_data_for_month($journalu, $remote, $GET{'year'}, $GET{'month'}) );
+}
+_code?>
+

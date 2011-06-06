@@ -7713,6 +7713,44 @@ sub get_daycounts
     return \@days;
 }
 
+## input: $u, $remote, $year, $month
+## output: hashref with data for rendering calendar for given month,
+##      days:       hashref { day: count of entries for this day }
+##      prev_month: arrayref [year, month] - previous month that has entries
+##      next_month, prev_year, next_year - arrayref of the same format
+##
+sub get_calendar_data_for_month {
+    my ($u, $remote, $year, $month) = @_;
+
+    $remote ||= LJ::get_remote();
+    unless ($year || $month) {
+        ($month, $year) = (localtime)[4, 5];
+        $year += 1900;
+        $month++;
+    }
+
+    my %ret = (journal => $u->user, year => $year, month => $month);
+    my $days = LJ::get_daycounts($u, $remote);
+    foreach my $d (@$days) {
+        ## @$d = ($y, $m, $d, $count)
+        if ($d->[0]==$year && $d->[1]==$month) {
+            $ret{days}->{ $d->[2] } = $d->[3];
+        }
+    }
+    ## $prev_month  = max(  grep { $day < Date($year, $month) }  @$days  );
+    ## max @list    = List::Util::reduce { $a > $b ? $a : $b } @list
+    my $current_month   = [$year, $month];
+    my $less_year       = sub { my ($a, $b) = @_; return $a->[0]<$b->[0];  };
+    my $less            = sub { my ($a, $b) = @_; return $a->[0]<$b->[0] || $a->[0]==$b->[0] && $a->[1]<$b->[1] };
+    $ret{'prev_month'}  = List::Util::reduce { $less->($a, $b) ? $a : $b }  grep { $less->($_, $current_month) }        @$days;
+    $ret{'next_month'}  = List::Util::reduce { $less->($a, $b) ? $b : $a }  grep { $less->($current_month, $_) }        @$days;
+    $ret{'prev_year'}   = List::Util::reduce { $less->($a, $b) ? $a : $b }  grep { $less_year->($_, $current_month) }   @$days;
+    $ret{'next_year'}   = List::Util::reduce { $less->($a, $b) ? $b : $a }  grep { $less_year->($current_month, $_) }   @$days;
+    
+    return \%ret;
+}
+
+
 # <LJFUNC>
 # name: LJ::set_interests
 # des: Change a user's interests.

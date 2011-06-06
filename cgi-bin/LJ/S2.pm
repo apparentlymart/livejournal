@@ -154,6 +154,10 @@ sub make_journal
 
     $page->{head_content} .= LJ::res_includes() . $extra_js;
     LJ::run_hooks('head_content', \$page->{head_content});
+    my $calendar_json = LJ::JSON->to_json( LJ::get_calendar_data_for_month($u) );
+    $page->{head_content} .= "<script type='text/javascript'>\n" . 
+        "Site = window.Site || {};\nSite.journal_calendar = $calendar_json;\n".
+        "</script>\n";
 
     s2_run($r, $ctx, $opts, $entry, $page);
     
