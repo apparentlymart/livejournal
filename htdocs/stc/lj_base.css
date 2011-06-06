@@ -2973,7 +2973,7 @@ DIV.lj_ippu_app {
 	padding: 0!important;
 	border: none!important;
 	text-decoration: none!important;
-	font: 11px/21px Arial,sans-serif!important;
+	font: 11px/22px Arial,sans-serif!important;
     white-space:nowrap!important;
 	}
 .lj-button {
@@ -2996,7 +2996,7 @@ A.lj-button-link:active {
 	}
 .lj-button-link IMG {
 	position:relative!important;
-	top:1px!important;
+	top:2px!important;
 	vertical-align: baseline!important;
 	border: none!important;
 	}
@@ -3077,5 +3077,4 @@ A.lj-button-link:active {
         height: 20px !important;
         padding: 1px 0 !important;
         }
-
 
