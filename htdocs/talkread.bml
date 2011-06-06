@@ -114,8 +114,8 @@ body<=
     );
 
     $$head .= qq[
-        <meta name="title" value="$meta{'title'}"/>
-        <meta name="description" value="$meta{'description'}"/>
+        <meta name="title" content="$meta{'title'}" />
+        <meta name="description" content="$meta{'description'}" />
     ];
 
     my $talkurl = LJ::journal_base($u) . "/$ditemid.html";

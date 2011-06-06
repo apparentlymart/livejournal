@@ -376,8 +376,8 @@ sub EntryPage
     );
 
     $p->{'head_content'} .= qq[
-        <meta name="title" value="$meta{'title'}"/>
-        <meta name="description" value="$meta{'description'}"/>
+        <meta name="title" content="$meta{'title'}" />
+        <meta name="description" content="$meta{'description'}" />
     ];
 
     LJ::need_res(qw(
