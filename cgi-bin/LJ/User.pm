@@ -7715,7 +7715,8 @@ sub get_daycounts
 
 ## input: $u, $remote, $year, $month
 ## output: hashref with data for rendering calendar for given month,
-##      days:       hashref { day: count of entries for this day }
+##      days:       arrayref [ count of entries for each day]
+##                  days[1] = count of entries for the 1st day, days[0] is always null
 ##      prev_month: arrayref [year, month] - previous month that has entries
 ##      next_month, prev_year, next_year - arrayref of the same format
 ##
@@ -7734,7 +7735,7 @@ sub get_calendar_data_for_month {
     foreach my $d (@$days) {
         ## @$d = ($y, $m, $d, $count)
         if ($d->[0]==$year && $d->[1]==$month) {
-            $ret{days}->{ $d->[2] } = $d->[3];
+            $ret{days}->[ $d->[2] ] = $d->[3]+0;
         }
     }
     ## $prev_month  = max(  grep { $day < Date($year, $month) }  @$days  );
@@ -7746,7 +7747,12 @@ sub get_calendar_data_for_month {
     $ret{'next_month'}  = List::Util::reduce { $less->($a, $b) ? $b : $a }  grep { $less->($current_month, $_) }        @$days;
     $ret{'prev_year'}   = List::Util::reduce { $less->($a, $b) ? $a : $b }  grep { $less_year->($_, $current_month) }   @$days;
     $ret{'next_year'}   = List::Util::reduce { $less->($a, $b) ? $b : $a }  grep { $less_year->($current_month, $_) }   @$days;
-    
+    foreach my $k (qw/prev_month next_month prev_year next_year/) {
+        if ($ret{$k}) {
+            $ret{$k} = [ $ret{$k}->[0]+0, $ret{$k}->[1]+0];
+        }
+    }
+ 
     return \%ret;
 }
 
