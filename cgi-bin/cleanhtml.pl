@@ -724,21 +724,27 @@ sub clean
                 }
 
                 my $entry_url = $opts->{'entry_url'};
-                my @buttons = qw( facebook google vkontakte );
+                my @buttons = qw( facebook google twitter vkontakte livejournal );
 
                 if ( exists $attr->{'buttons'} && $attr->{'buttons'} ) {
                     my $buttons = $attr->{'buttons'};
 
                     @buttons = ();
                     foreach my $button ( split /,\s*/, $buttons ) {
-                        if ( $button =~ /^f/i ) {
+                        if ( $button =~ /^(?:fb|facebook)$/i ) {
                             push @buttons, 'facebook';
                         }
-                        elsif ( $button =~ /^g/i ) {
+                        elsif ( $button =~ /^(?:go|google)$/i ) {
                             push @buttons, 'google';
                         }
-                        elsif ( $button =~ /^v/i ) {
+                        elsif ( $button =~ /^(?:tw|twitter)$/i ) {
+                            push @buttons, 'twitter';
+                        }
+                        elsif ( $button =~ /^(?:vk|vkontakte)$/i ) {
                             push @buttons, 'vkontakte';
+                        }
+                        elsif ( $button =~ /^(?:lj|livejournal)$/i ) {
+                            push @buttons, 'livejournal';
                         }
                     }
                 }
@@ -779,6 +785,21 @@ sub clean
                             . qq{VK.Widgets.Like("vk_like_$uniqid", {type: "mini", pageUrl: $entry_url_ejs});}
                             . qq{</script>};
                         $newdata .= qq{<div class="lj-like-item lj-like-item-vkontakte"><x-vk-like id="$uniqid"></div>};
+                    }
+
+                    elsif ( $button eq 'livejournal' ) {
+                        my $entry = LJ::Entry->new_from_url($entry_url);
+                        my $give_button = LJ::run_hook("give_button", {
+                            'journal' => $entry->journal->user,
+                            'itemid'  => $entry->ditemid,
+                            'type'    => 'tag',
+                        });
+
+                        if ($give_button) {
+                            $newdata .= qq{<div class="lj-like-item lj-like-item-livejournal">}
+                                      . $give_button
+                                      . qq{</div>};
+                        }
                     }
                 }
                 $newdata .= '</div>';

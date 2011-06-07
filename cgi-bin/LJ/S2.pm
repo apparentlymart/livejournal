@@ -1898,7 +1898,6 @@ sub Entry
     push @$link_keyseq, 'watch_comments'    if LJ::is_enabled('esn');
     push @$link_keyseq, 'unwatch_comments'  if LJ::is_enabled('esn');
     push @$link_keyseq, 'flag'              if LJ::is_enabled('content_flag');
-    push @$link_keyseq, 'give_button'       if LJ::is_enabled('give_features');
 
     # Note: nav_prev and nav_next are not included in the keyseq anticipating
     #      that their placement relative to the others will vary depending on

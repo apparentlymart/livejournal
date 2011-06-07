@@ -1110,7 +1110,6 @@ sub render_options_block {
         [ 'mood', 'comment_settings' ],
         [ 'location', 'comment_screening' ],
         [ 'music', 'content_flag' ],
-        [ 'blank', 'give_features' ],
         'extra',
         [ 'lastfm_logo', 'spellcheck' ],
     );
