@@ -336,6 +336,9 @@ sub addcomment
 
 sub getcomments {
     my ($req, $err, $flags) = @_;
+    
+    $flags->{allow_anonymous} = 1;
+
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
 
@@ -349,6 +352,8 @@ sub getcomments {
         $journal = $u;
     }
 
+    return fail($err,200,"journal") unless($journal);
+
     return fail($err,200,"ditemid") unless($req->{ditemid});
     my $itemid = int($req->{ditemid} / 256); 
 
@@ -357,7 +362,7 @@ sub getcomments {
     return fail($err,203,"ditemid (specified post doesn't exist in requested journal)") unless($jitem);
     my $up = LJ::load_userid( $jitem->{'posterid'} );
 
-    # check permission to access post
+    # check permission to access root post
     return fail($err,300,"") unless( LJ::can_view($u, $jitem));
 
     my $talkid = int(($req->{dtalkid} + 0)/256);   # talkid to load thread
@@ -459,7 +464,7 @@ sub getcomments {
                      qw(edit_time deleted_poster picture_keyword opt_preformatted) };
             
             $item_data->{props}->{'poster_ip'} = $item->{'props'}->{'poster_ip'}
-                if $item->{'props'}->{'poster_ip'} && ( $u->{'user'} eq $up->{'user'} || $u->can_manage($journal) );
+                if $item->{'props'}->{'poster_ip'} && $u && ( $u->{'user'} eq $up->{'user'} || $u->can_manage($journal) );
             
             $item_data->{privileges} = {};
             $item_data->{privileges}->{delete}   = LJ::Talk::can_delete($u, $journal, $up, $item->{userpost});
@@ -2665,6 +2670,8 @@ sub editevent
 sub getevents
 {
     my ($req, $err, $flags) = @_;
+
+    $flags->{allow_anonymous} = 1;
     return undef unless authenticate($req, $err, $flags);
 
     $flags->{'ignorecanuse'} = 1; # later we will check security levels, so allow some access to communities
@@ -2674,7 +2681,7 @@ sub getevents
     my $uowner = $flags->{'u_owner'} || $u;
 
     ### shared-journal support
-    my $posterid = $u->{'userid'};
+    my $posterid = ($u ? $u->{'userid'} : 0);
     my $ownerid = $flags->{'ownerid'};
     if( $req->{journalid} ){
         $ownerid = $req->{journalid};
@@ -2718,9 +2725,9 @@ sub getevents
         # not a friend?  only see public.
         # and own posts in non-sensitive communities
 
-        if ($LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $uowner->{user} }) {
+        if ($LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $uowner->{user} } || !$posterid) {
             $secwhere = "AND (security='public')";
-        } else {
+        } else{
             $secwhere = "AND (security='public' OR posterid=$posterid)";
         }
     }
@@ -2811,6 +2818,7 @@ sub getevents
         my $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
         return fail($err,203,"Invalid syncitems date format")
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
+        return fail($err,301,"syncitems is unavailable in anonymous mode") unless($u);
 
         my $now = time();
         # broken client loop prevention
@@ -3889,7 +3897,17 @@ sub check_altusage
     # see note in ljlib.pl::can_use_journal about why we return
     # both 'ownerid' and 'u_owner' in $flags
 
-    my $alt = $req->{'usejournal'};
+    my $alt = $req->{'usejournal'} || $req->{journal};
+
+    if ($flags->{allow_anonymous}) {
+        return fail($err,200) unless $alt;
+        return fail($err,100) unless LJ::canonical_username($alt);
+        $flags->{'u_owner'} = LJ::load_user($alt);
+        $flags->{'ownerid'} = $flags->{'u_owner'}->{'userid'};
+        return 1 if $flags->{'ownerid'};
+        return fail($err,206);
+    }
+
     my $u = $flags->{'u'};
     unless ($u) {
         my $username = $req->{'username'};
@@ -3936,6 +3954,14 @@ sub authenticate
     my ($req, $err, $flags) = @_;
 
     my $username = $req->{'username'};
+
+    # add flag to avoid authentication
+    if (!$username && $flags->{'allow_anonymous'}) {
+        undef $flags->{'u'};
+        # TODO: check for banned IP
+        return 1;
+    }
+
     return fail($err,200) unless $username;
     return fail($err,100) unless LJ::canonical_username($username);
 
