@@ -3958,7 +3958,6 @@ sub authenticate
     # add flag to avoid authentication
     if (!$username && $flags->{'allow_anonymous'}) {
         undef $flags->{'u'};
-        # TODO: check for banned IP
         return 1;
     }
 
