@@ -158,6 +158,7 @@ my %HANDLERS = (
     unscreencomments  => \&unscreencomments,
     freezecomments    => \&unfreezecomments,
     editcomment       => \&editcomment,
+    getuserpics       => \&getuserpics,
 );
 
 sub translate
@@ -1258,6 +1259,43 @@ sub getusertags
         }
     };
 }
+
+sub getuserpics
+{
+    my ($req, $err, $flags) = @_;
+
+    $flags->{allow_anonymous} = 1;
+    return undef unless authenticate($req, $err, $flags);
+    return undef unless check_altusage($req, $err, $flags);
+
+    my $u = $flags->{'u'};
+    my $uowner = $flags->{'u_owner'} || $u;
+    return fail($err, 502) unless $uowner;
+
+    my $res = {
+        xc3 => {
+            u => $u
+        }
+    };
+
+    my $pickws = list_pickws($uowner);
+    @$pickws = sort { lc($a->[0]) cmp lc($b->[0]) } @$pickws;
+    $res->{'pickws'} = [ map { $_->[0] } @$pickws ];
+
+    if ($uowner->{'defaultpicid'}) {
+             $res->{'defaultpicurl'} = "$LJ::USERPIC_ROOT/$uowner->{'defaultpicid'}/$uowner->{'userid'}";
+    }
+    $res->{'pickwurls'} = [ map {
+         "$LJ::USERPIC_ROOT/$_->[1]/$uowner->{'userid'}"
+        } @$pickws ];
+    # validate all text
+    foreach(@{$res->{'pickws'}}) { LJ::text_out(\$_); }
+    foreach(@{$res->{'pickwurls'}}) { LJ::text_out(\$_); }
+    LJ::text_out(\$res->{'defaultpicurl'});
+
+    return $res;
+}
+
 
 sub getfriends
 {
@@ -3897,20 +3935,22 @@ sub check_altusage
     # see note in ljlib.pl::can_use_journal about why we return
     # both 'ownerid' and 'u_owner' in $flags
 
-    my $alt = $req->{'usejournal'} || $req->{journal};
-
-    if ($flags->{allow_anonymous}) {
-        return fail($err,200) unless $alt;
-        return fail($err,100) unless LJ::canonical_username($alt);
-        $flags->{'u_owner'} = LJ::load_user($alt);
-        $flags->{'ownerid'} = $flags->{'u_owner'}->{'userid'};
-        return 1 if $flags->{'ownerid'};
-        return fail($err,206);
-    }
-
+    my $alt = $req->{'usejournal'} || $req->{'journal'};
     my $u = $flags->{'u'};
+
     unless ($u) {
         my $username = $req->{'username'};
+        unless($username) {
+            if ($flags->{allow_anonymous}) {
+                return fail($err,200) unless $alt;
+                return fail($err,100) unless LJ::canonical_username($alt);
+                $flags->{'u_owner'} = LJ::load_user($alt);
+                $flags->{'ownerid'} = $flags->{'u_owner'}->{'userid'};
+                return 1 if $flags->{'ownerid'};
+                return fail($err,206);
+            }
+            return fail($err,200);
+        }
         return fail($err,200) unless $username;
         return fail($err,100) unless LJ::canonical_username($username);
 
