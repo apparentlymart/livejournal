@@ -3675,7 +3675,7 @@ sub UserLite__get_link
         return LJ::S2::Link($_[0], $_[1], LJ::S2::Image("$LJ::IMGPREFIX/$_[2]", 24, 24));
     };
 
-    if ($key eq 'add_friend' && defined($remote)) {
+    if ($key eq 'add_friend' && defined($remote) && ! LJ::is_friend($remote, $u)) {
         return $button->("$LJ::SITEROOT/friends/add.bml?user=$user", "Add $user to friends list", "btn_addfriend.gif");
     }
     if ($key eq 'post_entry') {
