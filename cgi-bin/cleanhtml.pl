@@ -790,8 +790,8 @@ sub clean
                     elsif ( $button eq 'livejournal' ) {
                         my $entry = LJ::Entry->new_from_url($entry_url);
                         my $give_button = LJ::run_hook("give_button", {
-                            'journal' => $entry->journal->user,
-                            'itemid'  => $entry->ditemid,
+                            'journal' => $entry ? $entry->journal->user : '',
+                            'itemid'  => $entry ? $entry->ditemid : 0,
                             'type'    => 'tag',
                         });
 
