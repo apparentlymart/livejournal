@@ -1393,6 +1393,11 @@ sub res_includes {
     # include standard JS info
     unless ( $only_needed ) {
         my $jsml_out = LJ::JSON->to_json(\%LJ::JSML);
+        my %journal_info;
+        if (my $journalu = LJ::get_active_journal()) {
+            %journal_info = $journalu->info_for_js;
+        }
+        my $journal_info_json = LJ::JSON->to_json(\%journal_info);
         $ret .= qq {
             <script type="text/javascript">
                 Site = window.Site || {};
@@ -1401,6 +1406,7 @@ sub res_includes {
                     var p = $site_params, i;
                     for (i in p) Site[i] = p[i];
                 })();
+                Site.current_journal = $journal_info_json;
            </script>
         };
     }

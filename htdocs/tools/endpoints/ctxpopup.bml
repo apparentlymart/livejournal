@@ -187,13 +187,6 @@
         }
     }
     
-    ## current journal info
-    my $journalu = LJ::get_active_journal();
-    if ($journalu) {
-        my %journal_info = $journalu->info_for_js;
-        $ret{active_journal} = \%journal_info;
-    }
-
     $ret{success} = 1;
     return LJ::JSON->to_json(\%ret);
 }
