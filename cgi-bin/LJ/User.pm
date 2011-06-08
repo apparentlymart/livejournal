@@ -4508,13 +4508,13 @@ sub _friend_friendof_uids {
     my %args = @_;
 
     ## check cache first
-    my @res = $u->_load_friend_friendof_uids_from_memcache($args{mode}, $args{limit});
-    return @res if defined @res;
+    my $res = $u->_load_friend_friendof_uids_from_memcache($args{mode}, $args{limit});
+    return @$res if defined $res;
 
     # call normally if no gearman/not wanted
     my $gc = '';
     return $u->_friend_friendof_uids_do(skip_memcached => 1, %args) # we've already checked memcached above
-        unless 0 and LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $u->id) and $gc = LJ::gearman_client();
+        unless LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $u->id) and $gc = LJ::gearman_client();
 
     # invoke gearman
     my @uids;
@@ -4548,8 +4548,8 @@ sub _friend_friendof_uids_do {
 
     ## cache
     unless ($skip_memcached){
-        my @res = $u->_load_friend_friendof_uids_from_memcache($mode, $limit);
-        return @res if @res;
+        my $res = $u->_load_friend_friendof_uids_from_memcache($mode, $limit);
+        return @$res if $res;
     }
 
     ## db
@@ -4597,13 +4597,13 @@ sub _load_friend_friendof_uids_from_memcache {
         # have to truncate it to match the requested limit
         if ($slimit >= $limit) {
             @uids = @uids[0..$limit-1] if @uids > $limit;
-            return @uids;
+            return \@uids;
         }
 
         # value in memcache is also good if number of items is less
         # than the stored limit... because then we know it's the full
         # set that got stored, not a truncated version.
-        return @uids if @uids < $slimit;
+        return \@uids if @uids < $slimit;
     }
 
     return undef;
