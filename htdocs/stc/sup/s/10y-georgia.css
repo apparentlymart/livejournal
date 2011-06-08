@@ -369,6 +369,14 @@ A:visited:hover {
 			color:#FFF;
 			background:#1F2932;
 			}
+
+.sbar-cal-nav-prev .sbar-cal-nav-arr {
+	border-right-color: #CCC;
+	}
+.sbar-cal-nav-next .sbar-cal-nav-arr {
+	border-left-color: #CCC;
+	}
+
 .footer {
 	padding-top:1px;
 	background:#000 url(../i/10y-georgia/grid.gif?v=1) 1px 0;

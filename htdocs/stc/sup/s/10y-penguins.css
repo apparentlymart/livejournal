@@ -334,6 +334,13 @@ A:visited:hover {
 			color:#F99E00;
 			}
 
+.sbar-cal-nav-prev .sbar-cal-nav-arr {
+	border-right-color: #000;
+	}
+.sbar-cal-nav-next .sbar-cal-nav-arr {
+	border-left-color: #000;
+	}
+
 /* Comments */
 .comment-wrap .even {
 	background:#E0E0E0;

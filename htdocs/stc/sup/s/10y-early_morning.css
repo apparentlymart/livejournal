@@ -449,6 +449,32 @@ A:visited:hover {
 		#page .calendar-wrap TABLE TBODY TD A:visited:hover {
 			text-decoration:underline;
 			}
+
+.sbar-cal-nav {
+	margin: 0 -28px 20px;
+	padding: 10px 20px;
+	background: url(../i/10y-early_morning/sprite.png?v=1) no-repeat 100% 0 #89C542;
+	font-size: 1.8em;
+	line-height: 1.1;
+	}
+	#page .calendar-wrap .sbar-cal-nav A:link,
+	#page .calendar-wrap .sbar-cal-nav A:visited {
+		color:#4F3B1B;
+		text-decoration:none;
+		}
+	#page .calendar-wrap .sbar-cal-nav A:link:hover,
+	#page .calendar-wrap .sbar-cal-nav A:visited:hover {
+		text-decoration:underline;
+		}
+	.sbar-cal-nav-prev .sbar-cal-nav-arr {
+		margin-top: -4px;
+		border-right-color: #4F3B1B;
+		}
+	.sbar-cal-nav-next .sbar-cal-nav-arr {
+		margin-top: -4px;
+		border-left-color: #4F3B1B;
+		}
+
 /* Page-nav */
 .content .page-nav {
 	padding-top:0;

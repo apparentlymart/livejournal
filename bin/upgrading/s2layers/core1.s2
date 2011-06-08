@@ -1664,6 +1664,29 @@ property string text_day_next {
 set text_day_prev = "Previous Day";
 set text_day_next = "Next Day";
 
+### Calendar Prev Next Titles
+property string text_month_prev {
+    des="Text to link to the previous month";
+    example = "Previous Month";
+}
+property string text_month_next {
+    des="Text to link to the next month";
+    example = "Next Month";
+}
+set text_month_prev = "Previous Month";
+set text_month_next = "Next Month";
+
+property string text_year_prev {
+    des="Text to link to the previous year";
+    example = "Previous Year";
+}
+property string text_year_next {
+    des="Text to link to the next year";
+    example = "Next Year";
+}
+set text_year_prev = "Previous Year";
+set text_year_next = "Next Year";
+
 property string text_comment_from {
     des = "Text of the 'from' header in comments";
     example = "From:";

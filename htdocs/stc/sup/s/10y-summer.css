@@ -447,6 +447,14 @@ TH DIV {
 	font-size:14px;
 	}
 
+.sbar-cal-nav-prev .sbar-cal-nav-arr {
+	border-right-color: #555;
+	}
+.sbar-cal-nav-next .sbar-cal-nav-arr {
+	border-left-color: #555;
+	}
+
+
 .sidebar UL, 
 .sidebar LI,
 .sidebar DD,
