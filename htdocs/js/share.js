@@ -197,7 +197,10 @@ window.LJShare.link = function( opts, node ) {
 
 		str.push( supplant( template.end, global_options.ml ) );
 
-		bubbleOptions = { target: link, showOn: options.showOn };
+		bubbleOptions = {
+			target: link,
+			showOn: options.showOn || global_options.showOn
+		};
 		if( options.showOn === "hover" ) {
 			bubbleOptions.closeControl = false;
 		}
