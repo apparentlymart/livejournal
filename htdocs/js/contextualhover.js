@@ -523,6 +523,17 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 		.appendTo(content);
 		content.appendChild(document.createElement('br'));
 	}
+
+	if( !data.is_comm && Site.current_journal && ( "is_comm" in Site.current_journal ) 
+				&& Site.current_journal.is_comm === "1" ) {
+		jQuery( '<a/>', {
+			href: Site.current_journal.url_journal + '/?poster=' + data.username,
+			text: ( Site.remoteUser === data.username ) ? ( data.ml_filter_by_poster_me || 'Filter community by me' ) :
+							( data.ml_filter_by_poster || 'Filter community by poster' )
+		} )
+		.appendTo(content);
+		content.appendChild(document.createElement('br'));
+	}
 	
 	// wishlist
 	if ((data.is_person || data.is_comm) && !data.is_requester && data.wishlist_url) {
