@@ -6226,6 +6226,8 @@ web.controlstrip.links.removefeed=Remove it from your Friends Page
 
 web.controlstrip.links.share=Share
 
+web.controlstrip.links.sort.poster=Sort by poster
+
 web.controlstrip.links.stylemystyle|staleness=1
 web.controlstrip.links.stylemystyle=View in my style
 
