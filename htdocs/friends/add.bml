@@ -284,11 +284,22 @@ if ($u->is_visible) {
          foreach (values %$tags) { 
              next unless $_->{display};
              next unless $_->{name} =~ /\S/;
-             $user_tags_map->{ LJ::FriendsTags->normalize_tag($_->{name}) } += $_->{uses};
+             my $normalized_tag = LJ::FriendsTags->normalize_tag($_->{name});
+            
+             my $tag_data = $user_tags_map->{$normalized_tag};
+             unless ($tag_data) {
+                 $tag_data = {};
+                 $user_tags_map->{$normalized_tag} = $tag_data;
+             }
+             $tag_data->{total_uses} += $_->{uses};
+             if (!$tag_data->{name} || $tag_data->{uses} < $_->{uses}) {
+                 $tag_data->{name} = $_->{name};
+                 $tag_data->{uses} = $_->{uses};
+             }
          }
          foreach (keys %$user_tags_map) {
-             my $uses = $user_tags_map->{$_};
-             $user_tags_map->{$_} = ($uses < 2 ? '' : ($uses > 999 ? '(999+)' : "($uses)"));
+             my $uses = $user_tags_map->{$_}->{total_uses};
+             $user_tags_map->{$_}->{total_uses} = ($uses < 2 ? '' : ($uses > 999 ? '(999+)' : "($uses)"));
          }
      }
 
@@ -319,7 +330,14 @@ if ($u->is_visible) {
 
      {
          foreach (@$friend_tags_list) {
-             $body .= '<li><span><a target="_blank" href="' . $u->journal_base . '/tag/' . LJ::eurl($_) . '">' . LJ::ehtml($_) . '</a> ' . (exists $user_tags_map->{$_} ? $user_tags_map->{$_} : '(-)') . '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
+             my $tag_data = $user_tags_map->{$_};
+             my $tag_href = $tag_data ?
+                                $u->journal_base . '/tag/' . LJ::eurl($tag_data->{name}) :
+                                '#';
+             $body .= '<li><span><a target="_blank" href="' . $tag_href . '">' . LJ::ehtml($_) . '</a> ' .
+                      ($tag_data ? $tag_data->{total_uses} : '(-)') .
+                      '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' .
+                      (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
              $friend_tags_map->{$_} = 1;
          }
      }
@@ -338,7 +356,12 @@ if ($u->is_visible) {
          my @tags = sort grep { !$friend_tags_map->{$_} } keys %$user_tags_map;
          my $not_last = scalar(@tags);
          foreach my $tag (@tags) {
-             $body .= '<li><span><a target="_blank" href="' . $u->journal_base . '/tag/' . LJ::eurl($tag) . '">' . LJ::ehtml($tag) . '</a> ' . $user_tags_map->{$tag} . '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' . (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
+             my $tag_data = $user_tags_map->{$tag};
+             my $tag_href = $u->journal_base . '/tag/' . LJ::eurl($tag_data->{name});
+             $body .= '<li><span><a target="_blank" href="' . $tag_href . '">' . LJ::ehtml($tag) . '</a> ' .
+             $tag_data->{total_uses} .
+             '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' .
+             (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
          }
      }
 
