@@ -3016,7 +3016,7 @@ A.lj-button-link:active {
 	}
 
 /* light button */
-.light.donate-button {
+.lj-button-light.donate-button {
 	border: 1px solid!important;
 	border-color: #C9C9C9 #B4B4B4 #AAA!important;
 	-webkit-border-radius: 2px!important;
@@ -3024,16 +3024,16 @@ A.lj-button-link:active {
 	border-radius: 2px!important;
 	background-color: #CBCBCB!important;
 	}
-.light.donate-button .lj-button-b {
+.lj-button-light.donate-button .lj-button-b {
 	padding: 0 5px!important;
 	-webkit-border-radius: 2px!important;
 	-moz-border-radius: 2px!important;
 	border-radius: 2px!important;
 	}
-.light.donate-button .lj-button-b {
+.lj-button-light.donate-button .lj-button-b {
 	border-right: 1px solid #AAA!important;
 	}
-.light.donate-button A .lj-button-b {
+.lj-button-light.donate-button A .lj-button-b {
 	border-right: none!important;
 	background: #FFFFFF!important;
 	background: -moz-linear-gradient(top, #FFFFFF 0%, #FEFEFC 10%, #FFFEFE 52%, #F2F6F1 57%, #EFEFF0 62%, #E7E8EA 76%, #E1E2E4 100%)!important;
@@ -3043,28 +3043,88 @@ A.lj-button-link:active {
 	background: -ms-linear-gradient(top, #FFFFFF 0%,#FEFEFC 10%,#FFFEFE 52%,#F2F6F1 57%,#EFEFF0 62%,#E7E8EA 76%,#E1E2E4 100%)!important;
 	background: linear-gradient(top, #FFFFFF 0%,#FEFEFC 10%,#FFFEFE 52%,#F2F6F1 57%,#EFEFF0 62%,#E7E8EA 76%,#E1E2E4 100%)!important;
 	}
-.light.donate-button .lj-button-c {
+.lj-button-light.donate-button .lj-button-c {
 	padding: 0 4px 0 6px!important;
 	border-left: 1px solid #FEFEFE!important;
 	}
-.light.donate-button A .lj-button-c {
+.lj-button-light.donate-button A .lj-button-c {
 	border-left: 1px solid #B4B4B4!important;
 	}
-.light.donate-button .lj-button-c.empty {
+.lj-button-light.donate-button .lj-button-c.empty {
 	margin-left: -1px!important;
 	padding: 0!important;
 	border: none!important;
 	}
-.light.donate-button A .lj-button-c.empty {
+.lj-button-light.donate-button A .lj-button-c.empty {
 	margin-left: 0!important;
 	}
-.light.donate-button .lj-button-link,
-.light.donate-button .lj-button-link:link,
-.light.donate-button .lj-button-link:visited,
-.light.donate-button .lj-button-link:hover,
-.light.donate-button .lj-button-link:active {
+.lj-button-light.donate-button .lj-button-link,
+.lj-button-light.donate-button .lj-button-link:link,
+.lj-button-light.donate-button .lj-button-link:visited,
+.lj-button-light.donate-button .lj-button-link:hover,
+.lj-button-light.donate-button .lj-button-link:active {
 	text-shadow: -1px 1px 0 #DDD!important;
 	color: #222!important;
+	}
+
+/* embed donate button */
+.lj-button-light.donate-button.embed-button {
+	border: none!important;
+	background-color: transparent!important;
+	}
+.embed-button .lj-button-b {
+	border: 1px solid!important;
+	border-color: #C9C9C9 #B4B4B4 #AAA!important;
+	border-radius: 2px!important;
+	-webkit-border-radius: 2px!important;
+	-moz-border-radius: 2px!important;
+	}
+.lj-button-light.donate-button.embed-button A .lj-button-b {
+	border-right: 1px solid #AAA!important;
+	color: #222!important;
+	}
+.lj-button-light.donate-button.embed-button .lj-button-b {
+	color: #999!important;
+	margin: 0 5px 0 0!important;
+	}
+.lj-button-light.donate-button.embed-button .lj-button-c.empty {
+	margin: 0!important;
+	padding: 0!important;
+	border: none!important;
+	}
+.lj-button-light.donate-button.embed-button .lj-button-c {
+	position: relative!important;
+	padding: 0 5px!important;
+	border: 1px solid #CCC!important;
+	border-radius: 3px!important;
+	background-color: #FFF!important;
+	color: #222!important;
+	text-shadow: none!important;
+	-webkit-border-radius: 3px!important;
+	-moz-border-radius: 3px!important;
+	}
+.donate-button .lj-button-c.empty .lj-button-arrow {
+	display: none!important;
+	}
+.lj-button-light.donate-button .lj-button-arrow {
+	position: absolute!important;
+	top: 6px!important;
+	left: -9px!important;
+	border: 4px solid!important;
+	border-color: transparent #CCC transparent transparent!important;
+	width:0!important;
+	height:0!important;
+	font-size:0!important;
+	}
+.lj-button-light.donate-button .lj-button-arrow-bg {
+	position: absolute!important;
+	top: -4px!important;
+	left: -3px!important;
+	border: 4px solid!important;
+	border-color: transparent #FFF transparent transparent!important;
+	width:0!important;
+	height:0!important;
+	font-size:0!important;
 	}
 
 
