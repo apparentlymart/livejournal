@@ -1392,12 +1392,13 @@ sub res_includes {
 
     # include standard JS info
     unless ( $only_needed ) {
-        my $jsml_out = LJ::JSON->to_json(\%LJ::JSML);
         my %journal_info;
         if (my $journalu = LJ::get_active_journal()) {
+            LJ::need_string('ml_filter_by_poster_me', 'ml_filter_by_poster');
             %journal_info = $journalu->info_for_js;
         }
         my $journal_info_json = LJ::JSON->to_json(\%journal_info);
+        my $jsml_out = LJ::JSON->to_json(\%LJ::JSML);
         $ret .= qq {
             <script type="text/javascript">
                 Site = window.Site || {};

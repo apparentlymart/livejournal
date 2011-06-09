@@ -2858,6 +2858,10 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+ml_filter_by_poster=Filter community by poster
+
+ml_filter_by_poster_me=Filter community by me
+
 multisearch.error.no_query|staleness=1
 multisearch.error.no_query=There is no any query provided
 
