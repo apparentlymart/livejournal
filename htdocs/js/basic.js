@@ -26,8 +26,7 @@ function Cookie(name, value, options)
 		var path = options.path ? '; path=' + (options.path) : '',
 			domain = options.domain ? '; domain=' + (options.domain) : '',
 			secure = options.secure ? '; secure' : '';
-		value = encodeURIComponent(value).replace(/%3A/g, ':'); //LJSUP-8676 
-		document.cookie = [name, '=', value, expires, path, domain, secure].join('');
+		document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
 	} else { // only name given, get cookie
 		var cookieValue = null;
 		if (document.cookie && document.cookie != '') {
@@ -52,76 +51,77 @@ function Cookie(name, value, options)
  * @param x <code>any</code> Any JavaScript value, including <code>undefined</code>.
  * @return boolean <code>true</code> if the value is not <code>null</code> and is not <code>undefined</code>.
  */
-finite = function( x ) {
-	return isFinite( x ) ? x : 0;
-}
+finite = function(x){
+	return isFinite(x) ? x : 0;
+};
 
 
-finiteInt = function( x, base ) {
-	return finite( parseInt( x, base ) );
-}
+finiteInt = function(x, base){
+	return finite(parseInt(x, base));
+};
 
 
-finiteFloat = function( x ) {
-	return finite( parseFloat( x ) );
-}
+finiteFloat = function(x){
+	return finite(parseFloat(x));
+};
 
 /* unique id generator */
 Unique = {
 	length: 0,
-	id: function() {
+	id: function(){
 		return ++this.length;
 	}
-}
+};
 
 /* event methods */
 var Event = Event||{};
 
-Event.stop = function(e)
-{
+Event.stop = function(e){
 	// this set in Event.prep
 	e = e || window.event || this;
 	Event.stopPropagation(e);
 	Event.preventDefault(e);
 	return false;
-}
+};
 
-Event.stopPropagation = function(e)
-{
-	if (e && e.stopPropagation)
-		e.stopPropagation();
-	else
+Event.stopPropagation = function(e){
+	if(e && e.stopPropagation)
+		e.stopPropagation(); else
 		window.event.cancelBubble = true;
-}
+};
 
-Event.preventDefault = function(e)
-{
+Event.preventDefault = function(e){
 	e = e || window.event;
-	if (e.preventDefault)
+	if(e.preventDefault)
 		e.preventDefault();
 	e.returnValue = false;
-}
+};
 
-Event.prep = function(e)
-{
+Event.prep = function(e){
 	e = e || window.event;
-	if (e.stop === undefined)
+	if(e.stop === undefined)
 		e.stop = this.stop;
-	if (e.target === undefined)
+	if(e.target === undefined)
 		e.target = e.srcElement;
-	if (e.relatedTarget === undefined)
+	if(e.relatedTarget === undefined)
 		e.relatedTarget = e.toElement;
 	return e;
-}
+};
 
 
 
 /* object extensions */
 if (!Object.extend)
-	Object.extend = function (d, s) { if (d) for (var p in s) if (!d[p]) d[p] = s[p]; return d }
+	Object.extend = function (d, s){
+		if(d) for(var p in s) if(!d[p]) d[p] = s[p];
+		return d
+	};
 
 if (!Object.override)
-	Object.override = function (d, s) { if (d) for (var p in s) d[p] = s[p]; return d }
+	Object.override = function (d, s){
+		if(d) for(var p in s) d[p] = s[p];
+		return d
+	};
 
 
 
@@ -149,52 +149,58 @@ Object.extend(Function.prototype, {
 /* class helpers */
 indirectObjects = [];
 
-Class = function( superClass ) {
+Class = function(superClass){
 	// Set the constructor:
-	var constructor = function() {
-		if( arguments.length )
-			this.init.apply( this, arguments );
+	var constructor = function(){
+		if(arguments.length)
+			this.init.apply(this, arguments);
 	};
 	//   -- Accomplish static-inheritance:
 	Object.override(constructor, Class);  // inherit static methods from Class
-	
-	superClass = superClass || function(){};
-	superClassFunc = function(){}
+
+	superClass = superClass || function(){
+	};
+	superClassFunc = function(){
+	}
 	Object.extend(superClassFunc.prototype, superClass.prototype)
 	Object.extend(superClassFunc.prototype, {
-		init: function(){},
-		destroy: function(){}
+		init: function(){
+		},
+		destroy: function(){
+		}
 	})
 	Object.override(constructor, superClass); // inherit static methods from the superClass
 	constructor.superClass = superClassFunc.prototype;
-	
+
 	// Set the constructor's prototype (accomplish object-inheritance):
 	constructor.prototype = new superClass();
 	constructor.prototype.constructor = constructor; // rev. 0.7
 	//   -- extend prototype with Class instance methods
 	Object.extend(constructor.prototype, Class.prototype);
 	//   -- override prototype with interface methods
-	for( var i = 1; i < arguments.length; i++ )
+	for(var i = 1; i < arguments.length; i++)
 		Object.override(constructor.prototype, arguments[i]);
-	
+
 	return constructor;
-}
+};
 
 Class.prototype = {
-	destroy: function() {
-		try {
-			if( this.indirectIndex )
+	destroy: function(){
+		try{
+			if(this.indirectIndex)
 				indirectObjects[ this.indirectIndex ] = undefined;
 			delete this.indirectIndex;
-		} catch( e ) {}
-		
-		for( var property in this ) {
-			try {
+		} catch(e){
+		}
+
+		for(var property in this){
+			try{
 				delete this[ property ];
-			} catch( e ) {}
+			} catch(e){
+			}
 		}
 	}
-}
+};
 
 
 
@@ -364,86 +370,81 @@ Object.extend(Array.prototype, {
 
 
 /* ajax */
-var XMLHttpRequest = XMLHttpRequest || window.ActiveXObject && function(){ return new ActiveXObject('Msxml2.XMLHTTP'); }
+var XMLHttpRequest = XMLHttpRequest || window.ActiveXObject && function(){
+	return new ActiveXObject('Msxml2.XMLHTTP');
+};
 
 //dom.js
 /* DOM class */
 DOM = {
-	getElement: function( e ) {
-		return (typeof e == "string" || typeof e == "number") ? document.getElementById( e ) : e;
+	getElement: function(e){
+		return (typeof e == "string" || typeof e == "number") ? document.getElementById(e) : e;
 	},
-	
-	addEventListener: function(e, eventName, func, useCapture)
-	{
-		if (e.addEventListener)
-			e.addEventListener(eventName, func, useCapture);
-		else if (e.attachEvent)
-			e.attachEvent('on' + eventName, func);
-		else
+
+	addEventListener: function(e, eventName, func, useCapture){
+		if(e.addEventListener)
+			e.addEventListener(eventName, func, useCapture); else if(e.attachEvent)
+			e.attachEvent('on' + eventName, func); else
 			e['on' + eventName] = func;
 	},
-	
-	removeEventListener: function(e, eventName, func, useCapture)
-	{
+
+	removeEventListener: function(e, eventName, func, useCapture){
 		if(e.removeEventListener)
-			e.removeEventListener(eventName, func, useCapture);
-		else if(e.detachEvent)
-			e.detachEvent('on' + eventName, func);
-		else
+			e.removeEventListener(eventName, func, useCapture); else if(e.detachEvent)
+			e.detachEvent('on' + eventName, func); else
 			e['on' + eventName] = undefined;
 	},
-	
+
 	/* style */
-	getComputedStyle: function(node)
-	{
-		if (node.currentStyle) {
+	getComputedStyle: function(node){
+		if(node.currentStyle){
 			return node.currentStyle;
 		}
 		var defaultView = node.ownerDocument.defaultView;
-		if (defaultView && defaultView.getComputedStyle) {
+		if(defaultView && defaultView.getComputedStyle){
 			return defaultView.getComputedStyle(node, null);
 		}
 	},
-	
+
 	// given a window (or defaulting to current window), returns
 	// object with .x and .y of client's usable area
-	getClientDimensions: function( w ) {
-		if( !w )
+	getClientDimensions: function(w){
+		if(!w)
 			w = window;
-		
+
 		var d = {};
-		
+
 		// most browsers
-		if( w.innerHeight ) {
+		if(w.innerHeight){
 			d.x = w.innerWidth;
 			d.y = w.innerHeight;
 			return d;
 		}
-		
+
 		// IE6, strict
 		var de = w.document.documentElement;
-		if( de && de.clientHeight ) {
+		if(de && de.clientHeight){
 			d.x = de.clientWidth;
 			d.y = de.clientHeight;
 			return d;
 		}
-		
+
 		// IE, misc
-		if( document.body ) {
+		if(document.body){
 			d.x = document.body.clientWidth;
 			d.y = document.body.clientHeight;
 			return d;
 		}
-		
+
 		return undefined;
 	},
-	
-	getDimensions: function( e ) {
-		if( !e )
+
+	getDimensions: function(e){
+		if(!e)
 			return undefined;
-		
-		var style = DOM.getComputedStyle( e );
-		
+
+		var style = DOM.getComputedStyle(e);
+
 		return {
 			offsetLeft: e.offsetLeft,
 			offsetTop: e.offsetTop,
@@ -451,33 +452,33 @@ DOM = {
 			offsetHeight: e.offsetHeight,
 			clientWidth: e.clientWidth,
 			clientHeight: e.clientHeight,
-			
+
 			offsetRight: e.offsetLeft + e.offsetWidth,
 			offsetBottom: e.offsetTop + e.offsetHeight,
-			clientLeft: finiteInt( style.borderLeftWidth ) + finiteInt( style.paddingLeft ),
-			clientTop: finiteInt( style.borderTopWidth ) + finiteInt( style.paddingTop ),
+			clientLeft: finiteInt(style.borderLeftWidth) + finiteInt(style.paddingLeft),
+			clientTop: finiteInt(style.borderTopWidth) + finiteInt(style.paddingTop),
 			clientRight: e.clientLeft + e.clientWidth,
 			clientBottom: e.clientTop + e.clientHeight
 		};
 	},
-	
-	getAbsoluteDimensions: function( e ) {
-		var d = DOM.getDimensions( e );
-		if( !d )
+
+	getAbsoluteDimensions: function(e){
+		var d = DOM.getDimensions(e);
+		if(!d)
 			return d;
 		d.absoluteLeft = d.offsetLeft;
 		d.absoluteTop = d.offsetTop;
 		d.absoluteRight = d.offsetRight;
 		d.absoluteBottom = d.offsetBottom;
 		var bork = 0;
-		while( e ) {
-			try { // IE 6 sometimes gives an unwarranted error ("htmlfile: Unspecified error").
+		while(e){
+			try{ // IE 6 sometimes gives an unwarranted error ("htmlfile: Unspecified error").
 				e = e.offsetParent;
-			} catch ( err ) {
-				if ( ++bork > 25 )
+			} catch (err){
+				if(++bork > 25)
 					return null;
 			}
-			if( !e )
+			if(!e)
 				return d;
 			d.absoluteLeft += e.offsetLeft;
 			d.absoluteTop += e.offsetTop;
@@ -486,253 +487,252 @@ DOM = {
 		}
 		return d;
 	},
-	
-	
-	setLeft: function( e, v ) { e.style.left = finiteInt( v ) + "px"; },
-	setTop: function( e, v ) { e.style.top = finiteInt( v ) + "px"; },
-	setWidth: function( e, v ) { e.style.width = Math.max( 0, finiteInt( v ) ) + "px"; },
-	setHeight: function( e, v ) { e.style.height = Math.max( 0, finiteInt( v ) ) + "px"; },
-	
-	getWindowScroll: function( w ) {
+
+
+	setLeft: function(e, v){
+		e.style.left = finiteInt(v) + "px";
+	},
+	setTop: function(e, v){
+		e.style.top = finiteInt(v) + "px";
+	},
+	setWidth: function(e, v){
+		e.style.width = Math.max(0, finiteInt(v)) + "px";
+	},
+	setHeight: function(e, v){
+		e.style.height = Math.max(0, finiteInt(v)) + "px";
+	},
+
+	getWindowScroll: function(w){
 		var s = {
 			left: 0,
 			top: 0
 		}
-		
-		if (!w) w = window;
+
+		if(!w) w = window;
 		var d = w.document;
 		var de = d.documentElement;
-		
+
 		// most browsers
-		if (w.pageXOffset !== undefined) {
+		if(w.pageXOffset !== undefined){
 			s.left = w.pageXOffset;
 			s.top = w.pageYOffset;
 		}
-		
+
 		// ie
-		else if ( de && de.scrollLeft !== undefined) {
+		else if(de && de.scrollLeft !== undefined){
 			s.left = de.scrollLeft;
 			s.top = de.scrollTop;
 		}
-		
+
 		// safari
-		else if (w.scrollX !== undefined ) {
+		else if(w.scrollX !== undefined){
 			s.left = w.scrollX;
 			s.top = w.scrollY;
 		}
-		
+
 		// opera
-		else if( d.body && d.body.scrollLeft !== undefined) {
+		else if(d.body && d.body.scrollLeft !== undefined){
 			s.left = d.body.scrollLeft;
 			s.top = d.body.scrollTop;
 		}
-		
+
 		return s;
 	},
-	
-	getAbsoluteCursorPosition: function( event ) {
+
+	getAbsoluteCursorPosition: function(event){
 		event = event || window.event;
-		var s = DOM.getWindowScroll( window );
+		var s = DOM.getWindowScroll(window);
 		return {
 			x: s.left + event.clientX,
 			y: s.top + event.clientY
 		};
 	},
-	
+
 	/* dom methods */
-	filterElementsByClassName: function( es, className ) {
+	filterElementsByClassName: function(es, className){
 		var filtered = [];
-		for( var i = 0; i < es.length; i++ ) {
+		for(var i = 0; i < es.length; i++){
 			var e = es[ i ];
-			if( DOM.hasClassName( e, className ) )
+			if(DOM.hasClassName(e, className))
 				filtered[ filtered.length ] = e;
 		}
 		return filtered;
 	},
-	
-	filterElementsByAttribute: function( es, attr ) {
-		if( !es )
+
+	filterElementsByAttribute: function(es, attr){
+		if(!es)
 			return [];
-		if (!attr)
+		if(!attr)
 			return es;
 		var filtered = [];
-		for( var i = 0; i < es.length; i++ ) {
+		for(var i = 0; i < es.length; i++){
 			var element = es[ i ];
-			if( !element )
+			if(!element)
 				continue;
-			if( element.getAttribute && ( element.getAttribute( attr ) ) )
+			if(element.getAttribute && ( element.getAttribute(attr) ))
 				filtered[ filtered.length ] = element;
 		}
 		return filtered;
 	},
-	
-	filterElementsByTagName: function( es, tagName ) {
-		if( tagName == "*" )
+
+	filterElementsByTagName: function(es, tagName){
+		if(tagName == "*")
 			return es;
 		var filtered = [];
 		tagName = tagName.toLowerCase();
-		for( var i = 0; i < es.length; i++ ) {
+		for(var i = 0; i < es.length; i++){
 			var e = es[ i ];
-			if( e.tagName && e.tagName.toLowerCase() == tagName )
+			if(e.tagName && e.tagName.toLowerCase() == tagName)
 				filtered[ filtered.length ] = e;
 		}
 		return filtered;
 	},
-	
+
 	// private
-	getElementsByTagAndAttribute: function( root, tagName, attr ) {
-		if( !root )
+	getElementsByTagAndAttribute: function(root, tagName, attr){
+		if(!root)
 			root = document;
-		var es = root.getElementsByTagName( tagName );
-		return DOM.filterElementsByAttribute( es, attr );
+		var es = root.getElementsByTagName(tagName);
+		return DOM.filterElementsByAttribute(es, attr);
 	},
-	
-	getElementsByAttributeAndValue: function( root, attr, value ) {
-		var es = DOM.getElementsByTagAndAttribute( root, "*", attr );
+
+	getElementsByAttributeAndValue: function(root, attr, value){
+		var es = DOM.getElementsByTagAndAttribute(root, "*", attr);
 		var filtered = [];
-		for ( var i = 0; i < es.length; i++ )
-			if ( es[ i ].getAttribute( attr ) == value )
-				filtered.push( es[ i ] );
+		for(var i = 0; i < es.length; i++)
+			if(es[ i ].getAttribute(attr) == value)
+				filtered.push(es[ i ]);
 		return filtered;
 	},
-	
-	getElementsByTagAndClassName: function( root, tagName, className ) {
-		if( !root )
+
+	getElementsByTagAndClassName: function(root, tagName, className){
+		if(!root)
 			root = document;
-		var elements = root.getElementsByTagName( tagName );
-		return DOM.filterElementsByClassName( elements, className );
+		var elements = root.getElementsByTagName(tagName);
+		return DOM.filterElementsByClassName(elements, className);
 	},
-	
-	getElementsByClassName: function( root, className ) {
-		return DOM.getElementsByTagAndClassName( root, "*", className );
+
+	getElementsByClassName: function(root, className){
+		return DOM.getElementsByTagAndClassName(root, "*", className);
 	},
-	
-	getAncestors: function( n, includeSelf ) {
-		if( !n )
+
+	getAncestors: function(n, includeSelf){
+		if(!n)
 			return [];
 		var as = includeSelf ? [ n ] : [];
 		n = n.parentNode;
-		while( n ) {
-			as.push( n );
+		while(n){
+			as.push(n);
 			n = n.parentNode;
 		}
 		return as;
 	},
-	
-	getAncestorsByClassName: function( n, className, includeSelf ) {
-		var es = DOM.getAncestors( n, includeSelf );
-		return DOM.filterElementsByClassName( es, className );
+
+	getAncestorsByClassName: function(n, className, includeSelf){
+		var es = DOM.getAncestors(n, includeSelf);
+		return DOM.filterElementsByClassName(es, className);
 	},
-	
-	getFirstAncestorByClassName: function( n, className, includeSelf ) {
-		return DOM.getAncestorsByClassName( n, className, includeSelf )[ 0 ];
+
+	getFirstAncestorByClassName: function(n, className, includeSelf){
+		return DOM.getAncestorsByClassName(n, className, includeSelf)[ 0 ];
 	},
-	
-	hasClassName: function( e, className ) {
-		if( !e || !e.className )
+
+	hasClassName: function(e, className){
+		if(!e || !e.className)
 			return false;
 		var cs = e.className.split(/\s+/g);
-		for( var i = 0; i < cs.length; i++ ) {
-			if( cs[ i ] == className )
+		for(var i = 0; i < cs.length; i++){
+			if(cs[ i ] == className)
 				return true;
 		}
 		return false;
 	},
-	
-	addClassName: function( e, className ) {
-		if( !e || !className )
+
+	addClassName: function(e, className){
+		if(!e || !className)
 			return false;
 		var cs = e.className.split(/\s+/g);
-		for( var i = 0; i < cs.length; i++ ) {
-			if( cs[ i ] == className )
+		for(var i = 0; i < cs.length; i++){
+			if(cs[ i ] == className)
 				return true;
 		}
-		cs.push( className );
-		e.className = cs.join( " " );
+		cs.push(className);
+		e.className = cs.join(" ");
 		return false;
 	},
-	
-	removeClassName: function( e, className ) {
+
+	removeClassName: function(e, className){
 		var r = false;
-		if( !e || !e.className || !className )
+		if(!e || !e.className || !className)
 			return r;
-		var cs = (e.className && e.className.length)
-			? e.className.split( /\s+/g )
-			: [];
+		var cs = (e.className && e.className.length) ? e.className.split(/\s+/g) : [];
 		var ncs = [];
-		for( var i = 0; i < cs.length; i++ ) {
-			if( cs[ i ] == className ) {
+		for(var i = 0; i < cs.length; i++){
+			if(cs[ i ] == className){
 				r = true;
 				continue;
 			}
-			ncs.push( cs[ i ] );
+			ncs.push(cs[ i ]);
 		}
-		if( r )
-			e.className = ncs.join( " " );
+		if(r)
+			e.className = ncs.join(" ");
 		return r;
 	},
-	
-	getSelectedRange: function(node)
-	{
+
+	getSelectedRange: function(node){
 		var start = 0,
 			end = 0;
-		if ('selectionStart' in node)
-		{
+		if('selectionStart' in node){
 			start = node.selectionStart;
 			end = node.selectionEnd;
-		}
-		else if (node.createTextRange)
-		{
+		} else if(node.createTextRange){
 			var range = document.selection.createRange(),
 				dup = range.duplicate();
-			
-			if (range.parentElement() == node)
+
+			if(node.type == 'text'){
+				start = -dup.moveStart('character', -100000);
+				end = start + range.text.length;
+			} else // textarea
 			{
-				if (node.type == 'text') {
-					start = -dup.moveStart('character', -100000);
-					end = start + range.text.length;
+				var rex = /\r/g;
+				dup.moveToElementText(node);
+				dup.setEndPoint('EndToStart', range);
+				start = dup.text.replace(rex, '').length;
+				dup.setEndPoint('EndToEnd', range);
+				end = dup.text.replace(rex, '').length;
+				dup = document.selection.createRange();
+				dup.moveToElementText(node);
+				dup.moveStart('character', start);
+				while(dup.move('character', -dup.compareEndPoints('StartToStart', range))){
+					start++;
 				}
-				else // textarea
-				{
-					var rex = /\r/g;
-					dup.moveToElementText(node);
-					dup.setEndPoint('EndToStart', range);
-					start = dup.text.replace(rex, '').length;
-					dup.setEndPoint('EndToEnd', range);
-					end = dup.text.replace(rex, '').length;
-					dup = document.selection.createRange();
-					dup.moveToElementText(node);
-					dup.moveStart('character', start);
-					while (dup.move('character', -dup.compareEndPoints('StartToStart', range)))
-					{
-						start++;
-					}
-					dup.moveStart('character', end-start);
-					while (dup.move('character', -dup.compareEndPoints('StartToEnd', range)))
-					{
-						end++;
-					}
+				dup.moveStart('character', end - start);
+				while(dup.move('character', -dup.compareEndPoints('StartToEnd', range))){
+					end++;
 				}
 			}
+
+			// range.parentElement() drops selection in IE 7-8 in some cases.
+			if(range.parentElement() != node){
+				start = end = undefined;
+			}
 		}
+
 		return {
 			start: start,
 			end: end
 		}
 	},
-	
-	setSelectedRange: function(node, start, end)
-	{
+
+	setSelectedRange: function(node, start, end){
 		// see https://bugzilla.mozilla.org/show_bug.cgi?id=265159
 		node.focus();
-		if (node.setSelectionRange)
-		{
+		if(node.setSelectionRange){
 			node.setSelectionRange(start, end);
 			return;
 		}
 		// IE, "else" for opera 10
-		else if (document.selection && document.selection.createRange)
-		{
+		else if(document.selection && document.selection.createRange){
 			var range = node.createTextRange();
 			range.collapse(true);
 			range.moveEnd('character', end);
@@ -740,7 +740,7 @@ DOM = {
 			range.select();
 		}
 	}
-}
+};
 
 $ = DOM.getElement;
 
@@ -756,69 +756,68 @@ $ = DOM.getElement;
 // method: HTTP method, GET by default
 // data: what to send to the server (urlencoded)
 HTTPReq = {
-	getJSON: function(opts)
-	{
+	getJSON: function(opts){
 		var req = new XMLHttpRequest();
-		
-		var state_callback = function() {
-			if (req.readyState != 4) return;
-			
-			if (req.status != 200) {
-				if (opts.onError) opts.onError(req.status ? "status: " + req.status : "no data");
+
+		var state_callback = function(){
+			if(req.readyState != 4) return;
+
+			if(req.status != 200){
+				if(opts.onError) opts.onError(req.status ? "status: " + req.status : "no data");
 				return;
 			}
-			
+
 			var resObj;
 			var e;
-			try {
+			try{
 				eval("resObj = " + req.responseText + ";");
-			} catch (e) {}
-			
-			if (e || ! resObj) {
-				if (opts.onError)
+			} catch (e){
+			}
+
+			if(e || ! resObj){
+				if(opts.onError)
 					opts.onError("Error parsing response: \"" + req.responseText + "\"");
-				
+
 				return;
 			}
-			
-			if (opts.onData)
+
+			if(opts.onData)
 				opts.onData(resObj);
 		};
-		
+
 		req.onreadystatechange = state_callback;
-		
+
 		var method = opts.method || "GET";
 		var data = opts.data || null;
-		
+
 		var url = opts.url;
-		if (opts.method == "GET" && opts.data) {
+		if(opts.method == "GET" && opts.data){
 			url += url.match(/\?/) ? "&" : "?";
 			url += opts.data
 		}
-		
+
 		url += url.match(/\?/) ? "&" : "?";
 		url += "_rand=" + Math.random();
-		
+
 		req.open(method, url, true);
-		
+
 		// we should send null unless we're in a POST
 		var to_send = null;
-		
-		if (method.toUpperCase() == "POST") {
+
+		if(method.toUpperCase() == "POST"){
 			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			to_send = data;
 		}
-		
+
 		req.send(to_send);
 	},
-	
-	formEncoded: function(vars)
-	{
+
+	formEncoded: function(vars){
 		var enc = [];
 		var e;
-		for (var key in vars) {
+		for(var key in vars){
 			enc.push(encodeURIComponent(key) + "=" + encodeURIComponent(vars[key]));
 		}
 		return enc.join("&");
 	}
-}
+};
