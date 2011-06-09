@@ -268,6 +268,9 @@ sub render
                 "$LJ::SITEROOT/community/members.bml?authas=$journal->{user}",
                 BML::ml('web.controlstrip.links.editcommmembers')
             );
+
+            my $pending_members = LJ::get_pending_members($journal->id()) || [];
+            $data_journal->{pending_members} = scalar(@$pending_members);
         }
 
         if ($remote->is_person) {
