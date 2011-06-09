@@ -19,7 +19,8 @@ sub usage { '[--unmark] <username or email address or entry url> <reason>' }
 sub can_execute {
     my $remote = LJ::get_remote();
     return      LJ::check_priv($remote, "suspend")
-            ||  LJ::check_priv($remote, "unsuspend");
+            ||  LJ::check_priv($remote, "unsuspend")
+            ||  $LJ::IS_DEV_SERVER;
 }
 
 sub execute {
@@ -135,7 +136,7 @@ sub execute {
             my $res = $u->$method;
 
             $u->{statusvis} = $new_status;
-
+            LJ::run_hooks("account_unsuspend", $u);
         }
 
         my $job = TheSchwartz::Job->new_from_array("LJ::Worker::MarkSuspendedEntries::unmark", { userid => $u->userid });

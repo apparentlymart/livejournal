@@ -4229,6 +4229,7 @@ sub set_suspended {
 
     #
     LJ::run_hooks("account_cancel", $u);
+    LJ::run_hooks("account_suspend", $u);
 
     if (my $err = LJ::run_hook("cdn_purge_userpics", $u)) {
         $$errref = $err if ref $errref and $err;
@@ -4256,6 +4257,7 @@ sub set_unsuspended {
     }
 
     LJ::statushistory_add($u, $who, "unsuspend", $reason);
+    LJ::run_hooks("account_unsuspend", $u);
 
     return $res; # success
 }
