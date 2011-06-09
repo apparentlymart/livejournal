@@ -15,6 +15,7 @@ use Class::Autouse qw(
                       LJ::Config
                       LJ::Comment
                       LJ::RateLimit
+                      LJ::EmbedModule
                       );
 
 use LJ::TimeUtil;
@@ -446,6 +447,10 @@ sub getcomments {
         };
 
         $item_data->{body} = $item->{body} if($item->{body} && $item->{_loaded});
+
+        # add parameters to lj-embed
+        #LJ::EmbedModule->expand_entry($item->{upost}, \$item_data->{body}, get_video_id => 1) if($item->{upost} && $req->{get_video_ids});
+
         $item_data->{subject} = $item->{subject} if($item->{subject} && $item->{_loaded});
    
         if($item->{upost} && $item->{upost}->identity ){
@@ -717,6 +722,9 @@ sub getrecentcomments {
             read_more => '<a href="' . $comment->url . '"> ...</a>',
         ) if $req->{trim_widgets};
 
+        # add parameters to lj-tags
+        #LJ::EmbedModule->expand_entry($users->{$comment->{posterid}}, \$comment->{text}, get_video_id => 1) if($req->{get_video_ids});
+
         $comment->{text} = LJ::convert_lj_tags_to_links(
             event => $comment->{text},
             embed_url => $comment->url,
@@ -819,6 +827,8 @@ sub getfriendspage
             text      => $h{event_raw},
             read_more => '<a href="' . $entry->url . '"> ...</a>',
         ) if $req->{trim_widgets};
+
+        LJ::EmbedModule->expand_entry($entry->poster, \$h{event_raw}, get_video_id => 1) if $req->{get_video_ids};
 
         $h{event_raw} = LJ::convert_lj_tags_to_links(
             event => $h{event_raw},
@@ -3102,6 +3112,8 @@ sub getevents
             text      => $t->[1],
             read_more => '<a href="' . $evt->{url} . '"> ...</a>',
         ) if $req->{trim_widgets};
+
+        LJ::EmbedModule->expand_entry($uowner, \$t->[1], get_video_id => 1) if($req->{get_video_ids});
 
         $t->[1] = LJ::convert_lj_tags_to_links(
             event => $t->[1],

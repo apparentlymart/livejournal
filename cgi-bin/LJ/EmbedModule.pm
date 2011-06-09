@@ -125,16 +125,26 @@ sub _expand_tag {
                 (" target=\"" . $opts{expand_to_link}->{target} . "\"") : ''
             ) .
             ">" . $opts{expand_to_link}->{caption} . "</a>";
-    } elsif ($opts{get_youtube_id}) {
+    } elsif ($opts{get_video_id}) {
         my $code = $class->module_content(moduleid  => $attrs{id}, journalid => $journal->id);        
 
         my $out=  '<lj-embed id="'. $attrs{id} .'" ';
 
+        # LJSUP-8992
         if ($code =~ m!src=["']?http://www\.youtube\.com/embed/([\w\d\_\-]+)['"]?!) {
-            $out .= 'vid="'.$1.'" ';
+            $out .= 'vid="'.$1.'" source="youtube" ';
+        } elsif ($code =~ m!src=["']?http://player\.vimeo\.com/video/(\d+)[?'"]?! || 
+                 $code =~ m!=["']?http://vimeo\.com/moogaloop\.swf\?[\d\w\_\-\&\;\=]*clip_id=(\d+)[&'"]?! ) {
+            $out .= 'vid="'.$1.'" source="vimeo" ';
+        } elsif ($code =~ m!=["']?http://video\.rutube\.ru/([\dabcdef]+)['"]?!) {
+            $out .= 'vid="'.$1.'" source="rutube" ';
+        } elsif ($code =~ m!=["']?http://static\.video\.yandex\.ru/([\d\w\/\-\_\.]+)['"]?!) {
+            $out .= 'vid="'.$1.'" source="yandex" '; 
+        } elsif ($code =~ m!http://img\.mail\.ru.+value=["']?movieSrc=([\w\d\/\_\-\.]+)["']?!) {
+            $out .= 'vid="'.$1.'" source="mail.ru" ';
         }
 
-        $out .= ' />';
+        $out .= '/>';
 
         return $out;
         
