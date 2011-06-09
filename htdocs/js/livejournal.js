@@ -248,7 +248,7 @@ LiveJournal.checkLjUniq = function() {
 		Cookie( 'ljuniq', LiveJournal.generateLjUniq(),
 		{
 			domain: Site.siteroot.replace(/^https?:\/\/www\./, ''),
-			expires: 1
+			expires: 5000
 		} );
 	}
 }
