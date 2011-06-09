@@ -253,6 +253,7 @@ sub blocked_bot
     my $reason = shift;
     LJ::Request->status(LJ::Request::HTTP_PRECONDITION_FAILED);
     LJ::Request->content_type("text/html");
+    LJ::Request->header_out("X-Ban-Reason" => $reason || 'unknown');
     LJ::Request->send_http_header();
 
     my ($ip, $uniq);
@@ -261,7 +262,7 @@ sub blocked_bot
         $uniq = LJ::UniqCookie->current_uniq;
     }
 
-    my $subject = LJ::Lang::get_text(undef, 'error.banned.bot.subject') || $LJ::BLOCKED_BOT_SUBJECT || "403 Denied";
+    my $subject = LJ::Lang::get_text(undef, 'error.banned.bot.subject') || $LJ::BLOCKED_BOT_SUBJECT || "412 Precondition Failed";
     my $message = LJ::Lang::get_text(undef, 'error.banned.bot.message', undef, { ip => $ip, uniq => $uniq } );
 
     unless ($message) {
