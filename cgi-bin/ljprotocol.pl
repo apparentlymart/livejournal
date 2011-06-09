@@ -725,10 +725,13 @@ sub getrecentcomments {
         # add parameters to lj-tags
         #LJ::EmbedModule->expand_entry($users->{$comment->{posterid}}, \$comment->{text}, get_video_id => 1) if($req->{get_video_ids});
 
-        $comment->{text} = LJ::convert_lj_tags_to_links(
-            event => $comment->{text},
-            embed_url => $comment->url,
-        ) if $req->{parseljtags};
+        if ($req->{mode}) {
+            LJ::EmbedModule->expand_entry($users->{$comment->{posterid}}, \$comment->{text}, edit => 1) if $req->{mode} eq 'stored';
+        } elsif ($req->{parseljtags}) {
+            $comment->{text} = LJ::convert_lj_tags_to_links(
+                event => $comment->{text},
+                embed_url => $comment->url );
+        }
 
         $comment->{postername} = $users->{$comment->{posterid}}
             && $users->{$comment->{posterid}}->username;
@@ -830,11 +833,14 @@ sub getfriendspage
 
         LJ::EmbedModule->expand_entry($entry->poster, \$h{event_raw}, get_video_id => 1) if $req->{get_video_ids};
 
-        $h{event_raw} = LJ::convert_lj_tags_to_links(
-            event => $h{event_raw},
-            embed_url => $entry->url,
-        ) if $req->{parseljtags};
-        
+        if ($req->{mode}) {
+            LJ::EmbedModule->expand_entry($entry->poster, \$h{event_raw}, edit => 1) if $req->{mode} eq 'stored';
+        } elsif ($req->{parseljtags}) {
+            $h{event_raw} = LJ::convert_lj_tags_to_links(
+                event => $h{event_raw},
+                embed_url => $entry->url)
+        }
+
         #userpic 
         $h{poster_userpic_url} = $h{userpic} && $h{userpic}->url;
         
@@ -3115,11 +3121,13 @@ sub getevents
 
         LJ::EmbedModule->expand_entry($uowner, \$t->[1], get_video_id => 1) if($req->{get_video_ids});
 
-        $t->[1] = LJ::convert_lj_tags_to_links(
-            event => $t->[1],
-            embed_url => $evt->{url},
-        ) if $req->{parseljtags};
-
+        if ($req->{mode}) {
+            LJ::EmbedModule->expand_entry($uowner, \$t->[1], edit => 1) if $req->{mode} eq 'stored';
+        } elsif ($req->{parseljtags}) {
+            $t->[1] = LJ::convert_lj_tags_to_links(
+                event => $t->[1],
+                embed_url => $evt->{url});
+        }
 
         # truncate
         if ($req->{'truncate'} >= 4) {
