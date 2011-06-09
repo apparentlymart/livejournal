@@ -19,7 +19,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  my $userid = $u->{userid};
  $body = "";
 
- LJ::need_res(qw(stc/addfriend.css stc/entry.css js/core.js js/dom.js js/colorpicker.js js/jquery/jquery.lj.itemlist.js js/jquery/jquery.dependentLists.js js/jquery-ui-autocomplete.js js/jquery.tmpl.js js/addfriend.js));
+ LJ::need_res(qw(stc/addfriend.css stc/entry.css js/core.js js/colorpicker.js js/jquery-ui-autocomplete.js js/jquery.tmpl.js js/addfriend.js));
 
  LJ::set_active_crumb('addfriend');
 
