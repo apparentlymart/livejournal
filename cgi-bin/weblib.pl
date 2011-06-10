@@ -2515,6 +2515,7 @@ sub get_body_class_for_service_pages {
     my %opts = @_;
     
     my @classes;
+    push @classes, @{ $opts{'classes'} } if $opts{'classes'};
     push @classes, (LJ::get_remote()) ? 'logged-in' : 'logged-out';
    
     my $uri = LJ::Request->uri;
