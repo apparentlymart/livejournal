@@ -528,8 +528,8 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 				&& Site.current_journal.is_comm === "1" ) {
 		jQuery( '<a/>', {
 			href: Site.current_journal.url_journal + '/?poster=' + data.username,
-			text: ( Site.remoteUser === data.username ) ? ( data.ml_filter_by_poster_me || 'Filter community by me' ) :
-							( data.ml_filter_by_poster || 'Filter community by poster' )
+			text: ( Site.remoteUser === data.username ) ? ( Site.ml_text.ml_filter_by_poster_me || 'Filter community by me' ) :
+							( Site.ml_text.ml_filter_by_poster || 'Filter community by poster' )
 		} )
 		.appendTo(content);
 		content.appendChild(document.createElement('br'));
