@@ -2613,7 +2613,9 @@ sub get_thread_html
                 {
                     ## resolve IP to a location
                     my $ip   = $post->{'props'}->{'poster_ip'};
-                    my $info = LJ::GeoLocation->get_city_info_by_ip($ip);
+                    my $info = LJ::is_enabled('display_remote_location_on_comments_page')
+                                ? LJ::GeoLocation->get_city_info_by_ip($ip)
+                                : '';
 
                     if ($info and my $country = $info->{country_name} and my $city = $info->{city_name}){
                         ## Display location of an IP.
