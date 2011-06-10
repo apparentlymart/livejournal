@@ -446,6 +446,13 @@ sub getcomments {
             is_loaded       => ($item->{_loaded} ? 1 : 0),
         };
 
+        unless($u || $item->{_show}) {
+            delete $item_data->{postername};
+            delete $item_data->{posterid};
+            delete $item_data->{datepost_unix};
+            delete $item_data->{datepost};
+        }
+
         $item_data->{body} = $item->{body} if($item->{body} && $item->{_loaded});
 
         # add parameters to lj-embed
@@ -1280,8 +1287,9 @@ sub getuserpics
 {
     my ($req, $err, $flags) = @_;
 
-    $flags->{allow_anonymous} = 1;
+    $flags->{'allow_anonymous'} = 1;
     return undef unless authenticate($req, $err, $flags);
+    $flags->{'ignorecanuse'} = 1;   #    function return public info
     return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
