@@ -686,35 +686,33 @@ DOM = {
 			start = node.selectionStart;
 			end = node.selectionEnd;
 		} else if(node.createTextRange){
-			var range = document.selection.createRange(),
-				dup = range.duplicate();
+			var range = document.selection.createRange();
+			if(range.parentElement() == node){
+				var dup = range.duplicate();
 
-			if(node.type == 'text'){
-				start = -dup.moveStart('character', -100000);
-				end = start + range.text.length;
-			} else // textarea
-			{
-				var rex = /\r/g;
-				dup.moveToElementText(node);
-				dup.setEndPoint('EndToStart', range);
-				start = dup.text.replace(rex, '').length;
-				dup.setEndPoint('EndToEnd', range);
-				end = dup.text.replace(rex, '').length;
-				dup = document.selection.createRange();
-				dup.moveToElementText(node);
-				dup.moveStart('character', start);
-				while(dup.move('character', -dup.compareEndPoints('StartToStart', range))){
-					start++;
+				if(node.type == 'text'){
+					node.focus();
+					start = -dup.moveStart('character', -node.value.length);
+					end = start + range.text.length;
+				} else {// textarea
+					var rex = /\r/g;
+					dup.moveToElementText(node);
+					dup.setEndPoint('EndToStart', range);
+					start = dup.text.replace(rex, '').length;
+					dup.setEndPoint('EndToEnd', range);
+					end = dup.text.replace(rex, '').length;
+					dup = document.selection.createRange();
+					dup.moveToElementText(node);
+					dup.moveStart('character', start);
+					while(dup.move('character', -dup.compareEndPoints('StartToStart', range))){
+						start++;
+					}
+					dup.moveStart('character', end - start);
+					while(dup.move('character', -dup.compareEndPoints('StartToEnd', range))){
+						end++;
+					}
 				}
-				dup.moveStart('character', end - start);
-				while(dup.move('character', -dup.compareEndPoints('StartToEnd', range))){
-					end++;
-				}
-			}
 
-			// range.parentElement() drops selection in IE 7-8 in some cases.
-			if(range.parentElement() != node){
-				start = end = undefined;
 			}
 		}
 
@@ -729,7 +727,6 @@ DOM = {
 		node.focus();
 		if(node.setSelectionRange){
 			node.setSelectionRange(start, end);
-			return;
 		}
 		// IE, "else" for opera 10
 		else if(document.selection && document.selection.createRange){
