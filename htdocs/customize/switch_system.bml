@@ -26,10 +26,12 @@ body<=
         if ($POST{s2}) {
             $u->set_prop('stylesys', 2);
             $u->set_prop('s1_confirmed', 0);
+            LJ::run_hooks('apply_theme', $u);
             return BML::redirect("$LJ::SITEROOT/customize/$getextra");
         } elsif ($POST{s1}) {
             $u->set_prop('stylesys', 1);
             $u->set_prop('s1_confirmed', time());
+            LJ::run_hooks('apply_theme', $u);
             return BML::redirect("$LJ::SITEROOT/customize/s1/$getextra");
         }
     }
