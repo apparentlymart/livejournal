@@ -1944,6 +1944,12 @@ property string text_i_like_this {
 }
 set text_i_like_this = "Please click Track this if you want to receive all comments to this entry";
 
+property string tag_cloud_tags {
+    des = "Tags shown in the tag cloud";
+    values = "recent|recently-used|all|all";
+}
+set tag_cloud_tags = "all";
+
 ###[ global function implementations ]
 
 function prop_init ()

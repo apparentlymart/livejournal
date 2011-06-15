@@ -410,6 +410,7 @@ sub calculate_recent_logtags {
                     },
                     'security_level' => 'private',
                     'uses' => 0,
+                    'display' => 1,
                 };
             }
 

@@ -4271,6 +4271,7 @@ foreach my $class (qw(RecentPage FriendsPage YearPage MonthPage DayPage EntryPag
 sub Page__visible_tag_list
 {
     my ($ctx, $this) = @_;
+
     return $this->{'_visible_tag_list'}
         if defined $this->{'_visible_tag_list'};
 
@@ -4278,7 +4279,24 @@ sub Page__visible_tag_list
     my $u = $LJ::S2::CURR_PAGE->{'_u'};
     return [] unless $u;
 
-    my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
+    my $tags;
+
+    my $tag_cloud_tags = $ctx->[S2::PROPS]->{'tag_cloud_tags'};
+    if ( $tag_cloud_tags eq 'all' ) {
+        $tags = LJ::Tags::get_usertags($u, { remote => $remote });
+    } else {
+        my $propval = $u->prop('recent_logtags');
+        return [] unless $propval;
+
+        my $parse_result = eval {
+            $tags = LJ::JSON->from_json( LJ::text_uncompress($propval) );
+            LJ::Tags::filter_accessible_tags( $u, $remote, $tags );
+            1;
+        };
+
+        return [] unless $parse_result;
+    }
+
     return [] unless $tags;
 
     my @taglist;

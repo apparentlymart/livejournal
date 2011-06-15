@@ -1662,3 +1662,11 @@ logproplist.reposted_from:
   datatype: char
   prettyname: Reposted from
   des: In case this entry is a repost, the URL of the original entry that was reposted
+
+userproplist.recent_logtags:
+  datatype: blobchar
+  prettyname: Recently used tags
+  des: Recently used tags, a compressed JSON structure with its format similar to the output of LJ::Tags::get_usertags
+  indexed: 0
+  multihomed: 0
+  cldversion: 8
