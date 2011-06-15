@@ -379,6 +379,8 @@ sub generate_uniq_ident {
 
 sub ensure_cookie_value {
     my $class = shift;
+    return;
+=head LJSUP-8676: set ljuniq cookie on client side. it allows to cached pages for logged-out users.
     return unless LJ::is_web_context();
 
     return unless LJ::Request->is_inited;
@@ -429,7 +431,6 @@ sub ensure_cookie_value {
     # set this new or transformed uniq in Apache request notes
     $class->set_current_uniq($uniq);
 
-=head LJSUP-8676: set ljuniq cookie on client side. it allows to cached pages for logged-out users.
     if ($setting_new && ! $hook_saved_mapping && ! $class->is_disabled) {
         my $remote = LJ::get_remote();
         $class->save_mapping($uniq => $remote) if $remote;
