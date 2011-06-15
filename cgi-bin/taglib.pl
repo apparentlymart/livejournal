@@ -253,6 +253,46 @@ sub _get_usertagsmulti {
     return $res;
 }
 
+sub filter_accessible_tags {
+    my ( $journalu, $remote, $tags_info ) = @_;
+
+    # never going to cull anything if you control it, so just return
+    return if $remote && $remote->can_manage($journalu);
+
+    # setup helper variables from journalu to remote
+    my ($is_friend, $grpmask) = (0, 0);
+    if ($remote) {
+        $is_friend = LJ::is_friend( $journalu, $remote );
+        $grpmask   = LJ::get_groupmask( $journalu, $remote );
+    }
+
+    # figure out what we need to purge
+    my @purge;
+
+    foreach my $tagid ( keys %$tags_info ) {
+        my $tag_info = $tags_info->{$tagid};
+        my $sec = $tag_info->{'security_level'};
+
+        if ( $sec eq 'public' ) {
+            next;
+        } elsif ( $sec eq 'friends' ) {
+            delete $tags_info->{$tagid} unless $is_friend;
+            next;
+        } elsif ( $sec eq 'group' ) {
+            my @groups = keys %{ $tag_info->{'security'}->{'groups'} };
+
+            my $accessible = 0;
+            foreach my $grpid (@groups) {
+                $accessible ||= ( $grpmask & ( 1 << $grpid ) );
+            }
+
+            delete $tags_info->{$tagid} unless $accessible;
+        }
+    }
+
+    return;
+}
+
 # <LJFUNC>
 # name: LJ::Tags::get_usertags
 # class: tags
@@ -277,37 +317,157 @@ sub get_usertags {
     my $res = $tags->{$u->{userid}} || {};
     return {} unless %$res;
 
-    # now if they provided a remote, remove the ones they don't want to see; note that
-    # remote may be undef so we have to check exists
-    if (exists $opts->{remote}) {
-        # never going to cull anything if you control it, so just return
-        my $remote = $opts->{remote};
-        return $res if $remote && $remote->can_manage($u);
-
-        # setup helper variables from u to remote
-        my ($is_friend, $grpmask) = (0, 0);
-        if ($opts->{remote}) {
-            $is_friend = LJ::is_friend($u, $opts->{remote});
-            $grpmask = LJ::get_groupmask($u, $opts->{remote});
-        }
-
-        # figure out what we need to purge
-        my @purge;
-TAG:    foreach my $tagid (keys %$res) {
-            my $sec = $res->{$tagid}->{security_level};
-            next TAG if $sec eq 'public';
-            next TAG if $is_friend && $sec eq 'friends';
-            if ($grpmask && $sec eq 'group') {
-                foreach my $grpid (keys %{$res->{$tagid}->{security}->{groups}}) {
-                    next TAG if $grpmask & (1 << $grpid);
-                }
-            }
-            push @purge, $tagid;
-        }
-        delete $res->{$_} foreach @purge;
+    # now if they provided a remote, remove the ones they don't want to see;
+    # note that remote may be undef so we have to check exists
+    if ( exists $opts->{'remote'} ) {
+        filter_accessible_tags( $u, $opts->{'remote'}, $res );
     }
 
     return $res;
+}
+
+sub get_recent_logtags {
+    my ( $journalu, $days, $opts ) = @_;
+
+    $days = int $days || 30;
+    $opts ||= {};
+
+    my $memkey = [
+        $journalu->userid,
+        'logtagtrends:' . $journalu->userid . ':' . $days
+    ];
+
+    my $tags_info;
+
+    unless ( $tags_info = LJ::MemCache::get($memkey) ) {
+        $tags_info = calculate_recent_logtags( $journalu, $days );
+        LJ::MemCache::set( $memkey => $tags_info );
+    }
+
+    # now if they provided a remote, remove the ones they don't want to see;
+    # note that remote may be undef so we have to check exists
+    if ( exists $opts->{'remote'} ) {
+        filter_accessible_tags( $journalu, $opts->{'remote'}, $tags_info );
+    }
+
+    return $tags_info;
+}
+
+sub calculate_recent_logtags {
+    my ( $journalu, $days ) = @_;
+
+    my $dbr = LJ::get_cluster_reader($journalu);
+
+    # step 1: acquire information about entries in the last month
+    my $rlogtime_max = $LJ::EndOfTime - time + 86400 * $days;
+    my $entries_rows = $dbr->selectall_arrayref(
+        qq{
+            SELECT jitemid, security, allowmask FROM log2
+            WHERE journalid=$journalu->{userid} AND rlogtime < $rlogtime_max
+        },
+        { 'Slice' => {} }
+    );
+
+    my ( @jitemids, %security );
+    foreach my $row ( @$entries_rows ) {
+        my $jitemid = $row->{'jitemid'};
+
+        push @jitemids, $jitemid;
+
+        $security{$jitemid} = {
+            'level'     => $row->{'security'},
+            'allowmask' => $row->{'allowmask'},
+        }
+    }
+
+    return {} unless @jitemids;
+
+    # step 2: acquire information and collect statistics
+    # about tags to these entries, in terms of kwids
+    my $tags_info = {};
+    my @jitemids_copy = @jitemids;
+    while ( my @jitemids_chunk = splice @jitemids, 0, 1000 ) {
+        my $jitemids_in = join( ',', @jitemids_chunk );
+        my $tags_info_rows = $dbr->selectall_arrayref(
+            qq{
+                SELECT jitemid, kwid FROM logtags
+                WHERE journalid=? AND jitemid IN ($jitemids_in)
+            },
+            { 'Slice' => {} }, $journalu->userid,
+        );
+
+        foreach my $row (@$tags_info_rows) {
+            my $jitemid = $row->{'jitemid'};
+            my $kwid = $row->{'kwid'};
+
+            unless ( exists $tags_info->{$kwid} ) {
+                $tags_info->{$kwid} = {
+                    'security' => {
+                        'public'  => 0,
+                        'groups'  => {},
+                        'private' => 0,
+                        'friends' => 0
+                    },
+                    'security_level' => 'private',
+                    'uses' => 0,
+                };
+            }
+
+            $tags_info->{$kwid}->{'uses'}++;
+
+            my $security = $security{$jitemid}->{'level'};
+            my $allowmask = $security{$jitemid}->{'allowmask'};
+
+            if ( $security eq 'public' ) {
+                $tags_info->{$kwid}->{'security'}->{'public'}++;
+                $tags_info->{$kwid}->{'security_level'} = 'public';
+            }
+
+            elsif ( $security eq 'usemask' && ( $allowmask & 1 ) ) {
+                $tags_info->{$kwid}->{'security'}->{'friends'}++;
+                $tags_info->{$kwid}->{'security_level'} = 'friends'
+                    unless $tags_info->{$kwid}->{'security_level'} eq 'public';
+            }
+
+            elsif ( $security eq 'usemask' ) {
+                my @grpids = LJ::bit_breakdown($allowmask);
+                my $groups = $tags_info->{$kwid}->{'security'}->{'groups'};
+                foreach my $grpid (@grpids) {
+                    unless ( exists $groups->{$grpid} ) {
+                        $groups->{$grpid} = 0;
+                    }
+
+                    $groups->{$grpid}++;
+                }
+
+                $tags_info->{$kwid}->{'security_level'} = 'group'
+                    if $tags_info->{$kwid}->{'security_level'} eq 'private';
+            }
+
+            elsif ( $security eq 'private' ) {
+                $tags_info->{$kwid}->{'security'}->{'private'}++;
+            }
+        }
+    }
+
+    # step 3: fetch names for the keywords
+    my @kwids = keys %$tags_info;
+    return {} unless @kwids;
+    my $kwid_in = join( ',', keys %$tags_info );
+    my $kwrows = $dbr->selectall_arrayref(
+        qq{
+            SELECT kwid, keyword FROM userkeywords
+            WHERE userid=? AND kwid IN ($kwid_in)
+        },
+        { 'Slice' => {} },
+        $journalu->userid,
+    );
+
+    foreach my $kwrow (@$kwrows) {
+        $tags_info->{ $kwrow->{'kwid'} }->{'name'} = $kwrow->{'keyword'};
+    }
+
+    return $tags_info;
 }
 
 # <LJFUNC>
