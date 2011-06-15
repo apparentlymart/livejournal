@@ -25,6 +25,7 @@ LJ::register_hook( 'insert_html_after_body_open' => sub {
 } );
 
 LJ::register_hook( 'sitewide_resources' => sub {
+    return unless $LJ::VKONTAKTE_CONF;
     return if $LJ::REQ_GLOBAL{'sitewide_resources_ljlike_vkontakte'}++;
 
     my $api_id = $LJ::VKONTAKTE_CONF->{'client_id'};
