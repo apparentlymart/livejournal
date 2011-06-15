@@ -3033,7 +3033,7 @@ A.lj-button-link:active {
 .lj-button-light.donate-button .lj-button-b {
 	border-right: 1px solid #AAA!important;
 	}
-.lj-button-light.donate-button A .lj-button-b {
+.lj-button-light.donate-button .lj-button-b {
 	border-right: none!important;
 	background: #FFFFFF!important;
 	background: -moz-linear-gradient(top, #FFFFFF 0%, #FEFEFC 10%, #FFFEFE 52%, #F2F6F1 57%, #EFEFF0 62%, #E7E8EA 76%, #E1E2E4 100%)!important;
@@ -3072,7 +3072,7 @@ A.lj-button-link:active {
 	border: none!important;
 	background-color: transparent!important;
 	}
-.embed-button .lj-button-b {
+.lj-button-light.donate-button.embed-button .lj-button-b {
 	border: 1px solid!important;
 	border-color: #C9C9C9 #B4B4B4 #AAA!important;
 	border-radius: 2px!important;
