@@ -152,8 +152,7 @@ sub save_mapping {
     return if $class->is_disabled;
 
     my ($uniq, $uid_arg) = @_; # no extra parts, only ident
-    croak "invalid uniq: $uniq"
-        unless length $uniq;
+    return unless length $uniq;
 
     my $uid = LJ::want_userid($uid_arg);
     croak "invalid userid arg: $uid_arg"
@@ -379,8 +378,6 @@ sub generate_uniq_ident {
 
 sub ensure_cookie_value {
     my $class = shift;
-    return;
-=head LJSUP-8676: set ljuniq cookie on client side. it allows to cached pages for logged-out users.
     return unless LJ::is_web_context();
 
     return unless LJ::Request->is_inited;
@@ -403,6 +400,8 @@ sub ensure_cookie_value {
     # -- will be overridden later if we generate a new value
     $class->set_current_uniq($uniq);
     
+    return;
+=head LJSUP-8676: set ljuniq cookie on client side. it allows to cached pages for logged-out users.
     # if no cookie, create one.  if older than a day, revalidate
     my $now = time();
     return if $uniq && $now - $uniq_time < 86400;
