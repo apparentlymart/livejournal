@@ -159,7 +159,7 @@ sub save_mapping {
     croak "invalid userid arg: $uid_arg"
         unless $uid;
 
-    my $dbh = LJ::get_uniq_db_writer()
+    my $dbh = LJ::get_db_writer()
         or die "unable to contact uniq master for uniq mapping";
 
     # allow tests to specify an insertion time callback which specifies 
@@ -272,7 +272,7 @@ sub _load_mapping_uid {
         return @$memval;
     }
 
-    my $dbh = LJ::get_uniq_db_writer() #FIXME should use reader when appropriate
+    my $dbh = LJ::get_db_writer()
         or die "unable to contact uniq writer";
 
     my $limit = $window_size + 1;
@@ -327,7 +327,7 @@ sub _load_mapping_uniq {
         return @$memval;
     }
 
-    my $dbh = LJ::get_uniq_db_writer() # FIXME switch to reader
+    my $dbh = LJ::get_db_writer()
         or die "unable to contact uniq reader";
 
     my $limit = $window_size + 1;
