@@ -319,6 +319,14 @@ sub module_iframe_tag {
                     $eleheight = $attr->{height}+0;
                     $height = $eleheight if $eleheight > $height;
                 }
+                if ($attr->{style}) {
+                    if ($attr->{style} =~ /\bwidth:\s*(\d+)px/) {
+                        $width = $1 if $1 > $width;
+                    }
+                    if ($attr->{style} =~ /\bheight:\s*(\d+)px/) {
+                        $height = $1 if $1 > $height;
+                    }
+                }
 
                 my $flashvars = $attr->{flashvars};
 
