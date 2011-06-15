@@ -957,38 +957,41 @@ sub search_posts {
     my @entries = ();
     my $comm_list = join ",", @$comms;
     my $dbh = LJ::get_db_reader();
-    if (bytes::length($search)) {
-        my $where = $vertical ? " AND km.vert_id = " . $vertical->vert_id . " AND " : "";
-        my @search_words = map { "SELECT '%".$_."%' AS cond" } split /\s+/, $search;
-        $search = join " UNION ALL ", @search_words;
+
+    if (my @search_words = split /\s+/, $search) {
+        ## Search for keyword ids for search string
+        my $where_search = join " OR ", map { " keyword LIKE '%".$_."%' " } @search_words;
+        my $keyword_ids = $dbh->selectall_arrayref (
+                                "SELECT kw_id FROM vertical_keywords WHERE $where_search",
+                                { Slice => {} }
+                          );
+
+        ## No results
+        return () unless scalar @$keyword_ids;
+
+        ## Map keyword ids to community or journal posts
+        my $ph = join ",", map { '?' } @$keyword_ids;
+        my @vals = map { $_->{kw_id} } @$keyword_ids;
+        my $where = $vertical ? " AND km.vert_id = " . $vertical->vert_id : "";
         my $posts = $dbh->selectall_arrayref (
-            "SELECT journalid, jitemid
-                FROM vertical_keymap km
-                WHERE 
-                $where
-                kw_id IN (
-                    SELECT kw_id
-                        FROM vertical_keywords kw
-                        WHERE EXISTS (
-                            SELECT 1 
-                                FROM (
-                                    $search
-                                ) c 
-                            WHERE kw.keyword LIKE cond
-                        )
-                    )",
-            { Slice => {} }
-        ) || [];
+                                "SELECT * FROM vertical_keymap WHERE kw_id IN ($ph) $where", 
+                                { Slice => {} }, 
+                                @vals
+                          ) || [];
+
+        ## No results
+        return () unless scalar @$posts;
+
+        ## Load found posts ordered by timecreate
         my @found_posts = ();
         foreach my $post (@$posts) {
+            next unless grep { $post->{journalid} eq $_ } @$comms;
             my $post_ids = $dbh->selectall_arrayref (
-                "SELECT journalid, jitemid 
+                "SELECT journalid, jitemid, UNIX_TIMESTAMP(timecreate) AS timecreate
                     FROM category_recent_posts 
-                    WHERE journalid IN ($comm_list) 
-                        AND journalid = ? 
+                    WHERE journalid = ? 
                         AND jitemid = ? 
                         AND is_deleted = 0 
-                    ORDER BY timecreate DESC 
                     LIMIT $limit", 
                 { Slice => {} }, $post->{journalid}, $post->{jitemid}
             );
@@ -1006,6 +1009,7 @@ sub search_posts {
             }
             map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) }      ## Create LJ::Entry object
             grep { $_->{journalid} }                                                ## remove SEO posts
+            sort { $b->{'timecreate'} <=> $a->{'timecreate'} }
             @found_posts;
     } else {
         if ($comm_list) {

@@ -369,7 +369,7 @@ sub get_communities_by_interests {
 
     return $comms unless $comm_interests && @$comm_interests;
 
-    my $comms = $dbh->selectcol_arrayref (
+    $comms = $dbh->selectcol_arrayref (
         "SELECT userid
             FROM comminterests
             WHERE intid in (" . join (",", @$comm_interests) . ")",
