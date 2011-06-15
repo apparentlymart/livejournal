@@ -984,15 +984,16 @@ sub search_posts {
 
         ## Load found posts ordered by timecreate
         my @found_posts = ();
+        my %comms_hash = map { $_ => 1 } @$comms;
         foreach my $post (@$posts) {
-            next unless grep { $post->{journalid} eq $_ } @$comms;
+            next unless $comms_hash{$post->{journalid}};
             my $post_ids = $dbh->selectall_arrayref (
-                "SELECT journalid, jitemid, UNIX_TIMESTAMP(timecreate) AS timecreate
+                "SELECT journalid, jitemid, UNIX_TIMESTAMP(timecreate) AS timecreate_unix
                     FROM category_recent_posts 
                     WHERE journalid = ? 
                         AND jitemid = ? 
                         AND is_deleted = 0 
-                    LIMIT $limit", 
+                    ", 
                 { Slice => {} }, $post->{journalid}, $post->{jitemid}
             );
             push @found_posts, @$post_ids if $post_ids;
@@ -1009,7 +1010,7 @@ sub search_posts {
             }
             map { LJ::Entry->new ($_->{journalid}, jitemid => $_->{jitemid}) }      ## Create LJ::Entry object
             grep { $_->{journalid} }                                                ## remove SEO posts
-            sort { $b->{'timecreate'} <=> $a->{'timecreate'} }
+            sort { $b->{'timecreate_unix'} <=> $a->{'timecreate_unix'} }
             @found_posts;
     } else {
         if ($comm_list) {
