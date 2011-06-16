@@ -471,8 +471,10 @@ sub parts_from_cookie {
 
     my $cookieval = LJ::Request->header_in("Cookie");
 
-    if ($cookieval =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)([^;]+)/) {
-        return wantarray() ? ($1, $2, $3) : $1;
+    if ($cookieval =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15})(?:\:|\%3A)(\d+)([^;]+)/) {
+        my ($uniq, $uniq_time, $uniq_extra) = ($1, $2, $3);
+        $uniq_extra =~ s/\%3A/:/g;
+        return wantarray() ? ($uniq, $uniq_time, $uniq_extra) : $uniq;
     }
 
     return;
