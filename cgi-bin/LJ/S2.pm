@@ -1164,7 +1164,7 @@ sub get_style_layers
 
     my $memkey = [$styleid, "s2sl:$styleid"];
     $stylay = LJ::MemCache::get($memkey) unless $force;
-    if ($stylay) {
+    if ( $stylay && ref $stylay eq 'HASH' && $stylay->{'layout'} ) {
         $LJ::S2::REQ_CACHE_STYLE_ID{$styleid} = $stylay;
         return $stylay;
     }
