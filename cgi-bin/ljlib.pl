@@ -2264,7 +2264,7 @@ sub start_request
             ) if LJ::show_contextual_hover();
 
             # Conditional IE CSS file for all pages 
-            LJ::need_res({condition => 'IE'}, 'stc/ie.css');
+            LJ::need_res({condition => 'lte IE 8'}, 'stc/ie.css');
         }
     }
 
