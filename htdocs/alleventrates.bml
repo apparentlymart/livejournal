@@ -21,6 +21,7 @@ body<=
     my @result = LJ::get_eventrates(
         journalid   => $journalid,
         itemid      => $itemid,
+        limits      => 500,
     );
 
     return
