@@ -4282,9 +4282,7 @@ sub Page__visible_tag_list
     my $tags;
 
     my $tag_cloud_tags = $ctx->[S2::PROPS]->{'tag_cloud_tags'};
-    if ( $tag_cloud_tags eq 'all' ) {
-        $tags = LJ::Tags::get_usertags($u, { remote => $remote });
-    } else {
+    if ( $tag_cloud_tags eq 'recent' ) {
         my $propval = $u->prop('recent_logtags');
         return [] unless $propval;
 
@@ -4295,6 +4293,8 @@ sub Page__visible_tag_list
         };
 
         return [] unless $parse_result;
+    } else {
+        $tags = LJ::Tags::get_usertags($u, { remote => $remote });
     }
 
     return [] unless $tags;
