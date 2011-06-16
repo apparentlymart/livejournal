@@ -1277,8 +1277,14 @@ property string text_skiplinks_forward_words {
     "size" = 15;
     example = "Go forward";
 }
+property string text_totop {
+    des = "Text to show in a link to go to top of the page";
+    maxlength = 20;
+    "size" = 15;
+}
 set text_skiplinks_back="Previous #";
 set text_skiplinks_forward="Next #";
+set text_totop="Back to top";
 
 property string text_view_recent {
     des = "Text used to link to the 'Recent Entries' view";

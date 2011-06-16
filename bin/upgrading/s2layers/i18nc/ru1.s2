@@ -49,6 +49,7 @@ set text_max_comments = "Достигнуто максимальное коли�
 set text_skiplinks_back="Предыдущие #";
 set text_skiplinks_forward="Следующие #";
 set text_skiplinks_forward_words="Вперёд";
+set text_totop="Наверх";
 
 set text_tags_page_header = "Метки";
 set text_tag_uses = "# раз // # раза // # раз";
