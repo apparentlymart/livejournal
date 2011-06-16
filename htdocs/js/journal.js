@@ -44,7 +44,7 @@ ILikeThis = {
 							append_node = jQuery(context);
 						}
 						append_node.append('<i class="i_like_this_already">/</i>');
-					}
+					} 
 				}
 			}
 		});
@@ -130,27 +130,6 @@ ILikeThis = {
 }
 
 DonateButton = {
-	donate: function(node, url_data, button_data, event) {
-		if (confirm(button_data.ml_message)) {
-			jQuery.post(LiveJournal.getAjaxUrl("give_tokens") + "?" + url_data + "&mode=js", {
-				lj_form_auth: button_data.lj_form_auth,
-				confirm: 1
-			}, function(data) {
-				if( data.html ) {
-					$node = jQuery( node );
-					if( /type=button/.test( url_data ) ) {
-						$node = $node.closest( '.lj-button' );
-					}
-					$node.replaceWith( data.html );
-					LiveJournal.run_hook( 'update_wallet_balance' );
-				}
-			}, "json");
-		}
-
-		event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
-		return false;
-	},
-
 	buyMore: function(node, ml_message, event) {
 		var bubble = jQuery(node).data("bubble");
 		if (!bubble) {
@@ -161,6 +140,42 @@ DonateButton = {
 		}
 
 		bubble.bubble("show");
+		event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
+		return false;
+	},
+
+	donate: function( link, url_data, event ) {
+		var url = link.href,
+			origin, h;
+
+		var width = 900;
+		var height = 480;
+
+		jQuery.rpc.bind( function( ev ) {
+			if( ev.origin && ev.origin != Site.siteroot ) {
+				return;
+			}
+
+			if( ev.data === "updateWallet" ) {
+				LiveJournal.run_hook( 'update_wallet_balance' );
+				jQuery.getJSON( LiveJournal.getAjaxUrl( 'give_tokens' ) + "?" + url_data + "&mode=js", 
+					function( result ) {
+						if( result.html ) {
+							$node = jQuery( link ).closest( '.lj-button' );
+							$node.replaceWith( result.html );
+						}
+					} );
+			}
+		} );
+
+		var popupUrl = url +  '?usescheme=nonavigation';
+		h = window.open( 'about:blank', 'donate' , 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
+		h.name = location.href.replace( /#.*$/, '' );
+
+		setTimeout( function() {
+			jQuery.rpc.initRecipient( h, popupUrl, location.href.replace( /#.*$/, '' ) );
+		}, 0 );
+
 		event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
 		return false;
 	}
