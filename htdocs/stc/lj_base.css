@@ -3144,3 +3144,57 @@ A.lj-button-link:active {
         padding: 0 24px 0 0;
         }
 
+/* Popup browser window*/
+.popup-win {
+	color: #222;
+	font: 12px Arial, sans-serif;
+	}
+.popup-win-header {
+	height: 60px;
+	background-color: #051C43;
+	font-weight: normal;
+	}.popup-win-body {
+	padding: 35px 75px;
+	}
+.popup-win-body A,
+.popup-win-body A:link,
+.popup-win-body A:visited {
+	border-bottom: 1px solid #D5D5D5;
+	color: #4F74AE;
+	text-decoration: none;
+	}
+.popup-win-body A: hover {
+	border-color: #4F74AE;
+	}
+	.popup-win-title {
+		color: #222;
+		font-weight: normal;
+		font-size: 20px;	 }
+	.popup-win-text {
+		font-size: 12px;
+		}
+	.popup-win-tooltip {
+		position: relative;
+		padding: 8px 10px;
+		border: 1px solid;
+		border-radius: 6px;
+		font-size: 11px;
+		-webkit-border-radius: 6px;
+		-moz-border-radius: 6px;
+		}
+	.warning {
+		border-color: #EAE8AC;
+		background-color: #FFFFD5;
+		}
+	.popup-win-buttons {
+		}
+		.popup-win-submit {
+			border: 1px solid #959595;
+			font: 18px Arial, sans-serif;
+			}
+		.popup-win-cancel {
+			display: inline-block;
+			margin: 0 17px 4px;
+			vertical-align: middle;
+			}
+
