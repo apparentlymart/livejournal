@@ -2320,6 +2320,11 @@ DIV.lj_ippu_app {
 		-moz-border-radius: 7px;
 		border-radius: 7px;
 		}
+	.b-popup,
+	.b-popup-outer,
+	.b-popup-inner {
+		float: none;
+		}
 	.b-popup-withclosecontrol .b-popup-inner {
 		padding: 10px 25px 10px 15px;
 		}
