@@ -3151,7 +3151,7 @@ A.lj-button-link:active {
 	}
 .popup-win-header {
 	height: 60px;
-	background-color: #051C43;
+	background: #051C43 url(/img/popup/header.jpg?v=1) no-repeat 0 0;
 	font-weight: normal;
 	}.popup-win-body {
 	padding: 35px 75px;
