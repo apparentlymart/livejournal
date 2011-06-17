@@ -7745,14 +7745,15 @@ sub get_calendar_data_for_month {
         }
     }
     ## $prev_month  = max(  grep { $day < Date($year, $month) }  @$days  );
-    ## max @list    = List::Util::reduce { $a > $b ? $a : $b } @list
+    ## max @list    = List::Util::reduce {  ($a < $b) ? $b : $a } @list
+    ## min @list    = List::Util::reduce { !($a < $b) ? $b : $a } @list
     my $current_month   = [$year, $month];
     my $less_year       = sub { my ($a, $b) = @_; return $a->[0]<$b->[0];  };
     my $less            = sub { my ($a, $b) = @_; return $a->[0]<$b->[0] || $a->[0]==$b->[0] && $a->[1]<$b->[1] };
-    $ret{'prev_month'}  = List::Util::reduce { $less->($a, $b) ? $a : $b }  grep { $less->($_, $current_month) }        @$days;
-    $ret{'next_month'}  = List::Util::reduce { $less->($a, $b) ? $b : $a }  grep { $less->($current_month, $_) }        @$days;
-    $ret{'prev_year'}   = List::Util::reduce { $less->($a, $b) ? $a : $b }  grep { $less_year->($_, $current_month) }   @$days;
-    $ret{'next_year'}   = List::Util::reduce { $less->($a, $b) ? $b : $a }  grep { $less_year->($current_month, $_) }   @$days;
+    $ret{'prev_month'}  = List::Util::reduce {  $less->($a, $b) ? $b : $a } grep { $less->($_, $current_month) }        @$days;
+    $ret{'next_month'}  = List::Util::reduce { !$less->($a, $b) ? $b : $a } grep { $less->($current_month, $_) }        @$days;
+    $ret{'prev_year'}   = List::Util::reduce {  $less->($a, $b) ? $b : $a } grep { $less_year->($_, $current_month) }   @$days;
+    $ret{'next_year'}   = List::Util::reduce { !$less->($a, $b) ? $b : $a } grep { $less_year->($current_month, $_) }   @$days;
     foreach my $k (qw/prev_month next_month prev_year next_year/) {
         if ($ret{$k}) {
             $ret{$k} = [ $ret{$k}->[0]+0, $ret{$k}->[1]+0];
