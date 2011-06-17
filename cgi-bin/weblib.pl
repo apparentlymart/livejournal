@@ -619,7 +619,14 @@ sub form_auth {
 #          or the user has changed session (logged out and in again, or something).
 # </LJFUNC>
 sub check_form_auth {
-    my $formauth = shift || $BMLCodeBlock::POST{'lj_form_auth'};
+    my $opts = shift;
+    my $formauth = $BMLCodeBlock::POST{'lj_form_auth'};
+    if (ref $opts eq 'HASH') {
+        $formauth = $opts->{'lj_form_auth'} if defined $opts->{'lj_form_auth'};
+    } else {
+        $formauth = $opts if defined $opts;
+        $opts = {};
+    }
     return 0 unless $formauth;
 
     my $remote = LJ::get_remote();
@@ -634,9 +641,9 @@ sub check_form_auth {
     return 0 unless $sess eq $chal_sess;
 
     # check the signature is good and not expired
-    my $opts = { dont_check_count => 1 };  # in/out
-    LJ::challenge_check($formauth, $opts);
-    return $opts->{valid} && ! $opts->{expired};
+    my $opts = { dont_check_count => !$opts->{enable_check_count} };  # in/out
+    my $result = LJ::challenge_check($formauth, $opts);
+    return $result;
 }
 
 # <LJFUNC>
