@@ -7339,7 +7339,9 @@ sub ljuser {
          @link_tag_extra,
          $journal_name,
          @link_extra,
-         @extra );
+         @extra,
+         $journal,
+    );
 
     $profile_url = $opts->{'profile_url'};
 
@@ -7446,8 +7448,10 @@ sub ljuser {
     }
     my $extra = join('', @extra);
 
+    $journal = $opts->{in_journal} ? " lj:journal='" . LJ::ehtml($opts->{in_journal}) . "'" : '';
+
     return
-        "<span class='$span_classes' lj:user='$username' style='$span_styles'>" .
+        "<span class='$span_classes' lj:user='$username'$journal style='$span_styles'>" .
         "<a href='$profile_url'$profile_link_tag_extra>" .
         "<img src='$userhead' alt='[info]' " .
             "width='$userhead_w' height='$userhead_h' " .

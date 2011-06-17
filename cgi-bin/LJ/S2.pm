@@ -3656,8 +3656,17 @@ sub DateTime__time_format
 sub UserLite__ljuser
 {
     my ($ctx, $UserLite, $link_color) = @_;
-    my $link_color_string = $link_color ? $link_color->{as_string} : "";
-    return LJ::ljuser($UserLite->{_u}, {link_color => $link_color_string, side_alias => $UserLite->{_opt_side_alias} });
+
+    my $params = { side_alias => $UserLite->{_opt_side_alias} };
+
+    if ( $link_color && exists $link_color->{in_journal} ) {
+        $params->{in_journal} = $link_color->{in_journal};
+    }
+    else {
+    	$params->{link_color} = $link_color->{as_string};
+    }
+
+    return LJ::ljuser($UserLite->{_u}, $params );
 }
 
 sub UserLite__get_link
@@ -4167,7 +4176,7 @@ sub Page__print_ad_box {
     $S2::pout->($ad_html) if $ad_html;
 }
 
-my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers FaceBookILike PublicStats OnLivejournal);
+my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers FaceBookILike PublicStats OnLivejournal MySuperWidget);
 
 sub Page__widget
 {

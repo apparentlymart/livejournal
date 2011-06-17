@@ -276,6 +276,7 @@ class UserLite
 
     function builtin equals(UserLite u) : bool "Returns true if the two user objects refer to the same user. Use this rather than comparing usernames, since usernames aren't globally unique.";
     function builtin ljuser() : string "Returns an LJ user tag for the user.";
+    function builtin ljuser(string{} opts) : string "Returns an LJ user tag with journal attribute for the user.";
     function builtin ljuser(Color link_color) : string "Returns an LJ user tag for the user.  The color of the link will be link_color.";
     function builtin get_link(string key) : Link "Returns a link based on the given key, or null if the link is unavailable";
     function base_url () : string "Returns URL of user's journal.";
