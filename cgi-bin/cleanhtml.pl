@@ -797,7 +797,7 @@ sub clean
 
                         if ($give_button) {
                             $newdata .= qq{<div class="lj-like-item lj-like-item-livejournal">}
-                                      . $give_button
+                                      . Encode::decode_utf8($give_button)
                                       . qq{</div>};
                         }
                     }
