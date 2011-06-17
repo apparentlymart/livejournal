@@ -156,10 +156,7 @@
                     return false;
                 }
                 if (document.getElementById && (document.getSelection || document.selection || window.getSelection)) {
-                    // Opera clears the paste buffer before mouse events, useless here
-                        if (navigator.userAgent.indexOf("Opera") == -1) {
-                            document.write('&nbsp;&nbsp;<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" tabindex="23" />');
-                        }
+					document.write('&nbsp;&nbsp;<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" tabindex="23" />');
                 }
                 //-->
                 </script>
