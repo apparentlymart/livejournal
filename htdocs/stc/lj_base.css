@@ -2320,9 +2320,15 @@ DIV.lj_ippu_app {
 		-moz-border-radius: 7px;
 		border-radius: 7px;
 		}
+	/* Put here styles for popups that need to reset */
 	.b-popup,
 	.b-popup-outer,
-	.b-popup-inner {
+	.b-popup-inner 
+	.popup-inner,
+	.w-cs-filter-inner,
+	.w-cs-filter-sort,
+	.b-sharethis,
+	.b-sharethis-services {
 		float: none;
 		}
 	.b-popup-withclosecontrol .b-popup-inner {
