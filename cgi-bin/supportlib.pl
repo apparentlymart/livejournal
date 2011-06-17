@@ -12,6 +12,7 @@ use Digest::MD5 qw(md5_hex);
 use lib "$ENV{LJHOME}/cgi-bin";
 require "sysban.pl";
 use LJ::TimeUtil;
+use LJ::Support::Request::Tag;
 
 # Constants
 my $SECONDS_IN_DAY  = 3600 * 24;

@@ -59,7 +59,9 @@ use Encode qw(encode decode);
 sub get_requests_tags {
     my @spids = @_;
 
-    @spids = map { $_+0 } @spids;
+    return {} unless @spids;
+
+    @spids = map { int $_ } @spids;
     my $spids = join ',', @spids;
 
     my $dbr = LJ::get_db_reader();
@@ -111,20 +113,30 @@ sub set_request_tags {
 
     my $dbh = LJ::get_db_writer();
 
-    @tags_remove = map { $_+0 } @tags_remove;
-    my $tags_remove = join(',', map { $_+0 } @tags_remove);
-    $dbh->do(
-        "DELETE FROM supporttagmap WHERE spid=? AND sptagid IN ($tags_remove)",
-        undef, $spid
-    );
+    if (@tags_remove) {
+        @tags_remove = map { int $_ } @tags_remove;
+        my $tags_remove = join( ',', map { int $_ } @tags_remove );
+        $dbh->do(
+            qq{
+                DELETE FROM supporttagmap
+                WHERE spid=? AND sptagid IN ($tags_remove)
+            },
+            undef, $spid
+        );
+    }
 
-    @tags_add = map { $_+0 } @tags_add;
-    my @tags_add_exprs = map { "($spid,$_)" } @tags_add;
-    my $tags_add_exprs = join ',', @tags_add_exprs;
+    if (@tags_add) {
+        @tags_add = map { int $_ } @tags_add;
+        my @tags_add_exprs = map { "($spid,$_)" } @tags_add;
+        my $tags_add_exprs = join ',', @tags_add_exprs;
 
-    $dbh->do(
-        "INSERT INTO supporttagmap (spid, sptagid) VALUES $tags_add_exprs"
-    );
+        $dbh->do(
+            qq{
+                INSERT INTO supporttagmap (spid, sptagid)
+                VALUES $tags_add_exprs
+            }
+        );
+    }
 
     return { added => \@tags_add, removed => \@tags_remove };
 }

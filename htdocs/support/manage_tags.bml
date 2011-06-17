@@ -13,8 +13,11 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    return $ML{'.error.unauthorized'} unless
-        LJ::check_priv($remote, 'supportviewinternal');
+    unless (   LJ::check_priv( $remote, 'supportviewinternal' )
+            || LJ::check_priv( $remote, 'supporthelp' ) )
+    {
+        return LJ::Lang::ml('.error.unauthorized');
+    }
 
     my $cats = LJ::Support::load_cats();
 
