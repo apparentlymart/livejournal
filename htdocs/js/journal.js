@@ -148,8 +148,8 @@ DonateButton = {
 		var url = link.href,
 			origin, h;
 
-		var width = 900;
-		var height = 480;
+		var width = 800;
+		var height = 290;
 
 		jQuery.rpc.bind( function( ev ) {
 			if( ev.origin && ev.origin != Site.siteroot ) {
@@ -168,7 +168,7 @@ DonateButton = {
 			}
 		} );
 
-		var popupUrl = url +  '?usescheme=nonavigation';
+		var popupUrl = url + ( url.indexOf( "?" ) === -1 ? "?" : "&" ) + 'usescheme=nonavigation';
 		h = window.open( 'about:blank', 'donate' , 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
 		h.name = location.href.replace( /#.*$/, '' );
 
