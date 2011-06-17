@@ -3510,7 +3510,7 @@ sub Comment__print_expand_collapse_links
     my $print_expand_link = sub {
         $S2::pout->(
             "<span id='expand_$this->{talkid}'>" .
-                " (<a href='$this->{thread_url}' onclick=\"ExpanderEx.make(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_expand</a>)" . 
+                "<a href='$this->{thread_url}' onclick=\"ExpanderEx.make(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_expand</a>" . 
             "</span>"
         );
     };
@@ -3518,7 +3518,7 @@ sub Comment__print_expand_collapse_links
     my $print_collapse_link = sub {
         $S2::pout->(
             "<span id='collapse_$this->{talkid}'>" .
-                " (<a href='$this->{thread_url}' onclick=\"ExpanderEx.collapse(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_collapse</a>)" . 
+                "<a href='$this->{thread_url}' onclick=\"ExpanderEx.collapse(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_collapse</a>" . 
             "</span>"
         );
     };
