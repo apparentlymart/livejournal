@@ -140,6 +140,10 @@
     foreach my $key (@ml_keys) {
         $ret{"ml_$key"} = $ML{".$key"};
     }
+    if ($u->is_community) {
+        $ret{'ml_filter_by_poster_me'}  = $ML{'ml_filter_by_poster_me'};
+        $ret{'ml_filter_by_poster'}     = $ML{'ml_filter_by_poster'};
+    }
     if ($u && $remote && $u==$remote && $u->is_identity) {
         $ret{"ml_upgrade_account"} = $ML{"horizon.nav.identity_convert"};
     }
