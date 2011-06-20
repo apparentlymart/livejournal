@@ -1401,7 +1401,6 @@ sub res_includes {
     unless ( $only_needed ) {
         my %journal_info;
         if (my $journalu = LJ::get_active_journal()) {
-            LJ::need_string('ml_filter_by_poster_me', 'ml_filter_by_poster');
             %journal_info = $journalu->info_for_js;
         }
         my $journal_info_json = LJ::JSON->to_json(\%journal_info);
