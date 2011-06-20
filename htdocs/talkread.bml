@@ -105,18 +105,11 @@ body<=
         return;
     }
 
-    my %meta = (
-        'title'
-            => LJ::ehtml( LJ::Text->drop_html( $entry->subject_raw ) ),
+    my %meta = %{ $entry->extract_metadata };
 
-        'description'
-            => LJ::ehtml( LJ::Text->drop_html( $entry->event_raw ) ),
-    );
-
-    $$head .= qq[
-        <meta property="og:title" name="title" content="$meta{'title'}" />
-        <meta property="og:description" name="description" content="$meta{'description'}" />
-    ];
+    $$head .= "<meta property=\"og:title\" name=\"title\" content=\"" . LJ::ehtml( $meta{'title'} ) . "\" />\n";
+    $$head .= "<meta property=\"og:description\" name=\"description\" content=\"" . LJ::ehtml( $meta{'description'} ) . "\" />\n";
+    $$head .= "<meta property=\"og:image\" content=\"" . LJ::ehtml( $meta{'image'} ) . "\" />\n";
 
     my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
 

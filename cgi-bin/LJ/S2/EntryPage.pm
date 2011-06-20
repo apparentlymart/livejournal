@@ -367,18 +367,11 @@ sub EntryPage
         $p->{'head_content'} .= $js;
     }
 
-    my %meta = (
-        'title'
-            => LJ::ehtml( LJ::Text->drop_html( $entry->subject_raw ) ),
+    my %meta = %{ $entry->extract_metadata };
 
-        'description'
-            => LJ::ehtml( LJ::Text->drop_html( $entry->event_raw ) ),
-    );
-
-    $p->{'head_content'} .= qq[
-        <meta property="og:title" name="title" content="$meta{'title'}" />
-        <meta property="og:description" name="description" content="$meta{'description'}" />
-    ];
+    $p->{'head_content'} .= "<meta property=\"og:title\" name=\"title\" content=\"" . LJ::ehtml( $meta{'title'} ) . "\" />\n";
+    $p->{'head_content'} .= "<meta property=\"og:description\" name=\"description\" content=\"" . LJ::ehtml( $meta{'description'} ) . "\" />\n";
+    $p->{'head_content'} .= "<meta property=\"og:image\" content=\"" . LJ::ehtml( $meta{'image'} ) . "\" />\n";
 
     LJ::need_res(qw(
                     js/commentmanage.js

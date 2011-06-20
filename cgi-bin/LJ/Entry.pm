@@ -1394,6 +1394,39 @@ sub check_for_negative_terms {
     return $nterms;
 }
 
+# returns a hashref: { title => '', description => '', image => $url }
+sub extract_metadata {
+    my ($self) = @_;
+
+    my %meta;
+
+    $meta{'title'} = LJ::Text->drop_html( $self->subject_raw );
+
+    $meta{'description'} = eval {
+        my $text = $self->event_raw;
+        $text = LJ::Text->drop_html($text);
+        $text = LJ::Text->truncate_to_word_with_ellipsis( 'str' => $text, 'bytes' => 300 );
+        return $text;
+    };
+    die "cannot get entry description: $@" unless defined $meta{'description'};
+
+    $meta{'image'} = eval {
+        my $text = $self->event_raw;
+        my $images = LJ::html_get_img_urls( \$text, 'exclude_site_imgs' => 1 );
+        return $images->[0] if $images && @$images;
+
+        my $userpic = $self->userpic;
+        return $userpic->url if $userpic;
+
+        my $journal = $self->journal;
+        my ($userhead_url) = $journal->userhead;
+        return $userhead_url;
+    };
+    die "cannot get entry image: $@" unless defined $meta{'image'};
+
+    return \%meta;
+}
+
 package LJ;
 
 use Class::Autouse qw (

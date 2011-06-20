@@ -724,7 +724,21 @@ sub clean
                 }
 
                 my $entry_url = $opts->{'entry_url'};
-                my @buttons = qw( facebook google twitter vkontakte livejournal );
+                my $entry = LJ::Entry->new_from_url($entry_url);
+                my $meta = $entry->extract_metadata;
+
+                unless ($entry) {
+                    $newdata .= '<b>[lj-like in invalid context]</b>';
+                    next TOKEN;
+                }
+
+                my @buttons = qw(
+                    facebook
+                    twitter
+                    google
+                    vkontakte
+                    livejournal
+                );
 
                 if ( exists $attr->{'buttons'} && $attr->{'buttons'} ) {
                     my $buttons = $attr->{'buttons'};
@@ -758,8 +772,24 @@ sub clean
 
                         $newdata .= qq{<div class="lj-like-item lj-like-item-facebook">}
                                   . qq{<fb:like href="$entry_url_ehtml" send="false" layout="button_count" }
-                                  . qq{width="100" show_faces="false" font="">}
+                                  . qq{width="100" show_faces="false" font="" action="recommend">}
                                   . qq{</fb:like></div>};
+                    }
+
+                    elsif ( $button eq 'twitter' ) {
+                        my $language = LJ::Lang::get_remote_lang();
+
+                        my $locale = LJ::lang_to_locale($language);
+                        $locale =~ s/_.*//;
+
+                        my $entry_url_ehtml = LJ::ehtml($entry_url);
+                        my $title_ehtml = Encode::decode_utf8( LJ::ehtml( $meta->{'title'} ) );
+
+                        $newdata .= qq{<div class="lj-like-item lj-like-item-twitter">}
+                                  . qq{<a href="http://twitter.com/share" class="twitter-share-button" }
+                                  . qq{data-url="$entry_url_ehtml" data-text="$title_ehtml" data-count="horizontal" }
+                                  . qq{data-lang="$locale">Tweet</a>}
+                                  . qq{</div>};
                     }
 
                     elsif ( $button eq 'google' ) {
@@ -777,12 +807,21 @@ sub clean
 
                         $LJ::REQ_GLOBAL{'ljlike_vkontakte_id'} ||= 1;
                         my $uniqid = $LJ::REQ_GLOBAL{'ljlike_vkontakte_id'}++;
-                        my $entry_url_ejs = LJ::js_dumper($entry_url);
+
+                        my $widget_opts = {
+                            'type'              => 'mini',
+                            'verb'              => '1',
+                            'pageUrl'           => $entry_url,
+                            'pageTitle'         => $meta->{'title'},
+                            'pageDescription'   => $meta->{'description'},
+                            'pageImage'         => $meta->{'image'},
+                        };
+                        my $widget_opts_out = Encode::decode_utf8( LJ::JSON->to_json($widget_opts) );
 
                         $vkontakte_like_js{$uniqid}
                             = qq{<div id="vk_like_$uniqid"></div>}
                             . qq{<script type="text/javascript">}
-                            . qq{VK.Widgets.Like("vk_like_$uniqid", {type: "mini", pageUrl: $entry_url_ejs});}
+                            . qq{VK.Widgets.Like("vk_like_$uniqid",$widget_opts_out);}
                             . qq{</script>};
                         $newdata .= qq{<div class="lj-like-item lj-like-item-vkontakte"><x-vk-like id="$uniqid"></div>};
                     }

@@ -24,6 +24,14 @@ LJ::register_hook( 'insert_html_after_body_open' => sub {
     $$after_body_open_ref .= qq{<div id="fb-root"></div><script src="http://connect.facebook.net/$locale/all.js#appId=214181831945836&amp;xfbml=1"></script>};
 } );
 
+LJ::register_hook( 'insert_html_after_body_open' => sub {
+    my ($after_body_open_ref) = @_;
+
+    return if $LJ::REQ_GLOBAL{'sitewide_resources_ljlike_twitter'}++;
+
+    $$after_body_open_ref .=  qq{<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>};
+} );
+
 LJ::register_hook( 'sitewide_resources' => sub {
     return unless $LJ::VKONTAKTE_CONF;
     return if $LJ::REQ_GLOBAL{'sitewide_resources_ljlike_vkontakte'}++;
