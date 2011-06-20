@@ -199,6 +199,9 @@ sub create_community {
     $u->set_prop("adult_content", $opts{journal_adult_settings}) if LJ::is_enabled("content_flag");
 
     my $remote = LJ::get_remote();
+
+	die "No remote user!\n" unless $remote;
+
     LJ::set_rel($u, $remote, "A");  # maintainer
 
     LJ::set_rel($u, $remote, "S");  # supermaintainer
@@ -7448,7 +7451,10 @@ sub ljuser {
     }
     my $extra = join('', @extra);
 
-    $journal = $opts->{in_journal} ? " lj:journal='" . LJ::ehtml($opts->{in_journal}) . "'" : '';
+    if ( exists $opts->{in_journal} && $opts->{in_journal} ) {
+        my $cu = LJ::load_user( $opts->{in_journal} );
+        $journal = $cu ? ' lj:journal="' . $cu->journal_base . '"' : '';
+    }
 
     return
         "<span class='$span_classes' lj:user='$username'$journal style='$span_styles'>" .
