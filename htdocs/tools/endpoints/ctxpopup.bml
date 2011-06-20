@@ -20,6 +20,7 @@
     # get user
     my $remote = LJ::get_remote();
     my $is_remote_sup = LJ::SUP->is_remote_sup();
+    my $journalu = LJ::get_active_journal();
 
     my $get_user = sub {
         # three ways to load a user:
@@ -140,7 +141,7 @@
     foreach my $key (@ml_keys) {
         $ret{"ml_$key"} = $ML{".$key"};
     }
-    if ($u->is_community) {
+    if ($journalu && $journalu->is_community) {
         $ret{'ml_filter_by_poster_me'}  = $ML{'ml_filter_by_poster_me'};
         $ret{'ml_filter_by_poster'}     = $ML{'ml_filter_by_poster'};
     }
