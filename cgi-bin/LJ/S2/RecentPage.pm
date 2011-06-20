@@ -88,11 +88,7 @@ sub RecentPage
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
 
-    my $posteru_filter;
-    if ($get->{'poster'}) {
-        $posteru_filter = LJ::load_user($get->{'poster'});
-    }
-    
+   
     ## load the itemids
     my @itemids;
     my $err;
@@ -113,7 +109,7 @@ sub RecentPage
         'order' => ($u->{'journaltype'} eq "C" || $u->{'journaltype'} eq "Y")  # community or syndicated
             ? "logtime" : "",
         'err' => \$err,
-        ($posteru_filter) ?  ('posterid'  => $posteru_filter->{'userid'}) : (),
+        'poster'  => $get->{'poster'} || '',
     });
 
     my $is_prev_exist = scalar @items - $itemshow > 0 ? 1 : 0;
@@ -284,7 +280,7 @@ sub RecentPage
         'skip' => $skip,
         'count' => $itemnum,
     };
-
+ 
     # if we've skipped down, then we can skip back up
     if ($skip) {
         my $newskip = $skip - $itemshow;
@@ -295,7 +291,7 @@ sub RecentPage
             tag      => (LJ::eurl($get->{tag})      || ""),
             security => (LJ::eurl($get->{security}) || ""),
             mode     => (LJ::eurl($get->{mode})     || ""), 
-            poster   => ($posteru_filter) ? $posteru_filter->{user} : "", 
+            poster   => (LJ::eurl($get->{'poster'}) || ""),
         });
         $nav->{'forward_count'} = $itemshow;
     }
@@ -316,7 +312,7 @@ sub RecentPage
                 tag      => (LJ::eurl($get->{tag})      || ""),
                 security => (LJ::eurl($get->{security}) || ""),
                 mode     => (LJ::eurl($get->{mode})     || ""), 
-                poster   => ($posteru_filter) ? $posteru_filter->{user} : "", 
+                poster   => (LJ::eurl($get->{'poster'}) || ""),
             });
             $nav->{'backward_skip'} = $newskip;
         }

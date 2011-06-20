@@ -1196,11 +1196,6 @@ sub create_view_lastn
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
 
-    my $posteru_filter;
-    if ($get->{'poster'}) {
-        $posteru_filter = LJ::load_user($get->{'poster'});
-    }
- 
     ## load the itemids
     my @itemids;
     my $err;
@@ -1217,7 +1212,7 @@ sub create_view_lastn
         'order' => ($u->{'journaltype'} eq "C" || $u->{'journaltype'} eq "Y")  # community or syndicated
             ? "logtime" : "",
         'err' => \$err,
-        ($posteru_filter) ?  ('posterid'  => $posteru_filter->{'userid'}) : (),
+        'poster'  => $get->{'poster'},
     });
 
     my $is_prev_exist = scalar @items - $itemshow > 0 ? 1 : 0;
@@ -1461,7 +1456,7 @@ sub create_view_lastn
     my %skiplinks;
 
     ### filter by poster in skip links
-    my $poster_filter = ($posteru_filter) ? "poster=$posteru_filter->{user}" : "";
+    my $poster_filter = ($get->{'poster'}) ? "poster=" . LJ::eurl($get->{'poster'}) : "";
 
     ### if we've skipped down, then we can skip back up
 

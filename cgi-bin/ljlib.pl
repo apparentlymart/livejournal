@@ -1020,7 +1020,8 @@ sub get_friend_items
 #           -- viewsome: if set, suspended flag is not used
 #           -- dateformat: if "S2", uses S2's 'alldatepart' format.
 #           -- itemids: optional arrayref onto which itemids should be pushed
-#           -- posterid: optional, return (community) posts made by this poster only
+#           -- posterid: [userid] optional, return (community) posts made by this poster only
+#           -- poster: [username] optional, return (community) posts made by this poster only
 # returns: array of hashrefs containing keys:
 #          -- itemid (the jitemid)
 #          -- posterid
@@ -1220,6 +1221,14 @@ sub get_recent_items
     my $posterwhere;
     if ($opts->{'posterid'} && $opts->{'posterid'} =~ /^(\d+)$/) {
         $posterwhere = " AND posterid=$1";
+    } elsif ($opts->{'poster'}) {
+        my $posteru = LJ::load_user($opts->{'poster'});
+        unless ($posteru) {
+            $$err = "No such user: " . LJ::ehtml($opts->{'poster'}) 
+                if ref $err eq "SCALAR";
+            return;
+        }
+        $posterwhere = " AND posterid=$posteru->{userid}";
     } else {
         $posterwhere = '';
     }
