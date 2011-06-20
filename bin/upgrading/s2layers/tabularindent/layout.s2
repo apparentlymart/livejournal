@@ -570,14 +570,14 @@ function print_comment_close (string footer, Comment c) {
             
             ") ";
         }
-        print $footer;
-        if ($c.thread_url != "" and (not $c.spam)) {
-            $c->print_expand_collapse_links();
+        if ($c.thread_url != "" and (not $c.spam) and $c.parent_url != "" and size $c.replies > 0) {
+            " ("; $c->print_expand_collapse_links(); ")";
         }
 
         if (not $c.frozen) {
             $c->print_reply_container({"class" => "quickreply"});
         }
+        print $footer;
     }
     "</td></tr></table></div><br />";
 }
@@ -1060,7 +1060,7 @@ function EntryPage::print_comment_partial (Comment c) {
     print_genericbox_open();
     print "<a href='$c.permalink_url'>$subj</a> - $poster";
     if ($c.thread_url != "") {
-        $c->print_expand_collapse_links();
+        " - "; $c->print_expand_collapse_links();
     }
     print_genericbox_close();
 }

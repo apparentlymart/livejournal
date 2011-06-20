@@ -982,7 +982,7 @@ function EntryPage::print_comment_partial (Comment c) {
     var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
     print safe "<a href='$c.permalink_url'>$subj</a> - $poster";
     if ($c.thread_url != "") {
-        " ("; $c->print_expand_collapse_links(); ")";
+        " - "; $c->print_expand_collapse_links();
     }
 }
 

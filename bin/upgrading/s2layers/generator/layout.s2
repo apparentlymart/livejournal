@@ -1357,7 +1357,7 @@ function EntryPage::print_comment_partial (Comment c) {
     var string poster = isnull $c.poster ? $*text_poster_anonymous : $c.poster->as_string();
 
     print safe """<a href="$c.permalink_url">$subject</a> $poster""";
-    " (";$c->print_expand_collapse_links(); ")";
+    " ";$c->print_expand_collapse_links();
 }
 function EntryPage::print_comment_full (Comment c) {
     var Page p = get_page();
