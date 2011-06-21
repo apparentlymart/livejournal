@@ -2294,6 +2294,7 @@ DIV.lj_ippu_app {
 /* Must be removed after implementation of Framework! */
 .b-popup {
 	position: absolute;
+	background-image: url(about:blank);
 	font-size:12px;
 	z-index: 4000;
 	}
