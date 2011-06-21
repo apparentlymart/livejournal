@@ -3090,7 +3090,7 @@ A.lj-button-link:active {
 	-webkit-border-radius: 2px!important;
 	-moz-border-radius: 2px!important;
 	}
-.lj-button-light.donate-button.embed-button A .lj-button-b {
+.lj-button-light.donate-button.embed-button A.lj-button-b {
 	border-right: 1px solid #AAA!important;
 	color: #222!important;
 	}
