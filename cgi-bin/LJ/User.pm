@@ -7453,7 +7453,7 @@ sub ljuser {
 
     if ( exists $opts->{in_journal} && $opts->{in_journal} ) {
         my $cu = LJ::load_user( $opts->{in_journal} );
-        $journal = $cu ? ' lj:journal="' . $cu->journal_base . '"' : '';
+        $journal = $cu ? ' data-journal="' . $cu->journal_base . '"' : '';
     }
 
     return
