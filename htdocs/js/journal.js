@@ -148,7 +148,7 @@ DonateButton = {
 		var url = link.href,
 			origin, h;
 
-		var width = 800;
+		var width = 640;
 		var height = 290;
 
 		jQuery.rpc.bind( function( ev ) {
