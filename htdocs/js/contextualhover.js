@@ -176,6 +176,10 @@ var ContextualPopup =
 			} else {
 				continue;
 			}
+
+			if (parent.parentNode.getAttribute('data-journal')) {
+				ljuser.posted_in = parent.parentNode.getAttribute('data-journal');
+			}
 			DOM.addClassName(ljuser, 'ContextualPopup');
 		}
 		
@@ -186,6 +190,9 @@ var ContextualPopup =
 			ljuser = ljusers[i];
 			if (ljuser.src.match(rex_userpic)) {
 				ljuser.up_url = ljuser.src;
+				if (ljuser.parentNode.getAttribute('data-journal')) {
+					ljuser.posted_in = ljuser.parentNode.getAttribute('data-journal');
+				}
 				DOM.addClassName(ljuser, 'ContextualPopup');
 			}
 		}
@@ -524,13 +531,13 @@ ContextualPopup.renderPopup = function(ctxPopupId)
 		content.appendChild(document.createElement('br'));
 	}
 
-	if( !data.is_comm && Site.current_journal && ( "is_comm" in Site.current_journal ) 
-				&& Site.current_journal.is_comm === "1" ) {
+	if( ( !data.is_comm && Site.current_journal && ( "is_comm" in Site.current_journal ) 
+				&& Site.current_journal.is_comm === "1" ) || data.posted_in ) {
 		jQuery( '<a/>', {
-			href: Site.current_journal.url_journal + '/?poster=' + data.username,
-			text: ( Site.remoteUser === data.username ) 
-                    ? ( data.ml_filter_by_poster_me || 'Filter community by me' ) 
-                    : ( data.ml_filter_by_poster || 'Filter community by poster' )
+			href: ( ( data.posted_in ) ? data.posted_in : Site.current_journal.url_journal ) + '/?poster=' + data.username,
+			text: ( Site.remoteUser === data.username && !data.posted_in ) 
+					? ( data.ml_filter_by_poster_me || 'Filter community by me' ) 
+					: ( data.ml_filter_by_poster || 'Filter community by poster' )
 		} )
 		.appendTo(content);
 		content.appendChild(document.createElement('br'));
@@ -736,6 +743,10 @@ ContextualPopup.getInfo = function(target, popup_id)
 				ContextualPopup.hidePopup();
 				t.showNote(data.error, target);
 				return;
+			}
+
+			if( target.posted_in ) {
+				data.posted_in = target.posted_in;
 			}
 			
 			t.cachedResults[String(data.userid)] =
