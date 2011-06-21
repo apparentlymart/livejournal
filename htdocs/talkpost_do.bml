@@ -295,6 +295,15 @@
         $commentlink = LJ::Talk::talkargs($talkurl, "thread=$POST{viewing_thread}", $stylemine) . "#t$dtalkid";
     }
 
+    if( Apache::WURFL->is_mobile && $BML::COOKIE{fullversion} ne 'yes') {
+        my $mobile_link = LJ::Mob::Uri->find($commentlink);
+        $commentlink = "http://m.$LJ::DOMAIN$mobile_link"
+            if $mobile_link ;
+    }
+        
+
+warn "\$commentlink = $commentlink";
+
     my $ret = "";
     $ret .= "<h1>$ML{'.success.title'}</h1>";
 
