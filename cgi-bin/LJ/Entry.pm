@@ -1420,6 +1420,13 @@ sub extract_metadata {
 
         my $journal = $self->journal;
         my ($userhead_url) = $journal->userhead;
+
+        # for now, LJ::User::userhead may return a relative path,
+        # so let's fix this
+        unless ( $userhead_url =~ /^https?:\/\// ) {
+            $userhead_url = $LJ::IMGPREFIX . '/' . $userhead_url . "?v=3";
+        }
+
         return $userhead_url;
     };
     die "cannot get entry image: $@" unless defined $meta{'image'};
