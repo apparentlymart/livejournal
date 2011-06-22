@@ -2294,7 +2294,6 @@ DIV.lj_ippu_app {
 /* Must be removed after implementation of Framework! */
 .b-popup {
 	position: absolute;
-	background-image: url(about:blank);
 	font-size:12px;
 	z-index: 4000;
 	}
@@ -3153,6 +3152,6 @@ A.lj-button-link:active {
     .lj-like-item {
         display: table-cell;
         vertical-align: middle;
-        padding: 0 24px 0 0;
+        padding: 0 12px 0 0;
         }
 
