@@ -36,6 +36,17 @@
 				<p class="lj3-submit-wrapper">
 					<input type="submit" value="<TMPL_VAR expr="ml('/talkpost.bml.opt.submitcomment')">" class="lj3-submit" name="submitpost" disabled="disabled">
 				</p>
+
+				<TMPL_IF expr="usertype_default eq 'facebook_cookie'">
+					Перепостить:
+					<input type="checkbox" id="repost_facebook" name="repost_facebook">
+					<label for="repost_facebook">Facebook</label>
+				<TMPL_ELSIF expr="usertype_default eq 'twitter_cookie'">
+					Перепостить:
+					<input type="checkbox" id="repost_twitter" name="repost_twitter">
+					<label for="repost_twitter">Twitter</label>
+				</TMPL_IF>
+
 				<p class="lj3-close">
 					<a href="javascript:void(0);" id="close-button"></a>
 				</p>
