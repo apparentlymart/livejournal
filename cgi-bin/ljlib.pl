@@ -1224,8 +1224,8 @@ sub get_recent_items
     } elsif ($opts->{'poster'}) {
         my $posteru = LJ::load_user($opts->{'poster'});
         unless ($posteru) {
-            $$err = "No such user: " . LJ::ehtml($opts->{'poster'}) 
-                if ref $err eq "SCALAR";
+            ## silently drop the error, since S2 can't handle it nicely (it dies)
+            ## $$err = "No such user: " . LJ::ehtml($opts->{'poster'}) if ref $err eq "SCALAR";
             return;
         }
         $posterwhere = " AND posterid=$posteru->{userid}";
