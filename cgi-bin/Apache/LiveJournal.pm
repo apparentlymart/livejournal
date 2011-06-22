@@ -342,18 +342,23 @@ sub trans
     if( LJ::Request->notes('controller') ) {
         my @args = split (/\//, LJ::Request->uri);
         
-        my $responce = LJ::Request->notes('controller')->process([@args[1 .. @args-1]], LJ::Request::request->{r});
+        my $response = LJ::Request->notes('controller')->process([@args[1 .. @args-1]]);
         LJ::Request->handler("perl-script");
         LJ::Request->set_handlers(PerlHandler => sub {
+            # show error page if controller didn't return response object
+            unless($response) {
+                $response = LJ::Mob::Response::Error->new;
+            }
+
             # processing result of controller
-            my $result = eval{$responce->output};
+            my $result = eval{$response->output};
 
             return LJ::Request::OK
-                if $responce->isa('LJ::Mob::Responce::Template');
+                if $response->isa('LJ::Mob::Response::Template');
 
-            if ($responce->isa('LJ::Mob::Responce::Redirect')) {
+            if ($response->isa('LJ::Mob::Response::Redirect')) {
                 LJ::Request->send_cookies;
-                LJ::Request->redirect($responce->location);
+                LJ::Request->redirect($response->location);
                 LJ::Request->send_http_header();
                 return LJ::Request::REDIRECT;
             }
