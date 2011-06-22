@@ -4,7 +4,7 @@
 BODY {
 	font:62.5%/1.5 Arial, sans-serif;
 	color:#000;
-	background:#C9A884 url(../i/10y-cardboard/bg.jpg?v=1) 0 0;
+	background:#C9A884 url(/sup/i/10y-cardboard/bg.jpg?v=1) 0 0;
 	}
 .hr {
 	display:none;
@@ -64,7 +64,7 @@ A:visited {
 	min-height:158px;
 	padding:38px 21px 0;
 	text-align:right;
-	background:url(../i/10y-cardboard/arrows.gif?v=1) 314px 53px no-repeat;
+	background:url(/sup/i/10y-cardboard/arrows.gif?v=1) 314px 53px no-repeat;
 	}
 * HTML .header {
 	_height:158px;
@@ -84,7 +84,7 @@ A:visited {
 	text-align:left;
 	font-size:1.2em;
 	text-transform:uppercase;
-	background:url(../i/10y-cardboard/barcode.gif?v=1) 0 0 no-repeat;
+	background:url(/sup/i/10y-cardboard/barcode.gif?v=1) 0 0 no-repeat;
 	zoom:1;
 	}
 .header H2,
@@ -229,7 +229,7 @@ A:visited {
 	#page .btn-comments {
 		display:inline-block;
 		padding:6px 0;
-		background:url(../i/10y-cardboard/tail.gif?v=1) 42% 100% no-repeat;
+		background:url(/sup/i/10y-cardboard/tail.gif?v=1) 42% 100% no-repeat;
 		text-decoration:none;
 		}
 	#page .sidebar .btn-comments {
@@ -269,7 +269,7 @@ A:visited {
 /* Sidebar */
 .sidebar-inner {
 	padding-top:77px;
-	background:url(../i/10y-cardboard/signs.gif?v=1) 155px 38px no-repeat;
+	background:url(/sup/i/10y-cardboard/signs.gif?v=1) 155px 38px no-repeat;
 	}
 .sidebar-block {
 	padding-top:15px;
@@ -297,10 +297,10 @@ A:visited {
 		list-style:none;
 		}
 	.sidebar-links DD {
-		background:url(../i/10y-cardboard/bullet.gif?v=1) 0 .4em no-repeat;
+		background:url(/sup/i/10y-cardboard/bullet.gif?v=1) 0 .4em no-repeat;
 		}
 	.sidebar-summary LI {
-		background:url(../i/10y-cardboard/bullet.gif?v=1) -3px .4em no-repeat;
+		background:url(/sup/i/10y-cardboard/bullet.gif?v=1) -3px .4em no-repeat;
 		}
 		.sidebar-links DD A:link,
 		.sidebar-links DD A:visited,
