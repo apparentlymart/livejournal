@@ -126,6 +126,7 @@ sub _page_head {
 
     my $get = $opts->{'getargs'};
     my $need_block_robots = $opts->{entry_block_robots};
+    $need_block_robots ||= $opts->{reply_block_robots};
     $need_block_robots ||= $u->should_block_robots;
     $need_block_robots ||= $get->{'skip'};
 
@@ -227,7 +228,7 @@ sub _recent_page_head {
     $head_content .= qq(title=");
     $head_content .= LJ::ehtml($friendstitle);
     $head_content .= qq(" );
-    $head_content .= qq(fhref=") .LJ::ehtml($friendsurl). qq(" />\n);
+    $head_content .= qq(href=") .LJ::ehtml($friendsurl). qq(" />\n);
 
     if ( my $icbm = $u->prop("icbm") ) {
         $head_content .= qq(<meta name="ICBM" content="$icbm" />\n);
@@ -243,10 +244,6 @@ sub _reply_page_head {
 
     my $head_content = $LJ::COMMON_CODE{'chalresp_js'};
 
-    if ( $opts->{reply_block_robots} ) {
-        $head_content .= LJ::robot_meta_tags();
-    }
-
     return $head_content;
 }
 
@@ -254,14 +251,8 @@ sub _tags_page_head {
     my ($self) = @_;
 
     my $u = $self->{u};
-    my $head_content = '';
-
-    $head_content = $u->openid_tags;
-
-    if ($u->should_block_robots) {
-        $head_content .= LJ::robot_meta_tags();
-    }
-
+    my $head_content =  $u->openid_tags;
+    
     return $head_content;
 }
 
