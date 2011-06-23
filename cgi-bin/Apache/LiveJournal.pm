@@ -20,6 +20,7 @@ use Class::Autouse qw(
                       Apache::LiveJournal::Interface::AtomAPI
                       Apache::LiveJournal::Interface::S2
                       Apache::LiveJournal::Interface::ElsewhereInfo
+                      Apache::LiveJournal::ConcatHeadFiles
                       Apache::LiveJournal::PalImg
                       Apache::LiveJournal::Interface::Api
                       LJ::ModuleCheck
@@ -1015,6 +1016,15 @@ sub trans
 
         my $view = $determine_view->($user, $vhost, $rest);
         return $view if defined $view;
+    }
+
+    # header file concatenation
+    my $unParsedURI= LJ::Request->r->unparsed_uri();
+    if ($unParsedURI =~ /\?\?/) {
+        Apache::LiveJournal::ConcatHeadFiles->load;
+        LJ::Request->handler("perl-script");
+        LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::ConcatHeadFiles::handler);
+        return LJ::Request::OK;
     }
 
     # custom interface handler
