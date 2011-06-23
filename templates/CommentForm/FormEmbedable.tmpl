@@ -34,18 +34,21 @@
 					<textarea name="body" id="commenttext" class="lj3-input-message" wrap="soft" placeholder="<TMPL_VAR expr="ml('/talkpost.bml.opt.message')">"></textarea>
 				</p>
 				<p class="lj3-submit-wrapper">
+				<TMPL_IF expr="usertype_default eq 'facebook_cookie'">
+					<span class="lj3-submit-repost">
+						<TMPL_VAR expr="ml('/talkpost.bml.opt.repost')">
+						<input type="checkbox" id="repost_facebook" name="repost_facebook">
+						<label for="repost_facebook"><img src="/img/icons/facebook-16.gif?v=3" /> Facebook</label>
+					</span>
+				<TMPL_ELSIF expr="usertype_default eq 'twitter_cookie'">
+					<span class="lj3-submit-repost">
+						<TMPL_VAR expr="ml('/talkpost.bml.opt.repost')">
+						<input type="checkbox" id="repost_twitter" name="repost_twitter">
+						<label for="repost_twitter"><img src="/img/icons/twitter-16.gif?v=3" /> Twitter</label>
+					</span>
+				</TMPL_IF>
 					<input type="submit" value="<TMPL_VAR expr="ml('/talkpost.bml.opt.submitcomment')">" class="lj3-submit" name="submitpost" disabled="disabled">
 				</p>
-
-				<TMPL_IF expr="usertype_default eq 'facebook_cookie'">
-					Перепостить:
-					<input type="checkbox" id="repost_facebook" name="repost_facebook">
-					<label for="repost_facebook">Facebook</label>
-				<TMPL_ELSIF expr="usertype_default eq 'twitter_cookie'">
-					Перепостить:
-					<input type="checkbox" id="repost_twitter" name="repost_twitter">
-					<label for="repost_twitter">Twitter</label>
-				</TMPL_IF>
 
 				<p class="lj3-close">
 					<a href="javascript:void(0);" id="close-button"></a>

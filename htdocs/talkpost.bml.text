@@ -87,6 +87,8 @@
 
 .opt.submitcomment=Publish
 
+.opt.repost=Repost:
+
 .opt.willscreen=(will be screened)
 
 .opt.willscreenfriend=(will be screened if not a friend)
