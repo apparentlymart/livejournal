@@ -3146,12 +3146,11 @@ A.lj-button-link:active {
 /* LJ like buttons 
 -----------------------------------------------*/
 .lj-like {
-    display: table;
-    margin: 24px 0 !important;
-    }
-    .lj-like-item {
-        display: table-cell;
-        vertical-align: middle;
-        padding: 0 12px 0 0;
-        }
+	margin:12px 0!important;
+	}
+	.lj-like-item {
+		display:inline-block!important;
+		vertical-align:middle!important;
+		margin:12px 12px 12px 0!important;
+		}
 
