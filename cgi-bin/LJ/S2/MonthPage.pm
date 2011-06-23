@@ -17,6 +17,7 @@ sub MonthPage
     $p->{'_type'} = "MonthPage";
     $p->{'view'} = "month";
     $p->{'days'} = [];
+    $p->{'head_content'}->set_object_type( $p->{'_type'} );
 
     $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote);
 
@@ -27,9 +28,6 @@ sub MonthPage
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
-    if ($u->should_block_robots) {
-        $p->{'head_content'} .= LJ::robot_meta_tags();
-    }
 
     my ($year, $month);
     if ($opts->{'pathextra'} =~ m!^/(\d\d\d\d)/(\d\d)\b!) {

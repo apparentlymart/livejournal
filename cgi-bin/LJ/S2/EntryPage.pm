@@ -20,7 +20,7 @@ sub EntryPage
     $p->{'comment_pages'} = undef;
 
     $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote);
-
+    $p->{head_content}->set_object_type( $p->{_type} );
     # setup viewall options
     my ($viewall, $viewsome) = (0, 0);
     if ($get->{viewall} && LJ::check_priv($remote, 'canview', 'suspended')) {
@@ -48,12 +48,8 @@ sub EntryPage
     my $style_set = defined $get->{'s2id'} ? "s2id=" . int( $get->{'s2id'} ) : "";
     my $style_arg = ($stylemine ne '' and $style_set ne '') ? ($stylemine . '&' . $style_set) : ($stylemine . $style_set);
 
-    if ($u->should_block_robots || $entry->should_block_robots) {
-        $p->{'head_content'} .= LJ::robot_meta_tags();
-    }
-    if ($LJ::UNICODE) {
-        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
-    }
+    my $block_robots = $entry->should_block_robots;
+    $p->{head_content}->set_options( { entry_block_robots => $block_robots } );
 
     # quickreply js libs
     LJ::need_res(qw(
@@ -323,6 +319,7 @@ sub EntryPage
     }
 
     # print comment info
+    my $entry_cminfo = ();
     {
         my $canAdmin = ($remote && ($remote->can_manage($u) || $remote->can_sweep($u))) ? 1 : 0;
         my $formauth = LJ::ejs(LJ::eurl(LJ::form_auth(1)));
@@ -364,14 +361,11 @@ sub EntryPage
         $js .= "var LJ_cmtinfo = " . LJ::js_dumper($cmtinfo) . "\n";
         $js .= '</script>';
         $p->{'LJ_cmtinfo'} = $js if $opts->{'need_cmtinfo'};
-        $p->{'head_content'} .= $js;
+        $entry_cminfo .= $js;
     }
-
-    my %meta = %{ $entry->extract_metadata };
-
-    $p->{'head_content'} .= "<meta property=\"og:title\" name=\"title\" content=\"" . LJ::ehtml( $meta{'title'} ) . "\" />\n";
-    $p->{'head_content'} .= "<meta property=\"og:description\" name=\"description\" content=\"" . LJ::ehtml( $meta{'description'} ) . "\" />\n";
-    $p->{'head_content'} .= "<meta property=\"og:image\" content=\"" . LJ::ehtml( $meta{'image'} ) . "\" />\n";
+    
+    $p->{head_content}->set_options( { entry_cmtinfo => $entry_cminfo} );
+    $p->{head_content}->set_options( { entry_metadata => $entry->extract_metadata } );
 
     LJ::need_res(qw(
                     js/commentmanage.js

@@ -20,16 +20,8 @@ sub RecentPage
     $p->{'_type'} = "RecentPage";
     $p->{'view'} = "recent";
     $p->{'entries'} = [];
+    $p->{'head_content'}->set_object_type( $p->{'_type'} );
 
-    # Link to the friends page as a "group", for use with OpenID "Group Membership Protocol"
-    {
-        my $is_comm = $u->is_community;
-        my $friendstitle = $LJ::SITENAMESHORT." ".($is_comm ? "members" : "friends");
-        my $rel = "group ".($is_comm ? "members" : "friends made");
-        my $friendsurl = $u->journal_base."/friends"; # We want the canonical form here, not the vhost form
-        $p->{head_content} .= '<link rel="'.$rel.'" title="'.LJ::ehtml($friendstitle).'" href="'.LJ::ehtml($friendsurl)."\" />\n";
-    }
-    
     $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote); 
 
     my $user = $u->{'user'};
@@ -60,15 +52,7 @@ sub RecentPage
         $opts->{'badargs'} = 1;
         return 1;
     }
-
-    if ($u->should_block_robots || $get->{'skip'}) {
-        $p->{'head_content'} .= LJ::robot_meta_tags();
-    }
-
-    if (my $icbm = $u->prop("icbm")) {
-        $p->{'head_content'} .= qq{<meta name="ICBM" content="$icbm" />\n};
-    }
-
+    
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
     elsif ($itemshow > 50 && !$LJ::S2_TRUSTED{ $u->{'userid'} } ) { $itemshow = 50; }

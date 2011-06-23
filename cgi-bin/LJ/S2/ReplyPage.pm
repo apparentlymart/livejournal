@@ -17,6 +17,7 @@ sub ReplyPage
     my $p = Page($u, $opts);
     $p->{'_type'} = "ReplyPage";
     $p->{'view'} = "reply";
+    $p->{'head_content'}->set_object_type( $p->{'_type'} );
 
     $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote); 
 
@@ -45,14 +46,12 @@ sub ReplyPage
 
     return if $opts->{'handler_return'};
     return if $opts->{'redir'};
-    my $ditemid = $entry->ditemid;
-    $p->{'head_content'} .= $LJ::COMMON_CODE{'chalresp_js'};
+    my $ditemid = $entry->ditemid;    
 
     LJ::Talk::resources_for_talkform();    
 
-    if ($u->should_block_robots || $entry->should_block_robots) {
-        $p->{'head_content'} .= LJ::robot_meta_tags();
-    }
+    my $block_robots = ($u->should_block_robots || $entry->should_block_robots);
+    $p->{head_content}->set_options( {reply_block_robots => $block_robots } );
 
     $p->{'entry'} = $s2entry;
     LJ::run_hook('notify_event_displayed', $entry);

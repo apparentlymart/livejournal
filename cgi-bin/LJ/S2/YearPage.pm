@@ -14,18 +14,10 @@ sub YearPage
     my $p = Page($u, $opts);
     $p->{'_type'} = "YearPage";
     $p->{'view'} = "archive";
-
+    $p->{'head_content'}->set_object_type( $p->{'_type'} );
     $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote); 
 
     my $user = $u->{'user'};
-
-    if ($u->should_block_robots) {
-        $p->{'head_content'} .= LJ::robot_meta_tags();
-    }
-    if ($LJ::UNICODE) {
-        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
-    }
-
     my $get = $opts->{'getargs'};
 
     my $count = LJ::S2::get_journal_day_counts($p);

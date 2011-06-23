@@ -11,7 +11,7 @@ sub TagsPage
     $p->{'_type'} = "TagsPage";
     $p->{'view'} = "tags";
     $p->{'tags'} = [];
-
+    $p->{'head_content'}->set_object_type( $p->{'_type'} );
     $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote); 
 
     my $user = $u->{'user'};
@@ -20,12 +20,6 @@ sub TagsPage
     if ($opts->{'pathextra'}) {
         $opts->{'badargs'} = 1;
         return 1;
-    }
-
-    $p->{'head_content'} .= $u->openid_tags;
-
-    if ($u->should_block_robots) {
-        $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 
     # get tags for the page to display

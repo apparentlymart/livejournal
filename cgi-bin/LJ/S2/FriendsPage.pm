@@ -24,11 +24,9 @@ sub FriendsPage
     $p->{'friends_title'} = LJ::ehtml($u->{'friendspagetitle'});
     $p->{'filter_active'} = 0;
     $p->{'filter_name'} = "";
+    $p->{'head_content'}->set_object_type( $p->{'_type'} );
 
     $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote);
-
-    # Add a friends-specific XRDS reference
-    $p->{'head_content'} .= qq{<meta http-equiv="X-XRDS-Location" content="}.LJ::ehtml($u->journal_base).qq{/data/yadis/friends" />\n};
 
     my $sth;
     my $user = $u->{'user'};
@@ -72,10 +70,6 @@ sub FriendsPage
     ($maximgwidth, $maximgheight) = ($1, $2)
         if ($remote && $remote->{'userid'} == $u->{'userid'} &&
             $remote->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
-
-    ## never have spiders index friends pages (change too much, and some
-    ## people might not want to be indexed)
-    $p->{'head_content'} .= LJ::robot_meta_tags();
 
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_friends_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
@@ -477,11 +471,6 @@ sub FriendsPage
     }
 
     $p->{'nav'} = $nav;
-
-    if ($get->{'mode'} eq "framed") {
-        $p->{'head_content'} .= "<base target='_top' />";
-    }
-    
     # warn "[FriendsPage=$user] page prepared. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
 
     return $p;

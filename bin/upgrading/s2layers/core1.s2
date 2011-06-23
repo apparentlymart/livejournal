@@ -535,6 +535,12 @@ class Page
     function print_head [fixed]
     "Print server side supplied head content. This is a fixed function, so you can't override it. See
     [method[Page.print_custom_head()]] if you want to supply custom head content.";
+    
+    function builtin need_res(string{} options, string[] resources)
+    "Appends resoures to header content with correct timestamp.";
+
+    function builtin need_res(string[] resources)
+    "Appends resoures to header content with correct timestamp.";
 
     function builtin print_hbox_top [fixed]
     "Prints an horizontal bar of site-specific content at the top of a journal.";

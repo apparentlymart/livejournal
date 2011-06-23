@@ -19,6 +19,7 @@ use LJ::S2::MonthPage;
 use LJ::S2::EntryPage;
 use LJ::S2::ReplyPage;
 use LJ::S2::TagsPage;
+use LJ::S2::HeadContent;
 
 use HTMLCleaner;
 
@@ -141,23 +142,6 @@ sub make_journal
     # but we have to make sure it's defined at all first, otherwise things
     # like print_stylesheet() won't run, which don't have an method invocant
     return $page if $page && ref $page ne 'HASH';
-
-    # Include any head stc or js head content
-    LJ::run_hooks("need_res_for_journals", $u);
-    my $graphicpreviews_obj = LJ::graphicpreviews_obj();
-    $graphicpreviews_obj->need_res($u);
-    my $extra_js = LJ::statusvis_message_js($u);
-
-    if ( LJ::is_enabled('sharing') ) {
-        LJ::Share->request_resources;
-    }
-
-    $page->{head_content} .= LJ::res_includes() . $extra_js;
-    LJ::run_hooks('head_content', \$page->{head_content});
-    my $calendar_json = LJ::JSON->to_json( LJ::get_calendar_data_for_month($u) );
-    $page->{head_content} .= "<script type='text/javascript'>\n" . 
-        "Site = window.Site || {};\nSite.journal_calendar = $calendar_json;\n".
-        "</script>\n";
 
     s2_run($r, $ctx, $opts, $entry, $page);
     
@@ -2059,7 +2043,10 @@ sub Page
         'views_order' => [ 'recent', 'archive', 'friends', 'userinfo' ],
         'global_title' =>  LJ::ehtml($u->{'journaltitle'} || $u->{'name'}),
         'global_subtitle' => LJ::ehtml($u->{'journalsubtitle'}),
-        'head_content' => '',
+        'head_content' => LJ::S2::HeadContent::->new({ u      => $u,
+                                                       remote => $remote,
+                                                       type   => 'Page',
+                                                       opts   => $opts, }),
         'data_link' => {},
         'data_links_order' => [],
         'showspam' => $get->{mode} eq 'showspam' && LJ::is_enabled('spam_button')
@@ -2067,28 +2054,6 @@ sub Page
         'page_id' => 'journal-' . $u->username,
     };
 
-    if ($LJ::UNICODE && $opts && $opts->{'saycharset'}) {
-        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset=' . $opts->{'saycharset'} . "\" />\n";
-    }
-
-    if (LJ::are_hooks('s2_head_content_extra')) {
-        LJ::run_hooks('s2_head_content_extra', \$p->{head_content}, $remote, $opts->{r});
-    }
-
-    # Automatic Discovery of RSS/Atom
-    if ($opts && $opts->{'addfeeds'}) {
-        $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/data/rss" />\n};
-        $p->{'head_content'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$p->{'base_url'}/data/atom" />\n};
-        $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
-        $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
-    }
-
-    # OpenID information if the caller asked us to include it here.
-    $p->{'head_content'} .= $u->openid_tags if $opts && $opts->{'addopenid'};
-
-    # Ads and control strip
-    my $ad_base_url = LJ::stat_src_to_url('/ad_base.css');
-    $p->{'head_content'} .= qq{<link rel='stylesheet' href='$ad_base_url' type='text/css' />\n};
 
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
@@ -2101,18 +2066,8 @@ sub Page
     }
     LJ::journal_js_inject();
 
-    # FOAF autodiscovery
-    my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$p->{base_url}/data/foaf";
-    $p->{head_content} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
-
-    if ($u->email_visible($remote)) {
-        my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
-        $p->{head_content} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
-    }
-
     # Identity (type I) accounts only have friends views
     $p->{'views_order'} = [ 'friends', 'userinfo' ] if $u->{'journaltype'} eq 'I';
-
     return $p;
 }
 
@@ -4177,7 +4132,7 @@ sub Page__print_ad_box {
 }
 
 #my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers FaceBookILike PublicStats OnLivejournal MySuperWidget);
-    
+
 sub Page__widget
 {
     my ($ctx, $this, $opts) = @_;
@@ -4825,6 +4780,51 @@ sub get_remote_lang {
     $lang =~ s/_.*//;
 
     return $lang;
+}
+
+# there are two ways this function can be called:
+# $this->need_res( [ "a.css", "b.css" ] );
+# $this->need_res( { "condition" => "IE" }, [ "a.css", "b.css" ] );
+sub Page__need_res {
+    my ($ctx, $this, $arguments, $resources) = @_;
+    
+    if ( ref $arguments eq 'ARRAY' && !$resources ) {
+        $resources = $arguments;
+        $arguments = {};
+    } else {
+        my $condition = delete $arguments->{'condition'};
+        if ( $condition && $condition !~ /^[\w\s]+$/ ) {
+            undef $condition;
+        }
+
+        my $args = delete $arguments->{'args'};
+        if ( $args && $args !~ /^media="\w+"$/ ) {
+            undef $args;
+        }
+
+        $arguments = {};
+        $arguments->{'condition'} = $condition if defined $condition;
+        $arguments->{'args'} = $args if defined $args;
+    }
+
+    my @valid_resources = grep { _is_secure_resource($_) } @$resources;
+
+    if ( $arguments && %$arguments ) {
+        LJ::need_res( $arguments, @valid_resources );
+    } else {
+        LJ::need_res(@valid_resources);
+    }
+}
+
+sub _is_secure_resource {
+    my $resource = shift;
+
+    return $resource =~ /^
+                            (?:\w+\/)*   # path
+                            [\w+\-]+     # filename
+                            \.
+                            (?:js|css)   # extension
+                        $/x;
 }
 
 1; 
