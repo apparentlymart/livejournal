@@ -2189,7 +2189,7 @@ sub postevent
     if (LJ::is_enabled('give_features')) {
         $req->{'props'}->{'give_features'} = ($req->{'props'}->{'give_features'} eq 'enable') ? 1 :
                                              ($req->{'props'}->{'give_features'} eq 'disable') ? 0 :
-                                             $uowner->prop('give_features') ? 1 : 0;
+                                             1; # LJSUP-9142: All users should be able to use give button 
     }
 
     # meta-data

@@ -1029,7 +1029,7 @@ sub render_options_block {
                 $is_enabled = $opts->{'prop_give_features'};
             } else {
                 my $journalu = LJ::load_user($opts->{'usejournal'}) || $remote;
-                $is_enabled = $journalu && $journalu->prop('give_features');    
+                $is_enabled = $journalu ? 1 : 0; 
             }
 
             $out .= LJ::html_select({
