@@ -1005,7 +1005,6 @@ sub get_friend_items
 #           -- userid
 #           -- remote: remote user's $u
 #           -- remoteid: id of remote user
-#           -- clusterid: clusterid of userid
 #           -- tagids: arrayref of tagids to return entries with
 #           -- security: (public|friends|private) or a group number
 #           -- clustersource: if value 'slave', uses replicated databases
@@ -1042,6 +1041,8 @@ sub get_recent_items
     my $err = $opts->{'err'};
 
     my $userid = $opts->{'userid'}+0;
+    my $u = LJ::load_userid($userid) 
+        or die "No such userid: $userid";
 
     # 'remote' opt takes precendence, then 'remoteid'
     my $remote = $opts->{'remote'};
@@ -1054,7 +1055,7 @@ sub get_recent_items
     my $max_hints = $LJ::MAX_SCROLLBACK_LASTN;  # temporary
     my $sort_key = "revttime";
 
-    my $clusterid = $opts->{'clusterid'}+0;
+    my $clusterid = $u->{'clusterid'}+0;
     my @sources = ("cluster$clusterid");
     if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$clusterid}) {
         @sources = ("cluster${clusterid}${ab}");
@@ -1272,8 +1273,27 @@ sub get_recent_items
         # construct an LJ::Entry singleton
         my $entry = LJ::Entry->new($userid, jitemid => $li->{itemid});
         $entry->absorb_row($li);
+        push @{$opts->{'entry_objects'}}, $entry;
     }
+
     $flush->();
+
+    if ( exists $opts->{load_props} && $opts->{load_props} ) {
+        my %logprops = ();
+        LJ::load_log_props2($userid, $opts->{'itemids'}, \%logprops);
+
+        for my $Entry ( @{$opts->{'entry_objects'}} ) {
+            $Entry->handle_prefetched_props($logprops{$Entry->{jitemid}});
+        }
+    }
+
+    if ( exists $opts->{load_text} && $opts->{load_text} ) {
+        my $texts = LJ::get_logtext2($u, @{$opts->{'itemids'}});
+
+        for my $Entry ( @{$opts->{'entry_objects'}} ) {
+            $Entry->handle_prefetched_text( $texts->{ $Entry->{jitemid} }->[0], $texts->{ $Entry->{jitemid} }->[1] );
+        }
+    }
 
     return @items;
 }

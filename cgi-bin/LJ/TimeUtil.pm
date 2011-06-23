@@ -57,6 +57,20 @@ sub http_to_time {
     return HTTP::Date::str2time($string);
 }
 
+sub mysqldate_to_ljtime {
+    my ($class, $string) = @_;
+    return undef unless $string =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d)(?::(\d\d))?)?$/;
+
+    my ($y, $mon, $d, $h, $min, $s) = ($1, $2, $3, $4, $5, $6);
+    return undef unless ($d + 0) and ($mon + 0); # '00' is string and is true value
+
+    $mon -= 1;
+    return undef if $mon < 0;
+    
+    return "$d " . LJ::Lang::ml( LJ::Lang::month_long_genitive_langcode( $mon )) . ' ' . LJ::Lang::ml('time.preposition') . " $h:$min";    
+    
+}
+
 sub mysqldate_to_time {
     my ($class, $string, $gmt) = @_;
     return undef unless $string =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d)(?::(\d\d))?)?$/;

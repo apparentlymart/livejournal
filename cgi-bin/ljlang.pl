@@ -36,6 +36,7 @@ sub day_short_langcode   { return "date.day."   . lc(LJ::Lang::day_long(@_))    
 sub day_long_langcode    { return "date.day."   . lc(LJ::Lang::day_long(@_))    . ".long";  }
 sub month_short_langcode { return "date.month." . lc(LJ::Lang::month_long(@_))  . ".short"; }
 sub month_long_langcode  { return "date.month." . lc(LJ::Lang::month_long(@_))  . ".long";  }
+sub month_long_genitive_langcode  { return "date.month." . lc(LJ::Lang::month_long(@_))  . ".genitive";  }
 
 ## ordinal suffix
 sub day_ord {

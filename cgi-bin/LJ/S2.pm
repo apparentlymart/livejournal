@@ -4176,14 +4176,17 @@ sub Page__print_ad_box {
     $S2::pout->($ad_html) if $ad_html;
 }
 
-my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers FaceBookILike PublicStats OnLivejournal MySuperWidget);
-
+#my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers FaceBookILike PublicStats OnLivejournal MySuperWidget);
+    
 sub Page__widget
 {
     my ($ctx, $this, $opts) = @_;
 
     my $class = $opts->{'class'};
-    return '' unless $approved_widget_classes{$class};
+    return '' unless exists $LJ::APPROVED_WIDGET_CLASSES{$class};
+    unless ( exists $LJ::APPROVED_WIDGET_CLASSES{$class}->{'*'} ) {
+        return '' unless exists $LJ::APPROVED_WIDGET_CLASSES{$class}->{ $LJ::S2::CURR_PAGE->{'journal'}->{'_u'}->{'user'} }
+    }
 
     # if $opts->{'journal'} specified, try use it as name to load LJ::User object,
     # else get current journal.

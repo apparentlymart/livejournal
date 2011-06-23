@@ -989,49 +989,73 @@ date.month.april.long=April
 
 date.month.april.short=Apr
 
+date.month.april.genitive=April
+
 date.month.august.long=August
 
 date.month.august.short=Aug
+
+date.month.august.genitive=August
 
 date.month.december.long=December
 
 date.month.december.short=Dec
 
+date.month.december.genitive=December
+
 date.month.february.long=February
 
 date.month.february.short=Feb
+
+date.month.february.genitive=February
 
 date.month.january.long=January
 
 date.month.january.short=Jan
 
+date.month.january.genitive=January
+
 date.month.july.long=July
 
 date.month.july.short=Jul
+
+date.month.july.genitive=July
 
 date.month.june.long=June
 
 date.month.june.short=Jun
 
+date.month.june.genitive=June
+
 date.month.march.long=March
 
 date.month.march.short=Mar
+
+date.month.march.genitive=March
 
 date.month.may.long=May
 
 date.month.may.short=May
 
+date.month.may.genitive=May
+
 date.month.november.long=November
 
 date.month.november.short=Nov
+
+date.month.november.genitive=November
 
 date.month.october.long=October
 
 date.month.october.short=Oct
 
+date.month.october.genitive=October
+
 date.month.september.long=September
 
 date.month.september.short=Sep
+
+date.month.september.genitive=September
 
 Email=Email
 
@@ -4814,6 +4838,8 @@ time.ago.never=Never.
 time.ago.second=[[num]] [[?num|second|seconds]] ago
 
 time.ago.week=[[num]] [[?num|week|weeks]] ago
+
+time.preposition=at
 
 tos.error=You must read and agree to the terms of service.
 
