@@ -821,7 +821,7 @@ sub clean
                         $vkontakte_like_js{$uniqid}
                             = qq{<div id="vk_like_$uniqid"></div>}
                             . qq{<script type="text/javascript">}
-                            . qq{VK.Widgets.Like("vk_like_$uniqid",$widget_opts_out);}
+                            . qq{jQuery.VK.addButton("vk_like_$uniqid",$widget_opts_out);}
                             . qq{</script>};
                         $newdata .= qq{<div class="lj-like-item lj-like-item-vkontakte"><x-vk-like id="$uniqid"></div>};
                     }

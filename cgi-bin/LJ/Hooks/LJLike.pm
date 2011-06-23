@@ -38,8 +38,8 @@ LJ::register_hook( 'sitewide_resources' => sub {
 
     my $api_id = $LJ::VKONTAKTE_CONF->{'client_id'};
 
-    LJ::include_raw( 'html' => qq{<script type="text/javascript" src="http://userapi.com/js/api/openapi.js?31"></script>}
-                             . qq{<script type="text/javascript">VK.init({apiId: $api_id, onlyWidgets: true});</script>} );
+    LJ::need_res ( 'js/jquery/jquery.vkloader.js' );
+    LJ::include_raw( 'html' => qq{<script type="text/javascript">jQuery.VK.init({apiId: $api_id, onlyWidgets: true});</script>} );
 } );
 
 1;
