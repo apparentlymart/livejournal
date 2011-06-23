@@ -129,15 +129,16 @@
 
 /* Donate button
 --------------------------- */
-.light.donate-button A .lj-button-b {
+.lj-button-light.donate-button .lj-button-b {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#E1E2E4',GradientType=0 );
-	}
-.lj-button-link IMG {
-	top:2px!important;
 	}
 .lj-button,
 .lj-button-wrapper,
-.lj-button-link SPAN {
+.lj-button-link,
+.lj-button-link .lj-button-a,
+.lj-button-link .lj-button-b,
+.lj-button-link .lj-button-c,
+.lj-button-link .lj-button-icon {
 	display: inline!important;
 	zoom: 1!important;
 	}

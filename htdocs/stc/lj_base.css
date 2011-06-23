@@ -2992,7 +2992,8 @@ DIV.lj_ippu_app {
 .lj-button-link,
 .lj-button-link .lj-button-a,
 .lj-button-link .lj-button-b,
-.lj-button-link .lj-button-c {
+.lj-button-link .lj-button-c,
+.lj-button-link .lj-button-icon {
 	display: inline-block!important;
 	margin: 0!important;
 	padding: 0!important;
@@ -3084,19 +3085,25 @@ A.lj-button-link:active {
 	background-color: transparent!important;
 	}
 .lj-button-light.donate-button.embed-button .lj-button-b {
-	padding:0 5px 0 22px!important;
+	padding:0 5px!important;
 	border: 1px solid!important;
 	border-color: #C9C9C9 #B4B4B4 #AAA!important;
 	border-radius: 2px!important;
 	-webkit-border-radius: 2px!important;
 	-moz-border-radius: 2px!important;
-	background-image:url(/img/icons/donate-inactive.png)!important;
-	background-repeat: no-repeat!important;
-	background-position:5px 7px!important;
+	}
+.lj-button-light.donate-button.embed-button .lj-button-icon {
+	width:12px!important;
+	height:10px!important;
+	margin:0 5px 0 0!important;
+	vertical-align:middle;
+	background:url(/img/icons/donate-inactive.png)!important;
 	}
 .lj-button-light.donate-button.embed-button A.lj-button-b {
 	border-right: 1px solid #AAA!important;
 	color: #222!important;
+	}
+.lj-button-light.donate-button.embed-button A .lj-button-icon {
 	background-image:url(/img/icons/donate.png)!important;
 	}
 .lj-button-light.donate-button.embed-button .lj-button-b {
