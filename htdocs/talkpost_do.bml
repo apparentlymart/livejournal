@@ -289,20 +289,15 @@
                           'replyto'    => $parentid, );
 
         $commentlink = $uri->as_string;
+    # need to return on mobile version
+    } elsif ($POST{'mobile_domain'} =~ qr/$LJ::DOMAIN$/) {
+        my $mobile_link = LJ::Mob::Uri->find($talkurl);
+        $commentlink = "http://$POST{'mobile_domain'}$mobile_link/comments#comments";
     } elsif ($POST{'viewing_thread'} eq '') {
         $commentlink = LJ::Talk::talkargs($talkurl, "view=$dtalkid", $stylemine) . "#t$dtalkid";
     } else {
         $commentlink = LJ::Talk::talkargs($talkurl, "thread=$POST{viewing_thread}", $stylemine) . "#t$dtalkid";
     }
-
-    if( Apache::WURFL->is_mobile && $BML::COOKIE{fullversion} ne 'yes') {
-        my $mobile_link = LJ::Mob::Uri->find($commentlink);
-        $commentlink = "http://m.$LJ::DOMAIN$mobile_link"
-            if $mobile_link ;
-    }
-        
-
-warn "\$commentlink = $commentlink";
 
     my $ret = "";
     $ret .= "<h1>$ML{'.success.title'}</h1>";
