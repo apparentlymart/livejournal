@@ -164,15 +164,6 @@ sub link_bar
         push @linkele, $mlink->($flag_url, 'flag');
     }
 
-    ## Give features
-    if (LJ::is_enabled('give_features') && $remote && $entry->prop('give_features')) {
-        my $give_button = LJ::run_hook("give_button", {
-            'journal' => $u->{'user'},
-            'itemid'  => $itemid,
-        });
-        push @linkele, $give_button if $give_button;
-    }
-
     ## Next
     push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
     $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next' />\n";
