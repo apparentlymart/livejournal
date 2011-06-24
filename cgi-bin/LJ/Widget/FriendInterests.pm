@@ -42,7 +42,7 @@ sub handle_post {
         my $dbh = LJ::get_db_writer();
         $dbh->do("DELETE FROM $uitable WHERE userid=? AND intid IN ($intid_in)",
                  undef, $u->id);
-        $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
+        $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)  AND intcount > 0");
         $deleted = 1;
     }
     if (@toadd) {

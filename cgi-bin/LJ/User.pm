@@ -7813,7 +7813,7 @@ sub set_interests
         ## easy, we know their IDs, so delete them en masse
         my $intid_in = join(", ", values %int_del);
         $dbh->do("DELETE FROM $uitable WHERE userid=$userid AND intid IN ($intid_in)");
-        $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
+        $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in) AND intcount > 0");
         $did_mod = 1;
     }
 
