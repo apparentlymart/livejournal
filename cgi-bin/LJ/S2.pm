@@ -4798,7 +4798,7 @@ sub Page__need_res {
         }
 
         my $args = delete $arguments->{'args'};
-        if ( $args && $args !~ /^media="\w+"$/ ) {
+        if ( $args && $args !~ /^media="[\w+\,\s]+"$/ ) {
             undef $args;
         }
 
