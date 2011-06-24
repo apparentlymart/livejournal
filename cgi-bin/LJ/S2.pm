@@ -4821,7 +4821,7 @@ sub _is_secure_resource {
 
     return $resource =~ /^
                             (?:\w+\/)*   # path
-                            [\w+\-]+     # filename
+                            [\w+\-\.]+     # filename
                             \.
                             (?:js|css)   # extension
                         $/x;
