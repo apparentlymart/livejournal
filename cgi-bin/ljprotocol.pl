@@ -3968,23 +3968,21 @@ sub check_altusage
 
     unless ($u) {
         my $username = $req->{'username'};
-        unless($username) {
+        if ($username) {
+            my $dbr = LJ::get_db_reader();
+            return fail($err,502) unless $dbr;
+            $u = $flags->{'u'} = LJ::load_user($username);
+         } else {
             if ($flags->{allow_anonymous}) {
                 return fail($err,200) unless $alt;
-                return fail($err,100) unless LJ::canonical_username($alt);
-                $flags->{'u_owner'} = LJ::load_user($alt);
-                $flags->{'ownerid'} = $flags->{'u_owner'}->{'userid'};
-                return 1 if $flags->{'ownerid'};
-                return fail($err,206);
+                my $uowner = LJ::load_user($alt);
+                return fail($err,206) unless $uowner;
+                $flags->{'u_owner'} = $uowner;
+                $flags->{'ownerid'} = $uowner->{'userid'};
+                return 1;
             }
             return fail($err,200);
         }
-        return fail($err,200) unless $username;
-        return fail($err,100) unless LJ::canonical_username($username);
-
-        my $dbr = LJ::get_db_reader();
-        return fail($err,502) unless $dbr;
-        $u = $flags->{'u'} = LJ::load_user($username);
     }
 
     $flags->{'ownerid'} = $u->{'userid'};
@@ -3993,15 +3991,15 @@ sub check_altusage
     return 1 unless $alt;
 
     # complain if the username is invalid
-    return fail($err,206) unless LJ::canonical_username($alt);
-
+    my $uowner = LJ::load_user($alt);
+    return fail($err,206) unless $uowner;
+    
     # allow usage if we're told explicitly that it's okay
     if ($flags->{'usejournal_okay'}) {
-        $flags->{'u_owner'} = LJ::load_user($alt);
-        $flags->{'ownerid'} = $flags->{'u_owner'}->{'userid'};
+        $flags->{'u_owner'} = $uowner;
+        $flags->{'ownerid'} = $uowner->{'userid'};
         LJ::Request->notes("journalid" => $flags->{'ownerid'}) if LJ::Request->is_inited && !LJ::Request->notes("journalid");
-        return 1 if $flags->{'ownerid'};
-        return fail($err,206);
+        return 1;
     }
 
     # otherwise, check for access:
