@@ -2343,6 +2343,13 @@ DIV.lj_ippu_app {
 		height: 0;
 		font: 0/0 serif;
 		}
+	.b-popup-inner A,
+	.b-popup-inner A:link,
+	.b-popup-inner A:visited,
+	.b-popup-inner A:hover,
+	.b-popup-inner A:active {
+		color: #036;
+		}
 
 	.i-popup-arrt.i-popup-arr,
 	.i-popup-arrtl.i-popup-arr,
