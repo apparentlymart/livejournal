@@ -671,6 +671,18 @@ sub trans
         # we have per-user favicons.
         return LJ::Request::DECLINED if $uuri eq "/favicon.ico";
 
+        # Now that we know ourselves to be at a sensible URI, redirect renamed
+        # journals. This ensures redirects work sensibly for all valid paths
+        # under a given username, without sprinkling redirects everywhere.
+        my $u = LJ::load_user($user);
+        if ($u && $u->is_renamed) {
+            my $renamedto = $u->prop('renamedto');
+            if ($renamedto ne '') {
+                my $redirect_url = ($renamedto =~ m!^https?://!) ? $renamedto : LJ::journal_base($renamedto, $vhost) . $uuri . $args_wq;
+                return redir($redirect_url, 301);
+            }
+        }
+
         # see if there is a modular handler for this URI
         my $ret = LJ::URI->handle($uuri);
         return $ret if defined $ret;
@@ -801,19 +813,6 @@ sub trans
             LJ::Request->pnotes ('error' => 'e404');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;
-        }
-
-        # Now that we know ourselves to be at a sensible URI, redirect renamed
-        # journals. This ensures redirects work sensibly for all valid paths
-        # under a given username, without sprinkling redirects everywhere.
-        my $u = LJ::load_user($user);
-        if ($u && $u->{'journaltype'} eq 'R' && $u->{'statusvis'} eq 'R') {
-            LJ::load_user_props($u, 'renamedto');
-            my $renamedto = $u->{'renamedto'};
-            if ($renamedto ne '') {
-                my $redirect_url = ($renamedto =~ m!^https?://!) ? $renamedto : LJ::journal_base($renamedto, $vhost) . $uuri . $args_wq;
-                return redir($redirect_url, 301);
-            }
         }
 
         return $journal_view->({
