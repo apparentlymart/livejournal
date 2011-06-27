@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>LiveJournal Poll Questions</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta content="noindex, nofollow" name="robots">
+	<script src="<?_code $LJ::STATPREFIX _code?>/stc/fck/editor/dialog/common/fck_dialog_common.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		//Standard setup stuff (notice the command name used in the property names)//var oEditor = window.parent.InnerDialogLoaded();
+		var $ = top.jQuery,
+			answerCount,
+			currentQuestion,
+			QArray;
+
+		window.Questions = 0;
+
+		window.ready = function(poll){
+			var form = document.poll;
+			currentQuestion = 0;
+			answerCount = [5];
+
+			var aincrement = 5; // Answer Increment and default minimum
+
+			QArray = document.getElementById('QArray');
+			QArray.innerHTML = '';
+
+			var qLength = poll.questions.length;
+			window.Questions = 0;
+
+			if(qLength){
+				for(var i = 0; i < qLength; i++){
+					var question = poll.questions[i];
+					answerCount[i] = Math.max(aincrement, question.answers.length);
+					addQuestion(!i, true, i);
+					if(question.type){
+						$(form['type_' + i]).val(question.type);
+					}
+					insertQandA(false, false, i, poll);
+				}
+			} else {
+				addQuestion(true, true, Questions);
+			}
+
+			updateQuestionNav();
+		};
+
+		function insertQandA(add_answers, switch_answers, q_num, poll){
+			q_num = q_num || currentQuestion;
+
+			var form = document.poll;
+
+			var isInserted = !!form['inserted_' + q_num];
+			var add_a = add_answers && isInserted;
+			var switch_a = switch_answers && isInserted;
+
+			// Answer counter
+			var aincrement = 5; // Answer Increment and default minimum
+			var acount = aincrement;
+			// Adding answer fields
+
+			if(add_a){
+				if(poll && poll.questions[q_num] != null){
+					acount = Math.max(poll.questions[q_num].answers.length, answerCount[q_num]) + aincrement;
+				} else {
+					acount += aincrement;
+				}
+				// Switching type of answer fields
+			} else if(switch_a){
+				if(poll && poll.questions[q_num].answers.length > answerCount[q_num]){
+					answerCount[q_num] = poll.questions[q_num].answers.length;
+				}
+				acount = answerCount[q_num];
+			} else if(answerCount[q_num]){
+				acount = answerCount[q_num];
+			}
+
+			if(acount < aincrement){
+				acount = aincrement;
+			} // Always show at least the minimum number of answer fields
+
+			answerCount[q_num] = acount;
+
+			document.getElementById('QandA_' + q_num).innerHTML = form['type_' + q_num] == null ? '' : insertA(switch_a, add_a, q_num, poll);
+
+			!switch_a && poll && populateQandA(poll, form, q_num);
+			if(add_a){
+				form['answer_' + q_num + '_' + (acount - aincrement)].focus();
+			}
+			return false;
+		}
+
+		function insertA(switch_a, add_a, q_num, poll){
+			var form = document.poll;
+			var ele = form['type_' + q_num];
+			var type = ele.options[ele.selectedIndex].value;
+			var html = '<div id="innerA" style="height: 120px; overflow: auto">';
+			var isTypeLength = /^check|drop|radio$/.test(type);
+
+			if(isTypeLength){
+				html += '<input type="hidden" name="inserted_' + q_num + '" value="1" />';
+				for(var i = 0; i < answerCount[q_num]; i++){
+					var atype = type;
+					var value = '';
+					if(switch_a || add_a){
+						var input = form['answer_' + q_num + '_' + i];
+						if(input && input.form){
+							value = input.value;
+						}
+					}
+					if(atype == 'check'){
+						atype = 'checkbox';
+					}
+					if(type != 'drop'){
+						html += '<input name="dummy_' + q_num + '" disabled="disabled" type="' + atype + '">';
+					}
+					html += '<input maxlength="500" value="' + value + '" name="answer_' + q_num + '_' + i + '" size="35" type="text"><br />';
+				}
+				
+				document.poll['setType_' + q_num].value = '<?_ml fcklang.poll.question.label.switch _ml?>';
+			} else if(type == "text"){
+				html += '<input type="hidden" name="inserted_' + q_num + '" value="1" />';
+				html += '<?_ml fcklang.poll.question.text.label.size _ml?> <input maxlength="3" value="30" name="pq_' + q_num + '_size" size="3" type="text"> ';
+				html += '<?_ml fcklang.poll.question.text.label.maxlength _ml?> <input maxlength="3" value="50" name="pq_' + q_num + '_maxlength" size="3" type="text">\n';
+
+				document.poll['setType_' + q_num].value = '<?_ml fcklang.poll.question.label.switch _ml?>';
+			} else if(type == "scale"){
+				html += '<input type="hidden" name="inserted_' + q_num + '" value="1" />';
+				html += '<?_ml fcklang.poll.question.scale.label.from _ml?> <input maxlength="9" value="1" name="pq_' + q_num + '_from" size="3" type="text">\n';
+				html += '<?_ml fcklang.poll.question.scale.label.to _ml?> <input maxlength="9" value="10" name="pq_' + q_num + '_to" size="3" type="text">\n';
+				html += '<?_ml fcklang.poll.question.scale.label.by _ml?> <input maxlength="9" value="1" name="pq_' + q_num + '_by" size="3" type="text">\n';
+
+				document.poll['setType_' + q_num].value = '<?_ml fcklang.poll.question.label.switch _ml?>';
+			} else {
+				document.poll['setType_' + q_num].value = '<?_ml fcklang.poll.question.label.insert _ml?>';
+			}
+
+			html += '</div>';
+
+			if(isTypeLength){
+				html += '<input type="button" name="more_answer" value=" <?_ml fcklang.poll.question.label.more _ml?> " onclick="insertQandA(true)">';
+			}
+
+			return html;
+		}
+
+		function populateQandA(poll, form, q_num){
+			var question = poll.questions[q_num];
+			if(question != null){
+				form['question_' + q_num].value = question.name;
+				if(/^check|drop|radio$/.test(question.type)){
+					for(var j = 0; j < question.answers.length; j++){
+						var pqNum = 'answer_' + q_num + '_' + j;
+						if(form[pqNum]){
+							form[pqNum].value = question.answers[j];
+						}
+					}
+				} else if(question.type == 'text'){
+					form['pq_' + q_num + '_size'].value = question.size;
+					form['pq_' + q_num + '_maxlength'].value = question.maxlength;
+				} else if(question.type == 'scale'){
+					form['pq_' + q_num + '_from'].value = question.from;
+					form['pq_' + q_num + '_to'].value = question.to;
+					form['pq_' + q_num + '_by'].value = question.by;
+				}
+			}
+		}
+
+		function addQuestion(switchQ, ignore_empty, index){
+			index = isNaN(index) ? Questions : index;
+			if(!ignore_empty && document.poll['question_' + currentQuestion].value == ''){
+				alert('<?_ml fcklang.poll.wizard.notice.empty _ml?>');
+			} else {
+				var div = document.createElement('div');
+				div.id = 'qa_' + index;
+				div.style.display = 'none';
+				div.innerHTML = '<p><table><tr><td><?_ml fcklang.poll.question.title _ml?>'
+					.replace('#1', index + 1) + ' </td><td><input name="question_' + index + '" type="text" size="50" value=""></td></tr>\n<tr>\n<td><?_ml fcklang.poll.question.label.anstype _ml?> </td><td><select name="type_' + index + '">\n<option value="--"></option>\n<option value="radio"><?_ml fcklang.poll.question.anstype.option.radio _ml?></option>\n<option value="check"><?_ml fcklang.poll.question.anstype.option.check _ml?></option>\n<option value="drop"><?_ml fcklang.poll.question.anstype.option.dropdown _ml?></option>\n<option value="text"><?_ml fcklang.poll.question.anstype.option.text _ml?></option>\n<option value="scale"><?_ml fcklang.poll.question.anstype.option.scale _ml?></option>\n</select>\n<input type="button" name="setType_' + index + '" value="<?_ml fcklang.poll.question.label.insert _ml?>" onclick="insertQandA(false, true)" />\n</td></tr>\n<tr><td></td><td><div id="QandA_' + index + '"></div></td></tr></table></p>\n';
+
+				QArray.appendChild(div);
+				if(switchQ){
+					switchQuestion(Questions++);
+				} else {
+					Questions++;
+					updateQuestionNav();
+				}
+			}
+		}
+
+		function switchQuestion(q_selected){
+			document.getElementById('qa_' + currentQuestion).style.display = 'none';
+			currentQuestion = q_selected;
+			document.getElementById('qa_' + currentQuestion).style.display = 'block';
+			updateQuestionNav();
+		}
+
+		function updateQuestionNav(){
+			var html = '';
+			if(Questions > 1){
+				html += '<?_ml fcklang.poll.nav.label.question _ml?>'.replace('#1', currentQuestion + 1)
+					.replace('#2', Questions) + ' &nbsp; ';
+				html += currentQuestion > 0 ? '<a href="javascript:switchQuestion(' + (currentQuestion - 1) + ')"><?_ml fcklang.poll.nav.label.prev _ml?></a> | ' : '<?_ml fcklang.poll.nav.label.prev _ml?> | ';
+				html += currentQuestion < Questions - 1 ? '<a href="javascript:switchQuestion(' + (currentQuestion + 1) + ')"><?_ml fcklang.poll.nav.label.next _ml?></a> ' : '<?_ml fcklang.poll.nav.label.next _ml?> ';
+			}
+			document.getElementById('QNav').innerHTML = html;
+		}
+	</script>
+</head>
+<body style="overflow: hidden">
+<form action="" name="poll">
+	<div>
+		<div style="padding: 0 3px 3px 3px; border-bottom: 1px dashed #cec6b5; width: 100%">
+			<div style="float:right;">
+				<input type="button" value="Next Question" onclick="addQuestion(true)">
+			</div>
+			<div id="QNav" style="padding-top: 3px;">
+				<?_code my $ret = BML::ml('fcklang.poll.nav.label.question'); $ret =~ s/#\d/1/g; return $ret; _code?>
+			</div>
+			<div style="clear: both"></div>
+		</div>
+		<div id="QArray" style="height: 220px; border: 0;"></div>
+	</div>
+</form>
+</body>
+</html>
