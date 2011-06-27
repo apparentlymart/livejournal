@@ -1,0 +1,83 @@
+/*
+Copyright (c) 2003-2011, CKSource - Frederico Knabben. All rights reserved.
+For licensing, see LICENSE.html or http://ckeditor.com/license
+*/
+
+body
+{
+	/* Font */
+	font-family: Arial, Verdana, sans-serif;
+	font-size: 12px;
+
+	/* Text color */
+	color: #222;
+
+	/* Remove the background color to make it transparent */
+	background-color: #fff;
+}
+
+ol,ul,dl
+{
+	/* IE7: reset rtl list margin. (#7334) */
+	*margin-right:0px;
+	/* preserved spaces for rtl list item bullets. (#6249)*/
+    padding-right:40px;
+}
+
+/* LJ CSS */
+.lj-template {
+	background-color: #000;
+	color: #fff;
+}
+
+lj\:wishlist,
+lj-wishlist {
+	display: block;
+	width: 212px;
+	height: 212px;
+	border: 1px solid #d2d2d2;
+	background: url(/img/widget/wishlist/bag_212x212.png?v=1) no-repeat 0 0;
+}
+
+lj\:raw,
+lj-raw {
+	border: #000000 1px dotted;
+}
+
+lj\:cut,
+lj-cut {
+	display: inline;
+	border: #000 1px dotted;
+	background-color: #d2d2d2;
+}
+
+/* fix inline behavior, for no IE */
+lj-cut ul,
+lj-cut ol {
+	background-color: #d2d2d2;
+	border: #000 1px dotted;
+}
+
+.ljuser {
+	white-space: nowrap;
+	color: #00C;
+	font-weight: bold;
+}
+
+.ljvideo {
+	padding: 5px;
+	width: 8px;
+	height: 8px;
+}
+
+.ljembed {
+	background-color: #CCCCCC;
+	border: 1px solid #CCCCCC;
+}
+
+form.ljpoll {
+	display: block;
+	border: #000 1px dotted;
+	background-color: #d2d2d2;
+	font-style: italic;
+}
