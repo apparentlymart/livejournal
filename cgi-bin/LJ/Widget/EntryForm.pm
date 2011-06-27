@@ -148,7 +148,7 @@ sub need_res {
     push @ret, qw(
         js/ippu.js
         js/lj_ippu.js
-        stc/fck/fckeditor.js
+        stc/ck/ckeditor.js
         js/rte.js
         stc/display_none.css
     );
@@ -1462,21 +1462,11 @@ sub render_body {
 
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
         $out .= $self->wrap_js(qq{
-            FCKeditor_IsCompatibleBrowser = (function(FCKeditor_IsCompatibleBrowser) {
-                return function() {
-                    if (/iPad|iPhone/.test(navigator.userAgent)) {
-                        return false;
-                    }
-                    return FCKeditor_IsCompatibleBrowser();
-                };
-            }(FCKeditor_IsCompatibleBrowser));
-            var FCKLang = FCKLang || {};
-            jQuery.extend(FCKLang, $langmap);
-            if (!FCKeditor_IsCompatibleBrowser()) {
-                document.getElementById('htmltools').style.display = 'block';
-                document.write("$jnorich");
-                usePlainText('draft');
-            }
+            var CKLang = CKEDITOR.lang[CKEDITOR.lang.detect()] || {};
+            jQuery.extend(CKLang, $langmap);
+						document.getElementById('htmltools').style.display = 'block';
+						document.write("$jnorich");
+						usePlainText('draft');
         });
 
         $out .= qq{
