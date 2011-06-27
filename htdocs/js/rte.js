@@ -152,12 +152,12 @@
 				editor.on('instanceReady', function(){
 					CKEditor = editor;
 
-					$('updateForm').onsubmit = function(){
+					/*$('updateForm').onsubmit = function(){
 						if(switchedRteOn){
 							var html = closeEmptyTags(CKEditor.element.getValue());
 							CKEditor.setData(html);
 						}
-					};
+					};*/
 					
 					CKEditor.on('dataReady', LJToHtml);
 				});
