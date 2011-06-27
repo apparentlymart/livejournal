@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>LiveJournal Poll Setup</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta content="noindex, nofollow" name="robots">
+	<script type="text/javascript">
+		window.ready = function(poll){
+			top.jQuery(document.poll.whovote).val([poll.whovote]);
+			top.jQuery(document.poll.whoview).val([poll.whoview]);
+			document.poll.name.value = poll.name;
+		};
+	</script>
+</head>
+
+<body style="overflow: hidden">
+<form action="" name="poll">
+	<div>
+		<p>
+			<?_ml fcklang.poll.label.name _ml?><br /> <input name="name" id="name" type="text" size="50">
+		</p>
+
+		<p>
+			<?_ml fcklang.poll.label.whovote _ml?><br />
+			<input name="whovote" value="all" type="radio" id="whovote_all" checked="checked">
+			<label for="whovote_all"><?_ml fcklang.poll.whovote.option.everyone _ml?></label><br />
+			<input name="whovote" value="friends" type="radio" id="whovote_friend">
+			<label for="whovote_friend"><?_ml fcklang.poll.whovote.option.friends _ml?></label>
+		</p>
+
+		<p>
+			<?_ml fcklang.poll.label.whoview _ml?><br />
+			<input name="whoview" value="all" type="radio" id="whoview_all" checked="checked">
+			<label for="whoview_all"><?_ml fcklang.poll.whoview.option.everyone _ml?></label><br />
+			<input name="whoview" value="friends" type="radio" id="whoview_friends">
+			<label for="whoview_friends"><?_ml fcklang.poll.whoview.option.friends _ml?></label><br />
+			<input name="whoview" value="none" type="radio" id="whoview_none">
+			<label for="whoview_none"><?_ml fcklang.poll.whoview.option.owner _ml?></label>
+		</p>
+	</div>
+</form>
+</body>
+</html>
