@@ -19,8 +19,6 @@ sub MonthPage
     $p->{'days'} = [];
     $p->{'head_content'}->set_object_type( $p->{'_type'} );
 
-    $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote);
-
     my $ctx = $opts->{'ctx'};
 
     my $dbcr = LJ::get_cluster_reader($u);

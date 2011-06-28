@@ -12,7 +12,6 @@ sub TagsPage
     $p->{'view'} = "tags";
     $p->{'tags'} = [];
     $p->{'head_content'}->set_object_type( $p->{'_type'} );
-    $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote); 
 
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});

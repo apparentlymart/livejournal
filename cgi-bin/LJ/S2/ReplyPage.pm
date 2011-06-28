@@ -19,8 +19,6 @@ sub ReplyPage
     $p->{'view'} = "reply";
     $p->{'head_content'}->set_object_type( $p->{'_type'} );
 
-    $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote); 
-
     my $get = $opts->{'getargs'};
 
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);

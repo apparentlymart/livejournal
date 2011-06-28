@@ -19,7 +19,6 @@ sub EntryPage
     $p->{'comments'} = [];
     $p->{'comment_pages'} = undef;
 
-    $p->{'view_my_games'} = $remote && $remote->equals($u) && !LJ::SUP->is_remote_sup() && LJ::UserApps->user_games_count($remote);
     $p->{head_content}->set_object_type( $p->{_type} );
     # setup viewall options
     my ($viewall, $viewsome) = (0, 0);

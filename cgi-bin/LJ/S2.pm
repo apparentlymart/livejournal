@@ -2054,6 +2054,7 @@ sub Page
         'page_id' => 'journal-' . $u->username,
     };
 
+    $p->{'view_my_games'} = $remote && $remote->equals($u) && LJ::UserApps->user_games_count($remote);
 
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
