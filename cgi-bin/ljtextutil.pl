@@ -979,7 +979,7 @@ sub html_get_img_urls {
     my $p = HTML::TokeParser->new($htmlref);
 
     while (my $token = $p->get_token) {
-        if ($token->[1] eq "img") {
+        if ($token->[1] eq "img" and ref $token->[2] eq 'HASH') {
             my $attrs = $token->[2];
             foreach my $attr (keys %$attrs) {
                 push @image_urls, $attrs->{$attr} if
@@ -1001,7 +1001,7 @@ sub html_get_link_urls {
     my $p = HTML::TokeParser->new($htmlref);
 
     while (my $token = $p->get_token) {
-        if ($token->[0] eq "S" && $token->[1] eq "a") {
+        if ($token->[0] eq "S" && $token->[1] eq "a" and ref $token->[2] eq 'HASH') {
             my $attrs = $token->[2];
             foreach my $attr (keys %$attrs) {
                 push @link_urls, $attrs->{$attr} if $attr eq "href";
