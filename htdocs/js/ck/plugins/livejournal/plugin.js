@@ -37,7 +37,6 @@ CKEDITOR.plugins.add('livejournal', {
 		};
 
 		editor.dataProcessor.toDataFormat = function(html, fixForBody){
-			console.log(html);
 			// DOM methods are used for detection of node opening/closing
 			/*var document = editor.document.$;
 			var newBody = document.createElement('div'),
