@@ -725,11 +725,10 @@ sub clean
 
                 my $entry_url = $opts->{'entry_url'};
                 my $entry = LJ::Entry->new_from_url($entry_url);
-                my $meta = $entry->extract_metadata;
 
-                unless ($entry) {
-                    $newdata .= '<b>[lj-like in invalid context]</b>';
-                    next TOKEN;
+                my $meta = { map { $_ => '' } qw( title description image ) };
+                if ($entry) {
+                    $meta = $entry->extract_metadata;
                 }
 
                 my @buttons = qw(
