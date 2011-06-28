@@ -343,7 +343,6 @@ sub trans
         my @args = split (/\//, LJ::Request->uri);
         
         my $response = LJ::Request->notes('controller')->process([@args[1 .. @args-1]]);
-warn "RUN: ". LJ::Request->notes('controller'). ' => '.LJ::Request->notes('method');
         LJ::Request->handler("perl-script");
         LJ::Request->set_handlers(PerlHandler => sub {
             # show error page if controller didn't return response object
