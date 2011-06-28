@@ -148,7 +148,7 @@ sub need_res {
     push @ret, qw(
         js/ippu.js
         js/lj_ippu.js
-        stc/ck/ckeditor.js
+        js/ck/ckeditor.js
         js/rte.js
         stc/display_none.css
     );
@@ -623,7 +623,7 @@ sub render_subject_block {
     my $switch_rte_link = BML::ml("entryform.htmlokay.rich4", {
         'opts' => 'href="javascript:void(0);" '.
             'onclick="return useRichText(\'draft\', \'' .
-            $LJ::WSTATPREFIX. '\');"'
+            $LJ::JSPREFIX. '\');"'
     });
 
     my $switch_rte_tab = '';
@@ -1477,7 +1477,7 @@ sub render_body {
         };
 
         if ($opts->{'richtext_default'}) {
-            $$onload .= 'useRichText("draft", "' . LJ::ejs($LJ::WSTATPREFIX) . '");';
+            $$onload .= 'useRichText("draft", "' . LJ::ejs($LJ::JSPREFIX) . '");';
         }
     }
 
