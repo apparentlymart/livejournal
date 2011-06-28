@@ -343,6 +343,7 @@ sub trans
         my @args = split (/\//, LJ::Request->uri);
         
         my $response = LJ::Request->notes('controller')->process([@args[1 .. @args-1]]);
+warn "RUN: ". LJ::Request->notes('controller'). ' => '.LJ::Request->notes('method');
         LJ::Request->handler("perl-script");
         LJ::Request->set_handlers(PerlHandler => sub {
             # show error page if controller didn't return response object
@@ -481,10 +482,6 @@ sub trans
     # user-agent string; FIXME: maybe this should do more than just look at the
     # initial letters?
 
-#my %cookies = LJ::Request->cookies;
-#use Data::Dumper;
-#warn Dumper \%cookies;
-
     if (my $ua = LJ::Request->header_in('User-Agent')) {
         if ( Apache::WURFL->is_mobile && $BML::COOKIE{fullversion} ne 'yes' 
             #($ua =~ /^([a-z]+)/i) && $LJ::MINIMAL_USERAGENT{$1}
@@ -496,7 +493,6 @@ sub trans
 
             return redir("http://m.$LJ::DOMAIN$mobile_url")
                 if $mobile_url;
-#warn "URI: $mobile_url ($LJ::DOMAIN)";
         }
     }
 
