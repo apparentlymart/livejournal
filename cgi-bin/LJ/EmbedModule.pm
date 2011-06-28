@@ -131,8 +131,8 @@ sub _expand_tag {
         my $out=  '<lj-embed id="'. $attrs{id} .'" ';
 
         # LJSUP-8992
-        if ($code =~ m!src=["']?http://www\.youtube\.com/embed/([\w\d\_\-]+)['"]?!) {
-            $out .= 'vid="'.$1.'" source="youtube" ';
+        if ($code =~ m!src=["']?http://www\.youtube\.com/(v|embed)/([\w\d\_\-]+)['"]?!) {
+            $out .= 'vid="'.$2.'" source="youtube" ';
         } elsif ($code =~ m!src=["']?http://player\.vimeo\.com/video/(\d+)[?'"]?! || 
                  $code =~ m!=["']?http://vimeo\.com/moogaloop\.swf\?[\d\w\_\-\&\;\=]*clip_id=(\d+)[&'"]?! ) {
             $out .= 'vid="'.$1.'" source="vimeo" ';
@@ -140,7 +140,7 @@ sub _expand_tag {
             $out .= 'vid="'.$1.'" source="rutube" ';
         } elsif ($code =~ m!=["']?http://static\.video\.yandex\.ru/([\d\w\/\-\_\.]+)['"]?!) {
             $out .= 'vid="'.$1.'" source="yandex" '; 
-        } elsif ($code =~ m!http://img\.mail\.ru.+value=["']?movieSrc=([\w\d\/\_\-\.]+)["']?!) {
+        } elsif ($code =~ m!http://img\.mail\.ru.+movieSrc=([\w\d\/\_\-\.]+)["']?!) {
             $out .= 'vid="'.$1.'" source="mail.ru" ';
         }
 
