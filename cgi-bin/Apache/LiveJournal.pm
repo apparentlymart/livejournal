@@ -363,7 +363,7 @@ sub trans
                 return LJ::Request::REDIRECT;
             }
 
-            #return $result; 
+            return LJ::Request::OK;
         } );
         return LJ::Request::OK;
     }
