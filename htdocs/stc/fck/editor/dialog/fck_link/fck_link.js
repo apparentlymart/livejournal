@@ -79,253 +79,233 @@ var oParser = new Object() ;
 
 // This method simply returns the two inputs in numerical order. You can even
 // provide strings, as the method would parseInt() the values.
-oParser.SortNumerical = function(a, b)
-{
-	return parseInt( a, 10 ) - parseInt( b, 10 ) ;
-}
+oParser.SortNumerical = function(a, b){
+	return parseInt(a, 10) - parseInt(b, 10);
+};
 
-oParser.ParseEMailParams = function(sParams)
-{
+oParser.ParseEMailParams = function(sParams){
 	// Initialize the oEMailParams object.
-	var oEMailParams = new Object() ;
-	oEMailParams.Subject = '' ;
-	oEMailParams.Body = '' ;
+	var oEMailParams = new Object();
+	oEMailParams.Subject = '';
+	oEMailParams.Body = '';
 
-	var aMatch = sParams.match( /(^|^\?|&)subject=([^&]+)/i ) ;
-	if ( aMatch ) oEMailParams.Subject = decodeURIComponent( aMatch[2] ) ;
+	var aMatch = sParams.match(/(^|^\?|&)subject=([^&]+)/i);
+	if(aMatch) oEMailParams.Subject = decodeURIComponent(aMatch[2]);
 
-	aMatch = sParams.match( /(^|^\?|&)body=([^&]+)/i ) ;
-	if ( aMatch ) oEMailParams.Body = decodeURIComponent( aMatch[2] ) ;
+	aMatch = sParams.match(/(^|^\?|&)body=([^&]+)/i);
+	if(aMatch) oEMailParams.Body = decodeURIComponent(aMatch[2]);
 
-	return oEMailParams ;
-}
+	return oEMailParams;
+};
 
 // This method returns either an object containing the email info, or FALSE
 // if the parameter is not an email link.
-oParser.ParseEMailUri = function( sUrl )
-{
+oParser.ParseEMailUri = function(sUrl){
 	// Initializes the EMailInfo object.
-	var oEMailInfo = new Object() ;
-	oEMailInfo.Address = '' ;
-	oEMailInfo.Subject = '' ;
-	oEMailInfo.Body = '' ;
+	var oEMailInfo = new Object();
+	oEMailInfo.Address = '';
+	oEMailInfo.Subject = '';
+	oEMailInfo.Body = '';
 
-	var aLinkInfo = sUrl.match( /^(\w+):(.*)$/ ) ;
-	if ( aLinkInfo && aLinkInfo[1] == 'mailto' )
-	{
+	var aLinkInfo = sUrl.match(/^(\w+):(.*)$/);
+	if(aLinkInfo && aLinkInfo[1] == 'mailto'){
 		// This seems to be an unprotected email link.
-		var aParts = aLinkInfo[2].match( /^([^\?]+)\??(.+)?/ ) ;
-		if ( aParts )
-		{
+		var aParts = aLinkInfo[2].match(/^([^\?]+)\??(.+)?/);
+		if(aParts){
 			// Set the e-mail address.
-			oEMailInfo.Address = aParts[1] ;
+			oEMailInfo.Address = aParts[1];
 
 			// Look for the optional e-mail parameters.
-			if ( aParts[2] )
-			{
-				var oEMailParams = oParser.ParseEMailParams( aParts[2] ) ;
-				oEMailInfo.Subject = oEMailParams.Subject ;
-				oEMailInfo.Body = oEMailParams.Body ;
+			if(aParts[2]){
+				var oEMailParams = oParser.ParseEMailParams(aParts[2]);
+				oEMailInfo.Subject = oEMailParams.Subject;
+				oEMailInfo.Body = oEMailParams.Body;
 			}
 		}
-		return oEMailInfo ;
-	}
-	else if ( aLinkInfo && aLinkInfo[1] == 'javascript' )
-	{
+		return oEMailInfo;
+	} else if(aLinkInfo && aLinkInfo[1] == 'javascript'){
 		// This may be a protected email.
 
 		// Try to match the url against the EMailProtectionFunction.
-		var func = FCKConfig.EMailProtectionFunction ;
-		if ( func != null )
-		{
-			try
-			{
+		var func = FCKConfig.EMailProtectionFunction;
+		if(func != null){
+			try{
 				// Escape special chars.
-				func = func.replace( /([\/^$*+.?()\[\]])/g, '\\$1' ) ;
+				func = func.replace(/([\/^$*+.?()\[\]])/g, '\\$1');
 
 				// Define the possible keys.
-				var keys = new Array('NAME', 'DOMAIN', 'SUBJECT', 'BODY') ;
+				var keys = new Array('NAME', 'DOMAIN', 'SUBJECT', 'BODY');
 
 				// Get the order of the keys (hold them in the array <pos>) and
 				// the function replaced by regular expression patterns.
-				var sFunc = func ;
-				var pos = new Array() ;
-				for ( var i = 0 ; i < keys.length ; i ++ )
-				{
-					var rexp = new RegExp( keys[i] ) ;
-					var p = func.search( rexp ) ;
-					if ( p >= 0 )
-					{
-						sFunc = sFunc.replace( rexp, '\'([^\']*)\'' ) ;
-						pos[pos.length] = p + ':' + keys[i] ;
+				var sFunc = func;
+				var pos = new Array();
+				for(var i = 0; i < keys.length; i ++){
+					var rexp = new RegExp(keys[i]);
+					var p = func.search(rexp);
+					if(p >= 0){
+						sFunc = sFunc.replace(rexp, '\'([^\']*)\'');
+						pos[pos.length] = p + ':' + keys[i];
 					}
 				}
 
 				// Sort the available keys.
-				pos.sort( oParser.SortNumerical ) ;
+				pos.sort(oParser.SortNumerical);
 
 				// Replace the excaped single quotes in the url, such they do
 				// not affect the regexp afterwards.
-				aLinkInfo[2] = aLinkInfo[2].replace( /\\'/g, '###SINGLE_QUOTE###' ) ;
+				aLinkInfo[2] = aLinkInfo[2].replace(/\\'/g, '###SINGLE_QUOTE###');
 
 				// Create the regexp and execute it.
-				var rFunc = new RegExp( '^' + sFunc + '$' ) ;
-				var aMatch = rFunc.exec( aLinkInfo[2] ) ;
-				if ( aMatch )
-				{
+				var rFunc = new RegExp('^' + sFunc + '$');
+				var aMatch = rFunc.exec(aLinkInfo[2]);
+				if(aMatch){
 					var aInfo = new Array();
-					for ( var i = 1 ; i < aMatch.length ; i ++ )
-					{
-						var k = pos[i-1].match(/^\d+:(.+)$/) ;
-						aInfo[k[1]] = aMatch[i].replace(/###SINGLE_QUOTE###/g, '\'') ;
+					for(var i = 1; i < aMatch.length; i ++){
+						var k = pos[i - 1].match(/^\d+:(.+)$/);
+						aInfo[k[1]] = aMatch[i].replace(/###SINGLE_QUOTE###/g, '\'');
 					}
 
 					// Fill the EMailInfo object that will be returned
-					oEMailInfo.Address = aInfo['NAME'] + '@' + aInfo['DOMAIN'] ;
-					oEMailInfo.Subject = decodeURIComponent( aInfo['SUBJECT'] ) ;
-					oEMailInfo.Body = decodeURIComponent( aInfo['BODY'] ) ;
+					oEMailInfo.Address = aInfo['NAME'] + '@' + aInfo['DOMAIN'];
+					oEMailInfo.Subject = decodeURIComponent(aInfo['SUBJECT']);
+					oEMailInfo.Body = decodeURIComponent(aInfo['BODY']);
 
-					return oEMailInfo ;
+					return oEMailInfo;
 				}
-			}
-			catch (e)
-			{
+			} catch (e){
 			}
 		}
 
 		// Try to match the email against the encode protection.
-		var aMatch = aLinkInfo[2].match( /^(?:void\()?location\.href='mailto:'\+(String\.fromCharCode\([\d,]+\))\+'(.*)'\)?$/ ) ;
-		if ( aMatch )
-		{
+		var aMatch = aLinkInfo[2].match(/^(?:void\()?location\.href='mailto:'\+(String\.fromCharCode\([\d,]+\))\+'(.*)'\)?$/);
+		if(aMatch){
 			// The link is encoded
-			oEMailInfo.Address = eval( aMatch[1] ) ;
-			if ( aMatch[2] )
-			{
-				var oEMailParams = oParser.ParseEMailParams( aMatch[2] ) ;
-				oEMailInfo.Subject = oEMailParams.Subject ;
-				oEMailInfo.Body = oEMailParams.Body ;
+			oEMailInfo.Address = eval(aMatch[1]);
+			if(aMatch[2]){
+				var oEMailParams = oParser.ParseEMailParams(aMatch[2]);
+				oEMailInfo.Subject = oEMailParams.Subject;
+				oEMailInfo.Body = oEMailParams.Body;
 			}
-			return oEMailInfo ;
+			return oEMailInfo;
 		}
 	}
 	return false;
-}
+};
 
-oParser.CreateEMailUri = function( address, subject, body )
-{
+oParser.CreateEMailUri = function(address, subject, body){
 	// Switch for the EMailProtection setting.
-	switch ( FCKConfig.EMailProtection )
-	{
+	switch(FCKConfig.EMailProtection){
 		case 'function' :
-			var func = FCKConfig.EMailProtectionFunction ;
-			if ( func == null )
-			{
-				if ( FCKConfig.Debug )
-				{
-					alert('EMailProtection alert!\nNo function defined. Please set "FCKConfig.EMailProtectionFunction"') ;
+			var func = FCKConfig.EMailProtectionFunction;
+			if(func == null){
+				if(FCKConfig.Debug){
+					alert('EMailProtection alert!\nNo function defined. Please set "FCKConfig.EMailProtectionFunction"');
 				}
 				return '';
 			}
 
 			// Split the email address into name and domain parts.
-			var aAddressParts = address.split( '@', 2 ) ;
-			if ( aAddressParts[1] == undefined )
-			{
-				aAddressParts[1] = '' ;
+			var aAddressParts = address.split('@', 2);
+			if(aAddressParts[1] == undefined){
+				aAddressParts[1] = '';
 			}
 
 			// Replace the keys by their values (embedded in single quotes).
-			func = func.replace(/NAME/g, "'" + aAddressParts[0].replace(/'/g, '\\\'') + "'") ;
-			func = func.replace(/DOMAIN/g, "'" + aAddressParts[1].replace(/'/g, '\\\'') + "'") ;
-			func = func.replace(/SUBJECT/g, "'" + encodeURIComponent( subject ).replace(/'/g, '\\\'') + "'") ;
-			func = func.replace(/BODY/g, "'" + encodeURIComponent( body ).replace(/'/g, '\\\'') + "'") ;
+			func = func.replace(/NAME/g, "'" + aAddressParts[0].replace(/'/g, '\\\'') + "'");
+			func = func.replace(/DOMAIN/g, "'" + aAddressParts[1].replace(/'/g, '\\\'') + "'");
+			func = func.replace(/SUBJECT/g, "'" + encodeURIComponent(subject).replace(/'/g, '\\\'') + "'");
+			func = func.replace(/BODY/g, "'" + encodeURIComponent(body).replace(/'/g, '\\\'') + "'");
 
-			return 'javascript:' + func ;
+			return 'javascript:' + func;
 
 		case 'encode' :
-			var aParams = [] ;
-			var aAddressCode = [] ;
+			var aParams = [];
+			var aAddressCode = [];
 
-			if ( subject.length > 0 )
-				aParams.push( 'subject='+ encodeURIComponent( subject ) ) ;
-			if ( body.length > 0 )
-				aParams.push( 'body=' + encodeURIComponent( body ) ) ;
-			for ( var i = 0 ; i < address.length ; i++ )
-				aAddressCode.push( address.charCodeAt( i ) ) ;
+			if(subject.length > 0)
+				aParams.push('subject=' + encodeURIComponent(subject));
+			if(body.length > 0)
+				aParams.push('body=' + encodeURIComponent(body));
+			for(var i = 0; i < address.length; i++)
+				aAddressCode.push(address.charCodeAt(i));
 
-			return 'javascript:void(location.href=\'mailto:\'+String.fromCharCode(' + aAddressCode.join( ',' ) + ')+\'?' + aParams.join( '&' ) + '\')' ;
+			return 'javascript:void(location.href=\'mailto:\'+String.fromCharCode(' + aAddressCode.join(',') + ')+\'?' + aParams.join('&') + '\')';
 	}
 
 	// EMailProtection 'none'
 
-	var sBaseUri = 'mailto:' + address ;
+	var sBaseUri = 'mailto:' + address;
 
-	var sParams = '' ;
+	var sParams = '';
 
-	if ( subject.length > 0 )
-		sParams = '?subject=' + encodeURIComponent( subject ) ;
+	if(subject.length > 0)
+		sParams = '?subject=' + encodeURIComponent(subject);
 
-	if ( body.length > 0 )
-	{
-		sParams += ( sParams.length == 0 ? '?' : '&' ) ;
-		sParams += 'body=' + encodeURIComponent( body ) ;
+	if(body.length > 0){
+		sParams += ( sParams.length == 0 ? '?' : '&' );
+		sParams += 'body=' + encodeURIComponent(body);
 	}
 
-	return sBaseUri + sParams ;
-}
+	return sBaseUri + sParams;
+};
+var oLink;
+function onLoad(){
 
-//#### Initialization Code
+	//#### Initialization Code
 
-// oLink: The actual selected link in the editor.
-var oLink = dialog.Selection.GetSelection().MoveToAncestorNode( 'A' ) ;
-if ( oLink )
-	FCK.Selection.SelectNode( oLink ) ;
-
-window.onload = function()
-{
+	// oLink: The actual selected link in the editor.
+	oLink = dialog.Selection.GetSelection().MoveToAncestorNode('A');
+	if(oLink)
+		FCK.Selection.SelectNode(oLink);
+	
 	// Translate the dialog box texts.
-	oEditor.FCKLanguageManager.TranslatePage(document) ;
+	oEditor.FCKLanguageManager.TranslatePage(document);
 
 	// Fill the Anchor Names and Ids combos.
-	LoadAnchorNamesAndIds() ;
+	LoadAnchorNamesAndIds();
 
 	// Load the selected link information (if any).
-	LoadSelection() ;
+	LoadSelection();
 
 	// Update the dialog box.
-	SetLinkType( GetE('cmbLinkType').value ) ;
+	SetLinkType(GetE('cmbLinkType').value);
 
 	// Show/Hide the "Browse Server" button.
-	GetE('divBrowseServer').style.display = FCKConfig.LinkBrowser ? '' : 'none' ;
+	GetE('divBrowseServer').style.display = FCKConfig.LinkBrowser ? '' : 'none';
 
 	// Show the initial dialog content.
-	GetE('divInfo').style.display = '' ;
+	GetE('divInfo').style.display = '';
 
 	// Set the actual uploader URL.
-	if ( FCKConfig.LinkUpload )
-		GetE('frmUpload').action = FCKConfig.LinkUploadURL ;
+	if(FCKConfig.LinkUpload)
+		GetE('frmUpload').action = FCKConfig.LinkUploadURL;
 
 	// Set the default target (from configuration).
-	SetDefaultTarget() ;
+	SetDefaultTarget();
 
 	// Activate the "OK" button.
-	dialog.SetOkButton( true ) ;
+	dialog.SetOkButton(true);
 
 	// Select the first field.
-	switch( GetE('cmbLinkType').value )
-	{
+	switch(GetE('cmbLinkType').value){
 		case 'url' :
-			SelectField( 'txtUrl' ) ;
-			break ;
+			SelectField('txtUrl');
+			break;
 		case 'email' :
-			SelectField( 'txtEMailAddress' ) ;
-			break ;
+			SelectField('txtEMailAddress');
+			break;
 		case 'anchor' :
-			if ( GetE('divSelAnchor').style.display != 'none' )
-				SelectField( 'cmbAnchorName' ) ;
-			else
-				SelectField( 'cmbLinkType' ) ;
+			if(GetE('divSelAnchor').style.display != 'none')
+				SelectField('cmbAnchorName'); else
+				SelectField('cmbLinkType');
 	}
+}
+
+if(window.addEventListener){
+	window.addEventListener('load', onLoad, false);
+} else {
+	window.attachEvent('onload', onLoad);
 }
 
 var bHasAnchors ;

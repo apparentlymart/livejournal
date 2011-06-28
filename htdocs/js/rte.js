@@ -143,22 +143,15 @@
 			$('switched_rte_on').value = '1';
 
 			if(!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible){
+				CKEDITOR.basePath = statPrefix + '/ck/';
 				var editor = CKEDITOR.replace(textArea, {
 					skin: 'v2',
-					baseHref: statPrefix + '/ck/',
+					baseHref: CKEDITOR.basePath,
 					height: 350
 				});
 
 				editor.on('instanceReady', function(){
 					CKEditor = editor;
-
-					/*$('updateForm').onsubmit = function(){
-						if(switchedRteOn){
-							var html = closeEmptyTags(CKEditor.element.getValue());
-							CKEditor.setData(html);
-						}
-					};*/
-					
 					CKEditor.on('dataReady', LJToHtml);
 				});
 			} else {
