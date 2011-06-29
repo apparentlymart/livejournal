@@ -7665,12 +7665,7 @@ sub get_timezone {
 #
 sub get_daycounts
 {
-    my ($u, $remote, $not_memcache) = @_;
-    # NOTE: $remote not yet used.  one of the oldest LJ shortcomings is that
-    # it's public how many entries users have per-day, even if the entries
-    # are protected.  we'll be fixing that with a new table, but first
-    # we're moving everything to this API.
-
+    my ($u, $remote) = @_;
     my $uid = LJ::want_userid($u) or return undef;
 
     my $memkind = 'p'; # public only, changed below
@@ -7703,15 +7698,30 @@ sub get_daycounts
     ## invalid if there are new entries in journal since that time.
     ##
     my $memkey = [$uid, "dayct2:$uid:$memkind"];
-    unless ($not_memcache) {
-        my $list = LJ::MemCache::get($memkey);
-        if ($list) {
-            my $list_create_time = shift @$list;
-            return $list if $list_create_time >= $u->timeupdate;
+    my $list = LJ::MemCache::get($memkey);
+    if ($list) {
+        my $list_create_time = shift @$list;
+        return $list if $list_create_time >= $u->timeupdate;
+    }
+
+    my $dbcr = LJ::get_cluster_def_reader($u) or return;
+    
+    ## get lock to prevent multiple apache processes to execute the sql below.
+    ## one process runs, the other wait for results 
+    my $release_lock = sub { $dbcr->selectrow_array("SELECT RELEASE_LOCK('$memkey')"); };
+    my $locked = $dbcr->selectrow_array("SELECT GET_LOCK('$memkey',10)");
+    return unless $locked; ## 10 seconds expired
+
+    $list = LJ::MemCache::get($memkey);
+    if ($list) {
+        ## other process may have filled the data while we waited for the lock
+        my $list_create_time = shift @$list;
+        if ($list_create_time >= $u->timeupdate) {
+            $release_lock->();
+            return $list;
         }
     }
 
-    my $dbcr = LJ::get_cluster_def_reader($u) or return undef;
     my $sth = $dbcr->prepare("SELECT year, month, day, COUNT(*) ".
                              "FROM log2 WHERE journalid=? $secwhere GROUP BY 1, 2, 3");
     $sth->execute($uid);
@@ -7722,6 +7732,7 @@ sub get_daycounts
         push @days, [ int($y), int($m), int($d), int($c) ];
     }
     LJ::MemCache::set($memkey, [time, @days]);
+    $release_lock->();
     return \@days;
 }
 
