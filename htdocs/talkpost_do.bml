@@ -291,6 +291,10 @@
                           'replyto'    => $parentid, );
 
         $commentlink = $uri->as_string;
+    # need to return on mobile version
+    } elsif ($POST{'mobile_domain'} =~ qr/^\w\.$LJ::DOMAIN$/) {
+        my $mobile_link = LJ::Mob::Uri->find($talkurl);
+        $commentlink = "http://$POST{'mobile_domain'}$mobile_link/comments#comments";
     } elsif ($POST{'viewing_thread'} eq '') {
         $commentlink = LJ::Talk::talkargs($talkurl, "view=$dtalkid", $stylemine) . "#t$dtalkid";
     } else {

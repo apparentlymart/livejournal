@@ -29,6 +29,7 @@ use Class::Autouse qw(
                       LJ::AccessLogSink::Database
                       LJ::AccessLogSink::DInsertd
                       LJ::AccessLogSink::DBIProfile
+                      LJ::Mob::Router
                       );
 
 # these aren't lazily loaded in the typical call-a-package-method way,
@@ -191,6 +192,28 @@ sub handler
 
         LJ::work_report_start();
     }
+    # try to match controller
+    LJ::Mob::Router::match_controller($r);
+
+
+    if(my $controller = LJ::Request->notes('controller')) {
+        # clear cookie's cache
+        LJ::start_request();
+        my $url = $controller->check_access(LJ::Request->notes('branding_id'), LJ::get_remote_ip);
+        if(LJ::Request->notes('method') eq '__setdomsess') {
+            return redir(LJ::Session->setdomsess_handler())
+        } else {
+            my $session = LJ::Session->session_from_cookies(
+                tried_fast   => 0,
+                redirect_ref => \$LJ::CACHE_REMOTE_BOUNCE_URL,
+                ignore_ip    => 1
+            );
+
+            if( !$session && $LJ::CACHE_REMOTE_BOUNCE_URL ) {       
+                return redir($LJ::CACHE_REMOTE_BOUNCE_URL);
+            }
+        }
+    }      
 
     LJ::Request->set_handlers(PerlTransHandler => [ \&trans ]);
 
@@ -325,6 +348,37 @@ sub trans
     my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check");
     $LJ::IS_BOT_USERAGENT = BotCheck->is_bot( LJ::Request->header_in('User-Agent') );
 
+    # process controller
+    # if defined
+    if( LJ::Request->notes('controller') ) {
+        my @args = split (/\//, LJ::Request->uri);
+        
+        my $response = LJ::Request->notes('controller')->process([@args[1 .. @args-1]]);
+        LJ::Request->handler("perl-script");
+        LJ::Request->set_handlers(PerlHandler => sub {
+            # show error page if controller didn't return response object
+            unless($response) {
+                $response = LJ::Mob::Response::Error->new;
+            }
+
+            # processing result of controller
+            my $result = eval{$response->output};
+
+            return LJ::Request::OK
+                if $response->isa('LJ::Mob::Response::Template');
+
+            if ($response->isa('LJ::Mob::Response::Redirect')) {
+                LJ::Request->send_cookies;
+                LJ::Request->redirect($response->location);
+                LJ::Request->send_http_header();
+                return LJ::Request::REDIRECT;
+            }
+
+            return LJ::Request::OK;
+        } );
+        return LJ::Request::OK;
+    }
+
     my $bml_handler = sub {
         my $filename = shift;
 
@@ -437,10 +491,18 @@ sub trans
     # see if we should setup a minimal scheme based on the initial part of the
     # user-agent string; FIXME: maybe this should do more than just look at the
     # initial letters?
+
     if (my $ua = LJ::Request->header_in('User-Agent')) {
-        if (($ua =~ /^([a-z]+)/i) && $LJ::MINIMAL_USERAGENT{$1}) {
+        if ( Apache::WURFL->is_mobile && $BML::COOKIE{fullversion} ne 'yes' 
+            #($ua =~ /^([a-z]+)/i) && $LJ::MINIMAL_USERAGENT{$1}
+           ) {
             LJ::Request->notes('use_minimal_scheme' => 1);
             LJ::Request->notes('bml_use_scheme' => $LJ::MINIMAL_BML_SCHEME);
+
+            my $mobile_url = LJ::Mob::Uri->find("http://".LJ::Request->hostname.LJ::Request->uri);
+
+            return redir("http://m.$LJ::DOMAIN$mobile_url")
+                if $mobile_url;
         }
     }
 
