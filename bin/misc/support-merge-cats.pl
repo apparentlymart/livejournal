@@ -358,4 +358,4 @@ bin/misc/support-merge-cats.pl --from entries --to general
 bin/misc/support-merge-cats.pl --from entries --to general --write
 
 # this one prints usage information:
-bin/stat/calculate-recent-logtags.pm --help
+bin/misc/support-merge-cats.pl --help
