@@ -118,10 +118,8 @@ sub _page_head {
 
     $head_content .= LJ::res_includes() . $extra_js;
     LJ::run_hooks( 'head_content', \$head_content );
-    my $calendar_json = LJ::JSON->to_json( LJ::get_calendar_data_for_month($u) );
     $head_content .= qq(<script type='text/javascript'>\n);
     $head_content .= qq(Site = window.Site || {};\n);
-    $head_content .= qq(Site.journal_calendar = $calendar_json;\n);
     $head_content .= qq(</script>\n);
 
     my $get = $opts->{'getargs'};
