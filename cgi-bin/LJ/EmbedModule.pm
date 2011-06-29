@@ -131,8 +131,8 @@ sub _expand_tag {
         my $out=  '<lj-embed id="'. $attrs{id} .'" ';
 
         # LJSUP-8992
-        if ($code =~ m!src=["']?http://www\.youtube\.com/(v|embed)/([\w\d\_\-]+)['"]?!) {
-            $out .= 'vid="'.$2.'" source="youtube" ';
+        if ($code =~ m!src=["']?http://www\.youtube\.com/(?:v|embed)/([\w\d\_\-]+)['"]?!) {
+            $out .= 'vid="'.$1.'" source="youtube" ';
         } elsif ($code =~ m!src=["']?http://player\.vimeo\.com/video/(\d+)[?'"]?! || 
                  $code =~ m!=["']?http://vimeo\.com/moogaloop\.swf\?[\d\w\_\-\&\;\=]*clip_id=(\d+)[&'"]?! ) {
             $out .= 'vid="'.$1.'" source="vimeo" ';
@@ -142,8 +142,12 @@ sub _expand_tag {
             $out .= 'vid="'.$1.'" source="yandex" '; 
         } elsif ($code =~ m!http://img\.mail\.ru.+movieSrc=([\w\d\/\_\-\.]+)["']?!) {
             $out .= 'vid="'.$1.'" source="mail.ru" ';
+        } elsif ($code =~ m!http://(vkontakte\.ru|vk\.com)/video_ext!) {
+            $out .= 'source="'.$1.'" ';
+            my %fields = ($code =~ /(oid|id|hash)=([\dabcdef]+)/gm);
+            $fields{vid} =  delete $fields{id};
+            $out .= $_.'="'.$fields{$_}.'" ' foreach (keys %fields);    
         }
-
         $out .= '/>';
 
         return $out;
