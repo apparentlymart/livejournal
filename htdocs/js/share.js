@@ -168,10 +168,10 @@ window.LJShare.init = function( opts ) {
 * @param String|Node|Jquery collection Node the popup has to be attached to. Default id a:last
 */
 window.LJShare.link = function( opts, node ) {
-	if( opts && opts.id ) {
-		var id = opts.id;
-		delete opts.id;
-		LJShare.link( opts, $( '#' + id ) );
+	if( opts && opts.share_uniq_id ) {
+		var id = opts.share_uniq_id;
+		delete opts.share_uniq_id;
+		LJShare.link( opts, $( '#' + share_uniq_id ) );
 		return;
 	}
 
