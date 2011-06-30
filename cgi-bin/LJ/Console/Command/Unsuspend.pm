@@ -62,6 +62,8 @@ sub execute {
         LJ::statushistory_add($poster, $remote, "unsuspend", $reason)
             unless $journal->equals($poster);
 
+        LJ::run_hooks('editpost', $entry);
+
         return $self->print("Entry " . $entry->url . " unsuspended.");
     }
 

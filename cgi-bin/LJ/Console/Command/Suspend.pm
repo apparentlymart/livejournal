@@ -35,15 +35,15 @@ sub execute {
         return $self->error("Invalid entry.")
             unless $entry->valid;
 
-        # LJSV-723: 
-        # It is currently not possible to suspend a user whose journal is deleted & purged, 
-        # or an entry left by a user whose journal is deleted & purged. 
-        # However, entries made to communities and comments left in other journals by a deleted & purged journal still appear, 
-        # and it is sometimes necessary to disable access to these. 
+        # LJSV-723:
+        # It is currently not possible to suspend a user whose journal is deleted & purged,
+        # or an entry left by a user whose journal is deleted & purged.
+        # However, entries made to communities and comments left in other journals by a deleted & purged journal still appear,
+        # and it is sometimes necessary to disable access to these.
         # Suspend functionality should be changed to allow Abuse to disable access to these journals & content.
-        # 
+        #
         # So do not check $poster status.
-        # 
+        #
         return $self->error("Journal is purged; cannot suspend entry.")
             if $journal->is_expunged;
 
@@ -57,6 +57,8 @@ sub execute {
         LJ::statushistory_add($journal, $remote, "suspend", $reason);
         LJ::statushistory_add($poster, $remote, "suspend", $reason)
             unless $journal->equals($poster);
+
+        LJ::run_hooks('editpost', $entry,);
 
         return $self->print("Entry " . $entry->url . " suspended.");
     }
@@ -103,7 +105,7 @@ sub execute {
         }
 
         my $err;
-        $self->error($err) 
+        $self->error($err)
             unless $u->set_suspended($remote, $reason, \$err);
 
         my $job = TheSchwartz::Job->new_from_array("LJ::Worker::MarkSuspendedEntries::mark", { userid => $u->userid });
