@@ -299,7 +299,7 @@
                 display: none !important;
             }
             </style>
-        } . "<link rel='stylesheet' href='" . LJ::stat_src_to_url('/lj_base.css') . "type='text/css' />";
+        };# . "<link rel='stylesheet' href='" . LJ::stat_src_to_url('/lj_base.css') . "' type='text/css' />";
 
         $p->{'entry'} = $s2entry;
 
