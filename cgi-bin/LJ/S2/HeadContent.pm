@@ -135,6 +135,35 @@ sub _page_head {
     if ( $need_block_robots || $self->{type} eq 'FriendsPage' ) {
         $head_content .= LJ::robot_meta_tags();
     }
+    return $head_content;
+}
+
+sub _entry_page_head {
+    my ($self) = @_;
+
+    my $u = $self->{u};
+    my $remote = $self->{remote};
+    my $opts = $self->{opts} || {};
+
+    my $head_content = $opts->{entry_cmtinfo} || '';
+
+    if ( $opts->{entry_metadata} ) {
+        my %meta = %{ $opts->{entry_metadata} };
+        $head_content .= qq(<meta property="og:title" name="title" );
+        $head_content .= qq(content=");
+        $head_content .= LJ::ehtml( $meta{'title'} );
+        $head_content .= qq(" />\n);
+
+        $head_content .= qq(<meta property="og:description" );
+        $head_content .= qq(name="description" content=");
+        $head_content .= LJ::ehtml( $meta{'description'} );
+        $head_content .= qq(" />\n);
+
+        $head_content .= qq(<meta property="og:image" );
+        $head_content .= qq(content=");
+        $head_content .= LJ::ehtml( $meta{'image'} );
+        $head_content .= qq( " />\n);
+    }
 
     if ( $opts->{dont_show_nav_strip} ) {
         $head_content .= _get_html_dont_show_navstrip();
@@ -155,37 +184,6 @@ sub _get_html_dont_show_navstrip {
                     display: none !important;
                 }
             </style>};
-}
-
-sub _entry_page_head {
-    my ($self) = @_;
-
-    my $u = $self->{u};
-    my $remote = $self->{remote};
-    my $opts = $self->{opts} || {};
-
-    my $head_content = '';
-
-    $head_content .= $opts->{entry_cmtinfo};
-
-    if ( $opts->{entry_metadata} ) {
-        my %meta = %{ $opts->{entry_metadata} };
-        $head_content .= qq(<meta property="og:title" name="title" );
-        $head_content .= qq(content=");
-        $head_content .= LJ::ehtml( $meta{'title'} );
-        $head_content .= qq(" />\n);
-
-        $head_content .= qq(<meta property="og:description" );
-        $head_content .= qq(name="description" content=");
-        $head_content .= LJ::ehtml( $meta{'description'} );
-        $head_content .= qq(" />\n);
-
-        $head_content .= qq(<meta property="og:image" );
-        $head_content .= qq(content=");
-        $head_content .= LJ::ehtml( $meta{'image'} );
-        $head_content .= qq( " />\n);
-    }
-    return $head_content;
 }
 
 sub _day_page_head {
