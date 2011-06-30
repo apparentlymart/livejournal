@@ -171,7 +171,7 @@ window.LJShare.link = function( opts, node ) {
 	if( opts && opts.share_uniq_id ) {
 		var id = opts.share_uniq_id;
 		delete opts.share_uniq_id;
-		LJShare.link( opts, $( '#' + share_uniq_id ) );
+		LJShare.link( opts, $( '#' + id ) );
 		return;
 	}
 
