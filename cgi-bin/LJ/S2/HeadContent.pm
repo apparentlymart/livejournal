@@ -62,7 +62,7 @@ sub _page_head {
 
         $head_content .= qq(<meta http-equiv="Content-Type" );
         $head_content .= qq(content="text/html;);
-        $head_content .= qq(charset=$opts->{'saycharset'}" />\n);
+        $head_content .= qq(charset=$charset" />\n);
     }
 
     if ( LJ::are_hooks('s2_head_content_extra') ) {
