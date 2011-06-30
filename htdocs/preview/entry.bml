@@ -230,6 +230,10 @@
         $p->{'comments'} = [];
         $p->{'comment_pages'} = undef;
 
+        $p->{head_content}->set_object_type( $p->{_type} );
+        # Don't show the navigation strip
+        $p->{head_content}->set_options( { dont_show_nav_strip => 'UNUSED' } );
+
         my $userlite_journal = LJ::S2::UserLite($u);
         my $userlite_poster  = LJ::S2::UserLite($up);
 
@@ -279,31 +283,7 @@
 
         $p->{'multiform_on'} = 0;
 
-        if ($u->should_block_robots) {
-            $p->{'head_content'} .= LJ::robot_meta_tags();
-        }
-        if ($LJ::UNICODE) {
-            $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
-        }
-
-        # Don't show the navigation strip
-        $p->{'head_content'} .= qq{
-            <style type="text/css">
-            html body {
-                padding-top: 0 !important;
-            }
-            #lj_controlstrip,
-            .w-cs,
-            .b-message-mobile,
-            .appwidget-sitemessages {
-                display: none !important;
-            }
-            </style>
-        };# . "<link rel='stylesheet' href='" . LJ::stat_src_to_url('/lj_base.css') . "' type='text/css' />";
-
         $p->{'entry'} = $s2entry;
-
-        my $userlite_journal = LJ::S2::UserLite($u);
 
         $p->{'comments'} = [];
 

@@ -136,7 +136,25 @@ sub _page_head {
         $head_content .= LJ::robot_meta_tags();
     }
 
+    if ( $opts->{dont_show_nav_strip} ) {
+        $head_content .= _get_html_dont_show_navstrip();
+    }
     return $head_content;
+}
+
+sub _get_html_dont_show_navstrip {
+
+    return qq{<style type="text/css">
+                html body {
+                    padding-top: 0 !important;
+                }
+                #lj_controlstrip,
+                .w-cs,
+                .b-message-mobile,
+                .appwidget-sitemessages {
+                    display: none !important;
+                }
+            </style>};
 }
 
 sub _entry_page_head {
