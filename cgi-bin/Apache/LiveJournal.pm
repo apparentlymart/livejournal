@@ -506,6 +506,11 @@ sub trans
         }
     }
 
+    if(LJ::Request->post_param('mobile_domain')) {
+        LJ::Request->notes('use_minimal_scheme' => 1);
+        LJ::Request->notes('bml_use_scheme' => $LJ::MINIMAL_BML_SCHEME)
+    }
+
     # Redirect to mobile version if needed.
     my $new_url = Apache::WURFL->redirect4mobile( host => $host, uri => $uri, );
     return redir($new_url, LJ::Request::HTTP_MOVED_PERMANENTLY) if $new_url;
