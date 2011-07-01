@@ -36,7 +36,8 @@ LiveJournal.initPage = function () {
     LiveJournal.initInboxUpdate();
 
 	//check ljuniq cookie and create if needed
-	LiveJournal.checkLjUniq();
+// Now called from PageStats/Omniture.pm
+//	LiveJournal.checkLjUniq();
 
     // run other hooks
     LiveJournal.run_hook("page_load");
