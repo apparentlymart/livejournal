@@ -25,7 +25,7 @@ sub option {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
 
-    my $commentscreening = $class->get_arg($args, "commentscreening") || $u->prop("opt_whoscreened");
+    my $commentscreening = $class->get_arg($args, "commentscreening") || $u->prop("opt_whoscreened") || '';
     if ($commentscreening eq 'L') {
         $u->set_prop( opt_whoscreened => 'R' );
         $commentscreening = 'R';
