@@ -139,7 +139,7 @@
 
 	window.useRichText = function (textArea, statPrefix){
 		if(!switchedRteOn){
-			switchedRteOn = true;
+			window.switchedRteOn = true;
 			$('switched_rte_on').value = '1';
 
 			if(!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible){
@@ -152,6 +152,13 @@
 
 				editor.on('instanceReady', function(){
 					CKEditor = editor;
+
+					$('updateForm').onsubmit = function(){
+						if(switchedRteOn){
+							this['draft'].value = CKEditor.getData();
+						}
+					};
+
 					CKEditor.on('dataReady', LJToHtml);
 				});
 			} else {
@@ -173,7 +180,7 @@
 
 	window.usePlainText = function(textArea){
 		if(switchedRteOn){
-			switchedRteOn = false;
+			window.switchedRteOn = false;
 			$('switched_rte_on').value = '0';
 
 			if(CKEditor){

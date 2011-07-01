@@ -9,10 +9,11 @@ CKEDITOR.editorConfig = function(config){
 	if(top.Site.media_embed_enabled){
 		ljItems.push('LJEmbedLink');
 	}
-	ljItems.push('LJPollLink', 'LJCutLink', 'LJCut', 'Table');
+	ljItems.push('LJPollLink', 'LJCutLink', 'LJCut', 'LJLike', 'Table');
 
 	config.language = 'ru';
 	config.autoParagraph = false;
+	config.autoUpdateElement = false;
 	config.customConfig = '';
 	config.docType = '<!DOCTYPE html>';
 	config.baseHref = '';
