@@ -3,6 +3,7 @@ package LJ::Event::Birthday;
 use strict;
 use base 'LJ::Event';
 use LJ::WishList;
+use LJ::Client::BitLy;
 use Carp qw(croak);
 
 sub new {
@@ -40,7 +41,7 @@ sub as_string {
     my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
     my $tinyurl = $self->bdayuser->journal_base;
-    $tinyurl = LJ::API::BitLy->shorten($tinyurl);
+    $tinyurl = LJ::Client::BitLy->shorten($tinyurl);
     undef $tinyurl if $tinyurl =~ /^500/;
 
 # [[user]]'s birthday is on [[bday]]!
