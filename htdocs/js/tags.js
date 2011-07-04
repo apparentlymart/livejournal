@@ -199,10 +199,10 @@ EditTag =
 			tagfield = $('tagfield'),
 			cur_tags = tagfield.value.split(/,\s*/),
 			i, tag;
-		
+
+		var index,
+			top = this.scrollTop; // jump to last element in FF 3.6
 		if (e.type === 'keyup') {
-			var index,
-				top = this.scrollTop; // jump to last element in FF 3.6
 			
 			for (i = -1; selected[++i];) {
 				cache_list[selected[i]].selected = false;
@@ -224,8 +224,6 @@ EditTag =
 				}
 			}
 		} else {
-			var index,
-				top = this.scrollTop; // jump to last element in FF 3.6
 			
 			i = cur_tags.length;
 			while (i--) {
@@ -259,4 +257,4 @@ EditTag =
 		selected = $list.val();
 		EditTag.last_val = selected && selected.join(',');
 	}
-}
+};
