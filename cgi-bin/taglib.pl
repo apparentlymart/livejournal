@@ -287,6 +287,10 @@ sub filter_accessible_tags {
             }
 
             delete $tags_info->{$tagid} unless $accessible;
+        } elsif ( $sec eq 'private' ) {
+            delete $tags_info->{$tagid};
+        } else {
+            die "unknown security level $sec";
         }
     }
 
