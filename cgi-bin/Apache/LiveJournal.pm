@@ -351,6 +351,14 @@ sub trans
     # process controller
     # if defined
     if( LJ::Request->notes('controller') ) {
+
+        my $cookie_str = LJ::Request->header_in("Cookie");
+        if ($cookie_str =~ /\blangpref=(\w{2,10})\/\d+\b/) { # simplified code from BML::decide_language
+            my $lang = $1;
+            # Attention! LJ::Lang::ml uses BML::ml in web context, so we must do full BML language initialization
+            BML::set_language($lang, \&LJ::Lang::get_text);
+        }
+
         my @args = split (/\//, LJ::Request->uri);
         
         my $response = LJ::Request->notes('controller')->process([@args[1 .. @args-1]]);
