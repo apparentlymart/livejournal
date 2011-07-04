@@ -66,9 +66,8 @@ sub mysqldate_to_ljtime {
 
     $mon -= 1;
     return undef if $mon < 0;
-    
-    return "$d " . LJ::Lang::ml( LJ::Lang::month_long_genitive_langcode( $mon )) . ' ' . LJ::Lang::ml('time.preposition') . " $h:$min";    
-    
+
+    return "$d " . LJ::Lang::ml( LJ::Lang::month_long_genitive_langcode( $mon )) . ' ' . LJ::Lang::ml('time.preposition') . " $h:$min";
 }
 
 sub mysqldate_to_time {

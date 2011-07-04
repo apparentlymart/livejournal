@@ -144,7 +144,7 @@ sub make_journal
     return $page if $page && ref $page ne 'HASH';
 
     s2_run($r, $ctx, $opts, $entry, $page);
-    
+
     if (ref $opts->{'errors'} eq "ARRAY" && @{$opts->{'errors'}}) {
         return join('',
                     "Errors occurred processing this page:<ul>",
@@ -401,7 +401,7 @@ sub load_layers {
         my $sth = $db->prepare("SELECT s2lid, compdata, comptime FROM s2compiled2 WHERE $where");
         $sth->execute;
         die "can't get layer from DB " if $sth->err;
-        
+
         # iterate over data, memcaching as we go
         while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
             LJ::text_uncompress(\$comp);
@@ -493,12 +493,12 @@ sub b2lid_remap
 sub get_layers_of_user
 {
     my ($u, $is_system, $infokeys) = @_;
-    
+
     my $subst_user = LJ::run_hook("substitute_s2_layers_user", $u);
     if (defined $subst_user && LJ::isu($subst_user)) {
         $u = $subst_user;
     }
-    
+
     my $userid = LJ::want_userid($u);
     return undef unless $userid;
     undef $u unless LJ::isu($u);
@@ -673,7 +673,7 @@ sub s2_context
 
     my $u = $opts->{u} || LJ::get_active_journal();
     my $remote = LJ::get_remote();
-    
+
     my $style_u = $opts->{style_u} || $u;
 
     # but it doesn't matter if we're using the minimal style ...
@@ -707,17 +707,17 @@ sub s2_context
 
     if($remote) {
         my $bl = $remote->prop('browselang');
-        
+
         if($bl) {
             my %journal_style = LJ::S2::get_style($u, "verify");
-            
+
             unless ($journal_style{i18nc}) {
                 my $style = LJ::Customize->save_language($u, $bl, 'return' => 1);
 
                 $style{i18nc} = $style->{i18nc} if ($style->{i18nc});
                 $style{i18n} = $style->{i18n}   if ($style->{i18n});
             }
-        }   
+        }
     }
 
     my @layers;
@@ -2247,7 +2247,7 @@ sub nth_entry_seen {
     my $e = shift;
     my $key = "$e->{'journal'}->{'username'}-$e->{'itemid'}";
     my $ref = $LJ::REQ_GLOBAL{'nth_entry_keys'};
-    
+
     if (exists $ref->{$key}) {
         return $ref->{$key};
     }
@@ -2354,6 +2354,11 @@ sub striphtml
 
     $s =~ s/<.*?>//g;
     return $s;
+}
+
+sub html_get_img_urls {
+    my ( $ctx, $s ) = @_;
+    return LJ::html_get_img_urls( \$s );
 }
 
 sub ehtml
@@ -2523,10 +2528,10 @@ sub viewer_sees_control_strip
 
 sub _get_ad_box_args {
     my $ctx = shift;
-    
+
     my $journalu = LJ::load_userid(LJ::Request->notes("journalid"));
     return unless $journalu;
-    
+
     my $colors = _get_colors_for_ad($ctx);
 
     my $qotd = 0;
@@ -2534,7 +2539,7 @@ sub _get_ad_box_args {
         my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
         $qotd = $entry->prop("qotdid") if $entry;
     }
- 
+
     return {
         journalu => $journalu,
         pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
@@ -2544,7 +2549,7 @@ sub _get_ad_box_args {
         interests_extra => $qotd ? { qotd => $qotd } : {},
         s2_view  => $LJ::S2::CURR_PAGE->{'view'},
         total_posts_number => scalar( @{$LJ::S2::CURR_PAGE->{'entries'} || []}),
-    };    
+    };
 
 }
 
@@ -2589,7 +2594,7 @@ sub viewer_sees_ebox {
 
 sub _get_Entry_ebox_args {
     my ($ctx, $this) = @_;
-    
+
     my $journalu = LJ::load_userid(LJ::Request->notes("journalid"));
     return unless $journalu;
 
@@ -2598,9 +2603,9 @@ sub _get_Entry_ebox_args {
     my $total_entry_ct = @$entries;
 
     $LJ::REQ_GLOBAL{ebox_count} = $LJ::REQ_GLOBAL{ebox_count} > 1 ? $LJ::REQ_GLOBAL{ebox_count} : 1;
-    
+
     #return unless (LJ::S2::current_box_type($journalu) eq "ebox");
-    
+
     my $colors = _get_colors_for_ad($ctx);
     my $pubtext;
     my @tag_names;
@@ -2624,7 +2629,7 @@ sub _get_Entry_ebox_args {
     }
 
     return {
-        location    => 's2.ebox',       
+        location    => 's2.ebox',
         journalu    => $journalu,
         pubtext     => $pubtext,
         tags        => \@tag_names,
@@ -2635,7 +2640,7 @@ sub _get_Entry_ebox_args {
         s2_view        => $LJ::S2::CURR_PAGE->{view},
         current_post_number => LJ::S2::nth_entry_seen($this),
         total_posts_number  => scalar( @{$LJ::S2::CURR_PAGE->{'entries'} || []} ),
-    }; 
+    };
 }
 
 sub Entry__viewer_sees_ebox {
@@ -3088,7 +3093,7 @@ sub _Comment__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 24, 24));
     }
 
-    
+
     if (($key eq "watch_thread" || $key eq "unwatch_thread" || $key eq "watching_parent") && ($LJ::DISABLED{'spam_button'} || $comment->{state} ne 'B')) {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
@@ -3184,8 +3189,8 @@ sub _Comment__get_link
 
     if ($key eq "expand_comments" or $key eq "collapse_comments") {
         return $null_link unless LJ::run_hook('show_thread_expander');
-        ## show "Expand" or "Collapse" link only if 
-        ## 1) the comment is collapsed 
+        ## show "Expand" or "Collapse" link only if
+        ## 1) the comment is collapsed
         ## 2) any of comment's children are collapsed
         my $show_link;
         if (!$this->{full} and !$this->{deleted}) {
@@ -3243,7 +3248,7 @@ sub _print_quickreply_link
     my ($ctx, $this, $opts) = @_;
 
     $opts ||= {};
-    
+
     # one of these had better work
     my $replyurl =  $opts->{'reply_url'} || $this->{'reply_url'} || $this->{'entry'}->{'comments'}->{'post_url'};
 
@@ -3348,7 +3353,7 @@ sub _print_reply_container
         my $userpic = LJ::ehtml($page->{'_picture_keyword'}) || "";
         my $thread = $page->{'viewing_thread'} + 0 || "";
         my $text_hint = $ctx->[S2::PROPS]->{'comment_form_text_hint'} || '';
-    
+
         $text_hint = LJ::dhtml ($text_hint);
         LJ::CleanHTML::clean(\$text_hint, {
             'linkify' => 1,
@@ -3364,11 +3369,11 @@ sub _print_reply_container
 
         $S2::pout->(
                     LJ::create_qr_div(
-                                      $u, 
-                                      $ditemid, 
-                                      $page->{'_stylemine'} || 0, 
-                                      $userpic, 
-                                      $thread, 
+                                      $u,
+                                      $ditemid,
+                                      $page->{'_stylemine'} || 0,
+                                      $userpic,
+                                      $thread,
                                       $text_hint,
                                      )
                    );
@@ -3447,7 +3452,7 @@ sub Comment__expand_link
 
     my $expand_url = $this->{thread_url};
     $expand_url =~ s/(?=#)/&expand=$banners_off/;
-    
+
     return "<a href='$this->{thread_url}'$title$class onClick=\"Expander.make(this,'$expand_url','$this->{talkid}'); return false;\" rel=\"nofollow\">$text</a>";
 }
 
@@ -3466,7 +3471,7 @@ sub Comment__print_expand_collapse_links
     my $print_expand_link = sub {
         $S2::pout->(
             "<span id='expand_$this->{talkid}'>" .
-                "<a href='$this->{thread_url}' onclick=\"ExpanderEx.make(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_expand</a>" . 
+                "<a href='$this->{thread_url}' onclick=\"ExpanderEx.make(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_expand</a>" .
             "</span>"
         );
     };
@@ -3474,12 +3479,12 @@ sub Comment__print_expand_collapse_links
     my $print_collapse_link = sub {
         $S2::pout->(
             "<span id='collapse_$this->{talkid}'>" .
-                "<a href='$this->{thread_url}' onclick=\"ExpanderEx.collapse(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_collapse</a>" . 
+                "<a href='$this->{thread_url}' onclick=\"ExpanderEx.collapse(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_collapse</a>" .
             "</span>"
         );
     };
 
-    my $show_expand_link = sub { 
+    my $show_expand_link = sub {
         return 1 if !$this->{full} and !$this->{deleted};
         foreach my $c (@{ $this->{replies} }) {
             return 1 if !$c->{full} and !$c->{deleted};
@@ -3562,6 +3567,7 @@ sub Date__date_format
 {
     my ($ctx, $this, $fmt) = @_;
     $fmt ||= "short";
+
     my $c = \$ctx->[S2::SCRATCH]->{'_code_datefmt'}->{$fmt};
     return $$c->($this) if ref $$c eq "CODE";
     if (++$ctx->[S2::SCRATCH]->{'_code_datefmt_count'} > 50) { return "[too_many_fmts]"; }
@@ -3589,16 +3595,36 @@ sub DateTime__time_format
 {
     my ($ctx, $this, $fmt) = @_;
     $fmt ||= "short";
+
+    if ($fmt eq 'genitive') {
+        return LJ::TimeUtil->mysqldate_to_ljtime(
+            join( '-',
+                $this->{'year'},
+                sprintf("%02d", $this->{'month'}),
+                sprintf("%02d", $this->{'day'})
+            )
+          . ' '
+          . join( ':',
+                sprintf("%02d", $this->{'hour'}),
+                sprintf("%02d", $this->{'min'}),
+                sprintf("%02d", $this->{'sec'})
+            )
+        );
+    }
+
     my $c = \$ctx->[S2::SCRATCH]->{'_code_timefmt'}->{$fmt};
     return $$c->($this) if ref $$c eq "CODE";
+
     if (++$ctx->[S2::SCRATCH]->{'_code_timefmt_count'} > 15) { return "[too_many_fmts]"; }
     my $realfmt = $fmt;
+
     if (defined $ctx->[S2::PROPS]->{"lang_fmt_time_$fmt"}) {
         $realfmt = $ctx->[S2::PROPS]->{"lang_fmt_time_$fmt"};
     }
     my @parts = split(/\%\%/, $realfmt);
     my $code = "\$\$c = sub { my \$time = shift; return join('',";
     my $i = 0;
+
     foreach (@parts) {
         if ($i % 2) { $code .= $dt_vars{$_} . ","; }
         else { $_ = LJ::ehtml($_); $code .= "\$parts[$i],"; }
@@ -3677,7 +3703,7 @@ sub EntryLite__get_link
 {
     my ($ctx, $this, $key) = @_;
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
-    
+
     if ($this->{_type} eq 'Entry') {
         return _Entry__get_link($ctx, $this, $key);
     }
@@ -3701,12 +3727,12 @@ sub Entry__formatted_subject {
     # if subject has html-tags - print raw subject
     return $this->{subject}
         if($this->{subject} =~ /[<>]/);
-    
+
     my $class = $attrs->{class} ? " class=\"".LJ::ehtml($attrs->{class})."\" " : '';
     my $style = $attrs->{style} ? " style=\"".LJ::ehtml($attrs->{style})."\" " : '';
-    
+
     return "<a href=\"".$this->{permalink_url}."\"$class$style>".$this->{subject}."</a>";
-    
+
 }
 
 sub EntryLite__get_tags_text
@@ -3740,7 +3766,7 @@ sub _Entry__get_link
     my $entry = LJ::Entry->new($journalu, ditemid => $this->{itemid});
 
     if ($key eq "edit_entry") {
-        return $null_link unless $remote && 
+        return $null_link unless $remote &&
                                     ( LJ::u_equals( $remote, $journalu ) ||
                                       LJ::u_equals( $remote, $posteru ) ||
                                       $remote->can_manage($journalu)
@@ -3852,7 +3878,7 @@ sub _Entry__get_link
                             $ctx->[S2::PROPS]->{"text_flag"},
                             LJ::S2::Image("$LJ::IMGPREFIX/button-flag.gif", 24, 24));
     }
-    
+
     if ($key eq "give_button") {
         return $null_link;
     }
@@ -3956,6 +3982,15 @@ sub EntryLite__print_give_button
 }
 
 *Entry__print_give_button = \&EntryLite__print_give_button;
+
+sub Entry__truncate_text {
+    my ( $ctx, $this, $limit ) = @_;
+
+    return LJ::Text->truncate_to_word_with_ellipsis(
+        'str'   => $this->{'text'},
+        'chars' => $limit || 80,
+    ) . '';
+}
 
 sub Entry__plain_subject
 {
@@ -4132,8 +4167,6 @@ sub Page__print_ad_box {
     $S2::pout->($ad_html) if $ad_html;
 }
 
-#my %approved_widget_classes = map { $_ => $_ } qw (TopEntries TopUsers FaceBookILike PublicStats OnLivejournal MySuperWidget);
-
 sub Page__widget
 {
     my ($ctx, $this, $opts) = @_;
@@ -4227,7 +4260,7 @@ foreach my $class (qw(RecentPage FriendsPage YearPage MonthPage DayPage EntryPag
         ##
         ## Oops, years later after this code was written, an error is found:
         ## the argument string to eval must have an extra \:
-        ##      "*${class}__$func = \\&Page__$func"; 
+        ##      "*${class}__$func = \\&Page__$func";
         ## eval "*${class}__$func = \&Page__$func";
         ##
         ## How did it work all this time?
@@ -4322,6 +4355,75 @@ sub Page__get_latest_month
 *EntryPage__get_latest_month = \&Page__get_latest_month;
 *ReplyPage__get_latest_month = \&Page__get_latest_month;
 
+sub Page__get_last_entries {
+    my ( $ctx, $this, $ljuser, $count ) = @_;
+
+    my $u = LJ::load_user($ljuser);
+    return [] unless $u;
+
+    my $err;
+    my @objs;
+
+    my @items = LJ::get_recent_items({
+        'remote'        => undef,
+        'viewall'       => 0,
+        'viewsome'      => 0,
+        'itemshow'      => $count,
+        'dateformat'    => 'S2',
+        'clusterid'     => $u->{clusterid},
+        'userid'        => $u->{userid},
+        'err'           => \$err,
+        'entry_objects' => \@objs,
+        'load_props'    => 1,
+        'load_text'     => 1,
+        'load_tags'     => 1,
+    });
+
+    die "Can't get recent items of journal $u->{name}: $err" if $err;
+
+    my @ret;
+
+    my $journal_userlite = LJ::S2::UserLite($u);
+    my @posters_userids  = map { $_->{'posterid'} } @items;
+    my $posters_users    = LJ::load_userids( @posters_userids );
+    my %posters_userlite = map { $_ => LJ::S2::UserLite( $posters_users->{$_} ) }
+        keys %$posters_users;
+
+    for my $entry ( @objs ) {
+        my $item = shift @items;
+
+        # userpic
+        my $poster  = $posters_users->{ $entry->posterid };
+        my $pickw   = LJ::Entry->userpic_kw_from_props( $entry->props );
+        my $userpic = LJ::S2::Image_userpic( $poster, 0, $pickw );
+
+        push @ret, LJ::S2::Entry(
+            $u,
+            {
+                'subject'           => clear_entry_subject($entry),
+                'text'              => clear_entry_text( $entry ),
+                'dateparts'         => $item->{'alldatepart'},
+                'system_dateparts'  => $item->{'system_alldatepart'},
+                'security'          => $entry->security,
+                'allowmask'         => $entry->allowmask,
+                'props'             => $entry->{'props'},
+                'itemid'            => $entry->ditemid,
+                'journal'           => $journal_userlite,
+                'poster'            => $posters_userlite{ $entry->posterid },
+                'comments'          => get_comments_info($entry),
+                'tags'              => get_sorted_tags($entry),
+                'userpic'           => $userpic,
+                'permalink_url'     => $entry->url,
+
+                # for now, these are not implemented
+                'new_day'           => 0,
+                'end_day'           => 0,
+        });
+    }
+
+    return \@ret;
+}
+
 # the whole procedure assumes there is no remote
 sub Page__get_entries_by_tags {
     my ( $ctx, $this, $taglist, $mode, $count ) = @_;
@@ -4335,6 +4437,7 @@ sub Page__get_entries_by_tags {
 
     my $tags = LJ::Tags::get_usertags( $journal, { 'remote' => undef } ) || {};
     my %kwref = map { $tags->{$_}->{'name'} => $_ } keys %$tags;
+
     foreach (@$taglist) {
         push @$tagids, $kwref{$_}
             if $kwref{$_};
@@ -4344,11 +4447,11 @@ sub Page__get_entries_by_tags {
     # this is get_entries_by_tags, after all
     return [] unless $tagids && @$tagids;
 
-    my $order
-        = $journal->is_community || $journal->is_syndicated ? 'logtime' : '';
+    my $order = $journal->is_community || $journal->is_syndicated ? 'logtime' : '';
 
     # load items first
     my @itemids;
+    my @objs;
     my $err;
     my @items = LJ::get_recent_items({
         'clusterid'     => $journal->clusterid,
@@ -4369,93 +4472,26 @@ sub Page__get_entries_by_tags {
         'order'         => $order,
         'itemids'       => \@itemids,
         'err'           => \$err,
+        'entry_objects' => \@objs,
+        'load_tags'     => 1,
+        'load_props'    => 1,
+        'load_text'     => 1,
     });
 
-    # then, load their entryprops, texts, tags, and posters en masse
-    my %logprops = ();
-    LJ::load_log_props2( $journal->userid, \@itemids, \%logprops );
-
-    my $logtext = LJ::get_logtext2($journal, @itemids);
-
-    my $tags = LJ::Tags::get_logtagsmulti( {
-        $journal->clusterid => [ map { [ $journal->userid, $_ ] } @itemids ],
-    } );
-
-    my @posters_userids  = map { $_->{'posterid'} } @items;
-    my $posters_users    = LJ::load_userids( @posters_userids );
+    # then, load their posters en masse
+    my @posters_userids = map { $_->{'posterid'} } @items;
+    my $posters_users   = LJ::load_userids( @posters_userids );
     my %posters_userlite
         = map { $_ => LJ::S2::UserLite( $posters_users->{$_} ) }
           keys %$posters_users;
 
     my $journal_userlite = LJ::S2::UserLite($journal);
 
-    my $journal_cap_maxcomments = $journal->get_cap('maxcomments');
-
     # and convert it to the convenient output format!
     my @ret;
 
     foreach my $item (@items) {
-        my $entry
-            = LJ::Entry->new( $journal, 'jitemid' => $item->{'itemid'} );
-
-        # swallow whatever we preloaded, for easier OO access
-        #
-        # props go first deliberately because handle_prefetched_text depends
-        # on them
-        $entry->handle_prefetched_props( $logprops{ $entry->jitemid } );
-        $entry->handle_prefetched_text( @{ $logtext->{ $entry->jitemid } } );
-
-        # subject and text info
-        my $subject = $entry->subject_raw;
-        LJ::CleanHTML::clean_subject(\$subject);
-
-        my $text = $entry->event_raw;
-        LJ::CleanHTML::clean_event( \$text, {
-            'preformatted'          => $entry->prop('opt_preformatted'),
-            'cuturl'                => $entry->prop('reposted_from') || $entry->url,
-            'entry_url'             => $entry->prop('reposted_from') || $entry->url,
-            'ljcut_disable'         => 0,
-            'journalid'             => $entry->journalid,
-            'posterid'              => $entry->posterid,
-
-            # suspended entries parts are not implemented here for now
-            'suspend_msg'           => '',
-            'unsuspend_supportid'   => 0,
-        } );
-
-        # comments info
-        my $replycount = $entry->prop('replycount');
-
-        my $comments = LJ::S2::CommentInfo({
-            'read_url'      => $entry->url,
-            'post_url'      => $entry->reply_url,
-            'count'         => $replycount,
-            'maxcomments'   =>
-                ( $replycount > $journal_cap_maxcomments ) ? 1 : 0,
-
-            'enabled'       => $entry->comments_shown,
-            'locked'        => !$entry->posting_comments_allowed,
-            'screened'      => 0,
-            'show_readlink' => $entry->comments_shown && $replycount,
-            'show_postlink' => $entry->posting_comments_allowed,
-        });
-
-        # tags
-        my @taglist;
-        my $entry_tags
-            = $tags->{ $journal->userid . ' ' . $entry->jitemid } || {};
-
-        while ( my ( $kwid, $kw ) = each %$entry_tags ) {
-            push @taglist, LJ::S2::Tag( $journal, $kwid => $kw );
-        }
-
-        LJ::run_hooks( 'augment_s2_tag_list',
-            'u'         => $journal,
-            'jitemid'   => $entry->jitemid,
-            'tag_list'  => \@taglist
-        );
-
-        @taglist = sort { $a->{'name'} cmp $b->{'name'} } @taglist;
+        my $entry = shift @objs;
 
         # userpic
         my $poster  = $posters_users->{ $entry->posterid };
@@ -4464,25 +4500,25 @@ sub Page__get_entries_by_tags {
 
         # and now, let's compile it!
         push @ret, LJ::S2::Entry( $journal, {
-            'subject'           => $subject,
-            'text'              => $text,
-            'dateparts'         => $item->{'alldatepart'},
-            'system_dateparts'  => $item->{'system_alldatepart'},
-            'security'          => $entry->security,
-            'allowmask'         => $entry->allowmask,
-            'props'             => $logprops{ $entry->jitemid },
-            'itemid'            => $entry->ditemid,
-            'journal'           => $journal_userlite,
-            'poster'            => $posters_userlite{ $entry->posterid },
-            'comments'          => $comments,
+            'subject'          => clear_entry_subject($entry),
+            'text'             => clear_entry_text( $entry ),
+            'dateparts'        => $item->{'alldatepart'},
+            'system_dateparts' => $item->{'system_alldatepart'},
+            'security'         => $entry->security,
+            'allowmask'        => $entry->allowmask,
+            'props'            => $entry->{'props'},,
+            'itemid'           => $entry->ditemid,
+            'journal'          => $journal_userlite,
+            'poster'           => $posters_userlite{ $entry->posterid },
+            'comments'         => get_comments_info($entry),
 
-            'tags'              => \@taglist,
-            'userpic'           => $userpic,
-            'permalink_url'     => $entry->url,
+            'tags'             => get_sorted_tags($entry),
+            'userpic'          => $userpic,
+            'permalink_url'    => $entry->url,
 
             # for now, these are not implemented
-            'new_day'           => 0,
-            'end_day'           => 0,
+            'new_day'          => 0,
+            'end_day'          => 0,
         } );
     }
 
@@ -4495,6 +4531,77 @@ sub Page__get_entries_by_tags {
 *FriendsPage__get_entries_by_tags = \&Page__get_entries_by_tags;
 *EntryPage__get_entries_by_tags = \&Page__get_entries_by_tags;
 *ReplyPage__get_entries_by_tags = \&Page__get_entries_by_tags;
+
+sub get_comments_info {
+    my ( $entry ) = @_;
+
+    my $journal_cap_maxcomments = $entry->{u}->get_cap('maxcomments');
+
+    # comments info
+    my $replycount = $entry->prop('replycount');
+
+    return LJ::S2::CommentInfo({
+        'read_url'      => $entry->url,
+        'post_url'      => $entry->reply_url,
+        'count'         => $replycount,
+        'maxcomments'   =>
+            ( $replycount > $journal_cap_maxcomments ) ? 1 : 0,
+
+        'enabled'       => $entry->comments_shown,
+        'locked'        => !$entry->posting_comments_allowed,
+        'screened'      => 0,
+        'show_readlink' => $entry->comments_shown && $replycount,
+        'show_postlink' => $entry->posting_comments_allowed,
+    });
+}
+
+sub get_sorted_tags {
+    my ( $entry ) = @_;
+
+    my @taglist;
+    my $entry_tags = $entry->{'tags'};
+
+    while ( my ( $kwid, $kw ) = each %$entry_tags ) {
+        push @taglist, LJ::S2::Tag( $entry->{u}, $kwid => $kw );
+    }
+
+    LJ::run_hooks( 'augment_s2_tag_list',
+        'u'        => $entry->{u},
+        'jitemid'  => $entry->jitemid,
+        'tag_list' => \@taglist
+    );
+
+    return [ sort { $a->{'name'} cmp $b->{'name'} } @taglist ];
+}
+
+sub clear_entry_text {
+    my ( $entry ) = @_;
+
+    my $text = $entry->event_raw;
+    LJ::CleanHTML::clean_event( \$text, {
+        'preformatted'          => $entry->prop('opt_preformatted'),
+        'cuturl'                => $entry->prop('reposted_from') || $entry->url,
+        'entry_url'             => $entry->prop('reposted_from') || $entry->url,
+        'ljcut_disable'         => 0,
+        'journalid'             => $entry->journalid,
+        'posterid'              => $entry->posterid,
+
+        # suspended entries parts are not implemented here for now
+        'suspend_msg'           => '',
+        'unsuspend_supportid'   => 0,
+    } );
+
+    return $text;
+}
+
+sub clear_entry_subject {
+    my ( $entry ) = @_;
+
+    my $subject = $entry->subject_raw;
+    LJ::CleanHTML::clean_subject(\$subject);
+
+    return $subject;
+}
 
 sub palimg_modify
 {
@@ -4622,7 +4729,7 @@ sub UserLite__equals
 sub string__substr
 {
     my ($ctx, $this, $start, $length) = @_;
-    
+
     my $ustr = Encode::decode_utf8($this);
     my $result = substr($ustr, $start, $length);
     return Encode::encode_utf8($result);
@@ -4788,7 +4895,7 @@ sub get_remote_lang {
 # $this->need_res( { "condition" => "IE" }, [ "a.css", "b.css" ] );
 sub Page__need_res {
     my ($ctx, $this, $arguments, $resources) = @_;
-    
+
     if ( ref $arguments eq 'ARRAY' && !$resources ) {
         $resources = $arguments;
         $arguments = {};
@@ -4828,4 +4935,4 @@ sub _is_secure_resource {
                         $/x;
 }
 
-1; 
+1;

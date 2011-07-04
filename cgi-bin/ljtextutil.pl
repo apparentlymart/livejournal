@@ -979,12 +979,12 @@ sub html_get_img_urls {
     my $p = HTML::TokeParser->new($htmlref);
 
     while (my $token = $p->get_token) {
-        if ($token->[1] eq "img" and ref $token->[2] eq 'HASH') {
+        if ($token->[1] eq 'img' and ref $token->[2] eq 'HASH') {
             my $attrs = $token->[2];
-            foreach my $attr (keys %$attrs) {
-                push @image_urls, $attrs->{$attr} if
-                    $attr eq "src" &&
-                    ($exclude_site_imgs ? $attrs->{$attr} !~ /^$LJ::IMGPREFIX/ : 1);
+
+            if ( exists $attrs->{'src'} && $attrs->{'src'} ) {
+                push @image_urls, $attrs->{'src'} if
+                    ($exclude_site_imgs ? $attrs->{'src'} !~ /^$LJ::IMGPREFIX/ : 1);
             }
         }
     }

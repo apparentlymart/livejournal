@@ -976,7 +976,6 @@ sub upload_to_fb {
 # returns result of &upload_to_fb
 sub crop_picture_from_web {
     my %opts = @_;
-
     my $data;
 
     my $source = LJ::trim($opts{source});
@@ -993,7 +992,6 @@ sub crop_picture_from_web {
                                     timeout  => 10,
                                   );
         my $result = $ua->request(GET($source));
-
         unless ($result and $result->is_success) {
             return {
                 picid  => -1,
@@ -1002,23 +1000,21 @@ sub crop_picture_from_web {
                 errstr => $result ? $result->status_line : 'unknown error in downloading',
             };
         }
-
-        $data = $result->content;
+        $data       = $result->content;
+        $opts{data} = $result->content;
     } else {
         $data = ${$opts{'dataref'}};
     }
-
     my $res = LJ::_get_upf_scaled(
-                    source => \$data,
-                    size => $opts{size},
+                    source      => \$data,
+                    size        => $opts{size},
                     cancel_size => $opts{cancel_size},
-                    save_to_FB => 1,
-                    auto_crop => 1,
+                    save_to_FB  => 1,
+                    auto_crop   => 1,
                     fb_username => $opts{username},
                     fb_password => $opts{password},
-                    fb_gallery => $opts{galleries},
+                    fb_gallery  => $opts{galleries},
               );
-
     unless ($res) {
         return {
             picid  => -1,
@@ -1027,14 +1023,12 @@ sub crop_picture_from_web {
             errstr => 'probably bad picture',
         };
     }
-
     # need to repeat? (because of bad auth in CentOS-32 ScrapBook)
     # DELETE THIS IN FUTURE!!!
     if ($res->{picid} == -1) {
         warn $res->{errstr} if $LJ::IS_DEV_SERVER;
         return upload_to_fb(%{$res->{opts}});
     }
-
     return $res;
 }
 

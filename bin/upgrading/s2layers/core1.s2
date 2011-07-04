@@ -378,6 +378,8 @@ class Entry extends EntryLite
     "Id list of users who rates this entry.";
     function builtin is_myvoice() : bool
     "Is my voice already counted by the system.";
+    function builtin truncate_text( int limit ) : string
+    "Truncates entry text to limit chars and adds ellipsis";
 }
 
 class Comment extends EntryLite
@@ -601,6 +603,9 @@ class Page
 
     function builtin get_entries_by_tags( string[] taglist, string mode, int count ) : Entry[]
     "Returns last 'count' entries with the specified tag(s); returns the entries containing all of them or any of them, depending on 'mode'; does not work in untrusted journals";
+
+    function builtin get_last_entries( string ljname, int count ) : Entry[]
+    "Returns last 'count' entries from selected journal for LJTimes verticals.";
 }
 
 class TagsPage extends Page
@@ -831,6 +836,9 @@ function builtin etags (string s) : string
 
 function builtin clean_url (string s) : string
 "Returns the given URL back if it's a valid URL.";
+
+function builtin html_get_img_urls (string s) : string[]
+"Returns an array of URLs of images from given HTML";
 
 function builtin rand (int high) : int
 "Returns a random integer between 1 and \$high, inclusive.";

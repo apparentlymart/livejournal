@@ -405,6 +405,13 @@ sub handle_prefetched_text {
     $self->{_loaded_text} = 1;
 }
 
+sub handle_prefetched_tags {
+    my ( $self, $tags ) = @_;
+
+    $self->{tags} = $tags;
+    $self->{_loaded_tags} = 1;
+}
+
 # returns true if loaded, zero if not.
 # also sets _loaded_text and subject and event.
 sub _load_text {
