@@ -81,3 +81,18 @@ form.ljpoll {
 	background-color: #d2d2d2;
 	font-style: italic;
 }
+
+.lj-like {
+	margin:12px 0!important;
+	}
+	.lj-like-item {
+		display:inline-block!important;
+		vertical-align:middle!important;
+		margin:12px 12px 12px 0!important;
+		}
+	.lj-like-gag {
+		border:1px dashed #999;
+		border-radius:6px;
+		padding:6px 8px;
+		}
+
