@@ -840,6 +840,12 @@ function builtin clean_url (string s) : string
 function builtin html_get_img_urls (string s) : string[]
 "Returns an array of URLs of images from given HTML";
 
+function builtin truncate_to_paragraph (string s, string m) : string
+"Truncates given string to p/br tag or first delimiter. Depends on the mode (p|br|first)";
+
+function builtin get_metadata (string s) : string{}
+"Extracts metadata from p-tags";
+
 function builtin rand (int high) : int
 "Returns a random integer between 1 and \$high, inclusive.";
 

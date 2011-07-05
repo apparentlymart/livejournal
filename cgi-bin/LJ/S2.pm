@@ -2361,6 +2361,64 @@ sub html_get_img_urls {
     return LJ::html_get_img_urls( \$s );
 }
 
+sub truncate_to_paragraph {
+    my ( $ctx, $text, $mode ) = @_;
+
+    my $re = $mode eq 'p'
+        ? qr/(.*?)<\/p>/s
+        : $mode eq 'b'
+            ? qr/(.*?)<br\s?\/?>/s
+            : qr/(.*?)(?:<br\s?\/?>|<\/p>)/s;
+
+    while ($text =~ /$re/g) {
+        my $p = $1;
+        return $p if $p =~ /\S/;
+    }
+
+    return '';
+}
+
+sub get_metadata {
+    my ( $ctx, $text ) = @_;
+
+    my %data;
+    my $p = HTML::TokeParser->new(\$text);
+    my $ctoken = undef;
+
+    while (my $token = $p->get_token) {
+        if ($token->[0] eq 'S' and $token->[1] eq 'p' and ref $token->[2] eq 'HASH') {
+            my $attrs = $token->[2];
+
+            if ( exists $attrs->{'class'} && $attrs->{'class'} ) {
+                my @classes = split(/\s+/, $attrs->{'class'});
+
+                for my $class ( @classes ) {
+                    next unless $class =~ /^data\-(.+)$/;
+                    $ctoken = $1;
+                    $data{$ctoken} = '';
+                    last;
+                }
+            }
+        }
+        elsif ($token->[1] eq 'p' and $ctoken ) {
+            $ctoken = undef;
+        }
+        elsif ( $ctoken ) {
+            if ( $token->[0] eq 'S' ) {
+                $data{$ctoken} .= $token->[4];
+            }
+            elsif ($token->[0] eq 'E' ) {
+                $data{$ctoken} .= $token->[2];
+            }
+            elsif ($token->[0] eq 'T' ) {
+                $data{$ctoken} .= $token->[1];
+            }
+        }
+    }
+
+    return \%data;
+}
+
 sub ehtml
 {
     my ($ctx, $text) = @_;
@@ -3989,6 +4047,7 @@ sub Entry__truncate_text {
     return LJ::Text->truncate_to_word_with_ellipsis(
         'str'   => $this->{'text'},
         'chars' => $limit || 80,
+        'strip_html'  => 1,
     ) . '';
 }
 
