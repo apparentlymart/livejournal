@@ -1898,11 +1898,7 @@ sub control_strip_old
     return "" unless $show_strip;
 
     my $remote = LJ::get_remote();
-
-    my $args = scalar LJ::Request->args;
-    my $querysep = $args ? "?" : "";
-    my $uri = "http://" . LJ::Request->header_in("Host") . LJ::Request->uri . $querysep . $args;
-    $uri = LJ::eurl($uri);
+    my $uri = LJ::eurl( LJ::Request->current_page_url );
     my $create_link = LJ::run_hook("override_create_link_on_navstrip", $journal) || "<a href='$LJ::SITEROOT/create.bml'>" . BML::ml('web.controlstrip.links.create', {'sitename' => $LJ::SITENAMESHORT}) . "</a>";
 
     # Build up some common links

@@ -126,9 +126,15 @@ sub FriendsPage
         my $public = $grp->{'is_public'};
         if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) {
             $filter = (1 << $bit);
-        } elsif ($group_name){
-            $opts->{'badfriendgroup'} = 1;
-            return 1;
+        } elsif ($group_name) {
+            if ($remote) {
+                $opts->{'badfriendgroup'} = 1;
+                return 1;
+            } else {
+                my $redir = LJ::eurl( LJ::Request->current_page_url );
+                $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir&errmsg=notloggedin";
+                return;
+            }
         }
     }
 

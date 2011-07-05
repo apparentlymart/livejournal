@@ -15,11 +15,7 @@ sub render
 
     my $remote = LJ::get_remote();
     my $journal = LJ::load_user($user);
-
-    my $args = scalar LJ::Request->args;
-    my $querysep = $args ? "?" : "";
-    my $uri = "http://" . LJ::Request->header_in("Host") . LJ::Request->uri . $querysep . $args;
-    $uri = LJ::eurl($uri);
+    my $uri = LJ::eurl( LJ::Request->current_page_url );
 
     my $data_remote = {};
     my $data_journal = {

@@ -454,10 +454,7 @@ sub EntryPage_entry
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return;
         } else {
-            my $host = LJ::Request->header_in("Host");
-            my $args = scalar LJ::Request->args;
-            my $querysep = $args ? "?" : "";
-            my $redir = LJ::eurl("http://$host$uri$querysep$args");
+            my $redir = LJ::eurl( LJ::Request->current_page_url );
             $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir&errmsg=notloggedin";
             return;
         }

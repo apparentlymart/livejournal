@@ -66,12 +66,7 @@ sub ReplyPage
         my $errref;
         $comment = LJ::Comment->new($u, dtalkid => $editid);
         unless ($remote) {
-            my $host = LJ::Request->header_in("Host");
-            my $uri = LJ::Request->uri;
-            my $args = scalar LJ::Request->args;
-            my $querysep = $args ? "?" : "";
-            my $redir = LJ::eurl("http://$host$uri$querysep$args");
-
+            my $redir = LJ::eurl( LJ::Request->current_page_url );
             $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir&errmsg=notloggedin";
             return;
         }

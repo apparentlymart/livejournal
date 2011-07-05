@@ -307,6 +307,17 @@ sub redirected {
     return $redirected;
 }
 
+sub current_page_url {
+    my $class = shift;
+
+    my $proto   = ($LJ::IS_SSL) ? "https" : "http"; 
+    my $host    = $class->header_in("Host");
+    my $uri     = $class->uri;
+    my $args    = $class->args;
+    my $querysep= ($args) ? "?" : "";
+    return "$proto://$host$uri$querysep$args";
+}
+
 =head2 Cleanup
 
     # clean internal state variables; this is a hack until we get a cleaner
