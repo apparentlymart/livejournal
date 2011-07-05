@@ -1314,17 +1314,23 @@ li.cke_panel_listItem {
 	
 	
 /* LJ Buttons */
+.cke_skin_v2 .cke_button_LJUserLink .cke_icon,
+.cke_skin_v2 .cke_button_LJEmbedLink .cke_icon,
+.cke_skin_v2 .cke_button_LJPollLink .cke_icon,
+.cke_skin_v2 .cke_button_LJCut .cke_icon {
+	background:url(lj_strip.png) no-repeat 0 0;
+	}
 .cke_skin_v2 .cke_button_LJUserLink .cke_icon {
-	background: url("ljuser.gif") center center;
+	background-position:0 -16px;
 	}
 .cke_skin_v2 .cke_button_LJEmbedLink .cke_icon {
-	background: url("ljvideo.gif") center center;
+	background-position:0 -32px;
 	}
 .cke_skin_v2 .cke_button_LJPollLink .cke_icon {
-	background: url("ljpoll.gif") center center;
+	background-position:0 -48px;
 	}
 .cke_skin_v2 .cke_button_LJCut .cke_icon {
-	background: url("ljcut.gif") center center;
+	background-position:0 0;
 	}
 
 #entry-tabs A {
