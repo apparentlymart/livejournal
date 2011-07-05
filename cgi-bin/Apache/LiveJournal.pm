@@ -193,12 +193,9 @@ sub handler
         LJ::work_report_start();
     }
     # try to match controller
-    LJ::Mob::Router::match_controller($r);
-
+    LJ::Mob::Router::match_controller();
 
     if(my $controller = LJ::Request->notes('controller')) {
-        # clear cookie's cache
-        LJ::start_request();
         my $url = $controller->check_access(LJ::Request->notes('branding_id'), LJ::get_remote_ip);
         if(LJ::Request->notes('method') eq '__setdomsess') {
             return redir(LJ::Session->setdomsess_handler())
