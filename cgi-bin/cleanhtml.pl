@@ -727,7 +727,7 @@ sub clean
                 my $entry = LJ::Entry->new_from_url($entry_url);
 
                 my $meta = { map { $_ => '' } qw( title description image ) };
-                if ($entry) {
+                if ($entry and $entry->valid) {
                     $meta = $entry->extract_metadata;
                 }
 
@@ -827,6 +827,8 @@ sub clean
 
                     elsif ( $button eq 'livejournal' ) {
                         my $entry = LJ::Entry->new_from_url($entry_url);
+                           $entry = undef unless $entry->valid;
+
                         my $give_button = LJ::run_hook("give_button", {
                             'journal' => $entry ? $entry->journal->user : '',
                             'itemid'  => $entry ? $entry->ditemid : 0,
@@ -1285,8 +1287,14 @@ sub clean
                         $subject = LJ::ehtml($entry->subject_raw || LJ::Lang::ml("repost.default_subject"));
                         $subject = Encode::decode_utf8($subject) if $subject;
                     }
+
+                    ## 'posterid' property of a removed (is_valied eq 'false') entry is empty.
+                    my $poster_username = $entry->poster
+                                            ? $entry->poster->username
+                                            : '';
+
                     $captured = LJ::Lang::ml("repost.wrapper", {
-                                                username => $entry->poster->username,
+                                                username => $poster_username,
                                                 url      => $entry->url,
                                                 subject  => $subject,
                                                 text     => $captured,
