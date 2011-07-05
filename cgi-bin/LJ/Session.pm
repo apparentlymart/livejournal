@@ -552,7 +552,8 @@ sub domain_cookie {
     my ($subdomain, $user) = LJ::Session->domain_journal($url);
 
     # undef:  not on a user-subdomain
-    return undef unless $subdomain;
+    return undef 
+        unless defined $subdomain;
 
     # on a user subdomain, or shared subdomain
     if ($user ne "") {
