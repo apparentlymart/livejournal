@@ -2296,6 +2296,7 @@ DIV.lj_ippu_app {
 	position: absolute;
 	font-size:12px;
 	z-index: 4000;
+	background-color:transparent;
 	}
 	.b-popup input,
 	.b-popup div,
@@ -2323,7 +2324,7 @@ DIV.lj_ippu_app {
 	/* Put here styles for popups that need to reset */
 	.b-popup,
 	.b-popup-outer,
-	.b-popup-inner 
+	.b-popup-inner,
 	.popup-inner,
 	.w-cs-filter-inner,
 	.w-cs-filter-sort,
