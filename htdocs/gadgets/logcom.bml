@@ -24,8 +24,6 @@
         return 'this domain doesn\'t belong to this partner';
     }
 
-    $partner->request_logcom_resources;
-
     my $journal = $partner->journal;
 
     return 'rate limit exceeded'
@@ -52,7 +50,6 @@
 
     if (my $remote = LJ::get_remote() and not LJ::Request->get_param('viewform')) {
         ## show add comment form
-        LJ::need_res(qw( stc/partners/login.css ));
 
         my $remote_sessid;
         if ($remote) {
@@ -81,11 +78,6 @@
             });
     } else {
         ## display login widget
-        LJ::need_res(qw(
-          stc/lj_base.css
-          stc/partners/login.css
-        ));
-
         # send out a P3P header thing so as to work around IE's
         # unwillingness to receive our cookies while we're in an iframe
         LJ::Session->allow_login_from_iframe;
@@ -97,7 +89,7 @@
             'embedded'          => 1,
             'partner'           => $partner,
             'js_check_domain'   => $js_check_domain,
-            'resources_html'    => $partner->resources,
+            'resources_html'    => $partner->resources_html,
             'forwhat'           => 'external',
             'thispage'          => $thispage,
             'lj_auth'           => 1,
