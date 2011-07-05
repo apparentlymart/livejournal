@@ -4288,7 +4288,7 @@ sub set_renamed {
 # returns if this user is considered visible
 sub is_visible {
     my $u = shift;
-    return $u->statusvis eq 'V' and $u->clusterid != 0;
+    return ($u->statusvis eq 'V' && $u->clusterid != 0);
 }
 
 sub is_deleted {
