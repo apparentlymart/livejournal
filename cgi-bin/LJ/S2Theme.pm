@@ -643,14 +643,13 @@ sub get_preview_styleid {
     # we don't have a style for this theme, so get the new layers and set them to _for_preview directly
     my %style = LJ::S2::get_style($u);
     my $i18n_layer = $self->get_custom_i18n_layer_for_theme($u);
-    my $user_layer = $self->get_custom_user_layer_for_theme($u);
     my %layers = (
         core   => $style{core},
         i18nc  => $style{i18nc},
         layout => $self->layoutid,
         i18n   => $i18n_layer,
         theme  => $self->themeid,
-        user   => $user_layer,
+        user   => 0,
     );
     LJ::S2::set_style_layers($u, $styleid, %layers);
 
