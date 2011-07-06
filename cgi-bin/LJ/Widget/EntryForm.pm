@@ -1453,6 +1453,13 @@ sub render_body {
             'Poll_AccountLevelNotice' => 'poll.accountlevelnotice',
             'Poll_PollWizardTitle' => 'poll.pollwizardtitle',
             'Poll' => 'poll',
+            'LJLike_name' => 'ljlike.name',
+            'LJLike_dialogText' => 'ljlike.dialog.text',
+            'LJLike_button_google' => 'ljlike.button.google',
+            'LJLike_button_facebook' => 'ljlike.button.facebook',
+            'LJLike_button_vkontakte' => 'ljlike.button.vkontakte',
+            'LJLike_button_twitter' => 'ljlike.button.twitter',
+            'LJLike_button_give' => 'ljlike.button.give',
         );
 
         my %langmap_translated = map { $_ => BML::ml("fcklang.$langmap{$_}") }
@@ -1464,9 +1471,8 @@ sub render_body {
         $out .= $self->wrap_js(qq{
             var CKLang = CKEDITOR.lang[CKEDITOR.lang.detect()] || {};
             jQuery.extend(CKLang, $langmap);
-						document.getElementById('htmltools').style.display = 'block';
-						document.write("$jnorich");
-						usePlainText('draft');
+            document.getElementById('htmltools').style.display = 'block';
+            usePlainText('draft');
         });
 
         $out .= qq{

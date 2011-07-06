@@ -1,14 +1,35 @@
-var flashFilenameRegex = /\.swf(?:$|\?)/i;
-
-function isFlashEmbed(element){
-	var attributes = element.attributes;
-
-	return ( attributes.type == 'application/x-shockwave-flash' || flashFilenameRegex.test(attributes.src || '') );
-}
-
-function createFakeElement(editor, realElement){
-	return editor.createFakeParserElement(realElement, 'lj-embed', 'livejournal', false);
-}
+var likeButtons = [
+	{
+		label: top.CKLang.LJLike_button_google,
+		id: 'google',
+		abbr: 'go',
+		html: '<div class="lj-like-item lj-like-gag">' + top.CKLang.LJLike_button_google +'</div>'
+	},
+	{
+		label: top.CKLang.LJLike_button_facebook,
+		id: 'facebook',
+		abbr: 'fb',
+		html: '<div class="lj-like-item lj-like-gag">' + top.CKLang.LJLike_button_facebook + '</div>'
+	},
+	{
+		label: top.CKLang.LJLike_button_vkontakte,
+		id: 'vkontakte',
+		abbr: 'vk',
+		html: '<div class="lj-like-item lj-like-gag">' + top.CKLang.LJLike_button_vkontakte + '</div>'
+	},
+	{
+		label: top.CKLang.LJLike_button_twitter,
+		id: 'twitter',
+		abbr: 'tw',
+		html: '<div class="lj-like-item lj-like-gag">' + top.CKLang.LJLike_button_twitter + '</div>'
+	},
+	{
+		label: top.CKLang.LJLike_button_give,
+		id: 'livejournal',
+		abbr: 'lj',
+		html: '<div class="lj-like-item lj-like-gag">' + top.CKLang.LJLike_button_give + '</div>'
+	}
+];
 
 CKEDITOR.plugins.add('livejournal', {
 	init: function(editor){
@@ -97,7 +118,7 @@ CKEDITOR.plugins.add('livejournal', {
 		};
 
 		//////////  LJ User Button //////////////
-		var url = window.parent.Site.siteroot + '/tools/endpoints/ljuser.bml',
+		var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml',
 			LJUserNode;
 
 		editor.attachStyleStateChange(new CKEDITOR.style({
@@ -128,13 +149,13 @@ CKEDITOR.plugins.add('livejournal', {
 					LJUser = LJUserNode;
 
 				if(this.state == CKEDITOR.TRISTATE_ON && LJUserNode){
-					userName = prompt(window.parent.CKLang.UserPrompt, LJUserNode.getElementsByTag('b').getItem(0).getText());
+					userName = prompt(top.CKLang.UserPrompt, LJUserNode.getElementsByTag('b').getItem(0).getText());
 				} else if(selection.getType() == 2){
 					userName = selection.getSelectedText();
 				}
 
 				if(userName == ''){
-					userName = prompt(window.parent.CKLang.UserPrompt, userName);
+					userName = prompt(top.CKLang.UserPrompt, userName);
 				}
 
 				if(!userName){
@@ -170,19 +191,19 @@ CKEDITOR.plugins.add('livejournal', {
 		});
 
 		editor.ui.addButton('LJUserLink', {
-			label: window.parent.CKLang.LJUser,
+			label: top.CKLang.LJUser,
 			command: 'LJUserLink'
 		});
 
 		//////////  LJ Embed Media Button //////////////
 		editor.addCommand('LJEmbedLink', {
 			exec: function(){
-				top.LJ_IPPU.textPrompt(window.parent.CKLang.LJEmbedPromptTitle, window.parent.CKLang.LJEmbedPrompt, do_embed);
+				top.LJ_IPPU.textPrompt(top.CKLang.LJEmbedPromptTitle, top.CKLang.LJEmbedPrompt, doEmbed);
 			}
 		});
 
 		editor.ui.addButton('LJEmbedLink', {
-			label: window.parent.CKLang.LJEmbed,
+			label: top.CKLang.LJEmbed,
 			command: 'LJEmbedLink'
 		});
 
@@ -196,7 +217,7 @@ CKEDITOR.plugins.add('livejournal', {
 				'height: 80px;' +
 			'}');
 
-		function do_embed(content){
+		function doEmbed(content){
 			if(content && content.length){
 				editor.insertHtml('<div class="ljembed">' + content + '</div><br/>');
 				editor.focus();
@@ -233,19 +254,19 @@ CKEDITOR.plugins.add('livejournal', {
 			exec: function(){
 				var text;
 				if(this.state == CKEDITOR.TRISTATE_ON){
-					text = prompt(window.parent.CKLang.CutPrompt, ljCutNode.getAttribute('text') || top.CKLang.ReadMore);
+					text = prompt(top.CKLang.CutPrompt, ljCutNode.getAttribute('text') || top.CKLang.ReadMore);
 					if(text){
-						if(text == window.parent.CKLang.ReadMore){
+						if(text == top.CKLang.ReadMore){
 							ljCutNode.removeAttribute('text');
 						} else {
 							ljCutNode.setAttribute('text', text);
 						}
 					}
 				} else {
-					text = prompt(window.parent.CKLang.CutPrompt, window.parent.CKLang.ReadMore);
+					text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore);
 					if(text){
 						ljCutNode = editor.document.createElement('lj-cut');
-						if(text != window.parent.CKLang.ReadMore){
+						if(text != top.CKLang.ReadMore){
 							ljCutNode.setAttribute('text', text);
 						}
 						editor.getSelection().getRanges()[0].extractContents().appendTo(ljCutNode);
@@ -256,14 +277,14 @@ CKEDITOR.plugins.add('livejournal', {
 		});
 
 		editor.ui.addButton('LJCut', {
-			label: window.parent.CKLang.LJCut,
+			label: top.CKLang.LJCut,
 			command: 'LJCut'
 		});
 
 		//////////  LJ Poll Button //////////////
 		if(top.canmakepoll){
 			var currentPollForm, currentPoll;
-			var noticeHtml = window.parent.CKLang
+			var noticeHtml = top.CKLang
 				.Poll_PollWizardNotice + '<br /><a href="#" onclick="CKEDITOR.instances.draft.getCommand(\'LJPollLink\').exec(); return false;">' + window
 				.parent.CKLang.Poll_PollWizardNoticeLink + '</a>';
 
@@ -315,7 +336,7 @@ CKEDITOR.plugins.add('livejournal', {
 				};
 
 				return {
-					title : window.parent.CKLang.Poll_PollWizardTitle,
+					title : top.CKLang.Poll_PollWizardTitle,
 					width : 420,
 					height : 270,
 					onShow: function(){
@@ -400,7 +421,7 @@ CKEDITOR.plugins.add('livejournal', {
 		} else {
 			editor.addCommand('LJPollLink', {
 				exec: function(editor){
-					var notice = top.LJ_IPPU.showNote(window.parent.CKLang.Poll_AccountLevelNotice, editor.container.$);
+					var notice = top.LJ_IPPU.showNote(top.CKLang.Poll_AccountLevelNotice, editor.container.$);
 					notice.centerOnWidget(editor.container.$);
 				}
 			});
@@ -409,47 +430,193 @@ CKEDITOR.plugins.add('livejournal', {
 		}
 
 		editor.ui.addButton('LJPollLink', {
-			label: window.parent.CKLang.Poll,
+			label: top.CKLang.Poll,
 			command: 'LJPollLink'
+		});
+
+		//////////  LJ Like Button //////////////
+		var buttonsLength = likeButtons.length;
+		var dialogContents = [];
+		var currentLjLikeNode;
+		likeButtons.defaultButtons = [];
+
+		for(var i = 0; i < buttonsLength; i++){
+			var button = likeButtons[i];
+			likeButtons[button.id] = likeButtons[button.abbr] = button;
+			likeButtons.defaultButtons.push(button.abbr);
+			dialogContents.push({
+				type: 'checkbox',
+				label: button.label,
+				id: 'LJLike_' + button.id
+			});
+		}
+
+		dialogContents.unshift({
+			type: 'html',
+			html: top.CKLang.LJLike_dialogText
+		});
+
+		CKEDITOR.dialog.add('LJLikeDialog', function(){
+			return {
+				title : top.CKLang.LJLike_name,
+				width : 200,
+				height : 150,
+				resizable: false,
+				contents : [
+					{
+						id: 'LJLike_Options',
+						elements: dialogContents
+					}
+				],
+				buttons : [new CKEDITOR.ui.button({
+					type : 'button',
+					id : 'LJLike_Ok',
+					label : editor.lang.common.ok,
+					onClick : function(evt){
+						var dialog = evt.data.dialog, attr = [];
+						var likeNode = currentLjLikeNode || new CKEDITOR.dom.element('div');
+						likeNode.setHtml('');
+
+						for(var i = 0; i < buttonsLength; i++){
+							var button = likeButtons[i];
+							var buttonNode = dialog.getContentElement('LJLike_Options', 'LJLike_' + button.id);
+							if(buttonNode.getValue('checked')){
+								attr.push(button.abbr);
+								likeNode.appendHtml(button.html);
+							}
+						}
+
+						likeNode.setAttribute('buttons', attr.join(','));
+
+						if(!currentLjLikeNode){
+							likeNode.setAttribute('class', 'lj-like');
+							editor.insertElement(likeNode);
+						}
+
+						dialog.hide();
+					}
+				}), CKEDITOR.dialog.cancelButton],
+				onShow: function(){
+					var command = editor.getCommand('LJLikeCommand');
+					var i = 0;
+					if(command.state == CKEDITOR.TRISTATE_ON){
+						var buttons = currentLjLikeNode.getAttribute('buttons').split(',');
+						for(var l = buttons.length; i < l; i++){
+							this.getContentElement('LJLike_Options', 'LJLike_' + likeButtons[buttons[i]].id)
+								.setValue('checked', true);
+						}
+					} else {
+						for(i; i < buttonsLength; i++){
+							this.getContentElement('LJLike_Options', 'LJLike_' + likeButtons[i].id).setValue('checked', false);
+						}
+					}
+				}
+			}
+		});
+
+		editor.attachStyleStateChange(new CKEDITOR.style({
+			element: 'div'
+		}), function(){
+			currentLjLikeNode = editor.getSelection().getStartElement().getAscendant('div', true);
+			while(currentLjLikeNode){
+				if(currentLjLikeNode.hasClass('lj-like')){
+					break;
+				}
+				currentLjLikeNode = currentLjLikeNode.getParent();
+			}
+			editor.getCommand('LJLikeCommand').setState(currentLjLikeNode ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF);
+		});
+
+		editor.on('doubleclick', function(){
+			var command = editor.getCommand('LJLikeCommand');
+			if(command.state == CKEDITOR.TRISTATE_ON){
+				command.exec();
+			}
+		});
+
+		editor.addCommand('LJLikeCommand', new CKEDITOR.dialogCommand('LJLikeDialog'));
+
+		editor.ui.addButton('LJLike', {
+			label: top.CKLang.LJLike_name,
+			command: 'LJLikeCommand'
 		});
 	},
 	afterInit : function(editor){
+		var flashFilenameRegex = /\.swf(?:$|\?)/i;
+		function isFlashEmbed(element){
+			var attributes = element.attributes;
 
-		//////////  LJ Embed Media Button //////////////
-		var dataProcessor = editor.dataProcessor,
-			dataFilter = dataProcessor && dataProcessor.dataFilter;
+			return ( attributes.type == 'application/x-shockwave-flash' || flashFilenameRegex.test(attributes.src || '') );
+		}
 
-		if(dataFilter){
-			dataFilter.addRules({
-				elements : {
-					'cke:object' : function(element){
-						var attributes = element.attributes,
-							classId = attributes.classid && String(attributes.classid).toLowerCase();
+		function createFakeElement(editor, realElement){
+			return editor.createFakeParserElement(realElement, 'lj-embed', 'flash', false);
+		}
 
-						if(!classId && !isFlashEmbed(element)){
-							for(var i = 0; i < element.children.length; i++){
-								if(element.children[ i ].name == 'cke:embed'){
-									if(!isFlashEmbed(element.children[ i ]))
-										return null;
+		var dataProcessor = editor.dataProcessor;
+		
+		dataProcessor.dataFilter.addRules({
+			elements: {
+				'cke:object' : function(element){
+					//////////  LJ Embed Media Button //////////////
+					var attributes = element.attributes,
+						classId = attributes.classid && String(attributes.classid).toLowerCase();
 
-									return createFakeElement(editor, element);
-								}
+					if(!classId && !isFlashEmbed(element)){
+						for(var i = 0; i < element.children.length; i++){
+							if(element.children[i].name == 'cke:embed'){
+								return isFlashEmbed(element.children[i]) ? createFakeElement(editor, element) : null;
 							}
-							return null;
 						}
+						return null;
+					}
 
-						return createFakeElement(editor, element);
-					},
+					return createFakeElement(editor, element);
+				},
+				'cke:embed' : function(element){
+					return isFlashEmbed(element) ? createFakeElement(editor, element) : null;
+				},
+				'lj-like': function(element){
+					var html = '', attr = [];
 
-					'cke:embed' : function(element){
-						if(!isFlashEmbed(element))
-							return null;
+					var fakeElement = new CKEDITOR.htmlParser.element('div');
+					fakeElement.attributes['class'] = 'lj-like';
 
-						return createFakeElement(editor, element);
+					var currentButtons = element.attributes.buttons && element.attributes.buttons.split(',') || likeButtons.defaultButtons;
+
+					var length = currentButtons.length;
+					for(var i = 0; i < length; i++){
+						var buttonName = currentButtons[i].replace(/^\s*([a-z]{2,})\s*$/i, '$1');
+						var button = likeButtons[buttonName];
+						if(button){
+							html += button.html;
+							attr.push(buttonName);
+						}
+					}
+
+					fakeElement.attributes.buttons = attr.join(',');
+					fakeElement.add(new CKEDITOR.htmlParser.fragment.fromHtml(html));
+					return fakeElement;
+				}
+			}
+		}, 5);
+
+		dataProcessor.htmlFilter.addRules({
+			elements: {
+				'div': function(element){
+					if(element.attributes['class'] == 'lj-like'){
+						var ljLikeNode = new CKEDITOR.htmlParser.element('lj-like');
+						if(element.attributes.buttons && element.attributes.buttons.length){
+							ljLikeNode.attributes.buttons = element.attributes.buttons;
+						}
+						ljLikeNode.isEmpty = true;
+						ljLikeNode.isOptionalClose = true;
+						return ljLikeNode;
 					}
 				}
-			}, 5);
-		}
+			}
+		});
+
 	},
 
 	requires : [ 'fakeobjects' ]

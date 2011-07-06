@@ -2676,6 +2676,22 @@ fcklang.readmore=Read more...
 
 fcklang.userprompt=Enter their username
 
+
+fcklang.ljlike.name=Like buttons
+
+fcklang.ljlike.dialog.text=Check buttons
+
+fcklang.ljlike.button.google=Google +1
+
+fcklang.ljlike.button.facebook=Facebook
+
+fcklang.ljlike.button.vkontakte=Vkontakte
+
+fcklang.ljlike.button.twitter=Twitter
+
+fcklang.ljlike.button.give=10 Give
+
+
 fcklang.videoprompt=Please enter the YouTube, PhotoBucket, or Google Video URL:
 
 feeds.link=syndicated feeds

@@ -103,7 +103,8 @@ CKEDITOR.editorConfig = function(config){
 		['Link', 'Unlink'],
 		ljItems,
 		['Outdent','Indent'],
-		['UnorderedList','OrderedList','JustifyLeft','JustifyCenter','JustifyRight'],
+		['UnorderedList','OrderedList','NumberedList','BulletedList'],
+		['JustifyLeft','JustifyCenter','JustifyRight'],
 		['Undo', 'Redo']
 	];
 	config.toolbar_Basic = [

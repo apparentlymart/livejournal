@@ -1318,7 +1318,7 @@ li.cke_panel_listItem {
 .cke_skin_v2 .cke_button_LJEmbedLink .cke_icon,
 .cke_skin_v2 .cke_button_LJPollLink .cke_icon,
 .cke_skin_v2 .cke_button_LJCut .cke_icon,
-.cke_skin_v2 .cke_button_LJLike .cke_icon {
+.cke_skin_v2 .cke_button_LJLikeCommand .cke_icon {
 	background:url(lj_strip.png) no-repeat 0 0;
 	}
 .cke_skin_v2 .cke_button_LJUserLink .cke_icon {
@@ -1333,7 +1333,7 @@ li.cke_panel_listItem {
 .cke_skin_v2 .cke_button_LJCut .cke_icon {
 	background-position:0 0;
 	}
-.cke_skin_v2 .cke_button_LJLike .cke_icon {
+.cke_skin_v2 .cke_button_LJLikeCommand .cke_icon {
 	background-position:0 -64px;
 	}
 
