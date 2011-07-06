@@ -301,11 +301,7 @@ sub check_viewable
              return;
             return $err->(BML::ml('talk.error.notauthorised'));
         } else {
-            my $host = LJ::Request->header_in("Host");
-            my $args = scalar LJ::Request->args;
-            my $querysep = $args ? "?" : "";
-            my $redir = LJ::eurl("http://" . $host . LJ::Request->uri . $querysep . $args);
-
+            my $redir = LJ::eurl( LJ::Request->current_page_url );
             return $err->(BML::redirect("$LJ::SITEROOT/?returnto=$redir&errmsg=notloggedin"));
         }
     }
