@@ -16,7 +16,7 @@ CKEDITOR.editorConfig = function(config){
 	config.autoUpdateElement = false;
 	config.customConfig = '';
 	config.docType = '<!DOCTYPE html>';
-	config.baseHref = '/js/ck/';
+	config.baseHref = 'http://www.livejournal.com/js/ck/';
 	config.plugins =
 		'basicstyles,' +
 		'bidi,' +
