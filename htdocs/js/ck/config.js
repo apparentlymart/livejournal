@@ -32,7 +32,7 @@ CKEDITOR.editorConfig = function(config){
 		//'elementspath,' +
 		'enterkey,' +
 		'entities,' +
-		'filebrowser,' +
+		//'filebrowser,' +
 		//'find,' +
 		//'flash,' +
 		'font,' +
@@ -164,34 +164,6 @@ CKEDITOR.editorConfig = function(config){
 	config.indentClasses = [];
 	config.indentOffset = 40;
 	config.indentUnit = 'px';
-
-	// The following value defines which File Browser connector and Quick Upload
-	// "uploader" to use. It is valid for the default implementaion and it is here
-	// just to make this configuration file cleaner.
-	// It is not possible to change this value using an external file or even
-	// inline when creating the editor instance. In that cases you must set the
-	// values of LinkBrowserURL, ImageBrowserURL and so on.
-	// Custom implementations should just ignore it.
-	var _FileBrowserLanguage = 'php';	// asp | aspx | cfm | lasso | perl | php | py
-	var _QuickUploadLanguage = 'php';	// asp | aspx | cfm | lasso | perl | php | py
-
-	// Don't care about the following two lines. It just calculates the correct connector
-	// extension to use for the default File Browser (Perl uses "cgi").
-	var _FileBrowserExtension = _FileBrowserLanguage == 'perl' ? 'cgi' : _FileBrowserLanguage;
-	var _QuickUploadExtension = _QuickUploadLanguage == 'perl' ? 'cgi' : _QuickUploadLanguage;
-
-	config.filebrowserImageBrowseLinkUrl = config.baseHref + 'filemanager/browser/default/browser.html?Connector=' + encodeURIComponent(config.baseHref + 'filemanager/connectors/' + _FileBrowserLanguage + '/connector.' + _FileBrowserExtension);
-	config.filebrowserFlashBrowseUrl = config.baseHref + 'filemanager/browser/default/browser.html?Type=Flash&Connector=' + encodeURIComponent(config.baseHref + 'filemanager/connectors/' + _FileBrowserLanguage + '/connector.' + _FileBrowserExtension);
-	config.filebrowserFlashUploadUrl = config.baseHref + 'filemanager/connectors/' + _QuickUploadLanguage + '/upload.' + _QuickUploadExtension + '?Type=Flash';
-	config.filebrowserImageBrowseUrl = config.baseHref + 'filemanager/browser/default/browser.html?Type=Image&Connector=' + encodeURIComponent(config.baseHref + 'filemanager/connectors/' + _FileBrowserLanguage + '/connector.' + _FileBrowserExtension);
-	//config.filebrowserImageUploadUrl = config.baseHref + 'filemanager/connectors/' + _QuickUploadLanguage + '/upload.' + _QuickUploadExtension + '?Type=Image';
-
-	config.filebrowserWindowHeight = screen.height * 0.7;
-	config.filebrowserWindowWidth = screen.width * 0.7;
-
-	/*config.smiley_path = config.baseHref + 'images/smiley/msn/';
-	config.smiley_images = ['regular_smile.gif','sad_smile.gif','wink_smile.gif','teeth_smile.gif','confused_smile.gif','tounge_smile.gif','embaressed_smile.gif','omg_smile.gif','whatchutalkingabout_smile.gif','angry_smile.gif','angel_smile.gif','shades_smile.gif','devil_smile.gif','cry_smile.gif','lightbulb.gif','thumbs_down.gif','thumbs_up.gif','heart.gif','broken_heart.gif','kiss.gif','envelope.gif'];
-	config.smiley_columns = 8;*/
 
 	config.dialog_backgroundCoverColor = '#ffffff';
 	config.dialog_backgroundCoverOpacity = 0.50;
