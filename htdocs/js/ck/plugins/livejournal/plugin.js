@@ -33,28 +33,34 @@ var likeButtons = [
 
 CKEDITOR.plugins.add('livejournal', {
 	init: function(editor){
-		editor.dataProcessor.toHtml = function(data, fixForBody){
-			data = top.convertToHTMLTags(data); // call from rte.js
+		editor.dataProcessor.toHtml = function(html, fixForBody){
+			html = top.convertToHTMLTags(html); // call from rte.js
 
-			data = data.replace(/<lj-cut([^>]*)><\/lj-cut>/g, '<lj-cut$1>\ufeff</lj-cut>')
+			html = html.replace(/<lj-cut([^>]*)><\/lj-cut>/g, '<lj-cut$1>\ufeff</lj-cut>')
 				.replace(/(<lj-cut[^>]*>)/g, '\ufeff$1').replace(/(<\/lj-cut>)/g, '$1\ufeff');
 
 			// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
 			if(CKEDITOR.env.ie){
-				data = data.replace(/<lj-cut([^>]*)>/g, '<lj:cut$1>').replace(/<\/lj-cut>/g, '</lj:cut>')
+				html = html.replace(/<lj-cut([^>]*)>/g, '<lj:cut$1>').replace(/<\/lj-cut>/g, '</lj:cut>')
 					.replace(/<([\/])?lj-raw>/g, '<$1lj:raw>').replace(/<([\/])?lj-wishlist>/g, '<$1lj:wishlist>')
 					.replace(/(<lj [^>]*)> /g, '$1> '); // IE merge spaces
 			} else {
 				// close <lj user> tags
-				data = data.replace(/(<lj [^>]*[^\/])>/g, '$1/> ');
+				html = html.replace(/(<lj [^>]*[^\/])>/g, '$1/> ');
 			}
+			if(!$('event_format').checked){
+			 html = '<pre>' + html + '</pre>';
+			}
+
+			html = html.replace(/<br\s*\/?>/g, '');
+			html = CKEDITOR.htmlDataProcessor.prototype.toHtml.call(this, html, fixForBody);
 
 			if(!$('event_format').checked){
-				data = data.replace(/\n/g, '<br />');
+				html = html.replace(/<\/?pre>/g, '');
+				html = html.replace(/\n/g, '<br\/>');
 			}
 
-			data = CKEDITOR.htmlDataProcessor.prototype.toHtml.call(this, data, fixForBody);
-			return data;
+			return html;
 		};
 
 		editor.dataProcessor.toDataFormat = function(html, fixForBody){
@@ -89,9 +95,12 @@ CKEDITOR.plugins.add('livejournal', {
 
 				}
 			}*/
+			html = html.replace(/^<pre>\n*([\s\S]*?)\n*<\/pre>\n*$/, '$1');
 
 			html = CKEDITOR.htmlDataProcessor.prototype.toDataFormat.call(this, html, fixForBody);
+
 			html = html.replace(/\t/g, ' ');
+			html = html.replace(/>\n\s*(?!\s)([^<]+)</g, '>$1<');
 			// rte fix, http://dev.fckeditor.net/ticket/3023
 			// type="_moz" for Safari 4.0.11
 			if(!CKEDITOR.env.ie){
