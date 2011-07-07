@@ -36,71 +36,7 @@
 		CKEditor.container.show();
 		CKEditor.element.hide();
 
-		var ljTags = CKEditor.document.getElementsByTag('lj').$,
-			i = ljTags.length;
-
-		while(i--){
-			var ljTag = ljTags[i],
-				userName = ljTag.getAttribute('user') || ljTag.getAttribute('comm'),
-				T = ljTag.getAttribute('title'),
-				cacheName = T ? userName + ':' + T : userName;
-			if(cache.hasOwnProperty(cacheName)){
-				if(cache[cacheName].html){
-					updateLJUser(ljTag, cache[cacheName].html);
-				} else {
-					cache[cacheName].queue.push(ljTag);
-				}
-				continue;
-			}
-
-			cache[cacheName] = {
-				queue: [ljTag]
-			};
-
-			var postData = {
-				username: userName
-			};
-
-			if(T){
-				postData.usertitle = T;
-			}
-
-			var gotError = (function(username){
-				return function(err){
-					alert(err + ' "' + username + '"');
-				}
-			})(userName);
-
-			var gotInfo = (function(username, cachename){
-				return function (data){
-					if(data.error){
-						return alert(data.error + ' "' + username + '"');
-					}
-					if(!data.success){
-						return;
-					}
-
-					data.ljuser = data.ljuser.replace("<span class='useralias-value'>*</span>", '');
-
-					var ljTag;
-					while(ljTag = cache[cachename].queue.shift()){
-						updateLJUser(ljTag, data.ljuser);
-					}
-
-					cache[cachename].html = data.ljuser;
-				}
-			})(userName, cacheName);
-
-			HTTPReq.getJSON({
-				data: HTTPReq.formEncoded(postData),
-				method: 'POST',
-				url: Site.siteroot + '/tools/endpoints/ljuser.bml',
-				onError: gotError,
-				onData: gotInfo
-			});
-		}
-
-		ljTags = CKEditor.document.getElementsByTag('lj-template').$,i = ljTags.length;
+		var ljTags = CKEditor.document.getElementsByTag('lj-template').$,i = ljTags.length;
 		var styleNoEdit = 'cursor: default; -moz-user-select: all; -moz-user-input: none; -moz-user-focus: none; -khtml-user-select: all;';
 		while(i--){
 			ljTag = ljTags[i];
@@ -185,7 +121,6 @@
 
 			if(CKEditor){
 				var data = CKEditor.getData();
-				data = convertUserAndPool(data);
 				CKEditor.element.setValue(data);
 				
 				CKEditor.container.hide();
@@ -225,48 +160,4 @@
 
 		return false;
 	};
-
-	function convertUserAndPool(html){
-		html = html.replace(/<form.*?class="ljpoll" data="([^"]*)"[\s\S]*?<\/form>/gi, function(form, data){
-			return unescape(data);
-		})
-			.replace(/<span[^>]*?class="ljuser[^>]*?><a href="http:\/\/(?:community|syndicated)\.[-.\w]+\/([\w]+)\/.*?<b>\1<\/b><\/a><\/span>/g, '<lj comm="$1"/>')
-			.replace(/<span[^>]*?class="ljuser[^>]*?><a href="http:\/\/(?:community|syndicated)\.[-.\w]+\/([\w]+)\/.*?<b>([^<]+)?<\/b><\/a><\/span>/g, '<lj comm="$1" title="$2"/>')
-			.replace(/<span[^>]*?class="ljuser[^>]*?><a href="http:\/\/users\.[-.\w]+\/([\w]+)\/.*?<b>\1<\/b><\/a><\/span>/g, '<lj user="$1"/>')
-			.replace(/<span[^>]*?class="ljuser[^>]*?lj:user="([^"]*?)".+(?!<\/a>).*?<b>([^<]+)?<\/b><\/a><\/span>/g, '<lj user="$1" title="$2"/>')
-			.replace(/<\/lj>/g, '');
-
-		//change user-name to user_name
-		var ljUser, rex = /<lj user="([-\w]+)"([^>]+)?\/>/g;
-		while(ljUser = rex.exec(html)){
-			html = html.replace(ljUser[0], '<lj user="' + ljUser[1].replace(/-/g, '_') + '"' + (ljUser[2] || '') + '/>');
-		}
-
-		return html.replace(/<lj user="([\w]+)" title="\1"\/>/g, '<lj user="$1"/>');
-	}
-
-	window.convertToLJTags = function(html){
-		return convertUserAndPool(html)
-			.replace(/<div(?=[^>]*class="ljvideo")[^>]*url="(\S+)"[^>]*><img.+?\/><\/div>/g, '<lj-template name="video">$1</lj-template>')
-			.replace(/<div(?=[^>]*class="ljvideo")[^>]*url="\S+"[^>]*>([\s\S]+?)<\/div>/g, '<p>$1</p>')
-			.replace(/<div class=['"]ljembed['"](\s*embedid="(\d*)")?\s*>([\s\S]*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')
-			.replace(/<div\s*(embedid="(\d*)")?\s*class=['"]ljembed['"]\s*>([\s\S]*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')// convert qotd
-			.replace(/<div([^>]*)qotdid="(\d+)"([^>]*)>[^\b]*<\/div>(<br \/>)*/g, '<lj-template id="$2"$1$3 /><br />')// div tag and qotdid attrib
-			.replace(/(<lj-template id="\d+" )([^>]*)class="ljqotd"?([^>]*\/>)/g, '$1name="qotd" $2$3')// class attrib
-			.replace(/(<lj-template id="\d+" name="qotd" )[^>]*(lang="\w+")[^>]*\/>/g, '$1$2 \/>'); // lang attrib
-	};
-
-	window.convertToHTMLTags = function(html){
-		return html
-			.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
-			.replace(/<lj-embed\s*(?:id="(\d*)")?\s*>([\s\S]*?)<\/lj-embed>/gi, '<div class="ljembed" embedid="$1">$2</div>')
-			.replace(/<lj-poll .*?>[^b]*?<\/lj-poll>/gm, function(ljtags){
-				return new Poll(ljtags).outputHTML();
-			})
-			.replace(/<lj-template(.*?)><\/lj-template>/g, "<lj-template$1 />");
-	};
-
-	window.convertToDraft = function(html){
-		return switchedRteOn ? convertUserAndPool(html) : html;
-	}
 })();

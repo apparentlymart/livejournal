@@ -1369,8 +1369,6 @@ LJDraft.save = function (drafttext, cb){
 		}
 	};
 
-	drafttext = convertToDraft(drafttext);
-
 	HTTPReq.getJSON({
 		method: 'POST',
 		url: '/tools/endpoints/draft.bml',
