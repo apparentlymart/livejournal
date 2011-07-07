@@ -2261,7 +2261,10 @@ sub AUTOLOAD {
         ##      305: Client error: Action forbidden; account is suspended. at
         ## They are useless for Ops, but, yes, they can be useful for engineering debug.
         ##
-        warn "LJ::XMLRPC::$method died: $@" unless $@ =~ /^\d+?\s*:/; 
+        warn "LJ::XMLRPC::$method died: $@" 
+            if $@ !~ /^\d+?\s*:/
+            and $@ ne "Account not validated."
+            and $@ ne "Unknown username."; 
 
         die $@; 
     }
