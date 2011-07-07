@@ -2356,6 +2356,51 @@ sub striphtml
     return $s;
 }
 
+sub Page__get_alien_post {
+    my ( $ctx, $this, $url ) = @_;
+
+    my $entry = LJ::Entry->new_from_url($url);
+    return undef unless $entry;
+    return undef unless $entry->visible_to(undef);
+
+    my $page_user = LJ::load_user($this->{journal}->{username});
+    return undef unless $page_user->prop('get_alien_posts');
+
+    my $post_user = LJ::load_user($entry->{u}->{user});
+    return undef unless $post_user->prop('give_posts_to_alien');
+
+    my $dateparts = $entry->{eventtime};
+    $dateparts =~ tr/-:/  /;
+    my $system_dateparts = $entry->{logtime};
+    $system_dateparts =~ tr/-:/  /;
+
+    my $pickw   = LJ::Entry->userpic_kw_from_props( $entry->props );
+    my $userpic = LJ::S2::Image_userpic( $post_user, 0, $pickw );
+
+    return LJ::S2::Entry(
+        $post_user,
+        {
+            'subject'          => clear_entry_subject($entry),
+            'text'             => clear_entry_text($entry),
+            'dateparts'        => $dateparts,
+            'system_dateparts' => $system_dateparts,
+            'security'         => $entry->security,
+            'allowmask'        => $entry->allowmask,
+            'props'            => $entry->{'props'},
+            'itemid'           => $entry->ditemid,
+            'journal'          => LJ::S2::UserLite($post_user),
+            'poster'           => LJ::S2::UserLite($entry->poster),
+            'comments'         => get_comments_info($entry),
+            'tags'             => get_sorted_tags($entry),
+            'userpic'          => $userpic,
+            'permalink_url'    => $entry->url,
+
+            # for now, these are not implemented
+            'new_day'          => 0,
+            'end_day'          => 0,
+        });
+}
+
 sub html_get_img_urls {
     my ( $ctx, $s ) = @_;
     return LJ::html_get_img_urls( \$s );

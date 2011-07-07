@@ -293,6 +293,46 @@ register_setter("maintainers_freeze", sub {
     }
 });
 
+register_setter('get_alien_posts', sub {
+    my ($u, $key, $value, $err) = @_;
+
+    unless ($value =~ /^(0|1)$/) {
+        $$err = "Illegal value. Must be '0' or '1'";
+        return 0;
+    }
+
+    my $remote = LJ::get_remote();
+
+    if (LJ::check_priv($remote, 'siteadmin', 'propedit') || $LJ::IS_DEV_SERVER) {
+        $u->set_prop('get_alien_posts', $value);
+        return 1;
+    }
+    else {
+        $$err = "You don't have permission to change this property";
+        return 0;
+    }
+});
+
+register_setter('give_posts_to_alien', sub {
+    my ($u, $key, $value, $err) = @_;
+
+    unless ($value =~ /^(0|1)$/) {
+        $$err = "Illegal value. Must be '0' or '1'";
+        return 0;
+    }
+
+    my $remote = LJ::get_remote();
+
+    if (LJ::check_priv($remote, 'siteadmin', 'propedit') || $LJ::IS_DEV_SERVER) {
+        $u->set_prop('give_posts_to_alien', $value);
+        return 1;
+    }
+    else {
+        $$err = "You don't have permission to change this property";
+        return 0;
+    }
+});
+
 register_setter('custom_usericon', sub {
     my ($u, $key, $value, $err) = @_;
 

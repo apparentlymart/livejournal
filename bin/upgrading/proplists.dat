@@ -1670,3 +1670,19 @@ userproplist.recent_logtags:
   indexed: 0
   multihomed: 0
   cldversion: 8
+
+userproplist.get_alien_posts:
+  datatype: bool
+  prettyname: Can get other journals post
+  des: Can get other journals post
+  indexed: 0
+  multihomed: 0
+  cldversion: 8
+
+userproplist.give_posts_to_alien:
+  datatype: bool
+  prettyname: Can give post to others
+  des: Can give post to others
+  indexed: 0
+  multihomed: 0
+  cldversion: 8
