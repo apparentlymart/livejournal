@@ -822,6 +822,7 @@ sub getfriendspage
 
         my $entry = LJ::Entry->new_from_item_hash($ei);
         next unless $entry;
+        next unless $entry->visible_to($u);
 
         # event result data structure
         my %h = ();
@@ -3013,6 +3014,18 @@ sub getevents
         $count++;
         my $evt = {};
         $evt->{'itemid'} = $itemid;
+
+        if ($jposterid != $posterid) {  # now my own post, so need to check for suspended prop
+            my $entry = LJ::Entry->new_from_row(journalid => $ownerid, 
+                                    jitemid => $itemid, 
+                                    allowmask => $mask, 
+                                    posterid => $jposterid, 
+                                    eventtime => $eventtime,
+                                    security => $sec,
+                                    anum => $anum);
+            next if($entry->is_suspended_for($u));
+        }
+
         push @itemids, $itemid;
 
         $evt_from_itemid{$itemid} = $evt;
