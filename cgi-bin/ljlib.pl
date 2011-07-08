@@ -1011,7 +1011,7 @@ sub get_friend_items
 #           -- order: if 'logtime', sorts by logtime, not eventtime
 #           -- friendsview: if true, sorts by logtime, not eventtime
 #           -- notafter: upper bound inclusive for rlogtime/revttime (depending on sort mode),
-#           defaults to no limit
+#              defaults to no limit
 #           -- afterid: upper bound inclusive for jitemid. defaults to not use
 #           -- skip: items to skip
 #           -- itemshow: items to show
@@ -1021,14 +1021,17 @@ sub get_friend_items
 #           -- itemids: optional arrayref onto which itemids should be pushed
 #           -- posterid: [userid] optional, return (community) posts made by this poster only
 #           -- poster: [username] optional, return (community) posts made by this poster only
-# returns: array of hashrefs containing keys:
-#          -- itemid (the jitemid)
-#          -- posterid
-#          -- security
-#          -- alldatepart (in S1 or S2 fmt, depending on 'dateformat' req key)
-#          -- system_alldatepart (same as above, but for the system time)
-#          -- ownerid (if in 'friendsview' mode)
-#          -- rlogtime (if in 'friendsview' mode)
+#              returns: array of hashrefs containing keys:
+#           -- itemid (the jitemid)
+#           -- posterid
+#           -- security
+#           -- alldatepart (in S1 or S2 fmt, depending on 'dateformat' req key)
+#           -- system_alldatepart (same as above, but for the system time)
+#           -- ownerid (if in 'friendsview' mode)
+#           -- rlogtime (if in 'friendsview' mode)
+#           -- entry_objects: optional arrayref onto which LJ::Entry objects should be pushed
+#           -- load_props: if set, objects into entry_objects comes whis preloaded props
+#           -- load_text: if set, objects into entry_objects comes whis preloaded text
 # </LJFUNC>
 sub get_recent_items
 {
