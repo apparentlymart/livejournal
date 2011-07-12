@@ -39,7 +39,7 @@ LJ::register_hook( 'sitewide_resources' => sub {
     my $api_id = $LJ::VKONTAKTE_CONF->{'client_id'};
 
     LJ::need_res ( 'js/jquery/jquery.vkloader.js' );
-    LJ::include_raw( 'html' => qq{<script type="text/javascript">jQuery.VK.init({apiId: $api_id, onlyWidgets: true});</script>} );
+    LJ::include_raw( 'html' => qq[<script type="text/javascript">if (jQuery.VK) { jQuery.VK.init({apiId: $api_id, onlyWidgets: true})} </script> ] );
 } );
 
 1;
