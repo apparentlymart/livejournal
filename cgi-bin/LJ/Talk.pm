@@ -1646,11 +1646,13 @@ sub talkform {
     return "You cannot edit this comment."
         if $editid && !$is_person;
 
+    my $filename = $opts->{embedable_form} 
+        ? "$ENV{'LJHOME'}/templates/CommentForm/FormEmbedable.tmpl"
+        : "$ENV{'LJHOME'}/templates/CommentForm/Form.tmpl";
+
     my $template = LJ::HTML::Template->new(
         { use_expr => 1 },    # force HTML::Template::Pro with Expr support
-        filename          => $opts->{embedable_form}
-                                ? "$ENV{'LJHOME'}/templates/CommentForm/FormEmbedable.tmpl"
-                                : "$ENV{'LJHOME'}/templates/CommentForm/Form.tmpl",
+        filename          => $filename,
         die_on_bad_params => 0,
         strict            => 0,
         )
@@ -2042,6 +2044,33 @@ sub talkform {
     );
 
     return $template->output;
+}
+
+# mobile commenting form 
+sub talkform_mobile {
+    my $opts = shift;
+
+    my @opts = (
+        'read','user',$opts->{form}{journal}, $opts->{form}{itemid}, 'comments', 
+    );
+
+    push @opts, $opts->{form}{thread}
+        if $opts->{form}{thread};
+
+    push @opts, 'reply';
+
+    # run controller
+    my $controller = LJ::Mob::Controller::ReadPost->new;
+    $controller->_user(LJ::get_remote());
+    my $res = $controller->reply(\@opts);
+
+    # passing error messages
+    $res->template->param(
+        errors          => [map { { 'error' => $_ } } @{ $opts->{errors} }],    
+    );
+    
+    # and get ready html code
+    return $res->output_html;
 }
 
 # <LJFUNC>

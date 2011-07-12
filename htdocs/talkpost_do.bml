@@ -126,7 +126,6 @@
             'domain=' . LJ::eurl( $POST{'partner_domain'} ) . '&' .
             'replyto=' . $replyto;
     }
-
     # special case here (LJINT-408), only applies to the partners case:
     #
     # if the user got logged out after they opened the form, disabling them
@@ -140,8 +139,8 @@
     ## init.  this handles all the error-checking, as well.
     my $need_captcha = 0;
     my $init = LJ::Talk::Post::init(\%POST, $remote, \$need_captcha, \@errors);
-    return if LJ::Request->redirected;
 
+    return if LJ::Request->redirected;
     # Report errors in a friendly manner by regenerating the field.
     # Required for challenge/response login, since we also need to regenerate an auth token.
     # We repopulate what we can via hidden fields - however the objects (journalu & parpost) must be recreated here.
@@ -153,7 +152,6 @@
     if ($init && ! $POST{agree_tos} && $commentu && ! $commentu->tosagree_verify) {
         $require_tos = 1;
     }
-
     if (! $init || $require_tos) {
         my ($sth, $parpost);
         my $dbcr = LJ::get_cluster_def_reader($journalu);
@@ -207,10 +205,13 @@
             $talkform_opts->{'resources_html'} = $partner->resources_html({only_needed => 1});
             $talkform_opts->{'partner_domain'} = $POST{'partner_domain'};
         }
+        
+        # show mobile form 
+        return LJ::Talk::talkform_mobile($talkform_opts)
+            if $POST{'mobile_domain'} =~ qr/^\w\.$LJ::DOMAIN$/;
 
         return LJ::Talk::talkform($talkform_opts);
     }
-
     # checked $POST{agree_tos} was checked above if it was necessary,
     # now we just need to save the userprop
     if ($commentu && ! $commentu->tosagree_verify && $POST{agree_tos}) {
@@ -218,7 +219,6 @@
         return LJ::bad_input($err)
             unless $commentu->tosagree_set(\$err);
     }
-
 
     my $talkurl = $init->{talkurl};
 
