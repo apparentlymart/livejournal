@@ -1077,10 +1077,10 @@ sub render_options_block {
             my $preview_tabindex = $self->tabindex;
             my $preview = qq{
                 <input
-                    type='button'
-                    value='$BML::ML{'entryform.preview'}'
-                    onclick='entryPreview(this.form)'
-                    tabindex='$preview_tabindex'
+                    type="button"
+                    value="$BML::ML{'entryform.preview'}"
+                    onclick="entryPreview(this.form)"
+                    tabindex="$preview_tabindex"
                 />
             };
             $preview =~ s/\s+/ /sg; # JS doesn't like newlines in string
@@ -1089,7 +1089,9 @@ sub render_options_block {
             unless ($opts->{'disabled_save'}) {
                 $out .= $self->wrap_js(qq{
                     if (document.getElementById) {
-                        document.write("$preview ");
+                        setTimeout( function() {
+                            jQuery( '$preview' ).prependTo( '#entryform-spellcheck-wrapper' );
+                        }, 0 );
                     }
                 });
             }
