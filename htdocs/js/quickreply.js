@@ -1,7 +1,6 @@
 QuickReply = {
 	lastDiv: 'qrdiv',
-
-
+	
 	reply: function(dtid, pid, newsubject)
 	{
 		var targetname = 'ljqrt' + dtid,
@@ -15,7 +14,7 @@ QuickReply = {
 			subject = $('subject');
 		
 		// Is this a dumb browser?
-		if (! QuickReply._checkElements(qr_ptid, qr_rto, qr_dtid, qr_div, cur_div, qr_form, qr_form_div, subject)) {
+		if (!qr_ptid || !qr_rto || !qr_dtid || !qr_div || !cur_div || !qr_form || !qr_form_div || !subject) {
 			return true;
 		}
 		
@@ -24,7 +23,7 @@ QuickReply = {
 		qr_rto.value = pid;
 		
 		if (QuickReply.lastDiv == 'qrdiv') {
-			qr_div.css('display', 'inline');
+			qr_div.style.display = 'inline';
 			// Only one swap
 			cur_div.parentNode.insertBefore(qr_div, cur_div);
 		} else if (QuickReply.lastDiv != dtid) {
@@ -56,7 +55,7 @@ QuickReply = {
 			pidform = $('parenttalkid');
 		
 		// do not do the default form action (post comment) if something is broke
-		if (! QuickReply._checkElements(qr_form, basepath, dtid, pidform)) {
+		if (!qr_form || !basepath || !dtid || !pidform) {
 			return false;
 		}
 		
@@ -78,7 +77,7 @@ QuickReply = {
 		var submitmore = $('submitmoreopts'),
 			submit = $('submitpost');
 		
-		if (! QuickReply._checkElements(submitmore, submit)) {
+		if (!submitmore || !submit) {
 			return false;
 		}
 		
@@ -115,13 +114,12 @@ QuickReply = {
 	save: function()
 	{
 		var qr_form = $('qrform');
-		var do_spellcheck = $('do_spellcheck'),
-			qr_upic = $('prop_picture_keyword');
-	
-		if (! QuickReply._checkElements(qr_form, do_spellcheck, qr_upic)) {
+		if (!qr_form) {
 			return false;
 		}
-
+		var do_spellcheck = $('do_spellcheck'),
+			qr_upic = $('prop_picture_keyword');
+		
 		$('saved_body').value = qr_form.body.value;
 		$('saved_subject').value = $('subject').value;
 		$('saved_dtid').value = $('dtid').value;
@@ -146,10 +144,7 @@ QuickReply = {
 				subject = $('saved_subject'),
 				subject_str = '',
 				qr_form = $('qrform');
-			if (! QuickReply._checkElements(saved_body, qr_form, dtid)) {
-				return;
-			}
-			if (saved_body.value == '') {
+			if (!saved_body || saved_body.value == '' || !qr_form || !dtid) {
 				return;
 			}
 			
@@ -199,15 +194,6 @@ QuickReply = {
 			}
 		});
 		ups.show();
-	},
-
-	_checkElements:  function () {
-		for (var i = 0; i < arguments.length; ++i) {
-			if (!arguments[i] || !arguments[i].length) {
-				return false;
-			}
-		}
-		return true;
 	}
 }
 
