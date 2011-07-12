@@ -293,7 +293,7 @@ sub module_iframe_tag {
     $moduleid += 0;
 
     # parse the contents of the module and try to come up with a guess at the width and height of the content
-    my $content = $class->module_content(moduleid => $moduleid, journalid => $journalid);
+    my $content = $class->module_content(moduleid => $moduleid, journalid => $journalid, preview => $opts{'preview'});
     my $preview = $opts{preview};
     my $width = 0;
     my $height = 0;
@@ -314,7 +314,6 @@ sub module_iframe_tag {
 
             if ($type eq "S") {
                 my ($elewidth, $eleheight);
-
                 if ($attr->{width}) {
                     $elewidth = $attr->{width}+0;
                     $width = $elewidth if $elewidth > $width;
@@ -361,10 +360,6 @@ sub module_iframe_tag {
                 }
             }
         }
-
-        # add padding
-        # $width += 50 if $width;
-        # $height += 50 if $height;
     }
 
     # use explicit values if we have them
