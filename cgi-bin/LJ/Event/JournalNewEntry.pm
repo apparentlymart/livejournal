@@ -355,15 +355,27 @@ sub subscription_as_html {
         }, @tagdropdown);
 
     } elsif ($arg1) {
-        $usertags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner})->{$arg1}->{'name'};
+        my $tags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner}) || {};
+        my $tag_info = $tags->{$arg1} || {};
+        $usertags = $tag_info->{'name'};
     }
 
     if ($arg1) {
-        return LJ::Lang::ml('event.journal_new_entry.tag.' . ($journal->is_comm ? 'community' : 'user'),
-                {
-                    user    => $journal->ljuser_display,
-                    tags    => $usertags,
-                });
+        if ($usertags) {
+            return LJ::Lang::ml('event.journal_new_entry.tag.' .
+                        ($journal->is_comm ? 'community' : 'user'),
+            {
+                user    => $journal->ljuser_display,
+                tags    => $usertags,
+            });
+        } else {
+            return LJ::Lang::ml('event.journal_new_entry.restricted_tag.' .
+                                ($journal->is_comm ? 'community' : 'user'),
+            {
+                user    => $journal->ljuser_display,                        
+            });
+        }
+        
     }
 
     return LJ::Lang::ml('event.journal_new_entry.friendlist') unless $journal;

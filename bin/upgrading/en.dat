@@ -2510,6 +2510,12 @@ event.journal_new_entry.tag.community=Someone posts an entry tagged [[tags]] to 
 event.journal_new_entry.tag.user|staleness=1
 event.journal_new_entry.tag.user=[[user]] posts a new entry tagged [[tags]]
 
+event.journal_new_entry.restricted_tag.community|staleness=1
+event.journal_new_entry.restricted_tag.community=Someone posts an entry tagged with private or deleted tag to [[user]]
+
+event.journal_new_entry.restricted_tag.user|staleness=1
+event.journal_new_entry.restricted_tag.user=[[user]] posts a new entry tagged with private or deleted tag
+
 event.journal_new_entry.user|staleness=1
 event.journal_new_entry.user=[[user]] posts a new entry.
 
