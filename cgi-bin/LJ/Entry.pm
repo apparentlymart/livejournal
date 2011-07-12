@@ -78,6 +78,7 @@ sub new
     $self->{anum}    = delete $opts{anum};
     $self->{ditemid} = delete $opts{ditemid};
     $self->{jitemid} = delete $opts{jitemid};
+    $self->{rlogtime}= delete $opts{rlogtime};
 
     # make arguments numeric
     for my $f (qw(ditemid jitemid anum)) {
@@ -90,7 +91,7 @@ sub new
     croak("Unknown parameters: " . join(", ", keys %opts))
         if %opts;
 
-    if ($self->{ditemid}) {
+    if ( $self->{ditemid} ) {
         $self->{anum}    = $self->{ditemid} & 255;
         $self->{jitemid} = int($self->{ditemid} / 256);
     }
@@ -107,6 +108,8 @@ sub new
     my $anum = $self->{anum}; # caller supplied anum
     __PACKAGE__->preload_rows([ $self ]);
     return undef if $anum and $anum != $self->{anum}; # incorrect anum -> 'no such entry'
+
+    $self->{ditemid}  = $self->{jitemid} * 256 + $self->{anum};
 
     # save the singleton if it doesn't exist
     $singletons{$journalid}->{$jitemid} = $self;
@@ -206,12 +209,12 @@ sub url {
     my $self = shift;
     my %opts = @_;
     my %args = %opts; # used later
-    my $u = $self->{u};
-    my $view = delete $opts{view};
+    my $u    = $self->{u};
+    my $view   = delete $opts{view};
     my $anchor = delete $opts{anchor};
-    my $mode = delete $opts{mode};
-    my $style = delete $opts{style};
-    my $nc = delete $opts{nc};
+    my $mode   = delete $opts{mode};
+    my $style  = delete $opts{style};
+    my $nc     = delete $opts{nc};
 
     croak "Unknown args passed to url: " . join(",", keys %opts)
         if %opts;
@@ -430,6 +433,7 @@ sub _load_text {
 sub prop {
     my ($self, $prop) = @_;
     $self->_load_props unless $self->{_loaded_props};
+    return $self->{props} unless $prop;
     return $self->{props}{$prop};
 }
 
@@ -2174,8 +2178,7 @@ sub set_logprop
 # des-:
 # returns:
 # </LJFUNC>
-sub load_log_props2
-{
+sub load_log_props2 {
     my $db = isdb($_[0]) ? shift @_ : undef;
 
     my ($uuserid, $listref, $hashref) = @_;
@@ -2186,50 +2189,57 @@ sub load_log_props2
     my %needrc;
     my %rc;
     my @memkeys;
-    foreach (@$listref) {
-        my $id = $_+0;
+
+    foreach ( @$listref ) {
+        my $id          = $_ + 0;
         $needprops{$id} = 1;
-        $needrc{$id} = 1;
+        $needrc{$id}    = 1;
         push @memkeys, [$userid, "logprop:$userid:$id"];
         push @memkeys, LJ::Entry::reply_count_memkey($userid, $id);
     }
+
     return unless %needprops || %needrc;
 
     my $mem = LJ::MemCache::get_multi(@memkeys) || {};
-    while (my ($k, $v) = each %$mem) {
+
+    while ( my ($k, $v) = each %$mem ) {
         next unless $k =~ /(\w+):(\d+):(\d+)/;
-        if ($1 eq 'logprop') {
+
+        if ( $1 eq 'logprop' ) {
             next unless ref $v eq "HASH";
             delete $needprops{$3};
             $hashref->{$3} = $v;
         }
-        if ($1 eq 'rp') {
+
+        if ( $1 eq 'rp' ) {
             delete $needrc{$3};
             $rc{$3} = int($v);  # change possible "0   " (true) to "0" (false)
         }
     }
 
-    foreach (keys %rc) {
+    foreach ( keys %rc ) {
         $hashref->{$_}{'replycount'} = $rc{$_};
     }
 
     return unless %needprops || %needrc;
 
-    unless ($db) {
+    unless ( $db ) {
         my $u = LJ::load_userid($userid);
         $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_def_reader($u) :  LJ::get_cluster_reader($u);
         return unless $db;
     }
 
-    if (%needprops) {
+    if ( %needprops ) {
         LJ::load_props("log");
         my $in = join(",", keys %needprops);
         my $sth = $db->prepare("SELECT jitemid, propid, value FROM logprop2 ".
                                  "WHERE journalid=? AND jitemid IN ($in)");
         $sth->execute($userid);
+
         while (my ($jitemid, $propid, $value) = $sth->fetchrow_array) {
             $hashref->{$jitemid}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
         }
+
         foreach my $id (keys %needprops) {
             LJ::MemCache::set([$userid,"logprop:$userid:$id"], $hashref->{$id} || {});
           }
@@ -2516,12 +2526,10 @@ sub replyspamcount_do {
 # des-opts: Optional hashref of special options.  NOW IGNORED (2005-09-14)
 # des-jitemid: List of jitemids to retrieve the subject & text for.
 # </LJFUNC>
-sub get_logtext2
-{
+sub get_logtext2 {
     my $u = shift;
     my $clusterid = $u->{'clusterid'};
-    my $journalid = $u->{'userid'}+0;
-
+    my $journalid = $u->{'userid'} + 0;
     my $opts = ref $_[0] ? shift : {};  # this is now ignored
 
     # return structure.
@@ -2531,14 +2539,16 @@ sub get_logtext2
     # keep track of itemids we still need to load.
     my %need;
     my @mem_keys;
+
     foreach (@_) {
-        my $id = $_+0;
+        my $id = $_ + 0;
         $need{$id} = 1;
-        push @mem_keys, [$journalid,"logtext:$clusterid:$journalid:$id"];
+        push @mem_keys, [$journalid, "logtext:$clusterid:$journalid:$id"];
     }
 
     # pass 1: memcache
     my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
+
     while (my ($k, $v) = each %$mem) {
         next unless $v;
         $k =~ /:(\d+):(\d+):(\d+)/;
@@ -2556,13 +2566,15 @@ sub get_logtext2
     my $sth = $db->prepare("SELECT jitemid, subject, event FROM logtext2 ".
                            "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
     $sth->execute;
+
     while (my ($id, $subject, $event) = $sth->fetchrow_array) {
         LJ::text_uncompress(\$event);
         my $val = [ $subject, $event ];
         $lt->{$id} = $val;
-        LJ::MemCache::add([$journalid,"logtext:$clusterid:$journalid:$id"], $val);
+        LJ::MemCache::add([$journalid, "logtext:$clusterid:$journalid:$id"], $val);
         delete $need{$id};
     }
+
     return $lt;
 }
 

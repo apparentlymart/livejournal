@@ -17,10 +17,10 @@ my %feedtypes = (
     yadis       => { handler => \&create_view_yadis,                },
     userpics    => { handler => \&create_view_userpics,             },
     comments    => { handler => \&create_view_comments,             },
+    friends     => { handler => \&create_view_rss,  need_items => 1 },
 );
 
-sub make_feed
-{
+sub make_feed {
     my ($u, $remote, $opts) = @_;
 
     $opts->{pathextra} =~ s!^/(\w+)!!;
@@ -36,8 +36,10 @@ sub make_feed
 
         my $allowed = 0;
         my $remote_ip = LJ::get_remote_ip();
+
         foreach my $block (@LJ::YANDEX_RSS_IP_BLOCKS) {
             my $net = Net::Netmask->new($block);
+
             next unless $net->match($remote_ip);
             $allowed = 1;
             last;
@@ -80,17 +82,17 @@ sub make_feed
 
     # if we do not want items for this view, just call out
     $opts->{'contenttype'} = 'text/xml; charset='.$opts->{'saycharset'};
+
     return $viewfunc->{handler}->($journalinfo, $u, $opts)
-        unless ($viewfunc->{need_items});
+        unless $viewfunc->{need_items};
 
     # for syndicated accounts, redirect to the syndication URL
     # However, we only want to do this if the data we're returning
     # is similar. (Not FOAF, for example)
     if ($u->{'journaltype'} eq 'Y') {
         my $synurl = $dbr->selectrow_array("SELECT synurl FROM syndicated WHERE userid=$u->{'userid'}");
-        unless ($synurl) {
-            return 'No syndication URL available.';
-        }
+        return 'No syndication URL available.' unless $synurl;
+
         $opts->{'redir'} = $synurl;
         return undef;
     }
@@ -98,10 +100,10 @@ sub make_feed
     my %FORM = LJ::Request->args;
 
     ## load the itemids
-    my (@itemids, @items);
+    my (@itemids, @objs);
 
-    # for consistency, we call ditemids "itemid" in user-facing settings 
-    my $ditemid = $FORM{itemid}+0;
+    # for consistency, we call ditemids "itemid" in user-facing settings
+    my $ditemid = $FORM{itemid} + 0;
 
     if ($ditemid) {
         my $entry = LJ::Entry->new($u, ditemid => $ditemid);
@@ -111,54 +113,57 @@ sub make_feed
             return undef;
         }
 
-        @itemids = $entry->jitemid;
-
-        push @items, {
-            itemid => $entry->jitemid,
-            anum => $entry->anum,
-            posterid => $entry->poster->id,
-            security => $entry->security,
-            alldatepart => LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql),
-        };
-    } else {
-        @items = LJ::get_recent_items({
-            'clusterid' => $u->{'clusterid'},
-            'clustersource' => 'slave',
-            'remote' => $remote,
-            'userid' => $u->{'userid'},
-            'itemshow' => 25,
-            'order' => "logtime",
-            'tagids' => $opts->{tagids},
-            'tagmode' => $opts->{tagmode},
-            'itemids' => \@itemids,
-            'friendsview' => 1,           # this returns rlogtimes
-            'dateformat' => "S2",         # S2 format time format is easier
+        push @objs, $entry;
+    }
+    elsif ( $feedtype eq 'friends' ) {
+        LJ::get_friend_items({
+            'u'             => $u,
+            'remote'        => $remote,
+            'itemshow'      => 25,
+            'dateformat'    => 'S2',
+            'itemids'       => \@itemids,
+            'entry_objects' => \@objs,
+            'load_props'    => 1,
+            'load_text'     => 1,
+        });
+        $journalinfo->{title} .= ' ' . LJ::Lang::ml('feeds.title.friends');
+        $journalinfo->{link}  .= 'friends/';
+    }
+    else {
+        LJ::get_recent_items({
+            'remote'        => $remote,
+            'userid'        => $u->{'userid'},
+            'itemshow'      => 25,
+            'order'         => 'logtime',
+            'tagids'        => $opts->{tagids},
+            'tagmode'       => $opts->{tagmode},
+            'itemids'       => \@itemids,
+            'friendsview'   => 1,           # this returns rlogtimes
+            'dateformat'    => 'S2',        # S2 format time format is easier
+            'entry_objects' => \@objs,
+            'load_props'    => 1,
+            'load_text'     => 1,
         });
     }
 
-    $opts->{'contenttype'} = 'text/xml; charset='.$opts->{'saycharset'};
-
-    ### load the log properties
-    my %logprops = ();
-    my $logtext;
-    my $logdb = LJ::get_cluster_reader($u);
-    LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
-    $logtext = LJ::get_logtext2($u, @itemids);
+    $opts->{'contenttype'} = 'text/xml; charset=' . $opts->{'saycharset'};
 
     # set last-modified header, then let apache figure out
     # whether we actually need to send the feed.
     my $lastmod = 0;
-    foreach my $item (@items) {
+
+    for my $obj ( @objs ) {
         # revtime of the item.
-        my $revtime = $logprops{$item->{itemid}}->{revtime};
+        my $revtime = $obj->prop('revtime');
         $lastmod = $revtime if $revtime > $lastmod;
 
-        # if we don't have a revtime, use the logtime of the item.
         unless ($revtime) {
-            my $itime = $LJ::EndOfTime - $item->{rlogtime};
+            # use the logtime of the item.
+            my $itime = $LJ::EndOfTime - $obj->{rlogtime};
             $lastmod = $itime if $itime > $lastmod;
         }
     }
+
     LJ::Request->set_last_modified($lastmod) if $lastmod;
 
     # use this $lastmod as the feed's last-modified time
@@ -184,31 +189,27 @@ sub make_feed
     # load tags now that we have no chance of jumping out early
     my $logtags = LJ::Tags::get_logtags($u, \@itemids);
 
-    my %posteru = ();  # map posterids to u objects
-    LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
-
     my @cleanitems;
-    my @entries;     # LJ::Entry objects
 
   ENTRY:
-    foreach my $it (@items)
-    {
-        # load required data
-        my $itemid  = $it->{'itemid'};
-        my $ditemid = $itemid*256 + $it->{'anum'};
-        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
-        $entry_obj->handle_prefetched_props($logprops{$itemid});
+    foreach my $entry_obj (@objs) {
+        my $ditemid = $entry_obj->{ditemid};
 
-        next ENTRY if $posteru{$it->{'posterid'}} && $posteru{$it->{'posterid'}}->{'statusvis'} eq 'S';
+        next ENTRY if $entry_obj->poster->{'statusvis'} eq 'S';
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
 
-        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-            LJ::item_toutf8($u, \$logtext->{$itemid}->[0],
-                            \$logtext->{$itemid}->[1], $logprops{$itemid});
+        if ( $LJ::UNICODE && $entry_obj->prop('unknown8bit') ) {
+            LJ::item_toutf8(
+                $u,
+                \$entry_obj->{'subject'},
+                \$entry_obj->{'event'},
+                $entry_obj->prop,
+            );
         }
 
         # see if we have a subject and clean it
-        my $subject = $logtext->{$itemid}->[0];
+        my $subject = $entry_obj->{'subject'};
+
         if ($subject) {
             $subject =~ s/[\r\n]/ /g;
             LJ::CleanHTML::clean_subject_all(\$subject);
@@ -218,12 +219,12 @@ sub make_feed
         my $readmore = "<b>(<a href=\"$journalinfo->{link}$ditemid.html\">Read more ...</a>)</b>";
 
         # empty string so we don't waste time cleaning an entry that won't be used
-        my $event = $u->{'opt_synlevel'} eq 'title' ? '' : $logtext->{$itemid}->[1];
+        my $event = $u->{'opt_synlevel'} eq 'title' ? '' : $entry_obj->event_raw;
 
         # clean the event, if non-empty
         my $ppid = 0;
-        if ($event) {
 
+        if ($event) {
             # users without 'full_rss' get their logtext bodies truncated
             # do this now so that the html cleaner will hopefully fix html we break
             unless (LJ::get_cap($u, 'full_rss')) {
@@ -232,11 +233,12 @@ sub make_feed
             }
 
             LJ::CleanHTML::clean_event(\$event,
-                {   'wordlength'    => 0, 
-                    'preformatted'  => $logprops{$itemid}->{'opt_preformatted'},
-                    'journalid'     => $u->userid,
-                    'posterid'      => $it->{'posterid'},
-                    'entry_url'     => $entry_obj->url,
+                {
+                    'wordlength'   => 0,
+                    'preformatted' => $entry_obj->prop('opt_preformatted'),
+                    'journalid'    => $u->userid,
+                    'posterid'     => $entry_obj->{'posterid'},
+                    'entry_url'    => $entry_obj->url,
                 }
             );
 
@@ -245,12 +247,12 @@ sub make_feed
             if ($u->{'opt_synlevel'} eq 'summary') {
                 # assume the first paragraph is terminated by two <br> or a </p>
                 # valid XML tags should be handled, even though it makes an uglier regex
-                if ($event =~ m! 
+                if ($event =~ m!
                     (.*?)   ## any text
                     (?=<)   ## followed by "<" (zero-width positive look-ahead assertion)
-                            ## and then either </p> or 2 BRs, 
+                            ## and then either </p> or 2 BRs,
                             ## where BR is one of: <br></br>, <br> or <br/>
-                    ( (?:<br\s*/?\>(?:</br\s*>)?\s*){2} | (?:</p\s*>) ) !six) 
+                    ( (?:<br\s*/?\>(?:</br\s*>)?\s*){2} | (?:</p\s*>) ) !six)
                 {
                     # everything before the matched tag + the tag itself
                     # + a link to read more
@@ -264,13 +266,14 @@ sub make_feed
                 my $name = LJ::Poll->new($pollid)->name;
                 if ($name) {
                     LJ::Poll->clean_poll(\$name);
-                } else {
+                }
+                else {
                     $name = "#$pollid";
                 }
 
                 $event =~ s!<lj-poll-$pollid>!<div><a href="$LJ::SITEROOT/poll/?id=$pollid">View Poll: $name</a></div>!g;
             }
-            
+
             my %args = LJ::Request->args;
             LJ::EmbedModule->expand_entry($u, \$event, expand_full => 1)
                 if %args && $args{'unfold_embed'};
@@ -280,45 +283,47 @@ sub make_feed
         }
 
         my $mood;
-        if ($logprops{$itemid}->{'current_mood'}) {
-            $mood = $logprops{$itemid}->{'current_mood'};
-        } elsif ($logprops{$itemid}->{'current_moodid'}) {
-            $mood = LJ::mood_name($logprops{$itemid}->{'current_moodid'}+0);
+
+        if ( $entry_obj->prop('current_mood') ) {
+            $mood = $entry_obj->prop('current_mood');
+        }
+        elsif ( $entry_obj->prop('current_moodid') ) {
+            $mood = LJ::mood_name($entry_obj->prop('current_moodid') + 0);
         }
 
-        my $createtime = $LJ::EndOfTime - $it->{rlogtime};
-        my $cleanitem = {
-            itemid     => $itemid,
+        my $alldateparts = $entry_obj->{'eventtime'};
+        $alldateparts =~ s/[-:]/ /g;
+
+        my $createtime = $LJ::EndOfTime - $entry_obj->{rlogtime};
+        push @cleanitems, {
+            itemid     => $entry_obj->jitemid,
             ditemid    => $ditemid,
             subject    => $subject,
             event      => $event,
             createtime => $createtime,
-            eventtime  => $it->{alldatepart},  # ugly: this is of a different format than the other two times.
-            modtime    => $logprops{$itemid}->{revtime} || $createtime,
+            eventtime  => $alldateparts,
+            modtime    => $entry_obj->prop('revtime') || $createtime,
             comments   => $entry_obj->comments_shown,
-            music      => $logprops{$itemid}->{'current_music'},
+            music      => $entry_obj->prop('current_music'),
             mood       => $mood,
             ppid       => $ppid,
-            tags       => [ values %{$logtags->{$itemid} || {}} ],
-            security   => $it->{security},
-            posterid   => $it->{posterid},
-            replycount => $logprops{$itemid}->{'replycount'},
+            tags       => [ values %{$logtags->{$entry_obj->jitemid} || {}} ],
+            security   => $entry_obj->security,
+            posterid   => $entry_obj->poster->id,
+            replycount => $entry_obj->prop('replycount'),
+            posteruser => $entry_obj->poster->user,
         };
-        push @cleanitems, $cleanitem;
-        push @entries,    $entry_obj;
     }
 
     # fix up the build date to use entry-time
-    $journalinfo->{'builddate'} = LJ::TimeUtil->time_to_http($LJ::EndOfTime - $items[0]->{'rlogtime'}),
+    $journalinfo->{'builddate'} = LJ::TimeUtil->time_to_http($LJ::EndOfTime - $objs[0]->{'rlogtime'}),
 
-    return $viewfunc->{handler}->($journalinfo, $u, $opts, \@cleanitems, \@entries);
+    return $viewfunc->{handler}->($journalinfo, $u, $opts, \@cleanitems, \@objs);
 }
 
 # the creator for the RSS XML syndication view
-sub create_view_rss
-{
-    my ($journalinfo, $u, $opts, $cleanitems) = @_;
-
+sub create_view_rss {
+    my ($journalinfo, $u, $opts, $cleanitems, $objs) = @_;
     my $ret;
 
     # For Yandex ( http://blogs.yandex.ru/faq.xml?id=542563 )
@@ -367,30 +372,25 @@ sub create_view_rss
         $ret .= "  </image>\n\n";
     }
 
-    my %posteru = ();  # map posterids to u objects
-    LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @$cleanitems], [$u]);
-
     # output individual item blocks
-
-    foreach my $it (@$cleanitems)
-    {
+    foreach my $it (@$cleanitems) {
+        my $entry = shift @$objs;
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
-        my $poster = $posteru{$it->{posterid}};
 
         $ret .= "<item>\n";
         $ret .= "  <guid isPermaLink='true'>$journalinfo->{link}$ditemid.html</guid>\n";
         $ret .= "  <pubDate>" . LJ::TimeUtil->time_to_http($it->{createtime}) . "</pubDate>\n";
         $ret .= "  <title>" . LJ::exml($it->{subject}) . "</title>\n" if $it->{subject};
         $ret .= "  <author>" . LJ::exml($journalinfo->{email}) . "</author>" if $journalinfo->{email};
-        $ret .= "  <link>$journalinfo->{link}$ditemid.html</link>\n";
+        $ret .= "  <link>" . $entry->url . "</link>\n";
         # omit the description tag if we're only syndicating titles
         #   note: the $event was also emptied earlier, in make_feed
         unless ($u->{'opt_synlevel'} eq 'title') {
             $ret .= "  <description>" . LJ::exml($it->{event}) . "</description>\n";
         }
         if ($it->{comments}) {
-            $ret .= "  <comments>$journalinfo->{link}$ditemid.html</comments>\n";
+            $ret .= "  <comments>" . $entry->url . "</comments>\n";
         }
         $ret .= "  <category>$_</category>\n" foreach map { LJ::exml($_) } @{$it->{tags} || []};
         # support 'podcasting' enclosures
@@ -401,9 +401,9 @@ sub create_view_rss
         $ret .= "  <media:title type=\"plain\">" . LJ::exml($it->{music}) . "</media:title>\n" if $it->{music};
         $ret .= "  <lj:mood>" . LJ::exml($it->{mood}) . "</lj:mood>\n" if $it->{mood};
         $ret .= "  <lj:security>" . LJ::exml($it->{security}) . "</lj:security>\n" if $it->{security};
-        unless (LJ::u_equals($u, $poster)) {
-            $ret .= "  <lj:poster>" . LJ::exml($poster->user) . "</lj:poster>\n";
-            $ret .= "  <lj:posterid>" . $poster->userid . "</lj:posterid>\n";
+        unless ($u->{'userid'} == $it->{'posterid'}) {
+            $ret .= "  <lj:poster>" . LJ::exml($it->{'posteruser'}) . "</lj:poster>\n";
+            $ret .= "  <lj:posterid>" . $it->{'posterid'} . "</lj:posterid>\n";
         }
         $ret .= "  <lj:reply-count>$it->{replycount}</lj:reply-count>\n";
 
@@ -444,7 +444,7 @@ sub create_view_rss
             for (my $i = 0; $i <= $now->hour; $i++) {
                 $sum += $today_hits[$i];
             }
-            
+
             if ($now->hour < 23) {
                 my @yesterday_hits;
                 foreach my $el (@$data_y) {
@@ -533,6 +533,7 @@ sub create_view_atom
     unless ($opts->{'single_entry'}) {
         $feed = XML::Atom::Feed->new( Version => 1 );
         $xml  = $feed->{doc};
+
         unless ($xml){
             die "Error: XML-LibXML is required"; ## sudo yum install perl-XML-LibXML
         }
@@ -596,9 +597,9 @@ sub create_view_atom
     }
 
     my $posteru = LJ::load_userids( map { $_->{posterid} } @$cleanitems);
+
     # output individual item blocks
-    foreach my $it (@$cleanitems)
-    {
+    foreach my $it ( @$cleanitems )     {
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
         my $poster = $posteru->{$it->{posterid}};
@@ -945,15 +946,15 @@ sub create_view_yadis {
 
     my $view;
     if ($viewchunk eq '') {
-        $view = "recent";    
+        $view = "recent";
     }
     elsif ($viewchunk eq '/friends') {
-        $view = "friends";    
+        $view = "friends";
     }
     else {
         $view = undef;
     }
-    
+
     if ($view eq 'recent') {
         # Only people (not communities, etc) can be OpenID authenticated
         if ($person && LJ::OpenID->server_enabled) {
@@ -1109,12 +1110,12 @@ sub create_view_comments
         $opts->{handler_return} = 404;
         return 404;
     }
-    
+
     unless ($u->get_cap('latest_comments_rss')) {
         $opts->{handler_return} = 403;
         return;
     }
-    
+
     my $ret;
     $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
     $ret .= LJ::run_hook("bot_director", "<!-- ", " -->") . "\n";
@@ -1154,7 +1155,7 @@ sub create_view_comments
         my $thread_url = $c->thread_url;
         my $subject = $c->subject_raw;
         LJ::CleanHTML::clean_subject_all(\$subject);
-        
+
         $ret .= "<item>\n";
         $ret .= "  <guid isPermaLink='true'>$thread_url</guid>\n";
         $ret .= "  <pubDate>" . LJ::TimeUtil->time_to_http($r->{datepostunix}) . "</pubDate>\n";

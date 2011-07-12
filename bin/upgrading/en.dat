@@ -2704,6 +2704,8 @@ feeds.link=syndicated feeds
 
 feeds.text=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
 
+feeds.title.friends=friends page feed
+
 gender.female|staleness=1
 gender.female=Female
 

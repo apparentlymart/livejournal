@@ -612,20 +612,21 @@ sub get_times_multi {
 #           - showtypes: /[PICNY]/
 # returns: Array of item hashrefs containing the same elements
 # </LJFUNC>
-sub get_friend_items
-{
+sub get_friend_items {
     &nodb;
     my $opts = shift;
 
     my $dbr = LJ::get_db_reader();
     my $sth;
 
-    my $userid = $opts->{'userid'}+0;
+    my $userid = $opts->{'userid'} + 0;
+    $userid = $opts->{'u'}->{'userid'} unless $userid;
     return () if $LJ::FORCE_EMPTY_FRIENDS{$userid};
 
     # 'remote' opt takes precendence, then 'remoteid'
     my $remote = $opts->{'remote'};
     my $remoteid = $remote ? $remote->{'userid'} : 0;
+
     if ($remoteid == 0 && $opts->{'remoteid'}) {
         $remoteid = $opts->{'remoteid'} + 0;
         $remote = LJ::load_userid($remoteid);
@@ -642,13 +643,13 @@ sub get_friend_items
     }
 
     my @items = ();
-    my $itemshow = $opts->{'itemshow'}+0;
-    my $skip = $opts->{'skip'}+0;
+    my $itemshow = $opts->{'itemshow'} + 0;
+    my $skip = $opts->{'skip'} + 0;
     my $getitems = $itemshow + $skip;
 
     # friendspage per day is allowed only for journals with 
     # special cap 'friendspage_per_day'
-    my $events_date = $opts->{u}->get_cap('friendspage_per_day')
+    my $events_date = $opts->{'u'}->get_cap('friendspage_per_day')
                         ? $opts->{events_date}
                         : '';
 
@@ -708,7 +709,7 @@ sub get_friend_items
         if ($LJ::SLOPPY_FRIENDS_THRESHOLD && $fcount > $LJ::SLOPPY_FRIENDS_THRESHOLD) {
             $tu_opts->{memcache_only} = 1;
         }
-        
+
         my $times = $events_date 
                         ? LJ::get_times_multi($tu_opts, keys %$friends)
                         : {updated => LJ::get_timeupdate_multi($tu_opts, keys %$friends)};
@@ -722,11 +723,11 @@ sub get_friend_items
             push @friends_buffer, [ $fid, $rupdate, $clusterid, $friends->{$fid}, $fu ];
         }
 
-        @friends_buffer = 
-            sort { $a->[1] <=> $b->[1] } 
-            grep { 
+        @friends_buffer =
+            sort { $a->[1] <=> $b->[1] }
+            grep {
                 $timeupdate->{$_->[0]} >= $lastmax and # reverse index
-                ($events_date 
+                ($events_date
                     ? $times->{created}->{$_->[0]} < $events_date
                     : 1
                 )
@@ -978,10 +979,50 @@ sub get_friend_items
     # remove skipped ones
     splice(@items, 0, $skip) if $skip;
 
+    my ( @itemids, %owner_itemsids );
+
     # get items
     foreach (@items) {
         $opts->{'owners'}->{$_->{'ownerid'}} = 1;
+
+        # construct an LJ::Entry singleton
+        my $entry = LJ::Entry->new(
+            $_->{'journalid'},
+            'jitemid'  => $_->{'itemid'},
+            'anum'     => $_->{'anum'},
+            'rlogtime' => $_->{'rlogtime'},
+        );
+        $entry->absorb_row($_);
+        push @{$opts->{'entry_objects'}}, $entry;
+        push @{$opts->{'itemids'}}, $_->{'itemid'};
+        push @{$owner_itemsids{ $_->{'journalid'} }->{id}}, $_->{'itemid'};
+        push @{$owner_itemsids{ $_->{'journalid'} }->{entry}}, \$opts->{'entry_objects'}->[-1];
     }
+
+    if ( exists $opts->{load_props} && $opts->{load_props} ) {
+        my %logprops = ();
+
+        for my $journal ( keys %owner_itemsids ) {
+            LJ::load_log_props2($journal, $owner_itemsids{ $journal }->{id}, \%logprops);
+        }
+
+        for my $entry ( @{$opts->{'entry_objects'}} ) {
+            $entry->handle_prefetched_props($logprops{$entry->{jitemid}});
+        }
+    }
+
+    if ( exists $opts->{load_text} && $opts->{load_text} ) {
+        my $texts;
+
+        for my $journal ( keys %owner_itemsids ) {
+            $texts = LJ::get_logtext2(LJ::load_userid($journal), @{$owner_itemsids{ $journal }->{id}} );
+
+            for my $rentry ( @{$owner_itemsids{ $journal }->{entry}} ) {
+                $$rentry->handle_prefetched_text( $texts->{ $$rentry->{jitemid} }->[0], $texts->{ $$rentry->{jitemid} }->[1] );
+            }
+        }
+    }
+
 
     # return the itemids grouped by clusters, if callers wants it.
     if (ref $opts->{'idsbycluster'} eq "HASH") {
@@ -1044,7 +1085,7 @@ sub get_recent_items
     my $err = $opts->{'err'};
 
     my $userid = $opts->{'userid'}+0;
-    my $u = LJ::load_userid($userid) 
+    my $u = LJ::load_userid($userid)
         or die "No such userid: $userid";
 
     # 'remote' opt takes precendence, then 'remoteid'
@@ -1058,13 +1099,16 @@ sub get_recent_items
     my $max_hints = $LJ::MAX_SCROLLBACK_LASTN;  # temporary
     my $sort_key = "revttime";
 
-    my $clusterid = $u->{'clusterid'}+0;
+    my $clusterid = $u->{'clusterid'} + 0;
     my @sources = ("cluster$clusterid");
+
     if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$clusterid}) {
         @sources = ("cluster${clusterid}${ab}");
     }
+
     unshift @sources, ("cluster${clusterid}lite", "cluster${clusterid}slave")
         if $opts->{'clustersource'} eq "slave";
+
     my $logdb = LJ::get_dbh(@sources);
 
     # community/friend views need to post by log time, not event time
@@ -1161,7 +1205,7 @@ sub get_recent_items
         # set $jitemidwhere iff we have jitemids
         if (@$jitemids) {
             $jitemidwhere = " AND jitemid IN (" .
-                            join(',', map { $_+0 } @$jitemids) .
+                            join(',', map { $_ + 0 } @$jitemids) .
                             ")";
         } else {
             # no items, so show no entries
@@ -1260,6 +1304,7 @@ sub get_recent_items
     # keep track of the last alldatepart, and a per-minute buffer
     my $last_time;
     my @buf;
+
     my $flush = sub {
         return unless @buf;
         push @items, sort { $b->{itemid} <=> $a->{itemid} } @buf;
@@ -1274,7 +1319,7 @@ sub get_recent_items
         $last_time = $li->{alldatepart};
 
         # construct an LJ::Entry singleton
-        my $entry = LJ::Entry->new($userid, jitemid => $li->{itemid});
+        my $entry = LJ::Entry->new($userid, jitemid => $li->{itemid}, rlogtime => $li->{rlogtime});
         $entry->absorb_row($li);
         push @{$opts->{'entry_objects'}}, $entry;
     }
