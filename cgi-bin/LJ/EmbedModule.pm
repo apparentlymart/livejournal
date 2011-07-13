@@ -158,6 +158,14 @@ sub _expand_tag {
     }
 };
 
+sub add_user_to_embed {
+    my ($class, $u, $postref) = @_;
+
+    return unless $postref && $$postref;
+
+    my $journal = $u->user;
+    $$postref =~ s/(<lj\-embed\s+id=)/<lj\-embed source_user="$journal" id=/g;
+}
 
 # take a scalarref to a post, parses any lj-embed tags, saves the contents
 # of the tags and replaces them with a module tag with the id.
@@ -213,6 +221,26 @@ sub parse_module_embed {
                 $embed_attrs{id} = $attr->{id} if $attr->{id};
                 $embed_attrs{width} = ($attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width}) if $attr->{width};
                 $embed_attrs{height} = ($attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height}) if $attr->{height};
+            } elsif ($tag eq 'lj-embed' && $type eq 'S' &&
+                     $attr->{'source_user'} && $attr->{'/'}) {
+
+                my $u = LJ::load_user($attr->{'source_user'});
+
+                if ($u) {
+                    $newstate = REGULAR;
+                    $embed = $class->module_content( moduleid  => $attr->{id},
+                                                     journalid => $u->id );
+
+                    if ($embed ne "") {
+                        if ($attr->{width}) {
+                            $embed_attrs{width} = $attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width};
+                        }
+
+                        if ($attr->{height}) {
+                            $embed_attrs{height} = $attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height};
+                        }
+                    }
+                }
             } elsif (($tag eq 'object' || $tag eq 'embed' || $tag eq 'iframe') && $type eq 'S') {
                 # <object> or <embed>
                 # switch to IMPLICIT state unless it is a self-closed tag

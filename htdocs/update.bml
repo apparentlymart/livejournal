@@ -170,8 +170,14 @@ EMBED
 
         if ($entry->visible_to($remote)){
             $subject ||= (LJ::ehtml($entry->subject_orig) || LJ::Lang::ml("repost.default_subject"));
-            unless ($event){
+            unless ($event) {
                 $event = $entry->event_raw;
+                my $journalu = $entry->journal;
+
+                if (!$journalu->equals($remote)) {
+                    LJ::EmbedModule->add_user_to_embed($journalu, \$event);
+                }
+
                 $event = LJ::Lang::ml("repost.wrapper", { 
                                             username => $entry->poster->username,
                                             url      => $entry->url,
