@@ -2059,6 +2059,17 @@ sub talkform_mobile {
 
     push @opts, 'reply';
 
+    my $controller = LJ::Mob::Controller::ReadPost->new;
+
+    # emulating controller work
+    if($opts->{form}{mobile_domain} =~ m!^0.$LJ::DOMAIN!) {
+        if(my $location = $controller->check_access('zero', LJ::get_remote_ip())) {
+            BML::redirect($location);
+        }
+
+        LJ::Request->notes(branding_id => 'zero');
+    }
+
     # run controller
     my $controller = LJ::Mob::Controller::ReadPost->new;
     $controller->_user(LJ::get_remote());
