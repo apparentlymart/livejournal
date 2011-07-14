@@ -70,6 +70,7 @@ use XMLRPC::Lite;
 use XML::Parser;
 use Digest::MD5 qw(md5_hex);
 use Term::ReadKey;
+use POSIX;
 
 # get options
 my %opts;
@@ -89,7 +90,8 @@ exit 1 unless
                "md5pass=s" => \$opts{md5password},
                "alter-security=s" => \$opts{alter_security},
                "confirm-alter" => \$opts{confirm_alter},
-               "no-comments" => \$opts{no_comments},);
+               "no-comments" => \$opts{no_comments},
+               "content-dump-dir=s" => \$opts{content_dump},);
 
 # hit up .jbackup for other options
 if (-e "$ENV{HOME}/.jbackup") {
@@ -143,6 +145,11 @@ jbackup.pl -- journal database generator and formatter
     --dump=X        Dump data in the specified format: html, xml, raw.
     --publiconly    When dumping, only spit out public entries.
     --file=X        Dump to specified file instead of the screen.
+    
+  Debug options:
+    --content-dump-dir=X Specify the directory to use for content dumps.
+                         Content dump creates if a problem occurred during
+                         journal dumping.
 
 Usage examples:
 
@@ -345,7 +352,15 @@ sub do_sync {
 
         # now we want to XML parse this
         my $parser = new XML::Parser(Handlers => { Start => $meta_handler, Char => $meta_content, End => $meta_closer });
-        $parser->parse($content);
+        eval {
+            $parser->parse($content);
+        };
+
+        if ($@) {
+            my $error = $@;
+            print STDERR  "Dump journal failed. Reason is: $@\n";
+            create_content_dump($error, $content, 1)
+        }
     }
     $bak{"comment:ids"} = join ',', keys %meta;
     $bak{"usermap:userids"} = join ',', @userids;
@@ -391,7 +406,15 @@ sub do_sync {
 
         # now we want to XML parse this
         my $parser = new XML::Parser(Handlers => { Start => $body_handler, Char => $body_content, End => $body_closer });
-        $parser->parse($content);
+        eval {
+            $parser->parse($content);
+        };
+
+        if ($@) {
+            my $error = $@;
+            print STDERR  "Dump journal failed. Reason is: $@\n";
+            create_content_dump($error, $content, 2)
+        }
 
         # now at this point what we have to decide whether we should loop again for more metadata
         $lastid += $COMMENTS_FETCH_BODY;
@@ -410,6 +433,27 @@ sub do_sync {
     # update our lastid.  we want this to always point to the last comment we downloaded, because
     # comment ids will never go backwards, and we can always count on the next one being > lastid
     $bak{"comment:lastid"} = $lastid if $count;
+}
+
+
+# save a content to dump file
+sub create_content_dump {
+    my ($error, $content, $id) = @_;
+    
+    if ($opts{content_dump}) {
+        my $dump_file = $opts{content_dump} . "/lj_" . $opts{user} . "_".
+                        strftime('%d_%b_%Y__%H_%M', localtime) .
+                        ".$id.xml";
+        open(my $fh, ">$dump_file")
+            or die "error: failed to create $dump_file $dump_file";
+
+        print $fh $content;
+        close $fh;
+
+        print "-------------------------------------------------\n";
+        print "content dump created: $dump_file\n";
+        print "-------------------------------------------------\n";
+    }
 }
 
 # save an event that we get
