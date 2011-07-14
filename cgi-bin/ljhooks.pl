@@ -369,7 +369,6 @@ register_setter("opt_ctxpopup", sub {
     return 1;
 });
 
-#TODO: enable 'enabled_s2_js' when it will be implemented
 register_setter("s2privs", sub {
     my ($u, $key, $value, $err) = @_;
 
@@ -380,19 +379,14 @@ register_setter("s2privs", sub {
         return 1;
     }
 
-    my %args = map { $_ => 1 } split( /\+/, $value );
-    my @to_set;
-
-    delete $args{$_}
-        ? do {
-            push( @to_set, $_ );
-            delete $good_params{$_};
-          }
-        : undef
-            for keys %good_params;
+    my %args = map { $_ => $_ } split( /\+/, $value );
+    my @to_set = delete @args{ keys %good_params };
+    @to_set = grep { $_ } @to_set;
 
     return 0 if int(keys %args);
     return 0 unless @to_set;
+
+    delete @good_params{ @to_set };
 
     # First of all clear unused s2privs props
     $u->set_prop( $_, 0 ) for keys %good_params;
