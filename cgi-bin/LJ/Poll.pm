@@ -1747,6 +1747,21 @@ sub process_submission {
     }
 
     my $pollid = int($form->{'pollid'});
+
+    my $answers;
+    map { if(/pollq\-(\d+)/) { $answers->{$1} = $form->{$_} } } keys %$form;
+
+    return $class->process_vote($remote, $pollid, $answers, $error, $warnings);
+}
+
+sub process_vote {
+    my $class = shift;
+    my $remote = shift;
+    my $pollid = shift;
+    my $answers = shift;
+    my $error = shift;
+    my $warnings = shift;
+
     my $poll = LJ::Poll->new($pollid);
     unless ($poll) {
         $$error = LJ::Lang::ml('poll.error.nopollid');
@@ -1836,7 +1851,7 @@ sub process_submission {
     my $ct = 0; # how many questions did they answer?
     foreach my $q (@qs) {
         my $qid = $q->pollqid;
-        my $val = $form->{"pollq-$qid"};
+        my $val = $answers->{$qid}; #$form->{"pollq-$qid"};
         if ($q->type eq "check") {
             ## multi-selected items are comma separated from htdocs/poll/index.bml
             $val = join(",", sort { $a <=> $b } split(/,/, $val));

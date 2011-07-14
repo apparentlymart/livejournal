@@ -160,6 +160,10 @@ my %HANDLERS = (
     freezecomments    => \&unfreezecomments,
     editcomment       => \&editcomment,
     getuserpics       => \&getuserpics,
+    createpoll        => \&createpoll,
+    getpoll           => \&getpoll,
+    editpoll          => \&editpoll,
+    votepoll          => \&votepoll,
 );
 
 sub translate
@@ -267,9 +271,192 @@ sub do_request
     return fail($err, 201);
 }
 
-sub checksession {
+sub createpoll 
+{
     my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    my $u = $flags->{'u'};
 
+    # check name parameter
+    my $name = $req->{name} || '';
+    return fail($err, 203, 'name') unless(length($name) <= 1000);
+
+    # check whoview
+    my $whoview = $req->{whoview};
+    return fail($err, 200, 'whoview') unless($whoview);
+    return fail($err, 203, 'whoview') unless($whoview =~ /all|friends|none/);
+
+    # check whovote
+    my $whovote = $req->{whovote};
+    return fail($err, 200, 'whovote') unless($whovote);
+    return fail($err, 203, 'whovote') unless($whovote =~ /all|friends/);
+
+
+    # check questions parameter
+    my $questions = $req->{questions};
+    return fail($err, 200, 'questions') unless($questions);
+    return fail($err, 203, 'questions') unless(ref $questions eq 'HASH');
+
+    my $errors;
+
+    #unless (LJ::Poll->create_from_hash(\$errors)) {
+    #    return fail($err, 103, $errors);
+    #}
+
+
+    return {
+        status      => "OK",
+        pollid     => -1,
+        xc3 => {
+            u => $u,
+        }
+    };
+}
+
+sub getpoll 
+{
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    my $u = $flags->{'u'};
+
+    # check arguments
+    my $mode = $req->{mode} || 'all';
+    return fail($err, 203, 'wrong mode') unless($mode =~ /enter|results|answers|all/);
+
+    # Dynamically change mode
+    
+    my $pollid = $req->{pollid} + 0;
+    return fail($err, 200, 'pollid') unless($pollid);
+
+    # load poll object
+    my $poll = LJ::Poll->new($pollid);
+    return fail($err, 203, 'pollid') unless($poll && $poll->valid);
+
+    my $res = {
+        xc3 => {
+            u => $u,
+        },
+        pollid => $pollid,
+        ditemid => $poll->ditemid,
+        name => $poll->name,
+        whovote => $poll->whovote,
+        whoview => $poll->whoview,
+        posterid => $poll->posterid,
+        journalid => $poll->journalid,
+        journal => $poll->journal->username,
+        poster => $poll->poster->username,
+        status => ($poll->is_closed ? 'close' : 'open'),
+        can_vote => $poll->can_vote($u),
+        can_view => $poll->can_view($u),
+        is_owner => $poll->is_owner($u),
+        mode => $mode,
+    };
+
+    my $time = $poll->get_time_user_submitted($u);
+    $res->{submitted_time} = $time if ($time);
+
+    # Get all questions
+    my @questions = $poll->questions;
+
+    # mode to show poll questions
+    if($mode =~ /enter|all/) {
+        # render_enter
+        @{$res->{questions}} = map { $_->get_hash } @questions;
+    }
+
+    if($mode =~ /results|all/) {
+        $poll->load_aggregated_results();
+        $res->{results} = $poll->{results};
+    }
+
+    if($mode =~ /answers|all/ && $poll->can_view($u)) {
+        foreach my $question (@questions) {
+            my @answers = map { delete $_->{pollqid}; $_ } $question->answers;
+            @{$res->{answers}{$question->pollqid}} = @answers;
+        }
+    }
+    return $res;
+}
+
+sub editpoll 
+{
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    my $u = $flags->{'u'};
+
+    # check arguments
+    my $pollid = $req->{pollid} + 0;
+    return fail($err, 200, 'pollid') unless($pollid);
+
+    # load poll object
+    my $poll = LJ::Poll->new($pollid);
+    return fail($err, 203, 'pollid') unless($poll && $poll->valid);
+
+    my $is_super = $poll->prop('supermaintainer');
+
+    return fail($err, 103, 'Maintainer election poll') if($is_super);
+
+    my $status = $req->{status};
+    return fail($err, 200, 'status') unless($status);
+    return fail($err, 203, 'status') unless($status =~ /open|close/);
+
+    return fail($err, 103, 'You are not owner of the poll') unless($poll->is_owner($u));
+
+    if($status eq 'open') {
+        $poll->open_poll();
+    } elsif ($status eq 'close')  {
+        $poll->close_poll();
+    }
+
+    return {
+        pollid => $pollid,
+        status  => ($poll->{status} eq 'X' ? 'close' : 'open') ,
+        xc3 => {
+            u => $u,
+        }
+    };
+}
+
+sub votepoll 
+{
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    my $u = $flags->{'u'};  # remote_id
+
+    # check pollid
+    my $pollid = $req->{pollid} + 0;
+    return fail($err, 200, 'pollid') unless($pollid);
+
+    # load poll object
+    my $poll = LJ::Poll->new($pollid);
+    return fail($err, 203, 'pollid') unless($poll && $poll->valid);
+
+    # check answers parameter
+    my $answers = $req->{answers};
+    return fail($err, 200, 'answers') unless($answers);
+    return fail($err, 203, 'answers') unless(ref $answers eq 'HASH');
+
+    my @warnings;
+    my $errors;
+
+    unless (LJ::Poll->process_vote($u, $pollid, $answers, \$errors, \@warnings)) {
+        return fail($err, 103, $errors);
+    }
+
+    return {
+        pollid  => $pollid,
+        journalid => $poll->journalid,
+        posterid => $poll->posterid,
+        journal => $poll->journal->username,
+        poster => $poll->poster->username,
+        xc3 => {
+            u => $u,
+        }
+    };
+}
+
+sub checksession {
+    my ($req, $err, $flags) = @_; 
     return undef
         unless authenticate($req, $err, $flags);
 

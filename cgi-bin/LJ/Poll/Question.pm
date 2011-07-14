@@ -201,6 +201,42 @@ sub qtext {
     return $self->{qtext};
 }
 
+sub get_hash {
+    my $self = shift;
+    my $res = {
+                    pollqid => $self->pollqid,
+                    type => $self->type,
+                    sortorder => $self->sortorder,
+              };
+
+    my $text = $self->qtext;
+    if ($text) {
+        LJ::Poll->clean_poll(\$text);
+        $res->{text} = $text;
+    }
+
+    my $opts = $self->opts;
+    my @items = $self->items;
+    @{$res->{items}} = map { delete $_->{pollid}; delete $_->{pollqid}; $_ } @items if (@items);
+
+    if ($self->type eq 'text') {
+        my ($size, $max) = split(m!/!, $opts);
+        $res->{size} = $size;
+        $res->{max} = $max;
+    } elsif ($self->type eq 'scale') {
+        my ($from, $to, $by) = split(m!/!, $opts);
+        $by ||= 1;
+        $res->{from} = $from;
+        $res->{to} = $to;
+        $res->{by} = $by;
+        my $num = 1;
+        for (my $at = $from; $at <= $to; $at += $by) {
+            push @{$res->{items}}, { item => $at, pollitid => $at, sortorder => $num++ };
+        }
+    }
+    return $res;
+}
+
 # Count answers pages
 sub answers_pages {
     my $self = shift;
