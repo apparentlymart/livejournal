@@ -1692,5 +1692,5 @@ userproplist.javascript:
   prettyname: JS is enabled in S2
   des: JS is enabled in S2
   indexed: 0
-  multihomed: 0
+  multihomed: 1
   cldversion: 8
