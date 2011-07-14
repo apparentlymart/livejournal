@@ -131,12 +131,12 @@ ILikeThis = {
 
 DonateButton = {
 	buyMore: function(node, ml_message, event) {
-		var bubble = jQuery(node).data("bubble");
+		var bubble = jQuery(node).data("buyMoreCachedBubble");
 		if (!bubble) {
 			bubble = jQuery("<span>" + ml_message + "</span>").bubble({
 				target: node
 			});
-			jQuery(node).data("bubble", bubble);
+			jQuery(node).data("buyMoreCachedBubble", bubble);
 		}
 
 		bubble.bubble("show");
