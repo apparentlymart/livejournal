@@ -1671,7 +1671,7 @@ userproplist.recent_logtags:
   multihomed: 0
   cldversion: 8
 
-userproplist.get_alien_posts:
+userproplist.take_entries:
   datatype: bool
   prettyname: Can get other journals post
   des: Can get other journals post
@@ -1679,10 +1679,18 @@ userproplist.get_alien_posts:
   multihomed: 0
   cldversion: 8
 
-userproplist.give_posts_to_alien:
+userproplist.provide_entries:
   datatype: bool
   prettyname: Can give post to others
   des: Can give post to others
+  indexed: 0
+  multihomed: 0
+  cldversion: 8
+
+userproplist.javascript:
+  datatype: bool
+  prettyname: JS is enabled in S2
+  des: JS is enabled in S2
   indexed: 0
   multihomed: 0
   cldversion: 8

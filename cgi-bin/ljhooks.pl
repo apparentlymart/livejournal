@@ -293,7 +293,7 @@ register_setter("maintainers_freeze", sub {
     }
 });
 
-register_setter('get_alien_posts', sub {
+register_setter('take_entries', sub {
     my ($u, $key, $value, $err) = @_;
 
     unless ($value =~ /^(0|1)$/) {
@@ -304,7 +304,7 @@ register_setter('get_alien_posts', sub {
     my $remote = LJ::get_remote();
 
     if (LJ::check_priv($remote, 'siteadmin', 'propedit') || $LJ::IS_DEV_SERVER) {
-        $u->set_prop('get_alien_posts', $value);
+        $u->set_prop('take_entries', $value);
         return 1;
     }
     else {
@@ -313,7 +313,7 @@ register_setter('get_alien_posts', sub {
     }
 });
 
-register_setter('give_posts_to_alien', sub {
+register_setter('provide_entries', sub {
     my ($u, $key, $value, $err) = @_;
 
     unless ($value =~ /^(0|1)$/) {
@@ -324,7 +324,7 @@ register_setter('give_posts_to_alien', sub {
     my $remote = LJ::get_remote();
 
     if (LJ::check_priv($remote, 'siteadmin', 'propedit') || $LJ::IS_DEV_SERVER) {
-        $u->set_prop('give_posts_to_alien', $value);
+        $u->set_prop('provide_entries', $value);
         return 1;
     }
     else {
@@ -366,6 +366,40 @@ register_setter("opt_ctxpopup", sub {
         return 0;
     }
     $u->set_prop("opt_ctxpopup", $value);
+    return 1;
+});
+
+#TODO: enable 'enabled_s2_js' when it will be implemented
+register_setter("s2privs", sub {
+    my ($u, $key, $value, $err) = @_;
+
+    my %good_params = map { $_ => 1} qw/javascript take_entries provide_entries/;
+
+    if ( $value eq 'none' ) {
+        $u->set_prop( $_, 0 ) for keys %good_params;
+        return 1;
+    }
+
+    my %args = map { $_ => 1 } split( /\+/, $value );
+    my @to_set;
+
+    delete $args{$_}
+        ? do {
+            push( @to_set, $_ );
+            delete $good_params{$_};
+          }
+        : undef
+            for keys %good_params;
+
+    return 0 if int(keys %args);
+    return 0 unless @to_set;
+
+    # First of all clear unused s2privs props
+    $u->set_prop( $_, 0 ) for keys %good_params;
+
+    # and now set required props
+    $u->set_prop( $_, 0 ) for @to_set;
+
     return 1;
 });
 
