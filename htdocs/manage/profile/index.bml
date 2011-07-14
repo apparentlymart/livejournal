@@ -252,7 +252,7 @@ body<=
                         ## we found a uh. get id and look at paid exp for expire date
                         $ret .= "<img src='".$uh->get_uh_img."' class='i-manage-userhead' />";
                         ## whether the user bought userhead?
-                        if (my ($found_uh) = grep { $_->{item} == "uh_".$uh->get_uh_id } @$uhs) {
+                        if (my ($found_uh) = grep { $_->{item} eq ( "uh_" . f->get_uh_id ) } @$uhs) {
                             $ret .= '&nbsp;'. LJ::Lang::ml('.section.userheads.expire_date', { date => $date_format->($found_uh->{expdate}) });
                         }
                     } else {
