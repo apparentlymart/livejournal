@@ -1906,7 +1906,8 @@ sub clean_comment
     my ($ref, $opts) = @_;
 
     unless (ref $opts) {
-        $opts = { 'preformatted' => $opts };
+        $opts = { 'preformatted' => $opts,
+                  'nocss'        => 1 };
     }
 
     # fast path:  no markup or URLs to linkify
