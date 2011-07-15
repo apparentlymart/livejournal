@@ -271,48 +271,6 @@ sub do_request
     return fail($err, 201);
 }
 
-sub createpoll 
-{
-    my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
-    my $u = $flags->{'u'};
-
-    # check name parameter
-    my $name = $req->{name} || '';
-    return fail($err, 203, 'name') unless(length($name) <= 1000);
-
-    # check whoview
-    my $whoview = $req->{whoview};
-    return fail($err, 200, 'whoview') unless($whoview);
-    return fail($err, 203, 'whoview') unless($whoview =~ /all|friends|none/);
-
-    # check whovote
-    my $whovote = $req->{whovote};
-    return fail($err, 200, 'whovote') unless($whovote);
-    return fail($err, 203, 'whovote') unless($whovote =~ /all|friends/);
-
-
-    # check questions parameter
-    my $questions = $req->{questions};
-    return fail($err, 200, 'questions') unless($questions);
-    return fail($err, 203, 'questions') unless(ref $questions eq 'HASH');
-
-    my $errors;
-
-    #unless (LJ::Poll->create_from_hash(\$errors)) {
-    #    return fail($err, 103, $errors);
-    #}
-
-
-    return {
-        status      => "OK",
-        pollid     => -1,
-        xc3 => {
-            u => $u,
-        }
-    };
-}
-
 sub getpoll 
 {
     my ($req, $err, $flags) = @_;
@@ -323,14 +281,15 @@ sub getpoll
     my $mode = $req->{mode} || 'all';
     return fail($err, 203, 'wrong mode') unless($mode =~ /enter|results|answers|all/);
 
-    # Dynamically change mode
-    
     my $pollid = $req->{pollid} + 0;
     return fail($err, 200, 'pollid') unless($pollid);
 
     # load poll object
     my $poll = LJ::Poll->new($pollid);
     return fail($err, 203, 'pollid') unless($poll && $poll->valid);
+
+    # question id
+    my $pollqid = $req->{'pollqid'} + 0;
 
     my $res = {
         xc3 => {
