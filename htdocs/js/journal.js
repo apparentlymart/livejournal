@@ -184,6 +184,7 @@ DonateButton = {
 FriendsTimes = {
 	prev_page_start: null,
 	have_prev: null,
+	initTime: +new Date(),
 
 	init: function() {
 		jQuery(function(){
@@ -218,6 +219,88 @@ FriendsTimes = {
 			});
 		}, conf.timeout);
 	},
+
+	/**
+	 * Fetch new posts that have appeared since page load.
+	 *    Function loads new posts with ajax if the user is on the first page and there are ten
+	 *    or less new posts.
+	 */
+	fetchNew: function() {
+		var blockFunction = false,
+			content;
+
+		function fetchContent() {
+			var ftList = jQuery( '.b-friendstimes' );
+			jQuery.get( LiveJournal.getAjaxUrl( 'ft_more' ), {
+					boundary: ftList.attr( 'data-firstitem' )
+				}, function( html ) {
+					html = html.replace( /<script[^>]+>(.*?)<\/script>/, '');
+
+					var node = jQuery( html ).find( '.b-friendstimes' ),
+						newBoundary = node.attr( 'data-firstitem' ),
+						newTs = +new Date();
+
+					content = node.children();
+					if( content.length ) {
+						ftList.attr( 'data-firstitem', newBoundary );
+						Site.server_time += Math.floor( ( newTs - FriendsTimes.initTime ) / 1000 );
+						FriendsTimes.initTime = newTs;
+					}
+			} )
+		}
+
+		function renderContent() {
+			if( !content ) { setTimeout( renderContent, 1000 ); return; }
+
+			jQuery(".b-friendstimes-f5").hide();
+
+			content
+				.css( 'opacity', 0.01 )
+				.prependTo( '.b-friendstimes' );
+
+			setTimeout( function() {
+				if( jQuery.browser.msie && +jQuery.browser.version <= 8 ) {
+					content
+						.css( 'opacity', 1 )
+					blockFunction = false;
+					content = null;
+				} else {
+					content
+						.animate( { opacity: 1 }, 300, function() {
+							blockFunction = false;
+							content = null;
+						} );
+				}
+			}, 200 );
+		}
+
+		return function( event ) {
+			if( blockFunction ) { return false; }
+
+			var unreadNumber = +jQuery(".b-friendstimes-f5 b").text(),
+				getArgs = LiveJournal.parseGetArgs( location.href );
+
+			if( unreadNumber > 10  || !!getArgs.to ) {
+				return;
+			}
+
+			blockFunction = true;
+			var animateComplete = false;
+			jQuery( 'body,html' ).animate( { scrollTop: 0 }, 300, function() {
+				if( !animateComplete ) {
+					renderContent();
+					animateComplete = true;
+				}
+			} );
+			fetchContent();
+
+			if( event ) {
+				event = jQuery.event.fix( event );
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		}
+	}(),
 
 	bindLoadMore: function(conf) {
 		var $window = jQuery(window),
