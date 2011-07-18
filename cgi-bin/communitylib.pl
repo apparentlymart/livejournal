@@ -29,6 +29,14 @@ sub create_supermaintainer_election_poll {
     my $to_journal = $args{'to_journal'} || LJ::load_user('lj_elections');
 
     my $comm = LJ::load_userid($comm_id);
+    my $comm_username = $comm->{user};
+    if ($comm_username eq 'cheaptrip' ||
+        $comm_username eq 'cheaptrip_spb' ||
+        $comm_username eq 'cheaptrip_ua')
+    {
+        die "Can't create supermaintainer election poll for $comm_username: the community doesn't participate in voting"; 
+    }
+
     my $entry = undef;
     unless ($no_job) {
         $entry = _create_post (to => $to_journal, comm => $comm);

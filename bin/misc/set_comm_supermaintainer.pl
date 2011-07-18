@@ -198,13 +198,21 @@ foreach my $c_id (@$communities) {
         } else {
             _log "Create poll for supermaintainer election\n";
             my $log = '';
-            my $poll_id = LJ::create_supermaintainer_election_poll (
+            my $poll_id;
+            eval {
+                $poll_id = LJ::create_supermaintainer_election_poll (
                     comm_id     => $c_id, 
                     maint_list  => \@alive_maintainers, 
                     log         => \$log,
                     no_job      => $no_job,
                     to_journal  => $to_journal,
-            );
+                );
+            };
+            if ($@) {
+                warn "Can't create poll for community '$comm': log=$log, error=$@";
+                next;
+            }    
+            
             _log $log;
             unless ($no_job) {
                 $comm->set_prop ('election_poll_id' => $poll_id)

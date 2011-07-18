@@ -69,15 +69,18 @@ sub execute {
         unless @maintainers;
 
     my $log = '';
-    my $poll_id = LJ::create_supermaintainer_election_poll (
+    my $poll_id;
+    eval {
+        $poll_id = LJ::create_supermaintainer_election_poll (
             comm_id      => $c->userid, 
             maint_list   => \@maintainers, 
             log          => \$log,
             no_job       => 0,
             check_active => 1,
-    );
+        );
+    };
 
-    return $self->error("Can't create poll")
+    return $self->error("Can't create poll: $@")
         unless $poll_id;
 
     $c->set_prop ("election_poll_id", $poll_id);
