@@ -493,24 +493,7 @@ sub trans
         return redir($url);
     }
 
-    # see if we should setup a minimal scheme based on the initial part of the
-    # user-agent string; FIXME: maybe this should do more than just look at the
-    # initial letters?
-
-    if (my $ua = LJ::Request->header_in('User-Agent')) {
-        if ( Apache::WURFL->is_mobile && $BML::COOKIE{fullversion} ne 'yes' 
-            #($ua =~ /^([a-z]+)/i) && $LJ::MINIMAL_USERAGENT{$1}
-           ) {
-            LJ::Request->notes('use_minimal_scheme' => 1);
-            LJ::Request->notes('bml_use_scheme' => $LJ::MINIMAL_BML_SCHEME);
-
-            my $mobile_url = LJ::Mob::Uri->find("http://".LJ::Request->hostname.LJ::Request->uri);
-
-            return redir("http://m.$LJ::DOMAIN$mobile_url")
-                if $mobile_url;
-        }
-    }
-
+    # show mobile.look if in POST-request is 'mobile_domain' argument
     if(LJ::Request->post_param('mobile_domain')) {
         LJ::Request->notes('use_minimal_scheme' => 1);
         LJ::Request->notes('bml_use_scheme' => $LJ::MINIMAL_BML_SCHEME)
@@ -518,7 +501,11 @@ sub trans
 
     # Redirect to mobile version if needed.
     my $new_url = Apache::WURFL->redirect4mobile( host => $host, uri => $uri, );
-    return redir($new_url, LJ::Request::HTTP_MOVED_PERMANENTLY) if $new_url;
+    if($new_url) {
+        LJ::Request->notes('use_minimal_scheme' => 1);
+        LJ::Request->notes('bml_use_scheme' => $LJ::MINIMAL_BML_SCHEME);
+        return redir($new_url, LJ::Request::HTTP_MOVED_PERMANENTLY);
+    }
 
     # now we know that the request is going to succeed, so do some checking if they have a defined
     # referer.  clients and such don't, so ignore them.
