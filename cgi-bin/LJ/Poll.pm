@@ -1010,6 +1010,26 @@ sub preview {
     return $ret;
 }
 
+# get poll description as a xml
+sub get_poll_xml {
+    my $self = shift;
+    my $ret = '';
+
+    my $attrs = ' id="'.$self->pollid.'"';
+    my $name = $self->name;
+    if ($name) {
+        LJ::Poll->clean_poll(\$name);
+        $attrs .=" name=\"$name\"";
+    }
+
+    $attrs .= ' whovote="'.$self->whovote.'" whoview="'.$self->whoview.'"';
+    $ret .= "<lj-poll$attrs>";
+    my @questions = $self->questions;
+    map { $ret .= $_->get_question_xml() } @questions;
+    $ret .= '</lj-poll>';
+    return $ret;
+}
+
 sub render_results {
     my $self = shift;
     my %opts = @_;
@@ -1716,20 +1736,22 @@ use Carp qw (croak);
 
 # takes a scalarref to entry text and expands lj-poll tags into the polls
 sub expand_entry {
-    my ($class, $entryref) = @_;
+    my ($class, $entryref, %opts) = @_;
+    my $getpolls = $opts{getpolls};
 
     my $expand = sub {
         my $pollid = (shift) + 0;
+        my $viewpoll = shift;
 
         return "[Error: no poll ID]" unless $pollid;
 
         my $poll = LJ::Poll->new($pollid);
         return "[Error: Invalid poll ID $pollid]" unless $poll && $poll->valid;
 
-        return $poll->render;
+        return ($viewpoll ? $poll->get_poll_xml : $poll->render);
     };
 
-    $$entryref =~ s/<lj-poll-(\d+)>/$expand->($1)/eg;
+    $$entryref =~ s/<lj-poll-(\d+)>/$expand->($1, $getpolls)/eg;
 }
 
 sub process_submission {

@@ -237,6 +237,32 @@ sub get_hash {
     return $res;
 }
 
+sub get_question_xml {
+    my $self = shift;
+    my $ret;
+    my $attrs = ' id="'.$self->pollqid.'" type="'.$self->type.'"';
+
+    my $opts = $self->opts;
+    if ($self->type eq 'text') {
+        my ($size,$max) = split(m!/!, $opts);
+        $attrs .= ' size="'.$size.'" max="'.$max.'"';
+    } elsif ($self->type eq 'scale') {
+        my ($from, $to, $by) = split(m!/!, $opts);
+        $by ||= 1;
+        $attrs .= ' from="'.$from.'" to="'.$to.'" by="'.$by.'"';
+    }
+    $ret = "<lj-pq$attrs>";
+    my $text = $self->qtext;
+    if($text) {
+        LJ::Poll->clean_poll(\$text);
+        $ret .= $text;
+    }
+    my @items = $self->items;
+    map { $ret .= '<lj-pi id="'.$_->{pollitid}.'" sortorder="'.$_->{sortorder}.'">'.$_->{item}.'</lj-pi>' } @items;
+    $ret .= '</lj-pq>';
+    return $ret;
+}
+
 # Count answers pages
 sub answers_pages {
     my $self = shift;
