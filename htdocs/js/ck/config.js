@@ -5,7 +5,7 @@
 
 CKEDITOR.editorConfig = function(config){
 
-	var ljItems = ['LJUserLink','Image'];
+	var ljItems = ['LJUserLink','LJImage'];
 	if(top.Site.media_embed_enabled){
 		ljItems.push('LJEmbedLink');
 	}
@@ -41,7 +41,7 @@ CKEDITOR.editorConfig = function(config){
 		'horizontalrule,' +
 		'htmldataprocessor,' +
 		'iframedialog,' +
-		'image,' +
+		//'image,' +
 		'indent,' +
 		'justify,' +
 		'keystrokes,' +
@@ -112,7 +112,7 @@ CKEDITOR.editorConfig = function(config){
 		['Bold','Italic','-','OrderedList','UnorderedList','-','Link','Unlink','-','About']
 	];
 	config.toolbar = 'Full';
-	config.enterMode = 'br';
+	config.enterMode = CKEDITOR.ENTER_BR;
 	config.forceEnterMode = false;
 	config.shiftEnterMode = 'p';
 	config.keystrokes = [
