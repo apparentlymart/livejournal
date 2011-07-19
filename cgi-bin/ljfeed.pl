@@ -11,13 +11,14 @@ use XML::Atom::Person;
 use XML::Atom::Feed;
 
 my %feedtypes = (
-    rss         => { handler => \&create_view_rss,  need_items => 1 },
-    atom        => { handler => \&create_view_atom, need_items => 1 },
-    foaf        => { handler => \&create_view_foaf,                 },
-    yadis       => { handler => \&create_view_yadis,                },
-    userpics    => { handler => \&create_view_userpics,             },
-    comments    => { handler => \&create_view_comments,             },
-    friends     => { handler => \&create_view_rss,  need_items => 1 },
+    'rss'          => { handler => \&create_view_rss,  need_items => 1 },
+    'atom'         => { handler => \&create_view_atom, need_items => 1 },
+    'foaf'         => { handler => \&create_view_foaf,                 },
+    'yadis'        => { handler => \&create_view_yadis,                },
+    'userpics'     => { handler => \&create_view_userpics,             },
+    'comments'     => { handler => \&create_view_comments,             },
+    'rss_friends'  => { handler => \&create_view_rss,  need_items => 1, paid_only => 1 },
+    'atom_friends' => { handler => \&create_view_atom, need_items => 1, paid_only => 1 },
 );
 
 sub make_feed {
@@ -37,7 +38,7 @@ sub make_feed {
         my $allowed = 0;
         my $remote_ip = LJ::get_remote_ip();
 
-        foreach my $block (@LJ::YANDEX_RSS_IP_BLOCKS) {
+        foreach my $block ( @LJ::YANDEX_RSS_IP_BLOCKS ) {
             my $net = Net::Netmask->new($block);
 
             next unless $net->match($remote_ip);
@@ -45,13 +46,13 @@ sub make_feed {
             last;
         }
 
-        unless ($allowed) {
+        unless ( $allowed ) {
             $opts->{'handler_return'} = 403;
             return undef;
         }
     }
 
-    unless ($viewfunc) {
+    unless ( $viewfunc ) {
         $opts->{'handler_return'} = 404;
         return undef;
     }
@@ -62,10 +63,10 @@ sub make_feed {
 
     my $user = $u->{'user'};
 
-    LJ::load_user_props($u, qw/ journaltitle journalsubtitle opt_synlevel /);
+    LJ::load_user_props($u, qw/journaltitle journalsubtitle opt_synlevel/);
 
     LJ::text_out(\$u->{$_})
-        foreach ("name", "url", "urlname");
+        foreach qw/name url urlname/;
 
     # opt_synlevel will default to 'full'
     $u->{'opt_synlevel'} = 'full'
@@ -89,7 +90,7 @@ sub make_feed {
     # for syndicated accounts, redirect to the syndication URL
     # However, we only want to do this if the data we're returning
     # is similar. (Not FOAF, for example)
-    if ($u->{'journaltype'} eq 'Y') {
+    if ( $u->{'journaltype'} eq 'Y' ) {
         my $synurl = $dbr->selectrow_array("SELECT synurl FROM syndicated WHERE userid=$u->{'userid'}");
         return 'No syndication URL available.' unless $synurl;
 
@@ -105,17 +106,17 @@ sub make_feed {
     # for consistency, we call ditemids "itemid" in user-facing settings
     my $ditemid = $FORM{itemid} + 0;
 
-    if ($ditemid) {
+    if ( $ditemid ) {
         my $entry = LJ::Entry->new($u, ditemid => $ditemid);
 
-        if (! $entry || ! $entry->valid || ! $entry->visible_to($remote)) {
+        if ( ! $entry || ! $entry->valid || ! $entry->visible_to($remote) ) {
             $opts->{'handler_return'} = 404;
             return undef;
         }
 
         push @objs, $entry;
     }
-    elsif ( $feedtype eq 'friends' ) {
+    elsif ( $viewfunc->{'paid_only'} ) {
         LJ::get_friend_items({
             'u'             => $u,
             'remote'        => $remote,
@@ -126,6 +127,12 @@ sub make_feed {
             'load_props'    => 1,
             'load_text'     => 1,
         });
+
+        # available for paid users only
+        unless ( $u->get_cap('paid') ) {
+            @itemids = @objs = ();
+        }
+
         $journalinfo->{title} .= ' ' . LJ::Lang::ml('feeds.title.friends');
         $journalinfo->{link}  .= 'friends/';
     }
@@ -224,7 +231,7 @@ sub make_feed {
         # clean the event, if non-empty
         my $ppid = 0;
 
-        if ($event) {
+        if ( $event ) {
             # users without 'full_rss' get their logtext bodies truncated
             # do this now so that the html cleaner will hopefully fix html we break
             unless (LJ::get_cap($u, 'full_rss')) {
@@ -244,15 +251,15 @@ sub make_feed {
 
             # do this after clean so we don't have to about know whether or not
             # the event is preformatted
-            if ($u->{'opt_synlevel'} eq 'summary') {
+            if ( $u->{'opt_synlevel'} eq 'summary' ) {
                 # assume the first paragraph is terminated by two <br> or a </p>
                 # valid XML tags should be handled, even though it makes an uglier regex
-                if ($event =~ m!
+                if ( $event =~ m!
                     (.*?)   ## any text
                     (?=<)   ## followed by "<" (zero-width positive look-ahead assertion)
                             ## and then either </p> or 2 BRs,
                             ## where BR is one of: <br></br>, <br> or <br/>
-                    ( (?:<br\s*/?\>(?:</br\s*>)?\s*){2} | (?:</p\s*>) ) !six)
+                    ( (?:<br\s*/?\>(?:</br\s*>)?\s*){2} | (?:</p\s*>) ) !six )
                 {
                     # everything before the matched tag + the tag itself
                     # + a link to read more
@@ -260,11 +267,11 @@ sub make_feed {
                 }
             }
 
-            while ($event =~ /<lj-poll-(\d+)>/g) {
+            while ( $event =~ /<lj-poll-(\d+)>/g ) {
                 my $pollid = $1;
 
                 my $name = LJ::Poll->new($pollid)->name;
-                if ($name) {
+                if ( $name ) {
                     LJ::Poll->clean_poll(\$name);
                 }
                 else {
