@@ -157,6 +157,7 @@ body<=
                      page      => $page,
                      view      => $view,
                      mode      => $GET{mode},
+                     selected  => $GET{selected},
                      items     => \@all_items);
 
     $body .= qq{

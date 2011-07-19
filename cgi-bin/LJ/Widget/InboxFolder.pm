@@ -4,6 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use LJ::TimeUtil;
+use constant ITEMS_PER_PAGE => 15;
 
 # DO NOT COPY
 # This widget is not a good example of how to use JS and AJAX.
@@ -34,6 +35,7 @@ sub need_res {
 #   expand: display a specified in expanded view
 #   inbox: NotificationInbox object
 #   items: list of notification items
+#   selected: message to expanded view (page is ignored)
 sub render_body {
     my $class = shift;
     my %opts = @_;
@@ -46,6 +48,7 @@ sub render_body {
     my $page = $opts{page} || 1;
     my $view = $opts{view} || "all";
     my $remote = LJ::get_remote();
+    my $selected = $opts{selected} || 0; # this is msgid
 
     my $unread_count = 1; #TODO get real number
     my $disabled = $unread_count ? '' : 'disabled';
@@ -62,11 +65,17 @@ sub render_body {
                   });
 
     # pagination
-    my $page_limit = 15;
+    my $page_limit = ITEMS_PER_PAGE;
     $page = 1 if $page < 1;
     my $last_page = POSIX::ceil((scalar @$nitems) / $page_limit);
     $last_page ||= 1;
     $page = $last_page if $page > $last_page;
+
+    @$nitems = sort { $b->when_unixtime <=> $a->when_unixtime } @$nitems;
+
+    # find page for selected item 
+    my $selected_page = __get_page_by_selected_item($selected, $nitems);
+    $page = $selected_page ? $selected_page : $page;
 
     my $prev_disabled = ($page <= 1) ? 'disabled' : '';
     my $next_disabled = ($page >= $last_page) ? 'disabled' : '';
@@ -96,6 +105,7 @@ sub render_body {
             </tr>
         };
     };
+    
     # create table of messages
     my $messagetable = qq {
      <div id="${name}_Table" class="NotificationTable">
@@ -110,11 +120,8 @@ sub render_body {
             };
     }
 
-    @$nitems = sort { $b->when_unixtime <=> $a->when_unixtime } @$nitems;
-
     # print out messages
     my $rownum = 0;
-
     my $starting_index = ($page - 1) * $page_limit;
     for (my $i = $starting_index; $i < $starting_index + $page_limit; $i++) {
         my $inbox_item = $nitems->[$i];
@@ -150,9 +157,15 @@ sub render_body {
         if ($contents) {
             BML::ebml(\$contents);
 
-            my $expanded = $expand && $expand == $qid;
+            # Was item selected by id?
+            my $expand_selected = __was_item_selected($selected, $inbox_item);
+
+            # Does item need to be expanded?
+            my $expanded = ( $expand && $expand == $qid ) || $expand_selected;
             $expanded ||= $remote->prop('esn_inbox_default_expand');
-            $expanded = 0 if $inbox_item->read;
+            if ( $inbox_item->read && !$expand_selected ) {
+                $expanded = 0 ;
+            }
 
             my $img = $expanded ? "expand.gif" : "collapse.gif";
 
@@ -207,6 +220,42 @@ sub render_body {
     $msgs_body .= "<script>ESN_Inbox.confirmDelete = '" . $class->ml('widget.inboxfolder.confirm.delete') . "';</script>";
 
     return $msgs_body;
+}
+
+
+sub __was_item_selected {
+    my ($selected, $inbox_item) = @_;
+    return 0 unless $selected;
+
+    my $event = $inbox_item->event;
+
+    if ($event) {
+        my $msgid = $event->arg1;
+        return $msgid == $selected;
+    }
+}
+
+sub __get_page_by_selected_item {
+    my ($selected, $nitems) = @_;
+    my $page = 0;
+    return $page unless $selected;
+
+    my $index = 0;
+    while (1) {
+        my $inbox_item = $nitems->[$index];
+        last unless $inbox_item;
+        my $event = $inbox_item->event;
+
+        if ($event) {
+            my $msgid = $event->arg1;
+            
+            if ($msgid == $selected) {
+                $page = int($index / ITEMS_PER_PAGE) + 1;
+            }
+        }
+        $index++;
+    }
+    return $page;
 }
 
 1;
