@@ -358,7 +358,7 @@ sub set_text
     my $dbh = LJ::get_db_writer();
     my $txtid = 0;
 
-    my $oldtextid = $dbh->selectrow_array("SELECT txtid FROM ml_text WHERE lnid=? AND dmid=? AND itid=?", undef, $lnid, $dmid, $itid);
+    my $oldtextid = $dbh->selectrow_array("SELECT MAX(txtid) FROM ml_text WHERE lnid=? AND dmid=? AND itid=?", undef, $lnid, $dmid, $itid);
 
     if (defined $text) {
         my $userid = $opts->{'userid'} + 0;
