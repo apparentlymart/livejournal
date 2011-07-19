@@ -433,10 +433,11 @@ sub get_lock
     return undef unless $db && $lockname;
     return undef unless $dbrole eq 'global' || $dbrole eq 'user';
 
-    my $curr_sub = (caller 1)[3]; # caller of current sub
+    my $curr_sub = join(", ", ((caller 1)[0..3])); # caller of current sub
 
     # die if somebody already has a lock
-    die "LOCK ERROR: $curr_sub; can't get lock from: $LJ::LOCK_OUT{$dbrole}\n"
+    use Carp qw/cluck confess/;
+    confess "LOCK ERROR: can't get lock from\n$curr_sub\nbecause it's already taken from\n$LJ::LOCK_OUT{$dbrole}\n"
         if exists $LJ::LOCK_OUT{$dbrole};
 
     # get a lock from mysql
