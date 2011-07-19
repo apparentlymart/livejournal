@@ -46,7 +46,7 @@ lj-raw {
 
 lj\:cut,
 lj-cut {
-	display: inline;
+	display: block;
 	border: #000 1px dotted;
 	background-color: #d2d2d2;
 }
