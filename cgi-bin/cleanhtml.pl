@@ -827,7 +827,7 @@ sub clean
 
                     elsif ( $button eq 'livejournal' ) {
                         my $entry = LJ::Entry->new_from_url($entry_url);
-                           $entry = undef unless $entry->valid;
+                           $entry = undef unless $entry && $entry->valid;
 
                         my $give_button = LJ::run_hook("give_button", {
                             'journal' => $entry ? $entry->journal->user : '',
