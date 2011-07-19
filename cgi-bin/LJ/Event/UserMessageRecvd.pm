@@ -35,7 +35,8 @@ sub _as_email {
     my $msg         = $self->load_message;
     my $other_u     = $msg->other_u;
     my $sender      = $other_u->user;
-    my $inbox       = "$LJ::SITEROOT/inbox/?view=usermsg_recvd";
+    my $msgid       = $msg->msgid;
+    my $inbox       = "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid;
     $inbox = "<a href=\"$inbox\">" . LJ::Lang::get_text($lang, 'esn.your_inbox') . "</a>" if $is_html;
 
     my $vars = {
@@ -78,7 +79,9 @@ sub as_email_html {
 sub load_message {
     my ($self) = @_;
 
-    my $msg = LJ::Message->load({msgid => $self->arg1, journalid => $self->u->{userid}, otherid => $self->arg2});
+    my $msg = LJ::Message->load({msgid => $self->arg1,
+                                 journalid => $self->u->{userid},
+                                 otherid => $self->arg2});
     return $msg;
 }
 
@@ -111,7 +114,7 @@ sub as_html_actions {
     $ret .= " <a href='$LJ::SITEROOT/inbox/compose.bml?mode=reply&msgid=$msgid'>Reply</a>";
     $ret .= " | <a href='$LJ::SITEROOT/friends/add.bml?user=". $msg->other_u->user ."'>Add as friend</a>"
         unless $u->is_friend($msg->other_u);
-    $ret .= " | <a href='$LJ::SITEROOT/inbox/markspam.bml?msgid=". $msg->msgid ."'>Mark as Spam</a>";
+    $ret .= " | <a href='$LJ::SITEROOT/inbox/markspam.bml?msgid=". $msgid ."'>Mark as Spam</a>";
     $ret .= "</div>";
 
     return $ret;
@@ -122,8 +125,11 @@ sub as_string {
 
     my $subject = $self->load_message->subject;
     my $other_u = $self->load_message->other_u;
+    my $msgid = $self->load_message->msgid;
+    my $inbox = "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid;
     my $ret = sprintf("You've received a new message \"%s\" from %s. %s",
-                   $subject, $other_u->{user}, "$LJ::SITEROOT/inbox/?view=usermsg_recvd");
+                   $subject, $other_u->{user},
+                   $inbox);
     return $ret;
 }
 
@@ -149,9 +155,11 @@ sub as_alert {
     my $message = $self->load_message;
     my $subject = $message->subject;
     my $other_u = $message->other_u;
+    my $msgid   = $message->msgid;
 
     return LJ::Lang::get_text($lang, 'event.user_message_recvd.alert', undef, {
             subject => $subject,
+            selected => $msgid,
             user    => $other_u->ljuser_display(),
         });
 }
