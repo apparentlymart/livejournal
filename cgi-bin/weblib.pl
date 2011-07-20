@@ -1270,19 +1270,6 @@ sub need_res {
         return;
     }
 
-    ## Filter included res.
-    ## if resource is a part of a common set, skip it here
-    ## and add to page inside the set.
-    @keys = grep {
-                ## check common JS sources.
-                if ($LJ::STRICTLY_INCLUDED_JS_H{$_}){
-                    $LJ::NEEDED_RES{include_common_js} = 1;
-                    0; ## include this file as a part of common sources set.
-                } else {
-                    1; ## include them as is.
-                }
-            } @keys;
-
     foreach my $reskey (@keys) {
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
         unless (exists $LJ::NEEDED_RES{$reskey}) {
@@ -1331,45 +1318,47 @@ sub res_includes {
         $wstatprefix = $LJ::WSTATPREFIX;
     }
 
-    # find current journal
-    my $journal_base = '';
-    my $journal = '';
-    my $ju;
-    if (LJ::Request->is_inited) {
-        my $journalid = LJ::Request->notes('journalid');
+    # include standard JS info
+    unless ( $only_needed ) {
+        # find current journal
+        my $journal_base = '';
+        my $journal = '';
+        my $ju;
+        if (LJ::Request->is_inited) {
+            my $journalid = LJ::Request->notes('journalid');
 
-        $ju = LJ::load_userid($journalid) if $journalid;
+            $ju = LJ::load_userid($journalid) if $journalid;
 
-        if ($ju) {
-            $journal_base = $ju->journal_base;
-            $journal = $ju->{user};
+            if ($ju) {
+                $journal_base = $ju->journal_base;
+                $journal = $ju->{user};
+            }
         }
-    }
 
-    my $remote = LJ::get_remote();
-    my $hasremote = $remote ? 1 : 0;
-    my $remote_is_suspended = $remote && $remote->is_suspended ? 1 : 0;
+        my $remote = LJ::get_remote();
+        my $hasremote = $remote ? 1 : 0;
+        my $remote_is_suspended = $remote && $remote->is_suspended ? 1 : 0;
 
-    # ctxpopup prop
-    my $ctxpopup = 1;
-    $ctxpopup = 0 if $remote and not $remote->prop("opt_ctxpopup");
+        # ctxpopup prop
+        my $ctxpopup = 1;
+        $ctxpopup = 0 if $remote and not $remote->prop("opt_ctxpopup");
 
-    # poll for esn inbox updates?
-    my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 0 : 1;
+        # poll for esn inbox updates?
+        my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 0 : 1;
 
-    # are media embeds enabled?
-    my $embeds_enabled = $LJ::DISABLED{embed_module} ? 0 : 1;
+        # are media embeds enabled?
+        my $embeds_enabled = $LJ::DISABLED{embed_module} ? 0 : 1;
 
-    # esn ajax enabled?
-    my $esn_async = LJ::conf_test($LJ::DISABLED{esn_ajax}) ? 0 : 1;
+        # esn ajax enabled?
+        my $esn_async = LJ::conf_test($LJ::DISABLED{esn_ajax}) ? 0 : 1;
 
-    # remote is maintainer in current journal
-    my $remote_is_maintainer = ($remote && $remote->can_manage($ju)) ? 1 : 0;
+        # remote is maintainer in current journal
+        my $remote_is_maintainer = ($remote && $remote->can_manage($ju)) ? 1 : 0;
 
-    my $default_copyright = $remote ? ($remote->prop("default_copyright") || 'P') : 'P';
+        my $default_copyright = $remote ? ($remote->prop("default_copyright") || 'P') : 'P';
 
-    my $ljentry = LJ::Request->notes('ljentry') || ''; # url
-    my %site = (
+        my $ljentry = LJ::Request->notes('ljentry') || ''; # url
+        my %site = (
                 imgprefix => "$imgprefix",
                 siteroot => "$siteroot",
                 statprefix => "$statprefix",
@@ -1388,17 +1377,14 @@ sub res_includes {
                 remoteJournalBase => $remote && $remote->journal_base,
                 remoteUser => $remote && $remote->user,
                 );
-    $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
-    $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
+        $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
+        $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
+        $site{inbox_unread_count} = $remote->notification_inbox->unread_count if $remote and LJ::is_enabled('inbox_unread_count_in_head');
+        
+        LJ::run_hooks('add_to_site_js', \%site);
 
-    $site{inbox_unread_count} = $remote->notification_inbox->unread_count if $remote and LJ::is_enabled('inbox_unread_count_in_head');
+        my $site_params = LJ::js_dumper(\%site);
 
-    LJ::run_hooks('add_to_site_js', \%site);
-
-    my $site_params = LJ::js_dumper(\%site);
-
-    # include standard JS info
-    unless ( $only_needed ) {
         my %journal_info;
         if (my $journalu = LJ::get_active_journal()) {
             %journal_info = $journalu->info_for_js;
@@ -1416,7 +1402,20 @@ sub res_includes {
                 Site.current_journal = $journal_info_json;
            </script>
         };
-    }
+
+        ## Filter included res.
+        ## if resource is a part of a common set, skip it here
+        ## and add to page inside the set.
+        @LJ::NEEDED_RES = grep {
+                    ## check common JS sources.
+                    if ($LJ::STRICTLY_INCLUDED_JS_H{$_}){
+                        $LJ::NEEDED_RES{include_common_js} = 1;
+                        0; ## include this file as a part of common sources set.
+                    } else {
+                        1; ## include them as is.
+                    }
+                } @LJ::NEEDED_RES;
+    } ## / unless $only_needed 
 
     my $now = time();
     my %list;   # type -> condition -> args -> [list of files];
