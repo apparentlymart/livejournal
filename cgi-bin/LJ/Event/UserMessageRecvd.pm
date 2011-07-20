@@ -105,6 +105,7 @@ sub as_html {
 
 sub as_html_actions {
     my $self = shift;
+    my %opts = @_;
 
     my $msg = $self->load_message;
     my $msgid = $msg->msgid;
@@ -114,7 +115,12 @@ sub as_html_actions {
     $ret .= " <a href='$LJ::SITEROOT/inbox/compose.bml?mode=reply&msgid=$msgid'>Reply</a>";
     $ret .= " | <a href='$LJ::SITEROOT/friends/add.bml?user=". $msg->other_u->user ."'>Add as friend</a>"
         unless $u->is_friend($msg->other_u);
-    $ret .= " | <a href='$LJ::SITEROOT/inbox/markspam.bml?msgid=". $msgid ."'>Mark as Spam</a>";
+
+    if (LJ::is_enabled('spam_inbox') && $opts{'state'} && $opts{'state'} eq 'S') {
+        $ret .= " | <a href='#$LJ::SITEROOT/inbox/markspam.bml?msgid=". $msg->msgid ."'>Mark as not Spam</a>";
+    } else {
+        $ret .= " | <a href='$LJ::SITEROOT/inbox/markspam.bml?msgid=". $msg->msgid ."'>Mark as Spam</a>";
+    }
     $ret .= "</div>";
 
     return $ret;
@@ -177,13 +183,14 @@ sub subscription_as_html {
 
 sub content {
     my $self = shift;
+    my ($u, $state) = @_;
 
     my $msg = $self->load_message;
 
     my $body = $msg->body;
     $body = LJ::html_newlines($body);
 
-    return $body . $self->as_html_actions;
+    return $body . $self->as_html_actions( 'state' => $state );
 }
 
 # override parent class sbuscriptions method to always return

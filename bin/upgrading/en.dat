@@ -2805,6 +2805,8 @@ inbox.menu.new_message.btn=New Message
 inbox.menu.sent|staleness=1
 inbox.menu.sent=Sent
 
+inbox.menu.spam=Suspicious messages
+
 inbox.message|staleness=1
 inbox.message=Message
 

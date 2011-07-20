@@ -488,7 +488,7 @@ sub init {
     if ( $need_spam_check && !$can_mark_spam ) {
         my $spam = 0;
         LJ::run_hook('spam_comment_detector', $form, \$spam, $journalu, $up);
-        LJ::run_hook('spam_in_all_journals', \$spam, $journalu, $up) unless $spam;
+        LJ::run_hook('spam_in_all_journals', \$spam, $up) unless $spam;
         $state = 'B' if $spam;
     }
     

@@ -60,6 +60,14 @@ sub send {
         $self->_orig_u->rate_log('usermessage', $self->rate_multiple) if !$opts->{'nocheck'}
                                                                          and not $LJ::WHITELIST_SEND_INBOX_MESSAGES{$self->_orig_u->user}
                                                                          and $self->rate_multiple;
+
+        # a parent message will be marked as read automatically 
+        # and moved from suspicious folder to inbox if needed
+        if ($self->parent_msgid) {
+            my $nitem = LJ::NotificationItem->new($self->_orig_u, $self->parent_qid);
+            $nitem->mark_read;
+        }
+
         return 1;
     } else {
         return 0;
@@ -304,6 +312,28 @@ sub valid {
     my $self = shift;
     # just check a field that requires a db load...
     return $self->type ? 1 : 0;
+}
+
+sub qid {
+    my $self = shift;
+    unless ($self->{qid}) {
+        my $u = $self->_orig_u;
+        my $sth = $u->prepare( "select qid from notifyqueue where userid=? and arg1=?" );
+        $sth->execute( $self->journalid, $self->msgid );
+        $self->{qid} = $sth->fetchrow_array();
+    }
+    return $self->{qid};
+}
+
+sub parent_qid {
+    my $self = shift;
+    unless ($self->{qid}) {
+        my $u = $self->_orig_u;
+        my $sth = $u->prepare( "select qid from notifyqueue where userid=? and arg1=?" );
+        $sth->execute( $self->journalid, $self->parent_msgid );
+        $self->{qid} = $sth->fetchrow_array();
+    }
+    return $self->{qid};
 }
 
 #############
@@ -785,6 +815,10 @@ sub mark_as_spam {
              undef, $self->timesent, undef, $self->journalid, $posterid,
              'message', $subject, $body);
     return 0 if $dbh->err;
+
+    LJ::set_rel($self->_orig_u, $self->other_u, 'D');                                                                                                               
+    $self->_orig_u->log_event('spam_set', { actiontarget => $self->otherid });    
+            
     return 1;
 
 }

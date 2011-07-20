@@ -55,3 +55,7 @@
 .btn.delete=delete
 .btn.prev=Previous
 .btn.next=Next
+
+.btn.spam=spam
+
+.btn.unspam=unspam

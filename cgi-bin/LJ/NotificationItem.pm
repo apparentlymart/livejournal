@@ -82,7 +82,7 @@ sub as_html {
     my $self = shift;
     croak "Too many args passed to NotificationItem->as_html" if scalar @_;
     return "(Invalid event)" unless $self->event;
-    return eval { $self->event->content($self->u) } || $@;
+    return eval { $self->event->content($self->u, $self->_state) } || $@;
 }
 
 # returns the event that this item refers to

@@ -69,7 +69,7 @@ sub items {
 sub all_items {
     my $self = shift;
 
-    return grep { $_->event->class ne "LJ::Event::UserMessageSent" } grep {$_->event} $self->items;
+    return grep { $_->{state} ne 'S' } grep { $_->event->class ne "LJ::Event::UserMessageSent" } grep {$_->event} $self->items;
 }
 
 # returns a list of friend-related notificationitems
@@ -112,8 +112,11 @@ sub usermsg_recvd_items {
     my $self = shift;
 
     my @events = ( 'UserMessageRecvd' );
+    my @items = $self->subset_items(@events);
 
-    return $self->subset_items(@events);
+    @items = grep { $_->{state} ne 'S' } @items if LJ::is_enabled('spam_inbox');
+
+    return @items;
 }
 
 # returns a list of non user-message recvd notificationitems
@@ -123,6 +126,15 @@ sub usermsg_sent_items {
     my @events = ( 'UserMessageSent' );
 
     return $self->subset_items(@events);
+}
+
+# returns a list of spam notificationitems
+sub spam_items {
+    my $self = shift;
+
+    my @events = ( 'UserMessageRecvd' );
+
+    return grep { $_->{state} eq 'S' } $self->subset_items(@events);
 }
 
 sub birthday_items {
@@ -384,14 +396,21 @@ sub enqueue {
     # get a qid
     my $qid = LJ::alloc_user_counter($u, 'Q')
         or die "Could not alloc new queue ID";
+    my $spam = 0;
+    if ( LJ::is_enabled('spam_inbox') && $evt->etypeid == 6 ) {
+        my $need_check = 0;
+        LJ::run_hook('need_spam_check_inbox', \$need_check, $evt->arg1, $evt->userid);
+        LJ::run_hook('spam_inbox_detector', \$spam, $evt->arg1, $evt->userid)
+            if $need_check;
+    }
 
     my %item = (qid        => $qid,
                 userid     => $u->{userid},
-                journalid  => $evt->u->{userid},
+                journalid  => $evt->userid,
                 etypeid    => $evt->etypeid,
                 arg1       => $evt->arg1,
                 arg2       => $evt->arg2,
-                state      => $evt->mark_read ? 'R' : 'N',
+                state      => $spam ? 'S' : $evt->mark_read ? 'R' : 'N',
                 createtime => $evt->eventtime_unix || time());
 
     # insert this event into the notifyqueue table
@@ -675,6 +694,12 @@ sub usermsg_sent_event_count {
     my $self = shift;
     my @events = ('UserMessageSent' );
     return $self->subset_unread_count(@events);
+}
+
+sub spam_event_count {
+    my $self = shift;
+
+    return scalar $self->spam_items();
 }
 
 # Methods that return Arrays of Event categories
