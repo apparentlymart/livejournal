@@ -114,7 +114,7 @@ CKEDITOR.editorConfig = function(config){
 	config.toolbar = 'Full';
 	config.enterMode = CKEDITOR.ENTER_BR;
 	config.forceEnterMode = false;
-	config.shiftEnterMode = 'p';
+	config.shiftEnterMode = CKEDITOR.ENTER_P;
 	config.keystrokes = [
 		[ CKEDITOR.CTRL + 65 /*A*/, true ],
 		[ CKEDITOR.CTRL + 67 /*C*/, true ],

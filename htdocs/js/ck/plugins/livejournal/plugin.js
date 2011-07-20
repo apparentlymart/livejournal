@@ -227,6 +227,24 @@
 				command: 'LJUserLink'
 			});
 
+			//////////  LJ Image Button //////////////
+			editor.addCommand('LJImage', {
+				exec : function(editor){
+					if(ljphotoEnabled){
+						// call LJImage
+					} else {
+						editor.getCommand('image').exec();
+					}
+				}
+			});
+
+
+
+			editor.ui.addButton('LJImage', {
+				label: editor.lang.common.imageButton,
+				command: 'LJImage'
+			});
+
 			//////////  LJ Embed Media Button //////////////
 			editor.addCommand('LJEmbedLink', {
 				exec: function(){
@@ -482,6 +500,21 @@
 				html: top.CKLang.LJLike_dialogText
 			});
 
+			var countChanges = 0, ljLikeDialog;
+			function onChangeLike(){
+				if('isChanged' in this){
+					ljLikeDialog = ljLikeDialog || this.getDialog();
+					countChanges += this.isChanged() ? 1 : -1;
+				} else {
+					countChanges += this.$.checked ? 1 : -1;
+				}
+
+				var command = editor.getCommand('LJLikeCommand');
+				if(command.state == CKEDITOR.TRISTATE_OFF){
+					ljLikeDialog.getButton('LJLike_Ok').getElement()[countChanges == 0 ? 'hide' : 'show']();
+				}
+			}
+
 			CKEDITOR.dialog.add('LJLikeDialog', function(){
 				return {
 					title : top.CKLang.LJLike_name,
@@ -512,29 +545,36 @@
 								}
 							}
 
-							likeNode.setAttribute('buttons', attr.join(','));
-
-							if(!currentLjLikeNode){
+							if(attr.length){
+								likeNode.setAttribute('buttons', attr.join(','));
 								likeNode.setAttribute('class', 'lj-like');
 								editor.insertElement(likeNode);
+							} else {
+								likeNode.remove();
 							}
-
 							dialog.hide();
 						}
 					}), CKEDITOR.dialog.cancelButton],
 					onShow: function(){
 						var command = editor.getCommand('LJLikeCommand');
-						var i = 0;
+						var i = countChanges = 0;
 						if(command.state == CKEDITOR.TRISTATE_ON){
 							var buttons = currentLjLikeNode.getAttribute('buttons').split(',');
 							for(var l = buttons.length; i < l; i++){
 								this.getContentElement('LJLike_Options', 'LJLike_' + likeButtons[buttons[i]].id)
-									.setValue('checked', true);
+									.setValue('checked', false);
 							}
 						} else {
-							for(i; i < buttonsLength; i++){
+							for(; i < buttonsLength; i++){
 								this.getContentElement('LJLike_Options', 'LJLike_' + likeButtons[i].id).setValue('checked', false);
 							}
+						}
+					},
+					onLoad: function(){
+						for(var i = 0; i < buttonsLength; i++){
+							var uiElement = this.getContentElement('LJLike_Options', 'LJLike_' + likeButtons[i].id);
+							uiElement.on('change', onChangeLike);
+							uiElement.getInputElement().on('change', onChangeLike);
 						}
 					}
 				}
