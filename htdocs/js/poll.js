@@ -14,19 +14,18 @@
  ], ...}
  */
 
-// Poll Object Constructor
 function Poll(selectPoll, qDoc, sDoc, qNum){
 	if(typeof selectPoll == 'string'){
 		// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
 		selectPoll = jQuery(selectPoll.replace(/<(\/?)lj-(poll|pq|pi)(>| )/gi, '<$1lj:$2$3'));
-		var tag_prefix = jQuery.browser.msie ? '' : 'lj\\:';
+		var tagPrefix = jQuery.browser.msie && Number(jQuery.browser.version) < 9 ? '' : 'lj\\:';
 
 		this.name = selectPoll.attr('name');
 		this.whovote = selectPoll.attr('whovote');
 		this.whoview = selectPoll.attr('whoview');
 		this.questions = [];
 
-		selectPoll.find(tag_prefix + 'pq').each(function(i, pq){
+		selectPoll.find(tagPrefix + 'pq').each(function(i, pq){
 			pq = jQuery(pq);
 			var name = pq.html().match(/^\s*(.*?)\s*(?:<lj:pi>|$)/);
 			var question = {
@@ -40,7 +39,7 @@ function Poll(selectPoll, qDoc, sDoc, qNum){
 			}
 
 			if(/^check|drop|radio$/.test(question.type)){
-				pq.find(tag_prefix + 'pi').each(function(){
+				pq.find(tagPrefix + 'pi').each(function(){
 					question.answers.push(jQuery(this).html())
 				});
 			}
@@ -80,13 +79,13 @@ Poll.prototype.outputHTML = function(){
 	if(this.name){
 		html += ' <i>' + this.name + '</i>';
 	}
-	html += '<br/>Open to: ' + '<b>' + this.whovote + '</b>, results viewable to: ' + '<b>' + this.whoview + '</b>';
+	html += '<br />Open to: ' + '<b>' + this.whovote + '</b>, results viewable to: ' + '<b>' + this.whoview + '</b>';
 	for(var i = 0; i < this.questions.length; i++){
-		html += '<br/><p>' + this.questions[i].name + '</p>' + '<p style="margin:0 0 10px 40px">';
+		html += '<br /><p>' + this.questions[i].name + '</p>' + '<p style="margin:0 0 10px 40px">';
 		if(this.questions[i].type == 'radio' || this.questions[i].type == 'check'){
 			var type = this.questions[i].type == 'check' ? 'checkbox' : this.questions[i].type;
 			for(var j = 0; j < this.questions[i].answers.length; j++){
-				html += '<input type="' + type + '">' + this.questions[i].answers[j] + '<br/>';
+				html += '<input type="' + type + '">' + this.questions[i].answers[j] + '<br />';
 			}
 		} else if(this.questions[i].type == 'drop'){
 			html += '<select name="select_' + i + '">' + '<option value=""></option>';
@@ -103,7 +102,7 @@ Poll.prototype.outputHTML = function(){
 				to = Number(this.questions[i].to),
 				by = Number(this.questions[i].by);
 			for(var j = from; j <= to; j = j + by){
-				html += '<td><input type="radio"/><br/>' + j + '</td>';
+				html += '<td><input type="radio"/><br />' + j + '</td>';
 			}
 			html += '</tr></tbody></table>';
 		}

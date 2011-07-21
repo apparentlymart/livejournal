@@ -944,26 +944,24 @@ InOb.handleInsertSelect = function (){
 	return true;
 };
 
-entry_insert_embed = function (cb){
-	var prompt = "Add media from other websites by copying and pasting their embed code here. ";
-	LJ_IPPU.textPrompt("Insert Embedded Content", prompt, cb);
-};
-
 InOb.handleInsertEmbed = function (){
-	var cb = function (content){
-		var form = $("updateForm");
-		if(! form || ! form.event){
-			;
-		}
-		form.event.value += "\n<lj-embed>\n" + content + "\n</lj-embed>";
-	};
-	entry_insert_embed(cb);
+	LJ_IPPU.textPrompt(top.CKLang.LJEmbedPromptTitle, top.CKLang.LJEmbedPrompt, function(content){
+		$('updateForm').event.value += "\n<lj-embed>\n" + content + "\n</lj-embed>";
+	});
 };
 
 InOb.handleInsertImage = function (){
-	var include;
-	include = '/imgupload.bml';
-	onInsertObject(include);
+	// if PhotoHosting enabled - show new popup
+	if (window.ljphotoEnabled) {
+		jQuery('#content')
+			.photouploader('option', 'type', 'upload')
+			.bind('htmlready', function (event, htmlOutput) {
+				jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
+			})
+			.photouploader('show');
+	} else {
+		onInsertObject('/imgupload.bml');
+	}
 	return true;
 };
 InOb.handleInsertVideo = function(){

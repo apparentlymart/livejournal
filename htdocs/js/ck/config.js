@@ -28,7 +28,7 @@ CKEDITOR.editorConfig = function(config){
 		'colordialog,' +
 		'contextmenu,' +
 		'dialog,' +
-		'div,' +
+		//'div,' +
 		//'elementspath,' +
 		'enterkey,' +
 		'entities,' +
@@ -54,17 +54,17 @@ CKEDITOR.editorConfig = function(config){
 		'pastefromword,' +
 		'pastetext,' +
 		//'popup,' +
-		'preview,' +
+		//'preview,' +
 		//'print,' +
 		'removeformat,' +
 		'resize,' +
 		//'save,' +
 		//'smiley,' +
-		'showblocks,' +
+		//'showblocks,' +
 		'showborders,' +
 		'sourcearea,' +
 		'stylescombo,' +
-		'scayt,' +
+		//'scayt,' +
 		'table,' +
 		'tabletools,' +
 		'specialchar,' +
@@ -149,7 +149,7 @@ CKEDITOR.editorConfig = function(config){
 	config.format_tags = 'p;h1;h2;h3;h4;h5;h6;pre;address;div';
 	config.bodyId = '';
 	config.bodyClass = '';
-	config.fontSize_defaultLabel = '';
+	config.fontSize_defaultLabel = 'Size';
 	config.removeFormatTags = 'b,big,code,del,dfn,em,font,i,ins,kbd,q,samp,small,span,strike,strong,sub,sup,tt,u,var';
 	config.removeFormatAttributes = 'class,style,lang,width,height,align,hspace,valign';
 	config.stylesSet = [{
