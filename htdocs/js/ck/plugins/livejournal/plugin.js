@@ -535,7 +535,6 @@
 						onClick : function(evt){
 							var dialog = evt.data.dialog, attr = [];
 							var likeNode = currentLjLikeNode || new CKEDITOR.dom.element('div');
-							likeNode.$.readOnly = true;
 							likeNode.remove();
 							likeNode.setHtml('');
 
@@ -545,6 +544,7 @@
 								if(buttonNode.getValue('checked')){
 									attr.push(button.id);
 									likeNode.appendHtml(button.html);
+									likeNode.getLast().addClass(button.abbr);
 								}
 							}
 
@@ -726,7 +726,7 @@
 						return isFlashEmbed(element) ? createFakeElement(editor, element) : null;
 					},
 					'lj-like': function(element){
-						var html = '', attr = [];
+						var attr = [];
 
 						var fakeElement = new CKEDITOR.htmlParser.element('div');
 						fakeElement.attributes['class'] = 'lj-like';
@@ -739,13 +739,14 @@
 							var buttonName = currentButtons[i].replace(/^\s*([a-z]{2,})\s*$/i, '$1');
 							var button = likeButtons[buttonName];
 							if(button){
-								html += button.html;
+								var buttonNode = new CKEDITOR.htmlParser.fragment.fromHtml(button.html).children[0];
+								buttonNode.attributes['class'] += (' ' + button.abbr);
+								fakeElement.add(buttonNode);
 								attr.push(buttonName);
 							}
 						}
 
 						fakeElement.attributes.buttons = attr.join(',');
-						fakeElement.add(new CKEDITOR.htmlParser.fragment.fromHtml(html));
 						return fakeElement;
 					},
 					'lj': function(element){
@@ -816,8 +817,17 @@
 					'div': function(element){
 						if(element.attributes['class'] == 'lj-like'){
 							var ljLikeNode = new CKEDITOR.htmlParser.element('lj-like');
-							if(element.attributes.buttons && element.attributes.buttons.length){
-								ljLikeNode.attributes.buttons = element.attributes.buttons;
+
+							var childs = element.children, attr = [];
+							for(var i = 0; i < childs.length; i++){
+								var abbr = /.*?([a-z]{2})$/.exec(childs[i].attributes['class'])[1];
+								if(abbr && likeButtons.hasOwnProperty(abbr)){
+									attr.push(abbr);
+								}
+							}
+
+							if(attr.length){
+								ljLikeNode.attributes.buttons = attr.join(',');
 							}
 							ljLikeNode.isEmpty = true;
 							ljLikeNode.isOptionalClose = true;
