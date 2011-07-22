@@ -212,12 +212,12 @@ LiveJournal.parseGetArgs = function (url) {
  * @param {Object} args Object with arguments, that have to be passed with the url.
  * @return {String}
  */
-LiveJournal.constructUrl = function( base, args ) {
+LiveJournal.constructUrl = function( base, args, escapeArgs ) {
 	var queryStr = base + ( base.indexOf( '?' ) === -1 ? '?' : '&' ),
 		queryArr = [];
 
 	for( var i in args ) {
-		queryArr.push( i + '=' + args[i] );
+		queryArr.push( i + '=' + ( ( escapeArgs ) ? encodeURIComponent( args[i] ) : args[i] ) );
 	}
 
 	return queryStr + queryArr.join( '&' );
@@ -266,4 +266,33 @@ LiveJournal.closeSiteMessage = function(node, e, id)
 				LiveJournal.ajaxError(data);
 			}
 		}, 'json');
+}
+
+LiveJournal.parseLikeButtons = function() {
+	try {
+		FB.XFBML.parse();
+	} catch(e) {};
+
+	try {
+		gapi.plusone.go();
+	} catch(e) {};
+
+	jQuery( 'a.twitter-share-button' ).each( function() {
+		if( this.href != 'http://twitter.com/share' ) { return; }
+
+		var link = jQuery( this ),
+			params = {
+				url: link.attr( 'data-url' ),
+				text: link.attr( 'data-text' ),
+				count: link.attr( 'data-count' ),
+				lang: link.attr( 'data-lang' )
+			};
+
+		link.replaceWith( jQuery( '<iframe frameborder="0" scrolling="no" allowtransparency="true" />' )
+			.css( {
+				width: "110px",
+				height: "20px" } )
+			.attr( 'src',  LiveJournal.constructUrl( 'http://platform.twitter.com/widgets/tweet_button.html', params ) )
+			.insertBefore( link ) );
+	} );
 }

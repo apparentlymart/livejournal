@@ -181,23 +181,34 @@ DonateButton = {
 	}
 };
 
+(function() {
+	var prev_page_start, have_prev, list;
+
+	function getList( html ) {
+		var answer = jQuery( html ),
+			node = answer.find( '.b-friendstimes' );
+
+		return node
+			.add( answer.filter( 'script' ) );
+	}
+
 FriendsTimes = {
-	prev_page_start: null,
-	have_prev: null,
 	initTime: +new Date(),
 
-	init: function() {
-		jQuery(function(){
-			FriendsTimes.checkUnreaded({
-				timeout: 5000
-			});
+	init: function( node ) {
+		prev_page_start = node.attr( 'data-prev-page-start' );
+		have_prev = parseInt( node.attr( 'data-have-prev' ), 10 );
+		list = node;
 
-			if( FriendsTimes.have_prev ) {
-				FriendsTimes.bindLoadMore({
-					max_load: 4
-				});
-			}
+		FriendsTimes.checkUnreaded({
+			timeout: 5000
 		});
+
+		if( have_prev ) {
+			FriendsTimes.bindLoadMore({
+				max_load: 4
+			});
+		}
 	},
 
 	checkUnreaded: function(conf) {
@@ -220,6 +231,26 @@ FriendsTimes = {
 		}, conf.timeout);
 	},
 
+	fetchContent: function( data, success, error ) {
+		jQuery.ajax({
+			url: LiveJournal.getAjaxUrl("ft_more"),
+			data: data,
+			dataType: "html",
+			success: function(html) {
+				if( html ) {
+					var node = getList( html ),
+						li = node.children(),
+						scripts = node.filter( 'script' );
+
+					success( node, li, scripts );
+				} else {
+					success;
+				}
+			},
+			error: error
+		});
+	},
+
 	/**
 	 * Fetch new posts that have appeared since page load.
 	 *    Function loads new posts with ajax if the user is on the first page and there are ten
@@ -229,24 +260,20 @@ FriendsTimes = {
 		var blockFunction = false,
 			content;
 
-		function fetchContent() {
-			var ftList = jQuery( '.b-friendstimes' );
-			jQuery.get( LiveJournal.getAjaxUrl( 'ft_more' ), {
-					boundary: ftList.attr( 'data-firstitem' )
-				}, function( html ) {
-					html = html.replace( /<script[^>]+>(.*?)<\/script>/, '');
-
-					var node = jQuery( html ).find( '.b-friendstimes' ),
-						newBoundary = node.attr( 'data-firstitem' ),
+		function loadContent() {
+			FriendsTimes.fetchContent( {
+					boundary: list.attr( 'data-firstitem' )
+				}, function( node, li, scripts ) {
+					var newBoundary = node.attr( 'data-firstitem' ),
 						newTs = +new Date();
 
-					content = node.children();
-					if( content.length ) {
-						ftList.attr( 'data-firstitem', newBoundary );
+					if( li.length ) {
+						list.attr( 'data-firstitem', newBoundary );
 						Site.server_time += Math.floor( ( newTs - FriendsTimes.initTime ) / 1000 );
 						FriendsTimes.initTime = newTs;
+						content = li.add( scripts );
 					}
-			} )
+				} );
 		}
 
 		function renderContent() {
@@ -256,7 +283,9 @@ FriendsTimes = {
 
 			content
 				.css( 'opacity', 0.01 )
-				.prependTo( '.b-friendstimes' );
+				.prependTo( list );
+
+			LiveJournal.parseLikeButtons();
 
 			setTimeout( function() {
 				if( jQuery.browser.msie && +jQuery.browser.version <= 8 ) {
@@ -292,7 +321,7 @@ FriendsTimes = {
 					animateComplete = true;
 				}
 			} );
-			fetchContent();
+			loadContent();
 
 			if( event ) {
 				event = jQuery.event.fix( event );
@@ -306,36 +335,38 @@ FriendsTimes = {
 		var $window = jQuery(window),
 			more_node = jQuery(".b-friendstimes-loading"),
 			loaded_count = 0;
+
 		function loading_more() {
 			// preload
 			if ((jQuery(document).height() - 1000) <= ($window.scrollTop() + $window.height())) {
 				$window.unbind("scroll", loading_more);
-				jQuery.ajax({
-					url: LiveJournal.getAjaxUrl("ft_more"),
-					data: {
-						to: FriendsTimes.prev_page_start
-					},
-					dataType: "html",
-					success: function(html) {
-						if (html) {
-							loaded_count++;
-							more_node.before(html);
+				FriendsTimes.fetchContent( { to: prev_page_start },
+					function( node, li, scripts ) {
+						if( li ) {
+							list.append( li ).append( scripts );
+							LiveJournal.parseLikeButtons();
+							prev_page_start = node.attr( 'data-prev-page-start' );
+							have_prev = parseInt( node.attr( 'data-have-prev' ), 10 );
+
 							if (loaded_count < conf.max_load) {
-								jQuery(".b-friendstimes-pages").remove();
-								$window.scroll(loading_more);
+								if( !have_prev ) {
+									$window.scroll(loading_more);
+								} else {
+									more_node.remove();
+								}
 							} else {
-								jQuery(".b-friendstimes-pages").show();
+								node.nextAll( '.b-friendstimes-pages' )
+									.insertAfter( list )
+									.show();
 								more_node.remove();
 							}
 						} else {
 							more_node.remove();
 						}
-					},
-					error: function() {
+					}, function() {
 						// retry
 						setTimeout(loading_more, 5000);
-					}
-				});
+					} );
 			}
 		}
 
@@ -344,9 +375,12 @@ FriendsTimes = {
 	}
 };
 
+} )();
+
 jQuery(function($) {
-	if ($("#friendstimes").length) {
-		FriendsTimes.init();
+	var ft = $( '#friendstimes' )
+	if ( ft.length) {
+		FriendsTimes.init( ft.find( '.b-friendstimes' ) );
 	}
 });
 
