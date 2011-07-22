@@ -343,13 +343,14 @@ FriendsTimes = {
 				FriendsTimes.fetchContent( { to: prev_page_start },
 					function( node, li, scripts ) {
 						if( li ) {
+							loaded_count++;
 							list.append( li ).append( scripts );
 							LiveJournal.parseLikeButtons();
 							prev_page_start = node.attr( 'data-prev-page-start' );
 							have_prev = parseInt( node.attr( 'data-have-prev' ), 10 );
 
 							if (loaded_count < conf.max_load) {
-								if( !have_prev ) {
+								if( have_prev ) {
 									$window.scroll(loading_more);
 								} else {
 									more_node.remove();
