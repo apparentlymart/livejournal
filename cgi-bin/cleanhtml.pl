@@ -805,7 +805,7 @@ sub clean
                         }
 
                         $LJ::REQ_GLOBAL{'ljlike_vkontakte_id'} ||= 1;
-                        my $uniqid = $LJ::REQ_GLOBAL{'ljlike_vkontakte_id'}++;
+                        my $uniqid = int(rand(1_000_000_000));
 
                         my $widget_opts = {
                             'type'              => 'mini',
