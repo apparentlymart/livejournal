@@ -762,11 +762,11 @@ sub create_qr_div {
     $qrhtml .= "<b>".BML::ml('/talkpost.bml.opt.subject')."</b></td>";
     $qrhtml .= "<td colspan='2' align='left'>";
     $qrhtml .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value='' tabindex='10' />";
-    
+
     $qrhtml .= "<div id=\"subjectCaptionText\">" . $text_hint . "</div>" if $text_hint;
-    
+
     $qrhtml .= "</td></tr>";
-    
+
     $qrhtml .= "<tr valign='top'>";
     $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.message')."</b></td>";
     $qrhtml .= "<td colspan='3' style='width: 90%'>";
@@ -1142,7 +1142,7 @@ sub entry_form_decode
     $req->{'prop_opt_lockcomments'} ||= $POST->{'comment_settings'} eq 'lockcomments' ? 1 : 0;
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
-    $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C' if LJ::is_enabled('default_copyright', LJ::get_remote()) 
+    $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C' if LJ::is_enabled('default_copyright', LJ::get_remote())
                                     && $POST->{'defined_copyright'};
 
     if ( my $reposted_from = $POST->{'reposted_from'} ) {
@@ -1204,7 +1204,7 @@ sub entry_form_decode
 
     # process site-specific options
     LJ::run_hooks('decode_entry_form', $POST, $req);
-    
+
     return $req;
 }
 
@@ -1284,7 +1284,7 @@ sub include_raw  {
     my $code = shift;
 
     die "Bogus include type: $type"
-        unless $type =~ m!^(js|css|js_link|css_link|html)$!;
+        unless $type =~ m!^(?:js|css|js_link|css_link|html)$!;
 
     push @LJ::INCLUDE_RAW => [$type, $code];
 }
@@ -1305,16 +1305,17 @@ sub res_includes {
     # use correct root and prefixes for SSL pages
     my ($siteroot, $imgprefix, $statprefix, $jsprefix, $wstatprefix);
     if ($LJ::IS_SSL) {
-        $siteroot = $LJ::SSLROOT;
-        $imgprefix = $LJ::SSLIMGPREFIX;
-        $statprefix = $LJ::SSLSTATPREFIX;
-        $jsprefix = $LJ::SSLJSPREFIX;
+        $siteroot    = $LJ::SSLROOT;
+        $imgprefix   = $LJ::SSLIMGPREFIX;
+        $statprefix  = $LJ::SSLSTATPREFIX;
+        $jsprefix    = $LJ::SSLJSPREFIX;
         $wstatprefix = $LJ::SSLWSTATPREFIX;
-    } else {
-        $siteroot = $LJ::SITEROOT;
-        $imgprefix = $LJ::IMGPREFIX;
-        $statprefix = $LJ::STATPREFIX;
-        $jsprefix = $LJ::JSPREFIX;
+    }
+    else {
+        $siteroot    = $LJ::SITEROOT;
+        $imgprefix   = $LJ::IMGPREFIX;
+        $statprefix  = $LJ::STATPREFIX;
+        $jsprefix    = $LJ::JSPREFIX;
         $wstatprefix = $LJ::WSTATPREFIX;
     }
 
@@ -1322,8 +1323,9 @@ sub res_includes {
     unless ( $only_needed ) {
         # find current journal
         my $journal_base = '';
-        my $journal = '';
+        my $journal      = '';
         my $ju;
+
         if (LJ::Request->is_inited) {
             my $journalid = LJ::Request->notes('journalid');
 
@@ -1359,36 +1361,38 @@ sub res_includes {
 
         my $ljentry = LJ::Request->notes('ljentry') || ''; # url
         my %site = (
-                imgprefix => "$imgprefix",
-                siteroot => "$siteroot",
-                statprefix => "$statprefix",
-                currentJournalBase => "$journal_base",
-                currentJournal => "$journal",
-                currentEntry => $ljentry,
-                has_remote => $hasremote,
+                imgprefix                => "$imgprefix",
+                siteroot                 => "$siteroot",
+                statprefix               => "$statprefix",
+                currentJournalBase       => "$journal_base",
+                currentJournal           => "$journal",
+                currentEntry             => $ljentry,
+                has_remote               => $hasremote,
                 remote_can_track_threads => $remote && $remote->get_cap('track_thread'),
-                remote_is_suspended => $remote_is_suspended,
-                remote_is_maintainer => $remote_is_maintainer,
-                ctx_popup => $ctxpopup,
-                inbox_update_poll => $inbox_update_poll,
-                media_embed_enabled => $embeds_enabled,
-                esn_async => $esn_async,
-                server_time => time(),
-                remoteJournalBase => $remote && $remote->journal_base,
-                remoteUser => $remote && $remote->user,
-                );
+                remote_is_suspended      => $remote_is_suspended,
+                remote_is_maintainer     => $remote_is_maintainer,
+                ctx_popup                => $ctxpopup,
+                inbox_update_poll        => $inbox_update_poll,
+                media_embed_enabled      => $embeds_enabled,
+                esn_async                => $esn_async,
+                server_time              => time(),
+                remoteJournalBase        => $remote && $remote->journal_base,
+                remoteUser               => $remote && $remote->user,
+        );
         $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
         $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
         $site{inbox_unread_count} = $remote->notification_inbox->unread_count if $remote and LJ::is_enabled('inbox_unread_count_in_head');
-        
+
         LJ::run_hooks('add_to_site_js', \%site);
 
         my $site_params = LJ::js_dumper(\%site);
 
         my %journal_info;
+
         if (my $journalu = LJ::get_active_journal()) {
             %journal_info = $journalu->info_for_js;
         }
+
         my $journal_info_json = LJ::JSON->to_json(\%journal_info);
         my $jsml_out = LJ::JSON->to_json(\%LJ::JSML);
         $ret .= qq {
@@ -1415,7 +1419,67 @@ sub res_includes {
                         1; ## include them as is.
                     }
                 } @LJ::NEEDED_RES;
-    } ## / unless $only_needed 
+    } ## / unless $only_needed
+
+    my $host = LJ::Request->header_in("Host");
+
+    # foreign domain case
+    unless ($host =~ /\.$LJ::DOMAIN(:\d+)?$/) {
+        my $remote = LJ::get_remote();
+
+        #first part of cross-domain auth
+        if ( $remote ) {
+            $ret .= qq|
+                <script type="text/javascript">
+                    lj_user = $remote->{_session}->{userid};
+                </script>
+            |;
+        }
+        else {
+             $ret .= qq|
+                <script type="text/javascript">
+                    lj_user = 0;
+                </script>
+            |;
+        }
+
+        $ret .= qq|
+            <script src="$siteroot/misc/get_auth_js.bml"></script>
+        |;
+
+        my $curl = LJ::Session::_current_url();
+        $curl =~ m|^https?://(.+?)/|i;
+
+        my $domain = $1;
+        $curl = LJ::eurl($curl);
+
+        $ret .= qq|
+        <script type="text/javascript">
+        // case 2
+        var redir = 0;
+
+        // case 1
+        if( lj_user == 0 && !lj_master_user==0 ) {
+            redir = 1;
+        }
+        // case 3
+        else if( !lj_user == 0 && lj_master_user==0 ) {
+            window.location = "http://$domain/misc/clear_domain_session.bml?return=$curl";
+        }
+        // case 4
+        else if( !lj_user == 0 && !lj_master_user==0 ) {
+            if( !lj_user == lj_master_user ) {
+                redir = 1;
+            }
+        }
+
+        // redirect to pta
+        if( redir ) {
+            window.location = "${LJ::SITEROOT}/misc/get_domain_session.bml?return=$curl";
+        }
+        </script>
+        |;
+    }
 
     my $now = time();
     my %list;   # type -> condition -> args -> [list of files];
@@ -1426,7 +1490,7 @@ sub res_includes {
         $opts ||= {};
         my $condition = $opts->{condition};
         $condition ||= ''; ## by default, no condtion is present
-        
+
         my $args = $opts->{args};
         $args ||= '';
 
@@ -1465,9 +1529,11 @@ sub res_includes {
 
         if ($path =~ m!^js/(.+)!) {
             $add->('js', $1, $mtime, $LJ::NEEDED_RES{$key});
-        } elsif ($path =~ /\.css$/ && $path =~ m!^(w?)stc/(.+)!) {
+        }
+        elsif ($path =~ /\.css$/ && $path =~ m!^(w?)stc/(.+)!) {
             $add->("${1}stccss", $2, $mtime, $LJ::NEEDED_RES{$key});
-        } elsif ($path =~ /\.js$/ && $path =~ m!^(w?)stc/(.+)!) {
+        }
+        elsif ($path =~ /\.js$/ && $path =~ m!^(w?)stc/(.+)!) {
             $add->("${1}stcjs", $2, $mtime, $LJ::NEEDED_RES{$key});
         }
     }
@@ -1475,13 +1541,13 @@ sub res_includes {
     my $tags = sub {
         my ($type, $template) = @_;
         return unless $list{$type};
-        
+
         foreach my $cond (sort {length($a) <=> length($b)} keys %{ $list{$type} }) {
             foreach my $args (sort {length($a) <=> length($b)} keys %{ $list{$type}{$cond} }) {
                 my $list = $list{$type}{$cond}{$args};
                 my $start = ($cond) ? "<!--[if $cond]>" : "";
                 my $end = ($cond) ? "<![endif]-->\n" : "\n";
-                
+
                 if ($do_concat) {
                     my $csep = join(',', @$list);
                     $csep .= "?v=" . $oldest{$type}{$cond}{$args};
@@ -1489,7 +1555,8 @@ sub res_includes {
                     $inc =~ s/__+/??$csep/;
                     $inc =~ s/##/$args/;
                     $ret .= $start . $inc . $end;
-                } else {
+                }
+                else {
                     foreach my $item (@$list) {
                         my $inc = $template;
                         $inc =~ s/__+/$item/;
@@ -1501,7 +1568,7 @@ sub res_includes {
         }
     };
 
-    ## To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript. 
+    ## To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript.
     ##  (C) http://code.google.com/speed/page-speed/
     ##
     $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
@@ -1519,13 +1586,17 @@ sub res_includes {
 
         if ($type eq 'js'){
             $ret .= qq|<script type="text/javascript">\r\n$code</script>\r\n|;
-        } elsif ($type eq 'css'){
+        }
+        elsif ($type eq 'css'){
             $ret .= qq|<style>\r\n$code</style>\n|;
-        } elsif ( $type eq 'js_link' ) {
+        }
+        elsif ( $type eq 'js_link' ) {
             $ret .= qq{<script type="text/javascript" src="$code"></script>\r\n};
-        } elsif ( $type eq 'css_link' ) {
+        }
+        elsif ( $type eq 'css_link' ) {
             $ret .= qq{<link rel="stylesheet" type="text/css" href="$code" />};
-        } elsif ( $type eq 'html' ) {
+        }
+        elsif ( $type eq 'html' ) {
             $ret .= $code;
         }
     }
@@ -1721,23 +1792,26 @@ sub search_ads {
     my @divids = map { "ad_$_" } (1 .. $count);
 
     my %adcall = (
-                  u  => join(',', map { $adcount } @divids), # how many ads to show in each
-                  r  => rand(),
-                  q  => $query,
-                  id => join(',', @divids),
-                  p  => 'lj',
-                  add => 'lj_content_ad',
-                  remove => 'lj_inactive_ad',
-                  );
+        u      => join(',', map { $adcount } @divids), # how many ads to show in each
+        r      => rand(),
+        q      => $query,
+        id     => join(',', @divids),
+        p      => 'lj',
+        add    => 'lj_content_ad',
+        remove => 'lj_inactive_ad',
+    );
 
     if ($remote) {
         $adcall{user} = $remote->id;
     }
 
-    my $adparams = LJ::encode_url_string(\%adcall, 
-                                         [ sort { length $adcall{$a} <=> length $adcall{$b} } 
-                                           grep { length $adcall{$_} } 
-                                           keys %adcall ] );
+    my $adparams = LJ::encode_url_string(\%adcall,
+        [
+            sort { length $adcall{$a} <=> length $adcall{$b} }
+            grep { length $adcall{$_} }
+            keys %adcall
+        ]
+    );
 
     # allow 24 bytes for escaping overhead
     $adparams = substr($adparams, 0, 1_000);
@@ -1772,7 +1846,7 @@ sub should_show_ad {
 
 # modifies list of interests (appends tags of sponsored questions to the list)
 # sponsored question may be taken
-#   1. from argument of function: $opts = { extra => {qotd => ...} }, 
+#   1. from argument of function: $opts = { extra => {qotd => ...} },
 #   2. from URL args of /update.bml page (/update.bml?qotd=123)
 #   3. from first displayed entry on the page
 sub modify_interests_for_adcall {
@@ -1791,7 +1865,7 @@ sub modify_interests_for_adcall {
             $qotd = $entry->prop("qotdid");
         }
     }
-    
+
     if ($qotd) {
         $qotd = LJ::QotD->get_single_question($qotd) unless ref $qotd;
         my $tags = LJ::QotD->remove_default_tags($qotd->{tags});
@@ -1802,7 +1876,7 @@ sub modify_interests_for_adcall {
 }
 
 # this function will filter out blocked interests, as well filter out interests which
-# cause the 
+# cause the
 sub interests_for_adcall {
     my $u = shift;
     my %opts = @_;
@@ -1818,15 +1892,15 @@ sub interests_for_adcall {
     modify_interests_for_adcall(\%opts, \@interest_list);
 
     return join(',',
-                grep { 
+                grep {
 
                     # not a blocked interest
-                    ! defined $LJ::AD_BLOCKED_INTERESTS{$_} && 
+                    ! defined $LJ::AD_BLOCKED_INTERESTS{$_} &&
 
                     # and we've not already got over 768 bytes of interests
                     # -- +1 is for comma
                     ($int_len += length($_) + 1) <= $max_len;
-                        
+
                     } @interest_list
                 );
 }
@@ -1871,370 +1945,10 @@ sub ad_display {
     return $ret;
 }
 
-sub control_strip
-{  
-    return $LJ::DISABLED{control_strip_new} ? control_strip_old(@_) : control_strip_new(@_);
-}
-
-sub control_strip_new
-{
+sub control_strip {
     my %opts = @_;
 
     return LJ::ControlStrip->render($opts{user});
-}
-
-sub control_strip_old
-{
-    my %opts = @_;
-    my $user = delete $opts{user};
-
-    my $journal = LJ::load_user($user);
-    my $show_strip = 1;
-    if (LJ::are_hooks("show_control_strip")) {
-        $show_strip = LJ::run_hook("show_control_strip", { user => $user });
-    }
-
-    return "" unless $show_strip;
-
-    my $remote = LJ::get_remote();
-    my $uri = LJ::eurl( LJ::Request->current_page_url );
-    my $create_link = LJ::run_hook("override_create_link_on_navstrip", $journal) || "<a href='$LJ::SITEROOT/create.bml'>" . BML::ml('web.controlstrip.links.create', {'sitename' => $LJ::SITENAMESHORT}) . "</a>";
-
-    # Build up some common links
-    my %links = (
-                 'login'             => "<a href='$LJ::SITEROOT/?returnto=$uri'>$BML::ML{'web.controlstrip.links.login'}</a>",
-                 'home'              => "<a href='$LJ::SITEROOT/'>" . $BML::ML{'web.controlstrip.links.home'} . "</a>&nbsp;&nbsp; ",
-                 'recent_comments'   => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>$BML::ML{'web.controlstrip.links.recentcomments'}</a>",
-                 'manage_friends'    => "<a href='$LJ::SITEROOT/friends/'>$BML::ML{'web.controlstrip.links.managefriends'}</a>",
-                 'manage_entries'    => "<a href='$LJ::SITEROOT/editjournal.bml'>$BML::ML{'web.controlstrip.links.manageentries'}</a>",
-                 'invite_friends'    => "<a href='$LJ::SITEROOT/friends/invite.bml'>$BML::ML{'web.controlstrip.links.invitefriends'}</a>",
-                 'create_account'    => $create_link,
-                 'syndicated_list'   => "<a href='$LJ::SITEROOT/syn/list.bml'>$BML::ML{'web.controlstrip.links.popfeeds'}</a>",
-                 'learn_more'        => LJ::run_hook('control_strip_learnmore_link') || "<a href='$LJ::SITEROOT/'>$BML::ML{'web.controlstrip.links.learnmore'}</a>",
-                 'explore'           => "<a href='$LJ::SITEROOT/explore/'>" . BML::ml('web.controlstrip.links.explore', { sitenameabbrev => $LJ::SITENAMEABBREV }) . "</a>",
-                 );
-
-    if ($remote && $remote->is_person) {
-        $links{'post_journal'} = "<a href='$LJ::SITEROOT/update.bml'>$BML::ML{'web.controlstrip.links.post2'}</a>&nbsp;&nbsp; ";
-    }
-
-    if ($remote) {
-        $links{'view_friends_page'} = "<a href='" . $remote->journal_base . "/friends/'>$BML::ML{'web.controlstrip.links.viewfriendspage2'}</a>";
-        $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.addfriend'}</a>";
-        if ($journal->is_syndicated || $journal->is_news) {
-            $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.addfeed'}</a>";
-            $links{'remove_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.removefeed'}</a>";
-        }
-        if ($journal->is_community) {
-            $links{'join_community'}   = "<a href='$LJ::SITEROOT/community/join.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.joincomm'}</a>";
-            $links{'leave_community'}  = "<a href='$LJ::SITEROOT/community/leave.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.leavecomm'}</a>";
-            $links{'watch_community'}  = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.watchcomm'}</a>";
-            $links{'unwatch_community'}   = "<a href='$LJ::SITEROOT/community/leave.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.removecomm'}</a>";
-            $links{'post_to_community'}   = "<a href='$LJ::SITEROOT/update.bml?usejournal=$journal->{user}'>$BML::ML{'web.controlstrip.links.postcomm'}</a>";
-            $links{'edit_community_profile'} = "<a href='$LJ::SITEROOT/manage/profile/?authas=$journal->{user}'>$BML::ML{'web.controlstrip.links.editcommprofile'}</a>";
-            $links{'edit_community_invites'} = "<a href='$LJ::SITEROOT/community/sentinvites.bml?authas=$journal->{user}'>$BML::ML{'web.controlstrip.links.managecomminvites'}</a>";
-            $links{'edit_community_members'} = "<a href='$LJ::SITEROOT/community/members.bml?authas=$journal->{user}'>$BML::ML{'web.controlstrip.links.editcommmembers'}</a>";
-        }
-    }
-    my $journal_display = LJ::ljuser($journal);
-    my %statustext = (
-                    'yourjournal'       => $BML::ML{'web.controlstrip.status.yourjournal'},
-                    'yourfriendspage'   => $BML::ML{'web.controlstrip.status.yourfriendspage'},
-                    'yourfriendsfriendspage' => $BML::ML{'web.controlstrip.status.yourfriendsfriendspage'},
-                    'personal'          => BML::ml('web.controlstrip.status.personal', {'user' => $journal_display}),
-                    'personalfriendspage' => BML::ml('web.controlstrip.status.personalfriendspage', {'user' => $journal_display}),
-                    'personalfriendsfriendspage' => BML::ml('web.controlstrip.status.personalfriendsfriendspage', {'user' => $journal_display}),
-                    'community'         => BML::ml('web.controlstrip.status.community', {'user' => $journal_display}),
-                    'syn'               => BML::ml('web.controlstrip.status.syn', {'user' => $journal_display}),
-                    'news'              => BML::ml('web.controlstrip.status.news', {'user' => $journal_display, 'sitename' => $LJ::SITENAMESHORT}),
-                    'other'             => BML::ml('web.controlstrip.status.other', {'user' => $journal_display}),
-                    'mutualfriend'      => BML::ml('web.controlstrip.status.mutualfriend', {'user' => $journal_display}),
-                    'friend'            => BML::ml('web.controlstrip.status.friend', {'user' => $journal_display}),
-                    'friendof'          => BML::ml('web.controlstrip.status.friendof', {'user' => $journal_display}),
-                    'maintainer'        => BML::ml('web.controlstrip.status.maintainer', {'user' => $journal_display}),
-                    'memberwatcher'     => BML::ml('web.controlstrip.status.memberwatcher', {'user' => $journal_display}),
-                    'watcher'           => BML::ml('web.controlstrip.status.watcher', {'user' => $journal_display}),
-                    'member'            => BML::ml('web.controlstrip.status.member', {'user' => $journal_display}),
-                    );
-    # Style the status text
-    foreach my $key (keys %statustext) {
-        $statustext{$key} = "<span id='lj_controlstrip_statustext'>" . $statustext{$key} . "</span>";
-    }
-
-    my $ret;
-    if ($remote) {
-        my $remote_display  = LJ::ljuser($remote);
-        if ($remote->{'defaultpicid'}) {
-            my $url = "$LJ::USERPIC_ROOT/$remote->{'defaultpicid'}/$remote->{'userid'}";
-            $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$url' alt=\"$BML::ML{'web.controlstrip.userpic.alt'}\" title=\"$BML::ML{'web.controlstrip.userpic.title'}\" /></a></td>";
-        } else {
-            my $tinted_nouserpic_img = "";
-
-            if ($journal->prop('stylesys') == 2) {
-                my $ctx = $LJ::S2::CURR_CTX;
-                my $custom_nav_strip = S2::get_property_value($ctx, "custom_control_strip_colors");
-
-                if ($custom_nav_strip ne "off") {
-                    my $linkcolor = S2::get_property_value($ctx, "control_strip_linkcolor");
-
-                    if ($linkcolor ne "") {
-                        $tinted_nouserpic_img = S2::Builtin::LJ::palimg_modify($ctx, "controlstrip/nouserpic.gif", [S2::Builtin::LJ::PalItem($ctx, 0, $linkcolor)]);
-                    }
-                }
-            }
-            $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'>";
-            if ($tinted_nouserpic_img eq "") {
-                $ret .= "<img src='$LJ::IMGPREFIX/controlstrip/nouserpic.gif' alt=\"$BML::ML{'web.controlstrip.nouserpic.alt'}\" title=\"$BML::ML{'web.controlstrip.nouserpic.title'}\" height='43' />";
-            } else {
-                $ret .= "<img src='$tinted_nouserpic_img' alt=\"$BML::ML{'web.controlstrip.nouserpic.alt'}\" title=\"$BML::ML{'web.controlstrip.nouserpic.title'}\" height='43' />";
-            }
-            $ret .= "</a></td>";
-        }
-        $ret .= "<td id='lj_controlstrip_user' nowrap='nowrap'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'><div>";
-        $ret .= "<input type='hidden' name='user' value='$remote->{'user'}' />";
-        $ret .= "<input type='hidden' name='sessid' value='$remote->{'_session'}->{'sessid'}' />"
-            if $remote->session;
-        my $logout = "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.logout'}\" id='Logout' />";
-        $ret .= "$remote_display $logout";
-        $ret .= "</div></form>\n";
-        $ret .= "$links{'home'} $links{'post_journal'} $links{'view_friends_page'}";
-        $ret .= "</td>\n";
-
-        $ret .= "<td id='lj_controlstrip_actionlinks' nowrap='nowrap'>";
-        if (LJ::u_equals($remote, $journal)) {
-            if (LJ::Request->notes('view') eq "friends") {
-                $ret .= $statustext{'yourfriendspage'};
-            } elsif (LJ::Request->notes('view') eq "friendsfriends") {
-                $ret .= $statustext{'yourfriendsfriendspage'};
-            } else {
-                $ret .= $statustext{'yourjournal'};
-            }
-            $ret .= "<br />";
-            if (LJ::Request->notes('view') eq "friends") {
-                my @filters = ("all", $BML::ML{'web.controlstrip.select.friends.all'}, "showpeople", $BML::ML{'web.controlstrip.select.friends.journals'}, "showcommunities", $BML::ML{'web.controlstrip.select.friends.communities'}, "showsyndicated", $BML::ML{'web.controlstrip.select.friends.feeds'});
-                my %res;
-                # FIXME: make this use LJ::Protocol::do_request
-                LJ::do_request({ 'mode' => 'getfriendgroups',
-                                 'ver'  => $LJ::PROTOCOL_VER,
-                                 'user' => $remote->{'user'}, },
-                               \%res, { 'noauth' => 1, 'userid' => $remote->{'userid'} });
-                my %group;
-                foreach my $k (keys %res) {
-                    if ($k =~ /^frgrp_(\d+)_name/) {
-                        $group{$1}->{'name'} = $res{$k};
-                    }
-                    elsif ($k =~ /^frgrp_(\d+)_sortorder/) {
-                        $group{$1}->{'sortorder'} = $res{$k};
-                    }
-                }
-                foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
-                    push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
-                }
-
-                my $selected = "all";
-                if (LJ::Request->uri eq "/friends" && LJ::Request->args ne "") {
-                    $selected = "showpeople"      if LJ::Request->args eq "show=P&filter=0";
-                    $selected = "showcommunities" if LJ::Request->args eq "show=C&filter=0";
-                    $selected = "showsyndicated"  if LJ::Request->args eq "show=Y&filter=0";
-                } elsif (LJ::Request->uri =~ /^\/friends\/?(.+)?/i) {
-                    my $filter = $1 || "default view";
-                    $selected = "filter:" . LJ::durl(lc($filter));
-                }
-
-                $ret .= "$links{'manage_friends'}&nbsp;&nbsp; ";
-                $ret .= "$BML::ML{'web.controlstrip.select.friends.label'} <form method='post' style='display: inline;' action='$LJ::SITEROOT/friends/filter.bml'>\n";
-                $ret .= LJ::html_hidden("user", $remote->{'user'}, "mode", "view", "type", "allfilters");
-                $ret .= LJ::html_select({'name' => "view", 'selected' => $selected }, @filters) . " ";
-                $ret .= LJ::html_submit($BML::ML{'web.controlstrip.btn.view'});
-                $ret .= "</form>";
-                # drop down for various groups and show values
-            } else {
-                $ret .= "$links{'recent_comments'}&nbsp;&nbsp; $links{'manage_entries'}&nbsp;&nbsp; $links{'invite_friends'}";
-            }
-        } elsif ($journal->is_personal || $journal->is_identity) {
-            my $friend = LJ::is_friend($remote, $journal);
-            my $friendof = LJ::is_friend($journal, $remote);
-
-            if ($friend and $friendof) {
-                $ret .= "$statustext{'mutualfriend'}<br />";
-                $ret .= "$links{'manage_friends'}";
-            } elsif ($friend) {
-                $ret .= "$statustext{'friend'}<br />";
-                $ret .= "$links{'manage_friends'}";
-            } elsif ($friendof) {
-                $ret .= "$statustext{'friendof'}<br />";
-                $ret .= "$links{'add_friend'}";
-            } else {
-                if (LJ::Request->notes('view') eq "friends") {
-                    $ret .= $statustext{'personalfriendspage'};
-                } elsif (LJ::Request->notes('view') eq "friendsfriends") {
-                    $ret .= $statustext{'personalfriendsfriendspage'};
-                } else {
-                    $ret .= $statustext{'personal'};
-                }
-                $ret .= "<br />$links{'add_friend'}";
-            }
-        } elsif ($journal->is_community) {
-            my $watching = LJ::is_friend($remote, $journal);
-            my $memberof = LJ::is_friend($journal, $remote);
-            my $haspostingaccess = LJ::check_rel($journal, $remote, 'P');
-            if (LJ::can_manage_other($remote, $journal)) {
-                $ret .= "$statustext{'maintainer'}<br />";
-                if ($haspostingaccess) {
-                    $ret .= "$links{'post_to_community'}&nbsp;&nbsp; ";
-                }
-                $ret .= "$links{'edit_community_profile'}&nbsp;&nbsp; $links{'edit_community_invites'}&nbsp;&nbsp; $links{'edit_community_members'}";
-            } elsif ($watching && $memberof) {
-                $ret .= "$statustext{'memberwatcher'}<br />";
-                if ($haspostingaccess) {
-                    $ret .= "$links{'post_to_community'}&nbsp;&nbsp; ";
-                }
-                $ret .= $links{'leave_community'};
-            } elsif ($watching) {
-                $ret .= "$statustext{'watcher'}<br />";
-                if ($haspostingaccess) {
-                    $ret .= "$links{'post_to_community'}&nbsp;&nbsp; ";
-                }
-                $ret .= "$links{'join_community'}&nbsp;&nbsp; $links{'unwatch_community'}";
-            } elsif ($memberof) {
-                $ret .= "$statustext{'member'}<br />";
-                if ($haspostingaccess) {
-                    $ret .= "$links{'post_to_community'}&nbsp;&nbsp; ";
-                }
-                $ret .= "$links{'watch_community'}&nbsp;&nbsp; $links{'leave_community'}";
-            } else {
-                $ret .= "$statustext{'community'}<br />";
-                if ($haspostingaccess) {
-                    $ret .= "$links{'post_to_community'}&nbsp;&nbsp; ";
-                }
-                $ret .= "$links{'join_community'}&nbsp;&nbsp; $links{'watch_community'}";
-            }
-        } elsif ($journal->is_syndicated) {
-            $ret .= "$statustext{'syn'}<br />";
-            if ($remote && !LJ::is_friend($remote, $journal)) {
-                $ret .= "$links{'add_friend'}&nbsp;&nbsp; ";
-            } elsif ($remote && LJ::is_friend($remote, $journal)) {
-                $ret .= "$links{'remove_friend'}&nbsp;&nbsp; ";
-            }
-            $ret .= $links{'syndicated_list'};
-        } elsif ($journal->is_news) {
-            $ret .= "$statustext{'news'}<br />";
-            if ($remote && !LJ::is_friend($remote, $journal)) {
-                $ret .= $links{'add_friend'};
-            } else {
-                $ret .= "&nbsp;";
-            }
-        } else {
-            $ret .= "$statustext{'other'}<br />";
-            $ret .= "&nbsp;";
-        }
-
-        $ret .= LJ::Widget::StyleAlwaysMine->render( u => $remote )
-            if ($remote && $remote->{userid} != $journal->{userid});
-
-        $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);
-        $ret .= "</td>";
-
-    } else {
-
-        my $show_login_form = LJ::run_hook("show_control_strip_login_form", $journal);
-        $show_login_form = 1 if !defined $show_login_form;
-
-        if ($show_login_form) {
-            my ($form_root, $extra_fields);
-            if ($LJ::USE_SSL_LOGIN) {
-                $form_root = $LJ::SSLROOT;
-                $extra_fields = '';
-            } else {
-                $form_root = $LJ::SITEROOT;
-                my $chal = LJ::challenge_generate(300);
-                $extra_fields = 
-                    "<input type='hidden' name='chal' id='login_chal' class='lj_login_chal' value='$chal' />" .
-                    "<input type='hidden' name='response' id='login_response' class='lj_login_response' value='' />";
-            }
-            my $contents = LJ::run_hook('control_strip_userpic_contents', $uri) || "&nbsp;";
-            $ret .= <<"LOGIN_BAR";
-                <td id='lj_controlstrip_userpic'>$contents</td>
-                <td id='lj_controlstrip_login' style='background-image: none;' nowrap='nowrap'>
-                <form id="login" class="lj_login_form" action="$form_root/login.bml?ret=1" method="post"><div>
-                <input type="hidden" name="mode" value="login" />
-                $extra_fields
-                <table cellspacing="0" cellpadding="0" style="margin-right: 1em;"><tr><td>
-                <label for="xc_user">$BML::ML{'/login.bml.login.username'}</label> <input type="text" name="user" size="7" maxlength="17" tabindex="1" id="xc_user" value="" />
-                </td><td>
-                <label style="margin-left: 3px;" for="xc_password">$BML::ML{'/login.bml.login.password'}</label> <input type="password" name="password" size="7" tabindex="2" id="xc_password" class='lj_login_password' />
-LOGIN_BAR
-            $ret .= "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.login'}\" tabindex='4' />";
-            $ret .= "</td></tr>";
-
-            $ret .= "<tr><td valign='top'>";
-            $ret .= "<a href='$LJ::SITEROOT/lostinfo.bml'>$BML::ML{'web.controlstrip.login.forgot'}</a>";
-            $ret .= "</td><td style='font: 10px Arial, Helvetica, sans-serif;' valign='top' colspan='2' align='right'>";
-            $ret .= "<input type='checkbox' id='xc_remember' name='remember_me' style='height: 10px; width: 10px;' tabindex='3' />";
-            $ret .= "<label for='xc_remember'>$BML::ML{'web.controlstrip.login.remember'}</label>";
-            $ret .= "</td></tr></table>";
-
-            $ret .= '</div></form></td>';
-        } else {
-            my $contents = LJ::run_hook('control_strip_loggedout_userpic_contents', $uri) || "&nbsp;";
-            $ret .= "<td id='lj_controlstrip_loggedout_userpic'>$contents</td>";
-        }
-
-        $ret .= "<td id='lj_controlstrip_actionlinks' nowrap='nowrap'>";
-
-        if ($journal->is_personal || $journal->is_identity) {
-            if (LJ::Request->notes('view') eq "friends") {
-                $ret .= $statustext{'personalfriendspage'};
-            } elsif (LJ::Request->notes('view') eq "friendsfriends") {
-                $ret .= $statustext{'personalfriendsfriendspage'};
-            } else {
-                $ret .= $statustext{'personal'};
-            }
-        } elsif ($journal->is_community) {
-            $ret .= $statustext{'community'};
-        } elsif ($journal->is_syndicated) {
-            $ret .= $statustext{'syn'};
-        } elsif ($journal->is_news) {
-            $ret .= $statustext{'news'};
-        } else {
-            $ret .= $statustext{'other'};
-        }
-
-        $ret .= "<br />";
-        $ret .= "$links{'login'}&nbsp;&nbsp; " unless $show_login_form;
-        $ret .= "$links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}";
-        $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);
-        $ret .= "</td>";
-    }
-
-    LJ::run_hooks('add_extra_cells_in_controlstrip', \$ret);
-
-    my $message;
-    $message = LJ::Widget::SiteMessages->render if LJ::Widget::SiteMessages->should_render;
-
-    my $mobile_link = '';
-    if (!$LJ::DISABLED{'view_mobile_link_always'} || Apache::WURFL->is_mobile()) {
-        my $url;
-        my $uri = LJ::Request->uri;
-        if ($uri =~ /\/__rpc_/) {
-            ## control strip is called from AJAX request
-            ## TODO: more secure Referer check?
-            $url = LJ::eurl( LJ::Request->header_in("Referer") );
-        } else {
-            my $hostname = LJ::Request->hostname;
-            my $args = LJ::Request->args;
-            my $args_wq = $args ? "?$args" : "";
-            $url = LJ::eurl("http://$hostname" . $uri . $args_wq);
-        }
-        
-        if ($url) {
-            $mobile_link =  
-                "<div class='b-message-mobile'><div class='b-message-mobile-wrapper'>" .
-                LJ::Lang::ml('link.mobile', { href => "href='http://m.livejournal.com/redirect?from=$url'" }) .
-	            "</div></div>";
-        }
-    }
-    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr></table> $message $mobile_link";
 }
 
 sub control_strip_js_inject
@@ -2515,11 +2229,11 @@ sub needlogin_redirect {
 
 sub get_body_class_for_service_pages {
     my %opts = @_;
-    
+
     my @classes;
     push @classes, @{ $opts{'classes'} } if $opts{'classes'};
     push @classes, (LJ::get_remote()) ? 'logged-in' : 'logged-out';
-   
+
     my $uri = LJ::Request->uri;
     if ($uri =~ m!^/index\.bml$!) {
         push @classes, "index-page";
@@ -2528,7 +2242,7 @@ sub get_body_class_for_service_pages {
     } elsif ($uri =~ m!^/browse(/.*)?$!) {
         push @classes, "catalogue-page";
     } elsif ($uri =~ m!^/games(/.*)?$! || LJ::Request->header_in("Host") eq "$LJ::USERAPPS_SUBDOMAIN.$LJ::DOMAIN") {
-        push @classes, 'framework-page';    
+        push @classes, 'framework-page';
     } elsif ($uri =~ m|^/friendstimes|){
         push @classes, "p-friendstimes";
     }
@@ -2538,7 +2252,7 @@ sub get_body_class_for_service_pages {
 # Add some javascript language strings
 sub need_string {
     my @strings = @_;
-  
+
     for my $item (@strings) {
         # When comes as a hash ref, should be treated as name => value
         if(ref $item eq 'HASH') {

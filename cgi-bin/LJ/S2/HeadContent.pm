@@ -120,9 +120,6 @@ sub _page_head {
 
     $head_content .= LJ::res_includes() . $extra_js;
     LJ::run_hooks( 'head_content', \$head_content );
-    $head_content .= qq(<script type='text/javascript'>\n);
-    $head_content .= qq(Site = window.Site || {};\n);
-    $head_content .= qq(</script>\n);
 
     my $get = $opts->{'getargs'};
     my $need_block_robots = $opts->{entry_block_robots};

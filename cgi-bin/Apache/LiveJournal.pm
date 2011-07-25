@@ -93,7 +93,7 @@ sub handler
 {
     my $class = ();
     my $r     = shift; #
-    
+
     LJ::Request->free();
     LJ::Request->init($r);
 
@@ -145,7 +145,7 @@ sub handler
                 }
                 LJ::Request->header_in('X-Forwarded-For', join(", ", @hosts));
             }
-            
+
             # and now, deal with getting the right Host header
             if ($_ = LJ::Request->header_in('X-Host')) {
                 LJ::Request->header_in('Host', $_);
@@ -206,11 +206,11 @@ sub handler
                 ignore_ip    => 1
             );
 
-            if( !$session && $LJ::CACHE_REMOTE_BOUNCE_URL ) {       
+            if( !$session && $LJ::CACHE_REMOTE_BOUNCE_URL ) {
                 return redir($LJ::CACHE_REMOTE_BOUNCE_URL);
             }
         }
-    }      
+    }
 
     LJ::Request->set_handlers(PerlTransHandler => [ \&trans ]);
 
@@ -295,21 +295,21 @@ sub blocked_bot
     return LJ::Request::HTTP_PRECONDITION_FAILED;
 }
 
-sub trans
-{
+sub trans {
     {
         my $r = shift;
         LJ::Request->init($r);
     }
 
+    # don't deal with subrequests or OPTIONS
     return LJ::Request::DECLINED
-        if ! LJ::Request->is_main || LJ::Request->method_number == LJ::Request->M_OPTIONS;  # don't deal with subrequests or OPTIONS
+        if ! LJ::Request->is_main || LJ::Request->method_number == LJ::Request->M_OPTIONS;
 
     my $uri  = LJ::Request->uri;
 
     my $args = LJ::Request->args;
-    my $args_wq = $args ? "?$args" : "";
-    my $host = LJ::Request->header_in("Host");
+    my $args_wq = $args ? "?$args" : '';
+    my $host = LJ::Request->header_in('Host');
     $host =~ s/(:\d+)$//;
     my ($hostport) = $1 || "";
     $host =~ s/\.$//; ## 'www.livejournal.com.' is a valid DNS hostname
@@ -337,29 +337,30 @@ sub trans
 
     # add server mark
     my ($aws_id) = $LJ::HARDWARE_SERVER_NAME =~ /\-(.+)$/;
-    LJ::Request->header_out("X-AWS-Id" => $aws_id || 'unknown');
+    LJ::Request->header_out('X-AWS-Id' => $aws_id || 'unknown');
 
     my $lang = $LJ::DEFAULT_LANG || $LJ::LANGS[0];
     BML::set_language($lang, \&LJ::Lang::get_text);
 
-    my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check");
+    my $is_ssl = $LJ::IS_SSL = LJ::run_hook('ssl_check');
     $LJ::IS_BOT_USERAGENT = BotCheck->is_bot( LJ::Request->header_in('User-Agent') );
 
     # process controller
     # if defined
     if( LJ::Request->notes('controller') ) {
+        my $cookie_str = LJ::Request->header_in('Cookie');
 
-        my $cookie_str = LJ::Request->header_in("Cookie");
         if ($cookie_str =~ /\blangpref=(\w{2,10})\/\d+\b/) { # simplified code from BML::decide_language
             my $lang = $1;
+
             # Attention! LJ::Lang::ml uses BML::ml in web context, so we must do full BML language initialization
             BML::set_language($lang, \&LJ::Lang::get_text);
         }
 
         my @args = split (/\//, LJ::Request->uri);
-        
+
         my $response = LJ::Request->notes('controller')->process([@args[1 .. @args-1]]);
-        LJ::Request->handler("perl-script");
+        LJ::Request->handler('perl-script');
         LJ::Request->set_handlers(PerlHandler => sub {
             # show error page if controller didn't return response object
             unless($response) {
@@ -387,16 +388,21 @@ sub trans
     my $bml_handler = sub {
         my $filename = shift;
 
-        LJ::Request->handler("perl-script");
-        LJ::Request->notes("bml_filename" => $filename);
+        LJ::Request->handler('perl-script');
+        LJ::Request->notes('bml_filename' => $filename);
         LJ::Request->set_handlers(PerlHandler => \&Apache::BML::handler);
         return LJ::Request::OK;
     };
 
     if (LJ::Request->is_initial_req) {
         # delete cookies if there are any we want gone
-        if (my $cookie = $LJ::DEBUG{"delete_cookie"}) {
-            LJ::Session::set_cookie($cookie => 0, delete => 1, domain => $LJ::DOMAIN, path => "/");
+        if (my $cookie = $LJ::DEBUG{'delete_cookie'}) {
+            LJ::Session::set_cookie(
+                $cookie => 0,
+                delete  => 1,
+                domain  => $LJ::DOMAIN,
+                path    => '/',
+            );
         }
 
         # handle uniq cookies
@@ -408,17 +414,19 @@ sub trans
 
               # apply sysban block if applicable
               if (LJ::UniqCookie->sysban_should_block) {
-                  LJ::Request->handler("perl-script");
+                  LJ::Request->handler('perl-script');
                   LJ::Request->set_handlers(PerlHandler => sub { blocked_bot('sysban_should_block', @_) } );
                   return LJ::Request::OK;
               }
           }
-    } else {
+    }
+    else {
         # on error we do internal redirect to error page
         LJ::Request->pnotes ('error' => 'e404');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
+
         if (LJ::Request->status == 404) {
-            my $fn = $LJ::PAGE_404 || "404-error.html";
+            my $fn = $LJ::PAGE_404 || '404-error.html';
             return $bml_handler->("$LJ::HOME/htdocs/" . $fn);
         }
     }
@@ -428,54 +436,61 @@ sub trans
     unless ( $LJ::BLOCKED_BOT_URI && index( $uri, $LJ::BLOCKED_BOT_URI ) == 0 ) {
         foreach my $ip (@req_hosts) {
             if (LJ::sysban_check('ip', $ip)) {
-                LJ::Request->handler("perl-script");
+                LJ::Request->handler('perl-script');
                 LJ::Request->set_handlers(PerlHandler => sub { blocked_bot('sysban-ip: ' . $ip, @_) } );
                 return LJ::Request::OK;
             }
         }
-        if (LJ::run_hook("forbid_request")) {
-            LJ::Request->handler("perl-script");
+
+        if (LJ::run_hook('forbid_request')) {
+            LJ::Request->handler('perl-script');
             LJ::Request->set_handlers(PerlHandler => sub { blocked_bot('forbid_request', @_) } );
             return LJ::Request::OK
         }
     }
-    
+
     if(LJ::Request->headers_in->{Accept} eq 'application/xrds+xml'){
         LJ::Request->header_out('X-XRDS-Location' => 'http://api.' . $LJ::DOMAIN .'/xrds');
     }
-    
+
     # only allow certain pages over SSL
     if ($is_ssl) {
         if ($uri =~ m!^/interface/! || $uri =~ m!^/__rpc_!) {
             # handled later
-        } elsif ($LJ::SSLDOCS && $uri !~ m!(\.\.|\%|\.\/)!) {
-            if ($uri =~ m#^/img/userinfo.gif#) {
+        }
+        elsif ($LJ::SSLDOCS && $uri !~ m!(\.\.|\%|\.\/)!) {
+            if ($uri =~ m|^/img/userinfo.gif|) {
                 my $remote = LJ::get_remote();
+
                 if ($remote) {
                     my $custom_userhead = $remote->custom_usericon;
                     require URI;
                     my $uri = URI->new ($custom_userhead);
                     my $res = send_files ($uri->path);
-                    LJ::Request->content_type ("image/gif");
+                    LJ::Request->content_type ('image/gif');
                     return ($res == LJ::Request::OK) ? LJ::Request::DONE : $res;
                 }
             }
 
             my $file = "$LJ::SSLDOCS/$uri";
+
             unless (-e $file) {
                 # no such file.  send them to the main server if it's a GET.
                 return LJ::Request->method eq 'GET' ? redir("$LJ::SITEROOT$uri$args_wq") : 404;
             }
-            if (-d _) { $file .= "/index.bml"; }
+
+            if (-d _) { $file .= '/index.bml'; }
             $file =~ s!/{2,}!/!g;
             LJ::Request->filename($file);
-            $LJ::IMGPREFIX = "/img";
-            $LJ::STATPREFIX = "/stc";
+            $LJ::IMGPREFIX = '/img';
+            $LJ::STATPREFIX = '/stc';
             return LJ::Request::OK
-        } else {
+        }
+        else {
             return LJ::Request::FORBIDDEN;
         }
-    } elsif (LJ::run_hook("set_alternate_statimg")) {
+    }
+    elsif (LJ::run_hook('set_alternate_statimg')) {
         # do nothing, hook did it.
     } else {
         $LJ::DEBUG_HOOK{'pre_restore_bak_stats'}->() if $LJ::DEBUG_HOOK{'pre_restore_bak_stats'};
@@ -526,12 +541,14 @@ sub trans
     # anti-squatter checking
     if ($LJ::DEBUG{'anti_squatter'} && LJ::Request->method eq "GET") {
         my $ref = LJ::Request->header_in("Referer");
+
         if ($ref && index($ref, $LJ::SITEROOT) != 0) {
             # FIXME: this doesn't anti-squat user domains yet
             if ($uri !~ m!^/404!) {
                 # So hacky!  (see note below)
                 $LJ::SQUAT_URL = "http://$host$hostport$uri$args_wq";
-            } else {
+            }
+            else {
                 # then Apache's 404 handler takes over and we get here
                 # FIXME: why??  why doesn't it just work to return OK
                 # the first time with the handlers pushed?  nothing
@@ -539,6 +556,7 @@ sub trans
                 LJ::Request->handler("perl-script");
                 LJ::Request->set_handlers(PerlHandler => \&anti_squatter);
             }
+
             return LJ::Request::OK
         }
     }
@@ -566,20 +584,21 @@ sub trans
         $opts->{'user'} = LJ::canonical_username($opts->{'user'});
         my $u = LJ::load_user($opts->{'user'});
         my $remote = LJ::get_remote();
-        unless ($u) {
+
+        unless ( $u ) {
             LJ::Request->pnotes('error' => 'baduser');
             LJ::Request->pnotes('remote' => $remote);
             return LJ::Request::NOT_FOUND;
-        } 
-        
+        }
+
         LJ::Request->notes("journalid" => $u->{userid});
 
         ## check that request URL is canonical (i.e. it starts with $u->journal_base)
-        ## if not, construct canonical URL and redirect there 
+        ## if not, construct canonical URL and redirect there
         ## (redirect cases: old http://community.lj.com/name URL, upper-case URLs, hyphen/underscore in usernames etc)
         {
             ## warning: $uri from outer scope has stripped <user> part from http://users.livejournal.com/<user> URLs
-            my $uri  = LJ::Request->uri; 
+            my $uri  = LJ::Request->uri;
             my $current_url = "http://$host$uri";
             my $journal_base = $u->journal_base;
             if (substr($current_url, 0, length($journal_base)) ne $journal_base) {
@@ -594,7 +613,7 @@ sub trans
         if ($u->is_community) {
             LJ::run_hook('vertical_tags', $remote, $u);
         }
-        
+
         # check if this entry or journal contains adult content
         if (LJ::is_enabled('content_flag')) {
             # force remote to be checked
@@ -734,8 +753,10 @@ sub trans
         # journals. This ensures redirects work sensibly for all valid paths
         # under a given username, without sprinkling redirects everywhere.
         my $u = LJ::load_user($user);
+
         if ($u && $u->is_renamed) {
             my $renamedto = $u->prop('renamedto');
+
             if ($renamedto ne '') {
                 my $redirect_url = ($renamedto =~ m!^https?://!) ? $renamedto : LJ::journal_base($renamedto, $vhost) . $uuri . $args_wq;
                 return redir($redirect_url, 301);
@@ -752,6 +773,7 @@ sub trans
 
         if ($uuri =~ m#^/(\d+)\.html$#) { #
             my $u = LJ::load_user($user);
+
             unless ($u) {
                 LJ::Request->pnotes ('error' => 'baduser');
                 LJ::Request->pnotes ('remote' => LJ::get_remote());
@@ -759,15 +781,18 @@ sub trans
             }
 
             $ljentry = LJ::Entry->new($u, ditemid => $1);
-            if ($GET{'mode'} eq "reply" || $GET{'replyto'} || $GET{'edit'}) {
+
+            if ( $GET{'mode'} eq "reply" || $GET{'replyto'} || $GET{'edit'} ) {
                 $mode = "reply";
             } else {
                 $mode = "entry";
             }
 
-        } elsif ($uuri =~ m#^/(\d\d\d\d)(?:/(\d\d)(?:/(\d\d))?)?(/?)$#) {
+        }
+        elsif ( $uuri =~ m|^/(\d\d\d\d)(?:/(\d\d)(?:/(\d\d))?)?(/?)$| ) {
             my ($year, $mon, $day, $slash) = ($1, $2, $3, $4);
-            unless ($slash) {
+
+            unless ( $slash ) {
                 my $u = LJ::load_user($user)
                     or return LJ::Request::NOT_FOUND;
                 my $proper = $u->journal_base . "/$year";
@@ -781,20 +806,22 @@ sub trans
             # that's how it used to do it, when the pathextra was /day[/yyyy/mm/dd]
             $pe = $uuri;
 
-            if (defined $day) {
+            if ( defined $day ) {
                 $mode = "day";
-            } elsif (defined $mon) {
+            }
+            elsif ( defined $mon ) {
                 $mode = "month";
-            } else {
+            }
+            else {
                 $mode = "calendar";
             }
-
-        } elsif ($uuri =~ m!
+        }
+        elsif ( $uuri =~ m!
                  /([a-z\_]+)?           # optional /<viewname>
                  (.*)                   # path extra: /FriendGroup, for example
-                 !x && ($1 eq "" || defined $LJ::viewinfo{$1}))
+                 !x && ($1 eq "" || defined $LJ::viewinfo{$1}) )
         {
-            ($mode, $pe) = ($1, $2);
+            ( $mode, $pe ) = ($1, $2);
             $mode ||= "" unless length $pe;  # if no pathextra, then imply 'lastn'
 
             # redirect old-style URLs to new versions:
@@ -802,37 +829,45 @@ sub trans
                 my $newuri = $uri;
                 $newuri =~ s!$mode/(\d\d\d\d)!$1!;
                 return redir(LJ::journal_base($user) . $newuri);
-            } elsif ($mode eq 'rss') {
+            }
+            elsif ( $mode eq 'rss' ) {
                 # code 301: moved permanently, update your links.
                 return redir(LJ::journal_base($user) . "/data/rss$args_wq", 301);
-            } elsif ($mode eq 'pics' && $LJ::REDIRECT_ALLOWED{$LJ::FB_DOMAIN}) {
+            }
+            elsif ( $mode eq 'pics' && $LJ::REDIRECT_ALLOWED{$LJ::FB_DOMAIN} ) {
                 # redirect to a user's gallery
                 my $url = "$LJ::FB_SITEROOT/$user";
                 return redir($url);
-            } elsif ($mode eq 'tag') {
+            }
+            elsif ( $mode eq 'tag' ) {
 
                 # tailing slash on here to prevent a second redirect after this one
                 return redir(LJ::journal_base($user) . "$uri/") unless $pe;
-                if ($pe eq '/') {
+
+                if ( $pe eq '/' ) {
                     # tag list page
                     $mode = 'tag';
                     $pe = undef;
-                } else {
+                }
+                else {
                     # filtered lastn page
                     $mode = 'lastn';
 
                     # prepend /tag so that lastn knows to do tag filtering
                     $pe = "/tag$pe";
                 }
-            } elsif ($mode eq 'security') {
+            }
+            elsif ( $mode eq 'security' ) {
                 # tailing slash on here to prevent a second redirect after this one
                 return redir(LJ::journal_base($user) . "$uri/") unless $pe;
-                if ($pe eq '/') {
+
+                if ( $pe eq '/' ) {
                     # do a 404 for now
                     LJ::request->pnotes ('error' => 'e404');
                     LJ::Request->pnotes ('remote' => LJ::get_remote());
                     return LJ::Request::NOT_FOUND;
-                } else {
+                }
+                else {
                     # filtered lastn page
                     $mode = 'lastn';
 
@@ -840,14 +875,17 @@ sub trans
                     $pe = "/security$pe";
                 }
             }
-        } elsif (($vhost eq "users" || $vhost =~ /^other:/) &&
+        }
+        elsif ( ($vhost eq "users" || $vhost =~ /^other:/ ) &&
                  $uuri eq "/robots.txt") {
             $mode = "robots_txt";
-        } else {
+        }
+        else {
             my $key = $uuri;
             $key =~ s!^/!!;
             my $u = LJ::load_user($user);
-            unless ($u) {
+
+            unless ( $u ) {
                 LJ::Request->pnotes ('error' => 'baduser');
                 LJ::Request->pnotes ('remote' => LJ::get_remote());
                 return LJ::Request::NOT_FOUND;
@@ -859,9 +897,11 @@ sub trans
                                     undef, $u->{userid}, $key);
             if ($type eq "L") {
                 $ljentry = LJ::Entry->new($u, ditemid => $nodeid);
+
                 if ($GET{'mode'} eq "reply" || $GET{'replyto'} || $GET{'edit'}) {
                     $mode = "reply";
-                } else {
+                }
+                else {
                     $mode = "entry";
                 }
             }
@@ -875,12 +915,12 @@ sub trans
         }
 
         return $journal_view->({
-            'vhost' => $vhost,
-            'mode' => $mode,
-            'args' => $args,
+            'vhost'     => $vhost,
+            'mode'      => $mode,
+            'args'      => $args,
             'pathextra' => $pe,
-            'user' => $user,
-            'ljentry' => $ljentry,
+            'user'      => $user,
+            'ljentry'   => $ljentry,
         });
     };
 
@@ -891,12 +931,12 @@ sub trans
 
     ## special case:
     ## www.test.livejournal.com --(redirect)--> test.livejournal.com
-    if ($host =~ /^w{1,4}\.([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/) {
+    if ( $host =~ /^w{1,4}\.([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ ) {
         return redir("http://$1.$LJ::USER_DOMAIN$uri$args_wq");
     }
 
     # user domains:
-    if (($LJ::USER_VHOSTS || $LJ::ONLY_USER_VHOSTS) &&
+    if ( ($LJ::USER_VHOSTS || $LJ::ONLY_USER_VHOSTS ) &&
         $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
         $1 ne "www" &&
 
@@ -909,42 +949,40 @@ sub trans
         # see if the "user" is really functional code
         my $func = $LJ::SUBDOMAIN_FUNCTION{$user};
 
-        if ($func eq "normal") {
+        if ( $func eq "normal" ) {
             # site admin wants this domain to be ignored and treated as if it
             # were "www", so set this flag so the custom "OTHER_VHOSTS" check
             # below fails.
             $skip_domain_checks = 1;
 
-        } elsif ($func eq "cssproxy") {
-
+        }
+        elsif ( $func eq "cssproxy" ) {
             return $bml_handler->("$LJ::HOME/htdocs/extcss/index.bml");
-
-        } elsif ($func eq 'portal') {
+        }
+        elsif ( $func eq 'portal' ) {
             # if this is a "portal" subdomain then prepend the portal URL
             return redir("$LJ::SITEROOT/portal/");
-
-        } elsif ($func eq 'support') {
+        }
+        elsif ( $func eq 'support' ) {
             return redir("$LJ::SITEROOT/support/");
-
-        } elsif (ref $func eq "ARRAY" && $func->[0] eq "changehost") {
-
+        }
+        elsif ( ref $func eq "ARRAY" && $func->[0] eq "changehost" ) {
             return redir("http://$func->[1]$uri$args_wq");
-
-        } elsif ($uri =~ m!^/(?:talkscreen|delcomment)\.bml!) {
+        }
+        elsif ( $uri =~ m!^/(?:talkscreen|delcomment)\.bml! ) {
             # these URLs need to always work for the javascript comment management code
             # (JavaScript can't do cross-domain XMLHttpRequest calls)
             return LJ::Request::DECLINED
-
-        } elsif ($func eq "journal") {
-            
+        }
+        elsif ( $func eq "journal" ) {
 # Temporary block. Just for one-time verification. LJSUP-7700
             if ($uri eq '/yandex_58d720848324d318.txt') {
                 LJ::Request->handler("perl-script");
                 LJ::Request->set_handlers(PerlHandler => sub{ return LJ::Request::OK; });
                 return LJ::Request::OK;
-            } 
-# end of temporary block            
-            elsif ($uri !~ m!^/([\w\-]{1,15})(/.*)?$!) {
+            }
+# end of temporary block
+            elsif ( $uri !~ m!^/([\w\-]{1,15})(/.*)?$! ) {
                 return LJ::Request::DECLINED if $uri eq "/favicon.ico";
                 my $redir = LJ::run_hook("journal_subdomain_redirect_url",
                                          $host, $uri);
@@ -953,53 +991,61 @@ sub trans
                 LJ::Request->pnotes ('remote' => LJ::get_remote());
                 return LJ::Request::NOT_FOUND;
             }
+
             ($user, $uri) = ($1, $2);
             $uri ||= "/";
 
             # redirect them to their canonical URL if on wrong host/prefix
-            if (my $u = LJ::load_user($user)) {
+            if ( my $u = LJ::load_user($user) ) {
                 my $canon_url = $u->journal_base;
+
                 unless ($canon_url =~ m!^http://$host!i || $LJ::DEBUG{'user_vhosts_no_wronghost_redirect'}) {
                     return redir("$canon_url$uri$args_wq");
                 }
+
                 LJ::set_active_journal($u); #for Wishlist2, communities
             }
-            
+
             my $view = $determine_view->($user, "safevhost", $uri);
             return $view if defined $view;
-        } elsif ($func eq 'api') {
+        }
+        elsif ( $func eq 'api' ) {
             Apache::LiveJournal::Interface::Api->load;
             LJ::Request->handler("perl-script");
             LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Api::handler);
             return LJ::Request::OK;
-        
+
             LJ::Request->pnotes ('error' => 'e404');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;
-        } elsif ($func eq "games") {
+        }
+        elsif ( $func eq "games" ) {
             LJ::get_remote();
             return redir(LJ::Session->setdomsess_handler()) if LJ::Request->uri eq "/__setdomsess";
 
             return LJ::URI->bml_handler($LJ::AJAX_URI_MAP{$1}) if (LJ::Request->uri =~ /^\/__rpc_((?:ljapp|lj_times|ctxpopup|close|get).*)$/);
 
-    	    return remote_domsess_bounce() if LJ::remote_bounce_url();
+            return remote_domsess_bounce() if LJ::remote_bounce_url();
             return $bml_handler->("$LJ::HOME/htdocs/games/game.bml");
-        } elsif ($func) {
+        }
+        elsif ( $func ) {
             my $code = {
                 'userpics' => \&userpic_trans,
                 'files' => \&files_trans,
             };
             return $code->{$func}->(LJ::Request->r) if $code->{$func};
+
             LJ::Request->pnotes ('error' => 'e404');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;  # bogus ljconfig
-        } else {
-            ##
+        }
+        else {
             my $u = LJ::load_user($user);
             LJ::set_active_journal($u) if $u;
 
             my $view = $determine_view->($user, "users", $uri);
             return $view if defined $view;
+
             LJ::Request->pnotes ('error' => 'e404');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;
@@ -1007,12 +1053,15 @@ sub trans
     }
 
     # custom used-specified domains
-    if ($LJ::OTHER_VHOSTS && !$skip_domain_checks &&
-        $host ne $LJ::DOMAIN_WEB &&
-        $host ne $LJ::DOMAIN && $host =~ /\./ &&
-        $host =~ /[^\d\.]/)
+    if ($LJ::OTHER_VHOSTS
+     && !$skip_domain_checks
+     && $host ne $LJ::DOMAIN_WEB
+     && $host ne $LJ::DOMAIN
+     && $host =~ /\./
+     && $host =~ /[^\d\.]/ )
     {
         my $u = LJ::User->new_from_external_domain($host);
+
         unless ($u) {
             LJ::Request->pnotes ('error' => 'baduser');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
@@ -1189,7 +1238,7 @@ sub trans
     ){
         # maps uri to dir
         my $uri = LJ::Request->uri;
-        
+
         ## forbids ANY .. in uri
         if ($uri =~ /\.\./) {
             LJ::Request->pnotes ('error' => 'e404');
@@ -1226,11 +1275,11 @@ sub userpic_trans
 {
 
     if (LJ::Request->uri eq '/crossdomain.xml') {
-        LJ::Request->handler("perl-script"); 
-        LJ::Request->set_handlers(PerlHandler => \&crossdomain_content); 
+        LJ::Request->handler("perl-script");
+        LJ::Request->set_handlers(PerlHandler => \&crossdomain_content);
         return LJ::Request::OK;
     }
-    
+
     LJ::Request->pnotes (error => 'e404') unless LJ::Request->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
     return LJ::Request::NOT_FOUND unless LJ::Request->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
     my ($picid, $userid) = ($1, $2);
@@ -1284,7 +1333,7 @@ sub userpic_trans
     return LJ::Request::OK
 }
 
-sub crossdomain_content 
+sub crossdomain_content
 {
     my $crossdomain = '<?xml version="1.0"?>
 <!DOCTYPE cross-domain-policy SYSTEM "http://www.adobe.com/xml/dtds/cross-domain-policy.dtd">
@@ -1687,7 +1736,7 @@ sub journal_content
     LJ::run_hooks("after_journal_content_created", $opts, \$html);
 
     return redir($opts->{'redir'}) if $opts->{'redir'};
-    
+
     if (defined $opts->{'handler_return'}) {
         if ($opts->{'handler_return'} =~ /^(\d+)/) {
             return $1;
@@ -1715,7 +1764,7 @@ sub journal_content
         }
 
         if ($RQ{'mode'} eq "entry" || $RQ{'mode'} eq "reply") {
-            my $filename = $RQ{'mode'} eq "entry" 
+            my $filename = $RQ{'mode'} eq "entry"
                 ? ( $GET{talkread2}
                     ? "$LJ::HOME/htdocs/talkread2.bml"
                     : "$LJ::HOME/htdocs/talkread.bml"
@@ -1897,7 +1946,7 @@ sub journal_content
         $length = length($html);
         LJ::Request->header_out('Content-Encoding', 'gzip');
     }
-    
+
     # other headers
     my $html_md5 = md5_base64($html);
     LJ::Request->header_out(ETag => $html_md5);
@@ -2176,14 +2225,14 @@ sub xmlrpc_method {
 
     ## All our functions take signle hashref as an argument.
     ## Moreover, we use $req->{'props'} for our tracking purposes
-    $req = {} unless ref $req eq "HASH"; 
+    $req = {} unless ref $req eq "HASH";
 
     # get rid of the UTF8 flag in scalars
     while (my ($k, $v) = each %$req) {
         $req->{$k} = Encode::encode_utf8($v) if Encode::is_utf8($v);
     }
     $req->{'props'}->{'interface'} = "xml-rpc";
-    
+
     my $res = LJ::Protocol::do_request($method, $req, \$error);
     if ($error) {
         die SOAP::Fault
@@ -2243,17 +2292,17 @@ sub AUTOLOAD {
     ## Without eval/warn/die there will be no error message in our logs,
     ## since XMLRPC::Transport::HTTP::Apache will send the error to client.
     my $res = eval { LJ::Protocol::xmlrpc_method($method, @_) };
-    if ($@) { 
+    if ($@) {
         ## Do not log XMLRPC exceptions with exception number:
         ##      305: Client error: Action forbidden; account is suspended. at
         ## They are useless for Ops, but, yes, they can be useful for engineering debug.
         ##
-        warn "LJ::XMLRPC::$method died: $@" 
+        warn "LJ::XMLRPC::$method died: $@"
             if $@ !~ /^\d+?\s*:/
             and $@ ne "Account not validated."
-            and $@ ne "Unknown username."; 
+            and $@ ne "Unknown username.";
 
-        die $@; 
+        die $@;
     }
 
     return $res;

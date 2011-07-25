@@ -209,7 +209,6 @@ sub set_cookie {
     my ($class, $key, $value, %opts) = @_;
 
     $class->_parse_cookies;
-
     $opts{'path'}    ||= $LJ::COOKIE_PATH;
     $opts{'domain'}  ||= $LJ::COOKIE_DOMAIN;
     $opts{'expires'} ||= 0;
@@ -230,23 +229,23 @@ sub set_cookie {
 
     my $header = '';
     $header .= LJ::Text->eurl($key) . '=' . LJ::Text->eurl($value);
-    $header .= "; expires=$expires_dump" if $opts{'expires'};
-    $header .= "; path=$opts{'path'}" if $opts{'path'};
+    $header .= "; expires=$expires_dump"  if $opts{'expires'};
+    $header .= "; path=$opts{'path'}"     if $opts{'path'};
     $header .= "; domain=$opts{'domain'}" if $opts{'domain'};
-    $header .= "; HttpOnly" if $opts{'http_only'};
+    $header .= "; HttpOnly"               if $opts{'http_only'};
 
     ## Only one cookie with same name
     @cookie_set = grep { $_->{name} ne $key } @cookie_set;
 
     push @cookie_set, {
-        'name' => $key,
-        'value' => $value,
-        'expires' => $opts{'expires'},
+        'name'         => $key,
+        'value'        => $value,
+        'expires'      => $opts{'expires'},
         'expires_dump' => $expires_dump,
-        'path' => $opts{'path'},
-        'domain' => $opts{'domain'},
-        'http_only' => $opts{'http_only'},
-        'header' => $header,
+        'path'         => $opts{'path'},
+        'domain'       => $opts{'domain'},
+        'http_only'    => $opts{'http_only'},
+        'header'       => $header,
     };
 
     push @{$cookie{$key}}, $value;
@@ -256,9 +255,11 @@ sub set_cookie {
 sub delete_cookie {
     my ($class, $key, %opts) = @_;
 
-    $class->set_cookie($key, undef, time - 86400,
-        'domain' => $opts{'domain'},
-        'path' => $opts{'path'},
+    $class->set_cookie(
+        $key      => undef,
+        'expires' => time - 86400,
+        'domain'  => $opts{'domain'},
+        'path'    => $opts{'path'},
     );
     delete $cookie{$key};
 }
