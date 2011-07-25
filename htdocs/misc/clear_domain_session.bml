@@ -1,0 +1,17 @@
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
+    my $return = $GET{'return'};
+
+    if ( $return =~ m|^https?://(.+?)/|i ) {
+        my $domain = $1;
+warn "-> $domain";
+        LJ::Request->delete_cookie('ljdomsess.__external', domain => $domain );#, 'path' => '/', 'domain' => $domain);
+    }
+
+    return BML::redirect( $return );
+}
+_code?>
+
+

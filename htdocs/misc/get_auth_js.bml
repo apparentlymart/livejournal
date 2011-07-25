@@ -1,0 +1,24 @@
+<?_code
+{
+    use strict;
+    our %GET;
+    my $remote = LJ::get_remote;
+
+    my $ret = '';
+
+    if( $remote ) {
+        $ret .= qq|
+        lj_master_user = $remote->{_session}->{userid};
+        |;
+    }
+    else {
+        $ret .= q|
+        lj_master_user = 0;
+        |;
+    }
+
+    return $ret;
+}
+_code?>
+
+
