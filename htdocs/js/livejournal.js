@@ -32,15 +32,13 @@ LiveJournal.initPage = function () {
 	//register system hooks
 	LiveJournal.register_hook( 'update_wallet_balance', LiveJournal.updateWalletBalance );
 
-    // set up various handlers for every page
-    LiveJournal.initInboxUpdate();
+	// set up various handlers for every page
+	LiveJournal.initInboxUpdate();
 
-	//check ljuniq cookie and create if needed
-// Now called from PageStats/Omniture.pm
-//	LiveJournal.checkLjUniq();
+	//ljunq cookie is checked in PageStats/Omniture.pm now
 
-    // run other hooks
-    LiveJournal.run_hook("page_load");
+	// run other hooks
+	LiveJournal.run_hook("page_load");
 };
 
 jQuery(LiveJournal.initPage);
@@ -274,6 +272,24 @@ LiveJournal.parseLikeButtons = function() {
 	} catch(e) {};
 
 	try {
+		if( jQuery.browser.msie ) {
+			var replaceNode, attrs, j, node;
+			var nodes = document.body.getElementsByTagName( 'plusone' );
+
+			for( var i = 0, l = nodes.length; i < l; ++i ) {
+				replaceNode = document.createElement( 'g:plusone' );
+				node = nodes[i];
+				attrs = node.attributes;
+
+				for( j = 0; j < attrs.length; ++j ) {
+					if( attrs[j].specified ) {
+						replaceNode.setAttribute( attrs[j].nodeName, attrs[j].nodeValue );
+					}
+				}
+
+				node.parentNode.replaceChild( replaceNode, node );
+			}
+		}
 		gapi.plusone.go();
 	} catch(e) {};
 
