@@ -656,6 +656,9 @@ head<=
     # Turning off BML parsing for the rest of this code block
     # The draft might contain BML like syntax and cause problems
     BML::noparse();
+
+    my $is_sup = LJ::SUP->is_remote_sup() ? 1 : 0;
+
     $ret .= qq^
     <script type="text/javascript">
         // ensure that we're not being displayed in an iframe;
@@ -667,6 +670,7 @@ head<=
         var restoredDraft = $draft;
 
         function init_update_bml() {
+            window.isSupUser = $is_sup;
             setTimeout(function(){ $initDraft }, 0)
             $_[0]->{'onload'}
             $pageload
