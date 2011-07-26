@@ -84,15 +84,17 @@ form.ljpoll {
 
 /* LJ Like buttons */
 .lj-like {
+	overflow: hidden;
 	padding: 13px 20px;
 	margin-top: 20px;
 	background: #D2D2D2;
 	border: 1px dotted #000;
 	}
 	.lj-like .lj-like-item {
-		display: inline-block;
+		float: left;
 		margin-right: 15px;
 		background: url(/js/ck/images/lj-like-buttons.png) no-repeat;
+		border: 1px dotted #D2D2D2;
 		vertical-align: middle;
 		text-indent: -3333px;
 		cursor: pointer;
@@ -122,19 +124,3 @@ form.ljpoll {
 		height: 24px;
 		background-position: 0 -21px;
 		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
