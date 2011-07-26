@@ -397,7 +397,7 @@ sub enqueue {
     my $qid = LJ::alloc_user_counter($u, 'Q')
         or die "Could not alloc new queue ID";
     my $spam = 0;
-    if ( LJ::is_enabled('spam_inbox') && $evt->etypeid == 6 ) {
+    if ( LJ::is_enabled('spam_inbox') && $evt->etypeid == LJ::Event::UserMessageRecvd->etypeid ) {
         my $need_check = 0;
         LJ::run_hook('need_spam_check_inbox', \$need_check, $evt->arg1, $evt->userid);
         LJ::run_hook('spam_inbox_detector', \$spam, $evt->arg1, $evt->userid)
