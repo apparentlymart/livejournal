@@ -285,7 +285,7 @@ sub new_from_url {
     }
 
     # user subdomains
-    if ($LJ::USER_DOMAIN && $url =~ m!^http://([\w-]+)\.\Q$LJ::USER_DOMAIN\E/?$!) {
+    if ($LJ::USER_DOMAIN && $url =~ m!^http://([\w-]+)\.\Q$LJ::USER_DOMAIN\E(/.*|/)?$!) {
         my $u = LJ::load_user($1);
         return $u if $u;
     }
@@ -318,6 +318,7 @@ sub new_from_external_domain {
 
     my $key = "domain:$host";
     my $userid = LJ::MemCache::get($key);
+
     unless (defined $userid) {
         my $db = LJ::get_db_reader();
         ($userid) = $db->selectrow_array(qq{SELECT userid FROM domains WHERE domain=?}, undef, $host);
@@ -325,7 +326,8 @@ sub new_from_external_domain {
         my $expire = time() + 1800;
         LJ::MemCache::set($key, $userid, $expire);
     }
-    return ($userid) ? LJ::load_userid($userid) : undef;
+
+    return ($userid) if LJ::load_userid($userid);
 }
 
 # returns LJ::User class of a random user, undef if we couldn't get one
@@ -6230,6 +6232,22 @@ sub get_postto_list {
 }
 
 # <LJFUNC>
+# name: LJ::trusted
+# des: Checks to see if the remote user can use javascript in S2 layers.
+# returns: boolean; 1 if remote user can use javascript
+# args: userid
+# des-userid: id of user to check
+# </LJFUNC>
+sub trusted {
+    my ($userid) = @_;
+
+    my $u = LJ::load_userid($userid);
+    return 0 unless $u;
+
+    return $u->prop('javascript');
+}
+
+# <LJFUNC>
 # name: LJ::can_view
 # des: Checks to see if the remote user can view a given journal entry.
 #      <b>Note:</b> This is meant for use on single entries at a time,
@@ -9964,8 +9982,7 @@ sub can_delete_journal_item {
 # returns: hashref containing 'user' and 'userid' if valid user, else
 #          undef.
 # </LJFUNC>
-sub get_remote
-{
+sub get_remote {
     my $opts = ref $_[0] eq "HASH" ? shift : {};
     return $LJ::CACHE_REMOTE if $LJ::CACHED_REMOTE && ! $opts->{'ignore_ip'};
 
@@ -9987,10 +10004,11 @@ sub get_remote
     # in and set it, or set it with a free account, then we give them
     # the invalid cookies error.
     my $tried_fast = 0;
-    my $sessobj = LJ::Session->session_from_cookies(tried_fast   => \$tried_fast,
-                                                    redirect_ref => \$LJ::CACHE_REMOTE_BOUNCE_URL,
-                                                    ignore_ip    => $opts->{ignore_ip},
-                                                    );
+    my $sessobj = LJ::Session->session_from_cookies(
+        tried_fast   => \$tried_fast,
+        redirect_ref => \$LJ::CACHE_REMOTE_BOUNCE_URL,
+        ignore_ip    => $opts->{ignore_ip},
+    );
 
     my $u = $sessobj ? $sessobj->owner : undef;
 
