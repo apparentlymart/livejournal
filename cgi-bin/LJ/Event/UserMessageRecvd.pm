@@ -112,14 +112,14 @@ sub as_html_actions {
     my $u = LJ::want_user($msg->journalid);
 
     my $ret = "<div class='actions'>";
-    $ret .= " <a href='$LJ::SITEROOT/inbox/compose.bml?mode=reply&msgid=$msgid'>Reply</a>";
+    $ret .= " <a href='$LJ::SITEROOT/inbox/compose.bml?mode=reply&msgid=$msgid'>".LJ::Lang::ml('esn.html_actions.reply')."</a>";
 
     if (LJ::is_enabled('spam_inbox') && $opts{'state'} && $opts{'state'} eq 'S') {
-        $ret .= " | <a href='#$LJ::SITEROOT/inbox/markspam.bml?msgid=". $msg->msgid ."'>Mark as not Spam</a>";
+        $ret .= " | <a href='#$LJ::SITEROOT/inbox/markspam.bml?msgid=". $msg->msgid ."'>".LJ::Lang::ml('esn.html_actions.unspam')."</a>";
     } else {
-        $ret .= " | <a href='$LJ::SITEROOT/friends/add.bml?user=". $msg->other_u->user ."'>Add as friend</a>"
+        $ret .= " | <a href='$LJ::SITEROOT/friends/add.bml?user=". $msg->other_u->user ."'>".LJ::Lang::ml('esn.html_actions.add_as_friend')."</a>"
             unless $u->is_friend($msg->other_u);
-        $ret .= " | <a href='$LJ::SITEROOT/inbox/markspam.bml?msgid=". $msg->msgid ."'>Mark as Spam</a>";
+        $ret .= " | <a href='$LJ::SITEROOT/inbox/markspam.bml?msgid=". $msg->msgid ."'>".LJ::Lang::ml('esn.html_actions.spam')."</a>";
     }
     $ret .= "</div>";
 
