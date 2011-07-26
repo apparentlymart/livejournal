@@ -88,6 +88,10 @@ sub render_body {
             id      => "${name}_CheckAll_$sfx",
             class   => "InboxItem_Check",
         });
+        
+        my $spam_button = $LJ::DISABLED{'spam_inbox'} ? '' :
+                          ($view eq 'spam') ? qq{ <input type="submit" name="unspam_$sfx" value="$BML::ML{'.btn.unspam'}" id="${name}_UnSpam_$sfx" /> }
+                                            : qq{ <input type="submit" name="spam_$sfx" value="$BML::ML{'.btn.spam'}" id="${name}_Spam_$sfx" /> };
 
         return qq {
              <tr class="header" id="ActionRow$sfx">
@@ -101,6 +105,7 @@ sub render_body {
                         <input type="submit" name="markRead_$sfx" value="$BML::ML{'.btn.read'}" $disabled id="${name}_MarkRead_$sfx" />
                         <input type="submit" name="markUnread_$sfx" value="$BML::ML{'.btn.unread'}" id="${name}_MarkUnread_$sfx" />
                         <input type="submit" name="delete_$sfx" value="$BML::ML{'.btn.delete'}" id="${name}_Delete_$sfx" />
+                        $spam_button
                     </td>
             </tr>
         };
