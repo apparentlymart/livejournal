@@ -44,6 +44,8 @@
 .menu.sent|staleness=1
 .menu.sent=Sent
 
+.menu.unspam_all.btn=Unspam All
+
 .refresh|staleness=1
 .refresh=Refresh
 

@@ -215,12 +215,21 @@ sub render_body {
 
     $messagetable .= '</tbody></table></div>';
 
-    $messagetable .= qq {
-      <div style="text-align: center; margin-top: 20px;">
-        <input type="submit" name="markAllRead" value="Mark All Read" $disabled id="${name}_MarkAllRead" style="margin-right: 5em; width: 12em;" />
-        <input type="submit" name="deleteAll" value="Delete All" $disabled id="${name}_DeleteAll" style="width: 12em;" />
-     </div>
-    };
+    if ($view eq 'spam') {
+        $messagetable .= qq {
+          <div style="text-align: center; margin-top: 20px;">
+            <input type="submit" name="markAllRead" value="$BML::ML{'.menu.unspam_all.btn'}" $disabled id="${name}_MarkAllRead" style="margin-right: 5em; width: 12em;" />
+            <input type="submit" name="deleteAll" value="$BML::ML{'.menu.delete_all.btn'}" $disabled id="${name}_DeleteAll" style="width: 12em;" />
+         </div>
+        };
+    } else {
+        $messagetable .= qq {
+          <div style="text-align: center; margin-top: 20px;">
+            <input type="submit" name="markAllRead" value="$BML::ML{'.menu.mark_all_read.btn'}" $disabled id="${name}_MarkAllRead" style="margin-right: 5em; width: 12em;" />
+            <input type="submit" name="deleteAll" value="$BML::ML{'.menu.delete_all.btn'}" $disabled id="${name}_DeleteAll" style="width: 12em;" />
+         </div>
+        };
+    }
 
     $msgs_body .= $messagetable;
 
