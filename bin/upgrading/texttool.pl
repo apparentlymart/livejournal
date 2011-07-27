@@ -15,6 +15,8 @@ my $opt_only;
 my $opt_verbose;
 my $opt_all;    ## load texts for all known languages
 my $force_override = 0;
+my $opt_force_popstruct = 0;
+my $opt_process_deadphrases = 0;
 GetOptions(
            "help" => \$opt_help,
            "local-lang=s" => \$opt_local_lang,
@@ -22,6 +24,8 @@ GetOptions(
            "only=s" => \$opt_only,
            "all"    => \$opt_all,
            "force-override" => \$force_override,
+           'force-popstruct' => \$opt_force_popstruct,
+           'process-deadphrases' => \$opt_process_deadphrases,
            ) or die "can't parse arguments";
 
 my $mode = shift @ARGV;
@@ -50,11 +54,24 @@ Where 'command' is one of:
 
 Optionally:
     --local-lang=..     If given, works on local site files too
-    --all               When loading texts, and no language is
+
+    --all
+                        When loading texts, and no language is
                         specified, load all languages
-    
-    --force-override    Force overriding existing keys when loading texts from disk.
-    
+
+    --force-override
+                        Force overriding existing keys when loading texts
+                        from disk.
+
+    --force-popstruct
+                        Force updating/replacing languages and language domains
+                        if they are found to be unchanged
+
+    --process-deadphrases
+                        Process data found in deadphrases.dat and
+                        deadphrases-local.dat; this is disabled by default
+                        because these data are outdated.
+
 Examples:
     texttool.pl load en en_LJ
     texttool.pl --all load
@@ -199,9 +216,7 @@ sub makeusable
         my $l = $lang_code{$lang};
         $out->("x", "Bogus language: $lang") unless $l;
         my @children = grep { $_->{'parentlnid'} == $l->{'lnid'} } values %lang_code;
-        foreach my $cl (@children) {
-            $out->("$l->{'lncode'} -- $cl->{'lncode'}");
-
+        foreach my $cl ( sort { $a->{'lncode'} cmp $b->{'lncode'} } @children ) {
             my %need;
             # push downwards everything that has some valid text in some language (< 4)
             $sth = $dbh->prepare("SELECT dmid, itid, txtid FROM ml_latest WHERE lnid=$l->{'lnid'} AND staleness < 4");
@@ -214,13 +229,21 @@ sub makeusable
             while (my ($dmid, $itid, $txtid) = $sth->fetchrow_array) {
                 delete $need{"$dmid:$itid"};
             }
-            while (my $k = each %need) {
+
+            if ( %need && !$opt_verbose ) {
+                my $count = scalar keys %need;
+                $out->("[$l->{'lncode'} => $cl->{'lncode'}] $count items");
+            }
+
+            foreach my $k ( sort keys %need ) {
                 my ($dmid, $itid) = split(/:/, $k);
                 my $txtid = $need{$k};
                 my $stale = $cl->{'parenttype'} eq "diff" ? 3 : 0;
                 $dbh->do("INSERT INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) VALUES ".
                          "($cl->{'lnid'}, $dmid, $itid, $txtid, NOW(), $stale)");
                 die $dbh->errstr if $dbh->err;
+
+                $out->("[$l->{'lncode'} => $cl->{'lncode'}] $itid") if $opt_verbose;
             }
             $rec->($cl->{'lncode'}, $rec);
         }
@@ -321,15 +344,18 @@ sub loadcrumbs
 
     # begin iterating, order doesn't matter...
     foreach my $crumbkey (@crumbs) {
-        $out->("inserting crumb.$crumbkey");
         my $crumb = LJ::get_crumb($crumbkey);
         my $local = $LJ::CRUMBS_LOCAL{$crumbkey} ? 1 : 0;
 
         # see if it exists
         my $itid = $dbh->selectrow_array("SELECT itid FROM ml_items
                                           WHERE dmid = $genid AND itcode = 'crumb.$crumbkey'")+0;
-        LJ::Lang::set_text($genid, $local ? $loclang : 'en', "crumb.$crumbkey", $crumb->[0])
-            unless $itid;
+
+        unless ($itid) {
+            $out->("inserting crumb.$crumbkey");
+            my $lang = $local ? $loclang : 'en';
+            LJ::Lang::set_text( $genid, $lang, "crumb.$crumbkey", $crumb->[0] );
+        }
     }
 
     # done
@@ -339,19 +365,91 @@ sub loadcrumbs
 sub popstruct
 {
     $out->("Populating structure...", '+');
-    foreach my $l (values %lang_id) {
-        $out->("Inserting language: $l->{'lnname'}");
-        $dbh->do("REPLACE INTO ml_langs (lnid, lncode, lnname, parenttype, parentlnid) ".
-                 "VALUES (" . join(",", map { $dbh->quote($l->{$_}) } qw(lnid lncode lnname parenttype parentlnid)) . ")");
+
+    my $languages_changed = 0;
+    my $langdata = $dbh->selectall_arrayref(
+        'SELECT * FROM ml_langs',
+        { 'Slice' => {} },
+    );
+
+    my %langid_present;
+    foreach my $langrow (@$langdata) {
+        $langid_present{ $langrow->{'lnid'} } = 1;
+        my $l = $lang_id{ $langrow->{'lnid'} };
+
+        $languages_changed ||= !$l;
+        $l ||= {};
+
+        foreach my $key ( qw( lncode lnname parenttype parentlnid ) ) {
+            $languages_changed ||= ( $l->{$key} ne $langrow->{$key} );
+        }
+
+        last if $languages_changed;
     }
 
-    foreach my $d (values %dom_id) {
-        $out->("Inserting domain: $d->{'type'}\[$d->{'args'}\]");
-        $dbh->do("REPLACE INTO ml_domains (dmid, type, args) ".
-                 "VALUES (" . join(",", map { $dbh->quote($d->{$_}) } qw(dmid type args)) . ")");
+    if ( grep { !$langid_present{$_} } keys %lang_id ) {
+        $languages_changed = 1;
     }
 
-    $out->("Inserting language domains ...");
+    if ( $languages_changed || $opt_force_popstruct ) {
+        $out->('Languages:', '+');
+        foreach my $l ( values %lang_id ) {
+            $out->("$l->{'lnname'} (lncode=$l->{'lncode'})");
+            $dbh->do(
+                qq{
+                    REPLACE INTO ml_langs
+                    (lnid, lncode, lnname, parenttype, parentlnid)
+                    VALUES (?, ?, ?, ?, ?)
+                }, undef,
+                $l->{'lnid'}, $l->{'lncode'}, $l->{'lnname'},
+                $l->{'parenttype'}, $l->{'parentlnid'},
+            );
+        }
+        $out->('-');
+    } else {
+        $out->('Languages seem to be unchanged, not changing anything without --force-popstruct');
+    }
+
+    my $domains_changed = 0;
+    my $domdata = $dbh->selectall_arrayref(
+        'SELECT * FROM ml_domains',
+        { 'Slice' => {} },
+    );
+
+    my %domid_present;
+    foreach my $domrow (@$domdata) {
+        $domid_present{ $domrow->{'dmid'} } = 1;
+        my $l = $dom_id{ $domrow->{'dmid'} };
+
+        $domains_changed ||= !$l;
+        $l ||= {};
+
+        foreach my $key ( qw( type args ) ) {
+            $domains_changed ||= ( $l->{$key} ne $domrow->{$key} );
+        }
+
+        last if $domains_changed;
+    }
+
+    if ( grep { !$domid_present{$_} } keys %dom_id ) {
+        $domains_changed = 1;
+    }
+
+    if ( $domains_changed || $opt_force_popstruct ) {
+        $out->('Domains:', '+');
+        foreach my $d (values %dom_id) {
+            $out->("$d->{'type'}\[$d->{'args'}\]");
+            $dbh->do(
+                'REPLACE INTO ml_domains (dmid, type, args) VALUES (?, ?, ?)',
+                undef, $d->{'dmid'}, $d->{'type'}, $d->{'args'},
+            );
+        }
+        $out->('-');
+    } else {
+        $out->('Domains seem to be unchanged, not changing anything without --force-popstruct');
+    }
+
+    $out->('Inserting/updating language domains ...');
     foreach my $ld (@lang_domains) {
         $dbh->do("INSERT IGNORE INTO ml_langdomains (lnid, dmid, dmmaster) VALUES ".
                  "(" . join(",", map { $dbh->quote($ld->{$_}) } qw(lnid dmid dmmaster)) . ")");
@@ -373,7 +471,9 @@ sub poptext
         }
     }
 
-    $out->("Populating text...", '+');
+    $out->('Populating text (reading all these files may take a while)...');
+    $out->('  hint: --verbose will output filenames') unless $opt_verbose;
+    $out->('+');
 
     # learn about base files
     my %source;   # langcode -> absfilepath
@@ -381,7 +481,7 @@ sub poptext
         my $file = "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat";
         next if $opt_only && $lang ne $opt_only;
         next unless -e $file;
-        $source{$file} = [$lang, ''];
+        $source{$file} = [ $lang, '', "bin/upgrading/${lang}.dat" ];
     }
 
     # learn about local files
@@ -399,16 +499,15 @@ sub poptext
         $pfx =~ s!^htdocs/!!;
         $pfx =~ s!\.text(\.local)?$!!;
         $pfx = "/$pfx";
-        $source{"$ENV{'LJHOME'}/$tf"} = [$lang, $pfx];
+        $source{"$ENV{'LJHOME'}/$tf"} = [ $lang, $pfx, $tf ];
     }
 
     my %existing_item;  # langid -> code -> 1
 
-    foreach my $file (keys %source)
-    {
-        my ($lang, $pfx) = @{$source{$file}};
+    foreach my $file ( sort keys %source ) {
+        my ( $lang, $pfx, $filename_short ) = @{$source{$file}};
 
-        $out->("$lang", '+');
+        $out->("reading $filename_short...") if $opt_verbose;
         my $ldf = LJ::LangDatFile->new($file);
 
         my $l = $lang_code{$lang} or die "unknown language '$lang'";
@@ -421,15 +520,25 @@ sub poptext
             my $text = $ldf->value($code);
 
             $code = "$pfx$code";
-            die "Code in file $file can't start with a dot: $code"
+            die "Code in file $filename_short can't start with a dot: $code"
                 if $code =~ /^\./;
 
             # load existing items for target language
             unless (exists $existing_item{$l->{'lnid'}}) {
                 $existing_item{$l->{'lnid'}} = {};
                 my $sth = $dbh->prepare(qq{
-                    SELECT i.itcode, t.text   FROM ml_latest l, ml_items i, ml_text t WHERE i.dmid=1 AND l.dmid=1 AND i.itid=l.itid AND l.lnid=? AND t.lnid=l.lnid and t.txtid = l.txtid and i.dmid=i.dmid and t.dmid=i.dmid
-                    });
+                    SELECT i.itcode, t.text
+                    FROM ml_latest l, ml_items i, ml_text t
+                    WHERE
+                        i.dmid  = 1       AND
+                        l.dmid  = 1       AND
+                        i.itid  = l.itid  AND
+                        l.lnid  = ?       AND
+                        t.lnid  = l.lnid  AND
+                        t.txtid = l.txtid AND
+                        i.dmid  = i.dmid  AND
+                        t.dmid  = i.dmid
+                });
                 $sth->execute($l->{lnid});
                 die $sth->errstr if $sth->err;
                 while (my ($code, $oldtext) = $sth->fetchrow_array) {
@@ -447,8 +556,16 @@ sub poptext
             return if exists $existing_item{$l->{'lnid'}}->{$code}
                         and not $force_override;
             
-            unless ($existing_item{$l->{'lnid'}}->{$code} eq $text) {
+            my $old_text = $existing_item{$l->{'lnid'}}->{$code};
+
+            unless ( $old_text eq $text ) {
                 $addcount++;
+                if ($old_text) {
+                    $out->("[$filename_short, lang=$lang] $code: $old_text => $text");
+                } else {
+                    $out->("[$filename_short, lang=$lang] $code: setting to $text");
+                }
+
                 # if the text is changing, the staleness is at least 1
                 my $staleness = $metadata{'staleness'}+0 || 1;
 
@@ -456,18 +573,21 @@ sub poptext
                                              { 'staleness' => $staleness,
                                                'notes' => $metadata{'notes'},
                                                'changeseverity' => 2, });
-                $out->("set: $code") if $opt_verbose;
+
                 unless ($res) {
                     $out->('x', "ERROR: " . LJ::Lang::last_error());
                 }
             }
         });
-        $out->("added: $addcount", '-');
+
+        if ( $addcount > 0 ) {
+            $out->("added $addcount from $file");
+        }
     }
     $out->("-", "done.");
 
     # dead phrase removal
-    if ($LJ::IS_DEV_SERVER) {
+    if ($opt_process_deadphrases) {
         $out->("Removing dead phrases...", '+');
         foreach my $file ("deadphrases.dat", "deadphrases-local.dat") {
             my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
@@ -687,11 +807,15 @@ sub remove {
     return if $no_error && !$itid;
     $out->("x", "Unknown item code $itcode.") unless $itid;
 
-    $out->("Removing item $itcode from domain $dmcode ($itid)...", "+");
-
     # need to delete everything from: ml_items ml_latest ml_text
 
-    $dbh->do("DELETE FROM ml_items WHERE dmid=$dmid AND itid=$itid");
+    my $affected = $dbh->do("DELETE FROM ml_items WHERE dmid=$dmid AND itid=$itid");
+
+    # we're only outputting something if this is something
+    # significant, according to ml_items
+    if ( $affected > 0 ) {
+        $out->("Removing item $itcode from domain $dmcode ($itid)...");
+    }
 
     my $txtids = "";
     my $sth = $dbh->prepare("SELECT txtid FROM ml_latest WHERE dmid=$dmid AND itid=$itid");
@@ -702,9 +826,4 @@ sub remove {
     }
     $dbh->do("DELETE FROM ml_latest WHERE dmid=$dmid AND itid=$itid");
     $dbh->do("DELETE FROM ml_text WHERE dmid=$dmid AND txtid IN ($txtids)") if $txtids;
-
-    $out->("-","done.");
 }
-
-
-
