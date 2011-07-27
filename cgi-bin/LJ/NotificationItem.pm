@@ -173,6 +173,12 @@ sub unread {
     return $_[0]->_state eq 'N';
 }
 
+# returns if this event is marked as spam
+sub spam {
+    return 0 unless defined $_[0]->_state;
+    return $_[0]->_state eq 'S';
+}
+
 # delete this item from its inbox
 sub delete {
     my $self = shift;

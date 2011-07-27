@@ -99,6 +99,7 @@
         $class =~ s/LJ::Event:://;
         push @{$ret{items}}, {
             read => $item->read,
+            spam => $item->spam,
             qid  => $item->qid,
             bookmarked => $u->notification_inbox->is_bookmark($item->qid),
             category => $class,
@@ -112,6 +113,7 @@
         unread_friend => $inbox->friendplus_event_count,
         unread_entrycomment => $inbox->entrycomment_event_count,
         unread_usermsg_sent => $inbox->usermsg_sent_event_count,
+        spam_count => $inbox->spam_event_count,
         %ret,
     });
 }
