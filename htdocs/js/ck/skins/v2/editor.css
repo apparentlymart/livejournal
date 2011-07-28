@@ -312,9 +312,10 @@ li.cke_panel_listItem {
 	white-space:normal;
 	}
 .cke_skin_v2 .cke_toolbox {
-	clear:both;
-	padding-bottom:1px;
-	padding-left:4px;
+	clear: both;
+	float: left;
+	padding-top: 1px;
+	padding-bottom: 1px;
 	}
 .cke_skin_v2 a.cke_toolbox_collapser,
 .cke_skin_v2 a:hover.cke_toolbox_collapser {
@@ -355,21 +356,15 @@ li.cke_panel_listItem {
 	background-position:4px -781px;
 	}
 .cke_skin_v2 .cke_toolbar {
-	padding-top:1px;
-	padding-bottom:1px;
-	display:inline-block;
-	float:left;
+	padding-top: 1px;
+	padding-bottom: 1px;
 	}
 .cke_skin_v2 .cke_rtl .cke_toolbar {
-	float:right;
+	float: right;
 	}
 .cke_skin_v2 .cke_toolgroup {
-	display:inline-block;
-	float:left;
-	}
-.cke_skin_v2 .cke_browser_ie .cke_toolgroup {
-	#float:none;
-	#display:inline;
+	float: left;
+	display: inline;
 	}
 .cke_skin_v2 .cke_rtl .cke_toolgroup {
 	float:right;
@@ -378,15 +373,13 @@ li.cke_panel_listItem {
 	#float:none;
 	}
 .cke_skin_v2 .cke_separator {
-	display:inline-block;
-	float:left;
-	border-left:solid 1px #999;
-	margin:4px 2px;
-	height:16px;
-	}
-.cke_skin_v2 .cke_browser_ie .cke_separator {
-	#float:none;
-	#display:inline;
+	position: relative;
+	top: 4px;
+	float: left;
+	width: 1px;
+	height: 16px;
+	margin: 0 15px;
+	background: #6C96CA;
 	}
 .cke_skin_v2 .cke_rtl .cke_separator {
 	float:right;
@@ -401,13 +394,12 @@ li.cke_panel_listItem {
 	clear:right;
 	}
 .cke_skin_v2 .cke_toolbar_start {
-	display:inline-block;
-	background-image:url(images/toolbar_start.gif);
-	background-repeat:no-repeat;
-	margin:4px 2px 0 2px;
-	width:3px;
-	height:20px;
-	float:left;
+	display: none;
+	float: left;
+	width: 1px;
+	height: 16px;
+	margin: 4px 15px 0 15px;
+	background: #6C96CA;
 	}
 .cke_skin_v2 .cke_browser_ie .cke_toolbar_start {
 	#float:none;
@@ -420,10 +412,8 @@ li.cke_panel_listItem {
 	#float:none;
 	}
 .cke_skin_v2 .cke_toolbar_end {
-	display:inline-block;
-	float:left;
+	display: none;
 	}
-	
 .cke_skin_v2 .cke_browser_ie .cke_toolbar_end {
 	#float:none;
 	#display:inline;
@@ -513,8 +503,7 @@ li.cke_panel_listItem {
 	border-width:3px;
 	}
 .cke_skin_v2 .cke_button .cke_icon {
-	background-image:url(icons.png);
-	background-position:100px;
+	background-image:url(icons-new.png);
 	background-repeat:no-repeat;
 	margin-top:1px;
 	width:16px;
@@ -847,12 +836,13 @@ li.cke_panel_listItem {
 .cke_skin_v2 .cke_rcombo .cke_text {
 	border:1px solid #8f8f73;
 	background-color:#fff;
-	height:12px;
-	width:60px;
-	padding-top:4px;
-	padding-bottom:4px;
-	padding-left:5px;
-	padding-right:5px;
+	height: 11px;
+	width: 60px;
+	padding-top:2px;
+	padding-bottom:2px;
+	padding-left:4px;
+	padding-right:4px;
+	margin-top: 2px;
 	text-overflow:ellipsis;
 	overflow:hidden;
 	display:inline-block;
@@ -880,17 +870,19 @@ li.cke_panel_listItem {
 	}
 .cke_skin_v2 .cke_rcombo .cke_openbutton {
 	display:inline-block;
+	width: 14px;
+	height: 15px;
 	border-top:1px solid #8f8f73;
 	border-bottom:1px solid #8f8f73;
 	}
 .cke_skin_v2 .cke_rcombo .cke_openbutton .cke_icon {
 	display:inline-block;
-	background-position:5px -715px;
+	background-position: 4px -718px;
 	background-image:url(images/sprites.png);
 	_background-image:url(images/sprites_ie6.png);
 	background-repeat:no-repeat;
-	width:14px;
-	height:20px;
+	width: 14px;
+	height: 15px;
 	}
 .cke_skin_v2 .cke_browser_ie .cke_rcombo .cke_openbutton .cke_icon {
 	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='scale');
@@ -903,6 +895,7 @@ li.cke_panel_listItem {
 	filter:;
 	}
 .cke_skin_v2 .cke_ltr .cke_rcombo .cke_openbutton {
+	margin-top: 2px;
 	border-right:1px solid #8f8f73;
 	-moz-border-radius-topright:3px;
 	-webkit-border-top-right-radius:3px;
@@ -1099,16 +1092,17 @@ li.cke_panel_listItem {
 	background-position:0 -288px;
 	}
 .cke_skin_v2 .cke_button_bold .cke_icon {
-	background-position:0 -304px;
+	background-position: 0 0;
 	}
 .cke_skin_v2 .cke_button_italic .cke_icon {
-	background-position:0 -320px;
+	background-position: 0 -16px;
 	}
 .cke_skin_v2 .cke_button_underline .cke_icon {
-	background-position:0 -336px;
+	background-position: 0 -32px;
 	}
 .cke_skin_v2 .cke_button_strike .cke_icon {
-	background-position:0 -352px;
+	width: 31px;
+	background-position: 0 -48px;
 	}
 .cke_skin_v2 .cke_button_subscript .cke_icon {
 	background-position:0 -368px;
@@ -1126,7 +1120,7 @@ li.cke_panel_listItem {
 	background-position:0 -640px;
 	}
 .cke_skin_v2 .cke_button_link .cke_icon {
-	background-position:0 -528px;
+	background-position: 0 -79px;
 	}
 .cke_skin_v2 .cke_button_unlink .cke_icon {
 	background-position:0 -544px;
@@ -1157,7 +1151,7 @@ li.cke_panel_listItem {
 	background-position:0 -672px;
 	}
 .cke_skin_v2 .cke_button_textcolor .cke_icon {
-	background-position:0 -704px;
+	background-position: 0 -63px;
 	}
 .cke_skin_v2 .cke_button_bgcolor .cke_icon {
 	background-position:0 -720px;
@@ -1193,13 +1187,13 @@ li.cke_panel_listItem {
 	background-position:0 -880px;
 	}
 .cke_skin_v2 .cke_button_undo .cke_icon {
-	background-position:0 -208px;
+	background-position: 0 -263px;
 	}
 .cke_skin_v2 .cke_rtl .cke_button_undo .cke_icon {
-	background-position:0 -224px;
+	background-position: 0 -224px;
 	}
 .cke_skin_v2 .cke_button_redo .cke_icon {
-	background-position:0 -224px;
+	background-position: 0 -278px;
 	}
 .cke_skin_v2 .cke_rtl .cke_button_redo .cke_icon {
 	background-position:0 -208px;
@@ -1208,10 +1202,10 @@ li.cke_panel_listItem {
 	background-position:0 -80px;
 	}
 .cke_skin_v2 .cke_button_numberedlist .cke_icon {
-	background-position:0 -400px;
+	background-position: 0 -185px;
 	}
 .cke_skin_v2 .cke_button_bulletedlist .cke_icon {
-	background-position:0 -416px;
+	background-position: 0 -200px;
 	}
 .cke_skin_v2 .cke_mixed_dir_content .cke_button_numberedlist .cke_icon {
 	background-position:0 -1217px;
@@ -1233,13 +1227,13 @@ li.cke_panel_listItem {
 	background-position:0 -1249px;
 	}
 .cke_skin_v2 .cke_button_justifyleft .cke_icon {
-	background-position:0 -464px;
+	background-position: 0 -215px;
 	}
 .cke_skin_v2 .cke_button_justifycenter .cke_icon {
-	background-position:0 -480px;
+	background-position: 0 -231px;
 	}
 .cke_skin_v2 .cke_button_justifyright .cke_icon {
-	background-position:0 -496px;
+	background-position: 0 -247px;
 	}
 .cke_skin_v2 .cke_button_justifyblock .cke_icon {
 	background-position:0 -512px;
@@ -1300,7 +1294,7 @@ li.cke_panel_listItem {
 	height:170px;
 	}
 .cke_skin_v2 .cke_fontSize .cke_text {
-	width:20px;
+	width: 45px;
 	}
 .cke_skin_v2 .cke_browser_iequirks .cke_fontSize .cke_text {
 	width:32px;
@@ -1317,22 +1311,25 @@ li.cke_panel_listItem {
 .cke_skin_v2 .cke_button_LJPollLink .cke_icon,
 .cke_skin_v2 .cke_button_LJCut .cke_icon,
 .cke_skin_v2 .cke_button_LJLikeCommand .cke_icon {
-	background:url(lj_strip.png?v=2) no-repeat 0 0;
+	background: url(icons-new.png?v=1) no-repeat 0 0;
 	}
 .cke_skin_v2 .cke_button_LJUserLink .cke_icon {
-	background-position:0 -16px;
+	background-position: 0 -95px;
+	}
+.cke_skin_v2 .cke_button_LJImage .cke_icon {
+	background-position: 0 -125px;
 	}
 .cke_skin_v2 .cke_button_LJEmbedLink .cke_icon {
-	background-position:0 -32px;
+	background-position: 0 -110px;
 	}
 .cke_skin_v2 .cke_button_LJPollLink .cke_icon {
-	background-position:0 -48px;
+	background-position: 0 -170px;
 	}
 .cke_skin_v2 .cke_button_LJCut .cke_icon {
-	background-position:0 0;
+	background-position: 0 -155px;
 	}
 .cke_skin_v2 .cke_button_LJLikeCommand .cke_icon {
-	background-position:0 -64px;
+	background-position: 0 -140px;
 	}
 
 #entry-tabs A {
