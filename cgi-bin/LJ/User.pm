@@ -284,8 +284,34 @@ sub new_from_url {
         return LJ::load_user($1);
     }
 
+    # subdomains that hold a bunch of users (eg, users.siteroot.com/username/)
+    if ($url =~ m!^http://(\w+)\.\Q$LJ::USER_DOMAIN\E/([\w-]+)/?$!) {
+        if ( $LJ::IS_USER_DOMAIN->{$1} ) {
+            return LJ::load_user($2);
+        }
+    }
+
     # user subdomains
-    if ($LJ::USER_DOMAIN && $url =~ m!^http://([\w-]+)\.\Q$LJ::USER_DOMAIN\E(/.*|/)?$!) {
+    my $user_uri_regex = qr{
+        # it all starts with a protocol:
+        ^http://
+
+        # username:
+        ([\w-]+)
+
+        # literal dot separating it from our domain space:
+        [.]
+
+        # our domain space:
+        \Q$LJ::USER_DOMAIN\E
+
+        # either it ends right there, or there is a forward slash character
+        # followed by something (we don't care what):
+        (?:$|/)
+
+    }xo; # $LJ::USER_DOMAIN is basically a constant, let Perl know that
+
+    if ( $LJ::USER_DOMAIN && $url =~ $user_uri_regex ) {
         my $u = LJ::load_user($1);
         return $u if $u;
     }
@@ -293,11 +319,6 @@ sub new_from_url {
     # domains like 'http://news.independent.livejournal.com' or 'http://some.site.domain.com'
     if ($url =~ m!^http://([\w.-]+)/?$!) {
         return $class->new_from_external_domain($1);
-    }
-
-    # subdomains that hold a bunch of users (eg, users.siteroot.com/username/)
-    if ($url =~ m!^http://\w+\.\Q$LJ::USER_DOMAIN\E/([\w-]+)/?$!) {
-        return LJ::load_user($1);
     }
 
     return undef;
