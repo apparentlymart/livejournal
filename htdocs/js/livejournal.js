@@ -187,6 +187,7 @@ LiveJournal.ajaxError = function (err) {
 
 // given a URL, parse out the GET args and return them in a hash
 LiveJournal.parseGetArgs = function (url) {
+    url = url || window.location.href;
     var getArgsHash = {};
 
     var urlParts = url.split("?");
@@ -311,4 +312,20 @@ LiveJournal.parseLikeButtons = function() {
 			.attr( 'src',  LiveJournal.constructUrl( 'http://platform.twitter.com/widgets/tweet_button.html', params ) )
 			.insertBefore( link ) );
 	} );
+}
+
+LiveJournal.getLocalizedStr = function( key, dict ) {
+	dict = dict || {};
+	var str = "";
+	if( key in Site.ml_text ) {
+		str = Site.ml_text[ key ];
+
+		for( var tmpl in dict ) {
+			str = str.replace( '%' + tmpl + '%', dict[ tmpl ] );
+		}
+	} else {
+		str = "[" + key + "]";
+	}
+
+	return str;
 }

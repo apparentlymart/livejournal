@@ -61,13 +61,7 @@ function multiformSubmit (form, txt) {
 }
 
 function getLocalizedStr( key, username ) {
-    var str = "";
-    if( key in Site.ml_text ) {
-        str = Site.ml_text[ key ];
-        str = str.replace( '%username%', username );
-    }
-
-    return str;
+    return LiveJournal.getLocalizedStr( key, { username: username } );
 }
 
 // hsv to rgb

@@ -58,6 +58,7 @@ ESN_Inbox.initTableSelection = function (folder) {
         }
     });
 
+    ESN_Inbox.selectedRowsChanged();
 };
 
 ESN_Inbox.is_bookmark = function(qid) {
@@ -76,9 +77,13 @@ ESN_Inbox.bookmarkClicked = function(evt) {
 ESN_Inbox.selectedRowsChanged = function (rows) {
     // find the selected qids
     ESN_Inbox.selected_qids = [];
-    rows.forEach(function (row) {
-        ESN_Inbox.selected_qids.push(row.getAttribute("lj_qid"));
-    });
+    if( rows ) {
+        rows.forEach(function (row) {
+            ESN_Inbox.selected_qids.push(row.getAttribute("lj_qid"));
+        });
+    }
+
+    jQuery( '#all .header .actions > input[type=submit]' ).prop( 'disabled', !ESN_Inbox.selected_qids.length );
 };
 
 // set up event handlers on expand buttons
@@ -155,18 +160,89 @@ ESN_Inbox.saveDefaultExpanded = function (expanded) {
 ESN_Inbox.initInboxBtns = function (folder, cur_folder) {
     // 2 instances of action buttons
     for (var i=1; i<=2; i++) {
-        DOM.addEventListener($(folder + "_MarkRead_" + i), "click", function(e) { ESN_Inbox.markRead(e, folder) });
-        DOM.addEventListener($(folder + "_MarkUnread_" + i), "click", function(e) { ESN_Inbox.markUnread(e, folder) });
-        DOM.addEventListener($(folder + "_Delete_" + i), "click", function(e) { ESN_Inbox.deleteItems(e, folder) });
+        if( $(folder + "_MarkRead_" + i) ) {
+            DOM.addEventListener($(folder + "_MarkRead_" + i), "click", function(e) { ESN_Inbox.markRead(e, folder) });
+        }
+        if( $(folder + "_MarkUnread_" + i) ) {
+            DOM.addEventListener($(folder + "_MarkUnread_" + i), "click", function(e) { ESN_Inbox.markUnread(e, folder) });
+        }
+        if( $(folder + "_Delete_" + i) ) {
+            DOM.addEventListener($(folder + "_Delete_" + i), "click", function(e) { ESN_Inbox.deleteItems(e, this, folder) });
+        }
+        if( $(folder + "_UnSpam_" + i) ) {
+            DOM.addEventListener($(folder + "_UnSpam_" + i), "click", function(e) { ESN_Inbox.markRead(e, folder) });
+        }
+        if( $(folder + "_Spam_" + i) ) {
+            DOM.addEventListener($(folder + "_Spam_" + i), "click", function(e) { ESN_Inbox.markSpam(e, this, folder) });
+        }
     }
+
+    jQuery( '#all_Body .mark-spam' ).click( function(ev) {
+        var qid = jQuery( this ).closest( 'tr' ).attr( 'lj_qid' );
+        ESN_Inbox.markSpam( ev.originalEvent, this, folder, qid );
+        ev.preventDefault();
+    } );
+
+    jQuery( '#all_Body .mark-notspam' ).click( function(ev) {
+        var qid = jQuery( this ).closest( 'tr' ).attr( 'lj_qid' );
+        ESN_Inbox.markRead( ev.originalEvent, folder, qid );
+        ev.preventDefault();
+    } );
+
+    //selectableTable class has nontrivial logic about stopping events when click on a row,
+    //so we make a hack to be sure that popup will be closed in this case
+    jQuery( '#all_Body tr' ).mousedown( function( ev ) {
+        if( window.ctrlPopup ) {
+            ctrlPopup.bubble( 'hide' );
+        }
+    } );
     
     DOM.addEventListener($(folder + "_MarkAllRead"), "click", function(e) { ESN_Inbox.markAllRead(e, folder, cur_folder) });
     DOM.addEventListener($(folder + "_DeleteAll"), "click", function(e) { ESN_Inbox.deleteAll(e, folder, cur_folder) });
 };
 
-ESN_Inbox.markRead = function (evt, folder) {
+ESN_Inbox.confirmSpam = function( target, applyCallback, deleteSuspicious ) {
+    var mlPrefix = 'esn.confirmspam.';
+    if (!window.ctrlPopup) {
+        window.ctrlPopup = jQuery('<div class="b-popup-ctrlcomm" />')
+            .delegate('input.spam-comment-button', 'click', function () {
+                window.ctrlPopup.bubble('hide');
+                applyCallback( window.ctrlPopup.find( '[name=ban]' ).is( ':checked' ) );
+            });
+    }
+    
+    var html = '<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + LiveJournal.getLocalizedStr( mlPrefix + 'title' )
+                + '</strong></div><div class="b-popup-row">' + LiveJournal.getLocalizedStr( mlPrefix + ( ( deleteSuspicious ) ? 'delete' : 'deleteban' ) ) + '</div>';
+
+    if( deleteSuspicious ) {
+        html += "<div class='b-popup-row'><input type='checkbox' name='ban' id='ban'> <label for='ban'>" + LiveJournal.getLocalizedStr( mlPrefix + 'ban' ) + "</label></div>";
+    }
+
+    html += '</div><div class="b-popup-row"><input type="button" class="spam-comment-button" value="'
+                + LiveJournal.getLocalizedStr( mlPrefix + 'button' ) + '" /></div><div>';
+
+    window.ctrlPopup
+        .html( html )
+        .bubble( {
+            target: target,
+            closeOnDocumentClick: true,
+            closeOnContentClick: false
+        } )
+        .bubble('show');
+}
+
+ESN_Inbox.markSpam = function (evt, element, folder, qid) {
     Event.stop(evt);
-    ESN_Inbox.updateItems('mark_read', evt, folder, '');
+    ESN_Inbox.confirmSpam( element, function( banUser ) {
+        ESN_Inbox.updateItems('deleteban', evt, folder, qid);
+    } );
+    return false;
+};
+
+ESN_Inbox.markRead = function (evt, folder, qid) {
+    qid = qid || '';
+    Event.stop(evt);
+    ESN_Inbox.updateItems('mark_read', evt, folder, qid);
     return false;
 };
 
@@ -176,17 +252,27 @@ ESN_Inbox.markUnread = function (evt, folder) {
     return false;
 };
 
-ESN_Inbox.deleteItems = function (evt, folder) {
+ESN_Inbox.deleteItems = function (evt, element, folder) {
     Event.stop(evt);
 
-    var has_bookmark = false;
-    Array.prototype.forEach.call( ESN_Inbox.selected_qids, function (qid) {
-        if (ESN_Inbox.is_bookmark(qid)) has_bookmark = true;
-    });
-    var msg = ESN_Inbox.confirmDelete;
-    if (has_bookmark && msg && !confirm(msg)) return false;
+    if( cur_folder === 'spam' ) {
+        ESN_Inbox.confirmSpam( element, function( banUser ) {
+            if( banUser ) {
+                ESN_Inbox.updateItems('deleteban', evt, folder, '');
+            } else {
+                ESN_Inbox.updateItems('delete', evt, folder, '');
+            }
+        }, true );
+    } else {
+        var has_bookmark = false;
+        Array.prototype.forEach.call( ESN_Inbox.selected_qids, function (qid) {
+            if (ESN_Inbox.is_bookmark(qid)) has_bookmark = true;
+        });
+        var msg = ESN_Inbox.confirmDelete;
+        if (has_bookmark && msg && !confirm(msg)) return false;
 
-    ESN_Inbox.updateItems('delete', evt, folder, '');
+        ESN_Inbox.updateItems('delete', evt, folder, '');
+    }
     return false;
 };
 
@@ -199,7 +285,7 @@ ESN_Inbox.markAllRead = function (evt, folder, cur_folder) {
 ESN_Inbox.deleteAll = function (evt, folder, cur_folder) {
     Event.stop(evt);
 
-    if (confirm("Delete all Inbox messages in the current folder except flagged?")) {
+    if (confirm( LiveJournal.getLocalizedStr( 'esn.html_actions.delete_all' ) ) ) {
         ESN_Inbox.updateItems('delete_all', evt, folder, '', cur_folder);
     }
     return false;
@@ -230,11 +316,16 @@ ESN_Inbox.updateItems = function (action, evt, folder, qid, cur_folder) {
         "cur_folder": cur_folder
     };
 
+    if( action === 'deleteban' ) {
+        postData.action = 'delete';
+        postData.spam = '1';
+    }
+
     var opts = {
         "data": HTTPReq.formEncoded(postData),
         "method": "POST",
         "onError": ESN_Inbox.reqError,
-        "onData": function(info) { ESN_Inbox.finishedUpdate(info, folder) }
+        "onData": function(info) { ESN_Inbox.finishedUpdate(info, folder ) }
     };
 
     opts.url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
@@ -252,7 +343,7 @@ ESN_Inbox.reqError = function (error) {
 };
 
 // successfully completed request
-ESN_Inbox.finishedUpdate = function (info, folder) {
+ESN_Inbox.finishedUpdate = function ( info, folder ) {
     if (ESN_Inbox.hourglass) {
         ESN_Inbox.hourglass.hide();
         ESN_Inbox.hourglass = null;
@@ -277,6 +368,7 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
     info.items.forEach(function (item) {
         var qid     = item.qid;
         var read    = item.read;
+        var spam    = item.spam;
         var deleted = item.deleted;
         var bookmarked = item.bookmarked;
 
@@ -294,7 +386,7 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
             ESN_Inbox.bookmarked[qid] = bookmarked ? true : false;
         }
 
-        if (deleted) {
+        if (deleted || ( cur_folder === 'spam' && !spam ) ) {
             rowElement.parentNode.removeChild(rowElement);
             inbox_count--;
         } else {
@@ -313,6 +405,7 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
 
     ESN_Inbox.refresh_count("esn_folder_all", info.unread_all);
     ESN_Inbox.refresh_count("esn_folder_usermsg_recvd", info.unread_usermsg_recvd);
+    ESN_Inbox.refresh_count("esn_folder_spam", info.spam_count );
     ESN_Inbox.refresh_count("esn_folder_friendplus", info.unread_friend);
     ESN_Inbox.refresh_count("esn_folder_entrycomment", info.unread_entrycomment);
     ESN_Inbox.refresh_count("esn_folder_usermsg_sent", info.unread_usermsg_sent);
@@ -340,9 +433,13 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
 
     // 2 instances of action buttons with suffix 1 and 2
     for (var i=1; i<=2; i++) {
-        $(folder + "_MarkRead_" + i).disabled    = unread_count ? false : true;
+        if( $(folder + "_MarkRead_" + i) ) {
+            $(folder + "_MarkRead_" + i).disabled    = unread_count ? false : true;
+        }
     }
     $(folder + "_MarkAllRead").disabled = unread_count ? false : true;
+
+    ESN_Inbox.selectedRowsChanged();
 };
 
 ESN_Inbox.refresh_count = function(name, count) {
