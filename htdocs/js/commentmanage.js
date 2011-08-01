@@ -142,7 +142,8 @@ function deleteComment (ditemid, action) {
         }
     };
 
-    HTTPReq.getJSON(opts);
+	HTTPReq.getJSON(opts);
+
 
     var flash = function () {
         var rgb = hsv_to_rgb(0, Math.cos((pulse + 1) / 2), 1);
@@ -154,12 +155,12 @@ function deleteComment (ditemid, action) {
             todel.style.border = "";
             // and let timer expire
         } else if (is_deleted) {
-            removeComment(ditemid, opt_delthread);
-            if (opt_delauthor) {
+			removeComment(ditemid, opt_delthread);
+            if (opt_delauthor && LJ_cmtinfo[ditemid].u !== '') {
                 for (var item in LJ_cmtinfo) {
 					if ( LJ_cmtinfo[item].u == LJ_cmtinfo[ditemid].u
-						&& !LJ_cmtinfo[ item ].is_deleted ) {
-                        removeComment(item, false);
+						&& !LJ_cmtinfo[ item ].is_deleted) {
+						removeComment(item, false);
                     }
                 }
             }
