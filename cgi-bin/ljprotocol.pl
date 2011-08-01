@@ -3134,6 +3134,10 @@ sub getevents
         return fail($err,200,"Invalid selecttype.");
     }
 
+    if (my $posterid = int($req->{'posterid'})) {
+        $where .= " AND posterid=$posterid";
+    }
+
     # common SQL template:
     unless ($sql) {
         $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid, replycount, UNIX_TIMESTAMP(eventtime) ".

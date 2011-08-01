@@ -100,7 +100,9 @@ body<=
             my $event = LJ::ehtml(LJ::durl($res{"events_${i}_event"}));
             $event =~ s!\n!<br />!g;
             $ret .= $event;
-
+            if (my $taglist = $props{$itemid}{'taglist'}) {
+                $ret .= "<br/><b>Tags:</b> " . LJ::ehtml($taglist);
+            }
             $ret .= "</td></tr></table>\n";
         }
         $ret .= "</td>";
@@ -144,7 +146,9 @@ body<=
                              'ver' => $LJ::PROTOCOL_VER,
                              'user' => $u->{'user'},
                              'usejournal' => $usejournal,
-                             'itemid' => $itemid },
+                             'itemid' => $itemid,
+                             ($POST{'my_posts_only'}) ? ('posterid' =>  $u->{'userid'}) : (),
+                           },
                            \%res,
                            { "noauth" => 1,
                              'u' => $u }
@@ -446,7 +450,7 @@ body<=
                    'user' => $u->{'user'},
                    'usejournal' => $usejournal,
                    'truncate' => 300,
-                   'noprops' => 1,
+                    ($POST{'my_posts_only'}) ? ('posterid' =>  $u->{'userid'}) : (),
                    );
 
         # last 1
@@ -548,7 +552,10 @@ body<=
         # use journal
         $ret .= "<tr valign=\"top\"><td align='right'>$ML{'.in'}</td>\n<td>\n";
         $ret .= LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'maxlength' => '15', 'value' => $GET{'usejournal'} }) . " ";
-        $ret .= " (optional)</td></tr>";
+        $ret .= " (optional)</br>";
+        $ret .= LJ::html_check({ 'name' => 'my_posts_only', 'value' => 1 });
+        $ret .= " $ML{'.my_posts_only'}";
+        $ret .= "</td></tr>";
 
         # submit button
         $ret .= "<tr><td>&nbsp;</td><td>" . LJ::html_submit(undef, $ML{'.btn.proceed'}) . "</td></tr>\n";
@@ -563,9 +570,9 @@ body<=
             user => $u->user,
             usejournal => $usejournal,
             truncate => 300,
-            noprops => 1,
             selecttype => 'lastn',
             howmany => 5,
+            ($POST{'my_posts_only'}) ? ('posterid' =>  $u->{'userid'}) : (),
         );
 
         # do getevents request
