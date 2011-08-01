@@ -125,13 +125,15 @@ sub create {
         unless $nolog;
 
     $u->do("REPLACE INTO sessions (userid, sessid, auth, exptype, ".
-           "timecreate, timeexpire, ipfixed) VALUES (?,?,?,?,UNIX_TIMESTAMP(),".
+           "timecreate, timeexpire, ipfixed) VALUES (?,?,?,?,LAST_INSERT_ID(UNIX_TIMESTAMP()),".
            "?,?)", undef,
            $u->{'userid'}, $id, $sess->{'auth'}, $exptype, $timeexpire, $ipfixed);
 
     return undef if $u->err;
     $sess->{'sessid'} = $id;
     $sess->{'userid'} = $u->{'userid'};
+
+    $sess->{timecreate} = $u->mysql_insertid;
 
     # clean up old sessions
     my $old = $udbh->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
@@ -231,9 +233,23 @@ sub expiration_time {
 # return format of the "ljloggedin" cookie.
 sub loggedin_cookie_string {
     my ($sess) = @_;
-    return "u$sess->{userid}:s$sess->{sessid}";
+
+    my $time = $sess->{timecreate};
+    my $ver  = VERSION;
+
+    my $signed = "v$ver:u$sess->{userid}:s$sess->{sessid}:t$time";
+    my $secret = LJ::conf_test($LJ::LJLOGGEDIN_SECRET, $sess, $time, $signed);
+    my $sign   = hmac_sha1_hex($time . $secret . $signed);
+    return $signed . ":g$sign";
 }
 
+# for backward compatibility.
+# this method is a copy of loggedin_cookie_string method without sign part.
+# it's safe to remove it some day. 
+sub unsigned_loggedin_cookie_string {
+    my ($sess) = @_;
+    return "u$sess->{userid}:s$sess->{sessid}";
+}
 
 sub master_cookie_string {
     my $sess = shift;
@@ -777,11 +793,15 @@ sub session_from_master_cookie {
         }
 
         # make sure their ljloggedin cookie
-        unless ($old_cookie || $sess->loggedin_cookie_string eq $li_cook) {
-            $err->("loggedin cookie bogus");
-            next COOKIE;
+        unless ($old_cookie){
+            my $sess_cookie = (substr($li_cook, 0, 1) eq 'v')
+                              ? $sess->loggedin_cookie_string ## versioned cookie
+                              : $sess->unsigned_loggedin_cookie_string; ## backward compatibility: user has cookie without a sign
+            if ($sess_cookie ne $li_cook){
+                $err->("loggedin cookie bogus");
+                next COOKIE;
+            }
         }
-
         last COOKIE;
     }
 
@@ -1069,7 +1089,9 @@ sub valid_domain_cookie {
 
     # the per-domain cookie has to match the session of the master cookie
     unless ($opts->{ignore_li_cook}) {
-        my $sess_licook = $sess->loggedin_cookie_string;
+        my $sess_licook = (substr($li_cook, 0, 1) eq 'v')
+                              ? $sess->loggedin_cookie_string ## versioned cookie
+                              : $sess->unsigned_loggedin_cookie_string; ## backward compatibility: user has cookie without a sign
         return $not_valid->("li_cook mismatch.  session=$sess_licook, user=$li_cook")
             unless $sess_licook eq $li_cook;
     }
