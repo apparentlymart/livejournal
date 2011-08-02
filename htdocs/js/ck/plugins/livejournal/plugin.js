@@ -811,7 +811,7 @@
 									ljNoteData.LJLikeCommand.node.setAttribute('buttons', attr.join(','));
 									ljNoteData.LJLikeCommand.node.setHtml(likeHtml);
 								} else {
-									editor.insertHtml('<div class="lj-like" lj-cmd="LJLikeCommand" buttons="' + attr.join(',') + '">' + likeHtml + '</div>'); // IE7 fix
+									editor.insertHtml('<div class="lj-like" lj-cmd="LJLikeCommand" buttons="' + attr.join(',') + '">' + likeHtml + '</div>\n');
 								}
 							} else if(ljNoteData.LJLikeCommand.node){
 								ljNoteData.LJLikeCommand.node.remove();
