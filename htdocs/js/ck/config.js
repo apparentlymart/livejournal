@@ -131,22 +131,21 @@ CKEDITOR.editorConfig = function(config){
 	config.shiftEnterMode = CKEDITOR.ENTER_P;
 
 	config.keystrokes = [
-		[ CKEDITOR.CTRL + 86 /*V*/, 'Paste' ],
-		[ CKEDITOR.SHIFT + 45 /*INS*/, 'Paste' ],
-		[ CKEDITOR.CTRL + 88 /*X*/, 'Cut' ],
-		[ CKEDITOR.SHIFT + 46 /*DEL*/, 'Cut' ],
-		[ CKEDITOR.CTRL + 90 /*Z*/, 'Undo' ],
-		[ CKEDITOR.CTRL + 89 /*Y*/, 'Redo' ],
-		[ CKEDITOR.CTRL + CKEDITOR.SHIFT + 90 /*Z*/, 'Redo' ],
-		[ CKEDITOR.CTRL + 76 /*L*/, 'Link' ],
-		[ CKEDITOR.CTRL + 73 /*I*/, 'Italic' ],
-		[ CKEDITOR.CTRL + 85 /*U*/, 'Underline' ],
-		[ CKEDITOR.CTRL + CKEDITOR.SHIFT + 83 /*S*/, 'Save' ],
-		[ CKEDITOR.CTRL + CKEDITOR.ALT + 13 /*ENTER*/, 'FitWindow' ],
-		[ CKEDITOR.SHIFT + 32 /*SPACE*/, 'Nbsp' ]
-	];
+    [ CKEDITOR.ALT + 121 /*F10*/, 'toolbarFocus' ],
+    [ CKEDITOR.ALT + 122 /*F11*/, 'elementsPathFocus' ],
 
-	!window.opera && config.keystrokes.push([ CKEDITOR.CTRL + 66 /*B*/, 'Bold' ]);  // LIVEJOURNAL SPECIFIC, LJSUP-4442
+    [ CKEDITOR.SHIFT + 121 /*F10*/, 'contextMenu' ],
+
+    [ CKEDITOR.CTRL + 90 /*Z*/, 'undo' ],
+    [ CKEDITOR.CTRL + 89 /*Y*/, 'redo' ],
+    [ CKEDITOR.CTRL + CKEDITOR.SHIFT + 90 /*Z*/, 'redo' ],
+
+    [ CKEDITOR.CTRL + 76 /*L*/, 'link' ],
+
+    [ CKEDITOR.CTRL + 66 /*B*/, 'bold' ],
+    [ CKEDITOR.CTRL + 73 /*I*/, 'italic' ],
+    [ CKEDITOR.CTRL + 85 /*U*/, 'underline' ]
+];
 
 	config.browserContextMenuOnCtrl = true;
 	config.colorButton_colors = '000000,993300,333300,003300,003366,000080,333399,333333,800000,FF6600,808000,808080,008080,0000FF,666699,808080,FF0000,FF9900,99CC00,339966,33CCCC,3366FF,800080,999999,FF00FF,FFCC00,FFFF00,00FF00,00FFFF,00CCFF,993366,C0C0C0,FF99CC,FFCC99,FFFF99,CCFFCC,CCFFFF,99CCFF,CC99FF,FFFFFF';
