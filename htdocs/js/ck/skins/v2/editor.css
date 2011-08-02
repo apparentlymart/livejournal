@@ -66,7 +66,6 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	border:2px groove #E0DFE3;
 	}
 .cke_skin_v2 .cke_editor {
-	display:inline-table;
 	width:100%;
 	}
 .cke_skin_v2 .cke_browser_webkit .cke_editor {
@@ -77,9 +76,6 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	}
 .cke_skin_v2 span.cke_browser_webkit,
 .cke_skin_v2 span.cke_browser_gecko18 {
-	display:block;
-	}
-.cke_skin_v2 .cke_wrapper {
 	display:block;
 	}
 .cke_skin_v2 .cke_browser_opera .cke_editor {
@@ -313,7 +309,7 @@ li.cke_panel_listItem {
 	}
 .cke_skin_v2 .cke_toolbox {
 	clear: both;
-	float: left;
+	overflow: hidden;
 	padding-top: 1px;
 	padding-bottom: 1px;
 	}
