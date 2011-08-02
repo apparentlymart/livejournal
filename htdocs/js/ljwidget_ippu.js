@@ -1,9 +1,9 @@
 LJWidgetIPPU = new Class(LJWidget, {
     init: function (opts, reqParams) {
-        var title = opts.title;
-        var widgetClass = opts.widgetClass;
-        var authToken = opts.authToken;
-        var nearEle = opts.nearElement;
+        var title          = opts.title;
+        var widgetClass    = opts.widgetClass;
+        var authToken      = opts.authToken;
+        var nearEle        = opts.nearElement;
         var not_view_close = opts.not_view_close;
 
         if (! reqParams) reqParams = {};
@@ -50,13 +50,20 @@ LJWidgetIPPU = new Class(LJWidget, {
         var widgetArgs = [c.id, widgetClass, authToken]
         LJWidgetIPPU.superClass.init.apply(this, widgetArgs);
 
+        var self = this;
+        ippu.setCancelledCallback( function() {
+            if( self.cancel ) {
+                self.cancel();
+            }
+        } );
+
         if (!widgetClass)
             return null;
 
         this.widgetClass = widgetClass;
-        this.authToken = authToken;
-        this.title = title;
-        this.nearEle = nearEle;
+        this.authToken   = authToken;
+        this.title       = title;
+        this.nearEle     = nearEle;
 
         window.setInterval(this.animateLoading.bind(this), 20);
 
@@ -92,10 +99,10 @@ LJWidgetIPPU = new Class(LJWidget, {
     doAjaxRequest: function (params) {
       if (! params) params = {};
       params['_widget_ippu'] = 1;
-      if(document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_self")){
-      	params['Widget[IPPU_SettingProd]_LJ__Setting__InvisibilityGuests_invisibleguests']=
-	      (document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_self").checked==true)?(1):((document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_anon").checked==true)?(2):(0))
-      }
+     if(document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_self")){
+       params['Widget[IPPU_SettingProd]_LJ__Setting__InvisibilityGuests_invisibleguests']=
+         (document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_self").checked==true)?(1):((document.getElementById("LJ__Setting__InvisibilityGuests_invisibleguests_anon").checked==true)?(2):(0))
+     }
       LJWidgetIPPU.superClass.doAjaxRequest.apply(this, [params]);
     },
 
