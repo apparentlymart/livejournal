@@ -130,7 +130,9 @@ LJ_IPPU.showNoteElement = function (noteEle, underele, timeout, style) {
     return notePopup;
 };
 
-LJ_IPPU.textPrompt = function (title, prompt, callback) {
+LJ_IPPU.textPrompt = function (title, prompt, callback, options) {
+		options = options || {};
+
     title += '';
     var notePopup = new LJ_IPPU(title);
 
@@ -161,7 +163,7 @@ LJ_IPPU.textPrompt = function (title, prompt, callback) {
     notePopup.setContentElement(inner);
 
     notePopup.setAutoCenter(true, true);
-    notePopup.setDimensions("60%", "auto");
+    notePopup.setDimensions(options.width || "60%", "auto");
     notePopup.show();
     field.focus();
 

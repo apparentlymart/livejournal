@@ -947,6 +947,8 @@ InOb.handleInsertSelect = function (){
 InOb.handleInsertEmbed = function (){
 	LJ_IPPU.textPrompt(top.CKLang.LJEmbedPromptTitle, top.CKLang.LJEmbedPrompt, function(content){
 		$('updateForm').event.value += "\n<lj-embed>\n" + content + "\n</lj-embed>";
+	}, {
+		width: '350px'
 	});
 };
 

@@ -539,7 +539,9 @@
 			//////////  LJ Embed Media Button //////////////
 			editor.addCommand('LJEmbedLink', {
 				exec: function(){
-					top.LJ_IPPU.textPrompt(top.CKLang.LJEmbedPromptTitle, top.CKLang.LJEmbedPrompt, doEmbed);
+					top.LJ_IPPU.textPrompt(top.CKLang.LJEmbedPromptTitle, top.CKLang.LJEmbedPrompt, doEmbed, {
+						width: '350px'
+					});
 				}
 			});
 
@@ -599,6 +601,9 @@
 							}
 							editor.getSelection().getRanges()[0].extractContents().appendTo(ljCutNode);
 							editor.insertElement(ljCutNode);
+							var range = new CKEDITOR.dom.range(editor.document);
+							range.selectNodeContents(ljCutNode);
+							editor.getSelection().selectRanges([range]);
 						}
 					}
 				}
