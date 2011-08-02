@@ -129,15 +129,9 @@ CKEDITOR.editorConfig = function(config){
 	config.enterMode = CKEDITOR.ENTER_BR;
 	config.forceEnterMode = false;
 	config.shiftEnterMode = CKEDITOR.ENTER_P;
+
 	config.keystrokes = [
-		[ CKEDITOR.CTRL + 65 /*A*/, true ],
-		[ CKEDITOR.CTRL + 67 /*C*/, true ],
-		[ CKEDITOR.CTRL + 70 /*F*/, true ],
-		[ CKEDITOR.CTRL + 83 /*S*/, true ],
-		[ CKEDITOR.CTRL + 84 /*T*/, true ],
-		[ CKEDITOR.CTRL + 88 /*X*/, true ],
 		[ CKEDITOR.CTRL + 86 /*V*/, 'Paste' ],
-		[ CKEDITOR.CTRL + 45 /*INS*/, true ],
 		[ CKEDITOR.SHIFT + 45 /*INS*/, 'Paste' ],
 		[ CKEDITOR.CTRL + 88 /*X*/, 'Cut' ],
 		[ CKEDITOR.SHIFT + 46 /*DEL*/, 'Cut' ],
