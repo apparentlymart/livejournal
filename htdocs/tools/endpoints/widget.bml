@@ -25,8 +25,10 @@
     my $remote = LJ::get_remote();
 
     my $widget_class = $POST{_widget_class} || $GET{_widget_class};
-    return $err->("Invalid widget class $widget_class") unless $widget_class =~ /^(IPPU::)?\w+$/gm;
-    $widget_class = "LJ::Widget::$widget_class";
+    return $err->("Invalid widget class $widget_class") unless $widget_class =~ /^(IPPU::|LJ::Setting::)?\w+$/gm;
+
+    # hack: enable LJ::Setting class
+    $widget_class = "LJ::Widget::$widget_class" unless $widget_class =~ /^LJ::Setting::/;
 
     return $err->("Cannot do AJAX request to $widget_class")
         unless $widget_class->ajax;
@@ -39,21 +41,24 @@
         $POST{$_} = $GET{$_} foreach keys %GET;
     }
 
-    my $widget_id    = $POST{_widget_id};
-    my $widget_ippu  = $POST{_widget_ippu};
-    my $doing_post   = delete $POST{_widget_post};
+    my $widget_id   = $POST{_widget_id};
+
+    my $doing_post  = delete $POST{_widget_post};
 
     my %ret = (
-               _widget_id    => $widget_id,
-               _widget_class => $widget_class,
-               );
+        _widget_id    => $widget_id,
+        _widget_class => ref $widget_class || $widget_class,
+    );
 
     # make sure that we're working with the right user
+    # TODO: check auth validity
     if ($POST{authas}) {
         if ($widget_class->authas) {
+        # TODO: check if it is really needed
             my $u = LJ::get_authas_user($POST{authas});
             return $err->("Invalid user.") unless $u;
-        } else {
+        }
+        else {
             return $err->("Widget does not support authas authentication.");
         }
     }
@@ -66,9 +71,17 @@
 
         my %res;
 
-        eval {
-            %res = LJ::Widget->handle_post(\%POST, $widget_class);
-        };
+        if( $widget_class =~ /^LJ::Setting::/ ) {
+            eval {
+                %res = LJ::Setting->handle_post(\%POST, $widget_class);
+            };
+        }
+        else {
+            eval {
+                %res = LJ::Widget->handle_post(\%POST, $widget_class);
+            };
+        }
+
 
         $ret{res} = \%res;
 

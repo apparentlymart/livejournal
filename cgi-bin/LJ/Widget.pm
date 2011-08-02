@@ -1,7 +1,7 @@
 package LJ::Widget;
 
 use strict;
-use Carp;
+use Carp qw/croak cluck/;
 use LJ::ModuleLoader;
 use LJ::Auth;
 
@@ -36,6 +36,7 @@ sub start_form {
 
     my $eopts = "";
     my $ehtml = $opts{noescape} ? 0 : 1;
+
     foreach my $attr (grep { ! /^(noescape)$/ && ! /^(authas)$/ } keys %opts) {
         $eopts .= " $attr=\"" . ($ehtml ? LJ::ehtml($opts{$attr}) : $opts{$_}) . "\"";
     }
@@ -121,7 +122,6 @@ sub render {
             }
         }
         LJ::need_res($opt_hash{stylesheet}) if $opt_hash{stylesheet};
-
         return $widget->render_body(@opts);
     } or $class->handle_error($@);
 
@@ -139,11 +139,11 @@ sub render {
 
 sub post_fields_by_widget {
     my $class = shift;
-    my %opts = @_;
+    my %opts  = @_;
 
-    my $post = $opts{post};
+    my $post    = $opts{post};
     my $widgets = $opts{widgets};
-    my $errors = $opts{errors};
+    my $errors  = $opts{errors};
 
     my %per_widget = map { /^(?:LJ::Widget::)?(.+)$/; $1 => {} } @$widgets;
     my $eff_submit = undef;
@@ -233,18 +233,23 @@ sub get_effective_remote {
 # returns hash returned from the last processed widget
 # pushes any errors onto @BMLCodeBlock::errors
 sub handle_post {
-    my $class   = shift;
-    my $post    = shift;
+    my $class = shift;
+    my $post  = shift;
     my @widgets;
+
     # support for per-widget handle_post() options
     my %widget_opts = ();
-    while (@_) {
+
+    while ( @_ ) {
         my $w = shift;
-        if (@_ && ref $_[0]) {
+
+        if ( @_ && ref $_[0] ) {
             $widget_opts{$w} = shift(@_);
         }
+
         push @widgets, $w;
     }
+
     # no errors, return empty list
     return () unless LJ::did_post() && @widgets;
 
@@ -254,15 +259,19 @@ sub handle_post {
     # require form auth for widget submissions
     my $errorsref = \@BMLCodeBlock::errors;
 
-    unless (LJ::check_form_auth($post->{lj_form_auth}) || $LJ::WIDGET_NO_AUTH_CHECK) {
+    unless ( LJ::check_form_auth($post->{lj_form_auth}) || $LJ::WIDGET_NO_AUTH_CHECK ) {
         push @$errorsref, BML::ml('error.invalidform');
     }
 
-    my $per_widget = $class->post_fields_by_widget( post => $post, widgets => \@widgets, errors => $errorsref );
+    my $per_widget = $class->post_fields_by_widget(
+        post    => $post,
+        widgets => \@widgets,
+        errors  => $errorsref,
+    );
 
     my %res;
 
-    while (my ($class, $fields) = each %$per_widget) {
+    while ( my ($class, $fields) = each %$per_widget ) {
         eval { %res = "LJ::Widget::$class"->handle_post($fields, %{$widget_opts{$class} or {}}) } or
             "LJ::Widget::$class"->handle_error($@ => $errorsref);
     }

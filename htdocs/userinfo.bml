@@ -1623,7 +1623,7 @@
 
     $body .= "</div>";
 
-    $body .= LJ::Widget::SettingProdDisplay->render;
+    $body .= LJ::Widget::SettingWindow->render;
 
     $bml_okay = 0;
     return;

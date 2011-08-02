@@ -23,12 +23,41 @@ sub htmlcontrol { "" }
 sub htmlcontrol_label { "" }
 sub raw_html          { "" }
 
+sub handle_post {
+    my ( $class, $params, $widget ) = @_;
+    delete @$params{qw/lj_form_auth _widget_id _widget_ippu _widget_class/};
+
+    my %res;
+
+    eval {
+        %res = $widget->save(LJ::get_remote(), $params);
+    };
+
+    return %res;
+}
+
+sub form_start {
+    my $self = shift;
+
+    return '<form action="javascript: return false" id="settingwindow_form">'
+      . '<input type="hidden" name="_widget_class" value="'
+      . (  ref($self) || $self )
+      . '">'
+      # hidden for posting submit button (form can have several submit buttons)
+      . '<input type="hidden" id="form_submit" name="submit" value="">' ;
+}
+
+sub form_end {
+    return '</form>';
+}
+
+sub form_auth {
+    return LJ::form_auth();
+}
+
 sub error_check {
     my ($class, $u, $args) = @_;
     my $val = $class->get_arg($args, "foo");
-    #unless ($val =~ /blah/) {
-    #   $class->errors("foo" => "Invalid foo");
-    #}
 
     die "No 'error_check' configured for settings module '$class'\n";
 }

@@ -497,7 +497,7 @@ body<=
 
     $ret .= "</div>";
 
-    $ret .= LJ::Widget::SettingProdDisplay->render;
+    $ret .= LJ::Widget::SettingWindow->render;
     
     return $ret;
 }

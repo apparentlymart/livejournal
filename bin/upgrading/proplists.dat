@@ -1694,3 +1694,11 @@ userproplist.javascript:
   indexed: 0
   multihomed: 1
   cldversion: 8
+
+userproplist.singapore_invitations:
+  datatype: char
+  prettyname: Singapore invitations status
+  des: Singapore invitations status
+  indexed: 0
+  multihomed: 0
+  cldversion: 8
