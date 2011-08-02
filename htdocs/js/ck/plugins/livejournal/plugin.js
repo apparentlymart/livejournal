@@ -798,8 +798,6 @@
 						onClick : function(){
 							var attr = [], likeHtml = '';
 
-							ljNoteData.LJLikeCommand.node && ljNoteData.LJLikeCommand.node.remove();
-
 							for(var i = 0; i < buttonsLength; i++){
 								var button = likeButtons[i];
 								if(ljLikeInputs.$[i].checked){
@@ -809,7 +807,14 @@
 							}
 
 							if(attr.length){
-								editor.insertHtml('<div class="lj-like" lj-cmd="LJLikeCommand" buttons="' + attr.join(',') + '">' + likeHtml + '</div>'); // IE7 fix
+								if(ljNoteData.LJLikeCommand.node){
+									ljNoteData.LJLikeCommand.node.setAttribute('buttons', attr.join(','));
+									ljNoteData.LJLikeCommand.node.setHtml(likeHtml);
+								} else {
+									editor.insertHtml('<div class="lj-like" lj-cmd="LJLikeCommand" buttons="' + attr.join(',') + '">' + likeHtml + '</div>'); // IE7 fix
+								}
+							} else if(ljNoteData.LJLikeCommand.node){
+								ljNoteData.LJLikeCommand.node.remove();
 							}
 
 							ljLikeDialog.hide();
