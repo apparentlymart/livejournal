@@ -82,7 +82,6 @@
 
 				var isMouseOver = evt.name == 'mouseover';
 				var node = isMouseOver ? evt.data.getTarget() : editor.getSelection().getStartElement();
-				var isNote;
 				var actNode;
 
 				while(node){
@@ -97,26 +96,20 @@
 
 					var attr = node.getAttribute('lj-cmd');
 
-					if(isMouseOver && node.getName() == 'lj-note'){
-						isNote = true;
-					}
-
-					if(attr && !isNote){
+					if(attr){
 						cmd = attr;
 						actNode = node;
 					}
 					node = node.getParent();
 				}
 
-				if(!isNote){
-					if(!isNote && cmd && ljNoteData.hasOwnProperty(cmd)){
-						if(!isMouseOver){
-							ljNoteData[cmd].node = actNode;
-						}
-						note.show(ljNoteData[cmd].html, cmd, actNode);
-					} else {
-						note.hide();
+				if(cmd && ljNoteData.hasOwnProperty(cmd)){
+					if(!isMouseOver){
+						ljNoteData[cmd].node = actNode;
 					}
+					note.show(ljNoteData[cmd].html, cmd, actNode);
+				} else {
+					note.hide();
 				}
 			}
 
@@ -251,7 +244,8 @@
 							totalTime = 100,
 							steps = totalTime * fps / 1000,
 							timeOuts = [],
-							type;
+							type,
+							parentContainer = document.getElementById('draft-container') || document.body;
 
 						function apply(){
 							var data = timeOuts.shift();
@@ -291,7 +285,7 @@
 								}
 							}
 
-							document.body.appendChild(noteNode);
+							parentContainer.appendChild(noteNode);
 							noteNode.style.marginTop = -noteNode.offsetHeight / 2 + 'px';
 							noteNode.style.marginLeft = -noteNode.offsetWidth / 2 + 'px';
 						}
@@ -1046,9 +1040,6 @@
 							ljUserNode.isOptionalClose = ljUserNode.isEmpty = true;
 							return ljUserNode;
 						}
-					},
-					'lj-note': function(){
-						return false;
 					}
 				},
 				attributes: {
