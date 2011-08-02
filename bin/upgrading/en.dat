@@ -2697,6 +2697,27 @@ fcklang.ljlike.button.twitter=Twitter
 
 fcklang.ljlike.button.give=10 Give
 
+fcklang.ljlike.wizardnotice=Likes must be edited inside the Like Wizard
+
+fcklang.ljlike.wizardnoticelink=Go to like wizard
+
+fcklang.ljlike.faq=FAQ
+
+
+fcklang.ljuser.wizardnotice=User must be edited inside the User Wizard
+
+fcklang.ljuser.wizardnoticelink=Go to user wizard
+
+
+fcklang.ljlink.wizardnotice=Link must be edited inside the Link Wizard
+
+fcklang.ljlink.wizardnoticelink=Go to link wizard
+
+
+fcklang.ljimage.wizardnotice=Image must be edited inside the Link Wizard
+
+fcklang.ljimage.wizardnoticelink=Go to Image wizard
+
 
 fcklang.videoprompt=Please enter the YouTube, PhotoBucket, or Google Video URL:
 

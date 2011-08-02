@@ -5,41 +5,123 @@
 			label: top.CKLang.LJLike_button_facebook,
 			id: 'facebook',
 			abbr: 'fb',
-			html: '<div class="lj-like-item lj-like-gag">' + top.CKLang.LJLike_button_facebook + '</div>'
+			html: '<div class="lj-like-item lj-like-gag fb">' + top.CKLang.LJLike_button_facebook + '</div>',
+			htmlOpt: '<li class="like-fb"><input type="checkbox" id="like-fb" /><label for="like-fb">' + top.CKLang
+				.LJLike_button_facebook + '</label></li>'
 		},
 		{
 			label: top.CKLang.LJLike_button_twitter,
 			id: 'twitter',
 			abbr: 'tw',
-			html: '<div class="lj-like-item lj-like-gag">' + top.CKLang.LJLike_button_twitter + '</div>'
+			html: '<div class="lj-like-item lj-like-gag tw">' + top.CKLang.LJLike_button_twitter + '</div>',
+			htmlOpt: '<li class="like-tw"><input type="checkbox" id="like-tw" /><label for="like-tw">' + top.CKLang
+				.LJLike_button_twitter + '</label></li>'
 		},
 		{
 			label: top.CKLang.LJLike_button_google,
 			id: 'google',
 			abbr: 'go',
-			html: '<div class="lj-like-item lj-like-gag">' + top.CKLang.LJLike_button_google + '</div>'
-		},
-		{
-			label: top.CKLang.LJLike_button_vkontakte,
-			id: 'vkontakte',
-			abbr: 'vk',
-			html: '<div class="lj-like-item lj-like-gag">' + top.CKLang.LJLike_button_vkontakte + '</div>'
-		},
-		{
-			label: top.CKLang.LJLike_button_give,
-			id: 'livejournal',
-			abbr: 'lj',
-			html: '<div class="lj-like-item lj-like-gag">' + top.CKLang.LJLike_button_give + '</div>'
+			html: '<div class="lj-like-item lj-like-gag go">' + top.CKLang.LJLike_button_google + '</div>',
+			htmlOpt: '<li class="like-go"><input type="checkbox" id="like-go" /><label for="like-go">' + top.CKLang
+				.LJLike_button_google + '</label></li>'
 		}
 	];
 
+	if(window.isSupUser){
+		likeButtons.push({
+			label: top.CKLang.LJLike_button_vkontakte,
+			id: 'vkontakte',
+			abbr: 'vk',
+			html: '<div class="lj-like-item lj-like-gag vk">' + top.CKLang.LJLike_button_vkontakte + '</div>',
+			htmlOpt: '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + top.CKLang
+				.LJLike_button_vkontakte + '</label></li>'
+		});
+	}
+
+	likeButtons.push({
+		label: top.CKLang.LJLike_button_give,
+		id: 'livejournal',
+		abbr: 'lj',
+		html: '<div class="lj-like-item lj-like-gag lj">' + top.CKLang.LJLike_button_give + '</div>',
+		htmlOpt: '<li class="like-lj"><input type="checkbox" id="like-lj" /><label for="like-lj">' + top.CKLang
+			.LJLike_button_give + '</label></li>'
+	});
+	
+	var note;
+
+	var ljNoteData = {
+		LJPollLink: {
+			html: encodeURIComponent(top.CKLang.Poll_PollWizardNotice + '<br /><a href="#">' + top.CKLang.Poll_PollWizardNoticeLink + '</a>')
+		},
+		LJLikeCommand: {
+			html: encodeURIComponent(top.CKLang.LJLike_WizardNotice + '<br /><a href="#">' + top.CKLang.LJLike_WizardNoticeLink + '</a>')
+		},
+		LJUserLink: {
+			html: encodeURIComponent(top.CKLang.LJUser_WizardNotice + '<br /><a href="#">' + top.CKLang.LJUser_WizardNoticeLink + '</a>')
+		},
+		LJLink: {
+			html: encodeURIComponent(top.CKLang.LJLink_WizardNotice + '<br /><a href="#">' + top.CKLang.LJLink_WizardNoticeLink + '</a>')
+		},
+		LJImage: {
+			html: encodeURIComponent(top.CKLang.LJImage_WizardNotice + '<br /><a href="#">' + top.CKLang.LJImage_WizardNoticeLink + '</a>')
+		}
+	};
+
 	var ljUsers = {};
+	var currentNoteNode;
 
 	CKEDITOR.plugins.add('livejournal', {
 		init: function(editor){
+			function onFindCmd(evt){
+				var cmd;
+				
+				if(evt.name == 'mouseout'){
+					note.hide();
+					return;
+				}
+
+				var isMouseOver = evt.name == 'mouseover';
+				var node = isMouseOver ? evt.data.getTarget() : editor.getSelection().getStartElement();
+				var isNote;
+				var actNode;
+
+				while(node){
+
+					if(!attr){
+						if(node.is('img')){
+							node.setAttribute('lj-cmd', 'LJImage');
+						} else if(node.is('a')){
+							node.setAttribute('lj-cmd', 'LJLink');
+						}
+					}
+
+					var attr = node.getAttribute('lj-cmd');
+
+					if(isMouseOver && node.getName() == 'lj-note'){
+						isNote = true;
+					}
+
+					if(attr && !isNote){
+						cmd = attr;
+						actNode = node;
+					}
+					node = node.getParent();
+				}
+
+				if(!isNote){
+					if(!isNote && cmd && ljNoteData.hasOwnProperty(cmd)){
+						if(!isMouseOver){
+							ljNoteData[cmd].node = actNode;
+						}
+						note.show(ljNoteData[cmd].html, cmd, actNode);
+					} else {
+						note.hide();
+					}
+				}
+			}
+
 			editor.dataProcessor.toHtml = function(html, fixForBody){
-				html = html
-					.replace(/<((?!br)[^\s>]+)([^\/>]+)?\/>/gi, '<$1$2></$1>')
+				html = html.replace(/<((?!br)[^\s>]+)([^\/>]+)?\/>/gi, '<$1$2></$1>')
 					.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site
 					.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
 					.replace(/<lj-embed\s*(?:id="(\d*)")?\s*>([\s\S]*?)<\/lj-embed>/gi, '<div class="ljembed" embedid="$1">$2</div>')
@@ -112,8 +194,6 @@
 
 				html = html.replace(/\t/g, ' ');
 				html = html.replace(/>\n\s*(?!\s)([^<]+)</g, '>$1<');
-				// rte fix, http://dev.fckeditor.net/ticket/3023
-				// type="_moz" for Safari 4.0.11
 				if(!CKEDITOR.env.ie){
 					html = html.replace(/<br (type="_moz" )? ?\/>$/, '');
 					if(CKEDITOR.env.webkit){
@@ -121,9 +201,10 @@
 					}
 				}
 
-				html = html.replace(/<form.*?class="ljpoll" data="([^"]*)"[\s\S]*?<\/form>/gi, function(form, data){
-					return unescape(data);
-				}).replace(/<\/lj>/g, '');
+				html = html.replace(/<form.*?class="ljpoll" data="([^"]*)"[\s\S]*?<\/form>/gi,
+					function(form, data){
+						return unescape(data);
+					}).replace(/<\/lj>/g, '');
 
 				html = html
 					.replace(/<div(?=[^>]*class="ljvideo")[^>]*url="(\S+)"[^>]*><img.+?\/><\/div>/g, '<lj-template name="video">$1</lj-template>')
@@ -149,39 +230,203 @@
 				return html;
 			};
 
+			editor.on('dataReady', function(){
+
+				editor.document.on('mouseover', onFindCmd);
+				editor.document.on('mouseout', onFindCmd);
+				editor.document.on('keyup', onFindCmd);
+				editor.document.on('click', onFindCmd);
+
+				if(!note){
+					var timer,
+						state,
+						currentData = {},
+						tempData = {},
+						noteNode = document.createElement('lj-note'),
+						isIE = typeof(document.body.style.opacity) != 'string';
+
+					var animate = (function(){
+						var
+							fps = 60,
+							totalTime = 100,
+							steps = totalTime * fps / 1000,
+							timeOuts = [],
+							type;
+
+						function apply(){
+							var data = timeOuts.shift();
+							var currentStep = (type ? data.time / totalTime : -(data.time / totalTime - 1)).toFixed(1);
+
+							if(!timeOuts.length){
+								currentStep = type ? 1 : 0;
+							}
+
+							if(isIE){
+								noteNode.style.filter = (currentStep >= 1) ? null : 'progid:DXImageTransform.Microsoft.Alpha(opacity=' + (currentStep * 100) + ')';
+							} else {
+								noteNode.style.opacity = currentStep;
+							}
+
+							if(currentStep == 0 && noteNode && noteNode.parentNode){
+								noteNode.parentNode.removeChild(noteNode);
+							}
+						}
+
+						return function(animateType){
+							type = animateType;
+
+							if(type && noteNode.parentNode){
+								if(isIE){
+									noteNode.style.filter = null;
+								} else {
+									noteNode.style.opacity = 1;
+								}
+							} else {
+								for(var i = 1; i <= steps; i++){
+									var time = Math.floor(1000 / fps) * i;
+									timeOuts.push({
+										time: time,
+										timer: setTimeout(apply, time)
+									});
+								}
+							}
+
+							document.body.appendChild(noteNode);
+							noteNode.style.marginTop = -noteNode.offsetHeight / 2 + 'px';
+							noteNode.style.marginLeft = -noteNode.offsetWidth / 2 + 'px';
+						}
+					})();
+
+					noteNode.className = 'note';
+					noteNode.style.backgroundColor = '#ccc';
+					noteNode.style.border = '#f000 1px solid';
+					noteNode.style.position = 'absolute';
+					noteNode.style.left = '50%';
+					noteNode.style.top = '50%';
+					
+					noteNode.onmouseout = function(){
+						if(!currentData.cmd) {
+							note.hide();
+						}
+					};
+
+					noteNode.onmouseover = function(){
+						if(timer && !state){
+							state = 1;
+							clearTimeout(timer);
+							timer = null;
+						}
+					};
+
+					if(isIE){
+						noteNode.style.filter = 'progid:DXImageTransform.Microsoft.Alpha(opacity=0)';
+					} else {
+						noteNode.style.opacity = 0;
+					}
+
+					function callCmd(){
+						if(currentData.cmd){
+							currentNoteNode = ljNoteData[currentData.cmd].node = currentData.node;
+							editor.getCommand(currentData.cmd).exec();
+						}
+						return false;
+					}
+
+					function applyNote(){
+						if(state){
+							currentData.cmd = tempData.cmd;
+							currentData.data = tempData.data;
+							currentData.node = tempData.node;
+
+							delete tempData.node;
+							delete tempData.cmd;
+							delete tempData.data;
+
+							noteNode.innerHTML = decodeURIComponent(currentData.data);
+
+							var link = noteNode.getElementsByTagName('a')[0];
+							if(link && currentData.cmd){
+								link.onclick = callCmd;
+							}
+						} else {
+							delete currentData.node;
+							delete currentData.cmd;
+							delete currentData.data;
+
+							currentNoteNode = null;
+						}
+
+						animate(state);
+
+						timer = null;
+					}
+
+					note = {
+						show: function(data, cmd, node){
+							if(data == tempData.data && cmd == tempData.cmd && node === tempData.node){
+								return;
+							}
+
+							if(timer){
+								clearTimeout(timer);
+								timer = null;
+							}
+
+							state = 1;
+							timer = setTimeout(applyNote, 1000);
+							
+							tempData.data = data;
+							tempData.cmd = cmd;
+							tempData.node = node;
+						},
+						hide: function(isNow){
+							if(state){
+								state = 0;
+
+								if(timer){
+									clearTimeout(timer);
+									timer = null;
+								}
+
+								if(noteNode.parentNode){
+									isNow === true ? applyNote() : timer = setTimeout(applyNote, 500);
+								}
+							}
+						}
+					};
+				}
+
+			});
+
 			//////////  LJ User Button //////////////
-			var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml',
-				LJUserNode;
+			var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml';
 
 			editor.attachStyleStateChange(new CKEDITOR.style({
 				element: 'span'
 			}), function(){
 				var selectNode = editor.getSelection().getStartElement().getAscendant('span', true);
 				var isUserLink = selectNode && selectNode.hasClass('ljuser');
-				LJUserNode = isUserLink ? selectNode : null;
+				ljNoteData.LJUserLink.node = isUserLink ? selectNode : null;
 				editor.getCommand('LJUserLink').setState(isUserLink ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF);
 			});
 
 			editor.on('doubleclick', function(evt){
 				var command = editor.getCommand('LJUserLink');
-				LJUserNode = evt.data.element.getAscendant('span', true);
-				if(LJUserNode && LJUserNode.hasClass('ljuser')){
-					command.setState(CKEDITOR.TRISTATE_ON);
+				if(command.state == CKEDITOR.TRISTATE_ON){
 					command.exec();
-					evt.data.dialog = '';
-				} else {
-					command.setState(CKEDITOR.TRISTATE_OFF);
 				}
+
+				evt.data.dialog = '';
 			});
 
 			editor.addCommand('LJUserLink', {
 				exec : function(editor){
 					var userName = '',
 						selection = editor.getSelection(),
-						LJUser = LJUserNode;
+						LJUser = ljNoteData.LJUserLink.node;
 
-					if(this.state == CKEDITOR.TRISTATE_ON && LJUserNode){
-						userName = prompt(top.CKLang.UserPrompt, LJUserNode.getElementsByTag('b').getItem(0).getText());
+					if(ljNoteData.LJUserLink.node){
+						userName = prompt(top.CKLang.UserPrompt, ljNoteData.LJUserLink.node.getElementsByTag('b').getItem(0).getText());
 					} else if(selection.getType() == 2){
 						userName = selection.getSelectedText();
 					}
@@ -210,12 +455,17 @@
 							}
 							data.ljuser = data.ljuser.replace('<span class="useralias-value">*</span>', '');
 
+							ljUsers[userName] = data.ljuser;
+
+							var tmpNode = editor.document.createElement('div');
+							tmpNode.setHtml(data.ljuser);
+							ljNoteData.LJUserLink.node = tmpNode.getFirst();
+							ljNoteData.LJUserLink.node.setAttribute('lj-cmd', 'LJUserLink');
+
 							if(LJUser){
-								LJUser.setHtml(data.ljuser);
-								LJUser.insertBeforeMe(LJUser.getFirst());
-								LJUser.remove();
+								LJUser.$.parentNode.replaceChild(ljNoteData.LJUserLink.node.$, LJUser.$);
 							} else {
-								editor.insertHtml(data.ljuser);
+								editor.insertElement(ljNoteData.LJUserLink.node);
 							}
 						}
 					});
@@ -233,14 +483,68 @@
 					if(ljphotoEnabled){
 						// call LJImage
 					} else {
+						if(ljNoteData.LJImage.node){
+							editor.getSelection().selectElement(ljNoteData.LJImage.node);
+						}
 						editor.getCommand('image').exec();
 					}
 				}
 			});
 
+			editor.attachStyleStateChange(new CKEDITOR.style({
+				element: 'img'
+			}), function(state){
+				if(state == CKEDITOR.TRISTATE_OFF && !currentNoteNode){
+					delete ljNoteData.LJImage.node;
+				}
+				editor.getCommand('LJImage').setState(state);
+			});
+
+			editor.on('doubleclick', function(evt){
+				var command = editor.getCommand('LJImage');
+				if(command.state == CKEDITOR.TRISTATE_ON){
+					command.exec();
+				}
+
+				evt.data.dialog = '';
+			});
+
 			editor.ui.addButton('LJImage', {
 				label: editor.lang.common.imageButton,
 				command: 'LJImage'
+			});
+
+			//////////  LJ Link Button //////////////
+			editor.addCommand('LJLink', {
+				exec : function(editor){
+					if(ljNoteData.LJLink.node){
+						editor.getSelection().selectElement(ljNoteData.LJLink.node);
+					}
+					editor.getCommand('link').exec();
+				}
+			});
+
+			editor.attachStyleStateChange(new CKEDITOR.style({
+				element: 'a'
+			}), function(state){
+				if(state == CKEDITOR.TRISTATE_OFF && !currentNoteNode){
+					delete ljNoteData.LJLink.node;
+				}
+				editor.getCommand('LJLink').setState(state);
+			});
+
+			editor.on('doubleclick', function(evt){
+				var command = editor.getCommand('LJLink');
+				if(command.state == CKEDITOR.TRISTATE_ON){
+					command.exec();
+				}
+
+				evt.data.dialog = '';
+			});
+
+			editor.ui.addButton('LJLink', {
+				label: editor.lang.link.tollbar,
+				command: 'LJLink'
 			});
 
 			//////////  LJ Embed Media Button //////////////
@@ -274,23 +578,14 @@
 			editor.attachStyleStateChange(new CKEDITOR.style({
 				element: 'lj-cut'
 			}), function(state){
-				var command = editor.getCommand('LJCut');
-				command.setState(state);
-				if(state == CKEDITOR.TRISTATE_ON){
-					ljCutNode = this.getSelection().getStartElement().getAscendant('lj-cut', true);
-				} else {
-					ljCutNode = null;
-				}
+				ljCutNode = state == CKEDITOR.TRISTATE_ON && this.getSelection().getStartElement().getAscendant('lj-cut', true);
+				editor.getCommand('LJCut').setState(state);
 			});
 
 			editor.on('doubleclick', function(evt){
 				var command = editor.getCommand('LJCut');
-				ljCutNode = evt.data.element.getAscendant('lj-cut', true);
-				if(ljCutNode){
-					command.setState(CKEDITOR.TRISTATE_ON);
+				if(command.state == CKEDITOR.TRISTATE_ON){
 					command.exec();
-				} else {
-					command.setState(CKEDITOR.TRISTATE_OFF);
 				}
 			});
 
@@ -327,10 +622,7 @@
 
 			//////////  LJ Poll Button //////////////
 			if(top.canmakepoll){
-				var currentPollForm, currentPoll;
-				var noticeHtml = top.CKLang
-					.Poll_PollWizardNotice + '<br /><a href="#" onclick="CKEDITOR.instances.draft.getCommand(\'LJPollLink\').exec(); return false;">' + window
-					.parent.CKLang.Poll_PollWizardNoticeLink + '</a>';
+				var currentPoll;
 
 				editor.attachStyleStateChange(new CKEDITOR.style({
 					element: 'form',
@@ -338,24 +630,17 @@
 						'class': 'ljpoll'
 					}
 				}), function(state){
-					var command = editor.getCommand('LJPollLink');
-					command.setState(state);
-					currentPollForm = this.getSelection().getStartElement().getAscendant('form', true);
-					currentPollForm = currentPollForm && currentPollForm.hasClass('ljpoll') ? currentPollForm : null;
-					if(state == CKEDITOR.TRISTATE_ON){
-						parent.LJ_IPPU.showNote(noticeHtml, editor.container.$).centerOnWidget(editor.container.$);
+					if(state == CKEDITOR.TRISTATE_OFF && !currentNoteNode){
+						delete ljNoteData.LJPollLink.node;
 					}
+					editor.getCommand('LJPollLink').setState(state);
 				});
 
 				editor.on('doubleclick', function(evt){
 					var command = editor.getCommand('LJPollLink');
-					currentPollForm = evt.data.element.getAscendant('form', true);
-					if(currentPollForm && currentPollForm.hasClass('ljpoll')){
-						command.setState(CKEDITOR.TRISTATE_ON);
+					if(command.state == CKEDITOR.TRISTATE_ON){
 						command.exec();
 						evt.data.dialog = '';
-					} else {
-						command.setState(CKEDITOR.TRISTATE_OFF);
 					}
 				});
 
@@ -367,7 +652,7 @@
 							this.removeListener('load', onLoadPollPage);
 						}
 						if(isAllFrameLoad && okButtonNode){
-							currentPoll = new Poll(currentPollForm && unescape(currentPollForm.getAttribute('data')), questionsWindow
+							currentPoll = new Poll(ljNoteData.LJPollLink.node && unescape(ljNoteData.LJPollLink.node.getAttribute('data')), questionsWindow
 								.document, setupWindow.document, questionsWindow.Questions);
 
 							questionsWindow.ready(currentPoll);
@@ -385,7 +670,7 @@
 						height : 270,
 						onShow: function(){
 							if(isAllFrameLoad){
-								currentPoll = new Poll(currentPollForm && unescape(currentPollForm
+								currentPoll = new Poll(ljNoteData.LJPollLink.node && unescape(ljNoteData.LJPollLink.node
 									.getAttribute('data')), questionsWindow.document, setupWindow.document, questionsWindow.Questions);
 
 								questionsWindow.ready(currentPoll);
@@ -446,16 +731,17 @@
 								evt.data.dialog.hide();
 								var pollSource = new Poll(currentPoll, questionsWindow.document, setupWindow.document, questionsWindow
 									.Questions).outputHTML();
+
 								if(pollSource.length > 0){
-									if(currentPollForm){
-										var node = document.createElement('div');
-										node.innerHTML = pollSource;
-										currentPollForm.$.parentNode.insertBefore(node.firstChild, currentPollForm.$);
-										currentPollForm.remove();
+									if(ljNoteData.LJPollLink.node){
+										var node = editor.document.createElement('div');
+										node.setHtml(pollSource);
+										ljNoteData.LJPollLink.node.insertBeforeMe(node);
+										ljNoteData.LJPollLink.node.remove();
 									} else {
 										editor.insertHtml(pollSource);
 									}
-									currentPollForm = null;
+									ljNoteData.LJPollLink.node = null;
 								}
 							}
 						}), CKEDITOR.dialog.cancelButton]
@@ -465,9 +751,8 @@
 				editor.addCommand('LJPollLink', new CKEDITOR.dialogCommand('LJPollDialog'));
 			} else {
 				editor.addCommand('LJPollLink', {
-					exec: function(editor){
-						var notice = top.LJ_IPPU.showNote(top.CKLang.Poll_AccountLevelNotice, editor.container.$);
-						notice.centerOnWidget(editor.container.$);
+					exec: function(){
+						note.show(top.CKLang.Poll_AccountLevelNotice);
 					}
 				});
 
@@ -481,37 +766,23 @@
 
 			//////////  LJ Like Button //////////////
 			var buttonsLength = likeButtons.length;
-			var dialogContents = [];
-			var currentLjLikeNode, currentLjLikeButton;
+			var dialogContent = '<ul class="likes">';
 			likeButtons.defaultButtons = [];
 
 			for(var i = 0; i < buttonsLength; i++){
 				var button = likeButtons[i];
 				likeButtons[button.id] = likeButtons[button.abbr] = button;
 				likeButtons.defaultButtons.push(button.id);
-				dialogContents.push({
-					type: 'checkbox',
-					label: button.label,
-					id: 'LJLike_' + button.id
-				});
+				dialogContent += button.htmlOpt;
 			}
 
-			dialogContents.unshift({
-				type: 'html',
-				html: top.CKLang.LJLike_dialogText
-			});
+			dialogContent += '</ul><a href="/support/faqbrowse.bml?faqid=344" class="helplink" target="_blank"><img src="/img/help.gif" alt="Help" title="Help" width="14" height="14" border="0"> ' + top.CKLang.LJLike_FAQ + '</a>';
 
-			var countChanges = 0, ljLikeDialog;
+			var countChanges = 0, ljLikeDialog, ljLikeInputs;
 			function onChangeLike(){
-				if('isChanged' in this){
-					ljLikeDialog = ljLikeDialog || this.getDialog();
-					countChanges += this.isChanged() ? 1 : -1;
-				} else {
-					countChanges += this.$.checked ? 1 : -1;
-				}
-
 				var command = editor.getCommand('LJLikeCommand');
 				if(command.state == CKEDITOR.TRISTATE_OFF){
+					this.$.checked ? countChanges++ : countChanges--;
 					ljLikeDialog.getButton('LJLike_Ok').getElement()[countChanges == 0 ? 'hide' : 'show']();
 				}
 			}
@@ -519,63 +790,64 @@
 			CKEDITOR.dialog.add('LJLikeDialog', function(){
 				return {
 					title : top.CKLang.LJLike_name,
-					width : 200,
-					height : 150,
+					width : 130,
+					height : 180,
 					resizable: false,
 					contents : [
 						{
 							id: 'LJLike_Options',
-							elements: dialogContents
+							elements: [{
+								type: 'html',
+								html: dialogContent
+							}]
 						}
 					],
 					buttons : [new CKEDITOR.ui.button({
 						type : 'button',
 						id : 'LJLike_Ok',
 						label : editor.lang.common.ok,
-						onClick : function(evt){
-							var dialog = evt.data.dialog, attr = [];
-							var likeNode = currentLjLikeNode || new CKEDITOR.dom.element('div');
-							likeNode.remove();
-							likeNode.setHtml('');
+						onClick : function(){
+							var attr = [], likeHtml = '';
+
+							ljNoteData.LJLikeCommand.node && ljNoteData.LJLikeCommand.node.remove();
 
 							for(var i = 0; i < buttonsLength; i++){
 								var button = likeButtons[i];
-								var buttonNode = dialog.getContentElement('LJLike_Options', 'LJLike_' + button.id);
-								if(buttonNode.getValue('checked')){
+								if(ljLikeInputs.$[i].checked){
 									attr.push(button.id);
-									likeNode.appendHtml(button.html);
-									likeNode.getLast().addClass(button.abbr);
+									likeHtml += button.html;
 								}
 							}
 
 							if(attr.length){
-								likeNode.setAttribute('buttons', attr.join(','));
-								likeNode.setAttribute('class', 'lj-like');
-								editor.insertElement(likeNode);
+								editor.insertHtml('<div class="lj-like" lj-cmd="LJLikeCommand" buttons="' + attr.join(',') + '">' + likeHtml + '</div>'); // IE7 fix
 							}
-							dialog.hide();
+
+							ljLikeDialog.hide();
 						}
 					}), CKEDITOR.dialog.cancelButton],
 					onShow: function(){
 						var command = editor.getCommand('LJLikeCommand');
-						var i = countChanges = 0;
-						if(command.state == CKEDITOR.TRISTATE_ON){
-							var buttons = currentLjLikeNode.getAttribute('buttons').split(',');
-							for(var l = buttons.length; i < l; i++){
-								this.getContentElement('LJLike_Options', 'LJLike_' + likeButtons[buttons[i]].id)
-									.setValue('checked', false);
+						var i = countChanges = 0,
+							isOn = command.state == CKEDITOR.TRISTATE_ON,
+							buttons = ljNoteData.LJLikeCommand.node && ljNoteData.LJLikeCommand.node.getAttribute('buttons');
+
+						for(; i < buttonsLength; i++){
+							var isChecked = buttons ? !!(buttons.indexOf(likeButtons[i].abbr) + 1 || buttons.indexOf(likeButtons[i]
+								.id) + 1) : true;
+
+							if(isChecked && !isOn){
+								countChanges++;
 							}
-						} else {
-							for(; i < buttonsLength; i++){
-								this.getContentElement('LJLike_Options', 'LJLike_' + likeButtons[i].id).setValue('checked', false);
-							}
+
+							ljLikeInputs.$[i].checked = isChecked;
 						}
 					},
 					onLoad: function(){
+						ljLikeDialog = this;
+						ljLikeInputs = ljLikeDialog.parts.contents.getElementsByTag('input');
 						for(var i = 0; i < buttonsLength; i++){
-							var uiElement = this.getContentElement('LJLike_Options', 'LJLike_' + likeButtons[i].id);
-							uiElement.on('change', onChangeLike);
-							uiElement.getInputElement().on('change', onChangeLike);
+							ljLikeInputs.getItem(i).on('change', onChangeLike);
 						}
 					}
 				}
@@ -584,22 +856,21 @@
 			editor.attachStyleStateChange(new CKEDITOR.style({
 				element: 'div'
 			}), function(){
-				currentLjLikeNode = this.getSelection().getStartElement();
-				if(currentLjLikeButton){
-					currentLjLikeButton.setStyle('border-color', '#999999');
-					currentLjLikeButton = null;
-				}
-				while(currentLjLikeNode){
-					if(currentLjLikeNode.hasClass('lj-like-item')){
-						currentLjLikeButton = currentLjLikeNode;
-						currentLjLikeButton.setStyle('border-color', '#ff0000');
-					} else if(currentLjLikeNode.hasClass('lj-like')){
+				var ljLikeNode = this.getSelection().getStartElement();
+
+				while(ljLikeNode){
+					if(ljLikeNode.hasClass('lj-like')){
+						ljNoteData.LJLikeCommand.node = ljLikeNode;
 						break;
 					}
-					currentLjLikeNode = currentLjLikeNode.getParent();
+					ljLikeNode = ljLikeNode.getParent();
 				}
 
-				editor.getCommand('LJLikeCommand').setState(currentLjLikeNode ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF);
+				if(!ljLikeNode && !currentNoteNode){
+					delete ljNoteData.LJLikeCommand.node;
+				}
+
+				editor.getCommand('LJLikeCommand').setState(ljLikeNode ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF);
 			});
 
 			editor.on('doubleclick', function(){
@@ -609,80 +880,7 @@
 				}
 			});
 
-			/*editor.on('dataReady', function(){
-				editor.document.on('keypress', function(evt){
-					var key = evt.data.getKey();
-					if(editor.getCommand('LJLikeCommand').state == CKEDITOR.TRISTATE_ON){
-						if(key == 46 || key == 8){
-							if(currentLjLikeButton){
-								editor.getCommand('LJLike_remove').exec();
-							}
-
-							if(!currentLjLikeNode.getChildCount()){
-								editor.getCommand('LJLike_removeAll').exec();
-							}
-
-							console.log(editor.getSelection().getRanges());
-							evt.data.preventDefault();
-						}
-					}
-				});
-			});*/
-
 			editor.addCommand('LJLikeCommand', new CKEDITOR.dialogCommand('LJLikeDialog'));
-
-			editor.addCommand('LJLike_remove', {
-				exec : function(){
-					var newButtons = currentLjLikeNode.getAttribute('buttons').split(',');
-					newButtons.splice(currentLjLikeButton.getIndex(), 1);
-					currentLjLikeNode.setAttribute('buttons', newButtons.join(','));
-					currentLjLikeButton.remove();
-				}
-			});
-
-			editor.addCommand('LJLike_removeAll', {
-				exec : function(){
-					currentLjLikeNode.remove();
-				}
-			});
-
-			editor.addMenuGroup('LJLike', 5);
-
-			editor.addMenuItems({
-				LJLike_remove: {
-					label : 'Delete button',
-					command : 'LJLike_remove',
-					group : 'LJLike',
-					order : 5
-				},
-				LJLike_removeAll: {
-					label : 'Delete all buttons',
-					command : 'LJLike_removeAll',
-					group : 'LJLike',
-					order : 5
-				}
-			});
-
-			var execCommandDefinition = {
-				LJLike_remove : CKEDITOR.TRISTATE_ON,
-				LJLike_removeAll : CKEDITOR.TRISTATE_ON
-			};
-
-			editor.contextMenu.addListener(function(element){
-				if(!element || element.isReadOnly()){
-					return null;
-				}
-
-				var elementPath = new CKEDITOR.dom.elementPath(element);
-				currentLjLikeButton = elementPath.block;
-
-				if(currentLjLikeButton && currentLjLikeButton.hasClass('lj-like-item')){
-					return execCommandDefinition;
-				}
-
-
-				return null;
-			});
 
 			editor.ui.addButton('LJLike', {
 				label: top.CKLang.LJLike_name,
@@ -730,6 +928,7 @@
 
 						var fakeElement = new CKEDITOR.htmlParser.element('div');
 						fakeElement.attributes['class'] = 'lj-like';
+						fakeElement.attributes['lj-cmd'] = 'LJLikeCommand';
 
 						var currentButtons = element.attributes.buttons && element.attributes.buttons.split(',') || likeButtons
 							.defaultButtons;
@@ -740,7 +939,6 @@
 							var button = likeButtons[buttonName];
 							if(button){
 								var buttonNode = new CKEDITOR.htmlParser.fragment.fromHtml(button.html).children[0];
-								buttonNode.attributes['class'] += (' ' + button.abbr);
 								fakeElement.add(buttonNode);
 								attr.push(buttonName);
 							}
@@ -759,7 +957,10 @@
 						var cacheName = ljUserTitle ? ljUserName + ':' + ljUserTitle : ljUserName;
 						
 						if(ljUsers.hasOwnProperty(cacheName)){
-							return (new CKEDITOR.htmlParser.fragment.fromHtml(ljUsers[cacheName])).children[0];
+							var ljTag = (new CKEDITOR.htmlParser.fragment.fromHtml(ljUsers[cacheName])).children[0];
+
+							ljTag.attributes['lj-cmd'] = 'LJUserLink';
+							return ljTag;
 						} else {
 							var onSuccess = function(data){
 								ljUsers[cacheName] = data.ljuser;
@@ -782,7 +983,9 @@
 									var userTitle = ljTag.getAttribute('title');
 									if(cacheName == userTitle ? userName + ':' + userTitle : userName){
 										ljTag.setHtml(ljUsers[cacheName]);
-										ljTag.insertBeforeMe(ljTag.getFirst());
+										var newLjTag = ljTag.getFirst();
+										newLjTag.setAttribute('lj-cmd', 'LJUserLink');
+										ljTag.insertBeforeMe(newLjTag);
 										ljTag.remove();
 									}
 								}
@@ -808,6 +1011,12 @@
 								onData: onSuccess
 							});
 						}
+					},
+					a: function(element){
+						element.attributes['lj-cmd'] = 'LJLink';
+					},
+					img: function(element){
+						element.attributes['lj-cmd'] = 'LJImage';
 					}
 				}
 			}, 5);
@@ -817,18 +1026,7 @@
 					'div': function(element){
 						if(element.attributes['class'] == 'lj-like'){
 							var ljLikeNode = new CKEDITOR.htmlParser.element('lj-like');
-
-							var childs = element.children, attr = [];
-							for(var i = 0; i < childs.length; i++){
-								var abbr = /.*?([a-z]{2})$/.exec(childs[i].attributes['class'])[1];
-								if(abbr && likeButtons.hasOwnProperty(abbr)){
-									attr.push(abbr);
-								}
-							}
-
-							if(attr.length){
-								ljLikeNode.attributes.buttons = attr.join(',');
-							}
+							ljLikeNode.attributes.buttons = element.attributes.buttons;
 							ljLikeNode.isEmpty = true;
 							ljLikeNode.isOptionalClose = true;
 							return ljLikeNode;
@@ -845,14 +1043,20 @@
 								ljUserNode.attributes.title = userTitle;
 							}
 
-							ljUserNode.isEmpty = true;
-							ljUserNode.isOptionalClose = true;
+							ljUserNode.isOptionalClose = ljUserNode.isEmpty = true;
 							return ljUserNode;
 						}
+					},
+					'lj-note': function(){
+						return false;
+					}
+				},
+				attributes: {
+					'lj-cmd': function(){
+						return false;
 					}
 				}
 			});
-
 		},
 
 		requires : [ 'fakeobjects' ]

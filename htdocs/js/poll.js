@@ -74,7 +74,7 @@ function Poll(selectPoll, qDoc, sDoc, qNum){
 
 // Poll method to generate HTML for RTE
 Poll.prototype.outputHTML = function(){
-	var html = '<form action="#" class="ljpoll" data="' + escape(this.outputLJtags()) + '"><b>Poll #xxxx</b>';
+	var html = '<form action="#" lj-cmd="LJPollLink" class="ljpoll" data="' + escape(this.outputLJtags()) + '"><b>Poll #xxxx</b>';
 
 	if(this.name){
 		html += ' <i>' + this.name + '</i>';
