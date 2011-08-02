@@ -291,12 +291,7 @@
 						}
 					})();
 
-					noteNode.className = 'note';
-					noteNode.style.backgroundColor = '#ccc';
-					noteNode.style.border = '#f000 1px solid';
-					noteNode.style.position = 'absolute';
-					noteNode.style.left = '50%';
-					noteNode.style.top = '50%';
+					noteNode.className = 'note-popup';
 					
 					noteNode.onmouseout = function(){
 						if(!currentData.cmd) {
