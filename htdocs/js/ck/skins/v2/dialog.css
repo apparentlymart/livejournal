@@ -2,7 +2,11 @@
 Copyright (c) 2003-2011, CKSource - Frederico Knabben. All rights reserved.
 For licensing, see LICENSE.html or http://ckeditor.com/license
 */
-	
+
+BODY,
+TABLE TD {
+	font: 12px/16px Arial, sans-serif;
+	}
 	body .cke_dialog {
 	visibility:visible;
 	}
@@ -24,10 +28,9 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 .cke_skin_v2 .cke_dialog_bl,
 .cke_skin_v2 .cke_dialog_br,
 .cke_skin_v2 .cke_dialog_bc {
-	background-image:url(images/sprites.png);
+	background-image:url(images/sprites-grey.png);
 	background-repeat:no-repeat;
 	position:absolute;
-	_background-image:url(images/sprites_ie6.png);
 	_z-index:-1;
 	}
 .cke_skin_v2 .cke_dialog_tl {
@@ -88,13 +91,12 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	}
 .cke_skin_v2 .cke_dialog_ml,
 .cke_skin_v2 .cke_dialog_mr {
-	background-image:url(images/dialog_sides.png);
+	background-image:url(images/dialog_sides-grey.png);
 	background-repeat:repeat-y;
 	position:absolute;
 	width:16px;
 	top:16px;
 	bottom:51px;
-	_background-image:url(images/dialog_sides.gif);
 	_top:auto;
 	}
 .cke_skin_v2 .cke_rtl .cke_dialog_ml,
@@ -117,8 +119,8 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 .cke_skin_v2 .cke_dialog_title {
 	font-weight:bold;
 	font-size:14pt;
-	color:#737357;
-	background-color:#e3e3c7;
+	color:#504845;
+	background-color:#DEDEDE;
 	padding:3px 10px 26px 10px;
 	cursor:move;
 	position:relative;
@@ -127,13 +129,13 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	position:static;
 	}
 .cke_skin_v2 .cke_dialog_contents {
-	background-color:#f1f1e3;
-	border:#d5d59d 1px solid;
+	background-color:#F7F7F7;
+	border:#CEC6B5 1px solid;
 	overflow:auto;
 	padding:5px 10px;
 	}
 .cke_skin_v2 .cke_dialog_footer {
-	background-color:#e3e3c7;
+	background-color:#DEDEDE;
 	text-align:right;
 	}
 .cke_skin_v2 .cke_rtl .cke_dialog_footer {
@@ -144,7 +146,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	}
 .cke_skin_v2 .cke_dialog_tabs {
 	height:23px;
-	background-color:#e3e3c7;
+	background-color:#DEDEDE;
 	display:inline-block;
 	margin-left:10px;
 	margin-right:10px;
@@ -160,10 +162,10 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 .cke_skin_v2 a:active.cke_dialog_tab,
 .cke_skin_v2 a:hover.cke_dialog_tab,
 .cke_skin_v2 a:visited.cke_dialog_tab {
-	color:#737357;
-	border-left:1px solid #d5d59d;
-	border-right:1px solid #d5d59d;
-	border-top:1px solid #d5d59d;
+	color:#504845;
+	border-left:1px solid #CEC6B5;
+	border-right:1px solid #CEC6B5;
+	border-top:1px solid #CEC6B5;
 	height:14px;
 	padding:4px 5px;
 	display:inline-block;
@@ -179,7 +181,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	top:6px;
 	}
 .cke_skin_v2 a:hover.cke_dialog_tab {
-	background-color:#f1f1e3;
+	background-color:#F7F7F7;
 	}
 .cke_skin_v2 .cke_hc a:hover.cke_dialog_tab {
 	padding:2px 3px!important;
@@ -190,8 +192,8 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 .cke_skin_v2 a:active.cke_dialog_tab_selected,
 .cke_skin_v2 a:hover.cke_dialog_tab_selected,
 .cke_skin_v2 a:visited.cke_dialog_tab_selected {
-	border-bottom:1px solid #f1f1e3;
-	background-color:#f1f1e3;
+	border-bottom:1px solid #F7F7F7;
+	background-color:#F7F7F7;
 	font-weight:bold;
 	cursor:default;
 	}
@@ -313,11 +315,11 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	width:60px;
 	}
 .cke_skin_v2 span.cke_dialog_ui_button {
-	border:#737357 1px solid;
+	border:#7A7261 1px solid;
 	padding:2px 10px;
 	text-align:center;
-	color:#3b3b1f;
-	background-color:#c7c78f;
+	color:#504845;
+	background-color:#CEC6B5;
 	display:inline-block;
 	cursor:default;
 	}
@@ -331,7 +333,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	}
 .cke_skin_v2 a:focus span.cke_dialog_ui_button,
 .cke_skin_v2 a:active span.cke_dialog_ui_button {
-	background-color:#e3e3c7;
+	background-color:#CEC6B5;
 	}
 .cke_skin_v2 .cke_hc a:focus span.cke_dialog_ui_button,
 .cke_skin_v2 .cke_hc a:active span.cke_dialog_ui_button {
