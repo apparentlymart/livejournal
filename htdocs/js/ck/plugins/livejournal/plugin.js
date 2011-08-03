@@ -557,8 +557,6 @@
 				if(content && content.length){
 					if(switchedRteOn){
 						editor.insertHtml('<div class="ljembed">' + content + '</div><br/>');
-					} else {
-						
 					}
 				}
 			}

@@ -12,7 +12,8 @@
 				var editor = CKEDITOR.replace(textArea, {
 					skin: 'v2',
 					baseHref: CKEDITOR.basePath,
-					height: 350
+					height: 350,
+					language: Site.current_lang || 'en'
 				});
 
 				editor.on('instanceReady', function(){
