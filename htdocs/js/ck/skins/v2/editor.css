@@ -42,6 +42,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	text-align:right;
 	}
 .cke_skin_v2 iframe {
+	display: block;
 	vertical-align:inherit;
 	}
 .cke_skin_v2 textarea {

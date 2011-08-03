@@ -20,6 +20,10 @@ TABLE TD {
 	margin-bottom:20px;
 	z-index:1;
 	position:relative;
+	-moz-box-shadow: 5px 5px 15px #666;
+	-webkit-box-shadow: 5px 5px 15px #666;
+	box-shadow: 5px 5px 15px #666;
+	#border: 5px solid #999;
 	_position:static;
 	}
 .cke_skin_v2 .cke_dialog_tl,
@@ -28,8 +32,8 @@ TABLE TD {
 .cke_skin_v2 .cke_dialog_bl,
 .cke_skin_v2 .cke_dialog_br,
 .cke_skin_v2 .cke_dialog_bc {
-	background-image:url(images/sprites-grey.png);
-	background-repeat:no-repeat;
+/*	background-image:url(images/sprites-grey.png);
+	background-repeat:no-repeat;*/
 	position:absolute;
 	_z-index:-1;
 	}
@@ -91,8 +95,8 @@ TABLE TD {
 	}
 .cke_skin_v2 .cke_dialog_ml,
 .cke_skin_v2 .cke_dialog_mr {
-	background-image:url(images/dialog_sides-grey.png);
-	background-repeat:repeat-y;
+/*	background-image:url(images/dialog_sides-grey.png);
+	background-repeat:repeat-y;*/
 	position:absolute;
 	width:16px;
 	top:16px;
