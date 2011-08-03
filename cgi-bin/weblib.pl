@@ -1337,6 +1337,13 @@ sub res_includes {
             }
         }
 
+        my %journal_info;
+        if (my $journalu = LJ::get_active_journal()) {
+            %journal_info = $journalu->info_for_js;
+            $journal_base ||= $journalu->journal_base;
+            $journal      ||= $journalu->username;
+        }
+
         my $remote = LJ::get_remote();
         my $hasremote = $remote ? 1 : 0;
         my $remote_is_suspended = $remote && $remote->is_suspended ? 1 : 0;
@@ -1386,12 +1393,6 @@ sub res_includes {
         LJ::run_hooks('add_to_site_js', \%site);
 
         my $site_params = LJ::js_dumper(\%site);
-
-        my %journal_info;
-
-        if (my $journalu = LJ::get_active_journal()) {
-            %journal_info = $journalu->info_for_js;
-        }
 
         my $current_lang = eval { BML::get_language(); } || ($LJ::DEFAULT_LANG || $LJ::LANGS[0]);
            $current_lang =~ s/^([^_]+)_.*/$1/; # en_LJ -> en
@@ -2238,16 +2239,22 @@ sub get_body_class_for_service_pages {
     push @classes, @{ $opts{'classes'} } if $opts{'classes'};
     push @classes, (LJ::get_remote()) ? 'logged-in' : 'logged-out';
 
-    my $uri = LJ::Request->uri;
+    my $uri  = LJ::Request->uri;
+    my $host = LJ::Request->header_in("Host");
     if ($uri =~ m!^/index\.bml$!) {
         push @classes, "index-page";
     } elsif ($uri =~ m!^/shop(/.*)?$!) {
         push @classes, "shop-page";
     } elsif ($uri =~ m!^/browse(/.*)?$!) {
         push @classes, "catalogue-page";
-    } elsif ($uri =~ m!^/games(/.*)?$! || LJ::Request->header_in("Host") eq "$LJ::USERAPPS_SUBDOMAIN.$LJ::DOMAIN") {
+    } elsif ($uri =~ m!^/games(/.*)?$! || $host eq "$LJ::USERAPPS_SUBDOMAIN.$LJ::DOMAIN") {
         push @classes, 'framework-page';
-    } elsif ($uri =~ m|^/friendstimes|){
+    } elsif ($uri =~ m|^/friendstimes|
+             or ($host =~ m!^(\w+)\.\Q$LJ::USER_DOMAIN\E$!
+                 and $LJ::IS_USER_DOMAIN->{$1}
+                 and $uri =~ m!/([\w-]+)/friendstimes/?!
+                 )
+    ){
         push @classes, "p-friendstimes";
     }
     return join(" ", @classes);
