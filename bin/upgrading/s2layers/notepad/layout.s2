@@ -607,29 +607,29 @@ function CommentInfo::print_postlink() {
 
 function CommentInfo::print() {
     var Page p = get_page();
+    var string del = "";
+    if (clean_url($*img_btwn_comments) != "") {
+        $del = """ <img src="$*img_btwn_comments" alt="" /> """;
+    } else {
+        $del = $*text_btwn_comments;
+    }
     if ($.show_readlink or $.show_postlink) {
         print safe "$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
             if ($p.view == "entry" and $.spam_counter > 0 and $.read_spam_url != "") {
-                if (clean_url($*img_btwn_comments) != "") {
-                    """ <img src="$*img_btwn_comments" alt="" /> """;
-                } else {
-                    print safe "$*text_btwn_comments";
-                }
+                print safe "$del";
+            }
+        }
+            if ($p.view == "entry" and $.spam_counter > 0 and $.read_spam_url != "") {
                 if ($p.showspam) {
                      print safe get_plural_phrase($.spam_counter, "text_read_spam_comments");
                 } else {
                      print safe """<a href=\"$.read_spam_url\">""" + get_plural_phrase($.spam_counter, "text_read_all_spam_comments") + """</a>""";
                 }
             }
-        }
-        if ($.show_postlink and $.show_readlink) {
-            if (clean_url($*img_btwn_comments) != "") {
-                """ <img src="$*img_btwn_comments" alt="" /> """;
-            } else {
-                print safe "$*text_btwn_comments";
-            }
+        if (($.show_postlink and $.show_readlink) or ($.show_postlink and $p.view == "entry" and $.spam_counter > 0)) {
+            print safe "$del";
         }
         if ($.show_postlink) {
             $this->print_postlink();
