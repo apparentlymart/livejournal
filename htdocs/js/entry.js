@@ -883,7 +883,12 @@ InOb.onInsURL = function (url, width, height){
 		h = " height='" + height + "'";
 	}
 	ta = ta.event;
-	ta.value = ta.value + "\n<img src=\"" + url + "\"" + w + h + " />";
+
+	var selection = DOM.getSelectedRange($('draft'));
+	var value = ta.value;
+	var start = value.substring(0, selection.start);
+	var end = value.substring(selection.end);
+	ta.value = start + "\n<img src=\"" + url + "\"" + w + h + " />" + end;
 	return true;
 };
 
@@ -893,24 +898,25 @@ function onInsertObject(include){
 	InOb.onClosePopup();
 
 	//var iframe = document.createElement("iframe");
-	var iframe = document.createElement("div");
-	iframe.id = "updateinsobject";
-	iframe.className = 'updateinsobject';
-	iframe.style.overflow = "hidden";
-	iframe.style.position = "absolute";
-	iframe.style.border = "0";
-	iframe.style.backgroundColor = "#fff";
-	iframe.style.zIndex = 1000;
+	var container = document.createElement("div");
+	container.id = "updateinsobject";
+	container.className = 'updateinsobject';
+	container.style.overflow = "hidden";
+	container.style.position = "absolute";
+	container.style.border = "0";
+	container.style.backgroundColor = "#fff";
+	container.style.zIndex = 1000;
 
-	//iframe.src = include;
-	iframe
-		.innerHTML = "<iframe id='popupsIframe' style='border:none' frameborder='0' width='100%' height='100%' src='" + include + "'></iframe>";
+	var iframe = document.createElement('iframe');
+	iframe.id = 'popupsIframe';
+	iframe.style.border = 'none';
+	iframe.frameborder = 0;
+	iframe.height = iframe.width = '100%';
+	iframe.src = include;
 
-	document.body.appendChild(iframe);
-	currentPopup = iframe;
-	setTimeout(function (){
-		document.getElementById('popupsIframe').setAttribute('src', include);
-	}, 500);
+	document.body.appendChild(container);
+	container.appendChild(iframe);
+	currentPopup = container;
 	InOb.smallCenter();
 	InOb.onresize = function(){
 		return InOb.smallCenter();
@@ -946,7 +952,12 @@ InOb.handleInsertSelect = function (){
 
 InOb.handleInsertEmbed = function (){
 	LJ_IPPU.textPrompt(top.CKLang.LJEmbedPromptTitle, top.CKLang.LJEmbedPrompt, function(content){
-		$('updateForm').event.value += "\n<lj-embed>\n" + content + "\n</lj-embed>";
+		var selection = DOM.getSelectedRange($('draft'));
+		var node = $('updateForm').event;
+		var value = node.value;
+		var start = value.substring(0, selection.start);
+		var end = value.substring(selection.end);
+		node.value = start + '<lj-embed>\n' + content + '\n</lj-embed>' + end;
 	}, {
 		width: '350px'
 	});
@@ -954,13 +965,11 @@ InOb.handleInsertEmbed = function (){
 
 InOb.handleInsertImage = function (){
 	// if PhotoHosting enabled - show new popup
-	if (window.ljphotoEnabled) {
-		jQuery('#content')
-			.photouploader('option', 'type', 'upload')
-			.bind('htmlready', function (event, htmlOutput) {
+	if(window.ljphotoEnabled){
+		jQuery('#content').photouploader('option', 'type', 'upload')
+			.bind('htmlready', function (event, htmlOutput){
 				jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
-			})
-			.photouploader('show');
+		}).photouploader('show');
 	} else {
 		onInsertObject('/imgupload.bml');
 	}
