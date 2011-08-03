@@ -5,7 +5,7 @@
 			label: top.CKLang.LJLike_button_facebook,
 			id: 'facebook',
 			abbr: 'fb',
-			html: '<div class="lj-like-item lj-like-gag fb">' + top.CKLang.LJLike_button_facebook + '</div>',
+			html: '<span class="lj-like-item lj-like-gag fb">' + top.CKLang.LJLike_button_facebook + '</span>',
 			htmlOpt: '<li class="like-fb"><input type="checkbox" id="like-fb" /><label for="like-fb">' + top.CKLang
 				.LJLike_button_facebook + '</label></li>'
 		},
@@ -13,7 +13,7 @@
 			label: top.CKLang.LJLike_button_twitter,
 			id: 'twitter',
 			abbr: 'tw',
-			html: '<div class="lj-like-item lj-like-gag tw">' + top.CKLang.LJLike_button_twitter + '</div>',
+			html: '<span class="lj-like-item lj-like-gag tw">' + top.CKLang.LJLike_button_twitter + '</span>',
 			htmlOpt: '<li class="like-tw"><input type="checkbox" id="like-tw" /><label for="like-tw">' + top.CKLang
 				.LJLike_button_twitter + '</label></li>'
 		},
@@ -21,7 +21,7 @@
 			label: top.CKLang.LJLike_button_google,
 			id: 'google',
 			abbr: 'go',
-			html: '<div class="lj-like-item lj-like-gag go">' + top.CKLang.LJLike_button_google + '</div>',
+			html: '<span class="lj-like-item lj-like-gag go">' + top.CKLang.LJLike_button_google + '</span>',
 			htmlOpt: '<li class="like-go"><input type="checkbox" id="like-go" /><label for="like-go">' + top.CKLang
 				.LJLike_button_google + '</label></li>'
 		}
@@ -32,7 +32,7 @@
 			label: top.CKLang.LJLike_button_vkontakte,
 			id: 'vkontakte',
 			abbr: 'vk',
-			html: '<div class="lj-like-item lj-like-gag vk">' + top.CKLang.LJLike_button_vkontakte + '</div>',
+			html: '<span class="lj-like-item lj-like-gag vk">' + top.CKLang.LJLike_button_vkontakte + '</span>',
 			htmlOpt: '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + top.CKLang
 				.LJLike_button_vkontakte + '</label></li>'
 		});
@@ -42,7 +42,7 @@
 		label: top.CKLang.LJLike_button_give,
 		id: 'livejournal',
 		abbr: 'lj',
-		html: '<div class="lj-like-item lj-like-gag lj">' + top.CKLang.LJLike_button_give + '</div>',
+		html: '<span class="lj-like-item lj-like-gag lj">' + top.CKLang.LJLike_button_give + '</span>',
 		htmlOpt: '<li class="like-lj"><input type="checkbox" id="like-lj" /><label for="like-lj">' + top.CKLang
 			.LJLike_button_give + '</label></li>'
 	});
@@ -942,6 +942,7 @@
 						}
 
 						fakeElement.attributes.buttons = attr.join(',');
+						fakeElement.attributes.style = element.attributes.style;
 						return fakeElement;
 					},
 					'lj': function(element){
@@ -1020,10 +1021,13 @@
 
 			dataProcessor.htmlFilter.addRules({
 				elements: {
-					'div': function(element){
+					div: function(element){
 						if(element.attributes['class'] == 'lj-like'){
 							var ljLikeNode = new CKEDITOR.htmlParser.element('lj-like');
 							ljLikeNode.attributes.buttons = element.attributes.buttons;
+							if(element.attributes.style){
+								ljLikeNode.attributes.style = element.attributes.style;
+							}
 							ljLikeNode.isEmpty = true;
 							ljLikeNode.isOptionalClose = true;
 							return ljLikeNode;
