@@ -1393,7 +1393,7 @@ sub res_includes {
             %journal_info = $journalu->info_for_js;
         }
 
-        my $current_lang = eval { Apache::BML::get_language(); } || ($LJ::DEFAULT_LANG || $LJ::LANGS[0]);
+        my $current_lang = eval { BML::get_language(); } || ($LJ::DEFAULT_LANG || $LJ::LANGS[0]);
            $current_lang =~ s/^([^_]+)_.*/$1/; # en_LJ -> en
 
         my $journal_info_json = LJ::JSON->to_json(\%journal_info);
