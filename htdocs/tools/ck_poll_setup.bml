@@ -11,6 +11,7 @@
 			document.poll.name.value = poll.name;
 		};
 	</script>
+	<link rel="stylesheet" type="text/css" href="<?statprefix?>/js/ck/skins/v2/dialog.css" media="all">
 </head>
 
 <body style="overflow: hidden">
