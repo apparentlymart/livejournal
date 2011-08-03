@@ -1127,7 +1127,7 @@ sub get_recent_items
     my $notafter = $opts->{'notafter'} + 0 || $LJ::EndOfTime - 1;
 
     my $skip = $opts->{'skip'}+0;
-    my $itemshow = $opts->{'itemshow'}+0;
+    my $itemshow = $opts->{'itemshow'}+0 || 10;
     if ($itemshow > $max_hints) { $itemshow = $max_hints; }
     my $maxskip = $max_hints - $itemshow;
     if ($skip < 0) { $skip = 0; }

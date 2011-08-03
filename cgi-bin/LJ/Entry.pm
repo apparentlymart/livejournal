@@ -1395,6 +1395,7 @@ sub get_suspended_mark {
     return $compressed;
 }
 
+## returns 'yes' if entry is ads-eligible (there are no offensive terms etc), and 'no' otherwise
 sub check_for_negative_terms {
     my $self = shift;
     
