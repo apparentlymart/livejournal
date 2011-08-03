@@ -679,7 +679,7 @@
 								elements :[
 									{
 										type : 'html',
-										html : '<iframe src="/tools/ck_poll_setup.bml" allowTransparency="true" frameborder="0" style="width:100%; height:370px; position: relative;"></iframe>',
+										html : '<iframe src="/tools/ck_poll_setup.bml" allowTransparency="true" frameborder="0" style="width:100%; height:250px;"></iframe>',
 										onShow: function(data){
 											if(!okButtonNode){
 												(okButtonNode = document.getElementById(data.sender.getButton('LJPool_Ok').domId).parentNode)
@@ -703,7 +703,7 @@
 								elements:[
 									{
 										type : 'html',
-										html : '<iframe src="/tools/ck_poll_questions.bml" allowTransparency="true" frameborder="0" style="width:100%; height:370px; position: relative;"></iframe>',
+										html : '<iframe src="/tools/ck_poll_questions.bml" allowTransparency="true" frameborder="0" style="width:100%; height:250px;"></iframe>',
 										onShow: function(){
 											var iframe = this.getElement('iframe');
 											questionsWindow = iframe.$.contentWindow;
