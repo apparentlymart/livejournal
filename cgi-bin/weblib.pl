@@ -1393,6 +1393,9 @@ sub res_includes {
             %journal_info = $journalu->info_for_js;
         }
 
+        my $current_lang = eval { Apache::BML::get_language(); } || ($LJ::DEFAULT_LANG || $LJ::LANGS[0]);
+           $current_lang =~ s/^([^_]+)_.*/$1/; # en_LJ -> en
+
         my $journal_info_json = LJ::JSON->to_json(\%journal_info);
         my $jsml_out = LJ::JSON->to_json(\%LJ::JSML);
         $ret .= qq {
@@ -1404,6 +1407,7 @@ sub res_includes {
                     for (i in p) Site[i] = p[i];
                 })();
                 Site.current_journal = $journal_info_json;
+                Site.current_lang    = '$current_lang';
            </script>
         };
 
