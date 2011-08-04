@@ -375,7 +375,7 @@ li.cke_panel_listItem {
 	float: left;
 	width: 1px;
 	height: 16px;
-	margin: 0 15px;
+	margin: 0 5px;
 	background: #6C96CA;
 	}
 .cke_skin_v2 .cke_rtl .cke_separator {
@@ -1330,8 +1330,7 @@ li.cke_panel_listItem {
 	}
 
 #entry-tabs A {
-	color:#3F5F9E !important;
-	text-decoration:none;
+	text-decoration:none !important;
 	}
 /* LJ Like buttons */
 .likes {

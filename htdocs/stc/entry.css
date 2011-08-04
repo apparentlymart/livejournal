@@ -198,6 +198,7 @@
     outline: none;
     border: 1px solid #6699CC;
     border-bottom: none;
+	text-decoration:none;
 }
 #entry ul li.on {
 }
@@ -284,7 +285,7 @@
 #htmltools ul {
     list-style: none;
     margin: 0;
-    padding: 3px 2px 3px 4px;
+    padding: 3px 2px 3px 5px;
     border-bottom: 1px solid #BBB;
     min-height: 18px;
 }
@@ -292,7 +293,7 @@
     float: left;
     margin: 0 10px 0 0;
     padding: 0;
-    font-size: 0.95em;
+    font-size: 0;
 }
 #htmltools ul li a {
     display: block;
@@ -304,14 +305,14 @@
 }
 #htmltools ul li.image a {
     background: url(/js/ck/skins/v2/icons-new.png?v=1) no-repeat 0 -125px;
-    padding-left: 20px;
+    padding-left: 15px;
 }
 #htmltools ul li.image a:hover {
 /*    background: url(/img/html-buttons-image.gif?v=1) no-repeat 0 -40px; */
 }
 #htmltools ul li.media a {
     background: url(/js/ck/skins/v2/icons-new.png?v=1) no-repeat 0 -110px;
-    padding-left: 20px;
+    padding-left: 15px;
 }
 #htmltools ul li.media a:hover {
 /*    background: url(/stc/fck/editor/plugins/livejournal/ljvideo.gif?v=1) no-repeat 0 -40px; */
