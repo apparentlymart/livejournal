@@ -463,9 +463,6 @@ sub helper_url {
         return;
     }
 
-    # check if $dest is our domain
-    return unless LJ::User->new_from_url($dest);
-
     my $domcook = LJ::Session->domain_cookie($dest) or
         return;
 
@@ -491,6 +488,7 @@ sub helper_url {
              . "&v=" . LJ::eurl($cookie)
              if exists $LJ::DOMAIN_JOURNALS_REVERSE{$1};
     }
+
     return;
 }
 
