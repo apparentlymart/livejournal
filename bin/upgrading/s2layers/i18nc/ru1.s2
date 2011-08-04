@@ -200,6 +200,7 @@ function Comment::time_display (string datefmt, string timefmt) : string {
     var string main_date;
 
     if ($this.time_remote) {
+        $datefmt = ($datefmt->contains("%%a%%m") ? "%%dayord%% %%month%% %%yyyy%%" : $datefmt);
         $main_date = $this.time_remote->date_format($datefmt);
         $main = $main_date;
         $main = $main + " " + $this.time_remote->time_format("short") + " (местное)";
