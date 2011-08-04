@@ -60,12 +60,16 @@
     } elsif ($action eq 'delete') {
         foreach my $item (@items) {
             push @{$ret{items}}, { qid => $item->qid, deleted => 1 };
+            if ($POST{spam}) {
+                my $msg = $item->event->load_message();
+                $msg->mark_as_spam();
+            }
             $item->delete;
         }
 
         $success = 1;
     } elsif ($action eq 'delete_all') {
-        @items = $inbox->delete_all( $cur_folder );
+        @items = $inbox->delete_all( $cur_folder, { spam => $POST{spam} } );
 
         foreach my $item (@items) {
             push @{$ret{items}}, { qid => $item->{qid}, deleted => 1 };

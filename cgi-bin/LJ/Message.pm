@@ -818,6 +818,8 @@ sub mark_as_spam {
 
     LJ::set_rel($self->_orig_u, $self->other_u, 'D');                                                                                                               
     $self->_orig_u->log_event('spam_set', { actiontarget => $self->otherid });    
+
+    $self->_orig_u->ban_user($self->other_u);    
             
     return 1;
 

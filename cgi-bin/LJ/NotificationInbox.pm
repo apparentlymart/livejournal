@@ -544,7 +544,7 @@ sub can_add_bookmark {
 }
 
 sub delete_all {
-    my ( $self, $view ) = @_;
+    my ( $self, $view, %opts ) = @_;
     my @items;
 
     # Unless in folder 'Bookmarks', don't fetch any bookmarks
@@ -579,6 +579,10 @@ sub delete_all {
 
     # Delete items
     foreach my $item (@items) {
+        if ($opts{spam}) {
+            my $msg = $item->event->load_message();
+            $msg->mark_as_spam();
+        }
         $item->delete;
     }
 
