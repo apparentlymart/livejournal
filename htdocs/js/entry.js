@@ -742,13 +742,20 @@ IPPUSelectTags = {
 
 	input: function(){
 		var ary = $('selecttags-all').value.split(/ *, */),
-			checkboxes = IPPUSelectTags.checkboxes;
+			checkboxes = IPPUSelectTags.checkboxes,
+			tag;
 		ary = jQuery.map(ary, function (val, idx){
 			return (val.length > 0) ? val : null
 		});
 		checkboxes.attr('checked', false);
 		while(ary.length){
-			checkboxes.filter('[value=' + ary.pop() + ']').attr('checked', true);
+			tag = ary.pop();
+			try {
+				//if tag contains nonalpha chars, this may easily fall
+				checkboxes.filter('[value=' + tag + ']').attr('checked', true);
+			} catch(e) {
+				checkboxes.filter( function() { return this.value === tag; } ).attr('checked', true);
+			}
 		}
 	},
 
