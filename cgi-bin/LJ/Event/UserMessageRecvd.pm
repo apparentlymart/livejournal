@@ -145,12 +145,20 @@ sub as_sms {
 
     my $subject = $self->load_message->subject;
     my $other_u = $self->load_message->other_u;
+    my $body    = $self->load_message->body;
 
-# You've received a new message "[[subject]]" from [[user]]
-    return LJ::Lang::get_text($lang, 'notification.sms.usermessagerecvd', undef, {
+    # %usename% sent you a message on LiveJournal: %Message_Subject%
+    # %Message_Body%
+    # ------
+    # To respond, send your reply to the number this message was sent from. LiveJournal will automatically forward it to %usename%. 
+    #
+    my $text = LJ::Lang::get_text($lang, 'notification.sms.usermessagerecvd', undef, {
         subject => $subject,
+        body    => $body,
         user    => $other_u->user,
     });    
+
+    return $text;
 }
 
 sub as_alert {

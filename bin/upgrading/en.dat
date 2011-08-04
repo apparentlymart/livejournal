@@ -2984,7 +2984,12 @@ notification.sms.pollvote=[[voter]] has voted in [[pollname]] at [[entry_url]]
 
 notification.sms.userexpunged=[[journal]] has been purged.
 
-notification.sms.usermessagerecvd=You've received a new message "[[subject]]" from [[user]]
+notification.sms.usermessagerecvd<<
+[[user]] sent you a message on LiveJournal: [[subject]]
+[[body]]
+------
+To respond, send your reply to the number this message was sent from. LiveJournal will automatically forward it to [[user]].
+.
 
 notification.sms.usermessagesent=message sent to [[user]].
 
@@ -2997,6 +3002,8 @@ sms.numbernotverified=Number not verified.
 sms.uknowncommand=Incorrect request.
 
 sms.unsubscribesuccesseful=You have successful unsubscribed from LiveJournal sms notification.
+
+sms.messagesent=Your message is sent.
 
 number.million|staleness=1
 number.million=[[number]] million
