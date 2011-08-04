@@ -31,6 +31,15 @@ body<=
                   stc/esn.css
                   stc/lj_base.css
                   ));
+                  
+    LJ::need_string(qw(
+                  esn.confirmspam.title
+                  esn.confirmspam.deleteban
+                  esn.confirmspam.delete
+                  esn.confirmspam.ban
+                  esn.confirmspam.button
+                  esn.html_actions.delete_all 
+                  ));
 
     my $formauth = LJ::form_auth();
 
