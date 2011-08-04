@@ -127,7 +127,7 @@ CKEDITOR.editorConfig = function(config){
 
 	config.toolbar = 'Full';
 	config.enterMode = CKEDITOR.ENTER_BR;
-	config.forceEnterMode = false;
+	config.forceEnterMode = true;
 	config.shiftEnterMode = CKEDITOR.ENTER_P;
 
 	config.keystrokes = [

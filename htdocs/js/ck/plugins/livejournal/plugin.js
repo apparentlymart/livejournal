@@ -223,12 +223,22 @@
 				return html;
 			};
 
+			function addLastTag(){
+				var body = editor.document.getBody();
+				if(!body.getLast().is('br')){
+					body.appendHtml('<br />');
+				}
+			}
+
 			editor.on('dataReady', function(){
 
 				editor.document.on('mouseover', onFindCmd);
 				editor.document.on('mouseout', onFindCmd);
 				editor.document.on('keyup', onFindCmd);
 				editor.document.on('click', onFindCmd);
+
+				editor.document.on('keyup', addLastTag);
+				editor.document.on('click', addLastTag);
 
 				if(!note){
 					var timer,
@@ -814,7 +824,7 @@
 									ljNoteData.LJLikeCommand.node.setAttribute('buttons', attr.join(','));
 									ljNoteData.LJLikeCommand.node.setHtml(likeHtml);
 								} else {
-									editor.insertHtml('<div class="lj-like" lj-cmd="LJLikeCommand" buttons="' + attr.join(',') + '">' + likeHtml + '</div>\n');
+									editor.insertHtml('<div class="lj-like" lj-cmd="LJLikeCommand" buttons="' + attr.join(',') + '">' + likeHtml + '</div>');
 								}
 							} else if(ljNoteData.LJLikeCommand.node){
 								ljNoteData.LJLikeCommand.node.remove();
@@ -1031,6 +1041,8 @@
 							ljLikeNode.isEmpty = true;
 							ljLikeNode.isOptionalClose = true;
 							return ljLikeNode;
+						} else if(!element.children.length){
+							return false;
 						}
 					},
 					span: function(element){
