@@ -200,12 +200,6 @@
     border-bottom: none;
 	text-decoration:none;
 }
-#entry ul li.on {
-}
-#entry ul li.on a {
-    font-weight: bold;
-    padding-bottom: 9px;
-}
 #metainfo, #metainfo label, #metainfo input.text, #metainfo strong {
     font-size: 14px;
 }
@@ -721,3 +715,14 @@ td.tabs {
 		float: left;
 		margin-top: 0;
 		}
+
+/* Hide blocks */
+.hide-html #htmltools {
+	display: none;
+	}
+.hide-html #entry UL #jrich A,
+.hide-richtext #entry UL #jplain A {
+	font-weight: bold;
+    padding-bottom: 9px;
+	}
+
