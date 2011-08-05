@@ -30,7 +30,7 @@
 			id: 'vkontakte',
 			abbr: 'vk',
 			html: '<span class="lj-like-item lj-like-gag vk">' + top.CKLang.LJLike_button_vkontakte + '</span>',
-			htmlOpt: !window.isSupUser ? '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + top.CKLang
+			htmlOpt: window.isSupUser ? '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + top.CKLang
 				.LJLike_button_vkontakte + '</label></li>' : ''
 		},
 		{
@@ -222,7 +222,7 @@
 			function addLastTag(){
 				var body = editor.document.getBody();
 				var last = body.getLast();
-				if(last && !last.is('br')){
+				if(last && last.type == 1 && !last.is('br')){
 					body.appendHtml('<br />');
 				}
 			}
