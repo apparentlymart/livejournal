@@ -192,7 +192,7 @@ sub tag_end {
             $context =~ s/^(\S{1,5}\s*)//;
         }
 
-        $links[-1]->{context} = $context;        
+        $links[-1]->{context} = $context if scalar @links;        
         $prev_link_end = length($res);
     }
     return;
