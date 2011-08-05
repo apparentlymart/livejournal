@@ -1460,28 +1460,11 @@ sub res_includes {
 
         $ret .= qq|
         <script type="text/javascript">
-        // case 2
-        var redir = 0;
-
-        // case 1
-        if( lj_user == 0 && !lj_master_user==0 ) {
-            redir = 1;
-        }
-        // case 3
-        else if( !lj_user == 0 && lj_master_user==0 ) {
-            window.location = "http://$domain/misc/clear_domain_session.bml?return=$curl";
-        }
-        // case 4
-        else if( !lj_user == 0 && !lj_master_user==0 ) {
-            if( !lj_user == lj_master_user ) {
-                redir = 1;
+            if( lj_user !== 0 && lj_master_user === 0 ) {
+                window.location = "http://$domain/misc/clear_domain_session.bml?return=$curl";
+            } else if ( lj_master_user > 0 && lj_master_user !== lj_user ) {
+                window.location = "${LJ::SITEROOT}/misc/get_domain_session.bml?return=$curl";
             }
-        }
-
-        // redirect to pta
-        if( redir ) {
-            window.location = "${LJ::SITEROOT}/misc/get_domain_session.bml?return=$curl";
-        }
         </script>
         |;
     }
