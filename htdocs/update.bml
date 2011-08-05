@@ -200,6 +200,36 @@ EMBED
         
     }
 
+    # in case of insert one photo or photo album
+    my $insert_photos = [];
+    if ($remote) {
+        my $albums_id = $POST{'albums_id'} || $GET{'albums_id'};
+        my $photos_id = $POST{'photos_id'} || $GET{'photos_id'};
+
+        my @photos = grep { $_ } map {
+            my $photo = LJ::Fotki::Photo->new ( url_id => $_, userid => $remote->userid );
+            $photo;
+        } split (/,/, $photos_id);
+
+        foreach my $album_id (split /,/, $albums_id) {
+            my $album = LJ::Fotki::Album->new ( url_id => $album_id, userid => $remote->userid );
+            next unless $album;
+            push @photos, @{$album->get_all_photos() || []};
+        }
+
+        $insert_photos = [ grep { $_ } map {
+                my $photo = $_;
+                
+                my $res = $photo->is_valid ? {
+                    photo_desc  => $photo->desc,
+                    photo_title => $photo->title,
+                    photo_url   => @photos > 1 ? $photo->u100_url : $photo->u600_url,
+                    photo_id    => $photo->url_id,
+                } : undef;
+                $res;
+            } @photos ];
+    }
+
     # try to call a hook to fill in the fields
     my $override_fields = LJ::run_hook('update_fields', \%GET);
     my $opt_preformatted = 0;
@@ -349,6 +379,36 @@ EMBED
         }
 
         $$body .= "\n\n<form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>\n\n";
+        my $remote = LJ::get_remote ();
+        my $photo_sizes = LJ::JSON->to_json ( LJ::Fotki::Photo->get_photo_sizes() );
+        my $album_list = [];
+        my $album_list_json = '';
+		my $available_space = '';
+        if ($remote) {
+            $album_list = LJ::Fotki::Album->get_albums ($remote->userid);
+            $album_list = [
+                map {
+                    my $album = $_;
+                    my $main_photo = $album->main_photo_url;
+                    {
+                        album_title     => $album->title,
+                        album_id        => $album->url_id,
+                    }
+                } @$album_list
+            ];
+            $album_list_json = LJ::JSON->to_json ( $album_list );
+            my $spaces = LJ::Fotki::Photo->get_spaces ( $remote );
+            $available_space = $spaces->[2] || 0;
+        }
+        #####
+        # TODO If remote not exist?
+        #####
+        my $auth_token = LJ::Auth->sessionless_auth_token ($LJ::DOMAIN_WEB."/pics/upload", user => $remote ? $remote->user : undef);
+        my $user_groups = LJ::JSON->to_json (LJ::Widget::Fotki::Photo->get_user_groups ($remote));
+		my $comm = LJ::load_user($LJ::LJPHOTO_ALLOW_FROM_COMMUNITY);
+		my $ljphoto_enabled = $remote && $remote->is_mutual_friend($comm) ? 1 : 0;
+        LJ::need_res('stc/pics/pics.css', 'js/swfupload/swfupload.js', 'js/swfupload/swfupload.queue.js', 'js/jquery/jquery.lj.photouploader.js');
+		
         $$body .= LJ::form_auth();
 
         if ($reposted_from) {
@@ -361,6 +421,70 @@ EMBED
 
         $$body .= LJ::entry_form($entry, \$$head, $onload, $errors);
         $$body .= "</form><!-- end #updateForm -->\n";
+		
+        $$body .= <<JS;
+<script type="text/javascript">
+	window.ljphotoEnabled = $ljphoto_enabled;
+    jQuery('#updateForm').photouploader({
+		availableSpace: '$available_space',
+		sizesData: $photo_sizes,
+        albumsData: $album_list_json,
+        privacyData: $user_groups,
+        type: 'upload',
+        guid: '$auth_token',
+		
+        ml: {
+JS
+            $$body .= "'fotki.album.add.images': '".BML::ml('fotki.album.albums')."',"
+            ."'fotki.album.link.click.to.upload': '".BML::ml('fotki.album.link.click.to.upload')."',"
+            ."'fotki.album.add.photos': '".BML::ml('fotki.album.add.photos')."',"
+            ."'fotki.album.upgrade': '".BML::ml('fotki.album.upgrade')."',"
+            ."'fotki.album.add.image.name': '".BML::ml('fotki.album.add.image.name')."',"
+            ."'fotki.album.description': '".BML::ml('fotki.album.description')."',"
+            ."'fotki.album.album_cover': '".BML::ml('fotki.album.album_cover')."',"
+            ."'fotki.album.remove.this.image': '".BML::ml('fotki.album.remove.this.image')."',"
+            ."'fotki.album.select_album': '".BML::ml('fotki.album.select_album')."',"
+            ."'fotki.album.new.album.name': '".BML::ml('fotki.album.new.album.name')."',"
+            ."'fotki.album.post.images': '".BML::ml('fotki.album.post.images')."',"
+            ."'fotki.album.save.images': '".BML::ml('fotki.album.save.images')."',"
+            ."'fotki.privacy': '".BML::ml('fotki.privacy')."',"
+            ."'fotki.album.resize.to.post': '".BML::ml('fotki.album.resize.to.post')."',"
+            ."'fotki.album.stop.upload.confirm': '".BML::ml('fotki.album.stop.upload.confirm')."',"
+            ."'fotki.album.close.without.saving.confirm': '".BML::ml('fotki.album.close.without.saving.confirm')."',"
+            ."'fotki.album.upload.unknown.error': '".BML::ml('fotki.album.upload.unknown.error')."',"
+            ."'fotki.album.uploading.image': '".BML::ml('fotki.album.uploading.image')."',"
+            ."'fotki.album.available.now': '".BML::ml('fotki.album.available.now')."',"
+			."'fotki.album.click.image': '".BML::ml('fotki.album.click.image')."',"
+			."'fotki.album.remove.image': '".BML::ml('fotki.album.remove.image')."',"
+            ."'fotki.album.create.new': '".BML::ml('fotki.album.create.new')."'";
+        $$body .= <<JS;
+        }
+    });
+</script>
+JS
+        
+        if (@$insert_photos) {
+            my $insert_photos_json = LJ::JSON->to_json ( $insert_photos );
+			$$body .= <<JS;
+<script type="text/javascript">
+    jQuery('#updateForm')
+		.photouploader({
+			insertPhotosData: $insert_photos_json,
+	
+	        type: 'add'
+	    })
+		.bind('htmlready', function (event, htmlOutput) {
+			if (window.switchedRteOn) {
+				CKEDITOR.instances.draft.insertHtml(htmlOutput);
+			} else {
+				jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
+			}
+		})
+		.photouploader('show');		
+</script>
+JS
+			
+        }
 
         $$body .= LJ::Widget::SettingWindow->render;
 

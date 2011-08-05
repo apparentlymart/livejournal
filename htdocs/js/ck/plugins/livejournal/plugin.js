@@ -476,14 +476,22 @@
 			//////////  LJ Image Button //////////////
 			editor.addCommand('LJImage', {
 				exec : function(editor){
-					if(ljphotoEnabled){
-						// call LJImage
-					} else {
-						if(ljNoteData.LJImage.node){
-							editor.getSelection().selectElement(ljNoteData.LJImage.node);
-						}
-						editor.getCommand('image').exec();
-					}
+                    if (window.ljphotoEnabled){
+                        jQuery('#updateForm')
+                            .photouploader({
+                                type: 'upload'
+                            })
+                            .photouploader('show')
+                                .bind('htmlready', function (event, html) {
+                                    editor.insertHtml(html);
+                                });
+                    } else {
+                        if (ljNoteData.LJImage.node){
+                            editor.getSelection().selectElement(ljNoteData.LJImage.node);
+                        }
+
+                        editor.getCommand('image').exec();
+                    }                                       
 				}
 			});
 
@@ -1085,3 +1093,4 @@
 	});
 
 })();
+

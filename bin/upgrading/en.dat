@@ -2727,6 +2727,213 @@ feeds.text=Apparently there's good content outside of LJ?  We'll let you add [[l
 
 feeds.title.friends=friends page feed
 
+fotki.album.albums=albums
+
+fotki.album.album_cover=Album cover
+
+fotki.album.albums_of=albums of
+
+fotki.album.default_album_name=Unsorted
+
+fotki.album.edit.save=Save
+
+fotki.album.edit.cancel=Cancel
+
+fotki.album.edit.empty=&nbsp;
+
+fotki.album.edit.empty.photo.title=(no title)
+
+fotki.album.edit.empty.photo.desc=(no description)
+
+fotki.album.edit.empty.album.title=(no title)
+
+fotki.album.edit.empty.album.desc=(no description)
+
+fotki.album.create.new=(Create new)
+
+fotki.album.add.photos=You can add one or more photos at once using "Ctrl" button or "Shift"
+
+fotki.album.add.images=Add images
+
+fotki.album.add.image.name=Add image name
+
+fotki.album.add.five.images=Add 5 images to your LiveJournal entry
+
+fotki.album.add.more=Add more
+
+fotki.album.btn.add=Add photos
+
+fotki.album.btn.remove=Remove
+
+fotki.album.btn.save=Save
+
+fotki.album.add.to.entry=Add to entry
+
+fotki.album.btn.upload=Upload
+
+fotki.album.upload.unknown.error=Unknown error
+
+fotki.album.stop.upload.confirm=Do you really want to stop upload and close without saving?
+
+fotki.album.close.without.saving.confirm=Do you really want to close without saving?
+
+fotki.album.click.image=Click on image to remove it
+
+fotki.album.uploading.image=Uploading image
+
+fotki.album.available.now=Available now
+
+fotki.album.description=Add your description
+
+fotki.album.no.photo=No photo
+
+fotki.album.resize.to.post=Resize to post:
+
+fotki.album.remove=Remove
+
+fotki.album.remove_album=Remove album
+
+fotki.album.remove_image=Remove image
+
+fotki.album.remove.this.image=Remove this image
+
+fotki.album.remove_album_desc=Images will be deleted and disappear from all related posts in your blog
+
+fotki.album.title=Title
+
+fotki.album.create_album=Create album
+
+fotki.album.save_all=Save all
+
+fotki.album.index.title=PhotoAlbums
+
+fotki.album.index.title.beta=beta
+
+fotki.album.index.windowtitle=PhotoAlbums
+
+fotki.album.view.title=Album [[album_name]] view
+
+fotki.album.link.album_list=Albums
+
+fotki.album.link.cancel=Cancel
+
+fotki.album.link.click.to.upload=Click to upload <br> new images
+
+fotki.album.link.edit=Edit
+
+fotki.album.link.edit_album=Edit album
+
+fotki.album.link.add.to.post=Add to post
+
+fotki.album.link.add.to.entry=Add to entry
+
+fotki.album.link.manage=Manage
+
+fotki.album.link.album_view=Album view
+
+fotki.album.link.original.size=Original size
+
+fotki.album.link.remove=Remove
+
+fotki.album.link.remove.album=Remove album
+
+fotki.album.link.photo_view=View photo
+
+fotki.album.link.upload=Upload
+
+fotki.album.link.upload.new=Upload new
+
+fotki.album.edit.update.button=Update
+
+fotki.album.manage.albums=Manage albums
+
+fotki.album.new.album.name=New album name
+
+fotki.album.post.images=Add to post
+
+fotki.album.save.images=Save images
+
+fotki.album.remove.image=Remove this image
+
+fotki.album.select_album=Select album:
+
+fotki.album.select.image.size=Select image size:
+
+fotki.album.select.images.size=Select images size:
+
+fotki.album.storage.title=Photo album: not enough space
+
+fotki.album.storage.used=Used
+
+fotki.album.your.friends.updates=Your friends updates
+
+fotki.album.your_albums=Your albums
+
+fotki.album.upgrade=Upgrade
+
+fotki.promo.slogan=Organise your photos and images with LiveJournal PhotoAlbums...
+
+fotki.promo.description=Discover and share your photos with your friends and community.
+
+fotki.promo.description_other=Discover and share your photos with your friends and community (2).
+
+fotki.promo.add_foto.button=Add your photos now
+
+fotki.promo.about.title=LJ PhotoAlbums
+
+fotki.promo.about.list<<
+ 
+<li>1Gb space for your files</li>
+<li>Free upload 30 photos a day</li>
+<li>Easy posting access to LiveJournal</li>
+<li>Include titles, tags and location</li>
+<li>Mobile uploading</li>
+.
+
+fotki.promo.about.list.more=and many more...
+
+fotki.photo.upload.title=Upload photo
+
+fotki.photo.upload.photo_desc=Photo description
+
+fotki.photo.upload.select_album.title=Select album for upload
+
+fotki.photo.cancel.removing=Cancel removing
+
+fotki.photo.edit.title=Photo edit
+
+fotki.photo.edit.tags.label=Edit tags
+
+fotki.photo.view.title=Photo view
+
+fotki.photo.edit.link=Edit photo
+
+fotki.photo.edit.update.button=Update
+
+fotki.photo.delete.button=Delete
+
+fotki.photo.edit.make_main.label=Make a main photo
+
+fotki.photo.upload.alien.error=You can'n upload to alien albums
+
+fotki.photo.edit.move_to_album.label=Move photo to album:
+
+fotki.photo.edit.photo=Edit photo
+
+fotki.photo.recover=You can recover it, before you clicking "Save all" button
+
+fotki.photo.remove_photo=Remove photo
+
+fotki.photo.removed=This image will be removed
+
+fotki.privacy=Privacy
+
+fotki.privacy.private=Private
+
+fotki.privacy.friends_only=Friends only
+
+fotki.privacy.public=Public
+
 gender.female|staleness=1
 gender.female=Female
 
