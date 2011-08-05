@@ -24,28 +24,24 @@
 			html: '<span class="lj-like-item lj-like-gag go">' + top.CKLang.LJLike_button_google + '</span>',
 			htmlOpt: '<li class="like-go"><input type="checkbox" id="like-go" /><label for="like-go">' + top.CKLang
 				.LJLike_button_google + '</label></li>'
-		}
-	];
-
-	if(window.isSupUser){
-		likeButtons.push({
+		},
+		{
 			label: top.CKLang.LJLike_button_vkontakte,
 			id: 'vkontakte',
 			abbr: 'vk',
 			html: '<span class="lj-like-item lj-like-gag vk">' + top.CKLang.LJLike_button_vkontakte + '</span>',
-			htmlOpt: '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + top.CKLang
-				.LJLike_button_vkontakte + '</label></li>'
-		});
-	}
-
-	likeButtons.push({
-		label: top.CKLang.LJLike_button_give,
-		id: 'livejournal',
-		abbr: 'lj',
-		html: '<span class="lj-like-item lj-like-gag lj">' + top.CKLang.LJLike_button_give + '</span>',
-		htmlOpt: '<li class="like-lj"><input type="checkbox" id="like-lj" /><label for="like-lj">' + top.CKLang
-			.LJLike_button_give + '</label></li>'
-	});
+			htmlOpt: !window.isSupUser ? '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + top.CKLang
+				.LJLike_button_vkontakte + '</label></li>' : ''
+		},
+		{
+			label: top.CKLang.LJLike_button_give,
+			id: 'livejournal',
+			abbr: 'lj',
+			html: '<span class="lj-like-item lj-like-gag lj">' + top.CKLang.LJLike_button_give + '</span>',
+			htmlOpt: '<li class="like-lj"><input type="checkbox" id="like-lj" /><label for="like-lj">' + top.CKLang
+				.LJLike_button_give + '</label></li>'
+		}
+	];
 	
 	var note;
 
@@ -225,7 +221,8 @@
 
 			function addLastTag(){
 				var body = editor.document.getBody();
-				if(!body.getLast().is('br')){
+				var last = body.getLast();
+				if(last && !last.is('br')){
 					body.appendHtml('<br />');
 				}
 			}
@@ -781,6 +778,7 @@
 			dialogContent += '</ul><a href="/support/faqbrowse.bml?faqid=344" class="helplink" target="_blank"><img src="/img/help.gif" alt="Help" title="Help" width="14" height="14" border="0"> ' + top.CKLang.LJLike_FAQ + '</a>';
 
 			var countChanges = 0, ljLikeDialog, ljLikeInputs;
+			
 			function onChangeLike(){
 				var command = editor.getCommand('LJLikeCommand');
 				if(command.state == CKEDITOR.TRISTATE_OFF){
@@ -809,24 +807,29 @@
 						id : 'LJLike_Ok',
 						label : editor.lang.common.ok,
 						onClick : function(){
-							var attr = [], likeHtml = '';
+							var attr = [],
+								likeHtml = '',
+								likeNode = ljNoteData.LJLikeCommand.node;
 
 							for(var i = 0; i < buttonsLength; i++){
 								var button = likeButtons[i];
-								if(ljLikeInputs.$[i].checked){
+								var input = document.getElementById('like-' + button.abbr);
+								var currentBtn = likeNode.getAttribute('buttons');
+								if((input && input.checked) || (!button.htmlOpt && (currentBtn.indexOf(button.abbr) + 1) || currentBtn.indexOf(button
+									.id) + 1)){
 									attr.push(button.id);
 									likeHtml += button.html;
 								}
 							}
 
 							if(attr.length){
-								if(ljNoteData.LJLikeCommand.node){
+								if(likeNode){
 									ljNoteData.LJLikeCommand.node.setAttribute('buttons', attr.join(','));
 									ljNoteData.LJLikeCommand.node.setHtml(likeHtml);
 								} else {
 									editor.insertHtml('<div class="lj-like" lj-cmd="LJLikeCommand" buttons="' + attr.join(',') + '">' + likeHtml + '</div>');
 								}
-							} else if(ljNoteData.LJLikeCommand.node){
+							} else if(likeNode){
 								ljNoteData.LJLikeCommand.node.remove();
 							}
 
@@ -843,18 +846,27 @@
 							var isChecked = buttons ? !!(buttons.indexOf(likeButtons[i].abbr) + 1 || buttons.indexOf(likeButtons[i]
 								.id) + 1) : true;
 
-							if(isChecked && !isOn){
-								countChanges++;
-							}
+							var input = document.getElementById('like-' + likeButtons[i].abbr);
 
-							ljLikeInputs.$[i].checked = isChecked;
+							if(input){
+								if(isChecked && !isOn){
+									countChanges++;
+								}
+
+								input.checked = isChecked;
+							}
+						}
+
+						if(countChanges > 0){
+							ljLikeDialog.getButton('LJLike_Ok').getElement().show();
 						}
 					},
 					onLoad: function(){
 						ljLikeDialog = this;
 						ljLikeInputs = ljLikeDialog.parts.contents.getElementsByTag('input');
 						for(var i = 0; i < buttonsLength; i++){
-							ljLikeInputs.getItem(i).on('change', onChangeLike);
+							var item = ljLikeInputs.getItem(i);
+							item && item.on('click', onChangeLike);
 						}
 					}
 				}
