@@ -4,11 +4,12 @@ use strict;
 use base 'LJ::Widget';
 
 sub set_data {
-    my ($self, $opts, $head, $onload, $errors) = @_;
+    my ($self, $opts, $head, $onload, $errors, $js) = @_;
     $self->{'opts'} = $opts;
     $self->{'head'} = $head;
     $self->{'onload'} = $onload;
     $self->{'errors'} = $errors;
+    $self->{'js'} = $js;
 }
 
 sub opts {
@@ -31,6 +32,11 @@ sub onload {
 sub errors {
     my ($self) = @_;
     return $self->{'errors'} || {};
+}
+
+sub js {
+    my ($self) = @_;
+    return $self->{'js'} || {};
 }
 
 sub remote {
@@ -637,7 +643,7 @@ sub render_subject_block {
     });
 
     my $switch_plaintext_tab =
-        "<li id='jplain' class='on'>" . $switch_plaintext_link . "</li>";
+        "<li id='jplain'>" . $switch_plaintext_link . "</li>";
 
     $out .= qq{
         $block_qotd
@@ -1077,10 +1083,10 @@ sub render_options_block {
             my $preview_tabindex = $self->tabindex;
             my $preview = qq{
                 <input
-                    type="button"
-                    value="$BML::ML{'entryform.preview'}"
-                    onclick="entryPreview(this.form)"
-                    tabindex="$preview_tabindex"
+                    type='button'
+                    value='$BML::ML{'entryform.preview'}'
+                    onclick='entryPreview(this.form)'
+                    tabindex='$preview_tabindex'
                 />
             };
             $preview =~ s/\s+/ /sg; # JS doesn't like newlines in string
@@ -1089,9 +1095,7 @@ sub render_options_block {
             unless ($opts->{'disabled_save'}) {
                 $out .= $self->wrap_js(qq{
                     if (document.getElementById) {
-                        setTimeout( function() {
-                            jQuery( '$preview' ).prependTo( '#entryform-spellcheck-wrapper' );
-                        }, 0 );
+                        document.write("$preview ");
                     }
                 });
             }
@@ -1360,6 +1364,7 @@ sub render_body {
     my $head = $self->head;
     my $onload = $self->onload;
     my $errors = $self->errors;
+    my $js = $self->js;
 
     my $out = "";
     my $remote = $self->remote;
@@ -1384,7 +1389,8 @@ sub render_body {
 
     # 1 hour auth token, should be adequate
     my $chal = LJ::challenge_generate(3600);
-    $out .= "<div id='entry-form-wrapper'>";
+    my $style = $opts->{'richtext_default'} ? 'hide-html' : 'hide-rich';
+    $out .= "<div id='entry-form-wrapper' class='$style'>";
     $out .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
     $out .= "<input type='hidden' name='response' id='login_response' value='' />";
 
@@ -1462,15 +1468,6 @@ sub render_body {
             'LJLike_button_vkontakte' => 'ljlike.button.vkontakte',
             'LJLike_button_twitter' => 'ljlike.button.twitter',
             'LJLike_button_give' => 'ljlike.button.give',
-            'LJLike_WizardNotice' => 'ljlike.wizardnotice',
-            'LJLike_WizardNoticeLink' => 'ljlike.wizardnoticelink',
-            'LJLike_FAQ' => 'ljlike.faq',
-            'LJUser_WizardNotice' => 'ljuser.wizardnotice',
-            'LJUser_WizardNoticeLink' => 'ljuser.wizardnoticelink',
-            'LJLink_WizardNotice' => 'ljlink.wizardnotice',
-            'LJLink_WizardNoticeLink' => 'ljlink.wizardnoticelink',
-            'LJImage_WizardNotice' => 'ljimage.wizardnotice',
-            'LJImage_WizardNoticeLink' => 'ljimage.wizardnoticelink',
         );
 
         my %langmap_translated = map { $_ => BML::ml("fcklang.$langmap{$_}") }
@@ -1482,8 +1479,6 @@ sub render_body {
         $out .= $self->wrap_js(qq{
             var CKLang = CKEDITOR.lang[CKEDITOR.lang.detect()] || {};
             jQuery.extend(CKLang, $langmap);
-            document.getElementById('htmltools').style.display = 'block';
-            usePlainText('draft');
         });
 
         $out .= qq{
@@ -1493,9 +1488,14 @@ sub render_body {
             </noscript>
         };
 
+        $$js = "init_update_bml();";
         if ($opts->{'richtext_default'}) {
-            $$onload .= 'useRichText("draft", "' . LJ::ejs($LJ::JSPREFIX) . '");';
+            $$js .= 'useRichText("draft", "' . LJ::ejs($LJ::JSPREFIX) . '");';
+        } else {
+            $$js .= 'usePlainText("draft");';
         }
+        $$js = $self->wrap_js($$js);
+
     }
 
     $out .= LJ::html_hidden({
@@ -1510,7 +1510,6 @@ sub render_body {
 
     $out .= "</div><!-- end #entry-form-wrapper -->\n\n";
 
-    $out .= $self->wrap_js("jQuery(init_update_bml);");
     return $out;
 }
 
