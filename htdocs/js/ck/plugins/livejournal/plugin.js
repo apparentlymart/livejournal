@@ -814,9 +814,9 @@
 							for(var i = 0; i < buttonsLength; i++){
 								var button = likeButtons[i];
 								var input = document.getElementById('like-' + button.abbr);
-								var currentBtn = likeNode.getAttribute('buttons');
-								if((input && input.checked) || (!button.htmlOpt && (currentBtn.indexOf(button.abbr) + 1) || currentBtn.indexOf(button
-									.id) + 1)){
+								var currentBtn = likeNode && likeNode.getAttribute('buttons');
+								if((input && input.checked) || (currentBtn && !button.htmlOpt && (currentBtn.indexOf(button.abbr) + 1 || currentBtn.indexOf(button
+									.id) + 1))){
 									attr.push(button.id);
 									likeHtml += button.html;
 								}
