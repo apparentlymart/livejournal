@@ -29,6 +29,9 @@ sub handle {
         return LJ::URI->bml_handler($bml_handler_path) if $bml_handler_path;
     }
 
+    ## URI "/pics" can be handle only under user domains
+    return undef if $uri =~ /^\/pics/;
+
     # handle normal URI mappings
     if (my $bml_file = $LJ::URI_MAP{$uri}) {
         return LJ::URI->bml_handler($bml_file);

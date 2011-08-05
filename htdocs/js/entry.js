@@ -972,16 +972,19 @@ InOb.handleInsertEmbed = function (){
 
 InOb.handleInsertImage = function (){
 	// if PhotoHosting enabled - show new popup
-	if(window.ljphotoEnabled){
-		jQuery('#content').photouploader('option', 'type', 'upload')
-			.bind('htmlready', function (event, htmlOutput){
-				jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
-		}).photouploader('show');
-	} else {
-		onInsertObject('/imgupload.bml');
-	}
-	return true;
+    if (window.ljphotoEnabled) {
+        jQuery('#updateForm')
+            .photouploader('option', 'type', 'upload')
+            .bind('htmlready', function (event, htmlOutput) {
+                jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
+            })
+            .photouploader('show');
+    } else {
+        onInsertObject('/imgupload.bml');
+    }
+    return true;
 };
+
 InOb.handleInsertVideo = function(){
 	var videoUrl = prompt('Please enter a video URL:');
 	var draft = $('draft');

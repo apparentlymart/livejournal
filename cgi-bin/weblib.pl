@@ -2228,6 +2228,8 @@ sub get_body_class_for_service_pages {
         push @classes, "index-page";
     } elsif ($uri =~ m!^/shop(/.*)?$!) {
         push @classes, "shop-page";
+    } elsif ($uri =~ m!^/pics(/.*)?$!) {
+        push @classes, "framework-page";
     } elsif ($uri =~ m!^/browse(/.*)?$!) {
         push @classes, "catalogue-page";
     } elsif ($uri =~ m!^/games(/.*)?$! || $host eq "$LJ::USERAPPS_SUBDOMAIN.$LJ::DOMAIN") {

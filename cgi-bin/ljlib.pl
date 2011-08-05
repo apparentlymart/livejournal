@@ -105,6 +105,7 @@ sub END { LJ::end_request(); }
                     "comet_history", "pingrel",
                     "eventrates", "eventratescounters",
                     "friending_actions_q",
+                    "fotki_albums", "fotki_photos", "fotki_tags", "fotki_tags_map",
                     );
 
 # keep track of what db locks we have out
@@ -292,6 +293,7 @@ sub get_blob_domainid
         "captcha_audio" => 3,
         "captcha_image" => 4,
         "fotobilder" => 5,
+        "photoalbums" => 6,
     }->{$name};
     # FIXME: add hook support, so sites can't define their own
     # general code gets priority on numbers, say, 1-200, so verify
