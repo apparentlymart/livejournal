@@ -36,7 +36,8 @@ sub errors {
 
 sub js {
     my ($self) = @_;
-    return $self->{'js'} || {};
+    my $dummy_js;
+    return $self->{'js'} || \$dummy_js;
 }
 
 sub remote {
