@@ -1469,6 +1469,15 @@ sub render_body {
             'LJLike_button_vkontakte' => 'ljlike.button.vkontakte',
             'LJLike_button_twitter' => 'ljlike.button.twitter',
             'LJLike_button_give' => 'ljlike.button.give',
+            'LJLike_WizardNotice' => 'ljlike.wizardnotice',
+            'LJLike_WizardNoticeLink' => 'ljlike.wizardnoticelink',
+            'LJLike_FAQ' => 'ljlike.faq',
+            'LJUser_WizardNotice' => 'ljuser.wizardnotice',
+            'LJUser_WizardNoticeLink' => 'ljuser.wizardnoticelink',
+            'LJLink_WizardNotice' => 'ljlink.wizardnotice',
+            'LJLink_WizardNoticeLink' => 'ljlink.wizardnoticelink',
+            'LJImage_WizardNotice' => 'ljimage.wizardnotice',
+            'LJImage_WizardNoticeLink' => 'ljimage.wizardnoticelink',
         );
 
         my %langmap_translated = map { $_ => BML::ml("fcklang.$langmap{$_}") }
