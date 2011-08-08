@@ -198,15 +198,18 @@ sub handler
     if(my $controller = LJ::Request->notes('controller')) {
         my $url = $controller->check_access(LJ::Request->notes('branding_id'), LJ::get_remote_ip);
         if(LJ::Request->notes('method') eq '__setdomsess') {
+warn "Demiurg: Apache handler: " . __LINE__;
             return redir(LJ::Session->setdomsess_handler())
         } else {
+warn "Demiurg: Apache handler: " . __LINE__;
             my $session = LJ::Session->session_from_cookies(
                 tried_fast   => 0,
                 redirect_ref => \$LJ::CACHE_REMOTE_BOUNCE_URL,
                 ignore_ip    => 1
             );
-
+warn "Demiurg: Apache handler: " . __LINE__;
             if( !$session && $LJ::CACHE_REMOTE_BOUNCE_URL ) {
+warn "Demiurg: Apache handler: " . __LINE__;
                 return redir($LJ::CACHE_REMOTE_BOUNCE_URL);
             }
         }
