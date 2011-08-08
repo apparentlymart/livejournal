@@ -4,6 +4,9 @@
     use vars qw(%GET %POST %ML);
     BML::decl_params(_default => qr/./);
 
+    use LJ::Fotki::Photo;
+    use LJ::Fotki::Album;
+
     # $_[0] is a pre-request scratch area
     # put variables here so that we can access them later
     # outside of this _code block
