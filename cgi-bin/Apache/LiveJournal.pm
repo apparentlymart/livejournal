@@ -1132,6 +1132,8 @@ sub trans {
             return LJ::Request::NOT_FOUND;
         }
 
+        $u = LJ::want_user($u);
+
         my $view = $determine_view->($u->user, "other:$host$hostport", $uri);
         return $view if defined $view;
         LJ::Request->pnotes ('error' => 'baduser');
