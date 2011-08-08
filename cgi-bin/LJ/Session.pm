@@ -579,27 +579,30 @@ sub fb_cookie {
 sub session_from_cookies {
     my $class = shift;
     my %getopts = @_;
-warn "Demiurg: session_from_cookies: " . __LINE__;
+warn "Demiurg: session_from_cookies";
     # must be in web context
     return undef unless LJ::Request->is_inited;
 
     my $sessobj;
     my $host = LJ::Request->header_in("Host");
     my $domain_cookie = LJ::Session->domain_cookie;
-
+warn "Demiurg: session_from_cookies: host = $host";
     # foreign domain case
     unless ( $host =~ /\.$LJ::DOMAIN(:\d+)?$/ ) {
-warn "Demiurg: session_from_cookies: " . __LINE__;
-        return LJ::Session->session_from_external_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
+warn "Demiurg: session_from_cookies: found external domain";
+my $tmp = LJ::Session->session_from_external_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
+warn "Demiurg: session_from_cookies: session: " . Dumper($tmp);
+        return $tmp;
     }
-warn "Demiurg: session_from_cookies: " . __LINE__;
+warn "Demiurg: session_from_cookies: no external domain";
     if ($domain_cookie) {
-warn "Demiurg: session_from_cookies: " . __LINE__;
+warn "Demiurg: session_from_cookies: found local domain";
         # journal domain
         $sessobj = LJ::Session->session_from_domain_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
+warn "Demiurg: session_from_cookies: session: " . Dumper($sessobj);
     }
     else {
-warn "Demiurg: session_from_cookies: " . __LINE__;
+warn "Demiurg: session_from_cookies: master domain";
         # this is the master cookie at "www.livejournal.com" or "livejournal.com";
         my @cookies = @{ $BML::COOKIE{'ljmastersession[]'} || [] };
 
@@ -611,6 +614,7 @@ warn "Demiurg: session_from_cookies: " . __LINE__;
         }
 
         $sessobj = LJ::Session->session_from_master_cookie(\%getopts, @cookies);
+warn "Demiurg: session_from_cookies: session: " . Dumper($sessobj);
     }
 
     return $sessobj;
@@ -1044,7 +1048,7 @@ sub set_cookie {
 # session's uid/sessid
 sub valid_domain_cookie {
     my ($domcook, $val, $li_cook, $opts) = @_;
-warn "Demiurg: valid_domain_cookie: " . __LINE__ . ": " . Dumper(\@_);
+warn "Demiurg: valid_domain_cookie start: " . Dumper(\@_);
     $opts ||= {};
 
     my ($cookie, $gen) = split m!//!, $val;
