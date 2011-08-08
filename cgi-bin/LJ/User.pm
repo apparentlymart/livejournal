@@ -10005,18 +10005,18 @@ sub can_delete_journal_item {
 # </LJFUNC>
 sub get_remote {
     my $opts = ref $_[0] eq "HASH" ? shift : {};
-warn "Demiurg: get_remote: " . __LINE__;
+
     return $LJ::CACHE_REMOTE if $LJ::CACHED_REMOTE && ! $opts->{'ignore_ip'};
-warn "Demiurg: get_remote: " . __LINE__;
+
     my $no_remote = sub {
 warn "Demiurg: get_remote: " . __LINE__ . ": " . shift;
         LJ::User->set_remote(undef);
         return undef;
     };
-warn "Demiurg: get_remote: " . __LINE__;
+
     # can't have a remote user outside of web context
     return $no_remote->() unless LJ::Request->is_inited;
-warn "Demiurg: get_remote: " . __LINE__;
+
     my $criterr = $opts->{criterr} || do { my $d; \$d; };
     $$criterr = 0;
 
@@ -10038,12 +10038,11 @@ warn "Demiurg: get_remote: " . __LINE__;
     # inform the caller that this user is faking their fast-server cookie
     # attribute.
     if ($tried_fast && ! LJ::get_cap($u, "fastserver")) {
-warn "Demiurg: get_remote: " . __LINE__;
         $$criterr = 1;
     }
 
     return $no_remote->() unless $sessobj;
-warn "Demiurg: get_remote: " . __LINE__;
+
     # renew soon-to-expire sessions
     $sessobj->try_renew;
 
@@ -10054,7 +10053,6 @@ warn "Demiurg: get_remote: " . __LINE__;
     # - if necessary, this code will actually run in Apache's cleanup handler
     #   so latency won't affect the user
     if (@LJ::MEMCACHE_SERVERS && ! $LJ::DISABLED{active_user_tracking}) {
-warn "Demiurg: get_remote: " . __LINE__;
         push @LJ::CLEANUP_HANDLERS, sub { $u->note_activity('A') };
     }
 
