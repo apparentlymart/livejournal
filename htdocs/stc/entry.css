@@ -285,6 +285,8 @@
 }
 #htmltools ul li {
     float: left;
+	width: 16px;
+	height: 16px;
     margin: 0 10px 0 0;
     padding: 0;
 	text-indent: -3333px;
@@ -725,7 +727,6 @@ td.tabs {
 	}
 .hide-html #entry UL #jrich A,
 .hide-richtext #entry UL #jplain A {
+	padding-bottom: 9px;
 	font-weight: bold;
-    padding-bottom: 9px;
 	}
-
