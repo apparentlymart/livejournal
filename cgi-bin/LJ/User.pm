@@ -10009,7 +10009,6 @@ sub get_remote {
     return $LJ::CACHE_REMOTE if $LJ::CACHED_REMOTE && ! $opts->{'ignore_ip'};
 
     my $no_remote = sub {
-warn "Demiurg: get_remote: " . __LINE__ . ": " . shift;
         LJ::User->set_remote(undef);
         return undef;
     };

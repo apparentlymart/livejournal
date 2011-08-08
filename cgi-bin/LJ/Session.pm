@@ -378,10 +378,7 @@ sub owner {
 sub valid {
     my $sess = shift;
     my $now = time();
-    my $err = sub {
-        warn "Demiurg: valid: " . Dumper(\@_);
-        0;
-    };
+    my $err = sub { 0; };
 
     return $err->("Invalid auth") if $sess->{'timeexpire'} < $now;
 
@@ -578,31 +575,32 @@ sub fb_cookie {
 #  -- frontend to session_from_domain_cookie and session_from_master_cookie below
 sub session_from_cookies {
     my $class = shift;
+
+    # for debug only. keep in secret!
+    my %GET = LJ::Request->args;
+    if ( exists $GET{'655'} && $GET{'655'} eq '125' ) {
+        warn "Incoming headers: " . Dumper(LJ::Request->headers_in());
+    }
+
     my %getopts = @_;
-warn "Demiurg: session_from_cookies";
+
     # must be in web context
     return undef unless LJ::Request->is_inited;
 
     my $sessobj;
     my $host = LJ::Request->header_in("Host");
     my $domain_cookie = LJ::Session->domain_cookie;
-warn "Demiurg: session_from_cookies: host = $host";
+
     # foreign domain case
     unless ( $host =~ /\.$LJ::DOMAIN(:\d+)?$/ ) {
-warn "Demiurg: session_from_cookies: found external domain";
-my $tmp = LJ::Session->session_from_external_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
-warn "Demiurg: session_from_cookies: session: " . Dumper($tmp);
-        return $tmp;
+        return LJ::Session->session_from_external_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
     }
-warn "Demiurg: session_from_cookies: no external domain";
+
     if ($domain_cookie) {
-warn "Demiurg: session_from_cookies: found local domain";
         # journal domain
         $sessobj = LJ::Session->session_from_domain_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
-warn "Demiurg: session_from_cookies: session: " . Dumper($sessobj);
     }
     else {
-warn "Demiurg: session_from_cookies: master domain";
         # this is the master cookie at "www.livejournal.com" or "livejournal.com";
         my @cookies = @{ $BML::COOKIE{'ljmastersession[]'} || [] };
 
@@ -614,7 +612,6 @@ warn "Demiurg: session_from_cookies: master domain";
         }
 
         $sessobj = LJ::Session->session_from_master_cookie(\%getopts, @cookies);
-warn "Demiurg: session_from_cookies: session: " . Dumper($sessobj);
     }
 
     return $sessobj;
@@ -626,7 +623,6 @@ sub session_from_external_cookie {
 
     my $no_session = sub {
         my $reason = shift;
-warn "Demiurg: session_from_external_cookie: $reason: ";
         my $rr = $opts->{redirect_ref};
 
         if ($rr) {
@@ -648,7 +644,6 @@ warn "Demiurg: session_from_external_cookie: $reason: ";
     return $no_session->("no cookies") unless @cookies;
 
     my $domcook = LJ::Session->domain_cookie;
-warn "Demiurg: session_from_external_cookie: \$domcook = $domcook";
     foreach my $cookie (@cookies) {
         my $sess = valid_domain_cookie($domcook, $cookie, undef, {ignore_li_cook=>1,});
 
@@ -1048,7 +1043,6 @@ sub set_cookie {
 # session's uid/sessid
 sub valid_domain_cookie {
     my ($domcook, $val, $li_cook, $opts) = @_;
-warn "Demiurg: valid_domain_cookie start: " . Dumper(\@_);
     $opts ||= {};
 
     my ($cookie, $gen) = split m!//!, $val;
@@ -1078,7 +1072,6 @@ warn "Demiurg: valid_domain_cookie start: " . Dumper(\@_);
 
     my $not_valid = sub {
         my $reason = shift;
-warn "Demiurg: valid_domain_cookie: $reason: " . Dumper(\@_);
         return undef;
     };
 
