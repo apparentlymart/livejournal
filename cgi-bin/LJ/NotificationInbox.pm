@@ -567,6 +567,8 @@ sub delete_all {
         @items = $self->bookmark_items;
     } elsif ( $view eq 'usermsg_sent' ) {
         @items = $self->usermsg_sent_items;
+    } elsif ( $view eq 'spam' ) {
+        @items = $self->spam_items;
     }
 
     @items = grep { !$self->is_bookmark($_->qid) } @items
