@@ -721,6 +721,12 @@ sub trans {
                 return LJ::Request::NOT_FOUND;
             }
 
+            if ($LJ::DISABLED{'new_ljphoto'}) {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
+
             ## For beta-testers only.
             my $comm = LJ::load_user($LJ::LJPHOTO_ALLOW_FROM_COMMUNITY);
 
@@ -1397,6 +1403,7 @@ sub crossdomain_content
 <!DOCTYPE cross-domain-policy SYSTEM "http://www.adobe.com/xml/dtds/cross-domain-policy.dtd">
 <cross-domain-policy>
     <site-control permitted-cross-domain-policies="master-only"/>
+    <allow-access-from domain="*.lj-11-m.bulyon.local"/>
     <allow-access-from domain="*.livejournal.com"/>
     <allow-access-from domain="*.livejournal.ru"/>
     <allow-access-from domain="*.i-jet.ru"/>

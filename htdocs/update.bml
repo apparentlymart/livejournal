@@ -370,36 +370,37 @@ EMBED
 	
         ## Show a new photoalbums interface only for logged-in users
         my $remote = LJ::get_remote ();
-        if ($remote) {
+        my $comm = LJ::load_user($LJ::LJPHOTO_ALLOW_FROM_COMMUNITY);
+        my $ljphoto_enabled = !$LJ::DISABLED{'new_ljphoto'} && $remote && $remote->is_mutual_friend($comm) ? 1 : 0;
+        if ($remote && $ljphoto_enabled) {
             # in case of insert one photo or photo album
             my $insert_photos = [];
-            if ($remote) {
-                my $albums_id = $POST{'albums_id'} || $GET{'albums_id'};
-                my $photos_id = $POST{'photos_id'} || $GET{'photos_id'};
 
-                my @photos = grep { $_ } map {
-                    my $photo = LJ::Fotki::Photo->new ( url_id => $_, userid => $remote->userid );
-                    $photo;
-                } split (/,/, $photos_id);
+            my $albums_id = $POST{'albums_id'} || $GET{'albums_id'};
+            my $photos_id = $POST{'photos_id'} || $GET{'photos_id'};
 
-                foreach my $album_id (split /,/, $albums_id) {
-                    my $album = LJ::Fotki::Album->new ( url_id => $album_id, userid => $remote->userid );
-                    next unless $album;
-                    push @photos, @{$album->get_all_photos() || []};
-                }
+            my @photos = grep { $_ } map {
+                my $photo = LJ::Fotki::Photo->new ( url_id => $_, userid => $remote->userid );
+                $photo;
+            } split (/,/, $photos_id);
 
-                $insert_photos = [ grep { $_ } map {
-                        my $photo = $_;
-
-                        my $res = $photo->is_valid ? {
-                            photo_desc  => $photo->desc,
-                            photo_title => $photo->title,
-                            photo_url   => @photos > 1 ? $photo->u100_url : $photo->u600_url,
-                            photo_id    => $photo->url_id,
-                        } : undef;
-                        $res;
-                    } @photos ];
+            foreach my $album_id (split /,/, $albums_id) {
+                my $album = LJ::Fotki::Album->new ( url_id => $album_id, userid => $remote->userid );
+                next unless $album;
+                push @photos, @{$album->get_all_photos() || []};
             }
+
+            $insert_photos = [ grep { $_ } map {
+                    my $photo = $_;
+
+                    my $res = $photo->is_valid ? {
+                        photo_desc  => $photo->desc,
+                        photo_title => $photo->title,
+                        photo_url   => @photos > 1 ? $photo->u100_url : $photo->u600_url,
+                        photo_id    => $photo->url_id,
+                    } : undef;
+                    $res;
+                } @photos ];
 
             my $photo_sizes = LJ::JSON->to_json ( LJ::Fotki::Photo->get_photo_sizes() );
             my $album_list = [];
@@ -422,8 +423,6 @@ EMBED
 
             my $auth_token = LJ::Auth->sessionless_auth_token ($LJ::DOMAIN_WEB."/pics/upload", user => $remote ? $remote->user : undef);
             my $user_groups = LJ::JSON->to_json (LJ::Widget::Fotki::Photo->get_user_groups ($remote));
-    		my $comm = LJ::load_user($LJ::LJPHOTO_ALLOW_FROM_COMMUNITY);
-    		my $ljphoto_enabled = $remote && $remote->is_mutual_friend($comm) ? 1 : 0;
             LJ::need_res('stc/pics/pics.css', 'js/swfupload/swfupload.js', 'js/swfupload/swfupload.queue.js', 'js/jquery/jquery.lj.photouploader.js');
 		
             $$body .= <<JS;
