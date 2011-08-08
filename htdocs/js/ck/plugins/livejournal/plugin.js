@@ -476,22 +476,14 @@
 			//////////  LJ Image Button //////////////
 			editor.addCommand('LJImage', {
 				exec : function(editor){
-                    if (window.ljphotoEnabled){
-                        jQuery('#updateForm')
-                            .photouploader({
-                                type: 'upload'
-                            })
-                            .photouploader('show')
-                                .bind('htmlready', function (event, html) {
-                                    editor.insertHtml(html);
-                                });
-                    } else {
-                        if (ljNoteData.LJImage.node){
-                            editor.getSelection().selectElement(ljNoteData.LJImage.node);
-                        }
-
-                        editor.getCommand('image').exec();
-                    }                                       
+					if(ljphotoEnabled){
+						// call LJImage
+					} else {
+						if(ljNoteData.LJImage.node){
+							editor.getSelection().selectElement(ljNoteData.LJImage.node);
+						}
+						editor.getCommand('image').exec();
+					}
 				}
 			});
 
@@ -798,7 +790,7 @@
 			CKEDITOR.dialog.add('LJLikeDialog', function(){
 				return {
 					title : top.CKLang.LJLike_name,
-					width : 130,
+					width : 145,
 					height : 180,
 					resizable: false,
 					contents : [
@@ -1093,4 +1085,3 @@
 	});
 
 })();
-
