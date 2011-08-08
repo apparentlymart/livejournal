@@ -105,7 +105,6 @@ sub END { LJ::end_request(); }
                     "comet_history", "pingrel",
                     "eventrates", "eventratescounters",
                     "friending_actions_q",
-                    "fotki_albums", "fotki_photos", "fotki_tags", "fotki_tags_map",
                     );
 
 # keep track of what db locks we have out
