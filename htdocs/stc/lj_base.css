@@ -3188,3 +3188,11 @@ A.lj-button-link:active {
 		color: #555;
 		cursor:pointer;
 		}
+.btn-disabled {
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+	filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+	opacity:.5;
+	}
+
+
+

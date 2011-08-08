@@ -287,6 +287,8 @@
     float: left;
     margin: 0 10px 0 0;
     padding: 0;
+	text-indent: -3333px;
+	line-height: 0;
     font-size: 0;
 }
 #htmltools ul li a {
@@ -294,6 +296,7 @@
     overflow: hidden;
     float: left;
     height: 16px;
+	border: none;
     line-height: 19px;
     text-decoration: none;
 }
