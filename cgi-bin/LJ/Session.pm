@@ -576,10 +576,12 @@ sub fb_cookie {
 sub session_from_cookies {
     my $class = shift;
 
-    # for debug only. keep in secret!
-    my %GET = LJ::Request->args;
-    if ( exists $GET{'655'} && $GET{'655'} eq '125' ) {
-        warn "Incoming headers: " . Dumper(LJ::Request->headers_in());
+    unless ( $LJ::DISABLED{'dump_headers'} ) {
+        # for debug only. keep in secret!
+        my %GET = LJ::Request->args;
+        if ( exists $GET{'655'} && $GET{'655'} eq '125' ) {
+            warn "Incoming headers: " . Dumper(LJ::Request->headers_in());
+        }
     }
 
     my %getopts = @_;
@@ -731,7 +733,7 @@ sub session_from_master_cookie {
     foreach my $sessdata (@cookies) {
         my ($cookie, $gen) = split(m!//!, $sessdata);
 
-        my ($version, $userid, $sessid, $auth, $flags);
+        my ($version, $userid, $sessid, $auth, $flags, $sig);
 
         my $dest = {
             v => \$version,
@@ -739,6 +741,7 @@ sub session_from_master_cookie {
             s => \$sessid,
             a => \$auth,
             f => \$flags,
+            g => \$sig
         };
 
         my $bogus = 0;
