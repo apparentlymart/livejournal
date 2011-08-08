@@ -530,6 +530,43 @@ __________________________________________*/
 	zoom:1;
 	}
 
+/* Fotki
+-----------------------------------------------*/
+.b-pics-bar,
+.b-pics-nav {
+	zoom: 1;
+	}
+.b-pics-input-submit {
+	overflow: visible;
+	padding: 0 10px;
+	}
+.b-pics-list-albums LI.b-pics-list-albums-item,
+.b-pics-edit-field-click .b-pics-input-edit,
+.b-pics-edit-field-click .b-pics-textarea-edit,
+.b-pics-edit-field-click .b-pics-btn,
+.b-pics-edit-field-click .b-pics-cancel,
+.b-pics-preloader .b-pics-preloader-inner,
+.b-popup-pics .b-pics-privacy,
+.b-pics-privacy .b-pics-privacy-icon,
+.b-pics-pager-first,
+.b-pics-pager-last,
+.b-pics-pager-prev,
+.b-pics-pager-next,
+.b-popup-pics .b-pics-pager,
+.b-popup-pics H2 {
+	display: inline;
+	zoom: 1;
+	}
+.b-pics-edit-field-click {
+	margin: -3px 0 0 -1px;
+	}
+	.b-pics-edit-field-click .b-pics-input-text {
+		padding-left: 2px;
+		}
+.b-pics-privacy .b-pics-privacy-icon {
+	margin-right: 3px;
+	}
+
 /* Should be at bottom of the page! */
 * HTML .i-ljtimes-btn,
 * HTML .i-ljtimes-drag,
