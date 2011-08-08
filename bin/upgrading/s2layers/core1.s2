@@ -1980,6 +1980,21 @@ property string tag_cloud_tags {
 }
 set tag_cloud_tags = "all";
 
+
+property string text_addcomment_id {
+    des="ID for add comment form at Reply Page";
+    noui = 1;
+}
+set text_addcomment_id = "add_comment";
+
+property string text_comments_id {
+    des="ID for all comments at Entry Page";
+    noui = 1;
+}
+set text_comments_id = "comments";
+
+
+
 ###[ global function implementations ]
 
 function prop_init ()
