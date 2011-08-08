@@ -363,8 +363,10 @@ EMBED
             $$body .= LJ::tosagree_html('update', $POST{agree_tos}, $errors->{require_tos});
         }
 
-        $$body .= LJ::entry_form($entry, \$$head, $onload, $errors);
+        my $js = undef;
+        $$body .= LJ::entry_form($entry, \$$head, $onload, $errors, \$js);
         $$body .= "</form><!-- end #updateForm -->\n";
+        $$body .= $js;
 	
         ## Show a new photoalbums interface only for logged-in users
         my $remote = LJ::get_remote ();
