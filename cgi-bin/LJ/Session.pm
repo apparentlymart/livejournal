@@ -8,7 +8,7 @@ use Class::Autouse qw(
                       );
 use LJ::TimeUtil;
 use Digest::MD5;
-
+use Data::Dumper;
 use constant VERSION => 1;
 
 # NOTES
@@ -378,7 +378,10 @@ sub owner {
 sub valid {
     my $sess = shift;
     my $now = time();
-    my $err = sub { 0; };
+    my $err = sub {
+        warn "Demiurg: valid: " . Dumper(\@_);
+        0;
+    };
 
     return $err->("Invalid auth") if $sess->{'timeexpire'} < $now;
 
@@ -479,10 +482,11 @@ sub helper_url {
         return $url . "__setdomsess?dest=" . LJ::eurl($dest) .
             "&k=" . LJ::eurl($domcook) . "&v=" . LJ::eurl($cookie);
     }
-    elsif ( $dest =~ m!^https?://(.+?)(/.*)$! ) {
+    elsif ( $dest =~ m!^(https?://)(.+?)(/.*)$! ) {
+        my $setdomsess = $1 . $2;
         $dest =~ m!^https?://(?:www\.)?(.+?)(/.*)$!;
 
-        return "${dest}__setdomsess?dest="
+        return "${setdomsess}/__setdomsess?dest="
              . LJ::eurl($dest)
              . "&k=" . LJ::eurl($domcook)
              . "&v=" . LJ::eurl($cookie)
@@ -575,7 +579,7 @@ sub fb_cookie {
 sub session_from_cookies {
     my $class = shift;
     my %getopts = @_;
-
+warn "Demiurg: session_from_cookies: " . __LINE__;
     # must be in web context
     return undef unless LJ::Request->is_inited;
 
@@ -585,14 +589,17 @@ sub session_from_cookies {
 
     # foreign domain case
     unless ( $host =~ /\.$LJ::DOMAIN(:\d+)?$/ ) {
+warn "Demiurg: session_from_cookies: " . __LINE__;
         return LJ::Session->session_from_external_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
     }
-
+warn "Demiurg: session_from_cookies: " . __LINE__;
     if ($domain_cookie) {
+warn "Demiurg: session_from_cookies: " . __LINE__;
         # journal domain
         $sessobj = LJ::Session->session_from_domain_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
     }
     else {
+warn "Demiurg: session_from_cookies: " . __LINE__;
         # this is the master cookie at "www.livejournal.com" or "livejournal.com";
         my @cookies = @{ $BML::COOKIE{'ljmastersession[]'} || [] };
 
@@ -615,6 +622,7 @@ sub session_from_external_cookie {
 
     my $no_session = sub {
         my $reason = shift;
+warn "Demiurg: session_from_external_cookie: $reason: ";
         my $rr = $opts->{redirect_ref};
 
         if ($rr) {
@@ -636,7 +644,7 @@ sub session_from_external_cookie {
     return $no_session->("no cookies") unless @cookies;
 
     my $domcook = LJ::Session->domain_cookie;
-
+warn "Demiurg: session_from_external_cookie: \$domcook = $domcook";
     foreach my $cookie (@cookies) {
         my $sess = valid_domain_cookie($domcook, $cookie, undef, {ignore_li_cook=>1,});
 
@@ -1036,7 +1044,7 @@ sub set_cookie {
 # session's uid/sessid
 sub valid_domain_cookie {
     my ($domcook, $val, $li_cook, $opts) = @_;
-
+warn "Demiurg: valid_domain_cookie: " . __LINE__ . ": " . Dumper(\@_);
     $opts ||= {};
 
     my ($cookie, $gen) = split m!//!, $val;
@@ -1052,28 +1060,33 @@ sub valid_domain_cookie {
     };
 
     my $bogus = 0;
+    my @bogus;
+
     foreach my $var (split /:/, $cookie) {
         if ($var =~ /^(\w)(.+)$/ && $dest->{$1}) {
             ${$dest->{$1}} = $2;
-        } else {
+        }
+        else {
             $bogus = 1;
+            push @bogus, $var;
         }
     }
 
     my $not_valid = sub {
         my $reason = shift;
+warn "Demiurg: valid_domain_cookie: $reason: " . Dumper(\@_);
         return undef;
     };
 
-    return $not_valid->("bogus params") if $bogus;
+    return $not_valid->("bogus params", @bogus) if $bogus;
     return $not_valid->("wrong gen") unless valid_cookie_generation($gen);
-    return $not_valid->("wrong ver") if $version != VERSION;
+    return $not_valid->("wrong version", $version, VERSION) if $version != VERSION;
 
     # have to be relatively new.  these shouldn't last longer than a day
     # or so anyway.
     unless ($opts->{ignore_age}) {
         my $now = time();
-        return $not_valid->("old cookie") unless $time > $now - 86400*7;
+        return $not_valid->("old cookie", $time, $now) unless $time > $now - 86400*7;
     }
 
     my $u = LJ::load_userid($uid)
@@ -1083,7 +1096,7 @@ sub valid_domain_cookie {
         or return $not_valid->("no session $sessid");
 
     # the master session can't be expired or ip-bound to wrong IP
-    return $not_valid->("not valid") unless $sess->valid;
+    return $not_valid->("not valid session") unless $sess->valid;
 
     # the per-domain cookie has to match the session of the master cookie
     unless ($opts->{ignore_li_cook}) {
@@ -1095,7 +1108,7 @@ sub valid_domain_cookie {
     }
 
     my $correct_sig = domsess_signature($time, $sess, $domcook);
-    return $not_valid->("signature wrong") unless $correct_sig eq $sig;
+    return $not_valid->("signature wrong", $sig, $correct_sig) unless $correct_sig eq $sig;
 
     return $sess;
 }
