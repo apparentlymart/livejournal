@@ -1477,6 +1477,8 @@ sub render_body {
             'LJLink_WizardNoticeLink' => 'ljlink.wizardnoticelink',
             'LJImage_WizardNotice' => 'ljimage.wizardnotice',
             'LJImage_WizardNoticeLink' => 'ljimage.wizardnoticelink',
+            'LJCut_WizardNotice' => 'ljcut.wizardnotice',
+            'LJCut_WizardNoticeLink' => 'ljcut.wizardnoticelink',
         );
 
         my %langmap_translated = map { $_ => BML::ml("fcklang.$langmap{$_}") }

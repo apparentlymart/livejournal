@@ -2717,6 +2717,11 @@ fcklang.ljimage.wizardnotice=Image must be edited inside the Link Wizard
 fcklang.ljimage.wizardnoticelink=Go to Image wizard
 
 
+fcklang.ljcut.wizardnotice=Cut must be edited inside the Cut Wizard
+
+fcklang.ljcut.wizardnoticelink=Go to Cut wizard
+
+
 fcklang.videoprompt=Please enter the YouTube, PhotoBucket, or Google Video URL:
 
 feeds.link=syndicated feeds

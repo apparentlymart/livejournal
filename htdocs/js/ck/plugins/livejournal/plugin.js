@@ -49,7 +49,7 @@
 		LJPollLink: {
 			html: encodeURIComponent(top.CKLang.Poll_PollWizardNotice + '<br /><a href="#">' + top.CKLang.Poll_PollWizardNoticeLink + '</a>')
 		},
-		LJLikeCommand: {
+		LJLike: {
 			html: encodeURIComponent(top.CKLang.LJLike_WizardNotice + '<br /><a href="#">' + top.CKLang.LJLike_WizardNoticeLink + '</a>')
 		},
 		LJUserLink: {
@@ -60,6 +60,9 @@
 		},
 		LJImage: {
 			html: encodeURIComponent(top.CKLang.LJImage_WizardNotice + '<br /><a href="#">' + top.CKLang.LJImage_WizardNoticeLink + '</a>')
+		},
+		LJCut :{
+			html: encodeURIComponent(top.CKLang.LJCut_WizardNotice + '<br /><a href="#">' + top.CKLang.LJCut_WizardNoticeLink + '</a>')
 		}
 	};
 
@@ -569,12 +572,12 @@
 			}
 
 			//////////  LJ Cut Button //////////////
-			var ljCutNode;
-
 			editor.attachStyleStateChange(new CKEDITOR.style({
 				element: 'lj-cut'
 			}), function(state){
-				ljCutNode = state == CKEDITOR.TRISTATE_ON && this.getSelection().getStartElement().getAscendant('lj-cut', true);
+				if(state == CKEDITOR.TRISTATE_OFF && !currentNoteNode){
+					delete ljNoteData.LJCut.node;
+				}
 				editor.getCommand('LJCut').setState(state);
 			});
 
@@ -588,26 +591,27 @@
 			editor.addCommand('LJCut', {
 				exec: function(){
 					var text;
-					if(this.state == CKEDITOR.TRISTATE_ON){
-						text = prompt(top.CKLang.CutPrompt, ljCutNode.getAttribute('text') || top.CKLang.ReadMore);
+					if(ljNoteData.LJCut.node){
+						text = prompt(top.CKLang.CutPrompt, ljNoteData.LJCut.node.getAttribute('text') || top.CKLang.ReadMore);
 						if(text){
 							if(text == top.CKLang.ReadMore){
-								ljCutNode.removeAttribute('text');
+								ljNoteData.LJCut.node.removeAttribute('text');
 							} else {
-								ljCutNode.setAttribute('text', text);
+								ljNoteData.LJCut.node.setAttribute('text', text);
 							}
 						}
 					} else {
 						text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore);
 						if(text){
-							ljCutNode = editor.document.createElement('lj-cut');
+							ljNoteData.LJCut.node = editor.document.createElement('lj-cut');
+							ljNoteData.LJCut.node.setAttribute('lj-cmd', 'LJCut');
 							if(text != top.CKLang.ReadMore){
-								ljCutNode.setAttribute('text', text);
+								ljNoteData.LJCut.node.setAttribute('text', text);
 							}
-							editor.getSelection().getRanges()[0].extractContents().appendTo(ljCutNode);
-							editor.insertElement(ljCutNode);
+							editor.getSelection().getRanges()[0].extractContents().appendTo(ljNoteData.LJCut.node);
+							editor.insertElement(ljNoteData.LJCut.node);
 							var range = new CKEDITOR.dom.range(editor.document);
-							range.selectNodeContents(ljCutNode);
+							range.selectNodeContents(ljNoteData.LJCut.node);
 							editor.getSelection().selectRanges([range]);
 						}
 					}
@@ -780,7 +784,7 @@
 			var countChanges = 0, ljLikeDialog, ljLikeInputs;
 			
 			function onChangeLike(){
-				var command = editor.getCommand('LJLikeCommand');
+				var command = editor.getCommand('LJLike');
 				if(command.state == CKEDITOR.TRISTATE_OFF){
 					this.$.checked ? countChanges++ : countChanges--;
 					ljLikeDialog.getButton('LJLike_Ok').getElement()[countChanges == 0 ? 'addClass' : 'removeClass']('btn-disabled');
@@ -813,7 +817,7 @@
 
 							var attr = [],
 								likeHtml = '',
-								likeNode = ljNoteData.LJLikeCommand.node;
+								likeNode = ljNoteData.LJLike.node;
 
 							for(var i = 0; i < buttonsLength; i++){
 								var button = likeButtons[i];
@@ -828,23 +832,23 @@
 
 							if(attr.length){
 								if(likeNode){
-									ljNoteData.LJLikeCommand.node.setAttribute('buttons', attr.join(','));
-									ljNoteData.LJLikeCommand.node.setHtml(likeHtml);
+									ljNoteData.LJLike.node.setAttribute('buttons', attr.join(','));
+									ljNoteData.LJLike.node.setHtml(likeHtml);
 								} else {
-									editor.insertHtml('<div class="lj-like" lj-cmd="LJLikeCommand" buttons="' + attr.join(',') + '">' + likeHtml + '</div>');
+									editor.insertHtml('<div class="lj-like" lj-cmd="LJLike" buttons="' + attr.join(',') + '">' + likeHtml + '</div>');
 								}
 							} else if(likeNode){
-								ljNoteData.LJLikeCommand.node.remove();
+								ljNoteData.LJLike.node.remove();
 							}
 
 							ljLikeDialog.hide();
 						}
 					}), CKEDITOR.dialog.cancelButton],
 					onShow: function(){
-						var command = editor.getCommand('LJLikeCommand');
+						var command = editor.getCommand('LJLike');
 						var i = countChanges = 0,
 							isOn = command.state == CKEDITOR.TRISTATE_ON,
-							buttons = ljNoteData.LJLikeCommand.node && ljNoteData.LJLikeCommand.node.getAttribute('buttons');
+							buttons = ljNoteData.LJLike.node && ljNoteData.LJLike.node.getAttribute('buttons');
 
 						for(; i < buttonsLength; i++){
 							var isChecked = buttons ? !!(buttons.indexOf(likeButtons[i].abbr) + 1 || buttons.indexOf(likeButtons[i]
@@ -883,31 +887,31 @@
 
 				while(ljLikeNode){
 					if(ljLikeNode.hasClass('lj-like')){
-						ljNoteData.LJLikeCommand.node = ljLikeNode;
+						ljNoteData.LJLike.node = ljLikeNode;
 						break;
 					}
 					ljLikeNode = ljLikeNode.getParent();
 				}
 
 				if(!ljLikeNode && !currentNoteNode){
-					delete ljNoteData.LJLikeCommand.node;
+					delete ljNoteData.LJLike.node;
 				}
 
-				editor.getCommand('LJLikeCommand').setState(ljLikeNode ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF);
+				editor.getCommand('LJLike').setState(ljLikeNode ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF);
 			});
 
 			editor.on('doubleclick', function(){
-				var command = editor.getCommand('LJLikeCommand');
+				var command = editor.getCommand('LJLike');
 				if(command.state == CKEDITOR.TRISTATE_ON){
 					command.exec();
 				}
 			});
 
-			editor.addCommand('LJLikeCommand', new CKEDITOR.dialogCommand('LJLikeDialog'));
+			editor.addCommand('LJLike', new CKEDITOR.dialogCommand('LJLikeDialog'));
 
 			editor.ui.addButton('LJLike', {
 				label: top.CKLang.LJLike_name,
-				command: 'LJLikeCommand'
+				command: 'LJLike'
 			});
 		},
 		afterInit : function(editor){
@@ -927,6 +931,9 @@
 
 			dataProcessor.dataFilter.addRules({
 				elements: {
+					'lj-cut': function(element){
+						element.attributes['lj-cmd'] = 'LJCut';
+					},
 					'cke:object' : function(element){
 						//////////  LJ Embed Media Button //////////////
 						var attributes = element.attributes,
@@ -951,7 +958,7 @@
 
 						var fakeElement = new CKEDITOR.htmlParser.element('div');
 						fakeElement.attributes['class'] = 'lj-like';
-						fakeElement.attributes['lj-cmd'] = 'LJLikeCommand';
+						fakeElement.attributes['lj-cmd'] = 'LJLike';
 
 						var currentButtons = element.attributes.buttons && element.attributes.buttons.split(',') || likeButtons
 							.defaultButtons;
