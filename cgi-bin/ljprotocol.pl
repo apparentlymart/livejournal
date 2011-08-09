@@ -3466,15 +3466,30 @@ sub editfriends
             $error_flag = 1;
         } else {
             $friends_added++;
-            my $added = { 'username' => $aname,
-                          'fullname' => $row->{'name'},
+            my $added = { 'username'    => $aname,
+                          'fullname'    => $row->{'name'},
                           'journaltype' => $row->{journaltype},
                           'defaultpicurl' => ($row->{'defaultpicid'} && "$LJ::USERPIC_ROOT/$row->{'defaultpicid'}/$row->{'userid'}"),
+                          'fgcolor'     => $fg,
+                          'bgcolor'     => $bg,
                       };
             if ($req->{'ver'} >= 1) {
                 LJ::text_out(\$added->{'fullname'});
             }
-            push @{$res->{'added'}}, $added;
+
+            if ($row->identity) {
+                my $i = $row->identity;
+                $added->{'identity_type'} = $i->pretty_type;
+                $added->{'identity_value'} = $i->value;
+                $added->{'identity_display'} = $row->display_name;
+            }
+            $added->{"type"} = {
+                'C' => 'community',
+                'Y' => 'syndicated',
+                'N' => 'news',
+                'S' => 'shared',
+                'I' => 'identity',
+            }->{$row->{'journaltype'}} if $row->{'journaltype'} ne 'P';
 
             my $qfg = LJ::color_todb($fg);
             my $qbg = LJ::color_todb($bg);
@@ -3492,6 +3507,9 @@ sub editfriends
             }
             # force bit 0 on.
             $gmask |= 1;
+
+            $added->{groupmask} = $gmask;
+            push @{$res->{'added'}}, $added;
 
             # TAG:FR:protocol:editfriends4_addeditfriend
             my $cnt = $dbh->do("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
