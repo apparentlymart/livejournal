@@ -1193,7 +1193,7 @@ function EntryPage::print_body () {
                                          ]);
 
     print_entry_full($this, $.entry, null Color, null Color, $.viewing_thread);
-    """<div style="margin: 20px 0 17px 0;">""";
+    """<div style="margin: 20px 0 17px 0;" id="$*text_comments_id">""";
          $.entry->print_ebox();
     "</div>";
 
@@ -1205,13 +1205,13 @@ function EntryPage::print_body () {
             if ($p.showspam) {
                 $comments_showspam = """ &mdash; """ + get_plural_phrase($.entry.comments.spam_counter, "text_read_spam_comments");
             } else {
-                $comments_showspam = """ &mdash; <a href=\"$.entry.comments.read_spam_url\">""" + get_plural_phrase($.entry.comments.spam_counter, "text_read_all_spam_comments") + """</a> """;
+                $comments_showspam = """ &mdash; <a href=\"$.entry.comments.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($.entry.comments.spam_counter, "text_read_all_spam_comments") + """</a> """;
             }
         }
         if ($.comment_pages.all_subitems_displayed) {
             if (not $.entry.comments.locked) {
                 print_heading_bar_begin();
-                $this->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
+                $this->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.entry.comments.post_url+"#$*text_addcomment_id"});
                 $this->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
                 if ($p.view == "entry") { print $comments_showspam; }
                 print_heading_bar_end();
@@ -1223,11 +1223,11 @@ function EntryPage::print_body () {
                     $pages = "$pages <b>[$i]</b> ";
                 } else {
                     var string url_of = $.comment_pages->url_of($i);
-                    $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
+                    $pages = """$pages <a href="$url_of#$*text_comments_id" class="link"><b>[$i]</b></a> """;
                 }
             }
             if ($p.view != "entry") { $comments_showspam == ""; }
-            print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)  $comments_showspam""", $pages);
+            print_heading_bar("""(<a href="$.entry.comments.post_url#$*text_addcomment_id">$*text_post_comment</a>)  $comments_showspam""", $pages);
         }
 
         if ($.comment_pages.total_subitems > 0) {
@@ -1236,7 +1236,7 @@ function EntryPage::print_body () {
             if ($.comment_pages.all_subitems_displayed) {
 if (not $.entry.comments.locked) {
                print_heading_bar_begin();
-               print "("; $this->print_reply_link({"target" => "bottomcomment", "linktext" => $*text_post_comment}); """)""";
+               print "("; $this->print_reply_link({"target" => "bottomcomment", "linktext" => $*text_post_comment, "reply_url" => $.entry.comments.post_url+"#$*text_addcomment_id"}); """)""";
                $this->print_reply_container({"target" => "bottomcomment", "class" => "quickreply"});
                print_heading_bar_end();
 }
@@ -1437,10 +1437,10 @@ function ReplyPage::print_body
         print_heading_bar($.replyto.subject, $datetime);
         print "<table><tr><td>"; $.replyto->print_text(); "</td></tr></table>";
     }
-    """<div style="margin: 20px 0 17px 0;">""";
+    """<div style="margin: 20px 0 17px 0;" id="$*text_addcomment_id">""";
       $.entry->print_ebox();
     "</div>";
-    print_heading_bar("Reply to this:","""(<a href="$.entry.permalink_url">$*text_reply_back</a>)""");
+    print_heading_bar("$*text_post_comment:","""(<a href="$.entry.permalink_url#$*text_comments_id">$*text_reply_back</a>)""");
     $.form->print();
 }
 
