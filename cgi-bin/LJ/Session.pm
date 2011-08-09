@@ -10,6 +10,7 @@ use LJ::TimeUtil;
 use Digest::MD5;
 use Data::Dumper;
 use constant VERSION => 1;
+use constant MASTER_VERSION => 2;
 
 # NOTES
 #
@@ -254,11 +255,13 @@ sub unsigned_loggedin_cookie_string {
 sub master_cookie_string {
     my $sess = shift;
 
-    my $ver = VERSION;
+    my $ver    = MASTER_VERSION;
+    my $sig    = master_signature($sess);
     my $cookie = "v$ver:" .
         "u$sess->{userid}:" .
         "s$sess->{sessid}:" .
-        "a$sess->{auth}";
+        "a$sess->{auth}:" .
+        "g$sig";
 
     if ($sess->{flags}) {
         $cookie .= ":f$sess->{flags}";
@@ -720,7 +723,7 @@ sub session_from_master_cookie {
     my $old_cookie = delete $opts->{old_cookie} ? 1 : 0;
 
     delete $opts->{'redirect_ref'};  # we don't use this
-    croak("Unknown options") if %$opts;
+    croak("Unknown options: " . join(', ', keys(%$opts))) if %$opts;
 
     my $now = time();
 
@@ -732,7 +735,6 @@ sub session_from_master_cookie {
   COOKIE:
     foreach my $sessdata (@cookies) {
         my ($cookie, $gen) = split(m!//!, $sessdata);
-
         my ($version, $userid, $sessid, $auth, $flags, $sig);
 
         my $dest = {
@@ -746,9 +748,10 @@ sub session_from_master_cookie {
 
         my $bogus = 0;
         foreach my $var (split /:/, $cookie) {
-            if ($var =~ /^(\w)(.+)$/ && $dest->{$1}) {
+            if ( $var =~ /^(\w)(.+)$/ && $dest->{$1} ) {
                 ${$dest->{$1}} = $2;
-            } else {
+            }
+            else {
                 $bogus = 1;
             }
         }
@@ -764,12 +767,6 @@ sub session_from_master_cookie {
             $sess = undef;
             push @$errs, "$sessdata: $_[0]";
         };
-
-        # fail unless version matches current
-        unless ($version == VERSION) {
-            $err->("no ws auth");
-            next COOKIE;
-        }
 
         my $u = LJ::load_userid($userid);
         unless ($u) {
@@ -810,6 +807,25 @@ sub session_from_master_cookie {
                 next COOKIE;
             }
         }
+
+        # current cookie version
+        if ( $version == MASTER_VERSION ) {
+            unless ( $sig eq master_signature($sess) ) {
+                $err->("wrong master cookie signature");
+                next COOKIE;
+            }
+        }
+        # prev cookie version
+        elsif ( $version == MASTER_VERSION - 1 ) {
+            # don't check signature
+            # it will work for a some time
+        }
+        # all other cookie must fail
+        else {
+            $err->("no ws auth");
+            next COOKIE;
+        }
+
         last COOKIE;
     }
 
@@ -959,6 +975,17 @@ sub _current_url {
     my $host = LJ::Request->header_in("Host");
     my $uri = LJ::Request->uri;
     return "http://$host$uri$args_wq";
+}
+
+sub master_signature {
+    my ($sess) = @_;
+    my $u      = $sess->owner;
+    my $secret = $LJ::MASTER_COOKIE_SALT;
+
+    my $data = join("-", $sess->{auth}, $u->{userid}, $sess->{sessid});
+    my $sig  = hmac_sha1_hex($data, $secret);
+
+    return $sig;
 }
 
 sub domsess_signature {
