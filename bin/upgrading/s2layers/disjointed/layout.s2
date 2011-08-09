@@ -1135,7 +1135,7 @@ if (not $c.frozen) {
       if ($en.comments.count > 0 or $en.comments.screened) {
         $url  = $en.comments.read_url;
         $text = get_plural_phrase($en.comments.count, ("text_read_comments" + ($p.view == "friends" ? "_friends" : "")));
-        $linkbar = $linkbar + """<a href="$url">$text""";
+        $linkbar = $linkbar + """<a href="$url#$*text_comments_id">$text""";
         if($en.comments.screened) {
           $text    = $*text_month_screened_comments;
           $linkbar = $linkbar + """ $text""";
@@ -1150,7 +1150,7 @@ if (not $c.frozen) {
         if ($p.showspam) {
             $comments_showspam = get_plural_phrase($en.comments.spam_counter, "text_read_spam_comments") + "&ndash;";
         } else {
-            $comments_showspam = """<a href=\"$en.comments.read_spam_url\">""" + get_plural_phrase($en.comments.spam_counter, "text_read_all_spam_comments") + """</a> &ndash """;
+            $comments_showspam = """<a href=\"$en.comments.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($en.comments.spam_counter, "text_read_all_spam_comments") + """</a> &ndash """;
         }
     }
     if ($p.view == "entry") { $linkbar = $linkbar + $comments_showspam; }
@@ -1160,13 +1160,13 @@ if (not $c.frozen) {
     } else {
       if ($p.view == "entry") {
 if (not $en.comments.locked) {
-        $p->print_reply_link({"target" => "topcomment", "linktext" => "$*text_post_comment"}); print " - ";
+        $p->print_reply_link({"target" => "topcomment", "linktext" => "$*text_post_comment", "reply_url" => $en.comments.post_url+"#$*text_addcomment_id"}); print " - ";
 }
       } else {
 if (not $en.comments.locked) {
         $url  = $en.comments.post_url;
         $text = get_plural_phrase(0, ("text_post_comment" + ($p.view == "friends" ? "_friends" : "")));
-        $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+        $linkbar = $linkbar + """<a href="$url#$*text_comments_id">$text</a>$btwn_comments""";
 }
       }
     }
@@ -1736,7 +1736,7 @@ function EntryPage::print_body() {
   $this->print_entry($.entry);
   print_ebox($.entry);
   if($.entry.comments.enabled) {
-    "<hr />";
+    "<hr id='$*text_comments_id' />";
     if($.multiform_on) {
       $this->print_multiform_start();
     }
@@ -1765,7 +1765,7 @@ function EntryPage::print_comment(Comment c) {
 
 function ReplyPage::print_body() {
   $this->print_entry($.entry);
-  "<hr />";
+  "<hr id='$*text_addcomment_id' />";
   print_ebox($.entry);
   if($.replyto.depth > 0) { # If we're replying to a comment
     print_entry($.replyto, null Color, null Color);
