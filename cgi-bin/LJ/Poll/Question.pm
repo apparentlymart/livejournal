@@ -245,7 +245,7 @@ sub get_question_xml {
     my $opts = $self->opts;
     if ($self->type eq 'text') {
         my ($size,$max) = split(m!/!, $opts);
-        $attrs .= ' size="'.$size.'" max="'.$max.'"';
+        $attrs .= ' size="'.$size.'" maxlength="'.$max.'"';
     } elsif ($self->type eq 'scale') {
         my ($from, $to, $by) = split(m!/!, $opts);
         $by ||= 1;
