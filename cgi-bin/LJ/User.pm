@@ -348,7 +348,9 @@ sub new_from_external_domain {
         LJ::MemCache::set($key, $userid, $expire);
     }
 
-    return ($userid) if LJ::load_userid($userid);
+    my $u = LJ::load_userid($userid);
+    return $u if $u;
+    return undef;
 }
 
 # returns LJ::User class of a random user, undef if we couldn't get one
