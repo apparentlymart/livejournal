@@ -913,7 +913,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
             $comments_showspam = """ | <span>""" + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</span> """;
 
         } else {
-            $comments_showspam = """ | <a href=\"$e.comments.read_spam_url\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></span> """;
+            $comments_showspam = """ | <a href=\"$e.comments.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></span> """;
         }
     }
 """</td></tr>
@@ -926,7 +926,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     } elseif ($e.comments.enabled) {
         "<td align='right' class='comments'>";
         if (not $e.comments.locked) {
-            $p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment"});
+            $p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment", "reply_url" => $e.comments.post_url+"#$*text_addcomment_id"});
         }
     } else {
         "<td>";
@@ -1283,7 +1283,7 @@ function EntryPage::print_body () {
 <tr align='left'>
 <td class="caption" colspan='2'>Comments:</td></tr>""";
 
-        """<tr align='left'><td colspan="2" bgcolor="$*entry_back"><a name='comments'></a>""";
+        """<tr align='left'><td colspan="2" bgcolor="$*entry_back"><a name='$*text_comments_id'></a>""";
 
         $.comment_pages->print();
 
@@ -1511,9 +1511,9 @@ function ReplyPage::print_body () {
     """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="$*stronger_back" align="center">
-<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
+<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="" id="$*text_addcomment_id">
 <tr align='left'>
-<td class="caption" colspan='2'>Reply:</td></tr>
+<td class="caption" colspan='2'>$*text_post_comment:</td></tr>
 <tr align='left'>
 <td colspan="2" bgcolor="$*entry_back">""";
 
