@@ -727,10 +727,9 @@ sub trans {
                 return LJ::Request::NOT_FOUND;
             }
 
-            ## For beta-testers only.
-            my $comm = LJ::load_user($LJ::LJPHOTO_ALLOW_FROM_COMMUNITY);
 
             my %post_params = LJ::Request->post_params;
+            ## If no remote we can try authtorize by auth_token
             if (!$remote && !LJ::Auth->check_sessionless_auth_token (
                     $LJ::DOMAIN_WEB."/pics/upload",
                     auth_token => $post_params{'form_auth'}, 
@@ -743,12 +742,11 @@ sub trans {
 
             LJ::set_remote ($u) unless $remote;
             $remote = LJ::get_remote();
-            unless ($remote && $remote->is_mutual_friend($comm)) {
+            unless ($remote && $remote->can_use_ljphoto()) {
                 LJ::Request->pnotes ('error' => 'members');
                 LJ::Request->pnotes ('remote' => LJ::get_remote());
                 return LJ::Request::FORBIDDEN;
             }
-            ##
 
             unless ($u->is_person) {
                 LJ::Request->pnotes ('error' => 'e404');

@@ -7054,6 +7054,7 @@ sub remote_has_priv
 #       'O' == pOrtal box id, 'V' == 'vgift', 'E' == ESN subscription id
 #       'Q' == Notification Inbox, 'G' == 'SMS messaGe'
 #       'D' == 'moDule embed contents', 'W' == 'Wish-list element'
+#       'F' == Photo ID, 'A' == Album ID
 #
 # FIXME: both phonepost and vgift are ljcom.  need hooks. but then also
 #        need a separate namespace.  perhaps a separate function/table?
@@ -7064,7 +7065,7 @@ sub alloc_user_counter
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMPSRKCOVEQGDW]$/;               #
+    return undef unless $dom =~ /^[LTMPSRKCOVEQGDWFA]$/;             #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -7181,6 +7182,12 @@ sub alloc_user_counter
                                       undef, $uid);
     } elsif ($dom eq "W") {
         $newmax = $u->selectrow_array("SELECT MAX(wishid) FROM wishlist2 WHERE userid=?",
+                                      undef, $uid);
+    } elsif ($dom eq "F") {
+        $newmax = $u->selectrow_array("SELECT MAX(photo_id) FROM fotki_photos WHERE userid=?",
+                                      undef, $uid);
+    } elsif ($dom eq "A") {
+        $newmax = $u->selectrow_array("SELECT MAX(album_id) FROM fotki_albums WHERE userid=?",
                                       undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
