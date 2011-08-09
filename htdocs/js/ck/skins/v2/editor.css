@@ -1333,51 +1333,61 @@ li.cke_panel_listItem {
 	text-decoration:none !important;
 	}
 /* LJ Like buttons */
-.likes {
+.cke-dialog-likes-list {
 	padding: 0;
 	margin: 0;
 	list-style: none;
 	}
-	.likes LI {
+	.cke-dialog-likes-list LI {
 		overflow: hidden;
 		padding: 0;
 		margin: 0 0 10px 0;
 		vertical-align: top;
 		}
-		.likes LI INPUT {
+		.cke-dialog-likes-list LI INPUT {
 			float: left;
 			margin: 6px 7px 0 0;
 			#margin: 0 4px -3px -3px;
 			}
-		.likes LI LABEL {
+		.cke-dialog-likes-list LI LABEL {
 			float: left;
 			display: block;
 			background: url(/js/ck/images/lj-like-buttons.png) no-repeat;
 			text-indent: -3333px;
 			cursor: pointer;
 			}
-		.likes .like-fb LABEL {
+		.cke-dialog-likes-list .like-fb LABEL {
 			width: 93px;
 			height: 20px;
 			background-position: 0 0;
 			}
-		.likes .like-tw LABEL {
+		.cke-dialog-likes-list .like-tw LABEL {
 			width: 55px;
 			height: 20px;
 			background-position: 0 -46px;
 			}
-		.likes .like-go LABEL {
+		.cke-dialog-likes-list .like-go LABEL {
 			width: 32px;
 			height: 20px;
 			background-position: 0 -90px;
 			}
-		.likes .like-vk LABEL {
+		.cke-dialog-likes-list .like-vk LABEL {
 			width: 40px;
 			height: 22px;
 			background-position: 0 -67px;
 			}
-		.likes .like-lj LABEL {
+		.cke-dialog-likes-list .like-lj LABEL {
 			width: 67px;
 			height: 24px;
 			background-position: 0 -21px;
 			}
+.cke-dialog-likes-faq {
+    margin: 0;
+    text-align: right;
+    }
+    .cke-dialog-likes-faq A,
+    .cke-dialog-likes-faq A IMG {
+        cursor: pointer;
+        }
+
+
