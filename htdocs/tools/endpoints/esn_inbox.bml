@@ -62,9 +62,15 @@
             push @{$ret{items}}, { qid => $item->qid, deleted => 1 };
             if ($POST{spam}) {
                 my $msg = $item->event->load_message();
+                my $senderid = $item->event->arg2;
                 $msg->mark_as_spam();
+                my @deleted_qids = $inbox->delete_all_from_sender($senderid);
+                foreach (@deleted_qids) {
+                    push @{$ret{items}}, { qid => $_->{qid}, deleted => 1 };
+                }
+            } else {
+                $item->delete;
             }
-            $item->delete;
         }
 
         $success = 1;

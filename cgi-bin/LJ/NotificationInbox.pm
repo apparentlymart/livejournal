@@ -591,6 +591,25 @@ sub delete_all {
     return @ret;
 }
 
+sub delete_all_from_sender {
+    my ( $self, $senderid ) = @_;
+    my @items;
+
+    @items = grep { $_->event->class ne "LJ::Event::UserMessageSent" } grep {$_->event} $self->items;
+
+    @items = grep { !$self->is_bookmark($_->qid) } @items;
+
+    my @ret;
+    # Delete items
+    foreach my $item (@items) {
+        next unless $item->event->arg2 == $senderid;
+        push @ret, {qid => $item->qid};
+        $item->delete;
+    }
+
+    return @ret;
+}
+
 sub mark_all_read {
     my ( $self, $view ) = @_;
     my @items;
