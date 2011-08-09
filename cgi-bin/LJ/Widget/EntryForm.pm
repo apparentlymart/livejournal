@@ -1390,7 +1390,7 @@ sub render_body {
 
     # 1 hour auth token, should be adequate
     my $chal = LJ::challenge_generate(3600);
-    my $style = $opts->{'richtext_default'} ? 'hide-html' : 'hide-rich';
+    my $style = $opts->{'richtext_default'} ? 'hide-html' : 'hide-richtext';
     $out .= "<div id='entry-form-wrapper' class='$style'>";
     $out .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
     $out .= "<input type='hidden' name='response' id='login_response' value='' />";
