@@ -220,9 +220,9 @@ sub get_hash {
     @{$res->{items}} = map { delete $_->{pollid}; delete $_->{pollqid}; $_ } @items if (@items);
 
     if ($self->type eq 'text') {
-        my ($size, $max) = split(m!/!, $opts);
+        my ($size, $maxlength) = split(m!/!, $opts);
         $res->{size} = $size;
-        $res->{max} = $max;
+        $res->{maxlength} = $maxlength;
     } elsif ($self->type eq 'scale') {
         my ($from, $to, $by) = split(m!/!, $opts);
         $by ||= 1;
@@ -244,8 +244,8 @@ sub get_question_xml {
 
     my $opts = $self->opts;
     if ($self->type eq 'text') {
-        my ($size,$max) = split(m!/!, $opts);
-        $attrs .= ' size="'.$size.'" maxlength="'.$max.'"';
+        my ($size,$maxlength) = split(m!/!, $opts);
+        $attrs .= ' size="'.$size.'" maxlength="'.$maxlength.'"';
     } elsif ($self->type eq 'scale') {
         my ($from, $to, $by) = split(m!/!, $opts);
         $by ||= 1;
