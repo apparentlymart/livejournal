@@ -366,7 +366,7 @@ EMBED
         my $js = undef;
         $$body .= LJ::entry_form($entry, \$$head, $onload, $errors, \$js);
         $$body .= "</form><!-- end #updateForm -->\n";
-        my $like_faq_link = LJ::help_icon_html('like', undef, undef, BML::ml('fcklang.ljlike.faq'));
+        my $like_faq_link = LJ::help_icon_html('like');
         $$body .= <<LIKE_FAQ;
         <script type="text/javascript">
         // <![CDATA[
