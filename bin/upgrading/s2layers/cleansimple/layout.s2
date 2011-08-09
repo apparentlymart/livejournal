@@ -869,7 +869,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         if ($p.showspam) {
             $comments_showspam = """ | """ + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments");
         } else {
-            $comments_showspam = """ | <a href="$e.comments.read_spam_url">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a>""";
+            $comments_showspam = """ | <a href="$e.comments.read_spam_url#$*text_comments_id">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a>""";
         }
     } else {
         $comments_showspam = "";
@@ -904,9 +904,9 @@ function CommentInfo::print_postlink() {
         print safe "$*text_max_comments";
     } else {
         if ($p.view == "entry") {
-                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.post_url+"#$*text_addcomment_id"});
         } else {
-        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+        print safe "<a href=\"$.post_url#$*text_addcomment_id\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
        }
     }
 }
@@ -1072,7 +1072,7 @@ function EntryPage::print_body () {
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
         $this->print_multiform_start();
-        """<div class="day"><h3>Comments</h3></div>""";
+        """<div class="day"><h3 id="$*text_comments_id">Comments</h3></div>""";
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();
             $this->print_comments($.comments);
@@ -1234,7 +1234,7 @@ function ReplyPage::print_body () {
     "<div style=\"margin:5px 0 10px 0;\">";
         $e->print_ebox();
         "</div>";
-    """<div class="day"><h3>Reply</h3></div>""";
+    """<div class="day"><h3 id="$*text_addcomment_id">Reply</h3></div>""";
     $.form->print();
 
 }
