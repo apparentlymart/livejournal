@@ -1115,9 +1115,9 @@ function CommentInfo::print_postlink() {
         print safe "$*text_max_comments";
     } else {
         if ($p.view == "entry") {
-             $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
+             $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.post_url+"#$*text_addcomment_id"});
         } else {
-            print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+            print safe "<a href=\"$.post_url#$*text_addcomment_id\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
         }
     }
 }
@@ -1230,7 +1230,7 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
         if ($p.showspam) {
             $comments_showspam = get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</span> """;
         } else {
-            $comments_showspam = """<a href=\"$e.comments.read_spam_url\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></span> """;
+            $comments_showspam = """<a href=\"$e.comments.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></span> """;
         }
     }
     if ($p.view == "entry") {print safe "$comments_showspam | ";}
@@ -1452,7 +1452,7 @@ function EntryPage::print_body () {
         print_ebox($.entry); 
         "</div>";
     }
-
+    """<span id="$*text_comments_id"></span>""";
 
     if ($.entry.comments.enabled)
     {
@@ -1467,7 +1467,7 @@ function EntryPage::print_body () {
             $pages = "$pages <b>[$i]</b> ";
         } else {
                 var string url_of = $.comment_pages->url_of($i);
-                $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
+                $pages = """$pages <a href="$url_of#$*text_comments_id" class="link"><b>[$i]</b></a> """;
             }
         }
             println $pages;
@@ -1475,7 +1475,7 @@ function EntryPage::print_body () {
             println "&nbsp;";
         }
         println safe """</div><div class="comments"><div class="leave_comment">(""";
-        $this->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
+        $this->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.entry.comments.post_url+"#$*text_addcomment_id"});
         """)</div>""";
         $this->print_reply_container({"target" => "topcomment"});
         if ($.comment_pages.total_subitems > 0) {
@@ -1619,7 +1619,8 @@ function ReplyPage::print_body ()
         print_ebox($.entry); 
         "</div>";
     }
-    print_content_tab("Your Reply:");
+    """<span id="$*text_addcomment_id"></span>""";
+    print_content_tab("$*text_post_comment:");
     println """<div class="content">""";
     $.form->print();
     println "</div>";
