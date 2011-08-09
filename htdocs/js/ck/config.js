@@ -78,7 +78,6 @@ CKEDITOR.editorConfig = function(config){
 	config.entities_greek = true;
 	config.entities_latin = true;
 	config.fillEmptyBlocks = false;
-	config.emailProtection = 'mt(NAME,DOMAIN,SUBJECT,BODY)';
 	config.startupFocus = false;
 	config.forcePasteAsPlainText = false;
 	config.forceSimpleAmpersand = false;
