@@ -480,7 +480,14 @@
 			editor.addCommand('LJImage', {
 				exec : function(editor){
 					if(window.ljphotoEnabled){
-						// call LJImage
+						jQuery('#updateForm')
+							.photouploader({
+								type: 'upload'
+							})
+							.photouploader('show')
+								.bind('htmlready', function (event, html) {
+									editor.insertHtml(html);
+								});
 					} else {
 						if(ljNoteData.LJImage.node){
 							editor.getSelection().selectElement(ljNoteData.LJImage.node);
