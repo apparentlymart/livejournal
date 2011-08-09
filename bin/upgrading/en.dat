@@ -2870,6 +2870,8 @@ fotki.album.storage.used=Used
 
 fotki.album.your.friends.updates=Your friends updates
 
+fotki.album.user.updates=[[ljuser]]'s updates
+
 fotki.album.your_albums=Your albums
 
 fotki.album.upgrade=Upgrade
@@ -2936,6 +2938,10 @@ fotki.privacy.private=Private
 fotki.privacy.friends_only=Friends only
 
 fotki.privacy.public=Public
+
+fotki.status.new_photo=[[ljuser]] has load new [[number]] photos in <a [[aopts]]>[[album]]</a> album.
+
+fotki.status.new_album=[[ljuser]] has create a new album <a [[aopts]]>[[album]]</a>.
 
 gender.female|staleness=1
 gender.female=Female
