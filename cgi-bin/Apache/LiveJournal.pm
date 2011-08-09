@@ -1088,6 +1088,7 @@ sub trans {
             return LJ::URI->bml_handler($LJ::AJAX_URI_MAP{$1}) if (LJ::Request->uri =~ /^\/__rpc_((?:ljapp|lj_times|ctxpopup|close|get).*)$/);
 
             return remote_domsess_bounce() if LJ::remote_bounce_url();
+
             return $bml_handler->("$LJ::HOME/htdocs/games/game.bml");
         }
         elsif ( $func ) {
@@ -2313,7 +2314,6 @@ sub xmlrpc_method {
     # Key - field name, value - type.
     my %lj_types_map = (
         journalname => 'string',
-        name => 'base64',
     );
 
     my $recursive_mark_elements;
