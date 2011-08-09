@@ -1783,6 +1783,7 @@ sub process_vote {
     my $answers = shift;
     my $error = shift;
     my $warnings = shift;
+    my %opts = @_;
 
     my $poll = LJ::Poll->new($pollid);
     unless ($poll) {
@@ -1861,6 +1862,38 @@ sub process_vote {
 
     ### load all the questions
     my @qs = $poll->questions;
+
+    if ($opts{wrong_value_as_error}) {
+        foreach my $q (@qs) {
+            my $qid = $q->pollqid;
+            my $val = $answers->{$qid};
+            next unless ($val);   # check given values only, so allow the user to change his mind
+
+            my @vals = ();
+            if ($q->type eq "check") {
+                ## multi-selected items are comma separated from htdocs/poll/index.bml
+                @vals = split(/,/, $val);
+            } elsif ($q->type eq "scale") {
+                my ($from, $to, $by) = split(m!/!, $q->opts);
+                if ($val < $from || $val > $to) {
+                    $$error = LJ::Lang::ml('poll.error.pollitid');
+                    return 0;
+                }
+            } elsif ($q->type ne 'text') {
+                push @vals, $val;
+            }
+            if ($q->type ne 'text' && $q->type ne 'scale' && $opts{wrong_value_as_error}) {
+                my %pollitids;
+                map { $pollitids{$_->{pollitid}} = 1 } $q->items;
+                foreach my $v (@vals) {
+                    unless ($pollitids{$v}) {
+                        $$error = LJ::Lang::ml('poll.error.pollitid');
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
 
     unless (LJ::get_lock($dbh, 'global', "poll:$pollid:$remote->{userid}")) {
         $$error = LJ::Lang::ml('poll.error.cantlock');

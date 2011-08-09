@@ -402,7 +402,7 @@ sub votepoll
     my @warnings;
     my $errors;
 
-    unless (LJ::Poll->process_vote($u, $pollid, $answers, \$errors, \@warnings)) {
+    unless (LJ::Poll->process_vote($u, $pollid, $answers, \$errors, \@warnings, wrong_value_as_error => 1)) {
         return fail($err, 103, $errors);
     }
 
