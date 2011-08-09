@@ -366,6 +366,14 @@ EMBED
         my $js = undef;
         $$body .= LJ::entry_form($entry, \$$head, $onload, $errors, \$js);
         $$body .= "</form><!-- end #updateForm -->\n";
+        my $like_faq_link = LJ::help_icon_html('like', undef, undef, BML::ml('fcklang.ljlike.faq'));
+        $$body .= <<LIKE_FAQ;
+        <script type="text/javascript">
+        // <![CDATA[
+            window.faqLink = '$like_faq_link';
+        // ]]>
+        </script>
+LIKE_FAQ
         $$body .= $js;
 	
         ## Show a new photoalbums interface only for logged-in users
@@ -808,7 +816,7 @@ head<=
 
         function init_update_bml() {
             window.isSupUser = $is_sup;
-            setTimeout(function(){ $initDraft }, 0)
+            $initDraft;
             $_[0]->{'onload'}
             $pageload
         }

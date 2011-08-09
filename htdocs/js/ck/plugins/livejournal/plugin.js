@@ -476,7 +476,7 @@
 			//////////  LJ Image Button //////////////
 			editor.addCommand('LJImage', {
 				exec : function(editor){
-					if(ljphotoEnabled){
+					if(window.ljphotoEnabled){
 						// call LJImage
 					} else {
 						if(ljNoteData.LJImage.node){
@@ -775,7 +775,7 @@
 				dialogContent += button.htmlOpt;
 			}
 
-			dialogContent += '</ul><a href="/support/faqbrowse.bml?faqid=344" class="helplink" target="_blank"><img src="/img/help.gif" alt="Help" title="Help" width="14" height="14" border="0"> ' + top.CKLang.LJLike_FAQ + '</a>';
+			dialogContent += '</ul>' + window.faqLink;
 
 			var countChanges = 0, ljLikeDialog, ljLikeInputs;
 			
@@ -783,7 +783,7 @@
 				var command = editor.getCommand('LJLikeCommand');
 				if(command.state == CKEDITOR.TRISTATE_OFF){
 					this.$.checked ? countChanges++ : countChanges--;
-					ljLikeDialog.getButton('LJLike_Ok').getElement()[countChanges == 0 ? 'hide' : 'show']();
+					ljLikeDialog.getButton('LJLike_Ok').getElement()[countChanges == 0 ? 'addClass' : 'removeClass']('btn-disabled');
 				}
 			}
 
@@ -807,6 +807,10 @@
 						id : 'LJLike_Ok',
 						label : editor.lang.common.ok,
 						onClick : function(){
+							if(ljLikeDialog.getButton('LJLike_Ok').getElement().hasClass('btn-disabled')){
+								return false;
+							}
+
 							var attr = [],
 								likeHtml = '',
 								likeNode = ljNoteData.LJLikeCommand.node;
@@ -858,7 +862,7 @@
 						}
 
 						if(countChanges > 0){
-							ljLikeDialog.getButton('LJLike_Ok').getElement().show();
+							ljLikeDialog.getButton('LJLike_Ok').getElement().removeClass('btn-disabled');
 						}
 					},
 					onLoad: function(){

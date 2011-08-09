@@ -1471,7 +1471,6 @@ sub render_body {
             'LJLike_button_give' => 'ljlike.button.give',
             'LJLike_WizardNotice' => 'ljlike.wizardnotice',
             'LJLike_WizardNoticeLink' => 'ljlike.wizardnoticelink',
-            'LJLike_FAQ' => 'ljlike.faq',
             'LJUser_WizardNotice' => 'ljuser.wizardnotice',
             'LJUser_WizardNoticeLink' => 'ljuser.wizardnoticelink',
             'LJLink_WizardNotice' => 'ljlink.wizardnotice',
