@@ -3909,12 +3909,14 @@ sub syncitems
 
     my $LIMIT = 500;
 
+    my $external_ids = $req->{'use_external_ids'};
+
     my %item;
-    $sth = $db->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
+    $sth = $db->prepare("SELECT jitemid, logtime, anum FROM log2 WHERE ".
                         "journalid=? and logtime > ?");
     $sth->execute($ownerid, $date);
-    while (my ($id, $dt) = $sth->fetchrow_array) {
-        $item{$id} = [ 'L', $id, $dt, "create" ];
+    while (my ($id, $dt, $anum) = $sth->fetchrow_array) {
+        $item{$id} = [ 'L', $id, $dt, "create", $anum ];
     }
 
     my %cmt;
@@ -3926,13 +3928,14 @@ sub syncitems
                         "AND value+0 > UNIX_TIMESTAMP(?)");
     $sth->execute($ownerid, $date);
     while (my ($id, $prop, $dt) = $sth->fetchrow_array) {
+        my $entry = LJ::Entry->new($ownerid, jitemid => $id); 
         if ($prop == $p_calter->{'id'}) {
-            $cmt{$id} = [ 'C', $id, $dt, "update" ];
+            $cmt{$id} = [ 'C', $id, $dt, "update", $entry->anum ];
         } elsif ($prop == $p_revtime->{'id'}) {
-            $item{$id} = [ 'L', $id, $dt, "update" ];
+            $item{$id} = [ 'L', $id, $dt, "update", $entry->anum ];
         }
     }
-
+    
     my @ev = sort { $a->[2] cmp $b->[2] } (values %item, values %cmt);
 
     my $res = {
@@ -3947,7 +3950,9 @@ sub syncitems
         $ct++;
         push @$list, { 'item' => "$ev->[0]-$ev->[1]",
                        'time' => $ev->[2],
-                       'action' => $ev->[3],  };
+                       'action' => $ev->[3],  
+                       ( $external_ids ? (ditemid => $ev->[1]*256 + $ev->[4]) : () )
+                      };
         last if $ct >= $LIMIT;
     }
     $res->{'count'} = $ct;
