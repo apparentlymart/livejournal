@@ -407,11 +407,20 @@ body<=
             foreach ( keys %POST ) { $entry->{$_} = %POST->{$_}; }
             $entry->{'richtext_default'} = $entry->{"prop_used_rte"} ? 1 : 0,
 
+            my $js = undef;
             my $onload;
-            $ret .= LJ::entry_form($entry, \$$head, \$onload);
+            $ret .= LJ::entry_form($entry, \$$head, \$onload, undef, \$js);
             $ret .= "</form></div>";
-            
-            
+            my $like_faq_link = LJ::help_icon_html('like');
+            $ret .= <<LIKE_FAQ;
+            <script type="text/javascript">
+            // <![CDATA[
+                window.faqLink = '$like_faq_link';
+            // ]]>
+            </script>
+LIKE_FAQ
+            $ret .= $js;
+	
             ## Show a new photoalbums interface only for logged-in users
             my $remote = LJ::get_remote ();
             if ($remote) {
@@ -554,10 +563,12 @@ JS
             #    be placed in the correct BML head portion later
             # -- this is a hack, should be done by weblib and pushed into \$$head above
             #    in a way which is compatible with both this page and update.bml
+            my $is_sup = LJ::SUP->is_remote_sup() ? 1 : 0;
             $$head .= qq{
     <script type="text/javascript">
     //<![CDATA[
         function init_update_bml () {
+            window.isSupUser = $is_sup;
             $onload
         }
     //]]>
