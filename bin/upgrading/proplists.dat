@@ -1696,9 +1696,17 @@ userproplist.javascript:
   cldversion: 8
 
 userproplist.singapore_invitations:
-  datatype: char
-  prettyname: Singapore invitations status
-  des: Singapore invitations status
+  datatype: num
+  prettyname: Singapore invitations status/time
+  des: Singapore invitations status/time
+  indexed: 0
+  multihomed: 0
+  cldversion: 8
+
+userproplist.singapore_invitations_posted:
+  datatype: bool
+  prettyname: Singapore invitations posted
+  des: Singapore invitations posted
   indexed: 0
   multihomed: 0
   cldversion: 8
