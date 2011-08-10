@@ -592,7 +592,7 @@ body<=
             if ($showspam) {
                 $readspamlink = "(" . BML::ml('talk.hidespam', { spam_counter => $spam_counter }) . ")";
             } else {
-                $readspamlink = "(<a href='$showspamurl'>" . BML::ml('talk.showspam', { spam_counter => $spam_counter }) . "</a>)";
+                $readspamlink = "(<a href='$showspamurl#comments'>" . BML::ml('talk.showspam', { spam_counter => $spam_counter }) . "</a>)";
             }
         }
         $readspamlink .= ' - ' if $readspamlink && $allow_commenting;
@@ -620,12 +620,12 @@ body<=
                 # See if we want to force them to change their password
                 my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
                 if ($bp) {
-                    $ret .= "(<a href='$bp'>" . BML::ml('talk.replytothis') . " </a>)";
+                    $ret .= "(<a href='$bp#add_comment'>" . BML::ml('talk.replytothis') . " </a>)";
                 } else {
-                    $ret .= "(" . LJ::make_qr_link('top', '', BML::ml('talk.commentpost'), $posturl) . "</a>)";
+                    $ret .= "(" . LJ::make_qr_link('top', '', BML::ml('talk.commentpost'), $posturl."#add_comment") . "</a>)";
                 }
             } else {
-                $ret .= "(<a href='$posturl'>" . BML::ml('talk.commentpost') . "</a>)";
+                $ret .= "(<a href='$posturl#add_comment'>" . BML::ml('talk.commentpost') . "</a>)";
             }
         }
 
@@ -687,12 +687,12 @@ body<=
                     # See if we want to force them to change their password
                     my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
                     if ($bp) {
-                        $ret .= "(<a href='$bp'>" . BML::ml('talk.replytothis') . " </a>)";
+                        $ret .= "(<a href='$bp#add_comment'>" . BML::ml('talk.replytothis') . " </a>)";
                     } else {
-                        $ret .= "(" . LJ::make_qr_link('bottom', '', BML::ml('talk.commentpost'), $posturl) . "</a>)";
+                        $ret .= "(" . LJ::make_qr_link('bottom', '', BML::ml('talk.commentpost'), $posturl."#add_comment") . "</a>)";
                     }
                 } else {
-                    $ret .= "(<a href='$posturl'>" . BML::ml('talk.commentpost') . "</a>)";
+                    $ret .= "(<a href='$posturl#add_comment'>" . BML::ml('talk.commentpost') . "</a>)";
                 }
             }
             $ret .= $rated_count;
