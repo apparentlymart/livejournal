@@ -567,7 +567,7 @@ JS
             $$head .= qq{
     <script type="text/javascript">
     //<![CDATA[
-        function init_update_bml () {
+        function initUpdateBml() {
             window.isSupUser = $is_sup;
             $onload
         }

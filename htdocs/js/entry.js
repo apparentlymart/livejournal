@@ -18,7 +18,11 @@ function editdate(){
 }
 
 function showEntryTabs(){
-	document.getElementById('entry-tabs').style.visibility = 'visible';
+	if(CKEDITOR && CKEDITOR.env.isCompatible){
+		document.getElementById('entry-tabs').style.visibility = 'visible';
+	} else {
+		document.getElementById('htmltools').style.display = 'block';
+	}
 }
 
 function changeSubmit(prefix, defaultjournal, defPrefix){
@@ -742,20 +746,13 @@ IPPUSelectTags = {
 
 	input: function(){
 		var ary = $('selecttags-all').value.split(/ *, */),
-			checkboxes = IPPUSelectTags.checkboxes,
-			tag;
+			checkboxes = IPPUSelectTags.checkboxes;
 		ary = jQuery.map(ary, function (val, idx){
 			return (val.length > 0) ? val : null
 		});
 		checkboxes.attr('checked', false);
 		while(ary.length){
-			tag = ary.pop();
-			try {
-				//if tag contains nonalpha chars, this may easily fall
-				checkboxes.filter('[value=' + tag + ']').attr('checked', true);
-			} catch(e) {
-				checkboxes.filter( function() { return this.value === tag; } ).attr('checked', true);
-			}
+			checkboxes.filter('[value=' + ary.pop() + ']').attr('checked', true);
 		}
 	},
 
@@ -972,19 +969,16 @@ InOb.handleInsertEmbed = function (){
 
 InOb.handleInsertImage = function (){
 	// if PhotoHosting enabled - show new popup
-    if (window.ljphotoEnabled) {
-        jQuery('#updateForm')
-            .photouploader('option', 'type', 'upload')
-            .bind('htmlready', function (event, htmlOutput) {
-                jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
-            })
-            .photouploader('show');
-    } else {
-        onInsertObject('/imgupload.bml');
-    }
-    return true;
+	if(window.ljphotoEnabled){
+		jQuery('#content').photouploader('option', 'type', 'upload')
+			.bind('htmlready', function (event, htmlOutput){
+				jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
+		}).photouploader('show');
+	} else {
+		onInsertObject('/imgupload.bml');
+	}
+	return true;
 };
-
 InOb.handleInsertVideo = function(){
 	var videoUrl = prompt('Please enter a video URL:');
 	var draft = $('draft');
@@ -1353,141 +1347,4 @@ InOb.showNext = function (){
 InOb.setTitle = function (title){
 	var wintitle = currentPopupWindow.document.getElementById('wintitle');
 	wintitle.innerHTML = title;
-};
-
-/* ******************** DRAFT SUPPORT ******************** */
-
-/* RULES:
- -- don't save if they have typed in last 3 seconds, unless it's been
- 15 seconds.  otherwise save at most every 10 seconds, if dirty.
- */
-
-var LJDraft = {};
-
-LJDraft.saveInProg = false;
-LJDraft.epoch = 0;
-LJDraft.lastSavedBody = "";
-LJDraft.prevCheckBody = "";
-LJDraft.lastTypeTime = 0;
-LJDraft.lastSaveTime = 0;
-LJDraft.autoSaveInterval = 10;
-LJDraft.savedMsg = "Autosaved at [[time]]";
-
-LJDraft.save = function (drafttext, cb){
-	var callback = cb;  // old safari closure bug
-	if(LJDraft.saveInProg){
-		return;
-	}
-
-	LJDraft.saveInProg = true;
-
-	var finished = function (){
-		LJDraft.saveInProg = false;
-		if(callback){
-			callback();
-		}
-	};
-
-	HTTPReq.getJSON({
-		method: 'POST',
-		url: '/tools/endpoints/draft.bml',
-		onData: finished,
-		onError: function (){
-			LJDraft.saveInProg = false;
-		},
-		data: HTTPReq.formEncoded({"saveDraft": drafttext})
-	});
-};
-
-LJDraft.startTimer = function (){
-	setInterval(LJDraft.checkIfDirty, 1000);  // check every second
-	LJDraft.epoch = 0;
-};
-
-LJDraft.checkIfDirty = function (){
-	LJDraft.epoch++;
-	var curBody, draft = $('draft');
-
-	if(!draft){
-		return false;
-	}
-
-	if(draft.style.display == 'none'){ // Need to check this to deal with hitting the back button
-		// Since they may start using the RTE in the middle of writing their
-		// entry, we should just get the editor each time.
-		if(!CKEDITOR || !CKEDITOR.env.isCompatible){
-			return;
-		}
-
-		curBody = CKEDITOR.instances.draft.getData();
-	} else {
-		curBody = $('draft').value;
-	}
-
-	// no changes to save
-	if(curBody == LJDraft.lastSavedBody){
-		return;
-	}
-
-	// at this point, things are dirty.
-
-	// see if they've typed in the last second.  if so,
-	// we'll want to note their last type time, and defer
-	// saving until they settle down, unless they've been
-	// typing up a storm and pass our 15 second barrier.
-	if(curBody != LJDraft.prevCheckBody){
-		LJDraft.lastTypeTime = LJDraft.epoch;
-		LJDraft.prevCheckBody = curBody;
-	}
-
-	if(LJDraft.lastSaveTime < LJDraft.lastTypeTime - 15){
-		// let's fall through and save!  they've been busy.
-	} else if(LJDraft.lastTypeTime > LJDraft.epoch - 3){
-		// they're recently typing, don't save.  let them finish.
-		return;
-	} else if(LJDraft.lastSaveTime > LJDraft.epoch - LJDraft.autoSaveInterval){
-		// we've saved recently enough.
-		return;
-	}
-
-	// async save, and pass in our callback
-	var curEpoch = LJDraft.epoch;
-	LJDraft.save(curBody, function (){
-		var msg = LJDraft.savedMsg.replace(/\[\[time\]\]/, LJDraft.getTime());
-		$('draftstatus').value = msg + ' ';
-		LJDraft.lastSaveTime = curEpoch;
-		/* capture lexical.  remember: async! */
-		LJDraft.lastSavedBody = curBody;
-	});
-};
-
-LJDraft.getTime = function (){
-	var date = new Date();
-	var hour, minute, sec, time;
-
-	hour = date.getHours();
-	if(hour >= 12){
-		time = ' PM';
-	} else {
-		time = ' AM';
-	}
-
-	if(hour > 12){
-		hour -= 12;
-	} else if(hour == 0){
-		hour = 12;
-	}
-
-	minute = date.getMinutes();
-	if(minute < 10){
-		minute = '0' + minute;
-	}
-
-	sec = date.getSeconds();
-	if(sec < 10){
-		sec = '0' + sec;
-	}
-
-	time = hour + ':' + minute + ':' + sec + time;
-	return time;
 };
