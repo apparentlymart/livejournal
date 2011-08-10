@@ -541,6 +541,10 @@ __________________________________________*/
 	overflow: visible;
 	padding: 0 10px;
 	}
+.b-pics-btn {
+	height: 22px;
+	padding: 0 3px;
+	}
 .b-pics-list-albums LI.b-pics-list-albums-item,
 .b-pics-edit-field-click .b-pics-input-edit,
 .b-pics-edit-field-click .b-pics-textarea-edit,
