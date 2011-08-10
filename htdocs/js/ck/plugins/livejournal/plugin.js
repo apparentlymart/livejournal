@@ -776,7 +776,7 @@
 
 			//////////  LJ Like Button //////////////
 			var buttonsLength = likeButtons.length;
-			var dialogContent = '<ul class="likes">';
+			var dialogContent = '<div class="cke-dialog-likes"><ul class="cke-dialog-likes-list">';
 			likeButtons.defaultButtons = [];
 
 			for(var i = 0; i < buttonsLength; i++){
@@ -786,7 +786,7 @@
 				dialogContent += button.htmlOpt;
 			}
 
-			dialogContent += '</ul>' + window.faqLink;
+			dialogContent += '</ul><p class="cke-dialog-likes-faq">' + window.faqLink + '</p></div>';
 
 			var countChanges = 0, ljLikeDialog, ljLikeInputs;
 			
