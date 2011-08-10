@@ -812,30 +812,18 @@ head<=
             top.location.href = document.location.href;
         }
 
-        var restoredDraft = $draft;
-
-        function init_update_bml() {
+        function initUpdateBml() {
             window.isSupUser = $is_sup;
-            $initDraft;
             $_[0]->{'onload'}
+            window.initDraft({
+              ask: true,
+              restoreData: $draft,
+              saveMsg: '$eMLautosave',
+              interval: $LJ::AUTOSAVE_DRAFT_INTERVAL,
+              draftStatus: '$eMLrestored ',
+              confirmMsg: '$eMLconfirm'
+            });
             $pageload
-        }
-
-        // TODO: make these function calls
-        LJDraft.autoSaveInterval = $LJ::AUTOSAVE_DRAFT_INTERVAL;
-        LJDraft.savedMsg = '$eMLautosave';
-
-        function initDraft(askToRestore) {
-            if (askToRestore && restoredDraft) {
-                if (confirm("$eMLconfirm")) {
-                    \$("draft").value = restoredDraft;
-                    \$("draftstatus").value = '$eMLrestored ';
-                } else {
-                    // Clear out their current draft
-                    LJDraft.save('');
-                }
-            }
-            LJDraft.startTimer();
         }
     </script>^;
 

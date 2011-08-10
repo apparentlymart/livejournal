@@ -629,7 +629,7 @@ sub render_subject_block {
 
     my $switch_rte_link = BML::ml("entryform.htmlokay.rich4", {
         'opts' => 'href="javascript:void(0);" '.
-            'onclick="return useRichText(\'draft\', \'' .
+            'onclick="return useRichText(\'' .
             $LJ::JSPREFIX. '\');"'
     });
 
@@ -640,7 +640,7 @@ sub render_subject_block {
 
     my $switch_plaintext_link = BML::ml("entryform.plainswitch2", {
         'aopts' => 'href="javascript:void(0);" '.
-            'onclick="return usePlainText(\'draft\');"'
+            'onclick="return usePlainText();"'
     });
 
     my $switch_plaintext_tab =
@@ -1499,11 +1499,11 @@ sub render_body {
             </noscript>
         };
 
-        $$js = "init_update_bml();";
+        $$js = "initUpdateBml();";
         if ($opts->{'richtext_default'}) {
-            $$js .= 'useRichText("draft", "' . LJ::ejs($LJ::JSPREFIX) . '");';
+            $$js .= 'useRichText("' . LJ::ejs($LJ::JSPREFIX) . '");';
         } else {
-            $$js .= 'usePlainText("draft");';
+            $$js .= 'usePlainText();';
         }
         $$js = $self->wrap_js($$js);
 
