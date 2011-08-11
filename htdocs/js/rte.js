@@ -16,6 +16,8 @@
 				data.lastValue = data.restoreData;
 				data.statusNode.val(data.draftStatus);
 			}
+		} else {
+			data.statusNode.val('');
 		}
 
 		draftData.textArea.val(draftData.lastValue);
