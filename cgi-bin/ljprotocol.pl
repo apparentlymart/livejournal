@@ -1023,7 +1023,6 @@ sub getfriendspage
         $_->{postername} = $users->{ $_->{posterid} }->{'user'};
         $_->{postertype} = $users->{ $_->{posterid} }->{'journaltype'};
         $_->{posterurl}  = $users->{ $_->{posterid} }->journal_base;
-        delete $_->{posterid};
         if ($users->{ $_->{posterid} }->identity) {
                 my $i = $users->{ $_->{posterid} }->identity;
                 $_->{'identity_type'} = $i->pretty_type;
@@ -1031,6 +1030,7 @@ sub getfriendspage
                 $_->{'identity_url'} = $i->url;
                 $_->{'identity_display'} = $users->{ $_->{posterid} }->display_name;
         }
+        delete $_->{posterid};
     }
 
     LJ::run_hooks("getfriendspage", {userid => $u->userid, });
