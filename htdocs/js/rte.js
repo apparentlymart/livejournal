@@ -44,11 +44,11 @@
 
 					editor.resetDirty();
 
-					$('#updateForm').onsubmit = function() {
+					$('#updateForm').bind('submit', function() {
 						if (window.switchedRteOn) {
 							draftData.textArea.val(CKEditor.getData());
 						}
-					};
+					});
 
 					CKEditor.on('dataReady', function() {
 						$('#entry-form-wrapper').attr('class', 'hide-html');
