@@ -87,13 +87,16 @@
 				}
 
 				var isMouseOver = evt.name == 'mouseover';
-				var node = isMouseOver ? evt.data.getTarget() : editor.getSelection().getStartElement();
+				var node = isMouseOver ? evt.data.getTarget() : editor.getSelection().getRanges()[0].startContainer;
 				var actNode;
 
-				while (node) {
+				if(node.type != 1){
+					node = node.getParent();
+				}
 
+				while (node) {
 					if (!attr) {
-						if (node.is('img')) {
+						if (node.type == 1 && node.is('img')) {
 							node.setAttribute('lj-cmd', 'LJImage');
 						} else if (node.is('a')) {
 							node.setAttribute('lj-cmd', 'LJLink');
@@ -458,10 +461,10 @@
 				exec : function(editor) {
 					if (window.ljphotoEnabled) {
 						jQuery('#updateForm').photouploader({
-																									type: 'upload'
-																								}).photouploader('show').bind('htmlready', function (event, html) {
-							editor.insertHtml(html);
-						});
+							type: 'upload'
+						}).photouploader('show').bind('htmlready', function (event, html) {
+								editor.insertHtml(html);
+							});
 					} else {
 						if (ljNoteData.LJImage.node) {
 							editor.getSelection().selectElement(ljNoteData.LJImage.node);
@@ -496,7 +499,7 @@
 
 			//////////  LJ Link Button //////////////
 			editor.addCommand('LJLink', {
-				exec : function(editor) {
+				exec: function(editor) {
 					if (ljNoteData.LJLink.node) {
 						editor.getSelection().selectElement(ljNoteData.LJLink.node);
 					}

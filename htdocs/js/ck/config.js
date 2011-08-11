@@ -126,8 +126,8 @@ CKEDITOR.editorConfig = function(config){
 
 	config.toolbar = 'Full';
 	config.enterMode = CKEDITOR.ENTER_BR;
-	config.forceEnterMode = true;
-	config.shiftEnterMode = CKEDITOR.ENTER_P;
+	config.forceEnterMode = false;
+	config.shiftEnterMode = CKEDITOR.ENTER_BR;
 
 	config.keystrokes = [
     [ CKEDITOR.ALT + 121 /*F10*/, 'toolbarFocus' ],

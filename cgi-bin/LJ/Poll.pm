@@ -1866,21 +1866,26 @@ sub process_vote {
     if ($opts{wrong_value_as_error}) {
         foreach my $q (@qs) {
             my $qid = $q->pollqid;
+            next unless (defined $answers->{$qid}); # check given values only, so allow the user to change his mind
             my $val = $answers->{$qid};
-            next unless ($val);   # check given values only, so allow the user to change his mind
-
             my @vals = ();
             if ($q->type eq "check") {
                 ## multi-selected items are comma separated from htdocs/poll/index.bml
                 @vals = split(/,/, $val);
             } elsif ($q->type eq "scale") {
                 my ($from, $to, $by) = split(m!/!, $q->opts);
-                if ($val < $from || $val > $to) {
+                if ($val !~ /^\d+$/ || $val < $from || $val > $to) {
                     $$error = LJ::Lang::ml('poll.error.pollitid');
                     return 0;
                 }
             } elsif ($q->type ne 'text') {
                 push @vals, $val;
+            } elsif ($q->type eq 'text') {
+                my ($size, $maxlength) = split(m!/!, $q->opts);
+                if (length($val) > $maxlength) {
+                    $$error = LJ::Lang::ml('poll.error.pollitid');
+                    return 0;
+                }
             }
             if ($q->type ne 'text' && $q->type ne 'scale' && $opts{wrong_value_as_error}) {
                 my %pollitids;
@@ -1913,7 +1918,7 @@ sub process_vote {
         }
         if ($q->type eq "scale") {
             my ($from, $to, $by) = split(m!/!, $q->opts);
-            if ($val < $from || $val > $to) {
+            if ($val !~ /^\d+$/ || $val < $from || $val > $to) {
                 # bogus! cheating?
                 $val = "";
             }

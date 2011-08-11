@@ -7,8 +7,8 @@
 	window.initDraft = function(data) {
 		draftData = data;
 
-		data.lastValue = '';
 		data.textArea = $('#draft');
+		data.lastValue = draftData.textArea.val();
 		data.statusNode = $('#draftstatus');
 
 		if (data.ask && data.restoreData) {
@@ -16,6 +16,8 @@
 				data.lastValue = data.restoreData;
 				data.statusNode.val(data.draftStatus);
 			}
+		} else {
+			data.statusNode.val('');
 		}
 
 		draftData.textArea.val(draftData.lastValue);
@@ -42,11 +44,11 @@
 
 					editor.resetDirty();
 
-					$('#updateForm').onsubmit = function() {
+					$('#updateForm').bind('submit', function() {
 						if (window.switchedRteOn) {
 							draftData.textArea.val(CKEditor.getData());
 						}
-					};
+					});
 
 					CKEditor.on('dataReady', function() {
 						$('#entry-form-wrapper').attr('class', 'hide-html');

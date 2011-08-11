@@ -462,6 +462,7 @@ JS
                 ."'fotki.album.stop.upload.confirm': '".BML::ml('fotki.album.stop.upload.confirm')."',"
                 ."'fotki.album.close.without.saving.confirm': '".BML::ml('fotki.album.close.without.saving.confirm')."',"
                 ."'fotki.album.upload.unknown.error': '".BML::ml('fotki.album.upload.unknown.error')."',"
+                ."'fotki.album.upload.io.error': '".BML::ml('fotki.album.upload.io.error')."',"
                 ."'fotki.album.uploading.image': '".BML::ml('fotki.album.uploading.image')."',"
                 ."'fotki.album.available.now': '".BML::ml('fotki.album.available.now')."',"
     			."'fotki.album.click.image': '".BML::ml('fotki.album.click.image')."',"
@@ -787,9 +788,9 @@ head<=
         # While transforms aren't considered posts, we don't want to
         # prompt the user to restore from a draft on a transform
         if (!LJ::did_post()) {
-            $initDraft = 'initDraft(true);';
+            $initDraft = 'window.isInitDraft = true;';
         } else {
-            $initDraft = 'initDraft(false);';
+            $initDraft = 'window.isInitDraft = false;';
         }
     }
 
@@ -814,15 +815,18 @@ head<=
 
         function initUpdateBml() {
             window.isSupUser = $is_sup;
+            $initDraft
+            if('isInitDraft' in window){
+              window.initDraft({
+                ask: window.isInitDraft,
+                restoreData: $draft,
+                saveMsg: '$eMLautosave',
+                interval: $LJ::AUTOSAVE_DRAFT_INTERVAL,
+                draftStatus: '$eMLrestored ',
+                confirmMsg: '$eMLconfirm'
+              });
+            }
             $_[0]->{'onload'}
-            window.initDraft({
-              ask: true,
-              restoreData: $draft,
-              saveMsg: '$eMLautosave',
-              interval: $LJ::AUTOSAVE_DRAFT_INTERVAL,
-              draftStatus: '$eMLrestored ',
-              confirmMsg: '$eMLconfirm'
-            });
             $pageload
         }
     </script>^;

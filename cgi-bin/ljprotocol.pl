@@ -614,7 +614,7 @@ sub getcomments {
             my $i = $item->{upost}->identity;
             $item_data->{'identity_type'} = $i->pretty_type;
             $item_data->{'identity_value'} = $i->value;
-            $item_data->{'identity_url'} = $i->url;
+            $item_data->{'identity_url'} = $item->{upost}->url;
             $item_data->{'identity_display'} = $item->{upost}->display_name;
         }
 
@@ -1023,14 +1023,14 @@ sub getfriendspage
         $_->{postername} = $users->{ $_->{posterid} }->{'user'};
         $_->{postertype} = $users->{ $_->{posterid} }->{'journaltype'};
         $_->{posterurl}  = $users->{ $_->{posterid} }->journal_base;
-        delete $_->{posterid};
         if ($users->{ $_->{posterid} }->identity) {
                 my $i = $users->{ $_->{posterid} }->identity;
                 $_->{'identity_type'} = $i->pretty_type;
                 $_->{'identity_value'} = $i->value;
-                $_->{'identity_url'} = $i->url;
+                $_->{'identity_url'} = $users->{ $_->{posterid} }->url;
                 $_->{'identity_display'} = $users->{ $_->{posterid} }->display_name;
         }
+        delete $_->{posterid};
     }
 
     LJ::run_hooks("getfriendspage", {userid => $u->userid, });
@@ -3207,7 +3207,7 @@ sub getevents
                 my $i = $uposter->identity;
                 $evt->{'identity_type'} = $i->pretty_type;
                 $evt->{'identity_value'} = $i->value;
-                $evt->{'identity_url'} = $i->url;
+                $evt->{'identity_url'} = $uposter->url;
                 $evt->{'identity_display'} = $uposter->display_name;
             }
         }
@@ -3499,7 +3499,7 @@ sub editfriends
                 my $i = $row->identity;
                 $added->{'identity_type'} = $i->pretty_type;
                 $added->{'identity_value'} = $i->value;
-                $added->{'identity_url'} = $i->url;
+                $added->{'identity_url'} = $row->url;
                 $added->{'identity_display'} = $row->display_name;
             }
             $added->{"type"} = {
@@ -3860,8 +3860,8 @@ sub list_friends
             my $i = $u->identity;
             $r->{'identity_type'} = $i->pretty_type;
             $r->{'identity_value'} = $i->value;
-            $r->{'identity_url'} = $i->url;
-           $r->{'identity_display'} = $u->display_name;
+            $r->{'identity_url'} = $u->url;
+            $r->{'identity_display'} = $u->display_name;
         }
 
         if ($opts->{'includebdays'} &&
