@@ -1880,6 +1880,12 @@ sub process_vote {
                 }
             } elsif ($q->type ne 'text') {
                 push @vals, $val;
+            } elsif ($q->type eq 'text') {
+                my ($size, $maxlength) = split(m!/!, $q->opts);
+                if (length($val) > $maxlength) {
+                    $$error = LJ::Lang::ml('poll.error.pollitid');
+                    return 0;
+                }
             }
             if ($q->type ne 'text' && $q->type ne 'scale' && $opts{wrong_value_as_error}) {
                 my %pollitids;
