@@ -72,7 +72,7 @@
     # them through since they're coming from a comment page and
     # validate the hash later.
     elsif (! LJ::did_post() && !$POST{'ecphash'}) {
-        return LJ::bad_input("Comment not posted: POST required, or missing parameter.");
+        return LJ::bad_input(LJ::Lang::ml("comment.not.posted.POST.required.or.missing.parameter"));
     }
 
 

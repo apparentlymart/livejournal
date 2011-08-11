@@ -273,16 +273,16 @@ sub help_icon_html {
 # args: error*
 # des-error: A list of errors
 # </LJFUNC>
-sub bad_input
-{
+sub bad_input {
     my @errors = @_;
-    my $ret = "";
-    $ret .= "<?badcontent?>\n<ul>\n";
-    foreach my $ei (@errors) {
-        my $err  = LJ::errobj($ei) or next;
+    my $ret = LJ::Lang::ml('bml.badcontent.body') . "\n<ul>\n";
+
+    foreach my $ei ( @errors ) {
+        my $err = LJ::errobj($ei) or next;
         $err->log;
         $ret .= $err->as_bullets;
     }
+
     $ret .= "</ul>\n";
     return $ret;
 }
