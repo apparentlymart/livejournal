@@ -1866,9 +1866,8 @@ sub process_vote {
     if ($opts{wrong_value_as_error}) {
         foreach my $q (@qs) {
             my $qid = $q->pollqid;
+            next unless (defined $answers->{$qid}); # check given values only, so allow the user to change his mind
             my $val = $answers->{$qid};
-            next unless ($val);   # check given values only, so allow the user to change his mind
-
             my @vals = ();
             if ($q->type eq "check") {
                 ## multi-selected items are comma separated from htdocs/poll/index.bml
