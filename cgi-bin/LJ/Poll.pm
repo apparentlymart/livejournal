@@ -1875,7 +1875,7 @@ sub process_vote {
                 @vals = split(/,/, $val);
             } elsif ($q->type eq "scale") {
                 my ($from, $to, $by) = split(m!/!, $q->opts);
-                if ($val < $from || $val > $to) {
+                if ($val !~ /^\d+$/ || $val < $from || $val > $to) {
                     $$error = LJ::Lang::ml('poll.error.pollitid');
                     return 0;
                 }
@@ -1913,7 +1913,7 @@ sub process_vote {
         }
         if ($q->type eq "scale") {
             my ($from, $to, $by) = split(m!/!, $q->opts);
-            if ($val < $from || $val > $to) {
+            if ($val !~ /^\d+$/ || $val < $from || $val > $to) {
                 # bogus! cheating?
                 $val = "";
             }
