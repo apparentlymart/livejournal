@@ -7,8 +7,8 @@
 	window.initDraft = function(data) {
 		draftData = data;
 
-		data.lastValue = '';
 		data.textArea = $('#draft');
+		data.lastValue = draftData.textArea.val();
 		data.statusNode = $('#draftstatus');
 
 		if (data.ask && data.restoreData) {
