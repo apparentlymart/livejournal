@@ -697,7 +697,7 @@
 							{
 								id: 'LJPool_Setup',
 								label: 'Setup',
-								padding: 0,
+								padding: 0, 
 								elements: [
 									{
 										type: 'html',
@@ -830,7 +830,7 @@
 				return {
 					title: top.CKLang.LJLike_name,
 					width: 145,
-					height: 180,
+					height: window.isSupUser ? 180 : 145,
 					resizable: false,
 					contents: [
 						{
