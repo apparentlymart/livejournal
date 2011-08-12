@@ -1425,10 +1425,7 @@ sub render_body {
     $out .= LJ::html_textarea({
         'name' => 'event',
         'value' => $opts->{'event'},
-        'rows' => '20',
-        'cols' => '50',
         'tabindex' => $self->tabindex,
-        'wrap' => 'soft',
         'disabled' => $opts->{'disabled_save'},
         'id' => 'draft'
     });
