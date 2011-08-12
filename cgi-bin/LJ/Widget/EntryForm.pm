@@ -1079,6 +1079,7 @@ sub render_options_block {
                 $out .= qq{
                     <input type='submit' name='action:$action'
                         class='hidden_submit' />
+                    <span id="preview_button_holder"></span>
                 };
             }
             my $preview_tabindex = $self->tabindex;
@@ -1096,7 +1097,7 @@ sub render_options_block {
             unless ($opts->{'disabled_save'}) {
                 $out .= $self->wrap_js(qq{
                     if (document.getElementById) {
-                        document.write("$preview ");
+                        \$('preview_button_holder').innerHTML = "$preview ";
                     }
                 });
             }
