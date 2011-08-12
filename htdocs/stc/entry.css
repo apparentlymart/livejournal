@@ -7,7 +7,7 @@
 
 #draft-container TEXTAREA {
 	margin: 0;
-	border: none;
+	border: 0;
 	}
 
 #updateForm {
@@ -225,19 +225,12 @@
     padding: 0; 
 }
 #draft {
-    display: block;
+    display: inline-block;
+    line-height: 100%;
     width: 100%;
-    border: none;
-    font-size: 105%;
-}
-* html #draft {
-    width: 99%;
-    margin: 0 auto;
-}
-/* IE7 only */
-*:first-child+html #draft {
-    width: 98%;
-    margin: 0 auto;
+    height: 280px;
+    border: 0;
+    font-size: 13px;
 }
 #draftstatus {
     font-style: italic;
