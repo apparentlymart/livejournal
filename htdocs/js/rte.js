@@ -56,7 +56,7 @@
 						CKEditor.container.show();
 						CKEditor.element.hide();
 
-						if(draftData){
+						if (draftData) {
 							editor.on('dialogHide', checkDraftTimer);
 							editor.on('afterCommandExec', checkDraftTimer);
 							editor.on('insertElement', checkDraftTimer);
@@ -97,8 +97,8 @@
 				CKEditor.element.show();
 
 				// IE7 hack fix
-				if($.browser.msie && $.browser.version == '7.0'){
-					setTimeout(function(){
+				if ($.browser.msie && $.browser.version == '7.0') {
+					setTimeout(function() {
 						CKEditor.element.setValue(data);
 					}, 30);
 				} else {
