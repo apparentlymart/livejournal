@@ -56,13 +56,15 @@
 						CKEditor.container.show();
 						CKEditor.element.hide();
 
-						editor.on('dialogHide', checkDraftTimer);
-						editor.on('afterCommandExec', checkDraftTimer);
-						editor.on('insertElement', checkDraftTimer);
-						editor.on('insertHtml', checkDraftTimer);
-						editor.on('insertText', checkDraftTimer);
-						editor.document.on('keypress', checkDraftTimer);
-						editor.document.on('click', checkDraftTimer);
+						if(draftData){
+							editor.on('dialogHide', checkDraftTimer);
+							editor.on('afterCommandExec', checkDraftTimer);
+							editor.on('insertElement', checkDraftTimer);
+							editor.on('insertHtml', checkDraftTimer);
+							editor.on('insertText', checkDraftTimer);
+							editor.document.on('keypress', checkDraftTimer);
+							editor.document.on('click', checkDraftTimer);
+						}
 					});
 				});
 			} else {
@@ -87,15 +89,23 @@
 			window.switchedRteOn = false;
 			$('#switched_rte_on').value = '0';
 
+			$('#entry-form-wrapper').attr('class', 'hide-richtext');
 			if (CKEditor) {
-				var data = CKEditor.getData();
-				CKEditor.element.setValue(data);
 
+				var data = CKEditor.getData();
 				CKEditor.container.hide();
 				CKEditor.element.show();
+
+				// IE7 hack fix
+				if($.browser.msie && $.browser.version == '7.0'){
+					setTimeout(function(){
+						CKEditor.element.setValue(data);
+					}, 30);
+				} else {
+					CKEditor.element.setValue(data);
+				}
 			}
 
-			$('#entry-form-wrapper').attr('class', 'hide-richtext');
 		}
 
 		return false;
