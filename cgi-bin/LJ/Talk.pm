@@ -1963,14 +1963,17 @@ sub talkform {
     );
 
     # COMMON TEMPLATE PARAMS ARE DEFINED HERE
-    $template->param(
-
+    my %params = (
         # string values the template may wish
         'remote_username'        => $remote_username,
         'remote_display_name'    => $remote_display_name,
         'journalu_username'      => $journalu->username,
         'editid'                 => $editid,
         'entry_url'              => $entry->url,
+        'nocomments'             => $entry->prop('opt_nocomments'),
+        'suspended'              => $entry->is_suspended_for($remote),
+        'deleted'                => $remote->is_deleted || $remote->is_expunged,
+        'will_be_screened'       => $entry->prop('opt_screening'),
 
         # various checks
         'remote_banned'          => LJ::is_banned( $remote, $journalu ),
@@ -1981,26 +1984,6 @@ sub talkform {
         'is_person'              => $is_person,
         'is_identity'            => $remote && $remote->is_identity,
         'remote_can_comment'     => $remote_can_comment,
-
-        # ml variables. it is weird that we've got to pass these to
-        # the template, but well, the logic here is considered too
-        # complex to be in a template, so whatever.
-        'ml_banned'              => $ml{'banned'},
-        'ml_friendsonly'         => $ml{'friendsonly'},
-        'ml_logcommentips'       => $ml{'logcommentips'},
-        'ml_loggedin'            => $ml{'loggedin'},
-        'ml_noaccount'           => $ml{'noaccount'},
-        'ml_noopenidpost'        => $ml{'noopenidpost'},
-        'ml_notafriend'          => $ml{'notafriend'},
-        'ml_picturetouse'        => $ml{'picturetouse'},
-        'ml_usermismatch'        => $ml{'usermismatch'},
-        'ml_willscreen'          => $ml{'willscreen'},
-        'ml_willscreenfriend'    => $ml{'willscreenfriend'},
-
-        # help icons
-        'helpicon_userpics'      => LJ::help_icon_html( "userpics",     " " ),
-        'helpicon_noautoformat'  => LJ::help_icon_html( "noautoformat", " " ),
-        'helpicon_iplogging'     => LJ::help_icon_html( "iplogging",    " " ),
 
         'captcha_html'              => $captcha_html,
         'comment_length_cap'        => LJ::CMAX_COMMENT,
@@ -2035,18 +2018,27 @@ sub talkform {
             'entry'     => $entry,
             'editid'    => $editid,
         }) || undef,
-
-        'logout_url'            => $opts->{'logout_url'},
-        'js_check_domain'       => $opts->{'js_check_domain'},
-        'resources_html'        => $opts->{'resources_html'},
-        'partner_domain'        => $opts->{'partner_domain'},
-        'partner_remote_ljuser' => $opts->{'partner_remote_ljuser'},
     );
+
+    # ml variables. it is weird that we've got to pass these to
+    # the template, but well, the logic here is considered too
+    # complex to be in a template, so whatever.
+    $params{"ml_$_"} = $ml{ $_ } for qw/banned     friendsonly  logcommentips
+                                        loggedin   noaccount    noopenidpost
+                                        notafriend picturetouse usermismatch
+                                        willscreen willscreenfriend/;
+
+    # help icons
+    $params{"helpicon_$_"} = LJ::help_icon_html( $_, " " ) for qw/userpics noautoformat iplogging/;
+
+    $params{$_} = $opts->{$_} for qw/logout_url js_check_domain resources_html partner_domain partner_remote_ljuser/;
+
+    $template->param( %params );
 
     return $template->output;
 }
 
-# mobile commenting form 
+# mobile commenting form
 sub talkform_mobile {
     my $opts = shift;
 
