@@ -2774,6 +2774,8 @@ fotki.album.add.to.entry=Add to entry
 
 fotki.album.btn.upload=Upload
 
+fotki.album.image.loading=Image loading...
+
 fotki.album.upload.unknown.error=Unknown error
 
 fotki.album.stop.upload.confirm=Do you really want to stop upload and close without saving?
@@ -2821,6 +2823,8 @@ fotki.album.link.album_list=Albums
 fotki.album.link.cancel=Cancel
 
 fotki.album.link.click.to.upload=Click to upload <br> new images
+
+fotki.album.uploading.message=Uploading...
 
 fotki.album.link.edit=Edit
 

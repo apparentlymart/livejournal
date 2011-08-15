@@ -466,6 +466,7 @@ JS
                 ."'fotki.album.uploading.image': '".BML::ml('fotki.album.uploading.image')."',"
                 ."'fotki.album.available.now': '".BML::ml('fotki.album.available.now')."',"
     			."'fotki.album.click.image': '".BML::ml('fotki.album.click.image')."',"
+				."'fotki.album.uploading.message': '".BML::ml('fotki.album.uploading.message')."',"
     			."'fotki.album.remove.image': '".BML::ml('fotki.album.remove.image')."',"
                 ."'fotki.album.create.new': '".BML::ml('fotki.album.create.new')."'";
             $$body .= <<JS;
