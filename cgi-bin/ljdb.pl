@@ -135,8 +135,25 @@ sub time_range_to_ids {
     return ($startid, $endid);
 }
 
+sub _connection_options {
+    my $options = {
+        'AutoCommit' => 1,
+        'RaiseError' => 0,
+        'PrintError' => 0,
+    };
+
+    if ( $LJ::IS_DEV_SERVER ) {
+        $options->{'RaiseError'} = 1;
+    }
+    else {
+        $options->{'PrintError'} = 1;
+    }
+
+    return { 'connection_opts' => $options };
+}
+
 sub dbh_by_role {
-    return $LJ::DBIRole->get_dbh( @_ );
+    return $LJ::DBIRole->get_dbh( _connection_options(), @_ );
 }
 
 sub dbh_by_name {
@@ -147,13 +164,13 @@ sub dbh_by_name {
     my $fdsn = $dbh->selectrow_array("SELECT fdsn FROM dbinfo WHERE name=?", undef, $name);
     die "No fdsn found for db name '$name'\n" unless $fdsn;
 
-    return $LJ::DBIRole->get_dbh_conn($fdsn);
+    return $LJ::DBIRole->get_dbh_conn( _connection_options(), $fdsn );
 
 }
 
 sub dbh_by_fdsn {
     my $fdsn = shift;
-    return $LJ::DBIRole->get_dbh_conn($fdsn);
+    return $LJ::DBIRole->get_dbh_conn( _connection_options(), $fdsn );
 }
 
 sub root_dbh_by_name {
@@ -164,7 +181,7 @@ sub root_dbh_by_name {
     my $fdsn = $dbh->selectrow_array("SELECT rootfdsn FROM dbinfo WHERE name=?", undef, $name);
     die "No rootfdsn found for db name '$name'\n" unless $fdsn;
 
-    return $LJ::DBIRole->get_dbh_conn($fdsn);
+    return $LJ::DBIRole->get_dbh_conn( _connection_options(), $fdsn );
 }
 
 sub backup_in_progress {
@@ -401,9 +418,8 @@ sub master_role {
 # returns: A dbh.
 # </LJFUNC>
 sub get_dbirole_dbh {
-    my $dbh = $LJ::DBIRole->get_dbh( @_ ) or return undef;
-
-    $dbh->{'RaiseError'} = 1 if $LJ::IS_DEV_SERVER;
+    my $dbh = $LJ::DBIRole->get_dbh( LJ::DB::_connection_options(), @_ )
+        or return undef;
 
     if ( $LJ::DB_LOG_HOST && $LJ::HAVE_DBI_PROFILE ) {
         $LJ::DB_REPORT_HANDLES{ $dbh->{Name} } = $dbh;
