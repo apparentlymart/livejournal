@@ -20,7 +20,7 @@
 			data.statusNode.val('');
 		}
 
-		draftData.textArea.val(draftData.lastValue);
+		draftData.textArea.val(draftData.lastValue.replace(/<br\s?\/>\n?/g, '\n'));
 
 		$('#updateForm').delegate('#draft', 'keypress click', checkDraftTimer);
 	};

@@ -107,6 +107,7 @@ CKEDITOR.editorConfig = function(config){
 	if(top.Site.media_embed_enabled){
 		config.toolbar_Full[0].push('LJEmbedLink');
 	}
+
 	config.toolbar_Full[0].push('LJPollLink',
 		'LJCutLink',
 		'LJCut',
@@ -126,8 +127,8 @@ CKEDITOR.editorConfig = function(config){
 
 	config.toolbar = 'Full';
 	config.enterMode = CKEDITOR.ENTER_BR;
-	config.forceEnterMode = false;
-	config.shiftEnterMode = CKEDITOR.ENTER_BR;
+	config.forceEnterMode = true;
+	config.shiftEnterMode = CKEDITOR.ENTER_P;
 
 	config.keystrokes = [
     [ CKEDITOR.ALT + 121 /*F10*/, 'toolbarFocus' ],
