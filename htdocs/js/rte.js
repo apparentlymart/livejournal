@@ -100,7 +100,7 @@
 				if ($.browser.msie && $.browser.version == '7.0') {
 					setTimeout(function() {
 						CKEditor.element.setValue(data);
-					}, 30);
+					}, 50);
 				} else {
 					CKEditor.element.setValue(data);
 				}
