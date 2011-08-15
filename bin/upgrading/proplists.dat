@@ -1710,3 +1710,11 @@ userproplist.singapore_invitations_posted:
   indexed: 0
   multihomed: 0
   cldversion: 8
+
+userproplist.lastloginid:
+  datatype: num
+  prettyname: Previous login id
+  des: Previous login id
+  indexed: 0
+  multihomed: 0
+  cldversion: 8
