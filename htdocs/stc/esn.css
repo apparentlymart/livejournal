@@ -364,6 +364,9 @@ span.InboxItem_Read:hover a {
     margin: auto auto auto auto;
     width: 49%;
 }
+.ippu .ljippu_textprompt {
+	padding: 10px;
+	}
 
 #compose label {
     font-weight: bold;
