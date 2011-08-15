@@ -736,16 +736,19 @@ function CommentInfo::print() {
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        if ($.show_postlink and $.show_readlink) {
+        if (($.show_postlink and $.show_readlink) or ($.spam_counter > 0)) {
             " | ";
         }
+        if ($p.view == "entry" and $.spam_counter > 0 and $.read_spam_url != "") {
+            if ($p.showspam) {
+                print safe get_plural_phrase($.spam_counter, "text_read_spam_comments");
+            } else {
+                print safe """<a href=\"$.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($.spam_counter, "text_read_all_spam_comments") + """</a>""";
+            }
+        }
         if ($.show_readlink) {
-            if ($p.view == "entry" and $.spam_counter > 0 and $.read_spam_url != "") {
-                if ($p.showspam) {
-                    print safe get_plural_phrase($.spam_counter, "text_read_spam_comments") + """ | """;
-                } else {
-                    print safe """<a href=\"$.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($.spam_counter, "text_read_all_spam_comments") + """</a> | """;
-                }
+            if ($.spam_counter > 0) {
+                """ | """;
             }
             $this->print_readlink();
         }
