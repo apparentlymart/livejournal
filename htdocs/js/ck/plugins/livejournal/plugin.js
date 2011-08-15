@@ -127,7 +127,7 @@
 					.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site
 					.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
 					.replace(/<lj-embed\s*(?:id="(\d*)")?\s*>([\s\S]*?)<\/lj-embed>/gi, '<div class="ljembed" embedid="$1">$2</div>')
-					.replace(/<lj-poll .*?>[^b]*?<\/lj-poll>/gm,
+					.replace(/<lj-poll .*?>[^\b]*?<\/lj-poll>/gm,
 					function(ljtags) {
 						return new Poll(ljtags).outputHTML();
 					}).replace(/<lj-template(.*?)><\/lj-template>/g, "<lj-template$1 />");
