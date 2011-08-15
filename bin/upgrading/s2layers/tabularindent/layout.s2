@@ -999,7 +999,7 @@ function EntryPage::print_body () {
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
     print_ebox($.entry);
-    if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
+    if ($.entry.comments.enabled and ($.comment_pages.total_subitems > 0 or $e.comments.spam_counter > 0))
     {
         $this->print_multiform_start();
 
