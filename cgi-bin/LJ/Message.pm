@@ -187,8 +187,8 @@ sub _save_msgtxt_row_to_db {
            undef,
            $userid,
            $self->msgid,
-           $self->subject_raw,
-           $self->body_raw,
+           $self->subject_raw || '',
+           $self->body_raw    || '',
           );
     if ($u->err) {
         warn($u->errstr);
