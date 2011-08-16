@@ -492,8 +492,9 @@ LIKE_FAQ
 
                 ml: {
 JS
-                    $ret .= "'fotki.album.add.images': '".BML::ml('fotki.album.albums')."',"
+                    $ret .= "'fotki.album.add.images': '".BML::ml('fotki.add.images')."',"
                     ."'fotki.album.link.click.to.upload': '".BML::ml('fotki.album.link.click.to.upload')."',"
+                    ."'fotki.album.upload.images': '".BML::ml('fotki.album.upload.images')."',"
 	                ."'fotki.album.add.photos': '".BML::ml('fotki.album.add.photos')."',"
 	                ."'fotki.album.upgrade': '".BML::ml('fotki.album.upgrade')."',"
 	                ."'fotki.album.add.image.name': '".BML::ml('fotki.album.add.image.name')."',"
