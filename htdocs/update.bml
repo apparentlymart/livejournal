@@ -6,6 +6,7 @@
 
     use LJ::Fotki::Photo;
     use LJ::Fotki::Album;
+	use LJ::Widget::Fotki::Upload;
 
     # $_[0] is a pre-request scratch area
     # put variables here so that we can access them later
@@ -429,9 +430,10 @@ LIKE_FAQ
 
             my $auth_token = LJ::Auth->sessionless_auth_token ($LJ::DOMAIN_WEB."/pics/upload", user => $remote ? $remote->user : undef);
             my $user_groups = LJ::JSON->to_json (LJ::Widget::Fotki::Photo->get_user_groups ($remote));
-            LJ::need_res('stc/pics/pics.css', 'js/swfupload/swfupload.js', 'js/swfupload/swfupload.queue.js', 'js/jquery/jquery.lj.photouploader.js');
-		
             my $ljphoto_enabled = $remote->can_upload_photo();
+            
+			LJ::Widget::Fotki::Upload->render();
+		
             $$body .= <<JS;
     <script type="text/javascript">
     	window.ljphotoEnabled = $ljphoto_enabled;
@@ -441,37 +443,7 @@ LIKE_FAQ
             albumsData: $album_list_json,
             privacyData: $user_groups,
             type: 'upload',
-            guid: '$auth_token',
-		
-            ml: {
-JS
-                $$body .= "'fotki.album.add.images': '".BML::ml('fotki.album.add.images')."',"
-                ."'fotki.album.link.click.to.upload': '".BML::ml('fotki.album.link.click.to.upload')."',"
-                ."'fotki.album.upload.images': '".BML::ml('fotki.album.upload.images')."',"
-                ."'fotki.album.add.photos': '".BML::ml('fotki.album.add.photos')."',"
-                ."'fotki.album.upgrade': '".BML::ml('fotki.album.upgrade')."',"
-                ."'fotki.album.add.image.name': '".BML::ml('fotki.album.add.image.name')."',"
-                ."'fotki.album.description': '".BML::ml('fotki.album.description')."',"
-                ."'fotki.album.album_cover': '".BML::ml('fotki.album.album_cover')."',"
-                ."'fotki.album.remove.this.image': '".BML::ml('fotki.album.remove.this.image')."',"
-                ."'fotki.album.select_album': '".BML::ml('fotki.album.select_album')."',"
-                ."'fotki.album.new.album.name': '".BML::ml('fotki.album.new.album.name')."',"
-                ."'fotki.album.post.images': '".BML::ml('fotki.album.post.images')."',"
-                ."'fotki.album.save.images': '".BML::ml('fotki.album.save.images')."',"
-                ."'fotki.privacy': '".BML::ml('fotki.privacy')."',"
-                ."'fotki.album.resize.to.post': '".BML::ml('fotki.album.resize.to.post')."',"
-                ."'fotki.album.stop.upload.confirm': '".BML::ml('fotki.album.stop.upload.confirm')."',"
-                ."'fotki.album.close.without.saving.confirm': '".BML::ml('fotki.album.close.without.saving.confirm')."',"
-                ."'fotki.album.upload.unknown.error': '".BML::ml('fotki.album.upload.unknown.error')."',"
-                ."'fotki.album.upload.io.error': '".BML::ml('fotki.album.upload.io.error')."',"
-                ."'fotki.album.uploading.image': '".BML::ml('fotki.album.uploading.image')."',"
-                ."'fotki.album.available.now': '".BML::ml('fotki.album.available.now')."',"
-    			."'fotki.album.click.image': '".BML::ml('fotki.album.click.image')."',"
-				."'fotki.album.uploading.message': '".BML::ml('fotki.album.uploading.message')."',"
-    			."'fotki.album.remove.image': '".BML::ml('fotki.album.remove.image')."',"
-                ."'fotki.album.create.new': '".BML::ml('fotki.album.create.new')."'";
-            $$body .= <<JS;
-            }
+            guid: '$auth_token'
         });
     </script>
 JS
