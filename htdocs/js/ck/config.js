@@ -21,52 +21,21 @@ CKEDITOR.editorConfig = function(config){
 		'colordialog,' +
 		'contextmenu,' +
 		'dialog,' +
-		//'div,' +
-		//'elementspath,' +
 		'enterkey,' +
 		'entities,' +
-		//'filebrowser,' +
-		//'find,' +
-		//'flash,' +
 		'font,' +
 		'format,' +
-		//'forms,' +
-		//'horizontalrule,' +
 		'htmldataprocessor,' +
-		//'iframedialog,' +
 		'image,' +
-		//'indent,' +
-		'justify,' +
 		'keystrokes,' +
 		'link,' +
 		'list,' +
 		'liststyle,' +
-		//'maximize,' +
-		//'newpage,' +
-		//'pagebreak,' +
-		//'pastefromword,' +
-		//'pastetext,' +
-		//'popup,' +
-		//'preview,' +
-		//'print,' +
-		//'removeformat,' +
-		//'resize,' +
-		//'save,' +
-		//'smiley,' +
-		//'showblocks,' +
-		//'showborders,' +
-		//'sourcearea,' +
-		//'stylescombo,' +
-		//'scayt,' +
-		//'table,' +
-		//'tabletools,' +
 		'specialchar,' +
 		'tab,' +
-		//'templates,' +
 		'toolbar,' +
 		'undo,' +
-		'wysiwygarea,'/* +
-		'wsc'*/;
+		'wysiwygarea,';
 
 	config.fullPage = false;
 	config.startupOutlineBlocks = false;
@@ -99,7 +68,7 @@ CKEDITOR.editorConfig = function(config){
 			'TextColor',
 			'FontSize',
 			'-',
-			'Link',
+			'LJLink',
 			'LJUserLink',
 			'LJImage']
 	];

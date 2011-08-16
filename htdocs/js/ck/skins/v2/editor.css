@@ -1316,6 +1316,9 @@ li.cke_panel_listItem {
 .cke_skin_v2 .cke_button_LJImage .cke_icon {
 	background-position: 0 -125px;
 	}
+.cke_skin_v2 .cke_button_LJLink .cke_icon {
+	background-position: 0 -79px;
+	}
 .cke_skin_v2 .cke_button_LJEmbedLink .cke_icon {
 	background-position: 0 -110px;
 	}
