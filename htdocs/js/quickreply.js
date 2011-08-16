@@ -63,7 +63,7 @@ QuickReply = {
 			//a reply to a comment
 			qr_form.action = basepath.value + "replyto=" + dtid.value;
 		} else {
-			qr_form.action = basepath.value + "mode=reply";
+			qr_form.action = basepath.value + "mode=reply#add_comment";
 		}
 		
 		// we changed the form action so submit ourselves
