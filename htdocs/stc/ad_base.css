@@ -34,6 +34,10 @@
     overflow: hidden;
     zoom: 1;
 }
+.index-page .ljadmedrect {
+    overflow: visible;
+}
+
 .ljadmedrect OBJECT,
 .ljadmedrect EMBED,
 .ljadmedrect IMG {
