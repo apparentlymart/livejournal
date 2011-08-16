@@ -264,6 +264,8 @@ sub get_syndicated {
 # save current user id, so we can restore it later
 sub save_current {
     my ( $u ) = @_;
+    return 0 unless $u;
+
     my $remote = LJ::get_remote();
     return 0 unless $remote;
 
@@ -274,6 +276,8 @@ sub save_current {
 # restore user from prop lastloginid
 sub restore {
     my ($u) = @_;
+    return 0 unless $u;
+
     my $userid = $u->prop('lastloginid');
     return 0 unless $userid;
 
