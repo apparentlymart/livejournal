@@ -1972,7 +1972,7 @@ sub talkform {
         'entry_url'              => $entry->url,
         'nocomments'             => $entry->prop('opt_nocomments'),
         'suspended'              => $entry->is_suspended_for($remote),
-        'deleted'                => $remote->is_deleted || $remote->is_expunged,
+        'deleted'                => $remote ? $remote->is_deleted || $remote->is_expunged : 0,
         'will_be_screened'       => $entry->prop('opt_screening'),
 
         # various checks
