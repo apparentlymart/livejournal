@@ -99,6 +99,7 @@ form.ljpoll {
 /* LJ Like buttons */
 .lj-like {
 	overflow: hidden;
+	min-height: 13px;
 	padding: 13px 20px;
 	margin-top: 20px;
 	background: #D2D2D2;
@@ -109,7 +110,7 @@ form.ljpoll {
 		margin-right: 15px;
 		background: url(/js/ck/images/lj-like-buttons.png) no-repeat;
 		vertical-align: middle;
-		font-size: 0;
+		text-indent: -3333px;
 		cursor: pointer;
 		}
 	.lj-like .fb {
@@ -137,3 +138,12 @@ form.ljpoll {
 		height: 24px;
 		background-position: 0 -21px;
 		}
+/* LJ map */
+.lj-map {
+	overflow: hidden;
+	min-height: 13px;
+	padding: 13px 20px;
+	margin-top: 20px;
+	background: #D2D2D2;
+	border: 1px dotted #000;
+	}
