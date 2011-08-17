@@ -1970,7 +1970,7 @@ sub talkform {
         'journalu_username'      => $journalu->username,
         'editid'                 => $editid,
         'entry_url'              => $entry->url,
-        'nocomments'             => $entry->prop('opt_nocomments'),
+        'nocomments'             => $entry->prop('opt_nocomments') || ( $journalu ? $journalu->{opt_showtalklinks} : 0),
         'suspended'              => $remote ? $remote->is_suspended : 0,
         'deleted'                => $remote ? $remote->is_deleted || $remote->is_expunged : 0,
         'will_be_screened'       => $entry->prop('opt_screening'),
