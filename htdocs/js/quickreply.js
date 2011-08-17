@@ -61,7 +61,7 @@ QuickReply = {
 		
 		if(dtid.value > 0 && pidform.value > 0) {
 			//a reply to a comment
-			qr_form.action = basepath.value + "replyto=" + dtid.value;
+			qr_form.action = basepath.value + "replyto=" + dtid.value + "#add_comment";
 		} else {
 			qr_form.action = basepath.value + "mode=reply#add_comment";
 		}
