@@ -1161,17 +1161,11 @@
 						}
 					},
 					'lj-map': function(element){
-						var fakeElement = new CKEDITOR.htmlParser.element('div');
-						fakeElement.attributes['lj-url'] = encodeURIComponent(element.attributes.url);
-						fakeElement.attributes.contentEditable = 'false';
-
-						var width = 'width: ' + (isNaN(element.attributes.width) ? 100 : element.attributes.width) + 'px; ';
-						var height = 'height: ' + (isNaN(element.attributes.height) ? 100 : element.attributes.height) + 'px; ';
-						fakeElement.attributes.style = width + height;
-
-						fakeElement.attributes['class'] = 'lj-map';
-
-						return fakeElement;
+						return new CKEDITOR.htmlParser.fragment.fromHtml('' + '<div style="' + 'width: ' + (isNaN(element.attributes
+							.width) ? 100 : element.attributes.width) + 'px;' + 'height: ' + (isNaN(element.attributes
+							.height) ? 100 : element.attributes
+							.height) + 'px;"' + 'contentEditable="false"' + 'lj-url="' + (encodeURIComponent(element.attributes
+							.url) || '') + '"' + 'class="lj-map"><p>map</p>' + '</div>').children[0];
 					},
 					a: function(element) {
 						element.attributes['lj-cmd'] = 'LJLink';
