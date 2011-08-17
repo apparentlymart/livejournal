@@ -1658,7 +1658,7 @@ DAY_SUBJECT<=
 
 <=DAY_SUBJECT
 
-DAY_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% Comment%%mc-plural-s%%</a> -
+DAY_TALK_READLINK=><a href="%%urlread%%#comments">%%messagecount%% Comment%%mc-plural-s%%</a> -
 
 DAY_SORT_MODE=>forward
 
@@ -1674,7 +1674,7 @@ DAY_SKYSCRAPER_AD<=
 </td>
 <=DAY_SKYSCRAPER_AD
 
-DAY_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%">Comment on this</a></div>
+DAY_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%#add_comment">Comment on this</a></div>
 
 DAY_EVENT_PRIVATE<=
 <div class="entry" id="entry%%itemid%%">
@@ -1934,7 +1934,7 @@ DAY_NOEVENTS=><I>(no journal entries for this day)</I>
 
 DAY_SUBJECT=><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%subject%%</B></I></FONT><BR>
 
-DAY_TALK_READLINK=><B><A HREF="%%urlread%%">%%messagecount%% Comment%%mc-plural-s%%</A></B> | 
+DAY_TALK_READLINK=><B><A HREF="%%urlread%%#comments">%%messagecount%% Comment%%mc-plural-s%%</A></B> | 
 
 DAY_SORT_MODE=>forward
 
@@ -1967,7 +1967,7 @@ DAY_SKYSCRAPER_AD<=
 
 DAY_TALK_LINKS<=
 <DIV STYLE="text-align:right">
-  <FONT SIZE=-2>(%%readlink%%<A HREF="%%urlpost%%">Comment on this</A>)</FONT></DIV>
+  <FONT SIZE=-2>(%%readlink%%<A HREF="%%urlpost%%#add_comment">Comment on this</A>)</FONT></DIV>
 <=DAY_TALK_LINKS
 
 DAY_EVENT_PRIVATE<=
@@ -2115,7 +2115,7 @@ DAY_NOEVENTS<=
 
 DAY_SUBJECT=>%%subject%%
 
-DAY_TALK_READLINK=><a href="%%urlread%%">Read %%messagecount%%</a>&nbsp;-&nbsp;
+DAY_TALK_READLINK=><a href="%%urlread%%#comments">Read %%messagecount%%</a>&nbsp;-&nbsp;
 
 DAY_SORT_MODE=>
 
@@ -2127,7 +2127,7 @@ DAY_WEBSITE=><br><a class="links" href="%%url%%">%%name%%</a>
 
 DAY_SKYSCRAPER_AD=><td width="20%" valign="top"><div style="float: right;">%%ad%%</div></td>
 
-DAY_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">Post</a>
+DAY_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%#add_comment">Post</a>
 
 DAY_EVENT_PRIVATE<=
 <table cellspacing=0 class="entries">
@@ -2416,7 +2416,7 @@ DAY_NOEVENTS=>
 
 DAY_SUBJECT=>%%subject%%
 
-DAY_TALK_READLINK=><a href="%%urlread%%"><b>%%messagecount%% comment%%mc-plural-s%%</b></a>|
+DAY_TALK_READLINK=><a href="%%urlread%%#comments"><b>%%messagecount%% comment%%mc-plural-s%%</b></a>|
 
 DAY_SORT_MODE=>forward
 
@@ -2464,7 +2464,7 @@ summary="" style="margin-left: auto; margin-right: auto;">
 DAY_TALK_LINKS<=
 <tr>
 <td align="right" colspan="2" width="100%" bgcolor="%%color:weak_back%%" class="comments">
-%%readlink%%<a href="%%urlpost%%">post comment</a>
+%%readlink%%<a href="%%urlpost%%#add_comment">post comment</a>
 </td>
 </tr>
 <=DAY_TALK_LINKS
@@ -2719,7 +2719,7 @@ DAY_NOEVENTS=><p style="margin: 0.5em;">(No journal entries for this day)</p>
 
 DAY_SUBJECT=> - <em>%%subject%%</em>
 
-DAY_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+DAY_TALK_READLINK=><a href="%%urlread%%#comments">%%messagecount%% comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
 
 DAY_SORT_MODE=>forward
 
@@ -2737,7 +2737,7 @@ DAY_SKYSCRAPER_AD<=
 </tr></table>
 <=DAY_SKYSCRAPER_AD
 
-DAY_TALK_LINKS=>   <div class="Comment">(%%readlink%%<a href="%%urlpost%%">comment&nbsp;on&nbsp;this</a>)</div>
+DAY_TALK_LINKS=>   <div class="Comment">(%%readlink%%<a href="%%urlpost%%#add_comment">comment&nbsp;on&nbsp;this</a>)</div>
 
 DAY_EVENT_PRIVATE<=
   <div class="H3Holder">
@@ -2843,7 +2843,7 @@ DAY_NOEVENTS=>No journal entries for this day.
 
 DAY_SUBJECT=> <FONT COLOR="red">%%subject%%</FONT>
 
-DAY_TALK_READLINK=><A HREF="%%urlread%%">Read %%messagecount%% Note%%mc-plural-s%%</A> -
+DAY_TALK_READLINK=><A HREF="%%urlread%%#comments">Read %%messagecount%% Note%%mc-plural-s%%</A> -
 
 DAY_SORT_MODE=>forward
 
@@ -2859,7 +2859,7 @@ DAY_SKYSCRAPER_AD<=
 </div>
 <=DAY_SKYSCRAPER_AD
 
-DAY_TALK_LINKS=><P>%%readlink%%<A HREF="%%urlpost%%">Make Notes</A></P>
+DAY_TALK_LINKS=><P>%%readlink%%<A HREF="%%urlpost%%#add_comment">Make Notes</A></P>
 
 DAY_EVENT_PRIVATE<=
 <IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
@@ -2977,7 +2977,7 @@ DAY_NOEVENTS=><TR><TD><BR><BR><BR><CENTER><FONT FACE="Verdana,Arial,Helvetica" S
 
 DAY_SUBJECT=><B> - <FONT COLOR="%%color:page_text_em%%">%%subject%%</FONT></B>
 
-DAY_TALK_READLINK=><A HREF="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</A> |
+DAY_TALK_READLINK=><A HREF="%%urlread%%#comments">%%messagecount%% comment%%mc-plural-s%%</A> |
 
 DAY_SORT_MODE=>forward
 
@@ -2996,7 +2996,7 @@ DAY_SKYSCRAPER_AD<=
 </FONT>
 <=DAY_SKYSCRAPER_AD
 
-DAY_TALK_LINKS=><P ALIGN="RIGHT"><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%">comment on this</A>)</FONT></P>
+DAY_TALK_LINKS=><P ALIGN="RIGHT"><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%#add_comment">comment on this</A>)</FONT></P>
 
 DAY_EVENT_PRIVATE<=
 <TR><TD VALIGN=TOP>
@@ -3160,7 +3160,7 @@ DAY_NOEVENTS=><table><tr><td><br><br><br><div align="center"><font class="date">
 
 DAY_SUBJECT=>%%subject%%
 
-DAY_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+DAY_TALK_READLINK=><a href="%%urlread%%#comments">%%messagecount%% comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
 
 DAY_SORT_MODE=>forward
 
@@ -3188,7 +3188,7 @@ DAY_SKYSCRAPER_AD<=
 	<!-- AD -->
 <=DAY_SKYSCRAPER_AD
 
-DAY_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">post a comment</a>
+DAY_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%#add_comment">post a comment</a>
 
 DAY_EVENT_PRIVATE<=
 <br>
@@ -3443,7 +3443,7 @@ DAY_NOEVENTS=>No journal entries for this day.
 
 DAY_SUBJECT=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%subject%%</FONT></TD></TR>
 
-DAY_TALK_READLINK=><A HREF="%%urlread%%">Read %%messagecount%%</A> or
+DAY_TALK_READLINK=><A HREF="%%urlread%%#comments">Read %%messagecount%%</A> or
 
 DAY_SORT_MODE=>forward
 
@@ -3466,7 +3466,7 @@ DAY_TALK_LINKS<=
 <TD BGCOLOR="%%color:weak_back%%">
 <FONT COLOR="%%color:weak_text%%">
 <NOBR>
-Comments: %%readlink%%<A HREF="%%urlpost%%">Add Your Own</A>.
+Comments: %%readlink%%<A HREF="%%urlpost%%#add_comment">Add Your Own</A>.
 </NOBR>
 </FONT>
 </TD>
@@ -3675,7 +3675,7 @@ FRIENDS_WEBSITE=><li><a href="%%url%%">%%name%%</a></li>
 
 FRIENDS_CLOSE_SKYSCRAPER_AD=>
 
-FRIENDS_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%">Comment on this</a></div>
+FRIENDS_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%#add_comment">Comment on this</a></div>
 
 FRIENDS_SKIP_FORWARD<=
 <li><a href="%%url%%">Next %%numitems%% Entries</a></li>
@@ -3699,7 +3699,7 @@ FRIENDS_CURRENT<=
 
 FRIENDS_SKIP_BACKWARD=><li><a href="%%url%%">Previous %%numitems%% Entries</a></li>
 
-FRIENDS_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% Comment%%mc-plural-s%%</a> -
+FRIENDS_TALK_READLINK=><a href="%%urlread%%#comments">%%messagecount%% Comment%%mc-plural-s%%</a> -
 
 FRIENDS_SKYSCRAPER_AD<=
 <td valign="top" style="background: %%color:weak_back%% none; color: %%color:weak_text%%; width: 10%; padding: 10px;">
@@ -4005,7 +4005,7 @@ FRIENDS_CLOSE_SKYSCRAPER_AD=>
 
 FRIENDS_TALK_LINKS<=
 <DIV STYLE="text-align:right">
-  <FONT SIZE=-2>(%%readlink%%<A HREF="%%urlpost%%">Comment on this</A>)</FONT></DIV>
+  <FONT SIZE=-2>(%%readlink%%<A HREF="%%urlpost%%#add_comment">Comment on this</A>)</FONT></DIV>
 <=FRIENDS_TALK_LINKS
 
 FRIENDS_SKIP_FORWARD=><A HREF="%%url%%">Next %%numitems%% &gt;&gt;</A>
@@ -4020,7 +4020,7 @@ FRIENDS_CURRENT=><BR><FONT FACE="Arial,Helvetica" SIZE=-1><B>Current %%what%%:</
 
 FRIENDS_SKIP_BACKWARD=><A HREF="%%url%%">&lt;&lt; Previous %%numitems%%</A>
 
-FRIENDS_TALK_READLINK=><B><A HREF="%%urlread%%">%%messagecount%% Comment%%mc-plural-s%%</A></B> |
+FRIENDS_TALK_READLINK=><B><A HREF="%%urlread%%#comments">%%messagecount%% Comment%%mc-plural-s%%</A></B> |
 
 FRIENDS_SKYSCRAPER_AD<=
 </td>
@@ -4227,7 +4227,7 @@ FRIENDS_WEBSITE=><br><a class="links" href="%%url%%">%%name%%</a>
 
 FRIENDS_CLOSE_SKYSCRAPER_AD=>
 
-FRIENDS_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">Post</a>
+FRIENDS_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%#add_comment">Post</a>
 
 FRIENDS_SKIP_FORWARD=><a href="%%url%%">Forward</a>
 
@@ -4246,7 +4246,7 @@ FRIENDS_CURRENT=><div><span style="font-weight:bold">%%lc:what%%:</span> %%value
 
 FRIENDS_SKIP_BACKWARD=><a href="%%url%%">Backward</a>
 
-FRIENDS_TALK_READLINK=><a href="%%urlread%%">Read %%messagecount%%</a>&nbsp;-&nbsp;
+FRIENDS_TALK_READLINK=><a href="%%urlread%%#comments">Read %%messagecount%%</a>&nbsp;-&nbsp;
 
 FRIENDS_SKYSCRAPER_AD=><td width="20%" valign="top"><div style="float: right;">%%ad%%</div></td>
 
@@ -4625,7 +4625,7 @@ FRIENDS_CLOSE_SKYSCRAPER_AD=>
 FRIENDS_TALK_LINKS<=
 <tr>
 <td align="right" colspan="2" width="100%" bgcolor="%%color:weak_back%%" class="comments">
-%%readlink%%<a href="%%urlpost%%">post comment</a>
+%%readlink%%<a href="%%urlpost%%#add_comment">post comment</a>
 </td>
 </tr>
 <=FRIENDS_TALK_LINKS
@@ -4658,7 +4658,7 @@ FRIENDS_CURRENT<=
 
 FRIENDS_SKIP_BACKWARD=><a href="%%url%%">earlier</a>
 
-FRIENDS_TALK_READLINK=><a href="%%urlread%%"><b>%%messagecount%% comment%%mc-plural-s%%</b></a>|
+FRIENDS_TALK_READLINK=><a href="%%urlread%%#comments"><b>%%messagecount%% comment%%mc-plural-s%%</b></a>|
 
 FRIENDS_SKYSCRAPER_AD<=
 </td>
@@ -4978,7 +4978,7 @@ FRIENDS_WEBSITE=>(<a href="%%url%%">%%name%%</a>)
 
 FRIENDS_CLOSE_SKYSCRAPER_AD=>
 
-FRIENDS_TALK_LINKS=>   <div class="Comment">(%%readlink%%<a href="%%urlpost%%">comment&nbsp;on&nbsp;this</a>)</div>
+FRIENDS_TALK_LINKS=>   <div class="Comment">(%%readlink%%<a href="%%urlpost%%#add_comment">comment&nbsp;on&nbsp;this</a>)</div>
 
 FRIENDS_SKIP_FORWARD=><a href="%%url%%">Next&nbsp;%%numitems%%&nbsp;friends</a>
 
@@ -4992,7 +4992,7 @@ FRIENDS_CURRENT=><div><strong>Current %%lc:what%%:</strong> %%value%%</div>
 
 FRIENDS_SKIP_BACKWARD=><a href="%%url%%">Previous&nbsp;%%numitems%%&nbsp;friends</a>
 
-FRIENDS_TALK_READLINK=><a href="%%urlread%%">%%messagecount%%&nbsp;comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+FRIENDS_TALK_READLINK=><a href="%%urlread%%#comments">%%messagecount%%&nbsp;comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
 
 FRIENDS_SKYSCRAPER_AD<=
 </td>
@@ -5130,7 +5130,7 @@ FRIENDS_WEBSITE=>
 
 FRIENDS_CLOSE_SKYSCRAPER_AD=>
 
-FRIENDS_TALK_LINKS=><BR><BR>%%readlink%%<A HREF="%%urlpost%%">Make Notes</A>
+FRIENDS_TALK_LINKS=><BR><BR>%%readlink%%<A HREF="%%urlpost%%#add_comment">Make Notes</A>
 
 FRIENDS_SKIP_FORWARD=><A HREF="%%url%%">Forward A Page</A>
 
@@ -5144,7 +5144,7 @@ FRIENDS_CURRENT=><BR>Current %%lc:what%%: %%value%%.
 
 FRIENDS_SKIP_BACKWARD=><A HREF="%%url%%">Back A Page</A>
 
-FRIENDS_TALK_READLINK=><A HREF="%%urlread%%">Read %%messagecount%% Note%%mc-plural-s%%</A> -
+FRIENDS_TALK_READLINK=><A HREF="%%urlread%%#comments">Read %%messagecount%% Note%%mc-plural-s%%</A> -
 
 FRIENDS_SKYSCRAPER_AD<=
 <div style="float: right; margin-right: 10px;">
@@ -5324,7 +5324,7 @@ FRIENDS_WEBSITE=><A HREF="%%url%%">&gt; %%name%%</A><BR>
 
 FRIENDS_CLOSE_SKYSCRAPER_AD=>
 
-FRIENDS_TALK_LINKS=><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%">comment&nbsp;on&nbsp;this</A>)</FONT>
+FRIENDS_TALK_LINKS=><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%#add_comment">comment&nbsp;on&nbsp;this</A>)</FONT>
 
 FRIENDS_SKIP_FORWARD=><A HREF="%%url%%">&gt; next %%numitems%% entries</A>
 
@@ -5338,7 +5338,7 @@ FRIENDS_CURRENT=><BR><FONT FACE="Verdana,Arial,Helvetica" SIZE=-1><B>current %%l
 
 FRIENDS_SKIP_BACKWARD=><A HREF="%%url%%">&gt; previous %%numitems%% entries</A>
 
-FRIENDS_TALK_READLINK=><A HREF="%%urlread%%">%%messagecount%%&nbsp;comment%%mc-plural-s%%</A>&nbsp;|&nbsp;
+FRIENDS_TALK_READLINK=><A HREF="%%urlread%%#comments">%%messagecount%%&nbsp;comment%%mc-plural-s%%</A>&nbsp;|&nbsp;
 
 FRIENDS_SKYSCRAPER_AD<=
 <P>
@@ -5545,7 +5545,7 @@ FRIENDS_WEBSITE<=
 
 FRIENDS_CLOSE_SKYSCRAPER_AD=>
 
-FRIENDS_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">post a comment</a>
+FRIENDS_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%#add_comment">post a comment</a>
 
 FRIENDS_SKIP_FORWARD=><a href="%%url%%">forward %%lc:numitems%% entries</a>
 
@@ -5559,7 +5559,7 @@ FRIENDS_CURRENT=><tr><td><font class="date"><b>%%what%%:</b></font></td><td><fon
 
 FRIENDS_SKIP_BACKWARD=><a href="%%url%%">back %%lc:numitems%% entries</a>
 
-FRIENDS_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</a> | 
+FRIENDS_TALK_READLINK=><a href="%%urlread%%#comments">%%messagecount%% comment%%mc-plural-s%%</a> | 
 
 FRIENDS_SKYSCRAPER_AD<=
 	<!-- AD -->
@@ -5905,7 +5905,7 @@ FRIENDS_TALK_LINKS<=
 <TD BGCOLOR="%%color:weak_back%%">
 <FONT COLOR="%%color:weak_text%%">
 <NOBR>
-Comments: %%readlink%%<A HREF="%%urlpost%%">Add Your Own</A>.
+Comments: %%readlink%%<A HREF="%%urlpost%%#add_comment">Add Your Own</A>.
 </NOBR>
 </FONT>
 </TD>
@@ -5924,7 +5924,7 @@ FRIENDS_CURRENT=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">%%what%
 
 FRIENDS_SKIP_BACKWARD=><A HREF="%%url%%">back %%numitems%% entries</A>
 
-FRIENDS_TALK_READLINK=><A HREF="%%urlread%%">Read %%messagecount%%</A> or 
+FRIENDS_TALK_READLINK=><A HREF="%%urlread%%#comments">Read %%messagecount%%</A> or 
 
 FRIENDS_SKYSCRAPER_AD<=
 </td>
@@ -6384,7 +6384,7 @@ clear: right;
 
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><a href="%%urlread%%" rel="nofollow">%%messagecount%% Comment%%mc-plural-s%%</a> -
+LASTN_TALK_READLINK=><a href="%%urlread%%#comments" rel="nofollow">%%messagecount%% Comment%%mc-plural-s%%</a> -
 
 LASTN_SKIP_BACKWARD<=
 <li><a href="%%url%%">Previous %%numitems%% Entries</a></li>
@@ -6393,7 +6393,7 @@ LASTN_SKIP_BACKWARD<=
 
 LASTN_SUBJECT=> <span class="subject">%%subject%%</span><br>
 
-LASTN_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%" rel="nofollow">Comment on this</a></div>
+LASTN_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%#add_comment" rel="nofollow">Comment on this</a></div>
 
 
 .
@@ -6537,7 +6537,7 @@ text-align: left;
 </HTML>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><B><A HREF="%%urlread%%" rel="nofollow">%%messagecount%% Comment%%mc-plural-s%%</A></B> |
+LASTN_TALK_READLINK=><B><A HREF="%%urlread%%#comments" rel="nofollow">%%messagecount%% Comment%%mc-plural-s%%</A></B> |
 
 LASTN_SKIP_BACKWARD=><A HREF="%%url%%">&lt;&lt; Previous %%numitems%%</A>
 
@@ -6545,7 +6545,7 @@ LASTN_SUBJECT=><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%subject
 
 LASTN_TALK_LINKS<=
 <DIV STYLE="text-align:right">
-  <FONT SIZE=-2>(%%readlink%%<A HREF="%%urlpost%%" rel="nofollow">Comment on this</A>)</FONT></DIV>
+  <FONT SIZE=-2>(%%readlink%%<A HREF="%%urlpost%%#add_comment" rel="nofollow">Comment on this</A>)</FONT></DIV>
 <=LASTN_TALK_LINKS
 
 
@@ -6867,13 +6867,13 @@ color:%%color:stronger_text%%;
 </html>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><a href="%%urlread%%" rel="nofollow">Read %%messagecount%%</a>&nbsp;-&nbsp;
+LASTN_TALK_READLINK=><a href="%%urlread%%#comments" rel="nofollow">Read %%messagecount%%</a>&nbsp;-&nbsp;
 
 LASTN_SKIP_BACKWARD=><a href="%%url%%">Backward</a>
 
 LASTN_SUBJECT=>%%subject%%
 
-LASTN_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%" rel="nofollow">Post</a>
+LASTN_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%#add_comment" rel="nofollow">Post</a>
 
 
 .
@@ -7258,7 +7258,7 @@ summary="">
 </html>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><a href="%%urlread%%" rel="nofollow"><b>%%messagecount%% comment%%mc-plural-s%%</b></a>|
+LASTN_TALK_READLINK=><a href="%%urlread%%#comments" rel="nofollow"><b>%%messagecount%% comment%%mc-plural-s%%</b></a>|
 
 LASTN_SKIP_BACKWARD=><a href="%%url%%">earlier</a>
 
@@ -7267,7 +7267,7 @@ LASTN_SUBJECT=>%%subject%%
 LASTN_TALK_LINKS<=
 <tr>
 <td align="right" colspan="2" width="100%" bgcolor="%%color:weak_back%%" class="comments">
-%%readlink%%<a href="%%urlpost%%" rel="nofollow">post comment</a>
+%%readlink%%<a href="%%urlpost%%#add_comment" rel="nofollow">post comment</a>
 </td>
 </tr>
 <=LASTN_TALK_LINKS
@@ -7429,14 +7429,14 @@ LASTN_PAGE<=
 </html>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><a href="%%urlread%%" rel="nofollow">%%messagecount%%&nbsp;comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+LASTN_TALK_READLINK=><a href="%%urlread%%#comments" rel="nofollow">%%messagecount%%&nbsp;comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
 
 LASTN_SKIP_BACKWARD=><a href="%%url%%">Previous&nbsp;%%numitems%%&nbsp;entries</a>
 
 LASTN_SUBJECT=> - <em>%%subject%%</em>
 
 LASTN_TALK_LINKS<=
-    <div class="Comment">(%%readlink%%<a href="%%urlpost%%" rel="nofollow">comment&nbsp;on&nbsp;this</a>)</div>
+    <div class="Comment">(%%readlink%%<a href="%%urlpost%%#add_comment" rel="nofollow">comment&nbsp;on&nbsp;this</a>)</div>
 
 <=LASTN_TALK_LINKS
 
@@ -7597,13 +7597,13 @@ text-align: left;
 </HTML>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><A HREF="%%urlread%%" rel="nofollow">Read %%messagecount%% Note%%mc-plural-s%%</A> -
+LASTN_TALK_READLINK=><A HREF="%%urlread%%#comments" rel="nofollow">Read %%messagecount%% Note%%mc-plural-s%%</A> -
 
 LASTN_SKIP_BACKWARD=><A HREF="%%url%%">Back A Page</A>
 
 LASTN_SUBJECT=> <FONT COLOR="red">%%subject%%</FONT>
 
-LASTN_TALK_LINKS=><P>%%readlink%%<A HREF="%%urlpost%%" rel="nofollow">Make Notes</A></P>
+LASTN_TALK_LINKS=><P>%%readlink%%<A HREF="%%urlpost%%#add_comment" rel="nofollow">Make Notes</A></P>
 
 
 .
@@ -7813,13 +7813,13 @@ A:active { color: %%color:page_alink%% ; }
 </HTML>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><A HREF="%%urlread%%" rel="nofollow">%%messagecount%%&nbsp;comment%%mc-plural-s%%</A>&nbsp;|&nbsp;
+LASTN_TALK_READLINK=><A HREF="%%urlread%%#comments" rel="nofollow">%%messagecount%%&nbsp;comment%%mc-plural-s%%</A>&nbsp;|&nbsp;
 
 LASTN_SKIP_BACKWARD=><A HREF="%%url%%">&gt; previous %%numitems%% entries</A>
 
 LASTN_SUBJECT=><B> - <FONT COLOR="%%color:page_text_em%%">%%subject%%</FONT></B>
 
-LASTN_TALK_LINKS=><P ALIGN="RIGHT"><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%" rel="nofollow">comment&nbsp;on&nbsp;this</A>)</FONT></P>
+LASTN_TALK_LINKS=><P ALIGN="RIGHT"><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%#add_comment" rel="nofollow">comment&nbsp;on&nbsp;this</A>)</FONT></P>
 
 
 .
@@ -8102,13 +8102,13 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 </html>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><a href="%%urlread%%" rel="nofollow">%%messagecount%% comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+LASTN_TALK_READLINK=><a href="%%urlread%%#comments" rel="nofollow">%%messagecount%% comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
 
 LASTN_SKIP_BACKWARD=><a href="%%url%%">back %%lc:numitems%% entries</a>
 
 LASTN_SUBJECT=>%%subject%%
 
-LASTN_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%" rel="nofollow">post a comment</a>
+LASTN_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%#add_comment" rel="nofollow">post a comment</a>
 
 
 .
@@ -8334,7 +8334,7 @@ LASTN_PAGE<=
 </HTML>
 <=LASTN_PAGE
 
-LASTN_TALK_READLINK=><A HREF="%%urlread%%" rel="nofollow">Read %%messagecount%%</A> or 
+LASTN_TALK_READLINK=><A HREF="%%urlread%%#comments" rel="nofollow">Read %%messagecount%%</A> or 
 
 LASTN_SKIP_BACKWARD=><A HREF="%%url%%">back %%numitems%% entries</A>
 
@@ -8345,7 +8345,7 @@ LASTN_TALK_LINKS<=
 <TD BGCOLOR="%%color:weak_back%%">
 <FONT COLOR="%%color:weak_text%%">
 <NOBR>
-Comments: %%readlink%%<A HREF="%%urlpost%%" rel="nofollow">Add Your Own</A>.
+Comments: %%readlink%%<A HREF="%%urlpost%%#add_comment" rel="nofollow">Add Your Own</A>.
 </NOBR>
 </FONT>
 </TD>
@@ -8512,7 +8512,7 @@ LASTN_SKIP_BACKWARD=><a href="%%url%%">&lt;&lt; Previous %%numitems%%</a>
 LASTN_SUBJECT=><b>%%subject%%</b>
 
 LASTN_TALK_LINKS<=
-<a href="%%urlread%%" rel="nofollow">
+<a href="%%urlread%%#comments" rel="nofollow">
 <img src="%%cons:img%%/style/webley/jwc%%readlink%%.png" border="0" /></a>
 <=LASTN_TALK_LINKS
 
