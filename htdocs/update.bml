@@ -96,17 +96,7 @@
     # see if we need to do any transformations
     LJ::run_hooks("transform_update_$POST{transform}", \%GET, \%POST) if $POST{transform};
 
-    LJ::need_res(qw(
-                    stc/display_none.css
-                    stc/lj_base.css
-                    stc/entry.css
-                    stc/widgets/selecttags.css
-                    js/jquery/jquery.ui.position.min.js
-                    js/jquery/jquery.ui.autocomplete.min.js
-                    js/jquery/jquery.bgiframe.js
-                    js/gears_init.js
-                    js/scanner.js
-                    ));
+    LJ::need_res('stc/display_none.css', 'stc/lj_base.css', 'stc/entry.css', 'stc/widgets/selecttags.css', 'js/jquery-ui-autocomplete.js', 'js/gears_init.js', 'js/scanner.js');
 
     ## figure out times
     my $now = DateTime->now;
