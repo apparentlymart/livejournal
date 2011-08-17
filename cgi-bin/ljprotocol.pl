@@ -614,7 +614,7 @@ sub getcomments {
             my $i = $item->{upost}->identity;
             $item_data->{'identity_type'} = $i->pretty_type;
             $item_data->{'identity_value'} = $i->value;
-            $item_data->{'identity_url'} = $item->{upost}->url;
+            $item_data->{'identity_url'} = $i->url($item->{upost});
             $item_data->{'identity_display'} = $item->{upost}->display_name;
         }
 
@@ -1027,7 +1027,7 @@ sub getfriendspage
                 my $i = $users->{ $_->{posterid} }->identity;
                 $_->{'identity_type'} = $i->pretty_type;
                 $_->{'identity_value'} = $i->value;
-                $_->{'identity_url'} = $users->{ $_->{posterid} }->url;
+                $_->{'identity_url'} = $i->url($users->{ $_->{posterid} });
                 $_->{'identity_display'} = $users->{ $_->{posterid} }->display_name;
         }
         delete $_->{posterid};
@@ -3207,7 +3207,7 @@ sub getevents
                 my $i = $uposter->identity;
                 $evt->{'identity_type'} = $i->pretty_type;
                 $evt->{'identity_value'} = $i->value;
-                $evt->{'identity_url'} = $uposter->url;
+                $evt->{'identity_url'} = $i->url($uposter);
                 $evt->{'identity_display'} = $uposter->display_name;
             }
         }
@@ -3499,7 +3499,7 @@ sub editfriends
                 my $i = $row->identity;
                 $added->{'identity_type'} = $i->pretty_type;
                 $added->{'identity_value'} = $i->value;
-                $added->{'identity_url'} = $row->url;
+                $added->{'identity_url'} = $i->url($row);
                 $added->{'identity_display'} = $row->display_name;
             }
             $added->{"type"} = {
@@ -3860,7 +3860,7 @@ sub list_friends
             my $i = $u->identity;
             $r->{'identity_type'} = $i->pretty_type;
             $r->{'identity_value'} = $i->value;
-            $r->{'identity_url'} = $u->url;
+            $r->{'identity_url'} = $i->url($u);
             $r->{'identity_display'} = $u->display_name;
         }
 

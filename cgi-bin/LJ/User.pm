@@ -1286,7 +1286,7 @@ sub url {
     $url ||= $u->prop('url');
     return unless $url;
 
-    $url = "http://$url" unless $url =~ m!^http://!;
+    $url = "http://$url" unless $url =~ m!^https?://!;
 
     return $url;
 }
@@ -5999,7 +5999,6 @@ sub custom_usericon {
 
 sub set_custom_usericon {
     my ($u, $url) = @_;
-    my $uid = $u->id;
 
     $u->set_prop( 'custom_usericon' => $url );
 }

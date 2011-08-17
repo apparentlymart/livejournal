@@ -86,9 +86,9 @@
 					return;
 				}
 
-				var isMouseOver = evt.name == 'mouseover';
-				var node = isMouseOver ? evt.data.getTarget() : editor.getSelection().getRanges()[0].startContainer;
+				var node = evt.data.getTarget();
 				var actNode;
+				var isNoMouseOver = evt.name != 'mouseover';
 
 				if (node.type != 1) {
 					node = node.getParent();
@@ -113,12 +113,22 @@
 				}
 
 				if (cmd && ljNoteData.hasOwnProperty(cmd)) {
-					if (!isMouseOver) {
+					if (isNoMouseOver) {
 						ljNoteData[cmd].node = actNode;
+						editor.getCommand(cmd).setState(CKEDITOR.TRISTATE_ON);
 					}
 					note.show(ljNoteData[cmd].html, cmd, actNode);
 				} else {
 					note.hide();
+				}
+
+				if (isNoMouseOver) {
+					for (var command in ljNoteData) {
+						if (ljNoteData.hasOwnProperty(command) && (!cmd || cmd != command)) {
+							delete ljNoteData[command].node;
+							editor.getCommand(command).setState(CKEDITOR.TRISTATE_OFF);
+						}
+					}
 				}
 			}
 
@@ -126,19 +136,14 @@
 				html = html.replace(/<((?!br)[^\s>]+)([^\/>]+)?\/>/gi, '<$1$2></$1>')
 					.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site
 					.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
-					.replace(/<lj-embed\s*(?:id="(\d*)")?\s*>([\s\S]*?)<\/lj-embed>/gi, '<div class="ljembed" embedid="$1">$2</div>')
 					.replace(/<lj-poll .*?>[^\b]*?<\/lj-poll>/gm,
 					function(ljtags) {
 						return new Poll(ljtags).outputHTML();
 					}).replace(/<lj-template(.*?)><\/lj-template>/g, "<lj-template$1 />");
 
-				html = html.replace(/<lj-cut([^>]*)><\/lj-cut>/g, '<lj-cut$1>\ufeff</lj-cut>')
-					.replace(/(<lj-cut[^>]*>)/g, '\ufeff$1').replace(/(<\/lj-cut>)/g, '$1\ufeff');
-
 				// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
 				if (CKEDITOR.env.ie) {
-					html = html.replace(/<lj-cut([^>]*)>/g, '<lj:cut$1>').replace(/<\/lj-cut>/g, '</lj:cut>')
-						.replace(/<([\/])?lj-raw>/g, '<$1lj:raw>').replace(/<([\/])?lj-wishlist>/g, '<$1lj:wishlist>')
+					html = html.replace(/<([\/])?lj-raw>/g, '<$1lj:raw>').replace(/<([\/])?lj-wishlist>/g, '<$1lj:wishlist>')
 						.replace(/(<lj [^>]*)> /g, '$1> '); // IE merge spaces
 				} else {
 					// close <lj user> tags
@@ -172,7 +177,7 @@
 					}
 				}
 
-				html = html.replace(/<form.*?class="ljpoll" data="([^"]*)"[\s\S]*?<\/form>/gi,
+				html = html.replace(/<form.*?class="ljpoll".*?data="([^"]*)"[\s\S]*?<\/form>/gi,
 					function(form, data) {
 						return unescape(data);
 					}).replace(/<\/lj>/g, '');
@@ -180,8 +185,6 @@
 				html = html
 					.replace(/<div(?=[^>]*class="ljvideo")[^>]*url="(\S+)"[^>]*><img.+?\/><\/div>/g, '<lj-template name="video">$1</lj-template>')
 					.replace(/<div(?=[^>]*class="ljvideo")[^>]*url="\S+"[^>]*>([\s\S]+?)<\/div>/g, '<p>$1</p>')
-					.replace(/<div class=['"]ljembed['"](\s*embedid="(\d*)")?\s*>([\s\S]*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')
-					.replace(/<div\s*(embedid="(\d*)")?\s*class=['"]ljembed['"]\s*>([\s\S]*?)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>')// convert qotd
 					.replace(/<div([^>]*)qotdid="(\d+)"([^>]*)>[^\b]*<\/div>(<br \/>)*/g, '<lj-template id="$2"$1$3 /><br />')// div tag and qotdid attrib
 					.replace(/(<lj-template id="\d+" )([^>]*)class="ljqotd"?([^>]*\/>)/g, '$1name="qotd" $2$3')// class attrib
 					.replace(/(<lj-template id="\d+" name="qotd" )[^>]*(lang="\w+")[^>]*\/>/g, '$1$2 \/>'); // lang attrib
@@ -305,7 +308,7 @@
 					function callCmd() {
 						if (currentData.cmd) {
 							currentNoteNode = ljNoteData[currentData.cmd].node = currentData.node;
-							editor.getCommand(currentData.cmd).exec();
+							editor.execCommand(currentData.cmd);
 						}
 						return false;
 					}
@@ -379,15 +382,6 @@
 			//////////  LJ User Button //////////////
 			var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml';
 
-			editor.attachStyleStateChange(new CKEDITOR.style({
-				element: 'span'
-			}), function() {
-				var selectNode = editor.getSelection().getStartElement().getAscendant('span', true);
-				var isUserLink = selectNode && selectNode.hasClass('ljuser');
-				ljNoteData.LJUserLink.node = isUserLink ? selectNode : null;
-				editor.getCommand('LJUserLink').setState(isUserLink ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF);
-			});
-
 			editor.on('doubleclick', function(evt) {
 				var command = editor.getCommand('LJUserLink');
 				if (command.state == CKEDITOR.TRISTATE_ON) {
@@ -460,8 +454,7 @@
 			editor.addCommand('LJImage', {
 				exec: function(editor) {
 					if (ljNoteData.LJImage.node) {
-						editor.getSelection().selectElement(ljNoteData.LJImage.node);
-						editor.getCommand('image').exec();
+						editor.openDialog('image');
 					} else if (window.ljphotoEnabled) {
 						jQuery('#updateForm').photouploader({
 							type: 'upload'
@@ -469,30 +462,16 @@
 							editor.insertHtml(html);
 						});
 					} else {
-						editor.getCommand('image').exec();
+						editor.openDialog('image');
 					}
-				}
+				},
+				editorFocus: false
 			});
 
-			editor.attachStyleStateChange(new CKEDITOR.style({
-				element: 'img'
-			}), function(state) {
-				if (state == CKEDITOR.TRISTATE_OFF && !currentNoteNode) {
-					delete ljNoteData.LJImage.node;
+			editor.on('doubleclick', function() {
+				if (ljNoteData.LJImage.node){
+					editor.openDialog('image');
 				}
-
-				if (!window.ljphotoEnabled) {
-					editor.getCommand('LJImage').setState(state);
-				}
-			});
-
-			editor.on('doubleclick', function(evt) {
-				var command = editor.getCommand('LJImage');
-				if (command.state == CKEDITOR.TRISTATE_ON) {
-					command.exec();
-				}
-
-				evt.data.dialog = '';
 			});
 
 			editor.ui.addButton('LJImage', {
@@ -503,35 +482,229 @@
 			//////////  LJ Link Button //////////////
 			editor.addCommand('LJLink', {
 				exec: function(editor) {
-					if (ljNoteData.LJLink.node) {
-						editor.getSelection().selectElement(ljNoteData.LJLink.node);
-					}
-					editor.getCommand('link').exec();
-				}
-			});
-
-			editor.attachStyleStateChange(new CKEDITOR.style({
-				element: 'a'
-			}), function(state) {
-				if (state == CKEDITOR.TRISTATE_OFF && !currentNoteNode) {
-					delete ljNoteData.LJLink.node;
-				}
-				editor.getCommand('LJLink').setState(state);
+					editor.openDialog('link');
+				},
+				editorFocus: false
 			});
 
 			editor.on('doubleclick', function(evt) {
-				var command = editor.getCommand('LJLink');
-				if (command.state == CKEDITOR.TRISTATE_ON) {
-					command.exec();
+				if (ljNoteData.LJLink.node) {
+					editor.openDialog('link');
 				}
-
-				evt.data.dialog = '';
 			});
 
 			editor.ui.addButton('LJLink', {
 				label: editor.lang.link.tollbar,
 				command: 'LJLink'
 			});
+
+			//////////  LJ Justify //////////////
+			(function() {
+				function getState(editor, path) {
+					var firstBlock = path.block || path.blockLimit;
+
+					if (!firstBlock || firstBlock.getName() == 'body')
+						return CKEDITOR.TRISTATE_OFF;
+
+					return ( getAlignment(firstBlock, editor.config.useComputedState) == this.value ) ? CKEDITOR
+						.TRISTATE_ON : CKEDITOR.TRISTATE_OFF;
+				}
+
+				function getAlignment(element, useComputedState) {
+					useComputedState = useComputedState === undefined || useComputedState;
+
+					var align;
+					if (useComputedState)
+						align = element.getComputedStyle('text-align'); else {
+						while (!element.hasAttribute || !( element.hasAttribute('align') || element.getStyle('text-align') )) {
+							var parent = element.getParent();
+							if (!parent)
+								break;
+							element = parent;
+						}
+						align = element.getStyle('text-align') || element.getAttribute('align') || '';
+					}
+
+					align && ( align = align.replace(/-moz-|-webkit-|start|auto/i, '') );
+
+					!align && useComputedState && ( align = element.getComputedStyle('direction') == 'rtl' ? 'right' : 'left' );
+
+					return align;
+				}
+
+				function onSelectionChange(evt) {
+					if (evt.editor.readOnly)
+						return;
+
+					var command = evt.editor.getCommand(this.name);
+					command.state = getState.call(this, evt.editor, evt.data.path);
+					command.fire('state');
+				}
+
+				function justifyCommand(editor, name, value) {
+					this.name = name;
+					this.value = value;
+
+					var classes = editor.config.justifyClasses;
+					if (classes) {
+						switch (value) {
+							case 'left' :
+								this.cssClassName = classes[0];
+								break;
+							case 'center' :
+								this.cssClassName = classes[1];
+								break;
+							case 'right' :
+								this.cssClassName = classes[2];
+								break;
+							case 'justify' :
+								this.cssClassName = classes[3];
+								break;
+						}
+
+						this.cssClassRegex = new RegExp('(?:^|\\s+)(?:' + classes.join('|') + ')(?=$|\\s)');
+					}
+				}
+
+				function onDirChanged(e) {
+					var editor = e.editor;
+
+					var range = new CKEDITOR.dom.range(editor.document);
+					range.setStartBefore(e.data.node);
+					range.setEndAfter(e.data.node);
+
+					var walker = new CKEDITOR.dom.walker(range),
+						node;
+
+					while (( node = walker.next() )) {
+						if (node.type == CKEDITOR.NODE_ELEMENT) {
+							// A child with the defined dir is to be ignored.
+							if (!node.equals(e.data.node) && node.getDirection()) {
+								range.setStartAfter(node);
+								walker = new CKEDITOR.dom.walker(range);
+								continue;
+							}
+
+							// Switch the alignment.
+							var classes = editor.config.justifyClasses;
+							if (classes) {
+								// The left align class.
+								if (node.hasClass(classes[ 0 ])) {
+									node.removeClass(classes[ 0 ]);
+									node.addClass(classes[ 2 ]);
+								}
+								// The right align class.
+								else if (node.hasClass(classes[ 2 ])) {
+									node.removeClass(classes[ 2 ]);
+									node.addClass(classes[ 0 ]);
+								}
+							}
+
+							// Always switch CSS margins.
+							var style = 'text-align';
+							var align = node.getStyle(style);
+
+							if (align == 'left')
+								node.setStyle(style, 'right'); else if (align == 'right')
+								node.setStyle(style, 'left');
+						}
+					}
+				}
+
+				justifyCommand.prototype = {
+					exec : function(editor) {
+						if(ljNoteData.LJLike.node){
+							ljNoteData.LJLike.node.removeAttribute('contenteditable');
+							editor.getSelection().selectElement(ljNoteData.LJLike.node);
+						}
+
+						var selection = editor.getSelection(),
+							enterMode = editor.config.enterMode;
+
+						if (!selection)
+							return;
+
+						var bookmarks = selection.createBookmarks(),
+							ranges = selection.getRanges(true);
+
+						var cssClassName = this.cssClassName,
+							iterator,
+							block;
+
+						var useComputedState = editor.config.useComputedState;
+						useComputedState = useComputedState === undefined || useComputedState;
+
+						for (var i = ranges.length - 1; i >= 0; i--) {
+							iterator = ranges[ i ].createIterator();
+							iterator.enlargeBr = enterMode != CKEDITOR.ENTER_BR;
+
+							while (( block = iterator.getNextParagraph(enterMode == CKEDITOR.ENTER_P ? 'p' : 'div') )) {
+								block.removeAttribute('align');
+								block.removeStyle('text-align');
+
+								// Remove any of the alignment classes from the className.
+								var className = cssClassName && ( block.$.className = CKEDITOR.tools.ltrim(block.$.className
+									.replace(this.cssClassRegex, '')) );
+
+								var apply = ( this.state == CKEDITOR
+									.TRISTATE_OFF ) && ( !useComputedState || ( getAlignment(block, true) != this.value ) );
+
+								if (cssClassName) {
+									// Append the desired class name.
+									if (apply)
+										block.addClass(cssClassName); else if (!className)
+										block.removeAttribute('class');
+								} else if (apply)
+									block.setStyle('text-align', this.value);
+							}
+
+						}
+
+						editor.focus();
+						editor.forceNextSelectionCheck();
+						selection.selectBookmarks(bookmarks);
+
+						if (ljNoteData.LJLike.node) {
+							ljNoteData.LJLike.node.setAttribute('contenteditable', 'false');
+						}
+					}
+				};
+
+				var left = new justifyCommand(editor, 'justifyleft', 'left'),
+					center = new justifyCommand(editor, 'justifycenter', 'center'),
+					right = new justifyCommand(editor, 'justifyright', 'right'),
+					justify = new justifyCommand(editor, 'justifyblock', 'justify');
+
+				editor.addCommand('justifyleft', left);
+				editor.addCommand('justifycenter', center);
+				editor.addCommand('justifyright', right);
+				editor.addCommand('justifyblock', justify);
+
+				editor.ui.addButton('JustifyLeft', {
+					label : editor.lang.justify.left,
+					command : 'justifyleft'
+				});
+				editor.ui.addButton('JustifyCenter', {
+					label : editor.lang.justify.center,
+					command : 'justifycenter'
+				});
+				editor.ui.addButton('JustifyRight', {
+					label : editor.lang.justify.right,
+					command : 'justifyright'
+				});
+				editor.ui.addButton('JustifyBlock', {
+					label : editor.lang.justify.block,
+					command : 'justifyblock'
+				});
+
+				editor.on('selectionChange', CKEDITOR.tools.bind(onSelectionChange, left));
+				editor.on('selectionChange', CKEDITOR.tools.bind(onSelectionChange, right));
+				editor.on('selectionChange', CKEDITOR.tools.bind(onSelectionChange, center));
+				editor.on('selectionChange', CKEDITOR.tools.bind(onSelectionChange, justify));
+				editor.on('dirChanged', onDirChanged);
+
+			})();
+
 
 			//////////  LJ Embed Media Button //////////////
 			editor.addCommand('LJEmbedLink', {
@@ -547,27 +720,24 @@
 				command: 'LJEmbedLink'
 			});
 
-			editor.addCss('img.lj-embed' + '{' + 'background-image: url(' + CKEDITOR.getUrl(this
-				.path + 'images/placeholder_flash.png') + ');' + 'background-position: center center;' + 'background-repeat: no-repeat;' + 'border: 1px solid #a9a9a9;' + 'width: 80px;' + 'height: 80px;' + '}');
+			editor.addCss('.lj-embed' + '{'
+				+ 'background-image: url(' + CKEDITOR.getUrl(this.path + 'images/placeholder_flash.png') + ');'
+				+ 'background-position: center center;'
+				+ 'background-repeat: no-repeat;'
+				+ 'background-color: #CCCCCC;'
+				+ 'border: 1px dotted #000000;'
+				+ 'height: 80px;'
+			+ '}');
 
 			function doEmbed(content) {
 				if (content && content.length) {
 					if (window.switchedRteOn) {
-						editor.insertHtml('<div class="ljembed">' + content + '</div><br/>');
+						editor.insertHtml('<div class="lj-embed" contentEditable="false">' + content + '</div><br/>');
 					}
 				}
 			}
 
 			//////////  LJ Cut Button //////////////
-			editor.attachStyleStateChange(new CKEDITOR.style({
-				element: 'lj-cut'
-			}), function(state) {
-				if (state == CKEDITOR.TRISTATE_OFF && !currentNoteNode) {
-					delete ljNoteData.LJCut.node;
-				}
-				editor.getCommand('LJCut').setState(state);
-			});
-
 			editor.on('doubleclick', function(evt) {
 				var command = editor.getCommand('LJCut');
 				if (command.state == CKEDITOR.TRISTATE_ON) {
@@ -613,18 +783,6 @@
 			//////////  LJ Poll Button //////////////
 			if (top.canmakepoll) {
 				var currentPoll;
-
-				editor.attachStyleStateChange(new CKEDITOR.style({
-					element: 'form',
-					attributes: {
-						'class': 'ljpoll'
-					}
-				}), function(state) {
-					if (state == CKEDITOR.TRISTATE_OFF && !currentNoteNode) {
-						delete ljNoteData.LJPollLink.node;
-					}
-					editor.getCommand('LJPollLink').setState(state);
-				});
 
 				editor.on('doubleclick', function(evt) {
 					var command = editor.getCommand('LJPollLink');
@@ -814,8 +972,8 @@
 								ljNoteData.LJLike.node.setAttribute('buttons', attr.join(','));
 								ljNoteData.LJLike.node.setHtml(likeHtml);
 							} else {
-								editor.insertHtml('<div class="lj-like" lj-cmd="LJLike" buttons="' + attr
-									.join(',') + '">' + likeHtml + '</div>');
+								editor.insertHtml('<div contentEditable="false" class="lj-like" lj-cmd="LJLike" buttons="' + attr
+									.join(',') + '">' + likeHtml + '</div><br />');
 							}
 						} else if (likeNode) {
 							ljNoteData.LJLike.node.remove();
@@ -880,26 +1038,6 @@
 				}
 			});
 
-			editor.attachStyleStateChange(new CKEDITOR.style({
-				element: 'div'
-			}), function() {
-				var ljLikeNode = this.getSelection().getStartElement();
-
-				while (ljLikeNode) {
-					if (ljLikeNode.hasClass('lj-like')) {
-						ljNoteData.LJLike.node = ljLikeNode;
-						break;
-					}
-					ljLikeNode = ljLikeNode.getParent();
-				}
-
-				if (!ljLikeNode && !currentNoteNode) {
-					delete ljNoteData.LJLike.node;
-				}
-
-				editor.getCommand('LJLike').setState(ljLikeNode ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF);
-			});
-
 			editor.on('doubleclick', function() {
 				var command = editor.getCommand('LJLike');
 				if (command.state == CKEDITOR.TRISTATE_ON) {
@@ -915,18 +1053,6 @@
 			});
 		},
 		afterInit: function(editor) {
-			var flashFilenameRegex = /\.swf(?:$|\?)/i;
-
-			function isFlashEmbed(element) {
-				var attributes = element.attributes;
-
-				return ( attributes.type == 'application/x-shockwave-flash' || flashFilenameRegex.test(attributes.src || '') );
-			}
-
-			function createFakeElement(editor, realElement) {
-				return editor.createFakeParserElement(realElement, 'lj-embed', 'flash', false);
-			}
-
 			var dataProcessor = editor.dataProcessor;
 
 			dataProcessor.dataFilter.addRules({
@@ -934,29 +1060,20 @@
 					'lj-cut': function(element) {
 						element.attributes['lj-cmd'] = 'LJCut';
 					},
-					'cke:object': function(element) {
-						//////////  LJ Embed Media Button //////////////
-						var attributes = element.attributes,
-							classId = attributes.classid && String(attributes.classid).toLowerCase();
+					'lj-embed': function(element){
+						var fakeElement = new CKEDITOR.htmlParser.element('div');
+						fakeElement.attributes.contentEditable = 'false';
+						fakeElement.attributes['class'] = 'lj-embed';
+						fakeElement.attributes['embedid'] = element.attributes.id;
+						fakeElement.children = element.children;
 
-						if (!classId && !isFlashEmbed(element)) {
-							for (var i = 0; i < element.children.length; i++) {
-								if (element.children[i].name == 'cke:embed') {
-									return isFlashEmbed(element.children[i]) ? createFakeElement(editor, element) : null;
-								}
-							}
-							return null;
-						}
-
-						return createFakeElement(editor, element);
-					},
-					'cke:embed': function(element) {
-						return isFlashEmbed(element) ? createFakeElement(editor, element) : null;
+						return fakeElement;
 					},
 					'lj-like': function(element) {
 						var attr = [];
 
 						var fakeElement = new CKEDITOR.htmlParser.element('div');
+						fakeElement.attributes.contentEditable = 'false';
 						fakeElement.attributes['class'] = 'lj-like';
 						fakeElement.attributes['lj-cmd'] = 'LJLike';
 
@@ -1003,7 +1120,7 @@
 									return;
 								}
 
-								data.ljuser = data.ljuser.replace("<span class='useralias-value'>*</span>", '');
+								data.ljuser = data.ljuser.replace('<span class="useralias-value">*</span>', '');
 
 								var ljTags = editor.document.getElementsByTag('lj');
 
@@ -1064,6 +1181,12 @@
 							ljLikeNode.isEmpty = true;
 							ljLikeNode.isOptionalClose = true;
 							return ljLikeNode;
+						} else if(element.attributes['class'] == 'lj-embed'){
+							var ljEmbedNode = new CKEDITOR.htmlParser.element('lj-embed');
+							ljEmbedNode.attributes.id = element.attributes.embedid;
+							ljEmbedNode.children = element.children;
+
+							return ljEmbedNode;
 						} else if (!element.children.length) {
 							return false;
 						}
@@ -1087,12 +1210,15 @@
 				attributes: {
 					'lj-cmd': function() {
 						return false;
+					},
+					'contenteditable': function(){
+						return false;
 					}
 				}
 			});
 		},
 
-		requires: ['fakeobjects']
+		requires: ['fakeobjects', 'domiterator']
 	});
 
 })();

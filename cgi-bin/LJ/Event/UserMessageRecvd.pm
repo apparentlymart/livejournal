@@ -82,6 +82,7 @@ sub load_message {
     my $msg = LJ::Message->load({msgid => $self->arg1,
                                  journalid => $self->u->{userid},
                                  otherid => $self->arg2});
+
     return $msg;
 }
 
@@ -143,7 +144,13 @@ sub as_sms {
     my ($self, $u) = @_;
     my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
-    my $subject = $self->load_message->subject;
+    
+    my $subject = '';
+
+    # make subject if if not empty
+    $subject = $self->load_message->subject
+        if $self->load_message->subject_raw;
+
     my $other_u = $self->load_message->other_u;
     my $body    = $self->load_message->body;
 
