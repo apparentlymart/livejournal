@@ -2802,6 +2802,10 @@ fotki.album.remove_album=Remove album
 
 fotki.album.remove_image=Remove image
 
+fotki.album.remove_photo=Remove photo
+
+fotki.album.remove_photo_desc=Remove this photo
+
 fotki.album.remove.this.image=Remove this image
 
 fotki.album.remove_album_desc=Images will be deleted and disappear from all related posts in your blog
