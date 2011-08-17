@@ -133,7 +133,7 @@
 			}
 
 			editor.dataProcessor.toHtml = function(html, fixForBody) {
-				html = html.replace(/<((?!br)[^\s>]+)([^\/>]+)?\/>/gi, '<$1$2></$1>')
+				html = html.replace(/<((?!br)[^\s>]+)((?!\/>).*?)\/>/gi, '<$1$2></$1>')
 					.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site
 					.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
 					.replace(/<lj-poll .*?>[^\b]*?<\/lj-poll>/gm,
@@ -1160,6 +1160,19 @@
 							});
 						}
 					},
+					'lj-map': function(element){
+						var fakeElement = new CKEDITOR.htmlParser.element('div');
+						fakeElement.attributes['lj-url'] = encodeURIComponent(element.attributes.url);
+						fakeElement.attributes.contentEditable = 'false';
+
+						var width = 'width: ' + (isNaN(element.attributes.width) ? 100 : element.attributes.width) + 'px; ';
+						var height = 'height: ' + (isNaN(element.attributes.height) ? 100 : element.attributes.height) + 'px; ';
+						fakeElement.attributes.style = width + height;
+
+						fakeElement.attributes['class'] = 'lj-map';
+
+						return fakeElement;
+					},
 					a: function(element) {
 						element.attributes['lj-cmd'] = 'LJLink';
 					},
@@ -1187,6 +1200,15 @@
 							ljEmbedNode.children = element.children;
 
 							return ljEmbedNode;
+						} else if (element.attributes['class'] == 'lj-map') {
+							var ljMapNode = new CKEDITOR.htmlParser.element('lj-map');
+							ljMapNode.attributes.url = decodeURIComponent(element.attributes['lj-url']);
+							element.attributes.style.replace(/([a-z-]+):(.*?);/gi, function(relust, name, value){
+								ljMapNode.attributes[name] = parseInt(value);
+							});
+
+							ljMapNode.isOptionalClose = ljMapNode.isEmpty = true;
+							return ljMapNode;
 						} else if (!element.children.length) {
 							return false;
 						}
