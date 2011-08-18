@@ -860,13 +860,24 @@ InOb.fail = function (msg){
 
 // image upload stuff
 InOb.onUpload = function (surl, furl, swidth, sheight){
-	var ta = $("updateForm");
-	if(! ta){
-		return InOb.fail("no updateform");
+
+	var html = "\n<a href=\"" + furl + "\"><img src=\"" + surl + "\" width=\"" + swidth + "\" height=\"" + sheight + "\" border='0'/></a>";
+
+	if (window.switchedRteOn) {
+		CKEDITOR.instances.draft.insertHtml(html);
+	} else {
+		var ta = $("updateForm");
+		if (!ta) {
+			return InOb.fail("no updateform");
+		}
+		ta = ta.event;
+
+		var selection = DOM.getSelectedRange($('draft'));
+		var value = ta.value;
+		var start = value.substring(0, selection.start);
+		var end = value.substring(selection.end);
+		ta.value = start + "\n" + html + end;
 	}
-	ta = ta.event;
-	ta.value = ta
-		.value + "\n<a href=\"" + furl + "\"><img src=\"" + surl + "\" width=\"" + swidth + "\" height=\"" + sheight + "\" border='0'/></a>";
 };
 
 InOb.onInsURL = function (url, width, height){
