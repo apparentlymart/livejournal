@@ -726,7 +726,7 @@
 				+ 'background-repeat: no-repeat;'
 				+ 'background-color: #CCCCCC;'
 				+ 'border: 1px dotted #000000;'
-				+ 'height: 80px;'
+				+ 'min-height: 80px;'
 			+ '}');
 
 			function doEmbed(content) {
