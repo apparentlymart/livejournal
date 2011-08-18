@@ -1386,11 +1386,8 @@ li.cke_panel_listItem {
 			}
 .cke-dialog-likes-faq {
     margin: 0;
-    text-align: right;
     }
     .cke-dialog-likes-faq A,
     .cke-dialog-likes-faq A IMG {
         cursor: pointer;
         }
-
-

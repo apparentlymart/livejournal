@@ -4,6 +4,7 @@ use Carp qw/ croak /;
 
 use Class::Autouse qw(
                       LJ::Typemap
+                      LJ::NotificationItem
                       );
 
 my %singletons = (); # journalid-msgid

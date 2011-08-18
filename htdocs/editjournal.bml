@@ -8,7 +8,8 @@ body<=
     BML::decl_params(_default => qr/./);
 
     use LJ::Fotki::Photo;
-    use LJ::Fotki::Album;	
+    use LJ::Fotki::Album;
+    use LJ::Fotki::UserSpace;
     use LJ::Widget::Fotki::Upload;
 
     my $head     = \$_[0]->{'head'};
@@ -406,7 +407,7 @@ body<=
             my $onload;
             $ret .= LJ::entry_form($entry, \$$head, \$onload, undef, \$js);
             $ret .= "</form></div>";
-            my $like_faq_link = LJ::help_icon_html('like');
+            my $like_faq_link = LJ::help_icon_html('like', undef, undef, BML::ml('fcklang.ljlike.faq'));
             $ret .= <<LIKE_FAQ;
             <script type="text/javascript">
             // <![CDATA[
@@ -465,7 +466,7 @@ LIKE_FAQ
                     } @$album_list
                 ];
                 $album_list_json = LJ::JSON->to_json ( $album_list );
-                my $spaces = LJ::Fotki::Photo->get_spaces ( $remote );
+                my $spaces = LJ::Fotki::UserSpace->get_spaces ( $remote );
                 $available_space = $spaces->[2] || 0;
 
                 my $auth_token = LJ::Auth->sessionless_auth_token ($LJ::DOMAIN_WEB."/pics/upload", user => $remote ? $remote->user : undef);

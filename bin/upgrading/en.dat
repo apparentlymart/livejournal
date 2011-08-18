@@ -2697,6 +2697,8 @@ fcklang.ljlike.button.twitter=Twitter
 
 fcklang.ljlike.button.give=10 Give
 
+fcklang.ljlike.faq=FAQ
+
 fcklang.ljlike.wizardnotice=Likes must be edited inside the Like Wizard
 
 fcklang.ljlike.wizardnoticelink=Go to like wizard
@@ -2801,6 +2803,10 @@ fotki.album.remove=Remove
 fotki.album.remove_album=Remove album
 
 fotki.album.remove_image=Remove image
+
+fotki.album.remove_photo=Remove photo
+
+fotki.album.remove_photo_desc=Remove this photo
 
 fotki.album.remove.this.image=Remove this image
 

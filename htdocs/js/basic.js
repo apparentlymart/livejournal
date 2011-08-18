@@ -254,7 +254,17 @@ Object.extend(String.prototype, {
 	trim: function()
 	{
 		return this.replace(/^\s+|\s+$/g, '');
-	}
+	},
+	
+
+	supplant: function(o)
+	{
+		return this.replace(/{([^{}]*)}/g,
+			function (a, b) {
+				var r = o[b];
+				return typeof r === 'string' || typeof r === 'number' ? r : a;
+			});		
+	}	
 });
 
 
@@ -366,8 +376,6 @@ Object.extend(Array.prototype, {
 		return -1;
 	}
 });
-
-
 
 /* ajax */
 var XMLHttpRequest = XMLHttpRequest || window.ActiveXObject && function(){
