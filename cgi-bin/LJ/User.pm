@@ -3845,7 +3845,7 @@ sub can_use_ljphoto {
     ## For beta-testers only.
     my $comm = LJ::load_user($LJ::LJPHOTO_ALLOW_FROM_COMMUNITY);
     return 1 if $u->can_manage ($comm);
-    return 0 unless $comm->is_friend($u);
+    return 0 unless $comm && $comm->is_friend($u);
 
     return 1;
 }
