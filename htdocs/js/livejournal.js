@@ -464,34 +464,4 @@ LiveJournal.JSON = function() {
 			return false;
 		}
 	};
-}();	
-
-LiveJournal.String = {
-	supplant: function(s, o) {
-		return s.replace(/{([^{}]*)}/g,
-			function (a, b) {
-				var r = o[b];
-				return typeof r === 'string' || typeof r === 'number' ? r : a;
-			});		
-	}
-}
-
-LiveJournal.Object = {
-	supplant: function(destObj, dataObj) {
-		var obj = {};;
-		
-		for (var key in destObj) {
-			if (!destObj.hasOwnProperty(key)) {
-				continue;
-			}
-
-			if (typeof destObj[key] == 'string') {
-				obj[key] = LiveJournal.String.supplant(destObj[key], dataObj);
-			} else {
-				obj[key] = destObj[key];
-			}
-		}
-		
-		return obj;
-	}
-}
+}();
