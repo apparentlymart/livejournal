@@ -200,7 +200,7 @@ HTML{font-size:100.01%;}HTML,BODY,DIV,SPAN,APPLET,OBJECT,H1,H2,H3,H4,H5,H6,P,BLO
 
 /* Some base styles */
 BODY {
-	font:62.5%/1.5 Helvetica, Arial, serif;
+	font:62.5%/1.5 Helvetica, Arial, sans-serif;
 	}
 
 /* Comments */
