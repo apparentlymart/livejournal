@@ -1906,15 +1906,15 @@ sub talkform {
         }
     }
 
-    my $logips = $journalu->{'opt_logcommentips'};
-    my ( $ml_logcommentips, $show_logips );
-    if ( $logips =~ /[AS]/ ) {
+    my $show_logips = $journalu->{'opt_logcommentips'};
+    my $ml_logcommentips;
+
+    if ( $show_logips =~ /[AS]/ ) {
         my $mlkey =
-            $logips eq 'A'
+            $show_logips eq 'A'
             ? '/talkpost.bml.logyourip'
             : '/talkpost.bml.loganonip';
 
-        $show_logips      = 1;
         $ml_logcommentips = LJ::Lang::ml($mlkey);
     }
 
