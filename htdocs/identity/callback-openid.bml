@@ -65,6 +65,9 @@ body<=
     # affects the partner sites authorization
     LJ::Session->allow_login_from_iframe;
 
+    # save current user id, so we can restore it later
+    $u->save_current();
+
     $u->make_login_session($sess_opts->{'exptype'}, $sess_opts->{'ipfixed'});
     LJ::set_remote($u);
 
