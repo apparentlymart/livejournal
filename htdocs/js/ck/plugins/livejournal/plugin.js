@@ -462,7 +462,7 @@
 							editor.insertHtml(html);
 						});
 					} else {
-						editor.openDialog('image');
+						InOb.handleInsertImage();
 					}
 				},
 				editorFocus: false
@@ -470,7 +470,7 @@
 
 			editor.on('doubleclick', function() {
 				if (ljNoteData.LJImage.node){
-					editor.openDialog('image');
+					editor.execCommand('LJImage');
 				}
 			});
 
@@ -541,7 +541,7 @@
 					command.fire('state');
 				}
 
-				function justifyCommand(editor, name, value) {
+				function JustifyCommand(editor, name, value) {
 					this.name = name;
 					this.value = value;
 
@@ -611,7 +611,7 @@
 					}
 				}
 
-				justifyCommand.prototype = {
+				JustifyCommand.prototype = {
 					exec : function(editor) {
 						if(ljNoteData.LJLike.node){
 							ljNoteData.LJLike.node.removeAttribute('contenteditable');
@@ -670,10 +670,10 @@
 					}
 				};
 
-				var left = new justifyCommand(editor, 'justifyleft', 'left'),
-					center = new justifyCommand(editor, 'justifycenter', 'center'),
-					right = new justifyCommand(editor, 'justifyright', 'right'),
-					justify = new justifyCommand(editor, 'justifyblock', 'justify');
+				var left = new JustifyCommand(editor, 'justifyleft', 'left'),
+					center = new JustifyCommand(editor, 'justifycenter', 'center'),
+					right = new JustifyCommand(editor, 'justifyright', 'right'),
+					justify = new JustifyCommand(editor, 'justifyblock', 'justify');
 
 				editor.addCommand('justifyleft', left);
 				editor.addCommand('justifycenter', center);

@@ -888,11 +888,17 @@ InOb.onInsURL = function (url, width, height){
 	}
 	ta = ta.event;
 
-	var selection = DOM.getSelectedRange($('draft'));
-	var value = ta.value;
-	var start = value.substring(0, selection.start);
-	var end = value.substring(selection.end);
-	ta.value = start + "\n<img src=\"" + url + "\"" + w + h + " />" + end;
+	var html = "<img src=\"" + url + "\"" + w + h + " />";
+
+	if(window.switchedRteOn){
+		CKEDITOR.instances.draft.insertHtml(html);
+	} else {
+		var selection = DOM.getSelectedRange($('draft'));
+		var value = ta.value;
+		var start = value.substring(0, selection.start);
+		var end = value.substring(selection.end);
+		ta.value = start + "\n" + html + end;
+	}
 	return true;
 };
 
@@ -1124,10 +1130,7 @@ InOb.onSubmit = function (){
 	}
 
 	var div_err = InOb.popid('img_error');
-	if(div_err){
-		div_err.style.display = 'block';
-	}
-	if(! div_err){
+	if(!div_err){
 		return InOb.fail('Unable to get error div');
 	}
 
@@ -1151,9 +1154,11 @@ InOb.onSubmit = function (){
 		}
 
 		if(url.value == ''){
+			div_err.style.display = 'block';
 			InOb.setError('You must specify the image\'s URL');
 			return false;
 		} else if(url.value.match(/html?$/i)){
+			div_err.style.display = 'block';
 			InOb.setError('It looks like you are trying to insert a web page, not an image');
 			return false;
 		}
