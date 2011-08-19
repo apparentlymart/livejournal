@@ -1070,7 +1070,10 @@
 						var fakeElement = new CKEDITOR.htmlParser.element('div');
 						fakeElement.attributes.contentEditable = 'false';
 						fakeElement.attributes['class'] = 'lj-embed';
-						fakeElement.attributes['embedid'] = element.attributes.id;
+						fakeElement.attributes.embedid = element.attributes.id;
+						if(element.attributes.hasOwnProperty('source_user')){
+							fakeElement.attributes.source_user = element.attributes.source_user;
+						}
 						fakeElement.children = element.children;
 
 						return fakeElement;
@@ -1198,6 +1201,9 @@
 							case 'lj-embed':
 								newElement = new CKEDITOR.htmlParser.element('lj-embed');
 								newElement.attributes.id = element.attributes.embedid;
+								if(element.attributes.hasOwnProperty('source_user')){
+									newElement.attributes.source_user = element.attributes.source_user;
+								}
 								newElement.children = element.children;
 							break;
 							case 'lj-map':
