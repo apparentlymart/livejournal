@@ -57,29 +57,11 @@
 					CKEditor = editor;
 					editor.resetDirty();
 
-					var isSetFocuse;
-
 					$('#updateForm')[0].onsubmit = function() {
 						if (window.switchedRteOn) {
 							draftData.textArea.val(CKEditor.getData());
 						}
 					};
-
-					$('#subject').blur(function(){
-						if(isSetFocuse){
-							$('#draft').focus();
-						}
-
-						return false;
-					});
-
-					$('#prop_taglist').bind('focus', function(){
-						return isSetFocuse = false;
-					});
-
-					$(document).bind('keypress', function(evt){
-						isSetFocuse = !evt.shiftKey;
-					});
 
 					CKEditor.on('dataReady', function() {
 						$('#entry-form-wrapper').attr('class', 'hide-html');
