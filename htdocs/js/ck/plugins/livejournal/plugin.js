@@ -726,7 +726,7 @@
 				+ 'background-repeat: no-repeat;'
 				+ 'background-color: #CCCCCC;'
 				+ 'border: 1px dotted #000000;'
-				+ 'height: 80px;'
+				+ 'min-height: 80px;'
 			+ '}');
 
 			function doEmbed(content) {
@@ -1229,10 +1229,6 @@
 								}
 								newElement.children = element.children;
 							break;
-							case 'lj-repost':
-								newElement = new CKEDITOR.htmlParser.element('lj-repost');
-								newElement.isOptionalClose = newElement.isEmpty = true;
-							break;
 							default:
 								if (!element.children.length) {
 									newElement = false;
@@ -1254,6 +1250,13 @@
 
 							ljUserNode.isOptionalClose = ljUserNode.isEmpty = true;
 							return ljUserNode;
+						}
+					},
+					input: function(element){
+						if(element.attributes['class'] == 'lj-repost'){
+							var newElement = new CKEDITOR.htmlParser.element('lj-repost');
+							newElement.isOptionalClose = newElement.isEmpty = true;
+							return newElement;
 						}
 					}
 				},
