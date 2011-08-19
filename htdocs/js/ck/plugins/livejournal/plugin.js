@@ -1177,7 +1177,7 @@
 					'lj-repost': function(element){
 						var fakeElement = new CKEDITOR.htmlParser.element('input');
 						fakeElement.attributes.type = 'button';
-						fakeElement.attributes.value = 'Repost';
+						fakeElement.attributes.value = top.CKLang.LJRepost_Value;
 						fakeElement.attributes['class'] = 'lj-repost';
 						return fakeElement;
 					},
