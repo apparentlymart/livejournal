@@ -147,6 +147,6 @@ CKEDITOR.editorConfig = function(config){
 	config.extraPlugins = 'livejournal';
 	config.protectedSource.push(/<lj-poll-\d+\s*\/?>/gi); // created lj polls;
 	config.protectedSource.push(/<lj-replace name="first_post"\s*\/?>/gi);
-	config.protectedSource.push(/<lj-repost\s*\/?>/gi);
+	//config.protectedSource.push(/<lj-repost\s*\/?>/gi);
 
 };

@@ -134,7 +134,7 @@
 
 			editor.dataProcessor.toHtml = function(html, fixForBody) {
 				html = html.replace(/(<lj [^>]+)(?!\/)>/gi, '$1 />')
-					.replace(/<((?!br)[^\s>]+)((?!\/>).*?)\/>/gi, '<$1$2></$1>')
+					.replace(/<((?!br)[^\s>]+)([^>]*?)\/>/gi, '<$1$2></$1>')
 					.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site
 					.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
 					.replace(/<lj-poll .*?>[^\b]*?<\/lj-poll>/gm,
@@ -142,14 +142,13 @@
 						return new Poll(ljtags).outputHTML();
 					}).replace(/<lj-template(.*?)><\/lj-template>/g, "<lj-template$1 />");
 
+
 				// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
 				if (CKEDITOR.env.ie) {
 					html = html.replace(/<([\/])?lj-raw>/g, '<$1lj:raw>').replace(/<([\/])?lj-wishlist>/g, '<$1lj:wishlist>')
 						.replace(/(<lj [^>]*)> /g, '$1> '); // IE merge spaces
-				} else {
-					// close <lj user> tags
-					html = html.replace(/(<lj [^>]*[^\/])>/g, '$1/> ');
 				}
+
 				if (!$('event_format').checked) {
 					html = '<pre>' + html + '</pre>';
 				}
@@ -196,8 +195,7 @@
 
 				// IE custom tags
 				if (CKEDITOR.env.ie) {
-					html = html.replace(/<lj:cut([^>]*)>/g, '<lj-cut$1>').replace(/<\/lj:cut>/g, '</lj-cut>')
-						.replace(/<([\/])?lj:wishlist>/g, '<$1lj-wishlist>').replace(/<([\/])?lj:raw>/g, '<$1lj-raw>');
+					html.replace(/<([\/])?lj:wishlist>/g, '<$1lj-wishlist>').replace(/<([\/])?lj:raw>/g, '<$1lj-raw>');
 				}
 
 				html = html.replace(/><\/lj-template>/g, '/>');// remove null pointer.replace(/\ufeff/g, '');
@@ -1176,6 +1174,13 @@
 							.height) + 'px;"' + 'contentEditable="false"' + 'lj-url="' + (encodeURIComponent(element.attributes
 							.url) || '') + '"' + 'class="lj-map"><p>map</p>' + '</div>').children[0];
 					},
+					'lj-repost': function(element){
+						var fakeElement = new CKEDITOR.htmlParser.element('input');
+						fakeElement.attributes.type = 'button';
+						fakeElement.attributes.value = 'Repost';
+						fakeElement.attributes['class'] = 'lj-repost';
+						return fakeElement;
+					},
 					a: function(element) {
 						element.attributes['lj-cmd'] = 'LJLink';
 					},
@@ -1206,6 +1211,7 @@
 									newElement.attributes.source_user = element.attributes.source_user;
 								}
 								newElement.children = element.children;
+								newElement.isOptionalClose = true;
 							break;
 							case 'lj-map':
 								newElement = new CKEDITOR.htmlParser.element('lj-map');
@@ -1222,6 +1228,10 @@
 									newElement.attributes.text = element.attributes.text;
 								}
 								newElement.children = element.children;
+							break;
+							case 'lj-repost':
+								newElement = new CKEDITOR.htmlParser.element('lj-repost');
+								newElement.isOptionalClose = newElement.isEmpty = true;
 							break;
 							default:
 								if (!element.children.length) {

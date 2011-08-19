@@ -132,7 +132,7 @@
 				CKEditor.element.show();
 
 				// IE7 hack fix
-				if ($.browser.msie && $.browser.version == '7.0') {
+				if ($.browser.msie && ($.browser.version == '7.0' || $.browser.version == '8.0')) {
 					setTimeout(function() {
 						CKEditor.element.setValue(data);
 					}, 50);
