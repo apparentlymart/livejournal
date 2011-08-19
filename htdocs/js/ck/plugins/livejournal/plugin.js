@@ -431,7 +431,7 @@
 							ljUsers[userName] = data.ljuser;
 
 							var tmpNode = editor.document.createElement('div');
-							tmpNode.setHtml(data.ljuser);
+							tmpNode.$.innerHTML = data.ljuser;
 							ljNoteData.LJUserLink.node = tmpNode.getFirst();
 							ljNoteData.LJUserLink.node.setAttribute('lj-cmd', 'LJUserLink');
 
@@ -825,7 +825,7 @@
 							if (pollSource.length > 0) {
 								if (ljNoteData.LJPollLink.node) {
 									var node = editor.document.createElement('div');
-									node.setHtml(pollSource);
+									node.$.innerHTML = pollSource;
 									ljNoteData.LJPollLink.node.insertBeforeMe(node);
 									ljNoteData.LJPollLink.node.remove();
 								} else {
@@ -1135,8 +1135,7 @@
 									var userName = ljTag.getAttribute('user');
 									var userTitle = ljTag.getAttribute('title');
 									if (cacheName == userTitle ? userName + ':' + userTitle : userName) {
-										ljTag.setHtml(ljUsers[cacheName]);
-										var newLjTag = ljTag.getFirst();
+										var newLjTag = CKEDITOR.dom.element.createFromHtml(ljUsers[cacheName], editor.document);
 										newLjTag.setAttribute('lj-cmd', 'LJUserLink');
 										ljTag.insertBeforeMe(newLjTag);
 										ljTag.remove();
