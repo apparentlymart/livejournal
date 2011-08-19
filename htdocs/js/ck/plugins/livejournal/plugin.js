@@ -133,7 +133,8 @@
 			}
 
 			editor.dataProcessor.toHtml = function(html, fixForBody) {
-				html = html.replace(/<((?!br)[^\s>]+)((?!\/>).*?)\/>/gi, '<$1$2></$1>')
+				html = html.replace(/(<lj [^>]+)(?!\/)>/gi, '$1 />')
+					.replace(/<((?!br)[^\s>]+)((?!\/>).*?)\/>/gi, '<$1$2></$1>')
 					.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site
 					.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
 					.replace(/<lj-poll .*?>[^\b]*?<\/lj-poll>/gm,
