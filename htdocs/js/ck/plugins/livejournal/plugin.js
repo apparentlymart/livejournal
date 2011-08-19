@@ -726,7 +726,7 @@
 				+ 'background-repeat: no-repeat;'
 				+ 'background-color: #CCCCCC;'
 				+ 'border: 1px dotted #000000;'
-				+ 'min-height: 80px;'
+				+ 'height: 80px;'
 			+ '}');
 
 			function doEmbed(content) {
@@ -760,8 +760,9 @@
 					} else {
 						text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore);
 						if (text) {
-							ljNoteData.LJCut.node = editor.document.createElement('lj-cut');
+							ljNoteData.LJCut.node = editor.document.createElement('div');
 							ljNoteData.LJCut.node.setAttribute('lj-cmd', 'LJCut');
+							ljNoteData.LJCut.node.setAttribute('class', 'lj-cut');
 							if (text != top.CKLang.ReadMore) {
 								ljNoteData.LJCut.node.setAttribute('text', text);
 							}
@@ -1058,7 +1059,11 @@
 			dataProcessor.dataFilter.addRules({
 				elements: {
 					'lj-cut': function(element) {
-						element.attributes['lj-cmd'] = 'LJCut';
+						var fakeElement = new CKEDITOR.htmlParser.element('div');
+						fakeElement.attributes['lj-cmd'] = 'LJCut';
+						fakeElement.attributes['class'] = 'lj-cut';
+						fakeElement.children = element.children;
+						return fakeElement;
 					},
 					'lj-embed': function(element){
 						var fakeElement = new CKEDITOR.htmlParser.element('div');
@@ -1179,33 +1184,45 @@
 			dataProcessor.htmlFilter.addRules({
 				elements: {
 					div: function(element) {
-						if (element.attributes['class'] == 'lj-like') {
-							var ljLikeNode = new CKEDITOR.htmlParser.element('lj-like');
-							ljLikeNode.attributes.buttons = element.attributes.buttons;
-							if (element.attributes.style) {
-								ljLikeNode.attributes.style = element.attributes.style;
-							}
-							ljLikeNode.isEmpty = true;
-							ljLikeNode.isOptionalClose = true;
-							return ljLikeNode;
-						} else if(element.attributes['class'] == 'lj-embed'){
-							var ljEmbedNode = new CKEDITOR.htmlParser.element('lj-embed');
-							ljEmbedNode.attributes.id = element.attributes.embedid;
-							ljEmbedNode.children = element.children;
+						var newElement = element;
+						switch(element.attributes['class']){
+							case 'lj-like':
+								newElement = new CKEDITOR.htmlParser.element('lj-like');
+								newElement.attributes.buttons = element.attributes.buttons;
+								if (element.attributes.style) {
+									newElement.attributes.style = element.attributes.style;
+								}
+								newElement.isEmpty = true;
+								newElement.isOptionalClose = true;
+							break;
+							case 'lj-embed':
+								newElement = new CKEDITOR.htmlParser.element('lj-embed');
+								newElement.attributes.id = element.attributes.embedid;
+								newElement.children = element.children;
+							break;
+							case 'lj-map':
+								newElement = new CKEDITOR.htmlParser.element('lj-map');
+								newElement.attributes.url = decodeURIComponent(element.attributes['lj-url']);
+								element.attributes.style.replace(/([a-z-]+):(.*?);/gi, function(relust, name, value) {
+									newElement.attributes[name] = parseInt(value);
+								});
 
-							return ljEmbedNode;
-						} else if (element.attributes['class'] == 'lj-map') {
-							var ljMapNode = new CKEDITOR.htmlParser.element('lj-map');
-							ljMapNode.attributes.url = decodeURIComponent(element.attributes['lj-url']);
-							element.attributes.style.replace(/([a-z-]+):(.*?);/gi, function(relust, name, value){
-								ljMapNode.attributes[name] = parseInt(value);
-							});
-
-							ljMapNode.isOptionalClose = ljMapNode.isEmpty = true;
-							return ljMapNode;
-						} else if (!element.children.length) {
-							return false;
+								newElement.isOptionalClose = newElement.isEmpty = true;
+							break;
+							case 'lj-cut':
+								newElement = new CKEDITOR.htmlParser.element('lj-cut');
+								if(element.attributes.hasOwnProperty('text')){
+									newElement.attributes.text = element.attributes.text;
+								}
+								newElement.children = element.children;
+							break;
+							default:
+								if (!element.children.length) {
+									newElement = false;
+								}
 						}
+
+						return newElement;
 					},
 					span: function(element) {
 						var userName = element.attributes['lj:user'];

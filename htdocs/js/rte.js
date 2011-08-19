@@ -27,6 +27,17 @@
 
 	window.useRichText = function (statPrefix) {
 		if (!window.switchedRteOn) {
+			if(!draftData){
+				draftData = {
+					textArea: $('#draft'),
+					statusNode: $('#draftstatus')
+				};
+
+				draftData.lastValue = draftData.textArea.val();
+
+				draftData.textArea.val(draftData.lastValue.replace(/<br\s?\/>\n?/g, '\n'));
+			}
+
 			window.switchedRteOn = true;
 			$('#switched_rte_on').value = '1';
 
@@ -44,11 +55,11 @@
 
 					editor.resetDirty();
 
-					$('#updateForm').bind('submit', function() {
+					$('#updateForm')[0].onsubmit = function() {
 						if (window.switchedRteOn) {
 							draftData.textArea.val(CKEditor.getData());
 						}
-					});
+					};
 
 					CKEditor.on('dataReady', function() {
 						$('#entry-form-wrapper').attr('class', 'hide-html');
@@ -56,7 +67,7 @@
 						CKEditor.container.show();
 						CKEditor.element.hide();
 
-						if (draftData) {
+						if (draftData.hasOwnProperty('draftStatus')) {
 							editor.on('dialogHide', checkDraftTimer);
 							editor.on('afterCommandExec', checkDraftTimer);
 							editor.on('insertElement', checkDraftTimer);

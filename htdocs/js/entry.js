@@ -466,8 +466,8 @@ function entryPreview(entryForm){
 	window
 		.open('', 'preview', 'width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes');
 	entryForm.submit();
-	entryForm.action = action;
 	entryForm.target = '_self';
+	entryForm.action = action;
 	return false;
 }
 
@@ -919,14 +919,14 @@ function onInsertObject(include){
 	InOb.onClosePopup();
 
 	//var iframe = document.createElement("iframe");
-	var container = document.createElement("div");
-	container.id = "updateinsobject";
+	var container = document.createElement('div');
+	container.id = 'updateinsobject';
 	container.className = 'updateinsobject';
-	container.style.overflow = "hidden";
-	container.style.position = "absolute";
-	container.style.border = "0";
-	container.style.backgroundColor = "#fff";
+	container.style.overflow = 'hidden';
+	container.style.border = '0';
+	container.style.backgroundColor = '#fff';
 	container.style.zIndex = 1000;
+	container.style.position = 'fixed';
 
 	var iframe = document.createElement('iframe');
 	iframe.id = 'popupsIframe';
@@ -939,6 +939,8 @@ function onInsertObject(include){
 	container.appendChild(iframe);
 	currentPopup = container;
 	InOb.smallCenter();
+
+
 	InOb.onresize = function(){
 		return InOb.smallCenter();
 	};
@@ -1273,10 +1275,12 @@ InOb.smallCenter = function (){
 
 	DOM.setHeight(currentPopup, 300);
 	DOM.setWidth(currentPopup, 700);
-	DOM.setTop(currentPopup, (windims.y - 300) / 2);
-	DOM.setLeft(currentPopup, (windims.x - 715) / 2);
 
-	scroll(0, 0);
+	currentPopup.style.top = '50%';
+	currentPopup.style.marginTop = '-150px';
+
+	currentPopup.style.left = '50%';
+	currentPopup.style.marginLeft = '-350px';
 };
 
 InOb.setPreviousCb = function (cb){
