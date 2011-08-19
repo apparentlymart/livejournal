@@ -61,7 +61,7 @@
 						if (window.switchedRteOn) {
 							draftData.textArea.val(CKEditor.getData());
 						}
-					});
+					};
 
 					CKEditor.on('dataReady', function() {
 						$('#entry-form-wrapper').attr('class', 'hide-html');
