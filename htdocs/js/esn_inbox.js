@@ -158,6 +158,8 @@ ESN_Inbox.saveDefaultExpanded = function (expanded) {
 
 // set up inbox buttons
 ESN_Inbox.initInboxBtns = function (folder, cur_folder) {
+
+    var delItem, markSpam;
     // 2 instances of action buttons
     for (var i=1; i<=2; i++) {
         if( $(folder + "_MarkRead_" + i) ) {
@@ -166,14 +168,19 @@ ESN_Inbox.initInboxBtns = function (folder, cur_folder) {
         if( $(folder + "_MarkUnread_" + i) ) {
             DOM.addEventListener($(folder + "_MarkUnread_" + i), "click", function(e) { ESN_Inbox.markUnread(e, folder) });
         }
-        if( $(folder + "_Delete_" + i) ) {
-            DOM.addEventListener($(folder + "_Delete_" + i), "click", function(e) { ESN_Inbox.deleteItems(e, this, folder) });
+
+        //we use bind because DOM.addEventListener doesn't handle differences in the this value in different browsers
+        delItem = $(folder + "_Delete_" + i);
+        if( delItem ) {
+            DOM.addEventListener(delItem, "click", (function(e) { ESN_Inbox.deleteItems(e, this, folder) }).bind(delItem));
         }
         if( $(folder + "_UnSpam_" + i) ) {
             DOM.addEventListener($(folder + "_UnSpam_" + i), "click", function(e) { ESN_Inbox.markRead(e, folder) });
         }
-        if( $(folder + "_Spam_" + i) ) {
-            DOM.addEventListener($(folder + "_Spam_" + i), "click", function(e) { ESN_Inbox.markSpam(e, this, folder) });
+
+        markSpam = $(folder + "_Spam_" + i);
+        if( markSpam ) {
+            DOM.addEventListener(markSpam, "click", (function(e) { ESN_Inbox.markSpam(e, this, folder) }).bind(markSpam));
         }
     }
 
