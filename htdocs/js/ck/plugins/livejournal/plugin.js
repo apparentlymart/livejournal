@@ -343,8 +343,8 @@
 					}
 
 					note = {
-						show: function(data, cmd, node) {
-							if (data == tempData.data && cmd == tempData.cmd && node === tempData.node) {
+						show: function(data, cmd, node, isNow) {
+							if (!isNow && data == tempData.data && cmd == tempData.cmd && node === tempData.node) {
 								return;
 							}
 
@@ -354,11 +354,12 @@
 							}
 
 							state = 1;
-							timer = setTimeout(applyNote, 1000);
 
 							tempData.data = data;
 							tempData.cmd = cmd;
 							tempData.node = node;
+
+							isNow === true ? applyNote() : timer = setTimeout(applyNote, 1000);
 						},
 						hide: function(isNow) {
 							if (state) {
@@ -906,7 +907,7 @@
 			} else {
 				editor.addCommand('LJPollLink', {
 					exec: function() {
-						note.show(top.CKLang.Poll_AccountLevelNotice);
+						note.show(top.CKLang.Poll_AccountLevelNotice, null, null, true);
 					}
 				});
 

@@ -31,6 +31,7 @@ CKEDITOR.editorConfig = function(config){
 		'link,' +
 		'list,' +
 		'liststyle,' +
+		'pastefromword,' +
 		'specialchar,' +
 		'tab,' +
 		'toolbar,' +
@@ -46,6 +47,7 @@ CKEDITOR.editorConfig = function(config){
 	config.entities_additional = '#39';
 	config.entities_greek = true;
 	config.entities_latin = true;
+	config.enableTabKeyTools = true;
 	config.fillEmptyBlocks = false;
 	config.startupFocus = false;
 	config.forcePasteAsPlainText = false;

@@ -4,40 +4,43 @@
 	var CKEditor,
 		draftData;
 
+	function initDraftData(){
+		draftData = {
+			textArea: $('#draft'),
+			statusNode: $('#draftstatus')
+		};
+		
+		draftData.lastValue = draftData.textArea.val();
+		draftData.textArea.val(draftData.lastValue.replace(/<br\s?\/>\n?/g, '\n'));
+	}
+
 	window.initDraft = function(data) {
-		draftData = data;
+		initDraftData();
 
-		data.textArea = $('#draft');
-		data.lastValue = draftData.textArea.val();
-		data.statusNode = $('#draftstatus');
-
-		if (data.ask && data.restoreData) {
-			if (confirm(data.confirmMsg)) {
-				data.lastValue = data.restoreData;
-				data.statusNode.val(data.draftStatus);
+		for(var prop in data){
+			if(data.hasOwnProperty(prop)){
+				draftData[prop] = data[prop];
 			}
-		} else {
-			data.statusNode.val('');
 		}
 
-		draftData.textArea.val(draftData.lastValue.replace(/<br\s?\/>\n?/g, '\n'));
+		if (draftData.ask && draftData.restoreData) {
+			if (confirm(draftData.confirmMsg)) {
+				draftData.lastValue = draftData.restoreData;
+				draftData.statusNode.val(draftData.draftStatus);
+			}
+		} else {
+			draftData.statusNode.val('');
+		}
 
 		$('#updateForm').delegate('#draft', 'keypress click', checkDraftTimer);
 	};
 
 	window.useRichText = function (statPrefix) {
+		if (!draftData) {
+			initDraftData();
+		}
+
 		if (!window.switchedRteOn) {
-			if(!draftData){
-				draftData = {
-					textArea: $('#draft'),
-					statusNode: $('#draftstatus')
-				};
-
-				draftData.lastValue = draftData.textArea.val();
-
-				draftData.textArea.val(draftData.lastValue.replace(/<br\s?\/>\n?/g, '\n'));
-			}
-
 			window.switchedRteOn = true;
 			$('#switched_rte_on').value = '1';
 
@@ -52,14 +55,31 @@
 
 				editor.on('instanceReady', function() {
 					CKEditor = editor;
-
 					editor.resetDirty();
+
+					var isSetFocuse;
 
 					$('#updateForm')[0].onsubmit = function() {
 						if (window.switchedRteOn) {
 							draftData.textArea.val(CKEditor.getData());
 						}
 					};
+
+					$('#subject').blur(function(){
+						if(isSetFocuse){
+							$('#draft').focus();
+						}
+
+						return false;
+					});
+
+					$('#prop_taglist').bind('focus', function(){
+						return isSetFocuse = false;
+					});
+
+					$(document).bind('keypress', function(evt){
+						isSetFocuse = !evt.shiftKey;
+					});
 
 					CKEditor.on('dataReady', function() {
 						$('#entry-form-wrapper').attr('class', 'hide-html');
@@ -96,6 +116,10 @@
 	};
 
 	window.usePlainText = function() {
+		if (!draftData) {
+			initDraftData();
+		}
+
 		if (window.switchedRteOn) {
 			window.switchedRteOn = false;
 			$('#switched_rte_on').value = '0';
