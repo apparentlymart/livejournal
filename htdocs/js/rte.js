@@ -42,7 +42,7 @@
 
 		if (!window.switchedRteOn) {
 			window.switchedRteOn = true;
-			$('#switched_rte_on').value = '1';
+			$('#switched_rte_on').val('1');
 
 			if (!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible) {
 				CKEDITOR.basePath = statPrefix + '/ck/';
@@ -59,7 +59,7 @@
 
 					$('#updateForm')[0].onsubmit = function() {
 						if (window.switchedRteOn) {
-							draftData.textArea.val(CKEditor.getData());
+							draftData.textArea.val(CKEditor.getData().replace(/(\r|\n)/g,'')); //we remove all newlines
 						}
 					};
 
@@ -104,7 +104,7 @@
 
 		if (window.switchedRteOn) {
 			window.switchedRteOn = false;
-			$('#switched_rte_on').value = '0';
+			$('#switched_rte_on').val('0');
 
 			$('#entry-form-wrapper').attr('class', 'hide-richtext');
 			if (CKEditor) {
