@@ -230,12 +230,13 @@ my $SC = '/talkpost_do.bml';
 sub init {
     my ($form, $remote, $need_captcha, $errret) = @_;
     my $sth = undef;
-    
+
     my $err = sub {
         my $error = shift;
         push @$errret, $error;
         return undef;
     };
+
     my $bmlerr = sub {
         return $err->(LJ::Lang::ml($_[0]));
     };
@@ -247,7 +248,7 @@ sub init {
     return $bmlerr->('talk.error.nojournal') unless $journalu;
     return $err->($LJ::MSG_READONLY_USER) if LJ::get_cap($journalu, "readonly");
 
-    return $err->("Account is locked, unable to post or edit a comment.") if $journalu->{statusvis} eq 'L';
+    return $err->(LJ::Lang::ml('talkpostdo.bml.error.account.is.locked')) if $journalu->{statusvis} eq 'L';
 
     eval {
         LJ::Request->notes("journalid" => $journalu->{'userid'});
@@ -256,13 +257,13 @@ sub init {
     my $dbcr = LJ::get_cluster_def_reader($journalu);
     return $bmlerr->('error.nodb') unless $dbcr;
 
-    my $itemid = $init->{'itemid'}+0;
+    my $itemid = $init->{'itemid'} + 0;
 
     my $item = LJ::Talk::get_journal_item($journalu, $itemid);
 
     if ($init->{'oldurl'} && $item) {
         $init->{'anum'} = $item->{'anum'};
-        $init->{'ditemid'} = $init->{'itemid'}*256 + $item->{'anum'};
+        $init->{'ditemid'} = $init->{'itemid'} * 256 + $item->{'anum'};
     }
 
     unless ($item && $item->{'anum'} == $init->{'anum'}) {
@@ -279,9 +280,10 @@ sub init {
     $init->{talkurl} = $talkurl;
 
     ### load users
-    LJ::load_userids_multiple([
-                               $item->{'posterid'} => \$init->{entryu},
-                               ], [ $journalu ]);
+    LJ::load_userids_multiple(
+        [
+            $item->{'posterid'} => \$init->{entryu},
+        ], [ $journalu ]);
     LJ::load_user_props($journalu, "opt_logcommentips");
 
     ### two hacks; unsure if these need to stay
@@ -304,7 +306,6 @@ sub init {
     $form->{donot_login} = 1 if LJ::get_remote();
 
     my $up;
-
     my $author_class = LJ::Talk::Author->get_handler($form->{'usertype'});
 
     # whoops, a bogus usertype value. no way.
@@ -314,35 +315,42 @@ sub init {
 
     $up = $author_class->handle_user_input( $form, $remote, $need_captcha,
                                             $errret, $init );
+
     return if @$errret or LJ::Request->redirected;
-    
+
     # validate the challenge/response value (anti-spammer)
-    unless ($init->{'used_ecp'}) {
+    unless ( $init->{'used_ecp'} ) {
         my $chrp_err;
-        if (my $chrp = $form->{'chrp1'}) {
+
+        if ( my $chrp = $form->{'chrp1'} ) {
             my ($c_ditemid, $c_uid, $c_time, $c_chars, $c_res) =
                 split(/\-/, $chrp);
-            my $chal = "$c_ditemid-$c_uid-$c_time-$c_chars";
+            my $chal   = "$c_ditemid-$c_uid-$c_time-$c_chars";
             my $secret = LJ::get_secret($c_time);
-            my $res = Digest::MD5::md5_hex($secret . $chal);
-            if ($res ne $c_res) {
+            my $res    = Digest::MD5::md5_hex($secret . $chal);
+
+            if ( $res ne $c_res ) {
                 $chrp_err = "invalid";
-            } elsif ($c_time < time() - 2*60*60) {
+            }
+            elsif ($c_time < time() - 2 * 60 * 60) {
                 $chrp_err = "too_old" if $LJ::REQUIRE_TALKHASH_NOTOLD;
             }
-        } else {
+        }
+        else {
             $chrp_err = "missing";
         }
-        if ($chrp_err) {
+
+        if ( $chrp_err ) {
             my $ip = LJ::get_remote_ip();
-            if ($LJ::DEBUG{'talkspam'}) {
+
+            if ( $LJ::DEBUG{'talkspam'} ) {
                 my $ruser = $remote ? $remote->{user} : "[nonuser]";
-                print STDERR "talkhash error: from $ruser \@ $ip - $chrp_err - $talkurl\n";
+                warn "talkhash error: from $ruser \@ $ip - $chrp_err - $talkurl\n";
             }
             if ($LJ::REQUIRE_TALKHASH) {
-                return $err->("Sorry, form expired.  Press back, copy text, reload form, paste into new form, and re-submit.")
+                return $err->(LJ::Lang::ml('talkpostdo.bml.error.form.expired'))
                     if $chrp_err eq "too_old";
-                return $err->("Missing parameters");
+                return $err->(LJ::Lang::ml('talkpostdo.bml.error.missing.parameters'));
             }
         }
     }
@@ -366,7 +374,7 @@ sub init {
     # reply and unscreen it
 
     my $parpost;
-    my $partid = $form->{'parenttalkid'}+0;
+    my $partid = $form->{'parenttalkid'} + 0;
 
     if ($partid) {
         $parpost = LJ::Talk::get_talk2_row($dbcr, $journalu->{userid}, $partid);
@@ -377,12 +385,12 @@ sub init {
         # can't use $remote because we may get here
         # with a reply from email. so use $up instead of $remote
         # in the call below.
-
         if ($parpost && $parpost->{'state'} eq "S" &&
             !LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{'user'})) {
             $bmlerr->("$SC.error.screened");
         }
     }
+
     $init->{parpost} = $parpost;
 
     # don't allow anonymous comments on syndicated items
@@ -402,11 +410,14 @@ sub init {
         if ($up->{'status'} eq "N" && $up->{'journaltype'} ne "I" && !LJ::run_hook("journal_allows_unvalidated_commenting", $journalu, $up)) {
             $err->(LJ::Lang::ml("$SC.error.noverify2", {'aopts' => "href='$LJ::SITEROOT/register.bml'"}));
         }
+
         if ($up->{'statusvis'} eq "D") {
             $bmlerr->("$SC.error.deleted");
-        } elsif ($up->{'statusvis'} eq "S") {
+        }
+        elsif ($up->{'statusvis'} eq "S") {
             $bmlerr->("$SC.error.suspended");
-        } elsif ($up->{'statusvis'} eq "X") {
+        }
+        elsif ($up->{'statusvis'} eq "X") {
             $bmlerr->("$SC.error.purged");
         }
     }
@@ -419,7 +430,8 @@ sub init {
                     $err->(LJ::Lang::ml("$SC.error.$msg", {'user'=>$journalu->{'user'}}));
                 }
             }
-        } else {
+        }
+        else {
             my $msg = $journalu->is_comm ? "membersonly" : "friendsonly";
             $err->(LJ::Lang::ml("$SC.error.$msg", {'user'=>$journalu->{'user'}}));
         }
@@ -438,10 +450,10 @@ sub init {
     $form->{'body'} =~ s/\r\n/\n/g;
 
     # now check for UTF-8 correctness, it must hold
-
     return $err->("<?badinput?>") unless LJ::text_in($form);
 
     $init->{unknown8bit} = 0;
+
     unless (LJ::is_ascii($form->{'body'}) && LJ::is_ascii($form->{'subject'})) {
         if ($LJ::UNICODE) {
             # no need to check if they're well-formed, we did that above
@@ -453,15 +465,19 @@ sub init {
     }
 
     my ($bl, $cl) = LJ::text_length($form->{'body'});
+
     if ($cl > LJ::CMAX_COMMENT) {
         $err->(LJ::Lang::ml("$SC.error.manychars", {'current'=>$cl, 'limit'=>LJ::CMAX_COMMENT}));
-    } elsif ($bl > LJ::BMAX_COMMENT) {
+    }
+    elsif ($bl > LJ::BMAX_COMMENT) {
         $err->(LJ::Lang::ml("$SC.error.manybytes", {'current'=>$bl, 'limit'=>LJ::BMAX_COMMENT}));
     }
+
     # the Subject can be silently shortened, no need to reject the whole comment
     $form->{'subject'} = LJ::text_trim($form->{'subject'}, 100, 100);
 
     my $subjecticon = "";
+
     if ($form->{'subjecticon'} ne "none" && $form->{'subjecticon'} ne "") {
         $subjecticon = LJ::trim(lc($form->{'subjecticon'}));
     }
@@ -469,10 +485,12 @@ sub init {
     # New comment state
     my $state = 'A';
     my $screening = LJ::Talk::screening_level($journalu, int($ditemid / 256));
+
     if ($form->{state} =~ /^[A-Z]\z/){
         # use provided state.
         $state = $form->{state};
-    } else {
+    }
+    else {
         # figure out whether to post this comment screened
         if (!$form->{editid} && ($screening eq 'A' ||
             ($screening eq 'R' && ! $up) ||
@@ -485,13 +503,14 @@ sub init {
     my $can_mark_spam = LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user});
     my $need_spam_check = 0;
     LJ::run_hook('need_spam_check_comment', \$need_spam_check, $entry, $state, $journalu, $up);
+
     if ( $need_spam_check && !$can_mark_spam ) {
         my $spam = 0;
         LJ::run_hook('spam_comment_detector', $form, \$spam, $journalu, $up);
         LJ::run_hook('spam_in_all_journals', \$spam, $up) unless $spam;
         $state = 'B' if $spam;
     }
-    
+
     my $parent = {
         state     => $parpost->{state},
         talkid    => $partid,
@@ -530,8 +549,9 @@ sub init {
                 $form->{'recaptcha_challenge_field'}, $form->{'recaptcha_response_field'}
             );
 
-            return $err->("Incorrect response to spam robot challenge.") unless $result->{is_valid} eq '1';
-        } elsif (!LJ::is_enabled("recaptcha") && $form->{captcha_chal}) {
+            return $err->(LJ::Lang::ml('talkpostdo.bml.error.incorrect.response.to.spam.robot.challenge')) unless $result->{is_valid} eq '1';
+        }
+        elsif (!LJ::is_enabled("recaptcha") && $form->{captcha_chal}) {
             # assume they won't pass and re-set the flag
             $$need_captcha = 1;
 
@@ -544,14 +564,16 @@ sub init {
             my ($capid, $anum) = LJ::Captcha::session_check_code($form->{captcha_chal},
                                                                  $form->{answer}, $journalu);
 
-            return $err->("Incorrect response to spam robot challenge.") unless $capid && $anum;
+            return $err->(LJ::Lang::ml('talkpostdo.bml.error.incorrect.response.to.spam.robot.challenge')) unless $capid && $anum;
             my $expire_u = $comment->{'u'} || LJ::load_user('system');
             LJ::Captcha::expire($capid, $anum, $expire_u->{userid});
 
-        } else {
+        }
+        else {
             $$need_captcha = LJ::Talk::Post::require_captcha_test($comment->{'u'}, $journalu, $form->{body}, $ditemid);
+
             if ($$need_captcha) {
-                return $err->("Please confirm you are a human below.");
+                return $err->(LJ::Lang::ml('talkpostdo.bml.error.please.confirm.you.are.a.human.below'));
             }
         }
     }
@@ -574,13 +596,13 @@ sub require_captcha_test {
 
     ## LJSUP-7832: If user is a member of "http://community.livejournal.com/notaspammers/" 
     ##             we shouldn't display captcha for him
-            
+
     return if $commenter && LJ::is_friend($LJ::NOTASPAMMERS_COMM_UID, $commenter);
-    
+
     return if $commenter && $commenter->prop('in_whitelist_for_spam');
 
     ## allow some users (our bots) to post without captchas in any rate
-    return if $commenter and 
+    return if $commenter and
               grep { $commenter->username eq $_ } @LJ::NO_RATE_CHECK_USERS;
 
     ## anonymous commenter user =
@@ -594,10 +616,10 @@ sub require_captcha_test {
     if ($LJ::HUMAN_CHECK{anonpost} || $LJ::HUMAN_CHECK{authpost}) {
         return 1 if !LJ::Talk::Post::check_rate($commenter, $journal, $nowrite);
     }
+
     if ($LJ::HUMAN_CHECK{anonpost} && $anon_commenter) {
         return 1 if LJ::sysban_check('talk_ip_test', LJ::get_remote_ip());
     }
-
 
     ##
     ## 4. Test preliminary limit on comment.
@@ -618,15 +640,20 @@ sub require_captcha_test {
     ## 3. Custom (journal) settings
     ##
     my $show_captcha_to = $journal->prop('opt_show_captcha_to');
+
     if (!$show_captcha_to || $show_captcha_to eq 'N') {
         ## no one
-    } elsif ($show_captcha_to eq 'R') {
+        return 0;
+    }
+    elsif ($show_captcha_to eq 'R') {
         ## anonymous
         return 1 if $anon_commenter;
-    } elsif ($show_captcha_to eq 'F') {
+    }
+    elsif ($show_captcha_to eq 'F') {
         ## not friends
         return 1 if !LJ::is_friend($journal, $commenter);
-    } elsif ($show_captcha_to eq 'A') {
+    }
+    elsif ($show_captcha_to eq 'A') {
         ## all
         return 1;
     }
@@ -712,7 +739,7 @@ sub post_comment {
 
         # save its identifying characteristics to protect against duplicates.
         LJ::MemCache::set($memkey, $jtalkid+0, time()+60*10);
-        
+
         # update spam counter if needed
         if ($comment->{state} eq 'B') {
             my $entry = LJ::Entry->new($journalu, jitemid => $item->{itemid});
@@ -742,7 +769,7 @@ sub post_comment {
 # returns 1 on success.  0 on fail (with $$errref set)
 sub edit_comment {
     my ($entryu, $journalu, $comment, $parent, $item, $errref, $remote) = @_;
-    
+
     my $err = sub {
         $$errref = join(": ", @_);
         return 0;
@@ -772,14 +799,14 @@ sub edit_comment {
     {
         $comment_obj->set_poster_ip;
     }
-    
+
     ## Save changes if comment is screened now and it wasn't.
     ## Don't save opposite change (screened --> unscreened), because change
     ## may be caused by that edit comment form misses 'state' field.
     if ($comment_obj->state ne $comment->{state} && $comment->{state} =~ /[SB]/) {
         $comment_obj->set_state($comment->{state});
     }
-    
+
     # set subject and body text
     $comment_obj->set_subject_and_body($comment->{subject}, $comment->{body});
 
@@ -823,9 +850,11 @@ sub make_preview {
 
     my $event = $form->{'body'};
     my $spellcheck_html;
+
     # clean first; if the cleaner finds it invalid, don't spellcheck, so that we
     # can show the user the error.
     my $cleanok = LJ::CleanHTML::clean_comment(\$event, $form->{'prop_opt_preformatted'});
+
     if (defined($cleanok) && $LJ::SPELLER && $form->{'do_spellcheck'}) {
         my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
                                      'color' => '#ff0000', };
@@ -836,7 +865,8 @@ sub make_preview {
     if ($spellcheck_html) {
         $ret .= $spellcheck_html;
         $ret .= "<p>";
-    } else {
+    }
+    else {
         $ret .= $event;
     }
 
@@ -853,11 +883,14 @@ sub make_preview {
 
     # change mode:
     delete $form->{'submitpreview'}; $form->{'submitpost'} = 1;
+
     if ($cookie_auth) {
         $form->{'usertype'} = "cookieuser";
         delete $form->{'userpost'};
     }
+
     delete $form->{'do_spellcheck'};
+
     foreach (keys %$form) {
         $ret .= LJ::html_hidden($_, $form->{$_})
             unless $_ eq 'body' || $_ eq 'subject' || $_ eq 'prop_opt_preformatted';
@@ -865,20 +898,23 @@ sub make_preview {
 
     $ret .= "<br /><input type='submit' value='$BML::ML{'/talkpost_do.bml.preview.submit'}' />\n";
     $ret .= "<input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />\n";
+
     if ($LJ::SPELLER) {
         $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$BML::ML{'talk.spellcheck'}</label>";
     }
+
     $ret .= "<p>";
     $ret .= "$BML::ML{'/talkpost.bml.opt.noautoformat'} ".
         LJ::html_check({ 'name' => 'prop_opt_preformatted',
                          selected => $form->{'prop_opt_preformatted'} });
     $ret .= LJ::help_icon_html("noautoformat", " ");
     $ret .= "</p>";
-
     $ret .= "<p> <span class='de'> $BML::ML{'/talkpost.bml.allowedhtml'}: ";
+
     foreach (sort &LJ::CleanHTML::get_okay_comment_tags()) {
         $ret .= "&lt;$_&gt; ";
     }
+
     $ret .= "</span> </p>";
 
     $ret .= "</form></div>";
@@ -912,7 +948,8 @@ sub check_rate {
             "talklog:$remote->{userid}",
             $LJ::RATE_COMMENT_AUTH || [ [ 200, 3600 ], [ 20, 60 ] ],
           ];
-    } else {
+    }
+    else {
         # anonymous, per IP address (robot or human)
         push @watch,
           [
