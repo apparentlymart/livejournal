@@ -179,68 +179,79 @@ sub link_bar
     return $ret;
 }
 
-sub init
-{
+sub init {
     my ($form) = @_;
-    my $init = {};  # structure to return
 
+    # structure to return
+    my $init    = {};
     my $journal = $form->{'journal'};
-    my $ju = undef;
-    my $item = undef;        # hashref; journal item conversation is in
+    my $ju      = undef;
+
+    # hashref; journal item conversation is in
+    my $item = undef;
 
     # defaults, to be changed later:
-    $init->{'itemid'} = $form->{'itemid'}+0;
-    $init->{'ditemid'} = $init->{'itemid'};
-    $init->{'thread'} = $form->{'thread'}+0;
-    $init->{'dthread'} = $init->{'thread'};
+    $init->{'itemid'}    = $form->{'itemid'} + 0;
+    $init->{'ditemid'}   = $init->{'itemid'};
+    $init->{'thread'}    = $form->{'thread'} + 0;
+    $init->{'dthread'}   = $init->{'thread'};
     $init->{'clustered'} = 0;
-    $init->{'replyto'} = $form->{'replyto'}+0;
-    $init->{'style'} = $form->{'style'} ? "mine" : undef;
+    $init->{'replyto'}   = $form->{'replyto'} + 0;
+    $init->{'style'}     = $form->{'style'} ? "mine" : undef;
 
-    if ($journal) {
+    if ( $journal ) {
         # they specified a journal argument, which indicates new style.
         $ju = LJ::load_user($journal);
-        return { 'error' => BML::ml('talk.error.nosuchjournal')} unless $ju;
-        return { 'error' => BML::ml('talk.error.purged')} if $ju->is_expunged;
+        return { 'error' => LJ::Lang::ml('talk.error.nosuchjournal')} unless $ju;
+        return { 'error' => LJ::Lang::ml('talk.error.purged')}        if $ju->is_expunged;
 
         $init->{'clustered'} = 1;
+
         foreach (qw(itemid replyto)) {
             next unless $init->{$_};
             $init->{'anum'} = $init->{$_} % 256;
             $init->{$_} = int($init->{$_} / 256);
             last;
         }
+
         $init->{'thread'} = int($init->{'thread'} / 256)
             if $init->{'thread'};
-    } else {
+    }
+    else {
         # perhaps it's an old URL for a user that's since been clustered.
         # look up the itemid and see what user it belongs to.
-        if ($form->{'itemid'}) {
-            my $itemid = $form->{'itemid'}+0;
+        if ( $form->{'itemid'} ) {
+            my $itemid  = $form->{'itemid'}+0;
             my $newinfo = LJ::get_newids('L', $itemid);
-            if ($newinfo) {
+
+            if ( $newinfo ) {
                 $ju = LJ::load_userid($newinfo->[0]);
-                return { 'error' => BML::ml('talk.error.nosuchjournal')} unless $ju;
+                return { 'error' => LJ::Lang::ml('talk.error.nosuchjournal')} unless $ju;
                 $init->{'clustered'} = 1;
-                $init->{'itemid'} = $newinfo->[1];
-                $init->{'oldurl'} = 1;
-                if ($form->{'thread'}) {
+                $init->{'itemid'}    = $newinfo->[1];
+                $init->{'oldurl'}    = 1;
+
+                if ( $form->{'thread'} ) {
                     my $tinfo = LJ::get_newids('T', $init->{'thread'});
                     $init->{'thread'} = $tinfo->[1] if $tinfo;
                 }
-            } else {
-                return { 'error' => BML::ml('talk.error.noentry') };
             }
-        } elsif ($form->{'replyto'}) {
+            else {
+                return { 'error' => LJ::Lang::ml('talk.error.noentry') };
+            }
+        }
+        elsif ( $form->{'replyto'} ) {
             my $replyto = $form->{'replyto'}+0;
             my $newinfo = LJ::get_newids('T', $replyto);
-            if ($newinfo) {
+
+            if ( $newinfo ) {
                 $ju = LJ::load_userid($newinfo->[0]);
-                return { 'error' => BML::ml('talk.error.nosuchjournal')} unless $ju;
+                return { 'error' => LJ::Lang::ml('talk.error.nosuchjournal')} unless $ju;
                 $init->{'replyto'} = $newinfo->[1];
-                $init->{'oldurl'} = 1;
-            } else {
-                return { 'error' => BML::ml('talk.error.noentry') };
+                $init->{'oldurl'}  = 1;
+            }
+            else {
+                return { 'error' => LJ::Lang::ml('talk.error.noentry') };
             }
         }
     }
@@ -299,8 +310,9 @@ sub check_viewable
              LJ::Request->pnotes ('remote' => LJ::get_remote());
              BML::return_error_status(403);
              return;
-            return $err->(BML::ml('talk.error.notauthorised'));
-        } else {
+             return $err->(LJ::Lang::ml('talk.error.notauthorised'));
+        }
+        else {
             my $redir = LJ::eurl( LJ::Request->current_page_url );
             return $err->(BML::redirect("$LJ::SITEROOT/?returnto=$redir&errmsg=notloggedin"));
         }
@@ -1974,6 +1986,8 @@ sub talkform {
         'suspended'              => $remote ? $remote->is_suspended : 0,
         'deleted'                => $remote ? $remote->is_deleted || $remote->is_expunged : 0,
         'will_be_screened'       => $entry->prop('opt_screening') || ( $journalu ? $journalu->prop("opt_whoscreened") : 0),
+        'is_friend'              => $remote ? $journalu->is_friend($remote) : 0,
+        'email_active'           => $remote ? $remote->is_validated : 0,
 
         # various checks
         'remote_banned'          => LJ::is_banned( $remote, $journalu ),
@@ -2018,15 +2032,17 @@ sub talkform {
             'entry'     => $entry,
             'editid'    => $editid,
         }) || undef,
+
+        'ml_loggedin' => $remote ? LJ::ljuser($remote) : $ml{'loggedin'},
     );
 
     # ml variables. it is weird that we've got to pass these to
     # the template, but well, the logic here is considered too
     # complex to be in a template, so whatever.
-    $params{"ml_$_"} = $ml{ $_ } for qw/banned     friendsonly  logcommentips
-                                        loggedin   noaccount    noopenidpost
-                                        notafriend picturetouse usermismatch
-                                        willscreen willscreenfriend/;
+    $params{"ml_$_"} = $ml{ $_ } for qw/banned       friendsonly  logcommentips
+                                        noaccount    noopenidpost notafriend
+                                        picturetouse usermismatch willscreen
+                                        willscreenfriend/;
 
     # help icons
     $params{"helpicon_$_"} = LJ::help_icon_html( $_, " " ) for qw/userpics noautoformat iplogging/;
@@ -2423,30 +2439,29 @@ sub get_thread_html
     LJ::run_hooks('load_comments_opts', $u, $entry->jitemid, $opts);
 
     my @comments = LJ::Talk::load_comments($u, $remote, "L", $entry->jitemid, $opts);
-        
+
     if ($opts->{'out_error'} eq "nodb")
     {
-        $output->{error} = BML::ml('error.nodbmaintenance');
+        $output->{error} = LJ::Lang::ml('error.nodbmaintenance');
         return undef;
     }
 
-    $output->{page} = $opts->{out_page};
+    $output->{page}  = $opts->{out_page};
     $output->{pages} = $opts->{out_pages};
 
     ##################################################
-        
     my $LJ_cmtinfo = $input->{LJ_cmtinfo};
 
     my $formatlight = $input->{'format'} eq 'light' ? 'format=light' : '';
-    my $stylemine = $input->{'style'} eq "mine" ? "style=mine" : "";
-        
+    my $stylemine   = $input->{'style'} eq 'mine'   ? 'style=mine'   : '';
+
     my ($last_talkid, $last_jid) = LJ::get_lastcomment();
-        
+
     my $fmt_time_short = "%%hh%%:%%min%% %%a%%m";
-    my $jarg = "journal=$u->{'user'}&";
-    my $jargent ="journal=$u->{'user'}&amp;";
+    my $jarg    = "journal=$u->{'user'}&";
+    my $jargent = "journal=$u->{'user'}&amp;";
     my $allow_commenting = $entry->posting_comments_allowed;
-    my $pics = LJ::Talk::get_subjecticons();
+    my $pics    = LJ::Talk::get_subjecticons();
     my $talkurl = LJ::journal_base($u) . "/" . $entry->ditemid() . ".html";
     my $showmultiform = $input->{showmultiform};
     my $anum = $entry->anum();
@@ -2454,10 +2469,9 @@ sub get_thread_html
     my $comments = [];
 
     my $recurse_post = sub {
-
         my ($self, $post, $depth) = @_;
         $depth ||= 0;
-        
+
         my $tid = $post->{'talkid'};
         my $dtid = $tid * 256 + $anum;
         my $thread_url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
@@ -2490,9 +2504,9 @@ sub get_thread_html
 
         my $user;
         if ($post->{'props'}->{'deleted_poster'}) {
-            $user = BML::ml('.deleteduser', { username => $post->{'deleted_poster'} });
+            $user = LJ::Lang::ml('.deleteduser', { username => $post->{'deleted_poster'} });
         } else {
-            $user = BML::ml('.anonuser');
+            $user = LJ::Lang::ml('.anonuser');
         }
 
         my $comment_header = sub {
@@ -2512,71 +2526,71 @@ sub get_thread_html
 
         my $html = {};
         my $state;
-                
-        if ($post->{'state'} eq "D") ## LJSUP-6433
-        {
+
+        if ($post->{'state'} eq "D") {  ## LJSUP-6433
             $state = 'deleted';
             $html->{header} = $comment_header->();
-            $html->{text}   = BML::ml('.deletedpost');
+            $html->{text}   = LJ::Lang::ml('.deletedpost');
             $html->{footer} = $comment_footer->();
         }
-        elsif ($post->{'state'} eq "S" && !$post->{'_loaded'} && !$post->{'_show'})
-        {
+        elsif ($post->{'state'} eq "S" && !$post->{'_loaded'} && !$post->{'_show'}) {
             $state = 'screened';
             $html->{header} = $comment_header->();
-            $html->{text}   = BML::ml('.screenedpost');
+            $html->{text}   = LJ::Lang::ml('.screenedpost');
             $html->{footer} = $comment_footer->();
         }
         elsif ($post->{'state'} ne 'B' && $opts->{'showspam'}) {
             $html->{text} = undef;
         }
-        elsif ($post->{'state'} eq 'B' && !$opts->{'showspam'} && !($remote && $remote->user eq (ref $userpost ? $userpost->{'user'} : $userpost))) 
-        {
+        elsif ($post->{'state'} eq 'B' && !$opts->{'showspam'} && !($remote && $remote->user eq (ref $userpost ? $userpost->{'user'} : $userpost))) {
             $state = 'spamed';
-            if ($post->{'_show'}) { 
+
+            if ($post->{'_show'}) {
                 $html->{header} = $comment_header->();
-                $html->{text}   = BML::ml('.spamedpost');
+                $html->{text}   = LJ::Lang::ml('.spamedpost');
                 $html->{footer} = $comment_footer->();
-            } else {
+            }
+            else {
                 $html->{text} = undef;
             }
         }
-        elsif ($pu && $pu->is_suspended && !$viewsome)
-        {
+        elsif ($pu && $pu->is_suspended && !$viewsome) {
             $state = 'suspended';
             $html->{header} = $comment_header->();
             $html->{footer} = $comment_footer->();
 
-            my $text = BML::ml('.replysuspended');
+            my $text = LJ::Lang::ml('.replysuspended');
+
             if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
                 $text .= " <a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid'>" .
                          LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                          "</a>";
             }
+
             if ($post->{state} ne 'F' && LJ::Talk::can_freeze($remote, $u, $up, $userpost)) {
                 $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtid'>" .
                          LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) .
                          "</a>";
             }
+
             if ($post->{state} eq 'F' && LJ::Talk::can_unfreeze($remote, $u, $up, $userpost)) {
                 $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid'>" .
                          LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) .
                          "</a>";
             }
-               
+
             $html->{text} = $text;
         }
-        else
-        {
+        else {
             $user = LJ::ljuser($upost, { side_alias => 1 }) if $upost;
-                
+
             my $icon = LJ::Talk::show_image($pics, $post->{'props'}->{'subjecticon'});
 
             my $get_expand_link = sub {
                 return
                     "<span id='expand_$dtid'>" . 
                         " (<a href='$thread_url' onclick=\"ExpanderEx.make(event,this,'$thread_url','$dtid',true)\">" .
-                            BML::ml('talk.expandlink') .
+                            LJ::Lang::ml('talk.expandlink') .
                         "</a>)" .
                     "</span>";
             };
@@ -2585,19 +2599,18 @@ sub get_thread_html
                 return
                     "<span id='collapse_$dtid'>" .
                         " (<a href='$thread_url' onclick=\"ExpanderEx.collapse(event,this,'$thread_url','$dtid',true)\">" .
-                            BML::ml('talk.collapselink') .
+                            LJ::Lang::ml('talk.collapselink') .
                         "</a>)" .
                     "</span>";
             };
 
-            if ($post->{'_loaded'})
-            {
+            if ($post->{'_loaded'}) {
                 $state = 'expanded';
                 my $comment = LJ::Comment->new($u, dtalkid => $dtid);
 
                 my $edittime;
-                if ($comment->is_edited)
-                {
+
+                if ($comment->is_edited) {
                     my $s2_datetime_edittime = $tz_remote ?
                         LJ::S2::DateTime_tz($comment->edit_time, $tz_remote) :
                         LJ::S2::DateTime_unix($comment->edit_time);
@@ -2609,14 +2622,16 @@ sub get_thread_html
 
                 $html->{header} = $comment_header->("width='100%' class='talk-comment'");
                 $html->{footer} = $comment_footer->();
-                    
+
                 my $text = "<div id='cmtbar$dtid' class='talk-comment-head' style='background-color:$bgcolor'>";
 
                 if (my $picid = $post->{'picid'}) {
                     my $alt = $pu->{'name'};
+
                     if ($post->{'props'}->{'picture_keyword'}) {
                         $alt .= ": $post->{'props'}->{'picture_keyword'}";
                     }
+
                     $alt = LJ::ehtml($alt);
                     my ($w, $h) = ($userpics{$picid}->{'width'}, $userpics{$picid}->{'height'});
                     $text .= "<img align='left' hspace='3' src='$LJ::USERPIC_ROOT/$picid/$post->{'posterid'}'";
@@ -2627,6 +2642,7 @@ sub get_thread_html
                 $text .= "<font size='+1' face='Arial,Helvetica'><b>$cleansubject</b></font> $icon";
                 $text .= "<br />$user\n";
                 $text .= "<br /><font size='-1'>$datepost</font>\n";
+
                 if ($post->{'props'}->{'poster_ip'} &&
                     $remote && ($remote->{'user'} eq $up->{'user'} || $remote->can_manage($u) || $viewall))
                 {
@@ -2639,8 +2655,9 @@ sub get_thread_html
                     if ($info and my $country = $info->{country_name} and my $city = $info->{city_name}){
                         ## Display location of an IP.
                         $text .= LJ::Lang::ml('.fromip.extended', { ip => $ip, country => $country, city => $city });
-                    } else {
-                        ## IP location is unknown 
+                    }
+                    else {
+                        ## IP location is unknown
                         $text .= LJ::Lang::ml('.fromip', { ip => $ip });
                     }
                 }
@@ -2649,9 +2666,9 @@ sub get_thread_html
                     $text .= " <font size='-1'>(<a href='" .
                              LJ::Talk::talkargs($talkurl, "thread=$dtid", $formatlight) .
                              "#t$dtid' rel='nofollow'>" .
-                             BML::ml('talk.commentpermlink') . "</a>)</font> ";
+                             LJ::Lang::ml('talk.commentpermlink') . "</a>)</font> ";
                 }
-                
+
                 if ($comment->remote_can_edit) {
                     $text .= "<a href='" .
                              LJ::Talk::talkargs($comment->edit_url, $stylemine, $formatlight) .
@@ -2683,7 +2700,7 @@ sub get_thread_html
                              LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) .
                              "</a>";
                 }
-                    
+
                 if ($post->{'state'} eq 'F' && LJ::Talk::can_unfreeze($remote, $u, $up, $userpost)) {
                     $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid' rel='nofollow'>" .
                              LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) .
@@ -2695,7 +2712,7 @@ sub get_thread_html
                              LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
                 }
-                   
+
                 if ($post->{'state'} eq 'S' && LJ::Talk::can_unscreen($remote, $u, $up, $userpost)) {
                     $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid' rel='nofollow'>" .
                              LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
@@ -2714,17 +2731,16 @@ sub get_thread_html
 
                     if ($comment_watched) {
                         $track_img = 'track_active';
-                    } else {
+                    }
+                    else {
                         # see if any parents are being watched
-                        while ($comment && $comment->valid && $comment->parenttalkid)
-                        {
+                        while ($comment && $comment->valid && $comment->parenttalkid) {
                             # check cache
                             $comment->{_watchedby} ||= {};
                             my $thread_watched = $comment->{_watchedby}->{$u->{userid}};
 
                             # not cached
-                            if (!defined $thread_watched)
-                            {
+                            if (!defined $thread_watched) {
                                 $thread_watched = $remote->has_subscription(
                                     event   => "JournalNewComment",
                                     journal => $u,
@@ -2748,12 +2764,12 @@ sub get_thread_html
 
                 if ($showmultiform) {
                     $text .= " <nobr><input type='checkbox' name='selected_$tid' id='s$tid' />";
-                    $text .= " <label for='s$tid'>" . BML::ml('.select') . "</label></nobr>";
+                    $text .= " <label for='s$tid'>" . LJ::Lang::ml('.select') . "</label></nobr>";
                     $output->{multiform_selects} = 1;
                 }
 
                 # Comment Posted Notice
-                $text .= "<br /><b>" . BML::ml('.posted') . "</b>"
+                $text .= "<br /><b>" . LJ::Lang::ml('.posted') . "</b>"
                     if $last_talkid == $dtid && $last_jid == $u->{'userid'};
 
                 $text .= "</div><div class='talk-comment-box'>";
@@ -2770,16 +2786,15 @@ sub get_thread_html
 
                 BML::ebml(\$post->{'body'});
                 my $event = $post->{'body'};
-    
-                if ($input->{nohtml})
-                {
+
+                if ($input->{nohtml}) {
                     # quote all non-LJ tags
                     $event =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
                 }
 
                 my $edit_html = $edittime
                                 ? "<br /><br /><span class='ljedittime'><em>" .
-                                    BML::ml('.edittime', { edittime => $edittime }) .
+                                    LJ::Lang::ml('.edittime', { edittime => $edittime }) .
                                   "</em></span>"
                                 : "";
 
@@ -2787,42 +2802,45 @@ sub get_thread_html
 
                 $text .= "<p style='margin: 0.7em 0 0.2em 0'><font size='-2'>";
 
-                if ($allow_commenting)
-                {
+                if ($allow_commenting) {
                     my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine, $formatlight);
+
                     if ($post->{'state'} eq 'F') {
-                        $text .= "(" . BML::ml('talk.frozen') . ") ";
+                        $text .= "(" . LJ::Lang::ml('talk.frozen') . ") ";
                     }
                     elsif ($remote) {
                         # See if we want to force them to change their password
                         my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
+
                         if ($bp) {
-                            $text .= "(<a href='$bp' rel='nofollow'>" . BML::ml('talk.replytothis') . "</a>) ";
+                            $text .= "(<a href='$bp' rel='nofollow'>" . LJ::Lang::ml('talk.replytothis') . "</a>) ";
                         }
                         else {
                             if ($post->{state} eq 'S') {
                                 # show unscreen to reply link id comment screened
-                                $text .= "(<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . BML::ml('talk.unscreentoreply') . "</a>) ";
+                                $text .= "(<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::Lang::ml('talk.unscreentoreply') . "</a>) ";
                             }
                             else {
-                                $text .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, BML::ml('talk.replytothis'), $replyurl) .  ") ";
+                                $text .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, LJ::Lang::ml('talk.replytothis'), $replyurl) .  ") ";
                             }
                         }
                     }
                     else {
-                        $text .= "(<a href='$replyurl' rel='nofollow'>" . BML::ml('talk.replytothis') . "</a>) ";
+                        $text .= "(<a href='$replyurl' rel='nofollow'>" . LJ::Lang::ml('talk.replytothis') . "</a>) ";
                     }
                 }
 
                 my $parentid = $post->{'parenttalkid'} || $post->{'parenttalkid_actual'};
+
                 if ($parentid != 0) {
                     my $dpid = $parentid * 256 + $anum;
-                    $text .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid' rel='nofollow'>" . BML::ml('talk.parentlink') . "</a>) ";
+                    $text .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid' rel='nofollow'>" . LJ::Lang::ml('talk.parentlink') . "</a>) ";
                 }
-   
+
                 my $has_closed_children = 0;
+
                 if ($post->{'children'} && @{$post->{'children'}}) {
-                    $text .= "(<a href='$thread_url' rel='nofollow'>" . BML::ml('talk.threadlink') . "</a>) ";
+                    $text .= "(<a href='$thread_url' rel='nofollow'>" . LJ::Lang::ml('talk.threadlink') . "</a>) ";
 
                     if (grep {! $_->{_loaded} and !($_->{state} eq "D")} @{$post->{'children'}}) {
                         $has_closed_children = 1;
@@ -2851,18 +2869,18 @@ sub get_thread_html
 
                 # link to message
                 $LJci->{has_link} = 1;
-                    
+
                 $html->{header} = $comment_header->();
                 $html->{footer} = $comment_footer->();
 
-                my $text = "<a href='$thread_url' rel='nofollow'>" . LJ::ehtml($post->{'subject'} || BML::ml('.nosubject')) . "</a> - $user, <i>$datepost</i> ";
+                my $text = "<a href='$thread_url' rel='nofollow'>" . LJ::ehtml($post->{'subject'} || LJ::Lang::ml('.nosubject')) . "</a> - $user, <i>$datepost</i> ";
 
                 if (LJ::run_hook('show_thread_expander', { is_s1 => 1 })) {
                     $text .= ' ' . $get_expand_link->();
                 }
 
                 # Comment Posted Notice
-                $text .= " - <b>" . BML::ml('.posted') . "</b>"
+                $text .= " - <b>" . LJ::Lang::ml('.posted') . "</b>"
                     if $last_talkid == $dtid && $last_jid == $u->{'userid'};
 
                 $html->{text} = $text;
@@ -2890,4 +2908,3 @@ sub get_thread_html
 }
 
 1;
-
