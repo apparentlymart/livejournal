@@ -1982,12 +1982,13 @@ sub talkform {
         'journalu_username'      => $journalu->username,
         'editid'                 => $editid,
         'entry_url'              => $entry->url,
-        'nocomments'             => $entry->prop('opt_nocomments') || ( $journalu ? $journalu->{opt_showtalklinks} : 0),
+        'nocomments'             => $entry->prop('opt_nocomments') || ( $journalu ? $journalu->prop("opt_showtalklinks") : 0),
         'suspended'              => $remote ? $remote->is_suspended : 0,
         'deleted'                => $remote ? $remote->is_deleted || $remote->is_expunged : 0,
         'will_be_screened'       => $entry->prop('opt_screening') || ( $journalu ? $journalu->prop("opt_whoscreened") : 0),
         'is_friend'              => $remote ? $journalu->is_friend($remote) : 0,
         'email_active'           => $remote ? $remote->is_validated : 0,
+        'whocanreply'            => $journalu->prop("opt_whocanreply"),
 
         # various checks
         'remote_banned'          => LJ::is_banned( $remote, $journalu ),
