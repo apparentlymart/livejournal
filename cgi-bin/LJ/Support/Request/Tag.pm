@@ -50,6 +50,7 @@ package LJ::Support::Request::Tag;
 use strict;
 
 use Encode qw(encode decode);
+use List::MoreUtils qw();
 
 # get_requests_tags(): fetches information about which tags are assigned
 # to the given requests; returns:
@@ -126,6 +127,7 @@ sub set_request_tags {
     }
 
     if (@tags_add) {
+        @tags_add = List::MoreUtils::uniq(@tags_add);
         @tags_add = map { int $_ } @tags_add;
         my @tags_add_exprs = map { "($spid,$_)" } @tags_add;
         my $tags_add_exprs = join ',', @tags_add_exprs;
