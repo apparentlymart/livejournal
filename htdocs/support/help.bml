@@ -39,6 +39,7 @@ title=>Support Requests
 body<=
 
 <?_code
+#line 43
  use strict;
  use vars qw(%FORM);
 
@@ -157,7 +158,8 @@ body<=
      
      @shown_cats = map { $_->{'spcatid'} } @shown_cats;
 
-     $filterwhere = ' AND s.spcatid IN ('.join(',', @shown_cats).')';
+     $filterwhere = ' AND s.spcatid IN ('. join( ',', @shown_cats ) .')'
+        if @shown_cats;
 
      my $dbr = LJ::get_db_reader();
      if ($state eq "closed") {
