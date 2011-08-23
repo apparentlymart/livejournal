@@ -494,7 +494,7 @@
 			});
 
 			editor.ui.addButton('LJLink', {
-				label: editor.lang.link.tollbar,
+				label: editor.lang.link.toolbar,
 				command: 'LJLink'
 			});
 
