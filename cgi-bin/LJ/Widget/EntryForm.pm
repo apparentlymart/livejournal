@@ -761,7 +761,8 @@ sub render_options_block {
             my $selectTags = '';
             if ($remote) {
                 $selectTags = qq|<a href="#" onclick="return selectTags(this)" class="i-prop-selecttags">$BML::ML{'entryform.selecttags'}</a>|;
-                $$onload .= " getUserTags(jQuery(document.updateForm.usejournal).val());";
+                # we do not use bind, because it was wrongly implemented long ago and this is a quick fix
+                $$onload .= " jQuery(function() { getUserTags(jQuery(document.updateForm.usejournal).val()) });";
             }
 
             return qq{
