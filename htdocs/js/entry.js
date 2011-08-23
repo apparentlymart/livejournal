@@ -1249,30 +1249,32 @@ InOb.photobucket = function (seedurl, pb_affsite_id){
 };
 
 InOb.fullCenter = function (){
-	var windims = DOM.getClientDimensions();
+	var windims = DOM.getClientDimensions(),
+		h2 = Math.floor((windims.y - 220)/2), //half of real height, we do not want to round numbers again
+		w2 = Math.floor((windims.x - 55)/2)
 
-	DOM.setHeight(currentPopup, windims.y - 220);
-	DOM.setWidth(currentPopup, windims.x - 55);
-	DOM.setTop(currentPopup, (210 / 2));
-	DOM.setLeft(currentPopup, (40 / 2));
+	DOM.setHeight(currentPopup, h2 * 2);
+	DOM.setWidth(currentPopup, w2 * 2);
 
-	scroll(0, 0);
+	currentPopup.style.top = '50%';
+	currentPopup.style.marginTop = '-' + h2 + 'px';
+
+	currentPopup.style.left = '50%';
+	currentPopup.style.marginLeft = '-' + w2 + 'px';
 };
 
 InOb.tallCenter = function (){
-	var windims = DOM.getClientDimensions();
-
 	DOM.setHeight(currentPopup, 500);
 	DOM.setWidth(currentPopup, 420);
-	DOM.setTop(currentPopup, (windims.y - 300) / 2);
-	DOM.setLeft(currentPopup, (windims.x - 715) / 2);
 
-	scroll(0, 0);
+	currentPopup.style.top = '50%';
+	currentPopup.style.marginTop = '-250px';
+
+	currentPopup.style.left = '50%';
+	currentPopup.style.marginLeft = '-210px';
 };
 
 InOb.smallCenter = function (){
-	var windims = DOM.getClientDimensions();
-
 	DOM.setHeight(currentPopup, 300);
 	DOM.setWidth(currentPopup, 700);
 
