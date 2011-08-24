@@ -19,7 +19,6 @@ CKEDITOR.editorConfig = function(config){
 		'clipboard,' +
 		'colorbutton,' +
 		'colordialog,' +
-		'contextmenu,' +
 		'dialog,' +
 		'enterkey,' +
 		'entities,' +
@@ -37,6 +36,10 @@ CKEDITOR.editorConfig = function(config){
 		'toolbar,' +
 		'undo,' +
 		'wysiwygarea,';
+
+	if(jQuery.browser.msie) { //show context menu only in internet explorer as it was in previous version of editor
+		config.plugins += 'contextmenu,';
+	}
 
 	config.fullPage = false;
 	config.startupOutlineBlocks = false;
