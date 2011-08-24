@@ -10,6 +10,7 @@
 
 <ul class="b-catalogue-list b-recent-posts">
 <tmpl_loop posts>
+    <tmpl_unless is_vertical_selected><tmpl_var vertical_name>:<tmpl_var vertical_url></tmpl_unless>
 	<li class="b-catalogue-item">
 		<dl class="b-catalogue-item-header">
 			<dt class="b-catalogue-item-subject"><a href="<tmpl_var url_to_post>"><tmpl_var subject><tmpl_if is_subject_trimmed>&hellip;</tmpl_if></a></dt>

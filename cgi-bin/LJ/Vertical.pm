@@ -386,6 +386,8 @@ sub get_communities {
 
     my $search = $args{'search'};
 
+    my $vertical = ref $self eq 'LJ::Vertical' ? $self : 'LJ::Vertical';
+
     ## remove trailing spaces
     $search =~ s/^\s+(.*?)$/$1/;
     $search =~ s/(.*?)\s+?$/$1/;
@@ -440,7 +442,7 @@ sub get_communities {
     }
 
     ## Get subcategories
-    my $cats = $self->get_categories( $args{'category'} );
+    my $cats = $vertical->get_categories( $args{'category'} );
 
     my $cusers = {};
 
@@ -491,11 +493,16 @@ sub get_categories {
 
     my $dbh = LJ::get_db_reader();
 
-    my $where = $cat ? " AND parentcatid = " . $cat->catid : "";
+    my @where = $cat ? ("parentcatid = " . $cat->catid) : ();
+    my @args = ();
+    if (ref $self eq 'LJ::Vertical') {
+        push @where, " vert_id = ? ";
+        push @args, $self->vert_id;
+    }
 
     my $cats = $dbh->selectall_arrayref(
-        "SELECT * FROM category WHERE vert_id = ? $where", 
-        { Slice => {} }, $self->vert_id
+        "SELECT * FROM category " . (@where ? " WHERE " . join " AND ", @where : ""), 
+        { Slice => {} }, @args
     );
 
     return $cats;
