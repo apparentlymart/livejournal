@@ -126,32 +126,32 @@ sub _expand_tag {
             ) .
             ">" . $opts{expand_to_link}->{caption} . "</a>";
     } elsif ($opts{get_video_id}) {
-        my $code = $class->module_content(moduleid  => $attrs{id}, journalid => $journal->id);        
+        my $code = $class->module_content(moduleid  => $attrs{id}, journalid => $journal->id);
 
         my $out=  '<lj-embed id="'. $attrs{id} .'" ';
 
         # LJSUP-8992
         if ($code =~ m!src=["']?http://www\.youtube\.com/(?:v|embed)/([\w\d\_\-]+)['"]?!) {
             $out .= 'vid="'.$1.'" source="youtube" ';
-        } elsif ($code =~ m!src=["']?http://player\.vimeo\.com/video/(\d+)[?'"]?! || 
+        } elsif ($code =~ m!src=["']?http://player\.vimeo\.com/video/(\d+)[?'"]?! ||
                  $code =~ m!=["']?http://vimeo\.com/moogaloop\.swf\?[\d\w\_\-\&\;\=]*clip_id=(\d+)[&'"]?! ) {
             $out .= 'vid="'.$1.'" source="vimeo" ';
         } elsif ($code =~ m!=["']?http://video\.rutube\.ru/([\dabcdef]+)['"]?!) {
             $out .= 'vid="'.$1.'" source="rutube" ';
         } elsif ($code =~ m!=["']?http://static\.video\.yandex\.ru/([\d\w\/\-\_\.]+)['"]?!) {
-            $out .= 'vid="'.$1.'" source="yandex" '; 
+            $out .= 'vid="'.$1.'" source="yandex" ';
         } elsif ($code =~ m!http://img\.mail\.ru.+movieSrc=([\w\d\/\_\-\.]+)["']?!) {
             $out .= 'vid="'.$1.'" source="mail.ru" ';
         } elsif ($code =~ m!http://(vkontakte\.ru|vk\.com)/video_ext!) {
             $out .= 'source="'.$1.'" ';
             my %fields = ($code =~ /(oid|id|hash)=([\dabcdef]+)/gm);
             $fields{vid} =  delete $fields{id};
-            $out .= $_.'="'.$fields{$_}.'" ' foreach (keys %fields);    
+            $out .= $_.'="'.$fields{$_}.'" ' foreach (keys %fields);
         }
         $out .= '/>';
 
         return $out;
-        
+
     } else {
         @opts{qw /width height/} = @attrs{qw/width height/};
         return $class->module_iframe_tag($journal, $attrs{id}, %opts)
@@ -211,7 +211,7 @@ sub parse_module_embed {
         $tag = lc $tag;
         my $newstate = undef;
         my $reconstructed = $class->reconstruct($token);
-        
+
         if ($state == REGULAR) {
             if ($tag eq 'lj-embed' && $type eq 'S' && ! $attr->{'/'}) {
                 # <lj-embed ...>, not self-closed
@@ -225,8 +225,13 @@ sub parse_module_embed {
                      $attr->{'source_user'} && $attr->{'/'}) {
 
                 my $u = LJ::load_user($attr->{'source_user'});
-
                 if ($u) {
+                    if ($journal->equals($u)) {
+                        $newstate = EXPLICIT;     # save embed id, width and height if they do exist in attributes
+                        $embed_attrs{id} = $attr->{id} if $attr->{id};
+                        $embed_attrs{width} = ($attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width}) if $attr->{width};
+                        $embed_attrs{height} = ($attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height}) if $attr->{height};
+                    } else {
                     $newstate = REGULAR;
                     $embed = $class->module_content( moduleid  => $attr->{id},
                                                      journalid => $u->id );
@@ -240,6 +245,7 @@ sub parse_module_embed {
                             $embed_attrs{height} = $attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height};
                         }
                     }
+                  }
                 }
             } elsif (($tag eq 'object' || $tag eq 'embed' || $tag eq 'iframe') && $type eq 'S') {
                 # <object> or <embed>
@@ -528,10 +534,10 @@ sub reconstruct {
                 $selfclose = 1;
                 next;
             }
-            
+
             ## Remove "data" attribute from <object data="..."> constructs.
-            ## Right now attribute is silently dropped. 
-            ## TODO: pass a flag to outer scope that it was dropped, so that 
+            ## Right now attribute is silently dropped.
+            ## TODO: pass a flag to outer scope that it was dropped, so that
             ## ljprotocol can notify user by throwing an error.
             if ($tag eq 'object' && $name eq 'data') {
                 next;

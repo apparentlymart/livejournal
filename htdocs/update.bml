@@ -28,7 +28,7 @@
         $$body = "<?badinput?>";
         return;
     }
-    
+
     ## This header is to pass page content through IE8 XSS Filter.
     ## See also htdocs/preview/entry.bml.
     LJ::Request->header_out("X-XSS-Protection" => 0);
@@ -48,7 +48,7 @@
 
     # get remote and see if they can post right now
     my $remote = LJ::get_remote();
-    
+
     # Should we show try and buy
     my $show_trynbuy = LJ::TryNBuy->can_enable($remote) || LJ::TryNBuy->active($remote);
 
@@ -155,7 +155,7 @@
         my $text = LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], form_disabled => 1 );
         $$head .= "<script type=\"text/javascript\">LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";
     }
-    
+
     if ($url) {
         ## currently, the URL is for YouTube only.
         ## in future support for other quick embeds will be added.
@@ -183,12 +183,9 @@ EMBED
             unless ($event) {
                 $event = $entry->event_raw;
                 my $journalu = $entry->journal;
+                LJ::EmbedModule->add_user_to_embed($journalu, \$event);
 
-                if (!$journalu->equals($remote)) {
-                    LJ::EmbedModule->add_user_to_embed($journalu, \$event);
-                }
-
-                $event = LJ::Lang::ml("repost.wrapper", { 
+                $event = LJ::Lang::ml("repost.wrapper", {
                                             username => $entry->poster->username,
                                             url      => $entry->url,
                                             subject  => $subject,
@@ -197,7 +194,6 @@ EMBED
                 $reposted_from = $entry->url;
             }
         }
-        
     }
 
     # try to call a hook to fill in the fields
@@ -232,7 +228,7 @@ EMBED
     my $errors = {};
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
     my $preview = $POST{'action:preview'};
-    
+
         # are we spellchecking before we post?
     my $did_spellcheck; my $spellcheck_html;
     if ($LJ::SPELLER && $POST{'action:spellcheck'}) {
@@ -315,7 +311,7 @@ EMBED
             $entry->{prop_opt_default_nocomments} = $remote->prop('opt_showtalklinks');
             $entry->{prop_last_fm_user} = $remote->prop('last_fm_user');
         }
-        
+
         if ($did_post) {
             $entry->{$_} = $POST{$_} foreach keys %POST;
 
@@ -351,7 +347,7 @@ EMBED
         }
 
         $$body .= "\n\n<form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>\n\n";
-        
+
         $$body .= LJ::form_auth();
 
         if ($reposted_from) {
@@ -374,7 +370,6 @@ EMBED
         </script>
 LIKE_FAQ
         $$body .= $js;
-	
         $$body .= LJ::Widget::SettingWindow->render;
 
         return;
