@@ -1851,7 +1851,7 @@ HTML BODY.logged-out {
 				padding: 7px 0;
 				}
  			.b-postform-authtype-cookieuser .b-postform-login-user .b-postform-login-opts {
-				padding: 6px 0;
+				padding: 5px 0 0;
 				}
 			.b-postform-login-livejournal .b-postform-login-opts {
 				position: static;
@@ -1859,7 +1859,7 @@ HTML BODY.logged-out {
 				width: auto;
 				height: auto;
 				margin: 0;
-				padding: 1px 2px 0;
+				padding: 0;
 				}
 			.b-postform-login-item .b-postform-login-opts {
 				display:inline-block;
