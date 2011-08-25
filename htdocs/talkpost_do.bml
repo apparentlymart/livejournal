@@ -53,6 +53,7 @@
 
             if ( $tempbody =~ /$LJ::TALK_ABORT_REGEXP/ || $POST{'body'} =~ /$LJ::TALK_ABORT_REGEXP/ ) {
                 ( $status, $result ) = ('error', 'stopword');
+
                 return "";
             }
         }
@@ -60,6 +61,7 @@
         foreach my $re (@LJ::TALKSPAM) {
             if ( $POST{'body'} =~ /$re/ ) {
                 ( $status, $result ) = ('error', 'spam');
+
                 return;
             }
         }
@@ -100,8 +102,10 @@
 
             %POST = %$penddata;
 
-            push @errors, "You chose to cancel your identity verification"
-                if $GET{'failed'};
+            if ( $GET{'failed'} ) {
+                push @errors, "You chose to cancel your identity verification";
+                return $error->($errors[-1]) if $ajax;
+            }
         }
         # normally require POST.  if an ecphash is specified, we'll let
         # them through since they're coming from a comment page and
@@ -126,8 +130,10 @@
 
         # FIXME: this isn't entirely correct, if ecphash is present but ignored/incorrect
         # that fix would need to be done in talklib.pl
-        push @errors, $ML{'.error.invalidform'}
-            if $remote && ! ($skip_form_auth || $POST{'ecphash'} || LJ::check_form_auth());
+        if ( $remote && ! ($skip_form_auth || $POST{'ecphash'} || LJ::check_form_auth()) ) {
+            push @errors, $ML{'.error.invalidform'};
+            return $error->($errors[-1]) if $ajax;
+        }
 
         $user_url = $journalu->journal_base;
 
@@ -138,6 +144,7 @@
             $cookie_auth = 1 if $POST{usertype} eq "cookieuser";
             my $talkurl = $user_url . "/$POST{itemid}.html";
             $title = $ML{'.title.preview'};
+
             return LJ::Talk::Post::make_preview($talkurl, $cookie_auth, \%POST);
         }
 
@@ -169,6 +176,7 @@
         {
             if ( $external_site_case && !$remote ) {
                 return $redirect->($logcom_page) if $ajax;
+
                 return BML::redirect( $logcom_page );
             }
         }
@@ -177,6 +185,7 @@
         my $need_captcha = 0;
         my $init = LJ::Talk::Post::init(\%POST, $remote, \$need_captcha, \@errors);
 
+        return $error->($errors[-1]) if $ajax && int(@errors);
         return if LJ::Request->redirected;
 
         # Report errors in a friendly manner by regenerating the field.
@@ -293,6 +302,7 @@
         # no replying to entries/comments in an entry where the remote user or journal are read-only
         return $error_bi->('/talkpost.bml.error.noreply_readonly_remote')
             if $remote && $remote->is_readonly;
+
         return $error_bi->('/talkpost.bml.error.noreply_readonly_journal')
             if $journalu && $journalu->is_readonly;
 
@@ -358,7 +368,9 @@
             # is screened itself, or they logged in
             if (!($wasscreened and $parent->{state} ne 'S') && !$init->{didlogin}) {
                 LJ::set_lastcomment($journalu->{'userid'}, $remote, $dtalkid);
+
                 return $redirect->($commentlink) if $ajax;
+
                 return BML::redirect($commentlink);
             }
 
@@ -393,6 +405,9 @@
 
         # Sucessful!
         $title = $ML{'.title'};
+
+        return $ok->('posted') if $ajax;
+
         return $ret;
 
     }; # end $render_body
@@ -407,7 +422,7 @@
 
     if ( $ajax ) {
         $result => LJ::eurl($result);
-        return  qq~
+        return qq~
 <!DOCTYPE html>
 <html>
 <head></head>
