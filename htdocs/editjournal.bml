@@ -65,7 +65,7 @@ body<=
     $getextra = "?$getextra" if $getextra;
 
     my $start_from = $GET{'start_from'} || 0;
-    my $items_per_page = 2;
+    my $items_per_page = 20;
 
     my $entry_chooser = sub {
         my $ref = shift;
@@ -111,7 +111,7 @@ body<=
             }
             $ret .= $sec;
 
-            $ret .= "<a href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "mode=edit&itemid=".$entry->ditemid."'>";
+            $ret .= "<a href='".$entry->url."'>";
             if (my $subj = $entry->subject_text) {
                 $ret .= LJ::ehtml($subj);
             } else {
