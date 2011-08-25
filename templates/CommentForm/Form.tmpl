@@ -74,6 +74,12 @@
                             </TMPL_LOOP>
                         </ul>
                     </div>
+					
+<script type="text/javascript" src="http://www.ljdev10.livejournal.ru/js/jquery/jquery.lj.subjecticons.js"></script>					
+					
+					<script type="text/javascript">
+						jQuery('div.b-subjecticons').subjecticons();
+					</script>
 
                     <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-nosubjecthtml"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.nosubjecthtml')"></p>
 
@@ -187,9 +193,15 @@
             </tr>
         </table>
     </form>
+
+<script type="text/javascript" src="http://www.ljdev10.livejournal.ru/js/jquery/jquery.lj.commentator.js"></script>	
+	
     <script type="text/javascript">
-        jQuery('#postform').authtype();
+        jQuery('#postform')
+			.authtype()
+			.commentator();
     </script>
+	
 <TMPL_ELSE>
     <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost_do.bml.error.nocomments')"></p>
 </TMPL_IF>
