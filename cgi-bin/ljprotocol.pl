@@ -19,6 +19,7 @@ use Class::Autouse qw(
                       );
 
 use LJ::TimeUtil;
+use POSIX;
 
 LJ::Config->load;
 
@@ -2087,6 +2088,29 @@ sub postevent
             $release->();
         }
     };
+
+    # LJSUP-9616
+    if ($req->{'props'}->{'opt_backdated'}) {
+        my $state_date = POSIX::strftime("%Y-%m-%d", gmtime);
+        my $key = "stat:opt_backdated:$state_date";
+
+        LJ::MemCache::incr($key, 1) ||
+            (LJ::MemCache::add($key, 0),  LJ::MemCache::incr($key, 1));
+
+        my @ltime = gmtime(time());
+        my $current = sprintf("%04d-%02d-%02d %02d:%02d",
+                                 $ltime[5]+1900,
+                                 $ltime[4] + 1,
+                                 $ltime[3],
+                                 $ltime[2],
+                                 $ltime[1]);
+
+        if ($eventtime ge $current) {
+            my $key_future = "stat:opt_backdated:future:$state_date";
+            LJ::MemCache::incr($key_future, 1) ||
+                (LJ::MemCache::add($key_future, 0),  LJ::MemCache::incr($key, 1));
+        }
+    }
 
     my $need_moderated = ( $uowner->{'moderated'} =~ /^[1A]$/ ) ? 1 : 0;
     if ( $uowner->{'moderated'} eq 'F' ) {
