@@ -1165,7 +1165,8 @@ HTML BODY.logged-out {
 .b-postform-alert-banned,
 .b-postform-alert-notafriend,
 .b-postform-alert-notreg,
-.b-postform-alert-regonly {
+.b-postform-alert-regonly,
+.b-postform-alert-ajax {
 	display: none;
 	}
 
@@ -1479,31 +1480,49 @@ HTML BODY.logged-out {
 .b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-notreg .b-postform-msgbox,
 .b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-notreg .b-postform-repostbox,
 .b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-notreg .b-postform-submitbox,
+.b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-notreg .b-postform-alert-screened,
+.b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-notreg.b-postform-user-screened-nonf .b-postform-alert-screened,
+.b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-notreg .b-postform-alert-logcommentips,
 
 .b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-notreg .b-postform-subjectbox,
 .b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-notreg .b-postform-msgbox,
 .b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-notreg .b-postform-repostbox,
 .b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-notreg .b-postform-submitbox,
+.b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-notreg .b-postform-alert-screened,
+.b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-notreg.b-postform-user-screened-nonf .b-postform-alert-screened,
+.b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-notreg .b-postform-alert-logcommentips,
 
 .b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-notreg .b-postform-subjectbox,
 .b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-notreg .b-postform-msgbox,
 .b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-notreg .b-postform-repostbox,
 .b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-notreg .b-postform-submitbox,
+.b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-notreg .b-postform-alert-screened,
+.b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-notreg.b-postform-user-screened-nonf .b-postform-alert-screened,
+.b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-notreg .b-postform-alert-logcommentips,
 
 .b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-notreg .b-postform-subjectbox,
 .b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-notreg .b-postform-msgbox,
 .b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-notreg .b-postform-repostbox,
 .b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-notreg .b-postform-submitbox,
+.b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-notreg .b-postform-alert-screened,
+.b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-notreg.b-postform-user-screened-nonf .b-postform-alert-screened,
+.b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-notreg .b-postform-alert-logcommentips,
 
 .b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-notreg .b-postform-subjectbox,
 .b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-notreg .b-postform-msgbox,
 .b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-notreg .b-postform-repostbox,
 .b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-notreg .b-postform-submitbox,
+.b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-notreg .b-postform-alert-screened,
+.b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-notreg.b-postform-user-screened-nonf .b-postform-alert-screened,
+.b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-notreg .b-postform-alert-logcommentips,
 
 .b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-notreg .b-postform-subjectbox,
 .b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-notreg .b-postform-msgbox,
 .b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-notreg .b-postform-repostbox,
-.b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-notreg .b-postform-submitbox {
+.b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-notreg .b-postform-submitbox,
+.b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-notreg .b-postform-alert-screened,
+.b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-notreg.b-postform-user-screened-nonf .b-postform-alert-screened,
+.b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-notreg .b-postform-alert-logcommentips {
 	display: none;
 	}
 
@@ -1760,6 +1779,16 @@ HTML BODY.logged-out {
 						vertical-align: -4px;
 						border: 0 !important;
 						}
+			.b-postform-realauth-cookieuser .b-postform-login-services-livejournal {
+				display: none;
+				}
+			.b-postform-login-services-livejournal,
+			.b-postform-realauth-cookieuser .b-postform-login-services-user {
+				border-bottom: 1px solid #CCC;
+				}
+			.b-postform-realauth-cookieuser .b-postform-login-services-livejournal {
+				border-bottom: 0;
+				}
 	.b-postform-login-details {
 		position: static;
 		float: none;
