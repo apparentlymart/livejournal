@@ -1867,6 +1867,7 @@ HTML BODY.logged-out {
 			#js .b-postform-login-opts {
 				display:block;
 				}
+	.b-postform-preload,
 	.replyform TABLE .b-postform-preload {
 		padding: 0 0.4em 10px 0;
 		vertical-align: bottom;
