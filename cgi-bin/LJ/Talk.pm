@@ -441,8 +441,10 @@ sub screening_level {
     # now return userprop, as it's our last chance
     LJ::load_user_props($journalu, 'opt_whoscreened');
     return if $journalu->{opt_whoscreened} eq 'N';
-    $journalu->{opt_whoscreened} = 'R' 
+
+    $journalu->{opt_whoscreened} = 'R'
         if $journalu->{opt_whoscreened} eq 'L';
+
     return $journalu->{opt_whoscreened} || 'R';
 }
 
@@ -1753,23 +1755,28 @@ sub talkform {
     my $screening = LJ::Talk::screening_level( $journalu, $entry->jitemid );
 
     my $willscreen;
+
     if ( $screening eq 'A' ) {
         $willscreen = 1;
     }
     elsif ( $screening eq 'F' ) {
         $willscreen = !( $remote && $is_person && $is_friend );
     }
+    elsif ( $screening eq 'R' ) {
+        $willscreen = $remote ? 0 : 1;
+    }
 
     my ( $ml_willscreen, $ml_willscreenfriend );
+
     if ($willscreen) {
-        $ml_willscreen = LJ::Lang::ml('/talkpost.bml.opt.willscreen'),;
+        $ml_willscreen = LJ::Lang::ml('/talkpost.bml.opt.willscreen');
     }
     elsif ( $screening eq 'F' ) {
-        $ml_willscreenfriend
-            = LJ::Lang::ml('/talkpost.bml.opt.willscreenfriend');
+        $ml_willscreenfriend = LJ::Lang::ml('/talkpost.bml.opt.willscreenfriend');
     }
 
     my $basesubject = $form->{subject} || "";
+
     if ( $opts->{replyto} && !$basesubject && $parpost->{'subject'} ) {
         $basesubject = $parpost->{'subject'};
         $basesubject =~ s/^Re:\s*//i;
@@ -1868,11 +1875,10 @@ sub talkform {
             my $c      = Captcha::reCAPTCHA->new;
             my $apikey = LJ::conf_test( $LJ::RECAPTCHA{public_key} );
 
-            $captcha_html .= $c->get_options_setter(
-                {   'theme' => 'white',
-                    'lang'  => BML::get_language(),
-                }
-            );
+            $captcha_html .= $c->get_options_setter({
+                'theme' => 'white',
+                'lang'  => BML::get_language(),
+            });
             $captcha_html .= $c->get_html($apikey);
         }
         else {
@@ -1881,39 +1887,34 @@ sub talkform {
 
             # Captcha sessions
             my $cid = $journalu->{clusterid};
-            $captcha_chal = $form->{captcha_chal}
-                || LJ::challenge_generate(900);
+            $captcha_chal = $form->{captcha_chal} || LJ::challenge_generate(900);
             $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
             my $dbcr = LJ::get_cluster_reader($journalu);
+            my $try  = 0;
 
-            my $try = 0;
             if ( $form->{captcha_chal} ) {
                 $try = $dbcr->selectrow_array(
                     'SELECT trynum FROM captcha_session ' . 'WHERE sess=?',
-                    undef, $captcha_sess );
+                    undef,
+                    $captcha_sess );
             }
             $captcha_html .= '<br /><br />';
 
             # Visual challenge
             if ( !$wants_audio && !$form->{audio_chal} ) {
-                $captcha_html
-                    .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.desc'}</div>";
-                $captcha_html
-                    .= "<img src='/captcha/image.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try' width='175' height='35' />";
-                $captcha_html
-                    .= "<br /><br />$BML::ML{'/create.bml.captcha.answer'}";
+                $captcha_html .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.desc'}</div>";
+                $captcha_html .= "<img src='/captcha/image.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try' width='175' height='35' />";
+                $captcha_html .= "<br /><br />$BML::ML{'/create.bml.captcha.answer'}";
             }
 
             # Audio challenge
             else {
-                $captcha_html
-                    .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.audiodesc'}</div>";
-                $captcha_html
-                    .= "<a href='/captcha/audio.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try'>$BML::ML{'/create.bml.captcha.play'}</a> &nbsp; ";
+                $captcha_html .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.audiodesc'}</div>";
+                $captcha_html .= "<a href='/captcha/audio.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try'>$BML::ML{'/create.bml.captcha.play'}</a> &nbsp; ";
                 $captcha_html .= LJ::html_hidden( audio_chal => 1 );
             }
-            $captcha_html
-                .= LJ::html_text( { name => 'answer', size => 15 } );
+
+            $captcha_html .= LJ::html_text( { name => 'answer', size => 15 } );
             $captcha_html .= LJ::html_hidden( captcha_chal => $captcha_chal );
         }
     }
@@ -1922,8 +1923,7 @@ sub talkform {
     my $ml_logcommentips;
 
     if ( $show_logips =~ /[AS]/ ) {
-        my $mlkey =
-            $show_logips eq 'A'
+        my $mlkey = $show_logips eq 'A'
             ? '/talkpost.bml.logyourip'
             : '/talkpost.bml.loganonip';
 
@@ -1933,8 +1933,8 @@ sub talkform {
     my %ml = (
         'loggedin' => LJ::Lang::ml(
             '/talkpost.bml.opt.loggedin',
-            {   'username' => '<i>'
-                    . LJ::ehtml($remote_display_name) . '</i>',
+            {
+                'username' => '<i>' . LJ::ehtml($remote_display_name) . '</i>',
             }
         ),
         'banned' => LJ::Lang::ml(
@@ -1943,32 +1943,28 @@ sub talkform {
         ),
         'noopenidpost' => LJ::Lang::ml(
             '/talkpost.bml.opt.noopenidpost',
-            {   'aopts1' => "href='$LJ::SITEROOT/changeemail.bml'",
+            {
+                'aopts1' => "href='$LJ::SITEROOT/changeemail.bml'",
                 'aopts2' => "href='$LJ::SITEROOT/register.bml'",
             }
         ),
         'friendsonly' => LJ::Lang::ml(
-            '/talkpost.bml.opt.'
-                . ( $is_person ? 'friends' : 'members' ) . 'only',
-            { 'username' => '<b>' . $journalu->username . '</b>', }
+            '/talkpost.bml.opt.' . ( $is_person ? 'friends' : 'members' ) . 'only',
+            { 'username' => '<b>' . $journalu->username . '</b>' }
         ),
         'notafriend' => LJ::Lang::ml(
-            '/talkpost_do.bml.error.nota'
-                . ( $is_person ? 'friend' : 'member' ),
-            { 'user' => $journalu->username, }
+            '/talkpost_do.bml.error.nota' . ( $is_person ? 'friend' : 'member' ),
+            { 'user' => $journalu->username }
         ),
         'noaccount' => LJ::Lang::ml(
             '/talkpost.bml.noaccount',
-            { 'aopts' => "href='$LJ::SITEROOT/create.bml'", }
+            { 'aopts' => "href='$LJ::SITEROOT/create.bml'" }
         ),
         'picturetouse' => LJ::Lang::ml(
             '/talkpost.bml.label.picturetouse2',
-            {   'aopts' =>
-                    "href='$LJ::SITEROOT/allpics.bml?user=$remote_username'",
-            }
+            { 'aopts' => "href='$LJ::SITEROOT/allpics.bml?user=$remote_username'" }
         ),
-        'usermismatch' =>
-            LJ::ejs( LJ::Lang::ml('/talkpost.bml.usermismatch') ),
+        'usermismatch'     => LJ::ejs( LJ::Lang::ml('/talkpost.bml.usermismatch') ),
         'logcommentips'    => $ml_logcommentips,
         'willscreen'       => $ml_willscreen,
         'willscreenfriend' => $ml_willscreenfriend,
