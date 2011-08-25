@@ -4,7 +4,7 @@
     use strict;
 
     our ( %ML, %GET, %POST, $title, $body );
-    my ( $status, $result, $message, $answer, $redirected );
+    my ( $status, $result, $message, $answer, $redirected, $user_url );
 
     my $restore_old = sub {
         my $remote = LJ::get_remote();
@@ -132,12 +132,14 @@
         push @errors, $ML{'.error.invalidform'}
             if $remote && ! ($skip_form_auth || $POST{'ecphash'} || LJ::check_form_auth());
 
+        $user_url = $journalu->journal_base;
+
         ## preview
         # ignore errors for previewing
         if ($POST{'submitpreview'} || ($POST{'qr'} && $POST{'do_spellcheck'})) {
             my $cookie_auth;
             $cookie_auth = 1 if $POST{usertype} eq "cookieuser";
-            my $talkurl = LJ::journal_base($journalu) . "/$POST{itemid}.html";
+            my $talkurl = $user_url . "/$POST{itemid}.html";
             $title = $ML{'.title.preview'};
             return LJ::Talk::Post::make_preview($talkurl, $cookie_auth, \%POST);
         }
@@ -415,9 +417,15 @@
             )
         };
 
-        BML::set_content_type('application/json');
-
-        return LJ::JSON->to_json($res);
+        return qq~
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+<iframe src="$user_url/xdreceiver.html?status=$status&result=$result&message=$message" />
+</body>
+</html>
+~;
     }
     elsif ($site_scheme_wrap) {
         return BML::render_page({
