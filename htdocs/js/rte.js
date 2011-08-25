@@ -26,6 +26,7 @@
 		if (draftData.ask && draftData.restoreData) {
 			if (confirm(draftData.confirmMsg)) {
 				draftData.lastValue = draftData.restoreData;
+				draftData.textArea.val(draftData.lastValue);
 				draftData.statusNode.val(draftData.draftStatus);
 			}
 		} else {
