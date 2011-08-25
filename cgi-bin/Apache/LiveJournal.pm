@@ -735,7 +735,7 @@ sub trans {
                     auth_token => $post_params{'form_auth'}, 
                     user => $opts->{user})
             ) {
-                LJ::Request->pnotes ('error' => 'members');
+                LJ::Request->pnotes ('error' => 'ljphoto_members');
                 LJ::Request->pnotes ('remote' => LJ::load_user($opts->{'user'}));
                 return LJ::Request::FORBIDDEN;
             }
@@ -743,7 +743,7 @@ sub trans {
             LJ::set_remote ($u) unless $remote;
             $remote = LJ::get_remote();
             unless ($remote && $remote->can_use_ljphoto()) {
-                LJ::Request->pnotes ('error' => 'members');
+                LJ::Request->pnotes ('error' => 'ljphoto_members');
                 LJ::Request->pnotes ('remote' => LJ::get_remote());
                 return LJ::Request::FORBIDDEN;
             }
