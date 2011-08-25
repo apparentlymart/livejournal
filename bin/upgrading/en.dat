@@ -2955,6 +2955,20 @@ fotki.promo.about.list.more=and many more...
 
 fotki.photo.upload.title=Upload photo
 
+fotki.photo.upload.error.file_type_not_supported=File type is not supported
+
+fotki.photo.upload.error.file_not_selected=File not selected
+
+fotki.photo.upload.error.no_access_rpc=Internal Error
+
+fotki.photo.upload.error.auth_token_invalid=Auth error
+
+fotki.photo.upload.error.common_error=Common error
+
+fotki.photo.upload.error.cant_get_storage_space=Can't get count of used storage space
+
+fotki.photo.upload.error.no_access_to_storage_media=No access to storage media
+
 fotki.photo.upload.photo_desc=Photo description
 
 fotki.photo.upload.select_album.title=Select album for upload
