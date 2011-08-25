@@ -49,6 +49,34 @@
                             </div>
                         </div>
                     </TMPL_IF>
+					
+                    <TMPL_IF EXPR="(will_be_screened eq 'A') || (will_be_screened eq 'F' && !is_friend) || (will_be_screened eq 'R' and !email_active)">
+                        <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext b-postform-alert-screened"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_willscreen></p>
+                    </TMPL_IF>
+
+                    <TMPL_IF suspended>
+                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-suspended"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.suspended')"></p>
+                    </TMPL_IF>
+
+                    <TMPL_IF deleted>
+                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-deleted"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.deleted')"></p>
+                    </TMPL_IF>
+
+                    <TMPL_IF EXPR="remote_banned && !(whocanreply eq 'reg' && !email_active)">
+                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-banned"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_banned></p>
+                    </TMPL_IF>
+
+                    <TMPL_IF EXPR="whocanreply eq 'friends'">
+                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notafriend"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_notafriend></p>
+                    </TMPL_IF>
+
+                    <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype_default ne 'anonymous'">
+                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notreg"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_noopenidpost></p>
+                    </TMPL_IF>
+
+                    <TMPL_IF EXPR="whocanreply eq 'reg'">
+                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-regonly"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></p>
+                    </TMPL_IF>					
                 </td>
             </tr>
 
@@ -106,23 +134,26 @@
 
             <tr valign="top" class="b-postform-msgbox">
                 <td align="right"><label for="commenttext"><TMPL_VAR expr="ml('/talkpost.bml.opt.message')"></label></td>
-                <td style="width: 90%">
+                <td>
                     <textarea class="textbox" rows="15" cols="75" wrap="soft" name="body" id="commenttext" tabindex="30"><TMPL_VAR comment_body></textarea>
                 </td>
             </tr>
 
             <TMPL_VAR extra_rows>
 
-            <tr class="b-postform-submitbox">
-                <td class="b-postform-preload"><i class="b-postform-preloader"></i></td>
-                <td>
-                    <TMPL_IF captcha_html>
-                        <TMPL_VAR captcha_html>
-                        <br />
-                    </TMPL_IF>
-
+            <TMPL_IF captcha_html>
+			<tr class="b-postform-submitbox">
+			    <td>&nbsp;</td>
+				<td>
+				    <TMPL_VAR captcha_html>
                     <br />
+				</td>
+			</tr>
+			</TMPL_IF>
 
+            <tr class="b-postform-submitbox">
+                <td class="b-postform-preload">&nbsp;</td>
+                <td class="b-postform-submitbox-submit">
                     <input type="submit" name="submitpost" tabindex="40"
                         <TMPL_IF editid>
                             value="<TMPL_VAR expr="ml('/talkpost.bml.opt.edit')">"
@@ -143,6 +174,7 @@
             <tr class="b-postform-alertbox">
                 <td>&nbsp;</td>
                 <td>
+                    <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-ajax"></p>
 
                     <TMPL_IF errors>
                         <ul>
@@ -159,36 +191,6 @@
                     <TMPL_IF EXPR="show_logips eq 'S' || show_logips eq 'A'">
                         <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext b-postform-alert-logcommentips"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_logcommentips>&nbsp;<TMPL_VAR helpicon_iplogging></p>
                     </TMPL_IF>
-
-                    <TMPL_IF EXPR="(will_be_screened eq 'A') || (will_be_screened eq 'F' && !is_friend) || (will_be_screened eq 'R' and !email_active)">
-                        <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext b-postform-alert-screened"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_willscreen></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF suspended>
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-suspended"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.suspended')"></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF deleted>
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-deleted"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.deleted')"></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF EXPR="remote_banned && !(whocanreply eq 'reg' && !email_active)">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-banned"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_banned></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF EXPR="whocanreply eq 'friends'">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notafriend"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_notafriend></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype_default ne 'anonymous'">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notreg"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_noopenidpost></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF EXPR="whocanreply eq 'reg'">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-regonly"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></p>
-                    </TMPL_IF>
-                    
-                    <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-ajax"></p>
                 </td>
             </tr>
         </table>
