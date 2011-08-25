@@ -421,7 +421,7 @@
         : '';
 
     if ( $ajax ) {
-        $result => LJ::eurl($result);
+        $result => LJ::eurl(LJ::eurl($result));
         return qq~
 <!DOCTYPE html>
 <html>
