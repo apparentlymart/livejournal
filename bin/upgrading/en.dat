@@ -2567,6 +2567,8 @@ fcklang.invalidchars=Invalid characters in username
 
 fcklang.ljcut=LiveJournal Cut
 
+fcklang.ljrepost=Repost
+
 fcklang.ljembed|staleness=1
 fcklang.ljembed=Embed Media
 
@@ -2697,11 +2699,11 @@ fcklang.ljlike.button.twitter=Twitter
 
 fcklang.ljlike.button.give=10 Give
 
-fcklang.ljlike.faq=FAQ
-
 fcklang.ljlike.wizardnotice=Likes must be edited inside the Like Wizard
 
 fcklang.ljlike.wizardnoticelink=Go to like wizard
+
+fcklang.ljlike.faq=FAQ
 
 
 fcklang.ljuser.wizardnotice=User must be edited inside the User Wizard
@@ -2760,8 +2762,6 @@ fotki.album.add.photos=You can add one or more photos at once using "Ctrl" butto
 
 fotki.album.add.images=Add images
 
-fotki.album.upload.images=Upload images
-
 fotki.album.add.image.name=Add image name
 
 fotki.album.add.five.images=Add 5 images to your LiveJournal entry
@@ -2777,8 +2777,6 @@ fotki.album.btn.save=Save
 fotki.album.add.to.entry=Add to entry
 
 fotki.album.btn.upload=Upload
-
-fotki.album.image.loading=Image loading...
 
 fotki.album.upload.unknown.error=Unknown error
 
@@ -2804,10 +2802,6 @@ fotki.album.remove_album=Remove album
 
 fotki.album.remove_image=Remove image
 
-fotki.album.remove_photo=Remove photo
-
-fotki.album.remove_photo_desc=Remove this photo
-
 fotki.album.remove.this.image=Remove this image
 
 fotki.album.remove_album_desc=Images will be deleted and disappear from all related posts in your blog
@@ -2831,8 +2825,6 @@ fotki.album.link.album_list=Albums
 fotki.album.link.cancel=Cancel
 
 fotki.album.link.click.to.upload=Click to upload <br> new images
-
-fotki.album.uploading.message=Uploading...
 
 fotki.album.link.edit=Edit
 
@@ -2876,59 +2868,15 @@ fotki.album.select.image.size=Select image size:
 
 fotki.album.select.images.size=Select images size:
 
-fotki.album.storage.title=Your storage space
+fotki.album.storage.title=Photo album: not enough space
 
 fotki.album.storage.used=Used
 
 fotki.album.your.friends.updates=Your friends updates
 
-fotki.album.user.updates=[[ljuser]]'s updates
-
 fotki.album.your_albums=Your albums
 
 fotki.album.upgrade=Upgrade
-
-fotki.storage.title_more_space=Add more storage space
-
-fotki.storage.full.message_more_space=You can add more storage space to: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>You can get <a [[add_link]]>more options</a>.
-
-fotki.storage.2gb.paid_account=up to 2Gb by <a [[link1]]>upgrade to paid account</a>
-
-fotki.storage.10gb.addon_storage=up to 10Gb by pay a <a [[link2]]>storage space</a>
-
-fotki.storage.15gb.permanent_account=up to 15Gb by upgrade to <a [[link3]]>permanent account</a>
-
-fotki.storage.title_prolog_space=Your storage space is near to empty
-
-fotki.storage.full.message_prolong_space=Your storage space ends [[date]]. All your images on additional space will be disabled. You can: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>You can:
-
-fotki.storage.10gb.addon_storage_prolong=<a [[link2]]>extend the extra space</a> with the volume of 10Gb
-
-fotki.storage.15gb.permanent_account_2=<a [[link3]]>upgrade to permanent account</a> and get up to 15Gb
-
-fotki.storage.title_free_space_out=Your storage space is near to empty
-
-fotki.storage.full.message_free_space_out=Your storage space ends [[date]]. All your images on additional space will be disabled. You can: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>
-
-fotki.storage.2gb.paid_account_3=up to 2Gb by <a [[link1]]>upgrade to paid account</a>
-
-fotki.storage.10gb.addon_storage_3=up to 10Gb by pay a <a [[link2]]>storage space</a>
-
-fotki.storage.15gb.permanent_account_3=up to 15Gb by upgrade to <a [[link3]]>permanent account</a>
-
-fotki.storage.title_payed_time_out=Your rent time is out.
-
-fotki.storage.full.message_payed_time_out=Your rent time is out. All your images on additional space will be deleted at [[date]]. You can: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li> 
-
-fotki.storage.2gb.paid_account_4=up to 2Gb by <a [[link1]]>upgrade to paid account</a>
-
-fotki.storage.10gb.addon_storage_4=up to 10Gb by pay a <a [[link2]]>storage space</a>
-
-fotki.storage.15gb.permanent_account_4=up to 15Gb by upgrade to <a [[link3]]>permanent account</a>
-
-fotki.storage.used.title=Used [[used]]
-
-fotki.storage.used.numbers=from [[max]]
 
 fotki.promo.slogan=Organise your photos and images with LiveJournal PhotoAlbums...
 
@@ -2992,10 +2940,6 @@ fotki.privacy.private=Private
 fotki.privacy.friends_only=Friends only
 
 fotki.privacy.public=Public
-
-fotki.status.new_photo=[[ljuser]] has load new [[number]] photos in <a [[aopts]]>[[album]]</a> album.
-
-fotki.status.new_album=[[ljuser]] has create a new album <a [[aopts]]>[[album]]</a>.
 
 gender.female|staleness=1
 gender.female=Female

@@ -1792,16 +1792,19 @@ sub gender_for_adcall {
     croak "Invalid user object" unless LJ::isu($u);
 
     my $gender = $u->prop('gender') || '';
+    $gender = uc(substr($gender, 0, 1));
     if ($format eq '6a') {
         if ($gender && $gender !~ /^U/i) {
-            return uc(substr($gender, 0, 1)); # M|F
+            return $gender; # M|F
         } else {
             return "unspecified";
         }
     } elsif ($format eq 'dc') {
-        $gender = uc(substr($gender, 0, 1)) || '';
         return  ($gender eq 'M') ? 1 :
                 ($gender eq 'F') ? 2 : 0;
+    } elsif ($format eq 'ga') {
+        return  ($gender eq 'M') ? 'male' :
+                ($gender eq 'F') ? 'female' : 'all';
     } else {
         return;
     }

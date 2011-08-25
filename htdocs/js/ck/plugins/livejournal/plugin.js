@@ -133,7 +133,8 @@
 			}
 
 			editor.dataProcessor.toHtml = function(html, fixForBody) {
-				html = html.replace(/<((?!br)[^\s>]+)([^\/>]+)?\/>/gi, '<$1$2></$1>')
+				html = html.replace(/(<lj [^>]+)(?!\/)>/gi, '$1 />')
+					.replace(/<((?!br)[^\s>]+)([^>]*?)\/>/gi, '<$1$2></$1>')
 					.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site
 					.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
 					.replace(/<lj-poll .*?>[^\b]*?<\/lj-poll>/gm,
@@ -141,14 +142,13 @@
 						return new Poll(ljtags).outputHTML();
 					}).replace(/<lj-template(.*?)><\/lj-template>/g, "<lj-template$1 />");
 
+
 				// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
 				if (CKEDITOR.env.ie) {
 					html = html.replace(/<([\/])?lj-raw>/g, '<$1lj:raw>').replace(/<([\/])?lj-wishlist>/g, '<$1lj:wishlist>')
 						.replace(/(<lj [^>]*)> /g, '$1> '); // IE merge spaces
-				} else {
-					// close <lj user> tags
-					html = html.replace(/(<lj [^>]*[^\/])>/g, '$1/> ');
 				}
+
 				if (!$('event_format').checked) {
 					html = '<pre>' + html + '</pre>';
 				}
@@ -195,8 +195,7 @@
 
 				// IE custom tags
 				if (CKEDITOR.env.ie) {
-					html = html.replace(/<lj:cut([^>]*)>/g, '<lj-cut$1>').replace(/<\/lj:cut>/g, '</lj-cut>')
-						.replace(/<([\/])?lj:wishlist>/g, '<$1lj-wishlist>').replace(/<([\/])?lj:raw>/g, '<$1lj-raw>');
+					html.replace(/<([\/])?lj:wishlist>/g, '<$1lj-wishlist>').replace(/<([\/])?lj:raw>/g, '<$1lj-raw>');
 				}
 
 				html = html.replace(/><\/lj-template>/g, '/>');// remove null pointer.replace(/\ufeff/g, '');
@@ -432,7 +431,7 @@
 							ljUsers[userName] = data.ljuser;
 
 							var tmpNode = editor.document.createElement('div');
-							tmpNode.setHtml(data.ljuser);
+							tmpNode.$.innerHTML = data.ljuser;
 							ljNoteData.LJUserLink.node = tmpNode.getFirst();
 							ljNoteData.LJUserLink.node.setAttribute('lj-cmd', 'LJUserLink');
 
@@ -495,7 +494,7 @@
 			});
 
 			editor.ui.addButton('LJLink', {
-				label: editor.lang.link.tollbar,
+				label: editor.lang.link.toolbar,
 				command: 'LJLink'
 			});
 
@@ -727,7 +726,7 @@
 				+ 'background-repeat: no-repeat;'
 				+ 'background-color: #CCCCCC;'
 				+ 'border: 1px dotted #000000;'
-				+ 'height: 80px;'
+				+ 'min-height: 80px;'
 			+ '}');
 
 			function doEmbed(content) {
@@ -761,8 +760,9 @@
 					} else {
 						text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore);
 						if (text) {
-							ljNoteData.LJCut.node = editor.document.createElement('lj-cut');
+							ljNoteData.LJCut.node = editor.document.createElement('div');
 							ljNoteData.LJCut.node.setAttribute('lj-cmd', 'LJCut');
+							ljNoteData.LJCut.node.setAttribute('class', 'lj-cut');
 							if (text != top.CKLang.ReadMore) {
 								ljNoteData.LJCut.node.setAttribute('text', text);
 							}
@@ -825,7 +825,7 @@
 							if (pollSource.length > 0) {
 								if (ljNoteData.LJPollLink.node) {
 									var node = editor.document.createElement('div');
-									node.setHtml(pollSource);
+									node.$.innerHTML = pollSource;
 									ljNoteData.LJPollLink.node.insertBeforeMe(node);
 									ljNoteData.LJPollLink.node.remove();
 								} else {
@@ -1059,7 +1059,11 @@
 			dataProcessor.dataFilter.addRules({
 				elements: {
 					'lj-cut': function(element) {
-						element.attributes['lj-cmd'] = 'LJCut';
+						var fakeElement = new CKEDITOR.htmlParser.element('div');
+						fakeElement.attributes['lj-cmd'] = 'LJCut';
+						fakeElement.attributes['class'] = 'lj-cut';
+						fakeElement.children = element.children;
+						return fakeElement;
 					},
 					'lj-embed': function(element){
 						var fakeElement = new CKEDITOR.htmlParser.element('div');
@@ -1131,8 +1135,7 @@
 									var userName = ljTag.getAttribute('user');
 									var userTitle = ljTag.getAttribute('title');
 									if (cacheName == userTitle ? userName + ':' + userTitle : userName) {
-										ljTag.setHtml(ljUsers[cacheName]);
-										var newLjTag = ljTag.getFirst();
+										var newLjTag = CKEDITOR.dom.element.createFromHtml(ljUsers[cacheName], editor.document);
 										newLjTag.setAttribute('lj-cmd', 'LJUserLink');
 										ljTag.insertBeforeMe(newLjTag);
 										ljTag.remove();
@@ -1161,6 +1164,13 @@
 							});
 						}
 					},
+					'lj-repost': function(element){
+						var fakeElement = new CKEDITOR.htmlParser.element('input');
+						fakeElement.attributes.type = 'button';
+						fakeElement.attributes.value = top.CKLang.LJRepost_Value;
+						fakeElement.attributes['class'] = 'lj-repost';
+						return fakeElement;
+					},
 					a: function(element) {
 						element.attributes['lj-cmd'] = 'LJLink';
 					},
@@ -1173,24 +1183,46 @@
 			dataProcessor.htmlFilter.addRules({
 				elements: {
 					div: function(element) {
-						if (element.attributes['class'] == 'lj-like') {
-							var ljLikeNode = new CKEDITOR.htmlParser.element('lj-like');
-							ljLikeNode.attributes.buttons = element.attributes.buttons;
-							if (element.attributes.style) {
-								ljLikeNode.attributes.style = element.attributes.style;
-							}
-							ljLikeNode.isEmpty = true;
-							ljLikeNode.isOptionalClose = true;
-							return ljLikeNode;
-						} else if(element.attributes['class'] == 'lj-embed'){
-							var ljEmbedNode = new CKEDITOR.htmlParser.element('lj-embed');
-							ljEmbedNode.attributes.id = element.attributes.embedid;
-							ljEmbedNode.children = element.children;
+						var newElement = element;
+						switch(element.attributes['class']){
+							case 'lj-like':
+								newElement = new CKEDITOR.htmlParser.element('lj-like');
+								newElement.attributes.buttons = element.attributes.buttons;
+								if (element.attributes.style) {
+									newElement.attributes.style = element.attributes.style;
+								}
+								newElement.isEmpty = true;
+								newElement.isOptionalClose = true;
+							break;
+							case 'lj-embed':
+								newElement = new CKEDITOR.htmlParser.element('lj-embed');
+								newElement.attributes.id = element.attributes.embedid;
+								newElement.children = element.children;
+								newElement.isOptionalClose = true;
+							break;
+							case 'lj-map':
+								newElement = new CKEDITOR.htmlParser.element('lj-map');
+								newElement.attributes.url = decodeURIComponent(element.attributes['lj-url']);
+								element.attributes.style.replace(/([a-z-]+):(.*?);/gi, function(relust, name, value) {
+									newElement.attributes[name] = parseInt(value);
+								});
 
-							return ljEmbedNode;
-						} else if (!element.children.length) {
-							return false;
+								newElement.isOptionalClose = newElement.isEmpty = true;
+							break;
+							case 'lj-cut':
+								newElement = new CKEDITOR.htmlParser.element('lj-cut');
+								if(element.attributes.hasOwnProperty('text')){
+									newElement.attributes.text = element.attributes.text;
+								}
+								newElement.children = element.children;
+							break;
+							default:
+								if (!element.children.length) {
+									newElement = false;
+								}
 						}
+
+						return newElement;
 					},
 					span: function(element) {
 						var userName = element.attributes['lj:user'];
@@ -1205,6 +1237,13 @@
 
 							ljUserNode.isOptionalClose = ljUserNode.isEmpty = true;
 							return ljUserNode;
+						}
+					},
+					input: function(element){
+						if(element.attributes['class'] == 'lj-repost'){
+							var newElement = new CKEDITOR.htmlParser.element('lj-repost');
+							newElement.isOptionalClose = newElement.isEmpty = true;
+							return newElement;
 						}
 					}
 				},

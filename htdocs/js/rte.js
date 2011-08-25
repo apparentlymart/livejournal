@@ -26,6 +26,7 @@
 		if (draftData.ask && draftData.restoreData) {
 			if (confirm(draftData.confirmMsg)) {
 				draftData.lastValue = draftData.restoreData;
+				draftData.textArea.val(draftData.lastValue);
 				draftData.statusNode.val(draftData.draftStatus);
 			}
 		} else {
@@ -41,8 +42,19 @@
 		}
 
 		if (!window.switchedRteOn) {
+			if(!draftData){
+				draftData = {
+					textArea: $('#draft'),
+					statusNode: $('#draftstatus')
+				};
+
+				draftData.lastValue = draftData.textArea.val();
+
+				draftData.textArea.val(draftData.lastValue.replace(/<br\s?\/>\n?/g, '\n'));
+			}
+
 			window.switchedRteOn = true;
-			$('#switched_rte_on').value = '1';
+			$('#switched_rte_on').val('1');
 
 			if (!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible) {
 				CKEDITOR.basePath = statPrefix + '/ck/';
@@ -59,7 +71,7 @@
 
 					$('#updateForm')[0].onsubmit = function() {
 						if (window.switchedRteOn) {
-							draftData.textArea.val(CKEditor.getData());
+							draftData.textArea.val(CKEditor.getData().replace(/(\r|\n)/g,'')); //we remove all newlines
 						}
 					};
 
@@ -69,7 +81,7 @@
 						CKEditor.container.show();
 						CKEditor.element.hide();
 
-						if (draftData) {
+						if (draftData.hasOwnProperty('draftStatus')) {
 							editor.on('dialogHide', checkDraftTimer);
 							editor.on('afterCommandExec', checkDraftTimer);
 							editor.on('insertElement', checkDraftTimer);
@@ -104,7 +116,7 @@
 
 		if (window.switchedRteOn) {
 			window.switchedRteOn = false;
-			$('#switched_rte_on').value = '0';
+			$('#switched_rte_on').val('0');
 
 			$('#entry-form-wrapper').attr('class', 'hide-richtext');
 			if (CKEditor) {
@@ -114,7 +126,7 @@
 				CKEditor.element.show();
 
 				// IE7 hack fix
-				if ($.browser.msie && $.browser.version == '7.0') {
+				if ($.browser.msie && ($.browser.version == '7.0' || $.browser.version == '8.0')) {
 					setTimeout(function() {
 						CKEditor.element.setValue(data);
 					}, 50);

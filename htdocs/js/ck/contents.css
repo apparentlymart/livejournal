@@ -45,11 +45,27 @@ lj-raw {
 }
 
 lj\:cut,
-lj-cut {
+.lj-cut {
 	display: block;
 	border: #000 1px dotted;
 	background-color: #d2d2d2;
+	text-align: center;
 }
+
+.lj-map P {
+	position: relative;
+	top: 40%;
+	display: inline-block;
+	padding: 5px 15px;
+	margin: 0;
+	background: #FFF;
+	border: 1px solid #FF0000;
+	text-align: center;
+	text-transform: uppercase;
+	line-height: 12px;
+	font-size: 12px;
+	color: #FF0000;
+	}
 
 /* fix inline behavior, for no IE */
 lj-cut ul,
@@ -137,3 +153,12 @@ form.ljpoll {
 		height: 24px;
 		background-position: 0 -21px;
 		}
+/* LJ map */
+.lj-map {
+	overflow: hidden;
+	min-height: 13px;
+	padding: 13px 20px;
+	margin-top: 20px;
+	background: #D2D2D2;
+	border: 1px dotted #000;
+	}
