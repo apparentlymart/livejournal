@@ -6,7 +6,6 @@
 
     if ( $return =~ m|^https?://(.+?)/|i ) {
         my $domain = $1;
-warn "-> $domain";
         LJ::Request->delete_cookie('ljdomsess.__external', domain => $domain );#, 'path' => '/', 'domain' => $domain);
     }
 
