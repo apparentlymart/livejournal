@@ -1886,6 +1886,9 @@ HTML BODY.logged-out {
 		.b-postform-preload-active .b-postform-preloader {
 			visibility: visible;
 			}
+	#subjectIconImage {
+		cursor: pointer;
+		}
 
 
 
