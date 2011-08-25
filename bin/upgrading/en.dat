@@ -6757,6 +6757,22 @@ widget.browse.community.watch=Watch
 
 widget.browse.community.empty_list=No communities in this category yet
 
+widget.browse.comments=Comments
+
+widget.browse.leave.comment=Leave comment
+
+widget.browse.read.more=Read more in original post
+
+widget.browse.share.mail=mail
+
+widget.browse.share=share
+
+widget.browse.share.twiiter=twitter
+
+widget.browse.share.facebook=facebook
+
+widget.browse.more.recent.posts=More recent posts
+
 widget.commsofuser.title=Communities [[user]] has added
 
 widget.commsofuser.viewfriendspage|staleness=1

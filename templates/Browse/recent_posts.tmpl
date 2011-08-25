@@ -8,9 +8,10 @@
 	</ul>
 </TMPL_IF>
 
-<ul class="b-catalogue-list b-recent-posts">
+
 <tmpl_loop posts>
-    <tmpl_unless is_vertical_selected><tmpl_var vertical_name>:<tmpl_var vertical_url></tmpl_unless>
+<tmpl_unless is_vertical_selected><h2 class="title"><a href="<tmpl_var vertical_url>" class="link"><TMPL_VAR expr="ml('widget.browse.more.recent.posts')"></a><tmpl_var vertical_name></h2></tmpl_unless>
+<ul class="b-catalogue-list b-recent-posts">
 	<li class="b-catalogue-item">
 		<dl class="b-catalogue-item-header">
 			<dt class="b-catalogue-item-subject"><a href="<tmpl_var url_to_post>"><tmpl_var subject><tmpl_if is_subject_trimmed>&hellip;</tmpl_if></a></dt>
@@ -25,15 +26,15 @@
 		<div class="b-catalogue-item-desc">
 			<tmpl_if photo_for_post><img src="<tmpl_var photo_for_post>" class="pic" alt="<tmpl_var subject>"></tmpl_if>
 			<tmpl_var post_text>
-			<tmpl_if is_need_more><p class="readmore">(<a href="<tmpl_var url_to_post>">Read more in original post</a>)</p></tmpl_if>
+			<tmpl_if is_need_more><p class="readmore">(<a href="<tmpl_var url_to_post>"><TMPL_VAR expr="ml('widget.browse.read.more')"></a>)</p></tmpl_if>
 		</div>
 		<ul class="b-share">
-			<li class="b-share-fb"><a href="http://facebook.com/sharer.php?u=<tmpl_var expr="eurl(url_to_post)">" target="_blank">">facebook</a></li>
-			<li class="b-share-twitter"><a href="http://twitter.com/share?url=<tmpl_var expr="eurl(url_to_post)">&text=<tmpl_var expr="eurl(subject)">" target="_blank">twitter</a></li>
+			<li class="b-share-fb"><a href="http://facebook.com/sharer.php?u=<tmpl_var expr="eurl(url_to_post)">" target="_blank">"><TMPL_VAR expr="ml('widget.browse.share.facebook')"></a></li>
+			<li class="b-share-twitter"><a href="http://twitter.com/share?url=<tmpl_var expr="eurl(url_to_post)">&text=<tmpl_var expr="eurl(subject)">" target="_blank"><TMPL_VAR expr="ml('widget.browse.share.twiiter')"></a></li>
             <tmpl_if expr="lj_enabled('sharing')">
-                <li class="b-share-sharethis"><a href="#">share</a><tmpl_var sharing_js></li>
+                <li class="b-share-sharethis"><a href="#"><TMPL_VAR expr="ml('widget.browse.share')"></a><tmpl_var sharing_js></li>
             </tmpl_if>
-			<li class="b-share-email"><a href="javascript:void(0);">mail</a></li>
+			<li class="b-share-email"><a href="javascript:void(0);"><TMPL_VAR expr="ml('widget.browse.share.mail')"></a></li>
 			<li class="b-share-fb-like"><iframe src="http://www.facebook.com/plugins/like.php?href=<tmpl_var expr="eurl(url_to_post)">&amp;layout=button_count&amp;show_faces=true&amp;width=150&amp;action=like&amp;font=verdana&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"></iframe></li>
 		</ul>
         <tmpl_if expr="lj_enabled('sharing')">
@@ -47,10 +48,10 @@
             }());
             </script>
         </tmpl_if>
-		<p class="b-catalogue-item-comments"><span class="b-catalogue-comments-count"><a href="<tmpl_var url_to_post>#comments"><tmpl_var comments_count> comments</a> |</span> <a href="<tmpl_var url_to_post>?mode=reply">Leave comment</a></p>
+		<p class="b-catalogue-item-comments"><span class="b-catalogue-comments-count"><a href="<tmpl_var url_to_post>#comments"><tmpl_var comments_count> <TMPL_VAR expr="ml('widget.browse.comments')"></a> |</span> <a href="<tmpl_var url_to_post>?mode=reply"><TMPL_VAR expr="ml('widget.browse.leave.comment')"></a></p>
 	</li>
-</tmpl_loop>
 </ul>
+</tmpl_loop>
 
 <TMPL_IF expr="post_pages gt 1">
 	<ul class="b-nav-counter">
