@@ -82,14 +82,18 @@ sub render_js {
         $opts->{'description'}  = LJ::ejs( LJ::Text->drop_html($entry->event_raw) );
         $opts->{'url'}          = $entry->url;
 
-        $opts->{'title'}       = Encode::decode_utf8($opts->{'title'});
-        $opts->{'description'} = Encode::decode_utf8($opts->{description});
+        if ($opts->{'title'}){
+            $opts->{'title'}       = Encode::decode_utf8($opts->{'title'});
+            $opts->{'title'}       =~ s/\r|\n|\x85|\x{2028}|\x{2029}//gsm;
+            $opts->{'title'}       = Encode::encode_utf8($opts->{'title'});
+        }
 
-        $opts->{'title'}       =~ s/\r|\n|\x85|\x{2028}|\x{2029}//gsm;
-        $opts->{'description'} =~ s/\r|\n|\x85|\x{2028}|\x{2029}//gsm;
+        if ($opts->{'description'}){
+            $opts->{'description'} = Encode::decode_utf8($opts->{description});
+            $opts->{'description'} =~ s/\r|\n|\x85|\x{2028}|\x{2029}//gsm;
+            $opts->{'description'} = Encode::encode_utf8($opts->{description});
+        }
 
-        $opts->{'title'}       = Encode::encode_utf8($opts->{'title'});
-        $opts->{'description'} = Encode::encode_utf8($opts->{description});
     }
 
     my $opts_out = LJ::JSON->to_json($opts);
