@@ -834,14 +834,14 @@ sub _get_upf_scaled
 
 sub format_magic {
     my $magic = shift;
-    my $hex = unpack "H*", $magic;
-    my $mime;
+    my $default = shift;
 
-    $mime = 'text/plain'; # default value
+    my $magic_ref = (ref $magic) ? $magic : \$magic;
+    my $mime = $default || 'text/plain'; # default value
     # image formats
-    $mime = 'image/jpeg' if $magic =~ /^\xff\xd8/; # JPEG
-    $mime = 'image/gif'  if $magic =~ /^GIF8/;     # GIF
-    $mime = 'image/png'  if $magic =~ /^\x89PNG/;  # PNG
+    $mime = 'image/jpeg' if $$magic_ref =~ /^\xff\xd8/; # JPEG
+    $mime = 'image/gif'  if $$magic_ref =~ /^GIF8/;     # GIF
+    $mime = 'image/png'  if $$magic_ref =~ /^\x89PNG/;  # PNG
 
     return $mime;
 }
