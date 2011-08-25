@@ -1975,6 +1975,7 @@ sub talkform {
         # string values the template may wish
         'remote_username'        => $remote_username,
         'remote_display_name'    => $remote_display_name,
+        'service_short_code'     => $remote && $remote->identity ? $remote->identity->short_code : undef,
         'journalu_username'      => $journalu->username,
         'editid'                 => $editid,
         'entry_url'              => $entry->url,
