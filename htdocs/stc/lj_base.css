@@ -1452,6 +1452,7 @@ HTML BODY.logged-out {
 	}
 
 /* not a friend/member */
+.b-postform-authtype-anonymous.b-postform-user-friendonly .b-postform-alert-notafriend,
 .b-postform-authtype-anonymous.b-postform-user-notafriend .b-postform-alert-notafriend,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-notafriend .b-postform-alert-notafriend,
 .b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-notafriend .b-postform-alert-notafriend,
@@ -1866,6 +1867,25 @@ HTML BODY.logged-out {
 			#js .b-postform-login-opts {
 				display:block;
 				}
+	.replyform TABLE .b-postform-preload {
+		padding: 0 0.4em 10px 0;
+		vertical-align: bottom;
+		text-align: right;
+		}
+		.b-postform-preloader {
+			overflow: hidden;
+			visibility: hidden;
+			position: static;
+			display: block;
+			width: 11px;
+			height: 3px;
+			margin: 0 0 0 auto;
+			padding: 0;
+			background: url(/img/preloader-s.gif?v=1) no-repeat 0 0;
+			}
+		.b-postform-preload-active .b-postform-preloader {
+			visibility: visible;
+			}
 
 
 
