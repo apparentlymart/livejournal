@@ -406,7 +406,7 @@
         # Sucessful!
         $title = $ML{'.title'};
 
-        return $ok->('posted') if $ajax;
+        return $ok->($ret) if $ajax;
 
         return $ret;
 
