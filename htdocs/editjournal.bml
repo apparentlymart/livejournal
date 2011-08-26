@@ -76,11 +76,14 @@ body<=
         my @res = @$ref;
         my $show_ad = $opts{show_ad} ? 1 : 0;
 
-        $ret .= ($opts{'prev'} > 0) ? "<a href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{prev}'>prev</a>, " : "";
-        $ret .= "<a href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{next}'>next</a><br/>"
+        $ret .= "<p class='i-qotd-nav'>";
+        $ret .=  "<a class='i-qotd-nav-prev" . (($opts{'prev'} > 0) ? "": " i-qotd-nav-prev-dis") . "' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{prev}'>prev</a>";
+        $ret .= "<a class='i-qotd-nav-next' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{next}'>next</a>";
+        $ret .= "</div>"
+
             if @res;
 
-        $ret .= "<table style='width: 100%;'><tr><td>";
+        $ret .= "<ul class='b-editentries'>";
         foreach my $e_raw (@res) {
             my $entry = LJ::Entry->new_from_item_hash (LJ::load_user($usejournal) || $remote, $e_raw); 
 
@@ -94,7 +97,7 @@ body<=
 
             my $poster = $usejournal ? LJ::ljuser(LJ::load_userid($entry->posterid)) : "";
 
-            $ret .= "<?hr?><table width='100%'><tr valign='top'><td>";
+            $ret .= "<li class='b-editentry'>";
 
             ### security indicator
             my $sec = ' ';
@@ -111,43 +114,47 @@ body<=
             }
             $ret .= $sec;
 
-            $ret .= "<a href='".$entry->url."'>";
+            $ret .= "<p class='b-editentry-ctrls'>";
+            if (!$edit_disable) {
+                if ($getextra) {
+                    $ret .= "<a href='editjournal.bml$getextra&amp;itemid=" . $entry->ditemid . "&amp;mode=edit' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
+                } else {
+                    $ret .= "<a href='editjournal.bml?itemid=" . $entry->ditemid . "&amp;mode=edit' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
+                }
+            } else {
+                if ($getextra) {
+                    $ret .= "<a href='editjournal.bml$getextra&amp;itemid=" . $entry->ditemid . "&amp;mode=delete' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
+                } else {
+                    $ret .= "<a href='editjournal.bml?itemid=" . $entry->ditemid . "&amp;mode=delete' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
+                }
+            }
+            $ret .= "</p>";
+
+            $ret .= "<h2><a href='".$entry->url."'>";
             if (my $subj = $entry->subject_text) {
                 $ret .= LJ::ehtml($subj);
             } else {
                 $ret .= BML::ml('.event.no_subject.title');
             }
-            $ret .= "</a>";
-            $ret .= "<br />\n";
+            $ret .= "</a></h2>";
             my ($year, $mon, $mday, $hour, $min) = split(/\D/, LJ::TimeUtil->alldatepart_s2($entry->{'eventtime'}));
             my $monthlong = LJ::Lang::month_long($mon);
-            $ret .= $poster . " <label for='itemid-$entry->ditemid'>" . "$monthlong $mday, $year, $hour:$min" . "</label></br>";
+            $ret .= "<p class='date'>" . $poster . " $monthlong $mday, $year, $hour:$min" . "</p>";
 
             my $event = LJ::ehtml(LJ::durl($entry->event_raw));
             $event =~ s!\n!<br />!g;
             $ret .= $event;
             if (my @taglist = $entry->tags) {
-                $ret .= "<br/><b>Tags:</b> " . LJ::ehtml(join ",", @taglist);
+                $ret .= "<p><b>Tags:</b> " . LJ::ehtml(join ",", @taglist) . "</p>";
             }
-            $ret .= "</td><td align='right'>";
-            $ret .= "<form method='post' action='editjournal.bml$getextra'>\n";
-            $ret .= LJ::form_auth();
-            $ret .= LJ::html_hidden('itemid',$entry->ditemid,'mode',"edit");
-            if (!$edit_disable) {
-                $ret .= LJ::html_submit("itemid-$entry->ditemid", 'Edit this Entry');
-            } else {
-                $ret .= LJ::html_submit("action:delete", 'Delete this Entry');
-            }
-            $ret .= "</form>";
-            $ret .= "</td></tr></table>\n";
+            $ret .= "</li>";
 
         }
-        $ret .= "</td>";
         if ($show_ad) {
             my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
             $ret .= "<td valign='top'>$ad</td>" if $ad;
         }
-        $ret .= "</tr></table>";
+        $ret .= "</ul>";
         return $ret;
     };
 
@@ -557,26 +564,28 @@ LIKE_FAQ
         $ret .= "<table style='width: 100%;'><tr><td>";
 
         # header
-        $ret .= "<?p " . BML::ml('.desc',
+        $ret .= "<div class='b-editentries-header'>";
+        $ret .= "<h1>Edit journal entries</h1>";
+        $ret .= "<div class='b-editentries-info'><?p " . BML::ml('.desc',
                                 {'aopts' => "href='$LJ::SITEROOT/editprivacy.bml'"})
-                 . " p?>\n";
+                 . " p?></div>\n";
 
         # edit form
 
 
-        $ret .= "<form action='editjournal.bml$getextra' method='post'>\n";
-        $ret .= "Show entries 
-        <input type='text' name='year' value='$year'>
-        <input type='text' name='month' value='$month'>
-        <input type='text' name='day' value='$day'>
-        or <a href='editjournal.bml?show=recent&mode=init'>back to recent entries</a><br/>";
-        $ret .= LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'maxlength' => '15', 'value' => $GET{'usejournal'} || $POST{'usejournal'} });
-        $ret .= LJ::html_submit(undef, $ML{'.btn.search'});
-        $ret .= "<br/>" . LJ::html_check({ name => 'only_me', id => 'only_me',
+        $ret .= "<form action='editjournal.bml$getextra' method='post' class='b-editentries-form'>\n";
+        $ret .= "<p>Show entries: 
+        <span class='b-editentries-cal'><i></i>Choose date</span>
+        <input type='hidden' name='year' value='$year'/>
+        <input type='hidden' name='month' value='$month'/>
+        <input type='hidden' name='day' value='$day'/>
+        or <a href='editjournal.bml?show=recent&mode=init'>back to recent entries</a></p>";
+        $ret .= "<p>" . LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'maxlength' => '15', 'value' => $GET{'usejournal'} || $POST{'usejournal'}, 'class' => 'b-editentries-comm' });
+        $ret .= LJ::html_submit(undef, $ML{'.btn.search'}) . "</p>";
+        $ret .= "<p>" . LJ::html_check({ name => 'only_me', id => 'only_me',
                                 value => '1', selected =>  $only_me_checked });
-        $ret .= "<label for='only_me'>Only my entries</label><br/>"; 
+        $ret .= "<label for='only_me'>Only my entries</label></p>"; 
         $ret .= "</form>\n";
-        $ret .= "<br/>";
 
         my $err = '';
         my $usejournal_u = LJ::load_user ($usejournal || $remote->{'user'});
