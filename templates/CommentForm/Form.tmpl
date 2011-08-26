@@ -18,8 +18,8 @@
         <TMPL_VAR form_intro>
         <TMPL_VAR tosagree>
         <TMPL_VAR create_link>
-        
-        <input type="hidden" name="json" value="1" />
+
+        <input type="hidden" name="json" value="0" />
 
         <table>
             <tr class="b-postform-loginbox">
@@ -176,11 +176,11 @@
                     <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-ajax"></p>
 
                     <TMPL_IF errors>
-                        <div>
-                            <TMPL_LOOP errors>
-                                <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR error></p>
-                            </TMPL_LOOP>
-                        </div>
+                    <div class="b-postform-user-errors">
+                        <TMPL_LOOP errors>
+                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-errors"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR error></p>
+                        </TMPL_LOOP>
+                    </div>
                     </TMPL_IF>
 
                     <TMPL_IF warnscreened>

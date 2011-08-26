@@ -1174,6 +1174,9 @@ HTML BODY.logged-out {
 	display: none;
 	width: 70%;
 	}
+.b-postform-alert-errors {
+	width: 70%;
+	}
 
 
 /* deleted */
