@@ -37,7 +37,7 @@ CKEDITOR.editorConfig = function(config){
 		'undo,' +
 		'wysiwygarea,';
 
-	if(jQuery.browser.msie) { //show context menu only in internet explorer as it was in previous version of editor
+	if(jQuery.browser.msie || jQuery.browser.opera) { //show context menu only in internet explorer as it was in previous version of editor
 		config.plugins += 'contextmenu,';
 	}
 
