@@ -6,14 +6,14 @@
         <TMPL_IF EXPR="whocanreply eq 'friends'">b-postform-user-friendonly</TMPL_IF>
         <TMPL_IF EXPR="whocanreply eq 'friends' && !is_friend">b-postform-user-notafriend</TMPL_IF>
         <TMPL_IF EXPR="whocanreply eq 'reg'">b-postform-user-regonly</TMPL_IF>
-        <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype_default ne 'anonymous'">b-postform-user-notreg</TMPL_IF>
+        <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous'">b-postform-user-notreg</TMPL_IF>
         <TMPL_IF EXPR="show_logips eq 'S'">b-postform-user-logips b-postform-user-logips-anon</TMPL_IF>
         <TMPL_IF EXPR="show_logips eq 'A'">b-postform-user-logips b-postform-user-logips-all</TMPL_IF>
         <TMPL_IF EXPR="will_be_screened eq 'A'">b-postform-user-screened b-postform-user-screened-all</TMPL_IF>
         <TMPL_IF EXPR="will_be_screened eq 'F' && !is_friend">b-postform-user-screened b-postform-user-screened-nonf</TMPL_IF>
         <TMPL_IF EXPR="will_be_screened eq 'R' and !email_active">b-postform-user-screened b-postform-user-screened-anon</TMPL_IF>
-        b-postform-realauth-<TMPL_VAR usertype_default>
-        b-postform-authtype-<TMPL_VAR usertype_default>
+        b-postform-realauth-<TMPL_VAR usertype>
+        b-postform-authtype-<TMPL_VAR usertype>
         ">
         <TMPL_VAR form_intro>
         <TMPL_VAR tosagree>
@@ -69,7 +69,7 @@
                         <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notafriend"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_notafriend></p>
                     </TMPL_IF>
 
-                    <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype_default ne 'anonymous'">
+                    <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous'">
                         <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notreg"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_noopenidpost></p>
                     </TMPL_IF>
 
