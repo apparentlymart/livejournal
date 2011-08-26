@@ -1606,22 +1606,21 @@ sub resources_for_talkform {
     LJ::need_res('js/jquery/jquery.lj.authtype.js');
 }
 
+# Takes a hashref with the following keys / values:
+# remote:      optional remote u object
+# journalu:    prequired journal u object
+# parpost:     parent post object
+# replyto:     init->replyto
+# ditemid:     init->ditemid
+# stylemine:   user using style=mine or not
+# form:        optional full form hashref
+# do_captcha:  optional toggle for creating a captcha challenge
+# require_tos: optional toggle to include TOS requirement form
+# errors:      optional error arrayref
+# text_hint:   hint before message textarea
+# embedable_form: use embedable template to draw form
+#
 sub talkform {
-
-    # Takes a hashref with the following keys / values:
-    # remote:      optional remote u object
-    # journalu:    prequired journal u object
-    # parpost:     parent post object
-    # replyto:     init->replyto
-    # ditemid:     init->ditemid
-    # stylemine:   user using style=mine or not
-    # form:        optional full form hashref
-    # do_captcha:  optional toggle for creating a captcha challenge
-    # require_tos: optional toggle to include TOS requirement form
-    # errors:      optional error arrayref
-    # text_hint:   hint before message textarea
-    # embedable_form: use embedable template to draw form
-    #
     my $opts = shift;
     return "Invalid talkform values." unless ref $opts eq 'HASH';
 
@@ -1870,6 +1869,7 @@ sub talkform {
 
     # Display captcha challenge if over rate limits.
     my $captcha_html = '';
+
     if ( $opts->{do_captcha} ) {
         if ( LJ::is_enabled("recaptcha") ) {
             my $c      = Captcha::reCAPTCHA->new;
@@ -1970,6 +1970,9 @@ sub talkform {
         'willscreenfriend' => $ml_willscreenfriend,
     );
 
+    $usertype_default =~ /^(.+)_cookie$/;
+    my $usertype = $1;
+
     # COMMON TEMPLATE PARAMS ARE DEFINED HERE
     my %params = (
         # string values the template may wish
@@ -2025,6 +2028,7 @@ sub talkform {
         'basesubject'           => $basesubject,
         'author_options'        => \@author_options,
         'usertype_default'      => $usertype_default,
+        'usertype'              => $usertype,
 
         'extra_rows'            => LJ::run_hook('extra_talkform_rows', {
             'entry'     => $entry,
