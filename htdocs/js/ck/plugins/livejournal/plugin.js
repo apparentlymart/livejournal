@@ -202,7 +202,6 @@
 				if (!isNow && data == tempData.data && cmd == tempData.cmd && node === tempData.node) {
 					return;
 				}
-				console.log('show');
 
 				if (timer) {
 					clearTimeout(timer);
@@ -219,7 +218,6 @@
 			},
 			hide: function(isNow) {
 				if (state) {
-					console.log('hide');
 					state = 0;
 
 					if (timer) {
@@ -496,7 +494,14 @@
 			//////////  LJ Link Button //////////////
 			editor.addCommand('LJLink', {
 				exec: function(editor) {
-					editor.openDialog('link');
+					var state = editor.getCommand('LJLink').state;
+
+					if (state === CKEDITOR.TRISTATE_OFF) {
+						editor.openDialog('link');
+					} else if (state === CKEDITOR.TRISTATE_ON) {
+						editor.execCommand('unlink')
+					}
+
 				},
 				editorFocus: false
 			});
