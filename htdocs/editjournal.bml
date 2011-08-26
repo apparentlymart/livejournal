@@ -115,18 +115,11 @@ body<=
             $ret .= $sec;
 
             $ret .= "<p class='b-editentry-ctrls'>";
+            my $ditemid_get = $getextra ? ("$getextra&amp;itemid=" . $entry->ditemid) : ("?itemid=" . $entry->ditemid);
             if (!$edit_disable) {
-                if ($getextra) {
-                    $ret .= "<a href='editjournal.bml$getextra&amp;itemid=" . $entry->ditemid . "&amp;mode=edit' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
-                } else {
-                    $ret .= "<a href='editjournal.bml?itemid=" . $entry->ditemid . "&amp;mode=edit' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
-                }
+                $ret .= "<a href='editjournal.bml" . $ditemid_get . "&amp;mode=edit' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
             } else {
-                if ($getextra) {
-                    $ret .= "<a href='editjournal.bml$getextra&amp;itemid=" . $entry->ditemid . "&amp;mode=delete' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
-                } else {
-                    $ret .= "<a href='editjournal.bml?itemid=" . $entry->ditemid . "&amp;mode=delete' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
-                }
+                $ret .= "<a href='editjournal.bml" . $ditemid_get . "&amp;mode=delete' class='b-editentry-del-btn b-editentry-ctrl-btn'></a>";
             }
             $ret .= "</p>";
 
