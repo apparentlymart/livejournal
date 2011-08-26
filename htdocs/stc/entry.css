@@ -744,7 +744,9 @@ td.tabs {
 		.b-editentry-ctrls {
 			margin: 0 17px 0 0;
 			}
-		.b-editentry-ctrl-btn {
+		.b-editentry-ctrl-btn,
+		.b-editentry-ctrl-btn:link,
+		.b-editentry-ctrl-btn:visited {
 			float: right;
 			height: 24px;
 			width: 24px;
