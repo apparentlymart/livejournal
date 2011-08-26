@@ -676,6 +676,7 @@ head<=
     BML::noparse();
 
     my $is_sup = LJ::SUP->is_remote_sup() ? 1 : 0;
+    LJ::need_string('entryform.close.confirm');
 
     $ret .= qq^
     <script type="text/javascript">
@@ -688,16 +689,14 @@ head<=
         function initUpdateBml() {
             window.isSupUser = $is_sup;
             $initDraft
-            if('isInitDraft' in window){
-              window.initDraft({
-                ask: window.isInitDraft,
-                restoreData: $draft,
-                saveMsg: '$eMLautosave',
-                interval: $LJ::AUTOSAVE_DRAFT_INTERVAL,
-                draftStatus: '$eMLrestored ',
-                confirmMsg: '$eMLconfirm'
-              });
-            }
+            window.initEditor({
+              ask: window.isInitDraft,
+              restoreData: $draft,
+              saveMsg: '$eMLautosave',
+              interval: $LJ::AUTOSAVE_DRAFT_INTERVAL,
+              draftStatus: '$eMLrestored ',
+              confirmMsg: '$eMLconfirm'
+            });
             $_[0]->{'onload'}
             $pageload
         }
