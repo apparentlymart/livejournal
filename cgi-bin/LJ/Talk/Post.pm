@@ -288,10 +288,13 @@ sub init {
 
     ### two hacks; unsure if these need to stay
     if ($form->{'userpost'} && $form->{'usertype'} ne "user") {
-        unless ($form->{'usertype'} eq "cookieuser" &&
-                $form->{'userpost'} eq $form->{'cookieuser'}) {
-            $bmlerr->("$SC.error.confused_identity");
-        }
+# i think it's totally wrong
+#        unless ($form->{'usertype'} eq "cookieuser" &&
+#                $form->{'userpost'} eq $form->{'cookieuser'}) {
+#            $bmlerr->("$SC.error.confused_identity");
+#        }
+# end of wrong code
+        $form->{'post'} = undef;
     }
 
     # anonymous/cookie users cannot authenticate with ecphash
