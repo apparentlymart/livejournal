@@ -2096,19 +2096,19 @@ sub postevent
 
         LJ::MemCache::incr($key, 1) ||
             (LJ::MemCache::add($key, 0),  LJ::MemCache::incr($key, 1));
-
-        my @ltime = gmtime(time());
+    
+        my $poster_offset = $u->timezone;
+        my @ltime = gmtime(time() + $poster_offset * 3600);
         my $current = sprintf("%04d-%02d-%02d %02d:%02d",
                                  $ltime[5]+1900,
                                  $ltime[4] + 1,
                                  $ltime[3],
                                  $ltime[2],
                                  $ltime[1]);
-
-        if ($eventtime ge $current) {
+        if ($eventtime gt $current) {
             my $key_future = "stat:opt_backdated:future:$state_date";
             LJ::MemCache::incr($key_future, 1) ||
-                (LJ::MemCache::add($key_future, 0),  LJ::MemCache::incr($key, 1));
+                (LJ::MemCache::add($key_future, 0),  LJ::MemCache::incr($key_future, 1));
         }
     }
 
