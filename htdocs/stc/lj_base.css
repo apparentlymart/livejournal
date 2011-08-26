@@ -1603,7 +1603,49 @@ HTML BODY.logged-out {
 
 
 /* alert ajax */
-.b-postform-user-regonly.b-postform-authtype-anonymous .b-postform-alert-ajax {
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-suspended .b-postform-alert-ajax,
+.b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-suspended .b-postform-alert-ajax,
+.b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-suspended .b-postform-alert-ajax,
+.b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-suspended .b-postform-alert-ajax,
+.b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-suspended .b-postform-alert-ajax,
+.b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-suspended .b-postform-alert-ajax,
+.b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-suspended .b-postform-alert-ajax,
+
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-deleted .b-postform-alert-ajax,
+.b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-deleted .b-postform-alert-ajax,
+.b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-deleted .b-postform-alert-ajax,
+.b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-deleted .b-postform-alert-ajax,
+.b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-deleted .b-postform-alert-ajax,
+.b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-deleted .b-postform-alert-ajax,
+.b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-deleted .b-postform-alert-ajax,
+
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-banned .b-postform-alert-ajax,
+.b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-banned .b-postform-alert-ajax,
+.b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-banned .b-postform-alert-ajax,
+.b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-banned .b-postform-alert-ajax,
+.b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-banned .b-postform-alert-ajax,
+.b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-banned .b-postform-alert-ajax,
+.b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-banned .b-postform-alert-ajax,
+
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-notafriend .b-postform-alert-ajax,
+.b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-notafriend .b-postform-alert-ajax,
+.b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-notafriend .b-postform-alert-ajax,
+.b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-notafriend .b-postform-alert-ajax,
+.b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-notafriend .b-postform-alert-ajax,
+.b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-notafriend .b-postform-alert-ajax,
+.b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-notafriend .b-postform-alert-ajax,
+
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-notreg .b-postform-alert-ajax,
+.b-postform-realauth-facebook_cookie.b-postform-authtype-facebook_cookie.b-postform-user-notreg .b-postform-alert-ajax,
+.b-postform-realauth-twitter_cookie.b-postform-authtype-twitter_cookie.b-postform-user-notreg .b-postform-alert-ajax,
+.b-postform-realauth-google_cookie.b-postform-authtype-google_cookie.b-postform-user-notreg .b-postform-alert-ajax,
+.b-postform-realauth-openid_cookie.b-postform-authtype-openid_cookie.b-postform-user-notreg .b-postform-alert-ajax,
+.b-postform-realauth-mailru_cookie.b-postform-authtype-mailru_cookie.b-postform-user-notreg .b-postform-alert-ajax,
+.b-postform-realauth-vkontakte_cookie.b-postform-authtype-vkontakte_cookie.b-postform-user-notreg .b-postform-alert-ajax,
+
+.b-postform-authtype-anonymous.b-postform-user-friendonly .b-postform-alert-ajax,
+
+.b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-alert-ajax {
 	display: none !important;
 	}
 
