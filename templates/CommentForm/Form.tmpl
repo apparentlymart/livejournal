@@ -49,10 +49,6 @@
                             </div>
                         </div>
                     </TMPL_IF>
-					
-                    <TMPL_IF EXPR="(will_be_screened eq 'A') || (will_be_screened eq 'F' && !is_friend) || (will_be_screened eq 'R' and !email_active)">
-                        <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext b-postform-alert-screened"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_willscreen></p>
-                    </TMPL_IF>
 
                     <TMPL_IF suspended>
                         <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-suspended"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.suspended')"></p>
@@ -76,7 +72,7 @@
 
                     <TMPL_IF EXPR="whocanreply eq 'reg'">
                         <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-regonly"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></p>
-                    </TMPL_IF>					
+                    </TMPL_IF>
                 </td>
             </tr>
 
@@ -102,12 +98,12 @@
                             </TMPL_LOOP>
                         </ul>
                     </div>
-					
-<script type="text/javascript" src="http://www.ljdev10.livejournal.ru/js/jquery/jquery.lj.subjecticons.js"></script>					
-					
-					<script type="text/javascript">
-						jQuery('div.b-subjecticons').subjecticons();
-					</script>
+
+<script type="text/javascript" src="http://www.ljdev10.livejournal.ru/js/jquery/jquery.lj.subjecticons.js"></script>
+
+<script type="text/javascript">
+    jQuery('div.b-subjecticons').subjecticons();
+</script>
 
                     <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-nosubjecthtml"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.nosubjecthtml')"></p>
 
@@ -142,14 +138,14 @@
             <TMPL_VAR extra_rows>
 
             <TMPL_IF captcha_html>
-			<tr class="b-postform-submitbox">
-			    <td>&nbsp;</td>
-				<td>
-				    <TMPL_VAR captcha_html>
+            <tr class="b-postform-submitbox">
+                <td>&nbsp;</td>
+                <td>
+                    <TMPL_VAR captcha_html>
                     <br />
-				</td>
-			</tr>
-			</TMPL_IF>
+                </td>
+            </tr>
+            </TMPL_IF>
 
             <tr class="b-postform-submitbox">
                 <td class="b-postform-preload">&nbsp;</td>
@@ -177,11 +173,11 @@
                     <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-ajax"></p>
 
                     <TMPL_IF errors>
-                        <ul>
+                        <div>
                             <TMPL_LOOP errors>
-                                <li><TMPL_VAR error></li>
+                                <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR error></p>
                             </TMPL_LOOP>
-                        </ul>
+                        </div>
                     </TMPL_IF>
 
                     <TMPL_IF warnscreened>
@@ -191,19 +187,23 @@
                     <TMPL_IF EXPR="show_logips eq 'S' || show_logips eq 'A'">
                         <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext b-postform-alert-logcommentips"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_logcommentips>&nbsp;<TMPL_VAR helpicon_iplogging></p>
                     </TMPL_IF>
+
+                    <TMPL_IF EXPR="(will_be_screened eq 'A') || (will_be_screened eq 'F' && !is_friend) || (will_be_screened eq 'R' and !email_active)">
+                        <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext b-postform-alert-screened"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_willscreen></p>
+                    </TMPL_IF>
                 </td>
             </tr>
         </table>
     </form>
 
 <script type="text/javascript" src="http://www.ljdev10.livejournal.ru/js/jquery/jquery.lj.commentator.js"></script>	
-	
-    <script type="text/javascript">
-        jQuery('#postform')
-			.authtype()
-			.commentator();
+
+<script type="text/javascript">
+    jQuery('#postform')
+        .authtype()
+        .commentator();
     </script>
-	
+
 <TMPL_ELSE>
     <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost_do.bml.error.nocomments')"></p>
 </TMPL_IF>
