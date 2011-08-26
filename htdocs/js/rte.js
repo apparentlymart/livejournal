@@ -162,7 +162,7 @@
 			$('#entry-form-wrapper').attr('class', 'hide-richtext');
 			if (CKEditor) {
 
-				var data = CKEditor.getData();
+				var data = CKEditor.getData().trim(); //also remove trailing spaces and newlines
 				CKEditor.container.hide();
 				CKEditor.element.show();
 
