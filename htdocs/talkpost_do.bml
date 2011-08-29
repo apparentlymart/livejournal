@@ -362,8 +362,15 @@
         $ret .= "<h1>$ML{'.success.title'}</h1>";
 
         my $mlcode;
-        $commentlink =~ /^(.+)(\#.)$/;
-        my ($curl, $cadr) = ($1, $2);
+        my ($curl, $cadr);
+
+        if ( $commentlink =~ /^(.+)(\#.+)$/ ) {
+            ($curl, $cadr) = ($1, $2);
+        }
+        else {
+            $curl = $commentlink;
+            $cadr = '';
+        }
 
         if ($comment->{state} eq 'A') {
             # Redirect the user back to their post as long as it didn't unscreen its parent,
