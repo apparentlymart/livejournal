@@ -2026,6 +2026,7 @@ sub talkform {
         'subjicon_current_img'      => $subicon_current_show{'img'},
         'subjicon_current_w'        => $subicon_current_show{'w'},
         'subjicon_current_h'        => $subicon_current_show{'h'},
+        'subjicon_current_id'       => $subicon_current_show{'id'},
         'warnscreened'              => !$editid && $parpost->{'state'} eq "S",
 
         'form_intro'                => $form_intro,
