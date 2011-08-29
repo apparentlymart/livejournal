@@ -1970,8 +1970,14 @@ sub talkform {
         'willscreenfriend' => $ml_willscreenfriend,
     );
 
-    $usertype_default =~ /^(.+)_cookie$/;
-    my $usertype = $1 || $usertype_default;
+    my $usertype;
+
+    if ( $usertype_default =~ /^(.+)_cookie$/ ) {
+        $usertype = $1;
+    }
+    else {
+        $usertype = $usertype_default;
+    }
 
     # COMMON TEMPLATE PARAMS ARE DEFINED HERE
     my %params = (
