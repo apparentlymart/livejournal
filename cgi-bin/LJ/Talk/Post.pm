@@ -286,14 +286,8 @@ sub init {
         ], [ $journalu ]);
     LJ::load_user_props($journalu, "opt_logcommentips");
 
-    ### two hacks; unsure if these need to stay
+    ### hack: clear user name if not a user
     if ($form->{'userpost'} && $form->{'usertype'} ne "user") {
-# i think it's totally wrong
-#        unless ($form->{'usertype'} eq "cookieuser" &&
-#                $form->{'userpost'} eq $form->{'cookieuser'}) {
-#            $bmlerr->("$SC.error.confused_identity");
-#        }
-# end of wrong code
         $form->{'post'} = undef;
     }
 
@@ -593,6 +587,7 @@ sub init {
 # des-journal: User object of journal where to post comment
 # des-body: Text of the comment (may be checked for spam, may be empty)
 # des-ditemid: identifier of post, need for checking reply-count
+# des-nowrite: do not write to rate limit, only check current state
 # </LJFUNC>
 sub require_captcha_test {
     my ($commenter, $journal, $body, $ditemid, $nowrite) = @_;
@@ -675,8 +670,10 @@ sub require_captcha_test {
             # attributes and other elements)
             my $body_copy = $body;
             $body_copy =~ s/<(?:q|blockquote|b|strong|i|em|cite|sub|sup|var|del|tt|code|pre|p)>//ig;
+
             return 1 if $body_copy =~ /<[a-z]/i;
         }
+
         # multiple URLs is questionable too
         return 1 if $body =~ /\b(?:http|ftp|www)\b.+\b(?:http|ftp|www)\b/s;
 

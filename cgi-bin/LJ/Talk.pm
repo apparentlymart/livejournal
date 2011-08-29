@@ -1971,7 +1971,7 @@ sub talkform {
     );
 
     $usertype_default =~ /^(.+)_cookie$/;
-    my $usertype = $1;
+    my $usertype = $1 || $usertype_default;
 
     # COMMON TEMPLATE PARAMS ARE DEFINED HERE
     my %params = (
