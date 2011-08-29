@@ -1797,6 +1797,7 @@ sub talkform {
             'img' => $picinfo->{'img'},
             'w'   => $picinfo->{'w'},
             'h'   => $picinfo->{'h'},
+            'id'  => $picinfo->{'id'},
         );
     }
 
