@@ -3407,9 +3407,30 @@ DIV.lj_ippu_app {
 			*display: inline;
 			text-align: center;
 			}
-			.b-subjecticons-item IMG {
+			.b-subjecticon {
 				cursor: pointer;
+				background-image: url(/img/subjecticons.gif?v=1);
+				background-repeat: no-repeat;
 				}
+			.b-subjecticons-default {background-position: 0 0;}
+			.b-subjecticons-sm01 {background-position: -15px 0;}
+			.b-subjecticons-sm02 {background-position: -30px 0;}
+			.b-subjecticons-sm03 {background-position: -45px 0;}
+			.b-subjecticons-sm04 {background-position: -60px 0;}
+			.b-subjecticons-sm05 {background-position: -75px 0;}
+			.b-subjecticons-sm06 {background-position: -90px 0;}
+			.b-subjecticons-sm07 {background-position: -105px 0;}
+			.b-subjecticons-sm08 {background-position: -120px 0;}
+			.b-subjecticons-sm09 {background-position: -140px 0;}
+			.b-subjecticons-sm10 {background-position: -154px 0;}
+			.b-subjecticons-md01 {background-position: -178px 0;}
+			.b-subjecticons-md02 {background-position: -210px 0;}
+			.b-subjecticons-md05 {background-position: -242px 0;}
+			.b-subjecticons-md06 {background-position: -267px 0;}
+			.b-subjecticons-md07 {background-position: -287px 0;}
+			.b-subjecticons-md08 {background-position: -307px 0;}
+			.b-subjecticons-md09 {background-position: -324px 0;}
+			.b-subjecticons-md10 {background-position: -349px 0;}
 	
 
 
