@@ -362,6 +362,8 @@
         $ret .= "<h1>$ML{'.success.title'}</h1>";
 
         my $mlcode;
+        $commentlink =~ /^(.+)(\#.)$/;
+        my ($curl, $cadr) = ($1, $2);
 
         if ($comment->{state} eq 'A') {
             # Redirect the user back to their post as long as it didn't unscreen its parent,
@@ -382,11 +384,13 @@
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.comm.anon2'
                     : '.success.screened.comm2';
+                return $redirect->($curl . '&screen=1' . $cadr) if $ajax;
             }
             else {
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.user.anon2'
                     : '.success.screened.user2';
+                return $redirect->($curl . '&screen=1' . $cadr) if $ajax;
             }
         }
 
