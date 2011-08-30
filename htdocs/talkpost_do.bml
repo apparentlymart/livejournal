@@ -392,13 +392,13 @@
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.comm.anon2'
                     : '.success.screened.comm2';
-                return $redirect->($curl . '&screen=' . "$SC$mlcode" . $cadr) if $ajax;
+                return $redirect->($curl . '&screen=' . LJ::eurl($SC . $mlcode) . $cadr) if $ajax;
             }
             else {
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.user.anon2'
                     : '.success.screened.user2';
-                return $redirect->($curl . '&screen=' . "$SC$mlcode" . $cadr) if $ajax;
+                return $redirect->($curl . '&screen=' . LJ::eurl($SC . $mlcode) . $cadr) if $ajax;
             }
         }
 
