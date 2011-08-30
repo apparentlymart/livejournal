@@ -424,6 +424,7 @@ class Comment extends EntryLite
     function builtin print_expand_link (string{} opts) : string "Prints a link to expand a collapsed comment. Can pass options 'text', 'title', 'class', and 'img_url' (and other 'img_*' options).";
 
     function builtin print_expand_collapse_links () "Prints links to expand and to collapse this comment.";
+    function builtin print_expand_collapse_links (string{} template) "Prints links to expand and to collapse this comment (output with template).";
 
     function time_display (string datefmt, string timefmt, bool edittime) : string "Same as EntryLite::time_display, except can pass in if we want the edit time or not.";
     function edittime_display () : string "Show the time that this comment was edited, with most useful information for user.  Empty string if the comment hasn't been edited.";

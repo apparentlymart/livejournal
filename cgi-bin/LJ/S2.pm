@@ -3566,25 +3566,32 @@ sub Comment__print_expand_link
 
 sub Comment__print_expand_collapse_links
 {
-    my ($ctx, $this) = @_;
+    my ($ctx, $this, $cetemplate) = @_;
+    $cetemplate ||= { 'expand' => '%_', 'collapse' => '%_'};
 
     my $text_expand = LJ::ehtml($ctx->[S2::PROPS]->{"text_comment_expand"});
     my $text_collapse = LJ::ehtml($ctx->[S2::PROPS]->{"text_comment_collapse"});
 
     my $print_expand_link = sub {
-        $S2::pout->(
-            "<span id='expand_$this->{talkid}'>" .
-                "<a href='$this->{thread_url}' onclick=\"ExpanderEx.make(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_expand</a>" .
-            "</span>"
-        );
+        return unless $text_expand;
+
+        my $outString = "<span id='expand_$this->{talkid}'>";
+        my $link = "<a href='$this->{thread_url}' onclick=\"ExpanderEx.make(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_expand</a>";
+        my $template = $cetemplate->{'expand'};
+        $template =~ s/%_/$link/;
+        $outString .= "$template</span>";
+        $S2::pout->($outString);
     };
 
     my $print_collapse_link = sub {
-        $S2::pout->(
-            "<span id='collapse_$this->{talkid}'>" .
-                "<a href='$this->{thread_url}' onclick=\"ExpanderEx.collapse(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_collapse</a>" .
-            "</span>"
-        );
+        return unless $text_collapse;
+
+        my $outString =  "<span id='collapse_$this->{talkid}'>";
+        my $link = "<a href='$this->{thread_url}' onclick=\"ExpanderEx.collapse(event,this,'$this->{thread_url}','$this->{talkid}',true)\">$text_collapse</a>";
+        my $template = $cetemplate->{'collapse'};
+        $template =~ s/%_/$link/;
+        $outString .= "$template</span>";
+        $S2::pout->($outString);
     };
 
     my $show_expand_link = sub {
