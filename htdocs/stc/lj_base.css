@@ -1965,6 +1965,7 @@ HTML BODY.logged-out {
 				display:block;
 				}
 	#subjectIconImage {
+		vertical-align: top;
 		cursor: pointer;
 		}
 	.b-postform-preload,
