@@ -163,7 +163,7 @@
 
     my %friends = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count' => 0);
     my %friendsof = ('load'=>1, 'loaded'=>0, 'display'=>1);
-
+    
     if ($com) {
         $title = $ML{'.title.communityprofile'};
     } elsif ($u->is_person) {
@@ -178,7 +178,7 @@
 
     $windowtitle = $u->display_name . " - $title";
 
-    $friends{'load'} = $friendsof{'load'} = 0 if $com && $u->{'dont_load_members'};
+    $friends{'load'} = $friendsof{'load'} = 0 if $com && $u->prop('dont_load_members');
 
     # do they have the viewall priv?
     # there are no entries on this page, so we just check if they have any viewall, so viewsome
@@ -1528,7 +1528,8 @@
 
         } else {
             $body .= "<p class='inner_section_header first'><span class='expandcollapse on' id='members_header'>" . $arrowimg->("members") . " $ML{'.members.members'}";
-            $body .= " (" . $friends{'count'} . ")";
+            $body .= " (" . $friends{'count'} . ")" if $should_show_friends; 
+
             if (!$should_show_friends) {
                 $body .= ":</span></p><div class='inner_section_body' id='members_body'>" . BML::ml('.friends.viewall.comm2', { aopts => "href='$viewall_url'" }) . "</div>";
             } elsif ($friends{count}) {
