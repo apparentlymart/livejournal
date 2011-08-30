@@ -300,7 +300,7 @@ sub error_list
     # FIXME: retrofit like bad_input above?  merge?  make aliases for each other?
     my @errors = @_;
     my $ret;
-    $ret .= "<?errorbar ";
+    $ret .= '<div class="errorbar">';
     $ret .= "<strong>";
     $ret .= BML::ml('error.procrequest');
     $ret .= "</strong><ul>";
@@ -310,7 +310,7 @@ sub error_list
         $err->log;
         $ret .= $err->as_bullets;
     }
-    $ret .= " </ul> errorbar?>";
+    $ret .= " </ul></div>";
     return $ret;
 }
 
