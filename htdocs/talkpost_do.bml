@@ -362,6 +362,7 @@
         $ret .= "<h1>$ML{'.success.title'}</h1>";
 
         my $mlcode;
+        my $SC = '/talkpost_do.bml';
         my ($curl, $cadr);
 
         if ( $commentlink =~ /^(.+)(\#.+)$/ ) {
@@ -391,13 +392,13 @@
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.comm.anon2'
                     : '.success.screened.comm2';
-                return $redirect->($curl . '&screen=' . $mlcode . $cadr) if $ajax;
+                return $redirect->($curl . '&screen=' . "$SC$mlcode" . $cadr) if $ajax;
             }
             else {
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.user.anon2'
                     : '.success.screened.user2';
-                return $redirect->($curl . '&screen=' . $mlcode . $cadr) if $ajax;
+                return $redirect->($curl . '&screen=' . "$SC$mlcode" . $cadr) if $ajax;
             }
         }
 
