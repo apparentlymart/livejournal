@@ -488,7 +488,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Config;
 LJ::Config->load;
 
-require "ljlang.pl";
+use LJ::Lang;
 require "cleanhtml.pl";
 
 # the creator for the 'lastn' view:

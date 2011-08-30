@@ -7,7 +7,7 @@ use LJ::Worker::ErrorLog;
 
 require 'ljlib.pl';
 require 'ljprotocol.pl';
-require 'ljlang.pl';
+use LJ::Lang;
 
 my $name        = 0;    # Name of this worker
 my $quantity    = 0;    # Quantity of workers (0 means no-daemons)

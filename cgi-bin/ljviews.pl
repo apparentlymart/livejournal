@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 # <LJDEP>
-# lib: cgi-bin/ljlib.pl, cgi-bin/ljconfig.pl, cgi-bin/ljlang.pl, cgi-bin/cleanhtml.pl
+# lib: cgi-bin/ljlib.pl, cgi-bin/ljconfig.pl, cgi-bin/LJ/Lang.pm, cgi-bin/cleanhtml.pl
 # </LJDEP>
 
 use strict;
@@ -1065,7 +1065,7 @@ LJ::Config->load;
 
 use lib "$ENV{LJHOME}/cgi-bin";
 
-require "ljlang.pl";
+use LJ::Lang;
 require "cleanhtml.pl";
 use LJ::FriendsTags;
 

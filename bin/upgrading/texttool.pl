@@ -84,7 +84,7 @@ unless ( -d $ENV{'LJHOME'} ) {
 }
 
 require 'ljlib.pl';
-require 'ljlang.pl';
+use LJ::Lang;
 require 'weblib.pl';
 
 my %dom_id;       # number -> {}

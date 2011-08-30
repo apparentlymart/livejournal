@@ -8,7 +8,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::TheSchwartz';
 require 'ljlib.pl';
 require 'ljprotocol.pl';
-require 'ljlang.pl';
+use LJ::Lang;
 require 'ljfeed.pl';
 use LJ::SMS;
 

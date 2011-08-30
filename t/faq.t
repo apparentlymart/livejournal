@@ -5,7 +5,7 @@ use Test::More qw(no_plan);
 use lib "$ENV{LJHOME}/cgi-bin";
 
 require 'ljlib.pl';
-require 'ljlang.pl';
+use LJ::Lang;
 
 use LJ::Faq;
 use LJ::Test qw(memcache_stress);

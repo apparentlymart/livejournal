@@ -6,7 +6,7 @@ no warnings 'once';
 use lib "$ENV{LJHOME}/cgi-bin";
 require "ljlib.pl";
 require "ljdb.pl";
-require "ljlang.pl";
+use LJ::Lang;
 require 'ljprotocol.pl';
 use Getopt::Long;
 use LJ::DBUtil;

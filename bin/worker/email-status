@@ -6,7 +6,7 @@ use LJ::User::EmailStatus;
 
 require 'ljlib.pl';
 require 'ljprotocol.pl';
-require 'ljlang.pl';
+use LJ::Lang;
 
 package LJ::NewWorker::TheSchwartz::EmailStatus;
 use base 'LJ::NewWorker::TheSchwartz';
