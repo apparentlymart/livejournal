@@ -23,11 +23,16 @@
                 my $sheight = int($GET{"sh_$pn"});
                 my $esurl   = LJ::ejs($GET{"su_$pn"});
                 my $eppurl  = LJ::ejs($GET{"pp_$pn"});
-                $js .= "window.onload = function () { window.setTimeout(\"InObFCK.onUpload('$esurl','$eppurl',$swidth,$sheight);\",500) }\n";
+                $js .= "window.onload = function () { window.parent.parent.setTimeout(\"InOb.onUpload('$esurl','$eppurl',$swidth,$sheight);\",500) }\n";
             }
             $js .= "</script>\n";
+
+            $$head = $js;
+            return;
         }
     }
+
+    my $is_only_upload_div = $GET{'only_upload'};
 
     my $step = 1;
     my $fbenabled = LJ::get_cap($u, 'fb_account') && LJ::get_cap($u, 'fb_can_upload');
@@ -44,15 +49,29 @@
         .insobjOuter div.ex { font: 8pt sans-serif; color: #888; font-style: italic;}
           .img_error { color: red; font-weight: bold; text-align: center; }
         </style>
+    } unless $is_only_upload_div;
+
+    $$head .= qq{
         <script>
         var fileaction = '$LJ::FB_SITEROOT/interface/webupload';
         var fbroot     = '$LJ::SITEROOT/__using/$LJ::FB_DOMAIN';
         </script>
+        };
+
+    $$head .= qq{
                 <script src="$LJ::STATPREFIX/fck/editor/dialog/common/fck_dialog_common.js" type="text/javascript"></script>
                 <script src="$LJ::STATPREFIX/fck/editor/dialog/fck_image/fck_image.js" type="text/javascript"></script>
                 $js
                 <link href="$LJ::STATPREFIX/fck/editor/dialog/common/fck_dialog_common.css" rel="stylesheet" type="text/css" />
+        } unless $is_only_upload_div;
+
+    if( $is_only_upload_div ) {
+        $$head .= qq{
+            <link href="$LJ::STATPREFIX/display_none.css" rel="stylesheet" type="text/css" />
+            <link href="$LJ::STATPREFIX/imguploadrte.css" rel="stylesheet" type="text/css" />
         };
+    }
+
 
     #taken from the original fck_image.html    
     $ret .= qq{
@@ -132,65 +151,81 @@
                        <div id="divUpload" style="DISPLAY: none">
                    };
 
+        my $div_upload = '';
         # taken from imgupload.bml with customization for rte
-        $ret .= "<div class='insobjOuter' id='insobjOuter'>";
-        $ret .= "<form style='display:inline' id='insobjform' enctype='multipart/form-data' action='imguploadrte.bml' method='post' onsubmit='return InObFCK.onSubmit()' >";
+        $div_upload .= "<div class='insobjOuter' id='insobjOuter'>";
+        if($is_only_upload_div) {
+            $div_upload .= "<form style='display:inline' id='insobjform' enctype='multipart/form-data' action='imguploadrte.bml' method='post' onsubmit='return window.parent.InOb.onSubmit()' >";
+        } else {
+            $div_upload .= "<form style='display:inline' id='insobjform' enctype='multipart/form-data' action='imguploadrte.bml' method='post' onsubmit='return InObFCK.onSubmit()' >";
+        }
         
-        $ret .= "<table width='99%' height='99%' border='0' cellpadding='0' cellspacing='0'><tr height='20' class='insObjTitle' id='insObjTitle'><td align='left' colspan='2'><p class='wintitle' id='wintitle'>Insert Image</p></td></tr>";
+        $div_upload .= "<table width='99%' height='99%' border='0' cellpadding='0' cellspacing='0'><tr height='20' class='insObjTitle' id='insObjTitle'><td align='left' colspan='2'><p class='wintitle' id='wintitle'>Insert Image</p></td></tr>";
         
 # content
-        $ret .= "<tr><td colspan='2'><div class='insobjContent' id='img_iframe_holder' style='display: none; margin: 0px 0px 0px 0px;'></div><div id='img_fromwhere' class='insobjContent'>";
+        $div_upload .= "<tr><td colspan='2'><div class='insobjContent' id='img_iframe_holder' style='display: none; margin: 0px 0px 0px 0px;'></div><div id='img_fromwhere' class='insobjContent'>";
         
-        $ret .= "<table cellspacing='8' valign='top'>";
+        $div_upload .= "<table cellspacing='8' valign='top'>";
 
-        $ret .= "<tr><td id='img_error' class='img_error' colspan='2'></td></tr>";
+        $div_upload .= "<tr><td id='img_error' class='img_error' colspan='2'></td></tr>";
 
         # from file
-        $ret .= "<tr valign='top' colspan='2'><td>";
-        $ret .= LJ::html_check({
+        $div_upload .= "<tr valign='top' colspan='2'><td>";
+        $div_upload .= LJ::html_check({
             'type'=> 'radio',
             'name'=> 'method',
             'id'=> 'fromfile',
             'value' => 'file',
             'disabled' => $fbenabled ? 0 : 1,
         });
-        $ret .= " <label for='fromfile'>Image from file</label>:</td></tr><tr><td colspan='2'>";
-        $ret .= LJ::html_hidden('redir_to_auth_base', '2', 'sec1', '255');
+        $div_upload .= " <label for='fromfile'>Image from file</label>:</td></tr><tr><td colspan='2'>";
+        $div_upload .= LJ::html_hidden('redir_to_auth_base', '2', 'sec1', '255');
 
         my $disabled = $fbenabled ? '' : "disabled='1'";
 
-        $ret .= "<div id='filediv'><input type='file' name='file1' id='fromfileentry' size='50' $disabled /></div>";
+        $div_upload .= "<div id='filediv'><input type='file' name='file1' id='fromfileentry' size='50' $disabled /></div>";
 
         my $msg = LJ::run_hook('update_insobj_fb', $fbenabled) || "Upload a file from your computer";
-        $ret .= "<div class='ex'>$msg</div>";
-        $ret .= "</td></tr>";
+        $div_upload .= "<div class='ex'>$msg</div>";
+        $div_upload .= "</td></tr>";
 
         # from Fotobilder
         if ($fbenabled) {
-            $ret .= "<tr><td colspan='2'>";
-            $ret .= LJ::html_check({
+            $div_upload .= "<tr><td colspan='2'>";
+            $div_upload .= LJ::html_check({
                 'type' => 'radio',
                 'name' => 'method',
                 'id' => 'fromfb',
                 'value'=> 'fb',
             });
 
-            $ret .= " <label for='fromfb'>$ML{'/imgupload.bml.gallery.label'}</label></td></tr>";
-}
-        $ret .= "</table>";
+            $div_upload .= " <label for='fromfb'>$ML{'/imgupload.bml.gallery.label'}</label></td></tr>";
+        }
+        $div_upload .= "</table>";
 
-        $ret .= "<br /><font size='1' color='gray'><i>$ML{'.size'}</i></font></div></td></tr><tr height='20' class='insobjNav' id='insobjNav'><td align='left'><div style='margin-left: 10px'>";
-        $ret .= "<input type='button' name='btn:prev' id='btnPrev' style='display:none' value='&lt;-- Back' />";
-        $ret .= "</div></td>";
-        $ret .= "<td align='right'><div style='margin-right: 10px'>";
-        $ret .= LJ::html_submit('btn:next', 'Insert', { 'id' => 'btnNext' });
-        $ret .= "</div></td></tr></table>";
-        $ret .= "</form></div><script>InObFCK.setupIframeHandlers();</script>";
+        $div_upload .= "<br /><font size='1' color='gray'><i>$ML{'.size'}</i></font></div></td></tr><tr height='20' class='insobjNav' id='insobjNav'><td align='left'><div style='margin-left: 10px'>";
+        $div_upload .= "<input type='button' name='btn:prev' id='btnPrev' style='display:none' value='&lt;-- Back' />";
+        $div_upload .= "</div></td>";
+        $div_upload .= "<td align='right'><div style='margin-right: 10px'>";
+        $div_upload .= LJ::html_submit('btn:next', 'Insert', { 'id' => 'btnNext' });
+        $div_upload .= "</div></td></tr></table>";
+        $div_upload .= "</form></div>";
+
+        if ($is_only_upload_div) {
+            $div_upload .= "<script>window.parent.InOb.setupIframeHandlers(true);</script>";
+            ## We no need a html and head tags
+            $$body = $div_upload;
+            # BML::finish();
+            # return $div_upload;
+            return;
+        } else {
+            $ret .= $div_upload;
+        }
 
         # taken from orig fck_image.html
         my $ml_unavailable = LJ::Lang::ml('/imgupload.bml.msg.unavailable');
         $ret .= qq{
-                </div>
+                <script>InObFCK.setupIframeHandlers();</script></div>
                 <div id="divLink" style="DISPLAY: none">
                 <table cellspacing="1" cellpadding="1" border="0" width="100%">
                 <tr>
