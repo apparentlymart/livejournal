@@ -383,12 +383,23 @@
 				}
 			}
 
+			function checkLastLine() {
+				var body = editor.document.getBody();
+				var last = body.getLast();
+				if (last && last.type == 1 && !last.is('br')) {
+					body.appendHtml('<br />');
+				}
+			}
+
 			editor.on('dataReady', function() {
 				note = note || createNote(editor);
 
 				editor.on('selectionChange', onSelectionChange);
 				editor.document.on('mouseout', note.hide.bind(note));
 				editor.document.on('mouseover', onMouseOver);
+				editor.document.on('keyup', checkLastLine );
+				editor.document.on('click', checkLastLine );
+				editor.document.on('selectionChange', checkLastLine );
 			});
 
 			//////////  LJ User Button //////////////
