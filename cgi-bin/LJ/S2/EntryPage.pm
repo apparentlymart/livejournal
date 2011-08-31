@@ -7,10 +7,18 @@ package LJ::S2;
 use LJ::TimeUtil;
 use LJ::UserApps;
 
-sub EntryPage
-{
+sub EntryPage {
     my ($u, $remote, $opts) = @_;
     my $get = $opts->{'getargs'};
+
+    if ( $get->{'screen'} ) {
+        LJ::need_string(qw{
+            /talkpost_do.bml.success.screened.comm.anon2
+            /talkpost_do.bml.success.screened.comm2
+            /talkpost_do.bml.success.screened.user.anon2
+            /talkpost_do.bml.success.screened.user2
+        });
+    }
 
     my $p = Page($u, $opts);
     $p->{'_type'} = "EntryPage";
@@ -40,7 +48,7 @@ sub EntryPage
 
     $p->{'page_id'} = 'journal-' . $u->username . '-' . $entry->ditemid;
     $p->{'multiform_on'} = $entry->comments_manageable_by($remote);
-    
+
     my $itemid = $entry->jitemid;
     my $permalink = $entry->url;
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
@@ -73,7 +81,7 @@ sub EntryPage
                     ));
 
     if($remote) {
-        LJ::need_string(qw/ 
+        LJ::need_string(qw/
                             comment.cancel
                             comment.delete
                             comment.delete.q
@@ -255,7 +263,7 @@ sub EntryPage
                 'edit_url' => $edit_url,
             };
 
-            # don't show info from suspended users, and from users who deleted their journals 
+            # don't show info from suspended users, and from users who deleted their journals
             # and choosed to delete their comments in other journals
             if (!$viewsome && $pu) {
                 my $hide_comment;
@@ -267,7 +275,7 @@ sub EntryPage
                         $hide_comment = 1;
                     }
                 }
-                
+
                 if ($hide_comment) {
                     $s2com->{'text'} = "";
                     $s2com->{'subject'} = "";
@@ -362,7 +370,7 @@ sub EntryPage
         $p->{'LJ_cmtinfo'} = $js if $opts->{'need_cmtinfo'};
         $entry_cminfo .= $js;
     }
-    
+
     $p->{head_content}->set_options( { entry_cmtinfo => $entry_cminfo} );
     $p->{head_content}->set_options( { entry_metadata => $entry->extract_metadata } );
 
@@ -517,14 +525,14 @@ sub EntryPage_entry
     }
 
     my $subject = $entry->subject_html;
-    
-    my $no_cut_expand = !$get->{cut_expand} && $get->{page} && $get->{page} > 1 ? 1 : 0; 
+
+    my $no_cut_expand = !$get->{cut_expand} && $get->{page} && $get->{page} > 1 ? 1 : 0;
 
     my $event = $entry->event_html({
         no_cut_expand   => $no_cut_expand,
         page            => $get->{page},
     });
-    
+
     if ($get->{'nohtml'}) {
         # quote all non-LJ tags
         $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
