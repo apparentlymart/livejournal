@@ -777,22 +777,23 @@
 					} else {
 						text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore);
 						if (text) {
-							var br = editor.document.createElement('br');
+							var br = editor.document.createElement('br'),
+								selection = editor.document.getSelection();
 
-							ljNoteData.LJCut.node = editor.document.createElement('p');
+							ljNoteData.LJCut.node = editor.document.createElement('div');
 							ljNoteData.LJCut.node.setAttribute('lj-cmd', 'LJCut');
 							ljNoteData.LJCut.node.setAttribute('class', 'lj-cut');
 							if (text != top.CKLang.ReadMore) {
 								ljNoteData.LJCut.node.setAttribute('text', text);
 							}
-							editor.getSelection().getRanges()[0].extractContents().appendTo(ljNoteData.LJCut.node);
+							selection.getRanges()[0].extractContents().appendTo(ljNoteData.LJCut.node);
 							editor.insertElement( br );
 							ljNoteData.LJCut.node.insertBefore(br);
 
 							var range = new CKEDITOR.dom.range(editor.document);
 							range.moveToPosition( ljNoteData.LJCut.node, CKEDITOR.POSITION_AFTER_END );
 							range.selectNodeContents(ljNoteData.LJCut.node);
-							editor.getSelection().selectRanges([range]);
+							editor.document.getSelection().selectRanges([range]);
 
 						}
 					}
