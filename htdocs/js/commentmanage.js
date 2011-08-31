@@ -537,6 +537,7 @@ function removeEmptyMarkup(threadId) {
 
 	window.LiveJournal.CommentManager = function() {
 		this.bindLinks();
+		this.showIfScreened();
 	}
 
 	LiveJournal.CommentManager.prototype.bindLinks = function() {
@@ -578,6 +579,25 @@ function removeEmptyMarkup(threadId) {
 			ev.preventDefault();
 			ev.stopPropagation();
 		} );
+	}
+	
+	/**
+	 * Shows message (in LJ Bubble) that new added comment is screened (if there are GET-param)
+	 */
+	LiveJournal.CommentManager.prototype.showIfScreened = function() {
+		var getParams = LiveJournal.parseGetArgs( location.href ),
+			message;
+		
+		if( getParams.screen ) {
+			message = Site.ml_text[decodeURIComponent( getParams.screen )];
+			
+			$( '<p style="width: 40em;">' + message + '</p>' )
+				.bubble( {
+					target: '#ljcmtxt' + getParams.view,
+					align: 'left'
+				} )
+				.bubble( 'show' );
+		}
 	}
 
 	var manager = window.LiveJournal.CommentManager;
