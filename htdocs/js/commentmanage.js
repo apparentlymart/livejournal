@@ -589,7 +589,7 @@ function removeEmptyMarkup(threadId) {
 			message;
 		
 		if( getParams.screen ) {
-			message = Site.ml_text[decodeURIComponent( getParams.screen )];
+			message = Site.ml_text[decodeURIComponent( getParams.screen.split('#')[0] )];
 			
 			$( '<p style="width: 40em;">' + message + '</p>' )
 				.bubble( {
