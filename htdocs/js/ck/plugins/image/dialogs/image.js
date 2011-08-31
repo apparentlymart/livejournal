@@ -361,6 +361,8 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 
 				//return scrapbook tab to the initial state
 				InOb.showSelectorPage();
+				InOb.setupIframeHandlers(); //If we switch dialog in rte/html editor we loose correct currentPopupWindow object.
+											//So, we init again.
 			},
 			onOk : function()
 			{
