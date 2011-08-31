@@ -938,7 +938,7 @@ function onInsertObject(include){
 	var iframe = document.createElement('iframe');
 	iframe.id = 'popupsIframe';
 	iframe.style.border = 'none';
-	iframe.frameborder = 0;
+	iframe.frameBorder = 0;
 	iframe.height = iframe.width = '100%';
 	iframe.src = include;
 
@@ -1237,14 +1237,8 @@ InOb.fotobilderStepOne = function (){
 		};
 	}
 	var div_if = InOb.popid("img_iframe_holder");
-	if (!window.switchedRteOn) {
-		var windims = DOM.getClientDimensions();
-		DOM.setHeight(div_if, windims.y - 300);
-		var h = windims.y - 350;
-	} else {
-		div_if.style.height = '99%';
-	}
 	var div_fw = InOb.popid("img_fromwhere");
+
 	div_fw.style.display = "none";
 	div_if.style.display = "block";
 	var url = currentPopupWindow.fbroot + "/getgals";
@@ -1252,10 +1246,10 @@ InOb.fotobilderStepOne = function (){
 	if (window.switchedRteOn) {
 		url += 'rte';
 		div_if
-			.innerHTML = '<iframe id="fbstepframe" src="' + url + '" height="99%" width="99%" frameborder="0" style="margin: 0 auto;"></iframe>';
+			.innerHTML = '<iframe id="fbstepframe" src="' + url + '" height="99%" width="99%" frameBorder="0" style="margin: 0 auto;"></iframe>';
 	} else {
 		div_if
-			.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"" + h + "\" width='99%' frameborder='0' style='margin: 0 auto;'></iframe>";
+			.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"95%\" width='99%' frameBorder='0' style='margin: 0 auto;'></iframe>";
 	}
 	InOb.setPreviousCb(InOb.showSelectorPage);
 };
@@ -1275,7 +1269,7 @@ InOb.photobucket = function (seedurl, pb_affsite_id){
 	var cb_url = "&url=" + escape(seedurl);
 
 	div_if
-		.innerHTML = '<iframe name="jwidget" id="jwidget" src="http://photobucket.com/svc/jwidget.php?width=360&height=400&largeThumb=true&pbaffsite=' + pb_affsite_id + '&bg=%23FFFFFF&border=false&bordercolor=%23000000' + cb_url + '&linkType=url&textcolor=%23000000&linkcolor=%230000FF&media=image&btntxt=Paste&dimensions=false&promo=false" bgcolor="transparent" width="99%" height="440" frameborder="0" scrolling="no"></iframe>';
+		.innerHTML = '<iframe name="jwidget" id="jwidget" src="http://photobucket.com/svc/jwidget.php?width=360&height=400&largeThumb=true&pbaffsite=' + pb_affsite_id + '&bg=%23FFFFFF&border=false&bordercolor=%23000000' + cb_url + '&linkType=url&textcolor=%23000000&linkcolor=%230000FF&media=image&btntxt=Paste&dimensions=false&promo=false" bgcolor="transparent" width="99%" height="440" frameBorder="0" scrolling="no"></iframe>';
 	InOb.setPreviousCb(InOb.showSelectorPage);
 };
 
@@ -1292,6 +1286,18 @@ InOb.fullCenter = function (){
 
 	currentPopup.style.left = '50%';
 	currentPopup.style.marginLeft = '-' + w2 + 'px';
+
+	//put iframe resize logic here from fotoBilderStepOne
+	try {
+		var div_if = InOb.popid("img_iframe_holder");
+		if (!window.switchedRteOn) {
+			var windims = DOM.getClientDimensions();
+			DOM.setHeight(div_if, windims.y - 270);
+			var h = windims.y - 350;
+		} else {
+			div_if.style.height = '99%';
+		}
+	} catch(e) { }
 };
 
 InOb.tallCenter = function (){
@@ -1306,7 +1312,7 @@ InOb.tallCenter = function (){
 };
 
 InOb.smallCenter = function (){
-	DOM.setHeight(currentPopup, 300);
+	DOM.setHeight(currentPopup, 307);
 	DOM.setWidth(currentPopup, 700);
 
 	currentPopup.style.top = '50%';
@@ -1352,7 +1358,7 @@ InOb.clearError = function (){
 	}
 
 	div_err.innerHTML = '';
-	return true;
+	return true B on Border is required to make this work in I;
 };
 
 InOb.disableNext = function (){
