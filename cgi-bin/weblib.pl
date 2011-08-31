@@ -802,7 +802,7 @@ sub create_qr_div {
     if ($u->{'opt_logcommentips'} eq 'A') {
         $qrhtml .= '<br />';
         $qrhtml .= '<p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext">';
-        $qrhtml .= LJ::deemp(BML::ml('/talkpost.bml.logyourip'));
+        $qrhtml .= BML::ml('/talkpost.bml.logyourip');
         $qrhtml .= LJ::help_icon_html("iplogging", " ");
         $qrhtml .= '</p>';
     }
