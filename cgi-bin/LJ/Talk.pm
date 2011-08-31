@@ -1871,7 +1871,9 @@ sub talkform {
     # Display captcha challenge if over rate limits.
     my $captcha_html = '';
 
-    if ( $opts->{do_captcha} ) {
+    # generate captcha_html in any case but show only when needed
+    # TODO: commented code will be cleared after tests
+#    if ( $opts->{do_captcha} ) {
         if ( LJ::is_enabled("recaptcha") ) {
             my $c      = Captcha::reCAPTCHA->new;
             my $apikey = LJ::conf_test( $LJ::RECAPTCHA{public_key} );
@@ -1918,7 +1920,7 @@ sub talkform {
             $captcha_html .= LJ::html_text( { name => 'answer', size => 15 } );
             $captcha_html .= LJ::html_hidden( captcha_chal => $captcha_chal );
         }
-    }
+#    }
 
     my $show_logips = $journalu->{'opt_logcommentips'};
     my $ml_logcommentips;
@@ -2007,6 +2009,7 @@ sub talkform {
         'is_identity'            => $remote && $remote->is_identity,
         'remote_can_comment'     => $remote_can_comment,
 
+        'need_captcha'              => $opts->{do_captcha},
         'captcha_html'              => $captcha_html,
         'comment_length_cap'        => LJ::CMAX_COMMENT,
         'show_spellcheck'           => $LJ::SPELLER ? 1 : 0,
