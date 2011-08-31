@@ -358,13 +358,8 @@ sub get_communities_by_interests {
     my $comm_interests = $dbh->selectcol_arrayref (
         "SELECT intid
             FROM interests i
-            WHERE EXISTS (
-                SELECT 1 
-                    FROM (
-                        $search
-                    ) c 
-                WHERE i.interest LIKE cond
-            )"
+            WHERE i.interest = ?
+        ", undef, $search
     );
 
     return $comms unless $comm_interests && @$comm_interests;
@@ -397,10 +392,7 @@ sub get_communities {
 
     my $comms_search = [];
     my %finded = ();
-    if (bytes::length($search)) {
-        my @search_words = map { "SELECT '%".$_."%' AS cond" } split /\s+/, $search;
-        $search = join " UNION ALL ", @search_words;
-
+    if (length $search) {
         ## Fetch suitable communities from community directory
         $comms_search = $dbh->selectall_arrayref (
             "SELECT DISTINCT journalid
@@ -410,15 +402,9 @@ sub get_communities {
                 AND kw_id IN (
                     SELECT kw_id
                         FROM vertical_keywords kw
-                        WHERE EXISTS (
-                            SELECT 1 
-                                FROM (
-                                    $search
-                                ) c 
-                            WHERE kw.keyword LIKE cond
-                        )
+                        WHERE kw.keyword = ?
                     )",
-            { Slice => {} }, $self->vert_id
+            { Slice => {} }, $self->vert_id, $search,
         ) || [];
         %finded = map { $_->{journalid} => 1 } @$comms_search;
 

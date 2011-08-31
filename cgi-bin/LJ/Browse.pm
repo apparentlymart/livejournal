@@ -958,9 +958,9 @@ sub search_posts {
     my $comm_list = join ",", @$comms;
     my $dbh = LJ::get_db_reader();
 
-    if (my @search_words = split /\s+/, $search) {
+    if (length $search) {
         ## Search for keyword ids for search string
-        my $where_search = join " OR ", map { " keyword LIKE '%".$_."%' " } @search_words;
+        my $where_search = " keyword = '".$search."' ";
         my $keyword_ids = $dbh->selectall_arrayref (
                                 "SELECT kw_id FROM vertical_keywords WHERE $where_search",
                                 { Slice => {} }
@@ -974,7 +974,7 @@ sub search_posts {
         my @vals = map { $_->{kw_id} } @$keyword_ids;
         my $where = $vertical ? " AND km.vert_id = " . $vertical->vert_id : "";
         my $posts = $dbh->selectall_arrayref (
-                                "SELECT * FROM vertical_keymap WHERE kw_id IN ($ph) $where", 
+                                "SELECT * FROM vertical_keymap km WHERE kw_id IN ($ph) $where", 
                                 { Slice => {} }, 
                                 @vals
                           ) || [];

@@ -382,7 +382,12 @@ sub render_body {
             @tmpl_posts = @{$result->{'posts'}};
             $post_count = $result->{'post_count'};
         } else {
-            my @posts = LJ::Browse->search_posts ( comms => [ map { $_->{userid} } @comms ], page_size => 300, search_str => $search_str );
+            my @posts = LJ::Browse->search_posts (
+                comms       => [ map { $_->{userid} } @comms ],
+                page_size   => 300,
+                search_str  => $search_str,
+                vertical    => $vertical,
+            );
 
             my $result = render_posts ( \@posts, post_skip => $post_skip, post_last => $post_last );
             @tmpl_posts = @{$result->{'posts'}};
