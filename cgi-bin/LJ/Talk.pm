@@ -2010,7 +2010,7 @@ sub talkform {
         'remote_can_comment'     => $remote_can_comment,
 
         'need_captcha'              => $opts->{do_captcha},
-        'captcha_html'              => $captcha_html,
+        'captcha_html'              => LJ::ehtml($captcha_html),
         'comment_length_cap'        => LJ::CMAX_COMMENT,
         'show_spellcheck'           => $LJ::SPELLER ? 1 : 0,
         'show_logips'               => $show_logips,
