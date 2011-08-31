@@ -477,7 +477,7 @@ sub set_text {
                         dmid=? AND
                         lnid IN ($langids_in)
                         AND itid=? AND
-                        txtid=
+                        txtid=?
                 },
                 undef, $txtid, $revid, $dmid, $itid, $oldtextid,
             );
