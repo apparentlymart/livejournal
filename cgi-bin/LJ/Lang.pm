@@ -364,7 +364,7 @@ sub set_text {
     my ( $dmid, $lncode, $itcode, $text, $opts ) = @_;
     load_lang_struct() unless $LS_CACHED;
 
-    my $l = $LN_CODE{$lncode} or return set_error("Language not defined.");
+    my $l = $LN_CODE{$lncode} or return set_error("Language $lncode not defined.");
     my $lnid = $l->{'lnid'};
 
     # is this domain/language request even possible?
@@ -438,7 +438,6 @@ sub set_text {
     my $rec;
     $rec = sub {
         my $l   = shift;
-        my $rec = shift;
         foreach my $cid ( @{ $l->{'children'} } ) {
             my $clid = $LN_ID{$cid};
             if ( $opts->{'childrenlatest'} ) {
@@ -488,7 +487,7 @@ sub set_text {
                     UPDATE ml_latest
                     SET txtid=?, revid=?
                     WHERE
-                        dmid=> AND
+                        dmid=? AND
                         lnid IN ($langids_in) AND
                         itid=? AND
                         staleness >= 3

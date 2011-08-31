@@ -665,12 +665,13 @@ sub poptext {
                     my $staleness = $metadata{'staleness'} + 0 || 1;
 
                     my $res = LJ::Lang::set_text(
-                        $dbh, 1,
+                        1,
                         $l->{'lncode'},
                         $code, $text,
                         {   'staleness'      => $staleness,
                             'notes'          => $metadata{'notes'},
                             'changeseverity' => 2,
+                            'userid'         => 0,
                         }
                     );
 
