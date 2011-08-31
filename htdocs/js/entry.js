@@ -1358,7 +1358,7 @@ InOb.clearError = function (){
 	}
 
 	div_err.innerHTML = '';
-	return true B on Border is required to make this work in I;
+	return true;
 };
 
 InOb.disableNext = function (){
