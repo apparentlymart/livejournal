@@ -465,16 +465,14 @@
 			//////////  LJ Image Button //////////////
 			editor.addCommand('LJImage', {
 				exec: function(editor) {
-					if (ljNoteData.LJImage.node) {
-						editor.openDialog('image');
-					} else if (window.ljphotoEnabled) {
+					if (window.ljphotoEnabled) {
 						jQuery('#updateForm').photouploader({
 							type: 'upload'
 						}).photouploader('show').bind('htmlready', function (event, html) {
 							editor.insertHtml(html);
 						});
 					} else {
-						InOb.handleInsertImage();
+						editor.openDialog('image');
 					}
 				},
 				editorFocus: false
