@@ -54,7 +54,7 @@ sub save {
     $class->error_check($u, $args);
 
     my $val = $class->get_arg($args, "lang");
-    LJ::Lang::set_lang($val);
+    LJ::set_remote_language($val);
 
     return 1;
 }

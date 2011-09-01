@@ -11,7 +11,7 @@
         });
     };
 
-    LJ::Lang::set_lang($GET{lang});
+    LJ::set_remote_language( $GET{'lang'} );
 
     return 1;
 }

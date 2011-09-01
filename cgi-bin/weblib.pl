@@ -2271,4 +2271,33 @@ sub need_string {
     }
 }
 
+sub set_remote_language {
+    my ($lang) = @_;
+
+    my $l      = LJ::Lang::get_lang($lang);
+    my $remote = LJ::get_remote();
+
+    my $exptime = 0;
+
+    my $cval = $l->{'lncode'} . '/' . time();
+
+    # if logged in, change userprop and make cookie expiration
+    # the same as their login expiration
+    if ($remote) {
+        $remote->set_prop( 'browselang' => $l->{lncode} );
+
+        if ( $remote->{'_session'}->{'exptype'} eq 'long' ) {
+            $exptime = $remote->{'_session'}->{'timeexpire'};
+        }
+    }
+
+    # set cookie
+    LJ::Request->set_cookie( 'langpref' => $cval, 'expires' => $exptime );
+
+    # set language through BML so it will apply immediately
+    BML::set_language( $l->{'lncode'} );
+
+    return;
+}
+
 1;

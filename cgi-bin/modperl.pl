@@ -56,6 +56,6 @@ $SIG{'USR2'} = sub { Carp::confess("caught SIGUSR2!"); };
 use Sys::Hostname;
 $LJ::HARDWARE_SERVER_NAME = hostname();
 
-
+LJ::Lang::init_bml();
 
 1;

@@ -97,6 +97,8 @@ sub handler
     LJ::Request->free();
     LJ::Request->init($r);
 
+    BML::current_site('livejournal');
+
     LJ::run_hooks("post_read_request");
 
     $class = __PACKAGE__ unless $class;

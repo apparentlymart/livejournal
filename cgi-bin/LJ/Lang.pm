@@ -5,6 +5,9 @@ use warnings;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 require "ljhooks.pl";
 
+use base qw( Exporter );
+our @EXPORT_OK = qw( ml );
+
 use LJ::LangDatFile;
 use LJ::TimeUtil;
 
@@ -554,33 +557,6 @@ sub remove_text {
     return 1;
 }
 
-sub get_effective_lang {
-
-    return LJ::run_hook('effective_lang')
-        if LJ::are_hooks('effective_lang');
-
-    my $lang;
-    if ( LJ::is_web_context() ) {
-        $lang = BML::get_language();
-    }
-
-    if ( my $remote = LJ::get_remote() ) {
-
-        # we have a user; try their browse language
-        $lang ||= $remote->prop("browselang");
-    }
-
-    load_lang_struct() unless $LS_CACHED;
-
-    # did we get a valid language code?
-    if ( $lang && $LN_CODE{$lang} ) {
-        return $lang;
-    }
-
-    # had no language code, or invalid.  return default
-    return $LJ::DEFAULT_LANG;
-}
-
 sub get_remote_lang {
     if ( my $remote = LJ::get_remote() ) {
         return $remote->prop('browselang')
@@ -592,21 +568,6 @@ sub get_remote_lang {
     }
 
     return $LJ::DEFAULT_LANG;
-}
-
-sub ml {
-    my ( $code, $vars ) = @_;
-
-    if ( LJ::is_web_context() ) {
-
-        # this means we should use BML::ml and not do our own handling
-        my $text = BML::ml( $code, $vars );
-        $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
-        return $text;
-    }
-
-    my $lang = LJ::Lang::get_effective_lang();
-    return get_text( $lang, $code, undef, $vars );
 }
 
 sub string_exists {
@@ -861,34 +822,6 @@ sub get_lang_names {
     return $list;
 }
 
-sub set_lang {
-    my $lang = shift;
-
-    my $l      = LJ::Lang::get_lang($lang);
-    my $remote = LJ::get_remote();
-
-    # default cookie value to set
-    my $cval = $l->{'lncode'} . '/' . time();
-
-    # if logged in, change userprop and make cookie expiration
-    # the same as their login expiration
-    if ($remote) {
-        $remote->set_prop( 'browselang' => $l->{lncode} );
-
-        if ( $remote->{'_session'}->{'exptype'} eq 'long' ) {
-            $cval = [ $cval, $remote->{'_session'}->{'timeexpire'} ];
-        }
-    }
-
-    # set cookie
-    $BML::COOKIE{'langpref'} = $cval;
-
-    # set language through BML so it will apply immediately
-    BML::set_language( $l->{'lncode'} );
-
-    return;
-}
-
 # The translation system supports the ability to add multiple plural forms of
 # the word given different rules in a languge. This functionality is much like
 # the plural support in the S2 styles code. To use this code you must use the
@@ -1008,6 +941,133 @@ sub plural_form_is {
 
     return 0 if ( $count % 10 == 1 and $count % 100 != 11 );
     return 1;
+}
+
+my ( $current_language, $guessed_language, $language_scope );
+
+sub decide_language {
+    return $guessed_language if $guessed_language;
+
+    my %existing_language =
+        map { $_ => 1 } ( @LJ::LANGS, @LJ::LANGS_IN_PROGRESS, 'debug' );
+
+    if ( LJ::is_web_context() ) {
+        # 'uselang' get param goes first
+        if ( my $uselang = LJ::Request->get_param('uselang') ) {
+            if ( $existing_language{$uselang} ) {
+                return ( $guessed_language = $uselang );
+            }
+        }
+
+        # next, 'langpref' cookie
+        if ( my $cookieval = LJ::Request->cookie('langpref') ) {
+            my ( $lang, $mtime ) = split m{/}, $cookieval;
+
+            if ( $existing_language{$lang} ) {
+                # let BML know of mtime for backwards compatibility,
+                # although it may end up not being used in case
+                # this is not a BML page
+                BML::note_mod_time($mtime);
+
+                return ( $guessed_language = $lang );
+            }
+        }
+
+        # if that failed, resort to Accept-Language
+        if ( my $headerval = LJ::Request->header_in('Accept-Language') ) {
+            my %weights;
+
+            foreach my $langval ( split /\s*,\s*/, $headerval ) {
+                my ( $lang, $weight ) = split /;q=/, $langval;
+
+                # $lang may contain country code, remove it:
+                $lang =~ s/-.*//;
+
+                # weight may not be specified, default to 1
+                $weight ||= 1.0;
+
+                $weights{$lang} = $weight;
+            }
+
+            my @langs =
+                reverse sort { $weights{$a} <=> $weights{$b} } keys %weights;
+
+            foreach my $lang (@langs) {
+                next unless $existing_language{$lang};
+                return ( $guessed_language = $lang );
+            }
+        }
+
+        # all else failing, default to the default language
+        return ( $guessed_language = $LJ::DEFAULT_LANG );
+    }
+
+    # alright, this is not a web context, so there is little we can do,
+    # but at least let's try to extract it from remote, in case
+    # someone set it to whatever
+    if ( my $remote = LJ::get_remote() ) {
+        if ( my $lang = $remote->prop('browselang') ) {
+            if ( $existing_language{$lang} ) {
+                return ( $guessed_language = $lang );
+            }
+        }
+    }
+
+    # failing that, it's the default language, alas;
+    # however, let's not cache it so that we can try remote
+    # again if it's set between the calls
+    return $LJ::DEFAULT_LANG;
+}
+
+sub current_language {
+    my @args = @_;
+
+    my $ret = $current_language || decide_language();
+
+    if (@args) {
+        $current_language = $args[0];
+        $guessed_language = undef;
+    }
+
+    return $ret;
+}
+
+*get_effective_lang = \&current_language;
+
+sub current_scope {
+    my @args = @_;
+
+    my $ret = $language_scope;
+    if (@args) { $language_scope = $args[0]; }
+    return $ret;
+}
+
+sub ml {
+    my ( $code, $vars ) = @_;
+
+    if ( current_language() eq 'debug' ) {
+        return $code;
+    }
+
+    if ( $code =~ /^[.]/ ) {
+        $code = current_scope() . $code;
+    }
+
+    return get_text( current_language(), $code, undef, $vars );
+}
+
+sub init_bml {
+    BML::current_site('livejournal');
+
+    BML::implementation( 'decide_language' => \&decide_language );
+
+    BML::implementation( 'get_language' => \&current_language );
+    BML::implementation( 'set_language' => \&current_language );
+
+    BML::implementation( 'get_language_scope' => \&current_scope );
+    BML::implementation( 'set_language_scope' => \&current_scope );
+
+    BML::implementation( 'ml' => \&ml );
 }
 
 1;

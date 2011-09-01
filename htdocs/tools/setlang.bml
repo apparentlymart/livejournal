@@ -9,7 +9,7 @@ body<=
     my $returnto = LJ::CleanHTML::canonical_url($GET{returnto});
 
     if ($lang && $returnto) {
-        LJ::Lang::set_lang($lang);
+        LJ::set_remote_language($lang);
         return BML::redirect($returnto);
     }
 
