@@ -129,7 +129,7 @@
 	                    </TMPL_IF>
 						
 						<input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="22" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
-						&nbsp;&nbsp;<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" class="b-postform-quote" tabindex="23" />
+						&nbsp;&nbsp;<input type="button" value="<TMPL_VAR expr="ml('/talkpost.bml.btn.quote')">" class="b-postform-quote" tabindex="23" />
 					</div>
                 </td>
             </tr>
@@ -198,58 +198,13 @@
             </tr>
         </table>
     </form>
-
-    <script type='text/javascript' language='JavaScript'>
-        var helped = 0;
-        var pasted = 0;
-		
-        function quote() {
-            var text = '';
-            
-            if (document.getSelection) {
-                text = document.getSelection();
-            }
-            else 
-                if (document.selection) {
-                    text = document.selection.createRange().text;
-                }
-                else 
-                    if (window.getSelection) {
-                        text = window.getSelection();
-                    }
-            // Fix for Safari 
-            if (typeof(text) == 'object') 
-                text = text.toString();
-            if (text == '') {
-                if (helped != 1 && pasted != 1) {
-                    helped = 1;
-                    alert("If you'd like to quote a portion of the original message, highlight it then press 'Quote'");
-                }
-                return false;
-            }
-            else {
-                pasted = 1;
-            }
-            
-            var element = text.search(/\\n/) == -1 ? 'q' : 'blockquote';
-            var textarea = document.getElementById('commenttext');
-            textarea.focus();
-            textarea.value = textarea.value + "<" + element + ">" + text + "</" + element + ">";
-            textarea.caretPos = textarea.value;
-            textarea.focus();
-            return false;
-        }
-        
-        if (document.getElementById && (document.getSelection || document.selection || window.getSelection)) {
-            document.write('');
-        }
-    </script>
-
 <script type="text/javascript" src="http://www.ljdev10.livejournal.ru/js/jquery/jquery.lj.commentator.js"></script>
+<script type="text/javascript" src="http://www.ljdev10.livejournal.ru/js/jquery/jquery.lj.quotescreator.js"></script>
 
 <script type="text/javascript">
     jQuery('#postform')
         .authtype()
+		.quotescreator()
         .commentator({
 			publicKey: '<TMPL_VAR captcha_public>',
 			captchaContainerId: 'captcha-container',

@@ -72,6 +72,10 @@
 
 .preview.title=Preview
 
+.btn.quote=Quote
+
+.quote.info.message=If you'd like to quote a portion of the original message, highlight it then press 'Quote'
+
 .success.loggedin=You are now logged in.
 
 .success.message2=Your comment has been added. You can view it <a [[aopts]]>here</a>.
