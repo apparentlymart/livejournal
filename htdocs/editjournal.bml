@@ -572,7 +572,7 @@ LIKE_FAQ
         # edit form
 
 
-        $ret .= "<form action='editjournal.bml$getextra' method='post' class='b-editentries-form'>\n";
+        $ret .= "<form action='editjournal.bml$getextra' method='get' class='b-editentries-form'>\n";
         $ret .= "<p>Show entries: 
         <span class='b-editentries-cal'><i></i>Choose date</span>
         <input type='hidden' name='year' value='$year'/>
