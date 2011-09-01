@@ -1920,6 +1920,7 @@ sub talkform {
             $captcha_html .= LJ::html_text( { name => 'answer', size => 15 } );
             $captcha_html .= LJ::html_hidden( captcha_chal => $captcha_chal );
         }
+    $captcha_html =~ s/\n|\r//g;
 #    }
 
     my $show_logips = $journalu->{'opt_logcommentips'};
@@ -2010,7 +2011,7 @@ sub talkform {
         'remote_can_comment'     => $remote_can_comment,
 
         'need_captcha'              => $opts->{do_captcha},
-        'captcha_html'              => LJ::ehtml($captcha_html),
+        'captcha_html'              => LJ::ejs($captcha_html),
         'comment_length_cap'        => LJ::CMAX_COMMENT,
         'show_spellcheck'           => $LJ::SPELLER ? 1 : 0,
         'show_logips'               => $show_logips,
