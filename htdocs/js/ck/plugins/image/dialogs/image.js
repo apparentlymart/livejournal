@@ -272,7 +272,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 
 		return {
 			title : editor.lang.image[ dialogType == 'image' ? 'title' : 'titleButton' ],
-			minWidth : 420,
+			minWidth : 480,
 			minHeight : 360,
 			onShow : function()
 			{

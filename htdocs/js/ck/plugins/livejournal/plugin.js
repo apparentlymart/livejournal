@@ -789,7 +789,8 @@
 						text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore);
 						if (text) {
 							var br = editor.document.createElement('br'),
-								selection = editor.document.getSelection();
+								selection = editor.document.getSelection(),
+								bookmarks = selection.createBookmarks();
 
 							ljNoteData.LJCut.node = editor.document.createElement('div');
 							ljNoteData.LJCut.node.setAttribute('lj-cmd', 'LJCut');
@@ -798,14 +799,10 @@
 								ljNoteData.LJCut.node.setAttribute('text', text);
 							}
 							selection.getRanges()[0].extractContents().appendTo(ljNoteData.LJCut.node);
+
+							selection.selectBookmarks(bookmarks);
 							editor.insertElement( br );
 							ljNoteData.LJCut.node.insertBefore(br);
-
-							var range = new CKEDITOR.dom.range(editor.document);
-							range.moveToPosition( ljNoteData.LJCut.node, CKEDITOR.POSITION_AFTER_END );
-							range.selectNodeContents(ljNoteData.LJCut.node);
-							editor.document.getSelection().selectRanges([range]);
-
 						}
 					}
 				}

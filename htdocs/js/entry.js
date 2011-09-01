@@ -1210,6 +1210,8 @@ InOb.showSelectorPage = function (){
 	var div_if = InOb.popid("img_iframe_holder");
 	var div_fw = InOb.popid("img_fromwhere");
 	div_fw.style.display = "block";
+	div_fw.style.height = "100%";
+	div_if.style.height = "100%";
 	div_if.style.display = "none";
 
 	InOb.setPreviousCb(null);
@@ -1241,6 +1243,8 @@ InOb.fotobilderStepOne = function (){
 
 	div_fw.style.display = "none";
 	div_if.style.display = "block";
+	div_fw.style.height = "100%";
+	div_if.style.height = "100%";
 	var url = currentPopupWindow.fbroot + "/getgals";
 
 	if (window.switchedRteOn) {
