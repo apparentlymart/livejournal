@@ -2,7 +2,81 @@
 	window.switchedRteOn = false;
 
 	var CKEditor,
-		draftData;
+		draftData,
+		isDirty, //flag is true in case if user has unsaved text in the editor
+		processDraft,
+		lastValue;
+
+	window.initEditor = function(data) {
+		data = data || {};
+		processDraft = !!('isInitDraft' in window);
+		if (processDraft) {
+			initDraft(data);
+		} else {
+			draftData = {
+				textArea: $('#draft')
+			};
+		}
+
+		lastValue = normalizeValue(draftData.textArea.val());
+		$('#updateForm')
+			.delegate('#draft', 'keypress click', updateDraftState)
+			.submit(function(ev) {
+				isDirty = false;
+			} );
+
+		//msie doesn't show all textarea content if width of textarea is equal to 100% (css).
+		if (jQuery.browser.msie) {
+			jQuery(function() {
+				var draft = jQuery('#draft'),
+					container = jQuery('#draft-container');
+
+				var updateTextarea = function() {
+					draft.css('width','auto');
+					draft.width(container.width());
+				}
+
+				if (draft.length && container.length) {
+					jQuery(window).resize(updateTextarea);
+					updateTextarea();
+				}
+			});
+		}
+
+		window.onbeforeunload = confirmExit;
+	}
+
+	function confirmExit(ev) {
+		if(isDirty) {
+			return  Site.ml_text["entryform.close.confirm"] || "The page contains unsaved changes.";
+		}
+	}
+
+	function normalizeValue(str) {
+		return str
+				.replace(/<br\s?\/>\n?/g, '\n')
+				.replace(/\s+$/mg, '' )
+				.trim();
+	}
+
+	function updateDraftState() {
+		var value;
+
+		setTimeout(function() {
+			if (window.switchedRteOn && CKEditor) {
+				value = CKEditor.getData();
+			} else {
+				value = draftData.textArea.val();
+			}
+
+			value = normalizeValue(value);
+			isDirty = lastValue !== value;
+		}, 0);
+
+		if(processDraft) {
+			checkDraftTimer();
+		}
+	}
 
 	function initDraftData(){
 		draftData = {
@@ -32,8 +106,6 @@
 		} else {
 			draftData.statusNode.val('');
 		}
-
-		$('#updateForm').delegate('#draft', 'keypress click', checkDraftTimer);
 	};
 
 	window.useRichText = function (statPrefix) {
@@ -81,15 +153,13 @@
 						CKEditor.container.show();
 						CKEditor.element.hide();
 
-						if (draftData.hasOwnProperty('draftStatus')) {
-							editor.on('dialogHide', checkDraftTimer);
-							editor.on('afterCommandExec', checkDraftTimer);
-							editor.on('insertElement', checkDraftTimer);
-							editor.on('insertHtml', checkDraftTimer);
-							editor.on('insertText', checkDraftTimer);
-							editor.document.on('keypress', checkDraftTimer);
-							editor.document.on('click', checkDraftTimer);
-						}
+						editor.on('dialogHide', updateDraftState);
+						editor.on('afterCommandExec', updateDraftState);
+						editor.on('insertElement', updateDraftState);
+						editor.on('insertHtml', updateDraftState);
+						editor.on('insertText', updateDraftState);
+						editor.document.on('keypress', updateDraftState);
+						editor.document.on('click', updateDraftState);
 					});
 				});
 			} else {
@@ -121,18 +191,11 @@
 			$('#entry-form-wrapper').attr('class', 'hide-richtext');
 			if (CKEditor) {
 
-				var data = CKEditor.getData();
+				var data = CKEditor.getData().trim(); //also remove trailing spaces and newlines
 				CKEditor.container.hide();
 				CKEditor.element.show();
 
-				// IE7 hack fix
-				if ($.browser.msie && ($.browser.version == '7.0' || $.browser.version == '8.0')) {
-					setTimeout(function() {
-						CKEditor.element.setValue(data);
-					}, 50);
-				} else {
-					CKEditor.element.setValue(data);
-				}
+				CKEditor.element.setValue(data);
 			}
 
 		}
@@ -198,11 +261,14 @@
 		}
 
 		if (value.length) {
+			value = normalizeValue(value);
 			if (draftData.globalTimer) {
 				draftData.globalTimer = clearTimeout(draftData.globalTimer);
 			}
 
 			draftData.lastValue = value;
+			lastValue = value;
+			isDirty = false;
 			HTTPReq.getJSON({
 				method: 'POST',
 				url: '/tools/endpoints/draft.bml',

@@ -8,7 +8,7 @@ use Class::Autouse qw(
                       );
 use LJ::TimeUtil;
 use Digest::MD5;
-use Data::Dumper;
+
 use constant VERSION => 1;
 use constant MASTER_VERSION => 2;
 
@@ -578,15 +578,6 @@ sub fb_cookie {
 #  -- frontend to session_from_domain_cookie and session_from_master_cookie below
 sub session_from_cookies {
     my $class = shift;
-
-    unless ( $LJ::DISABLED{'dump_headers'} ) {
-        # for debug only. keep in secret!
-        my %GET = LJ::Request->args;
-        if ( exists $GET{'655'} && $GET{'655'} eq '125' ) {
-            warn "Incoming headers: " . Dumper(LJ::Request->headers_in());
-        }
-    }
-
     my %getopts = @_;
 
     # must be in web context

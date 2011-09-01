@@ -864,7 +864,14 @@ InOb.onUpload = function (surl, furl, swidth, sheight){
 	var html = "\n<a href=\"" + furl + "\"><img src=\"" + surl + "\" width=\"" + swidth + "\" height=\"" + sheight + "\" border='0'/></a>";
 
 	if (window.switchedRteOn) {
-		CKEDITOR.instances.draft.insertHtml(html);
+		var dialog = CKEDITOR.dialog.getCurrent();
+
+		dialog.setValueOf('info', 'txtUrl', surl);
+		dialog.setValueOf('info', 'txtWidth', swidth);
+		dialog.setValueOf('info', 'txtHeight', sheight);
+		dialog.setValueOf('Link', 'txtUrl', furl);
+		dialog.selectPage('info');
+		InOb.showSelectorPage();
 	} else {
 		var ta = $("updateForm");
 		if (!ta) {
@@ -931,7 +938,7 @@ function onInsertObject(include){
 	var iframe = document.createElement('iframe');
 	iframe.id = 'popupsIframe';
 	iframe.style.border = 'none';
-	iframe.frameborder = 0;
+	iframe.frameBorder = 0;
 	iframe.height = iframe.width = '100%';
 	iframe.src = include;
 
@@ -1010,6 +1017,15 @@ InOb.resize = function(){
 };
 
 InOb.onClosePopup = function (){
+	//close dialog even if it's the rte one
+	//used when we insert image from scrapbook and should not interfere in other cases
+	if (window.switchedRteOn) {
+		var dialog = window.top.CKEDITOR.dialog.getCurrent();
+		if (dialog) {
+			dialog.hide();
+		}
+	}
+
 	if(! currentPopup){
 		return;
 	}
@@ -1019,8 +1035,8 @@ InOb.onClosePopup = function (){
 	currentPopup = null;
 };
 
-InOb.setupIframeHandlers = function (){
-	var ife = $("popupsIframe");  //currentPopup;
+InOb.setupIframeHandlers = function (fromRte){
+	var ife = $("popupsIframe") || $('rteUpload');  //currentPopup;
 	if(! ife){
 		return InOb.fail('handler without a popup?');
 	}
@@ -1075,14 +1091,14 @@ InOb.setupIframeHandlers = function (){
 };
 
 InOb.selectRadio = function (which){
-	if(! currentPopup){
-		alert('no popup');
-		alert(window.parent.currentPopup);
-		return false;
-	}
-	if(! currentPopupWindow){
-		return InOb.fail('no popup window');
-	}
+	// if(! currentPopup){
+	// 	alert('no popup');
+	// 	alert(window.parent.currentPopup);
+	// 	return false;
+	// }
+	// if(! currentPopupWindow){
+	// 	return InOb.fail('no popup window');
+	// }
 
 	var radio = currentPopupWindow.document.getElementById(which);
 	if(! radio){
@@ -1098,7 +1114,7 @@ InOb.selectRadio = function (which){
 	}
 
 	// clear stuff
-	if(which != 'fromurl'){
+	if(which != 'fromurl' && fromurl){
 		fromurl.value = '';
 	}
 
@@ -1108,7 +1124,7 @@ InOb.selectRadio = function (which){
 	}
 
 	// focus and change next button
-	if(which == "fromurl"){
+	if(which == "fromurl" && fromurl){
 		submit.value = 'Insert';
 		fromurl.focus();
 	}
@@ -1119,7 +1135,7 @@ InOb.selectRadio = function (which){
 	}
 
 	else if(which == "fromfb"){
-		submit.value = "Next -->";  // &#x2192 is a right arrow
+		submit.value = "Next \u2192";  // &#x2192 is a right arrow
 		// fromfile.focus();
 	}
 
@@ -1194,16 +1210,20 @@ InOb.showSelectorPage = function (){
 	var div_if = InOb.popid("img_iframe_holder");
 	var div_fw = InOb.popid("img_fromwhere");
 	div_fw.style.display = "block";
+	div_fw.style.height = "100%";
+	div_if.style.height = "100%";
 	div_if.style.display = "none";
 
 	InOb.setPreviousCb(null);
 	InOb.setTitle('');
 	InOb.showNext();
 
-	setTimeout(function (){
-		InOb.smallCenter();
-		InOb.selectRadio("fromurl");
-	}, 200);
+	if( !window.switchedRteOn) {
+		setTimeout(function (){
+			InOb.smallCenter();
+			InOb.selectRadio("fromurl");
+		}, 200);
+	}
 	var div_err = InOb.popid('img_error');
 	if(div_err){
 		div_err.style.display = 'none';
@@ -1211,21 +1231,30 @@ InOb.showSelectorPage = function (){
 };
 
 InOb.fotobilderStepOne = function (){
-	InOb.fullCenter();
-	InOb.onresize = function(){
-		return InOb.fullCenter();
-	};
+	//whole hack to make this work in both rte and non-rte dialogs
+	if (!window.switchedRteOn) {
+		InOb.fullCenter();
+		InOb.onresize = function(){
+			return InOb.fullCenter();
+		};
+	}
 	var div_if = InOb.popid("img_iframe_holder");
-	var windims = DOM.getClientDimensions();
-	DOM.setHeight(div_if, windims.y - 300);
 	var div_fw = InOb.popid("img_fromwhere");
+
 	div_fw.style.display = "none";
 	div_if.style.display = "block";
+	div_fw.style.height = "100%";
+	div_if.style.height = "100%";
 	var url = currentPopupWindow.fbroot + "/getgals";
 
-	var h = windims.y - 350;
-	div_if
-		.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"" + h + "\" width='99%' frameborder='0' style='margin: 0 auto;'></iframe>";
+	if (window.switchedRteOn) {
+		url += 'rte';
+		div_if
+			.innerHTML = '<iframe id="fbstepframe" src="' + url + '" height="99%" width="99%" frameBorder="0" style="margin: 0 auto;"></iframe>';
+	} else {
+		div_if
+			.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"95%\" width='99%' frameBorder='0' style='margin: 0 auto;'></iframe>";
+	}
 	InOb.setPreviousCb(InOb.showSelectorPage);
 };
 
@@ -1244,7 +1273,7 @@ InOb.photobucket = function (seedurl, pb_affsite_id){
 	var cb_url = "&url=" + escape(seedurl);
 
 	div_if
-		.innerHTML = '<iframe name="jwidget" id="jwidget" src="http://photobucket.com/svc/jwidget.php?width=360&height=400&largeThumb=true&pbaffsite=' + pb_affsite_id + '&bg=%23FFFFFF&border=false&bordercolor=%23000000' + cb_url + '&linkType=url&textcolor=%23000000&linkcolor=%230000FF&media=image&btntxt=Paste&dimensions=false&promo=false" bgcolor="transparent" width="99%" height="440" frameborder="0" scrolling="no"></iframe>';
+		.innerHTML = '<iframe name="jwidget" id="jwidget" src="http://photobucket.com/svc/jwidget.php?width=360&height=400&largeThumb=true&pbaffsite=' + pb_affsite_id + '&bg=%23FFFFFF&border=false&bordercolor=%23000000' + cb_url + '&linkType=url&textcolor=%23000000&linkcolor=%230000FF&media=image&btntxt=Paste&dimensions=false&promo=false" bgcolor="transparent" width="99%" height="440" frameBorder="0" scrolling="no"></iframe>';
 	InOb.setPreviousCb(InOb.showSelectorPage);
 };
 
@@ -1257,6 +1286,18 @@ InOb.fullCenter = function (){
 	DOM.setLeft(currentPopup, (40 / 2));
 
 	scroll(0, 0);
+
+	//put iframe resize logic here from fotoBilderStepOne
+	try {
+		var div_if = InOb.popid("img_iframe_holder");
+		if (!window.switchedRteOn) {
+			var windims = DOM.getClientDimensions();
+			DOM.setHeight(div_if, windims.y - 270);
+			var h = windims.y - 350;
+		} else {
+			div_if.style.height = '99%';
+		}
+	} catch(e) { }
 };
 
 InOb.tallCenter = function (){
@@ -1271,9 +1312,7 @@ InOb.tallCenter = function (){
 };
 
 InOb.smallCenter = function (){
-	var windims = DOM.getClientDimensions();
-
-	DOM.setHeight(currentPopup, 300);
+	DOM.setHeight(currentPopup, 307);
 	DOM.setWidth(currentPopup, 700);
 
 	currentPopup.style.top = '50%';
@@ -1284,8 +1323,10 @@ InOb.smallCenter = function (){
 };
 
 InOb.setPreviousCb = function (cb){
+	var btnPrev = InOb.popid("btnPrev");
 	InOb.cbForBtnPrevious = cb;
-	InOb.popid("btnPrev").style.display = cb ? "block" : "none";
+	btnPrev.style.display = cb ? "block" : "none";
+	btnPrev.value = btnPrev.value.replace('<--','\u2190')
 };
 
 // all previous clicks come in here, then we route it to the registered previous handler

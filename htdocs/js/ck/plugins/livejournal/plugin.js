@@ -76,19 +76,170 @@
 	var ljUsers = {};
 	var currentNoteNode;
 
-	CKEDITOR.plugins.add('livejournal', {
-		init: function(editor) {
-			function onFindCmd(evt) {
-				var cmd;
+	function createNote(editor) {
+		var timer,
+			state,
+			currentData = {},
+			tempData = {},
+			note,
+			noteNode = document.createElement('lj-note'),
+			isIE = typeof(document.body.style.opacity) != 'string';
 
-				if (evt.name == 'mouseout') {
-					note.hide();
+		var animate = (function() {
+			var fps = 60,
+				totalTime = 100,
+				steps = totalTime * fps / 1000,
+				timeOuts = [],
+				type,
+				parentContainer = document.getElementById('draft-container') || document.body;
+
+			function apply() {
+				var data = timeOuts.shift();
+				var currentStep = (type ? data.time / totalTime : -(data.time / totalTime - 1)).toFixed(1);
+
+				if (!timeOuts.length) {
+					currentStep = type ? 1 : 0;
+				}
+
+				if (isIE) {
+					noteNode.style
+						.filter = (currentStep >= 1) ? null : 'progid:DXImageTransform.Microsoft.Alpha(opacity=' + (currentStep * 100) + ')';
+				} else {
+					noteNode.style.opacity = currentStep;
+				}
+
+				if (currentStep == 0 && noteNode && noteNode.parentNode) {
+					noteNode.parentNode.removeChild(noteNode);
+				}
+			}
+
+			return function(animateType) {
+				type = animateType;
+
+				if (type && noteNode.parentNode) {
+					if (isIE) {
+						noteNode.style.filter = null;
+					} else {
+						noteNode.style.opacity = 1;
+					}
+				} else {
+					for (var i = 1; i <= steps; i++) {
+						var time = Math.floor(1000 / fps) * i;
+						timeOuts.push({
+							time: time,
+							timer: setTimeout(apply, time)
+						});
+					}
+				}
+
+				parentContainer.appendChild(noteNode);
+				noteNode.style.marginTop = -noteNode.offsetHeight / 2 + 'px';
+				noteNode.style.marginLeft = -noteNode.offsetWidth / 2 + 'px';
+			}
+		})();
+
+		noteNode.className = 'note-popup';
+
+		noteNode.onmouseout = function() {
+			if (!currentData.cmd) {
+				note.hide();
+			}
+		};
+
+		noteNode.onmouseover = function() {
+			if (timer && !state) {
+				state = 1;
+				clearTimeout(timer);
+				timer = null;
+			}
+		};
+
+		if (isIE) {
+			noteNode.style.filter = 'progid:DXImageTransform.Microsoft.Alpha(opacity=0)';
+		} else {
+			noteNode.style.opacity = 0;
+		}
+
+		function callCmd() {
+			if (currentData.cmd) {
+				currentNoteNode = ljNoteData[currentData.cmd].node = currentData.node;
+				editor.execCommand(currentData.cmd);
+			}
+			return false;
+		}
+
+		function applyNote() {
+			if (state) {
+				currentData.cmd = tempData.cmd;
+				currentData.data = tempData.data;
+				currentData.node = tempData.node;
+
+				delete tempData.node;
+				delete tempData.cmd;
+				delete tempData.data;
+
+				noteNode.innerHTML = decodeURIComponent(currentData.data);
+
+				var link = noteNode.getElementsByTagName('a')[0];
+				if (link && currentData.cmd) {
+					link.onclick = callCmd;
+				}
+			} else {
+				delete currentData.node;
+				delete currentData.cmd;
+				delete currentData.data;
+
+				currentNoteNode = null;
+			}
+
+			animate(state);
+
+			timer = null;
+		}
+
+		note = {
+			show: function(data, cmd, node, isNow) {
+				if (!isNow && data == tempData.data && cmd == tempData.cmd && node === tempData.node) {
 					return;
 				}
 
-				var node = evt.data.getTarget();
-				var actNode;
-				var isNoMouseOver = evt.name != 'mouseover';
+				if (timer) {
+					clearTimeout(timer);
+					timer = null;
+				}
+
+				state = 1;
+
+				tempData.data = data;
+				tempData.cmd = cmd;
+				tempData.node = node;
+
+				isNow === true ? applyNote() : timer = setTimeout(applyNote, 1000);
+			},
+			hide: function(isNow) {
+				if (state) {
+					state = 0;
+
+					if (timer) {
+						clearTimeout(timer);
+						timer = null;
+					}
+
+					if (noteNode.parentNode) {
+						isNow === true ? applyNote() : timer = setTimeout(applyNote, 500);
+					}
+				}
+			}
+		};
+
+		return note;
+	}
+
+	CKEDITOR.plugins.add('livejournal', {
+		init: function(editor) {
+			function onMouseOver(evt) {
+				var cmd, actNode,
+					node = evt.data.getTarget();
 
 				if (node.type != 1) {
 					node = node.getParent();
@@ -113,28 +264,15 @@
 				}
 
 				if (cmd && ljNoteData.hasOwnProperty(cmd)) {
-					if (isNoMouseOver) {
-						ljNoteData[cmd].node = actNode;
-						editor.getCommand(cmd).setState(CKEDITOR.TRISTATE_ON);
-					}
 					note.show(ljNoteData[cmd].html, cmd, actNode);
 				} else {
 					note.hide();
-				}
-
-				if (isNoMouseOver) {
-					for (var command in ljNoteData) {
-						if (ljNoteData.hasOwnProperty(command) && (!cmd || cmd != command)) {
-							delete ljNoteData[command].node;
-							editor.getCommand(command).setState(CKEDITOR.TRISTATE_OFF);
-						}
-					}
 				}
 			}
 
 			editor.dataProcessor.toHtml = function(html, fixForBody) {
 				html = html.replace(/(<lj [^>]+)(?!\/)>/gi, '$1 />')
-					.replace(/<((?!br)[^\s>]+)([^>]*?)\/>/gi, '<$1$2></$1>')
+					.replace(/<((?!br)[^\s>]+)((?!\/>).*?)\/>/gi, '<$1$2></$1>')
 					.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site
 					.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
 					.replace(/<lj-poll .*?>[^\b]*?<\/lj-poll>/gm,
@@ -203,7 +341,49 @@
 				return html;
 			};
 
-			function addLastTag() {
+			function onSelectionChange(ev) {
+				var cmd,
+					node,
+					actNode,
+					elements = ev.data.path.elements,
+					i = 0;
+
+				while(node = elements[i++]) {
+					var attr = node.getAttribute('lj-cmd');
+
+					if (!attr) {
+						if (node.type == 1 && node.is('img')) {
+							node.setAttribute('lj-cmd', 'LJImage');
+							attr = 'LJImage';
+						} else if (node.is('a')) {
+							node.setAttribute('lj-cmd', 'LJLink');
+							attr = 'LJLink';
+						}
+					}
+
+					if (attr) {
+						cmd = attr;
+						actNode = node;
+					}
+				}
+
+				if (cmd && ljNoteData.hasOwnProperty(cmd)) {
+					ljNoteData[cmd].node = actNode;
+					editor.getCommand(cmd).setState(CKEDITOR.TRISTATE_ON);
+					note.show(ljNoteData[cmd].html, cmd, actNode);
+				} else {
+					note.hide();
+				}
+
+				for (var command in ljNoteData) {
+					if (ljNoteData.hasOwnProperty(command) && (!cmd || cmd != command)) {
+						delete ljNoteData[command].node;
+						editor.getCommand(command).setState(CKEDITOR.TRISTATE_OFF);
+					}
+				}
+			}
+
+			function checkLastLine() {
 				var body = editor.document.getBody();
 				var last = body.getLast();
 				if (last && last.type == 1 && !last.is('br')) {
@@ -212,171 +392,14 @@
 			}
 
 			editor.on('dataReady', function() {
+				note = note || createNote(editor);
 
-				editor.document.on('mouseover', onFindCmd);
-				editor.document.on('mouseout', onFindCmd);
-				editor.document.on('keyup', onFindCmd);
-				editor.document.on('click', onFindCmd);
-
-				editor.document.on('keyup', addLastTag);
-				editor.document.on('click', addLastTag);
-
-				if (!note) {
-					var timer,
-						state,
-						currentData = {},
-						tempData = {},
-						noteNode = document.createElement('lj-note'),
-						isIE = typeof(document.body.style.opacity) != 'string';
-
-					var animate = (function() {
-						var fps = 60,
-							totalTime = 100,
-							steps = totalTime * fps / 1000,
-							timeOuts = [],
-							type,
-							parentContainer = document.getElementById('draft-container') || document.body;
-
-						function apply() {
-							var data = timeOuts.shift();
-							var currentStep = (type ? data.time / totalTime : -(data.time / totalTime - 1)).toFixed(1);
-
-							if (!timeOuts.length) {
-								currentStep = type ? 1 : 0;
-							}
-
-							if (isIE) {
-								noteNode.style
-									.filter = (currentStep >= 1) ? null : 'progid:DXImageTransform.Microsoft.Alpha(opacity=' + (currentStep * 100) + ')';
-							} else {
-								noteNode.style.opacity = currentStep;
-							}
-
-							if (currentStep == 0 && noteNode && noteNode.parentNode) {
-								noteNode.parentNode.removeChild(noteNode);
-							}
-						}
-
-						return function(animateType) {
-							type = animateType;
-
-							if (type && noteNode.parentNode) {
-								if (isIE) {
-									noteNode.style.filter = null;
-								} else {
-									noteNode.style.opacity = 1;
-								}
-							} else {
-								for (var i = 1; i <= steps; i++) {
-									var time = Math.floor(1000 / fps) * i;
-									timeOuts.push({
-										time: time,
-										timer: setTimeout(apply, time)
-									});
-								}
-							}
-
-							parentContainer.appendChild(noteNode);
-							noteNode.style.marginTop = -noteNode.offsetHeight / 2 + 'px';
-							noteNode.style.marginLeft = -noteNode.offsetWidth / 2 + 'px';
-						}
-					})();
-
-					noteNode.className = 'note-popup';
-
-					noteNode.onmouseout = function() {
-						if (!currentData.cmd) {
-							note.hide();
-						}
-					};
-
-					noteNode.onmouseover = function() {
-						if (timer && !state) {
-							state = 1;
-							clearTimeout(timer);
-							timer = null;
-						}
-					};
-
-					if (isIE) {
-						noteNode.style.filter = 'progid:DXImageTransform.Microsoft.Alpha(opacity=0)';
-					} else {
-						noteNode.style.opacity = 0;
-					}
-
-					function callCmd() {
-						if (currentData.cmd) {
-							currentNoteNode = ljNoteData[currentData.cmd].node = currentData.node;
-							editor.execCommand(currentData.cmd);
-						}
-						return false;
-					}
-
-					function applyNote() {
-						if (state) {
-							currentData.cmd = tempData.cmd;
-							currentData.data = tempData.data;
-							currentData.node = tempData.node;
-
-							delete tempData.node;
-							delete tempData.cmd;
-							delete tempData.data;
-
-							noteNode.innerHTML = decodeURIComponent(currentData.data);
-
-							var link = noteNode.getElementsByTagName('a')[0];
-							if (link && currentData.cmd) {
-								link.onclick = callCmd;
-							}
-						} else {
-							delete currentData.node;
-							delete currentData.cmd;
-							delete currentData.data;
-
-							currentNoteNode = null;
-						}
-
-						animate(state);
-
-						timer = null;
-					}
-
-					note = {
-						show: function(data, cmd, node, isNow) {
-							if (!isNow && data == tempData.data && cmd == tempData.cmd && node === tempData.node) {
-								return;
-							}
-
-							if (timer) {
-								clearTimeout(timer);
-								timer = null;
-							}
-
-							state = 1;
-
-							tempData.data = data;
-							tempData.cmd = cmd;
-							tempData.node = node;
-
-							isNow === true ? applyNote() : timer = setTimeout(applyNote, 1000);
-						},
-						hide: function(isNow) {
-							if (state) {
-								state = 0;
-
-								if (timer) {
-									clearTimeout(timer);
-									timer = null;
-								}
-
-								if (noteNode.parentNode) {
-									isNow === true ? applyNote() : timer = setTimeout(applyNote, 500);
-								}
-							}
-						}
-					};
-				}
-
+				editor.on('selectionChange', onSelectionChange);
+				editor.document.on('mouseout', note.hide.bind(note));
+				editor.document.on('mouseover', onMouseOver);
+				editor.document.on('keyup', checkLastLine );
+				editor.document.on('click', checkLastLine );
+				editor.document.on('selectionChange', checkLastLine );
 			});
 
 			//////////  LJ User Button //////////////
@@ -453,16 +476,14 @@
 			//////////  LJ Image Button //////////////
 			editor.addCommand('LJImage', {
 				exec: function(editor) {
-					if (ljNoteData.LJImage.node) {
-						editor.openDialog('image');
-					} else if (window.ljphotoEnabled) {
+					if (window.ljphotoEnabled) {
 						jQuery('#updateForm').photouploader({
 							type: 'upload'
 						}).photouploader('show').bind('htmlready', function (event, html) {
 							editor.insertHtml(html);
 						});
 					} else {
-						InOb.handleInsertImage();
+						editor.openDialog('image');
 					}
 				},
 				editorFocus: false
@@ -482,7 +503,14 @@
 			//////////  LJ Link Button //////////////
 			editor.addCommand('LJLink', {
 				exec: function(editor) {
-					editor.openDialog('link');
+					var state = editor.getCommand('LJLink').state;
+
+					if (state === CKEDITOR.TRISTATE_OFF) {
+						editor.openDialog('link');
+					} else if (state === CKEDITOR.TRISTATE_ON) {
+						editor.execCommand('unlink')
+					}
+
 				},
 				editorFocus: false
 			});
@@ -760,17 +788,21 @@
 					} else {
 						text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore);
 						if (text) {
+							var br = editor.document.createElement('br'),
+								selection = editor.document.getSelection(),
+								bookmarks = selection.createBookmarks();
+
 							ljNoteData.LJCut.node = editor.document.createElement('div');
 							ljNoteData.LJCut.node.setAttribute('lj-cmd', 'LJCut');
 							ljNoteData.LJCut.node.setAttribute('class', 'lj-cut');
 							if (text != top.CKLang.ReadMore) {
 								ljNoteData.LJCut.node.setAttribute('text', text);
 							}
-							editor.getSelection().getRanges()[0].extractContents().appendTo(ljNoteData.LJCut.node);
-							editor.insertElement(ljNoteData.LJCut.node);
-							var range = new CKEDITOR.dom.range(editor.document);
-							range.selectNodeContents(ljNoteData.LJCut.node);
-							editor.getSelection().selectRanges([range]);
+							selection.getRanges()[0].extractContents().appendTo(ljNoteData.LJCut.node);
+
+							selection.selectBookmarks(bookmarks);
+							editor.insertElement( br );
+							ljNoteData.LJCut.node.insertBefore(br);
 						}
 					}
 				}
@@ -1069,7 +1101,10 @@
 						var fakeElement = new CKEDITOR.htmlParser.element('div');
 						fakeElement.attributes.contentEditable = 'false';
 						fakeElement.attributes['class'] = 'lj-embed';
-						fakeElement.attributes['embedid'] = element.attributes.id;
+						fakeElement.attributes.embedid = element.attributes.id;
+						if(element.attributes.hasOwnProperty('source_user')){
+							fakeElement.attributes.source_user = element.attributes.source_user;
+						}
 						fakeElement.children = element.children;
 
 						return fakeElement;
@@ -1197,6 +1232,9 @@
 							case 'lj-embed':
 								newElement = new CKEDITOR.htmlParser.element('lj-embed');
 								newElement.attributes.id = element.attributes.embedid;
+								if(element.attributes.hasOwnProperty('source_user')){
+									newElement.attributes.source_user = element.attributes.source_user;
+								}
 								newElement.children = element.children;
 								newElement.isOptionalClose = true;
 							break;
