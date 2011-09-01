@@ -104,30 +104,33 @@
 
 <script type="text/javascript" src="http://www.ljdev10.livejournal.ru/js/jquery/jquery.lj.subjecticons.js"></script>
 
-<script type="text/javascript">
-    jQuery('div.b-subjecticons').subjecticons();
-</script>
+					<script type="text/javascript">
+					    jQuery('div.b-subjecticons').subjecticons();
+					</script>
 
                     <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-nosubjecthtml"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.nosubjecthtml')"></p>
 
                     <TMPL_IF text_hint>
                         <div id="subjectCaptionText"><TMPL_VAR text_hint></div>
                     </TMPL_IF>
-
-                    <div id="userpics">
-                        <TMPL_IF show_userpics>
-                            <label for="prop_picture_keyword"><TMPL_VAR ml_picturetouse></label>
-                            <select name="prop_picture_keyword" id="prop_picture_keyword" tabindex="21">
-                                <TMPL_LOOP userpics>
-                                    <option value="<TMPL_VAR userpic_keyword>" <TMPL_IF userpic_selected>selected="selected"</TMPL_IF>><TMPL_VAR userpic_title></option>
-                                </TMPL_LOOP>
-                            </select>
-                            <TMPL_VAR helpicon_userpics>
-                            &nbsp;&nbsp;
-                        </TMPL_IF>
-                        <input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="22" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
-
-                    </div>
+					
+					<div>
+	                    <TMPL_IF show_userpics>
+	                    <span id="userpics">
+	                        <label for="prop_picture_keyword"><TMPL_VAR ml_picturetouse></label>
+	                        <select name="prop_picture_keyword" id="prop_picture_keyword" tabindex="21">
+	                            <TMPL_LOOP userpics>
+	                                <option value="<TMPL_VAR userpic_keyword>" <TMPL_IF userpic_selected>selected="selected"</TMPL_IF>><TMPL_VAR userpic_title></option>
+	                            </TMPL_LOOP>
+	                        </select>
+	                        <TMPL_VAR helpicon_userpics>
+	                        &nbsp;&nbsp;
+	                    </span>
+	                    </TMPL_IF>
+						
+						<input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="22" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
+						&nbsp;&nbsp;<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" class="b-postform-quote" tabindex="23" />
+					</div>
                 </td>
             </tr>
 
@@ -140,15 +143,10 @@
 
             <TMPL_VAR extra_rows>
 
-            <TMPL_IF captcha_html>
             <tr class="b-postform-submitbox">
                 <td>&nbsp;</td>
-                <td>
-                    <TMPL_VAR captcha_html>
-                    <br />
-                </td>
+                <td id="captcha-container"></td>
             </tr>
-            </TMPL_IF>
 
             <tr class="b-postform-submitbox">
                 <td class="b-postform-preload">&nbsp;</td>
@@ -199,13 +197,62 @@
         </table>
     </form>
 
+    <script type='text/javascript' language='JavaScript'>
+        var helped = 0;
+        var pasted = 0;
+		
+        function quote() {
+            var text = '';
+            
+            if (document.getSelection) {
+                text = document.getSelection();
+            }
+            else 
+                if (document.selection) {
+                    text = document.selection.createRange().text;
+                }
+                else 
+                    if (window.getSelection) {
+                        text = window.getSelection();
+                    }
+            // Fix for Safari 
+            if (typeof(text) == 'object') 
+                text = text.toString();
+            if (text == '') {
+                if (helped != 1 && pasted != 1) {
+                    helped = 1;
+                    alert("If you'd like to quote a portion of the original message, highlight it then press 'Quote'");
+                }
+                return false;
+            }
+            else {
+                pasted = 1;
+            }
+            
+            var element = text.search(/\\n/) == -1 ? 'q' : 'blockquote';
+            var textarea = document.getElementById('commenttext');
+            textarea.focus();
+            textarea.value = textarea.value + "<" + element + ">" + text + "</" + element + ">";
+            textarea.caretPos = textarea.value;
+            textarea.focus();
+            return false;
+        }
+        
+        if (document.getElementById && (document.getSelection || document.selection || window.getSelection)) {
+            document.write('');
+        }
+    </script>
+
 <script type="text/javascript" src="http://www.ljdev10.livejournal.ru/js/jquery/jquery.lj.commentator.js"></script>	
 
 <script type="text/javascript">
     jQuery('#postform')
         .authtype()
-        .commentator();
-    </script>
+        .commentator({
+			captchaHtml: '<TMPL_VAR captcha_html>',
+			needCaptcha: Number('<TMPL_VAR need_captcha>')
+		});
+</script>
 
 <TMPL_ELSE>
     <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost_do.bml.error.nocomments')"></p>
