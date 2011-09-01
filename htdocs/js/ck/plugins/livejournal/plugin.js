@@ -1094,6 +1094,7 @@
 						var fakeElement = new CKEDITOR.htmlParser.element('div');
 						fakeElement.attributes['lj-cmd'] = 'LJCut';
 						fakeElement.attributes['class'] = 'lj-cut';
+						fakeElement.attributes['text'] = element.attributes.text || "";
 						fakeElement.children = element.children;
 						return fakeElement;
 					},
