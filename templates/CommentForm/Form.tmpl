@@ -144,14 +144,14 @@
             <tr class="b-postform-submitbox">
                 <td>&nbsp;</td>
                 <td id="captcha-container">
-               		<noscript><TMPL_VAR captcha_html></noscript>
+               		<TMPL_IF need_captcha><noscript><TMPL_VAR captcha_html></noscript></TMPL_IF>
                 </td>
             </tr>
 
             <tr class="b-postform-submitbox">
                 <td class="b-postform-preload">&nbsp;</td>
                 <td class="b-postform-submitbox-submit">
-                    <input type="submit" name="submitpost" tabindex="40"
+                    <input type="submit" id="postform-submit-comment-button" name="submitpost" tabindex="40"
                         <TMPL_IF editid>
                             value="<TMPL_VAR expr="ml('/talkpost.bml.opt.edit')">"
                         <TMPL_ELSE>
