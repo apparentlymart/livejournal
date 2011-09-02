@@ -10,7 +10,7 @@
 
 
 <tmpl_loop posts>
-<tmpl_unless is_vertical_selected><h2 class="title"><a href="<tmpl_var vertical_url>" class="link"><TMPL_VAR expr="ml('widget.browse.more.recent.posts')"></a><tmpl_var vertical_name></h2></tmpl_unless>
+<tmpl_unless is_vertical_selected><tmpl_if vertical_name><h2 class="title"><a href="<tmpl_var vertical_url>" class="link"><TMPL_VAR expr="ml('widget.browse.more.recent.posts')"></a><tmpl_var vertical_name></h2></tmpl_if></tmpl_unless>
 <tmpl_loop vertical_posts>
 <ul class="b-catalogue-list b-recent-posts">
 	<li class="b-catalogue-item">
