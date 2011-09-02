@@ -14,6 +14,12 @@ sub ReplyPage
     $opts->{'redir'} = LJ::bad_password_redirect({ 'returl' => 1 }); # Get the URL back
     return 1 if $opts->{'redir'};
 
+    LJ::need_res(qw(
+        js/jquery/jquery.lj.subjecticons.js
+        js/jquery/jquery.lj.commentator.js
+        js/jquery/jquery.lj.quotescreator.js
+    ));
+
     my $p = Page($u, $opts);
     $p->{'_type'} = "ReplyPage";
     $p->{'view'} = "reply";
