@@ -574,16 +574,18 @@ LIKE_FAQ
 
         $ret .= "<form action='editjournal.bml$getextra' method='get' class='b-editentries-form'>\n";
         $ret .= "<p>Show entries: 
-        <span class='b-editentries-cal'><i></i>Choose date</span>
+        <span class='b-editentries-cal'><i></i><b>Choose date</b></span> <span class='b-editentries-cal-clear'>( <b>Clear</b> )</span>
         <input type='hidden' name='year' value='$year'/>
         <input type='hidden' name='month' value='$month'/>
-        <input type='hidden' name='day' value='$day'/>
-        or <a href='editjournal.bml?show=recent&mode=init'>back to recent entries</a></p>";
+        <input type='hidden' name='day' value='$day'/>";
         $ret .= "<p>" . LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'maxlength' => '15', 'value' => $GET{'usejournal'} || $POST{'usejournal'}, 'class' => 'b-editentries-comm' });
         $ret .= LJ::html_submit(undef, $ML{'.btn.search'}) . "</p>";
         $ret .= "<p>" . LJ::html_check({ name => 'only_me', id => 'only_me',
                                 value => '1', selected =>  $only_me_checked });
         $ret .= "<label for='only_me'>Only my entries</label></p>"; 
+        if ($year || $month || $day || $show ne 'recent') {
+            $ret .= "Or <a href='editjournal.bml?show=recent&mode=init'>back to recent entries</a></p>";
+        }
         $ret .= "</form>\n";
 
         my $err = '';

@@ -774,6 +774,16 @@ td.tabs {
 	background: url("/img/widget/wishlist/date-icon.gif");
 	margin: 0 1px 0 0;
 	}
+.b-editentries-cal B,
+.b-editentries-cal-clear B {
+	font-weight: normal;
+	border-bottom: 1px dotted #000;
+	cursor: pointer;
+	}
+.b-editentries-cal B:hover,
+.b-editentries-cal-clear B:hover {
+	border: none;
+	}
 .b-editentries-info {
 	max-width: 50%;
 	border: 1px solid #CCC;
