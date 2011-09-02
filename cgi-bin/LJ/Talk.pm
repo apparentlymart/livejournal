@@ -1609,6 +1609,7 @@ sub resources_for_talkform {
         js/jquery/jquery.lj.commentator.js
         js/jquery/jquery.lj.quotescreator.js
     ));
+    LJ::need_res( {condition => 'IE'}, 'js/jquery/jquery.ie6multipleclass.min.js');
 }
 
 # Takes a hashref with the following keys / values:
