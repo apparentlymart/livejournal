@@ -17,7 +17,7 @@ use LJ::TimeUtil;
 use LJ::Pay::Wallet;
 use LJ::GeoLocation;
 
-use constant PACK_FORMAT => "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state 
+use constant PACK_FORMAT => "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state
 
 # dataversion for rate limit logging
 our $RATE_DATAVER = "1";
@@ -704,7 +704,7 @@ sub freeze_comments {
     # invalidate memcache for this comment
     LJ::Talk::invalidate_comment_cache($u->id, $nodeid, @$ids);
 
-    
+
     # set time of comments modification in the journal
     LJ::Talk::update_journals_commentalter($u);
 
@@ -782,7 +782,7 @@ sub unscreen_comment {
                                                  "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='S'");
         LJ::set_logprop($u, $itemid, { 'hasscreened' => 0 }) unless $hasscreened;
     }
-    
+
     LJ::run_hooks('unscreen_comment', $userid, $itemid, $in);
 
     LJ::Talk::update_commentalter($u, $itemid);
@@ -810,7 +810,7 @@ sub spam_comment {
                                         "AND nodetype='L' AND nodeid=$itemid ".
                                         "AND state NOT IN ('B','D')");
     return undef unless $updated;
-    
+
     my $entry = LJ::Entry->new($u, jitemid => $itemid);
     my $spam_counter = $entry->prop('spam_counter') || 0;
     $entry->set_prop('spam_counter', $spam_counter + 1);
@@ -835,9 +835,9 @@ sub unspam_comment {
     return undef unless LJ::isu($u);
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
-    
-    my $new_state = 'A';    
-    my $screening = LJ::Talk::screening_level( $u, $itemid ); 
+
+    my $new_state = 'A';
+    my $screening = LJ::Talk::screening_level( $u, $itemid );
     if ($screening eq 'A') {
         $new_state = 'S';
     }
@@ -856,7 +856,7 @@ sub unspam_comment {
                                         "AND nodetype='L' AND nodeid=$itemid ".
                                         "AND state='B'");
     return undef unless $updated;
-    
+
     my $entry = LJ::Entry->new($u, jitemid => $itemid);
     my $spam_counter = $entry->prop('spam_counter') || 0;
 
@@ -875,7 +875,7 @@ sub unspam_comment {
                                                  "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='B'");
         LJ::set_logprop($u, $itemid, { 'hasspamed' => 0 }) unless $hasspamed;
     }
-    
+
     LJ::Talk::update_commentalter($u, $itemid);
     LJ::Talk::update_journals_commentalter($u);
 
@@ -890,7 +890,7 @@ sub get_talk_data {
     my $uid = $u->id;
 
     ## call normally if no gearman/not wanted
-    
+
     ## Do no try to connect to Gearman if there is no need.
     return get_talk_data_do($uid, $nodetype, $nodeid, $opts)
         unless LJ::conf_test($LJ::LOADCOMMENTS_USING_GEARMAN, $u->id);
@@ -936,7 +936,7 @@ sub get_talk_data_do
 
     my $init_comobj = 1;
        $init_comobj = $opts->{init_comobj} if exists $opts->{init_comobj};
-    
+
     my $ret = {};
 
     # check for data in memcache
@@ -1123,7 +1123,7 @@ sub get_talk_data_do
 
         $rp_ourcount++ if $r->{'state'} eq "A";
     }
-    LJ::MemCache::set($memkey, $memval, 3600); # LJSV-748, using LJ::MemCache::append(...) in some (rare) cases 
+    LJ::MemCache::set($memkey, $memval, 3600); # LJSV-748, using LJ::MemCache::append(...) in some (rare) cases
                                                # can produce comment lose. This is a workaround. Real solution is more complicated.
     $dbcr->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
@@ -1221,7 +1221,7 @@ sub fixup_logitem_replycount {
 #   userref -- hashref to load users into, keyed by userid
 #   init_comobj -- init or not LJ::Comment object for every loaded raw data of a comment.
 #                  by default it is On (true), but in this case it produces a huge overhead:
-#                       LJ::Comment class stores in memory all comment instances and when load 
+#                       LJ::Comment class stores in memory all comment instances and when load
 #                       property for any of a comment LJ::Comment loads all properties for ALL inited comments.
 #                  (!) provide 'init_comobj => 0' wherever it is possible
 #   strict_page_size -- under some circumstances page size (defined in 'page_size' option') may be changed.
@@ -1265,13 +1265,13 @@ sub load_comments
             delete $posts->{$commentid};
         }
     }
-    
+
     unless ($posts) {
         $opts->{'out_error'} = "nodb";
         return;
     }
     my %users_to_load;  # userid -> 1
-    my %posts_to_load;  # talkid -> 1 
+    my %posts_to_load;  # talkid -> 1
     my %children;       # talkid -> [ childenids+ ]
 
     my $uposterid = $opts->{'up'} ? $opts->{'up'}->{'userid'} : 0;
@@ -1464,9 +1464,9 @@ sub load_comments
                     @childrens = map {$children{$_}?@{$children{$_}}:()} @childrens;
                 }
             }
-        }        
+        }
     }
-    
+
     my (@subjects_to_load, @subjects_ignored);
     while (@check_for_children) {
         my $cfc = shift @check_for_children;
@@ -1552,7 +1552,7 @@ sub load_comments
         }
     }
 
-    ## Fix: if authors of comments deleted their journals, 
+    ## Fix: if authors of comments deleted their journals,
     ## and choosed to delete their content in other journals,
     ## then show their comments as deleted.
     ## Note: only posts with loaded users (posts that will be shown) are processed here.
@@ -1567,7 +1567,7 @@ sub load_comments
                 }
             }
         }
-    } 
+    }
 
     # optionally give them back user refs
     if (ref($opts->{'userref'}) eq "HASH") {
@@ -1604,6 +1604,11 @@ my $SC = '/talkpost_do.bml';
 sub resources_for_talkform {
     LJ::need_res('stc/display_none.css');
     LJ::need_res('js/jquery/jquery.lj.authtype.js');
+    LJ::need_res(qw(
+        js/jquery/jquery.lj.subjecticons.js
+        js/jquery/jquery.lj.commentator.js
+        js/jquery/jquery.lj.quotescreator.js
+    ));
 }
 
 # Takes a hashref with the following keys / values:
@@ -1659,7 +1664,7 @@ sub talkform {
     return "You cannot edit this comment."
         if $editid && !$is_person;
 
-    my $filename = $opts->{embedable_form} 
+    my $filename = $opts->{embedable_form}
         ? "$ENV{'LJHOME'}/templates/CommentForm/FormEmbedable.tmpl"
         : "$ENV{'LJHOME'}/templates/CommentForm/Form.tmpl";
 
@@ -2075,7 +2080,7 @@ sub talkform_mobile {
     my $opts = shift;
 
     my @opts = (
-        'read','user',$opts->{form}{journal}, $opts->{form}{itemid}, 'comments', 
+        'read','user',$opts->{form}{journal}, $opts->{form}{itemid}, 'comments',
     );
 
     push @opts, $opts->{form}{thread}
@@ -2101,9 +2106,9 @@ sub talkform_mobile {
 
     # passing error messages
     $res->template->param(
-        errors          => [map { { 'error' => $_ } } @{ $opts->{errors} }],    
+        errors          => [map { { 'error' => $_ } } @{ $opts->{errors} }],
     );
-    
+
     # and get ready html code
     return $res->output_html;
 }
@@ -2344,7 +2349,7 @@ sub invalidate_comment_cache {
 
     ## invalidate cache with all commments for this entry
     LJ::MemCache::delete([$jid, "talk2:$jid:L:$nodeid"]);
- 
+
     ## and invalidate all individual caches for each comment
     foreach my $jtalkid (@jtalkids) {
         LJ::MemCache::delete([ $jid, "talk2row:$jid:$jtalkid" ]);
@@ -2406,7 +2411,7 @@ sub get_replycount {
 #            multiform_selects
 #
 # returns: Arrayref of hashrefs:
-# 
+#
 # </LJFUNC>
 sub get_thread_html
 {
@@ -2419,7 +2424,7 @@ sub get_thread_html
     if ($remote) {
         my $tz = $remote->prop("timezone");
         $tz_remote = $tz ? eval { DateTime::TimeZone->new(name => $tz); } : undef;
-    }    
+    }
 
     my $viewsome = $input->{viewsome};
     my $viewall = $input->{viewall};
@@ -2604,7 +2609,7 @@ sub get_thread_html
 
             my $get_expand_link = sub {
                 return
-                    "<span id='expand_$dtid'>" . 
+                    "<span id='expand_$dtid'>" .
                         " (<a href='$thread_url' onclick=\"ExpanderEx.make(event,this,'$thread_url','$dtid',true)\">" .
                             LJ::Lang::ml('talk.expandlink') .
                         "</a>)" .
