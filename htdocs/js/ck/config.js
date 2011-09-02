@@ -64,6 +64,7 @@ CKEDITOR.editorConfig = function(config){
 	config.baseFloatZIndex = 10000;
 	config.htmlEncodeOutput = false;
 	config.templates_replaceContent = true;
+	config.disableNativeSpellChecker = false;
 	config.toolbarLocation = 'top';
 	config.toolbar_Full = [
 		['Bold',
