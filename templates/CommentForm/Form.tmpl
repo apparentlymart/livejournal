@@ -141,7 +141,7 @@
 
             <TMPL_VAR extra_rows>
 
-            <tr class="b-postform-submitbox">
+            <tr class="b-postform-submitbox b-postform-captchabox <TMPL_IF need_captcha>b-postform-captchabox-active</TMPL_IF>">
                 <td>&nbsp;</td>
                 <td id="captcha-container">
                		<TMPL_IF need_captcha><noscript><TMPL_VAR captcha_html></noscript></TMPL_IF>

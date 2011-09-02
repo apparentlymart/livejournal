@@ -1656,6 +1656,17 @@ HTML BODY.logged-out {
 	display: none !important;
 	}
 
+.b-postform-captchabox {
+	display: none;
+	}
+.b-postform-captchabox-active {
+	display: table-row;
+	*display: block;
+	}
+	.b-postform-captchabox-active #captcha-container {
+		background: url(/img/preloader-s.gif?v=1) no-repeat 0 50%;
+		}
+
 
 .b-postform-login-label {
 	margin: 0;
