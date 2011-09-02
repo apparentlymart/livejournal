@@ -10,7 +10,7 @@ CKEDITOR.editorConfig = function(config){
 	config.customConfig = '';
 	config.docType = '<!DOCTYPE html>';
 	config.baseHref = '';
-	config.contentsCss = '/js/ck/contents.css';
+	config.contentsCss = '/js/ck/contents.css?t=' + CKEDITOR.timestamp;
 	config.plugins =
 		'basicstyles,' +
 		'bidi,' +
