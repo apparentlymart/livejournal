@@ -202,6 +202,9 @@ body<=
     LJ::need_res(qw(
         js/thread_expander.js
         js/journal.js
+        js/jquery/jquery.lj.subjecticons.js
+        js/jquery/jquery.lj.commentator.js
+        js/jquery/jquery.lj.quotescreator.js
     ));
 
     if (($remote && !$remote->{'opt_no_quickreply'}) && $allow_commenting) {
@@ -251,6 +254,7 @@ body<=
             /talkpost_do.bml.success.screened.comm2
             /talkpost_do.bml.success.screened.user.anon2
             /talkpost_do.bml.success.screened.user2
+            /talkpost.bml.quote.info.message
         });
     }
 

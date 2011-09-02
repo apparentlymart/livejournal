@@ -17,23 +17,26 @@ sub EntryPage {
             /talkpost_do.bml.success.screened.comm2
             /talkpost_do.bml.success.screened.user.anon2
             /talkpost_do.bml.success.screened.user2
+            /talkpost.bml.quote.info.message
         });
     }
 
     my $p = Page($u, $opts);
-    $p->{'_type'} = "EntryPage";
-    $p->{'view'} = "entry";
+    $p->{'_type'}         = "EntryPage";
+    $p->{'view'}          = "entry";
     $p->{'comment_pages'} = undef;
-    $p->{'comments'} = [];
+    $p->{'comments'}      = [];
     $p->{'comment_pages'} = undef;
 
     $p->{head_content}->set_object_type( $p->{_type} );
+
     # setup viewall options
     my ($viewall, $viewsome) = (0, 0);
-    if ($get->{viewall} && LJ::check_priv($remote, 'canview', 'suspended')) {
+
+    if ( $get->{viewall} && LJ::check_priv($remote, 'canview', 'suspended') ) {
         # we don't log here, as we don't know what entry we're viewing yet.  the logging
         # is done when we call EntryPage_entry below.
-        $viewall = LJ::check_priv($remote, 'canview', '*');
+        $viewall  = LJ::check_priv($remote, 'canview', '*');
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
 
@@ -46,10 +49,10 @@ sub EntryPage {
     return if $opts->{'handler_return'};
     return if $opts->{'redir'};
 
-    $p->{'page_id'} = 'journal-' . $u->username . '-' . $entry->ditemid;
+    $p->{'page_id'}      = 'journal-' . $u->username . '-' . $entry->ditemid;
     $p->{'multiform_on'} = $entry->comments_manageable_by($remote);
 
-    my $itemid = $entry->jitemid;
+    my $itemid    = $entry->jitemid;
     my $permalink = $entry->url;
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
     my $style_set = defined $get->{'s2id'} ? "s2id=" . int( $get->{'s2id'} ) : "";
@@ -60,67 +63,72 @@ sub EntryPage {
 
     # quickreply js libs
     LJ::need_res(qw(
-                    js/basic.js
-                    js/json.js
-                    js/template.js
-                    js/ippu.js
-                    js/lj_ippu.js
-                    js/userpicselect.js
-                    js/hourglass.js
-                    js/inputcomplete.js
-                    stc/ups.css
-                    stc/lj_base.css
-                    js/datasource.js
-                    js/selectable_table.js
-                    )) if ! $LJ::DISABLED{userpicselect} && $remote && $remote->get_cap('userpicselect');
+        js/basic.js
+        js/json.js
+        js/template.js
+        js/ippu.js
+        js/lj_ippu.js
+        js/userpicselect.js
+        js/hourglass.js
+        js/inputcomplete.js
+        stc/ups.css
+        stc/lj_base.css
+        js/datasource.js
+        js/selectable_table.js
+    )) if ! $LJ::DISABLED{userpicselect} && $remote && $remote->get_cap('userpicselect');
 
     LJ::need_res(qw(
-                    js/quickreply.js
-                    js/md5.js
-                    js/thread_expander.js
-                    ));
+        js/quickreply.js
+        js/md5.js
+        js/thread_expander.js
+        js/jquery/jquery.lj.subjecticons.js
+        js/jquery/jquery.lj.commentator.js
+        js/jquery/jquery.lj.quotescreator.js
+    ));
 
     if($remote) {
-        LJ::need_string(qw/
-                            comment.cancel
-                            comment.delete
-                            comment.delete.q
-                            comment.delete.all
-                            comment.delete.all.sub
-                            comment.delete.no.options
-                            comment.ban.user
-                            comment.mark.spam
-                            comment.mark.spam.title
-                            comment.mark.spam.subject
-                            comment.mark.spam.button
-                            comment.mark.spam2
-                            comment.mark.spam2.title
-                            comment.mark.spam2.subject
-                            comment.mark.spam2.button
-                            comment.delete/)
+        LJ::need_string(qw(
+            comment.cancel
+            comment.delete
+            comment.delete.q
+            comment.delete.all
+            comment.delete.all.sub
+            comment.delete.no.options
+            comment.ban.user
+            comment.mark.spam
+            comment.mark.spam.title
+            comment.mark.spam.subject
+            comment.mark.spam.button
+            comment.mark.spam2
+            comment.mark.spam2.title
+            comment.mark.spam2.subject
+            comment.mark.spam2.button
+            comment.delete
+        ))
     }
 
     $p->{'entry'} = $s2entry;
     LJ::run_hook('notify_event_displayed', $entry);
 
     # add the comments
-    my $view_arg = $get->{'view'} || "";
+    my $view_arg  = $get->{'view'} || "";
     my $flat_mode = ($view_arg =~ /\bflat\b/);
-    my $view_num = ($view_arg =~ /(\d+)/) ? $1 : undef;
+    my $view_num  = ($view_arg =~ /(\d+)/) ? $1 : undef;
 
     my %userpic;
     my %user;
     my $copts = {
-        'flat' => $flat_mode,
-        'thread' => int($get->{'thread'} / 256),
-        'page' => $get->{'page'},
-        'view' => $view_num,
+        'flat'       => $flat_mode,
+        'thread'     => int($get->{'thread'} / 256),
+        'page'       => $get->{'page'},
+        'view'       => $view_num,
         'userpicref' => \%userpic,
-        'userref' => \%user,
+        'userref'    => \%user,
+
         # user object is cached from call just made in EntryPage_entry
-        'up' => LJ::load_user($s2entry->{'poster'}->{'username'}),
-        'viewall' => $viewall,
-        'expand_all' => $opts->{expand_all},
+        'up'          => LJ::load_user($s2entry->{'poster'}->{'username'}),
+        'viewall'     => $viewall,
+        'expand_all'  => $opts->{expand_all},
         'init_comobj' => 0,
         'showspam'    => $p->{'showspam'} && !$get->{from_rpc},
     };
@@ -131,21 +139,23 @@ sub EntryPage {
     }
 
     my $userlite_journal = UserLite($u);
-
     my @comments;
-    if ($entry->comments_shown) {
+
+    if ( $entry->comments_shown ) {
         ## allow to modify strategies to load/expand comments tree.
         LJ::run_hooks('load_comments_opts', $u, $itemid, $copts);
         @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $copts);
     }
 
     my $tz_remote;
-    if ($remote) {
+
+    if ( $remote ) {
         my $tz = $remote->prop("timezone");
         $tz_remote = $tz ? eval { DateTime::TimeZone->new( name => $tz); } : undef;
     }
 
-    my $pics = LJ::Talk::get_subjecticons()->{'pic'};  # hashref of imgname => { w, h, img }
+    # hashref of imgname => { w, h, img }
+    my $pics = LJ::Talk::get_subjecticons()->{'pic'};
     my $convert_comments = sub {
         my ($self, $destlist, $srclist, $depth) = @_;
 
@@ -154,44 +164,53 @@ sub EntryPage {
 
             my $dtalkid = $com->{'talkid'} * 256 + $entry->anum;
             my $text = $com->{'body'};
+
             if ($get->{'nohtml'}) {
                 # quote all non-LJ tags
                 $text =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             }
-            LJ::CleanHTML::clean_comment(\$text, { 'preformatted' => $com->{'props'}->{'opt_preformatted'},
-                                                   'anon_comment' => (!$pu || $pu->{'journaltype'} eq 'I'),
-                                                   'nocss'        => 1,
-                                                   'posterid'     => $com->{'posterid'},
-                                                   });
+
+            LJ::CleanHTML::clean_comment(
+                \$text,
+                {
+                    'preformatted' => $com->{'props'}->{'opt_preformatted'},
+                    'anon_comment' => (!$pu || $pu->{'journaltype'} eq 'I'),
+                    'nocss'        => 1,
+                    'posterid'     => $com->{'posterid'},
+            });
 
             # local time in mysql format to gmtime
-            my $datetime = DateTime_unix($com->{'datepost_unix'});
-            my $datetime_remote = $tz_remote ? DateTime_tz($com->{'datepost_unix'}, $tz_remote) : undef;
+            my $datetime            = DateTime_unix($com->{'datepost_unix'});
+            my $datetime_remote     = $tz_remote ? DateTime_tz($com->{'datepost_unix'}, $tz_remote) : undef;
             my $seconds_since_entry = $com->{'datepost_unix'} - $entry->logtime_unix;
-            my $datetime_poster = DateTime_tz($com->{'datepost_unix'}, $pu);
+            my $datetime_poster     = DateTime_tz($com->{'datepost_unix'}, $pu);
 
             my ($edited, $edit_url, $edittime, $edittime_remote, $edittime_poster);
-            if ($com->{_loaded}) {
+
+            if ( $com->{_loaded} ) {
                 my $comment = LJ::Comment->new($u, jtalkid => $com->{talkid});
 
-                $edited = $comment->is_edited;
+                $edited   = $comment->is_edited;
                 $edit_url = LJ::Talk::talkargs($comment->edit_url, $style_arg);
-                if ($edited) {
-                    $edittime = DateTime_unix($comment->edit_time);
+
+                if ( $edited ) {
+                    $edittime        = DateTime_unix($comment->edit_time);
                     $edittime_remote = $tz_remote ? DateTime_tz($comment->edit_time, $tz_remote) : undef;
                     $edittime_poster = DateTime_tz($comment->edit_time, $pu);
                 }
             }
 
             my $subject_icon = undef;
-            if (my $si = $com->{'props'}->{'subjecticon'}) {
+
+            if ( my $si = $com->{'props'}->{'subjecticon'} ) {
                 my $pic = $pics->{$si};
                 $subject_icon = Image("$LJ::IMGPREFIX/talk/$pic->{'img'}",
                                       $pic->{'w'}, $pic->{'h'}) if $pic;
             }
 
             my $comment_userpic;
-            if (my $pic = $userpic{$com->{'picid'}}) {
+
+            if ( my $pic = $userpic{$com->{'picid'}} ) {
                 $comment_userpic = Image("$LJ::USERPIC_ROOT/$com->{'picid'}/$pic->{'userid'}",
                                          $pic->{'width'}, $pic->{'height'});
             }
@@ -201,17 +220,18 @@ sub EntryPage {
             my $par_url;
 
             # in flat mode, promote the parenttalkid_actual
-            if ($flat_mode) {
+            if ( $flat_mode ) {
                 $com->{'parenttalkid'} ||= $com->{'parenttalkid_actual'};
             }
 
-            if ($com->{'parenttalkid'}) {
+            if ( $com->{'parenttalkid'} ) {
                 my $dparent = ($com->{'parenttalkid'} * 256) + $entry->anum;
                 $par_url = LJ::Talk::talkargs($permalink, "thread=$dparent", $style_arg) . "#t$dparent";
             }
 
             my $poster;
-            if ($com->{'posterid'} && $pu) {
+
+            if ( $com->{'posterid'} && $pu ) {
                 $poster = UserLite($pu);
                 $poster->{'_opt_side_alias'} = 1;
             }
@@ -223,54 +243,57 @@ sub EntryPage {
                  if ($last_talkid == $dtalkid && $last_jid == $remote->{'userid'});
 
             my $s2com = {
-                '_type' => 'Comment',
-                'journal' => $userlite_journal,
+                '_type'    => 'Comment',
+                'journal'  => $userlite_journal,
                 'metadata' => {
                     'picture_keyword' => $com->{'props'}->{'picture_keyword'},
                 },
                 'permalink_url' => "$permalink?thread=$dtalkid#t$dtalkid",
-                'reply_url' => $reply_url,
-                'poster' => $poster,
-                'replies' => [],
-                'subject' => LJ::ehtml($com->{'subject'}),
-                'subject_icon' => $subject_icon,
-                'talkid' => $dtalkid,
-                'text' => $text,
-                'userpic' => $comment_userpic,
-                'time' => $datetime,
-                'system_time' => $datetime, # same as regular time for comments
-                'edittime' => $edittime,
-                'tags' => [],
-                'full' => $com->{'_loaded'} ? 1 : 0,
-                'show' => $com->{'_show'} ? 1 : 0,
-                'depth' => $depth,
-                'parent_url' => $par_url,
-                'spam' => $com->{'state'} eq "B" ? 1 : 0,
+                'reply_url'     => $reply_url,
+                'poster'        => $poster,
+                'replies'       => [],
+                'subject'       => LJ::ehtml($com->{'subject'}),
+                'subject_icon'  => $subject_icon,
+                'talkid'        => $dtalkid,
+                'text'          => $text,
+                'userpic'       => $comment_userpic,
+                'time'          => $datetime,
+                'system_time'   => $datetime, # same as regular time for comments
+                'edittime'      => $edittime,
+                'tags'          => [],
+                'full'          => $com->{'_loaded'} ? 1 : 0,
+                'show'          => $com->{'_show'} ? 1 : 0,
+                'depth'         => $depth,
+                'parent_url'    => $par_url,
+                'spam'          => $com->{'state'} eq "B" ? 1 : 0,
                 'can_marked_as_spam' => LJ::Talk::can_marked_as_spam($remote, $u, $entry->poster, $poster),
-                'screened' => $com->{'state'} eq "S" ? 1 : 0,
-                'frozen' => $com->{'state'} eq "F" || !$entry->posting_comments_allowed ? 1 : 0,
-                'deleted' => $com->{'state'} eq "D" ? 1 : 0,
-                'link_keyseq' => [ 'delete_comment' ],
-                'anchor' => "t$dtalkid",
-                'dom_id' => "ljcmt$dtalkid",
+                'screened'      => $com->{'state'} eq "S" ? 1 : 0,
+                'frozen'        => $com->{'state'} eq "F" || !$entry->posting_comments_allowed ? 1 : 0,
+                'deleted'       => $com->{'state'} eq "D" ? 1 : 0,
+                'link_keyseq'   => [ 'delete_comment' ],
+                'anchor'        => "t$dtalkid",
+                'dom_id'        => "ljcmt$dtalkid",
                 'comment_posted' => $commentposted,
-                'edited' => $edited ? 1 : 0,
-                'time_remote' => $datetime_remote,
-                'time_poster' => $datetime_poster,
+                'edited'        => $edited ? 1 : 0,
+                'time_remote'   => $datetime_remote,
+                'time_poster'   => $datetime_poster,
                 'seconds_since_entry' => $seconds_since_entry,
                 'edittime_remote' => $edittime_remote,
                 'edittime_poster' => $edittime_poster,
-                'edit_url' => $edit_url,
+                'edit_url'      => $edit_url,
             };
 
             # don't show info from suspended users, and from users who deleted their journals
             # and choosed to delete their comments in other journals
             if (!$viewsome && $pu) {
                 my $hide_comment;
+
                 if ($pu->is_suspended) {
                     $hide_comment = 1;
-                } elsif ($pu->is_deleted) {
+                }
+                elsif ($pu->is_deleted) {
                     my ($purge_comments, $purge_community_entries) = split /:/, $pu->prop("purge_external_content");
+
                     if ($purge_comments && !$LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $u->{user} }) {
                         $hide_comment = 1;
                     }
@@ -289,9 +312,11 @@ sub EntryPage {
             my $link_keyseq = $s2com->{'link_keyseq'};
             push @$link_keyseq, $s2com->{'spam'} ? 'unspam_comment' : 'spam_comment';
             push @$link_keyseq, $s2com->{'screened'} ? 'unscreen_comment' : 'screen_comment';
+
             if ($entry->posting_comments_allowed) {
                 push @$link_keyseq, $s2com->{'frozen'} ? 'unfreeze_thread' : 'freeze_thread';
             }
+
             push @$link_keyseq, "watch_thread" unless $LJ::DISABLED{'esn'};
             push @$link_keyseq, "unwatch_thread" unless $LJ::DISABLED{'esn'};
             push @$link_keyseq, "watching_parent" unless $LJ::DISABLED{'esn'};
@@ -311,16 +336,19 @@ sub EntryPage {
             $self->($self, $s2com->{'replies'}, $com->{'children'}, $depth+1);
         }
     };
+
     $p->{'comments'} = [];
     $convert_comments->($convert_comments, $p->{'comments'}, \@comments, ($get->{'depth'} || 0) + 1);
 
     # prepare the javascript data structure to put in the top of the page
     # if the remote user is a manager of the comments
     my $do_commentmanage_js = $p->{'multiform_on'};
+
     if ($LJ::DISABLED{'commentmanage'}) {
         if (ref $LJ::DISABLED{'commentmanage'} eq "CODE") {
             $do_commentmanage_js = $LJ::DISABLED{'commentmanage'}->($remote);
-        } else {
+        }
+        else {
             $do_commentmanage_js = 0;
         }
     }
