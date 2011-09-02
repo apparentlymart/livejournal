@@ -102,6 +102,7 @@
                     js/jquery/jquery.bgiframe.js
                     js/gears_init.js
                     js/scanner.js
+                    js/photobucket_jw.js
                     ));
 
     ## figure out times
@@ -685,6 +686,10 @@ head<=
         if (top.location != location) {
             top.location.href = document.location.href;
         }
+
+        var seedurl='$LJ::SITEROOT/photobucket_cb.bml';
+        var pb_affsite_id = $LJ::PHOTOBUCKET_JWIDGET_ID;
+        var cb_url = "&url=" + escape(seedurl);
 
         function initUpdateBml() {
             window.isSupUser = $is_sup;

@@ -300,7 +300,7 @@ sub error_list
     # FIXME: retrofit like bad_input above?  merge?  make aliases for each other?
     my @errors = @_;
     my $ret;
-    $ret .= "<?errorbar ";
+    $ret .= '<div class="errorbar">';
     $ret .= "<strong>";
     $ret .= BML::ml('error.procrequest');
     $ret .= "</strong><ul>";
@@ -310,7 +310,7 @@ sub error_list
         $err->log;
         $ret .= $err->as_bullets;
     }
-    $ret .= " </ul> errorbar?>";
+    $ret .= " </ul></div>";
     return $ret;
 }
 
@@ -801,8 +801,10 @@ sub create_qr_div {
     LJ::load_user_props($u, 'opt_logcommentips');
     if ($u->{'opt_logcommentips'} eq 'A') {
         $qrhtml .= '<br />';
-        $qrhtml .= LJ::deemp(BML::ml('/talkpost.bml.logyourip'));
+        $qrhtml .= '<p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext">';
+        $qrhtml .= BML::ml('/talkpost.bml.logyourip');
         $qrhtml .= LJ::help_icon_html("iplogging", " ");
+        $qrhtml .= '</p>';
     }
 
     $qrhtml .= "</td></tr></table>";

@@ -50,7 +50,7 @@ sub RecentPage
         $opts->{'badargs'} = 1;
         return 1;
     }
-    
+
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
     elsif ($itemshow > 50 && !$LJ::S2_TRUSTED{ $u->{'userid'} } ) { $itemshow = 50; }
@@ -70,7 +70,7 @@ sub RecentPage
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
 
-   
+
     ## load the itemids
     my @itemids;
     my $err;
@@ -135,7 +135,7 @@ sub RecentPage
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
-        
+
         next ENTRY unless $entry_obj->visible_to($remote, {'viewall' => $viewall, 'viewsome' => $viewsome});
 
         $entry_obj->handle_prefetched_props($logprops{$itemid});
@@ -262,17 +262,17 @@ sub RecentPage
         'skip' => $skip,
         'count' => $itemnum,
     };
- 
+
     # if we've skipped down, then we can skip back up
     if ($skip) {
         my $newskip = $skip - $itemshow;
         $newskip = 0 if $newskip <= 0;
         $nav->{'forward_skip'} = $newskip;
-        $nav->{'forward_url'} = LJ::make_link("$p->{base_url}/", { 
+        $nav->{'forward_url'} = LJ::make_link("$p->{base_url}/", {
             skip     => ($newskip                   || ""),
             tag      => (LJ::eurl($get->{tag})      || ""),
             security => (LJ::eurl($get->{security}) || ""),
-            mode     => (LJ::eurl($get->{mode})     || ""), 
+            mode     => (LJ::eurl($get->{mode})     || ""),
             poster   => (LJ::eurl($get->{'poster'}) || ""),
         });
         $nav->{'forward_count'} = $itemshow;
@@ -289,11 +289,11 @@ sub RecentPage
             $nav->{'backward_url'} = "$p->{'base_url'}/$date_slashes";
         } elsif ($is_prev_exist) {
             my $newskip = $skip + $itemshow;
-            $nav->{'backward_url'} = LJ::make_link("$p->{'base_url'}/", { 
+            $nav->{'backward_url'} = LJ::make_link("$p->{'base_url'}/", {
                 skip     => ($newskip                   || ""),
                 tag      => (LJ::eurl($get->{tag})      || ""),
                 security => (LJ::eurl($get->{security}) || ""),
-                mode     => (LJ::eurl($get->{mode})     || ""), 
+                mode     => (LJ::eurl($get->{mode})     || ""),
                 poster   => (LJ::eurl($get->{'poster'}) || ""),
             });
             $nav->{'backward_skip'} = $newskip;

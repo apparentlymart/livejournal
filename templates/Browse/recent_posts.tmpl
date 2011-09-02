@@ -10,7 +10,8 @@
 
 
 <tmpl_loop posts>
-<tmpl_unless is_vertical_selected><h2 class="title"><a href="<tmpl_var vertical_url>" class="link"><TMPL_VAR expr="ml('widget.browse.more.recent.posts')"></a><tmpl_var vertical_name></h2></tmpl_unless>
+<tmpl_unless is_vertical_selected><tmpl_if vertical_name><h2 class="title"><a href="<tmpl_var vertical_url>" class="link"><TMPL_VAR expr="ml('widget.browse.more.recent.posts')"></a><tmpl_var vertical_name></h2></tmpl_if></tmpl_unless>
+<tmpl_loop vertical_posts>
 <ul class="b-catalogue-list b-recent-posts">
 	<li class="b-catalogue-item">
 		<dl class="b-catalogue-item-header">
@@ -51,6 +52,7 @@
 		<p class="b-catalogue-item-comments"><span class="b-catalogue-comments-count"><a href="<tmpl_var url_to_post>#comments"><tmpl_var comments_count> <TMPL_VAR expr="ml('widget.browse.comments')"></a> |</span> <a href="<tmpl_var url_to_post>?mode=reply"><TMPL_VAR expr="ml('widget.browse.leave.comment')"></a></p>
 	</li>
 </ul>
+</tmpl_loop>
 </tmpl_loop>
 
 <TMPL_IF expr="post_pages gt 1">

@@ -1,31 +1,31 @@
 <TMPL_IF is_person>
     <TMPL_IF remote_banned>
         <div class="b-postform-login-item b-postform-login-user">
-            <input type="radio" name="usertype" value="cookieuser" data-value="cookieuser" id="talkpostfromremote" class="b-postform-login-radio" tabindex="11" <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> />
+            <input type="radio" name="usertype" value="cookieuser" id="talkpostfromremote" class="b-postform-login-radio" tabindex="11" <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> />
             <label for="talkpostfromremote" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></label>
             <div class="b-postform-login-opts">
                 <TMPL_VAR ml_loggedin>
-                <span class="b-postform-login-opts-lj"><a href="#livejournal" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
+                <span class="b-postform-login-opts-lj"><a href="#user" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
             </div>
         </div>
     <TMPL_ELSE>
         <TMPL_IF remote_can_comment>
             <div class="b-postform-login-item b-postform-login-user">
-                <input type="radio" name="usertype" value="cookieuser" data-value="cookieuser" id="talkpostfromremote" class="b-postform-login-radio" tabindex="11" <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> />
+                <input type="radio" name="usertype" value="cookieuser" id="talkpostfromremote" class="b-postform-login-radio" tabindex="11" <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> />
                 <label for="talkpostfromremote" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></label>
                 <div class="b-postform-login-opts">
                     <TMPL_VAR ml_loggedin>
-                    <span class="b-postform-login-opts-lj"><a href="#livejournal" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
+                    <span class="b-postform-login-opts-lj"><a href="#user" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
                     <input type='hidden' name='cookieuser' value='<TMPL_VAR remote_username>' id='cookieuser' />
                 </div>
             </div>
         <TMPL_ELSE>
             <div class="b-postform-login-item b-postform-login-user b-postform-login-disabled">
-                <input type="radio" name="usertype" value="cookieuser" data-value="cookieuser" id="talkpostfromremote" class="b-postform-login-radio" tabindex="11" <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> />
+                <input type="radio" name="usertype" value="cookieuser" id="talkpostfromremote" class="b-postform-login-radio" tabindex="11" <TMPL_IF whocheck_remote>checked="checked"</TMPL_IF> />
                 <label for="talkpostfromremote" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></label>
                 <div class="b-postform-login-opts">
                     <TMPL_VAR ml_loggedin>
-                    <span class="b-postform-login-opts-lj"><a href="#livejournal" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
+                    <span class="b-postform-login-opts-lj"><a href="#user" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
                     <input type="hidden" name="cookieuser" value="<TMPL_VAR remote_username>" id="cookieuser" />
                 </div>
             </div>
@@ -33,7 +33,7 @@
     </TMPL_IF>
 </TMPL_IF>
 <div class="b-postform-login-item b-postform-login-livejournal">
-    <input type="radio" name="usertype" value="user" data-value="user" id="talkpostfromlj" class="b-postform-login-radio" tabindex="11" <TMPL_IF whocheck_ljuser>checked="checked"</TMPL_IF> />
+    <input type="radio" name="usertype" value="user" id="talkpostfromlj" class="b-postform-login-radio" tabindex="11" <TMPL_IF whocheck_ljuser>checked="checked"</TMPL_IF> />
     <label for="talkpostfromlj" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></label>
     <div class="b-postform-login-opts">
         <span class="i-bubble b-bubble-lite"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><input class="textbox" name="userpost" size="13" maxlength="15" id="username" value="<TMPL_VAR username_default>" placeholder="<TMPL_VAR expr="ml('Username')">" tabindex="12" /> <input class="textbox" name="password" type="password" maxlength="30" size="18" id="password" placeholder="<TMPL_VAR expr="ml('Password')">" tabindex="13" /><TMPL_IF is_person>&nbsp;<span class="b-postform-login-opts-lj"><a href="#cookieuser" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.back.to')">&nbsp;<em><TMPL_VAR username_default></em></a></span></TMPL_IF><input type="hidden" name="do_login" id="logincheck" /><TMPL_UNLESS create_link><TMPL_UNLESS is_person>&nbsp;<TMPL_VAR ml_noaccount></TMPL_UNLESS></TMPL_UNLESS></span>

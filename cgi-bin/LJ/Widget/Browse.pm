@@ -67,7 +67,7 @@ sub _get_recent_posts {
         my @journals = map {
             $_->{'userid'},
         } @comms;
-        my @recent_posts = LJ::Browse->search_posts ( comms => \@journals, page_size => 1, vertical => $vertical );
+        my @recent_posts = LJ::Browse->search_posts ( comms => \@journals, page_size => 3, vertical => $vertical );
     } @all_verticals;
 
     return \@posts;
@@ -126,6 +126,8 @@ sub render_posts {
 
     my $post_count = 0;
     my @tmpl_posts = ();
+    my $vertical = undef;
+    my @temp_array_post = ();
     foreach my $entry_href (@$posts) {
         my $entry = $entry_href->{'entry'};
 
@@ -139,6 +141,9 @@ sub render_posts {
 
         $post_count++;
         next if $post_count <= $post_skip || $post_count > $post_last;
+
+        $vertical = LJ::Vertical->new ( vert_id => $entry_href->{'vert_id'} )
+            unless $vertical;
 
         my $logtime = LJ::TimeUtil->mysqldate_to_time($entry->{logtime}, 0);
         my $secondsold = $logtime ? time() - $logtime : undef;
@@ -166,9 +171,18 @@ sub render_posts {
             $sharing_js = LJ::Share->render_js({ 'entry' => $entry });
         }
 
-        my $vertical = LJ::Vertical->new ( vert_id => $entry_href->{'vert_id'} );
+        if ($vertical && $entry_href->{'vert_id'} != $vertical->vert_id) {
+            my @posts = @temp_array_post;
+            push @tmpl_posts, {
+                vertical_name   => $vertical->name,
+                vertical_url    => $vertical->url,
+                vertical_posts  => \@posts,
+            };
+            @temp_array_post = ();
+            $vertical = LJ::Vertical->new ( vert_id => $entry_href->{'vert_id'} );
+        }
 
-        push @tmpl_posts, {
+        push @temp_array_post, {
             subject         => $trimmed_subj,
             is_subject_trimmed => $subject ne $trimmed_subj ? 1 : 0,
             userpic         => $userpic ? $userpic->url : '',
@@ -189,6 +203,12 @@ sub render_posts {
             vertical_url    => $vertical->url,
         };
     }
+    my @posts = @temp_array_post;
+    push @tmpl_posts, {
+        vertical_name   => $vertical->name,
+        vertical_url    => $vertical->url,
+        vertical_posts  => \@posts,
+    } if @posts;
 
     return {
         posts       => \@tmpl_posts,
@@ -356,7 +376,7 @@ sub render_body {
                 };
         }
     } else {
-        unless (@comms) {
+        if (!$vertical && !@comms) {
             my $posts = _get_recent_posts ();
             my $result = render_posts ( $posts, post_skip => $post_skip, post_last => $post_last );
             @tmpl_posts = @{$result->{'posts'}};

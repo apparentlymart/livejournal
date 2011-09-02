@@ -230,6 +230,7 @@ _info?><?_code
             LJ::Talk::mark_comment_as_spam( $journal, $comment->jtalkid );
             LJ::set_rel($journal, $poster, 'D');
             $journal->log_event('spam_set', { actiontarget => $poster->{userid}, remote => $remote });
+            LJ::run_hook('auto_suspender_for_spam', $poster->{userid});
             $actions{'marked_spam'} = 1;
         }
 

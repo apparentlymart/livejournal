@@ -25,6 +25,24 @@
 				isDirty = false;
 			} );
 
+		//msie doesn't show all textarea content if width of textarea is equal to 100% (css).
+		if (jQuery.browser.msie) {
+			jQuery(function() {
+				var draft = jQuery('#draft'),
+					container = jQuery('#draft-container');
+
+				var updateTextarea = function() {
+					draft.css('width','auto');
+					draft.width(container.width());
+				}
+
+				if (draft.length && container.length) {
+					jQuery(window).resize(updateTextarea);
+					updateTextarea();
+				}
+			});
+		}
+
 		window.onbeforeunload = confirmExit;
 	}
 
@@ -166,14 +184,7 @@
 				CKEditor.container.hide();
 				CKEditor.element.show();
 
-				// IE7 hack fix
-				if ($.browser.msie && ($.browser.version == '7.0' || $.browser.version == '8.0')) {
-					setTimeout(function() {
-						CKEditor.element.setValue(data);
-					}, 50);
-				} else {
-					CKEditor.element.setValue(data);
-				}
+				CKEditor.element.setValue(data);
 			}
 
 		}

@@ -202,6 +202,9 @@ body<=
     LJ::need_res(qw(
         js/thread_expander.js
         js/journal.js
+        js/jquery/jquery.lj.subjecticons.js
+        js/jquery/jquery.lj.commentator.js
+        js/jquery/jquery.lj.quotescreator.js
     ));
 
     if (($remote && !$remote->{'opt_no_quickreply'}) && $allow_commenting) {
@@ -224,9 +227,9 @@ body<=
             js/quickreply.js
         ));
     }
-    
+
     if($remote) {
-        LJ::need_string(qw/ 
+        LJ::need_string(qw/
                             comment.cancel
                             comment.delete
                             comment.delete.q
@@ -245,6 +248,19 @@ body<=
                             comment.delete/);
     }
 
+    if ( $GET{'screen'} ) {
+        LJ::need_string(qw(
+            /talkpost_do.bml.success.screened.comm.anon2
+            /talkpost_do.bml.success.screened.comm2
+            /talkpost_do.bml.success.screened.user.anon2
+            /talkpost_do.bml.success.screened.user2
+        ));
+    }
+
+    LJ::need_string(qw(
+        /talkpost.bml.quote.info.message
+    ));
+
     my $showmultiform = $remote &&
                         ($remote->{'user'} eq $u->{'user'} ||
                          $remote->{'user'} eq $up->{'user'} ||
@@ -255,7 +271,7 @@ body<=
     my $event = $item->{'event'};
     my $suspend_msg = $entry && $entry->should_show_suspend_msg_to($remote) ? 1 : 0;
     my $no_cut_expand = !$GET{cut_expand} && $GET{page} && $GET{page} > 1 ? 1 : 0;
-    
+
     if($no_cut_expand) {
        $talkurl .= '?page=' . $GET{page} . '&cut_expand=1';
     }
@@ -265,8 +281,8 @@ body<=
         {
             preformatted        => $props->{'opt_preformatted'},
             suspend_msg         => $suspend_msg,
-            unsuspend_supportid => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, 
-            cuturl              => $entry->prop('reposted_from') || $talkurl, 
+            unsuspend_supportid => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0,
+            cuturl              => $entry->prop('reposted_from') || $talkurl,
             expand_cut          => !$no_cut_expand,
             journalid           => $entry->journalid,
             posterid            => $entry->posterid,
@@ -362,8 +378,8 @@ body<=
             $moodname ||= LJ::mood_name($val);
             my %pic;
             if (LJ::get_mood_picture($themeid, $val, \%pic)) {
-                $moodpic = "<img src=\"$pic{'pic'}\" align='absmiddle' " . 
-                           LJ::mood_size_attributes(%pic) . 
+                $moodpic = "<img src=\"$pic{'pic'}\" align='absmiddle' " .
+                           LJ::mood_size_attributes(%pic) .
                            " vspace='1' alt='' /> ";
             }
         }
@@ -416,9 +432,9 @@ body<=
             my $curkey = "talk.curname_" . $_;
             my $curname = BML::ml($curkey);
             $curname = "<b>Current $_:</b>" unless $curname;
-         
+
             $ret .= "<tr><td align=right>$curname</td>";
-         
+
             if ($_ eq 'Music') {
                 $ret .= "<td>" . LJ::LastFM::format_current_music_string($current{$_}) . "</td></tr>\n";
             } else {
@@ -473,16 +489,16 @@ body<=
     if (@verticals) {
         $LJ::REQ_GLOBAL{verticals_of_first_public_post} = join(",", @verticals);
     }
- 
+
     my $ad = LJ::get_ads ({
         location        => 'bml.talkread.ebox',
         nowrap          => 1,
-        journalu        => $u, 
-        vertical        => $LJ::REQ_GLOBAL{verticals_of_first_public_post}, 
+        journalu        => $u,
+        vertical        => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
         interests_extra => $qotd ? { qotd => $qotd } : {},
         s1_view         => 'entry',
     });
- 
+
     if ($ad) {
         $ret .= $ad;
         $ret .= "<hr width='100%' size='2' align='center' />";
@@ -526,7 +542,7 @@ body<=
     );
 
     return $output->{error} if $output->{error};
-    
+
     my $page = $output->{page};
     my $pages = $output->{pages};
     $multiform_selects ||= $output->{multiform_selects};
@@ -586,7 +602,7 @@ body<=
         my $showspamurl = LJ::Talk::talkargs($talkurl, "mode=showspam", $stylemine, $formatlight);
         my $hidespamurl = LJ::Talk::talkargs($talkurl, "", $stylemine, $formatlight);
         my $spam_counter = $entry->prop('spam_counter') || 0;
-        
+
         my $readspamlink = '';
         if ($spam_counter > 0 && LJ::Talk::can_unmark_spam($remote, $u, $up)) {
             if ($showspam) {
@@ -637,7 +653,7 @@ body<=
 
             if ($remote) {
                 $rated_count .= " (<a href=\"#\" class=\"i_like_this i_like_this_".$ditemid."\" onclick=\"return ILikeThis.rate(event,this,'$ditemid','".$u->{'user'}."')\" title=\"$i_like_this_title\">+1";
-                if (LJ::get_eventrates( 
+                if (LJ::get_eventrates(
                        journalid => $u->{'userid'},
                        itemid    => $ditemid,
                        userids   => [ $remote->{'userid'} ], ))
@@ -736,7 +752,7 @@ body<=
                 $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'});
                 $ret .= "</p>";
             }
-         
+
             my $ad = LJ::get_ads({ location => 'bml.talk.bottom', journalu => $u, s1_view => 'entry', });
             if ($ad) {
                 $ret .= "<hr width='100%' size='2' align='center' />" if $showmultiform && $multiform_selects;
@@ -745,7 +761,7 @@ body<=
         }
 
         $ret .= "</form>";
-     
+
         if ($navcrap) {
             $ret .= "<p>$navcrap</p>";
         }

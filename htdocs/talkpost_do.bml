@@ -5,6 +5,7 @@
 
     our ( %ML, %GET, %POST, $title, $body );
     my ( $status, $result, $answer, $redirected, $user_url );
+    my $need_captcha = 0;
 
     my $restore_old = sub {
         my $remote = LJ::get_remote();
@@ -182,7 +183,6 @@
         }
 
         ## init.  this handles all the error-checking, as well.
-        my $need_captcha = 0;
         my $init = LJ::Talk::Post::init(\%POST, $remote, \$need_captcha, \@errors);
 
         return $error->($errors[-1]) if $ajax && int(@errors);
@@ -362,6 +362,16 @@
         $ret .= "<h1>$ML{'.success.title'}</h1>";
 
         my $mlcode;
+        my $SC = '/talkpost_do.bml';
+        my ($curl, $cadr);
+
+        if ( $commentlink =~ /^(.+)(\#.+)$/ ) {
+            ($curl, $cadr) = ($1, $2);
+        }
+        else {
+            $curl = $commentlink;
+            $cadr = '';
+        }
 
         if ($comment->{state} eq 'A') {
             # Redirect the user back to their post as long as it didn't unscreen its parent,
@@ -382,11 +392,13 @@
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.comm.anon2'
                     : '.success.screened.comm2';
+                return $redirect->($curl . '&screen=' . LJ::eurl($SC . $mlcode) . $cadr) if $ajax;
             }
             else {
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.user.anon2'
                     : '.success.screened.user2';
+                return $redirect->($curl . '&screen=' . LJ::eurl($SC . $mlcode) . $cadr) if $ajax;
             }
         }
 
@@ -422,12 +434,15 @@
 
     if ( $ajax ) {
         $result = LJ::eurl($result);
+        my $add = $need_captcha
+            ? '&need_captcha=1'
+            : '';
         return qq~
 <!DOCTYPE html>
 <html>
 <head></head>
 <body>
-<iframe src="$user_url/xdreceiver.html?status=$status&result=$result" />
+<iframe src="$user_url/xdreceiver.html?status=$status&result=$result$add" />
 </body>
 </html>
 ~;

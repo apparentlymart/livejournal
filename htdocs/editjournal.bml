@@ -41,6 +41,7 @@ body<=
                     js/jquery/jquery.bgiframe.js
                     js/gears_init.js
                     js/scanner.js
+                    js/photobucket_jw.js
                     ));
     
     return LJ::bad_input("You must be authenticated as a person.")
@@ -470,6 +471,11 @@ LIKE_FAQ
             $$head .= qq|
     <script type="text/javascript">
     //<![CDATA[
+        var seedurl='$LJ::SITEROOT/photobucket_cb.bml';
+        var pb_affsite_id = $LJ::PHOTOBUCKET_JWIDGET_ID;
+        var cb_url = "&url=" + escape(seedurl);
+
+
         function initUpdateBml() {
             window.isSupUser = $is_sup;
             window.initEditor();

@@ -202,7 +202,6 @@
 				if (!isNow && data == tempData.data && cmd == tempData.cmd && node === tempData.node) {
 					return;
 				}
-				console.log('show');
 
 				if (timer) {
 					clearTimeout(timer);
@@ -219,7 +218,6 @@
 			},
 			hide: function(isNow) {
 				if (state) {
-					console.log('hide');
 					state = 0;
 
 					if (timer) {
@@ -385,12 +383,23 @@
 				}
 			}
 
+			function checkLastLine() {
+				var body = editor.document.getBody();
+				var last = body.getLast();
+				if (last && last.type == 1 && !last.is('br')) {
+					body.appendHtml('<br />');
+				}
+			}
+
 			editor.on('dataReady', function() {
 				note = note || createNote(editor);
 
 				editor.on('selectionChange', onSelectionChange);
 				editor.document.on('mouseout', note.hide.bind(note));
 				editor.document.on('mouseover', onMouseOver);
+				editor.document.on('keyup', checkLastLine );
+				editor.document.on('click', checkLastLine );
+				editor.document.on('selectionChange', checkLastLine );
 			});
 
 			//////////  LJ User Button //////////////
@@ -467,16 +476,14 @@
 			//////////  LJ Image Button //////////////
 			editor.addCommand('LJImage', {
 				exec: function(editor) {
-					if (ljNoteData.LJImage.node) {
-						editor.openDialog('image');
-					} else if (window.ljphotoEnabled) {
+					if (window.ljphotoEnabled) {
 						jQuery('#updateForm').photouploader({
 							type: 'upload'
 						}).photouploader('show').bind('htmlready', function (event, html) {
 							editor.insertHtml(html);
 						});
 					} else {
-						InOb.handleInsertImage();
+						editor.openDialog('image');
 					}
 				},
 				editorFocus: false
@@ -496,7 +503,14 @@
 			//////////  LJ Link Button //////////////
 			editor.addCommand('LJLink', {
 				exec: function(editor) {
-					editor.openDialog('link');
+					var state = editor.getCommand('LJLink').state;
+
+					if (state === CKEDITOR.TRISTATE_OFF) {
+						editor.openDialog('link');
+					} else if (state === CKEDITOR.TRISTATE_ON) {
+						editor.execCommand('unlink')
+					}
+
 				},
 				editorFocus: false
 			});
@@ -774,23 +788,21 @@
 					} else {
 						text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore);
 						if (text) {
-							var br = editor.document.createElement('br');
+							var br = editor.document.createElement('br'),
+								selection = editor.document.getSelection(),
+								bookmarks = selection.createBookmarks();
 
-							ljNoteData.LJCut.node = editor.document.createElement('p');
+							ljNoteData.LJCut.node = editor.document.createElement('div');
 							ljNoteData.LJCut.node.setAttribute('lj-cmd', 'LJCut');
 							ljNoteData.LJCut.node.setAttribute('class', 'lj-cut');
 							if (text != top.CKLang.ReadMore) {
 								ljNoteData.LJCut.node.setAttribute('text', text);
 							}
-							editor.getSelection().getRanges()[0].extractContents().appendTo(ljNoteData.LJCut.node);
+							selection.getRanges()[0].extractContents().appendTo(ljNoteData.LJCut.node);
+
+							selection.selectBookmarks(bookmarks);
 							editor.insertElement( br );
 							ljNoteData.LJCut.node.insertBefore(br);
-
-							var range = new CKEDITOR.dom.range(editor.document);
-							range.moveToPosition( ljNoteData.LJCut.node, CKEDITOR.POSITION_AFTER_END );
-							range.selectNodeContents(ljNoteData.LJCut.node);
-							editor.getSelection().selectRanges([range]);
-
 						}
 					}
 				}
