@@ -571,7 +571,7 @@ function print_comment_close (string footer, Comment c) {
             ") ";
         }
         if ($c.thread_url != "" and (not $c.spam) and $c.parent_url != "" and size $c.replies > 0) {
-            " ("; $c->print_expand_collapse_links(); ")";
+            $c->print_expand_collapse_links({ "expand"=>"%_", "collapse"=>"%_"});
         }
 
         if (not $c.frozen) {
@@ -1065,7 +1065,7 @@ function EntryPage::print_comment_partial (Comment c) {
     print_genericbox_open();
     print "<a href='$c.permalink_url'>$subj</a> - $poster";
     if ($c.thread_url != "") {
-        " - "; $c->print_expand_collapse_links();
+        $c->print_expand_collapse_links({ "expand"=>" - %_", "collapse"=>" - %_"});
     }
     print_genericbox_close();
 }

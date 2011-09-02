@@ -869,7 +869,7 @@ function EntryPage::print_comment_full(Comment c) {
     if ($c.thread_url != "" and (not $c.spam)) {
         """<a href="$c.thread_url">$*text_comment_thread</a> """;
         if ($c.parent_url != "" and size $c.replies > 0) {
-            " - "; $c->print_expand_collapse_links();
+            $c->print_expand_collapse_links({ "expand"=>" - %_", "collapse"=>" - %_"});
         }
 	""" - """;
     }
@@ -914,7 +914,7 @@ function EntryPage::print_comment_partial(Comment c) {
     print """<div class="minicomment" id="$c.dom_id"><a href="$c.permalink_url">$subj</a> - $poster""";
     var Link expand_link = $c->get_link("expand_comments");
     if ($c.thread_url != "" and (not $c.spam)) {
-        " - "; $c->print_expand_collapse_links();
+        $c->print_expand_collapse_links({ "expand"=>" - %_", "collapse"=>" - %_"});
     }
     print """</div>""";
 }

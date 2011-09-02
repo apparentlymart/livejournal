@@ -1349,7 +1349,7 @@ function EntryPage::print_comment_partial (Comment c) {
     var string poster = isnull $c.poster ? $*text_poster_anonymous : $c.poster->as_string();
 
     print safe """<a href="$c.permalink_url">$subject</a> $poster""";
-    " ";$c->print_expand_collapse_links();
+    $c->print_expand_collapse_links({ "expand"=>" %_", "collapse"=>" %_"});
 }
 function EntryPage::print_comment_full (Comment c) {
     var Page p = get_page();
@@ -1442,7 +1442,7 @@ function EntryPage::print_comment_full (Comment c) {
     if ($c.thread_url != "" and (not $c.spam)) {
         "(<a href='$c.thread_url'>Thread</a>) ";
         if ($c.parent_url != "" and size $c.replies > 0) {
-            "("; $c->print_expand_collapse_links(); ")";
+            $c->print_expand_collapse_links({ "expand"=>"(%_)", "collapse"=>"(%_)"});
         }
     }
     if (not $c.frozen) {

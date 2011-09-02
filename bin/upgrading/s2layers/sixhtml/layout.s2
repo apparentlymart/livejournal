@@ -1061,7 +1061,7 @@ function EntryPage::print_comment_partial(Comment e) {
      "<a href='$e.permalink_url' class='collapsed-comment-link'>$subject</a> <span class='separator'>-</span> ";
      print safe lang_posted_by($e.poster, $e.poster); " <span class='separator'>-</span> ";
      print lang_posted_date_and_time($e, $e.time, true, true);
-     " $sep "; $e->print_expand_collapse_links();
+     $e->print_expand_collapse_links({ "expand"=>" $sep %_", "collapse"=>" $sep %_"});
      "</div>";
      "</div>";
 }
@@ -1107,7 +1107,7 @@ function EntryPage::print_comment_full(Comment e) {
      if (($e.thread_url != "") and (not $e.spam)) {
          print " $sep <a href='$e.thread_url'>$*text_comment_thread</a>";
          if ($e.parent_url != "" and size $e.replies > 0) {
-            " $sep "; $e->print_expand_collapse_links();
+            $e->print_expand_collapse_links({ "expand"=>" $sep %_", "collapse"=>" $sep %_"});
         }
      }
      if (($e.reply_url != "") and ((not $e.spam) or ($p.showspam)))  {

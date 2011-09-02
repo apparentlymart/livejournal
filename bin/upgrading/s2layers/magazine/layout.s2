@@ -959,7 +959,7 @@ function EntryPage::print_comment_partial (Comment c) {
     var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
     print safe "<a href='$c.permalink_url'>$subj</a> - $poster";
     if ($c.thread_url != "") {
-        " ("; $c->print_expand_collapse_links(); ")";
+        $c->print_expand_collapse_links({ "expand"=>" (%_) ", "collapse"=>" (%_) "});
     }
 }
 
@@ -1053,7 +1053,7 @@ function EntryPage::print_comment_full (Comment c) {
     if (($c.thread_url != "") and (not $c.spam)) {
         "(<a href='$c.thread_url'>Thread</a>) ";
         if ($c.parent_url != "" and size $c.replies > 0) {
-            "("; $c->print_expand_collapse_links(); ") ";
+            $c->print_expand_collapse_links({ "expand"=>"(%_) ", "collapse"=>"(%_) "});
         }
     }
     if (not $c.frozen) {
