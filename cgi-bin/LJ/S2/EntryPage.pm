@@ -12,14 +12,15 @@ sub EntryPage {
     my $get = $opts->{'getargs'};
 
     if ( $get->{'screen'} ) {
-        LJ::need_string(qw{
+        LJ::need_string(qw(
             /talkpost_do.bml.success.screened.comm.anon2
             /talkpost_do.bml.success.screened.comm2
             /talkpost_do.bml.success.screened.user.anon2
             /talkpost_do.bml.success.screened.user2
-            /talkpost.bml.quote.info.message
-        });
+        ));
     }
+
+    LJ::need_string(qw(/talkpost.bml.quote.info.message));
 
     my $p = Page($u, $opts);
     $p->{'_type'}         = "EntryPage";
