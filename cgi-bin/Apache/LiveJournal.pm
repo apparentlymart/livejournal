@@ -317,6 +317,14 @@ sub trans {
 
     $host = $LJ::DOMAIN_WEB unless LJ::Request::request->{r}->is_initial_req;
 
+    ## This is a hack for alpha/beta/omega servers to make them 
+    ## send static files (e.g. http://stat.livejournal.com/lanzelot/img/menu/div.gif?v=1)
+    ## Production static files are served by CDN (http://l-stat.livejournal.com)
+    if ($host eq 'stat.livejournal.com' && $uri !~ m!^/(stc|img|js)!) {
+         $uri = "/stc$uri";
+         LJ::Request->uri($uri);
+    }
+
     # disable TRACE (so scripts on non-LJ domains can't invoke
     # a trace to get the LJ cookies in the echo)
     if (LJ::Request->method_number == LJ::Request::M_TRACE) {
