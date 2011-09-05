@@ -1161,14 +1161,15 @@
 									alert(err + ' "' + ljUserName + '"');
 								},
 								onData: function(data) {
-									ljUsers[cacheName] = data.ljuser;
-
 									if (data.error) {
 										return alert(data.error + ' "' + username + '"');
 									}
+									
 									if (!data.success) {
 										return;
 									}
+
+									ljUsers[cacheName] = data.ljuser;
 
 									data.ljuser = data.ljuser.replace('<span class="useralias-value">*</span>', '');
 
