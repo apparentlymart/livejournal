@@ -784,6 +784,19 @@ td.tabs {
 .b-editentries-cal-clear B:hover {
 	border: none;
 	}
+
+.b-editentries-cal-date,
+.b-editentries-cal-clear {
+	display: none;
+	}
+.b-editentries-form-withdate .b-editentries-cal-message {
+	display: none;
+	}
+.b-editentries-form-withdate .b-editentries-cal-date,
+.b-editentries-form-withdate .b-editentries-cal-clear {
+	display: inline;
+	}
+
 .b-editentries-info {
 	max-width: 50%;
 	border: 1px solid #CCC;
