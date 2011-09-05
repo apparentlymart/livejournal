@@ -1,17 +1,19 @@
 <?page
-title=><?_ML .title _ML?>
 body<=
 <?_code
 {
 #line 7
     use strict;
-    use vars qw(%GET %POST);
+    use vars qw(%GET %POST $title);
     BML::decl_params(_default => qr/./);
 
     use LJ::Fotki::Photo;
     use LJ::Fotki::Album;
     use LJ::Fotki::UserSpace;
     use LJ::Widget::Fotki::Upload;
+    use LJ::Widget::Calendar;
+
+    my $title = BML::ml('.title');
 
     my $head     = \$_[0]->{'head'};
     my $bodyopts = \$_[0]->{'bodyopts'};
@@ -572,9 +574,13 @@ LIKE_FAQ
         # edit form
 
 
-        $ret .= "<form action='editjournal.bml$getextra' method='get' class='b-editentries-form'>\n";
+        $ret .= "<form action='editjournal.bml$getextra' method='get' class='b-editentries-form";
+        if ($day) {
+            $ret .= " b-editentries-form-withdate";
+        }
+        $ret .= "'>\n";
         $ret .= "<p>Show entries: 
-        <span class='b-editentries-cal'><i></i><b>Choose date</b></span> <span class='b-editentries-cal-clear'>( <b>Clear</b> )</span>
+        <span class='b-editentries-cal'><i></i><b class='b-editentries-cal-message'>Choose date</b><b class='b-editentries-cal-date'>$day.$month.$year</b></span> <span class='b-editentries-cal-clear'>( <b>Clear</b> )</span>
         <input type='hidden' name='year' value='$year'/>
         <input type='hidden' name='month' value='$month'/>
         <input type='hidden' name='day' value='$day'/>";
@@ -587,6 +593,15 @@ LIKE_FAQ
             $ret .= "Or <a href='editjournal.bml?show=recent&mode=init'>back to recent entries</a></p>";
         }
         $ret .= "</form>\n";
+
+        $ret .= LJ::Widget::Calendar->render();
+
+        $ret .= <<JS_INIT;
+            <script type="text/javascript">
+                jQuery('form.b-editentries-form')
+                    .editentriesfilter();
+            </script>
+JS_INIT
 
         my $err = '';
         my $usejournal_u = LJ::load_user ($usejournal || $remote->{'user'});
@@ -674,6 +689,7 @@ head<=
                     js/livejournal.js
                     js/entry.js
                     js/poll.js
+                    js/jquery/jquery.lj.editentriesfilter.js
                     ));
 
     # JS vars for the RTE
@@ -687,6 +703,7 @@ _code?>
 </script>
 
 <=head
+title=><?_code return $title; _code?>
 page?><?_c <LJDEP>
 post: htdocs/editjournal.bml
 link: htdocs/lostinfo.bml
