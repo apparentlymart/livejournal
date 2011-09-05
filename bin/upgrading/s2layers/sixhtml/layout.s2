@@ -1208,8 +1208,6 @@ function Page::print_entry(Entry e) {
          if ($e.comments.show_postlink) { " $sep "; $e.comments->print_postlink(); }
          if ($e.comments.show_readlink)   {
             " $sep "; $e.comments->print_readlink();
-         }
-         if ($e.comments.spam_counter) {
             if ($p.view == "entry" and $e.comments.spam_counter > 0 and $e.comments.read_spam_url != "") {
                 if ($p.showspam) {
                     print safe """ $sep """ + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments");

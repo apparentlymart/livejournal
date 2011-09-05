@@ -410,7 +410,7 @@ body<=
 		$readlink_text = BML::ml("talk.commentsread.nocomments");
 	}
 
-    $ret .= "<p align='center' class='lesstop' id='add_comment'><b>(<a href=\"$readurl#comments\">$readlink_text</a>)</b></p>";
+    $ret .= "<p align='center' class='lesstop'><b>(<a href=\"$readurl#comments\">$readlink_text</a>)</b></p>";
 
     my $h1title = $editid ? $ML{'.editresponse'} : $ML{'.postresponse'};
     $ret .= BML::fill_template("H1", { DATA => $h1title });

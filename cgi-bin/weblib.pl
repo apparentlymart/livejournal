@@ -273,16 +273,16 @@ sub help_icon_html {
 # args: error*
 # des-error: A list of errors
 # </LJFUNC>
-sub bad_input {
+sub bad_input
+{
     my @errors = @_;
-    my $ret = LJ::Lang::ml('bml.badcontent.body') . "\n<ul>\n";
-
-    foreach my $ei ( @errors ) {
-        my $err = LJ::errobj($ei) or next;
+    my $ret = "";
+    $ret .= "<?badcontent?>\n<ul>\n";
+    foreach my $ei (@errors) {
+        my $err  = LJ::errobj($ei) or next;
         $err->log;
         $ret .= $err->as_bullets;
     }
-
     $ret .= "</ul>\n";
     return $ret;
 }
@@ -300,7 +300,7 @@ sub error_list
     # FIXME: retrofit like bad_input above?  merge?  make aliases for each other?
     my @errors = @_;
     my $ret;
-    $ret .= '<div class="errorbar">';
+    $ret .= "<?errorbar ";
     $ret .= "<strong>";
     $ret .= BML::ml('error.procrequest');
     $ret .= "</strong><ul>";
@@ -310,7 +310,7 @@ sub error_list
         $err->log;
         $ret .= $err->as_bullets;
     }
-    $ret .= " </ul></div>";
+    $ret .= " </ul> errorbar?>";
     return $ret;
 }
 
@@ -801,10 +801,8 @@ sub create_qr_div {
     LJ::load_user_props($u, 'opt_logcommentips');
     if ($u->{'opt_logcommentips'} eq 'A') {
         $qrhtml .= '<br />';
-        $qrhtml .= '<p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext">';
-        $qrhtml .= BML::ml('/talkpost.bml.logyourip');
+        $qrhtml .= LJ::deemp(BML::ml('/talkpost.bml.logyourip'));
         $qrhtml .= LJ::help_icon_html("iplogging", " ");
-        $qrhtml .= '</p>';
     }
 
     $qrhtml .= "</td></tr></table>";
@@ -1537,14 +1535,7 @@ sub res_includes {
 
                 if ($do_concat) {
                     my $csep = join(',', @$list);
-                    my $mtime = $oldest{$type}{$cond}{$args}; 
-
-                    ## stc/0 is the empty file.
-                    ## touch-ing it changes ?v= param for all included res.
-                    my $mtime_base = _file_modtime("stc/0", $now);
-                    $mtime = $mtime_base if $mtime_base > $mtime;
-
-                    $csep .= "?v=" . $mtime;
+                    $csep .= "?v=" . $oldest{$type}{$cond}{$args};
                     my $inc = $template;
                     $inc =~ s/__+/??$csep/;
                     $inc =~ s/##/$args/;

@@ -591,7 +591,7 @@ function print_entry_box_close (string footer, Entry entry) {
     if ($footer) {
         #TODO - rewrite with this.save
         print  "<tr><td style='white-space: nowrap'>$*text_left_comments";
-        $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $e.comments.post_url+"#$*text_addcomment_id"});
+        $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
         " $footer";
         
         if ($p.view == "entry")
@@ -669,14 +669,9 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
     print_box_close($footer, $e);
 }
 
-function print_header (string header, string header_id)
-{
-    print safe "<h3 class='page-header'" + ($header_id != "" ? "id='$header_id'" : "") + ">$header</h3>";
-}
-
 function print_header (string header)
 {
-    print_header($header, "");
+    print safe "<h3 class='page-header'>$header</h3>";
 }
 
 function print_genericbox_open () {
@@ -768,7 +763,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $footer = $footer + "$*text_left_comments";
         if ($e.comments.show_readlink) {
             $footer = $footer +
-                      "<a href=\"$e.comments.read_url#$*text_comments_id\">" +
+                      "<a href=\"$e.comments.read_url\">" +
                       get_plural_phrase($e.comments.count, $p.view == "friends" ? "text_read_comments_friends" : "text_read_comments") +
                       "</a>";
         }
@@ -787,7 +782,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                     $footer = "";
                 } else {
                     $footer = $footer +
-                        "<a href=\"$e.comments.post_url#$*text_addcomment_id\">" +
+                        "<a href=\"$e.comments.post_url\">" +
                         ($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment) +
                         "</a>";
                 }
@@ -999,16 +994,16 @@ function EntryPage::print_body () {
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
     print_ebox($.entry);
-    if ($.entry.comments.enabled and ($.comment_pages.total_subitems > 0 or $e.comments.spam_counter > 0))
+    if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
         $this->print_multiform_start();
 
-        print_header("Comments:", $*text_comments_id);
+        print_header("Comments:");
 	if ($e.comments.spam_counter > 0 and $e.comments.read_spam_url != "") {
 		if ($p.showspam) {
 		    print """<p width='95%' style='text-align:center;'>""" + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</p>""";
 		} else {
-		    print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></p>""";
+		    print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></p>""";
 		}
 	}
         if ($.comment_pages.total_subitems > 0) {
@@ -1171,7 +1166,7 @@ function ReplyPage::print_body () {
     }
     print_ebox($.entry);
 
-    print_header("$*text_post_comment:", $*text_addcomment_id);
+    print_header("Reply:");
 
     print_genericbox_open();
     $.form->print();

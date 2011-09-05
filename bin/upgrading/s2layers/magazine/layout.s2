@@ -670,15 +670,11 @@ function CommentInfo::print() {
         print safe "<div class='Comment'>$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
-        }
-        if ($.spam_counter > 0) {
             if ($p.view == "entry" and $.spam_counter > 0 and $.read_spam_url != "") {
-                if ($.show_readlink) {
-                    if (clean_url($*img_btwn_comments) != "") {
-                        """ <img src="$*img_btwn_comments" alt="" /> """;
-                    } else {
-                        print safe "$*text_btwn_comments";
-                    }
+                if (clean_url($*img_btwn_comments) != "") {
+                    """ <img src="$*img_btwn_comments" alt="" /> """;
+                } else {
+                    print safe "$*text_btwn_comments";
                 }
                 if ($p.showspam) {
                     print safe get_plural_phrase($.spam_counter, "text_read_spam_comments");
@@ -687,7 +683,7 @@ function CommentInfo::print() {
                 }
             }
         }
-        if (($.show_postlink and $.show_readlink) or ($.spam_counter > 0)) {
+        if ($.show_postlink and $.show_readlink) {
             if (clean_url($*img_btwn_comments) != "") {
                 """ <img src="$*img_btwn_comments" alt="" /> """;
             } else {

@@ -114,6 +114,17 @@
 		}
 
 		if (!window.switchedRteOn) {
+			if(!draftData){
+				draftData = {
+					textArea: $('#draft'),
+					statusNode: $('#draftstatus')
+				};
+
+				draftData.lastValue = draftData.textArea.val();
+
+				draftData.textArea.val(draftData.lastValue.replace(/<br\s?\/>\n?/g, '\n'));
+			}
+
 			window.switchedRteOn = true;
 			$('#switched_rte_on').val('1');
 

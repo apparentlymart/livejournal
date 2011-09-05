@@ -194,6 +194,7 @@ sub save_all {
             };
             if (my $err = $@) {
                 require Data::Dumper;
+                warn "Settings error: " . Data::Dumper::Dumper($err) . " ";
                 $save_errors = $err->field('map') if ref $err;
             }
         }

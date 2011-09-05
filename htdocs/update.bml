@@ -4,6 +4,10 @@
     use vars qw(%GET %POST %ML);
     BML::decl_params(_default => qr/./);
 
+    use LJ::Fotki::Photo;
+    use LJ::Fotki::Album;
+	use LJ::Widget::Fotki::Upload;
+
     # $_[0] is a pre-request scratch area
     # put variables here so that we can access them later
     # outside of this _code block
@@ -303,8 +307,6 @@ EMBED
             'altlogin' => $GET{altlogin} ? 1 : 0,
             'prop_opt_preformatted' => $opt_preformatted ? 1 : 0,
             'qid' => $qid,
-            'albums_id' => $POST{'albums_id'} || $GET{'albums_id'},
-            'photos_id' => $POST{'photos_id'} || $GET{'photos_id'},
         };
 
         if ($remote) {
@@ -371,6 +373,101 @@ EMBED
         </script>
 LIKE_FAQ
         $$body .= $js;
+        ## Show a new photoalbums interface only for logged-in users
+        my $remote = LJ::get_remote ();
+        if ($remote && $remote->can_upload_photo()) {
+            # in case of insert one photo or photo album
+            my $insert_photos = [];
+
+            my $albums_id = $POST{'albums_id'} || $GET{'albums_id'};
+            my $photos_id = $POST{'photos_id'} || $GET{'photos_id'};
+
+            my @photos = grep { $_ } map {
+                my $photo = LJ::Fotki::Photo->new ( url_id => $_, userid => $remote->userid );
+                $photo;
+            } split (/,/, $photos_id);
+
+            foreach my $album_id (split /,/, $albums_id) {
+                my $album = LJ::Fotki::Album->new ( url_id => $album_id, userid => $remote->userid );
+                next unless $album;
+                push @photos, @{$album->get_all_photos() || []};
+            }
+
+            $insert_photos = [ grep { $_ } map {
+                    my $photo = $_;
+
+                    my $res = $photo->is_valid ? {
+                        photo_desc  => $photo->desc,
+                        photo_title => $photo->title,
+                        photo_url   => @photos > 1 ? $photo->u100_url : $photo->u600_url,
+                        photo_id    => $photo->url_id,
+                    } : undef;
+                    $res;
+                } @photos ];
+
+            my $photo_sizes = LJ::JSON->to_json ( LJ::Fotki::Photo->get_photo_sizes() );
+            my $album_list = [];
+            my $album_list_json = '';
+    		my $available_space = '';
+            $album_list = LJ::Fotki::Album->get_albums ($remote->userid);
+            $album_list = [
+                map {
+                    my $album = $_;
+                    my $main_photo = $album->main_photo_url;
+                    {
+                        album_title     => $album->title,
+                        album_id        => $album->url_id,
+                    }
+                } @$album_list
+            ];
+            $album_list_json = LJ::JSON->to_json ( $album_list );
+            my $spaces = LJ::Fotki::UserSpace->get_spaces ( $remote );
+            $available_space = $spaces->[2] || 0;
+
+            my $auth_token = LJ::Auth->sessionless_auth_token ($LJ::DOMAIN_WEB."/pics/upload", user => $remote ? $remote->user : undef);
+            my $user_groups = LJ::JSON->to_json (LJ::Widget::Fotki::Photo->get_user_groups ($remote));
+            my $ljphoto_enabled = $remote->can_upload_photo();
+            
+			LJ::Widget::Fotki::Upload->render();
+		
+            $$body .= <<JS;
+    <script type="text/javascript">
+    	window.ljphotoEnabled = $ljphoto_enabled;
+        jQuery('#updateForm').photouploader({
+    		availableSpace: '$available_space',
+    		sizesData: $photo_sizes,
+            albumsData: $album_list_json,
+            privacyData: $user_groups,
+            type: 'upload',
+            guid: '$auth_token'
+        });
+    </script>
+JS
+        
+            if (@$insert_photos) {
+                my $insert_photos_json = LJ::JSON->to_json ( $insert_photos );
+    			$$body .= <<JS;
+    <script type="text/javascript">
+        jQuery('#updateForm')
+    		.photouploader({
+    			insertPhotosData: $insert_photos_json,
+	
+    	        type: 'add'
+    	    })
+    		.bind('htmlready', function (event, htmlOutput) {
+    			if (window.switchedRteOn) {
+    				CKEDITOR.instances.draft.insertHtml(htmlOutput);
+    			} else {
+    				jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
+    			}
+    		})
+    		.photouploader('show');		
+    </script>
+JS
+			
+            }
+        }
+        
         $$body .= LJ::Widget::SettingWindow->render;
 
         return;

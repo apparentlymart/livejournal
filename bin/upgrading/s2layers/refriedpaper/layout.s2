@@ -797,7 +797,7 @@ function EntryLite::print_linkbar() {
       if ($en.comments.count > 0 or $en.comments.screened) {
         $url  = $en.comments.read_url;
         $text = get_plural_phrase($en.comments.count, ("text_read_comments" + ($p.view == "friends" ? "_friends" : "")));
-        $linkbar = $linkbar + """<a href="$url#$*text_comments_id">$text""";
+        $linkbar = $linkbar + """<a href="$url">$text""";
         if($en.comments.screened) {
           $text    = $*text_month_screened_comments;
           $linkbar = $linkbar + """ $text""";
@@ -807,7 +807,7 @@ function EntryLite::print_linkbar() {
             if ($p.showspam) {
                 $linkbar = $linkbar + get_plural_phrase($en.comments.spam_counter, "text_read_spam_comments") + """$btwn_comments""";
             } else {
-                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($en.comments.spam_counter, "text_read_all_spam_comments") + """</a>$btwn_comments""";
+                $linkbar = $linkbar + """<a href=\"$en.comments.read_spam_url\">""" + get_plural_phrase($en.comments.spam_counter, "text_read_all_spam_comments") + """</a>$btwn_comments""";
             }
         }
       }
@@ -816,11 +816,11 @@ function EntryLite::print_linkbar() {
         $linkbar = $linkbar + "$*text_max_comments$btwn_comments";
       } else {
         if ($p.view == "entry") {
-            $p->print_reply_link({"target" => "topcomment", "linktext" => "$*text_post_comment", "reply_url" => $en.comments.post_url+"#$*text_addcomment_id"}); print " | ";
+            $p->print_reply_link({"target" => "topcomment", "linktext" => "$*text_post_comment"}); print " | ";
         } else {
             $url  = $en.comments.post_url;
             $text = get_plural_phrase(0, ("text_post_comment" + ($p.view == "friends" ? "_friends" : "")));
-            $linkbar = $linkbar + """<a href="$url#$*text_addcomment_id">$text</a>$btwn_comments""";
+            $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
         }
       }
     }
@@ -1357,7 +1357,6 @@ function EntryPage::print_body() {
   }
 
   if($.entry.comments.enabled) {
-    """<span id="$*text_comments_id"></span>""";
     if($.multiform_on) {
       $this->print_multiform_start();
     }
@@ -1409,7 +1408,6 @@ function ReplyPage::print_body() {
         $.entry->print_ebox();
         """</div><br /><hr size="1" /><br />""";
   }
-  """<span id="$*text_addcomment_id"></span>""";
   $.form->print();
 }
 

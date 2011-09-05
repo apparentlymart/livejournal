@@ -603,13 +603,10 @@ sub poptext {
                 my %metadata = $ldf->meta($code);
                 my $text     = $ldf->value($code);
 
+                $code = "$pfx$code";
                 if ( $code =~ /^[.]/ ) {
-                    unless ($pfx) {
-                        die "Code in file $filename_short can't start "
-                            . "with a dot: $code";
-                    }
-
-                    $code = "$pfx$code";
+                    die "Code in file $filename_short can't start "
+                        . "with a dot: $code";
                 }
 
                 # load existing items for target language

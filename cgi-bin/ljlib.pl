@@ -1267,12 +1267,6 @@ sub get_recent_items
         $after_sql = "AND jitemid > $afterid";
     }
 
-    my $before_sql = '';
-    my $beforeid = $opts->{'beforeid'} + 0;
-    if ($beforeid) {
-        $before_sql = "AND jitemid < $beforeid";
-    }
-
     my $posterwhere;
     if ($opts->{'posterid'} && $opts->{'posterid'} =~ /^(\d+)$/) {
         $posterwhere = " AND posterid=$1";
@@ -1294,7 +1288,7 @@ sub get_recent_items
                DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
                allowmask, eventtime, logtime
         FROM log2 USE INDEX ($sort_key)
-        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere $after_sql $before_sql $suspend_where
+        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere $after_sql $suspend_where
         ORDER BY journalid, $sort_key
         $sql_limit
     };

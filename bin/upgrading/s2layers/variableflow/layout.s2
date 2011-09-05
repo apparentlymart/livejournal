@@ -733,7 +733,7 @@ function CommentInfo::print() {
                 if ($p.showspam) {
                     """<li class="comments-hidespam">""" + get_plural_phrase($.spam_counter, "text_read_spam_comments") + """</li>""";
                 } else {
-                    """<li class="comments-showspam"><a href=\"$.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($.spam_counter, "text_read_all_spam_comments") + """</a></li>""";
+                    """<li class="comments-showspam"><a href=\"$.read_spam_url\">""" + get_plural_phrase($.spam_counter, "text_read_all_spam_comments") + """</a></li>""";
                 }
             }
         }
@@ -822,7 +822,7 @@ function ReplyPage::print_body() {
         $.entry->print_ebox();
         "</div>";
     }
-    """<div id="$*text_addcomment_id">""";
+    """<div id="commentform">""";
     $.form->print();
     """</div>""";
 }
@@ -835,7 +835,7 @@ function EntryPage::lay_print_pager() {
             print "<li class=\"current\">$i</li>";
         }
         else {
-            print "<li><a href=\""+$.comment_pages->url_of($i)+"#$*text_comments_id\">$i</a></li>";
+            print "<li><a href=\""+$.comment_pages->url_of($i)+"\">$i</a></li>";
         }
     }
     print "</ul>";
@@ -848,7 +848,6 @@ function EntryPage::print_body() {
         $.entry->print_ebox();
         "</div>";
     }
-    """<span id="$*text_comments_id"></span>""";
     $this->lay_print_pager();
     $this->print_comments($.comments);
     $this->lay_print_pager();

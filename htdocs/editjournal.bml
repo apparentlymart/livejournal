@@ -3,7 +3,6 @@ title=><?_ML .title _ML?>
 body<=
 <?_code
 {
-#line 7
     use strict;
     use vars qw(%GET %POST);
     BML::decl_params(_default => qr/./);
@@ -27,10 +26,9 @@ body<=
 
     my $mode = $GET{'mode'} || $POST{'mode'} || "init";
     if ($GET{'itemid'} || $POST{'itemid'}) { $mode = "edit"; }
-    my $only_me_checked = LJ::did_post() ? $POST{'only_me'} : $GET{'only_me'};
 
     my $ret;
-    my $getextra = undef;
+    my $getextra = $GET{'authas'} ? "?authas=$GET{'authas'}" : undef;
 
     LJ::need_res(qw(
                     stc/entry.css
@@ -44,67 +42,63 @@ body<=
                     js/photobucket_jw.js
                     ));
     
+    # are they asking to be authed as someone else?
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+
     return LJ::bad_input("You must be authenticated as a person.")
-        unless $remote->is_personal || $remote->is_identity;
+        unless $u->is_personal || $u->is_identity;
 
     # are we modify a community post?
     my $usejournal = $GET{'usejournal'} || $POST{'usejournal'} || $GET{'journal'};
-    undef $usejournal if $usejournal eq $remote->{'user'}; # ignore if it's the user
-    my $usejournal_u = LJ::load_user ($usejournal) || $remote;
-
-    my ($year, $month, $day) = ($POST{'year'} || $GET{'year'}, $POST{'month'} || $GET{'month'}, $POST{'day'} || $GET{'day'});
-    my $ymd = join "-", ($year, $month, $day);
-
-    my $show = $GET{'show'} || undef;
+    undef $usejournal if $usejournal eq $u->{'user'}; # ignore if it's the user
 
     # extra get arguments
     my $getextra;
+    $getextra .= "authas=$authas&" if $authas ne $u->{'user'};
     $getextra .= "usejournal=$usejournal&" if $usejournal;
-    $getextra .= "year=$year&month=$month&day=$day&" if $year && $month && $day;
-    $getextra .= "only_me=$only_me_checked&" if $only_me_checked;
     chop $getextra;
     $getextra = "?$getextra" if $getextra;
 
-    my $start_from = $GET{'start_from'} || 0;
-    my $items_per_page = 20;
-
     my $entry_chooser = sub {
+        my $ret;
         my $ref = shift;
         my %opts = @_;
 
-        my $ret;
-
-        my @res = @$ref;
+        my %res = %$ref;
         my $show_ad = $opts{show_ad} ? 1 : 0;
 
-        $ret .= ($opts{'prev'} > 0) ? "<a href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{prev}'>prev</a>, " : "";
-        $ret .= "<a href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{next}'>next</a><br/>"
-            if @res;
-
         $ret .= "<table style='width: 100%;'><tr><td>";
-        foreach my $e_raw (@res) {
-            my $entry = LJ::Entry->new_from_item_hash (LJ::load_user($usejournal) || $remote, $e_raw); 
+        my %props = ();
+        for (my $i=1; $i<=$res{'prop_count'}; $i++) {
+            $props{$res{"prop_${i}_itemid"}}->{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
+        }
 
-            my $edit_disable = 0;
-            if (
-                ($e_raw->{'posterid'} != $remote->userid)
-                || ($remote->is_readonly || ($usejournal_u && $usejournal_u->is_readonly))
-            ) {
-                $edit_disable++;
-            }
+        my $ev_count = $res{'events_count'};
+        for (my $i=1; $i<=$ev_count; $i++) {
+            my $itemid = $res{"events_${i}_itemid"};
+            my $ditemid = $itemid * 256 + $res{"events_${i}_anum"};
 
-            my $poster = $usejournal ? LJ::ljuser(LJ::load_userid($entry->posterid)) : "";
+            $ret .= "<?hr?><table><tr valign='top'><td align='middle'>";
+            $ret .= "<form method='post' action='editjournal.bml$getextra'>\n";
+            $ret .= LJ::html_hidden('itemid',$ditemid,'mode',"edit");
+            $ret .= LJ::html_submit("itemid-$ditemid",'Edit this Entry');
+            $ret .= "</form>";
+            $ret .= "</td><td>";
 
-            $ret .= "<?hr?><table width='100%'><tr valign='top'><td>";
+            $ret .= " <b><label for='itemid-$ditemid'>" . $res{"events_${i}_eventtime"} . "</label></b>";
+            $ret .= " (Posted by: " . LJ::ljuser($res{"events_${i}_poster"}) . ")" if $usejournal;
 
             ### security indicator
             my $sec = ' ';
-            if ($entry->security eq "private") {
+            if ($res{"events_${i}_security"} eq "private") {
                 $sec .= BML::fill_template("securityprivate");
-            } elsif ($entry->security eq "usemask") {
-                if ($entry->allowmask == 0) { # custom security with no group -- essentially private
+            } elsif ($res{"events_${i}_security"} eq "usemask") {
+                if ($res{"events_${i}_allowmask"} == 0) { # custom security with no group -- essentially private
                     $sec .= BML::fill_template("securityprivate");
-                } elsif ($entry->allowmask > 1) { # custom group
+                } elsif ($res{"events_${i}_allowmask"} > 1) { # custom group
                     $sec .= BML::fill_template("securitygroups");
                 } else { # friends only
                     $sec .= BML::fill_template("securityprotected");
@@ -112,36 +106,19 @@ body<=
             }
             $ret .= $sec;
 
-            $ret .= "<a href='".$entry->url."'>";
-            if (my $subj = $entry->subject_text) {
-                $ret .= LJ::ehtml($subj);
-            } else {
-                $ret .= BML::ml('.event.no_subject.title');
-            }
-            $ret .= "</a>";
+            if (my $subj = $res{"events_${i}_subject"}) {
+                LJ::CleanHTML::clean_subject_all(\$subj);
+                  $ret .= " <i>" . LJ::ehtml($subj) . "</i>";
+              }
             $ret .= "<br />\n";
-            my ($year, $mon, $mday, $hour, $min) = split(/\D/, LJ::TimeUtil->alldatepart_s2($entry->{'eventtime'}));
-            my $monthlong = LJ::Lang::month_long($mon);
-            $ret .= $poster . " <label for='itemid-$entry->ditemid'>" . "$monthlong $mday, $year, $hour:$min" . "</label></br>";
 
-            my $event = LJ::ehtml(LJ::durl($entry->event_raw));
+            my $event = LJ::ehtml(LJ::durl($res{"events_${i}_event"}));
             $event =~ s!\n!<br />!g;
             $ret .= $event;
-            if (my @taglist = $entry->tags) {
-                $ret .= "<br/><b>Tags:</b> " . LJ::ehtml(join ",", @taglist);
+            if (my $taglist = $props{$itemid}{'taglist'}) {
+                $ret .= "<br/><b>Tags:</b> " . LJ::ehtml($taglist);
             }
-            $ret .= "</td><td align='right'>";
-            $ret .= "<form method='post' action='editjournal.bml$getextra'>\n";
-            $ret .= LJ::form_auth();
-            $ret .= LJ::html_hidden('itemid',$entry->ditemid,'mode',"edit");
-            if (!$edit_disable) {
-                $ret .= LJ::html_submit("itemid-$entry->ditemid", 'Edit this Entry');
-            } else {
-                $ret .= LJ::html_submit("action:delete", 'Delete this Entry');
-            }
-            $ret .= "</form>";
             $ret .= "</td></tr></table>\n";
-
         }
         $ret .= "</td>";
         if ($show_ad) {
@@ -149,10 +126,12 @@ body<=
             $ret .= "<td valign='top'>$ad</td>" if $ad;
         }
         $ret .= "</tr></table>";
+
         return $ret;
     };
 
-    if ($mode eq "edit") {
+    if ($mode eq "edit")
+    {
         # user object for community if we're modifying one
         my $usejournal_u;
         if ($usejournal) {
@@ -172,7 +151,7 @@ body<=
             my $anum = $ditemid % 256;
             my $itemid = int($ditemid / 256);
 
-            my $u_for_entry = $usejournal ? $usejournal_u : $remote;
+            my $u_for_entry = $usejournal ? $usejournal_u : $u;
             my $entry_obj = LJ::Entry->new($u_for_entry, ditemid => $ditemid);
 
             # do getevents request
@@ -180,14 +159,14 @@ body<=
             LJ::do_request({ 'mode' => 'getevents',
                              'selecttype' => 'one',
                              'ver' => $LJ::PROTOCOL_VER,
-                             'user' => $remote->{'user'},
+                             'user' => $u->{'user'},
                              'usejournal' => $usejournal,
                              'itemid' => $itemid,
-                             ($POST{'my_posts_only'}) ? ('posterid' =>  $remote->{'userid'}) : (),
+                             ($POST{'my_posts_only'}) ? ('posterid' =>  $u->{'userid'}) : (),
                            },
                            \%res,
                            { "noauth" => 1,
-                             'u' => $remote }
+                             'u' => $u }
                            );
 
             # was there a protocol error?
@@ -207,14 +186,14 @@ body<=
             my $disabled_save = 0;
             my $disabled_delete = 0;
             my $disabled_spamdelete = 0;
-            if ($usejournal && $res{'events_1_poster'} ne $remote->{'user'}) {
-                $disabled_delete = ! LJ::can_delete_journal_item($remote, $usejournal_u, $itemid);
+            if ($usejournal && $res{'events_1_poster'} ne $u->{'user'}) {
+                $disabled_delete = ! LJ::can_delete_journal_item($u, $usejournal_u, $itemid);
                 $disabled_save++;
             }
-            $disabled_spamdelete = $disabled_delete || !$usejournal || ($res{'events_1_poster'} eq $remote->{'user'});
+            $disabled_spamdelete = $disabled_delete || !$usejournal || ($res{'events_1_poster'} eq $u->{'user'});
 
             # read-only posters and journals cannot be edited
-            if (!$disabled_save && ($remote->is_readonly || ($usejournal_u && $usejournal_u->is_readonly))) {
+            if (!$disabled_save && ($u->is_readonly || ($usejournal_u && $usejournal_u->is_readonly))) {
                 $disabled_save++;
             }
 
@@ -242,7 +221,7 @@ body<=
 
                 my %req = (
                             'ver' => $LJ::PROTOCOL_VER,
-                            'username' => $remote->{'user'},
+                            'username' => $u->{'user'},
                             'usejournal' => $usejournal,
                             'itemid' => $itemid,
                             );
@@ -257,7 +236,7 @@ body<=
                 # if the action is to delete it, then let's note that
                 if ($POST{'action:delete'} || $POST{'action:deletespam'}) {
                     # now log the event created above
-                    ($usejournal ? $usejournal_u : $remote)->log_event('delete_entry', {
+                    ($usejournal ? $usejournal_u : $u)->log_event('delete_entry', {
                             remote => $remote,
                             actiontarget => $ditemid,
                             method => 'web',
@@ -271,7 +250,7 @@ body<=
                     delete $req{$k};
                 }
                 my $err = 0;
-                my $res = LJ::Protocol::do_request('editevent', \%req, \$err, { 'noauth' => 1, 'u' => $remote });
+                my $res = LJ::Protocol::do_request('editevent', \%req, \$err, { 'noauth' => 1, 'u' => $u });
 
                 # check response
                 unless ($res) {
@@ -279,7 +258,7 @@ body<=
                 }
 
                 my $deleted = $req{event} ? 0 : 1;
-                my $journalu = $usejournal ? $usejournal_u : $remote;
+                my $journalu = $usejournal ? $usejournal_u : $u;
                 my $j_base = $journalu->journal_base;
                 my $entry_url = LJ::item_link($journalu, $itemid, $res->{anum});
 
@@ -448,6 +427,105 @@ body<=
 LIKE_FAQ
             $ret .= $js;
 	
+            ## Show a new photoalbums interface only for logged-in users
+            my $remote = LJ::get_remote ();
+            if ($remote) {
+                # in case of insert one photo or photo album
+                my $insert_photos = [];
+                if ($remote) {
+                    my $albums_id = $POST{'albums_id'} || $GET{'albums_id'};
+                    my $photos_id = $POST{'photos_id'} || $GET{'photos_id'};
+
+                    my @photos = grep { $_ } map {
+                        my $photo = LJ::Fotki::Photo->new ( url_id => $_, userid => $remote->userid );
+                        $photo;
+                    } split (/,/, $photos_id);
+
+                    foreach my $album_id (split /,/, $albums_id) {
+                        my $album = LJ::Fotki::Album->new ( url_id => $album_id, userid => $remote->userid );
+                        next unless $album;
+                        push @photos, @{$album->get_all_photos() || []};
+                    }
+
+                    $insert_photos = [ grep { $_ } map {
+                            my $photo = $_;
+
+                            my $res = $photo->is_valid ? {
+                                photo_desc  => $photo->desc,
+                                photo_title => $photo->title,
+                                photo_url   => @photos > 1 ? $photo->u100_url : $photo->u600_url,
+                                photo_id    => $photo->url_id,
+                            } : undef;
+                            $res;
+                        } @photos ];
+                }
+
+                my $photo_sizes = LJ::JSON->to_json ( LJ::Fotki::Photo->get_photo_sizes() );
+                my $album_list = [];
+                my $album_list_json = '';
+        		my $available_space = '';
+                $album_list = LJ::Fotki::Album->get_albums ($remote->userid);
+                $album_list = [
+                    map {
+                        my $album = $_;
+                        my $main_photo = $album->main_photo_url;
+                        {
+                            album_title     => $album->title,
+                            album_id        => $album->url_id,
+                        }
+                    } @$album_list
+                ];
+                $album_list_json = LJ::JSON->to_json ( $album_list );
+                my $spaces = LJ::Fotki::UserSpace->get_spaces ( $remote );
+                $available_space = $spaces->[2] || 0;
+
+                my $auth_token = LJ::Auth->sessionless_auth_token ($LJ::DOMAIN_WEB."/pics/upload", user => $remote ? $remote->user : undef);
+                my $user_groups = LJ::JSON->to_json (LJ::Widget::Fotki::Photo->get_user_groups ($remote));
+        		my $comm = LJ::load_user($LJ::LJPHOTO_ALLOW_FROM_COMMUNITY);
+        		my $ljphoto_enabled = $remote && $remote->is_mutual_friend($comm) ? 1 : 0;
+                
+				LJ::Widget::Fotki::Upload->render();
+
+                $ret .= <<JS;
+        <script type="text/javascript">
+        	window.ljphotoEnabled = $ljphoto_enabled;
+            jQuery('#updateForm').photouploader({
+        		availableSpace: '$available_space',
+        		sizesData: $photo_sizes,
+                albumsData: $album_list_json,
+                privacyData: $user_groups,
+                type: 'upload',
+                guid: '$auth_token'
+            });
+        </script>
+JS
+
+                if (@$insert_photos) {
+                    my $insert_photos_json = LJ::JSON->to_json ( $insert_photos );
+        			$ret .= <<JS;
+        <script type="text/javascript">
+            jQuery('#updateForm')
+        		.photouploader({
+        			insertPhotosData: $insert_photos_json,
+
+        	        type: 'add'
+        	    })
+        		.bind('htmlready', function (event, htmlOutput) {
+        			if (window.switchedRteOn) {
+        				CKEDITOR.instances.draft.insertHtml(htmlOutput);
+        			} else {
+        				jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
+        			}
+        		})
+        		.photouploader('show');		
+        </script>
+JS
+
+                }
+            }
+            
+            
+            
             $ret .= "</td>";
             my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
             if ($ad) {
@@ -466,6 +544,7 @@ LIKE_FAQ
             # -- this is a hack, should be done by weblib and pushed into \$$head above
             #    in a way which is compatible with both this page and update.bml
             my $is_sup = LJ::SUP->is_remote_sup() ? 1 : 0;
+
             LJ::need_string('entryform.close.confirm');
 
             $$head .= qq|
@@ -505,10 +584,10 @@ LIKE_FAQ
         my %req = (
                    'mode' => 'getevents',
                    'ver'  => $LJ::PROTOCOL_VER,
-                   'user' => $remote->{'user'},
+                   'user' => $u->{'user'},
                    'usejournal' => $usejournal,
                    'truncate' => 300,
-                    ($POST{'my_posts_only'}) ? ('posterid' =>  $remote->{'userid'}) : (),
+                    ($POST{'my_posts_only'}) ? ('posterid' =>  $u->{'userid'}) : (),
                    );
 
         # last 1
@@ -528,7 +607,7 @@ LIKE_FAQ
         }
 
         # do getevents request
-        LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $remote });
+        LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $u });
 
         # check response
         unless ($res{'success'} eq "OK") {
@@ -562,80 +641,83 @@ LIKE_FAQ
 
         $ret .= "<table style='width: 100%;'><tr><td>";
 
+        # user switcher
+        $ret .= "<form action='editjournal.bml' method='get'>\n";
+        $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'}, 'type' => 'P' });
+        $ret .= "</form>\n\n";
+
         # header
         $ret .= "<?p " . BML::ml('.desc',
                                 {'aopts' => "href='$LJ::SITEROOT/editprivacy.bml'"})
                  . " p?>\n";
 
         # edit form
-
-
         $ret .= "<form action='editjournal.bml$getextra' method='post'>\n";
-        $ret .= "Show entries 
-        <input type='text' name='year' value='$year'>
-        <input type='text' name='month' value='$month'>
-        <input type='text' name='day' value='$day'>
-        or <a href='editjournal.bml?show=recent&mode=init'>back to recent entries</a><br/>";
-        $ret .= LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'maxlength' => '15', 'value' => $GET{'usejournal'} || $POST{'usejournal'} });
-        $ret .= LJ::html_submit(undef, $ML{'.btn.search'});
-        $ret .= "<br/>" . LJ::html_check({ name => 'only_me', id => 'only_me',
-                                value => '1', selected =>  $only_me_checked });
-        $ret .= "<label for='only_me'>Only my entries</label><br/>"; 
+        $ret .= LJ::html_hidden("mode","edit");
+        $ret .= "<?standout <table>\n";
+
+        # view type
+        $ret .= "<tr valign=\"top\"><td>$ML{'.viewwhat'}</td>\n<td>\n";
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'selecttype', 'id' => 'selecttype-last',
+                                 'value' => 'last', 'selected' => 1 });
+        $ret .= "<label for='selecttype-last'>$ML{'.recententry'}</label><br />\n";
+
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'selecttype',
+                                 'id' => 'selecttype-lastn', 'value' => 'lastn' }) . " ";
+        $ret .= LJ::html_text({ 'name' => 'howmany', 'size' => '3', 'maxlength' => '2', 'value' => '20',
+                                'onchange' => "checkRadioButton('selecttype-lastn');" }) . " ";
+        $ret .= "<label for='selecttype-lastn'>$ML{'.recententries'}</label><br />\n";
+
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'selecttype',
+                                 'id' => 'selecttype-day', 'value' => 'day' });
+        $ret .= "<label for='selecttype-day'>$ML{'.certainday'}</label>";
+
+        my @time = localtime(time);
+        my $mday = sprintf("%02d", $time[3]);
+        my $mon = sprintf("%02d", $time[4] + 1);
+        my $year = $time[5] + 1900;
+
+        $ret .= LJ::html_text({ 'name' => 'year', 'size' => '5', 'maxlength' => '4', 'value' => $year,
+                                'onchange' => "checkRadioButton('selecttype-day');" }) . "-";
+        $ret .= LJ::html_text({ 'name' => 'month', 'size' => '3', 'maxlength' => '2', 'value' => $mon,
+                                'onchange' => "checkRadioButton('selecttype-day');" }) . "-";
+        $ret .= LJ::html_text({ 'name' => 'day', 'size' => '3', 'maxlength' => '2', 'value' => $mday,
+                                'onchange' => "checkRadioButton('selecttype-day');" }) . "\n";
+
+        $ret .= "</td></tr>\n";
+
+        # use journal
+        $ret .= "<tr valign=\"top\"><td align='right'>$ML{'.in'}</td>\n<td>\n";
+        $ret .= LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'maxlength' => '15', 'value' => $GET{'usejournal'} }) . " ";
+        $ret .= " (optional)</br>";
+        $ret .= LJ::html_check({ 'name' => 'my_posts_only', 'value' => 1 });
+        $ret .= " $ML{'.my_posts_only'}";
+        $ret .= "</td></tr>";
+
+        # submit button
+        $ret .= "<tr><td>&nbsp;</td><td>" . LJ::html_submit(undef, $ML{'.btn.proceed'}) . "</td></tr>\n";
+
+        $ret .= "</table> standout?>\n";
         $ret .= "</form>\n";
-        $ret .= "<br/>";
 
-        my $err = '';
-        my $usejournal_u = LJ::load_user ($usejournal || $remote->{'user'});
-        my @recent_entries = ();
-        my %entry_ids = ();
-        my $prev_page_id = ($start_from > 0) ? ($start_from + $items_per_page) : 0;
-        my $ymd = join "/", ($year, $month, $day);
-        my %ymd_req = ($year && $month && $day && $show ne 'recent') ? ( ymd => $ymd ) : ();
-        while ($LJ::MAX_SCROLLBACK_LASTN = 50000, 
-            my @recent = LJ::get_recent_items({
-                itemshow  => $items_per_page,
-                err       => \$err,
-                userid    => $usejournal_u->{userid},
-                clusterid => $usejournal_u->{clusterid},
-                remote    => $remote,
-                dateformat => 'S2',
-                beforeid  => $start_from,
-                order     => 'logtime',
-                %ymd_req,
-                ($only_me_checked) ? ('posterid' =>  $remote->{'userid'}) : (),
-            })) {
+        my %res;
+        my %req = (
+            mode => 'getevents',
+            ver  => $LJ::PROTOCOL_VER,
+            user => $u->user,
+            usejournal => $usejournal,
+            truncate => 300,
+            selecttype => 'lastn',
+            howmany => 5,
+            ($POST{'my_posts_only'}) ? ('posterid' =>  $u->{'userid'}) : (),
+        );
 
-            ## do not process entries twice
-            @recent = grep { $entry_ids{$_->{'itemid'}} ? 0 : 1 } @recent;
-            last unless @recent;
+        # do getevents request
+        LJ::do_request(\%req, \%res, { noauth => 1, u => $u });
 
-            ## store fetched itemids
-            foreach my $item (@recent) {
-                $entry_ids{$item->{'itemid'}} = 1;
-            }
-
-            ## Filter records uneditable for remote user
-            @recent = grep {
-                my $entry = LJ::Entry->new_from_item_hash ($usejournal_u, $_);
-                my $poster = $entry->poster;
-                if ($poster eq $remote || $remote->can_manage ($usejournal_u)) {
-                    1;
-                } else {
-                    0;
-                }
-            } @recent;
-
-            push @recent_entries, @recent;
-
-            my @temp_sort = sort { $a->{itemid} <=> $b->{itemid} } @recent_entries;
-            $start_from = $temp_sort[0]->{'itemid'};
-
-            if (@recent_entries == $items_per_page) {
-                last;
-            }
+        if ($res{success} eq "OK" && $res{events_count} > 0) {
+            $ret .= $entry_chooser->(\%res);
         }
-
-        $ret .= $entry_chooser->(\@recent_entries, prev => $prev_page_id, 'next' => $start_from);
 
         my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
         if ($ad) {

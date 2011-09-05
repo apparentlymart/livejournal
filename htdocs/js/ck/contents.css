@@ -115,7 +115,6 @@ form.ljpoll {
 /* LJ Like buttons */
 .lj-like {
 	overflow: hidden;
-	min-height: 13px;
 	padding: 13px 20px;
 	margin-top: 20px;
 	background: #D2D2D2;
@@ -126,7 +125,7 @@ form.ljpoll {
 		margin-right: 15px;
 		background: url(/js/ck/images/lj-like-buttons.png) no-repeat;
 		vertical-align: middle;
-		text-indent: -3333px;
+		font-size: 0;
 		cursor: pointer;
 		}
 	.lj-like .fb {

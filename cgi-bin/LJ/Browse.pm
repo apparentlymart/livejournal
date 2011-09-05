@@ -999,12 +999,6 @@ sub search_posts {
             push @found_posts, @$post_ids if $post_ids;
         }
         @entries =
-            map {
-                {
-                    entry   => $_,
-                    vert_id => $vertical->vert_id,
-                }
-            }
             grep {
                 ## Filter off suspended entries, deleted communities, suspended posters
                 if ($_ && $_->valid) {
@@ -1029,12 +1023,6 @@ sub search_posts {
                 { Slice => {} }
             );
             @entries =
-                map {
-                    {
-                        entry   => $_,
-                        vert_id => $vertical ? $vertical->vert_id : 0,
-                    }
-                }
                 grep {
                     ## Filter off suspended entries, deleted communities, suspended posters
                     if ($_ && $_->valid) {

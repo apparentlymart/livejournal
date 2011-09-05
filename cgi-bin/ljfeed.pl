@@ -606,8 +606,7 @@ sub create_view_atom
     my $posteru = LJ::load_userids( map { $_->{posterid} } @$cleanitems);
 
     # output individual item blocks
-    foreach my $it ( @$cleanitems ) {
-        my $obj = shift @$entrylist;
+    foreach my $it ( @$cleanitems )     {
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
         my $poster = $posteru->{$it->{posterid}};
@@ -634,7 +633,7 @@ sub create_view_atom
         }
 
         $entry->add_link(
-            $make_link->( 'alternate', 'text/html', $obj->url ) #"$j->{'link'}$ditemid.html" )
+            $make_link->( 'alternate', 'text/html', "$j->{'link'}$ditemid.html" )
         );
         $entry->add_link(
             $make_link->( 'self', 'text/xml', "$api/?itemid=$ditemid" )

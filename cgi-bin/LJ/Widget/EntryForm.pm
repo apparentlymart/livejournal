@@ -3,11 +3,6 @@ package LJ::Widget::EntryForm;
 use strict;
 use base 'LJ::Widget';
 
-use LJ::Fotki::Photo;
-use LJ::Fotki::Album;
-use LJ::Widget::Fotki::Upload;
-
-
 sub set_data {
     my ($self, $opts, $head, $onload, $errors, $js) = @_;
     $self->{'opts'} = $opts;
@@ -1365,106 +1360,6 @@ sub render_submitbar_block {
     return $out;
 }
 
-sub render_ljphoto_block {
-    my ($self) = @_;
-
-    my $opts = $self->opts;
-    my $out = '';
-
-    my $remote = $self->remote ();
-
-    # in case of insert one photo or photo album
-    my $insert_photos = [];
-
-    my $albums_id = $opts->{'albums_id'};
-    my $photos_id = $opts->{'photos_id'};
-
-    my @photos = grep { $_ } map {
-        my $photo = LJ::Fotki::Photo->new ( url_id => $_, userid => $remote->userid );
-        $photo;
-    } split (/,/, $photos_id);
-
-    foreach my $album_id (split /,/, $albums_id) {
-        my $album = LJ::Fotki::Album->new ( url_id => $album_id, userid => $remote->userid );
-        next unless $album;
-        push @photos, @{$album->get_all_photos() || []};
-    }
-
-    $insert_photos = [ grep { $_ } map {
-            my $photo = $_;
-
-            my $res = $photo->is_valid ? {
-                photo_desc  => $photo->desc,
-                photo_title => $photo->title,
-                photo_url   => @photos > 1 ? $photo->u100_url : $photo->u600_url,
-                photo_id    => $photo->url_id,
-            } : undef;
-            $res;
-        } @photos ];
-
-    my $photo_sizes = LJ::JSON->to_json ( LJ::Fotki::Photo->get_photo_sizes() );
-    my $album_list = [];
-    my $album_list_json = '';
-    my $available_space = '';
-    $album_list = LJ::Fotki::Album->get_albums ($remote->userid);
-    $album_list = [
-        map {
-            my $album = $_;
-            my $main_photo = $album->main_photo_url;
-            {
-                album_title     => $album->title,
-                album_id        => $album->url_id,
-            }
-        } @$album_list
-    ];
-    $album_list_json = LJ::JSON->to_json ( $album_list );
-    my $spaces = LJ::Fotki::UserSpace->get_spaces ( $remote );
-    $available_space = $spaces->[2] || 0;
-
-    my $auth_token = LJ::Auth->sessionless_auth_token ($LJ::DOMAIN_WEB."/pics/upload", user => $remote ? $remote->user : undef);
-    my $user_groups = LJ::JSON->to_json (LJ::Widget::Fotki::Photo->get_user_groups ($remote));
-    my $ljphoto_enabled = $remote->can_upload_photo();
-
-    LJ::Widget::Fotki::Upload->render();
-       
-    $out .= <<JS;
-<script type="text/javascript">
-    window.ljphotoEnabled = $ljphoto_enabled;
-    jQuery('#updateForm').photouploader({
-        availableSpace: '$available_space',
-        sizesData: $photo_sizes,
-        albumsData: $album_list_json,
-        privacyData: $user_groups,
-        type: 'upload',
-        guid: '$auth_token'
-    });
-</script>
-JS
- 
-    if (@$insert_photos) {
-        my $insert_photos_json = LJ::JSON->to_json ( $insert_photos );
-        $out .= <<JS;
-<script type="text/javascript">
-    jQuery('#updateForm')
-        .photouploader({
-            insertPhotosData: $insert_photos_json,
-            type: 'add'
-        })
-        .bind('htmlready', function (event, htmlOutput) {
-            if (window.switchedRteOn) {
-                CKEDITOR.instances.draft.insertHtml(htmlOutput);
-            } else {
-                jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
-            }
-        })
-        .photouploader('show');
-</script>
-JS
-    }
-
-    return $out;
-}
-
 sub render_body {
     my ($self) = @_;
 
@@ -1610,8 +1505,6 @@ sub render_body {
         } else {
             $$js .= 'usePlainText();';
         }
-        my $ljphoto_enabled = $remote ? $remote->can_upload_photo() : 0;
-        $$js .= "window.ljphotoEnabled = $ljphoto_enabled;";
         $$js = $self->wrap_js($$js);
 
     }
@@ -1625,10 +1518,6 @@ sub render_body {
     $out .= $self->render_options_block;
     $out .= LJ::run_hook('entryform_pre_submitbar', $opts);
     $out .= $self->render_submitbar_block;
-
-    ## Show a new photoalbums interface only for logged-in users
-    $out .= $self->render_ljphoto_block
-        if $remote && $remote->can_upload_photo();
 
     $out .= "</div><!-- end #entry-form-wrapper -->\n\n";
 

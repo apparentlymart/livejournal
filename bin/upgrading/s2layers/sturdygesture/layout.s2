@@ -723,9 +723,9 @@ function CommentInfo::print_postlink() {
         print safe "$*text_max_comments";
     } else {
         if ($p.view == "entry") {
-                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.post_url+"#$*text_addcomment_id"});
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
         } else {
-        print safe "<a href=\"$.post_url#$*text_addcomment_id\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
        }
     }
 }
@@ -736,19 +736,16 @@ function CommentInfo::print() {
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        if (($.show_postlink and $.show_readlink) or ($.spam_counter > 0)) {
+        if ($.show_postlink and $.show_readlink) {
             " | ";
         }
-        if ($p.view == "entry" and $.spam_counter > 0 and $.read_spam_url != "") {
-            if ($p.showspam) {
-                print safe get_plural_phrase($.spam_counter, "text_read_spam_comments");
-            } else {
-                print safe """<a href=\"$.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($.spam_counter, "text_read_all_spam_comments") + """</a>""";
-            }
-        }
         if ($.show_readlink) {
-            if ($.spam_counter > 0) {
-                """ | """;
+            if ($p.view == "entry" and $.spam_counter > 0 and $.read_spam_url != "") {
+                if ($p.showspam) {
+                    print safe get_plural_phrase($.spam_counter, "text_read_spam_comments") + """ | """;
+                } else {
+                    print safe """<a href=\"$.read_spam_url\">""" + get_plural_phrase($.spam_counter, "text_read_all_spam_comments") + """</a> | """;
+                }
             }
             $this->print_readlink();
         }
@@ -780,7 +777,6 @@ function EntryPage::print_body() {
         $.entry->print_ebox();
         "</div>";
     }
-    """<span id="$*text_comments_id"></span>""";
     if ($this.multiform_on) {
         $this->print_multiform_start();
     }
@@ -961,7 +957,7 @@ function ReplyPage::print_body() {
         "</div>";
     }
 
-    """<div class="box" style="margin-left: 25px;" id="$*text_addcomment_id">\n""";
+    """<div class="box" style="margin-left: 25px;">\n""";
     $.form->print();
     "</div>\n";
 

@@ -57,22 +57,6 @@ sub _build_tree {
     return @tree;
 }
 
-sub _get_recent_posts {
-
-    my @all_verticals = LJ::Vertical->load_all ();
-
-    my @posts = map {
-        my $vertical = $_;
-        my @comms = $vertical->get_communities;
-        my @journals = map {
-            $_->{'userid'},
-        } @comms;
-        my @recent_posts = LJ::Browse->search_posts ( comms => \@journals, page_size => 3, vertical => $vertical );
-    } @all_verticals;
-
-    return \@posts;
-}
-
 sub _get_spotlight_communities {    # Load communities saved by spotlight admin
     my @comms = ();
 
@@ -117,106 +101,6 @@ sub _get_spotlight_communities {    # Load communities saved by spotlight admin
     return @comms;
 }
 
-sub render_posts {
-    my $posts = shift;
-
-    my %args = @_;
-    my $post_skip = $args{'post_skip'};
-    my $post_last = $args{'post_last'};
-
-    my $post_count = 0;
-    my @tmpl_posts = ();
-    my $vertical = undef;
-    my @temp_array_post = ();
-    foreach my $entry_href (@$posts) {
-        my $entry = $entry_href->{'entry'};
-
-        next unless $entry;
-
-        next unless $entry->valid;
-
-        next unless 1;## This entry is inappropriate language in the subject or body
-
-        next unless $entry->visible_to (undef);
-
-        $post_count++;
-        next if $post_count <= $post_skip || $post_count > $post_last;
-
-        $vertical = LJ::Vertical->new ( vert_id => $entry_href->{'vert_id'} )
-            unless $vertical;
-
-        my $logtime = LJ::TimeUtil->mysqldate_to_time($entry->{logtime}, 0);
-        my $secondsold = $logtime ? time() - $logtime : undef;
-        my $poster = $entry->poster;
-        my $userpic = $entry->userpic;
-        my @tags = $entry->tags;
-        my $subject = $entry->subject_text || '***';
-        my $trimmed_subj = LJ::html_trim ($subject, 60);
-        my $event = $entry->event_raw;
-
-        my $parsed = LJ::Browse::Parser->do_parse (
-            text        => $event,
-            remove_tags => [ 'b', 'p', 'div', 'span', 'strong', 'font' ],
-            max_len     => 400,
-            crop_image  => 1,
-            entry       => $entry,
-            need_resize => 0,
-        );
-        $event = $parsed->{'text'};
-        my $images = $parsed->{'images'};
-
-        my $sharing_js = '';
-        if ( LJ::is_enabled('sharing') ) {
-            LJ::Share->request_resources;
-            $sharing_js = LJ::Share->render_js({ 'entry' => $entry });
-        }
-
-        if ($vertical && $entry_href->{'vert_id'} != $vertical->vert_id) {
-            my @posts = @temp_array_post;
-            push @tmpl_posts, {
-                vertical_name   => $vertical->name,
-                vertical_url    => $vertical->url,
-                vertical_posts  => \@posts,
-            };
-            @temp_array_post = ();
-            $vertical = LJ::Vertical->new ( vert_id => $entry_href->{'vert_id'} );
-        }
-
-        push @temp_array_post, {
-            subject         => $trimmed_subj,
-            is_subject_trimmed => $subject ne $trimmed_subj ? 1 : 0,
-            userpic         => $userpic ? $userpic->url : '',
-            posted_ago      => LJ::TimeUtil->ago_text($secondsold),
-            poster          => $poster ? LJ::ljuser($poster) : '?',
-            tags            => scalar @tags ? [ map { { tag => $_ } } @tags ] : '',
-            mood            => $entry->prop('current_mood') || LJ::mood_name($entry->prop('current_moodid')) || '',
-            music           => $entry->prop('current_music'),
-            location        => $entry->prop('current_location'),
-            post_text       => $event,
-            posted_to       => LJ::ljuser(LJ::get_username($entry->journalid)),
-            url_to_post     => $entry->url,
-            photo_for_post  => scalar @$images ? $images->[0] : '',
-            comments_count  => $entry->reply_count,
-            is_need_more    => $parsed->{'is_removed_video'} || $parsed->{'is_text_trimmed'},
-            sharing_js      => $sharing_js,
-            vertical_name   => $vertical->name,
-            vertical_url    => $vertical->url,
-        };
-    }
-    my @posts = @temp_array_post;
-    push @tmpl_posts, {
-        vertical_name   => $vertical->name,
-        vertical_url    => $vertical->url,
-        vertical_posts  => \@posts,
-    } if @posts;
-
-    return {
-        posts       => \@tmpl_posts,
-        post_count  => $post_count,
-    }
-
-}
-
 sub render_body {
     my $class = shift;
     my %opts = @_;
@@ -233,7 +117,7 @@ sub render_body {
     ) or die "Can't open template: $!";
 
     my $vertical = LJ::Vertical->load_by_url($uri);
-    $view = "recent_posts" unless $view;
+    $view = "recent_posts" unless $vertical;
 
     $$windowtitle = $vertical ? $vertical->name : $class->ml('widget.browse.windowtitle');
 
@@ -340,11 +224,6 @@ sub render_body {
         $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $cat->display_name, ljadwrapper => 1 });
     } else {
         @comms = _get_spotlight_communities();  # Show spotlight communities by default
-        if (!@comms && $view eq 'communities') {
-            @comms = LJ::Vertical->get_communities(
-                is_need_child   => 1, 
-            );
-        }
         $ad = LJ::get_ads({ location => 'bml.explore/novertical', ljadwrapper => 1 });
     }
 
@@ -376,17 +255,63 @@ sub render_body {
                 };
         }
     } else {
-        if (!$vertical && !@comms) {
-            my $posts = _get_recent_posts ();
-            my $result = render_posts ( $posts, post_skip => $post_skip, post_last => $post_last );
-            @tmpl_posts = @{$result->{'posts'}};
-            $post_count = $result->{'post_count'};
-        } else {
-            my @posts = LJ::Browse->search_posts ( comms => [ map { $_->{userid} } @comms ], page_size => 300, search_str => $search_str );
+        my @posts = LJ::Browse->search_posts ( comms => [ map { $_->{userid} } @comms ], page_size => 300, search_str => $search_str );
 
-            my $result = render_posts ( \@posts, post_skip => $post_skip, post_last => $post_last );
-            @tmpl_posts = @{$result->{'posts'}};
-            $post_count = $result->{'post_count'};
+        foreach my $entry (@posts) {
+            next unless $entry;
+            next unless $entry->valid;
+
+            next unless 1;## This entry is inappropriate language in the subject or body
+
+            next unless $entry->visible_to (undef);
+
+            $post_count++;
+            next if $post_count <= $post_skip || $post_count > $post_last;
+
+            my $logtime = LJ::TimeUtil->mysqldate_to_time($entry->{logtime}, 0);
+            my $secondsold = $logtime ? time() - $logtime : undef;
+            my $poster = $entry->poster;
+            my $userpic = $entry->userpic;
+            my @tags = $entry->tags;
+            my $subject = $entry->subject_text || '***';
+            my $trimmed_subj = LJ::html_trim ($subject, 60);
+            my $event = $entry->event_raw;
+
+            my $parsed = LJ::Browse::Parser->do_parse (
+                text        => $event,
+                remove_tags => [ 'b', 'p', 'div', 'span', 'strong', 'font' ],
+                max_len     => 400,
+                crop_image  => 1,
+                entry       => $entry,
+                need_resize => 0,
+            );
+            $event = $parsed->{'text'};
+            my $images = $parsed->{'images'};
+
+            my $sharing_js = '';
+            if ( LJ::is_enabled('sharing') ) {
+                LJ::Share->request_resources;
+                $sharing_js = LJ::Share->render_js({ 'entry' => $entry });
+            }
+
+            push @tmpl_posts, {
+                subject         => $trimmed_subj,
+                is_subject_trimmed => $subject ne $trimmed_subj ? 1 : 0,
+                userpic         => $userpic ? $userpic->url : '',
+                posted_ago      => LJ::TimeUtil->ago_text($secondsold),
+                poster          => $poster ? LJ::ljuser($poster) : '?',
+                tags            => scalar @tags ? [ map { { tag => $_ } } @tags ] : '',
+                mood            => $entry->prop('current_mood') || LJ::mood_name($entry->prop('current_moodid')) || '',
+                music           => $entry->prop('current_music'),
+                location        => $entry->prop('current_location'),
+                post_text       => $event,
+                posted_to       => LJ::ljuser(LJ::get_username($entry->journalid)),
+                url_to_post     => $entry->url,
+                photo_for_post  => scalar @$images ? $images->[0] : '',
+                comments_count  => $entry->reply_count,
+                is_need_more    => $parsed->{'is_removed_video'} || $parsed->{'is_text_trimmed'},
+                sharing_js      => $sharing_js,
+            };
         }
     }
 
@@ -524,8 +449,7 @@ sub render_body {
                                         vertical_account => $vertical ? $vertical->journal : undef,
                                         vertical_name    => $vertical ? $vertical->name : undef,
                                     ),
-        is_vertical_view        => 1,
-        is_vertical_selected    => $vertical ? 1 : 0,
+        is_vertical_view        => $vertical ? 1 : 0,
     );
 
     return $template->output;

@@ -272,7 +272,7 @@
 
 			editor.dataProcessor.toHtml = function(html, fixForBody) {
 				html = html.replace(/(<lj [^>]+)(?!\/)>/gi, '$1 />')
-					.replace(/<((?!br)[^\s>]+)([^>]*?)\/>/gi, '<$1$2></$1>')
+					.replace(/<((?!br)[^\s>]+)((?!\/>).*?)\/>/gi, '<$1$2></$1>')
 					.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, '<div class="ljvideo" url="$1"><img src="' + Site
 					.statprefix + '/fck/editor/plugins/livejournal/ljvideo.gif" /></div>')
 					.replace(/<lj-poll .*?>[^\b]*?<\/lj-poll>/gm,
@@ -1198,13 +1198,6 @@
 								onData: onSuccess
 							});
 						}
-					},
-					'lj-map': function(element){
-						return new CKEDITOR.htmlParser.fragment.fromHtml('' + '<div style="' + 'width: ' + (isNaN(element.attributes
-							.width) ? 100 : element.attributes.width) + 'px;' + 'height: ' + (isNaN(element.attributes
-							.height) ? 100 : element.attributes
-							.height) + 'px;"' + 'contentEditable="false"' + 'lj-url="' + (encodeURIComponent(element.attributes
-							.url) || '') + '"' + 'class="lj-map"><p>map</p>' + '</div>').children[0];
 					},
 					'lj-repost': function(element){
 						var fakeElement = new CKEDITOR.htmlParser.element('input');

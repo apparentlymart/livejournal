@@ -261,35 +261,6 @@ sub get_syndicated {
     return $synd;
 }
 
-# save current user id, so we can restore it later
-sub save_current {
-    my ( $u ) = @_;
-    return 0 unless $u;
-
-    my $remote = LJ::get_remote();
-    return 0 unless $remote;
-
-    $u->set_prop('lastloginid', $remote->id);
-    return 1;
-}
-
-# restore user from prop lastloginid
-sub restore {
-    my ($u) = @_;
-    return 0 unless $u;
-
-    my $userid = $u->prop('lastloginid');
-    return 0 unless $userid;
-
-    $u->set_prop('lastloginid', 0);
-
-    my $old = LJ::load_userid( $userid );
-    return 0 unless $u;
-
-    $old->make_login_session('long', 0);
-    return 1;
-}
-
 sub is_protected_username {
     my ($class, $username) = @_;
     foreach my $re (@LJ::PROTECTED_USERNAMES) {
