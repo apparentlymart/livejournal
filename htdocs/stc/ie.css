@@ -572,6 +572,11 @@ __________________________________________*/
 	margin-right: 3px;
 	}
 
+/* Ratings */
+.rate-posts .selfpromo .voting .vote-value A {
+	top: 0;
+	}
+
 /* Should be at bottom of the page! */
 * HTML .i-ljtimes-btn,
 * HTML .i-ljtimes-drag,

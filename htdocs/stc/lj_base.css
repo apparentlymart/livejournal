@@ -3194,5 +3194,19 @@ A.lj-button-link:active {
 	opacity:.5;
 	}
 
-
-
+/* Self promo
+------------------------------------------------------------------------*/
+.selfpromo .rate-posts-item {
+	padding: 5px 32px !important;
+	margin-bottom: 10px;
+	background: #FFFEE3 url(/img/selfpromo-title.png?ver=1) no-repeat 0 50%;
+	}
+	.selfpromo .rate-posts-item DT {
+		margin-bottom: 3px;
+		}
+		.selfpromo .rate-posts-item DT EM {
+			font-style: normal;
+			}
+	.selfpromo .rate-posts-item DD {
+		color: #404040;
+		}

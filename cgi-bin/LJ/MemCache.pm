@@ -615,7 +615,7 @@ sub get_or_set {
 
     my $value = LJ::MemCache::get($key);
 
-    unless ($value) {
+    unless ( defined $value ) {
         $value = $code->();
         LJ::MemCache::set( $key, $value, $expire );
     }
