@@ -1535,7 +1535,14 @@ sub res_includes {
 
                 if ($do_concat) {
                     my $csep = join(',', @$list);
-                    $csep .= "?v=" . $oldest{$type}{$cond}{$args};
+                    my $mtime = $oldest{$type}{$cond}{$args}; 
+
+                    ## stc/0 is the empty file.
+                    ## touch-ing it changes ?v= param for all included res.
+                    my $mtime_base = _file_modtime("stc/0", $now);
+                    $mtime = $mtime_base if $mtime_base > $mtime;
+
+                    $csep .= "?v=" . $mtime;
                     my $inc = $template;
                     $inc =~ s/__+/??$csep/;
                     $inc =~ s/##/$args/;
