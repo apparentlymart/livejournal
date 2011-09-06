@@ -164,7 +164,7 @@ sub add_user_to_embed {
     return unless $postref && $$postref;
 
     my $journal = $u->user;
-    $$postref =~ s/(<lj\-embed\s+id=)/<lj\-embed source_user="$journal" id=/g;
+    $$postref =~ s/(<\s*lj\-embed\s+id=)/<lj\-embed source_user="$journal" id=/g;
 }
 
 # take a scalarref to a post, parses any lj-embed tags, saves the contents
@@ -227,24 +227,25 @@ sub parse_module_embed {
                 my $u = LJ::load_user($attr->{'source_user'});
                 if ($u) {
                     if ($journal->equals($u)) {
-                        $newstate = EXPLICIT;     # save embed id, width and height if they do exist in attributes
-                        $embed_attrs{id} = $attr->{id} if $attr->{id};
+                        $newstate = REGULAR;
+                        $embed_attrs{id} = $attr->{id};
                         $embed_attrs{width} = ($attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width}) if $attr->{width};
                         $embed_attrs{height} = ($attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height}) if $attr->{height};
+                        $newtxt .= "<lj-embed " . join(' ', map { exists $embed_attrs{$_} ? "$_=\"$embed_attrs{$_}\"" : () } qw / id width height /) . "/>";
                     } else {
-                    $newstate = REGULAR;
-                    $embed = $class->module_content( moduleid  => $attr->{id},
-                                                     journalid => $u->id );
-
-                    if ($embed ne "") {
-                        if ($attr->{width}) {
-                            $embed_attrs{width} = $attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width};
+                        $newstate = REGULAR;
+                        $embed = $class->module_content( moduleid  => $attr->{id},
+                                                         journalid => $u->id );
+    
+                        if ($embed ne "") {
+                            if ($attr->{width}) {
+                                $embed_attrs{width} = $attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width};
+                            }
+    
+                            if ($attr->{height}) {
+                                $embed_attrs{height} = $attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height};
+                            }
                         }
-
-                        if ($attr->{height}) {
-                            $embed_attrs{height} = $attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height};
-                        }
-                    }
                   }
                 }
             } elsif (($tag eq 'object' || $tag eq 'embed' || $tag eq 'iframe') && $type eq 'S') {
