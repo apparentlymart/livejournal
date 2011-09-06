@@ -12,6 +12,7 @@
         <TMPL_IF EXPR="will_be_screened eq 'A'">b-postform-user-screened b-postform-user-screened-all</TMPL_IF>
         <TMPL_IF EXPR="will_be_screened eq 'F' && !is_friend">b-postform-user-screened b-postform-user-screened-nonf</TMPL_IF>
         <TMPL_IF EXPR="will_be_screened eq 'R' and !email_active">b-postform-user-screened b-postform-user-screened-anon</TMPL_IF>
+		<TMPL_IF EXPR="commentcaptcha eq 'R'">b-postform-captcha-anon</TMPL_IF>
         b-postform-realauth-<TMPL_VAR usertype>
         b-postform-authtype-<TMPL_VAR usertype>
         ">

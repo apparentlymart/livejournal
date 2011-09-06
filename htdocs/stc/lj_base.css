@@ -1653,7 +1653,7 @@ HTML BODY.logged-out {
 .b-postform-authtype-anonymous.b-postform-user-friendonly .b-postform-alert-ajax,
 
 .b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-alert-ajax {
-	display: none !important;
+	display: none;
 	}
 
 .b-postform-captchabox {
