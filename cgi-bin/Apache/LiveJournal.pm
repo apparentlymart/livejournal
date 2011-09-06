@@ -198,7 +198,12 @@ sub handler
     LJ::Mob::Router::match_controller();
 
     if ( my $controller = LJ::Request->notes('controller') ) {
-        my $url = $controller->check_access(LJ::Request->notes('branding_id'), LJ::get_remote_ip);
+
+        # checking access for specific brandings
+        if(my $url = $controller->check_access(LJ::Request->notes('branding_id'), LJ::get_remote_ip)) {
+            return redir("http://".LJ::Request->hostname.$url);
+        }
+
         if ( LJ::Request->notes('method') eq '__setdomsess' ) {
             return redir(LJ::Session->setdomsess_handler())
         }
