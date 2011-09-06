@@ -2017,6 +2017,7 @@ sub talkform {
         'is_identity'            => $remote && $remote->is_identity,
         'remote_can_comment'     => $remote_can_comment,
 
+        'commentcaptcha'            => $journalu->prop("opt_show_captcha_to"),
         'need_captcha'              => $opts->{do_captcha},
         'captcha_html'              => $captcha_html,
         'captcha_private'           => LJ::conf_test( $LJ::RECAPTCHA{private_key} ),
