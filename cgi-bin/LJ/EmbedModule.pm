@@ -159,12 +159,10 @@ sub _expand_tag {
 };
 
 sub add_user_to_embed {
-    my ($class, $u, $postref) = @_;
+    my ($class, $user_name, $postref) = @_;
 
     return unless $postref && $$postref;
-
-    my $journal = $u->user;
-    $$postref =~ s/(<\s*lj\-embed\s+id=)/<lj\-embed source_user="$journal" id=/g;
+    $$postref =~ s/(<\s*lj\-embed\s+id=)/<lj\-embed source_user="$user_name" id=/g;
 }
 
 # take a scalarref to a post, parses any lj-embed tags, saves the contents

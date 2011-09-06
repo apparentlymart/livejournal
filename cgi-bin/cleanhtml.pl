@@ -1294,10 +1294,7 @@ sub clean
                                             ? $entry->poster->username
                                             : '';
 
-                    my $journalu = LJ::want_user($poster_username);
-                    if ($journalu) {
-                        LJ::EmbedModule->add_user_to_embed($journalu, \$captured);
-                    }
+                    LJ::EmbedModule->add_user_to_embed($poster_username, \$captured);
                     $captured = LJ::Lang::ml("repost.wrapper", {
                                                 username => $poster_username,
                                                 url      => $entry->url,

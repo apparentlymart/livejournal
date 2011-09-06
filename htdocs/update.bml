@@ -183,8 +183,7 @@ EMBED
             $subject ||= (LJ::ehtml($entry->subject_orig) || LJ::Lang::ml("repost.default_subject"));
             unless ($event) {
                 $event = $entry->event_raw;
-                my $journalu = $entry->journal;
-                LJ::EmbedModule->add_user_to_embed($journalu, \$event);
+                LJ::EmbedModule->add_user_to_embed($entry->poster->username, \$event);
 
                 $event = LJ::Lang::ml("repost.wrapper", {
                                             username => $entry->poster->username,
