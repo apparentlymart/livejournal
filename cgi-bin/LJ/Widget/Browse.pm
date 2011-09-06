@@ -74,6 +74,8 @@ sub _get_recent_posts {
 }
 
 sub _get_spotlight_communities {    # Load communities saved by spotlight admin
+    return ();
+
     my @comms = ();
 
     my $remote = LJ::get_remote();
