@@ -358,11 +358,6 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 					this.preview.removeAttribute( 'src' );
 					this.preview.setStyle( 'display', 'none' );
 				}
-
-				//return scrapbook tab to the initial state
-				InOb.showSelectorPage();
-				InOb.setupIframeHandlers(); //If we switch dialog in rte/html editor we loose correct currentPopupWindow object.
-											//So, we init again.
 			},
 			onOk : function()
 			{
@@ -472,7 +467,6 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 				}
 
 				this.commitContent = commitContent;
-
 			},
 			onHide : function()
 			{
