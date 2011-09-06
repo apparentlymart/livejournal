@@ -28,7 +28,8 @@
             $js .= "</script>\n";
 
             $$head = $js;
-            return;
+            $GET{'only_upload'} = 1;
+            #return;
         }
     }
 
@@ -212,7 +213,7 @@
         $div_upload .= "</form></div>";
 
         if ($is_only_upload_div) {
-            $div_upload .= "<script>window.parent.InOb.setupIframeHandlers(true);</script>";
+            $div_upload .= "<script>window.parent.InOb.setupIframeHandlers(true);window.parent.InOb.showSelectorPage();</script>";
             ## We no need a html and head tags
             $$body = $div_upload;
             # BML::finish();
