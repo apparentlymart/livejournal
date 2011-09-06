@@ -1180,7 +1180,7 @@ HTML BODY.logged-out {
 
 
 /* deleted */
-.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-deleted .b-postform-subjectbox,
+/* .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-deleted .b-postform-subjectbox,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-deleted .b-postform-msgbox,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-deleted .b-postform-repostbox,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-deleted .b-postform-submitbox,
@@ -1215,7 +1215,7 @@ HTML BODY.logged-out {
 .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-deleted .b-postform-repostbox,
 .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-deleted .b-postform-submitbox {
 	visibility: hidden;
-	}
+	} */
 	
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-deleted .b-postform-alert-screened,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-deleted.b-postform-user-screened-nonf .b-postform-alert-screened,
@@ -1259,7 +1259,7 @@ HTML BODY.logged-out {
 
 
 /* suspended */
-.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-suspended .b-postform-subjectbox,
+/* .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-suspended .b-postform-subjectbox,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-suspended .b-postform-msgbox,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-suspended .b-postform-repostbox,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-suspended .b-postform-submitbox,
@@ -1294,7 +1294,7 @@ HTML BODY.logged-out {
 .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-suspended .b-postform-repostbox,
 .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-suspended .b-postform-submitbox {
 	visibility: hidden;
-	}
+	} */
 	
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-suspended .b-postform-alert-screened,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-suspended.b-postform-user-screened-nonf .b-postform-alert-screened,
@@ -1338,7 +1338,7 @@ HTML BODY.logged-out {
 
 
 /* banned */
-.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-banned .b-postform-subjectbox,
+/*.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-banned .b-postform-subjectbox,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-banned .b-postform-msgbox,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-banned .b-postform-repostbox,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-banned .b-postform-submitbox,
@@ -1373,7 +1373,7 @@ HTML BODY.logged-out {
 .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-banned .b-postform-repostbox,
 .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-banned .b-postform-submitbox {
 	visibility: hidden;
-	}
+	} */
 
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-banned .b-postform-alert-screened,
 .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-banned.b-postform-user-screened-nonf .b-postform-alert-screened,
@@ -1417,7 +1417,7 @@ HTML BODY.logged-out {
 
 
 /* not a friend/member */
-.b-postform-authtype-anonymous.b-postform-user-friendonly .b-postform-subjectbox,
+/* .b-postform-authtype-anonymous.b-postform-user-friendonly .b-postform-subjectbox,
 .b-postform-authtype-anonymous.b-postform-user-friendonly .b-postform-msgbox,
 .b-postform-authtype-anonymous.b-postform-user-friendonly .b-postform-repostbox,
 .b-postform-authtype-anonymous.b-postform-user-friendonly .b-postform-submitbox,
@@ -1457,7 +1457,7 @@ HTML BODY.logged-out {
 .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-notafriend .b-postform-repostbox,
 .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-notafriend .b-postform-submitbox {
 	visibility: hidden;
-	}
+	}*/
 	
 .b-postform-authtype-anonymous.b-postform-user-friendonly .b-postform-alert-screened,
 .b-postform-authtype-anonymous.b-postform-user-friendonly.b-postform-user-screened-nonf .b-postform-alert-screened,
@@ -1507,7 +1507,7 @@ HTML BODY.logged-out {
 
 
 /* reg users only */
-.b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-subjectbox,
+/* .b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-subjectbox,
 .b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-msgbox,
 .b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-repostbox,
 .b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-submitbox,
@@ -1542,7 +1542,7 @@ HTML BODY.logged-out {
 .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-notreg .b-postform-repostbox,
 .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-notreg .b-postform-submitbox {
 	visibility: hidden;
-	}
+	} */
 	
 .b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-alert-screened,
 .b-postform-authtype-anonymous.b-postform-user-regonly.b-postform-user-screened-anon .b-postform-alert-screened,
