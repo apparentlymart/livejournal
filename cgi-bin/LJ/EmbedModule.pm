@@ -220,7 +220,7 @@ sub parse_module_embed {
                 $embed_attrs{width} = ($attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width}) if $attr->{width};
                 $embed_attrs{height} = ($attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height}) if $attr->{height};
             } elsif ($tag eq 'lj-embed' && $type eq 'S' &&
-                     $attr->{'source_user'} && $attr->{'/'}) {
+                     $attr->{'source_user'}) {
 
                 my $u = LJ::load_user($attr->{'source_user'});
                 if ($u) {
