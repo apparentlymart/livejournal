@@ -401,8 +401,9 @@ sub clean
                 if ($attr->{'/'}){
                     # short <lj-repost /> form of tag
                     $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="GET">]
-                             .  qq[<input type=hidden name="repost" value="$opts->{cuturl}" />]
-                             .  qq(<input type="submit" value="$button" /> )
+                             .  qq[<input type="hidden" name="repost" value="$opts->{cuturl}" />]
+                             .  qq[<input type="hidden" name="repost_type" value="a" />]
+                             .  qq[<input type="submit" value="$button" /> ]
                              .  qq[</form>];
                 } else {
                     $opencount{$tag} = {

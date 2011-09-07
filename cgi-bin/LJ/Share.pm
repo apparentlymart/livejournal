@@ -23,7 +23,7 @@ sub request_resources {
 
     my $services = {
         'livejournal' => {
-            'bindLink' => $LJ::SITEROOT . '/update.bml?repost={url}'
+            'bindLink' => $LJ::SITEROOT . '/update.bml?repost_type=c&repost={url}'
         },
         'facebook' => {
             'bindLink' => 'http://www.facebook.com/sharer.php?u={url}'

@@ -586,6 +586,28 @@ sub check_referer {
 }
 
 # <LJFUNC>
+# name: LJ::repost_auth
+# class: web
+# des: Creates an authentication token to be used later to verify that a form hidden field "repost"
+#      not modified by user
+# args: type, username, url
+# des-type: type of repost, see LJSUP-8061
+# des-username: name of original poster
+# des-url: url of original post
+# returns: HTML hidden field to be inserted into the output of a page.
+# </LJFUNC>
+sub repost_auth {
+    my ($type, $username, $url, $raw) = @_;
+    my $str = join( ':', map ( LJ::eurl($_), $type, $username, $url));
+    my $auth = Digest::MD5::md5_hex( $str . $LJ::REPOST_SECRET );
+
+    return $auth if $raw;
+
+    $str .= ":$auth";
+    return LJ::html_hidden("repost_params", $str);
+}
+
+# <LJFUNC>
 # name: LJ::form_auth
 # class: web
 # des: Creates an authentication token to be used later to verify that a form

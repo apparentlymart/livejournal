@@ -1718,3 +1718,11 @@ userproplist.lastloginid:
   indexed: 0
   multihomed: 0
   cldversion: 8
+
+userproplist.hidefriendsreposts:
+  datatype: bool
+  prettyname: hide friends reposts
+  des: hide reposts in friends page
+  indexed: 0
+  multihomed: 0
+  cldversion: 8

@@ -147,6 +147,7 @@
     # if a QotD id was passed in, fill in the fields with that QotD
     my $qid = $GET{qotd}+0;
     my $qotd = $qid ? LJ::QotD->get_single_question($qid) : '';
+
     if ($qotd) {
         $subject = LJ::Widget::QotD->subject_text($qotd, user => $remote);
         my $lncode = ($remote && $remote->prop('browselang')) ? $remote->prop('browselang') : $LJ::DEFAULT_LANG;
@@ -169,11 +170,13 @@ EMBED
     }
 
     my $reposted_from = '';
+    my $repost_hidden = '';
 
     # in case of repost other entry by its uri we should check its visibility
     # for remote user.
     if (my $repost = ($POST{repost} || $GET{repost})){
         my $entry = LJ::Entry->new_from_url($repost);
+
         unless ($entry){
             $$body = "<?badinput?>";
             return;
@@ -181,6 +184,7 @@ EMBED
 
         if ($entry->visible_to($remote)){
             $subject ||= (LJ::ehtml($entry->subject_orig) || LJ::Lang::ml("repost.default_subject"));
+
             unless ($event) {
                 $event = $entry->event_raw;
                 LJ::EmbedModule->add_user_to_embed($entry->poster->username, \$event);
@@ -192,6 +196,7 @@ EMBED
                                             text     => $event,
                                             });
                 $reposted_from = $entry->url;
+                $repost_hidden = LJ::repost_auth($POST{'repost_type'} || $GET{'repost_type'} || 'd', $entry->poster->username, $entry->url);
             }
         }
     }
@@ -199,6 +204,7 @@ EMBED
     # try to call a hook to fill in the fields
     my $override_fields = LJ::run_hook('update_fields', \%GET);
     my $opt_preformatted = 0;
+
     if ($override_fields) {
             $event      = $override_fields->{'event'}   if exists($override_fields->{'event'});
             $subject    = $override_fields->{'subject'} if exists($override_fields->{'subject'});
@@ -218,9 +224,11 @@ EMBED
     # which authentication option do we display by default?
     my $altlogin_display = 'none';
     my $remotelogin_display = 'none';
+
     if ($auth_as_remote) {
         $remotelogin_display = 'block';
-    } else {
+    }
+    else {
         $altlogin_display = 'block';
     }
 
@@ -229,8 +237,9 @@ EMBED
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
     my $preview = $POST{'action:preview'};
 
-        # are we spellchecking before we post?
+    # are we spellchecking before we post?
     my $did_spellcheck; my $spellcheck_html;
+
     if ($LJ::SPELLER && $POST{'action:spellcheck'}) {
         $did_spellcheck++;
         my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
@@ -252,26 +261,29 @@ EMBED
         my $auth = '';
 
         if ($altlogin_display eq 'none') {
-            $auth.= "<p id='remotelogin' class='pkg'>\n";
+            $auth .= "<p id='remotelogin' class='pkg'>\n";
             $auth .= "<label for='current_username' class='left'>" . BML::ml('entryform.postas') . "</label>\n";
             $auth .= "<strong id='current_username'>" . $remote->display_name . "</strong> <a href='$LJ::SITEROOT/update.bml?altlogin=1' id='remotelogin_content' class='small'>$ML{'entryform.switchuser'}</a>\n";
             $auth .= "</p>\n\n";
         }
+
         # table with username/password fields
         $auth .= "<div id='altlogin_wrapper' style='display: $altlogin_display;'>";
         $auth .= "<p class='pkg'>\n";
         $auth .= "<label for='altlogin_username' class='left'>$ML{'.username'}</label>\n";
-        $auth .=  LJ::html_text({ 'name' => 'user', 'id' => 'altlogin_username', 'class' => 'text', 'size' => '15', 
+        $auth .=  LJ::html_text({ 'name' => 'user', 'id' => 'altlogin_username', 'class' => 'text', 'size' => '15',
                 'maxlength' => '15', 'tabindex' => '5', 'value' => $POST{'user'} || $GET{'user'} }) . "\n";
         $auth .= "</p>\n";
         $auth .= "<p class='pkg'>\n";
         $auth .= "<label for='altlogin_password' class='left'>$ML{'.password'}</label>\n";
-        $auth .= LJ::html_text({ 'type' => 'password', 'id' => 'altlogin_password', 'class' => 'text',  
+        $auth .= LJ::html_text({ 'type' => 'password', 'id' => 'altlogin_password', 'class' => 'text',
                 'name' => 'password', 'tabindex' => '6', 'size' => '15', 'maxlength' => '30' }) . "\n";
+
         # posted with a user, but no password
         if ($did_post && $auth_missing) {
             $auth .= "<br /><?inerr $ML{'.error.nopass'} inerr?>";
         }
+
         $auth .= "</p>\n\n";
         $auth .= "</div>";
 
@@ -283,33 +295,33 @@ EMBED
         chop $getextra;
 
         my $entry = {
-            'mode' => "update",
-            'auth_as_remote' => $auth_as_remote,
-            'subject' => $subject,
-            'event' => $event,
-            'prop_taglist' => $tags,
-            'datetime' => "$year-$mon-$mday $hour:$min",
-            'usejournal' => ($usejournalu) ? $usejournalu->user : undef,
-            'auth' => $auth,
-            'remote' => $remote,
-            'spellcheck_html' => $spellcheck_html,
-            'clientversion' => "WebUpdate/2.0.0",
-            'richtext' => $LJ::DISABLED{'richtext'} ? 0 : 1,
+            'mode'             => "update",
+            'auth_as_remote'   => $auth_as_remote,
+            'subject'          => $subject,
+            'event'            => $event,
+            'prop_taglist'     => $tags,
+            'datetime'         => "$year-$mon-$mday $hour:$min",
+            'usejournal'       => ($usejournalu) ? $usejournalu->user : undef,
+            'auth'             => $auth,
+            'remote'           => $remote,
+            'spellcheck_html'  => $spellcheck_html,
+            'clientversion'    => "WebUpdate/2.0.0",
+            'richtext'         => $LJ::DISABLED{'richtext'} ? 0 : 1,
             'richtext_default' => $remote ? $remote->new_entry_editor eq 'rich' ? 1 : 0  # User setting
                                           : $LJ::DEFAULT_EDITOR       eq 'rich' ? 1 : 0, # Site default
             'include_insert_object' => $GET{'insobj'},
-            'prop_qotdid' => $qid,
-            'altlogin' => $GET{altlogin} ? 1 : 0,
+            'prop_qotdid'           => $qid,
+            'altlogin'              => $GET{altlogin} ? 1 : 0,
             'prop_opt_preformatted' => $opt_preformatted ? 1 : 0,
-            'qid' => $qid,
-            'albums_id' => $POST{'albums_id'} || $GET{'albums_id'},
-            'photos_id' => $POST{'photos_id'} || $GET{'photos_id'},
+            'qid'                   => $qid,
+            'albums_id'             => $POST{'albums_id'} || $GET{'albums_id'},
+            'photos_id'             => $POST{'photos_id'} || $GET{'photos_id'},
         };
 
         if ($remote) {
-            $entry->{prop_opt_default_noemail} = $remote->prop('opt_gettalkemail');
+            $entry->{prop_opt_default_noemail}    = $remote->prop('opt_gettalkemail');
             $entry->{prop_opt_default_nocomments} = $remote->prop('opt_showtalklinks');
-            $entry->{prop_last_fm_user} = $remote->prop('last_fm_user');
+            $entry->{prop_last_fm_user}           = $remote->prop('last_fm_user');
         }
 
         if ($did_post) {
@@ -352,6 +364,7 @@ EMBED
 
         if ($reposted_from) {
             $$body .= LJ::html_hidden( 'reposted_from' => $reposted_from );
+            $$body .= $repost_hidden;
         }
 
         if ($opts->{require_tos}){
@@ -393,14 +406,18 @@ LIKE_FAQ
 
             # Verify entered password, if it is present.
             my $ok;
+
             if ($POST{response}) {
                 $ok = LJ::challenge_check_login($u, $POST{chal}, $POST{response});
-            } else {  # js disabled, fallback to plaintext
+            }
+            else {  # js disabled, fallback to plaintext
                 $ok = LJ::auth_okay($u, $POST{password});
             }
+
             $flags = { 'noauth' => 1, 'u' => $u } if $ok;
 
-        } elsif ($remote && LJ::check_referer()) {
+        }
+        elsif ($remote && LJ::check_referer()) {
             # assume remote if we have it
             $flags = { 'noauth' => 1, 'u' => $remote };
             $user = $remote->{'user'};
@@ -410,6 +427,7 @@ LIKE_FAQ
         if ($u && ! $u->tosagree_verify) {
             if ($POST{agree_tos}) {
                 my $err = "";
+
                 unless ($u->tosagree_set(\$err)) {
                     # error
                     $errors->{require_tos} = $err;
@@ -417,7 +435,8 @@ LIKE_FAQ
                     return;
                 }
                 # successfully set
-            } else {
+            }
+            else {
                 $errors->{require_tos} = $ML{'tos.error'};
                 $print_entry_form->({ require_tos => 1 });
                 return;
@@ -426,6 +445,7 @@ LIKE_FAQ
 
         # Check if the account they're posting to is read-only
         my $uj = $usejournalu || $u;
+
         if ($uj && $uj->readonly) {
             # Tell the user they can't post since read only
             $$body .= "<?errorbar ";
@@ -477,6 +497,7 @@ LIKE_FAQ
                     );
 
         LJ::entry_form_decode(\%req, \%POST);
+
         if ($req{'event'} eq "") {
             $errors->{'entry'} = $ML{'.error.noentry'};
         }
@@ -489,17 +510,29 @@ LIKE_FAQ
         $req{prop_qotdid} = $qid;
         $req{prop_interface} = "web";
 
+        if ( $POST{'repost_params'} ) {
+            my ( $type, $username, $url, $auth ) = split(/:/, $POST{'repost_params'} );
+
+            $req{'prop_repost_url'}    = LJ::durl($url);
+            $req{'prop_repost_author'} = LJ::durl($username);
+            $req{'prop_repost'}        = $auth eq LJ::repost_auth($type, $username, $url, 1)
+                ? $type
+                : '0';
+        }
+
         foreach my $k (keys %req) {
-            next unless ($k =~ /^prop_(.+)/);
+            next unless ($k =~ /^prop_(.+)$/);
             $req{'props'}->{$1} = $req{$k};
             delete $req{$k};
         }
+
         my $err = 0;
         my $res = LJ::Protocol::do_request("postevent", \%req, \$err, $flags);
 
         if (!keys %$errors) {
             # examine response
             my $update_message;
+
             if ($res && $res->{'message'}) {
                 $update_message = LJ::auto_linkify(LJ::ehtml($res->{'message'}));
             }
@@ -609,11 +642,13 @@ LIKE_FAQ
         my $ad_details;
         my $ad = LJ::get_ads({ location => 'bml.update/main', get_slots_params => \$ad_details, interests_extra => $qid ? { qotd => $qotd } : {} });
         my $trynbuy = LJ::Widget::Trynbuy->render(stage => 'simple') if($show_trynbuy);
-        if ($ad) {
+
+        if ( $ad ) {
             my $width = $ad_details->[-1]->{width};
             my $adunit = $ad_details->[-1]->{adunit};
             $$body .= "<td class='$adunit' style='width: ${width}px; padding-left: 1em;'>$ad";
-        } else {
+        }
+        else {
             $$body .= "<td>";
         }
     }

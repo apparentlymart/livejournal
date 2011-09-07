@@ -64,6 +64,7 @@ body<=
                 LJ::Setting::AdultContent
                 LJ::Setting::ViewingAdultContent
                 LJ::Setting::SafeSearch
+                LJ::Setting::HideFriendsReposts
                 LJ::Setting::CyrillicServices
             )],
         },
