@@ -211,7 +211,8 @@ sub parse_module_embed {
         my $reconstructed = $class->reconstruct($token);
 
         if ($state == REGULAR) {
-            if ($tag eq 'lj-embed' && $type eq 'S' && ! $attr->{'/'}) {
+            if ( $tag eq 'lj-embed' && $type eq 'S' && ! $attr->{'/'}
+                    && !$attr->{'source_user'} ) {
                 # <lj-embed ...>, not self-closed
                 # switch to EXPLICIT state
                 $newstate = EXPLICIT;
@@ -219,33 +220,40 @@ sub parse_module_embed {
                 $embed_attrs{id} = $attr->{id} if $attr->{id};
                 $embed_attrs{width} = ($attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width}) if $attr->{width};
                 $embed_attrs{height} = ($attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height}) if $attr->{height};
-            } elsif ($tag eq 'lj-embed' && $type eq 'S' &&
-                     $attr->{'source_user'}) {
+            } elsif ( $tag eq 'lj-embed' && $type eq 'S' && $attr->{'source_user'} ) {
 
+                my $embed_ext = '';
                 my $u = LJ::load_user($attr->{'source_user'});
                 if ($u) {
                     if ($journal->equals($u)) {
-                        $newstate = REGULAR;
                         $embed_attrs{id} = $attr->{id};
                         $embed_attrs{width} = ($attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width}) if $attr->{width};
                         $embed_attrs{height} = ($attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height}) if $attr->{height};
-                        $newtxt .= "<lj-embed " . join(' ', map { exists $embed_attrs{$_} ? "$_=\"$embed_attrs{$_}\"" : () } qw / id width height /) . "/>";
+                        $embed_ext = "<lj-embed " . join(' ', map { exists $embed_attrs{$_} ? "$_=\"$embed_attrs{$_}\"" : () } qw / id width height /) . "/>";
                     } else {
-                        $newstate = REGULAR;
-                        $embed = $class->module_content( moduleid  => $attr->{id},
-                                                         journalid => $u->id );
-    
+                        $embed_ext = $class->module_content( moduleid  => $attr->{id},
+                                                          journalid => $u->id );
                         if ($embed ne "") {
                             if ($attr->{width}) {
                                 $embed_attrs{width} = $attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width};
                             }
-    
+
                             if ($attr->{height}) {
                                 $embed_attrs{height} = $attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height};
                             }
                         }
-                  }
+                    }
                 }
+                unless ($attr->{'/'}) {
+                    $newstate = EXPLICIT;
+                    # tag balance
+                    push @stack, $tag;
+                    $embed = $embed_ext;
+                } else {
+                    $newstate = REGULAR;
+                    $newtxt .= $embed_ext;
+                }
+
             } elsif (($tag eq 'object' || $tag eq 'embed' || $tag eq 'iframe') && $type eq 'S') {
                 # <object> or <embed>
                 # switch to IMPLICIT state unless it is a self-closed tag
@@ -278,7 +286,6 @@ sub parse_module_embed {
             $embed .= $reconstructed;
 
         } elsif ($state == EXPLICIT) {
-
             if ($tag eq 'lj-embed' && $type eq 'E') {
                 # </lj-embed> - that's the end of explicit embed block, switch to REGULAR
                 $newstate = REGULAR;
@@ -303,7 +310,6 @@ sub parse_module_embed {
             );
 
             $newtxt .= "<lj-embed " . join(' ', map { exists $embed_attrs{$_} ? "$_=\"$embed_attrs{$_}\"" : () } qw / id width height /) . "/>";
-
             $embed = '';
             %embed_attrs = ();
         }
