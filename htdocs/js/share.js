@@ -105,7 +105,7 @@ var default_options = {
 	},
 	services: {
 		livejournal: {
-			title: 'LiveJournal', bindLink: 'http://www.livejournal.com/update.bml?repost={url}', openInTab: true
+			title: 'LiveJournal', bindLink: 'http://www.livejournal.com/update.bml?repost_type=c&repost={url}', openInTab: true
 		},
 		facebook: {
 			title: 'Facebook', bindLink: 'http://www.facebook.com/sharer.php?u={url}'
