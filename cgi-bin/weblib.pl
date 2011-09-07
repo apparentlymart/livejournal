@@ -21,6 +21,7 @@ use Class::Autouse qw(
                       LJ::M::FriendsOf
                       );
 use LJ::ControlStrip;
+use LJ::SiteScheme;
 use Apache::WURFL;
 
 # <LJFUNC>

@@ -6,17 +6,24 @@ use LJ::Config;
 LJ::Config->load;
 
 BML::register_block("DOMAIN", "S", $LJ::DOMAIN);
-BML::register_block("IMGPREFIX", "S", $LJ::IMGPREFIX);
-BML::register_block("SSLIMGPREFIX", "S", $LJ::SSLIMGPREFIX);
-BML::register_block("STATPREFIX", "S", $LJ::STATPREFIX);
-BML::register_block("SSLSTATPREFIX", "S", $LJ::SSLSTATPREFIX);
+
 BML::register_block("SITEROOT", "S", $LJ::SITEROOT);
 BML::register_block("SITENAME", "S", $LJ::SITENAME);
 BML::register_block("ADMIN_EMAIL", "S", $LJ::ADMIN_EMAIL);
 BML::register_block("SUPPORT_EMAIL", "S", $LJ::SUPPORT_EMAIL);
 BML::register_block("CHALRESPJS", "", $LJ::COMMON_CODE{'chalresp_js'});
-BML::register_block("JSPREFIX", "S", $LJ::JSPREFIX);
-BML::register_block("SSLJSPREFIX", "S", $LJ::SSLJSPREFIX);
+
+BML::register_block("IMGPREFIX", "S", sub {
+    return $LJ::IS_SSL ? $LJ::SSLIMGPREFIX : $LJ::IMGPREFIX;
+});
+
+BML::register_block("STATPREFIX", "S", sub {
+    return $LJ::IS_SSL ? $LJ::SSLSTATPREFIX : $LJ::STATPREFIX;
+});
+
+BML::register_block("JSPREFIX", "S", sub {
+    return $LJ::IS_SSL ? $LJ::SSLJSPREFIX : $LJ::JSPREFIX;
+});
 
 # dynamic blocks to implement calling our ljuser function to generate HTML
 #    <?ljuser banana ljuser?>

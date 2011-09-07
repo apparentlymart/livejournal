@@ -1,0 +1,21 @@
+<TMPL_IF breadcrumbs>
+    <div id='ljbreadcrumbs'>
+        <TMPL_LOOP breadcrumbs>
+            <TMPL_IF is_dynamic>
+                <b><TMPL_VAR name></b>
+            <TMPL_ELSE>
+                <TMPL_IF __last__>
+                    <b><TMPL_VAR name></b>
+                <TMPL_ELSE>
+                    <TMPL_IF link>
+                        <a href="<TMPL_VAR link>"><TMPL_VAR name></a>
+                    <TMPL_ELSE>
+                        <TMPL_VAR name>
+                    </TMPL_IF>
+                </TMPL_IF>
+            </TMPL_IF>
+
+            <TMPL_UNLESS __last__> : </TMPL_UNLESS>
+        </TMPL_LOOP>
+    </div>
+</TMPL_IF>

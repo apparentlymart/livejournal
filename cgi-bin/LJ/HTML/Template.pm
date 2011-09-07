@@ -9,12 +9,25 @@ sub new {
 
     my %common_params = (
         'lj_siteroot'   => $LJ::SITEROOT,
-        'lj_statprefix' => $LJ::STATPREFIX,
-        'lj_imgprefix'  => $LJ::IMGPREFIX,
         'lj_sitename'   => $LJ::SITENAMESHORT,
         'lj_sslroot'    => $LJ::SSLROOT,
-        'lj_jsprefix'   => $LJ::JSPREFIX,
     );
+
+    if ($LJ::IS_SSL) {
+        %common_params = (
+            %common_params,
+            'lj_imgprefix'  => $LJ::SSLIMGPREFIX,
+            'lj_jsprefix'   => $LJ::SSLJSPREFIX,
+            'lj_statprefix' => $LJ::SSLSTATPREFIX,
+        );
+    } else {
+        %common_params = (
+            %common_params,
+            'lj_imgprefix'  => $LJ::IMGPREFIX,
+            'lj_jsprefix'   => $LJ::JSPREFIX,
+            'lj_statprefix' => $LJ::STATPREFIX,
+        );
+    }
 
     if ( LJ::is_web_context() ) {
         %common_params = (

@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9" />
+<link rel="home" title="<TMPL_VAR expr="ml('lynx.nav.home')">" href="<TMPL_VAR lj_siteroot>/" />
+<link rel="contents" title="<TMPL_VAR expr="ml('lynx.nav.sitemap')">" href="<TMPL_VAR lj_siteroot>/site/" />
+<link rel="help" title="<TMPL_VAR expr="ml('lynx.nav.help')">" href="<TMPL_VAR lj_siteroot>/support/" />
+
+<TMPL_IF parentcrumb_link>
+    <link rel='up' title='<TMPL_VAR parentcrumb_title>' href='<TMPL_VAR parentcrumb_link>' />
+</TMPL_IF>
+
+<TMPL_IF favicon>
+    <link rel="shortcut icon" type="image/x-icon" href="<TMPL_VAR lj_imgprefix>/userinfo.ico">
+    <link rel="icon" type="image/gif" href="<TMPL_VAR favicon>">
+</TMPL_IF>
+
+<style>
+    #Comments q { padding-left: 2.5em; font-style: italic; }
+</style>
+
+<title><TMPL_VAR windowtitle></title>
+<TMPL_VAR after_bml_title>
+<TMPL_VAR lj_res_includes>
+<TMPL_VAR head>
+<TMPL_VAR additional_head_content>
+
+</head>
+
+<body class='<TMPL_VAR body_class>' <TMPL_VAR bodyopts> >
+<TMPL_VAR initial_body_html>
+
+<TMPL_VAR site_messages_html>
+<TMPL_VAR body>
+
+<hr style="clear:both;" />
+
+<p>
+    [
+
+    <a href='<TMPL_VAR lj_siteroot>/'><TMPL_VAR expr="ml('lynx.nav.home')"></a> |
+
+    <TMPL_IF remote_logged_in>
+        <TMPL_IF remote_personal>
+            <a href='<TMPL_VAR lj_siteroot>/update.bml'><TMPL_VAR expr="ml('lynx.nav.update')"></a> |
+            <a href='<TMPL_VAR remote_recent_url>'><TMPL_VAR expr="ml('lynx.nav.recent')"></a> |
+        </TMPL_IF>
+
+        <a href='<TMPL_VAR remote_friends_url>'><TMPL_VAR expr="ml('lynx.nav.friends')"></a> |
+    </TMPL_IF>
+
+    <a href='<TMPL_VAR lj_siteroot>/login.bml'><TMPL_VAR expr="ml('lynx.nav.login')"></a> /
+    <a href='<TMPL_VAR lj_siteroot>/logout.bml'><TMPL_VAR expr="ml('lynx.nav.logout')"></a> |
+
+    <a href='<TMPL_VAR lj_siteroot>/site/search.bml'><TMPL_VAR expr="ml('lynx.nav.search')"></a> |
+    <a href='<TMPL_VAR lj_siteroot>/manage/settings/?cat=account'><TMPL_VAR expr="ml('lynx.nav.siteopts')"></a> |
+    <a href='<TMPL_VAR lj_siteroot>/site/'><TMPL_VAR expr="ml('lynx.nav.sitemap')"></a>
+
+    ]
+</p>
+
+<TMPL_INCLUDE "templates/SiteScheme/include/breadcrumbs.tmpl">
+
+<TMPL_VAR pagestats_html>
+<TMPL_VAR before_body_close>
+<TMPL_VAR final_body_html>
+
+</body>
+</html>

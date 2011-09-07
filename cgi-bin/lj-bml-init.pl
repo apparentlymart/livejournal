@@ -73,7 +73,10 @@ BML::register_hook('default_scheme_override', sub {
 # extra perl to insert at the beginning of a code block
 # compilation
 BML::register_hook("codeblock_init_perl", sub {
-    return q{*errors = *BMLCodeBlock::errors;};
+    return q{
+        *errors = *BMLCodeBlock::errors;
+        *warnings = *BMLCodeBlock::warnings;
+    };
 });
 
 # now apply any local behaviors which may be defined
