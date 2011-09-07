@@ -80,8 +80,16 @@ body<=
         my $show_ad = $opts{show_ad} ? 1 : 0;
 
         $ret .= "<p class='i-qotd-nav'>";
-        $ret .=  "<a class='i-qotd-nav-prev" . (($opts{'prev'} > 0) ? "": " i-qotd-nav-prev-dis") . "' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{prev}'>prev</a>";
-        $ret .= "<a class='i-qotd-nav-next' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{next}'>next</a>";
+        if ($opts{'prev'}) {
+            $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{prev}'>prev</a>";
+        } else {
+            $ret .=  "<span class='i-qotd-nav-prev i-qotd-nav-prev-dis'>prev</span>";
+        }
+        if ($opts{'next'}) {
+            $ret .= "<a class='i-qotd-nav-next' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{next}'>next</a>";
+        } else {
+            $ret .= "<span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>";
+        }
         $ret .= "</div>"
 
             if @res;
