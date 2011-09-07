@@ -9,7 +9,7 @@ BEGIN {
     # ljlib.pl (via require, ick!).  so this lets them know if it's recursive.
     # we REALLY need to move the rest of this crap to .pm files.
     $LJ::_LJLIB_INIT = 1;
-    
+
     # All config options have to be loaded before load any modules that depends on them.
     use LJ::Config;
     LJ::Config->load;
@@ -232,28 +232,28 @@ if ($SIG{'HUP'}) {
 sub get_user_by_url
 {
     my $url = shift;
-    
+
     my $username = '';
-   
+
     # drop protocol
     $url =~ s/http(?:s)?:\/\///;
-   
+
     #try to get username from domain name
     if ($url =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E/ &&
         $1 ne "www"
-    ) 
+    )
     {
         my $user = $1;
-        
+
         # see if the "user" is really functional code
         my $func = $LJ::SUBDOMAIN_FUNCTION{$user};
         my $uri = '';
         if ($func eq "journal") {
             ($user, $uri) = $url =~ m!^[\w\-]{1,15}\.\Q$LJ::USER_DOMAIN\E/(\w{1,15})(/.*)?$!;
             $uri ||= "/";
-            
+
         }
-       
+
         my $u = LJ::load_user($user);
         if ($u && $u->{'journaltype'} eq 'R' && $u->{'statusvis'} eq 'R') {
             LJ::load_user_props($u, 'renamedto');
@@ -265,7 +265,7 @@ sub get_user_by_url
             $username = $u->user;
         }
     }
-    
+
     # try to find userid in user domains
     unless ($username) {
         my $dbr = LJ::get_db_reader();
@@ -387,7 +387,7 @@ sub mogclient {
 
 sub theschwartz {
     my $opts = shift;
-    
+
     return LJ::Test->theschwartz() if $LJ::_T_FAKESCHWARTZ;
 
     if (%LJ::THESCHWARTZ_DBS_ROLES) {
@@ -409,7 +409,7 @@ sub theschwartz {
         if ($client && $client->can('delete_every_n_errors')) {
             $client->delete_every_n_errors($LJ::DELETE_EVERY_N_ERRORS);
         }
-        
+
         $LJ::SchwartzClient{$role} = $client;
         return $client;
     } else {
@@ -548,11 +548,11 @@ sub get_times_multi {
         my ($tc, $tu) = ('', '');
         if ($tu = $mem->{"tu:$uid"}) {
             $times{updated}->{$uid} = unpack("N", $tu);
-        } 
+        }
         if ($tc = $mem->{"tc:$_"}){
             $times{created}->{$_} = $tc;
         }
-        
+
         push @need => $uid
             unless $tc and $tu;
     }
@@ -566,17 +566,17 @@ sub get_times_multi {
     my $dbr = LJ::get_db_reader();
     my $need_bind = join(",", map { "?" } @need);
 
-    # Fetch timeupdate and timecreate from DB.    
+    # Fetch timeupdate and timecreate from DB.
     # Timecreate is loaded in pre-emptive goals.
     # This is tiny optimization for 'get_timecreate_multi',
-    # which is called right after this method during 
+    # which is called right after this method during
     # friends page generation.
     my $sth = $dbr->prepare("
-        SELECT userid, 
+        SELECT userid,
                UNIX_TIMESTAMP(timeupdate),
                UNIX_TIMESTAMP(timecreate)
-        FROM   userusage 
-        WHERE 
+        FROM   userusage
+        WHERE
                userid IN ($need_bind)");
     $sth->execute(@need);
     while (my ($uid, $tu, $tc) = $sth->fetchrow_array){
@@ -648,7 +648,7 @@ sub get_friend_items {
     my $skip = $opts->{'skip'} + 0;
     my $getitems = $itemshow + $skip;
 
-    # friendspage per day is allowed only for journals with 
+    # friendspage per day is allowed only for journals with
     # special cap 'friendspage_per_day'
     my $events_date = $opts->{'u'}->get_cap('friendspage_per_day')
                         ? $opts->{events_date}
@@ -665,6 +665,7 @@ sub get_friend_items {
     # given a hash of friends rows, strip out rows with invalid journaltype
     my $filter_journaltypes = sub {
         my ($friends, $friends_u, $memcache_only, $valid_types) = @_;
+
         return unless $friends && $friends_u;
         $valid_types ||= uc($opts->{'showtypes'});
 
@@ -675,6 +676,7 @@ sub get_friend_items {
         # delete u objects based on 'showtypes'
         foreach my $fid (keys %$friends_u) {
             my $fu = $friends_u->{$fid};
+
             if ($fu->{'statusvis'} ne "V" ||
                 $valid_types && index(uc($valid_types), $fu->{journaltype}) == -1)
             {
@@ -691,8 +693,7 @@ sub get_friend_items {
     my $fr_loaded = 0;  # flag:  have we loaded friends?
 
     # normal friends mode
-    my $get_next_friend = sub
-    {
+    my $get_next_friend = sub {
         # return one if we already have some loaded.
         return $friends_buffer[0] if @friends_buffer;
         return undef if $fr_loaded;
@@ -711,7 +712,7 @@ sub get_friend_items {
             $tu_opts->{memcache_only} = 1;
         }
 
-        my $times = $events_date 
+        my $times = $events_date
                         ? LJ::get_times_multi($tu_opts, keys %$friends)
                         : {updated => LJ::get_timeupdate_multi($tu_opts, keys %$friends)};
         my $timeupdate = $times->{updated};
@@ -744,8 +745,7 @@ sub get_friend_items {
     };
 
     # memcached friends of friends mode
-    $get_next_friend = sub
-    {
+    $get_next_friend = sub {
         # return one if we already have some loaded.
         return $friends_buffer[0] if @friends_buffer;
         return undef if $fr_loaded;
@@ -780,6 +780,7 @@ sub get_friend_items {
             last if $ffct > 50;
             my $ff = LJ::get_friends($fid, undef, "memcache_only") || {};
             my $ct = 0;
+
             while (my $ffid = each %$ff) {
                 last if $ct > 100;
                 next if $allfriends{$ffid} || $ffid == $userid;
@@ -821,8 +822,7 @@ sub get_friend_items {
 
     # old friends of friends mode
     # - use this when there are no memcache servers
-    $get_next_friend = sub
-    {
+    $get_next_friend = sub {
         # return one if we already have some loaded.
         return $friends_buffer[0] if @friends_buffer;
         return undef if $fr_loaded;
@@ -836,6 +836,7 @@ sub get_friend_items {
             WHERE f.userid=? AND f.friendid=uu.userid AND u.userid=f.friendid AND u.journaltype='P'
         });
         $sth->execute($userid);
+
         while (my ($id, $mask, $time, $jt) = $sth->fetchrow_array) {
             next if $id == $userid; # don't follow user's own friends
             $f{$id} = { 'userid' => $id, 'timeupdate' => $time, 'jt' => $jt,
@@ -845,11 +846,11 @@ sub get_friend_items {
         # load some friends of friends (most 20 queries)
         my %ff;
         my $fct = 0;
-        foreach my $fid (sort { $f{$a}->{'timeupdate'} <=> $f{$b}->{'timeupdate'} } keys %f)
-        {
+        foreach my $fid (sort { $f{$a}->{'timeupdate'} <=> $f{$b}->{'timeupdate'} } keys %f) {
             next unless $f{$fid}->{'jt'} eq "P" && $f{$fid}->{'relevant'};
             last if ++$fct > 20;
             my $extra;
+
             if ($opts->{'showtypes'}) {
                 my @in;
                 if ($opts->{'showtypes'} =~ /P/) { push @in, "'P'"; }
@@ -866,6 +867,7 @@ sub get_friend_items {
                     AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 14 DAY) LIMIT 100
             });
             $sth->execute($fid);
+
             while (my $u = $sth->fetchrow_hashref) {
                 my $uid = $u->{'userid'};
                 next if $f{$uid} || $uid == $userid;  # we don't wanna see our friends
@@ -886,6 +888,7 @@ sub get_friend_items {
     } if $opts->{'friendsoffriends'} && ! @LJ::MEMCACHE_SERVERS;
 
     my $friends_tags = undef;
+
     if ($opts->{'filter_by_tags'} && !$opts->{'friendsoffriends'}) {
         if ($opts->{u} &&
             $opts->{u}->id() == $remoteid)
@@ -898,8 +901,7 @@ sub get_friend_items {
     my $itemsleft = $getitems;  # even though we got a bunch, potentially, they could be old
     my $fr;
 
-    while ($loop && ($fr = $get_next_friend->()))
-    {
+    while ($loop && ($fr = $get_next_friend->())) {
         shift @friends_buffer;
 
         # load the next recent updating friend's recent items
@@ -926,8 +928,7 @@ sub get_friend_items {
             foreach (@newitems) { $_->{'clusterid'} = $fr->[2]; }
         }
 
-        if (@newitems)
-        {
+        if (@newitems) {
             if ($friends_tags) {
                 my $filter_func = $friends_tags->filter_func($friendid);
                 if ($filter_func) {
@@ -964,8 +965,7 @@ sub get_friend_items {
             @items = splice(@items, 0, $getitems) if (@items > $getitems);
         }
 
-        if (@items == $getitems)
-        {
+        if (@items == $getitems) {
             $lastmax = $items[-1]->{'rlogtime'};
             $lastmax = $lastmax_cutoff if $lastmax_cutoff && $lastmax > $lastmax_cutoff;
 
@@ -1777,12 +1777,12 @@ sub load_state_city_for_zip
     if ($zip =~ /^\d{5}$/) {
         my $dbr = LJ::get_db_reader()
             or die "Unable to get database handle";
-    
+
         my $sth = $dbr->prepare("SELECT city, state FROM zip WHERE zip=?");
         $sth->execute($zip) or die "Failed to fetch state and city for zip: $DBI::errstr";
         ($zipcity, $zipstate) = $sth->fetchrow_array;
     }
-    
+
     return ($zipcity, $zipstate);
 }
 
@@ -2347,7 +2347,7 @@ sub start_request
                             )
             ) if LJ::show_contextual_hover();
 
-            # Conditional IE CSS file for all pages 
+            # Conditional IE CSS file for all pages
             LJ::need_res({condition => 'lte IE 8'}, 'stc/ie.css');
         }
     }
@@ -3362,8 +3362,8 @@ sub blobcache_get {
 
     my $dbr = LJ::get_db_reader()
         or die "Unable to contact global reader";
-    
-    my ($value, $timeupdate) = 
+
+    my ($value, $timeupdate) =
         $dbr->selectrow_array("SELECT value, UNIX_TIMESTAMP(dateupdate) FROM blobcache WHERE bckey=?",
                               undef, $key);
 
