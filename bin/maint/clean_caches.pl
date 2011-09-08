@@ -187,7 +187,7 @@ $maint{'clean_caches'} = sub
     print "-I- Cleaning friendstimes.\n";
     foreach my $c (@LJ::CLUSTERS) {
         my $dbcm = LJ::get_cluster_master($c);
-        $dbcm->do("DELETE FROM friendstimes WHERE added < UNIX_TIMESTAMP() - 86400*7 LIMIT 100000");
+        $dbcm->do("DELETE FROM friendstimes WHERE added < UNIX_TIMESTAMP() - 86400*14 LIMIT 100000");
     }
     LJ::disconnect_dbs();
 
