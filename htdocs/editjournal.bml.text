@@ -1,13 +1,15 @@
 ;; -*- coding: utf-8 -*-
 .auth.poster=Poster:
 
-.btn.proceed=Proceed...
+.btn.proceed=Proceed…
 
-.btn.search=Search...
+.btn.search=Search…
+
+.input.usejournal=Enter community name here
 
 .certainday=Certain Day:
 
-.desc=Please use the form below to find the entry you would like to edit.
+.desc=Please use the form below to find the entry you would like to edit. [[aopts]]
 
 .event.no_subject.title=No Subject
 
@@ -49,4 +51,5 @@
 .title=Edit Journal Entries
 
 .viewwhat=View What Entries:
+
 

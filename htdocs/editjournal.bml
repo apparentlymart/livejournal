@@ -589,7 +589,7 @@ LIKE_FAQ
         <input type='hidden' name='year' value='$year'/>
         <input type='hidden' name='month' value='$month'/>
         <input type='hidden' name='day' value='$day'/>";
-        $ret .= "<p>" . LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'maxlength' => '15', 'value' => $GET{'usejournal'} || $POST{'usejournal'}, 'class' => 'b-editentries-comm' });
+        $ret .= "<p>" . LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'maxlength' => '15', 'value' => $GET{'usejournal'} || $POST{'usejournal'}, 'class' => 'b-editentries-comm', 'placeholder' => $ML{'.input.usejournal'} });
         $ret .= LJ::html_submit(undef, $ML{'.btn.search'}) . "</p>";
         $ret .= "<p>" . LJ::html_check({ name => 'only_me', id => 'only_me',
                                 value => '1', selected =>  $only_me_checked });
