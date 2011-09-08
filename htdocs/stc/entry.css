@@ -758,6 +758,9 @@ td.tabs {
 		.b-editentry-edit-btn {
 			background: url("/img/btn_edit.gif") no-repeat 0 0;
 			}
+		.b-editentry-del-btn {
+			background: url("/img/btn_del.gif") no-repeat 0 0;
+			}
 .b-editentries-header {
 	overflow: hidden;
 	}
