@@ -4,6 +4,10 @@
 
 .add_friend=Add friend
 
+.app_change_userhead=Install the same user head for free
+.app_install=Install &laquo;[[name]]&raquo; to have the same user head
+.app_use=Use that user head application
+
 .ban_everywhere.title|staleness=1
 .ban_everywhere.title=Ban user everywhere
 

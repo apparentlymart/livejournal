@@ -6029,10 +6029,21 @@ sub custom_usericon {
     return $url;
 }
 
+sub custom_usericon_appid {
+    my ($u) = @_;
+    return $u->prop('custom_usericon_appid') || 0;
+}
+
 sub set_custom_usericon {
-    my ($u, $url) = @_;
+    my ($u, $url, %opts) = @_;
 
     $u->set_prop( 'custom_usericon' => $url );
+
+    if ($opts{application_id}) {
+        $u->set_prop( 'custom_usericon_appid' => $opts{application_id});
+    } else {
+        $u->clear_prop( 'custom_usericon_appid' );
+    }
 }
 
 sub _subscriptions_count {

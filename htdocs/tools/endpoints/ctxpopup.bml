@@ -191,6 +191,26 @@
             }
         }
     }
+
+    if ($remote && $u && $ret{is_custom_userhead} && $u->custom_usericon_appid) {
+        $ret{is_app_userhead} = 1;
+        my $app = LJ::UserApps->get_application(id => $u->custom_usericon_appid);
+        if($app && $app->can_show_restricted) {
+            $ret{is_app_userhead} = 1;
+            if ($app->is_authorized(user => $remote)) {
+                if($remote->custom_usericon_appid == $app->id) {
+                    $ret{url_userhead_install} = $app->href;    # default view !!! TODO: pass referer parameters
+                    $ret{ml_userhead_install} = BML::ml('.app_use');
+                } else {
+                    $ret{url_userhead_install} = "$LJ::SITEROOT/manage/profile/#userheads";   # Edit profile
+                    $ret{ml_userhead_install} = BML::ml('.app_change_userhead');
+                }
+            } else {    # Not installed
+                $ret{url_userhead_install} = $app->href;    # INSTALL view !!!
+                $ret{ml_userhead_install} = BML::ml('.app_install', { name => $app->name });
+            }
+        }
+    }
     
     $ret{success} = 1;
     return LJ::JSON->to_json(\%ret);

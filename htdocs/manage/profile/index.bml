@@ -244,6 +244,11 @@ body<=
                 my $class = LJ::Pay::Payment::PayItem->get_class_for_item('userhead');
                 my $uhs = $class->get_expire_times ($u);
                 if ($uh_prop) {
+                    my $appid = $u->custom_usericon_appid;
+                    if ($appid) {
+                        my $app_obj = LJ::UserApps->get_application(id => $appid);
+                        $ret .= "<img src='".$app_obj->userhead."'>&nbsp;".LJ::Lang::ml('.section.userhead.application', { name => $app_obj->name, href => $app_obj->href}) if ($app_obj);
+                    } else {
                     ## Try to fetch expire date by userhead user's prop
                     ## At first we try to find uh in a shop
                     my $uhs_all = LJ::UserHead->get_all_userheads ();
@@ -262,12 +267,14 @@ body<=
                             $ret .= "<img src='$LJ::IMGPREFIX/$uh_prop' class='i-manage-userhead' />";
                         }
                     }
+                    }
                 } else {
                     $ret .= "<img src='$LJ::DEFAULT_USERHEAD' class='i-manage-userhead' />&nbsp;$ML{'.fn.userheads.default_userhead'}";
                 }
                 $ret .= "</td></tr>";
                 $ret .= "<tr><td class='field_name'>$ML{'.fn.userheads.collection'}</td><td>";
-                if (scalar @$uhs) {
+                my $apps = LJ::UserApps->get_apps_with_userhead($remote); # get all installed applications with userheads for specified user
+                if (scalar @$uhs || scalar @$apps) {
                     $ret .= '<p class="b-manage-userheads-desc">' . LJ::Lang::ml('.section.userhead.apply.href', { aopts => "href='$LJ::SITEROOT/shop/userheads.bml'" } ) . '</p>';
                     $ret .= '<ul class="b-manage-userheads">';
                     $ret .= "<li><label for='userhead0'><input type='radio' name='uh_id' value='default' id='userhead0' /><img src='$LJ::DEFAULT_USERHEAD' class='i-manage-userhead' />&nbsp;$ML{'.fn.userheads.default_userhead'}</label></li>";
@@ -275,6 +282,10 @@ body<=
                         my ($uh_id) = $uh->{item} =~ /uh-(\d+)/;
                         my $uh_obj = LJ::UserHead->get_userhead ($uh_id);
                         $ret .= "<li><label for='userhead$uh_id'><input type='radio' name='uh_id' value='$uh_id' id='userhead$uh_id' /><img src='".$uh_obj->get_uh_img . "' class='i-manage-userhead' /> " . LJ::Lang::ml('.section.userheads.expire_date', { date => $date_format->($uh->{expdate}) })."</label></li>" if $uh_obj;
+                    }
+                    foreach my $app (@$apps) {
+                        my $uh_id = 'appid_'.$app->id;
+                        $ret .= "<li><label for='userhead$uh_id'><input type='radio' name='uh_id' value='$uh_id' id='userhead$uh_id' /><img src='".$app->userhead . "' class='i-manage-userhead' /> " . LJ::Lang::ml('.section.userhead.application', { name => $app->name, href => $app->href })."</label></li>" if $app;
                     }
                     $ret .= '</ul>';
                 } else {
@@ -981,9 +992,14 @@ body<=
             if ($POST{'uh_id'} eq 'default') {
                 $u->set_custom_usericon (undef);
             } elsif ($POST{'uh_id'}) {
-                my $uh = LJ::UserHead->get_userhead ($POST{'uh_id'});
-                $u->set_custom_usericon ($uh->get_uh_img)
-                    if $uh;
+                if ($POST{'uh_id'} =~ /^appid_(\d+)$/) {
+                    my $app_obj = LJ::UserApps->get_application(id => $1);
+                    $u->set_custom_usericon ($app_obj->userhead, application_id => $app_obj->id) if ($app_obj);
+                } else {
+                    my $uh = LJ::UserHead->get_userhead ($POST{'uh_id'});
+                    $u->set_custom_usericon ($uh->get_uh_img)
+                        if $uh;
+                }
             }
         }
 

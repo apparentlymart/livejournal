@@ -384,6 +384,8 @@
 
 .section.userheads.expire_date=Expire [[date]]
 
+.section.userhead.application=&laquo;<a href="[[href]]">[[name]]</a>&raquo; promo userhead
+
 .section.userhead.apply.href=Click userhead to apply (or <a [[aopts]]>buy more userheads</a>):
 
 .section.vernum.button=Verify
