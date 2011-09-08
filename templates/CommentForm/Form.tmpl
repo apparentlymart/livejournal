@@ -115,7 +115,13 @@
 					
 					<div>
 	                    <TMPL_IF show_userpics>
-	                    <span id="userpics">
+
+		                <script type="text/javascript"> 
+		                    var userpicmap=<TMPL_VAR userpicmap>; 
+		                    var defaultpicurl="<TMPL_VAR defaultpicurl>"; 
+		                </script> 
+						
+						<span id="userpics">
 	                        <label for="prop_picture_keyword"><TMPL_VAR ml_picturetouse></label>
 	                        <select name="prop_picture_keyword" id="prop_picture_keyword" tabindex="21">
 	                            <TMPL_LOOP userpics>
