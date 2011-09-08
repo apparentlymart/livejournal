@@ -132,9 +132,8 @@ body<=
             my $ditemid_get = $getextra ? ("$getextra&amp;itemid=" . $entry->ditemid) : ("?itemid=" . $entry->ditemid);
             if (!$edit_disable) {
                 $ret .= "<a href='editjournal.bml" . $ditemid_get . "&amp;mode=edit' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
-            } else {
-                $ret .= "<a href='editjournal.bml" . $ditemid_get . "&amp;mode=delete' class='b-editentry-del-btn b-editentry-ctrl-btn'></a>";
             }
+            $ret .= "<a href='editjournal.bml" . $ditemid_get . "&amp;mode=delete' class='b-editentry-del-btn b-editentry-ctrl-btn'></a>";
             $ret .= "</p>";
 
             $ret .= "<h2><a href='".$entry->url."'>";
