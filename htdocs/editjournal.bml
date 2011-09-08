@@ -575,9 +575,6 @@ LIKE_FAQ
         # header
         $ret .= "<div class='b-editentries-header'>";
         $ret .= "<h1>Edit journal entries</h1>";
-        $ret .= "<div class='b-editentries-info'><?p " . BML::ml('.desc',
-                                {'aopts' => "href='$LJ::SITEROOT/editprivacy.bml'"})
-                 . " p?></div>\n";
 
         # edit form
 
