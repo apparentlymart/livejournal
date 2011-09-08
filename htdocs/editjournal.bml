@@ -639,6 +639,7 @@ JS_INIT
         my $prev_page_id = ($start_from > 0) ? ($start_from + $items_per_page) : 0;
         my $ymd = join "/", ($year, $month, $day);
         my %ymd_req = ($year && $month && $day && $show ne 'recent') ? ( ymd => $ymd ) : ();
+        my @post_ids = sort { $b <=> $a } ($usejournal_u ? $usejournal_u->get_post_ids : $remote->get_post_ids);
         while ($usejournal_u && ($LJ::MAX_SCROLLBACK_LASTN = 50000,
             my @recent = LJ::get_recent_items({
                 itemshow  => $items_per_page,
@@ -683,7 +684,7 @@ JS_INIT
             }
         }
 
-        $ret .= $entry_chooser->(\@recent_entries, prev => $prev_page_id, 'next' => $start_from);
+        $ret .= $entry_chooser->(\@recent_entries, prev => $post_ids[0] >= $prev_page_id ? $prev_page_id : 0, 'next' => @recent_entries >= $items_per_page ? $start_from : 0);
 
         my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
         if ($ad) {
