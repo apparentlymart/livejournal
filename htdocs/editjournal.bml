@@ -79,6 +79,7 @@ body<=
         my @res = @$ref;
         my $show_ad = $opts{show_ad} ? 1 : 0;
 
+        if ($opts{'prev'} || $opts{'next'}) {
         $ret .= "<p class='i-qotd-nav'>";
         if ($opts{'prev'}) {
             $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{prev}'>prev</a>";
@@ -90,9 +91,11 @@ body<=
         } else {
             $ret .= "<span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>";
         }
+        $ret .= "</p>";
         $ret .= "</div>"
 
             if @res;
+        }
 
         $ret .= "<ul class='b-editentries'>";
         foreach my $e_raw (@res) {
@@ -159,6 +162,22 @@ body<=
             $ret .= "<td valign='top'>$ad</td>" if $ad;
         }
         $ret .= "</ul>";
+
+        if ($opts{'prev'} || $opts{'next'}) {
+        $ret .= "<p class='i-qotd-nav'>";
+        if ($opts{'prev'}) {
+            $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{prev}'>prev</a>";
+        } else {
+            $ret .=  "<span class='i-qotd-nav-prev i-qotd-nav-prev-dis'>prev</span>";
+        }
+        if ($opts{'next'}) {
+            $ret .= "<a class='i-qotd-nav-next' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{next}'>next</a>";
+        } else {
+            $ret .= "<span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>";
+        }
+        $ret .= "</p>";
+        }
+
         return $ret;
     };
 
