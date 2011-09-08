@@ -624,6 +624,9 @@ LIKE_FAQ
             <script type="text/javascript">
                 jQuery('form.b-editentries-form')
                     .editentriesfilter();
+
+                jQuery('input.b-editentries-comm')
+                    .placeholder();
             </script>
 JS_INIT
 
