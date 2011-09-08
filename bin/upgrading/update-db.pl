@@ -337,7 +337,7 @@ sub populate_s2 {
         # find existing re-distributed layers that are in the database
         # and their styleids.
         my $existing = LJ::S2::get_public_layers({ force => 1 }, $sysid);
-
+        
         my %known_id;
         chdir "$ENV{'LJHOME'}/bin/upgrading" or die;
         my %layer;    # maps redist_uniq -> { 'type', 'parent' (uniq), 'id' (s2lid) }
@@ -364,6 +364,8 @@ sub populate_s2 {
 
             # remember it so we don't delete it later.
             $known_id{$id} = 1;
+          
+            $existing->{$base}->{'s2lid'} = $id;
 
             $layer{$base} = {
                 'type' => $type,
