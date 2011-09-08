@@ -951,7 +951,7 @@ sub decide_language {
     my %existing_language =
         map { $_ => 1 } ( @LJ::LANGS, @LJ::LANGS_IN_PROGRESS, 'debug' );
 
-    if ( LJ::is_web_context() ) {
+    if ( LJ::is_web_context() && LJ::Request->is_inited ) {
         # 'uselang' get param goes first
         if ( my $uselang = LJ::Request->get_param('uselang') ) {
             if ( $existing_language{$uselang} ) {
