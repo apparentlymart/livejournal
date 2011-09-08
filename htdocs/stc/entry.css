@@ -762,6 +762,7 @@ td.tabs {
 			background: url("/img/btn_del.gif") no-repeat 0 0;
 			}
 .b-editentries-header {
+	position: relative;
 	overflow: hidden;
 	}
 
@@ -801,11 +802,13 @@ td.tabs {
 	}
 
 .b-editentries-info {
+	position: absolute;
+	right: 0;
+	top: 18px;
 	max-width: 50%;
 	border: 1px solid #CCC;
 	padding: 10px;
 	border-radius: 5px;
-	float: right;
 	}
 .b-editentries-form INPUT[type="checkbox"],
 .b-editentries-form INPUT[type="radio"] {

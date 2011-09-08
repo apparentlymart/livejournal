@@ -91,11 +91,13 @@ body<=
         } else {
             $ret .= "<span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>";
         }
-        $ret .= "</p>";
-        $ret .= "</div>"
-
+        $ret .= "</p>"
             if @res;
         }
+        unless (@res) {
+            $ret .= "<p class='b-editentries-info'>" .  BML::ml('.no_entries_to_edit') . "</p>";
+        }
+        $ret .= "</div>";
 
         $ret .= "<ul class='b-editentries'>";
         foreach my $e_raw (@res) {
@@ -155,9 +157,6 @@ body<=
             }
             $ret .= "</li>";
 
-        }
-        unless (@res) {
-            $ret .= "<p class='b-editentries-info'>" .  BML::ml('.no_entries_to_edit') . "</p>";
         }
         if ($show_ad) {
             my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
