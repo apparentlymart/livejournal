@@ -585,9 +585,6 @@
 							case 'right' :
 								this.cssClassName = classes[2];
 								break;
-							case 'justify' :
-								this.cssClassName = classes[3];
-								break;
 						}
 
 						this.cssClassRegex = new RegExp('(?:^|\\s+)(?:' + classes.join('|') + ')(?=$|\\s)');
@@ -679,9 +676,11 @@
 
 								if (cssClassName) {
 									// Append the desired class name.
-									if (apply)
-										block.addClass(cssClassName); else if (!className)
+									if (apply){
+										block.addClass(cssClassName);
+									} else if (!className){
 										block.removeAttribute('class');
+									}
 								} else if (apply)
 									block.setStyle('text-align', this.value);
 							}
@@ -700,13 +699,11 @@
 
 				var left = new JustifyCommand(editor, 'justifyleft', 'left'),
 					center = new JustifyCommand(editor, 'justifycenter', 'center'),
-					right = new JustifyCommand(editor, 'justifyright', 'right'),
-					justify = new JustifyCommand(editor, 'justifyblock', 'justify');
+					right = new JustifyCommand(editor, 'justifyright', 'right');
 
 				editor.addCommand('justifyleft', left);
 				editor.addCommand('justifycenter', center);
 				editor.addCommand('justifyright', right);
-				editor.addCommand('justifyblock', justify);
 
 				editor.ui.addButton('JustifyLeft', {
 					label : editor.lang.justify.left,
@@ -720,15 +717,10 @@
 					label : editor.lang.justify.right,
 					command : 'justifyright'
 				});
-				editor.ui.addButton('JustifyBlock', {
-					label : editor.lang.justify.block,
-					command : 'justifyblock'
-				});
 
 				editor.on('selectionChange', CKEDITOR.tools.bind(onSelectionChange, left));
 				editor.on('selectionChange', CKEDITOR.tools.bind(onSelectionChange, right));
 				editor.on('selectionChange', CKEDITOR.tools.bind(onSelectionChange, center));
-				editor.on('selectionChange', CKEDITOR.tools.bind(onSelectionChange, justify));
 				editor.on('dirChanged', onDirChanged);
 
 			})();
@@ -789,8 +781,7 @@
 						text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore);
 						if (text) {
 							var br = editor.document.createElement('br'),
-								selection = editor.document.getSelection(),
-								bookmarks = selection.createBookmarks();
+								selection = editor.document.getSelection();
 
 							ljNoteData.LJCut.node = editor.document.createElement('div');
 							ljNoteData.LJCut.node.setAttribute('lj-cmd', 'LJCut');
@@ -798,10 +789,13 @@
 							if (text != top.CKLang.ReadMore) {
 								ljNoteData.LJCut.node.setAttribute('text', text);
 							}
-							selection.getRanges()[0].extractContents().appendTo(ljNoteData.LJCut.node);
 
-							selection.selectBookmarks(bookmarks);
-							editor.insertElement( br );
+							var ranges = selection.getRanges();
+							for (var i = 0, l = ranges.length; i < l; i++) {
+								ranges[i].extractContents().appendTo(ljNoteData.LJCut.node);
+							}
+
+							editor.insertElement(br);
 							ljNoteData.LJCut.node.insertBefore(br);
 						}
 					}
@@ -1150,38 +1144,6 @@
 							ljTag.attributes['lj-cmd'] = 'LJUserLink';
 							return ljTag;
 						} else {
-							var onSuccess = function(data) {
-								ljUsers[cacheName] = data.ljuser;
-
-								if (data.error) {
-									return alert(data.error + ' "' + username + '"');
-								}
-								if (!data.success) {
-									return;
-								}
-
-								data.ljuser = data.ljuser.replace('<span class="useralias-value">*</span>', '');
-
-								var ljTags = editor.document.getElementsByTag('lj');
-
-								for (var i = 0, l = ljTags.count(); i < l; i++) {
-									var ljTag = ljTags.getItem(i);
-
-									var userName = ljTag.getAttribute('user');
-									var userTitle = ljTag.getAttribute('title');
-									if (cacheName == userTitle ? userName + ':' + userTitle : userName) {
-										var newLjTag = CKEDITOR.dom.element.createFromHtml(ljUsers[cacheName], editor.document);
-										newLjTag.setAttribute('lj-cmd', 'LJUserLink');
-										ljTag.insertBeforeMe(newLjTag);
-										ljTag.remove();
-									}
-								}
-							};
-
-							var onError = function(err) {
-								alert(err + ' "' + ljUserName + '"');
-							};
-
 							var postData = {
 								username: ljUserName
 							};
@@ -1194,8 +1156,37 @@
 								data: HTTPReq.formEncoded(postData),
 								method: 'POST',
 								url: Site.siteroot + '/tools/endpoints/ljuser.bml',
-								onError: onError,
-								onData: onSuccess
+								onError: function(err) {
+									alert(err + ' "' + ljUserName + '"');
+								},
+								onData: function(data) {
+									if (data.error) {
+										return alert(data.error + ' "' + username + '"');
+									}
+									
+									if (!data.success) {
+										return;
+									}
+
+									ljUsers[cacheName] = data.ljuser;
+
+									data.ljuser = data.ljuser.replace('<span class="useralias-value">*</span>', '');
+
+									var ljTags = editor.document.getElementsByTag('lj');
+
+									for (var i = 0, l = ljTags.count(); i < l; i++) {
+										var ljTag = ljTags.getItem(i);
+
+										var userName = ljTag.getAttribute('user');
+										var userTitle = ljTag.getAttribute('title');
+										if (cacheName == (userTitle ? userName + ':' + userTitle : userName)) {
+											var newLjTag = CKEDITOR.dom.element.createFromHtml(ljUsers[cacheName], editor.document);
+											newLjTag.setAttribute('lj-cmd', 'LJUserLink');
+											ljTag.insertBeforeMe(newLjTag);
+											ljTag.remove();
+										}
+									}
+								}
 							});
 						}
 					},
