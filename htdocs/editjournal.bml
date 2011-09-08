@@ -149,7 +149,7 @@ body<=
             $event =~ s!\n!<br />!g;
             $ret .= $event;
             if (my @taglist = $entry->tags) {
-                $ret .= "<p><b>Tags:</b> " . LJ::ehtml(join ",", @taglist) . "</p>";
+                $ret .= "<p><b>Tags:</b> " . LJ::ehtml(join ", ", @taglist) . "</p>";
             }
             $ret .= "</li>";
 
@@ -597,8 +597,8 @@ LIKE_FAQ
         $ret .= "<p>" . LJ::html_check({ name => 'only_me', id => 'only_me',
                                 value => '1', selected =>  $only_me_checked });
         $ret .= "<label for='only_me'>Only my entries</label></p>"; 
-        if ($year || $month || $day || $show ne 'recent') {
-            $ret .= "Or <a href='editjournal.bml?show=recent&mode=init'>back to recent entries</a></p>";
+        if ($year || $month || $day || $usejournal) {
+            $ret .= "Or <a href='editjournal.bml'>back to recent entries</a></p>";
         }
         $ret .= "</form>\n";
 
