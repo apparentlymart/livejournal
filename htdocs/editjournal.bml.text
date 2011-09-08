@@ -21,6 +21,8 @@
 
 .recententry=Most recent entry
 
+.no_entries_to_edit=There is no entries to edit
+
 .success.delete=Journal entry was deleted.
 
 .success.deletespam=Additionally, the entry was marked as spam.  Thank you for your report.

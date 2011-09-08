@@ -157,6 +157,9 @@ body<=
             $ret .= "</li>";
 
         }
+        unless (@res) {
+            $ret .= BML::ml('.no_entries_to_edit');
+        }
         if ($show_ad) {
             my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
             $ret .= "<td valign='top'>$ad</td>" if $ad;
@@ -637,7 +640,7 @@ JS_INIT
         my $prev_page_id = ($start_from > 0) ? ($start_from + $items_per_page) : 0;
         my $ymd = join "/", ($year, $month, $day);
         my %ymd_req = ($year && $month && $day && $show ne 'recent') ? ( ymd => $ymd ) : ();
-        while ($LJ::MAX_SCROLLBACK_LASTN = 50000, 
+        while ($usejournal_u && ($LJ::MAX_SCROLLBACK_LASTN = 50000,
             my @recent = LJ::get_recent_items({
                 itemshow  => $items_per_page,
                 err       => \$err,
@@ -649,7 +652,7 @@ JS_INIT
                 order     => 'logtime',
                 %ymd_req,
                 ($only_me_checked) ? ('posterid' =>  $remote->{'userid'}) : (),
-            })) {
+            }))) {
 
             ## do not process entries twice
             @recent = grep { $entry_ids{$_->{'itemid'}} ? 0 : 1 } @recent;
