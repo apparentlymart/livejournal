@@ -95,7 +95,7 @@ body<=
             if @res;
         }
         unless (@res) {
-            $ret .= "<p class='b-editentries-info'>" .  BML::ml('.no_entries_to_edit') . "</p>";
+            $ret .= "<p class='b-editentries-info b-editentries-error'>" .  BML::ml('.no_entries_to_edit') . "</p>";
         }
         $ret .= "</div>";
 
