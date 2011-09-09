@@ -320,7 +320,7 @@ sub trans {
     ## This is a hack for alpha/beta/omega servers to make them 
     ## send static files (e.g. http://stat.livejournal.com/lanzelot/img/menu/div.gif?v=1)
     ## Production static files are served by CDN (http://l-stat.livejournal.com)
-    if ($host eq 'stat.livejournal.com' && $uri !~ m!^/(stc|img|js)!) {
+    if ($LJ::IS_LJCOM_BETA && $host eq 'stat.livejournal.com' && $uri !~ m!^/(stc|img|js)!) {
          $uri = "/stc$uri";
          LJ::Request->uri($uri);
     }
