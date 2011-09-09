@@ -727,13 +727,14 @@ td.tabs {
 
 /* Edit Entries, editjournal.bml */
 .b-editentries {
-	border-top: 1px solid #D2D2D2;
 	padding: 0;
+	margin-left: 0;
+	border-top: 1px solid #D2D2D2;
 	}
 	.b-editentry {
-		border-bottom: 1px solid #D2D2D2;
-		list-style: none;
 		padding: 10px 0;
+		list-style: none;
+		border-bottom: 1px solid #D2D2D2;
 		}
 		.b-editentry H2 {
 			color: #3F5F9E;
@@ -752,8 +753,8 @@ td.tabs {
 			width: 24px;
 			border: none;
 			text-indent: -9999px;
-			cursor: pointer;
 			margin: 0 0 0 12px;
+			cursor: pointer;
 			}
 		.b-editentry-edit-btn {
 			background: url("/img/btn_edit.gif") no-repeat 0 0;
