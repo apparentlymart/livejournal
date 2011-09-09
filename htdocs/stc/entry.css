@@ -801,16 +801,6 @@ td.tabs {
 	display: inline;
 	}
 
-.b-editentries-info {
-	max-width: 50%;
-	border: 1px solid #CCC;
-	padding: 10px;
-	border-radius: 5px;
-	}
-.b-editentries-error {
-	border-color: #F00;
-	background-color: #FEE;
-	}
 .b-editentries-form INPUT[type="checkbox"],
 .b-editentries-form INPUT[type="radio"] {
 	margin-left: 0;
