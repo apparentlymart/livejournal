@@ -665,7 +665,7 @@ sub get_text {
             ([^\[]+?)   # the key
             \]\]        # closing literal ']]'
         }
-        {$vars->{$1} || "[$1]"}xeg;
+        { defined $vars->{$1} ? $vars->{$1} : "[$1]" }xeg;
     }
 
     $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
