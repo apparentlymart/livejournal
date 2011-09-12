@@ -102,7 +102,8 @@ sub FriendsPage
         $common_filter = 0;
         $p->{'filter_active'} = 1;
         $p->{'filter_name'} = "";
-    } else {
+    }
+    else {
 
         # Show group or day log
         if ($pathextra) {
@@ -124,13 +125,16 @@ sub FriendsPage
         my $grp = LJ::get_friend_group($u, { 'name' => $group_name || "Default View" });
         my $bit = $grp->{'groupnum'};
         my $public = $grp->{'is_public'};
+
         if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) {
             $filter = (1 << $bit);
-        } elsif ($group_name) {
+        }
+        elsif ($group_name) {
             if ($remote) {
                 $opts->{'badfriendgroup'} = 1;
                 return 1;
-            } else {
+            }
+            else {
                 my $redir = LJ::eurl( LJ::Request->current_page_url );
                 $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir&errmsg=notloggedin";
                 return;
@@ -142,13 +146,11 @@ sub FriendsPage
         $p->{'friends_mode'} = "friendsfriends";
     }
 
-    # use Time::HiRes qw//;
-    # my $t0 = [Time::HiRes::gettimeofday];
-
     ## load the itemids
     my %friends;
     my %friends_row;
     my %idsbycluster;
+
     my @items = LJ::get_friend_items({
         'u'                 => $u,
         'userid'            => $u->{'userid'},
@@ -165,6 +167,7 @@ sub FriendsPage
         'dateformat'        => 'S2',
         'events_date'       => $events_date,
         'filter_by_tags'    => ($get->{notags} ? 0 : 1),
+        'preload_props'     => 1,
     });
 
     # warn "[FriendsPage=$user] Items loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
@@ -194,12 +197,15 @@ sub FriendsPage
     # warn "[FriendsPage=$user] LJ::Tags::get_logtagsmulti loaded. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
 
     my %posters;
+
     {
         my @posterids;
+
         foreach my $item (@items) {
             next if $friends{$item->{'posterid'}};
             push @posterids, $item->{'posterid'};
         }
+
         LJ::load_userids_multiple([ map { $_ => \$posters{$_} } @posterids ])
             if @posterids;
     }
@@ -208,6 +214,7 @@ sub FriendsPage
     my @userpic_load;
 
     my %lite;   # posterid -> s2_UserLite
+
     my $get_lite = sub {
         my $id = shift;
         return $lite{$id} if $lite{$id};
@@ -216,9 +223,9 @@ sub FriendsPage
 
     my $eventnum = 0;
     my $hiddenentries = 0;
+
   ENTRY:
-    foreach my $item (@items)
-    {
+    foreach my $item (@items) {
         my ($friendid, $posterid, $itemid, $security, $allowmask, $alldatepart) =
             map { $item->{$_} } qw(ownerid posterid itemid security allowmask alldatepart);
 
@@ -226,16 +233,18 @@ sub FriendsPage
         $p->{'friends'}->{$fr->{'user'}} ||= Friend($fr);
 
         my $clusterid = $item->{'clusterid'}+0;
-        my $datakey = "$friendid $itemid";
+        my $datakey   = "$friendid $itemid";
 
         my $replycount = $logprops{$datakey}->{'replycount'};
-        my $subject = $logtext->{$datakey}->[0];
-        my $text = $logtext->{$datakey}->[1];
+        my $subject    = $logtext->{$datakey}->[0];
+        my $text       = $logtext->{$datakey}->[1];
+
         if ($get->{'nohtml'}) {
             # quote all non-LJ tags
             $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             $text    =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
         }
+
 
         if ($LJ::UNICODE && $logprops{$datakey}->{'unknown8bit'}) {
             LJ::item_toutf8($friends{$friendid}, \$subject, \$text, $logprops{$datakey});
@@ -249,7 +258,21 @@ sub FriendsPage
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
 
+        if ( $logprops{$datakey}->{'repost'} && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
+            $text = LJ::Lang::ml(
+                'friendsposts.reposted',
+                {
+                    'user'     => $logprops{$datakey}->{'repost_author'},
+                    'subject'  => $logprops{$datakey}->{'repost_subject'},
+                    'orig_url' => $logprops{$datakey}->{'repost_url'},
+                    'url'      => $entry_obj->url,
+            });
+        }
+
+        LJ::Entry->preload_props([$entry_obj]);
+
         my %urlopts_style;
+
         if (    $remote && $remote->{'opt_stylemine'}
              && $remote->{'userid'} != $friendid )
         {
@@ -257,22 +280,27 @@ sub FriendsPage
         }
 
         my %urlopts_nc;
+
         if ( $replycount && $remote && $remote->{'opt_nctalklinks'} ) {
             $urlopts_nc{'nc'} .= $replycount;
         }
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
-        LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                             'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts_style),
-                                             'entry_url' => $entry_obj->prop('reposted_from') || $entry_obj->url,
-                                             'maximgwidth' => $maximgwidth,
-                                             'maximgheight' => $maximgheight,
-                                             'ljcut_disable' => $remote ? $remote->{'opt_ljcut_disable_friends'} : undef,
-                                             'suspend_msg' => $suspend_msg,
-                                             'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
-                                             'journalid' => $entry_obj->journalid,
-                                             'posterid' => $entry_obj->posterid,
-                                           });
+        LJ::CleanHTML::clean_event(
+            \$text,
+            {
+                 'preformatted'        => $logprops{$datakey}->{'opt_preformatted'},
+                 'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts_style),
+                 'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                 'maximgwidth'         => $maximgwidth,
+                 'maximgheight'        => $maximgheight,
+                 'ljcut_disable'       => $remote ? $remote->{'opt_ljcut_disable_friends'} : undef,
+                 'suspend_msg'         => $suspend_msg,
+                 'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
+                 'journalid'           => $entry_obj->journalid,
+                 'posterid'            => $entry_obj->posterid,
+        });
+
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$text);
 
         $text = LJ::ContentFlag->transform_post(post => $text, journal => $friends{$friendid},
@@ -311,13 +339,15 @@ sub FriendsPage
         # do the picture
         my $picid = 0;
         my $picu = undef;
+
         if ($friendid != $posterid && S2::get_property_value($opts->{ctx}, 'use_shared_pic')) {
             # using the community, the user wants to see shared pictures
             $picu = $friends{$friendid};
 
             # use shared pic for community
             $picid = $friends{$friendid}->{defaultpicid};
-        } else {
+        }
+        else {
             # we're using the poster for this picture
             $picu = $po;
 
@@ -327,18 +357,18 @@ sub FriendsPage
 
         my $journalbase = LJ::journal_base($friends{$friendid});
         my $permalink = $eobj->url;
-        my $readurl = $eobj->url( %urlopts_style, %urlopts_nc );
-        my $posturl = $eobj->url( %urlopts_style, 'mode' => 'reply' );
+        my $readurl   = $eobj->url( %urlopts_style, %urlopts_nc );
+        my $posturl   = $eobj->url( %urlopts_style, 'mode' => 'reply' );
 
         my $comments = CommentInfo({
-            'read_url' => $readurl,
-            'post_url' => $posturl,
-            'count' => $replycount,
+            'read_url'    => $readurl,
+            'post_url'    => $posturl,
+            'count'       => $replycount,
             'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
-            'enabled' => $eobj->comments_shown,
-            'locked' => !$eobj->posting_comments_allowed,
-            'screened' => ($logprops{$datakey}->{'hasscreened'} && $remote &&
-                           ($remote->{'user'} eq $fr->{'user'} || $remote->can_manage($fr))) ? 1 : 0,
+            'enabled'     => $eobj->comments_shown,
+            'locked'      => !$eobj->posting_comments_allowed,
+            'screened'    => ($logprops{$datakey}->{'hasscreened'} && $remote &&
+                               ($remote->{'user'} eq $fr->{'user'} || $remote->can_manage($fr))) ? 1 : 0,
         });
         $comments->{show_postlink} = $eobj->posting_comments_allowed;
         $comments->{show_readlink} = $eobj->comments_shown && ($replycount || $comments->{'screened'});
@@ -347,9 +377,11 @@ sub FriendsPage
             $u->{'moodthemeid'} : $friends{$friendid}->{'moodthemeid'};
 
         my @taglist;
+
         while (my ($kwid, $kw) = each %{$logtags->{$datakey} || {}}) {
             push @taglist, Tag($friends{$friendid}, $kwid => $kw);
         }
+
         LJ::run_hooks('augment_s2_tag_list', u => $u, jitemid => $itemid, tag_list => \@taglist);
         @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
 
@@ -366,24 +398,25 @@ sub FriendsPage
         }
 
         my $entry = Entry($u, {
-            'subject' => $subject,
-            'text' => $text,
-            'dateparts' => $alldatepart,
-            'system_dateparts' => $item->{'system_alldatepart'},
-            'security' => $security,
-            'allowmask' => $allowmask,
-            'props' => $logprops{$datakey},
-            'itemid' => $ditemid,
-            'journal' => $userlite_journal,
-            'poster' => $userlite_poster,
-            'comments' => $comments,
-            'new_day' => 0,  # setup below
-            'end_day' => 0,  # setup below
-            'userpic' => undef,
-            'tags' => \@taglist,
-            'permalink_url' => $permalink,
-            'moodthemeid' => $moodthemeid,
+            'subject'           => $subject,
+            'text'              => $text,
+            'dateparts'         => $alldatepart,
+            'system_dateparts'  => $item->{'system_alldatepart'},
+            'security'          => $security,
+            'allowmask'         => $allowmask,
+            'props'             => $logprops{$datakey},
+            'itemid'            => $ditemid,
+            'journal'           => $userlite_journal,
+            'poster'            => $userlite_poster,
+            'comments'          => $comments,
+            'new_day'           => 0,  # setup below
+            'end_day'           => 0,  # setup below
+            'userpic'           => undef,
+            'tags'              => \@taglist,
+            'permalink_url'     => $permalink,
+            'moodthemeid'       => $moodthemeid,
         });
+
         $entry->{'_ymd'} = join('-', map { $entry->{'time'}->{$_} } qw(year month day));
 
         if ($picid && $picu) {
@@ -395,8 +428,6 @@ sub FriendsPage
         $eventnum++;
         LJ::run_hook('notify_event_displayed', $eobj);
     } # end while
-
-    # warn "[FriendsPage=$user] items prepared. elapsed=" . Time::HiRes::tv_interval( $t0, [Time::HiRes::gettimeofday]) . " sec";
 
     # set the new_day and end_day members.
     if ($eventnum) {

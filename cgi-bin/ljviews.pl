@@ -1551,8 +1551,7 @@ sub create_view_lastn
 }
 
 # the creator for the 'friends' view:
-sub create_view_friends
-{
+sub create_view_friends {
     my ($ret, $u, $vars, $remote, $opts) = @_;
     my $sth;
     my $user = $u->{'user'};
@@ -1711,33 +1710,34 @@ sub create_view_friends
     my %friends;
     my %friends_row;
     my %idsbycluster;
+
     my @items = LJ::get_friend_items({
-        'u' => $u,
-        'userid' => $u->{'userid'},
-        'remote' => $remote,
-        'itemshow' => $itemshow,
-        'skip' => $skip,
-        'filter' => $filter,
-        'common_filter' => $common_filter,
-        'friends_u' => \%friends,
-        'friends' => \%friends_row,
-        'idsbycluster' => \%idsbycluster,
-        'showtypes' => $get->{'show'},
+        'u'                => $u,
+        'userid'           => $u->{'userid'},
+        'remote'           => $remote,
+        'itemshow'         => $itemshow,
+        'skip'             => $skip,
+        'filter'           => $filter,
+        'common_filter'    => $common_filter,
+        'friends_u'        => \%friends,
+        'friends'          => \%friends_row,
+        'idsbycluster'     => \%idsbycluster,
+        'showtypes'        => $get->{'show'},
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
-        'events_date' => $events_date,
-        'filter_by_tags' => ($get->{notags} ? 0 : 1),
+        'events_date'      => $events_date,
+        'filter_by_tags'   => ($get->{notags} ? 0 : 1),
     });
 
-    while ($_ = each %friends) {
+    for ( keys %friends ) {
+#    while ($_ = each %friends) {
         # we expect fgcolor/bgcolor to be in here later
         $friends{$_}->{'fgcolor'} = $friends_row{$_}->{'fgcolor'} || '#000000';
         $friends{$_}->{'bgcolor'} = $friends_row{$_}->{'bgcolor'} || '#ffffff';
     }
 
-    unless (%friends)
-    {
+    unless ( %friends ) {
         $friends_page{'events'} = LJ::fill_var_props($vars, 'FRIENDS_NOFRIENDS', {
-          "name" => LJ::ehtml($u->{'name'}),
+          "name"     => LJ::ehtml($u->{'name'}),
           "name-\'s" => ($u->{'name'} =~ /s$/i) ? "'" : "'s",
           "username" => $user,
         });
@@ -1780,7 +1780,7 @@ sub create_view_friends
 
     my $lastday = -1;
     my $eventnum = 0;
-    
+
   ENTRY:
     foreach my $item (@items)
     {
@@ -1809,11 +1809,23 @@ sub create_view_friends
         my $clusterid = $item->{'clusterid'}+0;
 
         my $datakey = "$friendid $itemid";
+        my $replycount = $logprops{$datakey}->{'replycount'};
+        my $subject    = $logtext->{$datakey}->[0];
+        my $event      = $logtext->{$datakey}->[1];
+
+        if ( $logprops{$datakey}->{'repost'} && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
+            $event = LJ::Lang::ml(
+                'friendsposts.reposted',
+                {
+                    'user'    => $logprops{$datakey}->{'repost_author'},
+                    'subject' => $logprops{$datakey}->{'repost_subject'},
+                    'orig_url' => $logprops{$datakey}->{'repost_url'},
+                    'url'     => $entry_obj->url,
+            });
+        }
 
         $entry_obj->handle_prefetched_props($logprops{$datakey});
-        my $replycount = $logprops{$datakey}->{'replycount'};
-        my $subject = $logtext->{$datakey}->[0];
-        my $event = $logtext->{$datakey}->[1];
+
         if ($get->{'nohtml'}) {
             # quote all non-LJ tags
             $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
