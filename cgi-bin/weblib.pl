@@ -597,8 +597,8 @@ sub check_referer {
 # returns: HTML hidden field to be inserted into the output of a page.
 # </LJFUNC>
 sub repost_auth {
-    my ($type, $username, $url, $raw) = @_;
-    my $str = join( ':', map ( LJ::eurl($_), $type, $username, $url));
+    my ($type, $username, $url, $subject, $raw) = @_;
+    my $str  = join( ':', map ( LJ::eurl($_), $type, $username, $url, $subject));
     my $auth = Digest::MD5::md5_hex( $str . $LJ::REPOST_SECRET );
 
     return $auth if $raw;
