@@ -605,8 +605,8 @@ LIKE_FAQ
             $ret .= " b-editentries-form-withdate";
         }
         $ret .= "'>\n";
-        $ret .= "<p>Show entries: 
-        <span class='b-editentries-cal'><i></i><b class='b-editentries-cal-message'>Choose date</b><b class='b-editentries-cal-date'>$day.$month.$year</b></span> <span class='b-editentries-cal-clear'>( <b>Clear</b> )</span>
+        $ret .= "<p>".$ML{'.show_entries'}.": 
+        <span class='b-editentries-cal'><i></i><b class='b-editentries-cal-message'>".$ML{'.choose_date'}."</b><b class='b-editentries-cal-date'>$day.$month.$year</b></span> <span class='b-editentries-cal-clear'>( <b>Clear</b> )</span>
         <input type='hidden' name='year' value='$year'/>
         <input type='hidden' name='month' value='$month'/>
         <input type='hidden' name='day' value='$day'/>";
@@ -614,9 +614,9 @@ LIKE_FAQ
         $ret .= LJ::html_submit(undef, $ML{'.btn.search'}) . "</p>";
         $ret .= "<p>" . LJ::html_check({ name => 'only_me', id => 'only_me',
                                 value => '1', selected =>  $only_me_checked });
-        $ret .= "<label for='only_me'>Only my entries</label></p>"; 
+        $ret .= "<label for='only_me'>".$ML{'.only_my_entries'}."</label></p>"; 
         if ($year || $month || $day || $usejournal) {
-            $ret .= "Or <a href='editjournal.bml'>back to recent entries</a></p>";
+            $ret .= BML::ml('.back_to_recent_entries', { aopts => "href='editjournal.bml'" } )."</p>";
         }
         $ret .= "</form>\n";
 

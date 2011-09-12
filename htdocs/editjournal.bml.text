@@ -5,9 +5,13 @@
 
 .btn.search=Search…
 
+.back_to_recent_entries=Or <a [[aopts]]>back to recent entries</a>
+
 .input.usejournal=Enter community name here
 
 .certainday=Certain Day:
+
+.choose_date=Choose date
 
 .desc=Please use the form below to find the entry you would like to edit. [[aopts]]
 
@@ -22,6 +26,10 @@
 .recententry=Most recent entry
 
 .no_entries_to_edit=There is no entries to edit
+
+.only_my_entries=Only my entries
+
+.show_entries=Show entries
 
 .success.delete=Journal entry was deleted.
 
