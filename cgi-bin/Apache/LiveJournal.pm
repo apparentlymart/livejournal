@@ -206,8 +206,9 @@ sub handler
 
         if ( LJ::Request->notes('method') eq '__setdomsess' ) {
             return redir(LJ::Session->setdomsess_handler())
-        }
-        else {
+        } elsif (LJ::Request->notes('method') eq 'access_denied') {
+            # do not check session
+        } else {
             my $session = LJ::Session->session_from_cookies(
                 tried_fast   => 0,
                 redirect_ref => \$LJ::CACHE_REMOTE_BOUNCE_URL,
