@@ -189,14 +189,16 @@ EMBED
                 $event = $entry->event_raw;
                 LJ::EmbedModule->add_user_to_embed($entry->poster->username, \$event);
 
-                $event = LJ::Lang::ml("repost.wrapper", {
-                                            username => $entry->poster->username,
-                                            url      => $entry->url,
-                                            subject  => $subject,
-                                            text     => $event,
-                                            });
+                $event = LJ::Lang::ml(
+                    "repost.wrapper",
+                    {
+                        username => $entry->poster->username,
+                        url      => $entry->url,
+                        subject  => $subject,
+                        text     => $event,
+                });
                 $reposted_from = $entry->url;
-                $repost_hidden = LJ::repost_auth($POST{'repost_type'} || $GET{'repost_type'} || 'd', $entry->poster->username, $entry->url);
+                $repost_hidden = LJ::repost_auth($POST{'repost_type'} || $GET{'repost_type'} || 'd', $entry->poster->username, $entry->url, $subject);
             }
         }
     }
@@ -511,13 +513,16 @@ LIKE_FAQ
         $req{prop_interface} = "web";
 
         if ( $POST{'repost_params'} ) {
-            my ( $type, $username, $url, $auth ) = split(/:/, $POST{'repost_params'} );
+            my ( $type, $username, $url, $subject, $auth ) = split(/:/, $POST{'repost_params'} );
 
-            $req{'prop_repost_url'}    = LJ::durl($url);
-            $req{'prop_repost_author'} = LJ::durl($username);
-            $req{'prop_repost'}        = $auth eq LJ::repost_auth($type, $username, $url, 1)
+            $req{'prop_repost_url'}     = LJ::durl($url);
+            $req{'prop_repost_author'}  = LJ::durl($username);
+            $req{'prop_repost_subject'} = LJ::durl($subject);
+
+            my $new_auth = LJ::repost_auth($type, $req{'prop_repost_author'}, $req{'prop_repost_url'}, $subject, 1);
+            $req{'prop_repost'}        = $auth eq $new_auth
                 ? $type
-                : '0';
+                : 'N';
         }
 
         foreach my $k (keys %req) {
