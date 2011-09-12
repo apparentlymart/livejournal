@@ -570,7 +570,7 @@ function print_comment_close (string footer, Comment c) {
             
             ") ";
         }
-        if ($c.thread_url != "" and (not $c.spam) and $c.parent_url != "" and size $c.replies > 0) {
+        if ($c.thread_url != "" and (not $c.spam) and $c.parent_url != "") {
             $c->print_expand_collapse_links({ "expand"=>" (%_) ", "collapse"=>" (%_) "});
         }
 

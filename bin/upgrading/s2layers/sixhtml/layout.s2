@@ -1106,7 +1106,7 @@ function EntryPage::print_comment_full(Comment e) {
      if ($e.parent_url) { print " $sep <a href='$e.parent_url'>$*text_comment_parent</a>"; }
      if (($e.thread_url != "") and (not $e.spam)) {
          print " $sep <a href='$e.thread_url'>$*text_comment_thread</a>";
-         if ($e.parent_url != "" and size $e.replies > 0) {
+         if ($e.parent_url != "") {
             $e->print_expand_collapse_links({ "expand"=>" $sep %_", "collapse"=>" $sep %_"});
         }
      }

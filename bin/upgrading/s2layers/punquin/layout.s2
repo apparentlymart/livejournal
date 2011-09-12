@@ -988,7 +988,7 @@ function EntryPage::print_comment_full (Comment c) {
 #          # if (defined $expand_link) {
 #          #     "(" + $c->expand_link() + ") ";
 #          # }
-         if ($c.parent_url != "" and size $c.replies > 0) {
+         if ($c.parent_url != "") {
             $c->print_expand_collapse_links({ "expand"=>"(%_) ", "collapse"=>"(%_) "});
         }
     }
