@@ -27,6 +27,7 @@ use LJ::JSON;
 use HTTP::Date qw(str2time);
 use LJ::TimeUtil;
 use LJ::User::PropStorage;
+use LJ::FileStore;
 
 use Class::Autouse qw(
                       URI
@@ -6025,6 +6026,17 @@ sub custom_usericon {
     my ($u) = @_;
 
     my $url = $u->prop('custom_usericon') || '';
+    if (
+           $url =~ /userhead/
+        && $url !~ /v=\d+/
+        && (my ($uh_id) = $url =~ m/\/userhead\/(\d+)$/)
+    ) {
+        my $uh = LJ::UserHead->get_userhead ($uh_id);
+        if ($uh) {
+            my $uh_fs = LJ::FileStore->get_path_info ( path => "/userhead/".$uh->get_uh_id );
+            $url .= "?v=".$uh_fs->{'change_time'} if $uh_fs->{'change_time'};
+        }
+    }
     $url =~ s#^http://files\.livejournal\.com#$LJ::FILEPREFIX#;
     return $url;
 }
