@@ -272,7 +272,7 @@ sub do_request
     return fail($err, 201);
 }
 
-sub getpoll 
+sub getpoll
 {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
@@ -342,7 +342,7 @@ sub getpoll
     return $res;
 }
 
-sub editpoll 
+sub editpoll
 {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
@@ -381,7 +381,7 @@ sub editpoll
     };
 }
 
-sub votepoll 
+sub votepoll
 {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
@@ -420,7 +420,7 @@ sub votepoll
 }
 
 sub checksession {
-    my ($req, $err, $flags) = @_; 
+    my ($req, $err, $flags) = @_;
     return undef
         unless authenticate($req, $err, $flags);
 
@@ -444,21 +444,21 @@ sub addcomment
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
-    
+
     my $journal;
     if( $req->{journal} ){
         return fail($err,100) unless LJ::canonical_username($req->{journal});
         $journal = LJ::load_user($req->{journal}) or return fail($err, 100);
-        return fail($err,214) 
+        return fail($err,214)
             if LJ::Talk::Post::require_captcha_test($u, $journal, $req->{body}, $req->{ditemid});
     }else{
         $journal = $u;
     }
-    
+
     # some additional checks
 #    return fail($err,314) unless $u->get_cap('paid');
     return fail($err,214) if LJ::Comment->is_text_spam( \ $req->{body} );
-    
+
     # create
     my $comment = LJ::Comment->create(
         journal      => $journal,
@@ -489,7 +489,7 @@ sub addcomment
 
 sub getcomments {
     my ($req, $err, $flags) = @_;
-    
+
     $flags->{allow_anonymous} = 1;
 
     return undef unless authenticate($req, $err, $flags);
@@ -508,9 +508,9 @@ sub getcomments {
     return fail($err,200,"journal") unless($journal);
 
     return fail($err,200,"ditemid") unless($req->{ditemid});
-    my $itemid = int($req->{ditemid} / 256); 
+    my $itemid = int($req->{ditemid} / 256);
 
-    # load root post   
+    # load root post
     my $jitem = LJ::Talk::get_journal_item($journal, $itemid);
     return fail($err,203,"ditemid (specified post doesn't exist in requested journal)") unless($jitem);
     my $up = LJ::load_userid( $jitem->{'posterid'} );
@@ -526,10 +526,10 @@ sub getcomments {
     my $page = $req->{page} + 0;                # page to show  - defaut
     my $view = $req->{view_ditemid} + 0;        # ditemid   - external comment id to show that page with it
 
-    my $skip = $req->{skip} + 0;            
+    my $skip = $req->{skip} + 0;
     my $itemshow = $req->{itemshow} + 0;
 
-    my $expand = $req->{expand_strategy} ? $req->{expand_strategy} : 'default' ;    
+    my $expand = $req->{expand_strategy} ? $req->{expand_strategy} : 'default' ;
     return fail($err, 203, 'expand_strategy') unless ($expand =~ /^mobile|mobile_thread|expand_all|by_level|detailed|default$/);
 
     my $format = $req->{format} || 'thread'; # default value thread
@@ -580,10 +580,10 @@ sub getcomments {
     my @comments;
     my @parent = ( \{ level => -1, children => \@comments } );
 
-    while (my $item = shift @com){        
+    while (my $item = shift @com){
         $item->{indent} ||= 0;
         shift( @parent ) while $item->{indent} <= ${$parent[0]}->{level};
-        
+
         my $item_data = {
             parentdtalkid   => $item->{parenttalkid}?($item->{parenttalkid} * 256 + $jitem->{anum}):0,
             postername      => $item->{userpost},
@@ -610,7 +610,7 @@ sub getcomments {
         #LJ::EmbedModule->expand_entry($item->{upost}, \$item_data->{body}, get_video_id => 1) if($item->{upost} && $req->{get_video_ids});
 
         $item_data->{subject} = $item->{subject} if($item->{subject} && $item->{_loaded});
-   
+
         if($item->{upost} && $item->{upost}->identity ){
             my $i = $item->{upost}->identity;
             $item_data->{'identity_type'} = $i->pretty_type;
@@ -624,13 +624,13 @@ sub getcomments {
 
             my $userpic = $comment->userpic;
             $item_data->{userpic} = $userpic && $userpic->url;
-            
+
             $item_data->{props} = { map {$item->{props}->{$_} ? ($_ => $item->{props}->{$_}) : ()}
                      qw(edit_time deleted_poster picture_keyword opt_preformatted) };
-            
+
             $item_data->{props}->{'poster_ip'} = $item->{'props'}->{'poster_ip'}
                 if $item->{'props'}->{'poster_ip'} && $u && ( $u->{'user'} eq $up->{'user'} || $u->can_manage($journal) );
-            
+
             $item_data->{privileges} = {};
             $item_data->{privileges}->{delete}   = LJ::Talk::can_delete($u, $journal, $up, $item->{userpost});
             $item_data->{privileges}->{edit}     = $comment->user_can_edit($u);
@@ -639,17 +639,17 @@ sub getcomments {
             my $pu = $comment->poster;
             unless ($pu && $pu->is_suspended){
                 $item_data->{privileges}->{screen}   = (!$comment->is_screened && LJ::Talk::can_screen($u, $journal, $up, $item->{userpost}));
-                $item_data->{privileges}->{unscreen} = ($comment->is_screened && LJ::Talk::can_unscreen($u, $journal, $up, $item->{userpost})); 
+                $item_data->{privileges}->{unscreen} = ($comment->is_screened && LJ::Talk::can_unscreen($u, $journal, $up, $item->{userpost}));
             }
             $item_data->{privileges}->{spam} = (!$comment->is_spam && LJ::Talk::can_marked_as_spam($u, $journal, $up, $item->{userpost}));
             $item_data->{privileges}->{unspam} = ($comment->is_spam && LJ::Talk::can_unmark_spam($u, $journal, $up, $item->{userpost}));
         }
-        
+
         if ( $req->{calculate_count} ){
             $item_data->{thread_count} = 0;
             $$_->{thread_count}++ for @parent;
         }
-        
+
         if( $req->{only_loaded} && !$item->{_loaded} ){
             my $hc = \${$parent[0]}->{has_children};
             $$hc = $$hc?$$hc+1:1;
@@ -669,8 +669,8 @@ sub getcomments {
             undef $item->{children};
         }
     }
-        
-    if($format eq 'list') {    
+
+    if($format eq 'list') {
         $extra{items} = scalar(@comments);
         $itemshow = $extra{items} unless ($itemshow && $itemshow <= $extra{items});
         @comments = splice(@comments, $skip, $itemshow);
@@ -690,12 +690,12 @@ sub getcomments {
 sub delcomments {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
-    
+
     my $comment = LJ::Comment->new( $req->{journalid} || $flags->{'u'} , dtalkid => $req->{dtalkid} );
     return fail($err, 300) unless $comment->user_can_delete($flags->{'u'});
-    
+
     my @to_delete;
-    
+
     if( !$req->{recursive}){
         push @to_delete, $comment;
     }else{
@@ -708,7 +708,7 @@ sub delcomments {
         }
     }
     $_->delete for @to_delete;
-    
+
     return {
         status => 'OK',
         result => @to_delete + 0,
@@ -721,14 +721,14 @@ sub delcomments {
 sub screencomments {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
-    
+
     my $journal = $req->{journalid}?LJ::load_userid($req->{journalid}):$flags->{'u'};
     my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
     my $up = $comment->entry->poster;
     return fail($err, 300) unless LJ::Talk::can_screen($flags->{'u'}, $journal, $up, $comment->poster);
-    
+
     my @to_screen;
-    
+
     if( !$req->{recursive}){
         push @to_screen, $comment;
     }else{
@@ -741,7 +741,7 @@ sub screencomments {
         }
     }
     LJ::Talk::screen_comment($journal, $comment->entry->jitemid, $_->{jtalkid}) for @to_screen;
-    
+
     return {
         status => 'OK',
         result => @to_screen + 0,
@@ -754,14 +754,14 @@ sub screencomments {
 sub unscreencomments {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
-    
+
     my $journal = $req->{journalid}?LJ::load_userid($req->{journalid}):$flags->{'u'};
     my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
     my $up = $comment->entry->poster;
     return fail($err, 300) unless LJ::Talk::can_unscreen($flags->{'u'}, $journal, $up, $comment->poster);
-    
+
     my @to_screen;
-    
+
     if( !$req->{recursive}){
         push @to_screen, $comment;
     }else{
@@ -774,7 +774,7 @@ sub unscreencomments {
         }
     }
     LJ::Talk::unscreen_comment($journal, $comment->entry->jitemid, $_->{jtalkid}) for @to_screen;
-    
+
     return {
         status => 'OK',
         result => @to_screen + 0,
@@ -787,14 +787,14 @@ sub unscreencomments {
 sub freezecomments {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
-    
+
     my $journal = $req->{journalid}?LJ::load_userid($req->{journalid}):$flags->{'u'};
     my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
     my $up = $comment->entry->poster;
     return fail($err, 300) unless LJ::Talk::can_freeze($flags->{'u'}, $journal, $up, $comment->poster);
-      
+
     LJ::Talk::freeze_thread($journal, $comment->entry->jitemid, $comment->{jtalkid});
-             
+
     return {
         status => 'OK',
         result => 1,
@@ -808,14 +808,14 @@ sub freezecomments {
 sub unfreezecomments {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
-    
+
     my $journal = $req->{journalid}?LJ::load_userid($req->{journalid}):$flags->{'u'};
     my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
     my $up = $comment->entry->poster;
     return fail($err, 300) unless LJ::Talk::can_unfreeze($flags->{'u'}, $journal, $up, $comment->poster);
-      
+
     LJ::Talk::unfreeze_thread($journal, $comment->entry->jitemid, $comment->{jtalkid});
-             
+
     return {
         status => 'OK',
         result => 1,
@@ -844,9 +844,9 @@ sub editcomment {
 
     my $new_comment = { map {$_ => $req->{$_}} qw( picture_keyword preformat subject body) };
     $new_comment->{editid} = $req->{dtalkid};
-    
+
     my $errref;
-    return fail($err, 300, $errref) 
+    return fail($err, 300, $errref)
         unless LJ::Talk::Post::edit_comment(
             $up, $journal, $new_comment, $parent, {itemid => $entry->jitemid}, \$errref, $remote);
 
@@ -1002,9 +1002,9 @@ sub getfriendspage
                 embed_url => $entry->url)
         }
 
-        #userpic 
+        #userpic
         $h{poster_userpic_url} = $h{userpic} && $h{userpic}->url;
-        
+
         # log time value
         $h{logtime} = $LJ::EndOfTime - $ei->{rlogtime};
         $h{do_captcha} = LJ::Talk::Post::require_captcha_test($u, $entry->poster, '', $h{ditemid}, 1)?1:0;
@@ -1035,7 +1035,7 @@ sub getfriendspage
     }
 
     LJ::run_hooks("getfriendspage", {userid => $u->userid, });
-    
+
     return {
         entries => [ @res ],
         skip => $skip,
@@ -1098,11 +1098,11 @@ sub getinbox
 
     if ($req->{gettype}) {
         $req->{gettype} = [$req->{gettype}] unless ref($req->{gettype});
-        
+
         my %filter;
         $filter{"LJ::Event::" . $number_type{$_}} = 1 for @{$req->{gettype}};
         @notifications = grep { exists $filter{$_->event->class} } $inbox->items;
-        
+
     } else {
         @notifications = $inbox->all_items;
     }
@@ -1413,7 +1413,7 @@ sub getfriendgroups
             u => $u
         }
     };
-    
+
     $res->{'friendgroups'} = list_friendgroups($u);
     return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
     if ($req->{'ver'} >= 1) {
@@ -1521,7 +1521,7 @@ sub getfriends
     if ($req->{'ver'} >= 1) {
         foreach(@{$res->{'friends'}}) { LJ::text_out(\$_->{'fullname'}) };
     }
-    
+
     return $res;
 }
 
@@ -1747,7 +1747,7 @@ sub common_event_validation
     {
 
         if ($req->{'ver'} < 1) { # client doesn't support Unicode
-            ## Hack: some old clients do send valid UTF-8 data, 
+            ## Hack: some old clients do send valid UTF-8 data,
             ## but don't tell us about that.
             ## Check, if the event/subject are valid UTF-8 strings.
             my $tmp_event   = $req->{'event'};
@@ -2096,7 +2096,7 @@ sub postevent
 
         LJ::MemCache::incr($key, 1) ||
             (LJ::MemCache::add($key, 0),  LJ::MemCache::incr($key, 1));
-    
+
         my $poster_offset = $u->timezone;
         my @ltime = gmtime(time() + $poster_offset * 3600);
         my $current = sprintf("%04d-%02d-%02d %02d:%02d",
@@ -2230,7 +2230,7 @@ sub postevent
     # posting:
 
     $getlock->();
-    
+
     return $res if $res_done;
 
     # do rate-checking
@@ -2368,12 +2368,12 @@ sub postevent
     } else {
         delete $req->{'props'}->{'copyright'};
     }
-    
+
     ## give features
     if (LJ::is_enabled('give_features')) {
         $req->{'props'}->{'give_features'} = ($req->{'props'}->{'give_features'} eq 'enable') ? 1 :
                                              ($req->{'props'}->{'give_features'} eq 'disable') ? 0 :
-                                             1; # LJSUP-9142: All users should be able to use give button 
+                                             1; # LJSUP-9142: All users should be able to use give button
     }
 
     # meta-data
@@ -2500,7 +2500,7 @@ sub editevent
     # Ownerid - community/blog id
     my $ownerid = $flags->{'ownerid'};
     my $uowner = $flags->{'u_owner'} || $u;
-    
+
     # Make sure we have a user object here
     $uowner = LJ::want_user($uowner) unless LJ::isu($uowner);
     my $clusterid = $uowner->{'clusterid'};
@@ -2534,11 +2534,11 @@ sub editevent
             ($req->{'security'} eq "private" ||
             ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
 
-    # make sure user can't change post in a certain community without being its member 
+    # make sure user can't change post in a certain community without being its member
     return fail($err,102)
         if ($LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $uowner->{user} } &&
             !LJ::is_friend($uowner, $u));
-        
+
 
     # make sure the new entry's under the char limit
     # NOTE: as in postevent, this requires $req->{event} to be binary data
@@ -2913,8 +2913,7 @@ sub editevent
     return $res;
 }
 
-sub getevents
-{
+sub getevents {
     my ($req, $err, $flags) = @_;
 
     $flags->{allow_anonymous} = 1;
@@ -2929,27 +2928,31 @@ sub getevents
     ### shared-journal support
     my $posterid = ($u ? $u->{'userid'} : 0);
     my $ownerid = $flags->{'ownerid'};
+
     if( $req->{journalid} ){
         $ownerid = $req->{journalid};
         $uowner = LJ::load_userid( $req->{journalid} );
     }
-    
+
     my $dbr = LJ::get_db_reader();
     my $sth;
 
     my $dbcr =  LJ::get_cluster_reader($uowner);
-    return fail($err,502) unless $dbcr && $dbr;
+    return fail($err, 502) unless $dbcr && $dbr;
 
     # can't pull events from deleted/suspended journal
-    return fail($err,307) unless $uowner->{'statusvis'} eq "V" || $uowner->is_readonly;
+    return fail($err, 307) unless $uowner->{'statusvis'} eq "V" || $uowner->is_readonly;
 
     my $reject_code = $LJ::DISABLE_PROTOCOL{getevents};
+
     if (ref $reject_code eq "CODE") {
         my $errmsg = $reject_code->($req, $flags, eval { LJ::request->request });
-        if ($errmsg) { return fail($err, "311", $errmsg); }
+
+        return fail($err, "311", $errmsg) if $errmsg;
     }
 
     my $secmask = 0;
+
     if ($u && ($u->{'journaltype'} eq "P" || $u->{'journaltype'} eq "I") && $posterid != $ownerid) {
         $secmask = LJ::get_groupmask($ownerid, $posterid);
     }
@@ -2957,23 +2960,28 @@ sub getevents
     # decide what level of security the remote user can see
     # 'getevents' used in small count of places and we will not pass 'viewall' through their call chain
     my $secwhere = "";
+
     if ($posterid == $ownerid) {
         # no extra where restrictions... user can see all their own stuff
-    } elsif ($secmask) {
+    }
+    elsif ($secmask) {
         # can see public or things with them in the mask
         # and own posts in non-sensitive communities
         if ($LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $uowner->{user} }) {
             $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $secmask != 0))";
-        } else {
+        }
+        else {
             $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $secmask != 0) OR posterid=$posterid)";
         }
-    } else {
+    }
+    else {
         # not a friend?  only see public.
         # and own posts in non-sensitive communities
 
         if ($LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $uowner->{user} } || !$posterid) {
             $secwhere = "AND (security='public')";
-        } else{
+        }
+        else{
             $secwhere = "AND (security='public' OR posterid=$posterid)";
         }
     }
@@ -2995,16 +3003,18 @@ sub getevents
         $req->{'selecttype'} = 'lastn' unless $req->{'selecttype'};
         $req->{'howmany'} = $req->{'itemshow'};
     }
+
     my $skip = $req->{'skip'} + 0;
-    if ($skip > 500) { $skip = 500; }
-    
+
+    $skip = 500 if $skip > 500;
+
     # build the query to get log rows.  each selecttype branch is
     # responsible for either populating the following 3 variables
     # OR just populating $sql
     my ($orderby, $where, $limit, $offset);
     my $sql;
-    if ($req->{'selecttype'} eq "day")
-    {
+
+    if ($req->{'selecttype'} eq "day") {
         return fail($err,203)
             unless ($req->{'year'} =~ /^\d\d\d\d$/ &&
                     $req->{'month'} =~ /^\d\d?$/ &&
@@ -3021,10 +3031,10 @@ sub getevents
         # see note above about why the sort order is different
         $orderby = $is_community ? "ORDER BY logtime" : "ORDER BY eventtime";
     }
-    elsif ($req->{'selecttype'} eq "lastn")
-    {
+    elsif ($req->{'selecttype'} eq "lastn") {
         my $howmany = $req->{'howmany'} || 20;
-        if ($howmany > 50) { $howmany = 50; }
+
+        $howmany = 50 if $howmany > 50;
         $howmany = $howmany + 0;
         $limit = "LIMIT $howmany";
 
@@ -3037,6 +3047,7 @@ sub getevents
         # mysql's braindead optimizer to use the right index.
         my $rtime_after = 0;
         my $rtime_what = $is_community ? "rlogtime" : "revttime";
+
         if ($req->{'beforedate'}) {
             return fail($err,203,"Invalid beforedate format.")
                 unless ($req->{'beforedate'} =~
@@ -3044,44 +3055,50 @@ sub getevents
             my $qd = $dbr->quote($req->{'beforedate'});
             $rtime_after = "$LJ::EndOfTime-UNIX_TIMESTAMP($qd)";
         }
+
         $where .= "AND $rtime_what > $rtime_after ";
         $orderby = "ORDER BY $rtime_what";
     }
-    elsif ($req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1") 
-    {
+    elsif ( $req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1" ) {
         $use_master = 1;  # see note above.
         $limit = "LIMIT 1";
         $orderby = "ORDER BY rlogtime";
-    } 
-    elsif ($req->{'selecttype'} eq "one")
-    {
+    }
+    elsif ($req->{'selecttype'} eq "one") {
         my $id = $req->{'itemid'} + 0;
         $where = "AND jitemid=$id";
     }
-    elsif ($req->{'selecttype'} eq "syncitems") 
-    {
+    elsif ($req->{'selecttype'} eq "syncitems") {
         return fail($err,506) if $LJ::DISABLED{'syncitems'};
+
         my $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
         return fail($err,203,"Invalid syncitems date format")
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
+
         return fail($err,301,"syncitems is unavailable in anonymous mode") unless($u);
 
         my $now = time();
+
         # broken client loop prevention
         if ($req->{'lastsync'}) {
             my $pname = "rl_syncitems_getevents_loop";
             LJ::load_user_props($u, $pname);
+
             # format is:  time/date/time/date/time/date/... so split
             # it into a hash, then delete pairs that are older than an hour
             my %reqs = split(m!/!, $u->{$pname});
-            foreach (grep { $_ < $now - 60*60 } keys %reqs) { delete $reqs{$_}; }
+
+            delete $reqs{$_} foreach grep { $_ < $now - 60*60 } keys %reqs;
+
             my $count = grep { $_ eq $date } values %reqs;
             $reqs{$now} = $date;
+
             if ($count >= 2) {
                 # 2 prior, plus this one = 3 repeated requests for same synctime.
                 # their client is busted.  (doesn't understand syncitems semantics)
                 return fail($err,406);
             }
+
             $u->set_prop( $pname => join( '/', map { $_ => $reqs{$_} }
                                                sort { $b <=> $a }
                                                keys %reqs ) );
@@ -3091,6 +3108,7 @@ sub getevents
         $sth = $dbcr->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
                               "journalid=? and logtime > ? $secwhere");
         $sth->execute($ownerid, $date);
+
         while (my ($id, $dt) = $sth->fetchrow_array) {
             $item{$id} = $dt;
         }
@@ -3101,31 +3119,33 @@ sub getevents
                               "AND propid=$p_revtime->{'id'} ".
                               "AND value+0 > UNIX_TIMESTAMP(?)");
         $sth->execute($ownerid, $date);
+
         while (my ($id, $dt) = $sth->fetchrow_array) {
             $item{$id} = $dt;
         }
 
         my $limit = 100;
         my @ids = sort { $item{$a} cmp $item{$b} } keys %item;
+
         if (@ids > $limit) { @ids = @ids[0..$limit-1]; }
 
         my $in = join(',', @ids) || "0";
         $where = "AND jitemid IN ($in)";
     }
-    elsif ($req->{'selecttype'} eq "multiple")
-    {
+    elsif ($req->{'selecttype'} eq "multiple") {
         my @ids;
+
         foreach my $num (split(/\s*,\s*/, $req->{'itemids'})) {
             return fail($err,203,"Non-numeric itemid") unless $num =~ /^\d+$/;
             push @ids, $num;
         }
+
         my $limit = 100;
         return fail($err,209,"Can't retrieve more than $limit entries at once") if @ids > $limit;
         my $in = join(',', @ids);
         $where = "AND jitemid IN ($in)";
     }
-    elsif ($req->{'selecttype'} eq 'before')
-    {
+    elsif ($req->{'selecttype'} eq 'before') {
         my $before = $req->{'before'};
         my $itemshow = $req->{'howmany'};
         my $itemselect = $itemshow + $skip;
@@ -3134,9 +3154,9 @@ sub getevents
         $sth = $dbcr->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
                               "journalid=? AND logtime < ? $secwhere LIMIT $itemselect");
         $sth->execute($ownerid, $before);
+
         while (my ($id, $dt) = $sth->fetchrow_array) {
             $item{$id} = $dt;
-            
         }
 
         my $p_revtime = LJ::get_prop("log", "revtime");
@@ -3146,23 +3166,25 @@ sub getevents
                               "AND propid=$p_revtime->{'id'} ".
                               "AND value+0 < ? LIMIT $itemselect");
         $sth->execute($ownerid, $before);
+
         while (my ($id, $dt) = $sth->fetchrow_array) {
             $item{$id} = $dt;
         }
 
-        my @ids = sort { $item{$a} cmp $item{$b} } keys %item;        
+        my @ids = sort { $item{$a} cmp $item{$b} } keys %item;
+
         if (@ids > $skip){
             @ids = @ids[$skip..(@ids-1)];
             @ids = @ids[0..$itemshow-1] if @ids > $itemshow;
-        }else{
+        }
+        else{
             @ids = ();
         }
 
         my $in = join(',', @ids) || "0";
         $where = "AND jitemid IN ($in)";
     }
-    else
-    {
+    else {
         return fail($err,200,"Invalid selecttype.");
     }
 
@@ -3172,7 +3194,7 @@ sub getevents
 
     # common SQL template:
     unless ($sql) {
-        $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid, replycount, UNIX_TIMESTAMP(eventtime) ".
+        $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid, replycount, UNIX_TIMESTAMP(eventtime), logtime ".
             "FROM log2 WHERE journalid=$ownerid $secwhere $where $orderby $limit $offset";
     }
 
@@ -3183,33 +3205,38 @@ sub getevents
 
     ## load the log rows
     ($sth = $dbcr->prepare($sql))->execute;
-    return fail($err,501,$dbcr->errstr) if $dbcr->err;
+    return fail($err, 501, $dbcr->errstr) if $dbcr->err;
 
     my $count = 0;
     my @itemids = ();
+
     my $res = {
         skip => $skip,
-        xc3 => {
+        xc3  => {
             u => $u
         }
     };
+
     my $events = $res->{'events'} = [];
     my %evt_from_itemid;
 
-    while (my ($itemid, $eventtime, $sec, $mask, $anum, $jposterid, $replycount, $event_timestamp) = $sth->fetchrow_array)
-    {
+    while (my ($itemid, $eventtime, $sec, $mask, $anum, $jposterid, $replycount, $event_timestamp, $logtime) = $sth->fetchrow_array) {
         $count++;
         my $evt = {};
         $evt->{'itemid'} = $itemid;
 
-        if ($jposterid != $posterid) {  # now my own post, so need to check for suspended prop
-            my $entry = LJ::Entry->new_from_row(journalid => $ownerid, 
-                                    jitemid => $itemid, 
-                                    allowmask => $mask, 
-                                    posterid => $jposterid, 
-                                    eventtime => $eventtime,
-                                    security => $sec,
-                                    anum => $anum);
+        # now my own post, so need to check for suspended prop
+        if ($jposterid != $posterid) {
+            my $entry = LJ::Entry->new_from_row(
+                'journalid' => $ownerid,
+                'jitemid'   => $itemid,
+                'allowmask' => $mask,
+                'posterid'  => $jposterid,
+                'eventtime' => $eventtime,
+                'security'  => $sec,
+                'anum'      => $anum,
+            );
+
             next if($entry->is_suspended_for($u));
         }
 
@@ -3217,25 +3244,31 @@ sub getevents
 
         $evt_from_itemid{$itemid} = $evt;
 
-        $evt->{"eventtime"} = $eventtime;
-        $evt->{event_timestamp} = $event_timestamp;
+        $evt->{"eventtime"}       = $eventtime;
+        $evt->{"event_timestamp"} = $event_timestamp;
+        $evt->{"logtime"}         = $logtime;
+
         if ($sec ne "public") {
-            $evt->{'security'} = $sec;
+            $evt->{'security'}  = $sec;
             $evt->{'allowmask'} = $mask if $sec eq "usemask";
         }
+
         $evt->{'anum'} = $anum;
+
         if ($jposterid != $ownerid) {
             my $uposter = LJ::load_userid($jposterid);
             $evt->{'poster'} = $uposter->username;
+
             if ($uposter->identity) {
                 my $i = $uposter->identity;
-                $evt->{'identity_type'} = $i->pretty_type;
-                $evt->{'identity_value'} = $i->value;
-                $evt->{'identity_url'} = $i->url($uposter);
+                $evt->{'identity_type'}    = $i->pretty_type;
+                $evt->{'identity_value'}   = $i->value;
+                $evt->{'identity_url'}     = $i->url($uposter);
                 $evt->{'identity_display'} = $uposter->display_name;
             }
         }
-        $evt->{'url'} = LJ::item_link($uowner, $itemid, $anum);
+
+        $evt->{'url'}         = LJ::item_link($uowner, $itemid, $anum);
         $evt->{'reply_count'} = $replycount;
         push @$events, $evt;
     }
@@ -3243,8 +3276,7 @@ sub getevents
     # load properties. Even if the caller doesn't want them, we need
     # them in Unicode installations to recognize older 8bit non-UF-8
     # entries.
-    unless ($req->{'noprops'} && !$LJ::UNICODE)
-    {
+    unless ($req->{'noprops'} && !$LJ::UNICODE) {
         ### do the properties now
         $count = 0;
         my %props = ();
@@ -3270,6 +3302,7 @@ sub getevents
 
             my $evt = $evt_from_itemid{$itemid};
             $evt->{'props'} = {};
+
             foreach my $name (keys %{$props{$itemid}}) {
                 my $value = $props{$itemid}->{$name};
                 $value =~ s/\n/ /g;
@@ -3283,8 +3316,7 @@ sub getevents
         return LJ::get_logtext2($uowner, @itemids);
     });
 
-    foreach my $i (@itemids)
-    {
+    foreach my $i (@itemids) {
         my $t = $text->{$i};
         my $evt = $evt_from_itemid{$i};
 
@@ -3302,10 +3334,12 @@ sub getevents
             my $error = 0;
             $t->[0] = LJ::text_convert($t->[0], $uowner, \$error);
             $t->[1] = LJ::text_convert($t->[1], $uowner, \$error);
+
             foreach (keys %{$evt->{'props'}}) {
                 $evt->{'props'}->{$_} = LJ::text_convert($evt->{'props'}->{$_}, $uowner, \$error);
             }
-            return fail($err,208,"Cannot display this post. Please see $LJ::SITEROOT/support/encodings.bml for more information.")
+
+            return fail($err, 208, "Cannot display this post. Please see $LJ::SITEROOT/support/encodings.bml for more information.")
                 if $error;
         }
 
@@ -3319,8 +3353,9 @@ sub getevents
 
                 if ($req->{'selecttype'} eq 'day') {
                     $t->[0] = $t->[1] = $CannotBeShown;
-                } else {
-                    return fail($err,207,"Cannot display/edit a Unicode post with a non-Unicode client. Please see $LJ::SITEROOT/support/encodings.bml for more information.");
+                }
+                else {
+                    return fail($err, 207, "Cannot display/edit a Unicode post with a non-Unicode client. Please see $LJ::SITEROOT/support/encodings.bml for more information.");
                 }
             }
         }
@@ -3331,10 +3366,10 @@ sub getevents
         }
 
         $t->[1] = LJ::trim_widgets(
-            length     => $req->{trim_widgets},
-            img_length => $req->{widgets_img_length},
-            text      => $t->[1],
-            read_more => '<a href="' . $evt->{url} . '"> ...</a>',
+            'length'     => $req->{trim_widgets},
+            'img_length' => $req->{widgets_img_length},
+            'text'       => $t->[1],
+            'read_more'  => '<a href="' . $evt->{url} . '"> ...</a>',
         ) if $req->{trim_widgets};
 
         LJ::EmbedModule->expand_entry($uowner, \$t->[1], get_video_id => 1) if($req->{get_video_ids});
@@ -3342,7 +3377,8 @@ sub getevents
 
         if ($req->{view}) {
             LJ::EmbedModule->expand_entry($uowner, \$t->[1], edit => 1) if $req->{view} eq 'stored';
-        } elsif ($req->{parseljtags}) {
+        }
+        elsif ($req->{parseljtags}) {
             $t->[1] = LJ::convert_lj_tags_to_links(
                 event => $t->[1],
                 embed_url => $evt->{url});
@@ -3351,28 +3387,37 @@ sub getevents
         # truncate
         if ($req->{'truncate'} >= 4) {
             my $original = $t->[1];
+
             if ($req->{'ver'} > 1) {
                 $t->[1] = LJ::text_trim($t->[1], $req->{'truncate'} - 3, 0);
-            } else {
+            }
+            else {
                 $t->[1] = LJ::text_trim($t->[1], 0, $req->{'truncate'} - 3);
             }
+
             # only append the elipsis if the text was actually truncated
             $t->[1] .= "..." if $t->[1] ne $original;
         }
 
         # line endings
         $t->[1] =~ s/\r//g;
+
         if ($req->{'lineendings'} eq "unix") {
             # do nothing.  native format.
-        } elsif ($req->{'lineendings'} eq "mac") {
+        }
+        elsif ($req->{'lineendings'} eq "mac") {
             $t->[1] =~ s/\n/\r/g;
-        } elsif ($req->{'lineendings'} eq "space") {
+        }
+        elsif ($req->{'lineendings'} eq "space") {
             $t->[1] =~ s/\n/ /g;
-        } elsif ($req->{'lineendings'} eq "dots") {
+        }
+        elsif ($req->{'lineendings'} eq "dots") {
             $t->[1] =~ s/\n/ ... /g;
-        } else { # "pc" -- default
+        }
+        else { # "pc" -- default
             $t->[1] =~ s/\n/\r\n/g;
         }
+
         $evt->{'event'} = $t->[1];
     }
 
@@ -3918,9 +3963,9 @@ sub list_friends
             'S' => "suspended",
             'X' => "purged",
         }->{$u->{'statusvis'}} if $u->{'statusvis'} ne 'V';
-        
+
         $r->{defaultpicurl} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}" if $u->{'defaultpicid'};
-        
+
         push @$res, $r;
         # won't happen for zero limit (which means no limit)
         last if @$res == $limitnum;
@@ -3972,14 +4017,14 @@ sub syncitems
                         "AND value+0 > UNIX_TIMESTAMP(?)");
     $sth->execute($ownerid, $date);
     while (my ($id, $prop, $dt) = $sth->fetchrow_array) {
-        my $entry = LJ::Entry->new($ownerid, jitemid => $id); 
+        my $entry = LJ::Entry->new($ownerid, jitemid => $id);
         if ($prop == $p_calter->{'id'}) {
             $cmt{$id} = [ 'C', $id, $dt, "update", $entry->anum ];
         } elsif ($prop == $p_revtime->{'id'}) {
             $item{$id} = [ 'L', $id, $dt, "update", $entry->anum ];
         }
     }
-    
+
     my @ev = sort { $a->[2] cmp $b->[2] } (values %item, values %cmt);
 
     my $res = {
@@ -3994,7 +4039,7 @@ sub syncitems
         $ct++;
         push @$list, { 'item' => "$ev->[0]-$ev->[1]",
                        'time' => $ev->[2],
-                       'action' => $ev->[3],  
+                       'action' => $ev->[3],
                        ( $external_ids ? (ditemid => $ev->[1]*256 + $ev->[4]) : () )
                       };
         last if $ct >= $LIMIT;
@@ -4229,7 +4274,7 @@ sub check_altusage
     # complain if the username is invalid
     my $uowner = LJ::load_user($alt);
     return fail($err,206) unless $uowner;
-    
+
     # allow usage if we're told explicitly that it's okay
     if ($flags->{'usejournal_okay'}) {
         $flags->{'u_owner'} = $uowner;
@@ -4400,13 +4445,12 @@ sub un_utf8_request {
 #### Old interface (flat key/values) -- wrapper aruond LJ::Protocol
 package LJ;
 
-sub do_request
-{
+sub do_request {
     # get the request and response hash refs
     my ($req, $res, $flags) = @_;
 
     # initialize some stuff
-    %{$res} = ();                      # clear the given response hash
+    %$res  = ();                      # clear the given response hash
     $flags = {} unless (ref $flags eq "HASH");
 
     # did they send a mode?
