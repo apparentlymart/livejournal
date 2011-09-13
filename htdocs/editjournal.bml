@@ -36,6 +36,7 @@ body<=
 
     LJ::need_res(qw(
                     stc/entry.css
+                    stc/editjournal.css
                     stc/widgets/selecttags.css
                     js/inputcomplete.js
                     js/jquery/jquery.ui.position.min.js
@@ -95,7 +96,7 @@ body<=
             if @res;
         }
         unless (@res) {
-            $ret .= "<p class='b-message b-message-error'>" .  BML::ml('.no_entries_to_edit') . "</p>";
+            $ret .= "<p class='i-bubble b-bubble-warning b-bubble-noarrow'>" .  BML::ml('.no_entries_to_edit') . "</p>";
         }
         $ret .= "</div>";
 
