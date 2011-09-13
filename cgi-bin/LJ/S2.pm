@@ -4303,12 +4303,50 @@ sub Page__widget
     return $ret;
 }
 
+sub Page__init_appviews {
+    return LJ::need_res(LJ::Widget::ApplicationsViewsLayout->need_res());
+}
+
 sub Page__render_widget {
     my ($ctx, $this, $opts) = @_;
 
     my $rendered = Page__widget($ctx, $this, $opts);
     $S2::pout->($rendered);
 }
+
+sub Page__appview
+{
+    my ($ctx, $this, $opts) = @_;
+
+    $opts->{'viewer'} = LJ::get_remote();
+    $opts->{'owner'} = $LJ::S2::CURR_PAGE->{'_u'};
+    $opts->{'journal'} = $LJ::S2::CURR_PAGE->{'journal'}->{'_u'};
+    $opts->{'GET'} = $LJ::S2::CURR_PAGE->{'_getargs'};
+    $opts->{'page_type'} =  $LJ::S2::CURR_PAGE->{'_type'};
+
+    my $page_id = $LJ::S2::CURR_PAGE->{'page_id'};
+    if ($page_id =~ /^journal\-\w+\-(\d+)$/ ) {
+        $opts->{ditemid} = $1;
+    }
+
+    my $ret = '';
+
+    eval { $ret = "LJ::Widget::ApplicationsViewsLayout"->render(%$opts); };
+
+    if ($@) {
+        warn "Error when Page::appview() try to call LJ::Widget::ApplicationsViewsLayout->render() from LJ::S2:\n$@\n";
+        return '';
+    }
+    return $ret;
+}
+
+sub Page__render_appview {
+    my ($ctx, $this, $opts) = @_;
+
+    my $rendered = Page__appview($ctx, $this, $opts);
+    $S2::pout->($rendered);
+}
+
 
 sub Entry__print_ebox {
     my $args = _get_Entry_ebox_args(@_);
