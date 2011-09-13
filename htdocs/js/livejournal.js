@@ -314,6 +314,49 @@ LiveJournal.parseLikeButtons = function() {
 	} );
 }
 
+/**
+ * Insert script in the document.
+ *
+ * @param {String} url Url of the script
+ * @param {Object=} params Data to apply to the scipt node object, e.g. async, text.
+ * @param {Node=} parent If exists, script tag will be inserted in this node or before the
+ *     first script tag otherwise.
+ */
+LiveJournal.injectScript = function( url, params, parent ) {
+
+	function loadScript() {
+		var defaults = {
+			async: true
+		};
+
+		params = params || {};
+		params = jQuery.extend({}, defaults, params);
+
+		var e = document.createElement('script');
+		e.src = url;
+
+		for (var i in params) {
+			if (params.hasOwnProperty(i)) {
+				e[i] = params[i];
+			}
+		}
+
+		if (parent) {
+			parent.appendChild(e);
+		} else {
+			s = document.getElementsByTagName('script')[0];
+			s.parentNode.insertBefore(e, s);
+		}
+	}
+
+	//opera doesn't support async attribute, so we load the scrips on onload event to display page faster
+	if (jQuery.browser.opera) {
+		jQuery(loadScript);
+	} else {
+		loadScript();
+	}
+}
+
 LiveJournal.getLocalizedStr = function( key, dict ) {
 	dict = dict || {};
 	var str = "";
