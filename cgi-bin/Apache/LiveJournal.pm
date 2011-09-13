@@ -349,6 +349,8 @@ sub trans {
             my $response =
                 $controller->process(\@args) || $controller->default_response;
 
+            LJ::Lang::current_language(undef);
+
             # processing result of controller
             my $result = eval { $response->output };
 
