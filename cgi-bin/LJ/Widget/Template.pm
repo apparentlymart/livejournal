@@ -29,7 +29,7 @@ sub render_body {
     my $class = shift;
     my %opts = @_;
 
-    my $filename = $class->template_filename;
+    my $filename = $class->template_filename(%opts);
     my $template = LJ::HTML::Template->new(
         { use_expr => 1 }, # force HTML::Template::Pro with Expr support
         filename => $filename,
