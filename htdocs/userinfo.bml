@@ -1596,6 +1596,9 @@
         $apps .= '<ul class="b-app-user-list">';
         $apps .= join("", @userapps);
         $apps .= '</ul>';
+        $apps .= '<div class="hr"><hr /></div>';
+        $apps .= LJ::Widget::ApplicationsViewsLayout->render(view_id => 'PROFILE', owner => $u, viewer => $remote, GET => \%GET);
+
         if (scalar @activities) {
             $apps .= '<div class="hr"><hr /></div>';
             $apps .= '<ul class="b-app-activity-list">';
