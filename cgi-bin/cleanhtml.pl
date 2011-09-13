@@ -677,9 +677,21 @@ sub clean
             {
                 next TOKEN if $LJ::DISABLED{'userapps'};
                 my %app_attr = map { $_ => Encode::encode_utf8($attr->{$_}) } keys %$attr;
-                my $app = LJ::UserApps->get_application( %app_attr );
+                my $app = LJ::UserApps->get_application( id => delete $app_attr{id}, key => delete $app_attr{key} );
                 next TOKEN unless $app && $app->can_show_restricted;
-                $newdata .= Encode::decode_utf8($app->ljapp_display($app_attr{extra}, $app_attr{title}), Encode::FB_QUIET);
+
+                # Gain all context data
+                my %context;
+                $context{posterid} = $opts->{posterid} if($opts->{posterid});
+                $context{journalid} = $opts->{journalid} if($opts->{journalid});
+                if($opts->{entry_url}) {
+                    my $entry = LJ::Entry->new_from_url($opts->{entry_url});
+                    if ($entry && $entry->valid) {
+                        $context{ditemid} = $entry->ditemid;
+                    }
+                }
+
+                $newdata .= Encode::decode_utf8($app->ljapp_display(viewer => LJ::get_remote(), owner => $poster, attrs => \%app_attr, context => \%context), Encode::FB_QUIET);
                 next TOKEN;
             }
             elsif ($tag eq "lj")
