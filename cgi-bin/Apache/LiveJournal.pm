@@ -9,40 +9,30 @@ no warnings 'uninitialized';
 use LJ::Request;
 use lib "$ENV{LJHOME}/cgi-bin";
 
-# needed to call S2::set_domain() so early:
-use LJ::S2;
+use Compress::Zlib;
+use Digest::MD5 qw( md5_base64 md5_hex );
 
-use Digest::MD5 qw/md5_hex/;
-
-use Class::Autouse qw(
-                      LJ::Blob
-                      Apache::LiveJournal::Interface::Blogger
-                      Apache::LiveJournal::Interface::AtomAPI
-                      Apache::LiveJournal::Interface::S2
-                      Apache::LiveJournal::Interface::ElsewhereInfo
-                      Apache::LiveJournal::ConcatHeadFiles
-                      Apache::LiveJournal::PalImg
-                      Apache::LiveJournal::Interface::Api
-                      LJ::ModuleCheck
-                      LJ::AccessLogSink
-                      LJ::AccessLogRecord
-                      LJ::AccessLogSink::Database
-                      LJ::AccessLogSink::DInsertd
-                      LJ::AccessLogSink::DBIProfile
-                      LJ::Mob::Router
-                      );
-
-# these aren't lazily loaded in the typical call-a-package-method way,
-# but rather we just use Class::Autouse to bring them in during mod_perl
-# load.  in non-apache mode, they're loaded via LJ::ModuleCheck->have
-use Class::Autouse qw(
-                      Compress::Zlib
-                      LJ::URI
-                      );
-
-use LJ::TimeUtil;
+use Apache::LiveJournal::Interface::Blogger;
+use Apache::LiveJournal::Interface::AtomAPI;
+use Apache::LiveJournal::Interface::S2;
+use Apache::LiveJournal::Interface::ElsewhereInfo;
+use Apache::LiveJournal::ConcatHeadFiles;
+use Apache::LiveJournal::PalImg;
+use Apache::LiveJournal::Interface::Api;
 use Apache::WURFL;
-use Digest::MD5 qw/md5_base64/;
+
+use LJ::AccessLogSink;
+use LJ::AccessLogRecord;
+use LJ::AccessLogSink::Database;
+use LJ::AccessLogSink::DInsertd;
+use LJ::AccessLogSink::DBIProfile;
+
+use LJ::Blob;
+use LJ::ModuleCheck;
+use LJ::Router;
+use LJ::S2;
+use LJ::TimeUtil;
+use LJ::URI;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval { require Compress::Zlib; 1;};
@@ -194,30 +184,16 @@ sub handler
 
         LJ::work_report_start();
     }
+
     # try to match controller
-    LJ::Mob::Router::match_controller();
+    LJ::Router->match_controller;
 
     if ( my $controller = LJ::Request->notes('controller') ) {
+        $controller->premature_checks;
 
-        # checking access for specific brandings
-        if(my $url = $controller->check_access(LJ::Request->notes('branding_id'), LJ::get_remote_ip)) {
-            return redir("http://".LJ::Request->hostname.$url);
-        }
-
-        if ( LJ::Request->notes('method') eq '__setdomsess' ) {
-            return redir(LJ::Session->setdomsess_handler())
-        } elsif (LJ::Request->notes('method') eq 'access_denied') {
-            # do not check session
-        } else {
-            my $session = LJ::Session->session_from_cookies(
-                tried_fast   => 0,
-                redirect_ref => \$LJ::CACHE_REMOTE_BOUNCE_URL,
-                ignore_ip    => 1
-            );
-
-            if ( !$session && $LJ::CACHE_REMOTE_BOUNCE_URL ) {
-                return redir($LJ::CACHE_REMOTE_BOUNCE_URL);
-            }
+        if ( my $redir = LJ::Request->redirected ) {
+            my ( $uri, $status ) = @$redir;
+            return $status;
         }
     }
 
@@ -364,41 +340,21 @@ sub trans {
 
     # process controller
     # if defined
-    if( LJ::Request->notes('controller') ) {
-        my $cookie_str = LJ::Request->header_in('Cookie');
-
-        if ($cookie_str =~ /\blangpref=(\w{2,10})\/\d+\b/) { # simplified code from BML::decide_language
-            my $lang = $1;
-
-            # Attention! LJ::Lang::ml uses BML::ml in web context, so we must do full BML language initialization
-            BML::set_language($lang, \&LJ::Lang::get_text);
-        }
-
-        my @args = split (/\//, LJ::Request->uri);
-
-        my $response = LJ::Request->notes('controller')->process([@args[1 .. @args-1]]);
+    if ( my $controller = LJ::Request->notes('controller') ) {
         LJ::Request->handler('perl-script');
         LJ::Request->set_handlers(PerlHandler => sub {
-            # show error page if controller didn't return response object
-            unless($response) {
-                $response = LJ::Mob::Response::Error->new;
-            }
+            my @args = split ( m{/}, LJ::Request->uri );
+            shift @args if @args;
+
+            my $response =
+                $controller->process(\@args) || $controller->default_response;
 
             # processing result of controller
-            my $result = eval{$response->output};
+            my $result = eval { $response->output };
 
-            return LJ::Request::OK
-                if $response->isa('LJ::Mob::Response::Template');
-
-            if ($response->isa('LJ::Mob::Response::Redirect')) {
-                LJ::Request->send_cookies;
-                LJ::Request->redirect($response->location);
-                LJ::Request->send_http_header();
-                return LJ::Request::REDIRECT;
-            }
-
-            return LJ::Request::OK;
+            return $response->http_status;
         } );
+
         return LJ::Request::OK;
     }
 
