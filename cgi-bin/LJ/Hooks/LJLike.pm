@@ -27,7 +27,7 @@ LJ::register_hook( 'insert_html_after_body_open' => sub {
             FB.init({appId: '214181831945836', xfbml: true});
           };
 
-          LiveJournal.injectScript(document.location.protocol + '//connect.facebook.net/en_US/all.js', null, document.getElementById('fb-root'))
+          LiveJournal.injectScript(document.location.protocol + '//connect.facebook.net/$locale/all.js', null, document.getElementById('fb-root'))
         </script>
     };
 } );
