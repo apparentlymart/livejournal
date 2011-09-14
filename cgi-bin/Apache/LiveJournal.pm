@@ -187,16 +187,13 @@ sub handler
 
     # try to match controller
     LJ::Router->match_controller;
-
     if ( my $controller = LJ::Request->notes('controller') ) {
         $controller->premature_checks;
-
         if ( my $redir = LJ::Request->redirected ) {
-            my ( $uri, $status ) = @$redir;
+            my ( $status, $uri ) = @$redir;
             return $status;
         }
     }
-
     LJ::Request->set_handlers(PerlTransHandler => [ \&trans ]);
 
     return LJ::Request::OK;
@@ -353,6 +350,9 @@ sub trans {
 
             # processing result of controller
             my $result = eval { $response->output };
+
+            warn "response error: $@"
+                if $@;
 
             return $response->http_status;
         } );
@@ -531,6 +531,9 @@ sub trans {
                 LJ::Request->handler("perl-script");
                 LJ::Request->set_handlers(PerlHandler => \&anti_squatter);
             }
+
+            warn "error: $@"
+                if $@;
 
             return LJ::Request::OK
         }
