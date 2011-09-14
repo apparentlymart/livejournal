@@ -238,6 +238,10 @@
 
 	CKEDITOR.plugins.add('livejournal', {
 		init: function(editor) {
+			CKEDITOR.dtd['lj-template'] = {};
+			CKEDITOR.dtd.$block['lj-template'] = 1;
+			CKEDITOR.dtd.div['lj-template'] = 1;
+
 			function findLJTags(evt) {
 				var noteData,
 					isSelection = evt.name == 'selectionChange',
@@ -248,8 +252,8 @@
 				}
 
 				while (node) {
-					if (!attr) {
-						if (node.type == 1 && node.is('img') && node.getParent().getParent() && node.getParent().getParent().getAttribute('contentEditable') != 'false') {
+					if (!attr && node.type == 1) {
+						if (node.is('img') && node.getParent().getParent() && node.getParent().getParent().getAttribute('contentEditable') != 'false') {
 							node.setAttribute('lj-cmd', 'LJImage');
 						} else if (node.is('a') && node.getParent().getAttribute('contentEditable') != 'false') {
 							node.setAttribute('lj-cmd', 'LJLink');
@@ -1160,6 +1164,10 @@
 					'lj-cut': function(element) {
 						element.attributes['lj-cmd'] = 'LJCut';
 					},
+					'lj-template': function(element){
+						element.attributes.contentEditable = 'false';
+						element.children.length = 0;
+					},
 					a: function(element) {
 						if(element.parent.attributes.contentEditable != 'false'){
 							element.attributes['lj-cmd'] = 'LJLink';
@@ -1240,6 +1248,9 @@
 						if (element.attributes['class'] == 'ljpoll') {
 							return new CKEDITOR.htmlParser.fragment.fromHtml(unescape(element.attributes.data)).children[0];
 						}
+					},
+					'lj-template': function(element){
+						element.isOptionalClose = element.isEmpty = true;
 					}
 				},
 				attributes: {
