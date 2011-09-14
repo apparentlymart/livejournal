@@ -100,7 +100,7 @@ body<=
         }
         $ret .= "</div>";
 
-        $ret .= "<ul class='b-editentries'>";
+        $ret .= "<ul class='b-editentries'>" if @res;
         foreach my $e_raw (@res) {
             my $entry = LJ::Entry->new_from_item_hash (LJ::load_user($usejournal) || $remote, $e_raw); 
 
@@ -164,7 +164,7 @@ body<=
             my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
             $ret .= "<td valign='top'>$ad</td>" if $ad;
         }
-        $ret .= "</ul>";
+        $ret .= "</ul>" if @res;
 
         if ($opts{'prev'} || $opts{'next'}) {
         $ret .= "<p class='i-qotd-nav'>";
