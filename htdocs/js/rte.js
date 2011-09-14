@@ -19,11 +19,9 @@
 		}
 
 		lastValue = normalizeValue(draftData.textArea.val());
-		$('#updateForm')
-			.delegate('#draft', 'keypress click', updateDraftState)
-			.submit(function(ev) {
-				isDirty = false;
-			} );
+		$('#updateForm').delegate('#draft', 'keypress click', updateDraftState).submit(function(ev) {
+			isDirty = false;
+		});
 
 		//msie doesn't show all textarea content if width of textarea is equal to 100% (css).
 		if (jQuery.browser.msie) {
@@ -32,9 +30,9 @@
 					container = jQuery('#draft-container');
 
 				var updateTextarea = function() {
-					draft.css('width','auto');
+					draft.css('width', 'auto');
 					draft.width(container.width());
-				}
+				};
 
 				if (draft.length && container.length) {
 					jQuery(window).resize(updateTextarea);
@@ -44,19 +42,16 @@
 		}
 
 		window.onbeforeunload = confirmExit;
-	}
+	};
 
 	function confirmExit(ev) {
-		if(isDirty) {
-			return  Site.ml_text["entryform.close.confirm"] || "The page contains unsaved changes.";
+		if (isDirty) {
+			return	Site.ml_text["entryform.close.confirm"] || "The page contains unsaved changes.";
 		}
 	}
 
 	function normalizeValue(str) {
-		return str
-				.replace(/<br\s?\/>\n?/g, '\n')
-				.replace(/\s+$/mg, '' )
-				.trim();
+		return str.replace(/<br\s?\/>\n?/g, '\n').replace(/\s+$/mg, '').trim();
 	}
 
 	function updateDraftState() {
@@ -73,17 +68,17 @@
 			isDirty = lastValue !== value;
 		}, 0);
 
-		if(processDraft) {
+		if (processDraft) {
 			checkDraftTimer();
 		}
 	}
 
-	function initDraftData(){
+	function initDraftData() {
 		draftData = {
 			textArea: $('#draft'),
 			statusNode: $('#draftstatus')
 		};
-		
+
 		draftData.lastValue = draftData.textArea.val();
 		draftData.textArea.val(draftData.lastValue.replace(/<br\s?\/>\n?/g, '\n'));
 	}
@@ -91,8 +86,8 @@
 	window.initDraft = function(data) {
 		initDraftData();
 
-		for(var prop in data){
-			if(data.hasOwnProperty(prop)){
+		for (var prop in data) {
+			if (data.hasOwnProperty(prop)) {
 				draftData[prop] = data[prop];
 			}
 		}
@@ -118,6 +113,7 @@
 			$('#switched_rte_on').val('1');
 
 			if (!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible) {
+				CKEDITOR.timestamp = 'v.84.2';
 				CKEDITOR.basePath = statPrefix + '/ck/';
 				var editor = CKEDITOR.replace('draft', {
 					skin: 'v2',
@@ -132,7 +128,7 @@
 
 					$('#updateForm')[0].onsubmit = function() {
 						if (window.switchedRteOn) {
-							draftData.textArea.val(CKEditor.getData().replace(/(\r|\n)/g,'')); //we remove all newlines
+							draftData.textArea.val(CKEditor.getData().replace(/(\r|\n)/g, '')); //we remove all newlines
 						}
 					};
 

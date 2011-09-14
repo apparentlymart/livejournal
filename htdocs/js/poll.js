@@ -81,7 +81,7 @@ Poll.prototype.outputHTML = function(){
 	}
 	html += '<br />Open to: ' + '<b>' + this.whovote + '</b>, results viewable to: ' + '<b>' + this.whoview + '</b>';
 	for(var i = 0; i < this.questions.length; i++){
-		html += '<br /><p>' + this.questions[i].name + '</p>' + '<p style="margin:0 0 10px 40px">';
+		html += '<br /><p>' + this.questions[i].name + '</p>';
 		if(this.questions[i].type == 'radio' || this.questions[i].type == 'check'){
 			var type = this.questions[i].type == 'check' ? 'checkbox' : this.questions[i].type;
 			for(var j = 0; j < this.questions[i].answers.length; j++){
@@ -106,7 +106,6 @@ Poll.prototype.outputHTML = function(){
 			}
 			html += '</tr></tbody></table>';
 		}
-		html += '</p>';
 	}
 
 	html += '<input type="submit" value="Submit Poll"/></form><br />';
@@ -117,7 +116,7 @@ Poll.prototype.outputHTML = function(){
 Poll.prototype.outputLJtags = function(){
 	var tags = '';
 
-	tags += '<lj-poll name="' + this.name + '" whovote="' + this.whovote + '" whoview="' + this.whoview + '">\n';
+	tags += '<lj-poll name="' + this.name + '" whovote="' + this.whovote + '" whoview="' + this.whoview + '">';
 
 	for(var i = 0; i < this.questions.length; i++){
 		var extrargs = '';
@@ -127,13 +126,13 @@ Poll.prototype.outputLJtags = function(){
 			extrargs = ' from="' + this.questions[i].from + '"' + ' to="' + this.questions[i].to + '"' + ' by="' + this
 				.questions[i].by + '"';
 		}
-		tags += ' <lj-pq type="' + this.questions[i].type + '"' + extrargs + '>\n' + '  ' + this.questions[i].name + '\n';
+		tags += '<lj-pq type="' + this.questions[i].type + '"' + extrargs + '>' + this.questions[i].name;
 		if(/^check|drop|radio$/.test(this.questions[i].type)){
 			for(var j = 0; j < this.questions[i].answers.length; j++){
-				tags += '  <lj-pi>' + this.questions[i].answers[j] + '</lj-pi>\n';
+				tags += '<lj-pi>' + this.questions[i].answers[j] + '</lj-pi>';
 			}
 		}
-		tags += ' </lj-pq>\n';
+		tags += '</lj-pq>';
 	}
 
 	tags += '</lj-poll>';
