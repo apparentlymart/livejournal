@@ -519,7 +519,7 @@ LIKE_FAQ
             $req{'prop_repost_author'}  = LJ::durl($username);
             $req{'prop_repost_subject'} = LJ::durl($subject);
 
-            my $new_auth = LJ::repost_auth($type, $req{'prop_repost_author'}, $req{'prop_repost_url'}, $subject, 1);
+            my $new_auth = LJ::repost_auth($type, $req{'prop_repost_author'}, $req{'prop_repost_url'}, $req{'prop_repost_subject'}, 1);
             $req{'prop_repost'}        = $auth eq $new_auth
                 ? $type
                 : 'N';
