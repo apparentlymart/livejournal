@@ -165,6 +165,7 @@
 			if (currentData.hasOwnProperty(cmd)) {
 				currentNoteNode = ljNoteData[cmd].node = currentData[cmd].node;
 				editor.execCommand(cmd);
+				note.hide(true);
 			}
 			return false;
 		}
@@ -248,10 +249,9 @@
 
 				while (node) {
 					if (!attr) {
-						if (node.type == 1 && node.is('img') && node.isEditable()) {
+						if (node.type == 1 && node.is('img') && node.getParent().getParent() && node.getParent().getParent().getAttribute('contentEditable') != 'false') {
 							node.setAttribute('lj-cmd', 'LJImage');
-						} else if (node.is('a') && node.isEditable()) {
-							console.log(node);
+						} else if (node.is('a') && node.getParent().getAttribute('contentEditable') != 'false') {
 							node.setAttribute('lj-cmd', 'LJLink');
 						}
 					}
@@ -280,13 +280,7 @@
 						editor.getCommand(command).setState(CKEDITOR.TRISTATE_OFF);
 					}
 				}
-
 			}
-
-			CKEDITOR.dtd.pre = CKEDITOR.dtd.div;
-			CKEDITOR.dtd.pre['lj-poll'] = 1;
-			CKEDITOR.dtd.pre['lj-cut'] = 1;
-			CKEDITOR.dtd.$block.pre = 1;
 			
 			editor.dataProcessor.toHtml = function(html, fixForBody) {
 				html = html
@@ -333,7 +327,8 @@
 				}
 			}
 
-			function showDialog(evt){
+			editor.on('selectionChange', findLJTags);
+			editor.on('doubleclick', function(evt) {
 				var node = evt.data.element;
 
 				if (node.type != 1) {
@@ -353,10 +348,7 @@
 					}
 					node = node.getParent();
 				}
-			}
-
-			editor.on('selectionChange', findLJTags);
-			editor.on('doubleclick', showDialog);
+			});
 
 			editor.on('dataReady', function() {
 				note = note || createNote(editor);
@@ -445,7 +437,7 @@
 							jQuery('#updateForm').photouploader({
 								type: 'upload'
 							}).photouploader('show').bind('htmlready', function (event, html) {
-								editor.insertHtml(html);
+								editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html, editor.document));
 							});
 						} else {
 							editor.openDialog('image');
@@ -716,7 +708,7 @@
 			function doEmbed(content) {
 				if (content && content.length) {
 					if (window.switchedRteOn) {
-						editor.insertHtml('<div class="lj-embed" contentEditable="false">' + content + '</div><br/>');
+						editor.insertElement(CKEDITOR.dom.element.createFromHtml('<div class="lj-embed" contentEditable="false">' + content + '</div><br/>', editor.document));
 					}
 				}
 			}
@@ -729,7 +721,6 @@
 			editor.addCommand('LJCut', {
 				exec: function() {
 					var text;
-					note.hide(true);
 					if (ljNoteData.LJCut.node) {
 						text = prompt(top.CKLang.CutPrompt, ljNoteData.LJCut.node.getAttribute('text') || top.CKLang.ReadMore);
 						if (text) {
@@ -759,6 +750,7 @@
 							editor.insertElement(br);
 							ljNoteData.LJCut.node.insertBefore(br);
 						}
+						note.hide(true);
 					}
 				}
 			});
@@ -825,7 +817,7 @@
 									ljNoteData.LJPollLink.node.insertBeforeMe(node);
 									ljNoteData.LJPollLink.node.remove();
 								} else {
-									editor.insertHtml(pollSource);
+									editor.insertElement(CKEDITOR.dom.element.createFromHtml(pollSource, editor.document));
 								}
 								ljNoteData.LJPollLink.node = null;
 							}
@@ -970,8 +962,9 @@
 								ljNoteData.LJLike.node.setAttribute('buttons', attr.join(','));
 								ljNoteData.LJLike.node.setHtml(likeHtml);
 							} else {
-								editor.insertHtml('<div contentEditable="false" class="lj-like" lj-cmd="LJLike" buttons="' + attr
-									.join(',') + '">' + likeHtml + '</div><br/>');
+								editor.insertElement(CKEDITOR.dom.element
+									.createFromHtml('<div contentEditable="false" class="lj-like" lj-cmd="LJLike" buttons="' + attr
+									.join(',') + '">' + likeHtml + '</div><br/>', editor.document));
 							}
 						} else if (likeNode) {
 							ljNoteData.LJLike.node.remove();
