@@ -602,6 +602,15 @@ class Page
     function builtin render_widget(string{} opts)
     "Prints rendered widget body.";
 
+    function builtin init_appviews()
+    "Include JS/CSS for application view(s).";
+
+    function builtin appview(string{} opts) : string
+    "Returns rendered aplication(s) view(s).";
+
+    function builtin render_appview(string{} opts)
+    "Print rendered application(s) view(s).";
+
     function builtin get_entries_by_tags( string[] taglist, string mode, int count ) : Entry[]
     "Returns last 'count' entries with the specified tag(s); returns the entries containing all of them or any of them, depending on 'mode'; does not work in untrusted journals";
 
