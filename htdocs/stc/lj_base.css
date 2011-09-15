@@ -3718,23 +3718,27 @@ A.lj-button-link:active {
 
 /* Betatest
 ------------------------------------------------------------------------*/
-.beta-testing .user-agent {
-	padding-left: 30px;
+.beta-testing {
+	margin-bottom: 50px;
 	}
-	.beta-testing .user-agent H3 {
-		padding: 0;
-		margin: 0 0 5px 0;
-		line-height: 16px;
-		font-style: normal;
-		font-size: 14px;
-		color: #000;
+	.beta-testing .user-agent {
+		padding-left: 30px;
 		}
-	.beta-testing .user-agent P {
-		padding: 0;
-		margin: 0;
-		}
+		.beta-testing .user-agent H3 {
+			padding: 0;
+			margin: 0 0 5px 0;
+			line-height: 16px;
+			font-style: normal;
+			font-size: 14px;
+			color: #000;
+			}
+		.beta-testing .user-agent P {
+			padding: 0;
+			margin: 0;
+			}
 /* Alternate servers list */
 .alt-servers-list {
+	overflow: hidden;
 	padding: 30px;
 	margin: 0 0 10px 0;
 	border: 1px solid #E9E9E9;
@@ -3744,6 +3748,7 @@ A.lj-button-link:active {
 	list-style: none;
 	}
 	.alt-servers-list LI {
+		position: relative;
 		overflow: hidden;
 		padding: 13px 30px;
 		margin: 0;
@@ -3758,18 +3763,35 @@ A.lj-button-link:active {
 			line-height: 24px;
 			font-size: 22px;
 			}
+		.alt-servers-list LI .server-desc {
+			clear: both;
+			width: 60%;
+			padding: 3px 0 0 0;
+			margin: 0;
+			text-shadow: 0 1px 1px #FFF;
+			line-height: 13px;
+			font-size: 11px;
+			color: #666;
+			}
 		.alt-servers-list LI .side {
-			float: right;
+			position: absolute;
+			top: 50%;
+			right: 0;
 			width: 200px;
-			margin-right: -30px;
+			margin-top: -12px;
 			text-align: center;
 			}
 		.alt-servers-list LI .b-btn {
 			margin: -7px 0;
 			}
 		.alt-servers-list LI .note {
+			text-shadow: 0 1px 1px #FFF;
 			line-height: 20px;
 			font-weight: bold;
 			font-size: 18px;
+			}
+		.alt-servers-list LI .checkbox {
+			margin: 0;
+			padding: 0;
 			}
 
