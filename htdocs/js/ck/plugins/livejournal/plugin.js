@@ -1,4 +1,6 @@
 (function() {
+	// For IE 8-
+	document.namespaces && document.namespaces.add('lj', 'livejournal');
 
 	var likeButtons = [
 		{
@@ -718,9 +720,9 @@
 			}
 
 			//////////  LJ Cut Button //////////////
-			CKEDITOR.dtd.$block['lj-cut'] = 1;
+			CKEDITOR.dtd.$block['lj-cut'] = CKEDITOR.dtd.$block['lj:cut'] = 1;
 
-			CKEDITOR.dtd['lj-cut'] = CKEDITOR.dtd.div;
+			CKEDITOR.dtd['lj:cut'] = CKEDITOR.dtd['lj-cut'] = CKEDITOR.dtd.div;
 
 			editor.addCommand('LJCut', {
 				exec: function() {
@@ -740,7 +742,7 @@
 							var br = editor.document.createElement('br'),
 								selection = editor.document.getSelection();
 
-							ljNoteData.LJCut.node = editor.document.createElement('lj-cut');
+							ljNoteData.LJCut.node = editor.document.createElement('lj:cut');
 							ljNoteData.LJCut.node.setAttribute('lj-cmd', 'LJCut');
 							if (text != top.CKLang.ReadMore) {
 								ljNoteData.LJCut.node.setAttribute('text', text);
@@ -1154,7 +1156,7 @@
 							.height) + 'px;"' + 'contentEditable="false"' + 'lj-url="' + (encodeURIComponent(element.attributes
 							.url) || '') + '"' + 'class="lj-map"><p>map</p>' + '</div>').children[0];
 					},
-					'lj-repost': function(element) {
+					'lj-repost': function() {
 						var fakeElement = new CKEDITOR.htmlParser.element('input');
 						fakeElement.attributes.type = 'button';
 						fakeElement.attributes.value = top.CKLang.LJRepost_Value;
@@ -1162,9 +1164,17 @@
 						return fakeElement;
 					},
 					'lj-cut': function(element) {
+						element.name = 'lj:cut';
 						element.attributes['lj-cmd'] = 'LJCut';
 					},
+					'lj-raw': function(element) {
+						element.name = 'lj:raw';
+					},
+					'lj-wishlist': function(element) {
+						element.name = 'lj:wishlist';
+					},
 					'lj-template': function(element){
+						element.name = 'lj:template';
 						element.attributes.contentEditable = 'false';
 						element.children.length = 0;
 					},
@@ -1181,7 +1191,7 @@
 					},
 					div: function(element){
 						if(element.attributes && element.attributes['class'] == 'ljcut'){
-							var newElement = new CKEDITOR.htmlParser.element('lj-cut');
+							var newElement = new CKEDITOR.htmlParser.element('lj:cut');
 							newElement.attributes['lj-cmd'] = 'LJCut';
 							newElement.children = element.children;
 							return newElement;
@@ -1257,8 +1267,18 @@
 							return new CKEDITOR.htmlParser.fragment.fromHtml(unescape(element.attributes.data)).children[0];
 						}
 					},
-					'lj-template': function(element){
+					'lj:template': function(element){
+						element.name = 'lj-template';
 						element.isOptionalClose = element.isEmpty = true;
+					},
+					'lj:cut': function(element){
+						element.name = 'lj-cut'
+					},
+					'lj:raw': function(element) {
+						element.name = 'lj-raw';
+					},
+					'lj:wishlist': function(element) {
+						element.name = 'lj-wishlist';
 					}
 				},
 				attributes: {
