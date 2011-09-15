@@ -1169,7 +1169,7 @@
 						element.children.length = 0;
 					},
 					a: function(element) {
-						if(element.parent.attributes.contentEditable != 'false'){
+						if(element.parent.attributes && element.parent.attributes.contentEditable != 'false'){
 							element.attributes['lj-cmd'] = 'LJLink';
 						}
 					},
@@ -1177,6 +1177,15 @@
 						var parent = element.parent.parent;
 						if (!parent || !parent.attributes || parent.attributes.contentEditable != 'false') {
 							element.attributes['lj-cmd'] = 'LJImage';
+						}
+					},
+					div: function(element){
+						if(element.attributes && element.attributes['class'] == 'ljcut'){
+							var newElement = new CKEDITOR.htmlParser.element('lj-cut');
+							console.log(newElement);
+							newElement.attributes['lj-cmd'] = 'LJCut';
+							newElement.children = element.children;
+							return newElement;
 						}
 					}
 				}
@@ -1208,7 +1217,7 @@
 							case 'lj-map':
 								newElement = new CKEDITOR.htmlParser.element('lj-map');
 								newElement.attributes.url = decodeURIComponent(element.attributes['lj-url']);
-								element.attributes.style.replace(/([a-z-]+):(.*?);/gi, function(relust, name, value) {
+								element.attributes.style && element.attributes.style.replace(/([a-z-]+):(.*?);/gi, function(relust, name, value) {
 									newElement.attributes[name] = parseInt(value);
 								});
 
