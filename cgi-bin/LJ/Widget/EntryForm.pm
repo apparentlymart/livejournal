@@ -607,7 +607,7 @@ sub render_subject_block {
     my $onload = $self->onload;
 
     my $block_qotd = '';
-    if ($opts->{prop_qotdid} && !$opts->{richtext}) {
+    if ($opts->{prop_qotdid}) {
         my $qotd = LJ::QotD->get_single_question($opts->{prop_qotdid});
         my $qotd_show = LJ::Widget::QotD->qotd_display_embed(
             questions => [ $qotd ],
