@@ -32,6 +32,7 @@ my %domains = (
     hmp_ontd        => 'Homepage/ONTD',
     hmp_spotlight   => 'Homepage/Spotlight',
     anythingdisney  => 'AnythingDisney',
+    bullying_begone => 'bullying_begone',
 );
 =head
     culture         => 'Arts & Culture',
