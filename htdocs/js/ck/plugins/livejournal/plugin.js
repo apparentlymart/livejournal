@@ -1182,7 +1182,6 @@
 					div: function(element){
 						if(element.attributes && element.attributes['class'] == 'ljcut'){
 							var newElement = new CKEDITOR.htmlParser.element('lj-cut');
-							console.log(newElement);
 							newElement.attributes['lj-cmd'] = 'LJCut';
 							newElement.children = element.children;
 							return newElement;
