@@ -12,21 +12,25 @@ use File::Path ();
 use File::Basename ();
 use File::Copy ();
 use Image::Size ();
-BEGIN { require "ljlib.pl";
-        require "ljviews.pl"; }
+
+BEGIN {
+    require "ljlib.pl";
+    require "ljviews.pl";
+}
+
 use LJ::S2;
 use MogileFS::Admin;
 
-my $opt_sql = 0;
-my $opt_drop = 0;
-my $opt_pop = 0;
+my $opt_sql     = 0;
+my $opt_drop    = 0;
+my $opt_pop     = 0;
 my $opt_confirm = "";
-my $opt_skip = "";
-my $opt_help = 0;
-my $cluster = 0;   # by default, upgrade master.
+my $opt_skip    = "";
+my $opt_help    = 0;
+my $cluster     = 0;   # by default, upgrade master.
 my $opt_listtables;
 my $opt_nostyles;
-my $opt_forcebuild = 0;
+my $opt_forcebuild    = 0;
 my $opt_compiletodisk = 0;
 my $opt_innodb;
 my $opt_force_production_alter;
@@ -44,7 +48,7 @@ Usage: update-db.pl [options]
   -l  --listtables   Print used tables, one per line.
       --nostyles     When used in combination with --populate, disables population
                      of style information.
-      --force-alter  By default, alter statements on production database are not 
+      --force-alter  By default, alter statements on production database are not
                      executed (they may take too much time). This option forces
                      these statements to be executed
   -b  --beta         Affects '--populate' option - only data that are safe during
@@ -53,107 +57,121 @@ Usage: update-db.pl [options]
 ";
 
 die $usage unless
-GetOptions("runsql"     => \$opt_sql,
-           "drop"       => \$opt_drop,
-           "populate"   => \$opt_pop,
-           "beta!"      => \$opt_beta,
-           "confirm=s"  => \$opt_confirm,
-           "cluster=s"  => \$cluster,
-           "skip=s"     => \$opt_skip,
-           "help"       => \$opt_help,
-           "listtables" => \$opt_listtables,
-           "nostyles"   => \$opt_nostyles,
-           "forcebuild|fb" => \$opt_forcebuild,
-           "ctd"        => \$opt_compiletodisk,
-           "innodb"     => \$opt_innodb,
-           "force-alter"=> \$opt_force_production_alter,
-           );
+    GetOptions(
+        "runsql"        => \$opt_sql,
+        "drop"          => \$opt_drop,
+        "populate"      => \$opt_pop,
+        "beta!"         => \$opt_beta,
+        "confirm=s"     => \$opt_confirm,
+        "cluster=s"     => \$cluster,
+        "skip=s"        => \$opt_skip,
+        "help"          => \$opt_help,
+        "listtables"    => \$opt_listtables,
+        "nostyles"      => \$opt_nostyles,
+        "forcebuild|fb" => \$opt_forcebuild,
+        "ctd"           => \$opt_compiletodisk,
+        "innodb"        => \$opt_innodb,
+        "force-alter"   => \$opt_force_production_alter,
+    );
 
 $opt_nostyles = 1 unless LJ::is_enabled("update_styles");
-$opt_innodb = 1 if $LJ::USE_INNODB;
+$opt_innodb = 1   if $LJ::USE_INNODB;
 
 die $usage if $opt_help;
-die "You must specify '--populate' option with '--[no]beta'" 
+die "You must specify '--populate' option with '--[no]beta'"
     if defined $opt_beta && !$opt_pop;
 die "You are running script on beta server without specifying '--beta' option"
     if $opt_pop && !defined($opt_beta) && $LJ::IS_LJCOM_BETA;
 
 
 ## make sure $LJHOME is set so we can load & run everything
-unless (-d $ENV{'LJHOME'}) {
-    die "LJHOME environment variable is not set, or is not a directory.\n".
+unless ( -d $ENV{'LJHOME'} ) {
+    die "LJHOME environment variable is not set, or is not a directory.\n" .
         "You must fix this before you can run this database update script.";
 }
 
 die "Can't --populate a cluster" if $opt_pop && ($cluster && $cluster ne "all");
 
 my @clusters;
-foreach my $cl (split(/,/, $cluster)) {
+
+foreach my $cl ( split(/,/, $cluster) ) {
     die "Invalid cluster spec: $cl\n" unless
         $cl =~ /^\s*((\d+)|all|user)\s*$/;
-    if ($cl eq "all") { push @clusters, 0, @LJ::CLUSTERS; }
-    elsif ($cl eq "user") { push @clusters, @LJ::CLUSTERS; }
-    else { push @clusters, $1; }
+
+    if ( $cl eq "all" ) {
+        push @clusters, 0, @LJ::CLUSTERS;
+    }
+    elsif ( $cl eq "user" ) {
+        push @clusters, @LJ::CLUSTERS;
+    }
+    else {
+        push @clusters, $1;
+    }
 }
+
 @clusters = (0) unless @clusters;
 
-my $su;              # system user, not available until populate mode
-my %status;          # clusterid -> string
-my %clustered_table; # $table -> 1
-my $sth;
-my %table_exists;   # $table -> 1
-my %table_unknown;  # $table -> 1
-my %table_create;   # $table -> $create_sql
-my %table_drop;     # $table -> 1
-my %table_status;   # $table -> { SHOW TABLE STATUS ... row }
-my %post_create;    # $table -> [ [ $action, $what ]* ]
-my %coltype;        # $table -> { $col -> [ $type, $null ] }
-my %indexname;      # $table -> "INDEX"|"UNIQUE" . ":" . "col1-col2-col3" -> "PRIMARY" | index_name
-my @alters;
+my $su;                   # system user, not available until populate mode
+my %status;               # clusterid -> string
+my %clustered_table = (); # $table -> 1
+my %table_exists    = (); # $table -> 1
+my %table_unknown   = (); # $table -> 1
+my %table_create    = (); # $table -> $create_sql
+my %table_drop      = (); # $table -> 1
+my %table_status    = (); # $table -> { SHOW TABLE STATUS ... row }
+my %post_create     = (); # $table -> [ [ $action, $what ]* ]
+my %coltype         = (); # $table -> { $col -> [ $type, $null ] }
+my %indexname       = (); # $table -> "INDEX"|"UNIQUE" . ":" . "col1-col2-col3" -> "PRIMARY" | index_name
+my @alters          = ();
 my $dbh;
+my $sth;
 
-CLUSTER: foreach my $cluster (@clusters) {
+CLUSTER: foreach my $cluster ( @clusters ) {
     print "Updating cluster: $cluster\n" unless $opt_listtables;
+
     ## make sure we can connect
     $dbh = $cluster ? LJ::get_cluster_master($cluster) : LJ::get_db_writer();
-    unless ($dbh) {
-        $status{$cluster} = "ERROR: Can't connect to the database (clust\#$cluster), so I can't update it. (".DBI->errstr.")";
+
+    unless ( $dbh ) {
+        $status{$cluster} = "ERROR: Can't connect to the database (clust\#$cluster), so I can't update it. (" . DBI->errstr . ")";
         next CLUSTER;
     }
 
     $dbh->{'RaiseError'} = 0;
     $dbh->{'PrintError'} = 1 if $LJ::IS_DEV_SERVER;
 
-    # reset everything
-    %clustered_table = %table_exists = %table_unknown =
-        %table_create = %table_drop = %post_create =
-        %coltype = %indexname = %table_status = ();
-    @alters = ();
-
     ## figure out what tables already exist (but not details of their structure)
     $sth = $dbh->prepare("SHOW TABLES");
     $sth->execute;
+
     while (my ($table) = $sth->fetchrow_array) {
         next if $table =~ /^(access|errors)\d+$/;
         $table_exists{$table} = 1;
     }
-    %table_unknown = %table_exists;  # for now, later we'll delete from table_unknown
+
+    # for now, later we'll delete from table_unknown
+    %table_unknown = %table_exists;
 
     ## very important that local is run first!  (it can define tables that
     ## the site-wide would drop if it didn't know about them already)
 
     my $load_datfile = sub {
-        my $file = shift;
-        my $local = shift;
+        my ( $file, $local ) = @_;
+
         return if $local && ! -e $file;
+
         open(F, $file) or die "Can't find database update file at $file\n";
         my $data;
+
         {
             local $/ = undef;
             $data = <F>;
         }
+
         close F;
+
         eval $data;
+
         die "Can't run $file: $@\n" if $@;
         return 1;
     };
@@ -162,38 +180,35 @@ CLUSTER: foreach my $cluster (@clusters) {
     $load_datfile->("$LJ::HOME/bin/upgrading/update-db-int.pl", 1);
     $load_datfile->("$LJ::HOME/bin/upgrading/update-db-general.pl");
 
-    foreach my $t (sort keys %table_create) {
+    foreach my $t ( sort keys %table_create ) {
         delete $table_drop{$t} if ($table_drop{$t});
         print "$t\n" if $opt_listtables;
     }
+
     exit if $opt_listtables;
 
-    foreach my $t (keys %table_drop) {
+    foreach my $t ( keys %table_drop ) {
         delete $table_unknown{$t};
     }
 
-    foreach my $t (keys %table_unknown)
-    {
+    foreach my $t ( keys %table_unknown ) {
         print "# Warning: unknown live table: $t\n";
     }
 
     ## create tables
-    foreach my $t (keys %table_create)
-    {
+    foreach my $t ( keys %table_create ) {
         next if $table_exists{$t};
         create_table($t);
     }
 
     ## drop tables
-    foreach my $t (keys %table_drop)
-    {
+    foreach my $t ( keys %table_drop ) {
         next unless $table_exists{$t};
         drop_table($t);
     }
 
     ## do all the alters
-    foreach my $s (@alters)
-    {
+    foreach my $s ( @alters ) {
         $s->($dbh, $opt_sql);
     }
 
@@ -201,12 +216,13 @@ CLUSTER: foreach my $cluster (@clusters) {
 }
 
 print "\ncluster: status\n";
+
 foreach my $clid (sort { $a <=> $b } keys %status) {
     printf "%7d: %s\n", $clid, $status{$clid};
 }
 print "\n";
 
-if ($opt_pop) {
+if ( $opt_pop ) {
     $dbh = LJ::get_db_writer()
         or die "Couldn't get master handle for population.";
     $dbh->{'RaiseError'} = 0;
@@ -220,10 +236,11 @@ if ($opt_pop) {
 # Note:  now cluster 0 means expunged (as well as statuvis 'X'), so there's
 # an option to disable the warning if you're running new code and know what's up.
 # if they're running modern code (with dversion 6 users), we won't check
-if (table_exists('user')) {
-    unless ($dbh->selectrow_array("SELECT userid FROM user WHERE dversion >= 6 LIMIT 1")) {
+if ( table_exists('user') ) {
+    unless ( $dbh->selectrow_array("SELECT userid FROM user WHERE dversion >= 6 LIMIT 1") ) {
         my $cluster0 = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE clusterid=0");
-        if ($cluster0) {
+
+        if ( $cluster0 ) {
             print "\n", "* "x35, "\nWARNING: You have $cluster0 users on cluster 0.\n\n".
                 "Support for that old database schema is deprecated and will be removed soon.\n".
                 "You should stop updating from CVS until you've moved all your users to a cluster \n".
@@ -251,6 +268,7 @@ sub populate_database {
 
     # check for old style external_foaf_url (indexed:1, cldversion:0)
     my $prop = LJ::get_prop('user', 'external_foaf_url');
+
     if ($prop->{indexed} == 1 && $prop->{cldversion} == 0) {
         print "Updating external_foaf_url userprop.\n";
         system("$ENV{'LJHOME'}/bin/upgrading/migrate-userprop.pl", 'external_foaf_url');
@@ -261,11 +279,12 @@ sub populate_database {
     populate_proplists();
     clean_schema_docs();
     populate_mogile_conf();
-   
+
     unless ($opt_beta) {
         schema_upgrade_scripts();
         populate_moods();
     }
+
     print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
         if $made_system;
 
@@ -277,16 +296,21 @@ sub populate_database {
 sub vivify_system_user {
     my $freshly_made = 0;
     my $su = LJ::load_user("system");
+
     unless ($su) {
         print "System user not found. Creating with random password.\n";
         my $pass = LJ::make_auth_code(10);
-        LJ::create_account({ 'user' => 'system',
-                             'name' => 'System Account',
-                             'password' => $pass })
-            || die "Failed to create system user.";
+
+        LJ::create_account({
+            'user'     => 'system',
+            'name'     => 'System Account',
+            'password' => $pass,
+        }) || die "Failed to create system user.";
+
         $su = LJ::load_user("system") || die "Failed to load the newly created system user.";
         $freshly_made = 1;
     }
+
     return wantarray ? ($su, $freshly_made) : $su;
 }
 
@@ -295,8 +319,8 @@ sub populate_s1 {
     print "Populating public system styles (S1):\n";
     require "$ENV{'LJHOME'}/bin/upgrading/s1style-rw.pl";
     my $ss = s1styles_read();
-    foreach my $uniq (sort keys %$ss) {
 
+    foreach my $uniq (sort keys %$ss) {
         my $s = $ss->{$uniq};
         my $existing = LJ::S1::check_dup_style($su, $s->{'type'}, $s->{'styledes'});
 
@@ -305,17 +329,25 @@ sub populate_s1 {
             if ($LJ::DONT_TOUCH_STYLES) {
                 next;
             }
+
             if ( LJ::S1::update_style($existing->{'styleid'},
                                       { map { $_, $s->{$_} } qw(formatdata is_embedded is_colorfree) }) ) {
                 print "  $uniq: ";
                 print "updated \#$existing->{'styleid'}\n";
             }
+
             next;
         }
 
         # insert new
-        my %opts = ( "is_public" => 'Y', "opt_cache" => 'Y',
-                     map { $_, $s->{$_} } qw(styledes type formatdata is_embedded is_colorfree lastupdate));
+        my %opts = (
+            "is_public" => 'Y',
+            "opt_cache" => 'Y',
+            map {
+                $_ => $s->{$_}
+            } qw(styledes type formatdata is_embedded is_colorfree lastupdate),
+        );
+
         LJ::S1::create_style($su, \%opts)
             or die "Error: unable to create style!  Database potentially unavailable?";
         print "  $uniq: ";
@@ -329,15 +361,16 @@ sub populate_s1 {
 sub populate_s2 {
     # S2
     print "Populating public system styles (S2):\n";
-    {
-        my $LD = "s2layers"; # layers dir
 
+    {
+        # layers dir
+        my $LD    = "s2layers";
         my $sysid = $su->{'userid'};
 
         # find existing re-distributed layers that are in the database
         # and their styleids.
         my $existing = LJ::S2::get_public_layers({ force => 1 }, $sysid);
-        
+
         my %known_id;
         chdir "$ENV{'LJHOME'}/bin/upgrading" or die;
         my %layer;    # maps redist_uniq -> { 'type', 'parent' (uniq), 'id' (s2lid) }
@@ -350,35 +383,38 @@ sub populate_s2 {
             unless ($id) {
                 my $parentid = 0;
                 $parentid = $layer{$parent}->{'id'} unless $type eq "core";
+
                 # allocate a new one.
                 $dbh->do("INSERT INTO s2layers (s2lid, b2lid, userid, type) ".
                          "VALUES (NULL, $parentid, $sysid, ?)", undef, $type);
                 die $dbh->errstr if $dbh->err;
                 $id = $dbh->{'mysql_insertid'};
+
                 if ($id) {
                     $dbh->do("INSERT INTO s2info (s2lid, infokey, value) VALUES (?,'redist_uniq',?)",
                              undef, $id, $base);
                 }
             }
+
             die "Can't generate ID for '$base'" unless $id;
 
             # remember it so we don't delete it later.
             $known_id{$id} = 1;
-          
+
             $existing->{$base}->{'s2lid'} = $id;
 
             $layer{$base} = {
-                'type' => $type,
+                'type'   => $type,
                 'parent' => $parent,
-                'id' => $id,
+                'id'     => $id,
             };
 
             my $parid = $layer{$parent}->{'id'};
 
             # see if source changed
-            my $md5_source = Digest::MD5::md5_hex($s2source);
+            my $md5_source   = Digest::MD5::md5_hex($s2source);
             my $source_exist = LJ::S2::load_layer_source($id);
-            my $md5_exist = Digest::MD5::md5_hex($source_exist);
+            my $md5_exist    = Digest::MD5::md5_hex($source_exist);
 
             # skip compilation if source is unchanged and parent wasn't rebuilt.
             return if $md5_source eq $md5_exist && ! $layer{$parent}->{'built'} && ! $opt_forcebuild;
@@ -390,14 +426,15 @@ sub populate_s2 {
             # we're going to go ahead and build it.
             $layer{$base}->{'built'} = 1;
 
-            unless ($dry) {
+            unless ( $dry ) {
                 # compile!
                 my $lay = {
-                    's2lid' => $id,
+                    's2lid'  => $id,
                     'userid' => $sysid,
-                    'b2lid' => $parid,
-                    'type' => $type,
+                    'b2lid'  => $parid,
+                    'type'   => $type,
                 };
+
                 my $error = "";
                 my $compiled;
                 my $info;
@@ -407,11 +444,14 @@ sub populate_s2 {
                 # an error itself, which we can get.
                 eval {
                     die $error unless
-                        LJ::S2::layer_compile($lay, \$error, {
-                            's2ref' => \$s2source,
-                            'redist_uniq' => $base,
-                            'compiledref' => \$compiled,
-                            'layerinfo' => \$info,
+                        LJ::S2::layer_compile(
+                            $lay,
+                            \$error,
+                            {
+                                's2ref'       => \$s2source,
+                                'redist_uniq' => $base,
+                                'compiledref' => \$compiled,
+                                'layerinfo'   => \$info,
                         });
                 };
 
@@ -421,7 +461,7 @@ sub populate_s2 {
                 }
 
                 if ($opt_compiletodisk) {
-                    open (CO, ">$LD/$base.pl") or die;
+                    open( CO, '>', "$LD/$base.pl" ) or die;
                     print CO $compiled;
                     close CO;
                 }
@@ -432,22 +472,23 @@ sub populate_s2 {
         };
 
         my @to_compile;
+
         my $dry_compile = sub {
             my @args = @_;
-
             $compile->(@args, 1);
             push @to_compile, \@args;
         };
 
         my @layerfiles = ("s2layers.dat");
-        while (@layerfiles)
-        {
+
+        while ( @layerfiles ) {
             my $file = shift @layerfiles;
             next unless -e $file;
-            open (SL, $file) or die;
+
+            open (SL, '<', $file) or die;
             print "SOURCE: $file\n";
-            while (<SL>)
-            {
+
+            while (<SL>) {
                 s/\#.*//; s/^\s+//; s/\s+$//;
                 next unless /\S/;
                 my ($base, $type, $parent) = split;
@@ -466,34 +507,44 @@ sub populate_s2 {
                 my $multi = ($type =~ s/\+$//);
 
                 my $s2source;
-                open (L, "$LD/$base.s2") or die "Can't open file: $base.s2\n";
+                open (L, '<', "$LD/$base.s2") or die "Can't open file: $base.s2\n";
 
                 unless ($multi) {
                     # check if this layer should be mapped to another layer (i.e. exact copy except for layerinfo)
                     if ($type =~ s/\(([^)]+)\)//) { # grab the layer in the parentheses and erase it
                         open (my $map_layout, "$LD/$1.s2") or die "Can't open file: $1.s2\n";
+
                         while (<$map_layout>) { $s2source .= $_; }
                     }
+
                     while (<L>) { $s2source .= $_; }
+
                     $dry_compile->($base, $type, $parent, $s2source);
-                } else {
+                }
+                else {
                     my $curname;
+
                     while (<L>) {
                         if (/^\#NEWLAYER:\s*(\S+)/) {
                             my $newname = $1;
                             $dry_compile->($curname, $type, $parent, $s2source);
-                            $curname = $newname;
+                            $curname  = $newname;
                             $s2source = "";
-                        } elsif (/^\#NEWLAYER/) {
+                        }
+                        elsif (/^\#NEWLAYER/) {
                             die "Badly formatted \#NEWLAYER line";
-                        } else {
+                        }
+                        else {
                             $s2source .= $_;
                         }
                     }
+
                     $dry_compile->($curname, $type, $parent, $s2source);
                 }
+
                 close L;
             }
+
             close SL;
         }
 
@@ -502,9 +553,11 @@ sub populate_s2 {
 
             LJ::end_request();
             my $pid = fork;
+
             if ($pid) {
                 waitpid($pid, 0);
-            } else {
+            }
+            else {
                 $compile->(@$_) foreach @batch;
                 exit 0;
             }
@@ -521,32 +574,34 @@ sub populate_s2 {
         $dbh->{'RaiseError'} = 0;
         $dbh->{'PrintError'} = 1 if $LJ::IS_DEV_SERVER;
 
-    if ($LJ::IS_DEV_SERVER) {
-        # now, delete any system layers that don't below (from previous imports?)
-        my @del_ids;
-        my $sth = $dbh->prepare("SELECT s2lid FROM s2layers WHERE userid=?");
-        $sth->execute($sysid);
-        while (my $id = $sth->fetchrow_array) {
-            next if $known_id{$id};
-            push @del_ids, $id;
-        }
+        if ($LJ::IS_DEV_SERVER) {
+            # now, delete any system layers that don't below (from previous imports?)
+            my @del_ids;
+            my $sth = $dbh->prepare("SELECT s2lid FROM s2layers WHERE userid=?");
+            $sth->execute($sysid);
 
-        # if we need to delete things, prompt before blowing away system layers
-        if (@del_ids) {
-            print "\nWARNING: The following S2 layer ids are known as system layers but are no longer\n" .
-                  "present in the import files.  If this is expected and you really want to DELETE\n" .
-                  "these layers, type 'YES' (in all capitals).\n\nType YES to delete layers " .
-                  join(', ', @del_ids) . ": ";
-            my $inp = <STDIN>;
-            if ($inp =~ /^YES$/) {
-                print "\nOkay, I am PERMANENTLY DELETING the layers.\n";
-                LJ::S2::delete_layer($_) foreach @del_ids;
-            } else {
-                print "\nOkay, I am NOT deleting the layers.\n";
+            while (my $id = $sth->fetchrow_array) {
+                next if $known_id{$id};
+                push @del_ids, $id;
+            }
+
+            # if we need to delete things, prompt before blowing away system layers
+            if (@del_ids) {
+                print "\nWARNING: The following S2 layer ids are known as system layers but are no longer\n" .
+                      "present in the import files.  If this is expected and you really want to DELETE\n" .
+                      "these layers, type 'YES' (in all capitals).\n\nType YES to delete layers " .
+                      join(', ', @del_ids) . ": ";
+                my $inp = <STDIN>;
+
+                if ($inp =~ /^YES$/) {
+                    print "\nOkay, I am PERMANENTLY DELETING the layers.\n";
+                    LJ::S2::delete_layer($_) foreach @del_ids;
+                }
+                else {
+                    print "\nOkay, I am NOT deleting the layers.\n";
+                }
             }
         }
-    }
-
     }
 }
 
@@ -559,12 +614,14 @@ sub populate_schools {
     # show message about schools
     if ($sid) {
         print "Skipping school data population -- manual population of new data required.\n";
+    }
 
     # okay to populate
-    } elsif (open(F, "$ENV{LJHOME}/bin/upgrading/schools.dat")) {
+    elsif (open(F, "$ENV{LJHOME}/bin/upgrading/schools.dat")) {
         print "Populating school data.\n";
 
         my $sid;
+
         while (<F>) {
             chomp;
 
@@ -591,14 +648,19 @@ sub populate_basedata {
     foreach my $file ("base-data.sql", "base-data-local.sql") {
         my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
         next unless -e $ffile;
+
         print "Populating database with $file.\n";
-        open (BD, $ffile) or die "Can't open $file file\n";
-        while (my $q = <BD>)
-        {
-            chomp $q;  # remove newline
+        open (BD, '<', $ffile) or die "Can't open $file file\n";
+
+        while (my $q = <BD>) {
+            # remove newline
+            chomp $q;
             next unless ($q =~ /^(REPLACE|INSERT|UPDATE)/);
-            chop $q;  # remove semicolon
+
+            # remove semicolon
+            chop $q;
             $dbh->do($q);
+
             if ($dbh->err) {
                 print "$q\n";
                 die "#  ERROR: " . $dbh->errstr . "\n";
@@ -609,12 +671,16 @@ sub populate_basedata {
 }
 
 sub populate_proplists {
-    foreach my $file ("proplists.dat", "proplists-local.dat") {
+    foreach my $file ( "proplists.dat", "proplists-local.dat" ) {
         my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
         next unless -e $ffile;
+
         my $scope = ($file =~ /local/) ? "local" : "general";
         populate_proplist_file($ffile, $scope);
     }
+
+    LJ::MemCache::delete('CACHE_PROPID');
+    LJ::MemCache::delete('CACHE_PROP');
 }
 
 sub populate_proplist_file {
@@ -622,23 +688,23 @@ sub populate_proplist_file {
     open (my $fh, $file) or die "Failed to open $file: $!";
 
     my %pk = (
-              'userproplist' => 'name',
-              'logproplist'  => 'name',
-              'talkproplist' => 'name',
-              'usermsgproplist' => 'name',
-              'pollproplist2'   => 'name',
-              'categoryproplist' => 'name',
-              'ratelist' => 'name',
-              );
+        'userproplist'     => 'name',
+        'logproplist'      => 'name',
+        'talkproplist'     => 'name',
+        'usermsgproplist'  => 'name',
+        'pollproplist2'    => 'name',
+        'categoryproplist' => 'name',
+        'ratelist'         => 'name',
+    );
 
     my %propid_field = (
-        'categoryproplist'  => 'propid',
-        'logproplist'       => 'propid',
-        'pollproplist2'     => 'propid',
-        'ratelist'          => 'rlid',
-        'talkproplist'      => 'tpropid',
-        'usermsgproplist'   => 'propid',
-        'userproplist'      => 'upropid',
+        'categoryproplist' => 'propid',
+        'logproplist'      => 'propid',
+        'pollproplist2'    => 'propid',
+        'ratelist'         => 'rlid',
+        'talkproplist'     => 'tpropid',
+        'usermsgproplist'  => 'propid',
+        'userproplist'     => 'upropid',
     );
 
     my %noscope = (
@@ -649,20 +715,24 @@ sub populate_proplist_file {
     my $pk;     # table's primary key name
     my $pkv;    # primary key value
     my %vals;   # hash of column -> value, including primary key
+
     my $insert = sub {
         return unless %vals;
 
         my $sets = join(", ", map { "$_=" . $dbh->quote($vals{$_}) } keys %vals);
 
-        my $row = $dbh->selectrow_hashref(qq{
-            SELECT * FROM $table WHERE $pk = ?
-        }, undef, $pkv);
+        my $row = $dbh->selectrow_hashref(
+            "SELECT * FROM $table WHERE $pk = ?",
+            undef,
+            $pkv,
+        );
 
         if ( defined $row ) {
             # the row exists, let's update it
             $dbh->do("UPDATE $table SET $sets WHERE $pk=?", undef, $pkv);
             die $dbh->errstr if $dbh->err;
-        } else {
+        }
+        else {
             # find a propid for the row and then insert it
 
             my $propid_field = $propid_field{$table};
@@ -680,9 +750,12 @@ sub populate_proplist_file {
             $propid++ while exists $existing_propids{$propid};
 
             # finally, insert
-            $dbh->do(qq{
-                INSERT INTO $table SET $propid_field = ?, $sets
-            }, undef, $propid);
+            $dbh->do(
+                "INSERT INTO $table SET $propid_field = ?, $sets",
+                undef,
+                $propid,
+            );
+
             die $dbh->errstr if $dbh->err;
         }
 
@@ -693,7 +766,7 @@ sub populate_proplist_file {
     while (<$fh>) {
         next if /^\#/;
 
-        if (/^(\w+)\.(\w+):/) {
+        if ( /^(\w+)\.(\w+):/) {
             $insert->();
             ($table, $pkv) = ($1, $2);
             $pk = $pk{$table} or die "Don't know non-numeric primary key for table '$table'";
@@ -701,15 +774,18 @@ sub populate_proplist_file {
             $vals{"scope"} = $scope unless exists $noscope{$table};
             next;
         }
+
         if (/^\s+(\w+)\s*:\s*(.+)/) {
             die "Unexpected line: $_ when not in a block" unless $table;
             $vals{$1} = $2;
             next;
         }
+
         if (/\S/) {
             die "Unxpected line: $_";
         }
     }
+
     $insert->();
     close($fh);
 }
@@ -717,17 +793,20 @@ sub populate_proplist_file {
 sub populate_moods {
     # moods
     my $moodfile = "$ENV{'LJHOME'}/bin/upgrading/moods.dat";
+
     if (open(M, $moodfile)) {
         print "Populating mood data.\n";
 
         my %mood;   # id -> [ mood, parent_id ]
         my $sth = $dbh->prepare("SELECT moodid, mood, parentmood FROM moods");
         $sth->execute;
+
         while (@_ = $sth->fetchrow_array) { $mood{$_[0]} = [ $_[1], $_[2] ]; }
 
         my %moodtheme;  # name -> [ id, des ]
         $sth = $dbh->prepare("SELECT moodthemeid, name, des FROM moodthemes WHERE is_public='Y'");
         $sth->execute;
+
         while (@_ = $sth->fetchrow_array) { $moodtheme{$_[1]} = [ $_[0], $_[2] ]; }
 
         my $themeid;  # current themeid (from existing db or just made)
@@ -747,8 +826,10 @@ sub populate_moods {
             if (/^MOODTHEME\s+(.+?)\s*:\s*(.+)$/) {
                 my ($name, $des) = ($1, $2);
                 %data = ();
+
                 if ($moodtheme{$name}) {
                     $themeid = $moodtheme{$name}->[0];
+
                     if ($moodtheme{$name}->[1] ne $des) {
                         $dbh->do("UPDATE moodthemes SET des=? WHERE moodthemeid=?", undef,
                                  $des, $themeid);
@@ -756,10 +837,12 @@ sub populate_moods {
                     $sth = $dbh->prepare("SELECT moodid, picurl, width, height ".
                                          "FROM moodthemedata WHERE moodthemeid=?");
                     $sth->execute($themeid);
+
                     while (@_ = $sth->fetchrow_array) {
                         $data{$_[0]} = "$_[1]$_[2]$_[3]";
                     }
-                } else {
+                }
+                else {
                     $dbh->do("INSERT INTO moodthemes (ownerid, name, des, is_public) ".
                              "VALUES (?,?,?,'Y')", undef, $su->{'userid'}, $name, $des);
                     $themeid = $dbh->{'mysql_insertid'};
@@ -786,6 +869,7 @@ sub clean_schema_docs {
     foreach my $tbl (qw(schemacols schematables)) {
         my $sth = $dbh->prepare("SELECT DISTINCT tablename FROM $tbl");
         $sth->execute;
+
         while (my $doctbl = $sth->fetchrow_array) {
             next if $table_create{$doctbl};
             $dbh->do("DELETE FROM $tbl WHERE tablename=?", undef, $doctbl);
@@ -805,6 +889,7 @@ sub populate_mogile_conf {
 
     # verify domain exists?
     my $domain = $LJ::MOGILEFS_CONFIG{domain};
+
     unless (defined $exists->{$domain}) {
         print "\tCreating domain $domain...\n";
         $mgd->create_domain($domain)
@@ -821,7 +906,8 @@ sub populate_mogile_conf {
                 $mgd->update_class($domain, $class, $LJ::MOGILEFS_CONFIG{classes}->{$class})
                     or die "Error: Unable to update class.\n";
             }
-        } else {
+        }
+        else {
             # create it
             print "\tCreating class $class...\n";
             $mgd->create_class($domain, $class, $LJ::MOGILEFS_CONFIG{classes}->{$class})
@@ -863,13 +949,11 @@ sub schema_upgrade_scripts {
     }
 }
 
-sub skip_opt
-{
+sub skip_opt {
     return $opt_skip;
 }
 
-sub do_sql
-{
+sub do_sql {
     my $sql = shift;
     chomp $sql;
     my $disp_sql = $sql;
@@ -885,8 +969,7 @@ sub do_sql
     }
 }
 
-sub try_sql
-{
+sub try_sql {
     my $sql = shift;
     print "$sql;\n";
     if ($opt_sql) {
@@ -898,8 +981,7 @@ sub try_sql
     }
 }
 
-sub try_alter
-{
+sub try_alter {
     my ($table, $sql) = @_;
     return if $cluster && ! defined $clustered_table{$table};
 
@@ -909,11 +991,10 @@ sub try_alter
     clear_table_info($table);
 }
 
-sub do_alter
-{
+sub do_alter {
     my ($table, $sql) = @_;
     return if $cluster && ! defined $clustered_table{$table};
-    
+
     if ($LJ::IS_DEV_SERVER || $opt_force_production_alter) {
         do_sql($sql);
         # columns will have changed, so clear cache:
@@ -925,8 +1006,7 @@ sub do_alter
     }
 }
 
-sub create_table
-{
+sub create_table {
     my $table = shift;
     return if $cluster && ! defined $clustered_table{$table};
 
@@ -956,8 +1036,7 @@ sub create_table
     }
 }
 
-sub drop_table
-{
+sub drop_table {
     my $table = shift;
     return if $cluster && ! defined $clustered_table{$table};
 
@@ -968,15 +1047,13 @@ sub drop_table
     }
 }
 
-sub mark_clustered
-{
+sub mark_clustered {
     foreach (@_) {
         $clustered_table{$_} = 1;
     }
 }
 
-sub register_tablecreate
-{
+sub register_tablecreate {
     my ($table, $create) = @_;
     # we now know of it
     delete $table_unknown{$table};
@@ -986,28 +1063,25 @@ sub register_tablecreate
     $table_create{$table} = $create;
 }
 
-sub register_tabledrop
-{
+sub register_tabledrop {
     my ($table) = @_;
     $table_drop{$table} = 1;
 }
 
-sub post_create
-{
+sub post_create {
     my $table = shift;
+
     while (my ($type, $what) = splice(@_, 0, 2)) {
         push @{$post_create{$table}}, [ $type, $what ];
     }
 }
 
-sub register_alter
-{
+sub register_alter {
     my $sub = shift;
     push @alters, $sub;
 }
 
-sub clear_table_info
-{
+sub clear_table_info {
     my $table = shift;
     delete $coltype{$table};
     delete $indexname{$table};
@@ -1016,14 +1090,14 @@ sub clear_table_info
 
 sub table_exists {
     my $table = shift;
-    
+
     ## TODO: use $dbh->table_info() to retrieve this info
     my $data_source = $dbh->get_info( $GetInfoType{SQL_DATA_SOURCE_NAME} );
     if ($data_source =~ /^dbi:mysql:(\w+)/) {
         my $schema = $1;
         my $result = $dbh->selectrow_array('
-            SELECT count(*) 
-            FROM information_schema.tables 
+            SELECT count(*)
+            FROM information_schema.tables
             WHERE table_schema = ?
               AND table_name = ?
         ', undef, $schema, $table);
@@ -1031,8 +1105,7 @@ sub table_exists {
     }
 }
 
-sub load_table_info
-{
+sub load_table_info {
     my $table = shift;
 
     clear_table_info($table);

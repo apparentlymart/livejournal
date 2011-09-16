@@ -1654,30 +1654,38 @@ sub make_auth_code
 # des-table: a list of tables' proplists to load. Can be one of
 #            "log", "talk", "user", or "rate".
 # </LJFUNC>
-sub load_props
-{
+sub load_props {
     my $dbarg = ref $_[0] ? shift : undef;
     my @tables = @_;
     my $dbr;
-    my %keyname = qw(log  propid
-                     talk tpropid
-                     user upropid
-                     rate rlid
-                     );
+    my %keyname = (
+        'log'  => 'propid',
+        'talk' => 'tpropid',
+        'user' => 'upropid',
+        'rate' => 'rlid',
+    );
+
+    my $prop   = LJ::MemCache::get('CACHE_PROP');
+    my $propid = LJ::MemCache::get('CACHE_PROPID');
 
     foreach my $t (@tables) {
         next unless defined $keyname{$t};
-        next if defined $LJ::CACHE_PROP{$t};
+        next if defined $prop->{$t} && defined $propid->{$t};
+
         my $tablename = $t eq "rate" ? "ratelist" : "${t}proplist";
         $dbr ||= LJ::get_db_reader();
         my $sth = $dbr->prepare("SELECT * FROM $tablename");
         $sth->execute;
+
         while (my $p = $sth->fetchrow_hashref) {
             $p->{'id'} = $p->{$keyname{$t}};
-            $LJ::CACHE_PROP{$t}->{$p->{'name'}} = $p;
-            $LJ::CACHE_PROPID{$t}->{$p->{'id'}} = $p;
+            $prop->{$t}->{$p->{'name'}} = $p;
+            $propid->{$t}->{$p->{'id'}} = $p;
         }
     }
+
+    LJ::MemCache::set('CACHE_PROP',   $prop);
+    LJ::MemCache::set('CACHE_PROPID', $propid);
 }
 
 # <LJFUNC>
@@ -1693,26 +1701,27 @@ sub load_props
 #            "log", "talk", or "user".
 # des-name: the name of the prop to get the hashref of.
 # </LJFUNC>
-sub get_prop
-{
+sub get_prop {
     my $table = shift;
     my $name = shift;
-    unless (defined $LJ::CACHE_PROP{$table} && $LJ::CACHE_PROP{$table}->{$name}) {
-        $LJ::CACHE_PROP{$table} = undef;
+
+    my $prop = LJ::MemCache::get('CACHE_PROP');
+
+    unless (defined $prop->{$table} && $prop->{$table}->{$name}) {
         LJ::load_props($table);
     }
 
-    unless ($LJ::CACHE_PROP{$table}) {
+    unless ($prop->{$table}) {
         warn "Prop table does not exist: $table" if $LJ::IS_DEV_SERVER;
         return undef;
     }
 
-    unless ($LJ::CACHE_PROP{$table}->{$name}) {
-        warn "Prop does not exist: $table - $name" if $LJ::IS_DEV_SERVER;
+    unless ($prop->{$table}->{$name}) {
+        warn "Prop does not exist: $table - $name" if $LJ::IS_DEV_SERVER && $name ne 'replycount';
         return undef;
     }
 
-    return $LJ::CACHE_PROP{$table}->{$name};
+    return LJ::MemCache::get('CACHE_PROP')->{$table}->{$name};
 }
 
 # <LJFUNC>
@@ -1725,36 +1734,35 @@ sub get_prop
 #                and their associated values being hashrefs to where you
 #                want that data to be populated.
 # </LJFUNC>
-sub load_codes
-{
+sub load_codes {
     &nodb;
     my $req = shift;
 
     my $dbr = LJ::get_db_reader()
         or die "Unable to get database handle";
 
-    foreach my $type (keys %{$req})
-    {
+    foreach my $type (keys %{$req}) {
         my $memkey = "load_codes:$type";
-        unless ($LJ::CACHE_CODES{$type} ||= LJ::MemCache::get($memkey))
-        {
+
+        unless ($LJ::CACHE_CODES{$type} ||= LJ::MemCache::get($memkey)) {
             $LJ::CACHE_CODES{$type} = [];
             my $sth = $dbr->prepare("SELECT code, item, sortorder FROM codes WHERE type=?");
             $sth->execute($type);
-            while (my ($code, $item, $sortorder) = $sth->fetchrow_array)
-            {
+
+            while (my ($code, $item, $sortorder) = $sth->fetchrow_array) {
                 push @{$LJ::CACHE_CODES{$type}}, [ $code, $item, $sortorder ];
             }
+
             @{$LJ::CACHE_CODES{$type}} =
                 sort { $a->[2] <=> $b->[2] } @{$LJ::CACHE_CODES{$type}};
             LJ::MemCache::set($memkey, $LJ::CACHE_CODES{$type}, 60*15);
         }
 
-        foreach my $it (@{$LJ::CACHE_CODES{$type}})
-        {
+        foreach my $it (@{$LJ::CACHE_CODES{$type}}) {
             if (ref $req->{$type} eq "HASH") {
                 $req->{$type}->{$it->[0]} = $it->[1];
-            } elsif (ref $req->{$type} eq "ARRAY") {
+            }
+            elsif (ref $req->{$type} eq "ARRAY") {
                 push @{$req->{$type}}, { 'code' => $it->[0], 'item' => $it->[1] };
             }
         }
@@ -2211,7 +2219,6 @@ sub handle_caches
 
     $LJ::DBIRole->flush_cache();
 
-    %LJ::CACHE_PROP = ();
     %LJ::CACHE_STYLE = ();
     $LJ::CACHED_MOODS = 0;
     $LJ::CACHED_MOOD_MAX = 0;
@@ -2777,8 +2784,7 @@ sub get_recommended_communities {
 # des-:
 # returns:
 # </LJFUNC>
-sub load_talk_props2
-{
+sub load_talk_props2 {
     my $db = isdb($_[0]) ? shift @_ : undef;
     my ($uuserid, $listref, $hashref) = @_;
 
@@ -2789,11 +2795,13 @@ sub load_talk_props2
 
     my %need;
     my @memkeys;
+
     foreach (@$listref) {
-        my $id = $_+0;
+        my $id     = $_ + 0;
         $need{$id} = 1;
         push @memkeys, [$userid,"talkprop:$userid:$id"];
     }
+
     return $hashref unless %need;
 
     my $mem = LJ::MemCache::get_multi(@memkeys) || {};
@@ -2812,7 +2820,10 @@ sub load_talk_props2
 
     if (!$db || @LJ::MEMCACHE_SERVERS) {
         $u ||= LJ::load_userid($userid);
-        $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_def_reader($u) :  LJ::get_cluster_reader($u);
+        $db = @LJ::MEMCACHE_SERVERS
+            ? LJ::get_cluster_def_reader($u)
+            :  LJ::get_cluster_reader($u);
+
         return $hashref unless $db;
     }
 
@@ -2821,14 +2832,18 @@ sub load_talk_props2
     my $sth = $db->prepare("SELECT jtalkid, tpropid, value FROM talkprop2 ".
                            "WHERE journalid=? AND jtalkid IN ($in)");
     $sth->execute($userid);
+
     while (my ($jtalkid, $propid, $value) = $sth->fetchrow_array) {
-        my $p = $LJ::CACHE_PROPID{'talk'}->{$propid};
+        LJ::load_props('talk') unless defined LJ::MemCache::get('CACHE_PROPID');
+        my $p = LJ::MemCache::get('CACHE_PROPID')->{'talk'}->{$propid};
         next unless $p;
         $hashref->{$jtalkid}->{$p->{'name'}} = $value;
     }
+
     foreach my $id (keys %need) {
         LJ::MemCache::set([$userid,"talkprop:$userid:$id"], $hashref->{$id} || {});
     }
+
     return $hashref;
 }
 

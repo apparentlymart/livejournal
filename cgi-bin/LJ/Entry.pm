@@ -351,14 +351,14 @@ sub absorb_row {
 # @entries - array of LJ::Entry objects
 #
 # See also instance method '_load_props'
-# 
+#
 sub preload_props {
     my ($class, $entlist) = @_;
-    
-    ## %needed_to_load: userid --> [LJ::Entry, LJ::Entry, ... ] 
+
+    ## %needed_to_load: userid --> [LJ::Entry, LJ::Entry, ... ]
     ## %users:          userid --> LJ::User
-    my (%needed_to_load, %users); 
-    
+    my (%needed_to_load, %users);
+
     foreach my $en (@$entlist) {
         next if $en->{_loaded_props};
         my $u = $en->{u};
@@ -850,7 +850,7 @@ sub event_html
     $opts->{journalid} = $self->journalid;
     $opts->{posterid} = $self->posterid;
     $opts->{entry_url} = $self->prop('reposted_from') || $self->url;
-    
+
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};
     LJ::CleanHTML::clean_event(\$event, $opts);
@@ -930,7 +930,7 @@ sub visible_to
         my $poster = $self->poster;
         return 0 if $poster->{statusvis} eq 'S';
 
-        # if poster choosed to delete jouranl and all external content, 
+        # if poster choosed to delete jouranl and all external content,
         # then don't show his/her entries, except in some protected journals like 'lj_core'
         if ($poster->{statusvis} eq 'D') {
             my ($purge_comments, $purge_community_entries) = split /:/, $poster->prop("purge_external_content");
@@ -1398,7 +1398,7 @@ sub get_suspended_mark {
 ## returns 'yes' if entry is ads-eligible (there are no offensive terms etc), and 'no' otherwise
 sub check_for_negative_terms {
     my $self = shift;
-    
+
     my $tags = $self->prop('personifi_tags');
     return $1 if $tags =~ /nterms:(\w+)/;
     my $nterms = ( ($self->subject_raw . ' '. $self->event_raw) =~ /($LJ::NEGATIVE_TERMS)/) ?'no':'yes';
@@ -1480,20 +1480,25 @@ sub _get_posts_raw_wrapper {
     my ($idsbyc, $type, $ret) = @_;
 
     my $opts = {};
+
     if ($type eq 'text') {
         $opts->{text_only} = 1;
-    } elsif ($type eq 'prop') {
+    }
+    elsif ($type eq 'prop') {
         $opts->{prop_only} = 1;
-    } else {
+    }
+    else {
         return undef;
     }
 
     my @postids;
+
     while (my ($cid, $ids) = each %$idsbyc) {
         foreach my $pair (@$ids) {
             push @postids, [ $cid, $pair->[0], $pair->[1] ];
         }
     }
+
     my $rawposts = LJ::get_posts_raw($opts, @postids);
 
     # add replycounts fields to props
@@ -1505,10 +1510,12 @@ sub _get_posts_raw_wrapper {
 
     # translate colon-separated (new) to space-separated (old) keys.
     $ret ||= {};
+
     while (my ($id, $data) = each %{$rawposts->{$type}}) {
         $id =~ s/:/ /;
         $ret->{$id} = $data;
     }
+
     return $ret;
 }
 
@@ -1646,17 +1653,21 @@ sub get_posts_raw
         my $fetchprop = sub {
             my $db = shift;
             return unless %$cneedprop;
+
             my $in = $make_in->(keys %$cneedprop);
             $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
                                 "FROM logprop2 WHERE $in");
             $sth->execute;
             my %gotid;
+
             while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
                 my $id = "$jid:$jitemid";
-                my $propname = $LJ::CACHE_PROPID{'log'}->{$propid}{name};
+                LJ::load_props('log') unless defined LJ::MemCache::get('CACHE_PROPID');
+                my $propname = LJ::MemCache::get('CACHE_PROPID')->{'log'}->{$propid}{name};
                 $ret->{prop}{$id}{$propname} = $value;
                 $gotid{$id} = 1;
             }
+
             foreach my $id (keys %gotid) {
                 my ($jid, $jitemid) = map { $_ + 0 } split(/:/, $id);
                 LJ::MemCache::add([$jid, "logprop:$id"], $ret->{prop}{$id});
@@ -2218,10 +2229,12 @@ sub load_log_props2 {
         }
     }
 
+    # move reply count to props hash
     foreach ( keys %rc ) {
         $hashref->{$_}{'replycount'} = $rc{$_};
     }
 
+    # return if all props loaded from memcached
     return unless %needprops || %needrc;
 
     unless ( $db ) {
@@ -2230,6 +2243,7 @@ sub load_log_props2 {
         return unless $db;
     }
 
+    # if not all props loaded
     if ( %needprops ) {
         LJ::load_props("log");
         my $in = join(",", keys %needprops);
@@ -2237,19 +2251,23 @@ sub load_log_props2 {
                                  "WHERE journalid=? AND jitemid IN ($in)");
         $sth->execute($userid);
 
+        my $propid = LJ::MemCache::get('CACHE_PROPID')->{'log'};
+
         while (my ($jitemid, $propid, $value) = $sth->fetchrow_array) {
-            $hashref->{$jitemid}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+            $hashref->{$jitemid}->{ $propid->{$propid}->{'name'} } = $value;
         }
 
         foreach my $id (keys %needprops) {
-            LJ::MemCache::set([$userid,"logprop:$userid:$id"], $hashref->{$id} || {});
-          }
+            LJ::MemCache::set([$userid, "logprop:$userid:$id"], $hashref->{$id} || {});
+        }
     }
 
+    # if not all reply counts loaded
     if (%needrc) {
         my $in = join(",", keys %needrc);
         my $sth = $db->prepare("SELECT jitemid, replycount FROM log2 WHERE journalid=? AND jitemid IN ($in)");
         $sth->execute($userid);
+
         while (my ($jitemid, $rc) = $sth->fetchrow_array) {
             $hashref->{$jitemid}->{'replycount'} = $rc;
             LJ::MemCache::add(LJ::Entry::reply_count_memkey($userid, $jitemid), $rc);
@@ -2420,9 +2438,9 @@ sub replycount_do {
     my ($u, $jitemid, $action, $value) = @_;
 
     # check action name
-    die "unknown action: $action" 
+    die "unknown action: $action"
         unless $action =~ /^(init)|(incr)|(decr)$/;
-    
+
     $value = 1 unless defined $value;
     my $uid = $u->{'userid'};
     my $memkey = LJ::Entry::reply_count_memkey($uid, $jitemid);
@@ -2434,19 +2452,19 @@ sub replycount_do {
     }
 
     return 0 unless $u->writer;
-    
+
     ##
     my $update_memc = $action eq 'decr'
             ? sub { LJ::MemCache::decr($memkey, $value) }
             : sub { LJ::MemCache::incr($memkey, $value) };
-    
+
     my $entry = LJ::Entry->new( $u, 'jitemid' => $jitemid );
     LJ::run_hooks( 'replycount_change', $entry );
 
     ##
     my $sql_sign = $action eq 'decr' ? '-' : '+';
     my $sql = "UPDATE log2 SET replycount=LAST_INSERT_ID(replycount $sql_sign $value) WHERE journalid=? AND jitemid=?";
-    
+
     unless ( LJ::MemCache::can_gets() ){
     # used Cache::Memcached driver that does not support 'gets' and 'cas' commands
         $u->selectrow_array("SELECT GET_LOCK(?,10)", undef, $memkey);
@@ -2461,7 +2479,7 @@ sub replycount_do {
         }
 
         $u->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $memkey);
-    
+
     } else {
     # used Cache::Memcached::Fast
 
@@ -2469,7 +2487,7 @@ sub replycount_do {
         LJ::run_hooks('report_entry_update', $uid, $jitemid);
         $u->do($sql, undef, $uid, $jitemid);
         if (@LJ::MEMCACHE_SERVERS and not defined $ret) {
-            ## Lock free update 
+            ## Lock free update
             my $max_loops = 100; # prevent infinite loop
             while ($max_loops--){
                 my $gets = LJ::MemCache::gets($memkey); # get [cas, $val]
@@ -2495,24 +2513,26 @@ sub replyspamcount_do {
     my ($u, $jitemid, $action, $value) = @_;
 
     # check action name
-    die "unknown action: $action" 
+    die "unknown action: $action"
         unless $action =~ /^(init)|(incr)|(decr)$/;
-    
+
     return 0 unless $value;
-    
+
     my $entry = LJ::Entry->new( $u, 'jitemid' => $jitemid );
     my $spam_counter = $entry->prop('spam_counter') || 0;
-    
+
     if ($action eq 'init') {
         $entry->set_prop('spam_counter', 0);
         return 1;
-    } elsif ($action eq 'decr') {
+    }
+    elsif ($action eq 'decr') {
         return 0 if $spam_counter - $value < 0;
         $entry->set_prop('spam_counter', $spam_counter - $value);
-    } elsif ($action eq 'incr') {
+    }
+    elsif ($action eq 'incr') {
         $entry->set_prop('spam_counter', $spam_counter + $value);
     }
-    
+
     return 1;
 }
 
