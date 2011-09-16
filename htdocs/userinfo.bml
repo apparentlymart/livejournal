@@ -1596,7 +1596,6 @@
         $apps .= '<ul class="b-app-user-list">';
         $apps .= join("", @userapps);
         $apps .= '</ul>';
-        $apps .= '<div class="hr"><hr /></div>';
         $apps .= LJ::Widget::ApplicationsViewsLayout->render(view_id => 'PROFILE', owner => $u, viewer => $remote, GET => \%GET);
 
         if (scalar @activities) {
@@ -1646,7 +1645,8 @@ head<=
        'js/ljwidget.js',
        'js/ljwidget_ippu.js',
        'js/widget_ippu/vgiftsmspay.js',
-       'js/inputcomplete.js'
+       'js/inputcomplete.js',
+       'stc/widgets/applicationsviewslayout.css'
 
     );
     return $head;
