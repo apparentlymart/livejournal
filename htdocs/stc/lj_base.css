@@ -93,6 +93,20 @@ div.lj_ippu {
 	border: 2px solid #444;
 	padding: 2px;
 }
+.b-btn-tokens {
+	margin: 30px 0 0;
+	padding: 10px 6px 7px;
+    text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
+	border-color: #025266;
+	background: -moz-linear-gradient(top, #6ed6e5 0%, #1bbbd2 14%, #1bb2c8 37%, #1ba4b8 66%, #1b9eb1 83%, #1495a7 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#6ed6e5), color-stop(14%,#1bbbd2), color-stop(37%,#1bb2c8), color-stop(66%,#1ba4b8), color-stop(83%,#1b9eb1), color-stop(100%,#1495a7));
+	background: -webkit-linear-gradient(top, #6ed6e5 0%,#1bbbd2 14%,#1bb2c8 37%,#1ba4b8 66%,#1b9eb1 83%,#1495a7 100%);
+	background: -o-linear-gradient(top, #6ed6e5 0%,#1bbbd2 14%,#1bb2c8 37%,#1ba4b8 66%,#1b9eb1 83%,#1495a7 100%);
+	background: -ms-linear-gradient(top, #6ed6e5 0%,#1bbbd2 14%,#1bb2c8 37%,#1ba4b8 66%,#1b9eb1 83%,#1495a7 100%);
+	background: linear-gradient(top, #6ed6e5 0%,#1bbbd2 14%,#1bb2c8 37%,#1ba4b8 66%,#1b9eb1 83%,#1495a7 100%);
+	background-color: #1495A7;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6ed6e5', endColorstr='#1495a7',GradientType=0 );
+	}
 
 div.lj_ippu_titlebar {
 	background-color: #444;
