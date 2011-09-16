@@ -360,7 +360,7 @@
 				}
 				var body = editor.document.getBody();
 				var last = body.$.lastChild;
-				if (last && last.nodeType == 1 && last.nodeName.toLowerCase() != 'br') {
+				if (!last || last.nodeType != 1 || last.nodeName.toLowerCase() != 'br') {
 					body.appendHtml('<br />');
 				}
 			}
@@ -778,7 +778,8 @@
 							selection.lock();
 							for (var i = 0, l = ranges.length; i < l; i++) {
 								var range = ranges[i];
-								range.extractContents().appendTo(ljNoteData.LJCut.node);
+								range.cloneContents().appendTo(ljNoteData.LJCut.node);
+								range.deleteContents();
 							}
 							selection.unlock();
 							editor.insertElement(ljNoteData.LJCut.node);
