@@ -12,6 +12,7 @@ body<=
 
     my $remote = LJ::get_remote();
     my $is_admin = LJ::check_priv($remote, "canview", "entryprops");
+
     return BML::redirect("$LJ::SITEROOT/editjournal.bml")
         unless $is_admin || $LJ::IS_DEV_SERVER;
 
@@ -23,25 +24,30 @@ body<=
     $ret .= "<?hr?>";
 
     my $entry = LJ::Entry->new_from_url($GET{url});
+
     unless ($entry && $entry->valid) {
         $ret .= LJ::error_list("$POST{url} is not a valid entry URL.") if LJ::did_post();
         return $ret;
     }
 
-    # WE HAEV ENTRY!!
+    # WE HAVE ENTRY!!
 
     my $subject;
-    if ($entry->visible_to($remote)) {
+
+    if ( $entry->visible_to($remote) ) {
         $subject = $entry->subject_html ? $entry->subject_html : "<em>no subject</em>";
-    } else {
+    }
+    else {
         $subject = "<em>hidden</em>";
     }
 
     my $security = $entry->security;
-    if ($security eq "usemask") {
-        if ($entry->allowmask == 1) {
+
+    if ( $security eq "usemask" ) {
+        if ( $entry->allowmask == 1 ) {
             $security = "friends";
-        } else {
+        }
+        else {
             $security = "custom";
         }
     }
@@ -63,10 +69,13 @@ body<=
     return $ret unless %props;
 
     $ret .= "<ul>";
+
     foreach my $prop (sort keys %props) {
         my $extra = "";
-        if (my $p = LJ::get_prop("log", $prop)) {
+
+        if ( my $p = LJ::get_prop("log", $prop) ) {
             $extra = "<br /><small>$p->{des}</small>";
+
             # an ugly hack, i know
             $props{$prop} = LJ::TimeUtil->mysql_time($props{$prop}) if $p->{des} =~ /unix/i;
         }
