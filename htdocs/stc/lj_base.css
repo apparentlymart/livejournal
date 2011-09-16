@@ -74,6 +74,7 @@ form {
 	text-shadow: 1px 1px 1px #0B6294;
 	font-size: 14px;
 	font-weight: bold;
+	cursor: pointer;
 	color: #FFF;
 	}
 .b-btn-disabled {
