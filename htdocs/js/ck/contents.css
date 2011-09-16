@@ -61,9 +61,11 @@ lj|wishlist {
 
 lj\:raw {
 	border: #000000 1px dotted;
+	display:block;
 }
 lj|raw {
 	border: #000000 1px dotted;
+	display: block;
 }
 
 lj\:cut {

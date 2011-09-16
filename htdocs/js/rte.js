@@ -128,7 +128,11 @@
 
 					$('#updateForm')[0].onsubmit = function() {
 						if (window.switchedRteOn) {
-							draftData.textArea.val(CKEditor.getData().replace(/(\r|\n)/g, '')); //we remove all newlines
+							var data = CKEditor.getData();
+							if($('#event_format')[0].checked){
+								data = data.replace(/(\r|\n)/g, '');
+							}
+							draftData.textArea.val(data);
 						}
 					};
 
