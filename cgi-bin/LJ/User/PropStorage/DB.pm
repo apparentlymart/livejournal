@@ -15,7 +15,6 @@ sub fetch_props_db {
     LJ::load_props('user');
 
     my @propids;
-
     foreach my $k (@$props) {
         my $propinfo = LJ::get_prop('user', $k);
         my $propid   = $propinfo->{'id'};
@@ -23,20 +22,17 @@ sub fetch_props_db {
         push @propids, $propid;
     }
 
-    LJ::load_props('user') unless defined LJ::MemCache::get('CACHE_PROPID');
-    my %propid_map = %{ LJ::MemCache::get('CACHE_PROPID')->{'user'} };
+    my %propid_map = %{ $LJ::CACHE_PROPID{'user'} };
 
     my %ret = map { $_ => undef } @$props;
     my $sql;
-
     if ( my $propids_in = join(',', @propids) ) {
         $sql = qq{
             SELECT upropid, value
             FROM $table
             WHERE userid=? AND upropid IN ($propids_in)
         };
-    }
-    else {
+    } else {
         # well, it seems that they didn't pass us any props, so
         # let's use a somewhat different SQL query to load everything
         # from the given table

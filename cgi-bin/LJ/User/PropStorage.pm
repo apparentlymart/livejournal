@@ -137,8 +137,7 @@ sub unpack_from_memcache {
     my %ret;
 
     foreach my $propid (keys %$packed) {
-        LJ::load_props('user') unless defined LJ::MemCache::get('CACHE_PROPID');
-        my $propname = LJ::MemCache::get('CACHE_PROPID')->{'user'}->{$propid}->{'name'};
+        my $propname = $LJ::CACHE_PROPID{'user'}->{$propid}->{'name'};
         next unless defined $propname;
         $ret{$propname} = $packed->{$propid};
     }
