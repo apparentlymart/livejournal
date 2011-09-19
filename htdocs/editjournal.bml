@@ -148,7 +148,7 @@ body<=
             }
             $ret .= "</a></h2>";
             my ($year, $mon, $mday, $hour, $min) = split(/\D/, LJ::TimeUtil->alldatepart_s2($entry->{'eventtime'}));
-            my $monthlong = LJ::Lang::month_long($mon);
+            my $monthlong = BML::ml(LJ::Lang::month_long_langcode($mon));
             $ret .= "<p class='date'>" . $poster . " $monthlong $mday, $year, $hour:$min" . "</p>";
 
             my $event = LJ::ehtml(LJ::durl($entry->event_raw));
