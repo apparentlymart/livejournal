@@ -335,7 +335,19 @@ sub getpoll
 
     if($mode =~ /answers|all/ && $poll->can_view($u)) {
         foreach my $question (@questions) {
-            my @answers = map { delete $_->{pollqid}; $_ } $question->answers;
+            my @answers = map {     my $user = LJ::load_userid($_->{userid});
+                                    if ($user) {
+                                        $_->{'username'} = $user->username;
+                                        if ($user->identity) {
+                                            my $i = $user->identity;
+                                            $_->{'identity_type'}    = $i->pretty_type;
+                                            $_->{'identity_value'}   = $i->value;
+                                            $_->{'identity_url'}     = $i->url($user);
+                                            $_->{'identity_display'} = $user->display_name;
+                                        }
+                                    }
+                                    $_;
+                                } map { delete $_->{pollqid}; $_ } $question->answers;
             @{$res->{answers}{$question->pollqid}} = @answers;
         }
     }
