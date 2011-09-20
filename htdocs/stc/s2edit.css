@@ -152,7 +152,7 @@ div.output {
 div.divider {
 	padding: 0px;
 	background-color: #b0b0b0;
-	background-image: url(/img/s2edit/knob.gif?v=1);
+	background-image: url(/img/s2edit/knob.gif?v=5411);
 	background-position: center;
 	background-repeat: no-repeat;
 }
@@ -205,7 +205,7 @@ a:hover {
 }
 
 .treenode {
-	background-image: url(/img/s2edit/disclosure-closed.gif?v=1);
+	background-image: url(/img/s2edit/disclosure-closed.gif?v=5411);
 	background-position: 0px 3px;
 	background-repeat: no-repeat;
 	padding: 0px 0px 0px 12px;
@@ -213,7 +213,7 @@ a:hover {
 }
 
 .treenodeopen {
-	background-image: url(/img/s2edit/disclosure-open.gif?v=1);
+	background-image: url(/img/s2edit/disclosure-open.gif?v=5411);
 	background-position: 0px 3px;
 	background-repeat: no-repeat;
 	padding: 0px 0px 0px 12px;
@@ -221,7 +221,7 @@ a:hover {
 }
 
 .treevar, .navvar {
-	background-image: url(/img/s2edit/icon-var.gif?v=1);
+	background-image: url(/img/s2edit/icon-var.gif?v=5411);
 	background-position: 0px 3px;
 	background-repeat: no-repeat;
 }
@@ -237,19 +237,19 @@ a:hover {
 }
 
 .treemethod, .navmethod {
-	background-image: url(/img/s2edit/icon-method.gif?v=1);
+	background-image: url(/img/s2edit/icon-method.gif?v=5411);
 	background-position: 0px 3px;
 	background-repeat: no-repeat;
 }
 
 .treefunction, .navfunction {
-	background-image: url(/img/s2edit/icon-function.gif?v=1);
+	background-image: url(/img/s2edit/icon-function.gif?v=5411);
 	background-position: 0px 3px;
 	background-repeat: no-repeat;
 }
 
 .treeproperty {
-	background-image: url(/img/s2edit/icon-property.gif?v=1);
+	background-image: url(/img/s2edit/icon-property.gif?v=5411);
 	background-position: 0px 3px;
 	background-repeat: no-repeat;
 }
@@ -260,7 +260,7 @@ a:hover {
 }
 
 .navpropgroup {
-	background-image: url(/img/s2edit/icon-propgroup.gif?v=1);
+	background-image: url(/img/s2edit/icon-propgroup.gif?v=5411);
 	background-position: 0px 3px;
 	background-repeat: no-repeat;
 	padding: 0px 0px 0px 12px;

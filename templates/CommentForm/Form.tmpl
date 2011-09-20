@@ -28,14 +28,14 @@
                     <div class="b-postform-login-item b-postform-login-ljedit">
                         <TMPL_IF remote_banned>
                             <div class="b-postform-login-opts">
-                                <img src="<TMPL_VAR lj_imgprefix>/userinfo.gif" class="b-postform-login-img" />
+                                <img src="<TMPL_VAR lj_imgprefix>/userinfo.gif?v=7355" class="b-postform-login-img" />
                                 <TMPL_VAR ml_loggedin>
                                 <TMPL_VAR ml_banned>
                             </div>
                         <TMPL_ELSE>
                             <span class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></span>
                             <div class="b-postform-login-opts">
-                                <img src="<TMPL_VAR lj_imgprefix>/userinfo.gif" class="b-postform-login-img" />
+                                <img src="<TMPL_VAR lj_imgprefix>/userinfo.gif?v=7355" class="b-postform-login-img" />
                                 <TMPL_VAR ml_loggedin>
                                 <input type="hidden" name="usertype" value="cookieuser" />
                                 <input type="hidden" name="cookieuser" value="<TMPL_VAR remote_username>" id="cookieuser" />
@@ -76,7 +76,7 @@
         <TMPL_IF 0> subject icon </TMPL_IF>
         <input type='hidden' id='subjectIconField' name='subjecticon' value='<TMPL_VAR subjicon>'>
         <TMPL_IF subjicon_none>
-            <img src='<TMPL_VAR lj_imgprefix>/talk/none.gif' border='0' width='15' height='15' valign='middle' id='subjectIconImage' style='cursor:pointer;cursor:hand' align='absmiddle' onclick='subjectIconListToggle();' title='Click to change the subject icon' />
+            <img src='<TMPL_VAR lj_imgprefix>/talk/none.gif?v=2277' border='0' width='15' height='15' valign='middle' id='subjectIconImage' style='cursor:pointer;cursor:hand' align='absmiddle' onclick='subjectIconListToggle();' title='Click to change the subject icon' />
         <TMPL_ELSE>
             <img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_current_img>' border='0' width='<TMPL_VAR subjicon_current_w>' height='<TMPL_VAR subjicon_current_h>' valign='middle' id='subjectIconImage' onclick='subjectIconListToggle();' style='cursor:pointer;cursor:hand' />
         </TMPL_IF>
@@ -84,7 +84,7 @@
             <ul class="b-subjecticons-items">
                 <TMPL_LOOP subjicon_types>
                     <TMPL_IF __first__>
-                        <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/none.gif' border='0' width='15' height='15' id='none' title='No subject icon' onclick="subjectIconChange(this);" /></li>
+                        <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/none.gif?v=2277' border='0' width='15' height='15' id='none' title='No subject icon' onclick="subjectIconChange(this);" /></li>
                     </TMPL_IF>
                     <TMPL_LOOP subjicons>
                         <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_img>' border='0' width='<TMPL_VAR subjicon_w>' height='<TMPL_VAR subjicon_h>' id='<TMPL_VAR subjicon_id>' onclick="subjectIconChange(this);" /></li>

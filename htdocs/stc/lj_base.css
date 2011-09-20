@@ -30,7 +30,7 @@ form {
 }
 
 .lj_progressindefinite {
-	background-image: url(/img/progress/barber.gif?v=1);
+	background-image: url(/img/progress/barber.gif?v=6460);
 }
 
 .lj_hourglass {
@@ -207,7 +207,7 @@ IFRAME.lj_embedcontent {
 }
 
 .warning-background {
-	background-image: url('/img/message-warning.gif?v=1');
+	background-image: url(/img/message-warning.gif?v=4888);
 }
 
 .lj_invisible {
@@ -359,7 +359,7 @@ Must be removed after implementation of Framework! */
 	margin: 0 0 24px !important;
 	border: 1px solid #F99;
 	background-color: #FEE;
-	background-image: url(/img/message-error.gif?v=1);
+	background-image: url(/img/message-error.gif?v=4888);
 	background-image: -moz-linear-gradient(100% 100% 90deg, #FED4D3, #FFF2F0);
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FFF2F0), to(#FED4D3));
 	}
@@ -1303,7 +1303,7 @@ HTML BODY.logged-out {
 				-moz-border-radius: 3px !important;
 				border-radius: 3px !important;
 				background-color: transparent;
-				background-image: url(/img/pencil.gif?v=1);
+				background-image: url(/img/pencil.gif?v=2135);
 				background-repeat: no-repeat;
 				background-position: 6px 1px;
 				}
@@ -1311,7 +1311,7 @@ HTML BODY.logged-out {
 				left: 1px;
 				}
 			.b-postform-authtype-anonymous .b-postform-login-services-current-pic {
-				background-image: url(/img/anonymous.gif?v=1);
+				background-image: url(/img/anonymous.gif?v=5110);
 				}
 			.b-postform-authtype-livejournal .b-postform-login-services-current-pic,
 			.b-postform-authtype-anonymous.b-postform-ability-disabled-anonymous .b-postform-login-services-current-pic,
@@ -1322,28 +1322,28 @@ HTML BODY.logged-out {
 			.b-postform-authtype-mailru.b-postform-ability-disabled-mailru .b-postform-login-services-current-pic,
 			.b-postform-authtype-vkontakte.b-postform-ability-disabled-vkontakte .b-postform-login-services-current-pic,
 			.b-postform-authtype-user.b-postform-ability-disabled-anonymous.b-postform-ability-disabled-user .b-postform-login-services-current-pic {
-				background-image: url(/img/pencil.gif?v=1);
+				background-image: url(/img/pencil.gif?v=2135);
 				}
 			.b-postform-authtype-user .b-postform-login-services-current-pic {
-				background-image: url(/img/userinfo.gif?v=1);
+				background-image: url(/img/userinfo.gif?v=7355);
 				}
 			.b-postform-authtype-facebook .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/facebook-16.gif?v=1);
+				background-image: url(/img/icons/facebook-16.gif?v=17127);
 				}
 			.b-postform-authtype-twitter .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/twitter-16.gif?v=3);
+				background-image: url(/img/icons/twitter-16.gif?v=18540);
 				}
 			.b-postform-authtype-google .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/google-16.png?v=1);
+				background-image: url(/img/icons/google-16.png?v=12457);
 				}
 			.b-postform-authtype-openid .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/openid-16.gif?v=1);
+				background-image: url(/img/icons/openid-16.gif?v=17127);
 				}
 			.b-postform-authtype-mailru .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/mailru-16.gif?v=3);
+				background-image: url(/img/icons/mailru-16.gif?v=11910);
 				}
 			.b-postform-authtype-vkontakte .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/vkontakte-16.gif?v=1);
+				background-image: url(/img/icons/vkontakte-16.gif?v=10284);
 				}
 		.b-postform-login-services-items {
 			position: absolute;
@@ -1726,7 +1726,7 @@ HTML BODY.logged-out {
 			width: 16px;
 			height: 16px;
 			margin: -9px 0 0 0;
-			background-image: url(/img/icons/smsn.gif?v=1);
+			background-image: url(/img/icons/smsn.gif?v=9361);
 			background-repeat: no-repeat;
 			background-position: 0 -800px;
 			}
@@ -1990,7 +1990,7 @@ HTML BODY.logged-out {
 			margin: 0;
 			padding: 0;
 			vertical-align: -4px;
-			background-image: url(/img/arrow-spotlight.gif?v=1);
+			background-image: url(/img/arrow-spotlight.gif?v=16423);
 			background-repeat: no-repeat;
 			font: 0/0 serif;
 			cursor: pointer;
@@ -2188,7 +2188,7 @@ DIV.lj_ippu_app {
 			height: 16px;
 			padding: 0;
 			vertical-align: -4px;
-			background-image: url(/img/arrow-spotlight.gif?v=1);
+			background-image: url(/img/arrow-spotlight.gif?v=16423);
 			background-repeat: no-repeat;
 			font: 0/0 serif;
 			cursor: pointer;
@@ -2634,7 +2634,7 @@ DIV.lj_ippu_app {
  		position: absolute;
 		border: 0;
  		font: 0/0 serif;
-		background-image: url(/img/popup-arr.gif?v=1);
+		background-image: url(/img/popup-arr.gif?v=10883);
 		background-repeat: no-repeat;
  		}
  	.b-ljtimes-update .i-popup-arrt,
@@ -2902,7 +2902,7 @@ DIV.lj_ippu_app {
 				-moz-border-radius: 3px;
 				border-radius: 3px;
 				background-color: #FFF;
-				background-image: url(/img/icons/sharethis.gif?v=3);
+				background-image: url(/img/icons/sharethis.gif?v=11484);
 				background-position: 0 0;
 				background-repeat: no-repeat;
 				}
@@ -3161,7 +3161,7 @@ A.lj-button-link:active {
 	color: #222!important;
 	}
 .lj-button-light.donate-button.embed-button A .lj-button-icon {
-	background-image:url(/img/icons/donate.png)!important;
+	background-image: url(/img/icons/donate.png?v=12515)!important;
 	}
 .lj-button-light.donate-button.embed-button .lj-button-b {
 	color: #999!important;

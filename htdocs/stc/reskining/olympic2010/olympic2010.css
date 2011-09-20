@@ -36,13 +36,13 @@
 	background:none;
 	} 
 #header .themes .cur {
-    background-image:url(/img/reskining/olympic2010/olympic2010-l.gif?v=1);
+    background-image: url(/img/reskining/olympic2010/olympic2010-l.gif?v=16223);
     }
 #header .themes .cur SPAN {
-    background-image:url(/img/reskining/olympic2010/olympic2010-r.gif?v=1);
+    background-image: url(/img/reskining/olympic2010/olympic2010-r.gif?v=16223);
     }
 #header .themes .next {
-    background-image:url(/img/reskining/olympic2010/olympic2010-next.png?v=1);
+    background-image: url(/img/reskining/olympic2010/olympic2010-next.png?v=16223);
     }
 * HTML #header .themes .next {
     background-image:none;

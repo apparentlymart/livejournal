@@ -32,7 +32,7 @@ TABLE TD {
 .cke_skin_v2 .cke_dialog_bl,
 .cke_skin_v2 .cke_dialog_br,
 .cke_skin_v2 .cke_dialog_bc {
-/*	background-image:url(images/sprites-grey.png);
+/*	background-image: url(images/sprites-grey.png?v=13711);
 	background-repeat:no-repeat;*/
 	position:absolute;
 	_z-index:-1;
@@ -95,7 +95,7 @@ TABLE TD {
 	}
 .cke_skin_v2 .cke_dialog_ml,
 .cke_skin_v2 .cke_dialog_mr {
-/*	background-image:url(images/dialog_sides-grey.png);
+/*	background-image: url(images/dialog_sides-grey.png?v=13711);
 	background-repeat:repeat-y;*/
 	position:absolute;
 	width:16px;
@@ -105,8 +105,8 @@ TABLE TD {
 	}
 .cke_skin_v2 .cke_rtl .cke_dialog_ml,
 .cke_skin_v2 .cke_rtl .cke_dialog_mr {
-	background-image:url(images/dialog_sides_rtl.png);
-	_background-image:url(images/dialog_sides.gif);
+	background-image: url(images/dialog_sides_rtl.png?v=19384);
+	_background-image: url(images/dialog_sides.gif?v=19384);
 	}
 .cke_skin_v2 .cke_dialog_ml {
 	background-position:0 0;
@@ -366,7 +366,7 @@ TABLE TD {
 .cke_skin_v2 a:hover.cke_dialog_close_button,
 .cke_skin_v2 .cke_browser_ie6 a.cke_dialog_close_button,
 .cke_skin_v2 .cke_browser_ie6 a:hover.cke_dialog_close_button {
-	background-image:url(images/sprites.png);
+	background-image: url(images/sprites.png?v=19384);
 	background-repeat:no-repeat;
 	background-position:-16px -651px;
 	position:absolute;
@@ -375,7 +375,7 @@ TABLE TD {
 	height:20px;
 	width:20px;
 	top:5px;
-	_background-image:url(images/sprites_ie6.png);
+	_background-image: url(images/sprites_ie6.png?v=19384);
 	}
 	
 .cke_skin_v2 a.cke_dialog_close_button span {
@@ -430,7 +430,7 @@ TABLE TD {
 .cke_skin_v2 .cke_dialog a.cke_btn_reset {
 	float:right;
 	background-position:0 -32px;
-	background-image:url(images/mini.gif);
+	background-image: url(images/mini.gif?v=19384);
 	width:16px;
 	height:16px;
 	background-repeat:no-repeat;
@@ -444,7 +444,7 @@ TABLE TD {
 .cke_skin_v2 .cke_dialog a.cke_btn_unlocked {
 	float:left;
 	background-position:0 0;
-	background-image:url(images/mini.gif);
+	background-image: url(images/mini.gif?v=19384);
 	width:16px;
 	height:16px;
 	background-repeat:no-repeat;
@@ -460,7 +460,7 @@ TABLE TD {
 	}
 .cke_skin_v2 .cke_dialog a.cke_btn_unlocked {
 	background-position:0 -16px;
-	background-image:url(images/mini.gif);
+	background-image: url(images/mini.gif?v=19384);
 	}
 .cke_skin_v2 .cke_dialog .cke_btn_over {
 	border:outset 1px;

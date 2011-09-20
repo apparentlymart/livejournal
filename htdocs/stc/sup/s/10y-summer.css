@@ -41,10 +41,10 @@ A:link:hover, A:link:active, A:visited:hover, A:visited:active {
 	}
 
 #page .btn {
-	background-image:url(/sup/i/x-1-1.png?v=1);
+	background-image: url(/sup/i/x-1-1.png?v=7503);
 	}
 #page .btn SPAN {
-	background-image:url(/sup/i/x-1-1.png?v=1);
+	background-image: url(/sup/i/x-1-1.png?v=7503);
 	}
 
 #page .btn-add, #page .btn-rss {
@@ -324,7 +324,7 @@ A:visited:hover, A:visited:active {
 	line-height:1;
 	}
 #page .nav .btn {
-	background-image:url(/sup/i/10y-summer/icons.png?v=1);
+	background-image: url(/sup/i/10y-summer/icons.png?v=15450);
 	background-repeat:no-repeat;
 	}
 #page .btn-add, #page .btn-rss {
