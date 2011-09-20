@@ -79,6 +79,9 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 .cke_skin_v2 span.cke_browser_gecko18 {
 	display:block;
 	}
+.cke_skin_v2 span.cke_browser_webkit {
+	outline: none;
+	}
 .cke_skin_v2 .cke_browser_opera .cke_editor {
 	display:table;
 	}
