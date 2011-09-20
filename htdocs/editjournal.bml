@@ -598,7 +598,7 @@ LIKE_FAQ
 
         # header
         $ret .= "<div class='b-editentries-header'>";
-        $ret .= "<h1>Edit journal entries</h1>";
+        $ret .= "<h1>$title</h1>";
 
         # edit form
 
