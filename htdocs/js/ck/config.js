@@ -33,6 +33,7 @@ CKEDITOR.editorConfig = function(config){
 		'pastefromword,' +
 		'specialchar,' +
 		'tab,' +
+		'table,' +
 		'toolbar,' +
 		'undo,' +
 		'wysiwygarea,';
