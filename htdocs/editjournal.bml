@@ -1,4 +1,6 @@
 <?page
+title=><?_code return $title; _code?>
+windowtitle=><?_ML .title _ML?>
 body<=
 <?_code
 {
@@ -734,7 +736,6 @@ _code?>
 </script>
 
 <=head
-title=><?_code return $title; _code?>
 page?><?_c <LJDEP>
 post: htdocs/editjournal.bml
 link: htdocs/lostinfo.bml
