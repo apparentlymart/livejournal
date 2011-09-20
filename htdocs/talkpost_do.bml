@@ -4,35 +4,6 @@
     use strict;
 
     our ( %ML, %GET, %POST, $title, $body );
-    my ( $status, $result, $answer, $redirected, $user_url );
-    my $need_captcha = 0;
-
-    my $restore_old = sub {
-        my $remote = LJ::get_remote();
-
-        # restore previous login
-        if ( $remote ) {
-            $remote->restore();
-        }
-    };
-
-    my $error = sub {
-        ( $status, $result ) = ( 'error', shift );
-        return $result;
-    };
-
-    my $redirect = sub {
-        ( $status, $result, $redirected ) = ( 'redirect', shift, 1 );
-        return $result;
-    };
-
-    my $error_bi = sub {
-        return LJ::bad_input( $error->(LJ::Lang::ml(shift)) )
-    };
-
-    my $ok = sub {
-        ( $status, $result ) = ( 'ok', shift );
-    };
 
     my @errors;
     my $skip_form_auth = 0;
@@ -40,421 +11,343 @@
     my $external_site_case = $POST{'is_form_embedded'};
     my $site_scheme_wrap = ! $external_site_case;
 
+    # indentation inside this subroutine is intentionally screwed
+    # to reduce the diff size ;-)
+    my $render_body = sub {
+
     # stupid hack to allow hotmail people to post, since hotmail changes
     # POST forms to GET.  this isn't a security problem (GET -> POST escalation)
     # since talklib.pl's LJ::Talk::Post::init checks for $POST{'ecphash'}
     # and requires it to be correct.  if it's not, the page fails.
-    %POST = %GET if $GET{'ecphash'};
+    if ($GET{'ecphash'}) {
+        %POST = %GET;
+    }
 
-    my $ajax = $POST{'json'} || 0;
-    my $render_body = sub {
-        if ($LJ::TALK_ABORT_REGEXP) {
-            my $tempbody = $POST{'body'};
-            LJ::CleanHTML::clean_comment(\$tempbody);
+    if ($LJ::TALK_ABORT_REGEXP) {
+        my $tempbody = $POST{'body'};
+        LJ::CleanHTML::clean_comment(\$tempbody);
+        return "" if $tempbody =~ /$LJ::TALK_ABORT_REGEXP/ || $POST{'body'} =~ /$LJ::TALK_ABORT_REGEXP/;
+    }
 
-            if ( $tempbody =~ /$LJ::TALK_ABORT_REGEXP/ || $POST{'body'} =~ /$LJ::TALK_ABORT_REGEXP/ ) {
-                ( $status, $result ) = ('error', 'stopword');
+    foreach my $re (@LJ::TALKSPAM) {
+        return if ($POST{'body'} =~ /$re/);
+    }
 
-                return "";
-            }
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+
+    LJ::Talk::resources_for_talkform();
+    
+    my $editid = $POST{editid};
+
+    # Set the title to be for an error, it will be changed later
+    # upon sucess
+    $title = $ML{'Error'};
+
+    # identities support
+    # identities are a bit of hackery but we'll check to make sure they're
+    # coming back from the identity server and then recreate their
+    # POST hash as if they never left.  Watch and see
+    if ($GET{'jid'} && $GET{'pendcid'}) {
+        # Restore their data to reset state where they were
+        my $pendcid = $GET{'pendcid'} + 0;
+
+        my $journalu = LJ::load_userid($GET{'jid'});
+        return LJ::bad_input("Unable to load user or get database handle") unless $journalu && $journalu->writer;
+
+        my $pending = $journalu->selectrow_array("SELECT data FROM pendcomments WHERE jid=? AND pendcid=?",
+                                                 undef, $journalu->{'userid'}, $pendcid);
+
+        return LJ::bad_input("Unable to load pending comment, maybe you took too long") unless $pending;
+
+        my $penddata = eval { Storable::thaw($pending) };
+
+        $skip_form_auth = 1;  # wouldn't have form auth at this point
+
+        %POST = %$penddata;
+
+        push @errors, "You chose to cancel your identity verification"
+            if $GET{'failed'};
+    }
+    # normally require POST.  if an ecphash is specified, we'll let
+    # them through since they're coming from a comment page and
+    # validate the hash later.
+    elsif (! LJ::did_post() && !$POST{'ecphash'}) {
+        return LJ::bad_input("Comment not posted: POST required, or missing parameter.");
+    }
+
+
+    # as an exception, we do NOT call LJ::text_in() to check for bad
+    # input, since it may be not in UTF-8 in replies coming from mail
+    # clients. We call it later.
+
+    my $remote_ip = LJ::get_remote_ip();
+    if (($POST{'usertype'} eq "anonymous" || $POST{'usertype'} eq "openid") && LJ::is_open_proxy($remote_ip)) {
+        return LJ::bad_input("Your IP address ($remote_ip) is detected as an open proxy (a common source of spam) so comment access is denied.  If you do not believe you're accessing the net through an open proxy, please contact your ISP or this site's tech support to help resolve the problem.");
+    }
+
+    my $remote = LJ::get_remote();
+    my $journalu = LJ::load_user($POST{journal});
+    return LJ::bad_input('Unknown journal.  Please go back and try again.') unless $journalu;
+
+    # FIXME: this isn't entirely correct, if ecphash is present but ignored/incorrect
+    # that fix would need to be done in talklib.pl
+    push @errors, $ML{'.error.invalidform'}
+        if $remote && ! ($skip_form_auth || $POST{'ecphash'} || LJ::check_form_auth());
+
+    ## preview
+    # ignore errors for previewing
+    if ($POST{'submitpreview'} || ($POST{'qr'} && $POST{'do_spellcheck'})) {
+        my $cookie_auth;
+        $cookie_auth = 1 if $POST{usertype} eq "cookieuser";
+        my $talkurl = LJ::journal_base($journalu) . "/$POST{itemid}.html";
+        $title = $ML{'.title.preview'};
+        return LJ::Talk::Post::make_preview($talkurl, $cookie_auth, \%POST);
+    }
+
+    my $entry = LJ::Entry->new( $journalu, ditemid => $POST{'itemid'} );
+
+    # various variables for the external site case
+    my ( $partner, $docid, $logcom_page );
+    if ( $external_site_case ) {
+        $partner
+            = LJ::PartnerSite->find_by_journal_username(
+                $journalu->username );
+
+        $docid = $partner->docid_from_entry($entry);
+
+        my $replyto = $POST{'replyto'}
+            ? int ( $POST{'replyto'} ) * 256 + $entry->anum
+            : 0;
+
+        $logcom_page =
+            "$LJ::SITEROOT/gadgets/logcom.bml?" .
+            'rsk=' . LJ::eurl($partner->api_key) . '&' .
+            'docid=' . LJ::eurl($docid) . '&' .
+            'domain=' . LJ::eurl( $POST{'partner_domain'} ) . '&' .
+            'replyto=' . $replyto;
+    }
+    # special case here (LJINT-408), only applies to the partners case:
+    #
+    # if the user got logged out after they opened the form, disabling them
+    # from commenting, we are going to redirect them back to the login form
+    {
+        if ( $external_site_case && !$remote ) {
+            return LJ::Request->redirect( $logcom_page );
         }
+    }
 
-        foreach my $re (@LJ::TALKSPAM) {
-            if ( $POST{'body'} =~ /$re/ ) {
-                ( $status, $result ) = ('error', 'spam');
+    ## init.  this handles all the error-checking, as well.
+    my $need_captcha = 0;
+    my $init = LJ::Talk::Post::init(\%POST, $remote, \$need_captcha, \@errors);
 
-                return;
-            }
-        }
+    return if LJ::Request->redirected;
+    # Report errors in a friendly manner by regenerating the field.
+    # Required for challenge/response login, since we also need to regenerate an auth token.
+    # We repopulate what we can via hidden fields - however the objects (journalu & parpost) must be recreated here.
 
-        return error( LJ::server_down_html() )
-            if $LJ::SERVER_DOWN;
+    # if the user leaving the comment hasn't agreed to the current TOS, and they
+    # didn't click the agreement checkbox, return the form back to them
+    my $require_tos = 0;
+    my $commentu = $init ? $init->{comment}->{u} : undef;
+    if ($init && ! $POST{agree_tos} && $commentu && ! $commentu->tosagree_verify) {
+        $require_tos = 1;
+    }
+    if (! $init || $require_tos) {
+        my ($sth, $parpost);
+        my $dbcr = LJ::get_cluster_def_reader($journalu);
+        return LJ::bad_input('No database connection present.  Please go back and try again.') unless $dbcr;
 
-        LJ::Talk::resources_for_talkform();
+        $sth = $dbcr->prepare("SELECT posterid, state FROM talk2 ".
+                              "WHERE journalid=? AND jtalkid=?");
+        $sth->execute($journalu->{userid}, int(($POST{itemid}+0)/256));
+        $parpost = $sth->fetchrow_hashref;
 
-        my $editid = $POST{editid};
+        $title = $ML{'.title.error'} unless $need_captcha;
 
-        # Set the title to be for an error, it will be changed later
-        # upon sucess
-        $title = $ML{'Error'};
+        $POST{replyto} = $POST{parenttalkid}+0 unless exists $POST{replyto};
+        $POST{edit} = $POST{editid}; # talkform expects the editid to be in "edit"
 
-        # identities support
-        # identities are a bit of hackery but we'll check to make sure they're
-        # coming back from the identity server and then recreate their
-        # POST hash as if they never left.  Watch and see
-        if ($GET{'jid'} && $GET{'pendcid'}) {
-            # Restore their data to reset state where they were
-            my $pendcid  = $GET{'pendcid'} + 0;
-            my $journalu = LJ::load_userid($GET{'jid'});
-
-            return $error_bi->('talkpostdo.bml.error.unable.to.load.user.or.get.database.handle')
-                unless $journalu && $journalu->writer;
-
-            my $pending = $journalu->selectrow_array("SELECT data FROM pendcomments WHERE jid=? AND pendcid=?",
-                                                     undef, $journalu->{'userid'}, $pendcid);
-
-            return $error_bi->('talkpostdo.bml.error.unable.to.load.pending.comment')
-                unless $pending;
-
-            my $penddata = eval { Storable::thaw($pending) };
-
-            # wouldn't have form auth at this point
-            $skip_form_auth = 1;
-
-            %POST = %$penddata;
-
-            if ( $GET{'failed'} ) {
-                push @errors, "You chose to cancel your identity verification";
-                return $error->($errors[-1]) if $ajax;
-            }
-        }
-        # normally require POST.  if an ecphash is specified, we'll let
-        # them through since they're coming from a comment page and
-        # validate the hash later.
-        elsif (! LJ::did_post() && !$POST{'ecphash'}) {
-            return $error_bi->('comment.not.posted.POST.required.or.missing.parameter');
-        }
-
-        # as an exception, we do NOT call LJ::text_in() to check for bad
-        # input, since it may be not in UTF-8 in replies coming from mail
-        # clients. We call it later.
-        my $remote_ip = LJ::get_remote_ip();
-
-        return $error_bi->('talkpostdo.bml.error.your.ip.address.is.detected.as.an.open.proxy')
-            if ($POST{'usertype'} eq "anonymous" || $POST{'usertype'} eq "openid") && LJ::is_open_proxy($remote_ip);
-
-        my $remote   = LJ::get_remote();
-        my $journalu = LJ::load_user($POST{journal});
-
-        return $error_bi->('talkpostdo.bml.error.unknown.journal')
-            unless $journalu;
-
-        # FIXME: this isn't entirely correct, if ecphash is present but ignored/incorrect
-        # that fix would need to be done in talklib.pl
-        if ( $remote && ! ($skip_form_auth || $POST{'ecphash'} || LJ::check_form_auth()) ) {
-            push @errors, $ML{'.error.invalidform'};
-            return $error->($errors[-1]) if $ajax;
-        }
-
-        $user_url = $journalu->journal_base;
-
-        ## preview
-        # ignore errors for previewing
-        if ($POST{'submitpreview'} || ($POST{'qr'} && $POST{'do_spellcheck'})) {
-            my $cookie_auth;
-            $cookie_auth = 1 if $POST{usertype} eq "cookieuser";
-            my $talkurl = $user_url . "/$POST{itemid}.html";
-            $title = $ML{'.title.preview'};
-
-            return LJ::Talk::Post::make_preview($talkurl, $cookie_auth, \%POST);
-        }
-
-        my $entry = LJ::Entry->new( $journalu, ditemid => $POST{'itemid'} );
-
-        # various variables for the external site case
-        my ( $partner, $docid, $logcom_page );
+        my $talkform_opts = {
+            'remote'            => $remote,
+            'journalu'          => $journalu,
+            'parpost'           => $parpost,
+            'replyto'           => $POST{replyto},
+            'ditemid'           => $POST{itemid},
+            'require_tos'       => $require_tos,
+            'do_captcha'        => $need_captcha,
+            'stylemine'         => $GET{'style'} eq "mine",
+            'errors'            => \@errors,
+            'form'              => \%POST,
+        };
 
         if ( $external_site_case ) {
-            $partner = LJ::PartnerSite->find_by_journal_username( $journalu->username );
+            $talkform_opts->{'embedable_form'} = 1;
 
-            $docid = $partner->docid_from_entry($entry);
-
-            my $replyto = $POST{'replyto'}
-                ? int ( $POST{'replyto'} ) * 256 + $entry->anum
-                : 0;
-
-            $logcom_page = "$LJ::SITEROOT/gadgets/logcom.bml?"
-                . 'rsk='     . LJ::eurl($partner->api_key)         . '&'
-                . 'docid='   . LJ::eurl($docid)                    . '&'
-                . 'domain='  . LJ::eurl( $POST{'partner_domain'} ) . '&'
-                . 'replyto=' . $replyto;
-        }
-
-        # special case here (LJINT-408), only applies to the partners case:
-        #
-        # if the user got logged out after they opened the form, disabling them
-        # from commenting, we are going to redirect them back to the login form
-        {
-            if ( $external_site_case && !$remote ) {
-                return $redirect->($logcom_page) if $ajax;
-
-                return BML::redirect( $logcom_page );
-            }
-        }
-
-        ## init.  this handles all the error-checking, as well.
-        my $init = LJ::Talk::Post::init(\%POST, $remote, \$need_captcha, \@errors);
-
-        return $error->($errors[-1]) if $ajax && int(@errors);
-        return if LJ::Request->redirected;
-
-        # Report errors in a friendly manner by regenerating the field.
-        # Required for challenge/response login, since we also need to regenerate an auth token.
-        # We repopulate what we can via hidden fields - however the objects (journalu & parpost) must be recreated here.
-
-        # if the user leaving the comment hasn't agreed to the current TOS, and they
-        # didn't click the agreement checkbox, return the form back to them
-        my $require_tos = 0;
-        my $commentu = $init ? $init->{comment}->{u} : undef;
-
-        if ($init && ! $POST{agree_tos} && $commentu && ! $commentu->tosagree_verify) {
-            $require_tos = 1;
-        }
-
-        if (! $init || $require_tos) {
-            # we will show form again with error message, so we need old user
-            $restore_old->();
-            $remote = LJ::get_remote();
-
-            my ($sth, $parpost);
-            my $dbcr = LJ::get_cluster_def_reader($journalu);
-
-            return $error_bi->('talkpostdo.bml.error.no.database.connection.present')
-                unless $dbcr;
-
-            $sth = $dbcr->prepare("SELECT posterid, state FROM talk2 ".
-                                  "WHERE journalid=? AND jtalkid=?");
-            $sth->execute($journalu->{userid}, int(($POST{itemid}+0)/256));
-            $parpost = $sth->fetchrow_hashref;
-
-            $title = $ML{'.title.error'} unless $need_captcha;
-
-            $POST{replyto} = $POST{parenttalkid}+0 unless exists $POST{replyto};
-
-            # talkform expects the editid to be in "edit"
-            $POST{edit} = $POST{editid};
-
-            my $talkform_opts = {
-                'remote'      => $remote,
-                'journalu'    => $journalu,
-                'parpost'     => $parpost,
-                'replyto'     => $POST{replyto},
-                'ditemid'     => $POST{itemid},
-                'require_tos' => $require_tos,
-                'do_captcha'  => $need_captcha,
-                'stylemine'   => $GET{'style'} eq "mine",
-                'errors'      => \@errors,
-                'form'        => \%POST,
-            };
-
-            if ( $external_site_case ) {
-                $talkform_opts->{'embedable_form'} = 1;
-
-                my $remote_sessid;
-
-                if ($remote) {
-                    $remote_sessid = $remote->session->id;
-                }
-
-                my $logout_url = "$LJ::SITEROOT/gadgets/logout.bml?"
-                    . 'returnto=' . LJ::eurl($logcom_page) . '&'
-                    . 'sessid='   . $remote_sessid;
-
-                $talkform_opts->{'logout_url'}      = $logout_url;
-                $talkform_opts->{'js_check_domain'} = $partner->domain_check_js({
-                    'mode'           => 'logcom',
-                    'partner_domain' => $POST{'partner_domain'},
-                });
-
-                $talkform_opts->{'partner_remote_ljuser'} = $partner->ljuser_html($remote);
-
-                $talkform_opts->{'resources_html'} = $partner->resources_html({only_needed => 1});
-                $talkform_opts->{'partner_domain'} = $POST{'partner_domain'};
+            my $remote_sessid;
+            if ($remote) {
+                $remote_sessid = $remote->session->id;
             }
 
-            # show mobile form
-            return LJ::Talk::talkform_mobile($talkform_opts)
-                if $POST{'mobile_domain'} =~ qr/^\w\.$LJ::DOMAIN$/;
+            my $logout_url = "$LJ::SITEROOT/gadgets/logout.bml?" .
+                             'returnto=' . LJ::eurl($logcom_page) . '&' .
+                             'sessid=' . $remote_sessid;
 
-            return LJ::Talk::talkform($talkform_opts);
+            $talkform_opts->{'logout_url'} = $logout_url;
+
+            $talkform_opts->{'js_check_domain'} = $partner->domain_check_js({
+                'mode' => 'logcom',
+                'partner_domain' => $POST{'partner_domain'},
+            });
+
+            $talkform_opts->{'partner_remote_ljuser'}
+                = $partner->ljuser_html($remote);
+
+            $talkform_opts->{'resources_html'} = $partner->resources_html({only_needed => 1});
+            $talkform_opts->{'partner_domain'} = $POST{'partner_domain'};
+        }
+        
+        # show mobile form 
+        return LJ::Talk::talkform_mobile($talkform_opts)
+            if $POST{'mobile_domain'} =~ qr/^\w\.$LJ::DOMAIN$/;
+
+        return LJ::Talk::talkform($talkform_opts);
+    }
+    # checked $POST{agree_tos} was checked above if it was necessary,
+    # now we just need to save the userprop
+    if ($commentu && ! $commentu->tosagree_verify && $POST{agree_tos}) {
+        my $err = "";
+        return LJ::bad_input($err)
+            unless $commentu->tosagree_set(\$err);
+    }
+
+    my $talkurl = $init->{talkurl};
+
+    my $entryu   = $init->{entryu};
+    my $parent   = $init->{parent};
+    my $comment  = $init->{comment};
+    my $item     = $init->{item};
+
+    # check max comments only if posting a new comment (not when editing)
+    unless ($editid) {
+        return LJ::bad_input($ML{'.error.maxcomments'})
+            if LJ::Talk::Post::over_maxcomments($journalu, $item->{'jitemid'});
+    }
+
+    # no replying to frozen comments
+    return LJ::bad_input($ML{'/talkpost.bml.error.noreply_frozen'})
+        if $parent->{state} eq 'F';
+
+    # no replying to suspended entries, even by entry poster
+    return LJ::bad_input($ML{'/talkpost.bml.error.noreply_suspended'})
+        if $entry && $entry->is_suspended;
+
+    # no replying to entries/comments in an entry where the remote user or journal are read-only
+    return LJ::bad_input($ML{'/talkpost.bml.error.noreply_readonly_remote'})
+        if $remote && $remote->is_readonly;
+    return LJ::bad_input($ML{'/talkpost.bml.error.noreply_readonly_journal'})
+        if $journalu && $journalu->is_readonly;
+
+    ## insertion or editing
+    my $wasscreened = ($parent->{state} eq 'S');
+    my $err;
+    if ($editid) {
+        unless (LJ::Talk::Post::edit_comment($entryu, $journalu, $comment, $parent, $item, \$err)) {
+            return LJ::bad_input($err);
+        }
+    } else {
+        unless (LJ::Talk::Post::post_comment($entryu, $journalu, $comment, $parent, $item, \$err)) {
+            return LJ::bad_input($err);
+        }
+    }
+
+    # Yeah, we're done.
+    my $dtalkid = $comment->{talkid}*256 + $item->{anum};
+
+    # Allow style=mine for QR redirects
+    my $stylemine = $POST{'stylemine'} ? 'style=mine' : '';
+
+    my $commentlink;
+    if ($external_site_case) {
+        my $partner
+            = LJ::PartnerSite->find_by_journal_username($journalu->username);
+
+        my $uri
+            = URI->new( $partner->xdreceiver_url( $POST{'partner_domain'} ) );
+
+        my $parentid = $parent->{'talkid'}
+            ? $parent->{'talkid'} * 256 + $entry->anum
+            : 0;
+
+        $uri->query_form( $uri->query_form,
+                          'mode'       => 'addcomment',
+                          'comment_id' => $dtalkid,
+                          'replyto'    => $parentid, );
+
+        $commentlink = $uri->as_string;
+    # need to return on mobile version
+    } elsif ($POST{'mobile_domain'} =~ qr/^\w\.$LJ::DOMAIN$/ && $POST{'ret'} =~ m!^/([\w\d\/]+)$!) {
+        $commentlink = "http://$POST{'mobile_domain'}$POST{'ret'}#comments";
+    } elsif ($POST{'viewing_thread'} eq '') {
+        $commentlink = LJ::Talk::talkargs($talkurl, "view=$dtalkid", $stylemine) . "#t$dtalkid";
+    } else {
+        $commentlink = LJ::Talk::talkargs($talkurl, "thread=$POST{viewing_thread}", $stylemine) . "#t$dtalkid";
+    }
+
+    my $ret = "";
+    $ret .= "<h1>$ML{'.success.title'}</h1>";
+
+    my $mlcode;
+    if ($comment->{state} eq 'A') {
+        # Redirect the user back to their post as long as it didn't unscreen its parent,
+        # is screened itself, or they logged in
+        if (!($wasscreened and $parent->{state} ne 'S') && !$init->{didlogin}) {
+            LJ::set_lastcomment($journalu->{'userid'}, $remote, $dtalkid);
+            return BML::redirect($commentlink);
         }
 
-        # checked $POST{agree_tos} was checked above if it was necessary,
-        # now we just need to save the userprop
-        if ( $commentu && ! $commentu->tosagree_verify && $POST{agree_tos} ) {
-            my $err = "";
-
-            return LJ::bad_input($error->($err))
-                unless $commentu->tosagree_set(\$err);
+        $mlcode = '.success.message2';
+    } else {
+        # otherwise, it's a screened comment.
+        if ($journalu->{'journaltype'} eq 'C') {
+            $mlcode = $POST{'usertype'} eq 'anonymous' ? '.success.screened.comm.anon2'
+                                                       : '.success.screened.comm2';
+        } else {
+            $mlcode = $POST{'usertype'} eq 'anonymous' ? '.success.screened.user.anon2'
+                                                       : '.success.screened.user2';
         }
+    }
 
-        my $talkurl = $init->{talkurl};
+    $ret .= "<p> " . BML::ml($mlcode, {'aopts' => "href='$commentlink'"}) . " </p>";
 
-        my $entryu  = $init->{entryu};
-        my $parent  = $init->{parent};
-        my $comment = $init->{comment};
-        my $item    = $init->{item};
+    # did this comment unscreen its parent?
+    if ($wasscreened and $parent->{state} ne 'S') {
+        $ret .= "<p> $ML{'.success.unscreened'} </p>";
+    }
 
-        # check max comments only if posting a new comment (not when editing)
-        unless ($editid) {
-            return $error_bi->('.error.maxcomments')
-                if LJ::Talk::Post::over_maxcomments($journalu, $item->{'jitemid'});
-        }
+    if ($init->{didlogin}) {
+        $ret .= "<p> $ML{'.success.loggedin'} </p>";
+    }
 
-        # no replying to frozen comments
-        return $error_bi->('/talkpost.bml.error.noreply_frozen')
-            if $parent->{state} eq 'F';
-
-        # no replying to suspended entries, even by entry poster
-        return $error_bi->('/talkpost.bml.error.noreply_suspended')
-            if $entry && $entry->is_suspended;
-
-        # no replying to entries/comments in an entry where the remote user or journal are read-only
-        return $error_bi->('/talkpost.bml.error.noreply_readonly_remote')
-            if $remote && $remote->is_readonly;
-
-        return $error_bi->('/talkpost.bml.error.noreply_readonly_journal')
-            if $journalu && $journalu->is_readonly;
-
-        ## insertion or editing
-        my $wasscreened = ($parent->{state} eq 'S');
-        my $err;
-
-        if ($editid) {
-            return LJ::bad_input($error->($err))
-                unless LJ::Talk::Post::edit_comment($entryu, $journalu, $comment, $parent, $item, \$err);
-        }
-        else {
-            return LJ::bad_input($error->($err))
-                unless LJ::Talk::Post::post_comment($entryu, $journalu, $comment, $parent, $item, \$err);
-        }
-
-        # Yeah, we're done.
-        my $dtalkid = $comment->{talkid}*256 + $item->{anum};
-
-        # Allow style=mine for QR redirects
-        my $stylemine = $POST{'stylemine'} ? 'style=mine' : '';
-
-        my $commentlink;
-
-        if ($external_site_case) {
-            my $partner
-                = LJ::PartnerSite->find_by_journal_username($journalu->username);
-
-            my $uri
-                = URI->new( $partner->xdreceiver_url( $POST{'partner_domain'} ) );
-
-            my $parentid = $parent->{'talkid'}
-                ? $parent->{'talkid'} * 256 + $entry->anum
-                : 0;
-
-            $uri->query_form( $uri->query_form,
-                'mode'       => 'addcomment',
-                'comment_id' => $dtalkid,
-                'replyto'    => $parentid,
-            );
-
-            $commentlink = $uri->as_string;
-
-        # need to return on mobile version
-        }
-        elsif ($POST{'mobile_domain'} =~ qr/^\w\.$LJ::DOMAIN$/ && $POST{'ret'} =~ m!^/([\w\d\/]+)$!) {
-            $commentlink = "http://$POST{'mobile_domain'}$POST{'ret'}#comments";
-        }
-        elsif ($POST{'viewing_thread'} eq '') {
-            $commentlink = LJ::Talk::talkargs($talkurl, "view=$dtalkid", $stylemine) . "#t$dtalkid";
-        }
-        else {
-            $commentlink = LJ::Talk::talkargs($talkurl, "thread=$POST{viewing_thread}", $stylemine) . "#t$dtalkid";
-        }
-
-        my $ret = "";
-        $ret .= "<h1>$ML{'.success.title'}</h1>";
-
-        my $mlcode;
-        my $SC = '/talkpost_do.bml';
-        my ($curl, $cadr);
-
-        if ( $commentlink =~ /^(.+)(\#.+)$/ ) {
-            ($curl, $cadr) = ($1, $2);
-        }
-        else {
-            $curl = $commentlink;
-            $cadr = '';
-        }
-
-        if ($comment->{state} eq 'A') {
-            # Redirect the user back to their post as long as it didn't unscreen its parent,
-            # is screened itself, or they logged in
-            if (!($wasscreened and $parent->{state} ne 'S') && !$init->{didlogin}) {
-                LJ::set_lastcomment($journalu->{'userid'}, $remote, $dtalkid);
-
-                return $redirect->($commentlink) if $ajax;
-
-                return BML::redirect($commentlink);
-            }
-
-            $mlcode = '.success.message2';
-        }
-        else {
-            # otherwise, it's a screened comment.
-            if ($journalu->{'journaltype'} eq 'C') {
-                $mlcode = $POST{'usertype'} eq 'anonymous'
-                    ? '.success.screened.comm.anon2'
-                    : '.success.screened.comm2';
-                return $redirect->($curl . '&screen=' . LJ::eurl($SC . $mlcode) . $cadr) if $ajax;
-            }
-            else {
-                $mlcode = $POST{'usertype'} eq 'anonymous'
-                    ? '.success.screened.user.anon2'
-                    : '.success.screened.user2';
-                return $redirect->($curl . '&screen=' . LJ::eurl($SC . $mlcode) . $cadr) if $ajax;
-            }
-        }
-
-        $ok->($mlcode);
-
-        $ret .= "<p> " . BML::ml($mlcode, {'aopts' => "href='$commentlink'"}) . " </p>";
-
-        # did this comment unscreen its parent?
-        if ($wasscreened and $parent->{state} ne 'S') {
-            $ret .= "<p> $ML{'.success.unscreened'} </p>";
-        }
-
-        if ($init->{didlogin}) {
-            $ret .= "<p> $ML{'.success.loggedin'} </p>";
-        }
-
-        # Sucessful!
-        $title = $ML{'.title'};
-
-        return $ok->($ret) if $ajax;
-
-        return $ret;
+    # Sucessful!
+    $title = $ML{'.title'};
+    return $ret;
 
     }; # end $render_body
 
     my $body = $render_body->();
 
-    $restore_old->();
+    my $head
+        = ! $LJ::REQ_HEAD_HAS{'chalresp_js'}++
+            ? $LJ::COMMON_CODE{'chalresp_js'}
+            : "";
 
-    my $head = ! $LJ::REQ_HEAD_HAS{'chalresp_js'}++
-        ? $LJ::COMMON_CODE{'chalresp_js'}
-        : '';
-
-    if ( $ajax ) {
-        $result = LJ::eurl($result);
-        my $add = $need_captcha
-            ? '&need_captcha=1'
-            : '';
-        return qq~
-<!DOCTYPE html>
-<html>
-<head></head>
-<body>
-<iframe src="$user_url/xdreceiver.html?status=$status&result=$result$add" />
-</body>
-</html>
-~;
-    }
-    elsif ($site_scheme_wrap) {
+    if ($site_scheme_wrap) {
         return BML::render_page({
             'body'  => $body,
             'title' => $title,
             'head'  => $head,
         });
-    }
-    else {
+    } else {
         return $body;
     }
 }

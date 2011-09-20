@@ -1,21 +1,21 @@
 <TMPL_IF everyone_can_comment>
-    <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_IF EXPR="service_short_code eq 'twitter'"><TMPL_VAR remote_display_name><TMPL_ELSE><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></TMPL_IF></span></a></span>
+    <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></span></a></span>
 <TMPL_ELSIF registered_can_comment>
     <TMPL_IF is_trusted_identity>
-        <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_IF EXPR="service_short_code eq 'twitter'"><TMPL_VAR remote_display_name><TMPL_ELSE><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></TMPL_IF></span></a></span>
+        <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></span></a></span>
     <TMPL_ELSIF is_identity>
-        <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_IF EXPR="service_short_code eq 'twitter'"><TMPL_VAR remote_display_name><TMPL_ELSE><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></TMPL_IF></span></a></span>
+        <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" title="<TMPL_VAR ml_noopenidpost>" class="b-postform-login-services-disabled"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></span></a></span>
     <TMPL_ELSE>
-        <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_IF EXPR="service_short_code eq 'twitter'"><TMPL_VAR remote_display_name><TMPL_ELSE><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></TMPL_IF></span></a></span>
+        <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></span></a></span>
     </TMPL_IF>
 <TMPL_ELSIF friends_can_comment>
     <TMPL_IF is_identity>
         <TMPL_IF remote_can_comment>
-            <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_IF EXPR="service_short_code eq 'twitter'"><TMPL_VAR remote_display_name><TMPL_ELSE><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></TMPL_IF></span></a></span>
+            <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></span></a></span>
         <TMPL_ELSE>
-            <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_IF EXPR="service_short_code eq 'twitter'"><TMPL_VAR remote_display_name><TMPL_ELSE><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></TMPL_IF></span></a></span>
+            <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" title="<TMPL_VAR remote_display_name> <TMPL_VAR ml_notafriend> <TMPL_VAR ml_willscreen>" class="b-postform-login-services-disabled"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></span></a></span>
         </TMPL_IF>
     <TMPL_ELSE>
-        <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_IF EXPR="service_short_code eq 'twitter'"><TMPL_VAR remote_display_name><TMPL_ELSE><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></TMPL_IF></span></a></span>
+        <span class="b-postform-login-services-item b-postform-login-services-twitter"><a href="#twitter" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/icons/twitter-16.gif" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.twitter')"></span></a></span>
     </TMPL_IF>
 </TMPL_IF>

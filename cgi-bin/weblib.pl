@@ -274,16 +274,16 @@ sub help_icon_html {
 # args: error*
 # des-error: A list of errors
 # </LJFUNC>
-sub bad_input {
+sub bad_input
+{
     my @errors = @_;
-    my $ret = LJ::Lang::ml('bml.badcontent.body') . "\n<ul>\n";
-
-    foreach my $ei ( @errors ) {
-        my $err = LJ::errobj($ei) or next;
+    my $ret = "";
+    $ret .= "<?badcontent?>\n<ul>\n";
+    foreach my $ei (@errors) {
+        my $err  = LJ::errobj($ei) or next;
         $err->log;
         $ret .= $err->as_bullets;
     }
-
     $ret .= "</ul>\n";
     return $ret;
 }
@@ -824,10 +824,8 @@ sub create_qr_div {
     LJ::load_user_props($u, 'opt_logcommentips');
     if ($u->{'opt_logcommentips'} eq 'A') {
         $qrhtml .= '<br />';
-        $qrhtml .= '<p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext">';
-        $qrhtml .= BML::ml('/talkpost.bml.logyourip');
+        $qrhtml .= LJ::deemp(BML::ml('/talkpost.bml.logyourip'));
         $qrhtml .= LJ::help_icon_html("iplogging", " ");
-        $qrhtml .= '</p>';
     }
 
     $qrhtml .= "</td></tr></table>";

@@ -1,220 +1,231 @@
-<TMPL_IF EXPR="nocomments eq 'Y'">
-    <form method="post" action="<TMPL_VAR lj_siteroot>/talkpost_do.bml" id="postform" class="b-postform
-        <TMPL_IF suspended>b-postform-user-suspended</TMPL_IF>
-        <TMPL_IF deleted>b-postform-user-deleted</TMPL_IF>
-        <TMPL_IF EXPR="remote_banned && email_active">b-postform-user-banned</TMPL_IF>
-        <TMPL_IF EXPR="whocanreply eq 'friends'">b-postform-user-friendonly</TMPL_IF>
-        <TMPL_IF EXPR="whocanreply eq 'friends' && !is_friend">b-postform-user-notafriend</TMPL_IF>
-        <TMPL_IF EXPR="whocanreply eq 'reg'">b-postform-user-regonly</TMPL_IF>
-        <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous'">b-postform-user-notreg</TMPL_IF>
-        <TMPL_IF EXPR="show_logips eq 'S'">b-postform-user-logips b-postform-user-logips-anon</TMPL_IF>
-        <TMPL_IF EXPR="show_logips eq 'A'">b-postform-user-logips b-postform-user-logips-all</TMPL_IF>
-        <TMPL_IF EXPR="will_be_screened eq 'A'">b-postform-user-screened b-postform-user-screened-all</TMPL_IF>
-        <TMPL_IF EXPR="will_be_screened eq 'F' && !is_friend">b-postform-user-screened b-postform-user-screened-nonf</TMPL_IF>
-        <TMPL_IF EXPR="will_be_screened eq 'R' and !email_active">b-postform-user-screened b-postform-user-screened-anon</TMPL_IF>
-		<TMPL_IF EXPR="commentcaptcha eq 'R'">b-postform-captcha-anon</TMPL_IF>
-        b-postform-realauth-<TMPL_VAR usertype>
-        b-postform-authtype-<TMPL_VAR usertype>
-        ">
-        <TMPL_VAR form_intro>
-        <TMPL_VAR tosagree>
-        <TMPL_VAR create_link>
+<TMPL_IF warnscreened>
+    <div class='ljwarnscreened'><TMPL_VAR expr="ml('/talkpost.bml.warnscreened')"></div>
+</TMPL_IF>
 
-        <input type="hidden" name="json" value="0" />
+<form method='post' action='<TMPL_VAR lj_siteroot>/talkpost_do.bml' id='postform'>
+<TMPL_VAR form_intro>
 
-        <table>
-            <tr class="b-postform-loginbox">
-                <td align="right" valign="top" class="b-postform-login-label"><label for="login-current"><TMPL_VAR expr="ml('/talkpost.bml.opt.from')"></label></td>
-                <td class="b-postform-login-wrapper">
-                    <TMPL_IF editid>
+<TMPL_IF errors>
+    <ul>
+        <TMPL_LOOP errors>
+            <li><TMPL_VAR error></li>
+        </TMPL_LOOP>
+    </ul>
+    <hr/>
+</TMPL_IF>
+
+<TMPL_VAR tosagree>
+
+<TMPL_VAR create_link>
+
+<table>
+<tr>
+    <td align='right' valign='top' class="b-postform-login-label"><TMPL_VAR expr="ml('/talkpost.bml.opt.from')"></td>
+    <td class="b-postform-login-wrapper">
+        <TMPL_IF 0> Internal for "From" options </TMPL_IF>
+        <TMPL_IF editid>
+            <div class="b-postform-login b-postform-ljedit">
+                    <div class="b-postform-login-item b-postform-login-ljedit">
                         <TMPL_IF remote_banned>
+                            <div class="b-postform-login-opts">
+                                <img src="<TMPL_VAR lj_imgprefix>/userinfo.gif" class="b-postform-login-img" />
                                 <TMPL_VAR ml_loggedin>
                                 <TMPL_VAR ml_banned>
                             </div>
                         <TMPL_ELSE>
+                            <span class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></span>
+                            <div class="b-postform-login-opts">
+                                <img src="<TMPL_VAR lj_imgprefix>/userinfo.gif" class="b-postform-login-img" />
                                 <TMPL_VAR ml_loggedin>
                                 <input type="hidden" name="usertype" value="cookieuser" />
                                 <input type="hidden" name="cookieuser" value="<TMPL_VAR remote_username>" id="cookieuser" />
-                        </TMPL_IF>
-                    <TMPL_ELSE>
-                        <div class="b-postform-login">
-                            <div class="b-postform-login-services">
-                                <a href="#login-current" class="b-postform-login-services-current" tabindex="10" id="login-current"><i class="b-postform-login-services-current-pic"></i></a>
-                                <div class="b-postform-login-services-items">
-                                    <TMPL_LOOP author_options>
-                                        <TMPL_INCLUDE EXPR="sprintf('templates/CommentForm/AuthorTitle-%s.tmpl', short_code)">
-                                    </TMPL_LOOP>
-                                </div>
                             </div>
-                            <div class="b-postform-login-details">
-                                <TMPL_LOOP author_options>
-                                    <TMPL_INCLUDE EXPR="sprintf('templates/CommentForm/Author-%s.tmpl', short_code)">
-                                </TMPL_LOOP>
-                            </div>
-                        </div>
-                    </TMPL_IF>
-
-                    <TMPL_IF suspended>
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-suspended"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.suspended')"></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF deleted>
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-deleted"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.deleted')"></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF EXPR="remote_banned && !(whocanreply eq 'reg' && !email_active)">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-banned"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_banned></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF EXPR="whocanreply eq 'friends'">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notafriend"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_notafriend></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous'">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notreg"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_noopenidpost></p>
-                    </TMPL_IF>
-
-                    <TMPL_IF EXPR="whocanreply eq 'reg'">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-regonly"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></p>
-                    </TMPL_IF>
-                </td>
-            </tr>
-
-            <tr valign="top" class="b-postform-subjectbox">
-                <td align="right"><label for="subject"><TMPL_VAR expr="ml('/talkpost.bml.opt.subject')"></label></td>
-                <td>
-                    <input class="textbox" type="text" size="60" maxlength="100" name="subject" id="subject" value="<TMPL_VAR basesubject>" tabindex="20" />
-                    <input type="hidden" id="subjectIconField" name="subjecticon" value="<TMPL_VAR subjicon>">
-                    <TMPL_IF subjicon_none>
-                        <img src="<TMPL_VAR lj_imgprefix>/spacer.gif" border="0" width="15" height="15" valign="middle" id="subjectIconImage" align="absmiddle" title="Click to change the subject icon" class="b-subjecticon b-subjecticons-default" />
-                    <TMPL_ELSE>
-                        <img src="<TMPL_VAR lj_imgprefix>/spacer.gif" border="0" width="<TMPL_VAR subjicon_current_w>" height="<TMPL_VAR subjicon_current_h>" valign="middle" id="subjectIconImage" class="b-subjecticon b-subjecticons-<TMPL_VAR subjicon_current_id>" />
-                    </TMPL_IF>
-                    <div class="b-subjecticons">
-                        <ul class="b-subjecticons-items">
-                            <TMPL_LOOP subjicon_types>
-                                <TMPL_IF __first__>
-                                    <li class="b-subjecticons-item"><img src="<TMPL_VAR lj_imgprefix>/spacer.gif" border="0" width="15" height="15" id="none" title="No subject icon" class="b-subjecticon b-subjecticons-default" /></li>
-                                </TMPL_IF>
-                                <TMPL_LOOP subjicons>
-                                    <li class="b-subjecticons-item"><img src="<TMPL_VAR lj_imgprefix>/spacer.gif" border="0" width="<TMPL_VAR subjicon_w>" height="<TMPL_VAR subjicon_h>" id="<TMPL_VAR subjicon_id>" class="b-subjecticon b-subjecticons-<TMPL_VAR subjicon_id>" /></li>
-                                </TMPL_LOOP>
-                            </TMPL_LOOP>
-                        </ul>
-                    </div>
-
-					<script type="text/javascript">
-					    jQuery('div.b-subjecticons').subjecticons();
-					</script>
-
-                    <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-nosubjecthtml"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.nosubjecthtml')"></p>
-
-                    <TMPL_IF text_hint>
-                        <div id="subjectCaptionText"><TMPL_VAR text_hint></div>
-                    </TMPL_IF>
-					
-					<div>
-	                    <TMPL_IF show_userpics>
-
-		                <script type="text/javascript"> 
-		                    var userpicmap=<TMPL_VAR userpicmap>; 
-		                    var defaultpicurl="<TMPL_VAR defaultpicurl>"; 
-		                </script> 
-						
-						<span id="userpics">
-	                        <label for="prop_picture_keyword"><TMPL_VAR ml_picturetouse></label>
-	                        <select name="prop_picture_keyword" id="prop_picture_keyword" tabindex="21">
-	                            <TMPL_LOOP userpics>
-	                                <option value="<TMPL_VAR userpic_keyword>" <TMPL_IF userpic_selected>selected="selected"</TMPL_IF>><TMPL_VAR userpic_title></option>
-	                            </TMPL_LOOP>
-	                        </select>
-	                        <TMPL_VAR helpicon_userpics>
-	                        &nbsp;&nbsp;
-	                    </span>
-	                    </TMPL_IF>
-						
-						<input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="22" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
-						&nbsp;&nbsp;<input type="button" value="<TMPL_VAR expr="ml('/talkpost.bml.btn.quote')">" class="b-postform-quote" tabindex="23" />
-					</div>
-                </td>
-            </tr>
-
-            <tr valign="top" class="b-postform-msgbox">
-                <td align="right"><label for="commenttext"><TMPL_VAR expr="ml('/talkpost.bml.opt.message')"></label></td>
-                <td>
-                    <textarea class="textbox" rows="15" cols="75" wrap="soft" name="body" id="commenttext" tabindex="30"><TMPL_VAR comment_body></textarea>
-                </td>
-            </tr>
-
-            <TMPL_VAR extra_rows>
-
-            <tr class="b-postform-submitbox b-postform-captchabox <TMPL_IF need_captcha>b-postform-captchabox-active</TMPL_IF>">
-                <td>&nbsp;</td>
-                <td id="captcha-container">
-               		<TMPL_IF need_captcha><noscript><TMPL_VAR captcha_html></noscript></TMPL_IF>
-                </td>
-            </tr>
-
-            <tr class="b-postform-submitbox">
-                <td class="b-postform-preload">&nbsp;</td>
-                <td class="b-postform-submitbox-submit">
-                    <input type="submit" id="postform-submit-comment-button" name="submitpost" tabindex="40"
-                        <TMPL_IF editid>
-                            value="<TMPL_VAR expr="ml('/talkpost.bml.opt.edit')">"
-                        <TMPL_ELSE>
-                            value="<TMPL_VAR expr="ml('/talkpost.bml.opt.submit')">"
                         </TMPL_IF>
-                    />
-                    &nbsp;
-                    <input type="submit" name="submitpreview" value="<TMPL_VAR expr="ml('talk.btn.preview')">" tabindex="60" />
-
-                    <TMPL_IF show_spellcheck>
-                        <input type="checkbox" name="do_spellcheck" value="1" id="spellcheck" tabindex="61" />
-                        <label for="spellcheck"><TMPL_VAR expr="ml('talk.spellcheck')"></label>
-                    </TMPL_IF>
-                </td>
-            </tr>
-
-            <tr class="b-postform-alertbox">
-                <td>&nbsp;</td>
-                <td>
-                    <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-ajax"></p>
-
-                    <TMPL_IF errors>
-                    <div class="b-postform-user-errors">
-                        <TMPL_LOOP errors>
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-errors"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR error></p>
+                </div>
+            </div>
+        <TMPL_ELSE>
+            <div class='b-postform-login b-postform-authtype-<TMPL_IF expr="usertype_default eq 'anonymous'">anonymous b-postform-anonymous-cookie<TMPL_IF is_person> b-postform-useranonymous-cookie</TMPL_IF><TMPL_ELSIF expr="usertype_default eq 'cookieuser'">user b-postform-user-cookie<TMPL_ELSIF expr="usertype_default eq 'facebook_cookie'">facebook b-postform-facebook-cookie<TMPL_ELSIF expr="usertype_default eq 'twitter_cookie'">twitter b-postform-twitter-cookie<TMPL_ELSIF expr="usertype_default eq 'google_cookie'">google b-postform-google-cookie<TMPL_ELSIF expr="usertype_default eq 'openid_cookie'">openid b-postform-openid-cookie<TMPL_ELSIF expr="usertype_default eq 'mailru_cookie'">mailru b-postform-mailru-cookie<TMPL_ELSIF expr="usertype_default eq 'vkontakte_cookie'">vkontakte b-postform-vkontakte-cookie</TMPL_IF>
+                <TMPL_LOOP author_options>
+                    <TMPL_INCLUDE expr="sprintf('templates/CommentForm/AuthorDisabled-%s.tmpl', short_code)">
+                </TMPL_LOOP>'>
+                <div class="b-postform-login-services">
+                    <a href="#" class="b-postform-login-services-current" tabindex="10"><i class="b-postform-login-services-current-pic"></i></a>
+                    <div class="b-postform-login-services-items">
+                        <TMPL_LOOP author_options>
+                            <TMPL_INCLUDE expr="sprintf('templates/CommentForm/AuthorTitle-%s.tmpl', short_code)">
                         </TMPL_LOOP>
                     </div>
-                    </TMPL_IF>
+                </div>
+                <div class="b-postform-login-details">
+                    <TMPL_LOOP author_options>
+                        <TMPL_INCLUDE expr="sprintf('templates/CommentForm/Author-%s.tmpl', short_code)">
+                    </TMPL_LOOP>
+                </div>
+            </div>
+        </TMPL_IF>
+        <script type="text/javascript">
+            jQuery('div.b-postform-login').authtype();
+        </script>
+    </td>
+</tr>
 
-                    <TMPL_IF warnscreened>
-                        <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext b-postform-alert-warnscreened"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost.bml.warnscreened')"></p>
+<tr valign='top'>
+    <td align='right'><TMPL_VAR expr="ml('/talkpost.bml.opt.subject')"></td>
+    <td>
+        <input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value="<TMPL_VAR basesubject>" onKeyPress='subjectNoHTML(event);' tabindex='20' />
+        <TMPL_IF 0> subject icon </TMPL_IF>
+        <input type='hidden' id='subjectIconField' name='subjecticon' value='<TMPL_VAR subjicon>'>
+        <TMPL_IF subjicon_none>
+            <img src='<TMPL_VAR lj_imgprefix>/talk/none.gif' border='0' width='15' height='15' valign='middle' id='subjectIconImage' style='cursor:pointer;cursor:hand' align='absmiddle' onclick='subjectIconListToggle();' title='Click to change the subject icon' />
+        <TMPL_ELSE>
+            <img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_current_img>' border='0' width='<TMPL_VAR subjicon_current_w>' height='<TMPL_VAR subjicon_current_h>' valign='middle' id='subjectIconImage' onclick='subjectIconListToggle();' style='cursor:pointer;cursor:hand' />
+        </TMPL_IF>
+        <div class="b-subjecticons">
+            <ul class="b-subjecticons-items">
+                <TMPL_LOOP subjicon_types>
+                    <TMPL_IF __first__>
+                        <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/none.gif' border='0' width='15' height='15' id='none' title='No subject icon' onclick="subjectIconChange(this);" /></li>
                     </TMPL_IF>
+                    <TMPL_LOOP subjicons>
+                        <li class="b-subjecticons-item"><img src='<TMPL_VAR lj_imgprefix>/talk/<TMPL_VAR subjicon_img>' border='0' width='<TMPL_VAR subjicon_w>' height='<TMPL_VAR subjicon_h>' id='<TMPL_VAR subjicon_id>' onclick="subjectIconChange(this);" /></li>
+                    </TMPL_LOOP>
+                </TMPL_LOOP>
+            </ul>
+        </div>
+		<script type="text/javascript">
+			jQuery('div.b-subjecticons').bubble({ target: jQuery('#subjectIconImage'), showOn: 'click', closeOnContentClick: true });
+		</script>
+						
+        <TMPL_IF 0> end subject icon </TMPL_IF>
 
-                    <TMPL_IF EXPR="show_logips eq 'S' || show_logips eq 'A'">
-                        <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext b-postform-alert-logcommentips"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_logcommentips>&nbsp;<TMPL_VAR helpicon_iplogging></p>
-                    </TMPL_IF>
+        <div id='ljnohtmlsubj' class='ljdeem'><span style='font-size: 8pt; font-style: italic;'><TMPL_VAR expr="ml('/talkpost.bml.nosubjecthtml')"></span></div>
 
-                    <TMPL_IF EXPR="(will_be_screened eq 'A') || (will_be_screened eq 'F' && !is_friend) || (will_be_screened eq 'R' and !email_active)">
-                        <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext b-postform-alert-screened"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_willscreen></p>
-                    </TMPL_IF>
-                </td>
-            </tr>
-        </table>
-    </form>
+        <TMPL_IF text_hint>
+            <div id="subjectCaptionText"><TMPL_VAR text_hint></div>
+        </TMPL_IF>
 
-<script type="text/javascript">
-    jQuery('#postform')
-        .authtype()
-		.quotescreator()
-        .commentator({
-			publicKey: '<TMPL_VAR captcha_public>',
-			captchaContainerId: 'captcha-container',
-			needCaptcha: !!(Number('<TMPL_VAR need_captcha>'))
-		});
+        <div id='userpics'>
+            <TMPL_IF show_userpics>
+                <script type="text/javascript">
+                    var userpicmap=<TMPL_VAR userpicmap>;
+                    var defaultpicurl="<TMPL_VAR defaultpicurl>";
+                </script>
+                <TMPL_VAR ml_picturetouse>
+                <select name="prop_picture_keyword" tabindex="21">
+                    <TMPL_LOOP userpics>
+                        <option value="<TMPL_VAR userpic_keyword>" <TMPL_IF userpic_selected>selected="selected"</TMPL_IF>><TMPL_VAR userpic_title></option>
+                    </TMPL_LOOP>
+                </select>
+                <TMPL_VAR helpicon_userpics>
+            </TMPL_IF>
+
+            &nbsp;&nbsp;<input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="22" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
+
+            <TMPL_IF show_quick_quote>
+                <script type='text/javascript' language='JavaScript'>
+                <!--
+                var helped = 0; var pasted = 0;
+                function quote () {
+                    var text = '';
+
+                    if (document.getSelection) {
+                        text = document.getSelection();
+                    } else if (document.selection) {
+                        text = document.selection.createRange().text;
+                    } else if (window.getSelection) {
+                        text = window.getSelection();
+                    }
+
+                    // Fix for Safari
+                    if (typeof(text) == 'object') text = text.toString();
+                    if (text == '') {
+                        if (helped != 1 && pasted != 1) {
+                            helped = 1; alert("If you'd like to quote a portion of the original message, highlight it then press 'Quote'");
+                        }
+                        return false;
+                    } else {
+                        pasted = 1;
+                    }
+
+                    var element = text.search(/\\n/) == -1 ? 'q' : 'blockquote';
+                    var textarea = document.getElementById('commenttext');
+                    textarea.focus();
+                    textarea.value = textarea.value + "<" + element + ">" + text + "</" + element + ">";
+                    textarea.caretPos = textarea.value;
+                    textarea.focus();
+                    return false;
+                }
+                if (document.getElementById && (document.getSelection || document.selection || window.getSelection)) {
+					document.write('&nbsp;&nbsp;<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" tabindex="23" />');
+                }
+                //-->
+                </script>
+            </TMPL_IF>
+        </div>
+    </td>
+</tr>
+
+<TMPL_IF 0> textarea for their message body </TMPL_IF>
+<tr valign='top'>
+    <td align='right'><TMPL_VAR expr="ml('/talkpost.bml.opt.message')"></td>
+    <td style='width: 90%'>
+        <textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext' tabindex='30'><TMPL_VAR comment_body></textarea>
+    </td>
+</tr>
+
+<TMPL_VAR extra_rows>
+
+<tr>
+    <td></td>
+    <td>
+        <TMPL_IF captcha_html>
+            <TMPL_VAR captcha_html>
+            <br />
+        </TMPL_IF>
+
+        <br />
+        <script language="JavaScript" type='text/javascript'>
+            <!--
+            function checkLength() {
+                if (!document.getElementById) return true;
+                var textbox = document.getElementById('commenttext');
+                if (!textbox) return true;
+                if (textbox.value.length > <TMPL_VAR comment_length_cap>) {
+                    alert('Sorry, but your comment of ' + textbox.value.length + ' characters exceeds the maximum character length of <TMPL_VAR comment_length_cap>.  Please try shortening it and then post again.');
+                    return false;
+                }
+                return true;
+            }
+            // -->
+        </script>
+
+        <input type='submit' name='submitpost' onclick='return checkLength() && sendForm("postform", "username")' tabindex='40'
+            <TMPL_IF editid>
+                value="<TMPL_VAR expr="ml('/talkpost.bml.opt.edit')">"
+            <TMPL_ELSE>
+                value="<TMPL_VAR expr="ml('/talkpost.bml.opt.submit')">"
+            </TMPL_IF>
+        />
+        &nbsp;
+        <input type='submit' name='submitpreview' onclick='return checkLength() && sendForm("postform", "username")'
+            value="<TMPL_VAR expr="ml('talk.btn.preview')">" tabindex="60" />
+
+        <TMPL_IF show_spellcheck>
+            <input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' tabindex='61' />
+            <label for='spellcheck'><TMPL_VAR expr="ml('talk.spellcheck')"></label>
+        </TMPL_IF>
+
+        <TMPL_IF show_logips>
+            <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR ml_logcommentips>&nbsp;<TMPL_VAR helpicon_iplogging></p>
+        </TMPL_IF>
+    </td>
+</tr>
+</table>
+
+<TMPL_IF 0> Some JavaScript to help the UI out </TMPL_IF>
+<script type='text/javascript' language='JavaScript'>
+    var usermismatchtext = "<TMPL_VAR ml_usermismatch>";
 </script>
+<script type='text/javascript' src='<TMPL_VAR lj_jsprefix>/talkpost.js'></script>
 
-<TMPL_ELSE>
-    <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext"><i class="i-bubble-arrow-border"></i><i class="i-bubble-arrow"></i><TMPL_VAR expr="ml('/talkpost_do.bml.error.nocomments')"></p>
-</TMPL_IF>
+</form>

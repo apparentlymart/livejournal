@@ -3,12 +3,12 @@
     <TMPL_ELSIF registered_can_comment>
         <TMPL_IF is_trusted_identity>
         <TMPL_ELSIF is_identity>
-            b-postform-disabled-openid
+            b-postform-ability-disabled-openid
         </TMPL_IF>
     <TMPL_ELSIF friends_can_comment>
         <TMPL_IF is_identity>
             <TMPL_UNLESS remote_can_comment>
-                b-postform-disabled-openid
+                b-postform-ability-disabled-openid
             </TMPL_UNLESS>
         </TMPL_IF>
     </TMPL_IF>

@@ -72,8 +72,6 @@
 
 .opt.noautoformat=Don't auto-format: 
 
-.btn.quote=Quote
-
 .opt.noimage=No Image
 
 .opt.noopenidpost|staleness=1
