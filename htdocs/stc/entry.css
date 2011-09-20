@@ -3,13 +3,19 @@
 .small {
     font-size: 85%;
     margin-left: 6px;
-}
-
-#draft-container TEXTAREA {
-	margin: 0;
-	border: 0;
 	}
-
+#draft-container TEXTAREA {
+	padding: 6px 8px;
+	#padding: 4px 0;
+	margin: 0;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	border: 0;
+	outline: none;
+	font: 12px/16px 'Arial', sans-serif;
+	color: #222;
+	}
 #updateForm {
     font-family: arial, verdana, 'sans-serif';
     min-width: 620px;
