@@ -129,8 +129,8 @@
 					$('#updateForm')[0].onsubmit = function() {
 						if (window.switchedRteOn) {
 							var data = CKEditor.getData();
-							if($('#event_format')[0].checked){
-								data = data.replace(/(\r|\n)/g, '');
+							if(!$('#event_format')[0].checked){
+								data = data.replace(/(\r|\n)/g, '<br />');
 							}
 							draftData.textArea.val(data);
 						}
