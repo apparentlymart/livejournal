@@ -1163,8 +1163,8 @@
 					},
 					'lj-map': function(element) {
 						return new CKEDITOR.htmlParser.fragment.fromHtml('' + '<div style="' + 'width: ' + (isNaN(element.attributes
-							.width) ? 100 : element.attributes.width) + 'px;' + 'height: ' + (isNaN(element.attributes
-							.height) ? 100 : element.attributes
+							.width) ? 500 : element.attributes.width) + 'px;' + 'height: ' + (isNaN(element.attributes
+							.height) ? 350 : element.attributes
 							.height) + 'px;"' + 'contentEditable="false"' + 'lj-url="' + (encodeURIComponent(element.attributes
 							.url) || '') + '"' + 'class="lj-map"><p>map</p>' + '</div>').children[0];
 					},
