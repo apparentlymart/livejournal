@@ -297,6 +297,12 @@ Object.extend(String.prototype, {
 	}	
 });
 
+Object.extend(Date, {
+    now: function() {
+        return +new Date;
+    }
+});
+
 Object.extend(Array, {
 	/**
 	 * Returns true if an object is an array, false if it is not.
