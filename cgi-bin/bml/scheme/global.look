@@ -107,8 +107,7 @@ CHOICES<=
 <=CHOICES
 
 PAGE<=
-{Fp}
-<?_code
+{Fp}<?_code
     my ( $scratch, $elhash ) = @_;
     return LJ::SiteScheme->render_page($elhash);
 _code?>
