@@ -330,6 +330,10 @@ sub common_template_params {
         { 'current_year' => $LJ::CURRENT_YEAR },
     );
 
+    ## service page branding (optional)
+    ## see also cgi-bin/LJ/Hooks/Homepage.pm
+    my $branding = LJ::run_hook("service_page_branding", { scheme => $class->code }); 
+
     return {
         'pretitle'           => $args->{'pretitle'},
         'title'              => $args->{'title'},
@@ -402,6 +406,8 @@ sub common_template_params {
         'ml_ljlabs_dashboard' => $ml_ljlabs_dashboard,
         'version_html'        => $version_html,
         'ml_copyright_header' => $ml_copyright_header,
+
+        'branding'            => $branding,
     };
 }
 
