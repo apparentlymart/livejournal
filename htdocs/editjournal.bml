@@ -639,7 +639,7 @@ JS_INIT
         my $usejournal_u = LJ::load_user ($usejournal || $remote->{'user'});
         my @recent_entries = ();
         my %entry_ids = ();
-        my $prev_page_id = ($start_from > 0) ? ($start_from + $items_per_page) : 0;
+        my $prev_page_id = ($start_from > 0) ? ($start_from + $items_per_page - 1) : 0;
         my $ymd = join "/", ($year, $month, $day);
         my %ymd_req = ($year && $month && $day && $show ne 'recent') ? ( ymd => $ymd ) : ();
         my @post_ids = sort { $b <=> $a } ($usejournal_u ? $usejournal_u->get_post_ids : $remote->get_post_ids);
