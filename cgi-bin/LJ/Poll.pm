@@ -1012,7 +1012,7 @@ sub preview {
 
 # get poll description as a xml
 sub get_poll_xml {
-    my $self = shift;
+    my ($self, %opts) = @_;
     my $ret = '';
 
     my $attrs = ' id="'.$self->pollid.'"';
@@ -1023,6 +1023,8 @@ sub get_poll_xml {
     }
 
     $attrs .= ' whovote="'.$self->whovote.'" whoview="'.$self->whoview.'"';
+    $attrs .= ' can_view="'.$self->can_view($opts{viewer}).'" can_vote="'.$self->can_vote($opts{viewer}).'" is_owner="'.$self->is_owner($opts{viewer}).'" status="'.($self->is_closed ? 'close' : 'open').'"' if ($opts{viewer});
+
     $ret .= "<lj-poll$attrs>";
     my @questions = $self->questions;
     map { $ret .= $_->get_question_xml() } @questions;
@@ -1748,7 +1750,7 @@ sub expand_entry {
         my $poll = LJ::Poll->new($pollid);
         return "[Error: Invalid poll ID $pollid]" unless $poll && $poll->valid;
 
-        return ($viewpoll ? $poll->get_poll_xml : $poll->render);
+        return ($viewpoll ? $poll->get_poll_xml(viewer => $opts{viewer}) : $poll->render);
     };
 
     $$entryref =~ s/<lj-poll-(\d+)>/$expand->($1, $getpolls)/eg;

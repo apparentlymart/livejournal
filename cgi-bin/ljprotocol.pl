@@ -1004,7 +1004,7 @@ sub getfriendspage
         ) if $req->{trim_widgets};
 
         LJ::EmbedModule->expand_entry($entry->poster, \$h{event_raw}, get_video_id => 1) if $req->{get_video_ids};
-        LJ::Poll->expand_entry(\$h{event_raw}, getpolls => 1) if $req->{get_polls};
+        LJ::Poll->expand_entry(\$h{event_raw}, getpolls => 1, viewer => $u ) if $req->{get_polls};
 
         if ($req->{view}) {
             LJ::EmbedModule->expand_entry($entry->poster, \$h{event_raw}, edit => 1) if $req->{view} eq 'stored';
@@ -3385,7 +3385,7 @@ sub getevents {
         ) if $req->{trim_widgets};
 
         LJ::EmbedModule->expand_entry($uowner, \$t->[1], get_video_id => 1) if($req->{get_video_ids});
-        LJ::Poll->expand_entry(\$t->[1], getpolls => 1) if $req->{get_polls};
+        LJ::Poll->expand_entry(\$t->[1], getpolls => 1, viewer => $u) if $req->{get_polls};
 
         if ($req->{view}) {
             LJ::EmbedModule->expand_entry($uowner, \$t->[1], edit => 1) if $req->{view} eq 'stored';
