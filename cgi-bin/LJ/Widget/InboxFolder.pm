@@ -115,9 +115,9 @@ sub render_body {
                                 <input type="button" id="Page_Next_$sfx" value="$BML::ML{'.btn.next'}" $next_disabled />
                             </span>
                             <input type="submit" name="markRead_$sfx" value="$BML::ML{'.btn.read'}" $disabled id="${name}_MarkRead_$sfx" />
-                            <input type="submit" name="markUnread_$sfx" value="$BML::ML{'.btn.unread'}" id="${name}_MarkUnread_$sfx" />
-                            <input type="submit" name="spam_$sfx" value="$BML::ML{'.btn.spam'}" id="${name}_Spam_$sfx" />
-                            <input type="submit" name="delete_$sfx" value="$BML::ML{'.btn.delete'}" id="${name}_Delete_$sfx" />
+                            <input type="submit" name="markUnread_$sfx" value="$BML::ML{'.btn.unread'}" id="${name}_MarkUnread_$sfx" /> } .
+                            ( ( $view eq 'all' || $view eq 'usermsg_recvd' ) ? qq { <input type="submit" name="spam_$sfx" value="$BML::ML{'.btn.spam'}" id="${name}_Spam_$sfx" /> } : '' ) .
+                            qq { <input type="submit" name="delete_$sfx" value="$BML::ML{'.btn.delete'}" id="${name}_Delete_$sfx" />
                         </td>
                 </tr>
             };
