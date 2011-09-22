@@ -62,6 +62,7 @@ my %community_for_domain = (
 my @order = qw/
     hmp_ontd
     anythingdisney
+    bullying_begone
 /;
 =head
     culture
