@@ -775,7 +775,7 @@
 						if (text) {
 							var selection = new CKEDITOR.dom.selection(editor.document);
 
-							ljNoteData.LJCut.node = new CKEDITOR.dom.element('lj:cut', editor.document);
+							ljNoteData.LJCut.node = new CKEDITOR.dom.element.get(document.createElement('lj:cut'));
 							ljNoteData.LJCut.node.setAttribute('lj-cmd', 'LJCut');
 							if (text != top.CKLang.ReadMore) {
 								ljNoteData.LJCut.node.setAttribute('text', text);
