@@ -779,7 +779,6 @@
 							for (var i = 0, l = ranges.length; i < l; i++) {
 								var range = ranges[i];
 								range.cloneContents().appendTo(ljNoteData.LJCut.node);
-								range.deleteContents();
 							}
 							selection.unlock();
 							editor.insertElement(ljNoteData.LJCut.node);
