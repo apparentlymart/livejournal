@@ -2864,6 +2864,77 @@ DIV.lj_ippu_app {
 	max-width: 380px;
 	}
 
+/* Contextual hover */
+.b-contextualhover {
+	width: 250px;
+	font-family: 'Arial', sans-serif;
+	}
+	.b-contextualhover,
+	.b-contextualhover DIV,
+	.b-contextualhover P,
+	.b-contextualhover UL,
+	.b-contextualhover OL,
+	.b-contextualhover LI,
+	.b-contextualhover LABEL,
+	.b-contextualhover IMG,
+	.b-contextualhover SPAN,
+	.b-contextualhover H3,
+	.b-contextualhover INPUT {
+		padding: 0;
+		margin: 0;
+		}
+	.b-contextualhover P {
+		line-height: 18px;
+		font-size: 12px;
+		}
+	.b-contextualhover .input-checkbox {
+		margin-right: 2px;
+		vertical-align: middle;
+		}
+	.b-contextualhover .b-contextualhover-section {
+		overflow: hidden;
+		padding-right: 15px;
+		}
+	.b-contextualhover .b-contextualhover-side {
+		float: right;
+		width: 60px;
+		}
+	.b-contextualhover .b-contextualhover-userpic {
+		float: right;
+		width: 60px;
+		height: 60px;
+		text-align: right;
+		}
+		.b-contextualhover .b-contextualhover-userpic IMG {
+			max-width: 60px;
+			max-height: 60px;
+			}
+	.b-contextualhover .b-contextualhover-title {
+		margin-bottom: 10px;
+		}
+		.b-contextualhover .b-contextualhover-title H3 {
+			font-weight: normal;
+			line-height: 16px;
+			font-size: 12px;
+			}
+	.b-contextualhover .b-contextualhover-options {
+		margin-top: 10px;
+		list-style: none;
+		}
+		.b-contextualhover .b-contextualhover-options LI {
+			line-height: 18px;
+			font-size: 12px;
+			}
+		.b-contextualhover .b-contextualhover-options-ban P {
+			float: left;
+			}
+		.b-contextualhover .b-contextualhover-options-ban .b-contextualhover-options-wrap {
+			overflow: hidden;
+			padding-left: 7px;
+			}
+			.b-contextualhover .b-contextualhover-options-ban .b-contextualhover-options-wrap P {
+				float: none;
+				}
 
 /* Native Sharing */
 .b-sharethis {

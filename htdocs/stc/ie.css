@@ -596,6 +596,13 @@ __________________________________________*/
 	margin-bottom: -4px;
 	}
 
+/* Contextual hover
+-----------------------------------------------*/
+.b-contextualhover .b-contextualhover-section,
+.b-contextualhover .b-contextualhover-options LI {
+	zoom: 1;
+	}
+
 /* Should be at bottom of the page! */
 * HTML .i-ljtimes-btn,
 * HTML .i-ljtimes-drag,
@@ -604,5 +611,4 @@ __________________________________________*/
 * HTML .b-ljtimes-bubble-top {
 	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg : this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='crop')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
 	}
-
 
