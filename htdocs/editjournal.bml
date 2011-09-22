@@ -643,6 +643,7 @@ JS_INIT
         my $ymd = join "/", ($year, $month, $day);
         my %ymd_req = ($year && $month && $day && $show ne 'recent') ? ( ymd => $ymd ) : ();
         my @post_ids = sort { $b <=> $a } ($usejournal_u ? $usejournal_u->get_post_ids : $remote->get_post_ids);
+        $only_me_checked = 1 unless $remote->can_manage ($usejournal_u);
         while ($usejournal_u && ($LJ::MAX_SCROLLBACK_LASTN = 50000,
             my @recent = LJ::get_recent_items({
                 itemshow  => $items_per_page,
@@ -666,17 +667,6 @@ JS_INIT
                 $entry_ids{$item->{'itemid'}} = 1;
             }
 
-            ## Filter records uneditable for remote user
-            @recent = grep {
-                my $entry = LJ::Entry->new_from_item_hash ($usejournal_u, $_);
-                my $poster = $entry->poster;
-                if ($poster eq $remote || $remote->can_manage ($usejournal_u)) {
-                    1;
-                } else {
-                    0;
-                }
-            } @recent;
-
             push @recent_entries, @recent;
 
             my @temp_sort = sort { $a->{itemid} <=> $b->{itemid} } @recent_entries;
@@ -685,6 +675,8 @@ JS_INIT
             if (@recent_entries == $items_per_page) {
                 last;
             }
+
+            $start_from += $items_per_page;
         }
 
         $ret .= $entry_chooser->(\@recent_entries, prev => $post_ids[0] >= $prev_page_id ? $prev_page_id : 0, 'next' => @recent_entries >= $items_per_page ? $start_from : 0);
