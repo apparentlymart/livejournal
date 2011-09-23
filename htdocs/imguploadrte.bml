@@ -40,40 +40,34 @@
     my $ret = '';
 
     $$head .= qq{
-        <style>
-        .insobjOuter { }
-        .insobjTitle { vertical-align: top; }
-        .insobjNav { text-align: right; vertical-align: middle; padding-top: 6px;}
-        .insobjContent { padding-bottom: 15px; }
-        table { margin: 0px}
-        div.insobjOuter p.wintitle { font: 12pt; font-weight: bold; }
-        .insobjOuter div.ex { font: 8pt sans-serif; color: #888; font-style: italic;}
-          .img_error { color: red; font-weight: bold; text-align: center; }
-        </style>
-    } unless $is_only_upload_div;
-
-    $$head .= qq{
         <script>
         var fileaction = '$LJ::FB_SITEROOT/interface/webupload';
         var fbroot     = '$LJ::SITEROOT/__using/$LJ::FB_DOMAIN';
         </script>
-        };
+    };
 
-    $$head .= qq{
-                <script src="$LJ::STATPREFIX/fck/editor/dialog/common/fck_dialog_common.js" type="text/javascript"></script>
-                <script src="$LJ::STATPREFIX/fck/editor/dialog/fck_image/fck_image.js" type="text/javascript"></script>
-                $js
-                <link href="$LJ::STATPREFIX/fck/editor/dialog/common/fck_dialog_common.css" rel="stylesheet" type="text/css" />
-        } unless $is_only_upload_div;
-
-    if( $is_only_upload_div ) {
+    if ($is_only_upload_div) {
+        LJ::need_res("stc/display_none.css", 
+                     "stc/imguploadrte.css");
+    } else {
         $$head .= qq{
-            <link href="$LJ::STATPREFIX/display_none.css" rel="stylesheet" type="text/css" />
-            <link href="$LJ::STATPREFIX/imguploadrte.css" rel="stylesheet" type="text/css" />
+            <style>
+            .insobjOuter { }
+            .insobjTitle { vertical-align: top; }
+            .insobjNav { text-align: right; vertical-align: middle; padding-top: 6px;}
+            .insobjContent { padding-bottom: 15px; }
+            table { margin: 0px}
+            div.insobjOuter p.wintitle { font: 12pt; font-weight: bold; }
+            .insobjOuter div.ex { font: 8pt sans-serif; color: #888; font-style: italic;}
+            .img_error { color: red; font-weight: bold; text-align: center; }
+            </style>
+            $js
         };
+        LJ::need_res("js/fck/editor/dialog/common/fck_dialog_common.js",
+                     "js/fck/editor/dialog/fck_image/fck_image.js",
+                     "stc/fck/editor/dialog/common/fck_dialog_common.css");
     }
-
-
+    
     #taken from the original fck_image.html    
     $ret .= qq{
                 <div id="divInfo">
