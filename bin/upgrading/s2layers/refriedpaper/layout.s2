@@ -497,7 +497,10 @@ A.subjlink, A.subjlink:hover, A.subjlink:visited {
 $fontspec
 }
 
-br, hr, li, ol, p, table, td, tr, ul {
+.entry-text {
+  margin: 10px 0;
+  }
+.entry-text, br, hr, li, ol, p, table, td, tr, ul {
   color:       $*page_fgcolor;
   font-size:   12px;
   line-height: 18px;
@@ -1263,7 +1266,7 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
 
   """
   </table>
-  <p>"""; $e->print_text(); """</p>
+  <div class="entry-text">"""; $e->print_text(); """</div>
   <span class="author">""";
   $e->print_linkbar();
   """</span>""";
