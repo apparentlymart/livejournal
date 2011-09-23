@@ -830,10 +830,12 @@ function EntryLite::print_linkbar() {
   }
   foreach var string link_key ($.link_keyseq) {
     var Link link = $this->get_link($link_key);
-    $url          = $link.url;
-    $text         = $texts{$link_key} != "" ? $texts{$link_key} : $link.caption;
-    if($url != "") {
-      $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+    if (defined $link) {
+      $url          = $link.url;
+      $text         = $texts{$link_key} != "" ? $texts{$link_key} : $link.caption;
+      if($url != "") {
+        $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+      }
     }
   }
   $url     = $.permalink_url;
