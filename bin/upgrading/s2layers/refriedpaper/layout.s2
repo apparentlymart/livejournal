@@ -452,14 +452,14 @@ td.title {
   font-weight:    700;
   letter-spacing: .1em;
   padding:        20px;
-$fontspec
+  $fontspec
 }
 
 td.links {
   font-size:   10px;
   line-height: 16px;
   padding:     8px;
-$fontspec
+  $fontspec
 }
 
 .descrip {
@@ -469,14 +469,14 @@ $fontspec
   letter-spacing: .2em;
   padding:        5px;
   text-transform: uppercase;
-$fontspec
+  $fontspec
 }
 
 .date, .dateheader, .datecontent {
   color:       $*date_fgcolor;
   font-size:   12px;
   line-height: 16px;
-$sec_fontspec
+  $sec_fontspec
 }
 
 A.subjlink, A.subjlink:hover, A.subjlink:visited {
@@ -494,7 +494,7 @@ A.subjlink, A.subjlink:hover, A.subjlink:visited {
   font-weight:    700;
   letter-spacing: .1em;
   padding:        8px;
-$fontspec
+  $fontspec
 }
 
 .entry-text {
@@ -505,14 +505,14 @@ $fontspec
   font-size:   12px;
   line-height: 18px;
   text-align:  justify;
-$sec_fontspec
+  $sec_fontspec
 }
 
 p.links {
   color:       #666666;
   font-size:   10px;
   line-height: 12px;
-$fontspec
+  $fontspec
 }
 
 .author, .time {
@@ -520,7 +520,7 @@ $fontspec
   font-size:      10px;
   line-height:    16px;
   text-transform: uppercase;
-$fontspec
+  $fontspec
 }
 
 #commenttext {
