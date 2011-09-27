@@ -259,8 +259,9 @@ sub handle_post {
     # require form auth for widget submissions
     my $errorsref = \@BMLCodeBlock::errors;
 
-    unless ( LJ::check_form_auth($post->{lj_form_auth}) || $LJ::WIDGET_NO_AUTH_CHECK ) {
+    unless ( $LJ::WIDGET_NO_AUTH_CHECK || LJ::check_form_auth($post->{lj_form_auth}) ) {
         push @$errorsref, BML::ml('error.invalidform');
+        return;
     }
 
     my $per_widget = $class->post_fields_by_widget(
