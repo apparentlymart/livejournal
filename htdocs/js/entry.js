@@ -997,7 +997,8 @@ InOb.handleInsertImage = function (){
 	// if PhotoHosting enabled - show new popup
 	if(window.ljphotoEnabled){
 		jQuery('#updateForm').photouploader('option', 'type', 'upload')
-			.bind('htmlready', function (event, htmlOutput){
+			.bind('htmlready', function (event){
+				var htmlOutput = event.htmlStrings.join(' ');
 				jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
 		}).photouploader('show');
 	} else {
