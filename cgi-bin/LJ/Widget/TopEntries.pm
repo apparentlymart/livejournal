@@ -37,7 +37,7 @@ sub render_default_view {
     my $opts = shift;
 
     my $domain  = $opts->{'domain'};
-    my $lang    = LJ::lang::current_language();
+    my $lang    = LJ::Lang::current_language();
     my $memcache_key = "top_entries.$domain.$lang";
     
     if (my $text = LJ::MemCache::get($memcache_key)) {
