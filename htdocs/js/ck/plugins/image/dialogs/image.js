@@ -841,17 +841,8 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 														var value = parseInt( this.getValue(), 10 );
 														if ( type == IMAGE || type == PREVIEW )
 														{
-															if ( !isNaN( value ) )
-															{
-																element.setStyle( 'border-width', CKEDITOR.tools.cssLength( value ) );
-																element.setStyle( 'border-style', 'solid' );
-															}
-															else if ( !value && this.isChanged() )
-															{
-																element.removeStyle( 'border-width' );
-																element.removeStyle( 'border-style' );
-																element.removeStyle( 'border-color' );
-															}
+															element.setStyle('border-width', !isNaN(value) && this.isChanged() ? CKEDITOR.tools.cssLength(value) : 0);
+															element.setStyle('border-style', 'solid');
 
 															if ( !internalCommit && type == IMAGE )
 																element.removeAttribute( 'border' );
