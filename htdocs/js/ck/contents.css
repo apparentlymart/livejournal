@@ -49,14 +49,6 @@ lj|wishlist {
 	background: url(/img/widget/wishlist/bag_212x212.png?v=1) no-repeat 0 0;
 }
 
-lj|wishlist {
-	display: block;
-	width: 212px;
-	height: 212px;
-	border: 1px solid #d2d2d2;
-	background: url(/img/widget/wishlist/bag_212x212.png?v=1) no-repeat 0 0;
-}
-
 lj\:raw {
 	border: #000000 1px dotted;
 	display:block;
