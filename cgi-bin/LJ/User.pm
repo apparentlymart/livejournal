@@ -10074,6 +10074,15 @@ sub get_remote {
     # can't have a remote user outside of web context
     return $no_remote->() unless LJ::Request->is_inited;
 
+    my $get_as = LJ::Request->get_param('as');
+    if ( $LJ::IS_DEV_SERVER && $get_as =~ /^\w{1,15}$/ ) {
+        my $ru = LJ::load_user($get_as);
+
+        # might be undef, to allow for "view as logged out":
+        LJ::set_remote($ru);
+        return $ru;
+    }
+
     my $criterr = $opts->{criterr} || do { my $d; \$d; };
     $$criterr = 0;
 

@@ -194,6 +194,7 @@ sub handler
             return $status;
         }
     }
+
     LJ::Request->set_handlers(PerlTransHandler => [ \&trans ]);
 
     return LJ::Request::OK;
@@ -335,6 +336,8 @@ sub trans {
     my $is_ssl = $LJ::IS_SSL = LJ::run_hook('ssl_check');
     $LJ::IS_BOT_USERAGENT = BotCheck->is_bot( LJ::Request->header_in('User-Agent') );
 
+    LJ::Request->pnotes( 'original_uri' => LJ::Request->uri );
+
     # process controller
     # if defined
     if ( my $controller = LJ::Request->notes('controller') ) {
@@ -401,6 +404,16 @@ sub trans {
         LJ::Request->pnotes ('remote' => LJ::get_remote());
 
         if (LJ::Request->status == 404) {
+            if (    LJ::Request->prev
+                 && LJ::Request->prev->notes('http_errors_no_bml') )
+            {
+                LJ::Request->handler('perl-script');
+                LJ::Request->set_handlers(
+                    'PerlHandler' => sub { return LJ::Request::OK; }
+                );
+                return LJ::Request::OK;
+            }
+
             my $fn = $LJ::PAGE_404 || '404-error.html';
             return $bml_handler->("$LJ::HOME/htdocs/" . $fn);
         }
@@ -507,11 +520,6 @@ sub trans {
     }
 
     my %GET = LJ::Request->args;
-
-    if ($LJ::IS_DEV_SERVER && $GET{'as'} =~ /^\w{1,15}$/) {
-        my $ru = LJ::load_user($GET{'as'});
-        LJ::set_remote($ru); # might be undef, to allow for "view as logged out"
-    }
 
     # anti-squatter checking
     if ($LJ::DEBUG{'anti_squatter'} && LJ::Request->method eq "GET") {
