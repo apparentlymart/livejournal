@@ -480,8 +480,11 @@
 						if (window.ljphotoEnabled) {
 							jQuery('#updateForm').photouploader({
 								type: 'upload'
-							}).photouploader('show').bind('htmlready', function (event, html) {
-								editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html, editor.document));
+							}).photouploader('show').bind('htmlready', function (event) {
+								html = event.htmlStrings;
+								for (var i = 0, l = html.length; i < l; i++) {
+									editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html[i], editor.document));
+								}
 							});
 						} else {
 							editor.openDialog('image');
