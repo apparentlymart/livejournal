@@ -16,29 +16,44 @@ sub render_body {
 
     return '' unless LJ::is_enabled('widget_top_entries');
 
-    my $domain = $opts{domain};
+    # hmp_ontd (ohnotheydidnt) is the default domain (hm, why?)
+    my $domain = $opts{domain} || 'hmp_ontd';
 
     my $top_entries = LJ::TopEntries->new(domain => $domain);
 
-    ## Ontd spotlights widget has its own design
-    return $class->render_ontd_homepage($top_entries) 
-        if $domain eq 'hmp_ontd' or not $domain; # hmp_ontd is default
+    ## Ontd & Disney spotlights widgets have their own designs
+    if ($domain eq 'hmp_ontd') {
+        return $class->render_ontd_homepage($top_entries);
+    } elsif ($domain eq 'anythingdisney') {
+        return $class->render_anythingdisney($top_entries);
+    } else {
+        return $class->render_default_view($top_entries, \%opts);
+    }
+}
 
-    return $class->render_anythingdisney($top_entries)
-        if $domain eq 'anythingdisney';
+sub render_default_view {
+    my $class = shift;
+    my $top_entries = shift;
+    my $opts = shift;
 
-    ## TODO: Cache on 5 minutes.
-    ##      !!! use lang_id in cache key.
+    my $domain  = $opts->{'domain'};
+    my $lang    = LJ::lang::current_language();
+    my $memcache_key = "top_entries.$domain.$lang";
+    
+    if (my $text = LJ::MemCache::get($memcache_key)) {
+        return $text;
+    }
 
-    ## Default layout
+    my $title = $opts->{'title'} || $class->ml('widget.topentries.spotlight.title');
     my $ret = qq|
         <div class="w-topentries">
             <div class="w-head">
-                <h2><span class="w-head-in"><a href="$LJ::SITEROOT/browse">| . $class->ml('widget.topentries.spotlight.title') . qq|</a></span></h2>
+                <h2><span class="w-head-in"><a href="$LJ::SITEROOT/browse">$title</a></span></h2>
                 <i class="w-head-corner"></i></div><div class="w-content"><ul class="b-posts">|;
 
     my $classname = 'event';
-    foreach my $post ($top_entries->get_featured_posts()) {
+    my @posts = $top_entries->get_featured_posts();
+    foreach my $post (@posts) {
         ##
         my $comments = qq|<span class="i-posts-comments"><a href="$post->{comments_url}">|
                             . BML::ml('widget.topentries.comments', { count => $post->{comments} }) .
@@ -62,7 +77,9 @@ sub render_body {
                         ## add row with Vertical only if it's defined,
                         ## add tags only if ther are as well as Vertical's name and uri.
                         ($post->{vertical_uri} && $post->{vertical_name}
-                            ? (qq|<p class="b-posts-vertical"><a href="$post->{vertical_uri}">$post->{vertical_name}</a>| . ($post->{tags} ? ": $post->{tags}" : "") . "</p>")
+                            ? (qq|<p class="b-posts-vertical"><a href="$post->{vertical_uri}">$post->{vertical_name}</a>| . 
+                                ($post->{tags} ? ": $post->{tags}" : "") . 
+                                "</p>")
                             : ''
                         ) . qq!
                         <p class="b-posts-data">$posttime | $comments</p>
@@ -75,10 +92,11 @@ sub render_body {
     }
 
     $ret .= '</ul></div></div>';
+    
+    ## do not cache if posts list is empty 
+    LJ::MemCache::set($memcache_key, $ret, 60) if @posts;
 
     return $ret;
-
-
 }
 
 sub render_ontd_homepage {
