@@ -113,7 +113,6 @@
 			$('#switched_rte_on').val('1');
 
 			if (!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible) {
-				CKEDITOR.timestamp = 'v.84.2';
 				CKEDITOR.basePath = statPrefix + '/ck/';
 				var editor = CKEDITOR.replace('draft', {
 					skin: 'v2',
@@ -223,12 +222,12 @@
 
 		minute = date.getMinutes();
 		if (minute < 10) {
-			minute = Number('0' + minute);
+			minute = '0' + minute;
 		}
 
 		sec = date.getSeconds();
 		if (sec < 10) {
-			sec = Number('0' + sec);
+			sec = '0' + sec;
 		}
 
 		draftData.statusNode.val(draftData.saveMsg.replace(/\[\[time\]\]/, hour + ':' + minute + ':' + sec + time + ' '));
