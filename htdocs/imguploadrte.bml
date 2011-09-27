@@ -210,6 +210,7 @@
             $div_upload .= "<script>window.parent.InOb.setupIframeHandlers(true);window.parent.InOb.showSelectorPage();</script>";
             ## We no need a html and head tags
             $$body = $div_upload;
+            $$head .= LJ::res_includes();
             # BML::finish();
             # return $div_upload;
             return;
