@@ -14,6 +14,7 @@ if(! ("$" in window)){
 function editdate(){
 	var currentDate = jQuery('#currentdate'),
 		modifyDate = jQuery('#modifydate'),
+		customTimeFlag = jQuery('#journal_time_edited'),
 		cal = modifyDate.find('.wrap-calendar'),
 		calVal = modifyDate.find('.wrap a');
 
@@ -24,6 +25,7 @@ function editdate(){
 
 	currentDate.hide();
 	modifyDate.css('display', '');
+	customTimeFlag.val('1');
 
 	f = document.updateForm;
 	var month = f.date_ymd_mm.selectedIndex || f.date_ymd_mm.value;
@@ -44,6 +46,7 @@ function editdate(){
 function revertdate() {
 	var currentDate = jQuery('#currentdate'),
 		modifyDate = jQuery('#modifydate'),
+		customTimeFlag = jQuery('#journal_time_edited'),
 		cal = modifyDate.find('.wrap-calendar');
 
 	if (cal.is(':lj-calendar')) {
@@ -52,6 +55,7 @@ function revertdate() {
 
 	currentDate.css('display', '');
 	modifyDate.hide();
+	customTimeFlag.val('0');
 
 	if (currentDate.data('dotime')) {
 		settime.interval = setInterval(function() { settime(); }, 1000);
