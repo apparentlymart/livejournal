@@ -855,6 +855,7 @@ JS_INIT
         }
         my $delayed_count = scalar(@$delayed_entries) - $delayed_skip;
         my $show_usual = ($items_per_page - $delayed_count) > 0 ? $items_per_page - $delayed_count : 0;
+        my $have_next_page = 0;
 
         if (($usejournal_u && ($LJ::MAX_SCROLLBACK_LASTN = 50000,
             my @recent = LJ::get_recent_items({
@@ -870,7 +871,6 @@ JS_INIT
                 ($only_me_checked) ? ('posterid' =>  $remote->{'userid'}) : (),
             }))) || $delayed_entries) {
             
-            my $have_next_page = 0;
             if (@recent > $show_usual){
                 $have_next_page = 1;
                 pop @recent;
@@ -905,7 +905,7 @@ JS_INIT
                                 delayed_next => $delayed_count > 0 ? $items_per_page + $delayed_skip : $delayed_skip,
                                 delayed_prev => $delayed_skip > 0 ? $delayed_skip - $items_per_page : 0,
                                 prev => $prev_page_start, 
-                                next => $next_page > 0 ? $next_page : 0
+                                next => $have_next_page ? $next_page : 0
         );
 
         my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
