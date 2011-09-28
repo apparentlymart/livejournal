@@ -2940,6 +2940,18 @@ fotki.storage.used.title=Used [[used]]
 
 fotki.storage.used.numbers=from [[max]]
 
+fotki.size.100.text=100x100
+
+fotki.size.300.text=300x300
+
+fotki.size.600.text=600x600
+
+fotki.size.900.text=900x900
+
+fotki.size.1000.text=1000x1000
+
+fotki.size.original.text=Original size
+
 fotki.promo.slogan=Organise your photos and images with LiveJournal PhotoAlbums...
 
 fotki.promo.description=Discover and share your photos with your friends and community.
