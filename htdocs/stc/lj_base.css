@@ -2912,6 +2912,7 @@ DIV.lj_ippu_app {
 		.b-contextualhover .b-contextualhover-userpic IMG {
 			max-width: 60px;
 			max-height: 60px;
+			border: none;
 			}
 	.b-contextualhover .b-contextualhover-title {
 		margin-bottom: 10px;
