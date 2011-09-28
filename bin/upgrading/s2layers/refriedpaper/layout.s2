@@ -1391,7 +1391,7 @@ function EntryPage::print_comments (Comment[] cs) {
     if (size $cs == 0) { return; }
     foreach var Comment c ($cs) {
         var int indent = ($c.depth - 1) * 25;
-        """<div id="$c.dom_id" style='margin-left: ${indent}px; margin-top: 5px'>"::;
+        """<div id="$c.dom_id" style='margin-left: ${indent}px; margin-top: 5px'>""";
         if (($c.spam) and (not $p.showspam) and (not $c.can_marked_as_spam) and (size($c.replies) > 0)) {
             """$*text_spam_comment""";
         } elseif (($c.spam) and (not $p.showspam)) {
