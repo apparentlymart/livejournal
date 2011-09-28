@@ -1993,8 +1993,8 @@ sub postevent {
     #    $eventtime lt $u->{'newesteventtime'} ) {
     #    return fail($err, 153, "You have an entry which was posted at $u->{'newesteventtime'}, but you're trying to post an entry before this. Please check the date and time of both entries. If the other entry is set in the future on purpose, edit that entry to use the \"Date Out of Order\" option. Otherwise, use the \"Date Out of Order\" option for this entry instead.");
     #}
-    
-    if ( $req->{props} && $req->{props}->{sticky} &&
+   
+    if ( $req->{sticky} &&
          $uowner->{'journaltype'} eq 'C' &&
           !( LJ::check_rel($ownerid, $posterid, 'S') ||
              LJ::check_rel($ownerid, $posterid, 'M') ) )
@@ -2137,13 +2137,16 @@ sub postevent {
         ## Scan post for spam
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
-
+    
+    warn LJ::D($req);
     if ( $req->{ver} > 1 ) {
         if ( LJ::DelayedEntry::is_future_date($req) ) {
             return fail($err, 215) unless $req->{tz};
 
             # if posting to a moderated community, store and bail out here
-            if ($uowner->{'journaltype'} eq 'C' && $need_moderated && !$flags->{'nomod'}) {
+            if ($uowner->{'journaltype'} eq 'C' &&
+                $need_moderated &&
+                !$flags->{'nomod'} && !$u->can_manage($uowner)) {
                 return fail($err, 322);
             }
 
@@ -2303,7 +2306,7 @@ sub postevent {
                      "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dberr) if $dberr;
 
-    if ( $req->{props} && $req->{props}->{sticky} &&
+    if ( $req->{sticky} &&
          $uowner->{'journaltype'} eq 'C' &&
           !( LJ::check_rel($ownerid, $posterid, 'S') ||
              LJ::check_rel($ownerid, $posterid, 'M') ) )
@@ -2312,7 +2315,7 @@ sub postevent {
     }
 
     # post become 'sticky post'
-    if ( $req->{props} && $req->{props}->{sticky} ) {
+    if ( $req->{sticky} ) {
         $uowner->set_sticky($jitemid);
     }
 
@@ -2615,7 +2618,7 @@ sub editevent {
 
         if ( $delayedid ) {
             return fail( $err, 217 ) if $req->{itemid} || $req->{anum};
-            return fail( $err, 215 ) unless $req->{timezone};                        
+            return fail( $err, 215 ) unless $req->{tz};                        
 
             $req->{ext}->{flags} = $flags;
             $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
@@ -2638,8 +2641,7 @@ sub editevent {
             if ( LJ::DelayedEntry::is_future_date($req) ) {
                 $entry->update($req);
                 $res->{type} = 'delayed';
-            }
-            else {
+            } else {
                 my $out = $entry->convert;
                 $res->{type}   = 'posted';
                 $res->{itemid} = $out->{res}->{itemid};
@@ -2647,7 +2649,7 @@ sub editevent {
             }
         }
 
-        return $res if $res->{type};        
+        return $res if $res->{type};
     }
 
     # fetch the old entry from master database so we know what we
@@ -2786,9 +2788,8 @@ sub editevent {
     my %curprops;
     LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
 
-    warn LJ::D($req);
     # make post sticky
-    if ( $req->{props} && $req->{props}->{sticky} ) {
+    if ( $req->{sticky} ) {
         if( $uowner->get_sticky_entry() != $itemid ) {
             $uowner->set_sticky($itemid);
             LJ::MemCache::delete([$ownerid, "log2lt:$ownerid"]);
@@ -4206,8 +4207,7 @@ sub syncitems {
     if ($date) {
         return fail($err, 203, "Invalid date format")
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
-    }
-    else {
+    } else {
         $date = "0000-00-00 00:00:00";
     }
 
@@ -4224,8 +4224,7 @@ sub syncitems {
         elsif ( $req->{type} eq 'delayed' ) {
             $table = 'delayed';
             $idfield = 'delayedid';
-        }
-        else {
+        } else {
             return fail( $err, 216 );
         }
     }
@@ -4246,14 +4245,16 @@ sub syncitems {
         $sth = $db->prepare("SELECT jitemid, propid, FROM_UNIXTIME(value) ".
                         "FROM logprop2 WHERE journalid=? ".
                         "AND propid IN ($p_calter->{'id'}, $p_revtime->{'id'}) ".
-                        "AND value+0 > UNIX_TIMESTAMP(?)");
-    $sth->execute($ownerid, $date);
-    while (my ($id, $prop, $dt) = $sth->fetchrow_array) {
-        my $entry = LJ::Entry->new($ownerid, jitemid => $id);
-        if ($prop == $p_calter->{'id'}) {
-            $cmt{$id} = [ 'C', $id, $dt, "update", $entry->anum ];
-        } elsif ($prop == $p_revtime->{'id'}) {
-            $item{$id} = [ 'L', $id, $dt, "update", $entry->anum ];
+                        "AND value+0 > UNIX_TIMESTAMP(?)");i
+    
+         $sth->execute($ownerid, $date);
+         while (my ($id, $prop, $dt) = $sth->fetchrow_array) {
+         my $entry = LJ::Entry->new($ownerid, jitemid => $id);
+            if ($prop == $p_calter->{'id'}) {
+                $cmt{$id} = [ 'C', $id, $dt, "update", $entry->anum ];
+            } elsif ($prop == $p_revtime->{'id'}) {
+                $item{$id} = [ 'L', $id, $dt, "update", $entry->anum ];
+            }
         }
     }
     my @ev = sort { $a->[2] cmp $b->[2] } (values %item, values %cmt);
@@ -4618,6 +4619,7 @@ sub authenticate
     $flags->{'u'} = $u;
     return 1;
 }
+
 
 sub fail
 {

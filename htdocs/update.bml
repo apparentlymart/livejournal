@@ -500,17 +500,16 @@ LIKE_FAQ
             $$body .= "<?p <strong>$ML{'.loggingin'}</strong> $ML{'.servermsg'} p?><div style='margin-left: 40px'><b>$login_message</b></div>";
         }
 
+        my $sticky = $POST{'sticky_type'} || $GET{'sticky_type'};
         my $timezone = $POST{'timezone'} || $GET{'timezone'};
         $timezone =  sprintf("%+.4d", $timezone);
         my %req = (
-                    'ver'         => $LJ::PROTOCOL_VER,
+                    'ver'         => 2,
                     'username'    => $user,
                     'password'    => $POST{'password'},
                     'usejournal'  => ($usejournalu) ? $usejournalu->user : undef,
+                    'sticky'      => $sticky,
                     'tz'          => $timezone, 
-                    'type'        => $POST{'type'} || $GET{'type'},
-                    'ver'         => 2,
-                    'type'        => 'posted',
                     'do_not_add_rss_friends' => $POST{'do_not_add_rss_friends'} ||
                                                     $GET{'do_not_add_rss_friends'}
                     );

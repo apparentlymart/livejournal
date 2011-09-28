@@ -439,6 +439,11 @@ sub verticals_list_for_ad {
     return @verticals_for_ad ? @verticals_for_ad : ();
 }
 
+sub tags {
+    my ($self) = @_;
+    return @{$self->{taglist}};
+}
+
 sub get_tags {
     my ($self) = @_;
     my $i = 1;

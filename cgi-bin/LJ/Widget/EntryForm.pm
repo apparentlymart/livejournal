@@ -381,6 +381,20 @@ sub render_userpics_block {
     return $out;
 }
 
+sub render_infobox_block {
+    my ($self) = @_;
+
+    my $out = '';
+
+    my $opts = $self->opts;
+
+    $out .= "<div id='infobox'>\n";
+    $out .= LJ::run_hook('entryforminfo', $opts->{'usejournal'}, $opts->{'remote'});
+    $out .= "</div><!-- end #infobox -->\n\n";
+
+    return $out;
+}
+
 sub render_metainfo_block {
     my ($self) = @_;
 
@@ -588,20 +602,6 @@ sub render_metainfo_block {
     $out .= "</ul></div>";
 }
 
-sub render_infobox_block {
-    my ($self) = @_;
-
-    my $out = '';
-
-    my $opts = $self->opts;
-
-    $out .= "<div id='infobox'>\n";
-    $out .= LJ::run_hook('entryforminfo', $opts->{'usejournal'}, $opts->{'remote'});
-    $out .= "</div><!-- end #infobox -->\n\n";
-
-    return $out;
-}
-
 sub render_top_block {
     my ($self) = @_;
 
@@ -609,8 +609,9 @@ sub render_top_block {
 
     $out .= LJ::Widget::Calendar->render();
     $out .= $self->render_userpics_block;
-    $out .= $self->render_metainfo_block;
     $out .= $self->render_infobox_block;
+    $out .= $self->render_metainfo_block;
+    
 
     return $out;
 }
@@ -781,7 +782,7 @@ sub render_options_block {
                 'type' => "check",
                 'class' => 'sticky_type',
                 'value' => 'sticky',
-                'name' => 'prop_sticky_type',
+                'name' => 'sticky_type',
                 'id' => 'sticky_type',
                 'selected' => $selected,
                 $opts->{'prop_opt_preformatted'} || $opts->{'event_format'},
@@ -1598,14 +1599,17 @@ sub render_body {
         my $site = shift;
 
         my $remote = LJ::get_remote();
+        if (!$remote) {
+            return;
+        }
         my $login_data = LJ::Protocol::do_request("login", {
                             "ver" => $LJ::PROTOCOL_VER,
-                            "username" => $self->remote->username,
+                            "username" => $remote->username,
                             "getpickws" => 1,
                             "getpickwurls" => 1,
                         }, undef, {
                             "noauth" => 1,
-                            "u" => $self->remote,
+                            "u" => $remote,
                         });
 
         my $logins = $login_data->{'usejournals'};

@@ -10,6 +10,7 @@ body<=
     BML::decl_params(_default => qr/./);
 
     use LJ::Fotki::Photo;
+    use LJ::DelayedEntry;
     use LJ::Fotki::Album;
     use LJ::Fotki::UserSpace;
     use LJ::Widget::Fotki::Upload;
@@ -39,7 +40,6 @@ body<=
     my $ret;
     my $getextra = undef;
 
-<<<<<<< .working
     LJ::need_res(qw(
                     stc/entry.css
                     stc/editjournal.css
@@ -52,18 +52,10 @@ body<=
                     js/scanner.js
                     js/photobucket_jw.js
                     ));
-=======
-    LJ::need_res( 'stc/entry.css', 
-                  'stc/widgets/selecttags.css', 
-                  'js/inputcomplete.js', 
-                  'js/jquery-ui-autocomplete.js', 
-                  'js/gears_init.js', 
-                  'js/scanner.js' );
 
     LJ::need_string(qw/
                         entryform.sticky_replace.edit
                         entryform.sticky.edit/);
->>>>>>> .merge-right.r20130
     
     return LJ::bad_input("You must be authenticated as a person.")
         unless $remote->is_personal || $remote->is_identity;
@@ -87,7 +79,51 @@ body<=
     $getextra = "?$getextra" if $getextra;
 
     my $start_from = $GET{'start_from'} || 0;
+    my $delayed_skip = $GET{'delayed_skip'} || 0;
     my $items_per_page = 20;
+    my $append_delayed = sub {
+        my ($u, $items, $delayed_entries) = @_;
+        my $delayed_appened = 0;
+        my @ordered;
+        
+        my $append_delayed = sub {
+            foreach my $ditem (@$delayed_entries) {
+                my $entry = LJ::DelayedEntry->get_entry_by_id($u, $ditem);
+                
+                push @ordered, {
+                                'alldatepart' => $entry->alldatepart ,
+                                'system_alldatepart' => $entry->system_alldatepart,
+                                'allowmask'   => $entry->allowmask,
+                                'posterid'    => $entry->posterid,
+                                'eventtime'   => $entry->posttime,
+                                'security'    => $entry->security,
+                                'logtime'     => $entry->logtime,
+                                'delayed_obj' => $entry,
+                                'delayedid'    => $ditem,
+                                'itemid'      => 0,
+                                'anum'        => 0,
+                               };
+            }
+        };
+    
+        if ( scalar @$items == 0 ) {
+            $append_delayed->();
+            return @ordered;
+        }
+    
+        foreach my $item (@$items) {
+            if ($u->get_sticky_entry() == $item->{itemid}) {
+                push @ordered, $item;
+                next;        }
+    
+            if (!$delayed_appened) {
+                $append_delayed->();
+                $delayed_appened = 1;
+            }
+            push @ordered, $item;
+        }
+        return @ordered;
+    };
 
     my $entry_chooser = sub {
         my $ref = shift;
@@ -97,16 +133,30 @@ body<=
 
         my @res = @$ref;
         my $show_ad = $opts{show_ad} ? 1 : 0;
+        my $delayed_prev = $opts{'delayed_prev'};
+        my $delayed_next = $opts{'delayed_next'};
 
         if ($opts{'prev'} || $opts{'next'}) {
         $ret .= "<p class='i-qotd-nav'>";
         if ($opts{'prev'}) {
-            $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{prev}'>prev</a>";
+            my $delayedext = '';
+            if ($delayed_prev) {
+                $delayedext = "&delayed_skip=$delayed_prev";
+            }
+            $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" .
+                    ($getextra ? "&" : "?") .
+                    "start_from=$opts{prev}$delayedext'>prev</a>";
         } else {
             $ret .=  "<span class='i-qotd-nav-prev i-qotd-nav-prev-dis'>prev</span>";
         }
         if ($opts{'next'}) {
-            $ret .= "<a class='i-qotd-nav-next' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{next}'>next</a>";
+            my $delayedext = '';
+            if ($delayed_next) {
+                $delayedext = "&delayed_skip=$delayed_next";
+            }
+            $ret .= "<a class='i-qotd-nav-next' href='$LJ::SITEROOT/editjournal.bml$getextra" .
+                    ($getextra ? "&" : "?") .
+                    "start_from=$opts{next}$delayedext'>next</a>";
         } else {
             $ret .= "<span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>";
         }
@@ -118,19 +168,18 @@ body<=
         }
         $ret .= "</div>";
 
-<<<<<<< .working
         $ret .= "<ul class='b-editentries'>" if @res;
         foreach my $e_raw (@res) {
-            my $entry = LJ::Entry->new_from_item_hash (LJ::load_user($usejournal) || $remote, $e_raw); 
-=======
-        my $ev_count = $res{'events_count'};
-        for (my $i=1; $i<=$ev_count; $i++) {
-            my $delayedid = $res{"events_${i}_delayedid"} || 0;
-            my $itemid = $res{"events_${i}_itemid"} || 0;
-            my $ditemid = $itemid * 256 + $res{"events_${i}_anum"};
->>>>>>> .merge-right.r20130
+            my $entry;
+            if ( $e_raw->{'itemid'} ) {
+                $entry = LJ::Entry->new_from_item_hash (LJ::load_user($usejournal) || $remote, $e_raw);
+            } elsif ($e_raw->{'delayedid'}) {
+                $entry = LJ::DelayedEntry->get_entry_by_id(LJ::load_user($usejournal,) || $remote, 
+                                                            $e_raw->{'delayedid'}, {'dateformat' => 'S2'});
+            } else {
+                die "unknown entry type";
+            }
 
-<<<<<<< .working
             my $edit_disable = 0;
             if (
                 ($e_raw->{'posterid'} != $remote->userid)
@@ -138,37 +187,19 @@ body<=
             ) {
                 $edit_disable++;
             }
-=======
-            $ret .= "<?hr?><table><tr valign='top'><td align='middle'>";
-            $ret .= "<form method='post' action='editjournal.bml$getextra'>\n";
-            if ($itemid) {
-                $ret .= LJ::html_hidden('itemid',$ditemid,'mode',"edit");
-                $ret .= LJ::html_submit("itemid-$ditemid",'Edit this Entry');
-
-            } else {
-                $ret .= LJ::html_hidden('delayedid',$delayedid,'mode',"edit");
-                $ret .= LJ::html_submit("delayedid-$delayedid",'Edit this Entry');
-            }
-
-            $ret .= "</form>";
-            $ret .= "</td><td>";
->>>>>>> .merge-right.r20130
 
             my $poster = $usejournal ? LJ::ljuser(LJ::load_userid($entry->posterid)) : "";
 
-<<<<<<< .working
             $ret .= "<li class='b-editentry'>";
 
-=======
-            if ( $res{"events_${i}_delayedid"} ) {
-                $ret .= BML::fill_template("typedelayed");
+            if ( $entry->is_delayed() ) {
+                  $ret .= BML::fill_template("typedelayed");
             }
-
-            if ( $res{"events_${i}_sticky"} ) {
+ 
+            if ( $entry->is_sticky())  {
                 $ret .= BML::fill_template("typesticky");
             }
 
->>>>>>> .merge-right.r20130
             ### security indicator
             my $sec = ' ';
             if ($entry->security eq "private") {
@@ -185,7 +216,12 @@ body<=
             $ret .= $sec;
 
             $ret .= "<p class='b-editentry-ctrls'>";
-            my $ditemid_get = $getextra ? ("$getextra&amp;itemid=" . $entry->ditemid) : ("?itemid=" . $entry->ditemid);
+            my $ditemid_get;
+            if ($entry) {
+                $ditemid_get = $getextra ? ("$getextra&amp;delayedid=" . $entry->delayedid) : ("?delayedid=" . $entry->delayedid);
+            } else {
+                $ditemid_get = $getextra ? ("$getextra&amp;itemid=" . $entry->ditemid) : ("?itemid=" . $entry->ditemid);
+            }
             if (!$edit_disable) {
                 $ret .= "<a href='editjournal.bml" . $ditemid_get . "&amp;mode=edit' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>";
             } else {
@@ -200,7 +236,13 @@ body<=
                 $ret .= BML::ml('.event.no_subject.title');
             }
             $ret .= "</a></h2>";
-            my ($year, $mon, $mday, $hour, $min) = split(/\D/, LJ::TimeUtil->alldatepart_s2($entry->{'eventtime'}));
+            my $alldateparts;
+            if ($entry->is_delayed) {
+                $alldateparts = $entry->alldatepart;
+            } else {
+                $alldateparts = LJ::TimeUtil->alldatepart_s2($entry->{'eventtime'});
+            }
+            my ($year, $mon, $mday, $hour, $min) = split(/\D/, $alldateparts);
             my $monthlong = BML::ml(LJ::Lang::month_long_langcode($mon));
             $ret .= "<p class='date'>" . $poster . " $monthlong $mday, $year, $hour:$min" . "</p>";
 
@@ -211,7 +253,6 @@ body<=
                 $ret .= "<p><b>Tags:</b> " . LJ::ehtml(join ", ", @taglist) . "</p>";
             }
             $ret .= "</li>";
-
         }
         if ($show_ad) {
             my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
@@ -222,12 +263,26 @@ body<=
         if ($opts{'prev'} || $opts{'next'}) {
         $ret .= "<p class='i-qotd-nav'>";
         if ($opts{'prev'}) {
-            $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{prev}'>prev</a>";
+            my $delayedext = '';
+            if ($delayed_prev) {
+                $delayedext = "&delayed_skip=$delayed_prev";
+            }
+
+            $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" .
+                     ($getextra ? "&" : "?") .
+                     "start_from=$opts{prev}$delayedext'>prev</a>";
         } else {
             $ret .=  "<span class='i-qotd-nav-prev i-qotd-nav-prev-dis'>prev</span>";
         }
         if ($opts{'next'}) {
-            $ret .= "<a class='i-qotd-nav-next' href='$LJ::SITEROOT/editjournal.bml$getextra" . ($getextra ? "&" : "?") . "start_from=$opts{next}'>next</a>";
+            my $delayedext = '';
+            if ($delayed_next) {
+                $delayedext = "&delayed_skip=$delayed_next";
+            }
+
+            $ret .= "<a class='i-qotd-nav-next' href='$LJ::SITEROOT/editjournal.bml$getextra" .
+                     ($getextra ? "&" : "?") .
+                      "start_from=$opts{next}$delayedext'>next</a>";
         } else {
             $ret .= "<span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>";
         }
@@ -260,7 +315,6 @@ body<=
             my $u_for_entry = $usejournal ? $usejournal_u : $remote;
             my $entry_obj;
             my %res = ();
-<<<<<<< .working
             LJ::do_request({ 'mode' => 'getevents',
                              'selecttype' => 'one',
                              'ver' => $LJ::PROTOCOL_VER,
@@ -273,8 +327,6 @@ body<=
                            { "noauth" => 1,
                              'u' => $remote }
                            );
-=======
->>>>>>> .merge-right.r20130
 
             if ($ditemid) {
                 # the 'itemid' form element is really an 'itemid'
@@ -288,12 +340,12 @@ body<=
                 LJ::do_request({ 'mode' => 'getevents',
                                  'selecttype' => 'one',
                                  'ver' => $LJ::PROTOCOL_VER,
-                                 'user' => $u->{'user'},
+                                 'user' => $remote->{'user'},
                                  'usejournal' => $usejournal,
                                  'itemid' => $itemid },
                                  \%res,
                                  { "noauth" => 1,
-                                   'u' => $u } );
+                                   'u' => $remote } );
             } else {
                 $entry_obj = LJ::DelayedEntry->get_entry_by_id($u_for_entry, $delayedid);
 
@@ -341,17 +393,12 @@ body<=
             my $disabled_save = 0;
             my $disabled_delete = 0;
             my $disabled_spamdelete = 0;
-<<<<<<< .working
             if ($usejournal && $res{'events_1_poster'} ne $remote->{'user'}) {
-                $disabled_delete = ! LJ::can_delete_journal_item($remote, $usejournal_u, $itemid);
-=======
-            if ($usejournal && $res{'events_1_poster'} ne $u->{'user'}) {
                 if ($entry_obj->is_delayed) {
-                    $disabled_delete = ! $entry_obj->can_delete_delayed_item($u, $usejournal_u);
+                    $disabled_delete = ! $entry_obj->can_delete_delayed_item($remote, $usejournal_u);
                 } else {
-                    $disabled_delete = ! LJ::can_delete_journal_item($u, $usejournal_u, $itemid);
+                    $disabled_delete = ! LJ::can_delete_journal_item($remote, $usejournal_u, $itemid);
                 }
->>>>>>> .merge-right.r20130
                 $disabled_save++;
             }
             $disabled_spamdelete = $disabled_delete || !$usejournal || ($res{'events_1_poster'} eq $remote->{'user'});
@@ -383,17 +430,13 @@ body<=
             if (!$spellcheck_html && ($POST{'action:save'} || $POST{'action:saveunsuspend'} || $POST{'action:delete'} || $POST{'action:deletespam'})) {
                 return LJ::bad_input($ML{'error.invalidform'}) unless LJ::check_form_auth();
 
+                my $timezone = $POST{'timezone'} || $GET{'timezone'};
+                $timezone =  sprintf("%+.4d", $timezone);
                 my %req = (
-<<<<<<< .working
-                            'ver' => $LJ::PROTOCOL_VER,
+                            'ver' => 2,
                             'username' => $remote->{'user'},
-=======
-                            'ver'        => $LJ::PROTOCOL_VER,
-                            'username'   => $u->{'user'},
->>>>>>> .merge-right.r20130
                             'usejournal' => $usejournal,
-                            'timezone'   => $POST{'delayed_timezone'} ||
-                                                $POST{'delayed_timezone'},
+                            tz           => $timezone,
                             'itemid'     => $itemid,
                             'delayedid'  => $delayedid,
                             'type'       => $POST{'type'} || $POST{'type'},
@@ -641,7 +684,6 @@ LIKE_FAQ
             LJ::need_string('entryform.close.confirm');
 
             $$head .= qq|
-<<<<<<< .working
     <script type="text/javascript">
     //<![CDATA[
         var seedurl='$LJ::SITEROOT/photobucket_cb.bml';
@@ -659,18 +701,6 @@ LIKE_FAQ
     LiveJournal.qotdText = "$escaped_qotd_text";
     </script>
 |;
-=======
-                    <script type="text/javascript">
-                    //<![CDATA[
-                        function init_update_bml () {
-                            $onload
-                        }
-                    //]]>
-                    LiveJournal.qotdText = "$escaped_qotd_text";
-                    </script>
-                };
->>>>>>> .merge-right.r20130
-
             $ret .= LJ::Widget::SettingWindow->render;
 
             return $ret;
@@ -770,7 +800,7 @@ LIKE_FAQ
         <input type='hidden' name='year' value='$year'/>
         <input type='hidden' name='month' value='$month'/>
         <input type='hidden' name='day' value='$day'/>";
-        $ret .= "<p>" . LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'maxlength' => '15', 'value' => $GET{'usejournal'} || $POST{'usejournal'}, 'class' => 'b-editentries-comm', 'placeholder' => $ML{'.input.usejournal'} });
+        $ret .= "<p>" . LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'mfaxlength' => '15', 'value' => $GET{'usejournal'} || $POST{'usejournal'}, 'class' => 'b-editentries-comm', 'placeholder' => $ML{'.input.usejournal'} });
         $ret .= LJ::html_submit(undef, $ML{'.btn.search'}) . "</p>";
         $ret .= "<p>" . LJ::html_check({ name => 'only_me', id => 'only_me',
                                 value => '1', selected =>  $only_me_checked });
@@ -802,9 +832,19 @@ JS_INIT
         my @post_ids = sort { $b <=> $a } ($usejournal_u ? $usejournal_u->get_post_ids : $remote->get_post_ids);
         $only_me_checked = 1 unless $remote->can_manage ($usejournal_u);
         my $next_page = 0;
-        while ($usejournal_u && ($LJ::MAX_SCROLLBACK_LASTN = 50000,
+
+        my $delayed_entries;
+        if ( $show eq 'recent' || !($year && $month && $day)) {
+            $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u) || [];
+        } else {
+            $delayed_entries = LJ::DelayedEntry->get_entries_for_day_row($usejournal_u, $year, $month, $day );
+        }
+        my $delayed_count = scalar(@$delayed_entries) - $delayed_skip;
+        my $show_usual = ($items_per_page - $delayed_count) > 0 ? $items_per_page - $delayed_count : 0;
+
+        while (($usejournal_u && ($LJ::MAX_SCROLLBACK_LASTN = 50000,
             my @recent = LJ::get_recent_items({
-                itemshow  => $items_per_page + 1,
+                itemshow  => $show_usual + 1,
                 err       => \$err,
                 userid    => $usejournal_u->{userid},
                 clusterid => $usejournal_u->{clusterid},
@@ -814,10 +854,16 @@ JS_INIT
                 order     => 'logtime',
                 %ymd_req,
                 ($only_me_checked) ? ('posterid' =>  $remote->{'userid'}) : (),
-            }))) {
+            }))) || $delayed_entries) {
 
             ## do not process entries twice
             @recent = grep { $entry_ids{$_->{'itemid'}} ? 0 : 1 } @recent;
+
+            my @delayed = splice(@$delayed_entries, $delayed_skip, $delayed_skip + $items_per_page);
+            if ($delayed_count > 0) {
+                @recent = $append_delayed->($usejournal_u, \@recent, \@delayed);
+            }
+            $delayed_entries = undef;
             last unless @recent;
 
             ## store fetched itemids
@@ -839,6 +885,8 @@ JS_INIT
 
         my $prev_page = $start_from + $items_per_page + 1;
         $ret .= $entry_chooser->(\@recent_entries,
+                                delayed_next => $delayed_count > 0 ? $items_per_page + $delayed_skip : $delayed_skip,
+                                delayed_prev => $delayed_skip > 0 ? $delayed_skip - $items_per_page : 0,
                                 prev => $prev_page < $post_ids[0] || ($prev_page - $post_ids[0] < $items_per_page) ? $prev_page : 0,
                                 'next' => $next_page > 0 ? $next_page : 0
         );

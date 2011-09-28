@@ -577,12 +577,15 @@ __________________________________________*/
 	top: 0;
 	}
 #updateForm #metainfo LI .title {
-	display: inline-block;
+	float: left;
 	min-width: 8.5em;
 	}
 #updateForm #metainfo LI .wrap {
 	overflow: hidden;
 	zoom: 1;
+	}
+#updateForm #metainfo LI.pkg {
+	display: block;
 	}
 
 /* LJ like buttons 

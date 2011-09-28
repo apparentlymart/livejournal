@@ -146,13 +146,17 @@
 /* Metainfo
 ----------------------------------------------- */
 #updateForm #metainfo-wrap {
-	float: left;
+	overflow: hidden;
+	#zoom: 1;
 	}
 	#updateForm #metainfo {
 		display: table;
-		margin: -3px 10px 20px 0;
+		margin: -3px 0 20px 0;
 		}
 		#updateForm #metainfo LI {
+			display: none;
+			}
+		#updateForm #metainfo LI.pkg {
 			display: table-row;
 			padding: 0;
 			margin: 0 0 10px 0;
@@ -192,7 +196,7 @@
 				border: none;
 				vertical-align: top;
 				}
-			#updateForm #metainfo LI #modifydate .wrap {
+			#updateForm #metainfo #modifydate .wrap {
 				padding-top: 1px;
 				}
 			#updateForm #metainfo LI .i-calendar {
