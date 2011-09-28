@@ -4465,6 +4465,15 @@ sub get_post_ids {
         }
     }
 
+    if ($opts{posterid}){
+        $query .= " AND posterid = ? ";
+        push @vals => $opts{posterid};
+    }
+    if ($opts{afterid}){
+        $query .= " AND jitemid > ? ";
+        push @vals => $opts{afterid};
+    }
+
     # filter by date, use revttime as it is indexed
     if ($opts{'start_date'} && $opts{'end_date'}) {
         # revttime is reverse event time
