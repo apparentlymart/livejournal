@@ -2138,7 +2138,6 @@ sub postevent {
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
     
-    warn LJ::D($req);
     if ( $req->{ver} > 1 ) {
         if ( LJ::DelayedEntry::is_future_date($req) ) {
             return fail($err, 215) unless $req->{tz};
