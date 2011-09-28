@@ -1058,17 +1058,13 @@ function EntryPage::print_comment (Comment c) {
 	}
 	"""</div>$*_{"HR"}""";
 }
+
 function EntryPage::print_comment_partial (Comment c) {
-	var string poster = defined $c.poster ? _ljuser($c.poster, "") : "<em>$*text_poster_anonymous</em>";
-	var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
-	if ($subj == "...") {
-		$subj = "…";
-	}
-	print safe """<a href="$c.permalink_url">$subj</a> <span class="emdash">—</span> $poster""";
-	var Link expand_link = $c->get_link("expand_comments");
-	if ($c.thread_url != "" and defined $expand_link) {
-		" ("; $c->print_expand_link(); ")";
-	}
+    var string poster = defined $c.poster ? _ljuser($c.poster, "") : """<em class="noposter">$*text_poster_anonymous</em>""";
+    var string subj = $c.subject != "" ? $c.subject : """<em class="nosubject">$*text_nosubject</em>""";
+    var string sep = """<span class="emdash">—</span>""";
+    print safe """<a href="$c.permalink_url">$subj</a> $sep $poster""";
+    $c->print_expand_collapse_links({ "expand"=>" $sep %_", "collapse"=>" $sep %_"});
 }
 
 function Page::print() {

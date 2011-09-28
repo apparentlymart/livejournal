@@ -1343,14 +1343,15 @@ function EntryPage::print_comment (Comment c) {
         }
         "</div>";
     }
-function EntryPage::print_comment_partial (Comment c) {
-    var string subject = $c.subject ? $c.subject : $*text_nosubject;
-    var string date = $c->time_display("long", "");
-    var string poster = isnull $c.poster ? $*text_poster_anonymous : $c.poster->as_string();
 
-    print safe """<a href="$c.permalink_url">$subject</a> $poster""";
+function EntryPage::print_comment_partial (Comment c) {
+    var string poster = defined $c.poster ? $c.poster->as_string() : """<em class="noposter">$*text_poster_anonymous</em>""";
+    var string subj = $c.subject != "" ? $c.subject : """<em class="nosubject">$*text_nosubject</em>""";
+    var string sep = "-";
+    print safe """<a href="$c.permalink_url">$subj</a> $sep $poster""";
     $c->print_expand_collapse_links({ "expand"=>" %_", "collapse"=>" %_"});
 }
+
 function EntryPage::print_comment_full (Comment c) {
     var Page p = get_page();
     var Color background; var Color color;
