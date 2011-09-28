@@ -986,35 +986,35 @@ function ReplyPage::print_body {
 	}
 	"""</div>""";
 }
+
 function EntryPage::print_comments (Comment[] cs) {
-	if (size $cs == 0) { return; }
-	foreach var Comment c ($cs) {
-		var int indent = ($c.depth - 1) * 25;
-		var string comment_classes = "comment-wrap";
-		$comment_classes = $comment_classes + ($c.depth % 2 ? " comment-odd" : " comment-even");
-		
-		if ($c.deleted) { $comment_classes = $comment_classes + " comment-deleted"; }
-		if ($c.screened) { $comment_classes = $comment_classes + " comment-screened"; }
-		if ($c.edited) { $comment_classes = $comment_classes + " comment-edited"; }
-		if ($c.frozen) { $comment_classes = $comment_classes + " comment-frozen"; }
-		if (not defined $c.poster) { $comment_classes = $comment_classes + " comment-anon"; }
-		if (not $c.full) { $comment_classes = $comment_classes + " comment-partial"; }
-		if (not(defined $c.userpic and $*comment_userpic_style != "off")) { $comment_classes = $comment_classes + " comment-woup"; }
-		if ($.entry.poster->equals($c.poster)) { $comment_classes = $comment_classes + " comment-author"; }
-		"""<div id="$c.dom_id" class="$comment_classes" style="margin-left:${indent}px;">""";
-		if ($c.screened and not $c.full and not viewer_is_owner()) {
-			"""<strong>(Screened comment)</strong>""";
-		} elseif ($c.deleted) {
-			"""<strong>(Deleted comment)</strong>""";
-		} elseif ($c.full) {
-			$this->print_comment($c);
-		} else {
-			$this->print_comment_partial($c);
-		}
-		"</div>";
-		$c->print_reply_container();
-		$this->print_comments($c.replies);
-	}
+    if (size $cs == 0) { return; }
+    foreach var Comment c ($cs) {
+        var int indent = ($c.depth - 1) * 25;
+        var string comment_classes = "comment-wrap";
+        $comment_classes = $comment_classes + ($c.depth % 2 ? " comment-odd" : " comment-even");
+        if ($c.deleted) { $comment_classes = $comment_classes + " comment-deleted"; }
+        if ($c.screened) { $comment_classes = $comment_classes + " comment-screened"; }
+        if ($c.edited) { $comment_classes = $comment_classes + " comment-edited"; }
+        if ($c.frozen) { $comment_classes = $comment_classes + " comment-frozen"; }
+        if (not defined $c.poster) { $comment_classes = $comment_classes + " comment-anon"; }
+        if (not $c.full) { $comment_classes = $comment_classes + " comment-partial"; }
+        if (not(defined $c.userpic and $*comment_userpic_style != "off")) { $comment_classes = $comment_classes + " comment-woup"; }
+        if ($.entry.poster->equals($c.poster)) { $comment_classes = $comment_classes + " comment-author"; }
+        """<div id="$c.dom_id" class="$comment_classes" style="margin-left:${indent}px;">""";
+        if ($c.screened and not $c.full and not viewer_is_owner()) {
+            """<strong>(Screened comment)</strong>""";
+        } elseif ($c.deleted) {
+            """<strong>(Deleted comment)</strong>""";
+        } elseif ($c.full) {
+            $this->print_comment($c);
+        } else {
+            $this->print_comment_partial($c);
+        }
+        """</div>""";
+        $c->print_reply_container();
+        $this->print_comments($c.replies);
+    }
 }
 
 function EntryPage::print_comment (Comment c) {

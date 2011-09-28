@@ -793,15 +793,14 @@ function EntryPage::print_body() {
     }
 }
 
-function EntryPage::print_comments(Comment[] cs) {
-    var Page p = get_page();
+function EntryPage::print_comments (Comment[] cs) {
     if (size $cs == 0) { return; }
-    print "<div style=\"margin-left: 25px;\">";
+    """<div style="margin-left: 25px;">""";
     foreach var Comment c ($cs) {
         $this->print_comment($c);
         $this->print_comments($c.replies);
     }
-    print "</div>";
+    """</div>""";
 }
 
 function EntryPage::print_comment(Comment c) {

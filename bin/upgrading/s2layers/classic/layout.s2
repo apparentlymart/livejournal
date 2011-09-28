@@ -945,9 +945,7 @@ function EntryPage::print_body () {
 }
 
 function EntryPage::print_comments (Comment[] cs) {
-    var Page p = get_page();
     if (size $cs == 0) { return; }
-
     foreach var Comment c ($cs) {
         $this->print_comment($c);
         $this->print_comments($c.replies);

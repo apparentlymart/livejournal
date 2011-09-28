@@ -858,15 +858,15 @@ function EntryPage::print_body() {
     $this->lay_print_pager();
 }
 
-function EntryPage::print_comments(Comment[] comments) {
+function EntryPage::print_comments (Comment[] cs) {
     """<ul class="comments">""";
-    foreach var Comment c ($comments) {
+    foreach var Comment c ($cs) {
         """<li class="commentsitem">""";
         $this->print_comment($c);
         if (size($c.replies) > 0) {
             $this->print_comments($c.replies);
         }
-        "</li>\n";
+        """</li>""";
     }
     """</ul>""";
 }
