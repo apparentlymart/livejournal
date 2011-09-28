@@ -1576,9 +1576,14 @@ JS
             insertPhotosData: $insert_photos_json,
             type: 'add'
         })
-        .bind('htmlready', function (event, htmlOutput) {
+        .bind('htmlready', function (event) {
             if (window.switchedRteOn) {
-                CKEDITOR.instances.draft.insertHtml(htmlOutput);
+                var html = event.htmlStrings,
+                    editor = CKEDITOR.instances.draft;
+
+                for (var i = 0, l = html.length; i < l; i++) {
+                    editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html[i], editor.document));
+                }
             } else {
                 jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
             }
