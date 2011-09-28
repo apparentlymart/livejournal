@@ -78,7 +78,7 @@ sub RecentPage
     if ( $u->has_sticky_entry && !$skip) {
         $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow - 1) ;
     } elsif ( $u->has_sticky_entry && $skip) {
-        $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip - 1, $itemshow + 1);
+        $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip - 1, $itemshow);
     } else {
         $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow + 1);
     }
@@ -96,6 +96,9 @@ sub RecentPage
     my $itemshow_usual = $itemshow - scalar(@$delayed_entries);
     if ( $itemshow <= scalar(@$delayed_entries) ) {
             $itemshow_usual -= 1;
+    }
+    if ( $itemshow_usual < 0 ) {
+        $itemshow_usual = 0;
     }
 
     ## load the itemids
@@ -167,7 +170,7 @@ sub RecentPage
          !$u->has_sticky_entry()) ) {
         __append_delayed( $u, $delayed_entries,  $p->{'entries'} );
     }
-    
+  warn scalar (@items); 
   ENTRY:
     foreach my $item (@items)
     {
