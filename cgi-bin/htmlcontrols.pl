@@ -236,7 +236,7 @@ sub html_check
     if ($opts->{'selected'}) { $ret .= " checked='checked'"; }
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
     foreach (grep { ! /^(disabled|type|selected|raw|noescape|label)$/ } keys %$opts) {
-        $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
+        $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"" if $_;
     }
     $ret .= "$disabled />";
     my $e_label = ($ehtml ? ehtml($opts->{'label'}) : $opts->{'label'});

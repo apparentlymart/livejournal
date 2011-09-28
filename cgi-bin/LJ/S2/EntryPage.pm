@@ -409,10 +409,10 @@ sub EntryPage_entry
 
     my $uri = LJ::Request->uri;
 
-    my ($ditemid, $itemid);
+    my ($ditemid, $itemid, $delayedid);
     my $entry = $opts->{ljentry};  # only defined in named-URI case.  otherwise undef.
 
-    unless ($entry || $uri =~ /(\d+)\.html/) {
+    unless ($entry || $uri =~ /(\d+)\.html/ || $uri =~ /d(\d+)\.html/) {
         $opts->{'handler_return'} = 404;
         LJ::Request->pnotes ('error' => 'e404');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
@@ -421,7 +421,7 @@ sub EntryPage_entry
 
     $entry ||= LJ::Entry->new($u, ditemid => $1);
 
-    unless ($entry and $entry->correct_anum) {
+    unless ($entry and ($entry->correct_anum or $entry->is_delayed)) {
         $opts->{'handler_return'} = 404;
         LJ::Request->pnotes ('error' => 'e404');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
@@ -430,6 +430,7 @@ sub EntryPage_entry
 
     $ditemid = $entry->ditemid;
     $itemid  = $entry->jitemid;
+    $delayedid = $entry->delayedid;
 
     my $pu = $entry->poster;
 
@@ -512,7 +513,9 @@ sub EntryPage_entry
         while (my ($kwid, $kw) = each %$tag_map) {
             push @taglist, Tag($u, $kwid => $kw);
         }
-        LJ::run_hooks('augment_s2_tag_list', u => $u, jitemid => $itemid, tag_list => \@taglist);
+        if (!$delayedid) {
+            LJ::run_hooks('augment_s2_tag_list', u => $u, jitemid => $itemid, tag_list => \@taglist);
+        }
         @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
     }
 
@@ -551,12 +554,15 @@ sub EntryPage_entry
     my $s2entry = Entry($u, {
         'subject' => $subject,
         'text' => $event,
-        'dateparts' => LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql),
-        'system_dateparts' => LJ::TimeUtil->alldatepart_s2($entry->logtime_mysql),
+        'dateparts' => $entry->is_delayed ? $entry->alldatepart :
+                    LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql),
+        'system_dateparts' => $entry->is_delayed ? $entry->system_alldatepart :
+                    LJ::TimeUtil->alldatepart_s2($entry->logtime_mysql),
         'security' => $entry->security,
         'allowmask' => $entry->allowmask,
         'props' => $entry->props,
         'itemid' => $ditemid,
+        'delayedid' => $entry->is_delayed ? $entry->delayedid : undef ,
         'comments' => $comments,
         'journal' => $userlite_journal,
         'poster' => $userlite_poster,

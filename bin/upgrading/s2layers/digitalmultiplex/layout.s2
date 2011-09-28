@@ -606,9 +606,11 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
     var string time = $p.view != "day" ? $e.time->date_format("med") + " @ " : "";
     $time = $time + $e.time->time_format();
     var string subject = $e.subject;
-    if ($e.security) {
-        $subject = "$e.security_icon $subject";
-    }
+
+    if ($e.delayed) { $subject = "$e.delayed_icon $subject"; }
+    if ($e.sticky) { $subject = "$e.sticky_icon $subject"; }
+    if ($e.security) { $subject = "$e.security_icon $subject"; }
+
     if ($subject) {
        if ($p.view != "entry" and not $subject->contains("<a ")) {
           $subject = """<span class="subject"><a href="$e.permalink_url" class="subj-link">$subject</a></span>""";
@@ -1107,10 +1109,15 @@ function RecentPage::lay_sidebar_view_summary() : string {
     var string return;
     if (not $*sidebar_disable_recent_summary) {
         foreach var Entry e ($.entries) {
+            var string posticons = "";
+            if ($e.delayed) { $posticons = $posticons + " $e.delayed_icon"; }
+            if ($e.sticky) { $posticons = $posticons + " $e.sticky_icon"; }
+            if ($e.security) { $posticons = $posticons + " $e.security_icon"; }
+            
             if ($e.subject != "") {
-                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url">$e.subject</a> $e.security_icon</td></tr>""";
+                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url">$e.subject</a> $posticons</td></tr>""";
             } else {
-                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url"><em>$*text_nosubject</em></a> $e.security_icon</td></tr>""";
+                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url"><em>$*text_nosubject</em></a> $posticons</td></tr>""";
             }
         }
     }
@@ -1562,10 +1569,15 @@ function DayPage::lay_sidebar_view_summary() : string {
     var string return;
     if ($.has_entries) {
         foreach var Entry e ($.entries) {
+            var string posticons = "";
+            if ($e.delayed) { $posticons = $posticons + " $e.delayed_icon"; }
+            if ($e.sticky) { $posticons = $posticons + " $e.sticky_icon"; }
+            if ($e.security) { $posticons = $posticons + " $e.security_icon"; }
+
             if ($e.subject != "") {
-                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url">$e.subject</a> $e.security_icon</td></tr>""";
+                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url">$e.subject</a> $posticons</td></tr>""";
             } else {
-                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url"><em>$*text_nosubject</em></a> $e.security_icon </td></tr>""";
+                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url"><em>$*text_nosubject</em></a> $posticons </td></tr>""";
             }
         }
     }

@@ -40,12 +40,9 @@
 }
 #updateForm label.left {
     width: auto;
-    min-width: 6.5em;
-    line-height: 1.8em;
+	padding-right: 10px;
+    line-height: 1.6em;
     font-size: 14px;
-}
-* html #updateForm label.left {
-    width: 6.5em;
 }
 #updateForm label.options {
     font-size: 11px;
@@ -67,7 +64,7 @@
 #updateForm span.inputgroup-right {
     display: block; float: right; width: 49%;  position: relative;
 }
-#updateForm span.inputgroup-right label.left {
+#updateForm span.inputgroup-right label.title {
     width: 11em;
 }
 #updateForm a.helplink {
@@ -94,7 +91,6 @@
     width: 100px;
 }
 #lj_userpicselect {
-    float: left;
     font-size: 85%;
     color: #00C;
     margin: 4px 0px 0px 5px;
@@ -146,12 +142,106 @@
     font-size: 90%;
     line-height: 110%;
 }
-#metainfo {
-    float: left;
-    margin-right: 10px;
-    width: 55%;
-    margin-bottom: 20px;
-}
+
+/* Metainfo
+----------------------------------------------- */
+#updateForm #metainfo-wrap {
+	float: left;
+	}
+	#updateForm #metainfo {
+		display: table;
+		margin: -3px 10px 20px 0;
+		}
+		#updateForm #metainfo LI {
+			display: table-row;
+			padding: 0;
+			margin: 0 0 10px 0;
+			list-style: none;
+			line-height: 22px;
+			}
+			#updateForm #metainfo LI .title {
+				display: table-cell;
+				padding: 3px 7px 0 0;
+				vertical-align: top;
+				text-align: right;
+				line-height: 20px;
+			    font-size: 14px;
+				}
+			#updateForm #metainfo LI .wrap {
+				display: table-cell;
+				padding: 3px;
+				vertical-align: top;
+				}
+			#updateForm #metainfo LI .current-username {
+				line-height: 20px;
+				font-size: 14px;
+				}
+			#updateForm #metainfo LI .select {
+				float: none;
+				display: inline-block;
+				vertical-align: top;
+				}
+			#updateForm #metainfo LI .select-timezone {
+				width: 133px;
+				font-size: 12px;
+				}
+			#updateForm #metainfo LI .helplink {
+				float: none;
+				display: inline-block;
+				margin: 4px 0 0 4px;
+				border: none;
+				vertical-align: top;
+				}
+			#updateForm #metainfo LI #modifydate .wrap {
+				padding-top: 1px;
+				}
+			#updateForm #metainfo LI .i-calendar {
+				display: inline-block;
+				width: 10px;
+				height: 10px;
+				margin-left: 5px;
+				background: url(/img/widget/wishlist/date-icon.gif?ver=1) no-repeat;
+				vertical-align: moddle;
+				cursor: pointer;
+				}
+			#updateForm #metainfo LI .datetime {
+				margin-left: 10px;
+				vertical-align: middle;
+				}
+				#updateForm #metainfo LI .datetime .input-num {
+					width: 22px;
+					padding: 2px 1px;
+					text-align: center;
+					}
+				#updateForm #metainfo LI .datetime .de {
+					white-space: nowrap;
+					font-size: 11px;
+					}
+			#updateForm #metainfo LI .timezone {
+				display: block;
+				padding-top: 5px;
+				}
+
+/* Options
+----------------------------------------------- */
+#updateForm #options {
+	padding: 10px;
+	margin: 0;
+	}
+	#updateForm #options LI {
+		padding: 0;
+		margin: 0 0 5px 0;
+		list-style: none;
+		}
+		#updateForm #options LI .title {
+			float: left;
+			min-width: 6em;
+			padding: 3px 7px 0 0;
+			}
+		#updateForm #options LI .i-prop-selecttags {
+			margin-top: 3px;
+			}
+
 #currentdate {
     display: none;
 }
@@ -205,12 +295,6 @@
     border: 1px solid #6699CC;
     border-bottom: none;
 	text-decoration:none;
-}
-#metainfo, #metainfo label, #metainfo input.text, #metainfo strong {
-    font-size: 14px;
-}
-#metainfo p, #metainfo label, #metainfo label.left {
-    line-height: 1.5em ;
 }
 #subject {
     width: 52%;
@@ -478,13 +562,17 @@
     border: 1px solid #aaa;    
     padding: 7px 10px;
     margin-top: 10px;
-    text-align: center;
     position: relative;
 }
 #security_container {
-    width: 600px;
-    margin: 0 auto;
-}
+	overflow: hidden;
+	}
+	#security_container .security-options {
+	    float: left;
+		}
+	#security_container .submit-options {
+	    float: right;
+		}
 #security {
     float: none !important;
 }

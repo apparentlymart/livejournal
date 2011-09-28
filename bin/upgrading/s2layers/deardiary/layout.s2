@@ -782,9 +782,11 @@ function Entry::lay_print_poster() {
 }
 
 function Entry::lay_print_icon() {
-    if ($.security != "") {
+    if ($.security != "" or $.delayed or $.sticky) {
         """<div class="entryicon">""";
-        print $.security_icon->as_string("[$.security]");
+        if ($.delayed) { "$.delayed_icon "; }
+        if ($.sticky) { "$.sticky_icon "; }
+        if ($.security) { "$.security_icon"; }
         "</div>";
     }
 }

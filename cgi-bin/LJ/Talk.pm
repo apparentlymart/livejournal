@@ -16,6 +16,7 @@ use LJ::Talk::Author;
 use LJ::TimeUtil;
 use LJ::Pay::Wallet;
 use LJ::GeoLocation;
+use LJ::DelayedEntry;
 
 use constant PACK_FORMAT => "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state 
 
@@ -120,14 +121,21 @@ sub link_bar
     my $jarg = "journal=$u->{'user'}&";
     my $jargent = "journal=$u->{'user'}&amp;";
 
-    my $entry = LJ::Entry->new($u, ditemid => $itemid);
+    my $entry;
+    if ($opts->{delayedid}) {
+        $entry = LJ::DelayedEntry->get_entry_by_id($u, $opts->{delayedid});
+    } else {
+        $entry = LJ::Entry->new($u, ditemid => $itemid);
+    }
 
     # << Previous
-    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=prev", "prev_entry");
-    $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous' />\n";
+    if (!$entry->is_delayed) {
+        push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=prev", "prev_entry");
+        $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous' />\n";
+    }
 
     # memories
-    unless ($LJ::DISABLED{'memories'}) {
+    unless ($LJ::DISABLED{'memories'} || $entry->is_delayed) {
         push @linkele, $mlink->("$LJ::SITEROOT/tools/memadd.bml?${jargent}itemid=$itemid", "memadd");
     }
 
@@ -137,36 +145,47 @@ sub link_bar
     if (defined $remote && ($remote && $remote->can_manage($u) ||
                             (LJ::u_equals($remote, $up) && LJ::can_use_journal($up->{userid}, $u->{user}, {}))))
     {
-        push @linkele, $mlink->("$LJ::SITEROOT/editjournal.bml?${jargent}itemid=$itemid", "editentry");
+        if ($entry->is_delayed) {
+            push @linkele, $mlink->("$LJ::SITEROOT/editjournal.bml?${jargent}delayedid=" . $entry->delayedid, "editentry");
+        } else {
+            push @linkele, $mlink->("$LJ::SITEROOT/editjournal.bml?${jargent}itemid=$itemid", "editentry");
+        }
     }
 
     # edit tags
     unless ($LJ::DISABLED{tags}) {
         if (defined $remote && LJ::Tags::can_add_entry_tags($remote, $entry)) {
-            push @linkele, $mlink->("$LJ::SITEROOT/edittags.bml?${jargent}itemid=$itemid", "edittags");
+            if ($entry->is_delayed) {
+                push @linkele, $mlink->("$LJ::SITEROOT/edittags.bml?${jargent}delayedid=" . $entry->delayedid, "edittags");
+            } else {
+                push @linkele, $mlink->("$LJ::SITEROOT/edittags.bml?${jargent}itemid=$itemid", "edittags");
+            }
         }
     }
 
-    if ( LJ::is_enabled('sharing') && $entry->is_public ) {
+    if ( LJ::is_enabled('sharing') && $entry->is_public && !$entry->is_delayed ) {
         LJ::Share->request_resources;
         push @linkele, $mlink->( '#', 'share' )
                      . LJ::Share->render_js( { 'entry' => $entry } );
     }
 
-    if ($remote && $remote->can_use_esn) {
+    if ($remote && $remote->can_use_esn && !$entry->is_delayed) {
         my $img_key = $remote->has_subscription(journal => $u, event => "JournalNewComment", arg1 => $itemid, require_active => 1) ?
             "track_active" : "track";
         push @linkele, $mlink->("$LJ::SITEROOT/manage/subscriptions/entry.bml?${jargent}itemid=$itemid", $img_key);
     }
 
-    if ($remote && $remote->can_see_content_flag_button( content => $entry )) {
+    if (!$entry->is_delayed && $remote && $remote->can_see_content_flag_button( content => $entry )) {
         my $flag_url = LJ::ContentFlag->adult_flag_url($entry);
         push @linkele, $mlink->($flag_url, 'flag');
     }
 
     ## Next
-    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
-    $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next' />\n";
+    if (!$entry->is_delayed)
+    {
+        push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
+        $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next' />\n";
+    }
 
     if (@linkele) {
         $ret .= BML::fill_template("standout", {

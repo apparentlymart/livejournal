@@ -592,7 +592,13 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
      if ($p.view != "entry" and not $subject->contains("<a ")) {
        """<a href="$e.permalink_url" class="subj-link">$subject</a>""";}
      else { "$subject"; }
-    "</span> $e.security_icon</h3>";
+    "</span>";
+
+    if ($e.delayed) { " $e.delayed_icon"; }
+    if ($e.sticky) { " $e.sticky_icon"; }
+    if ($e.security) { " $e.security_icon"; }
+
+    "</h3>";
 
     if ($p.view == "entry" and $*show_entrynav_icons)
     {

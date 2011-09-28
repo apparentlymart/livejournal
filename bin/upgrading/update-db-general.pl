@@ -998,6 +998,38 @@ CREATE TABLE talkleft_xfp (
 )
 EOC
 
+register_tablecreate("delayedlog2", <<'EOC'); # clustered
+CREATE TABLE delayedlog2 (
+    journalid INT UNSIGNED NOT NULL,
+    delayedid MEDIUMINT UNSIGNED NOT NULL,
+    PRIMARY KEY (journalid, delayedid),
+    posterid    INT UNSIGNED NOT NULL,
+    subject     CHAR(30),
+    logtime     DATETIME,
+    posttime    DATETIME,
+    security    enum('public','private','usemask') NOT NULL default 'public',
+    allowmask   int(10) unsigned NOT NULL default '0',
+    year        smallint(6) NOT NULL default '0',
+    month       tinyint(4) NOT NULL default '0',
+    day         tinyint(4) NOT NULL default '0',
+    rlogtime    int(10) unsigned NOT NULL default '0',
+    revptime    int(10) unsigned NOT NULL default '0',
+    KEY         (journalid, logtime, posttime, year, month, day),
+    KEY         `rlogtime` (`journalid`,`rlogtime`),
+    KEY         `revptime` (`journalid`,`revptime`)
+)
+EOC
+
+# delayed post Storable object (all props/options)
+register_tablecreate("delayedblob2", <<'EOC'); # clustered
+CREATE TABLE delayedblob2 (
+    journalid INT UNSIGNED NOT NULL,
+    delayedid INT UNSIGNED NOT NULL,
+    PRIMARY KEY (journalid, delayedid),
+    request_stor    MEDIUMBLOB
+)
+EOC
+
 register_tabledrop("ibill_codes");
 register_tabledrop("paycredit");
 register_tabledrop("payments");

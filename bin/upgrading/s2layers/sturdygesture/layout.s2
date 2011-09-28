@@ -590,11 +590,9 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor) {
 
     """<div class="box"><h2 style="color: $fgcolor; background: $bgcolor;">$datetime """;
 
-    if ($e.security != "") {
-        print """<img src="$e.security_icon.url" align="right" """+
-              """width="$e.security_icon.width" height="$e.security_icon.height" """+
-              """alt="[$e.security]" />""";
-    }
+    if ($e.delayed) { " $e.delayed_icon "; }
+    if ($e.sticky) { " $e.sticky_icon "; }
+    if ($e.security) { " $e.security_icon "; }
 
     if ($p.view == "friends" or
         $e.subject != "" or

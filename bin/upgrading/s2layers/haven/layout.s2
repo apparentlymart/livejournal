@@ -1065,11 +1065,13 @@ function format_replyto(Page p, Entry e, EntryLite el) : string
 {
     var string replyto = "";
 
-    var Image security;
+    var string security;
     if ($el isa Entry) {
         var Entry en = $el as Entry;
-
-        $security = $en.security_icon;
+        
+        if ($en.delayed) {  $security = $security + "$en.delayed_icon "; }
+        if ($en.sticky) { $security = $security + " $en.sticky_icon "; }
+        if ($en.security) { $security = $security + " $en.security_icon"; }
     }
 
     # Named anchor to link from page summary
@@ -1129,7 +1131,12 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
     println """<div class="entry">""";
     var string subject = $e.subject != "" ? $e.subject : $*text_nosubject;
     var string time    = $e.time->time_format();
-    println """<h4 class="subject">$e.security_icon """;
+    println """<h4 class="subject">""";
+
+    if ($e.delayed) { "$e.delayed_icon "; }
+    if ($e.sticky) { "$e.sticky_icon "; }
+    if ($e.security) { "$e.security_icon "; }
+
     if ($p.view != "entry" and not $subject->contains("<a ")) {
         print "<a href='$e.permalink_url' class='subj-link'>$subject</a>";
     } else { print "$subject"; }
@@ -1368,7 +1375,11 @@ function RecentPage::lay_sidebar_view_summary() : string
     foreach var Entry e ($.entries) {
         var string subject = $e.subject != "" ? $e.subject : $*text_nosubject;
         $return = $return + "&rarr;";
-        if ($e.security) { $return = $return + " $e.security_icon"; }
+
+        if ($e.delayed) { $return = $return + " $e.delayed_icon "; }
+        if ($e.sticky) { $return = $return + " $e.sticky_icon "; }
+        if ($e.security) { $return = $return + " $e.security_icon "; }
+
         $return = $e.poster.username != $.journal.username ?
                   $return + """ $e.poster:<br /><a href="#entry_$e.itemid">$subject</a><br />""" :
                   $return + """ <a href="#entry_$e.itemid">$subject</a><br />""";
@@ -1403,7 +1414,11 @@ function FriendsPage::lay_sidebar_view_summary() : string
         var string poster = $e.poster.username != $e.journal.username ? $e.poster->as_string() + ", posting in " + $e.journal->as_string() : $e.journal->as_string();
         var string subject = $e.subject != "" ? $e.subject : $*text_nosubject;
         $return = $return + "&rarr;";
-        if ($e.security) { $return = $return + " $e.security_icon"; }
+
+        if ($e.delayed) { $return = $return + " $e.delayed_icon "; }
+        if ($e.sticky) { $return = $return + " $e.sticky_icon "; }
+        if ($e.security) { $return = $return + " $e.security_icon "; }
+
         $return = $return + """ $poster:<br /><a href="#entry_$e.itemid">$subject</a><br />""";
     }
     return $return;

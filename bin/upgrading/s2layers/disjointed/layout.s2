@@ -907,9 +907,11 @@ function EntryLite::lay_make_icon() : string {
   }
   if($this isa Entry) {
     var Entry en = $this as Entry;
-    if(defined $en.security_icon) {
-      $icon = $en.security_icon + " ";
-    }
+
+    if ($en.delayed) { "$en.delayed_icon "; }
+    if ($en.sticky) { "$en.sticky_icon "; }
+    if ($en.security) { "$en.security_icon "; }
+
   }
   return $icon;
 }
@@ -1712,7 +1714,11 @@ function MonthPage::print_body {
         if (not $e.poster->equals($e.journal)) {
           $dissed = $dissed + $e.poster + " ";
         }
-        $dissed = $dissed + "$e.security_icon";
+
+        if ($e.delayed) { $dissed = $dissed + "$e.delayed_icon "; }
+        if ($e.sticky) { $dissed = $dissed + "$e.sticky_icon "; }
+        if ($e.security) { $dissed = $dissed + "$e.security_icon"; }
+
         if ($e.subject != "") {
           $dissed = $dissed + " <a href=\"$e.permalink_url\">" + $e->plain_subject() + "</a>";
         } else {

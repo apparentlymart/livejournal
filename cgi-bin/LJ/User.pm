@@ -6220,6 +6220,32 @@ sub is_spamprotection_enabled {
     return 0;
 }
 
+# return sticky entries existing
+sub has_sticky_entry {
+    my ($self) = @_;
+    my $has_sticky  = !!$self->prop("sticky_entries") || 0;
+    return int $has_sticky;
+}
+
+# returns sticky entry jitemid
+sub get_sticky_entry {
+    my ($self) = @_;
+    return $self->prop("sticky_entries") || '';
+}
+
+# returns sticky entry jitemid
+sub remove_sticky {
+    my ($self) = @_;
+    $self->clear_prop("sticky_entries");
+}
+
+# set sticky entry? 
+sub set_sticky {
+    my ($self, $itemid) = @_;
+    die "itemid is not set" unless ($itemid);
+    $self->set_prop( sticky_entries => $itemid );
+}
+
 package LJ;
 
 use Carp;
@@ -7082,7 +7108,7 @@ sub remote_has_priv
 #       'O' == pOrtal box id, 'V' == 'vgift', 'E' == ESN subscription id
 #       'Q' == Notification Inbox, 'G' == 'SMS messaGe'
 #       'D' == 'moDule embed contents', 'W' == 'Wish-list element'
-#       'F' == Photo ID, 'A' == Album ID
+#       'F' == Photo ID, 'A' == Album ID, 'Y' == delaYed entries
 #
 # FIXME: both phonepost and vgift are ljcom.  need hooks. but then also
 #        need a separate namespace.  perhaps a separate function/table?
@@ -7093,7 +7119,7 @@ sub alloc_user_counter
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMPSRKCOVEQGDWFA]$/;             #
+    return undef unless $dom =~ /^[LTMPSRKCOVEQGDWFAY]$/;             #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -7216,6 +7242,9 @@ sub alloc_user_counter
                                       undef, $uid);
     } elsif ($dom eq "A") {
         $newmax = $u->selectrow_array("SELECT MAX(album_id) FROM fotki_albums WHERE userid=?",
+                                      undef, $uid);
+    } elsif ($dom eq "Y") {
+        $newmax = $u->selectrow_array("SELECT MAX(delayedid) FROM delayedlog2 WHERE journalid=?",
                                       undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
@@ -7798,6 +7827,12 @@ sub get_daycounts
     my $list = LJ::MemCache::get($memkey);
     if ($list) {
         my $list_create_time = shift @$list;
+        my $sth = LJ::DelayedEntry->get_daycount_query($u, $secwhere);
+        if ($sth) {
+            while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
+                push @$list, [ int($y), int($m), int($d), int($c) ];
+            }
+        }
         return $list if $list_create_time >= $u->timeupdate;
     }
 
@@ -7828,7 +7863,18 @@ sub get_daycounts
         # so they store smaller in memcache
         push @days, [ int($y), int($m), int($d), int($c) ];
     }
+
     LJ::MemCache::set($memkey, [time, @days]);
+
+    # not cached part
+    $sth = LJ::DelayedEntry->get_daycount_query($u, $secwhere);
+    if ($sth) {
+        while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
+            # we force each number from string scalars (from DBI) to int scalars,
+            # so they store smaller in memcache
+            push @days, [ int($y), int($m), int($d), int($c) ];
+        }
+    }
     $release_lock->();
     return \@days;
 }

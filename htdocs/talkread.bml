@@ -28,15 +28,26 @@ body<=
         $GET{'thread'} =~ s/^3D//;
     }
 
+    if ($GET{'delayedid'} =~ s/^3D//) {
+        $GET{'journal'} =~ s/^3D//;
+        $GET{'thread'} =~ s/^3D//;
+    }
+
     LJ::Request->notes("codepath" => "bml.talkread");
 
     my $uri = BML::get_uri();
     my $itemid;
+    my $delayedid;
     my $old_url = 0;
 
     if ($uri =~ m!/(\d+)\.html$!) {
         $itemid = $1;
         $GET{'itemid'} = $itemid;
+        $GET{'journal'} = LJ::Request->notes("_journal");
+        BML::set_language_scope("/talkread.bml");
+    } elsif ($uri =~ m!/d(\d+)\.html$!) {
+        $delayedid = $1;
+        $GET{'delayedid'} = $delayedid;
         $GET{'journal'} = LJ::Request->notes("_journal");
         BML::set_language_scope("/talkread.bml");
     } else {
@@ -59,6 +70,9 @@ body<=
         my $args = "";
         if (%args) {
             $args = "?" . join("&", map { LJ::eurl($_) . "=" . LJ::eurl($args{$_}) } keys %args);
+        }
+        if ($delayedid) {
+            return BML::redirect($u->journal_base . "/d$delayedid.html$args");
         }
         return BML::redirect($u->journal_base . "/$ditemid.html$args");
     }
@@ -91,14 +105,19 @@ body<=
         $ditemid = $init->{'ditemid'} + 0;
     }
 
-    my $entry = LJ::Entry->new($u, ditemid => $ditemid);
+    my $entry;
+    if ($itemid) {
+        $entry = LJ::Entry->new($u, ditemid => $ditemid);
+    } else {
+        $entry = LJ::DelayedEntry->get_entry_by_id($u, $delayedid);
+    }
 
     $u->preload_props("opt_blockrobots", "adult_content", "admin_content_flag") if $u->is_visible;
     if (!$u->is_visible || $u->should_block_robots || ($entry && $entry->should_block_robots)) {
         $$head .= LJ::robot_meta_tags();
     }
 
-    unless ($item && $item->{'anum'} == $init->{'anum'}) {
+    unless ( $entry || ($item && $item->{'anum'} == $init->{'anum'}) ) {
         LJ::Request->pnotes ('error' => 'e404');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
         BML::return_error_status(404);
@@ -111,11 +130,20 @@ body<=
     $$head .= "<meta property=\"og:description\" name=\"description\" content=\"" . LJ::ehtml( $meta{'description'} ) . "\" />\n";
     $$head .= "<meta property=\"og:image\" content=\"" . LJ::ehtml( $meta{'image'} ) . "\" />\n";
 
-    my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
+    my $talkurl = '';
+    if ($entry->is_delayed) {
+        $talkurl = $entry->url;
+    } else {
+        $talkurl = LJ::journal_base($u) . "/$ditemid.html";
+    }
 
     ### load users
     my ($up);  # $up = user posted journal item
-    LJ::load_userids_multiple([ $item->{'posterid'} => \$up, ], [ $u ]);
+    if ($entry->is_delayed) {
+        $up = $entry->poster;
+    } else {
+        LJ::load_userids_multiple([ $item->{'posterid'} => \$up, ], [ $u ]);
+    }
 
     LJ::text_out(\$u->{'name'});
 
@@ -177,11 +205,12 @@ body<=
         }
     }
 
-    unless ($viewall) {
+    unless ($viewall || $entry->is_delayed) {
         ###  Check security before viewing this post
         my $errtxt;
         return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
     }
+    
 
     my $props = $item->{'props'};
     my $nocomments_old = $viewall ?
@@ -252,7 +281,7 @@ body<=
 
     my $multiform_selects = 0;  # are there select boxes?  don't show form if not.
 
-    my $event = $item->{'event'};
+    my $event = $item->{'event'} || $entry->event;
     my $suspend_msg = $entry && $entry->should_show_suspend_msg_to($remote) ? 1 : 0;
     my $no_cut_expand = !$GET{cut_expand} && $GET{page} && $GET{page} > 1 ? 1 : 0;
     
@@ -278,7 +307,8 @@ body<=
 
     # make the title
     {
-        my $subject = $item->{'subject'} || $event;
+        my $subject = $item->{'subject'} || $entry->subject;
+        $subject = $subject || $event;
         # yes, the 3 param to text_trim is chars, and length returns bytes, but
         # it works, as bytes >= chars:
         $subject = LJ::CleanHTML::clean_and_trim_subject(\$subject, length($item->{'subject'}) || 40);
@@ -325,13 +355,18 @@ body<=
         );
     }
 
-    my $etime = $item->{'eventtime'};
+    my $etime = $item->{'eventtime'} || $entry->posttime;
     $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
     $ret .= "<br /><font size='-1'>@ $etime</font>";
     $ret .= "</td></tr></table>";
 
     ## standout bar
-    $ret .= LJ::Talk::link_bar({ 'u' => $u, 'up' => $up, 'headref' => $head, 'remote' => $remote, 'itemid' => $ditemid, });
+    $ret .= LJ::Talk::link_bar({ 'u' => $u,
+                                 'up' => $up,
+                                 'headref' => $head,
+                                 'remote' => $remote,
+                                 'itemid' => $ditemid,
+                                 'delayedid' => $delayedid});
 
     if ($u->is_locked) {
         $ret .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.locked'}</div>";
@@ -430,6 +465,8 @@ body<=
 
     ### security indicator
     my $sec = "";
+    $item->{'security'} = $item->{'security'} || $entry->security;
+    $item->{'allowmask'} = $item->{'allowmask'} || $entry->security;
     if ($item->{'security'} eq "private") {
         $sec = BML::fill_template("securityprivate");
     } elsif ($item->{'security'} eq "usemask") {
@@ -441,13 +478,21 @@ body<=
             $sec = BML::fill_template("securityprotected");
         }
     }
+    
+    if ($entry->is_delayed) {
+        $sec =  BML::fill_template("typedelayed") . $sec;
+    }
+
+    if ($entry->is_sticky) {
+         $sec =  BML::fill_template("typesticky") . $sec;
+    }
 
     $sec .= "<br />\n" unless $sec eq "" or $item->{'subject'};
     $ret .= $sec;
 
     ###
-    if ($item->{'subject'}) {
-        my $subject = $item->{'subject'};
+    if ($item->{'subject'} || $entry->subject) {
+        my $subject = $item->{'subject'} || $entry->subject;
         if ($GET{'nohtml'}) {
             # quote all non-LJ tags
             $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
@@ -570,11 +615,11 @@ body<=
         $ret .= "<a name='comments'></a>";
         $ret .= "<p>$navcrap</p>" if $navcrap;
         my $readlink;
-	    my $replycount = $entry->prop("replycount");
-	    my $readlink_text = BML::ml("talk.commentsread.counted", { replycount => $replycount });
-	    my $comments_count = BML::ml("talk.comments.counted", { replycount => $replycount });
-	
-	    if (($dthread && $pages == 1) || $showspam) {
+        my $replycount = $entry->prop("replycount");
+        my $readlink_text = BML::ml("talk.commentsread.counted", { replycount => $replycount });
+        my $comments_count = BML::ml("talk.comments.counted", { replycount => $replycount });
+    
+    if (($dthread && $pages == 1) || $showspam) {
             my $readurl = LJ::Talk::talkargs($talkurl, $stylemine, $formatlight);
             $readlink = "(<a href='$readurl#comments'>$readlink_text</a>)";
         } elsif ($replycount > 0) {
@@ -633,10 +678,14 @@ body<=
         if (LJ::is_eventrate_enable($u)) {
             my ($we_like_this_title, $i_like_this_title) = map { $ML{$_} } qw(we_like_this_title i_like_this_title);
 
-            $rated_count = " (<a class=\"we_like_this we_like_this_".$ditemid."\" href=\"/$LJ::SITEROOT/alleventrates.bml?journal=".$u->{'user'}."&amp;itemid=$ditemid\" onclick=\"return ILikeThis.showList(event,this,'$ditemid','".$u->{'user'}."')\" title=\"$we_like_this_title\">".LJ::get_eventratescounters($u->{'userid'}, $ditemid)."</a>)";
+            if (!$delayedid) {
+                $rated_count = " (<a class=\"we_like_this we_like_this_".$ditemid."\" href=\"/$LJ::SITEROOT/alleventrates.bml?journal=".$u->{'user'}."&amp;itemid=$ditemid\" onclick=\"return ILikeThis.showList(event,this,'$ditemid','".$u->{'user'}."')\" title=\"$we_like_this_title\">".LJ::get_eventratescounters($u->{'userid'}, $ditemid)."</a>)";
+            }
 
             if ($remote) {
-                $rated_count .= " (<a href=\"#\" class=\"i_like_this i_like_this_".$ditemid."\" onclick=\"return ILikeThis.rate(event,this,'$ditemid','".$u->{'user'}."')\" title=\"$i_like_this_title\">+1";
+                if (!$delayedid) {
+                    $rated_count .= " (<a href=\"#\" class=\"i_like_this i_like_this_".$ditemid."\" onclick=\"return ILikeThis.rate(event,this,'$ditemid','".$u->{'user'}."')\" title=\"$i_like_this_title\">+1";
+                }
                 if (LJ::get_eventrates( 
                        journalid => $u->{'userid'},
                        itemid    => $ditemid,
@@ -654,6 +703,7 @@ body<=
         $ret .= "</b></p>";
         $ret .= "<div align='center'>" . LJ::make_qr_target('top') . "</div>" if $remote;
 
+        $ret .= LJ::html_hidden("delayedid", $delayedid);
         $ret .= LJ::html_hidden("ditemid", $ditemid);
         $ret .= LJ::html_hidden("journal", $u->{'user'});
 

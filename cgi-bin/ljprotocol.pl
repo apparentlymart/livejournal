@@ -16,6 +16,7 @@ use Class::Autouse qw(
                       LJ::Comment
                       LJ::RateLimit
                       LJ::EmbedModule
+                      LJ::DelayedEntry
                       );
 
 use LJ::TimeUtil;
@@ -65,6 +66,7 @@ my %e = (
          LJ::tosagree_str('protocol' => 'title')
      } ],
      "157" => [ E_TEMP, "Tags error" ],
+     "158" => [ E_TEMP, "You have no rights to make this entry sticky"],
 
      # Client Errors
      "200" => [ E_PERM, "Missing required argument(s)" ],
@@ -82,7 +84,12 @@ my %e = (
      "212" => [ E_PERM, "Message body is too long" ],
      "213" => [ E_PERM, "Message body is empty" ],
      "214" => [ E_PERM, "Message looks like spam" ],
-
+     "215" => [ E_PERM, "Timezone is not set" ],
+     "216" => [ E_PERM, "Unknown post type" ],
+     "217" => [ E_PERM, "Can't convert posted item to delayed" ],
+     "218" => [ E_PERM, "Wrong selecttype" ],
+     "219" => [ E_PERM, "Missing mandatory argument (id or ids)" ],
+     "220" => [ E_PERM, "Can't use such view mode" ],
 
      # Access Errors
      "300" => [ E_TEMP, "Don't have access to requested journal" ],
@@ -107,6 +114,7 @@ my %e = (
      "319" => [ E_TEMP, "Journal is read-only and its entries cannot be edited." ],
      "320" => [ E_TEMP, "Sorry, there was a problem with content of the entry" ],
      "321" => [ E_TEMP, "Sorry, deleting is temporary disabled. Entry is 'private' now" ],
+     "322" => [ E_PERM, "Not allowed to post to community with moderation queue"],
 
      # Limit errors
      "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
@@ -127,6 +135,8 @@ my %e = (
      "504" => [ E_PERM, "Protocol mode no longer supported." ],
      "505" => [ E_TEMP, "Account data format on server is old and needs to be upgraded." ], # cluster0
      "506" => [ E_TEMP, "Journal sync temporarily unavailable." ],
+     "507" => [ E_PERM, "Delayed entry 'create' failed"],
+     "508" => [ E_PERM, "Delayed entry 'edit' failed"],
 );
 
 my %HANDLERS = (
@@ -1837,8 +1847,7 @@ sub common_event_validation
     return 1;
 }
 
-sub postevent
-{
+sub postevent {
     my ($req, $err, $flags) = @_;
     un_utf8_request($req);
 
@@ -1969,7 +1978,7 @@ sub postevent
     # load userprops all at once
     my @poster_props = qw(newesteventtime dupsig_post);
     my @owner_props = qw(newpost_minsecurity moderated);
-    push @owner_props, 'opt_weblogscom' unless $req->{'props'}->{'opt_backdated'};
+    push @owner_props, 'opt_weblogscom';
 
     LJ::load_user_props($u, @poster_props, @owner_props);
     if ($uowner->{'userid'} == $u->{'userid'}) {
@@ -1979,11 +1988,18 @@ sub postevent
     }
 
     # are they trying to post back in time?
-    if ($posterid == $ownerid && $u->{'journaltype'} ne 'Y' &&
-        !$time_was_faked && $u->{'newesteventtime'} &&
-        $eventtime lt $u->{'newesteventtime'} &&
-        !$req->{'props'}->{'opt_backdated'}) {
-        return fail($err, 153, "You have an entry which was posted at $u->{'newesteventtime'}, but you're trying to post an entry before this. Please check the date and time of both entries. If the other entry is set in the future on purpose, edit that entry to use the \"Date Out of Order\" option. Otherwise, use the \"Date Out of Order\" option for this entry instead.");
+    #if ($posterid == $ownerid && $u->{'journaltype'} ne 'Y' &&
+    #    !$time_was_faked && $u->{'newesteventtime'} &&
+    #    $eventtime lt $u->{'newesteventtime'} ) {
+    #    return fail($err, 153, "You have an entry which was posted at $u->{'newesteventtime'}, but you're trying to post an entry before this. Please check the date and time of both entries. If the other entry is set in the future on purpose, edit that entry to use the \"Date Out of Order\" option. Otherwise, use the \"Date Out of Order\" option for this entry instead.");
+    #}
+    
+    if ( $req->{props} && $req->{props}->{sticky} &&
+         $uowner->{'journaltype'} eq 'C' &&
+          !( LJ::check_rel($ownerid, $posterid, 'S') ||
+             LJ::check_rel($ownerid, $posterid, 'M') ) )
+    {
+        return fail($err, 158);
     }
 
     my $qallowmask = $req->{'allowmask'}+0;
@@ -2021,11 +2037,6 @@ sub postevent
     return fail($err,151) if
         LJ::is_banned($posterid, $ownerid);
 
-    # don't allow backdated posts in communities
-    return fail($err,152) if
-        ($req->{'props'}->{"opt_backdated"} &&
-         $uowner->{'journaltype'} ne "P");
-
     # do processing of embedded polls (doesn't add to database, just
     # does validity checking)
     my @polls = ();
@@ -2060,10 +2071,7 @@ sub postevent
     # it... where clause there is: < $LJ::EndOfTime).  but this way we can
     # have entries that don't show up on friends view, now that we don't have
     # the hints table to not insert into.
-    my $rlogtime = $LJ::EndOfTime;
-    unless ($req->{'props'}->{"opt_backdated"}) {
-        $rlogtime -= $now;
-    }
+    my $rlogtime = $LJ::EndOfTime - $now;
 
     my $dupsig = Digest::MD5::md5_hex(join('', map { $req->{$_} }
                                            qw(subject event usejournal security allowmask)));
@@ -2129,6 +2137,32 @@ sub postevent
         ## Scan post for spam
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
+
+    if ( $req->{ver} > 1 ) {
+        if ( LJ::DelayedEntry::is_future_date($req) ) {
+            return fail($err, 215) unless $req->{tz};
+
+            # if posting to a moderated community, store and bail out here
+            if ($uowner->{'journaltype'} eq 'C' && $need_moderated && !$flags->{'nomod'}) {
+                return fail($err, 322);
+            }
+
+            $req->{ext}->{flags} = $flags;
+            $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
+            $req->{usejournal} = $req->{usejournal} || '';
+  
+            my $entry = LJ::DelayedEntry->create( $req, { journal => $uowner,
+                                                      poster  => $u,} );
+            return fail($err, 507) unless $entry;
+            $res->{delayedid} = $entry->delayedid;
+            $res->{type}      = 'delayed';
+            return $res;
+        }
+        else {
+            $res->{type} = 'posted';
+        }
+    }
+
     # if posting to a moderated community, store and bail out here
     if ($uowner->{'journaltype'} eq 'C' && $need_moderated && !$flags->{'nomod'}) {
         # don't moderate admins, moderators & pre-approved users
@@ -2269,6 +2303,19 @@ sub postevent
                      "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dberr) if $dberr;
 
+    if ( $req->{props} && $req->{props}->{sticky} &&
+         $uowner->{'journaltype'} eq 'C' &&
+          !( LJ::check_rel($ownerid, $posterid, 'S') ||
+             LJ::check_rel($ownerid, $posterid, 'M') ) )
+    {
+        return fail($err, 158);
+    }
+
+    # post become 'sticky post'
+    if ( $req->{props} && $req->{props}->{sticky} ) {
+        $uowner->set_sticky($jitemid);
+    }
+
     LJ::MemCache::incr([$ownerid, "log2ct:$ownerid"]);
     LJ::memcache_kill($ownerid, "dayct2");
 
@@ -2281,7 +2328,7 @@ sub postevent
 
         # record the eventtime of the last update (for own journals only)
         $set_userprop{"newesteventtime"} = $eventtime
-            if $posterid == $ownerid and not $req->{'props'}->{'opt_backdated'} and not $time_was_faked;
+            if $posterid == $ownerid and not $time_was_faked;
 
         $u->set_prop(\%set_userprop);
     }
@@ -2429,8 +2476,10 @@ sub postevent
     my @jobs;  # jobs to add into TheSchwartz
 
     # notify weblogs.com of post if necessary
-    if (!$LJ::DISABLED{'weblogs_com'} && $u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
-        $security eq "public" && !$req->{'props'}->{'opt_backdated'}) {
+    if (!$LJ::DISABLED{'weblogs_com'} &&
+         $u->{'opt_weblogscom'} &&
+         LJ::get_cap($u, "weblogscom") &&
+        $security eq "public" ) {
         push @jobs, TheSchwartz::Job->new_from_array("LJ::Worker::Ping::WeblogsCom", {
             'user' => $u->{'user'},
             'title' => $u->{'journaltitle'} || $u->{'name'},
@@ -2467,7 +2516,10 @@ sub postevent
     $res->{'url'} = $entry->url;
 
     push @jobs, LJ::Event::JournalNewEntry->new($entry)->fire_job;
-    push @jobs, LJ::Event::UserNewEntry->new($entry)->fire_job if (!$LJ::DISABLED{'esn-userevents'} || $LJ::_T_FIRE_USERNEWENTRY);
+    if (!$LJ::DISABLED{'esn-userevents'} || $LJ::_T_FIRE_USERNEWENTRY) {
+        push @jobs, LJ::Event::UserNewEntry->new($entry)->fire_job
+    }
+
     push @jobs, LJ::EventLogRecord::NewEntry->new($entry)->fire_job;
 
     # PubSubHubbub Support
@@ -2492,8 +2544,7 @@ sub postevent
     return $res;
 }
 
-sub editevent
-{
+sub editevent {
     my ($req, $err, $flags) = @_;
     un_utf8_request($req);
 
@@ -2556,7 +2607,48 @@ sub editevent
     # NOTE: as in postevent, this requires $req->{event} to be binary data
     # but we've already removed the utf-8 flag in the XML-RPC path, and it
     # never gets set in the "flat" protocol path
-    return fail($err,409) if length($req->{event}) >= LJ::BMAX_EVENT;
+    return fail($err, 409) if length($req->{event}) >= LJ::BMAX_EVENT;
+    
+    if ( $req->{ver} > 1 ) {
+        my $delayedid = delete $req->{delayedid};
+        my $res = {};
+
+        if ( $delayedid ) {
+            return fail( $err, 217 ) if $req->{itemid} || $req->{anum};
+            return fail( $err, 215 ) unless $req->{timezone};                        
+
+            $req->{ext}->{flags} = $flags;
+            $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
+            $req->{usejournal} = $req->{usejournal}  || '';
+
+            my $entry = LJ::DelayedEntry->get_entry_by_id(
+                $uowner,
+                $delayedid,
+                { userid => $posterid },
+            );
+
+            return fail($err, 508) unless $entry;
+
+            if ($req->{'event'} !~ /\S/ ) {
+                $entry->delete();
+                $res->{delayedid} = $delayedid;
+                return $res;
+            }
+
+            if ( LJ::DelayedEntry::is_future_date($req) ) {
+                $entry->update($req);
+                $res->{type} = 'delayed';
+            }
+            else {
+                my $out = $entry->convert;
+                $res->{type}   = 'posted';
+                $res->{itemid} = $out->{res}->{itemid};
+                $res->{anum}   = $out->{res}->{anum};
+            }
+        }
+
+        return $res if $res->{type};        
+    }
 
     # fetch the old entry from master database so we know what we
     # really have to update later.  usually people just edit one part,
@@ -2610,9 +2702,7 @@ sub editevent
     }
 
     # simple logic for deleting an entry
-    if (!$flags->{'use_old_content'} && $req->{'event'} !~ /\S/)
-    {
-
+    if (!$flags->{'use_old_content'} && $req->{'event'} !~ /\S/) {
         ## 23.11.2009. Next code added due to some hackers activities
         ## that use trojans to delete user's entries in theirs journals.
         if ($LJ::DELETING_ENTRIES_IS_DISABLED
@@ -2666,17 +2756,16 @@ sub editevent
             }
         };
 
+        if ( $itemid == $uowner->get_sticky_entry() ) {
+            $u->remove_sticky();
+        }
+
         return $res;
     }
 
     # now make sure the new entry text isn't $CannotBeShown
     return fail($err, 210)
         if $req->{event} eq $CannotBeShown;
-
-    # don't allow backdated posts in communities
-    return fail($err,152) if
-        ($req->{'props'}->{"opt_backdated"} &&
-         $uowner->{'journaltype'} ne "P");
 
     # make year/mon/day/hour/min optional in an edit event,
     # and just inherit their old values
@@ -2696,6 +2785,19 @@ sub editevent
     ### load existing meta-data
     my %curprops;
     LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
+
+    warn LJ::D($req);
+    # make post sticky
+    if ( $req->{props} && $req->{props}->{sticky} ) {
+        if( $uowner->get_sticky_entry() != $itemid ) {
+            $uowner->set_sticky($itemid);
+            LJ::MemCache::delete([$ownerid, "log2lt:$ownerid"]);
+        }
+    }
+    elsif ( $itemid == $uowner->get_sticky_entry() ) {
+        $uowner->remove_sticky();
+        LJ::MemCache::delete([$ownerid, "log2lt:$ownerid"]);
+    }
 
     ## give features
     my $give_features = $req->{'props'}->{'give_features'};
@@ -2747,22 +2849,15 @@ sub editevent
 
     if ($eventtime ne $oldevent->{'eventtime'} ||
         $security ne $oldevent->{'security'} ||
-        (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) ||
         $qallowmask != $oldevent->{'allowmask'})
     {
         # are they changing their most recent post?
         LJ::load_user_props($u, "newesteventtime");
         if ($u->{userid} == $uowner->{userid} &&
             $u->{newesteventtime} eq $oldevent->{eventtime}) {
-            if (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) {
-                # if they set the backdated flag, then we no longer know
-                # the newesteventtime.
-                $u->clear_prop('newesteventtime');
-            } elsif ($eventtime ne $oldevent->{eventtime}) {
                 # otherwise, if they changed time on this event,
                 # the newesteventtime is this event's new time.
                 $u->set_prop( 'newesteventtime' => $eventtime );
-            }
         }
 
         my $qsecurity = $uowner->quote($security);
@@ -2794,7 +2889,8 @@ sub editevent
     {
         if ($security eq "public" || $security eq "private") {
             $uowner->do("DELETE FROM logsec2 WHERE journalid=$ownerid AND jitemid=$itemid");
-        } else {
+        }
+        else {
             $uowner->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
                         "VALUES ($ownerid, $itemid, $qallowmask)");
         }
@@ -2843,13 +2939,16 @@ sub editevent
         unless (defined $req->{'props'}->{'copyright'}) { # try 1: previous value
             $req->{'props'}->{'copyright'} = $curprops{$itemid}->{'copyright'};
         }
+
         unless (defined $req->{'props'}->{'copyright'}) { # try 2: global setting
             $req->{'props'}->{'copyright'} = $uowner->prop('default_copyright');
         }
+
         unless (defined $req->{'props'}->{'copyright'}) { # try 3: allow
             $req->{'props'}->{'copyright'} = 'P';
         }
-    } else { # disabled feature
+    }
+    else { # disabled feature
         delete $req->{'props'}->{'copyright'};
     }
 
@@ -2869,20 +2968,8 @@ sub editevent
         }
     }
 
-    # deal with backdated changes.  if the entry's rlogtime is
-    # $EndOfTime, then it's backdated.  if they want that off, need to
-    # reset rlogtime to real reverse log time.  also need to set
-    # rlogtime to $EndOfTime if they're turning backdate on.
-    if ($req->{'props'}->{'opt_backdated'} eq "1" &&
-        $oldevent->{'rlogtime'} != $LJ::EndOfTime) {
-        my $dberr;
-        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
-        $uowner->log2_do(undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
-                         "journalid=$ownerid AND jitemid=$itemid");
-        return fail($err,501,$dberr) if $dberr;
-    }
-    if ($req->{'props'}->{'opt_backdated'} eq "0" &&
-        $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
+    # compatible with depricated 'opt_backdated'
+    if ( $oldevent->{'rlogtime'} == $LJ::EndOfTime ) {
         my $dberr;
         LJ::run_hooks('report_entry_update', $ownerid, $itemid);
         $uowner->log2_do(\$dberr, "UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
@@ -2946,6 +3033,9 @@ sub getevents {
         $uowner = LJ::load_userid( $req->{journalid} );
     }
 
+
+    my $sticky_id = $uowner->prop("sticky_entries") || undef;
+    
     my $dbr = LJ::get_db_reader();
     my $sth;
 
@@ -2989,7 +3079,6 @@ sub getevents {
     else {
         # not a friend?  only see public.
         # and own posts in non-sensitive communities
-
         if ($LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $uowner->{user} } || !$posterid) {
             $secwhere = "AND (security='public')";
         }
@@ -3019,6 +3108,97 @@ sub getevents {
     my $skip = $req->{'skip'} + 0;
 
     $skip = 500 if $skip > 500;
+    
+    if ( $req->{ver} > 1 ) {
+        my $res = {};
+
+        if ( $req->{delayedid} ) {
+            return fail( $err, 220 ) if $req->{view} && $req->{view} ne 'stored';
+
+            if ( $req->{selecttype} eq 'lastn' ) {
+                my $ids = LJ::DelayedEntry::get_entries_by_journal(
+                    $uowner,
+                    $req->{skip} || 0,
+                    $req->{howmany} || $req->{itemshow} || 20,
+                    $flags->{user}->id,
+                );
+
+                for my $did ( @$ids ) {
+                    my $entry, LJ::DelayedEntry::get_entry_by_id(
+                        $uowner,
+                        $did,
+                        { userid => $flags->{user}->id },
+                    );
+                    
+                    my $re = {};
+
+                    $re->{$_} = $entry->{$_} for qw(delayedid subject event props logtime);
+                                                    
+                    $re->{eventtime}       = $entry->{posttime};
+                    $re->{event_timestamp} = $entry->{posttime_unixtime};
+                    $re->{url}             = $entry->url;
+                    $re->{security}        = $entry->data->{security};
+                    $re->{allowmask}       = $entry->data->{allowmask};
+                    $re->{posterid}        = $entry->poster->userid;
+                    $re->{poster}          = $entry->poster->{user};
+
+                    push @{$res->{events}}, $re;
+                }
+            }
+            elsif ( $req->{selecttype} eq 'one' ) {
+                my $entry, LJ::DelayedEntry::get_entry_by_id(
+                    $uowner,
+                    $req->{delayedid},
+                    { userid => $flags->{user}->id },
+                );
+                    
+                my $re = {};
+
+                $re->{$_} = $entry->{$_} for qw(delayedid subject event props logtime);
+                                                    
+                $re->{eventtime}       = $entry->{posttime};
+                $re->{event_timestamp} = $entry->{posttime_unixtime};
+                $re->{url}             = $entry->url;
+                $re->{security}        = $entry->data->{security};
+                $re->{allowmask}       = $entry->data->{allowmask};
+                $re->{posterid}        = $entry->poster->userid;
+                $re->{poster}          = $entry->poster->{user};
+
+                push @{$res->{events}}, $re;
+            }
+            else {
+                return fail( $err, 218 );
+            }
+        }
+        elsif ( $req->{delayedids} ) {
+            if ( $req->{selecttype} eq 'multiple' ) {
+                for my $did ( @$req->{delayedids} ) {
+                    my $entry, LJ::DelayedEntry::get_entry_by_id(
+                        $uowner,
+                        $did,
+                        { userid => $flags->{user}->id },
+                    );
+                    
+                    my $re = {};
+
+                    $re->{$_} = $entry->{$_} for qw(delayedid subject event props logtime);
+                                                    
+                    $re->{eventtime}       = $entry->{posttime};
+                    $re->{event_timestamp} = $entry->{posttime_unixtime};
+                    $re->{url}             = $entry->url;
+                    $re->{security}        = $entry->data->{security};
+                    $re->{allowmask}       = $entry->data->{allowmask};
+                    $re->{posterid}        = $entry->poster->userid;
+                    $re->{poster}          = $entry->poster->{user};
+
+                    push @{$res->{events}}, $re;
+                }
+            }
+            else {
+                return fail( $err, 218 );
+            }
+        }
+    }
 
     # build the query to get log rows.  each selecttype branch is
     # responsible for either populating the following 3 variables
@@ -3046,7 +3226,8 @@ sub getevents {
     elsif ($req->{'selecttype'} eq "lastn") {
         my $howmany = $req->{'howmany'} || 20;
 
-        $howmany = 50 if $howmany > 50;
+        if ($howmany > 50) { $howmany = 50; }
+
         $howmany = $howmany + 0;
         $limit = "LIMIT $howmany";
 
@@ -3070,8 +3251,12 @@ sub getevents {
 
         $where .= "AND $rtime_what > $rtime_after ";
         $orderby = "ORDER BY $rtime_what";
+
+        unless ($skip) {
+            $where .= "OR jitemid=$sticky_id";
+        }
     }
-    elsif ( $req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1" ) {
+    elsif ($req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1") {
         $use_master = 1;  # see note above.
         $limit = "LIMIT 1";
         $orderby = "ORDER BY rlogtime";
@@ -3081,13 +3266,12 @@ sub getevents {
         $where = "AND jitemid=$id";
     }
     elsif ($req->{'selecttype'} eq "syncitems") {
-        return fail($err,506) if $LJ::DISABLED{'syncitems'};
+        return fail($err, 506) if $LJ::DISABLED{'syncitems'};
 
         my $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
-        return fail($err,203,"Invalid syncitems date format")
+        return fail($err, 203, "Invalid syncitems date format")
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
-
-        return fail($err,301,"syncitems is unavailable in anonymous mode") unless($u);
+        return fail($err, 301, "syncitems is unavailable in anonymous mode") unless($u);
 
         my $now = time();
 
@@ -3100,8 +3284,7 @@ sub getevents {
             # it into a hash, then delete pairs that are older than an hour
             my %reqs = split(m!/!, $u->{$pname});
 
-            delete $reqs{$_} foreach grep { $_ < $now - 60*60 } keys %reqs;
-
+            foreach (grep { $_ < $now - 60*60 } keys %reqs) { delete $reqs{$_}; }
             my $count = grep { $_ eq $date } values %reqs;
             $reqs{$now} = $date;
 
@@ -3148,18 +3331,19 @@ sub getevents {
         my @ids;
 
         foreach my $num (split(/\s*,\s*/, $req->{'itemids'})) {
-            return fail($err,203,"Non-numeric itemid") unless $num =~ /^\d+$/;
+            return fail($err, 203, "Non-numeric itemid") unless $num =~ /^\d+$/;
             push @ids, $num;
         }
 
         my $limit = 100;
-        return fail($err,209,"Can't retrieve more than $limit entries at once") if @ids > $limit;
+        return fail($err, 209, "Can't retrieve more than $limit entries at once") if @ids > $limit;
+
         my $in = join(',', @ids);
         $where = "AND jitemid IN ($in)";
     }
     elsif ($req->{'selecttype'} eq 'before') {
-        my $before = $req->{'before'};
-        my $itemshow = $req->{'howmany'};
+        my $before     = $req->{'before'};
+        my $itemshow   = $req->{'howmany'};
         my $itemselect = $itemshow + $skip;
 
         my %item;
@@ -3185,11 +3369,12 @@ sub getevents {
 
         my @ids = sort { $item{$a} cmp $item{$b} } keys %item;
 
-        if (@ids > $skip){
+
+        if (@ids > $skip) {
             @ids = @ids[$skip..(@ids-1)];
             @ids = @ids[0..$itemshow-1] if @ids > $itemshow;
         }
-        else{
+        else {
             @ids = ();
         }
 
@@ -3213,7 +3398,7 @@ sub getevents {
     # whatever selecttype might have wanted us to use the master db.
     $dbcr = LJ::get_cluster_def_reader($uowner) if $use_master;
 
-    return fail($err,502) unless $dbcr;
+    return fail($err, 502) unless $dbcr;
 
     ## load the log rows
     ($sth = $dbcr->prepare($sql))->execute;
@@ -3260,6 +3445,7 @@ sub getevents {
         $evt->{"event_timestamp"} = $event_timestamp;
         $evt->{"logtime"}         = $logtime;
 
+
         if ($sec ne "public") {
             $evt->{'security'}  = $sec;
             $evt->{'allowmask'} = $mask if $sec eq "usemask";
@@ -3282,7 +3468,13 @@ sub getevents {
 
         $evt->{'url'}         = LJ::item_link($uowner, $itemid, $anum);
         $evt->{'reply_count'} = $replycount;
-        push @$events, $evt;
+
+        if ( $itemid == $sticky_id && $req->{'selecttype'} eq "lastn") {
+    	    unshift @$events, $evt,
+        }
+        else {
+    	    push @$events, $evt;
+	    }
     }
 
     # load properties. Even if the caller doesn't want them, we need
@@ -3320,6 +3512,10 @@ sub getevents {
                 $value =~ s/\n/ /g;
                 $evt->{'props'}->{$name} = $value;
             }
+
+    	    if ( $itemid == $sticky_id ) {
+        		$evt->{'props'}->{'sticky'} = 1;
+    	    }
         }
     }
 
@@ -3892,8 +4088,7 @@ sub sessiongenerate {
     };
 }
 
-sub list_friends
-{
+sub list_friends {
     my ($u, $opts) = @_;
 
     # do not show people in here
@@ -3901,9 +4096,11 @@ sub list_friends
 
     # TAG:FR:protocol:list_friends
     my $sql;
+
     unless ($opts->{'friendof'}) {
         $sql = "SELECT friendid, fgcolor, bgcolor, groupmask FROM friends WHERE userid=?";
-    } else {
+    }
+    else {
         $sql = "SELECT userid FROM friends WHERE friendid=?";
 
         if (my $list = LJ::load_rel_user($u, 'B')) {
@@ -3916,6 +4113,7 @@ sub list_friends
     $sth->execute($u->{'userid'});
 
     my @frow;
+
     while (my @row = $sth->fetchrow_array) {
         next if $hide{$row[0]};
         push @frow, [ @row ];
@@ -3925,6 +4123,7 @@ sub list_friends
     my $limitnum = $opts->{'limit'}+0;
 
     my $res = [];
+
     foreach my $f (sort { $us->{$a->[0]}{'user'} cmp $us->{$b->[0]}{'user'} }
                    grep { $us->{$_->[0]} } @frow)
     {
@@ -3939,8 +4138,8 @@ sub list_friends
 
         if ($u->identity) {
             my $i = $u->identity;
-            $r->{'identity_type'} = $i->pretty_type;
-            $r->{'identity_value'} = $i->value;
+            $r->{'identity_type'}    = $i->pretty_type;
+            $r->{'identity_value'}   = $i->value;
             $r->{'identity_url'} = $i->url($u);
             $r->{'identity_display'} = $u->display_name;
         }
@@ -3954,10 +4153,11 @@ sub list_friends
         }
 
         unless ($opts->{'friendof'}) {
-            $r->{'fgcolor'} = LJ::color_fromdb($f->[1]);
-            $r->{'bgcolor'} = LJ::color_fromdb($f->[2]);
-            $r->{"groupmask"} = $f->[3] if $f->[3] != 1;
-        } else {
+            $r->{'fgcolor'}   = LJ::color_fromdb($f->[1]);
+            $r->{'bgcolor'}   = LJ::color_fromdb($f->[2]);
+            $r->{'groupmask'} = $f->[3] if $f->[3] != 1;
+        }
+        else {
             $r->{'fgcolor'} = "#000000";
             $r->{'bgcolor'} = "#ffffff";
         }
@@ -3979,41 +4179,59 @@ sub list_friends
         $r->{defaultpicurl} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}" if $u->{'defaultpicid'};
 
         push @$res, $r;
+
         # won't happen for zero limit (which means no limit)
         last if @$res == $limitnum;
     }
+
     return $res;
 }
 
-sub syncitems
-{
+sub syncitems {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
     return undef unless check_altusage($req, $err, $flags);
-    return fail($err,506) if $LJ::DISABLED{'syncitems'};
+    return fail($err, 506) if $LJ::DISABLED{'syncitems'};
 
     my $ownerid = $flags->{'ownerid'};
-    my $uowner = $flags->{'u_owner'} || $flags->{'u'};
+    my $uowner  = $flags->{'u_owner'} || $flags->{'u'};
     my $sth;
 
     my $db = LJ::get_cluster_reader($uowner);
-    return fail($err,502) unless $db;
+    return fail($err, 502) unless $db;
 
     ## have a valid date?
     my $date = $req->{'lastsync'};
+
     if ($date) {
-        return fail($err,203,"Invalid date format")
+        return fail($err, 203, "Invalid date format")
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
-    } else {
+    }
+    else {
         $date = "0000-00-00 00:00:00";
     }
 
     my $LIMIT = 500;
+    my ( $table, $idfield ) = ( '', 'jitemid');
 
     my $external_ids = $req->{'use_external_ids'};
 
+    if ( $req->{ver} > 1 ) {
+        if ( $req->{type} eq 'posted' ) {
+            $table   = '';
+            $idfield = 'jitemid';
+        }
+        elsif ( $req->{type} eq 'delayed' ) {
+            $table = 'delayed';
+            $idfield = 'delayedid';
+        }
+        else {
+            return fail( $err, 216 );
+        }
+    }
+
     my %item;
-    $sth = $db->prepare("SELECT jitemid, logtime, anum FROM log2 WHERE ".
+    $sth = $db->prepare("SELECT ${idfield}, logtime FROM ${table}log2 WHERE ".
                         "journalid=? and logtime > ?");
     $sth->execute($ownerid, $date);
     while (my ($id, $dt, $anum) = $sth->fetchrow_array) {
@@ -4021,9 +4239,11 @@ sub syncitems
     }
 
     my %cmt;
-    my $p_calter = LJ::get_prop("log", "commentalter");
-    my $p_revtime = LJ::get_prop("log", "revtime");
-    $sth = $db->prepare("SELECT jitemid, propid, FROM_UNIXTIME(value) ".
+
+    unless ( $req->{type} eq 'delayed' ) {
+        my $p_calter  = LJ::get_prop("log", "commentalter");
+        my $p_revtime = LJ::get_prop("log", "revtime");
+        $sth = $db->prepare("SELECT jitemid, propid, FROM_UNIXTIME(value) ".
                         "FROM logprop2 WHERE journalid=? ".
                         "AND propid IN ($p_calter->{'id'}, $p_revtime->{'id'}) ".
                         "AND value+0 > UNIX_TIMESTAMP(?)");
@@ -4036,7 +4256,6 @@ sub syncitems
             $item{$id} = [ 'L', $id, $dt, "update", $entry->anum ];
         }
     }
-
     my @ev = sort { $a->[2] cmp $b->[2] } (values %item, values %cmt);
 
     my $res = {
@@ -4044,25 +4263,29 @@ sub syncitems
             u => $flags->{'u'}
         }
     };
+
     my $list = $res->{'syncitems'} = [];
     $res->{'total'} = scalar @ev;
     my $ct = 0;
+
     while (my $ev = shift @ev) {
         $ct++;
-        push @$list, { 'item' => "$ev->[0]-$ev->[1]",
-                       'time' => $ev->[2],
-                       'action' => $ev->[3],
-                       ( $external_ids ? (ditemid => $ev->[1]*256 + $ev->[4]) : () )
-                      };
+        push @$list, {
+            'item'   => "$ev->[0]-$ev->[1]",
+            'time'   => $ev->[2],
+            'action' => $ev->[3],
+            'type'   => $req->{type},
+            ( $external_ids ? (ditemid => $ev->[1]*256 + $ev->[4]) : () )
+        };
         last if $ct >= $LIMIT;
     }
+
     $res->{'count'} = $ct;
 
     return $res;
 }
 
-sub consolecommand
-{
+sub consolecommand {
     my ($req, $err, $flags) = @_;
 
     # logging in isn't necessary, but most console commands do require it
@@ -5090,40 +5313,46 @@ sub getevents
 {
     my ($req, $res, $flags) = @_;
 
-    my $err = 0;
-    my $rq = upgrade_request($req);
-
-    my $rs = LJ::Protocol::do_request("getevents", $rq, \$err, $flags);
-    unless ($rs) {
-        $res->{'success'} = "FAIL";
-        $res->{'errmsg'} = LJ::Protocol::error_message($err);
-        return 0;
-    }
-
-    my $ect = 0;
+    my $err = 0;    
     my $pct = 0;
-    foreach my $evt (@{$rs->{'events'}}) {
-        $ect++;
-        foreach my $f (qw(itemid eventtime security allowmask subject anum url poster)) {
-            if (defined $evt->{$f}) {
-                $res->{"events_${ect}_$f"} = $evt->{$f};
+    my $rq = upgrade_request($req);
+    my $ect = LJ::DelayedEntry->getevents($rq, $flags, \$err, $res);
+    my $many = $rq->{'howmany'} || 0;
+
+    if ( $many == 0 || $many > $ect ) {
+        $rq->{'howmany'} -= $ect if $rq->{'howmany'};
+        
+        my $rs = LJ::Protocol::do_request("getevents", $rq, \$err, $flags);
+        unless ($rs) {
+            $res->{'success'} = "FAIL";
+            $res->{'errmsg'} = LJ::Protocol::error_message($err);
+            return 0;
+        }
+    
+        foreach my $evt (@{$rs->{'events'}}) {
+            $ect++;
+            foreach my $f (qw(itemid eventtime security allowmask subject anum url poster)) {
+                if (defined $evt->{$f}) {
+                    $res->{"events_${ect}_$f"} = $evt->{$f};
+                }
+            }
+            $res->{"events_${ect}_event"} = LJ::eurl($evt->{'event'});
+    
+            if ($evt->{'props'}) {
+                foreach my $k (sort keys %{$evt->{'props'}}) {
+                    $pct++;
+                    $res->{"prop_${pct}_itemid"} = $evt->{'itemid'};
+                    $res->{"prop_${pct}_name"} = $k;
+                    $res->{"prop_${pct}_value"} = $evt->{'props'}->{$k};
+                }
             }
         }
-        $res->{"events_${ect}_event"} = LJ::eurl($evt->{'event'});
-
-        if ($evt->{'props'}) {
-            foreach my $k (sort keys %{$evt->{'props'}}) {
-                $pct++;
-                $res->{"prop_${pct}_itemid"} = $evt->{'itemid'};
-                $res->{"prop_${pct}_name"} = $k;
-                $res->{"prop_${pct}_value"} = $evt->{'props'}->{$k};
-            }
+    
+        unless ($req->{'noprops'}) {
+            $res->{'prop_count'} = $pct;
         }
     }
-
-    unless ($req->{'noprops'}) {
-        $res->{'prop_count'} = $pct;
-    }
+    
     $res->{'events_count'} = $ect;
     $res->{'success'} = "OK";
 

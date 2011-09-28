@@ -126,6 +126,9 @@
 .title2|staleness=1
 .title2=Post an Entry
 
+.title2_sticky|staleness=1
+.title2_sticky=Post an Entry: entry will be displayed at the top of the journal
+
 .update.head=Update your Journal...
 
 .update.success2=Update successful. You can view your updated journal <a [[aopts]]>here</a>.

@@ -605,8 +605,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
       {
           print $userpic;
       }
-      # Security icon
-      if ($e.security) { print $e.security_icon; }
+      # Icons
+      if ($e.delayed) { "$e.delayed_icon "; }
+      if ($e.sticky) { "$e.sticky_icon "; }
+      if ($e.security) { "$e.security_icon"; }
       # Permalink
       "<p>[<a href='$e.permalink_url'>$*text_permalink</a>]</p>";
       "</td>";

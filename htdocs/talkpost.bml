@@ -48,7 +48,7 @@ body<=
 
     my $init = LJ::Talk::init(\%FORM);
     return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'};
-
+    
     my $u = $init->{'journalu'};
     return $ML{'talk.error.nojournal'} unless $u;
 

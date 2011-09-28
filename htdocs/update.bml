@@ -13,7 +13,8 @@
     my $bodyopts = \$_[0]->{'bodyopts'};
     my $onload   = \$_[0]->{'onload'};
 
-    $$title = $ML{'.title2'};
+    my $update_type = $POST{'type'} || $GET{'type'};
+    $$title = ($update_type eq 'sticky') ?  $ML{'.title2_sticky'} : $ML{'.title2'};
 
     # server down?
     if ($LJ::SERVER_DOWN) {
@@ -115,6 +116,10 @@
         $now = eval { DateTime->from_epoch(epoch => time(), time_zone => $tz); }
            if $tz;
     }
+
+    LJ::need_string(qw/
+                        entryform.sticky_replace.edit
+                        entryform.sticky.edit/);
 
     my ($year, $mon, $mday, $hour, $min) = ($now->year,
                                             sprintf("%02d", $now->month),
@@ -228,10 +233,10 @@ EMBED
     my $remotelogin_display = 'none';
 
     if ($auth_as_remote) {
-        $remotelogin_display = 'block';
+        $remotelogin_display = '';
     }
     else {
-        $altlogin_display = 'block';
+        $altlogin_display = '';
     }
 
     # Check for errors, store in hash to render later
@@ -263,31 +268,32 @@ EMBED
         my $auth = '';
 
         if ($altlogin_display eq 'none') {
-            $auth .= "<p id='remotelogin' class='pkg'>\n";
-            $auth .= "<label for='current_username' class='left'>" . BML::ml('entryform.postas') . "</label>\n";
-            $auth .= "<strong id='current_username'>" . $remote->display_name . "</strong> <a href='$LJ::SITEROOT/update.bml?altlogin=1' id='remotelogin_content' class='small'>$ML{'entryform.switchuser'}</a>\n";
-            $auth .= "</p>\n\n";
+            $auth.= "<li id='remotelogin' class='pkg'>\n";
+            $auth .= "<label for='current_username' class='title'>" . BML::ml('entryform.postas') . "</label>\n";
+            $auth .= "<span class='wrap'><strong id='current_username' class='current-username'>" . $remote->display_name . "</strong> <a href='$LJ::SITEROOT/update.bml?altlogin=1' id='remotelogin_content' class='small'>$ML{'entryform.switchuser'}</a></span>\n";
+            $auth .= "</li>\n\n";
         }
 
         # table with username/password fields
-        $auth .= "<div id='altlogin_wrapper' style='display: $altlogin_display;'>";
-        $auth .= "<p class='pkg'>\n";
-        $auth .= "<label for='altlogin_username' class='left'>$ML{'.username'}</label>\n";
+        $auth .= "<li id='altlogin_wrapper_login' class='pkg' style='display: $altlogin_display;'>\n";
+        $auth .= "<label for='altlogin_username' class='title'>$ML{'.username'}</label>\n";
+        $auth .= "<span class='wrap'>\n";
         $auth .=  LJ::html_text({ 'name' => 'user', 'id' => 'altlogin_username', 'class' => 'text', 'size' => '15',
                 'maxlength' => '15', 'tabindex' => '5', 'value' => $POST{'user'} || $GET{'user'} }) . "\n";
-        $auth .= "</p>\n";
-        $auth .= "<p class='pkg'>\n";
-        $auth .= "<label for='altlogin_password' class='left'>$ML{'.password'}</label>\n";
+        $auth .= "</span>\n";
+        $auth .= "</li>\n";
+        $auth .= "<li id='altlogin_wrapper_password' class='pkg' style='display: $altlogin_display;'>\n";
+        $auth .= "<label for='altlogin_password' class='title'>$ML{'.password'}</label>\n";
+        $auth .= "<span class='wrap'>\n";
         $auth .= LJ::html_text({ 'type' => 'password', 'id' => 'altlogin_password', 'class' => 'text',
                 'name' => 'password', 'tabindex' => '6', 'size' => '15', 'maxlength' => '30' }) . "\n";
-
+        $auth .= "</span>\n";
         # posted with a user, but no password
         if ($did_post && $auth_missing) {
             $auth .= "<br /><?inerr $ML{'.error.nopass'} inerr?>";
         }
 
-        $auth .= "</p>\n\n";
-        $auth .= "</div>";
+        $auth .= "</li>\n\n";
 
         # if they submit the form and are spellchecking, remember
         # their settings from the GET requests
@@ -367,6 +373,10 @@ EMBED
         if ($reposted_from) {
             $$body .= LJ::html_hidden( 'reposted_from' => $reposted_from );
             $$body .= $repost_hidden;
+        }
+
+        if ($update_type) {
+            $$body .= LJ::html_hidden( 'type' => $update_type );
         }
 
         if ($opts->{require_tos}){
@@ -490,14 +500,22 @@ LIKE_FAQ
             $$body .= "<?p <strong>$ML{'.loggingin'}</strong> $ML{'.servermsg'} p?><div style='margin-left: 40px'><b>$login_message</b></div>";
         }
 
+        my $timezone = $POST{'timezone'} || $GET{'timezone'};
+        $timezone =  sprintf("%+.4d", $timezone);
         my %req = (
                     'ver'         => $LJ::PROTOCOL_VER,
                     'username'    => $user,
                     'password'    => $POST{'password'},
                     'usejournal'  => ($usejournalu) ? $usejournalu->user : undef,
-                    'tz'          => 'guess',
+                    'tz'          => $timezone, 
+                    'type'        => $POST{'type'} || $GET{'type'},
+                    'ver'         => 2,
+                    'type'        => 'posted',
+                    'do_not_add_rss_friends' => $POST{'do_not_add_rss_friends'} ||
+                                                    $GET{'do_not_add_rss_friends'}
                     );
 
+        $flags->{'ignore_type'} = 1; 
         LJ::entry_form_decode(\%req, \%POST);
 
         if ($req{'event'} eq "") {
@@ -595,7 +613,15 @@ LIKE_FAQ
 
                     my $juser = $ju->{'user'};
                     my ($itemid, $anum) = ($res->{'itemid'}, $res->{'anum'});
-                    $itemlink = LJ::item_link($ju, $itemid, $anum);
+                    my $delayedid = $res->{'delayedid'};
+                    if ($res->{'itemid'})
+                    {
+                        $itemlink = LJ::item_link($ju, $itemid, $anum);
+                    }
+                    else
+                    {
+                        $itemlink = LJ::DelayedEntry::item_link($ju, $res->{'delayedid'});
+                    }
                     $itemid = $itemid * 256 + $anum;
 
                     my $writersblocklink = '';
@@ -607,15 +633,24 @@ LIKE_FAQ
                     my @after_entry_post_extra_options = LJ::run_hooks('after_entry_post_extra_options', user => $ju, itemlink => $itemlink);
                     my $after_entry_post_extra_options = join('', map {$_->[0]} @after_entry_post_extra_options) || '';
 
-                    $$body .= " p?><?p $ML{'.success.links'} p?><ul>" . $writersblocklink .
-                        "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
-                        "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" .
-                        "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
-                        "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
+                    $$body .= " p?><?p $ML{'.success.links'} p?><ul>" . $writersblocklink.
+                        "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>";
+                        my $item_text;
+                        if ($itemid) {
+                            $item_text = "journal=$juser&itemid=$itemid";
+                        } elsif ($delayedid) {
+                            $item_text = "journal=$juser&delayedid=$delayedid";
+                        } else { return "unknown error"; }
+
+                        $$body .= "<li><a href=\"/editjournal.bml?$item_text\">$ML{'.success.links.edit'}</a></li>";
+                        if ($itemid) {
+                            $$body .= "<li><a href=\"/tools/memadd.bml?$item_text\">$ML{'.success.links.memories'}</a></li>";
+                        }
+                        $$body .= "<li><a href=\"/edittags.bml?$item_text\">$ML{'.success.links.tags'}</a></li>" .
                         $after_entry_post_extra_options .
                         "</ul>";
 
-                    $$body .= '<div class="b-tnb-getstart">' . LJ::Widget::Trynbuy->render(stage => 'simple') if ($show_trynbuy);
+                    $$body .= '<div class="b--getstart">' . LJ::Widget::Trynbuy->render(stage => 'simple') if ($show_trynbuy);
                     $$body .= LJ::Widget::GettingStarted->render;
                     $$body .= '</div>' if ($show_trynbuy);
                 }

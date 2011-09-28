@@ -157,6 +157,17 @@ sub new_from_item_hash {
     return $entry;
 }
 
+sub is_delayed {
+    my ($class) = @_;
+    return 0;
+}
+
+sub delayedid { 
+    my ($class) = @_;
+    return 0;
+}
+
+
 sub new_from_url {
     my ($class, $url) = @_;
 
@@ -277,7 +288,7 @@ sub journal {
 sub eventtime_mysql {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
-    return $self->{eventtime};
+    return $self->{eventtime}; 
 }
 
 sub logtime_mysql {
@@ -1446,6 +1457,18 @@ sub extract_metadata {
     return \%meta;
 }
 
+sub is_sticky {
+    my ($self) = @_;
+
+    my $u = $self->{u};
+    return $self->{jitemid} == $u->get_sticky_entry();
+}
+
+sub can_delete_journal_item {
+    my $class = shift;
+    return LJ::can_delete_journal_item(@_);
+}
+
 package LJ;
 
 use Class::Autouse qw (
@@ -1935,8 +1958,7 @@ sub get_log2_recent_log
                AND rlogtime >= ($LJ::EndOfTime - " . ($events_date + 24*3600) . ")"
             :
             "AND rlogtime <= ($LJ::EndOfTime - UNIX_TIMESTAMP()) + $max_age"
-         )
-         ;
+         );
 
     my $sth = $db->prepare($sql);
     $sth->execute($jid);
@@ -1985,7 +2007,7 @@ sub get_log2_recent_user
     my $ret = [];
 
     my $log = LJ::get_log2_recent_log($opts->{'userid'}, $opts->{'clusterid'},
-              $opts->{'update'}, $opts->{'notafter'}, $opts->{events_date});
+              $opts->{'update'}, $opts->{'notafter'}, $opts->{events_date},);
 
     ## UNUSED: my $left     = $opts->{'itemshow'};
     my $notafter = $opts->{'notafter'};
@@ -2332,6 +2354,10 @@ sub delete_entry
 
     # delete all comments
     LJ::delete_all_comments($u, 'L', $jitemid);
+
+    if ( $jitemid == $u->get_sticky_entry() ){
+        $u->remove_sticky_entry();
+    }
 
     return 1;
 }

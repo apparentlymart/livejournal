@@ -83,6 +83,7 @@ sub DayPage
 
     my @items;
     push @items, $_ while $_ = $sth->fetchrow_hashref;
+    
     my @itemids = map { $_->{'itemid'} } @items;
 
     # load 'opt_ljcut_disable_lastn' prop for $remote.
@@ -106,6 +107,13 @@ sub DayPage
 
     # load tags
     my $tags = LJ::Tags::get_logtags($u, \@itemids);
+    
+    my @ditems = LJ::DelayedEntry->get_entries_for_day($u, $year, $month, $day, $dateformat, $secwhere);
+    foreach my $ditem (@ditems) {
+        if ($ditem) {
+            push @items, $ditem;
+        }
+    }
 
     my $userlite_journal = UserLite($u);
 
@@ -116,12 +124,25 @@ sub DayPage
             map { $item->{$_} } qw(posterid itemid security allowmask alldatepart anum);
 
         my $ditemid = $itemid*256 + $anum;
-        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
-        $entry_obj->handle_prefetched_props($logprops{$itemid});
-
-        my $replycount = $logprops{$itemid}->{'replycount'};
-        my $subject = $logtext->{$itemid}->[0];
-        my $text = $logtext->{$itemid}->[1];
+        my $entry_obj;
+        if ($item->{delayedid}) {
+            $entry_obj = LJ::DelayedEntry->get_entry_by_id($u, $item->{delayedid});
+        } else {
+            $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+            $entry_obj->handle_prefetched_props($logprops{$itemid});
+        }
+        
+        my ($replycount, $subject, $text);
+        if ($item->{delayedid}) {
+            $replycount = 0;
+            $subject = $entry_obj->subject;
+            $text = $entry_obj->event;
+        } else {
+            $replycount = $logprops{$itemid}->{'replycount'} || 0;
+            $subject = $logtext->{$itemid}->[0];
+            $text = $logtext->{$itemid}->[1];
+        }
+        
         if ($get->{'nohtml'}) {
             # quote all non-LJ tags
             $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
@@ -142,7 +163,7 @@ sub DayPage
             next ENTRY if $purge_community_entries;
         }
 
-       if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
             LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
         }
 
@@ -166,7 +187,7 @@ sub DayPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my $permalink = "$journalbase/$ditemid.html";
+        my $permalink = $entry_obj->is_delayed ? $entry_obj->url : "$journalbase/$ditemid.html";
         my $readurl = $permalink;
         $readurl .= "?$nc" if $nc;
         my $posturl = $permalink . "?mode=reply";
@@ -220,6 +241,7 @@ sub DayPage
             'security' => $security,
             'allowmask' => $allowmask,
             'props' => $logprops{$itemid},
+            'delayedid' => $entry_obj->is_delayed ? $entry_obj->delayedid : undef,
             'itemid' => $ditemid,
             'journal' => $userlite_journal,
             'poster' => $userlite_poster,

@@ -513,7 +513,12 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
            " ";print $e->formatted_subject({"class"=>"subj-link subjlink"});
         } else { " <span style='color: $*subject_color'>$e.subject</span>";} 
     }
-    " $e.security_icon</font>";
+
+    if ($e.delayed) { " $e.delayed_icon"; }
+    if ($e.sticky) { " $e.sticky_icon"; }
+    if ($e.security) { " $e.security_icon"; }
+
+    "</font>";
 
     if (not $hide_text)
     {

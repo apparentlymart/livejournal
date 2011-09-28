@@ -720,9 +720,13 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $metapic = "$metapic</div>";
     }
     # Security Icon
-    if ($e.security) {
-        $meta{"Security:"} = "$e.security_icon $e.security";
-    }
+    var string posticon = "";
+
+    if ($e.delayed) { $posticon = $posticon + "$e.delayed_icon "; }
+    if ($e.sticky) { $posticon = $posticon + "$e.sticky_icon "; }
+    if ($e.security) { $posticon = $posticon + "$e.security_icon "; }
+    $meta{"Security:"} = "$posticon";
+    
     # Subject
     if ($e.subject) {
       if ($p.view != "entry") {

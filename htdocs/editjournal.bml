@@ -31,12 +31,15 @@ body<=
     }
 
     my $mode = $GET{'mode'} || $POST{'mode'} || "init";
-    if ($GET{'itemid'} || $POST{'itemid'}) { $mode = "edit"; }
     my $only_me_checked = LJ::did_post() ? $POST{'only_me'} : $GET{'only_me'};
+
+    if ( $GET{'itemid'} || $POST{'itemid'} ) { $mode = "edit"; }
+    if ( $GET{'delayedid'} || $POST{'delayedid'} ) { $mode = "edit"; }
 
     my $ret;
     my $getextra = undef;
 
+<<<<<<< .working
     LJ::need_res(qw(
                     stc/entry.css
                     stc/editjournal.css
@@ -49,6 +52,18 @@ body<=
                     js/scanner.js
                     js/photobucket_jw.js
                     ));
+=======
+    LJ::need_res( 'stc/entry.css', 
+                  'stc/widgets/selecttags.css', 
+                  'js/inputcomplete.js', 
+                  'js/jquery-ui-autocomplete.js', 
+                  'js/gears_init.js', 
+                  'js/scanner.js' );
+
+    LJ::need_string(qw/
+                        entryform.sticky_replace.edit
+                        entryform.sticky.edit/);
+>>>>>>> .merge-right.r20130
     
     return LJ::bad_input("You must be authenticated as a person.")
         unless $remote->is_personal || $remote->is_identity;
@@ -103,10 +118,19 @@ body<=
         }
         $ret .= "</div>";
 
+<<<<<<< .working
         $ret .= "<ul class='b-editentries'>" if @res;
         foreach my $e_raw (@res) {
             my $entry = LJ::Entry->new_from_item_hash (LJ::load_user($usejournal) || $remote, $e_raw); 
+=======
+        my $ev_count = $res{'events_count'};
+        for (my $i=1; $i<=$ev_count; $i++) {
+            my $delayedid = $res{"events_${i}_delayedid"} || 0;
+            my $itemid = $res{"events_${i}_itemid"} || 0;
+            my $ditemid = $itemid * 256 + $res{"events_${i}_anum"};
+>>>>>>> .merge-right.r20130
 
+<<<<<<< .working
             my $edit_disable = 0;
             if (
                 ($e_raw->{'posterid'} != $remote->userid)
@@ -114,11 +138,37 @@ body<=
             ) {
                 $edit_disable++;
             }
+=======
+            $ret .= "<?hr?><table><tr valign='top'><td align='middle'>";
+            $ret .= "<form method='post' action='editjournal.bml$getextra'>\n";
+            if ($itemid) {
+                $ret .= LJ::html_hidden('itemid',$ditemid,'mode',"edit");
+                $ret .= LJ::html_submit("itemid-$ditemid",'Edit this Entry');
+
+            } else {
+                $ret .= LJ::html_hidden('delayedid',$delayedid,'mode',"edit");
+                $ret .= LJ::html_submit("delayedid-$delayedid",'Edit this Entry');
+            }
+
+            $ret .= "</form>";
+            $ret .= "</td><td>";
+>>>>>>> .merge-right.r20130
 
             my $poster = $usejournal ? LJ::ljuser(LJ::load_userid($entry->posterid)) : "";
 
+<<<<<<< .working
             $ret .= "<li class='b-editentry'>";
 
+=======
+            if ( $res{"events_${i}_delayedid"} ) {
+                $ret .= BML::fill_template("typedelayed");
+            }
+
+            if ( $res{"events_${i}_sticky"} ) {
+                $ret .= BML::fill_template("typesticky");
+            }
+
+>>>>>>> .merge-right.r20130
             ### security indicator
             my $sec = ' ';
             if ($entry->security eq "private") {
@@ -200,18 +250,17 @@ body<=
         ### HAVE AN ITEMID TO EDIT
         ###
 
-        if ($GET{'itemid'} || $POST{'itemid'}) {
+        my $ditemid = $GET{'itemid'} || $POST{'itemid'} || 0;
+        my $delayedid = $GET{'delayedid'} || $POST{'delayedid'} || 0;    
 
-            # the 'itemid' form element is really an 'itemid'
-            my $ditemid = $GET{'itemid'} || $POST{'itemid'};
-            my $anum = $ditemid % 256;
-            my $itemid = int($ditemid / 256);
+        if ( $ditemid || $delayedid ) {
+            my $itemid = 0;
+            my $anum = 0;
 
             my $u_for_entry = $usejournal ? $usejournal_u : $remote;
-            my $entry_obj = LJ::Entry->new($u_for_entry, ditemid => $ditemid);
-
-            # do getevents request
+            my $entry_obj;
             my %res = ();
+<<<<<<< .working
             LJ::do_request({ 'mode' => 'getevents',
                              'selecttype' => 'one',
                              'ver' => $LJ::PROTOCOL_VER,
@@ -224,7 +273,55 @@ body<=
                            { "noauth" => 1,
                              'u' => $remote }
                            );
+=======
+>>>>>>> .merge-right.r20130
 
+            if ($ditemid) {
+                # the 'itemid' form element is really an 'itemid'
+                $anum = $ditemid % 256;
+                $itemid = int($ditemid / 256);
+
+                $entry_obj = LJ::Entry->new($u_for_entry, ditemid => $ditemid);
+    
+                # do getevents request
+              
+                LJ::do_request({ 'mode' => 'getevents',
+                                 'selecttype' => 'one',
+                                 'ver' => $LJ::PROTOCOL_VER,
+                                 'user' => $u->{'user'},
+                                 'usejournal' => $usejournal,
+                                 'itemid' => $itemid },
+                                 \%res,
+                                 { "noauth" => 1,
+                                   'u' => $u } );
+            } else {
+                $entry_obj = LJ::DelayedEntry->get_entry_by_id($u_for_entry, $delayedid);
+
+                $res{'success'} = 'OK';
+                $res{'events_count'}  = 1;
+                $res{'events_1_anum'} = 0;
+                $res{'events_1_poster'} = $entry_obj->poster->user;
+                $res{'events_1_subject'} = $entry_obj->subject;
+                $res{'events_1_event'} = $entry_obj->event;
+                $res{'events_1_allowmask'} = $entry_obj->allowmask;
+                $res{'events_1_security'} = $entry_obj->security;            
+                $res{'events_1_eventtime'} = $entry_obj->posttime;
+                $res{'events_1_'} = $entry_obj->mood;
+                $res{'events_1_itemid'} = $entry_obj->jitemid;
+                $res{'events_1_anum'} = $entry_obj->correct_anum;
+                
+                my @prop_keys = keys %{$entry_obj->props};
+                $res{'prop_count'} = scalar @prop_keys; 
+
+                my $i = 1;
+                foreach my $key (@prop_keys) {
+                    $res{"prop_${i}_name"} = $key;
+                    $res{"prop_${i}_value"} = $entry_obj->props->{$key};
+                    $i++;
+                }
+    
+            }
+    
             # was there a protocol error?
             return "<?h1 $ML{'Error'} h1?><?p $res{'errmsg'} p?>"
                 unless $res{'success'} eq 'OK';
@@ -235,15 +332,26 @@ body<=
 
             ####  Check security before viewing this post
             my $errtxt;
-            my $item = LJ::Talk::get_journal_item($u_for_entry, $itemid);
-            return $errtxt unless LJ::Talk::check_viewable($remote, $item, undef, \$errtxt);
+            if ($itemid) {
+                my $item = LJ::Talk::get_journal_item($u_for_entry, $itemid);
+                return $errtxt unless LJ::Talk::check_viewable($remote, $item, undef, \$errtxt);
+            }
 
             # are we authorized to edit other peoples' posts in this community?
             my $disabled_save = 0;
             my $disabled_delete = 0;
             my $disabled_spamdelete = 0;
+<<<<<<< .working
             if ($usejournal && $res{'events_1_poster'} ne $remote->{'user'}) {
                 $disabled_delete = ! LJ::can_delete_journal_item($remote, $usejournal_u, $itemid);
+=======
+            if ($usejournal && $res{'events_1_poster'} ne $u->{'user'}) {
+                if ($entry_obj->is_delayed) {
+                    $disabled_delete = ! $entry_obj->can_delete_delayed_item($u, $usejournal_u);
+                } else {
+                    $disabled_delete = ! LJ::can_delete_journal_item($u, $usejournal_u, $itemid);
+                }
+>>>>>>> .merge-right.r20130
                 $disabled_save++;
             }
             $disabled_spamdelete = $disabled_delete || !$usejournal || ($res{'events_1_poster'} eq $remote->{'user'});
@@ -276,10 +384,19 @@ body<=
                 return LJ::bad_input($ML{'error.invalidform'}) unless LJ::check_form_auth();
 
                 my %req = (
+<<<<<<< .working
                             'ver' => $LJ::PROTOCOL_VER,
                             'username' => $remote->{'user'},
+=======
+                            'ver'        => $LJ::PROTOCOL_VER,
+                            'username'   => $u->{'user'},
+>>>>>>> .merge-right.r20130
                             'usejournal' => $usejournal,
-                            'itemid' => $itemid,
+                            'timezone'   => $POST{'delayed_timezone'} ||
+                                                $POST{'delayed_timezone'},
+                            'itemid'     => $itemid,
+                            'delayedid'  => $delayedid,
+                            'type'       => $POST{'type'} || $POST{'type'},
                             );
                 LJ::entry_form_decode(\%req, \%POST);
 
@@ -287,10 +404,13 @@ body<=
                 $req{'event'} = '' if $POST{'action:delete'} || $POST{'action:deletespam'};
 
                 # mark as spam, if need be
-                LJ::mark_entry_as_spam($usejournal_u, $itemid) if $POST{'action:deletespam'};
+                if ( $POST{'action:deletespam'} && $entry_obj->is_delayed ) {
+                      LJ::mark_entry_as_spam($usejournal_u, $itemid);
+                }
 
                 # if the action is to delete it, then let's note that
-                if ($POST{'action:delete'} || $POST{'action:deletespam'}) {
+                if ( ($POST{'action:delete'} || $POST{'action:deletespam'} ) 
+                                    && $entry_obj->is_delayed ) {
                     # now log the event created above
                     ($usejournal ? $usejournal_u : $remote)->log_event('delete_entry', {
                             remote => $remote,
@@ -316,7 +436,13 @@ body<=
                 my $deleted = $req{event} ? 0 : 1;
                 my $journalu = $usejournal ? $usejournal_u : $remote;
                 my $j_base = $journalu->journal_base;
-                my $entry_url = LJ::item_link($journalu, $itemid, $res->{anum});
+                my $entry_url = '';
+                if ($entry_obj->is_delayed) {
+                    $entry_url = $entry_obj->url;
+                } else {
+                    $entry_url = LJ::item_link($journalu, $itemid, $res->{anum});
+                }
+    
 
                 my $result = "<?h1 $ML{'.success.head'} h1?>";
                 $result .= "<table border='0' width='100%'><tr valign='top'><td>";
@@ -329,28 +455,31 @@ body<=
                     $result .= $deleted_extras if defined $deleted_extras;
                 } else {
                     $result .= "<?p $ML{'.success.edited'} p?>";
+                    
+                    if (!$delayedid) {
+        
+                        # open a request about the unsuspension if one doesn't already exist
+                        if ($POST{'action:saveunsuspend'} && !$entry_obj->prop("unsuspend_supportid") && $LJ::UNSUSPENSION_REQUEST_SPCATID) {
+                            my %req;
+                            $req{reqtype} = "user";
+                            $req{requserid} = $remote->id;
+                            $req{uniq} = LJ::UniqCookie->current_uniq;
+                            $req{spcatid} = $LJ::UNSUSPENSION_REQUEST_SPCATID;
+                            $req{ignore_dup_check} = 1; # can't have dup checking in case a particular entry gets re-suspended after unsuspension
+                            $req{subject} = "Unsuspension Request from " . $remote->user;
+                            $req{body} = "The suspended entry at " . $entry_obj->url . " has been edited and the poster requests unsuspension.";
 
-                    # open a request about the unsuspension if one doesn't already exist
-                    if ($POST{'action:saveunsuspend'} && !$entry_obj->prop("unsuspend_supportid") && $LJ::UNSUSPENSION_REQUEST_SPCATID) {
-                        my %req;
-                        $req{reqtype} = "user";
-                        $req{requserid} = $remote->id;
-                        $req{uniq} = LJ::UniqCookie->current_uniq;
-                        $req{spcatid} = $LJ::UNSUSPENSION_REQUEST_SPCATID;
-                        $req{ignore_dup_check} = 1; # can't have dup checking in case a particular entry gets re-suspended after unsuspension
-                        $req{subject} = "Unsuspension Request from " . $remote->user;
-                        $req{body} = "The suspended entry at " . $entry_obj->url . " has been edited and the poster requests unsuspension.";
+                            my @errors;
+                            my $spid = LJ::Support::file_request(\@errors, \%req);
 
-                        my @errors;
-                        my $spid = LJ::Support::file_request(\@errors, \%req);
-
-                        if ($spid) {
-                            $entry_obj->set_prop( unsuspend_supportid => $spid );
-                            my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
-                            $result .= "<?p " . BML::ml('.success.editedunsuspend', { url => "<a href='$url'>$url</a>" }) . " p?>";
+                            if ($spid) {
+                                $entry_obj->set_prop( unsuspend_supportid => $spid );
+                                my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
+                                $result .= "<?p " . BML::ml('.success.editedunsuspend', { url => "<a href='$url'>$url</a>" }) . " p?>";
+                            }
+                        } elsif ($POST{'action:save'} && $entry_obj->is_suspended && !$entry_obj->prop("unsuspend_supportid")) {
+                            $result .= "<?p " . BML::ml('.success.editedstillsuspended', { aopts => "href='$LJ::SITEROOT/abuse/report.bml'" }) . " p?>";
                         }
-                    } elsif ($POST{'action:save'} && $entry_obj->is_suspended && !$entry_obj->prop("unsuspend_supportid")) {
-                        $result .= "<?p " . BML::ml('.success.editedstillsuspended', { aopts => "href='$LJ::SITEROOT/abuse/report.bml'" }) . " p?>";
                     }
                 }
 
@@ -378,12 +507,12 @@ body<=
             ### SHOW EDIT FORM
             ###
 
-            my $auth = "<p class='pkg'><label for='' class='left'>$ML{'.auth.poster'}</label>";
-            $auth   .= "<span id='poster' class='float-left'>";
+            my $auth = "<li class='pkg'><label for='' class='title'>$ML{'.auth.poster'}</label>";
+            $auth   .= "<span class='wrap'><span id='poster'>";
             $auth   .= $usejournal ? LJ::ljuser($res{'events_1_poster'}) . " in community " . LJ::ljuser($usejournal)
                                    :  LJ::ljuser($remote);
             $auth .= LJ::html_hidden("usejournal", $usejournal);
-            $auth   .= "</span></p>";
+            $auth   .= "</span></span></li>";
 
             # Tags
             my @tag_names;
@@ -429,14 +558,18 @@ body<=
             $ret .= "<table><tr><td>";
             $ret .= "<div style='width: 100%; float: left;'><form method='post' action='editjournal.bml$getextra' id='updateForm' name='updateForm'>";
             $ret .= LJ::form_auth();
-            $ret .= LJ::html_hidden('itemid', $ditemid,'mode','edit','edited',1) . "\n";
-
+            if (!$delayedid) {
+                $ret .= LJ::html_hidden('itemid', $ditemid,'mode','edit','edited',1) . "\n";
+            } else { 
+                $ret .= LJ::html_hidden('delayedid', $delayedid,'mode','edit','edited',1) . "\n";
+            }
+            
             $event = LJ::durl($event);
             my $journalu = $usejournal ? LJ::load_user($usejournal) : $remote;
             LJ::EmbedModule->parse_module_embed($journalu, \$event, edit => 1);
             $event = LJ::eurl($event);
 
-            my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
+            my $suspend_msg = $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
             my $entry = {
                 'mode' => "edit",
                 'auth_as_remote' => 1,
@@ -456,14 +589,18 @@ body<=
                 'disabled_spamdelete' => $disabled_spamdelete,
                 'suspended' => $suspend_msg,
                 'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
+                'jitemid' => $itemid,
+                'delayedid' => $delayedid,
+                'sticky' => $entry_obj->is_sticky,
+                'opt_backdated' => $entry_obj->prop('opt_backdated'),
             };
+
             for (my $i = 1; $i <= $res{'prop_count'}; $i++) {
                 $entry->{"prop_" . $res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
             }
 
             # add property for current music button displaying if last.fm user specified
             $entry->{prop_last_fm_user} = $u_for_entry->prop('last_fm_user');
-
             $entry->{prop_copyright} = $entry_obj->prop('copyright') || $remote->prop('default_copyright') || 'P';
 
             foreach ( keys %POST ) { $entry->{$_} = %POST->{$_}; }
@@ -488,7 +625,7 @@ LIKE_FAQ
             if ($ad) {
                 $ret .= "<td valign='top' style='width: 300px;'>$ad</td>";
             }
-                
+
             $ret .= "</tr></table>";
 
             my $qotd = LJ::QotD->get_single_question($entry->{prop_qotdid});
@@ -504,6 +641,7 @@ LIKE_FAQ
             LJ::need_string('entryform.close.confirm');
 
             $$head .= qq|
+<<<<<<< .working
     <script type="text/javascript">
     //<![CDATA[
         var seedurl='$LJ::SITEROOT/photobucket_cb.bml';
@@ -521,6 +659,17 @@ LIKE_FAQ
     LiveJournal.qotdText = "$escaped_qotd_text";
     </script>
 |;
+=======
+                    <script type="text/javascript">
+                    //<![CDATA[
+                        function init_update_bml () {
+                            $onload
+                        }
+                    //]]>
+                    LiveJournal.qotdText = "$escaped_qotd_text";
+                    </script>
+                };
+>>>>>>> .merge-right.r20130
 
             $ret .= LJ::Widget::SettingWindow->render;
 
@@ -574,8 +723,15 @@ LIKE_FAQ
         # only one item returned?  go directly to edit it
         if ($res{'events_count'} == 1) {
             my $ditemid = ($res{'events_1_itemid'} * 256) + $res{'events_1_anum'};
-            my $ditemid_get = $getextra ? "$getextra&itemid=$ditemid" : "?itemid=$ditemid";
-            return BML::redirect("$LJ::SITEROOT/editjournal.bml$ditemid_get");
+            my $ditemid_get = '';
+            
+            if ($delayedid) {
+                $ditemid_get = $getextra ? "$getextra&delayedid=$delayedid" : "?delayedid=$delayedid";
+            } else { 
+                $ditemid_get = $getextra ? "$getextra&itemid=$ditemid" : "?itemid=$ditemid";
+
+            }
+           # return BML::redirect("$LJ::SITEROOT/editjournal.bml$ditemid_get");
         }
 
         # how many results did we get?
@@ -695,7 +851,6 @@ JS_INIT
         $ret .= "</td></tr></table>";
 
         $ret .= LJ::Widget::SettingWindow->render;
-
         return $ret;
     }
 }
@@ -730,7 +885,7 @@ head<=
 }
 _code?>
 <script type='text/javascript'>
-	LiveJournal.register_hook("page_load", setCopyrightEdit);
+    LiveJournal.register_hook("page_load", setCopyrightEdit);
 </script>
 
 <=head

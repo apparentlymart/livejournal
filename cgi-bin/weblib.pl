@@ -1137,7 +1137,6 @@ sub entry_form_decode
     # time is sync'd with their computer clock. otherwise, the JS didn't run,
     # so let's guess at their timezone.
     if ($POST->{'date_diff'} || $POST->{'date_diff_nojs'} || $different) {
-        delete $req->{'tz'};
         $req->{'year'} = $year;
         $req->{'mon'} = $mon;
         $req->{'day'} = $day;

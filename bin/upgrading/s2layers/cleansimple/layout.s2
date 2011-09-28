@@ -808,9 +808,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     }
     "<span class=\"timestamp\">"+$e.time->time_format($*time_format)+"</span>: ";
 
-    if ($e.security) {
-        $e.security_icon->print();
-    }
+    if ($e.delayed) { "$e.delayed_icon "; }
+    if ($e.sticky) { "$e.sticky_icon "; }
+    if ($e.security) { "$e.security_icon"; }
+
     if ($e.subject) {
         " <span class=\"subject\"> ";
           if ($p.view != "entry") {

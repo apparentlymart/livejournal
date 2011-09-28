@@ -576,6 +576,14 @@ __________________________________________*/
 .rate-posts .selfpromo .voting .vote-value A {
 	top: 0;
 	}
+#updateForm #metainfo LI .title {
+	display: inline-block;
+	min-width: 8.5em;
+	}
+#updateForm #metainfo LI .wrap {
+	overflow: hidden;
+	zoom: 1;
+	}
 
 /* LJ like buttons 
 -----------------------------------------------*/

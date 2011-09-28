@@ -886,11 +886,13 @@ function ReplyPage::print_body
         return;
     }
 
-    var Image security;
+    var string security = "";
     if ($.replyto isa Entry) {
         var Entry en = $.replyto as Entry;
 
-        $security = $en.security_icon;
+        if ($en.delayed) { $security = $security + "$en.delayed_icon "; }
+        if ($en.sticky) { $security = $security + "$en.sticky_icon "; }
+        if ($en.security) { $security = $security + "$en.security_icon "; }
     }
 
     "<table><tr valign='middle'>";
@@ -1179,8 +1181,12 @@ function Page::print_entry(Entry e) {
       }
 
       "<h3 class='entry-header'>";
-      if (defined $e.security_icon) {
-          print "<span class='lj-entry-securityicon'>$e.security_icon</span> ";
+      if (defined $e.security_icon or $e.sticky or $e.delayed) {
+          "<span class='lj-entry-securityicon'>";
+          if ($e.delayed) { "$e.delayed_icon "; }
+          if ($e.sticky) { " $e.sticky_icon "; }
+          if ($e.security) { " $e.security_icon"; }
+          "</span> ";
       }
       if ($.view != "entry") {
         print $e->formatted_subject({"class"=>"subj-link"});

@@ -12,9 +12,77 @@ if(! ("$" in window)){
 }
 
 function editdate(){
+	var currentDate = jQuery('#currentdate'),
+		modifyDate = jQuery('#modifydate'),
+		cal = modifyDate.find('.wrap-calendar'),
+		calVal = modifyDate.find('.wrap a');
+
+	if (settime.interval) {
+		currentDate.data('dotime', '1');
+	}
 	clearInterval(settime.interval);
-	$('currentdate').style.display = 'none';
-	$('modifydate').style.display = 'inline';
+
+	currentDate.hide();
+	modifyDate.css('display', '');
+
+	f = document.updateForm;
+	var month = f.date_ymd_mm.selectedIndex || f.date_ymd_mm.value;
+	var dateStr = f.date_ymd_yyyy.value + "/" + month + "/" + f.date_ymd_dd.value;
+
+	cal.calendar({
+		currentDate: new Date(dateStr),
+		ml: {
+			caption: 'Choose date:'
+		},
+		endMonth: new Date(2037,11,31),
+		showCellHovers: true
+	}).bind("daySelected", function(ev, date) {
+		settime(date);
+	});
+}
+
+function revertdate() {
+	var currentDate = jQuery('#currentdate'),
+		modifyDate = jQuery('#modifydate'),
+		cal = modifyDate.find('.wrap-calendar');
+
+	if (cal.is(':lj-calendar')) {
+		cal.calendar('destroy');
+	}
+
+	currentDate.css('display', '');
+	modifyDate.hide();
+
+	if (currentDate.data('dotime')) {
+		settime.interval = setInterval(function() { settime(); }, 1000);
+		settime();
+	}
+}
+
+function setPostingPermissions(journal) {
+	if (!Site.remote_permissions[journal]) { return; }
+
+	var modifyDate = jQuery('#modifydate'),
+		stickyCheckbox = jQuery('#sticky_type'),
+		stickyLabel = jQuery('#sticky_type_label'),
+		currentDateEdit = jQuery('#currentdate-edit');
+
+		journal = Site.remote_permissions[journal];
+
+	if (!journal.can_post_delayed) {
+		if (modifyDate.is(':visible')) {
+			revertdate();
+		}
+		currentDateEdit.hide();
+	} else {
+		currentDateEdit.show();
+	}
+
+	stickyCheckbox.attr('disabled', !journal.can_create_sticky);
+	stickyLabel.html(journal.is_replace_sticky ? 
+			Site.ml_text['entryform.sticky_replace.edit'] :
+			Site.ml_text['entryform.sticky.edit']);
+
 }
 
 function showEntryTabs(){
@@ -50,7 +118,7 @@ function changeSubmit(prefix, defaultjournal, defPrefix){
 
 function new_post_load(dotime){
 	if(dotime){
-		settime.interval = setInterval(settime, 1000);
+		settime.interval = setInterval(function() { settime(); }, 1000);
 		settime();
 	}
 
@@ -330,11 +398,13 @@ function altlogin(e){
 		return false;
 	}
 
-	var altlogin_wrapper = $('altlogin_wrapper');
-	if(! altlogin_wrapper){
+	var altlogin_wrapper_login = $('altlogin_wrapper_login'),
+	    altlogin_wrapper_password = $('altlogin_wrapper_password');
+	if (!altlogin_wrapper_login || !altlogin_wrapper_password) {
 		return false;
 	}
-	altlogin_wrapper.style.display = 'block';
+	altlogin_wrapper_login.style.display = '';
+	altlogin_wrapper_password.style.display = '';
 
 	var remotelogin = $('remotelogin');
 	if(! remotelogin){
@@ -409,7 +479,7 @@ function insertFormHints(){
 }
 
 function defaultDate(){
-	$('currentdate').style.display = 'block';
+	$('currentdate').style.display = '';
 	$('modifydate').style.display = 'none';
 }
 
@@ -563,40 +633,40 @@ function setColumns(number){
 	listWrapper.removeChild(listObj);
 }
 
-function settime(){
+function settime(time){
 	function twodigit(n){
-		if(n < 10){
+		if (n < 10) {
 			return "0" + n;
 		} else {
 			return n;
 		}
 	}
 
-	now = new Date();
-	if(! now){
+	var newTime = time || new Date();
+	if (!newTime) {
 		return false;
 	}
 	f = document.updateForm;
-	if(! f){
+	if (!f) {
 		return false;
 	}
 
-	f.date_ymd_yyyy.value = now.getYear() < 1900 ? now.getYear() + 1900 : now.getYear();
-	f.date_ymd_mm.selectedIndex = twodigit(now.getMonth());
-	f.date_ymd_dd.value = twodigit(now.getDate());
-	f.hour.value = twodigit(now.getHours());
-	f.min.value = twodigit(now.getMinutes());
+	f.date_ymd_yyyy.value = newTime.getFullYear() < 1900 ? newTime.getFullYear() + 1900 : newTime.getFullYear();
+	f.date_ymd_mm.selectedIndex = twodigit(newTime.getMonth() + 1);
+	f.date_ymd_dd.value = twodigit(newTime.getDate());
+	if (!time) {
+		f.hour.value = twodigit(newTime.getHours());
+		f.min.value = twodigit(newTime.getMinutes());
+	}
 
 	f.date_diff.value = 1;
 
 	var mNames = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
 	var currentdate = document.getElementById('currentdate-date');
-	var cMonth = now.getMonth();
-	var cDay = now.getDate();
-	var cYear = now.getYear() < 1900 ? now.getYear() + 1900 : now.getYear();
-	var cHour = now.getHours();
-	var cMinute = twodigit(now.getMinutes());
-	currentdate.innerHTML = mNames[cMonth] + " " + cDay + ", " + cYear + ", " + cHour + ":" + cMinute;
+	var cMonth = newTime.getMonth();
+	var cDay = newTime.getDate();
+	var cYear = newTime.getFullYear() < 1900 ? newTime.getFullYear() + 1900 : newTime.getFullYear();
+	currentdate.innerHTML = mNames[cMonth] + " " + cDay + ", " + cYear;
 
 	return false;
 }

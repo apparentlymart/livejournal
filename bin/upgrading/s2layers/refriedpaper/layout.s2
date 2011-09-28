@@ -593,12 +593,6 @@ function EntryLite::lay_make_icon() : string {
       $icon = $c.subject_icon + " ";
     }
   }
-  if($this isa Entry) {
-    var Entry en = $this as Entry;
-    if(defined $en.security_icon) {
-      $icon = $en.security_icon + " ";
-    }
-  }
   return $icon;
 }
 
@@ -1205,7 +1199,15 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
 
   if ($e isa Entry) {
     var Entry en = $e as Entry;
-    $security = $en.security != "" ? $en.security->upperfirst() : "Public";
+
+    if ($en.security != "" or $en.sticky or $en.delayed) {
+        if ($en.delayed) { $security = $security + "$en.delayed_icon "; }
+        if ($en.sticky) { $security = $security + "$en.sticky_icon "; }
+        if ($en.security) { $security = $security + "$en.security_icon "; }
+    } else {
+        $security = "Public";
+    }
+
   }
   if ($e isa Comment) {
     var Comment c = $e as Comment;

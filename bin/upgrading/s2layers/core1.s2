@@ -349,7 +349,11 @@ class Entry extends EntryLite
 "A journal entry"
 {
     var readonly string security "The security level of the entry ('private', 'protected'), or blank if public.";
+    var readonly bool sticky "Indicates that this entry is sticky";
+    var readonly bool delayed "Indicates that this entry is delayed";
     var Image security_icon "A little icon which should be displayed somewhere on an entry to represent the security setting";
+    var Image sticky_icon "A little icon which should be displyaed somewhere on an entry to represent the sticky setting";
+    var Image delayed_icon "A little icon which should be displyaed somewhere on an entry to represent the delayed entry";
 
     var Image mood_icon "Mood icon, or null.";
     var CommentInfo comments "Comment information on this entry";
@@ -1846,9 +1850,19 @@ property string text_icon_alt_groups {
     des = "Alternative text for icons of custom friends group entries";
     noui = 1;
 }
+property string text_icon_alt_sticky {
+    des = "Alternative text for icons of sticky entries";
+    noui = 1;
+}
+property string text_icon_alt_delayed {
+    des = "Alternative text for icons of delayed entries";
+    noui = 1;
+}
 set text_icon_alt_protected = "[protected post]";
 set text_icon_alt_private = "[private post]";
 set text_icon_alt_groups = "[custom friends groups post]";
+set text_icon_alt_sticky = "[sticky post]";
+set text_icon_alt_delayed = "[delayed post]";
 
 property string comment_form_text_hint {
     des = "Text hint for comment message";
@@ -2285,7 +2299,7 @@ function Image::as_string_ex(string alttext, string attributes) [fixed] : string
 
     $extraParams = $extraParams + $attributes;
 
-    return "<img src=\"$.url\" title=\"\" alt=\"" + ehtml($alttext) + "\"" +
+    return "<img src=\"$.url\" alt=\"" + ehtml($alttext) + "\" " +
         $extraParams + " />";
 }
 
@@ -2546,7 +2560,12 @@ function Page::print_entry_poster(Entry e) {
 function Page::print_entry(Entry e) {
     ## For most styles, this will be overridden by FriendsPage::print_entry and such.
     """<div class="entry" id="$e.dom_id">\n""";
-    "<h3>$e.security_icon $e.subject</h3>\n";
+    "<h3>";
+    if ($e.delayed) {"$e.delayed_icon ";}
+    if ($e.sticky) {"$e.sticky_icon ";}
+    if ($e.security) {"$e.security_icon ";}
+    "$e.subject";
+    "</h3>\n";
     if ($.view == "friends" or $e.poster.username != $e.journal.username) {
         "<div>"; $this->print_entry_poster($e); "</div>";
     }
@@ -2883,7 +2902,9 @@ function MonthDay::print_subjectlist() {
         if ($e.poster.username != $e.journal.username) {
             $e.poster->print(); " ";
         }
-        "$e.security_icon";
+        if ($e.delayed) {" $e.delayed_icon";}
+        if ($e.sticky) {" $e.sticky_icon";}
+        if ($e.security) {" $e.security_icon";}
         if ($e.subject != "") {
             " <a href=\"$e.permalink_url\">$e.subject</a>";
         } else {

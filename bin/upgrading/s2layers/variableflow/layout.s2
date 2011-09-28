@@ -659,9 +659,13 @@ function Page::print_entry(Entry e) {
     elseif ($altposter) {
         " - " + $e.poster->as_string();
     }
-    if ($e.security != "") {
-        " - " + $e.security_icon->as_string();
+    if ($e.security != "" or $e.sticky or $e.delayed) {
+        " - ";
     }
+    if ($e.delayed) { " $e.delayed_icon"; }
+    if ($e.sticky) { " $e.sticky_icon"; }
+    if ($e.security) { " $e.security_icon"; }
+
     if ($e.subject != "") {
         " - ";
         if ($.view != "entry") {

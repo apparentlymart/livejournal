@@ -6,6 +6,7 @@ package LJ::S2;
 
 use LJ::TimeUtil;
 use LJ::UserApps;
+use LJ::DelayedEntry;
 
 sub MonthPage
 {
@@ -76,6 +77,12 @@ sub MonthPage
 
     my @items;
     push @items, $_ while $_ = $sth->fetchrow_hashref;
+    
+    my @ditems = LJ::DelayedEntry->get_entries_for_month($u, $year, $month, $dateformat, $secwhere);
+    foreach my $ditem (@ditems) {
+        push @items, $ditem;
+    }
+    
     @items = sort { $a->{'alldatepart'} cmp $b->{'alldatepart'} } @items;
 
     my @itemids = map { $_->{'jitemid'} } @items;
@@ -106,8 +113,16 @@ sub MonthPage
         my $day = $item->{'day'};
 
         my $ditemid = $itemid*256 + $anum;
-        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
-        $entry_obj->handle_prefetched_props($logprops{$itemid});
+        my $entry_obj; 
+        if ($item->{delayedid}) {
+            $entry_obj = LJ::DelayedEntry->get_entry_by_id($u, $item->{delayedid});
+        } else {
+            $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        }
+        
+        if (!$entry_obj->is_delayed()) {
+            $entry_obj->handle_prefetched_props($logprops{$itemid});
+        }
 
         # don't show posts from suspended users or suspended posts
         my $pu = $pu{$posterid};
@@ -124,10 +139,14 @@ sub MonthPage
         }
 
 
-	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-            my $text;
-	    LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
-	}
+        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+                my $text;
+            LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
+        }
+        
+        if ($entry_obj->is_delayed) {
+            $subject = $entry_obj->subject;
+        }
 
         if ($opt_text_subjects) {
             LJ::CleanHTML::clean_subject_all(\$subject);
@@ -137,7 +156,7 @@ sub MonthPage
 
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-        my $permalink = "$journalbase/$ditemid.html";
+        my $permalink = $entry_obj->is_delayed ? $entry_obj->url : "$journalbase/$ditemid.html";
         my $readurl = $permalink;
         $readurl .= "?$nc" if $nc;
         my $posturl = $permalink . "?mode=reply";
@@ -175,6 +194,7 @@ sub MonthPage
             'comments' => $comments,
             'userpic' => $userpic,
             'permalink_url' => $permalink,
+            'delayedid' => $entry_obj->is_delayed ? $entry_obj->delayedid : undef,
         });
 
         push @{$day_entries{$day}}, $entry;
