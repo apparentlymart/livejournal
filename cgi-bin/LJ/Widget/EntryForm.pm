@@ -1545,8 +1545,7 @@ sub render_ljphoto_block {
         } @$album_list
     ];
     $album_list_json = LJ::JSON->to_json ( $album_list );
-    my $spaces = LJ::Fotki::UserSpace->get_spaces ( $remote );
-    $available_space = $spaces->[2] || 0;
+    my $available_space = LJ::Fotki::UserSpace->get_available_space();
 
     my $auth_token = LJ::Auth->sessionless_auth_token ($LJ::DOMAIN_WEB."/pics/upload", user => $remote ? $remote->user : undef);
     my $user_groups = LJ::JSON->to_json (LJ::Widget::Fotki::Photo->get_user_groups ($remote));
