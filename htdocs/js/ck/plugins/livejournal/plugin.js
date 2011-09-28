@@ -322,7 +322,7 @@
 					}
 				}
 			}
-			
+
 			editor.dataProcessor.toHtml = function(html, fixForBody) {
 				html = html
 					.replace(/(<lj [^>]+)(?!\/)>/gi, '$1 />')
@@ -375,6 +375,8 @@
 					body.appendHtml('<br />');
 					selection && selection.selectBookmarks(bookmark);
 				}
+
+				currentNoteNode = null;
 			}
 
 			editor.on('selectionChange', findLJTags);
@@ -392,13 +394,16 @@
 						if (cmd.state == CKEDITOR.TRISTATE_ON) {
 							var selection = new CKEDITOR.dom.selection(editor.document);
 							selection.selectElement(node);
+							currentNoteNode = node;
 							evt.data.dialog = '';
 							cmd.exec();
-							break;
+							return;
 						}
 					}
 					node = node.getParent();
 				}
+
+				currentNoteNode = null;
 			});
 
 			editor.on('dataReady', function() {
