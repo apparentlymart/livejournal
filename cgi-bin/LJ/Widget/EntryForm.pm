@@ -538,7 +538,7 @@ sub render_metainfo_block {
             </li>};
     }
 
-    $out .= qq{ <li class='pkg' id='modifydate'><label class='title'>$BML::ML{'entryform.postponed.until'}</label>
+    $out .= qq{ <li class='pkg' id='modifydate' style='display: none;'><label class='title'>$BML::ML{'entryform.postponed.until'}</label>
                 <span class='wrap'>
                     <input type="hidden" name="date_ymd_mm" value="$mon" />
                     <input type="hidden" name="date_ymd_dd" value="$mday" />
