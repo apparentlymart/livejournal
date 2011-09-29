@@ -87,6 +87,13 @@ sub new {
             },
         );
 
+        HTML::Template::Pro->register_function(
+            'src2url' => sub {
+                my $src = shift;
+                return LJ::stat_src_to_url($src);
+            },
+        );
+
         my $template = HTML::Template::Pro->new(
             global_vars => 1, # normally variables declared outside a loop are not available inside
                               # a loop.  This option makes <TMPL_VAR>s like global variables in Perl
