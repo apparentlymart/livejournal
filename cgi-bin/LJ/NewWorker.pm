@@ -16,8 +16,6 @@ my $verbose     = 0;    # Verbose output (>0 means debug mode)
 my $memory_limit;       # Memory limit in bytes (undef means don't check)
 
 my $piddir      = "/var/run/workers";
-my $pidfile     = '';
-
 my $should_quit = 0;
 
 # Methods, which overloaded in derived classes
@@ -126,20 +124,14 @@ sub start {
         $self->pre_fork(); 
 
         my $pid;
+        my %children_pids;      ## list of child processes for parent
         for (my $count = 0; $count < $quantity; ++$count) {
             defined($pid = fork) or die "Cannot fork $!";
-            if ($pid) { # Parent process.
-                # Wait child started (pid file created), report 'OK' and exit.
-                $pidfile = "$piddir/$name-$pid.pid";
-                my $maxwait = 30;
-                while (! (-r $pidfile) ) {
-                    sleep 1;
-                    unless ($maxwait-- > 0) {
-                        print STDERR "# Worker $name (pid=$pid) failed to start.\n";
-                        exit 1;
-                    }
-                }
-            } else { # Child process.
+            if ($pid) { 
+                # Parent process.
+                $children_pids{$pid}++;
+            } else { 
+                # Child process.
                 $self->after_fork();
 
                 # Detach ourselves from the terminal
@@ -154,9 +146,8 @@ sub start {
                 # Catch all signals we needed
                 $self->catch_signals();
 
-
                 # Create pid-file
-                $pidfile = "$piddir/$name-$$.pid";
+                my $pidfile = "$piddir/$name-$$.pid";
                 open(PID, '>', $pidfile) or die "Cannot create pid file: '$pidfile'";
                 print PID "start time = ", time(), "\n";
                 close(PID);
@@ -175,8 +166,38 @@ sub start {
                 exit 0;
             }
         }
-        print STDERR "# $quantity worker(s) $name started.\n"; # Complete loop in parent process.
-        exit 0;
+
+        ## parent
+        ## Wait for children to start (pid file created) and exit.
+        my $maxwait = 30;
+        while (1) {
+            foreach my $pid (keys %children_pids) {
+                my $pidfile = "$piddir/$name-$pid.pid";
+                if (-r $pidfile) {
+                    delete $children_pids{$pid};
+                }
+            }
+
+            my @pids = keys %children_pids;
+            my $count = scalar @pids;
+
+            unless ($count) {
+                ## all childs started and created pid files
+                print STDERR "# $quantity worker(s) $name started\n"; # Complete loop in parent process.
+                exit 0;
+            }
+
+            if ($maxwait-- <= 0) {
+                print STDERR "# $count of $quantity worker(s) $name failed to start (@pids)\n";
+                exit 1;
+            }
+            
+            if (($maxwait%10) == 1) {
+                print STDERR "# waiting for $count worker(s) $name to start\n";
+            }
+
+            sleep 1;
+        }
     } else {
         # Catch all signals we needed
         $self->catch_signals();
