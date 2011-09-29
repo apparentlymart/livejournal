@@ -2345,7 +2345,7 @@ DIV.lj_ippu_app {
 	position: absolute;
 	font-size: 12px;
 	z-index: 4000;
-	background-color:transparent;
+	background: url(about:blank);
 	}
 	.b-popup input,
 	.b-popup div,
