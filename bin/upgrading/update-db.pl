@@ -140,6 +140,12 @@ CLUSTER: foreach my $cluster ( @clusters ) {
     $dbh->{'RaiseError'} = 0;
     $dbh->{'PrintError'} = 1 if $LJ::IS_DEV_SERVER;
 
+    # reset everything
+    %clustered_table = %table_exists = %table_unknown =
+        %table_create = %table_drop = %post_create =
+        %coltype = %indexname = %table_status = ();
+    @alters = ();
+
     ## figure out what tables already exist (but not details of their structure)
     $sth = $dbh->prepare("SHOW TABLES");
     $sth->execute;
