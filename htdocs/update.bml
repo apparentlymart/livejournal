@@ -502,6 +502,7 @@ LIKE_FAQ
 
         my $sticky = $POST{'sticky_type'} || $GET{'sticky_type'};
         my $timezone = $POST{'timezone'} || $GET{'timezone'};
+        my $custom_time = $POST{'custom_time'} || $GET{'custom_time'};
         $timezone =  sprintf("%+.4d", $timezone);
         my %req = (
                     'ver'         => 2,
@@ -509,12 +510,13 @@ LIKE_FAQ
                     'password'    => $POST{'password'},
                     'usejournal'  => ($usejournalu) ? $usejournalu->user : undef,
                     'sticky'      => $sticky,
+                    'custom_time' => $custom_time,
                     'tz'          => $timezone, 
                     'do_not_add_rss_friends' => $POST{'do_not_add_rss_friends'} ||
                                                     $GET{'do_not_add_rss_friends'}
                     );
 
-        $flags->{'ignore_type'} = 1; 
+        $flags->{'use_custom_time'} = 1; 
         LJ::entry_form_decode(\%req, \%POST);
 
         if ($req{'event'} eq "") {

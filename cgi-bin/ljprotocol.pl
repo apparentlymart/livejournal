@@ -2139,7 +2139,9 @@ sub postevent {
     }
     
     if ( $req->{ver} > 1 ) {
-        if ( LJ::DelayedEntry::is_future_date($req) ) {
+        my $use_delayed = $req->{'custom_time'} ||
+                    !(exists $flags->{'use_custom_time'});
+        if ( $use_delayed && LJ::DelayedEntry::is_future_date($req) ) {
             return fail($err, 215) unless $req->{tz};
 
             # if posting to a moderated community, store and bail out here

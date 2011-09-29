@@ -411,6 +411,11 @@ sub render_metainfo_block {
         value => 'guess',
         id => 'journal_timezone',
     });
+    $out .= LJ::html_hidden({
+        name => 'custom_time',
+        value => '0',
+        id => 'journal_time_edited',
+    });
     $out .= "<script>try { \$('journal_timezone').value = - (new Date).getTimezoneOffset()/0.6; } catch(e) {} </script>";
     $out .= "<div id='metainfo-wrap'><ul id='metainfo'>";
 
@@ -611,7 +616,6 @@ sub render_top_block {
     $out .= $self->render_userpics_block;
     $out .= $self->render_infobox_block;
     $out .= $self->render_metainfo_block;
-    
 
     return $out;
 }
