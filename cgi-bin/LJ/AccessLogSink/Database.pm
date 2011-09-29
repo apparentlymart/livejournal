@@ -23,6 +23,8 @@ sub new {
 
 sub should_log {
     my ($self, $rec) = @_;
+    return 0 
+        if $rec->{method} eq 'OPTIONS';
     return 0
         if defined $self->{percent} && rand(100) > $self->{percent};
     return 1;
