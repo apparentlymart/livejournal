@@ -2359,6 +2359,7 @@ sub start_request
                             js/livejournal.js
                             js/jquery/jquery.ui.core.min.js
                             js/jquery/jquery.ui.widget.min.js
+                            js/jquery/jquery.tmpl.min.js
                             js/jquery/jquery.lj.bubble.js
                             stc/lj_base.css
                             ));
