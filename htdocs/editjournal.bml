@@ -693,9 +693,8 @@ LIKE_FAQ
 
         function initUpdateBml() {
             window.isSupUser = $is_sup;
-            window.initEditor();
-
             $onload
+            window.initEditor();
         }
     //]]>
     LiveJournal.qotdText = "$escaped_qotd_text";

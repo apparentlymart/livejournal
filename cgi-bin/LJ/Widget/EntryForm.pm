@@ -1581,15 +1581,17 @@ JS
             type: 'add'
         })
         .bind('htmlready', function (event) {
+            var html = event.htmlStrings,
+                editor;
+
             if (window.switchedRteOn) {
-                var html = event.htmlStrings,
-                    editor = CKEDITOR.instances.draft;
+                editor = CKEDITOR.instances.draft;
 
                 for (var i = 0, l = html.length; i < l; i++) {
                     editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html[i], editor.document));
                 }
             } else {
-                jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
+                jQuery('#draft').val(jQuery('#draft').val() + html.join(' '));
             }
         })
         .photouploader('show');

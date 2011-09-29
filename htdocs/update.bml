@@ -769,6 +769,7 @@ head<=
         function initUpdateBml() {
             window.isSupUser = $is_sup;
             $initDraft
+            $_[0]->{'onload'}
             window.initEditor({
               ask: window.isInitDraft,
               restoreData: $draft,
@@ -777,7 +778,6 @@ head<=
               draftStatus: '$eMLrestored ',
               confirmMsg: '$eMLconfirm'
             });
-            $_[0]->{'onload'}
             $pageload
         }
     </script>^;
