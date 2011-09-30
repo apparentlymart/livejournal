@@ -27,7 +27,6 @@ sub pre_fork                { }
 sub after_fork              { }
 sub at_exit                 { }
 sub is_debug                { return 0 < $verbose }
-sub work_as_script          { 0 }
 
 sub catch_signals {
     my $self = shift;
