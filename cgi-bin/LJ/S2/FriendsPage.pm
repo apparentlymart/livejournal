@@ -258,7 +258,7 @@ sub FriendsPage
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
 
-        if ( $logprops{$datakey}->{'repost'} && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
+        if ( $remote && $logprops{$datakey}->{'repost'} && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
             $text = LJ::Lang::ml(
                 'friendsposts.reposted',
                 {
