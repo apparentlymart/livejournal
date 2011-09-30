@@ -16,9 +16,11 @@ sub template_params {
     my $remote = LJ::get_remote();
 
     my ( $parentcrumb_title, $parentcrumb_link ) = ( '', '' );
-    if ( LJ::get_active_crumb() ne '' ) {
-        my $parentcrumb = LJ::get_parent_crumb();
-        ( $parentcrumb_title, $parentcrumb_link ) = @$parentcrumb;
+    if ( LJ::get_active_crumb() ) {
+        my @path = LJ::get_crumb_path();
+        if ( my $parentcrumb = $path[-2] ) {
+            ( $parentcrumb_title, $parentcrumb_link ) = @$parentcrumb;
+        }
     }
 
     my $body_class = 'scheme-lynx ' . LJ::get_body_class_for_service_pages();
