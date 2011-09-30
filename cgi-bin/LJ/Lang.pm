@@ -680,12 +680,12 @@ sub get_text {
 sub get_text_multi {
     my ( $lang, $dmid, $codes ) = @_;
 
+    $lang ||= $LJ::DEFAULT_LANG;
     return {} unless $codes;
     return { map { $_ => $_ } @$codes }
         if $lang eq 'debug';
 
     $dmid = int( $dmid || 1 );
-    $lang ||= $LJ::DEFAULT_LANG;
     load_lang_struct() unless $LS_CACHED;
 
     ## %strings: code --> text
@@ -886,7 +886,8 @@ sub plural_form_fr {
 # Croatian, Czech, Russian, Slovak, Ukrainian, Belarusian
 sub plural_form_ru {
     my ($count) = @_;
-
+    $count = 0 unless defined $count;
+ 
     return 0 if ( $count % 10 == 1 && $count % 100 != 11 );
     return 1
         if ( $count % 10 >= 2 && $count % 10 <= 4 )
