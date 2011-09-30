@@ -5,16 +5,22 @@
 
 .bindip.yes=Yes (safer)
 
-.connect.google=Login with Google
-
+.connect.facebook|staleness=1
 .connect.facebook=Login with Facebook
 
+.connect.google|staleness=1
+.connect.google=Login with Google
+
+.connect.mailru|staleness=1
 .connect.mailru=Login with Mail.ru
 
+.connect.openid|staleness=1
 .connect.openid=Login with Openid
 
+.connect.twitter|staleness=1
 .connect.twitter=Login with Twitter
 
+.connect.vkontakte|staleness=1
 .connect.vkontakte=Login with Vkontakte
 
 .createaccount.button|staleness=1
@@ -139,6 +145,7 @@
 
 .logout.loggedout=You are logged out.
 
+.or.connect.using|staleness=1
 .or.connect.using=Or connect using: 
 
 .whylogin.benefit10|staleness=1

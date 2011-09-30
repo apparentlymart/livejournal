@@ -7,16 +7,19 @@
 .button.approve|staleness=1
 .button.approve=Approve membership
 
-.button.remove=Remove user from list
-
 .button.reject|staleness=1
 .button.reject=Reject membership
-
-.button.yes.reject=Yes, reject listed users
 
 .button.reject_ban|staleness=1
 .button.reject_ban=Reject membership and set ban
 
+.button.remove|staleness=1
+.button.remove=Remove user from list
+
+.button.yes.reject|staleness=1
+.button.yes.reject=Yes, reject listed users
+
+.following_users|staleness=1
 .following_users=You have selected to reject the following user(s):
 
 .jump|staleness=1
@@ -28,9 +31,11 @@
 
 .nopending.title=Nobody Pending
 
-.reason.reject.text=Use the above field to specify the reason you are rejecting membership. This field is optional.
-
+.reason.default.text|staleness=1
 .reason.default.text=No reason given
+
+.reason.reject.text|staleness=1
+.reason.reject.text=Use the above field to specify the reason you are rejecting membership. This field is optional.
 
 .succedd.ban_skipped|staleness=1
 .succedd.ban_skipped=You have [[num]] failed [[?num|ban|bans]] from this community. You can clean ban list and try again.
@@ -42,6 +47,7 @@
 
 .success.ignored=[[num]] [[?num|request is|requests are]] still on file pending decisions.
 
+.success.not_validated|staleness=1
 .success.not_validated=Following users was not added: [[list]] because they emails are not validated.
 
 .success.previous=[[num]] [[?num|request has|requests have]] not been processed, as they were no longer pending.  Another maintainer might have already processed [[?num|it|them]].
@@ -52,6 +58,6 @@
 
 .yes=Yes
 
+.you_can_remove|staleness=1
 .you_can_remove=You can remove users from this list by hovering over the username and clicking the 'x' button.
-
 

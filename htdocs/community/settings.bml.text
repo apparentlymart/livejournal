@@ -90,9 +90,9 @@
 
 .label.howoperates=Choose how your community operates.  You can change these later.
 
-.label.maintainer=Maintainer:
+.label.maintainer=Owner:
 
-.label.maintainer.login2=If this is not the maintainer account, <a [[aopts]]>log in</a> as somebody else.
+.label.maintainer.login2=If this is not the owner account, <a [[aopts]]>log in</a> as somebody else.
 
 .label.managepage=<a [[aopts]]>Community Management</a> - to add members, grant posting access, appoint moderators, etc.
 

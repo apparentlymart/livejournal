@@ -1,34 +1,43 @@
 ;; -*- coding: utf-8 -*-
 .auth.poster=Poster:
 
-.btn.proceed=Proceed…
-
-.btn.search=Search…
-
+.back_to_recent_entries|staleness=1
 .back_to_recent_entries=Or <a [[aopts]]>back to recent entries</a>
 
-.input.usejournal=Enter community name here
+.btn.proceed=Proceed...
+
+.btn.search|staleness=1
+.btn.search=Search...
 
 .certainday=Certain Day:
 
+.choose_date|staleness=1
 .choose_date=Choose date
 
-.desc=Please use the form below to find the entry you would like to edit. [[aopts]]
+.desc=Please use the form below to find the entry you would like to edit.
 
+.event.no_subject.title|staleness=1
 .event.no_subject.title=No Subject
 
 .in=In community:
 
+.input.usejournal|staleness=1
+.input.usejournal=Enter community name here
+
+.my_posts_only|staleness=1
 .my_posts_only=Posted by me only
+
+.no_entries_to_edit|staleness=1
+.no_entries_to_edit=There is no entries to edit
+
+.only_my_entries|staleness=1
+.only_my_entries=Only my entries
 
 .recententries=most recent entries
 
 .recententry=Most recent entry
 
-.no_entries_to_edit=There is no entries to edit
-
-.only_my_entries=Only my entries
-
+.show_entries|staleness=1
 .show_entries=Show entries
 
 .success.delete=Journal entry was deleted.
@@ -60,8 +69,8 @@
 
 .title=Edit Journal Entries
 
+.title_sticky|staleness=1
 .title_sticky=Edit Journal Sticky Entries
 
 .viewwhat=View What Entries:
-
 

@@ -1,5 +1,6 @@
-.title=Community Supermaintainer Election
+;; -*- coding: utf-8 -*-
+.choose|staleness=1
 .choose=Please choose a community
 
-
+.title=Community Owner Election
 

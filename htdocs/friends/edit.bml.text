@@ -22,6 +22,7 @@
 
 .editfriends.name=Name
 
+.editfriends.tagsonly|staleness=1
 .editfriends.tagsonly=Show only entries with tags
 
 .editfriends.text=You can add or remove anyone from your Friends list at any time. The green arrows ([[img1]]) indicate that someone is on your Friends list, while the blue arrows ([[img2]]) indicate that you're on their Friends list.
@@ -35,10 +36,13 @@
 
 .error.updating=There was an error updating your friends list:
 
+.filter.btn|staleness=1
 .filter.btn=Show
 
+.filter.label|staleness=1
 .filter.label=Username filter
 
+.filter.warning.no_matching_users|staleness=1
 .filter.warning.no_matching_users=Warning: there are no friends matching the filter; showing all friends.
 
 .foreground=Foreground
@@ -53,6 +57,7 @@
 
 .name=Name
 
+.selecttags.text|staleness=1
 .selecttags.text=select tags
 
 .success.editfriends=Manage your Friends list

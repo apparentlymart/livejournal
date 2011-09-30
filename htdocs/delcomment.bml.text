@@ -33,6 +33,7 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 
 .error.nocomment=The specified comment does not exist.
 
+.error.notloggedin|staleness=1
 .error.notloggedin=You need to log in in order to delete this comment.
 
 .error.suspended=You are not allowed to delete comments while your account is suspended.

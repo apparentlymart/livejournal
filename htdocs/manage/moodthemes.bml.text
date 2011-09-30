@@ -27,9 +27,15 @@
 
 .error.cantupdatetheme=There was an error updating this moodtheme.
 
+.error.global|staleness=1
+.error.global=Error: Some pictures weren't saved
+
 .error.nonamegiven=You must specify a name for this theme.
 
 .error.notyourtheme=You do not have permission to edit this theme.
+
+.error.url|staleness=1
+.error.url=Error: The URL you entered is not valid.
 
 .mood.deleted=[[mood]] was deleted and will now be represented by its parent.
 
@@ -62,8 +68,4 @@
 .yourthemes.header=Your Mood Themes
 
 .yourthemes.nothemes=You have not yet made any custom mood themes.
-
-.error.global=Error: Some pictures weren't saved
-
-.error.url=Error: The URL you entered is not valid.
 

@@ -104,6 +104,7 @@
 
 .error.year.outofrange=Invalid birthday year.
 
+.fn.active.userhead|staleness=1
 .fn.active.userhead=Active Userhead
 
 .fn.bio=Tell other users about yourself or your journal. If you want to display graphics, counters, or other HTML, you can enter it here.
@@ -153,6 +154,30 @@
 
 .fn.sitename=Name
 
+.fn.smsinterval|staleness=1
+.fn.smsinterval=SMS Interval
+
+.fn.smsinterval.end|staleness=1
+.fn.smsinterval.end=till
+
+.fn.smsinterval.info|staleness=1
+.fn.smsinterval.info=You can manage your subscriptions <a href="[[url]]">here</a>
+
+.fn.smsinterval.limitrange|staleness=1
+.fn.smsinterval.limitrange=Limit range
+
+.fn.smsinterval.limitrange.timezone_required|staleness=1
+.fn.smsinterval.limitrange.timezone_required=(disabled because you didn't specify time zone)
+
+.fn.smsinterval.localtime|staleness=1
+.fn.smsinterval.localtime=you local timezone.
+
+.fn.smsinterval.localtime2|staleness=1
+.fn.smsinterval.localtime2=you local timezone ([[timezone]]).
+
+.fn.smsinterval.start|staleness=1
+.fn.smsinterval.start=Send from
+
 .fn.state=State
 
 .fn.timezone=Timezone
@@ -161,29 +186,16 @@
 
 .fn.txtnum=Full phone number
 
-.fn.userpic=Default userpic
-
-.fn.userheads.default_userhead=Default userhead
-
+.fn.userheads.collection|staleness=1
 .fn.userheads.collection=Collection
 
+.fn.userheads.default_userhead|staleness=1
+.fn.userheads.default_userhead=Default userhead
+
+.fn.userpic=Default userpic
+
+.fn.vernum|staleness=1
 .fn.vernum=Verification number
-
-.fn.smsinterval=SMS Interval
-
-.fn.smsinterval.info=You can manage your subscriptions <a href="[[url]]">here</a>
-
-.fn.smsinterval.limitrange=Limit range
-
-.fn.smsinterval.limitrange.timezone_required=(disabled because you didn't specify time zone)
-
-.fn.smsinterval.start=Send from
-
-.fn.smsinterval.end=till
-
-.fn.smsinterval.localtime=you local timezone.
-
-.fn.smsinterval.localtime2=you local timezone ([[timezone]]).
 
 .fn.zip=ZIP Code
 
@@ -378,16 +390,22 @@
 .section.theme|staleness=1
 .section.theme=Community Theme
 
-.section.userheads=Userheads
-
-.section.userhead.no_userheads=No custom userheads. You can <a href='[[url]]'>buy it now</a>.
-
-.section.userheads.expire_date=Expire [[date]]
-
+.section.userhead.application|staleness=1
 .section.userhead.application=&laquo;<a href="[[href]]">[[name]]</a>&raquo; promo userhead
 
+.section.userhead.apply.href|staleness=1
 .section.userhead.apply.href=Click userhead to apply (or <a [[aopts]]>buy more userheads</a>):
 
+.section.userhead.no_userheads|staleness=1
+.section.userhead.no_userheads=No custom userheads. You can <a href='[[url]]'>buy it now</a>.
+
+.section.userheads|staleness=1
+.section.userheads=Userheads
+
+.section.userheads.expire_date|staleness=1
+.section.userheads.expire_date=Expire [[date]]
+
+.section.vernum.button|staleness=1
 .section.vernum.button=Verify
 
 .section.web=Web Page

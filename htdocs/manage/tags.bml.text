@@ -23,18 +23,18 @@
 
 .intro=Use this page to review and edit tags you have defined.
 
+.label.count|staleness=1
+.label.count=([[current]] of [[quota]])
+
 .label.settings=Tag Settings
 
 .label.tags=Tag Properties
 
 .label.yours=Your Tags
 
-.label.count=([[current]] of [[quota]])
-
 .none=You haven't created any tags yet.
 
-.setting.author|staleness=1
-.setting.author=Entry's author and maintainers
+.setting.author=Entry's author, maintainers and moderators
 
 .setting.desc.add=Who can add existing tags to entries?
 
@@ -42,11 +42,12 @@
 
 .setting.friends=Friends only
 
-.setting.maintainers=Only maintainers
-
-.setting.moderators=Maintainers and moderators
+.setting.maintainers=Maintainers only
 
 .setting.members=Members only
+
+.setting.moderators|staleness=1
+.setting.moderators=Maintainers and moderators
 
 .setting.private=Only you
 

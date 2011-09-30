@@ -56,14 +56,16 @@
 .op.bvk|staleness=1
 .op.bvk=BajkalVestKom
 
-.op.dalsv=Dalsvyaz GSM
-
 .op.cexp|staleness=1
 .op.cexp=Cifrovaya ekspansia
+
+.op.dalsv|staleness=1
+.op.dalsv=Dalsvyaz GSM
 
 .op.ekb_2000|staleness=1
 .op.ekb_2000=Ekaterinburg-2000
 
+.op.elain|staleness=1
 .op.elain=Elain GSM
 
 .op.etk|staleness=1
@@ -108,11 +110,13 @@
 .op.ntk|staleness=1
 .op.ntk=NTK
 
+.op.orenburg|staleness=1
 .op.orenburg=Orenburg GSM
 
 .op.rss|staleness=1
 .op.rss=Rostovskaja sotovaja svjaz'
 
+.op.sky|staleness=1
 .op.sky=SkyLink
 
 .op.smarts|staleness=1
@@ -121,6 +125,7 @@
 .op.stek_gsm|staleness=1
 .op.stek_gsm=Stek GSM
 
+.op.svyaz|staleness=1
 .op.svyaz=Svjaz'inform
 
 .op.tl2|staleness=1
@@ -129,6 +134,7 @@
 .op.ts_ltd|staleness=1
 .op.ts_ltd=Teleset LTD
 
+.op.ulyanovsk|staleness=1
 .op.ulyanovsk=Ulyanovsk GSM
 
 .op.umc|staleness=1
@@ -158,8 +164,7 @@
 .price_for|staleness=1
 .price_for=Price for sending sms <br /> to short number [[number]]<small>(without V.A.T)</small>
 
-.problems_text|staleness=1
-.problems_text=If you encounter problems with SMS payments please call 8-800-333-11-24 (the call is toll-free in Russia, only calls regarding SMS payments are accepted) or e-mail <a [[aopts]]>support@sup.com</a>
+.problems_text=If you encounter problems with SMS payments please call 8-800-555-12-00 (the call is toll-free in Russia, only calls regarding SMS payments are accepted) or e-mail <a href="mailto:helpdesk@smsonline.ru">helpdesk@smsonline.ru</a>.
 
 .rub|staleness=1
 .rub=rub

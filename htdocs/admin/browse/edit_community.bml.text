@@ -1,4 +1,10 @@
-.title=Edit Community
+;; -*- coding: utf-8 -*-
+.add|staleness=1
 .add=Select Category
+
+.title|staleness=1
+.title=Edit Community
+
+.update|staleness=1
 .update=Update tags list
 

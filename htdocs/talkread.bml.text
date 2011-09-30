@@ -15,6 +15,8 @@
 .edittime=Edited at [[edittime]]
 
 .fromip=(from [[ip]])
+
+.fromip.extended|staleness=1
 .fromip.extended=([[country]], [[city]] / [[ip]])
 
 .multi.no.action|staleness=1
@@ -40,6 +42,7 @@
 
 .select=Select
 
+.spamedpost|staleness=1
 .spamedpost=<b>(Spam)</b>
 
 .subjectdeleted=[deleted]
@@ -62,11 +65,12 @@
 .talkmulti.selected|staleness=1
 .talkmulti.selected=Selected
 
-.talkmulti.unspam=Mark as Not Spam
-
 .talkmulti.submit=Perform Action
 
 .talkmulti.unscreen=Unscreen
+
+.talkmulti.unspam|staleness=1
+.talkmulti.unspam=Mark as Not Spam
 
 .title=Read Comments
 

@@ -32,6 +32,7 @@ btn.add=Add
 
 btn.search=Search
 
+cart.add.vgift.success|staleness=1
 cart.add.vgift.success=Virtual gift added to your cart.
 
 cleanhtml.suspend_msg|staleness=1
@@ -40,53 +41,53 @@ cleanhtml.suspend_msg=This is a suspended entry.
 cleanhtml.suspend_msg_with_supportid|staleness=1
 cleanhtml.suspend_msg_with_supportid=This is a suspended entry. <a [[aopts]]>An unsuspension request</a> has been opened, and your entry will be reviewed soon.
 
-comment.delete.q=Delete comment?
-
-comment.delete=Delete
-
-comment.delete.all=Delete all %username% comments in this post
-
-comment.delete.all.sub=Delete thread (all subcomments)
-
-comment.delete.no.options=Shift+click to delete without options
-
-comment.cancel=Cancel
-
+comment.ban.user|staleness=1
 comment.ban.user=Ban %username% from commenting
 
+comment.cancel|staleness=1
+comment.cancel=Delete
+
+comment.delete|staleness=1
+comment.delete=Delete comment? 
+
+comment.delete.all|staleness=1
+comment.delete.all=Delete all %username% comments in this post
+
+comment.delete.all.sub|staleness=1
+comment.delete.all.sub=Delete thread (all subcomments)
+
+comment.delete.no.options|staleness=1
+comment.delete.no.options=Shift+click to delete without options
+
+comment.delete.q|staleness=1
+comment.delete.q=Delete comment?
+
+comment.mark.spam|staleness=1
 comment.mark.spam=Mark this comment as spam
 
-comment.mark.spam.title=Do you really want to mark comment as a spam?
+comment.mark.spam.button|staleness=1
+comment.mark.spam.button=OK
 
+comment.mark.spam.subject|staleness=1
 comment.mark.spam.subject=All comments of this author will be deleted and we will ban author.
 
-comment.mark.spam.button=OK
- 
+comment.mark.spam.title|staleness=1
+comment.mark.spam.title=Do you really want to mark comment as a spam?
+
+comment.mark.spam2|staleness=1
 comment.mark.spam2=Mark this comment as spam
 
-comment.mark.spam2.title=Do you really want to mark comment as a spam?
-
-comment.mark.spam2.subject=All comments of this author will be deleted.
-
+comment.mark.spam2.button|staleness=1
 comment.mark.spam2.button=OK
- 
+
+comment.mark.spam2.subject=Do you really want to mark this comment as a spam?
+
+comment.mark.spam2.title=Mark as a spam
+
+community.election.owner.election.link|staleness=1
 community.election.owner.election.link=The owner of the [[community]] community is not selected yet. You can <a [[href]]>vote for owner here</a>.
 
-community.members.maintainer.remove.email_html<<
-<p>Dear [[sitenameshort]] user [[user]],</p>
-<p>[[remote]] has removed you as a maintainer of the community <a [[mailclink]]>[[usercname]].</a></p>
-<p>Regards,<br/>
-[[sitename]] Team<br/>[[siteroot]]</p>
-.
-
-community.members.maintainer.remove.email_plain<<
-Dear [[sitenameshort]] user [[user]],
-[[remote]] has removed you as a maintainer of the community [[usercname]].
-Regards,
-[[sitename]] Team
-[[siteroot]]
-.
-
+community.members.maintainer.add.email_html|staleness=1
 community.members.maintainer.add.email_html<<
 <p>Dear [[sitenameshort]] user [[user]],</p>
 <p>You have just been added as a maintainer of the community <a [[mailclink]]>[[usercname]]</a> by one of the current maintainers. As the maintainer, you have the ability to control and manage the community. If you do not wish to take on this responsibility, you can remove your maintainership or transfer your community to another user.</p>
@@ -95,6 +96,7 @@ community.members.maintainer.add.email_html<<
 [[sitename]] Team<br/>[[siteroot]]</p>
 .
 
+community.members.maintainer.add.email_plain|staleness=1
 community.members.maintainer.add.email_plain<<
 Dear [[sitenameshort]] user [[user]],
 
@@ -109,10 +111,28 @@ Regards,
 [[siteroot]]
 .
 
-
-community.members.maintainer.remove.email_subject=Maintainership removal: [[mailusercname]]
-
+community.members.maintainer.add.email_subject|staleness=1
 community.members.maintainer.add.email_subject=You have been added as a maintainer of [[mailusercname]]
+
+community.members.maintainer.remove.email_html|staleness=1
+community.members.maintainer.remove.email_html<<
+<p>Dear [[sitenameshort]] user [[user]],</p>
+<p>[[remote]] has removed you as a maintainer of the community <a [[mailclink]]>[[usercname]].</a></p>
+<p>Regards,<br/>
+[[sitename]] Team<br/>[[siteroot]]</p>
+.
+
+community.members.maintainer.remove.email_plain|staleness=1
+community.members.maintainer.remove.email_plain<<
+Dear [[sitenameshort]] user [[user]],
+[[remote]] has removed you as a maintainer of the community [[usercname]].
+Regards,
+[[sitename]] Team
+[[siteroot]]
+.
+
+community.members.maintainer.remove.email_subject|staleness=1
+community.members.maintainer.remove.email_subject=Maintainership removal: [[mailusercname]]
 
 contentflag.viewingconcepts|staleness=1
 contentflag.viewingconcepts=You are about to view content that may not be appropriate for minors.
@@ -637,6 +657,7 @@ crumb.encodings=About Encodings
 
 crumb.export=Export Journal
 
+crumb.extralj|staleness=1
 crumb.extralj=ExtraLJ
 
 crumb.faq=Frequently Asked Questions
@@ -826,6 +847,7 @@ customize.cats.occasions=Occasions
 customize.cats.pattern|staleness=1
 customize.cats.pattern=Pattern/Texture
 
+customize.cats.premium|staleness=1
 customize.cats.premium=Premium
 
 customize.cats.special|staleness=1
@@ -985,77 +1007,89 @@ date.day.wednesday.long=Wednesday
 
 date.day.wednesday.short=Wed
 
+date.month.april.genitive|staleness=1
+date.month.april.genitive=April
+
 date.month.april.long=April
 
 date.month.april.short=Apr
 
-date.month.april.genitive=April
+date.month.august.genitive|staleness=1
+date.month.august.genitive=August
 
 date.month.august.long=August
 
 date.month.august.short=Aug
 
-date.month.august.genitive=August
+date.month.december.genitive|staleness=1
+date.month.december.genitive=December
 
 date.month.december.long=December
 
 date.month.december.short=Dec
 
-date.month.december.genitive=December
+date.month.february.genitive|staleness=1
+date.month.february.genitive=February
 
 date.month.february.long=February
 
 date.month.february.short=Feb
 
-date.month.february.genitive=February
+date.month.january.genitive|staleness=1
+date.month.january.genitive=January
 
 date.month.january.long=January
 
 date.month.january.short=Jan
 
-date.month.january.genitive=January
+date.month.july.genitive|staleness=1
+date.month.july.genitive=July
 
 date.month.july.long=July
 
 date.month.july.short=Jul
 
-date.month.july.genitive=July
+date.month.june.genitive|staleness=1
+date.month.june.genitive=June
 
 date.month.june.long=June
 
 date.month.june.short=Jun
 
-date.month.june.genitive=June
+date.month.march.genitive|staleness=1
+date.month.march.genitive=March
 
 date.month.march.long=March
 
 date.month.march.short=Mar
 
-date.month.march.genitive=March
+date.month.may.genitive|staleness=1
+date.month.may.genitive=May
 
 date.month.may.long=May
 
 date.month.may.short=May
 
-date.month.may.genitive=May
+date.month.november.genitive|staleness=1
+date.month.november.genitive=November
 
 date.month.november.long=November
 
 date.month.november.short=Nov
 
-date.month.november.genitive=November
+date.month.october.genitive|staleness=1
+date.month.october.genitive=October
 
 date.month.october.long=October
 
 date.month.october.short=Oct
 
-date.month.october.genitive=October
+date.month.september.genitive|staleness=1
+date.month.september.genitive=September
 
 date.month.september.long=September
 
 date.month.september.short=Sep
-
-date.month.september.genitive=September
 
 Email=Email
 
@@ -1209,18 +1243,25 @@ Enjoy!
 [[siteroot]]/
 .
 
+emailcheck.error.bad_aol_spelling|staleness=1
 emailcheck.error.bad_aol_spelling=You gave [[email]] as your email address.  Are you sure you didn't mean aol.com?
 
+emailcheck.error.bad_domain|staleness=1
 emailcheck.error.bad_domain=Your email address domain is invalid.
 
+emailcheck.error.bad_form|staleness=1
 emailcheck.error.bad_form=You did not give a valid email address.  An email address looks like username@some.domain
 
+emailcheck.error.bad_hotmail_spelling|staleness=1
 emailcheck.error.bad_hotmail_spelling=You gave [[email]] as your email address.  Are you sure you didn't mean hotmail.com?
 
+emailcheck.error.bad_username|staleness=1
 emailcheck.error.bad_username=You have invalid characters in your email address username.
 
+emailcheck.error.empty|staleness=1
 emailcheck.error.empty=Your email address cannot be blank.
 
+emailcheck.error.web_address|staleness=1
 emailcheck.error.web_address=You gave [[email]] as your email address, but it looks more like a web address to me.
 
 entryform.adultcontent|staleness=1
@@ -1260,9 +1301,10 @@ entryform.comment.settings.default4=Journal Default ([[aopts]])
 
 entryform.comment.settings.default5=Journal Default
 
-entryform.comment.settings.nocomments=Disabled
-
+entryform.comment.settings.lockcomments|staleness=1
 entryform.comment.settings.lockcomments=Locked
+
+entryform.comment.settings.nocomments=Disabled
 
 entryform.comment.settings.noemail=Don't E-mail
 
@@ -1281,6 +1323,9 @@ entryform.delete.confirm=Are you sure you want to delete this entry?
 entryform.deletespam=Delete and Mark as Spam
 
 entryform.deletespam.confirm=Are you sure you want to delete this entry and mark it as spam?
+
+entryform.do_not_add_rss_friends|staleness=1
+entryform.do_not_add_rss_friends=Do not add to friends lists and RSS
 
 entryform.entry=Entry:
 
@@ -1352,17 +1397,21 @@ entryform.plainswitch=(Use the 'Source' button to edit HTML.  You also can <a [[
 
 entryform.plainswitch2=<a [[aopts]]>HTML</a>
 
+entryform.post|staleness=1
+entryform.post=Publish:
+
+entryform.post.right.now|staleness=1
+entryform.post.right.now=Now
+
 entryform.postas=Post as:
+
+entryform.postponed.until|staleness=1
+entryform.postponed.until=Postpone untill:
 
 entryform.postto=Post to:
 
+entryform.postto.select|staleness=1
 entryform.postto.select=Select a community
-
-entryform.post=Publish:
-
-entryform.post.right.now=Now
-
-entryform.postponed.until=Postpone untill:
 
 entryform.preview=Preview
 
@@ -1415,15 +1464,12 @@ entryform.userpic.choose=Choose userpic
 
 entryform.userpics=User Picture Icon:
 
-entryform.do_not_add_rss_friends=Do not add to friends lists and RSS
-
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
 
 error.badpassword=Incorrect Password.
 
-error.banned.bot.subject=Access Forbidden
-
+error.banned.bot.message|staleness=1
 error.banned.bot.message<<
 This page is not available at this time, perhaps because you were hitting the site too quickly. Please make sure that you're
 following our <a href='http://www.livejournal.com/bots/'>Bot Policy</a>.
@@ -1431,6 +1477,9 @@ following our <a href='http://www.livejournal.com/bots/'>Bot Policy</a>.
 Please refresh the page and try again. If you are still blocked from using LiveJournal after refreshing the page, contact us at
 webmaster&#064;livejournal.com with the following information: [[uniq]] @ [[ip]].
 .
+
+error.banned.bot.subject|staleness=1
+error.banned.bot.subject=Access Forbidden
 
 error.code.comm_not_comm=Account is not a community
 
@@ -1615,15 +1664,11 @@ esn.comm_join_approve.alert=Your request to join [[community]] community has bee
 esn.comm_join_approve.email_subject|staleness=1
 esn.comm_join_approve.email_subject=Your Request to Join [[community]] community
 
-esn.comm_join_approve.email_text|staleness=1
 esn.comm_join_approve.email_text<<
-Dear [[user]],
+Dear [[username]],
 
-Your request to join the "[[community]]" community has been approved.
-If you wish to add this community to your friends page reading list,
-click the link below.
+Your request to join the "[[community]]" community has been approved. The community has been added to your 'Watching' list, so that its entries appear on your Friends page.
 
-[[options]]
 Please note that replies to this email are not sent to the community's maintainer(s). If you 
 have any questions, you will need to contact them directly.
 
@@ -1638,41 +1683,28 @@ esn.comm_join_reject.alert=Your request to join [[community]] community has been
 esn.comm_join_reject.email_subject|staleness=1
 esn.comm_join_reject.email_subject=Your Request to Join [[community]] community
 
-esn.comm_join_reject.maint.email_subject=[[username]] has been rejected from joining [[community]]
-
-esn.comm_join_reject.email_text|staleness=1
 esn.comm_join_reject.email_text<<
-Dear [[username]],<br> 
+Dear [[username]],<br> 
 <br>
 Your request to join the [[community]] community has been declined by the maintainer(s) of the community for the following reason: [[reason]]. <br/>
 <br/>
 Replies to this email are not sent to the community's maintainer(s). If you would like to discuss the reasons your membership request was rejected, you will need to contact a maintainer directly. Maintainers are listed on the community's Profile page. <br/>
 <br/>
-Regards, </br>
+Regards, </br>
 [[sitename]] Team
 
 .
 
+esn.comm_join_reject.maint.email_subject|staleness=1
+esn.comm_join_reject.maint.email_subject=[[username]] has been rejected from joining [[community]]
+
+esn.comm_join_reject.maint.email_text|staleness=1
 esn.comm_join_reject.maint.email_text<<
 Dear [[user]], 
 
 A membership request from [[username]] to the [[community]] (which you maintain) has been rejected by [[maintainer]] for the following reason: [[reason]].
 
 Regards,
-[[sitename]] Team
-
-.
-
-pending.mail.reject.subject=Your Request to Join [[community]] community
-
-pending.mail.reject.body<<
-Dear [[username]],<br> 
-<br>
-Your request to join the [[community]] community has been declined by the maintainer(s) of the community for the following reason: [[reason]]. <br/>
-<br/>
-Replies to this email are not sent to the community's maintainer(s). If you would like to discuss the reasons your membership request was rejected, you will need to contact a maintainer directly. Maintainers are listed on the community's Profile page. <br/>
-<br/>
-Regards, </br>
 [[sitename]] Team
 
 .
@@ -2512,17 +2544,17 @@ event.journal_new_entry.community=Someone posts a new entry to [[user]]
 event.journal_new_entry.friendlist|staleness=1
 event.journal_new_entry.friendlist=Someone on my Friends list posts a new entry
 
-event.journal_new_entry.tag.community|staleness=1
-event.journal_new_entry.tag.community=Someone posts an entry tagged [[tags]] to [[user]]
-
-event.journal_new_entry.tag.user|staleness=1
-event.journal_new_entry.tag.user=[[user]] posts a new entry tagged [[tags]]
-
 event.journal_new_entry.restricted_tag.community|staleness=1
 event.journal_new_entry.restricted_tag.community=Someone posts an entry tagged with private or deleted tag to [[user]]
 
 event.journal_new_entry.restricted_tag.user|staleness=1
 event.journal_new_entry.restricted_tag.user=[[user]] posts a new entry tagged with private or deleted tag
+
+event.journal_new_entry.tag.community|staleness=1
+event.journal_new_entry.tag.community=Someone posts an entry tagged [[tags]] to [[user]]
+
+event.journal_new_entry.tag.user|staleness=1
+event.journal_new_entry.tag.user=[[user]] posts a new entry tagged [[tags]]
 
 event.journal_new_entry.user|staleness=1
 event.journal_new_entry.user=[[user]] posts a new entry.
@@ -2536,6 +2568,7 @@ event.poll_vote.id=Someone votes in poll #[[pollid]]
 event.poll_vote.me|staleness=1
 event.poll_vote.me=Someone votes in a poll I posted
 
+event.post.error.not_validated_email|staleness=1
 event.post.error.not_validated_email=You must have an authenticated email address in order to post to another account
 
 event.userpic_upload.me|staleness=1
@@ -2561,9 +2594,11 @@ event.user_new_entry.any=Any of my friends posts a new entry anywhere.
 event.user_new_entry.user|staleness=1
 event.user_new_entry.user=[[user]] posts a new entry anywhere.
 
-eventrates.view_all=View all
-
+eventrates.users_who_like_it|staleness=1
 eventrates.users_who_like_it=Users who like it
+
+eventrates.view_all|staleness=1
+eventrates.view_all=View all
 
 fckland.ljimage=Insert/Edit Image
 
@@ -2575,7 +2610,11 @@ fcklang.invalidchars=Invalid characters in username
 
 fcklang.ljcut=LiveJournal Cut
 
-fcklang.ljrepost=Repost
+fcklang.ljcut.wizardnotice|staleness=1
+fcklang.ljcut.wizardnotice=Cut must be edited inside the Cut Wizard
+
+fcklang.ljcut.wizardnoticelink|staleness=1
+fcklang.ljcut.wizardnoticelink=Go to Cut wizard
 
 fcklang.ljembed|staleness=1
 fcklang.ljembed=Embed Media
@@ -2586,7 +2625,57 @@ fcklang.ljembedprompt=Add media from other websites by copying and pasting their
 fcklang.ljembedprompttitle|staleness=1
 fcklang.ljembedprompttitle=Insert Embedded Content
 
+fcklang.ljimage.wizardnotice|staleness=1
+fcklang.ljimage.wizardnotice=Image must be edited inside the Link Wizard
+
+fcklang.ljimage.wizardnoticelink|staleness=1
+fcklang.ljimage.wizardnoticelink=Go to Image wizard
+
+fcklang.ljlike.button.facebook|staleness=1
+fcklang.ljlike.button.facebook=Facebook
+
+fcklang.ljlike.button.give|staleness=1
+fcklang.ljlike.button.give=10 Give
+
+fcklang.ljlike.button.google|staleness=1
+fcklang.ljlike.button.google=Google +1
+
+fcklang.ljlike.button.twitter|staleness=1
+fcklang.ljlike.button.twitter=Twitter
+
+fcklang.ljlike.button.vkontakte|staleness=1
+fcklang.ljlike.button.vkontakte=Vkontakte
+
+fcklang.ljlike.dialog.text|staleness=1
+fcklang.ljlike.dialog.text=Check buttons
+
+fcklang.ljlike.faq|staleness=1
+fcklang.ljlike.faq=FAQ
+
+fcklang.ljlike.name=LJ-Like
+
+fcklang.ljlike.wizardnotice|staleness=1
+fcklang.ljlike.wizardnotice=Likes must be edited inside the Like Wizard
+
+fcklang.ljlike.wizardnoticelink|staleness=1
+fcklang.ljlike.wizardnoticelink=Go to like wizard
+
+fcklang.ljlink.wizardnotice|staleness=1
+fcklang.ljlink.wizardnotice=Link must be edited inside the Link Wizard
+
+fcklang.ljlink.wizardnoticelink|staleness=1
+fcklang.ljlink.wizardnoticelink=Go to link wizard
+
+fcklang.ljrepost|staleness=1
+fcklang.ljrepost=Repost
+
 fcklang.ljuser=LiveJournal User
+
+fcklang.ljuser.wizardnotice|staleness=1
+fcklang.ljuser.wizardnotice=User must be edited inside the User Wizard
+
+fcklang.ljuser.wizardnoticelink|staleness=1
+fcklang.ljuser.wizardnoticelink=Go to user wizard
 
 fcklang.ljvideo=LiveJournal Video
 
@@ -2692,276 +2781,334 @@ fcklang.readmore=Read more...
 
 fcklang.userprompt=Enter their username
 
-
-fcklang.ljlike.name=Like buttons
-
-fcklang.ljlike.dialog.text=Check buttons
-
-fcklang.ljlike.button.google=Google +1
-
-fcklang.ljlike.button.facebook=Facebook
-
-fcklang.ljlike.button.vkontakte=Vkontakte
-
-fcklang.ljlike.button.twitter=Twitter
-
-fcklang.ljlike.button.give=10 Give
-
-fcklang.ljlike.wizardnotice=Likes must be edited inside the Like Wizard
-
-fcklang.ljlike.wizardnoticelink=Go to like wizard
-
-fcklang.ljlike.faq=FAQ
-
-
-fcklang.ljuser.wizardnotice=User must be edited inside the User Wizard
-
-fcklang.ljuser.wizardnoticelink=Go to user wizard
-
-
-fcklang.ljlink.wizardnotice=Link must be edited inside the Link Wizard
-
-fcklang.ljlink.wizardnoticelink=Go to link wizard
-
-
-fcklang.ljimage.wizardnotice=Image must be edited inside the Link Wizard
-
-fcklang.ljimage.wizardnoticelink=Go to Image wizard
-
-
-fcklang.ljcut.wizardnotice=Cut must be edited inside the Cut Wizard
-
-fcklang.ljcut.wizardnoticelink=Go to Cut wizard
-
-
 fcklang.videoprompt=Please enter the YouTube, PhotoBucket, or Google Video URL:
 
 feeds.link=syndicated feeds
 
 feeds.text=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
 
+feeds.title.friends|staleness=1
 feeds.title.friends=friends page feed
 
-fotki.album.albums=albums
-
-fotki.album.album_cover=Album cover
-
-fotki.album.albums_of=albums of
-
-fotki.album.default_album_name=Unsorted
-
-fotki.album.edit.save=Save
-
-fotki.album.edit.cancel=Cancel
-
-fotki.album.edit.empty=&nbsp;
-
-fotki.album.edit.empty.photo.title=(no title)
-
-fotki.album.edit.empty.photo.desc=(no description)
-
-fotki.album.edit.empty.album.title=(no title)
-
-fotki.album.edit.empty.album.desc=(no description)
-
-fotki.album.create.new=(Create new)
-
-fotki.album.add.photos=You can add one or more photos at once using "Ctrl" button or "Shift"
-
-fotki.album.add.images=Add images
-
-fotki.album.upload.images=Upload images
-
-fotki.album.add.image.name=Add image name
-
+fotki.album.add.five.images|staleness=1
 fotki.album.add.five.images=Add 5 images to your LiveJournal entry
 
+fotki.album.add.image.name|staleness=1
+fotki.album.add.image.name=Add image name
+
+fotki.album.add.images|staleness=1
+fotki.album.add.images=Add images
+
+fotki.album.add.more|staleness=1
 fotki.album.add.more=Add more
 
-fotki.album.btn.add=Add photos
+fotki.album.add.photos|staleness=1
+fotki.album.add.photos=You can add one or more photos at once using "Ctrl" button or "Shift"
 
-fotki.album.btn.remove=Remove
-
-fotki.album.btn.save=Save
-
+fotki.album.add.to.entry|staleness=1
 fotki.album.add.to.entry=Add to entry
 
-fotki.album.btn.upload=Upload
+fotki.album.albums|staleness=1
+fotki.album.albums=albums
 
-fotki.album.image.loading=Image loading...
+fotki.album.albums_of|staleness=1
+fotki.album.albums_of=albums of
 
-fotki.album.upload.unknown.error=Unknown error
+fotki.album.album_cover|staleness=1
+fotki.album.album_cover=Album cover
 
-fotki.album.stop.upload.confirm=Do you really want to stop upload and close without saving?
-
-fotki.album.close.without.saving.confirm=Do you really want to close without saving?
-
-fotki.album.click.image=Click on image to remove it
-
-fotki.album.uploading.image=Uploading image
-
+fotki.album.available.now|staleness=1
 fotki.album.available.now=Available now
 
-fotki.album.description=Add your description
+fotki.album.btn.add|staleness=1
+fotki.album.btn.add=Add photos
 
-fotki.album.no.photo=No photo
+fotki.album.btn.remove|staleness=1
+fotki.album.btn.remove=Remove
 
-fotki.album.resize.to.post=Resize to post:
+fotki.album.btn.save|staleness=1
+fotki.album.btn.save=Save
 
-fotki.album.remove=Remove
+fotki.album.btn.upload|staleness=1
+fotki.album.btn.upload=Upload
 
-fotki.album.remove_album=Remove album
+fotki.album.click.image|staleness=1
+fotki.album.click.image=Click on image to remove it
 
-fotki.album.remove_image=Remove image
+fotki.album.close.without.saving.confirm|staleness=1
+fotki.album.close.without.saving.confirm=Do you really want to close without saving?
 
-fotki.album.remove_photo=Remove photo
+fotki.album.create.new|staleness=1
+fotki.album.create.new=(Create new)
 
-fotki.album.remove_photo_desc=Remove this photo
-
-fotki.album.remove.this.image=Remove this image
-
-fotki.album.remove_album_desc=Images will be deleted and disappear from all related posts in your blog
-
-fotki.album.title=Title
-
+fotki.album.create_album|staleness=1
 fotki.album.create_album=Create album
 
-fotki.album.save_all=Save all
+fotki.album.default_album_name|staleness=1
+fotki.album.default_album_name=Unsorted
 
-fotki.album.index.title=PhotoAlbums
+fotki.album.description|staleness=1
+fotki.album.description=Add your description
 
-fotki.album.index.title.beta=beta
+fotki.album.edit.cancel|staleness=1
+fotki.album.edit.cancel=Cancel
 
-fotki.album.index.windowtitle=PhotoAlbums
+fotki.album.edit.empty|staleness=1
+fotki.album.edit.empty=&nbsp;
 
-fotki.album.view.title=Album [[album_name]] view
+fotki.album.edit.empty.album.desc|staleness=1
+fotki.album.edit.empty.album.desc=(no description)
 
-fotki.album.link.album_list=Albums
+fotki.album.edit.empty.album.title|staleness=1
+fotki.album.edit.empty.album.title=(no title)
 
-fotki.album.link.cancel=Cancel
+fotki.album.edit.empty.photo.desc|staleness=1
+fotki.album.edit.empty.photo.desc=(no description)
 
-fotki.album.link.click.to.upload=Click to upload <br> new images
+fotki.album.edit.empty.photo.title|staleness=1
+fotki.album.edit.empty.photo.title=(no title)
 
-fotki.album.uploading.message=Uploading...
+fotki.album.edit.save|staleness=1
+fotki.album.edit.save=Save
 
-fotki.album.link.edit=Edit
-
-fotki.album.link.edit_album=Edit album
-
-fotki.album.link.add.to.post=Add to post
-
-fotki.album.link.add.to.entry=Add to entry
-
-fotki.album.link.manage=Manage
-
-fotki.album.link.album_view=Album view
-
-fotki.album.link.original.size=Original size
-
-fotki.album.link.remove=Remove
-
-fotki.album.link.remove.album=Remove album
-
-fotki.album.link.photo_view=View photo
-
-fotki.album.link.upload=Upload
-
-fotki.album.link.upload.new=Upload new
-
+fotki.album.edit.update.button|staleness=1
 fotki.album.edit.update.button=Update
 
+fotki.album.image.loading|staleness=1
+fotki.album.image.loading=Image loading...
+
+fotki.album.index.title|staleness=1
+fotki.album.index.title=PhotoAlbums
+
+fotki.album.index.title.beta|staleness=1
+fotki.album.index.title.beta=beta
+
+fotki.album.index.windowtitle|staleness=1
+fotki.album.index.windowtitle=PhotoAlbums
+
+fotki.album.link.add.to.entry|staleness=1
+fotki.album.link.add.to.entry=Add to entry
+
+fotki.album.link.add.to.post|staleness=1
+fotki.album.link.add.to.post=Add to post
+
+fotki.album.link.album_list|staleness=1
+fotki.album.link.album_list=Albums
+
+fotki.album.link.album_view|staleness=1
+fotki.album.link.album_view=Album view
+
+fotki.album.link.cancel|staleness=1
+fotki.album.link.cancel=Cancel
+
+fotki.album.link.click.to.upload|staleness=1
+fotki.album.link.click.to.upload=Click to upload <br> new images
+
+fotki.album.link.edit|staleness=1
+fotki.album.link.edit=Edit
+
+fotki.album.link.edit_album|staleness=1
+fotki.album.link.edit_album=Edit album
+
+fotki.album.link.manage|staleness=1
+fotki.album.link.manage=Manage
+
+fotki.album.link.original.size|staleness=1
+fotki.album.link.original.size=Original size
+
+fotki.album.link.photo_view|staleness=1
+fotki.album.link.photo_view=View photo
+
+fotki.album.link.remove|staleness=1
+fotki.album.link.remove=Remove
+
+fotki.album.link.remove.album|staleness=1
+fotki.album.link.remove.album=Remove album
+
+fotki.album.link.upload|staleness=1
+fotki.album.link.upload=Upload
+
+fotki.album.link.upload.new|staleness=1
+fotki.album.link.upload.new=Upload new
+
+fotki.album.manage.albums|staleness=1
 fotki.album.manage.albums=Manage albums
 
+fotki.album.new.album.name|staleness=1
 fotki.album.new.album.name=New album name
 
+fotki.album.no.photo|staleness=1
+fotki.album.no.photo=No photo
+
+fotki.album.post.images|staleness=1
 fotki.album.post.images=Add to post
 
-fotki.album.save.images=Save images
+fotki.album.remove|staleness=1
+fotki.album.remove=Remove
 
+fotki.album.remove.image|staleness=1
 fotki.album.remove.image=Remove this image
 
-fotki.album.select_album=Select album:
+fotki.album.remove.this.image|staleness=1
+fotki.album.remove.this.image=Remove this image
 
+fotki.album.remove_album|staleness=1
+fotki.album.remove_album=Remove album
+
+fotki.album.remove_album_desc|staleness=1
+fotki.album.remove_album_desc=Images will be deleted and disappear from all related posts in your blog
+
+fotki.album.remove_image|staleness=1
+fotki.album.remove_image=Remove image
+
+fotki.album.remove_photo|staleness=1
+fotki.album.remove_photo=Remove photo
+
+fotki.album.remove_photo_desc|staleness=1
+fotki.album.remove_photo_desc=Remove this photo
+
+fotki.album.resize.to.post|staleness=1
+fotki.album.resize.to.post=Resize to post:
+
+fotki.album.save.images|staleness=1
+fotki.album.save.images=Save images
+
+fotki.album.save_all|staleness=1
+fotki.album.save_all=Save all
+
+fotki.album.select.image.size|staleness=1
 fotki.album.select.image.size=Select image size:
 
+fotki.album.select.images.size|staleness=1
 fotki.album.select.images.size=Select images size:
 
-fotki.album.storage.title=Your storage space
+fotki.album.select_album|staleness=1
+fotki.album.select_album=Select album:
 
+fotki.album.stop.upload.confirm|staleness=1
+fotki.album.stop.upload.confirm=Do you really want to stop upload and close without saving?
+
+fotki.album.storage.title|staleness=1
+fotki.album.storage.title=Photo album: not enough space
+
+fotki.album.storage.used|staleness=1
 fotki.album.storage.used=Used
 
-fotki.album.your.friends.updates=Your friends updates
+fotki.album.title|staleness=1
+fotki.album.title=Title
 
-fotki.album.user.updates=[[ljuser]]'s updates
-
-fotki.album.your_albums=Your albums
-
+fotki.album.upgrade|staleness=1
 fotki.album.upgrade=Upgrade
 
-fotki.storage.title_more_space=Add more storage space
+fotki.album.upload.images|staleness=1
+fotki.album.upload.images=Upload images
 
-fotki.storage.full.message_more_space=You can add more storage space to: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>You can get <a [[add_link]]>more options</a>.
+fotki.album.upload.unknown.error|staleness=1
+fotki.album.upload.unknown.error=Unknown error
 
-fotki.storage.2gb.paid_account=up to 2Gb by <a [[link1]]>upgrade to paid account</a>
+fotki.album.uploading.image|staleness=1
+fotki.album.uploading.image=Uploading image
 
-fotki.storage.10gb.addon_storage=up to 10Gb by pay a <a [[link2]]>storage space</a>
+fotki.album.uploading.message|staleness=1
+fotki.album.uploading.message=Uploading...
 
-fotki.storage.15gb.permanent_account=up to 15Gb by upgrade to <a [[link3]]>permanent account</a>
+fotki.album.user.updates|staleness=1
+fotki.album.user.updates=[[ljuser]]'s updates
 
-fotki.storage.title_prolog_space=Your storage space is near to empty
+fotki.album.view.title|staleness=1
+fotki.album.view.title=Album [[album_name]] view
 
-fotki.storage.full.message_prolong_space=Your storage space ends [[date]]. All your images on additional space will be disabled. You can: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>You can:
+fotki.album.your.friends.updates|staleness=1
+fotki.album.your.friends.updates=Your friends updates
 
-fotki.storage.10gb.addon_storage_prolong=<a [[link2]]>extend the extra space</a> with the volume of 10Gb
+fotki.album.your_albums|staleness=1
+fotki.album.your_albums=Your albums
 
-fotki.storage.15gb.permanent_account_2=<a [[link3]]>upgrade to permanent account</a> and get up to 15Gb
+fotki.photo.cancel.removing|staleness=1
+fotki.photo.cancel.removing=Cancel removing
 
-fotki.storage.title_free_space_out=Your storage space is near to empty
+fotki.photo.delete.button|staleness=1
+fotki.photo.delete.button=Delete
 
-fotki.storage.full.message_free_space_out=Your storage space ends [[date]]. All your images on additional space will be disabled. You can: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>
+fotki.photo.edit.link|staleness=1
+fotki.photo.edit.link=Edit photo
 
-fotki.storage.2gb.paid_account_3=up to 2Gb by <a [[link1]]>upgrade to paid account</a>
+fotki.photo.edit.make_main.label|staleness=1
+fotki.photo.edit.make_main.label=Make a main photo
 
-fotki.storage.10gb.addon_storage_3=up to 10Gb by pay a <a [[link2]]>storage space</a>
+fotki.photo.edit.move_to_album.label|staleness=1
+fotki.photo.edit.move_to_album.label=Move photo to album:
 
-fotki.storage.15gb.permanent_account_3=up to 15Gb by upgrade to <a [[link3]]>permanent account</a>
+fotki.photo.edit.photo|staleness=1
+fotki.photo.edit.photo=Edit photo
 
-fotki.storage.title_payed_time_out=Your rent time is out.
+fotki.photo.edit.tags.label|staleness=1
+fotki.photo.edit.tags.label=Edit tags
 
-fotki.storage.full.message_payed_time_out=Your rent time is out. All your images on additional space will be deleted at [[date]]. You can: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li> 
+fotki.photo.edit.title|staleness=1
+fotki.photo.edit.title=Photo edit
 
-fotki.storage.2gb.paid_account_4=up to 2Gb by <a [[link1]]>upgrade to paid account</a>
+fotki.photo.edit.update.button|staleness=1
+fotki.photo.edit.update.button=Update
 
-fotki.storage.10gb.addon_storage_4=up to 10Gb by pay a <a [[link2]]>storage space</a>
+fotki.photo.recover|staleness=1
+fotki.photo.recover=You can recover it, before you clicking "Save all" button
 
-fotki.storage.15gb.permanent_account_4=up to 15Gb by upgrade to <a [[link3]]>permanent account</a>
+fotki.photo.removed|staleness=1
+fotki.photo.removed=This image will be removed
 
-fotki.storage.used.title=Used [[used]]
+fotki.photo.remove_photo|staleness=1
+fotki.photo.remove_photo=Remove photo
 
-fotki.storage.used.numbers=from [[max]]
+fotki.photo.upload.alien.error|staleness=1
+fotki.photo.upload.alien.error=You can'n upload to alien albums
 
-fotki.size.100.text=100x100
+fotki.photo.upload.error.auth_token_invalid|staleness=1
+fotki.photo.upload.error.auth_token_invalid=Auth error
 
-fotki.size.300.text=300x300
+fotki.photo.upload.error.cant_get_storage_space|staleness=1
+fotki.photo.upload.error.cant_get_storage_space=Can't get count of used storage space
 
-fotki.size.600.text=600x600
+fotki.photo.upload.error.common_error|staleness=1
+fotki.photo.upload.error.common_error=Common error
 
-fotki.size.900.text=900x900
+fotki.photo.upload.error.file_not_selected|staleness=1
+fotki.photo.upload.error.file_not_selected=File not selected
 
-fotki.size.1000.text=1000x1000
+fotki.photo.upload.error.file_type_not_supported|staleness=1
+fotki.photo.upload.error.file_type_not_supported=File type is not supported
 
-fotki.size.original.text=Original size
+fotki.photo.upload.error.no_access_rpc|staleness=1
+fotki.photo.upload.error.no_access_rpc=Internal Error
 
-fotki.promo.slogan=Organise your photos and images with LiveJournal PhotoAlbums...
+fotki.photo.upload.error.no_access_to_storage_media|staleness=1
+fotki.photo.upload.error.no_access_to_storage_media=No access to storage media
 
-fotki.promo.description=Discover and share your photos with your friends and community.
+fotki.photo.upload.photo_desc|staleness=1
+fotki.photo.upload.photo_desc=Photo description
 
-fotki.promo.description_other=Discover and share your photos with your friends and community (2).
+fotki.photo.upload.select_album.title|staleness=1
+fotki.photo.upload.select_album.title=Select album for upload
 
-fotki.promo.add_foto.button=Add your photos now
+fotki.photo.upload.title|staleness=1
+fotki.photo.upload.title=Upload photo
 
-fotki.promo.about.title=LJ PhotoAlbums
+fotki.photo.view.title|staleness=1
+fotki.photo.view.title=Photo view
 
+fotki.privacy|staleness=1
+fotki.privacy=Privacy
+
+fotki.privacy.friends_only|staleness=1
+fotki.privacy.friends_only=Friends only
+
+fotki.privacy.private|staleness=1
+fotki.privacy.private=Private
+
+fotki.privacy.public|staleness=1
+fotki.privacy.public=Public
+
+fotki.promo.about.list|staleness=1
 fotki.promo.about.list<<
  
 <li>1Gb space for your files</li>
@@ -2971,67 +3118,110 @@ fotki.promo.about.list<<
 <li>Mobile uploading</li>
 .
 
+fotki.promo.about.list.more|staleness=1
 fotki.promo.about.list.more=and many more...
 
-fotki.photo.upload.title=Upload photo
+fotki.promo.about.title|staleness=1
+fotki.promo.about.title=LJ PhotoAlbums
 
-fotki.photo.upload.error.file_type_not_supported=File type is not supported
+fotki.promo.add_foto.button|staleness=1
+fotki.promo.add_foto.button=Add your photos now
 
-fotki.photo.upload.error.file_not_selected=File not selected
+fotki.promo.description|staleness=1
+fotki.promo.description=Discover and share your photos with your friends and community.
 
-fotki.photo.upload.error.no_access_rpc=Internal Error
+fotki.promo.description_other|staleness=1
+fotki.promo.description_other=Discover and share your photos with your friends and community (2).
 
-fotki.photo.upload.error.auth_token_invalid=Auth error
+fotki.promo.slogan|staleness=1
+fotki.promo.slogan=Organise your photos and images with LiveJournal PhotoAlbums...
 
-fotki.photo.upload.error.common_error=Common error
+fotki.size.100.text|staleness=1
+fotki.size.100.text=100x100
 
-fotki.photo.upload.error.cant_get_storage_space=Can't get count of used storage space
+fotki.size.1000.text|staleness=1
+fotki.size.1000.text=1000x1000
 
-fotki.photo.upload.error.no_access_to_storage_media=No access to storage media
+fotki.size.300.text|staleness=1
+fotki.size.300.text=300x300
 
-fotki.photo.upload.photo_desc=Photo description
+fotki.size.600.text|staleness=1
+fotki.size.600.text=600x600
 
-fotki.photo.upload.select_album.title=Select album for upload
+fotki.size.900.text|staleness=1
+fotki.size.900.text=900x900
 
-fotki.photo.cancel.removing=Cancel removing
+fotki.size.original.text|staleness=1
+fotki.size.original.text=Original size
 
-fotki.photo.edit.title=Photo edit
+fotki.status.new_album|staleness=1
+fotki.status.new_album=[[ljuser]] has create a new album <a [[aopts]]>[[album]]</a>.
 
-fotki.photo.edit.tags.label=Edit tags
-
-fotki.photo.view.title=Photo view
-
-fotki.photo.edit.link=Edit photo
-
-fotki.photo.edit.update.button=Update
-
-fotki.photo.delete.button=Delete
-
-fotki.photo.edit.make_main.label=Make a main photo
-
-fotki.photo.upload.alien.error=You can'n upload to alien albums
-
-fotki.photo.edit.move_to_album.label=Move photo to album:
-
-fotki.photo.edit.photo=Edit photo
-
-fotki.photo.recover=You can recover it, before you clicking "Save all" button
-
-fotki.photo.remove_photo=Remove photo
-
-fotki.photo.removed=This image will be removed
-
-fotki.privacy=Privacy
-
-fotki.privacy.private=Private
-
-fotki.privacy.friends_only=Friends only
-
-fotki.privacy.public=Public
-
+fotki.status.new_photo|staleness=1
 fotki.status.new_photo=[[ljuser]] has load new [[number]] photos in <a [[aopts]]>[[album]]</a> album.
 
-fotki.status.new_album=[[ljuser]] has create a new album <a [[aopts]]>[[album]]</a>.
+fotki.storage.10gb.addon_storage|staleness=1
+fotki.storage.10gb.addon_storage=up to 10Gb by pay a <a [[link2]]>storage space</a>
+
+fotki.storage.10gb.addon_storage_3|staleness=1
+fotki.storage.10gb.addon_storage_3=up to 10Gb by pay a <a [[link2]]>storage space</a>
+
+fotki.storage.10gb.addon_storage_4|staleness=1
+fotki.storage.10gb.addon_storage_4=up to 10Gb by pay a <a [[link2]]>storage space</a>
+
+fotki.storage.10gb.addon_storage_prolong|staleness=1
+fotki.storage.10gb.addon_storage_prolong=<a [[link2]]>extend the extra space</a> with the volume of 10Gb
+
+fotki.storage.15gb.permanent_account|staleness=1
+fotki.storage.15gb.permanent_account=up to 15Gb by upgrade to <a [[link3]]>permanent account</a>
+
+fotki.storage.15gb.permanent_account_2|staleness=1
+fotki.storage.15gb.permanent_account_2=<a [[link3]]>upgrade to permanent account</a> and get up to 15Gb
+
+fotki.storage.15gb.permanent_account_3|staleness=1
+fotki.storage.15gb.permanent_account_3=up to 15Gb by upgrade to <a [[link3]]>permanent account</a>
+
+fotki.storage.15gb.permanent_account_4|staleness=1
+fotki.storage.15gb.permanent_account_4=up to 15Gb by upgrade to <a [[link3]]>permanent account</a>
+
+fotki.storage.2gb.paid_account|staleness=1
+fotki.storage.2gb.paid_account=up to 2Gb by <a [[link1]]>upgrade to paid account</a>
+
+fotki.storage.2gb.paid_account_3|staleness=1
+fotki.storage.2gb.paid_account_3=up to 2Gb by <a [[link1]]>upgrade to paid account</a>
+
+fotki.storage.2gb.paid_account_4|staleness=1
+fotki.storage.2gb.paid_account_4=up to 2Gb by <a [[link1]]>upgrade to paid account</a>
+
+fotki.storage.full.message_free_space_out|staleness=1
+fotki.storage.full.message_free_space_out=Your storage space ends [[date]]. All your images on additional space will be disabled. You can: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>
+
+fotki.storage.full.message_more_space|staleness=1
+fotki.storage.full.message_more_space=You can add more storage space to: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>You can get <a [[add_link]]>more options</a>.
+
+fotki.storage.full.message_payed_time_out|staleness=1
+fotki.storage.full.message_payed_time_out=Your rent time is out. All your images on additional space will be deleted at [[date]]. You can: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li> 
+
+fotki.storage.full.message_prolong_space|staleness=1
+fotki.storage.full.message_prolong_space=Your storage space ends [[date]]. All your images on additional space will be disabled. You can: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>You can:
+
+fotki.storage.title_free_space_out|staleness=1
+fotki.storage.title_free_space_out=Your storage space is near to empty
+
+fotki.storage.title_more_space|staleness=1
+fotki.storage.title_more_space=Add more storage space
+
+fotki.storage.title_payed_time_out|staleness=1
+fotki.storage.title_payed_time_out=Your rent time is out.
+
+fotki.storage.title_prolog_space|staleness=1
+fotki.storage.title_prolog_space=Your storage space is near to empty
+
+fotki.storage.used.numbers|staleness=1
+fotki.storage.used.numbers=from [[max]]
+
+fotki.storage.used.title|staleness=1
+fotki.storage.used.title=Used [[used]]
 
 gender.female|staleness=1
 gender.female=Female
@@ -3044,8 +3234,6 @@ gender.specify=Specify
 
 Help=Help
 
-i_like_this_title=Please click Track this if you want to receive all comments to this entry
-
 img.btn_del=Delete
 
 img.btn_down=Down
@@ -3054,12 +3242,14 @@ img.btn_freeze=Freeze
 
 img.btn_scr=Screen
 
+img.btn_spam|staleness=1
 img.btn_spam=Spam
 
 img.btn_unfreeze=Unfreeze
 
 img.btn_unscr=Unscreen
 
+img.btn_unspam|staleness=1
 img.btn_unspam=Not Spam
 
 img.btn_up=Up
@@ -3084,7 +3274,11 @@ img.placeholder=Image
 
 img.prev_entry=Previous Entry
 
+img.share|staleness=1
 img.share=Share
+
+img.sharethis|staleness=1
+img.sharethis=Share this!
 
 img.tellfriend=Tell a Friend!
 
@@ -3132,6 +3326,7 @@ inbox.menu.new_message.btn=New Message
 inbox.menu.sent|staleness=1
 inbox.menu.sent=Sent
 
+inbox.menu.spam|staleness=1
 inbox.menu.spam=Suspicious messages
 
 inbox.message|staleness=1
@@ -3142,6 +3337,9 @@ inbox.messages=Messages
 
 inbox.refresh|staleness=1
 inbox.refresh=Refresh
+
+i_like_this_title|staleness=1
+i_like_this_title=Please click Track this if you want to receive all comments to this entry
 
 label.screening.all=All comments
 
@@ -3235,8 +3433,10 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+ml_filter_by_poster|staleness=1
 ml_filter_by_poster=Filter community by poster
 
+ml_filter_by_poster_me|staleness=1
 ml_filter_by_poster_me=Filter community by me
 
 multisearch.error.no_query|staleness=1
@@ -3248,6 +3448,49 @@ multisearch.error.no_type=No type parameter
 multisearch.error.user_not_found|staleness=1
 multisearch.error.user_not_found=No user found
 
+notification.sms.befriended=User '[[friend]]' has added you to their friends list. [[mobile_url]]
+
+notification.sms.birthday=[[user]]'s birthday is on [[bday]]! [[mobile_url]]
+
+notification.sms.communityinvite|staleness=1
+notification.sms.communityinvite=[[inviter]] sent you an invitation to join the community [[comm]]. Visit the invitation page to accept
+
+notification.sms.communityjoinrequest|staleness=1
+notification.sms.communityjoinrequest=[[requestor]] requests membership in [[comm]]. Visit community settings to approve.
+
+notification.sms.defriended|staleness=1
+notification.sms.defriended=[[friend]] has removed you from their Friends list.
+
+notification.sms.invitedfriendjoins=Your invited friend '[[friend]]' has created a journal. [[mobile_url]]
+
+notification.sms.invitedfriendjoins_uknown=A friend you invited has created a journal. [[mobile_url]]
+
+notification.sms.journalnewentry=[[poster]] has posted with a new entry. To view, send READ [[journal]] to read it. [[disclaimer]][[mobile_url]]
+
+notification.sms.journalnewentry_comm=User '[[poster]]' has posted with a new entry in '[[journal]].' [[mobile_url]]
+
+notification.sms.newuserpic=User '[[journal]]' has uploaded a new userpic.
+
+notification.sms.newvgift|staleness=1
+notification.sms.newvgift=[[journal]] has received a new virtual gift.
+
+notification.sms.officialpost=There is a new announcement in '[[journal]].' [[mobile_url]]
+
+notification.sms.pollvote|staleness=1
+notification.sms.pollvote=[[voter]] has voted in [[pollname]] at [[entry_url]]
+
+notification.sms.userexpunged|staleness=1
+notification.sms.userexpunged=[[journal]] has been purged.
+
+notification.sms.usermessagerecvd=[[user]] sent you a message on LiveJournal
+
+notification.sms.usermessagesent|staleness=1
+notification.sms.usermessagesent=message sent to [[user]].
+
+notification.sms.usernewentry=User '[[user]]' posted in their journal. [[mobile_url]]
+
+notification.sms.usernewentry_comm=User '[[user]]' posted in community '[[journal]].' [[mobile_url]]
+
 notification_method.email.title|staleness=1
 notification_method.email.title=Email
 
@@ -3257,59 +3500,11 @@ notification_method.im.title=IM
 notification_method.inbox.title|staleness=1
 notification_method.inbox.title=Inbox
 
-notification_method.sms.title|staleness=1
-notification_method.sms.title=TxtLJ
-
+notification_method.sms-ru.title|staleness=1
 notification_method.sms-ru.title=SMS
 
-notification.sms.befriended=[[friend]] has added you to their friends list. Reply with ADD [[friend]] to add them [[disclaimer]]
-
-notification.sms.birthday=[[user]]'s birthday is on [[bday]]!
-
-notification.sms.communityinvite=[[inviter]] sent you an invitation to join the community [[comm]]. Visit the invitation page to accept
-
-notification.sms.communityjoinrequest=[[requestor]] requests membership in [[comm]]. Visit community settings to approve.
-
-notification.sms.defriended=[[friend]] has removed you from their Friends list.
-
-notification.sms.invitedfriendjoins=A friend you invited has created the journal [[friend]]
-
-notification.sms.invitedfriendjoins_uknown=A friend you invited has created a journal.
-
-notification.sms.journalnewentry=[[poster]] has posted with a new entry. To view, send READ [[journal]] to read it. [[disclaimer]]
-
-notification.sms.journalnewentry_comm=[[poster]] has posted with a new entry in [[journal]]. To view, send READ [[journal]] to read it. [[disclaimer]]
-
-notification.sms.newuserpic=[[journal]] has uploaded a new userpic. You can view it at: [[pic_url]]
-
-notification.sms.newvgift=[[journal]] has received a new virtual gift.
-
-notification.sms.officialpost=There is a new [[abbrev]] announcement in [[journal]]. Reply with READ [[journal]] to read it. [[disclaimer]]
-
-notification.sms.pollvote=[[voter]] has voted in [[pollname]] at [[entry_url]]
-
-notification.sms.userexpunged=[[journal]] has been purged.
-
-notification.sms.usermessagerecvd<<
-[[user]] sent you a message on LiveJournal: [[subject]]
-[[body]]
-------
-To respond, send your reply to the number this message was sent from. LiveJournal will automatically forward it to [[user]].
-.
-
-notification.sms.usermessagesent=message sent to [[user]].
-
-notification.sms.usernewentry=User '[[user]]' posted in their journal
-
-notification.sms.usernewentry_comm=User '[[user]]' posted '[[journal]]'
-
-sms.numbernotverified=Number not verified.
-
-sms.uknowncommand=Incorrect request.
-
-sms.unsubscribesuccesseful=You have successful unsubscribed from LiveJournal sms notification.
-
-sms.messagesent=Your message is sent.
+notification_method.sms.title|staleness=1
+notification_method.sms.title=TxtLJ
 
 number.million|staleness=1
 number.million=[[number]] million
@@ -3885,6 +4080,22 @@ pay.vgift.yellowrose=Yellow Rose
 
 pay.vgift.yulelog=Yule Log
 
+pending.mail.reject.body|staleness=1
+pending.mail.reject.body<<
+Dear [[username]], 
+
+Your request to join the [[community]] community has been declined by the maintainer(s) of the community for the following reason: [[reason]]. 
+
+Replies to this email are not sent to the community's maintainer(s). If you would like to discuss the reasons your membership request was rejected, you will need to contact a maintainer directly. Maintainers are listed on the community's Profile page. 
+
+Regards, 
+[[sitename]] Team
+
+.
+
+pending.mail.reject.subject|staleness=1
+pending.mail.reject.subject=Your Request to Join [[community]] community
+
 pingback.ljping.comment.text|staleness=1
 pingback.ljping.comment.text=User <lj user="[[poster]]"> referenced to your post from <a href="[[sourceURI]]">[[subject]]</a> saying: [...] [[context]] [...]
 
@@ -3912,39 +4123,20 @@ poll.dberror.items=Database error inserting items: [[errmsg]]
 
 poll.dberror.questions=Database error inserting questions: [[errmsg]]
 
+poll.election.closed|staleness=1
 poll.election.closed=No Active election for this community now.
 
-poll.election.description=Election will be opened <b>untill all maintainers will make their choices</b><br/> but no longer than [[enddate]].
+poll.election.description|staleness=1
+poll.election.description=Election will be opened <b>untill all maintainers will make their choices</b><br/> but no longer than [[enddate]].<br/> If winner will not be found (in case of number of candidates will get similar<br /> number of votes) election may be extended up to another 3 weeks.
 
+poll.election.description.extend|staleness=1
 poll.election.description.extend=If winner will not be found (in case of number of candidates will get similar number of votes) election may be extended up to another 3 weeks.
 
-poll.election.received.votes=([[cnt]] vote received)
-
+poll.election.email.subject|staleness=1
 poll.election.email.subject=Supermaintainer election
 
+poll.election.email.subject.closed|staleness=1
 poll.election.email.subject.closed=Supermaintainer election is closed
-
-poll.election.start.email<<
-Dear [[username]],
-
-You are receiving this email because you are a maintainer of the community [[communityname]]. LiveJournal has recently implemented a new role of community management, known as the 'Owner' of the community. The Owner of a community will be the only person who will be able to perform tasks such as deleting maintainers or deleting the community itself. You can read more about the Owner role here:  [[faqlink]]
-
-Since [[communityname]] is an existing community with multiple maintainers, it is now up to you and the other maintainers of the community to select which of you will be granted the Owner status. A poll has been created for your community <a href="[[siteroot]]/community/election.bml?authas=[[authas]]">at this page</a>. You simply need to visit this page and cast your vote for which current maintainer you believe should be made Owner of the community. More information on how the election process works can be found at the page above.
-
-Regards,
-[[shortsite]] Team
-.
-
-poll.election.start.email.plain<<
-Dear [[username]],
-
-You are receiving this email because you are a maintainer of the community [[communityname]]. LiveJournal has recently implemented a new role of community management, known as the 'Owner' of the community. The Owner of a community will be the only person who will be able to perform tasks such as deleting maintainers or deleting the community itself. You can read more about the Owner role here:  [[faqlink]]
-
-Since [[communityname]] is an existing community with multiple maintainers, it is now up to you and the other maintainers of the community to select which of you will be granted the Owner status. A poll has been created for your community <a href="[[siteroot]]/community/election.bml?authas=[[authas]]">at this page</a>. You simply need to visit this page and cast your vote for which current maintainer you believe should be made Owner of the community. More information on how the election process works can be found at the page above.
-
-Regards,
-[[shortsite]] Team
-.
 
 poll.election.end.email<<
 Dear [[username]],
@@ -3953,7 +4145,7 @@ You are receiving this email because you are a maintainer of the community [[com
 
 According to result of the Supermaintainer Election [[winner]] appointet to this role.
 
-You can read more about this role here:  [[faqlink]]
+You can read more about this role here: <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=225">http://www.livejournal.com/support/faqbrowse.bml?faqid=225</a>
 
 Regards,
 [[shortsite]] Team
@@ -3966,13 +4158,11 @@ You are receiving this email because you are a maintainer of the community [[com
 
 According to result of the Supermaintainer Election [[winner]] appointet to this role.
 
-You can read more about this role here:  [[faqlink]]
+You can read more about this role here:  http://www.livejournal.com/support/faqbrowse.bml?faqid=225
 
 Regards,
 [[shortsite]] Team
 .
-
-poll.election.not.need.subject=Owner choosen automatically
 
 poll.election.not.need.html<<
 Dear [[username]],<br><br> 
@@ -3981,11 +4171,12 @@ You are receiving this email because you are a maintainer of the community [[com
 
 According to the history for this community, you has been designated as the owner of this community.<br><br> 
 
-You can read more about this role here: [[faqlink]]<br><br> 
+You can read more about this role here: <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=225">http://www.livejournal.com/support/faqbrowse.bml?faqid=225</a><br><br> 
 
 Regards,<br> 
 [[shortsite]] Team
 .
+
 poll.election.not.need.html.plain<<
 Dear [[username]],
 
@@ -3993,25 +4184,58 @@ You are receiving this email because you are a maintainer of the community [[com
 
 According to the history for this community, you has been designated as the owner of this community.
 
-You can read more about this role here: [[faqlink]]
+You can read more about this role here: http://www.livejournal.com/support/faqbrowse.bml?faqid=225
 
 Regards,
 [[shortsite]] Team
 .
 
+poll.election.not.need.subject|staleness=1
+poll.election.not.need.subject=Supermaintainer choosen
 
-poll.election.subject=<b>Choose your candidate:</b>
-
-poll.election.post_subject=Election Post
-
+poll.election.post_body|staleness=1
 poll.election.post_body=Election Post for community [[comm]]
 
+poll.election.post_subject|staleness=1
+poll.election.post_subject=Election Post
+
+poll.election.received.votes|staleness=1
+poll.election.received.votes=([[cnt]] vote received)
+
+poll.election.selected|staleness=1
 poll.election.selected=<b>Your candidate:</b> [[choice]].
+
+poll.election.selected.tip|staleness=1
 poll.election.selected.tip=You can change your choice while election is open.
 
-poll.supermaintainer.not_selected=Not selected
+poll.election.start.email<<
+Dear [[username]],<br><br>
 
-poll.supermaintainer.is=<br/><br/>Current supermaintainer:&nbsp;[[user]]
+
+You're receiving this email because you're one of the maintainers of the community [[communityname]]. LiveJournal has recently implemented an additional role in community management. Moving forward, each community will have one designated Owner, who will be the only user permitted to perform high-level tasks, such as adding/deleting maintainers or deleting/renaming the community. You can read more about the Owner role here: <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=225">http://www.livejournal.com/support/faqbrowse.bml?faqid=225</a>.<br><br>
+
+
+
+Since [[communityname]] has multiple maintainers, it is now up to you and the other maintainers of the community to select which of you will be designated as Owner. A poll has been created for your community <a href="[[siteroot]]/community/election.bml?authas=[[authas]]">at this page</a>. Visit this page and vote for which current maintainer you believe should be made Owner of the community. You can read more information on the election process at the above-referenced page.<br><br>
+
+
+Regards,<br>
+[[shortsite]] Team
+.
+
+poll.election.start.email.plain<<
+Dear [[username]],
+
+You are receiving this email because you are a maintainer of the community [[communityname]]. LiveJournal has recently implemented a new role of community management, known as the 'Owner' of the community. The Owner of a community will be the only person who will be able to perform tasks such as deleting maintainers or deleting the community itself. You can read more about the Owner role here:  http://www.livejournal.com/support/faqbrowse.bml?faqid=225
+
+Since [[communityname]] is an existing community with multiple maintainers, it is now up to you and the other maintainers of the community to select which of you will be granted the Owner status. A poll has been created for your community <a href="[[siteroot]]/community/election.bml?authas=[[authas]]">at this page</a>. You simply need to visit this page and cast your vote for which current maintainer you believe should be made Owner of the community. More information on how the election process works can be found at the page above.
+
+Regards,
+[[shortsite]] Team
+.
+
+poll.election.subject|staleness=1
+poll.election.subject=Choose your candidate:
 
 poll.error.alreadyvoted|staleness=1
 poll.error.alreadyvoted=Sorry, you have already voted in this poll under the account [[user]].
@@ -4020,6 +4244,7 @@ poll.error.badmaxlength=Maxlength attribute on lj-pq text tags must be an intege
 
 poll.error.badsize=Size attribute on lj-pq text tags must be an integer from 1-100.
 
+poll.error.cantlock|staleness=1
 poll.error.cantlock=Sorry, cannot lock DB.
 
 poll.error.cantview=Error: you don't have access to view these poll results.
@@ -4042,12 +4267,13 @@ poll.error.nopollid=pollid parameter is missing.
 
 poll.error.noquestions=You must have at least one question in a poll.
 
-poll.error.not_enougth_rights=You are not have enougth rights for view this poll.
-
 poll.error.notext=Need text inside an lj-pq tag to say what the question is about.
 
 poll.error.notvalidated|staleness=1
 poll.error.notvalidated=Your email address must be validated in order to vote in this poll.
+
+poll.error.not_enougth_rights|staleness=1
+poll.error.not_enougth_rights=You are not have enougth rights for view this poll.
 
 poll.error.pitoolong=Text inside an lj-pi tag must be between 1 and 255 characters.  Yours is [[len]].
 
@@ -4087,6 +4313,7 @@ poll.participants=, participants: [[total]]
 
 poll.pollnum=Poll #[[num]]
 
+poll.posted|staleness=1
 poll.posted=Posted
 
 poll.scaleanswers=<b>Mean:</b> [[mean]] <b>Median:</b> [[median]] <b>Std. Dev</b> [[stddev]]
@@ -4112,8 +4339,15 @@ poll.security2=Open to: <b>[[whovote]]</b>, detailed results viewable to: <b>[[w
 
 poll.submit=Submit Poll
 
+poll.supermaintainer.is|staleness=1
+poll.supermaintainer.is=<br/><br/>Current supermaintainer:&nbsp;[[user]]
+
+poll.supermaintainer.not_selected|staleness=1
+poll.supermaintainer.not_selected=Not selected
+
 poll.viewanswers=View Answers
 
+poll.vote|staleness=1
 poll.vote=Vote!
 
 poll.warning.cutoff|staleness=1
@@ -4247,11 +4481,13 @@ quote.left="
 quote.right|staleness=1
 quote.right="
 
+repost.default_button|staleness=1
 repost.default_button=repost
 
+repost.default_subject|staleness=1
 repost.default_subject=post
 
-repost.wrapper=Originaly posted by <lj user="[[username]]"> at <a href="[[url]]">[[subject]]</a><div class="repost">[[text]]</div>
+repost.wrapper=Originally posted by <lj user="[[username]]" /> at <a href="[[url]]">[[subject]]</a><div class="repost">[[text]]</div>
 
 s2theme.themename.default|staleness=1
 s2theme.themename.default=(Unnamed - [[themeid]])
@@ -4297,7 +4533,7 @@ setting.birthdaydisplay.error.invalid=Invalid option
 setting.birthdaydisplay.question=Birthday display options:
 
 setting.commentcaptcha.label|staleness=1
-setting.commentcaptcha.label=CAPTCHA
+setting.commentcaptcha.label=Anti-Spam
 
 setting.commentcaptcha.option|staleness=1
 setting.commentcaptcha.option=Show CAPTCHA to
@@ -4781,15 +5017,20 @@ setting.viewingadultcontent.option.select.explicit=explicit adult content only
 setting.viewingadultcontent.option.select.none|staleness=1
 setting.viewingadultcontent.option.select.none=nothing
 
-setting.webmastertools_yandex.label=Yandex webmaster tools
+setting.webmastertools.error|staleness=1
+setting.webmastertools.error=This field can only accept characters: A-Z, 0-9, dashes, and underlines.
 
-setting.webmastertools_yandex.label2=Enter your meta tag content value obtained from Yandex
-
+setting.webmastertools_google.label|staleness=1
 setting.webmastertools_google.label=Google webmaster tools
 
+setting.webmastertools_google.label2|staleness=1
 setting.webmastertools_google.label2=Enter your meta tag content value obtained from Google
 
-setting.webmastertools.error=This field can only accept characters: A-Z, 0-9, dashes, and underlines.
+setting.webmastertools_yandex.label|staleness=1
+setting.webmastertools_yandex.label=Yandex webmaster tools
+
+setting.webmastertools_yandex.label2|staleness=1
+setting.webmastertools_yandex.label2=Enter your meta tag content value obtained from Yandex
 
 settings.city=City
 
@@ -4926,61 +5167,99 @@ settings.yearofbirth=Year of Birth
 
 settings.zipcode=ZIP Code
 
-sharing.popup.title=Share
-
+sharing.popup.close|staleness=1
 sharing.popup.close=Close
 
-sharing.service.livejournal=LiveJournal
+sharing.popup.title|staleness=1
+sharing.popup.title=Share
 
-sharing.service.facebook=Facebook
-
-sharing.service.twitter=Twitter
-
-sharing.service.vkontakte=Vkontakte
-
-sharing.service.moimir=Moi mir
-
-sharing.service.stumbleupon=StumbleUpon
-
+sharing.service.digg|staleness=1
 sharing.service.digg=Digg
 
+sharing.service.email|staleness=1
 sharing.service.email=E-mail
 
-sharing.service.tumblr=Tumblr
+sharing.service.facebook|staleness=1
+sharing.service.facebook=Facebook
 
+sharing.service.livejournal|staleness=1
+sharing.service.livejournal=LiveJournal
+
+sharing.service.moimir|staleness=1
+sharing.service.moimir=Moi mir
+
+sharing.service.odnoklassniki|staleness=1
 sharing.service.odnoklassniki=Odnoklassniki
 
-sms.journalnewcomment.edit_reply_your_comment=[[user]] edited a reply to your comment
+sharing.service.stumbleupon|staleness=1
+sharing.service.stumbleupon=StumbleUpon
 
-sms.journalnewcomment.edit_reply_a_comment=[[user]] edited a reply to a comment
+sharing.service.tumblr|staleness=1
+sharing.service.tumblr=Tumblr
 
-sms.journalnewcomment.replied_your_comment=[[user]] replied to your comment
+sharing.service.twitter|staleness=1
+sharing.service.twitter=Twitter
 
-sms.journalnewcomment.replied_a_comment=[[user]] replied to a comment
+sharing.service.vkontakte|staleness=1
+sharing.service.vkontakte=Vkontakte
 
-sms.journalnewcomment.edit_reply_your_post=[[user]] edited a reply to your post
-
-sms.journalnewcomment.edit_reply_a_post=[[user]] edited a reply to a post
-
-sms.journalnewcomment.replied_your_post=[[user]] replied to your post
-
-sms.journalnewcomment.replied_a_post=[[user]] replied to a post
-
-sms.communityentryreply.edit_reply_your_comment=[[user]] edited a reply to your comment
-
+sms.communityentryreply.edit_reply_a_comment|staleness=1
 sms.communityentryreply.edit_reply_a_comment=[[user]] edited a reply to a comment
 
-sms.communityentryreply.replied_your_comment=[[user]] replied to your comment
-
-sms.communityentryreply.replied_a_comment=[[user]] replied to a comment
-
-sms.communityentryreply.edit_reply_your_post=[[user]] edited a reply to your post in community [[community]]
-
+sms.communityentryreply.edit_reply_a_post|staleness=1
 sms.communityentryreply.edit_reply_a_post=[[user]] edited a reply to a post in community [[community]]
 
+sms.communityentryreply.edit_reply_your_comment|staleness=1
+sms.communityentryreply.edit_reply_your_comment=[[user]] edited a reply to your comment
+
+sms.communityentryreply.edit_reply_your_post|staleness=1
+sms.communityentryreply.edit_reply_your_post=[[user]] edited a reply to your post in community [[community]]
+
+sms.communityentryreply.replied_a_comment|staleness=1
+sms.communityentryreply.replied_a_comment=[[user]] replied to a comment
+
+sms.communityentryreply.replied_a_post=User '[[user]]' replied to a post in community '[[community]].' [[mobile_url]]
+
+sms.communityentryreply.replied_your_comment|staleness=1
+sms.communityentryreply.replied_your_comment=[[user]] replied to your comment
+
+sms.communityentryreply.replied_your_post|staleness=1
 sms.communityentryreply.replied_your_post=[[user]] replied to your post in community [[community]]
 
-sms.communityentryreply.replied_a_post=[[user]] replied to a post in community [[community]]
+sms.journalnewcomment.edit_reply_a_comment|staleness=1
+sms.journalnewcomment.edit_reply_a_comment=[[user]] edited a reply to a comment
+
+sms.journalnewcomment.edit_reply_a_post|staleness=1
+sms.journalnewcomment.edit_reply_a_post=[[user]] edited a reply to a post
+
+sms.journalnewcomment.edit_reply_your_comment|staleness=1
+sms.journalnewcomment.edit_reply_your_comment=[[user]] edited a reply to your comment
+
+sms.journalnewcomment.edit_reply_your_post|staleness=1
+sms.journalnewcomment.edit_reply_your_post=[[user]] edited a reply to your post
+
+sms.journalnewcomment.replied_a_comment|staleness=1
+sms.journalnewcomment.replied_a_comment=[[user]] replied to a comment
+
+sms.journalnewcomment.replied_a_post=User '[[user]]' replied to a post. [[mobile_url]]
+
+sms.journalnewcomment.replied_your_comment|staleness=1
+sms.journalnewcomment.replied_your_comment=[[user]] replied to your comment
+
+sms.journalnewcomment.replied_your_post|staleness=1
+sms.journalnewcomment.replied_your_post=[[user]] replied to your post
+
+sms.messagesent|staleness=1
+sms.messagesent=Your message is sent.
+
+sms.numbernotverified|staleness=1
+sms.numbernotverified=Number not verified.
+
+sms.uknowncommand|staleness=1
+sms.uknowncommand=Incorrect request.
+
+sms.unsubscribesuccesseful|staleness=1
+sms.unsubscribesuccesseful=You have successful unsubscribed from LiveJournal sms notification.
 
 Sorry|notes=typically used to announce that the requested action can't be done.
 Sorry=Sorry
@@ -5062,6 +5341,7 @@ talk.anonwrote_comm=Someone wrote in [[commlink]],
 
 talk.btn.preview=Preview
 
+talk.collapselink|staleness=1
 talk.collapselink=Collapse
 
 talk.commentpermlink=link
@@ -5199,6 +5479,7 @@ time.ago.second=[[num]] [[?num|second|seconds]] ago
 
 time.ago.week=[[num]] [[?num|week|weeks]] ago
 
+time.preposition|staleness=1
 time.preposition=at
 
 tos.error=You must read and agree to the terms of service.
@@ -5207,34 +5488,8 @@ tos.haveread=I have read and agree to the Terms of Service.
 
 tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
 
+trynbuy.account.title|staleness=1
 trynbuy.account.title=Try and Buy account, expiring on [[expdate]]
-trynbuy.expiring.notify_subject=LiveJournal paid account free trial
-
-trynbuy.expiring.notify_html<<
-Dear [[username]],<br>
-<br>
-We hope you enjoyed your free trial of LiveJournal Paid account. If you decide to upgrade to a Paid account, all of the settings and userpics you uploaded during your trial will be restored. . Just so you know, we have lots of flexible payment options. You can make a one-time manual payment of $5 for two months of Paid account service or sign up for automatic payments and get a full-year of LiveJournal Paid account time for $19.95.<br>
-<br>
-Thanks again!<br>
-<br>
-Regards,
-[[shortsite]] Team
-
-.
-
-trynbuy.expiring.notify_plain<<
-Dear [[username]],
-
-We hope you enjoyed your free trial of LiveJournal Paid account. If you decide to upgrade to a Paid account, all of the settings and userpics you uploaded during your trial will be restored. Just so you know, we have lots of flexible payment options. You can make a one-time manual payment of $5 for two months of Paid account service or sign up for automatic payments and get a full-year of LiveJournal Paid account time for $19.95.
-
-Thanks again!
-
-Regards,
-[[shortsite]] Team
-
-.
-
-trynbuy.expired.notify_subject=We hope you enjoyed your LiveJournal Paid Account trial!
 
 trynbuy.expired.notify_html<<
 Dear [[username]],<br>
@@ -5246,7 +5501,7 @@ Enjoy an ad-free environment<br>
 Spice up your posts with 30 userpics<br>
 Dress up your journal in hundreds of premium styles<br>
 Edit comments, create personal notes, and post polls<br>
-Get more storage, stats by Google, voice posting, and more!<br>
+Get stats by Google, voice posting, and more!<br>
 Rest easy: No obligation or credit card required<br>
 <br>
 We've kept all of your settings, so you can extend the fun for just a couple of dollars per month. We have lots of flexible payment plans, so you can choose the plan that's right for you!<br>
@@ -5268,7 +5523,7 @@ Enjoy an ad-free environment
 Spice up your posts with 30 userpics
 Dress up your journal in hundreds of premium styles
 Edit comments, create personal notes, and post polls
-Get more storage, stats by Google, voice posting, and more!
+Get stats by Google, voice posting, and more!
 Rest easy: No obligation or credit card required
 
 We've kept all of your settings, so you can extend the fun for just a couple of dollars per month. We have lots of flexible payment plans, so you can choose the plan that's right for you!
@@ -5280,32 +5535,101 @@ Regards,
 
 .
 
-trynbuy.launch.notify_subject=Protect the innocent, uphold the law
+trynbuy.expired.notify_subject|staleness=1
+trynbuy.expired.notify_subject=We hope you enjoyed your LiveJournal Paid Account trial!
+
+trynbuy.expiring.daysleft|staleness=1
+trynbuy.expiring.daysleft=You only have [[num]] [[?num|day|days]] left before your trial period ends
+
+trynbuy.expiring.notify_html<<
+Dear [[username]],<br>
+<br>
+We're so delighted that you decided to test drive a LiveJournal Paid Account!<br>
+<br>
+We happen to think our Paid accounts are pretty awesome.<br> You can:<br>
+Enjoy an ad-free environment<br>
+Spice up your posts with 30 userpics<br>
+Dress up your journal in hundreds of premium styles<br>
+Edit comments, create personal notes, and post polls<br>
+Get stats by Google, voice posting, and more!<br>
+Rest easy: No obligation or credit card required<br>
+<br>
+We hope you've been enjoying all of our Paid features this week. If you want to extend the fun, you can sign up for just a couple of dollars per month. We have lots of flexible payment plans, so you can sign up for a couple months or a whole year, whatever works for you!<br>
+<br>
+If you'd like to upgrade now, click <a href='http://www.livejournal.com/shop/paidaccount.bml?form=1'> here!</a> We want to thank you, again, for making LiveJournal your home.<br> 
+<br>
+Best,
+The LiveJournal Team<br>
+<br>
+.
+
+trynbuy.expiring.notify_plain<<
+Dear [[username]],
+
+We're so delighted that you decided to test drive a LiveJournal Paid Account!
+
+We happen to think our Paid accounts are pretty awesome. You can:
+Enjoy an ad-free environment
+Spice up your posts with 30 userpics
+Dress up your journal in hundreds of premium styles
+Edit comments, create personal notes, and post polls
+Get stats by Google, voice posting, and more!
+Rest easy: No obligation or credit card required
+
+We hope you've been enjoying all of our Paid features this week. If you want to extend the fun, you can sign up for just a couple of dollars per month. We have lots of flexible payment plans, so you can sign up for a couple months or a whole year, whatever works for you!
+
+If you'd like to upgrade now, click here: http://www.livejournal.com/shop/paidaccount.bml?form=1 . We want to thank you, again, for making LiveJournal your home. 
+
+Best,
+The LiveJournal Team
+
+.
+
+trynbuy.expiring.notify_subject=We hope you're enjoying your LiveJournal Paid Account trial!
 
 trynbuy.launch.notify_html<<
 Dear [[username]],<br>
 <br>
-Whatsup?<br>
+We could tell you all the great reasons to sign up for a LiveJournal Paid Account. But, since seeing is believing, we'd rather invite you to test drive a Paid Account for two weeks, free of charge! <br>
 <br>
-Regards,<br>
-[[shortsite]] Team
+Once you sign up, you can: <br>
+Enjoy an ad-free environment <br>
+Spice up your posts with 30 userpics <br>
+Dress up your journal in hundreds of premium styles <br>
+Edit comments, create personal notes, and post polls <br>
+Get more storage, stats by Google, voice posting, and more!<br> 
+Rest easy: No obligation or credit card required <br>
+<br>
+To sign up for your free trial now, click <a href='http://www.livejournal.com/free-trial'> here!</a> We want to thank you for making LiveJournal your home. <br>
+
+Best, <br>
+The LiveJournal Team <br>
 
 .
 
 trynbuy.launch.notify_plain<<
 Dear [[username]],
 
-Whatsup?
+We could tell you all the great reasons to sign up for a LiveJournal Paid Account. But, since seeing is believing, we'd rather invite you to test drive a Paid Account for two weeks, free of charge! 
 
-Regards,
-[[shortsite]] Team
+Once you sign up, you can: 
+Enjoy an ad-free environment 
+Spice up your posts with 30 userpics 
+Dress up your journal in hundreds of premium styles 
+Edit comments, create personal notes, and post polls 
+Get stats by Google, voice posting, and more! 
+Rest easy: No obligation or credit card required 
+
+To sign up for your free trial now, click here: http://www.livejournal.com/free-trial ! We want to thank you for making LiveJournal your home. 
+
+Best, 
+The LiveJournal Team 
 
 .
 
-trynbuy.expiring.daysleft=You only have <strong>[[num]]&nbsp;[[?num|day|days]]</strong> left before <em>your trial period ends</em>.
+trynbuy.launch.notify_subject=Test drive a LiveJournal Paid Account, free of charge!
 
-twitter.disconnect_letter.subject=You are disconnected from twitter account
-
+twitter.disconnect_letter.body|staleness=1
 twitter.disconnect_letter.body<<
 Dear [[user]],
 
@@ -5317,6 +5641,12 @@ Truly,
 LiveJournal Team 
 .
 
+twitter.disconnect_letter.subject|staleness=1
+twitter.disconnect_letter.subject=You are disconnected from twitter account
+
+userinfo.admins.owner.election.link|staleness=1
+userinfo.admins.owner.election.link=Not appointed yet. You can <a [[href]]>vote for owner here</a>.
+
 Username=Username
 
 userpic.inactive=Inactive
@@ -5325,7 +5655,17 @@ userpic.link=userpic
 
 userpic.text=[[user]], this is what you currently look like to your friends: [[empty]]<br />Boooring. Be classy and upload a [[link]].
 
-userinfo.admins.owner.election.link=Not appointed yet. You can <a [[href]]>vote for owner here</a>.
+vertical.admin.add_category.btn|staleness=1
+vertical.admin.add_category.btn=Add Category
+
+vertical.admin.move_category.btn|staleness=1
+vertical.admin.move_category.btn=Move
+
+vertical.admin.select_vertical|staleness=1
+vertical.admin.select_vertical=Community Directory
+
+vertical.admin.select_vertical.btn|staleness=1
+vertical.admin.select_vertical.btn=Select Vertical
 
 vertical.nav.explore.culture|staleness=1
 vertical.nav.explore.culture=Culture
@@ -5344,14 +5684,6 @@ vertical.nav.explore.news_and_politics=News & Politics
 
 vertical.nav.explore.technology|staleness=1
 vertical.nav.explore.technology=Technology
-
-vertical.admin.add_category.btn=Add Category
-
-vertical.admin.select_vertical=Community Directory
-
-vertical.admin.select_vertical.btn=Select Vertical
-
-vertical.admin.move_category.btn=Move
 
 vgift..anon=
 
@@ -6498,27 +6830,43 @@ web.authas.label.comm=Work as community:
 web.controlstrip.btn.go|staleness=1
 web.controlstrip.btn.go=Go
 
-web.controlstrip.btn.login=Login
+web.controlstrip.btn.login=Log in
 
-web.controlstrip.btn.logout=Logout
+web.controlstrip.btn.logout=Log out
 
+web.controlstrip.btn.password|staleness=1
 web.controlstrip.btn.password=Password
+
+web.controlstrip.btn.searchall|staleness=1
+web.controlstrip.btn.searchall=Search at LiveJournal
+
+web.controlstrip.btn.username|staleness=1
+web.controlstrip.btn.username=Username
 
 web.controlstrip.btn.view=View
 
-web.controlstrip.btn.searchall=Search at LiveJournal
-
-web.controlstrip.btn.username=Username
-
-web.controlstrip.links.viewownstyle=View in own style
-
 web.controlstrip.links.addfeed=Add it to your Friends Page
 
-web.controlstrip.links.addfriend=Add Friend
+web.controlstrip.links.addfriend=Add them as a friend
+
+web.controlstrip.links.calendar|staleness=1
+web.controlstrip.links.calendar=Calendar
 
 web.controlstrip.links.changecommsettings=Change Settings
 
-web.controlstrip.links.create=Create a [[sitename]] Account
+web.controlstrip.links.commonly|staleness=1
+web.controlstrip.links.commonly=View communities only
+
+web.controlstrip.links.community.addcatalogue|staleness=1
+web.controlstrip.links.community.addcatalogue=Add to catalogue
+
+web.controlstrip.links.community.directory|staleness=1
+web.controlstrip.links.community.directory=Community Directory
+
+web.controlstrip.links.create=Create an Account
+
+web.controlstrip.links.customgroups|staleness=1
+web.controlstrip.links.customgroups=Custom groups
 
 web.controlstrip.links.editcommmembers=Edit Members
 
@@ -6527,60 +6875,27 @@ web.controlstrip.links.editcommprofile=Edit the Profile
 web.controlstrip.links.explore|staleness=1
 web.controlstrip.links.explore=Explore [[sitenameabbrev]]
 
+web.controlstrip.links.filter|staleness=1
+web.controlstrip.links.filter=Filter
+
 web.controlstrip.links.flag|staleness=1
 web.controlstrip.links.flag=Flag Journal
 
-web.controlstrip.links.home=Home
-
-web.controlstrip.links.filter=Filter
-
-web.controlstrip.links.usersonly=View users only
-
-web.controlstrip.links.commonly=View communities only
-
-web.controlstrip.links.rssonly=View feeds only
-
+web.controlstrip.links.friendsoffriends|staleness=1
 web.controlstrip.links.friendsoffriends=Friends of Friends
 
-web.controlstrip.links.managetags=Manage Tags
-
-web.controlstrip.links.community.directory=Community Directory
-
-web.controlstrip.links.community.addcatalogue=Add to catalogue
-
-web.controlstrip.links.messagefriend=Send message
-
-web.controlstrip.links.customgroups=Custom groups
-
-web.controlstrip.links.vgift=Send vgift
-
-web.controlstrip.links.calendar=Calendar
-
-web.controlstrip.view.calendar=Friends page calendar
-
-web.controlstrip.links.viewaccount=Account
-
-web.controlstrip.links.viewhelp=FAQ
-
-web.controlstrip.view.calendar-s=S
-
-web.controlstrip.view.calendar-m=M
-
-web.controlstrip.view.calendar-t=T
-
-web.controlstrip.view.calendar-w=W
-
-web.controlstrip.view.calendar-f=F
-
-web.controlstrip.links.like=Like?
+web.controlstrip.links.home=Home
 
 web.controlstrip.links.invitefriends=Invite Friends
 
-web.controlstrip.links.joincomm=Join Community
+web.controlstrip.links.joincomm=Join this community
 
 web.controlstrip.links.learnmore=Learn more
 
-web.controlstrip.links.leavecomm=Leave Community
+web.controlstrip.links.leavecomm=Leave this community
+
+web.controlstrip.links.like|staleness=1
+web.controlstrip.links.like=Like?
 
 web.controlstrip.links.login|staleness=1
 web.controlstrip.links.login=Log in
@@ -6590,6 +6905,12 @@ web.controlstrip.links.managecomminvites=Manage Invites
 web.controlstrip.links.manageentries=Manage Entries
 
 web.controlstrip.links.managefriends=Manage Friends
+
+web.controlstrip.links.managetags|staleness=1
+web.controlstrip.links.managetags=Manage Tags
+
+web.controlstrip.links.messagefriend|staleness=1
+web.controlstrip.links.messagefriend=Send message
 
 web.controlstrip.links.more|staleness=1
 web.controlstrip.links.more=More
@@ -6608,14 +6929,19 @@ web.controlstrip.links.postcomm=Post to this community
 web.controlstrip.links.random|staleness=1
 web.controlstrip.links.random=Random Journal
 
-web.controlstrip.links.recentcomments=Recent Comments
+web.controlstrip.links.recentcomments=View Recent Comments
 
 web.controlstrip.links.removecomm=Stop watching this community
 
 web.controlstrip.links.removefeed=Remove it from your Friends Page
 
+web.controlstrip.links.rssonly|staleness=1
+web.controlstrip.links.rssonly=View feeds only
+
+web.controlstrip.links.share|staleness=1
 web.controlstrip.links.share=Share
 
+web.controlstrip.links.sort.poster|staleness=1
 web.controlstrip.links.sort.poster=Sort by poster
 
 web.controlstrip.links.stylemystyle|staleness=1
@@ -6624,25 +6950,45 @@ web.controlstrip.links.stylemystyle=View in my style
 web.controlstrip.links.styleorigstyle|staleness=1
 web.controlstrip.links.styleorigstyle=View in original style
 
+web.controlstrip.links.upgrade|staleness=1
+web.controlstrip.links.upgrade=Upgrade Account
+
+web.controlstrip.links.usersonly|staleness=1
+web.controlstrip.links.usersonly=View users only
+
+web.controlstrip.links.vgift|staleness=1
+web.controlstrip.links.vgift=Send vgift
+
+web.controlstrip.links.viewaccount|staleness=1
+web.controlstrip.links.viewaccount=Account
+
 web.controlstrip.links.viewfriendspage=View my Friends Page
 
 web.controlstrip.links.viewfriendspage2|staleness=1
 web.controlstrip.links.viewfriendspage2=Friends Page
 
-web.controlstrip.links.upgrade=Upgrade Account
+web.controlstrip.links.viewhelp|staleness=1
+web.controlstrip.links.viewhelp=FAQ
+
+web.controlstrip.links.viewownstyle|staleness=1
+web.controlstrip.links.viewownstyle=View in own style
 
 web.controlstrip.links.watchcomm=Watch this community
 
 web.controlstrip.login.forgot=Forgot your password?
 
-web.controlstrip.login.remember=Remember Me
-
-web.controlstrip.login.openid=Open ID
-
+web.controlstrip.login.google|staleness=1
 web.controlstrip.login.google=Google
 
+web.controlstrip.login.mailru|staleness=1
 web.controlstrip.login.mailru=Mail.ru
 
+web.controlstrip.login.openid|staleness=1
+web.controlstrip.login.openid=Open ID
+
+web.controlstrip.login.remember=Remember Me
+
+web.controlstrip.login.vkontakte|staleness=1
 web.controlstrip.login.vkontakte=Vkontakte
 
 web.controlstrip.nouserpic.alt=Upload Userpic
@@ -6697,6 +7043,24 @@ web.controlstrip.userpic.alt=Userpic
 
 web.controlstrip.userpic.title=Edit Userpics
 
+web.controlstrip.view.calendar|staleness=1
+web.controlstrip.view.calendar=Friends page calendar
+
+web.controlstrip.view.calendar-f|staleness=1
+web.controlstrip.view.calendar-f=F
+
+web.controlstrip.view.calendar-m|staleness=1
+web.controlstrip.view.calendar-m=M
+
+web.controlstrip.view.calendar-s|staleness=1
+web.controlstrip.view.calendar-s=S
+
+web.controlstrip.view.calendar-t|staleness=1
+web.controlstrip.view.calendar-t=T
+
+web.controlstrip.view.calendar-w|staleness=1
+web.controlstrip.view.calendar-w=W
+
 web.lj-replace.first_post=Your journal currently has no entries. Start by <a [[update_link]]>Posting an Entry</a>.
 
 web.lj-replace.first_post.subject=Welcome to [[sitename]]
@@ -6705,12 +7069,16 @@ web.postto.btn=Switch
 
 web.postto.label=Post to:
 
+we_like_this_title|staleness=1
 we_like_this_title=View people who like it
 
+widget.addcommunity.caption|staleness=1
 widget.addcommunity.caption=Add community
 
+widget.addcommunity.form_text|staleness=1
 widget.addcommunity.form_text=Please submit your suggestion for Community Directory. Or submit your suggestion for [[openlink]]Spotlight[[closelink]].
 
+widget.addcommunity.submit_button_caption|staleness=1
 widget.addcommunity.submit_button_caption=Submit
 
 widget.addqotd.extratext|staleness=1
@@ -6746,6 +7114,18 @@ widget.betafeature.homepage2007.on=You are beta testing the new homepage.
 widget.betafeature.homepage2007.title|staleness=1
 widget.betafeature.homepage2007.title=New Homepage
 
+widget.browse.comments|staleness=1
+widget.browse.comments=Comments
+
+widget.browse.community.empty_list|staleness=1
+widget.browse.community.empty_list=No communities in this category yet
+
+widget.browse.community.join|staleness=1
+widget.browse.community.join=Join
+
+widget.browse.community.watch|staleness=1
+widget.browse.community.watch=Watch
+
 widget.browse.directorysearch|staleness=1
 widget.browse.directorysearch=Directory Search:
 
@@ -6770,42 +7150,47 @@ widget.browse.findusers.location=State or Country
 widget.browse.findusers.school|staleness=1
 widget.browse.findusers.school=School
 
+widget.browse.leave.comment|staleness=1
+widget.browse.leave.comment=Leave comment
+
+widget.browse.more.recent.posts|staleness=1
+widget.browse.more.recent.posts=More recent posts
+
+widget.browse.nav_bar.home|staleness=1
+widget.browse.nav_bar.home=Home
+
+widget.browse.page.first|staleness=1
+widget.browse.page.first=First
+
+widget.browse.page.last|staleness=1
+widget.browse.page.last=Last
+
+widget.browse.page.next|staleness=1
+widget.browse.page.next=Next
+
+widget.browse.page.previous|staleness=1
+widget.browse.page.previous=Previous
+
+widget.browse.read.more|staleness=1
+widget.browse.read.more=Read more in original post
+
+widget.browse.share|staleness=1
+widget.browse.share=share
+
+widget.browse.share.facebook|staleness=1
+widget.browse.share.facebook=facebook
+
+widget.browse.share.mail|staleness=1
+widget.browse.share.mail=mail
+
+widget.browse.share.twiiter|staleness=1
+widget.browse.share.twiiter=twitter
+
 widget.browse.title|staleness=1
 widget.browse.title=Browse [[sitenameabbrev]]
 
+widget.browse.windowtitle|staleness=1
 widget.browse.windowtitle=Community Directory
-
-widget.browse.nav_bar.home=Home
-
-widget.browse.page.first=First
-
-widget.browse.page.previous=Previous
-
-widget.browse.page.next=Next
-
-widget.browse.page.last=Last
-
-widget.browse.community.join=Join
-
-widget.browse.community.watch=Watch
-
-widget.browse.community.empty_list=No communities in this category yet
-
-widget.browse.comments=Comments
-
-widget.browse.leave.comment=Leave comment
-
-widget.browse.read.more=Read more in original post
-
-widget.browse.share.mail=mail
-
-widget.browse.share=share
-
-widget.browse.share.twiiter=twitter
-
-widget.browse.share.facebook=facebook
-
-widget.browse.more.recent.posts=More recent posts
 
 widget.commsofuser.title=Communities [[user]] has added
 
@@ -6886,14 +7271,28 @@ widget.createaccount.error.password.blank=You must enter a password.
 widget.createaccount.error.password.nomatch|staleness=1
 widget.createaccount.error.password.nomatch=Passwords do not match.
 
+widget.createaccount.error.underage.faq|staleness=1
+widget.createaccount.error.underage.faq=You can read about it in <a href="[[faq]]">Faq</a>
+
+widget.createaccount.error.underage.links|staleness=1
+widget.createaccount.error.underage.links=Use the links to access more options
+
+widget.createaccount.error.underage.ljhome|staleness=1
+widget.createaccount.error.underage.ljhome=<a href="[[ljhome]]">LJ Home</a>
+
+widget.createaccount.error.underage.message|staleness=1
+widget.createaccount.error.underage.message=We no longer allow users under 13 to register for LiveJournal
+
+widget.createaccount.error.underage.title|staleness=1
+widget.createaccount.error.underage.title=Age Verification
+
 widget.createaccount.error.username.inuse|staleness=1
 widget.createaccount.error.username.inuse=Sorry, this username is already in use.
 
 widget.createaccount.error.username.mustenter|staleness=1
 widget.createaccount.error.username.mustenter=You must enter a username.
 
-widget.createaccount.error.username.purged|staleness=1
-widget.createaccount.error.username.purged=The username you entered is that of an account which has been deleted and purged. If you wish to use this username, you must first purchase a <a [[aopts]]>rename token</a> for an existing account.
+widget.createaccount.error.username.purged=The username you entered belongs to an account that has been deleted and purged. If you wish to use this username, you can do so by <a href="http://www.livejournal.com/shop/renameaccount.bml">renaming</a> an existing account to the purged username. 
 
 widget.createaccount.error.username.reserved|staleness=1
 widget.createaccount.error.username.reserved=Sorry, that is a reserved username.
@@ -6922,6 +7321,12 @@ widget.createaccount.field.email=Email Address:
 widget.createaccount.field.gender|staleness=1
 widget.createaccount.field.gender=Gender:
 
+widget.createaccount.field.location|staleness=1
+widget.createaccount.field.location=Location
+
+widget.createaccount.field.location.detect|staleness=1
+widget.createaccount.field.location.detect=Detect
+
 widget.createaccount.field.news|staleness=1
 widget.createaccount.field.news=Yes, send me [[sitename]] announcements via email.
 
@@ -6937,6 +7342,19 @@ widget.createaccount.field.username=Username:
 widget.createaccount.field.username.available|staleness=1
 widget.createaccount.field.username.available=Username available
 
+widget.createaccount.head1|staleness=1
+widget.createaccount.head1=Find yourself and each other on LiveJournal!
+
+widget.createaccount.head2|staleness=1
+widget.createaccount.head2=It only takes a few minutes to sign up! Here's all we need:
+
+widget.createaccount.intro|staleness=1
+widget.createaccount.intro<<
+LiveJournal is a global journaling platform that helps you share your unique passions and interests and form deep connections with friends, old and new! 
+Whether you’re interested in baking, writing, politics, photography, or pretty much anything else, you’re sure to find like-minded friends from around 
+the corner and around the world!
+.
+
 widget.createaccount.tip.birthdate|staleness=1
 widget.createaccount.tip.birthdate=Required by law. No worries, you can set privacy on this after you're done creating an account.
 
@@ -6951,6 +7369,9 @@ widget.createaccount.tip.email=We need your email address to send important info
 
 widget.createaccount.tip.gender=By default we will not show your gender to anybody.
 
+widget.createaccount.tip.location|staleness=1
+widget.createaccount.tip.location=LiveJournal detects your location automatically, but you can change if you want
+
 widget.createaccount.tip.password|staleness=1
 widget.createaccount.tip.password=Choose a secure password that is at least 6 characters long. Passwords cannot be based on your username, name, or email address.
 
@@ -6959,16 +7380,6 @@ widget.createaccount.tip.username=Your username is used in your journal URL. Use
 
 widget.createaccount.yearcheck|staleness=1
 widget.createaccount.yearcheck=The birth date you entered shows that you are under the age of 13. If this date is correct, then please proceed. But if it is not your actual date of birth, we suggest that you update the form with your real birth date. Some LiveJournal functionality is inaccessible for users under the age of 13 and you will need to complete one of the age verification processes described in this <a [[aopts]]>FAQ</a>
-
-widget.createaccount.error.underage.title=Age Verification
-
-widget.createaccount.error.underage.message=We no longer allow users under 13 to register for LiveJournal
-
-widget.createaccount.error.underage.links=Use the links to access more options
-
-widget.createaccount.error.underage.faq=You can read about it in <a href="[[faq]]">Faq</a>
-
-widget.createaccount.error.underage.ljhome=<a href="[[ljhome]]">LJ Home</a>
 
 widget.createaccountnextsteps.steps|staleness=1
 widget.createaccountnextsteps.steps=Now that your account is set up, you're ready to explore the rest of [[sitename]]. Here are some things to get you started:
@@ -7365,9 +7776,10 @@ widget.manageqotd.extratext=Extra Text
 widget.manageqotd.is_special|staleness=1
 widget.manageqotd.is_special=Special?
 
-widget.marqueefeatures.title=Cool features on LiveJournal
-
+widget.marqueefeatures.also|staleness=1
 widget.marqueefeatures.also=Also check out
+
+widget.marqueefeatures.title=Feature showcase
 
 widget.moodthemechooser.desc|staleness=1
 widget.moodthemechooser.desc=Mood themes are small icons that describe your mood or the mood of a post. Select from a variety of faces and characters.
@@ -7420,14 +7832,14 @@ widget.navstripchooser.option.color.light=Light gray gradient
 widget.navstripchooser.option.color.no_gradient|staleness=1
 widget.navstripchooser.option.color.no_gradient=without background gradient
 
-widget.navstripchooser.option.visible|staleness=1
-widget.navstripchooser.option.visible=Show navigation strip on journal (including my own) and communities page
-
 widget.navstripchooser.option.onjournal|staleness=1
 widget.navstripchooser.option.onjournal=Always show on my journal/community
 
 widget.navstripchooser.option.onothers|staleness=1
 widget.navstripchooser.option.onothers=Always show on any journal or community I view
+
+widget.navstripchooser.option.visible|staleness=1
+widget.navstripchooser.option.visible=Show navigation strip on journal (including my own) and communities page
 
 widget.navstripchooser.title|staleness=1
 widget.navstripchooser.title=Navigation Strip
@@ -7435,13 +7847,16 @@ widget.navstripchooser.title=Navigation Strip
 widget.navstripchooser.upgradetos2|staleness=1
 widget.navstripchooser.upgradetos2=<a [[aopts]]><strong>Switch to S2</strong></a> and you'll be able to use custom colors for the navigation strip.
 
-widget.news.title=LiveJournal news
-
+widget.news.more|staleness=1
 widget.news.more=More in <a href="[[href]]">News</a>.
+
+widget.news.title|staleness=1
+widget.news.title=LiveJournal news
 
 widget.pagenotice.dismiss|staleness=1
 widget.pagenotice.dismiss=Dismiss
 
+widget.popularinterests.title|staleness=1
 widget.popularinterests.title=Popular Interests
 
 widget.popularinterests.viewall|staleness=1
@@ -7465,6 +7880,7 @@ widget.qotd.entry.subject=Writer's Block: [[subject]]
 widget.qotd.entry.submittedby|staleness=1
 widget.qotd.entry.submittedby=Submitted By [[user]]
 
+widget.qotd.subscribe|staleness=1
 widget.qotd.subscribe=Subscribe
 
 widget.qotd.suggestions|staleness=1
@@ -7472,6 +7888,9 @@ widget.qotd.suggestions=Suggestions
 
 widget.qotd.title|staleness=1
 widget.qotd.title=Writer's Block
+
+widget.qotd.unplugged|staleness=1
+widget.qotd.unplugged=Unplugged Questions
 
 widget.qotd.view.more|staleness=1
 widget.qotd.view.more=View more
@@ -7481,8 +7900,6 @@ widget.qotd.view.other.answers=View other answers
 
 widget.qotd.viewanswers|staleness=1
 widget.qotd.viewanswers=View Answers
-
-widget.qotd.unplugged=Unplugged Questions
 
 widget.qotdarchive.skip.next|staleness=1
 widget.qotdarchive.skip.next=Newer
@@ -7654,19 +8071,26 @@ widget.search.username=Username
 
 widget.search.yahoo=Yahoo! ID
 
-widget.search.yandex.name=Search
-
+widget.search.yandex.find|staleness=1
 widget.search.yandex.find=Find
 
+widget.search.yandex.findall|staleness=1
 widget.search.yandex.findall=All
 
-widget.search.yandex.findposts=Posts
-
+widget.search.yandex.findcomments|staleness=1
 widget.search.yandex.findcomments=Comments
 
+widget.search.yandex.findfaq|staleness=1
+widget.search.yandex.findfaq=FAQ
+
+widget.search.yandex.findposts|staleness=1
+widget.search.yandex.findposts=Posts
+
+widget.search.yandex.findusers|staleness=1
 widget.search.yandex.findusers=People and communitites
 
-widget.search.yandex.findfaq=FAQ
+widget.search.yandex.name|staleness=1
+widget.search.yandex.name=Search
 
 widget.sitemessages.title|staleness=1
 widget.sitemessages.title=Announcement
@@ -7801,6 +8225,7 @@ widget.themenav.developer=Developer Area
 widget.themenav.filteravailable|staleness=1
 widget.themenav.filteravailable=Only show themes available to me
 
+widget.themenav.please_wait|staleness=1
 widget.themenav.please_wait=Please wait...
 
 widget.themenav.switchtos1|staleness=1
@@ -7809,19 +8234,25 @@ widget.themenav.switchtos1=Switch to old style system (S1)
 widget.themenav.title|staleness=1
 widget.themenav.title=2. Select a New Theme
 
+widget.topentries.comments|staleness=1
 widget.topentries.comments=[[count]] [[?count|comment|comments]]
 
+widget.topentries.spotlight.title|staleness=1
 widget.topentries.spotlight.title=Community spotlight
 
-widget.topusers.top5commenters.title=Top 5 commenters within 24h
-
+widget.topusers.head.nr|staleness=1
 widget.topusers.head.nr=Nr
 
+widget.topusers.head.users|staleness=1
 widget.topusers.head.users=Users
 
+widget.topusers.top5commenters.title|staleness=1
+widget.topusers.top5commenters.title=Top 5 commenters within 24h
+
+widget.topusers.top5posters.title|staleness=1
 widget.topusers.top5posters.title=Top 5 posters within a week
 
-widget.updatesforuser.footer=Customize your [[openlink]]notifications[[closelink]] so you never miss a beat
+widget.updatesforuser.footer=Customize your [[openlink]]notifications[[closelink]]
 
 widget.upgradeaccount.title|staleness=1
 widget.upgradeaccount.title=Upgrade your account
@@ -7912,3 +8343,4 @@ widget.vgifts.title=Virtual Gifts
 
 widget.vgifts.viewall|staleness=1
 widget.vgifts.viewall=more
+

@@ -17,6 +17,7 @@
 .form.question.label|staleness=1
 .form.question.label=Your suggested question(s):
 
+.form.unplugged.label|staleness=1
 .form.unplugged.label=Please consider my question for [[user]], the edgier side of Writer's Block!
 
 .intro|staleness=1

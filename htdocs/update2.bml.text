@@ -1,12 +1,16 @@
 ;; -*- coding: utf-8 -*-
-
+.actions.head.edit|staleness=1
 .actions.head.edit=Customize
 
+.actions.head.title|staleness=1
 .actions.head.title=You can have more
 
+.options.head.edit|staleness=1
 .options.head.edit=Edit (Customize)
 
+.options.head.title|staleness=1
 .options.head.title=Entry options
 
+.title|staleness=1
 .title=Post to Journal
 

@@ -19,8 +19,6 @@
 
 .draft.confirm=Restore from saved draft?
 
-.draft.confirm.add_photos=Restore from saved draft?
-
 .draft.restored=Restored last saved draft
 
 .error.cantpost=Sorry, you cannot post at this time.
@@ -135,7 +133,7 @@
 
 .update.success2=Update successful. You can view your updated journal <a [[aopts]]>here</a>.
 
-.updating=Updating journal...
+.updating=&nbsp;
 
 .username=Username:
 

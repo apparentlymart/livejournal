@@ -69,8 +69,10 @@
 .cat.privacy.desc|staleness=1
 .cat.privacy.desc=Journal privacy options
 
+.cat.userapps|staleness=1
 .cat.userapps=My Applications
 
+.cat.userapps.desc|staleness=1
 .cat.userapps.desc=Application access options
 
 .commentpage=View comment pages in your own journal style
@@ -81,12 +83,14 @@
 
 .contextualhover.text=Contextual hover menus appear when you hover over userhead images or userpics.
 
-.errors|staleness=1
-.errors=There were errors with your submission.  Please look below to fix them.
-
+.error.notvalidated|staleness=1
 .error.notvalidated=Your account is not validated.
 
+.error.validation.cancelled|staleness=1
 .error.validation.cancelled=Your email address is no longer validated, because we received error messages from the mail server for one week. To receive email notifications again, please validate your address <a href="http://www.livejournal.com/manage/settings/">here</a>.
+
+.errors|staleness=1
+.errors=There were errors with your submission.  Please look below to fix them.
 
 .finished.save_button=Save Changes
 

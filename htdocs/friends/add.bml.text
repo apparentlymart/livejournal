@@ -37,11 +37,13 @@
 
 .colors.hover=(Hover your mouse over a color to see its name)
 
-.colors.text=Select the colors that will represent [[user]] in your friends list.
-
+.colors.select|staleness=1
 .colors.select=Select colors
 
+.colors.select.user|staleness=1
 .colors.select.user=Select user colors
+
+.colors.text=Select the colors that will represent [[user]] in your friends list.
 
 .confirm.action1.person=you can read their journal entries on your friends page
 
@@ -71,14 +73,15 @@
 
 .disclaimer=This will not allow maintainers or members of the community to view your friends-only posts.
 
+.error.friendstags|staleness=1
+.error.friendstags=Error while saving friends tags. Perhaps you've reached the maximum number of the friends tags. Please, <a [[aopts]]>retry</a> operation.
+
 .error.notvisible=The account [[user]] cannot be added as a friend because it is deleted, purged, or suspended.
 
 .error.sessionchanged=Session info changed. Try again.
 
 .error.too.long|staleness=1
 .error.too.long=You've reached the maximum number of the notes.
-
-.error.friendstags=Error while saving friends tags. Perhaps you've reached the maximum number of the friends tags. Please, <a [[aopts]]>retry</a> operation.
 
 .error1.title=Add Friend
 
@@ -90,6 +93,7 @@
 
 .error3.title=Modify Friend
 
+.groups.addto|staleness=1
 .groups.addto=Add to groups
 
 .groups.header=Friends Groups
@@ -114,27 +118,39 @@
 
 .remove.title=Friend Removed!
 
+.tags.button.select|staleness=1
 .tags.button.select=Select
 
+.tags.cross.tooltip|staleness=1
 .tags.cross.tooltip=Remove tag from list
 
-.tags.input.tag=Input tag
-
-.tags.including=Including selected tags
-
+.tags.excluding|staleness=1
 .tags.excluding=Excluding selected tags
 
+.tags.find.tags|staleness=1
 .tags.find.tags=You can find user tags or add your own
 
+.tags.including|staleness=1
+.tags.including=Including selected tags
+
+.tags.input.tag|staleness=1
+.tags.input.tag=Input tag
+
+.tags.read|staleness=1
 .tags.read=Read entries by tags
 
+.tags.remove.tags|staleness=1
 .tags.remove.tags=You can remove tags from this list by hovering ovver the username and clicking close button
 
+.tags.select|staleness=1
 .tags.select=Select tags
 
+.tags.select.more|staleness=1
 .tags.select.more=Select more
 
+.tags.selected.by.you|staleness=1
 .tags.selected.by.you=Selected by you
 
-.tags.text=[[ljuser]] used [[tagscount]] tags.<br>You can read all entries by default or select entries with definitely tags.
+.tags.text|staleness=1
+.tags.text=You can read all entries by default or select entries with defe
 

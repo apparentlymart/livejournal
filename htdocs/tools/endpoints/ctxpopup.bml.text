@@ -2,75 +2,111 @@
 .addalias.title|staleness=1
 .addalias.title=Add Note
 
+.add_friend|staleness=1
 .add_friend=Add friend
 
+.app_change_userhead|staleness=1
 .app_change_userhead=Install the same user head for free
+
+.app_install|staleness=1
 .app_install=Install &laquo;[[name]]&raquo; to have the same user head
+
+.app_use|staleness=1
 .app_use=Use that user head application
+
+.ban|staleness=1
+.ban=Ban user
 
 .ban_everywhere.title|staleness=1
 .ban_everywhere.title=Ban user everywhere
 
-.ban=Ban user
-
+.buy_same_userhead|staleness=1
 .buy_same_userhead=Buy the same user head
 
+.community|staleness=1
 .community=Community
 
 .editalias.title|staleness=1
 .editalias.title=Edit Note
 
+.edit_friend_tags|staleness=1
 .edit_friend_tags=Edit tags
 
+.feed|staleness=1
 .feed=Feed
 
+.join_community|staleness=1
 .join_community=Join community
 
+.journal|staleness=1
 .journal=Journal
 
+.leave|staleness=1
 .leave=Leave
 
+.lists_as_friend|staleness=1
 .lists_as_friend=lists you as a friend
 
+.loading|staleness=1
 .loading=Loading...
 
+.mutual_friend|staleness=1
 .mutual_friend=is your mutual friend
 
+.profile|staleness=1
 .profile=Profile
 
+.remove_friend|staleness=1
 .remove_friend=Remove friend
 
+.report|staleness=1
 .report=Report a Bot
 
+.send_gift|staleness=1
 .send_gift=Send a virtual gift
 
+.send_message|staleness=1
 .send_message=Send message
 
+.stop_community|staleness=1
 .stop_community=Stop watching
 
+.subscribe_feed|staleness=1
 .subscribe_feed=Subscribe to feed
 
+.this_is_you|staleness=1
 .this_is_you=This is you
+
+.unban|staleness=1
+.unban=Unban user
 
 .unban_everywhere.title|staleness=1
 .unban_everywhere.title=Unban user everywhere
 
-.unban=Unban user
-
+.unsubscribe_feed|staleness=1
 .unsubscribe_feed=Unsubscribe
 
+.updating|staleness=1
 .updating=Updating...
 
+.view|staleness=1
 .view=View: 
 
+.view_wishlist|staleness=1
+.view_wishlist=View wishlist
+
+.watch_community|staleness=1
 .watch_community=Watch community
 
+.your_friend|staleness=1
 .your_friend=is your friend
 
+.you_member|staleness=1
 .you_member=You are a member of [[username]]
 
+.you_subscribed|staleness=1
 .you_subscribed=You are subscribed to [[username]]
 
+.you_watching|staleness=1
 .you_watching=You are watching [[username]]
 
-.view_wishlist=View wishlist

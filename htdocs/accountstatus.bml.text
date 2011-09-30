@@ -25,11 +25,14 @@
 
 .journalstatus.select.suspended=Suspended
 
-.label.purge_external_content=Do you want to delete comments and community entries as well?
-
+.label.purge_comments|staleness=1
 .label.purge_comments=Delete my comments in other journals and communities
 
+.label.purge_community_entries|staleness=1
 .label.purge_community_entries=Delete all community entries I have made
+
+.label.purge_external_content|staleness=1
+.label.purge_external_content=Do you want to delete comments and community entries as well?
 
 .message.deleted=If you wish to undelete this journal, you can return to this page at any time in the next 30 days to undelete it.
 

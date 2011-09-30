@@ -1,4 +1,7 @@
 ;; -*- coding: utf-8 -*-
+.btn.quote|staleness=1
+.btn.quote=Quote
+
 .error.badpassword2=Incorrect password given for the username specified. You can recover your password <a [[aopts]]>here</a> if you've forgotten it.
 
 .error.badusername2=The [[sitename]] username you specified does not exist. You can recover your username <a [[aopts]]>here</a> if you've forgotten it, or you may post as "Anonymous" instead.
@@ -48,6 +51,7 @@
 
 .error.nousername=You did not enter your LiveJournal username.  You can choose to post as "Anonymous" if you don't have a LiveJournal user account.
 
+.error.nousername.noanon|staleness=1
 .error.nousername.noanon=You did not enter your LiveJournal username.
 
 .error.noverify2=Sorry, you aren't allowed to post comments until your email address has been validated. If you've lost the confirmation email to do this, you can <a [[aopts]]>have it re-sent</a>.
@@ -71,6 +75,9 @@
 .preview.submit=Submit
 
 .preview.title=Preview
+
+.quote.info.message|staleness=1
+.quote.info.message=If you'd like to quote a portion of the original message, highlight it then press 'Quote'
 
 .success.loggedin=You are now logged in.
 

@@ -1,9 +1,15 @@
 ;; -*- coding: utf-8 -*-
+.abdicate.supermaintainer|staleness=1
+.abdicate.supermaintainer=Do you really want to do it?
+
 .error.adding=[[user]] has banned this community from sending them invitations.
 
 .error.alreadyadded=[[user]] was not added because they already have access to this community.
 
 .error.alreadysent=[[user]] could not be added because they were already sent a confirmation email on <i>[[datetime]]</i>.  Please wait for them to respond.
+
+.error.cant_create_poll|staleness=1
+.error.cant_create_poll=Can't create poll
 
 .error.invaliduser=Cannot add community or syndicated account: [[user]]
 
@@ -18,8 +24,6 @@
 .error.maintainer|staleness=1
 .error.maintainer=Unable to revoke maintainer rights for [[user]].
 
-.error.no_maintainers=Community has not have maintainers
-
 .error.noaccess=Only community maintainers are able to edit membership lists. You are not a maintainer of community [[comm]].
 
 .error.noattr=No attributes selected for user: [[user]]
@@ -32,9 +36,11 @@
 
 .error.nouser=User does not exist: <b>[[user]]</b>
 
-.error.poll_already_exists=Election poll exists already
+.error.no_maintainers|staleness=1
+.error.no_maintainers=Community has not have maintainers
 
-.error.cant_create_poll=Can't create poll
+.error.poll_already_exists|staleness=1
+.error.poll_already_exists=Election poll exists already
 
 .error.unknown=Error inviting [[user]].  Please make sure they're not already a member and try again.
 
@@ -69,10 +75,12 @@
 
 .reinvited2=[[user]] has been reinvited to join this community.  They will need to accept the invite from the <a [[aopts]]>Community Invitation Page</a>.
 
-.settings2=Settings
-
+.set.user_to_supermaintainer|staleness=1
 .set.user_to_supermaintainer=Proceed...
 
+.settings2=Settings
+
+.start_elections|staleness=1
 .start_elections=Start election
 
 .success.added=added: [[list]]
@@ -81,31 +89,35 @@
 
 .success.header=Success
 
-.success_empty.header=Success
-
-.success_empty.message=No users has been selected.
-
 .success.invited=The following users have been successfully invited to this community with the listed privileges:
 
 .success.invited2=The following users have been successfully invited to this community with the listed privileges.  They will need to accept the invite from the <a [[aopts]]>Community Invitation Page</a> before they can become a member of the community.
 
-.success.message2=The following changes have been made:
-
+.success.message|staleness=1
 .success.message=The following changes have been made:
+
+.success.message2=The following changes have been made:
 
 .success.nochanges=No changes have been made.
 
+.success.return|staleness=1
 .success.return=<a [[aopts]]>Return to the list</a>
 
 .success.return2=<a [[aopts]]>Return to the list</a>
+
+.success_empty.header|staleness=1
+.success_empty.header=Success
+
+.success_empty.message|staleness=1
+.success_empty.message=No users has been selected.
 
 .title=Community Members
 
 .update=Update settings
 
-.you_can_start_election=You can start a election
-
+.you.supermaintainer|staleness=1
 .you.supermaintainer=<br/><br/>Currently, you are <b>"SuperMaintainer"</b> for this community [[comm]].<br/><br/>You can abdicate and appoint another maintainer for this role:
 
-.abdicate.supermaintainer=Do you really want to do it?
+.you_can_start_election|staleness=1
+.you_can_start_election=You can start a election
 

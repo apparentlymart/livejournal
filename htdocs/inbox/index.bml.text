@@ -1,4 +1,25 @@
 ;; -*- coding: utf-8 -*-
+.btn.delete|staleness=1
+.btn.delete=delete
+
+.btn.next|staleness=1
+.btn.next=Next
+
+.btn.prev|staleness=1
+.btn.prev=Previous
+
+.btn.read|staleness=1
+.btn.read=read
+
+.btn.spam|staleness=1
+.btn.spam=spam
+
+.btn.unread|staleness=1
+.btn.unread=unread
+
+.btn.unspam|staleness=1
+.btn.unspam=unspam
+
 .error.couldnt_retrieve_inbox|staleness=1
 .error.couldnt_retrieve_inbox=Could not retrieve inbox for user [[user]]
 
@@ -44,6 +65,7 @@
 .menu.sent|staleness=1
 .menu.sent=Sent
 
+.menu.unspam_all.btn|staleness=1
 .menu.unspam_all.btn=Unspam All
 
 .refresh|staleness=1
@@ -52,12 +74,3 @@
 .title|staleness=1
 .title=Inbox
 
-.btn.read=read
-.btn.unread=unread
-.btn.delete=delete
-.btn.prev=Previous
-.btn.next=Next
-
-.btn.spam=spam
-
-.btn.unspam=unspam

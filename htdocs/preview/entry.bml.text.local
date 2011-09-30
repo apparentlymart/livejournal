@@ -1,2 +1,4 @@
+;; -*- coding: utf-8 -*-
+.error.no_journal|staleness=1
 .error.no_journal=Missing journal name.
 

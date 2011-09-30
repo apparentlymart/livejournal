@@ -14,8 +14,10 @@
 
 .allpics=View all userpics
 
+.apps.header|staleness=1
 .apps.header=Applications
 
+.apps.installed|staleness=1
 .apps.installed=Installed Applications
 
 .basicinfo.header|staleness=1
@@ -364,8 +366,6 @@
 
 .label.maintainers=Maintainers
 
-.label.super_maintainers=Owner
-
 .label.manageschools=Manage Schools
 
 .label.memberof=Member of
@@ -405,6 +405,9 @@
 .label.shared=Posting Access:
 
 .label.skype=Skype:
+
+.label.super_maintainers|staleness=1
+.label.super_maintainers=Owner
 
 .label.supportpoints=Support points
 
@@ -624,6 +627,7 @@
 .section.edit|staleness=1
 .section.edit=Edit
 
+.section.view_all|staleness=1
 .section.view_all=View All
 
 .sendmessage.body2=<a [[aopts]]>Send [[user]] a text message</a><br />on his/her cellphone/pager.
@@ -678,6 +682,7 @@
 .title.communityprofile|staleness=1
 .title.communityprofile=Community Profile
 
+.title.jabberprofile|staleness=1
 .title.jabberprofile=Profile
 
 .title.openidprofile|staleness=1

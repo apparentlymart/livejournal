@@ -38,6 +38,7 @@
 
 .commlist.username=<b>Username</b>
 
+.commlist.wishlist|staleness=1
 .commlist.wishlist=Wishlist
 
 .communitydirectory|staleness=1

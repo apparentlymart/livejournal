@@ -2,16 +2,23 @@
 .add|staleness=1
 .add=Add to Category
 
+.add_v|staleness=1
 .add_v=Select Vertical
 
-.category.title=Category
+.category.select.btn|staleness=1
 .category.select.btn=Select Category
+
+.category.selected|staleness=1
 .category.selected=Selected Category
+
+.category.title|staleness=1
+.category.title=Category
+
+.error.havent.comm|staleness=1
+.error.havent.comm=You do not have a community to manage.
 
 .error.noaccess|staleness=1
 .error.noaccess=Only community maintainers are able to submit to the Community Directory. You are not a maintainer of community [[comm]].
-
-.error.havent.comm=You do not have a community to manage.
 
 .error.nocomm|staleness=1
 .error.nocomm=Community not found.
@@ -43,6 +50,9 @@
 .update.listing|staleness=1
 .update.listing=Update directory listing for [[user]]:
 
-.vertical.title=Vertical
+.vertical.select.btn|staleness=1
 .vertical.select.btn=Select Vertical
+
+.vertical.title|staleness=1
+.vertical.title=Vertical
 
