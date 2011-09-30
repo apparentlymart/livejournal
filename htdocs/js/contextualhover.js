@@ -174,11 +174,6 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					ContextualPopup.hideHourglass();
 				}
 			});
-
-			wrapper.closest(this.selectors.bubble).addClass(this.classNames.popup)
-				.mouseover(function(ev) {
-					ev.stopPropagation();
-				});
 		},
 
 		show: function() {
@@ -641,8 +636,12 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			
 			ContextualPopup.hideHourglass();
 			ContextualPopup.hourglass = jQuery(e).hourglass(xhr)[0];
+			//entering mouse on the hourglass should no close popup
+			jQuery(ContextualPopup.hourglass.ele).bind('mouseenter', function(ev) {
+				popup.element.trigger('mouseenter');
+			});
 			// so mousing over hourglass doesn't make ctxpopup think mouse is outside
-			ContextualPopup.hourglass.add_class_name('lj_hourglass ContextualPopup');
+			ContextualPopup.hourglass.add_class_name('lj_hourglass');
 			
 			return false;
 		},
