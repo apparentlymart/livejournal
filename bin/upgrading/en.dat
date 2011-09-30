@@ -3153,6 +3153,7 @@ fotki.size.900.text=900x900
 
 fotki.size.original.text|staleness=1
 fotki.size.original.text=Original size
+fotki.size.original=Original
 
 fotki.status.new_album|staleness=1
 fotki.status.new_album=[[ljuser]] has create a new album <a [[aopts]]>[[album]]</a>.
