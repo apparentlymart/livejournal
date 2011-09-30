@@ -307,7 +307,7 @@ body<=
 
     # make the title
     {
-        my $subject = $item->{'subject'} || $entry->subject;
+        my $subject = $item->{'subject'} || ($entry ? $entry->subject_text : '');
         $subject = $subject || $event;
         # yes, the 3 param to text_trim is chars, and length returns bytes, but
         # it works, as bytes >= chars:
@@ -491,7 +491,7 @@ body<=
     $ret .= $sec;
 
     ###
-    if ($item->{'subject'} || $entry->subject) {
+    if ($item->{'subject'} || $entry->subject_text) {
         my $subject = $item->{'subject'} || $entry->subject;
         if ($GET{'nohtml'}) {
             # quote all non-LJ tags
