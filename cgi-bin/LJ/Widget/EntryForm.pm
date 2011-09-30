@@ -1533,7 +1533,13 @@ sub render_ljphoto_block {
             $res;
         } @photos ];
 
-    my $photo_sizes = LJ::JSON->to_json ( LJ::Fotki::Photo->get_photo_sizes() );
+    my @photo_sizes = map {
+        my $size = $_;
+        $size->{'text'} = $BML::ML{$_->{'text'}};
+        $size;
+    } @{LJ::Fotki::Photo->get_photo_sizes()};
+
+    my $photo_sizes_json = LJ::JSON->to_json ( \@photo_sizes );
     my $album_list = [];
     my $album_list_json = '';
     my $available_space = '';
@@ -1562,7 +1568,7 @@ sub render_ljphoto_block {
     window.ljphotoEnabled = $ljphoto_enabled;
     jQuery('#updateForm').photouploader({
         availableSpace: '$available_space',
-        sizesData: $photo_sizes,
+        sizesData: $photo_sizes_json,
         albumsData: $album_list_json,
         privacyData: $user_groups,
         type: 'upload',
