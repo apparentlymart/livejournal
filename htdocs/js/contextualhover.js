@@ -119,7 +119,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		},
 
 		classNames: {
-			popup: 'contextualPopup'
+			popup: 'b-popup-contextual'
 		},
 		selectors: {
 			wrapper: '.b-contextualhover',
@@ -172,6 +172,9 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				showOn: 'hover',
 				hide: function() {
 					ContextualPopup.hideHourglass();
+				},
+				classNames: {
+					containerAddClass: this.classNames.popup
 				}
 			});
 		},
