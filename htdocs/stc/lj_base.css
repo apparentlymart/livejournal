@@ -2887,6 +2887,10 @@ DIV.lj_ippu_app {
 	.b-contextualhover INPUT {
 		padding: 0;
 		margin: 0;
+		color: #000;
+		}
+	.b-contextualhover A {
+		text-decoration: none !important;
 		}
 	.b-contextualhover P {
 		line-height: 18px;
@@ -2923,6 +2927,7 @@ DIV.lj_ippu_app {
 		}
 		.b-contextualhover .b-contextualhover-title H3 {
 			font-weight: normal;
+			font-style: normal;
 			line-height: 16px;
 			font-size: 12px;
 			}
