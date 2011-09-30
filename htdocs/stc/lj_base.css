@@ -2865,6 +2865,10 @@ DIV.lj_ippu_app {
 	}
 
 /* Contextual hover */
+.b-popup-contextual .i-popup-arrtl,
+.b-popup-contextual .i-popup-arrbl {
+	left: 11px;
+	}
 .b-contextualhover {
 	width: 250px;
 	min-height: 50px;
