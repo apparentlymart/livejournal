@@ -301,8 +301,11 @@ sub trans {
 
     ## This is a hack for alpha/beta/omega servers to make them 
     ## send static files (e.g. http://stat.livejournal.com/lanzelot/img/menu/div.gif?v=1)
+    ## and LJTimes (e.g. http://stat.livejournal.com/tools/endpoints/lj_times_full_js.bml?lang=ru)
     ## Production static files are served by CDN (http://l-stat.livejournal.com)
-    if ($LJ::IS_LJCOM_BETA && $host eq 'stat.livejournal.com' && $uri !~ m!^/(stc|img|js)!) {
+    if ($LJ::IS_LJCOM_BETA && $host eq 'stat.livejournal.com' 
+        && $uri !~ m!^/(stc|img|js)! && $uri !~ m!\.bml$!) 
+    {
          $uri = "/stc$uri";
          LJ::Request->uri($uri);
     }
