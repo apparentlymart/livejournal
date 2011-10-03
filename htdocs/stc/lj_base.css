@@ -2901,19 +2901,30 @@ DIV.lj_ippu_app {
 		}
 	.b-contextualhover A:link,
 	.b-contextualhover A:visited {
-		text-decoration: none;
-		border-bottom: 0;
+		color: #00C !important;
+		text-decoration: none !important;
+		border-bottom: 0 !important;
+		background: #FFF;
 		}
 	.b-contextualhover A:hover,
 	.b-contextualhover A:active,
 	.b-contextualhover A:focus {
-		text-decoration: underline;
+		color: #00C !important;
+		border-bottom: 0 !important;
+		text-decoration: underline !important;
+		}
+	.s-lanzelot .b-contextualhover A:link,
+	.s-lanzelot .b-contextualhover A:visited {
+		color: #3F5F9E !important;
+		text-decoration: none !important;
+		border-bottom: 0 !important;
 		}
 	.s-lanzelot .b-contextualhover A:hover,
 	.s-lanzelot .b-contextualhover A:active,
 	.s-lanzelot .b-contextualhover A:focus {
+		color: #3F5F9E !important;
 		text-decoration: none !important;
-		border-bottom: 1px solid #3F5F9E;
+		border-bottom: 1px solid #3F5F9E !important;
 		}
 	.b-contextualhover .alias-unavailable A:link,
 	.b-contextualhover .alias-unavailable A:visited {
