@@ -2874,6 +2874,15 @@ DIV.lj_ippu_app {
 	width: 250px;
 	min-height: 50px;
 	font-family: 'Arial', sans-serif;
+	*zoom: 1;
+	}
+.b-contextualhover:before,
+.b-contextualhover:after {
+	content: "";
+	display: table;
+	}
+.b-contextualhover:after {
+	clear: both;
 	}
 	.b-contextualhover,
 	.b-contextualhover DIV,
@@ -2937,10 +2946,13 @@ DIV.lj_ippu_app {
 			font-size: 12px;
 			}
 	.b-contextualhover .b-contextualhover-options {
-		padding-top: 5px;
-		padding-bottom: 5px;
+		margin: 0;
+		padding: 5px 0;
 		list-style: none;
 		border-top: 1px dotted #D3D3D3;
+		}
+	.b-contextualhover .b-contextualhover-userpig .b-contextualhover-options {
+		margin: 0 70px 0 0;
 		}
 		.b-contextualhover .b-contextualhover-options LI {
 			line-height: 18px;

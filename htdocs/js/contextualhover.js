@@ -130,6 +130,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			wrapper: '<div class="b-contextualhover"></div>',
 			loading: 'Loading...',
 			content: 
+					'<div class="b-contextualhover-wrapper{{if userpic }} b-contextualhover-userpig{{/if}}">' +
 					'{{if userpic }}' +
 					'<div class="b-contextualhover-side">' +
 						'<div class="b-contextualhover-userpic">' +
@@ -142,12 +143,14 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 						'{{each headLinks}}<p><a href="${$value.url}">${$value.text}</a></p>{{/each}}' +
 					'</div>' +
 					'{{each(i, group) linkGroups}}' +
+						'{{if group.length }}' +
 						'<ul class="b-contextualhover-options">' +
 							'{{each group}}<li>' +
 								'{{if $value.url}}<a href="${$value.url}">${$value.text}</a>' +
 								'{{else}}{{html $value}}{{/if}}' +
 							'</li>{{/each}}' +
 						'</ul>' +
+						'{{/if}}' +
 					'{{/each}}' +
 					'{{if showBanOptions }}' +
 					'<ul class="b-contextualhover-options">' +
@@ -161,7 +164,8 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 						'</li>' +
 						'{{if reportBot}}<li><a href="${reportBot.url}">${reportBot.text}</a></li>{{/if}}' +
 					'</ul>' +
-					'{{/if}}'
+					'{{/if}}' +
+					'</div>'
 		},
 
 		init: function() {
