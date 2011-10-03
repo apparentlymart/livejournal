@@ -2393,13 +2393,14 @@ DIV.lj_ippu_app {
 		height: 0;
 		font: 0/0 serif;
 		}
-	.b-popup-inner A,
+	/*.b-popup-inner A,
 	.b-popup-inner A:link,
 	.b-popup-inner A:visited,
 	.b-popup-inner A:hover,
 	.b-popup-inner A:active {
 		color: #036;
 		}
+	*/
 
 	.i-popup-arrt.i-popup-arr,
 	.i-popup-arrtl.i-popup-arr,
@@ -2892,6 +2893,10 @@ DIV.lj_ippu_app {
 	.b-contextualhover A {
 		text-decoration: none !important;
 		}
+	.b-contextualhover A:hover,
+	.b-contextualhover A:focus {
+		text-decoration: underline !important;
+		}
 	.b-contextualhover P {
 		line-height: 18px;
 		font-size: 12px;
@@ -2923,7 +2928,7 @@ DIV.lj_ippu_app {
 			border: none;
 			}
 	.b-contextualhover .b-contextualhover-title {
-		margin-bottom: 10px;
+		padding-bottom: 5px;
 		}
 		.b-contextualhover .b-contextualhover-title H3 {
 			font-weight: normal;
@@ -2932,8 +2937,10 @@ DIV.lj_ippu_app {
 			font-size: 12px;
 			}
 	.b-contextualhover .b-contextualhover-options {
-		margin-top: 10px;
+		padding-top: 5px;
+		padding-bottom: 5px;
 		list-style: none;
+		border-top: 1px dotted #D3D3D3;
 		}
 		.b-contextualhover .b-contextualhover-options LI {
 			line-height: 18px;
