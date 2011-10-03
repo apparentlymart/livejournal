@@ -230,7 +230,7 @@ my $SC = '/talkpost_do.bml';
 sub init {
     my ($form, $remote, $need_captcha, $errret) = @_;
     my $sth = undef;
-    
+
     my $err = sub {
         my $error = shift;
         push @$errret, $error;

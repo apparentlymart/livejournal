@@ -1357,10 +1357,10 @@ sub convert {
 
         my %logprops;
         LJ::set_logprop($journal, $jitemid, $propset, \%logprops) if %$propset;
-        
+
         # if set_logprop modified props above, we can set the memcache key
         # to be the hashref of modified props, since this is a new post
-        LJ::MemCache::set([$journal->{'userid'}, "logprop:$journal->{'userid'}:$jitemid"],
+        LJ::MemCache::set([$journal->{'userid'}, "logprop2:$journal->{'userid'}:$jitemid"],
         \%logprops) if %logprops;
     }
 

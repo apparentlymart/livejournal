@@ -2137,7 +2137,7 @@ sub postevent {
         ## Scan post for spam
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
-    
+
     if ( $req->{ver} > 1 ) {
         my $use_delayed = $req->{'custom_time'} ||
                     !(exists $flags->{'use_custom_time'});
@@ -2455,7 +2455,7 @@ sub postevent {
 
         # if set_logprop modified props above, we can set the memcache key
         # to be the hashref of modified props, since this is a new post
-        LJ::MemCache::set([$uowner->{'userid'}, "logprop:$uowner->{'userid'}:$jitemid"],
+        LJ::MemCache::set([$uowner->{'userid'}, "logprop2:$uowner->{'userid'}:$jitemid"],
                           \%logprops) if %logprops;
     }
 
