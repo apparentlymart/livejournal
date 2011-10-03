@@ -3037,7 +3037,7 @@ sub getevents {
 
 
     my $sticky_id = $uowner->prop("sticky_entries") || undef;
-    
+
     my $dbr = LJ::get_db_reader();
     my $sth;
 
@@ -3110,7 +3110,7 @@ sub getevents {
     my $skip = $req->{'skip'} + 0;
 
     $skip = 500 if $skip > 500;
-    
+
     if ( $req->{ver} > 1 ) {
         my $res = {};
 
@@ -3131,11 +3131,11 @@ sub getevents {
                         $did,
                         { userid => $flags->{user}->id },
                     );
-                    
+
                     my $re = {};
 
                     $re->{$_} = $entry->{$_} for qw(delayedid subject event props logtime);
-                                                    
+
                     $re->{eventtime}       = $entry->{posttime};
                     $re->{event_timestamp} = $entry->{posttime_unixtime};
                     $re->{url}             = $entry->url;
@@ -3153,11 +3153,11 @@ sub getevents {
                     $req->{delayedid},
                     { userid => $flags->{user}->id },
                 );
-                    
+
                 my $re = {};
 
                 $re->{$_} = $entry->{$_} for qw(delayedid subject event props logtime);
-                                                    
+
                 $re->{eventtime}       = $entry->{posttime};
                 $re->{event_timestamp} = $entry->{posttime_unixtime};
                 $re->{url}             = $entry->url;
@@ -3180,11 +3180,11 @@ sub getevents {
                         $did,
                         { userid => $flags->{user}->id },
                     );
-                    
+
                     my $re = {};
 
                     $re->{$_} = $entry->{$_} for qw(delayedid subject event props logtime);
-                                                    
+
                     $re->{eventtime}       = $entry->{posttime};
                     $re->{event_timestamp} = $entry->{posttime_unixtime};
                     $re->{url}             = $entry->url;
@@ -3255,7 +3255,7 @@ sub getevents {
         $orderby = "ORDER BY $rtime_what";
 
         unless ($skip) {
-            $where .= "OR jitemid=$sticky_id";
+            $where .= "OR jitemid=$sticky_id" if defined $sticky_id;
         }
     }
     elsif ($req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1") {
