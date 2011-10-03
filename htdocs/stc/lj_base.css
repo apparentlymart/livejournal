@@ -2906,6 +2906,13 @@ DIV.lj_ippu_app {
 	.b-contextualhover A:focus {
 		text-decoration: underline !important;
 		}
+	.b-contextualhover .alias-unavailable A {
+		color: #999 !important;
+		}
+	.b-contextualhover .alias-unavailable A:hover,
+	.b-contextualhover .alias-unavailable A:focus {
+		color: #999 !important;
+		}
 	.b-contextualhover P {
 		line-height: 18px;
 		font-size: 12px;
@@ -2968,6 +2975,9 @@ DIV.lj_ippu_app {
 			.b-contextualhover .b-contextualhover-options-ban .b-contextualhover-options-wrap P {
 				float: none;
 				}
+		.b-contextualhover .b-contextualhover-options-ban IMG {
+			border: 0;
+			}
 
 /* Native Sharing */
 .b-sharethis {
