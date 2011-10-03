@@ -240,7 +240,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				if (data.is_requester) {
 					label = data.ml_this_is_you;
 				} else {
-					label = username + ' ';
+					label = '';
 					
 					if (data.is_friend_of) {
 						if (data.is_friend)
