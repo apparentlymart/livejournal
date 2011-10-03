@@ -2899,17 +2899,28 @@ DIV.lj_ippu_app {
 		margin: 0;
 		color: #000;
 		}
-	.b-contextualhover A {
-		text-decoration: none !important;
+	.b-contextualhover A:link,
+	.b-contextualhover A:visited {
+		text-decoration: none;
+		border-bottom: 0;
 		}
 	.b-contextualhover A:hover,
+	.b-contextualhover A:active,
 	.b-contextualhover A:focus {
-		text-decoration: underline !important;
+		text-decoration: underline;
 		}
-	.b-contextualhover .alias-unavailable A {
+	.s-lanzelot .b-contextualhover A:hover,
+	.s-lanzelot .b-contextualhover A:active,
+	.s-lanzelot .b-contextualhover A:focus {
+		text-decoration: none !important;
+		border-bottom: 1px solid #3F5F9E;
+		}
+	.b-contextualhover .alias-unavailable A:link,
+	.b-contextualhover .alias-unavailable A:visited {
 		color: #999 !important;
 		}
 	.b-contextualhover .alias-unavailable A:hover,
+	.b-contextualhover .alias-unavailable A:active,
 	.b-contextualhover .alias-unavailable A:focus {
 		color: #999 !important;
 		}
