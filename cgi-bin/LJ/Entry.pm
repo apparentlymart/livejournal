@@ -467,8 +467,6 @@ sub _load_props {
 
     my $props = {};
     LJ::load_log_props2($self->{u}, [ $self->jitemid ], $props);
-use Data::Dumper;
-warn Dumper($props);
     $self->handle_prefetched_props($props->{$self->jitemid});
     return 1;
 }
