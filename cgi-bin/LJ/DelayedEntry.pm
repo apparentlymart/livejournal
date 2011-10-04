@@ -788,7 +788,7 @@ sub get_entries_by_journal {
 }
 
 sub get_daycount_query {
-    my ($class, $journal) = @_;
+    my ($class, $journal, $list, $secwhere) = @_;
     my $dbcr = LJ::get_cluster_def_reader($journal);
 
     my $remote = LJ::get_remote();
@@ -796,14 +796,12 @@ sub get_daycount_query {
     return undef unless __delayed_entry_can_see( $journal,
                                                  $remote  );
     
-    my $secwhere = __delayed_entry_secwhere( $journal,
-                                             $journal->userid,
-                                             $remote->userid );
-
     my $sth = $dbcr->prepare("SELECT year, month, day, COUNT(*) " .
                              "FROM delayedlog2 WHERE journalid=? $secwhere GROUP BY 1, 2, 3");
     $sth->execute($journal->userid);
-    return $sth;
+    while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
+        push @$list, [ int($y), int($m), int($d), int($c) ];
+    }
 }
 
 sub get_entries_for_day_row {
@@ -1454,7 +1452,6 @@ sub __delayed_entry_can_see {
     if ($poster->can_moderate($uowner)) {
         return 1;
     }
-    warn "cannot see";
 
     return 0;
 }

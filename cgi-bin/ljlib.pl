@@ -1140,7 +1140,8 @@ sub get_recent_items
     if ($skip > $maxskip) { $skip = $maxskip; }
     my $itemload = $itemshow + $skip;
     my $usual_show  = $itemshow;
-    
+    my $skip_sticky = $skip;    
+
     if ( $show_sticky_on_top && $sticky )
     {
         if($skip > 0) {
@@ -1316,7 +1317,7 @@ sub get_recent_items
 
     if ( $sticky && $show_sticky_on_top ) {
         # build request to receive sticky entries
-        if (!$skip) {
+        if ( !$skip_sticky ) {
             $sticky_sql = "$sql AND jitemid = $sticky ";
             $sticky_sql .= "ORDER BY journalid, $sort_key ";
         }
@@ -1364,7 +1365,10 @@ sub get_recent_items
         }
     };
 
-    $absorb_data->($sticky_sql) if ( $sticky && !$skip && $show_sticky_on_top);
+    
+    if ( $sticky && !$skip_sticky && $show_sticky_on_top ) {
+        $absorb_data->($sticky_sql);
+    }
     $absorb_data->($sql);
     $flush->();
 

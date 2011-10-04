@@ -431,15 +431,20 @@ body<=
                 return LJ::bad_input($ML{'error.invalidform'}) unless LJ::check_form_auth();
 
                 my $timezone = $POST{'timezone'} || $GET{'timezone'};
+                my $sticky = $POST{'sticky_type'} || $GET{'sticky_type'};
+                my $custom_time = $POST{'custom_time'} || $GET{'custom_time'};
                 $timezone =  sprintf("%+.4d", $timezone);
                 my %req = (
                             'ver' => 2,
                             'username' => $remote->{'user'},
                             'usejournal' => $usejournal,
-                            tz           => $timezone,
+                            'tz'         => $timezone,
                             'itemid'     => $itemid,
                             'delayedid'  => $delayedid,
-                            'type'       => $POST{'type'} || $POST{'type'},
+                            'sticky'     => $sticky,
+                            'custom_time' => $custom_time,
+                            'do_not_add_rss_friends' => $POST{'do_not_add_rss_friends'} ||
+                                                        $GET{'do_not_add_rss_friends'}
                             );
                 LJ::entry_form_decode(\%req, \%POST);
 

@@ -71,32 +71,26 @@ sub RecentPage
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
 
-    my $delayed_entries = [];
+    my $delayed_entries;
+    
+    # calculate recent entries count
+    my $has_sticky = $u->has_sticky_entry;
     my $delayed_entries_count = LJ::DelayedEntry->get_entries_count($u);
-    my $usual_skip = $delayed_entries_count ? $skip - $delayed_entries_count : 0;
+    my $usual_skip =  $delayed_entries_count - $skip > $itemshow ? 
+                                            $skip - $delayed_entries_count + $has_sticky :
+                                            $skip ? $skip : 0;
 
-    if ( $u->has_sticky_entry && !$skip) {
-        $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow - 1) ;
-    } elsif ( $u->has_sticky_entry && $skip) {
-        $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip - 1, $itemshow);
-    } else {
-        $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow + 1);
-    }
+    if (!$skip) {
+        $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow - $has_sticky);
+    } elsif ( $skip) {
+        $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip - $has_sticky, $itemshow);
+    }    
 
     if (!$delayed_entries) {
         $delayed_entries = [];
     }
 
-    if ( $skip && $usual_skip < 0 && $u->has_sticky_entry ) {
-        $usual_skip = 1;
-    } elsif ( $skip && $usual_skip < 0 ) {
-        $usual_skip = 0;
-    }
-
     my $itemshow_usual = $itemshow - scalar(@$delayed_entries);
-    if ( $itemshow <= scalar(@$delayed_entries) ) {
-            $itemshow_usual -= 1;
-    }
     if ( $itemshow_usual < 0 ) {
         $itemshow_usual = 0;
     }
@@ -122,16 +116,17 @@ sub RecentPage
             ? "logtime" : "",
         'err' => \$err,
         'poster'  => $get->{'poster'} || '',
-        'show_sticky_on_top' => !$skip,
+        'show_sticky_on_top' => 1,
     }) if ($itemshow_usual >= 0) ;
     
     my $is_prev_exist = scalar @items + scalar(@$delayed_entries) - $itemshow > 0 ? 1 : 0;
     if ($is_prev_exist) {
         if ( scalar(@$delayed_entries) > $itemshow ) {
             pop @$delayed_entries;
-        } elsif ( scalar(@items) + scalar(@$delayed_entries) > $itemshow ) {
-            pop @items if scalar(@items);
         }
+        if ( scalar(@items) + scalar(@$delayed_entries) > $itemshow ) {        
+            pop @items;
+        } 
     }
 
     die $err if $err;
@@ -170,7 +165,7 @@ sub RecentPage
          !$u->has_sticky_entry()) ) {
         __append_delayed( $u, $delayed_entries,  $p->{'entries'} );
     }
-  warn scalar (@items); 
+  
   ENTRY:
     foreach my $item (@items)
     {
@@ -181,7 +176,7 @@ sub RecentPage
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
         
         # append delayed entries
-        if ( $entry_obj->is_sticky() && $sticky_appended) {
+        if ( $entry_obj->is_sticky() && $sticky_appended ) {
             __append_delayed( $u, $delayed_entries,  $p->{'entries'});
             $sticky_appended = 1;
         }
@@ -376,6 +371,10 @@ sub __append_delayed {
             'read_url' => $readurl,
             'post_url' => $posturl,
             'count' => 0,
+            'maxcomments' => 0,
+            'maxcomments' => 0,
+            'enabled' => $delayed_entry->comments_shown,
+            'locked' => !$delayed_entry->posting_comments_allowed,
             'maxcomments' => 0,
             'enabled' => $delayed_entry->comments_shown,
             'locked' => !$delayed_entry->posting_comments_allowed,

@@ -7836,12 +7836,7 @@ sub get_daycounts
     my $list = LJ::MemCache::get($memkey);
     if ($list) {
         my $list_create_time = shift @$list;
-        my $sth = LJ::DelayedEntry->get_daycount_query($u, $secwhere);
-        if ($sth) {
-            while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
-                push @$list, [ int($y), int($m), int($d), int($c) ];
-            }
-        }
+        LJ::DelayedEntry->get_daycount_query($u, $list, $secwhere);
         return $list if $list_create_time >= $u->timeupdate;
     }
 
