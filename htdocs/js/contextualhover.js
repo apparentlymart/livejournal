@@ -141,7 +141,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					'</div>' +
 					'{{/if}}' +
 					'<div class="b-contextualhover-title">' +
-						'<h3>${title.title}</h3>' +
+						'<h3>{{html title.title}}</h3>' +
 						'{{each headLinks}}<p><a href="${$value.url}">${$value.text}</a></p>{{/each}}' +
 					'</div>' +
 					'{{each(i, group) linkGroups}}' +
@@ -267,7 +267,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				if (data.is_requester) {
 					label = data.ml_this_is_you;
 				} else {
-					label = '';
+					label = '<strong>' + data.username + ' </strong>';
 					
 					if (data.is_friend_of) {
 						if (data.is_friend)
