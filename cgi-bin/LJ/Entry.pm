@@ -1691,7 +1691,7 @@ sub get_posts_raw {
             while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
                 my $id = "$jid:$jitemid";
 #                my $propname = $LJ::CACHE_PROPID{'log'}->{$propid}->{name};
-                $ret->{prop}->{$id}->{$propid} = $value;
+                $ret->{'prop'}->{$id}->{$propid} = $value;
                 $gotid{$id} = 1;
             }
 
@@ -2329,9 +2329,14 @@ sub convert_href_props {
     my %new_href;
 
     for my $key ( keys %$href ) {
-        my $prop = delete $href->{$key};
-        next unless exists $LJ::CACHE_PROPID{'log'}->{$key};
-        $new_href{ $LJ::CACHE_PROPID{'log'}->{$key}->{'name'} } = $prop;
+        my $prop = $href->{$key};
+
+        if ( $key eq 'replycount' ) {
+            $new_href{ 'replycount' } = $prop;
+        }
+        elsif ( exists $LJ::CACHE_PROPID{'log'}->{$key} ) {
+            $new_href{ $LJ::CACHE_PROPID{'log'}->{$key}->{'name'} } = $prop;
+        }
     }
 
     %$href = %new_href;
