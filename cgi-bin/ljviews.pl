@@ -1878,7 +1878,7 @@ sub create_view_friends {
         my $subject    = $logtext->{$datakey}->[0];
         my $event      = $logtext->{$datakey}->[1];
 
-        if ( $logprops{$datakey}->{'repost'} && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
+        if ( $logprops{$datakey}->{'repost'} && $remote && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
             $event = LJ::Lang::ml(
                 'friendsposts.reposted',
                 {
