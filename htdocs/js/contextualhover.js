@@ -112,6 +112,8 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 	 * Object contains methods to build and display user popup.
 	 */
 	var popup = {
+		popupDelay: 500,
+		popupTimer: null,
 		adriverImages : {
 			anonymous: 'http://ad.adriver.ru/cgi-bin/rle.cgi?sid=1&ad=186396&bt=21&pid=482107&bid=893162&bn=893162&rnd={random}',
 			guest: 'http://ad.adriver.ru/cgi-bin/rle.cgi?sid=1&ad=186396&bt=21&pid=482107&bid=893165&bn=893165&rnd={random}',
@@ -169,11 +171,13 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		},
 
 		init: function() {
-			var wrapper = jQuery(this.templates.wrapper);
+			var wrapper = jQuery(this.templates.wrapper),
+				self = this;
 
 			this.element = jQuery(wrapper).bubble({
+				// showDelay: 500,
 				closeControl: false,
-				showOn: 'hover',
+				// showOn: 'hover',
 				hide: function() {
 					ContextualPopup.hideHourglass();
 				},
@@ -181,21 +185,40 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					containerAddClass: this.classNames.popup
 				}
 			});
+
+			this.bindShowHideEvents(this.element.closest(this.selectors.bubble));
 		},
 
-		show: function() {
-			this.element.bubble('show');
+		bindShowHideEvents: function(el) {
+			var self = this;
+			el = jQuery(el);
+
+			el.bind('mouseenter', function(ev) { self.show(); });
+			el.bind('mouseleave', function(ev) { self.hide(); });
 		},
 
-		hide: function() {
-			this.element.bubble('hide');
+		show: function(force) {
+			this.setVisibile(true, force);
 		},
 
-		changeTarget: function(data, ctxPopupId, ele) {
-			this.hide();
-			this.render(data, ctxPopupId);
-			this.element.bubble('option', 'target', jQuery(ele));
-			this.show();
+		hide: function(force) {
+			this.setVisibile(false, force);
+		},
+
+		setVisibile: function(isVisible, force) {
+			var action = isVisible ? "show" : "hide",
+				self = this;
+
+			force = force || false;
+			clearTimeout(this.popupTimer);
+
+			if (force) {
+				this.element.bubble(action);
+			} else {
+				this.popupTimer = setTimeout(function() {
+					self.element.bubble(action);
+				}, this.popupDelay);
+			}
 		},
 
 		/**
@@ -210,7 +233,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				this.element.empty().append(this.templates.loading);
 				return;
 			} else if (!data.username || !data.success || data.noshow) {
-				this.hide();
+				this.hide(true);
 				return;
 			}
 
@@ -498,11 +521,8 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 	};
 
 	window.ContextualPopup = {
-		popupDelay  : 500,
-
 		cachedResults  : {},
 		currentRequests: {},
-		mouseInTimer   : null,
 		currentId      : null,
 		currentElement : null,
 		hourglass      : null,
@@ -567,8 +587,6 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				ctxPopupId = target.username || target.userid || target.up_url,
 				t = ContextualPopup;
 
-			clearTimeout(t.mouseInTimer);
-
 			if (target.tagName == 'IMG' && ctxPopupId) {
 				// if we don't have cached data background request it
 				if (!t.cachedResults[ctxPopupId]) {
@@ -584,26 +602,35 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				if (t.currentElement != target) {
 					t.showPopup(ctxPopupId, target);
 				} else {
-					t.mouseInTimer = setTimeout(function()
-					{
-						popup.show();
-					}, t.popupDelay);
+					popup.show();
 				}
 			}
 		},
 
 		showPopup: function(ctxPopupId, ele) {
+			var showNow = popup.element.is(':visible');
+
+			jQuery(this.currentElement)
+				.unbind('mouseenter mouseleave');
+
 			this.currentId = ctxPopupId;
 			var data = this.cachedResults[ctxPopupId];
 
 			if (data && data.noshow) return;
 			if (this.currentElement && this.currentElement !== ele) {
-				popup.hide();
+				popup.hide(true);
+			}
+
+			if (data && data.error) {
+				popup.hide(true);
+				ContextualPopup.showNote(data.error, ele);
+				return;
 			}
 
 			popup.render(data, ctxPopupId);
 			popup.element.bubble('option', 'target', jQuery(ele));
-			popup.show();
+			popup.bindShowHideEvents(ele);
+			popup.show(showNow);
 			this.currentElement = ele;
 		},
 
@@ -655,7 +682,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 		// create a little popup to notify the user of something
 		showNote: function (note, ele) {
-			ele = popup.element[0];
+			ele = ele || popup.element[0];
 			LJ_IPPU.showNote(note, ele);
 		},
 
@@ -666,20 +693,25 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				return;
 			}
 			t.currentRequests[popup_id] = 1;
-			
+
+			var reqParams = {
+				user: target.username || ''
+			};
+
 			jQuery.ajax({
 				url: LiveJournal.getAjaxUrl('ctxpopup'),
-				data: {
-					user: target.username || '',
+				data: Object.extend( reqParams, {
 					userid: target.userid || 0,
 					userpic_url: target.up_url || '',
 					mode: 'getinfo'
-				},
+				}),
 				dataType: 'json',
 				success: function(data)
 				{
 					if (data.error) {
-						popup.hide();
+						data.username = reqParams.user;
+						t.cachedResults[data.username] = data;
+						popup.hide(true);
 						t.showNote(data.error, target);
 						return;
 					}
