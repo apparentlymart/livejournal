@@ -116,6 +116,9 @@ sub set_error {
 
 sub get_lang {
     my $code = shift;
+
+    return unless defined $code;
+
     load_lang_struct() unless $LS_CACHED;
     return $LN_CODE{$code};
 }
