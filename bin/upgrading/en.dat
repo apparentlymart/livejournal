@@ -2916,6 +2916,8 @@ fotki.album.link.manage=Manage
 fotki.album.link.original.size|staleness=1
 fotki.album.link.original.size=Original size
 
+fotki.album.link.original=Original
+
 fotki.album.link.photo_view|staleness=1
 fotki.album.link.photo_view=View photo
 
@@ -2981,6 +2983,8 @@ fotki.album.select.image.size=Select image size:
 
 fotki.album.select.images.size|staleness=1
 fotki.album.select.images.size=Select images size:
+
+fotki.album.select.album=Album:
 
 fotki.album.select_album|staleness=1
 fotki.album.select_album=Select album:
