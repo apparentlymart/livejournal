@@ -41,7 +41,7 @@ Notes:
 
 package LJ::Text;
 
-use Encode qw(encode_utf8 decode_utf8);
+use Encode qw(encode_utf8 decode_utf8 is_utf8);
 use Carp qw(confess cluck);
 use UNIVERSAL qw(isa);
 use strict;
@@ -80,6 +80,34 @@ sub fix_utf8 {
 
     $str = decode_utf8($str, Encode::FB_QUIET());
     return encode_utf8($str);
+}
+
+#
+# LJ::Text->remove_utf8_flag($tree);
+# input: a string or any complex structure (hash, array etc)
+# output: the same structure without utf8 flag on any string in it.
+#
+sub remove_utf8_flag {
+    my $class = shift;
+    my $tree = shift;
+
+    unless (ref $tree) {
+        $tree = encode_utf8($tree) if $tree && is_utf8($tree);
+    }
+    
+    if (ref $tree eq 'ARRAY') {
+        foreach (@$tree) {
+            $_ = $class->remove_utf8_flag($_);
+        }
+    }
+
+    if (ref $tree eq 'HASH') {
+        foreach (values %$tree) {
+            $_ = $class->remove_utf8_flag($_);
+        }
+    }
+
+    return $tree;    
 }
 
 # given a string, returns its longest UTF-8 "prefix" (that is, its
