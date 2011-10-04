@@ -609,6 +609,7 @@ __________________________________________*/
 
 /* Contextual hover
 -----------------------------------------------*/
+.b-contextualhover,
 .b-contextualhover .b-contextualhover-section,
 .b-contextualhover .b-contextualhover-options LI {
 	zoom: 1;

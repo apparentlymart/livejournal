@@ -2874,7 +2874,6 @@ DIV.lj_ippu_app {
 	width: 250px;
 	min-height: 50px;
 	font-family: 'Arial', sans-serif;
-	*zoom: 1;
 	}
 .b-contextualhover:before,
 .b-contextualhover:after {
@@ -2899,32 +2898,35 @@ DIV.lj_ippu_app {
 		margin: 0;
 		color: #000;
 		}
+	.b-contextualhover IMG {
+		border: none;
+		}
 	.b-contextualhover A:link,
 	.b-contextualhover A:visited {
-		border-bottom: 0 !important;
 		background: #FFF;
-		color: #00C !important;
+		border-bottom: 0 !important;
 		text-decoration: none !important;
+		color: #00C !important;
 		}
 	.b-contextualhover A:hover,
 	.b-contextualhover A:active,
 	.b-contextualhover A:focus {
 		border-bottom: 0 !important;
-		color: #00C !important;
 		text-decoration: underline !important;
+		color: #00C !important;
 		}
 	.s-lanzelot .b-contextualhover A:link,
 	.s-lanzelot .b-contextualhover A:visited {
 		border-bottom: 0 !important;
-		color: #3F5F9E !important;
 		text-decoration: none !important;
+		color: #3F5F9E !important;
 		}
 	.s-lanzelot .b-contextualhover A:hover,
 	.s-lanzelot .b-contextualhover A:active,
 	.s-lanzelot .b-contextualhover A:focus {
 		border-bottom: 1px solid #3F5F9E !important;
-		color: #3F5F9E !important;
 		text-decoration: none !important;
+		color: #3F5F9E !important;
 		}
 	.b-contextualhover .alias-unavailable A:link,
 	.b-contextualhover .alias-unavailable A:visited {
@@ -2936,7 +2938,8 @@ DIV.lj_ippu_app {
 		color: #999 !important;
 		}
 	.b-contextualhover P {
-		line-height: 18px;
+		margin-bottom: 3px;
+		line-height: 16px;
 		font-size: 12px;
 		}
 	.b-contextualhover .input-checkbox {
@@ -2969,6 +2972,7 @@ DIV.lj_ippu_app {
 		padding-bottom: 5px;
 		}
 		.b-contextualhover .b-contextualhover-title H3 {
+			margin-bottom: 3px;
 			font-weight: normal;
 			font-style: normal;
 			line-height: 16px;
@@ -2976,19 +2980,14 @@ DIV.lj_ippu_app {
 			}
 	.b-contextualhover .b-contextualhover-options {
 		margin: 0;
-		padding: 5px 0;
-		list-style: none;
+		padding: 5px 0 2px 0;
 		border-top: 1px dotted #D3D3D3;
-		}
-	.b-contextualhover .b-contextualhover-userpig .b-contextualhover-options {
-		margin: 0 70px 0 0;
+		list-style: none;
 		}
 		.b-contextualhover .b-contextualhover-options LI {
-			line-height: 18px;
+			margin-bottom: 3px;
+			line-height: 16px;
 			font-size: 12px;
-			}
-		.b-contextualhover .b-contextualhover-options-ban IMG {
-			border: 0;
 			}
 
 /* Native Sharing */

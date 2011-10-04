@@ -132,7 +132,6 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			wrapper: '<div class="b-contextualhover"></div>',
 			loading: 'Loading...',
 			content: 
-					'<div class="b-contextualhover-wrapper{{if userpic }} b-contextualhover-userpig{{/if}}">' +
 					'{{if userpic }}' +
 					'<div class="b-contextualhover-side">' +
 						'<div class="b-contextualhover-userpic">' +
@@ -140,6 +139,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 						'</div>' +
 					'</div>' +
 					'{{/if}}' +
+					'<div class="b-contextualhover-section">' +
 					'<div class="b-contextualhover-title">' +
 						'<h3>{{html title.title}}</h3>' +
 						'{{each headLinks}}<p><a href="${$value.url}">${$value.text}</a></p>{{/each}}' +
