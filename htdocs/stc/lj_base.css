@@ -2873,6 +2873,7 @@ DIV.lj_ippu_app {
 .b-contextualhover {
 	width: 250px;
 	min-height: 50px;
+	text-align: left;
 	font-family: 'Arial', sans-serif;
 	}
 .b-contextualhover:before,
