@@ -2987,16 +2987,6 @@ DIV.lj_ippu_app {
 			line-height: 18px;
 			font-size: 12px;
 			}
-		.b-contextualhover .b-contextualhover-options-ban P {
-			float: left;
-			}
-		.b-contextualhover .b-contextualhover-options-ban .b-contextualhover-options-wrap {
-			overflow: hidden;
-			padding-left: 7px;
-			}
-			.b-contextualhover .b-contextualhover-options-ban .b-contextualhover-options-wrap P {
-				float: none;
-				}
 		.b-contextualhover .b-contextualhover-options-ban IMG {
 			border: 0;
 			}
