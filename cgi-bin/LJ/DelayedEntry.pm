@@ -5,7 +5,18 @@ use warnings;
 require 'ljprotocol.pl';
 use LJ::User;
 use Storable;
-                
+
+sub create_from_url {
+    my ($class, $url) = @_;
+
+    if ($url =~ m!(.+)/d(\d+)\.html!) {
+        my $u = LJ::User->new_from_url($1) or return undef;
+        return LJ::DelayedEntry->get_entry_by_id($u, $2);
+    }
+
+    return undef;
+}
+              
 sub create {
     my ( $class, $req, $opts ) = @_;
 
@@ -73,6 +84,10 @@ sub create {
     $self->{taglist} = $taglist;
     $self->{delayed_id} = $delayedid;
     return $self;
+}
+
+sub valid {
+    return 1;
 }
 
 sub delayedid {
@@ -238,6 +253,10 @@ sub is_suspended_for {
     return 0 if LJ::isu($u) && $u->equals($self->poster);
     return 1;
 }
+
+sub get_suspended_mark {
+    return 0;
+} 
 
 sub should_show_suspend_msg_to {
     my ( $self, $u ) = @_;
