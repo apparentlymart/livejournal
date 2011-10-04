@@ -51,7 +51,7 @@
 	}
 
 	function normalizeValue(str) {
-		return str.replace(/<br\s?\/>\n?/g, '\n').replace(/\s+$/mg, '').trim();
+		return str.replace(/<br\s?\/>\n?/g, '\n').trim();
 	}
 
 	function updateDraftState() {
@@ -129,7 +129,7 @@
 						if (window.switchedRteOn) {
 							var data = CKEditor.getData();
 							if(!$('#event_format')[0].checked){
-								data = data.replace(/(\r|\n)/g, '<br />');
+								data = data.replace(/\r|\n/g, '<br />');
 							}
 							draftData.textArea.val(data);
 						}
