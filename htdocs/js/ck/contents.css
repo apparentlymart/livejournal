@@ -118,12 +118,11 @@ form.ljpoll {
 	border: 1px solid #FFCC33;
 	color: #000;
 	display: block;
-}
-
-.note A {
-	color: #555;
-	cursor: pointer;
-}
+	}
+	.note A {
+		color: #555;
+		cursor: pointer;
+		}
 
 /* LJ Like buttons */
 .lj-like {
@@ -132,46 +131,44 @@ form.ljpoll {
 	margin-top: 20px;
 	background: #D2D2D2;
 	border: 1px dotted #000;
-}
-
-.lj-like .lj-like-item {
-	display: inline-block;
-	margin-right: 15px;
-	background: url(/js/ck/images/lj-like-buttons.png) no-repeat;
-	vertical-align: middle;
-	font-size: 0;
-	cursor: pointer;
-}
-
-.lj-like .fb {
-	width: 93px;
-	height: 20px;
-	background-position: 0 0;
-}
-
-.lj-like .tw {
-	width: 55px;
-	height: 20px;
-	background-position: 0 -46px;
-}
-
-.lj-like .go {
-	width: 32px;
-	height: 20px;
-	background-position: 0 -90px;
-}
-
-.lj-like .vk {
-	width: 40px;
-	height: 22px;
-	background-position: 0 -67px;
-}
-
-.lj-like .lj {
-	width: 67px;
-	height: 24px;
-	background-position: 0 -21px;
-}
+	}
+	.lj-like .lj-like-item {
+		display: inline-block;
+		margin-right: 15px;
+		background: url(/js/ck/images/lj-like-buttons.png) no-repeat;
+		vertical-align: middle;
+		font-size: 0;
+		cursor: pointer;
+		}
+	.lj-like .fb {
+		width: 93px;
+		height: 20px;
+		background-position: 0 0;
+		}
+	.lj-like .tw {
+		width: 55px;
+		height: 20px;
+		background-position: 0 -46px;
+		}
+	.lj-like .go {
+		width: 32px;
+		height: 20px;
+		background-position: 0 -90px;
+		}
+	.lj-like .vk {
+		width: 40px;
+		height: 22px;
+		background-position: 0 -67px;
+		}
+	.lj-like .lj {
+		width: 67px;
+		height: 24px;
+		background-position: 0 -21px;
+		}
+.lj-like-selected {
+	background-color: #C4E0F7;
+	border: 1px solid #6EA9DF;
+	}
 
 /* LJ map */
 .lj-map {
