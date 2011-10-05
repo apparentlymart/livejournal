@@ -2910,7 +2910,7 @@ fotki.album.link.edit=Edit
 fotki.album.link.edit_album|staleness=1
 fotki.album.link.edit_album=Edit album
 
-fotki.album.link.is.cover=(is cover)
+fotki.album.link.album.cover=(album cover)
 
 fotki.album.link.manage|staleness=1
 fotki.album.link.manage=Manage
@@ -2929,7 +2929,7 @@ fotki.album.link.remove=Remove
 fotki.album.link.remove.album|staleness=1
 fotki.album.link.remove.album=Remove album
 
-fotki.album.link.set.cover=Set cover
+fotki.album.link.set.as.cover=Set as cover
 
 fotki.album.link.upload|staleness=1
 fotki.album.link.upload=Upload
