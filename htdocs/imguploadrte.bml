@@ -10,6 +10,7 @@
     my $body = \$_[0]->{'body'};
     my $u = LJ::User->remote;
 
+    LJ::need_res( {clean_list => 1} );
     LJ::need_res("stc/display_none.css",
                  "js/photobucket_jw.js");
     my $js = "";
@@ -210,7 +211,7 @@
             $div_upload .= "<script>window.parent.InOb.setupIframeHandlers(true);window.parent.InOb.showSelectorPage();</script>";
             ## We no need a html and head tags
             $$body = $div_upload;
-            $$head .= LJ::res_includes();
+            $$head .= LJ::res_includes({ only_needed => 1});
             # BML::finish();
             # return $div_upload;
             return;
@@ -296,7 +297,7 @@
         $$body = $ret;
         $$head .= "<script type='text/javascript'>var seedurl='$LJ::SITEROOT/photobucket_cb.bml';";
         $$head .= "var pb_affsite_id = $LJ::PHOTOBUCKET_JWIDGET_ID;</script>\n";
-        $$head .= LJ::res_includes();
+        $$head .= LJ::res_includes({only_needed => 1});
         return;
 }
 _code?>

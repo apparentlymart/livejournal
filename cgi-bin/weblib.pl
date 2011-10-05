@@ -1282,7 +1282,7 @@ sub stat_src_to_url {
 ## <!--[if IE]><link rel="stylesheet" type="text/css" href="$statprefix/..." /><![endif]-->
 ## Support 'args' option. Example: LJ::need_res( { args => 'media="screen"' }, 'stc/ljtimes/iframe.css' );
 ## Results in: <link rel="stylesheet" type="text/css" href="http://stat.lj-3-32.bulyon.local/ljtimes/iframe.css?v=1285833891" media="screen"/>
-## LJ::need_res( {clean_list} ) will suppress ALL previous resources and do NOTHING more!
+## LJ::need_res( {clean_list => 1} ) will suppress ALL previous resources and do NOTHING more!
 sub need_res {
     my $opts = (ref $_[0]) ? shift : {};
     my @keys = @_;
