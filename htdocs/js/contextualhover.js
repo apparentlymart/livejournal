@@ -255,7 +255,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				if (data.is_member)
 					label = data.ml_you_member.replace('[[username]]', username);
 				else if (data.is_friend)
-					labelL = data.ml_you_watching.replace('[[username]]', username);
+					label = data.ml_you_watching.replace('[[username]]', username);
 				else
 					label = username;
 			} else if (data.is_syndicated) {
