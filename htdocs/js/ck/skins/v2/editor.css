@@ -1311,13 +1311,17 @@ li.cke_panel_listItem {
 .cke_skin_v2 .cke_button_LJPollLink .cke_icon,
 .cke_skin_v2 .cke_button_LJCut .cke_icon,
 .cke_skin_v2 .cke_button_LJLike .cke_icon {
-	background: url(icons-new.png?v=1) no-repeat 0 0;
+	background: url(icons-new.png?v=2) no-repeat 0 0;
 	}
 .cke_skin_v2 .cke_button_LJUserLink .cke_icon {
 	background-position: 0 -95px;
 	}
 .cke_skin_v2 .cke_button_LJImage .cke_icon {
 	background-position: 0 -125px;
+	}
+.cke_skin_v2 .cke_button_LJImage_beta .cke_icon {
+	width: 18px;
+	background-position: 0 -309px;
 	}
 .cke_skin_v2 .cke_button_LJLink .cke_icon {
 	background-position: 0 -79px;
