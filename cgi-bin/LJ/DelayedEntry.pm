@@ -668,10 +668,24 @@ sub get_entry_by_id {
     #                                         $journal->userid,
     #                                         $userid );
 
+    my $tz = $user->prop("timezone");
+    my $timezones = DateTime::TimeZone->new( name => $tz );
+
+    my $dt = DateTime->now( 'time_zone' => 'UTC');
+    my $offset = $timezones->offset_for_datetime($dt); 
+
+    my $daterequest;
+    if ($tz) {
+        $daterequest = "DATE_FORMAT(ADDDATE(posttime, INTERVAL $offset SECOND), \"$dateformat\") AS 'alldatepart', " .
+                       "DATE_FORMAT(ADDDATE(logtime,  INTERVAL $offset SECOND), \"$dateformat\") AS 'system_alldatepart' ";
+    } else {
+        $daterequest = "DATE_FORMAT(posttime, \"$dateformat\") AS 'alldatepart', " .
+                       "DATE_FORMAT(logtime, \"$dateformat\") AS 'system_alldatepart' ";
+
+    }
+
     my $opts = $dbcr->selectrow_arrayref("SELECT journalid, delayedid, posterid, " .
-                                         "DATE_FORMAT(posttime, \"$dateformat\") AS 'alldatepart', " .
-                                         "DATE_FORMAT(logtime, \"$dateformat\") AS 'system_alldatepart', " . 
-                                         "logtime " .
+                                         "$daterequest, logtime " .
                                          "FROM delayedlog2 ".
                                          "WHERE journalid=$journalid AND ".
                                          "delayedid = $delayedid");
