@@ -1716,13 +1716,19 @@ sub journal_content
         LJ::Request->pnotes (error => 'baduser') unless $u;
         return LJ::Request::NOT_FOUND unless $u;
 
+        my $is_unsuspicious_user = 0;
+        LJ::run_hook("is_unsuspicious_user", $u->userid, \$is_unsuspicious_user);
         $u->preload_props("opt_blockrobots", "adult_content", "admin_content_flag");
         LJ::Request->content_type("text/plain");
         LJ::Request->send_http_header();
-        my @extra = LJ::run_hook("robots_txt_extra", $u), ();
-        LJ::Request->print($_) foreach @extra;
+
+        if ( $is_unsuspicious_user ) {
+            my @extra = LJ::run_hook("robots_txt_extra", $u);
+            LJ::Request->print($_) foreach @extra;
+        }
+
         LJ::Request->print("User-Agent: *\n");
-        if ($u->should_block_robots) {
+        if ($u->should_block_robots or !$is_unsuspicious_user) {
             LJ::Request->print("Disallow: /\n");
         } else {
             LJ::Request->print("Disallow: /data/foaf/\n");
