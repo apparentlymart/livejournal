@@ -135,7 +135,7 @@ sub logtime {
     return $self->{logtime};
 }
 
-sub posttime {
+sub system_posttime {
     my ($self) = @_;
     return $self->{posttime};
 }
@@ -143,9 +143,30 @@ sub posttime {
 sub posttime_as_unixtime {
     my ($self) = @_;
     my $dbh = LJ::get_db_writer();
-    my $qposttime = $self->posttime;
-    return $dbh->selectrow_array("SELECT UNIX_TIMESTAMP($qposttime)");
-} 
+    my $qposttime = $self->system_posttime;
+    return $dbh->selectrow_array("SELECT UNIX_TIMESTAMP('$qposttime')");
+}
+
+
+sub posttime {
+    my ($self, $u) = @_;
+    my $posttime = $self->system_posttime;
+    my $timezone = $self->poster->prop("timezone");
+    if (!$timezone) {
+        return $posttime;
+    }
+    my $epoch =  $self->posttime_as_unixtime;
+    my $dt = DateTime->from_epoch( 'epoch' => $epoch );
+
+    $dt->set_time_zone( $timezone );
+
+    # make the proper date format
+    return sprintf("%04d-%02d-%02d %02d:%02d", $dt->year,
+                                               $dt->month,
+                                               $dt->day,
+                                               $dt->hour,
+                                               $dt->minute );
+}
 
 sub alldatepart {
     my ($self) = @_;
@@ -640,7 +661,6 @@ sub load_data {
     return $self;
 }
 
-
 sub get_entry_by_id {
     my ($class, $journal, $delayedid, $options) = @_;
     __assert($journal);
@@ -669,13 +689,13 @@ sub get_entry_by_id {
     #                                         $userid );
 
     my $tz = $user->prop("timezone");
-    my $timezones = DateTime::TimeZone->new( name => $tz );
-
-    my $dt = DateTime->now( 'time_zone' => 'UTC');
-    my $offset = $timezones->offset_for_datetime($dt); 
-
     my $daterequest;
     if ($tz) {
+        my $timezones = DateTime::TimeZone->new( name => $tz );
+
+        my $dt = DateTime->now( 'time_zone' => 'UTC');
+        my $offset = $timezones->offset_for_datetime($dt);
+
         $daterequest = "DATE_FORMAT(ADDDATE(posttime, INTERVAL $offset SECOND), \"$dateformat\") AS 'alldatepart', " .
                        "DATE_FORMAT(ADDDATE(logtime,  INTERVAL $offset SECOND), \"$dateformat\") AS 'system_alldatepart' ";
     } else {
@@ -759,7 +779,6 @@ sub get_entries_count {
 
     my $dbcr = LJ::get_cluster_def_reader($journal) 
         or die "get cluster for journal failed";
-
 
     unless ($userid) {
         my $remote = LJ::get_remote();
@@ -1107,6 +1126,7 @@ sub get_itemid_near2 {
 sub handle_prefetched_props {
     my ($self) = @_;
     #stab
+    return;
 }
 
 sub can_delete_delayed_item {
