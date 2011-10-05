@@ -478,6 +478,11 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				.empty()
 				.append(jQuery.tmpl(this.templates.content, buildObject));
 
+			if (this.element.is(':visible')) {
+				//show method forces bubble to reposition with respect to the new content
+				this.element.bubble('updatePosition');
+			}
+
 			this.setPopupEvents(buildObject);
 		},
 
