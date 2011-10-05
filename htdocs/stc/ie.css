@@ -534,7 +534,8 @@ __________________________________________*/
 /* Fotki
 -----------------------------------------------*/
 .b-pics-bar,
-.b-pics-nav {
+.b-pics-nav,
+.b-pics-edit-field-text {
 	zoom: 1;
 	}
 .b-pics-input-submit {
@@ -558,7 +559,11 @@ __________________________________________*/
 .b-pics-pager-prev,
 .b-pics-pager-next,
 .b-popup-pics .b-pics-pager,
-.b-popup-pics H2 {
+.b-popup-pics H2,
+.b-popup-pics .b-popup-pics-add-many .b-bubble-alert,
+.b-pics-with-output .b-pics-size-list,
+.b-pics-with-output .b-pics-size-label,
+.b-pics-with-output .b-pics-post-button {
 	display: inline;
 	zoom: 1;
 	}
