@@ -349,6 +349,10 @@ body<=
             } else {
                 $entry_obj = LJ::DelayedEntry->get_entry_by_id($u_for_entry, $delayedid);
 
+                # does the requested entry exist?
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'/editjournal_do.bml.error.nofind'} p?>"
+                    unless $entry_obj;
+
                 $res{'success'} = 'OK';
                 $res{'events_count'}  = 1;
                 $res{'events_1_anum'} = 0;
