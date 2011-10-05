@@ -248,11 +248,11 @@ Object.extend(String, {
 			case "\r": return "\\r";
 			case "\t": return "\\t";
 		}
-		
+
 		// return raw bytes now ... should be UTF-8
 		if( c >= " " )
 			return c;
-		
+
 		// try \uXXXX escaping, but shouldn't make it for case 1, 2
 		c = c.charCodeAt( 0 ).toString( 16 );
 		switch( c.length ) {
@@ -261,9 +261,37 @@ Object.extend(String, {
 			case 3: return "\\u0" + c;
 			case 4: return "\\u" + c;
 		}
-		
+
 		// should never make it here
 		return "";
+	},
+
+	encodeEntity: function( c ) {
+		switch( c ) {
+			case "<": return "&lt;";
+			case ">": return "&gt;";
+			case "&": return "&amp;";
+			case '"': return "&quot;";
+			case "'": return "&apos;";
+		}
+		return c;
+	},
+
+	decodeEntity: function( c ) {
+		switch( c ) {
+			case "amp": return "&";
+			case "quot": return '"';
+			case "apos": return "'";
+			case "gt": return ">";
+			case "lt": return "<";
+		}
+		var m = c.match( /^#(\d+)$/ );
+		if( m && defined( m[ 1 ] ) )
+			return String.fromCharCode( m[ 1 ] );
+		m = c.match( /^#x([0-9a-f]+)$/i );
+		if(  m && defined( m[ 1 ] ) )
+			return String.fromCharCode( parseInt( hex, m[ 1 ] ) );
+		return c;
 	}
 });
 
@@ -272,7 +300,26 @@ Object.extend(String.prototype, {
 	{
 		return this.replace( /([^ -!#-\[\]-~])/g, function( m, c ) { return String.escapeJSChar( c ); } )
 	},
-	
+
+	/**
+	 * Encode a string to allow a secure insertion in html code.
+	 */
+	encodeHTML: function() {
+		return this.replace( /([<>&"])/g, function( m, c ) { return String.encodeEntity( c ) } ); /* fix syntax highlight: " */
+	},
+
+	decodeHTML: function() {
+		return this.replace( /&(.*?);/g, function( m, c ) { return String.decodeEntity( c ) } );
+	},
+
+	/**
+	 * Add chars in front of string until it gets the length required.
+	 *
+	 * @param {Number} length Required string length.
+	 * @param {String} padChar A char to add in front of string.
+	 *
+	 * @return {String} A padded string.
+	 */
 	pad: function(length, padChar)
 	{
 		return ((new Array(length + 1))
@@ -280,12 +327,11 @@ Object.extend(String.prototype, {
 			+ this
 		).slice(-length);
 	},
-	
+
 	trim: function()
 	{
 		return this.replace(/^\s+|\s+$/g, '');
 	},
-	
 
 	supplant: function(o)
 	{
@@ -293,14 +339,19 @@ Object.extend(String.prototype, {
 			function (a, b) {
 				var r = o[b];
 				return typeof r === 'string' || typeof r === 'number' ? r : a;
-			});		
-	}	
+			});
+	}
 });
 
 Object.extend(Date, {
-    now: function() {
-        return +new Date;
-    }
+	/**
+	 * Return timestamp number for current moment.
+	 *
+	 * @return {Number} A Timestamp.
+	 */
+	now: function() {
+		return +new Date;
+	}
 });
 
 Object.extend(Array, {

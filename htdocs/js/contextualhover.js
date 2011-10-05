@@ -320,7 +320,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			if (!data.is_requester && data.is_logged_in) {
 				if (data.alias_enable) {
 					if (data.alias) {
-						linkGroup.push(data.alias);
+						linkGroup.push(data.alias.encodeHTML());
 					}
 					
 					linkGroup.push({
