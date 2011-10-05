@@ -568,6 +568,9 @@ __________________________________________*/
 	.b-pics-edit-field-click .b-pics-input-text {
 		padding-left: 2px;
 		}
+	.b-pics-edit-field .b-pics-textarea-edit {
+		width: 572px;
+		}
 .b-pics-privacy .b-pics-privacy-icon {
 	margin-right: 3px;
 	}
