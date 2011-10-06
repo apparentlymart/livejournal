@@ -2600,8 +2600,8 @@ eventrates.users_who_like_it=Users who like it
 eventrates.view_all|staleness=1
 eventrates.view_all=View all
 
-fckland.ljimage=Insert/Edit Image
-fckland.ljimage.beta=Insert/Edit Image Beta
+fcklang.ljimage=Insert/Edit Image
+fcklang.ljimage.beta=Insert/Edit Image Beta
 
 fcklang.cutcontents=Type your cut contents here.
 
