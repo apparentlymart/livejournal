@@ -7871,14 +7871,7 @@ sub get_daycounts
     LJ::MemCache::set($memkey, [time, @days]);
 
     # not cached part
-    $sth = LJ::DelayedEntry->get_daycount_query($u, $secwhere);
-    if ($sth) {
-        while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
-            # we force each number from string scalars (from DBI) to int scalars,
-            # so they store smaller in memcache
-            push @days, [ int($y), int($m), int($d), int($c) ];
-        }
-    }
+    LJ::DelayedEntry->get_daycount_query($u, \@days, $secwhere);
     $release_lock->();
     return \@days;
 }

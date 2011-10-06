@@ -687,10 +687,6 @@ sub get_entry_by_id {
         $sql_poster = 'AND posterid = ' . $user->userid . " "; 
     }
 
-    #my $secwhere = __delayed_entry_can_see() __delayed_entry_secwhere( $journal,
-    #                                         $journal->userid,
-    #                                         $userid );
-
     my $tz = $user->prop("timezone");
     my $daterequest;
     if ($tz) {
@@ -795,10 +791,6 @@ sub get_entries_count {
                                                       $u );
     }
 
-    #my $secwhere = __delayed_entry_secwhere( $journal,
-    #                                         $journal->userid,
-    #                                         $userid );
-
     return $dbcr->selectrow_array(" SELECT count(delayedid) " .
                                     "FROM delayedlog2 ".
                                     "WHERE journalid=$journalid ");
@@ -850,11 +842,13 @@ sub get_daycount_query {
 
     my $remote = LJ::get_remote();
     return undef unless $remote;
-    return undef unless __delayed_entry_can_see( $journal,
-                                                 $remote  );
-    
+    my $sql_poster = '';
+    if (! __delayed_entry_can_see( $journal, $remote ) ) {
+        $sql_poster = 'AND posterid = ' . $remote->userid . " ";
+    }
+
     my $sth = $dbcr->prepare("SELECT year, month, day, COUNT(*) " .
-                             "FROM delayedlog2 WHERE journalid=? $secwhere GROUP BY 1, 2, 3");
+                             "FROM delayedlog2 WHERE journalid=? $sql_poster $secwhere GROUP BY 1, 2, 3");
     $sth->execute($journal->userid);
     while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
         push @$list, [ int($y), int($m), int($d), int($c) ];
@@ -1264,14 +1258,13 @@ sub convert {
                                 "VALUES ($journalid, $jitemid, $posterid, $qeventtime, FROM_UNIXTIME($now), $qsecurity, $qallowmask, ".
                                 "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
                                 "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
-
     return {
         error_message => $dberr,
         delete_entry  => 0,
     } if $dberr;
 
     # post become 'sticky post'
-    if ( $req->{type} && $req->{type} eq 'sticky' ) {
+    if ( $req->{sticky}  ) {
         $journal->set_sticky($jitemid);
     }
 
@@ -1296,7 +1289,6 @@ sub convert {
     $release->();
 
     my $ditemid = $jitemid * 256 + $anum;
-
     ### finish embedding stuff now that we have the itemid
     {
         ### this should NOT return an error, and we're mildly fucked by now
