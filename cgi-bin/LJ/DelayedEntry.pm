@@ -240,7 +240,7 @@ sub adult_content_calculated {
 
 sub prop {
     my ( $self, $prop_name ) = @_;
-    return $self->props->{$prop_name} || '';
+    return $self->props->{$prop_name};
 }
 
 sub url {
@@ -440,12 +440,12 @@ sub verticals_list {
 
 sub eventtime_mysql {
     my ($self) = @_;
-    return $self->{alldatepart};
+    return $self->posttime;
 }
 
 sub logtime_mysql {
     my ($self) = @_;
-    return $self->{system_alldatepart};
+    return $self->system_posttime;
 }
 
 sub verticals_list_for_ad {
