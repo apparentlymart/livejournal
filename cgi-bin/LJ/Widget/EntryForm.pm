@@ -1759,6 +1759,8 @@ sub render_body {
             'LJUser_WizardNoticeLink' => 'ljuser.wizardnoticelink',
             'LJLink_WizardNotice' => 'ljlink.wizardnotice',
             'LJLink_WizardNoticeLink' => 'ljlink.wizardnoticelink',
+            'LJImage_title' => 'ljimage',
+            'LJImage_beta_title' => 'ljimage.beta',
             'LJImage_WizardNotice' => 'ljimage.wizardnotice',
             'LJImage_WizardNoticeLink' => 'ljimage.wizardnoticelink',
             'LJCut_WizardNotice' => 'ljcut.wizardnotice',
