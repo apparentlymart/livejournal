@@ -83,6 +83,9 @@ function setPostingPermissions(journal) {
 	}
 
 	stickyCheckbox.attr('disabled', !journal.can_create_sticky);
+	if (!journal.can_post_delayed) {
+		stickyCheckbox.attr('checked', false);
+	}
 	stickyLabel.html(journal.is_replace_sticky ? 
 			Site.ml_text['entryform.sticky_replace.edit'] :
 			Site.ml_text['entryform.sticky.edit']);
