@@ -2601,6 +2601,7 @@ eventrates.view_all|staleness=1
 eventrates.view_all=View all
 
 fckland.ljimage=Insert/Edit Image
+fckland.ljimage.beta=Insert/Edit Image Beta
 
 fcklang.cutcontents=Type your cut contents here.
 

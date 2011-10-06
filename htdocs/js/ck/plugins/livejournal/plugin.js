@@ -99,7 +99,7 @@
 			html: encodeURIComponent(top.CKLang.LJLink_WizardNotice + '<br /><a href="#" lj-cmd="LJLink">' + top.CKLang
 				.LJLink_WizardNoticeLink + '</a>')
 		},
-		LJImage: {
+		image: {
 			html: encodeURIComponent(top.CKLang.LJImage_WizardNotice + '<br /><a href="#" lj-cmd="LJImage">' + top.CKLang
 				.LJImage_WizardNoticeLink + '</a>')
 		},
@@ -291,7 +291,7 @@
 
 					if (!attr && node.type == 1) {
 						if (node.is('img') && node.getParent().getParent() && node.getParent().getParent().getAttribute('contentEditable') != 'false') {
-							attr = 'LJImage';
+							attr = 'image';
 							node.setAttribute('lj-cmd', attr);
 						} else if (node.is('a') && node.getParent().getAttribute('contentEditable') != 'false') {
 							attr = 'LJLink';
@@ -481,37 +481,31 @@
 			});
 
 			//////////  LJ Image Button //////////////
-			editor.addCommand('LJImage', {
-				exec: function(editor) {
-					var state = editor.getCommand('LJImage').state;
-
-					if (ljTagsData.LJImage.node) {
-						editor.openDialog('image');
-					} else if (state === CKEDITOR.TRISTATE_OFF) {
-						if (window.ljphotoEnabled) {
-							jQuery('#updateForm').photouploader({
-								type: 'upload'
-							}).photouploader('show').bind('htmlready', function (event) {
-								var html = event.htmlStrings;
-								for (var i = 0, l = html.length; i < l; i++) {
-									editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html[i], editor.document));
-								}
-							});
-						} else {
-							editor.openDialog('image');
-						}
-					} else if (state === CKEDITOR.TRISTATE_ON) {
-						editor.openDialog('image');
-					}
-					note.hide(true);
-				},
-				editorFocus: false
+			editor.ui.addButton('image', {
+				label: top.CKLang.LJImage_title,
+				command: 'image'
 			});
 
-			editor.ui.addButton('LJImage', {
-				label: editor.lang.common.imageButton,
-				command: 'LJImage'
-			});
+			if (window.ljphotoEnabled) {
+				editor.addCommand('LJImage_beta', {
+					exec: function(editor) {
+						jQuery('#updateForm').photouploader({
+							type: 'upload'
+						}).photouploader('show').bind('htmlready', function (event) {
+							var html = event.htmlStrings;
+							for (var i = 0, l = html.length; i < l; i++) {
+								editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html[i], editor.document));
+							}
+						});
+					},
+					editorFocus: false
+				});
+
+				editor.ui.addButton('LJImage_beta', {
+					label: top.CKLang.LJImage_beta_title,
+					command: 'LJImage_beta'
+				});
+			}
 
 			//////////  LJ Link Button //////////////
 			editor.addCommand('LJLink', {
@@ -1216,7 +1210,7 @@
 					img: function(element) {
 						var parent = element.parent.parent;
 						if (!parent || !parent.attributes || parent.attributes.contentEditable != 'false') {
-							element.attributes['lj-cmd'] = 'LJImage';
+							element.attributes['lj-cmd'] = 'image';
 						}
 					},
 					div: function(element){
