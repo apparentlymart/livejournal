@@ -681,8 +681,11 @@ sub get_entry_by_id {
     my $user = LJ::get_remote() || LJ::want_user($userid);
 
     return undef unless $user;
-    return undef unless __delayed_entry_can_see( $journal,
-                                                  $user );
+    my $sql_poster = '';
+    if (!__delayed_entry_can_see( $journal, $user ))
+    {
+        $sql_poster = 'AND posterid = ' . $user->userid . " "; 
+    }
 
     #my $secwhere = __delayed_entry_can_see() __delayed_entry_secwhere( $journal,
     #                                         $journal->userid,
@@ -701,14 +704,13 @@ sub get_entry_by_id {
     } else {
         $daterequest = "DATE_FORMAT(posttime, \"$dateformat\") AS 'alldatepart', " .
                        "DATE_FORMAT(logtime, \"$dateformat\") AS 'system_alldatepart' ";
-
     }
 
     my $opts = $dbcr->selectrow_arrayref("SELECT journalid, delayedid, posterid, " .
                                          "$daterequest, logtime " .
                                          "FROM delayedlog2 ".
                                          "WHERE journalid=$journalid AND ".
-                                         "delayedid = $delayedid");
+                                         "delayedid = $delayedid $sql_poster");
 
     return undef unless $opts;
 
@@ -817,17 +819,20 @@ sub get_entries_by_journal {
         $sql_limit = "LIMIT $skip, $elements_to_show";
     }
 
+    my $sql_poster = '';
     unless ($userid) {
         my $remote = LJ::get_remote();
         return undef unless $remote;
         $userid = $remote->userid ;
 
-        return undef unless __delayed_entry_can_see( $journal,
-                                                     $remote );
+        if (!__delayed_entry_can_see( $journal, $remote ) ) {
+            $sql_poster = 'AND posterid = ' . $remote->userid . " ";
+         }
     } else {
         my $u = LJ::want_user($userid);
-        return undef unless __delayed_entry_can_see( $journal,
-                                                     $u );
+        if (!__delayed_entry_can_see( $journal, $u ) ){
+            $sql_poster = 'AND posterid = ' . $u->userid . " ";
+        }
     }
 
     #my $secwhere = __delayed_entry_secwhere( $journal,
@@ -835,7 +840,7 @@ sub get_entries_by_journal {
     #                                         $userid );
 
     return $dbcr->selectcol_arrayref("SELECT delayedid " .
-                                     "FROM delayedlog2 WHERE journalid=$journalid  ".
+                                     "FROM delayedlog2 WHERE journalid=$journalid  $sql_poster".
                                      "ORDER BY revptime $sql_limit");
 }
 
