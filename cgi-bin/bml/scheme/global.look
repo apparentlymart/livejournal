@@ -109,7 +109,7 @@ CHOICES<=
 <=CHOICES
 
 PAGE<=
-{Fp}<?_code
+{Fpn}<?_code
     my ( $scratch, $elhash ) = @_;
     BML::noparse();
     return LJ::SiteScheme->render_page($elhash);
