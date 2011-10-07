@@ -5735,12 +5735,11 @@ sub num_comments_received {
     my $u = shift;
     my %opts = @_;
 
-    my $dbcr = $opts{dbh} || LJ::get_cluster_reader($u);
     my $userid = $u->id;
-
     my $memkey = [$userid, "talk2ct:$userid"];
     my $count = LJ::MemCache::get($memkey);
     unless ($count) {
+        my $dbcr = $opts{dbh} || LJ::get_cluster_reader($u);
         my $expire = time() + 3600*24*2; # 2 days;
         $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 ".
                                         "WHERE journalid=?", undef, $userid);
