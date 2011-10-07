@@ -141,17 +141,12 @@
             $body = $ad . "<?h1 $ML{'Error'} h1?><?p $ML{'.noaddress.text'} p?>";
             return;
         } else {
-            my $uid = $dbr->selectrow_array("SELECT userid FROM user WHERE journaltype='P' AND statusvis='V' ".
-                                            "AND allow_contactshow='Y' AND email=? LIMIT 1", undef, $email);
-            # try the email table
-            unless ($uid) {
-                $uid = $dbr->selectrow_array(qq{
-                    SELECT e.userid
-                    FROM user u, email e
-                    WHERE e.email=? AND e.userid=u.userid AND u.journaltype='P' AND u.statusvis='V'
-                    AND u.allow_contactshow='Y' LIMIT 1
-                }, undef, $email);
-            }
+            my $uid = $dbr->selectrow_array(qq{
+                SELECT e.userid
+                FROM user u, email e
+                WHERE e.email=? AND e.userid=u.userid AND u.journaltype='P' AND u.statusvis='V'
+                AND u.allow_contactshow='Y' LIMIT 1 }, undef, $email
+            );
             if (my $u = LJ::load_userid($uid)) {
                 LJ::load_user_props($u, "opt_whatemailshow");
                 if ($u->{'opt_whatemailshow'} eq "A" || $u->{'opt_whatemailshow'} eq "B") {
