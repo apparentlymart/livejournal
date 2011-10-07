@@ -109,9 +109,9 @@
     # various variables for the external site case
     my ( $partner, $docid, $logcom_page );
     if ( $external_site_case ) {
-        $partner
-            = LJ::PartnerSite->find_by_journal_username(
-                $journalu->username );
+        my $partner_journalname = $journalu->username;
+        $partner = LJ::PartnerSite->find_by_journal_username($partner_journalname)
+            or return "[API error: no partner for $partner_journalname]";
 
         $docid = $partner->docid_from_entry($entry);
 
