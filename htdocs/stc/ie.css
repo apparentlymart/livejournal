@@ -542,10 +542,6 @@ __________________________________________*/
 	overflow: visible;
 	padding: 0 10px;
 	}
-.b-pics-btn {
-	height: 22px;
-	padding: 0 3px;
-	}
 .b-pics-list-albums LI.b-pics-list-albums-item,
 .b-pics-edit-field-click .b-pics-input-edit,
 .b-pics-edit-field-click .b-pics-textarea-edit,
@@ -567,8 +563,11 @@ __________________________________________*/
 	display: inline;
 	zoom: 1;
 	}
+.b-pics-bar .b-pics-edit-field {
+	height: 22px;
+	}
 .b-pics-edit-field-click {
-	margin: -3px 0 0 -1px;
+	margin: -1px 0 0 -2px;
 	}
 	.b-pics-edit-field-click .b-pics-input-text {
 		padding-left: 2px;

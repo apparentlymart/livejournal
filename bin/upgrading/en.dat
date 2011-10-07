@@ -2794,6 +2794,8 @@ feeds.title.friends=friends page feed
 fotki.album.add.five.images|staleness=1
 fotki.album.add.five.images=Add 5 images to your LiveJournal entry
 
+fotki.album.no.title=(no title)
+
 fotki.album.add.image.name|staleness=1
 fotki.album.add.image.name=Add image name
 
@@ -2904,6 +2906,7 @@ fotki.album.link.cancel=Cancel
 
 fotki.album.link.click.to.upload|staleness=1
 fotki.album.link.click.to.upload=Click to upload <br> new images
+fotki.album.link.create.new=Create new
 
 fotki.album.link.edit|staleness=1
 fotki.album.link.edit=Edit
