@@ -3236,6 +3236,16 @@ fotki.storage.used.numbers=from [[max]]
 fotki.storage.used.title|staleness=1
 fotki.storage.used.title=Used [[used]]
 
+fotki.beta.description=We appreciate your opinion, so please:
+fotki.beta.listd<<
+
+<li>— tell us about any problems</li>
+<li>— <a href="http://lj-pics-beta.livejournal.com">leave your suggestions</a></li>
+
+.
+
+fotki.beta.title=Welcome to the Albums beta!
+
 gender.female|staleness=1
 gender.female=Female
 
