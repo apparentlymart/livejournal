@@ -12,6 +12,7 @@ CKEDITOR.editorConfig = function(config){
 	config.baseHref = '';
 	config.contentsCss = '/js/ck/contents.css?t=' + CKEDITOR.timestamp;
 	config.plugins =
+		'ajax,' +
 		'basicstyles,' +
 		'bidi,' +
 		'blockquote,' +
@@ -77,8 +78,12 @@ CKEDITOR.editorConfig = function(config){
 			'-',
 			'LJLink',
 			'LJUserLink',
-			'LJImage']
+			'image']
 	];
+
+	if(window.ljphotoEnabled){
+		config.toolbar_Full[0].push('LJImage_beta');
+	}
 
 	if(top.Site.media_embed_enabled){
 		config.toolbar_Full[0].push('LJEmbedLink');
@@ -94,9 +99,9 @@ CKEDITOR.editorConfig = function(config){
 		'NumberedList',
 		'BulletedList',
 		'-',
-		'JustifyLeft',
-		'JustifyCenter',
-		'JustifyRight',
+		'LJJustifyLeft',
+		'LJJustifyCenter',
+		'LJJustifyRight',
 		'-',
 		'Undo',
 		'Redo');
