@@ -2639,15 +2639,24 @@ sub editevent {
                 return $res;
             }
 
-
             $entry->update($req);
             if ( LJ::DelayedEntry::is_future_date($req) ) {
+                warn "delayed usual";
                 $res->{type} = 'delayed';
             } else {
                 my $out = $entry->convert;
+
+                if ( $out->{delete_entry} ) {
+                    $entry->delete();
+                }
+
                 $res->{type}   = 'posted';
                 $res->{itemid} = $out->{res}->{itemid};
                 $res->{anum}   = $out->{res}->{anum};
+
+                $res->{'url'} = LJ::item_link(  $uowner,
+                                                $res->{itemid},
+                                                $res->{anum} );
             }
         }
 

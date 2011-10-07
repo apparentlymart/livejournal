@@ -17,8 +17,8 @@ sub __load_delayed_entries {
     my @entries;
     
     my $list = $dbh->selectall_arrayref("SELECT journalid, delayedid, posterid " .
-                                     "FROM delayedlog2 ".
-                                     "WHERE posttime <= NOW()");
+                                        "FROM delayedlog2 ".
+                                        "WHERE posttime <= NOW()");
 
     foreach my $tuple (@$list) {
         push @entries, LJ::DelayedEntry->load_data($dbh,
@@ -60,7 +60,6 @@ sub on_pulse {
                          $entry->data->{subject},
                          $post_status->{error_message});
         }
-        
         if ( $post_status->{delete_entry} ) {
             $entry->delete();
         }
