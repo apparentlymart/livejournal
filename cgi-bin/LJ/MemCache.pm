@@ -171,6 +171,8 @@ my $used_handler;
 
 # 'host:port' => handler
 my %connections;
+## 'host:port' => pid
+my %connections_pid;
 
 use vars qw( $GET_DISABLED );
 $GET_DISABLED = 0;
@@ -225,12 +227,19 @@ sub _hashfunc {
 sub _connect {
     my ($server) = @_;
 
+    if ($connections{$server} && $connections_pid{$server} ne $$) {
+        warn "Connection to $server was established from other PID: old=$connections_pid{$server}, cur=$$";
+        my $old_handler = delete $connections{$server};
+        $old_handler->disconnect_all;
+    }
+
     unless ( exists $connections{$server} ) {
         init()
             unless defined $used_handler;
 
         $connections{$server}
             = $used_handler->new({ 'servers' => [ $server ] });
+        $connections_pid{$server} = $$;
     }
 
     return $connections{$server};
@@ -318,6 +327,7 @@ sub disconnect_all {
     foreach my $conn ( values %connections ) {
         $conn->disconnect_all;
     }
+    %connections = ();
 }
 
 sub list_servers {
