@@ -1151,7 +1151,7 @@ sub convert {
 
     my $flags     = $ext->{flags};
     my $event     = $req->{event};
-    my $eventtime = __get_datatime($req);
+    my $eventtime = __get_datatime($req, 'NO_TIMEZONE');
 
     my $security  = "public";
     my $uselogsec = 0;
@@ -1588,7 +1588,7 @@ sub __get_now {
 }
 
 sub __get_datatime {
-    my ($req) = @_;
+    my ($req, $dont_use_tz) = @_;
     __assert($req);
     __assert($req->{'tz'});
 
@@ -1601,11 +1601,9 @@ sub __get_datatime {
         time_zone => $req->{tz},
     );
 
-    #if ($dt->is_dst) {
-    #    $dt->subtract( hours => 1 );
-    #}
-
-    $dt->set_time_zone( 'UTC' );
+    if (!$dont_use_tz) {
+        $dt->set_time_zone( 'UTC' );
+    }
 
     # make the proper date format
     return sprintf("%04d-%02d-%02d %02d:%02d",  $dt->year, 

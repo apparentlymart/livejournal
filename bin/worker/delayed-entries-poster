@@ -2,14 +2,12 @@
 use lib "$ENV{LJHOME}/cgi-bin";
 LJ::NewWorker::Manual::DelayedEntriesPoster->start();
 
-package LJ::NewWorker::Manual::DelayedEntriesPoster ;
-
-
+package LJ::NewWorker::Manual::DelayedEntriesPoster;
 use strict;
 use warnings;
+
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::Manual';
-
 require 'ljlib.pl';
 require 'ljdb.pl';
 
@@ -20,7 +18,7 @@ my $cluster;
 sub options {
     my $self = shift;
     return (
-        'cluster|c=i'  => \$cluster,
+        'cluster=i'  => \$cluster,
         $self->SUPER::options(),
     );
 }
@@ -43,5 +41,9 @@ sub work {
 
 sub on_idle {
     sleep LJ::DelayedEntry::Scheduler::pulse_time();
-;
 }
+
+__PACKAGE__->start() unless caller;
+
+1;
+

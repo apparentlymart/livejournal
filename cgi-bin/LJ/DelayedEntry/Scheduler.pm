@@ -25,11 +25,9 @@ sub __load_delayed_entries {
                                                    { journalid  => $tuple->[0],
                                                      delayed_id => $tuple->[1],
                                                      posterid   => $tuple->[2]} );
-       
     }
     return \@entries;
 }
-
 
 sub __send_error {
     my ($poster, $subject, $error) = @_;
@@ -48,15 +46,14 @@ sub __send_error {
     });    
 }
 
-
 sub on_pulse {
     my ($clusterid, $dbh) = @_;
     __assert($dbh);
-
     my $entries = __load_delayed_entries($dbh);
+
     foreach my $entry(@$entries) {
         my $post_status = $entry->convert();
-        
+
         # do we need to send error
         if ( $post_status->{error_message} ) {
             __send_error($entry->poster, 
@@ -68,9 +65,7 @@ sub on_pulse {
             $entry->delete();
         }
     }
-    
 }
-
 
 sub __assert() {
     my ($statement) = @_;
