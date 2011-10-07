@@ -2,6 +2,7 @@ package LJ::TimeUtil;
 use strict;
 
 use DateTime;
+use HTTP::Date;
 
 # <LJFUNC>
 # name: LJ::TimeUtil->days_in_month
@@ -325,29 +326,26 @@ Related ML variables are: C<esn.month.day_*>.
 =cut
 
 sub fancy_time_format {
-    my ($class, $timestamp, $precision) = @_;
+    my ( $class, $timestamp, $precision, $timezone ) = @_;
     $precision ||= 'sec';
+    $timezone ||= 'UTC';
 
-    my ($sec, $min, $hour, $mday, $mon, $year) = gmtime($timestamp);
+    my $dt = DateTime->from_epoch(
+        'epoch'     => $timestamp,
+        'time_zone' => $timezone,
+    );
 
-    # gmtime has returned month and year in a weird format; let's convert
-    # these to something more convenient
-    # reference: perldoc localtime
-    $mon  += 1;
-    $year += 1900;
+    my $month_code = lc LJ::Lang::month_short( $dt->month );
+    my $day_month  = LJ::Lang::ml( 'esn.month.day_' . $month_code,
+        { 'day' => $dt->day } );
 
-    my $month_code = lc(LJ::Lang::month_short($mon));
-    my $day_month  = LJ::Lang::ml("esn.month.day_$month_code", {
-        'day' => $mday,
-    });
-
-    my $ret = "$day_month $year";
+    my $ret = $day_month . ' ' . $dt->year;
     return $ret if $precision eq 'day';
 
-    $ret .= sprintf(', %02d:%02d', $hour, $min);
+    $ret .= sprintf( ', %02d:%02d', $dt->hour, $dt->minute );
     return $ret if $precision eq 'min';
 
-    $ret .= sprintf(':%02d', $sec);
+    $ret .= sprintf( ':%02d', $dt->second );
     return $ret if $precision eq 'sec';
 
     die "unknown precision $precision";
