@@ -99,7 +99,7 @@ body<=
                                 'security'    => $entry->security,
                                 'logtime'     => $entry->logtime,
                                 'delayed_obj' => $entry,
-                                'delayedid'    => $ditem,
+                                'delayedid'   => $ditem,
                                 'itemid'      => 0,
                                 'anum'        => 0,
                                };
@@ -217,7 +217,7 @@ body<=
 
             $ret .= "<p class='b-editentry-ctrls'>";
             my $ditemid_get;
-            if ($entry) {
+            if ($entry->is_delayed) {
                 $ditemid_get = $getextra ? ("$getextra&amp;delayedid=" . $entry->delayedid) : ("?delayedid=" . $entry->delayedid);
             } else {
                 $ditemid_get = $getextra ? ("$getextra&amp;itemid=" . $entry->ditemid) : ("?itemid=" . $entry->ditemid);
@@ -306,7 +306,7 @@ body<=
         ###
 
         my $ditemid = $GET{'itemid'} || $POST{'itemid'} || 0;
-        my $delayedid = $GET{'delayedid'} || $POST{'delayedid'} || 0;    
+        my $delayedid = $GET{'delayedid'} || $POST{'delayedid'};    
 
         if ( $ditemid || $delayedid ) {
             my $itemid = 0;
@@ -768,7 +768,7 @@ LIKE_FAQ
             my $ditemid = ($res{'events_1_itemid'} * 256) + $res{'events_1_anum'};
             my $ditemid_get = '';
             
-            if ($delayedid) {
+            if ($delayedid && $delayedid != 0) {
                 $ditemid_get = $getextra ? "$getextra&delayedid=$delayedid" : "?delayedid=$delayedid";
             } else { 
                 $ditemid_get = $getextra ? "$getextra&itemid=$ditemid" : "?itemid=$ditemid";
