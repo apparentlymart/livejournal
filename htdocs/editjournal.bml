@@ -490,7 +490,7 @@ body<=
                 my $journalu = $usejournal ? $usejournal_u : $remote;
                 my $j_base = $journalu->journal_base;
                 my $entry_url = '';
-                if ($entry_obj->is_delayed && $res->{itemid}) {
+                if ($entry_obj->is_delayed) {
                     if (!$res->{itemid}) {
                         $entry_url = $entry_obj->url;
                     } else {

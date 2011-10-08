@@ -2641,8 +2641,8 @@ sub editevent {
 
             $entry->update($req);
             if ( LJ::DelayedEntry::is_future_date($req) ) {
-                warn "delayed usual";
-                $res->{type} = 'delayed';
+                $res->{type} = 'delayed';   
+                $res->{delayedid} = $delayedid;
             } else {
                 my $out = $entry->convert;
 
