@@ -180,8 +180,8 @@ sub system_alldatepart {
 
 sub is_sticky {
     my ($self) = @_;
-    return 0 unless  $self->data->{type};
-    return $self->data->{type} eq 'sticky';
+    return 0 unless  $self->data->{sticky};
+    return $self->data->{sticky};
 }
 
 sub allowmask {
@@ -475,7 +475,7 @@ sub verticals_list_for_ad {
         }
     }
     @verticals_for_ad = keys %vertical_in_list;
-    
+
     return @verticals_for_ad ? @verticals_for_ad : ();
 }
 
