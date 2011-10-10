@@ -79,6 +79,9 @@
 .th.status|staleness=1
 .th.status=Status
 
+.th.recent|staleness=1
+.th.recent=Updated
+
 .th.summary|staleness=1
 .th.summary=Summary
 

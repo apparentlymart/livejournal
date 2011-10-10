@@ -187,7 +187,7 @@ body<=
  }
 
  my $sort = $FORM{sort};
- $sort = 'date' unless $sort =~ /^id|summary|area|date$/;
+ $sort = 'date' unless $sort =~ /^id|summary|area|date|recent$/;
 
  if ($append) {
      # Counts of requests in differing states
@@ -216,6 +216,8 @@ body<=
     @support_log = sort { $a->{subject} cmp $b->{subject} } @support_log;
  } elsif ($sort eq 'area') {
     @support_log = sort { $cats->{$a->{spcatid}}->{catname} cmp $cats->{$b->{spcatid}}->{catname} } @support_log;
+ } elsif ($sort eq 'recent') {
+    @support_log = sort { $b->{'timetouched'} <=> $a->{'timetouched'} } @support_log;
  }
 
  # filter line:
@@ -300,6 +302,8 @@ body<=
     $ret .= "<td>&nbsp;<b><a href='$link'>X</a></b></td>\n";
  }
  my @headers = ( id => "ID#", summary => $ML{'.th.summary'}, area => $ML{'.th.problemarea'}, date => $ML{'.th.posted'} );
+ push @headers, recent => $ML{'.th.recent'} if $can_see_tags;
+
  while (my ($sorttype, $desc) = splice(@headers, 0, 2)) {
      if ($sort eq $sorttype) {
          $ret .= "<td><b>$desc</b></td>\n";
@@ -389,7 +393,9 @@ body<=
      # other content for this request
      my $summary = LJ::ehtml($sp->{'subject'});
      my $secold = time() - $sp->{'timecreate'};
+     my $sec_untoched = time() - $sp->{'timetouched'};
      my $age = $GET{rawdates} ? LJ::TimeUtil->mysql_time($sp->{'timecreate'}) : LJ::TimeUtil->ago_text($secold);
+     my $untoched = $GET{rawdates} ? LJ::TimeUtil->mysql_time($sp->{'timetouched'}) : LJ::TimeUtil->ago_text($sec_untoched); 
      my $probarea = $sp->{_cat}->{'catname'};
      my $points = LJ::Support::calc_points($sp, $secold);
 
@@ -416,6 +422,7 @@ body<=
      $ret .= "<td><b>$summary</b>$des$tags_line</td>\n";
      $ret .= "<td>$probarea</td>\n";
      $ret .= "<td nowrap='nowrap'><font size='-1'>$age</font></td>\n";
+     $ret .= "<td nowrap='nowrap'><font size='-1'>$untoched</font></td>\n" if $can_see_tags;
      $ret .= "<td nowrap='nowrap'><font size='-1'>$status</font></td>\n";
      $ret .= "</tr>";
 
