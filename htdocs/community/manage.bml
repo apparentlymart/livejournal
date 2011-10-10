@@ -142,7 +142,7 @@ body<=
             $ret .= BML::ml('Actionlink', {'link'=>$ML{'.commlist.actmembers2'}.$pend}) . "&nbsp;&nbsp;" if $pend;
         }
         $ret .= "</td><td align='center'>";
-        if ($mods{$id} || $smods{$id}) {
+        if ($admin{$id} || $mods{$id}) {
             my $num = $names{$id}->{'count'} || "0"; # relying on this to be <b>-wrapped
             $ret .= BML::ml('.commlist.moderation.num2', {'aopts' => "href='$LJ::SITEROOT/community/moderate.bml?authas=$user'", 'num' => $num});
         } else {
