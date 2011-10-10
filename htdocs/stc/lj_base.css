@@ -2933,6 +2933,13 @@ DIV.lj_ippu_app {
 		text-decoration: none !important;
 		color: #3F5F9E !important;
 		}
+	.index-page .b-contextualhover A:link,
+	.index-page .b-contextualhover A:visited,
+	.index-page .b-contextualhover A:hover,
+	.index-page .b-contextualhover A:active,
+	.index-page .b-contextualhover A:focus {
+		color: #3F5F9E !important;
+		}
 	.b-contextualhover .alias-unavailable A:link,
 	.b-contextualhover .alias-unavailable A:visited {
 		color: #999 !important;
