@@ -227,7 +227,7 @@ sub adult_content {
 # defined by an admin
 sub admin_content_flag {
     my ($self) = @_;
-    return $self->prop('admin_content_flag');
+    return $self->prop('admin_content_flag') || {};
 }
 
 # uses both poster- and admin-defined props to figure out the adult content level
@@ -599,17 +599,18 @@ sub update {
     $self->{taglist} = __extract_tag_list(\$req->{props}->{taglist});
     $req->{'event'} =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
 
-    $self->journal->do("UPDATE delayedlog2 SET posterid=$posterid, " .
-                         "subject=?, posttime=$qposttime, " . 
-                         "security=$qsecurity, allowmask=$qallowmask, " .    
-                         "year=?, month=?, day=?, " .
-                         "rlogtime=$rlogtime, revptime=$rposttime " .
-                         "WHERE journalid=$journalid AND delayedid=$delayedid",
-        undef,  LJ::text_trim($req->{'subject'}, 30, 0), 
-        $req->{year}, $req->{mon}, $req->{day} );
+    $self->journal->do( "UPDATE delayedlog2 SET posterid=$posterid, " .
+                        "subject=?, posttime=$qposttime, " . 
+                        "security=$qsecurity, allowmask=$qallowmask, " .    
+                        "year=?, month=?, day=?, " .
+                        "rlogtime=$rlogtime, revptime=$rposttime " .
+                        "WHERE journalid=$journalid AND delayedid=$delayedid",
+                        undef,  LJ::text_trim($req->{'subject'}, 30, 0), 
+                        $req->{year}, $req->{mon}, $req->{day} );
 
     $self->journal->do( "UPDATE delayedblob2 SET request_stor=$data_ser" . 
-                        "WHERE journalid=$journalid AND delayedid=$delayedid");
+                        "WHERE journalid=$journalid AND delayedid=$delayedid" );
+    $self->{data} = $req;
 }   
 
 sub update_tags {
@@ -687,20 +688,8 @@ sub get_entry_by_id {
         $sql_poster = 'AND posterid = ' . $user->userid . " "; 
     }
 
-    my $tz = $user->prop("timezone");
-    my $daterequest;
-    if ($tz) {
-        my $timezones = DateTime::TimeZone->new( name => $tz );
-
-        my $dt = DateTime->now( 'time_zone' => 'UTC');
-        my $offset = $timezones->offset_for_datetime($dt);
-
-        $daterequest = "DATE_FORMAT(ADDDATE(posttime, INTERVAL $offset SECOND), \"$dateformat\") AS 'alldatepart', " .
-                       "DATE_FORMAT(ADDDATE(logtime,  INTERVAL $offset SECOND), \"$dateformat\") AS 'system_alldatepart' ";
-    } else {
-        $daterequest = "DATE_FORMAT(posttime, \"$dateformat\") AS 'alldatepart', " .
+    my $daterequest  = "DATE_FORMAT(posttime, \"$dateformat\") AS 'alldatepart', " .
                        "DATE_FORMAT(logtime, \"$dateformat\") AS 'system_alldatepart' ";
-    }
 
     my $opts = $dbcr->selectrow_arrayref("SELECT journalid, delayedid, posterid, " .
                                          "$daterequest, logtime " .
@@ -1136,356 +1125,28 @@ sub can_delete_delayed_item {
 sub convert {
     my ($self) = @_;
     my $req = $self->{data};
+    
+    my $flags = { 'noauth' => 1, 
+                  'u' => $self->poster };
 
-    my $journal    = $self->journal;
-    my $journalid  = $journal->userid;
-    my $clusterid  = $journal->clusterid;
+    my $err = 0;
+    my $ree = LJ::Protocol::do_request("postevent", $req, \$err, $flags);
+    return { delete_entry => 1, res => $ree };
+}
 
-    my $poster     = $self->poster;
-    my $posterid   = $poster->userid;
+sub convert_from_data {
+    my ($self, $req) = @_;
+    my $flags = { 'noauth' => 1,
+                  'u' => $self->poster };
 
-    my $dbh  = LJ::get_db_writer();
-    my $dbcm = LJ::get_cluster_master($journal);
-
-    my $ext = $req->{data_d_ext};
-
-    my $flags     = $ext->{flags};
-    my $event     = $req->{event};
-    my $eventtime = __get_datatime($req, 'NO_TIMEZONE');
-
-    my $security  = "public";
-    my $uselogsec = 0;
-
-    if ($req->{'security'} eq "usemask" || $req->{'security'} eq "private") {
-        $security = $req->{'security'};
+    my $err = 0;
+    my $res = LJ::Protocol::do_request("postevent", $req, \$err, $flags);
+    my $fail = !defined $res->{itemid} && $res->{message};
+    if ($fail) {
+        $self->update($req);
     }
+    return { delete_entry => !$fail, res => $res };
 
-    if ($req->{'security'} eq "usemask") {
-        $uselogsec = 1;
-    }
-
-    my $qsecurity  = $dbh->quote($security);
-    my $qallowmask = $req->{'allowmask'}+0;
-    my $qeventtime = $dbh->quote($eventtime);
-    my $now        = $dbcm->selectrow_array("SELECT UNIX_TIMESTAMP()");
-    my $anum       = int(rand(256));
-    my $jitemid    = LJ::alloc_user_counter($journal, "L");
-    my $rlogtime   = $LJ::EndOfTime;
-
-    # do processing of embedded polls (doesn't add to database, just
-    # does validity checking)
-    my @polls = ();
-
-    if (LJ::Poll->contains_new_poll(\$event)) {
-        return "Your account type doesn't permit creating polls."
-            unless (LJ::get_cap($poster, "makepoll")
-                    || ($journal->{'journaltype'} eq "C"
-                    && LJ::get_cap($journal, "makepoll")
-                    && LJ::can_manage_other($poster, $journal)));
-
-        my $error = "";
-        @polls = LJ::Poll->new_from_html(\$event, \$error, {
-            'journalid' => $journalid,
-            'posterid' => $posterid,
-        });
-
-        return $error if $error;
-    }
-
-    $req->{subject}    = $req->{subject} || '';
-    $req->{usejournal} = $req->{usejournal} || '';
-    $req->{allowmask}  = $req->{allowmask} || '';
-    $req->{security}   = $req->{security} || '';
-
-    my $dupsig = Digest::MD5::md5_hex(join('', map { $req->{$_} }
-                            qw(subject event usejournal security allowmask)));
-
-    my $lock_key = "post-$journalid";
-
-    # release our duplicate lock
-    my $release = sub {  $dbcm->do("SELECT RELEASE_LOCK(?)", undef, $lock_key); };
-
-    # our own local version of fail that releases our lock first
-    my $fail = sub { $release->(); return fail(@_); };
-
-    my $res = {};
-    my $res_done = 0;  # set true by getlock when post was duplicate, or error getting lock
-
-    my $getlock = sub {
-        my $r = $dbcm->selectrow_array("SELECT GET_LOCK(?, 2)", undef, $lock_key);
-
-        unless ($r) {
-            $res = undef;    # a failure case has an undef result
-            $res_done = 1;   # tell caller to bail out
-
-            return {
-                error_message => "can't get lock",
-                delete_entry  => 0,
-            }; 
-        }
-
-        my @parts = split(/:/, $poster->{'dupsig_post'});
-
-        if ($parts[0] eq $dupsig) {
-            # duplicate!  let's make the client think this was just the
-            # normal first response.
-            $res->{'itemid'} = $parts[1];
-            $res->{'anum'}   = $parts[2];
-            
-            my $dup_entry = LJ::Entry->new(
-                $journal,
-                jitemid => $res->{'itemid'},
-                anum    => $res->{'anum'},
-            );
-            $res->{'url'} = $dup_entry->url;
-            
-            $res_done = 1;
-            $release->();
-        }
-    };
-
-    # bring in LJ::Entry with Class::Autouse
-    LJ::Entry->can("dostuff");
-    LJ::replycount_do($journal, $jitemid, "init");
-
-    # remove comments and logprops on new entry ... see comment by this sub for clarification
-    LJ::Protocol::new_entry_cleanup_hack($poster, $jitemid) if $LJ::NEW_ENTRY_CLEANUP_HACK;
-    my $verb = $LJ::NEW_ENTRY_CLEANUP_HACK ? 'REPLACE' : 'INSERT';    
-
-    my $dberr;
-    $journal->log2_do(\$dberr,  "INSERT INTO log2 (journalid, jitemid, posterid, eventtime, logtime, security, ".
-                                "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
-                                "VALUES ($journalid, $jitemid, $posterid, $qeventtime, FROM_UNIXTIME($now), $qsecurity, $qallowmask, ".
-                                "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
-                                "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
-    return {
-        error_message => $dberr,
-        delete_entry  => 0,
-    } if $dberr;
-
-    # post become 'sticky post'
-    if ( $req->{sticky}  ) {
-        $journal->set_sticky($jitemid);
-    }
-
-    LJ::MemCache::incr([$journalid, "log2ct:$journalid"]);
-    LJ::memcache_kill($journalid, "dayct2");
-    __kill_dayct2_cache();
-
-    # set userprops.
-    {
-        my %set_userprop;
-
-        # keep track of itemid/anum for later potential duplicates
-        $set_userprop{"dupsig_post"} = "$dupsig:$jitemid:$anum";
-
-        # record the eventtime of the last update (for own journals only)
-        $set_userprop{"newesteventtime"} = $eventtime if $posterid == $journalid;
-
-        $poster->set_prop(\%set_userprop);
-    }
-
-    # end duplicate locking section
-    $release->();
-
-    my $ditemid = $jitemid * 256 + $anum;
-    ### finish embedding stuff now that we have the itemid
-    {
-        ### this should NOT return an error, and we're mildly fucked by now
-        ### if it does (would have to delete the log row up there), so we're
-        ### not going to check it for now.
-        
-        my $error = "";
-        foreach my $poll (@polls) {
-            $poll->save_to_db(
-                journalid => $journalid,
-                posterid  => $posterid,
-                ditemid   => $ditemid,
-                error     => \$error,
-            );
-            
-            my $pollid = $poll->pollid;
-            
-            $event =~ s/<lj-poll-placeholder>/<lj-poll-$pollid>/;
-        }
-    }
-    #### /embedding
-
-    ### extract links for meme tracking
-    unless ( $req->{'security'} eq "usemask" ||
-             $req->{'security'} eq "private" )
-    {
-        foreach my $url (LJ::get_urls($event)) {
-            LJ::record_meme($url, $posterid, $ditemid, $journalid);
-        }
-    }
-
-    # record journal's disk usage
-    my $bytes = length($event) + length($req->{'subject'});
-    $journal->dudata_set('L', $jitemid, $bytes);
-
-    $journal->do("$verb INTO logtext2 (journalid, jitemid, subject, event) ".
-        "VALUES ($journalid, $jitemid, ?, ?)", undef, $req->{'subject'},
-    LJ::text_compress($event));
-
-    if ($journal->err) {
-        my $msg = $journal->errstr;
-        LJ::delete_entry($journal, $jitemid, undef, $anum);   # roll-back
-         return  { error_message =>  "logsec2:$msg", delete_entry => 0 };
-    }
-
-    LJ::MemCache::set(  [$journalid, "logtext:$clusterid:$journalid:$jitemid"],
-                        [ $req->{'subject'}, $event ]);
-
-    # keep track of custom security stuff in other table.
-    if ($uselogsec) {
-        $journal->do("INSERT INTO logsec2 (journalid, jitemid, allowmask) ".
-            "VALUES ($journalid, $jitemid, $qallowmask)");
-        if ($journal->err) {
-            my $msg = $journal->errstr;
-            LJ::delete_entry($journal, $jitemid, undef, $anum);   # roll-back
-            return  { error_message =>  "logsec2:$msg", delete_entry => 0 };
-        }
-    }
-
-    # Entry tags
-    if ($req->{props} && defined $req->{props}->{taglist}) {
-        # slightly misnamed, the taglist is/was normally a string, but now can also be an arrayref.
-        my $taginput = $req->{props}->{taglist};
-        
-        my $logtag_opts = {
-            remote       => $poster,
-            skipped_tags => [], # do all possible and report impossible
-        };
-
-        if (ref $taginput eq 'ARRAY') {
-            $logtag_opts->{set} = [@$taginput];
-            $req->{props}->{taglist} = join(", ", @$taginput);
-        }
-        else {
-            $logtag_opts->{set_string} = $taginput;
-        }
-
-        my $rv = LJ::Tags::update_logtags($journal, $jitemid, $logtag_opts);
-        push @{$res->{warnings} ||= []}, LJ::Lang::ml('/update.bml.tags.skipped', { 'tags' => join(', ', @{$logtag_opts->{skipped_tags}}),
-            'limit' => $journal->get_cap('tags_max') } )
-        if @{$logtag_opts->{skipped_tags}};
-    }
-
-    ## copyright
-    if (LJ::is_enabled('default_copyright', $poster)) {
-        $req->{'props'}->{'copyright'} = $poster->prop('default_copyright')
-            unless defined $req->{'props'}->{'copyright'};
-        $req->{'props'}->{'copyright'} = 'P' # second try
-            unless defined $req->{'props'}->{'copyright'};
-    }
-    else {
-        delete $req->{'props'}->{'copyright'};
-    }
-
-    ## give features
-    if (LJ::is_enabled('give_features')) {
-        $req->{'props'}->{'give_features'} = ($req->{'props'}->{'give_features'} eq 'enable') ? 1 :
-        ($req->{'props'}->{'give_features'} eq 'disable') ? 0 :
-        1; # LJSUP-9142: All users should be able to use give button 
-    }
-
-    # meta-data
-    if (%{$req->{'props'}}) {
-        my $propset = {};
-
-        foreach my $pname (keys %{$req->{'props'}}) {
-            next unless $req->{'props'}->{$pname};
-            next if $pname eq "revnum" || $pname eq "revtime";
-            my $p = LJ::get_prop("log", $pname);
-            next unless $p;
-            next unless $req->{'props'}->{$pname};
-            $propset->{$pname} = $req->{'props'}->{$pname};
-        }
-
-        my %logprops;
-        LJ::set_logprop($journal, $jitemid, $propset, \%logprops) if %$propset;
-
-        # if set_logprop modified props above, we can set the memcache key
-        # to be the hashref of modified props, since this is a new post
-        LJ::MemCache::set([$journal->{'userid'}, "logprop2:$journal->{'userid'}:$jitemid"],
-        \%logprops) if %logprops;
-    }
-
-    $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$jitemid ".
-        "WHERE userid=$journalid") unless $flags->{'notimeupdate'};
-    LJ::MemCache::set([$journalid, "tu:$journalid"], pack("N", time()), 30*60);
-
-    # argh, this is all too ugly.  need to unify more postpost stuff into async
-    $poster->invalidate_directory_record;
-
-    # note this post in recentactions table
-    LJ::note_recent_action($journal, 'post');
-
-    # if the post was public, and the user has not opted out, try to insert into the random table;
-    # note we do INSERT INGORE since there will be lots of people posting every second, and that's
-    # the granularity we use
-    if ($security eq 'public' && LJ::u_equals($poster, $journal) && ! $poster->prop('latest_optout')) {
-        $poster->do("INSERT IGNORE INTO random_user_set (posttime, userid) VALUES (UNIX_TIMESTAMP(), ?)",
-            undef, $poster->{userid});
-    }
-
-    my @jobs;  # jobs to add into TheSchwartz
-
-    # notify weblogs.com of post if necessary
-    if ( !$LJ::DISABLED{'weblogs_com'} && $poster->{'opt_weblogscom'} 
-         && LJ::get_cap($poster, "weblogscom") &&
-         $security eq "public" ) {
-            push @jobs, TheSchwartz::Job->new_from_array("LJ::Worker::Ping::WeblogsCom", {
-                'user'  => $poster->{'user'},
-                'title' => $poster->{'journaltitle'} || $poster->{'name'},
-                'url'   => LJ::journal_base($poster) . "/",
-        });
-    }
-
-    my $entry = LJ::Entry->new($journal, jitemid => $jitemid, anum => $anum);
-
-    # run local site-specific actions
-    LJ::run_hooks("postpost", {
-        'itemid'    => $jitemid,
-        'anum'      => $anum,
-        'journal'   => $journal,
-        'poster'    => $poster,
-        'event'     => $event,
-        'eventtime' => $eventtime,
-        'subject'   => $req->{'subject'},
-        'security'  => $security,
-        'allowmask' => $qallowmask,
-        'props'     => $req->{'props'},
-        'entry'     => $entry,
-        'jobs'      => \@jobs,  # for hooks to push jobs onto
-        'req'       => $req,
-        'res'       => $res,
-    });
-
-    # cluster tracking
-    LJ::mark_user_active($poster, 'post');
-    LJ::mark_user_active($journal, 'post') unless LJ::u_equals($poster, $journal);
-
-    $res->{'itemid'} = $jitemid;  # by request of mart
-    $res->{'anum'}   = $anum;
-    $res->{'url'}    = $entry->url;
-
-    push @jobs, LJ::Event::JournalNewEntry->new($entry)->fire_job;
-    push @jobs, LJ::Event::UserNewEntry->new($entry)->fire_job if (!$LJ::DISABLED{'esn-userevents'} || $LJ::_T_FIRE_USERNEWENTRY);
-    push @jobs, LJ::EventLogRecord::NewEntry->new($entry)->fire_job;
-
-    # PubSubHubbub Support
-    LJ::Feed::generate_hubbub_jobs($journal, \@jobs) unless $journal->is_syndicated;
-
-    my $sclient = LJ::theschwartz();
-
-    if ($sclient && @jobs) {
-        my @handles = $sclient->insert_jobs(@jobs);
-        # TODO: error on failure?  depends on the job I suppose?  property of the job?
-    }
-
-    return { delete_entry => 1, res => $res };
 }
 
 sub __delayed_entry_can_see {

@@ -2639,12 +2639,12 @@ sub editevent {
                 return $res;
             }
 
-            $entry->update($req);
             if ( LJ::DelayedEntry::is_future_date($req) ) {
+                $entry->update($req);
                 $res->{type} = 'delayed';   
                 $res->{delayedid} = $delayedid;
             } else {
-                my $out = $entry->convert;
+                my $out = $entry->convert_from_data($req);
 
                 if ( $out->{delete_entry} ) {
                     $entry->delete();
