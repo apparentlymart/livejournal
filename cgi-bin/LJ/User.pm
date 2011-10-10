@@ -3818,9 +3818,11 @@ sub can_use_ljphoto {
     return 0 if $LJ::DISABLED{'new_ljphoto'};
 
     ## For beta-testers only.
-    my $comm = LJ::load_user($LJ::LJPHOTO_ALLOW_FROM_COMMUNITY);
-    return 1 if $u->can_manage ($comm);
-    return 0 unless $comm && $comm->is_friend($u);
+    foreach my $community (@LJ::LJPHOTO_ALLOW_FROM_COMMUNITIES){
+        my $comm = LJ::load_user($community);
+        next unless $comm;
+        return 1 if $u->can_manage ($comm) or $comm->is_friend($u);
+    }
 
     return 1;
 }
