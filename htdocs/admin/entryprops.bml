@@ -25,7 +25,7 @@ body<=
 
     my $entry = LJ::Entry->new_from_url($GET{url});
     if (!$entry) {
-        $entry = LJ::DelayedEntry->create_from_url($GET{url});
+        $entry = LJ::DelayedEntry->create_from_url($GET{url}, { 'delayed_visibility' => 1});
     }
 
     unless ($entry && $entry->valid) {
