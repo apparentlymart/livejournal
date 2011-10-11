@@ -7,10 +7,11 @@
 
     my $language_scope = '/tools/endpoints/ctxpopup.bml';
     BML::set_language_scope($language_scope);
-    
+
     my $err = sub {
         my $msg = shift;
         my %extra = @_;
+
         return LJ::JSON->to_json({
             error => "$msg",
             %extra,
@@ -18,21 +19,22 @@
     };
 
     # get user
-    my $remote = LJ::get_remote();
+    my $remote        = LJ::get_remote();
     my $is_remote_sup = LJ::SUP->is_remote_sup();
-    my $journalu = LJ::get_active_journal();
+    my $journalu      = LJ::get_active_journal();
 
     my $get_user = sub {
         # three ways to load a user:
 
         # username:
-        if (my $user = LJ::canonical_username($GET{'user'})) {
+        if ( my $user = LJ::canonical_username($GET{'user'}) ) {
             return LJ::load_user($user);
         }
 
         # identity:
         if (my $userid = $GET{'userid'}) {
             return undef unless $userid =~ /^\d+$/;
+
             my $u = LJ::load_userid($userid);
             return undef unless $u && $u->identity;
             return $u;
@@ -41,6 +43,7 @@
         # based on userpic url
         if (my $upurl = $GET{'userpic_url'}) {
             return undef unless $upurl =~ m!(\d+)/(\d+)!;
+
             my ($picid, $userid) = ($1, $2);
             my $u = LJ::load_userid($userid);
             my $up = LJ::Userpic->instance($u, $picid);
@@ -54,16 +57,11 @@
     BML::set_content_type('text/javascript; charset=utf-8');
     BML::finish();
 
-    return $err->("Error: Invalid mode")
-        unless $GET{mode} eq 'getinfo';
-    return $err->("No such user", noshow => 1)
-        unless $u;
-    return $err->("This user's account is deleted.")
-        if $u->is_deleted;
-    return $err->("This user's account is deleted and purged.")
-        if $u->is_expunged;
-    return $err->("This user's account is suspended.")
-        if $u->is_suspended;
+    return $err->("Error: Invalid mode")                        unless $GET{mode} eq 'getinfo';
+    return $err->("No such user", noshow => 1)                  unless $u;
+    return $err->("This user's account is deleted.")            if $u->is_deleted;
+    return $err->("This user's account is deleted and purged.") if $u->is_expunged;
+    return $err->("This user's account is suspended.")          if $u->is_suspended;
 
     # uri for changerelation auth token
     my $uri = '/__rpc_changerelation';
@@ -75,15 +73,19 @@
 
     $ret{url_buy_userhead} = $LJ::SITEROOT."/shop/userheads.bml";
     my $usericon = $u->custom_usericon;
+
     if ($usericon eq '' || scalar grep { $usericon eq $_ } @LJ::DEFAULT_USERHEADS_LIST) {
         $ret{is_custom_userhead} = 0;
-    } else {
+    }
+    else {
         $ret{is_custom_userhead} = 1;
     }
+
     $ret{is_custom_userhead} = 0 if !$is_remote_sup && $LJ::DISABLED{'userhead_nonsup'};
 
     my $up = $u->userpic;
-    if ($up) {
+
+    if ( $up ) {
         $ret{url_userpic} = $up->url;
         $ret{userpic_w}   = $up->width;
         $ret{userpic_h}   = $up->height;
@@ -116,7 +118,7 @@
         $ret{userpic_h} = 100;
     }
 
-    if ($remote) {
+    if ( $remote ) {
         $ret{is_friend}    = LJ::is_friend($remote, $u);
         $ret{is_friend_of} = LJ::is_friend($u, $remote);
         $ret{is_requester} = LJ::u_equals($remote, $u);
@@ -124,41 +126,46 @@
 
     $ret{is_logged_in}  = $remote ? 1 : 0;
 
-    if ($u->is_comm) {
-        $ret{url_joincomm}   = "$LJ::SITEROOT/community/join.bml?comm=" . $u->{user};
-        $ret{url_leavecomm}  = "$LJ::SITEROOT/community/leave.bml?comm=" . $u->{user};
-        $ret{is_member} = LJ::is_friend($u, $remote) if $remote;
+    if ( $u->is_comm ) {
+        $ret{url_joincomm}  = "$LJ::SITEROOT/community/join.bml?comm=" . $u->{user};
+        $ret{url_leavecomm} = "$LJ::SITEROOT/community/leave.bml?comm=" . $u->{user};
+        $ret{is_member}     = LJ::is_friend($u, $remote) if $remote;
 
         push @actions, 'join', 'leave';
     }
 
-    if ($u && $remote) {
-        $ret{alias} = LJ::ljuser_alias($u->{user});
+    if ( $u && $remote ) {
+        $ret{alias}        = LJ::ljuser_alias($u->{user});
         $ret{alias_enable} = $remote->get_cap('aliases') ? 1 : 0;
-        $ret{alias_title} = $ret{alias} ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
+        $ret{alias_title}  = $ret{alias} ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
     }
-    
+
     my @ml_keys = qw/
-        add_friend ban ban_in_my community edit_friend_tags feed join_community journal leave 
+        add_friend ban ban_in_my community edit_friend_tags feed join_community journal leave
         lists_as_friend loading mutual_friend profile remove_friend
         report send_gift buy_same_userhead send_message stop_community subscribe_feed
         this_is_you unban unsubscribe_feed updating view watch_community
         your_friend you_member you_subscribed you_watching
     /;
+
     ## optimization: load all ML strings into local cache at once
     LJ::Lang::get_text_multi(BML::get_language(), undef, [map { "$language_scope.$_" } @ml_keys]);
+
     foreach my $key (@ml_keys) {
         $ret{"ml_$key"} = $ML{".$key"};
     }
+
     if ($journalu && $journalu->is_community) {
         $ret{'ml_filter_by_poster_me'}  = $ML{'ml_filter_by_poster_me'};
         $ret{'ml_filter_by_poster'}     = $ML{'ml_filter_by_poster'};
     }
+
     if ($u && $remote && $u==$remote && $u->is_identity) {
         $ret{"ml_upgrade_account"} = $ML{"horizon.nav.identity_convert"};
     }
-    
+
     my $cids = [];
+
     if ($remote) {
         $cids = LJ::load_rel_target($remote, 'A'); # admined communities
     }
@@ -176,16 +183,17 @@
 
         foreach my $action (@actions) {
             $ret{"${action}_authtoken"} = LJ::Auth->ajax_auth_token(
-                                                                    $remote,
-                                                                    $uri,
-                                                                    target => $u->user,
-                                                                    action => $action,
-                                                                    );
+                $remote,
+                $uri,
+                target => $u->user,
+                action => $action,
+            );
         }
     }
 
     sleep(1.5) if $LJ::IS_DEV_SERVER;
     my @hooked = LJ::run_hooks("ctxpopup_extra_info", $u);
+
     foreach my $result (@hooked) {
         %ret = (%ret, @$result);
     }
@@ -195,6 +203,7 @@
 
         if (@$cids) {
             $ret{is_banned_everywhere} = 1;
+
             foreach my $cid (@$cids) {
                 $ret{is_banned_everywhere} = 0 unless LJ::is_banned($u, $cid);
             }
@@ -204,23 +213,30 @@
     if ($remote && $u && $ret{is_custom_userhead} && $u->custom_usericon_appid) {
         $ret{is_app_userhead} = 1;
         my $app = LJ::UserApps->get_application(id => $u->custom_usericon_appid);
+
         if($app && $app->can_show_restricted) {
             $ret{is_app_userhead} = 1;
+
             if ($app->is_authorized(user => $remote)) {
                 if($remote->custom_usericon_appid == $app->id) {
-                    $ret{url_userhead_install} = $app->href;    # default view !!! TODO: pass referer parameters
+                    # default view !!! TODO: pass referer parameters
+                    $ret{url_userhead_install} = $app->href;
                     $ret{ml_userhead_install} = BML::ml('.app_use');
-                } else {
-                    $ret{url_userhead_install} = "$LJ::SITEROOT/manage/profile/#userheads";   # Edit profile
+                }
+                else {
+                    # Edit profile
+                    $ret{url_userhead_install} = "$LJ::SITEROOT/manage/profile/#userheads";
                     $ret{ml_userhead_install} = BML::ml('.app_change_userhead');
                 }
-            } else {    # Not installed
-                $ret{url_userhead_install} = $app->href;    # INSTALL view !!!
+            }
+            else {    # Not installed
+                # INSTALL view !!!
+                $ret{url_userhead_install} = $app->href;
                 $ret{ml_userhead_install} = BML::ml('.app_install', { name => $app->name });
             }
         }
     }
-    
+
     $ret{success} = 1;
     return LJ::JSON->to_json(\%ret);
 }
