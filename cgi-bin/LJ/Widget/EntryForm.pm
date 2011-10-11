@@ -448,7 +448,7 @@ sub render_metainfo_block {
             my @choices;
 
             if ( $remote->is_personal ) {
-                push @choices, '' => $remote->username;
+                push @choices, $remote->username => $remote->username;
             } else {
                 push @choices,
                     '[none]' => LJ::Lang::ml('entryform.postto.select');
