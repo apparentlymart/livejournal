@@ -77,6 +77,9 @@ body<=
             
             $res = $u->set_deleted;
             
+            LJ::statushistory_add( $u, $remote, 'journal_status',
+                'Set to deleted via accountstatus.bml' );
+
             if($res) {
                 # sending ESN status was changed
                 LJ::Event::SecurityAttributeChanged->new($u, { 
@@ -99,6 +102,13 @@ body<=
                 O => 'set_readonly',
                 R => 'set_renamed',
             }->{$new_status};
+
+            my $statushistory_msg = 'Undeleted via accountstatus.bml, '
+                . 'setting statusvis to ' . $new_status;
+
+            LJ::statushistory_add( $u, $remote, 'journal_status',
+                $statushistory_msg );
+
             return $dberr->("Can't set status '$new_status'") unless $method;
  
             $res = $u->$method;
