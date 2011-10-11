@@ -129,8 +129,8 @@
         $ret{alias_title} = $ret{alias} ne '' ? $ML{'.editalias.title'} : $ML{'.addalias.title'};
     }
     
-    my @ml_keys = qw/ 
-        add_friend ban community edit_friend_tags feed join_community journal leave 
+    my @ml_keys = qw/
+        add_friend ban ban_in_my community edit_friend_tags feed join_community journal leave 
         lists_as_friend loading mutual_friend profile remove_friend
         report send_gift buy_same_userhead send_message stop_community subscribe_feed
         this_is_you unban unsubscribe_feed updating view watch_community

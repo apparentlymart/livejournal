@@ -431,7 +431,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				buildObject.banCheckboxes.push({
 					selector: '.ban_user',
 					className: 'ban_user',
-					label: data.ml_ban,
+					label: data.ml_ban_in_my,
 					checked: data.is_banned,
 					change: function(e)
 					{
