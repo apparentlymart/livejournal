@@ -841,7 +841,7 @@ sub resolve_plural {
     my $count       = $vars->{$varname};
     my @wlist       = split( /\|/, $wordlist );
     my $plural_form = plural_form( $lang, $count );
-    return $wlist[$plural_form];
+    return ( exists $wlist[$plural_form] ? $wlist[$plural_form] : '' );
 }
 
 my %PLURAL_FORMS_HANDLERS = (
