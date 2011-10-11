@@ -11,9 +11,10 @@ sub desc { "Change the status of an account." }
 sub args_desc { [
                  'account' => "The account to update.",
                  'status' => "One of 'normal', 'memorial' (no new entries), 'locked' (no new entries or comments), or 'readonly' (no new entries or comments, but can log in and delete entries and comments), 'deleted'.",
+                 'reason' => "Why you are changing journal status (optional).", 
                  ] }
 
-sub usage { '<account> <status>' }
+sub usage { '<account> <status> [ <reason> ]' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
@@ -23,8 +24,8 @@ sub can_execute {
 sub execute {
     my ($self, $user, $status, @args) = @_;
 
-    return $self->error("This command takes exactly two arguments. Consult the reference")
-        unless $user && $status && scalar(@args) == 0;
+    return $self->error("This command takes two mandatory arguments. Consult the reference")
+        unless $user && $status;
 
     my $u = LJ::load_user($user);
     return $self->error("Invalid username: $user")
@@ -43,7 +44,9 @@ sub execute {
 
     # update statushistory first so we have the old statusvis
     my $remote = LJ::get_remote();
-    LJ::statushistory_add($u, $remote, "journal_status", "Changed status to $status from " . $u->statusvis);
+    my $reason = '';
+    $reason = join ' ', '. Reason:', @args if @args;
+    LJ::statushistory_add($u, $remote, "journal_status", "Changed status to $status from " . $u->statusvis. $reason);
 
     # we cannot call set_statusvis directly - it does not make all needed hooks, only sets statusvis
     # so call set_* method
@@ -61,7 +64,7 @@ sub execute {
         die "No call to setter for $statusvis case";
     }
 
-    return $self->print("Account has been marked as $status");
+    return $self->print("Account has been marked as $status". $reason);
 }
 
 1;

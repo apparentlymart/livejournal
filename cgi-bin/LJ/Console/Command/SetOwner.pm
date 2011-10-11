@@ -11,10 +11,10 @@ sub desc { "Set user as supermaintainer for community." }
 sub args_desc { [
                  'community' => "The community for which to set supermaintainer",
                  'username'  => "The username of the account to set as supermaintainer",
-                 'reason'    => "Why you're setting the account as supermaintainer.",
+                 'reason'    => "Why you're setting the account as supermaintainer (optional).",
                  ] }
 
-sub usage { '<community> <username> <reason>' }
+sub usage { '<community> <username> [ <reason> ]' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
@@ -22,10 +22,10 @@ sub can_execute {
 }
 
 sub execute {
-    my ($self, $comm, $user, $reason, @args) = @_;
+    my ($self, $comm, $user, @args) = @_;
 
-    return $self->error("This command takes two arguments. Consult the reference.")
-        unless $comm && $user && scalar(@args) == 0;
+    return $self->error("This command takes two mandatory arguments. Consult the reference.")
+        unless $comm && $user;
 
     my $remote = LJ::get_remote();
     my $c = LJ::load_user($comm);
@@ -59,13 +59,15 @@ sub execute {
         }
     }
 
-    LJ::statushistory_add($c, $remote, 'set_owner', "Console set owner and new maintainer as ".$u->{user});
+    my $reason = '';
+    $reason = join ' ', '. Reason: ', @args if @args;
+    LJ::statushistory_add($c, $remote, 'set_owner', "Console set owner and new maintainer as " . $u->{'user'}. $reason);
     LJ::set_rel($c->{userid}, $u->{userid}, 'S');
     ## Set a new supermaintainer as maintainer too.
     LJ::set_rel($c->{userid}, $u->{userid}, 'A');
     $c->log_event('maintainer_add', { actiontarget => $u->{userid}, remote => $remote });
 
-    $self->print("User '$user' setted as supermaintainer for '$comm'.");
+    $self->print("User '$user' setted as supermaintainer for '$comm'". $reason);
 
     return 1;
 }

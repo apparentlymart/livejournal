@@ -11,9 +11,10 @@ sub desc { "Transfer maintainership of a community to another user." }
 sub args_desc { [
                  'community' => "The username of the community.",
                  'new_owner' => "The username of the new owner of the community.",
+                 'reason'    => "Why you are changing community admin (optional)."
                  ] }
 
-sub usage { '<community> <new_owner>' }
+sub usage { '<community> <new_owner> [ <reason> ]' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
@@ -23,8 +24,8 @@ sub can_execute {
 sub execute {
     my ($self, $comm, $maint, @args) = @_;
 
-    return $self->error("This command takes exactly two arguments. Consult the reference")
-        unless $comm && $maint && scalar(@args) == 0;
+    return $self->error("This command takes two mandatory arguments. Consult the reference")
+        unless $comm && $maint;
 
     my $ucomm = LJ::load_user($comm);
     my $unew  = LJ::load_user($maint);
@@ -54,10 +55,12 @@ sub execute {
 
     # log to statushistory
     my $remote = LJ::get_remote();
-    LJ::statushistory_add($ucomm, $remote, "communityxfer", "Changed maintainer to ". $unew->user ." (". $unew->id .").");
-    LJ::statushistory_add($unew, $remote, "communityxfer", "Control of '". $ucomm->user ."' (". $ucomm->id .") given.");
+    my $reason = '';
+    $reason = join ' ', ' Reason:', @args if @args;
+    LJ::statushistory_add($ucomm, $remote, "communityxfer", "Changed maintainer to ". $unew->user ." (". $unew->id .")." . $reason);
+    LJ::statushistory_add($unew, $remote, "communityxfer", "Control of '". $ucomm->user ."' (". $ucomm->id .") given." . $reason);
 
-    return $self->print("Transferred maintainership of '" . $ucomm->user . "' to '" . $unew->user . "'.");
+    return $self->print("Transferred maintainership of '" . $ucomm->user . "' to '" . $unew->user . "'". $reason);
 }
 
 1;
