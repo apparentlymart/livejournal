@@ -108,13 +108,16 @@
     } elsif ($action eq 'setUnban') {    
         my $unban_user = LJ::load_user($target);
         $success = $remote->unban_user_multi($unban_user->{userid});
-    
+
     } elsif ($action eq 'banEverywhere') {
 
         my $ban_user = LJ::load_user($target);
 
-        $cids = LJ::load_rel_target($remote, 'A'); # admined communities
-        my $us = LJ::load_userids(@$cids, $remote->userid); # all communities and remote personal account
+        # admined communities
+        $cids = LJ::load_rel_target($remote, 'A');
+
+        # all communities
+        my $us = LJ::load_userids(@$cids);
 
         my $ok = 1;
         $success = 1;
