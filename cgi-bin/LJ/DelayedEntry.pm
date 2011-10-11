@@ -7,11 +7,11 @@ use LJ::User;
 use Storable;
 
 sub create_from_url {
-    my ($class, $url) = @_;
+    my ($class, $url, $opts) = @_;
 
     if ($url =~ m!(.+)/d(\d+)\.html!) {
         my $u = LJ::User->new_from_url($1) or return undef;
-        return LJ::DelayedEntry->get_entry_by_id($u, $2);
+        return LJ::DelayedEntry->get_entry_by_id($u, $2, $opts);
     }
 
     return undef;
@@ -215,7 +215,65 @@ sub is_future_date {
 
 sub visible_to {
     my ($self, $remote, $opts) = @_;
-    return __delayed_entry_can_see($self->journal, $remote);
+    return 0 unless $self->valid;
+
+    # can see anything with viewall
+    return 1 if $opts->{'viewall'};
+        
+    # can't see anything unless the journal is visible
+    # unless you have viewsome. then, other restrictions apply
+    if (!$opts->{'viewsome'}) {
+        return 0 if $self->journal->{statusvis} =~ m/[DSX]/;
+        
+        # can't see anything by suspended users
+        my $poster = $self->poster;
+        return 0 if $poster->{statusvis} eq 'S';
+        
+        # if poster choosed to delete jouranl and all external content, 
+        # then don't show his/her entries, except in some protected journals like 'lj_core'
+        if ($poster->{statusvis} eq 'D') {
+            my ($purge_comments, $purge_community_entries) = split /:/, $poster->prop("purge_external_content");
+            if ($purge_community_entries) {
+                my $journal_name = $self->journal->{user};
+                if (!$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$journal_name}) {
+                    return 0;
+                }
+            }
+        }
+        
+        # can't see suspended entries
+        return 0 if $self->is_suspended_for($remote);
+    }   
+            
+    # public is okay
+    return 1 if $self->security eq "public";
+    
+    # must be logged in otherwise
+    return 0 unless $remote;
+        
+    my $userid   = int($self->journalid);
+    my $remoteid = int($remote->userid);
+
+    # owners can always see their own.
+    return 1 if $userid == $remoteid;
+
+    # author in community can always see their post
+    return 1 if $remoteid == $self->posterid and not $LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $self->journal->{user} };
+
+    # other people can't read private
+    return 0 if $self->security eq "private";
+
+    # should be 'usemask' security from here out, otherwise
+    # assume it's something new and return 0
+    return 0 unless $self->security eq "usemask";
+
+    # if it's usemask, we have to refuse non-personal journals,
+    # so we have to load the user
+    return 0 unless $remote->{'journaltype'} eq 'P' || $remote->{'journaltype'} eq 'I';
+
+    my $gmask = LJ::get_groupmask($userid, $remoteid);
+    my $allowed = (int($gmask) & int($self->allowmask));
+    return $allowed ? 1 : 0;  # no need to return matching mask
 }
 
 # defined by the entry poster
@@ -252,7 +310,8 @@ sub url {
 
 sub statusvis {
     my ($self) = @_;
-    return $self->prop("statusvis") eq "S" ? "S" : "V";
+    my $statusvis = $self->prop("statusvis") || '';
+    return $statusvis eq "S" ? "S" : "V";
 }
 
 sub is_visible {
@@ -678,12 +737,13 @@ sub get_entry_by_id {
         $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
     }
 
+    my $delayed_visibility = $options->{'delayed_visibility'} || 0;
     my $userid = $options->{userid} || 0;
     my $user = LJ::get_remote() || LJ::want_user($userid);
 
     return undef unless $user;
     my $sql_poster = '';
-    if (!__delayed_entry_can_see( $journal, $user ))
+    if (!$delayed_visibility &&  !__delayed_entry_can_see( $journal, $user ))
     {
         $sql_poster = 'AND posterid = ' . $user->userid . " "; 
     }
