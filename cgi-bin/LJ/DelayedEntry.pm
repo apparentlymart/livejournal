@@ -1190,8 +1190,11 @@ sub convert {
                   'u' => $self->poster };
 
     my $err = 0;
-    my $ree = LJ::Protocol::do_request("postevent", $req, \$err, $flags);
-    return { delete_entry => 1, res => $ree };
+    my $res = LJ::Protocol::do_request("postevent", $req, \$err, $flags);
+    my $fail = !defined $res->{itemid} && $res->{message};
+    
+    return { 'delete_entry' => (!$fail || $err < 500), 
+             'res' => $res };
 }
 
 sub convert_from_data {
@@ -1205,7 +1208,8 @@ sub convert_from_data {
     if ($fail) {
         $self->update($req);
     }
-    return { delete_entry => !$fail, res => $res };
+    return { 'delete_entry' => (!$fail || $err < 500), 
+             'res' => $res };
 
 }
 
