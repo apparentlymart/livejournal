@@ -461,14 +461,19 @@ body<=
                 }
 
                 # if the action is to delete it, then let's note that
-                if ( ($POST{'action:delete'} || $POST{'action:deletespam'} ) 
-                                    && $entry_obj->is_delayed ) {
-                    # now log the event created above
-                    ($usejournal ? $usejournal_u : $remote)->log_event('delete_entry', {
-                            remote => $remote,
-                            actiontarget => $ditemid,
-                            method => 'web',
-                        });
+                if ( $POST{'action:delete'} || $POST{'action:deletespam'} ) {
+                    # now log the event created abovei
+                    if ($entry_obj->is_delayed) {
+                        ($usejournal ? $usejournal_u : $remote)->log_event('delete_delayed_entry', {
+                                                                                remote => $remote,
+                                                                                actiontarget => $delayedid,
+                                                                                method => 'web',});
+                    } else {
+                       ($usejournal ? $usejournal_u : $remote)->log_event('delete_entry', {
+                                                                                remote => $remote,
+                                                                                actiontarget => $ditemid,
+                                                                                method => 'web',});
+                    }
                 }
 
                 # do editevent request

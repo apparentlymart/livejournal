@@ -85,6 +85,8 @@ FORM
         my $action = "Action undefined for: $row->{action}";
         if ($row->{action} eq 'delete_entry') {
             $action = "Deleted entry $row->{actiontarget} via $extra->{method}";
+        } elsif ($row->{action} eq 'delete_delayed_entry') {
+            $action = "Deleted delayed entry $row->{actiontarget} via $extra->{method}";
         } elsif ($row->{action} eq 'account_create') {
             $action = "Account created";
         } elsif ($row->{action} eq 'ban_set') {

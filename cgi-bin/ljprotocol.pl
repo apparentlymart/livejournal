@@ -2636,6 +2636,12 @@ sub editevent {
             if ($req->{'event'} !~ /\S/ ) {
                 $entry->delete();
                 $res->{delayedid} = $delayedid;
+                
+                $uowner->log_event('delete_entry', {
+                                            remote => $u,
+                                            actiontarget => $delayedid,
+                                            method => 'protocol', })
+                        unless $flags->{noauth};
                 return $res;
             }
 
