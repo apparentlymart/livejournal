@@ -10,6 +10,7 @@ use Class::Autouse qw (LJ::Typemap
                        LJ::NotificationMethod::IM
                        LJ::NotificationMethod::DebugLog
                        LJ::NotificationMethod::Alerts
+                       LJ::NotificationMethod::Push
                        );
 
 # this mofo is basically just an interface

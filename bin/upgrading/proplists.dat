@@ -1206,6 +1206,27 @@ userproplist.zip:
   multihomed: 0
   prettyname: ZIP code
 
+userproplist.wp7notification_url:
+  cldversion: 8
+  datatype: char
+  des: Both tile & toast push notification url
+  multihomed: 0
+  prettyname: Push notification url for Windows Phone
+
+userproplist.android_c2dm_data:
+  cldversion: 8
+  datatype: char
+  des: Data for C2DM channel
+  multihomed: 0
+  prettyname: Push channel data for Android
+
+userproplist.ios_device_token:
+  cldversion: 8
+  datatype: char
+  des: device token for push notifications
+  multihomed: 0
+  prettyname: Device token for push notification service for iOS
+
 talkproplist.edit_time:
   datatype: num
   des: Unix time of the last edit.  undef if never edited.

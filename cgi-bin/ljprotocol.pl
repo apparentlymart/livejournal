@@ -17,6 +17,7 @@ use Class::Autouse qw(
                       LJ::RateLimit
                       LJ::EmbedModule
                       LJ::DelayedEntry
+                      LJ::PushNotification
                       );
 
 use LJ::TimeUtil;
@@ -175,6 +176,8 @@ my %HANDLERS = (
     getpoll           => \&getpoll,
     editpoll          => \&editpoll,
     votepoll          => \&votepoll,
+    registerpush      => \&registerpush,
+    unregisterpush    => \&unregisterpush,
 );
 
 sub translate
@@ -4694,6 +4697,63 @@ sub un_utf8_request {
         $props->{$k} = LJ::no_utf8_flag($props->{$k});
     }
 }
+
+# registerpush: adding push-notification params to user prop
+# specific for each mobile platform (windows phone 7, android, iOS)
+#
+# takes:
+# - platform:       wp7 / android / ios
+# - registrationid: argument which we use in communication with notification
+#                   servers, specific for each OS 
+# - deviceid:       id of registred device (not use yet)
+#
+# returns: { status => 'OK'} if success
+#
+sub registerpush {
+    my ($req, $err, $flags) = @_;
+    return undef
+        unless authenticate($req, $err, $flags);
+
+    my $u = $flags->{u};
+
+    return fail($err, 200)
+        unless $req->{platform} && $req->{registrationid};
+
+    my $res = LJ::PushNotification->subscribe($u, $req);
+
+    return fail($err, 200)
+        unless $res;
+    
+    return { status => 'OK' };
+}
+
+# unregisterpush: deletes subscription on push notification and clears user prop 
+#                 with notification servers connection arguments
+#
+# takes: 
+# - platform: wp7 / android / ios
+# - deviceid: id of registred device (not use yet)
+#
+# returns:  { status => 'OK'} if success
+#
+sub unregisterpush {
+    my ($req, $err, $flags) = @_;
+    return undef
+        unless authenticate($req, $err, $flags);
+
+    my $u = $flags->{u};
+
+    return fail($err,200)
+        unless $req->{platform};
+
+    my $res = LJ::PushNotification->unsubscribe($u, $req);
+
+    return fail($err,200)
+        unless $res;
+
+    return { status => 'OK' };
+}
+
 
 
 #### Old interface (flat key/values) -- wrapper aruond LJ::Protocol

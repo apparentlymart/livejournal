@@ -3511,9 +3511,24 @@ sub can_add_inbox_subscription {
 sub subscribe {
     my ($u, %opts) = @_;
     croak "No subscription options" unless %opts;
-
     return LJ::Subscription->create($u, %opts);
 }
+
+# unsubscribe from an event(s)
+sub unsubscribe {
+    my ($u, %opts) = @_;
+    croak "No subscription options" unless %opts;
+
+    # find all matching subscriptions
+    my @subs = LJ::Subscription->find($u, %opts);
+
+    foreach (@subs) {
+        # run delete method on each subscription
+        $_->delete();
+    }
+}
+
+
 
 sub subscribe_entry_comments_via_sms {
     my ($u, $entry) = @_;

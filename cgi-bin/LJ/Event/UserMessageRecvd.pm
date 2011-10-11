@@ -185,6 +185,17 @@ sub as_alert {
         });
 }
 
+sub as_push {
+    my $self = shift;
+    my $u = shift;
+    my %args = @_;
+
+    my $message = LJ::Lang::get_text($u->prop('browselang'), 'esn.push.notification.usermessagerecvd');
+
+    return $message;
+}
+
+
 sub subscription_as_html {
     my ($class, $subscr) = @_;
     my $journal = $subscr->journal or croak "No user";
