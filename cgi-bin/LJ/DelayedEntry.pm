@@ -703,7 +703,7 @@ sub load_data {
     __assert($opts->{delayed_id});
     __assert($opts->{posterid});
 
-    my $journalid = $opts->{posterid};
+    my $journalid = $opts->{journalid};
     my $delayedid = $opts->{delayed_id};
 
     my $data_ser = $dbcr->selectrow_array( "SELECT request_stor " .
