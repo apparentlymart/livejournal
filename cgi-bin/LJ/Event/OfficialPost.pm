@@ -172,7 +172,10 @@ sub as_alert {
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-    return LJ::Lang::ml('event.officialpost', { sitename => $LJ::SITENAME }); # $LJ::SITENAME makes a new announcement
+
+    # $LJ::SITENAME makes a new announcement
+    return LJ::Lang::ml( 'event.officialpost2',
+        { 'sitename' => $LJ::SITENAME } );
 }
 
 sub is_tracking { 0 }

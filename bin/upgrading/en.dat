@@ -2559,8 +2559,7 @@ event.journal_new_entry.tag.user=[[user]] posts a new entry tagged [[tags]]
 event.journal_new_entry.user|staleness=1
 event.journal_new_entry.user=[[user]] posts a new entry.
 
-event.officialpost|staleness=1
-event.officialpost=[[sitename]] makes a new [[openlink]]announcement[[closelink]].
+event.officialpost2=[[sitename]] makes a new announcement.
 
 event.poll_vote.id|staleness=1
 event.poll_vote.id=Someone votes in poll #[[pollid]]
