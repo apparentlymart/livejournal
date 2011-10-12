@@ -444,6 +444,7 @@ sub _load_text {
 sub prop {
     my ($self, $prop) = @_;
     $self->_load_props unless $self->{_loaded_props};
+
     return $self->{props} unless $prop;
     return $self->{props}{$prop};
 }
@@ -451,6 +452,7 @@ sub prop {
 sub props {
     my ($self, $prop) = @_;
     $self->_load_props unless $self->{_loaded_props};
+
     return $self->{props} || {};
 }
 
@@ -463,11 +465,13 @@ sub handle_prefetched_props {
 
 sub _load_props {
     my $self = shift;
+
     return 1 if $self->{_loaded_props};
 
     my $props = {};
     LJ::load_log_props2($self->{u}, [ $self->jitemid ], $props);
     $self->handle_prefetched_props($props->{$self->jitemid});
+
     return 1;
 }
 
@@ -1690,7 +1694,6 @@ sub get_posts_raw {
 
             while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
                 my $id = "$jid:$jitemid";
-#                my $propname = $LJ::CACHE_PROPID{'log'}->{$propid}->{name};
                 $ret->{'prop'}->{$id}->{$propid} = $value;
                 $gotid{$id} = 1;
             }
@@ -2281,6 +2284,7 @@ sub load_log_props2 {
     unless ( $db ) {
         my $u = LJ::load_userid($userid);
         $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_def_reader($u) :  LJ::get_cluster_reader($u);
+
         return unless $db;
     }
 
@@ -2327,6 +2331,7 @@ sub load_log_props2 {
 sub convert_href_props {
     my $href = shift;
     my %new_href;
+    LJ::load_props('log');
 
     for my $key ( keys %$href ) {
         my $prop = $href->{$key};
