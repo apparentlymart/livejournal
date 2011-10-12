@@ -196,7 +196,7 @@ body<=
     }
     my $dbcr = LJ::get_cluster_def_reader($c);
 
-    unless ($remote->can_moderate($c) || $remote->can_manage($c)) {
+    unless ($remote->can_moderate($c) || $remote->can_manage($c) || $remote->can_super_manage($c)) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p " .
             BML::ml('.error.noaccess', {'comm'=>"<?ljcomm $comm ljcomm?>"}) . " p?>";
         return $ret;
