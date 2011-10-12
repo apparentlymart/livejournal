@@ -32,7 +32,9 @@
 
     my %ret = ();
 
+    # admined communities
     my $cids = [];
+    $cids = LJ::load_rel_target($remote, 'A');
 
     if ($action eq 'addFriend') {
         my $errmsg = "";
@@ -97,15 +99,16 @@
         $success = LJ::leave_community($remote, $targetu);
     } elsif ($action eq 'setBan') {
         my $list_of_banned = LJ::load_rel_user($remote, 'B') || [ ];
-        
+
         return $err->("Exceeded limit maximum of banned users")
             if @$list_of_banned >= ($LJ::MAX_BANS || 5000);
-        
+
         my $ban_user = LJ::load_user($target);
         $success = $remote->ban_user($ban_user);
+
         LJ::run_hooks('ban_set', $remote, $ban_user);
 
-    } elsif ($action eq 'setUnban') {    
+    } elsif ($action eq 'setUnban') {
         my $unban_user = LJ::load_user($target);
         $success = $remote->unban_user_multi($unban_user->{userid});
 
@@ -113,8 +116,6 @@
 
         my $ban_user = LJ::load_user($target);
 
-        # admined communities
-        $cids = LJ::load_rel_target($remote, 'A');
 
         # all communities
         my $us = LJ::load_userids(@$cids);
@@ -145,8 +146,11 @@
 
         my $unban_user = LJ::load_user($target);
 
-        $cids = LJ::load_rel_target($remote, 'A'); # admined communities
-        my $us = LJ::load_userids(@$cids, $remote->userid); # all communities and remote personal account
+        # admined communities
+        $cids = LJ::load_rel_target($remote, 'A');
+
+        # all communities
+        my $us = LJ::load_userids(@$cids);
 
         $success = 1;
 
@@ -163,7 +167,10 @@
 
     if (@$cids) {
         $ret{is_banned_everywhere} = 1;
-        my $us = LJ::load_userids(@$cids, $remote->userid); # all communities and remote personal account
+
+        # all communities
+        my $us = LJ::load_userids(@$cids);
+
         foreach my $u (values %$us) {
             next if $u->is_expunged;
             $ret{is_banned_everywhere} = 0 unless LJ::is_banned($targetu, $u->id);
