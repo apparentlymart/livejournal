@@ -325,6 +325,9 @@ sub trans {
         LJ::Request->pnotes( 'gtop_mem' => $gtop->proc_mem($$) );
     }
 
+    # $LJ::IS_SSL is used in LJ::start_request, so we must init it here
+    my $is_ssl = $LJ::IS_SSL = LJ::run_hook('ssl_check');
+
     LJ::start_request();
     LJ::procnotify_check();
     S2::set_domain('LJ');
@@ -336,7 +339,6 @@ sub trans {
     my $lang = $LJ::DEFAULT_LANG || $LJ::LANGS[0];
     BML::set_language($lang, \&LJ::Lang::get_text);
 
-    my $is_ssl = $LJ::IS_SSL = LJ::run_hook('ssl_check');
     $LJ::IS_BOT_USERAGENT = BotCheck->is_bot( LJ::Request->header_in('User-Agent') );
 
     LJ::Request->pnotes( 'original_uri' => LJ::Request->uri );
@@ -1809,7 +1811,13 @@ sub journal_content
     LJ::Request->notes("view" => $RQ{'mode'});
     my $user = $RQ{'user'};
 
+# Task not ready yet
+#    my $return;
+#    my $ret = LJ::run_hooks("before_journal_content_created", $opts, %RQ, \$return);
+#    return $ret if $return;
+
     my $html = LJ::make_journal($user, $RQ{'mode'}, $remote, $opts);
+
     # Allow to add extra http-header or even modify html
     LJ::run_hooks("after_journal_content_created", $opts, \$html);
 
@@ -1818,7 +1826,8 @@ sub journal_content
     if (defined $opts->{'handler_return'}) {
         if ($opts->{'handler_return'} =~ /^(\d+)/) {
             return $1;
-        } else {
+        }
+        else {
             return LJ::Request::DECLINED;
         }
     }
@@ -1863,8 +1872,10 @@ sub journal_content
 
     my $status = $opts->{'status'} || "200 OK";
     $opts->{'contenttype'} ||= $opts->{'contenttype'} = "text/html";
+
     if ($opts->{'contenttype'} =~ m!^text/! &&
-        $LJ::UNICODE && $opts->{'contenttype'} !~ /charset=/) {
+        $LJ::UNICODE && $opts->{'contenttype'} !~ /charset=/)
+    {
         $opts->{'contenttype'} .= "; charset=utf-8";
     }
 
@@ -1872,15 +1883,13 @@ sub journal_content
     # display a more meaningful error message.
     my $generate_iejunk = 0;
 
-    if ($opts->{'badargs'})
-    {
+    if ($opts->{'badargs'}) {
         # No special information to give to the user, so just let
         # Apache handle the 404
         LJ::Request->pnotes (error => 'e404');
         return LJ::Request::NOT_FOUND;
     }
-    elsif ($opts->{'baduser'})
-    {
+    elsif ($opts->{'baduser'}) {
         $status = "404 Unknown User";
         $html = "<h1>Unknown User</h1><p>There is no user <b>$user</b> at <a href='$LJ::SITEROOT'>$LJ::SITENAME.</a></p>";
         $generate_iejunk = 1;
