@@ -40,6 +40,8 @@ body<=
     my $ret;
     my $getextra = undef;
 
+    my $editprivacy_link = "<p class='i-bubble b-bubble-lite b-bubble-editprivacy b-bubble-noarrow'>" . BML::ml('.editprivacy', { aopts => "href='editprivacy.bml'" }) . "</p>";
+
     LJ::need_res(qw(
                     stc/entry.css
                     stc/editjournal.css
@@ -804,6 +806,8 @@ LIKE_FAQ
         # header
         $ret .= "<div class='b-editentries-header'>";
         $ret .= "<h1>$title</h1>";
+        my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
+        $ret .= $editprivacy_link if !$ad;
 
         # edit form
 
@@ -928,7 +932,7 @@ JS_INIT
 
         my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
         if ($ad) {
-            $ret .= "</td><td valign='top'>$ad";
+            $ret .= "</td><td valign='top'>$editprivacy_link $ad";
         }
 
         $ret .= "</td></tr></table>";
