@@ -867,11 +867,13 @@ JS_INIT
 
         my $next_page = 0;
 
-        my $delayed_entries;
-        if ( $show eq 'recent' || !($year && $month && $day)) {
-            $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u) || [];
-        } else {
-            $delayed_entries = LJ::DelayedEntry->get_entries_for_day_row($usejournal_u, $year, $month, $day );
+        my $delayed_entries = [];
+        if (!$LJ::DELAYED_ENTRIES_DISABLED) {
+            if ( $show eq 'recent' || !($year && $month && $day)) {
+                $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u) || [];
+            } else {
+                $delayed_entries = LJ::DelayedEntry->get_entries_for_day_row($usejournal_u, $year, $month, $day );
+            }
         }
         my $delayed_count = scalar(@$delayed_entries) - $delayed_skip;
         my $show_usual = ($items_per_page - $delayed_count) > 0 ? $items_per_page - $delayed_count : 0;
@@ -887,6 +889,7 @@ JS_INIT
                 dateformat => 'S2',
                 beforeid  => $start_from,
                 order     => 'logtime',
+                show_sticky_on_top => 1,
                 %ymd_req,
                 ($only_me_checked) ? ('posterid' =>  $remote->{'userid'}) : (),
             }))) || $delayed_entries) {
