@@ -449,8 +449,6 @@ body<=
                             'delayedid'  => $delayedid,
                             'sticky'     => $sticky,
                             'custom_time' => $custom_time,
-                            'do_not_add_rss_friends' => $POST{'do_not_add_rss_friends'} ||
-                                                        $GET{'do_not_add_rss_friends'}
                             );
                 LJ::entry_form_decode(\%req, \%POST);
 

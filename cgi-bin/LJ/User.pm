@@ -7852,7 +7852,9 @@ sub get_daycounts
     my $list = LJ::MemCache::get($memkey);
     if ($list) {
         my $list_create_time = shift @$list;
-        LJ::DelayedEntry->get_daycount_query($u, $list, $secwhere);
+        if (!$LJ::DELAYED_ENTRIES_DISABLED) {
+            LJ::DelayedEntry->get_daycount_query($u, $list, $secwhere);
+        }
         return $list if $list_create_time >= $u->timeupdate;
     }
 
@@ -7887,7 +7889,9 @@ sub get_daycounts
     LJ::MemCache::set($memkey, [time, @days]);
 
     # not cached part
-    LJ::DelayedEntry->get_daycount_query($u, \@days, $secwhere);
+    if (!$LJ::DELAYED_ENTRIES_DISABLED) {
+        LJ::DelayedEntry->get_daycount_query($u, \@days, $secwhere);
+    }
     $release_lock->();
     return \@days;
 }

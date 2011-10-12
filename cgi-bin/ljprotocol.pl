@@ -2074,7 +2074,10 @@ sub postevent {
     # it... where clause there is: < $LJ::EndOfTime).  but this way we can
     # have entries that don't show up on friends view, now that we don't have
     # the hints table to not insert into.
-    my $rlogtime = $LJ::EndOfTime - $now;
+    my $rlogtime = $LJ::EndOfTime;
+    unless ($req->{'props'}->{'opt_backdated'}) {
+        $rlogtime -= $now;
+    }
 
     my $dupsig = Digest::MD5::md5_hex(join('', map { $req->{$_} }
                                            qw(subject event usejournal security allowmask)));
@@ -2141,7 +2144,7 @@ sub postevent {
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
 
-    if ( $req->{ver} > 1 ) {
+    if ( $req->{ver} > 1  && !$LJ::DELAYED_ENTRIES_DISABLED ) {
         my $use_delayed = $req->{'custom_time'} ||
                     !(exists $flags->{'use_custom_time'});
         if ( $use_delayed && LJ::DelayedEntry::is_future_date($req) ) {
@@ -2990,7 +2993,16 @@ sub editevent {
     }
 
     # compatible with depricated 'opt_backdated'
-    if ( $oldevent->{'rlogtime'} == $LJ::EndOfTime ) {
+    if ($req->{'props'}->{'opt_backdated'} eq "1" &&
+        $oldevent->{'rlogtime'} != $LJ::EndOfTime) {
+        my $dberr;
+        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
+        $uowner->log2_do(undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
+                         "journalid=$ownerid AND jitemid=$itemid");
+        return fail($err,501,$dberr) if $dberr;
+    }
+    if ($req->{'props'}->{'opt_backdated'} eq "0" &&
+        $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
         my $dberr;
         LJ::run_hooks('report_entry_update', $ownerid, $itemid);
         $uowner->log2_do(\$dberr, "UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
@@ -3130,7 +3142,7 @@ sub getevents {
 
     $skip = 500 if $skip > 500;
 
-    if ( $req->{ver} > 1 ) {
+    if ( $req->{ver} > 1 && !$LJ::DELAYED_ENTRIES_DISABLED ) {
         my $res = {};
 
         if ( $req->{delayedid} ) {

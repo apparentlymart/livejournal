@@ -512,8 +512,6 @@ LIKE_FAQ
                     'sticky'      => $sticky,
                     'custom_time' => $custom_time,
                     'tz'          => $timezone, 
-                    'do_not_add_rss_friends' => $POST{'do_not_add_rss_friends'} ||
-                                                    $GET{'do_not_add_rss_friends'}
                     );
 
         $flags->{'use_custom_time'} = 1; 

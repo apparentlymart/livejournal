@@ -420,12 +420,19 @@ sub render_metainfo_block {
     $out .= "<div id='metainfo-wrap'><ul id='metainfo'>";
 
 
+    my $can_edit_date = 1;
     # login info
     $out .= $opts->{'auth'};
     if ($opts->{'mode'} eq "update") {
         # communities the user can post in
         my $usejournal = $opts->{'usejournal'};
         if ($usejournal) {
+            my $posterid = $remote->userid;
+            my $ownerid = LJ::load_user($usejournal)->userid;
+            my $dbh = LJ::get_db_writer();
+            $can_edit_date = !!($dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
+                                                     "WHERE userid=$ownerid AND targetid=$posterid ".
+                                                     "AND type IN ('A','M','N')")) || 0;
             $out .= "<li id='usejournal_single' class='pkg'>\n";
             $out .= "<label for='usejournal' class='left'>" .
                 BML::ml('entryform.postto') . "</label>\n";
@@ -524,12 +531,13 @@ sub render_metainfo_block {
         "</noscript>";
 
     my $help_icon = LJ::help_icon("24hourshelp");
+    my $hide_link = $can_edit_date ? '' : 'style="display: none;"'; 
 
-    if ( $opts->{'mode'} eq "edit" ) {
+    if ( $opts->{'mode'} eq "edit" && $can_edit_date ) {
         $out .= qq{ <li class='pkg' id='currentdate'><label class='title'>$BML::ML{'entryform.date'}</label>
                 <span class='wrap'>
                     $monthlong, $mday, $year, $hour:$min
-                    <a href='javascript:void(0)' onclick='editdate();' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
+                    <a $hide_link href='javascript:void(0)' onclick='editdate();' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
                     $help_icon
                   </span>
                 </li> };
@@ -537,7 +545,7 @@ sub render_metainfo_block {
         $out .= qq{ <li class='pkg' id='currentdate'><label class='title'>$BML::ML{'entryform.post'}</label>
                 <span class='wrap'>
                     $BML::ML{'entryform.post.right.now'}
-                    <a href='javascript:void(0)' onclick='editdate();' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
+                    <a $hide_link href='javascript:void(0)' onclick='editdate();' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
                     $help_icon
                 </span>
             </li>};
@@ -777,9 +785,10 @@ sub render_options_block {
                     if ( $sticky_entry eq $opts->{jitemid} ) {
                         return 'checked' 
                     }
-                }
-                
+                }   
             };
+
+            my $disabled = !($remote->can_manage($journalu) || 0);
 
             my $selected = $is_checked->();
             my $sticky_check = LJ::html_check({
@@ -788,6 +797,7 @@ sub render_options_block {
                 'value' => 'sticky',
                 'name' => 'sticky_type',
                 'id' => 'sticky_type',
+                'disabled' => $disabled,
                 'selected' => $selected,
                 $opts->{'prop_opt_preformatted'} || $opts->{'event_format'},
                 'label' => "",
@@ -1640,10 +1650,20 @@ sub render_body {
             my $need_moderated = ( $moderated =~ /^[1A]$/ ) ? 1 : 0;
             my $can_post = ($u->{'journaltype'} eq 'C' && !$need_moderated) ||
                             $can_manage;
+   
+            my $ownerid = $u->userid;
+            my $posterid = $remote->userid;
+
+            # don't moderate admins, moderators & pre-approved users
+            my $dbh = LJ::get_db_writer();
+            my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
+                                                 "WHERE userid=$ownerid AND targetid=$posterid ".
+                                                 "AND type IN ('A','M','N')");
+        
 
             $site_data->{$login}->{'is_replace_sticky'} = $u->has_sticky_entry;
             $site_data->{$login}->{'can_create_sticky'} = $can_manage;
-            $site_data->{$login}->{'can_post_delayed'} = int $can_post;
+            $site_data->{$login}->{'can_post_delayed'} = (int $can_post) || !!$relcount;
         }
         $site->{remote_permissions} = $site_data;
     });

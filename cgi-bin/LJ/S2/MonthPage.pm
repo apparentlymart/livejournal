@@ -78,9 +78,13 @@ sub MonthPage
     my @items;
     push @items, $_ while $_ = $sth->fetchrow_hashref;
     
-    my @ditems = LJ::DelayedEntry->get_entries_for_month($u, $year, $month, $dateformat, $secwhere);
-    foreach my $ditem (@ditems) {
-        push @items, $ditem;
+    my @ditems = ();
+    if ( !$LJ::DELAYED_ENTRIES_DISABLED ) {
+        @ditems = LJ::DelayedEntry->get_entries_for_month($u, $year, $month, $dateformat, $secwhere);
+
+        foreach my $ditem (@ditems) {
+            push @items, $ditem;
+        }
     }
     
     @items = sort { $a->{'alldatepart'} cmp $b->{'alldatepart'} } @items;
