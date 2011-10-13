@@ -45,7 +45,7 @@ body<=
         }
         my $dbcm = LJ::get_cluster_master($c);
 
-        unless (LJ::check_rel($c, $remote, 'M') || ($remote && $remote->can_super_manage($c))) {
+        unless ($remote->can_moderate($c) || $remote->can_manage($c) || $remote->can_super_manage($c)) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p " .
                 BML::ml('.error.noaccess', {'comm'=>"<?ljcomm $c->{'user'} ljcomm?>"}) . " p?>";
             return $ret;
