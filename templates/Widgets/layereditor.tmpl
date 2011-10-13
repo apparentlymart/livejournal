@@ -1,0 +1,74 @@
+<form method="post" id="s2" action="" onsubmit="return s2submit()">
+    <TMPL_VAR form_auth>
+    <input type="hidden" name="<TMPL_VAR prefix>_action" value="compile" />
+    <input type="hidden" name="<TMPL_VAR prefix>_id" value="<TMPL_VAR id>"/>
+    <div class="header">
+        <h1><TMPL_VAR title></h1>
+        <div class="tools">
+            <a href="<TMPL_VAR s2doc>" target="_blank">Documentation</a>
+        </div>
+        <input type="submit" value="Save & Compile" class="compilelink" />
+    </div>
+    <div class="main" id="maindiv">
+        <div class="maincontainer">
+        <textarea id="main" class="maintext" name="<TMPL_VAR prefix>_s2code" onKeyPress="s2keyPressed(event)" wrap="off"
+                  onKeyDown="s2IETabKeyPressedHandler(event)"><TMPL_VAR s2code></textarea>
+        </div>
+    </div>
+        <div class="divider" id="outputdivider" onMouseDown="s2startDrag(event)"
+                onMouseUp="s2endDrag(event)"
+                onMouseMove="s2processDrag(event)">&nbsp;</div>
+    <div class="tabs" id="outputtabs">
+        <h2>Build</h2>
+    </div>
+    <div id="out" class="output">
+        <TMPL_VAR build>
+    </div>
+    <div class="tabs" id="reftabs">
+                <span id="navtabs" class="refvisible">
+                        <h2>Nav.</h2>
+                        <a href="javascript:s2switchRefTab(0)">Classes</a>
+                        <a href="javascript:s2switchRefTab(1)">Funcs.</a>
+                        <a href="javascript:s2switchRefTab(2)">Props.</a>
+                </span>
+                <span id="classtabs" class="refinvisible">
+                        <a href="javascript:s2switchRefTab(-1)">Nav.</a>
+                        <h2>Classes</h2>
+                        <a href="javascript:s2switchRefTab(1)">Funcs.</a>
+                        <a href="javascript:s2switchRefTab(2)">Props.</a>
+                </span>
+                <span id="functabs" class="refinvisible">
+                        <a href="javascript:s2switchRefTab(-1)">Nav.</a>
+                        <a href="javascript:s2switchRefTab(0)">Classes</a>
+                        <h2>Funcs.</h2>
+                        <a href="javascript:s2switchRefTab(2)">Props.</a>
+                </span>
+                <span id="proptabs" class="refinvisible">
+                        <a href="javascript:s2switchRefTab(-1)">Nav.</a>
+                        <a href="javascript:s2switchRefTab(0)">Classes</a>
+                        <a href="javascript:s2switchRefTab(1)">Funcs.</a>
+                        <h2>Props.</h2>
+                </span>
+    </div>
+    <div id="ref" class="reference">
+        <div id="nav" class="refvisible">
+                &nbsp;
+        </div>
+        <div id="classref" class="refinvisible">
+                (Classes)
+        </div>
+        <div id="funcref" class="refinvisible">
+                (Functions)
+        </div>
+        <div id="propref" class="refinvisible">
+                (Properties)
+        </div>
+    </div>
+        <div class="divider" id="refdivider" onMouseDown="s2startDragRef(event)"
+                onMouseUp="s2endDrag(event)"
+                onMouseMove="s2processDrag(event)">&nbsp;</div>
+    <div class="statusbar" id="statusbar">
+        <div class="gutter"> </div>
+        <div id="status">Ready.</div>
+    </div>
+</form>

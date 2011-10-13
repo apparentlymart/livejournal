@@ -1,0 +1,41 @@
+html {
+    overflow: hidden;
+}
+
+div.reference {
+    height: expression(xGetElementById('statusbar').offsetTop - (42 + 9 + 10) + "px");
+}
+
+div.output {
+    width: expression(xGetElementById('statusbar').clientWidth - (18 + xGetElementById('out').offsetLeft) + "px");
+    bottom: 45px;
+}
+
+div.divider {
+    font-size: 2px;
+}
+
+#outputdivider {
+    width: expression(xGetElementById('statusbar').clientWidth - (18 + xGetElementById('out').offsetLeft) + "px");
+    bottom: 145px;
+    height: 7px;
+}
+
+#refdivider {
+    height: expression(xGetElementById('statusbar').offsetTop - (42 + 9 + 10) + "px");
+}
+
+div.main {
+    width: expression(xGetElementById('statusbar').clientWidth - (18 + 6 + xGetElementById('out').offsetLeft) + "px");
+    height: expression(xGetElementById('statusbar').offsetTop - (42 - 16 + xGetElementById('out').clientHeight + 57) + "px");
+}
+
+textarea.maintext {
+    width: 100%;
+    height: expression(xGetElementById('statusbar').offsetTop - (42 - 16 + xGetElementById('out').clientHeight + 57) + "px");
+}
+
+#outputtabs {
+    width: expression(xGetElementById('statusbar').clientWidth - (18 + 4 + xGetElementById('out').offsetLeft) + "px");
+}
+
