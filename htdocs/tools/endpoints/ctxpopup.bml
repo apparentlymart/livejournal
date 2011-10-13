@@ -145,7 +145,7 @@
         lists_as_friend loading mutual_friend profile remove_friend
         report send_gift buy_same_userhead send_message stop_community subscribe_feed
         this_is_you unban unsubscribe_feed updating view watch_community
-        your_friend you_member you_subscribed you_watching
+        your_friend you_member you_subscribed you_watching ljtalk online offline
     /;
 
     ## optimization: load all ML strings into local cache at once
