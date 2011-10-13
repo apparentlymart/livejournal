@@ -1160,38 +1160,6 @@ sub render_options_block {
         'spellcheck' => sub {
             my $out = '';
 
-            # extra submit button so make sure it posts the form when
-            # person presses enter key
-            my %action_map = (
-                'edit' => 'save',
-                'update' => 'update',
-            );
-            if (my $action = $action_map{$opts->{'mode'}}) {
-                $out .= qq{
-                    <input type='submit' name='action:$action'
-                        class='hidden_submit' />
-                    <span id="preview_button_holder"></span>
-                };
-            }
-            my $preview_tabindex = $self->tabindex;
-            my $preview = qq{
-                <input
-                    type='button'
-                    value='$BML::ML{'entryform.preview'}'
-                    onclick='entryPreview(this.form)'
-                    tabindex='$preview_tabindex'
-                />
-            };
-            $preview =~ s/\s+/ /sg; # JS doesn't like newlines in string
-                                    # literals
-
-            unless ($opts->{'disabled_save'}) {
-                $out .= $self->wrap_js(qq{
-                    if (document.getElementById) {
-                        \$('preview_button_holder').innerHTML = "$preview ";
-                    }
-                });
-            }
             if ($LJ::SPELLER && !$opts->{'disabled_save'}) {
                 $out .= LJ::html_submit(
                     'action:spellcheck',

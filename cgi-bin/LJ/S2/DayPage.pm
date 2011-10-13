@@ -109,7 +109,7 @@ sub DayPage
     my $tags = LJ::Tags::get_logtags($u, \@itemids);
     
     my @ditems = ();
-    if ( !$LJ::DELAYED_ENTRIES_DISABLED ) {
+    if (LJ::is_enabled("delayed_entries")) {
         @ditems = LJ::DelayedEntry->get_entries_for_day($u, $year, $month, $day, $dateformat, $secwhere);
 
         foreach my $ditem (@ditems) {

@@ -79,7 +79,7 @@ sub MonthPage
     push @items, $_ while $_ = $sth->fetchrow_hashref;
     
     my @ditems = ();
-    if ( !$LJ::DELAYED_ENTRIES_DISABLED ) {
+    if (LJ::is_enabled("delayed_entries")) {
         @ditems = LJ::DelayedEntry->get_entries_for_month($u, $year, $month, $dateformat, $secwhere);
 
         foreach my $ditem (@ditems) {

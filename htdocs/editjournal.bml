@@ -868,7 +868,7 @@ JS_INIT
         my $next_page = 0;
 
         my $delayed_entries = [];
-        if (!$LJ::DELAYED_ENTRIES_DISABLED) {
+        if (LJ::is_enabled("delayed_entries")) {
             if ( $show eq 'recent' || !($year && $month && $day)) {
                 $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u) || [];
             } else {

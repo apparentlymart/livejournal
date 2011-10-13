@@ -79,7 +79,7 @@ sub RecentPage
     my $usual_skip =  $delayed_entries_count - $skip > $itemshow ? 
                                             $skip - $delayed_entries_count + $has_sticky :
                                             $skip ? $skip : 0;
-    if (!$LJ::DELAYED_ENTRIES_DISABLED) {
+    if (LJ::is_enabled("delayed_entries")) {
         if (!$skip) {
             $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow - $has_sticky);
         } elsif ( $skip) {

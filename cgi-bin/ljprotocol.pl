@@ -2144,7 +2144,7 @@ sub postevent {
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
 
-    if ( $req->{ver} > 1  && !$LJ::DELAYED_ENTRIES_DISABLED ) {
+    if ( $req->{ver} > 1  && LJ::is_enabled("delayed_entries") ) {
         my $use_delayed = $req->{'custom_time'} ||
                     !(exists $flags->{'use_custom_time'});
         if ( $use_delayed && LJ::DelayedEntry::is_future_date($req) ) {
@@ -3142,7 +3142,7 @@ sub getevents {
 
     $skip = 500 if $skip > 500;
 
-    if ( $req->{ver} > 1 && !$LJ::DELAYED_ENTRIES_DISABLED ) {
+    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") ) {
         my $res = {};
 
         if ( $req->{delayedid} ) {
