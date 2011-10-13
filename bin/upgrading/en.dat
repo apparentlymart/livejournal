@@ -1413,6 +1413,9 @@ entryform.postto=Post to:
 entryform.postto.select|staleness=1
 entryform.postto.select=Select a community
 
+entryform.post.edit|staleness=1
+entryform.post.edit=Edit date
+
 entryform.preview=Preview
 
 entryform.public|staleness=1

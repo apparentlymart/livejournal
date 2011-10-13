@@ -551,7 +551,8 @@ sub render_metainfo_block {
             </li>};
     }
 
-    $out .= qq{ <li class='pkg' id='modifydate' style='display: none;'><label class='title'>$BML::ML{'entryform.postponed.until'}</label>
+    my $postpone_edit_text = LJ::is_enabled("delayed_entries") ? $BML::ML{'entryform.postponed.until'} : $BML::ML{'entryform.post.edit'};
+    $out .= qq{ <li class='pkg' id='modifydate' style='display: none;'><label class='title'>$postpone_edit_text</label>
                 <span class='wrap'>
                     <input type="hidden" name="date_ymd_mm" value="$mon" />
                     <input type="hidden" name="date_ymd_dd" value="$mday" />
@@ -1614,24 +1615,28 @@ sub render_body {
             my $u = LJ::load_user($login);
 
             my $can_manage = $remote->can_manage($u) || 0;
-            my $moderated = $u->prop('moderated');
-            my $need_moderated = ( $moderated =~ /^[1A]$/ ) ? 1 : 0;
-            my $can_post = ($u->{'journaltype'} eq 'C' && !$need_moderated) ||
+            if (LJ::is_enabled("delayed_entries")) {
+                my $moderated = $u->prop('moderated');
+                my $need_moderated = ( $moderated =~ /^[1A]$/ ) ? 1 : 0;
+                my $can_post = ($u->{'journaltype'} eq 'C' && !$need_moderated) ||
                             $can_manage;
    
-            my $ownerid = $u->userid;
-            my $posterid = $remote->userid;
+                my $ownerid = $u->userid;
+                my $posterid = $remote->userid;
 
-            # don't moderate admins, moderators & pre-approved users
-            my $dbh = LJ::get_db_writer();
-            my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
+                # don't moderate admins, moderators & pre-approved users
+                my $dbh = LJ::get_db_writer();
+                my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
                                                  "WHERE userid=$ownerid AND targetid=$posterid ".
                                                  "AND type IN ('A','M','N')");
         
+               $site_data->{$login}->{'can_post_delayed'} = (int $can_post) || !!$relcount;
+            } else {    
+                $site_data->{$login}->{'can_post_delayed'} = 1;
+            }
 
             $site_data->{$login}->{'is_replace_sticky'} = $u->has_sticky_entry;
             $site_data->{$login}->{'can_create_sticky'} = $can_manage;
-            $site_data->{$login}->{'can_post_delayed'} = (int $can_post) || !!$relcount;
         }
         $site->{remote_permissions} = $site_data;
     });
