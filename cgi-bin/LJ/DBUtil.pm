@@ -24,7 +24,8 @@ sub get_inactive_db {
         if ($block && $block->data->{$cid}) {
             my $c = $block->data->{$cid};
             my $ab = ($c->{'active'} eq 'a') ? 'b' : 'a';
-            if ($c->{'dead'} && ($c->{'dead'} eq $ab) {
+            warn "$c->{'active'} is active, using $ab" if $verbose;
+            if ($c->{'dead'} && $c->{'dead'} eq $ab) {
                 ## oops, inactive db is dead
                 warn " inactivve DB $ab is marked dead";
                 return;
@@ -64,7 +65,7 @@ sub connect_to_cluster {
     my $clid = shift;
     my $verbose = shift;
     
-    my $dbr = LJ::DBUtil->get_inactive_db($clid);
+    my $dbr = LJ::DBUtil->get_inactive_db($clid, $verbose);
     unless ($dbr) {
         warn "Using master database for cluster #$clid"
             if $verbose;
