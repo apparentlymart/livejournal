@@ -225,17 +225,40 @@ my $check = sub {
     }
 
     #print "$dbid of $d->{masterid}: $d->{name} ($roles)\n";
-    printf("%4d %-18s %4s repl:%7s %4s conn:%4d/%4d  $dtg $tzone \%s ($roles)\n",
-           $dbid,
-           $d->{name},
-           $d->{masterid} ? $d->{masterid} : "",
-           $diff,
-           $log_count ? sprintf("<%2s>", $log_count) : "",
-           $pcount_busy, $pcount_total,
-       $extra_version) unless $opt_err;
+    unless ($opt_err) {
+        printf("%4d %-18s %4s %7s %4s %4d/%4d %5s %3s %10s (%s)\n",
+            $dbid,
+            $d->{name},
+            $d->{masterid} ? $d->{masterid} : "",
+            $diff, ## repl
+            $log_count ? sprintf("<%2s>", $log_count) : "", ## log count
+            $pcount_busy, 
+            $pcount_total,
+            $dtg,
+            $tzone,
+            $extra_version,
+            $roles
+        )
+    }
 };
 
 $check_master_status->($_) foreach (sorted_dbids());
+
+printf("%4s %-18s %4s %7s %4s %9s %5s %3s %10s (%s)\n",
+    "id", 
+    "name", 
+    "mid",
+    "repl",
+    "logs",
+    "conns",
+    "time",
+    "tz",
+    "version",
+    "roles"
+);
+printf("%4s %-18s %4s %7s %4s %9s %5s %3s %10s %s\n",
+    "-"x4, "-"x18, "-"x4, "-"x7, "-"x4, "-"x9, "-"x5, "-"x3, "-"x10, "-"x10
+);
 
 $check->($_) foreach (sorted_dbids());
 
