@@ -124,7 +124,7 @@ sub execute {
 
     # give the owner access
     } else {
-        LJ::set_rel_multi( [$u->id, $ou->id, 'A'], [$u->id, $ou->id, 'P'] );
+        LJ::set_rel_multi( [$u->id, $ou->id, 'S'], [$u->id, $ou->id, 'P'] );
     }
 
     LJ::run_hook("change_journal_type", $u);
