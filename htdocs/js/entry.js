@@ -34,7 +34,7 @@ function editdate(){
 	cal.calendar({
 		currentDate: new Date(dateStr),
 		ml: {
-			caption: 'Choose date:'
+			caption: Site.ml_text['entryform.choose_date'] || 'Choose date:'
 		},
 		endMonth: new Date(2037,11,31),
 		showCellHovers: true
