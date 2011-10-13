@@ -3472,15 +3472,6 @@ sub who_invited {
     return LJ::load_userid($inviterid);
 }
 
-# front-end to LJ::cmd_buffer_add, which has terrible interface
-#   cmd: scalar
-#   args: hashref
-sub cmd_buffer_add {
-    my ($u, $cmd, $args) = @_;
-    $args ||= {};
-    return LJ::cmd_buffer_add($u->{clusterid}, $u->{userid}, $cmd, $args);
-}
-
 sub subscriptions {
     my $u = shift;
     return LJ::Subscription->subscriptions_of_user($u);
@@ -6112,60 +6103,60 @@ sub reset_cache {
     return 0 unless $dbcm;
 
     my @keys = qw(
-        bio:#
-        cctry_uid:#
-        commsettings:#
-        dayct:#
-        fgrp:#
-        friendofs:#
-        friendofs2:#
-        friends:#
-        friends2:#
-        ident:#
-        inbox:newct:#
-        intids:#
-        invites:#
-        jablastseen:#
-        jabuser:#
-        kws:#
-        lastcomm:#
-        linkobj:#
-        log2ct:#
-        log2lt:#
-        logtag:#
-        mcrate:#
-        memct:#
-        memkwcnt:#
-        memkwid:#
-        msn:mutual_friends_wlids:uid=#
-        prtcfg:#
-        pw:#
-        rate:tracked:#
-        rcntalk:#
-        s1overr:#
-        s1uc:#
-        saui:#
-        subscriptions_count:#
-        supportpointsum:#
-        synd:#
-        tags2:#
-        talk2ct:#
-        talkleftct:#
-        tc:#
-        timeactive:#
-        timezone_guess:#
-        tu:#
-        txtmsgsecurity:#
-        uid2uniqs:#
-        upiccom:#
-        upicinf:#
-        upicquota:#
-        upicurl:#
-        userid:#
+        bio:*
+        cctry_uid:*
+        commsettings:*
+        dayct:*
+        fgrp:*
+        friendofs:*
+        friendofs2:*
+        friends:*
+        friends2:*
+        ident:*
+        inbox:newct:*
+        intids:*
+        invites:*
+        jablastseen:*
+        jabuser:*
+        kws:*
+        lastcomm:*
+        linkobj:*
+        log2ct:*
+        log2lt:*
+        logtag:*
+        mcrate:*
+        memct:*
+        memkwcnt:*
+        memkwid:*
+        msn:mutual_friends_wlids:uid=*
+        prtcfg:*
+        pw:*
+        rate:tracked:*
+        rcntalk:*
+        s1overr:*
+        s1uc:*
+        saui:*
+        subscriptions_count:*
+        supportpointsum:*
+        synd:*
+        tags2:*
+        talk2ct:*
+        talkleftct:*
+        tc:*
+        timeactive:*
+        timezone_guess:*
+        tu:*
+        txtmsgsecurity:*
+        uid2uniqs:*
+        upiccom:*
+        upicinf:*
+        upicquota:*
+        upicurl:*
+        userid:*
     );
 
     foreach my $key (@keys) {
-        $key =~ s/#/$u->{userid}/g;
+        $key =~ s/\*/$u->{userid}/g;
         LJ::MemCache::delete([ $u->{userid}, $key ]);
     }
 
@@ -9024,7 +9015,7 @@ sub mark_dirty {
                                                 );
                 $sclient->insert($job);
             } else {
-                LJ::cmd_buffer_add($u->{clusterid}, $u->{userid}, 'dirty', { what => 'friends' });
+                die "No schwartz client found";
             }
         };
     }

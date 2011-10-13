@@ -1102,17 +1102,7 @@ sub get_recent_items
     my $max_hints = $LJ::MAX_SCROLLBACK_LASTN;  # temporary
     my $sort_key = "revttime";
 
-    my $clusterid = $u->{'clusterid'} + 0;
-    my @sources = ("cluster$clusterid");
-
-    if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$clusterid}) {
-        @sources = ("cluster${clusterid}${ab}");
-    }
-
-    unshift @sources, ("cluster${clusterid}lite", "cluster${clusterid}slave")
-        if $opts->{'clustersource'} eq "slave";
-
-    my $logdb = LJ::get_dbh(@sources);
+    my $logdb = LJ::get_cluster_def_reader($u);
 
     # community/friend views need to post by log time, not event time
     $sort_key = "rlogtime" if ($opts->{'order'} eq "logtime" ||
@@ -2485,73 +2475,6 @@ sub do_to_cluster {
 }
 
 # <LJFUNC>
-# name: LJ::cmd_buffer_add
-# des: Schedules some command to be run sometime in the future which would
-#      be too slow to do synchronously with the web request.  An example
-#      is deleting a journal entry, which requires recursing through a lot
-#      of tables and deleting all the appropriate stuff.
-# args: db, journalid, cmd, hargs
-# des-db: Global db handle to run command on, or user clusterid if cluster
-# des-journalid: Journal id command affects.  This is indexed in the
-#                [dbtable[cmdbuffer]] table, so that all of a user's queued
-#                actions can be run before that user is potentially moved
-#                between clusters.
-# des-cmd: Text of the command name.  30 chars max.
-# des-hargs: Hashref of command arguments.
-# </LJFUNC>
-sub cmd_buffer_add
-{
-    my ($db, $journalid, $cmd, $args) = @_;
-
-    return 0 unless $cmd;
-
-    my $cid = ref $db ? 0 : $db+0;
-    $db = $cid ? LJ::get_cluster_master($cid) : $db;
-    my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$cid};
-
-    return 0 unless $db;
-
-    my $arg_str;
-    if (ref $args eq 'HASH') {
-        foreach (sort keys %$args) {
-            $arg_str .= LJ::eurl($_) . "=" . LJ::eurl($args->{$_}) . "&";
-        }
-        chop $arg_str;
-    } else {
-        $arg_str = $args || "";
-    }
-
-    my $rv;
-    if ($ab eq 'a' || $ab eq 'b') {
-        # get a lock
-        my $locked = $db->selectrow_array("SELECT GET_LOCK('cmd-buffer-$cid',10)");
-        return 0 unless $locked; # 10 second timeout elapsed
-
-        # a or b -- a goes odd, b goes even!
-        my $max = $db->selectrow_array('SELECT MAX(cbid) FROM cmdbuffer');
-        $max += $ab eq 'a' ? ($max & 1 ? 2 : 1) : ($max & 1 ? 1 : 2);
-
-        # insert command
-        $db->do('INSERT INTO cmdbuffer (cbid, journalid, instime, cmd, args) ' .
-                'VALUES (?, ?, NOW(), ?, ?)', undef,
-                $max, $journalid, $cmd, $arg_str);
-        $rv = $db->err ? 0 : 1;
-
-        # release lock
-        $db->selectrow_array("SELECT RELEASE_LOCK('cmd-buffer-$cid')");
-    } else {
-        # old method
-        $db->do("INSERT INTO cmdbuffer (journalid, cmd, instime, args) ".
-                "VALUES (?, ?, NOW(), ?)", undef,
-                $journalid, $cmd, $arg_str);
-        $rv = $db->err ? 0 : 1;
-    }
-
-    return $rv;
-}
-
-
-# <LJFUNC>
 # name: LJ::get_keyword_id
 # class:
 # des: Get the id for a keyword.
@@ -3147,12 +3070,6 @@ sub procnotify_callback
 
     if ($cmd eq "unban_contentflag") {
         delete $LJ::CONTENTFLAG_BANNED{$arg->{'username'}};
-        return;
-    }
-
-    # cluster switchovers
-    if ($cmd eq 'cluster_switch') {
-        $LJ::CLUSTER_PAIR_ACTIVE{ $arg->{'cluster'} } = $arg->{ 'role' };
         return;
     }
 

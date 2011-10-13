@@ -15,14 +15,25 @@ sub get_inactive_db {
     print STDERR " - cluster $cid... " if $verbose;
 
     # find approparite db server to connect to
-    my $role = "cluster$cid";
-    if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$cid}) {
-        $role .= "b" if $ab eq 'a';
-        $role .= "a" if $ab eq 'b';
-
-        print STDERR "{active=$ab, using=$role}\n" if $verbose;
+    my $role;
+    if ($LJ::IS_DEV_SERVER) {
+        $role = "cluster$cid";
     } else {
-        die "invalid cluster: $cid ?\n";
+        my $block_id = 'cluster_config.rc';
+        my $block = LJ::ExtBlock->load_by_id($block_id, {cache_valid => 15});
+        if ($block && $block->data->{$cid}) {
+            my $c = $block->data->{$cid};
+            my $ab = ($c->{'active'} eq 'a') ? 'b' : 'a';
+            if ($c->{'dead'} && ($c->{'dead'} eq $ab) {
+                ## oops, inactive db is dead
+                warn " inactivve DB $ab is marked dead";
+                return;
+            } else {
+                $role = "cluster${cid}$ab";
+            }
+        } else {
+            $role = "cluster${cid}a";
+        }
     }
 
     $LJ::DBIRole->clear_req_cache();
@@ -53,8 +64,7 @@ sub connect_to_cluster {
     my $clid = shift;
     my $verbose = shift;
     
-    my $dbr = ($LJ::IS_DEV_SERVER) ?
-        LJ::get_cluster_reader($clid) : LJ::DBUtil->get_inactive_db($clid);
+    my $dbr = LJ::DBUtil->get_inactive_db($clid);
     unless ($dbr) {
         warn "Using master database for cluster #$clid"
             if $verbose;

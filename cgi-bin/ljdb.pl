@@ -184,37 +184,6 @@ sub root_dbh_by_name {
     return $LJ::DBIRole->get_dbh_conn( _connection_options(), $fdsn );
 }
 
-sub backup_in_progress {
-    my $name = shift;
-    my $dbh = dbh_by_role("master")
-        or die "Couldn't contact master to find name of '$name'";
-
-    # return 0 if this a/b is the active side, as wecan't ever have a backup of active side in progress
-    my ($cid, $is_a_or_b) = user_cluster_details($name);
-    if ($cid) {
-        my $active_ab = $LJ::CLUSTER_PAIR_ACTIVE{$cid} or
-            die "Neither 'a' nor 'b' is active for clusterid $cid?\n";
-        die "Bogus active side" unless $active_ab =~ /^[ab]$/;
-
-        # can't have a backup in progress for an active a/b side.  short-circuit
-        # and don't even ask the database, as it might lie if the process
-        # was killed or something
-        return 0 if $active_ab eq $is_a_or_b;
-    }
-
-    my $fdsn = $dbh->selectrow_array("SELECT rootfdsn FROM dbinfo WHERE name=?", undef, $name);
-    die "No rootfdsn found for db name '$name'\n" unless $fdsn;
-    $fdsn =~ /\bhost=([\w\.\-]+)/ or die "Can't find host for database '$name'";
-    my $host = $1;
-
-    eval "use IO::Socket::INET; 1;" or die;
-    my $sock = IO::Socket::INET->new(PeerAddr => "$host:7602")  or return 0;
-    print $sock "is_backup_in_progress\r\n";
-    my $answer = <$sock>;
-    chomp $answer;
-    return $answer eq "1";
-}
-
 sub user_cluster_details {
     my $name = shift;
     my $dbh = dbh_by_role("master") or die;
@@ -345,15 +314,7 @@ sub get_uniq_db_writer {
 # </LJFUNC>
 sub get_cluster_reader
 {
-    my $arg = shift;
-    my $id = isu($arg) ? $arg->{'clusterid'} : $arg;
-    my @roles = ("cluster${id}slave", "cluster${id}");
-    if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$id}) {
-        $ab = lc($ab);
-        # master-master cluster
-        @roles = ("cluster${id}${ab}") if $ab eq "a" || $ab eq "b";
-    }
-    return LJ::get_dbh(@roles);
+    return LJ::get_cluster_master(@_);
 }
 
 # <LJFUNC>
@@ -368,12 +329,7 @@ sub get_cluster_reader
 # </LJFUNC>
 sub get_cluster_def_reader
 {
-    my @dbh_opts = scalar(@_) == 2 ? (shift @_) : ();
-    my $arg = shift;
-    my $id = LJ::isu($arg) ? $arg->{'clusterid'} : $arg;
-    return LJ::get_cluster_reader(@dbh_opts, $id) if
-        $LJ::DEF_READER_ACTUALLY_SLAVE{$id};
-    return LJ::get_dbh(@dbh_opts, LJ::master_role($id));
+    return LJ::get_cluster_master(@_);
 }
 
 # <LJFUNC>
@@ -397,13 +353,15 @@ sub get_cluster_master
 # returns the DBI::Role role name of a cluster master given a clusterid
 sub master_role {
     my $id = shift;
-    my $role = "cluster${id}";
-    if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$id}) {
-        $ab = lc($ab);
-        # master-master cluster
-        $role = "cluster${id}${ab}" if $ab eq "a" || $ab eq "b";
+    
+    if ($LJ::IS_DEV_SERVER) {
+        return "cluster${id}";
+    } else {
+        my $block_id = 'cluster_config.rc';
+        my $block = LJ::ExtBlock->load_by_id($block_id, {cache_valid => 15});
+        my $ab = ($block && $block->data->{$id}->{'active'}) ? $block->data->{$id}->{'active'} : 'a';
+        return "cluster${id}${ab}";
     }
-    return $role;
 }
 
 # <LJFUNC>
@@ -559,8 +517,7 @@ sub foreach_cluster {
     my $opts = shift || {};
     
     foreach my $cluster_id (@LJ::CLUSTERS) {
-        my $dbr = ($LJ::IS_DEV_SERVER) ?
-            LJ::get_cluster_reader($cluster_id) : LJ::DBUtil->get_inactive_db($cluster_id, $opts->{verbose});
+        my $dbr = LJ::DBUtil->get_inactive_db($cluster_id, $opts->{verbose});
         $coderef->($cluster_id, $dbr);
     }
 }
