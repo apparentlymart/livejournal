@@ -4,6 +4,48 @@
 //   s2gui.js - S2 GUI routines
 // ---------------------------------------------------------------------------
 
+var s2output = function() {
+	var el;
+
+	function parseLineNumbers(text) {
+		var match,
+			regex = /line\s+(\d+),\s+column\s+(\d+)/g,
+			subs = [];
+		while (match = regex.exec(text)) {
+			subs.push({ key: match[0], link: '<a href="javascript:s2jumpTo(' +
+						match[1] + ',' + match[2] + ')">' + match[0] + '</a>'});
+		}
+		subs.forEach(function(el) {
+			text = text.replace(el.key, el.link);
+		});
+
+		return text;
+	}
+
+	return {
+		init: function() {
+			el = jQuery('#out');
+
+			var text = el.html();
+			if (text.length > 0) {
+				text = parseLineNumbers(text);
+				el.html(text);
+			}
+		},
+
+		add: function(text, overwrite) {
+			overwrite = overwrite || false;
+			text = parseLineNumbers(text);
+
+			if (overwrite) {
+				el.html(text);
+			} else {
+				el.append(text);
+			}
+		}
+	}
+}();
+
 var s2status;
 
 function s2printStatus(str)
@@ -109,6 +151,18 @@ function s2IETabKeyPressedHandler(e)
 			return false;
 		}
 	}
+}
+
+function s2jumpTo(line, column) {
+	var main = s2getCodeArea(),
+		text = main.value,
+		pos = text.split('\n').slice(0, line - 1).join('\n').length + column;
+
+	if (jQuery.browser.msie) { //ie doesn't count linebreaks when positioning cursor
+		pos -= line - 1; 
+	}
+
+	s2jumpToPos(pos, line);
 }
 
 function s2jumpToPos(pos, line)
@@ -464,5 +518,6 @@ function s2submit()
 {
 	// save position textarea, where reload page
 	var textarea = s2getCodeArea();
-	window.name = textarea.scrollTop + ':' + nxgetPositionCursor(textarea);
+	s2edit.save(textarea.value);
+	return false;
 }

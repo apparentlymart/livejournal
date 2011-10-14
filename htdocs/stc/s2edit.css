@@ -8,7 +8,6 @@ body {
 }
 
 div.header {
-	position: absolute;
 	top: 0px;
 	height: 19px;
 	width: 100%;
@@ -121,7 +120,7 @@ div.main {
 	height: auto;
 }
 
-textarea.maintext {
+.maintext {
 	position: absolute;
 	border: solid #808080 1px;
 	font-family: monospace;
@@ -146,7 +145,7 @@ div.output {
 	height: 90px;
 	padding: 3px;
 	width: auto;
-	overflow: scroll;
+	overflow: auto;
 }
 
 div.divider {
@@ -197,6 +196,10 @@ div.gutter {
 a {
 	text-decoration: none;
 	color: #000000;
+}
+
+.output a {
+	text-decoration: underline;
 }
 
 a:hover {

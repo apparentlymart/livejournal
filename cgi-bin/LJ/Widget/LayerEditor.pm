@@ -5,7 +5,7 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 sub ajax { 1 }
 sub authas { 1 }
-sub need_res { qw( stc/widgets/layereditor.css js/s2edit/xlib.js js/s2edit/s2edit.js js/s2edit/s2gui.js js/s2edit/s2parser.js js/s2edit/s2sense.js js/s2edit/s2library.js stc/s2edit.css) }
+sub need_res { qw( stc/s2edit.css stc/widgets/layereditor.css js/s2edit/xlib.js js/s2edit/s2edit.js js/s2edit/s2gui.js js/s2edit/s2parser.js js/s2edit/s2sense.js js/s2edit/s2library.js) }
 
 =head2 template_filename
 # path to template file,
@@ -203,25 +203,16 @@ sub handle_post {
 sub js {
     q [
         initWidget: function () {
-            var self = this;
-
-            var form = DOM.getElement("s2");
-            DOM.addEventListener(form, "submit", function (evt) { self.warnWord(evt, form) });
+            s2edit.init(this);
         },
-        warnWord: function (evt, form) {
-            var given_text = form["Widget[LayerEditor]_s2code"].value + "";
-            
 
-            this.doPostAndUpdateContent({
-                s2code: given_text,
+        saveContent: function(text) {
+            var form = jQuery('#s2').get(0);
+            this.doPost({
+                s2code: text,
                 action: 'compile',
-                id: form["Widget[LayerEditor]_id"].value,
+                id: form["Widget[LayerEditor]_id"].value
             });
-
-            Event.stop(evt);
-        },
-        onRefresh: function (data) {
-            this.initWidget();
         }
     ];
 
