@@ -49,8 +49,7 @@ sub load_relation_destinations {
                         limit     => $limit, 
                         nogearman => $nogearman,
                         );
-    return undef unless $friends;
-    return @$friends;
+    return $friends;
 }
 
 ## friendofs rows
@@ -66,8 +65,7 @@ sub load_relation_sources {
                         limit     => $limit, 
                         nogearman => $nogearman,
                         );
-    return undef unless $friendofs;
-    return @$friendofs;
+    return $friendofs;
 
 }
 
