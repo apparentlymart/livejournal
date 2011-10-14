@@ -3066,9 +3066,7 @@ sub getevents {
         $uowner = LJ::load_userid( $req->{journalid} );
     }
 
-
     my $sticky_id = $uowner->prop("sticky_entries") || undef;
-
     my $dbr = LJ::get_db_reader();
     my $sth;
 
@@ -3286,7 +3284,7 @@ sub getevents {
         $orderby = "ORDER BY $rtime_what";
 
         unless ($skip) {
-            $where .= "OR jitemid=$sticky_id" if defined $sticky_id;
+            $where .= "OR ( journalid=$ownerid $secwhere $where AND jitemid=$sticky_id)" if defined $sticky_id;
         }
     }
     elsif ($req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1") {
