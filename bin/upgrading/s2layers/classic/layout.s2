@@ -773,9 +773,9 @@ function CommentInfo::print () {
             if (clean_url($*img_btwn_comments) != "") {
                 """ <img src="$*img_btwn_comments" alt="" /> """;
             } else {
+                print safe "$*text_btwn_comments";
             }
         }
-        print safe "$*text_btwn_comments";
         if ($.show_postlink) {
             $this->print_postlink();
         }
