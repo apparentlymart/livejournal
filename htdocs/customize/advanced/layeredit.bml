@@ -3,10 +3,13 @@
     use strict;
     use vars qw(%POST %GET );
     use LJ::Widget::LayerEditor;
+    
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
     my %from_post = LJ::Widget->handle_post(\%POST, qw ( LayerEditor ));
 
     my $widget = LJ::Widget::LayerEditor->new;
-
     my %template_params;
     $widget->prepare_template_params(\%template_params, %GET, %from_post);
 
