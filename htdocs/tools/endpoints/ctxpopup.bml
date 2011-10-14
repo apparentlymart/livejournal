@@ -101,7 +101,7 @@
             my $identity = $u->identity;
 
             if ($identity && $identity->isa("LJ::Identity::OpenID")) {
-                $ret{url_userpic} = "$LJ::IMGPREFIX/identity_100x100.png";
+                $ret{url_userpic} = "$LJ::IMGPREFIX/profile_icons/openid.gif";
             }
             else {
                 $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif";
@@ -109,9 +109,6 @@
         }
         elsif ( $u->is_comm ) {
             $ret{'url_userpic'} = "$LJ::IMGPREFIX/profile_icons/comm.gif";
-        }
-        elsif ( $u->is_identity ) {
-            $ret{'url_userpic'} = "$LJ::IMGPREFIX/profile_icons/openid.gif";
         }
         else {
             $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif";
