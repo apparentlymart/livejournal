@@ -16,6 +16,9 @@
  my $remote = LJ::get_remote();
  LJ::load_user_privs($remote, 'admin') if $remote;
 
+ my $can_view_priv;
+ $can_view_priv = LJ::check_priv($remote, 'canview', 'privs') if $remote;
+
  my @privs;
  my %priv;
  my %pcode2id;
@@ -196,7 +199,7 @@
          my $pcode = $priv{$prlid}->{'privcode'};
          my $can_grant = remote_can_grant($remote, $pcode, $arg);
 
-         next unless ($prec->{'is_public'} || ($remote && $remote->{'userid'} == $userid) || $can_grant);
+         next unless ($can_view_priv || $prec->{'is_public'} || ($remote && $remote->{'userid'} == $userid) || $can_grant);
 
          $ret .= "<tr><td align='center'>";
          if ($can_grant) {
@@ -258,7 +261,7 @@
 
      # $pcode is the name of the privilege list they're looking at, and $FORM{'viewarg'} is
      # the argument in particular they care about
-     unless ($prec->{'is_public'} || remote_can_grant($remote, $pcode, $FORM{'viewarg'})) {
+     unless ($can_view_priv || $prec->{'is_public'} || remote_can_grant($remote, $pcode, $FORM{'viewarg'})) {
          $ret .= "<p><b>ERROR:</b> This privilege's access list is not public.</p>\n";
          return $ret;
      }
