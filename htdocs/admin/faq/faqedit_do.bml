@@ -68,11 +68,11 @@ body<=
  my $do_trans = sub {
      my $id = shift;
      return unless $faqd;
-     LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
+     LJ::Lang::set_text($faqd->{'dmid'}, $rlang->{'lncode'},
                         "$id.1question", $FORM{'q'}, $opts_question);
-     LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
+     LJ::Lang::set_text($faqd->{'dmid'}, $rlang->{'lncode'},
                         "$id.3summary", $FORM{'s'}, $opts_summary);
-     LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
+     LJ::Lang::set_text($faqd->{'dmid'}, $rlang->{'lncode'},
                         "$id.2answer", $FORM{'a'}, $opts_answer);
  };
  

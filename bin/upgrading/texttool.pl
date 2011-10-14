@@ -328,7 +328,7 @@ sub copyfaq {
     while ( my ( $cat, $name ) = $sth->fetchrow_array ) {
         next if exists $existing{"cat.$cat"};
         my $opts = { 'childrenlatest' => 1 };
-        LJ::Lang::set_text( $dbh, $domid, $ll->{'lncode'}, "cat.$cat", $name,
+        LJ::Lang::set_text( $domid, $ll->{'lncode'}, "cat.$cat", $name,
             $opts );
     }
 
@@ -341,11 +341,11 @@ sub copyfaq {
                 and exists $existing{"$faqid.2answer"}
                 and exists $existing{"$faqid.3summary"};
         my $opts = { 'childrenlatest' => 1 };
-        LJ::Lang::set_text( $dbh, $domid, $ll->{'lncode'}, "$faqid.1question",
+        LJ::Lang::set_text( $domid, $ll->{'lncode'}, "$faqid.1question",
             $q, $opts );
-        LJ::Lang::set_text( $dbh, $domid, $ll->{'lncode'}, "$faqid.2answer",
+        LJ::Lang::set_text( $domid, $ll->{'lncode'}, "$faqid.2answer",
             $a, $opts );
-        LJ::Lang::set_text( $dbh, $domid, $ll->{'lncode'}, "$faqid.3summary",
+        LJ::Lang::set_text( $domid, $ll->{'lncode'}, "$faqid.3summary",
             $s, $opts );
     }
 
@@ -905,7 +905,7 @@ sub newitems {
     foreach my $it ( keys %{ $items{'general'} } ) {
         next if exists $e_general{$it};
         my $res =
-            LJ::Lang::set_text( $dbh, 1, "en", $it, undef,
+            LJ::Lang::set_text( 1, "en", $it, undef,
             { 'staleness' => 4 } );
         $out->("Adding general: $it ... $res");
     }
@@ -937,7 +937,7 @@ sub newitems {
             next if exists $e_general{$it};
             next if exists $e_local{$it};
             my $res =
-                LJ::Lang::set_text( $dbh, 1, $ll->{'lncode'}, $it, undef,
+                LJ::Lang::set_text( 1, $ll->{'lncode'}, $it, undef,
                 { 'staleness' => 4 } );
             $out->("Adding local: $it ... $res");
         }
