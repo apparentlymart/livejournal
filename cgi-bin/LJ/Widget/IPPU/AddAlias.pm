@@ -3,10 +3,6 @@ package LJ::Widget::IPPU::AddAlias;
 use strict;
 use base qw(LJ::Widget::IPPU);
 use Carp qw(croak);
-use Class::Autouse qw(
-                      LJ::JSUtil
-                      );
-
 use LJ::JSON;
 
 sub need_res {

@@ -102,7 +102,8 @@ sub load_hooks_dir {
     return if $hooks_dir_scanned++;
     # eh, not actually subclasses... just files:
     foreach my $class (LJ::ModuleLoader->module_subclasses("LJ::Hooks")) {
-        eval "use $class;";
+        $class =~ s!::!/!g;
+        require "$class.pm";
         die "Error loading $class: $@" if $@;
     }
 }
