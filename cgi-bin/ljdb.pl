@@ -350,17 +350,48 @@ sub get_cluster_master
     return LJ::get_dbh(@dbh_opts, LJ::master_role($id));
 }
 
-# returns the DBI::Role role name of a cluster master given a clusterid
-sub master_role {
-    my $id = shift;
+## input: cluster id
+## ouptut: hashiref like {active => 'a', dead => 'b' }
+sub _cluster_config {
+    my $cid = shift;
     
+    my $block_id = 'cluster_config.rc';
+    my $block = LJ::ExtBlock->load_by_id($block_id, {cache_valid => 15});
+    return ($block && $block->data->{$cid}) ? $block->data->{$cid} : {};
+}
+
+
+# input: LJ::User object or cluster id
+# output: the DBI::Role role name of a cluster master (like 'cluster10a')
+sub master_role {
+    my $arg = shift;
+    
+    my $cid = LJ::isu($arg) ? $arg->{'clusterid'} : $arg;
     if ($LJ::IS_DEV_SERVER) {
-        return "cluster${id}";
+        return "cluster${cid}";
     } else {
-        my $block_id = 'cluster_config.rc';
-        my $block = LJ::ExtBlock->load_by_id($block_id, {cache_valid => 15});
-        my $ab = ($block && $block->data->{$id}->{'active'}) ? $block->data->{$id}->{'active'} : 'a';
-        return "cluster${id}${ab}";
+        my $ab = _cluster_config($cid)->{'active'} || 'a';
+        return "cluster${cid}${ab}";
+    }
+}
+
+# input: LJ::User object or cluster id
+# output: role name of inactive server, or undef if inactive server is dead
+sub get_inactive_role {
+    my $arg = shift;
+    
+    my $cid = LJ::isu($arg) ? $arg->{'clusterid'} : $arg;
+    if ($LJ::IS_DEV_SERVER) {
+        return "cluster${cid}";
+    } else {
+        my $c = _cluster_config($cid);
+        my $ab = ($c && $c->{'active'} && $c->{'active'} eq 'b') ? 'a' : 'b';
+        if ($c && $c->{'dead'} && $c->{'dead'} eq $ab) {
+            ## oops, inactive is dead
+            return;
+        } else {
+            return "cluster${cid}${ab}";
+        }
     }
 }
 

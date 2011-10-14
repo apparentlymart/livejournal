@@ -14,28 +14,8 @@ sub get_inactive_db {
 
     print STDERR " - cluster $cid... " if $verbose;
 
-    # find approparite db server to connect to
-    my $role;
-    if ($LJ::IS_DEV_SERVER) {
-        $role = "cluster$cid";
-    } else {
-        my $block_id = 'cluster_config.rc';
-        my $block = LJ::ExtBlock->load_by_id($block_id, {cache_valid => 15});
-        if ($block && $block->data->{$cid}) {
-            my $c = $block->data->{$cid};
-            my $ab = ($c->{'active'} eq 'a') ? 'b' : 'a';
-            warn "$c->{'active'} is active, using $ab" if $verbose;
-            if ($c->{'dead'} && $c->{'dead'} eq $ab) {
-                ## oops, inactive db is dead
-                warn " inactivve DB $ab is marked dead";
-                return;
-            } else {
-                $role = "cluster${cid}$ab";
-            }
-        } else {
-            $role = "cluster${cid}a";
-        }
-    }
+    my $role = LJ::get_inactive_role($cid);
+    return unless $role;
 
     $LJ::DBIRole->clear_req_cache();
     my $db = LJ::get_dbh($role);

@@ -605,9 +605,6 @@ add_conf('%LOCKY_CACHE',
 add_conf('$WHEN_NEEDED_THRES',
          type => '',
          des => "");
-add_conf('%CLUSTER_PAIR_ACTIVE',
-         type => '',
-         des => "");
 add_conf('%DEF_READER_ACTUALLY_SLAVE',
          type => '',
          des => "");

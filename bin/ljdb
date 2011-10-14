@@ -3,6 +3,7 @@ use strict;
 
 ##   post-svn-commit script test IV
 use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
 require 'ljdb.pl';
 use Getopt::Long;
 
@@ -83,22 +84,8 @@ if (!$role && ($user || $uid)) {
 
     my ($userid, $cid) = $dbs->selectrow_array("SELECT userid, clusterid FROM user $whereClause", undef, $sqlArg);
     die "no such user as '$user'\n" unless $userid && $cid;
-    $role = "cluster" . $cid;
-    print "user: $user / userid: $userid / clusterid: $cid";
-
-    if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$cid}) {
-        print " / active=$ab\n";
-        if ($inactive) {
-            $role .= "b" if $ab eq 'a';
-            $role .= "a" if $ab eq 'b';
-        } else {
-            $role .= $ab;
-        }
-    } else {
-        # type must be master/slave
-        $role .= "slave" if $inactive && grep { $_->{role}{"${role}slave"} } values %LJ::DBINFO;
-    }
-    print "\n";
+    my $u = LJ::load_userid($userid);
+    $role = ($inactive) ? LJ::get_inactive_role($u) : LJ::master_role($u);
 }
 
 $role ||= "master";
