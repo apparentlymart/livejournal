@@ -28,6 +28,7 @@ use HTTP::Date qw(str2time);
 use LJ::TimeUtil;
 use LJ::User::PropStorage;
 use LJ::FileStore;
+use LJ::RelationService;
 
 use Class::Autouse qw(
                       URI
@@ -4564,7 +4565,7 @@ sub friendof_uids {
     my $limit = int(delete $args{limit}) || 50000;
     Carp::croak("unknown option") if %args;
 
-    return $u->_friend_friendof_uids(limit => $limit, mode => "friendofs");
+    return LJ::RelationService->find_relation_sources($u, limit => $limit);
 }
 
 # returns array of friend uids.  by default, limited at 50,000 items.
@@ -4573,9 +4574,8 @@ sub friend_uids {
     my $limit = int(delete $args{limit}) || 50000;
     Carp::croak("unknown option") if %args;
 
-    return $u->_friend_friendof_uids(limit => $limit, mode => "friends");
+    return LJ::RelationService->find_relation_destinations($u, limit => $limit);
 }
-
 
 # helper method since the logic for both friends and friendofs is so similar
 sub _friend_friendof_uids {
@@ -4615,6 +4615,7 @@ sub _friend_friendof_uids {
 # actually get friend/friendof uids, should not be called directly
 sub _friend_friendof_uids_do {
     my ($u, %args) = @_;
+## method is also called from load-friends-gm worker.
 
     my $limit = int(delete $args{limit}) || 50000;
     my $mode  = delete $args{mode};
@@ -8653,161 +8654,14 @@ sub get_friends {
     return undef unless $userid;
     return undef if $LJ::FORCE_EMPTY_FRIENDS{$userid};
 
-    unless ($force) {
-        my $memc = _get_friends_memc($userid, $mask);
-        return $memc if $memc;
-    }
-    return {} if $memcache_only; # no friends
+    my $u = LJ::load_userid($userid);
 
-    # nothing from memcache, select all rows from the
-    # database and insert those into memcache
-    # then return rows that matched the given groupmask
-
-    # no gearman/gearman not wanted
-    my $gc = LJ::gearman_client();
-    return _get_friends_db($userid, $mask)
-        unless $gc && LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $userid);
-
-    # invoke the gearman
-    my $friends;
-    my $arg = Storable::nfreeze({ userid => $userid, mask => $mask });
-    my $task = Gearman::Task->new("load_friends", \$arg,
-                                  {
-                                      uniq => "$userid",
-                                      on_complete => sub {
-                                          my $res = shift;
-                                          return unless $res;
-                                          $friends = Storable::thaw($$res);
-                                      }
-                                  });
-
-    my $ts = $gc->new_task_set();
-    $ts->add_task($task);
-    $ts->wait(timeout => 30); # 30 sec timeout
-
-    return $friends;
-}
-
-sub _get_friends_memc {
-    my $userid = shift
-        or Carp::croak("no userid to _get_friends_db");
-    my $mask = shift;
-
-    # memcache data version
-    my $ver = 1;
-
-    my $packfmt = "NH6H6NC";
-    my $packlen = 15;  # bytes
-
-    my @cols = qw(friendid fgcolor bgcolor groupmask showbydefault);
-
-    # first, check memcache
-    my $memkey = [$userid, "friends:$userid"];
-
-    my $memfriends = LJ::MemCache::get($memkey);
-    return undef unless $memfriends;
-
-    my %friends; # rows to be returned
-
-    # first byte of object is data version
-    # only version 1 is meaningful right now
-    my $memver = substr($memfriends, 0, 1, '');
-    return undef unless $memver == $ver;
-
-    # get each $packlen-byte row
-    while (length($memfriends) >= $packlen) {
-        my @row = unpack($packfmt, substr($memfriends, 0, $packlen, ''));
-
-        # don't add into %friends hash if groupmask doesn't match
-        next if $mask && ! ($row[3]+0 & $mask+0);
-
-        # add "#" to beginning of colors
-        $row[$_] = "\#$row[$_]" foreach 1..2;
-
-        # turn unpacked row into hashref
-        my $fid = $row[0];
-        my $idx = 1;
-        foreach my $col (@cols[1..$#cols]) {
-            $friends{$fid}->{$col} = $row[$idx];
-            $idx++;
-        }
-    }
-
-    # got from memcache, return
-    return \%friends;
-}
-
-sub _get_friends_db {
-    my $userid = shift
-        or Carp::croak("no userid to _get_friends_db");
-    my $mask = shift;
-
-    my $dbh = LJ::get_db_writer();
-
-    my $lockname = "get_friends:$userid";
-    my $release_lock = sub {
-        LJ::release_lock($dbh, "global", $lockname);
-    };
-
-    # get a lock
-    my $lock = LJ::get_lock($dbh, "global", $lockname);
-    return {} unless $lock;
-
-    # in lock, try memcache
-    my $memc = _get_friends_memc($userid, $mask);
-    if ($memc) {
-        $release_lock->();
-        return $memc;
-    }
-
-    # inside lock, but still not populated, query db
-
-    # memcache data info
-    my $ver = 1;
-    my $memkey = [$userid, "friends:$userid"];
-    my $packfmt = "NH6H6NC";
-    my $packlen = 15;  # bytes
-
-    # columns we're selecting
-    my @cols = qw(friendid fgcolor bgcolor groupmask showbydefault);
-
-    my $mempack = $ver; # full packed string to insert into memcache, byte 1 is dversion
-    my %friends;        # friends object to be returned, all groupmasks match
-
-    my $sth = $dbh->prepare("SELECT friendid, fgcolor, bgcolor, groupmask, showbydefault " .
-                            "FROM friends WHERE userid=?");
-    $sth->execute($userid);
-    die $dbh->errstr if $dbh->err;
-    while (my @row = $sth->fetchrow_array) {
-
-        # convert color columns to hex
-        $row[$_] = sprintf("%06x", $row[$_]) foreach 1..2;
-
-        my $newpack = pack($packfmt, @row);
-        last if length($mempack) + length($newpack) > 950*1024;
-
-        $mempack .= $newpack;
-
-        # unless groupmask matches, skip adding to %friends
-        next if $mask && ! ($row[3]+0 & $mask+0);
-
-        # add "#" to beginning of colors
-        $row[$_] = "\#$row[$_]" foreach 1..2;
-
-        my $fid = $row[0];
-        my $idx = 1;
-        foreach my $col (@cols[1..$#cols]) {
-            $friends{$fid}->{$col} = $row[$idx];
-            $idx++;
-        }
-    }
-
-    LJ::MemCache::add($memkey, $mempack);
-
-    # finished with lock, release it
-    $release_lock->();
-
-    return \%friends;
+    return LJ::RelationService->load_relation_destinations(
+            $u, uuid          => $uuid,
+                mask          => $mask,
+                memcache_only => $memcache_only,
+                force_db      => $force,
+                );
 }
 
 # <LJFUNC>
@@ -8823,27 +8677,11 @@ sub get_friendofs {
     my $userid = LJ::want_userid($uuid);
     return undef unless $userid;
 
-    # first, check memcache
-    my $memkey = [$userid, "friendofs:$userid"];
-
-    unless ($opts->{force}) {
-        my $memfriendofs = LJ::MemCache::get($memkey);
-        return @$memfriendofs if $memfriendofs;
-    }
-
-    # nothing from memcache, select all rows from the
-    # database and insert those into memcache
-
-    my $dbh = LJ::get_db_writer();
-    my $limit = $opts->{force} ? '' : " LIMIT " . ($LJ::MAX_FRIENDOF_LOAD+1);
-    my $friendofs = $dbh->selectcol_arrayref
-        ("SELECT userid FROM friends WHERE friendid=?$limit",
-         undef, $userid) || [];
-    die $dbh->errstr if $dbh->err;
-
-    LJ::MemCache::add($memkey, $friendofs);
-
-    return @$friendofs;
+    my $u = LJ::load_userid($userid);
+    return LJ::RelationService->find_relation_sources($u, 
+            nolimit        => $opts->{force} || 0,
+            skip_memcached => $opts->{force},
+            );
 }
 
 # <LJFUNC>

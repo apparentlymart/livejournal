@@ -9,6 +9,7 @@ use base 'LJ::NewWorker::Gearman';
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
+use LJ::RelationService;
 
 use LJ::NewWorker::Gearman;
 use Storable;
@@ -26,10 +27,11 @@ sub load_friends {
     my $uid = $args->{userid};
     my $mask = $args->{mask};
 
-    my $friends = LJ::_get_friends_db($uid, $mask);
+    my $u       = LJ::load_userid($uid);
+    my @friends = LJ::RelationService->load_relation_destinations($u, mask => $mask, nogearman => 1);
 
     # nfreeze friends hashref and return
-    return Storable::nfreeze($friends);
+    return Storable::nfreeze(\@friends);
 }
 
 sub load_friend_friendof_uids {
@@ -39,9 +41,8 @@ sub load_friend_friendof_uids {
     my $uid = $args->{uid};
     my $opts = $args->{opts};
 
-    my $u = LJ::load_userid($uid);
-
-    my @uids = $u->_friend_friendof_uids_do(%$opts);
+    my $u    = LJ::load_userid($uid);
+    my @uids = LJ::RelationService->find_relation_destinations($u, %$opts, nogearman => 1);
 
     return Storable::nfreeze(\@uids);
 }
