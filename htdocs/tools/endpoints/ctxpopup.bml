@@ -110,6 +110,9 @@
         elsif ( $u->is_comm ) {
             $ret{'url_userpic'} = "$LJ::IMGPREFIX/profile_icons/comm.gif";
         }
+        elsif ( $u->is_identity ) {
+            $ret{'url_userpic'} = "$LJ::IMGPREFIX/profile_icons/openid.gif";
+        }
         else {
             $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif";
         }
