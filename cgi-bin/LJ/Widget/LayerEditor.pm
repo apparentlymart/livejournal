@@ -5,7 +5,7 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 sub ajax { 1 }
 sub authas { 1 }
-sub need_res { qw( stc/s2edit.css stc/widgets/layereditor.css js/s2edit/xlib.js js/s2edit/s2edit.js js/s2edit/s2gui.js js/s2edit/s2parser.js js/s2edit/s2sense.js js/s2edit/s2library.js) }
+sub need_res { qw( js/jquery/jquery.storage.js js/ace/ace.js js/ace/theme-textmate.js js/ace/mode-perl.js js/ace/mode-s2.js stc/s2edit.css stc/widgets/layereditor.css js/s2edit/xlib.js js/s2edit/s2edit.js js/s2edit/s2gui.js js/s2edit/s2parser.js js/s2edit/s2sense.js js/s2edit/s2library.js) }
 
 =head2 template_filename
 # path to template file,

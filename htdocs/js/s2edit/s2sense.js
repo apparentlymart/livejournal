@@ -60,7 +60,13 @@ function s2acceptCompletion()
 	if (!(s2completions.length))
 		return false;
 
-	nxinsertText(area, s2completions[0].substring(s2compText.length));
+	var insertText = s2completions[0].substring(s2compText.length);
+
+	if (s2isAceActive()) {
+		aceEditor.insert(insertText);
+	} else {
+		nxinsertText(area, insertText);
+	}
 	s2printStatus('Autocompleted: ' + s2completions[0]);
 	s2completions = new Array();
 	
@@ -104,27 +110,36 @@ function s2sense(ch)
 				s2completionUpdated();
 		} else {
 			s2acceptCompletion();
+			return true;
 		}
-	} else
+	} else {
+		var currentLine;
+		if (s2isAceActive()) {
+			var position = aceEditor.getCursorPosition();
+			currentLine = aceEditor.getSession().getLine(position.row).substr(0,position.column);
+		} else {
+			currentLine = nxgetLastChars(area, 64);
+		}
 		switch (ch) {
 			case 58:	// :
-				var m = nxgetLastChars(area, 64).match(/([A-Za-z0-9_]+):$/);
+				var m = currentLine.match(/([A-Za-z0-9_]+):$/);
 				if (m)
 					s2startClassMethodCompletion(m[1]);
 				break;
 				
 			case 0x3e:	// >
-				var m = nxgetLastChars(area, 64).match(/\$[^-]+-$/);
+				var m = currentLine.match(/\$[^-]+-$/);
 				if (m)
 					s2startMethodCompletion();
 				break;
 				
 			case 0x2e:	// .
-				var m = nxgetLastChars(area, 64).match(/\$[^.]+$/);
+				var m = currentLine.match(/\$[^.]+$/);
 				if (m)
 					s2startMemberCompletion();
 				break;
 		}
+    }
 }
 
 // Create the completion caches - initialization routine

@@ -8,6 +8,7 @@ var s2index;
 
 var s2dirty;
 var s2lineCount;
+var s2settings;
 
 var s2edit = function() {
 	return {
@@ -17,6 +18,8 @@ var s2edit = function() {
 
 			s2dirty = 1;
 			s2lineCount = 0;
+
+			this.initSettings();
 
 			s2initIndex();
 			s2initParser();
@@ -28,6 +31,79 @@ var s2edit = function() {
 
 			// Disable selection in the document (IE only - prevents wacky dragging bugs)
 			document.onselectstart = function () { return false; };
+
+			if (jQuery.browser.opera || (jQuery.browser.msie && jQuery.browser.version)) { return; }
+
+			this.aceInit();
+		},
+
+		initSettings: function() {
+			var settings = jQuery.storage.getItem('s2edit') || {};
+
+			s2settings = {
+				load: function(item) {
+					return settings[item] || void 0;
+				},
+
+				save: function(item, val) {
+					//do nothing if option has the same value
+					if (settings.hasOwnProperty(item) && settings[item] === val) { return; }
+
+					settings[item] = val;
+					jQuery.storage.setItem('s2edit', settings);
+				}
+			};
+		},
+
+		aceInit: function() {
+			jQuery('<input type="button" id="toggleEditor" class="compilelink"/>')
+				.click(this.toggleEditor.bind(this))
+				.val('Toggle source view')
+				.insertAfter('.header .compilelink');
+
+			var textarea = jQuery('#main'),
+				pre = jQuery('<pre id="editor"/>')
+					.addClass('maintext')
+					.hide()
+					.insertAfter(textarea);
+
+			if (!s2settings.load('useAce')) { return; }
+
+			this.toggleEditor();
+		},
+
+		toggleEditor: function() {
+			var textarea = jQuery('#main'),
+				editorEl = jQuery('#editor');
+
+			if (!s2isAceActive()) {
+				textarea.hide();
+				editorEl.show();
+
+				if (!window.aceEditor) {
+					var editor = window.aceEditor = ace.edit("editor");
+					editor.setTheme("ace/theme/textmate");
+					require('ace/commands/autocompletion');
+
+					var S2Mode = require("ace/mode/s2").Mode;
+					editor.getSession().setMode(new S2Mode());
+					editor.getSession().addEventListener("change", function(e) {
+						s2dirty = 1;
+
+						if (e.data.action === 'insertText' && e.data.text.length === 1) {
+							s2sense(e.data.text.charCodeAt(0));
+						}
+					});
+				}
+
+				aceEditor.getSession().setValue(textarea.val());
+				s2settings.save('useAce', true);
+			} else {
+				textarea.val(aceEditor.getSession().getValue());
+				textarea.show();
+				editorEl.hide();
+				s2settings.save('useAce', false);
+			}
 		},
 
 		save: function(text) {

@@ -78,7 +78,11 @@ function s2getCodeArea()
 
 function s2getCode()
 {
-	return xGetElementById('main').value;
+	return s2isAceActive() ? aceEditor.getSession().getValue() : xGetElementById('main').value;
+}
+
+function s2isAceActive() {
+	return !jQuery('#main').is(':visible');
 }
 
 function s2setCode(to)
@@ -154,6 +158,11 @@ function s2IETabKeyPressedHandler(e)
 }
 
 function s2jumpTo(line, column) {
+	if (s2isAceActive()) {
+		aceEditor.gotoLine(line, column - 1);
+		return;
+	}
+
 	var main = s2getCodeArea(),
 		text = main.value,
 		pos = text.split('\n').slice(0, line - 1).join('\n').length + column;
@@ -167,8 +176,6 @@ function s2jumpTo(line, column) {
 
 function s2jumpToPos(pos, line)
 {
-	var main = s2getCodeArea();
-
 	nxpositionCursor(main, pos);
 	nxscrollObject(main, line, s2lineCount);
 }
@@ -385,6 +392,10 @@ function s2resizeOutput(force)
 		main.style.width = "50px";
 		main.style.width = oldwidth;
 	}
+
+	if (window.aceEditor) {
+		aceEditor.resize();
+	}
 }
 
 function s2resizeReference(force)
@@ -412,6 +423,10 @@ function s2resizeReference(force)
 	divider.style.left = (rWidth + 204 - 174) + 'px';
 	output.style.left = (rWidth + 204 - 174) + 'px';
 	xGetElementById('outputtabs').style.left = (rWidth + 204 - 174) + 'px';
+
+	if (window.aceEditor) {
+		aceEditor.resize();
+	}
 }
 
 function s2processDrag(e)
@@ -518,6 +533,10 @@ function s2submit()
 {
 	// save position textarea, where reload page
 	var textarea = s2getCodeArea();
+	if (s2isAceActive()) {
+		textarea.value = aceEditor.getSession().getValue();
+	}
+
 	s2edit.save(textarea.value);
 	return false;
 }
