@@ -391,7 +391,7 @@ sub set_text {
         undef, $lnid, $dmid, $itid, );
 
     if ( defined $text ) {
-        my $userid = $opts->{'userid'} + 0;
+        my $userid = int( $opts->{'userid'} || 0 );
 
         # Strip bad characters
         $text =~ s/\r//;
@@ -421,7 +421,7 @@ sub set_text {
     }
 
     my $revid     = LJ::alloc_global_counter("ml_latest_updates_counter");
-    my $staleness = int $opts->{'staleness'};
+    my $staleness = int( $opts->{'staleness'} || 0 );
     $dbh->do(
         qq{
             REPLACE INTO ml_latest
