@@ -564,6 +564,7 @@ sub populate_s2 {
                 waitpid($pid, 0);
             }
             else {
+                LJ::MemCache->disconnect_all;
                 $compile->(@$_) foreach @batch;
                 exit 0;
             }
