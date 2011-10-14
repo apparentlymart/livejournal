@@ -99,9 +99,9 @@ CKEDITOR.editorConfig = function(config){
 		'NumberedList',
 		'BulletedList',
 		'-',
-		'LJJustifyLeft',
-		'LJJustifyCenter',
-		'LJJustifyRight',
+		'JustifyLeft',
+		'JustifyCenter',
+		'JustifyRight',
 		'-',
 		'Undo',
 		'Redo');
