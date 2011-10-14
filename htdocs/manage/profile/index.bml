@@ -44,6 +44,9 @@ body<=
 
     return $print_with_ad->($LJ::MSG_READONLY_USER) if $u->readonly;
 
+    # Fix incorrect behaviour for users without init_bdate prop set
+    my $has_no_init_bdate = $u->prop('init_bdate')? 0 : 1;
+
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
     my $getsep = $getextra ? "&" : "?";
@@ -721,7 +724,7 @@ body<=
             push @errors, $ML{'.error.day.outofrange'};
         }
 
-        if ($u->is_child && $POST{'opt_sharebday'} ne "N") {
+        if ($u->is_child && $POST{'opt_sharebday'} ne "N" and not $has_no_init_bdate) {
             push @errors, $ML{'.error.bday.child'};
         }
 
@@ -748,7 +751,7 @@ body<=
             }
         }
 
-        if ($u->is_child && $POST{'allow_contactshow'} =~ /[YR]/) {
+        if ($u->is_child && $POST{'allow_contactshow'} =~ /[YR]/ and not $has_no_init_bdate) {
             push @errors, $ML{'.error.contact.child'};
         }
 
@@ -841,8 +844,16 @@ body<=
 
         $update{'email'} = $POST{'email'} unless $LJ::EMAIL_CHANGE_REQUIRES_PASSWORD;
 
-        if ($POST{'allow_contactshow'}) {
-            $update{'allow_contactshow'} = $POST{'allow_contactshow'} if $POST{'allow_contactshow'} =~ m/^(N|R|Y|F)$/;
+        if ( $u->is_child and $has_no_init_bdate ) {
+            if ( $POST{'allow_contactshow'} =~ m/^([NF])$/ ) {
+                $update{'allow_contactshow'} = $1;
+            } else {
+                $update{'allow_contactshow'} = 'N';
+            }
+        } else {
+            if ($POST{'allow_contactshow'}) {
+                $update{'allow_contactshow'} = $POST{'allow_contactshow'} if $POST{'allow_contactshow'} =~ m/^(N|R|Y|F)$/;
+            }
         }
 
         if (defined $POST{'oldenc'}) {
@@ -860,6 +871,7 @@ body<=
             $POST{'opt_hidefriendofs'} = $POST{'opt_hidefriendofs'} ? 0 : 1;
             $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|R|Y|F)$/;
             $POST{'gender'} = 'U' unless $POST{'gender'} =~ m/^[UMF]$/;
+            $POST{'opt_sharebday'} = 'N' if $u->is_child and $has_no_init_bdate;
             $POST{'opt_sharebday'} = undef unless $POST{'opt_sharebday'} =~ m/^(A|F|N|R)$/;
             $POST{'opt_showbday'} = 'D' unless $POST{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
             # undefined means show to everyone, "N" means don't show
