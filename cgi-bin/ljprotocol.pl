@@ -2782,7 +2782,7 @@ sub editevent {
         };
 
         if ( $itemid == $uowner->get_sticky_entry() ) {
-            $u->remove_sticky();
+            $uowner->remove_sticky();
         }
 
         return $res;
