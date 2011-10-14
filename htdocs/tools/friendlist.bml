@@ -133,14 +133,6 @@ body<=
 
     my $maxcol = 5;
 
-    my $format_userlink = sub {
-        my ($given_u, $userlink) = @_;
-
-        return "<strike>$userlink</strike>" if $given_u->is_deleted || $given_u->is_expunged || $given_u->is_suspended;
-        return "<b>$userlink</b>" if $show_mutual_friends && $remote_friend_uids{$given_u->id};
-        return $userlink;
-    };
-
     if ($pics) {
       ROW:
         while (1) {
@@ -161,8 +153,16 @@ body<=
             $body .= " </tr>\n";
         }
     } else {
-        my @friend_usernames = map { $format_userlink->($_, "<a href='" . $_->journal_base . "'>" . $_->display_username . "</a>") } @friends;
-        $body .= "<p>" . join(", ", @friend_usernames) . "</p>";
+        $body .= "<p>";
+        for (my $i = 0; $i < @friends; $i++ ) {
+            my $friend = $friends[$i];
+            my $n = $friend->display_username;
+            $n = '<b>'. $n. '</b>' if $show_mutual_friends and $remote_friend_uids{$friend->{userid}};
+            $n = '<strike>'. $n. '</strike>' if $friend->is_deleted or $friend->is_expunged or $friend->is_suspended;
+            $body .= ',&nbsp;' if $i;
+            $body .= '<a href="'. $friend->profile_url. '">'. $n.  '</a>'; 
+        }
+        $body .= '</p>';
     }
 
     $body .= "</table>\n";
