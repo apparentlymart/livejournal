@@ -78,7 +78,12 @@ FORM
         };
     };
 
-    while (my $row = $sth->fetchrow_hashref) {
+    # Hack, to display account_create event on last log row.
+    # logtime field in userlog table has type int(10) unsigned and
+    # events occured in less than one second after account creation
+    # can occasionaly be displayed before it in user log.
+    my $account_creation;
+    while (my $row = $sth->fetchrow_hashref || $account_creation) {
         my $extra = {};
         LJ::decode_url_string($row->{extra}, $extra);
 
@@ -89,6 +94,10 @@ FORM
             $action = "Deleted delayed entry $row->{actiontarget} via $extra->{method}";
         } elsif ($row->{action} eq 'account_create') {
             $action = "Account created";
+            unless ( $account_creation ) {
+                $account_creation = $row;
+                next;
+            }
         } elsif ($row->{action} eq 'ban_set') {
             my $u = LJ::load_userid($row->{actiontarget});
             $action = "Banned " . LJ::ljuser($u) if $u;
@@ -171,6 +180,7 @@ FORM
         }
 
         $ret .= "<tr>" . join('', map { "<td class='logrow'>$_</td>" } ($time, $action, $actor, $ip, $uniq)) . "</tr>\n";
+        last if $account_creation;
     }
 
     $ret .= "</table>";
