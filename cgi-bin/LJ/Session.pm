@@ -10,6 +10,7 @@ use LJ::TimeUtil;
 use Digest::MD5;
 
 use constant VERSION => 1;
+use constant LJLOGGEDIN_VERSION => 2;
 use constant MASTER_VERSION => 2;
 
 # NOTES
@@ -233,14 +234,16 @@ sub expiration_time {
 
 # return format of the "ljloggedin" cookie.
 sub loggedin_cookie_string {
-    my ($sess) = @_;
+    my ($sess, $version) = @_;
 
     my $time = $sess->{timecreate};
-    my $ver  = VERSION;
+    $version ||= LJLOGGEDIN_VERSION;
 
-    my $signed = "v$ver:u$sess->{userid}:s$sess->{sessid}:t$time";
+    my $signed = "v$version:u$sess->{userid}:s$sess->{sessid}:t$time";
     my $secret = LJ::conf_test($LJ::LJLOGGEDIN_SECRET, $sess, $time, $signed);
-    my $sign   = hmac_sha1_hex($time . $secret . $signed);
+    my $sign   = $version eq '1' 
+                 ? hmac_sha1_hex($time . $secret . $signed)
+                 : hmac_sha1_hex($signed, $secret);
     return $signed . ":g$sign";
 }
 
@@ -790,8 +793,9 @@ sub session_from_master_cookie {
 
         # make sure their ljloggedin cookie
         unless ($old_cookie){
-            my $sess_cookie = (substr($li_cook, 0, 1) eq 'v')
-                              ? $sess->loggedin_cookie_string ## versioned cookie
+            my ($version)   = $li_cook =~ m/^v(\d+)/;
+            my $sess_cookie = $version
+                              ? $sess->loggedin_cookie_string($version) ## versioned cookie
                               : $sess->unsigned_loggedin_cookie_string; ## backward compatibility: user has cookie without a sign
             if ($sess_cookie ne $li_cook){
                 $err->("loggedin cookie bogus");
@@ -1118,8 +1122,9 @@ sub valid_domain_cookie {
 
     # the per-domain cookie has to match the session of the master cookie
     unless ($opts->{ignore_li_cook}) {
-        my $sess_licook = (substr($li_cook, 0, 1) eq 'v')
-                              ? $sess->loggedin_cookie_string ## versioned cookie
+        my ($version)   = $li_cook =~ m/^v(\d+)/;
+        my $sess_licook = $version
+                              ? $sess->loggedin_cookie_string($version) ## versioned cookie
                               : $sess->unsigned_loggedin_cookie_string; ## backward compatibility: user has cookie without a sign
         return $not_valid->("li_cook mismatch.  session=$sess_licook, user=$li_cook")
             unless $sess_licook eq $li_cook;
