@@ -273,17 +273,6 @@ sub support_check_priv
     return 0;
 }
 
-# different calling convention than above. this matches LJ::check_priv
-sub category_check_priv
-{
-    my ($remote, $priv, $cat) = @_;
-
-    my $sp = get_cat_by_key(load_cats(), $cat)
-        or return 0;
-
-    return support_check_priv($sp, $remote, $priv);
-}
-
 # can they read internal comments?  if they're a helper or have
 # extended supportread (with a plus sign at the end of the category key)
 sub can_read_internal
