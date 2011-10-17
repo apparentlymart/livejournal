@@ -596,6 +596,7 @@ sub render_metainfo_block {
                     </span>
                     <span id='modifydate'>
                         $datetime
+                        $date_diff_input
                         <?de $BML::ML{'entryform.date.24hournote'} de?>
                         <span class="backdate">
                             $backdate_check
