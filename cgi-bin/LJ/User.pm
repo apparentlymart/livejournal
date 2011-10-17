@@ -3831,7 +3831,7 @@ sub can_use_ljphoto {
         return 1 if $u->can_manage ($comm) or $comm->is_friend($u);
     }
 
-    return 1;
+    return 0;
 }
 
 sub can_upload_photo {
