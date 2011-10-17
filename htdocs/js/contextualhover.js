@@ -142,7 +142,10 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					'<div class="b-contextualhover-section">' +
 					'<div class="b-contextualhover-title">' +
 						'<h3>{{html title.title}}</h3>' +
-						'{{each headLinks}}<p><a href="${$value.url}">${$value.text}</a></p>{{/each}}' +
+						'{{each headLinks}}' +
+								'<p>{{if $value.url}}<a href="${$value.url}">${$value.text}</a>' +
+								'{{else}}{{html $value}}{{/if}}</p>' + 
+						'{{/each}}' +
 					'</div>' +
 					'{{each(i, group) linkGroups}}' +
 						'{{if group.length }}' +
@@ -284,6 +287,33 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				title: label
 			};
 
+			// aliases
+			if (!data.is_requester && data.is_logged_in) {
+				if (data.alias_enable) {
+					if (data.alias) {
+						buildObject.headLinks.push(data.alias.encodeHTML());
+					}
+					
+					buildObject.headLinks.push({
+						url: Site.siteroot + '/manage/notes.bml',
+						click: function(e)
+						{
+							e.preventDefault();
+							addAlias(this, data.alias_title, data.username, data.alias || '');
+						},
+						text: data.alias_title
+					});
+				} else {
+					buildObject.headLinks.push(
+						'<span class="alias-unavailable">'+
+							'<a href="'+Site.siteroot+'/manage/account">'+
+								'<img src="'+Site.statprefix+'/horizon/upgrade-paid-icon.gif" width="13" height="16" alt=""/>'+
+							'</a> '+
+							'<a href="'+Site.siteroot+'/support/faqbrowse.bml?faqid=295">'+data.alias_title+'</a>'+
+						'</span>');
+				}
+			}
+
 			// add/remove friend link
 			if (data.is_logged_in && !data.is_requester) {
 				buildObject.headLinks.push({
@@ -316,33 +346,6 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 			var linkGroup = [];
 			
-			// aliases
-			if (!data.is_requester && data.is_logged_in) {
-				if (data.alias_enable) {
-					if (data.alias) {
-						linkGroup.push(data.alias.encodeHTML());
-					}
-					
-					linkGroup.push({
-						url: Site.siteroot + '/manage/notes.bml',
-						click: function(e)
-						{
-							e.preventDefault();
-							addAlias(this, data.alias_title, data.username, data.alias || '');
-						},
-						text: data.alias_title
-					});
-				} else {
-					linkGroup.push(
-						'<span class="alias-unavailable">'+
-							'<a href="'+Site.siteroot+'/manage/account">'+
-								'<img src="'+Site.statprefix+'/horizon/upgrade-paid-icon.gif" width="13" height="16" alt=""/>'+
-							'</a> '+
-							'<a href="'+Site.siteroot+'/support/faqbrowse.bml?faqid=295">'+data.alias_title+'</a>'+
-						'</span>');
-				}
-			}
-
 			// member of community
 			if (data.is_logged_in && data.is_comm) {
 				linkGroup.push({
