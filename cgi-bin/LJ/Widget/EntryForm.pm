@@ -824,8 +824,8 @@ sub render_options_block {
                 }
 
                 if ($opts->{jitemid}) {
-                    my $sticky_entry = $journalu->get_sticky_entry();
-                    if ( $sticky_entry eq $opts->{jitemid} ) {
+                    my $sticky_entry_id = $journalu->get_sticky_entry();
+                    if ( $sticky_entry_id eq $opts->{jitemid} ) {
                         return 'checked' 
                     }
                 }   
@@ -1632,57 +1632,6 @@ JS
 
 sub render_body {
     my ($self) = @_;
-
-    LJ::register_hook('add_to_site_js', sub {
-        my $site = shift;
-
-        my $remote = LJ::get_remote();
-        if (!$remote) {
-            return;
-        }
-        my $login_data = LJ::Protocol::do_request("login", {
-                            "ver" => $LJ::PROTOCOL_VER,
-                            "username" => $remote->username,
-                            "getpickws" => 1,
-                            "getpickwurls" => 1,
-                        }, undef, {
-                            "noauth" => 1,
-                            "u" => $remote,
-                        });
-
-        my $logins = $login_data->{'usejournals'};
-        push @$logins, $remote->username ;
-
-        my $site_data;
-        foreach my $login (@$logins) {
-            my $u = LJ::load_user($login);
-
-            my $can_manage = $remote->can_manage($u) || 0;
-            if (LJ::is_enabled("delayed_entries")) {
-                my $moderated = $u->prop('moderated');
-                my $need_moderated = ( $moderated =~ /^[1A]$/ ) ? 1 : 0;
-                my $can_post = ($u->{'journaltype'} eq 'C' && !$need_moderated) ||
-                            $can_manage;
-   
-                my $ownerid = $u->userid;
-                my $posterid = $remote->userid;
-
-                # don't moderate admins, moderators & pre-approved users
-                my $dbh = LJ::get_db_writer();
-                my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
-                                                 "WHERE userid=$ownerid AND targetid=$posterid ".
-                                                 "AND type IN ('A','M','N')");
-        
-               $site_data->{$login}->{'can_post_delayed'} = (int $can_post) || !!$relcount;
-            } else {    
-                $site_data->{$login}->{'can_post_delayed'} = 1;
-            }
-
-            $site_data->{$login}->{'is_replace_sticky'} = $u->has_sticky_entry;
-            $site_data->{$login}->{'can_create_sticky'} = $can_manage;
-        }
-        $site->{remote_permissions} = $site_data;
-    });
 
     my $opts = $self->opts;
     my $head = $self->head;

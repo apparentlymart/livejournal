@@ -55,9 +55,12 @@ body<=
                     js/photobucket_jw.js
                     ));
 
-    LJ::need_string(qw/
-                        entryform.sticky_replace.edit
-                        entryform.sticky.edit/);
+    if (LJ::is_enabled("delayed_entries")) {
+        LJ::need_string(qw/
+                            entryform.sticky_replace.edit
+                            entryform.sticky.edit
+                            entryform.choose_date/);
+    }
     
     return LJ::bad_input("You must be authenticated as a person.")
         unless $remote->is_personal || $remote->is_identity;
