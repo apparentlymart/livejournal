@@ -2256,20 +2256,21 @@ sub load_log_props2 {
 
     while ( my ($k, $v) = each %$mem ) {
         next unless $k =~ /(\w+):(\d+):(\d+)/;
+        my ( $memkey, $uid, $pid ) = ( $1, $2, $3 );
 
-        if ( $1 eq 'logprop2' ) {
+        if ( $memkey eq 'logprop2' ) {
             next unless ref $v eq "HASH";
 
             my @vkeys = keys %$v;
             next if $vkeys[0] =~ /\D/;
 
-            delete $needprops{$3};
-            $hashref->{$3} = $v;
+            delete $needprops{$pid};
+            $hashref->{$pid} = $v;
         }
 
-        if ( $1 eq 'rp' ) {
-            delete $needrc{$3};
-            $rc{$3} = int($v);  # change possible "0   " (true) to "0" (false)
+        if ( $memkey eq 'rp' ) {
+            delete $needrc{$pid};
+            $rc{$pid} = int($v);  # change possible "0   " (true) to "0" (false)
         }
     }
 
