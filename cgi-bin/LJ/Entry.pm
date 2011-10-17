@@ -2259,6 +2259,10 @@ sub load_log_props2 {
 
         if ( $1 eq 'logprop2' ) {
             next unless ref $v eq "HASH";
+
+            my @vkeys = keys %$v;
+            next if $vkeys[0] =~ /\D/;
+
             delete $needprops{$3};
             $hashref->{$3} = $v;
         }

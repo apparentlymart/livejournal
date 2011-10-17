@@ -2448,6 +2448,7 @@ sub postevent {
     # meta-data
     if (%{$req->{'props'}}) {
         my $propset = {};
+
         foreach my $pname (keys %{$req->{'props'}}) {
             next unless $req->{'props'}->{$pname};
             next if $pname eq "revnum" || $pname eq "revtime";
@@ -2456,8 +2457,20 @@ sub postevent {
             next unless $req->{'props'}->{$pname};
             $propset->{$pname} = $req->{'props'}->{$pname};
         }
+
         my %logprops;
         LJ::set_logprop($uowner, $jitemid, $propset, \%logprops) if %$propset;
+
+        for my $key ( keys %logprops ) {
+            next if $key =~ /^\d+$/;
+
+            unless ( $LJ::CACHE_PROP{'log'}->{$key}->{'propid'} ) {
+                delete $logprops{$key};
+            }
+            else {
+                $logprops{ $LJ::CACHE_PROP{'log'}->{$key}->{'propid'} } = delete $logprops{$key};
+            }
+        }
 
         # if set_logprop modified props above, we can set the memcache key
         # to be the hashref of modified props, since this is a new post
@@ -3001,6 +3014,7 @@ sub editevent {
                          "journalid=$ownerid AND jitemid=$itemid");
         return fail($err,501,$dberr) if $dberr;
     }
+
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
         $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
         my $dberr;
