@@ -1852,6 +1852,7 @@ sub common_event_validation
 
 sub postevent {
     my ($req, $err, $flags) = @_;
+
     un_utf8_request($req);
 
     my $post_noauth = LJ::run_hook('post_noauth', $req);
@@ -1997,7 +1998,7 @@ sub postevent {
     #    return fail($err, 153, "You have an entry which was posted at $u->{'newesteventtime'}, but you're trying to post an entry before this. Please check the date and time of both entries. If the other entry is set in the future on purpose, edit that entry to use the \"Date Out of Order\" option. Otherwise, use the \"Date Out of Order\" option for this entry instead.");
     #}
    
-    if ( $req->{sticky} &&
+    if ( $req->{type} eq 'sticky' &&
          $uowner->{'journaltype'} eq 'C' &&
           !( LJ::check_rel($ownerid, $posterid, 'S') ||
              LJ::check_rel($ownerid, $posterid, 'M') ) )
@@ -2313,7 +2314,7 @@ sub postevent {
                      "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dberr) if $dberr;
 
-    if ( $req->{sticky} &&
+    if ( $req->{type} eq 'sticky' &&
          $uowner->{'journaltype'} eq 'C' &&
           !( LJ::check_rel($ownerid, $posterid, 'S') ||
              LJ::check_rel($ownerid, $posterid, 'M') ) )
@@ -2322,7 +2323,7 @@ sub postevent {
     }
 
     # post become 'sticky post'
-    if ( $req->{sticky} ) {
+    if ( $req->{type} eq 'sticky' ) {
         $uowner->set_sticky($jitemid);
     }
 
@@ -2448,6 +2449,7 @@ sub postevent {
     # meta-data
     if (%{$req->{'props'}}) {
         my $propset = {};
+
         foreach my $pname (keys %{$req->{'props'}}) {
             next unless $req->{'props'}->{$pname};
             next if $pname eq "revnum" || $pname eq "revtime";
@@ -2456,8 +2458,20 @@ sub postevent {
             next unless $req->{'props'}->{$pname};
             $propset->{$pname} = $req->{'props'}->{$pname};
         }
+
         my %logprops;
         LJ::set_logprop($uowner, $jitemid, $propset, \%logprops) if %$propset;
+
+        for my $key ( keys %logprops ) {
+            next if $key =~ /^\d+$/;
+
+            unless ( $LJ::CACHE_PROP{'log'}->{$key}->{'propid'} ) {
+                delete $logprops{$key};
+            }
+            else {
+                $logprops{ $LJ::CACHE_PROP{'log'}->{$key}->{'propid'} } = delete $logprops{$key};
+            }
+        }
 
         # if set_logprop modified props above, we can set the memcache key
         # to be the hashref of modified props, since this is a new post
@@ -2781,6 +2795,10 @@ sub editevent {
             }
         };
 
+        if ( $itemid == $uowner->get_sticky_entry() ) {
+            $uowner->remove_sticky();
+        }
+
         return $res;
     }
 
@@ -2808,13 +2826,15 @@ sub editevent {
     LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
 
     # make post sticky
-    if ( $req->{sticky} ) {
+    if ( $req->{type} eq 'sticky' ) {
         if( $uowner->get_sticky_entry() != $itemid ) {
             $uowner->set_sticky($itemid);
+            LJ::MemCache::delete([$ownerid, "log2lt:$ownerid"]);
         }
     }
     elsif ( $itemid == $uowner->get_sticky_entry() ) {
         $uowner->remove_sticky();
+        LJ::MemCache::delete([$ownerid, "log2lt:$ownerid"]);
     }
 
     ## give features
@@ -2995,6 +3015,7 @@ sub editevent {
                          "journalid=$ownerid AND jitemid=$itemid");
         return fail($err,501,$dberr) if $dberr;
     }
+
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
         $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
         my $dberr;
@@ -3060,9 +3081,7 @@ sub getevents {
         $uowner = LJ::load_userid( $req->{journalid} );
     }
 
-
     my $sticky_id = $uowner->prop("sticky_entries") || undef;
-
     my $dbr = LJ::get_db_reader();
     my $sth;
 
@@ -3280,7 +3299,7 @@ sub getevents {
         $orderby = "ORDER BY $rtime_what";
 
         unless ($skip) {
-            $where .= "OR jitemid=$sticky_id" if defined $sticky_id;
+            $where .= "OR ( journalid=$ownerid $secwhere $where AND jitemid=$sticky_id)" if defined $sticky_id;
         }
     }
     elsif ($req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1") {
@@ -3497,11 +3516,11 @@ sub getevents {
         $evt->{'reply_count'} = $replycount;
 
         if ( $itemid == $sticky_id && $req->{'selecttype'} eq "lastn") {
-    	    unshift @$events, $evt,
+            unshift @$events, $evt,
         }
         else {
-    	    push @$events, $evt;
-	    }
+            push @$events, $evt;
+        }
     }
 
     # load properties. Even if the caller doesn't want them, we need
@@ -3540,9 +3559,9 @@ sub getevents {
                 $evt->{'props'}->{$name} = $value;
             }
 
-    	    if ( $itemid == $sticky_id ) {
-        		$evt->{'props'}->{'sticky'} = 1;
-    	    }
+            if ( $itemid == $sticky_id ) {
+                $evt->{'props'}->{'sticky'} = 1;
+            }
         }
     }
 
