@@ -291,7 +291,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			if (!data.is_requester && data.is_logged_in) {
 				if (data.alias_enable) {
 					if (data.alias) {
-						buildObject.headLinks.push(data.alias.encodeHTML());
+						buildObject.headLinks.push('<i>' + data.alias.encodeHTML() + '</i>');
 					}
 					
 					buildObject.headLinks.push({
