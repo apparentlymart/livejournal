@@ -804,10 +804,14 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 
     # Print
     print_box_open($colors, $metapic, $meta, "");
-    if (not $hide_text) { $e->print_text(); }
-    if ($p.view == "entry")
-    { print_entry_box_close($footer, $e);
-    } else { print_box_close($footer, $e); }
+    if (not $hide_text) {
+        $e->print_text();
+    }
+    if ($p.view == "entry") {
+        print_entry_box_close($footer, $e);
+    } else {
+        print_box_close($footer, $e);
+    }
 }
 
 function Page::print_entry (Entry e)
@@ -1001,7 +1005,8 @@ function EntryPage::print_body () {
                                          [ "style_color", "cmtbar#", "$*comment_bar_screened_fgcolor", ],
                                          ]);
 
-    print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
+    #print_entry($this, $.entry, null Color, null Color, $.viewing_thread); removed that behaviour because it is unexpect (LJSV-1842)
+    print_entry($this, $.entry, null Color, null Color, false);
     print_ebox($.entry);
     if ($.entry.comments.enabled and ($.comment_pages.total_subitems > 0 or $e.comments.spam_counter > 0))
     {
