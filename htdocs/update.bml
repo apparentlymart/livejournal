@@ -117,9 +117,12 @@
            if $tz;
     }
 
-    LJ::need_string(qw/
-                        entryform.sticky_replace.edit
-                        entryform.sticky.edit/);
+    if (LJ::is_enabled("delayed_entries")) {
+        LJ::need_string(qw/
+                          entryform.sticky_replace.edit
+                          entryform.sticky.edit
+                          entryform.choose_date/);
+    }
 
     my ($year, $mon, $mday, $hour, $min) = ($now->year,
                                             sprintf("%02d", $now->month),

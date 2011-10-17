@@ -225,6 +225,21 @@
 				display: block;
 				padding-top: 5px;
 				}
+/* Remove when new version is coming */
+#updateForm #metainfo LI .backdate {
+	display: block;
+	clear: both;
+	padding-top: 3px;
+	} 
+#updateForm #metainfo LI .select,
+#updateForm #metainfo LI .text {
+	float: left;
+	margin-bottom: 2px;
+	}
+#updateForm #metainfo LI .de {
+	white-space: nowrap;
+	font-size: 11px;
+	}
 
 /* Options
 ----------------------------------------------- */
@@ -245,10 +260,6 @@
 		#updateForm #options LI .i-prop-selecttags {
 			margin-top: 3px;
 			}
-
-#currentdate {
-    display: none;
-}
 #currentdate-edit {
     font-size: 85%;
     margin-left: 5px;
@@ -504,15 +515,6 @@
 }
 #prop_current_mood {
     width: 14%;
-}
-#prop_opt_backdated {
-    clear: left;
-    display: block;
-    float: left;
-    margin-left: 6.5em;
-}
-* html #prop_opt_backdated {
-    margin-left: 3em;
 }
 
 #prop_adult_content {
