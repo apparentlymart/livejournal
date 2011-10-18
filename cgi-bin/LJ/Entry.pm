@@ -2327,6 +2327,7 @@ sub load_log_props2 {
 sub convert_href_props {
     my $href = shift;
     my %new_href;
+    LJ::load_props('log');
 
     for my $key ( keys %$href ) {
         my $prop = $href->{$key};
