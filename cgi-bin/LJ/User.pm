@@ -6256,6 +6256,8 @@ sub get_sticky_entry_id {
 # returns sticky entry jitemid
 sub remove_sticky_id {
     my ($self) = @_;
+    my $ownerid = $self->userid;
+    LJ::MemCache::delete([$ownerid, "log2lt:$ownerid"]);
     $self->clear_prop("sticky_entry_id");
 }
 
@@ -6263,6 +6265,9 @@ sub remove_sticky_id {
 sub set_sticky_id {
     my ($self, $itemid) = @_;
     die "itemid is not set" unless ($itemid);
+
+    my $ownerid = $self->userid;
+    LJ::MemCache::delete([$ownerid, "log2lt:$ownerid"]);
     $self->set_prop( sticky_entry_id => $itemid );
 }
 

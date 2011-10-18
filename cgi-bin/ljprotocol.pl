@@ -1852,7 +1852,6 @@ sub common_event_validation
 
 sub postevent {
     my ($req, $err, $flags) = @_;
-
     un_utf8_request($req);
 
     my $post_noauth = LJ::run_hook('post_noauth', $req);
@@ -1998,7 +1997,7 @@ sub postevent {
     #    return fail($err, 153, "You have an entry which was posted at $u->{'newesteventtime'}, but you're trying to post an entry before this. Please check the date and time of both entries. If the other entry is set in the future on purpose, edit that entry to use the \"Date Out of Order\" option. Otherwise, use the \"Date Out of Order\" option for this entry instead.");
     #}
    
-    if ( $req->{type} eq 'sticky' &&
+    if ( $req->{sticky} &&
          $uowner->{'journaltype'} eq 'C' &&
           !( LJ::check_rel($ownerid, $posterid, 'S') ||
              LJ::check_rel($ownerid, $posterid, 'M') ) )
@@ -2314,7 +2313,7 @@ sub postevent {
                      "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dberr) if $dberr;
 
-    if ( $req->{type} eq 'sticky' &&
+    if ( $req->{sticky} &&
          $uowner->{'journaltype'} eq 'C' &&
           !( LJ::check_rel($ownerid, $posterid, 'S') ||
              LJ::check_rel($ownerid, $posterid, 'M') ) )
@@ -2323,7 +2322,7 @@ sub postevent {
     }
 
     # post become 'sticky post'
-    if ( $req->{type} eq 'sticky' ) {
+    if ( $req->{sticky} ) {
         $uowner->set_sticky($jitemid);
     }
 
@@ -2795,8 +2794,8 @@ sub editevent {
             }
         };
 
-        if ( $itemid == $uowner->get_sticky_entry() ) {
-            $uowner->remove_sticky();
+        if ( $itemid == $uowner->get_sticky_entry_id() ) {
+            $uowner->remove_sticky_id();
         }
 
         return $res;
@@ -2826,15 +2825,13 @@ sub editevent {
     LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
 
     # make post sticky
-    if ( $req->{type} eq 'sticky' ) {
-        if( $uowner->get_sticky_entry() != $itemid ) {
-            $uowner->set_sticky($itemid);
-            LJ::MemCache::delete([$ownerid, "log2lt:$ownerid"]);
+    if ( $req->{sticky} ) {
+        if( $uowner->get_sticky_entry_id() != $itemid ) {
+            $uowner->set_sticky_id($itemid);
         }
     }
-    elsif ( $itemid == $uowner->get_sticky_entry() ) {
-        $uowner->remove_sticky();
-        LJ::MemCache::delete([$ownerid, "log2lt:$ownerid"]);
+    elsif ( $itemid == $uowner->get_sticky_entry_id() ) {
+        $uowner->remove_sticky_id();
     }
 
     ## give features
@@ -3081,7 +3078,7 @@ sub getevents {
         $uowner = LJ::load_userid( $req->{journalid} );
     }
 
-    my $sticky_id = $uowner->prop("sticky_entries") || undef;
+    my $sticky_id = $uowner->prop("sticky_entry_id") || undef;
     my $dbr = LJ::get_db_reader();
     my $sth;
 

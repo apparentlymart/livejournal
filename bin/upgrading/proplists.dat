@@ -1748,10 +1748,10 @@ userproplist.hidefriendsreposts:
   multihomed: 0
   cldversion: 8
 
-userproplist.sticky_entry:
+userproplist.sticky_entry_id:
   datatype: char
-  des: Sticky entry
+  des: Sticky entry id
   indexed: 0
-  prettyname: Sticky entry
+  prettyname: Sticky entry id
 
 
