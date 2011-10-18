@@ -1210,10 +1210,12 @@ sub create_view_lastn
     
     my $delayed_entries;
 
-    if ($u->has_sticky_entry && !$skip) {
-        $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow - 1);
-    } else {
-        $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow + 1);
+    if (LJ::is_enabled("delayed_entries")) {
+        if ($u->has_sticky_entry && !$skip) {
+            $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow - 1);
+        } else {
+            $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow + 1);
+        }
     }
     
     if (!$delayed_entries) {
@@ -1479,8 +1481,10 @@ sub create_view_lastn
             $vars->{'LASTN_EVENT_PRIVATE'}) { $var = 'LASTN_EVENT_PRIVATE'; }
         if ($security eq "usemask" &&
             $vars->{'LASTN_EVENT_PROTECTED'}) { $var = 'LASTN_EVENT_PROTECTED'; }
-        $var .= '_STICKY' if $entry_obj->is_sticky();
-        $var .= '_DELAYED' if $entry_obj->is_delayed();
+        if (LJ::is_enabled("delayed_entries")) {
+            $var .= '_STICKY' if $entry_obj->is_sticky();
+            $var .= '_DELAYED' if $entry_obj->is_delayed();
+        }
 
         $$events .= LJ::fill_var_props($vars, $var, \%lastn_event);
         LJ::run_hook('notify_event_displayed', $entry_obj);
@@ -2766,8 +2770,10 @@ sub create_view_day
             $vars->{'DAY_EVENT_PRIVATE'}) { $var = 'DAY_EVENT_PRIVATE'; }
         if ($security eq "usemask" &&
             $vars->{'DAY_EVENT_PROTECTED'}) { $var = 'DAY_EVENT_PROTECTED'; }
-        #$var .= '_STICKY' if $entry_obj->is_sticky();
-        $var .= '_DELAYED' if $entry_obj->is_delayed();
+        if (LJ::is_enabled("delayed_entries")) {
+            #$var .= '_STICKY' if $entry_obj->is_sticky();
+            $var .= '_DELAYED' if $entry_obj->is_delayed();
+        }
 
         $events .= LJ::fill_var_props($vars, $var, \%day_event);
 
@@ -2922,7 +2928,8 @@ sub __append_delayed {
     }
 
     foreach my $item (@$items) {
-        if ($u->get_sticky_entry_id() == $item->{itemid}) {
+        if ($u->get_sticky_entry_id() == $item->{itemid} &&
+                 LJ::is_enabled("delayed_entries")) {
             push @ordered, $item;
             next;        }
 
