@@ -1981,7 +1981,7 @@ sub postevent {
     # load userprops all at once
     my @poster_props = qw(newesteventtime dupsig_post);
     my @owner_props = qw(newpost_minsecurity moderated);
-    push @owner_props, 'opt_weblogscom';
+    push @owner_props, 'opt_weblogscom' unless $req->{'props'}->{'opt_backdated'};
 
     LJ::load_user_props($u, @poster_props, @owner_props);
     if ($uowner->{'userid'} == $u->{'userid'}) {
@@ -1991,11 +1991,11 @@ sub postevent {
     }
 
     # are they trying to post back in time?
-    #if ($posterid == $ownerid && $u->{'journaltype'} ne 'Y' &&
-    #    !$time_was_faked && $u->{'newesteventtime'} &&
-    #    $eventtime lt $u->{'newesteventtime'} ) {
-    #    return fail($err, 153, "You have an entry which was posted at $u->{'newesteventtime'}, but you're trying to post an entry before this. Please check the date and time of both entries. If the other entry is set in the future on purpose, edit that entry to use the \"Date Out of Order\" option. Otherwise, use the \"Date Out of Order\" option for this entry instead.");
-    #}
+    if ($posterid == $ownerid && $u->{'journaltype'} ne 'Y' &&
+        !$time_was_faked && $u->{'newesteventtime'} &&
+        $eventtime lt $u->{'newesteventtime'} ) {
+        return fail($err, 153, "You have an entry which was posted at $u->{'newesteventtime'}, but you're trying to post an entry before this. Please check the date and time of both entries. If the other entry is set in the future on purpose, edit that entry to use the \"Date Out of Order\" option. Otherwise, use the \"Date Out of Order\" option for this entry instead.");
+    }
    
     if ( $req->{sticky} &&
          $uowner->{'journaltype'} eq 'C' &&
@@ -2039,6 +2039,11 @@ sub postevent {
     # this is a community journal)
     return fail($err,151) if
         LJ::is_banned($posterid, $ownerid);
+
+    # don't allow backdated posts in communities
+     return fail($err,152) if
+            ($req->{'props'}->{"opt_backdated"} &&
+             $uowner->{'journaltype'} ne "P");
 
     # do processing of embedded polls (doesn't add to database, just
     # does validity checking)
@@ -2338,7 +2343,7 @@ sub postevent {
 
         # record the eventtime of the last update (for own journals only)
         $set_userprop{"newesteventtime"} = $eventtime
-            if $posterid == $ownerid and not $time_was_faked;
+            if $posterid == $ownerid and not $req->{'props'}->{'opt_backdated'} and not $time_was_faked;
 
         $u->set_prop(\%set_userprop);
     }
@@ -2805,6 +2810,11 @@ sub editevent {
     return fail($err, 210)
         if $req->{event} eq $CannotBeShown;
 
+   # don't allow backdated posts in communities 
+    return fail($err,152) if 
+                ($req->{'props'}->{"opt_backdated"} && 
+                 $uowner->{'journaltype'} ne "P"); 
+
     # make year/mon/day/hour/min optional in an edit event,
     # and just inherit their old values
     {
@@ -2884,15 +2894,22 @@ sub editevent {
 
     if ($eventtime ne $oldevent->{'eventtime'} ||
         $security ne $oldevent->{'security'} ||
+        (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) ||  
         $qallowmask != $oldevent->{'allowmask'})
     {
         # are they changing their most recent post?
         LJ::load_user_props($u, "newesteventtime");
         if ($u->{userid} == $uowner->{userid} &&
             $u->{newesteventtime} eq $oldevent->{eventtime}) {
-                # otherwise, if they changed time on this event,
-                # the newesteventtime is this event's new time.
-                $u->set_prop( 'newesteventtime' => $eventtime );
+                if (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) { 
+                    # if they set the backdated flag, then we no longer know 
+                    # the newesteventtime. 
+                    $u->clear_prop('newesteventtime'); 
+                } elsif ($eventtime ne $oldevent->{eventtime}) { 
+                    # otherwise, if they changed time on this event, 
+                    # the newesteventtime is this event's new time. 
+                    $u->set_prop( 'newesteventtime' => $eventtime ); 
+               } 
         }
 
         my $qsecurity = $uowner->quote($security);
