@@ -444,6 +444,7 @@ sub _load_text {
 sub prop {
     my ($self, $prop) = @_;
     $self->_load_props unless $self->{_loaded_props};
+
     return $self->{props} unless $prop;
     return $self->{props}{$prop};
 }
@@ -451,6 +452,7 @@ sub prop {
 sub props {
     my ($self, $prop) = @_;
     $self->_load_props unless $self->{_loaded_props};
+
     return $self->{props} || {};
 }
 
@@ -463,11 +465,13 @@ sub handle_prefetched_props {
 
 sub _load_props {
     my $self = shift;
+
     return 1 if $self->{_loaded_props};
 
     my $props = {};
     LJ::load_log_props2($self->{u}, [ $self->jitemid ], $props);
     $self->handle_prefetched_props($props->{$self->jitemid});
+
     return 1;
 }
 
@@ -1460,7 +1464,7 @@ sub is_sticky {
     my ($self) = @_;
 
     my $u = $self->{u};
-    return $self->jitemid == $u->get_sticky_entry();
+    return $self->jitemid == $u->get_sticky_entry_id();
 }
 
 sub can_delete_journal_item {
@@ -1690,7 +1694,6 @@ sub get_posts_raw {
 
             while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
                 my $id = "$jid:$jitemid";
-#                my $propname = $LJ::CACHE_PROPID{'log'}->{$propid}->{name};
                 $ret->{'prop'}->{$id}->{$propid} = $value;
                 $gotid{$id} = 1;
             }
@@ -2253,16 +2256,21 @@ sub load_log_props2 {
 
     while ( my ($k, $v) = each %$mem ) {
         next unless $k =~ /(\w+):(\d+):(\d+)/;
+        my ( $memkey, $uid, $pid ) = ( $1, $2, $3 );
 
-        if ( $1 eq 'logprop2' ) {
+        if ( $memkey eq 'logprop2' ) {
             next unless ref $v eq "HASH";
-            delete $needprops{$3};
-            $hashref->{$3} = $v;
+
+            my @vkeys = keys %$v;
+            next if $vkeys[0] =~ /\D/;
+
+            delete $needprops{$pid};
+            $hashref->{$pid} = $v;
         }
 
-        if ( $1 eq 'rp' ) {
-            delete $needrc{$3};
-            $rc{$3} = int($v);  # change possible "0   " (true) to "0" (false)
+        if ( $memkey eq 'rp' ) {
+            delete $needrc{$pid};
+            $rc{$pid} = int($v);  # change possible "0   " (true) to "0" (false)
         }
     }
 
@@ -2281,6 +2289,7 @@ sub load_log_props2 {
     unless ( $db ) {
         my $u = LJ::load_userid($userid);
         $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_def_reader($u) :  LJ::get_cluster_reader($u);
+
         return unless $db;
     }
 
@@ -2367,7 +2376,6 @@ sub load_log_props2multi
 # des-jitemid: Journal itemid of item to delete.
 # des-quick: Optional boolean.  If set, only [dbtable[log2]] table
 #            is deleted from and the rest of the content is deleted
-#            later using [func[LJ::cmd_buffer_add]].
 # des-anum: The log item's anum, which'll be needed to delete lazily
 #           some data in tables which includes the anum, but the
 #           log row will already be gone so we'll need to store it for later.
@@ -2388,16 +2396,15 @@ sub delete_entry
     # delete tags
     LJ::Tags::delete_logtags($u, $jitemid);
 
-    #remove sticky
-    if ( $jitemid == $u->get_sticky_entry() ){
-        $u->remove_sticky_entry();
-    }
-
     LJ::run_hooks('report_entry_delete', $u->{'userid'}, $jitemid);
     my $dc = $u->log2_do(undef, "DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     LJ::MemCache::decr([$jid, "log2ct:$jid"]) if $dc > 0;
     LJ::memcache_kill($jid, "dayct2");
+
+    if ( $jitemid == $u->get_sticky_entry_id() ){
+        $u->remove_sticky_entry_id();
+    }
 
     # if this is running the second time (started by the cmd buffer),
     # the log2 row will already be gone and we shouldn't check for it.
