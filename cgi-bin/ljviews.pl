@@ -2922,7 +2922,7 @@ sub __append_delayed {
     }
 
     foreach my $item (@$items) {
-        if ($u->get_sticky_entry() == $item->{itemid}) {
+        if ($u->get_sticky_entry_id() == $item->{itemid}) {
             push @ordered, $item;
             next;        }
 

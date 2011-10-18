@@ -1120,7 +1120,7 @@ sub get_recent_items
     my $notafter = $opts->{'notafter'} + 0 || $LJ::EndOfTime - 1;
 
     # sticky entries array
-    my $sticky = $u->get_sticky_entry();
+    my $sticky = $u->get_sticky_entry_id();
 
     my $skip = $opts->{'skip'}+0;
     my $itemshow = $opts->{'itemshow'}+0 || 10;

@@ -825,7 +825,7 @@ sub render_options_block {
                 }
 
                 if ($opts->{jitemid}) {
-                    my $sticky_entry_id = $journalu->get_sticky_entry();
+                    my $sticky_entry_id = $journalu->get_sticky_entry_id();
                     if ( $sticky_entry_id eq $opts->{jitemid} ) {
                         return 'checked' 
                     }
