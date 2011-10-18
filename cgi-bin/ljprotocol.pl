@@ -1992,8 +1992,10 @@ sub postevent {
 
     # are they trying to post back in time?
     if ($posterid == $ownerid && $u->{'journaltype'} ne 'Y' &&
+        !LJ::is_enabled("delyaed_entries") && 
         !$time_was_faked && $u->{'newesteventtime'} &&
-        $eventtime lt $u->{'newesteventtime'} ) {
+        $eventtime lt $u->{'newesteventtime'} &&
+        !$req->{'props'}->{'opt_backdated'}) {
         return fail($err, 153, "You have an entry which was posted at $u->{'newesteventtime'}, but you're trying to post an entry before this. Please check the date and time of both entries. If the other entry is set in the future on purpose, edit that entry to use the \"Date Out of Order\" option. Otherwise, use the \"Date Out of Order\" option for this entry instead.");
     }
    
