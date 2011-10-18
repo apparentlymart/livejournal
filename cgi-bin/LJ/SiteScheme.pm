@@ -181,22 +181,24 @@ sub common_template_params {
     my $expresslane_html_comment =
         LJ::LJcom::expresslane_html_comment($remote);
 
-    my $remote_logged_in      = $remote ? 1 : 0;
-    my $remote_personal       = 0;
-    my $remote_identity       = 0;
-    my $remote_paid           = 0;
-    my $remote_sees_ads       = 0;
-    my $logout_link           = '';
-    my $remote_sessid         = 0;
-    my $remote_userpic_url    = '';
-    my $remote_ljuser_display = '';
-    my $remote_display_name   = '';
-    my $remote_profile_url    = '';
-    my $remote_recent_url     = '';
-    my $remote_friends_url    = '';
-    my $remote_can_use_esn    = 0;
-    my $remote_unread_count   = 0;
-    my $remote_wallet_link    = 0;
+    my $remote_logged_in       = $remote ? 1 : 0;
+    my $remote_personal        = 0;
+    my $remote_identity        = 0;
+    my $remote_paid            = 0;
+    my $remote_sees_ads        = 0;
+    my $logout_link            = '';
+    my $remote_sessid          = 0;
+    my $remote_userpic_url     = '';
+    my $remote_ljuser_display  = '';
+    my $remote_display_name    = '';
+    my $remote_profile_url     = '';
+    my $remote_recent_url      = '';
+    my $remote_friends_url     = '';
+    my $remote_can_use_esn     = 0;
+    my $remote_unread_count    = 0;
+    my $remote_wallet_link     = 0;
+    my $remote_ljphoto_url     = '';
+    my $remote_can_use_ljphoto = 0;
 
     if ($remote) {
         my $username = $remote->username;
@@ -213,18 +215,20 @@ sub common_template_params {
             $remote_userpic_url = $upi->url;
         }
 
-        $remote_personal       = $remote->is_personal;
-        $remote_identity       = $remote->is_identity;
-        $remote_paid           = $remote->get_cap('paid');
-        $remote_sees_ads       = $remote->get_cap('ads');
-        $remote_ljuser_display = $remote->ljuser_display;
-        $remote_display_name   = $remote->display_name;
-        $remote_profile_url    = $remote->profile_url;
-        $remote_recent_url     = $remote->journal_base . '/';
-        $remote_friends_url    = $remote->journal_base . '/friends/';
-        $remote_can_use_esn    = $remote->can_use_esn;
-        $remote_unread_count   = $remote->notification_inbox->unread_count;
-        $remote_wallet_link    = LJ::Pay::Wallet->get_wallet_link($remote);
+        $remote_personal        = $remote->is_personal;
+        $remote_identity        = $remote->is_identity;
+        $remote_paid            = $remote->get_cap('paid');
+        $remote_sees_ads        = $remote->get_cap('ads');
+        $remote_ljuser_display  = $remote->ljuser_display;
+        $remote_display_name    = $remote->display_name;
+        $remote_profile_url     = $remote->profile_url;
+        $remote_recent_url      = $remote->journal_base . '/';
+        $remote_friends_url     = $remote->journal_base . '/friends/';
+        $remote_can_use_esn     = $remote->can_use_esn;
+        $remote_unread_count    = $remote->notification_inbox->unread_count;
+        $remote_wallet_link     = LJ::Pay::Wallet->get_wallet_link($remote);
+        $remote_ljphoto_url     = $remote->journal_base . '/pics/';
+        $remote_can_use_ljphoto = $remote->can_use_ljphoto ? 1 : 0;
     }
 
     my $need_loginform = 0;
@@ -360,23 +364,25 @@ sub common_template_params {
         'before_body_close'  => $before_body_close,
         'final_body_html'    => $final_body_html,
 
-        'remote_logged_in'      => $remote_logged_in,
-        'remote_personal'       => $remote_personal,
-        'remote_identity'       => $remote_identity,
-        'remote_paid'           => $remote_paid,
-        'remote_sees_ads'       => $remote_sees_ads,
-        'remote_username'       => $remote_username,
-        'remote_sessid'         => $remote_sessid,
-        'logout_link'           => $logout_link,
-        'remote_userpic_url'    => $remote_userpic_url,
-        'remote_ljuser_display' => $remote_ljuser_display,
-        'remote_display_name'   => $remote_display_name,
-        'remote_profile_url'    => $remote_profile_url,
-        'remote_recent_url'     => $remote_recent_url,
-        'remote_friends_url'    => $remote_friends_url,
-        'remote_can_use_esn'    => $remote_can_use_esn,
-        'remote_unread_count'   => $remote_unread_count,
-        'remote_wallet_link'    => $remote_wallet_link,
+        'remote_logged_in'       => $remote_logged_in,
+        'remote_personal'        => $remote_personal,
+        'remote_identity'        => $remote_identity,
+        'remote_paid'            => $remote_paid,
+        'remote_sees_ads'        => $remote_sees_ads,
+        'remote_username'        => $remote_username,
+        'remote_sessid'          => $remote_sessid,
+        'logout_link'            => $logout_link,
+        'remote_userpic_url'     => $remote_userpic_url,
+        'remote_ljuser_display'  => $remote_ljuser_display,
+        'remote_display_name'    => $remote_display_name,
+        'remote_profile_url'     => $remote_profile_url,
+        'remote_recent_url'      => $remote_recent_url,
+        'remote_friends_url'     => $remote_friends_url,
+        'remote_can_use_esn'     => $remote_can_use_esn,
+        'remote_unread_count'    => $remote_unread_count,
+        'remote_wallet_link'     => $remote_wallet_link,
+        'remote_ljphoto_url'     => $remote_ljphoto_url,
+        'remote_can_use_ljphoto' => $remote_can_use_ljphoto,
 
         'need_loginform'              => $need_loginform,
         'loginform_returnto'          => $loginform_returnto,
