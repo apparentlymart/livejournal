@@ -1098,7 +1098,8 @@ sub get_recent_items
     }
 
     my $show_sticky_on_top = $opts->{show_sticky_on_top} || 0;
-
+    $show_sticky_on_top &= LJ::is_enabled("delayed_entries");
+    
     my $max_hints = $LJ::MAX_SCROLLBACK_LASTN;  # temporary
     my $sort_key = "revttime";
 
