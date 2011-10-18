@@ -1464,7 +1464,9 @@ sub is_sticky {
     my ($self) = @_;
 
     my $u = $self->{u};
-    return $self->jitemid == $u->get_sticky_entry_id();
+    my $sticky_entry_id = $u->get_sticky_entry_id();
+    return 0 unless $sticky_entry_id;
+    return $self->jitemid == $sticky_entry_id;
 }
 
 sub can_delete_journal_item {
