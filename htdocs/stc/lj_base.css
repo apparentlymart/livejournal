@@ -2877,6 +2877,7 @@ DIV.lj_ippu_app {
 .b-contextualhover {
 	width: 250px;
 	min-height: 50px;
+	margin-left: -3px;
 	text-align: left;
 	font-family: 'Arial', sans-serif;
 	}
@@ -2960,7 +2961,7 @@ DIV.lj_ippu_app {
 		}
 	.b-contextualhover .b-contextualhover-section {
 		overflow: hidden;
-		padding-right: 15px;
+		padding: 0 15px 0 3px;
 		}
 	.b-contextualhover .b-contextualhover-side {
 		float: right;
