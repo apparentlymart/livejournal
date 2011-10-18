@@ -6,10 +6,10 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 
 BODY {
 	position: relative;
-	background: #FFF;
 	font: 12px/16px 'Arial', sans-serif;
 	color: #222;
 	}
+
 ol, ul, dl {
 /* IE7: reset rtl list margin. (#7334) */
 	*margin-right: 0px; /* preserved spaces for rtl list item bullets. (#6249)*/
@@ -96,18 +96,6 @@ lj|cut ol {
 	height: 8px;
 }
 
-.ljembed {
-	background-color: #CCCCCC;
-	border: 1px solid #CCCCCC;
-}
-
-form.ljpoll {
-	display: block;
-	border: #000 1px dotted;
-	background-color: #d2d2d2;
-	font-style: italic;
-}
-
 /* Note popup */
 .note {
 	position: fixed;
@@ -125,60 +113,41 @@ form.ljpoll {
 		}
 
 /* LJ Like buttons */
-.lj-like {
-	overflow: hidden;
-	padding: 13px 20px;
-	margin-top: 20px;
-	background: #D2D2D2;
-	border: 1px dotted #000;
+.lj-like-item {
+	display: inline-block;
+	margin-right: 15px;
+	background: url(/js/ck/images/lj-like-buttons.png) no-repeat;
+	vertical-align: middle;
+	font-size: 0;
+	cursor: pointer;
 	}
-	.lj-like .lj-like-item {
-		display: inline-block;
-		margin-right: 15px;
-		background: url(/js/ck/images/lj-like-buttons.png) no-repeat;
-		vertical-align: middle;
-		font-size: 0;
-		cursor: pointer;
-		}
-	.lj-like .fb {
-		width: 93px;
-		height: 20px;
-		background-position: 0 0;
-		}
-	.lj-like .tw {
-		width: 55px;
-		height: 20px;
-		background-position: 0 -46px;
-		}
-	.lj-like .go {
-		width: 32px;
-		height: 20px;
-		background-position: 0 -90px;
-		}
-	.lj-like .vk {
-		width: 40px;
-		height: 22px;
-		background-position: 0 -67px;
-		}
-	.lj-like .lj {
-		width: 67px;
-		height: 24px;
-		background-position: 0 -21px;
-		}
-.lj-like-selected {
-	background-color: #C4E0F7;
-	border: 1px solid #6EA9DF;
+.fb {
+	width: 93px;
+	height: 20px;
+	background-position: 0 0;
+	}
+.tw {
+	width: 55px;
+	height: 20px;
+	background-position: 0 -46px;
+	}
+.go {
+	width: 32px;
+	height: 20px;
+	background-position: 0 -90px;
+	}
+.vk {
+	width: 40px;
+	height: 22px;
+	background-position: 0 -67px;
+	}
+.lj {
+	width: 67px;
+	height: 24px;
+	background-position: 0 -21px;
 	}
 
 /* LJ map */
-.lj-map {
-	overflow: hidden;
-	min-height: 13px;
-	margin-top: 20px;
-	background: #D2D2D2;
-	border: 1px dotted #000;
-	text-align: center;
-	}
 	.lj-map P {
 		position: relative;
 		top: 45%;

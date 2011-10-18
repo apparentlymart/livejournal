@@ -26,18 +26,16 @@ function Poll(selectPoll, qDoc, sDoc, qNum){
 		this.questions = [];
 
 		selectPoll.find(tagPrefix + 'pq').each(function(i, pq){
-			pq = jQuery(pq);
-			var name = pq.html().match(/^\s*(.*?)\s*(?:<lj:pi>|$)/);
 			var question = {
-				name: (name && name[1]) || '',
-				type: pq.attr('type'),
+				name: pq.firstChild.nodeValue || '',
+				type: pq.getAttribute('type'),
 				answers: []
 			};
 
 			if(!/^check|drop|radio|scale|text$/.test(question.type)){
 				return;
 			}
-
+			pq = jQuery(pq);
 			if(/^check|drop|radio$/.test(question.type)){
 				pq.find(tagPrefix + 'pi').each(function(){
 					question.answers.push(jQuery(this).html())
@@ -74,7 +72,7 @@ function Poll(selectPoll, qDoc, sDoc, qNum){
 
 // Poll method to generate HTML for RTE
 Poll.prototype.outputHTML = function(){
-	var html = '<form action="#" lj-cmd="LJPollLink" class="ljpoll" data="' + escape(this.outputLJtags()) + '" contentEditable="false"><b>Poll #xxxx</b>';
+	var html = '<form action="#"><b>Poll #xxxx</b>';
 
 	if(this.name){
 		html += ' <i>' + this.name + '</i>';
@@ -109,7 +107,7 @@ Poll.prototype.outputHTML = function(){
 	}
 
 	html += '<input type="submit" value="Submit Poll"/></form>';
-	return html;
+	return encodeURIComponent(html);
 };
 
 // Poll method to generate LJ Poll tags
@@ -126,18 +124,18 @@ Poll.prototype.outputLJtags = function(){
 			extrargs = ' from="' + this.questions[i].from + '"' + ' to="' + this.questions[i].to + '"' + ' by="' + this
 				.questions[i].by + '"';
 		}
-		tags += '<lj-pq type="' + this.questions[i].type + '"' + extrargs + '>' + this.questions[i].name;
+		tags += '<lj-pq type="' + this.questions[i].type + '"' + extrargs + '>' + this.questions[i].name + '<br />';
 		if(/^check|drop|radio$/.test(this.questions[i].type)){
 			for(var j = 0; j < this.questions[i].answers.length; j++){
-				tags += '<br /><lj-pi>' + this.questions[i].answers[j] + '</lj-pi>';
+				tags += '<lj-pi>' + this.questions[i].answers[j] + '</lj-pi><br />';
 			}
 		}
-		tags += '<br /></lj-pq>';
+		tags += '</lj-pq><br />';
 	}
 
-	tags += '<br /></lj-poll>';
+	tags += '</lj-poll>';
 
-	return tags;
+	return encodeURIComponent(tags);
 };
 
 // Answer Object Constructor
