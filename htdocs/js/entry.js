@@ -1070,19 +1070,24 @@ InOb.handleInsertEmbed = function (){
 	});
 };
 
-InOb.handleInsertImage = function (){
-	// if PhotoHosting enabled - show new popup
-	if(window.ljphotoEnabled){
-		jQuery('#updateForm').photouploader('option', 'type', 'upload')
-			.bind('htmlready', function (event){
-				var htmlOutput = event.htmlStrings.join(' ');
-				jQuery('#draft').val(jQuery('#draft').val() + htmlOutput);
+InOb.handleInsertImageBeta = function (){
+	jQuery('#updateForm').photouploader('option', 'type', 'upload').bind('htmlready',
+		function (event, htmlOutput){
+			var selection = DOM.getSelectedRange($('draft'));
+			var node = $('draft').event;
+			var value = node.value;
+			var start = value.substring(0, selection.start);
+			var end = value.substring(selection.end);
+			node.value = start + htmlOutput + end;
 		}).photouploader('show');
-	} else {
-		onInsertObject('/imgupload.bml');
-	}
 	return true;
 };
+
+InOb.handleInsertImage = function (){
+	onInsertObject('/imgupload.bml');
+	return true;
+};
+
 InOb.handleInsertVideo = function(){
 	var videoUrl = prompt('Please enter a video URL:');
 	var draft = $('draft');
