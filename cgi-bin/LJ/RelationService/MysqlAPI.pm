@@ -352,7 +352,7 @@ sub _get_friends_db {
     return {} unless $lock;
 
     # in lock, try memcache
-    my $memc = _get_friends_memc($userid, $mask);
+    my $memc = $class->_get_friends_memc($userid, $mask);
     if ($memc) {
         $release_lock->();
         return $memc;
