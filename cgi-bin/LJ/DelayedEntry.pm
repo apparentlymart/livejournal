@@ -76,6 +76,10 @@ sub create {
     $journal->do("INSERT INTO delayedblob2 ".
                 "VALUES ($journalid, $delayedid, $data_ser)");
 
+    my $memcache_key = "delayed_entry::$journalid::$delayedid";
+    my $timelife = $rposttime - $rlogtime;
+    LJ::MemCache::set($memcache_key, $data_ser, $timelife);
+
     $self->{journal} = $opts->{journal};    
     $self->{posttime} = $opts->{posttime};
     $self->{posttime} = $dbh->selectrow_array("SELECT NOW()");
@@ -1210,7 +1214,33 @@ sub convert_from_data {
     }
     return { 'delete_entry' => (!$fail || $err < 500), 
              'res' => $res };
+}
 
+sub can_post_to {
+    my ($uowner, $poster) = @_;
+    
+    #if (__delayed_entry_can_see($uowner, $poster)) {
+    #    return 1;
+    #}
+    
+    my $uownerid = $uowner->userid;
+    my $posterid = $poster->userid;
+
+    my $can_manage = $poster->can_manage($uowner) || 0;
+    my $moderated = $uowner->prop('moderated');
+    my $need_moderated = ( $moderated =~ /^[1A]$/ ) ? 1 : 0;
+    my $can_post = ($uowner->{'journaltype'} eq 'C' && !$need_moderated) || $can_manage;
+   
+    if ($can_post) {
+        return 1;
+    }
+
+    # don't moderate admins, moderators & pre-approved users
+    my $dbh = LJ::get_db_writer();
+    my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
+                                         "WHERE userid=$uownerid AND targetid=$posterid ".
+                                         "AND type IN ('A','M','N')");
+    return $relcount ? 1 : 0;
 }
 
 sub __delayed_entry_can_see {
