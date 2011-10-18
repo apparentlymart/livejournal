@@ -433,9 +433,9 @@ sub render_metainfo_block {
                                                      "WHERE userid=$ownerid AND targetid=$posterid ".
                                                      "AND type IN ('A','M','N')")) || 0;
             $out .= "<li id='usejournal_single' class='pkg'>\n";
-            $out .= "<label for='usejournal' class='left'>" .
+            $out .= "<label for='usejournal' class='title'>" .
                 BML::ml('entryform.postto') . "</label>\n";
-
+            $out .= "<span class='wrap'>";
             $out .= LJ::ljuser($usejournal);
             $out .= LJ::html_hidden({
                 name => 'usejournal',
@@ -444,7 +444,7 @@ sub render_metainfo_block {
             });
 
             $out .= LJ::html_hidden( usejournal_set => 'true' );
-            $out .= "</li>";
+            $out .= "<span></li>";
         } elsif ($login_data && ref $login_data->{'usejournals'} eq 'ARRAY') {
             my $submitprefix = BML::ml('entryform.update3');
             $out .= "<li id='usejournal_list' class='pkg'>\n";
