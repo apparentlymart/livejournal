@@ -64,7 +64,7 @@ function revertdate() {
 }
 
 function setPostingPermissions(journal) {
-	if (!Site.remote_permissions[journal]) { return; }
+	if (!('remote_permissions' in Site) || !Site.remote_permissions[journal]) { return; }
 
 	var modifyDate = jQuery('#modifydate'),
 		stickyCheckbox = jQuery('#sticky_type'),
