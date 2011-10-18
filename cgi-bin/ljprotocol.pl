@@ -1992,7 +1992,7 @@ sub postevent {
 
     # are they trying to post back in time?
     if ($posterid == $ownerid && $u->{'journaltype'} ne 'Y' &&
-        !LJ::is_enabled("delyaed_entries") && 
+        !LJ::is_enabled("delayed_entries") && 
         !$time_was_faked && $u->{'newesteventtime'} &&
         $eventtime lt $u->{'newesteventtime'} &&
         !$req->{'props'}->{'opt_backdated'}) {
