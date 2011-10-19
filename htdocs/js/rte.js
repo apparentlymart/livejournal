@@ -148,6 +148,8 @@
 						editor.on('insertText', updateDraftState);
 						editor.document.on('keypress', updateDraftState);
 						editor.document.on('click', updateDraftState);
+
+						editor.focus();
 					});
 				});
 			} else {
