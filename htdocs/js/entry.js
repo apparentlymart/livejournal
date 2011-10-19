@@ -69,6 +69,7 @@ function setPostingPermissions(journal) {
 	var modifyDate = jQuery('#modifydate'),
 		stickyCheckbox = jQuery('#sticky_type'),
 		stickyLabel = jQuery('#sticky_type_label'),
+		stickyWrapper = jQuery('#entryform-sticky-wrapper'),
 		currentDateEdit = jQuery('#currentdate-edit');
 
 		journal = Site.remote_permissions[journal];
@@ -82,14 +83,14 @@ function setPostingPermissions(journal) {
 		currentDateEdit.show();
 	}
 
-	stickyCheckbox.attr('disabled', !journal.can_create_sticky);
-	if (!journal.can_post_delayed) {
-		stickyCheckbox.attr('checked', false);
+	if (!journal.can_create_sticky) {
+		stickyWrapper.hide();
+	} else {
+		stickyLabel.html(journal.is_replace_sticky ? 
+				Site.ml_text['entryform.sticky_replace.edit'] :
+				Site.ml_text['entryform.sticky.edit']);
+		stickyWrapper.css('display','');
 	}
-	stickyLabel.html(journal.is_replace_sticky ? 
-			Site.ml_text['entryform.sticky_replace.edit'] :
-			Site.ml_text['entryform.sticky.edit']);
-
 }
 
 function showEntryTabs(){
