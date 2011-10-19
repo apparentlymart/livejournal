@@ -762,6 +762,21 @@ sub render_htmltools_block {
         </li>
     };
 
+    my $remote = LJ::get_remote();
+    if ($remote and $remote->can_use_ljphoto){
+        $insert_image .= qq{
+        <li class='image'>
+            <a
+                href='javascript:void(0);'
+                onclick='InOb.handleInsertImage();'
+                title='$BML::ML{'ljimage.beta'}'
+            >
+                $BML::ML{'entryform.insert.image2'}
+            </a>
+        </li>
+        };
+    }
+
     my $insert_media = '';
     unless ($LJ::DISABLED{embed_module}) {
         $insert_media = qq{
