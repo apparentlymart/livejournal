@@ -38,7 +38,7 @@ sub create {
     my $journalid = $journal->userid;
     my $posterid = $poster->userid;
     my $subject = $req->{subject};
-    my $posttime = __get_datatime($req);
+    my $posttime = __get_datetime($req);
     my $dbh = LJ::get_db_writer();
     
     my $delayedid = LJ::alloc_user_counter( $journal, 
@@ -56,39 +56,40 @@ sub create {
         $uselogsec = 1;
     }
 
-    my $now         = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()");
+    my ($now)       = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()");
 
     my $qsecurity   = $dbh->quote($security);
     my $qallowmask  = $req->{'allowmask'}+0;
     my $qposttime   = $dbh->quote($posttime);
-    my $utime       = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP($qposttime)");
+    my ($utime)     = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP($qposttime)");
 
     my $rlogtime    = $LJ::EndOfTime - $now;
     my $rposttime   = $LJ::EndOfTime - $utime;
 
     my $taglist = __extract_tag_list(\$req->{props}->{taglist});
 
-    $journal->do("INSERT INTO delayedlog2 (journalid, delayedid, posterid, subject, " .
+    $journal->do( "INSERT INTO delayedlog2 (journalid, delayedid, posterid, subject, " .
                   "logtime, posttime, security, allowmask, year, month, day, rlogtime, revptime) " .
                   "VALUES ($journalid, $delayedid, $posterid, ?, NOW(), $qposttime, ".
                   "$qsecurity, $qallowmask, ?, ?, ?, $rlogtime,  $rposttime)",
                   undef,  LJ::text_trim($req->{'subject'}, 30, 0), 
                   $req->{year}, $req->{mon}, $req->{day} );
     
-    $journal->do("INSERT INTO delayedblob2 ".
-                "VALUES ($journalid, $delayedid, $data_ser)");
+    $journal->do( "INSERT INTO delayedblob2 ".
+                  "VALUES ($journalid, $delayedid, $data_ser)" );
 
-    my $memcache_key = "delayed_entry::$journalid::$delayedid";
+    my $memcache_key = "delayed_entry:$journalid:$delayedid";
     my $timelife = $rposttime - $rlogtime;
     LJ::MemCache::set($memcache_key, $data_ser, $timelife);
 
     $self->{journal} = $opts->{journal};    
     $self->{posttime} = $opts->{posttime};
-    $self->{posttime} = $dbh->selectrow_array("SELECT NOW()");
+    $self->{posttime} = LJ::TimeUtil::mysql_time($now);
     $self->{poster} = $opts->{poster};
     $self->{data} = $req;
     $self->{taglist} = $taglist;
     $self->{delayed_id} = $delayedid;
+    $self->{default_dateformat} = $opts->{'dateformat'} || 'S2';
     return $self;
 }
 
@@ -136,6 +137,11 @@ sub journalid {
     return $self->journal->userid;
 }
 
+sub timezone {
+    my ($self) = @_;
+    return $self->data->{'tz'}
+}
+
 sub logtime {
     my ($self) = @_;
     return $self->{logtime};
@@ -150,20 +156,19 @@ sub posttime_as_unixtime {
     my ($self) = @_;
     my $dbh = LJ::get_db_writer();
     my $qposttime = $self->system_posttime;
-    return $dbh->selectrow_array("SELECT UNIX_TIMESTAMP('$qposttime')");
+    return LJ::TimeUtil::->mysqldate_to_time($qposttime, 0);
 }
 
 
 sub posttime {
     my ($self, $u) = @_;
     my $posttime = $self->system_posttime;
-    my $timezone = $self->poster->prop("timezone");
+    my $timezone = $self->timezone;
     if (!$timezone) {
         return $posttime;
     }
-    my $epoch =  $self->posttime_as_unixtime;
+    my $epoch = $self->posttime_as_unixtime;
     my $dt = DateTime->from_epoch( 'epoch' => $epoch );
-
     $dt->set_time_zone( $timezone );
 
     # make the proper date format
@@ -175,13 +180,22 @@ sub posttime {
 }
 
 sub alldatepart {
-    my ($self) = @_;
-    return $self->{alldatepart};
+    my ($self, $style) = @_;
+    my $mysql_time = $self->posttime;
+    if ( ($style && $style eq 'S1') || $self->{default_dateformat} eq 'S1') {
+        return LJ::TimeUtil::->alldatepart_s1($mysql_time);
+    }
+
+    return LJ::TimeUtil::->alldatepart_s2($mysql_time);
 }
 
 sub system_alldatepart { 
-    my ($self) = @_;
-    return $self->{system_alldatepart};
+    my ($self, $style) = @_;
+    my $mysql_time = $self->system_posttime;
+    if ( ($style && $style eq 'S1') || $self->{default_dateformat} eq 'S1' ) {
+        return LJ::TimeUtil::->alldatepart_s1($mysql_time);
+    }
+    return LJ::TimeUtil::->alldatepart_s2($mysql_time);
 }
 
 sub is_sticky {
@@ -583,20 +597,24 @@ sub delete {
     __assert( $self->{journal}, "no journal" );
 
     my $journal = $self->{journal};
+    my $journalid = $journal->userid;
     my $delayed_id = $self->{delayed_id};
 
     $journal->do("DELETE FROM delayedlog2 " .
                   "WHERE delayedid = $delayed_id AND " .
-                  "journalid = " . $journal->userid);
+                  "journalid = " . $journalid);
 
     $journal->do("DELETE FROM delayedblob2 " .
                  "WHERE delayedid = $delayed_id AND " .
-                 "journalid = " . $journal->userid);
+                 "journalid = " . $journalid);
 
     $self->{delayed_id} = undef;
     $self->{journal} = undef;
     $self->{poster} = undef;
     $self->{data} = undef;
+    
+    my $memcache_key = "delayed_entry:$journalid:$delayed_id";
+    LJ::MemCache::delete($memcache_key);
 }
 
 sub comments_manageable_by {
@@ -652,14 +670,14 @@ sub update {
         $uselogsec = 1;
     }
 
-    my $now         = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()");
+    my ($now)       = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()");
 
     my $qsecurity   = $dbh->quote($security);
     my $qallowmask  = $req->{'allowmask'}+0;
     my $qposttime   = $dbh->quote($posttime);
-    my $utime       = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP($qposttime)");
+    my ($utime)     = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP($qposttime)");
 
-    my $rlogtime    = $LJ::EndOfTime -= $now;
+    my $rlogtime    = $LJ::EndOfTime - $now;
     my $rposttime   = $LJ::EndOfTime - $utime;
     $self->{taglist} = __extract_tag_list(\$req->{props}->{taglist});
     $req->{'event'} =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
@@ -676,12 +694,16 @@ sub update {
     $self->journal->do( "UPDATE delayedblob2 SET request_stor=$data_ser" . 
                         "WHERE journalid=$journalid AND delayedid=$delayedid" );
     $self->{data} = $req;
+
+    my $memcache_key = 'delayed_entry:$journalid:$delayedid';
+    my $timelife = $rposttime - $rlogtime;
+    LJ::MemCache::set($memcache_key, $data_ser, $timelife);
 }   
 
 sub update_tags {
     my ($self, $tags) = @_;
     $self->props->{taglist} = $tags;
-    $self->{taglist} = __extract_tag_list(\$self->props->{taglist});
+    $self->{taglist} = __extract_tag_list(\$self->prop("taglist"));
     $self->update($self->data);
     return 1;
 }
@@ -712,10 +734,10 @@ sub load_data {
     my $journalid = $opts->{journalid};
     my $delayedid = $opts->{delayed_id};
 
-    my $data_ser = $dbcr->selectrow_array( "SELECT request_stor " .
-                                           "FROM delayedblob2 " .
-                                           "WHERE journalid=$journalid AND " .
-                                           "delayedid = $delayedid" );
+    my ($data_ser)= $dbcr->selectrow_array( "SELECT request_stor " .
+                                            "FROM delayedblob2 " .
+                                            "WHERE journalid=$journalid AND " .
+                                            "delayedid = $delayedid" );
 
     my $self = bless {}, $class; 
     $self->{journal} = LJ::want_user($opts->{journalid});
@@ -729,60 +751,56 @@ sub load_data {
 
 sub get_entry_by_id {
     my ($class, $journal, $delayedid, $options) = @_;
-    __assert($journal, "no journal");
-    
+    __assert($journal, "no journal");    
     return undef unless $delayedid;
 
     my $journalid = $journal->userid;
-    my $dateformat_type = $options->{'dateformat'} || '';
-    my $dbcr = LJ::get_cluster_def_reader($journal) 
-        or die "get cluster for journal failed";
-
-    my $dateformat = "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H";
-    if ($dateformat_type eq "S2") {
-        $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
-    }
-
-    my $delayed_visibility = $options->{'delayed_visibility'} || 0;
     my $userid = $options->{userid} || 0;
     my $user = LJ::get_remote() || LJ::want_user($userid);
-
     return undef unless $user;
+
+    my $delayed_visibility = $options->{'delayed_visibility'} || 0;
+
     my $sql_poster = '';
-    if (!$delayed_visibility &&  !__delayed_entry_can_see( $journal, $user ))
-    {
+    if ( !$delayed_visibility && !__delayed_entry_can_see( $journal, $user ) ) {
         $sql_poster = 'AND posterid = ' . $user->userid . " "; 
     }
 
-    my $daterequest  = "DATE_FORMAT(posttime, \"$dateformat\") AS 'alldatepart', " .
-                       "DATE_FORMAT(logtime, \"$dateformat\") AS 'system_alldatepart' ";
+    my $dbcr = LJ::get_cluster_def_reader($journal)
+        or die "get cluster for journal failed";
 
-    my $opts = $dbcr->selectrow_arrayref("SELECT journalid, delayedid, posterid, " .
-                                         "$daterequest, logtime " .
-                                         "FROM delayedlog2 ".
-                                         "WHERE journalid=$journalid AND ".
-                                         "delayedid = $delayedid $sql_poster");
-
+    my $opts = $dbcr->selectrow_arrayref( "SELECT journalid, delayedid, posterid, posttime, logtime " .
+                                          "FROM delayedlog2 ".
+                                          "WHERE journalid=$journalid AND ".
+                                          "delayedid = $delayedid $sql_poster");
     return undef unless $opts;
 
-    my $data_ser = $dbcr->selectrow_array("SELECT request_stor " .
-                                          "FROM delayedblob2 ".
-                                          "WHERE journalid=$journalid AND ".
-                                          "delayedid = $delayedid");
+    my $req = undef;
+   
+    my $memcache_key = "delayed_entry:$journalid:$delayedid";
+    my ($data_ser);# = LJ::MemCache::get($memcache_key);
+    if (!$data_ser) {
+        ($data_ser) = $dbcr->selectrow_array( "SELECT request_stor " .
+                                              "FROM delayedblob2 ".
+                                              "WHERE journalid=$journalid AND ".
+                                              "delayedid = $delayedid");
+        return undef unless $data_ser;
+        my $timelife = LJ::TimeUtil::->mysqldate_to_time($opts->[3]) - time();
+        LJ::MemCache::set($memcache_key, $data_ser, $timelife);
+    }
+
     my $self = bless {}, $class; 
     $self->{data}               = __deserialize($journal, $data_ser);
     $self->{journal}            = $journal;
     $self->{poster}             = LJ::want_user($opts->[2]);
     $self->{delayed_id}         = $delayedid;
     $self->{posttime}           = __get_datetime($self->{data});
-    $self->{alldatepart}        = $opts->[3];
-    $self->{logtime}            = $opts->[5];
-    $self->{system_alldatepart} = $opts->[4];
-    $self->{taglist}            = __extract_tag_list(\$self->{data}->{props}->{taglist});
+    $self->{logtime}            = $opts->[4];
+    $self->{taglist}            = __extract_tag_list( \$self->prop("taglist") );
+    $self->{default_dateformat}      = $options->{'dateformat'} || 'S2';
 
     __assert( $self->{poster}, "no poster" );
     __assert( $self->{journal}, "no journal" );
-
     return $self;
 }
 
@@ -846,9 +864,9 @@ sub get_entries_count {
                                                       $u );
     }
 
-    return $dbcr->selectrow_array(" SELECT count(delayedid) " .
+    return $dbcr->selectrow_array(  "SELECT count(delayedid) " .
                                     "FROM delayedlog2 ".
-                                    "WHERE journalid=$journalid ");
+                                    "WHERE journalid=$journalid" );
 }
 
 sub get_entries_by_journal {
@@ -1108,7 +1126,7 @@ sub get_itemid_near2 {
     my $jid = $self->journalid;
     my $field = $u->is_person() ? "revptime" : "rlogtime";
 
-    my $stime = $dbr->selectrow_array(  "SELECT $field FROM delayedlog2 WHERE ".
+    my ($stime) = $dbr->selectrow_array(  "SELECT $field FROM delayedlog2 WHERE ".
                                         "journalid=$jid AND delayedid=$delayedid");
     return 0 unless $stime;
 
@@ -1184,7 +1202,7 @@ sub handle_prefetched_props {
 }
 
 sub can_delete_delayed_item {
-    my ($u, $usejournal_u) = @_;
+    my ($class, $u, $usejournal_u) = @_;
     return LJ::can_delete_journal_item($u, $usejournal_u);
 }
 
@@ -1239,9 +1257,9 @@ sub can_post_to {
 
     # don't moderate admins, moderators & pre-approved users
     my $dbh = LJ::get_db_writer();
-    my $relcount = $dbh->selectrow_array("SELECT 1 FROM reluser ".
-                                         "WHERE userid=$uownerid AND targetid=$posterid ".
-                                         "AND type IN ('A','M','N') LIMIT 1");
+    my ($relcount) = $dbh->selectrow_array( "SELECT 1 FROM reluser ".
+                                            "WHERE userid=$uownerid AND targetid=$posterid ".
+                                            "AND type IN ('A','M','N') LIMIT 1" );
     return $relcount ? 1 : 0;
 }
 
@@ -1379,3 +1397,4 @@ sub __assert {
 }
 
 1;
+

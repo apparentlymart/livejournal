@@ -851,9 +851,7 @@ sub trans {
                 return LJ::Request::NOT_FOUND;
             }
             
-            $ljentry = LJ::DelayedEntry->get_entry_by_id($u,
-                                                         $delayedid,
-                                                         { 'dateformat' => 'S2'});
+            $ljentry = LJ::DelayedEntry->get_entry_by_id($u, $delayedid);
             
             if ( $GET{'mode'} eq "reply" || $GET{'replyto'} || $GET{'edit'} ) {
                 $mode = "reply";
