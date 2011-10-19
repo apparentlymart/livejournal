@@ -2000,9 +2000,8 @@ sub postevent {
     }
    
     if ( $req->{sticky} &&
-         $uowner->{'journaltype'} eq 'C' &&
-          !( LJ::check_rel($ownerid, $posterid, 'S') ||
-             LJ::check_rel($ownerid, $posterid, 'M') ) )
+         $uowner->is_community() &&
+         !$u->can_manage($uowner) )
     {
         return fail($err, 158);
     }
@@ -2321,16 +2320,15 @@ sub postevent {
     return $fail->($err,501,$dberr) if $dberr;
 
     if ( $req->{sticky} &&
-         $uowner->{'journaltype'} eq 'C' &&
-          !( LJ::check_rel($ownerid, $posterid, 'S') ||
-             LJ::check_rel($ownerid, $posterid, 'M') ) )
+         $uowner->is_community() &&
+         !$u->can_manage($uowner) )
     {
         return fail($err, 158);
     }
 
     # post become 'sticky post'
     if ( $req->{sticky} ) {
-        $uowner->set_sticky($jitemid);
+        $uowner->set_sticky_id($jitemid);
     }
 
     LJ::MemCache::incr([$ownerid, "log2ct:$ownerid"]);

@@ -10,8 +10,10 @@ sub create_from_url {
     my ($class, $url, $opts) = @_;
 
     if ($url =~ m!(.+)/d(\d+)\.html!) {
-        my $u = LJ::User->new_from_url($1) or return undef;
-        return LJ::DelayedEntry->get_entry_by_id($u, $2, $opts);
+        my $username = $1;
+        my $delayed_id = $2;
+        my $u = LJ::User->new_from_url($username) or return undef;
+        return LJ::DelayedEntry->get_entry_by_id($u, $delayed_id, $opts);
     }
 
     return undef;
@@ -20,10 +22,10 @@ sub create_from_url {
 sub create {
     my ( $class, $req, $opts ) = @_;
 
-    __assert( $opts );
-    __assert( $opts->{journal} );
-    __assert( $opts->{poster}  );
-    __assert( $req );
+    __assert( $opts , "no options");
+    __assert( $opts->{journal}, "no journal");
+    __assert( $opts->{poster}, "no poster" );
+    __assert( $req, "no request" );
 
     my $self = bless {}, $class;
 
@@ -212,7 +214,7 @@ sub props {
 sub is_future_date {
     my ($req) = @_;
     my $now = __get_now();
-    my $request_time = __get_datatime($req);
+    my $request_time = __get_datetime($req);
 
     return $request_time ge $now;
 }
@@ -273,7 +275,7 @@ sub visible_to {
 
     # if it's usemask, we have to refuse non-personal journals,
     # so we have to load the user
-    return 0 unless $remote->{'journaltype'} eq 'P' || $remote->{'journaltype'} eq 'I';
+    return 0 unless $remote->is_person() || $remote->is_identity();
 
     my $gmask = LJ::get_groupmask($userid, $remoteid);
     my $allowed = (int($gmask) & int($self->allowmask));
@@ -577,8 +579,8 @@ sub is_public {
 
 sub delete {
     my ($self) = @_;
-    __assert( $self->{delayed_id} );
-    __assert( $self->{journal} );
+    __assert( $self->{delayed_id}, "no delayed id" );
+    __assert( $self->{journal}, "no journal" );
 
     my $journal = $self->{journal};
     my $delayed_id = $self->{delayed_id};
@@ -625,16 +627,16 @@ sub should_block_robots {
 
 sub update {
     my ($self, $req) = @_;
-    __assert( $self->{delayed_id} );
-    __assert( $self->{journal} );
-    __assert( $self->{poster} );
+    __assert( $self->{delayed_id}, "no delayed id" );
+    __assert( $self->{journal}, "no journal" );
+    __assert( $self->{poster}, "no poster" );
 
     $req->{tz} = $req->{tz} || $self->data->{tz};
 
     my $journalid = $self->journal->userid;
     my $posterid  = $self->poster->userid;
     my $subject   = $req->{subject};
-    my $posttime  = __get_datatime($req);
+    my $posttime  = __get_datetime($req);
     my $data_ser  = __serialize($self->journal, $req);
     my $delayedid = $self->{delayed_id};
     my $dbh       = LJ::get_db_writer();
@@ -703,9 +705,9 @@ sub get_log2_row {
 
 sub load_data {
     my ($class, $dbcr, $opts) = @_;
-    __assert($opts->{journalid});
-    __assert($opts->{delayed_id});
-    __assert($opts->{posterid});
+    __assert($opts->{journalid}, "no journal id");
+    __assert($opts->{delayed_id}, "no delayed id");
+    __assert($opts->{posterid}, "no poster id");
 
     my $journalid = $opts->{journalid};
     my $delayedid = $opts->{delayed_id};
@@ -720,14 +722,14 @@ sub load_data {
     $self->{data} = __deserialize($self->journal, $data_ser);
     $self->{poster} = LJ::want_user($opts->{posterid});
     $self->{delayed_id} = $delayedid;
-    $self->{posttime} = __get_datatime($self->{data});
+    $self->{posttime} = __get_datetime($self->{data});
 
     return $self;
 }
 
 sub get_entry_by_id {
     my ($class, $journal, $delayedid, $options) = @_;
-    __assert($journal);
+    __assert($journal, "no journal");
     
     return undef unless $delayedid;
 
@@ -772,14 +774,14 @@ sub get_entry_by_id {
     $self->{journal}            = $journal;
     $self->{poster}             = LJ::want_user($opts->[2]);
     $self->{delayed_id}         = $delayedid;
-    $self->{posttime}           = __get_datatime($self->{data});
+    $self->{posttime}           = __get_datetime($self->{data});
     $self->{alldatepart}        = $opts->[3];
     $self->{logtime}            = $opts->[5];
     $self->{system_alldatepart} = $opts->[4];
     $self->{taglist}            = __extract_tag_list(\$self->{data}->{props}->{taglist});
 
-    __assert( $self->{poster} );
-    __assert( $self->{journal} );
+    __assert( $self->{poster}, "no poster" );
+    __assert( $self->{journal}, "no journal" );
 
     return $self;
 }
@@ -825,7 +827,7 @@ sub extract_metadata {
 
 sub get_entries_count {
     my ( $class, $journal, $skip, $elements_to_show, $userid ) = @_;
-    __assert($journal);
+    __assert($journal, "no journal");
     my $journalid = $journal->userid;
 
     my $dbcr = LJ::get_cluster_def_reader($journal) 
@@ -851,7 +853,7 @@ sub get_entries_count {
 
 sub get_entries_by_journal {
     my ( $class, $journal, $skip, $elements_to_show, $userid ) = @_;
-    __assert($journal);
+    __assert($journal, "no journal");
     my $journalid = $journal->userid;
 
     my $dbcr = LJ::get_cluster_def_reader($journal) 
@@ -1104,7 +1106,7 @@ sub get_itemid_near2 {
     }
 
     my $jid = $self->journalid;
-    my $field = $u->{'journaltype'} eq "P" ? "revptime" : "rlogtime";
+    my $field = $u->is_person() ? "revptime" : "rlogtime";
 
     my $stime = $dbr->selectrow_array(  "SELECT $field FROM delayedlog2 WHERE ".
                                         "journalid=$jid AND delayedid=$delayedid");
@@ -1116,7 +1118,7 @@ sub get_itemid_near2 {
     if ($remote) {
         if ($remote->userid == $self->journalid) {
             $secwhere = "";   # see everything
-        } elsif ($remote->{'journaltype'} eq 'P' || $remote->{'journaltype'} eq 'I') {
+        } elsif ($remote->is_person() || $remote->is_identity) {
             my $gmask = LJ::get_groupmask($u, $remote);
             $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
             if $gmask;
@@ -1227,9 +1229,9 @@ sub can_post_to {
     my $posterid = $poster->userid;
 
     my $can_manage = $poster->can_manage($uowner) || 0;
-    my $moderated = $uowner->prop('moderated');
+    my $moderated = $uowner->prop('moderated') || '';
     my $need_moderated = ( $moderated =~ /^[1A]$/ ) ? 1 : 0;
-    my $can_post = ($uowner->{'journaltype'} eq 'C' && !$need_moderated) || $can_manage;
+    my $can_post = ($uowner->is_community() && !$need_moderated) || $can_manage;
    
     if ($can_post) {
         return 1;
@@ -1237,9 +1239,9 @@ sub can_post_to {
 
     # don't moderate admins, moderators & pre-approved users
     my $dbh = LJ::get_db_writer();
-    my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
+    my $relcount = $dbh->selectrow_array("SELECT 1 FROM reluser ".
                                          "WHERE userid=$uownerid AND targetid=$posterid ".
-                                         "AND type IN ('A','M','N')");
+                                         "AND type IN ('A','M','N') LIMIT 1");
     return $relcount ? 1 : 0;
 }
 
@@ -1278,7 +1280,7 @@ sub __delayed_entry_secwhere {
 
 sub __extract_tag_list {
     my ($tags) = @_;
-    __assert($tags);
+    __assert($tags, "no tags");
 
     return [] unless $$tags;
 
@@ -1313,8 +1315,8 @@ sub __kill_dayct2_cache {
 
 sub __serialize {
     my ($journal, $req) = @_;
-    __assert($journal);
-    __assert($req);
+    __assert($journal, "no journal");
+    __assert($req, "no request");
 
     my $dbcm = LJ::get_cluster_master($journal);
 
@@ -1324,8 +1326,8 @@ sub __serialize {
 
 sub __deserialize {
     my ($journal, $req) = @_;
-    __assert($journal);
-    __assert($req);
+    __assert($journal, "no journal");
+    __assert($req, "no request");
 
     #return LJ::JSON->from_json( $data );
     return Storable::thaw($req);
@@ -1342,10 +1344,10 @@ sub __get_now {
                                                 $dt->minute );
 }
 
-sub __get_datatime {
+sub __get_datetime {
     my ($req, $dont_use_tz) = @_;
-    __assert($req);
-    __assert($req->{'tz'});
+    __assert($req, "No request");
+    __assert($req->{'tz'}, "time zone is not set");
 
     my $dt = DateTime->new(
         year      => $req->{'year'}, 
@@ -1369,10 +1371,10 @@ sub __get_datatime {
 }
 
 sub __assert {
-    my ($statement) = @_;
-
+    my ($statement, $error) = @_;
+    $error ||= '';
     unless ($statement) {
-        die "assertion failed!";
+        die "assertion failed! $error";
     }
 }
 

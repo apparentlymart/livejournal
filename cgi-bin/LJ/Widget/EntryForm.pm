@@ -848,6 +848,7 @@ sub render_options_block {
             };
 
             my $disabled = !($remote->can_manage($journalu) || 0);
+            return '' if $disabled;
 
             my $selected = $is_checked->();
             my $sticky_check = LJ::html_check({
@@ -856,7 +857,6 @@ sub render_options_block {
                 'value' => 'sticky',
                 'name' => 'sticky_type',
                 'id' => 'sticky_type',
-                'disabled' => $disabled,
                 'selected' => $selected,
                 $opts->{'prop_opt_preformatted'} || $opts->{'event_format'},
                 'label' => "",
