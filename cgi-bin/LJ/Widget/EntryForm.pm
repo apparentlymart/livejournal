@@ -768,7 +768,7 @@ sub render_htmltools_block {
         <li class='image'>
             <a
                 href='javascript:void(0);'
-                onclick='InOb.handleInsertImage();'
+                onclick='InOb.handleInsertImageBeta();'
                 title='$BML::ML{'ljimage.beta'}'
             >
                 $BML::ML{'entryform.insert.image2'}
