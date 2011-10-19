@@ -253,7 +253,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			}
 
 			// relation
-			var label, username = data.display_username;
+			var label, username = '<strong>' + data.display_username + ' </strong>';
 			if (data.is_comm) {
 				if (data.is_member)
 					label = data.ml_you_member.replace('[[username]]', username);
@@ -270,7 +270,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				if (data.is_requester) {
 					label = data.ml_this_is_you;
 				} else {
-					label = '<strong>' + username + ' </strong>';
+					label = username;
 					
 					if (data.is_friend_of) {
 						if (data.is_friend)
