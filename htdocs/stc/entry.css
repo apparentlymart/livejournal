@@ -402,9 +402,16 @@
     background: url(/js/ck/skins/v2/icons-new.png?v=1) no-repeat 0 -125px;
     padding-left: 15px;
 }
-#htmltools ul li.image a:hover {
-/*    background: url(/img/html-buttons-image.gif?v=1) no-repeat 0 -40px; */
-}
+#htmltools ul li.image-beta {
+	width: 18px;
+	}
+	#htmltools ul li.image-beta a {
+	    background: url(/js/ck/skins/v2/icons-new.png?v=1) no-repeat 0 -309px;
+	    padding-left: 18px;
+		}
+	#htmltools ul li.image a:hover {
+		/* background: url(/img/html-buttons-image.gif?v=1) no-repeat 0 -40px; */
+		}
 #htmltools ul li.media a {
     background: url(/js/ck/skins/v2/icons-new.png?v=1) no-repeat 0 -110px;
     padding-left: 15px;
