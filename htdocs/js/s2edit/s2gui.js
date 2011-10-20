@@ -180,6 +180,8 @@ function s2jumpTo(line, column) {
 
 function s2jumpToPos(pos, line)
 {
+	var main = s2getCodeArea();
+
 	nxpositionCursor(main, pos);
 	nxscrollObject(main, line, s2lineCount);
 }
