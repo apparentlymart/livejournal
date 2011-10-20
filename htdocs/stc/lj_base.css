@@ -2930,8 +2930,8 @@ DIV.lj_ippu_app {
 	.s-lanzelot .b-contextualhover A:hover,
 	.s-lanzelot .b-contextualhover A:active,
 	.s-lanzelot .b-contextualhover A:focus {
-		border-bottom: 1px solid #3F5F9E !important;
-		text-decoration: none !important;
+		border-bottom: 0 !important;
+		text-decoration: underline !important;
 		color: #3F5F9E !important;
 		}
 	.index-page .b-contextualhover A:link,
@@ -3003,6 +3003,9 @@ DIV.lj_ippu_app {
 			line-height: 16px;
 			font-size: 12px;
 			}
+			.b-contextualhover .b-contextualhover-options LI A:hover {
+				text-decoration: underline !important;
+				}
 
 /* Native Sharing */
 .b-sharethis {
