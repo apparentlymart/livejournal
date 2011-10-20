@@ -211,7 +211,7 @@
     }
 
     if ($remote && $u && $ret{is_custom_userhead} && $u->custom_usericon_appid) {
-        $ret{is_app_userhead} = 1;
+
         my $app = LJ::UserApps->get_application(id => $u->custom_usericon_appid);
 
         if($app && $app->can_show_restricted) {
