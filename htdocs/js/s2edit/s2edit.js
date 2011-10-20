@@ -33,7 +33,7 @@ var s2edit = function() {
 			// Disable selection in the document (IE only - prevents wacky dragging bugs)
 			document.onselectstart = function () { return false; };
 
-			if (jQuery.browser.opera || (jQuery.browser.msie && jQuery.browser.version)) { return; }
+			if (!this.isAceSupported()) { return; }
 
 			this.aceInit();
 		},
@@ -79,6 +79,10 @@ var s2edit = function() {
 			});
 		},
 
+		isAceSupported: function() {
+			return !(jQuery.browser.opera || (jQuery.browser.msie && jQuery.browser.version));
+		},
+
 		aceInit: function() {
 			var textarea = jQuery('#main'),
 				pre = jQuery('<pre id="editor"/>')
@@ -92,6 +96,7 @@ var s2edit = function() {
 		},
 
 		toggleEditor: function() {
+			if (!this.isAceSupported()) { return; }
 			var textarea = jQuery('#main'),
 				editorEl = jQuery('#editor');
 
