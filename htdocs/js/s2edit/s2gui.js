@@ -180,6 +180,10 @@ function s2jumpTo(line, column) {
 
 function s2jumpToPos(pos, line)
 {
+	if (s2isAceActive()) {
+		aceEditor.gotoLine(line, 0);
+		return;
+	}
 	var main = s2getCodeArea();
 
 	nxpositionCursor(main, pos);
