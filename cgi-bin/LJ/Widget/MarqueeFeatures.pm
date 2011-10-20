@@ -14,7 +14,27 @@ sub render_body {
     my $class = shift;
     my %opts = @_;
 
-    my $marquee_features_json = LJ::ExtBlock->load_by_id('marquee_features');
+    my $params = {
+        'marqueefeatures' => [
+            'widget.marqueefeatures.title',
+            'widget.marqueefeatures.also',
+            'marquee_features',
+        ],
+        'majornotes' => [
+            'widget.majornotes.title',
+            'widget.majornotes.also',
+            'major_notes',
+        ],
+        'featureshowcase' => [
+            'widget.featureshowcase.title',
+            'widget.featureshowcase.also',
+            'feature_showcase',
+        ],
+    };
+
+    my $type = $opts{'type'} || 'marqueefeatures';
+    my ($subject, $see, $block) = @{$params->{$type}};
+    my $marquee_features_json = LJ::ExtBlock->load_by_id($block);
     $marquee_features_json = $marquee_features_json->blocktext if $marquee_features_json;
 
     my $marquee_features = LJ::JSON->from_json($marquee_features_json);
@@ -28,9 +48,11 @@ sub render_body {
     );
 
     $template->param (
-        also_text   => $also->{text},
-        also_link   => $also->{link},
-        links       => $marquee_features,
+        also_text => $also->{text},
+        also_link => $also->{link},
+        links     => $marquee_features,
+        subject   => LJ::Lang::ml($subject),
+        see       => LJ::Lang::ml($see),
     );
 
     return $template->output;

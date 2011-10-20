@@ -17,7 +17,9 @@ body<=
         unless LJ::check_priv($remote, "siteadmin", "marqueefeatures") || $LJ::IS_DEV_SERVER;
 
     my @marquee_features;
-    if (%POST) {    # Add new entry
+
+    # Add new entry
+    if (%POST) {
         for (my $i = 1; $i < 20; $i++) {
             if ($POST{"text$i"} && $POST{"link$i"}) {
                 push @marquee_features,
@@ -35,6 +37,7 @@ body<=
 
     ## Read old data
     my $marquee_features_json = LJ::ExtBlock->load_by_id('marquee_features');
+
     if ($marquee_features_json) {
         $marquee_features_json = $marquee_features_json->blocktext;
         @marquee_features = @{LJ::JSON->from_json($marquee_features_json)};
@@ -43,7 +46,7 @@ body<=
     ## Page
     my $ret = qq|
         <div class="canyon">
-            <div class="canyon-side"> | . 
+            <div class="canyon-side"> | .
                 LJ::Widget::MarqueeFeatures->render() . qq|
             </div>
             <div class="canyon-section">
@@ -57,6 +60,7 @@ body<=
 
     my $i = 6;
     push @marquee_features, { text => '', link => '' } while --$i;
+
     foreach my $line (@marquee_features) {
         my $prefix = $i ? '&gt;&gt;' : 'Also check out ';
 
