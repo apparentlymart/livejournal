@@ -778,7 +778,7 @@ sub get_entry_by_id {
     my $req = undef;
    
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
-    my ($data_ser)  = LJ::MemCache::get($memcache_key);
+    my ($data_ser);# = LJ::MemCache::get($memcache_key);
     if (!$data_ser) {
         ($data_ser) = $dbcr->selectrow_array( "SELECT request_stor " .
                                               "FROM delayedblob2 ".

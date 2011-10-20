@@ -1133,8 +1133,7 @@ sub get_recent_items
     my $usual_show  = $itemshow;
     my $skip_sticky = $skip;    
 
-    if ( $show_sticky_on_top && $sticky )
-    {
+    if ( $show_sticky_on_top && $sticky ) {
         if($skip > 0) {
             $skip -= 1;
         } else {
@@ -1307,10 +1306,13 @@ sub get_recent_items
     };
 
     if ( $sticky && $show_sticky_on_top ) {
-        # build request to receive sticky entries
         if ( !$skip_sticky ) {
-            $sticky_sql = "$sql AND jitemid = $sticky ";
-            $sticky_sql .= "ORDER BY journalid, $sort_key ";
+            warn "sticky $sticky";
+            my $entry = LJ::Entry->new( $u, 'jitemid' => $sticky );
+            $entry->{'itemid'} = $sticky;
+            push @items, $entry;
+            push @{$opts->{'entry_objects'}}, $entry;
+            push @{$opts->{'itemids'}}, $entry->jitemid;
         }
 
         # sticky exculustion
@@ -1353,13 +1355,10 @@ sub get_recent_items
             my $entry = LJ::Entry->new($userid, jitemid => $li->{itemid}, rlogtime => $li->{rlogtime});
             $entry->absorb_row($li);
             push @{$opts->{'entry_objects'}}, $entry;
+            warn LJ::D($entry);
         }
     };
 
-    
-    if ( $sticky && !$skip_sticky && $show_sticky_on_top ) {
-        $absorb_data->($sticky_sql);
-    }
     $absorb_data->($sql);
     $flush->();
 
