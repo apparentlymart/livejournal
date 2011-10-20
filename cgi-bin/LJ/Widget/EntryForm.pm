@@ -847,7 +847,7 @@ sub render_options_block {
                 }   
             };
 
-            my $disabled = !($remote->can_manage($journalu) || 0);
+            my $disabled = $remote ? !($remote->can_manage($journalu) || 0) : 0;
             return '' if $disabled;
 
             my $selected = $is_checked->();
@@ -862,15 +862,17 @@ sub render_options_block {
                 'label' => "",
             });
 
+            my $help = LJ::help_icon_html('sticky_entry');
             my $sticky_exists = $journalu ? $journalu->has_sticky_entry && !$selected : undef;
             my $sticky_text = $sticky_exists ? $BML::ML{'entryform.sticky_replace.edit'} :
                                                $BML::ML{'entryform.sticky.edit'};
             return qq{$sticky_check <label for='sticky_type' id='sticky_type_label' class='right options'>
                    $sticky_text
-                </label>};
+                </label>$help};
         },
          'do_not_add' => sub {
             return '' unless LJ::is_enabled("delayed_entries");
+
             my $selected = $opts->{'opt_backdated'} || 0;
             my $dot_add_check = LJ::html_check({
                 'type' => "check",
@@ -882,11 +884,11 @@ sub render_options_block {
                 $opts->{'prop_opt_preformatted'} || $opts->{'event_format'},
                 'label' => "",
             });
-
+            my $help = LJ::help_icon_html('backdate');
             my $added_to_rss_text = $BML::ML{'entryform.do_not_add_rss_friends'};
             return qq{$dot_add_check <label for='do_not_add_type' class='right options'>
                    $added_to_rss_text
-                </label>};
+                </label>$help};
         },
         'tags' => sub {
             return if $LJ::DISABLED{'tags'};
