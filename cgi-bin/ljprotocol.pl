@@ -2157,9 +2157,7 @@ sub postevent {
             return fail($err, 215) unless $req->{tz};
 
             # if posting to a moderated community, store and bail out here
-            if ($uowner->{'journaltype'} eq 'C' &&
-                $need_moderated &&
-                !$flags->{'nomod'} && !$u->can_manage($uowner)) {
+            if ( !LJ::DelayedEntry::can_post_to($uowner, $u) && !$flags->{'nomod'} ) {
                 return fail($err, 322);
             }
 
