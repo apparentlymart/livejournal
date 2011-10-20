@@ -26,6 +26,10 @@ var s2output = function() {
 		init: function() {
 			el = jQuery('#out');
 
+			if (!s2settings.turboEnabled()) {
+				return;
+			}
+
 			var text = el.html();
 			if (text.length > 0) {
 				text = parseLineNumbers(text);
@@ -537,6 +541,8 @@ function s2submit()
 		textarea.value = aceEditor.getSession().getValue();
 	}
 
-	s2edit.save(textarea.value);
-	return false;
+	if (s2settings.turboEnabled()) {
+		s2edit.save(textarea.value);
+		return false;
+	}
 }

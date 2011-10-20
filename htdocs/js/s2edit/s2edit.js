@@ -20,6 +20,7 @@ var s2edit = function() {
 			s2lineCount = 0;
 
 			this.initSettings();
+			this.initGui();
 
 			s2initIndex();
 			s2initParser();
@@ -51,16 +52,34 @@ var s2edit = function() {
 
 					settings[item] = val;
 					jQuery.storage.setItem('s2edit', settings);
+				},
+
+				turboEnabled: function() {
+					return !!this.load('turboMode')
 				}
 			};
 		},
 
-		aceInit: function() {
-			jQuery('<input type="button" id="toggleEditor" class="compilelink"/>')
-				.click(this.toggleEditor.bind(this))
-				.val('Toggle source view')
-				.insertAfter('.header .compilelink');
+		initGui: function() {
+			var self = this;
+			jQuery('.turbo-mode').click(function(ev) {
+				var modeEnabled = !s2settings.load('turboMode');
+				s2settings.save('turboMode', modeEnabled);
+				if (modeEnabled) {
+					if (!s2isAceActive()) {
+						self.toggleEditor();
+					}
+					this.value = 'Back to old editor';
+				} else {
+					if (s2isAceActive()) {
+						self.toggleEditor();
+					}
+					this.value = 'Show new editor';
+				}
+			});
+		},
 
+		aceInit: function() {
 			var textarea = jQuery('#main'),
 				pre = jQuery('<pre id="editor"/>')
 					.addClass('maintext')
