@@ -74,7 +74,8 @@ sub new {
 
     return bless {
         userid => LJ::want_userid($u),
-        args => \@args,
+        args   => \@args,
+        user   => $u,
     }, $class;
 }
 
@@ -489,7 +490,7 @@ sub as_sms {
 
 # Returns a string representing a Schwartz role [queue] used to handle this event
 # By default returns undef, which is ok for most cases.
-sub schwartz_role { 
+sub schwartz_role {
     my $self = shift;
     my $class = ref $self || $self;
 
@@ -887,5 +888,16 @@ foreach my $event (@EVENTS) {
     eval "use $event";
     confess "Error loading event module '$event': $@" if $@;
 }
+
+sub as_email_to {
+    my ($self, $u) = @_;
+    return $u->email_raw;
+}
+
+sub as_email_from {
+    return $LJ::BOGUS_EMAIL;
+}
+
+sub go_through_clusters {1}
 
 1;

@@ -61,14 +61,18 @@ sub notify {
         unless ref $self eq __PACKAGE__;
 
     my $u = $self->u;
-    
+
     if (LJ::sysban_check('email_domain', $u->email_raw)){
         #warn "Not issuing job for " . $u->email_raw . " [banned]";
         return 1;
     }
 
     my $lang = $u->prop('browselang');
-    my $vars = { sitenameshort => $LJ::SITENAMESHORT, sitename => $LJ::SITENAME, siteroot => $LJ::SITEROOT };
+    my $vars = {
+        sitenameshort => $LJ::SITENAMESHORT,
+        sitename      => $LJ::SITENAME,
+        siteroot      => $LJ::SITEROOT,
+    };
 
     my @events = @_;
     croak "'notify' requires one or more events"
@@ -79,85 +83,62 @@ sub notify {
 
         # LJSUP-6332
         # Unsubscribe form [ru-]news subscription users who has not logins in 6 months
-        if (ref($ev) =~ /OfficialPost/) {
+        if ( ref($ev) =~ /OfficialPost/ ) {
             my @sessions = $u->sessions();
-            if ($u->last_login_time < time - 6*2_628_000 && !@sessions) {
+
+            if ( $u->last_login_time < time - 6 * 2_628_000 && !@sessions ) {
                 my @subs = LJ::Subscription->find($u, event => ref($ev));
+
                 foreach my $sub (@subs) {
                     $sub->delete();
                 }
+
                 next;
             }
         }
 
-        $vars->{'hook'} = LJ::run_hook("esn_email_footer", $ev, $u);
-        my $footer = LJ::Lang::get_text($lang, 'esn.footer.text', undef, $vars);
-
-        my $plain_body = LJ::run_hook("esn_email_plaintext", $ev, $u);
-        unless ($plain_body) {
-            $plain_body = $ev->as_email_string($u) or next;
-            $plain_body .= $footer if $ev->need_standard_footer;
+        if (LJ::run_hook('esn_send_email', $self, $opts, $ev)) {
+            ## do nothing, hook did the job
         }
+        else {
+            my $plain_body = $ev->as_email_string($u) or next;
+            my %headers = (
+                "X-LJ-Recipient" => $u->user,
+                %{$ev->as_email_headers($u) || {}},
+                %{$opts->{_debug_headers}   || {}}
+            );
 
-        # run transform hook on plain body
-        LJ::run_hook("esn_email_text_transform", event => $ev, rcpt_u => $u, bodyref => \$plain_body);
+            my $email_subject = $ev->as_email_subject($u);
 
-        my %headers = (
-                       "X-LJ-Recipient" => $u->user,
-                       %{$ev->as_email_headers($u) || {}},
-                       %{$opts->{_debug_headers}   || {}}
-                       );
-
-        my $email_subject =
-            LJ::run_hook("esn_email_subject", $ev, $u) ||
-            $ev->as_email_subject($u);
-
-        if ($LJ::_T_EMAIL_NOTIFICATION) {
-            $LJ::_T_EMAIL_NOTIFICATION->($u, $plain_body);
-         } elsif ($u->{opt_htmlemail} eq 'N') {
-            LJ::send_mail({
-                to       => $u->email_raw,
-                from     => $LJ::BOGUS_EMAIL,
-                fromname => scalar($ev->as_email_from_name($u)),
-                wrap     => 1,
-                charset  => $u->mailencoding || 'utf-8',
-                subject  => $email_subject,
-                headers  => \%headers,
-                body     => $plain_body,
-            }) or die "unable to send notification email";
-         } else {
-
-            my $html_body = LJ::run_hook("esn_email_html", $ev, $u);
-            unless ($html_body) {
-                $html_body = $ev->as_email_html($u) or next;
-                $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
-
-                my $html_footer = LJ::run_hook("esn_email_unsubscr", $ev, $u, $self->{subs});
-                $html_footer .= LJ::run_hook('esn_email_html_footer', event => $ev, rcpt_u => $u );
-                unless ($html_footer) {
-                    $html_footer = LJ::auto_linkify($footer);
-                    $html_footer =~ s/\n/\n<br\/>/g;
-                }
-
-                # convert newlines in HTML mail
-                $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
-                $html_body .= $html_footer if $ev->need_standard_footer;
-
-                # run transform hook on html body
-                LJ::run_hook("esn_email_html_transform", event => $ev, rcpt_u => $u, bodyref => \$html_body);
+            if ($u->{opt_htmlemail} eq 'N') {
+                LJ::send_mail({
+                    to       => $u->email_raw,
+                    from     => $LJ::BOGUS_EMAIL,
+                    fromname => scalar($ev->as_email_from_name($u)),
+                    wrap     => 1,
+                    charset  => $u->mailencoding || 'utf-8',
+                    subject  => $email_subject,
+                    headers  => \%headers,
+                    body     => $plain_body,
+                }) or die "unable to send notification email";
             }
+            else {
+                my $html_body = $ev->as_email_html($u);
+                next unless $html_body;
+                $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
 
-            LJ::send_mail({
-                to       => $u->email_raw,
-                from     => $LJ::BOGUS_EMAIL,
-                fromname => scalar($ev->as_email_from_name($u)),
-                wrap     => 1,
-                charset  => $u->mailencoding || 'utf-8',
-                subject  => $email_subject,
-                headers  => \%headers,
-                html     => $html_body,
-                body     => $plain_body,
-            }) or die "unable to send notification email";
+                LJ::send_mail({
+                    to       => $u->email_raw,
+                    from     => $LJ::BOGUS_EMAIL,
+                    fromname => scalar($ev->as_email_from_name($u)),
+                    wrap     => 1,
+                    charset  => $u->mailencoding || 'utf-8',
+                    subject  => $email_subject,
+                    headers  => \%headers,
+                    html     => $html_body,
+                    body     => $plain_body,
+                }) or die "unable to send notification email";
+            }
         }
     }
 
