@@ -191,5 +191,26 @@ LJ::register_hook("after_journal_content_created", sub {
     
 });
 
+LJ::register_hook("before_journal_content_created", sub {
+    my $return = pop;
+    my ( $opts, %RQ ) = @_;
+
+    return if $RQ{'pathextra'} eq '/rss';
+
+    # check if special journal
+    if ( exists $LJ::DOMAIN_SUBST->{$RQ{'user'}}  ) {
+        $return = 1;
+
+        my $filename = "$LJ::HOME/htdocs/" . $LJ::DOMAIN_SUBST->{$RQ{'user'}};
+        LJ::Request->notes("_journal" => $RQ{'user'});
+        LJ::Request->notes("bml_filename" => $filename);
+        LJ::Request->notes("RQ" => \%RQ);
+        LJ::Request->notes("opts" => $opts);
+        return Apache::BML::handler();
+    }
+
+    return;
+});
+
 
 1;

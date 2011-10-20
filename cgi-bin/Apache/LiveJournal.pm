@@ -1809,10 +1809,9 @@ sub journal_content
     LJ::Request->notes("view" => $RQ{'mode'});
     my $user = $RQ{'user'};
 
-# Task not ready yet
-#    my $return;
-#    my $ret = LJ::run_hooks("before_journal_content_created", $opts, %RQ, \$return);
-#    return $ret if $return;
+    my $return;
+    my $ret = LJ::run_hooks("before_journal_content_created", $opts, %RQ, \$return);
+    return $ret if $return;
 
     my $html = LJ::make_journal($user, $RQ{'mode'}, $remote, $opts);
 
