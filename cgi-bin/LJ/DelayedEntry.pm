@@ -38,7 +38,8 @@ sub create {
     my $subject = $req->{subject};
     my $posttime = __get_datetime($req);
     my $dbh = LJ::get_db_writer();
-    my $data_ser = $dbh->quote(__serialize($req));
+    my $data_ser = __serialize($req);
+    my $qdata_ser = $dbh->quote($data_ser);
     
     my $delayedid = LJ::alloc_user_counter( $journal, 
                                             'Y',
@@ -75,7 +76,7 @@ sub create {
                   $req->{year}, $req->{mon}, $req->{day} );
     
     $journal->do( "INSERT INTO delayedblob2 ".
-                  "VALUES ($journalid, $delayedid, $data_ser)" );
+                  "VALUES ($journalid, $delayedid, $qdata_ser)" );
 
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
     my $timelife = $rposttime - $rlogtime;
@@ -656,7 +657,8 @@ sub update {
     my $posttime  = __get_datetime($req);
     my $delayedid = $self->{delayed_id};
     my $dbh       = LJ::get_db_writer();
-    my $data_ser  = $dbh->quote(__serialize($req));
+    my $data_ser  = __serialize($req);
+    my $qdata_set = $dbh->quote($data_ser);
 
     my $security  = "public";
     my $uselogsec = 0;
@@ -690,7 +692,7 @@ sub update {
                         undef,  LJ::text_trim($req->{'subject'}, 30, 0), 
                         $req->{year}, $req->{mon}, $req->{day} );
 
-    $self->journal->do( "UPDATE delayedblob2 SET request_stor=$data_ser" . 
+    $self->journal->do( "UPDATE delayedblob2 SET request_stor=$qdata_ser" . 
                         "WHERE journalid=$journalid AND delayedid=$delayedid" );
     $self->{data} = $req;
 
