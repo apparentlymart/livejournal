@@ -562,6 +562,7 @@ sub render_metainfo_block {
                         <input type='text' name='hour' value='$hour' class='input-num' /> : <input type='text' value='$min' name='min' class='input-num' />
                         <?de $BML::ML{'entryform.date.24hournote'} de?>
                     </span>
+                    $help_icon 
                 </span>
             </li>
         <li>
