@@ -85,7 +85,9 @@ function setPostingPermissions(journal) {
 
 	if (!journal.can_create_sticky) {
 		stickyWrapper.hide();
+		stickyCheckbox.prop('disabled', true);
 	} else {
+		stickyCheckbox.prop('disabled', false);
 		stickyLabel.html(journal.is_replace_sticky ? 
 				Site.ml_text['entryform.sticky_replace.edit'] :
 				Site.ml_text['entryform.sticky.edit']);
