@@ -33,13 +33,12 @@ sub create {
     my $poster = $opts->{poster};
     $req->{'event'} =~ s/\r\n/\n/g;
 
-    my $data_ser = __serialize($journal, $req);
-
     my $journalid = $journal->userid;
     my $posterid = $poster->userid;
     my $subject = $req->{subject};
     my $posttime = __get_datetime($req);
     my $dbh = LJ::get_db_writer();
+    my $data_ser = $dbh->quote(__serialize($req));
     
     my $delayedid = LJ::alloc_user_counter( $journal, 
                                             'Y',
@@ -655,9 +654,9 @@ sub update {
     my $posterid  = $self->poster->userid;
     my $subject   = $req->{subject};
     my $posttime  = __get_datetime($req);
-    my $data_ser  = __serialize($self->journal, $req);
     my $delayedid = $self->{delayed_id};
     my $dbh       = LJ::get_db_writer();
+    my $data_ser  = $dbh->quoute(__serialize($req));
 
     my $security  = "public";
     my $uselogsec = 0;
@@ -741,7 +740,7 @@ sub load_data {
 
     my $self = bless {}, $class; 
     $self->{journal} = LJ::want_user($opts->{journalid});
-    $self->{data} = __deserialize($self->journal, $data_ser);
+    $self->{data} = __deserialize($data_ser);
     $self->{poster} = LJ::want_user($opts->{posterid});
     $self->{delayed_id} = $delayedid;
     $self->{posttime} = __get_datetime($self->{data});
@@ -778,7 +777,7 @@ sub get_entry_by_id {
     my $req = undef;
    
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
-    my ($data_ser);# = LJ::MemCache::get($memcache_key);
+    my ($data_ser) = LJ::MemCache::get($memcache_key);
     if (!$data_ser) {
         ($data_ser) = $dbcr->selectrow_array( "SELECT request_stor " .
                                               "FROM delayedblob2 ".
@@ -790,7 +789,7 @@ sub get_entry_by_id {
     }
 
     my $self = bless {}, $class; 
-    $self->{data}               = __deserialize($journal, $data_ser);
+    $self->{data}               = __deserialize($data_ser);
     $self->{journal}            = $journal;
     $self->{poster}             = LJ::want_user($opts->[2]);
     $self->{delayed_id}         = $delayedid;
@@ -1332,23 +1331,23 @@ sub __kill_dayct2_cache {
 }
 
 sub __serialize {
-    my ($journal, $req) = @_;
-    __assert($journal, "no journal");
+    my ($req) = @_;
     __assert($req, "no request");
+    $req->{'event'} =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
 
-    my $dbcm = LJ::get_cluster_master($journal);
+   my $ext = $req->{'ext'};
+   my $flags = $ext->{'flags'};
+   $flags->{'u_owner'} = undef;
+   $flags->{'u'} = undef;
 
-    return $dbcm->quote(Storable::nfreeze($req));
-    #return LJ::JSON->to_json( $data );
+   return LJ::JSON->to_json( $req );
 }
 
 sub __deserialize {
-    my ($journal, $req) = @_;
-    __assert($journal, "no journal");
+    my ($req) = @_;
     __assert($req, "no request");
 
-    #return LJ::JSON->from_json( $data );
-    return Storable::thaw($req);
+    return LJ::JSON->from_json( $req );
 }
 
 sub __get_now {

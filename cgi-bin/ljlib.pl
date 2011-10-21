@@ -1307,11 +1307,31 @@ sub get_recent_items
 
     if ( $sticky && $show_sticky_on_top ) {
         if ( !$skip_sticky ) {
-            warn "sticky $sticky";
             my $entry = LJ::Entry->new( $u, 'jitemid' => $sticky );
-            $entry->{'itemid'} = $sticky;
-            push @items, $entry;
-            push @{$opts->{'entry_objects'}}, $entry;
+            my $alldatepart;
+            my $system_alldatepart;
+
+            if ($opts->{'dateformat'} eq "S2") {
+                 $alldatepart = LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql);
+                 $system_alldatepart = LJ::TimeUtil->alldatepart_s2($entry->logtime_mysql);
+            } else {
+                 $alldatepart = LJ::TimeUtil->alldatepart_s1($entry->eventtime_mysql);
+                 $system_alldatepart = LJ::TimeUtil->alldatepart_s1($entry->logtime_mysql);
+            }
+
+            my $item = {'itemid' => $sticky,
+                        'alldatepart'   => $alldatepart,
+                        'allowmask'     => $entry->allowmask,
+                        'posterid'      => $entry->posterid,
+                        'eventtime'     => $entry->eventtime_mysql,
+                        'system_alldatepart' => $system_alldatepart,
+                        'security'           => $entry->security,
+                        'anum'               => $entry->anum,
+                        'logtime'            => $entry->logtime_mysql,
+                      };
+                            
+            push @items, $item;
+            push @{$opts->{'entry_objects'}}, $item;
             push @{$opts->{'itemids'}}, $entry->jitemid;
         }
 
@@ -1355,7 +1375,6 @@ sub get_recent_items
             my $entry = LJ::Entry->new($userid, jitemid => $li->{itemid}, rlogtime => $li->{rlogtime});
             $entry->absorb_row($li);
             push @{$opts->{'entry_objects'}}, $entry;
-            warn LJ::D($entry);
         }
     };
 
