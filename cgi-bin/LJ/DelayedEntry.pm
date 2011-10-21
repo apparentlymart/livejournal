@@ -656,7 +656,7 @@ sub update {
     my $posttime  = __get_datetime($req);
     my $delayedid = $self->{delayed_id};
     my $dbh       = LJ::get_db_writer();
-    my $data_ser  = $dbh->quoute(__serialize($req));
+    my $data_ser  = $dbh->quote(__serialize($req));
 
     my $security  = "public";
     my $uselogsec = 0;
