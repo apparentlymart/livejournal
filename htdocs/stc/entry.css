@@ -60,19 +60,22 @@
 }
 #updateForm span.inputgroup-left {
     display: block; float: left; width: 50%; position: relative;
-}
+	}
 #updateForm span.inputgroup-right {
     display: block; float: right; width: 49%;  position: relative;
-}
+	}
+	#entryform-spellcheck-wrapper INPUT {
+		overflow: visible;
+		padding-left: 5px;
+		padding-right: 5px;
+		}
 #updateForm span.inputgroup-right label.title {
     width: 11em;
-}
+	}
 #updateForm a.helplink {
     margin-left: 5px;
     margin-top: 4px;
-    float: left;
-}
-
+	}
 #updateForm h4 {
     margin: 0 0 4px 0;
     padding: 0;
