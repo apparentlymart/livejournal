@@ -843,6 +843,18 @@ sub extract_metadata {
     return \%meta;
 }
 
+sub entries_exists {
+  my ( $journal, $user ) = @_;
+    __assert($journal, "no journal");
+    my $journalid = $journal->userid;
+    my $userid = $user->userid ;
+    my $dbcr = LJ::get_cluster_def_reader($journal)
+        or die "get cluster for journal failed";
+
+    return $dbcr->selectcol_arrayref("SELECT delayedid " .
+                                     "FROM delayedlog2 WHERE journalid=$journalid AND posterid = $userid ".
+                                     "LIMIT 1");    
+}
 
 sub get_entries_count {
     my ( $class, $journal, $skip, $elements_to_show, $userid ) = @_;
