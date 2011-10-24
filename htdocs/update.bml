@@ -756,7 +756,13 @@ head<=
     BML::noparse();
 
     my $is_sup = LJ::SUP->is_remote_sup() ? 1 : 0;
-    LJ::need_string('entryform.close.confirm');
+  
+    LJ::need_string('entryform.close.confirm'); 
+    my @ml_months; 
+    push @ml_months, map { LJ::Lang::month_long_langcode($_) } (1 .. 12);
+    foreach my $month_ml_name (@ml_months) {
+        LJ::need_string($month_ml_name);
+    }
 
     $ret .= qq^
     <script type="text/javascript">

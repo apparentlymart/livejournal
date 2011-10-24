@@ -62,6 +62,12 @@ body<=
                             entryform.choose_date/);
     }
     
+    my @ml_months;
+    push @ml_months, map { LJ::Lang::month_long_langcode($_) } (1 .. 12);
+    foreach my $month_ml_name (@ml_months) {
+        LJ::need_string($month_ml_name);
+    }
+
     return LJ::bad_input("You must be authenticated as a person.")
         unless $remote->is_personal || $remote->is_identity;
 
