@@ -658,7 +658,6 @@ sub update {
     my $delayedid = $self->{delayed_id};
     my $dbh       = LJ::get_db_writer();
     my $data_ser  = __serialize($req);
-    my $qdata_ser = $dbh->quote($data_ser);
 
     my $security  = "public";
     my $uselogsec = 0;
@@ -684,7 +683,7 @@ sub update {
     $req->{'event'} =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
 
     $self->journal->do( "UPDATE delayedlog2 SET posterid=$posterid, " .
-                        "subject=?, posttime=$qposttime, " . 
+                        "subject=?, posttime = $qposttime, " . 
                         "security=$qsecurity, allowmask=$qallowmask, " .    
                         "year=?, month=?, day=?, " .
                         "rlogtime=$rlogtime, revptime=$rposttime " .
@@ -692,8 +691,8 @@ sub update {
                         undef,  LJ::text_trim($req->{'subject'}, 30, 0), 
                         $req->{year}, $req->{mon}, $req->{day} );
 
-    $self->journal->do( "UPDATE delayedblob2 SET request_stor=$qdata_ser" . 
-                        "WHERE journalid=$journalid AND delayedid=$delayedid" );
+    $self->journal->do( "UPDATE delayedblob2 SET request_stor=?" . 
+                        "WHERE journalid=$journalid AND delayedid=$delayedid", undef, $data_ser );
     $self->{data} = $req;
 
     my $memcache_key = 'delayed_entry:$journalid:$delayedid';
