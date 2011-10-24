@@ -848,8 +848,9 @@ sub render_options_block {
                 }   
             };
 
-            my $disabled = $remote ? !($remote->can_manage($journalu) || 0) : 0;
-            return '' if $disabled;
+            if (!$remote || !$remote->can_manage($journalu)) {
+                return '';
+            }
 
             my $selected = $is_checked->();
             my $sticky_check = LJ::html_check({
