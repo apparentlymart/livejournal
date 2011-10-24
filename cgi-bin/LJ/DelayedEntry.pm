@@ -79,8 +79,7 @@ sub create {
                   "VALUES ($journalid, $delayedid, $qdata_ser)" );
 
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
-    my $timelife = $rposttime - $rlogtime;
-    LJ::MemCache::set($memcache_key, $data_ser, $timelife);
+    LJ::MemCache::set($memcache_key, $data_ser, 3600);
 
     $self->{journal} = $opts->{journal};    
     $self->{posttime} = $opts->{posttime};
@@ -695,9 +694,8 @@ sub update {
                         "WHERE journalid=$journalid AND delayedid=$delayedid", undef, $data_ser );
     $self->{data} = $req;
 
-    my $memcache_key = 'delayed_entry:$journalid:$delayedid';
-    my $timelife = $rposttime - $rlogtime;
-    LJ::MemCache::set($memcache_key, $data_ser, $timelife);
+    my $memcache_key = "delayed_entry:$journalid:$delayedid";
+    LJ::MemCache::set($memcache_key, $data_ser, 3600);
 }   
 
 sub update_tags {
@@ -785,8 +783,7 @@ sub get_entry_by_id {
                                               "WHERE journalid=$journalid AND ".
                                               "delayedid = $delayedid");
         return undef unless $data_ser;
-        my $timelife = LJ::TimeUtil::->mysqldate_to_time($opts->[3]) - time();
-        LJ::MemCache::set($memcache_key, $data_ser, $timelife);
+        LJ::MemCache::set($memcache_key, $data_ser, 3600);
     }
 
     my $self = bless {}, $class; 
