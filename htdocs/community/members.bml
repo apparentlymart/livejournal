@@ -398,7 +398,7 @@ body<=
                             siteroot        => $LJ::SITEROOT,
                         });
     
-            if (LJ::DelayedEntry::entries_exists($cu, $remote)) {
+            if (LJ::DelayedEntry::entries_exists($c, $remote)) {
                 $html .=  LJ::Lang::get_text($lang, 'community.members.maintainer.remove.delayed.email_html', undef);
             }
 
@@ -412,7 +412,7 @@ body<=
                             siteroot        => $LJ::SITEROOT,
                         });
 
-            if (LJ::DelayedEntry::entries_exists($cu, $remote)) {
+            if (LJ::DelayedEntry::entries_exists($c, $remote)) {
                 $plain .=  LJ::Lang::get_text($lang, 'community.members.maintainer.remove.delayed.email_plain', undef);
             }
 
