@@ -28,7 +28,7 @@ function editdate(){
 	customTimeFlag.val('1');
 
 	f = document.updateForm;
-	var month = f.date_ymd_mm.selectedIndex || f.date_ymd_mm.value;
+	var month = f.date_ymd_mm.value;
 	var dateStr = f.date_ymd_yyyy.value + "/" + month + "/" + f.date_ymd_dd.value;
 
 	cal.calendar({
@@ -662,7 +662,7 @@ function settime(time){
 	}
 
 	f.date_ymd_yyyy.value = newTime.getFullYear() < 1900 ? newTime.getFullYear() + 1900 : newTime.getFullYear();
-	f.date_ymd_mm.selectedIndex = newTime.getMonth();
+	f.date_ymd_mm.value = newTime.getMonth() + 1;
 	f.date_ymd_dd.value = twodigit(newTime.getDate());
 	if (!time) {
 		f.hour.value = twodigit(newTime.getHours());
