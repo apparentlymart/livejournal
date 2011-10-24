@@ -66,9 +66,6 @@
             $body .= BML::ml('.label.removed.stopwatch4', { 'commname' => LJ::ljuser($cu) });
         }
         $body .= " p?>";
-        if (LJ::DelayedEntry::entries_exists($cu, $remote)) {
-            $body .= BML::ml('.warning.delayed_entries');
-        }
      } else {
         # show a confirmation form
         $body .= "<?h1 $ML{'.sure'} h1?><?p ";
@@ -77,6 +74,11 @@
         } else {
             $body .= BML::ml('.label.buttontoleave', { commname => $ecname });
         }
+    
+        if (LJ::DelayedEntry::entries_exists($cu, $remote)) {
+            $body .= " " . BML::ml('.warning.delayed_entries');
+        }
+
         $body .= " p?>";
         $body .= '<form method="post" action="leave.bml">';
         $body .= LJ::form_auth();
