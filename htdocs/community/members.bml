@@ -397,6 +397,11 @@ body<=
                             sitename        => $LJ::SITENAME,
                             siteroot        => $LJ::SITEROOT,
                         });
+    
+            if (LJ::DelayedEntry::entries_exists($cu, $remote)) {
+                $html .=  LJ::Lang::get_text($lang, 'community.members.maintainer.remove.delayed.email_html', undef);
+            }
+
             my $plain = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_plain', undef, {
                             sitenameshort   => $LJ::SITENAMESHORT,
                             user            => $mailusername,
@@ -407,10 +412,14 @@ body<=
                             siteroot        => $LJ::SITEROOT,
                         });
 
+            if (LJ::DelayedEntry::entries_exists($cu, $remote)) {
+                $plain .=  LJ::Lang::get_text($lang, 'community.members.maintainer.remove.delayed.email_plain', undef);
+            }
+
             my $subject = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_subject', undef,
                             { mailusercname => $mailusercname }
-                        );
-            $sendmail->($delmaintu, $html, $plain, $subject);
+                            );
+                $sendmail->($delmaintu, $html, $plain, $subject);
         }
 
         # delete other rel edges

@@ -122,6 +122,8 @@ community.members.maintainer.remove.email_html<<
 [[sitename]] Team<br/>[[siteroot]]</p>
 .
 
+community.members.maintainer.remove.delayed.email_html=All delayed entries will be deleted on publication date.
+
 community.members.maintainer.remove.email_plain|staleness=1
 community.members.maintainer.remove.email_plain<<
 Dear [[sitenameshort]] user [[user]],
@@ -130,6 +132,8 @@ Regards,
 [[sitename]] Team
 [[siteroot]]
 .
+
+community.members.maintainer.remove.delayed.email_plain=All delayed entries will be deleted on publication date.
 
 community.members.maintainer.remove.email_subject|staleness=1
 community.members.maintainer.remove.email_subject=Maintainership removal: [[mailusercname]]
