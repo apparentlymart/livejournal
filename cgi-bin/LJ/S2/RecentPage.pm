@@ -75,11 +75,17 @@ sub RecentPage
     
     # calculate recent entries count
     my $has_sticky = $u->has_sticky_entry;
-    my $delayed_entries_count = LJ::DelayedEntry->get_entries_count($u);
-    my $usual_skip =  $delayed_entries_count - $skip > $itemshow ? 
-                                            $skip - $delayed_entries_count + $has_sticky :
-                                            $skip ? $skip : 0;
+    my $delayed_entries_count = 0;
+    my $usual_skip = $skip;     
+
     if (LJ::is_enabled("delayed_entries")) {
+        $delayed_entries_count = LJ::DelayedEntry->get_entries_count($u);
+        $usual_skip -= $delayed_entries_count;
+
+        if ($usual_skip < 0 ) {
+            $usual_skip = $skip ? $has_sticky : 0;
+        }
+
         if (!$skip) {
             $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow - $has_sticky);
         } elsif ( $skip) {
