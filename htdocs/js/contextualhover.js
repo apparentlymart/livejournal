@@ -159,7 +159,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					'{{/each}}' +
 					'{{if showBanOptions }}' +
 					'<ul class="b-contextualhover-options">' +
-						'{{if reportBot}}<li><a href="${reportBot.url}">${reportBot.text}</a></li>{{/if}}' +
+						'{{if reportBot}}<li>${reportBot.text}</li>{{/if}}' +
 						'<li class="b-contextualhover-options-ban">' +
 							'<p><a href="${banUsersLink.url}">${banUsersLink.text}</a>:</p>' +
 							'{{if banCheckboxes}}<div class="b-contextualhover-options-wrap">' +
