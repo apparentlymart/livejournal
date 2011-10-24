@@ -61,12 +61,15 @@ body<=
                             entryform.sticky.edit
                             entryform.choose_date/);
     }
-    
-    my @ml_months;
-    push @ml_months, map { LJ::Lang::month_long_langcode($_) } (1 .. 12);
+
+    # append months names tranlation to Site.ml_text['entryform.choose_date']    
+    my $ml_months_texts;
+    my @ml_months = map { LJ::Lang::month_long_langcode($_) } (1 .. 12);
     foreach my $month_ml_name (@ml_months) {
-        LJ::need_string($month_ml_name);
+        $ml_months_texts->{$month_ml_name} = LJ::Lang::ml($month_ml_name);
     }
+
+    $LJ::JSML{'entryform.choose_date'} = $ml_months_texts;
 
     return LJ::bad_input("You must be authenticated as a person.")
         unless $remote->is_personal || $remote->is_identity;
