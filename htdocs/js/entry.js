@@ -671,12 +671,17 @@ function settime(time){
 
 	f.date_diff.value = 1;
 
-	var mNames = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+	var mNames = Site.ml_text['month.names.long'] ||
+					["January", "February", "March", "April", "May", "June", "July",
+					"August", "September", "October", "November", "December"];
 	var currentdate = document.getElementById('currentdate-date');
 	var cMonth = newTime.getMonth();
 	var cDay = newTime.getDate();
+
+	var monthLabel = mNames[cMonth];
+	monthLabel = monthLabel.charAt(0).toUpperCase() + monthLabel.substr(1);
 	var cYear = newTime.getFullYear() < 1900 ? newTime.getFullYear() + 1900 : newTime.getFullYear();
-	currentdate.innerHTML = mNames[cMonth] + " " + cDay + ", " + cYear;
+	currentdate.innerHTML = monthLabel + " " + cDay + ", " + cYear;
 
 	return false;
 }
