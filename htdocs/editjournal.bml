@@ -62,14 +62,11 @@ body<=
                             entryform.choose_date/);
     }
 
-    # append months names tranlation to Site.ml_text['entryform.choose_date']    
-    my $ml_months_texts;
+    # append months names tranlation to Site.ml_text['month.names.long']  
     my @ml_months = map { LJ::Lang::month_long_langcode($_) } (1 .. 12);
-    foreach my $month_ml_name (@ml_months) {
-        $ml_months_texts->{$month_ml_name} = LJ::Lang::ml($month_ml_name);
-    }
+    my @ml_months_texts = map { LJ::Lang::ml($_) } @ml_months;
 
-    $LJ::JSML{'entryform.choose_date'} = $ml_months_texts;
+    $LJ::JSML{'month.names.long'} = \@ml_months_texts;
 
     return LJ::bad_input("You must be authenticated as a person.")
         unless $remote->is_personal || $remote->is_identity;
