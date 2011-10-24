@@ -1861,6 +1861,7 @@ sub Entry
         'link_keyseq' => [ 'edit_entry', 'edit_tags' ],
         'metadata' => {},
     };
+
     foreach (qw(subject text journal poster new_day end_day
                 comments userpic permalink_url itemid tags delayedid )) {
         $e->{$_} = $arg->{$_};
@@ -1959,6 +1960,11 @@ sub Entry
         }
     }
 
+    if ($arg->{'delayed'}) {
+        $e->{'delayed'} = 1;
+        $e->{'delayed_icon'} = Image_std("delayed-entry"); 
+    }
+
     if (!$e->{delayedid}) {
         # custom friend groups
         my $entry = LJ::Entry->new($e->{journal}->{_u}, ditemid => $e->{itemid});
@@ -1971,14 +1977,16 @@ sub Entry
         #   untrusted layers.
         $e->{text_must_print_trusted} = 1 if $e->{text} =~ m!<(script|object|applet|embed|iframe)\b!i;
             
-        if ($entry->is_sticky()) {
+        if ($entry->is_sticky() || $arg->{'sticky_type'} ) {
            $e->{'sticky'} = 1;
            $e->{'sticky_icon'} = Image_std("sticky-entry");
         }
-    } else {
+   
+     } else {
         my $entry = LJ::DelayedEntry->get_entry_by_id( $e->{journal}->{_u}, 
                                                         $e->{delayedid} );
-        if ( $entry->is_sticky) {
+        
+       if ( $entry->is_sticky || $arg->{'sticky_type'}) {
             $e->{'sticky'} = 1;
             $e->{'sticky_icon'} = Image_std("sticky-entry");
         }
