@@ -1078,15 +1078,11 @@ sub trans {
             my $view = $determine_view->($user, "safevhost", $uri);
             return $view if defined $view;
         }
-        elsif ( $func eq 'api' ) {
+        elsif ( $func eq 'api' || LJ::Request->uri =~ /^\/__api_endpoint.*$/) {
             Apache::LiveJournal::Interface::Api->load;
             LJ::Request->handler("perl-script");
             LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Api::handler);
             return LJ::Request::OK;
-
-            LJ::Request->pnotes ('error' => 'e404');
-            LJ::Request->pnotes ('remote' => LJ::get_remote());
-            return LJ::Request::NOT_FOUND;
         }
         elsif ( $func eq "games" ) {
             LJ::get_remote();

@@ -15,6 +15,14 @@ sub bml_handler {
     return LJ::Request::OK;
 }
 
+sub api_handler {
+    my ($class) = @_;
+    Apache::LiveJournal::Interface::Api->load;
+    LJ::Request->handler("perl-script");
+    LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Api::handler);
+    return LJ::Request::OK;
+}
+
 # Handle a URI. Returns response if success, undef if not handled
 # Takes URI and Apache $r
 sub handle {
@@ -27,6 +35,11 @@ sub handle {
         my $bml_handler_path = $LJ::AJAX_URI_MAP{$rpc};
 
         return LJ::URI->bml_handler($bml_handler_path) if $bml_handler_path;
+    }
+
+    # handle "API" endpoint
+    if ($uri =~ /^\/__api_endpoint.*$/) {
+        return LJ::URI->api_handler();        
     }
 
     ## URI "/pics" can be handle only under user domains
