@@ -4306,7 +4306,13 @@ sub syncitems {
     
          $sth->execute($ownerid, $date);
          while (my ($id, $prop, $dt) = $sth->fetchrow_array) {
-         my $entry = LJ::Entry->new($ownerid, jitemid => $id);
+            my $entry = LJ::Entry->new($ownerid, jitemid => $id);
+
+            ## sometimes there is no row in log2 table, while there are rows in logprop2
+            ## it's either corrupted db (replication/failover problem) or lazy/slow deletion of an entry
+            ## calling $entry->anum on such an entry is a fatal error
+            next unless $entry && $entry->valid;
+
             if ($prop == $p_calter->{'id'}) {
                 $cmt{$id} = [ 'C', $id, $dt, "update", $entry->anum ];
             } elsif ($prop == $p_revtime->{'id'}) {
