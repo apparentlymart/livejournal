@@ -16,7 +16,7 @@ LJ::register_hook("add_extra_options_to_manage_comments", sub {
     my $selected_value = $u->prop('pingback');
     $selected_value = 'D' unless $selected_value =~ /^[OLD]$/;
     $selected_value = 'O' if $selected_value eq 'L';
-    
+
     # PingBack options
     my $ret = '';
     $ret .= "<tr><td class='field_name'>" . BML::ml('.pingback') . "</td>\n<td>";
@@ -43,7 +43,6 @@ LJ::register_hook("process_extra_options_for_manage_comments", sub {
 
     $POST->{'pingback'} = "D" unless $POST->{'pingback'}  =~ /^[OLD]$/;
     return 'pingback';
-
 });
 
 
@@ -57,7 +56,7 @@ LJ::register_hook("add_extra_entryform_fields", sub {
     return if $LJ::DISABLED{'pingback'};
     return if $opts->{remote} and
               not LJ::PingBack->has_user_pingback($opts->{remote});
-    
+
     return; # Disable user-specific pingback options
             # and Enable pingback by default
 =head
@@ -87,12 +86,11 @@ LJ::register_hook("add_extra_entryform_fields", sub {
 # Fetch pingback's option from POST data
 LJ::register_hook("decode_entry_form", sub {
     my ($POST, $req) = @_;
-    
+
     return; # Disable user-specific pingback options
             # and Enable pingback by default
 
     #$req->{prop_pingback} = $POST->{prop_pingback};
-    
 });
 
 # Process event's pingback option for new entry
@@ -130,7 +128,6 @@ LJ::register_hook("postpost", sub {
         uri  => $entry->url,
         mode => $prop_pingback,
     );
-    
 });
 
 # Process event's pingback option for updated entry
@@ -188,7 +185,6 @@ LJ::register_hook("after_journal_content_created", sub {
     if (LJ::PingBack->should_entry_recieve_pingback($entry)){
         LJ::Request->set_header_out('X-Pingback', $LJ::PINGBACK->{uri});
     }
-    
 });
 
 LJ::register_hook("before_journal_content_created", sub {
@@ -199,7 +195,7 @@ LJ::register_hook("before_journal_content_created", sub {
 
     # check if special journal
     if ( exists $LJ::DOMAIN_SUBST->{$RQ{'user'}}  ) {
-        $return = 1;
+        $$return = 1;
 
         my $filename = "$LJ::HOME/htdocs/" . $LJ::DOMAIN_SUBST->{$RQ{'user'}};
         LJ::Request->notes("_journal" => $RQ{'user'});
