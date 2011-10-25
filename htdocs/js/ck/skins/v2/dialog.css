@@ -133,6 +133,7 @@ TABLE TD {
 	position:static;
 	}
 .cke_skin_v2 .cke_dialog_contents {
+	width: 100%;
 	background-color:#F7F7F7;
 	border:#CEC6B5 1px solid;
 	overflow:auto;

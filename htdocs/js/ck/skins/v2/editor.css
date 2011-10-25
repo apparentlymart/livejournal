@@ -1278,6 +1278,16 @@ li.cke_panel_listItem {
 	display:inline;
 	display:inline-block;
 	}
+.cke_skin_v2 .cke_button_LJJustifyLeft .cke_icon {
+	background-position:0 -216px;
+	}
+.cke_skin_v2 .cke_button_LJJustifyCenter .cke_icon {
+	background-position:0 -232px;
+	}
+.cke_skin_v2 .cke_button_LJJustifyRight .cke_icon {
+	background-position:0 -248px;
+	}
+
 .cke_skin_v2 .cke_styles_panel {
 	width:150px;
 	height:170px;

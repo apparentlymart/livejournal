@@ -469,7 +469,7 @@
 				var length = frames.count();
 
 				while (length--) {
-					var iFrameCss = 'widht: 100%; margin: 0; padding 0; overflow-y: hidden;',
+					var iFrameCss = 'width: 100%; margin: 0; padding 0; overflow-y: hidden;',
 						frame = frames.getItem(length),
 						cmd = frame.getAttribute('lj-cmd'),
 						frameWin = frame.$.contentWindow,
@@ -1046,13 +1046,13 @@
 
 			editor
 				.addCss('.lj-like {' +
+				    'width: 100%;' +
+					'height: 44px !important;' +
 					'overflow: hidden;' +
 					'padding: 0;' +
 					'margin: 0;' +
 					'background: #D2D2D2;' +
 					'border: 1px dotted #000;' +
-					'width: 100%;' +
-					'height: 24px;' +
 				'}');
 
 			for (var i = 0; i < buttonsLength; i++) {
@@ -1086,7 +1086,7 @@
 						}
 
 						var attr = [],
-							likeHtml = '',
+							likeHtml = '<span class="lj-like-wrapper">',
 							likeNode = ljTagsData.LJLike.node;
 
 						for (var i = 0; i < buttonsLength; i++) {
@@ -1099,7 +1099,7 @@
 								likeHtml += button.html;
 							}
 						}
-
+						likeHtml += '</span>';
 						if (attr.length) {
 							if (likeNode) {
 								ljTagsData.LJLike.node.setAttribute('buttons', attr.join(','));
@@ -1188,6 +1188,7 @@
 			//////////  LJ Map Button //////////////
 			editor
 				.addCss('.lj-map {' +
+					'width: 100%;' +
 					'overflow: hidden;' +
 					'min-height: 13px;' +
 					'margin-top: 20px;' +
@@ -1210,7 +1211,7 @@
 							fakeElement.attributes['lj-style'] = element.attributes.style;
 						}
 						fakeElement.attributes['lj-cmd'] = 'LJLike';
-						fakeElement.attributes['lj-content'] = '';
+						fakeElement.attributes['lj-content'] = '<span class="lj-like-wrapper">';
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
@@ -1226,6 +1227,7 @@
 								attr.push(buttonName);
 							}
 						}
+						fakeElement.attributes['lj-content'] += '</span>';
 
 						fakeElement.attributes.buttons = attr.join(',');
 						return fakeElement;
@@ -1313,7 +1315,8 @@
 
 						fakeElement.attributes['lj-url'] = element.attributes.url ? encodeURIComponent(element.attributes.url) : '';
 						fakeElement.attributes['class'] = 'lj-map';
-						fakeElement.attributes['lj-content'] = '<p>map</p>';
+						fakeElement.attributes['lj-content'] = '<p class="lj-map">map</p>';
+						fakeElement.attributes['lj-style'] = ' height: 100%; text-align: center;';
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
