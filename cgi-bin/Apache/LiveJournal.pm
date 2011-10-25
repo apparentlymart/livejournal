@@ -1079,10 +1079,7 @@ sub trans {
             return $view if defined $view;
         }
         elsif ( $func eq 'api' || LJ::Request->uri =~ /^\/__api_endpoint.*$/) {
-            Apache::LiveJournal::Interface::Api->load;
-            LJ::Request->handler("perl-script");
-            LJ::Request->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::Api::handler);
-            return LJ::Request::OK;
+            return LJ::URI->api_handler();
         }
         elsif ( $func eq "games" ) {
             LJ::get_remote();
