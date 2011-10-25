@@ -1506,7 +1506,6 @@ sub _get_posts_raw_wrapper {
     #   optional hashref to put return value in.  (see get_logtext2multi docs)
     # returns: that hashref.
     my ($idsbyc, $type, $ret) = @_;
-
     my $opts = {};
     if ($type eq 'text') {
         $opts->{text_only} = 1;
@@ -1689,6 +1688,7 @@ sub get_posts_raw {
             my $db = shift;
             return unless %$cneedprop;
             my $in = $make_in->(keys %$cneedprop);
+
             $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
                                 "FROM logprop2 WHERE $in");
             $sth->execute;
@@ -1764,7 +1764,10 @@ sub get_posts_raw {
         }
     }
 
-    convert_href_props( $ret->{'prop'} );
+    for my $key ( keys %{$ret->{'prop'}} ) {
+        convert_href_props( $ret->{'prop'}->{$key} );
+    }
+
     return $ret;
 }
 
