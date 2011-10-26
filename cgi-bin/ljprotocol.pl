@@ -2327,6 +2327,16 @@ sub postevent {
     # post become 'sticky post'
     if ( $req->{sticky} ) {
         $uowner->set_sticky_id($jitemid);
+        my $state_date = POSIX::strftime("%Y-%m-%d", gmtime);
+        
+        my $postfix = '';
+        if ($uowner->is_community) {
+           $postfix = '_community';
+        }
+
+        my $sticky_entry = "stat:sticky$postfix:$state_date";
+        LJ::MemCache::incr($sticky_entry, 1) ||
+            (LJ::MemCache::add($sticky_entry, 0),  LJ::MemCache::incr($sticky_entry, 1));
     }
 
     LJ::MemCache::incr([$ownerid, "log2ct:$ownerid"]);
@@ -2836,6 +2846,16 @@ sub editevent {
     if ( $req->{sticky} ) {
         if( $uowner->get_sticky_entry_id() != $itemid ) {
             $uowner->set_sticky_id($itemid);
+
+            my $state_date = POSIX::strftime("%Y-%m-%d", gmtime);
+            my $postfix = '';
+            if ($uowner->is_community) {
+                $postfix = '_community';
+            }
+
+            my $sticky_entry = "stat:sticky$postfix:$state_date";
+            LJ::MemCache::incr($sticky_entry, 1) ||
+                (LJ::MemCache::add($sticky_entry, 0),  LJ::MemCache::incr($sticky_entry, 1));
         }
     }
     elsif ( $itemid == $uowner->get_sticky_entry_id() ) {

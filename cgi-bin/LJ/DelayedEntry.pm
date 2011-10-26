@@ -18,7 +18,7 @@ sub create_from_url {
 
     return undef;
 }
-              
+    
 sub create {
     my ( $class, $req, $opts ) = @_;
 
@@ -29,24 +29,22 @@ sub create {
 
     my $self = bless {}, $class;
 
-    my $journal = $opts->{journal};
-    my $poster = $opts->{poster};
     $req->{'event'} =~ s/\r\n/\n/g;
 
-    my $journalid = $journal->userid;
-    my $posterid = $poster->userid;
-    my $subject = $req->{subject};
-    my $posttime = __get_datetime($req);
-    my $dbh = LJ::get_db_writer();
-    my $data_ser = __serialize($req);
-    my $qdata_ser = $dbh->quote($data_ser);
-    
-    my $delayedid = LJ::alloc_user_counter( $journal, 
-                                            'Y',
-                                            undef);
+    my $journal = $opts->{journal};
+    my $poster  = $opts->{poster};
 
-    my $security = "public";
-    my $uselogsec = 0;
+    my $dbh         = LJ::get_db_writer();
+    my $journalid   = $journal->userid;
+    my $posterid    = $poster->userid;
+    my $subject     = $req->{subject};
+    my $posttime    = __get_datetime($req);
+    my $data_ser    = __serialize($req);
+    my $delayedid   = LJ::alloc_user_counter( $journal, 
+                                             'Y',
+                                              undef);
+    my $security    = "public";
+    my $uselogsec   = 0;
 
     if ($req->{'security'} eq "usemask" || $req->{'security'} eq "private") {
         $security = $req->{'security'};
@@ -56,13 +54,17 @@ sub create {
         $uselogsec = 1;
     }
 
-    my ($now)       = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()");
+    my $allowmask  = $req->{'allowmask'}+0;
+    my $now        = time;
 
-    my $qsecurity   = $dbh->quote($security);
-    my $qallowmask  = $req->{'allowmask'}+0;
-    my $qposttime   = $dbh->quote($posttime);
-    my ($utime)     = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP($qposttime)");
-
+    my $dt = DateTime->new(   year       => $req->{year},
+                              month      => $req->{mon},
+                              day        => $req->{day},
+                              hour       => $req->{hour},
+                              minute     => $req->{min},
+                              time_zone  => $req->{tz} );
+   
+    my $utime       = $dt->epoch;
     my $rlogtime    = $LJ::EndOfTime - $now;
     my $rposttime   = $LJ::EndOfTime - $utime;
 
@@ -70,25 +72,30 @@ sub create {
 
     $journal->do( "INSERT INTO delayedlog2 (journalid, delayedid, posterid, subject, " .
                   "logtime, posttime, security, allowmask, year, month, day, rlogtime, revptime) " .
-                  "VALUES ($journalid, $delayedid, $posterid, ?, NOW(), $qposttime, ".
-                  "$qsecurity, $qallowmask, ?, ?, ?, $rlogtime,  $rposttime)",
-                  undef,  LJ::text_trim($req->{'subject'}, 30, 0), 
-                  $req->{year}, $req->{mon}, $req->{day} );
+                  "VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)",
+                  undef, 
+                  $journalid, $delayedid, $posterid, LJ::text_trim($req->{'subject'}, 30, 0), 
+                  $posttime, $security, $allowmask,
+                  $req->{year}, $req->{mon}, $req->{day},
+                  $rlogtime, $rposttime );
     
     $journal->do( "INSERT INTO delayedblob2 ".
-                  "VALUES ($journalid, $delayedid, $qdata_ser)" );
+                  "VALUES (?, ?, ?)", undef, $journalid, $delayedid, $data_ser);
 
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
     LJ::MemCache::set($memcache_key, $data_ser, 3600);
 
-    $self->{journal} = $opts->{journal};    
-    $self->{posttime} = $opts->{posttime};
-    $self->{posttime} = LJ::TimeUtil::mysql_time($now);
-    $self->{poster} = $opts->{poster};
-    $self->{data} = $req;
-    $self->{taglist} = $taglist;
+    $self->{journal}    = $opts->{journal};    
+    $self->{posttime}   = LJ::TimeUtil::mysql_time($now);
+    $self->{poster}     = $opts->{poster};
+    $self->{data}       = $req;
+    $self->{taglist}    = $taglist;
     $self->{delayed_id} = $delayedid;
+
     $self->{default_dateformat} = $opts->{'dateformat'} || 'S2';
+    
+    __statistics_absorber($journal, $poster);
+
     return $self;
 }
 
@@ -108,12 +115,12 @@ sub data {
 
 sub subject {
     my ($self) = @_;
-    return $self->{data}->{subject};
+    return $self->data->{subject};
 }
 
 sub event {
     my ($self) = @_;
-    return $self->{data}->{event};
+    return $self->data->{event};
 }
 
 sub poster {
@@ -153,9 +160,14 @@ sub system_posttime {
 
 sub posttime_as_unixtime {
     my ($self) = @_;
-    my $dbh = LJ::get_db_writer();
-    my $qposttime = $self->system_posttime;
-    return LJ::TimeUtil::->mysqldate_to_time($qposttime, 0);
+    my $req = $self->data;
+    my $dt = DateTime->new(  year       => $req->{year},
+                             month      => $req->{mon},
+                             day        => $req->{day},
+                             hour       => $req->{hour},
+                             minute     => $req->{min},
+                             time_zone  => $req->{tz} );
+    return $dt->epoch;
 }
 
 
@@ -599,20 +611,20 @@ sub delete {
     my $journalid = $journal->userid;
     my $delayed_id = $self->{delayed_id};
 
-    $journal->do("DELETE FROM delayedlog2 " .
+    $journal->do( "DELETE FROM delayedlog2 " .
                   "WHERE delayedid = $delayed_id AND " .
                   "journalid = " . $journalid);
 
-    $journal->do("DELETE FROM delayedblob2 " .
-                 "WHERE delayedid = $delayed_id AND " .
-                 "journalid = " . $journalid);
+    $journal->do( "DELETE FROM delayedblob2 " .
+                  "WHERE delayedid = $delayed_id AND " .
+                  "journalid = " . $journalid);
 
     $self->{delayed_id} = undef;
-    $self->{journal} = undef;
-    $self->{poster} = undef;
-    $self->{data} = undef;
+    $self->{journal}    = undef;
+    $self->{poster}     = undef;
+    $self->{data}       = undef;
     
-    my $memcache_key = "delayed_entry:$journalid:$delayed_id";
+    my $memcache_key    = "delayed_entry:$journalid:$delayed_id";
     LJ::MemCache::delete($memcache_key);
 }
 
@@ -669,29 +681,38 @@ sub update {
         $uselogsec = 1;
     }
 
-    my ($now)       = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()");
+    my $now = time();
+    my $dt = DateTime->new(   year       => $req->{year},
+                              month      => $req->{mon},
+                              day        => $req->{day},
+                              hour       => $req->{hour},
+                              minute     => $req->{min},
+                              time_zone  => $req->{tz} );
+    
+    my $utime       = $dt->epoch;
 
-    my $qsecurity   = $dbh->quote($security);
-    my $qallowmask  = $req->{'allowmask'}+0;
-    my $qposttime   = $dbh->quote($posttime);
-    my ($utime)     = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP($qposttime)");
-
+    my $allowmask   = $req->{'allowmask'}+0;
     my $rlogtime    = $LJ::EndOfTime - $now;
     my $rposttime   = $LJ::EndOfTime - $utime;
-    $self->{taglist} = __extract_tag_list(\$req->{props}->{taglist});
-    $req->{'event'} =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
+    
+    $self->{'taglist'} = __extract_tag_list(\$req->{props}->{taglist});
+    $req->{'event'}    =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
 
-    $self->journal->do( "UPDATE delayedlog2 SET posterid=$posterid, " .
-                        "subject=?, posttime = $qposttime, " . 
-                        "security=$qsecurity, allowmask=$qallowmask, " .    
+    $self->journal->do( "UPDATE delayedlog2 SET posterid=?, " .
+                        "subject=?, posttime = ?, " . 
+                        "security=?, allowmask=?, " .    
                         "year=?, month=?, day=?, " .
-                        "rlogtime=$rlogtime, revptime=$rposttime " .
-                        "WHERE journalid=$journalid AND delayedid=$delayedid",
-                        undef,  LJ::text_trim($req->{'subject'}, 30, 0), 
-                        $req->{year}, $req->{mon}, $req->{day} );
+                        "rlogtime=?, revptime=? " .
+                        "WHERE journalid=? AND delayedid=?",
+                        undef, 
+                        $posterid, LJ::text_trim($req->{'subject'}, 30, 0), 
+                        $posttime, $security, $allowmask, 
+                        $req->{year}, $req->{mon}, $req->{day},
+                        $rlogtime, $rposttime, $journalid, $delayedid );
 
     $self->journal->do( "UPDATE delayedblob2 SET request_stor=?" . 
-                        "WHERE journalid=$journalid AND delayedid=$delayedid", undef, $data_ser );
+                        "WHERE journalid=? AND delayedid=?", undef, 
+                        $data_ser, $journalid, $delayedid );
     $self->{data} = $req;
 
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
@@ -753,9 +774,12 @@ sub get_entry_by_id {
     return undef unless $delayedid;
 
     my $journalid = $journal->userid;
-    my $userid = $options->{userid} || 0;
-    my $user = LJ::get_remote() || LJ::want_user($userid);
+    my $userid    = $options->{userid} || 0;
+    my $user      = LJ::get_remote() || LJ::want_user($userid);
     return undef unless $user;
+
+    my $dbcr = LJ::get_cluster_def_reader($journal)
+        or die "get cluster for journal failed";
 
     my $delayed_visibility = $options->{'delayed_visibility'} || 0;
 
@@ -763,9 +787,6 @@ sub get_entry_by_id {
     if ( !$delayed_visibility && !__delayed_entry_can_see( $journal, $user ) ) {
         $sql_poster = 'AND posterid = ' . $user->userid . " "; 
     }
-
-    my $dbcr = LJ::get_cluster_def_reader($journal)
-        or die "get cluster for journal failed";
 
     my $opts = $dbcr->selectrow_arrayref( "SELECT journalid, delayedid, posterid, posttime, logtime " .
                                           "FROM delayedlog2 ".
@@ -794,9 +815,9 @@ sub get_entry_by_id {
     $self->{posttime}           = __get_datetime($self->{data});
     $self->{logtime}            = $opts->[4];
     $self->{taglist}            = __extract_tag_list( \$self->prop("taglist") );
-    $self->{default_dateformat}      = $options->{'dateformat'} || 'S2';
+    $self->{default_dateformat} = $options->{'dateformat'} || 'S2';
 
-    __assert( $self->{poster}, "no poster" );
+    __assert( $self->{poster},  "no poster" );
     __assert( $self->{journal}, "no journal" );
     return $self;
 }
@@ -856,7 +877,6 @@ sub get_entries_count {
     my ( $class, $journal, $skip, $elements_to_show, $userid ) = @_;
     __assert($journal, "no journal");
     my $journalid = $journal->userid;
-
     my $dbcr = LJ::get_cluster_def_reader($journal) 
         or die "get cluster for journal failed";
 
@@ -881,10 +901,25 @@ sub get_entries_count {
 sub get_entries_by_journal {
     my ( $class, $journal, $skip, $elements_to_show, $userid ) = @_;
     __assert($journal, "no journal");
-    my $journalid = $journal->userid;
 
     my $dbcr = LJ::get_cluster_def_reader($journal) 
         or die "get cluster for journal failed";
+
+    my $sql_poster = '';
+    unless ($userid) {
+        my $remote = LJ::get_remote();
+        return undef unless $remote;
+        
+        $userid = $remote->userid ;
+        if (!__delayed_entry_can_see( $journal, $remote ) ) {
+            $sql_poster = 'AND posterid = ' . $remote->userid . " ";
+        }
+    } else {
+        my $u = LJ::want_user($userid);
+        if (!__delayed_entry_can_see( $journal, $u ) ){
+            $sql_poster = 'AND posterid = ' . $u->userid . " ";
+        }
+    }
 
     $elements_to_show += 1 if $skip > 0;
 
@@ -893,26 +928,7 @@ sub get_entries_by_journal {
         $sql_limit = "LIMIT $skip, $elements_to_show";
     }
 
-    my $sql_poster = '';
-    unless ($userid) {
-        my $remote = LJ::get_remote();
-        return undef unless $remote;
-        $userid = $remote->userid ;
-
-        if (!__delayed_entry_can_see( $journal, $remote ) ) {
-            $sql_poster = 'AND posterid = ' . $remote->userid . " ";
-         }
-    } else {
-        my $u = LJ::want_user($userid);
-        if (!__delayed_entry_can_see( $journal, $u ) ){
-            $sql_poster = 'AND posterid = ' . $u->userid . " ";
-        }
-    }
-
-    #my $secwhere = __delayed_entry_secwhere( $journal,
-    #                                         $journal->userid,
-    #                                         $userid );
-
+    my $journalid = $journal->userid;
     return $dbcr->selectcol_arrayref("SELECT delayedid " .
                                      "FROM delayedlog2 WHERE journalid=$journalid  $sql_poster".
                                      "ORDER BY revptime $sql_limit");
@@ -1097,6 +1113,7 @@ sub get_entries_for_month {
                           "FROM delayedlog2 l ".
                           "WHERE l.journalid=? AND l.year=? AND l.month=? ".
                           "$secwhere LIMIT 2000");
+
     $dbcr->execute($journal->userid, $year, $month);
 
     my @items;
@@ -1114,6 +1131,7 @@ sub get_itemid_before2 {
 
 sub get_itemid_near2 {
     my ($self, $after_before) = @_;
+    
     my $u = $self->journal;
     my $delayedid = $self->delayedid;
 
@@ -1127,20 +1145,20 @@ sub get_itemid_near2 {
     }
 
     my $dbr = LJ::get_cluster_reader($u);
-    unless ($dbr){
+    unless ($dbr) {
         warn "Can't connect to cluster reader. Cluster: " . $u->clusterid;
         return 0;
     }
 
-    my $jid = $self->journalid;
-    my $field = $u->is_person() ? "revptime" : "rlogtime";
+    my $jid     = $self->journalid;
+    my $field   = $u->is_person() ? "revptime" : "rlogtime";
 
     my ($stime) = $dbr->selectrow_array(  "SELECT $field FROM delayedlog2 WHERE ".
-                                        "journalid=$jid AND delayedid=$delayedid");
+                                          "journalid=$jid AND delayedid=$delayedid");
     return 0 unless $stime;
 
     my $secwhere = "AND security='public'";
-    my $remote = LJ::get_remote();
+    my $remote   = LJ::get_remote();
 
     if ($remote) {
         if ($remote->userid == $self->journalid) {
@@ -1248,10 +1266,6 @@ sub convert_from_data {
 sub can_post_to {
     my ($uowner, $poster) = @_;
     
-    #if (__delayed_entry_can_see($uowner, $poster)) {
-    #    return 1;
-    #}
-    
     my $uownerid = $uowner->userid;
     my $posterid = $poster->userid;
 
@@ -1340,13 +1354,84 @@ sub __kill_dayct2_cache {
     LJ::MemCache::delete($memkey);
 }
 
+sub __statistics_absorber {
+    my ($journal, $poster) = @_;
+
+    my $journalid  = $journal->userid;
+    my $posterid   = $poster->userid; 
+    my $state_date = POSIX::strftime("%Y-%m-%d", gmtime);
+   
+    # all posts
+    my $key = "stat:delayed_all:$state_date";
+
+    LJ::MemCache::incr($key, 1) ||
+            (LJ::MemCache::add($key, 0),  LJ::MemCache::incr($key, 1));
+
+    # common journal/community entries count
+    my $stat_key;
+
+    # current user mark 
+    my $poster_key;
+    
+    # unique users
+    my $poster_unique_key; 
+    
+    # user posted to communityi
+    my $posted_community_key = "stat:delayed_entry_posted_community:$posterid:$state_date";
+
+    # user posted to journal
+    my $posted_journal_key   = "stat:delayed_entry_posted_journal:$posterid:$state_date";
+
+    if (!(LJ::MemCache::get($posted_community_key) || LJ::MemCache::get($posted_journal_key)))  {        
+        my $unique_users = "stat:delayed_all_unique:$state_date";
+        LJ::MemCache::incr($unique_users, 1) ||
+            (LJ::MemCache::add($unique_users, 0),  LJ::MemCache::incr($unique_users, 1));
+    }
+
+    if (!$journal->is_community) {
+        $poster_key         = $posted_journal_key;
+        $poster_unique_key  = "stat:delayed_entry_posted_journal:$state_date";
+        $stat_key           = "stat:delayed_entry_journal:$state_date";
+    } else {
+        $poster_key         = $posted_community_key;
+        $poster_unique_key  = "stat:delayed_entry_posted_community:$state_date";
+        $stat_key           = "stat:delayed_entry_community:$state_date";
+        
+        my $stat_comm_key        = "stat:delayed_entry_community_id:$journalid:$state_date";
+        my $stat_comm_unique_key = "stat:delayed_entnry_community_unic:$state_date";
+
+        my $current_counter_state = LJ::MemCache::get($stat_comm_key);
+        if (!$current_counter_state) {
+            LJ::MemCache::incr($stat_comm_unique_key, 1) ||
+                (LJ::MemCache::add($stat_comm_unique_key, 0),  LJ::MemCache::incr($stat_comm_unique_key, 1));
+        }
+
+        LJ::MemCache::incr($stat_comm_key, 1) ||
+            (LJ::MemCache::add($stat_comm_key, 0),  LJ::MemCache::incr($stat_comm_key, 1));
+    }
+
+    my $current_counter_state = LJ::MemCache::get($poster_key);
+    if (!$current_counter_state) {
+        LJ::MemCache::incr($poster_unique_key, 1) ||
+            (LJ::MemCache::add($poster_unique_key, 0),  LJ::MemCache::incr($poster_unique_key, 1));
+    }
+
+    LJ::MemCache::incr($poster_key, 1) ||
+        (LJ::MemCache::add($poster_key, 0),  LJ::MemCache::incr($poster_key, 1));
+
+    LJ::MemCache::incr($stat_key, 1) ||
+        (LJ::MemCache::add($stat_key, 0),  LJ::MemCache::incr($stat_key, 1));
+
+}
+
 sub __serialize {
     my ($req) = @_;
     __assert($req, "no request");
     $req->{'event'} =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
 
-   my $ext = $req->{'ext'};
+   my $ext   = $req->{'ext'};
    my $flags = $ext->{'flags'};
+
    $flags->{'u_owner'} = undef;
    $flags->{'u'} = undef;
 
