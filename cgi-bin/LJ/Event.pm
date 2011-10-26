@@ -900,4 +900,6 @@ sub as_email_from {
 
 sub go_through_clusters {1}
 
+sub has_frame { 0 }
+
 1;
