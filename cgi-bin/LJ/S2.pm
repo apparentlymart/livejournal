@@ -236,9 +236,14 @@ sub s2_run
     my $css_mode = $ctype eq "text/css";
 
     S2::Builtin::LJ::start_css($ctx) if $css_mode;
+
     eval {
         S2::run_code($ctx, $entry, $page, @args);
     };
+
+    # real work for header generating, now all res in NEED_RES
+    LJ::S2::subst_header($page);
+
     S2::Builtin::LJ::end_css($ctx) if $css_mode;
 
     $LJ::S2::CURR_PAGE = undef;
@@ -251,6 +256,11 @@ sub s2_run
     }
     $cleaner->eof if $cleaner;  # flush any remaining text/tag not yet spit out
     return 1;
+}
+
+sub subst_header {
+    my ($page) = @_;
+    $$LJ::S2::ret_ref =~ s/<!\-\-SubstHeadContent\-\->/$page->{head_content}->subst_header()/e;
 }
 
 # <LJFUNC>

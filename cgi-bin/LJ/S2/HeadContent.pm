@@ -26,7 +26,11 @@ sub set_options {
 
 sub as_string {
     my $self = shift;
+    return '<!--SubstHeadContent-->';
+}
 
+sub subst_header {
+    my $self = shift;
     my $head_content = $self->_page_head();
     my %handlers = (
         'EntryPage'   => \&_entry_page_head,
