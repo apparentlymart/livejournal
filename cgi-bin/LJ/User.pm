@@ -6254,7 +6254,7 @@ sub get_sticky_entry_id {
 }
 
 # returns sticky entry jitemid
-sub remove_sticky_id {
+sub remove_sticky_entry_id {
     my ($self) = @_;
     my $ownerid = $self->userid;
     LJ::MemCache::delete([$ownerid, "log2lt:$ownerid"]);

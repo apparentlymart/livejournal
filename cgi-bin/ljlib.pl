@@ -1308,31 +1308,32 @@ sub get_recent_items
     if ( $sticky && $show_sticky_on_top ) {
         if ( !$skip_sticky ) {
             my $entry = LJ::Entry->new( $u, 'jitemid' => $sticky );
-            my $alldatepart;
-            my $system_alldatepart;
+            if ($entry && $entry->valid) {
+                my $alldatepart;
+                my $system_alldatepart;
 
-            if ($opts->{'dateformat'} eq "S2") {
-                 $alldatepart = LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql);
-                 $system_alldatepart = LJ::TimeUtil->alldatepart_s2($entry->logtime_mysql);
-            } else {
-                 $alldatepart = LJ::TimeUtil->alldatepart_s1($entry->eventtime_mysql);
-                 $system_alldatepart = LJ::TimeUtil->alldatepart_s1($entry->logtime_mysql);
-            }
+                if ($opts->{'dateformat'} eq "S2") {
+                    $alldatepart = LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql);
+                    $system_alldatepart = LJ::TimeUtil->alldatepart_s2($entry->logtime_mysql);
+                } else {
+                    $alldatepart = LJ::TimeUtil->alldatepart_s1($entry->eventtime_mysql);
+                    $system_alldatepart = LJ::TimeUtil->alldatepart_s1($entry->logtime_mysql);
+                }
 
-            my $item = {'itemid' => $sticky,
-                        'alldatepart'   => $alldatepart,
-                        'allowmask'     => $entry->allowmask,
-                        'posterid'      => $entry->posterid,
-                        'eventtime'     => $entry->eventtime_mysql,
-                        'system_alldatepart' => $system_alldatepart,
-                        'security'           => $entry->security,
-                        'anum'               => $entry->anum,
-                        'logtime'            => $entry->logtime_mysql,
-                      };
+                my $item = { 'itemid' => $sticky,
+                             'alldatepart'   => $alldatepart,
+                             'allowmask'     => $entry->allowmask,
+                             'posterid'      => $entry->posterid,
+                             'eventtime'     => $entry->eventtime_mysql,
+                             'system_alldatepart' => $system_alldatepart,
+                             'security'           => $entry->security,
+                             'anum'               => $entry->anum,
+                             'logtime'            => $entry->logtime_mysql, };
                             
-            push @items, $item;
-            push @{$opts->{'entry_objects'}}, $item;
-            push @{$opts->{'itemids'}}, $entry->jitemid;
+                push @items, $item;
+                push @{$opts->{'entry_objects'}}, $item;
+                push @{$opts->{'itemids'}}, $entry->jitemid;
+            }
         }
 
         # sticky exculustion

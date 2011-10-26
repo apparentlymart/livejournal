@@ -2808,7 +2808,7 @@ sub editevent {
         };
 
         if ( $itemid == $uowner->get_sticky_entry_id() ) {
-            $uowner->remove_sticky_id();
+            $uowner->remove_sticky_entry_id();
         }
 
         return $res;
@@ -2859,7 +2859,7 @@ sub editevent {
         }
     }
     elsif ( $itemid == $uowner->get_sticky_entry_id() ) {
-        $uowner->remove_sticky_id();
+        $uowner->remove_sticky_entry_id();
     }
 
     ## give features
