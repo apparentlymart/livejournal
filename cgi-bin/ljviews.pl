@@ -1210,21 +1210,34 @@ sub create_view_lastn
     
     my $delayed_entries;
 
+    # calculate recent entries count
+    my $has_sticky = $u->has_sticky_entry;
+    my $delayed_entries_count = 0;
+    my $usual_skip = $skip;
+
     if (LJ::is_enabled("delayed_entries")) {
-        if ($u->has_sticky_entry && !$skip) {
-            $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow - 1);
+        $delayed_entries_count = LJ::DelayedEntry->get_entries_count($u);
+        $usual_skip -= $delayed_entries_count;
+
+        if ($usual_skip < 0 ) {
+            $usual_skip = $skip ? $has_sticky : 0;
+        }
+
+        if ($skip) {
+            $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip - $has_sticky, $itemshow);
         } else {
-            $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow + 1);
+            $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow - $has_sticky);
         }
     }
-    
+
+
     if (!$delayed_entries) {
         $delayed_entries = [];
     }
 
     my $itemshow_usual = $itemshow - scalar(@$delayed_entries);
-    if ( $itemshow <= scalar(@$delayed_entries) ) {
-       $itemshow_usual = -1;
+    if ( $itemshow_usual < 0 ) {
+        $itemshow_usual = 0;
     }
 
     ## load the itemids
