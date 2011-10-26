@@ -742,12 +742,12 @@ sub subscriptions {
                                          );
         my $friend_ofs_count = $fro_m->friend_ofs;
         
-        return 0 if $friend_ofs_count <= $LJ::SPAM_MAX_FRIEND_OFS &&
+        return if $friend_ofs_count <= $LJ::SPAM_MAX_FRIEND_OFS &&
                     (time() - $comment_author->timecreate) / 86400 <= $LJ::SPAM_MAX_DAYS_CREATED;
 
         my $spam = 0;
         LJ::run_hook('spam_in_friends_journals', \$spam, $entry_journal, $comment_author);
-        return 0 if $spam;
+        return if $spam;
     }
 
     my $acquire_sub_slot = sub {
