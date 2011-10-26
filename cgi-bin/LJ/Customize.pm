@@ -544,6 +544,15 @@ sub get_propgroups {
             $prop = S2::get_property($lyr_core->{'s2lid'}, $prop);
             next unless ref $prop;
         }
+        
+        if ($prop->{'name'} eq 'sticky_subject' ||
+            $prop->{'name'} eq 'sticky_post' ) {
+            my $value = $class->get_s2_prop_values('sticky_post', $u, $style);
+            if (!$value) {
+                next;
+            }
+        }
+
         $prop{$prop->{'name'}} = $prop;
         push @propnames, $prop->{'name'};
     }
