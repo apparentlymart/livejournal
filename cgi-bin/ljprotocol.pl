@@ -4322,7 +4322,7 @@ sub syncitems {
         $sth = $db->prepare("SELECT jitemid, propid, FROM_UNIXTIME(value) ".
                         "FROM logprop2 WHERE journalid=? ".
                         "AND propid IN ($p_calter->{'id'}, $p_revtime->{'id'}) ".
-                        "AND value+0 > UNIX_TIMESTAMP(?)");i
+                        "AND value+0 > UNIX_TIMESTAMP(?)");
     
          $sth->execute($ownerid, $date);
          while (my ($id, $prop, $dt) = $sth->fetchrow_array) {
