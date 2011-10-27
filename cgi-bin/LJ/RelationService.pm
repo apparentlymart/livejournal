@@ -8,13 +8,14 @@ sub _load_alt_api {
     my $class = shift;
     my $user  = shift;
 
-    return 0 unless LJ::is_enable('send_test_load_to_rs2');
+    return 0 unless LJ::is_enabled('send_test_load_to_rs2');
 
     my $rate = $LJ::RELATION_SERVICE_LOAD_RATE; ## 0 .. 100
     return 0 unless $rate;
 
     ##
-    return 1 if ( (int rand(100)) > $rate );
+    my $val = int rand(100);
+    return 1 if $rate > $val;
 
     return 0;
 }
