@@ -71,6 +71,75 @@ sub load_relation_sources {
 
 
 ##
+sub create_relation_to {
+    my $class = shift;
+    my $u     = shift;
+    my %opts  = @_;
+
+    my $friendid   = $opts{friendid};
+    my $qfg        = $opts{qfg};
+    my $qbg        = $opts{qbg};
+    my $groupmask  = int($opts{groupmask});
+
+    my $dbh = LJ::get_db_writer();
+    my $cnt = $dbh->do("REPLACE INTO friends 
+                            (userid, friendid, fgcolor, bgcolor, groupmask) 
+                        VALUES 
+                            (?, ?, ?, ?, ?)
+                        ", undef, $u->userid, $friendid, $qfg, $qbg, $groupmask);
+    die "create_relation_to error: " . DBI->errstr if DBI->errstr;
+
+    my $memkey = [$u->userid,"frgmask:" . $u->userid . ":$friendid"];
+    LJ::MemCache::set($memkey, $groupmask, time()+60*15);
+    LJ::memcache_kill($friendid, 'friendofs');
+    LJ::memcache_kill($friendid, 'friendofs2');
+
+    # invalidate memcache of friends
+    LJ::memcache_kill($u->userid, "friends");
+    LJ::memcache_kill($u->userid, "friends2");
+
+    LJ::run_hooks('befriended', $u, LJ::load_userid($friendid));
+    LJ::User->increase_friendsof_counter($friendid);
+
+    return $cnt;
+}
+
+
+sub remove_relation_to {
+    my $class = shift;
+    my $u     = shift;
+    my %opts  = @_;
+
+    my $friendid = int $opts{friendid};
+
+    my $dbh = LJ::get_db_writer() 
+        or return 0;
+
+    my $cnt = $dbh->do("
+                DELETE 
+                FROM friends WHERE 
+                    userid = ? AND 
+                    friendid=?
+                ", undef, $u->userid, $friendid);
+
+    if (!$dbh->err && $cnt > 0) {
+        LJ::run_hooks('defriended', $u, LJ::load_userid($friendid));
+        LJ::User->decrease_friendsof_counter($friendid);
+
+        # delete friend-of memcache keys for anyone who was removed
+        LJ::MemCache::delete([ $u->userid, "frgmask:" . $u->userid . ":$friendid" ]);
+        LJ::memcache_kill($friendid, 'friendofs');
+        LJ::memcache_kill($friendid, 'friendofs2');
+
+        LJ::memcache_kill($u->userid, 'friends');
+        LJ::memcache_kill($u->userid, 'friends2');
+    }
+
+    return $cnt;
+}
+
+
+##
 ## Private methods
 ##
 
@@ -437,9 +506,9 @@ sub _get_friendofs {
     # database and insert those into memcache
 
     my $dbh   = LJ::get_db_writer();
-    my $limit = $limit ? '' : " LIMIT " . ($LJ::MAX_FRIENDOF_LOAD+1);
+    my $limit_sql = $limit ? '' : " LIMIT " . ($LJ::MAX_FRIENDOF_LOAD+1);
     my $friendofs = $dbh->selectcol_arrayref
-        ("SELECT userid FROM friends WHERE friendid=? $limit",
+        ("SELECT userid FROM friends WHERE friendid=? $limit_sql",
          undef, $u->userid) || [];
     die $dbh->errstr if $dbh->err;
 
