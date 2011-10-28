@@ -35,6 +35,8 @@ LiveJournal.initPage = function () {
 	// set up various handlers for every page
 	LiveJournal.initInboxUpdate();
 
+	LiveJournal.initNotificationStream();
+
 	//ljunq cookie is checked in PageStats/Omniture.pm now
 
 	// run other hooks
@@ -43,17 +45,61 @@ LiveJournal.initPage = function () {
 
 jQuery(LiveJournal.initPage);
 
+/**
+ * Init long-polling connection to the server.
+ * Now function can be used for testing purposes and
+ * should be modified for any real use. E.g. it could be
+ * used as an adapter to the Socket.IO
+ */
+LiveJournal.initNotificationStream = function(force) {
+	force = force || false;
+	var abortNotifications = false,
+		seed = Site.notifySeed || 0;
+
+	if (Site.notifyDisabled || (!Cookie('ljnotify') && !force && (Math.random() > seed))) { return; }
+
+	if (!Cookie( 'ljnotify')) {
+		Cookie( 'ljnotify', '1', {
+			domain: Site.siteroot.replace(/^https?:\/\/www\./, ''),
+			expires: 5000,
+			path: '/'
+		});
+	}
+
+	LiveJournal.register_hook('notification.stop', function() {
+		abortNotifications = true;
+	});
+
+	function requestRound() {
+		if (abortNotifications) { return; }
+
+		jQuery
+			.get(LiveJournal.getAjaxUrl('notifications'), 'json')
+			.success(function(data) {
+				//if it's not a notification than it is a timeout answer
+				if(data.type === 'notification') {
+					LiveJournal.run_hook(data.name, data.params || []);
+				}
+				requestRound();
+			}).error(function() {
+				requestRound()
+			});
+	}
+
+	requestRound();
+};
+
 // Set up a timer to keep the inbox count updated
 LiveJournal.initInboxUpdate = function () {
-    // Don't run if not logged in or this is disabled
-    if (! Site || ! Site.has_remote || ! Site.inbox_update_poll) return;
+	// Don't run if not logged in or this is disabled
+	if (! Site || ! Site.has_remote || ! Site.inbox_update_poll) return;
 
-    // Don't run if no inbox count
-    var unread = $("LJ_Inbox_Unread_Count");
-    if (! unread) return;
+	// Don't run if no inbox count
+	var unread = $("LJ_Inbox_Unread_Count");
+	if (! unread) return;
 
-    // Update every five minutes
-    window.setInterval(LiveJournal.updateInbox, 1000 * 60 * 5);
+	// Update every five minutes
+	window.setInterval(LiveJournal.updateInbox, 1000 * 60 * 5);
 };
 
 // Do AJAX request to find the number of unread items in the inbox
