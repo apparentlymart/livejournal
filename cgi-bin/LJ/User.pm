@@ -3942,7 +3942,7 @@ sub userhead {
     my $head_size = $opts->{head_size};
 
     my $userhead   = 'userinfo.gif';
-    my $userhead_w = 17;
+    my $userhead_w = 16;
     my $userhead_h = undef;
 
     ## special icon?
@@ -3959,7 +3959,7 @@ sub userhead {
     ## default way
     if (!$LJ::IS_SSL && ($icon = $u->custom_usericon)) {
         $userhead = $icon;
-        $userhead_w = 17;
+        $userhead_w = 16;
     } elsif ($u->is_community) {
         if ($head_size) {
             $userhead = "comm_${head_size}.gif";
@@ -3995,7 +3995,7 @@ sub userhead {
             $userhead_w = $head_size;
         } else {
             $userhead = "userinfo.gif";
-            $userhead_w = 17;
+            $userhead_w = 16;
         }
     }
     $userhead_h ||= $userhead_w;
@@ -7505,7 +7505,7 @@ sub ljuser {
         $journal_url = "$LJ::SITEROOT/userinfo.bml?user=$username";
         $profile_url ||= $journal_url;
         $userhead = 'userinfo.gif';
-        $userhead_w = 17;
+        $userhead_w = 16;
     } else {
         # Traverse the renames to the final journal
         if (!$opts->{'no_follow'}) {
