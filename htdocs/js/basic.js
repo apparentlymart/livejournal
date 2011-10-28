@@ -145,24 +145,36 @@ Object.extend(Object, {
 
 
 Object.extend(Function.prototype, {
-	//Mozilla MDN implementation
-	//Url: https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function/Bind
-	bind: function(oThis) {
-		if (typeof this !== "function") // closest thing possible to the ECMAScript 5 internal IsCallable function
-			throw new TypeError("Function.prototype.bind - what is trying to be fBound is not callable");
+	bind: function(that) { // .length is 1
+		var target = this,
+			slice = [].slice;
+		if (typeof target.apply != "function" || typeof target.call != "function")
+			return new TypeError();
 
-		var aArgs = Array.prototype.slice.call(arguments, 1), 
-				fToBind = this, 
-				fNOP = function () {},
-				fBound = function () {
-					return fToBind.apply(this instanceof fNOP ? this : oThis || window, aArgs.concat(Array.prototype.slice.call(arguments)));		
-				};
+		var args = slice.call(arguments, 1); // for normal call
+		var bound = function () {
 
-		fNOP.prototype = this.prototype;
-		fBound.prototype = new fNOP();
+			if (this instanceof bound) {
 
-		return fBound;
+				var self = Object.create(target.prototype);
+				var result = target.apply(
+					self,
+					args.concat(slice.call(arguments))
+				);
+				if (result !== null && Object(result) === result)
+					return result;
+				return self;
 
+			} else {
+				return target.apply(
+					that,
+					args.concat(slice.call(arguments))
+				);
+
+			}
+		}
+
+		return bound;
 	},
 	
 	bindEventListener: function(object) {
