@@ -1800,6 +1800,7 @@ sub journal_content
     };
 
     LJ::Request->notes("view" => $RQ{'mode'});
+    LJ::Request->notes("journalname" => $RQ{'user'});
     my $user = $RQ{'user'};
 
     my $return;
