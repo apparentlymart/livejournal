@@ -1578,6 +1578,8 @@ error.suspended.title=Suspended Account
 
 error.tempdisabled=This is disabled temporarily.
 
+error.unconfirmed=Please confirm that your entry meets the requirements of LiveJournal
+
 error.unknownmode=Unknown mode.
 
 error.usernameinvalid=Username contains invalid characters.
