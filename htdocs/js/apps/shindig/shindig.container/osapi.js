@@ -28,10 +28,11 @@
 if (gadgets && gadgets.rpc) { //Only define if gadgets rpc exists
 
   /**
-   * Dispatch a JSON-RPC batch request to services defined in the osapi namespace
+   * Dispatch a JSON-RPC batch request to services defined in the osapi namespace.
+   * Note: method was modified to pass security token to the container explicitly
    * @param {Array} requests
    */
-  osapi._handleGadgetRpcMethod = function(requests) {
+  osapi._handleGadgetRpcMethod = function(requests, st) {
     var responses = new Array(requests.length);
     var callCount = 0;
     var callback = this.callback;
@@ -68,7 +69,7 @@ if (gadgets && gadgets.rpc) { //Only define if gadgets rpc exists
             callback(responses);
           }
         };
-      }(i));
+      }(i), st);
     }
   };
 
