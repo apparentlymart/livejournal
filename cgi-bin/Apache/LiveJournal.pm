@@ -1841,12 +1841,24 @@ sub journal_content
         }
 
         if ($RQ{'mode'} eq "entry" || $RQ{'mode'} eq "reply") {
-            my $filename = $RQ{'mode'} eq "entry"
-                ? ( $GET{talkread2}
-                    ? "$LJ::HOME/htdocs/talkread2.bml"
-                    : "$LJ::HOME/htdocs/talkread.bml"
-                )
-                : "$LJ::HOME/htdocs/talkpost.bml";
+            my $filename;
+            if ( $RQ{'mode'} eq 'entry' ) {
+                if ( $GET{'talkread2'} ) {
+                    $filename = $LJ::HOME. '/htdocs/talkread2.bml';
+                } else {
+                    if ( $LJ::DISABLED{'new_comments'} ) {
+                        $filename = $LJ::HOME. '/htdocs/talkread.bml';
+                    } else {
+                        $filename = $LJ::HOME. '/htdocs/talkread_new.bml';
+                    }
+                } 
+            } else {
+                if ( $LJ::DISABLED{'new_comments'} ) {
+                    $filename = $LJ::HOME. '/htdocs/talkpost.bml';
+                } else {
+                    $filename = $LJ::HOME. '/htdocs/talkpost_new.bml';
+                }
+            }
             LJ::Request->notes("_journal" => $RQ{'user'});
             LJ::Request->notes("bml_filename" => $filename);
             return Apache::BML::handler();

@@ -183,7 +183,7 @@ _info?><?_code
          LJ::Talk::freeze_thread($u, $qitemid, $qtalkid);
      }
      return $jsres->($mode) if $jsmode;
-     my $linktext = BML::ml('.link', { aopts => "href='$itemlink'" });
+     my $linktext = BML::ml('.link', { aopts => "href='$commentlink'" });
      $body = "<?h1 $ML{'.frozen.title'} h1?><?p $ML{'.frozen.body'} $linktext p?>";
      return;
  }
@@ -211,7 +211,7 @@ _info?><?_code
          LJ::Talk::unfreeze_thread($u, $qitemid, $qtalkid);
      }
      return $jsres->($mode) if $jsmode;
-     my $linktext = BML::ml('.link', { aopts => "href='$itemlink'" });
+     my $linktext = BML::ml('.link', { aopts => "href='$commentlink'" });
      $body = "<?h1 $ML{'.unfrozen.title'} h1?><?p $ML{'.unfrozen.body'} $linktext p?>";
      return;
  }

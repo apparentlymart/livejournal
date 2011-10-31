@@ -5368,11 +5368,23 @@ subscribe_interface.special_subs.note=These notification options are only availa
 
 taglib.error.toomany=This would make you exceed your maximum of [[max]] tags.  Please remove some and try again.
 
+talk.anonuser=Anonymous
+
 talk.anonwrote=Someone wrote,
 
 talk.anonwrote_comm=Someone wrote in [[commlink]],
 
+talk.asanonymous=Anonymously
+
 talk.btn.preview=Preview
+
+talk.check=Check
+
+talk.checkall=Check All
+
+talk.checkspelling=Spellcheck
+
+talk.collapseall=Collapse All
 
 talk.collapselink|staleness=1
 talk.collapselink=Collapse
@@ -5392,6 +5404,8 @@ talk.commentsread.counted=Read [[replycount]] [[?replycount|comment|comments]]
 talk.commentsread.nocomments|staleness=1
 talk.commentsread.nocomments=No comments
 
+talk.created=Created:
+
 talk.curname_Groups|staleness=1
 talk.curname_Groups=<b>Custom friends groups:</b>
 
@@ -5402,6 +5416,21 @@ talk.curname_Mood=<b>Current mood:</b>
 talk.curname_Music=<b>Current music:</b>
 
 talk.curname_Tags=<b>Entry tags:</b>
+
+talk.delandspamall=Delete All and mark as spam
+
+talk.delete=Delete
+
+talk.deleteall=Delete All
+
+talk.deletedpost=Deleted Post
+
+talk.deleteduser=<i>Deleted user: [[username]]</i>
+
+talk.edit=Edit
+talk.edited=Edited:
+
+talk.emptypostalert=You need to write something first
 
 talk.error.bogusargs=Bogus arguments
 
@@ -5478,27 +5507,79 @@ talk.error.suspendedentry=This entry is suspended. You can visit the journal <a 
 talk.error.suspendedentryreply|staleness=1
 talk.error.suspendedentryreply=This entry is suspended. You cannot reply to it. You can visit the journal <a [[aopts]]>here</a>.
 
+talk.expandall=Expand All
+
 talk.expandlink|staleness=1
 talk.expandlink=Expand
 
+talk.freeze=Freeze
+
+talk.fromip=(from [[ip]])
+talk.fromip.extended|staleness=1
+talk.fromip.extended=([[country]], [[city]] / [[ip]])
+
 talk.frozen=Replies frozen
+
+talk.help=Help
+
+talk.insertphoto=Insert Photo
+
+talk.insertvideo=Insert Video
+
+talk.ipalert=Your IP address will be recorded
+
+talk.next=Next
+
+talk.nextshortcut=Ctrl →
 
 talk.parentlink=Parent
 
+talk.prev=Previous
+
+talk.prevshortcut=← Ctrl
+
 talk.readsimilar=Read similar journal entries:
 
+talk.replycount=[[count]] replies
+
 talk.replytothis=Reply to this
+
+talk.screen=Screen
+
+talk.screenedpost=Screened post
 
 talk.somebodywrote=[[realname]] ([[userlink]]) wrote,
 
 talk.somebodywrote_comm=[[realname]] ([[userlink]]) wrote in [[commlink]],
 
+talk.spam=Spam
+
+talk.spamcount=[[count]] suspicious comments
+
+talk.spammedpost=Spammed post
+
 talk.spellcheck=Check spelling during preview
+
+talk.suspendedpost=Suspended post
 
 talk.threadlink=Thread
 
+talk.track=Track
+
+talk.unfreeze=Unfreeze
+
+talk.unscreen=Unscreen
+
 talk.unscreentoreply|staleness=1
 talk.unscreentoreply=Unscreen to reply
+
+talk.unspam=Unspam
+
+talk.unspamall=Unspam All
+
+talk.unspamtoreply=Unspam to reply
+
+talk.userswitch=switch
 
 time.ago.day=[[num]] [[?num|day|days]] ago
 

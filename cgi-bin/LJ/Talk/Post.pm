@@ -670,7 +670,8 @@ sub post_comment {
     }
 
     # unban the parent comment if needed
-    if ($parent->{state} eq 'B' && $comment->{u} && LJ::Talk::can_unmark_spam($comment->{u}, $journalu, $entryu)) {
+    my $commenter = $comment->{'u'} || LJ::get_remote();
+    if ($parent->{state} eq 'B' && $commenter && LJ::Talk::can_unmark_spam($commenter, $journalu, $entryu)) {
         LJ::Talk::unspam_comment($journalu, $item->{itemid}, $parent->{talkid});
         $parent->{state} = 'A';
     }
