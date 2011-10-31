@@ -57,9 +57,6 @@ sub render_body {
 sub prepare_template_params {
     my ($class, $params, %opts) = @_;
 
-    use Data::Dumper;
-    warn "OPTS:".Dumper(\%opts);
-
     # we need a valid id
     my $id = $opts{'id'} if $opts{'id'} =~ /^\d+$/;
     die("You have not specified a layer to edit.")
