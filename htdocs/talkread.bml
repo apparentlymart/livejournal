@@ -117,7 +117,7 @@ body<=
         $$head .= LJ::robot_meta_tags();
     }
 
-    unless ( ($entry && $entry->is_delayed) || ($item && $item->{'anum'} == $init->{'anum'}) ) {
+    unless ( ($entry && $entry->valid) || ($item && $item->{'anum'} == $init->{'anum'}) ) {
         LJ::Request->pnotes ('error' => 'e404');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
         BML::return_error_status(404);
