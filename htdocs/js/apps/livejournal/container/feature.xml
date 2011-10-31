@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements. See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership. The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<feature>
+  <name>container</name>
+  <dependency>globals</dependency>
+  <dependency>core.log</dependency>
+  <dependency>shindig.auth</dependency>
+  <dependency>shindig.uri.ext</dependency>
+  <dependency>osapi</dependency>
+  <dependency>rpc</dependency>
+  <dependency>container.util</dependency>
+  <dependency>container.gadget</dependency>
+  <dependency>container.url</dependency>
+  <container>
+    <script src="service.js"/>
+    <script src="container.js"/>
+    <script src="init.js"/>
+    <api>
+      <exports type="js">osapi.container.Container</exports>
+      <exports type="js">osapi.container.Container.prototype.newGadgetSite</exports>
+      <exports type="js">osapi.container.Container.prototype.navigateGadget</exports>
+      <exports type="js">osapi.container.Container.prototype.closeGadget</exports>
+      <exports type="js">osapi.container.Container.prototype.preloadGadget</exports>
+      <exports type="js">osapi.container.Container.prototype.preloadGadgets</exports>
+      <exports type="js">osapi.container.Container.prototype.preloadCaches</exports>
+      <exports type="js">osapi.container.Container.prototype.unloadGadget</exports>
+      <exports type="js">osapi.container.Container.prototype.unloadGadgets</exports>
+      <exports type="js">osapi.container.Container.prototype.getGadgetMetadata</exports>
+      <exports type="js">osapi.container.Container.prototype.rpcRegister</exports>
+      <exports type="js">osapi.container.Container.prototype.onConstructed</exports>
+      <exports type="js">osapi.container.ContainerConfig.ALLOW_DEFAULT_VIEW</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_CAJOLE</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_DEBUG</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_DEBUG_PARAM</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_TEST</exports>
+      <exports type="js">osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL</exports>
+      <exports type="js">osapi.container.ContainerConfig.NAVIGATE_CALLBACK</exports>
+      <exports type="js">osapi.container.ContainerConfig.PRELOAD_REF_TIME</exports>
+      <exports type="js">osapi.container.ContainerConfig.PRELOAD_METADATAS</exports>
+      <exports type="js">osapi.container.ContainerConfig.PRELOAD_TOKENS</exports>
+      <exports type="rpc">resize_iframe</exports>
+      <exports type="rpc">resize_iframe_width</exports>
+      <exports type="rpc">set_pref</exports>
+      <uses type="rpc">update_security_token</uses>
+    </api>
+  </container>
+</feature>
