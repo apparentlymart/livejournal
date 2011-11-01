@@ -352,13 +352,16 @@ sub render
     }
     
     my $daycounts = LJ::get_daycounts($journal, $remote);
-    my @early_date = @{$daycounts->[0]};
-    my @last_date = @{$daycounts->[-1]};
-    pop @early_date;
-    pop @last_date;
+    if ($daycounts) {
+        my @early_date = @{$daycounts->[0]};
+        my @last_date = @{$daycounts->[-1]};
+        pop @early_date;
+        pop @last_date;
+    
+        $tmpl->param( 'EARLY_DATE' => join(',', @early_date),
+                      'LAST_DATE'  => join(',', @last_date));
+    }
 
-    $tmpl->param( 'EARLY_DATE' => join(',', @early_date),
-                  'LAST_DATE'  => join(',', @last_date));
     $tmpl->param(flatten($data), link_mobile => $mobile_link );
 
     return $tmpl->output;    
