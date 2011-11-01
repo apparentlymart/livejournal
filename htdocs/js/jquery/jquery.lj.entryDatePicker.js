@@ -1,17 +1,38 @@
+/*!
+ * LiveJournal FriendsTimes.
+ *
+ * Copyright 2011, dmitry.petrov@sup.com
+ *
+ * http://docs.jquery.com/UI
+ * 
+ * Depends:
+ *	jquery.ui.core.js
+ *	jquery.ui.widget.js
+ *	jquery.lj.basicWidget.js
+ *
+ * @overview Widget represents a date picker on update.bml and editjournal.bml pages.
+ *
+ * Public API:
+ * reset Return widget to the initial state
+ * 
+ */
 (function($,window) {
 	$.widget('lj.entryDatePicker', jQuery.lj.basicWidget, {
 		options: {
 			state: 'default',
+			//when the widget is in inedit or infutureedit states, the timers are paused.
 			states: ['default', 'edit', 'inedit', 'infutureedit', 'future'],
 			updateDate: true,
+			//if true, widget sets custom_time flag if user clicks on edit link. Otherwise it
+			//does so only on real time change from user.
 			disableOnEdit: false,
 			classNames: {
-				default: 'entrydate-date',
-				edit: 'entrydate-changeit',
-				inedit: 'entrydate-changeit',
-				infutureedit: 'entrydate-until',
-				future: 'entrydate-until',
-				delayed: 'entrydate-delayed'
+				'default': 'entrydate-date',
+				'edit': 'entrydate-changeit',
+				'inedit': 'entrydate-changeit',
+				'infutureedit': 'entrydate-until',
+				'future': 'entrydate-until',
+				'delayed': 'entrydate-delayed'
 			},
 			selectors: {
 				dateInputs: 'input, select',
@@ -19,6 +40,7 @@
 				editLink: '#currentdate-edit',
 				currentDate: '#currentdate-date'
 			},
+			//this input was located outside the widget markup
 			customTimeFlag: jQuery()
 		},
 
@@ -40,7 +62,9 @@
 
 			this._currentDate = this.element.find(this.options.selectors.currentDate);
 			$.lj.basicWidget.prototype._create.apply(this);
-			this.options.updateDate = !!window.updatePostTime;
+
+			this._initialUpdateDate = this.options.updateDate;
+			//if delayed posts are disabled we should get old bejavior
 			this.options.disableOnEdit = !this.element.hasClass(this.options.classNames.delayed);
 			this._updateTimer = null;
 			this._bindControls();
@@ -187,6 +211,7 @@
 					this._stopTimer(true);
 					break;
 				case 'default':
+					this.options.updateDate = this._initialUpdateDate;
 					this.options.customTimeFlag.val('0');
 					this._startTimer()
 					break;
@@ -194,12 +219,7 @@
 			this.options.state = state;
 		},
 
-		state: function(state) {
-			this._setOption('state', state);
-		},
-
 		reset: function() {
-			this._setOption('updateDate', true);
 			this._setOption('state', 'default');
 		},
 

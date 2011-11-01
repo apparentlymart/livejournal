@@ -13,6 +13,8 @@ if(! ("$" in window)){
 
 function initEntryDate() {
 	jQuery('#entrydate').entryDatePicker({
+		//flag is set to true for new posts
+		updateDate: !!window.updatePostTime,
 		customTimeFlag: jQuery('#journal_time_edited')
 	});
 }
