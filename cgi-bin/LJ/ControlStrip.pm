@@ -352,7 +352,7 @@ sub render
     }
     
     my $daycounts = LJ::get_daycounts($journal, $remote);
-    if ($daycounts) {
+    if (@$daycounts) {
         my @early_date = @{$daycounts->[0]};
         my @last_date = @{$daycounts->[-1]};
         pop @early_date;
