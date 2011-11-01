@@ -31,6 +31,7 @@ body<=
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
     }
 
+    my $skip = $GET{'skip'} || $POST{'skip'} || 0;
     my $mode = $GET{'mode'} || $POST{'mode'} || "init";
     my $only_me_checked = LJ::did_post() ? $POST{'only_me'} : $GET{'only_me'};
 
@@ -94,10 +95,9 @@ body<=
     my $items_per_page = 20;
     my $append_delayed = sub {
         my ($u, $items, $delayed_entries) = @_;
-        my $delayed_appened = 0;
         my @ordered;
         
-        my $append_delayed = sub {
+        my $insert = sub {
             foreach my $ditem (@$delayed_entries) {
                 my $entry = LJ::DelayedEntry->get_entry_by_id($u, $ditem);
                 
@@ -116,23 +116,23 @@ body<=
                                };
             }
         };
-    
+ 
         if ( scalar @$items == 0 ) {
-            $append_delayed->();
+            $insert->();
             return @ordered;
         }
-    
-        foreach my $item (@$items) {
-            if ($u->get_sticky_entry_id() == $item->{itemid}) {
-                push @ordered, $item;
-                next;        }
-    
-            if (!$delayed_appened) {
-                $append_delayed->();
-                $delayed_appened = 1;
-            }
-            push @ordered, $item;
+
+        my $delayed_appened = 0;    
+        my $first_item = shift @$items;
+        if ( $u->get_sticky_entry_id() == $first_item->{itemid} ) {
+            push @ordered, $first_item;
+            $insert->()
+        } else {
+            $insert->();
+            push @ordered, $first_item;
         }
+
+        push @ordered, @$items;
         return @ordered;
     };
 
@@ -149,25 +149,17 @@ body<=
 
         if ($opts{'prev'} || $opts{'next'}) {
         $ret .= "<p class='i-qotd-nav'>";
-        if ($opts{'prev'}) {
-            my $delayedext = '';
-            if ($delayed_prev) {
-                $delayedext = "&delayed_skip=$delayed_prev";
-            }
+        if ($opts{'prev'} || !$opts{'first_page'}) {
             $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" .
                     ($getextra ? "&" : "?") .
-                    "start_from=$opts{prev}$delayedext'>prev</a>";
+                    "skip=$opts{prev}'>prev</a>";
         } else {
             $ret .=  "<span class='i-qotd-nav-prev i-qotd-nav-prev-dis'>prev</span>";
         }
         if ($opts{'next'}) {
-            my $delayedext = '';
-            if ($delayed_next) {
-                $delayedext = "&delayed_skip=$delayed_next";
-            }
             $ret .= "<a class='i-qotd-nav-next' href='$LJ::SITEROOT/editjournal.bml$getextra" .
                     ($getextra ? "&" : "?") .
-                    "start_from=$opts{next}$delayedext'>next</a>";
+                    "skip=$opts{next}'>next</a>";
         } else {
             $ret .= "<span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>";
         }
@@ -273,27 +265,17 @@ body<=
 
         if ($opts{'prev'} || $opts{'next'}) {
         $ret .= "<p class='i-qotd-nav'>";
-        if ($opts{'prev'}) {
-            my $delayedext = '';
-            if ($delayed_prev) {
-                $delayedext = "&delayed_skip=$delayed_prev";
-            }
-
+        if ($opts{'prev'} || !$opts{'first_page'}) {
             $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" .
                      ($getextra ? "&" : "?") .
-                     "start_from=$opts{prev}$delayedext'>prev</a>";
+                     "skip=$opts{prev}'>prev</a>";
         } else {
             $ret .=  "<span class='i-qotd-nav-prev i-qotd-nav-prev-dis'>prev</span>";
         }
         if ($opts{'next'}) {
-            my $delayedext = '';
-            if ($delayed_next) {
-                $delayedext = "&delayed_skip=$delayed_next";
-            }
-
             $ret .= "<a class='i-qotd-nav-next' href='$LJ::SITEROOT/editjournal.bml$getextra" .
                      ($getextra ? "&" : "?") .
-                      "start_from=$opts{next}$delayedext'>next</a>";
+                      "skip=$opts{next}'>next</a>";
         } else {
             $ret .= "<span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>";
         }
@@ -860,84 +842,85 @@ JS_INIT
         
         ##
         $only_me_checked = 1 unless $remote->can_manage ($usejournal_u);
+        my $order = $usejournal_u->{'journaltype'} eq "C" || $usejournal_u->{'journaltype'} eq "Y";  # community or syndicated
 
-        ## Load ids of more recent posts
-        ## (skip this step for the first page)
-        my @post_ids = ();
-        if ($start_from){
-            my %ids_opts = (afterid => $start_from);
-               $ids_opts{posterid} = $remote->userid if $only_me_checked;
+        my $delayed_entries;
 
-            @post_ids = sort { $b <=> $a } 
-                        ($usejournal_u 
-                            ? $usejournal_u->get_post_ids(%ids_opts)  
-                            : $remote->get_post_ids(%ids_opts) );
-        }
+        # calculate recent entries count
+        my $has_sticky = $usejournal_u->has_sticky_entry;
+        my $delayed_entries_count = 0;
+        my $usual_skip = $skip;
 
-        my $next_page = 0;
-
-        my $delayed_entries = [];
         if (LJ::is_enabled("delayed_entries")) {
-            if ( $show eq 'recent' || !($year && $month && $day)) {
-                $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u) || [];
-            } else {
-                $delayed_entries = LJ::DelayedEntry->get_entries_for_day_row($usejournal_u, $year, $month, $day );
+            $delayed_entries_count = LJ::DelayedEntry->get_entries_count($usejournal_u);
+            $usual_skip -= $delayed_entries_count;
+
+            if ($usual_skip < 0 ) {
+                $usual_skip = $skip ? $has_sticky : 0;
+            }
+ 
+            if (!$skip) {
+                $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u, 
+                                                                            $skip, 
+                                                                            $items_per_page - $has_sticky);
+            } elsif ( $skip) {
+                $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u, 
+                                                                            $skip - $has_sticky, 
+                                                                            $items_per_page);
             }
         }
-        my $delayed_count = scalar(@$delayed_entries) - $delayed_skip;
-        my $show_usual = ($items_per_page - $delayed_count) > 0 ? $items_per_page - $delayed_count : 0;
+ 
+        if (!$delayed_entries) {
+            $delayed_entries = [];
+        }
+
+        my $itemshow_usual = $items_per_page - scalar(@$delayed_entries);
+        if ( $itemshow_usual < 0 ) {
+            $itemshow_usual = 0;
+        }
+           
         my $have_next_page = 0;
 
         if (($usejournal_u && ($LJ::MAX_SCROLLBACK_LASTN = 50000,
             my @recent = LJ::get_recent_items({
-                itemshow  => $show_usual + 1,
+                itemshow  => $itemshow_usual + 1,
                 err       => \$err,
                 userid    => $usejournal_u->{userid},
                 clusterid => $usejournal_u->{clusterid},
                 remote    => $remote,
                 dateformat => 'S2',
-                beforeid  => $start_from,
+                skip       => $skip,
                 order     => 'logtime',
+                order      => $order,
                 show_sticky_on_top => 1,
                 %ymd_req,
                 ($only_me_checked) ? ('posterid' =>  $remote->{'userid'}) : (),
             }))) || $delayed_entries) {
             
-            if (@recent > $show_usual){
-                $have_next_page = 1;
-                pop @recent;
+
+            $have_next_page = scalar @recent + scalar(@$delayed_entries) - $items_per_page > 0 ? 1 : 0;
+            if ($have_next_page) {
+                if ( scalar(@$delayed_entries) > $items_per_page ) {
+                    pop @$delayed_entries;
+                }
+                if ( scalar(@recent) + scalar(@$delayed_entries) > $items_per_page ) {
+                    pop @recent;
+                }
             }
 
-            my @delayed = splice(@$delayed_entries, $delayed_skip, $delayed_skip + $items_per_page);
-            if ($delayed_count > 0) {
-                @recent = $append_delayed->($usejournal_u, \@recent, \@delayed);
+            warn "delayed entries count: $delayed_entries_count";
+
+            if ($delayed_entries_count > 0) {
+                warn "recent update\n";
+                @recent_entries = $append_delayed->($usejournal_u, \@recent, $delayed_entries);
             }
-            $delayed_entries = undef;
 
-            push @recent_entries, @recent;
-
-            $next_page  = List::Util::min ( map { $_->{'itemid'} } @recent_entries );
-            $start_from = List::Util::max ( map { $_->{'itemid'} } @recent_entries );
-
-        }
-
-        ## calculate prev page start poin
-        ## 
-        my $prev_page_start = 0;
-        if (@post_ids){ ## not first page
-            my $pos = @post_ids - $items_per_page;
-            if ($pos < 0){
-                $prev_page_start = $post_ids[0] + 1; # from start
-            } else {
-                $prev_page_start = $post_ids[$pos];
-            }
         }
 
         $ret .= $entry_chooser->(\@recent_entries,
-                                delayed_next => $delayed_count > 0 ? $items_per_page + $delayed_skip : $delayed_skip,
-                                delayed_prev => $delayed_skip > 0 ? $delayed_skip - $items_per_page : 0,
-                                prev => $prev_page_start, 
-                                next => $have_next_page ? $next_page : 0
+                                first_page => $skip > 0 ? 0 : 1,
+                                prev => $skip > $items_per_page ? $skip - $items_per_page : 0, 
+                                next => $have_next_page ? $skip + $items_per_page : 0
         );
 
         my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
