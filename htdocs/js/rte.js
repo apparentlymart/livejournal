@@ -149,7 +149,7 @@
 						editor.document.on('keypress', updateDraftState);
 						editor.document.on('click', updateDraftState);
 
-						editor.focus();
+						!CKEDITOR.env.ie && editor.focus();
 					});
 				});
 			} else {
@@ -181,6 +181,7 @@
 			$('#entry-form-wrapper').attr('class', 'hide-richtext');
 			if (CKEditor) {
 
+				CKEDITOR.note.hide(true);
 				var data = CKEditor.getData().trim(); //also remove trailing spaces and newlines
 				CKEditor.container.hide();
 				CKEditor.element.show();

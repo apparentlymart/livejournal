@@ -58,13 +58,6 @@ lj|raw {
 	display: block;
 }
 
-lj\:cut {
-	display: block;
-	border: #000 1px dotted;
-	background-color: #d2d2d2;
-	min-height: 14px;
-}
-
 lj|cut {
 	display: block;
 	border: #000 1px dotted;
@@ -72,14 +65,20 @@ lj|cut {
 	min-height: 14px;
 }
 
+lj\:cut {
+	display: block;
+	border: #000 1px dotted;
+	background-color: #d2d2d2;
+	min-height: 14px;
+}
+
 /* fix inline behavior, for no IE */
-lj\:cut ul,
-lj\:cut ol {
+.lj|cut ul, .lj|cut ol {
 	background-color: #d2d2d2;
 	border: #000 1px dotted;
 }
-lj|cut ul,
-lj|cut ol {
+
+.lj\:cut ul, .lj\:cut ol {
 	background-color: #d2d2d2;
 	border: #000 1px dotted;
 }
@@ -151,7 +150,7 @@ lj|cut ol {
 		background-position: 0 -21px;
 		}
 /* LJ map */
-.lj-map {
+.lj-map, .lj-iframe {
 	position: relative;
 	top: 45%;
 	display: inline-block;
