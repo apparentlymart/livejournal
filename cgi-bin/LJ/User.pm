@@ -7093,6 +7093,34 @@ sub check_priv
 #
 #
 # <LJFUNC>
+# name: LJ::users_by_priv
+# class:
+# des: Return users with a certain privilege.
+# args: priv, arg?
+# des-args: user privilege to searching. arg can be "*" for all args.
+# return: Userids or empty list.
+# TODO Add store to MemCache
+sub users_by_priv {
+    my ($priv, $arg) = @_;
+    
+    my $dbr = LJ::get_db_reader();
+    return unless $dbr;
+
+    return unless $priv;
+    $arg ||= '*';
+    my $users = $dbr->selectcol_arrayref ("SELECT userid FROM priv_list pl, priv_map pm
+                                           WHERE pl.prlid = pm.prlid 
+                                                AND privcode = ?
+                                                AND arg = ?
+                                        ", undef, $priv, $arg);
+
+    return unless ref $users eq 'ARRAY';
+    return $users;
+}
+
+#
+#
+# <LJFUNC>
 # name: LJ::remote_has_priv
 # class:
 # des: Check to see if the given remote user has a certain privilege.
