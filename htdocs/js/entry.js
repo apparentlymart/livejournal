@@ -11,56 +11,14 @@ if(! ("$" in window)){
 	};
 }
 
-function editdate(){
-	var currentDate = jQuery('#currentdate'),
-		modifyDate = jQuery('#modifydate'),
-		customTimeFlag = jQuery('#journal_time_edited'),
-		cal = modifyDate.find('.wrap-calendar'),
-		calVal = modifyDate.find('.wrap a');
-
-	if (settime.interval) {
-		currentDate.data('dotime', '1');
-	}
-	clearInterval(settime.interval);
-
-	currentDate.hide();
-	modifyDate.css('display', '');
-	customTimeFlag.val('1');
-
-	f = document.updateForm;
-	var month = f.date_ymd_mm.value;
-	var dateStr = f.date_ymd_yyyy.value + "/" + month + "/" + f.date_ymd_dd.value;
-
-	cal.calendar({
-		currentDate: new Date(dateStr),
-		ml: {
-			caption: Site.ml_text['entryform.choose_date'] || 'Choose date:'
-		},
-		endMonth: new Date(2037,11,31),
-		showCellHovers: true
-	}).bind("daySelected", function(ev, date) {
-		settime(date);
+function initEntryDate() {
+	jQuery('#entrydate').entryDatePicker({
+		customTimeFlag: jQuery('#journal_time_edited')
 	});
 }
 
 function revertdate() {
-	var currentDate = jQuery('#currentdate'),
-		modifyDate = jQuery('#modifydate'),
-		customTimeFlag = jQuery('#journal_time_edited'),
-		cal = modifyDate.find('.wrap-calendar');
-
-	if (cal.is(':lj-calendar')) {
-		cal.calendar('destroy');
-	}
-
-	currentDate.css('display', '');
-	modifyDate.hide();
-	customTimeFlag.val('0');
-
-	if (currentDate.data('dotime')) {
-		settime.interval = setInterval(function() { settime(); }, 1000);
-		settime();
-	}
+	jQuery('#entrydate').entryDatePicker('reset');
 }
 
 function setPostingPermissions(journal) {
@@ -128,8 +86,7 @@ function changeSubmit(prefix, defaultjournal, defPrefix){
 
 function new_post_load(dotime){
 	if(dotime){
-		settime.interval = setInterval(function() { settime(); }, 1000);
-		settime();
+		window.updatePostTime = true;
 	}
 
 	var remotelogin = $('remotelogin');
@@ -488,11 +445,6 @@ function insertFormHints(){
 	// remove this function after changes to weblib.pl go live
 }
 
-function defaultDate(){
-	$('currentdate').style.display = '';
-	$('modifydate').style.display = 'none';
-}
-
 function insertViewThumbs(){
 	var lj_userpicselect = $('lj_userpicselect');
 	lj_userpicselect.innerHTML = 'View Thumbnails';
@@ -641,49 +593,6 @@ function setColumns(number){
 		}
 	}
 	listWrapper.removeChild(listObj);
-}
-
-function settime(time){
-	function twodigit(n){
-		if (n < 10) {
-			return "0" + n;
-		} else {
-			return n;
-		}
-	}
-
-	var newTime = time || new Date();
-	if (!newTime) {
-		return false;
-	}
-	f = document.updateForm;
-	if (!f) {
-		return false;
-	}
-
-	f.date_ymd_yyyy.value = newTime.getFullYear() < 1900 ? newTime.getFullYear() + 1900 : newTime.getFullYear();
-	f.date_ymd_mm.value = newTime.getMonth() + 1;
-	f.date_ymd_dd.value = twodigit(newTime.getDate());
-	if (!time) {
-		f.hour.value = twodigit(newTime.getHours());
-		f.min.value = twodigit(newTime.getMinutes());
-	}
-
-	f.date_diff.value = 1;
-
-	var mNames = Site.ml_text['month.names.long'] ||
-					["January", "February", "March", "April", "May", "June", "July",
-					"August", "September", "October", "November", "December"];
-	var currentdate = document.getElementById('currentdate-date');
-	var cMonth = newTime.getMonth();
-	var cDay = newTime.getDate();
-
-	var monthLabel = mNames[cMonth];
-	monthLabel = monthLabel.charAt(0).toUpperCase() + monthLabel.substr(1);
-	var cYear = newTime.getFullYear() < 1900 ? newTime.getFullYear() + 1900 : newTime.getFullYear();
-	currentdate.innerHTML = monthLabel + " " + cDay + ", " + cYear;
-
-	return false;
 }
 
 function tagAutocomplete(node, tags){
