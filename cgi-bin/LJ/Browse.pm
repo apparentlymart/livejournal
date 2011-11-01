@@ -1146,6 +1146,20 @@ sub remove_communities {
     return 1;
 }
 
+sub categories_by_comm {
+    my $class = shift;
+    my $comm  = shift;
+    
+    return unless $comm;
+    
+    my $dbh = LJ::get_db_reader();
+    my $cats = $dbh->selectcol_arrayref("SELECT catid FROM categoryjournals WHERE journalid = ?", undef, $comm->userid);
+
+    return map {
+        LJ::Browse->load_by_id($_);
+    } @$cats;
+}
+
 ## Return "path" for selected category
 ## catobj -> par_catobj -> par_par_catobj -> etc... (array)
 ## Param: arrayref to save "path"
