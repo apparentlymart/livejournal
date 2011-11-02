@@ -261,9 +261,12 @@ sub parse_module_embed {
                     $newstate = IMPLICIT;
                     # tag balance
                     push @stack, $tag;
+                    $embed .= $reconstructed;
+                } else {
+                    $newstate = REGULAR;
+                    $newtxt .= $reconstructed;
                 }
                 # append the tag contents to new embed buffer, so we can convert in to lj-embed later
-                $embed .= $reconstructed;
             } else {
                 # otherwise stay in REGULAR
                 $newtxt .= $reconstructed;
