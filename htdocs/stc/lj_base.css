@@ -1766,8 +1766,8 @@ HTML BODY.logged-out {
 --------------------------- */
 /* Must be removed after implementation of Framework! */
 .i-manage-userhead {
-	width: 17px;
-	height: 17px;
+	width: 16px;
+	height: 16px;
 	border: 0;
 	vertical-align: -2px;
 	}
