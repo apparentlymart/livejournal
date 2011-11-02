@@ -1,5 +1,5 @@
 /*!
- * LiveJournal FriendsTimes.
+ * LiveJournal datePicker for edit entries.
  *
  * Copyright 2011, dmitry.petrov@sup.com
  *
