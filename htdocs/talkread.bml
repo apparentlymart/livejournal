@@ -280,7 +280,11 @@ body<=
 
     my $multiform_selects = 0;  # are there select boxes?  don't show form if not.
 
-    my $event = $item->{'event'} || $entry->event;
+    my $event = $item->{'event'};
+    if ( !$event && $entry ) {
+        $event =  $entry->event;
+    }
+
     my $suspend_msg = $entry && $entry->should_show_suspend_msg_to($remote) ? 1 : 0;
     my $no_cut_expand = !$GET{cut_expand} && $GET{page} && $GET{page} > 1 ? 1 : 0;
     
