@@ -1356,8 +1356,7 @@
 									newElement.attributes[name.toLowerCase()] = parseInt(value);
 								});
 								newElement.attributes.frameBorder = 0;
-
-								newElement.isOptionalClose = newElement.isEmpty = true;
+								newElement.isEmpty = true;
 								break;
 							case 'lj-poll':
 								newElement = new CKEDITOR.htmlParser.fragment.fromHtml(decodeURIComponent(element.attributes['lj-data'])).children[0];
