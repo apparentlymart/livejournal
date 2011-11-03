@@ -4,10 +4,11 @@
     my $l = LJ::Lang::get_lang($lang);
     return "<b>Invalid language</b>" unless $l;
 
-    my $dbr = LJ::get_db_reader();
-    my $sth;
- 
-    my $sql;
+    my $dbr = LJ::get_db_reader()
+        or return "No database!";
+    $dbr->{'RaiseError'} = 1;
+
+    my ($sth, $sql);
 
     if ($FORM{'search'} eq 'sev') 
     {
@@ -15,7 +16,10 @@
         if ($FORM{'stale'} =~ /^(\d+)(\+?)$/) {
             $what = ($2 ? ">=" : "=") . $1;
         }
-        $sql = "SELECT i.dmid, i.itid, i.itcode FROM ml_items i, ml_latest l WHERE l.lnid=$l->{'lnid'} AND l.staleness $what AND l.dmid=i.dmid AND l.itid=i.itid ORDER BY i.dmid, i.itcode";
+        $sql = "SELECT i.dmid, i.itid, i.itcode 
+                FROM ml_items i, ml_latest l 
+                WHERE l.lnid=$l->{'lnid'} AND l.staleness $what AND l.dmid=i.dmid AND l.itid=i.itid 
+                ORDER BY i.dmid, i.itcode";
     }
     
     if ($FORM{'search'} eq 'txt') 
@@ -27,14 +31,35 @@
              LJ::check_priv($remote, "faqedit", "*") ||
              $LJ::IS_DEV_SERVER); # FAQ admins can search too
 
-        my $qtext = $dbr->quote($FORM{'searchtext'});
+        ## search text:
+        ##      asdf    --> LOCATE('asdf', field)
+        ##      ^asdf   --> field LIKE 'asdf%' //  field LIKE concat('asdf', '%')
+        ##      asdf$   --> field LIKE '%asdf'
+        ##      ^asdf$  --> field = 'asdf'
+        my $text = $FORM{'searchtext'};
+        my $field = ($FORM{'searchwhat'} eq "code") ? 'i.itcode' : 't.text';
+        my $search_sql;
+        if ($text =~ s/^\^//) {
+            if ($text =~ s/\$$//) {
+                $search_sql = " $field = " . $dbr->quote($text);
+            } else {
+                $search_sql = " $field LIKE concat(" . $dbr->quote($text) . ", '%')";
+            }
+        } else {
+            if ($text =~ s/\$$//) {
+                $search_sql = " $field LIKE concat('%', " . $dbr->quote($text) . ")";
+            } else {
+                $search_sql = "LOCATE(" . $dbr->quote($text) . ", $field)";
+            }
+        }
+
         my $dmid = $FORM{'searchdomain'}+0;
         my $dmidwhere = $dmid ? "AND i.dmid=$dmid" : "";
         if ($FORM{'searchwhat'} eq "code") {
             $sql = qq{
                 SELECT i.dmid, i.itid, i.itcode FROM ml_items i, ml_latest l
                 WHERE l.lnid=$l->{'lnid'} AND l.dmid=i.dmid AND i.itid=l.itid 
-                $dmidwhere AND LOCATE($qtext, i.itcode)
+                $dmidwhere AND $search_sql
             };
         } else {
             my $lnid = $l->{'lnid'};
@@ -42,7 +67,7 @@
             $sql = qq{
                 SELECT i.dmid, i.itid, i.itcode FROM ml_items i, ml_latest l, ml_text t
                 WHERE l.lnid=$lnid AND l.dmid=i.dmid AND i.itid=l.itid 
-                $dmidwhere AND t.dmid=l.dmid AND t.txtid=l.txtid AND LOCATE($qtext, t.text)
+                $dmidwhere AND t.dmid=l.dmid AND t.txtid=l.txtid AND $search_sql
                 ORDER BY i.itcode
             };
         }        
