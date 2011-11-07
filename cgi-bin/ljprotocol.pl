@@ -2653,6 +2653,10 @@ sub editevent {
             return fail( $err, 217 ) if $req->{itemid} || $req->{anum};
             return fail( $err, 215 ) unless $req->{tz};                        
 
+            # updating an entry:
+            return undef
+                unless common_event_validation($req, $err, $flags);
+
             $req->{ext}->{flags} = $flags;
             $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
             $req->{usejournal} = $req->{usejournal}  || '';
