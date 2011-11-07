@@ -1452,7 +1452,7 @@ sub prop {
 
 sub raw_prop {
     my ($u, $prop) = @_;
-    $u->preload_props($prop) unless exists $u->{$prop};
+    $u->preload_props($prop);
     return $u->{$prop};
 }
 
@@ -6463,6 +6463,9 @@ sub load_user_props {
             $u->{$propname} = $propmap->{$propname};
         }
     };
+
+    @props = grep { ! exists $u->{$_} } @props;
+    return unless @props;
 
     my $groups = LJ::User::PropStorage->get_handler_multi(\@props);
     my $memcache_available = @LJ::MEMCACHE_SERVERS;
