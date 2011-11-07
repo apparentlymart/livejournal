@@ -67,17 +67,18 @@ sub create {
     my $utime       = $dt->epoch;
     my $rlogtime    = $LJ::EndOfTime - $now;
     my $rposttime   = $LJ::EndOfTime - $utime;
+    my $sticky_type = $req->{sticky} ? 1 : 0;
 
     my $taglist = __extract_tag_list(\$req->{props}->{taglist});
 
     $journal->do( "INSERT INTO delayedlog2 (journalid, delayedid, posterid, subject, " .
-                  "logtime, posttime, security, allowmask, year, month, day, rlogtime, revptime) " .
-                  "VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)",
+                  "logtime, posttime, security, allowmask, year, month, day, rlogtime, revptime, is_sticky) " .
+                  "VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                   undef, 
                   $journalid, $delayedid, $posterid, LJ::text_trim($req->{'subject'}, 30, 0), 
                   $posttime, $security, $allowmask,
                   $req->{year}, $req->{mon}, $req->{day},
-                  $rlogtime, $rposttime );
+                  $rlogtime, $rposttime, $sticky_type);
     
     $journal->do( "INSERT INTO delayedblob2 ".
                   "VALUES (?, ?, ?)", undef, $journalid, $delayedid, $data_ser);
@@ -694,7 +695,8 @@ sub update {
     my $allowmask   = $req->{'allowmask'}+0;
     my $rlogtime    = $LJ::EndOfTime - $now;
     my $rposttime   = $LJ::EndOfTime - $utime;
-    
+    my $sticky_type = $req->{sticky} ? 1 : 0;   
+ 
     $self->{'taglist'} = __extract_tag_list(\$req->{props}->{taglist});
     $req->{'event'}    =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
 
@@ -702,13 +704,13 @@ sub update {
                         "subject=?, posttime = ?, " . 
                         "security=?, allowmask=?, " .    
                         "year=?, month=?, day=?, " .
-                        "rlogtime=?, revptime=? " .
+                        "rlogtime=?, revptime=?, is_sticky=? " .
                         "WHERE journalid=? AND delayedid=?",
                         undef, 
                         $posterid, LJ::text_trim($req->{'subject'}, 30, 0), 
                         $posttime, $security, $allowmask, 
                         $req->{year}, $req->{mon}, $req->{day},
-                        $rlogtime, $rposttime, $journalid, $delayedid );
+                        $rlogtime, $rposttime, $sticky_type, $journalid, $delayedid );
 
     $self->journal->do( "UPDATE delayedblob2 SET request_stor=?" . 
                         "WHERE journalid=? AND delayedid=?", undef, 
@@ -931,7 +933,7 @@ sub get_entries_by_journal {
     my $journalid = $journal->userid;
     return $dbcr->selectcol_arrayref("SELECT delayedid " .
                                      "FROM delayedlog2 WHERE journalid=$journalid  $sql_poster".
-                                     "ORDER BY revptime $sql_limit");
+                                     "ORDER BY is_sticky DESC, revptime $sql_limit");
 }
 
 sub get_daycount_query {
@@ -1130,11 +1132,8 @@ sub get_itemid_before2 {
 }
 
 sub get_itemid_near2 {
-    my ($self, $after_before) = @_;
+    my ($u, $delayedid, $after_before) = @_;
     
-    my $u = $self->journal;
-    my $delayedid = $self->delayedid;
-
     my ($order, $cmp1, $cmp2, $cmp3, $cmp4);
     if ($after_before eq "after") {
         ($order, $cmp1, $cmp2, $cmp3, $cmp4) = ("DESC", "<=", ">", sub {$a->[0] <=> $b->[0]}, sub {$b->[1] <=> $a->[1]} );
@@ -1150,7 +1149,7 @@ sub get_itemid_near2 {
         return 0;
     }
 
-    my $jid     = $self->journalid;
+    my $jid     = $u->userid;
     my $field   = $u->is_person() ? "revptime" : "rlogtime";
 
     my ($stime) = $dbr->selectrow_array(  "SELECT $field FROM delayedlog2 WHERE ".
@@ -1161,7 +1160,7 @@ sub get_itemid_near2 {
     my $remote   = LJ::get_remote();
 
     if ($remote) {
-        if ($remote->userid == $self->journalid) {
+        if ($remote->userid == $jid) {
             $secwhere = "";   # see everything
         } elsif ($remote->is_person() || $remote->is_identity) {
             my $gmask = LJ::get_groupmask($u, $remote);

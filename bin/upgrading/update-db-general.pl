@@ -4447,6 +4447,12 @@ register_alter(sub {
                 "ADD INDEX(time)");
     }
 
+    unless (column_type("delayedlog2", "is_sticky")) {
+        do_alter("delayedlog2",
+                 "ALTER TABLE delayedlog2 " .
+                 "ADD is_sticky BOOLEAN NOT NULL");
+    }
+
 });
 
 1; # return true

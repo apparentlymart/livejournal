@@ -4027,7 +4027,7 @@ sub _Entry__get_link
     if ($key eq "nav_prev") {
         my $jumpid;
         if ($entry->is_delayed) {
-            my $nextid = $entry->get_itemid_before2();
+            my $nextid = LJ::DelayedEntry::get_itemid_before2($journalu, $entry->delayedid);
             return $null_link unless $nextid;
             $jumpid = "d" . $nextid;
         } else {
@@ -4045,9 +4045,8 @@ sub _Entry__get_link
     if ($key eq "nav_next") {
         my $jumpid;
         if ($entry->is_delayed) {
-            my $nextid = $entry->get_itemid_after2();
+            my $nextid = LJ::DelayedEntry::get_itemid_after2($journalu, $entry->delayedid);
             return $null_link unless $nextid;
-
             $jumpid = "d" . $nextid;
         } else {
             $jumpid = LJ::get_itemid_after2($journalu, int($this->{'itemid'}/256));
