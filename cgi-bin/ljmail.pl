@@ -197,9 +197,6 @@ sub send_mail
         $log_action = ($opt->{html}) ? 'email_send_html' : 'email_send_text';
     }
 
-    LJ::note_recent_action(undef, $log_action);
-
-
     ## Start sending process:
     ##  1. At stage One we try to send email right now from this process 
     ##  2. If stage one faults for some reason, at stage Two add task to TheSchwartz queue.
