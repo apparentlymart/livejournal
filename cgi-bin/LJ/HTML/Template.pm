@@ -94,6 +94,24 @@ sub new {
             },
         );
 
+        HTML::Template::Pro->register_function(
+            'userid2display' => sub {
+                my ($userid, %opts) = @_;
+                my $u = LJ::load_userid($userid);
+                return $u->ljuser_display(\%opts);
+            },
+        );
+
+        HTML::Template::Pro->register_function(
+            'userid2name' => sub {
+                my ($userid, %opts) = @_;
+                my $u = LJ::load_userid($userid);
+                return $u->{user};
+            },
+        );
+
+
+
         my $template = HTML::Template::Pro->new(
             global_vars => 1, # normally variables declared outside a loop are not available inside
                               # a loop.  This option makes <TMPL_VAR>s like global variables in Perl

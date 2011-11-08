@@ -4312,6 +4312,8 @@ poll.error.not_enougth_rights=You are not have enougth rights for view this poll
 
 poll.error.pitoolong=Text inside an lj-pi tag must be between 1 and 255 characters.  Yours is [[len]].
 
+poll.error.usernotfound=Poll owner has been deleted
+
 poll.error.pollnotfound=Error: poll #[[num]] not found
 
 poll.error.questionnotfound=Error: this poll question doesn't exist.

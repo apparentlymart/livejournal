@@ -1,6 +1,14 @@
 package LJ::Poll::Question;
 use strict;
 use Carp qw (croak);
+use Class::Autouse qw (
+    LJ::Poll::Question::radio 
+    LJ::Poll::Question::text
+    LJ::Poll::Question::check
+    LJ::Poll::Question::scale
+    LJ::Poll::Question::drop
+);
+
 
 sub new {
     my ($class, $poll, $pollqid) = @_;
@@ -58,6 +66,18 @@ sub _load {
     }
 
     $self->absorb_row($sth->fetchrow_hashref);
+}
+
+sub get_items {
+    my $self = shift;
+    my $type = $self->type;
+    return "LJ::Poll::Question::$type"->out($self, @_)
+}
+
+sub stats {
+    my $self = shift;
+    my $type = $self->type;
+    return "LJ::Poll::Question::$type"->stats($self, @_);
 }
 
 # returns the question rendered for previewing
@@ -303,16 +323,16 @@ sub answers_pages {
     return $pages;
 }
 
-sub answers_as_html {
+sub answers {
     my $self = shift;
     my $jid = shift;
+
 
     my $page     =  shift || 1;
     my $pagesize =  shift || 2000;
 
     my $pages = shift || $self->answers_pages($jid, $pagesize);
 
-    my $ret = '';;
     my $sth;
 
     if ($self->is_clustered) {
@@ -345,24 +365,37 @@ sub answers_as_html {
     my ($pollid, $pollqid) = ($self->pollid, $self->pollqid);
 
     my @res;
-    push @res, $_ while $_ = $sth->fetchrow_hashref;
-    @res = sort { $a->{datesubmit} cmp $b->{datesubmit} } @res;
+    push @res, $_ 
+        while $_ = $sth->fetchrow_hashref;
 
-    foreach my $res (@res) {
-        my ($userid, $value) = ($res->{userid}, $res->{value}, $res->{pollqid});
+    foreach my $r (@res) {
         my @items = $self->items;
 
         my %it;
-        $it{$_->{pollitid}} = $_->{item} foreach @items;
-
-        my $u = LJ::load_userid($userid) or die "Invalid userid $userid";
+        $it{$_->{pollitid}} = $_->{item} 
+            foreach @items;
 
         ## some question types need translation; type 'text' doesn't.
         if ($self->type eq "radio" || $self->type eq "drop") {
-            $value = $it{$value};
+            $r->{value} = $it{$r->{value}};
         } elsif ($self->type eq "check") {
-            $value = join(", ", map { $it{$_} } split(/,/, $value));
+            $r->{value} = join(", ", map { $it{$_} } split(/,/, $r->{value}));
         }
+
+
+    }
+    
+    return sort { $a->{datesubmit} cmp $b->{datesubmit} } @res;
+}
+
+sub answers_as_html {
+    my $self = shift;
+    my $ret = '';
+
+    foreach my $res ($self->answers(@_)) {
+        my ($userid, $value) = ($res->{userid}, $res->{value}, $res->{pollqid});
+
+        my $u = LJ::load_userid($userid) or die "Invalid userid $userid";
 
         LJ::Poll->clean_poll(\$value);
         $ret .= "<div>" . $u->ljuser_display . " -- $value</div>\n";
@@ -408,6 +441,22 @@ sub answers {
 
     my @res;
     push @res, $_ while $_ = $sth->fetchrow_hashref;
+
+    foreach my $r (@res) {
+        my @items = $self->items;
+
+        # define real values 
+        my %it;
+        $it{$_->{pollitid}} = $_->{item}
+            foreach @items;
+
+        ## some question types need translation; type 'text' doesn't.
+        if ($self->type eq "radio" || $self->type eq "drop") {
+            $r->{value} = $it{$r->{value}};
+        } elsif ($self->type eq "check") {
+            $r->{value} = join(", ", map { $it{$_} } split(/,/, $r->{value}));
+        }
+    }
 
     return @res;
 }

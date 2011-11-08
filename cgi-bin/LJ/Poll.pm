@@ -1,7 +1,7 @@
 package LJ::Poll;
 use strict;
 use Carp qw (croak);
-use Class::Autouse qw (LJ::Entry LJ::Poll::Question LJ::Event::PollVote LJ::Typemap LJ::Text);
+use Class::Autouse qw (LJ::Entry LJ::Poll::Question LJ::Event::PollVote LJ::Typemap LJ::Text LJ::Poll::Render);
 
 ##
 ## Memcache routines
@@ -685,7 +685,10 @@ sub itemid {
 sub name {
     my $self = shift;
     $self->_load;
-    return $self->{name};
+
+    my $name = $self->{name};
+    LJ::Poll->clean_poll(\$name);
+    return $name;
 }
 sub whovote {
     my $self = shift;
@@ -1578,6 +1581,281 @@ sub render {
     return $ret;
 }
 
+sub load_preval {
+    my ($self,$pollid) = @_;
+
+    my $remote = LJ::get_remote();
+    my $dbr = LJ::get_db_reader();    
+
+    my $sth=undef; 
+    $self->{preval} = undef;
+
+
+    if ($self->is_clustered) {
+        $sth = $self->journal->prepare("SELECT pollqid, value, userid FROM pollresult2 WHERE pollid=? AND userid=? AND journalid=?");
+        $sth->execute($pollid, $remote->{'userid'}, $self->journalid);
+    } else {
+        $sth = $dbr->prepare("SELECT pollqid, value FROM pollresult WHERE pollid=? AND userid=?");
+        $sth->execute($pollid, $remote->{'userid'});
+    }
+
+    while (my ($qid, $value, $uid) = $sth->fetchrow_array) {
+        $self->{preval}{$qid} = $value;
+    }
+
+    return $self->{preval} || {};
+}
+
+sub aggr_results {
+    my $self = shift;
+    my $qid  = shift;
+
+
+    $self->load_aggregated_results
+        unless ref $self->{results};
+
+    return $qid ? %{$self->{results}{counts}{$qid}} : %{$self->{results}{counts}};
+}
+
+sub aggr_users {
+    my $self = shift;
+    my $qid  = shift;
+
+    $self->load_aggregated_results
+        unless ref $self->{results};
+
+    return $self->{results}{users};
+}
+
+sub participants {
+    my $self = shift;
+    ## calc amount of participants.
+    my $sth = "";
+
+    my $participants;
+    if ($self->aggr_users()) {
+        $participants = $self->aggr_users() || 0;
+    } elsif ($self->is_clustered) {
+        $sth = $self->journal->prepare("SELECT count(DISTINCT userid) FROM pollresult2 WHERE pollid=? AND journalid=?");
+        $sth->execute($self->pollid, $self->journalid);
+    } else {
+        my $dbr = LJ::get_db_reader();
+        $sth = $dbr->prepare("SELECT count(DISTINCT userid) FROM pollresult WHERE pollid=?");
+        $sth->execute($self->pollid);
+    }
+    
+    ($participants) = $sth->fetchrow_array 
+        if $sth;
+
+    return $participants;
+}
+
+sub render_new {
+    my ($self, %opts) = @_;
+
+    my $remote = LJ::get_remote();
+
+    my $ditemid   = $self->ditemid;
+    my $pollid    = $self->pollid;
+    my $journalid = $self->journalid;
+
+    my $mode     = delete $opts{mode};
+    my $qid      = delete $opts{qid};
+    my $page     = delete $opts{page};
+    my $pagesize = delete $opts{pagesize};
+
+    my $type = 'default';
+    $type = 'widget'
+        if $opts{widget};
+
+    $type = 'mobile'
+        if $opts{mobile};
+
+    my $render = LJ::Poll::Render->new(type => $type);
+
+    my $is_super = $self->prop ('supermaintainer');
+    ## Only maintainers can view, vote and see results for election polls.
+    if ($is_super) {
+        if (!$remote || !($remote->can_manage($is_super) || LJ::u_equals($remote, $self->journal))) {
+            $render->error('poll.error.not_enougth_rights');
+        }
+    }
+
+    # Default pagesize.
+    $pagesize = 2000 
+        unless $pagesize;
+
+    return $render->error('poll.error.usernotfound')
+        unless $self->journal->clusterid;
+
+    return $render->error('poll.error.pollnotfound', { 'num' => $pollid }) 
+        unless $pollid;
+
+    return $render->error('poll.error.noentry') 
+        unless $ditemid;
+
+    my $can_vote = $self->can_vote;
+
+    my $dbr = LJ::get_db_reader();
+
+    # update the mode if we need to
+    $mode = 'results' if ((!$remote && !$mode) || $self->is_closed);
+    if ($remote && !$mode) {
+        my $time = $self->get_time_user_submitted($remote);
+        $mode = $time ? 'results' : $can_vote ? 'enter' : 'results';
+    }
+
+    ## Supermaintainer election has only one mode - voting
+    $mode = "enter"
+        if ($is_super && !$self->is_closed);
+
+    my $sth;
+    my $ret = '';
+    my $ret_side = '';
+
+    ### load all the questions
+    my @qs = $self->questions;
+
+    my $whoview = $self->whoview;
+    if ($whoview eq "none") {
+        $whoview = $remote && $remote->id == $self->posterid ? "none_remote" : "none_others";
+    }
+
+    ### view answers to a particular question in a poll
+    if ($mode eq "ans") {
+        return $render->error('poll.error.cantview')
+            unless $self->can_view;
+
+        my $q = $self->question($qid)
+            or return $render->error('poll.error.questionnotfound');
+
+        my $text = $q->text;
+        LJ::Poll->clean_poll(\$text);
+
+        return $render->show_answers(
+            name        => $self->name(),
+            text        => $text,  
+            answers     => [$q->answers()],
+            post_uri    => $opts{post_uri},
+            whovote     => LJ::Lang::ml('poll.security.'.$self->whovote),
+            whoview     => LJ::Lang::ml('poll.security.'.$whoview),      
+            super       => $is_super ? 1 : 0,
+        );
+    }
+
+    # Users cannot vote unless they are logged in
+    return "<?needlogin?>"
+        if $mode eq 'enter' && !$remote;
+
+    my $do_form = $mode eq 'enter' && $can_vote;
+
+    # from here out, if they can't vote, we're going to force
+    # them to just see results.
+    $mode = 'results' 
+        unless $can_vote;
+    
+    my $results_table = "";
+    my $posted = '';
+
+    my $ago = time() - LJ::TimeUtil->mysqldate_to_time($self->entry->logtime_mysql, 0)
+        if $opts{widget};
+
+    my $choice;
+    my $close_time;
+
+    if ($is_super && !$self->is_closed) {
+        my $sth;
+        ## Election poll has a only one question
+        my $q = $qs[0];
+        if ($self->is_clustered) {
+            $sth = $self->journal->prepare("SELECT value FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=? AND userid=?");
+            $sth->execute($self->pollid, $q->pollqid, $self->journalid, $remote->userid);
+        } else {
+            $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=? AND userid=?");
+            $sth->execute($self->pollid, $q->pollqid, $remote->userid);
+        }
+
+        if (my @row = $sth->fetchrow_array) {
+            my @items = $self->question($q->pollqid)->items;
+            my $choice = $row[0] ? $items[$row[0] - 1] : undef;
+            if ($choice) {
+                $choice = $choice->{item};
+                LJ::Poll->clean_poll(\$choice);
+            }
+        }
+
+        use POSIX qw/strftime/;
+        my $create = LJ::TimeUtil->mysqldate_to_time($self->prop('createdate'));
+        my $delta = time - $create;
+        $close_time = strftime "%B %e %Y", localtime (int(($delta / (21 * 86400)) + 1) * (21 * 86400) + $create);
+    }
+
+    ## go through all questions, adding to buffer to return
+
+    my @questions = ();
+
+    foreach my $q (@qs) {
+        my $qid = $q->pollqid;
+        my $text = $q->text;
+        $text = LJ::trim_at_word($text, 150) if $opts{widget};
+        LJ::Poll->clean_poll(\$text);
+        
+        $posted = '';
+
+        my $type  = $q->type;
+        my $items = $q->get_items(do_form => $do_form);
+
+        $type    = $items->[0]{type}
+            if $items->[0] && $items->[0]{type};
+
+        my %stats = %{$q->stats()};
+
+        push @questions, {
+            text    => $text,
+            type    => $type,
+            qid     => $qid,
+            posterid=> $self->posterid,
+            pagesize=> $pagesize,
+            items   => $items,
+            %stats
+        };    
+
+    }
+
+    my $method = $do_form ? 'show_form' : 'show_results';
+
+    my $submit_value = LJ::Lang::ml('poll.submit');
+    $submit_value = LJ::Lang::ml('poll.vote')
+        if $is_super && $remote && $remote->can_manage($is_super) && !LJ::u_equals($remote, $self->journal); 
+
+    my %args = (
+        super        => $is_super ? 1 : 0,
+        closed       => $self->is_closed() ? 1 : 0,
+        name         => $self->name(),
+        pollid       => $pollid,
+        whovote      => LJ::Lang::ml('poll.security.'.$self->whovote),
+        whoview      => LJ::Lang::ml('poll.security.'.$whoview),
+        submit_value => $submit_value,
+        choice       => $choice,
+        questions    => \@questions,
+        participants => $self->participants(),
+        post_uri     => $opts{post_uri},
+        show_close   => $self->is_owner($remote) && !$self->is_closed ? 1 : 0,
+        show_open    => $self->is_owner($remote) && $self->is_closed ? 1 : 0,
+    );
+
+    if($opts{widget}) {
+        $args{widget} = 1;
+        $args{posted_ago} = LJ::TimeUtil->ago_text($ago);
+    }   
+
+    if($method eq 'show_form') {
+        $args{lj_form_auth} = LJ::form_auth();
+    }
+
+    return $render->$method(%args);
+}
+
 
 ######## Security
 
@@ -1792,17 +2070,14 @@ sub process_vote {
         $$error = LJ::Lang::ml('poll.error.nopollid');
         return 0;
     }
-
     if ($poll->is_closed) {
         $$error = LJ::Lang::ml('poll.isclosed');
         return 0;
     }
-
     unless ($poll->can_vote($remote)) {
         $$error = LJ::Lang::ml('poll.error.cantvote');
         return 0;
     }
-
     # if this particular user has already voted, let them change their answer
     my $time = $poll->get_time_user_submitted($remote);
 
@@ -1859,7 +2134,6 @@ sub process_vote {
             }
         }
     }
-
     my $dbh = $poll->is_clustered ? LJ::get_cluster_master($poll->journal) : LJ::get_db_writer();
 
     ### load all the questions
@@ -1901,7 +2175,6 @@ sub process_vote {
             }
         }
     }
-
     unless (LJ::get_lock($dbh, 'global', "poll:$pollid:$remote->{userid}")) {
         $$error = LJ::Lang::ml('poll.error.cantlock');
         return 0;
@@ -1989,7 +2262,6 @@ sub process_vote {
                                undef, $poll->journalid, $pollid, "$qid:$item");
         }
     }
-
     ## finally, register the vote happened
     if ($poll->is_clustered) {
         unless ($time) { # if new vote, not update of existing

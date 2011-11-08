@@ -54,6 +54,9 @@
             $poll->close_poll if ($mode eq 'close' && !$is_super);
             $poll->open_poll if ($mode eq 'open' && !$is_super);
             $mode = 'results' ;
+
+            BML::redirect($poll->entry->mobile_url())
+                if LJ::Request->get_param('mobile');
         }
     }
 
@@ -126,6 +129,10 @@
             my $journal = LJ::want_user($is_super);
             return BML::redirect($LJ::SITEROOR."/community/election.bml?authas=".$journal->user);
         }
+
+        return BML::redirect($entry->mobile_url)
+            if $FORM{mobile};
+
         return BML::redirect($entry->url);
     }
 
