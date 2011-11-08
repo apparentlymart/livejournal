@@ -65,7 +65,6 @@ body<=
     $ret .= "<strong>Journal Adult Content</strong>: " . ($entry->journal->adult_content || "none")
         . " (admin setting: " . ($entry->journal->admin_content_flag || "none") . ")<br />";
     $ret .= "<strong>Skip/iNclude in recent entries</strong>: " . $entry->get_suspended_mark . "<br />";
-
     $ret .= "<br />";
 
     my %props = %{$entry->props || {}};
@@ -84,6 +83,9 @@ body<=
         }
 
         $ret .= "<li><strong>$prop</strong>: $props{$prop}$extra</li><br />";
+    }
+    if ($entry->is_sticky) {
+        $ret .= "<li><strong>Post is sticky</strong>: Y";
     }
     $ret .= "</ul>";
 
