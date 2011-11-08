@@ -842,7 +842,10 @@ JS_INIT
         
         ##
         $only_me_checked = 1 unless $remote->can_manage ($usejournal_u);
-        my $order = $usejournal_u->{'journaltype'} eq "C" || $usejournal_u->{'journaltype'} eq "Y";  # community or syndicated
+        my $order = 0;
+        if ($usejournal_u) {
+             $order = $usejournal_u->is_syndicated || $usejournal_u->is_community;  # community or syndicated
+        }
 
         my $delayed_entries;
 
