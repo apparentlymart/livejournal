@@ -908,11 +908,10 @@ JS_INIT
                 }
             }
 
-            warn "delayed entries count: $delayed_entries_count";
-
             if ($delayed_entries_count > 0) {
-                warn "recent update\n";
                 @recent_entries = $append_delayed->($usejournal_u, \@recent, $delayed_entries);
+            } else {
+                @recent_entries = @recent;
             }
 
         }

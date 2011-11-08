@@ -2653,10 +2653,6 @@ sub editevent {
             return fail( $err, 217 ) if $req->{itemid} || $req->{anum};
             return fail( $err, 215 ) unless $req->{tz};                        
 
-            # updating an entry:
-            return undef
-                unless common_event_validation($req, $err, $flags);
-
             $req->{ext}->{flags} = $flags;
             $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
             $req->{usejournal} = $req->{usejournal}  || '';
@@ -2680,6 +2676,11 @@ sub editevent {
                         unless $flags->{noauth};
                 return $res;
             }
+
+
+            # updating an entry:
+            return undef
+                unless common_event_validation($req, $err, $flags);
 
             if ( LJ::DelayedEntry::is_future_date($req) ) {
                 $entry->update($req);
@@ -3206,7 +3207,7 @@ sub getevents {
                 );
 
                 for my $did ( @$ids ) {
-                    my $entry, LJ::DelayedEntry::get_entry_by_id(
+                    my $entry = LJ::DelayedEntry::get_entry_by_id(
                         $uowner,
                         $did,
                         { userid => $flags->{user}->id },
@@ -3228,7 +3229,7 @@ sub getevents {
                 }
             }
             elsif ( $req->{selecttype} eq 'one' ) {
-                my $entry, LJ::DelayedEntry::get_entry_by_id(
+                my $entry = LJ::DelayedEntry::get_entry_by_id(
                     $uowner,
                     $req->{delayedid},
                     { userid => $flags->{user}->id },
@@ -3255,7 +3256,7 @@ sub getevents {
         elsif ( $req->{delayedids} ) {
             if ( $req->{selecttype} eq 'multiple' ) {
                 for my $did ( @$req->{delayedids} ) {
-                    my $entry, LJ::DelayedEntry::get_entry_by_id(
+                    my $entry = LJ::DelayedEntry::get_entry_by_id(
                         $uowner,
                         $did,
                         { userid => $flags->{user}->id },
