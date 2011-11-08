@@ -1236,7 +1236,8 @@ sub convert {
     my ($self) = @_;
     my $req = $self->{data};
     
-    my $flags = { 'noauth' => 1, 
+    my $flags = { 'noauth' => 1,
+                  'use_custom_time' => 0, 
                   'u' => $self->poster };
 
     my $err = 0;
@@ -1250,6 +1251,7 @@ sub convert {
 sub convert_from_data {
     my ($self, $req) = @_;
     my $flags = { 'noauth' => 1,
+                  'use_custom_time' => 0,
                   'u' => $self->poster };
 
     my $err = 0;
