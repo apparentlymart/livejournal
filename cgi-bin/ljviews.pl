@@ -2917,7 +2917,7 @@ sub __append_delayed {
     
     my $append_delayed = sub {
         foreach my $ditem (@$delayed_entries) {
-            my $entry = LJ::DelayedEntry->get_entry_by_id($u, $ditem);
+            my $entry = LJ::DelayedEntry->get_entry_by_id($u, $ditem, {'dateformat' => 'S1'} );
             
             push @ordered, {
                             'alldatepart' => $entry->alldatepart ,
