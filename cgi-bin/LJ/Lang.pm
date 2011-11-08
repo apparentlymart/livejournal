@@ -642,6 +642,7 @@ sub get_text {
     my $text;
 
     if (   $LJ::IS_DEV_SERVER
+        && ! $LJ::Lang::PREVENT_LOADING_FROM_FILES
         && $is_gen_dmid
         && ( $lang eq "en" || $lang eq $LJ::DEFAULT_LANG ) )
     {
