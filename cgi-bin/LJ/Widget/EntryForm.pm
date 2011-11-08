@@ -1633,6 +1633,7 @@ sub render_ljphoto_block {
 <script type="text/javascript">
     window.ljphotoEnabled = $ljphoto_enabled;
     jQuery('#updateForm').photouploader({
+        action: 'add_new_post',
         availableSpace: '$available_space',
         sizesData: $photo_sizes_json,
         albumsData: $album_list_json,
