@@ -147,7 +147,7 @@ body<=
         my $delayed_prev = $opts{'delayed_prev'};
         my $delayed_next = $opts{'delayed_next'};
 
-        if ($opts{'prev'} || $opts{'next'}) {
+        if ($opts{'prev'} || $opts{'next'} || !$opts{'first_page'}) {
         $ret .= "<p class='i-qotd-nav'>";
         if ($opts{'prev'} || !$opts{'first_page'}) {
             $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" .
@@ -263,7 +263,7 @@ body<=
         }
         $ret .= "</ul>" if @res;
 
-        if ($opts{'prev'} || $opts{'next'}) {
+        if ($opts{'prev'} || $opts{'next'} || !$opts{'first_page'}) {
         $ret .= "<p class='i-qotd-nav'>";
         if ($opts{'prev'} || !$opts{'first_page'}) {
             $ret .=  "<a class='i-qotd-nav-prev' href='$LJ::SITEROOT/editjournal.bml$getextra" .
@@ -847,11 +847,12 @@ JS_INIT
         my $delayed_entries;
 
         # calculate recent entries count
-        my $has_sticky = $usejournal_u->has_sticky_entry;
         my $delayed_entries_count = 0;
         my $usual_skip = $skip;
 
-        if (LJ::is_enabled("delayed_entries")) {
+        if (LJ::is_enabled("delayed_entries") && $usejournal_u) {
+            my $has_sticky = $usejournal_u->has_sticky_entry;
+
             $delayed_entries_count = LJ::DelayedEntry->get_entries_count($usejournal_u);
             $usual_skip -= $delayed_entries_count;
 
@@ -863,7 +864,7 @@ JS_INIT
                 $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u, 
                                                                             $skip, 
                                                                             $items_per_page - $has_sticky);
-            } elsif ( $skip) {
+            } elsif ($skip) {
                 $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u, 
                                                                             $skip - $has_sticky, 
                                                                             $items_per_page);
@@ -919,7 +920,7 @@ JS_INIT
         $ret .= $entry_chooser->(\@recent_entries,
                                 first_page => $skip > 0 ? 0 : 1,
                                 prev => $skip > $items_per_page ? $skip - $items_per_page : 0, 
-                                next => $have_next_page ? $skip + $items_per_page : 0
+                                next => $have_next_page         ? $skip + $items_per_page : 0
         );
 
         my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
