@@ -13,9 +13,17 @@
 	box-sizing: border-box;
 	border: 0;
 	outline: none;
-	font: 13px/18px Arial, 'sans-serif';
+	font-size: 13px;
+	line-height: 18px;
+	 Arial, 'sans-serif';
 	color: #222;
 	}
+.s-horizon #draft-container TEXTAREA {
+    font-family: Courier, monospace;
+    }
+.s-lanzelot #draft-container TEXTAREA {
+    font-family: Arial, 'sans-serif';
+    }
 #updateForm {
     font-family: arial, verdana, 'sans-serif';
     min-width: 620px;
