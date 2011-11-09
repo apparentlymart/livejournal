@@ -899,6 +899,7 @@ sub render_options_block {
          'do_not_add' => sub {
             return '' unless LJ::is_enabled("delayed_entries");
             my $journalu = LJ::load_user($opts->{'usejournal'}) || $remote;  
+            return '' unless $journalu;
             return '' if $journalu->is_community;
 
             my $selected = $opts->{'opt_backdated'} || 0;
