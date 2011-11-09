@@ -989,16 +989,37 @@ InOb.handleInsertEmbed = function (){
 	});
 };
 
-InOb.handleInsertImageBeta = function (){
-	jQuery('#updateForm').photouploader('option', 'type', 'upload').bind('htmlready',
-		function (event, htmlOutput){
+InOb.handleInsertImageBeta = function () {
+	var jSortable,
+		jPhotoUploader = jQuery('#updateForm');
+
+	jPhotoUploader.photouploader('option', 'type', 'upload').bind('htmlready',
+		function (event) {
 			var selection = DOM.getSelectedRange($('draft'));
-			var node = $('draft').event;
+			var node = $('draft');
 			var value = node.value;
 			var start = value.substring(0, selection.start);
 			var end = value.substring(selection.end);
-			node.value = start + htmlOutput + end;
+			node.value = start + event.htmlStrings.join('') + end;
+		}).bind('endupload', function() {
+			jSortable.sortable('enable').sortable('refresh');
+		}).bind('uploading', function() {
+			jSortable.sortable('disable');
+		}).bind('removeitem', function () {
+			jSortable.sortable('refresh');
 		}).photouploader('show');
+
+	jSortable = jQuery('.b-popup-pics-gallery-list');
+	jSortable.sortable({
+		axis: 'x',
+		disabled: true,
+		stop: function() {
+			jPhotoUploader.photouploader('update');
+		}
+	});
+
+	jSortable.disableSelection();
+
 	return true;
 };
 
