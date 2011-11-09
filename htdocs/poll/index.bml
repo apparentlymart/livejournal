@@ -136,7 +136,7 @@
         return BML::redirect($entry->url);
     }
 
-    $body .= $poll->render(mode => $mode, qid => $FORM{qid},
+    $body .= $poll->render_new(mode => $mode, qid => $FORM{qid},
                 page => $FORM{page}, pagesize => $FORM{pagesize});
     return;
 }

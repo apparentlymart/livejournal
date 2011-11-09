@@ -243,6 +243,12 @@ sub url {
     return $url;
 }
 
+sub mobile_url {
+    my $self = shift;
+    my $u = $self->{u};    
+    return "http://m.$LJ::DOMAIN/read/user/".$u->user.'/'. $self->ditemid;
+}
+
 sub anum {
     my $self = shift;
     return $self->{anum} if defined $self->{anum};

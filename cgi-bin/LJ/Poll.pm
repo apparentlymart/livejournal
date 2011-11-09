@@ -1059,6 +1059,13 @@ sub render_ans {
 #   qid  => show a specific question
 #   page => page #
 #   widget => true if rendering must be short
+#
+# found call places:
+#  - LJ/Widget/PollOfTheDay.pm 
+#  - LJ/Poll.pm
+#  - htdocs/poll/index.bml
+#  - htdocs/community/election.bml
+#
 sub render {
     my ($self, %opts) = @_;
 
@@ -1803,12 +1810,13 @@ sub render_new {
         $posted = '';
 
         my $type  = $q->type;
-        my $items = $q->get_items(do_form => $do_form);
+        my $items = $q->get_items(
+            do_form => $do_form, 
+            widget => $opts{widget}
+        );
 
         $type    = $items->[0]{type}
             if $items->[0] && $items->[0]{type};
-
-        my %stats = %{$q->stats()};
 
         push @questions, {
             text    => $text,
@@ -1816,8 +1824,8 @@ sub render_new {
             qid     => $qid,
             posterid=> $self->posterid,
             pagesize=> $pagesize,
-            items   => $items,
-            %stats
+            items   => $items,  
+            %{$q->stats()}
         };    
 
     }
@@ -2028,7 +2036,7 @@ sub expand_entry {
         my $poll = LJ::Poll->new($pollid);
         return "[Error: Invalid poll ID $pollid]" unless $poll && $poll->valid;
 
-        return ($viewpoll ? $poll->get_poll_xml(viewer => $opts{viewer}) : $poll->render);
+        return ($viewpoll ? $poll->get_poll_xml(viewer => $opts{viewer}) : $poll->render_new);
     };
 
     $$entryref =~ s/<lj-poll-(\d+)>/$expand->($1, $getpolls)/eg;
