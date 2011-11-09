@@ -1651,26 +1651,40 @@ JS
         my $insert_photos_json = LJ::JSON->to_json ( $insert_photos );
         $out .= <<JS;
 <script type="text/javascript">
-    jQuery('#updateForm')
-        .photouploader({
-            insertPhotosData: $insert_photos_json,
-            type: 'add'
-        })
-        .bind('htmlready', function (event) {
-            var html = event.htmlStrings,
-                editor;
+		var jSortable,
+			jPhotoUploader = jQuery('#updateForm');
 
-            if (window.switchedRteOn) {
-                editor = CKEDITOR.instances.draft;
+		jPhotoUploader.photouploader({
+					insertPhotosData: $insert_photos_json,
+					type: 'add'
+			})
+			.bind('htmlready', function (event) {
+					var html = event.htmlStrings,
+							editor;
 
-                for (var i = 0, l = html.length; i < l; i++) {
-                    editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html[i], editor.document));
-                }
-            } else {
-                jQuery('#draft').val(jQuery('#draft').val() + html.join(' '));
-            }
-        })
-        .photouploader('show');
+					if (window.switchedRteOn) {
+							editor = CKEDITOR.instances.draft;
+
+							for (var i = 0, l = html.length; i < l; i++) {
+									editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html[i], editor.document));
+							}
+					} else {
+							jQuery('#draft').val(jQuery('#draft').val() + html.join(' '));
+					}
+			})
+			.bind('removeitem', function () {
+				jSortable.sortable('refresh');
+			})
+			.photouploader('show');
+
+		jSortable = jQuery('.b-popup-pics-gallery-list');
+		jSortable.sortable({
+			stop: function() {
+				jPhotoUploader.photouploader('update');
+			}
+		});
+
+		jSortable.disableSelection();
 </script>
 JS
     }
