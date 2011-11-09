@@ -151,7 +151,7 @@ sub _friend_friendof_uids {
 
     my $mode      = $args{mode};
     my $limit     = $args{limit};
-    my $nogearman = $args{nogearma} || 0;
+    my $nogearman = $args{nogearman} || 0;
 
     ## check cache first
     my $res = $class->_load_friend_friendof_uids_from_memcache($u, $mode, $limit);
