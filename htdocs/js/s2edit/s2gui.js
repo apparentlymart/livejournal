@@ -332,8 +332,8 @@ function s2buildReference()
 	s2buildClasses();
 	s2buildFunctions();
 	s2buildProperties();
-	
-	if (window.name)
+
+	if (!s2settings.turboEnabled() && window.name)
 	{
 		setTimeout(function() {
 			var pos = window.name.split(':'), textarea = s2getCodeArea();
@@ -550,5 +550,7 @@ function s2submit()
 	if (s2settings.turboEnabled()) {
 		s2edit.save(textarea.value);
 		return false;
+	} else {
+		window.name = textarea.scrollTop + ':' + nxgetPositionCursor(textarea);
 	}
 }

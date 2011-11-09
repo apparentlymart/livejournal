@@ -61,22 +61,33 @@ var s2edit = function() {
 		},
 
 		initGui: function() {
-			var self = this;
-			jQuery('.turbo-mode').click(function(ev) {
+			var self = this,
+				turboButton = jQuery('.turbo-mode'),
+				toggleTurboButton = function(enable) {
+					if (enable) {
+						turboButton.val('Back to old editor');
+					} else {
+						turboButton.val('Show new editor');
+					}
+				};
+
+			turboButton.click(function(ev) {
 				var modeEnabled = !s2settings.load('turboMode');
 				s2settings.save('turboMode', modeEnabled);
+				toggleTurboButton(modeEnabled);
 				if (modeEnabled) {
 					if (!s2isAceActive()) {
 						self.toggleEditor();
 					}
-					this.value = 'Back to old editor';
 				} else {
 					if (s2isAceActive()) {
 						self.toggleEditor();
 					}
-					this.value = 'Show new editor';
 				}
 			});
+
+			var modeEnabled = !!s2settings.load('turboMode');
+			toggleTurboButton(modeEnabled);
 		},
 
 		isAceSupported: function() {
