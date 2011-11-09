@@ -397,7 +397,9 @@ function EntryPage::lay_page_nav() {
         }
     }
     $l = $.entry->get_link("nav_prev");
-    $l->lay_print_li($*text_entry_links{"nav_prev"});
+    if (defined $l) {
+        $l->lay_print_li($*text_entry_links{"nav_prev"});
+    }
     println "</ul></div>";
 }
 
