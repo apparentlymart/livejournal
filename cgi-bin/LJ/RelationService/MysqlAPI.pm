@@ -10,6 +10,10 @@ sub find_relation_destinations {
     my $limit     = $opts{limit} || 50000;
     my $nogearman = $opts{nogearman} || 0;
 
+    ## stricly disable gearman,
+    ## load uids inporcess is faster than using gearman.
+    $nogearman = 1;
+
     my $uids = $class->_friend_friendof_uids($u, 
                         %opts,
                         limit     => $limit, 
@@ -26,6 +30,10 @@ sub find_relation_sources {
     my %opts  = @_;
     my $limit     = $opts{limit} || 50000;
     my $nogearman = $opts{nogearman} || 0;
+    
+    ## stricly disable gearman
+    ## load uids inporcess is faster than using gearman.
+    $nogearman = 1;
 
     my $uids = $class->_friend_friendof_uids($u, 
                         %opts,

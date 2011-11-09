@@ -4543,10 +4543,21 @@ sub people_friends {
 sub friends_added_count {
     my $u = shift;
 
-    my %initial = ( map { $_ => 1 } @LJ::INITIAL_FRIENDS, @LJ::INITIAL_OPTIONAL_FRIENDS, $u->user );
-
-    # return count of friends who were not initial
-    return scalar grep { ! $initial{$_->user} } $u->friends;
+    my @friendids = $u->friend_uids;
+    if (@friendids>5_000) {
+        return scalar @friendids;
+    } else {
+        my %initial = ( map { $_ => 1 } @LJ::INITIAL_FRIENDS, @LJ::INITIAL_OPTIONAL_FRIENDS, $u->user );
+        my $count = 0;
+        my $users = LJ::load_userids(@friendids);
+        while(my ($uid, $u) = each %$users) {
+            next unless $u;
+            next if $initial{$u->user};
+            $count++;
+        }
+        # return count of friends who were not initial
+        return $count;
+    }
 }
 
 sub set_password {
