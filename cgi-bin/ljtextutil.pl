@@ -977,7 +977,8 @@ sub html_get_img_urls {
 
     my @image_urls;
     my $p = HTML::TokeParser->new($htmlref);
-
+    return []
+        unless $p;
     while (my $token = $p->get_token) {
         if ($token->[1] eq 'img' and ref $token->[2] eq 'HASH') {
             my $attrs = $token->[2];
