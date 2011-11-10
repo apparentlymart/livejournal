@@ -63,7 +63,7 @@ sub log_ping {
         unless $dbh;
 
     my $sth = $dbh->prepare("
-        INSERT INTO pingrel
+        INSERT IGNORE INTO pingrel
             (suid, sjid, tuid, tjid)
         VALUES
             (?, ?, ?, ?)
