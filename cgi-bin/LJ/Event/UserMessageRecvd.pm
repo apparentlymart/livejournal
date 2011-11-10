@@ -42,19 +42,29 @@ sub _as_email {
     my $vars = {
         user            => $is_html ? ($u->ljuser_display) : ($u->user),
         subject         => $msg->subject,
-        body            => $msg->body,
         sender          => $is_html ? ($other_u->ljuser_display) : ($other_u->user),
         postername      => $other_u->user,
         sitenameshort   => $LJ::SITENAMESHORT,
         inbox           => $inbox,
+        siteroot        => $LJ::SITEROOT,
     };
 
-    my $body = LJ::Lang::get_text($lang, 'esn.email.pm_without_body', undef, $vars) .
+    my $reply_lnk = "$LJ::SITEROOT/inbox/compose.bml?mode=reply&msgid=$msgid";
+
+    my $ml_var = 'esn.email.pm_without_body';
+    if ( $u->get_cap('full_pm_esn') ) {
+        # paid users receive full texts of messages
+        $ml_var = 'esn.email.pm';
+        $vars->{'body'} = $msg->body;
+    }
+
+    my $body = LJ::Lang::get_text($lang, $ml_var, undef, $vars) .
         $self->format_options($is_html, $lang, $vars,
         {
-            'esn.view_profile'    => [ 1, $other_u->profile_url ],
-            'esn.read_journal'    => [ 2, $other_u->journal_base ],
-            'esn.add_friend'      => [ $u->is_friend($other_u) ? 0 : 3,
+            'esn.reply_message'   => [ 1, $reply_lnk ],
+            'esn.view_profile'    => [ 2, $other_u->profile_url ],
+            'esn.read_journal'    => [ 3, $other_u->journal_base ],
+            'esn.add_friend'      => [ $u->is_friend($other_u) ? 0 : 4,
                                             "$LJ::SITEROOT/friends/add.bml?user=$sender" ],
         }
     );

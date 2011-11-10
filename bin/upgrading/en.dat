@@ -1771,6 +1771,19 @@ esn.edit_friends=[[openlink]]Edit Friends[[closelink]]
 esn.edit_groups|staleness=1
 esn.edit_groups=[[openlink]]Edit Friends groups[[closelink]]
 
+esn.email.pm|staleness=1
+esn.email.pm<<
+Hi [[user]],
+
+[[sender]] sent you a message on [[sitenameshort]]: [[subject]].
+The message was:
+[[body]]
+
+Go to [[inbox]] to view your new messages.
+
+Or you can:
+.
+
 esn.email.pm.subject|staleness=1
 esn.email.pm.subject=[[sender]] sent you a message
 
@@ -2302,6 +2315,9 @@ esn.remove_friend=[[openlink]]Remove [[postername]] from your Friends list[[clos
 
 esn.reply_at_webpage|staleness=1
 esn.reply_at_webpage=[[openlink]]Reply[[closelink]] at the webpage
+
+esn.reply_message|staleness=1
+esn.reply_message=[[openlink]]Reply to message[[closelink]]
 
 esn.screened|staleness=1
 esn.screened=This comment was screened.
