@@ -7610,7 +7610,7 @@ sub ljuser {
     ### populate userhead data
     if ($userhead !~ /^https?:\/\//) {
         my $imgroot = $opts->{'imgroot'} || $LJ::IMGPREFIX;
-        $userhead = $imgroot . '/' . $userhead . "?v=3";
+        $userhead = $imgroot . '/' . $userhead . "?v=$LJ::CURRENT_VERSION";
     }
 
     $userhead_h ||= $userhead_w;  # make square if only one dimension given
