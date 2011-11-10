@@ -138,6 +138,29 @@ community.members.maintainer.remove.delayed.email_plain=All delayed entries will
 community.members.maintainer.remove.email_subject|staleness=1
 community.members.maintainer.remove.email_subject=Maintainership removal: [[mailusercname]]
 
+
+community.members.delayed.remove.email_html|staleness=1
+community.members.delayed.remove.email_html<<
+<p>Dear [[sitenameshort]] user [[user]],</p>
+<p>[[remote]] has removed you from the community <a [[mailclink]]>[[usercname]].</a></p>
+<p>Regards,<br/>
+[[sitename]] Team<br/>[[siteroot]]</p>
+.
+
+community.members.delayed.remove.email_plain|staleness=1
+community.members.delayed.remove.email_plain<<
+Dear [[sitenameshort]] user [[user]],
+[[remote]] has removed you from the the community [[usercname]].
+Regards,
+[[sitename]] Team
+[[siteroot]]
+.
+
+
+community.members.delayed.remove.email_subject|staleness=1
+community.members.delayed.remove.email_subject=Removing from the community: [[mailusercname]]
+
+
 contentflag.viewingconcepts|staleness=1
 contentflag.viewingconcepts=You are about to view content that may not be appropriate for minors.
 
