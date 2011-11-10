@@ -4543,21 +4543,9 @@ sub people_friends {
 sub friends_added_count {
     my $u = shift;
 
-    my @friendids = $u->friend_uids;
-    if (@friendids>5_000) {
-        return scalar @friendids;
-    } else {
-        my %initial = ( map { $_ => 1 } @LJ::INITIAL_FRIENDS, @LJ::INITIAL_OPTIONAL_FRIENDS, $u->user );
-        my $count = 0;
-        my $users = LJ::load_userids(@friendids);
-        while(my ($uid, $u) = each %$users) {
-            next unless $u;
-            next if $initial{$u->user};
-            $count++;
-        }
-        # return count of friends who were not initial
-        return $count;
-    }
+    my @friend_ids = $u->friend_uids;
+    my %init_friends_ids = map { $_ => 1 } LJ::get_uids( @LJ::INITIAL_FRIENDS, @LJ::INITIAL_OPTIONAL_FRIENDS, $u->user );
+    return scalar grep { ! $init_friends_ids{$_} } @friend_ids;
 }
 
 sub set_password {
@@ -7680,6 +7668,13 @@ sub set_email {
     LJ::MemCache::delete([$userid, "email:$userid"]);
     my $cache = $LJ::REQ_CACHE_USER_ID{$userid} or return;
     $cache->{'_email'} = $email;
+}
+
+sub get_uids {
+    my @friends_names = @_;
+    my @ret;
+    push @ret, grep { $_ } map { LJ::load_user($_) } @friends_names;
+    return @ret;
 }
 
 sub set_password {
