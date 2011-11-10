@@ -113,6 +113,101 @@ body<=
             my $qpostlevel = $POST{postlevel};
             $qpostlevel = "select" unless $qpostlevel =~ /^(?:anybody|members|select)$/;
 
+            my $sendmail = sub {
+                my ($targetu, $html, $plain, $subject) = @_;
+                return unless $targetu;
+
+                my $fromname = $remote->username;
+
+                #todo: check if user wants to receive emails?
+                if ($targetu->email_raw) {
+                    # send an email to this user:
+                    # send an email with both plain and html content
+                    my $msg = '';
+                    my $encoding = $targetu->{'mailencoding'} ?
+                                        $LJ::CACHE_ENCODINGS{$targetu->{'mailencoding'}} :
+                                        "UTF-8";
+                    if ($targetu->{opt_htmlemail} eq 'Y') {
+                        $msg =  new MIME::Lite ( 'From'    => "\"$LJ::SITENAME\" <$LJ::BOGUS_EMAIL>",
+                                                 'To'      => $targetu->email_raw,
+                                                 'Subject' => $subject,
+                                                 'Type'    => 'multipart/alternative',
+                                               );
+
+                        # add the plaintext version
+                        my $plainpart = $msg->attach( 'Type'     => 'TEXT',
+                                                      'Data'     => $plain,
+                                                      'Encoding' => 'quoted-printable',
+                                                    );
+
+                        $plainpart->attr("content-type.charset" => $encoding)
+                            if $LJ::UNICODE;
+
+                        # add the html version
+                        my $htmlpart = $msg->attach( 'Type'     => 'text/html',
+                                                     'Data'     => $html,
+                                                     'Encoding' => 'quoted-printable'
+                                                   );
+
+                        $htmlpart->attr("content-type.charset" => $encoding)
+                            if $LJ::UNICODE;
+
+                    } else {
+                        # no html version, do simple email
+                        $msg = new MIME::Lite ( 'From'    => "\"$LJ::SITENAME\" <$LJ::BOGUS_EMAIL>",
+                                                'To'      => $targetu->email_raw,
+                                                'Subject' => $subject,
+                                                'Type'    => 'text/plain',
+                                                'Data'    => $plain
+                                              );
+
+                        $msg->attr("content-type.charset" => $encoding);
+                    }
+
+                    LJ::send_mail($msg);
+                }
+            };
+
+            my $delayed_users_ids = LJ::DelayedEntry::get_usersids_with_delated_entry($cu);
+            foreach my $userid (@$delayed_users_ids) {
+                my $du = LJ::want_user($userid);
+               
+                next unless $du;
+                next if LJ::DelayedEntry::can_post_to($cu, $du);
+    
+                my $mailusername = $du->username;
+                my $mailusercname = $cu->username;
+                my $mailclink = LJ::journal_base($cu, ['community']);
+
+                my $lang = $du->prop('browselang') || $LJ::DEFAULT_LANG;
+                my $html = LJ::Lang::get_text($lang, 'community.members.delayed.remove.email_html', undef, {
+                                     sitenameshort   => $LJ::SITENAMESHORT,
+                                     user            => $mailusername,
+                                     usercname       => $mailusercname,
+                                     mailclink       => "href='$mailclink'",
+                                     remote          => $remote->username,
+                                     sitename        => $LJ::SITENAME,
+                                     siteroot        => $LJ::SITEROOT,
+                                });
+
+                my $plain = LJ::Lang::get_text($lang, 'community.members.delayed.remove.email_plain', undef, {
+                                    sitenameshort   => $LJ::SITENAMESHORT,
+                                    user            => $mailusername,
+                                    usercname       => $mailusercname,
+                                    mailclink       => $mailclink,
+                                    remote          => $remote->username,
+                                    sitename        => $LJ::SITENAME,
+                                    siteroot        => $LJ::SITEROOT,
+                                });
+
+
+                my $subject = LJ::Lang::get_text($lang, 'community.members.delayed.remove.email_subject', undef,
+                                { mailusercname => $mailusercname }
+                                );
+    
+                $sendmail->($du, $html, $plain, $subject);
+            }
+
             # postlevel and nonmember_posting are a single setting in the UI, but separate options in the backend
             # split them out so we can save them properly
             my $nonmember_posting = 0;

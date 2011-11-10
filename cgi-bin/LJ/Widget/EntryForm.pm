@@ -429,11 +429,11 @@ sub render_metainfo_block {
         my $usejournal = $opts->{'usejournal'};
         if ($usejournal) {
             my $posterid = $remote->userid;
-            my $ownerid = LJ::load_user($usejournal)->userid;
+            my $journalu = LJ::load_user($usejournal);
+            my $ownerid = $journalu->userid;
             my $dbh = LJ::get_db_writer();
-            $can_edit_date = !!($dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
-                                                     "WHERE userid=$ownerid AND targetid=$posterid ".
-                                                     "AND type IN ('A','M','N')")) || 0;
+            $can_edit_date = LJ::DelayedEntry::can_post_to($journalu, $remote);
+
             $out .= "<li id='usejournal_single' class='pkg'>\n";
             $out .= "<label for='usejournal' class='title'>" .
                 BML::ml('entryform.postto') . "</label>\n";

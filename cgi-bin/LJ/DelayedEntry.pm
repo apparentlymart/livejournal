@@ -870,9 +870,24 @@ sub entries_exists {
     my $dbcr = LJ::get_cluster_def_reader($journal)
         or die "get cluster for journal failed";
 
-    return $dbcr->selectcol_arrayref("SELECT delayedid " .
-                                     "FROM delayedlog2 WHERE journalid=$journalid AND posterid = $userid ".
-                                     "LIMIT 1");    
+    my ($delayeds) =  $dbcr->selectcol_arrayref("SELECT delayedid " .
+                                              "FROM delayedlog2 WHERE journalid=$journalid AND posterid = $userid ".
+                                              "LIMIT 1");    
+    return @$delayeds;
+}
+
+sub get_usersids_with_delated_entry {
+    my ($journalu) = @_;
+
+    __assert($journalu);
+
+    my $journalid = $journalu->userid;
+    my $dbcr = LJ::get_cluster_def_reader($journalu) 
+        or die "get cluster for journal failed";
+
+    return $dbcr->selectcol_arrayref(  "SELECT posterid " .
+                                       "FROM delayedlog2 ".
+                                       "WHERE journalid = $journalid GROUP BY posterid" );
 }
 
 sub get_entries_count {
@@ -885,7 +900,7 @@ sub get_entries_count {
     unless ($userid) {
         my $remote = LJ::get_remote();
         return undef unless $remote;
-        $userid = $remote->userid ;
+        $userid = $remote->userid;
 
         return undef unless __delayed_entry_can_see( $journal,
                                                      $remote );
