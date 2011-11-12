@@ -2388,7 +2388,7 @@ sub AUTOLOAD {
         ##
         warn "LJ::XMLRPC::$method died: $@"
             if $@ !~ /^\d+?\s*:/
-            and $@ =~ m/\s*:\s+Account not validated./
+            and $@ !~ m/\s*:\s*Account not validated./
             and $@ ne "Unknown username.";
 
         die $@;
