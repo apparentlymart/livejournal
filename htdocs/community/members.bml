@@ -449,8 +449,6 @@ body<=
                             siteroot        => $LJ::SITEROOT,
                         });
 
-            }
-
             my $subject = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_subject', undef,
                             { mailusercname => $mailusercname }
                             );
