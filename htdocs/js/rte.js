@@ -109,49 +109,48 @@
 		}
 
 		if (!window.switchedRteOn) {
-			window.switchedRteOn = true;
-			$('#switched_rte_on').val('1');
-
 			if (!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible) {
 				CKEDITOR.basePath = statPrefix + '/ck/';
-				var editor = CKEDITOR.replace('draft', {
+
+				CKEDITOR.replace('draft', {
 					skin: 'v2',
 					baseHref: CKEDITOR.basePath,
 					height: 350,
 					language: Site.current_lang || 'en'
-				});
+				}).on('instanceReady', function() {
+						CKEditor = this;
+						this.resetDirty();
 
-				editor.on('instanceReady', function() {
-					CKEditor = editor;
-					editor.resetDirty();
-
-					$('#updateForm')[0].onsubmit = function() {
-						if (window.switchedRteOn) {
-							var data = CKEditor.getData();
-							if(!$('#event_format')[0].checked){
-								data = data.replace(/\r|\n/g, '<br />');
+						$('#updateForm')[0].onsubmit = function() {
+							if (window.switchedRteOn) {
+								var data = CKEditor.getData();
+								if (!$('#event_format')[0].checked) {
+									data = data.replace(/\r|\n/g, '<br />');
+								}
+								draftData.textArea.val(data);
 							}
-							draftData.textArea.val(data);
-						}
-					};
+						};
 
-					CKEditor.on('dataReady', function() {
-						$('#entry-form-wrapper').attr('class', 'hide-html');
+						this.on('dialogHide', updateDraftState);
+						this.on('afterCommandExec', updateDraftState);
+						this.on('insertElement', updateDraftState);
+						this.on('insertHtml', updateDraftState);
+						this.on('insertText', updateDraftState);
 
-						CKEditor.container.show();
-						CKEditor.element.hide();
+						this.on('dataReady', function() {
+							$('#entry-form-wrapper').attr('class', 'hide-html');
+							this.container.show();
+							this.element.hide();
+							this.document.on('keypress', updateDraftState);
+							this.document.on('click', updateDraftState);
 
-						editor.on('dialogHide', updateDraftState);
-						editor.on('afterCommandExec', updateDraftState);
-						editor.on('insertElement', updateDraftState);
-						editor.on('insertHtml', updateDraftState);
-						editor.on('insertText', updateDraftState);
-						editor.document.on('keypress', updateDraftState);
-						editor.document.on('click', updateDraftState);
+							this.onSwitch = true;
+							!CKEDITOR.env.ie && this.focus();
 
-						!CKEDITOR.env.ie && editor.focus();
+							$('#switched_rte_on').val('1');
+							window.switchedRteOn = true;
+						});
 					});
-				});
 			} else {
 				var data = CKEditor.element.getValue();
 
@@ -163,7 +162,10 @@
 				}
 
 				CKEditor.setData(data);
+				$('#switched_rte_on').val('1');
+				window.switchedRteOn = true;
 			}
+
 		}
 
 		return false;
