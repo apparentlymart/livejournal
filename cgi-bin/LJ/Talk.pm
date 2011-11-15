@@ -128,11 +128,12 @@ sub link_bar
         $entry = LJ::Entry->new($u, ditemid => $itemid);
     }
 
+    my $itemlnk = $entry->is_delayed ? "delayedid=" . $opts->{delayedid} :
+                                       "itemid=$itemid";
+
     # << Previous
-    if (!$entry->is_delayed) {
-        push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=prev", "prev_entry");
-        $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous' />\n";
-    }
+    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev", "prev_entry");
+    $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev' rel='Previous' />\n";
 
     # memories
     unless ($LJ::DISABLED{'memories'} || $entry->is_delayed) {
@@ -181,11 +182,8 @@ sub link_bar
     }
 
     ## Next
-    if (!$entry->is_delayed)
-    {
-        push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
-        $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next' />\n";
-    }
+    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next", "next_entry");
+    $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next' rel='Next' />\n";
 
     if (@linkele) {
         $ret .= BML::fill_template("standout", {

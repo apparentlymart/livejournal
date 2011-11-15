@@ -951,6 +951,60 @@ sub get_entries_by_journal {
                                      "ORDER BY is_sticky DESC, revptime $sql_limit");
 }
 
+sub get_first_entry {
+    my ( $journal, $userid ) = @_;
+    __assert($journal, "no journal");
+
+    my $dbcr = LJ::get_cluster_def_reader($journal)
+        or die "get cluster for journal failed";
+
+    my $u;
+    my $sql_poster = '';
+
+    unless ($userid) {
+        $u = LJ::get_remote();
+    } else {
+        $u = LJ::want_user($userid);
+    }
+
+    return 0 unless $u;
+    if (!__delayed_entry_can_see( $journal, $u ) ){
+        $sql_poster = 'AND posterid = ' . $u->userid . " ";
+    }
+
+    my ($id) = $dbcr->selectrow_array("SELECT delayedid " .
+                                      "FROM delayedlog2 WHERE journalid=?  $sql_poster".
+                                      "ORDER BY is_sticky ASC, revptime DESC LIMIT 1", undef, $journal->userid);
+    return $id || 0;
+}
+
+sub get_last_entry {
+    my ( $journal, $userid ) = @_;
+    __assert($journal, "no journal");
+
+    my $dbcr = LJ::get_cluster_def_reader($journal)
+        or die "get cluster for journal failed";
+
+    my $u;
+    my $sql_poster = '';
+    unless ($userid) {
+        $u = LJ::get_remote();
+    } else {
+        $u = LJ::want_user($userid);
+    }
+
+    return 0 unless $u;
+    if (!__delayed_entry_can_see( $journal, $u ) ){
+        $sql_poster = 'AND posterid = ' . $u->userid . " ";
+    }
+
+    my ($id) = $dbcr->selectrow_array("SELECT delayedid " .
+                                      "FROM delayedlog2 WHERE journalid=?  $sql_poster".
+                                      "ORDER BY is_sticky DESC, revptime ASC LIMIT 1", undef, $journal->userid);
+    return $id || 0;
+}
+
+
 sub get_daycount_query {
     my ($class, $journal, $list, $secwhere) = @_;
     my $dbcr = LJ::get_cluster_def_reader($journal);
@@ -1148,12 +1202,16 @@ sub get_itemid_before2 {
 
 sub get_itemid_near2 {
     my ($u, $delayedid, $after_before) = @_;
-    
-    my ($order, $cmp1, $cmp2, $cmp3, $cmp4);
+
+    my $jid    = $u->userid;
+    my $remote = LJ::get_remote();
+    return 0 unless $remote;
+
+    my ($order, $order_sticky, $cmp1, $cmp2, $cmp3, $cmp4);
     if ($after_before eq "after") {
-        ($order, $cmp1, $cmp2, $cmp3, $cmp4) = ("DESC", "<=", ">", sub {$a->[0] <=> $b->[0]}, sub {$b->[1] <=> $a->[1]} );
+        ($order, $order_sticky, $cmp1, $cmp2, $cmp3, $cmp4) = ("DESC", "ASC", "<=", ">", sub {$a->[0] <=> $b->[0]}, sub {$b->[1] <=> $a->[1]} );
     } elsif ($after_before eq "before") {
-        ($order, $cmp1, $cmp2, $cmp3, $cmp4) = ("ASC",  ">=", "<", sub {$b->[0] <=> $a->[0]}, sub {$a->[1] <=> $b->[1]} );
+        ($order, $order_sticky, $cmp1, $cmp2, $cmp3, $cmp4) = ("ASC", "DESC",">=", "<", sub {$b->[0] <=> $a->[0]}, sub {$a->[1] <=> $b->[1]} );
     } else {
         return 0;
     }
@@ -1163,77 +1221,43 @@ sub get_itemid_near2 {
         warn "Can't connect to cluster reader. Cluster: " . $u->clusterid;
         return 0;
     }
-
-    my $jid     = $u->userid;
-    my $field   = $u->is_person() ? "revptime" : "rlogtime";
-
-    my ($stime) = $dbr->selectrow_array(  "SELECT $field FROM delayedlog2 WHERE ".
-                                          "journalid=$jid AND delayedid=$delayedid");
+    
+    my ($stime, $is_current_sticky) = $dbr->selectrow_array( "SELECT revptime, is_sticky FROM delayedlog2 WHERE ".
+                                        "journalid=$jid AND delayedid=$delayedid");
     return 0 unless $stime;
 
-    my $secwhere = "AND security='public'";
-    my $remote   = LJ::get_remote();
-
-    if ($remote) {
-        if ($remote->userid == $jid) {
-            $secwhere = "";   # see everything
-        } elsif ($remote->is_person() || $remote->is_identity) {
-            my $gmask = LJ::get_groupmask($u, $remote);
-            $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
-            if $gmask;
-        }
+    my $sql_poster = '';
+    if (!__delayed_entry_can_see( $u, $remote ) ){
+        $sql_poster = 'AND posterid = ' . $remote->userid . " ";
     }
 
-    ##
-    ## We need a next/prev record in journal before/after a given time
-    ## Since several records may have the same time (time is rounded to 1 minute),
-    ## we're ordering them by jitemid. So, the SQL we need is
-    ##      SELECT * FROM log2
-    ##      WHERE journalid=? AND rlogtime>? AND jitmemid<?
-    ##      ORDER BY rlogtime, jitemid DESC
-    ##      LIMIT 1
-    ## Alas, MySQL tries to do filesort for the query.
-    ## So, we sort by rlogtime only and fetch all (2, 10, 50) records
-    ## with the same rlogtime (we skip records if rlogtime is different from the first one).
-    ## If rlogtime of all fetched records is the same, increase the LIMIT and retry.
-    ## Then we sort them in Perl by jitemid and takes just one.
-    ##
-    my $result_ref;
-    foreach my $limit (2, 10, 50, 100) {
-        $result_ref = $dbr->selectall_arrayref( "SELECT delayedid, $field FROM delayedlog2 use index (rlogtime,revptime) ".
-                                                "WHERE journalid=? AND $field $cmp1 ? AND delayedid <> ? ".
-                                                $secwhere. " ".
-                                                "ORDER BY $field $order LIMIT $limit",
-                                                undef, $jid, $stime, $delayedid
-        );
-
-        my %hash_times = ();
-        map {$hash_times{$_->[1]} = 1} @$result_ref;
-
-        # If we has one the only 'time' in $limit fetched rows,
-        # may be $limit cuts off our record. Increase the limit and repeat.
-        if (((scalar keys %hash_times) > 1) || (scalar @$result_ref) < $limit) {
-            my @result;
-
-            # Remove results with the same time but the jitemid is too high or low
-            if ($after_before eq "after") {
-                @result = grep { $_->[1] != $stime || $_->[0] > $delayedid } @$result_ref;
-            } elsif ($after_before eq "before") {
-                @result = grep { $_->[1] != $stime || $_->[0] < $delayedid } @$result_ref;
+    my $sql_item_rule = ''; 
+    if ($after_before eq "after") {
+        $sql_item_rule =  $is_current_sticky ? "(revptime $cmp1 ? AND is_sticky = 1 )" : 
+                                               "(revptime $cmp1 ? OR is_sticky = 1 )";
+    } else {
+        if ($is_current_sticky) {
+            my ($new_stime) = $dbr->selectrow_array("SELECT revptime " .
+                                                    "FROM delayedlog2 WHERE journalid=? $sql_poster AND is_sticky = 0 ".
+                                                    "ORDER BY revptime LIMIT 1", undef, $jid); 
+            if ($new_stime < $stime) {
+                $stime = $new_stime;
             }
-
-            # Sort result by jitemid and get our id from a top.
-            @result =  sort $cmp3 @result;
-
-            # Sort result by revttime
-            @result =  sort $cmp4 @result;
-
-            my $id = $result[0]->[0];
-            return 0 unless $id;
-            return $id;
+ 
+            $sql_item_rule = "(revptime $cmp1 ? )";
+        } else {
+            $sql_item_rule = "(revptime $cmp1 ? AND is_sticky = 0 )";
         }
+         
     }
-    return 0;
+
+    my $result_ref = $dbr->selectcol_arrayref(  "SELECT delayedid FROM delayedlog2 use index (rlogtime,revptime) ".
+                                                "WHERE journalid=? AND $sql_item_rule AND delayedid <> ? ".
+                                                $sql_poster. " ".
+                                                "ORDER BY is_sticky $order_sticky, revptime $order LIMIT 2",
+                                                undef, $jid, $stime, $delayedid);
+    return 0 unless $result_ref;
+    return $result_ref->[0];
 }
 
 sub handle_prefetched_props {
