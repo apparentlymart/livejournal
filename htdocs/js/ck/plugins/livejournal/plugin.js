@@ -261,11 +261,11 @@
 
 	CKEDITOR.plugins.add('livejournal', {
 		init: function(editor) {
-			editor.addCss('.lj_selected {' + 'background-color: #C4E0F7 !important;' + 'border: 1px solid #6EA9DF !important;' + '}');
+			editor.addCss('.lj-cut-selected');
 
 			function onClickFrame(evt) {
 				if (this.$ != editor.document.$) {
-					this.frameElement.addClass('lj_selected');
+					this.frameElement.addClass('lj-cut-selected');
 					new CKEDITOR.dom.selection(editor.document).selectElement(this.frameElement);
 				}
 
@@ -349,11 +349,11 @@
 				if (isSelection) {
 					var frames = editor.document.getElementsByTag('iframe');
 					for (var i = 0, l = frames.count(); i < l; i++) {
-						frames.getItem(i).removeClass('lj_selected');
+						frames.getItem(i).removeClass('lj-cut-selected');
 					}
 
 					if (node.is('iframe')) {
-						node.addClass('lj_selected');
+						node.addClass('lj-cut-selected');
 					}
 				}
 
@@ -615,7 +615,7 @@
 			}
 
 			//////////  LJ Cut Button //////////////
-			editor.addCss('.lj-cut {' + 'width: 100%;' + 'height: 20px;' + 'display: block;' + 'border: #000 1px dotted;' + 'background-color: #d2d2d2;' + 'min-height: 14px;' + '}');
+			editor.addCss('.lj-cut');
 
 			editor.addCommand('LJCut', {
 				exec: function() {

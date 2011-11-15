@@ -89,6 +89,10 @@ lj\:cut {
 	border-width: 1px 0 0;
 	background-position: 0 -8px;
 	}
+.lj-cut-selected {
+	background-color: #C4E0F7;
+	border: 1px solid #6EA9DF;
+	}
 
 /* fix inline behavior, for no IE */
 .lj|cut ul, .lj|cut ol {
