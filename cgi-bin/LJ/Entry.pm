@@ -2198,6 +2198,152 @@ sub get_itemid_near2
 sub get_itemid_after2  { return get_itemid_near2(@_, "after");  }
 sub get_itemid_before2 { return get_itemid_near2(@_, "before"); }
 
+sub get_latest_item {
+    my ($u, $opts) = @_;
+
+    my $dbr = LJ::get_cluster_reader($u);
+    unless ($dbr){
+        warn "Can't connect to cluster reader. Cluster: " . $u->clusterid;
+        return 0;
+    }
+
+    # Do I need to skip sticky entry?
+    my $skip_sticky_item_sql = '';
+    my $sticky_id = $u->get_sticky_entry_id;
+    if ( $opts->{'skip_sticky_item'} && $sticky_id ) {
+        #$skip_sticky_item_sql = "AND jitemid <> $sticky_id";
+    }
+
+    my $jid = $u->userid;
+    my $field = $u->is_person ? "revttime" : "rlogtime";
+
+    my $secwhere = "AND security='public'";
+    my $remote = LJ::get_remote();
+
+    if ($remote) {
+        if ($remote->userid == $u->userid) {
+            $secwhere = "";   # see everything
+        } elsif ($remote->is_person || $remote->is_identity) {
+            my $gmask = LJ::get_groupmask($u, $remote);
+            $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
+                if $gmask;
+        }
+    }
+
+    my $res = $dbr->selectcol_arrayref( "SELECT jitemid, anum FROM log2 use index (rlogtime,revttime) ".
+                                        "WHERE journalid=? $skip_sticky_item_sql ".
+                                        $secwhere. " ".
+                                        "ORDER BY $field LIMIT 1", undef, $jid);
+    my $itemid = $res->[0];
+    my $anum   = $res->[1];
+
+    return 0 unless $itemid;
+    return ($itemid*256 + $anum);
+}
+
+sub get_after_item_link {
+    my ($u, $opts) = @_;
+
+    my $jumpid;
+    my $sticky_id =  $u->get_sticky_entry_id;
+    my $use_sticky = $opts->{'use_sticky'};
+
+    my $itemid = $opts->{'itemid'};
+    my $delayed_id = $opts->{'delayedid'};
+
+    if ($opts->{'delayedid'}) {
+        # get next delayed entry
+        my $after_id = LJ::DelayedEntry::get_itemid_after2($u, $delayed_id);
+
+        # does entry exists ?
+        if ($after_id) {
+            # append prefix to delayed entries
+            $jumpid = 'd' . $after_id;
+        } elsif ($use_sticky && $sticky_id) {
+            my $sticky_entry = LJ::Entry->new( $u, jitemid => $sticky_id);
+            if ($sticky_entry && $sticky_entry->valid) {
+                $jumpid = $sticky_entry->ditemid;
+            }
+        }
+    } elsif ($opts->{'itemid'} && $opts->{'itemid'} != $sticky_id) {
+
+        $jumpid = get_itemid_near2( $u,
+                                    $itemid,
+                                     'after',
+                                     { 'skip_sticky' => $use_sticky } );
+        LJ::DelayedEntry::get_itemid_after2($u, 0);
+        if ( !$jumpid ) {
+            my $after_id = LJ::DelayedEntry::get_first_entry($u);
+            if ($after_id) {
+                $jumpid = 'd' . $after_id;
+            } elsif ($use_sticky && $sticky_id) {
+                my $sticky_entry = LJ::Entry->new( $u, jitemid => $sticky_id);
+                if ($sticky_entry && $sticky_entry->valid) {
+                    $jumpid = $sticky_entry->ditemid;
+                }
+            }
+        }
+    }
+    if (!$jumpid) {
+        return undef;
+    }
+    return $u->journal_base . "/$jumpid.html";
+}
+
+
+sub get_before_item_link {
+    my ($u, $opts) = @_;
+
+    my $jumpid;
+    my $sticky_id = $u->get_sticky_entry_id;
+    my $use_sticky = $opts->{'use_sticky'};
+    my $skip_sticky = { 'skip_sticky' => 1 };
+
+    my $itemid = $opts->{'itemid'};
+
+    if ($opts->{'delayedid'}) {
+        my $delayed_id = $opts->{'delayedid'};
+        my $prev_id = LJ::DelayedEntry::get_itemid_before2($u, $delayed_id);
+
+        # does delayed entry exists?
+        if ($prev_id) {
+            # append prefix to delayed entries
+            $jumpid = 'd' . $prev_id;
+        } else {
+            # select usual entry
+            $jumpid = get_latest_item( $u, $skip_sticky );
+        }
+    } elsif ($opts->{itemid}) {
+        my $item_id = $opts->{itemid};
+        if ( $use_sticky && ( $item_id == $sticky_id ) ) {
+            my $prev_id = LJ::DelayedEntry::get_last_entry($u);
+            if ($prev_id) {
+                $jumpid = 'd' . $prev_id;
+            } else {
+                $jumpid = get_latest_item( $u, $skip_sticky );
+            }
+        } else {
+            $jumpid = get_itemid_near2( $u,
+                                        $item_id,
+                                        'before',
+                                        $skip_sticky );
+        }
+
+    } else {
+        die "Error: item id is not set at all";
+    }
+
+    if (!$jumpid) {
+        return undef;
+    }
+    if (!$jumpid) {
+        return undef;
+    }
+    return $u->journal_base . "/$jumpid.html";
+}
+
+
+
 sub set_logprop {
     my ($u, $jitemid, $hashref, $logprops) = @_;  # hashref to set, hashref of what was done
 

@@ -4025,16 +4025,18 @@ sub _Entry__get_link
     }
 
     if ($key eq "nav_prev") {
-        my $jumpid;
+        my $options = { 'use_sticky' => 1,
+                        'itemid'     => int($this->{'itemid'}/256),
+                      };
+
         if ($entry->is_delayed) {
-            my $nextid = LJ::DelayedEntry::get_itemid_before2($journalu, $entry->delayedid);
-            return $null_link unless $nextid;
-            $jumpid = "d" . $nextid;
-        } else {
-            $jumpid = LJ::get_itemid_before2($journalu, int($this->{'itemid'}/256));
+            $options->{'delayedid'} = $entry->delayedid;
         }
-        if ($jumpid) {
-            return LJ::S2::Link($journalu->journal_base . "/$jumpid.html",
+
+        my $jumplink = LJ::get_before_item_link($journalu, $options);
+
+        if ($jumplink) {
+            return LJ::S2::Link($jumplink,
                             $ctx->[S2::PROPS]->{"text_entry_prev"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 24, 24));
         } else {
@@ -4043,17 +4045,18 @@ sub _Entry__get_link
     }
 
     if ($key eq "nav_next") {
-        my $jumpid;
+        my $options = { 'use_sticky' => 1,
+                        'itemid'     => int($this->{'itemid'}/256),
+                      };
+
         if ($entry->is_delayed) {
-            my $nextid = LJ::DelayedEntry::get_itemid_after2($journalu, $entry->delayedid);
-            return $null_link unless $nextid;
-            $jumpid = "d" . $nextid;
-        } else {
-            $jumpid = LJ::get_itemid_after2($journalu, int($this->{'itemid'}/256));
+            $options->{'delayedid'} = $entry->delayedid;
         }
-        
-        if ($jumpid) {
-            return LJ::S2::Link($journalu->journal_base . "/$jumpid.html",,
+
+        my $jumplink = LJ::get_after_item_link($journalu, $options);
+
+        if ($jumplink) {
+            return LJ::S2::Link($jumplink,
                             $ctx->[S2::PROPS]->{"text_entry_next"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 24, 24));
         } else {
