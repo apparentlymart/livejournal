@@ -261,8 +261,6 @@
 
 	CKEDITOR.plugins.add('livejournal', {
 		init: function(editor) {
-			editor.addCss('.lj-cut-selected');
-
 			function onClickFrame(evt) {
 				if (this.$ != editor.document.$) {
 					this.frameElement.addClass('lj-cut-selected');
@@ -615,7 +613,29 @@
 			}
 
 			//////////  LJ Cut Button //////////////
-			editor.addCss('.lj-cut');
+			editor.addCss('.lj-cut {\
+				display: block;\
+				margin: 5px 0;\
+				width: 100%;\
+				cursor: pointer;\
+				height: 9px!important;\
+				background-color: #FFF;\
+				border: 0 dashed #BCBCBC;\
+				background: url(/js/ck/images/ljcut.png) no-repeat 0 0;\
+			}');
+			editor.addCss('.lj-cut-open {\
+				background-position: 0 2px;\
+				border-width: 0 0 1px;\
+			}');
+			editor.addCss('.lj-cut-close {\
+				border-width: 1px 0 0;\
+				background-position: 0 -8px;\
+			}');
+			editor.addCss('.lj-cut-selected {\
+				background-color: #C4E0F7;\
+				border: 1px solid #6EA9DF;\
+			}');
+
 
 			editor.addCommand('LJCut', {
 				exec: function() {

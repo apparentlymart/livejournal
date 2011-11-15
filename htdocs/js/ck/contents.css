@@ -4,6 +4,12 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 */
 @namespace lj "livejournal";
 
+/*
+Achtung!
+Some styles can be found in stc/lj/ck/plugins/livejournal/plugin.js
+It is for ultra sonic loading of style. Styles from plugin.js moved to <style></style>, and loads before <link rel="stylesheet"/>
+*/
+
 BODY {
 	position: relative;
 	font: 13px/18px 'Arial', sans-serif;
@@ -71,28 +77,6 @@ lj\:cut {
 	background-color: #d2d2d2;
 	min-height: 14px;
 }
-.lj-cut {
-	display: block;
-	margin: 5px 0;
-	width: 100%;
-	cursor: pointer;
-	height: 9px!important;
-	background-color: #FFF;
-	border: 0 dashed #BCBCBC;
-	background: url(/js/ck/images/ljcut.png) no-repeat 0 0;
-	}
-.lj-cut-open {
-	background-position: 0 2px;
-	border-width: 0 0 1px;
-	}
-.lj-cut-close {
-	border-width: 1px 0 0;
-	background-position: 0 -8px;
-	}
-.lj-cut-selected {
-	background-color: #C4E0F7;
-	border: 1px solid #6EA9DF;
-	}
 
 /* fix inline behavior, for no IE */
 .lj|cut ul, .lj|cut ol {
