@@ -7,7 +7,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 /*
 Achtung!
 Some styles can be found in stc/lj/ck/plugins/livejournal/plugin.js
-It is for ultra sonic loading of style. Styles from plugin.js moved to <style></style>, and loads before <link rel="stylesheet"/>
+It is for ultra sonic loading of style. Styles from plugin.js moved to [style][/style], and loads before [link rel="stylesheet"/]
 */
 
 BODY {
