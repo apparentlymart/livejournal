@@ -2098,6 +2098,9 @@ sub talkform_mobile {
     $controller->_user(LJ::get_remote());
     my $res = $controller->reply(\@opts);
 
+    return $res->output
+        if ref($res) eq 'LJ::Mob::Response::AuthRequired';
+
     # passing error messages
     $res->template->param(
         errors          => [map { { 'error' => $_ } } @{ $opts->{errors} }],    
