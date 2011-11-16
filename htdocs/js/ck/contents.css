@@ -28,13 +28,13 @@ pre {
 }
 
 /* LJ CSS */
-.lj\:template {
+lj\:template {
 	background-color: #000;
 	color: #fff;
 	display: none;
 }
 
-.lj|template {
+lj|template {
 	background-color: #000;
 	color: #fff;
 	display: none;
