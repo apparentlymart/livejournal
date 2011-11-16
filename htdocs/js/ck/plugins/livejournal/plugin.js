@@ -263,8 +263,8 @@
 		init: function(editor) {
 			function onClickFrame(evt) {
 				if (this.$ != editor.document.$) {
-					this.frameElement.addClass('lj-cut-selected');
-					new CKEDITOR.dom.selection(editor.document).selectElement(this.frameElement);
+					this.frame.addClass('lj-selected');
+					new CKEDITOR.dom.selection(editor.document).selectElement(this.frame);
 				}
 
 				evt.data.getKey() == 1 && evt.data.preventDefault();
@@ -283,7 +283,7 @@
 			function onLoadFrame() {
 				var win = this.$.contentWindow;
 				var doc = win.document;
-				if (win.frameElement.getAttribute('lj-cmd') && doc.body.scrollHeight) {
+				if (this.getAttribute('lj-cmd') && doc.body.scrollHeight) {
 					this.setStyle('height', doc.body.scrollHeight + 'px');
 				}
 
@@ -294,7 +294,7 @@
 
 				doc = new CKEDITOR.dom.element.get(doc);
 
-				doc.frameElement = body.frameElement = this;
+				doc.frame = body.frame = this;
 			}
 
 			function updateFrames() {
@@ -347,11 +347,11 @@
 				if (isSelection) {
 					var frames = editor.document.getElementsByTag('iframe');
 					for (var i = 0, l = frames.count(); i < l; i++) {
-						frames.getItem(i).removeClass('lj-cut-selected');
+						frames.getItem(i).removeClass('lj-selected');
 					}
 
 					if (node.is('iframe')) {
-						node.addClass('lj-cut-selected');
+						node.addClass('lj-selected');
 					}
 				}
 
@@ -444,7 +444,7 @@
 						var cmd = editor.getCommand(cmdName);
 						if (cmd.state == CKEDITOR.TRISTATE_ON) {
 							var selection = new CKEDITOR.dom.selection(editor.document);
-							ljTagsData[cmdName].node = node.is('body') ? new CKEDITOR.dom.element.get(node.getWindow().$.frameElement) : node;
+							ljTagsData[cmdName].node = node.is('body') ? new CKEDITOR.dom.element.get(node.getWindow().$.frame) : node;
 							selection.selectElement(ljTagsData[cmdName].node);
 							evt.data.dialog = '';
 							execFromEditor = true;
@@ -614,7 +614,6 @@
 
 			//////////  LJ Cut Button //////////////
 			editor.addCss('.lj-cut {\
-				display: block;\
 				margin: 5px 0;\
 				width: 100%;\
 				cursor: pointer;\
@@ -631,7 +630,7 @@
 				border-width: 1px 0 0;\
 				background-position: 0 -8px;\
 			}');
-			editor.addCss('.lj-cut-selected {\
+			editor.addCss('.lj-selected {\
 				background-color: #C4E0F7;\
 				border: 1px solid #6EA9DF;\
 			}');
@@ -681,7 +680,6 @@
 
 							var iframeClose = new CKEDITOR.dom.element('iframe', editor.document);
 							iframeClose.addClass('lj-cut lj-cut-close');
-							iframeClose.setAttribute('lj-cmd', 'LJCut');
 							iframeClose.setAttribute('frameBorder', 0);
 							iframeClose.setAttribute('allowTransparency', 'true');
 							fragment.append(iframeClose);
