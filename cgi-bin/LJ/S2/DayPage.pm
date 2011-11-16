@@ -95,6 +95,16 @@ sub DayPage
     LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
 
+    my @ditems = ();
+    if (LJ::is_enabled("delayed_entries")) {
+        @ditems = LJ::DelayedEntry->get_entries_for_day($u, $year, $month, $day, $dateformat, $secwhere);
+        foreach my $ditem (@ditems) {
+            if ($ditem) {
+                push @items, $ditem;
+            }
+        }
+    }
+
     my (%apu, %apu_lite);  # alt poster users; UserLite objects
     foreach (@items) {
         next unless $_->{'posterid'} != $u->{'userid'};
@@ -108,17 +118,6 @@ sub DayPage
     # load tags
     my $tags = LJ::Tags::get_logtags($u, \@itemids);
     
-    my @ditems = ();
-    if (LJ::is_enabled("delayed_entries")) {
-        @ditems = LJ::DelayedEntry->get_entries_for_day($u, $year, $month, $day, $dateformat, $secwhere);
-
-        foreach my $ditem (@ditems) {
-            if ($ditem) {
-                push @items, $ditem;
-            }
-        }
-    }
-
     my $userlite_journal = UserLite($u);
 
   ENTRY:
