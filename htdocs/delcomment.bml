@@ -10,8 +10,17 @@ _info?><?_code
     # because this BML may be called as __rpc_delcomment too
     BML::set_language_scope('/delcomment.bml');
 
+    my $check_form_auth;
     my $mode = LJ::Request->get_param('mode') || 'html';
-    $mode = 'html' unless $mode =~ /^(?:html|js|jsonp)$/;
+    $mode = 'html' unless $mode =~ /^(?:html|js|jsonp|json)$/;
+
+    if ( LJ::is_enabled('new_comments') ) {
+        my $format = $GET{'format'} || $POST{'format'};
+        $check_form_auth = 1;
+        if ( $format eq 'json' ) {
+            $mode = 'json';
+        }
+    }
 
     # helper subroutines
 
@@ -48,6 +57,21 @@ _info?><?_code
             return $jsonp_wrap->({
                 'success'   => 0,
                 'error'     => $why,
+            });
+        } elsif ( $mode eq 'json' ) {
+            BML::finish();
+            return LJ::JSON->to_json({
+                status  => 'error',
+                message => $why,
+            });
+        }
+    };
+
+    my $ok = sub {
+        if ( $mode eq 'json' ) {
+            BML::finish();
+            return LJ::JSON->to_json({
+                status  => 'ok',
             });
         }
     };
@@ -96,10 +120,10 @@ _info?><?_code
 
     if ( LJ::Request->did_post && LJ::Request->post_param('confirm') ) {
         return $error->( LJ::Lang::ml('error.invalidform') )
-            unless LJ::check_form_auth();
+            if $check_form_auth and not LJ::check_form_auth();
 
         $method = 'delete';
-    } elsif ( $mode eq 'jsonp' && LJ::Request->get_param('confirm') ) {
+    } elsif ( $mode =~ m!jsonp! && LJ::Request->get_param('confirm') ) {
         my %vars = (
             'auth_token' => LJ::Request->get_param('auth_token'),
             'journal'    => $journal->username,
@@ -300,6 +324,8 @@ _info?><?_code
             return "1;";
         } elsif ( $mode eq 'jsonp' ) {
             return $jsonp_wrap->({ 'success' => 1 });
+        } elsif ( $mode eq 'json' ) {
+            return $ok->();
         }
     }
 _code?>

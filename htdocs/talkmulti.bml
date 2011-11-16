@@ -6,11 +6,35 @@
     ## this page is called as endpoint from users journals, 
     ## so language scope must be set explicitly
     BML::set_language_scope('/talkmulti.bml');
-    
+
+    my ($json, $check_form_auth);
+    unless ( $LJ::DISABLED{'new_comments'} ) {
+        my $format = $GET{'format'} || $POST{'format'};
+        $json = 1 if $format eq 'json';
+        $check_form_auth = 1;
+    }
+
     my $err = sub {
         my $errmsg = shift;
-        $body = "<?h1 $ML{'Error'} h1?><?p $errmsg p?>";
-        return;
+        if ( $json ) {
+            BML::finish();
+            return LJ::JSON->to_json({
+                status  => 'error',
+                message => $errmsg,
+            });
+        } else {
+            $body = "<?h1 $ML{'Error'} h1?><?p $errmsg p?>";
+            return undef;
+        }
+    };
+
+    my $ok = sub {
+        if ( $json ) {
+            BML::finish();
+            return LJ::JSON->to_json({
+                status  => 'ok',
+            });
+        }
     };
 
     my $mode = $POST{'mode'};
@@ -31,8 +55,18 @@
     } elsif ($mode eq 'all:unspam') {
         $title = $ML{'.title.all.unspam'};
     } else {
-        $title = $ML{'Error'};
-        return $err->($ML{'.error.invalid_mode'});
+        my $ok;
+        if ( LJ::is_enabled('new_comments') ) {
+            if ( $mode =~ /^((?:un)?freeze)$/ ) {
+                $title = $ML{'.title.'. $1};
+                $ok++;
+            }
+        }
+
+        unless ( $ok ) {
+            $title = $ML{'Error'};
+            return $err->($ML{'.error.invalid_mode'});
+        }
     }
 
     my $sth;
@@ -104,6 +138,9 @@
     }
     @talkids = keys %talkinfo;
 
+    # check auth token
+    return $err->($ML{'.error.invalidform'}) if $check_form_auth and not LJ::check_form_auth();
+
     # do the work:
     if ($mode eq "delete" || $mode eq 'deletespam') {
         # first, unscreen everything for replycount and hasscreened to adjust
@@ -145,9 +182,10 @@
     } elsif ($mode eq "screen") {
         LJ::Talk::screen_comment($u, $itemid, @talkids);
     } elsif ($mode eq "unspam") {
-         LJ::Talk::unspam_comment($u, $itemid, @talkids);
+        LJ::Talk::unspam_comment($u, $itemid, @talkids);
     }
 
+    return $ok->() if $json;
     return BML::redirect($POST{returnto});
 }
 _code?>
