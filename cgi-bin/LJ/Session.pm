@@ -591,7 +591,7 @@ sub session_from_cookies {
     my $domain_cookie = LJ::Session->domain_cookie;
 
     # foreign domain case
-    unless ( $host =~ /$LJ::DOMAIN(:\d+)?$/ ) {
+    unless ( $host =~ /(^|\.)$LJ::DOMAIN(:\d+)?$/ ) {
         return LJ::Session->session_from_external_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
     }
 
