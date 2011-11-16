@@ -907,11 +907,15 @@ function EntryLite::lay_make_icon() : string {
   }
   if($this isa Entry) {
     var Entry en = $this as Entry;
-
-    if ($en.delayed) { "$en.delayed_icon "; }
-    if ($en.sticky) { "$en.sticky_icon "; }
-    if ($en.security) { "$en.security_icon "; }
-
+    if ($en.delayed) {
+        $icon = $en.delayed_icon + " ";
+        }
+    if ($en.sticky) {
+        $icon = $en.sticky_icon + " ";
+    }
+    if ($en.security) {
+        $icon = $en.security_icon + " ";
+    }
   }
   return $icon;
 }
@@ -1534,8 +1538,8 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
     if ($p.view != "entry" and not $subject->contains("<a ")) {
         $subject = """<a name="$id" id="$id"></a>$icon<a href="$e.permalink_url" class="subj subj-link">$subject</a>""";
     } else {
-       $subject = """<a name="$id" id="$id"></a>$icon$subject""";
-}
+        $subject = """<a name="$id" id="$id"></a>$icon$subject""";
+    }
 
 
   if ($e isa Comment) {
