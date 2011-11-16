@@ -655,7 +655,16 @@
 							var selection = new CKEDITOR.dom.selection(editor.document),
 								ranges = selection.getRanges();
 
-							var startContainer = selection.getRanges()[0].getTouchedStartNode().getPrevious();
+							var startContainer = selection.getRanges()[0].getTouchedStartNode();
+
+							if(startContainer){
+								if (startContainer.type == 1 && !startContainer.is('body')) {
+									startContainer = startContainer.getPrevious();
+								}
+							} else {
+								startContainer = editor.document.getBody();
+							}
+
 							var fragment = new CKEDITOR.dom.documentFragment(editor.document);
 
 							var iframeOpen = new CKEDITOR.dom.element('iframe', editor.document);
@@ -680,10 +689,11 @@
 							if (text != top.CKLang.ReadMore) {
 								iframeOpen.setAttribute('text', text);
 							}
-							if (startContainer) {
-								fragment.insertAfterNode(startContainer);
+
+							if (startContainer.is && startContainer.is('body')) {
+								startContainer.append(fragment, true);
 							} else {
-								editor.document.getBody().append(fragment, true);
+								fragment.insertAfterNode(startContainer);
 							}
 						}
 
