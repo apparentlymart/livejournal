@@ -655,6 +655,7 @@
 							var selection = new CKEDITOR.dom.selection(editor.document),
 								ranges = selection.getRanges();
 
+							var startContainer = selection.getRanges()[0].getTouchedStartNode().getPrevious();
 							var fragment = new CKEDITOR.dom.documentFragment(editor.document);
 
 							var iframeOpen = new CKEDITOR.dom.element('iframe', editor.document);
@@ -679,12 +680,10 @@
 							if (text != top.CKLang.ReadMore) {
 								iframeOpen.setAttribute('text', text);
 							}
-
-							var startContainer = selection.getRanges()[0].startContainer;
-							if (startContainer.type == 1 && startContainer.is('body')) {
-								startContainer.append(fragment);
-							} else {
+							if (startContainer) {
 								fragment.insertAfterNode(startContainer);
+							} else {
+								editor.document.getBody().append(fragment, true);
 							}
 						}
 
