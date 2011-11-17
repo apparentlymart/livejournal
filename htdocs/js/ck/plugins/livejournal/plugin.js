@@ -444,7 +444,7 @@
 						var cmd = editor.getCommand(cmdName);
 						if (cmd.state == CKEDITOR.TRISTATE_ON) {
 							var selection = new CKEDITOR.dom.selection(editor.document);
-							ljTagsData[cmdName].node = node.is('body') ? new CKEDITOR.dom.element.get(node.getWindow().$.frame) : node;
+							ljTagsData[cmdName].node = node.is('body') ? new CKEDITOR.dom.element.get(node.getWindow().$.frameElement) : node;
 							selection.selectElement(ljTagsData[cmdName].node);
 							evt.data.dialog = '';
 							execFromEditor = true;
