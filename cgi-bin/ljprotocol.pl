@@ -127,6 +127,7 @@ my %e = (
      "409" => [ E_PERM, "Post too large." ],
      "410" => [ E_PERM, "Your trial account has expired.  Posting now disabled." ],
      "411" => [ E_TEMP, "Action frequency limit." ],
+     "412" => [ E_TEMP, "Subscribe limit reached." ],
 
      # Server Errors
      "500" => [ E_TEMP, "Internal server error" ],
@@ -4779,20 +4780,19 @@ sub un_utf8_request {
 #
 sub registerpush {
     my ($req, $err, $flags) = @_;
+
     return undef
         unless authenticate($req, $err, $flags);
 
     my $u = $flags->{u};
 
     return fail($err, 200)
-        unless $req->{platform} && $req->{registrationid};
+        unless $u && $req->{platform} && $req->{registrationid};
 
-    my $res = LJ::PushNotification->subscribe($u, $req);
+    my $res = LJ::PushNotification->subscribe($u, $req) 
+        || return fail($err, 412);
 
-    return fail($err, 200)
-        unless $res;
-    
-    return { status => 'OK' };
+    return { status => 'OK' }
 }
 
 # unregisterpush: deletes subscription on push notification and clears user prop 
