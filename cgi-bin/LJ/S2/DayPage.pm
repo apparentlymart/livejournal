@@ -95,16 +95,6 @@ sub DayPage
     LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
 
-    my @ditems = ();
-    if (LJ::is_enabled("delayed_entries")) {
-        @ditems = LJ::DelayedEntry->get_entries_for_day($u, $year, $month, $day, $dateformat, $secwhere);
-        foreach my $ditem (@ditems) {
-            if ($ditem) {
-                push @items, $ditem;
-            }
-        }
-    }
-
     my (%apu, %apu_lite);  # alt poster users; UserLite objects
     foreach (@items) {
         next unless $_->{'posterid'} != $u->{'userid'};
@@ -127,24 +117,13 @@ sub DayPage
             map { $item->{$_} } qw(posterid itemid security allowmask alldatepart anum);
 
         my $ditemid = $itemid*256 + $anum;
-        my $entry_obj;
-        if ($item->{delayedid}) {
-            $entry_obj = LJ::DelayedEntry->get_entry_by_id($u, $item->{delayedid});
-        } else {
-            $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
-            $entry_obj->handle_prefetched_props($logprops{$itemid});
-        }
+        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
         
-        my ($replycount, $subject, $text);
-        if ($item->{delayedid}) {
-            $replycount = 0;
-            $subject = $entry_obj->subject;
-            $text = $entry_obj->event;
-        } else {
-            $replycount = $logprops{$itemid}->{'replycount'} || 0;
-            $subject = $logtext->{$itemid}->[0];
-            $text = $logtext->{$itemid}->[1];
-        }
+        
+        my $replycount = $logprops{$itemid}->{'replycount'} || 0;
+        my $subject = $logtext->{$itemid}->[0];
+        my $text = $logtext->{$itemid}->[1];
         
         if ($get->{'nohtml'}) {
             # quote all non-LJ tags
@@ -190,7 +169,7 @@ sub DayPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my $permalink = $entry_obj->is_delayed ? $entry_obj->url : "$journalbase/$ditemid.html";
+        my $permalink = "$journalbase/$ditemid.html";
         my $readurl = $permalink;
         $readurl .= "?$nc" if $nc;
         my $posturl = $permalink . "?mode=reply";
@@ -244,7 +223,6 @@ sub DayPage
             'security' => $security,
             'allowmask' => $allowmask,
             'props' => $logprops{$itemid},
-            'delayedid' => $entry_obj->is_delayed ? $entry_obj->delayedid : undef,
             'itemid' => $ditemid,
             'journal' => $userlite_journal,
             'poster' => $userlite_poster,
