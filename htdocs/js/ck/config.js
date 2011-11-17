@@ -42,7 +42,6 @@ CKEDITOR.editorConfig = function(config){
 	if(jQuery.browser.msie || jQuery.browser.opera) { //show context menu only in internet explorer as it was in previous version of editor
 		config.plugins += 'contextmenu,';
 	}
-
 	config.fullPage = false;
 	config.startupOutlineBlocks = false;
 	config.autoGrow_maxHeight = 400;
@@ -154,9 +153,11 @@ CKEDITOR.editorConfig = function(config){
 	config.dialog_backgroundCoverColor = '#ffffff';
 	config.dialog_backgroundCoverOpacity = 0.50;
 
+	config.pasteFromWordRemoveFontStyles = false;
+	config.pasteFromWordRemoveStyles = false;
+
 	config.extraPlugins = 'livejournal';
 	config.protectedSource.push(/<lj-poll-\d+\s*\/?>/gi); // created lj polls;
 	config.protectedSource.push(/<lj-replace name="first_post"\s*\/?>/gi);
-	//config.protectedSource.push(/<lj-repost\s*\/?>/gi);
 
 };
