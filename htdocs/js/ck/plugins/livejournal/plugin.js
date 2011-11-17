@@ -652,46 +652,36 @@
 					} else {
 						if (text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore)) {
 							var selection = new CKEDITOR.dom.selection(editor.document),
-								ranges = selection.getRanges();
+								ranges = selection.getRanges(),
+								startContainer,
+								iframeOpen = new CKEDITOR.dom.element('iframe', editor.document),
+								iframeClose = new CKEDITOR.dom.element('iframe', editor.document);
 
-							var startContainer = selection.getRanges()[0].getTouchedStartNode();
-
-							if(startContainer){
-								if (startContainer.type == 1 && !startContainer.is('body')) {
-									startContainer = startContainer.getPrevious();
-								}
-							} else {
-								startContainer = editor.document.getBody();
-							}
-
-							var fragment = new CKEDITOR.dom.documentFragment(editor.document);
-
-							var iframeOpen = new CKEDITOR.dom.element('iframe', editor.document);
 							iframeOpen.setAttribute('lj-cmd', 'LJCut');
 							iframeOpen.addClass('lj-cut lj-cut-open');
 							iframeOpen.setAttribute('frameBorder', 0);
 							iframeOpen.setAttribute('allowTransparency', 'true');
-							fragment.append(iframeOpen);
-
-							for (var i = 0, l = ranges.length; i < l; i++) {
-								var range = ranges[i];
-								fragment.append(range.extractContents());
-							}
-
-							var iframeClose = new CKEDITOR.dom.element('iframe', editor.document);
-							iframeClose.addClass('lj-cut lj-cut-close');
-							iframeClose.setAttribute('frameBorder', 0);
-							iframeClose.setAttribute('allowTransparency', 'true');
-							fragment.append(iframeClose);
-
 							if (text != top.CKLang.ReadMore) {
 								iframeOpen.setAttribute('text', text);
 							}
 
-							if (startContainer.is && startContainer.is('body')) {
-								startContainer.append(fragment, true);
+							iframeClose.addClass('lj-cut lj-cut-close');
+							iframeClose.setAttribute('frameBorder', 0);
+							iframeClose.setAttribute('allowTransparency', 'true');
+
+							if(ranges[0].collapsed === true){
+								editor.insertElement(iframeClose);
+								iframeClose.insertBeforeMe(iframeOpen);
 							} else {
-								fragment.insertAfterNode(startContainer);
+								startContainer = ranges[0].getTouchedStartNode();
+
+								var fragment = new CKEDITOR.dom.documentFragment(editor.document);
+								fragment.append(iframeOpen);
+								for (var i = 0, l = ranges.length; i < l; i++) {
+									fragment.append(ranges[i].extractContents());
+								}
+								editor.insertElement(iframeClose);
+								iframeClose.insertBeforeMe(fragment);
 							}
 						}
 
