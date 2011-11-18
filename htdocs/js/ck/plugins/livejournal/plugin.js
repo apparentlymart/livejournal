@@ -399,14 +399,18 @@
 						var poll = new Poll(ljtags);
 						return '<iframe class="lj-poll" frameborder="0" allowTransparency="true" ' + 'lj-cmd="LJPollLink" lj-data="' + poll.outputLJtags() + '" lj-content="' + poll.outputHTML() + '"></iframe>';
 					}).replace(/<lj-embed(.*?)>([\s\S]*?)<\/lj-embed>/gi, function(result, attrs, data) {
-						return '<iframe' + attrs + ' class="lj-embed" lj-data="' + encodeURIComponent(data) + '" frameborder="0" allowTransparency="true"></iframe>';
+						return '<iframe' + attrs + ' class="lj-embed" lj-data="' + encodeURIComponent(data) + '" lj-style="height: 100%;" frameborder="0" allowTransparency="true"></iframe>';
 					});
 
 				if (!$('event_format').checked) {
 					html = html.replace(/(<lj-raw.*?>)([\s\S]*?)(<\/lj-raw>)/gi,
 						function(result, open, content, close) {
 							return open + content.replace(/\n/g, '') + close;
-						}).replace(/\n/g, '<br />');
+						});
+
+					if(!window.switchedRteOn) {
+						html = html.replace(/\n/g, '<br />');
+					}
 				}
 
 				html = CKEDITOR.htmlDataProcessor.prototype.toHtml.call(this, html, fixForBody);
@@ -654,6 +658,7 @@
 					if (window.switchedRteOn) {
 						var iframe = new CKEDITOR.dom.element('iframe', editor.document);
 						iframe.setAttribute('lj-data', encodeURIComponent(content));
+						iframe.setAttribute('lj-style', 'height: 100%;');
 						iframe.setAttribute('class', 'lj-embed');
 						iframe.setAttribute('frameBorder', 0);
 						iframe.setAttribute('allowTransparency', 'true');
