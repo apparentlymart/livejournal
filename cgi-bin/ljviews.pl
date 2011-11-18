@@ -1024,24 +1024,10 @@ sub prepare_currents
 
     my %currents = ();
     my $val;
-    if ($entry_obj->is_delayed) {
-        my $val = $entry_obj->prop('current_music');
-        if ($val) {
-            $currents{'Music'} = LJ::current_music_str($val);
-        }
-    } elsif ($val = $args->{'props'}->{$datakey}->{'current_music'}) {
-        $currents{'Music'} = LJ::current_music_str($val);
-    }
-
-    if ($entry_obj->is_delayed) {
-        $currents{'Mood'} = LJ::current_mood_str($args->{'user'}->{'moodthemeid'},
-                                                  $entry_obj->prop('current_moodid'),
-                                                  $entry_obj->prop('current_mood'));
-    } else {
-        $currents{'Mood'} = LJ::current_mood_str($args->{'user'}->{'moodthemeid'},
+    $currents{'Music'} = LJ::current_music_str($val);
+    $currents{'Mood'} = LJ::current_mood_str($args->{'user'}->{'moodthemeid'},
                                                 $args->{'props'}->{$datakey}->{'current_moodid'},
                                                 $args->{'props'}->{$datakey}->{'current_mood'});
-    }
     delete $currents{'Mood'} unless $currents{'Mood'};
 
     if (%currents) {
@@ -1208,38 +1194,6 @@ sub create_view_lastn
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
     
-    my $delayed_entries;
-
-    # calculate recent entries count
-    my $has_sticky = $u->has_sticky_entry;
-    my $delayed_entries_count = 0;
-    my $usual_skip = $skip;
-
-    if (LJ::is_enabled("delayed_entries")) {
-        $delayed_entries_count = LJ::DelayedEntry->get_entries_count($u);
-        $usual_skip -= $delayed_entries_count;
-
-        if ($usual_skip < 0 ) {
-            $usual_skip = $skip ? $has_sticky : 0;
-        }
-
-        if ($skip) {
-            $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip - $has_sticky, $itemshow);
-        } else {
-            $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($u, $skip, $itemshow - $has_sticky);
-        }
-    }
-
-
-    if (!$delayed_entries) {
-        $delayed_entries = [];
-    }
-
-    my $itemshow_usual = $itemshow - scalar(@$delayed_entries);
-    if ( $itemshow_usual < 0 ) {
-        $itemshow_usual = 0;
-    }
-
     ## load the itemids
     my @itemids;
     my $err;
@@ -1250,7 +1204,7 @@ sub create_view_lastn
         'viewsome' => $viewsome,
         'userid' => $u->{'userid'},
         'remote' => $remote,
-        'itemshow' => $itemshow_usual + 1,
+        'itemshow' => $itemshow + 1,
         'skip' => $skip,
         'itemids' => \@itemids,
         'order' => ($u->{'journaltype'} eq "C" || $u->{'journaltype'} eq "Y")  # community or syndicated
@@ -1260,14 +1214,9 @@ sub create_view_lastn
         'poster'  => $get->{'poster'},
     });
     
-    @items = __append_delayed($u,\@items, $delayed_entries);
-
     my $is_prev_exist = scalar @items - $itemshow > 0 ? 1 : 0;
     if ($is_prev_exist) {
         pop @items;
-        if ( scalar(@$delayed_entries) > $itemshow ) {
-            pop @$delayed_entries;
-        }
     }
 
     if ($err) {
@@ -1323,29 +1272,17 @@ sub create_view_lastn
         my ($posterid, $itemid, $security, $alldatepart) =
             map { $item->{$_} } qw(posterid itemid security alldatepart);
 
-        my $delayedid = $item->{delayedid} || 0;
         my $ditemid = $itemid * 256 + $item->{'anum'};
-        my $entry_obj;
-        if ($item->{delayed_obj}) {
-            $entry_obj = delete $item->{delayed_obj};
-        } else {
-            $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
-        }
+        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
         
         next ENTRY unless $entry_obj->visible_to($remote, {'viewall' => $viewall, 'viewsome' => $viewsome});
 
         $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         my ($event, $subject, $replycount);
-        if ($entry_obj->is_delayed()) {
-            $event = $entry_obj->event;
-            $subject = $entry_obj->subject;
-            $replycount = 0;
-        } else {
-            $replycount = $logprops{$itemid}->{'replycount'};
-            $subject = $logtext->{$itemid}->[0];
-            $event = $logtext->{$itemid}->[1];
-        }
+        my $replycount = $logprops{$itemid}->{'replycount'};
+        my $subject = $logtext->{$itemid}->[0];
+        my $event = $logtext->{$itemid}->[1];
         
         if ($get->{'nohtml'}) {
             # quote all non-LJ tags
@@ -1392,12 +1329,7 @@ sub create_view_lastn
             });
         }
 
-        my $itemargs;
-        if ($entry_obj->is_delayed) {
-            $itemargs = "journal=$user&amp;delayedid=$delayedid";
-        } else {
-            $itemargs = "journal=$user&amp;itemid=$ditemid";
-        }
+        my $itemargs = "journal=$user&amp;itemid=$ditemid";
         $lastn_event{'itemargs'} = $itemargs;
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
@@ -1417,10 +1349,6 @@ sub create_view_lastn
         $lastn_event{'event'} = $event;
 
         my $permalink = "$journalbase/$ditemid.html";
-        if ($entry_obj->is_delayed) {
-            $permalink = $entry_obj->url;
-        }
-
         $lastn_event{'permalink'} = $permalink;
 
         if($subject !~ /[<>]/) {
@@ -1496,7 +1424,6 @@ sub create_view_lastn
             $vars->{'LASTN_EVENT_PROTECTED'}) { $var = 'LASTN_EVENT_PROTECTED'; }
         if (LJ::is_enabled("delayed_entries")) {
             $var .= '_STICKY' if $entry_obj->is_sticky();
-            $var .= '_DELAYED' if $entry_obj->is_delayed();
         }
 
         $$events .= LJ::fill_var_props($vars, $var, \%lastn_event);
@@ -2628,9 +2555,6 @@ sub create_view_day
     push @items, $_ while $_ = $sth->fetchrow_hashref;
     my @itemids = map { $_->{'itemid'} } @items;
     
-    my $delayed_entries = LJ::DelayedEntry->get_entries_for_day_row($u, $year, $month, $day);
-    @items = __append_delayed($u,\@items, $delayed_entries);
-
     # load 'opt_ljcut_disable_lastn' prop for $remote.
     LJ::load_user_props($remote, "opt_ljcut_disable_lastn");
 
@@ -2650,14 +2574,8 @@ sub create_view_day
         my ($itemid, $posterid, $security, $alldatepart, $anum) =
             map { $item->{$_} } qw(itemid posterid security alldatepart anum);
 
-        my $delayedid = $item->{delayedid} || 0;
         my $ditemid = $itemid*256 + $anum;
-        my $entry_obj;
-        if ($item->{delayed_obj}) {
-            $entry_obj = delete $item->{delayed_obj};
-        } else {
-            $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
-        }
+        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
         $entry_obj->handle_prefetched_props($logprops{$itemid});
 
         my $pu = $posteru{$posterid};
@@ -2674,16 +2592,9 @@ sub create_view_day
         }
 
         $eventnum++;
-        my ($event, $subject, $replycount);
-        if ($entry_obj->is_delayed()) {
-            $event = $entry_obj->event;
-            $subject = $entry_obj->subject;
-            $replycount = 0;
-        } else {
-            $replycount = $logprops{$itemid}->{'replycount'};
-            $subject = $logtext->{$itemid}->[0];
-            $event = $logtext->{$itemid}->[1];
-        }
+        my $replycount = $logprops{$itemid}->{'replycount'};
+        my $subject = $logtext->{$itemid}->[0];
+        my $event = $logtext->{$itemid}->[1];
 
         if ($LJ::UNICODE &&
             ( $entry_obj->prop("unknown8bit") || $logprops{$itemid}->{'unknown8bit'} )) {
@@ -2708,12 +2619,7 @@ sub create_view_day
             });
         }
 
-        my $itemargs;
-        if ($entry_obj->is_delayed) {
-            $itemargs = "journal=$user&amp;delayedid=$delayedid"
-        } else {
-            $itemargs = "journal=$user&amp;itemid=$ditemid";
-        }
+        my $itemargs = "journal=$user&amp;itemid=$ditemid";
         
         $day_event{'itemargs'} = $itemargs;
 
@@ -2727,16 +2633,13 @@ sub create_view_day
                                               'journalid' => $entry_obj->journalid,
                                               'posterid' => $entry_obj->posterid,
                                             });
-        if (!$entry_obj->is_delayed) {
-            LJ::expand_embedded($u, $ditemid, $remote, \$event);
-        }
+        LJ::expand_embedded($u, $ditemid, $remote, \$event);
     
         $event = LJ::ContentFlag->transform_post(post => $event, journal => $u,
                                                  remote => $remote, entry => $entry_obj);
         $day_event{'event'} = $event;
 
         my $permalink = "$journalbase/$ditemid.html";
-        $permalink = $entry_obj->url if $entry_obj->is_delayed;
         $day_event{'permalink'} = $permalink;
 
         $day_event{'subject'} = "<a href='$permalink'>" . $day_event{'subject'} . "</a>";
@@ -2783,9 +2686,8 @@ sub create_view_day
             $vars->{'DAY_EVENT_PRIVATE'}) { $var = 'DAY_EVENT_PRIVATE'; }
         if ($security eq "usemask" &&
             $vars->{'DAY_EVENT_PROTECTED'}) { $var = 'DAY_EVENT_PROTECTED'; }
-        if (LJ::is_enabled("delayed_entries")) {
-            #$var .= '_STICKY' if $entry_obj->is_sticky();
-            $var .= '_DELAYED' if $entry_obj->is_delayed();
+        if (LJ::is_enabled()) {
+            $var .= '_STICKY' if $entry_obj->is_sticky();
         }
 
         $events .= LJ::fill_var_props($vars, $var, \%day_event);
@@ -2908,51 +2810,6 @@ sub create_view_day
 
     $$ret .= LJ::fill_var_props($vars, 'DAY_PAGE', \%day_page);
     return 1;
-}
-
-sub __append_delayed {
-    my ($u, $items, $delayed_entries) = @_;
-    my $delayed_appened = 0;
-    my @ordered;
-    
-    my $append_delayed = sub {
-        foreach my $ditem (@$delayed_entries) {
-            my $entry = LJ::DelayedEntry->get_entry_by_id($u, $ditem, {'dateformat' => 'S1'} );
-            
-            push @ordered, {
-                            'alldatepart' => $entry->alldatepart ,
-                            'system_alldatepart' => $entry->system_alldatepart,
-                            'allowmask'   => $entry->allowmask,
-                            'posterid'    => $entry->posterid,
-                            'eventtime'   => $entry->posttime,
-                            'security'    => $entry->security,
-                            'logtime'     => $entry->logtime,
-                            'delayed_obj' => $entry,
-                            'delayedid'    => $ditem,
-                            'itemid'      => 0,
-                            'anum'        => 0,
-                           };
-        }
-    };
-
-    if ( scalar @$items == 0 ) {
-        $append_delayed->();
-        return @ordered;
-    }
-
-    foreach my $item (@$items) {
-        if ($u->get_sticky_entry_id() == $item->{itemid} &&
-                 LJ::is_enabled("delayed_entries")) {
-            push @ordered, $item;
-            next;        }
-
-        if (!$delayed_appened) {
-            $append_delayed->();
-            $delayed_appened = 1;
-        }
-        push @ordered, $item;
-    }
-    return @ordered;
 }
 
 1;
