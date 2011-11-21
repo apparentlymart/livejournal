@@ -4,6 +4,10 @@ use warnings;
 
 use base qw( LJ::Widget::Template );
 
+sub need_res {
+	qw(stc/widgets/entrychooser.css);
+}
+
 sub template_filename {
     return $ENV{'LJHOME'} . '/templates/Widgets/entry_chooser.tmpl';
 }
