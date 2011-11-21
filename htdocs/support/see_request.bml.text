@@ -83,6 +83,8 @@
 .goback.text|staleness=1
 .goback.text=<?p Go back to <a [[request_link]]>Request #[[spid]]</a> p?>
 
+.has_js=Is JavaScript enabled
+
 .help.link|staleness=1
 .help.link=Back to the <a href="help.bml">list of open requests</a>.<br />
 
@@ -103,6 +105,8 @@ and correct, it will be sent to the user. p?>
 
 .internal.comment|staleness=1
 .internal.comment=Internal Comment
+
+.ip_address=IP Address
 
 .language|staleness=1
 .language=language

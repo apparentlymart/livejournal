@@ -492,6 +492,19 @@ body<=
         $ret .= "</td></tr>\n";
     }
 
+    ## IP address
+    if (LJ::check_priv($remote, 'siteadmin', 'users')) {
+        $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.ip_address'}:</b></td>";
+        $ret .= "<td>$props->{ip}</td></tr>"
+    }
+
+    ## Has JS?
+    my $has_js =    ($props->{'has_js'} && $props->{'has_js'} eq 'Y') ? 'yes' : 
+                    ($props->{'has_js'} && $props->{'has_js'} eq 'N') ? 'no' : '(unknown)';
+    $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.has_js'}:</b></td>";
+    $ret .= "<td>$has_js</td></tr>";
+    
+
     $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.supportcategory'}:</b></td><td>";
     if (LJ::Support::can_read_cat($sp->{_cat}, $remote)) {
         $ret .= "<a href='$LJ::SITEROOT/support/help.bml?cat=$sp->{_cat}->{'catkey'}'>$problemarea</a>";

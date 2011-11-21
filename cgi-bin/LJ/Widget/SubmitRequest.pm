@@ -103,6 +103,17 @@ sub render_body {
     $ret .= $class->html_textarea(name => 'message', rows => '15', cols => '70', wrap => 'soft', value => $post->{message});
     $ret .= "</div></p>";
 
+    ## is javascript on?
+    $ret .= "\n" . $class->html_hidden({name => 'has_js', id => 'has_js', value => 'N'});
+    $ret .= "\n" . '
+<script>
+    // $() is DOM.getElement() defined in htdocs/js/dom.js
+    if ($) {
+        var has_js = $("has_js"); 
+        if (has_js) { has_js.value = "Y" } 
+    }
+</script>';
+
     if ($LJ::HUMAN_CHECK{support_submit} && LJ::is_enabled("recaptcha") && !$remote) {
         my $c = Captcha::reCAPTCHA->new;
 
@@ -186,10 +197,12 @@ sub handle_post {
         $req{'language'} = $post->{'language'};
     }
 
-    $req{'body'} = $post->{'message'};
+    $req{'body'}    = $post->{'message'};
     $req{'subject'} = $post->{'subject'};
     $req{'spcatid'} = $post->{'spcatid'};
-    $req{'uniq'} = LJ::UniqCookie->current_uniq;
+    $req{'uniq'}    = LJ::UniqCookie->current_uniq;
+    $req{'ip'}      = LJ::get_remote_ip();
+    $req{'has_js'}  = $post->{'has_js'};
 
     # don't autoreply if they aren't gonna get a link
     $req{'no_autoreply'} = $class->send_email ? 0 : 1;

@@ -599,10 +599,10 @@ sub file_request
         return unless $q && $q ne 'NULL';
         push @data, "($spid, '$_[0]', $q)";
     };
-    if (LJ::is_enabled("support_request_language") && $o->{language} ne "xx") {
-        $add_data->($_, $o->{$_}) foreach qw(uniq useragent language);
-    } else {
-        $add_data->($_, $o->{$_}) foreach qw(uniq useragent);
+    my @props = qw(uniq useragent ip has_js);
+    push @props, "language" if LJ::is_enabled("support_request_language");
+    foreach my $p (@props) {
+        $add_data->($p, $o->{$p});
     }
     $dbh->do("INSERT INTO supportprop (spid, prop, value) VALUES " . join(',', @data));
 
