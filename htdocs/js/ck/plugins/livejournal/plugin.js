@@ -287,14 +287,16 @@
 					this.setStyle('height', doc.body.scrollHeight + 'px');
 				}
 
-				var body = new CKEDITOR.dom.element.get(doc.body);
-				body.on('dblclick', onDoubleClick);
-				body.on('click', onClickFrame);
-				body.on('keyup', onKeyUp);
+				var iframeBody = new CKEDITOR.dom.element.get(doc.body);
+				if(iframeBody.on) {
+					iframeBody.on('dblclick', onDoubleClick);
+					iframeBody.on('click', onClickFrame);
+					iframeBody.on('keyup', onKeyUp);
+				}
 
 				doc = new CKEDITOR.dom.element.get(doc);
 
-				doc.frame = body.frame = this;
+				doc.frame = iframeBody.frame = this;
 			}
 
 			function updateFrames() {
@@ -703,6 +705,7 @@
 							iframeClose.setAttribute('frameBorder', 0);
 							iframeClose.setAttribute('allowTransparency', 'true');
 
+							selection.lock();
 							if (ranges[0].collapsed === true) {
 								editor.insertElement(iframeClose);
 								iframeClose.insertBeforeMe(iframeOpen);
@@ -717,6 +720,7 @@
 								editor.insertElement(iframeClose);
 								iframeClose.insertBeforeMe(fragment);
 							}
+							selection.unlock();
 						}
 
 						CKEDITOR.note && CKEDITOR.note.hide(true);
