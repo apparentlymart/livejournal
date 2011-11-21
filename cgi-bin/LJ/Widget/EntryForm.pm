@@ -1260,7 +1260,7 @@ sub render_options_block {
             }
             
             return qq{<label for='sticky_type' class='title options'>
-                $BML::ML{'entryform.spellcheck'}
+                $BML::ML{'entryform.spellcheck.label'}
                 </label> $out};
         },
         'none' => sub {return qq{};},
