@@ -317,7 +317,7 @@
 					frame.removeListener('load', onLoadFrame);
 					frame.on('load', onLoadFrame);
 					doc.open();
-					doc.write('<!DOCTYPE html><html style="' + iFrameCss + '"><head><style type="text/css">' + styleSheet + '</style></head><body style="' + iFrameCss + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>' + decodeURIComponent(frame.getAttribute('lj-content') || '&nbsp;') + '</body></html>');
+					doc.write('<!DOCTYPE html><html style="' + iFrameCss + '"><head><style type="text/css">' + styleSheet + '</style></head><body style="' + iFrameCss + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>' + decodeURIComponent(frame.getAttribute('lj-content') || '') + '</body></html>');
 					doc.close();
 				}
 			}
@@ -403,12 +403,11 @@
 					});
 
 				if (!$('event_format').checked) {
-					html = html.replace(/(<lj-raw.*?>)([\s\S]*?)(<\/lj-raw>)/gi,
-						function(result, open, content, close) {
-							return open + content.replace(/\n/g, '') + close;
-						});
+					html = html.replace(/(<lj-raw.*?>)([\s\S]*?)(<\/lj-raw>)/gi, function(result, open, content, close) {
+						return open + content.replace(/\n/g, '') + close;
+					});
 
-					if(!window.switchedRteOn) {
+					if (!window.switchedRteOn) {
 						html = html.replace(/\n/g, '<br />');
 					}
 				}
@@ -691,6 +690,7 @@
 								iframeClose = new CKEDITOR.dom.element('iframe', editor.document);
 
 							iframeOpen.setAttribute('lj-cmd', 'LJCut');
+							iframeOpen.setAttribute('lj-style', 'height: 100%;');
 							iframeOpen.addClass('lj-cut lj-cut-open');
 							iframeOpen.setAttribute('frameBorder', 0);
 							iframeOpen.setAttribute('allowTransparency', 'true');
@@ -699,10 +699,11 @@
 							}
 
 							iframeClose.addClass('lj-cut lj-cut-close');
+							iframeClose.setAttribute('lj-style', 'height: 100%;');
 							iframeClose.setAttribute('frameBorder', 0);
 							iframeClose.setAttribute('allowTransparency', 'true');
 
-							if(ranges[0].collapsed === true){
+							if (ranges[0].collapsed === true) {
 								editor.insertElement(iframeClose);
 								iframeClose.insertBeforeMe(iframeOpen);
 							} else {
@@ -1210,6 +1211,7 @@
 				var openFrame = new CKEDITOR.htmlParser.element('iframe');
 				openFrame.attributes['class'] = 'lj-cut lj-cut-open';
 				openFrame.attributes['lj-cmd'] = 'LJCut';
+				openFrame.attributes['lj-style'] = 'height: 100%;';
 				openFrame.attributes['frameBorder'] = 0;
 				openFrame.attributes['allowTransparency'] = 'true';
 
@@ -1221,6 +1223,7 @@
 
 				var closeFrame = new CKEDITOR.htmlParser.element('iframe');
 				closeFrame.attributes['class'] = 'lj-cut lj-cut-close';
+				closeFrame.attributes['lj-style'] = 'height: 100%;';
 				closeFrame.attributes['frameBorder'] = 0;
 				closeFrame.attributes['allowTransparency'] = 'true';
 				element.children.push(closeFrame);
