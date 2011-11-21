@@ -5456,50 +5456,45 @@ sub sessionexpire {
 }
 
 ## flat wrapper
-sub getevents
-{
+sub getevents {
     my ($req, $res, $flags) = @_;
 
-    my $err = 0;    
-    my $pct = 0;
+    my $err = 0;
     my $rq = upgrade_request($req);
-    my $ect = LJ::DelayedEntry->getevents($rq, $flags, \$err, $res);
-    my $many = $rq->{'howmany'} || 0;
 
-    if ( $many == 0 || $many > $ect ) {
-        $rq->{'howmany'} -= $ect if $rq->{'howmany'};
-        
-        my $rs = LJ::Protocol::do_request("getevents", $rq, \$err, $flags);
-        unless ($rs) {
-            $res->{'success'} = "FAIL";
-            $res->{'errmsg'} = LJ::Protocol::error_message($err);
-            return 0;
-        }
-    
-        foreach my $evt (@{$rs->{'events'}}) {
-            $ect++;
-            foreach my $f (qw(itemid eventtime security allowmask subject anum url poster)) {
-                if (defined $evt->{$f}) {
-                    $res->{"events_${ect}_$f"} = $evt->{$f};
-                }
-            }
-            $res->{"events_${ect}_event"} = LJ::eurl($evt->{'event'});
-    
-            if ($evt->{'props'}) {
-                foreach my $k (sort keys %{$evt->{'props'}}) {
-                    $pct++;
-                    $res->{"prop_${pct}_itemid"} = $evt->{'itemid'};
-                    $res->{"prop_${pct}_name"} = $k;
-                    $res->{"prop_${pct}_value"} = $evt->{'props'}->{$k};
-                }
+    my $rs = LJ::Protocol::do_request("getevents", $rq, \$err, $flags);
+    unless ($rs) {
+        $res->{'success'} = "FAIL";
+        $res->{'errmsg'} = LJ::Protocol::error_message($err);
+        return 0;
+    }
+
+    my $pct = 0;
+    my $ect = 0;
+
+    foreach my $evt (@{$rs->{'events'}}) {
+        $ect++;
+        foreach my $f (qw(itemid eventtime security allowmask subject anum url poster)) {
+            if (defined $evt->{$f}) {
+                $res->{"events_${ect}_$f"} = $evt->{$f};
             }
         }
-    
-        unless ($req->{'noprops'}) {
-            $res->{'prop_count'} = $pct;
+        $res->{"events_${ect}_event"} = LJ::eurl($evt->{'event'});
+
+        if ($evt->{'props'}) {
+            foreach my $k (sort keys %{$evt->{'props'}}) {
+                $pct++;
+                $res->{"prop_${pct}_itemid"} = $evt->{'itemid'};
+                $res->{"prop_${pct}_name"} = $k;
+                $res->{"prop_${pct}_value"} = $evt->{'props'}->{$k};
+            }
         }
     }
-    
+
+    unless ($req->{'noprops'}) {
+        $res->{'prop_count'} = $pct;
+    }
+
     $res->{'events_count'} = $ect;
     $res->{'success'} = "OK";
 
