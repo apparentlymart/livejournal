@@ -28,9 +28,12 @@ function setPostingPermissions(journal) {
 
 	var modifyDate = jQuery('#modifydate'),
 		stickyCheckbox = jQuery('#sticky_type'),
+		doNotAddType = jQuery('#entryform-do_not_add-wrapper'),
 		stickyLabel = jQuery('#sticky_type_label'),
 		stickyWrapper = jQuery('#entryform-sticky-wrapper'),
 		currentDateEdit = jQuery('#currentdate-edit');
+
+	doNotAddType[Site.currentJournal == journal ? 'show' : 'hide']();
 
 		journal = Site.remote_permissions[journal];
 
@@ -64,26 +67,26 @@ function showEntryTabs(){
 }
 
 function changeSubmit(prefix, defaultjournal, defPrefix){
-	if(document.getElementById){
-		var usejournal = document.getElementById('usejournal');
-		var formsubmit = document.getElementById('formsubmit');
-		var newvalue, commname;
-		if(!defaultjournal){
-			newvalue = prefix;
-		} else if(!usejournal || usejournal.value == ''){
-			newvalue = prefix + ' ' + defaultjournal;
-			commname = defaultjournal;
+	var usejournal = document.getElementById('usejournal'),
+		formsubmit = document.getElementById('formsubmit'),
+		newvalue,
+		commname;
+
+	if(!defaultjournal){
+		newvalue = prefix;
+	} else if(!usejournal || usejournal.value == ''){
+		newvalue = prefix + ' ' + defaultjournal;
+		commname = defaultjournal;
+	} else {
+		if(usejournal.value === '[none]'){
+			newvalue = defPrefix;
 		} else {
-			if(usejournal.value === '[none]'){
-				newvalue = defPrefix;
-			} else {
-				newvalue = prefix + ' ' + usejournal.value;
-			}
-			commname = usejournal.value;
+			newvalue = prefix + ' ' + usejournal.value;
 		}
-		formsubmit.disabled = ( /\[none\]/.test(commname) || /^ext_/.test(commname) );
-		formsubmit.value = newvalue;
+		commname = usejournal.value;
 	}
+	formsubmit.disabled = ( /\[none\]/.test(commname) || /^ext_/.test(commname) );
+	formsubmit.value = newvalue;
 }
 
 function new_post_load(dotime){
