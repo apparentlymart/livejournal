@@ -916,33 +916,37 @@ sub get_entries_count {
 }
 
 sub get_entries_by_journal {
-    my ( $class, $journal, $skip, $elements_to_show, $userid ) = @_;
+    my ( $class, $journal, $opts ) = @_;
     __assert($journal, "no journal");
+
+    my $skip   = $opts->{'skip'} || 0;
+    my $show   = $opts->{'show'} || 0;
+    my $userid = $opts->{'userid'};
+    my $only_my = $opts->{'only_my'};
+    
 
     my $dbcr = LJ::get_cluster_def_reader($journal) 
         or die "get cluster for journal failed";
 
-    my $sql_poster = '';
+    my $u;
+
     unless ($userid) {
-        my $remote = LJ::get_remote();
-        return undef unless $remote;
-        
-        $userid = $remote->userid ;
-        if (!__delayed_entry_can_see( $journal, $remote ) ) {
-            $sql_poster = 'AND posterid = ' . $remote->userid . " ";
-        }
+        $u = LJ::get_remote();
     } else {
-        my $u = LJ::want_user($userid);
-        if (!__delayed_entry_can_see( $journal, $u ) ){
-            $sql_poster = 'AND posterid = ' . $u->userid . " ";
-        }
+        $u = LJ::want_user($userid);      
     }
 
-    $elements_to_show += 1 if $skip > 0;
+    return [] unless $u;
+    $userid = $u->userid;
+   
+    my $sql_poster = ''; 
+    if ( !__delayed_entry_can_see( $journal, $u ) || $only_my ) {
+        $sql_poster = 'AND posterid = ' . $u->userid . " ";
+    }
 
     my $sql_limit = '';
-    if ($skip || $elements_to_show) {
-        $sql_limit = "LIMIT $skip, $elements_to_show";
+    if ($skip || $show) {
+        $sql_limit = "LIMIT $skip, $show";
     }
 
     my $journalid = $journal->userid;
