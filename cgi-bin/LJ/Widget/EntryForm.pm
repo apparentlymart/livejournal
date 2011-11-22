@@ -588,7 +588,7 @@ sub render_metainfo_block {
                 $date_diff_input
                 <span class="wrap-calendar"><a id="currentdate-date" href="#">$monthlong $mday, $year</a><i class='i-calendar'></i></span>
                 <span class='datetime'>
-                    <input type='text' name='hour' value='$hour' class='input-num' maxlength='2' /> : <input type='text' value='$min' name='min' class='input-num' maxlength='2' />
+                    <input type='text' name='time' value='$hour:$min' class='input-num' maxlength='5' />
                     <?de $BML::ML{'entryform.date.24hournote'} de?>
                 </span>
                 $help_icon
