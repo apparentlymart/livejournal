@@ -142,13 +142,12 @@ body<=
 
         my @res = @$ref;
         my $show_ad = $opts{show_ad} ? 1 : 0;
-        my $delayed_prev = $opts{'delayed_prev'};
-        my $delayed_next = $opts{'delayed_next'};
 
         my ( $link_prev, $link_next );
+        my $is_first_page = $opts{'first_page'};
 
-        if ($opts{'prev'} || $opts{'next'} || !$opts{'first_page'}) {
-            if ($opts{'prev'} || !$opts{'first_page'}) {
+        if ($opts{'prev'} || $opts{'next'} || !$is_first_page) {
+            if ($opts{'prev'} || !$is_first_page) {
                 $link_prev = "$LJ::SITEROOT/editjournal.bml$getextra" .
                              ($getextra ? "&" : "?") .
                              "skip=$opts{prev}";
@@ -168,10 +167,6 @@ body<=
             if ( $e_raw->{'itemid'} ) {
                 push @entries,
                     LJ::Entry->new_from_item_hash( $journal, $e_raw );
-            } elsif ( $e_raw->{'delayedid'} ) {
-                push @entries,
-                    LJ::DelayedEntry->get_entry_by_id( $journal,
-                        $e_raw->{'delayedid'}, { 'dateformat' => 'S2' } );
             }
         }
 
@@ -754,47 +749,11 @@ JS_INIT
              $order = $usejournal_u->is_syndicated || $usejournal_u->is_community;  # community or syndicated
         }
 
-        my $delayed_entries;
-
-        # calculate recent entries count
-        my $delayed_entries_count = 0;
-        my $usual_skip = $skip;
-
-        if (LJ::is_enabled("delayed_entries") && $usejournal_u) {
-            my $has_sticky = $usejournal_u->has_sticky_entry;
-
-            $delayed_entries_count = LJ::DelayedEntry->get_entries_count($usejournal_u);
-            $usual_skip -= $delayed_entries_count;
-
-            if ($usual_skip < 0 ) {
-                $usual_skip = $skip ? $has_sticky : 0;
-            }
- 
-            if (!$skip) {
-                $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u, 
-                                                                            $skip, 
-                                                                            $items_per_page - $has_sticky);
-            } elsif ($skip) {
-                $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u, 
-                                                                            $skip - $has_sticky, 
-                                                                            $items_per_page);
-            }
-        }
- 
-        if (!$delayed_entries) {
-            $delayed_entries = [];
-        }
-
-        my $itemshow_usual = $items_per_page - scalar(@$delayed_entries);
-        if ( $itemshow_usual < 0 ) {
-            $itemshow_usual = 0;
-        }
-           
         my $have_next_page = 0;
 
         if (($usejournal_u && ($LJ::MAX_SCROLLBACK_LASTN = 50000,
             my @recent = LJ::get_recent_items({
-                itemshow  => $itemshow_usual + 1,
+                itemshow  => $items_per_page + 1,
                 err       => \$err,
                 userid    => $usejournal_u->{userid},
                 clusterid => $usejournal_u->{clusterid},
@@ -806,24 +765,17 @@ JS_INIT
                 show_sticky_on_top => 1,
                 %ymd_req,
                 ($only_me_checked) ? ('posterid' =>  $remote->{'userid'}) : (),
-            }))) || $delayed_entries) {
+            })))) {
             
 
-            $have_next_page = scalar @recent + scalar(@$delayed_entries) - $items_per_page > 0 ? 1 : 0;
+            $have_next_page = scalar @recent - $items_per_page > 0 ? 1 : 0;
             if ($have_next_page) {
-                if ( scalar(@$delayed_entries) > $items_per_page ) {
-                    pop @$delayed_entries;
-                }
-                if ( scalar(@recent) + scalar(@$delayed_entries) > $items_per_page ) {
+                if ( scalar(@recent) > $items_per_page ) {
                     pop @recent;
                 }
             }
 
-            if ($delayed_entries_count > 0) {
-                @recent_entries = $append_delayed->($usejournal_u, \@recent, $delayed_entries);
-            } else {
-                @recent_entries = @recent;
-            }
+           @recent_entries = @recent;
 
         }
 
