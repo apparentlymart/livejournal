@@ -684,7 +684,6 @@
 							}
 						}
 					} else {
-						selection.lock();
 						if (text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore)) {
 							var selection = new CKEDITOR.dom.selection(editor.document),
 								ranges = selection.getRanges(),
@@ -710,6 +709,7 @@
 								editor.insertElement(iframeClose);
 								iframeClose.insertBeforeMe(iframeOpen);
 							} else {
+								selection.lock();
 								startContainer = ranges[0].getTouchedStartNode();
 
 								var fragment = new CKEDITOR.dom.documentFragment(editor.document);
@@ -719,9 +719,9 @@
 								}
 								editor.insertElement(iframeClose);
 								iframeClose.insertBeforeMe(fragment);
+								selection.unlock();
 							}
 						}
-						selection.unlock();
 
 						CKEDITOR.note && CKEDITOR.note.hide(true);
 					}
