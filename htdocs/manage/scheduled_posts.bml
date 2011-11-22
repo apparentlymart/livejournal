@@ -1,0 +1,159 @@
+<?page
+title=><?_ML .title _ML?>
+windowtitle=><?_ML .title _ML?>
+body<=
+<?_code
+{
+#line 7
+
+    LJ::need_res(qw(
+                    stc/entry.css
+                    stc/editjournal.css
+                    stc/widgets/selecttags.css
+                    js/inputcomplete.js
+                    js/jquery/jquery.ui.position.min.js
+                    js/jquery/jquery.ui.autocomplete.min.js
+                    js/jquery/jquery.bgiframe.js
+                    js/gears_init.js
+                    js/scanner.js
+                    js/photobucket_jw.js
+                    ));
+
+
+    my $page_name = 'scheduled_posts.bml';
+    my $items_per_page = 20;
+    my $skip = $GET{'skip'} || 0;
+    my $usejournal = $GET{'usejournal'};
+    my $only_me_checked = $GET{'only_me'};
+
+    my $remote = LJ::get_remote();
+    
+    return "<?needlogin?>" unless $remote;
+
+    if ($remote->underage) {
+        return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
+    }
+
+    my $usejournal_u = LJ::load_user ($usejournal || $remote->user);
+
+    my $entry_chooser = sub {
+        my $ref = shift;
+        my %opts = @_;
+
+        my @res = @$ref;
+        my $show_ad = $opts{show_ad} ? 1 : 0;
+
+        my ( $link_prev, $link_next );
+        my $is_first_page = $opts{'first_page'};
+
+        if ($opts{'prev'} || $opts{'next'} || !$is_first_page ) {
+            if ( $opts{'prev'} || !$is_first_page ) {
+                $link_prev = "$LJ::SITEROOT/$page_name$getextra" .
+                             ($getextra ? "&" : "?") .
+                             "skip=$opts{prev}";
+            }
+
+            if ($opts{'next'}) {
+                $link_next = "$LJ::SITEROOT/$page_name$getextra" .
+                             ($getextra ? "&" : "?") .
+                             "skip=$opts{next}";
+            }
+        }
+
+        my @entries;
+
+        my $journal = LJ::load_user($usejournal) || $remote;
+        foreach my $e_raw (@res) {
+            if ( $e_raw->{'delayedid'} ) {
+                push @entries,
+                    $e_raw->{'delayed_obj'};
+            }
+        }
+
+        my $adhtml = '';
+        if ($show_ad) {
+            $adhtml = LJ::get_ads(
+                { 'location' => 'bml.editjournal', 'ljadwrapper' => 1 } );
+        }
+
+        return LJ::Widget::EntryChooser->render(
+            'link_prev'    => $link_prev,
+            'link_next'    => $link_next,
+            'show_posters' => $usejournal ? 1 : 0,
+            'entries'      => \@entries,
+            'adhtml'       => $adhtml,
+            'scheduled'    => BML::ml('.date.scheduled'),
+        );
+    };
+
+    my $append_delayed = sub {
+        my ($u, $delayed_entries) = @_;
+        my @ordered;
+
+        foreach my $ditem (@$delayed_entries) {
+            my $entry = LJ::DelayedEntry->get_entry_by_id($u, $ditem);
+
+            push @ordered, {
+                            'alldatepart' => $entry->alldatepart ,
+                            'system_alldatepart' => $entry->system_alldatepart,
+                            'allowmask'   => $entry->allowmask,
+                            'posterid'    => $entry->posterid,
+                            'eventtime'   => $entry->posttime,
+                            'security'    => $entry->security,
+                            'logtime'     => $entry->logtime,
+                            'delayed_obj' => $entry,
+                            'delayedid'   => $ditem,
+                            'itemid'      => 0,
+                            'anum'        => 0,
+                           };
+        }
+        
+        return @ordered;
+    };
+
+
+    my $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u,
+                                                                   { 'skip'    => $skip,
+                                                                     'show'    => $items_per_page + 1,
+                                                                     'only_my' => $only_me_checked, });
+
+    my $have_next_page =  scalar @$delayed_entries > $items_per_page;
+    my @recent_entries = $append_delayed->($usejournal_u, $delayed_entries);
+
+
+    # draw the page
+
+    $ret .= "<table style='width: 100%;'><tr><td>";
+
+    # header
+    $ret .= "<div class='b-editentries-header'>";
+    $ret .= "<h1>" . BML::ml('.title') . "</h1>";
+
+    $ret .= "<form action='$page_name$getextra' method='get' class='b-editentries-form'>\n";
+    $ret .= "<p>" . LJ::html_text({ 'name'        => 'usejournal', 
+                                    'size'        => '20', 
+                                    'mfaxlength'  => '15', 
+                                    'value'       => $GET{'usejournal'} || $POST{'usejournal'}, 
+                                    'class'       => 'b-editentries-comm', 
+                                    'placeholder' => BML::ml('.input.journal') });
+
+    $ret .= LJ::html_submit(undef, $ML{'.btn.search'}) . "</p>";
+    $ret .= "<p>" . LJ::html_check({ 'name'     => 'only_me', 
+                                     'id'       => 'only_me',
+                                     'value'    => '1', 
+                                     'selected' =>  $only_me_checked });
+
+    $ret .= "<label for='only_me'>".$ML{'.only_my_entries'}."</label></p>";
+    $ret .= "</form>\n";
+    $ret .= "<a href='$LJ::SITEROOT/manage/$page_name'>" . BML::ml('.lnk.journal') . "</a>";
+
+    $ret .= $entry_chooser->(\@recent_entries,
+                                first_page   => $skip ? 0 : 1,
+                                prev         => $skip > $items_per_page ? $skip - $items_per_page : 0,
+                                next         => $have_next_page         ? $skip + $items_per_page : 0);
+
+    return $ret;    
+}
+_code?>
+<=body
+page?>
