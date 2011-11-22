@@ -1029,6 +1029,7 @@ sub prepare_currents
                                                 $args->{'props'}->{$datakey}->{'current_moodid'},
                                                 $args->{'props'}->{$datakey}->{'current_mood'});
     delete $currents{'Mood'} unless $currents{'Mood'};
+    delete $currents{'Music'} unless $currents{'Music'}; 
 
     if (%currents) {
         if ($args->{'vars'}->{$args->{'prefix'}.'_CURRENTS'})
