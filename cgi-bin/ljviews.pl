@@ -2687,7 +2687,7 @@ sub create_view_day
             $vars->{'DAY_EVENT_PRIVATE'}) { $var = 'DAY_EVENT_PRIVATE'; }
         if ($security eq "usemask" &&
             $vars->{'DAY_EVENT_PROTECTED'}) { $var = 'DAY_EVENT_PROTECTED'; }
-        if (LJ::is_enabled()) {
+        if (LJ::is_enabled("delayed_entries")) {
             $var .= '_STICKY' if $entry_obj->is_sticky();
         }
 
