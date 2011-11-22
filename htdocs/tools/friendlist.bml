@@ -159,7 +159,7 @@ body<=
             my $n = $friend->display_username;
             $n = '<b>'. $n. '</b>' if $show_mutual_friends and $remote_friend_uids{$friend->{userid}};
             $n = '<strike>'. $n. '</strike>' if $friend->is_deleted or $friend->is_expunged or $friend->is_suspended;
-            $body .= ',&nbsp;' if $i;
+            $body .= ', ' if $i;
             $body .= '<a href="'. $friend->profile_url. '">'. $n.  '</a>'; 
         }
         $body .= '</p>';
