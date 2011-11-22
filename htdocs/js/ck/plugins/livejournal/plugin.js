@@ -684,6 +684,7 @@
 							}
 						}
 					} else {
+						selection.lock();
 						if (text = prompt(top.CKLang.CutPrompt, top.CKLang.ReadMore)) {
 							var selection = new CKEDITOR.dom.selection(editor.document),
 								ranges = selection.getRanges(),
@@ -705,7 +706,6 @@
 							iframeClose.setAttribute('frameBorder', 0);
 							iframeClose.setAttribute('allowTransparency', 'true');
 
-							selection.lock();
 							if (ranges[0].collapsed === true) {
 								editor.insertElement(iframeClose);
 								iframeClose.insertBeforeMe(iframeOpen);
@@ -720,8 +720,8 @@
 								editor.insertElement(iframeClose);
 								iframeClose.insertBeforeMe(fragment);
 							}
-							selection.unlock();
 						}
+						selection.unlock();
 
 						CKEDITOR.note && CKEDITOR.note.hide(true);
 					}
