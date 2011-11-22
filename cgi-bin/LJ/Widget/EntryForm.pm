@@ -427,7 +427,7 @@ sub render_metainfo_block {
     if ($opts->{'mode'} eq "update") {
         # communities the user can post in
         my $usejournal = $opts->{'usejournal'};
-        if ($usejournal) {
+        if ($usejournal && $remote) {
             my $posterid = $remote->userid;
             my $journalu = LJ::load_user($usejournal);
             my $ownerid = $journalu->userid;
