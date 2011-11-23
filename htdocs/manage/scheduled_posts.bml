@@ -48,13 +48,13 @@ body<=
 
         if ($opts{'prev'} || $opts{'next'} || !$is_first_page ) {
             if ( $opts{'prev'} || !$is_first_page ) {
-                $link_prev = "$LJ::SITEROOT/$page_name$getextra" .
+                $link_prev = "$LJ::SITEROOT/manage/$page_name$getextra" .
                              ($getextra ? "&" : "?") .
                              "skip=$opts{prev}";
             }
 
             if ($opts{'next'}) {
-                $link_next = "$LJ::SITEROOT/$page_name$getextra" .
+                $link_next = "$LJ::SITEROOT/manage/$page_name$getextra" .
                              ($getextra ? "&" : "?") .
                              "skip=$opts{next}";
             }
@@ -118,6 +118,9 @@ body<=
                                                                      'only_my' => $only_me_checked, });
 
     my $have_next_page =  scalar @$delayed_entries > $items_per_page;
+    if ($have_next_page) {
+        pop @$delayed_entries;
+    }
     my @recent_entries = $append_delayed->($usejournal_u, $delayed_entries);
 
 
