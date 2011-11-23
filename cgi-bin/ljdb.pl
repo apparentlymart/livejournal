@@ -501,6 +501,27 @@ sub release_lock
     return 1;
 }
 
+sub lock_taken {
+    my ( $db, $dbrole, $lockname ) = @_;
+
+    return unless $db && $lockname;
+    return unless $dbrole eq 'global' || $dbrole eq 'user';
+
+    my ($connid) = $db->selectrow_array( 'SELECT IS_USED_LOCK(?)',
+        undef, $lockname );
+
+    return $connid ? 1 : 0;
+}
+
+sub lock_free {
+    my ( $db, $dbrole, $lockname ) = @_;
+
+    return unless $db && $lockname;
+    return unless $dbrole eq 'global' || $dbrole eq 'user';
+
+    return ! lock_taken( $db, $dbrole, $lockname );
+}
+
 # <LJFUNC>
 # name: LJ::disconnect_dbs
 # des: Clear cached DB handles
