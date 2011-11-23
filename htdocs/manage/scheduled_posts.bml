@@ -1,5 +1,5 @@
 <?page
-title=><?_ML .title _ML?>
+title=><?_code return $title; _code?>
 windowtitle=><?_ML .title _ML?>
 body<=
 <?_code
@@ -122,6 +122,7 @@ body<=
 
 
     # draw the page
+    LJ::set_active_crumb('editentries');
 
     $ret .= "<table style='width: 100%;'><tr><td>";
 
@@ -152,6 +153,7 @@ body<=
                                 prev         => $skip > $items_per_page ? $skip - $items_per_page : 0,
                                 next         => $have_next_page         ? $skip + $items_per_page : 0);
 
+    $ret .= "</div></td></tr></table>";
     return $ret;    
 }
 _code?>
