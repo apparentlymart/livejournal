@@ -1123,7 +1123,9 @@ sub entry_form_decode
     # date/time
     my $date = LJ::html_datetime_decode({ 'name' => "date_ymd", }, $POST);
     my ($year, $mon, $day) = split( /\D/, $date);
-    my ($hour, $min) = ($POST->{'hour'}, $POST->{'min'});
+
+    my $time_value= $POST->{'time'}; # get value of hh::mm
+    my ($hour, $min) = split ( /:/, $time_value);
 
     # TEMP: ease golive by using older way of determining differences
     my $date_old = LJ::html_datetime_decode({ 'name' => "date_ymd_old", }, $POST);
