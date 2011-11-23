@@ -144,8 +144,8 @@ body<=
                                      'selected' =>  $only_me_checked });
 
     $ret .= "<label for='only_me'>".$ML{'.only_my_entries'}."</label></p>";
+    $ret .= "<p><a href='$LJ::SITEROOT/manage/$page_name'>" . BML::ml('.lnk.journal') . "</a></p>";
     $ret .= "</form>\n";
-    $ret .= "<a href='$LJ::SITEROOT/manage/$page_name'>" . BML::ml('.lnk.journal') . "</a>";
 
     $ret .= $entry_chooser->(\@recent_entries,
                                 first_page   => $skip ? 0 : 1,

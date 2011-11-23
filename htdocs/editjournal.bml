@@ -717,7 +717,7 @@ LIKE_FAQ
                                 value => '1', selected =>  $only_me_checked });
         $ret .= "<label for='only_me'>".$ML{'.only_my_entries'}."</label></p>"; 
         if ($year || $month || $day || $usejournal) {
-            $ret .= BML::ml('.back_to_recent_entries', { aopts => "href='editjournal.bml'" } )."</p>";
+            $ret .= "<p>" . BML::ml('.back_to_recent_entries', { aopts => "href='editjournal.bml'" } )."</p>";
         }
         $ret .= "</form>\n";
 
