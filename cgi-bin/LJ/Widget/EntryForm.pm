@@ -498,13 +498,6 @@ sub render_metainfo_block {
         'default' => "$year-$mon-$mday",
         'disabled' => $opts->{'disabled_save'}
     });
-    my $datetimeonly = LJ::html_datetime({
-        'name' => "date_ymd",
-        'notime' => 1,
-        'default' => "$year-$mon-$mday",
-        'disabled' => $opts->{'disabled_save'}
-    });
-
     $datetime .= "<span class='float-left'>&nbsp;&nbsp;</span>";
     $datetime .= LJ::html_text({
         size => 2,
@@ -515,13 +508,27 @@ sub render_metainfo_block {
         tabindex => $self->tabindex,
         disabled => $opts->{'disabled_save'}
     }) . "<span class='float-left'>:</span>";
-
     $datetime .= LJ::html_text({
         size => 2,
         class => 'text',
         maxlength => 2,
         value => $min,
         name => "min",
+        tabindex => $self->tabindex,
+        disabled => $opts->{'disabled_save'}
+    });
+    my $datetimeonly = LJ::html_datetime({
+        'name' => "date_ymd",
+        'notime' => 1,
+        'default' => "$year-$mon-$mday",
+        'disabled' => $opts->{'disabled_save'}
+    });
+    my $time = LJ::html_text({
+        size => 4,
+        class => 'text input-time',
+        maxlength => 5,
+        value => "$hour:$min",
+        name => "time",
         tabindex => $self->tabindex,
         disabled => $opts->{'disabled_save'}
     });
@@ -586,10 +593,9 @@ sub render_metainfo_block {
             <span class="wrap entrydate-wrap-until">
                 <span class="wrap-select">$datetimeonly</span>
                 $date_diff_input
-                <span class="wrap-calendar"><a id="currentdate-date" href="#">$monthlong $mday, $year</a><i class='i-calendar'></i></span>
+                <span class="wrap-calendar">$datetimeonly<i class='i-calendar'></i></span>
                 <span class='datetime'>
-                    <input type='text' name='time' value='$hour:$min' class='input-num' maxlength='5' />
-                    <?de $BML::ML{'entryform.date.24hournote'} de?>
+                    $time <?de $BML::ML{'entryform.date.24hournote'} de?>
                 </span>
                 $help_icon
             </span>

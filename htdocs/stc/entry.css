@@ -223,11 +223,6 @@
 				margin-left: 10px;
 				vertical-align: middle;
 				}
-				#updateForm #metainfo LI .datetime .input-num {
-					width: 38px;
-					padding: 2px 1px;
-					text-align: center;
-					}
 				#updateForm #metainfo LI .datetime .de {
 					white-space: nowrap;
 					font-size: 11px;
@@ -269,6 +264,11 @@
 #updateForm #metainfo LI .text {
 	float: left;
 	margin-bottom: 2px;
+	}
+#updateForm #metainfo LI .datetime .input-time {
+	float: none;
+	width: 38px;
+	text-align: center;
 	}
 #updateForm #metainfo LI .de {
 	white-space: nowrap;
