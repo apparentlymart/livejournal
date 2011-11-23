@@ -919,12 +919,12 @@ sub get_entries_by_journal {
     my ( $class, $journal, $opts ) = @_;
     return [] unless $journal;
 
-    my $skip   = $opts->{'skip'} || 0;
-    my $show   = $opts->{'show'} || 0;
-    my $userid = $opts->{'userid'};
-    my $only_my = $opts->{'only_my'};
+    my $skip          = $opts->{'skip'} || 0;
+    my $show          = $opts->{'show'} || 0;
+    my $userid        = $opts->{'userid'};
+    my $only_my       = $opts->{'only_my'};
+    my $sticky_on_top = $opts->{'sticky_on_top'};
     
-
     my $dbcr = LJ::get_cluster_def_reader($journal) 
         or die "get cluster for journal failed";
 
@@ -949,10 +949,12 @@ sub get_entries_by_journal {
         $sql_limit = "LIMIT $skip, $show";
     }
 
+    my $sticky_sql = $sticky_on_top ? 'is_sticky DESC, ' : '';
+
     my $journalid = $journal->userid;
     return $dbcr->selectcol_arrayref("SELECT delayedid " .
                                      "FROM delayedlog2 WHERE journalid=$journalid  $sql_poster".
-                                     "ORDER BY is_sticky DESC, revptime $sql_limit");
+                                     "ORDER BY $sticky_sql revptime ASC $sql_limit");
 }
 
 sub get_first_entry {
