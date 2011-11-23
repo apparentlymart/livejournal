@@ -917,7 +917,7 @@ sub get_entries_count {
 
 sub get_entries_by_journal {
     my ( $class, $journal, $opts ) = @_;
-    __assert($journal, "no journal");
+    return [] unless $journal;
 
     my $skip   = $opts->{'skip'} || 0;
     my $show   = $opts->{'show'} || 0;
