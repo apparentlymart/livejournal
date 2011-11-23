@@ -98,7 +98,7 @@ sub get {
         return $self->_fetch_html;
     }
 
-    if ( $metadata_fields{$key} ) {
+    if ( exists $metadata_fields{$key} ) {
         $self->_extract_metadata;
         return Encode::encode_utf8( $self->SUPER::get($key) );
     }
@@ -177,8 +177,7 @@ sub _apply_rule {
         if ( my $attrval = $attr->{ $rule->{'extract_attr'} } ) {
             $extracted_data->{ $rule->{'fill'} } ||= $attrval;
         }
-
-        next;
+        return;
     }
 
     return;
@@ -190,8 +189,26 @@ sub _extract_metadata {
     return if $self->{'_html_parsed'};
 
     my $html = $self->html;
+
     if ( ! Encode::is_utf8($html) ) {
-        $html = Encode::decode_utf8($html);
+        ## pass #1 - find the document encoding
+        my $encoding = "utf-8";
+        {
+            my $parser = HTML::TokeParser->new( \$html );
+            while (my $taginfo = $parser->get_tag('meta')) {
+                my $attr = $taginfo->[1];
+                my $he = $attr->{'http-equiv'};
+                if ($he && lc($he) eq 'content-type') {
+                    my $content = $attr->{'content'};
+                    if ($content && $content =~ /charset=([\w\-]+)/) {
+                        $encoding = $1;
+                    }
+                    last;
+                }
+            }
+        }
+
+        $html = Encode::decode($encoding, $html);
     }
 
     my %extracted_data;
@@ -218,7 +235,7 @@ sub _extract_metadata {
             } );
         }
     }
-
+    
     $self->title( $extracted_data{'og_title'}
           || $extracted_data{'meta_title'}
           || $extracted_data{'title'}
