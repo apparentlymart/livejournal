@@ -1402,10 +1402,21 @@ sub render_submitbar_block {
 
     $out .= "<div id='submitbar' class='pkg'>\n\n";
     $out .= "<div id='security_container'>\n";
+
+    $out .= LJ::html_submit(
+        'action:delete',
+        BML::ml('entryform.delete'),
+        {
+            'disabled' => $opts->{'disabled_delete'},
+            'tabindex' => $self->tabindex,
+            'class' => "post-delete",
+            'onclick' => "return confirm('" .
+                LJ::ejs(BML::ml('entryform.delete.confirm')) . "')",
+        }
+    );
+
     $out .= "<div class='security-options'>\n";
     $out .= "<label for='security'>" . BML::ml('entryform.security2') . " </label>\n";
-    
-    # preview button 
     
     # extra submit button so make sure it posts the form when
     # person presses enter key
@@ -1419,14 +1430,14 @@ sub render_submitbar_block {
         };
     }
     
+    # preview button 
     my $preview_tabindex = $self->tabindex;
     my $preview = qq{
-        <input
-        type="button"
-        value="$BML::ML{'entryform.preview'}"
-        onclick="entryPreview(this.form)"
+        <a class="post-preview"
         tabindex="$preview_tabindex"
-        />
+        href="javascript:entryPreview(this.form)">
+        $BML::ML{'entryform.preview'}
+        </a>
     };
 
     
@@ -1513,17 +1524,6 @@ sub render_submitbar_block {
                 }
             ) . "&nbsp;\n";
         }
-
-        $out .= LJ::html_submit(
-            'action:delete',
-            BML::ml('entryform.delete'),
-            {
-                'disabled' => $opts->{'disabled_delete'},
-                'tabindex' => $self->tabindex,
-                'onclick' => "return confirm('" .
-                    LJ::ejs(BML::ml('entryform.delete.confirm')) . "')",
-            }
-        ) . "&nbsp;\n";
 
         if (!$opts->{'disabled_spamdelete'}) {
             $out .= LJ::html_submit(
