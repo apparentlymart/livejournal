@@ -591,7 +591,6 @@ sub render_metainfo_block {
         }
         $out .= qq{
             <span class="wrap entrydate-wrap-until">
-                <span class="wrap-select">$datetimeonly</span>
                 $date_diff_input
                 <span class="wrap-calendar">$datetimeonly<i class='i-calendar'></i></span>
                 <span class='datetime'>

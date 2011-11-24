@@ -231,25 +231,30 @@
 				display: block;
 				padding-top: 5px;
 				}
-			#updateForm #metainfo .entrydate .title,
-			#updateForm #metainfo .entrydate .wrap,
-			#updateForm #metainfo .wrap-select {
+			#updateForm #metainfo .entrydate .entrydate-title-until,
+			#updateForm #metainfo .entrydate .entrydate-wrap-date,
+			#updateForm #metainfo .entrydate .entrydate-wrap-post {
 				display: none;
 				}
-			#updateForm #metainfo .entrydate-date .entrydate-title-date,
-			#updateForm #metainfo .entrydate-date .entrydate-title-post,
-			#updateForm #metainfo .entrydate-changeit .entrydate-title-post,
-			#updateForm #metainfo .entrydate-changeit .entrydate-title-date,
-			#updateForm #metainfo .entrydate-until .entrydate-title-until {
+			#js #updateForm #metainfo .entrydate .entrydate-title-until,
+			#js #updateForm #metainfo .entrydate .entrydate-wrap-date,
+			#js #updateForm #metainfo .entrydate .entrydate-wrap-post {
 				display: table-cell;
 				*display: inline;
 				*zoom: 1;
 				}
-			#updateForm #metainfo .entrydate-date .entrydate-wrap-date,
-			#updateForm #metainfo .entrydate-date .entrydate-wrap-post,
-			#updateForm #metainfo .entrydate-changeit .entrydate-wrap-until,
-			#updateForm #metainfo .entrydate-changeit .entrydate-wrap-changeit,
-			#updateForm #metainfo .entrydate-until .entrydate-wrap-until {
+			#js #updateForm #metainfo .entrydate .entrydate-title-until,
+			#js #updateForm #metainfo .entrydate .entrydate-wrap-until {
+				display: none;
+				}
+			#js #updateForm #metainfo .entrydate-changeit .entrydate-title-date,
+			#js #updateForm #metainfo .entrydate-changeit .entrydate-wrap-date,
+			#js #updateForm #metainfo .entrydate-changeit .entrydate-title-post,
+			#js #updateForm #metainfo .entrydate-changeit .entrydate-wrap-post {
+				display: none;
+				}
+			#js #updateForm #metainfo .entrydate-changeit .entrydate-title-until,
+			#js #updateForm #metainfo .entrydate-changeit .entrydate-wrap-until {
 				display: table-cell;
 				*display: inline;
 				*zoom: 1;
