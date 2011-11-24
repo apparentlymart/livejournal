@@ -547,68 +547,49 @@ sub render_metainfo_block {
     my $help_icon = LJ::help_icon("24hourshelp");
     my $hide_link = $can_edit_date ? '' : 'style="display: none;"'; 
 
-    if (LJ::is_enabled("delayed_entries")) {
-        $out .= qq{
-            <li id="entrydate" class="pkg entrydate entrydate-date entrydate-delayed">
-        };
+    $out .= qq{
+        <li id="entrydate" class="pkg entrydate entrydate-date entrydate-delayed">
+    };
 
-        if ( $opts->{'mode'} eq "edit" && $can_edit_date ) {
-            if ( $opts->{'delayed'} ) {
-                $out .= qq{
-                    <label class="title entrydate-title-date">$BML::ML{'entryform.postponed.until'}</label>
-                };
-            } else {
-                $out .= qq{
-                    <label class="title entrydate-title-date">$BML::ML{'entryform.date'}</label>
-                };
-            }
-        } else {
+    if ( $opts->{'mode'} eq "edit" && $can_edit_date ) {
+        if ( $opts->{'delayed'} ) {
             $out .= qq{
-                <label class="title entrydate-title-post">$BML::ML{'entryform.post'}</label>
-            };
-        }
-
-        $out .= qq{
-            <label class="title entrydate-title-until">$BML::ML{'entryform.postponed.until'}</label>
-        };
-        
-        if ( $opts->{'mode'} eq "edit" && $can_edit_date ) {
-            $out .= qq{
-                <span class="wrap entrydate-wrap-date">
-                    $monthlong, $mday, $year, $hour:$min
-                    <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
-                    $help_icon
-                </span>
+                <label class="title entrydate-title-date">$BML::ML{'entryform.postponed.until'}</label>
             };
         } else {
             $out .= qq{
-                <span class="wrap entrydate-wrap-post">
-                    $monthlong $mday, $year, $hour:$min
-                    <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
-                    $help_icon
-                </span>
+                <label class="title entrydate-title-date">$BML::ML{'entryform.date'}</label>
             };
         }
+    } else {
         $out .= qq{
-            <span class="wrap entrydate-wrap-until">
-                $date_diff_input
-                <span class="wrap-calendar">$datetimeonly<i class='i-calendar'></i></span>
-                <span class='datetime'>
-                    $time <?de $BML::ML{'entryform.date.24hournote'} de?>
-                </span>
+            <label class="title entrydate-title-post">$BML::ML{'entryform.post'}</label>
+        };
+    }
+
+    $out .= qq{
+        <label class="title entrydate-title-until">$BML::ML{'entryform.postponed.until'}</label>
+    };
+    
+    if ( $opts->{'mode'} eq "edit" && $can_edit_date ) {
+        $out .= qq{
+            <span class="wrap entrydate-wrap-date">
+                $monthlong, $mday, $year, $hour:$min
+                <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
                 $help_icon
             </span>
-            </li>
-            
-            <li>
-            <noscript>
-                <p id='time-correct' class='small'>
-                $BML::ML{'entryform.nojstime.note'}
-                </p>
-            </noscript>
-            </li>
         };
     } else {
+        $out .= qq{
+            <span class="wrap entrydate-wrap-post">
+                $monthlong $mday, $year, $hour:$min
+                <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
+                $help_icon
+            </span>
+        };
+    }
+    my $backdateout = "";
+    if (LJ::is_enabled("delayed_entries")) {
         my $backdate_check = LJ::html_check({
             'type' => "check",
             'id' => "prop_opt_backdated",
@@ -617,36 +598,29 @@ sub render_metainfo_block {
             'selected' => $opts->{'prop_opt_backdated'},
             'tabindex' => $self->tabindex
         });
-
         my $backdate_help_icon = LJ::help_icon_html("backdate", "", "");
-
-        $out .= qq{
-            <li id="entrydate" class="pkg entrydate entrydate-date">
-                <label for="modifydate" class="title entrydate-title-date">$BML::ML{'entryform.date'}</label>
-                <span id='currentdate' class="wrap entrydate-wrap-date">
-                    <span id='currentdate-date'>
-                    $monthlong $mday, $year, $hour:$min
-                    </span>
-                    <a href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
-                </span>
-                <span id='modifydate' class="wrap entrydate-wrap-changeit">
-                    $datetime
-                    $date_diff_input
-                    <?de $BML::ML{'entryform.date.24hournote'} de?>
-                    <span class="backdate">
-                        $backdate_check
-                        <label for='prop_opt_backdated'>$BML::ML{'entryform.backdated3'}</label>
-                        $backdate_help_icon
-                    </span>
-                </span>
-            </li>
-            <li>
-            <noscript>
-            $BML::ML{'entryform.nojstime.note'}
-            </noscript>
-            </li>
-        };
+        $backdateout = '<span class="backdate">' . $backdate_check . "<label for='prop_opt_backdated'>$BML::ML{'entryform.backdated3'}</label>" . $backdate_help_icon . "</span>";
     }
+    $out .= qq{
+        <span class="wrap entrydate-wrap-until">
+            $date_diff_input
+            <span class="wrap-calendar">$datetimeonly<i class='i-calendar'></i></span>
+            <span class='datetime'>
+                $time <?de $BML::ML{'entryform.date.24hournote'} de?>
+            </span>
+            $help_icon
+            $backdateout
+        </span>
+        </li>
+        
+        <li>
+        <noscript>
+            <p id='time-correct' class='small'>
+            $BML::ML{'entryform.nojstime.note'}
+            </p>
+        </noscript>
+        </li>
+    };
 
     # User Picture
     if ($self->should_show_userpics) {
