@@ -589,7 +589,7 @@ sub render_metainfo_block {
         };
     }
     my $backdateout = "";
-    if (LJ::is_enabled("delayed_entries")) {
+    if (!LJ::is_enabled("delayed_entries")) {
         my $backdate_check = LJ::html_check({
             'type' => "check",
             'id' => "prop_opt_backdated",

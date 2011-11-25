@@ -233,27 +233,41 @@
 				}
 			#updateForm #metainfo .entrydate .entrydate-title-until,
 			#updateForm #metainfo .entrydate .entrydate-wrap-date,
-			#updateForm #metainfo .entrydate .entrydate-wrap-post {
+			#updateForm #metainfo .entrydate .entrydate-wrap-post,
+			#updateForm #metainfo LI .i-calendar {
 				display: none;
 				}
-			#js #updateForm #metainfo .entrydate .entrydate-title-until,
+			#js #updateForm #metainfo .entrydate .entrydate-title-date,
+			#js #updateForm #metainfo .entrydate .entrydate-title-post,
 			#js #updateForm #metainfo .entrydate .entrydate-wrap-date,
 			#js #updateForm #metainfo .entrydate .entrydate-wrap-post {
 				display: table-cell;
 				*display: inline;
 				*zoom: 1;
 				}
-			#js #updateForm #metainfo .entrydate .entrydate-title-until,
+			#js #updateForm #metainfo LI .i-calendar {
+				display: inline-block;
+				*display: inline;
+				*zoom: 1;
+				}
 			#js #updateForm #metainfo .entrydate .entrydate-wrap-until {
 				display: none;
 				}
+			#js #updateForm #metainfo .entrydate-until .entrydate-title-date,
+			#js #updateForm #metainfo .entrydate-until .entrydate-wrap-date,
+			#js #updateForm #metainfo .entrydate-until .entrydate-title-post,
+			#js #updateForm #metainfo .entrydate-until .entrydate-wrap-post,
 			#js #updateForm #metainfo .entrydate-changeit .entrydate-title-date,
 			#js #updateForm #metainfo .entrydate-changeit .entrydate-wrap-date,
 			#js #updateForm #metainfo .entrydate-changeit .entrydate-title-post,
 			#js #updateForm #metainfo .entrydate-changeit .entrydate-wrap-post {
 				display: none;
 				}
-			#js #updateForm #metainfo .entrydate-changeit .entrydate-title-until,
+			#js #updateForm #metainfo .entrydate-until .entrydate-title-date,
+			#js #updateForm #metainfo .entrydate-until .entrydate-title-post,
+			#js #updateForm #metainfo .entrydate-until .entrydate-wrap-until,
+			#js #updateForm #metainfo .entrydate-changeit .entrydate-title-date,
+			#js #updateForm #metainfo .entrydate-changeit .entrydate-title-post,
 			#js #updateForm #metainfo .entrydate-changeit .entrydate-wrap-until {
 				display: table-cell;
 				*display: inline;
