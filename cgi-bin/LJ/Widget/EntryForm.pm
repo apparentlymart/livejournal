@@ -1412,7 +1412,8 @@ sub render_submitbar_block {
     my $preview = qq{
         <a class="post-preview"
         tabindex="$preview_tabindex"
-        href="javascript:entryPreview(this.form)">
+        onclick="return entryPreview(\$(\\'updateForm\\'));"
+        href="#">
         $BML::ML{'entryform.preview'}
         </a>
     };
@@ -1423,11 +1424,9 @@ sub render_submitbar_block {
         
     unless ($opts->{'disabled_save'}) {
         $out .= $self->wrap_js(qq{
-            if (document.getElementById) {
-                setTimeout( function() {
-                    jQuery( '$preview' ).prependTo('#entryform-update-and-edit' );
-                }, 0 );
-            }
+            setTimeout( function() {
+                jQuery( '$preview' ).prependTo('#entryform-update-and-edit' );
+            }, 0 );
         });
     }
 
