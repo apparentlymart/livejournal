@@ -351,21 +351,6 @@ body<=
                       LJ::mark_entry_as_spam($usejournal_u, $itemid);
                 }
 
-                # if the action is to delete it, then let's note that
-                if ( $POST{'action:delete'} || $POST{'action:deletespam'} ) {
-                    # now log the event created abovei
-                    if ($entry_obj->is_delayed) {
-                        ($usejournal ? $usejournal_u : $remote)->log_event('delete_delayed_entry', {
-                                                                                remote => $remote,
-                                                                                actiontarget => $delayedid,
-                                                                                method => 'web',});
-                    } else {
-                       ($usejournal ? $usejournal_u : $remote)->log_event('delete_entry', {
-                                                                                remote => $remote,
-                                                                                actiontarget => $ditemid,
-                                                                                method => 'web',});
-                    }
-                }
 
                 # do editevent request
                 foreach my $k (keys %req) {
@@ -406,6 +391,19 @@ body<=
 
                     my $deleted_extras = LJ::run_hook('entry_deleted_page_extras');
                     $result .= $deleted_extras if defined $deleted_extras;
+
+                    # now log the event created abovei
+                    if ($entry_obj->is_delayed) {
+                       ($usejournal ? $usejournal_u : $remote)->log_event('delete_delayed_entry', {
+                                                                           remote => $remote,
+                                                                           actiontarget => $delayedid,
+                                                                           method => 'web',});
+                    } else {
+                       ($usejournal ? $usejournal_u : $remote)->log_event('delete_entry', {
+                                                                           remote => $remote,
+                                                                           actiontarget => $ditemid,
+                                                                           method => 'web',});
+                    }
                 } else {
                     $result .= "<?p $ML{'.success.edited'} p?>";
                     
