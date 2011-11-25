@@ -1376,17 +1376,19 @@ sub render_submitbar_block {
     $out .= "<div id='submitbar' class='pkg'>\n\n";
     $out .= "<div id='security_container'>\n";
 
-    $out .= LJ::html_submit(
-        'action:delete',
-        BML::ml('entryform.delete'),
-        {
-            'disabled' => $opts->{'disabled_delete'},
-            'tabindex' => $self->tabindex,
-            'class' => "post-delete",
-            'onclick' => "return confirm('" .
-                LJ::ejs(BML::ml('entryform.delete.confirm')) . "')",
-        }
-    );
+    if ($opts->{'mode'} ne "update") {
+        $out .= LJ::html_submit(
+            'action:delete',
+            BML::ml('entryform.delete'),
+            {
+                'disabled' => $opts->{'disabled_delete'},
+                'tabindex' => $self->tabindex,
+                'class' => "post-delete",
+                'onclick' => "return confirm('" .
+                    LJ::ejs(BML::ml('entryform.delete.confirm')) . "')",
+            }
+        );
+    }
 
     $out .= "<div class='security-options'>\n";
     $out .= "<label for='security'>" . BML::ml('entryform.security2') . " </label>\n";
