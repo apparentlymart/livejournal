@@ -165,6 +165,8 @@ sub need_res {
         js/rte.js
         js/jquery/jquery.lj.basicWidget.js
         js/jquery/jquery.lj.entryDatePicker.js
+        js/jquery/jquery.timeentry.min.js
+        js/jquery/jquery.dateentry.min.js
         stc/display_none.css
     );
 
