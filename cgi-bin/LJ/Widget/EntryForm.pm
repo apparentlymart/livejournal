@@ -574,7 +574,7 @@ sub render_metainfo_block {
     if ( $opts->{'mode'} eq "edit" && $can_edit_date ) {
         $out .= qq{
             <span class="wrap entrydate-wrap-date">
-                $monthlong, $mday, $year, $hour:$min
+                <span class="entrydate-string">$monthlong, $mday, $year, $hour:$min</span>
                 <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
                 $help_icon
             </span>
@@ -582,7 +582,7 @@ sub render_metainfo_block {
     } else {
         $out .= qq{
             <span class="wrap entrydate-wrap-post">
-                $monthlong $mday, $year, $hour:$min
+                <span class="entrydate-string">$monthlong $mday, $year, $hour:$min</span>
                 <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
                 $help_icon
             </span>
