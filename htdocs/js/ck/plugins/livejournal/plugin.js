@@ -263,7 +263,7 @@
 		init: function(editor) {
 			function onClickFrame(evt) {
 				if (this.$ != editor.document.$) {
-					this.frame.addClass('lj-selected');
+					this.className = 'lj-selected';
 					new CKEDITOR.dom.selection(editor.document).selectElement(this.frame);
 				}
 
@@ -303,7 +303,6 @@
 				execFromEditor = false;
 				var frames = editor.document.getElementsByTag('iframe');
 				var length = frames.count();
-
 				while (length--) {
 					var iFrameCss = 'widht: 100%; margin: 0; padding 0; overflow-y: hidden;',
 						frame = frames.getItem(length),
@@ -349,11 +348,11 @@
 				if (isSelection) {
 					var frames = editor.document.getElementsByTag('iframe');
 					for (var i = 0, l = frames.count(); i < l; i++) {
-						frames.getItem(i).removeClass('lj-selected');
+						frames.getItem(i).$.contentWindow.document.body.className = '';
 					}
 
 					if (node.is('iframe')) {
-						node.addClass('lj-selected');
+						node.$.contentWindow.document.body.className = 'lj-selected';
 					}
 				}
 
