@@ -1478,6 +1478,9 @@ sub render_submitbar_block {
     
     if ($opts->{'mode'} eq "edit") {
         my $onclick = $LJ::IS_SSL ? '' : 'return true;';
+        my $help_icon = LJ::help_icon("security",
+            "<span id='security-help'>\n", "\n</span>\n");
+        $out .= $help_icon;
         $out .= qq{ <div id="entryform-update-and-edit" class="submit-options"> };
         $out .= LJ::html_submit(
             'action:save',
