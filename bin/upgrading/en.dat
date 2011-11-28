@@ -5421,6 +5421,20 @@ talk.anonwrote_comm=Someone wrote in [[commlink]],
 
 talk.asanonymous=Anonymously
 
+talk.asuser=Another User
+ 
+talk.asfacebook=Facebook
+
+talk.asgoogle=Google
+
+talk.asmailru=MailRu
+ 
+talk.asopenid=OpenId
+
+talk.astwitter=Twitter
+
+talk.asvkontakte=Vkontakte
+ 
 talk.btn.preview=Preview
 
 talk.check=Check
@@ -5437,6 +5451,7 @@ talk.collapselink=Collapse
 talk.commentpermlink=link
 
 talk.commentpost=Post a new comment
+talk.commentedit=Edit comment
 
 talk.comments.counted|staleness=1
 talk.comments.counted=[[replycount]] [[?replycount|comment|comments]]
@@ -5448,6 +5463,8 @@ talk.commentsread.counted=Read [[replycount]] [[?replycount|comment|comments]]
 
 talk.commentsread.nocomments|staleness=1
 talk.commentsread.nocomments=No comments
+
+talk.close=Close
 
 talk.created=Created:
 
@@ -5473,9 +5490,14 @@ talk.deletedpost=Deleted Post
 talk.deleteduser=<i>Deleted user: [[username]]</i>
 
 talk.edit=Edit
+
 talk.edited=Edited:
 
 talk.emptypostalert=You need to write something first
+
+talk.error=Error
+
+talk.error.banned=You are banned form posting in this journal
 
 talk.error.bogusargs=Bogus arguments
 
@@ -5517,6 +5539,8 @@ talk.error.deleted.title=Deleted
 
 talk.error.mustlogin=You must be logged in to view this protected entry.
 
+talk.error.noanonpost=Anonymous comments are disabled in this journal
+
 talk.error.nocomment=The comment does not exist.
 
 talk.error.noentry=No such entry.
@@ -5525,7 +5549,11 @@ talk.error.nojournal=Error: couldn't determine journal from arguments.
 
 talk.error.nosuchjournal=No such journal
 
+talk.error.notreg=Your email is not confirmed
+
 talk.error.notauthorised=You are not authorized to view this protected entry.
+
+talk.error.notafriend=Comments allowed for friends only
 
 talk.error.purged|staleness=1
 talk.error.purged=This journal has been deleted and purged.
@@ -5567,17 +5595,43 @@ talk.frozen=Replies frozen
 
 talk.help=Help
 
+talk.insertlink=Insert Link
+
 talk.insertphoto=Insert Photo
 
 talk.insertvideo=Insert Video
 
 talk.ipalert=Your IP address will be recorded
 
+talk.link=Link
+
+talk.link.insert=Insert
+ 
+talk.loading=Loading...
+ 
+talk.loginafterpost=We will log you in after post
+
+talk.manageuserpic=Manage userpics
+ 
+talk.new=New comment
+ 
 talk.next=Next
 
 talk.nextshortcut=Ctrl →
 
 talk.parentlink=Parent
+
+talk.photo=Photo
+
+talk.photo.example=Example
+
+talk.photo.hint=Hint
+
+talk.photo.insert=Insert
+
+talk.placeholder.username=Username
+ 
+talk.placeholder.userpass=Password
 
 talk.prev=Previous
 
@@ -5589,9 +5643,17 @@ talk.replycount=[[count]] replies
 
 talk.replytothis=Reply to this
 
+talk.repost.facebook=Facebook
+
+talk.repost.twitter=Twitter
+
+talk.repost.setup=Setup Repost
+
 talk.screen=Screen
 
 talk.screenedpost=Screened post
+
+talk.searchuserpic=search userpic
 
 talk.somebodywrote=[[realname]] ([[userlink]]) wrote,
 
@@ -5625,6 +5687,16 @@ talk.unspamall=Unspam All
 talk.unspamtoreply=Unspam to reply
 
 talk.userswitch=switch
+
+talk.video=Video
+
+talk.video.example=Example
+
+talk.video.hint=Hint
+
+talk.video.insert=Insert
+
+talk.willscreen=Your reply will be screened
 
 time.ago.day=[[num]] [[?num|day|days]] ago
 
