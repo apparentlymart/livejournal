@@ -767,26 +767,19 @@ function EntryLite::print_linkbar() {
       $url    = $c.thread_url;
       $text   = $*text_comment_thread;
       $thread = """<a href="$url">$text</a>$btwn_comments""";
-      #var Link expand_link = $c->get_link("expand_comments");
-      #if (defined $expand_link) {
-      #  $expand = $c->expand_link() + $btwn_comments;
-      #}
     }
-    ###$c->print_reply_link({"linktext" => "$*text_comment_reply"}); 
 
-        if($c.screened == true) {
-            ### if comment screened - show link for unscreen
-            var Link link;
-            $link = $c->get_link("unscreen_to_reply");
-            """<a href="$link.url" title="$link.caption">$link.caption</a>""";
-        } else {
-            ### showing reply link if comment not screened
-            $c->print_reply_link({ "linktext" => $*text_comment_reply });
-        }
+    if($c.screened == true) {
+        ### if comment screened - show link for unscreen
+        var Link link;
+        $link = $c->get_link("unscreen_to_reply");
+        """<a href="$link.url" title="$link.caption">$link.caption</a>""";
+    } else {
+        ### showing reply link if comment not screened
+        $c->print_reply_link({ "linktext" => $*text_comment_reply });
+    }
 
-    
     print " | ";
-    #$linkbar = $linkbar + $parent + $thread + $expand;
     $linkbar = $linkbar + $parent + $thread;
   }
   if($this isa Entry) {
