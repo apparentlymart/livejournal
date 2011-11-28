@@ -892,9 +892,10 @@ if (not $.frozen) {
     }
     if ($.thread_url != "") {
         println """<li><a href="$.thread_url">$*text_comment_thread</a></li>""";
-        var Link expand_link = $this->get_link("expand_comments");
-        if (defined $expand_link) {
-            println "<li>" + $this->expand_link() + "</li>";
+        if ($.parent_url != "") {
+            print "<li>";
+            $this->print_expand_collapse_links({ "expand"=>"%_", "collapse"=>"%_"}); 
+            print "</li>";
         }
     }
     println """</ul>""";
@@ -1018,9 +1019,8 @@ function EntryPage::print_comment(Comment c) {
     else {
         var string subject = ($c.subject ? $c.subject : "<i>(no subject)</i>");
         """<div class="collapsed_entry" id="$c.dom_id"><a href="$c.permalink_url">$subject</a> - $c.poster""";
-        var Link expand_link = $c->get_link("expand_comments");
-        if ($c.thread_url != "" and defined $expand_link) {
-            " " + $c->expand_link();
+        if ($c.parent_url != "") {
+            $c->print_expand_collapse_links({ "expand"=>" %_", "collapse"=>" %_"}); 
         }
         """</div>""";
     }

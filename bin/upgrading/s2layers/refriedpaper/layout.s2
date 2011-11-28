@@ -602,20 +602,20 @@ function EntryLite::lay_make_userpic() : string {
   var string poster_name  = "";
   var string journal_name = "";
   var string userpic      = "";
-  if($.poster.username != "") {
-    $poster_name = $.poster.name;
-  } else {
-    $poster_name = $*text_poster_anonymous;
-  }
-  $alttext = $poster_name;
-  if((not $.poster->equals($.journal)) and ($.depth == 0)) {
-    $journal_name = $.journal.name;
-    $alttext      = $alttext + " posting in $journal_name";
-  }
-  if($.metadata{"picture_keyword"} != "") {
-    $alttext = $alttext + ": " + $.metadata{"picture_keyword"};
-  }
   if(defined $.userpic) {
+    if(defined $.poster) {
+      $poster_name = $.poster.name;
+    } else {
+      $poster_name = $*text_poster_anonymous;
+    }
+    $alttext = $poster_name;
+    if((not $.poster->equals($.journal)) and ($.depth == 0)) {
+      $journal_name = $.journal.name;
+      $alttext      = $alttext + " posting in $journal_name";
+    }
+    if($.metadata{"picture_keyword"} != "") {
+      $alttext = $alttext + ": " + $.metadata{"picture_keyword"};
+    }
     $userpic = """<img src="$.userpic.url" width="$.userpic.width" height="$.userpic.height" alt="$alttext" title="$alttext" />""";
   }
 
@@ -767,10 +767,10 @@ function EntryLite::print_linkbar() {
       $url    = $c.thread_url;
       $text   = $*text_comment_thread;
       $thread = """<a href="$url">$text</a>$btwn_comments""";
-      var Link expand_link = $c->get_link("expand_comments");
-      if (defined $expand_link) {
-        $expand = $c->expand_link() + $btwn_comments;
-      }
+      #var Link expand_link = $c->get_link("expand_comments");
+      #if (defined $expand_link) {
+      #  $expand = $c->expand_link() + $btwn_comments;
+      #}
     }
     ###$c->print_reply_link({"linktext" => "$*text_comment_reply"}); 
 
@@ -786,7 +786,8 @@ function EntryLite::print_linkbar() {
 
     
     print " | ";
-    $linkbar = $linkbar + $parent + $thread + $expand;
+    #$linkbar = $linkbar + $parent + $thread + $expand;
+    $linkbar = $linkbar + $parent + $thread;
   }
   if($this isa Entry) {
     var Entry en = $this as Entry;
@@ -836,6 +837,12 @@ function EntryLite::print_linkbar() {
   $text    = $*text_permalink;
   $linkbar = $linkbar + """<a href="$url">$text</a>""" + $*text_right_comments;
   print $linkbar;
+  if($this isa Comment) {
+    var Comment c      = $this as Comment;
+    if ($c.parent_url != "") {
+      $c->print_expand_collapse_links({ "expand"=>"$btwn_comments %_", "collapse"=>"$btwn_comments %_"}); 
+    }
+  }
 }
 
 function Page::lay_print_skiplinks() {
@@ -1160,10 +1167,11 @@ function make_poster(EntryLite e) : string {
   }
 
   if($e isa Comment) {
-    if($e.poster.username != "") {
+    if (defined $e.poster) {
+    #if($e.poster.username != "") {
       $user = $e.poster + "";
     } else {
-      $user = """<i class="noposter">$*text_poster_anonymous</i>""";
+      $user = """<em class="noposter">$*text_poster_anonymous</em>""";
     }
   }
 
@@ -1171,7 +1179,8 @@ function make_poster(EntryLite e) : string {
     $return = $return + """
       <td class="dateheader"$screenedfg>$*text_user</td>
       <td class="datecontent"$screenedfg>$user""";
-    if($poster != "") {
+    #if($poster != "") {
+    if (defined $e.poster) {
       $return = $return + " (posted by $poster)";
     }
     $return = $return + """</td>
@@ -1356,7 +1365,7 @@ function YearPage::print_year_links() {
 
 function EntryPage::print_body() {
   $this->print_entry($.entry);
-    
+
   if ($.entry->viewer_sees_ebox()) {
         """<div style="text-align:center">""";
         $.entry->print_ebox();
@@ -1383,25 +1392,25 @@ function EntryPage::print_body() {
 }
 
 function EntryPage::print_comment(Comment c) {
-  print_entry($c, null Color, null Color);
+  var Page p = get_page();
+  var int indent = ($c.depth - 1) * 25;
+  """<div id="$c.dom_id" style='margin-left: ${indent}px; margin-top: 5px'>""";
+  if (($c.spam) and (not $p.showspam) and (not $c.can_marked_as_spam) and (size($c.replies) > 0)) {
+      """$*text_spam_comment""";
+  } elseif (($c.spam) and (not $p.showspam)) {
+      """&nsbp;""";
+  } elseif ($c.full) {
+      print_entry($c, null Color, null Color);
+  } else {
+      $this->print_comment_partial($c);
+  }
+  """</div>""";
 }
 
 function EntryPage::print_comments (Comment[] cs) {
-    var Page p = get_page();
     if (size $cs == 0) { return; }
     foreach var Comment c ($cs) {
-        var int indent = ($c.depth - 1) * 25;
-        """<div id="$c.dom_id" style='margin-left: ${indent}px; margin-top: 5px'>""";
-        if (($c.spam) and (not $p.showspam) and (not $c.can_marked_as_spam) and (size($c.replies) > 0)) {
-            """$*text_spam_comment""";
-        } elseif (($c.spam) and (not $p.showspam)) {
-            """&nsbp;""";
-        } elseif ($c.full) {
-            $this->print_comment($c);
-        } else {
-            $this->print_comment_partial($c);
-        }
-        """</div>""";
+        $this->print_comment($c);
         $this->print_comments($c.replies);
     }
 }
