@@ -33,19 +33,19 @@
 
                 <h2>
 					<TMPL_IF entry_is_delayed>
-						<img src="<TMPL_VAR lj_imgprefix>/icon_delayed.png" width=13 height=15 align=absmiddle class="i-posticon">
+						<img src="<TMPL_VAR lj_imgprefix>/icon_delayed.png?v=11043" width=13 height=15 align=absmiddle class="i-posticon">
 					</TMPL_IF>
 
 					<TMPL_IF entry_is_sticky>
-						<img src="<TMPL_VAR lj_imgprefix>/icon_sticky.png" width=13 height=15 align=absmiddle class="i-posticon">
+						<img src="<TMPL_VAR lj_imgprefix>/icon_sticky.png?v=11043" width=13 height=15 align=absmiddle class="i-posticon">
 					</TMPL_IF>
 
 					<TMPL_IF expr="entry_security eq 'private'">
-						<img src="<?imgprefix?>/icon_private.gif" width=16 height=16 align=absmiddle class="i-posticon">
+						<img src="<?imgprefix?>/icon_private.gif?v=7017" width=16 height=16 align=absmiddle class="i-posticon">
 					<TMPL_ELSIF expr="entry_security eq 'groups'">
-						<img src="<?imgprefix?>/icon_groups.gif" width=19 height=16 align=absmiddle class="i-posticon">
+						<img src="<?imgprefix?>/icon_groups.gif?v=13546" width=19 height=16 align=absmiddle class="i-posticon">
 					<TMPL_ELSIF expr="entry_security eq 'friends'">
-						<img src="<?imgprefix?>/icon_protected.gif" width=14 height=15 align=absmiddle class="i-posticon">
+						<img src="<?imgprefix?>/icon_protected.gif?v=7017" width=14 height=15 align=absmiddle class="i-posticon">
 					</TMPL_IF>
 					<a href='<TMPL_VAR entry_url>'>
 						<TMPL_IF entry_subject>
